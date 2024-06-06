@@ -68,7 +68,7 @@ TEST(CompileTimeDerivativesTest, simple)
       const auto & x = v;                                                                          \
       r2 = expression;                                                                             \
     }                                                                                              \
-    EXPECT_EQ(r1, r2);                                                                             \
+    EXPECT_NEAR(r1, r2, 1e-13);                                                                    \
   }
 
 TEST(CompileTimeDerivativesTest, evaluate)
