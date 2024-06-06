@@ -1191,6 +1191,7 @@ PCApply_MoosePC(PC pc, Vec x, Vec y)
   PetscContainer container;
   PetscErrorCode ierr;
 
+  PetscFunctionBegin;
   ierr = PCGetOperators(pc, &Amat, &Pmat);
   CHKERRQ(ierr);
   ierr = PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container);
@@ -1228,6 +1229,7 @@ PCSetUp_MoosePC(PC pc)
   Mat Amat, Pmat;
   PetscContainer container;
 
+  PetscFunctionBegin;
   ierr = PCGetOperators(pc, &Amat, &Pmat);
   CHKERRQ(ierr);
   ierr = PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container);
@@ -1268,6 +1270,7 @@ mooseSlepcStoppingTest(EPS eps,
   PetscErrorCode ierr;
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
 
+  PetscFunctionBegin;
   ierr = EPSStoppingBasic(eps, its, max_it, nconv, nev, reason, NULL);
   LIBMESH_CHKERR(ierr);
 
@@ -1291,6 +1294,7 @@ mooseSlepcEPSGetSNES(EPS eps, SNES * snes)
   PetscErrorCode ierr;
   PetscBool same, nonlinear;
 
+  PetscFunctionBegin;
   ierr = PetscObjectTypeCompare((PetscObject)eps, EPSPOWER, &same);
   LIBMESH_CHKERR(ierr);
 
@@ -1316,6 +1320,7 @@ mooseSlepcEPSSNESSetUpOptionPrefix(EPS eps)
   SNES snes;
   const char * prefix = nullptr;
 
+  PetscFunctionBegin;
   ierr = mooseSlepcEPSGetSNES(eps, &snes);
   LIBMESH_CHKERR(ierr);
   // There is an extra "eps_power" in snes that users do not like it.
@@ -1338,6 +1343,7 @@ mooseSlepcEPSSNESSetCustomizePC(EPS eps)
   KSP ksp;
   PC pc;
 
+  PetscFunctionBegin;
   // Get SNES from EPS
   ierr = mooseSlepcEPSGetSNES(eps, &snes);
   LIBMESH_CHKERR(ierr);
@@ -1360,6 +1366,7 @@ mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
   SNES snes;
   KSP ksp;
 
+  PetscFunctionBegin;
   // Get SNES from EPS
   ierr = mooseSlepcEPSGetSNES(eps, &snes);
   LIBMESH_CHKERR(ierr);
@@ -1387,6 +1394,7 @@ mooseSlepcEPSMonitor(EPS eps,
   auto ierr = (PetscErrorCode)0;
   PetscScalar eigenr, eigeni;
 
+  PetscFunctionBegin;
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(mctx);
   auto & console = eigen_problem->console();
 
