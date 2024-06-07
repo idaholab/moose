@@ -64,8 +64,14 @@ more variables.
 
 Advanced restart and recovery in MOOSE require checkpoint files
 
-To enable automatic checkpoints using the default options (every time step, and keep last two) in
-a simulation simply add the following flag to your input file:
+Checkpoints are automatically enabled by default and are output every 1 hour of wall time (customizable interval), but can be disabled with:
+```text
+[Outputs]
+  wall_time_checkpoint = false
+[]
+```
+
+Checkpoints can be output at every time step with the following shortcut syntax:
 
 ```text
 [Outputs]
