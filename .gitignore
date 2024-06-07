@@ -326,3 +326,7 @@ share/
 /modules/misc/misc.yaml
 /tutorials/tutorial01_app_development/*/babbler.yaml
 /tutorials/darcy_thermo_mech/*/darcy_thermo_mech.yaml
+
+# default petsc output
+binaryoutput
+binaryoutput.info
