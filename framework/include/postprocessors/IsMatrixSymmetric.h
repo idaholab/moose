@@ -34,11 +34,25 @@ public:
 
   virtual Real getValue() const override;
 
+  virtual ~IsMatrixSymmetric();
+
 protected:
   /// Tolerance for the comparison between coefficients and transpose counterparts
   const Real _symm_tol;
-  /// Transpose of the system matrix
+  /// a binary file for loading the matrix (optional)
+  const FileName & _mat_file;
+  /// The matrix we are testing for symmetry
+  const SparseMatrix<Number> * _mat;
+  /// Transpose of the matrix we are testing
   std::unique_ptr<SparseMatrix<Number>> _mat_transpose;
+  /// Storage for the libMesh wrapper of the PETSc matrix, if it is provided
+  std::unique_ptr<SparseMatrix<Number>> _wrapped_petsc_mat;
+
+  /// PETSc mat
+  Mat _binary_mat = nullptr;
+  /// PETSc viewer
+  PetscViewer _binary_matviewer = nullptr;
+
   /// Whether the matrix is symmetric
   bool _equiv = true;
 };

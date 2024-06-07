@@ -1,5 +1,3 @@
-# This input file tests inlet, wall, symmetry, and outflow boundary conditions
-# for a conservative weak form of the incompressible NS equations
 U_in = 1
 gamma = ${U_in}
 mu = 1
@@ -51,11 +49,6 @@ rho = 1
     matrix_tags = 'mass'
     density = ${fparse -1/(gamma + mu)}
   []
-  [momentum_convection]
-    type = INSADMomentumConservativeAdvection
-    variable = vel
-    rho = rho
-  []
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = vel
@@ -93,13 +86,6 @@ rho = 1
     velocity = 'inlet'
     boundary = 'left'
   []
-  [inlet_momentum_advection]
-    type = INSADMomentumConservativeAdvectionWeakDiriBC
-    variable = vel
-    rho = 'rho'
-    velocity = 'inlet'
-    boundary = 'left'
-  []
   [inlet_momentum_stress]
     type = INSADMomentumZeroViscousStreeBC
     variable = vel
@@ -111,12 +97,6 @@ rho = 1
     type = INSADConservativeMassImplicitBC
     variable = p
     velocity = vel
-    boundary = 'right'
-  []
-  [outlet_momentum]
-    type = INSADMomentumConservativeAdvectionImplicitBC
-    variable = vel
-    rho = 'rho'
     boundary = 'right'
   []
 []

@@ -39,6 +39,12 @@
     type = Exodiff
     input = conservative-velocity-channel-with-symm-bc.i
     exodiff = conservative-velocity-channel-with-symm-bc_out.e
-    requirement = 'The system shall be able to solve a channel flow problem with a symmetry boundary condition using Taylor-Hood finite elements in which the mass and momentum advection terms are integrated by parts.'
+    requirement = 'The system shall be able to solve a Navier-Stokes channel flow problem with a symmetry boundary condition using Taylor-Hood finite elements in which the mass and momentum advection terms are integrated by parts.'
+  []
+  [conservative_stokes]
+    type = Exodiff
+    input = conservative-velocity-channel-with-symm-bc-stokes.i
+    exodiff = conservative-velocity-channel-with-symm-bc-stokes_out.e
+    requirement = 'The system shall be able to solve a Stokes channel flow problem with a symmetry boundary condition using Taylor-Hood finite elements in which the mass and momentum advection terms are integrated by parts.'
   []
 []
