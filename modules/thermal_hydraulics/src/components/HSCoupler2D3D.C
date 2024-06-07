@@ -27,10 +27,11 @@ HSCoupler2D3D::validParams()
   params.addRequiredParam<BoundaryName>("boundary_3d",
                                         "The boundary of the 3D heat structure to couple");
 
-  params.addRequiredParam<FunctionName>(
+  params.addParam<bool>("include_radiation", true, "Include radiation component of heat flux");
+  params.addParam<FunctionName>(
       "emissivity_2d",
       "Emissivity of the 2D heat structure boundary as a function of temperature [K]");
-  params.addRequiredParam<FunctionName>(
+  params.addParam<FunctionName>(
       "emissivity_3d",
       "Emissivity of the 3D heat structure boundary as a function of temperature [K]");
   params.addRequiredParam<FunctionName>("gap_thickness",
@@ -94,6 +95,19 @@ void
 HSCoupler2D3D::check() const
 {
   BoundaryBase::check();
+
+  if (getParam<bool>("include_radiation"))
+  {
+    if (!(isParamValid("emissivity_2d") && isParamValid("emissivity_3d")))
+      logError("If 'include_radiation' is 'true', then 'emissivity_2d' and 'emissivity_3d' are "
+               "required.");
+  }
+  else
+  {
+    if (isParamValid("emissivity_2d") || isParamValid("emissivity_3d"))
+      logError("If 'include_radiation' is 'false', then neither 'emissivity_2d' nor "
+               "'emissivity_3d' can be specified.");
+  }
 
   if (hasComponentByName<HeatStructureCylindricalBase>(_hs_name_2d))
   {
@@ -161,8 +175,11 @@ HSCoupler2D3D::addMooseObjects()
     params.set<std::vector<BoundaryName>>("boundary") = {_boundary_3d};
     params.set<std::vector<VariableName>>("temperature") = {HeatConductionModel::TEMPERATURE};
     params.set<Real>("radius_2d") = radius_2d;
-    params.set<FunctionName>("emissivity_2d") = getParam<FunctionName>("emissivity_2d");
-    params.set<FunctionName>("emissivity_3d") = getParam<FunctionName>("emissivity_3d");
+    if (getParam<bool>("include_radiation"))
+    {
+      params.set<FunctionName>("emissivity_2d") = getParam<FunctionName>("emissivity_2d");
+      params.set<FunctionName>("emissivity_3d") = getParam<FunctionName>("emissivity_3d");
+    }
     params.set<FunctionName>("gap_thickness") = getParam<FunctionName>("gap_thickness");
     params.set<FunctionName>("gap_thermal_conductivity") =
         getParam<FunctionName>("gap_thermal_conductivity");

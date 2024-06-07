@@ -148,6 +148,11 @@ these correspond to
 The temperature values are substituted in place of the time coordinate for
 these `Function`s.
 
+The radiation component of the heat flux can be disabled by setting
+[!param](/Components/HSCoupler2D3D/include_radiation) to `false`, and in this
+case the parameters [!param](/Components/HSCoupler2D3D/emissivity_2d) and
+[!param](/Components/HSCoupler2D3D/emissivity_3d) should not be specified.
+
 ### MOOSE Configuration
 
 Because a 2D surface is being coupled to a 3D surface, there is potentially
