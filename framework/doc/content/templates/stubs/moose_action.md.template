@@ -19,3 +19,5 @@ clear for users.
 !syntax description {{syntax}}
 
 !syntax parameters {{syntax}}
+
+!tag name={{name}}

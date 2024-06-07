@@ -21,3 +21,5 @@ documentation clear for users.
 !syntax inputs {{syntax}}
 
 !syntax children {{syntax}}
+
+!tag name={{name}}
