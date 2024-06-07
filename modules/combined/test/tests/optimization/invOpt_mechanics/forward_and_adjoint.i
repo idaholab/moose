@@ -1,3 +1,7 @@
+# DO NOT CHANGE THIS TEST
+# this test is documented as an example in forceInv_NeumannBC.md
+# if this test is changed, the figures will need to be updated.
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -119,7 +123,7 @@
   [params]
     type = ConstantReporter
     real_vector_names = 'right_values'
-    real_vector_values = '-1300 2100 ' # Dummy value
+    real_vector_values = '-1300 2100 ' # True Values
   []
   [combined]
     type = ParsedVectorReporter
