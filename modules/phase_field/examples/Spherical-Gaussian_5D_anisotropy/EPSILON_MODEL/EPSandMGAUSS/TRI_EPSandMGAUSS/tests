@@ -1,0 +1,10 @@
+[Tests]
+  [TRI_EPSandMGAUSS_test]
+    type = RunApp
+    input = 'TRI_EPSandMGAUSS.i'
+    check_input = True
+    requirement = "TRI_EPSandMGAUSS shall have a tricrystal example"
+    design = 'EPSandManisoGAUSS.md EPSILONmodelKERNEL1stGAUSS.md EPSILONmodelKERNEL1stV2GAUSS.md EPSILONmodelKERNEL2ndGAUSS.md EPSILONmodelKERNEL2ndV2GAUSS.md EPSILONmodelKernelAction.md'
+    issues = '#27774'
+  []
+[]

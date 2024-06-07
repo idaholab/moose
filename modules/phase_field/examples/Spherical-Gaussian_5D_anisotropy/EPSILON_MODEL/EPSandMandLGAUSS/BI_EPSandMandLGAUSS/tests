@@ -1,0 +1,10 @@
+[Tests]
+  [BI_EPSandMandLGAUSS_test]
+    type = RunApp
+    input = 'BI_EPSandMandLGAUSS.i'
+    check_input = True
+    requirement = "BI_EPSandMandLGAUSS shall have a bicrystal example"
+    design = 'EPSandMandLanisoGAUSS.md EPSILONmodelKERNEL1stGAUSS.md EPSILONmodelKERNEL1stV2GAUSS.md EPSILONmodelKERNEL2ndGAUSS.md EPSILONmodelKERNEL2ndV2GAUSS.md EPSILONmodelKernelAction.md'
+    issues = '#27774'
+  []
+[]
