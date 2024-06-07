@@ -8,19 +8,20 @@
 -pc_fieldsplit_type schur
 -pc_fieldsplit_schur_precondition self
 -prefix_push fieldsplit_p_
--ksp_monitor
+# -ksp_monitor
 -ksp_rtol 1.0E-1
 -ksp_type fgmres
 -ksp_max_it 100
+-ksp_gmres_restart 100
 -pc_type hpddm
 -pc_hpddm_has_neumann
 -ksp_converged_reason
 -pc_hpddm_ksp_type fgmres
--pc_hpddm_ksp_gmres_restart 30
--pc_hpddm_ksp_converged_reason
--pc_hpddm_ksp_monitor
+# -pc_hpddm_ksp_converged_reason
+# -pc_hpddm_ksp_monitor
 -pc_hpddm_ksp_rtol 1.0E-1
--pc_hpddm_ksp_max_it 30
+-pc_hpddm_ksp_max_it 100
+-pc_hpddm_ksp_gmres_restart 100
 -pc_hpddm_schur_precondition geneo
 -prefix_push pc_hpddm_levels_1_
 -eps_nev 40
@@ -44,6 +45,7 @@
 -prefix_push fieldsplit_u_
 -ksp_rtol 1.0E-4
 -ksp_max_it 100
+-ksp_gmres_restart 100
 -pc_type hpddm
 # -ksp_converged_reason
 -ksp_type fgmres

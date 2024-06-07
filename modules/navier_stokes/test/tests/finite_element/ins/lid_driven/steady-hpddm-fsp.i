@@ -3,7 +3,7 @@ mu=2e-3
 U=1
 l=1
 prefactor=${fparse 1/(l/2)^2}
-n=8
+n=64
 
 [GlobalParams]
   gravity = '0 0 0'
