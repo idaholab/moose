@@ -16,7 +16,9 @@
 // libMesh includes
 #include "libmesh/fe.h"
 
-registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "setup_darcy");
+registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "add_aux_variable");
+registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "add_aux_kernel");
+registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "add_kernel");
 
 InputParameters
 SetupDarcySimulation::validParams()
