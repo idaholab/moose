@@ -24,20 +24,12 @@ public:
   virtual void initialize() override;
 
 protected:
-  virtual SubdomainID computeSubdomainID() override;
-
   /**
    * Requests a vector of all points in time from the inheriting class
    * (these do not have to be sorted).
    * @returns Unsorted vector of points in time.
    */
-  virtual std::vector<Real> onGetTimes();
-
-  /**
-   * Determines the new subdomain-id for the current element.
-   * @returns New subdomain id to move the element to.
-   */
-  virtual SubdomainID onComputeSubdomainID(Real t_from_exclusive, Real t_to_inclusive);
+  virtual std::vector<Real> onGetTimes() = 0;
 
   /// storage for the times including their original index.
   struct timeIndexPair
@@ -56,14 +48,4 @@ protected:
 
   /// Times and subdomain changes to make
   std::vector<timeIndexPair> _times_and_indices;
-
-private:
-  /// Local variable for the current step (to be able to determine incrementation)
-  unsigned int _current_step;
-
-  /// Local variable for the end of the timespan to apply changes of the subdomain
-  Real _current_timespan_end;
-
-  /// Local variable for the start of the timespan to apply changes of the subdomain
-  Real _current_timespan_start;
 };

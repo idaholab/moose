@@ -266,12 +266,6 @@ TimedSubdomainModifier::buildFromFile()
                  [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
 }
 
-void
-TimedSubdomainModifier::initialize()
-{
-  TimedElementSubdomainModifier::initialize();
-}
-
 std::vector<Real>
 TimedSubdomainModifier::onGetTimes()
 {
@@ -280,7 +274,7 @@ TimedSubdomainModifier::onGetTimes()
 }
 
 SubdomainID
-TimedSubdomainModifier::onComputeSubdomainID(const Real t_from_exclusive, const Real t_to_inclusive)
+TimedSubdomainModifier::computeSubdomainID()
 {
   // get the subdomain-id of the current element
   SubdomainID resulting_subdomain_id = _current_elem->subdomain_id();
@@ -288,7 +282,7 @@ TimedSubdomainModifier::onComputeSubdomainID(const Real t_from_exclusive, const 
   // check for all the subdomain changes that can have been requested between the previous and the
   // current time
   const auto n_rows = _times_and_indices.size();
-  for (size_t i = 0; i < n_rows; ++i)
+  for (const auto i : make_range(n_rows))
   {
     // time of the data point
     const auto t = _times_and_indices[i].time;
@@ -297,7 +291,7 @@ TimedSubdomainModifier::onComputeSubdomainID(const Real t_from_exclusive, const 
     const auto j = _times_and_indices[i].index;
 
     // do we have to apply?
-    if (t > t_from_exclusive && t <= t_to_inclusive && resulting_subdomain_id == _blocks_from[j])
+    if (t > _t_old && t <= _t && resulting_subdomain_id == _blocks_from[j])
     {
       // we have to change the subdomain-id using the original index (stored in 'j')
       resulting_subdomain_id = _blocks_to[j];

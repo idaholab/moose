@@ -30,6 +30,7 @@ TransientInterface::TransientInterface(const MooseObject * moose_object)
     _is_implicit(_ti_params.have_parameter<bool>("implicit") ? _ti_params.get<bool>("implicit")
                                                              : true),
     _t(_is_implicit ? _ti_feproblem.time() : _ti_feproblem.timeOld()),
+    _t_old(_ti_feproblem.timeOld()),
     _t_step(_ti_feproblem.timeStep()),
     _dt(_ti_feproblem.dt()),
     _dt_old(_ti_feproblem.dtOld()),

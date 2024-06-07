@@ -60,6 +60,9 @@ protected:
   /// Time
   Real & _t;
 
+  /// Old time
+  const Real & _t_old;
+
   /// The number of the time step
   int & _t_step;
 

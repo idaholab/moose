@@ -23,12 +23,10 @@ public:
 
   TimedSubdomainModifier(const InputParameters & parameters);
 
-  virtual void initialize() override;
-
 protected:
   virtual std::vector<Real> onGetTimes() override;
 
-  virtual SubdomainID onComputeSubdomainID(Real t_from_exclusive, Real t_to_inclusive) override;
+  virtual SubdomainID computeSubdomainID() override;
 
 private:
   void buildFromParameters();
