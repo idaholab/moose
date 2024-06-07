@@ -260,3 +260,58 @@ abstract = {The phase-field method has been established as a de facto standard f
   doi = {10.1016/S0956-716X(99)80022-3},
   url = {https://www.sciencedirect.com/science/article/pii/S0956716X99800223}
 }
+
+@article{BAIR2021110126,
+title = {Spherical Gaussians: An intuitive method for creating complex anisotropies in interface energies for the phase field method},
+journal = {Computational Materials Science},
+volume = {188},
+pages = {110126},
+year = {2021},
+issn = {0927-0256},
+doi = {https://doi.org/10.1016/j.commatsci.2020.110126},
+url = {https://www.sciencedirect.com/science/article/pii/S0927025620306170},
+author = {Jacob L. Bair and Nikhil S. Deshmukh and David G. Abrecht},
+keywords = {Phase field model, Anisotropy, Spherical Gaussian, Interface energy},
+abstract = {The Phase Field Method requires continuous functions to control interface energies between phases. We have developed a method for phase field modeling where interface energies are described by spherical gaussians, a set of continuous functions which can simulate a wide variety of complex anisotropies. We demonstrate the use of the technique to produce a wide array of crystal geometries, including rods, hexagonal rods, cubes, and cubic dendrites, using the native properties of spherical gaussians to create specific interface energies throughout the full solid angle of an energy surface. Parameters controlling the sharpness of minima are shown to have a significant effect on morphology.}
+}
+
+@article{MOELANS2022110592,
+title = {New phase-field model for polycrystalline systems with anisotropic grain boundary properties},
+journal = {Materials & Design},
+volume = {217},
+pages = {110592},
+year = {2022},
+issn = {0264-1275},
+doi = {https://doi.org/10.1016/j.matdes.2022.110592},
+url = {https://www.sciencedirect.com/science/article/pii/S0264127522002131},
+author = {Nele Moelans},
+keywords = {Grain growth, Anisotropy, Phase-field model, Facets, Triple junctions},
+abstract = {In this paper, a new methodology is presented to inlude anisotropic grain boundary properties in a phase-field model. The new approach is thermodynamically consistent and gives accurate control of the inclination and misorientation of grain boundary properties. It is verified that accurate triple junction angles are obtained without ad hoc correction terms and under all conditions, including triple junction angles reaching the extreme values 0° and 180°. Grain boundary wetting is also reproduced. The new model allows us to consider polycrystalline microstructures with very complex grain boundary properties. Simulations show that grain boundary anisotropy may lead to a huge range of effects on the grain structure.}
+}
+
+@article{Yeo2022,
+  title = {Theoretical basis for phase field modeling of polycrystalline grain growth using a spherical-Gaussian-based 5-D computational approach},
+  journal = {Materials Theory},
+  volume = {6},
+  pages = {10},
+  year = {2022},
+  issn = {2509-8012},
+  doi = {10.1186/s41313-021-00035-3},
+  url = {https://doi.org/10.1186/s41313-021-00035-3},
+  author = {Lenissongui C. Yeo and Michael N. Costa and Jacob L. Bair},
+  abstract = {Using a previously developed phase field modeling method, where interface energies are described by spherical gaussians that allow the modeling of complex anisotropies, a new phase field model was developed to model 5-D anisotropy in polycrystalline grain growth. We present the use of quaternions, assigned to individual grains as orientations and misorientations for grain boundaries, as a means of simulating the ongoing mesoscale changes during anisotropic polycrystalline grain growth. The full 5-D landscape is scanned in MATLAB, and the grain boundary (GB) energy of each grain boundary is calculated from the continuous function developed by Bulatov et al. MATLAB is then used to find all local minima in the GB energy which are stored for use in the phase field model. The methodology of including these minima in the phase field model involves using 2-D gaussian switches, which match the misorientation between grains with misorientations for the GB energy minima. Within a threshold range of the minima misorientation, the switch activates a spherical Gaussian to set the GB energy to the desired value creating in combination a full 5D GB energy space. This creates a GB energy that morphs in real time and space as the GB plane or grain orientations change. Implementation methods of the model are outlined for the Multiphysics Object Oriented Simulation Environment (MOOSE), where reduced order parameters still retain individual grain identification useful for individually assigned quaternions.}
+}
+
+@article{YEO2024127508,
+title = {Phase field modeling of anisotropic bicrystal grain growth using a spherical-Gaussian-based 5-D computational approach},
+journal = {Journal of Crystal Growth},
+volume = {627},
+pages = {127508},
+year = {2024},
+issn = {0022-0248},
+doi = {https://doi.org/10.1016/j.jcrysgro.2023.127508},
+url = {https://www.sciencedirect.com/science/article/pii/S0022024823004347},
+author = {Lenissongui C. Yeo and Jacob L. Bair},
+keywords = {Phase Field, Grain boundary, Anisotropy, Faceting},
+abstract = {A previously developed Spherical-Gaussian method is used to incorporate 5-D anisotropy in two phase field models originally published by Moelans, here named epsilon and gamma models. Quaternions are used for representing both grains orientations and misorientations. A slice of fundamental zone for Σ3 grain boundaries with given orientations and misorientations from Olmsted, are used to verify the outputted grain boundary energies under different cases. Local minima selected from the slice are kept as minima library and used in both models. 2-D gaussian switches are used to compare the studied system misorientations between pair of grains to the list of minima misorientations. The switch causes a reduction from the assigned base energy to that of the minima library energy, depending on the computed value. Using only 3 minima from the corners of the Σ3 fundamental zone, the models are shown to reproduce energies in the full fundamental zone with a maximum error of around 30%. The Multiphysics Object Oriented Simulation Environment (MOOSE) is used to perform bicrystal simulations using both models; with variations in settings yielding close to accurate values as well as physical behaviors like faceting.}
+}
