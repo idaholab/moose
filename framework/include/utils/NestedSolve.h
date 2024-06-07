@@ -105,8 +105,8 @@ public:
 
   /// @{ Perform a bounded solve use Eigen::HybridNonLinearSolver
   template <typename R, typename J, typename B>
-  void
-  nonlinearBounded(NSReal & guess, R & computeResidual, J & computeJacobian, B & computeBounds);
+  void nonlinearBounded(
+      NSReal & guess, R & computeResidual, J & computeJacobian, B & computeBounds, const bool fail);
   ///@}
 
   ///@{ default values
@@ -353,7 +353,8 @@ void
 NestedSolveTempl<is_ad>::nonlinearBounded(NSReal & guess,
                                           R & computeResidual,
                                           J & computeJacobian,
-                                          B & computeBounds)
+                                          B & computeBounds,
+                                          const bool /*fail*/)
 {
   auto functor = make_real_adaptor<false>(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor), NSReal> solver(functor);
