@@ -1,0 +1,10 @@
+[Tests]
+  [BI_EPSandMandLGAUSS_out_test]
+    type = 'CSVDiff'
+    input = 'BI_EPSandMandLGAUSS.i'
+    csvdiff = 'BI_EPSandMandLGAUSS_out.csv'
+    requirement = "Material EPSandMandLanisoGAUSS shall compute the accurate anisotropic grain boundary energy and mobility"
+    design = 'EPSandMandLanisoGAUSS.md EPSILONmodelKERNEL1stGAUSS.md EPSILONmodelKERNEL1stV2GAUSS.md EPSILONmodelKERNEL2ndGAUSS.md EPSILONmodelKERNEL2ndV2GAUSS.md EPSILONmodelKernelAction.md'
+    issues = '#27774'
+  []
+[]

@@ -1,0 +1,10 @@
+[Tests]
+  [BI_GAMMAandLGAUSS_out_test]
+    type = 'CSVDiff'
+    input = 'BI_GAMMAandLGAUSS.i'
+    csvdiff = 'BI_GAMMAandLGAUSS_out.csv'
+    requirement = "Material GAMMAandLanisoGAUSS shall compute the accurate anisotropic grain boundary energy and mobility"
+    design = 'GAMMAandLanisoGAUSS.md GAMMAmodelKERNELGAUSS.md GAMMAmodelKERNELV2GAUSS.md GAMMAmodelKernelAction.md'
+    issues = '#27774'
+  []
+[]
