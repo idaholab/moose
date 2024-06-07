@@ -63,6 +63,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/petsc_solver_exception.h"
 
 // System include for dynamic library methods
 #ifdef LIBMESH_HAVE_DLOPEN
@@ -1143,7 +1144,8 @@ MooseApp::executeExecutioner()
   // run the simulation
   if (_use_executor && _executor)
   {
-    Moose::PetscSupport::petscSetupOutput(_command_line.get());
+    auto ierr = Moose::PetscSupport::petscSetupOutput(_command_line.get());
+    LIBMESH_CHKERR(ierr);
 
     _executor->init();
     errorCheck();
@@ -1153,7 +1155,8 @@ MooseApp::executeExecutioner()
   }
   else if (_executioner)
   {
-    Moose::PetscSupport::petscSetupOutput(_command_line.get());
+    auto ierr = Moose::PetscSupport::petscSetupOutput(_command_line.get());
+    LIBMESH_CHKERR(ierr);
     _executioner->init();
     errorCheck();
     _executioner->execute();

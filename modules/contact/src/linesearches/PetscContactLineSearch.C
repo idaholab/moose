@@ -102,11 +102,15 @@ PetscContactLineSearch::lineSearch()
   {
     if (contact_state_stored != _old_contact_state)
     {
-      KSPSetTolerances(ksp, _contact_ltol, ksp_abstol, ksp_dtol, ksp_maxits);
+      ierr = KSPSetTolerances(ksp, _contact_ltol, ksp_abstol, ksp_dtol, ksp_maxits);
+      LIBMESH_CHKERR(ierr);
       _console << "Contact set changed since previous non-linear iteration!" << std::endl;
     }
     else
-      KSPSetTolerances(ksp, _user_ksp_rtol, ksp_abstol, ksp_dtol, ksp_maxits);
+    {
+      ierr = KSPSetTolerances(ksp, _user_ksp_rtol, ksp_abstol, ksp_dtol, ksp_maxits);
+      LIBMESH_CHKERR(ierr);
+    }
   }
 
   size_t ls_its = 0;
@@ -130,9 +134,9 @@ PetscContactLineSearch::lineSearch()
     LIBMESH_CHKERR(ierr);
     if (gnorm < fnorm)
     {
-      VecCopy(G, F);
+      ierr = VecCopy(G, F);
       LIBMESH_CHKERR(ierr);
-      VecCopy(W1, W);
+      ierr = VecCopy(W1, W);
       LIBMESH_CHKERR(ierr);
       fnorm = gnorm;
       contact_state_stored.swap(_current_contact_state);
