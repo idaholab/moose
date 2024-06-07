@@ -83,7 +83,7 @@ PETScExternalSolverCreate(MPI_Comm comm, TS * ts)
   CHKERRQ(ierr);
   ierr = TSSetFromOptions(*ts);
   CHKERRQ(ierr);
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -94,7 +94,7 @@ PETScExternalSolverDestroy(TS ts)
   PetscFunctionBeginUser;
   ierr = TSDestroy(&ts);
   CHKERRQ(ierr);
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /*
@@ -185,7 +185,7 @@ externalPETScDiffusionFDMSolve(
   CHKERRQ(ierr);
   *converged = reason > 0 ? PETSC_TRUE : PETSC_FALSE;
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /* --------------------------------------------------------------------- */
@@ -335,7 +335,7 @@ FormIFunction(TS ts, PetscReal /*t*/, Vec U, Vec Udot, Vec F, void * /*ctx*/)
   CHKERRQ(ierr);
   ierr = PetscLogFlops(11.0 * ym * xm);
   CHKERRQ(ierr);
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /* --------------------------------------------------------------------- */
@@ -462,7 +462,7 @@ FormIJacobian(
     CHKERRQ(ierr);
   }
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /* ------------------------------------------------------------------- */
@@ -524,5 +524,5 @@ FormInitialSolution(TS ts, Vec U, void * /*ptr*/)
   /* Restore vectors */
   ierr = DMDAVecRestoreArray(da, U, &u);
   CHKERRQ(ierr);
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
