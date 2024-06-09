@@ -126,7 +126,8 @@ div.MuiBox-root {
 @media (prefers-color-scheme: light) {
     :root {
     color: #213547;
-    background-color: #6d3535;
+    background-color: #ffffffde;
+    background-size: cover;
     }
     a:hover {
         color: #747bff;

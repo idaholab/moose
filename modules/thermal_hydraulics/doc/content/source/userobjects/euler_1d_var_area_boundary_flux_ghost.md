@@ -1,3 +1,5 @@
+# Euler1DVarAreaBoundaryFluxGhost
+
 This boundary flux $\mathbf{F}_b$ is computed using a numerical flux function $\mathcal{F}$ with the interior solution $\mathbf{U}_i$ and the ghost cell
 solution $\mathbf{U}_b$:
 \begin{equation}
@@ -5,4 +7,4 @@ solution $\mathbf{U}_b$:
 \end{equation}
 where $\mathbf{n}$ is the outward-facing normal vector.
 
-!tag name=euler_1d_var_area_boundary_flux_ghost
+!tag name=Euler1DVarAreaBoundaryFluxGhost
