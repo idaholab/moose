@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSChorinCorrector
 
 !syntax children /Kernels/INSChorinCorrector
+
+!tag name=INSChorinCorrector

@@ -7,3 +7,5 @@
 !syntax inputs /UserObjects/PorousFlowWaterNCG
 
 !syntax children /UserObjects/PorousFlowWaterNCG
+
+!tag name=PorousFlowWaterNCG

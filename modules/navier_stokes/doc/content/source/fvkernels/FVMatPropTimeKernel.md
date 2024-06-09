@@ -14,3 +14,5 @@ derivative is computed properly.
 !syntax inputs /FVKernels/FVMatPropTimeKernel
 
 !syntax children /FVKernels/FVMatPropTimeKernel
+
+!tag name=FVMatPropTimeKernel

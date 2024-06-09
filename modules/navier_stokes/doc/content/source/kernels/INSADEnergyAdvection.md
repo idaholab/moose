@@ -34,3 +34,5 @@ stated above.
 !syntax inputs /Kernels/INSADEnergyAdvection
 
 !syntax children /Kernels/INSADEnergyAdvection
+
+!tag name=INSADEnergyAdvection

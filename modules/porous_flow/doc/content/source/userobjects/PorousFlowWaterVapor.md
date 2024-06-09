@@ -7,3 +7,5 @@
 !syntax inputs /UserObjects/PorousFlowWaterVapor
 
 !syntax children /UserObjects/PorousFlowWaterVapor
+
+!tag name=PorousFlowWaterVapor

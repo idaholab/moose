@@ -27,3 +27,5 @@ All quantities but gravity may be provided as postprocessors.
 !syntax inputs /Postprocessors/RayleighNumber
 
 !syntax children /Postprocessors/RayleighNumber
+
+!tag name=RayleighNumber

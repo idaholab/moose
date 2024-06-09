@@ -177,3 +177,5 @@ settings.
 !syntax children /Materials/ComputePlaneSmallStrain
 
 !bibtex bibliography
+
+!tag name=ComputePlaneSmallStrain

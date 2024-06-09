@@ -16,3 +16,5 @@ is necessary to make the documentation clear for users.
 !syntax children /Components/TestSetupStatusComponent
 
 !bibtex bibliography
+
+!tag name=TestSetupStatusComponent

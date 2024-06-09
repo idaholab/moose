@@ -14,3 +14,5 @@ This kernel can be useful for analyzing complex contact mechanics output in a fi
 !syntax inputs /AuxKernels/MortarFrictionalStateAux
 
 !syntax children /AuxKernels/MortarFrictionalStateAux
+
+!tag name=MortarFrictionalStateAux

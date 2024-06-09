@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=MultiGrainRigidBodyMotion syntax=/Kernels/MultiGrainRigidBodyMotion
+!tag name=MultiGrainRigidBodyMotion

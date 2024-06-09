@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=SwitchingFunctionMaterial syntax=/Materials/SwitchingFunctionMaterial
+!tag name=SwitchingFunctionMaterial

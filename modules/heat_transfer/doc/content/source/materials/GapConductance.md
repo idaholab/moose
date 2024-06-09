@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GapConductance syntax=/Materials/GapConductance
+!tag name=GapConductance

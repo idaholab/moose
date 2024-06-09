@@ -11,3 +11,4 @@ property.
 !syntax inputs /Postprocessors/Mass
 
 !syntax children /Postprocessors/Mass
+!tag name=Mass

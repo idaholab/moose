@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=FeatureVolumeFraction syntax=/Postprocessors/FeatureVolumeFraction
+!tag name=FeatureVolumeFraction

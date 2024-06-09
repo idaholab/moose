@@ -7,3 +7,5 @@
 !syntax inputs /BCs/MomentumFreeSlipBC
 
 !syntax children /BCs/MomentumFreeSlipBC
+
+!tag name=MomentumFreeSlipBC

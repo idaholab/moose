@@ -63,3 +63,5 @@ equation.
 !syntax inputs /Kernels/NestedKKSACBulkC
 
 !syntax children /Kernels/NestedKKSACBulkC
+
+!tag name=NestedKKSACBulkC

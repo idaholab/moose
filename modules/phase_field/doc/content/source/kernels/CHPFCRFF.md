@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=CHPFCRFF syntax=/Kernels/CHPFCRFF
+!tag name=CHPFCRFF

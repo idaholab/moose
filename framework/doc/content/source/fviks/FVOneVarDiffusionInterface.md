@@ -21,3 +21,5 @@ values. This discretization scheme is O(h) accurate.
 !syntax inputs /FVInterfaceKernels/FVOneVarDiffusionInterface
 
 !syntax children /FVInterfaceKernels/FVOneVarDiffusionInterface
+
+!tag name=FVOneVarDiffusionInterface

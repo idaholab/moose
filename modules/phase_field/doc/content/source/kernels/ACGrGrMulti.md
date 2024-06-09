@@ -27,3 +27,5 @@ listed in `args`.
 !syntax children /Kernels/ACGrGrMulti
 
 !bibtex bibliography
+
+!tag name=ACGrGrMulti

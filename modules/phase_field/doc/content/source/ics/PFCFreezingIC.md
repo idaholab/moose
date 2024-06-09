@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=PFCFreezingIC syntax=/ICs/PFCFreezingIC
+!tag name=PFCFreezingIC

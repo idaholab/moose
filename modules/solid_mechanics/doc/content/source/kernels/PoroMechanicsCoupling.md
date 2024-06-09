@@ -9,3 +9,5 @@ This kernel should be added for every direction of the displacement variables. I
 !syntax inputs /Kernels/PoroMechanicsCoupling
 
 !syntax children /Kernels/PoroMechanicsCoupling
+
+!tag name=PoroMechanicsCoupling

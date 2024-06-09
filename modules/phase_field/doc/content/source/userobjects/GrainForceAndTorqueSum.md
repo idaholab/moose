@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GrainForceAndTorqueSum syntax=/UserObjects/GrainForceAndTorqueSum
+!tag name=GrainForceAndTorqueSum

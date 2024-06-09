@@ -66,3 +66,5 @@ of the supported indexable properties was found.
 if (!_prop)
   paramError("property", "No suitable material property was found");
 ```
+
+!tag name=IndexableProperty

@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSPenalizedNormalFlowBC
 
 !syntax children /BCs/NSPenalizedNormalFlowBC
+
+!tag name=NSPenalizedNormalFlowBC

@@ -39,3 +39,4 @@ frictional constraint.
 !syntax inputs /Constraints/NodalFrictionalConstraint
 
 !syntax children /Constraints/NodalFrictionalConstraint
+!tag name=NodalFrictionalConstraint

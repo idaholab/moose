@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=ClosePackIC syntax=/ICs/ClosePackIC
+!tag name=ClosePackIC

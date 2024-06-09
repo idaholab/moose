@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/TotalEnergyConvectiveFlux
 
 !syntax children /Kernels/TotalEnergyConvectiveFlux
+
+!tag name=TotalEnergyConvectiveFlux

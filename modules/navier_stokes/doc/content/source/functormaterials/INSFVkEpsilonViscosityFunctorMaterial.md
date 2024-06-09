@@ -18,3 +18,5 @@ where:
 !syntax inputs /FunctorMaterials/INSFVkEpsilonViscosityFunctorMaterial
 
 !syntax children /FunctorMaterials/INSFVkEpsilonViscosityFunctorMaterial
+
+!tag name=INSFVkEpsilonViscosityFunctorMaterial

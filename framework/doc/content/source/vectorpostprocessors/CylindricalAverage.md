@@ -20,3 +20,5 @@ The average is an average over quadrature points! The specific weight / volume a
 !syntax inputs /VectorPostprocessors/CylindricalAverage
 
 !syntax children /VectorPostprocessors/CylindricalAverage
+
+!tag name=CylindricalAverage

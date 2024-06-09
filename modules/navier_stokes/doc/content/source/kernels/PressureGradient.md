@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/PressureGradient
 
 !syntax children /Kernels/PressureGradient
+
+!tag name=PressureGradient

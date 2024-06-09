@@ -204,3 +204,5 @@ reachable values.
 !syntax inputs /FluidProperties/TabulatedFluidProperties
 
 !syntax children /FluidProperties/TabulatedFluidProperties
+
+!tag name=TabulatedFluidProperties

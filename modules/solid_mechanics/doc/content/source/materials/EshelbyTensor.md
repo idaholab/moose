@@ -23,3 +23,5 @@ fracture integrals.
 !syntax inputs /Materials/EshelbyTensor
 
 !syntax children /Materials/EshelbyTensor
+
+!tag name=EshelbyTensor

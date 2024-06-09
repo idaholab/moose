@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GrainTextureVectorPostprocessor syntax=/VectorPostprocessors/GrainTextureVectorPostprocessor
+!tag name=GrainTextureVectorPostprocessor

@@ -14,3 +14,5 @@ For instance:
 !syntax inputs /DiracKernels/PorousFlowSquarePulsePointSource
 
 !syntax children /DiracKernels/PorousFlowSquarePulsePointSource
+
+!tag name=PorousFlowSquarePulsePointSource

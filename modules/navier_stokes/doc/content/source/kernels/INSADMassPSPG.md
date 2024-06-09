@@ -17,3 +17,5 @@ variables.
 !syntax inputs /Kernels/INSADMassPSPG
 
 !syntax children /Kernels/INSADMassPSPG
+
+!tag name=INSADMassPSPG

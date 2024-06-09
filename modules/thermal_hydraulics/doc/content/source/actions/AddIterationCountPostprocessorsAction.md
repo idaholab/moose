@@ -16,3 +16,5 @@ iterations using [Postprocessors](syntax/Postprocessors/index.md) named:
 !syntax inputs /Debug/AddIterationCountPostprocessorsAction
 
 !syntax children /Debug/AddIterationCountPostprocessorsAction
+
+!tag name=AddIterationCountPostprocessorsAction

@@ -14,3 +14,5 @@ passed to each [Component](syntax/Components/index.md).
 !syntax inputs /ICs/RhoEAFromPressureTemperatureVelocityIC
 
 !syntax children /ICs/RhoEAFromPressureTemperatureVelocityIC
+
+!tag name=RhoEAFromPressureTemperatureVelocityIC

@@ -4,3 +4,5 @@ solution $\mathbf{U}_b$:
   \mathbf{F}_b = \mathcal{F}(\mathbf{U}_i, \mathbf{U}_b, \mathbf{n}) \,,
 \end{equation}
 where $\mathbf{n}$ is the outward-facing normal vector.
+
+!tag name=euler_1d_var_area_boundary_flux_ghost

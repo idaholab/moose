@@ -44,3 +44,5 @@ QoI(s):
 !syntax inputs /Surrogates/NearestPointSurrogate
 
 !syntax children /Surrogates/NearestPointSurrogate
+
+!tag name=PolynomialRegressionSurrogate

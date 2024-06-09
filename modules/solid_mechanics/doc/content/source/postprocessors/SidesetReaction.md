@@ -17,3 +17,5 @@ where $\underline{\sigma}$ is the stress tensor.
 !syntax inputs /Postprocessors/SidesetReaction
 
 !syntax children /Postprocessors/SidesetReaction
+
+!tag name=SidesetReaction

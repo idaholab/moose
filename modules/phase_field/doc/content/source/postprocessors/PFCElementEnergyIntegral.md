@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=PFCElementEnergyIntegral syntax=/Postprocessors/PFCElementEnergyIntegral
+!tag name=PFCElementEnergyIntegral

@@ -25,3 +25,5 @@ The flag `use_displaced_mesh = false` is set internally by this Postprocessor, a
 !syntax inputs /Postprocessors/FVPorousFlowFluidMass
 
 !syntax children /Postprocessors/FVPorousFlowFluidMass
+
+!tag name=FVPorousFlowFluidMass

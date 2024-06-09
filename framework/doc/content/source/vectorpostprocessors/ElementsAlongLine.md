@@ -19,3 +19,5 @@ formats such as Exodus that start with 1.
 !syntax inputs /VectorPostprocessors/ElementsAlongLine
 
 !syntax children /VectorPostprocessors/ElementsAlongLine
+
+!tag name=ElementsAlongLine

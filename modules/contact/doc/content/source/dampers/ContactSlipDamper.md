@@ -29,3 +29,5 @@ Finally, it should be noted that although this damper is primarily intended to b
 !syntax inputs /Dampers/ContactSlipDamper
 
 !syntax children /Dampers/ContactSlipDamper
+
+!tag name=ContactSlipDamper

@@ -7,3 +7,5 @@
 !syntax inputs /Materials/Air
 
 !syntax children /Materials/Air
+
+!tag name=Air

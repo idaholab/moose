@@ -26,3 +26,5 @@ related [RankTwoScalarAux](RankTwoScalarAux.md)
 !syntax inputs /Materials/RankTwoDirectionalComponent
 
 !syntax children /Materials/RankTwoDirectionalComponent
+
+!tag name=RankTwoDirectionalComponent

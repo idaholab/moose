@@ -40,3 +40,5 @@ Third, in contrast to [!cite](hales15homogenization) some notational inconsisten
 !syntax children /Postprocessors/HomogenizedThermalConductivity
 
 !bibtex bibliography
+
+!tag name=HomogenizedThermalConductivity

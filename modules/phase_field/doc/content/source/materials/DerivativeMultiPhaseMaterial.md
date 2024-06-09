@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=DerivativeMultiPhaseMaterial syntax=/Materials/DerivativeMultiPhaseMaterial
+!tag name=DerivativeMultiPhaseMaterial

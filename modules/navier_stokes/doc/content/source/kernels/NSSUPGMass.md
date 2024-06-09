@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSSUPGMass
 
 !syntax children /Kernels/NSSUPGMass
+
+!tag name=NSSUPGMass

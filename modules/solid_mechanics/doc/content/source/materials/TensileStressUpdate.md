@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=TensileStressUpdate syntax=/Materials/TensileStressUpdate
+!tag name=TensileStressUpdate

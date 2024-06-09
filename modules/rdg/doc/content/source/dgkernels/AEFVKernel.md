@@ -7,3 +7,5 @@
 !syntax inputs /DGKernels/AEFVKernel
 
 !syntax children /DGKernels/AEFVKernel
+
+!tag name=AEFVKernel

@@ -25,3 +25,5 @@ variable.
 !syntax children /Kernels/SplitCHParsed
 
 !bibtex bibliography
+
+!tag name=SplitCHParsed

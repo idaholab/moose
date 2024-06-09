@@ -27,3 +27,5 @@ global alloy concentration.
 !syntax children /ICs/CoupledValueFunctionIC
 
 !bibtex bibliography
+
+!tag name=CoupledValueFunctionIC

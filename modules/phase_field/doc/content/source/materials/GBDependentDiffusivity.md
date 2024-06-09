@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GBDependentDiffusivity syntax=/Materials/GBDependentDiffusivity
+!tag name=GBDependentDiffusivity

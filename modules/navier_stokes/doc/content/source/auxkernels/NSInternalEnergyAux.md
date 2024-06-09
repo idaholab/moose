@@ -7,3 +7,5 @@
 !syntax inputs /AuxKernels/NSInternalEnergyAux
 
 !syntax children /AuxKernels/NSInternalEnergyAux
+
+!tag name=NSInternalEnergyAux

@@ -23,3 +23,5 @@ impinges perpendicular to the surface.
 !syntax inputs /FVBCs/FVGaussianEnergyFluxBC
 
 !syntax children /FVBCs/FVGaussianEnergyFluxBC
+
+!tag name=FVGaussianEnergyFluxBC

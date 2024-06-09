@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GrainForcesPostprocessor syntax=/VectorPostprocessors/GrainForcesPostprocessor
+!tag name=GrainForcesPostprocessor

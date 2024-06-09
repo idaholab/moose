@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=AverageGrainVolume syntax=/Postprocessors/AverageGrainVolume
+!tag name=AverageGrainVolume

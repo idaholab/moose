@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=EBSDReaderPointDataAux syntax=/AuxKernels/EBSDReaderPointDataAux
+!tag name=EBSDReaderPointDataAux

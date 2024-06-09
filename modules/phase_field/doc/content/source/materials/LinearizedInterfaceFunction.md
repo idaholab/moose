@@ -32,3 +32,5 @@ This material is also generated as part of the automated syntax implemented in [
 !syntax inputs /Materials/LinearizedInterfaceFunction
 
 !syntax children /Materials/LinearizedInterfaceFunction
+
+!tag name=LinearizedInterfaceFunction

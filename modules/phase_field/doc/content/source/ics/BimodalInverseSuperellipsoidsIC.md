@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=BimodalInverseSuperellipsoidsIC syntax=/ICs/BimodalInverseSuperellipsoidsIC
+!tag name=BimodalInverseSuperellipsoidsIC

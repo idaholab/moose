@@ -31,3 +31,5 @@ where `<shaft_name>` is the user-given name of the component:
 !syntax inputs /Components/Shaft
 
 !syntax children /Components/Shaft
+
+!tag name=Shaft

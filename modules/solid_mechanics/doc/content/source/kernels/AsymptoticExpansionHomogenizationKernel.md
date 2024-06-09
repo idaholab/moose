@@ -29,3 +29,5 @@ where $D_{ijkl}^\text{H}$ is the homogenized elasticity tensor.  See [!cite](hal
 !syntax children /Kernels/AsymptoticExpansionHomogenizationKernel
 
 !bibtex bibliography
+
+!tag name=AsymptoticExpansionHomogenizationKernel

@@ -41,3 +41,5 @@ StressDivergenceTensors Kernels should be used.
 !syntax inputs /Kernels/InertialTorque
 
 !syntax children /Kernels/InertialTorque
+
+!tag name=InertialTorque

@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=MultiAuxVariablesAction syntax=/AuxVariables/MultiAuxVariables/MultiAuxVariablesAction
+!tag name=MultiAuxVariablesAction

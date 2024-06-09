@@ -53,3 +53,5 @@ parameter setting is shown below:
 !syntax children /Materials/ADComputeMeanThermalExpansionFunctionEigenstrain
 
 !bibtex bibliography
+
+!tag name=ADComputeMeanThermalExpansionFunctionEigenstrain

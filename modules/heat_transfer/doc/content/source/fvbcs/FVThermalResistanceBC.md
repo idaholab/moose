@@ -103,3 +103,5 @@ boundary.
 !syntax inputs /FVBCs/FVThermalResistanceBC
 
 !syntax children /FVBCs/FVThermalResistanceBC
+
+!tag name=FVThermalResistanceBC

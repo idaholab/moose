@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=CHPFCRFFSplitKernelAction syntax=/Kernels/CHPFCRFFSplitKernel/CHPFCRFFSplitKernelAction
+!tag name=CHPFCRFFSplitKernelAction

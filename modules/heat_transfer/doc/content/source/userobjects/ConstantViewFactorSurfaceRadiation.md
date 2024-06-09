@@ -75,3 +75,5 @@ block=UserObjects
 !syntax inputs /UserObjects/ConstantViewFactorSurfaceRadiation
 
 !syntax children /UserObjects/ConstantViewFactorSurfaceRadiation
+
+!tag name=ConstantViewFactorSurfaceRadiation

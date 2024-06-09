@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GrainBoundaryArea syntax=/Postprocessors/GrainBoundaryArea
+!tag name=GrainBoundaryArea

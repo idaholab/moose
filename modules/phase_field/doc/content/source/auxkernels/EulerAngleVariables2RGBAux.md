@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=EulerAngleVariables2RGBAux syntax=/AuxKernels/EulerAngleVariables2RGBAux
+!tag name=EulerAngleVariables2RGBAux

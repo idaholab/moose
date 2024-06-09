@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=SolidMechanicsHardeningCutExponential syntax=/UserObjects/SolidMechanicsHardeningCutExponential
+!tag name=SolidMechanicsHardeningCutExponential

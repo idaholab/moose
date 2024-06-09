@@ -5,3 +5,5 @@
 !syntax inputs /UserObjects/FunctionElementLoopIntegralUserObject
 
 !syntax children /UserObjects/FunctionElementLoopIntegralUserObject
+
+!tag name=FunctionElementLoopIntegralUserObject

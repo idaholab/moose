@@ -20,3 +20,7 @@ the `CSVReaderVectorPostprocessor`.
 !syntax inputs /VectorPostprocessors/CSVReaderVectorPostprocessor
 
 !syntax children /VectorPostprocessors/CSVReaderVectorPostprocessor
+
+!tag name=CSVReaderVectorPostprocessor
+
+!tag name=CSVReader

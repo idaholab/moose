@@ -23,3 +23,5 @@ is the name of the component:
 !syntax inputs /Components/TotalPower
 
 !syntax children /Components/TotalPower
+
+!tag name=TotalPower

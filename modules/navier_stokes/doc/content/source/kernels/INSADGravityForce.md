@@ -9,3 +9,5 @@ $\vec{g}$ is the gravity vector.
 !syntax inputs /Kernels/INSADGravityForce
 
 !syntax children /Kernels/INSADGravityForce
+
+!tag name=INSADGravityForce

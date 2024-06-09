@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GapHeatPointSourceMaster syntax=/DiracKernels/GapHeatPointSourceMaster
+!tag name=GapHeatPointSourceMaster

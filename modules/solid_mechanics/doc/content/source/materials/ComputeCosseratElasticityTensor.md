@@ -20,3 +20,5 @@ for more explanation.
 !syntax inputs /Materials/ComputeCosseratElasticityTensor
 
 !syntax children /Materials/ComputeCosseratElasticityTensor
+
+!tag name=ComputeCosseratElasticityTensor

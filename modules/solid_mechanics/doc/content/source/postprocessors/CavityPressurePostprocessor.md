@@ -13,3 +13,5 @@ These quantities are calculated by the [CavityPressureUserObject](/CavityPressur
 !syntax inputs /Postprocessors/CavityPressurePostprocessor
 
 !syntax children /Postprocessors/CavityPressurePostprocessor
+
+!tag name=CavityPressurePostprocessor

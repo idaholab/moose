@@ -229,3 +229,5 @@ step size.
 !syntax children /Materials/ADComputeMultipleInelasticStress
 
 !bibtex bibliography
+
+!tag name=ADComputeMultipleInelasticStress

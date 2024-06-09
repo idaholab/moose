@@ -11,3 +11,5 @@ This is the automatic-differentiation version of [`ADCZMInterfaceKernelTotalLagr
 !syntax inputs /InterfaceKernels/ADCZMInterfaceKernelTotalLagrangian
 
 !syntax children /InterfaceKernels/ADCZMInterfaceKernelTotalLagrangian
+
+!tag name=ADCZMInterfaceKernelTotalLagrangian

@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=MatVecRealGradAuxKernelAction syntax=/AuxKernels/MatVecRealGradAuxKernel/MatVecRealGradAuxKernelAction
+!tag name=MatVecRealGradAuxKernelAction

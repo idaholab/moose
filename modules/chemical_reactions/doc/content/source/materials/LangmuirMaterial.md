@@ -24,3 +24,5 @@ equilibrium concentration and $K_d$ / $K_a$ are the desorption and adsorption ti
 !syntax inputs /Materials/LangmuirMaterial
 
 !syntax children /Materials/LangmuirMaterial
+
+!tag name=LangmuirMaterial

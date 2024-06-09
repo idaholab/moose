@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=SingleGrainRigidBodyMotion syntax=/Kernels/SingleGrainRigidBodyMotion
+!tag name=SingleGrainRigidBodyMotion

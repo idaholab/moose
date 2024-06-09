@@ -20,3 +20,5 @@ Note that the phase free energies usually have single well character. The global
 landscape will however have a double well character in the examples above.
 
 !syntax children /Materials/DerivativeTwoPhaseMaterial
+
+!tag name=DerivativeTwoPhaseMaterial

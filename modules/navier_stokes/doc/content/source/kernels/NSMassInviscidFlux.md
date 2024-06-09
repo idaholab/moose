@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSMassInviscidFlux
 
 !syntax children /Kernels/NSMassInviscidFlux
+
+!tag name=NSMassInviscidFlux

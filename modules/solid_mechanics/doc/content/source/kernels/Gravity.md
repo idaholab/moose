@@ -23,3 +23,5 @@ the gravity body force per unit mass.
 !syntax inputs /Kernels/Gravity
 
 !syntax children /Kernels/Gravity
+
+!tag name=Gravity

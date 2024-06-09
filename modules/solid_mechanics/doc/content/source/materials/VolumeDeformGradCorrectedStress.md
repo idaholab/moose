@@ -13,3 +13,5 @@ This class takes the stress from the previous configuration and the deformation 
 !syntax children /Materials/VolumeDeformGradCorrectedStress
 
 !bibtex bibliography
+
+!tag name=VolumeDeformGradCorrectedStress

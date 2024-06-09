@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=AnisoHeatConduction syntax=/Kernels/AnisoHeatConduction
+!tag name=AnisoHeatConduction

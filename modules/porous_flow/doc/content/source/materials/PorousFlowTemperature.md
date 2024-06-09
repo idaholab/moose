@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowTemperature
 
 !syntax children /Materials/PorousFlowTemperature
+
+!tag name=PorousFlowTemperature

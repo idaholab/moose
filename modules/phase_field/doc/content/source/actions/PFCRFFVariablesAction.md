@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=PFCRFFVariablesAction syntax=/Variables/PFCRFFVariables/PFCRFFVariablesAction
+!tag name=PFCRFFVariablesAction

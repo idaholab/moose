@@ -12,3 +12,5 @@ is necessary to make the documentation clear for users.
 !syntax parameters /ClosureTest1Phase/ClosureTest1PhaseAction
 
 !bibtex bibliography
+
+!tag name=ClosureTest1PhaseAction

@@ -22,3 +22,5 @@ variable.
 !syntax children /Kernels/SplitCHMath
 
 !bibtex bibliography
+
+!tag name=SplitCHMath

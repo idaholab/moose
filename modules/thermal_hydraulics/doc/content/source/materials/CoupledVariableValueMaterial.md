@@ -20,3 +20,5 @@ material property, please consider the [ParsedMaterial.md].
 !syntax inputs /Materials/CoupledVariableValueMaterial
 
 !syntax children /Materials/CoupledVariableValueMaterial
+
+!tag name=CoupledVariableValueMaterial

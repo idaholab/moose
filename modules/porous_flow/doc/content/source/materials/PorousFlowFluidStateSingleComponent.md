@@ -11,3 +11,5 @@ fluid state UserObjects.
 !syntax inputs /Materials/PorousFlowFluidStateSingleComponent
 
 !syntax children /Materials/PorousFlowFluidStateSingleComponent
+
+!tag name=PorousFlowFluidStateSingleComponent

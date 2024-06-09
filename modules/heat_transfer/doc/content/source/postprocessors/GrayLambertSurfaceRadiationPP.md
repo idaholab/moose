@@ -21,3 +21,5 @@ block=Postprocessors
 !syntax children /Postprocessors/GrayLambertSurfaceRadiationPP
 
 !bibtex bibliography
+
+!tag name=GrayLambertSurfaceRadiationPP
