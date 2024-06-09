@@ -11,3 +11,5 @@ a [ParsedAux.md] to compute the convective heat flux.
 !syntax inputs /AuxKernels/ConvectiveHeatFlux1PhaseAux
 
 !syntax children /AuxKernels/ConvectiveHeatFlux1PhaseAux
+
+!tag name=ConvectiveHeatFlux1PhaseAux pairs=module:thermal_hydraulics system:auxkernels

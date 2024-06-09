@@ -10,3 +10,5 @@ Initial condition to set specific enthalpy from given pressure and temperature u
 !syntax children /ICs/SpecificEnthalpyFromPressureTemperatureIC
 
 !bibtex bibliography
+
+!tag name=SpecificEnthalpyFromPressureTemperatureIC pairs=module:fluid_properties system:ics

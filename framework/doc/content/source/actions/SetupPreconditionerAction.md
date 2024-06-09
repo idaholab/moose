@@ -9,3 +9,5 @@ More information about preconditioners may be found on the
 [Preconditioning syntax documentation](syntax/Preconditioning/index.md).
 
 !syntax parameters /Preconditioning/SetupPreconditionerAction
+
+!tag name=SetupPreconditionerAction pairs=module:framework system:actions

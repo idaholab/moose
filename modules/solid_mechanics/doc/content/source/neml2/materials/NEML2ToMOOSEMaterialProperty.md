@@ -22,3 +22,5 @@ Objects in this family assign a selected NEML2 model output computed through [Ex
 !syntax inputs /Materials/NEML2ToRealMOOSEMaterialProperty
 
 !syntax children /Materials/NEML2ToRealMOOSEMaterialProperty
+
+!tag name=NEML2ToMOOSEMaterialProperty pairs=module:solid_mechanics system:neml2

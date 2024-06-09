@@ -145,3 +145,5 @@ functions are not valid. One should try to use equilibrium wall functions when p
 !syntax inputs /FVBCs/INSFVTurbulentViscosityWallFunction
 
 !syntax children /FVBCs/INSFVTurbulentViscosityWallFunction
+
+!tag name=INSFVTurbulentViscosityWallFunction pairs=module:navier_stokes system:fvbcs

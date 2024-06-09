@@ -12,3 +12,5 @@ $\nabla \vec u$ is stored in [Jacobian matrix form](https://en.wikipedia.org/wik
 !syntax inputs /Kernels/INSADMomentumAdvection
 
 !syntax children /Kernels/INSADMomentumAdvection
+
+!tag name=INSADMomentumAdvection pairs=module:navier_stokes system:kernels

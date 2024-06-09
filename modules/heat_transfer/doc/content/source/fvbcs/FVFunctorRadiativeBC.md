@@ -18,3 +18,5 @@ the surface.
 !syntax inputs /FVBCs/FVFunctorRadiativeBC
 
 !syntax children /FVBCs/FVFunctorRadiativeBC
+
+!tag name=FVFunctorRadiativeBC pairs=module:heat_transfer system:fvbcs

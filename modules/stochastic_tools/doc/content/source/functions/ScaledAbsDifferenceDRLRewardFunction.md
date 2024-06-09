@@ -18,3 +18,5 @@ For an example on how to use it in a DRL setting, see [LibtorchDRLControlTrainer
 !syntax inputs /Functions/ScaledAbsDifferenceDRLRewardFunction
 
 !syntax children /Functions/ScaledAbsDifferenceDRLRewardFunction
+
+!tag name=ScaledAbsDifferenceDRLRewardFunction pairs=module:stochastic_tools system:functions

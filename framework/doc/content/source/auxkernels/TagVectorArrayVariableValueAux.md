@@ -9,3 +9,5 @@ The value of a tagged vector for a given array variable is coupled to the curren
 !syntax children /AuxKernels/TagVectorArrayVariableValueAux
 
 !bibtex bibliography
+
+!tag name=TagVectorArrayVariableValueAux pairs=module:framework system:auxkernels

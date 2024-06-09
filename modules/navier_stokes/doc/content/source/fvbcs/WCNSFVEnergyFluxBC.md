@@ -52,3 +52,5 @@ the specific heat capacity and the temperature.
 !syntax inputs /FVBCs/WCNSFVEnergyFluxBC
 
 !syntax children /FVBCs/WCNSFVEnergyFluxBC
+
+!tag name=WCNSFVEnergyFluxBC pairs=module:navier_stokes system:fvbcs

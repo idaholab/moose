@@ -85,3 +85,5 @@ The different reasons (ways) things are printed are:
 5. Finished running, hasn't been printed, but is over the memory limit (print "Finished")
 
 In each case the entire "stack" is printed up to where the current section that needs to be printed is.  This is to give context to inner scopes and get proper indenting.
+
+!tag name=PerfGraphLivePrint pairs=module:framework system:utils

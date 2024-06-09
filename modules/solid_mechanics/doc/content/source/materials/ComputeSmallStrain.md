@@ -50,3 +50,5 @@ input file.
 !syntax children /Materials/ComputeSmallStrain
 
 !bibtex bibliography
+
+!tag name=ComputeSmallStrain pairs=module:solid_mechanics system:materials

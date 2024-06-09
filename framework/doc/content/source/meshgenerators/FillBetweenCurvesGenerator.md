@@ -22,3 +22,5 @@ All the other meshing options are the same as [`FillBetweenPointVectorsGenerator
 !syntax inputs /Mesh/FillBetweenCurvesGenerator
 
 !syntax children /Mesh/FillBetweenCurvesGenerator
+
+!tag name=FillBetweenCurvesGenerator pairs=module:framework system:meshgenerators

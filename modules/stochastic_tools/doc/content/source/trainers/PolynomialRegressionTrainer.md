@@ -128,3 +128,5 @@ the user has to set `regression_type` to either 'ols' or 'ridge' in the input fi
 !syntax inputs /Trainers/PolynomialRegressionTrainer
 
 !syntax children /Trainers/PolynomialRegressionTrainer
+
+!tag name=PolynomialRegressionTrainer pairs=module:stochastic_tools system:trainers

@@ -45,3 +45,5 @@ quantities:
 - $u_{\text{ext}}$, the provided exterior velocity,
 - $\rho_i$, the interior density, and
 - $E_i$, the interior specific total energy.
+
+!tag name=InletVelocityTemperature1Phase pairs=module:thermal_hydraulics system:components

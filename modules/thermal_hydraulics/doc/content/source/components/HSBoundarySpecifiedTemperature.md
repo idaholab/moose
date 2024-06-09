@@ -20,3 +20,5 @@ the temperature function $T_b$ to strongly impose on the boundary.
 !syntax inputs /Components/HSBoundarySpecifiedTemperature
 
 !syntax children /Components/HSBoundarySpecifiedTemperature
+
+!tag name=HSBoundarySpecifiedTemperature pairs=module:thermal_hydraulics system:components

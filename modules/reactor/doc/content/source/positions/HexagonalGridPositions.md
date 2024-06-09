@@ -15,3 +15,5 @@ Note that the pattern is rotated 30 degrees clockwise in the positions created.
 !syntax inputs /Positions/HexagonalGridPositions
 
 !syntax children /Positions/HexagonalGridPositions
+
+!tag name=HexagonalGridPositions pairs=module:reactor system:positions

@@ -32,3 +32,5 @@ block '1' in the main app to block '1' in the child app `sub`, filling the varia
 !syntax inputs /Transfers/MultiAppGeneralFieldShapeEvaluationTransfer
 
 !syntax children /Transfers/MultiAppGeneralFieldShapeEvaluationTransfer
+
+!tag name=MultiAppGeneralFieldShapeEvaluationTransfer pairs=module:framework system:transfers

@@ -21,3 +21,5 @@ This can be used to locally turn the BC on or off.
 !syntax inputs /BCs/CoupledVarNeumannBC
 
 !syntax children /BCs/CoupledVarNeumannBC
+
+!tag name=CoupledVarNeumannBC pairs=module:framework system:bcs

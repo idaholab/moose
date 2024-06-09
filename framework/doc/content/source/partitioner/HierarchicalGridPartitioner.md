@@ -34,3 +34,5 @@ To fix this we can use the HierarchicalGridPartitioner using syntax shown in [hi
 !syntax children /Mesh/Partitioner/HierarchicalGridPartitioner
 
 !bibtex bibliography
+
+!tag name=HierarchicalGridPartitioner pairs=module:framework system:partitioner

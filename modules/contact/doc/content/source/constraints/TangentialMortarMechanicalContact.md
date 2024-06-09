@@ -15,3 +15,5 @@ be `TangentialMortarMechanicalContact` instances for both x and y displacement c
 !syntax inputs /Constraints/TangentialMortarMechanicalContact
 
 !syntax children /Constraints/TangentialMortarMechanicalContact
+
+!tag name=TangentialMortarMechanicalContact pairs=module:contact system:constraints

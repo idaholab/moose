@@ -47,3 +47,5 @@ The input above should be equivalent to the input shown below.
 !syntax inputs /Mesh/SideSetExtruderGenerator
 
 !syntax children /Mesh/SideSetExtruderGenerator
+
+!tag name=SideSetExtruderGenerator pairs=module:framework system:meshgenerators

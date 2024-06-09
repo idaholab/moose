@@ -20,3 +20,5 @@ calculating the total strain measure with the small strain assumptions.
 !syntax inputs /Materials/ADComputeAxisymmetricRZSmallStrain
 
 !syntax children /Materials/ADComputeAxisymmetricRZSmallStrain
+
+!tag name=ADComputeAxisymmetricRZSmallStrain pairs=module:solid_mechanics system:materials

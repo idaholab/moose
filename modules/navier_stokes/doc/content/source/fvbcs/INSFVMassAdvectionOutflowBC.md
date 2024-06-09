@@ -12,3 +12,5 @@ they should use [INSFVOutletPressureBC](/INSFVOutletPressureBC.md).
 !syntax inputs /FVBCs/INSFVMassAdvectionOutflowBC
 
 !syntax children /FVBCs/INSFVMassAdvectionOutflowBC
+
+!tag name=INSFVMassAdvectionOutflowBC pairs=module:navier_stokes system:fvbcs

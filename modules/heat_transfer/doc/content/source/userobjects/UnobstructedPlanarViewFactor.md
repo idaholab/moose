@@ -75,3 +75,5 @@ block=UserObjects
 !syntax inputs /UserObjects/UnobstructedPlanarViewFactor
 
 !syntax children /UserObjects/UnobstructedPlanarViewFactor
+
+!tag name=UnobstructedPlanarViewFactor pairs=module:heat_transfer system:userobjects

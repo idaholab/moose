@@ -19,3 +19,5 @@ where
 !syntax inputs /Postprocessors/HeatRateRadiationRZ
 
 !syntax children /Postprocessors/HeatRateRadiationRZ
+
+!tag name=HeatRateRadiationRZ pairs=module:thermal_hydraulics system:postprocessors

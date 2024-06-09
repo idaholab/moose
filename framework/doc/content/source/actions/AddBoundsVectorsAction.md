@@ -9,3 +9,5 @@ More information about adding vectors to the linear system using the `[Bounds]` 
 may be found on the [Bounds syntax page](syntax/Bounds/index.md).
 
 !syntax parameters /Bounds/AddBoundsVectorsAction
+
+!tag name=AddBoundsVectorsAction pairs=module:framework system:actions

@@ -20,3 +20,5 @@ Eulerian Lagrangian (ALE) simulations.
 !syntax inputs /Kernels/INSADMomentumMeshAdvection
 
 !syntax children /Kernels/INSADMomentumMeshAdvection
+
+!tag name=INSADMomentumMeshAdvection pairs=module:navier_stokes system:kernels

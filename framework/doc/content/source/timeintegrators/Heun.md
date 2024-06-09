@@ -43,3 +43,5 @@ should be used with caution.
 !syntax inputs /Executioner/TimeIntegrator/Heun
 
 !syntax children /Executioner/TimeIntegrator/Heun
+
+!tag name=Heun pairs=module:framework system:timeintegrators

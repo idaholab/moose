@@ -20,3 +20,5 @@ within a [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetCo
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchControlValuePostprocessor pairs=module:framework system:libtorch

@@ -16,3 +16,5 @@ Block 1 and 2 are set differently by two `FVConstantIC` objects.
 !syntax inputs /FVICs/FVConstantIC
 
 !syntax children /FVICs/FVConstantIC
+
+!tag name=FVConstantIC pairs=module:framework system:fvics

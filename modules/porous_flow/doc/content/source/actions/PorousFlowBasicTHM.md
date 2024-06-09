@@ -85,3 +85,5 @@ A THM example that uses `PorousFlowBasicTHM` is also documented in the [PorousFl
 !listing modules/porous_flow/examples/tutorial/04.i
 
 !syntax parameters /PorousFlowBasicTHM/PorousFlowBasicTHM
+
+!tag name=PorousFlowBasicTHM pairs=module:porous_flow system:actions

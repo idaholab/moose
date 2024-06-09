@@ -116,3 +116,5 @@ Moose variables for the set union of all blocks handled by the action.
 !syntax children /Problem/DumpObjectsProblem
 
 !bibtex bibliography
+
+!tag name=DumpObjectsProblem pairs=module:framework system:problems

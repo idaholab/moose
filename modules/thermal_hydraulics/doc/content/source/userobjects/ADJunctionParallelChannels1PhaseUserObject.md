@@ -15,3 +15,5 @@ scalar degrees of freedom.
 !syntax children /UserObjects/ADJunctionParallelChannels1PhaseUserObject
 
 !bibtex bibliography
+
+!tag name=ADJunctionParallelChannels1PhaseUserObject pairs=module:thermal_hydraulics system:userobjects

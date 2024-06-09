@@ -19,3 +19,5 @@ where, $p$ is the fluid pressure and $g$ is the acceleration due to gravity. Thi
 !syntax inputs /BCs/FluidFreeSurfaceBC
 
 !syntax children /BCs/FluidFreeSurfaceBC
+
+!tag name=FluidFreeSurfaceBC pairs=module:fsi system:bcs

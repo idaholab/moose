@@ -28,3 +28,5 @@ The adjoint app reads in this outputted file and a [SolutionAux.md] sets the `u`
 !syntax inputs /UserObjects/AdjointSolutionUserObject
 
 !syntax children /UserObjects/AdjointSolutionUserObject
+
+!tag name=AdjointSolutionUserObject pairs=module:optimization system:userobjects

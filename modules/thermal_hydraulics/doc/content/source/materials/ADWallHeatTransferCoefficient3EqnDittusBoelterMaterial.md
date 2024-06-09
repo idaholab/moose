@@ -12,3 +12,5 @@ Because it uses AD, it does not declare additional material properties for the d
 !syntax inputs /Materials/ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial
+
+!tag name=ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial pairs=module:thermal_hydraulics system:materials

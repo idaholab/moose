@@ -55,3 +55,5 @@ be run for a certain sample. And example of using this parameter can be found in
 !syntax inputs /MultiApps/SamplerFullSolveMultiApp
 
 !syntax children /MultiApps/SamplerFullSolveMultiApp
+
+!tag name=SamplerFullSolveMultiApp pairs=module:stochastic_tools system:multiapps

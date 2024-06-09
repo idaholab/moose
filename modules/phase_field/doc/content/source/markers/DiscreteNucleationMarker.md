@@ -17,3 +17,5 @@ The `DiscreteNucleationMarker` is part of the
 !syntax children /Adaptivity/Markers/DiscreteNucleationMarker
 
 !bibtex bibliography
+
+!tag name=DiscreteNucleationMarker pairs=module:phase_field system:markers

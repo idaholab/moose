@@ -19,3 +19,5 @@ with itself and a source term from the reaction of the first component.
 !syntax inputs /Materials/GenericConstant2DArray
 
 !syntax children /Materials/GenericConstant2DArray
+
+!tag name=GenericConstant2DArray pairs=module:framework system:materials

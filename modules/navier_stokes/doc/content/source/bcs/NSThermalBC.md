@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSThermalBC
 
 !syntax children /BCs/NSThermalBC
+
+!tag name=NSThermalBC pairs=module:navier_stokes system:bcs

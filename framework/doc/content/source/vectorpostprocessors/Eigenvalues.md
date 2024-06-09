@@ -18,3 +18,5 @@ In this input file, the variable `u` is the solution of an eigenvalue diffusion-
 !syntax inputs /VectorPostprocessors/Eigenvalues
 
 !syntax children /VectorPostprocessors/Eigenvalues
+
+!tag name=Eigenvalues pairs=module:framework system:vectorpostprocessors

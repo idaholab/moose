@@ -19,3 +19,5 @@ derived from the [FormLoss1PhaseBase.md] component to add form loss terms in com
 !syntax inputs /Kernels/ADOneD3EqnMomentumFormLoss
 
 !syntax children /Kernels/ADOneD3EqnMomentumFormLoss
+
+!tag name=ADOneD3EqnMomentumFormLoss pairs=module:thermal_hydraulics system:kernels

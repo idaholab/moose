@@ -11,3 +11,5 @@ Because it uses AD, it does not require setting additional material properties t
 !syntax inputs /Materials/ADReynoldsNumberMaterial
 
 !syntax children /Materials/ADReynoldsNumberMaterial
+
+!tag name=ADReynoldsNumberMaterial pairs=module:thermal_hydraulics system:materials

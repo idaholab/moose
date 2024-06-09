@@ -120,3 +120,5 @@ Interact with this endpoint by a `GET` request to `/continue`. On success, the r
 !syntax inputs /Controls/WebServerControl
 
 !syntax children /Controls/WebServerControl
+
+!tag name=WebServerControl pairs=module:framework system:controls

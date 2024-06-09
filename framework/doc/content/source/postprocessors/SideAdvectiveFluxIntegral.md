@@ -22,3 +22,5 @@ The expression of the advective flux in this object is generic, as described, an
 !syntax inputs /Postprocessors/SideAdvectiveFluxIntegral
 
 !syntax children /Postprocessors/SideAdvectiveFluxIntegral
+
+!tag name=SideAdvectiveFluxIntegral pairs=module:framework system:postprocessors

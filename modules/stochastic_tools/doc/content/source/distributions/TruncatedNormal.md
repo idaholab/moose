@@ -30,3 +30,5 @@ The following input file defines a normal distribution with a mean of 100, a sta
 !syntax children /Distributions/TruncatedNormal
 
 !bibtex bibliography
+
+!tag name=TruncatedNormal pairs=module:stochastic_tools system:distributions

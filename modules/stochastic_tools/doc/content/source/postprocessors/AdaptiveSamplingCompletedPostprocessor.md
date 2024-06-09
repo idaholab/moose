@@ -12,3 +12,5 @@ It is automatically built by [AdaptiveSamplerAction](AdaptiveSamplerAction.md) i
 !syntax inputs /Postprocessors/AdaptiveSamplingCompletedPostprocessor
 
 !syntax children /Postprocessors/AdaptiveSamplingCompletedPostprocessor
+
+!tag name=AdaptiveSamplingCompletedPostprocessor pairs=module:stochastic_tools system:postprocessors

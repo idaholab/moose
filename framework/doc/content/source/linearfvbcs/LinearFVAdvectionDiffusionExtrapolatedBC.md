@@ -36,3 +36,5 @@ problems.
 !syntax inputs /LinearFVBCs/LinearFVAdvectionDiffusionExtrapolatedBC
 
 !syntax children /LinearFVBCs/LinearFVAdvectionDiffusionExtrapolatedBC
+
+!tag name=LinearFVAdvectionDiffusionExtrapolatedBC pairs=module:framework system:linearfvbcs

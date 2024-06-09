@@ -14,3 +14,5 @@ This +must+ be present in all simulations!
 !syntax inputs /UserObjects/PorousFlowDictator
 
 !syntax children /UserObjects/PorousFlowDictator
+
+!tag name=PorousFlowDictator pairs=module:porous_flow system:userobjects

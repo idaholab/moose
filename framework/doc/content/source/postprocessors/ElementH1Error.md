@@ -22,3 +22,5 @@ In this example, we compute a variety of error between a variable and a function
 !syntax inputs /Postprocessors/ElementH1Error
 
 !syntax children /Postprocessors/ElementH1Error
+
+!tag name=ElementH1Error pairs=module:framework system:postprocessors

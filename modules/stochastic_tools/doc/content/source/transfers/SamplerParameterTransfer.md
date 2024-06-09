@@ -11,3 +11,5 @@ example: [Monte Carlo Example](stochastic_tools/examples/monte_carlo.md).
 !syntax inputs /Transfers/SamplerParameterTransfer
 
 !syntax children /Transfers/SamplerParameterTransfer
+
+!tag name=SamplerParameterTransfer pairs=module:stochastic_tools system:transfers

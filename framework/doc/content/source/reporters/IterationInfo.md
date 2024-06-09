@@ -16,3 +16,5 @@ The following input file snippet demonstrates the use of the `IterationInfo` obj
 !syntax inputs /Reporters/IterationInfo
 
 !syntax children /Reporters/IterationInfo
+
+!tag name=IterationInfo pairs=module:framework system:reporters

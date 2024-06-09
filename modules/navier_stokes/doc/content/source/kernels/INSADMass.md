@@ -10,3 +10,5 @@ incompressible version of the mass continuity equation, e.g. $\nabla\cdot\vec u$
 !syntax inputs /Kernels/INSADMass
 
 !syntax children /Kernels/INSADMass
+
+!tag name=INSADMass pairs=module:navier_stokes system:kernels

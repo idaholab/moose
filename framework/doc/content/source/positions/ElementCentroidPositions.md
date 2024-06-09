@@ -16,3 +16,5 @@ enables creating the same subapps as the [CentroidMultiApp.md], except that it i
 !syntax inputs /Positions/ElementCentroidPositions
 
 !syntax children /Positions/ElementCentroidPositions
+
+!tag name=ElementCentroidPositions pairs=module:framework system:positions

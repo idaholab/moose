@@ -28,3 +28,5 @@ $V_{i}$ may be recorded into an AuxVariable using [NodalVoidVolumeAux](NodalVoid
 !syntax inputs /UserObjects/NodalVoidVolume
 
 !syntax children /UserObjects/NodalVoidVolume
+
+!tag name=NodalVoidVolume pairs=module:geochemistry system:userobjects

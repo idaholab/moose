@@ -12,3 +12,5 @@ at these values.
 !syntax inputs /AuxScalarKernels/SurrogateModelScalarAux
 
 !syntax children /AuxScalarKernels/SurrogateModelScalarAux
+
+!tag name=SurrogateModelScalarAux pairs=module:stochastic_tools system:auxkernels

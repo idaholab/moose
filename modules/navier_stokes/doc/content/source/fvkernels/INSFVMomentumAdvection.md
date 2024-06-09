@@ -49,3 +49,5 @@ in the velocity solution.
 !syntax inputs /FVKernels/INSFVMomentumAdvection
 
 !syntax children /FVKernels/INSFVMomentumAdvection
+
+!tag name=INSFVMomentumAdvection pairs=module:navier_stokes system:fvkernels

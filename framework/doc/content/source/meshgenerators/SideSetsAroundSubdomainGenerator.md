@@ -21,3 +21,5 @@ Optional parameters allow more specific behavior:
 !syntax inputs /Mesh/SideSetsAroundSubdomainGenerator
 
 !syntax children /Mesh/SideSetsAroundSubdomainGenerator
+
+!tag name=SideSetsAroundSubdomainGenerator pairs=module:framework system:meshgenerators

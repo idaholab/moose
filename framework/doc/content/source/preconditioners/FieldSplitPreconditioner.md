@@ -34,3 +34,5 @@ coupling matrix may be found in the
 !syntax inputs /Preconditioning/FSP
 
 !syntax children /Preconditioning/FSP
+
+!tag name=FieldSplitPreconditioner pairs=module:framework system:preconditioners

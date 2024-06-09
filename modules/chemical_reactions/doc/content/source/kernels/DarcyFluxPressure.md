@@ -20,3 +20,5 @@ $K/\mu$ and $\rho$ are expected as material properties called conductivity and d
 !syntax inputs /Kernels/DarcyFluxPressure
 
 !syntax children /Kernels/DarcyFluxPressure
+
+!tag name=DarcyFluxPressure pairs=module:chemical_reactions system:kernels

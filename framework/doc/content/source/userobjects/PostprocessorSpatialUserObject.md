@@ -16,3 +16,5 @@ the sub-app exists.
 !syntax inputs /UserObjects/PostprocessorSpatialUserObject
 
 !syntax children /UserObjects/PostprocessorSpatialUserObject
+
+!tag name=PostprocessorSpatialUserObject pairs=module:framework system:userobjects

@@ -11,3 +11,5 @@ gradient or just the boundary cell centroid value.
 !syntax inputs /Variables/INSFVPressureVariable
 
 !syntax children /Variables/INSFVPressureVariable
+
+!tag name=INSFVPressureVariable pairs=module:navier_stokes system:variables

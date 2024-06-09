@@ -21,3 +21,5 @@ scene by the action, to smooth the distance computation between two disjoint sur
 !syntax inputs /UserObjects/NodalNormalsEvaluator
 
 !syntax children /UserObjects/NodalNormalsEvaluator
+
+!tag name=NodalNormalsEvaluator pairs=module:framework system:userobjects

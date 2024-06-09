@@ -8,3 +8,5 @@ More information about kernels can be found on the
 [HDG BCs syntax page](syntax/HDGBCs/index.md).
 
 !syntax parameters /HDGBCs/AddHDGBCAction
+
+!tag name=AddHDGBCAction pairs=module:framework system:actions

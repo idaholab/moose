@@ -28,3 +28,5 @@ variable. Given scalar test functions $\psi_i$, the weak form, in inner-product 
 !syntax inputs /Kernels/DivField
 
 !syntax children /Kernels/DivField
+
+!tag name=DivField pairs=module:framework system:kernels

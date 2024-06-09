@@ -21,3 +21,5 @@ location between primary and secondary faces times the normal vector.
 !syntax inputs /AuxKernels/WeightedGapAux
 
 !syntax children /AuxKernels/WeightedGapAux
+
+!tag name=WeightedGapAux pairs=module:framework system:auxkernels

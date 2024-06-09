@@ -11,3 +11,5 @@ density material property. It is used by explicit dynamics contact.
 !syntax inputs /UserObjects/NodalDensity
 
 !syntax children /UserObjects/NodalDensity
+
+!tag name=NodalDensity pairs=module:contact system:userobjects

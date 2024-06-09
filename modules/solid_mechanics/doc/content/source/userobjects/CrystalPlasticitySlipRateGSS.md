@@ -12,3 +12,5 @@
 !syntax children /UserObjects/CrystalPlasticitySlipRateGSS
 
 !bibtex bibliography
+
+!tag name=CrystalPlasticitySlipRateGSS pairs=module:solid_mechanics system:userobjects

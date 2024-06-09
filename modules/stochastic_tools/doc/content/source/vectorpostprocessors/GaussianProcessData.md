@@ -11,3 +11,5 @@ The GaussianProcessData object simply coverts a the covariance function hyperpar
 !syntax inputs /VectorPostprocessors/GaussianProcessData
 
 !syntax children /VectorPostprocessors/GaussianProcessData
+
+!tag name=GaussianProcessData pairs=module:stochastic_tools system:vectorpostprocessors

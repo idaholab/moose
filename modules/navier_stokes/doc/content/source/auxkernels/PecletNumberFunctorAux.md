@@ -26,3 +26,5 @@ methods.
 !syntax inputs /AuxKernels/PecletNumberFunctorAux
 
 !syntax children /AuxKernels/PecletNumberFunctorAux
+
+!tag name=PecletNumberFunctorAux pairs=module:navier_stokes system:auxkernels

@@ -23,3 +23,5 @@ this can impact the convergence of the solver.  You can avoid this problem If yo
 number generators every "linear" iteration, meaning that the same random numbers are replayed each
 and every linear iteration. Other options are "nonlinear" and "initial" (the latter option is
 effectively no resetting).
+
+!tag name=RandomInterface pairs=module:framework system:interfaces

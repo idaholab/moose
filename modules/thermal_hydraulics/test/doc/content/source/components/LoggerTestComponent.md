@@ -11,3 +11,5 @@ Component for testing the `Logger` class.
 !syntax children /Components/LoggerTestComponent
 
 !bibtex bibliography
+
+!tag name=LoggerTestComponent pairs=module:test system:components

@@ -11,3 +11,5 @@ $\vec u$ is the velocity, and $t$ is time.
 !syntax inputs /Kernels/INSADMomentumTimeDerivative
 
 !syntax children /Kernels/INSADMomentumTimeDerivative
+
+!tag name=INSADMomentumTimeDerivative pairs=module:navier_stokes system:kernels

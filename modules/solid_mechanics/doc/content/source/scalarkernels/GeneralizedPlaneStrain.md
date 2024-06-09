@@ -29,3 +29,5 @@ A detailed description of generalized plane strain formulation can be found in [
 !syntax children /ScalarKernels/GeneralizedPlaneStrain
 
 !bibtex bibliography
+
+!tag name=GeneralizedPlaneStrain pairs=module:solid_mechanics system:scalarkernels

@@ -18,3 +18,5 @@ This model can be used for 1D, 2D and 3D problems.
 !syntax parameters /Materials/PureElasticTractionSeparation
 !syntax inputs /Materials/PureElasticTractionSeparation
 !syntax children /Materials/PureElasticTractionSeparation
+
+!tag name=PureElasticTractionSeparation pairs=module:solid_mechanics system:materials

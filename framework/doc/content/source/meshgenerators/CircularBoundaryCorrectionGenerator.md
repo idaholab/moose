@@ -76,3 +76,5 @@ Moving the nodes on a circular boundary may flip the local elements. In order to
 !syntax inputs /Mesh/CircularBoundaryCorrectionGenerator
 
 !syntax children /Mesh/CircularBoundaryCorrectionGenerator
+
+!tag name=CircularBoundaryCorrectionGenerator pairs=module:framework system:meshgenerators

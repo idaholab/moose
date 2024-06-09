@@ -23,3 +23,5 @@ and a vector named after each value sampled, containing the variable values at e
 !syntax inputs /VectorPostprocessors/LineValueSampler
 
 !syntax children /VectorPostprocessors/LineValueSampler
+
+!tag name=LineValueSampler pairs=module:framework system:vectorpostprocessors

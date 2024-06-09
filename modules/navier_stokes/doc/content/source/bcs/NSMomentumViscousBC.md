@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSMomentumViscousBC
 
 !syntax children /BCs/NSMomentumViscousBC
+
+!tag name=NSMomentumViscousBC pairs=module:navier_stokes system:bcs

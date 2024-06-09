@@ -42,3 +42,5 @@ applications with mathematical expressions.
 This method ensures a smooth transition from 0 to 1 between the two bounds, while also ensuring the first and second derivatives are zero at the two bounds.
 Use of this method is especially useful when transitioning between two non-smooth regimes.
 The derivative with respect to the passed value $u$ is returned using the optional derivative bool. Note that if $u = B_{lower} = B_{higher}$, then zero will be returned.
+
+!tag name=MathUtils pairs=module:framework system:utils

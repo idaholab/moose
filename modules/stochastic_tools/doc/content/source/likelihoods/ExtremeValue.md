@@ -21,3 +21,5 @@ where, $\hat{M}(\pmb{\theta},~\pmb{\Theta}_i)$ is the model prediction given mod
 !syntax inputs /Likelihood/ExtremeValue
 
 !syntax children /Likelihood/ExtremeValue
+
+!tag name=ExtremeValue pairs=module:stochastic_tools system:likelihoods

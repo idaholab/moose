@@ -44,3 +44,5 @@ block '1' in the main app to block '1' in the child app `sub`, filling the varia
 !syntax inputs /Transfers/MultiAppGeneralFieldNearestLocationTransfer
 
 !syntax children /Transfers/MultiAppGeneralFieldNearestLocationTransfer
+
+!tag name=MultiAppGeneralFieldNearestLocationTransfer pairs=module:framework system:transfers

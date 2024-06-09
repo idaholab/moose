@@ -16,3 +16,5 @@ A test example is listed below:
 !syntax inputs /Outputs/ExodusOptimizationSteady
 
 !syntax children /Outputs/ExodusOptimizationSteady
+
+!tag name=ExodusOptimizationSteady pairs=module:optimization system:outputs

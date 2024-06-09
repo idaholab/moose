@@ -23,3 +23,5 @@ constraint (like a `DirichletBC` is also active).
 !syntax inputs /NodalKernels/LowerBoundNodalKernel
 
 !syntax children /NodalKernels/LowerBoundNodalKernel
+
+!tag name=LowerBoundNodalKernel pairs=module:framework system:nodalkernels

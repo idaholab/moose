@@ -11,3 +11,5 @@ PolycrystalEBSD uses an EBSDReader object and utilizes the algorithms in [Polycr
 !syntax inputs /Postprocessors/PolycrystalEBSD
 
 !syntax children /Postprocessors/PolycrystalEBSD
+
+!tag name=PolycrystalEBSD pairs=module:phase_field system:userobjects

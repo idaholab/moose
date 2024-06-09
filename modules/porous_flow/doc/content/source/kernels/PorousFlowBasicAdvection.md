@@ -26,3 +26,5 @@ The typical usage of this `Kernel` is to model the advection equation $\dot{u}+\
 !syntax inputs /Kernels/PorousFlowBasicAdvection
 
 !syntax children /Kernels/PorousFlowBasicAdvection
+
+!tag name=PorousFlowBasicAdvection pairs=module:porous_flow system:kernels

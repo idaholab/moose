@@ -20,3 +20,5 @@ the same as in case of [SamplerFullSolveMultiApp.md].
 !syntax inputs /MultiApps/PODFullSolveMultiApp
 
 !syntax children /MultiApps/PODFullSolveMultiApp
+
+!tag name=PODFullSolveMultiApp pairs=module:stochastic_tools system:multiapps

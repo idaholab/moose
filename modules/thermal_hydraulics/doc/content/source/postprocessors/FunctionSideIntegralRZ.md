@@ -11,3 +11,5 @@ cylindrical boundary of a cylindrical heat structure:
 !syntax inputs /Postprocessors/FunctionSideIntegralRZ
 
 !syntax children /Postprocessors/FunctionSideIntegralRZ
+
+!tag name=FunctionSideIntegralRZ pairs=module:thermal_hydraulics system:postprocessors

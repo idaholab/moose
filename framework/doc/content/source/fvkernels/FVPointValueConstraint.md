@@ -25,3 +25,5 @@ single numerical solution, and be well-posed.
 !syntax inputs /FVKernels/FVPointValueConstraint
 
 !syntax children /FVKernels/FVPointValueConstraint
+
+!tag name=FVPointValueConstraint pairs=module:framework system:fvkernels

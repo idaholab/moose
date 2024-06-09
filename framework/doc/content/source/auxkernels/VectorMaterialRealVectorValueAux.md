@@ -14,3 +14,5 @@ executed on elements due to the elemental nature of material properties.
 !syntax inputs /AuxKernels/VectorMaterialRealVectorValueAux
 
 !syntax children /AuxKernels/VectorMaterialRealVectorValueAux
+
+!tag name=VectorMaterialRealVectorValueAux pairs=module:framework system:auxkernels

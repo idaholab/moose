@@ -160,3 +160,5 @@ iii. Variable `dsigspk2dfe` calculates $F^{eT} C:\frac{\partial E^e}{\partial F^
 !syntax children /Materials/FiniteStrainUObasedCP
 
 !bibtex bibliography
+
+!tag name=FiniteStrainUObasedCP pairs=module:solid_mechanics system:materials

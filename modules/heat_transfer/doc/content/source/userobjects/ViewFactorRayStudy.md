@@ -90,3 +90,5 @@ block=UserObjects
 !syntax children /UserObjects/ViewFactorRayStudy
 
 !bibtex bibliography
+
+!tag name=ViewFactorRayStudy pairs=module:heat_transfer system:userobjects

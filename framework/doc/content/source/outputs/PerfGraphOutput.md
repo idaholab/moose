@@ -164,3 +164,5 @@ By setting `heaviest_sections = 10` (or any positive integer) you can get a prin
 !syntax children /Outputs/PerfGraphOutput
 
 !bibtex bibliography
+
+!tag name=PerfGraphOutput pairs=module:framework system:outputs

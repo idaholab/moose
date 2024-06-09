@@ -54,3 +54,5 @@ can be found at [scalar_constraint_kernel](https://github.com/idaholab/large_med
 !syntax inputs /Kernels/ScalarLMKernel
 
 !syntax children /Kernels/ScalarLMKernel
+
+!tag name=ScalarLMKernel pairs=module:framework system:kernels

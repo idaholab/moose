@@ -10,3 +10,5 @@ object, we can forward the value of the postprocessor so it can be used by these
 !syntax inputs /ControlLogic/CopyPostprocessorValueControl
 
 !syntax children /ControlLogic/CopyPostprocessorValueControl
+
+!tag name=CopyPostprocessorValueControl pairs=module:thermal_hydraulics system:controllogic

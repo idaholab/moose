@@ -13,3 +13,5 @@ with the postprocessor as the [!param](/ControlLogic/CopyPostprocessorValueContr
 !syntax inputs /Postprocessors/PostprocessorAsControlAction
 
 !syntax children /Postprocessors/PostprocessorAsControlAction
+
+!tag name=PostprocessorAsControlAction pairs=module:thermal_hydraulics system:actions

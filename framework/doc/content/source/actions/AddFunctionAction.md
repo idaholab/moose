@@ -9,3 +9,5 @@ More information about `Functions` may be found on the
 [Functions syntax documentation](syntax/Functions/index.md).
 
 !syntax parameters /Functions/AddFunctionAction
+
+!tag name=AddFunctionAction pairs=module:framework system:actions

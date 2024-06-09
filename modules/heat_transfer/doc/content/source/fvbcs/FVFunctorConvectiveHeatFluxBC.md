@@ -26,3 +26,5 @@ the fluid and the solid.
 !syntax inputs /FVBCs/FVFunctorConvectiveHeatFluxBC
 
 !syntax children /FVBCs/FVFunctorConvectiveHeatFluxBC
+
+!tag name=FVFunctorConvectiveHeatFluxBC pairs=module:heat_transfer system:fvbcs

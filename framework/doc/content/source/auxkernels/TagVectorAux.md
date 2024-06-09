@@ -13,3 +13,5 @@ then is written out in an exodus file.
 !syntax children /AuxKernels/TagVectorAux
 
 !bibtex bibliography
+
+!tag name=TagVectorAux pairs=module:framework system:auxkernels

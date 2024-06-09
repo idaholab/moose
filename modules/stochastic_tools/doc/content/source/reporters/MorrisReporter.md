@@ -102,3 +102,5 @@ We see that for each vector we have three quantities: `mu` for $\mu$, `mu_star` 
 !syntax inputs /Reporters/MorrisReporter
 
 !syntax children /Reporters/MorrisReporter
+
+!tag name=MorrisReporter pairs=module:stochastic_tools system:reporters

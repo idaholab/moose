@@ -30,3 +30,5 @@ supports reading and writing a large number of formats and could be extended to 
 !syntax inputs /Mesh/FileMesh
 
 !syntax children /Mesh/FileMesh
+
+!tag name=FileMesh pairs=module:framework system:mesh

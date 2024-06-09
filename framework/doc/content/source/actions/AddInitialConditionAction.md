@@ -9,3 +9,5 @@ More information about setting variable initial conditions can be found on the
 [ICs syntax documentation](syntax/ICs/index.md).
 
 !syntax parameters /ICs/AddInitialConditionAction
+
+!tag name=AddInitialConditionAction pairs=module:framework system:actions

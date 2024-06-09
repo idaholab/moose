@@ -17,3 +17,5 @@ This object is automatically added to the simulation by the [VolumeJunction1Phas
 !syntax inputs /AuxScalarKernels/VolumeJunction1PhaseVelocityMagnitudeAux
 
 !syntax children /AuxScalarKernels/VolumeJunction1PhaseVelocityMagnitudeAux
+
+!tag name=VolumeJunction1PhaseVelocityMagnitudeAux pairs=module:thermal_hydraulics system:auxscalarkernels

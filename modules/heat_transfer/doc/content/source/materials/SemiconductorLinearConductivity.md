@@ -35,3 +35,5 @@ For the derivatives with respect to T:
 !syntax inputs /Materials/SemiconductorLinearConductivity
 
 !syntax children /Materials/SemiconductorLinearConductivity
+
+!tag name=SemiconductorLinearConductivity pairs=module:heat_transfer system:materials

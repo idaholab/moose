@@ -22,3 +22,5 @@ to a known analytic solution to examine the order of convergence of a time schem
 !syntax inputs /Postprocessors/ScalarL2Error
 
 !syntax children /Postprocessors/ScalarL2Error
+
+!tag name=ScalarL2Error pairs=module:framework system:postprocessors

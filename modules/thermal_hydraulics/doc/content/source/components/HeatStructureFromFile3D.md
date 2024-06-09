@@ -50,3 +50,5 @@ created.
 !syntax inputs /Components/HeatStructureFromFile3D
 
 !syntax children /Components/HeatStructureFromFile3D
+
+!tag name=HeatStructureFromFile3D pairs=module:thermal_hydraulics system:components

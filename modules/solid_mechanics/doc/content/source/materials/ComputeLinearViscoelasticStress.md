@@ -31,3 +31,5 @@ For the creep strains to be updated properly, the simulation must also include a
 !syntax inputs /Materials/ComputeLinearViscoelasticStress
 
 !syntax children /Materials/ComputeLinearViscoelasticStress
+
+!tag name=ComputeLinearViscoelasticStress pairs=module:solid_mechanics system:materials

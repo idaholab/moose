@@ -21,3 +21,5 @@ A kernel block demonstrating the `CoefTimeDerivative` syntax in a transient diff
 !syntax children /Kernels/CoefTimeDerivative
 
 !bibtex bibliography
+
+!tag name=CoefTimeDerivative pairs=module:framework system:kernels

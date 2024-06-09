@@ -19,3 +19,5 @@ In this example, the time stepper extracts the time sequence from an exodus outp
 !syntax inputs /Executioner/TimeSteppers/ExodusTimeSequenceStepper
 
 !syntax children /Executioner/TimeSteppers/ExodusTimeSequenceStepper
+
+!tag name=ExodusTimeSequenceStepper pairs=module:framework system:timesteppers

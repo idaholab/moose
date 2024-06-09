@@ -15,3 +15,5 @@ In this example, initial conditions are set for array variable `u` and auxiliary
 !syntax inputs /ICs/ArrayFunctionIC
 
 !syntax children /ICs/ArrayFunctionIC
+
+!tag name=ArrayFunctionIC pairs=module:framework system:ics

@@ -18,3 +18,5 @@ See [upwinding](/upwinding.md) for details.  Other Kernels implement [Kuzmin-Tur
 !syntax inputs /Kernels/PorousFlowAdvectiveFlux
 
 !syntax children /Kernels/PorousFlowAdvectiveFlux
+
+!tag name=PorousFlowAdvectiveFlux pairs=module:porous_flow system:kernels

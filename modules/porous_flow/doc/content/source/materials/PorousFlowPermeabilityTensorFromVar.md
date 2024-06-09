@@ -10,3 +10,5 @@ a scalar variable.
 !syntax inputs /Materials/PorousFlowPermeabilityTensorFromVar
 
 !syntax children /Materials/PorousFlowPermeabilityTensorFromVar
+
+!tag name=PorousFlowPermeabilityTensorFromVar pairs=module:porous_flow system:materials

@@ -73,3 +73,5 @@ Please consult the Abaqus user manual for more documentation on the UEL plugin p
 !syntax inputs /UserObjects/AbaqusUserElement
 
 !syntax children /UserObjects/AbaqusUserElement
+
+!tag name=AbaqusUserElement pairs=module:solid_mechanics system:userobjects

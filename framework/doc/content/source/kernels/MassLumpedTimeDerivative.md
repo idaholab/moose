@@ -71,3 +71,5 @@ steps.
 !syntax inputs /Kernels/MassLumpedTimeDerivative
 
 !syntax children /Kernels/MassLumpedTimeDerivative
+
+!tag name=MassLumpedTimeDerivative pairs=module:framework system:kernels

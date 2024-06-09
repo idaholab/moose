@@ -9,3 +9,5 @@ The `ThermalConstantHorizonMaterialBPD` Material calculates the micro-conductivi
 !syntax inputs /Materials/ThermalConstantHorizonMaterialBPD
 
 !syntax children /Materials/ThermalConstantHorizonMaterialBPD
+
+!tag name=ThermalConstantHorizonMaterialBPD pairs=module:peridynamics system:materials

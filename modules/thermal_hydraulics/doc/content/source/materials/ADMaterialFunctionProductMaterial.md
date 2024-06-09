@@ -10,3 +10,5 @@ material property, please consider the [ADParsedMaterial](ParsedMaterial.md).
 !syntax inputs /Materials/ADMaterialFunctionProductMaterial
 
 !syntax children /Materials/ADMaterialFunctionProductMaterial
+
+!tag name=ADMaterialFunctionProductMaterial pairs=module:thermal_hydraulics system:materials

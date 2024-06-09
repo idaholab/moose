@@ -17,3 +17,5 @@ details are the same as [BodyForce](BodyForce.md).
 !syntax inputs /Kernels/MatBodyForce
 
 !syntax children /Kernels/MatBodyForce
+
+!tag name=MatBodyForce pairs=module:framework system:kernels

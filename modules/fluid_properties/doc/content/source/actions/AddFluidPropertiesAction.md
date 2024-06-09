@@ -10,3 +10,5 @@ in the simulation setup.
 !syntax inputs /FluidProperties/AddFluidPropertiesAction
 
 !syntax children /FluidProperties/AddFluidPropertiesAction
+
+!tag name=AddFluidPropertiesAction pairs=module:fluid_properties system:actions

@@ -12,3 +12,5 @@ disabled according to the value of a [Function](syntax/Functions/index.md).
 !syntax inputs /Controls/ConditionalFunctionEnableControl
 
 !syntax children /Controls/ConditionalFunctionEnableControl
+
+!tag name=ConditionalFunctionEnableControl pairs=module:framework system:controls

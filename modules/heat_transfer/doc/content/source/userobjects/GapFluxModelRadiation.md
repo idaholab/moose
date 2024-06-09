@@ -61,3 +61,5 @@ constraint as shown below:
 !syntax children /UserObjects/GapFluxModelRadiation
 
 !bibtex bibliography
+
+!tag name=GapFluxModelRadiation pairs=module:heat_transfer system:userobjects

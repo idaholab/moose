@@ -12,3 +12,5 @@ $T$ is the temperature, and $T_{inf}$ is far field temperature.  Both $H$ and $T
 !syntax inputs /BCs/ADConvectiveHeatFluxBC
 
 !syntax children /BCs/ADConvectiveHeatFluxBC
+
+!tag name=ADConvectiveHeatFluxBC pairs=module:heat_transfer system:bcs

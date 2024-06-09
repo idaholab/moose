@@ -18,3 +18,5 @@ values computed by the aptly named `ParsedVectorFunction` `function`.
 !syntax inputs /AuxKernels/VectorFunctionAux
 
 !syntax children /AuxKernels/VectorFunctionAux
+
+!tag name=VectorFunctionAux pairs=module:framework system:auxkernels

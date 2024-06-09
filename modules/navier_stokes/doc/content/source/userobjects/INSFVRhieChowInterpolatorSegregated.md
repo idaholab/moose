@@ -21,3 +21,5 @@ This object operates on the matrices and right hand sides of the linearized mome
 !syntax inputs /UserObjects/INSFVRhieChowInterpolatorSegregated
 
 !syntax children /UserObjects/INSFVRhieChowInterpolatorSegregated
+
+!tag name=INSFVRhieChowInterpolatorSegregated pairs=module:navier_stokes system:userobjects

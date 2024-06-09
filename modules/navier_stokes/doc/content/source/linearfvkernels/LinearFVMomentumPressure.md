@@ -8,3 +8,5 @@ the Navier Stokes momentum equations.
 !syntax inputs /LinearFVKernels/LinearFVMomentumPressure
 
 !syntax children /LinearFVKernels/LinearFVMomentumPressure
+
+!tag name=LinearFVMomentumPressure pairs=module:navier_stokes system:linearfvkernels

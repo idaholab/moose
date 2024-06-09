@@ -30,3 +30,5 @@ for each problem dimension/type.
 !syntax inputs /Kernels/HomogenizedTotalLagrangianStressDivergence
 
 !syntax children /Kernels/HomogenizedTotalLagrangianStressDivergence
+
+!tag name=HomogenizedTotalLagrangianStressDivergence pairs=module:solid_mechanics system:kernels

@@ -27,3 +27,5 @@ Alternatively, this kernel is added automatically by the [GrainGrowthLinearizedI
 !syntax inputs /Kernels/ChangedVariableTimeDerivative
 
 !syntax children /Kernels/ChangedVariableTimeDerivative
+
+!tag name=ChangedVariableTimeDerivative pairs=module:phase_field system:kernels

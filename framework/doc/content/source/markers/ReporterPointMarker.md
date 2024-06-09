@@ -20,3 +20,5 @@ In the `ReporterPointMarker` labeled `bad_coord`, the reporter vectors containin
 !syntax inputs /Adaptivity/Markers/ReporterPointMarker
 
 !syntax children /Adaptivity/Markers/ReporterPointMarker
+
+!tag name=ReporterPointMarker pairs=module:framework system:markers

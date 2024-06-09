@@ -164,3 +164,5 @@ MOOSE also prints the details about the difference to help users removing the st
 !syntax children /Problem/FEProblem
 
 !bibtex bibliography
+
+!tag name=FEProblemBase pairs=module:framework system:problems

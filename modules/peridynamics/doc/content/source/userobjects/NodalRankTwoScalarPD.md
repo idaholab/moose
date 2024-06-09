@@ -16,3 +16,5 @@ where $\alpha_{\boldsymbol{\xi}_n}$ is the bond-associated scalar quantity of ra
 !syntax inputs /UserObjects/NodalRankTwoScalarPD
 
 !syntax children /UserObjects/NodalRankTwoScalarPD
+
+!tag name=NodalRankTwoScalarPD pairs=module:peridynamics system:userobjects

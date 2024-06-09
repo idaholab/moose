@@ -9,3 +9,5 @@ It assumes that the first cell centroid is located in the log layer.
 !syntax inputs /AuxKernels/WallFunctionWallShearStressAux
 
 !syntax children /AuxKernels/WallFunctionWallShearStressAux
+
+!tag name=WallFunctionWallShearStressAux pairs=module:navier_stokes system:auxkernels

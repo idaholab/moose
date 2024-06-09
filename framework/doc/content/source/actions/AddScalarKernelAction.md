@@ -12,3 +12,5 @@ More information about `ScalarKernels` may be found on the
 [ScalarKernels syntax documentation](syntax/ScalarKernels/index.md).
 
 !syntax parameters /ScalarKernels/AddScalarKernelAction
+
+!tag name=AddScalarKernelAction pairs=module:framework system:actions

@@ -51,3 +51,5 @@ block.
 !syntax inputs /AuxKernels/RankFourAux
 
 !syntax children /AuxKernels/RankFourAux
+
+!tag name=RankFourAux pairs=module:solid_mechanics system:auxkernels

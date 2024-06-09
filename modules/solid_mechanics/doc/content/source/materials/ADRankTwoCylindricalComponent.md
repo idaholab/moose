@@ -26,3 +26,5 @@ related [RankTwoScalarAux](RankTwoScalarAux.md)
 !syntax inputs /Materials/ADRankTwoCylindricalComponent
 
 !syntax children /Materials/ADRankTwoCylindricalComponent
+
+!tag name=ADRankTwoCylindricalComponent pairs=module:solid_mechanics system:materials

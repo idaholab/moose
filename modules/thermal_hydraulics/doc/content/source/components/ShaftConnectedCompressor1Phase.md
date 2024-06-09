@@ -236,3 +236,5 @@ In addition to the junction variables, this component creates the following post
 | `comp_name:rel_corrected_speed` | Relative corrected shaft speed | $\nu$ | \[-\]
 
 !bibtex bibliography
+
+!tag name=ShaftConnectedCompressor1Phase pairs=module:thermal_hydraulics system:components

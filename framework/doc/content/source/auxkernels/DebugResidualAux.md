@@ -15,3 +15,5 @@ More information about debugging convergence issues may be found
 !syntax inputs /AuxKernels/DebugResidualAux
 
 !syntax children /AuxKernels/DebugResidualAux
+
+!tag name=DebugResidualAux pairs=module:framework system:auxkernels

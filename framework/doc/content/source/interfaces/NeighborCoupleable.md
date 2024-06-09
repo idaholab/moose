@@ -27,3 +27,5 @@ See the [Coupleable.md] documentation for:
 - coupling in vector variables
 - accessing degrees-of-freedom values directly
 - writing to coupled variables
+
+!tag name=NeighborCoupleable pairs=module:framework system:interfaces

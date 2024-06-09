@@ -27,3 +27,5 @@ This `Material` also computes the derivatives of the Darcy velocities with respe
 !syntax inputs /Materials/PorousFlowDarcyVelocityMaterial
 
 !syntax children /Materials/PorousFlowDarcyVelocityMaterial
+
+!tag name=PorousFlowDarcyVelocityMaterial pairs=module:porous_flow system:materials

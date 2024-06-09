@@ -43,3 +43,5 @@ An optional `new_boundary` parameter can also be specified which will make any n
 !syntax inputs /Mesh/PlaneDeletionGenerator
 
 !syntax children /Mesh/PlaneDeletionGenerator
+
+!tag name=PlaneDeletionGenerator pairs=module:framework system:meshgenerators

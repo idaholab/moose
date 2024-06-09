@@ -37,3 +37,5 @@ parameter setting is shown below:
 !syntax inputs /Materials/CompositeEigenstrain
 
 !syntax children /Materials/CompositeEigenstrain
+
+!tag name=CompositeEigenstrain pairs=module:solid_mechanics system:materials

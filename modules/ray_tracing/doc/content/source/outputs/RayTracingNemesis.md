@@ -9,3 +9,5 @@ For more information, see [RayTracingMeshOutput.md].
 !syntax inputs /Outputs/RayTracingNemesis
 
 !syntax children /Outputs/RayTracingNemesis
+
+!tag name=RayTracingNemesis pairs=module:ray_tracing system:outputs

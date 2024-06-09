@@ -16,3 +16,5 @@ For example, the below csv file has two rows with 4 columns. The first three col
 !syntax inputs /NodalKernels/NodalTranslationalInertia
 
 !syntax children /NodalKernels/NodalTranslationalInertia
+
+!tag name=NodalTranslationalInertia pairs=module:solid_mechanics system:nodalkernels

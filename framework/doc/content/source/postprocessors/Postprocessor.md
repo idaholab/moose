@@ -6,3 +6,5 @@ in multiple [Output](/Output.md) formats once per time step (when applicable).
 
 !listing framework/include/postprocessors/Postprocessor.h
   re=([^\n]+\n)*[^\n]+getValue[^\n]*;
+
+!tag name=Postprocessor pairs=module:framework system:postprocessors

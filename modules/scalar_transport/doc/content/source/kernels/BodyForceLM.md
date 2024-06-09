@@ -17,3 +17,5 @@ point. See [LMKernel.md] for more details.
 !syntax inputs /Kernels/BodyForceLM
 
 !syntax children /Kernels/BodyForceLM
+
+!tag name=BodyForceLM pairs=module:scalar_transport system:kernels

@@ -26,3 +26,5 @@ See [boundary conditions](boundaries.md) for many more details and discussion.
 !syntax inputs /BCs/PorousFlowSink
 
 !syntax children /BCs/PorousFlowSink
+
+!tag name=PorousFlowSink pairs=module:porous_flow system:bcs

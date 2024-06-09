@@ -16,3 +16,5 @@ passed to each [Component](syntax/Components/index.md).
 !syntax inputs /ICs/RhoEAFromPressureTemperatureFunctionVelocityIC
 
 !syntax children /ICs/RhoEAFromPressureTemperatureFunctionVelocityIC
+
+!tag name=RhoEAFromPressureTemperatureFunctionVelocityIC pairs=module:thermal_hydraulics system:ics

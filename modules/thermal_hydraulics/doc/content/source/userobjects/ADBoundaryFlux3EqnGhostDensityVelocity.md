@@ -7,3 +7,5 @@
 !syntax inputs /UserObjects/ADBoundaryFlux3EqnGhostDensityVelocity
 
 !syntax children /UserObjects/ADBoundaryFlux3EqnGhostDensityVelocity
+
+!tag name=ADBoundaryFlux3EqnGhostDensityVelocity pairs=module:thermal_hydraulics system:userobjects

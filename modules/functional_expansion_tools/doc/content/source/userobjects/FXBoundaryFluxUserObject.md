@@ -17,3 +17,5 @@ This `UserObject` captures the moments of an FX representing the flux at a bound
 !syntax inputs /UserObjects/FXBoundaryFluxUserObject
 
 !syntax children /UserObjects/FXBoundaryFluxUserObject
+
+!tag name=FXBoundaryFluxUserObject pairs=module:functional_expansion_tools system:userobjects

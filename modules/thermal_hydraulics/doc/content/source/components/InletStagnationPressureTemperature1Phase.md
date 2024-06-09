@@ -48,3 +48,5 @@ quantities:
 - $p_{\text{ext}}$, the exterior pressure, assumed to be equal to the provided exterior stagnation pressure $p_{0,\text{ext}}$,
 - $\rho_i$, the interior density, and
 - $u_i$, the interior velocity.
+
+!tag name=InletStagnationPressureTemperature1Phase pairs=module:thermal_hydraulics system:components

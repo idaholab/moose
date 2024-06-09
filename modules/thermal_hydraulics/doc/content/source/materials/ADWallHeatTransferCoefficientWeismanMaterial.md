@@ -34,3 +34,5 @@ Weisman's correlation is valid for $0.7<\text{Pr}<100$ and $\text{Re}>10000$ for
 !syntax inputs /Materials/ADWallHeatTransferCoefficientWeismanMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficientWeismanMaterial
+
+!tag name=ADWallHeatTransferCoefficientWeismanMaterial pairs=module:thermal_hydraulics system:materials

@@ -13,3 +13,5 @@ In this example, we initialize the density at the desired initial temperature an
 !syntax inputs /ICs/NSInitialCondition
 
 !syntax children /ICs/NSInitialCondition
+
+!tag name=NSInitialCondition pairs=module:navier_stokes system:ics

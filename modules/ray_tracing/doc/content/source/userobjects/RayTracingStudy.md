@@ -106,3 +106,5 @@ There is often a need to obtain the outward normal for an element's side for man
 The `RayTracingStudy` can provide outward side normals for an element on the fly. It also caches the generated normal for future requests for the same side normal. This is accessed through the `getSideNormal()` method.
 
 Note that the side normals obtained through this caching are evaluated at the side centroid. Therefore, if the element side is non-planar, the returned normal will be an approximation.
+
+!tag name=RayTracingStudy pairs=module:ray_tracing system:userobjects

@@ -11,3 +11,5 @@ The ScalePostprocessor scales another Postprocessor in the simulation by a Real 
 !syntax children /Postprocessors/ScalePostprocessor
 
 !bibtex bibliography
+
+!tag name=ScalePostprocessor pairs=module:framework system:postprocessors

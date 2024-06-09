@@ -177,3 +177,5 @@ settings.
 !syntax children /Materials/ADComputePlaneSmallStrain
 
 !bibtex bibliography
+
+!tag name=ADComputePlaneSmallStrain pairs=module:solid_mechanics system:materials

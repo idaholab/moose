@@ -12,3 +12,4 @@ The sideset cannot be flipped if the original element it is attached to does not
 !syntax inputs /Mesh/FlipSidesetGenerator
 
 !syntax children /Mesh/FlipSidesetGenerator
+!tag name=FlipSidesetGenerator pairs=module:framework system:meshgenerators

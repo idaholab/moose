@@ -43,3 +43,5 @@ all of the nodes in the element are used for the interpolation.
 !syntax inputs /Transfers/MultiAppGeometricInterpolationTransfer
 
 !syntax children /Transfers/MultiAppGeometricInterpolationTransfer
+
+!tag name=MultiAppGeometricInterpolationTransfer pairs=module:framework system:transfers

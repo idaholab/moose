@@ -10,3 +10,5 @@ Initial condition to set density from given pressure and temperature using the
 !syntax children /ICs/RhoFromPressureTemperatureIC
 
 !bibtex bibliography
+
+!tag name=RhoFromPressureTemperatureIC pairs=module:fluid_properties system:ics

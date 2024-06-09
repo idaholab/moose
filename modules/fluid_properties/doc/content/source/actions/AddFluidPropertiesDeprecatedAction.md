@@ -11,3 +11,5 @@ non-nested `[FluidProperties]` block instead.
 !syntax inputs /Modules/FluidProperties/AddFluidPropertiesDeprecatedAction
 
 !syntax children /Modules/FluidProperties/AddFluidPropertiesDeprecatedAction
+
+!tag name=AddFluidPropertiesDeprecatedAction pairs=module:fluid_properties system:actions

@@ -15,3 +15,5 @@ conductivity.
 !syntax inputs /Materials/PrandtlNumberMaterial
 
 !syntax children /Materials/PrandtlNumberMaterial
+
+!tag name=PrandtlNumberMaterial pairs=module:thermal_hydraulics system:materials

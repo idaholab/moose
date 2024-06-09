@@ -21,3 +21,5 @@ carefully control this assignment.
 !syntax inputs /Mesh/AllSideSetsByNormalsGenerator
 
 !syntax children /Mesh/AllSideSetsByNormalsGenerator
+
+!tag name=AllSideSetsByNormalsGenerator pairs=module:framework system:meshgenerators

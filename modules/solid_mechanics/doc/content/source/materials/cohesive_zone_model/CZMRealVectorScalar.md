@@ -29,3 +29,5 @@ V_t = \lvert V - V_n \cdot n \rvert_2
 !syntax inputs /Materials/CZMRealVectorScalar
 
 !syntax children /Materials/CZMRealVectorScalar
+
+!tag name=CZMRealVectorScalar pairs=module:solid_mechanics system:materials

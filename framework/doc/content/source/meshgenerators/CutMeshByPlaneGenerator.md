@@ -33,3 +33,5 @@ Once all the elements of the input mesh have been converted into TET elements, t
 
 !syntax children /Mesh/CutMeshByPlaneGenerator
 
+
+!tag name=CutMeshByPlaneGenerator pairs=module:framework system:meshgenerators

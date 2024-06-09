@@ -28,3 +28,5 @@ The reporter names created by the `ConstantReporter` match the names passed in e
 !syntax inputs /Reporters/ConstantReporter
 
 !syntax children /Reporters/ConstantReporter
+
+!tag name=ConstantReporter pairs=module:framework system:reporters

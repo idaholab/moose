@@ -17,3 +17,5 @@ The functions are evaluated at the origin of the mesh at the current time.
 !syntax inputs /Positions/FunctorPositions
 
 !syntax children /Positions/FunctorPositions
+
+!tag name=FunctorPositions pairs=module:framework system:positions

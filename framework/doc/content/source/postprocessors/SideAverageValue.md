@@ -22,3 +22,5 @@ computing the value of a variable on the centerline of an axisymmetric simulatio
 !syntax inputs /Postprocessors/SideAverageValue
 
 !syntax children /Postprocessors/SideAverageValue
+
+!tag name=SideAverageValue pairs=module:framework system:postprocessors

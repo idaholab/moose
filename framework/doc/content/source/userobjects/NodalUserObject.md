@@ -10,3 +10,5 @@ NodalUserObjects may be made [BlockRestrictable](BlockRestrictable.md). When res
 two or more blocks, users may set a parameter in the respective input file block to choose whether or not
 MOOSE should "visit" (execute on) nodes on shared block boundaries only once or multiple times.
 Default: execute multiple times.
+
+!tag name=NodalUserObject pairs=module:framework system:userobjects

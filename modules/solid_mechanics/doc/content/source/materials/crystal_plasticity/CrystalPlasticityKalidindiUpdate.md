@@ -94,3 +94,5 @@ in the input file:
 !syntax children /Materials/CrystalPlasticityKalidindiUpdate
 
 !bibtex bibliography
+
+!tag name=CrystalPlasticityKalidindiUpdate pairs=module:solid_mechanics system:materials

@@ -41,3 +41,5 @@ This object is automatically added from the [Cohesive Zone Physics](CohesiveZone
 !syntax inputs /Materials/CZMComputeGlobalTractionSmallStrain
 
 !syntax children /Materials/CZMComputeGlobalTractionSmallStrain
+
+!tag name=CZMComputeGlobalTractionSmallStrain pairs=module:solid_mechanics system:materials

@@ -78,3 +78,5 @@ inelastic strain return mapping stress calculator as shown below:
 !syntax inputs /Materials/TemperatureDependentHardeningStressUpdate
 
 !syntax children /Materials/TemperatureDependentHardeningStressUpdate
+
+!tag name=TemperatureDependentHardeningStressUpdate pairs=module:solid_mechanics system:materials

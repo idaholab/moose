@@ -13,3 +13,5 @@ with $v$ the specific volume, $\alpha$ the volume fraction, $A$ the area and $\r
 !syntax inputs /AuxKernels/SpecificVolumeAux
 
 !syntax children /AuxKernels/SpecificVolumeAux
+
+!tag name=SpecificVolumeAux pairs=module:navier_stokes system:auxkernels

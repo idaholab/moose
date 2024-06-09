@@ -11,3 +11,5 @@ $\rho E A$ variable).
 !syntax inputs /Components/HeatSourceVolumetric1Phase
 
 !syntax children /Components/HeatSourceVolumetric1Phase
+
+!tag name=HeatSourceVolumetric1Phase pairs=module:thermal_hydraulics system:components

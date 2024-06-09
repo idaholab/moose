@@ -22,3 +22,5 @@ is transferred to a scalar AuxVariable on each of the sub-applications.
 !syntax inputs /Transfers/MultiAppPostprocessorToAuxScalarTransfer
 
 !syntax children /Transfers/MultiAppPostprocessorToAuxScalarTransfer
+
+!tag name=MultiAppPostprocessorToAuxScalarTransfer pairs=module:framework system:transfers

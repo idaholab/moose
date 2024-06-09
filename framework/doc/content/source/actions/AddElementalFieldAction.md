@@ -9,3 +9,5 @@ field variables, this actions creates those field variables. Please refer to
 
 
 !syntax parameters /Adaptivity/Indicators/AddElementalFieldAction
+
+!tag name=AddElementalFieldAction pairs=module:framework system:actions

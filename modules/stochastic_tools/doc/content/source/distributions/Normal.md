@@ -30,3 +30,5 @@ The following input file defines a normal distribution with a mean of 0 and a st
 !syntax children /Distributions/Normal
 
 !bibtex bibliography
+
+!tag name=Normal pairs=module:stochastic_tools system:distributions

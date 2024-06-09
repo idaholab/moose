@@ -31,3 +31,5 @@ and
 \begin{equation}
       T_{iJkL}^{\prime}=\delta_{ik}S_{LJ}+F_{iT}T_{TJMN}^{\prime\prime}\frac{1}{2}\left(\delta_{ML}F_{kN}+F_{kM}\delta_{NL}\right)
 \end{equation}
+
+!tag name=ComputeLagrangianStressPK2 pairs=module:solid_mechanics system:materials

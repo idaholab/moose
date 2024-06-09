@@ -9,3 +9,5 @@ This is used to compute the average of a variable over only the portion of a spe
 !syntax inputs /Postprocessors/ExposedSideAverageValue
 
 !syntax children /Postprocessors/ExposedSideAverageValue
+
+!tag name=ExposedSideAverageValue pairs=module:heat_transfer system:postprocessors

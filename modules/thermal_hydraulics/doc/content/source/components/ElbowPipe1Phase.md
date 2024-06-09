@@ -13,3 +13,5 @@ The underlying flow model is a [FlowChannel1Phase.md].
 !syntax inputs /Components/ElbowPipe1Phase
 
 !syntax children /Components/ElbowPipe1Phase
+
+!tag name=ElbowPipe1Phase pairs=module:thermal_hydraulics system:components

@@ -13,3 +13,5 @@ This action is the solid kinetic pendant of the aqueous equilibrium [AddCoupledE
 !syntax inputs /ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesAction
 
 !syntax children /ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesAction
+
+!tag name=AddCoupledSolidKinSpeciesAction pairs=module:chemical_reactions system:actions

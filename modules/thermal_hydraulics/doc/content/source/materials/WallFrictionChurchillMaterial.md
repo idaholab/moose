@@ -35,3 +35,5 @@ This material also defines material properties for the derivatives of the fricti
 !syntax inputs /Materials/WallFrictionChurchillMaterial
 
 !syntax children /Materials/WallFrictionChurchillMaterial
+
+!tag name=WallFrictionChurchillMaterial pairs=module:thermal_hydraulics system:materials

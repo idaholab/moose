@@ -12,3 +12,5 @@ implementation described in detail in [PCNSFVHLLC.md].
 !syntax inputs /FVKernels/PCNSFVMomentumHLLC
 
 !syntax children /FVKernels/PCNSFVMomentumHLLC
+
+!tag name=PCNSFVMomentumHLLC pairs=module:navier_stokes system:fvkernels

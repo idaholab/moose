@@ -12,3 +12,5 @@ More information about TimeIntegrators may be found on the
 [TimeIntegrator syntax documentation](syntax/Executioner/TimeIntegrator/index.md).
 
 !syntax parameters /Executioner/TimeIntegrator/SetupTimeIntegratorAction
+
+!tag name=SetupTimeIntegratorAction pairs=module:framework system:actions

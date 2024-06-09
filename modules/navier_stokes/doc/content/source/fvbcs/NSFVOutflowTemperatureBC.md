@@ -22,3 +22,5 @@ where $T_{backflow}$ is a user-specified backflow temperature.
 !syntax inputs /FVBCs/NSFVOutflowTemperatureBC
 
 !syntax children /FVBCs/NSFVOutflowTemperatureBC
+
+!tag name=NSFVOutflowTemperatureBC pairs=module:navier_stokes system:fvbcs

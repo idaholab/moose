@@ -8,3 +8,5 @@ that get applied by [HSCoupler2D2DRadiationRZBC.md].
 !syntax inputs /UserObjects/HSCoupler2D2DRadiationUserObject
 
 !syntax children /UserObjects/HSCoupler2D2DRadiationUserObject
+
+!tag name=HSCoupler2D2DRadiationUserObject pairs=module:thermal_hydraulics system:userobjects

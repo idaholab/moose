@@ -13,3 +13,5 @@ A class for computing the element-wise $L^2$ error (actually $L^p$ error, if you
 !syntax inputs /AuxKernels/ElementL2ErrorFunctionAux
 
 !syntax children /AuxKernels/ElementL2ErrorFunctionAux
+
+!tag name=ElementL2ErrorFunctionAux pairs=module:framework system:auxkernels

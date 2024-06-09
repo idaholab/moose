@@ -9,3 +9,5 @@ For more information and example use, see [line_integrals.md].
 !syntax inputs /Postprocessors/RayIntegralValue
 
 !syntax children /Postprocessors/RayIntegralValue
+
+!tag name=RayIntegralValue pairs=module:ray_tracing system:postprocessors

@@ -27,3 +27,5 @@ F(x) = \Phi(\gamma + \delta ln \tfrac{z}{1-z}),\,\textrm{where}\, z = \tfrac{x-\
 !syntax children /Distributions/JohnsonSB
 
 !bibtex bibliography
+
+!tag name=JohnsonSB pairs=module:stochastic_tools system:distributions

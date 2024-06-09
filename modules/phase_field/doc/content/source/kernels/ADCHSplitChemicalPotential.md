@@ -14,3 +14,5 @@ species diffusion mediated creep.  Typically used with
 !syntax inputs /Kernels/ADCHSplitChemicalPotential
 
 !syntax children /Kernels/ADCHSplitChemicalPotential
+
+!tag name=ADCHSplitChemicalPotential pairs=module:phase_field system:kernels

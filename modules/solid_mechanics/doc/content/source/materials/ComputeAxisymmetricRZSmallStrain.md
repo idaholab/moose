@@ -24,3 +24,5 @@ with the small strain assumptions.
 !syntax inputs /Materials/ComputeAxisymmetricRZSmallStrain
 
 !syntax children /Materials/ComputeAxisymmetricRZSmallStrain
+
+!tag name=ComputeAxisymmetricRZSmallStrain pairs=module:solid_mechanics system:materials

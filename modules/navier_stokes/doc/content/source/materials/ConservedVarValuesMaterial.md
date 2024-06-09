@@ -27,3 +27,5 @@ $e$ is the specific internal energy and $\bm{a} = \lbrace u, v, w\rbrace$.
 !syntax inputs /Materials/ConservedVarValuesMaterial
 
 !syntax children /Materials/ConservedVarValuesMaterial
+
+!tag name=ConservedVarValuesMaterial pairs=module:navier_stokes system:materials

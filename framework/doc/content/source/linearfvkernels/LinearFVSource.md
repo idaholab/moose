@@ -27,3 +27,5 @@ supplied based upon a function form:
 !syntax inputs /LinearFVKernels/LinearFVSource
 
 !syntax children /LinearFVKernels/LinearFVSource
+
+!tag name=LinearFVSource pairs=module:framework system:linearfvkernels

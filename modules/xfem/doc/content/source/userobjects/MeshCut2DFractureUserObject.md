@@ -23,3 +23,5 @@ Quasistatic behavior is assumed, and an iterative approach is taken to repeatedl
 !syntax inputs /UserObjects/MeshCut2DFractureUserObject
 
 !syntax children /UserObjects/MeshCut2DFractureUserObject
+
+!tag name=MeshCut2DFractureUserObject pairs=module:xfem system:userobjects

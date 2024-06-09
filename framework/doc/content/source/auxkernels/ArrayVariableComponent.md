@@ -11,3 +11,5 @@ The copied auxiliary variable can be used in all MOOSE objects that operate on s
 !syntax inputs /AuxKernels/ArrayVariableComponent
 
 !syntax children /AuxKernels/ArrayVariableComponent
+
+!tag name=ArrayVariableComponent pairs=module:framework system:auxkernels

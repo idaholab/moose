@@ -31,3 +31,5 @@ The inlet velocity is specified using a mass flow rate postprocessor.
 !syntax inputs /FVBCs/WCNSFVSwitchableInletVelocityBC
 
 !syntax children /FVBCs/WCNSFVSwitchableInletVelocityBC
+
+!tag name=WCNSFVSwitchableInletVelocityBC pairs=module:navier_stokes system:fvbcs

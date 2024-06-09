@@ -18,3 +18,5 @@ the generated mesh is sized to the dimensions of the images and creates one elem
 !syntax inputs /Mesh/ImageMesh
 
 !syntax children /Mesh/ImageMesh
+
+!tag name=ImageMesh pairs=module:framework system:mesh

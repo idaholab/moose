@@ -20,3 +20,5 @@ the source application.
 !syntax inputs /Transfers/MultiAppGeneralFieldUserObjectTransfer
 
 !syntax children /Transfers/MultiAppGeneralFieldUserObjectTransfer
+
+!tag name=MultiAppGeneralFieldUserObjectTransfer pairs=module:framework system:transfers

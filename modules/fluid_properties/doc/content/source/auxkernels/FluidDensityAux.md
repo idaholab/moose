@@ -21,3 +21,5 @@ based on nonlinear variables that represent pressure and temperature that are na
 
 !listing test/tests/auxkernels/fluid_density_aux.i
   block=AuxKernels/density
+
+!tag name=FluidDensityAux pairs=module:fluid_properties system:auxkernels

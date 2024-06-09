@@ -53,3 +53,5 @@ Lagrange formulations are the subject of [!cite](benzi2023solving).
 !syntax inputs /Kernels/INSADMomentumGradDiv
 
 !syntax children /Kernels/INSADMomentumGradDiv
+
+!tag name=INSADMomentumGradDiv pairs=module:navier_stokes system:kernels

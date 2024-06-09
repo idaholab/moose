@@ -18,3 +18,5 @@ and defined as the function `aux_exact_fn` as an auxiliary variable `aux_u`.
 !syntax inputs /AuxKernels/FunctionAux
 
 !syntax children /AuxKernels/FunctionAux
+
+!tag name=FunctionAux pairs=module:framework system:auxkernels

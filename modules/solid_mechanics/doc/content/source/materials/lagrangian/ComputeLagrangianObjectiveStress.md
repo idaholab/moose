@@ -222,3 +222,5 @@ should consider defining the constitutive response with a hyperelastic formulati
 base classes.
 
 !bibtex bibliography
+
+!tag name=ComputeLagrangianObjectiveStress pairs=module:solid_mechanics system:materials

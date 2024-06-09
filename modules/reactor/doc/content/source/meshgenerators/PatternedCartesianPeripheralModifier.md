@@ -42,3 +42,5 @@ This mesh generator forces the number of nodes on a cartesian mesh to match a us
 !syntax inputs /Mesh/PatternedCartesianPeripheralModifier
 
 !syntax children /Mesh/PatternedCartesianPeripheralModifier
+
+!tag name=PatternedCartesianPeripheralModifier pairs=module:reactor system:meshgenerators

@@ -14,3 +14,5 @@ and is observed to remove the uniqueness of the numerical solution, lower order 
 !syntax inputs /FluidProperties/TabulatedBicubicFluidProperties
 
 !syntax children /FluidProperties/TabulatedBicubicFluidProperties
+
+!tag name=TabulatedBicubicFluidProperties pairs=module:fluid_properties system:fluidproperties

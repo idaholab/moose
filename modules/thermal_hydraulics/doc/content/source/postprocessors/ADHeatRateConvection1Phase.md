@@ -16,3 +16,5 @@ $T$ is the fluid temperature and $T_{wall}$ is the wall temperature.
 !syntax inputs /Postprocessors/ADHeatRateConvection1Phase
 
 !syntax children /Postprocessors/ADHeatRateConvection1Phase
+
+!tag name=ADHeatRateConvection1Phase pairs=module:thermal_hydraulics system:postprocessors

@@ -12,3 +12,5 @@ variables, the model adjusts density based on deformation.
 !syntax inputs /Materials/Density
 
 !syntax children /Materials/Density
+
+!tag name=Density pairs=module:misc system:materials

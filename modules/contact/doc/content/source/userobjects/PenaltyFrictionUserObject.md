@@ -64,3 +64,5 @@ mechanical contact problem. This solver selection can enable the simulation of v
 !syntax inputs /UserObjects/PenaltyFrictionUserObject
 
 !syntax children /UserObjects/PenaltyFrictionUserObject
+
+!tag name=PenaltyFrictionUserObject pairs=module:contact system:userobjects

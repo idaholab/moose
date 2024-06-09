@@ -8,3 +8,5 @@ The Constant AuxKernel creates a constant field over the domain. Truly constant 
 !syntax inputs /AuxKernels/ConstantAux
 
 !syntax children /AuxKernels/ConstantAux
+
+!tag name=ConstantAux pairs=module:framework system:auxkernels

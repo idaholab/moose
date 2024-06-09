@@ -15,3 +15,5 @@ This object is a utility function used to output values of nodal variables at no
 !syntax inputs /Postprocessors/CrackFrontData
 
 !syntax children /Postprocessors/CrackFrontData
+
+!tag name=CrackFrontData pairs=module:solid_mechanics system:postprocessors

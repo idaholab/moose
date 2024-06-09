@@ -119,3 +119,5 @@ of the Jacobian matrix, such as this mortar method. Thus, the `NEWTON` solver is
 !syntax children /Constraints/PeriodicSegmentalConstraint
 
 !bibtex bibliography
+
+!tag name=PeriodicSegmentalConstraint pairs=module:framework system:constraints

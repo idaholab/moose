@@ -272,3 +272,5 @@ to the stress tensor.
 s = \sqrt{\frac{3}{2} S_{ij} S_{ij}}
 \end{equation}
 where $S_{ij}$ is the deviatoric tensor of the Rank-2 tensor $T_{ij}$.
+
+!tag name=RankTwoScalarTools pairs=module:solid_mechanics system:utils

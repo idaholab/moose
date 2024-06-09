@@ -31,3 +31,5 @@ To use this feature, the user object must define the `spatialPoints()` interface
 !syntax inputs /VectorPostprocessors/SpatialUserObjectVectorPostprocessor
 
 !syntax children /VectorPostprocessors/SpatialUserObjectVectorPostprocessor
+
+!tag name=SpatialUserObjectVectorPostprocessor pairs=module:framework system:vectorpostprocessors

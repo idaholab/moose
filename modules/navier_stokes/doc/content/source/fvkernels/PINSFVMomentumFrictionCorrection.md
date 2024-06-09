@@ -112,3 +112,5 @@ porous-media-driven oscillations without causing convergence issues
 !syntax inputs /FVKernels/PINSFVMomentumFrictionCorrection
 
 !syntax children /FVKernels/PINSFVMomentumFrictionCorrection
+
+!tag name=PINSFVMomentumFrictionCorrection pairs=module:navier_stokes system:fvkernels

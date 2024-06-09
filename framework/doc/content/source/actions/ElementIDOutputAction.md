@@ -13,3 +13,5 @@ More information can be found on the [Exodus output documentation page](outputs/
 !syntax inputs /Mesh/ElementIDOutputAction
 
 !syntax children /Mesh/ElementIDOutputAction
+
+!tag name=ElementIDOutputAction pairs=module:framework system:actions

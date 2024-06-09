@@ -10,3 +10,5 @@ to form the conservation of mass equation.
 !syntax inputs /FVKernels/WCNSFVMassTimeDerivative
 
 !syntax children /FVKernels/WCNSFVMassTimeDerivative
+
+!tag name=WCNSFVMassTimeDerivative pairs=module:navier_stokes system:fvkernels

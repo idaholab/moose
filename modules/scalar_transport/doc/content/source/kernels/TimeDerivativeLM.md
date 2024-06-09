@@ -17,3 +17,5 @@ point. See [LMKernel.md] for more details.
 !syntax inputs /Kernels/TimeDerivativeLM
 
 !syntax children /Kernels/TimeDerivativeLM
+
+!tag name=TimeDerivativeLM pairs=module:scalar_transport system:kernels

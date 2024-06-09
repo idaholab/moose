@@ -16,3 +16,5 @@ due to the user supplied pump head.
 !syntax children /UserObjects/ADPump1PhaseUserObject
 
 !bibtex bibliography
+
+!tag name=ADPump1PhaseUserObject pairs=module:thermal_hydraulics system:userobjects

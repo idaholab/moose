@@ -19,3 +19,5 @@ The `PolycrystalRandomICAction` is accessed through the `ICs/PolycrystalICs` blo
 !syntax parameters /ICs/PolycrystalICs/PolycrystalRandomIC/PolycrystalRandomICAction
 
 !syntax children /ICs/PolycrystalICs/PolycrystalRandomIC/PolycrystalRandomICAction
+
+!tag name=PolycrystalRandomICAction pairs=module:phase_field system:actions

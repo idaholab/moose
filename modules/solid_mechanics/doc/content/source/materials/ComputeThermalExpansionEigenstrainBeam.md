@@ -15,3 +15,5 @@
 !syntax inputs /Materials/ComputeThermalExpansionEigenstrainBeam
 
 !syntax children /Materials/ComputeThermalExpansionEigenstrainBeam
+
+!tag name=ComputeThermalExpansionEigenstrainBeam pairs=module:solid_mechanics system:materials

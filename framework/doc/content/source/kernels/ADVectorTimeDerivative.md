@@ -38,3 +38,5 @@ block for a transient diffusion problem that demonstrates the
 !syntax inputs /Kernels/ADVectorTimeDerivative
 
 !syntax children /Kernels/ADVectorTimeDerivative
+
+!tag name=ADVectorTimeDerivative pairs=module:framework system:kernels

@@ -26,3 +26,5 @@ g(\eta) = \eta^2(1-\eta^2)^2
 !syntax inputs /Materials/BarrierFunctionMaterial
 
 !syntax children /Materials/BarrierFunctionMaterial
+
+!tag name=BarrierFunctionMaterial pairs=module:phase_field system:materials

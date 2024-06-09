@@ -65,3 +65,5 @@ Additionally, this object defines:
 !syntax inputs /Closures/Closures1PhaseTHM
 
 !syntax children /Closures/Closures1PhaseTHM
+
+!tag name=Closures1PhaseTHM pairs=module:thermal_hydraulics system:closures

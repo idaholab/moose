@@ -9,3 +9,5 @@ pressure AD material property and the `T_sat(p)` interface of a
 !syntax inputs /Materials/ADSaturationTemperatureMaterial
 
 !syntax children /Materials/ADSaturationTemperatureMaterial
+
+!tag name=ADSaturationTemperatureMaterial pairs=module:fluid_properties system:materials

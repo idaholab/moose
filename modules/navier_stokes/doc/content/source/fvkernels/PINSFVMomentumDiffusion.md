@@ -19,3 +19,5 @@ For continuous porosity variations, the `smooth_porosity` parameter may be used 
 !syntax inputs /FVKernels/PINSFVMomentumDiffusion
 
 !syntax children /FVKernels/PINSFVMomentumDiffusion
+
+!tag name=PINSFVMomentumDiffusion pairs=module:navier_stokes system:fvkernels

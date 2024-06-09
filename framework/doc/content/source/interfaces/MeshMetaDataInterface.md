@@ -20,3 +20,5 @@ The MeshGenerator system is the only system that may set attributes in the mesh 
 written during the "act" phase. Here is an example of attributes written by the built-in GeneratedMeshGenerator object:
 
 !listing framework/src/meshgenerators/GeneratedMeshGenerator.C start=GeneratedMeshGenerator::setMeshMetaData() end=void
+
+!tag name=MeshMetaDataInterface pairs=module:framework system:interfaces

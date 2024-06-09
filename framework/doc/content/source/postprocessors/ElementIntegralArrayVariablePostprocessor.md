@@ -7,3 +7,5 @@
 !syntax inputs /Postprocessors/ElementIntegralArrayVariablePostprocessor
 
 !syntax children /Postprocessors/ElementIntegralArrayVariablePostprocessor
+
+!tag name=ElementIntegralArrayVariablePostprocessor pairs=module:framework system:postprocessors

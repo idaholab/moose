@@ -13,3 +13,5 @@ hand-coded set of INS objects.
 !syntax inputs /AuxKernels/INSStressComponentAux
 
 !syntax children /AuxKernels/INSStressComponentAux
+
+!tag name=INSStressComponentAux pairs=module:navier_stokes system:auxkernels

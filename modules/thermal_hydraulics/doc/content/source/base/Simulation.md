@@ -27,3 +27,5 @@ It also performs integrity checks for:
   their own integrity checks
 - control data, from [ControlLogic](syntax/ControlLogic/index.md) objects, making sure all the request control data
   does exist, and adding the proper dependencies
+
+!tag name=Simulation pairs=module:thermal_hydraulics system:base

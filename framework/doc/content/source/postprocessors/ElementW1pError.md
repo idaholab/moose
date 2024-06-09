@@ -15,3 +15,5 @@ The gradient difference term is computed as below:
 !syntax inputs /Postprocessors/ElementW1pError
 
 !syntax children /Postprocessors/ElementW1pError
+
+!tag name=ElementW1pError pairs=module:framework system:postprocessors

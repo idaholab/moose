@@ -15,3 +15,5 @@ function for phase $i$ defined in [!cite](Folch05) (referred to as $g_i$ there, 
 !syntax inputs /Kernels/SLKKSMultiACBulkC
 
 !syntax children /Kernels/SLKKSMultiACBulkC
+
+!tag name=SLKKSMultiACBulkC pairs=module:phase_field system:kernels

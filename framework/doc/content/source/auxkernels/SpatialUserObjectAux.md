@@ -41,3 +41,5 @@ will not propagate derivatives.
 !syntax inputs /AuxKernels/SpatialUserObjectAux
 
 !syntax children /AuxKernels/SpatialUserObjectAux
+
+!tag name=SpatialUserObjectAux pairs=module:framework system:auxkernels

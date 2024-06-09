@@ -11,3 +11,5 @@ The `TotalLagrangianWeakPlaneStress` kernel weakly enforces the out-of-plane str
 !syntax inputs /Kernels/TotalLagrangianWeakPlaneStress
 
 !syntax children /Kernels/TotalLagrangianWeakPlaneStress
+
+!tag name=TotalLagrangianWeakPlaneStress pairs=module:solid_mechanics system:kernels

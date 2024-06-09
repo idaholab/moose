@@ -9,3 +9,5 @@ The `ComputeSmallStrainConstantHorizonMaterialOSPD` Material calculates the para
 !syntax inputs /Materials/ComputeSmallStrainConstantHorizonMaterialOSPD
 
 !syntax children /Materials/ComputeSmallStrainConstantHorizonMaterialOSPD
+
+!tag name=ComputeSmallStrainConstantHorizonMaterialOSPD pairs=module:peridynamics system:materials

@@ -11,3 +11,5 @@ The times will be extracted from all the input exodus files and sorted.
 !syntax inputs /Times/ExodusFileTimes
 
 !syntax children /Times/ExodusFileTimes
+
+!tag name=ExodusFileTimes pairs=module:framework system:times

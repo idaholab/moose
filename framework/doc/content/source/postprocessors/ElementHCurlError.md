@@ -19,3 +19,4 @@ All input parameters and their restrictions are the same as those for
 !syntax inputs /Postprocessors/ElementHCurlError
 
 !syntax children /Postprocessors/ElementHCurlError
+!tag name=ElementHCurlError pairs=module:framework system:postprocessors

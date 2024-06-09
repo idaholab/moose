@@ -10,3 +10,5 @@ This is the [automatic differentiation (AD)](automatic_differentiation/index.md)
 !syntax inputs /Materials/ADTemperatureWall3EqnMaterial
 
 !syntax children /Materials/ADTemperatureWall3EqnMaterial
+
+!tag name=ADTemperatureWall3EqnMaterial pairs=module:thermal_hydraulics system:materials

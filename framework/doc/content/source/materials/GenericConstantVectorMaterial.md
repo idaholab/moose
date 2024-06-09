@@ -19,3 +19,5 @@ flux through a specified boundary on the mesh.
 !syntax inputs /Materials/GenericConstantVectorMaterial
 
 !syntax children /Materials/GenericConstantVectorMaterial
+
+!tag name=GenericConstantVectorMaterial pairs=module:framework system:materials

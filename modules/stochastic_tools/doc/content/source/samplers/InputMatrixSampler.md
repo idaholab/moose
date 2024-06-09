@@ -21,3 +21,5 @@ The resulting matrix looks like the following in CSV format:
 !syntax inputs /Samplers/InputMatrix
 
 !syntax children /Samplers/InputMatrix
+
+!tag name=InputMatrixSampler pairs=module:stochastic_tools system:samplers

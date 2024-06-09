@@ -22,3 +22,5 @@ The variation of the kinetic energy is not considered in this kernel.
 !syntax inputs /FVKernels/PINSFVEnergyTimeDerivative
 
 !syntax children /FVKernels/PINSFVEnergyTimeDerivative
+
+!tag name=PINSFVEnergyTimeDerivative pairs=module:navier_stokes system:fvkernels

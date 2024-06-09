@@ -46,3 +46,5 @@ The Jacobian is
 !syntax inputs /Kernels/ACInterfaceCleavageFracture
 
 !syntax children /Kernels/ACInterfaceCleavageFracture
+
+!tag name=ACInterfaceCleavageFracture pairs=module:phase_field system:kernels

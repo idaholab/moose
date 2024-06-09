@@ -14,3 +14,4 @@ to each instance of this kernel.
 !syntax inputs /Kernels/MomentBalancing
 
 !syntax children /Kernels/MomentBalancing
+!tag name=MomentBalancing pairs=module:solid_mechanics system:kernels

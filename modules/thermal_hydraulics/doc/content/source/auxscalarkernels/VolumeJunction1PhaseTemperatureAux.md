@@ -12,3 +12,5 @@ This object is automatically added to the simulation by the [VolumeJunction1Phas
 !syntax inputs /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
 
 !syntax children /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
+
+!tag name=VolumeJunction1PhaseTemperatureAux pairs=module:thermal_hydraulics system:auxscalarkernels

@@ -28,3 +28,5 @@ However, it can also be created automatically using the [GrainGrowthLinearizedIn
 !syntax children /Kernels/ACGrGrPolyLinearizedInterface
 
 !bibtex bibliography
+
+!tag name=ACGrGrPolyLinearizedInterface pairs=module:phase_field system:kernels

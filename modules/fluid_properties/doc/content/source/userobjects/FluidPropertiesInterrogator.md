@@ -113,3 +113,5 @@ that derive from `TwoPhaseFluidProperties` but not `TwoPhaseNCGFluidProperties`.
 !syntax inputs /UserObjects/FluidPropertiesInterrogator
 
 !syntax children /UserObjects/FluidPropertiesInterrogator
+
+!tag name=FluidPropertiesInterrogator pairs=module:fluid_properties system:userobjects

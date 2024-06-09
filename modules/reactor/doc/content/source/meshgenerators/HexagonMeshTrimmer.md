@@ -48,3 +48,5 @@ In addition, users can optionally use [!param](/Mesh/HexagonMeshTrimmer/peripher
 !syntax inputs /Mesh/HexagonMeshTrimmer
 
 !syntax children /Mesh/HexagonMeshTrimmer
+
+!tag name=HexagonMeshTrimmer pairs=module:reactor system:meshgenerators

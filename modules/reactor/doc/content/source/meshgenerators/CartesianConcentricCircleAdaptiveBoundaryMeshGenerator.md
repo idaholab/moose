@@ -40,3 +40,5 @@ Here, a simple square mesh stored in an Exodus file is used as the input of `Car
 !syntax inputs /Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator
 
 !syntax children /Mesh/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator
+
+!tag name=CartesianConcentricCircleAdaptiveBoundaryMeshGenerator pairs=module:reactor system:meshgenerators

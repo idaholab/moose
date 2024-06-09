@@ -91,3 +91,5 @@ directly opposite along the unit normal direction.
 !syntax children /Constraints/PenaltyPeriodicSegmentalConstraint
 
 !bibtex bibliography
+
+!tag name=PenaltyPeriodicSegmentalConstraint pairs=module:framework system:constraints

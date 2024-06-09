@@ -6,3 +6,5 @@ Additional documentation may be found on the [syntax page](syntax/Positions/inde
 in each `Positions` object's individual documentation.
 
 !syntax parameters /Positions/AddPositionsAction
+
+!tag name=AddPositionsAction pairs=module:framework system:actions

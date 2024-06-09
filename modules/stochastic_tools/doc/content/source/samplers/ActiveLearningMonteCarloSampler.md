@@ -32,3 +32,4 @@ using active learning.
 !syntax inputs /Samplers/ActiveLearningMonteCarloSampler
 
 !syntax children /Samplers/ActiveLearningMonteCarloSampler
+!tag name=ActiveLearningMonteCarloSampler pairs=module:stochastic_tools system:samplers

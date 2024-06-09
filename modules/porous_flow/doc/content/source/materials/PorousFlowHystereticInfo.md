@@ -27,3 +27,5 @@ In this input file, saturation is an AuxVariable which is varied with time throu
 !syntax inputs /Materials/PorousFlowHystereticInfo
 
 !syntax children /Materials/PorousFlowHystereticInfo
+
+!tag name=PorousFlowHystereticInfo pairs=module:porous_flow system:materials

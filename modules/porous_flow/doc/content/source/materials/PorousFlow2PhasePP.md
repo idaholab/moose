@@ -9,3 +9,5 @@ Given the liquid and gas porepressures, this Material computes the liquid and ga
 !syntax inputs /Materials/PorousFlow2PhasePP
 
 !syntax children /Materials/PorousFlow2PhasePP
+
+!tag name=PorousFlow2PhasePP pairs=module:porous_flow system:materials

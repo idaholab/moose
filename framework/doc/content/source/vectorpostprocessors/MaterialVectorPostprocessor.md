@@ -25,3 +25,5 @@ In this example, we request in a `MaterialVectorPostprocessor` the output of the
 !syntax inputs /VectorPostprocessors/MaterialVectorPostprocessor
 
 !syntax children /VectorPostprocessors/MaterialVectorPostprocessor
+
+!tag name=MaterialVectorPostprocessor pairs=module:framework system:vectorpostprocessors

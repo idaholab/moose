@@ -14,3 +14,5 @@ in boundary flux evaluation.
 !syntax inputs /FVBCs/CNSFVHLLCMomentumSpecifiedPressureBC
 
 !syntax children /FVBCs/CNSFVHLLCMomentumSpecifiedPressureBC
+
+!tag name=CNSFVHLLCMomentumSpecifiedPressureBC pairs=module:navier_stokes system:fvbcs

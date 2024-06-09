@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowThermalConductivityFromPorosity
 
 !syntax children /Materials/PorousFlowThermalConductivityFromPorosity
+
+!tag name=PorousFlowThermalConductivityFromPorosity pairs=module:porous_flow system:materials

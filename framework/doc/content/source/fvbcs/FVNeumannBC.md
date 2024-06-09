@@ -51,3 +51,5 @@ provided, see for example `INSFVOutletPressureBC`.
 !syntax inputs /FVBCs/FVNeumannBC
 
 !syntax children /FVBCs/FVNeumannBC
+
+!tag name=FVNeumannBC pairs=module:framework system:fvbcs

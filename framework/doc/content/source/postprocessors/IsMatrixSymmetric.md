@@ -11,3 +11,5 @@ fairly expensive so we only recommend using it on relatively small problems.
 !syntax children /Postprocessors/IsMatrixSymmetric
 
 !bibtex bibliography
+
+!tag name=IsMatrixSymmetric pairs=module:framework system:postprocessors

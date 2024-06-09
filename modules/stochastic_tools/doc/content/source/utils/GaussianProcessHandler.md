@@ -55,3 +55,5 @@ or with Adam (stochastic algorithm):
 
 !listing GaussianProcessHandler.C start=tuneHyperParamsAdam(training_params end=);
 
+
+!tag name=GaussianProcessHandler pairs=module:stochastic_tools system:utils

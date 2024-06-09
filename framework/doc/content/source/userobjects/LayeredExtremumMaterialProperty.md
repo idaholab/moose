@@ -30,3 +30,5 @@ ten layers. The result of this averaging in stored in the variable `layered_extr
 !syntax inputs /UserObjects/LayeredExtremumMaterialProperty
 
 !syntax children /UserObjects/LayeredExtremumMaterialProperty
+
+!tag name=LayeredExtremumMaterialProperty pairs=module:framework system:userobjects

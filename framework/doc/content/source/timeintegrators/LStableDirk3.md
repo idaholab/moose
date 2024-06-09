@@ -35,3 +35,5 @@ problems.
 !syntax inputs /Executioner/TimeIntegrator/LStableDirk3
 
 !syntax children /Executioner/TimeIntegrator/LStableDirk3
+
+!tag name=LStableDirk3 pairs=module:framework system:timeintegrators

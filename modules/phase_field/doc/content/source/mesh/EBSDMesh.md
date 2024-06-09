@@ -19,3 +19,5 @@ final mesh. It sets the levels of coarsening that can be applied to the EBSD dat
 !syntax inputs /Mesh/EBSDMesh
 
 !syntax children /Mesh/EBSDMesh
+
+!tag name=EBSDMesh pairs=module:phase_field system:mesh

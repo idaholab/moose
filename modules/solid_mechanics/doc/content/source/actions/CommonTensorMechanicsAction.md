@@ -7,3 +7,5 @@ This `CommonTensorMechanicsAction` action adds the parameters supplied at the `[
 !alert note
 It performs the same action on the deprecated `[Modules/TensorMechanics/Master]` and
 `[Modules/TensorMechanics/DynamicMaster]` syntaxes.
+
+!tag name=CommonTensorMechanicsAction pairs=module:solid_mechanics system:actions

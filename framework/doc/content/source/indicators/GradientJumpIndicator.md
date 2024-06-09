@@ -19,3 +19,5 @@ typical input file.
 !syntax inputs /Adaptivity/Indicators/GradientJumpIndicator
 
 !syntax children /Adaptivity/Indicators/GradientJumpIndicator
+
+!tag name=GradientJumpIndicator pairs=module:framework system:indicators

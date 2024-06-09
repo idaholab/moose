@@ -113,3 +113,5 @@ We provide the substepping capability in `ADRadialReturnStressUpdate` for nonlin
 <!-- !syntax children /Materials/RadialReturnStressUpdate -->
 
 !bibtex bibliography
+
+!tag name=ADRadialReturnStressUpdate pairs=module:solid_mechanics system:materials

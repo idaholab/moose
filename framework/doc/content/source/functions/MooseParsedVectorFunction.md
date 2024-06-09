@@ -19,3 +19,5 @@ Both x,y component and the z-curl are set for this function.
 !syntax inputs /Functions/ParsedVectorFunction
 
 !syntax children /Functions/ParsedVectorFunction
+
+!tag name=MooseParsedVectorFunction pairs=module:framework system:functions

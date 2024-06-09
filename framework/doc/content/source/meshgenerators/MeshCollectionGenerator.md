@@ -14,3 +14,5 @@ constraints.
 !syntax inputs /Mesh/MeshCollectionGenerator
 
 !syntax children /Mesh/MeshCollectionGenerator
+
+!tag name=MeshCollectionGenerator pairs=module:framework system:meshgenerators

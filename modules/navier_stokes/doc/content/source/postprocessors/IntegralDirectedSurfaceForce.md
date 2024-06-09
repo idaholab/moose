@@ -24,3 +24,5 @@ In this case, the lift and drag coefficients are computed on the surface of a cy
 !syntax inputs /Postprocessors/IntegralDirectedSurfaceForce
 
 !syntax children /Postprocessors/IntegralDirectedSurfaceForce
+
+!tag name=IntegralDirectedSurfaceForce pairs=module:navier_stokes system:postprocessors

@@ -27,3 +27,5 @@ R=\frac12L\left[
 !syntax inputs /Kernels/ACInterfaceStress
 
 !syntax children /Kernels/ACInterfaceStress
+
+!tag name=ACInterfaceStress pairs=module:phase_field system:kernels

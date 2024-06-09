@@ -37,3 +37,5 @@ When $\gamma = 2$ is equivalent to [](SquaredExponentialCovariance.md), save a f
 !syntax inputs /Covariance/ExponentialCovariance
 
 !syntax children /Covariance/ExponentialCovariance
+
+!tag name=ExponentialCovariance pairs=module:stochastic_tools system:surrogates

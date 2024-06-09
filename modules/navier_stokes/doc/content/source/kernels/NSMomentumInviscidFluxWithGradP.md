@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSMomentumInviscidFluxWithGradP
 
 !syntax children /Kernels/NSMomentumInviscidFluxWithGradP
+
+!tag name=NSMomentumInviscidFluxWithGradP pairs=module:navier_stokes system:kernels

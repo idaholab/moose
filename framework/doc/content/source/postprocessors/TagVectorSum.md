@@ -9,3 +9,5 @@ different residual objects to global balances.
 !syntax inputs /Postprocessors/TagVectorSum
 
 !syntax children /Postprocessors/TagVectorSum
+
+!tag name=TagVectorSum pairs=module:framework system:postprocessors

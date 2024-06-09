@@ -17,3 +17,5 @@ This `UserObject` captures the moments of an FX representing the value at a boun
 !syntax inputs /UserObjects/FXBoundaryValueUserObject
 
 !syntax children /UserObjects/FXBoundaryValueUserObject
+
+!tag name=FXBoundaryValueUserObject pairs=module:functional_expansion_tools system:userobjects

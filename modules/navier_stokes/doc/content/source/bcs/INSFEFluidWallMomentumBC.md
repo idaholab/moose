@@ -24,3 +24,5 @@ This boundary condition can only be used if the momentum equation pressure term 
 !syntax inputs /BCs/INSFEFluidWallMomentumBC
 
 !syntax children /BCs/INSFEFluidWallMomentumBC
+
+!tag name=INSFEFluidWallMomentumBC pairs=module:navier_stokes system:bcs

@@ -33,3 +33,5 @@ mapping stress calculator as shown below:
 !syntax children /Materials/HyperbolicViscoplasticityStressUpdate
 
 !bibtex bibliography
+
+!tag name=HyperbolicViscoplasticityStressUpdate pairs=module:solid_mechanics system:materials

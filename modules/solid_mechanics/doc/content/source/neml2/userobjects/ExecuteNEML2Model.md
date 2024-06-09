@@ -20,3 +20,5 @@ Each model +output+ can be retireved by a [NEML2ToMOOSEMaterialProperty](NEML2To
 !syntax inputs /UserObjects/ExecuteNEML2Model
 
 !syntax children /UserObjects/ExecuteNEML2Model
+
+!tag name=ExecuteNEML2Model pairs=module:solid_mechanics system:neml2

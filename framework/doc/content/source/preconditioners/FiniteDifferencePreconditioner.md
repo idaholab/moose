@@ -20,3 +20,5 @@ petsc_options_value = '1e-6                 ds'
 !syntax inputs /Preconditioning/FDP
 
 !syntax children /Preconditioning/FDP
+
+!tag name=FiniteDifferencePreconditioner pairs=module:framework system:preconditioners

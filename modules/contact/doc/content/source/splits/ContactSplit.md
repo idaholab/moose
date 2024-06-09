@@ -15,3 +15,5 @@ The `ContactSplit` class is used to create a split-based preconditioner for cont
 !syntax inputs /Preconditioning/ContactSplit
 
 !syntax children /Preconditioning/ContactSplit
+
+!tag name=ContactSplit pairs=module:contact system:splits

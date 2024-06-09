@@ -42,3 +42,5 @@ assumed to be a solid cylinder.
 !syntax inputs /Components/HeatStructureCylindrical
 
 !syntax children /Components/HeatStructureCylindrical
+
+!tag name=HeatStructureCylindrical pairs=module:thermal_hydraulics system:components

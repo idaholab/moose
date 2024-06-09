@@ -10,3 +10,5 @@ across cell/element faces.
 !syntax inputs /FVKernels/PINSFVMassAdvection
 
 !syntax children /FVKernels/PINSFVMassAdvection
+
+!tag name=PINSFVMassAdvection pairs=module:navier_stokes system:fvkernels

@@ -149,3 +149,5 @@ Various important `Materials` are not added by this Action, so must be added by 
 !syntax inputs /PorousFlowFullySaturated/PorousFlowFullySaturated
 
 !bibtex bibliography
+
+!tag name=PorousFlowFullySaturated pairs=module:porous_flow system:actions

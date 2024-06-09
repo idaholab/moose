@@ -33,3 +33,5 @@ Note that this BC computes its Jacobian using the automatic differentiation syst
 !syntax inputs /BCs/ADVectorFunctionNeumannBC
 
 !syntax children /BCs/ADVectorFunctionNeumannBC
+
+!tag name=ADVectorFunctionNeumannBC pairs=module:framework system:bcs

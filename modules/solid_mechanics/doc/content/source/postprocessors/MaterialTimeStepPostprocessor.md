@@ -115,3 +115,5 @@ must be set to run the time step limit calculation.
 !syntax inputs /Postprocessors/MaterialTimeStepPostprocessor
 
 !syntax children /Postprocessors/MaterialTimeStepPostprocessor
+
+!tag name=MaterialTimeStepPostprocessor pairs=module:solid_mechanics system:postprocessors

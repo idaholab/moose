@@ -13,3 +13,5 @@ The `NodalArea` object computes the tributary area of each node on a contact sur
 !syntax inputs /UserObjects/NodalArea
 
 !syntax children /UserObjects/NodalArea
+
+!tag name=NodalArea pairs=module:contact system:userobjects

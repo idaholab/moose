@@ -27,3 +27,5 @@ See [Polycrystal Initial Conditions](ICs/PolycrystalICs.md) for more information
 !syntax inputs /Postprocessors/PolycrystalHex
 
 !syntax children /Postprocessors/PolycrystalHex
+
+!tag name=PolycrystalHex pairs=module:phase_field system:userobjects

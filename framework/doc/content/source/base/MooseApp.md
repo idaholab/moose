@@ -37,3 +37,5 @@ MooseApp::errorOnJacobianNonzeroReallocation() const`. The `MooseApp` default is
 `false`, although this will hopefully be changed in the not-too-distant
 future. Note that the application level code setting can always be overridden at
 the input-file level by specifying a value for `Problem/error_on_jacobian_nonzero_reallocation`.
+
+!tag name=MooseApp pairs=module:framework system:base

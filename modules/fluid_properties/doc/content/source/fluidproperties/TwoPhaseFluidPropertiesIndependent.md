@@ -17,3 +17,5 @@ that ideally should reduce to two 1-phase test problems acting independently.
 !syntax children /FluidProperties/TwoPhaseFluidPropertiesIndependent
 
 !bibtex bibliography
+
+!tag name=TwoPhaseFluidPropertiesIndependent pairs=module:fluid_properties system:fluidproperties

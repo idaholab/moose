@@ -13,3 +13,5 @@ optimizes the Jacobian test performance.
 
 
 !syntax parameters /Debug/MaterialDerivativeTest/MaterialDerivativeTestAction
+
+!tag name=MaterialDerivativeTestAction pairs=module:framework system:actions

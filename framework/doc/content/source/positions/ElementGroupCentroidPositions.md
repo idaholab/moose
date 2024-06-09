@@ -57,3 +57,5 @@ corresponding to combinations of three extra element ids.
 !syntax inputs /Positions/ElementGroupCentroidPositions
 
 !syntax children /Positions/ElementGroupCentroidPositions
+
+!tag name=ElementGroupCentroidPositions pairs=module:framework system:positions

@@ -27,3 +27,5 @@ a matrix material property.
 !syntax inputs /AuxKernels/MaterialRealDenseMatrixAux
 
 !syntax children /AuxKernels/MaterialRealDenseMatrixAux
+
+!tag name=MaterialRealDenseMatrixAux pairs=module:framework system:auxkernels

@@ -14,3 +14,5 @@ There is no AD version currently implemented.
 !syntax inputs /VectorPostprocessors/Sampler1DVector
 
 !syntax children /VectorPostprocessors/Sampler1DVector
+
+!tag name=Sampler1DVector pairs=module:thermal_hydraulics system:vectorpostprocessors

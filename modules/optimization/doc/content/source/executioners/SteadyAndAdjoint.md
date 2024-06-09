@@ -67,3 +67,5 @@ The driving optimize app will thus have only have a single [FullSolveMultiApp.md
 !syntax inputs /Executioner/SteadyAndAdjoint
 
 !syntax children /Executioner/SteadyAndAdjoint
+
+!tag name=SteadyAndAdjoint pairs=module:optimization system:executioners

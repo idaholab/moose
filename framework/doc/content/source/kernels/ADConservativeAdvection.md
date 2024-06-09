@@ -19,3 +19,5 @@ The `ADConservativeAdvection` kernel implements the same advection term as
 !syntax inputs /Kernels/ADConservativeAdvection
 
 !syntax children /Kernels/ADConservativeAdvection
+
+!tag name=ADConservativeAdvection pairs=module:framework system:kernels

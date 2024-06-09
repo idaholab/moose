@@ -39,3 +39,5 @@ experimental data, see [!cite](shammamy1967incremental).
 !syntax children /Materials/ADComputeSmallStrain
 
 !bibtex bibliography
+
+!tag name=ADComputeSmallStrain pairs=module:solid_mechanics system:materials

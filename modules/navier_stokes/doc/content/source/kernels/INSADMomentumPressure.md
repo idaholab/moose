@@ -12,3 +12,5 @@ will be integrated by parts for the weak form.
 !syntax inputs /Kernels/INSADMomentumPressure
 
 !syntax children /Kernels/INSADMomentumPressure
+
+!tag name=INSADMomentumPressure pairs=module:navier_stokes system:kernels

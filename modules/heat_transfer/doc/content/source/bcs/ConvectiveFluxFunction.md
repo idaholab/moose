@@ -20,3 +20,5 @@ The far-field temperature is specified using the `T_infinity` parameter, which i
 !syntax inputs /BCs/ConvectiveFluxFunction
 
 !syntax children /BCs/ConvectiveFluxFunction
+
+!tag name=ConvectiveFluxFunction pairs=module:heat_transfer system:bcs

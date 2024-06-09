@@ -32,3 +32,5 @@ for all time past $t_N$:
 
 !equation
 \Delta t = t_N - t_{N-1} \,.
+
+!tag name=TimeSequenceStepperBase pairs=module:framework system:timesteppers

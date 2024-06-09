@@ -11,3 +11,5 @@ This action is triggered with *Modules/IncompressibleNavierStokes* input syntax.
 ## Example Input File Syntax
 
 !syntax parameters /Modules/IncompressibleNavierStokes
+
+!tag name=INSAction pairs=module:navier_stokes system:actions

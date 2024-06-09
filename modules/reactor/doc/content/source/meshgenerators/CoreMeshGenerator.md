@@ -84,3 +84,5 @@ This is the resulting mesh block layout:
 !syntax inputs /Mesh/CoreMeshGenerator
 
 !syntax children /Mesh/CoreMeshGenerator
+
+!tag name=CoreMeshGenerator pairs=module:reactor system:meshgenerators

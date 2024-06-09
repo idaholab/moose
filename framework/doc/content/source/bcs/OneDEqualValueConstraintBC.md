@@ -21,3 +21,5 @@ at the interface.
 !syntax inputs /BCs/OneDEqualValueConstraintBC
 
 !syntax children /BCs/OneDEqualValueConstraintBC
+
+!tag name=OneDEqualValueConstraintBC pairs=module:framework system:bcs

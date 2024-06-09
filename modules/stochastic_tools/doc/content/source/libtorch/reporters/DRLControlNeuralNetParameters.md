@@ -25,3 +25,5 @@ training process.
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=DRLControlNeuralNetParameters pairs=module:stochastic_tools system:libtorch

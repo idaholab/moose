@@ -129,3 +129,5 @@ As an illustration, we solve the 2D Hertzian problem by using VCP with several s
 !syntax inputs /Preconditioning/VCP
 
 !syntax children /Preconditioning/VCP
+
+!tag name=VariableCondensationPreconditioner pairs=module:framework system:preconditioners

@@ -55,3 +55,5 @@ Note that there is no runtime cost to calling `.D<dX>()`. The derivatives are ta
 The unit tests contain more examples on how to use the system.
 
 !listing unit/src/CompileTimeDerivativesTest.C
+
+!tag name=CompileTimeDerivatives pairs=module:framework system:utils

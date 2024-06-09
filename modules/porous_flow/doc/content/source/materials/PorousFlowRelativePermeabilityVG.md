@@ -31,3 +31,5 @@ $S_{\mathrm{eff}}=1$.
 !syntax inputs /Materials/PorousFlowRelativePermeabilityVG
 
 !syntax children /Materials/PorousFlowRelativePermeabilityVG
+
+!tag name=PorousFlowRelativePermeabilityVG pairs=module:porous_flow system:materials

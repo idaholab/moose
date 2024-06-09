@@ -13,3 +13,5 @@ weighted average of the level set variables values at each quadrature point of a
 !syntax inputs /Postprocessors/LevelSetVolume
 
 !syntax children /Postprocessors/LevelSetVolume
+
+!tag name=LevelSetVolume pairs=module:level_set system:postprocessors

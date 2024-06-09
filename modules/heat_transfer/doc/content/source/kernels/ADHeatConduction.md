@@ -20,3 +20,5 @@ This class inherits from the [ADDiffusion](/ADDiffusion.md) class.
 !syntax children /Kernels/ADHeatConduction
 
 !bibtex bibliography
+
+!tag name=ADHeatConduction pairs=module:heat_transfer system:kernels

@@ -17,3 +17,5 @@ information refer to [batch_mode.md].
 !syntax inputs /MultiApps/SamplerTransientMultiApp
 
 !syntax children /MultiApps/SamplerTransientMultiApp
+
+!tag name=SamplerTransientMultiApp pairs=module:stochastic_tools system:multiapps

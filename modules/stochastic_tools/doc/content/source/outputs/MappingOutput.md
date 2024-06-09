@@ -19,3 +19,5 @@ use by using this object. All data within the model that was declared using
 !syntax inputs /Outputs/MappingOutput
 
 !syntax children /Outputs/MappingOutput
+
+!tag name=MappingOutput pairs=module:stochastic_tools system:outputs

@@ -17,3 +17,5 @@ input file.
 !syntax inputs /Transfers/PODResidualTransfer
 
 !syntax children /Transfers/PODResidualTransfer
+
+!tag name=PODResidualTransfer pairs=module:stochastic_tools system:transfers

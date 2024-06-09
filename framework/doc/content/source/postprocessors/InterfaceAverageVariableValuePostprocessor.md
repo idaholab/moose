@@ -18,3 +18,5 @@ In this example the average of the diffusivity material property is computed acr
 !syntax inputs /Postprocessors/InterfaceAverageVariableValuePostprocessor
 
 !syntax children /Postprocessors/InterfaceAverageVariableValuePostprocessor
+
+!tag name=InterfaceAverageVariableValuePostprocessor pairs=module:framework system:postprocessors

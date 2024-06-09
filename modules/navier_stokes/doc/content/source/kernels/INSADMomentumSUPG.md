@@ -14,3 +14,5 @@ producing crippling oscillations.
 !syntax inputs /Kernels/INSADMomentumSUPG
 
 !syntax children /Kernels/INSADMomentumSUPG
+
+!tag name=INSADMomentumSUPG pairs=module:navier_stokes system:kernels

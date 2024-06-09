@@ -17,3 +17,5 @@ do Lagrange variables.
 !syntax inputs /AuxKernels/VariableValueTransferAux
 
 !syntax children /AuxKernels/VariableValueTransferAux
+
+!tag name=VariableValueTransferAux pairs=module:thermal_hydraulics system:auxkernels

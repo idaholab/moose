@@ -11,3 +11,5 @@ material properties can for example be used in [parsed materials](/ParsedMateria
 !syntax inputs /Materials/TimeStepMaterial
 
 !syntax children /Materials/TimeStepMaterial
+
+!tag name=TimeStepMaterial pairs=module:phase_field system:materials

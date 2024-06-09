@@ -11,3 +11,5 @@ This class computes the plane stress isotropic elasticity tensor for shell eleme
 !syntax inputs /Materials/ADComputeIsotropicElasticityTensorShell
 
 !syntax children /Materials/ADComputeIsotropicElasticityTensorShell
+
+!tag name=ADComputeIsotropicElasticityTensorShell pairs=module:solid_mechanics system:materials

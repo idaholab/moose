@@ -15,3 +15,5 @@ Kim-Kim-Suzuki (KKS) nested solve material (part 2 of 2). KKSPhaseConcentrationD
 !syntax inputs /Materials/KKSPhaseConcentrationDerivatives
 
 !syntax children /Materials/KKSPhaseConcentrationDerivatives
+
+!tag name=KKSPhaseConcentrationDerivatives pairs=module:phase_field system:materials

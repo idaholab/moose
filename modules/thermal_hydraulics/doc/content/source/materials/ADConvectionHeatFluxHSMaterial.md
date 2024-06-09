@@ -7,3 +7,5 @@
 !syntax inputs /Materials/ADConvectionHeatFluxHSMaterial
 
 !syntax children /Materials/ADConvectionHeatFluxHSMaterial
+
+!tag name=ADConvectionHeatFluxHSMaterial pairs=module:thermal_hydraulics system:materials

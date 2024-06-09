@@ -19,3 +19,5 @@ between the coupled variable and the applied force. When `coef` is positive
 !syntax inputs /NodalKernels/CoupledForceNodalKernel
 
 !syntax children /NodalKernels/CoupledForceNodalKernel
+
+!tag name=CoupledForceNodalKernel pairs=module:framework system:nodalkernels

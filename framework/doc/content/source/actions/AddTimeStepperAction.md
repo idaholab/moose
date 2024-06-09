@@ -8,3 +8,5 @@ This action handles both `[TimeStepper]` and `[TimeSteppers]` blocks. It support
 More information about Time Stepper System and CompositionDT time stepper may be found on the [Time Stepper System syntax documentation](syntax/Executioner/TimeSteppers/index.md).
 
 
+
+!tag name=AddTimeStepperAction pairs=module:framework system:actions

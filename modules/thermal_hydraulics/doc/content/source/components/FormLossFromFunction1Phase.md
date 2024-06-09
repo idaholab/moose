@@ -11,3 +11,5 @@ it simply defines the loss coefficient as being the function passed to the [!par
 !syntax inputs /Components/FormLossFromFunction1Phase
 
 !syntax children /Components/FormLossFromFunction1Phase
+
+!tag name=FormLossFromFunction1Phase pairs=module:thermal_hydraulics system:components

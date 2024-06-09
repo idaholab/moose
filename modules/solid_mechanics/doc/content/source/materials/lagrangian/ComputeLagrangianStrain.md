@@ -57,3 +57,5 @@ For small deformations the only change would be `large_kinematics=false`.
 !syntax inputs /Materials/ComputeLagrangianStrain
 
 !syntax children /Materials/ComputeLagrangianStrain
+
+!tag name=ComputeLagrangianStrain pairs=module:solid_mechanics system:materials

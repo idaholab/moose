@@ -20,3 +20,5 @@ inside elements (at quadrature points) is
 !syntax inputs /Postprocessors/NodalExtremeValue
 
 !syntax children /Postprocessors/NodalExtremeValue
+
+!tag name=NodalExtremeValue pairs=module:framework system:postprocessors

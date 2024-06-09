@@ -17,3 +17,5 @@ See also [CoupledTimeDerivative](/CoupledTimeDerivative.md).
 !syntax inputs /Kernels/CoupledSwitchingTimeDerivative
 
 !syntax children /Kernels/CoupledSwitchingTimeDerivative
+
+!tag name=CoupledSwitchingTimeDerivative pairs=module:phase_field system:kernels

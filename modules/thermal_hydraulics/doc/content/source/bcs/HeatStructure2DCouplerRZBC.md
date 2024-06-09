@@ -18,3 +18,5 @@ components. It is added once for each heat structure involved.
 !syntax inputs /BCs/HeatStructure2DCouplerRZBC
 
 !syntax children /BCs/HeatStructure2DCouplerRZBC
+
+!tag name=HeatStructure2DCouplerRZBC pairs=module:thermal_hydraulics system:bcs

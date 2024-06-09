@@ -18,3 +18,5 @@ users do not need to add it to an input file.
 !syntax inputs /UserObjects/ADShaftConnectedMotorUserObject
 
 !syntax children /UserObjects/ADShaftConnectedMotorUserObject
+
+!tag name=ADShaftConnectedMotorUserObject pairs=module:thermal_hydraulics system:userobjects

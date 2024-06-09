@@ -14,3 +14,5 @@ replacement for the standard strain calculators, and is applicable only to small
 !syntax inputs /Materials/ComputeCrackTipEnrichmentSmallStrain
 
 !syntax children /Materials/ComputeCrackTipEnrichmentSmallStrain
+
+!tag name=ComputeCrackTipEnrichmentSmallStrain pairs=module:xfem system:materials

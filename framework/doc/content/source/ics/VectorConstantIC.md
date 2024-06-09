@@ -13,3 +13,5 @@ defaulted to zero.
 !syntax inputs /ICs/VectorConstantIC
 
 !syntax children /ICs/VectorConstantIC
+
+!tag name=VectorConstantIC pairs=module:framework system:ics

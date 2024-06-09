@@ -27,3 +27,5 @@ it is recommended that Giga Newtons be used instead of Newtons, Giga kg be used 
 !syntax inputs /Kernels/AcousticInertia
 
 !syntax children /Kernels/AcousticInertia
+
+!tag name=AcousticInertia pairs=module:fsi system:kernels

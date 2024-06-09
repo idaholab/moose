@@ -28,3 +28,5 @@ pass fields between each application.
 
 
 !bibtex bibliography
+
+!tag name=ExternalProblem pairs=module:framework system:problems

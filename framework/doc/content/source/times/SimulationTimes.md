@@ -11,3 +11,5 @@ the times of every time step.
 !syntax inputs /Times/SimulationTimes
 
 !syntax children /Times/SimulationTimes
+
+!tag name=SimulationTimes pairs=module:framework system:times

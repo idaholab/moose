@@ -14,3 +14,5 @@ happen if a point lies on a face, edge, or vertex.
 !syntax inputs /AuxKernels/ContainsPointAux
 
 !syntax children /AuxKernels/ContainsPointAux
+
+!tag name=ContainsPointAux pairs=module:framework system:auxkernels

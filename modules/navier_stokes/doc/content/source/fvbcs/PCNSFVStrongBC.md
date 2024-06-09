@@ -20,3 +20,5 @@ scalars can be computed.
 !syntax inputs /FVBCs/PCNSFVStrongBC
 
 !syntax children /FVBCs/PCNSFVStrongBC
+
+!tag name=PCNSFVStrongBC pairs=module:navier_stokes system:fvbcs

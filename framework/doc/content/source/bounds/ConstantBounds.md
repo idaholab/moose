@@ -40,3 +40,5 @@ algorithms is summarized below:
 !syntax inputs /Bounds/ConstantBounds
 
 !syntax children /Bounds/ConstantBounds
+
+!tag name=ConstantBounds pairs=module:framework system:bounds

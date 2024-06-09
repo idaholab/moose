@@ -60,3 +60,5 @@ Gap offset can be provided to the current mechanical contact constraint. It can 
 !syntax inputs /Constraints/MechanicalContactConstraint
 
 !syntax children /Constraints/MechanicalContactConstraint
+
+!tag name=MechanicalContactConstraint pairs=module:contact system:constraints

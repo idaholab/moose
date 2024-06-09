@@ -17,3 +17,5 @@ is tied between the left and right boundaries of the two disconnected domains us
 !syntax inputs /Constraints/CoupledTiedValueConstraint
 
 !syntax children /Constraints/CoupledTiedValueConstraint
+
+!tag name=CoupledTiedValueConstraint pairs=module:framework system:constraints

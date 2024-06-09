@@ -59,3 +59,5 @@ The `DiscreteNucleationTimeStep` postprocessor is part of the
 !syntax children /Postprocessors/DiscreteNucleationTimeStep
 
 !bibtex bibliography
+
+!tag name=DiscreteNucleationTimeStep pairs=module:phase_field system:postprocessors

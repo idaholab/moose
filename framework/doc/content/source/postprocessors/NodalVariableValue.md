@@ -18,3 +18,5 @@ thermocouple to compare against experimental data.
 !syntax inputs /Postprocessors/NodalVariableValue
 
 !syntax children /Postprocessors/NodalVariableValue
+
+!tag name=NodalVariableValue pairs=module:framework system:postprocessors

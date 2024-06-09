@@ -339,3 +339,5 @@ step size.
 !syntax children /Materials/ComputeMultipleInelasticStress
 
 !bibtex bibliography
+
+!tag name=ComputeMultipleInelasticStress pairs=module:solid_mechanics system:materials

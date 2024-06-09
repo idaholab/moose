@@ -25,3 +25,5 @@ saved/loaded if re-initialization is enabled.
 !syntax children /UserObjects/ThermochimicaNodalData
 !syntax children /UserObjects/ThermochimicaNodalUO2X
 !syntax children /UserObjects/ThermochimicaNodalUZr
+
+!tag name=ThermochimicaNodalData pairs=module:chemical_reactions system:userobjects

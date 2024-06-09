@@ -18,3 +18,5 @@ notably because of the need to handle complex material property dependency resol
 !syntax inputs /Materials/MaterialFunctorConverter
 
 !syntax children /Materials/MaterialFunctorConverter
+
+!tag name=MaterialFunctorConverter pairs=module:framework system:materials

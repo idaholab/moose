@@ -34,3 +34,5 @@ happens to be `v` as well.
 !syntax inputs /BCs/ADVectorMatchedValueBC
 
 !syntax children /BCs/ADVectorMatchedValueBC
+
+!tag name=ADVectorMatchedValueBC pairs=module:framework system:bcs

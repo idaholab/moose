@@ -5,3 +5,5 @@ each block of the `[Adaptivity/Indicators]` block of an input file. This action 
 the [Problem](syntax/Problem/index.md). See [syntax/Adaptivity/index.md] for more information.
 
 !syntax parameters /Adaptivity/Indicators/AddIndicatorAction
+
+!tag name=AddIndicatorAction pairs=module:framework system:actions

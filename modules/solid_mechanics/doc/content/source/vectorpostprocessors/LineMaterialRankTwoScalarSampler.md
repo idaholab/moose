@@ -19,3 +19,5 @@ Often this class is used to track stress or strain along an exterior or interior
 !syntax inputs /VectorPostprocessors/LineMaterialRankTwoScalarSampler
 
 !syntax children /VectorPostprocessors/LineMaterialRankTwoScalarSampler
+
+!tag name=LineMaterialRankTwoScalarSampler pairs=module:solid_mechanics system:vectorpostprocessors

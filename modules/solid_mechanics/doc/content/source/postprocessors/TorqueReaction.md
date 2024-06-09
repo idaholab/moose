@@ -60,3 +60,5 @@ The `TagVectorAux` AuxKernel is used to extract the saved components of the reac
 !syntax inputs /Postprocessors/TorqueReaction
 
 !syntax children /Postprocessors/TorqueReaction
+
+!tag name=TorqueReaction pairs=module:solid_mechanics system:postprocessors

@@ -34,3 +34,5 @@ happens to be `v` as well.
 !syntax inputs /BCs/MatchedValueBC
 
 !syntax children /BCs/MatchedValueBC
+
+!tag name=MatchedValueBC pairs=module:framework system:bcs

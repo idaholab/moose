@@ -11,3 +11,5 @@ object imposes a momentum source in the +x direction.
 !syntax inputs /Kernels/INSADMomentumCoupledForce
 
 !syntax children /Kernels/INSADMomentumCoupledForce
+
+!tag name=INSADMomentumCoupledForce pairs=module:navier_stokes system:kernels

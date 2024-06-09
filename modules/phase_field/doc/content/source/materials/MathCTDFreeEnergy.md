@@ -16,3 +16,5 @@ $c=-1$. See also [`MathEBFreeEnergy`](/MathEBFreeEnergy.md).
 !syntax inputs /Materials/MathCTDFreeEnergy
 
 !syntax children /Materials/MathCTDFreeEnergy
+
+!tag name=MathCTDFreeEnergy pairs=module:phase_field system:materials

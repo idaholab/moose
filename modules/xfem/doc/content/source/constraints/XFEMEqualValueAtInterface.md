@@ -17,3 +17,5 @@ The `XFEMEqualValueAtInterface` enforces $u_{\Gamma^+} = u_{\Gamma^-}= a$ at the
 !syntax children /Constraints/XFEMEqualValueAtInterface
 
 !bibtex bibliography
+
+!tag name=XFEMEqualValueAtInterface pairs=module:xfem system:constraints

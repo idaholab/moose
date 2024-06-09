@@ -12,3 +12,5 @@ For an elemental array variable, element-wise L2 projection is performed for all
 !syntax inputs /AuxKernels/FunctionArrayAux
 
 !syntax children /AuxKernels/FunctionArrayAux
+
+!tag name=FunctionArrayAux pairs=module:framework system:auxkernels

@@ -21,3 +21,5 @@ This kernel requires the use of high order shape functions (e.g. third order Her
 !syntax children /Kernels/SimpleCHInterface
 
 !bibtex bibliography
+
+!tag name=SimpleCHInterface pairs=module:phase_field system:kernels

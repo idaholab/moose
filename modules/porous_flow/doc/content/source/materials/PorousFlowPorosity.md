@@ -29,3 +29,5 @@ Flags provided to `PorousFlowPorosity` control its evolution.
 !syntax inputs /Materials/PorousFlowPorosity
 
 !syntax children /Materials/PorousFlowPorosity
+
+!tag name=PorousFlowPorosity pairs=module:porous_flow system:materials

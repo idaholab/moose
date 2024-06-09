@@ -14,3 +14,5 @@ boundary conditions based on stagnation temperature and pressure.
 !syntax inputs /FVBCs/CNSFVHLLCFluidEnergyStagnationInletBC
 
 !syntax children /FVBCs/CNSFVHLLCFluidEnergyStagnationInletBC
+
+!tag name=CNSFVHLLCFluidEnergyStagnationInletBC pairs=module:navier_stokes system:fvbcs

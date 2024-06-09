@@ -14,3 +14,5 @@ P$ the pressure.
 !syntax inputs /AuxKernels/EnthalpyAux
 
 !syntax children /AuxKernels/EnthalpyAux
+
+!tag name=EnthalpyAux pairs=module:navier_stokes system:auxkernels

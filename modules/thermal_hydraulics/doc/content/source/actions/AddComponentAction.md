@@ -8,3 +8,5 @@ each sub-block of the `Components` block of an input file, then adds them to the
 [THMProblem.md].
 
 !syntax parameters /Components/AddComponentAction
+
+!tag name=AddComponentAction pairs=module:thermal_hydraulics system:actions

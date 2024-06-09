@@ -40,3 +40,5 @@ which expects a tensor valued mobility $M$.
 !syntax inputs /Kernels/CahnHilliard
 
 !syntax children /Kernels/CahnHilliard
+
+!tag name=CahnHilliard pairs=module:phase_field system:kernels

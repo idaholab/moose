@@ -28,3 +28,5 @@ The reference scalar variable is set using the `AuxScalarKernel` [Generalized Pl
 
 
 !syntax parameters /Physics/SolidMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction
+
+!tag name=GeneralizedPlaneStrainAction pairs=module:solid_mechanics system:actions

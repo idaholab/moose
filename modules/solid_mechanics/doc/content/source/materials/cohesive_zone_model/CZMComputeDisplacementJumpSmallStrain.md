@@ -26,3 +26,5 @@ This object is automatically added from the [Cohesive Zone Physics](CohesiveZone
 !syntax inputs /Materials/CZMComputeDisplacementJumpSmallStrain
 
 !syntax children /Materials/CZMComputeDisplacementJumpSmallStrain
+
+!tag name=CZMComputeDisplacementJumpSmallStrain pairs=module:solid_mechanics system:materials

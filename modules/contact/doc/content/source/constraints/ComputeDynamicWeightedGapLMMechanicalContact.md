@@ -23,3 +23,5 @@ For relevant, general equations, see [!citep](tal2018dynamic). Also, for discuss
 !syntax inputs /Constraints/ComputeDynamicWeightedGapLMMechanicalContact
 
 !syntax children /Constraints/ComputeDynamicWeightedGapLMMechanicalContact
+
+!tag name=ComputeDynamicWeightedGapLMMechanicalContact pairs=module:contact system:constraints

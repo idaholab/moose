@@ -39,3 +39,5 @@ then obtain the diffusion coefficient directly on the faces when evaluating the 
 !syntax inputs /FunctorMaterials/GenericFunctorMaterial
 
 !syntax children /FunctorMaterials/GenericFunctorMaterial
+
+!tag name=GenericFunctorMaterial pairs=module:framework system:functormaterials

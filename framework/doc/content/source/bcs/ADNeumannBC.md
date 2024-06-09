@@ -34,3 +34,5 @@ outward unit normal to $\partial \Omega_N$.
 !syntax inputs /BCs/ADNeumannBC
 
 !syntax children /BCs/ADNeumannBC
+
+!tag name=ADNeumannBC pairs=module:framework system:bcs

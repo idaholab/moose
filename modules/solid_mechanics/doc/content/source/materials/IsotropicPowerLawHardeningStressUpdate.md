@@ -39,3 +39,5 @@ mapping stress calculator as shown below:
 !syntax inputs /Materials/IsotropicPowerLawHardeningStressUpdate
 
 !syntax children /Materials/IsotropicPowerLawHardeningStressUpdate
+
+!tag name=IsotropicPowerLawHardeningStressUpdate pairs=module:solid_mechanics system:materials

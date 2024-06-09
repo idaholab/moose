@@ -29,3 +29,5 @@ If [!param](/Mesh/UniqueExtraIDMeshGenerator/new_id_rule) is provided, new ID va
 !syntax inputs /Mesh/UniqueExtraIDMeshGenerator
 
 !syntax children /Mesh/UniqueExtraIDMeshGenerator
+
+!tag name=UniqueExtraIDMeshGenerator pairs=module:framework system:meshgenerators

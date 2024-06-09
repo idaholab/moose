@@ -29,3 +29,5 @@ where $\vec{R}$ denotes the strong form of the momentum residuals.
 !syntax inputs /Kernels/ConvectedMeshPSPG
 
 !syntax children /Kernels/ConvectedMeshPSPG
+
+!tag name=ConvectedMeshPSPG pairs=module:fsi system:kernels

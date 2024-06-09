@@ -40,3 +40,5 @@ This example describes a pure advection problem with a source term on a 2D mesh.
 !syntax inputs /LinearFVKernels/LinearFVAdvection
 
 !syntax children /LinearFVKernels/LinearFVAdvection
+
+!tag name=LinearFVAdvection pairs=module:framework system:linearfvkernels

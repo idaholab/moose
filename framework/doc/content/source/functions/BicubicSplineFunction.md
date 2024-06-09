@@ -32,3 +32,5 @@ for the points has 3 points along the `x` direction and 4 points along the `y` d
 !syntax inputs /Functions/BicubicSplineFunction
 
 !syntax children /Functions/BicubicSplineFunction
+
+!tag name=BicubicSplineFunction pairs=module:framework system:functions

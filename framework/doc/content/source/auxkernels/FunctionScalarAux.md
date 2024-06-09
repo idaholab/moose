@@ -16,3 +16,5 @@ into a scalar variable, to verify the correctness of another system (parsed func
 !syntax inputs /AuxScalarKernels/FunctionScalarAux
 
 !syntax children /AuxScalarKernels/FunctionScalarAux
+
+!tag name=FunctionScalarAux pairs=module:framework system:auxkernels

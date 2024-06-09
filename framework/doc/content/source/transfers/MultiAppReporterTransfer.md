@@ -78,3 +78,5 @@ Here, we are transferring integer and string data between reporters:
 !syntax inputs /Transfers/MultiAppReporterTransfer
 
 !syntax children /Transfers/MultiAppReporterTransfer
+
+!tag name=MultiAppReporterTransfer pairs=module:framework system:transfers

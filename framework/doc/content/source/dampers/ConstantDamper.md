@@ -20,3 +20,5 @@ In this example, a constant damping factor of 0.9 is applied on all variables (j
 !syntax inputs /Dampers/ConstantDamper
 
 !syntax children /Dampers/ConstantDamper
+
+!tag name=ConstantDamper pairs=module:framework system:dampers

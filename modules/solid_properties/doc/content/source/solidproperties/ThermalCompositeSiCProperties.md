@@ -46,3 +46,5 @@ over an unspecified range [!cite](stone).
 !syntax children /SolidProperties/ThermalCompositeSiCProperties
 
 !bibtex bibliography
+
+!tag name=ThermalCompositeSiCProperties pairs=module:solid_properties system:solidproperties

@@ -26,3 +26,5 @@ to a value of 1.
 !syntax inputs /Postprocessors/HeatRateRadiation
 
 !syntax children /Postprocessors/HeatRateRadiation
+
+!tag name=HeatRateRadiation pairs=module:thermal_hydraulics system:postprocessors

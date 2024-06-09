@@ -70,3 +70,5 @@ Second, we will instead plot the ray data in a nodal sense, in which the value o
 Again, overlaying the ray mesh result on the problem result we obtain the result below in [nodal].
 
 !media large_media/ray_tracing/simple_diffusion_line_integral_rays_nodal.png id=nodal style=width:70%; caption=Simple diffusion line integral example result with Ray integral value overlay and nodal output enabled.
+
+!tag name=RayTracingMeshOutput pairs=module:ray_tracing system:outputs

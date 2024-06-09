@@ -23,3 +23,5 @@ This junction is treated just like any interface between two elements in the mes
 !syntax inputs /Components/JunctionOneToOne1Phase
 
 !syntax children /Components/JunctionOneToOne1Phase
+
+!tag name=JunctionOneToOne1Phase pairs=module:thermal_hydraulics system:components

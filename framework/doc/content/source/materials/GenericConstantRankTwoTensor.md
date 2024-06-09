@@ -20,3 +20,5 @@ domain explored by the simulation.
 !syntax inputs /Materials/GenericConstantRankTwoTensor
 
 !syntax children /Materials/GenericConstantRankTwoTensor
+
+!tag name=GenericConstantRankTwoTensor pairs=module:framework system:materials

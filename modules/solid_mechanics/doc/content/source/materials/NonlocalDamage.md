@@ -21,3 +21,5 @@ delayed by a single `execte_on` (timestep or nonlinear).
 !syntax children /Materials/NonlocalDamage
 
 !bibtex bibliography
+
+!tag name=NonlocalDamage pairs=module:solid_mechanics system:materials

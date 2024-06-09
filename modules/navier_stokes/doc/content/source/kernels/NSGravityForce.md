@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSGravityForce
 
 !syntax children /Kernels/NSGravityForce
+
+!tag name=NSGravityForce pairs=module:navier_stokes system:kernels

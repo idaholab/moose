@@ -15,3 +15,5 @@ block=Reporters/vecs Reporters/vectorOperation
 !syntax inputs /Reporters/ParsedVectorReporter
 
 !syntax children /Reporters/ParsedVectorReporter
+
+!tag name=ParsedVectorReporter pairs=module:optimization system:reporters

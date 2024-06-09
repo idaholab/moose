@@ -20,3 +20,5 @@ same:
 !syntax inputs /UserObjects/ADBoundaryFlux3EqnGhostWall
 
 !syntax children /UserObjects/ADBoundaryFlux3EqnGhostWall
+
+!tag name=ADBoundaryFlux3EqnGhostWall pairs=module:thermal_hydraulics system:userobjects

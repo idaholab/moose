@@ -19,3 +19,5 @@ parameter.
 !syntax inputs /Functions/CompositeFunction
 
 !syntax children /Functions/CompositeFunction
+
+!tag name=CompositeFunction pairs=module:framework system:functions

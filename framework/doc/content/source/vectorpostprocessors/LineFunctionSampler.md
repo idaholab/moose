@@ -27,3 +27,5 @@ In this example, the `LineFunctionSampler` is used to sample two functions acros
 !syntax inputs /VectorPostprocessors/LineFunctionSampler
 
 !syntax children /VectorPostprocessors/LineFunctionSampler
+
+!tag name=LineFunctionSampler pairs=module:framework system:vectorpostprocessors

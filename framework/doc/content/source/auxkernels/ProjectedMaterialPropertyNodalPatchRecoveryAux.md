@@ -13,3 +13,5 @@ See also [ProjectedStatefulMaterialAux](ProjectedStatefulMaterialAux.md) for the
 !syntax inputs /AuxKernels/ProjectedMaterialPropertyNodalPatchRecoveryAux
 
 !syntax children /AuxKernels/ProjectedMaterialPropertyNodalPatchRecoveryAux
+
+!tag name=ProjectedMaterialPropertyNodalPatchRecoveryAux pairs=module:framework system:auxkernels

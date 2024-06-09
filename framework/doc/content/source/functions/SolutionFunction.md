@@ -23,3 +23,5 @@ computed and stored in `aux_nonlinear_solution_out_0001.xda`, then compare it to
 !syntax inputs /Functions/SolutionFunction
 
 !syntax children /Functions/SolutionFunction
+
+!tag name=SolutionFunction pairs=module:framework system:functions

@@ -165,3 +165,5 @@ For a better understanding of Eigen and using it to its full potential, it is hi
 !syntax inputs /Variables/ArrayMooseVariable
 
 !syntax children /Variables/ArrayMooseVariable
+
+!tag name=ArrayMooseVariable pairs=module:framework system:variables

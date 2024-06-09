@@ -48,3 +48,5 @@ $\rho E A$ are defined:
 !syntax inputs /Materials/FluidProperties3EqnMaterial
 
 !syntax children /Materials/FluidProperties3EqnMaterial
+
+!tag name=FluidProperties3EqnMaterial pairs=module:thermal_hydraulics system:materials

@@ -23,3 +23,5 @@ impinges perpendicular to the surface.
 !syntax inputs /BCs/GaussianEnergyFluxBC
 
 !syntax children /BCs/GaussianEnergyFluxBC
+
+!tag name=GaussianEnergyFluxBC pairs=module:heat_transfer system:bcs

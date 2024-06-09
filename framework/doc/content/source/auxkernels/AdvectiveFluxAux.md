@@ -25,3 +25,5 @@ The expression of the advective flux in this object is generic, as described, an
 !syntax inputs /AuxKernels/AdvectiveFluxAux
 
 !syntax children /AuxKernels/AdvectiveFluxAux
+
+!tag name=AdvectiveFluxAux pairs=module:framework system:auxkernels

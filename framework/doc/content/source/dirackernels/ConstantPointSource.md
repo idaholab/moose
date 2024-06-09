@@ -20,3 +20,5 @@ with those three sources.
 !syntax inputs /DiracKernels/ConstantPointSource
 
 !syntax children /DiracKernels/ConstantPointSource
+
+!tag name=ConstantPointSource pairs=module:framework system:dirackernels

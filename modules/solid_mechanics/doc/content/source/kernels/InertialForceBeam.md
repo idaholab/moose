@@ -11,3 +11,5 @@ This class computes the $i^{th}$ component of the inertial force/torque and mass
 !syntax inputs /Kernels/InertialForceBeam
 
 !syntax children /Kernels/InertialForceBeam
+
+!tag name=InertialForceBeam pairs=module:solid_mechanics system:kernels

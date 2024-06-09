@@ -17,3 +17,5 @@ one object onto another, forming a lattice of lattices.
 !syntax inputs /Positions/DistributedPositions
 
 !syntax children /Positions/DistributedPositions
+
+!tag name=DistributedPositions pairs=module:framework system:positions

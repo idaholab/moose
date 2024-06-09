@@ -9,3 +9,5 @@ This object is deprecated. See [SideDiffusiveFluxAverage](/SideDiffusiveFluxAver
 !syntax inputs /Postprocessors/SideFluxAverage
 
 !syntax children /Postprocessors/SideFluxAverage
+
+!tag name=SideFluxAverage pairs=module:framework system:postprocessors

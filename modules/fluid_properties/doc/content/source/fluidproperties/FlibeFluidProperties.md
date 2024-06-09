@@ -51,3 +51,5 @@ not be used outside this range.
 !syntax inputs /FluidProperties/FlibeFluidProperties
 
 !syntax children /FluidProperties/FlibeFluidProperties
+
+!tag name=FlibeFluidProperties pairs=module:fluid_properties system:fluidproperties

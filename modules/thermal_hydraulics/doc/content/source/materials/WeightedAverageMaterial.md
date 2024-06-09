@@ -15,3 +15,5 @@ $m_i$ are the material properties passed in the [!param](/Materials/WeightedAver
 !syntax inputs /Materials/WeightedAverageMaterial
 
 !syntax children /Materials/WeightedAverageMaterial
+
+!tag name=WeightedAverageMaterial pairs=module:thermal_hydraulics system:materials

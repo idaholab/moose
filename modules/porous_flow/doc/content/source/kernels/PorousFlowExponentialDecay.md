@@ -15,3 +15,5 @@ where $u$ is the variable, and $r$ and $u_{\mathrm{ref}}$ are `AuxVariables` (or
 `!syntax inputs /Kernels/PorousFlowExponentialDecay`
 
 `!syntax children /Kernels/PorousFlowExponentialDecay`
+
+!tag name=PorousFlowExponentialDecay pairs=module:porous_flow system:kernels

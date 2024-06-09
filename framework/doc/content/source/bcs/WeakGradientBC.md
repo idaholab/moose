@@ -24,3 +24,5 @@ that class' documentation for more detailed information.
 !syntax inputs /BCs/WeakGradientBC
 
 !syntax children /BCs/WeakGradientBC
+
+!tag name=WeakGradientBC pairs=module:framework system:bcs

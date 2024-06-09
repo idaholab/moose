@@ -20,3 +20,5 @@ in the back-end.
 !syntax inputs /Times/ReporterTimes
 
 !syntax children /Times/ReporterTimes
+
+!tag name=ReporterTimes pairs=module:framework system:times

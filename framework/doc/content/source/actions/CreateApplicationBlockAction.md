@@ -7,3 +7,5 @@ This action is a placeholder for parsing the Application block. Please do not ad
 More information about the `Application` block can be found on the [Application syntax page](syntax/Application/index.md).
 
 !syntax parameters /Application/CreateApplicationBlockAction
+
+!tag name=CreateApplicationBlockAction pairs=module:framework system:actions

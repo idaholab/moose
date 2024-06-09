@@ -11,3 +11,5 @@ kernel only adds the off-diagonal Jacobian terms for the phase field damage vari
 !syntax inputs /Kernels/PhaseFieldFractureMechanicsOffDiag
 
 !syntax children /Kernels/PhaseFieldFractureMechanicsOffDiag
+
+!tag name=PhaseFieldFractureMechanicsOffDiag pairs=module:solid_mechanics system:kernels

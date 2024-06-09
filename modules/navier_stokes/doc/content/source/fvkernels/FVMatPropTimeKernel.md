@@ -14,3 +14,5 @@ derivative is computed properly.
 !syntax inputs /FVKernels/FVMatPropTimeKernel
 
 !syntax children /FVKernels/FVMatPropTimeKernel
+
+!tag name=FVMatPropTimeKernel pairs=module:navier_stokes system:fvkernels

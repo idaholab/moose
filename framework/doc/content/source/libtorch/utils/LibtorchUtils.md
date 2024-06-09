@@ -12,3 +12,5 @@ and Libtorch tensors.
  start=/**
  end=tensorToVector
  include-end=true
+
+!tag name=LibtorchUtils pairs=module:framework system:libtorch

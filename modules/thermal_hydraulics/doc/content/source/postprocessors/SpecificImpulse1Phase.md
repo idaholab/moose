@@ -37,3 +37,5 @@ is perfect:
 !syntax children /Postprocessors/SpecificImpulse1Phase
 
 !bibtex bibliography
+
+!tag name=SpecificImpulse1Phase pairs=module:thermal_hydraulics system:postprocessors

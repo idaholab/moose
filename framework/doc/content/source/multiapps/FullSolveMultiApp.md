@@ -20,3 +20,5 @@ The following code snippet demonstrates how to create a FullSolveMultiApp object
 !syntax inputs /MultiApps/FullSolveMultiApp
 
 !syntax children /MultiApps/FullSolveMultiApp
+
+!tag name=FullSolveMultiApp pairs=module:framework system:multiapps

@@ -33,3 +33,5 @@ Due to the extra flexibility in azimuthal mesh density, the central elements hav
 !syntax inputs /Mesh/AdvancedConcentricCircleGenerator
 
 !syntax children /Mesh/AdvancedConcentricCircleGenerator
+
+!tag name=AdvancedConcentricCircleGenerator pairs=module:reactor system:meshgenerators

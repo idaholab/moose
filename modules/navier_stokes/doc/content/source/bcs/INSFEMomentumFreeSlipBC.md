@@ -12,3 +12,5 @@ with velocity variables, which is appropriate for incompressible flow.
 !syntax inputs /BCs/INSFEMomentumFreeSlipBC
 
 !syntax children /BCs/INSFEMomentumFreeSlipBC
+
+!tag name=INSFEMomentumFreeSlipBC pairs=module:navier_stokes system:bcs

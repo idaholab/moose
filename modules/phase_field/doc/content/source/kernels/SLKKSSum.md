@@ -27,3 +27,5 @@ initial conditions of full solve simulations.
 !syntax inputs /Kernels/SLKKSSum
 
 !syntax children /Kernels/SLKKSSum
+
+!tag name=SLKKSSum pairs=module:phase_field system:kernels

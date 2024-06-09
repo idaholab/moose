@@ -10,3 +10,5 @@ Please refer to the regular version for additional documentation.
 !syntax inputs /Materials/ADWeightedAverageMaterial
 
 !syntax children /Materials/ADWeightedAverageMaterial
+
+!tag name=ADWeightedAverageMaterial pairs=module:thermal_hydraulics system:materials

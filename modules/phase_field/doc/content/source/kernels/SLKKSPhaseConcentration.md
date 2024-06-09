@@ -20,3 +20,5 @@ $i$ and $h$ is the phase switching function.
 !syntax inputs /Kernels/SLKKSPhaseConcentration
 
 !syntax children /Kernels/SLKKSPhaseConcentration
+
+!tag name=SLKKSPhaseConcentration pairs=module:phase_field system:kernels

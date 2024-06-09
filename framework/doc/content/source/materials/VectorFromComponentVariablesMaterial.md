@@ -22,3 +22,5 @@ be constructed.
 !syntax inputs /Materials/VectorFromComponentVariablesMaterial
 
 !syntax children /Materials/VectorFromComponentVariablesMaterial
+
+!tag name=VectorFromComponentVariablesMaterial pairs=module:framework system:materials

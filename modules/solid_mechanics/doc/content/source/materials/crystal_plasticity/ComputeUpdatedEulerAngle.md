@@ -34,3 +34,5 @@ The MOOSE developer would like to acknowledge contributions from Dr. Alankar Ala
 !syntax inputs /Materials/ComputeUpdatedEulerAngle
 
 !syntax children /Materials/ComputeUpdatedEulerAngle
+
+!tag name=ComputeUpdatedEulerAngle pairs=module:solid_mechanics system:materials

@@ -15,3 +15,5 @@ The `XFEMPhaseTransitionMovingInterfaceVelocity` calculates an interface velocit
 !syntax inputs /UserObjects/XFEMPhaseTransitionMovingInterfaceVelocity
 
 !syntax children /UserObjects/XFEMPhaseTransitionMovingInterfaceVelocity
+
+!tag name=XFEMPhaseTransitionMovingInterfaceVelocity pairs=module:xfem system:userobjects

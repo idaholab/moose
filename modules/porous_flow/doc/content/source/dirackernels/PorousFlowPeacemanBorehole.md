@@ -10,3 +10,5 @@ The function given by [!param](/DiracKernels/PorousFlowPeacemanBorehole/bottom_p
 !syntax inputs /DiracKernels/PorousFlowPeacemanBorehole
 
 !syntax children /DiracKernels/PorousFlowPeacemanBorehole
+
+!tag name=PorousFlowPeacemanBorehole pairs=module:porous_flow system:dirackernels

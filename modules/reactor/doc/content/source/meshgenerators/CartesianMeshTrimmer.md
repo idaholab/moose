@@ -48,3 +48,5 @@ In addition, users can optionally use [!param](/Mesh/CartesianMeshTrimmer/periph
 !syntax inputs /Mesh/CartesianMeshTrimmer
 
 !syntax children /Mesh/CartesianMeshTrimmer
+
+!tag name=CartesianMeshTrimmer pairs=module:reactor system:meshgenerators

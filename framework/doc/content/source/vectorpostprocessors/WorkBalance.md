@@ -26,3 +26,5 @@ For instance, here is a 1600x1600 mesh partitioned to run on 64 nodes, each havi
 !syntax inputs /VectorPostprocessors/WorkBalance
 
 !syntax children /VectorPostprocessors/WorkBalance
+
+!tag name=WorkBalance pairs=module:framework system:vectorpostprocessors

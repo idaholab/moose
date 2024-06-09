@@ -18,3 +18,5 @@ listing test/tests/materials/compliance_sensitivity/2d_mbb.i block=Materials/dc
 !syntax inputs /Materials/ComplianceSensitivity
 
 !syntax children /Materials/ComplianceSensitivity
+
+!tag name=ComplianceSensitivity pairs=module:solid_mechanics system:materials

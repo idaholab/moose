@@ -8,3 +8,5 @@ This effectively allows a class to either inherit from [KernelScalarBase](Kernel
 the non-AD or ADKernelScalarBase for the AD case via the boolean `<is_ad>`.
 
 See [GenericKernel](GenericKernel.md) for a similar description for field variables.
+
+!tag name=GenericKernelScalar pairs=module:framework system:kernels

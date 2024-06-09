@@ -27,3 +27,5 @@ where
 !syntax children /FluidProperties/StiffenedGasTwoPhaseFluidProperties
 
 !bibtex bibliography
+
+!tag name=StiffenedGasTwoPhaseFluidProperties pairs=module:fluid_properties system:fluidproperties

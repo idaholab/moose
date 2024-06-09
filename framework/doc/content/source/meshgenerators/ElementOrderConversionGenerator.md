@@ -42,3 +42,5 @@ The element type conversion maps of different [!param](/Mesh/ElementOrderConvers
 !syntax inputs /Mesh/ElementOrderConversionGenerator
 
 !syntax children /Mesh/ElementOrderConversionGenerator
+
+!tag name=ElementOrderConversionGenerator pairs=module:framework system:meshgenerators

@@ -10,3 +10,5 @@ You will probably want to set execute_on to initial to avoid unnecessary computa
 !syntax inputs /UserObjects/NearestNodeNumberUO
 
 !syntax children /UserObjects/NearestNodeNumberUO
+
+!tag name=NearestNodeNumberUO pairs=module:framework system:userobjects

@@ -20,3 +20,5 @@ Note that `ADVectorRobinBC` computes its Jacobian using automatic differentiatio
 !syntax inputs /BCs/ADVectorRobinBC
 
 !syntax children /BCs/ADVectorRobinBC
+
+!tag name=ADVectorRobinBC pairs=module:framework system:bcs

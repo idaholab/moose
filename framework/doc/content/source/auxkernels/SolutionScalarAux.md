@@ -11,3 +11,5 @@ or *add_factor* parameters.
 !syntax inputs /AuxScalarKernels/SolutionScalarAux
 
 !syntax children /AuxScalarKernels/SolutionScalarAux
+
+!tag name=SolutionScalarAux pairs=module:framework system:auxkernels

@@ -19,3 +19,5 @@ $N_{node}$ is the number of nodes for the element.
 !syntax children /ICs/FunctionNodalAverageIC
 
 !bibtex bibliography
+
+!tag name=FunctionNodalAverageIC pairs=module:thermal_hydraulics system:ics

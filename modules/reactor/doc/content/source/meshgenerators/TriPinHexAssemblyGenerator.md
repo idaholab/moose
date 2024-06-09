@@ -35,3 +35,5 @@ Additionally, users can assign the element extra integers ([reporting IDs](Polyg
 !syntax inputs /Mesh/TriPinHexAssemblyGenerator
 
 !syntax children /Mesh/TriPinHexAssemblyGenerator
+
+!tag name=TriPinHexAssemblyGenerator pairs=module:reactor system:meshgenerators

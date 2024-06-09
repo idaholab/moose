@@ -33,3 +33,5 @@ In this example, we compare variable `u` and `v` using a `ElementVariablesDiffer
 !syntax inputs /VectorPostprocessors/ElementVariablesDifferenceMax
 
 !syntax children /VectorPostprocessors/ElementVariablesDifferenceMax
+
+!tag name=ElementVariablesDifferenceMax pairs=module:framework system:vectorpostprocessors

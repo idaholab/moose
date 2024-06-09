@@ -40,3 +40,5 @@ equation is solved for the solid temperature.
 !syntax children /InterfaceKernels/ConjugateHeatTransfer
 
 !bibtex bibliography
+
+!tag name=ConjugateHeatTransfer pairs=module:heat_transfer system:interfacekernels

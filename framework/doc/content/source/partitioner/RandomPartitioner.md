@@ -19,3 +19,5 @@ For each element, the RandomPartitioner scales a random number on `[0, 1]` to th
 !syntax children /Mesh/Partitioner/RandomPartitioner
 
 !bibtex bibliography
+
+!tag name=RandomPartitioner pairs=module:framework system:partitioner

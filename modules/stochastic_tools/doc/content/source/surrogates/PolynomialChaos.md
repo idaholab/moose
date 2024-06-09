@@ -198,3 +198,5 @@ All this information is ready to be sent to the PolynomialChaos trainer:
 !syntax inputs /Surrogates/PolynomialChaos
 
 !syntax children /Surrogates/PolynomialChaos
+
+!tag name=PolynomialChaos pairs=module:stochastic_tools system:surrogates

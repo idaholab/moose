@@ -80,3 +80,5 @@ parameter values, note that this crystal plasticity class uses the "passive" rot
 !syntax children /Materials/ComputeElasticityTensorCP
 
 !bibtex bibliography
+
+!tag name=ComputeElasticityTensorCP pairs=module:solid_mechanics system:materials

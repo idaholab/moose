@@ -20,3 +20,5 @@ The user provides a power density variable using the parameter
 !syntax inputs /Components/HeatSourceFromPowerDensity
 
 !syntax children /Components/HeatSourceFromPowerDensity
+
+!tag name=HeatSourceFromPowerDensity pairs=module:thermal_hydraulics system:components

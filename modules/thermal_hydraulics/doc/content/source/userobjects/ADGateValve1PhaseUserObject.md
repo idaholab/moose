@@ -13,3 +13,5 @@ the connected flow channels.
 !syntax children /UserObjects/ADGateValve1PhaseUserObject
 
 !bibtex bibliography
+
+!tag name=ADGateValve1PhaseUserObject pairs=module:thermal_hydraulics system:userobjects

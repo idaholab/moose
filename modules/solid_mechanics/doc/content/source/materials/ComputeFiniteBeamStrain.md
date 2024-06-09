@@ -11,3 +11,5 @@ This class computes the rotation matrix that relates the global coordinate syste
 !syntax inputs /Materials/ComputeFiniteBeamStrain
 
 !syntax children /Materials/ComputeFiniteBeamStrain
+
+!tag name=ComputeFiniteBeamStrain pairs=module:solid_mechanics system:materials

@@ -13,3 +13,5 @@ individual components of the vector variable. If not supplied by the user,
 !syntax inputs /Kernels/VectorBodyForce
 
 !syntax children /Kernels/VectorBodyForce
+
+!tag name=VectorBodyForce pairs=module:framework system:kernels

@@ -110,3 +110,5 @@ that performs near-wall treatment. Otherwise, the results obtained won't be phys
 !syntax inputs /FVKernels/INSFVTKEDSourceSink
 
 !syntax children /FVKernels/INSFVTKEDSourceSink
+
+!tag name=INSFVTKEDSourceSink pairs=module:navier_stokes system:fvkernels

@@ -21,3 +21,5 @@ The `output_dimension` parameter allows you to override the default selection fo
 !syntax inputs /Outputs/Exodus
 
 !syntax children /Outputs/Exodus
+
+!tag name=Exodus pairs=module:framework system:outputs

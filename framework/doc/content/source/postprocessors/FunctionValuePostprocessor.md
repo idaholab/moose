@@ -22,3 +22,5 @@ to specify postprocessors passed to the space argument.
 !syntax inputs /Postprocessors/FunctionValuePostprocessor
 
 !syntax children /Postprocessors/FunctionValuePostprocessor
+
+!tag name=FunctionValuePostprocessor pairs=module:framework system:postprocessors

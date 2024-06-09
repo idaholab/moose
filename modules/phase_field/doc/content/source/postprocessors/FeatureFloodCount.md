@@ -49,3 +49,5 @@ Several pieces of information are recorded on each processor including all of th
 !syntax inputs /Postprocessors/FeatureFloodCount
 
 !syntax children /Postprocessors/FeatureFloodCount
+
+!tag name=FeatureFloodCount pairs=module:phase_field system:postprocessors

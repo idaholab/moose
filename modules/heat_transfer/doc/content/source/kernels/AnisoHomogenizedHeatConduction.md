@@ -36,3 +36,5 @@ See [!cite](hales15homogenization) and [!cite](SONG2006710) for more details.
 !syntax children /Kernels/AnisoHomogenizedHeatConduction
 
 !bibtex bibliography
+
+!tag name=AnisoHomogenizedHeatConduction pairs=module:heat_transfer system:kernels

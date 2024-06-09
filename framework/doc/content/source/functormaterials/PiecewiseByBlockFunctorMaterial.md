@@ -23,3 +23,5 @@ AD functors must be specified as the values on each block.
 !syntax inputs /FunctorMaterials/PiecewiseByBlockFunctorMaterial
 
 !syntax children /FunctorMaterials/PiecewiseByBlockFunctorMaterial
+
+!tag name=PiecewiseByBlockFunctorMaterial pairs=module:framework system:functormaterials

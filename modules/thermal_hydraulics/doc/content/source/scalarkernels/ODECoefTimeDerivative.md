@@ -10,3 +10,5 @@ To use a different time integrating scheme, the `ODECoefTimeDerivative` scalar k
 !syntax inputs /ScalarKernels/ODECoefTimeDerivative
 
 !syntax children /ScalarKernels/ODECoefTimeDerivative
+
+!tag name=ODECoefTimeDerivative pairs=module:thermal_hydraulics system:scalarkernels

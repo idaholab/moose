@@ -41,3 +41,5 @@ where
 !syntax inputs /BCs/VectorTransientAbsorbingBC
 
 !syntax children /BCs/VectorTransientAbsorbingBC
+
+!tag name=VectorTransientAbsorbingBC pairs=module:electromagnetics system:bcs

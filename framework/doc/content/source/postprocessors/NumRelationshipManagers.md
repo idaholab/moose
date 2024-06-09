@@ -17,3 +17,5 @@ is 'all'.
 !syntax children /Postprocessors/NumRelationshipManagers
 
 !bibtex bibliography
+
+!tag name=NumRelationshipManagers pairs=module:framework system:postprocessors

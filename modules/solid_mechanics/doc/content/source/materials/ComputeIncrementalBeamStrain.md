@@ -11,3 +11,5 @@ This class computes the small (and finite) displacement and rotational strain in
 !syntax inputs /Materials/ComputeIncrementalBeamStrain
 
 !syntax children /Materials/ComputeIncrementalBeamStrain
+
+!tag name=ComputeIncrementalBeamStrain pairs=module:solid_mechanics system:materials

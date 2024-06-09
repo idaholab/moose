@@ -12,3 +12,5 @@ each sub-block of the `[ControlLogic]` block of an input file, then adds them to
 !syntax inputs /ControlLogic/THMAddControlAction
 
 !syntax children /ControlLogic/THMAddControlAction
+
+!tag name=THMAddControlAction pairs=module:thermal_hydraulics system:actions

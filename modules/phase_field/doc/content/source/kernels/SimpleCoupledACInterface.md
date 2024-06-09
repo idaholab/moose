@@ -19,3 +19,5 @@ For the more common case where $\eta$ is the variable the kernel is acting on se
 !syntax children /Kernels/SimpleCoupledACInterface
 
 !bibtex bibliography
+
+!tag name=SimpleCoupledACInterface pairs=module:phase_field system:kernels

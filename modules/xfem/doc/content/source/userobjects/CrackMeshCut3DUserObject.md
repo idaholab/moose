@@ -15,3 +15,5 @@ This class: (1) reads in a mesh describing the crack surface, (2) uses the mesh 
 !syntax inputs /UserObjects/CrackMeshCut3DUserObject
 
 !syntax children /UserObjects/CrackMeshCut3DUserObject
+
+!tag name=CrackMeshCut3DUserObject pairs=module:xfem system:userobjects

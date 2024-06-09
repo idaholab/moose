@@ -29,3 +29,5 @@ For example, the following code creates a "bubble" in the lower left corner in a
 !syntax children /Functions/LevelSetOlssonBubble
 
 !bibtex bibliography
+
+!tag name=LevelSetOlssonBubble pairs=module:level_set system:functions

@@ -47,3 +47,5 @@ For `block_pair` option, only the nodes that are shared by specific block pairs 
 !syntax children /Mesh/BreakMeshByBlockGenerator
 
 !bibtex bibliography
+
+!tag name=BreakMeshByBlockGenerator pairs=module:framework system:meshgenerators

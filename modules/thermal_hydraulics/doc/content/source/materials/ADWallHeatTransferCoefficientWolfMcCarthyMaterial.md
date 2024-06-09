@@ -15,3 +15,5 @@ The Nusselt number is calculated as:
 !syntax inputs /Materials/ADWallHeatTransferCoefficientWolfMcCarthyMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficientWolfMcCarthyMaterial
+
+!tag name=ADWallHeatTransferCoefficientWolfMcCarthyMaterial pairs=module:thermal_hydraulics system:materials

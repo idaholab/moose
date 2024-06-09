@@ -32,3 +32,5 @@ block for a transient diffusion problem that demonstrates the
 !syntax inputs /Kernels/ADTimeDerivative
 
 !syntax children /Kernels/ADTimeDerivative
+
+!tag name=ADTimeDerivative pairs=module:framework system:kernels

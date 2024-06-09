@@ -25,3 +25,5 @@ To use this Material, it is necessary to include a [PorousFlowHysteresisOrder](P
 !syntax inputs /Materials/PorousFlowHystereticRelativePermeabilityLiquid
 
 !syntax children /Materials/PorousFlowHystereticRelativePermeabilityLiquid
+
+!tag name=PorousFlowHystereticRelativePermeabilityLiquid pairs=module:porous_flow system:materials

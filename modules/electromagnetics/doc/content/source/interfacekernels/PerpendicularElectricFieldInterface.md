@@ -30,3 +30,5 @@ where
 !syntax inputs /InterfaceKernels/PerpendicularElectricFieldInterface
 
 !syntax children /InterfaceKernels/PerpendicularElectricFieldInterface
+
+!tag name=PerpendicularElectricFieldInterface pairs=module:electromagnetics system:interfacekernels

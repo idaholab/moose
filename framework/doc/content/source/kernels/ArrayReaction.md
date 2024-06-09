@@ -34,3 +34,5 @@ The underlined part is the local Jacobian evaluated by [ArrayReaction::computeQp
 !syntax inputs /Kernels/ArrayReaction
 
 !syntax children /Kernels/ArrayReaction
+
+!tag name=ArrayReaction pairs=module:framework system:kernels

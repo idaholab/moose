@@ -11,3 +11,5 @@ Component that shows how to build a junction-like component connected to a shaft
 !syntax children /Components/ShaftConnectedTestComponent
 
 !bibtex bibliography
+
+!tag name=ShaftConnectedTestComponent pairs=module:test system:components

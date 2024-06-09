@@ -22,3 +22,5 @@ the [Finite Strain Class](ComputeFiniteStrain.md) page.
 !syntax inputs /Materials/ComputeAxisymmetricRZFiniteStrain
 
 !syntax children /Materials/ComputeAxisymmetricRZFiniteStrain
+
+!tag name=ComputeAxisymmetricRZFiniteStrain pairs=module:solid_mechanics system:materials

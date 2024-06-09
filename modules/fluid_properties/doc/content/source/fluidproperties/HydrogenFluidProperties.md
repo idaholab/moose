@@ -37,3 +37,5 @@ The HydrogenFluidProperties UserObject is valid for:
 !syntax children /FluidProperties/HydrogenFluidProperties
 
 !bibtex bibliography
+
+!tag name=HydrogenFluidProperties pairs=module:fluid_properties system:fluidproperties

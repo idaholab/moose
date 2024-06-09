@@ -25,3 +25,5 @@ where $p$ is the polynomial order of the shape functions; $h_\bot$ is the length
 !syntax inputs /DGKernels/ArrayDGDiffusion
 
 !syntax children /DGKernels/ArrayDGDiffusion
+
+!tag name=ArrayDGDiffusion pairs=module:framework system:dgkernels

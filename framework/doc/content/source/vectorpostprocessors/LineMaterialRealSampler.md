@@ -31,3 +31,5 @@ this line.
 !syntax inputs /VectorPostprocessors/LineMaterialRealSampler
 
 !syntax children /VectorPostprocessors/LineMaterialRealSampler
+
+!tag name=LineMaterialRealSampler pairs=module:framework system:vectorpostprocessors

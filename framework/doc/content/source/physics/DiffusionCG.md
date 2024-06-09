@@ -51,3 +51,5 @@ obeyed if the AD/non-AD object exists for the requested diffusivity / source / b
 !syntax inputs /Physics/Diffusion/ContinuousGalerkin/DiffusionCG
 
 !syntax children /Physics/Diffusion/ContinuousGalerkin/DiffusionCG
+
+!tag name=DiffusionCG pairs=module:framework system:physics

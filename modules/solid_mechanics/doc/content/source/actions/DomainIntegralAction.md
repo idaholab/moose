@@ -32,3 +32,5 @@ Details on the theory behind the computation of the various fracture integrals a
 | [DomainIntegralTopologicalQFunction](DomainIntegralTopologicalQFunction.md) | AuxKernel | Optionally populates AuxVariables with values of the topology-based q function when `output_q=true` |
 
 !syntax parameters /DomainIntegral/DomainIntegralAction
+
+!tag name=DomainIntegralAction pairs=module:solid_mechanics system:actions

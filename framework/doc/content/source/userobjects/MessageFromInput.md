@@ -15,3 +15,5 @@ This user object provides an option to print a message to the screen during the 
 !syntax inputs /UserObjects/MessageFromInput
 
 !syntax children /UserObjects/MessageFromInput
+
+!tag name=MessageFromInput pairs=module:framework system:userobjects

@@ -9,3 +9,4 @@ ComputeGBMisorientationType uses an EBSDReader object and a Grain Tracker object
 !syntax parameters /Materials/ComputeGBMisorientationType
 
 !syntax inputs /Materials/ComputeGBMisorientationType
+!tag name=ComputeGBMisorientationType pairs=module:phase_field system:materials

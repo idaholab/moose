@@ -9,3 +9,5 @@ momentum boundary flux, e.g. the sum of advective and viscous fluxes, to zero.
 !syntax inputs /FVBCs/INSFVNaturalFreeSlipBC
 
 !syntax children /FVBCs/INSFVNaturalFreeSlipBC
+
+!tag name=INSFVNaturalFreeSlipBC pairs=module:navier_stokes system:fvbcs

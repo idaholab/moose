@@ -11,3 +11,5 @@ will cause an error.
 !syntax inputs /Components/InletStagnationEnthalpyMomentum1Phase
 
 !syntax children /Components/InletStagnationEnthalpyMomentum1Phase
+
+!tag name=InletStagnationEnthalpyMomentum1Phase pairs=module:thermal_hydraulics system:components

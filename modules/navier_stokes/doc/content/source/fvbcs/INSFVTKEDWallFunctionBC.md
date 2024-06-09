@@ -10,3 +10,5 @@ A linear blending functions is used to interpolate between both layers.
 !syntax inputs /FVBCs/INSFVTKEDWallFunctionBC
 
 !syntax children /FVBCs/INSFVTKEDWallFunctionBC
+
+!tag name=INSFVTKEDWallFunctionBC pairs=module:navier_stokes system:fvbcs

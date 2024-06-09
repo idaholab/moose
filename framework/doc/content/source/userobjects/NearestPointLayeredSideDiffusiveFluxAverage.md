@@ -14,3 +14,5 @@ individual subdivision separately.
 !syntax children /UserObjects/NearestPointLayeredSideDiffusiveFluxAverage
 
 !bibtex bibliography
+
+!tag name=NearestPointLayeredSideDiffusiveFluxAverage pairs=module:framework system:userobjects

@@ -70,3 +70,5 @@ Similarly, all stateful material properties will be re-initialized when an eleme
 !syntax inputs /UserObjects/CoupledVarThresholdElementSubdomainModifier
 
 !syntax children /UserObjects/CoupledVarThresholdElementSubdomainModifier
+
+!tag name=CoupledVarThresholdElementSubdomainModifier pairs=module:framework system:userobjects

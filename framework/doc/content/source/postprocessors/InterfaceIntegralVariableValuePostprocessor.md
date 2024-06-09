@@ -19,3 +19,5 @@ listing test/tests/postprocessors/interface_value/interface_integral_variable_va
 !syntax inputs /Postprocessors/InterfaceIntegralVariableValuePostprocessor
 
 !syntax children /Postprocessors/InterfaceIntegralVariableValuePostprocessor
+
+!tag name=InterfaceIntegralVariableValuePostprocessor pairs=module:framework system:postprocessors

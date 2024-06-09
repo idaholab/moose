@@ -48,3 +48,5 @@ where $A_k$ is the area of the heat structure boundary $k$.
 !syntax inputs /Components/HeatStructure2DCoupler
 
 !syntax children /Components/HeatStructure2DCoupler
+
+!tag name=HeatStructure2DCoupler pairs=module:thermal_hydraulics system:components

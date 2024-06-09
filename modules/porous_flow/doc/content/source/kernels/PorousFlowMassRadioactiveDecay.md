@@ -13,3 +13,5 @@ where all parameters are defined in the [nomenclature](/nomenclature.md).
 !syntax inputs /Kernels/PorousFlowMassRadioactiveDecay
 
 !syntax children /Kernels/PorousFlowMassRadioactiveDecay
+
+!tag name=PorousFlowMassRadioactiveDecay pairs=module:porous_flow system:kernels

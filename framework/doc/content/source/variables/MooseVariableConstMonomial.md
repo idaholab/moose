@@ -12,3 +12,5 @@ A detailed description of the MOOSE variable system is given in the [base class 
 !syntax inputs /Variables/MooseVariableConstMonomial
 
 !syntax children /Variables/MooseVariableConstMonomial
+
+!tag name=MooseVariableConstMonomial pairs=module:framework system:variables

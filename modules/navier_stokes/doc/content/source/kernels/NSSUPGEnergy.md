@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSSUPGEnergy
 
 !syntax children /Kernels/NSSUPGEnergy
+
+!tag name=NSSUPGEnergy pairs=module:navier_stokes system:kernels

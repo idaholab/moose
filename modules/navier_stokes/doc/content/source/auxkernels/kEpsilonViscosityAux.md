@@ -32,3 +32,5 @@ with large computational cells.
 !syntax inputs /AuxKernels/kEpsilonViscosityAux
 
 !syntax children /AuxKernels/kEpsilonViscosityAux
+
+!tag name=kEpsilonViscosityAux pairs=module:navier_stokes system:auxkernels

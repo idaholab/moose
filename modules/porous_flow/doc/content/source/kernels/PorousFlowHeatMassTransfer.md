@@ -13,3 +13,5 @@ where $u$ and $v$ are `Variables` such as pressure, temperature or mass fraction
 !syntax inputs /Kernels/PorousFlowHeatMassTransfer
 
 !syntax children /Kernels/PorousFlowHeatMassTransfer
+
+!tag name=PorousFlowHeatMassTransfer pairs=module:porous_flow system:kernels

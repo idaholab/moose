@@ -15,3 +15,5 @@ Some examples may be found in [the test descriptions](porous_flow/tests/plastic_
 !syntax inputs /Kernels/PorousFlowPlasticHeatEnergy
 
 !syntax children /Kernels/PorousFlowPlasticHeatEnergy
+
+!tag name=PorousFlowPlasticHeatEnergy pairs=module:porous_flow system:kernels

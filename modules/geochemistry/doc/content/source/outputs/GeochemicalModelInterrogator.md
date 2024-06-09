@@ -24,3 +24,5 @@ An example of outputting pH and pe (`interrogation = activity`) at equilibrium i
 !syntax inputs /Outputs/GeochemicalModelInterrogator
 
 !syntax children /Outputs/GeochemicalModelInterrogator
+
+!tag name=GeochemicalModelInterrogator pairs=module:geochemistry system:outputs

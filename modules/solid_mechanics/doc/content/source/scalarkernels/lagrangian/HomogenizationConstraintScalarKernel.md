@@ -31,3 +31,5 @@ apply.
 !syntax inputs /ScalarKernels/HomogenizationConstraintScalarKernel
 
 !syntax children /ScalarKernels/HomogenizationConstraintScalarKernel
+
+!tag name=HomogenizationConstraintScalarKernel pairs=module:solid_mechanics system:scalarkernels

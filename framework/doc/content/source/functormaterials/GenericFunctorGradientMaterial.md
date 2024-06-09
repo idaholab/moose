@@ -26,3 +26,5 @@ flux. This flux is computed at the element centroids, not one the element faces.
 !syntax inputs /FunctorMaterials/GenericFunctorGradientMaterial
 
 !syntax children /FunctorMaterials/GenericFunctorGradientMaterial
+
+!tag name=GenericFunctorGradientMaterial pairs=module:framework system:functormaterials

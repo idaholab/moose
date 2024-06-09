@@ -12,3 +12,5 @@ and performs a volume integral over a cylindrical heat structure.
 !syntax children /Postprocessors/HeatStructureEnergyRZ
 
 !bibtex bibliography
+
+!tag name=HeatStructureEnergyRZ pairs=module:thermal_hydraulics system:postprocessors

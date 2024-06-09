@@ -20,3 +20,5 @@ $E$ is the elastic energy, $\boldsymbol{\epsilon}$ is the strain. The first term
 !syntax inputs /Kernels/AllenCahnElasticEnergyOffDiag
 
 !syntax children /Kernels/AllenCahnElasticEnergyOffDiag
+
+!tag name=AllenCahnElasticEnergyOffDiag pairs=module:phase_field system:kernels

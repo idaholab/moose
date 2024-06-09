@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSImposedVelocityDirectionBC
 
 !syntax children /BCs/NSImposedVelocityDirectionBC
+
+!tag name=NSImposedVelocityDirectionBC pairs=module:navier_stokes system:bcs

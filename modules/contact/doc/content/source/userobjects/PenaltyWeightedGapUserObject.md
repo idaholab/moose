@@ -62,3 +62,5 @@ mechanical contact problem. This solver selection can enable the simulation of v
 !syntax inputs /UserObjects/PenaltyWeightedGapUserObject
 
 !syntax children /UserObjects/PenaltyWeightedGapUserObject
+
+!tag name=PenaltyWeightedGapUserObject pairs=module:contact system:userobjects

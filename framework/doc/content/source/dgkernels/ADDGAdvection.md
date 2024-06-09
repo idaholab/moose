@@ -29,3 +29,5 @@ and bottom boundaries of the domain.
 !syntax inputs /DGKernels/ADDGAdvection
 
 !syntax children /DGKernels/ADDGAdvection
+
+!tag name=ADDGAdvection pairs=module:framework system:dgkernels

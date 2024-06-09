@@ -13,3 +13,5 @@ each individual subdomain separately.
 !syntax children /VectorPostprocessors/NearestPointIntegralVariablePostprocessor
 
 !bibtex bibliography
+
+!tag name=NearestPointIntegralVariablePostprocessor pairs=module:framework system:userobjects

@@ -9,3 +9,5 @@ creates a console output for the printing performed by the interrogator.
 !syntax parameters /FluidPropertiesInterrogator/AddFluidPropertiesInterrogatorAction
 
 !bibtex bibliography
+
+!tag name=AddFluidPropertiesInterrogatorAction pairs=module:fluid_properties system:actions

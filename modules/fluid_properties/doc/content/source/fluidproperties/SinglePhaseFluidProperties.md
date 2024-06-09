@@ -111,3 +111,5 @@ fluid property. For example, this routine converts (pressure, temperature) to (s
 to compute entropy.
 
 !listing modules/fluid_properties/src/fluidproperties/SinglePhaseFluidProperties.C start=SinglePhaseFluidProperties::s_from_p_T end=} include-end=true
+
+!tag name=SinglePhaseFluidProperties pairs=module:fluid_properties system:fluidproperties

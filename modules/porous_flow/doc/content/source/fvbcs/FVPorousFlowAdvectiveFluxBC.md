@@ -13,3 +13,5 @@ on the boundary where all parameters are defined in the [nomenclature](/nomencla
 !syntax inputs /FVBCs/FVPorousFlowAdvectiveFluxBC
 
 !syntax children /FVBCs/FVPorousFlowAdvectiveFluxBC
+
+!tag name=FVPorousFlowAdvectiveFluxBC pairs=module:porous_flow system:fvbcs

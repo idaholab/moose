@@ -17,3 +17,5 @@ the velocity in RZ coordinates.
 !syntax inputs /FVKernels/PINSFVMomentumAdvection
 
 !syntax children /FVKernels/PINSFVMomentumAdvection
+
+!tag name=PINSFVMomentumAdvection pairs=module:navier_stokes system:fvkernels

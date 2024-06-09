@@ -14,3 +14,5 @@ other ambient surrounding heat source/sink.
 !syntax inputs /Kernels/INSADEnergyAmbientConvection
 
 !syntax children /Kernels/INSADEnergyAmbientConvection
+
+!tag name=INSADEnergyAmbientConvection pairs=module:navier_stokes system:kernels

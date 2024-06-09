@@ -30,3 +30,5 @@ for each Rank-2 tensor component.
 !syntax inputs /Materials/RankTwoCartesianComponent
 
 !syntax children /Materials/RankTwoCartesianComponent
+
+!tag name=RankTwoCartesianComponent pairs=module:solid_mechanics system:materials

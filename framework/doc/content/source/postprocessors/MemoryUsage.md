@@ -47,3 +47,5 @@ current process.
 !syntax inputs /Postprocessors/MemoryUsage
 
 !syntax children /Postprocessors/MemoryUsage
+
+!tag name=MemoryUsage pairs=module:framework system:postprocessors

@@ -22,3 +22,5 @@ melting experiment below [!cite](gau1986melting)
 !syntax inputs /FVKernels/NSFVPhaseChangeSource
 
 !syntax children /FVKernels/NSFVPhaseChangeSource
+
+!tag name=NSFVPhaseChangeSource pairs=module:navier_stokes system:fvkernels

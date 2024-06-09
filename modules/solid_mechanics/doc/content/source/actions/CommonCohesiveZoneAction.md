@@ -10,3 +10,5 @@ It performs the same action for the deprecated `[Modules/TensorMechanics/Cohesiv
 !syntax description /Physics/SolidMechanics/CohesiveZone/CommonCohesiveZoneAction
 
 !syntax parameters /Physics/SolidMechanics/CohesiveZone/CommonCohesiveZoneAction
+
+!tag name=CommonCohesiveZoneAction pairs=module:solid_mechanics system:actions

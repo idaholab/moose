@@ -20,3 +20,5 @@ vector drawn from the cell centroid to the boundary face centroid.
 !syntax inputs /FVBCs/FVOrthogonalBoundaryDiffusion
 
 !syntax children /FVBCs/FVOrthogonalBoundaryDiffusion
+
+!tag name=FVOrthogonalBoundaryDiffusion pairs=module:framework system:fvbcs

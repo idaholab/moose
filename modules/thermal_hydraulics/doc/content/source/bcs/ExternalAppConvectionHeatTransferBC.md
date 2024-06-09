@@ -23,3 +23,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /BCs/ExternalAppConvectionHeatTransferBC
 
 !syntax children /BCs/ExternalAppConvectionHeatTransferBC
+
+!tag name=ExternalAppConvectionHeatTransferBC pairs=module:thermal_hydraulics system:bcs

@@ -11,3 +11,5 @@ refinement of curved geometries.
 !syntax inputs /UserObjects/GeometrySphere
 
 !syntax children /UserObjects/GeometrySphere
+
+!tag name=GeometrySphere pairs=module:framework system:userobjects

@@ -21,3 +21,5 @@ of variables and functions during a time dependent diffusion problem.
 !syntax inputs /AuxKernels/TimeDerivativeAux
 
 !syntax children /AuxKernels/TimeDerivativeAux
+
+!tag name=TimeDerivativeAux pairs=module:framework system:auxkernels

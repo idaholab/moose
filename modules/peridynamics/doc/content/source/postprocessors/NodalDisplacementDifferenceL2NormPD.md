@@ -14,3 +14,5 @@ where $V_{\mathbf{X}}$ is the area or volume of material point $\mathbf{X}$, and
 !syntax inputs /Postprocessors/NodalDisplacementDifferenceL2NormPD
 
 !syntax children /Postprocessors/NodalDisplacementDifferenceL2NormPD
+
+!tag name=NodalDisplacementDifferenceL2NormPD pairs=module:peridynamics system:postprocessors

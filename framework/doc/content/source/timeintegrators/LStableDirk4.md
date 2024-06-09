@@ -38,3 +38,5 @@ but its coefficients have less favorable "amplification factors" than the presen
 !syntax inputs /Executioner/TimeIntegrator/LStableDirk4
 
 !syntax children /Executioner/TimeIntegrator/LStableDirk4
+
+!tag name=LStableDirk4 pairs=module:framework system:timeintegrators

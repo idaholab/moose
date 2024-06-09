@@ -33,3 +33,5 @@ Again we can use PJFNK (preconditioned Jacobian-free Newton Krylov) method to so
 !syntax inputs /Executioner/NonlinearEigen
 
 !syntax children /Executioner/NonlinearEigen
+
+!tag name=NonlinearEigen pairs=module:framework system:executioners

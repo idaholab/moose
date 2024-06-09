@@ -29,3 +29,4 @@ the `vectorValue` and `curl` methods, e.g. [MooseParsedVectorFunction.md].
 !syntax inputs /Postprocessors/ElementHCurlSemiError
 
 !syntax children /Postprocessors/ElementHCurlSemiError
+!tag name=ElementHCurlSemiError pairs=module:framework system:postprocessors

@@ -51,3 +51,5 @@ convergence in the non-linear solve.
 !syntax inputs /Constraints/ComputeWeightedGapLMMechanicalContact
 
 !syntax children /Constraints/ComputeWeightedGapLMMechanicalContact
+
+!tag name=ComputeWeightedGapLMMechanicalContact pairs=module:contact system:constraints

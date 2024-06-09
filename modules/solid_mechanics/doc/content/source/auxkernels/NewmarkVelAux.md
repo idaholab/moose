@@ -17,3 +17,5 @@ Here, $\gamma$ is the Newmark time integration parameter and $\Delta t$ is the t
 !syntax inputs /AuxKernels/NewmarkVelAux
 
 !syntax children /AuxKernels/NewmarkVelAux
+
+!tag name=NewmarkVelAux pairs=module:solid_mechanics system:auxkernels

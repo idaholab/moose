@@ -19,3 +19,5 @@ where $\nu \in \mathbb{Z} > 0$. $\Beta(a,b)$ is the beta function and $I_z(a,b)$
 !syntax inputs /Distributions/StudentT
 
 !syntax children /Distributions/StudentT
+
+!tag name=StudentT pairs=module:stochastic_tools system:distributions

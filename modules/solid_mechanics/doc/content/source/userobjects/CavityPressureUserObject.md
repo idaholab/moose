@@ -33,3 +33,5 @@ where $N$ is the number of additional volumes.
 !syntax inputs /UserObjects/CavityPressureUserObject
 
 !syntax children /UserObjects/CavityPressureUserObject
+
+!tag name=CavityPressureUserObject pairs=module:solid_mechanics system:userobjects

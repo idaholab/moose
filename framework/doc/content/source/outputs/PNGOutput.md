@@ -19,3 +19,5 @@ Following is an example of all the different input variables that can be used.
   []
 []
 ```
+
+!tag name=PNGOutput pairs=module:framework system:outputs

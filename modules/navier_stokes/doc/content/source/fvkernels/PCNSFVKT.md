@@ -69,3 +69,5 @@ Interpolation of $\bm{\Psi}_{f\pm}$ is described in [Limiters/index.md].
 !syntax children /FVKernels/PCNSFVKT
 
 !bibtex bibliography
+
+!tag name=PCNSFVKT pairs=module:navier_stokes system:fvkernels

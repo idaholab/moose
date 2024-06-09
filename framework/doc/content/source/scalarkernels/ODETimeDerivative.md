@@ -23,3 +23,5 @@ The time derivative terms are added for each variable using two `ODETimeDerivati
 !syntax inputs /ScalarKernels/ODETimeDerivative
 
 !syntax children /ScalarKernels/ODETimeDerivative
+
+!tag name=ODETimeDerivative pairs=module:framework system:scalarkernels

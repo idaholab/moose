@@ -41,3 +41,5 @@ heat transfer module test `transient_jouleheating.i`.
 !syntax inputs /Materials/ElectricalConductivity
 
 !syntax children /Materials/ElectricalConductivity
+
+!tag name=ElectricalConductivity pairs=module:heat_transfer system:materials

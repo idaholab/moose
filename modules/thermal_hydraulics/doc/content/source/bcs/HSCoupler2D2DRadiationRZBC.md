@@ -9,3 +9,5 @@ in a [HSCoupler2D2DRadiation.md], where the heat fluxes are computed using
 !syntax inputs /BCs/HSCoupler2D2DRadiationRZBC
 
 !syntax children /BCs/HSCoupler2D2DRadiationRZBC
+
+!tag name=HSCoupler2D2DRadiationRZBC pairs=module:thermal_hydraulics system:bcs

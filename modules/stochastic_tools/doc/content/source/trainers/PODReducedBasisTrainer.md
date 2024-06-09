@@ -306,3 +306,5 @@ end it will create the reduced operators.
 !syntax inputs /Trainers/PODReducedBasisTrainer
 
 !syntax children /Trainers/PODReducedBasisTrainer
+
+!tag name=PODReducedBasisTrainer pairs=module:stochastic_tools system:trainers

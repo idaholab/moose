@@ -37,3 +37,5 @@ The determination of crack nucleation is based on the average value of the scala
 !syntax inputs /UserObjects/MeshCut2DRankTwoTensorNucleation
 
 !syntax children /UserObjects/MeshCut2DRankTwoTensorNucleation
+
+!tag name=MeshCut2DRankTwoTensorNucleation pairs=module:xfem system:userobjects

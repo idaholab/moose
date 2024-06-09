@@ -14,3 +14,5 @@ where $\phi$ is porosity.
 !syntax inputs /Kernels/PrimaryTimeDerivative
 
 !syntax children /Kernels/PrimaryTimeDerivative
+
+!tag name=PrimaryTimeDerivative pairs=module:chemical_reactions system:kernels

@@ -27,3 +27,5 @@ The following code snippet demonstrates the creation of a `QuadraturePointMultiA
 !syntax inputs /MultiApps/QuadraturePointMultiApp
 
 !syntax children /MultiApps/QuadraturePointMultiApp
+
+!tag name=QuadraturePointMultiApp pairs=module:framework system:multiapps

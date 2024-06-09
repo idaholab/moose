@@ -25,3 +25,5 @@ where
 !syntax inputs /Kernels/CurlCurlField
 
 !syntax children /Kernels/CurlCurlField
+
+!tag name=CurlCurlField pairs=module:electromagnetics system:kernels

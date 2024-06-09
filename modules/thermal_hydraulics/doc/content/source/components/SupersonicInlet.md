@@ -10,3 +10,5 @@ This component is deprecated and was not replaced. Do not use it.
 !syntax inputs /Components/SupersonicInlet
 
 !syntax children /Components/SupersonicInlet
+
+!tag name=SupersonicInlet pairs=module:thermal_hydraulics system:components

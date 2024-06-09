@@ -13,3 +13,5 @@ Different current values for components can be assigned.
 !syntax inputs /BCs/ArrayNeumannBC
 
 !syntax children /BCs/ArrayNeumannBC
+
+!tag name=ArrayNeumannBC pairs=module:framework system:bcs

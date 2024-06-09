@@ -71,3 +71,5 @@ Again, the same capability can be achieved with the `positions_file` option.
 !syntax inputs /Mesh/CombinerGenerator
 
 !syntax children /Mesh/CombinerGenerator
+
+!tag name=CombinerGenerator pairs=module:framework system:meshgenerators

@@ -7,3 +7,4 @@ but that contain some similar geometric relationship. For example, a "Layered" c
 within a cylindrical object to the surrounding "outside", which may be a different shape or might just be represented by a 1D line.
 
 The LayeredBase object derives from [Restartable.md] so it maintains stateful data across time steps.
+!tag name=LayeredBase pairs=module:framework system:userobjects

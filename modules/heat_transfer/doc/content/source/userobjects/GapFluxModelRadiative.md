@@ -20,3 +20,5 @@ is recommended for use instead.
 !syntax children /UserObjects/GapFluxModelRadiative
 
 !bibtex bibliography
+
+!tag name=GapFluxModelRadiative pairs=module:heat_transfer system:userobjects

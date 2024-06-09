@@ -14,3 +14,5 @@ objects deriving from `TwoPhaseFluidProperties` and the $\rho(p,T)$ function is 
 !syntax inputs /Functions/SaturationDensityFunction
 
 !syntax children /Functions/SaturationDensityFunction
+
+!tag name=SaturationDensityFunction pairs=module:fluid_properties system:functions

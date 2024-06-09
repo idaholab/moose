@@ -18,3 +18,5 @@ of the `INSADObjectTracker`.
 !syntax inputs /UserObjects/INSADObjectTracker
 
 !syntax children /UserObjects/INSADObjectTracker
+
+!tag name=INSADObjectTracker pairs=module:navier_stokes system:userobjects

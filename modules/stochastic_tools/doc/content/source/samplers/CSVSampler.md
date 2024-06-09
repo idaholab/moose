@@ -36,3 +36,5 @@ The samples file used in the above examples, `samples.csv`, is listed below.
 !syntax inputs /Samplers/CSVSampler
 
 !syntax children /Samplers/CSVSampler
+
+!tag name=CSVSampler pairs=module:stochastic_tools system:samplers

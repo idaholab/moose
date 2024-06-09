@@ -25,3 +25,5 @@ F(x) = \frac{1}{1+z(x)}
 !syntax children /Distributions/Logistic
 
 !bibtex bibliography
+
+!tag name=Logistic pairs=module:stochastic_tools system:distributions

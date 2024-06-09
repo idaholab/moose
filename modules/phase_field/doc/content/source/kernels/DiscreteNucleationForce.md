@@ -26,3 +26,5 @@ AuxKernel is [DiscreteNucleationAux](/DiscreteNucleationAux.md).
 !syntax inputs /Kernels/DiscreteNucleationForce
 
 !syntax children /Kernels/DiscreteNucleationForce
+
+!tag name=DiscreteNucleationForce pairs=module:phase_field system:kernels

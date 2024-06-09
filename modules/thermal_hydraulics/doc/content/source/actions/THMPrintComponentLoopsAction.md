@@ -12,3 +12,5 @@ The component loops are printed from the [THMProblem.md].
 !syntax inputs /Debug/THMPrintComponentLoopsAction
 
 !syntax children /Debug/THMPrintComponentLoopsAction
+
+!tag name=THMPrintComponentLoopsAction pairs=module:thermal_hydraulics system:actions

@@ -16,3 +16,5 @@ code snippet demonstrates how this switching of kernels is achieved with the `Ti
 !syntax inputs /Controls/TimePeriod
 
 !syntax children /Controls/TimePeriod
+
+!tag name=TimePeriod pairs=module:framework system:controls

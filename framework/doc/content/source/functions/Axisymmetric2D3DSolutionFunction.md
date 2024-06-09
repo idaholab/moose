@@ -21,3 +21,5 @@ block to impose a displacement on a boundary, and in a temperature variable usin
 !syntax inputs /Functions/Axisymmetric2D3DSolutionFunction
 
 !syntax children /Functions/Axisymmetric2D3DSolutionFunction
+
+!tag name=Axisymmetric2D3DSolutionFunction pairs=module:framework system:functions

@@ -28,3 +28,5 @@ Jacobian is calculated automatically via automatic differentiation.
 !syntax children /Kernels/ADMatHeatSource
 
 !bibtex bibliography
+
+!tag name=ADMatHeatSource pairs=module:heat_transfer system:kernels

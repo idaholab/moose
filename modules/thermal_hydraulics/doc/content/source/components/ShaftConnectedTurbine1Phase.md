@@ -180,3 +180,5 @@ I_{\text{turbine}} = I_{\text{coeff}}[0] + I_{\text{coeff}}[1] \mid \alpha \mid
 
 
 !bibtex bibliography
+
+!tag name=ShaftConnectedTurbine1Phase pairs=module:thermal_hydraulics system:components

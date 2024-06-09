@@ -13,3 +13,5 @@ A class for computing the element-wise $H1$ (Sobolev space) error (actually $W^{
 !syntax inputs /AuxKernels/ElementH1ErrorFunctionAux
 
 !syntax children /AuxKernels/ElementH1ErrorFunctionAux
+
+!tag name=ElementH1ErrorFunctionAux pairs=module:framework system:auxkernels

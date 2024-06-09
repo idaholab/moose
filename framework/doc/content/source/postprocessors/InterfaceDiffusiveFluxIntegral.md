@@ -26,3 +26,5 @@ The expression of the diffusive flux in this object is generic, as described, an
 !syntax inputs /Postprocessors/InterfaceDiffusiveFluxIntegral
 
 !syntax children /Postprocessors/InterfaceDiffusiveFluxIntegral
+
+!tag name=InterfaceDiffusiveFluxIntegral pairs=module:framework system:postprocessors

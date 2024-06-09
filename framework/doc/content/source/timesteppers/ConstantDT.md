@@ -30,3 +30,5 @@ remainder of the analysis.
 !syntax inputs /Executioner/TimeSteppers/ConstantDT
 
 !syntax children /Executioner/TimeSteppers/ConstantDT
+
+!tag name=ConstantDT pairs=module:framework system:timesteppers

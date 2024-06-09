@@ -18,3 +18,5 @@ with a [!param](/Mesh/SideSetsAroundSubdomainGenerator/normal) parameter.
 !syntax inputs /Mesh/SideSetsFromNormalsGenerator
 
 !syntax children /Mesh/SideSetsFromNormalsGenerator
+
+!tag name=SideSetsFromNormalsGenerator pairs=module:framework system:meshgenerators

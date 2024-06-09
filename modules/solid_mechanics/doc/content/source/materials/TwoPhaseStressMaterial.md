@@ -24,3 +24,5 @@ for both phases' derivatives but neglecting any dependence of the extra global s
 !syntax inputs /Materials/TwoPhaseStressMaterial
 
 !syntax children /Materials/TwoPhaseStressMaterial
+
+!tag name=TwoPhaseStressMaterial pairs=module:solid_mechanics system:materials

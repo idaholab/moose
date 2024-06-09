@@ -24,3 +24,5 @@
 !syntax inputs /Reporters/OptimizationInfo
 
 !syntax children /Reporters/OptimizationInfo
+
+!tag name=OptimizationInfo pairs=module:optimization system:reporters

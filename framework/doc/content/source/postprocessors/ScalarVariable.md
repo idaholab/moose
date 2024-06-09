@@ -15,3 +15,5 @@ to a CSV file.
 !syntax inputs /Postprocessors/ScalarVariable
 
 !syntax children /Postprocessors/ScalarVariable
+
+!tag name=ScalarVariable pairs=module:framework system:postprocessors

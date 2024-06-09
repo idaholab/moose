@@ -9,3 +9,5 @@ A detailed description of the MOOSE variable system is given in the [base class 
 !syntax inputs /Variables/VectorMooseVariable
 
 !syntax children /Variables/VectorMooseVariable
+
+!tag name=VectorMooseVariable pairs=module:framework system:variables

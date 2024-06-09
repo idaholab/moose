@@ -36,3 +36,5 @@ Normally, this class shouldn't be used directly. Instead set it up through the [
 !syntax children /AuxKernels/GhostingAux
 
 !bibtex bibliography
+
+!tag name=GhostingAux pairs=module:framework system:auxkernels

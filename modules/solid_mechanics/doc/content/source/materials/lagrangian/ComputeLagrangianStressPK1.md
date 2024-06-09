@@ -25,3 +25,5 @@ and
 \begin{equation}
       T_{iJkL}^{\prime}=J\sigma_{im}\left(F_{Lk}^{-1}F_{Jm}^{-1}-F_{Jk}^{-1}F_{Lm}^{-1}\right)+JT_{isab}f_{ak}^{-1}F_{Lb}^{-1}F_{Js}^{-1}
 \end{equation}
+
+!tag name=ComputeLagrangianStressPK1 pairs=module:solid_mechanics system:materials

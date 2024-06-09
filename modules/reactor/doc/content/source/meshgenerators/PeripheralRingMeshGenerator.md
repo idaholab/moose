@@ -43,3 +43,5 @@ Aside from the general mesh radial biasing options described above, users can al
 !syntax inputs /Mesh/PeripheralRingMeshGenerator
 
 !syntax children /Mesh/PeripheralRingMeshGenerator
+
+!tag name=PeripheralRingMeshGenerator pairs=module:reactor system:meshgenerators

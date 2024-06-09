@@ -11,3 +11,5 @@ This model computes the summation of the derivative of the eigenstrains with res
 !syntax inputs /Materials/ThermalFractureIntegral
 
 !syntax children /Materials/ThermalFractureIntegral
+
+!tag name=ThermalFractureIntegral pairs=module:solid_mechanics system:materials

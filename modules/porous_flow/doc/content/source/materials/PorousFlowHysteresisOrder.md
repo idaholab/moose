@@ -15,3 +15,5 @@ Since the hysteretic capillary-pressure and relative-permeability functions are 
 !syntax inputs /Materials/PorousFlowHysteresisOrder
 
 !syntax children /Materials/PorousFlowHysteresisOrder
+
+!tag name=PorousFlowHysteresisOrder pairs=module:porous_flow system:materials

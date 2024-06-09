@@ -51,3 +51,5 @@ J= \phi_j \frac{\partial R}{\partial \eta} = \phi_j \frac{dh}{d\eta}(c_b-c_a)
 !syntax inputs /Kernels/KKSPhaseConcentration
 
 !syntax children /Kernels/KKSPhaseConcentration
+
+!tag name=KKSPhaseConcentration pairs=module:phase_field system:kernels

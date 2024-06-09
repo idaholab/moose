@@ -33,3 +33,5 @@ This object controls a physical process using a neural network. The neural netwo
 can be either read from a file of transferred from a trainer.
 
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchNeuralNetControl pairs=module:framework system:libtorch

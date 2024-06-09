@@ -17,3 +17,5 @@ for more explanation.
 !syntax inputs /Materials/ComputeLayeredCosseratElasticityTensor
 
 !syntax children /Materials/ComputeLayeredCosseratElasticityTensor
+
+!tag name=ComputeLayeredCosseratElasticityTensor pairs=module:solid_mechanics system:materials

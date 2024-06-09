@@ -14,3 +14,5 @@ where $\vec{n}$ is the local normal, and $\vec{d}$ is the displacement vector.
 !syntax inputs /UserObjects/LayeredFlowAreaChange
 
 !syntax children /UserObjects/LayeredFlowAreaChange
+
+!tag name=LayeredFlowAreaChange pairs=module:thermal_hydraulics system:userobjects

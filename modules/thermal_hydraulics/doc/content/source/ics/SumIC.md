@@ -10,3 +10,5 @@ as initial conditions are only run once at the beginning of the simulation.
 !syntax inputs /ICs/SumIC
 
 !syntax children /ICs/SumIC
+
+!tag name=SumIC pairs=module:thermal_hydraulics system:ics

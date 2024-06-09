@@ -15,3 +15,5 @@ The `FilePositions` is similar the `positions_file` argument of [MultiApps](synt
 !syntax inputs /Positions/FilePositions
 
 !syntax children /Positions/FilePositions
+
+!tag name=FilePositions pairs=module:framework system:positions

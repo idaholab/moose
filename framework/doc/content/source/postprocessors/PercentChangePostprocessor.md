@@ -10,3 +10,5 @@ parameter to `true`.
 !syntax inputs /Postprocessors/PercentChangePostprocessor
 
 !syntax children /Postprocessors/PercentChangePostprocessor
+
+!tag name=PercentChangePostprocessor pairs=module:framework system:postprocessors

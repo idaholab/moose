@@ -24,3 +24,5 @@ In this example, the parameter `threshold` is used. This sets a color value abov
 !syntax inputs /Mesh/ImageSubdomainGenerator
 
 !syntax children /Mesh/ImageSubdomainGenerator
+
+!tag name=ImageSubdomainGenerator pairs=module:framework system:meshgenerators

@@ -18,3 +18,5 @@ state is typically used to represent water that is under very high pressure.
 !syntax children /FluidProperties/StiffenedGasFluidProperties
 
 !bibtex bibliography
+
+!tag name=StiffenedGasFluidProperties pairs=module:fluid_properties system:fluidproperties

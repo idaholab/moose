@@ -22,3 +22,5 @@ In THM, most kernels are added automatically by components. This scalar kernel i
 !syntax inputs /ScalarKernels/ShaftTimeDerivativeScalarKernel
 
 !syntax children /ScalarKernels/ShaftTimeDerivativeScalarKernel
+
+!tag name=ShaftTimeDerivativeScalarKernel pairs=module:thermal_hydraulics system:scalarkernels

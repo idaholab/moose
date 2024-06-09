@@ -19,3 +19,4 @@ This boundary condition hard-codes the use of a first order Euler time integrati
 !syntax inputs /BCs/PresetVelocity
 
 !syntax children /BCs/PresetVelocity
+!tag name=PresetVelocity pairs=module:solid_mechanics system:bcs

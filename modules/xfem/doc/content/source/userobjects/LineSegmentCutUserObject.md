@@ -26,3 +26,5 @@ to both start and end points.
 !syntax inputs /UserObjects/LineSegmentCutUserObject
 
 !syntax children /UserObjects/LineSegmentCutUserObject
+
+!tag name=LineSegmentCutUserObject pairs=module:xfem system:userobjects

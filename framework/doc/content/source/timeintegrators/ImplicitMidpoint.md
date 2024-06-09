@@ -33,3 +33,5 @@ This method can be expressed as a Runge-Kutta method with the following Butcher 
 !syntax inputs /Executioner/TimeIntegrator/ImplicitMidpoint
 
 !syntax children /Executioner/TimeIntegrator/ImplicitMidpoint
+
+!tag name=ImplicitMidpoint pairs=module:framework system:timeintegrators

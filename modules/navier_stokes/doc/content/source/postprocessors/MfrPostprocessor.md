@@ -16,3 +16,5 @@ aggregation process over processes and threads.
 !syntax inputs /Postprocessors/MfrPostprocessor
 
 !syntax children /Postprocessors/MfrPostprocessor
+
+!tag name=MfrPostprocessor pairs=module:navier_stokes system:postprocessors

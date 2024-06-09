@@ -15,3 +15,5 @@ Details on the theory behind the computation of the various fracture integrals, 
 !syntax inputs /VectorPostprocessors/InteractionIntegral
 
 !syntax children /VectorPostprocessors/InteractionIntegral
+
+!tag name=InteractionIntegral pairs=module:solid_mechanics system:vectorpostprocessors

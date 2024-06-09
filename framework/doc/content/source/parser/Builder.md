@@ -25,3 +25,5 @@ The Builder supports the ability to selectively activate or deactivate individua
 without the use of block comment characters through the use of the special "active" and
 "inactive" parameter blocks. Either of these parameters (but not both) can be added
 to any block (including the top level) to selectively turn individual blocks on/off.
+
+!tag name=Builder pairs=module:framework system:parser

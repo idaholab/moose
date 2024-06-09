@@ -14,3 +14,5 @@ with $k$ the thermal conductivity and $D_h$ the hydraulic diameter.
 !syntax inputs /Materials/ConvectiveHeatTransferCoefficientMaterial
 
 !syntax children /Materials/ConvectiveHeatTransferCoefficientMaterial
+
+!tag name=ConvectiveHeatTransferCoefficientMaterial pairs=module:thermal_hydraulics system:materials

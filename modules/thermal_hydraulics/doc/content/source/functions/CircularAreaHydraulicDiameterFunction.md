@@ -9,3 +9,5 @@
 !syntax children /Functions/CircularAreaHydraulicDiameterFunction
 
 !bibtex bibliography
+
+!tag name=CircularAreaHydraulicDiameterFunction pairs=module:thermal_hydraulics system:functions

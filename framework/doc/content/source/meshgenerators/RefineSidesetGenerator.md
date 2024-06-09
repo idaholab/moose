@@ -13,3 +13,5 @@ The user has to provide the name(s) of the boundary/boundaries to be modified, a
 !syntax inputs /Mesh/RefineSidesetGenerator
 
 !syntax children /Mesh/RefineSidesetGenerator
+
+!tag name=RefineSidesetGenerator pairs=module:framework system:meshgenerators

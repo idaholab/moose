@@ -21,3 +21,5 @@ This kernel is mainly used for applying wall functions to turbulent problems.
 !syntax inputs /FVKernels/INSFVTurbulentAdvection
 
 !syntax children /FVKernels/INSFVTurbulentAdvection
+
+!tag name=INSFVTurbulentAdvection pairs=module:navier_stokes system:fvkernels

@@ -29,3 +29,5 @@ notation, is given by:
 !syntax inputs /Kernels/GradField
 
 !syntax children /Kernels/GradField
+
+!tag name=GradField pairs=module:framework system:kernels

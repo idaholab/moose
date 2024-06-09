@@ -17,3 +17,5 @@ In THM, most kernels are added automatically by components. This kernel is creat
 !syntax inputs /Kernels/ADOneD3EqnEnergyHeatFlux
 
 !syntax children /Kernels/ADOneD3EqnEnergyHeatFlux
+
+!tag name=ADOneD3EqnEnergyHeatFlux pairs=module:thermal_hydraulics system:kernels

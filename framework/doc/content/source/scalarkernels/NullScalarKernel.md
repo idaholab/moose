@@ -25,3 +25,5 @@ This scalar kernel should mainly be used for creating small tests and while debu
 !syntax inputs /ScalarKernels/NullScalarKernel
 
 !syntax children /ScalarKernels/NullScalarKernel
+
+!tag name=NullScalarKernel pairs=module:framework system:scalarkernels

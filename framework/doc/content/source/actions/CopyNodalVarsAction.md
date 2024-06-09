@@ -12,3 +12,5 @@ options to restart simulations may be found in the
 [Restart/Recover system](/application_usage/restart_recover.md optional=True).
 
 !syntax parameters /Variables/CopyNodalVarsAction
+
+!tag name=CopyNodalVarsAction pairs=module:framework system:actions

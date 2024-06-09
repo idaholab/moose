@@ -46,3 +46,5 @@ and pressures up to 100 MPa.
 !syntax children /FluidProperties/MethaneFluidProperties
 
 !bibtex bibliography
+
+!tag name=MethaneFluidProperties pairs=module:fluid_properties system:fluidproperties

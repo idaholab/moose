@@ -20,3 +20,5 @@ potential, $k$ is Boltzmann's constant, and $T$ is the temperature in K.
 !syntax children /Kernels/MaskedExponential
 
 !bibtex bibliography
+
+!tag name=MaskedExponential pairs=module:phase_field system:kernels

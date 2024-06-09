@@ -18,3 +18,5 @@ in the back-end.
 !syntax inputs /Positions/ReporterPositions
 
 !syntax children /Positions/ReporterPositions
+
+!tag name=ReporterPositions pairs=module:framework system:positions

@@ -15,3 +15,5 @@ relative to a natural boundary condition.
 !syntax inputs /BCs/INSMomentumNoBCBCLaplaceForm
 
 !syntax children /BCs/INSMomentumNoBCBCLaplaceForm
+
+!tag name=INSADMomentumNoBCBC pairs=module:navier_stokes system:bcs

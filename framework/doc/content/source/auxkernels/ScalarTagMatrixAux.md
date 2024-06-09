@@ -9,3 +9,5 @@ The AuxVariable can then be visualized using the Exodus file output.
 !syntax inputs /AuxScalarKernels/ScalarTagMatrixAux
 
 !syntax children /AuxScalarKernels/ScalarTagMatrixAux
+
+!tag name=ScalarTagMatrixAux pairs=module:framework system:auxkernels

@@ -7,3 +7,5 @@
 !syntax inputs /Mesh/BreakBoundaryOnSubdomainGenerator
 
 !syntax children /Mesh/BreakBoundaryOnSubdomainGenerator
+
+!tag name=BreakBoundaryOnSubdomainGenerator pairs=module:framework system:meshgenerators

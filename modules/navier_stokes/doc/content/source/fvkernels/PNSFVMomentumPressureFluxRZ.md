@@ -19,3 +19,5 @@ for [PCNSFVKT.md] and for [PCNSFVHLLC.md].
 !syntax inputs /FVKernels/PNSFVMomentumPressureFluxRZ
 
 !syntax children /FVKernels/PNSFVMomentumPressureFluxRZ
+
+!tag name=PNSFVMomentumPressureFluxRZ pairs=module:navier_stokes system:fvkernels

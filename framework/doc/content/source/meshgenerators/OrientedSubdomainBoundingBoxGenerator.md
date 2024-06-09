@@ -13,3 +13,5 @@
 !syntax inputs /Mesh/OrientedSubdomainBoundingBoxGenerator
 
 !syntax children /Mesh/OrientedSubdomainBoundingBoxGenerator
+
+!tag name=OrientedSubdomainBoundingBoxGenerator pairs=module:framework system:meshgenerators

@@ -23,3 +23,5 @@ where $\boldsymbol{\epsilon}^{total}$ is the total strain formulation; this stra
 !syntax inputs /Materials/ComputeLinearElasticStress
 
 !syntax children /Materials/ComputeLinearElasticStress
+
+!tag name=ComputeLinearElasticStress pairs=module:solid_mechanics system:materials

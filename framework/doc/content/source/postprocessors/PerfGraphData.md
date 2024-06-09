@@ -18,3 +18,5 @@ Most registered [PerfGraph.md] sections are not registered until the first momen
 !syntax children /Postprocessors/PerfGraphData
 
 !bibtex bibliography
+
+!tag name=PerfGraphData pairs=module:framework system:postprocessors

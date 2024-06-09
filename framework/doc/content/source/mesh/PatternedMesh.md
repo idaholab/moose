@@ -22,3 +22,5 @@ file, as shown below, to create the pattern shown in Figure 3.
 !syntax inputs /Mesh/PatternedMesh
 
 !syntax children /Mesh/PatternedMesh
+
+!tag name=PatternedMesh pairs=module:framework system:mesh

@@ -60,3 +60,5 @@ The resulting Cartesian product is provided in the output file, as shown below.
 !syntax inputs /Samplers/CartesianProductSampler
 
 !syntax children /Samplers/CartesianProductSampler
+
+!tag name=CartesianProductSampler pairs=module:stochastic_tools system:samplers

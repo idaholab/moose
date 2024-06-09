@@ -23,3 +23,5 @@ saved/loaded if re-initialization is enabled.
 !syntax inputs /UserObjects/ThermochimicaElementData
 
 !syntax children /UserObjects/ThermochimicaElementData
+
+!tag name=ThermochimicaElementData pairs=module:chemical_reactions system:userobjects

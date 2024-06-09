@@ -157,3 +157,5 @@ tools with [ImageMagick](http://www.imagemagick.org) being one of the most power
 !syntax inputs /Functions/ImageFunction
 
 !syntax children /Functions/ImageFunction
+
+!tag name=ImageFunction pairs=module:framework system:functions

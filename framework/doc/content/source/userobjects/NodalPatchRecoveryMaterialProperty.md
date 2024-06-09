@@ -12,3 +12,5 @@ material property. Supported material property types are listed in
 !syntax inputs /UserObjects/NodalPatchRecoveryMaterialProperty
 
 !syntax children /UserObjects/NodalPatchRecoveryMaterialProperty
+
+!tag name=NodalPatchRecoveryMaterialProperty pairs=module:framework system:userobjects

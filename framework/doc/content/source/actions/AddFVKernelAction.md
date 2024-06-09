@@ -9,3 +9,5 @@ More information about finite volume kernels can be found on the
 [FVKernels syntax documentation](syntax/FVKernels/index.md).
 
 !syntax parameters /FVKernels/AddFVKernelAction
+
+!tag name=AddFVKernelAction pairs=module:framework system:actions

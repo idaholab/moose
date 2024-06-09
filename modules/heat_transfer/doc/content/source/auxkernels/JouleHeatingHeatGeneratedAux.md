@@ -11,3 +11,5 @@ The `JouleHeatingHeatGeneratedAux` AuxKernel is used to compute the heat generat
 !syntax inputs /AuxKernels/JouleHeatingHeatGeneratedAux
 
 !syntax children /AuxKernels/JouleHeatingHeatGeneratedAux
+
+!tag name=JouleHeatingHeatGeneratedAux pairs=module:heat_transfer system:auxkernels

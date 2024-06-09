@@ -12,3 +12,5 @@ Support for Sampler objects within the framework is minimal, please refer to the
 information and example use.
 
 !syntax list /Samplers objects=True actions=False subsystems=False heading=Available Sampler Objects
+
+!tag name=Sampler pairs=module:framework system:samplers

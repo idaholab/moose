@@ -20,3 +20,5 @@ $C_H$ is the molar concentration of free H+ ions.
 !syntax inputs /AuxKernels/PHAux
 
 !syntax children /AuxKernels/PHAux
+
+!tag name=PHAux pairs=module:chemical_reactions system:auxkernels

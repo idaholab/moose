@@ -21,3 +21,5 @@ In this example the functor is defined using a [MooseParsedFunction.md].
 !syntax inputs /LinearFVBCs/LinearFVAdvectionDiffusionFunctorDirichletBC
 
 !syntax children /LinearFVBCs/LinearFVAdvectionDiffusionFunctorDirichletBC
+
+!tag name=LinearFVAdvectionDiffusionFunctorDirichletBC pairs=module:framework system:linearfvbcs

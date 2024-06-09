@@ -20,3 +20,5 @@ object.
 !syntax children /VectorPostprocessors/SurfaceRadiationVectorPostprocessor
 
 !bibtex bibliography
+
+!tag name=SurfaceRadiationVectorPostprocessor pairs=module:heat_transfer system:vectorpostprocessors

@@ -103,3 +103,5 @@ large deformation kinematics.
 !syntax inputs /Kernels/TotalLagrangianStressDivergence
 
 !syntax children /Kernels/TotalLagrangianStressDivergence
+
+!tag name=TotalLagrangianStressDivergence pairs=module:solid_mechanics system:kernels

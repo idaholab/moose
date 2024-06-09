@@ -13,3 +13,5 @@ vector, and index of the component must be specified.
 !syntax children /Postprocessors/VectorPostprocessorComponent
 
 !bibtex bibliography
+
+!tag name=VectorPostprocessorComponent pairs=module:framework system:postprocessors

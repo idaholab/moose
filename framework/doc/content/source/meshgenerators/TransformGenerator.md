@@ -21,3 +21,5 @@ namespace.
 !syntax inputs /Mesh/TransformGenerator
 
 !syntax children /Mesh/TransformGenerator
+
+!tag name=TransformGenerator pairs=module:framework system:meshgenerators

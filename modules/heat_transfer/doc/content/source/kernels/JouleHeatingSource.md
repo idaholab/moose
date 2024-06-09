@@ -34,3 +34,5 @@ heat transfer module test `transient_jouleheating.i`.
 !syntax inputs /Kernels/JouleHeatingSource
 
 !syntax children /Kernels/JouleHeatingSource
+
+!tag name=JouleHeatingSource pairs=module:heat_transfer system:kernels

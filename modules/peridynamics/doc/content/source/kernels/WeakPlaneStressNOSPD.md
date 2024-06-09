@@ -9,3 +9,5 @@ The `WeakPlaneStressNOSPD` Kernel calculates the residual and Jacobian entries f
 !syntax inputs /Kernels/WeakPlaneStressNOSPD
 
 !syntax children /Kernels/WeakPlaneStressNOSPD
+
+!tag name=WeakPlaneStressNOSPD pairs=module:peridynamics system:kernels

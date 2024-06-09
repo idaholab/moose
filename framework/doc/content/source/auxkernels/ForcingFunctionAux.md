@@ -21,3 +21,5 @@ In this example, value of a postprocessor is supplied to the forcing function f 
 !syntax inputs /AuxKernels/ForcingFunctionAux
 
 !syntax children /AuxKernels/ForcingFunctionAux
+
+!tag name=ForcingFunctionAux pairs=module:framework system:auxkernels

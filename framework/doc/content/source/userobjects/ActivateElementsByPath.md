@@ -7,3 +7,5 @@ This user object uses the +function path+ as the metric to activate (add) an ele
 !syntax inputs /UserObjects/ActivateElementsByPath
 
 !syntax children /UserObjects/ActivateElementsByPath
+
+!tag name=ActivateElementsByPath pairs=module:framework system:userobjects

@@ -15,3 +15,5 @@ Because it contains volumetric strain, this Kernel always sets `use_displaced_me
 !syntax inputs /Kernels/PorousFlowHeatVolumetricExpansion
 
 !syntax children /Kernels/PorousFlowHeatVolumetricExpansion
+
+!tag name=PorousFlowHeatVolumetricExpansion pairs=module:porous_flow system:kernels

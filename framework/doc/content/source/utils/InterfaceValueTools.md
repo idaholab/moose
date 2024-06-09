@@ -15,3 +15,5 @@ Available outputs are:
 * secondary: value_s
 
 where value_m is the value on the primary side of the interface (e.g. where the boundary is defined) and value_s is the value on the secondary side of the interface.
+
+!tag name=InterfaceValueTools pairs=module:framework system:utils

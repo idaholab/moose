@@ -11,3 +11,5 @@ a volume integral of a functor quantity.
 !syntax inputs /Postprocessors/ElementIntegralFunctorPostprocessor
 
 !syntax children /Postprocessors/ElementIntegralFunctorPostprocessor
+
+!tag name=ElementIntegralFunctorPostprocessor pairs=module:framework system:postprocessors

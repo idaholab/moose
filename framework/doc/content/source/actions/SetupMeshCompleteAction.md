@@ -7,3 +7,5 @@ It takes care of deleting unnecessary remote elements, of triggering uniform
 refinement and general preparation of the mesh (neighbor search, renumbering, partitioning).
 
 !syntax parameters /Mesh/SetupMeshCompleteAction
+
+!tag name=SetupMeshCompleteAction pairs=module:framework system:actions

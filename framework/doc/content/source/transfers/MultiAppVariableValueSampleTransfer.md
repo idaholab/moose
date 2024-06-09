@@ -15,3 +15,5 @@ at the sub-application positions to a field variable on each sub-application.
 !syntax inputs /Transfers/MultiAppVariableValueSampleTransfer
 
 !syntax children /Transfers/MultiAppVariableValueSampleTransfer
+
+!tag name=MultiAppVariableValueSampleTransfer pairs=module:framework system:transfers

@@ -130,3 +130,5 @@ used in the solution process. Nonlinear executioner options are not
 relevant. When using PETSc as the default solver package, `pc` and `ksp` options
 from the `petsc_options*` parameters will be used while `snes` options will be
 ignored.
+
+!tag name=ExplicitTimeIntegrator pairs=module:framework system:timeintegrators

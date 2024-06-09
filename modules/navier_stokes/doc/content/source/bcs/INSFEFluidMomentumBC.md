@@ -45,3 +45,5 @@ parameter must be consistent with the formulation of the equations in the kernel
 !syntax inputs /BCs/INSFEFluidMomentumBC
 
 !syntax children /BCs/INSFEFluidMomentumBC
+
+!tag name=INSFEFluidMomentumBC pairs=module:navier_stokes system:bcs

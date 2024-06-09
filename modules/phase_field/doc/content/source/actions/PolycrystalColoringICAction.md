@@ -31,3 +31,5 @@ For `linearized_interface = true`
 !syntax inputs /ICs/PolycrystalICs/PolycrystalColoringIC/PolycrystalColoringICAction
 
 !syntax children /ICs/PolycrystalICs/PolycrystalColoringIC/PolycrystalColoringICAction
+
+!tag name=PolycrystalColoringICAction pairs=module:phase_field system:actions

@@ -21,3 +21,5 @@ reused as a Neumann boundary condition for the nonlinear variable `u` using a `P
 !syntax inputs /BCs/PostprocessorNeumannBC
 
 !syntax children /BCs/PostprocessorNeumannBC
+
+!tag name=PostprocessorNeumannBC pairs=module:framework system:bcs

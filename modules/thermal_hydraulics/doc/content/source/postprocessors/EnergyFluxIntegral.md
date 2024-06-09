@@ -14,3 +14,5 @@ with $\alpha \rho u A$ the conserved phase momentum and $h$ the specific total e
 !syntax inputs /Postprocessors/EnergyFluxIntegral
 
 !syntax children /Postprocessors/EnergyFluxIntegral
+
+!tag name=EnergyFluxIntegral pairs=module:thermal_hydraulics system:postprocessors

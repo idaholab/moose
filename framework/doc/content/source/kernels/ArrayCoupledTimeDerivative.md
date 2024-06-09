@@ -44,3 +44,5 @@ found in the kernel block below:
 !syntax inputs /Kernels/ArrayCoupledTimeDerivative
 
 !syntax children /Kernels/ArrayCoupledTimeDerivative
+
+!tag name=ArrayCoupledTimeDerivative pairs=module:framework system:kernels

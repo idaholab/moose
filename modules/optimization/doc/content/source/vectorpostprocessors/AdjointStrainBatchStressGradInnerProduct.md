@@ -5,3 +5,5 @@ This component is designed to compute the gradient of the objective function con
 ## Example Input Syntax
 
 !syntax parameters /VectorPostprocessors/AdjointStrainBatchStressGradInnerProduct
+
+!tag name=AdjointStrainBatchStressGradInnerProduct pairs=module:optimization system:vectorpostprocessors

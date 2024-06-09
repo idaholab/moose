@@ -44,3 +44,5 @@ in the input file.
 !syntax inputs /Materials/ComputeIncrementalSmallStrain
 
 !syntax children /Materials/ComputeIncrementalSmallStrain
+
+!tag name=ComputeIncrementalSmallStrain pairs=module:solid_mechanics system:materials

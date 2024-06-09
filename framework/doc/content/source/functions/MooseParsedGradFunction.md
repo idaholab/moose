@@ -21,3 +21,5 @@ the solution and its gradient, between `u` and this known solution.
 !syntax inputs /Functions/ParsedGradFunction
 
 !syntax children /Functions/ParsedGradFunction
+
+!tag name=MooseParsedGradFunction pairs=module:framework system:functions

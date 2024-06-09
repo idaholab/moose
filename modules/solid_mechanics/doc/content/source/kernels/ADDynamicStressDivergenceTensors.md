@@ -16,3 +16,5 @@ More information about the residual calculation and usage can be found at [Dynam
 !syntax inputs /Kernels/ADDynamicStressDivergenceTensors
 
 !syntax children /Kernels/ADDynamicStressDivergenceTensors
+
+!tag name=ADDynamicStressDivergenceTensors pairs=module:solid_mechanics system:kernels

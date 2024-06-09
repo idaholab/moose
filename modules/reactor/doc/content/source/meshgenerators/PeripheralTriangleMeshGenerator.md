@@ -31,3 +31,5 @@ During triangulation, the triangulation library used by [`XYDelaunayGenerator`](
 !syntax inputs /Mesh/PeripheralTriangleMeshGenerator
 
 !syntax children /Mesh/PeripheralTriangleMeshGenerator
+
+!tag name=PeripheralTriangleMeshGenerator pairs=module:reactor system:meshgenerators

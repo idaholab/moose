@@ -26,3 +26,5 @@ the extra IDs for those elements of the missing subdomains will not be changed; 
 !syntax inputs /Mesh/SubdomainExtraElementIDGenerator
 
 !syntax children /Mesh/SubdomainExtraElementIDGenerator
+
+!tag name=SubdomainExtraElementIDGenerator pairs=module:reactor system:meshgenerators

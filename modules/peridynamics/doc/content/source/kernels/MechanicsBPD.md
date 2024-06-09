@@ -22,3 +22,5 @@ More details on the residual and Jacobian formulation can be found in [!citep](C
 !syntax children /Kernels/MechanicsBPD
 
 !bibtex bibliography
+
+!tag name=MechanicsBPD pairs=module:peridynamics system:kernels

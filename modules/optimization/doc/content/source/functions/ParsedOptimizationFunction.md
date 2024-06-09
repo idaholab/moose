@@ -24,3 +24,5 @@ f(x,y,z,t; \vec{v}) = xv_1 + yv_2^2 + zv_3^3 + tv_4^4
 !syntax inputs /Functions/ParsedOptimizationFunction
 
 !syntax children /Functions/ParsedOptimizationFunction
+
+!tag name=ParsedOptimizationFunction pairs=module:optimization system:functions

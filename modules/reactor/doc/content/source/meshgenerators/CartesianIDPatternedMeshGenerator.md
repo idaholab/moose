@@ -45,3 +45,5 @@ a Cartesian assembly with pin reporting IDs (`pin_id`).
 
 !syntax children /Mesh/CartesianIDPatternedMeshGenerator
 
+
+!tag name=CartesianIDPatternedMeshGenerator pairs=module:reactor system:meshgenerators

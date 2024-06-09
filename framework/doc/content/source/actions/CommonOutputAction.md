@@ -20,3 +20,5 @@ objects. For example, the following enables two output objects and sets the outp
 Please refer to the [syntax/Outputs/index.md] for more information.
 
 !syntax parameters /Outputs/CommonOutputAction
+
+!tag name=CommonOutputAction pairs=module:framework system:actions

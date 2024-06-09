@@ -50,3 +50,5 @@ condition is better.
 !syntax inputs /BCs/FunctorDirichletBC
 
 !syntax children /BCs/FunctorDirichletBC
+
+!tag name=FunctorDirichletBC pairs=module:framework system:bcs

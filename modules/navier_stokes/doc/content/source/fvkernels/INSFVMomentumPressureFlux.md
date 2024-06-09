@@ -10,3 +10,5 @@ The pressure is a Lagrange Multiplier that ensures the incompressibility constra
 !syntax inputs /FVKernels/INSFVMomentumPressureFlux
 
 !syntax children /FVKernels/INSFVMomentumPressureFlux
+
+!tag name=INSFVMomentumPressureFlux pairs=module:navier_stokes system:fvkernels

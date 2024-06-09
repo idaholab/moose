@@ -16,3 +16,5 @@ species in the $i^{\mathrm{th}}$ secondary equilibrium species.
 !syntax inputs /AuxKernels/TotalConcentrationAux
 
 !syntax children /AuxKernels/TotalConcentrationAux
+
+!tag name=TotalConcentrationAux pairs=module:chemical_reactions system:auxkernels

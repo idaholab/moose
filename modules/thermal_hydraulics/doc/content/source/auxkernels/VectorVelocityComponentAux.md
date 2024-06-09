@@ -16,3 +16,5 @@ $\rho u A$ and $\rho A$ are variables usually defined by the [Components](syntax
 !syntax inputs /AuxKernels/VectorVelocityComponentAux
 
 !syntax children /AuxKernels/VectorVelocityComponentAux
+
+!tag name=VectorVelocityComponentAux pairs=module:thermal_hydraulics system:auxkernels

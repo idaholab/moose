@@ -11,3 +11,5 @@ Other extra element integers, already existing in the mesh, can also be used in 
 !syntax inputs /Mesh/ParsedExtraElementIDGenerator
 
 !syntax children /Mesh/ParsedExtraElementIDGenerator
+
+!tag name=ParsedExtraElementIDGenerator pairs=module:framework system:meshgenerators

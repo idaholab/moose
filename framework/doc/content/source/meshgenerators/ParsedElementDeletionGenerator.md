@@ -22,3 +22,5 @@ The criterion for deletion is that the expression evaluates to something that is
 !syntax inputs /Mesh/ParsedElementDeletionGenerator
 
 !syntax children /Mesh/ParsedElementDeletionGenerator
+
+!tag name=ParsedElementDeletionGenerator pairs=module:framework system:meshgenerators

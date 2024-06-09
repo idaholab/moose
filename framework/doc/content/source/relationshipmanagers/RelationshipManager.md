@@ -123,3 +123,5 @@ add relationship managers is
 `addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)`. Both
 the `ContactAction` in the contact module, and `PorousFlowActionBase` in the
 porous flow module provide examples of overriding this method.
+
+!tag name=RelationshipManager pairs=module:framework system:relationshipmanagers

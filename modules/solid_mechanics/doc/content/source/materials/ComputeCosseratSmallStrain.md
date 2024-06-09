@@ -29,3 +29,5 @@ for more explanation.
 !syntax inputs /Materials/ComputeCosseratSmallStrain
 
 !syntax children /Materials/ComputeCosseratSmallStrain
+
+!tag name=ComputeCosseratSmallStrain pairs=module:solid_mechanics system:materials

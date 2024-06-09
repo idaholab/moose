@@ -36,3 +36,5 @@ block. In this example, a parsed function is used.
 !syntax inputs /BCs/DisplacementAboutAxis
 
 !syntax children /BCs/DisplacementAboutAxis
+
+!tag name=DisplacementAboutAxis pairs=module:solid_mechanics system:bcs

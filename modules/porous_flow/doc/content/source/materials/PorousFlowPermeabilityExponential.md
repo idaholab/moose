@@ -24,3 +24,5 @@ The parameters $A$ and $B$ are then converted to the correct form internally.
 !syntax inputs /Materials/PorousFlowPermeabilityExponential
 
 !syntax children /Materials/PorousFlowPermeabilityExponential
+
+!tag name=PorousFlowPermeabilityExponential pairs=module:porous_flow system:materials

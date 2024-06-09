@@ -17,3 +17,5 @@ The extra element ID assignment can be restricted to subdomains in the fine mesh
 !syntax inputs /Mesh/CoarseMeshExtraElementIDGenerator
 
 !syntax children /Mesh/CoarseMeshExtraElementIDGenerator
+
+!tag name=CoarseMeshExtraElementIDGenerator pairs=module:reactor system:meshgenerators

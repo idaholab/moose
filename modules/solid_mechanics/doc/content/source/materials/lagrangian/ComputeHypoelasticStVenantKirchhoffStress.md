@@ -25,3 +25,5 @@ This model is interesting in the sense that, if the Truesdell objective rate is 
 !syntax inputs /Materials/ComputeHypoelasticStVenantKirchhoffStress
 
 !syntax children /Materials/ComputeHypoelasticStVenantKirchhoffStress
+
+!tag name=ComputeHypoelasticStVenantKirchhoffStress pairs=module:solid_mechanics system:materials

@@ -12,3 +12,5 @@ when using the contact action [ContactAction](/ContactAction.md)
 !syntax inputs /UserObjects/LMWeightedGapUserObject
 
 !syntax children /UserObjects/LMWeightedGapUserObject
+
+!tag name=LMWeightedGapUserObject pairs=module:contact system:userobjects

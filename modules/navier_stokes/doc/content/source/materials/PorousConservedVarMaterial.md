@@ -28,3 +28,5 @@ necessary quantities for solving the compressible porous version of the Euler eq
 !syntax inputs /Materials/PorousConservedVarMaterial
 
 !syntax children /Materials/PorousConservedVarMaterial
+
+!tag name=PorousConservedVarMaterial pairs=module:navier_stokes system:materials

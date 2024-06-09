@@ -11,3 +11,5 @@
 !syntax inputs /Adaptivity/Markers/UniformMarker
 
 !syntax children /Adaptivity/Markers/UniformMarker
+
+!tag name=UniformMarker pairs=module:framework system:markers

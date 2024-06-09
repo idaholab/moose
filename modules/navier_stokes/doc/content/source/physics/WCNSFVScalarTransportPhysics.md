@@ -15,3 +15,5 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 !syntax inputs /Physics/NavierStokes/ScalarTransport/WCNSFVScalarTransportPhysics
 
 !syntax children /Physics/NavierStokes/ScalarTransport/WCNSFVScalarTransportPhysics
+
+!tag name=WCNSFVScalarTransportPhysics pairs=module:navier_stokes system:physics

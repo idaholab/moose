@@ -10,3 +10,5 @@ time. This kernel must be applied for every component of the velocity.
 !syntax inputs /FVKernels/INSFVMomentumTimeDerivative
 
 !syntax children /FVKernels/INSFVMomentumTimeDerivative
+
+!tag name=INSFVMomentumTimeDerivative pairs=module:navier_stokes system:fvkernels

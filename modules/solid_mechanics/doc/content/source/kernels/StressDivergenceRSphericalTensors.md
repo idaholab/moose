@@ -58,3 +58,5 @@ and only a single displacement variable is provided:
 !syntax inputs /Kernels/StressDivergenceRSphericalTensors
 
 !syntax children /Kernels/StressDivergenceRSphericalTensors
+
+!tag name=StressDivergenceRSphericalTensors pairs=module:solid_mechanics system:kernels

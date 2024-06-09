@@ -14,3 +14,5 @@ where $p_N \in \mathbb{R}$ denotes the contact pressure, $\boldsymbol{f} \in \ma
 !syntax inputs /AuxKernels/ContactPressureAux
 
 !syntax children /AuxKernels/ContactPressureAux
+
+!tag name=ContactPressureAux pairs=module:contact system:auxkernels

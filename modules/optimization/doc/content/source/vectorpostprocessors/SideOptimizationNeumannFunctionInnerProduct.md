@@ -20,3 +20,5 @@ This function is primarily used for computing the gradient in an optimization ro
 !syntax inputs /VectorPostprocessors/SideOptimizationNeumannFunctionInnerProduct
 
 !syntax children /VectorPostprocessors/SideOptimizationNeumannFunctionInnerProduct
+
+!tag name=SideOptimizationNeumannFunctionInnerProduct pairs=module:optimization system:vectorpostprocessors

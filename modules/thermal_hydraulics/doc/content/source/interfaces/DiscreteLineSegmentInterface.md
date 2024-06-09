@@ -39,3 +39,5 @@ size 0.25 m, whereas the last 40 m have 60 elements of size $0.\bar{6}$ m.
 length = '10 40'
 n_elems = '40 60'
 ```
+
+!tag name=DiscreteLineSegmentInterface pairs=module:thermal_hydraulics system:interfaces

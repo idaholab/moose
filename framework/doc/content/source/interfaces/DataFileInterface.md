@@ -29,3 +29,5 @@ data files that are tied to a specific model and are not meant to be user
 replaceable. This method will not search relative to the input file location and
 will only find data files in source repositories and installed binary
 distributions.
+
+!tag name=DataFileInterface pairs=module:framework system:interfaces

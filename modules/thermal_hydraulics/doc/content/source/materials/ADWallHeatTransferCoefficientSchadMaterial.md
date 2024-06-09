@@ -35,3 +35,5 @@ where $k$ is the fluid thermal conductivity.
 !syntax inputs /Materials/ADWallHeatTransferCoefficientSchadMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficientSchadMaterial
+
+!tag name=ADWallHeatTransferCoefficientSchadMaterial pairs=module:thermal_hydraulics system:materials

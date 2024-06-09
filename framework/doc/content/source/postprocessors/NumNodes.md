@@ -14,3 +14,5 @@ of nodes when using DistributedMesh.
 !syntax children /Postprocessors/NumNodes
 
 !bibtex bibliography
+
+!tag name=NumNodes pairs=module:framework system:postprocessors

@@ -15,3 +15,5 @@ The FluidProperties UserObject expects temperature in Kelvin. If the simulation 
 !syntax inputs /ICs/PorousFlowFluidPropertyIC
 
 !syntax children /ICs/PorousFlowFluidPropertyIC
+
+!tag name=PorousFlowFluidPropertyIC pairs=module:porous_flow system:ics

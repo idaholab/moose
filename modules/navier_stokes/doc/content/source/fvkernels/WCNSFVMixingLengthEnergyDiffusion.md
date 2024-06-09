@@ -17,3 +17,5 @@ and $Pr_t$ the turbulent Prandtl number.
 !syntax inputs /FVKernels/WCNSFVMixingLengthEnergyDiffusion
 
 !syntax children /FVKernels/WCNSFVMixingLengthEnergyDiffusion
+
+!tag name=WCNSFVMixingLengthEnergyDiffusion pairs=module:navier_stokes system:fvkernels

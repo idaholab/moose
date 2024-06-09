@@ -25,3 +25,5 @@ The `PolycrystalVariablesAction` is accessed through the `Variables` block, as s
 !syntax parameters /Variables/PolycrystalVariables/PolycrystalVariablesAction
 
 !syntax children /Variables/PolycrystalVariables/PolycrystalVariablesAction
+
+!tag name=PolycrystalVariablesAction pairs=module:phase_field system:actions

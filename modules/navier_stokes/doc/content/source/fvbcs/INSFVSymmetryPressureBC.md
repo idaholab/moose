@@ -11,3 +11,5 @@ should be applied for every velocity component on a symmetry boundary.
 !syntax inputs /FVBCs/INSFVSymmetryPressureBC
 
 !syntax children /FVBCs/INSFVSymmetryPressureBC
+
+!tag name=INSFVSymmetryPressureBC pairs=module:navier_stokes system:fvbcs

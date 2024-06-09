@@ -26,3 +26,5 @@ through the solid region, and convection at the interface transfers the heat to 
 !syntax inputs /FVInterfaceKernels/FVConvectionCorrelationInterface
 
 !syntax children /FVInterfaceKernels/FVConvectionCorrelationInterface
+
+!tag name=FVConvectionCorrelationInterface pairs=module:navier_stokes system:fviks

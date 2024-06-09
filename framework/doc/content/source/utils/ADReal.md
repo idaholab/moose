@@ -61,3 +61,5 @@ By default, MOOSE is configured `--with-derivative-size=64`.
 
 - MOOSE non-sparse config: 9.61 seconds (MOOSE's old config, no longer available)
 - MOOSE sparse config: 9.22 seconds (MOOSE's current config)
+
+!tag name=ADReal pairs=module:framework system:utils

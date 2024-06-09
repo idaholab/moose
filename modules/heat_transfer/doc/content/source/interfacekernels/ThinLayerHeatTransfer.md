@@ -48,3 +48,5 @@ An example below is used to verify the thin layer heat transfer model. With the 
 !syntax children /InterfaceKernels/ThinLayerHeatTransfer
 
 !bibtex bibliography
+
+!tag name=ThinLayerHeatTransfer pairs=module:heat_transfer system:interfacekernels

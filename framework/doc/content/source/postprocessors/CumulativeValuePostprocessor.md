@@ -20,3 +20,5 @@ In this example, we tally the total number of nonlinear iterations over the time
 !syntax inputs /Postprocessors/CumulativeValuePostprocessor
 
 !syntax children /Postprocessors/CumulativeValuePostprocessor
+
+!tag name=CumulativeValuePostprocessor pairs=module:framework system:postprocessors

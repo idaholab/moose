@@ -12,3 +12,5 @@ between two functions either in time or along a spatial axis.
 !syntax children /Functions/CosineTransitionFunction
 
 !bibtex bibliography
+
+!tag name=CosineTransitionFunction pairs=module:thermal_hydraulics system:functions

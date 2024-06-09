@@ -12,3 +12,5 @@ parameter value for [!param](/FVKernels/FVMassMatrix/matrix_tags) or
 !syntax inputs /FVKernels/FVMassMatrix
 
 !syntax children /FVKernels/FVMassMatrix
+
+!tag name=FVMassMatrix pairs=module:framework system:fvkernels

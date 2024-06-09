@@ -33,3 +33,5 @@ For those domains specified in [!param](/Mesh/DepletionIDGenerator/exclude_id_na
 !syntax inputs /Mesh/DepletionIDGenerator
 
 !syntax children /Mesh/DepletionIDGenerator
+
+!tag name=DepletionIDGenerator pairs=module:reactor system:meshgenerators

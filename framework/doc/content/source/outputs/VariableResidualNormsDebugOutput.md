@@ -13,3 +13,5 @@ more information.
 !syntax inputs /Outputs/VariableResidualNormsDebugOutput
 
 !syntax children /Outputs/VariableResidualNormsDebugOutput
+
+!tag name=VariableResidualNormsDebugOutput pairs=module:framework system:outputs

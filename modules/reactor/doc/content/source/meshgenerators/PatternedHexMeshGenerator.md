@@ -121,3 +121,5 @@ Usage of this parameter is helpful to retain sequential numbering when dummy reg
 !syntax inputs /Mesh/PatternedHexMeshGenerator
 
 !syntax children /Mesh/PatternedHexMeshGenerator
+
+!tag name=PatternedHexMeshGenerator pairs=module:reactor system:meshgenerators

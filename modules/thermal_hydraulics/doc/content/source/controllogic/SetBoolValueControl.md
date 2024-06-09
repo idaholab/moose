@@ -17,3 +17,5 @@ using the `state` [ControlData.md] of the `threshold_ctrl` ControlLogic.
 !syntax inputs /ControlLogic/SetBoolValueControl
 
 !syntax children /ControlLogic/SetBoolValueControl
+
+!tag name=SetBoolValueControl pairs=module:thermal_hydraulics system:controllogic

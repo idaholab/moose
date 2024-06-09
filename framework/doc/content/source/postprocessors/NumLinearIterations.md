@@ -9,3 +9,5 @@ The number of linear iterations reported is the total number of linear iteration
 !syntax inputs /Postprocessors/NumLinearIterations
 
 !syntax children /Postprocessors/NumLinearIterations
+
+!tag name=NumLinearIterations pairs=module:framework system:postprocessors

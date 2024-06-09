@@ -9,3 +9,5 @@ This model computes a material property using a piecewise linear interpolation t
 !syntax inputs /Materials/PiecewiseLinearInterpolationMaterial
 
 !syntax children /Materials/PiecewiseLinearInterpolationMaterial
+
+!tag name=PiecewiseLinearInterpolationMaterial pairs=module:framework system:materials

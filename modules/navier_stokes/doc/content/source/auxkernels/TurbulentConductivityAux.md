@@ -21,3 +21,5 @@ where:
 !syntax inputs /AuxKernels/TurbulentConductivityAux
 
 !syntax children /AuxKernels/TurbulentConductivityAux
+
+!tag name=TurbulentConductivityAux pairs=module:navier_stokes system:auxkernels

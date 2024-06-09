@@ -16,3 +16,5 @@ Presently, a first-order accurate implicit Euler time derivative is hard-coded.
 !syntax inputs /FVKernels/FVPorousFlowMassTimeDerivative
 
 !syntax children /FVKernels/FVPorousFlowMassTimeDerivative
+
+!tag name=FVPorousFlowMassTimeDerivative pairs=module:porous_flow system:fvkernels

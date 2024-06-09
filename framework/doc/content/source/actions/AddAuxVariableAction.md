@@ -11,3 +11,5 @@ are specified as an object inside the `[AuxVariables]` block.
 More information about auxiliary variables can be found on the [AuxVariables syntax page](syntax/AuxVariables/index.md).
 
 !syntax parameters /AuxVariables/AddAuxVariableAction
+
+!tag name=AddAuxVariableAction pairs=module:framework system:actions

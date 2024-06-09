@@ -87,3 +87,5 @@ and the pressure-dependent gap flux conduction user object, as shown below:
 !syntax children /Constraints/ADInterfaceJouleHeatingConstraint
 
 !bibtex bibliography
+
+!tag name=ADInterfaceJouleHeatingConstraint pairs=module:heat_transfer system:constraints

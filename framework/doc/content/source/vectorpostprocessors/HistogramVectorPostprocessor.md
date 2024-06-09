@@ -61,3 +61,5 @@ figure.savefig("output.pdf")
 !syntax inputs /VectorPostprocessors/HistogramVectorPostprocessor
 
 !syntax children /VectorPostprocessors/HistogramVectorPostprocessor
+
+!tag name=HistogramVectorPostprocessor pairs=module:framework system:vectorpostprocessors

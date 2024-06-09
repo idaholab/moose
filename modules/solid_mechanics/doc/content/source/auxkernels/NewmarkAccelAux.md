@@ -17,3 +17,5 @@ Here, $\beta$ is the Newmark time integration parameter and $\Delta t$ is the ti
 !syntax inputs /AuxKernels/NewmarkAccelAux
 
 !syntax children /AuxKernels/NewmarkAccelAux
+
+!tag name=NewmarkAccelAux pairs=module:solid_mechanics system:auxkernels

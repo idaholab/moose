@@ -24,3 +24,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /Kernels/OneDEnergyWallHeating
 
 !syntax children /Kernels/OneDEnergyWallHeating
+
+!tag name=OneDEnergyWallHeating pairs=module:thermal_hydraulics system:kernels

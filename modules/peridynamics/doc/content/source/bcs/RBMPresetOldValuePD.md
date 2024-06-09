@@ -9,3 +9,5 @@ The `RBMPresetOldValuePD` BoundaryCondition applies Dirichlet boundary condition
 !syntax inputs /BCs/RBMPresetOldValuePD
 
 !syntax children /BCs/RBMPresetOldValuePD
+
+!tag name=RBMPresetOldValuePD pairs=module:peridynamics system:bcs

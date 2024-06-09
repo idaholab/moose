@@ -11,3 +11,5 @@ Please contact a MOOSE developer if you need support for variable numbers of Pos
 !syntax inputs /Postprocessors/NumPositions
 
 !syntax children /Postprocessors/NumPositions
+
+!tag name=NumPositions pairs=module:framework system:postprocessors

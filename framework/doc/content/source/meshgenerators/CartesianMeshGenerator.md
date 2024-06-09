@@ -25,3 +25,5 @@ Each linear subdivision in x, y, or z can be additionally subdivided into sub-el
 !syntax inputs /Mesh/CartesianMeshGenerator
 
 !syntax children /Mesh/CartesianMeshGenerator
+
+!tag name=CartesianMeshGenerator pairs=module:framework system:meshgenerators

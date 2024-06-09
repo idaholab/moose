@@ -39,3 +39,5 @@ tensor components).
 A [ProjectedMaterialPropertyNodalPatchRecoveryAux](/ProjectedMaterialPropertyNodalPatchRecoveryAux.md)
 aux kernel will be added for each scalar material property component to perform nodal patch recovery
 using the data collected in the user object.
+
+!tag name=ProjectedStatefulMaterialStorageAction pairs=module:framework system:actions

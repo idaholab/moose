@@ -44,3 +44,5 @@ for Q1Q1 elements, e.g. fist order velocity, pressure, and temperature on
 !syntax inputs /Postprocessors/INSElementIntegralEnergyAdvection
 
 !syntax children /Postprocessors/INSElementIntegralEnergyAdvection
+
+!tag name=INSElementIntegralEnergyAdvection pairs=module:navier_stokes system:postprocessors

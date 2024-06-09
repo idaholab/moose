@@ -26,3 +26,5 @@ For a discussion on the naming of objects and parameters see
 !syntax inputs /Controls/RealFunctionControl
 
 !syntax children /Controls/RealFunctionControl
+
+!tag name=RealFunctionControl pairs=module:framework system:controls

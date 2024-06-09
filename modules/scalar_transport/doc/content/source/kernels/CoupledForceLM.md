@@ -17,3 +17,5 @@ point. See [LMKernel.md] for more details.
 !syntax inputs /Kernels/CoupledForceLM
 
 !syntax children /Kernels/CoupledForceLM
+
+!tag name=CoupledForceLM pairs=module:scalar_transport system:kernels

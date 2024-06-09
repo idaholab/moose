@@ -17,3 +17,5 @@ A detailed explanation is given in [the LAROMANCE documentation](/LAROMANCE.md).
 !syntax children /Materials/LAROMANCEPartitionStressUpdate
 
 !bibtex bibliography
+
+!tag name=LAROMANCEPartitionStressUpdateBase pairs=module:solid_mechanics system:materials

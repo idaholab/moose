@@ -17,3 +17,5 @@ For more details, see the documentation of the [brine and CO$_2$](brineco2.md) e
 !syntax children /UserObjects/PorousFlowBrineCO2
 
 !bibtex bibliography
+
+!tag name=PorousFlowBrineCO2 pairs=module:porous_flow system:userobjects

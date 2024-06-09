@@ -18,3 +18,5 @@ where $\mathcal{S}_{y^{p}_{-1}}$ the accepted state at index $p$ from the previo
 !syntax inputs /Reporters/AffineInvariantStretchDecision
 
 !syntax children /Reporters/AffineInvariantStretchDecision
+
+!tag name=AffineInvariantStretchDecision pairs=module:stochastic_tools system:reporters

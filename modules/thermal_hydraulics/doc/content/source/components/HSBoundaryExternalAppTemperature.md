@@ -17,3 +17,5 @@ using an [ADMatchedValueBC.md] nodal boundary condition.
 !syntax inputs /Components/HSBoundaryExternalAppTemperature
 
 !syntax children /Components/HSBoundaryExternalAppTemperature
+
+!tag name=HSBoundaryExternalAppTemperature pairs=module:thermal_hydraulics system:components

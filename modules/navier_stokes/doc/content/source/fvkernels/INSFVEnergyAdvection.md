@@ -11,3 +11,5 @@ name `rho_cp_temp` which corresponds to a material property name declared by
 !syntax inputs /FVKernels/INSFVEnergyAdvection
 
 !syntax children /FVKernels/INSFVEnergyAdvection
+
+!tag name=INSFVEnergyAdvection pairs=module:navier_stokes system:fvkernels

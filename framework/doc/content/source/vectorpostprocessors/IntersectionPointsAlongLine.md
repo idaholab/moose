@@ -13,3 +13,5 @@ This object only supports replicated meshes. A distributed version of this objec
 !syntax inputs /VectorPostprocessors/IntersectionPointsAlongLine
 
 !syntax children /VectorPostprocessors/IntersectionPointsAlongLine
+
+!tag name=IntersectionPointsAlongLine pairs=module:framework system:vectorpostprocessors

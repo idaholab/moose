@@ -33,3 +33,5 @@ boundary.
 !syntax inputs /Adaptivity/Markers/BoundaryMarker
 
 !syntax children /Adaptivity/Markers/BoundaryMarker
+
+!tag name=BoundaryMarker pairs=module:framework system:markers

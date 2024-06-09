@@ -27,3 +27,5 @@ anisotropic thermal conductivity in a porous flow simulation.
 !syntax inputs /AuxKernels/MaterialRealTensorValueAux
 
 !syntax children /AuxKernels/MaterialRealTensorValueAux
+
+!tag name=MaterialRealTensorValueAux pairs=module:framework system:auxkernels

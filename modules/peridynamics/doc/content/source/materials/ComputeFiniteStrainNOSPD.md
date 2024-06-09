@@ -11,3 +11,5 @@ Note that Material `ComputeFiniteStrainNOSPD` can be used in general 3D and plan
 !syntax inputs /Materials/ComputeFiniteStrainNOSPD
 
 !syntax children /Materials/ComputeFiniteStrainNOSPD
+
+!tag name=ComputeFiniteStrainNOSPD pairs=module:peridynamics system:materials

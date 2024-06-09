@@ -18,3 +18,5 @@ value is being used within the timestep.
 !syntax inputs /DiracKernels/PorousFlowPointSourceFromPostprocessor
 
 !syntax children /DiracKernels/PorousFlowPointSourceFromPostprocessor
+
+!tag name=PorousFlowPointSourceFromPostprocessor pairs=module:porous_flow system:dirackernels

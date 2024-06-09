@@ -42,3 +42,5 @@ denoted by `_dv_dot` in the `VectorCoupledTimeDerivative` class.
 !syntax inputs /Kernels/VectorCoupledTimeDerivative
 
 !syntax children /Kernels/VectorCoupledTimeDerivative
+
+!tag name=VectorCoupledTimeDerivative pairs=module:framework system:kernels

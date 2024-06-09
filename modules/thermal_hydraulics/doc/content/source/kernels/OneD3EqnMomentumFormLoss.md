@@ -20,3 +20,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /Kernels/OneD3EqnMomentumFormLoss
 
 !syntax children /Kernels/OneD3EqnMomentumFormLoss
+
+!tag name=OneD3EqnMomentumFormLoss pairs=module:thermal_hydraulics system:kernels

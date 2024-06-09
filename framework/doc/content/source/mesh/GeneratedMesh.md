@@ -24,3 +24,5 @@ independently.
 !syntax inputs /Mesh/GeneratedMesh
 
 !syntax children /Mesh/GeneratedMesh
+
+!tag name=GeneratedMesh pairs=module:framework system:mesh

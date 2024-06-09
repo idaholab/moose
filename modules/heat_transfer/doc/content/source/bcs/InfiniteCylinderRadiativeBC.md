@@ -16,3 +16,5 @@ geometric information.
 !syntax inputs /BCs/InfiniteCylinderRadiativeBC
 
 !syntax children /BCs/InfiniteCylinderRadiativeBC
+
+!tag name=InfiniteCylinderRadiativeBC pairs=module:heat_transfer system:bcs

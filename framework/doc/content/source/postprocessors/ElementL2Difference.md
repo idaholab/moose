@@ -21,3 +21,5 @@ In this example, we compute the L2 difference between two variables that are sol
 !syntax inputs /Postprocessors/ElementL2Difference
 
 !syntax children /Postprocessors/ElementL2Difference
+
+!tag name=ElementL2Difference pairs=module:framework system:postprocessors

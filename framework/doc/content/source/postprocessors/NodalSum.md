@@ -7,3 +7,5 @@ Computes the sum of all of the nodal values of a specified variable.
 !syntax inputs /Postprocessors/NodalSum
 
 !syntax children /Postprocessors/NodalSum
+
+!tag name=NodalSum pairs=module:framework system:postprocessors

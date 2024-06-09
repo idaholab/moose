@@ -21,3 +21,5 @@ on `Positions` objects.
 !syntax inputs /Positions/TransformedPositions
 
 !syntax children /Positions/TransformedPositions
+
+!tag name=TransformedPositions pairs=module:framework system:positions

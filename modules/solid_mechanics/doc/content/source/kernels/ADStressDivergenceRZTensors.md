@@ -46,3 +46,5 @@ The coordinate type in the `[Problem]` block of the input file must be set to
 !syntax inputs /Kernels/ADStressDivergenceRZTensors
 
 !syntax children /Kernels/ADStressDivergenceRZTensors
+
+!tag name=ADStressDivergenceRZTensors pairs=module:solid_mechanics system:kernels

@@ -66,3 +66,5 @@ This `ChemicalComposition` action syntax is shown on the
 system page.
 
 !bibtex bibliography
+
+!tag name=ChemicalCompositionAction pairs=module:chemical_reactions system:actions

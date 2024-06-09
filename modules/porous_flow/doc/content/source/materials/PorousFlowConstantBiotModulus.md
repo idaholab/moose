@@ -20,3 +20,5 @@ This quantity is computed during the initial stage of the simulation and is kept
 !syntax inputs /Materials/PorousFlowConstantBiotModulus
 
 !syntax children /Materials/PorousFlowConstantBiotModulus
+
+!tag name=PorousFlowConstantBiotModulus pairs=module:porous_flow system:materials

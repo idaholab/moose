@@ -12,3 +12,5 @@ when using the contact action [ContactAction](/ContactAction.md)
 !syntax inputs /UserObjects/LMWeightedVelocitiesUserObject
 
 !syntax children /UserObjects/LMWeightedVelocitiesUserObject
+
+!tag name=LMWeightedVelocitiesUserObject pairs=module:contact system:userobjects

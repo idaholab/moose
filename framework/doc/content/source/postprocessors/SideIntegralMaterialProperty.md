@@ -12,3 +12,5 @@ supplied to select a scalar component from the supplied material property (e.g.
 !syntax inputs /Postprocessors/SideIntegralMaterialProperty
 
 !syntax children /Postprocessors/SideIntegralMaterialProperty
+
+!tag name=SideIntegralMaterialProperty pairs=module:framework system:postprocessors

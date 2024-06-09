@@ -11,3 +11,5 @@ computed using the mixing length model.
 !syntax inputs /FunctorMaterials/MixingLengthTurbulentViscosityFunctorMaterial
 
 !syntax children /FunctorMaterials/MixingLengthTurbulentViscosityFunctorMaterial
+
+!tag name=MixingLengthTurbulentViscosityFunctorMaterial pairs=module:navier_stokes system:functormaterials

@@ -24,3 +24,5 @@ where:
 !syntax inputs /FVBCs/FVMarshakRadiativeBC
 
 !syntax children /FVBCs/FVMarshakRadiativeBC
+
+!tag name=FVMarshakRadiativeBC pairs=module:heat_transfer system:fvbcs

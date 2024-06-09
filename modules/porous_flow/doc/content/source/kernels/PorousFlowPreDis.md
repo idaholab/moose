@@ -60,3 +60,5 @@ See [mass lumping](/porous_flow/mass_lumping.md) for details.
 !syntax inputs /Kernels/PorousFlowPreDis
 
 !syntax children /Kernels/PorousFlowPreDis
+
+!tag name=PorousFlowPreDis pairs=module:porous_flow system:kernels

@@ -11,3 +11,5 @@ This is the automatic-differentiation version of [`PureElasticTractionSeparation
 !syntax inputs /Materials/ADPureElasticTractionSeparation
 
 !syntax children /Materials/ADPureElasticTractionSeparation
+
+!tag name=ADPureElasticTractionSeparation pairs=module:solid_mechanics system:materials

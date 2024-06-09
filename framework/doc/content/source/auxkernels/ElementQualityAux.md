@@ -20,3 +20,5 @@ The `SHAPE` metric is a good one to use for quads and tris.  You can see the lis
 !syntax children /AuxKernels/ElementQualityAux
 
 !bibtex bibliography
+
+!tag name=ElementQualityAux pairs=module:framework system:auxkernels

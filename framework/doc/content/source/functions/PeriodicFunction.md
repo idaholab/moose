@@ -23,3 +23,5 @@ for negative values of the coordinates or time.
 !syntax inputs /Functions/PeriodicFunction
 
 !syntax children /Functions/PeriodicFunction
+
+!tag name=PeriodicFunction pairs=module:framework system:functions

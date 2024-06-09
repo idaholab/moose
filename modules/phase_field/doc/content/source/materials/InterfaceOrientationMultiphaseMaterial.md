@@ -9,3 +9,5 @@ This Material accounts for the orientation dependence of interfacial energy for 
 !syntax inputs /Materials/InterfaceOrientationMultiphaseMaterial
 
 !syntax children /Materials/InterfaceOrientationMultiphaseMaterial
+
+!tag name=InterfaceOrientationMultiphaseMaterial pairs=module:phase_field system:materials

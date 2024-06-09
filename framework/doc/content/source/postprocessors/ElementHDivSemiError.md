@@ -25,3 +25,4 @@ the `vectorValue` and `div` methods, e.g. [MooseParsedVectorFunction.md].
 !syntax inputs /Postprocessors/ElementHDivSemiError
 
 !syntax children /Postprocessors/ElementHDivSemiError
+!tag name=ElementHDivSemiError pairs=module:framework system:postprocessors

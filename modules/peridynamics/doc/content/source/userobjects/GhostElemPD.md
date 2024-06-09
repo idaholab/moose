@@ -9,3 +9,5 @@ The `GhostElemPD` UserObject is used to ghost the element information which is r
 !syntax inputs /UserObjects/GhostElemPD
 
 !syntax children /UserObjects/GhostElemPD
+
+!tag name=GhostElemPD pairs=module:peridynamics system:userobjects

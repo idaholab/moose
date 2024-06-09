@@ -22,3 +22,5 @@ where, $\hat{M}(\pmb{\theta},~\pmb{\Theta}_i)$ is the model prediction given mod
 !syntax inputs /Likelihood/Gaussian
 
 !syntax children /Likelihood/Gaussian
+
+!tag name=Gaussian pairs=module:stochastic_tools system:likelihoods

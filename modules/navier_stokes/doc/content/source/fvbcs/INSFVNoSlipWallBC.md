@@ -12,3 +12,5 @@ the velocity component specified with `variable`. If applying
 !syntax inputs /FVBCs/INSFVNoSlipWallBC
 
 !syntax children /FVBCs/INSFVNoSlipWallBC
+
+!tag name=INSFVNoSlipWallBC pairs=module:navier_stokes system:fvbcs

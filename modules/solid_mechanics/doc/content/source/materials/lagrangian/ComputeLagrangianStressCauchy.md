@@ -24,3 +24,5 @@ and
 \begin{equation}
       T_{ijkl}=\frac{d\sigma_{ij}}{d\Delta l_{kl}}=\frac{1}{J}T_{iAmN}^{\prime}F_{jA}F_{lN}f_{mk}+f_{jk}\sigma_{il}-\sigma_{ij}f_{lk}
 \end{equation}
+
+!tag name=ComputeLagrangianStressCauchy pairs=module:solid_mechanics system:materials

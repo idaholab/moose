@@ -65,3 +65,5 @@ The measurement data can also be given directly, like in the following example.
 !syntax inputs /OptimizationReporter/OptimizationReporter
 
 !syntax children /OptimizationReporter/OptimizationReporter
+
+!tag name=OptimizationReporter pairs=module:optimization system:optimizationreporters

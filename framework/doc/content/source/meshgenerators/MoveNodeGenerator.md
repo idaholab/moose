@@ -13,3 +13,5 @@ The user has to provide the ids the nodes to be modified. Nodes can then be move
 !syntax inputs /Mesh/MoveNodeGenerator
 
 !syntax children /Mesh/MoveNodeGenerator
+
+!tag name=MoveNodeGenerator pairs=module:framework system:meshgenerators

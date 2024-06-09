@@ -9,3 +9,5 @@ AD material property and the `sigma_from_T(T)` interface of a
 !syntax inputs /Materials/ADSurfaceTensionMaterial
 
 !syntax children /Materials/ADSurfaceTensionMaterial
+
+!tag name=ADSurfaceTensionMaterial pairs=module:fluid_properties system:materials

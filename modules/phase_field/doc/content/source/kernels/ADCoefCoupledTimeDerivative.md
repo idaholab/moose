@@ -15,3 +15,5 @@ where $v$ (`v`) is a coupled variable.
 !syntax children /Kernels/ADCoefCoupledTimeDerivative
 
 !bibtex bibliography
+
+!tag name=ADCoefCoupledTimeDerivative pairs=module:phase_field system:kernels

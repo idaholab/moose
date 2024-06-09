@@ -18,3 +18,4 @@ nonlinear variables, concentration and pore pressure.
 !syntax inputs /Kernels/DesorptionFromMatrix
 
 !syntax children /Kernels/DesorptionFromMatrix
+!tag name=DesorptionFromMatrix pairs=module:chemical_reactions system:kernels

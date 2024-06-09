@@ -69,3 +69,5 @@ Defining conductivity as a temperature dependent function:
 !syntax children /Materials/SideSetHeatTransferMaterial
 
 !bibtex bibliography
+
+!tag name=SideSetHeatTransferMaterial pairs=module:heat_transfer system:materials

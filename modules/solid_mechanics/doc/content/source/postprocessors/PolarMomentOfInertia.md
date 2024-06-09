@@ -16,3 +16,5 @@ condition.
 !syntax inputs /Postprocessors/PolarMomentOfInertia
 
 !syntax children /Postprocessors/PolarMomentOfInertia
+
+!tag name=PolarMomentOfInertia pairs=module:solid_mechanics system:postprocessors

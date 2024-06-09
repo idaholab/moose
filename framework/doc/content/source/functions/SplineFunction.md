@@ -27,3 +27,5 @@ parameters.
 !syntax inputs /Functions/SplineFunction
 
 !syntax children /Functions/SplineFunction
+
+!tag name=SplineFunction pairs=module:framework system:functions

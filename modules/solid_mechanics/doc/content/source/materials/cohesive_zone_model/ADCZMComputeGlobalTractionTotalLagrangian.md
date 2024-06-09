@@ -11,3 +11,5 @@ This is the automatic-differentiation version of [`CZMComputeGlobalTractionTotal
 !syntax inputs /Materials/ADCZMComputeGlobalTractionTotalLagrangian
 
 !syntax children /Materials/ADCZMComputeGlobalTractionTotalLagrangian
+
+!tag name=ADCZMComputeGlobalTractionTotalLagrangian pairs=module:solid_mechanics system:materials

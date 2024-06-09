@@ -17,3 +17,5 @@ to perform the constraint enforcement.
 !syntax children /Constraints/EqualGradientConstraint
 
 !bibtex bibliography
+
+!tag name=EqualGradientConstraint pairs=module:framework system:constraints

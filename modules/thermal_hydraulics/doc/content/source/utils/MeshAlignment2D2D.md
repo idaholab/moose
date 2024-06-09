@@ -19,3 +19,5 @@ const std::vector<dof_id_type> & getCoupledSecondaryElemIDs(primary_elem_id)
 The boundaries must be *aligned*; the axis is defined by `axis_point` and `axis_direction`,
 and the axial coordinates of the primary side element and the coupled secondary
 elements must be exactly the same.
+
+!tag name=MeshAlignment2D2D pairs=module:thermal_hydraulics system:utils

@@ -25,3 +25,5 @@ the surface.
 !syntax inputs /Kernels/OutOfPlanePressure
 
 !syntax children /Kernels/OutOfPlanePressure
+
+!tag name=OutOfPlanePressure pairs=module:solid_mechanics system:kernels

@@ -15,3 +15,5 @@ The `PenaltyDirichletNodalKernel` object is to apply Dirichlet boundary conditio
 !syntax inputs /NodalKernels/PenaltyDirichletNodalKernel
 
 !syntax children /NodalKernels/PenaltyDirichletNodalKernel
+
+!tag name=PenaltyDirichletNodalKernel pairs=module:framework system:nodalkernels

@@ -6,3 +6,5 @@ The coupling between displacements and pore-pressure is added for every dimensio
 displacements vector passed to the action.
 
 !syntax parameters /Kernels/PoroMechanics/PoroMechanicsAction
+
+!tag name=PoroMechanicsAction pairs=module:solid_mechanics system:actions

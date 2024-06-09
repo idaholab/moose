@@ -14,3 +14,5 @@ with $T_{fluid}$ the fluid temperature, $q$ the local heat flux and $h$ the wall
 !syntax inputs /Materials/TemperatureWall3EqnMaterial
 
 !syntax children /Materials/TemperatureWall3EqnMaterial
+
+!tag name=TemperatureWall3EqnMaterial pairs=module:thermal_hydraulics system:materials

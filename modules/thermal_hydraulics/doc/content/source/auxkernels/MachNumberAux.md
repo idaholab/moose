@@ -20,3 +20,5 @@ and computing them.
 !syntax inputs /AuxKernels/MachNumberAux
 
 !syntax children /AuxKernels/MachNumberAux
+
+!tag name=MachNumberAux pairs=module:thermal_hydraulics system:auxkernels

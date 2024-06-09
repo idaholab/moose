@@ -196,3 +196,5 @@ In addition, many methods are available for additional matrix operations:
 - `sum1x3()` calculates the vector from summing over $j$ in C$_{iijj}$
 - `isSymmetric()`
 - `isIsotropic()`
+
+!tag name=MooseUtils pairs=module:framework system:utils

@@ -15,3 +15,5 @@ This userobject, `LevelSetCutUserObject` uses a level set field to cut the finit
 !syntax inputs /UserObjects/LevelSetCutUserObject
 
 !syntax children /UserObjects/LevelSetCutUserObject
+
+!tag name=LevelSetCutUserObject pairs=module:xfem system:userobjects

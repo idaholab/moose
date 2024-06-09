@@ -16,3 +16,5 @@
 !syntax inputs /Mesh/StitchBoundaryMeshGenerator
 
 !syntax children /Mesh/StitchBoundaryMeshGenerator
+
+!tag name=StitchBoundaryMeshGenerator pairs=module:framework system:meshgenerators

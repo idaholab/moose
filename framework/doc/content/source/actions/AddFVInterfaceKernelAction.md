@@ -9,3 +9,5 @@ More information about finite volume interface kernels can be found on the
 [FVInterfaceKernels syntax page](syntax/FVInterfaceKernels/index.md).
 
 !syntax parameters /FVInterfaceKernels/AddFVInterfaceKernelAction
+
+!tag name=AddFVInterfaceKernelAction pairs=module:framework system:actions

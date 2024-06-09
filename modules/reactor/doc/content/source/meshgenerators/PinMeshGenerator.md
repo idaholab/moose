@@ -71,3 +71,5 @@ This is the resulting "region_id" extra element integer layout, which was chosen
 !syntax inputs /Mesh/PinMeshGenerator
 
 !syntax children /Mesh/PinMeshGenerator
+
+!tag name=PinMeshGenerator pairs=module:reactor system:meshgenerators

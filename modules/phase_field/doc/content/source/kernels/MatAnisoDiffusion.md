@@ -10,3 +10,5 @@ a tensor valued diffusion coefficient $D$ (`diffusivity`).
 !syntax inputs /Kernels/MatAnisoDiffusion
 
 !syntax children /Kernels/MatAnisoDiffusion
+
+!tag name=MatAnisoDiffusion pairs=module:phase_field system:kernels

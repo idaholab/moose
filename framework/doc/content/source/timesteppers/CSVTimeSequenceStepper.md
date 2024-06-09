@@ -18,3 +18,5 @@ of this time stepper for failed time steps.
 !syntax inputs /Executioner/TimeSteppers/CSVTimeSequenceStepper
 
 !syntax children /Executioner/TimeSteppers/CSVTimeSequenceStepper
+
+!tag name=CSVTimeSequenceStepper pairs=module:framework system:timesteppers

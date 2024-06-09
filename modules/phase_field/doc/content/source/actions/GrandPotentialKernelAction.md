@@ -101,3 +101,5 @@ The materials associated with strict mass conservation can be created automatica
     end=Preconditioning
 
 !bibtex bibliography
+
+!tag name=GrandPotentialKernelAction pairs=module:phase_field system:actions

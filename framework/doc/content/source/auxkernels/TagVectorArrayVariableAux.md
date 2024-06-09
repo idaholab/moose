@@ -15,3 +15,5 @@ completed before reliable indexing of the tagged vector can be performed.
 !syntax inputs /AuxKernels/TagVectorArrayVariableAux
 
 !syntax children /AuxKernels/TagVectorArrayVariableAux
+
+!tag name=TagVectorArrayVariableAux pairs=module:framework system:auxkernels

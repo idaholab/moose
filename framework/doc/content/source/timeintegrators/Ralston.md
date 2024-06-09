@@ -44,3 +44,5 @@ should be used with caution.
 !syntax inputs /Executioner/TimeIntegrator/Ralston
 
 !syntax children /Executioner/TimeIntegrator/Ralston
+
+!tag name=Ralston pairs=module:framework system:timeintegrators

@@ -20,3 +20,5 @@ file that uses a [MooseParsedFunction.md] object for computing the known solutio
 !syntax inputs /Adaptivity/Indicators/AnalyticalIndicator
 
 !syntax children /Adaptivity/Indicators/AnalyticalIndicator
+
+!tag name=AnalyticalIndicator pairs=module:framework system:indicators

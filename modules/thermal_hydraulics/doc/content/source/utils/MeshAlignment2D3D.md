@@ -7,3 +7,5 @@ Each element on the primary side maps to multiple elements on the secondary side
 These "meshes" must be *aligned*; the 2D boundary is associated
 with an arbitrary axis, and the axial coordinates of the paired elements must
 match.
+
+!tag name=MeshAlignment2D3D pairs=module:thermal_hydraulics system:utils

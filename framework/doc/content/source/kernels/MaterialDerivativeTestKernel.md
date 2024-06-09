@@ -51,3 +51,5 @@ and assembles the Jacobian using the derivatives of the material property as pro
 !syntax inputs /Kernels/MaterialDerivativeTestKernel
 
 !syntax children /Kernels/MaterialDerivativeTestKernel
+
+!tag name=MaterialDerivativeTestKernel pairs=module:framework system:kernels

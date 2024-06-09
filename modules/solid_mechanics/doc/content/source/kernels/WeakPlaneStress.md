@@ -22,3 +22,5 @@ For finite deformation models, this kernel should be run on the displaced mesh b
 !syntax children /Kernels/WeakPlaneStress
 
 !bibtex bibliography
+
+!tag name=WeakPlaneStress pairs=module:solid_mechanics system:kernels

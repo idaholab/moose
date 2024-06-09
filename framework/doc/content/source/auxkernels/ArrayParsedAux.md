@@ -26,3 +26,5 @@ This is an example that defines the following expression:
 !syntax inputs /AuxKernels/ArrayParsedAux
 
 !syntax children /AuxKernels/ArrayParsedAux
+
+!tag name=ArrayParsedAux pairs=module:framework system:auxkernels

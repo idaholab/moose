@@ -44,3 +44,5 @@ If you're going to enhance `ConcentricCircleMesh,` may be developing the windmil
 !syntax inputs /Mesh/ConcentricCircleMesh
 
 !syntax children /Mesh/ConcentricCircleMesh
+
+!tag name=ConcentricCircleMesh pairs=module:framework system:mesh

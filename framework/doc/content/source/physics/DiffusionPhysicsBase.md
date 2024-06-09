@@ -24,3 +24,5 @@ over the boundaries specified by the [!param](/Physics/Diffusion/FiniteVolume/di
 The values set at the Dirichlet boundary conditions, $g$, and Neumann boundary conditions, $h$,
 are set by the [!param](/Physics/Diffusion/FiniteVolume/boundary_values) and
 [!param](/Physics/Diffusion/FiniteVolume/boundary_fluxes) respectively.
+
+!tag name=DiffusionPhysicsBase pairs=module:framework system:physics

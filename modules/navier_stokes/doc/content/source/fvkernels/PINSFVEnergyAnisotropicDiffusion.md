@@ -23,3 +23,5 @@ due to the porous media, recirculation flow within the pores and eddy diffusion 
 !syntax inputs /FVKernels/PINSFVEnergyAnisotropicDiffusion
 
 !syntax children /FVKernels/PINSFVEnergyAnisotropicDiffusion
+
+!tag name=PINSFVEnergyAnisotropicDiffusion pairs=module:navier_stokes system:fvkernels

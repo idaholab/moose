@@ -89,3 +89,5 @@ The extra element IDs from the original peripheral region are conserved. They ma
 !syntax inputs /Mesh/PatternedHexPeripheralModifier
 
 !syntax children /Mesh/PatternedHexPeripheralModifier
+
+!tag name=PatternedHexPeripheralModifier pairs=module:reactor system:meshgenerators

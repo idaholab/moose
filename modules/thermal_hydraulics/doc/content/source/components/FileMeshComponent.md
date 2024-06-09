@@ -30,3 +30,5 @@ where $\mathbf{r}_\text{file}$ is a point in the loaded mesh file.
 !syntax inputs /Components/FileMeshComponent
 
 !syntax children /Components/FileMeshComponent
+
+!tag name=FileMeshComponent pairs=module:thermal_hydraulics system:components

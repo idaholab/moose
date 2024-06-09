@@ -15,3 +15,5 @@ In this example, an advection problem is solved at multiple mesh refinement leve
 !syntax inputs /Postprocessors/AverageElementSize
 
 !syntax children /Postprocessors/AverageElementSize
+
+!tag name=AverageElementSize pairs=module:framework system:postprocessors

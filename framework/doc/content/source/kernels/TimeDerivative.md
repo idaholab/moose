@@ -37,3 +37,5 @@ block for a transient advection-diffusion-reaction problem that demonstrates the
 !syntax inputs /Kernels/TimeDerivative
 
 !syntax children /Kernels/TimeDerivative
+
+!tag name=TimeDerivative pairs=module:framework system:kernels

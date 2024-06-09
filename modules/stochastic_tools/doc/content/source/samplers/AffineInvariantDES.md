@@ -18,3 +18,5 @@ where $r1$ is a random index defined between $[1,~P]$ excluding the index $p$ an
 !syntax inputs /Samplers/AffineInvariantDES
 
 !syntax children /Samplers/AffineInvariantDES
+
+!tag name=AffineInvariantDES pairs=module:stochastic_tools system:samplers

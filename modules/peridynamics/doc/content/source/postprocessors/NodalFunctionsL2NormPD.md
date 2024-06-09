@@ -14,3 +14,5 @@ where $V_{\mathbf{X}}$ is the area or volume of material point $\mathbf{X}$, and
 !syntax inputs /Postprocessors/NodalFunctionsL2NormPD
 
 !syntax children /Postprocessors/NodalFunctionsL2NormPD
+
+!tag name=NodalFunctionsL2NormPD pairs=module:peridynamics system:postprocessors

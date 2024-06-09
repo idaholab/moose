@@ -51,3 +51,5 @@ q_b = -q_\text{wall} = \mathcal{H}(T - T_s) \eqp
 !syntax inputs /Components/HeatTransferFromHeatStructure3D1Phase
 
 !syntax children /Components/HeatTransferFromHeatStructure3D1Phase
+
+!tag name=HeatTransferFromHeatStructure3D1Phase pairs=module:thermal_hydraulics system:components

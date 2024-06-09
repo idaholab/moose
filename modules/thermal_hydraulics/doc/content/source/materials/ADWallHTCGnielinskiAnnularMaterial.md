@@ -56,3 +56,5 @@ h = \frac{\text{Nu} k}{D_h} \,.
 !syntax inputs /Materials/ADWallHTCGnielinskiAnnularMaterial
 
 !syntax children /Materials/ADWallHTCGnielinskiAnnularMaterial
+
+!tag name=ADWallHTCGnielinskiAnnularMaterial pairs=module:thermal_hydraulics system:materials

@@ -10,3 +10,5 @@ This is the [automatic differentiation (AD)](automatic_differentiation/index.md)
 !syntax inputs /Materials/ADPrandtlNumberMaterial
 
 !syntax children /Materials/ADPrandtlNumberMaterial
+
+!tag name=ADPrandtlNumberMaterial pairs=module:thermal_hydraulics system:materials

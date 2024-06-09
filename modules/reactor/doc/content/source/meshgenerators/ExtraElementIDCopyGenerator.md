@@ -14,3 +14,5 @@ The extra element ID name *element_id* is reserved for the element ID and can be
 !syntax inputs /Mesh/ExtraElementIDCopyGenerator
 
 !syntax children /Mesh/ExtraElementIDCopyGenerator
+
+!tag name=ExtraElementIDCopyGenerator pairs=module:reactor system:meshgenerators

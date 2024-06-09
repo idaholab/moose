@@ -7,3 +7,5 @@
 !syntax inputs /UserObjects/AEFVUpwindInternalSideFlux
 
 !syntax children /UserObjects/AEFVUpwindInternalSideFlux
+
+!tag name=AEFVUpwindInternalSideFlux pairs=module:rdg system:userobjects

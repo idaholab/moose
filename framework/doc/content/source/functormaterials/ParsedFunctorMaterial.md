@@ -28,3 +28,5 @@ expression, see the [function parser site](http://warp.povusers.org/FunctionPars
 !syntax inputs /FunctorMaterials/ParsedFunctorMaterial
 
 !syntax children /FunctorMaterials/ParsedFunctorMaterial
+
+!tag name=ParsedFunctorMaterial pairs=module:framework system:functormaterials

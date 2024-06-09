@@ -15,3 +15,5 @@ In this example, constant initial conditions are set for variable `u` and auxili
 !syntax inputs /ICs/ConstantIC
 
 !syntax children /ICs/ConstantIC
+
+!tag name=ConstantIC pairs=module:framework system:ics

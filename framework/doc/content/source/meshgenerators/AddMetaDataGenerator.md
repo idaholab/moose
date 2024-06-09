@@ -12,3 +12,5 @@ This MeshGenerator object allows the user to add external Mesh Metadata to the i
 !syntax inputs /Mesh/AddMetaDataGenerator
 
 !syntax children /Mesh/AddMetaDataGenerator
+
+!tag name=AddMetaDataGenerator pairs=module:framework system:meshgenerators

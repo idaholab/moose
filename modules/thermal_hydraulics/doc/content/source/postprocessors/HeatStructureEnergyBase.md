@@ -14,3 +14,5 @@ default, yielding [eq:hs_total_energy]) to compute the energy *change*:
 \begin{equation}\label{eq:hs_energy_change}
   \Delta E_{tot} = \sum\limits_i^N \int\limits_{V_i} \rho c_p (T - T_0) dV \,.
 \end{equation}
+
+!tag name=HeatStructureEnergyBase pairs=module:thermal_hydraulics system:postprocessors

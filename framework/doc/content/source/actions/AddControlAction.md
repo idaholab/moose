@@ -10,3 +10,5 @@ More information about the Control system may be found on the
 [Controls syntax page](syntax/Controls/index.md).
 
 !syntax parameters /Controls/AddControlAction
+
+!tag name=AddControlAction pairs=module:framework system:actions

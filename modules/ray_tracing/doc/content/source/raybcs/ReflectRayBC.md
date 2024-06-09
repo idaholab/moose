@@ -15,3 +15,5 @@ Per the specularly reflected direction (static and available for other [RayBCs/i
 !syntax parameters /RayBCs/ReflectRayBC
 
 !syntax inputs /RayBCs/ReflectRayBC
+
+!tag name=ReflectRayBC pairs=module:ray_tracing system:raybcs

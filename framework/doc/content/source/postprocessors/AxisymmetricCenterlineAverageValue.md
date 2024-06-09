@@ -15,3 +15,5 @@
 !syntax inputs /Postprocessors/AxisymmetricCenterlineAverageValue
 
 !syntax children /Postprocessors/AxisymmetricCenterlineAverageValue
+
+!tag name=AxisymmetricCenterlineAverageValue pairs=module:framework system:postprocessors

@@ -11,3 +11,5 @@ sets the parameters of the adaptivity object and initializes it.
 More information about adaptivity can be found on the [Adaptivity syntax page](syntax/Adaptivity/index.md).
 
 !syntax parameters /Executioner/Adaptivity/AdaptivityAction
+
+!tag name=AdaptivityAction pairs=module:framework system:actions

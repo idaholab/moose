@@ -81,3 +81,5 @@ This object is automatically added from the [Cohesive Zone Physics](CohesiveZone
 !syntax parameters /InterfaceKernels/CZMInterfaceKernelSmallStrain
 !syntax inputs /InterfaceKernels/CZMInterfaceKernelSmallStrain
 !syntax children /InterfaceKernels/CZMInterfaceKernelSmallStrain
+
+!tag name=CZMInterfaceKernelSmallStrain pairs=module:solid_mechanics system:interfacekernels

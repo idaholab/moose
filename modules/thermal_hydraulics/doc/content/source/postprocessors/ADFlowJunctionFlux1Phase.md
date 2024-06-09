@@ -26,3 +26,5 @@ case, please contact the THM team for assistance.
 !syntax inputs /Postprocessors/ADFlowJunctionFlux1Phase
 
 !syntax children /Postprocessors/ADFlowJunctionFlux1Phase
+
+!tag name=ADFlowJunctionFlux1Phase pairs=module:thermal_hydraulics system:postprocessors

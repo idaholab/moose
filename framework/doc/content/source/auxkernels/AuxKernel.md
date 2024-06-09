@@ -5,3 +5,5 @@ An `AuxKernel` computes values that are stored in "Auxiliary Variables".  There 
 When an auxiliary kernel depends on user objects, including postprocessors, those user objects are put in a group of user objects named as *pre_aux*, so that those user objects can be evaluated before the auxiliary kernel. By default, all user objects are evaluated after auxiliary kernel evaluation, i.e. in *post_aux* group. If the depending user objects depend on some other user objects, these indirectly depending user objects for auxiliary kernels are automatically put in the *pre_aux* group.
 
 For more information: see the [documentation for the Auxiliary System](AuxKernels/index.md)
+
+!tag name=AuxKernel pairs=module:framework system:auxkernels

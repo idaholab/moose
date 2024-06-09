@@ -48,3 +48,5 @@ Users can output the information on the models inputted by setting the [!param](
 !syntax inputs /Reporters/PolynomialChaosReporter
 
 !syntax children /Reporters/PolynomialChaosReporter
+
+!tag name=PolynomialChaosReporter pairs=module:stochastic_tools system:reporters

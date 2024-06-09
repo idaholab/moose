@@ -18,3 +18,5 @@ g(\vec\eta) = \sum_i \eta_i^2(1-\eta_i)^2.
 !syntax inputs /Materials/MultiBarrierFunctionMaterial
 
 !syntax children /Materials/MultiBarrierFunctionMaterial
+
+!tag name=MultiBarrierFunctionMaterial pairs=module:phase_field system:materials

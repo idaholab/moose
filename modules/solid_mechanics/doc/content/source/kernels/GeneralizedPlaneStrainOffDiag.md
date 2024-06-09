@@ -9,3 +9,5 @@ Kernel `GeneralizedPlaneStrainOffDiag` computes the off-diagonal Jacobian entrie
 !syntax inputs /Kernels/GeneralizedPlaneStrainOffDiag
 
 !syntax children /Kernels/GeneralizedPlaneStrainOffDiag
+
+!tag name=GeneralizedPlaneStrainOffDiag pairs=module:solid_mechanics system:kernels

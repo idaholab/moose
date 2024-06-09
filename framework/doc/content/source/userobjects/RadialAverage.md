@@ -52,3 +52,5 @@ The weights mentioned above currently do not take into account the quadrature po
 !syntax children /UserObjects/RadialAverage
 
 !bibtex bibliography
+
+!tag name=RadialAverage pairs=module:framework system:userobjects

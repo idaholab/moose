@@ -13,3 +13,5 @@ useful for verification problems.
 !syntax children /Components/InletFunction1Phase
 
 !bibtex bibliography
+
+!tag name=InletFunction1Phase pairs=module:test system:components

@@ -12,3 +12,5 @@ Refer to [DGKernels/index.md] for the full HFEM weak form for Poisson's equation
 !syntax inputs /DGKernels/HFEMDiffusion
 
 !syntax children /DGKernels/HFEMDiffusion
+
+!tag name=HFEMDiffusion pairs=module:framework system:dgkernels

@@ -35,3 +35,5 @@ Additionally, a user can control whether volume-integrated values or volume-aver
 !syntax inputs /VectorPostprocessors/ExtraIDIntegralVectorPostprocessor
 
 !syntax children /VectorPostprocessors/ExtraIDIntegralVectorPostprocessor
+
+!tag name=ExtraIDIntegralVectorPostprocessor pairs=module:framework system:vectorpostprocessors

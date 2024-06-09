@@ -13,3 +13,5 @@ meaning that its value can be changed dynamically during a simulation using the 
 !syntax inputs /AuxScalarKernels/SimpleTurbinePowerAux
 
 !syntax children /AuxScalarKernels/SimpleTurbinePowerAux
+
+!tag name=SimpleTurbinePowerAux pairs=module:thermal_hydraulics system:auxscalarkernels

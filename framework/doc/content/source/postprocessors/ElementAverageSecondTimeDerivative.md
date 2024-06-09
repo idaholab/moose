@@ -11,3 +11,5 @@ This class computes the average value of the variable's second time derivative f
 !syntax inputs /Postprocessors/ElementAverageSecondTimeDerivative
 
 !syntax children /Postprocessors/ElementAverageSecondTimeDerivative
+
+!tag name=ElementAverageSecondTimeDerivative pairs=module:framework system:postprocessors

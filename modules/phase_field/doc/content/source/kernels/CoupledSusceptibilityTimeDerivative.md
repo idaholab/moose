@@ -21,3 +21,5 @@ See also [CoupledTimeDerivative](/CoupledTimeDerivative.md).s
 !syntax inputs /Kernels/CoupledSusceptibilityTimeDerivative
 
 !syntax children /Kernels/CoupledSusceptibilityTimeDerivative
+
+!tag name=CoupledSusceptibilityTimeDerivative pairs=module:phase_field system:kernels

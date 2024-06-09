@@ -25,3 +25,5 @@ boundary conditions, etc.) where the userobject functions are used.
 !syntax children /SolidProperties/ThermalFunctionSolidProperties
 
 !bibtex bibliography
+
+!tag name=ThermalFunctionSolidProperties pairs=module:solid_properties system:solidproperties

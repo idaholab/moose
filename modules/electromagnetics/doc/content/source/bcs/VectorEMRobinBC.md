@@ -78,3 +78,5 @@ in accuracy.
 !syntax inputs /BCs/VectorEMRobinBC
 
 !syntax children /BCs/VectorEMRobinBC
+
+!tag name=VectorEMRobinBC pairs=module:electromagnetics system:bcs

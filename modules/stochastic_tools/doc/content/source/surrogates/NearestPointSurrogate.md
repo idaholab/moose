@@ -30,3 +30,5 @@ A reporter is then used to evaluate the surrogate model with the points taken fr
 !syntax inputs /Surrogates/NearestPointSurrogate
 
 !syntax children /Surrogates/NearestPointSurrogate
+
+!tag name=NearestPointSurrogate pairs=module:stochastic_tools system:surrogates

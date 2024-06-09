@@ -120,3 +120,5 @@ Further description of this result and further examples may be found in the [bou
 !syntax inputs /BCs/PorousFlowOutflowBC
 
 !syntax children /BCs/PorousFlowOutflowBC
+
+!tag name=PorousFlowOutflowBC pairs=module:porous_flow system:bcs

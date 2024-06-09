@@ -29,3 +29,5 @@ V^r_i(t) = \int_{\Omega}u(\vec{r},t)\left.\frac{df(\vec{r},t,\vec{p})}{dp_i}\rig
 !syntax inputs /VectorPostprocessors/ElementOptimizationSourceFunctionInnerProduct
 
 !syntax children /VectorPostprocessors/ElementOptimizationSourceFunctionInnerProduct
+
+!tag name=ElementOptimizationSourceFunctionInnerProduct pairs=module:optimization system:vectorpostprocessors

@@ -11,3 +11,5 @@ a fluid system.
 !syntax inputs /AuxKernels/SpecificEnthalpyAux
 
 !syntax children /AuxKernels/SpecificEnthalpyAux
+
+!tag name=SpecificEnthalpyAux pairs=module:fluid_properties system:auxkernels

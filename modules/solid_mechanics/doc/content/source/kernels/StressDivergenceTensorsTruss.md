@@ -13,3 +13,5 @@ This class computes the axial force in the truss local coordinate system using t
 !syntax children /Kernels/StressDivergenceTensorsTruss
 
 !bibtex bibliography
+
+!tag name=StressDivergenceTensorsTruss pairs=module:solid_mechanics system:kernels

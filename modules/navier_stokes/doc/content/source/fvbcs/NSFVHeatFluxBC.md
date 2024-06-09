@@ -83,3 +83,5 @@ evaluated, we use an equal flux splitting.
 !syntax children /FVBCs/NSFVHeatFluxBC
 
 !bibtex bibliography
+
+!tag name=NSFVHeatFluxBC pairs=module:navier_stokes system:fvbcs

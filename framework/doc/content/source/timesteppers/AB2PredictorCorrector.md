@@ -27,3 +27,5 @@ corrector scheme. The prediction and correction steps can be observed during the
 !syntax inputs /Executioner/TimeSteppers/AB2PredictorCorrector
 
 !syntax children /Executioner/TimeSteppers/AB2PredictorCorrector
+
+!tag name=AB2PredictorCorrector pairs=module:framework system:timesteppers

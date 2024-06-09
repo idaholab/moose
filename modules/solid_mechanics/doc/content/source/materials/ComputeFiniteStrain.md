@@ -204,3 +204,5 @@ cycle limitations while using finite strains as outlined in the section
 !syntax children /Materials/ComputeFiniteStrain
 
 !bibtex bibliography
+
+!tag name=ComputeFiniteStrain pairs=module:solid_mechanics system:materials

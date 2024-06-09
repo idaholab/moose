@@ -66,3 +66,5 @@ This optimization simulation is restarted with the optimized parameter values fr
 !syntax inputs /OptimizationReporter/ParameterMeshOptimization
 
 !syntax children /OptimizationReporter/ParameterMeshOptimization
+
+!tag name=ParameterMeshOptimization pairs=module:optimization system:optimizationreporters

@@ -16,3 +16,5 @@ must be used.
 !syntax children /UserObjects/JSONFileReader
 
 !bibtex bibliography
+
+!tag name=JSONFileReader pairs=module:framework system:userobjects

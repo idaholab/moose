@@ -36,3 +36,5 @@ simulations to calculate the out-of-plane stress component.
 !syntax inputs /Postprocessors/MaterialTensorIntegral
 
 !syntax children /Postprocessors/MaterialTensorIntegral
+
+!tag name=MaterialTensorIntegral pairs=module:solid_mechanics system:postprocessors

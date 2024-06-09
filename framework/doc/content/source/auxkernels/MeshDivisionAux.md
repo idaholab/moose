@@ -11,3 +11,5 @@ MeshDivision, in a [ParsedAux.md].
 !syntax inputs /AuxKernels/MeshDivisionAux
 
 !syntax children /AuxKernels/MeshDivisionAux
+
+!tag name=MeshDivisionAux pairs=module:framework system:auxkernels

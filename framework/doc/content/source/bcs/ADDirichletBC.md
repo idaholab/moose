@@ -44,3 +44,5 @@ condition is better.
 !syntax inputs /BCs/ADDirichletBC
 
 !syntax children /BCs/ADDirichletBC
+
+!tag name=ADDirichletBC pairs=module:framework system:bcs

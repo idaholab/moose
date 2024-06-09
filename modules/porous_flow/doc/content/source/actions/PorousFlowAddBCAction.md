@@ -23,3 +23,5 @@ interface.
 
 An example of this approach can be seen in (PorousFlowSinkBC)[PorousFlowSinkBC.md] which is
 the user-friendly proxy class and the way it is setup can be seen in `PorousFlowAddBCAction.C`.
+
+!tag name=PorousFlowAddBCAction pairs=module:porous_flow system:actions

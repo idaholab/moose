@@ -16,3 +16,5 @@ constant values to fill the tensor. The input of the constants should be column 
 !syntax inputs /Materials/ADGenericConstantRankTwoTensor
 
 !syntax children /Materials/ADGenericConstantRankTwoTensor
+
+!tag name=ADGenericConstantRankTwoTensor pairs=module:framework system:materials

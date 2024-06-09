@@ -27,3 +27,5 @@ with a time derivative kernel ([TimeDerivative](/TimeDerivative.md)).
 !syntax inputs /Kernels/LevelSetAdvection
 
 !syntax children /Kernels/LevelSetAdvection
+
+!tag name=LevelSetAdvection pairs=module:level_set system:kernels

@@ -17,3 +17,5 @@ and $F_a, F_b,\dots$ are the free energies or grand potentials.
 !syntax children /Kernels/ACSwitching
 
 !bibtex bibliography
+
+!tag name=ACSwitching pairs=module:phase_field system:kernels

@@ -39,3 +39,5 @@ An example showing how to transfer all the components of an array variable is sh
 !syntax inputs /Transfers/MultiAppVariableValueSamplePostprocessorTransfer
 
 !syntax children /Transfers/MultiAppVariableValueSamplePostprocessorTransfer
+
+!tag name=MultiAppVariableValueSamplePostprocessorTransfer pairs=module:framework system:transfers

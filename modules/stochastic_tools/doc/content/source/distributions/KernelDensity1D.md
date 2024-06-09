@@ -31,3 +31,5 @@ standard deviation of unity.
 !syntax inputs /Distributions/KernelDensity1D
 
 !syntax children /Distributions/KernelDensity1D
+
+!tag name=KernelDensity1D pairs=module:stochastic_tools system:distributions

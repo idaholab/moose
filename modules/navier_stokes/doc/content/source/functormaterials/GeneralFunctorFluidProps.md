@@ -43,3 +43,5 @@ of the time derivative of the density.
 !syntax inputs /FunctorMaterials/GeneralFunctorFluidProps
 
 !syntax children /FunctorMaterials/GeneralFunctorFluidProps
+
+!tag name=GeneralFunctorFluidProps pairs=module:navier_stokes system:functormaterials

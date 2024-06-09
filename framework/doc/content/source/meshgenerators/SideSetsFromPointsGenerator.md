@@ -12,3 +12,5 @@ provided to define multiple sidesets.
 !syntax inputs /Mesh/SideSetsFromPointsGenerator
 
 !syntax children /Mesh/SideSetsFromPointsGenerator
+
+!tag name=SideSetsFromPointsGenerator pairs=module:framework system:meshgenerators

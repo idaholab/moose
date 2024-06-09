@@ -10,3 +10,5 @@ time. This kernel must be applied for every component of the velocity.
 !syntax inputs /FVKernels/WCNSFVMomentumTimeDerivative
 
 !syntax children /FVKernels/WCNSFVMomentumTimeDerivative
+
+!tag name=WCNSFVMomentumTimeDerivative pairs=module:navier_stokes system:fvkernels

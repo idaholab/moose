@@ -151,3 +151,5 @@ As a last step, we add the SIMPLE executioner:
 !syntax inputs /Executioner/SIMPLE
 
 !syntax children /Executioner/SIMPLE
+
+!tag name=SIMPLE pairs=module:navier_stokes system:executioners

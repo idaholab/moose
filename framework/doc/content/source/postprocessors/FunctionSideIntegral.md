@@ -17,3 +17,5 @@ the domain. Since the mesh is Cartesian, the integrals are known.
 !syntax inputs /Postprocessors/FunctionSideIntegral
 
 !syntax children /Postprocessors/FunctionSideIntegral
+
+!tag name=FunctionSideIntegral pairs=module:framework system:postprocessors

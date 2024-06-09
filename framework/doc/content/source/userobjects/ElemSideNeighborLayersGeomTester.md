@@ -14,3 +14,5 @@ geometric ghosting elements that will be preserved via a geometric relationship 
 !syntax inputs /UserObjects/ElemSideNeighborLayersGeomTester
 
 !syntax children /UserObjects/ElemSideNeighborLayersGeomTester
+
+!tag name=ElemSideNeighborLayersGeomTester pairs=module:framework system:userobjects

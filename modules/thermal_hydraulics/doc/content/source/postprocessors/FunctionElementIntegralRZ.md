@@ -21,3 +21,5 @@ Stay tuned!
 !syntax inputs /Postprocessors/FunctionElementIntegralRZ
 
 !syntax children /Postprocessors/FunctionElementIntegralRZ
+
+!tag name=FunctionElementIntegralRZ pairs=module:thermal_hydraulics system:postprocessors

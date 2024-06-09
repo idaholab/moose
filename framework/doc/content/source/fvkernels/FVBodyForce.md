@@ -37,3 +37,5 @@ supplied based upon a function form:
 !syntax inputs /FVKernels/FVBodyForce
 
 !syntax children /FVKernels/FVBodyForce
+
+!tag name=FVBodyForce pairs=module:framework system:fvkernels

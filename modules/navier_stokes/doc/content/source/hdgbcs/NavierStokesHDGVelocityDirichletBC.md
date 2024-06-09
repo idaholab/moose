@@ -10,3 +10,5 @@ that are not provided are defaulted to 0.
 !syntax inputs /HDGBCs/NavierStokesHDGVelocityDirichletBC
 
 !syntax children /HDGBCs/NavierStokesHDGVelocityDirichletBC
+
+!tag name=NavierStokesHDGVelocityDirichletBC pairs=module:navier_stokes system:hdgbcs

@@ -9,3 +9,5 @@ This initial condition provides a straightforward way to specify an initial gas 
 !syntax inputs /ICs/PorousFlowFluidStateIC
 
 !syntax children /ICs/PorousFlowFluidStateIC
+
+!tag name=PorousFlowFluidStateIC pairs=module:porous_flow system:ics

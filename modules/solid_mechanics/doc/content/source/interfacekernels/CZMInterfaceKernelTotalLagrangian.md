@@ -92,3 +92,5 @@ This object is automatically added from the [Cohesive Zone Physics](CohesiveZone
 !syntax parameters /InterfaceKernels/CZMInterfaceKernelTotalLagrangian
 !syntax inputs /InterfaceKernels/CZMInterfaceKernelTotalLagrangian
 !syntax children /InterfaceKernels/CZMInterfaceKernelTotalLagrangian
+
+!tag name=CZMInterfaceKernelTotalLagrangian pairs=module:solid_mechanics system:interfacekernels

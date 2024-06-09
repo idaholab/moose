@@ -52,3 +52,5 @@ The following statistics have been implemented:
 !syntax inputs /Reporters/AdaptiveImportanceStats
 
 !syntax children /Reporters/AdaptiveImportanceStats
+
+!tag name=AdaptiveImportanceStats pairs=module:stochastic_tools system:reporters

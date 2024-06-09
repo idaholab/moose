@@ -9,3 +9,5 @@ temperature material property and the `p_sat(T)` interface of a
 !syntax inputs /Materials/SaturationPressureMaterial
 
 !syntax children /Materials/SaturationPressureMaterial
+
+!tag name=SaturationPressureMaterial pairs=module:fluid_properties system:materials

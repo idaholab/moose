@@ -29,3 +29,5 @@ For classes deriving off of the `PMCMCBase`, it would suffice to override the `p
 !syntax inputs /Samplers/PMCMCBase
 
 !syntax children /Samplers/PMCMCBase
+
+!tag name=PMCMCBase pairs=module:stochastic_tools system:samplers

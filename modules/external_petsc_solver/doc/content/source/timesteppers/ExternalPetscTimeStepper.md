@@ -5,3 +5,5 @@ between the wrapper app and the external PETSc solver.
 
 The list of PETSc time steppers / integrators can be found on
 [this summary](https://petsc.org/release/overview/integrator_table/#integrator-table).
+
+!tag name=ExternalPetscTimeStepper pairs=module:external_petsc_solver system:timesteppers

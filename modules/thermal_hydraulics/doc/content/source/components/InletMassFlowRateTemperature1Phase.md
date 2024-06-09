@@ -48,3 +48,5 @@ quantities:
 - $\dot{m}_\text{ext}$, the provided exterior mass flow rate,
 - $\rho_i$, the interior density, and
 - $E_i$, the interior specific total energy.
+
+!tag name=InletMassFlowRateTemperature1Phase pairs=module:thermal_hydraulics system:components

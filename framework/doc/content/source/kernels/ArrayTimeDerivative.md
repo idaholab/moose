@@ -36,3 +36,5 @@ where $n$ and $m$ are the component row and column, respectively. The underlined
 !syntax inputs /Kernels/ArrayTimeDerivative
 
 !syntax children /Kernels/ArrayTimeDerivative
+
+!tag name=ArrayTimeDerivative pairs=module:framework system:kernels

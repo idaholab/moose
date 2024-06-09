@@ -33,3 +33,5 @@ where $S$ is the surface area, $\vec{n}$ is the normal vector, and $\vec{d}$ is 
 !syntax inputs /Postprocessors/NormalBoundaryDisplacement
 
 !syntax children /Postprocessors/NormalBoundaryDisplacement
+
+!tag name=NormalBoundaryDisplacement pairs=module:solid_mechanics system:postprocessors

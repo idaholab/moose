@@ -528,3 +528,5 @@ the nonlinear equations by forming a new Jacobian matrix less often.
 Put another way, preconditioner reuse aims to speed up solving the
 linear system of equations while modified Newton methods aim to
 accelerate solving the nonlinear equations.
+
+!tag name=NonlinearSystem pairs=module:framework system:systems

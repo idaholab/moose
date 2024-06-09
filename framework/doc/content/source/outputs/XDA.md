@@ -12,3 +12,5 @@ XDR (binary) format.
 !syntax inputs /Outputs/XDA
 
 !syntax children /Outputs/XDA
+
+!tag name=XDA pairs=module:framework system:outputs

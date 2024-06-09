@@ -19,3 +19,5 @@ See also [CoupledSusceptibilityTimeDerivative](/CoupledSusceptibilityTimeDerivat
 !syntax children /Kernels/AntitrappingCurrent
 
 !bibtex bibliography
+
+!tag name=AntitrappingCurrent pairs=module:phase_field system:kernels

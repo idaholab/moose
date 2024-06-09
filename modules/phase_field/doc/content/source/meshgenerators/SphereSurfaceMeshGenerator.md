@@ -20,3 +20,5 @@ Each refinement step multiplies the number of mesh elements by a factor of four.
 !syntax children /Mesh/SphereSurfaceMeshGenerator
 
 !bibtex bibliography
+
+!tag name=SphereSurfaceMeshGenerator pairs=module:phase_field system:meshgenerators

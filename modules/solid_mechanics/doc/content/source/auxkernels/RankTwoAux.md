@@ -61,3 +61,5 @@ AuxVariable is used as the argument for the `variable` input parameter in the `R
 !syntax inputs /AuxKernels/RankTwoAux
 
 !syntax children /AuxKernels/RankTwoAux
+
+!tag name=RankTwoAux pairs=module:solid_mechanics system:auxkernels

@@ -13,3 +13,5 @@ is computed for the sides on each individual subdomain separately.
 !syntax children /UserObjects/NearestPointLayeredSideAverage
 
 !bibtex bibliography
+
+!tag name=NearestPointLayeredSideAverage pairs=module:framework system:userobjects

@@ -37,3 +37,5 @@ The NitrogenFluidProperties UserObject is valid for:
 !syntax children /FluidProperties/NitrogenFluidProperties
 
 !bibtex bibliography
+
+!tag name=NitrogenFluidProperties pairs=module:fluid_properties system:fluidproperties

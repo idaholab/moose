@@ -9,3 +9,5 @@
 !syntax children /UserObjects/ShaftConnectedTestComponentUserObject
 
 !bibtex bibliography
+
+!tag name=ShaftConnectedTestComponentUserObject pairs=module:test system:userobjects

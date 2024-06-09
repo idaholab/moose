@@ -26,3 +26,5 @@ Currently, the function expression cannot be a function of time.
 !syntax inputs /ScalarKernels/ParsedODEKernel
 
 !syntax children /ScalarKernels/ParsedODEKernel
+
+!tag name=ParsedODEKernel pairs=module:framework system:scalarkernels

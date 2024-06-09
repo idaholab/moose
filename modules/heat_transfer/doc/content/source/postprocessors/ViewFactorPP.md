@@ -20,3 +20,5 @@ block=Postprocessors
 !syntax children /Postprocessors/ViewFactorPP
 
 !bibtex bibliography
+
+!tag name=ViewFactorPP pairs=module:heat_transfer system:postprocessors

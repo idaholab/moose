@@ -22,3 +22,5 @@ The detailed description of the derivation can be found at [scalar_constraint_ke
 !syntax inputs /Kernels/ScalarLagrangeMultiplier
 
 !syntax children /Kernels/ScalarLagrangeMultiplier
+
+!tag name=ScalarLagrangeMultiplier pairs=module:framework system:kernels

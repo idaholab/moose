@@ -12,3 +12,5 @@ and the sample point lies right on a discontinuity.
 !syntax inputs /Postprocessors/PointValue
 
 !syntax children /Postprocessors/PointValue
+
+!tag name=PointValue pairs=module:framework system:postprocessors

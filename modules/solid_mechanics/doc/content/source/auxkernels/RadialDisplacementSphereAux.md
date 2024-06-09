@@ -14,3 +14,5 @@ For a 2D and 3D spherical models, the vector from the origin to a node is $p_{n0
 !syntax children /AuxKernels/RadialDisplacementSphereAux
 
 !bibtex bibliography
+
+!tag name=RadialDisplacementSphereAux pairs=module:solid_mechanics system:auxkernels

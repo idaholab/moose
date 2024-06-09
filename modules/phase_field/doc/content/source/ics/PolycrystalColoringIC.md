@@ -15,3 +15,5 @@ We never recommend using this IC directly, but rather creating the full set of I
 !syntax inputs /ICs/PolycrystalColoringIC
 
 !syntax children /ICs/PolycrystalColoringIC
+
+!tag name=PolycrystalColoringIC pairs=module:phase_field system:ics

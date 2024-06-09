@@ -42,3 +42,5 @@ In some special cases, when [!param](/Mesh/FillBetweenPointVectorsGenerator/posi
 !syntax inputs /Mesh/FillBetweenPointVectorsGenerator
 
 !syntax children /Mesh/FillBetweenPointVectorsGenerator
+
+!tag name=FillBetweenPointVectorsGenerator pairs=module:framework system:meshgenerators

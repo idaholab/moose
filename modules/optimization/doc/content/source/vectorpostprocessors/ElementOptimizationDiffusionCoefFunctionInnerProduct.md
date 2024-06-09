@@ -20,3 +20,5 @@ This function is primarily used for computing the gradient in an optimization ro
 !syntax inputs /VectorPostprocessors/ElementOptimizationDiffusionCoefFunctionInnerProduct
 
 !syntax children /VectorPostprocessors/ElementOptimizationDiffusionCoefFunctionInnerProduct
+
+!tag name=ElementOptimizationDiffusionCoefFunctionInnerProduct pairs=module:optimization system:vectorpostprocessors

@@ -23,3 +23,5 @@ The time derivative term for the first equation is added using a `CoupledODETime
 !syntax inputs /ScalarKernels/CoupledODETimeDerivative
 
 !syntax children /ScalarKernels/CoupledODETimeDerivative
+
+!tag name=CoupledODETimeDerivative pairs=module:framework system:scalarkernels

@@ -17,3 +17,5 @@ The version of this auxiliary kernel for automatic differentiation (AD) material
 !syntax inputs /AuxKernels/FunctorVectorElementalAux
 
 !syntax children /AuxKernels/FunctorVectorElementalAux
+
+!tag name=FunctorVectorElementalAux pairs=module:framework system:auxkernels

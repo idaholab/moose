@@ -14,3 +14,5 @@ the box to the specified ID.
 !syntax inputs /Mesh/SubdomainBoundingBoxGenerator
 
 !syntax children /Mesh/SubdomainBoundingBoxGenerator
+
+!tag name=SubdomainBoundingBoxGenerator pairs=module:framework system:meshgenerators

@@ -14,3 +14,5 @@ expensive [FeatureFloodCount](postprocessors/FeatureFloodCount.md) is avoided.
 !syntax inputs /Postprocessors/FauxPolycrystalVoronoi
 
 !syntax children /Postprocessors/FauxPolycrystalVoronoi
+
+!tag name=FauxPolycrystalVoronoi pairs=module:phase_field system:userobjects

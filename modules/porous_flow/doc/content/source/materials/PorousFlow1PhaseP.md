@@ -9,3 +9,5 @@ Given the porepressure, this Material computes the saturation for 1-phase fluid 
 !syntax inputs /Materials/PorousFlow1PhaseP
 
 !syntax children /Materials/PorousFlow1PhaseP
+
+!tag name=PorousFlow1PhaseP pairs=module:porous_flow system:materials

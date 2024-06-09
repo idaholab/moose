@@ -20,3 +20,5 @@ or dependent on pressure and temperature through density's dependence:
 !syntax inputs /FluidProperties/LinearFluidProperties
 
 !syntax children /FluidProperties/LinearFluidProperties
+
+!tag name=LinearFluidProperties pairs=module:thermal_hydraulics system:fluidproperties

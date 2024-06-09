@@ -30,3 +30,5 @@ block=Postprocessors
 !syntax children /Postprocessors/ConvectiveHeatTransferSideIntegral
 
 !bibtex bibliography
+
+!tag name=ConvectiveHeatTransferSideIntegral pairs=module:heat_transfer system:postprocessors

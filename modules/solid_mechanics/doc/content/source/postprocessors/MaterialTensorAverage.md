@@ -34,3 +34,5 @@ The parameter `use_displaced_mesh` controls the volume utilized to compute the a
 !syntax inputs /Postprocessors/MaterialTensorAverage
 
 !syntax children /Postprocessors/MaterialTensorAverage
+
+!tag name=MaterialTensorAverage pairs=module:solid_mechanics system:postprocessors

@@ -29,3 +29,5 @@ And finally we introduce constants from the input file in the parsed expression:
 !syntax inputs /Postprocessors/ParsedPostprocessor
 
 !syntax children /Postprocessors/ParsedPostprocessor
+
+!tag name=ParsedPostprocessor pairs=module:framework system:postprocessors

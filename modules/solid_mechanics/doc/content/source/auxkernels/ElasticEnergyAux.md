@@ -11,3 +11,4 @@ This object is used to compute the local value of the elastic energy of continuu
 !syntax inputs /AuxKernels/ElasticEnergyAux
 
 !syntax children /AuxKernels/ElasticEnergyAux
+!tag name=ElasticEnergyAux pairs=module:solid_mechanics system:auxkernels

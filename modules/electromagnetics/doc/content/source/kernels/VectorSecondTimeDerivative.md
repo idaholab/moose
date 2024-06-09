@@ -28,3 +28,5 @@ where
 !syntax inputs /Kernels/VectorSecondTimeDerivative
 
 !syntax children /Kernels/VectorSecondTimeDerivative
+
+!tag name=VectorSecondTimeDerivative pairs=module:electromagnetics system:kernels

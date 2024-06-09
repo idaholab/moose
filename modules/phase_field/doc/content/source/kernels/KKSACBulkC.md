@@ -70,3 +70,5 @@ equation.
 !syntax inputs /Kernels/KKSACBulkC
 
 !syntax children /Kernels/KKSACBulkC
+
+!tag name=KKSACBulkC pairs=module:phase_field system:kernels

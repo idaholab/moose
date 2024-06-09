@@ -15,3 +15,5 @@ be a subdomain name while the second member should be a real value.
 !syntax inputs /Materials/PiecewiseConstantByBlockMaterial
 
 !syntax children /Materials/PiecewiseConstantByBlockMaterial
+
+!tag name=PiecewiseConstantByBlockMaterial pairs=module:framework system:materials

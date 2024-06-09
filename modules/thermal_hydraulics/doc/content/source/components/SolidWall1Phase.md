@@ -26,3 +26,5 @@ solution but with opposite velocity:
 \end{equation}
 
 This produces a zero velocity in the boundary flux computation.
+
+!tag name=SolidWall1Phase pairs=module:thermal_hydraulics system:components

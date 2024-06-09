@@ -19,3 +19,5 @@ parameter, which is set so they are functions of space rather than time (y for f
 !syntax inputs /Functions/PiecewiseLinearFromVectorPostprocessor
 
 !syntax children /Functions/PiecewiseLinearFromVectorPostprocessor
+
+!tag name=PiecewiseLinearFromVectorPostprocessor pairs=module:framework system:functions

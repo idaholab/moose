@@ -9,3 +9,5 @@ The `ADPeriodicSegmentalConstraint` is the automatic differentiation version of 
 !syntax inputs /Constraints/ADPeriodicSegmentalConstraint
 
 !syntax children /Constraints/ADPeriodicSegmentalConstraint
+
+!tag name=ADPeriodicSegmentalConstraint pairs=module:framework system:constraints

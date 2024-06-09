@@ -20,3 +20,5 @@ the value $\sigma$ can be regarded as a reaction rate coefficient.
 !syntax inputs /FVKernels/FVCoupledForce
 
 !syntax children /FVKernels/FVCoupledForce
+
+!tag name=FVCoupledForce pairs=module:framework system:fvkernels

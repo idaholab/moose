@@ -19,3 +19,5 @@ placeholder dummy name.
 !syntax inputs /FunctorMaterials/ThermalSolidPropertiesFunctorMaterial
 
 !syntax children /FunctorMaterials/ThermalSolidPropertiesFunctorMaterial
+
+!tag name=ThermalSolidPropertiesFunctorMaterial pairs=module:solid_properties system:functormaterials

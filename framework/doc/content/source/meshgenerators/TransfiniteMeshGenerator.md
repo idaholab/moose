@@ -70,3 +70,5 @@ Since opposite sides need to have the same number of points, we consider top-bot
 !syntax inputs /Mesh/TransfiniteMeshGenerator
 
 !syntax children /Mesh/TransfiniteMeshGenerator
+
+!tag name=TransfiniteMeshGenerator pairs=module:framework system:meshgenerators

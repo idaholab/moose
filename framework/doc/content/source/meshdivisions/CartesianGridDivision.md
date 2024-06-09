@@ -27,3 +27,5 @@ that a warning is output, please reach out to a MOOSE (or any MOOSE app) develop
 !syntax inputs /MeshDivisions/CartesianGridDivision
 
 !syntax children /MeshDivisions/CartesianGridDivision
+
+!tag name=CartesianGridDivision pairs=module:framework system:meshdivisions

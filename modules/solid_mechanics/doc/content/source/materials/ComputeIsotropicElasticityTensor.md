@@ -35,3 +35,5 @@ An automatic differentiation version of this object is available as `ADComputeIs
 !syntax children /Materials/ComputeIsotropicElasticityTensor
 
 !bibtex bibliography
+
+!tag name=ComputeIsotropicElasticityTensor pairs=module:solid_mechanics system:materials

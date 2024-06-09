@@ -9,3 +9,5 @@ For a more complex operation than a sum, please consider the [ParsedPostprocesso
 !syntax inputs /Postprocessors/SumPostprocessor
 
 !syntax children /Postprocessors/SumPostprocessor
+
+!tag name=SumPostprocessor pairs=module:thermal_hydraulics system:postprocessors

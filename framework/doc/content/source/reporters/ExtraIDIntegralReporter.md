@@ -22,3 +22,4 @@ requested and map from names to indexes into the integrals, and the `integrals`,
 !syntax inputs /Reporters/ExtraIDIntegralReporter
 
 !syntax children /Reporters/ExtraIDIntegralReporter
+!tag name=ExtraIDIntegralReporter pairs=module:framework system:reporters

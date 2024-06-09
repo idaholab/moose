@@ -13,3 +13,5 @@ This kernel is best set up using the [MaterialDerivativeTest](/MaterialDerivativ
 !syntax inputs /Kernels/MaterialDerivativeRankFourTestKernel
 
 !syntax children /Kernels/MaterialDerivativeRankFourTestKernel
+
+!tag name=MaterialDerivativeRankFourTestKernel pairs=module:framework system:kernels

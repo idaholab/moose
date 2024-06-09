@@ -45,3 +45,5 @@ The time step size of the first step is provided by
 !syntax inputs /Executioner/TimeSteppers/FixedPointIterationAdaptiveDT
 
 !syntax children /Executioner/TimeSteppers/FixedPointIterationAdaptiveDT
+
+!tag name=FixedPointIterationAdaptiveDT pairs=module:framework system:timesteppers

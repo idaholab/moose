@@ -32,3 +32,5 @@ subset $\partial \Omega_N$ via the [!param](/BCs/FunctorNeumannBC/boundary) para
 !syntax inputs /BCs/FunctorNeumannBC
 
 !syntax children /BCs/FunctorNeumannBC
+
+!tag name=FunctorNeumannBC pairs=module:framework system:bcs

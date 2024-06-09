@@ -24,3 +24,5 @@ This can be used to locally turn the BC on or off.
 !syntax inputs /BCs/CoupledConvectiveHeatFluxBC
 
 !syntax children /BCs/CoupledConvectiveHeatFluxBC
+
+!tag name=CoupledConvectiveHeatFluxBC pairs=module:heat_transfer system:bcs

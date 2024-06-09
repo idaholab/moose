@@ -20,3 +20,5 @@ The resulting integrated value can be obtained using a [RayIntegralValue.md] pos
 !syntax inputs /RayKernels/MaterialIntegralRayKernel
 
 !syntax children /RayKernels/MaterialIntegralRayKernel
+
+!tag name=MaterialIntegralRayKernel pairs=module:ray_tracing system:raykernels

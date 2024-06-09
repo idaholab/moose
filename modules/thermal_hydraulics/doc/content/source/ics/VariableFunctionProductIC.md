@@ -13,3 +13,5 @@ The function is evaluated at the `start_time` of the simulation, set in the
 !syntax inputs /ICs/VariableFunctionProductIC
 
 !syntax children /ICs/VariableFunctionProductIC
+
+!tag name=VariableFunctionProductIC pairs=module:thermal_hydraulics system:ics

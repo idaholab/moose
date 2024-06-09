@@ -12,3 +12,5 @@ Harten-Lax-Van Leer-Contact (HLLC) formulation described in [CNSFVHLLCBase.md].
 !syntax inputs /FVKernels/CNSFVMassHLLC
 
 !syntax children /FVKernels/CNSFVMassHLLC
+
+!tag name=CNSFVMassHLLC pairs=module:navier_stokes system:fvkernels

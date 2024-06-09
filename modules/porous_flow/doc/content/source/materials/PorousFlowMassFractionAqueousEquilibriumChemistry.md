@@ -44,3 +44,5 @@ If the equilibrium constants are AuxVariables that depend on temperature (or oth
 !syntax inputs /Materials/PorousFlowMassFractionAqueousEquilibriumChemistry
 
 !syntax children /Materials/PorousFlowMassFractionAqueousEquilibriumChemistry
+
+!tag name=PorousFlowMassFractionAqueousEquilibriumChemistry pairs=module:porous_flow system:materials

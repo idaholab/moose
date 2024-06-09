@@ -14,3 +14,5 @@ where $V_{\mathbf{X}}$ is the area or volume of material point $\mathbf{X}$, and
 !syntax inputs /Postprocessors/NodalVariableIntegralPD
 
 !syntax children /Postprocessors/NodalVariableIntegralPD
+
+!tag name=NodalVariableIntegralPD pairs=module:peridynamics system:postprocessors

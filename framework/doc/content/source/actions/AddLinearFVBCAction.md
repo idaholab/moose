@@ -10,3 +10,5 @@ More information about linear finite volume boundary conditions can be found on 
 [Linear FVBCs syntax page](syntax/LinearFVBCs/index.md).
 
 !syntax parameters /LinearFVBCs/AddLinearFVBCAction
+
+!tag name=AddLinearFVBCAction pairs=module:framework system:actions

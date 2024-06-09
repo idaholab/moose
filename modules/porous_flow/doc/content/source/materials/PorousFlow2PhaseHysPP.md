@@ -27,3 +27,5 @@ To improve numerical convergence, it is recommended that you use a `low_extensio
 !syntax inputs /Materials/PorousFlow2PhaseHysPP
 
 !syntax children /Materials/PorousFlow2PhaseHysPP
+
+!tag name=PorousFlow2PhaseHysPP pairs=module:porous_flow system:materials

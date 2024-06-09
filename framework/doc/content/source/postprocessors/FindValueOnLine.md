@@ -13,3 +13,5 @@ must behave monotonically or an indeterminate solution may be found.
 !syntax children /Postprocessors/FindValueOnLine
 
 !bibtex bibliography
+
+!tag name=FindValueOnLine pairs=module:framework system:postprocessors

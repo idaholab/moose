@@ -22,3 +22,5 @@ of up to four primary variable values.
 !syntax inputs /Materials/CoupledValueFunctionFreeEnergy
 
 !syntax children /Materials/CoupledValueFunctionFreeEnergy
+
+!tag name=CoupledValueFunctionFreeEnergy pairs=module:phase_field system:materials

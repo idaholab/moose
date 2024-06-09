@@ -13,3 +13,5 @@ A [SelfShadowSideUserObject](SelfShadowSideUserObject.md) can be supplied to tak
 !syntax inputs /BCs/DirectionalFluxBC
 
 !syntax children /BCs/DirectionalFluxBC
+
+!tag name=DirectionalFluxBC pairs=module:heat_transfer system:bcs

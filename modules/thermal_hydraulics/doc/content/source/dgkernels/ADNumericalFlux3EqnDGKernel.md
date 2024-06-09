@@ -10,3 +10,5 @@ of the [NumericalFlux3EqnDGKernel.md]. Please refer to the non-AD version for ad
 !syntax inputs /DGKernels/ADNumericalFlux3EqnDGKernel
 
 !syntax children /DGKernels/ADNumericalFlux3EqnDGKernel
+
+!tag name=ADNumericalFlux3EqnDGKernel pairs=module:thermal_hydraulics system:dgkernels

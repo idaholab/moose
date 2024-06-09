@@ -13,3 +13,5 @@ desired, then use `type = ADElementIntegralMaterialProperty`.
 !syntax inputs /Postprocessors/ElementIntegralMaterialProperty
 
 !syntax children /Postprocessors/ElementIntegralMaterialProperty
+
+!tag name=ElementIntegralMaterialProperty pairs=module:framework system:postprocessors

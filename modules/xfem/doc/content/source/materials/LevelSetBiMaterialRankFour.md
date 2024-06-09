@@ -30,3 +30,5 @@ tensor (C$_{ijkl}$)
 !syntax inputs /Materials/LevelSetBiMaterialRankFour
 
 !syntax children /Materials/LevelSetBiMaterialRankFour
+
+!tag name=LevelSetBiMaterialRankFour pairs=module:xfem system:materials

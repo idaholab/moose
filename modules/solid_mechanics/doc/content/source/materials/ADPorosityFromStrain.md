@@ -22,3 +22,5 @@ Here, $\epsilon_{in}$ is typically computed by [ADComputeMultipleInelasticStress
 !syntax children /Materials/ADPorosityFromStrain
 
 !bibtex bibliography
+
+!tag name=ADPorosityFromStrain pairs=module:solid_mechanics system:materials

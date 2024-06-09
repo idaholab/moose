@@ -22,3 +22,5 @@ averages of the centroid values of neighbor elements.
 !syntax inputs /AuxKernels/ProjectionAux
 
 !syntax children /AuxKernels/ProjectionAux
+
+!tag name=ProjectionAux pairs=module:framework system:auxkernels

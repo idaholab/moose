@@ -24,3 +24,5 @@ T_w = \dfrac{\sum_i T_{\text{wall source i}} P_{\text{source i}}}{P_{\text{heate
 !syntax inputs /Materials/AverageWallTemperature3EqnMaterial
 
 !syntax children /Materials/AverageWallTemperature3EqnMaterial
+
+!tag name=AverageWallTemperature3EqnMaterial pairs=module:thermal_hydraulics system:materials

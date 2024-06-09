@@ -10,3 +10,5 @@ While a penalty formulation may be selected, no penalty parameters can be specif
 !syntax inputs /Constraints/MassFreeConstraint
 
 !syntax children /Constraints/MassFreeConstraint
+
+!tag name=MassFreeConstraint pairs=module:thermal_hydraulics system:constraints

@@ -16,3 +16,5 @@ This material also defines material properties for the derivatives of dynamic vi
 !syntax children /Materials/DynamicViscosityMaterial
 
 !bibtex bibliography
+
+!tag name=DynamicViscosityMaterial pairs=module:thermal_hydraulics system:materials

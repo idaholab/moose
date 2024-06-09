@@ -22,3 +22,5 @@ convergence of a transient source-diffusion problem.
 !syntax inputs /Postprocessors/RelativeSolutionDifferenceNorm
 
 !syntax children /Postprocessors/RelativeSolutionDifferenceNorm
+
+!tag name=RelativeSolutionDifferenceNorm pairs=module:framework system:postprocessors

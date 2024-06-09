@@ -43,3 +43,5 @@ kernel block below:
 !syntax inputs /Kernels/ADCoupledTimeDerivative
 
 !syntax children /Kernels/ADCoupledTimeDerivative
+
+!tag name=ADCoupledTimeDerivative pairs=module:framework system:kernels

@@ -18,3 +18,5 @@ $\vec{d}$ the direction of the flow channel.
 !syntax inputs /Kernels/OneD3EqnMomentumFlux
 
 !syntax children /Kernels/OneD3EqnMomentumFlux
+
+!tag name=OneD3EqnMomentumFlux pairs=module:thermal_hydraulics system:kernels

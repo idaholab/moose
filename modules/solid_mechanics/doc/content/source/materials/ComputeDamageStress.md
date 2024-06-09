@@ -13,3 +13,5 @@ See [ScalarMaterialDamage](/ScalarMaterialDamage.md) for a simple example of a d
 !syntax inputs /Materials/ComputeDamageStress
 
 !syntax children /Materials/ComputeDamageStress
+
+!tag name=ComputeDamageStress pairs=module:solid_mechanics system:materials

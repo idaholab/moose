@@ -19,3 +19,5 @@ This postprocessor returns the aggregate number of elements when using Distribut
 !syntax children /Postprocessors/NumElems
 
 !bibtex bibliography
+
+!tag name=NumElems pairs=module:framework system:postprocessors

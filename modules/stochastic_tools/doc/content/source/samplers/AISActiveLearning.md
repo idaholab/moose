@@ -70,3 +70,4 @@ The syntax is show below.
 !syntax inputs /Samplers/AISActiveLearning
 
 !syntax children /Samplers/AISActiveLearning
+!tag name=AISActiveLearning pairs=module:stochastic_tools system:samplers

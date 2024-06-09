@@ -20,3 +20,5 @@ No [upwinding](upwinding.md) is performed, which means many [nodal Material prop
 !syntax children /Kernels/PorousFlowFullySaturatedDarcyBase
 
 !bibtex bibliography
+
+!tag name=PorousFlowFullySaturatedDarcyBase pairs=module:porous_flow system:kernels

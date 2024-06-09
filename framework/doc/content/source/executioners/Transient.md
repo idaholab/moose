@@ -60,3 +60,5 @@ steady-state convergence criteria:
 !syntax inputs /Executioner/Transient
 
 !syntax children /Executioner/Transient
+
+!tag name=Transient pairs=module:framework system:executioners

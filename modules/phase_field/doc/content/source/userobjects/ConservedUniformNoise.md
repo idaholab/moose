@@ -12,3 +12,5 @@
 !syntax inputs /UserObjects/ConservedUniformNoise
 
 !syntax children /UserObjects/ConservedUniformNoise
+
+!tag name=ConservedUniformNoise pairs=module:phase_field system:userobjects

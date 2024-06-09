@@ -15,3 +15,5 @@ in [`ParsedFunction`](MooseParsedFunction.md) and [`ParsedMaterial`](ParsedMater
 !syntax inputs /Mesh/ParsedNodeTransformGenerator
 
 !syntax children /Mesh/ParsedNodeTransformGenerator
+
+!tag name=ParsedNodeTransformGenerator pairs=module:framework system:meshgenerators

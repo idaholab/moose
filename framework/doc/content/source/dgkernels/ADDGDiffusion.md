@@ -7,3 +7,5 @@ Use DG to compute a diffusion term, and AD is adopted for Jacobian calculation.
 !syntax inputs /DGKernels/ADDGDiffusion
 
 !syntax children /DGKernels/ADDGDiffusion
+
+!tag name=ADDGDiffusion pairs=module:framework system:dgkernels

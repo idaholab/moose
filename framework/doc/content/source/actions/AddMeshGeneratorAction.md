@@ -6,3 +6,5 @@ This action adds them to the [application](MooseApp.md).
 The preferred syntax for adding `MeshGenerators` is to add them in the `[Mesh]` block.
 
 !syntax parameters /Mesh/AddMeshGeneratorAction
+
+!tag name=AddMeshGeneratorAction pairs=module:framework system:actions

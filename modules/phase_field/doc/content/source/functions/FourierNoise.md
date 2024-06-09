@@ -23,3 +23,5 @@ non-periodic noise.
 !syntax children /Functions/FourierNoise
 
 !bibtex bibliography
+
+!tag name=FourierNoise pairs=module:phase_field system:functions

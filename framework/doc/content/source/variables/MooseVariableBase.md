@@ -206,3 +206,5 @@ element-like arguments.
 !syntax inputs /Variables/MooseVariableBase
 
 !syntax children /Variables/MooseVariableBase
+
+!tag name=MooseVariableBase pairs=module:framework system:variables

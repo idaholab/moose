@@ -59,3 +59,5 @@ The `GrainGrowthLinearizedInterfaceAction` is accessed through the `Module` bloc
 !syntax parameters /Modules/PhaseField/GrainGrowthLinearizedInterface/GrainGrowthLinearizedInterfaceAction
 
 !syntax children /Modules/PhaseField/GrainGrowthLinearizedInterface/GrainGrowthLinearizedInterfaceAction
+
+!tag name=GrainGrowthLinearizedInterfaceAction pairs=module:phase_field system:actions

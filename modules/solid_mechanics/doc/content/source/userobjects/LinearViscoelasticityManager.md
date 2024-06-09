@@ -15,3 +15,5 @@ This updates the internal time-stepping scheme for linear viscoelastic materials
 !syntax inputs /UserObjects/LinearViscoelasticityManager
 
 !syntax children /UserObjects/LinearViscoelasticityManager
+
+!tag name=LinearViscoelasticityManager pairs=module:solid_mechanics system:userobjects

@@ -38,3 +38,5 @@ non-tangential vectors.  For instance, an isotropic permeability tensor is sensi
 !syntax inputs /AuxKernels/PorousFlowDarcyVelocityComponentLowerDimensional
 
 !syntax children /AuxKernels/PorousFlowDarcyVelocityComponentLowerDimensional
+
+!tag name=PorousFlowDarcyVelocityComponentLowerDimensional pairs=module:porous_flow system:auxkernels

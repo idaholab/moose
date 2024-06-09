@@ -33,3 +33,5 @@ The resulting mesh looks like this:
 !syntax inputs /Mesh/SpiralAnnularMeshGenerator
 
 !syntax children /Mesh/SpiralAnnularMeshGenerator
+
+!tag name=SpiralAnnularMeshGenerator pairs=module:framework system:meshgenerators

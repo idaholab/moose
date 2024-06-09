@@ -21,3 +21,5 @@ Because thermal dispersion acts to increase the diffusive effects, neglecting th
 !syntax inputs /FunctorMaterials/FunctorKappaFluid
 
 !syntax children /FunctorMaterials/FunctorKappaFluid
+
+!tag name=FunctorKappaFluid pairs=module:navier_stokes system:functormaterials

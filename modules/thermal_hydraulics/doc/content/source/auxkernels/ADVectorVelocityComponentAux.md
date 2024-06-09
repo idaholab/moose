@@ -23,3 +23,5 @@ $\rho u A$, $\rho A$ and $\alpha$ are variables usually defined by the [Componen
 !syntax inputs /AuxKernels/ADVectorVelocityComponentAux
 
 !syntax children /AuxKernels/ADVectorVelocityComponentAux
+
+!tag name=ADVectorVelocityComponentAux pairs=module:thermal_hydraulics system:auxkernels

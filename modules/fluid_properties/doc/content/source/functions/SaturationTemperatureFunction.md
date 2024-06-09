@@ -13,3 +13,5 @@ objects deriving from `TwoPhaseFluidProperties`.
 !syntax inputs /Functions/SaturationTemperatureFunction
 
 !syntax children /Functions/SaturationTemperatureFunction
+
+!tag name=SaturationTemperatureFunction pairs=module:fluid_properties system:functions

@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSPressurePoisson
 
 !syntax children /Kernels/INSPressurePoisson
+
+!tag name=INSPressurePoisson pairs=module:navier_stokes system:kernels

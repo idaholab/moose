@@ -76,3 +76,5 @@ For background on the functor system see [Functors/index.md].
 !syntax inputs /Adaptivity/Markers/MooseVariableFVReal
 
 !syntax children /Adaptivity/Markers/MooseVariableFVReal
+
+!tag name=MooseVariableFV pairs=module:framework system:variables

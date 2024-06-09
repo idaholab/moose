@@ -6,3 +6,5 @@ This action creates Reporter objects from the `[Reporters]` block then adds them
 
 
 !syntax parameters /Reporters/AddReporterAction
+
+!tag name=AddReporterAction pairs=module:framework system:actions

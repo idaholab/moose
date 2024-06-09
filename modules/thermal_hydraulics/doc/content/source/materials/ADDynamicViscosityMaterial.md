@@ -13,3 +13,5 @@ Because it uses AD, it does not require setting additional material properties t
 !syntax children /Materials/ADDynamicViscosityMaterial
 
 !bibtex bibliography
+
+!tag name=ADDynamicViscosityMaterial pairs=module:thermal_hydraulics system:materials

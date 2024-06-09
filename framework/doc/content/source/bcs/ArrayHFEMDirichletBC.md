@@ -15,3 +15,5 @@ Different boundary values for components can be assigned.
 !syntax inputs /BCs/ArrayHFEMDirichletBC
 
 !syntax children /BCs/ArrayHFEMDirichletBC
+
+!tag name=ArrayHFEMDirichletBC pairs=module:framework system:bcs

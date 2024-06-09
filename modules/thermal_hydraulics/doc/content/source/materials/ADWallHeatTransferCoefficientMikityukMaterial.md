@@ -31,3 +31,5 @@ where $k$ is the fluid thermal conductivity.
 !syntax inputs /Materials/ADWallHeatTransferCoefficientMikityukMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficientMikityukMaterial
+
+!tag name=ADWallHeatTransferCoefficientMikityukMaterial pairs=module:thermal_hydraulics system:materials

@@ -9,3 +9,4 @@
 !syntax inputs /Postprocessors/AverageNodalVariableValue
 
 !syntax children /Postprocessors/AverageNodalVariableValue
+!tag name=AverageNodalVariableValue pairs=module:framework system:postprocessors

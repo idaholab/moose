@@ -20,3 +20,5 @@ dissociating at the boundary to create the species corresponding to
 !syntax inputs /BCs/DissociationFluxBC
 
 !syntax children /BCs/DissociationFluxBC
+
+!tag name=DissociationFluxBC pairs=module:scalar_transport system:bcs

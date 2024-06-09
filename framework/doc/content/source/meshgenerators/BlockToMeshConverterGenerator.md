@@ -27,3 +27,5 @@ The final mesh is shown in the second figure.
 !syntax inputs /Mesh/BlockToMeshConverterGenerator
 
 !syntax children /Mesh/BlockToMeshConverterGenerator
+
+!tag name=BlockToMeshConverterGenerator pairs=module:framework system:meshgenerators

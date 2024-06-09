@@ -58,3 +58,5 @@ The HeliumFluidProperties UserObject is valid for:
 !syntax children /FluidProperties/HeliumFluidProperties
 
 !bibtex bibliography
+
+!tag name=HeliumFluidProperties pairs=module:fluid_properties system:fluidproperties

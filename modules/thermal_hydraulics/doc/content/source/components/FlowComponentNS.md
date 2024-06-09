@@ -8,3 +8,5 @@ This component inherits from [FileMeshComponent.md] to load a mesh and wraps
 !syntax inputs /Components/FlowComponentNS
 
 !syntax children /Components/FlowComponentNS
+
+!tag name=FlowComponentNS pairs=module:thermal_hydraulics system:components

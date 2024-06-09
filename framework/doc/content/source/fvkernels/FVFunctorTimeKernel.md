@@ -32,3 +32,5 @@ a `FVFunctorTimeKernel`.
 !syntax inputs /FVKernels/FVFunctorTimeKernel
 
 !syntax children /FVKernels/FVFunctorTimeKernel
+
+!tag name=FVFunctorTimeKernel pairs=module:framework system:fvkernels

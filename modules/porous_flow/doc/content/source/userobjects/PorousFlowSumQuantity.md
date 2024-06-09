@@ -7,3 +7,5 @@ This is used to record the total fluid (kg) or heat (J) flux that is produced by
 !syntax inputs /UserObjects/PorousFlowSumQuantity
 
 !syntax children /UserObjects/PorousFlowSumQuantity
+
+!tag name=PorousFlowSumQuantity pairs=module:porous_flow system:userobjects

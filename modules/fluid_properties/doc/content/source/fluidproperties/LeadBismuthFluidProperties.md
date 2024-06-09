@@ -43,3 +43,5 @@ The reported uncertainties in [!citep](Fazio) for lead-bismuth eutectic fluid pr
 !syntax children /FluidProperties/LeadBismuthFluidProperties
 
 !bibtex bibliography
+
+!tag name=LeadBismuthFluidProperties pairs=module:fluid_properties system:fluidproperties

@@ -144,3 +144,5 @@ large deformation kinematics.
 !syntax children /Kernels/UpdatedLagrangianStressDivergence
 
 !bibtex bibliography
+
+!tag name=UpdatedLagrangianStressDivergence pairs=module:solid_mechanics system:kernels

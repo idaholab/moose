@@ -24,3 +24,5 @@ If you desire full upwinding, use [PorousFlowFullySaturatedUpwindHeatAdvection](
 !syntax children /Kernels/PorousFlowFullySaturatedHeatAdvection
 
 !bibtex bibliography
+
+!tag name=PorousFlowFullySaturatedHeatAdvection pairs=module:porous_flow system:kernels

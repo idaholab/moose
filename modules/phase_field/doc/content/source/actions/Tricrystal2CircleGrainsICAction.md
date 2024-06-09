@@ -19,3 +19,5 @@ The `Tricrystal2CircleGrainsICAction` is accessed through the `ICs/PolycrystalIC
 !syntax parameters /ICs/PolycrystalICs/Tricrystal2CircleGrainsIC/Tricrystal2CircleGrainsICAction
 
 !syntax children /ICs/PolycrystalICs/Tricrystal2CircleGrainsIC/Tricrystal2CircleGrainsICAction
+
+!tag name=Tricrystal2CircleGrainsICAction pairs=module:phase_field system:actions

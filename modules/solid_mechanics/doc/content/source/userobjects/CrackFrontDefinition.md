@@ -15,3 +15,5 @@ This object is used in the computation of fracture domain integrals. It is used 
 !syntax inputs /UserObjects/CrackFrontDefinition
 
 !syntax children /UserObjects/CrackFrontDefinition
+
+!tag name=CrackFrontDefinition pairs=module:solid_mechanics system:userobjects

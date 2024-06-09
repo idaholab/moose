@@ -53,3 +53,5 @@ The corresponding mesh looks like this:
 !syntax inputs /Mesh/RinglebMeshGenerator
 
 !syntax children /Mesh/RinglebMeshGenerator
+
+!tag name=RinglebMeshGenerator pairs=module:framework system:meshgenerators

@@ -9,3 +9,5 @@ it ensures zero advective flux at the wall (non-penetrability).
 !syntax inputs /FVBCs/INSFVWallFunctionBC
 
 !syntax children /FVBCs/INSFVWallFunctionBC
+
+!tag name=INSFVWallFunctionBC pairs=module:navier_stokes system:fvbcs

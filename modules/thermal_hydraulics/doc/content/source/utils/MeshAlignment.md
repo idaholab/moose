@@ -9,3 +9,5 @@ These "meshes" must be *aligned*, i.e., each element/side on the primary mesh
 must correspond to a unique element/side on the secondary mesh. The pairing is
 determined by checking the centroids of the elements/sides and finding the
 nearest match on the other mesh.
+
+!tag name=MeshAlignment pairs=module:thermal_hydraulics system:utils

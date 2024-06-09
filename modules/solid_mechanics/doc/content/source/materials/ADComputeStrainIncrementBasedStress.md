@@ -36,3 +36,5 @@ elastic and inelastic (e.g. creep and/or plasticity) strains.
 !syntax children /Materials/ADComputeStrainIncrementBasedStress
 
 !bibtex bibliography
+
+!tag name=ADComputeStrainIncrementBasedStress pairs=module:solid_mechanics system:materials

@@ -77,3 +77,5 @@ derivatives and the function to the exodus output.
 !syntax inputs /Materials/DerivativeParsedMaterial
 
 !syntax children /Materials/DerivativeParsedMaterial
+
+!tag name=DerivativeParsedMaterial pairs=module:framework system:materials

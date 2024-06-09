@@ -16,3 +16,5 @@ with the mesh.
 !syntax children /UserObjects/NearestPointLayeredIntegral
 
 !bibtex bibliography
+
+!tag name=NearestPointLayeredIntegral pairs=module:framework system:userobjects

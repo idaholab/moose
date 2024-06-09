@@ -27,3 +27,5 @@ cut_data.
 !syntax inputs /UserObjects/LineSegmentCutSetUserObject
 
 !syntax children /UserObjects/LineSegmentCutSetUserObject
+
+!tag name=LineSegmentCutSetUserObject pairs=module:xfem system:userobjects

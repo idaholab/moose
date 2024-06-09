@@ -12,3 +12,5 @@ each sub-block of the `[HeatStructureMaterials]` block of an input file, then ad
 !syntax inputs /HeatStructureMaterials/AddHeatStructureMaterialAction
 
 !syntax children /HeatStructureMaterials/AddHeatStructureMaterialAction
+
+!tag name=AddHeatStructureMaterialAction pairs=module:thermal_hydraulics system:actions

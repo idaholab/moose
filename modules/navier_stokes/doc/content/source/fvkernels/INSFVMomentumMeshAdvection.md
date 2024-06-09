@@ -9,3 +9,5 @@ advected.
 !syntax inputs /FVKernels/INSFVMomentumMeshAdvection
 
 !syntax children /FVKernels/INSFVMomentumMeshAdvection
+
+!tag name=INSFVMomentumMeshAdvection pairs=module:navier_stokes system:fvkernels

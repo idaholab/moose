@@ -15,3 +15,5 @@ To use the `ParsedFunctionControl` in other applications, do not specify any par
 !syntax inputs /ControlLogic/ParsedFunctionControl
 
 !syntax children /ControlLogic/ParsedFunctionControl
+
+!tag name=ParsedFunctionControl pairs=module:thermal_hydraulics system:controllogic

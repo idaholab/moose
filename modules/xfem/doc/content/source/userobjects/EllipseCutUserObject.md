@@ -21,3 +21,5 @@ logic to determine whether a given point is located inside the cut plane.
 !syntax inputs /UserObjects/EllipseCutUserObject
 
 !syntax children /UserObjects/EllipseCutUserObject
+
+!tag name=EllipseCutUserObject pairs=module:xfem system:userobjects

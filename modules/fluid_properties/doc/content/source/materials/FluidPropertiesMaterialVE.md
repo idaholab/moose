@@ -26,3 +26,5 @@ The following variables are also computed through a variable set inversion:
 !syntax inputs /Materials/FluidPropertiesMaterialVE
 
 !syntax children /Materials/FluidPropertiesMaterialVE
+
+!tag name=FluidPropertiesMaterialVE pairs=module:fluid_properties system:materials

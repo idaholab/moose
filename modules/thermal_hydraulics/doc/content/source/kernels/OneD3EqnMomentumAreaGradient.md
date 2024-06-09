@@ -20,3 +20,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /Kernels/OneD3EqnMomentumAreaGradient
 
 !syntax children /Kernels/OneD3EqnMomentumAreaGradient
+
+!tag name=OneD3EqnMomentumAreaGradient pairs=module:thermal_hydraulics system:kernels

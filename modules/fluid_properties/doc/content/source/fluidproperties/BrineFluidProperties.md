@@ -38,3 +38,5 @@ The BrineFluidProperties UserObject is valid for:
 !syntax children /FluidProperties/BrineFluidProperties
 
 !bibtex bibliography
+
+!tag name=BrineFluidProperties pairs=module:fluid_properties system:fluidproperties

@@ -45,3 +45,5 @@ full = true
 !syntax inputs /Preconditioning/SMP
 
 !syntax children /Preconditioning/SMP
+
+!tag name=SingleMatrixPreconditioner pairs=module:framework system:preconditioners

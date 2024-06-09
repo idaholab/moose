@@ -27,3 +27,5 @@ Can be used to fetch two input parameters of type `std::vector<T1>` and
 for pairs of vectors that have a one to one correspondence, such as
 [!param](/Executioner/Steady/petsc_options_iname) and
 [!param](/Executioner/Steady/petsc_options_value).
+
+!tag name=MooseObject pairs=module:framework system:base

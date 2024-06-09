@@ -26,3 +26,5 @@ forces from the two models will be summed. The component is determined by the
 !syntax inputs /FVKernels/PCNSFVMomentumFriction
 
 !syntax children /FVKernels/PCNSFVMomentumFriction
+
+!tag name=PCNSFVMomentumFriction pairs=module:navier_stokes system:fvkernels

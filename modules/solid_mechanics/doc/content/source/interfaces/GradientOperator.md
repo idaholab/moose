@@ -115,3 +115,5 @@ Components of the gradient operator are
 \begin{equation}
   \nabla^r \phi_r = \phi_{r,R}\textbf{e}_r\textbf{e}_R + \frac{\phi_{r}}{R}\textbf{e}_\theta\textbf{e}_\Theta + \frac{\phi_{r}}{R}\textbf{e}_\phi\textbf{e}_\Phi.
 \end{equation}
+
+!tag name=GradientOperator pairs=module:solid_mechanics system:interfaces

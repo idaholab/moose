@@ -22,3 +22,5 @@ This object is set up by the [ProjectedStatefulMaterialStorageAction](ProjectedS
 !syntax inputs /UserObjects/ProjectedStatefulMaterialNodalPatchRecoveryReal
 
 !syntax children /UserObjects/ProjectedStatefulMaterialNodalPatchRecoveryReal
+
+!tag name=ProjectedStatefulMaterialNodalPatchRecovery pairs=module:framework system:userobjects

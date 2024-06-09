@@ -37,3 +37,5 @@ If the pressure head function for the positive direction should be used for nega
 !syntax inputs /FunctorMaterials/NSFVPumpFunctorMaterial
 
 !syntax children /FunctorMaterials/NSFVPumpFunctorMaterial
+
+!tag name=NSFVPumpFunctorMaterial pairs=module:navier_stokes system:functormaterials

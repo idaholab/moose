@@ -16,3 +16,5 @@ The value will be determined by a `Postprocessor`
 !syntax inputs /FVBCs/FVPostprocessorDirichletBC
 
 !syntax children /FVBCs/FVPostprocessorDirichletBC
+
+!tag name=FVPostprocessorDirichletBC pairs=module:framework system:fvbcs

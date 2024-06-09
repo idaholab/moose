@@ -8,3 +8,5 @@ on a 2D RZ domain.
 !syntax inputs /Postprocessors/SideFluxIntegralRZ
 
 !syntax children /Postprocessors/SideFluxIntegralRZ
+
+!tag name=SideFluxIntegralRZ pairs=module:thermal_hydraulics system:postprocessors

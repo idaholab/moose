@@ -255,3 +255,5 @@ PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`.
 !syntax children /Materials/ComputeLinearElasticPFFractureStress
 
 !bibtex bibliography
+
+!tag name=ComputeLinearElasticPFFractureStress pairs=module:solid_mechanics system:materials

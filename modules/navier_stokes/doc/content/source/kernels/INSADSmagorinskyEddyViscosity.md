@@ -36,3 +36,5 @@ from theory [!cite](smagorinsky1963), and is set by default to a reasonable valu
 !syntax children /Kernels/INSADSmagorinskyEddyViscosity
 
 !bibtex bibliography
+
+!tag name=INSADSmagorinskyEddyViscosity pairs=module:navier_stokes system:kernels

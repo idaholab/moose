@@ -21,3 +21,5 @@ consequences for boundary conditions on momentum flux boundaries.
 !syntax inputs /HDGKernels/NavierStokesHDGKernel
 
 !syntax children /HDGKernels/NavierStokesHDGKernel
+
+!tag name=NavierStokesHDGKernel pairs=module:navier_stokes system:hdgkernels

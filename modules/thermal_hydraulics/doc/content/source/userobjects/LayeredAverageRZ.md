@@ -15,3 +15,5 @@ Stay tuned!
 !syntax inputs /UserObjects/LayeredAverageRZ
 
 !syntax children /UserObjects/LayeredAverageRZ
+
+!tag name=LayeredAverageRZ pairs=module:thermal_hydraulics system:userobjects

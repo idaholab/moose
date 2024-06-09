@@ -11,3 +11,5 @@ Please note that finite volume boundary conditions `FVBCs` are specified in the 
 by the [AddFVBCAction.md] action.
 
 !syntax parameters /BCs/AddBCAction
+
+!tag name=AddBCAction pairs=module:framework system:actions

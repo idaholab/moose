@@ -11,3 +11,5 @@ parameter. Please refer to the [Debug/index.md] for more details.
 
 
 !syntax parameters /Debug/SetupResidualDebugAction heading=None
+
+!tag name=SetupResidualDebugAction pairs=module:framework system:actions

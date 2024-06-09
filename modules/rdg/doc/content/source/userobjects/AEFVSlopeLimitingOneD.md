@@ -7,3 +7,5 @@
 !syntax inputs /UserObjects/AEFVSlopeLimitingOneD
 
 !syntax children /UserObjects/AEFVSlopeLimitingOneD
+
+!tag name=AEFVSlopeLimitingOneD pairs=module:rdg system:userobjects

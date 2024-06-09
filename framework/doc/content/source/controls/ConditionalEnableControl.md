@@ -15,3 +15,5 @@ If the parameter `reverse_on_false` is set to true (as it is by default),
 the objects in the `enable_objects` list are disabled when the condition is
 false, and the objects in the `disable_objects` list are enabled when the
 condition is false.
+
+!tag name=ConditionalEnableControl pairs=module:framework system:controls

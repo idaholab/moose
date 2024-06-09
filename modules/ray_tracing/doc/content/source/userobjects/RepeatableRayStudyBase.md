@@ -69,3 +69,5 @@ If the private parameter `_claim_after_define_rays == false`, the rays within `_
 In every execution of the study, all of the rays in `_local_rays` are copied and inserted into the buffer to be traced. An actual copy takes place here - we want the rays within `_local_rays` to always be valid so that on later executions of the study, we can produce repeatable behavior in terms of the rays that are being traced.
 
 !listing modules/ray_tracing/src/userobjects/RepeatableRayStudyBase.C re=\s\s//\sReserve\sahead\sof\stime.*?^\s\s}
+
+!tag name=RepeatableRayStudyBase pairs=module:ray_tracing system:userobjects

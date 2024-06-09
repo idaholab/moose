@@ -24,3 +24,5 @@ to a value of 1.
 !syntax inputs /Postprocessors/HeatRateConvection
 
 !syntax children /Postprocessors/HeatRateConvection
+
+!tag name=HeatRateConvection pairs=module:thermal_hydraulics system:postprocessors

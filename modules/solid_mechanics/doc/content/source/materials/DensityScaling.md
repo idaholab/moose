@@ -23,3 +23,5 @@ have a key influence on the simulation output metrics.
 !syntax children /Materials/DensityScaling
 
 !bibtex bibliography
+
+!tag name=DensityScaling pairs=module:solid_mechanics system:materials

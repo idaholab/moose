@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSSUPGMomentum
 
 !syntax children /Kernels/NSSUPGMomentum
+
+!tag name=NSSUPGMomentum pairs=module:navier_stokes system:kernels

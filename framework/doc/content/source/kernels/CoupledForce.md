@@ -46,3 +46,5 @@ kernel for this purpose.
 !syntax inputs /Kernels/CoupledForce
 
 !syntax children /Kernels/CoupledForce
+
+!tag name=CoupledForce pairs=module:framework system:kernels

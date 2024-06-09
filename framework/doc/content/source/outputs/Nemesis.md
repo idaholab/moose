@@ -14,3 +14,5 @@ more information.
 !syntax inputs /Outputs/Nemesis
 
 !syntax children /Outputs/Nemesis
+
+!tag name=Nemesis pairs=module:framework system:outputs

@@ -5,3 +5,5 @@ each block of the `[Adaptivity/Markers]` block of an input file, then adds them 
 [Problem](syntax/Problem/index.md). See [syntax/Adaptivity/index.md] for more information.
 
 !syntax parameters /Adaptivity/Markers/AddMarkerAction
+
+!tag name=AddMarkerAction pairs=module:framework system:actions

@@ -16,3 +16,5 @@ The parameter [!param](/Postprocessors/TimeExtremeValue/output_type) allows the 
 !syntax children /Postprocessors/TimeExtremeValue
 
 !bibtex bibliography
+
+!tag name=TimeExtremeValue pairs=module:framework system:postprocessors

@@ -12,3 +12,5 @@ Please note that finite element boundary conditions `BCs` are specified in the `
 handled by the [AddBCAction.md] action.
 
 !syntax parameters /FVBCs/AddFVBCAction
+
+!tag name=AddFVBCAction pairs=module:framework system:actions

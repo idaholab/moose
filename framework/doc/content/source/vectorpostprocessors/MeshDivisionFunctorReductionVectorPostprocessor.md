@@ -34,3 +34,5 @@ a warning will be output and the elements will be ignored.
 !syntax inputs /VectorPostprocessors/MeshDivisionFunctorReductionVectorPostprocessor
 
 !syntax children /VectorPostprocessors/MeshDivisionFunctorReductionVectorPostprocessor
+
+!tag name=MeshDivisionFunctorReductionVectorPostprocessor pairs=module:framework system:vectorpostprocessors

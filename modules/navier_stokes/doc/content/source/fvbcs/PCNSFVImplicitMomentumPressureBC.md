@@ -13,3 +13,5 @@ information. This is the porous analog of
 !syntax inputs /FVBCs/PCNSFVImplicitMomentumPressureBC
 
 !syntax children /FVBCs/PCNSFVImplicitMomentumPressureBC
+
+!tag name=PCNSFVImplicitMomentumPressureBC pairs=module:navier_stokes system:fvbcs

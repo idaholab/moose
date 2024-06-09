@@ -31,3 +31,5 @@ The `eigenstrain_names` parameter value must also be set for the strain calculat
 !syntax inputs /Materials/ComputeThermalExpansionEigenstrain
 
 !syntax children /Materials/ComputeThermalExpansionEigenstrain
+
+!tag name=ComputeThermalExpansionEigenstrain pairs=module:solid_mechanics system:materials

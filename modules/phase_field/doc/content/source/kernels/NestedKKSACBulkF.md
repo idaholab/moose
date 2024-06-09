@@ -52,3 +52,5 @@ The off-diagonal Jacobian contribution is multiplied by the Allen-Cahn mobility 
 !syntax inputs /Kernels/NestedKKSACBulkF
 
 !syntax children /Kernels/NestedKKSACBulkF
+
+!tag name=NestedKKSACBulkF pairs=module:phase_field system:kernels

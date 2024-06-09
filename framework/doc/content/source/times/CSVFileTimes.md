@@ -10,3 +10,5 @@ The times will be extracted from all the input CSV files and sorted.
 !syntax inputs /Times/CSVFileTimes
 
 !syntax children /Times/CSVFileTimes
+
+!tag name=CSVFileTimes pairs=module:framework system:times

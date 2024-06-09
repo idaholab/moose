@@ -11,3 +11,5 @@ For boundary sideset conversion, phantom elements are constructed based on perid
 !syntax inputs /Mesh/MeshGeneratorPD
 
 !syntax children /Mesh/MeshGeneratorPD
+
+!tag name=MeshGeneratorPD pairs=module:peridynamics system:meshgenerators

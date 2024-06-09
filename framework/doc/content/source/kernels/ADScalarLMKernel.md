@@ -7,3 +7,5 @@ The `ADScalarLMKernel` is the automatic differentiation version of [`ScalarLMKer
 !syntax inputs /Kernels/ADScalarLMKernel
 
 !syntax children /Kernels/ADScalarLMKernel
+
+!tag name=ADScalarLMKernel pairs=module:framework system:kernels

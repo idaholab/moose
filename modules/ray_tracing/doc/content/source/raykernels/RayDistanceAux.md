@@ -9,3 +9,5 @@ The accumulation is achieved by overriding `onSegment` and appending into the `A
 !syntax parameters /RayKernels/RayDistanceAux
 
 !syntax inputs /RayKernels/RayDistanceAux
+
+!tag name=RayDistanceAux pairs=module:ray_tracing system:raykernels

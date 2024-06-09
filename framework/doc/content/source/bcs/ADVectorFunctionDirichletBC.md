@@ -35,3 +35,5 @@ Note that this BC computes its Jacobian using automatic differentiation
 !syntax inputs /BCs/ADVectorFunctionDirichletBC
 
 !syntax children /BCs/ADVectorFunctionDirichletBC
+
+!tag name=ADVectorFunctionDirichletBC pairs=module:framework system:bcs

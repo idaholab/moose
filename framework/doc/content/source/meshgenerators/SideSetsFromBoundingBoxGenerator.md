@@ -15,3 +15,5 @@ This `MeshGenerator` can be used in two ways:
 !syntax inputs /Mesh/SideSetsFromBoundingBoxGenerator
 
 !syntax children /Mesh/SideSetsFromBoundingBoxGenerator
+
+!tag name=SideSetsFromBoundingBoxGenerator pairs=module:framework system:meshgenerators

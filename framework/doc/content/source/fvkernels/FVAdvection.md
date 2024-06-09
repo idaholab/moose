@@ -62,3 +62,5 @@ In this example, a simple time-dependent advection problem is solved, with a con
 !syntax inputs /FVKernels/FVAdvection
 
 !syntax children /FVKernels/FVAdvection
+
+!tag name=FVAdvection pairs=module:framework system:fvkernels

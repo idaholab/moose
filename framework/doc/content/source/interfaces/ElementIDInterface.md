@@ -30,3 +30,5 @@ Because MOOSE creates three copies of materials for the current element, element
 
 
 It is noted that the element integer name *subdomain_id* is reserved by MOOSE for accessing subdomain IDs with this interface.
+
+!tag name=ElementIDInterface pairs=module:framework system:interfaces

@@ -29,3 +29,5 @@ where $k$ is the fluid thermal conductivity.
 !syntax inputs /Materials/ADWallHeatTransferCoefficientKazimiMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficientKazimiMaterial
+
+!tag name=ADWallHeatTransferCoefficientKazimiMaterial pairs=module:thermal_hydraulics system:materials

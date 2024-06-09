@@ -12,3 +12,5 @@ This can only be used with a [THMProblem.md], usually within a THM simulation.
 !syntax inputs /Postprocessors/BoolControlDataValuePostprocessor
 
 !syntax children /Postprocessors/BoolControlDataValuePostprocessor
+
+!tag name=BoolControlDataValuePostprocessor pairs=module:thermal_hydraulics system:postprocessors

@@ -10,3 +10,5 @@ Please see the documentation for this other boundary condition.
 !syntax inputs /FVBCs/NSFVFunctorHeatFluxBC
 
 !syntax children /FVBCs/NSFVFunctorHeatFluxBC
+
+!tag name=NSFVFunctorHeatFluxBC pairs=module:navier_stokes system:fvbcs

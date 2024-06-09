@@ -11,3 +11,5 @@ Using the results of this Postprocessor for a convergence criterion, the solutio
 !syntax inputs /Postprocessors/BondStatusConvergedPostprocessorPD
 
 !syntax children /Postprocessors/BondStatusConvergedPostprocessorPD
+
+!tag name=BondStatusConvergedPostprocessorPD pairs=module:peridynamics system:postprocessors

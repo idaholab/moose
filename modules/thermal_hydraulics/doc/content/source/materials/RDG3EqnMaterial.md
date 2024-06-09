@@ -19,3 +19,5 @@ Then, the solution values at the interfaces are computed from these values:
 !syntax inputs /Materials/RDG3EqnMaterial
 
 !syntax children /Materials/RDG3EqnMaterial
+
+!tag name=RDG3EqnMaterial pairs=module:thermal_hydraulics system:materials

@@ -46,3 +46,5 @@ More details on working with Saline can be found in this [reference](https://inf
 !syntax children /FluidProperties/SalineMoltenSaltFluidProperties
 
 !bibtex bibliography
+
+!tag name=SalineMoltenSaltFluidProperties pairs=module:fluid_properties system:fluidproperties

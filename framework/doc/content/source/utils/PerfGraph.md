@@ -191,3 +191,5 @@ Performance Graph:
 `Calls` is the number of times that section was run. `Self` time is the time actually taken by the section while `Children` time is the cumulative time of all of the sub-sections below that section and `Total` is the sum of the two.  The `Avg` and `%` columns represent the average and percent of the total run-time of the app for the number in the column to the left. `Mem` is the memory (in Megabytes) for the column to the left (Self or Total).
 
 There are also two other ways to print information out about the graph using `printHeaviestBranch()` and `printHeaviestSections()`.  These are described well over on the [/PerfGraphOutput.md] page.
+
+!tag name=PerfGraph pairs=module:framework system:utils

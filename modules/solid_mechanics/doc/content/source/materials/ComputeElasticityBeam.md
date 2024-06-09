@@ -11,3 +11,5 @@ This class computes the elasticity vectors (material stiffness and flexure) for 
 !syntax inputs /Materials/ComputeElasticityBeam
 
 !syntax children /Materials/ComputeElasticityBeam
+
+!tag name=ComputeElasticityBeam pairs=module:solid_mechanics system:materials

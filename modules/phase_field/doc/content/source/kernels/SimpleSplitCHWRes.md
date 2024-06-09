@@ -19,3 +19,5 @@ even for variable dependent mobilities $M$.
 !syntax children /Kernels/SimpleSplitCHWRes
 
 !bibtex bibliography
+
+!tag name=SimpleSplitCHWRes pairs=module:phase_field system:kernels

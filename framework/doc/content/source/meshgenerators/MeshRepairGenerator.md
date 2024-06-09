@@ -21,3 +21,5 @@ The operations currently implemented are:
 !syntax inputs /Mesh/MeshRepairGenerator
 
 !syntax children /Mesh/MeshRepairGenerator
+
+!tag name=MeshRepairGenerator pairs=module:framework system:meshgenerators

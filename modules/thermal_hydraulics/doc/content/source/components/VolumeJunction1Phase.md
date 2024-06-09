@@ -37,3 +37,5 @@ See [!cite](relap7theory) for a description of this junction formulation.
 !syntax children /Components/VolumeJunction1Phase
 
 !bibtex bibliography
+
+!tag name=VolumeJunction1Phase pairs=module:thermal_hydraulics system:components

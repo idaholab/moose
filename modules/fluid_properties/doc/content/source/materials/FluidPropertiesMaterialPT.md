@@ -22,3 +22,5 @@ The following material properties created are:
 !syntax inputs /Materials/FluidPropertiesMaterialPT
 
 !syntax children /Materials/FluidPropertiesMaterialPT
+
+!tag name=FluidPropertiesMaterialPT pairs=module:fluid_properties system:materials

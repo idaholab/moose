@@ -15,3 +15,5 @@ and temperature $T$, with pressure $p_i$ coming from the interior solution:
 !syntax inputs /UserObjects/ADBoundaryFlux3EqnGhostMassFlowRateTemperature
 
 !syntax children /UserObjects/ADBoundaryFlux3EqnGhostMassFlowRateTemperature
+
+!tag name=ADBoundaryFlux3EqnGhostMassFlowRateTemperature pairs=module:thermal_hydraulics system:userobjects

@@ -14,3 +14,5 @@ display this feature by only including the '1' position in the pattern.
 !syntax inputs /Positions/CartesianGridPositions
 
 !syntax children /Positions/CartesianGridPositions
+
+!tag name=CartesianGridPositions pairs=module:reactor system:positions

@@ -17,3 +17,5 @@ dependent mobilities $M$ and gradient energy parameters $\kappa$.
 !syntax inputs /Kernels/SimpleACInterface
 
 !syntax children /Kernels/SimpleACInterface
+
+!tag name=SimpleACInterface pairs=module:phase_field system:kernels

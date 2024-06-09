@@ -16,3 +16,5 @@ In this example, the `ChangeOverTimestepPostprocessor` is set to track the chang
 !syntax inputs /Postprocessors/ChangeOverTimestepPostprocessor
 
 !syntax children /Postprocessors/ChangeOverTimestepPostprocessor
+
+!tag name=ChangeOverTimestepPostprocessor pairs=module:framework system:postprocessors

@@ -18,3 +18,5 @@ $\rho_i$ and velocity $u_i$ coming from the solution:
 !syntax inputs /UserObjects/ADBoundaryFlux3EqnGhostPressure
 
 !syntax children /UserObjects/ADBoundaryFlux3EqnGhostPressure
+
+!tag name=ADBoundaryFlux3EqnGhostPressure pairs=module:thermal_hydraulics system:userobjects

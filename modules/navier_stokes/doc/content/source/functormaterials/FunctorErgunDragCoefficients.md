@@ -31,3 +31,5 @@ recognizable.
 !syntax inputs /FunctorMaterials/FunctorErgunDragCoefficients
 
 !syntax children /FunctorMaterials/FunctorErgunDragCoefficients
+
+!tag name=FunctorErgunDragCoefficients pairs=module:navier_stokes system:functormaterials

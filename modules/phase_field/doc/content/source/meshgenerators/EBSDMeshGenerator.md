@@ -19,3 +19,5 @@ final mesh. It sets the levels of coarsening that can be applied to the EBSD dat
 !syntax inputs /Mesh/EBSDMeshGenerator
 
 !syntax children /Mesh/EBSDMeshGenerator
+
+!tag name=EBSDMeshGenerator pairs=module:phase_field system:meshgenerators

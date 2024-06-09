@@ -10,3 +10,5 @@ More information about the `GlobalParams` system may be found on the
 [GlobalParams syntax documentation](syntax/GlobalParams/index.md).
 
 !syntax parameters /GlobalParams/GlobalParamsAction
+
+!tag name=GlobalParamsAction pairs=module:framework system:actions

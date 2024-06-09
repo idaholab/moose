@@ -12,3 +12,5 @@ implemented for the [!param](/UserObjects/LayeredSideIntegralFunctor/functor) pa
 !syntax inputs /UserObjects/LayeredSideIntegralFunctor
 
 !syntax children /UserObjects/LayeredSideIntegralFunctor
+
+!tag name=LayeredSideIntegralFunctor pairs=module:framework system:userobjects

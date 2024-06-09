@@ -15,3 +15,5 @@ The following input file snippet demonstrates the use of the `MeshInfo` object.
 !syntax inputs /Reporters/MeshInfo
 
 !syntax children /Reporters/MeshInfo
+
+!tag name=MeshInfo pairs=module:framework system:reporters

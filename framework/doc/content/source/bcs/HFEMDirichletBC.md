@@ -18,3 +18,5 @@ and the [!param](/BCs/HFEMDirichletBC/value) corresponds to $g$. Refer to [DGKer
 !syntax inputs /BCs/HFEMDirichletBC
 
 !syntax children /BCs/HFEMDirichletBC
+
+!tag name=HFEMDirichletBC pairs=module:framework system:bcs

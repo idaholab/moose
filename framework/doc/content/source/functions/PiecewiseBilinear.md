@@ -28,3 +28,5 @@ The csv file `data_file` may be substituted by specifying the `x`, `y` and `z` p
 !syntax inputs /Functions/PiecewiseBilinear
 
 !syntax children /Functions/PiecewiseBilinear
+
+!tag name=PiecewiseBilinear pairs=module:framework system:functions

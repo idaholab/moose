@@ -29,3 +29,5 @@ The `PolycrystalKernelAction` is accessed through the `Kernels` block, as shown 
 !syntax parameters /Kernels/PolycrystalKernel/PolycrystalKernelAction
 
 !syntax children /Kernels/PolycrystalKernel/PolycrystalKernelAction
+
+!tag name=PolycrystalKernelAction pairs=module:phase_field system:actions

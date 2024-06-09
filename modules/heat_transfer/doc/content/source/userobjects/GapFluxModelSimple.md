@@ -14,3 +14,5 @@
 !syntax children /UserObjects/GapFluxModelSimple
 
 !bibtex bibliography
+
+!tag name=GapFluxModelSimple pairs=module:heat_transfer system:userobjects

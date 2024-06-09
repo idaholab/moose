@@ -16,3 +16,5 @@ The `OverlayMeshGenerator` object is the built-in mesh generation capable of cre
 !syntax inputs /Mesh/OverlayMeshGenerator
 
 !syntax children /Mesh/OverlayMeshGenerator
+
+!tag name=OverlayMeshGenerator pairs=module:framework system:meshgenerators

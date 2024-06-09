@@ -13,3 +13,5 @@ This object retrieves both the MOOSE `small_stress` and `small_jacobian` values 
 !syntax inputs /Materials/NEML2StressToMOOSE
 
 !syntax children /Materials/NEML2StressToMOOSE
+
+!tag name=NEML2StressToMOOSE pairs=module:solid_mechanics system:neml2

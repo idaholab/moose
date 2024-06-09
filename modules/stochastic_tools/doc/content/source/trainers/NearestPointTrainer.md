@@ -41,3 +41,5 @@ We then output the training data to file:
 !syntax inputs /Trainers/NearestPointTrainer
 
 !syntax children /Trainers/NearestPointTrainer
+
+!tag name=NearestPointTrainer pairs=module:stochastic_tools system:trainers

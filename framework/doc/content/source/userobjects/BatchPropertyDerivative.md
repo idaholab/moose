@@ -4,3 +4,5 @@ This user object gathers a material property used as a parameter in a NEML2 mate
 
 !syntax parameters /UserObjects/BatchPropertyDerivativeRankTwoTensorReal
 
+
+!tag name=BatchPropertyDerivative pairs=module:framework system:userobjects

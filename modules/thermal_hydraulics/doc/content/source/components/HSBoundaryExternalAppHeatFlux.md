@@ -54,3 +54,5 @@ q_b = \pm q \frac{P_\text{ext}}{P} \eqp
 !syntax inputs /Components/HSBoundaryExternalAppHeatFlux
 
 !syntax children /Components/HSBoundaryExternalAppHeatFlux
+
+!tag name=HSBoundaryExternalAppHeatFlux pairs=module:thermal_hydraulics system:components

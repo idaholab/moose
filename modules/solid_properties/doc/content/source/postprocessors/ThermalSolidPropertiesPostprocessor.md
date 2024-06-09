@@ -8,3 +8,5 @@ object at a temperature given by another post-processor.
 !syntax inputs /Postprocessors/ThermalSolidPropertiesPostprocessor
 
 !syntax children /Postprocessors/ThermalSolidPropertiesPostprocessor
+
+!tag name=ThermalSolidPropertiesPostprocessor pairs=module:solid_properties system:postprocessors

@@ -20,3 +20,5 @@ The central difference time integrator derives from the [`ActuallyExplicitEuler`
 !syntax inputs /Executioner/TimeIntegrator/CentralDifference
 
 !syntax children /Executioner/TimeIntegrator/CentralDifference
+
+!tag name=CentralDifference pairs=module:framework system:timeintegrators

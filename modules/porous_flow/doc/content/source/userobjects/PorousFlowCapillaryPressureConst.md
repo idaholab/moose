@@ -14,3 +14,5 @@ This formulation is useful for testing purposes.
 !syntax inputs /UserObjects/PorousFlowCapillaryPressureConst
 
 !syntax children /UserObjects/PorousFlowCapillaryPressureConst
+
+!tag name=PorousFlowCapillaryPressureConst pairs=module:porous_flow system:userobjects

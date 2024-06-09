@@ -27,3 +27,5 @@ which can be difficult to solve.
 !syntax inputs /BCs/VectorPenaltyDirichletBC
 
 !syntax children /BCs/VectorPenaltyDirichletBC
+
+!tag name=VectorPenaltyDirichletBC pairs=module:framework system:bcs

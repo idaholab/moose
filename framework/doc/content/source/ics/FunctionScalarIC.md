@@ -15,3 +15,5 @@ In this example, the scalar variable `n`, solution of a first order ODE, is init
 !syntax inputs /ICs/FunctionScalarIC
 
 !syntax children /ICs/FunctionScalarIC
+
+!tag name=FunctionScalarIC pairs=module:framework system:ics

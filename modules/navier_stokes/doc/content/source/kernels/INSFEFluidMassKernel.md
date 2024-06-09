@@ -21,3 +21,5 @@ documentation clear for users.
 !syntax inputs /Kernels/INSFEFluidMassKernel
 
 !syntax children /Kernels/INSFEFluidMassKernel
+
+!tag name=INSFEFluidMassKernel pairs=module:navier_stokes system:kernels

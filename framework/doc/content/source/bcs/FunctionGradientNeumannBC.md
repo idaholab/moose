@@ -16,3 +16,5 @@ known.
 !syntax inputs /BCs/FunctionGradientNeumannBC
 
 !syntax children /BCs/FunctionGradientNeumannBC
+
+!tag name=FunctionGradientNeumannBC pairs=module:framework system:bcs

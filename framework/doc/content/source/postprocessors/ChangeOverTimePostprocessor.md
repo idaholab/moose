@@ -31,3 +31,5 @@ block=Postprocessors
 !syntax inputs /Postprocessors/ChangeOverTimePostprocessor
 
 !syntax children /Postprocessors/ChangeOverTimePostprocessor
+
+!tag name=ChangeOverTimePostprocessor pairs=module:framework system:postprocessors

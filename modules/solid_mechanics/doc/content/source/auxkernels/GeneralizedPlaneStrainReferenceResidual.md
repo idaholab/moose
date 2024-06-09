@@ -16,3 +16,5 @@ from [GeneralizedPlaneStrainUserObject](/GeneralizedPlaneStrainUserObject.md).
 !syntax inputs /AuxScalarKernels/GeneralizedPlaneStrainReferenceResidual
 
 !syntax children /AuxScalarKernels/GeneralizedPlaneStrainReferenceResidual
+
+!tag name=GeneralizedPlaneStrainReferenceResidual pairs=module:solid_mechanics system:auxkernels

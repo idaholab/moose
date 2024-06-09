@@ -21,3 +21,5 @@ $K_{integral/proportional/derivative}$ the coefficients for the integral error, 
 !syntax inputs /Controls/PIDTransientControl
 
 !syntax children /Controls/PIDTransientControl
+
+!tag name=PIDTransientControl pairs=module:framework system:controls

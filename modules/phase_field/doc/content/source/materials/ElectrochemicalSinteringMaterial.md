@@ -26,3 +26,5 @@ such as GB vacancy segregation and stoichiometry effects.
 !syntax children /Materials/ElectrochemicalSinteringMaterial
 
 !bibtex bibliography
+
+!tag name=ElectrochemicalSinteringMaterial pairs=module:phase_field system:materials

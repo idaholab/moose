@@ -47,3 +47,5 @@ object to `electrical_conductivity`.
 !syntax inputs /AuxKernels/CurrentDensity
 
 !syntax children /AuxKernels/CurrentDensity
+
+!tag name=CurrentDensity pairs=module:electromagnetics system:auxkernels

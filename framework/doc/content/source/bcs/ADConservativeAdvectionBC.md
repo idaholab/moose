@@ -29,3 +29,5 @@ implicitly through `velocity_mat_prop`.
 !syntax inputs /BCs/ADConservativeAdvectionBC
 
 !syntax children /BCs/ADConservativeAdvectionBC
+
+!tag name=ADConservativeAdvectionBC pairs=module:framework system:bcs

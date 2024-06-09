@@ -23,3 +23,5 @@ $K/\mu$ and $\rho$ are expected as material properties called conductivity and d
 !syntax inputs /Kernels/PrimaryConvection
 
 !syntax children /Kernels/PrimaryConvection
+
+!tag name=PrimaryConvection pairs=module:chemical_reactions system:kernels

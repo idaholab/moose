@@ -7,3 +7,5 @@
 !syntax inputs /AuxKernels/INSCourant
 
 !syntax children /AuxKernels/INSCourant
+
+!tag name=INSCourant pairs=module:navier_stokes system:auxkernels

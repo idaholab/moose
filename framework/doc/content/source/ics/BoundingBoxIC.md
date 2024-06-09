@@ -23,3 +23,5 @@ boxes are needed, this capability is implemented in the phase_field module as `M
 !syntax children /ICs/BoundingBoxIC
 
 !bibtex bibliography
+
+!tag name=BoundingBoxIC pairs=module:framework system:ics

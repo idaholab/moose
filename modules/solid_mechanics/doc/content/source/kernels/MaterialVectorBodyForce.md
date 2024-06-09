@@ -17,3 +17,5 @@ directions can be set up using the [MaterialVectorBodyForce action](SolidMechani
 !syntax inputs /Kernels/MaterialVectorBodyForce
 
 !syntax children /Kernels/MaterialVectorBodyForce
+
+!tag name=MaterialVectorBodyForce pairs=module:solid_mechanics system:kernels

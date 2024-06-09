@@ -11,3 +11,5 @@ The LinearNodalConstraint class constrains the secondary node to move as a linea
 !syntax children /Constraints/LinearNodalConstraint
 
 !bibtex bibliography
+
+!tag name=LinearNodalConstraint pairs=module:framework system:constraints

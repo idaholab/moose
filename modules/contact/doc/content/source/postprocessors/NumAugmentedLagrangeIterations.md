@@ -11,3 +11,5 @@ on the augmented Lagrangian iteration.
 !syntax inputs /Postprocessors/NumAugmentedLagrangeIterations
 
 !syntax children /Postprocessors/NumAugmentedLagrangeIterations
+
+!tag name=NumAugmentedLagrangeIterations pairs=module:contact system:postprocessors

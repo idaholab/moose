@@ -22,3 +22,5 @@ The detailed description of the derivation can be found at [scalar_constraint_ke
 !syntax inputs /ScalarKernels/AverageValueConstraint
 
 !syntax children /ScalarKernels/AverageValueConstraint
+
+!tag name=AverageValueConstraint pairs=module:framework system:scalarkernels

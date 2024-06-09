@@ -11,3 +11,5 @@ This is the automatic-differentiation version of [`ADCZMInterfaceKernelSmallStra
 !syntax inputs /InterfaceKernels/ADCZMInterfaceKernelSmallStrain
 
 !syntax children /InterfaceKernels/ADCZMInterfaceKernelSmallStrain
+
+!tag name=ADCZMInterfaceKernelSmallStrain pairs=module:solid_mechanics system:interfacekernels

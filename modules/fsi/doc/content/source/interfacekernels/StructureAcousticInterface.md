@@ -19,3 +19,5 @@ In this interface kernel, element is always the fluid and neighbor is always
 !syntax inputs /InterfaceKernels/StructureAcousticInterface
 
 !syntax children /InterfaceKernels/StructureAcousticInterface
+
+!tag name=StructureAcousticInterface pairs=module:fsi system:interfacekernels

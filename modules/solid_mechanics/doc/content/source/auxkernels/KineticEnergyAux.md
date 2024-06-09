@@ -11,3 +11,5 @@ This object is used to compute the value of the kinetic energy of continuum fini
 !syntax inputs /AuxKernels/KineticEnergyAux
 
 !syntax children /AuxKernels/KineticEnergyAux
+
+!tag name=KineticEnergyAux pairs=module:solid_mechanics system:auxkernels

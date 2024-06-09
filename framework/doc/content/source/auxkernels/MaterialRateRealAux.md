@@ -23,3 +23,5 @@ This class derives from the same base class as [MaterialRealAux.md] and therefor
 !syntax inputs /AuxKernels/MaterialRateRealAux
 
 !syntax children /AuxKernels/MaterialRateRealAux
+
+!tag name=MaterialRateRealAux pairs=module:framework system:auxkernels

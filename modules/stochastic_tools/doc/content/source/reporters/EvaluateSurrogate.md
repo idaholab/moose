@@ -18,3 +18,5 @@ See [examples/surrogate_creation.md], [examples/surrogate_training.md], and [exa
 !syntax inputs /Reporters/EvaluateSurrogate
 
 !syntax children /Reporters/EvaluateSurrogate
+
+!tag name=EvaluateSurrogate pairs=module:stochastic_tools system:reporters

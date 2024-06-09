@@ -11,3 +11,5 @@ Because it uses AD, it does not declare additional material properties for the d
 !syntax inputs /Materials/ADWallFrictionChurchillMaterial
 
 !syntax children /Materials/ADWallFrictionChurchillMaterial
+
+!tag name=ADWallFrictionChurchillMaterial pairs=module:thermal_hydraulics system:materials

@@ -27,3 +27,5 @@ The axis of plane can be specified using [!param](/Mesh/PlaneIDMeshGenerator/pla
 !syntax inputs /Mesh/PlaneIDMeshGenerator
 
 !syntax children /Mesh/PlaneIDMeshGenerator
+
+!tag name=PlaneIDMeshGenerator pairs=module:framework system:meshgenerators

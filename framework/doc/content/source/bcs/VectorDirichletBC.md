@@ -31,3 +31,5 @@ or more sidesets corresponding to the boundary subset $\partial \Omega_D$.
 !syntax inputs /BCs/VectorDirichletBC
 
 !syntax children /BCs/VectorDirichletBC
+
+!tag name=VectorDirichletBC pairs=module:framework system:bcs

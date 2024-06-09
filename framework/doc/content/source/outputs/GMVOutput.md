@@ -12,3 +12,5 @@ The GMV output writes variable information using a format suitable for the
 !syntax inputs /Outputs/GMV
 
 !syntax children /Outputs/GMV
+
+!tag name=GMVOutput pairs=module:framework system:outputs

@@ -17,3 +17,5 @@ input file.
 !syntax inputs /Problem/LevelSetReinitializationProblem
 
 !syntax children /Problem/LevelSetReinitializationProblem
+
+!tag name=LevelSetReinitializationProblem pairs=module:level_set system:base

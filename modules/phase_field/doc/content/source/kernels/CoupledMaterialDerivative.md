@@ -13,3 +13,5 @@ to a coupled variable $v$ (`v`).
 !syntax children /Kernels/CoupledMaterialDerivative
 
 !bibtex bibliography
+
+!tag name=CoupledMaterialDerivative pairs=module:phase_field system:kernels

@@ -14,3 +14,5 @@ porosity multiplier on the pressure gradient term in the momentum equation: $-\e
 !syntax inputs /UserObjects/PINSFVRhieChowInterpolatorSegregated
 
 !syntax children /UserObjects/PINSFVRhieChowInterpolatorSegregated
+
+!tag name=PINSFVRhieChowInterpolatorSegregated pairs=module:navier_stokes system:userobjects

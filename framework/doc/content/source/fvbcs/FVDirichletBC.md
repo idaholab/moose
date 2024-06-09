@@ -16,3 +16,5 @@ the flux.
 !syntax inputs /FVBCs/FVDirichletBC
 
 !syntax children /FVBCs/FVDirichletBC
+
+!tag name=FVDirichletBC pairs=module:framework system:fvbcs

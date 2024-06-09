@@ -177,3 +177,5 @@ which is the familiar form implemented by [`ACInterface`](/ACInterface.md).
 !syntax inputs /Kernels/ACMultiInterface
 
 !syntax children /Kernels/ACMultiInterface
+
+!tag name=ACMultiInterface pairs=module:phase_field system:kernels

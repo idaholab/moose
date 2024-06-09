@@ -63,3 +63,5 @@ realistic neutron transport calculations in the following paper:
   publisher={SIAM}
 }
 ```
+
+!tag name=HMGPreconditioner pairs=module:framework system:preconditioners

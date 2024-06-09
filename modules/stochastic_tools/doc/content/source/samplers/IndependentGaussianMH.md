@@ -18,3 +18,5 @@ where $\pmb{\mathcal{S}}_{seed}$ is the seed state selected from the previously 
 !syntax inputs /Samplers/IndependentGaussianMH
 
 !syntax children /Samplers/IndependentGaussianMH
+
+!tag name=IndependentGaussianMH pairs=module:stochastic_tools system:samplers

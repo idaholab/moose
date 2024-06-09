@@ -21,3 +21,5 @@ For instance: this is the case for [WorkBalance](WorkBalance.md).  By default it
 !syntax children /AuxKernels/VectorPostprocessorVisualizationAux
 
 !bibtex bibliography
+
+!tag name=VectorPostprocessorVisualizationAux pairs=module:framework system:auxkernels

@@ -32,3 +32,5 @@ Checkpoint object it is required to create a sub-block.
 !syntax inputs /Outputs/Checkpoint
 
 !syntax children /Outputs/Checkpoint
+
+!tag name=Checkpoint pairs=module:framework system:outputs

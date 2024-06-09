@@ -46,3 +46,5 @@ component, users do not need to add it to an input file.
 !syntax inputs /UserObjects/ADShaftConnectedPump1PhaseUserObject
 
 !syntax children /UserObjects/ADShaftConnectedPump1PhaseUserObject
+
+!tag name=ADShaftConnectedPump1PhaseUserObject pairs=module:thermal_hydraulics system:userobjects

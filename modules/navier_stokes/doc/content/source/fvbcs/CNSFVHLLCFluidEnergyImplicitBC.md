@@ -18,3 +18,5 @@ gradients. For a description of HLLC flux computation please see [CNSFVHLLCBase.
 !syntax inputs /FVBCs/CNSFVHLLCFluidEnergyImplicitBC
 
 !syntax children /FVBCs/CNSFVHLLCFluidEnergyImplicitBC
+
+!tag name=CNSFVHLLCFluidEnergyImplicitBC pairs=module:navier_stokes system:fvbcs

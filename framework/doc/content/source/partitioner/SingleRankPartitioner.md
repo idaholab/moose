@@ -13,3 +13,5 @@ Partitions all elements to the given [!param](/Mesh/Partitioner/SingleRankPartit
 !syntax children /Mesh/Partitioner/SingleRankPartitioner
 
 !bibtex bibliography
+
+!tag name=SingleRankPartitioner pairs=module:framework system:partitioner

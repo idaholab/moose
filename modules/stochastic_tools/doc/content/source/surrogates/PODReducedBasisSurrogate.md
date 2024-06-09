@@ -87,3 +87,5 @@ the approximate value of the nodal maximum of variable `u` in this case:
 !syntax inputs /Surrogates/PODReducedBasisSurrogate
 
 !syntax children /Surrogates/PODReducedBasisSurrogate
+
+!tag name=PODReducedBasisSurrogate pairs=module:stochastic_tools system:surrogates

@@ -15,3 +15,5 @@ Each `GeometricCutUserObject` may have defined its own set of `CutSubdomainID`s,
 !syntax inputs /UserObjects/ComboCutUserObject
 
 !syntax children /UserObjects/ComboCutUserObject
+
+!tag name=ComboCutUserObject pairs=module:xfem system:userobjects

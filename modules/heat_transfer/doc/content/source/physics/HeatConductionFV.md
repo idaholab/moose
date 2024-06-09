@@ -23,3 +23,5 @@ the union of boundaries.
 !syntax inputs /Physics/HeatConduction/FiniteVolume/HeatConductionFV
 
 !syntax children /Physics/HeatConduction/FiniteVolume/HeatConductionFV
+
+!tag name=HeatConductionFV pairs=module:heat_transfer system:physics

@@ -17,3 +17,5 @@ In this example, the residual is output for variable `u` and `v` with two `Varia
 !syntax inputs /Postprocessors/VariableResidual
 
 !syntax children /Postprocessors/VariableResidual
+
+!tag name=VariableResidual pairs=module:framework system:postprocessors

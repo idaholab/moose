@@ -15,3 +15,4 @@ The methods of interest for use during tracing on `ElemExtrema` are:
 - `vertexPoint()` - The point of the vertex that was intersected.
 - `edgeVertices()` - The vertices that define the edge that was intersected.
 - `buildEdge()` - Builds an `Elem` that is the edge that was intersected.
+!tag name=ElemExtrema pairs=module:ray_tracing system:raytracing

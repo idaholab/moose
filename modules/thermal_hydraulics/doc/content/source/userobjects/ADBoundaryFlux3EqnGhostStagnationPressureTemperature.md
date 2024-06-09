@@ -19,3 +19,5 @@ solution:
 !syntax inputs /UserObjects/ADBoundaryFlux3EqnGhostStagnationPressureTemperature
 
 !syntax children /UserObjects/ADBoundaryFlux3EqnGhostStagnationPressureTemperature
+
+!tag name=ADBoundaryFlux3EqnGhostStagnationPressureTemperature pairs=module:thermal_hydraulics system:userobjects

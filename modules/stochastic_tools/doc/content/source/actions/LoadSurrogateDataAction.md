@@ -7,3 +7,5 @@ ready for use via the evaluate method.
 !listing load_store/evaluate.i block=Surrogates
 
 !syntax parameters /Surrogates/AddSurrogateAction
+
+!tag name=LoadSurrogateDataAction pairs=module:stochastic_tools system:actions

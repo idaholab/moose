@@ -18,3 +18,5 @@ The `DiscreteNucleationFromFile` is part of the [Discrete Nucleation system](Nuc
 !syntax inputs /UserObjects/DiscreteNucleationFromFile
 
 !syntax children /UserObjects/DiscreteNucleationFromFile
+
+!tag name=DiscreteNucleationFromFile pairs=module:phase_field system:userobjects

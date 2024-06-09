@@ -7,3 +7,5 @@ This is used to record the total fluid (kg) or heat (J) flux that is produced by
 !syntax inputs /Postprocessors/PorousFlowPlotQuantity
 
 !syntax children /Postprocessors/PorousFlowPlotQuantity
+
+!tag name=PorousFlowPlotQuantity pairs=module:porous_flow system:postprocessors

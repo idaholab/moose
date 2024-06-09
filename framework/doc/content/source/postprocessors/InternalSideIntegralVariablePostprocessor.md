@@ -18,3 +18,5 @@ used to compute the integral of variable `u` over all internal sides.
 !syntax inputs /Postprocessors/InternalSideIntegralVariablePostprocessor
 
 !syntax children /Postprocessors/InternalSideIntegralVariablePostprocessor
+
+!tag name=InternalSideIntegralVariablePostprocessor pairs=module:framework system:postprocessors

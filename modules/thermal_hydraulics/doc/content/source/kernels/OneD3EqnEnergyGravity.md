@@ -20,3 +20,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /Kernels/OneD3EqnEnergyGravity
 
 !syntax children /Kernels/OneD3EqnEnergyGravity
+
+!tag name=OneD3EqnEnergyGravity pairs=module:thermal_hydraulics system:kernels

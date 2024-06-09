@@ -26,3 +26,5 @@ Many other useful member variables exist that describe the [Ray.md] segment. For
 
 !alert note
 `RZ` and `RSPHERICAL` coordinate changes are not valid for a `RayKernel`. This is because said coordinate systems have no way to represent a line source---one would end up with a plane/surface source or a volumetric source, respectively. This is why `_coord[_qp]` is not utilized in `RayKernel`.
+
+!tag name=ADRayKernel pairs=module:ray_tracing system:raykernels

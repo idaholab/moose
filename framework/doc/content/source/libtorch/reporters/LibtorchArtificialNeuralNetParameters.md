@@ -26,3 +26,5 @@ simulation.
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchArtificialNeuralNetParameters pairs=module:framework system:libtorch

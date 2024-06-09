@@ -36,3 +36,5 @@ See [boundary conditions](boundaries.md) for many more details and discussion.
 !syntax inputs /BCs/PorousFlowHalfGaussianSink
 
 !syntax children /BCs/PorousFlowHalfGaussianSink
+
+!tag name=PorousFlowHalfGaussianSink pairs=module:porous_flow system:bcs

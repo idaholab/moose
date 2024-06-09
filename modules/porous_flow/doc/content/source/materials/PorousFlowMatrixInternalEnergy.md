@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowMatrixInternalEnergy
 
 !syntax children /Materials/PorousFlowMatrixInternalEnergy
+
+!tag name=PorousFlowMatrixInternalEnergy pairs=module:porous_flow system:materials

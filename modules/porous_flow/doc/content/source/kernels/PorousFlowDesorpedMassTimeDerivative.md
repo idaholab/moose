@@ -13,3 +13,5 @@ where all parameters are defined in the [nomenclature](/nomenclature.md).
 !syntax inputs /Kernels/PorousFlowDesorpedMassTimeDerivative
 
 !syntax children /Kernels/PorousFlowDesorpedMassTimeDerivative
+
+!tag name=PorousFlowDesorpedMassTimeDerivative pairs=module:porous_flow system:kernels

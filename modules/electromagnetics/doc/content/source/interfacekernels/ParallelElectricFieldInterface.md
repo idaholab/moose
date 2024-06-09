@@ -26,3 +26,5 @@ where
 !syntax inputs /InterfaceKernels/ParallelElectricFieldInterface
 
 !syntax children /InterfaceKernels/ParallelElectricFieldInterface
+
+!tag name=ParallelElectricFieldInterface pairs=module:electromagnetics system:interfacekernels

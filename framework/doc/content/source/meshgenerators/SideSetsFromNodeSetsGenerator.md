@@ -25,3 +25,5 @@ if `construct_side_list_from_node_list = true` in the `[Mesh]` block.
 !syntax inputs /Mesh/SideSetsFromNodeSetsGenerator
 
 !syntax children /Mesh/SideSetsFromNodeSetsGenerator
+
+!tag name=SideSetsFromNodeSetsGenerator pairs=module:framework system:meshgenerators

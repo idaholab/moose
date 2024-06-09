@@ -15,3 +15,5 @@ In this example, constant initial conditions are set for array variable `u` and 
 !syntax inputs /ICs/ArrayConstantIC
 
 !syntax children /ICs/ArrayConstantIC
+
+!tag name=ArrayConstantIC pairs=module:framework system:ics

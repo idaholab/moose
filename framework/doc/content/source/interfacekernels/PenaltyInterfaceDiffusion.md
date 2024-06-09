@@ -27,3 +27,5 @@ $P$ is the penalty supplied in the parameter [!param](/InterfaceKernels/PenaltyI
 !syntax inputs /InterfaceKernels/PenaltyInterfaceDiffusion
 
 !syntax children /InterfaceKernels/PenaltyInterfaceDiffusion
+
+!tag name=PenaltyInterfaceDiffusion pairs=module:framework system:interfacekernels

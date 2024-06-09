@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlow1PhaseMD_Gaussian
 
 !syntax children /Materials/PorousFlow1PhaseMD_Gaussian
+
+!tag name=PorousFlow1PhaseMD_Gaussian pairs=module:porous_flow system:materials

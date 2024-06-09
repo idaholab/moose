@@ -31,3 +31,5 @@ Derivation of above relationships can be found in Ref. [!citep](Silling2005meshf
 !syntax inputs /AuxKernels/StretchBasedFailureCriterionPD
 
 !syntax children /AuxKernels/StretchBasedFailureCriterionPD
+
+!tag name=StretchBasedFailureCriterionPD pairs=module:peridynamics system:auxkernels

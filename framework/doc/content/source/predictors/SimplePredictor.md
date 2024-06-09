@@ -26,3 +26,5 @@ time step solution to compute better initial guesses for each non linear solve.
 !syntax inputs /Executioner/Predictor/SimplePredictor
 
 !syntax children /Executioner/Predictor/SimplePredictor
+
+!tag name=SimplePredictor pairs=module:framework system:predictors

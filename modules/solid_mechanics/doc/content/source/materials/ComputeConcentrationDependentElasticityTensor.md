@@ -21,3 +21,5 @@ the derivative tensor of the elasticity tensor with regards to the concentration
 !syntax inputs /Materials/ComputeConcentrationDependentElasticityTensor
 
 !syntax children /Materials/ComputeConcentrationDependentElasticityTensor
+
+!tag name=ComputeConcentrationDependentElasticityTensor pairs=module:solid_mechanics system:materials

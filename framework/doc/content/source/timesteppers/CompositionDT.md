@@ -20,3 +20,5 @@ An example of using multiple time steppers:
 !syntax inputs /Executioner/TimeSteppers/CompositionDT
 
 !syntax children /Executioner/TimeSteppers/CompositionDT
+
+!tag name=CompositionDT pairs=module:framework system:timesteppers

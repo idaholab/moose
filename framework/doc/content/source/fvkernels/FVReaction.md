@@ -21,3 +21,5 @@ parameters. An example block is shown below for a diffusion-reaction equation:
 !syntax inputs /FVKernels/FVReaction
 
 !syntax children /FVKernels/FVReaction
+
+!tag name=FVReaction pairs=module:framework system:fvkernels

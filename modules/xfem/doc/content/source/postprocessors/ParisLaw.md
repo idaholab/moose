@@ -13,3 +13,5 @@ The ParisLaw Postprocessor computes the crack extension size at all active crack
 !syntax inputs /Postprocessors/ParisLaw
 
 !syntax children /Postprocessors/ParisLaw
+
+!tag name=ParisLaw pairs=module:xfem system:postprocessors

@@ -15,3 +15,5 @@ to the matrix diagonal.
 !syntax children /BCs/EigenDirichletBC
 
 !bibtex bibliography
+
+!tag name=EigenDirichletBC pairs=module:framework system:bcs

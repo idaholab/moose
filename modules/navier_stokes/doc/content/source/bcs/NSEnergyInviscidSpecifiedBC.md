@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSEnergyInviscidSpecifiedBC
 
 !syntax children /BCs/NSEnergyInviscidSpecifiedBC
+
+!tag name=NSEnergyInviscidSpecifiedBC pairs=module:navier_stokes system:bcs

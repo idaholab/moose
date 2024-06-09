@@ -15,3 +15,5 @@ For direct VectorPostprocessor-to-VectorPostprocessor transfers see [MultiAppRep
 !syntax inputs /Transfers/MultiAppVectorPostprocessorTransfer
 
 !syntax children /Transfers/MultiAppVectorPostprocessorTransfer
+
+!tag name=MultiAppVectorPostprocessorTransfer pairs=module:framework system:transfers

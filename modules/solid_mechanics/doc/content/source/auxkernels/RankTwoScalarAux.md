@@ -51,3 +51,5 @@ Results will have different quality based on the AuxVariable:
 !syntax children /AuxKernels/RankTwoScalarAux
 
 !bibtex bibliography
+
+!tag name=RankTwoScalarAux pairs=module:solid_mechanics system:auxkernels

@@ -36,3 +36,5 @@ cd ~/projects/moose/test/tests/meshgenerators/tiled_mesh_generator/
 !syntax inputs /Mesh/TiledMeshGenerator
 
 !syntax children /Mesh/TiledMeshGenerator
+
+!tag name=TiledMeshGenerator pairs=module:framework system:meshgenerators

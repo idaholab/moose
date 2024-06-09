@@ -85,3 +85,5 @@ By comparing the output meshes produced using the two methods, it is clear that 
 !syntax inputs /Mesh/XYMeshLineCutter
 
 !syntax children /Mesh/XYMeshLineCutter
+
+!tag name=XYMeshLineCutter pairs=module:framework system:meshgenerators

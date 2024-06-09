@@ -14,3 +14,5 @@ automatically added to the simulation by the [ShaftConnectedTurbine1Phase.md] co
 !syntax inputs /AuxScalarKernels/Turbine1PhaseDrivingTorqueAux
 
 !syntax children /AuxScalarKernels/Turbine1PhaseDrivingTorqueAux
+
+!tag name=Turbine1PhaseDrivingTorqueAux pairs=module:thermal_hydraulics system:auxscalarkernels

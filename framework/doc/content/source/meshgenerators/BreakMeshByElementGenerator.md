@@ -17,3 +17,5 @@ In this example input file, we break all element-element interfaces in subdomain
 !syntax inputs /Mesh/BreakMeshByElementGenerator
 
 !syntax children /Mesh/BreakMeshByElementGenerator
+
+!tag name=BreakMeshByElementGenerator pairs=module:framework system:meshgenerators

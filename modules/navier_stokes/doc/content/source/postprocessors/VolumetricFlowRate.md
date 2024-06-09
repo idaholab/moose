@@ -20,3 +20,5 @@ of the finite volume discretization of the incompressible Navier Stokes equation
 !syntax inputs /Postprocessors/VolumetricFlowRate
 
 !syntax children /Postprocessors/VolumetricFlowRate
+
+!tag name=VolumetricFlowRate pairs=module:navier_stokes system:postprocessors

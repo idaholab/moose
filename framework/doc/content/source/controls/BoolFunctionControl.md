@@ -12,3 +12,5 @@ For a discussion on the naming of objects and parameters see
 !syntax inputs /Controls/BoolFunctionControl
 
 !syntax children /Controls/BoolFunctionControl
+
+!tag name=BoolFunctionControl pairs=module:framework system:controls

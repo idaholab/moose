@@ -40,3 +40,5 @@ This system is in charge of:
 - adding those local contributions to the global Jacobian and residual through the `add...` methods,
   for example `addResidual` for the local element residual or `addJacobianNeighbor` for the
   Jacobian on the neighbor element.
+
+!tag name=Assembly pairs=module:framework system:base

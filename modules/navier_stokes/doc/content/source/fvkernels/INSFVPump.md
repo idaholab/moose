@@ -8,3 +8,5 @@ via the pump functor provided by [NSFVPumpFunctorMaterial.md].
 !syntax inputs /FVKernels/INSFVPump
 
 !syntax children /FVKernels/INSFVPump
+
+!tag name=INSFVPump pairs=module:navier_stokes system:fvkernels

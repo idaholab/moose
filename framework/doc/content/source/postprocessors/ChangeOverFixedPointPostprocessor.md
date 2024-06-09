@@ -30,3 +30,5 @@ block=Postprocessors
 !syntax inputs /Postprocessors/ChangeOverFixedPointPostprocessor
 
 !syntax children /Postprocessors/ChangeOverFixedPointPostprocessor
+
+!tag name=ChangeOverFixedPointPostprocessor pairs=module:framework system:postprocessors

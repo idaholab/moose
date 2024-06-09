@@ -20,3 +20,5 @@ where:
 !syntax inputs /FVBCs/INSFVInletIntensityTKEBC
 
 !syntax children /FVBCs/INSFVInletIntensityTKEBC
+
+!tag name=INSFVInletIntensityTKEBC pairs=module:navier_stokes system:fvbcs

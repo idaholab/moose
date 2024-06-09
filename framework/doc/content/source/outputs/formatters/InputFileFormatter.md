@@ -135,3 +135,5 @@ disabled invalid parameters.
 ```
 
 !listing stork/test/tests/kernels/simple_diffusion/simple_diffusion.i caption=Input file used to show to formatting
+
+!tag name=InputFileFormatter pairs=module:framework system:outputs

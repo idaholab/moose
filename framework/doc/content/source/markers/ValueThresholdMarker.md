@@ -31,3 +31,5 @@ adjacent to elements marked for refinement.
 !syntax inputs /Adaptivity/Markers/ValueThresholdMarker
 
 !syntax children /Adaptivity/Markers/ValueThresholdMarker
+
+!tag name=ValueThresholdMarker pairs=module:framework system:markers

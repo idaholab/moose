@@ -13,3 +13,5 @@ entries.
 !syntax children /Postprocessors/VectorPostprocessorReductionValue
 
 !bibtex bibliography
+
+!tag name=VectorPostprocessorReductionValue pairs=module:framework system:postprocessors

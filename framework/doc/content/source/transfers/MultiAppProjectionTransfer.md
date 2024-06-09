@@ -18,3 +18,5 @@ to ([tosub]) and from ([fromsub]) sub-applications.
 !syntax inputs /Transfers/MultiAppProjectionTransfer
 
 !syntax children /Transfers/MultiAppProjectionTransfer
+
+!tag name=MultiAppProjectionTransfer pairs=module:framework system:transfers

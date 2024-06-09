@@ -18,3 +18,4 @@ where $t_\text{imported}$ is the GB type imported from a [SolutionUserObject](/S
 !syntax parameters /AuxKernels/SolutionAuxMisorientationBoundary
 
 !syntax inputs /AuxKernels/SolutionAuxMisorientationBoundary
+!tag name=SolutionAuxMisorientationBoundary pairs=module:phase_field system:auxkernels

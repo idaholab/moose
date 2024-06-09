@@ -29,3 +29,5 @@ there, then the kernel's nonlinear variable will be used in the operator as usua
 !syntax inputs /Kernels/FunctionDiffusion
 
 !syntax children /Kernels/FunctionDiffusion
+
+!tag name=FunctionDiffusion pairs=module:framework system:kernels

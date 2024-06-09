@@ -53,3 +53,5 @@ Cartesian simulations, as described in the [Finite Strain Class](ADComputeFinite
 !syntax inputs /Materials/ADComputeRSphericalFiniteStrain
 
 !syntax children /Materials/ADComputeRSphericalFiniteStrain
+
+!tag name=ADComputeRSphericalFiniteStrain pairs=module:solid_mechanics system:materials

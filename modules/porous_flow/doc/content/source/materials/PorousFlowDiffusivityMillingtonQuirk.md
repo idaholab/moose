@@ -12,3 +12,5 @@ A saturation dependent model where the diffusion coefficients are constant but t
 !syntax inputs /Materials/PorousFlowDiffusivityMillingtonQuirk
 
 !syntax children /Materials/PorousFlowDiffusivityMillingtonQuirk
+
+!tag name=PorousFlowDiffusivityMillingtonQuirk pairs=module:porous_flow system:materials

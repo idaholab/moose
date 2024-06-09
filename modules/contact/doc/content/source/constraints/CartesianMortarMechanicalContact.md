@@ -20,3 +20,5 @@ which are on both sides of the contact axis.
 !syntax inputs /Constraints/CartesianMortarMechanicalContact
 
 !syntax children /Constraints/CartesianMortarMechanicalContact
+
+!tag name=CartesianMortarMechanicalContact pairs=module:contact system:constraints

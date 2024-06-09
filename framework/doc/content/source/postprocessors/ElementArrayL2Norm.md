@@ -7,3 +7,5 @@
 !syntax inputs /Postprocessors/ElementArrayL2Norm
 
 !syntax children /Postprocessors/ElementArrayL2Norm
+
+!tag name=ElementArrayL2Norm pairs=module:framework system:postprocessors

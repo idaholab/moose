@@ -77,3 +77,5 @@ The quantities $\eta_f$, $A_f / A_t$, and $A_t / A_0$ are provided by the [funct
 !syntax inputs /FunctorMaterials/FinEnhancementFactorFunctorMaterial
 
 !syntax children /FunctorMaterials/FinEnhancementFactorFunctorMaterial
+
+!tag name=FinEnhancementFactorFunctorMaterial pairs=module:heat_transfer system:functormaterials

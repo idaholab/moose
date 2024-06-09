@@ -27,3 +27,5 @@ force densities between particles in a phase field simulation.
 !syntax inputs /AuxKernels/MaterialStdVectorRealGradientAux
 
 !syntax children /AuxKernels/MaterialStdVectorRealGradientAux
+
+!tag name=MaterialStdVectorRealGradientAux pairs=module:framework system:auxkernels

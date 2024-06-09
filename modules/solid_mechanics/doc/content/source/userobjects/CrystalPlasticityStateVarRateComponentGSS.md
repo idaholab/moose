@@ -11,3 +11,5 @@
 !syntax children /UserObjects/CrystalPlasticityStateVarRateComponentGSS
 
 !bibtex bibliography
+
+!tag name=CrystalPlasticityStateVarRateComponentGSS pairs=module:solid_mechanics system:userobjects

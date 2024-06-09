@@ -35,3 +35,5 @@ It should be noted that in some analyses the thermal conductivity could potentia
 !syntax children /Materials/AnisoHeatConductionMaterial
 
 !bibtex bibliography
+
+!tag name=AnisoHeatConductionMaterial pairs=module:heat_transfer system:materials

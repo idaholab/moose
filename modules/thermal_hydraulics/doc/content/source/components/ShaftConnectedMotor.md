@@ -26,3 +26,5 @@ for an example.
 !syntax inputs /Components/ShaftConnectedMotor
 
 !syntax children /Components/ShaftConnectedMotor
+
+!tag name=ShaftConnectedMotor pairs=module:thermal_hydraulics system:components

@@ -13,3 +13,5 @@ See also [/HeatCapacityConductionTimeDerivative.md] and [/SpecificHeatConduction
 !syntax inputs /Kernels/HeatConductionTimeDerivative
 
 !syntax children /Kernels/HeatConductionTimeDerivative
+
+!tag name=HeatConductionTimeDerivative pairs=module:heat_transfer system:kernels

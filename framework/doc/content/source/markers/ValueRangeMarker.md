@@ -28,3 +28,5 @@ refinement.
 !syntax inputs /Adaptivity/Markers/ValueRangeMarker
 
 !syntax children /Adaptivity/Markers/ValueRangeMarker
+
+!tag name=ValueRangeMarker pairs=module:framework system:markers

@@ -16,3 +16,5 @@ shared by the primary variables created within the same syntax by the [AddPrimar
 !syntax inputs /ReactionNetwork/SolidKineticReactions/AddSecondarySpeciesAction
 
 !syntax children /ReactionNetwork/AqueousEquilibriumReactions/AddSecondarySpeciesAction
+
+!tag name=AddSecondarySpeciesAction pairs=module:chemical_reactions system:actions

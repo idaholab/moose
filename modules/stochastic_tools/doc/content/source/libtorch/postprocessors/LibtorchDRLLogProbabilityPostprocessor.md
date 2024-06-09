@@ -22,3 +22,5 @@ exploration of the action space together with reducing the overfitting of the ne
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchDRLLogProbabilityPostprocessor pairs=module:stochastic_tools system:libtorch

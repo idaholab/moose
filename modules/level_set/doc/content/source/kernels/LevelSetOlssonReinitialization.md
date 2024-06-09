@@ -47,3 +47,5 @@ the `[Kernels]` as follows.
 
 
 !bibtex bibliography
+
+!tag name=LevelSetOlssonReinitialization pairs=module:level_set system:kernels

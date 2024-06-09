@@ -18,3 +18,5 @@ Poisson's equation.
 !syntax inputs /DGKernels/HFEMTestJump
 
 !syntax children /DGKernels/HFEMTestJump
+
+!tag name=HFEMTestJump pairs=module:framework system:dgkernels

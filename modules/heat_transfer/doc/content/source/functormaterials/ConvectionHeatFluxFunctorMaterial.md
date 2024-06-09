@@ -20,3 +20,5 @@ The AD version of this class is used to retrieve all of the input functors with 
 !syntax inputs /FunctorMaterials/ConvectionHeatFluxFunctorMaterial
 
 !syntax children /FunctorMaterials/ConvectionHeatFluxFunctorMaterial
+
+!tag name=ConvectionHeatFluxFunctorMaterial pairs=module:heat_transfer system:functormaterials

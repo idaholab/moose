@@ -20,3 +20,5 @@ In this input file, we compute the inner products $\langle f,g \rangle$ and $<f,
 !syntax inputs /Postprocessors/VariableInnerProduct
 
 !syntax children /Postprocessors/VariableInnerProduct
+
+!tag name=VariableInnerProduct pairs=module:framework system:postprocessors

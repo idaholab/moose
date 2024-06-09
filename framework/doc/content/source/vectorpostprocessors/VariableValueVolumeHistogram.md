@@ -19,3 +19,5 @@ The names of the vectors declared by `VariableValueVolumeHistogram` match the CS
 !syntax inputs /VectorPostprocessors/VariableValueVolumeHistogram
 
 !syntax children /VectorPostprocessors/VariableValueVolumeHistogram
+
+!tag name=VariableValueVolumeHistogram pairs=module:framework system:vectorpostprocessors

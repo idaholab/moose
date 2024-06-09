@@ -15,3 +15,5 @@ $\alpha$ the phase fraction, $p$ the pressure and $A$ the channel area at the bo
 !syntax inputs /Postprocessors/MomentumFluxIntegral
 
 !syntax children /Postprocessors/MomentumFluxIntegral
+
+!tag name=MomentumFluxIntegral pairs=module:thermal_hydraulics system:postprocessors

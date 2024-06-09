@@ -25,3 +25,5 @@ This kernel should mainly be used for creating small tests and while debugging s
 !syntax inputs /Kernels/NullKernel
 
 !syntax children /Kernels/NullKernel
+
+!tag name=NullKernel pairs=module:framework system:kernels

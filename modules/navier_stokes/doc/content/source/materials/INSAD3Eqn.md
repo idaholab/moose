@@ -11,3 +11,5 @@ the same, e.g. terms that have no integration by parts.
 !syntax inputs /Materials/INSAD3Eqn
 
 !syntax children /Materials/INSAD3Eqn
+
+!tag name=INSAD3Eqn pairs=module:navier_stokes system:materials

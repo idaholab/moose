@@ -6,3 +6,5 @@ the following block adds a [PolynomialChaos.md] surrogate model.
 !listing poly_chaos/main_2d_mc.i block=Surrogates
 
 !syntax parameters /Surrogates/AddSurrogateAction
+
+!tag name=AddSurrogateAction pairs=module:stochastic_tools system:actions

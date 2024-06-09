@@ -107,3 +107,5 @@ and the required Linear Viscoelasticity Manager User Object:
 !syntax inputs /Materials/GeneralizedMaxwellModel
 
 !syntax children /Materials/GeneralizedMaxwellModel
+
+!tag name=GeneralizedMaxwellModel pairs=module:solid_mechanics system:materials

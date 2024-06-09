@@ -33,3 +33,5 @@ The heat transfer coefficient, h, will be given by:
 !syntax inputs /Materials/ADWallHeatTransferCoefficientGnielinskiMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficientGnielinskiMaterial
+
+!tag name=ADWallHeatTransferCoefficientGnielinskiMaterial pairs=module:thermal_hydraulics system:materials

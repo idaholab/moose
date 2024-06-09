@@ -11,3 +11,5 @@ material property:
 !syntax inputs /Postprocessors/HeatRateDirectFlowChannel
 
 !syntax children /Postprocessors/HeatRateDirectFlowChannel
+
+!tag name=HeatRateDirectFlowChannel pairs=module:thermal_hydraulics system:postprocessors

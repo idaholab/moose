@@ -13,3 +13,5 @@ This scalar kernel retrieves the computed residuals and Jacobians from the
 !syntax inputs /ScalarKernels/VolumeJunctionAdvectionScalarKernel
 
 !syntax children /ScalarKernels/VolumeJunctionAdvectionScalarKernel
+
+!tag name=VolumeJunctionAdvectionScalarKernel pairs=module:thermal_hydraulics system:scalarkernels

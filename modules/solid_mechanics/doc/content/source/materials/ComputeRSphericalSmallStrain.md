@@ -63,3 +63,5 @@ to ensure consistency between the test function gradients and the strain formula
 !syntax inputs /Materials/ComputeRSphericalSmallStrain
 
 !syntax children /Materials/ComputeRSphericalSmallStrain
+
+!tag name=ComputeRSphericalSmallStrain pairs=module:solid_mechanics system:materials

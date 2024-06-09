@@ -13,3 +13,5 @@ where all parameters are defined in the [nomenclature](/nomenclature.md).
 !syntax inputs /FVKernels/FVPorousFlowHeatAdvection
 
 !syntax children /FVKernels/FVPorousFlowHeatAdvection
+
+!tag name=FVPorousFlowHeatAdvection pairs=module:porous_flow system:fvkernels

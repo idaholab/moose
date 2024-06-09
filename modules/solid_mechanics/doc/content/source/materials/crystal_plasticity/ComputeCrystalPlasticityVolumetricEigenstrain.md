@@ -61,3 +61,5 @@ Any constitutive eigenstrain model developed for use within the [ComputeMultiple
 !syntax inputs /Materials/ComputeCrystalPlasticityVolumetricEigenstrain
 
 !syntax children /Materials/ComputeCrystalPlasticityVolumetricEigenstrain
+
+!tag name=ComputeCrystalPlasticityVolumetricEigenstrain pairs=module:solid_mechanics system:materials

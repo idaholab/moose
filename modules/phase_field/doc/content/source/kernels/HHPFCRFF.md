@@ -17,3 +17,5 @@ or - if not explicitly specified - the non-linear variable the kernel is operati
 !syntax inputs /Kernels/HHPFCRFF
 
 !syntax children /Kernels/HHPFCRFF
+
+!tag name=HHPFCRFF pairs=module:phase_field system:kernels

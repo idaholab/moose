@@ -128,3 +128,5 @@ NonconservedAction. See the +PhaseField module documentation+ for more informati
 !syntax inputs /Materials/ComputeCrackedStress
 
 !syntax children /Materials/ComputeCrackedStress
+
+!tag name=ComputeCrackedStress pairs=module:solid_mechanics system:materials

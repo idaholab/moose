@@ -11,3 +11,5 @@ object are changing.
 !syntax inputs /Executioner/TimeSteppers/TimeSequenceFromTimes
 
 !syntax children /Executioner/TimeSteppers/TimeSequenceFromTimes
+
+!tag name=TimeSequenceFromTimes pairs=module:framework system:timesteppers

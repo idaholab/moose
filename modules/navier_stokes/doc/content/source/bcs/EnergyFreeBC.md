@@ -7,3 +7,5 @@
 !syntax inputs /BCs/EnergyFreeBC
 
 !syntax children /BCs/EnergyFreeBC
+
+!tag name=EnergyFreeBC pairs=module:navier_stokes system:bcs

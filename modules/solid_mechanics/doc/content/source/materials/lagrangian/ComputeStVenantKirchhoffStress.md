@@ -44,3 +44,5 @@ response.
 !syntax inputs /Materials/ComputeStVenantKirchhoffStress
 
 !syntax children /Materials/ComputeStVenantKirchhoffStress
+
+!tag name=ComputeStVenantKirchhoffStress pairs=module:solid_mechanics system:materials

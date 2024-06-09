@@ -11,3 +11,5 @@ $\varphi$.
 !alert warning
 The contribution to the diagonal of the system of this kernel is null, which introduces a saddle
 point. Make sure to use a `NONZERO` shift in your preconditioner.
+
+!tag name=FVScalarLagrangeMultiplierConstraint pairs=module:framework system:fvkernels

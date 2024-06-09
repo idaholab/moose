@@ -9,3 +9,5 @@ in a [HSCoupler2D3D.md], where the heat fluxes are computed using
 !syntax inputs /BCs/HSCoupler2D3DBC
 
 !syntax children /BCs/HSCoupler2D3DBC
+
+!tag name=HSCoupler2D3DBC pairs=module:thermal_hydraulics system:bcs

@@ -11,3 +11,5 @@ The ordering of the divisions is the same as the numerical ordering of the extra
 !syntax inputs /MeshDivisions/ExtraElementIntegerDivision
 
 !syntax children /MeshDivisions/ExtraElementIntegerDivision
+
+!tag name=ExtraElementIntegerDivision pairs=module:framework system:meshdivisions

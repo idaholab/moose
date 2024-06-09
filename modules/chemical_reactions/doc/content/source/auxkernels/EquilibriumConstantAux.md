@@ -29,3 +29,5 @@ If only one data point is provided, then $\log_{10}(K_eq)$ is set as a constant 
 !syntax inputs /AuxKernels/EquilibriumConstantAux
 
 !syntax children /AuxKernels/EquilibriumConstantAux
+
+!tag name=EquilibriumConstantAux pairs=module:chemical_reactions system:auxkernels

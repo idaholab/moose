@@ -10,3 +10,5 @@ for the material properties, to be able to use AD material properties.
 !syntax inputs /AuxKernels/ADConvectiveHeatFlux1PhaseAux
 
 !syntax children /AuxKernels/ADConvectiveHeatFlux1PhaseAux
+
+!tag name=ADConvectiveHeatFlux1PhaseAux pairs=module:thermal_hydraulics system:auxkernels

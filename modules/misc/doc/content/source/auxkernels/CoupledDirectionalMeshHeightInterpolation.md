@@ -13,3 +13,5 @@ This object scales a user-provided coupled variable (either a solution variable 
 !syntax inputs /AuxKernels/CoupledDirectionalMeshHeightInterpolation
 
 !syntax children /AuxKernels/CoupledDirectionalMeshHeightInterpolation
+
+!tag name=CoupledDirectionalMeshHeightInterpolation pairs=module:misc system:auxkernels

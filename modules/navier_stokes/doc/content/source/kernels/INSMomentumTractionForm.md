@@ -27,3 +27,5 @@ viscosity, this term can be simplified as described in [INSMomentumLaplaceForm.m
 !syntax inputs /Kernels/INSMomentumTractionForm
 
 !syntax children /Kernels/INSMomentumTractionForm
+
+!tag name=INSMomentumTractionForm pairs=module:navier_stokes system:kernels

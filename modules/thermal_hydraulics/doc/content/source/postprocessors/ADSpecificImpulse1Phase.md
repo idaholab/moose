@@ -31,3 +31,5 @@ I_{sp} = \dfrac{thrust}{\dot{m} g}
 !syntax inputs /Postprocessors/ADSpecificImpulse1Phase
 
 !syntax children /Postprocessors/ADSpecificImpulse1Phase
+
+!tag name=ADSpecificImpulse1Phase pairs=module:thermal_hydraulics system:postprocessors

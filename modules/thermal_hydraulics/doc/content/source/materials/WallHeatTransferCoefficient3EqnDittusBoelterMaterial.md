@@ -21,3 +21,5 @@ $Re$ the Reynolds number and $Pr$ the Prandtl number.
 !syntax inputs /Materials/WallHeatTransferCoefficient3EqnDittusBoelterMaterial
 
 !syntax children /Materials/WallHeatTransferCoefficient3EqnDittusBoelterMaterial
+
+!tag name=WallHeatTransferCoefficient3EqnDittusBoelterMaterial pairs=module:thermal_hydraulics system:materials

@@ -20,3 +20,5 @@ lives on.
 !syntax children /Postprocessors/ContactDOFSetSize
 
 !bibtex bibliography
+
+!tag name=ContactDOFSetSize pairs=module:contact system:postprocessors

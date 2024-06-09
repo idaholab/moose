@@ -18,3 +18,5 @@ where $\mathcal{S}_{y^{p}_{-1}}$ the accepted state at index $p$ from the previo
 !syntax inputs /Reporters/AffineInvariantDifferentialDecision
 
 !syntax children /Reporters/AffineInvariantDifferentialDecision
+
+!tag name=AffineInvariantDifferentialDecision pairs=module:stochastic_tools system:reporters

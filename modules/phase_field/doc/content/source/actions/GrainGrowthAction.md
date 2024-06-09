@@ -43,3 +43,5 @@ The `GrainGrowthAction` is created as shown below.
 !syntax parameters /Modules/PhaseField/GrainGrowth/GrainGrowthAction
 
 !syntax children /Modules/PhaseField/GrainGrowth/GrainGrowthAction
+
+!tag name=GrainGrowthAction pairs=module:phase_field system:actions

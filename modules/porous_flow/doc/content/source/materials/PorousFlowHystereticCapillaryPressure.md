@@ -11,3 +11,5 @@ This is a base class that enables computation of capillary pressure, saturations
 !syntax inputs /Materials/PorousFlowHystereticCapillaryPressure
 
 !syntax children /Materials/PorousFlowHystereticCapillaryPressure
+
+!tag name=PorousFlowHystereticCapillaryPressure pairs=module:porous_flow system:materials

@@ -14,3 +14,4 @@ The accumulation is performed on a quadrature point basis, and thus projections 
 !syntax inputs /AuxKernels/AccumulateAux
 
 !syntax children /AuxKernels/AccumulateAux
+!tag name=AccumulateAux pairs=module:solid_mechanics system:auxkernels

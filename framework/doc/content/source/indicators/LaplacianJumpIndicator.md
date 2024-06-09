@@ -24,3 +24,5 @@ typical input file.
 !syntax inputs /Adaptivity/Indicators/LaplacianJumpIndicator
 
 !syntax children /Adaptivity/Indicators/LaplacianJumpIndicator
+
+!tag name=LaplacianJumpIndicator pairs=module:framework system:indicators

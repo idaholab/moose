@@ -15,3 +15,5 @@ Most objects in MOOSE will retrieve UserObjects through special macro functions 
 Typical usage looks like this:
 
 !listing ElementUOAux.C start=doco-get-user-object-begin end=doco-get-user-object-end include-start=false
+
+!tag name=UserObjectInterface pairs=module:framework system:interfaces

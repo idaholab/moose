@@ -100,3 +100,5 @@ J &=& \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}\\
 !syntax inputs /Kernels/KKSCHBulk
 
 !syntax children /Kernels/KKSCHBulk
+
+!tag name=KKSCHBulk pairs=module:phase_field system:kernels

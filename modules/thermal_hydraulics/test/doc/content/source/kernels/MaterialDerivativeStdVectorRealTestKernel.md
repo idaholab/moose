@@ -16,3 +16,5 @@ that kernel provides the correct residual and this kernel only adds the derivati
 !syntax children /Kernels/MaterialDerivativeStdVectorRealTestKernel
 
 !bibtex bibliography
+
+!tag name=MaterialDerivativeStdVectorRealTestKernel pairs=module:test system:kernels

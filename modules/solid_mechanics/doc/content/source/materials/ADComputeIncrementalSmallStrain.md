@@ -30,3 +30,5 @@ complex finite incremental strain-stress calculations.
 !syntax inputs /Materials/ADComputeIncrementalSmallStrain
 
 !syntax children /Materials/ADComputeIncrementalSmallStrain
+
+!tag name=ADComputeIncrementalSmallStrain pairs=module:solid_mechanics system:materials

@@ -24,3 +24,5 @@ width can be assigned for diffused interfaces.
 !syntax children /ICs/IsolatedBoundingBoxIC
 
 !bibtex bibliography
+
+!tag name=IsolatedBoundingBoxIC pairs=module:phase_field system:ics

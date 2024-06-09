@@ -12,3 +12,5 @@ It employs Kuzmin-Turek [!citep](KuzminTurek2004) stabilization, so needs a corr
 !syntax inputs /Kernels/FluxLimitedTVDAdvection
 
 !syntax children /Kernels/FluxLimitedTVDAdvection
+
+!tag name=FluxLimitedTVDAdvection pairs=module:porous_flow system:kernels

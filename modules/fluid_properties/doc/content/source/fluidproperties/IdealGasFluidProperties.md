@@ -18,3 +18,5 @@ Temperature is calculated using the internal energy of an ideal gas
 !syntax inputs /FluidProperties/IdealGasFluidProperties
 
 !syntax children /FluidProperties/IdealGasFluidProperties
+
+!tag name=IdealGasFluidProperties pairs=module:fluid_properties system:fluidproperties

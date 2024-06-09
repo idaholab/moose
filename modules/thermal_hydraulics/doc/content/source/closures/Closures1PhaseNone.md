@@ -8,3 +8,5 @@ which allows all closures to be created directly in the input file.
 !syntax inputs /Closures/Closures1PhaseNone
 
 !syntax children /Closures/Closures1PhaseNone
+
+!tag name=Closures1PhaseNone pairs=module:thermal_hydraulics system:closures

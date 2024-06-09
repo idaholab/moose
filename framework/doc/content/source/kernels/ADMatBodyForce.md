@@ -15,3 +15,5 @@ All other implementation details are the same as [ADBodyForce](ADBodyForce.md).
 !syntax inputs /Kernels/ADMatBodyForce
 
 !syntax children /Kernels/ADMatBodyForce
+
+!tag name=ADMatBodyForce pairs=module:framework system:kernels

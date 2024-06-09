@@ -30,3 +30,5 @@ another then you can get inverted elements.
 !syntax inputs /BCs/INSADDisplaceBoundaryBC
 
 !syntax children /BCs/INSADDisplaceBoundaryBC
+
+!tag name=INSADDisplaceBoundaryBC pairs=module:navier_stokes system:bcs

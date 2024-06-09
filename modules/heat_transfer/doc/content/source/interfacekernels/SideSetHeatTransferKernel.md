@@ -45,3 +45,5 @@ Using bulk gap temperature (for convection) as auxiliary variable:
 !syntax children /InterfaceKernels/SideSetHeatTransferKernel
 
 !bibtex bibliography
+
+!tag name=SideSetHeatTransferKernel pairs=module:heat_transfer system:interfacekernels

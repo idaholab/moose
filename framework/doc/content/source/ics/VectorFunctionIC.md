@@ -14,3 +14,5 @@ vector variable.
 !syntax children /ICs/VectorFunctionIC
 
 !bibtex bibliography
+
+!tag name=VectorFunctionIC pairs=module:framework system:ics

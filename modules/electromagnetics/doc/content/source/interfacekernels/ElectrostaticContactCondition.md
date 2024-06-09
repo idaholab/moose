@@ -65,3 +65,5 @@ examples as well as [!citep](cincotti2007sps) for guidance and usage.
 !syntax inputs /InterfaceKernels/ElectrostaticContactCondition
 
 !syntax children /InterfaceKernels/ElectrostaticContactCondition
+
+!tag name=ElectrostaticContactCondition pairs=module:electromagnetics system:interfacekernels

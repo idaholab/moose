@@ -13,3 +13,5 @@ The time computed will be appended to the times vector. The times vector is regu
 !syntax inputs /Times/FunctorTimes
 
 !syntax children /Times/FunctorTimes
+
+!tag name=FunctorTimes pairs=module:framework system:times

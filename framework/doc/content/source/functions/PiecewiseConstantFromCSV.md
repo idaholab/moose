@@ -53,3 +53,5 @@ These functions read spatial data from CSV, e.g. data that is sorted by location
 !syntax inputs /Functions/PiecewiseConstantFromCSV
 
 !syntax children /Functions/PiecewiseConstantFromCSV
+
+!tag name=PiecewiseConstantFromCSV pairs=module:framework system:functions

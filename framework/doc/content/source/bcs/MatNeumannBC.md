@@ -34,3 +34,5 @@ corresponding to the boundary subset $\partial \Omega_N$ via the
 !syntax inputs /BCs/MatNeumannBC
 
 !syntax children /BCs/MatNeumannBC
+
+!tag name=MatNeumannBC pairs=module:framework system:bcs

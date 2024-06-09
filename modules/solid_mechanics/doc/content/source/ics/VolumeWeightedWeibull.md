@@ -31,3 +31,5 @@ As a result of this scaling, elements larger than the reference volume typically
 !syntax children /ICs/VolumeWeightedWeibull
 
 !bibtex bibliography
+
+!tag name=VolumeWeightedWeibull pairs=module:solid_mechanics system:ics

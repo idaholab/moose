@@ -24,3 +24,5 @@ do support automatic differentiation, to auxiliary variables, the derivatives wi
 !syntax children /AuxKernels/MaterialRankFourTensorAux
 
 !bibtex bibliography
+
+!tag name=MaterialRankFourTensorAux pairs=module:framework system:auxkernels

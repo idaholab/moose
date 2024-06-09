@@ -27,3 +27,5 @@ For more details, refer to the non-AD version [ExponentialSoftening](/Exponentia
 !syntax children /Materials/ADExponentialSoftening
 
 !bibtex bibliography
+
+!tag name=ADExponentialSoftening pairs=module:solid_mechanics system:materials

@@ -9,3 +9,5 @@ MOOSE can use field [splits](source/splits/Split.md) with Schur decomposition to
 [precondition](syntax/Preconditioning/index.md) nonlinear systems.
 
 !syntax parameters /Preconditioning/AddFieldSplitAction
+
+!tag name=AddFieldSplitAction pairs=module:framework system:actions

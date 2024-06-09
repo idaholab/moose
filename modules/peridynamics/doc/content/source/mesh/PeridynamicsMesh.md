@@ -9,3 +9,5 @@ The `PeridynamicsMesh` Mesh constructs and stores extra unconventional mesh data
 !syntax inputs /Mesh/PeridynamicsMesh
 
 !syntax children /Mesh/PeridynamicsMesh
+
+!tag name=PeridynamicsMesh pairs=module:peridynamics system:mesh

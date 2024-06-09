@@ -10,3 +10,5 @@ the flux vectors that are computed in [/ADVolumeJunction1PhaseUserObject.md].
 !syntax inputs /BCs/ADVolumeJunction1PhaseBC
 
 !syntax children /BCs/ADVolumeJunction1PhaseBC
+
+!tag name=ADVolumeJunction1PhaseBC pairs=module:thermal_hydraulics system:bcs

@@ -49,3 +49,5 @@ The properties are valid for 25$\degree$C $\le$ T $\le$ 1300$\degree$C.
 !syntax children /SolidProperties/ThermalSS316Properties
 
 !bibtex bibliography
+
+!tag name=ThermalSS316Properties pairs=module:solid_properties system:solidproperties

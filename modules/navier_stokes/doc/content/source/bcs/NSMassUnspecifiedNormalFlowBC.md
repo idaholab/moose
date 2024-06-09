@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSMassUnspecifiedNormalFlowBC
 
 !syntax children /BCs/NSMassUnspecifiedNormalFlowBC
+
+!tag name=NSMassUnspecifiedNormalFlowBC pairs=module:navier_stokes system:bcs

@@ -11,3 +11,5 @@ This aux-kernel is the same as [SurrogateModelAuxKernel.md], except it sets valu
 !syntax inputs /AuxKernels/SurrogateModelArrayAuxKernel
 
 !syntax children /AuxKernels/SurrogateModelArrayAuxKernel
+
+!tag name=SurrogateModelArrayAuxKernel pairs=module:stochastic_tools system:auxkernels

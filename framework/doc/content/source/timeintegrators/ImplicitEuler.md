@@ -26,3 +26,5 @@ in the non linear system solve [documentation](systems/NonlinearSystem.md).
 !syntax inputs /Executioner/TimeIntegrator/ImplicitEuler
 
 !syntax children /Executioner/TimeIntegrator/ImplicitEuler
+
+!tag name=ImplicitEuler pairs=module:framework system:timeintegrators

@@ -13,3 +13,5 @@ This kernel implements the third term on the right side of eq. (3) of the paper.
 !syntax children /Kernels/ADACInterfaceKobayashi2
 
 !bibtex bibliography
+
+!tag name=ADACInterfaceKobayashi2 pairs=module:phase_field system:kernels

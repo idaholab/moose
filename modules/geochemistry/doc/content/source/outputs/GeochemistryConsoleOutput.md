@@ -13,3 +13,5 @@ Advanced users may wish to add these objects manually to their input files.  Her
 !syntax inputs /Outputs/GeochemistryConsoleOutput
 
 !syntax children /Outputs/GeochemistryConsoleOutput
+
+!tag name=GeochemistryConsoleOutput pairs=module:geochemistry system:outputs

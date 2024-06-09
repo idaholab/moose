@@ -23,3 +23,5 @@ By default, `face_limiter = 1.0`.
 !syntax inputs /FVBCs/INSFVSwitchableOutletPressureBC
 
 !syntax children /FVBCs/INSFVSwitchableOutletPressureBC
+
+!tag name=INSFVSwitchableOutletPressureBC pairs=module:navier_stokes system:fvbcs

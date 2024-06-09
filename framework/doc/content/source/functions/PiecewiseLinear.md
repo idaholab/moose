@@ -29,3 +29,5 @@ the parameter `extrap` is set to `true`, in which case extrapolation is performe
 !syntax inputs /Functions/PiecewiseLinear
 
 !syntax children /Functions/PiecewiseLinear
+
+!tag name=PiecewiseLinear pairs=module:framework system:functions

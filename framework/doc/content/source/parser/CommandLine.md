@@ -62,3 +62,5 @@ ways in which SubApp syntax can be overridden or supplied on the command line.
 ./MyApp-opt -i input.i sub_app_left0:Section/object/some_parameter=new_value
                        sub_app_left1:Section/object/some_parameter=different_value
 ```
+
+!tag name=CommandLine pairs=module:framework system:parser

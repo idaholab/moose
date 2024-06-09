@@ -6,3 +6,5 @@ supports a uniform way of handing reading in boundary restrictions. Specifically
 restricted to one or more boundaries simultaneously. Boundaries may be specified either as numeric IDs
 or strings (when supported by the Mesh format or named entities are used). Finally, this interface handles
 queries about the set of boundaries that an object is restricted to when no restrictions are supplied.
+
+!tag name=BoundaryRestrictable pairs=module:framework system:interfaces

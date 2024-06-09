@@ -23,3 +23,5 @@ default 3D Cartesian simulations, as described in the
 !syntax children /Materials/ADComputeAxisymmetricRZFiniteStrain
 
 !bibtex bibliography
+
+!tag name=ADComputeAxisymmetricRZFiniteStrain pairs=module:solid_mechanics system:materials

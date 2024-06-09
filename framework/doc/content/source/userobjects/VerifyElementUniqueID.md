@@ -12,3 +12,5 @@ For distributed mesh, this will perform an `MPI_AllGather` operation, sending al
 !syntax inputs /UserObjects/VerifyElementUniqueID
 
 !syntax children /UserObjects/VerifyElementUniqueID
+
+!tag name=VerifyElementUniqueID pairs=module:framework system:userobjects

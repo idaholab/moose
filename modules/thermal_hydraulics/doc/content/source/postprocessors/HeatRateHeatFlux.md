@@ -21,3 +21,5 @@ to a value of 1.
 !syntax inputs /Postprocessors/HeatRateHeatFlux
 
 !syntax children /Postprocessors/HeatRateHeatFlux
+
+!tag name=HeatRateHeatFlux pairs=module:thermal_hydraulics system:postprocessors

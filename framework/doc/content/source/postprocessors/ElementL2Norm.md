@@ -27,3 +27,5 @@ In this example, we compute the L2 norm for a variety of auxiliary variable type
 !syntax inputs /Postprocessors/ElementL2Norm
 
 !syntax children /Postprocessors/ElementL2Norm
+
+!tag name=ElementL2Norm pairs=module:framework system:postprocessors

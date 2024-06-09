@@ -22,3 +22,5 @@ then defined.
 !syntax inputs /Adaptivity/Markers/OrientedBoxMarker
 
 !syntax children /Adaptivity/Markers/OrientedBoxMarker
+
+!tag name=OrientedBoxMarker pairs=module:framework system:markers

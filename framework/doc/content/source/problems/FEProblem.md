@@ -13,3 +13,5 @@ necessary objects for the actual physics solve. The FEProblem object contains on
 !syntax children /Problem/FEProblem
 
 !bibtex bibliography
+
+!tag name=FEProblem pairs=module:framework system:problems

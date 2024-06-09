@@ -16,3 +16,5 @@ To allow using XFEM to model interfaces between materials, the XFEM system uses 
 !syntax inputs /AuxKernels/CutSubdomainIDAux
 
 !syntax children /AuxKernels/CutSubdomainIDAux
+
+!tag name=CutSubdomainIDAux pairs=module:xfem system:auxkernels

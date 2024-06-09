@@ -16,3 +16,5 @@ substantially.
 !syntax inputs /AuxKernels/ProcessorIDAux
 
 !syntax children /AuxKernels/ProcessorIDAux
+
+!tag name=ProcessorIDAux pairs=module:framework system:auxkernels

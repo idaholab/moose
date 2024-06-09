@@ -15,3 +15,5 @@ where $\omega$ ([!param](/Materials/RegularSolutionFreeEnergy/omega)) is the reg
 !syntax inputs /Materials/RegularSolutionFreeEnergy
 
 !syntax children /Materials/RegularSolutionFreeEnergy
+
+!tag name=RegularSolutionFreeEnergy pairs=module:phase_field system:materials

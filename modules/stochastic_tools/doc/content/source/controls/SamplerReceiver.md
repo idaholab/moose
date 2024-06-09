@@ -10,3 +10,5 @@ example: [Monte Carlo Example](stochastic_tools/examples/monte_carlo.md).
 !syntax inputs /Controls/SamplerReceiver
 
 !syntax children /Controls/SamplerReceiver
+
+!tag name=SamplerReceiver pairs=module:stochastic_tools system:controls

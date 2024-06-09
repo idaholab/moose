@@ -22,3 +22,5 @@ function is the contribution of this boundary condition to the residual.
 !syntax inputs /BCs/INSFEFluidMassBC
 
 !syntax children /BCs/INSFEFluidMassBC
+
+!tag name=INSFEFluidMassBC pairs=module:navier_stokes system:bcs

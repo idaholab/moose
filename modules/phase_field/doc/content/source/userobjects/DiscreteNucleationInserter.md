@@ -32,3 +32,5 @@ The `DiscreteNucleationInserter` is part of the [Discrete Nucleation system](Nuc
 !syntax inputs /UserObjects/DiscreteNucleationInserter
 
 !syntax children /UserObjects/DiscreteNucleationInserter
+
+!tag name=DiscreteNucleationInserter pairs=module:phase_field system:userobjects

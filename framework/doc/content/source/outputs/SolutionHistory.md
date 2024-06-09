@@ -13,3 +13,5 @@ solve history to a file.
 !syntax inputs /Outputs/SolutionHistory
 
 !syntax children /Outputs/SolutionHistory
+
+!tag name=SolutionHistory pairs=module:framework system:outputs

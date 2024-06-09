@@ -32,3 +32,5 @@ file using a [SpatialUserObjectVectorPostprocessor.md].
 !syntax inputs /UserObjects/LayeredSideAverage
 
 !syntax children /UserObjects/LayeredSideAverage
+
+!tag name=LayeredSideAverage pairs=module:framework system:userobjects

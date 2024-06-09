@@ -13,3 +13,5 @@ out without adding ones to the diagonal.
 !syntax inputs /BCs/EigenArrayDirichletBC
 
 !syntax children /BCs/EigenArrayDirichletBC
+
+!tag name=EigenArrayDirichletBC pairs=module:framework system:bcs

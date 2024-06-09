@@ -15,3 +15,5 @@ It defines the following functor material properties, for a variety of use cases
 !syntax inputs /FunctorMaterials/INSFVEnthalpyFunctorMaterial
 
 !syntax children /FunctorMaterials/INSFVEnthalpyFunctorMaterial
+
+!tag name=INSFVEnthalpyFunctorMaterial pairs=module:navier_stokes system:functormaterials

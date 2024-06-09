@@ -47,3 +47,5 @@ kernels.
 !syntax inputs /Materials/ComputeLagrangianWrappedStress
 
 !syntax children /Materials/ComputeLagrangianWrappedStress
+
+!tag name=ComputeLagrangianWrappedStress pairs=module:solid_mechanics system:materials

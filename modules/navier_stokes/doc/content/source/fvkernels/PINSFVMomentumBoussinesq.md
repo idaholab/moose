@@ -12,3 +12,5 @@ natural convection and the effect of buoyancy.
 !syntax inputs /FVKernels/PINSFVMomentumBoussinesq
 
 !syntax children /FVKernels/PINSFVMomentumBoussinesq
+
+!tag name=PINSFVMomentumBoussinesq pairs=module:navier_stokes system:fvkernels

@@ -113,3 +113,5 @@ preserved in the final mesh shown in [Figure 2](#nested).
 !syntax parameters /Mesh/XYDelaunayGenerator
 
 !syntax inputs /Mesh/XYDelaunayGenerator
+
+!tag name=XYDelaunayGenerator pairs=module:framework system:meshgenerators

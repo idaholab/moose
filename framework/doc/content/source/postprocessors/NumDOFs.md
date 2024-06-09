@@ -21,3 +21,5 @@ When scaling your problem up to more processor cores, try not to spread your pro
 !syntax children /Postprocessors/NumDOFs
 
 !bibtex bibliography
+
+!tag name=NumDOFs pairs=module:framework system:postprocessors

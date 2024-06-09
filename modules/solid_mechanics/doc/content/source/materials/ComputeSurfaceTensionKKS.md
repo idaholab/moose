@@ -31,3 +31,5 @@ coefficient, $\bf{I}$ is the identity tensor, and $\otimes$ denotes the dyadic p
 !syntax children /Materials/ComputeSurfaceTensionKKS
 
 !bibtex bibliography
+
+!tag name=ComputeSurfaceTensionKKS pairs=module:solid_mechanics system:materials

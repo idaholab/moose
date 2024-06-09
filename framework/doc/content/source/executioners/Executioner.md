@@ -25,3 +25,5 @@ beyond that initially provided by the user.
 The Executioner has a shortcut method that can be used to add an attribute reporting mechanism to the simulation.
 The Executioner accomplishes this by adding a special [Postprocessor.md] to the simulation that will report
 a potentially changing scalar value over time.
+
+!tag name=Executioner pairs=module:framework system:executioners

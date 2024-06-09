@@ -16,3 +16,5 @@ n= \frac NV = \frac c\Omega,
 
 where $c$ (`c`) is the coupled concentration and $\Omega$ (`omega`) is the lattice
 site volume.
+
+!tag name=GasFreeEnergyBase pairs=module:phase_field system:materials

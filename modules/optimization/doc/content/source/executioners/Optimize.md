@@ -56,3 +56,5 @@ The following performs optimization using th Newton line search algorithm. The a
 !syntax inputs /Executioner/Optimize
 
 !syntax children /Executioner/Optimize
+
+!tag name=Optimize pairs=module:optimization system:executioners

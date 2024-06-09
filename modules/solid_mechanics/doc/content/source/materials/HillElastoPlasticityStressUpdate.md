@@ -153,3 +153,5 @@ The effective plastic strain increment is obtained within the framework of a gen
 !syntax children /Materials/HillElastoPlasticityStressUpdate
 
 !bibtex bibliography
+
+!tag name=HillElastoPlasticityStressUpdate pairs=module:solid_mechanics system:materials

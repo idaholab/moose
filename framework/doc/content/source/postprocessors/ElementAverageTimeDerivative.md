@@ -12,3 +12,5 @@ of the specified variable, per element.
 !syntax children /Postprocessors/ElementAverageTimeDerivative
 
 !bibtex bibliography
+
+!tag name=ElementAverageTimeDerivative pairs=module:framework system:postprocessors

@@ -15,3 +15,5 @@ producing crippling oscillations.
 !syntax inputs /Kernels/INSADEnergySUPG
 
 !syntax children /Kernels/INSADEnergySUPG
+
+!tag name=INSADEnergySUPG pairs=module:navier_stokes system:kernels

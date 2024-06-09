@@ -14,3 +14,5 @@ values:
 !syntax inputs /UserObjects/ADBoundaryFlux3EqnFreeOutflow
 
 !syntax children /UserObjects/ADBoundaryFlux3EqnFreeOutflow
+
+!tag name=ADBoundaryFlux3EqnFreeOutflow pairs=module:thermal_hydraulics system:userobjects

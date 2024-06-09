@@ -20,3 +20,5 @@ density.
 !syntax children /Materials/ThermalSolidPropertiesMaterial
 
 !bibtex bibliography
+
+!tag name=ThermalSolidPropertiesMaterial pairs=module:solid_properties system:materials

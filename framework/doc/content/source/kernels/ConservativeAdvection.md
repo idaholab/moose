@@ -171,3 +171,5 @@ behaviour but instead produces more numerical diffusion.
 !syntax children /Kernels/ConservativeAdvection
 
 !bibtex bibliography
+
+!tag name=ConservativeAdvection pairs=module:framework system:kernels

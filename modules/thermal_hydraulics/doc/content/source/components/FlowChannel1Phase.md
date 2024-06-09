@@ -100,3 +100,5 @@ See [!cite](relap7theory) for a description of the single-phase flow formulation
 !syntax children /Components/FlowChannel1Phase
 
 !bibtex bibliography
+
+!tag name=FlowChannel1Phase pairs=module:thermal_hydraulics system:components

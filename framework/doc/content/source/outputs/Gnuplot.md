@@ -12,3 +12,5 @@ The GNU output writes postprocessor and scalar variable data in a format suitabl
 !syntax inputs /Outputs/Gnuplot
 
 !syntax children /Outputs/Gnuplot
+
+!tag name=Gnuplot pairs=module:framework system:outputs

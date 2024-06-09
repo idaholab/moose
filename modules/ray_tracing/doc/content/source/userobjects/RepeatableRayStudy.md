@@ -51,3 +51,5 @@ For more advanced use, one can also register [Ray.md] data/auxiliary data and in
   visible=Required Trajectory
 
 !syntax inputs /UserObjects/RepeatableRayStudy
+
+!tag name=RepeatableRayStudy pairs=module:ray_tracing system:userobjects

@@ -29,3 +29,5 @@ related [RankTwoScalarAux](RankTwoScalarAux.md)
 !syntax inputs /Materials/ADRankTwoInvariant
 
 !syntax children /Materials/ADRankTwoInvariant
+
+!tag name=ADRankTwoInvariant pairs=module:solid_mechanics system:materials

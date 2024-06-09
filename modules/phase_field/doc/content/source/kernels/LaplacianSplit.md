@@ -23,3 +23,5 @@ where $u$ can be substituted to reduce the order of a PDE.
 !syntax inputs /Kernels/LaplacianSplit
 
 !syntax children /Kernels/LaplacianSplit
+
+!tag name=LaplacianSplit pairs=module:phase_field system:kernels

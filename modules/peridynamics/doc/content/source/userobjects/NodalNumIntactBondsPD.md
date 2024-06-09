@@ -9,3 +9,5 @@ The `NodalNumIntactBondsPD` UserObject computes the value of an AuxVariable by c
 !syntax inputs /UserObjects/NodalNumIntactBondsPD
 
 !syntax children /UserObjects/NodalNumIntactBondsPD
+
+!tag name=NodalNumIntactBondsPD pairs=module:peridynamics system:userobjects

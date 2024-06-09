@@ -15,3 +15,5 @@ by two `ElementExtremeMaterialProperty` postprocessors.
 !syntax inputs /Postprocessors/ElementExtremeMaterialProperty
 
 !syntax children /Postprocessors/ElementExtremeMaterialProperty
+
+!tag name=ElementExtremeMaterialProperty pairs=module:framework system:postprocessors

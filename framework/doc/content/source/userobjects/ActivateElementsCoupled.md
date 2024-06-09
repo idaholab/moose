@@ -7,3 +7,5 @@ This user object uses the +coupled variable value+ as the metric to activate (ad
 !syntax inputs /UserObjects/ActivateElementsCoupled
 
 !syntax children /UserObjects/ActivateElementsCoupled
+
+!tag name=ActivateElementsCoupled pairs=module:framework system:userobjects

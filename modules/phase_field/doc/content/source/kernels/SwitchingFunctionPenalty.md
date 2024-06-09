@@ -18,3 +18,5 @@ Also see: [Multiphase models](/MultiPhase/WBM.md)
 !syntax inputs /Kernels/SwitchingFunctionPenalty
 
 !syntax children /Kernels/SwitchingFunctionPenalty
+
+!tag name=SwitchingFunctionPenalty pairs=module:phase_field system:kernels

@@ -17,3 +17,5 @@ In addition to keeping track of all `Outputs` objects, the `OutputWarehouse` als
 - keeps track of the `sync_times` at which output is forced
 - handles the output to the console. The `ConsoleStream` that many objects use to output, uses the `OutputWarehouse`
   under the hood to output its messages.
+
+!tag name=OutputWarehouse pairs=module:framework system:outputs

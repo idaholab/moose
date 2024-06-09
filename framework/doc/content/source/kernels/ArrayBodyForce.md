@@ -19,3 +19,5 @@ The Jacobian term for this kernel is zero since it is assumed that $\vec{f}$ +is
 !syntax inputs /Kernels/ArrayBodyForce
 
 !syntax children /Kernels/ArrayBodyForce
+
+!tag name=ArrayBodyForce pairs=module:framework system:kernels

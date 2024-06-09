@@ -20,3 +20,5 @@ so that the training process can be easily visualized.
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=DRLRewardReporter pairs=module:stochastic_tools system:libtorch

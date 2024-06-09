@@ -33,3 +33,5 @@ In this example, we compute the L2 norm for the Lagrange multiplier variable usi
 !syntax inputs /Postprocessors/ElementSidesL2Norm
 
 !syntax children /Postprocessors/ElementSidesL2Norm
+
+!tag name=ElementSidesL2Norm pairs=module:framework system:postprocessors

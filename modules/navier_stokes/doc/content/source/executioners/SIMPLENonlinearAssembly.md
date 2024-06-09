@@ -53,3 +53,5 @@ pressure gradient kernels to enable the separation of terms needed in $A^{-1}H$.
 !syntax inputs /Executioner/SIMPLENonlinearAssembly
 
 !syntax children /Executioner/SIMPLENonlinearAssembly
+
+!tag name=SIMPLENonlinearAssembly pairs=module:navier_stokes system:executioners

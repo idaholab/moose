@@ -26,3 +26,5 @@ The reporter names created by the `AccumulateReporter` match each of the accumul
 !syntax inputs /Reporters/AccumulateReporter
 
 !syntax children /Reporters/AccumulateReporter
+
+!tag name=AccumulateReporter pairs=module:framework system:reporters

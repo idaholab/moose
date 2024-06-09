@@ -25,3 +25,5 @@ Alternatively, this auxkernel is added automatically by the [GrainGrowthLineariz
 !syntax inputs /AuxKernels/LinearizedInterfaceAux
 
 !syntax children /AuxKernels/LinearizedInterfaceAux
+
+!tag name=LinearizedInterfaceAux pairs=module:phase_field system:auxkernels

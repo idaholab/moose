@@ -13,3 +13,5 @@ command-line using the "--show-controls" flag.
 !syntax inputs /Outputs/ControlOutput
 
 !syntax children /Outputs/ControlOutput
+
+!tag name=ControlOutput pairs=module:framework system:outputs

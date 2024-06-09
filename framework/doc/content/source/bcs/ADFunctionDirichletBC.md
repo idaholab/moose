@@ -46,3 +46,5 @@ condition is better.
 !syntax inputs /BCs/ADFunctionDirichletBC
 
 !syntax children /BCs/ADFunctionDirichletBC
+
+!tag name=ADFunctionDirichletBC pairs=module:framework system:bcs

@@ -16,3 +16,5 @@ In THM, most kernels are added automatically by components. This scalar kernel i
 !syntax inputs /ScalarKernels/ShaftComponentTorqueScalarKernel
 
 !syntax children /ScalarKernels/ShaftComponentTorqueScalarKernel
+
+!tag name=ShaftComponentTorqueScalarKernel pairs=module:thermal_hydraulics system:scalarkernels

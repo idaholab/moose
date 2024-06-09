@@ -24,3 +24,5 @@ In this example, the `ParsedAux` is being used to compute the multiplication of 
 !syntax inputs /AuxKernels/ParsedAux
 
 !syntax children /AuxKernels/ParsedAux
+
+!tag name=ParsedAux pairs=module:framework system:auxkernels

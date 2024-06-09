@@ -21,3 +21,5 @@ The resulting matrix is 5 columns and 100 rows ($10\times 5 \times 2$), which is
 !syntax inputs /Samplers/NestedMonteCarlo
 
 !syntax children /Samplers/NestedMonteCarlo
+
+!tag name=NestedMonteCarloSampler pairs=module:stochastic_tools system:samplers

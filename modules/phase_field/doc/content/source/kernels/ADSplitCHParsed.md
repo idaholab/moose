@@ -25,3 +25,5 @@ potential variable.
 !syntax children /Kernels/ADSplitCHParsed
 
 !bibtex bibliography
+
+!tag name=ADSplitCHParsed pairs=module:phase_field system:kernels

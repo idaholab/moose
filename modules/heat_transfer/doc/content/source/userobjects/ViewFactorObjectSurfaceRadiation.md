@@ -15,3 +15,5 @@ block=UserObjects
 !syntax inputs /UserObjects/ViewFactorObjectSurfaceRadiation
 
 !syntax children /UserObjects/ViewFactorObjectSurfaceRadiation
+
+!tag name=ViewFactorObjectSurfaceRadiation pairs=module:heat_transfer system:userobjects

@@ -17,3 +17,5 @@ Note: This is only useful when the order parameters are initialized with a diffu
 !syntax children /ICs/BndsCalcIC
 
 !bibtex bibliography
+
+!tag name=BndsCalcIC pairs=module:phase_field system:ics

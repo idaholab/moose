@@ -31,3 +31,5 @@ An automatic differentiation version of this kernel is implemented in
 !syntax children /Kernels/ACGrGrPoly
 
 !bibtex bibliography
+
+!tag name=ACGrGrPoly pairs=module:phase_field system:kernels

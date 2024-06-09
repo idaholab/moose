@@ -16,3 +16,5 @@ The syntax is
 ```
 
 See [AuxKernel](source/auxkernels/AuxKernel.md) for more information about AuxKernels.
+
+!tag name=AddAuxKernelAction pairs=module:framework system:actions

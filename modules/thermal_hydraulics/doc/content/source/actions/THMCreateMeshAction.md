@@ -9,3 +9,5 @@ This enables input files to not contain a `[Mesh]` block and have a default, emp
 mesh created to satisfy objects that require the presence of a mesh.
 
 !syntax parameters /Components/THMCreateMeshAction
+
+!tag name=THMCreateMeshAction pairs=module:thermal_hydraulics system:actions

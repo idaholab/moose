@@ -10,3 +10,5 @@ kernel. See [INSFVMomentumAdvection.md] for more details.
 !syntax inputs /FVKernels/WCNSFV2PMomentumAdvectionSlip
 
 !syntax children /FVKernels/WCNSFV2PMomentumAdvectionSlip
+
+!tag name=WCNSFV2PMomentumAdvectionSlip pairs=module:navier_stokes system:fvkernels

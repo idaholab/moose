@@ -24,3 +24,5 @@ The following input file snippet demonstrates the use of the `RestartableDataRep
 !syntax inputs /Reporters/RestartableDataReporter
 
 !syntax children /Reporters/RestartableDataReporter
+
+!tag name=RestartableDataReporter pairs=module:framework system:reporters

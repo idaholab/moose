@@ -138,3 +138,5 @@ This simple mesh presents no issue.
 !syntax inputs /Mesh/MeshDiagnosticsGenerator
 
 !syntax children /Mesh/MeshDiagnosticsGenerator
+
+!tag name=MeshDiagnosticsGenerator pairs=module:framework system:meshgenerators

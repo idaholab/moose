@@ -20,3 +20,5 @@ the quality of the numerical solution.
 !syntax inputs /Postprocessors/NodalL2Error
 
 !syntax children /Postprocessors/NodalL2Error
+
+!tag name=NodalL2Error pairs=module:framework system:postprocessors

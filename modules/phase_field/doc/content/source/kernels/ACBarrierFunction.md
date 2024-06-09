@@ -25,3 +25,5 @@ $m$.
 !syntax inputs /Kernels/ACBarrierFunction
 
 !syntax children /Kernels/ACBarrierFunction
+
+!tag name=ACBarrierFunction pairs=module:phase_field system:kernels

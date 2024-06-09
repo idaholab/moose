@@ -11,3 +11,5 @@ details please refer to https://mooseframework.inl.gov/modules/navier_stokes/ran
 !syntax inputs /AuxKernels/WallDistanceMixingLengthAux
 
 !syntax children /AuxKernels/WallDistanceMixingLengthAux
+
+!tag name=WallDistanceMixingLengthAux pairs=module:navier_stokes system:auxkernels

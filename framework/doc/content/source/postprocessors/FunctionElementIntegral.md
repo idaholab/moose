@@ -15,3 +15,5 @@ over a domain $V$:
 !syntax children /Postprocessors/FunctionElementIntegral
 
 !bibtex bibliography
+
+!tag name=FunctionElementIntegral pairs=module:framework system:postprocessors

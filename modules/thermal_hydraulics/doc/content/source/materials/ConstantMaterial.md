@@ -12,3 +12,5 @@ parameter with `0` as the [!param](/Materials/GenericConstantMaterial/prop_value
 !syntax inputs /Materials/ConstantMaterial
 
 !syntax children /Materials/ConstantMaterial
+
+!tag name=ConstantMaterial pairs=module:thermal_hydraulics system:materials

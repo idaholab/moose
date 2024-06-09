@@ -14,3 +14,5 @@ then retrieved in this scalar kernel.
 !syntax children /ScalarKernels/ADVolumeJunctionAdvectionScalarKernel
 
 !bibtex bibliography
+
+!tag name=ADVolumeJunctionAdvectionScalarKernel pairs=module:thermal_hydraulics system:scalarkernels

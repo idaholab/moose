@@ -12,3 +12,5 @@ A large number of AuxVariables and GeochemistryQuantityAux Kernels are often add
 
 !syntax children /AuxKernels/GeochemistryQuantityAux
 
+
+!tag name=GeochemistryQuantityAux pairs=module:geochemistry system:auxkernels

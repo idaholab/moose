@@ -15,3 +15,5 @@ linear combination.
 !syntax inputs /Functions/LinearCombinationFunction
 
 !syntax children /Functions/LinearCombinationFunction
+
+!tag name=LinearCombinationFunction pairs=module:framework system:functions

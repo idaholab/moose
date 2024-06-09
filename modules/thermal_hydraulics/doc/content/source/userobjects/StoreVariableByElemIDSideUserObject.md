@@ -14,3 +14,5 @@ This user object is used by [HSCoupler2D3D.md].
 !syntax inputs /UserObjects/StoreVariableByElemIDSideUserObject
 
 !syntax children /UserObjects/StoreVariableByElemIDSideUserObject
+
+!tag name=StoreVariableByElemIDSideUserObject pairs=module:thermal_hydraulics system:userobjects

@@ -51,3 +51,5 @@ and the inlet area.
 !syntax inputs /FVBCs/WCNSFVScalarFluxBC
 
 !syntax children /FVBCs/WCNSFVScalarFluxBC
+
+!tag name=WCNSFVScalarFluxBC pairs=module:navier_stokes system:fvbcs

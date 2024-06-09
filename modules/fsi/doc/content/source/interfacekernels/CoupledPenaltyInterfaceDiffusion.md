@@ -18,3 +18,5 @@ convergence rate. For a discussion of this phenomena, see
 !syntax inputs /InterfaceKernels/CoupledPenaltyInterfaceDiffusion
 
 !syntax children /InterfaceKernels/CoupledPenaltyInterfaceDiffusion
+
+!tag name=CoupledPenaltyInterfaceDiffusion pairs=module:fsi system:interfacekernels

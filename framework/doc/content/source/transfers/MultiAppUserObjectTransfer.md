@@ -25,3 +25,5 @@ When `all_parent_nodes_contained_in_sub_app` option is set to true, an error is 
 !syntax children /Transfers/MultiAppUserObjectTransfer
 
 !bibtex bibliography
+
+!tag name=MultiAppUserObjectTransfer pairs=module:framework system:transfers

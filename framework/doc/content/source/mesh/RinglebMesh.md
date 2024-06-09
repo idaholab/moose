@@ -51,3 +51,4 @@ The corresponding mesh looks like this:
 !syntax inputs /Mesh/RinglebMesh
 
 !syntax children /Mesh/RinglebMesh
+!tag name=RinglebMesh pairs=module:framework system:mesh

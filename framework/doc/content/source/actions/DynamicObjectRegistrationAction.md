@@ -11,3 +11,5 @@ syntax, handled by `DynamicObjectRegistrationAction`,
 More information about dynamic loading may be found on [Google](https://lmgtfy.app/?q=dynamic+loading).
 
 !syntax parameters /Problem/DynamicObjectRegistrationAction
+
+!tag name=DynamicObjectRegistrationAction pairs=module:framework system:actions

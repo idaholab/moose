@@ -11,3 +11,5 @@ porosity distribution.
 !syntax inputs /Materials/PorousFlowPorosityConst
 
 !syntax children /Materials/PorousFlowPorosityConst
+
+!tag name=PorousFlowPorosityConst pairs=module:porous_flow system:materials

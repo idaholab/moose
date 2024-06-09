@@ -30,3 +30,5 @@ $\sigma^g_{ij} = 0$ for $i \neq j$.
 !syntax inputs /Materials/ComputeExtraStressVDWGas
 
 !syntax children /Materials/ComputeExtraStressVDWGas
+
+!tag name=ComputeExtraStressVDWGas pairs=module:solid_mechanics system:materials

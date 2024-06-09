@@ -46,3 +46,5 @@ second term ($\int\limits_{S_f} (\mathbb{D}\vec{n} - \mathbb{D}\vec{n}\cdot \vec
 !syntax inputs /LinearFVKernels/LinearFVAnisotropicDiffusion
 
 !syntax children /LinearFVKernels/LinearFVAnisotropicDiffusion
+
+!tag name=LinearFVAnisotropicDiffusion pairs=module:framework system:linearfvkernels

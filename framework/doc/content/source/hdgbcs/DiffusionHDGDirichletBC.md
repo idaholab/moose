@@ -12,3 +12,5 @@ should be paired with a [DiffusionHDGKernel.md].
 !syntax inputs /HDGBCs/DiffusionHDGDirichletBC
 
 !syntax children /HDGBCs/DiffusionHDGDirichletBC
+
+!tag name=DiffusionHDGDirichletBC pairs=module:framework system:hdgbcs

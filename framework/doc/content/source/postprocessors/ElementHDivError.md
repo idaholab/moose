@@ -19,3 +19,4 @@ All input parameters and their restrictions are the same as those for
 !syntax inputs /Postprocessors/ElementHDivError
 
 !syntax children /Postprocessors/ElementHDivError
+!tag name=ElementHDivError pairs=module:framework system:postprocessors

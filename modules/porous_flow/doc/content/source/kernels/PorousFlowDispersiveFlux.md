@@ -27,3 +27,5 @@ All parameters are defined in the [nomenclature](/nomenclature.md).
 !syntax inputs /Kernels/PorousFlowDispersiveFlux
 
 !syntax children /Kernels/PorousFlowDispersiveFlux
+
+!tag name=PorousFlowDispersiveFlux pairs=module:porous_flow system:kernels

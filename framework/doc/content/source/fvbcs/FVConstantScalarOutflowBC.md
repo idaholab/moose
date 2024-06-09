@@ -27,3 +27,5 @@ this velocity: `right` and `top`.
 !syntax inputs /FVBCs/FVConstantScalarOutflowBC
 
 !syntax children /FVBCs/FVConstantScalarOutflowBC
+
+!tag name=FVConstantScalarOutflowBC pairs=module:framework system:fvbcs

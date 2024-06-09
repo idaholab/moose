@@ -24,3 +24,5 @@ The `ReactorMeshParams` object stores certain global mesh information as metadat
 !syntax inputs /Mesh/ReactorMeshParams
 
 !syntax children /Mesh/ReactorMeshParams
+
+!tag name=ReactorMeshParams pairs=module:reactor system:meshgenerators

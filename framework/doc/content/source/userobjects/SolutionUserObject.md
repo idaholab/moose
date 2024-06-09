@@ -21,3 +21,5 @@ will query the function and write the value into the `AuxVariable`.
 !syntax inputs /UserObjects/SolutionUserObject
 
 !syntax children /UserObjects/SolutionUserObject
+
+!tag name=SolutionUserObject pairs=module:framework system:userobjects

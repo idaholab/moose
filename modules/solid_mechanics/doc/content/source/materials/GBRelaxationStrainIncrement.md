@@ -12,3 +12,5 @@ The strain increment from the relaxation of the grain boundaries $\boldsymbol{\e
 !syntax inputs /Materials/GBRelaxationStrainIncrement
 
 !syntax children /Materials/GBRelaxationStrainIncrement
+
+!tag name=GBRelaxationStrainIncrement pairs=module:solid_mechanics system:materials

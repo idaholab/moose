@@ -44,3 +44,5 @@ Thus when the transition occurs at the intersection of two functions, it may be
 advantageous to use [CubicTransition.md] instead of `WeightedTransition`,
 whereas transitions at a discontinuity may be handled well with
 `WeightedTransition`.
+
+!tag name=WeightedTransition pairs=module:thermal_hydraulics system:utils

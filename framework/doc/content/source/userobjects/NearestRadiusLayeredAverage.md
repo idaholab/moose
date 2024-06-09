@@ -20,3 +20,5 @@ number of layers is larger than one, it is recommended that the interface betwee
 !syntax children /UserObjects/NearestRadiusLayeredAverage
 
 !bibtex bibliography
+
+!tag name=NearestRadiusLayeredAverage pairs=module:framework system:userobjects

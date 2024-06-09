@@ -17,3 +17,5 @@ from the [`Elem`](https://libmesh.github.io/doxygen/classlibMesh_1_1Elem.html) c
 !syntax inputs /AuxKernels/ElementLengthAux
 
 !syntax children /AuxKernels/ElementLengthAux
+
+!tag name=ElementLengthAux pairs=module:framework system:auxkernels

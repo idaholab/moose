@@ -24,3 +24,5 @@ In this example, we compute a variety of error with the H1, L2 and H1-semi norms
 !syntax inputs /Postprocessors/ElementH1SemiError
 
 !syntax children /Postprocessors/ElementH1SemiError
+
+!tag name=ElementH1SemiError pairs=module:framework system:postprocessors

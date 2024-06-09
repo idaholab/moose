@@ -28,3 +28,5 @@ boundary layer is defined between 0 and 1.
 !syntax children /Functions/LevelSetOlssonPlane
 
 !bibtex bibliography
+
+!tag name=LevelSetOlssonPlane pairs=module:level_set system:functions

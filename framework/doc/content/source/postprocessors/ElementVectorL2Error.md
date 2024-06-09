@@ -37,3 +37,4 @@ With component-wise specifications for both the nonlinear variable and the funct
 !syntax inputs /Postprocessors/ElementVectorL2Error
 
 !syntax children /Postprocessors/ElementVectorL2Error
+!tag name=ElementVectorL2Error pairs=module:framework system:postprocessors

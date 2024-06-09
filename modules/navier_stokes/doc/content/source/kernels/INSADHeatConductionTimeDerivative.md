@@ -24,3 +24,5 @@ are provided using `ADMaterial` derived objects.
 !syntax inputs /Kernels/INSADHeatConductionTimeDerivative
 
 !syntax children /Kernels/INSADHeatConductionTimeDerivative
+
+!tag name=INSADHeatConductionTimeDerivative pairs=module:navier_stokes system:kernels

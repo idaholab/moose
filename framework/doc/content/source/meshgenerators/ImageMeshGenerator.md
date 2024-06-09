@@ -14,3 +14,5 @@ the generated mesh is sized to the dimensions of the images and creates one elem
 !syntax inputs /Mesh/ImageMeshGenerator
 
 !syntax children /Mesh/ImageMeshGenerator
+
+!tag name=ImageMeshGenerator pairs=module:framework system:meshgenerators

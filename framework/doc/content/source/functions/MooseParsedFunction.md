@@ -37,3 +37,5 @@ since `Function`s can currently only return `Real` values, not `ADReal` values.
 !syntax inputs /Functions/ParsedFunction
 
 !syntax children /Functions/ParsedFunction
+
+!tag name=MooseParsedFunction pairs=module:framework system:functions

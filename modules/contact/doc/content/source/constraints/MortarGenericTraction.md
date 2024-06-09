@@ -12,3 +12,5 @@ applies it.
 !syntax inputs /Constraints/MortarGenericTraction
 
 !syntax children /Constraints/MortarGenericTraction
+
+!tag name=MortarGenericTraction pairs=module:contact system:constraints

@@ -20,3 +20,5 @@ This function is primarily used for computing the gradient in an optimization ro
 !syntax inputs /VectorPostprocessors/ElementOptimizationReactionFunctionInnerProduct
 
 !syntax children /VectorPostprocessors/ElementOptimizationReactionFunctionInnerProduct
+
+!tag name=ElementOptimizationReactionFunctionInnerProduct pairs=module:optimization system:vectorpostprocessors

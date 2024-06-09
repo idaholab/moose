@@ -55,3 +55,5 @@ has to be resolved through the `_jvar_map`.
 !syntax inputs /Kernels/KKSPhaseChemicalPotential
 
 !syntax children /Kernels/KKSPhaseChemicalPotential
+
+!tag name=KKSPhaseChemicalPotential pairs=module:phase_field system:kernels

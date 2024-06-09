@@ -21,3 +21,5 @@ In this input file, a `NodalEqualValueConstraint` is used to impose an equality 
 !syntax inputs /ScalarKernels/NodalEqualValueConstraint
 
 !syntax children /ScalarKernels/NodalEqualValueConstraint
+
+!tag name=NodalEqualValueConstraint pairs=module:framework system:scalarkernels

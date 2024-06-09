@@ -22,3 +22,5 @@ In this example, the variable `u` is being damped with minimum and maximum value
 !syntax inputs /Dampers/BoundingValueNodalDamper
 
 !syntax children /Dampers/BoundingValueNodalDamper
+
+!tag name=BoundingValueNodalDamper pairs=module:framework system:dampers

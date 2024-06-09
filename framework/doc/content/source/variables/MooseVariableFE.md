@@ -18,3 +18,5 @@ numerous polyvalent objects.
 !syntax inputs /Variables/MooseVariable
 
 !syntax children /Variables/MooseVariable
+
+!tag name=MooseVariableFE pairs=module:framework system:variables

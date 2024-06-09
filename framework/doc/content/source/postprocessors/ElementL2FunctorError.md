@@ -12,3 +12,5 @@ generalization to the functor system of [ElementL2Error.md].
 !syntax inputs /Postprocessors/ElementL2FunctorError
 
 !syntax children /Postprocessors/ElementL2FunctorError
+
+!tag name=ElementL2FunctorError pairs=module:framework system:postprocessors

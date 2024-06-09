@@ -20,3 +20,5 @@ inside elements (at quadrature points) is
 !syntax inputs /Postprocessors/SideExtremeValue
 
 !syntax children /Postprocessors/SideExtremeValue
+
+!tag name=SideExtremeValue pairs=module:framework system:postprocessors

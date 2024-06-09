@@ -26,3 +26,5 @@ AD is used in THM to compute numerically exact Jacobians.
 !syntax inputs /ScalarKernels/ADShaftTimeDerivativeScalarKernel
 
 !syntax children /ScalarKernels/ADShaftTimeDerivativeScalarKernel
+
+!tag name=ADShaftTimeDerivativeScalarKernel pairs=module:thermal_hydraulics system:scalarkernels

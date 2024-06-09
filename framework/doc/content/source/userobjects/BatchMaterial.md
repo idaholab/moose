@@ -10,3 +10,5 @@ The output data type is a user specified template parameter (it could be a struc
 
 The user must write a simple glue material class that uses the `getOutputData()`/`getIndex(elem_id)` interface of the derived batch material user object.
 
+
+!tag name=BatchMaterial pairs=module:framework system:userobjects

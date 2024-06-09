@@ -38,3 +38,5 @@ can be used.
 !syntax inputs /AuxKernels/PorousFlowPropertyAux
 
 !syntax children /AuxKernels/PorousFlowPropertyAux
+
+!tag name=PorousFlowPropertyAux pairs=module:porous_flow system:auxkernels

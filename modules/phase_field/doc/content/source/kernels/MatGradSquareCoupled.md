@@ -20,3 +20,5 @@ where $\epsilon$ is the phase-dependent permittivity and $\eta$ is the order par
 !syntax inputs /Kernels/MatGradSquareCoupled
 
 !syntax children /Kernels/MatGradSquareCoupled
+
+!tag name=MatGradSquareCoupled pairs=module:phase_field system:kernels

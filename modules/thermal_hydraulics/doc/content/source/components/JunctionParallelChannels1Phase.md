@@ -76,3 +76,5 @@ the wall pressure integral projected in the flow direction is:
 !syntax inputs /Components/JunctionParallelChannels1Phase
 
 !syntax children /Components/JunctionParallelChannels1Phase
+
+!tag name=JunctionParallelChannels1Phase pairs=module:thermal_hydraulics system:components

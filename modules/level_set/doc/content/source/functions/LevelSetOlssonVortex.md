@@ -30,3 +30,5 @@ applies a cosine multiplier so that the reversal is smooth.
 
 
 !bibtex bibliography
+
+!tag name=LevelSetOlssonVortex pairs=module:level_set system:functions

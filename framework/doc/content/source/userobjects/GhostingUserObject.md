@@ -15,3 +15,5 @@ The GhostingUserObject maintains local data structures of elements involved in b
 !syntax children /UserObjects/GhostingUserObject
 
 !bibtex bibliography
+
+!tag name=GhostingUserObject pairs=module:framework system:userobjects

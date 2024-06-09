@@ -28,3 +28,5 @@ Creation of component-wise auxiliary kernels:
 !syntax inputs /AuxKernels/MortarFrictionalPressureVectorAux
 
 !syntax children /AuxKernels/MortarFrictionalPressureVectorAux
+
+!tag name=MortarFrictionalPressureVectorAux pairs=module:contact system:auxkernels

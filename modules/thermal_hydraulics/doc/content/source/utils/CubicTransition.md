@@ -17,3 +17,5 @@ for [WeightedTransition.md], which gives 4 equations:
 As noted for [WeightedTransition.md], this transition is recommended over
 [WeightedTransition.md] when the transition occurs at the intersection of two
 functions.
+
+!tag name=CubicTransition pairs=module:thermal_hydraulics system:utils

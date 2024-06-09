@@ -58,3 +58,5 @@ The updated axial stress is calculated
 !syntax inputs /Materials/PlasticTruss
 
 !syntax children /Materials/PlasticTruss
+
+!tag name=PlasticTruss pairs=module:solid_mechanics system:materials

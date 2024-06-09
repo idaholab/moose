@@ -13,3 +13,4 @@ Each `ADInertialForceShell` kernel calculates the force only along one coordinat
 !syntax inputs /Kernels/ADInertialForceShell
 
 !syntax children /Kernels/ADInertialForceShell
+!tag name=ADInertialForceShell pairs=module:solid_mechanics system:kernels

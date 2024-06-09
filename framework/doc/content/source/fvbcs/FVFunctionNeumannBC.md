@@ -12,3 +12,5 @@ constant `value` parameter is replaced by the `function` parameter.
 !syntax inputs /FVBCs/FVFunctionNeumannBC
 
 !syntax children /FVBCs/FVFunctionNeumannBC
+
+!tag name=FVFunctionNeumannBC pairs=module:framework system:fvbcs

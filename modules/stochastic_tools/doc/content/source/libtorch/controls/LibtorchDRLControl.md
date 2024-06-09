@@ -22,3 +22,5 @@ cases when the neural network needs to be simply evaluated, the user is encourag
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchDRLControl pairs=module:stochastic_tools system:libtorch

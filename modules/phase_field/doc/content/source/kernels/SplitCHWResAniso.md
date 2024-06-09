@@ -11,3 +11,5 @@ This is anisotropic version of [`SplitCHWRes`](/SplitCHWRes.md) and expects a te
 !syntax children /Kernels/SplitCHWResAniso
 
 !bibtex bibliography
+
+!tag name=SplitCHWResAniso pairs=module:phase_field system:kernels

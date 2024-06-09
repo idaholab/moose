@@ -40,3 +40,5 @@ sample.
 !syntax inputs /UserObjects/InverseMapping
 
 !syntax children /UserObjects/InverseMapping
+
+!tag name=InverseMapping pairs=module:stochastic_tools system:userobjects

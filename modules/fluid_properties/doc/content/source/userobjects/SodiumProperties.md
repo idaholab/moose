@@ -26,3 +26,5 @@ Properties of liquid sodium are obtained from [!cite](Fink:1995bf).
 !syntax children /FluidProperties/SodiumProperties
 
 !bibtex bibliography
+
+!tag name=SodiumProperties pairs=module:fluid_properties system:userobjects

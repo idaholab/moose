@@ -40,3 +40,5 @@ Example for mapping solutions:
 !syntax inputs /Reporters/MappingReporter
 
 !syntax children /Reporters/MappingReporter
+
+!tag name=MappingReporter pairs=module:stochastic_tools system:reporters

@@ -106,3 +106,5 @@ Reporter object.
 !syntax inputs /Samplers/AdaptiveImportance
 
 !syntax children /Samplers/AdaptiveImportance
+
+!tag name=AdaptiveImportanceSampler pairs=module:stochastic_tools system:samplers

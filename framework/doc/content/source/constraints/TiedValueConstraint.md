@@ -20,3 +20,5 @@ is tied between the left and right boundaries of the two disconnected domains us
 !syntax inputs /Constraints/TiedValueConstraint
 
 !syntax children /Constraints/TiedValueConstraint
+
+!tag name=TiedValueConstraint pairs=module:framework system:constraints

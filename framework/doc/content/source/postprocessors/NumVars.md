@@ -15,3 +15,5 @@ the Auxiliary system, the system containing only explicit calculations, or both 
 !syntax children /Postprocessors/NumVars
 
 !bibtex bibliography
+
+!tag name=NumVars pairs=module:framework system:postprocessors

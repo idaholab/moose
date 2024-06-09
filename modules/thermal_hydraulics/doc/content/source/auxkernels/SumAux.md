@@ -10,3 +10,5 @@ If you need a weighted sum, please consider using a [ParsedAux.md].
 !syntax inputs /AuxKernels/SumAux
 
 !syntax children /AuxKernels/SumAux
+
+!tag name=SumAux pairs=module:thermal_hydraulics system:auxkernels

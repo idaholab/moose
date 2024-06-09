@@ -10,3 +10,5 @@ The `RankTwoBasedFailureCriteriaNOSPD` AuxKernel is to determine the status of e
 !syntax inputs /AuxKernels/RankTwoBasedFailureCriteriaNOSPD
 
 !syntax children /AuxKernels/RankTwoBasedFailureCriteriaNOSPD
+
+!tag name=RankTwoBasedFailureCriteriaNOSPD pairs=module:peridynamics system:auxkernels

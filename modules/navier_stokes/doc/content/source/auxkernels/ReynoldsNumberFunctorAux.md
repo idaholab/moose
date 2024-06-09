@@ -29,3 +29,5 @@ stabilization.
 !syntax inputs /AuxKernels/ReynoldsNumberFunctorAux
 
 !syntax children /AuxKernels/ReynoldsNumberFunctorAux
+
+!tag name=ReynoldsNumberFunctorAux pairs=module:navier_stokes system:auxkernels

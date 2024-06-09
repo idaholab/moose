@@ -38,3 +38,5 @@ The boundary condition is added once for each cylindrical heat structure.
 !syntax inputs /BCs/HeatStructure2DRadiationCouplerRZBC
 
 !syntax children /BCs/HeatStructure2DRadiationCouplerRZBC
+
+!tag name=HeatStructure2DRadiationCouplerRZBC pairs=module:thermal_hydraulics system:bcs

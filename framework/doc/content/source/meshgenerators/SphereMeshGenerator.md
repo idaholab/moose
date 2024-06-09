@@ -14,3 +14,5 @@ The `SphereMeshGenerator` creates a 3-D mesh of a sphere. The mesh refinement an
 !syntax inputs /Mesh/SphereMeshGenerator
 
 !syntax children /Mesh/SphereMeshGenerator
+
+!tag name=SphereMeshGenerator pairs=module:framework system:meshgenerators

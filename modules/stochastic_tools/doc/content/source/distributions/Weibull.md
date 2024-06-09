@@ -25,3 +25,5 @@ where $k > 0$ and defines the shape parameter, $\lambda > 0$ and defines the sca
 !syntax inputs /Distributions/Weibull
 
 !syntax children /Distributions/Weibull
+
+!tag name=Weibull pairs=module:stochastic_tools system:distributions

@@ -14,3 +14,5 @@ on. The free energy density is minimized at $c=\pm1$.
 !syntax inputs /Kernels/CHMath
 
 !syntax children /Kernels/CHMath
+
+!tag name=CHMath pairs=module:phase_field system:kernels

@@ -10,3 +10,5 @@ streamline-upwind kernels for the energy equation.
 !syntax inputs /Materials/INSADStabilized3Eqn
 
 !syntax children /Materials/INSADStabilized3Eqn
+
+!tag name=INSADStabilized3Eqn pairs=module:navier_stokes system:materials

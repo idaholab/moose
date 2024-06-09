@@ -22,3 +22,5 @@ A set of `CoupledPressure` boundary conditions applied to multiple variables in 
 !syntax inputs /BCs/CoupledPressureBC
 
 !syntax children /BCs/CoupledPressureBC
+
+!tag name=CoupledPressureBC pairs=module:solid_mechanics system:bcs

@@ -19,3 +19,5 @@ share the same names as the column headers.
 !syntax inputs /VectorPostprocessors/PositionsFunctorValueSampler
 
 !syntax children /VectorPostprocessors/PositionsFunctorValueSampler
+
+!tag name=PositionsFunctorValueSampler pairs=module:framework system:vectorpostprocessors

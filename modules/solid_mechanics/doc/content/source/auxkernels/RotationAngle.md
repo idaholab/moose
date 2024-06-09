@@ -29,3 +29,5 @@ rule applies.
 !syntax inputs /AuxKernels/RotationAngle
 
 !syntax children /AuxKernels/RotationAngle
+
+!tag name=RotationAngle pairs=module:solid_mechanics system:auxkernels

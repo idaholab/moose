@@ -26,3 +26,5 @@ block=Postprocessors
 !syntax inputs /Postprocessors/RelativeDifferencePostprocessor
 
 !syntax children /Postprocessors/RelativeDifferencePostprocessor
+
+!tag name=RelativeDifferencePostprocessor pairs=module:framework system:postprocessors

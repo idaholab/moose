@@ -14,3 +14,5 @@ the reference volume $V$ is the volume of the mesh.
 !syntax inputs /Postprocessors/TotalMineralVolumeFraction
 
 !syntax children /Postprocessors/TotalMineralVolumeFraction
+
+!tag name=TotalMineralVolumeFraction pairs=module:chemical_reactions system:postprocessors

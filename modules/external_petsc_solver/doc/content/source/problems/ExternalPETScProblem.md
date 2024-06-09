@@ -7,3 +7,5 @@ This is an interface to call a pure PETSc solver. We also sync the PETSc solutio
 !syntax inputs /Problem/ExternalPETScProblem
 
 !syntax children /Problem/ExternalPETScProblem
+
+!tag name=ExternalPETScProblem pairs=module:external_petsc_solver system:problems

@@ -97,3 +97,5 @@ We only execute kernel objects because objects like `BoundaryConditions`,
 introduce global constraints for things like Dirichlet conditions or hanging
 nodes in mesh adaptivity. We want our scaling factors to represent our physics,
 not penalties or constraints.
+
+!tag name=NonlinearSystemBase pairs=module:framework system:systems

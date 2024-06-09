@@ -49,3 +49,5 @@ reporter data.
 !syntax inputs /Reporters/SobolReporter
 
 !syntax children /Reporters/SobolReporter
+
+!tag name=SobolReporter pairs=module:stochastic_tools system:reporters

@@ -38,3 +38,5 @@ is defined by the functions defined in
 !syntax inputs /Materials/ComputeEigenstrainFromInitialStress
 
 !syntax children /Materials/ComputeEigenstrainFromInitialStress
+
+!tag name=ComputeEigenstrainFromInitialStress pairs=module:solid_mechanics system:materials

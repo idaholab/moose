@@ -6,3 +6,5 @@ More information about the `Problem` system may be found on the
 [Problems syntax documentation](syntax/Problem/index.md).
 
 !syntax parameters /Problem/CreateProblemAction
+
+!tag name=CreateProblemAction pairs=module:framework system:actions

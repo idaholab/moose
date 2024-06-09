@@ -17,3 +17,5 @@ the `ThermalContactAction`, the details of which are documented in the
 !syntax children /Materials/GapConductance
 
 !bibtex bibliography
+
+!tag name=GapConductanceConstant pairs=module:heat_transfer system:materials

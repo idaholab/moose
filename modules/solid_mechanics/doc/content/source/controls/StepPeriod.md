@@ -22,3 +22,5 @@ boundary conditions and constraints are enabled or disabled, as directed by
 !syntax inputs /Controls/StepPeriod
 
 !syntax children /Controls/StepPeriod
+
+!tag name=StepPeriod pairs=module:solid_mechanics system:controls

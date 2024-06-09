@@ -15,3 +15,5 @@ will results in more nonlinear steps.
 !syntax inputs /Dampers/MaxIncrement
 
 !syntax children /Dampers/MaxIncrement
+
+!tag name=MaxIncrement pairs=module:framework system:dampers

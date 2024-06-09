@@ -26,3 +26,5 @@ listing test/tests/userobjects/interface_user_object/interface_value_user_object
 !syntax children /AuxKernels/InterfaceValueUserObjectAux
 
 !bibtex bibliography
+
+!tag name=InterfaceValueUserObjectAux pairs=module:framework system:auxkernels

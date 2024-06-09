@@ -27,3 +27,5 @@ Descriptions of other porosity classes can be found in the [porosity documentati
 !syntax inputs /Materials/PorousFlowPorosityLinear
 
 !syntax children /Materials/PorousFlowPorosityLinear
+
+!tag name=PorousFlowPorosityLinear pairs=module:porous_flow system:materials

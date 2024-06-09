@@ -25,3 +25,5 @@ Additional option for strict mass conservation formulation can be defined using 
 !syntax children /Materials/GrandPotentialSinteringMaterial
 
 !bibtex bibliography
+
+!tag name=GrandPotentialSinteringMaterial pairs=module:phase_field system:materials

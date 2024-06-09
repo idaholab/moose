@@ -40,3 +40,5 @@ We never recommend using this IC directly, but rather creating the full set of I
 !syntax inputs /ICs/PolycrystalColoringICLinearizedInterface
 
 !syntax children /ICs/PolycrystalColoringICLinearizedInterface
+
+!tag name=PolycrystalColoringICLinearizedInterface pairs=module:phase_field system:ics

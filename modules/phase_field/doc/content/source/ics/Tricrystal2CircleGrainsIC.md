@@ -21,3 +21,5 @@ We never recommend using this IC directly, but rather creating the full set of I
 !syntax inputs /ICs/Tricrystal2CircleGrainsIC
 
 !syntax children /ICs/Tricrystal2CircleGrainsIC
+
+!tag name=Tricrystal2CircleGrainsIC pairs=module:phase_field system:ics

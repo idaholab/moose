@@ -22,3 +22,5 @@ The multiplication by $\rho_{\beta}$ is optional and is controlled by the `multi
 !syntax inputs /Kernels/PorousFlowMassVolumetricExpansion
 
 !syntax children /Kernels/PorousFlowMassVolumetricExpansion
+
+!tag name=PorousFlowMassVolumetricExpansion pairs=module:porous_flow system:kernels

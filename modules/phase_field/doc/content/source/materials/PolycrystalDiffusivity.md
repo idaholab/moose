@@ -20,3 +20,5 @@ and $D_{GB}$ is the coefficient of diffusion along the grain boundaries. The pre
 !syntax children /Materials/PolycrystalDiffusivity
 
 !bibtex bibliography
+
+!tag name=PolycrystalDiffusivity pairs=module:phase_field system:materials

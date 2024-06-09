@@ -12,3 +12,5 @@ Its standard variable version is [PenaltyDirichletBC.md].
 !syntax children /BCs/ArrayPenaltyDirichletBC
 
 !bibtex bibliography
+
+!tag name=ArrayPenaltyDirichletBC pairs=module:framework system:bcs

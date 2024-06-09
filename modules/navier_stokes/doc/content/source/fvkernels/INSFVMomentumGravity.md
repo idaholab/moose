@@ -9,3 +9,5 @@ $\vec{g}$ is the gravity vector.
 !syntax inputs /FVKernels/INSFVMomentumGravity
 
 !syntax children /FVKernels/INSFVMomentumGravity
+
+!tag name=INSFVMomentumGravity pairs=module:navier_stokes system:fvkernels

@@ -16,3 +16,5 @@ cases, such as debugging.
 !syntax inputs /UserObjects/ADNumericalFlux3EqnCentered
 
 !syntax children /UserObjects/ADNumericalFlux3EqnCentered
+
+!tag name=ADNumericalFlux3EqnCentered pairs=module:thermal_hydraulics system:userobjects

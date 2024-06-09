@@ -19,3 +19,5 @@ retrieved as a `MaterialProperty` by the diffusion kernel.
 !syntax inputs /Materials/GenericFunctionMaterial
 
 !syntax children /Materials/GenericFunctionMaterial
+
+!tag name=GenericFunctionMaterial pairs=module:framework system:materials

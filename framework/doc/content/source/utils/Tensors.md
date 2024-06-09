@@ -29,3 +29,5 @@ A `SymmetricRankTwoTensor` is a symmetric second order tensor containing 6 compo
 ## SymmetricRankFourTensor / ADSymmetricRankFourTensor
 
 A `SymmetricRankFourTensor` is a fourth order tensor with minor symmetry containing 36 components. [Mandel notation](https://en.wikipedia.org/wiki/Voigt_notation#Mandel_notation) is used internally to store and access the components. An `ADSymmetricRankFourTensor` provides additional information for automatic differentiation. The complete list of available methods and operators can be found in the [SymmetricRankFourTensor Doxygen documentation](https://mooseframework.inl.gov/docs/doxygen/moose/classSymmetricRankFourTensorTempl.html).
+
+!tag name=Tensors pairs=module:framework system:utils

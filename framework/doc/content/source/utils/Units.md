@@ -99,3 +99,5 @@ output of the units.
 
 Unit conversion using `MooseUnits` is available in input files through the
 `${units ...}` [Brace Expression](input_syntax.md optional=True).
+
+!tag name=Units pairs=module:framework system:utils

@@ -11,3 +11,5 @@ can also be used to restart a scalar variable.
 !syntax inputs /ICs/ScalarSolutionIC
 
 !syntax children /ICs/ScalarSolutionIC
+
+!tag name=ScalarSolutionIC pairs=module:framework system:ics

@@ -20,3 +20,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /Kernels/OneD3EqnMomentumFriction
 
 !syntax children /Kernels/OneD3EqnMomentumFriction
+
+!tag name=OneD3EqnMomentumFriction pairs=module:thermal_hydraulics system:kernels

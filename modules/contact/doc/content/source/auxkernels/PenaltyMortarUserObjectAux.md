@@ -17,3 +17,5 @@ and weighted gap values.
 !syntax inputs /AuxKernels/PenaltyMortarUserObjectAux
 
 !syntax children /AuxKernels/PenaltyMortarUserObjectAux
+
+!tag name=PenaltyMortarUserObjectAux pairs=module:contact system:auxkernels

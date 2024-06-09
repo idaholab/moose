@@ -9,3 +9,5 @@ be visualized using the Exodus file output.
 !syntax inputs /AuxScalarKernels/ScalarTagVectorAux
 
 !syntax children /AuxScalarKernels/ScalarTagVectorAux
+
+!tag name=ScalarTagVectorAux pairs=module:framework system:auxkernels

@@ -22,3 +22,5 @@ sub-application.
 !syntax inputs /Postprocessors/NumFixedPointIterations
 
 !syntax children /Postprocessors/NumFixedPointIterations
+
+!tag name=NumFixedPointIterations pairs=module:framework system:postprocessors

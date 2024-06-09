@@ -25,3 +25,5 @@ gradient is not well resolved.
 !syntax inputs /AuxKernels/VariableGradientComponent
 
 !syntax children /AuxKernels/VariableGradientComponent
+
+!tag name=VariableGradientComponent pairs=module:framework system:auxkernels

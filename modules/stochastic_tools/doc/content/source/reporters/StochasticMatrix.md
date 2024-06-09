@@ -25,3 +25,5 @@ The input parameters in the StochasticMatrix block specify the column names, and
 !syntax inputs /Reporters/StochasticMatrix
 
 !syntax children /Reporters/StochasticMatrix
+
+!tag name=StochasticMatrix pairs=module:stochastic_tools system:reporters

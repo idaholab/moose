@@ -34,3 +34,5 @@ corresponding to the boundary subset $\partial \Omega_D$ via the
 !syntax inputs /BCs/VectorFunctionDirichletBC
 
 !syntax children /BCs/VectorFunctionDirichletBC
+
+!tag name=VectorFunctionDirichletBC pairs=module:framework system:bcs

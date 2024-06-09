@@ -32,3 +32,5 @@ The `eigenstrain_name` parameter value must also be set for the strain calculato
 !syntax inputs /Materials/ComputeReducedOrderEigenstrain
 
 !syntax children /Materials/ComputeReducedOrderEigenstrain
+
+!tag name=ComputeReducedOrderEigenstrain pairs=module:solid_mechanics system:materials

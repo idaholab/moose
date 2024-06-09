@@ -13,3 +13,5 @@ The `ADStressDivergenceShell` kernel calculates the contribution to the residual
 !syntax inputs /Kernels/ADStressDivergenceShell
 
 !syntax children /Kernels/ADStressDivergenceShell
+
+!tag name=ADStressDivergenceShell pairs=module:solid_mechanics system:kernels

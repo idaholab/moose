@@ -99,3 +99,5 @@ variable:
 !syntax children /Materials/ComputeAxisymmetric1DIncrementalStrain
 
 !bibtex bibliography
+
+!tag name=ComputeAxisymmetric1DIncrementalStrain pairs=module:solid_mechanics system:materials

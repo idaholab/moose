@@ -17,3 +17,5 @@ block 0 at the end of every time step using a `NodalL2Norm` postprocessor.
 !syntax inputs /Postprocessors/NodalL2Norm
 
 !syntax children /Postprocessors/NodalL2Norm
+
+!tag name=NodalL2Norm pairs=module:framework system:postprocessors

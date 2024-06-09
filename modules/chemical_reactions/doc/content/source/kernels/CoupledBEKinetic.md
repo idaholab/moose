@@ -15,3 +15,5 @@ mineral species.
 !syntax inputs /Kernels/CoupledBEKinetic
 
 !syntax children /Kernels/CoupledBEKinetic
+
+!tag name=CoupledBEKinetic pairs=module:chemical_reactions system:kernels

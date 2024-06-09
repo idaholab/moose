@@ -135,3 +135,5 @@ This block results in the following JSON file.
 !syntax inputs /Reporters/StatisticsReporter
 
 !syntax children /Reporters/StatisticsReporter
+
+!tag name=StatisticsReporter pairs=module:stochastic_tools system:reporters

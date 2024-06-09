@@ -12,3 +12,5 @@ a tensor valued mobility $M$.
 !syntax children /Kernels/ADSplitCHWResAniso
 
 !bibtex bibliography
+
+!tag name=ADSplitCHWResAniso pairs=module:phase_field system:kernels

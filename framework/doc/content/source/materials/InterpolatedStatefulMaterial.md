@@ -22,3 +22,5 @@ This object is set up by the [ProjectedStatefulMaterialStorageAction](ProjectedS
 !syntax children /Materials/InterpolatedStatefulMaterialReal
 
 !bibtex bibliography
+
+!tag name=InterpolatedStatefulMaterial pairs=module:framework system:materials

@@ -9,3 +9,5 @@ More information about setting finite volume variable initial conditions can be 
 [FVICs syntax documentation](syntax/FVICs/index.md).
 
 !syntax parameters /FVICs/AddFVInitialConditionAction
+
+!tag name=AddFVInitialConditionAction pairs=module:framework system:actions

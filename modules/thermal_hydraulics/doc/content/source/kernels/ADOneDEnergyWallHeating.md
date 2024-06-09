@@ -21,3 +21,5 @@ wall heating in a 1-phase flow channel component.
 !syntax inputs /Kernels/ADOneDEnergyWallHeating
 
 !syntax children /Kernels/ADOneDEnergyWallHeating
+
+!tag name=ADOneDEnergyWallHeating pairs=module:thermal_hydraulics system:kernels

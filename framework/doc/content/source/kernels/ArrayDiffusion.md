@@ -54,3 +54,5 @@ where the underlined part is the local Jacobian evaluated by [ArrayDiffusion::co
 !syntax inputs /Kernels/ArrayDiffusion
 
 !syntax children /Kernels/ArrayDiffusion
+
+!tag name=ArrayDiffusion pairs=module:framework system:kernels

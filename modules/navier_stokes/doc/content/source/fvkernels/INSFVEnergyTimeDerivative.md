@@ -38,3 +38,5 @@ The specific energy, $u = \int_0^T dT cp(T, p)$, is currently approximated as $c
 !syntax inputs /FVKernels/INSFVEnergyTimeDerivative
 
 !syntax children /FVKernels/INSFVEnergyTimeDerivative
+
+!tag name=INSFVEnergyTimeDerivative pairs=module:navier_stokes system:fvkernels

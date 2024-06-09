@@ -12,3 +12,5 @@ natural convection.
 !syntax inputs /Kernels/INSADBoussinesqBodyForce
 
 !syntax children /Kernels/INSADBoussinesqBodyForce
+
+!tag name=INSADBoussinesqBodyForce pairs=module:navier_stokes system:kernels

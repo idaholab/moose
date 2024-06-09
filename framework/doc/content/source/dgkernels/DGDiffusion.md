@@ -17,3 +17,5 @@ volumetric terms in the equation, while the `DGDiffusion` DGKernel is defined on
 !syntax inputs /DGKernels/DGDiffusion
 
 !syntax children /DGKernels/DGDiffusion
+
+!tag name=DGDiffusion pairs=module:framework system:dgkernels

@@ -36,3 +36,4 @@ v(t) =  \mu(t) + \eta(t)~\int_{0}^{t} \tilde{u}(t') e^{(t-t')/\tau}  dt'  + \eps
 !syntax children /Postprocessors/ThermocoupleSensorPostprocessor
 
 !bibtex bibliography
+!tag name=ThermocoupleSensorPostprocessor pairs=module:misc system:postprocessors

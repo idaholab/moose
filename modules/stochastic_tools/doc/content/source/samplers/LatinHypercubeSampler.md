@@ -35,3 +35,5 @@ the grid lines are defined with the associated probability based bins.
 !syntax inputs /Samplers/LatinHypercube
 
 !syntax children /Samplers/LatinHypercube
+
+!tag name=LatinHypercubeSampler pairs=module:stochastic_tools system:samplers

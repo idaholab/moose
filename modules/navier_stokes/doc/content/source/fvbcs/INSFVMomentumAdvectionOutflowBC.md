@@ -11,3 +11,5 @@ the boundary be zero.
 !syntax inputs /FVBCs/INSFVMomentumAdvectionOutflowBC
 
 !syntax children /FVBCs/INSFVMomentumAdvectionOutflowBC
+
+!tag name=INSFVMomentumAdvectionOutflowBC pairs=module:navier_stokes system:fvbcs

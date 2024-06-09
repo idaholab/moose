@@ -18,3 +18,5 @@ We never recommend using this IC directly, but rather creating the full set of I
 !syntax inputs /ICs/PolycrystalRandomIC
 
 !syntax children /ICs/PolycrystalRandomIC
+
+!tag name=PolycrystalRandomIC pairs=module:phase_field system:ics

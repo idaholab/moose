@@ -10,3 +10,5 @@ material properties. See its documentation for more details.
 !syntax inputs /FVBCs/FunctorThermalResistanceBC
 
 !syntax children /FVBCs/FunctorThermalResistanceBC
+
+!tag name=FunctorThermalResistanceBC pairs=module:heat_transfer system:fvbcs

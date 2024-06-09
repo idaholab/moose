@@ -17,3 +17,5 @@ An example usage of this reporter is to ensure that the sampler values are posit
 !syntax inputs /Reporters/ConditionalSampleReporter
 
 !syntax children /Reporters/ConditionalSampleReporter
+
+!tag name=ConditionalSampleReporter pairs=module:stochastic_tools system:reporters

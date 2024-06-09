@@ -8,3 +8,5 @@ This postprocessor outputs the node number of the nearest node to a given point,
 
 !syntax children /Postprocessors/NearestNodeNumber
 
+
+!tag name=NearestNodeNumber pairs=module:framework system:postprocessors

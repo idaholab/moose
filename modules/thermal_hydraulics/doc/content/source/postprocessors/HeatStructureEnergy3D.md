@@ -10,3 +10,5 @@ and performs a volume integral over a 3D heat structure.
 !syntax inputs /Postprocessors/HeatStructureEnergy3D
 
 !syntax children /Postprocessors/HeatStructureEnergy3D
+
+!tag name=HeatStructureEnergy3D pairs=module:thermal_hydraulics system:postprocessors

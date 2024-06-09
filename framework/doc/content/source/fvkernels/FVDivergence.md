@@ -17,3 +17,5 @@ where $\vec{n_f}$ is the surface normal on each side of the element considered.
 !syntax inputs /FVKernels/FVDivergence
 
 !syntax children /FVKernels/FVDivergence
+
+!tag name=FVDivergence pairs=module:framework system:fvkernels

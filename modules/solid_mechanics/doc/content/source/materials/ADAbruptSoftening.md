@@ -27,3 +27,5 @@ For more details, refer to the non-AD version [`AbruptSoftening`](/AbruptSofteni
 !syntax children /Materials/ADAbruptSoftening
 
 !bibtex bibliography
+
+!tag name=ADAbruptSoftening pairs=module:solid_mechanics system:materials

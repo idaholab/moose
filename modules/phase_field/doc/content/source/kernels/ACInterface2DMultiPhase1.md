@@ -17,3 +17,5 @@ is the test function.
 !syntax inputs /Kernels/ACInterface2DMultiPhase1
 
 !syntax children /Kernels/ACInterface2DMultiPhase1
+
+!tag name=ACInterface2DMultiPhase1 pairs=module:phase_field system:kernels

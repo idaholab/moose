@@ -16,3 +16,5 @@ to perform the constraint enforcement.
 !syntax children /Constraints/OldEqualValueConstraint
 
 !bibtex bibliography
+
+!tag name=OldEqualValueConstraint pairs=module:framework system:constraints

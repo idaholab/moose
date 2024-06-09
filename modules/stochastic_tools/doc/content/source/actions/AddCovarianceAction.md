@@ -6,3 +6,5 @@ the following block adds a [SquaredExponentialCovariance.md] covariance function
 !listing test/tests/surrogates/gaussian_process/GP_squared_exponential_training.i block=Covariance
 
 !syntax parameters /Covariance/AddCovarianceAction
+
+!tag name=AddCovarianceAction pairs=module:stochastic_tools system:actions

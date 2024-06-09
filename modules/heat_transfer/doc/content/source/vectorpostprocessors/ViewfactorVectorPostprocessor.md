@@ -17,3 +17,5 @@ boundaries involved in a gray, diffuse view factor calculation.
 !syntax children /VectorPostprocessors/ViewfactorVectorPostprocessor
 
 !bibtex bibliography
+
+!tag name=ViewfactorVectorPostprocessor pairs=module:heat_transfer system:vectorpostprocessors

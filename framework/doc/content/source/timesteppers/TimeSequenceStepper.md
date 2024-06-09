@@ -19,3 +19,5 @@ a `TimeSequenceStepper`.
 !syntax inputs /Executioner/TimeSteppers/TimeSequenceStepper
 
 !syntax children /Executioner/TimeSteppers/TimeSequenceStepper
+
+!tag name=TimeSequenceStepper pairs=module:framework system:timesteppers

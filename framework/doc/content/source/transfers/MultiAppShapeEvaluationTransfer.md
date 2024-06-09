@@ -26,3 +26,5 @@ to ([tosub]) and from ([fromsub]) sub-applications.
 !syntax inputs /Transfers/MultiAppShapeEvaluationTransfer
 
 !syntax children /Transfers/MultiAppShapeEvaluationTransfer
+
+!tag name=MultiAppShapeEvaluationTransfer pairs=module:framework system:transfers

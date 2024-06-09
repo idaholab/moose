@@ -11,3 +11,5 @@ UserObjects.
 !syntax inputs /Materials/PorousFlowFluidState
 
 !syntax children /Materials/PorousFlowFluidState
+
+!tag name=PorousFlowFluidState pairs=module:porous_flow system:materials

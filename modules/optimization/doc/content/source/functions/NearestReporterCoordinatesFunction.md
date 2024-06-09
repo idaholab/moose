@@ -19,3 +19,5 @@ Run this test to see how the function interpolates the data between specified ti
 !syntax inputs /Functions/NearestReporterCoordinatesFunction
 
 !syntax children /Functions/NearestReporterCoordinatesFunction
+
+!tag name=NearestReporterCoordinatesFunction pairs=module:optimization system:functions

@@ -10,3 +10,5 @@ the flux vectors that are computed in [/ADGateValve1PhaseUserObject.md].
 !syntax inputs /BCs/ADGateValve1PhaseBC
 
 !syntax children /BCs/ADGateValve1PhaseBC
+
+!tag name=ADGateValve1PhaseBC pairs=module:thermal_hydraulics system:bcs

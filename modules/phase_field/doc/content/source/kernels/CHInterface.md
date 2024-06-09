@@ -22,3 +22,5 @@ which expects a tensor valued mobility $M$.
 !syntax inputs /Kernels/CHInterface
 
 !syntax children /Kernels/CHInterface
+
+!tag name=CHInterface pairs=module:phase_field system:kernels

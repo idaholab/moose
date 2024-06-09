@@ -9,3 +9,5 @@ The `ADPenaltyEqualValueConstraint` is the automatic differentiation version of 
 !syntax inputs /Constraints/ADPenaltyEqualValueConstraint
 
 !syntax children /Constraints/ADPenaltyEqualValueConstraint
+
+!tag name=ADPenaltyEqualValueConstraint pairs=module:framework system:constraints

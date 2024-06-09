@@ -12,3 +12,5 @@ This AuxKernel does not check for division by zero.
 !syntax inputs /AuxKernels/QuotientAux
 
 !syntax children /AuxKernels/QuotientAux
+
+!tag name=QuotientAux pairs=module:framework system:auxkernels

@@ -25,3 +25,5 @@ added using a `ConstantRate` nodal kernel.
 !syntax inputs /NodalKernels/ConstantRate
 
 !syntax children /NodalKernels/ConstantRate
+
+!tag name=ConstantRate pairs=module:framework system:nodalkernels

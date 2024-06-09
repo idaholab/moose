@@ -24,3 +24,5 @@ The `DiscreteNucleationData` postprocessor is part of the
 !syntax children /Postprocessors/DiscreteNucleationData
 
 !bibtex bibliography
+
+!tag name=DiscreteNucleationData pairs=module:phase_field system:postprocessors

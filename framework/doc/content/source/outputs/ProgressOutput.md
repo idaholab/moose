@@ -17,3 +17,5 @@ The Progress output displays an ASCII art progress bar at the end of each timest
 !syntax inputs /Outputs/Progress
 
 !syntax children /Outputs/Progress
+
+!tag name=ProgressOutput pairs=module:framework system:outputs

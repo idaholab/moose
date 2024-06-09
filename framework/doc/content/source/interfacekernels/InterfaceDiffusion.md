@@ -22,3 +22,5 @@ combining this kernel with [MatchedValueBC.md] or other strong interface conditi
 !syntax inputs /InterfaceKernels/InterfaceDiffusion
 
 !syntax children /InterfaceKernels/InterfaceDiffusion
+
+!tag name=InterfaceDiffusion pairs=module:framework system:interfacekernels

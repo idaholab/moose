@@ -91,3 +91,5 @@ size being governed by the main application.
 !syntax inputs /MultiApps/TransientMultiApp
 
 !syntax children /MultiApps/TransientMultiApp
+
+!tag name=TransientMultiApp pairs=module:framework system:multiapps

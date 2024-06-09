@@ -85,3 +85,5 @@ The follow example configures a large deformation Neo-Hookean model with J2 plas
 !syntax inputs /Materials/ComputeSimoHughesJ2PlasticityStress
 
 !syntax children /Materials/ComputeSimoHughesJ2PlasticityStress
+
+!tag name=ComputeSimoHughesJ2PlasticityStress pairs=module:solid_mechanics system:materials

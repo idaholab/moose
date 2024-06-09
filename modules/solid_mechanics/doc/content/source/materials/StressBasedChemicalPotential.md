@@ -24,3 +24,5 @@ with regards to the stress.
 !syntax inputs /Materials/StressBasedChemicalPotential
 
 !syntax children /Materials/StressBasedChemicalPotential
+
+!tag name=StressBasedChemicalPotential pairs=module:solid_mechanics system:materials

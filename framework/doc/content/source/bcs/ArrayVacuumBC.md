@@ -14,3 +14,5 @@ Currently $\alpha$ is implemented in the boundary condition as an array with the
 !syntax children /BCs/ArrayVacuumBC
 
 !bibtex bibliography
+
+!tag name=ArrayVacuumBC pairs=module:framework system:bcs

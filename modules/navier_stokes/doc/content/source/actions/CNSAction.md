@@ -13,3 +13,5 @@ This action is triggered with *Modules/CompressibleNavierStokes* input syntax.
 !! Describe and include an example of how to use the CNSAction action.
 
 !syntax parameters /Modules/CompressibleNavierStokes/CNSAction
+
+!tag name=CNSAction pairs=module:navier_stokes system:actions

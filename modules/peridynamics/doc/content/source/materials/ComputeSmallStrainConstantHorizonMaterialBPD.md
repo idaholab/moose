@@ -9,3 +9,5 @@ The `ComputeSmallStrainConstantHorizonMaterialBPD` Material calculates the micro
 !syntax inputs /Materials/ComputeSmallStrainConstantHorizonMaterialBPD
 
 !syntax children /Materials/ComputeSmallStrainConstantHorizonMaterialBPD
+
+!tag name=ComputeSmallStrainConstantHorizonMaterialBPD pairs=module:peridynamics system:materials

@@ -22,3 +22,5 @@ The coordinates in both lists are rotated so that the illumination direction is 
 !syntax children /UserObjects/SelfShadowSideUserObject
 
 !bibtex bibliography
+
+!tag name=SelfShadowSideUserObject pairs=module:heat_transfer system:userobjects

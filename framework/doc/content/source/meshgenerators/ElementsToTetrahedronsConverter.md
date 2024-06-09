@@ -53,3 +53,5 @@ As discussed above, although splitting of non-TET elements into TET4 elements is
 
 !syntax children /Mesh/ElementsToTetrahedronsConverter
 
+
+!tag name=ElementsToTetrahedronsConverter pairs=module:framework system:meshgenerators

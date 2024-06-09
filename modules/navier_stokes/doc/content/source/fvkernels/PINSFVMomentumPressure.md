@@ -13,3 +13,5 @@ The pressure is a Lagrange Multiplier that ensures the incompressibility constra
 !syntax inputs /FVKernels/PINSFVMomentumPressure
 
 !syntax children /FVKernels/PINSFVMomentumPressure
+
+!tag name=PINSFVMomentumPressure pairs=module:navier_stokes system:fvkernels

@@ -44,3 +44,5 @@ axis and will have a single element in 1 (2) directions for 3 (2)-dimensional pr
 !syntax inputs /Mesh/PatchSidesetGenerator
 
 !syntax children /Mesh/PatchSidesetGenerator
+
+!tag name=PatchSidesetGenerator pairs=module:heat_transfer system:meshgenerators

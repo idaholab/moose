@@ -16,3 +16,5 @@ as the ordering of the blocks in the [!param](/MeshDivisions/SubdomainsDivision/
 !syntax inputs /MeshDivisions/SubdomainsDivision
 
 !syntax children /MeshDivisions/SubdomainsDivision
+
+!tag name=SubdomainsDivision pairs=module:framework system:meshdivisions

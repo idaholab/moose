@@ -41,3 +41,5 @@ supplied solely through the a function (denoted by `function`):
 !syntax inputs /Kernels/ADBodyForce
 
 !syntax children /Kernels/ADBodyForce
+
+!tag name=ADBodyForce pairs=module:framework system:kernels

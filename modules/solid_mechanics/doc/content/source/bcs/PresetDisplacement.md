@@ -11,3 +11,5 @@ The PresetDisplacement class takes a displacement time history as input (provide
 !syntax children /BCs/PresetDisplacement
 
 !bibtex bibliography
+
+!tag name=PresetDisplacement pairs=module:solid_mechanics system:bcs

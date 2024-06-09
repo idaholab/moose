@@ -12,3 +12,5 @@ heat transfer on the coupled boundary of a 3D heat structure.
 !syntax children /BCs/ADConvectionHeatTransfer3DBC
 
 !bibtex bibliography
+
+!tag name=ADConvectionHeatTransfer3DBC pairs=module:thermal_hydraulics system:bcs

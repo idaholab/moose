@@ -11,3 +11,5 @@ This class computes the stress divergence and the stiffness proportional Rayleig
 !syntax inputs /Kernels/DynamicStressDivergenceTensors
 
 !syntax children /Kernels/DynamicStressDivergenceTensors
+
+!tag name=DynamicStressDivergenceTensors pairs=module:solid_mechanics system:kernels

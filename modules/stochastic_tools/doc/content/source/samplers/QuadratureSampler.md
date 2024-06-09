@@ -91,3 +91,5 @@ The QuadratureSampler then uses the distributions to create a quadrature with $N
 !syntax inputs /Samplers/QuadratureSampler
 
 !syntax children /Samplers/QuadratureSampler
+
+!tag name=QuadratureSampler pairs=module:stochastic_tools system:samplers

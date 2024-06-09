@@ -31,3 +31,5 @@ quantities:
 - $p_{\text{ext}}$, the provided exterior pressure,
 - $\rho_i$, the interior density, and
 - $u_i$, the interior velocity.
+
+!tag name=Outlet1Phase pairs=module:thermal_hydraulics system:components

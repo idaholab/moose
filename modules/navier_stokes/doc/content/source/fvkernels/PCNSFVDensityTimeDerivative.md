@@ -20,3 +20,5 @@ $\partial \rho/\partial t$ occurs in a material).
 !syntax inputs /FVKernels/PCNSFVDensityTimeDerivative
 
 !syntax children /FVKernels/PCNSFVDensityTimeDerivative
+
+!tag name=PCNSFVDensityTimeDerivative pairs=module:navier_stokes system:fvkernels

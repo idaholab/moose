@@ -22,3 +22,5 @@ phase.
 !syntax inputs /Postprocessors/CFLTimeStepSize
 
 !syntax children /Postprocessors/CFLTimeStepSize
+
+!tag name=CFLTimeStepSize pairs=module:navier_stokes system:postprocessors

@@ -42,3 +42,5 @@ It is important for the `ReporterPointSource` to never use a `VectorPostprocesso
 !syntax inputs /DiracKernels/ReporterPointSource
 
 !syntax children /DiracKernels/ReporterPointSource
+
+!tag name=ReporterPointSource pairs=module:framework system:dirackernels

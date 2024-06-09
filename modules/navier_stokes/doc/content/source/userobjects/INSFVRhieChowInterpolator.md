@@ -61,3 +61,5 @@ The latter method is the default and is generally preferred due to its lower com
 !syntax inputs /UserObjects/INSFVRhieChowInterpolator
 
 !syntax children /UserObjects/INSFVRhieChowInterpolator
+
+!tag name=INSFVRhieChowInterpolator pairs=module:navier_stokes system:userobjects

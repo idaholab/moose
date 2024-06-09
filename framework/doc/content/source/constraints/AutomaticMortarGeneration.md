@@ -27,3 +27,5 @@ Elements defined on second order geometries are curvilinear so to simplify the '
 Quadrature points defined on mortar segments (which live on linearized elements) are mapped back to second order elements following an analogous but reverse procedure to the one illustrated above; points are mapped from linearized elements to first order sub-elements then subsequently transformed to the original second order elements.
 
 !bibtex bibliography
+
+!tag name=AutomaticMortarGeneration pairs=module:framework system:constraints

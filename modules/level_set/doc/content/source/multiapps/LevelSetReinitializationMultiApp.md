@@ -14,3 +14,5 @@ which allows for the proper resetting of the pseudo reinitialization time.
 !syntax inputs /MultiApps/LevelSetReinitializationMultiApp
 
 !syntax children /MultiApps/LevelSetReinitializationMultiApp
+
+!tag name=LevelSetReinitializationMultiApp pairs=module:level_set system:multiapps

@@ -18,3 +18,5 @@ Note the negative sign, which does *not* appear in [Reaction](/Reaction.md) or
 !syntax inputs /Kernels/MatReaction
 
 !syntax children /Kernels/MatReaction
+
+!tag name=MatReaction pairs=module:framework system:kernels

@@ -7,3 +7,4 @@ The `FEProblemSolve` class has two main roles:
 
 The `FEProblemSolve` is a solve executioner nested inside most executioners,
 such as [Steady](executioners/Steady.md) and [Transient](executioners/Transient.md) but notably *not* in the [Eigenvalue](executioners/Eigenvalue.md) executioner.
+!tag name=FEProblemSolve pairs=module:framework system:executioners

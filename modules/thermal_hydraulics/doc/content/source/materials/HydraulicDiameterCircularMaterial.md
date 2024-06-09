@@ -12,3 +12,5 @@ D_h = \sqrt{\dfrac{4 A}{\pi}}
 !syntax inputs /Materials/HydraulicDiameterCircularMaterial
 
 !syntax children /Materials/HydraulicDiameterCircularMaterial
+
+!tag name=HydraulicDiameterCircularMaterial pairs=module:thermal_hydraulics system:materials

@@ -9,3 +9,5 @@ More information about `Distributions` may be found on the
 [Distribution syntax page](syntax/Distributions/index.md).
 
 !syntax parameters /Distributions/AddDistributionAction
+
+!tag name=AddDistributionAction pairs=module:framework system:actions

@@ -13,3 +13,5 @@ diameter has not been set in the parameters of the component.
 !syntax inputs /Materials/ADHydraulicDiameterCircularMaterial
 
 !syntax children /Materials/ADHydraulicDiameterCircularMaterial
+
+!tag name=ADHydraulicDiameterCircularMaterial pairs=module:thermal_hydraulics system:materials

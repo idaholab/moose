@@ -43,3 +43,5 @@ complete simulation.
 !syntax inputs /Mesh/TiledMesh
 
 !syntax children /Mesh/TiledMesh
+
+!tag name=TiledMesh pairs=module:framework system:mesh

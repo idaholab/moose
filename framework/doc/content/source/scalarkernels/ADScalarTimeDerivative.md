@@ -12,3 +12,5 @@ The Jacobian of this residual contribution is computed using automatic different
 !syntax inputs /ScalarKernels/ADScalarTimeDerivative
 
 !syntax children /ScalarKernels/ADScalarTimeDerivative
+
+!tag name=ADScalarTimeDerivative pairs=module:framework system:scalarkernels

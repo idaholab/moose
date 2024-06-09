@@ -9,3 +9,5 @@ This damper functions in the same way as [ElementJacobianDamper](ElementJacobian
 !syntax inputs /Dampers/ReferenceElementJacobianDamper
 
 !syntax children /Dampers/ReferenceElementJacobianDamper
+
+!tag name=ReferenceElementJacobianDamper pairs=module:solid_mechanics system:dampers

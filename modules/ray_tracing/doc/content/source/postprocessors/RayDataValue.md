@@ -9,3 +9,5 @@ A [Ray.md] in the [ray_tracing/index.md] has the ability to locally store inform
 !syntax inputs /Postprocessors/RayDataValue
 
 !syntax children /Postprocessors/RayDataValue
+
+!tag name=RayDataValue pairs=module:ray_tracing system:postprocessors

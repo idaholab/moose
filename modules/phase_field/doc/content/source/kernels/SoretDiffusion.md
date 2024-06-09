@@ -23,3 +23,5 @@ variable.
 !syntax children /Kernels/SoretDiffusion
 
 !bibtex bibliography
+
+!tag name=SoretDiffusion pairs=module:phase_field system:kernels

@@ -10,3 +10,5 @@ and performs a volume integral over a plate heat structure.
 !syntax inputs /Postprocessors/HeatStructureEnergy
 
 !syntax children /Postprocessors/HeatStructureEnergy
+
+!tag name=HeatStructureEnergy pairs=module:thermal_hydraulics system:postprocessors

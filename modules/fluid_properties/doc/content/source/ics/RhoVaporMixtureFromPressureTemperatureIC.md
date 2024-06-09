@@ -8,3 +8,5 @@ Initial condition to set density of vapor mixture from given pressure and temper
 !syntax inputs /ICs/RhoVaporMixtureFromPressureTemperatureIC
 
 !syntax children /ICs/RhoVaporMixtureFromPressureTemperatureIC
+
+!tag name=RhoVaporMixtureFromPressureTemperatureIC pairs=module:fluid_properties system:ics

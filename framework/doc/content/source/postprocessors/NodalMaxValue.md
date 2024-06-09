@@ -9,3 +9,5 @@ This postprocessor is deprecated. Please use [NodalExtremeValue.md].
 !syntax inputs /Postprocessors/NodalMaxValue
 
 !syntax children /Postprocessors/NodalMaxValue
+
+!tag name=NodalMaxValue pairs=module:framework system:postprocessors

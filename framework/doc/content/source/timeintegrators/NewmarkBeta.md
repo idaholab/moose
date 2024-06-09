@@ -53,3 +53,5 @@ A sample result of using this parameter is shown in [fig:disp], [fig:vel], and [
 !syntax children /Executioner/TimeIntegrator/NewmarkBeta
 
 !bibtex bibliography
+
+!tag name=NewmarkBeta pairs=module:framework system:timeintegrators

@@ -20,3 +20,5 @@ See [EqualValueConstraint](/EqualValueConstraint.md) for exact enforcement using
 !syntax children /Constraints/PenaltyEqualValueConstraint
 
 !bibtex bibliography
+
+!tag name=PenaltyEqualValueConstraint pairs=module:framework system:constraints

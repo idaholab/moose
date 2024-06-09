@@ -15,3 +15,5 @@ The user has to provide the positions of the nodes for their element, as well as
 !syntax inputs /Mesh/ElementGenerator
 
 !syntax children /Mesh/ElementGenerator
+
+!tag name=ElementGenerator pairs=module:framework system:meshgenerators

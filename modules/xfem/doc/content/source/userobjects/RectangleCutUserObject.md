@@ -20,3 +20,5 @@ the cut plane.
 !syntax inputs /UserObjects/RectangleCutUserObject
 
 !syntax children /UserObjects/RectangleCutUserObject
+
+!tag name=RectangleCutUserObject pairs=module:xfem system:userobjects

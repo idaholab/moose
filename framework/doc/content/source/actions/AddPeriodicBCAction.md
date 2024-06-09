@@ -17,3 +17,5 @@ The boundaries that are matched on all sides of the system are automatically det
 !listing auto_periodic_bc_test.i block=BCs
 
 !syntax parameters /BCs/Periodic/AddPeriodicBCAction
+
+!tag name=AddPeriodicBCAction pairs=module:framework system:actions

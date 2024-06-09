@@ -22,3 +22,5 @@ This material also defines material properties for the derivatives of the Reynol
 !syntax inputs /Materials/ReynoldsNumberMaterial
 
 !syntax children /Materials/ReynoldsNumberMaterial
+
+!tag name=ReynoldsNumberMaterial pairs=module:thermal_hydraulics system:materials

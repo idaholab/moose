@@ -10,3 +10,5 @@ object.
 !syntax inputs /Trainers/PolynomialChaosTrainer
 
 !syntax children /Trainers/PolynomialChaosTrainer
+
+!tag name=PolynomialChaosTrainer pairs=module:stochastic_tools system:trainers

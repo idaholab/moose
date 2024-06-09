@@ -11,3 +11,5 @@ This class computes the stress increments and total stresses for shell elements.
 !syntax inputs /Materials/ADComputeShellStress
 
 !syntax children /Materials/ADComputeShellStress
+
+!tag name=ADComputeShellStress pairs=module:solid_mechanics system:materials

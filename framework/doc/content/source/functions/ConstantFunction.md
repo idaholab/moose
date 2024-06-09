@@ -19,3 +19,5 @@ return its constant value.
 !syntax inputs /Functions/ConstantFunction
 
 !syntax children /Functions/ConstantFunction
+
+!tag name=ConstantFunction pairs=module:framework system:functions

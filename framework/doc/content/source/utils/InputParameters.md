@@ -37,3 +37,5 @@ the new, blessed name that users should use. This name should have a
 corresponding `params.addCoupledVar('blessed_name', 'blessed_name_doc_string')`
 in the relevant `Class::validParams()` block. The final optional argument is the
 date that the deprecated variable name will be removed.
+
+!tag name=InputParameters pairs=module:framework system:utils

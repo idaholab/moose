@@ -11,3 +11,5 @@ This boundary flux is used with [InletFunction1Phase.md].
 !syntax children /UserObjects/BoundaryFlux3EqnFunction
 
 !bibtex bibliography
+
+!tag name=BoundaryFlux3EqnFunction pairs=module:test system:userobjects

@@ -6,3 +6,5 @@ generally execute after most other systems in MOOSE so these values are often la
 calculation.
 
 !listing /PostprocessorInterface.h start=doco-normal-methods-begin end=doco-normal-methods-end include-start=false
+
+!tag name=PostprocessorInterface pairs=module:framework system:interfaces

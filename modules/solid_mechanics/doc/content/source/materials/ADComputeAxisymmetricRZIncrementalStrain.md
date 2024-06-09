@@ -19,3 +19,5 @@ default 3D Cartesian simulations, as described in the
 !syntax inputs /Materials/ADComputeAxisymmetricRZIncrementalStrain
 
 !syntax children /Materials/ADComputeAxisymmetricRZIncrementalStrain
+
+!tag name=ADComputeAxisymmetricRZIncrementalStrain pairs=module:solid_mechanics system:materials

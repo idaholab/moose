@@ -11,3 +11,5 @@ For example use and a further description, see [flashlight_source.md].
 !syntax inputs /UserObjects/ConeRayStudy
 
 !syntax children /UserObjects/ConeRayStudy
+
+!tag name=ConeRayStudy pairs=module:ray_tracing system:userobjects

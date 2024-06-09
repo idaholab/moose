@@ -26,3 +26,5 @@ a diffusion problem in a RZ geometry problem on the `top` boundary for variable 
 !syntax inputs /BCs/VacuumBC
 
 !syntax children /BCs/VacuumBC
+
+!tag name=VacuumBC pairs=module:framework system:bcs

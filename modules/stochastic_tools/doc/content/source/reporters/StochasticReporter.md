@@ -11,3 +11,5 @@ This object is intended to be used directly with [SamplerReporterTransfer](Sampl
 !syntax inputs /Reporters/StochasticReporter
 
 !syntax children /Reporters/StochasticReporter
+
+!tag name=StochasticReporter pairs=module:stochastic_tools system:reporters

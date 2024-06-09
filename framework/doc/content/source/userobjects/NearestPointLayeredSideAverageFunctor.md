@@ -12,3 +12,5 @@ implemented for the [!param](/UserObjects/NearestPointLayeredSideAverageFunctor/
 !syntax inputs /UserObjects/NearestPointLayeredSideAverageFunctor
 
 !syntax children /UserObjects/NearestPointLayeredSideAverageFunctor
+
+!tag name=NearestPointLayeredSideAverageFunctor pairs=module:framework system:userobjects

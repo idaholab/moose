@@ -8,3 +8,5 @@ ControlData has an internal container, `ControlDataValue`, which can hold standa
 often used with boolean or `Real` values. It also keeps track of its value at the previous time step.
 
 ControlData is naturally restored during simulation restart and recover.
+
+!tag name=ControlData pairs=module:thermal_hydraulics system:controllogic

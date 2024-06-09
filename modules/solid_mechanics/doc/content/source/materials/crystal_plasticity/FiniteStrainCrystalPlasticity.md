@@ -78,3 +78,5 @@ of crystal defects (e.g. dislocations, point defects) should be given in
 !syntax children /Materials/FiniteStrainCrystalPlasticity
 
 !bibtex bibliography
+
+!tag name=FiniteStrainCrystalPlasticity pairs=module:solid_mechanics system:materials

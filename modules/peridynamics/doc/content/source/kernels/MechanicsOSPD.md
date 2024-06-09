@@ -29,3 +29,5 @@ More details on the residual and Jacobian formulation can be found in Ref. [!cit
 !syntax inputs /Kernels/MechanicsOSPD
 
 !syntax children /Kernels/MechanicsOSPD
+
+!tag name=MechanicsOSPD pairs=module:peridynamics system:kernels

@@ -33,3 +33,5 @@ material.
 !syntax children /Kernels/ADGrainGrowth
 
 !bibtex bibliography
+
+!tag name=ADGrainGrowth pairs=module:phase_field system:kernels

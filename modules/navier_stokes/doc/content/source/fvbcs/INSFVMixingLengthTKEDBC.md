@@ -20,3 +20,5 @@ where:
 !syntax inputs /FVBCs/INSFVMixingLengthTKEDBC
 
 !syntax children /FVBCs/INSFVMixingLengthTKEDBC
+
+!tag name=INSFVMixingLengthTKEDBC pairs=module:navier_stokes system:fvbcs

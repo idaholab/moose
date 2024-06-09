@@ -30,3 +30,5 @@ If the gap is sliced by a symmetry plane (e.g. only a quarter of a cylinder or a
 !syntax children /Constraints/ModularGapConductanceConstraint
 
 !bibtex bibliography
+
+!tag name=ModularGapConductanceConstraint pairs=module:heat_transfer system:constraints

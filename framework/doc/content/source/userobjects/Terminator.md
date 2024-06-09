@@ -46,3 +46,5 @@ In this example, the `Terminator` is used to stop a simulation and accept the re
 !syntax inputs /UserObjects/Terminator
 
 !syntax children /UserObjects/Terminator
+
+!tag name=Terminator pairs=module:framework system:userobjects

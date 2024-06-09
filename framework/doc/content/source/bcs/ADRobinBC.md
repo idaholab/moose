@@ -19,3 +19,5 @@ Note that `ADRobinBC` computes its Jacobian using automatic differentiation.
 !syntax inputs /BCs/ADRobinBC
 
 !syntax children /BCs/ADRobinBC
+
+!tag name=ADRobinBC pairs=module:framework system:bcs

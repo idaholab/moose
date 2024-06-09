@@ -13,3 +13,5 @@ on p. 412. doi:10.1016/0167-2789(93)90120-P
 !syntax children /Materials/InterfaceOrientationMaterial
 
 !bibtex bibliography
+
+!tag name=InterfaceOrientationMaterial pairs=module:phase_field system:materials

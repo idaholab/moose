@@ -65,3 +65,5 @@ which minimizes the number of contact constraints for frictionless problems.
 !syntax inputs /Constraints/ComputeWeightedGapCartesianLMMechanicalContact
 
 !syntax children /Constraints/ComputeWeightedGapCartesianLMMechanicalContact
+
+!tag name=ComputeWeightedGapCartesianLMMechanicalContact pairs=module:contact system:constraints

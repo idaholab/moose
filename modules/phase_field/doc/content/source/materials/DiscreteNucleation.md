@@ -15,3 +15,5 @@ The `DiscreteNucleation` material is part of the [Discrete Nucleation system](Nu
 !syntax inputs /Materials/DiscreteNucleation
 
 !syntax children /Materials/DiscreteNucleation
+
+!tag name=DiscreteNucleation pairs=module:phase_field system:materials

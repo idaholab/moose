@@ -12,3 +12,5 @@ numerical convergence for some linear solvers. For the `lu` (sub-)preconditioner
 `kernel_coverage_check`, a parameter in the `[Problem]` block, should be set to false, as
 the Lagrange multiplier variable is a variable that is not found on any block, only on
 the interface.
+
+!tag name=FVScalarLagrangeMultiplierInterface pairs=module:framework system:fviks

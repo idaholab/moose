@@ -51,3 +51,5 @@ Once step in this optimization process is shown below:
 
 
 For more detailed instructions on training a neural network, visit the Stochastic Tools module!
+
+!tag name=LibtorchArtificialNeuralNet pairs=module:framework system:libtorch

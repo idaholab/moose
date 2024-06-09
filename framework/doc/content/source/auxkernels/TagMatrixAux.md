@@ -19,3 +19,5 @@ unscaled results.
 !syntax children /AuxKernels/TagMatrixAux
 
 !bibtex bibliography
+
+!tag name=TagMatrixAux pairs=module:framework system:auxkernels

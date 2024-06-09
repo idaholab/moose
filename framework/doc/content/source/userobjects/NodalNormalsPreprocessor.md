@@ -13,3 +13,5 @@ parameter. See [syntax/NodalNormals/index.md] for more information.
 !syntax inputs /UserObjects/NodalNormalsPreprocessor
 
 !syntax children /UserObjects/NodalNormalsPreprocessor
+
+!tag name=NodalNormalsPreprocessor pairs=module:framework system:userobjects

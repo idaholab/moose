@@ -20,3 +20,5 @@ to `average-uo` or `point-value-uo` respectively.
 !syntax inputs /UserObjects/NSPressurePin
 
 !syntax children /UserObjects/NSPressurePin
+
+!tag name=NSPressurePin pairs=module:navier_stokes system:userobjects

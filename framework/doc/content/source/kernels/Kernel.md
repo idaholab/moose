@@ -12,3 +12,5 @@ the mathematical form of the residuals they can be applied to.
 - [ADKernelValue](/ADKernelValue.md)
 - [KernelGrad](/KernelGrad.md)
 - [ADKernelGrad](/ADKernelGrad.md)
+
+!tag name=Kernel pairs=module:framework system:kernels

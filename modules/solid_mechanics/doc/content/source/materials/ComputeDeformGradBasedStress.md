@@ -13,3 +13,5 @@ This class takes the deformation gradient and elasticity tensor as input, and co
 !syntax children /Materials/ComputeDeformGradBasedStress
 
 !bibtex bibliography
+
+!tag name=ComputeDeformGradBasedStress pairs=module:solid_mechanics system:materials

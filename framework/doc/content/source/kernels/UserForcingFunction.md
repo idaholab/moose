@@ -9,3 +9,5 @@ This kernel has been deprecated. Please use [BodyForce.md].
 !syntax inputs /Kernels/UserForcingFunction
 
 !syntax children /Kernels/UserForcingFunction
+
+!tag name=UserForcingFunction pairs=module:framework system:kernels

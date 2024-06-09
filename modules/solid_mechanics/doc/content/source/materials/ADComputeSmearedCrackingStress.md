@@ -15,3 +15,5 @@ except that the Jacobian of the internal forces is computed via automatic differ
 !syntax inputs /Materials/ADComputeSmearedCrackingStress
 
 !syntax children /Materials/ADComputeSmearedCrackingStress
+
+!tag name=ADComputeSmearedCrackingStress pairs=module:solid_mechanics system:materials

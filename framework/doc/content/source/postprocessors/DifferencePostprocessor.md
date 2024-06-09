@@ -10,3 +10,5 @@ p_1 - p_2
 !syntax inputs /Postprocessors/DifferencePostprocessor
 
 !syntax children /Postprocessors/DifferencePostprocessor
+
+!tag name=DifferencePostprocessor pairs=module:framework system:postprocessors

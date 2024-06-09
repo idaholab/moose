@@ -49,3 +49,5 @@ parameter setting is shown below:
 !syntax children /Materials/ComputeMeanThermalExpansionFunctionEigenstrain
 
 !bibtex bibliography
+
+!tag name=ComputeMeanThermalExpansionFunctionEigenstrain pairs=module:solid_mechanics system:materials

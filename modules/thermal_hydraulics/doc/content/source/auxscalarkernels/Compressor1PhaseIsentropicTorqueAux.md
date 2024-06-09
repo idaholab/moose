@@ -14,3 +14,5 @@ automatically added to the simulation by the [ShaftConnectedCompressor1Phase.md]
 !syntax inputs /AuxScalarKernels/Compressor1PhaseIsentropicTorqueAux
 
 !syntax children /AuxScalarKernels/Compressor1PhaseIsentropicTorqueAux
+
+!tag name=Compressor1PhaseIsentropicTorqueAux pairs=module:thermal_hydraulics system:auxscalarkernels

@@ -18,3 +18,5 @@ where, $\hat{M}(\pmb{\theta},~\pmb{\Theta}_i)$ is the model prediction given mod
 !syntax inputs /Likelihood/TruncatedGaussian
 
 !syntax children /Likelihood/TruncatedGaussian
+
+!tag name=TruncatedGaussian pairs=module:stochastic_tools system:likelihoods

@@ -9,3 +9,5 @@ The `BoundaryOffsetPD` AuxKernel is used to retrieve the offset of a material po
 !syntax inputs /AuxKernels/BoundaryOffsetPD
 
 !syntax children /AuxKernels/BoundaryOffsetPD
+
+!tag name=BoundaryOffsetPD pairs=module:peridynamics system:auxkernels

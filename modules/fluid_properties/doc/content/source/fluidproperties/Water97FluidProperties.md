@@ -45,3 +45,5 @@ The Water97FluidProperties UserObject is valid for:
 !syntax children /FluidProperties/Water97FluidProperties
 
 !bibtex bibliography
+
+!tag name=Water97FluidProperties pairs=module:fluid_properties system:fluidproperties

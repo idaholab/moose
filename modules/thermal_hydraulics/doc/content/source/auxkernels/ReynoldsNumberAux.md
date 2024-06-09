@@ -22,3 +22,5 @@ $v$, $e$, $vel$ and $\rho$ are variables declared when using a single-phase comp
 !syntax inputs /AuxKernels/ReynoldsNumberAux
 
 !syntax children /AuxKernels/ReynoldsNumberAux
+
+!tag name=ReynoldsNumberAux pairs=module:thermal_hydraulics system:auxkernels

@@ -11,3 +11,5 @@ This post-processor computes the total heat rate due to convection on a
 !syntax inputs /Postprocessors/HeatRateConvection1Phase
 
 !syntax children /Postprocessors/HeatRateConvection1Phase
+
+!tag name=HeatRateConvection1Phase pairs=module:thermal_hydraulics system:postprocessors

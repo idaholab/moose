@@ -45,3 +45,5 @@ When [!param](/Functions/MultiControlDrumFunction/use_control_drum_id) is true, 
 !syntax inputs /Functions/MultiControlDrumFunction
 
 !syntax children /Functions/MultiControlDrumFunction
+
+!tag name=MultiControlDrumFunction pairs=module:reactor system:functions

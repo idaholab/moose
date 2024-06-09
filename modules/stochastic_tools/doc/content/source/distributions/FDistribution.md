@@ -19,3 +19,5 @@ where $d_1,d_2 \in \mathbb{Z} > 0$ and $x > 0$. $\Beta(a,b)$ is the beta functio
 !syntax inputs /Distributions/FDistribution
 
 !syntax children /Distributions/FDistribution
+
+!tag name=FDistribution pairs=module:stochastic_tools system:distributions

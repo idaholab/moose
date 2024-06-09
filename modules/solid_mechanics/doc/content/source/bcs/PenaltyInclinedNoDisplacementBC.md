@@ -9,3 +9,5 @@
 \mathcal{R}_i = \alpha(\mathbf{u}\cdot \mathbf{normal})\mathbf{normal}(\text{component})\psi_i
 \end{equation}
 where $\alpha$ is the penalty parameter and `component` corresponds to the direction in which to apply the residual. The normal directly comes from the surface normal defined in a mesh.
+
+!tag name=PenaltyInclinedNoDisplacementBC pairs=module:solid_mechanics system:bcs

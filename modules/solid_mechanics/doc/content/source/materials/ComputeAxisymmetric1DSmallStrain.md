@@ -87,3 +87,5 @@ variable:
 !syntax inputs /Materials/ComputeAxisymmetric1DSmallStrain
 
 !syntax children /Materials/ComputeAxisymmetric1DSmallStrain
+
+!tag name=ComputeAxisymmetric1DSmallStrain pairs=module:solid_mechanics system:materials

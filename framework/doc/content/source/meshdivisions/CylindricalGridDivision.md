@@ -35,3 +35,5 @@ that a warning is output, please reach out to a MOOSE (or any MOOSE app) develop
 !syntax inputs /MeshDivisions/CylindricalGridDivision
 
 !syntax children /MeshDivisions/CylindricalGridDivision
+
+!tag name=CylindricalGridDivision pairs=module:framework system:meshdivisions

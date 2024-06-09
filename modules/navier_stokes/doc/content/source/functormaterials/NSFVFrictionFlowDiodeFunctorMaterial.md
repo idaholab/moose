@@ -52,3 +52,5 @@ to apply a friction term based on this local velocity, rather than an average qu
 !syntax inputs /FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial
 
 !syntax children /FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial
+
+!tag name=NSFVFrictionFlowDiodeFunctorMaterial pairs=module:navier_stokes system:functormaterials

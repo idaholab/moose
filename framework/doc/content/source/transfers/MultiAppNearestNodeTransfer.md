@@ -21,3 +21,5 @@ to ([tosub]) and from ([fromsub]) sub-applications.
 !syntax inputs /Transfers/MultiAppNearestNodeTransfer
 
 !syntax children /Transfers/MultiAppNearestNodeTransfer
+
+!tag name=MultiAppNearestNodeTransfer pairs=module:framework system:transfers

@@ -19,3 +19,5 @@ and the "direction" is passed as a parameter to the `energy_flux` kernel.
 !syntax inputs /Materials/DirectionMaterial
 
 !syntax children /Materials/DirectionMaterial
+
+!tag name=DirectionMaterial pairs=module:thermal_hydraulics system:materials

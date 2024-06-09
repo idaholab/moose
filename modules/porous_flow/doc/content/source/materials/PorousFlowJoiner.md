@@ -10,3 +10,5 @@ not need to be included by the user.
 !syntax inputs /Materials/PorousFlowJoiner
 
 !syntax children /Materials/PorousFlowJoiner
+
+!tag name=PorousFlowJoiner pairs=module:porous_flow system:materials

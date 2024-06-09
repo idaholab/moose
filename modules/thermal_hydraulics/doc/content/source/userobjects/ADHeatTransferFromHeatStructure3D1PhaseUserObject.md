@@ -14,3 +14,5 @@ component, users do not need to add it to an input file.
 !syntax inputs /UserObjects/ADHeatTransferFromHeatStructure3D1PhaseUserObject
 
 !syntax children /UserObjects/ADHeatTransferFromHeatStructure3D1PhaseUserObject
+
+!tag name=ADHeatTransferFromHeatStructure3D1PhaseUserObject pairs=module:thermal_hydraulics system:userobjects

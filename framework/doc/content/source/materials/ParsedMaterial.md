@@ -31,3 +31,5 @@ It will be 0 for phase 1, -1 for phase 2, and 1 for phase 3
 !syntax inputs /Materials/ParsedMaterial
 
 !syntax children /Materials/ParsedMaterial
+
+!tag name=ParsedMaterial pairs=module:framework system:materials

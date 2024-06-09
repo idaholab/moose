@@ -15,3 +15,5 @@ The `functor` may be a variable, a function or a functor material property.
 !syntax children /FVBCs/FVFunctorNeumannBC
 
 !bibtex bibliography
+
+!tag name=FVFunctorNeumannBC pairs=module:framework system:fvbcs

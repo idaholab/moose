@@ -19,3 +19,5 @@ when its value becomes larger than 0.6.
 !syntax inputs /ControlLogic/UnitTripControl
 
 !syntax children /ControlLogic/UnitTripControl
+
+!tag name=UnitTripControl pairs=module:thermal_hydraulics system:controllogic

@@ -35,3 +35,5 @@ will be ignored.
 !syntax inputs /AuxKernels/MaterialRealAux
 
 !syntax children /AuxKernels/MaterialRealAux
+
+!tag name=MaterialRealAux pairs=module:framework system:auxkernels

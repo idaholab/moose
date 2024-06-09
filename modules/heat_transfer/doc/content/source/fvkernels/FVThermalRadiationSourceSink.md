@@ -22,3 +22,5 @@ where:
 !syntax inputs /FVKernels/FVThermalRadiationSourceSink
 
 !syntax children /FVKernels/FVThermalRadiationSourceSink
+
+!tag name=FVThermalRadiationSourceSink pairs=module:heat_transfer system:fvkernels

@@ -54,3 +54,5 @@ J &=& \phi_j\frac{\partial}{\partial T}(\frac{\partial F_1}{\partial c_{i,1}} - 
 !syntax inputs /Kernels/NestedKKSSplitCHCRes
 
 !syntax children /Kernels/NestedKKSSplitCHCRes
+
+!tag name=NestedKKSSplitCHCRes pairs=module:phase_field system:kernels

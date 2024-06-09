@@ -17,3 +17,5 @@ passed to each [Component](syntax/Components/index.md).
 !syntax inputs /ICs/VariableProductIC
 
 !syntax children /ICs/VariableProductIC
+
+!tag name=VariableProductIC pairs=module:thermal_hydraulics system:ics

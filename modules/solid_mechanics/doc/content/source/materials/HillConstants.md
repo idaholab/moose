@@ -39,3 +39,5 @@ Temperature coupling and large deformation updates have only been tested on cree
 !syntax children /Materials/HillConstants
 
 !bibtex bibliography
+
+!tag name=HillConstants pairs=module:solid_mechanics system:materials

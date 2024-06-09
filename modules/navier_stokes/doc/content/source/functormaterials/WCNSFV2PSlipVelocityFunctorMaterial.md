@@ -44,3 +44,5 @@ where:
 !syntax inputs /FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial
 
 !syntax children /FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial
+
+!tag name=WCNSFV2PSlipVelocityFunctorMaterial pairs=module:navier_stokes system:functormaterials

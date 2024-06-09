@@ -66,3 +66,5 @@ purpose, the iteration related parameters are not required.
 !syntax inputs /Executioner/TimeSteppers/IterationAdaptiveDT
 
 !syntax children /Executioner/TimeSteppers/IterationAdaptiveDT
+
+!tag name=IterationAdaptiveDT pairs=module:framework system:timesteppers

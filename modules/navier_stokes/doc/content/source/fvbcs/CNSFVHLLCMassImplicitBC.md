@@ -13,3 +13,5 @@ entirely from internal domain information.
 !syntax inputs /FVBCs/CNSFVHLLCMassImplicitBC
 
 !syntax children /FVBCs/CNSFVHLLCMassImplicitBC
+
+!tag name=CNSFVHLLCMassImplicitBC pairs=module:navier_stokes system:fvbcs

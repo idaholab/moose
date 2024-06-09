@@ -25,3 +25,5 @@ Only effective saturation as a function of capillary pressure is available
 !syntax children /UserObjects/PorousFlowCapillaryPressureBW
 
 !bibtex bibliography
+
+!tag name=PorousFlowCapillaryPressureBW pairs=module:porous_flow system:userobjects

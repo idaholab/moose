@@ -14,3 +14,5 @@ used as a parent class for more advanced cohesive zone models, such as
 !syntax inputs /UserObjects/PenaltySimpleCohesiveZoneModel
 
 !syntax children /UserObjects/PenaltySimpleCohesiveZoneModel
+
+!tag name=PenaltySimpleCohesiveZoneModel pairs=module:contact system:userobjects

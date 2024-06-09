@@ -84,3 +84,5 @@ The inverse power method is appealing because we can apply matrix-free schemes o
 !syntax inputs /Executioner/InversePowerMethod
 
 !syntax children /Executioner/InversePowerMethod
+
+!tag name=InversePowerMethod pairs=module:framework system:executioners

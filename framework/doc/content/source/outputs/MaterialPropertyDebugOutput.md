@@ -13,3 +13,5 @@ more information.
 !syntax inputs /Outputs/MaterialPropertyDebugOutput
 
 !syntax children /Outputs/MaterialPropertyDebugOutput
+
+!tag name=MaterialPropertyDebugOutput pairs=module:framework system:outputs

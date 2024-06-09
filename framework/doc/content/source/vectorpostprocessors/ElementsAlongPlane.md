@@ -19,3 +19,5 @@ formats such as Exodus that start with 1.
 !syntax inputs /VectorPostprocessors/ElementsAlongPlane
 
 !syntax children /VectorPostprocessors/ElementsAlongPlane
+
+!tag name=ElementsAlongPlane pairs=module:framework system:vectorpostprocessors

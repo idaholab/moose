@@ -23,3 +23,5 @@ The time dependent term on the right is specified using a `UserForcingFunctionNo
 !syntax inputs /NodalKernels/UserForcingFunctionNodalKernel
 
 !syntax children /NodalKernels/UserForcingFunctionNodalKernel
+
+!tag name=UserForcingFunctionNodalKernel pairs=module:framework system:nodalkernels

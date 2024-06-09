@@ -60,3 +60,5 @@ and $\epsilon_{\phi \phi}$ are found with
 !syntax inputs /Materials/ADComputeRSphericalSmallStrain
 
 !syntax children /Materials/ADComputeRSphericalSmallStrain
+
+!tag name=ADComputeRSphericalSmallStrain pairs=module:solid_mechanics system:materials

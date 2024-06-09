@@ -9,3 +9,5 @@ The `GeneralizedPlaneStrainOffDiagOSPD` Kernel provides the off-diagonal couplin
 !syntax inputs /Kernels/GeneralizedPlaneStrainOffDiagOSPD
 
 !syntax children /Kernels/GeneralizedPlaneStrainOffDiagOSPD
+
+!tag name=GeneralizedPlaneStrainOffDiagOSPD pairs=module:peridynamics system:kernels

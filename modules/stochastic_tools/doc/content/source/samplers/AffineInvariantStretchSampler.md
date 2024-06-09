@@ -28,3 +28,5 @@ where $\mathcal{S}_{y^{p}_{-1}}$ is the previous state at index $p$, $\mathcal{S
 !syntax inputs /Samplers/AffineInvariantStretchSampler
 
 !syntax children /Samplers/AffineInvariantStretchSampler
+
+!tag name=AffineInvariantStretchSampler pairs=module:stochastic_tools system:samplers

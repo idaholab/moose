@@ -27,3 +27,5 @@ and given basis functions $\phi_j$, the Jacobian is defined as:
 !syntax inputs /Kernels/Diffusion
 
 !syntax children /Kernels/Diffusion
+
+!tag name=Diffusion pairs=module:framework system:kernels

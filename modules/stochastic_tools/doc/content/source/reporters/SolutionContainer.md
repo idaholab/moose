@@ -18,3 +18,5 @@ The solution fields are kept distributed using the communicator of the applicati
 !syntax inputs /Reporters/SolutionContainer
 
 !syntax children /Reporters/SolutionContainer
+
+!tag name=SolutionContainer pairs=module:stochastic_tools system:reporters

@@ -13,3 +13,5 @@ the connected flow channels.
 !syntax children /UserObjects/ADJunctionOneToOne1PhaseUserObject
 
 !bibtex bibliography
+
+!tag name=ADJunctionOneToOne1PhaseUserObject pairs=module:thermal_hydraulics system:userobjects

@@ -17,3 +17,5 @@ where
 !syntax inputs /BCs/RadiativeHeatFluxBC
 
 !syntax children /BCs/RadiativeHeatFluxBC
+
+!tag name=RadiativeHeatFluxBC pairs=module:thermal_hydraulics system:bcs

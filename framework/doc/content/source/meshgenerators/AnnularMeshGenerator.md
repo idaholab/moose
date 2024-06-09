@@ -35,3 +35,5 @@ Sidesets are also created:
 !syntax inputs /Mesh/AnnularMeshGenerator
 
 !syntax children /Mesh/AnnularMeshGenerator
+
+!tag name=AnnularMeshGenerator pairs=module:framework system:meshgenerators

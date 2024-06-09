@@ -12,3 +12,5 @@ implemented for the [!param](/UserObjects/LayeredSideAverageFunctor/functor) par
 !syntax inputs /UserObjects/LayeredSideAverageFunctor
 
 !syntax children /UserObjects/LayeredSideAverageFunctor
+
+!tag name=LayeredSideAverageFunctor pairs=module:framework system:userobjects

@@ -15,3 +15,5 @@ This class outputs the lower-dimensional mesh used to define cuts with XFEM.  It
 !syntax inputs /Outputs/XFEMCutMeshOutput
 
 !syntax children /Outputs/XFEMCutMeshOutput
+
+!tag name=XFEMCutMeshOutput pairs=module:xfem system:outputs

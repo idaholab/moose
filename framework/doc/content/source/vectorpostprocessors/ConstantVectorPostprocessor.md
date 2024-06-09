@@ -17,3 +17,5 @@ In this example, two `ConstantVectorPostprocessor` are used to specify three vec
 !syntax inputs /VectorPostprocessors/ConstantVectorPostprocessor
 
 !syntax children /VectorPostprocessors/ConstantVectorPostprocessor
+
+!tag name=ConstantVectorPostprocessor pairs=module:framework system:vectorpostprocessors

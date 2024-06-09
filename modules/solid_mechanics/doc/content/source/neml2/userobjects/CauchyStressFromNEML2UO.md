@@ -16,3 +16,5 @@ object is required to assign the outputs to their corresponding material propert
 ## Example Input Syntax
 
 !syntax parameters /UserObjects/CauchyStressFromNEML2UO
+
+!tag name=CauchyStressFromNEML2UO pairs=module:solid_mechanics system:neml2

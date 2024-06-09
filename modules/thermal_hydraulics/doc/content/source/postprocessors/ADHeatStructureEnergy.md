@@ -19,3 +19,5 @@ This volumetric integral is computed numerically using the [local quadrature](sy
 !syntax inputs /Postprocessors/ADHeatStructureEnergy
 
 !syntax children /Postprocessors/ADHeatStructureEnergy
+
+!tag name=ADHeatStructureEnergy pairs=module:thermal_hydraulics system:postprocessors

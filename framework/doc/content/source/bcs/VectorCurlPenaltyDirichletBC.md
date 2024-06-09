@@ -37,3 +37,5 @@ divergence, respectively.
 !syntax inputs /BCs/VectorCurlPenaltyDirichletBC
 
 !syntax children /BCs/VectorCurlPenaltyDirichletBC
+
+!tag name=VectorCurlPenaltyDirichletBC pairs=module:framework system:bcs

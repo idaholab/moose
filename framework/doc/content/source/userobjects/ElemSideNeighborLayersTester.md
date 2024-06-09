@@ -15,3 +15,5 @@ or an algebraic relationship manager.
 !syntax inputs /UserObjects/ElemSideNeighborLayersTester
 
 !syntax children /UserObjects/ElemSideNeighborLayersTester
+
+!tag name=ElemSideNeighborLayersTester pairs=module:framework system:userobjects

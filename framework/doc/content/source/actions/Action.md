@@ -178,3 +178,5 @@ developers:
   `getActions`, etc.
 - Actions may be added by other actions, but the added action will only execute
   for tasks occurring after the task in which the action is added.
+
+!tag name=Action pairs=module:framework system:actions

@@ -12,3 +12,5 @@ DOFMap output is designed to provide a machine readable file format for investig
 !syntax inputs /Outputs/DOFMap
 
 !syntax children /Outputs/DOFMap
+
+!tag name=DOFMapOutput pairs=module:framework system:outputs

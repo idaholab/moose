@@ -9,3 +9,5 @@ written for superficial velocity non-linear variables.
 !syntax inputs /Adaptivity/Markers/PINSFVSuperficialVelocityVariable
 
 !syntax children /Adaptivity/Markers/PINSFVSuperficialVelocityVariable
+
+!tag name=PINSFVSuperficialVelocityVariable pairs=module:navier_stokes system:variables

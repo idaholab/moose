@@ -5,3 +5,5 @@ block in a MOOSE input file. This action adds them to the [Problem](syntax/Probl
 See [syntax/MultiApps/index.md] for more information.
 
 !syntax parameters /MultiApps/AddMultiAppAction
+
+!tag name=AddMultiAppAction pairs=module:framework system:actions

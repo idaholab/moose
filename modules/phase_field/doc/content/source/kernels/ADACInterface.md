@@ -19,3 +19,5 @@ parameter, and $\psi_m$ is the test function.
 !syntax inputs /Kernels/ADACInterface
 
 !syntax children /Kernels/ADACInterface
+
+!tag name=ADACInterface pairs=module:phase_field system:kernels

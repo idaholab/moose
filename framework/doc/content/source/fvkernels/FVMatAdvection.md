@@ -30,3 +30,5 @@ fluid flow capabilities.
 !syntax inputs /FVKernels/FVMatAdvection
 
 !syntax children /FVKernels/FVMatAdvection
+
+!tag name=FVMatAdvection pairs=module:framework system:fvkernels

@@ -29,3 +29,5 @@ for a smear cracking model.
 !syntax inputs /AuxKernels/MaterialRealVectorValueAux
 
 !syntax children /AuxKernels/MaterialRealVectorValueAux
+
+!tag name=MaterialRealVectorValueAux pairs=module:framework system:auxkernels

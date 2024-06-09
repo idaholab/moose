@@ -15,3 +15,5 @@
 !syntax inputs /AuxKernels/BuildArrayVariableAux
 
 !syntax children /AuxKernels/BuildArrayVariableAux
+
+!tag name=BuildArrayVariableAux pairs=module:framework system:auxkernels

@@ -12,3 +12,5 @@ the pressure on the symmetry boundary.
 !syntax inputs /FVBCs/INSFVSymmetryVelocityBC
 
 !syntax children /FVBCs/INSFVSymmetryVelocityBC
+
+!tag name=INSFVSymmetryVelocityBC pairs=module:navier_stokes system:fvbcs

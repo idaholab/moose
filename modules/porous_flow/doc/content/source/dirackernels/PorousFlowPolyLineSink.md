@@ -7,3 +7,5 @@ A `PorousFlowPolyLineSink` is a special case of the general line sink in which a
 !syntax inputs /DiracKernels/PorousFlowPolyLineSink
 
 !syntax children /DiracKernels/PorousFlowPolyLineSink
+
+!tag name=PorousFlowPolyLineSink pairs=module:porous_flow system:dirackernels

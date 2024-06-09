@@ -17,3 +17,5 @@ at the point `(0.1 0.2 0)` and its intensity is controlled by the `switch_off` f
 !syntax inputs /DiracKernels/FunctionDiracSource
 
 !syntax children /DiracKernels/FunctionDiracSource
+
+!tag name=FunctionDiracSource pairs=module:framework system:dirackernels

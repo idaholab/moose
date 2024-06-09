@@ -17,3 +17,5 @@ This object is not typically defined directly by a user, but is set up automatic
 !syntax inputs /VectorPostprocessors/MixedModeEquivalentK
 
 !syntax children /VectorPostprocessors/MixedModeEquivalentK
+
+!tag name=MixedModeEquivalentK pairs=module:solid_mechanics system:vectorpostprocessors

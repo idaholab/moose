@@ -11,3 +11,5 @@ This reporter outputs the results of the [examples/cross_validation.md] study fo
 !syntax inputs /Reporters/CrossValidationScores
 
 !syntax children /Reporters/CrossValidationScores
+
+!tag name=CrossValidationScores pairs=module:stochastic_tools system:reporters

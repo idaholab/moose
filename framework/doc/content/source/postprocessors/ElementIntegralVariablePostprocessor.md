@@ -19,3 +19,5 @@ is defined on.
 !syntax inputs /Postprocessors/ElementIntegralVariablePostprocessor
 
 !syntax children /Postprocessors/ElementIntegralVariablePostprocessor
+
+!tag name=ElementIntegralVariablePostprocessor pairs=module:framework system:postprocessors

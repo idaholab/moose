@@ -66,3 +66,5 @@ The result is:
 !syntax inputs /Mesh/RenameBoundaryGenerator
 
 !syntax children /Mesh/RenameBoundaryGenerator
+
+!tag name=RenameBoundaryGenerator pairs=module:framework system:meshgenerators

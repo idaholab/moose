@@ -40,3 +40,5 @@ time integrator.
 !syntax inputs /Executioner/TimeIntegrator/ExplicitEuler
 
 !syntax children /Executioner/TimeIntegrator/ExplicitEuler
+
+!tag name=ExplicitEuler pairs=module:framework system:timeintegrators

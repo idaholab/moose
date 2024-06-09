@@ -11,3 +11,5 @@ y(t) = \frac{1}{A} \int\limits_A f(\mathbf{x}, t) dA \,.
 !syntax inputs /Postprocessors/FunctionSideIntegral
 
 !syntax children /Postprocessors/FunctionSideIntegral
+
+!tag name=FunctionSideAverage pairs=module:framework system:postprocessors

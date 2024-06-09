@@ -15,3 +15,5 @@ The `InterfaceMeshCut2DUserObject` is used to cut the 2D mesh with a 1D cutter m
 !syntax inputs /UserObjects/InterfaceMeshCut2DUserObject
 
 !syntax children /UserObjects/InterfaceMeshCut2DUserObject
+
+!tag name=InterfaceMeshCut2DUserObject pairs=module:xfem system:userobjects

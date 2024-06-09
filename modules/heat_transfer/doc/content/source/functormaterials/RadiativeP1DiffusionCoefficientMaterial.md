@@ -21,3 +21,5 @@ then $\sigma_{s, eff} \approx 3 \sigma_{s}$ is a good approximation [!citep](inc
 !syntax inputs /FunctorMaterials/RadiativeP1DiffusionCoefficientMaterial
 
 !syntax children /FunctorMaterials/RadiativeP1DiffusionCoefficientMaterial
+
+!tag name=RadiativeP1DiffusionCoefficientMaterial pairs=module:heat_transfer system:functormaterials

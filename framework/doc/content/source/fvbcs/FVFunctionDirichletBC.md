@@ -19,3 +19,5 @@ implementing MMS studies.
 !syntax inputs /FVBCs/FVFunctionDirichletBC
 
 !syntax children /FVBCs/FVFunctionDirichletBC
+
+!tag name=FVFunctionDirichletBC pairs=module:framework system:fvbcs

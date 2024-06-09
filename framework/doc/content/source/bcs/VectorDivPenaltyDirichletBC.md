@@ -29,3 +29,5 @@ curl, respectively.
 !syntax inputs /BCs/VectorDivPenaltyDirichletBC
 
 !syntax children /BCs/VectorDivPenaltyDirichletBC
+
+!tag name=VectorDivPenaltyDirichletBC pairs=module:framework system:bcs

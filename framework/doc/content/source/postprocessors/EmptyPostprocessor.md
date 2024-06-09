@@ -9,3 +9,5 @@ This postprocessor is not useful. It can be replaced by a [ParsedPostprocessor.m
 !syntax inputs /Postprocessors/EmptyPostprocessor
 
 !syntax children /Postprocessors/EmptyPostprocessor
+
+!tag name=EmptyPostprocessor pairs=module:framework system:postprocessors

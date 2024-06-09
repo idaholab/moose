@@ -44,3 +44,5 @@ supplied based upon a function form:
 !syntax inputs /Kernels/BodyForce
 
 !syntax children /Kernels/BodyForce
+
+!tag name=BodyForce pairs=module:framework system:kernels

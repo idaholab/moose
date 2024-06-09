@@ -17,3 +17,5 @@ To use a MOOSE +material property+ as input to a NEML2 object see [MOOSEMaterial
 !syntax inputs /UserObjects/MOOSEVariableToNEML2
 
 !syntax children /UserObjects/MOOSEVariableToNEML2
+
+!tag name=MOOSEVariableToNEML2 pairs=module:solid_mechanics system:neml2

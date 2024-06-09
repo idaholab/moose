@@ -10,3 +10,5 @@ To compute the Euclidean distance between two variables, use the [ElementL2Diffe
 !syntax inputs /Postprocessors/ElementL2Error
 
 !syntax children /Postprocessors/ElementL2Error
+
+!tag name=ElementL2Error pairs=module:framework system:postprocessors

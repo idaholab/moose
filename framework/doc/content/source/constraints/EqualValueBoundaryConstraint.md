@@ -18,3 +18,5 @@ a 10e6 penalty factor.
 !syntax inputs /Constraints/EqualValueBoundaryConstraint
 
 !syntax children /Constraints/EqualValueBoundaryConstraint
+
+!tag name=EqualValueBoundaryConstraint pairs=module:framework system:constraints

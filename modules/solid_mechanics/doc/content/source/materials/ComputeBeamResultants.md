@@ -10,3 +10,5 @@ This class computes the forces and moments at time $t$ in the global coordinate 
 !syntax inputs /Materials/ComputeBeamResultants
 
 !syntax children /Materials/ComputeBeamResultants
+
+!tag name=ComputeBeamResultants pairs=module:solid_mechanics system:materials

@@ -366,3 +366,5 @@ configuration, [eqn:SumShears_multiple_cp], [eqn:SumShears_one_cp], and [eqn:app
 !syntax children /Materials/ComputeMultipleCrystalPlasticityStress
 
 !bibtex bibliography
+
+!tag name=ComputeMultipleCrystalPlasticityStress pairs=module:solid_mechanics system:materials

@@ -6,3 +6,5 @@ The `CohesiveZoneAction` simplifies the input file syntax by adding the appropri
 
 !syntax description /Physics/SolidMechanics/CohesiveZone/CohesiveZoneAction
 !syntax parameters /Physics/SolidMechanics/CohesiveZone/CohesiveZoneAction
+
+!tag name=CohesiveZoneMasterAction pairs=module:solid_mechanics system:actions

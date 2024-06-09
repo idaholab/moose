@@ -4,3 +4,5 @@ This is an Action to add a [GeochemistrySpatialReactor](GeochemistrySpatialReact
 
 Please see the [SpatialReactionSolver page](SpatialReactionSolver/index.md) for examples.
 
+
+!tag name=AddSpatialReactionSolverAction pairs=module:geochemistry system:actions

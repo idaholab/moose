@@ -21,3 +21,5 @@ subapp index.
 !syntax inputs /Transfers/MultiAppCopyTransfer
 
 !syntax children /Transfers/MultiAppCopyTransfer
+
+!tag name=MultiAppCopyTransfer pairs=module:framework system:transfers

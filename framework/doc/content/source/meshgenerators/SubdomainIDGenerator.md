@@ -7,3 +7,5 @@
 !syntax inputs /Mesh/SubdomainIDGenerator
 
 !syntax children /Mesh/SubdomainIDGenerator
+
+!tag name=SubdomainIDGenerator pairs=module:framework system:meshgenerators

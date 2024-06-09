@@ -136,3 +136,5 @@ functions.
 !syntax children /FluidProperties/CaloricallyImperfectGas
 
 !bibtex bibliography
+
+!tag name=CaloricallyImperfectGas pairs=module:fluid_properties system:fluidproperties

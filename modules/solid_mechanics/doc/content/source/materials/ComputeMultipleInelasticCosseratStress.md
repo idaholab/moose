@@ -25,3 +25,5 @@ for more explanation.
 !syntax inputs /Materials/ComputeMultipleInelasticCosseratStress
 
 !syntax children /Materials/ComputeMultipleInelasticCosseratStress
+
+!tag name=ComputeMultipleInelasticCosseratStress pairs=module:solid_mechanics system:materials

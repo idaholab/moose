@@ -14,3 +14,5 @@ the [`PFCTradMaterial`](PFCTradMaterial.md).
 !syntax inputs /Kernels/CHBulkPFCTrad
 
 !syntax children /Kernels/CHBulkPFCTrad
+
+!tag name=CHBulkPFCTrad pairs=module:phase_field system:kernels

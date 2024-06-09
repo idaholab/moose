@@ -27,3 +27,5 @@ You should see a component name associated with each color. See example below:
 !syntax inputs /Outputs/ParaviewComponentAnnotationMap
 
 !syntax children /Outputs/ParaviewComponentAnnotationMap
+
+!tag name=ParaviewComponentAnnotationMap pairs=module:thermal_hydraulics system:outputs

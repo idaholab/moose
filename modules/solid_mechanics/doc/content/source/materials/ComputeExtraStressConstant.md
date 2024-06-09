@@ -28,3 +28,5 @@ tensor components in the specific order specified in the input parameter descrip
 !syntax inputs /Materials/ComputeExtraStressConstant
 
 !syntax children /Materials/ComputeExtraStressConstant
+
+!tag name=ComputeExtraStressConstant pairs=module:solid_mechanics system:materials

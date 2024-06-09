@@ -15,3 +15,5 @@ This model is a scalar damage model that does not compute the evolution of damag
 !syntax children /Materials/ScalarMaterialDamage
 
 !bibtex bibliography
+
+!tag name=ScalarMaterialDamage pairs=module:solid_mechanics system:materials

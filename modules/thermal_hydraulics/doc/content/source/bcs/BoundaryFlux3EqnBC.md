@@ -24,3 +24,5 @@ linear cross-sectional area is used externally as follows:
 !syntax inputs /BCs/BoundaryFlux3EqnBC
 
 !syntax children /BCs/BoundaryFlux3EqnBC
+
+!tag name=BoundaryFlux3EqnBC pairs=module:thermal_hydraulics system:bcs

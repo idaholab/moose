@@ -19,3 +19,5 @@ material we're a boundary condition for.
 !syntax inputs /BCs/INSADVaporRecoilPressureMomentumFluxBC
 
 !syntax children /BCs/INSADVaporRecoilPressureMomentumFluxBC
+
+!tag name=INSADVaporRecoilPressureMomentumFluxBC pairs=module:navier_stokes system:bcs

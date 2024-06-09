@@ -20,3 +20,5 @@ the surface.
 !syntax inputs /BCs/FunctionRadiativeBC
 
 !syntax children /BCs/FunctionRadiativeBC
+
+!tag name=FunctionRadiativeBC pairs=module:heat_transfer system:bcs

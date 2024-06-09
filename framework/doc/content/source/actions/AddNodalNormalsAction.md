@@ -15,3 +15,5 @@ More information about `NodalNormals` may be found on the
 [NodalNormals syntax documentation](syntax/NodalNormals/index.md).
 
 !syntax parameters /NodalNormals/AddNodalNormalsAction
+
+!tag name=AddNodalNormalsAction pairs=module:framework system:actions

@@ -19,3 +19,5 @@ term/body force, $f$ is a function (optional), and $P$ is the value of a postpro
 !syntax children /Kernels/MaskedBodyForce
 
 !bibtex bibliography
+
+!tag name=MaskedBodyForce pairs=module:phase_field system:kernels

@@ -9,3 +9,5 @@ object can be used to impose an average pressure value on a boundary. The
 !syntax inputs /FVBCs/INSFVAveragePressureValueBC
 
 !syntax children /FVBCs/INSFVAveragePressureValueBC
+
+!tag name=INSFVAveragePressureValueBC pairs=module:navier_stokes system:fvbcs

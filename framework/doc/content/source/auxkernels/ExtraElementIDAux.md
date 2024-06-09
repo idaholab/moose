@@ -10,3 +10,5 @@ Elements which do not have the extra element ID requested by [!param](/AuxKernel
 !syntax inputs /AuxKernels/ExtraElementIDAux
 
 !syntax children /AuxKernels/ExtraElementIDAux
+
+!tag name=ExtraElementIDAux pairs=module:framework system:auxkernels

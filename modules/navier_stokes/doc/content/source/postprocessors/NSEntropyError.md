@@ -7,3 +7,5 @@
 !syntax inputs /Postprocessors/NSEntropyError
 
 !syntax children /Postprocessors/NSEntropyError
+
+!tag name=NSEntropyError pairs=module:navier_stokes system:postprocessors

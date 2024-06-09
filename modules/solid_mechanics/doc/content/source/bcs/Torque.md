@@ -19,3 +19,5 @@ The application of a torque is currently only validated for small strains.
 !syntax inputs /BCs/Torque
 
 !syntax children /BCs/Torque
+
+!tag name=Torque pairs=module:solid_mechanics system:bcs

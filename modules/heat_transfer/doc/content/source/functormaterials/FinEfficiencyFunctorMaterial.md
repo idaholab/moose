@@ -54,3 +54,5 @@ parameters
 !syntax inputs /FunctorMaterials/FinEfficiencyFunctorMaterial
 
 !syntax children /FunctorMaterials/FinEfficiencyFunctorMaterial
+
+!tag name=FinEfficiencyFunctorMaterial pairs=module:heat_transfer system:functormaterials

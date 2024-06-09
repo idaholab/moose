@@ -17,3 +17,5 @@ The following input file snippet demonstrates the use of the `MeshMetaDataReport
 !syntax inputs /Reporters/MeshMetaDataReporter
 
 !syntax children /Reporters/MeshMetaDataReporter
+
+!tag name=MeshMetaDataReporter pairs=module:framework system:reporters

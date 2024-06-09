@@ -22,3 +22,5 @@ produces $\alpha$ as an output functor which will be evaluated on-demand.
 !syntax inputs /FunctorMaterials/ThermalDiffusivityFunctorMaterial
 
 !syntax children /FunctorMaterials/ThermalDiffusivityFunctorMaterial
+
+!tag name=ThermalDiffusivityFunctorMaterial pairs=module:navier_stokes system:functormaterials

@@ -17,3 +17,5 @@ $A$, $\rho A$ and $\alpha$ are variables usually defined by the [Components](syn
 !syntax inputs /AuxKernels/THMSpecificVolumeAux
 
 !syntax children /AuxKernels/THMSpecificVolumeAux
+
+!tag name=THMSpecificVolumeAux pairs=module:thermal_hydraulics system:auxkernels

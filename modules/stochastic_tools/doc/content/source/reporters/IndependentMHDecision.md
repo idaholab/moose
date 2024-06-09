@@ -23,3 +23,5 @@ where $t_{xy^p}$ is the transition probability defined as shown in the above equ
 !syntax inputs /Reporters/IndependentMHDecision
 
 !syntax children /Reporters/IndependentMHDecision
+
+!tag name=IndependentMHDecision pairs=module:stochastic_tools system:reporters

@@ -32,3 +32,5 @@ Final steps include adding in "ghosted" elements and making sure that boundary c
 !syntax inputs /Mesh/DistributedRectilinearMeshGenerator
 
 !syntax children /Mesh/DistributedRectilinearMeshGenerator
+
+!tag name=DistributedRectilinearMeshGenerator pairs=module:framework system:meshgenerators

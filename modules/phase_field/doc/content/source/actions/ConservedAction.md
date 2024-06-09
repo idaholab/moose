@@ -54,3 +54,5 @@ The kernels that are added depend on the solution approach:
 - [CoefReaction](/CoefReaction.md)
 
 !syntax parameters /Modules/PhaseField/Conserved/ConservedAction
+
+!tag name=ConservedAction pairs=module:phase_field system:actions

@@ -16,3 +16,5 @@ where $a$ (`a`) and $b$ (`b`) are the Van der Waals coefficients, and
 !syntax inputs /Materials/VanDerWaalsFreeEnergy
 
 !syntax children /Materials/VanDerWaalsFreeEnergy
+
+!tag name=VanDerWaalsFreeEnergy pairs=module:phase_field system:materials

@@ -13,3 +13,5 @@ using an [CoupledVariableValueMaterial.md], to be used by the kernel added by [F
 !syntax inputs /Components/FormLossFromExternalApp1Phase
 
 !syntax children /Components/FormLossFromExternalApp1Phase
+
+!tag name=FormLossFromExternalApp1Phase pairs=module:thermal_hydraulics system:components

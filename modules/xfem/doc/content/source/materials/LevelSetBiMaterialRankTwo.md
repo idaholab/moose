@@ -17,3 +17,5 @@ This material, `LevelSetBiMaterialRankTwo` determines the global material proper
 !syntax children /Materials/LevelSetBiMaterialRankTwo
 
 !bibtex bibliography
+
+!tag name=LevelSetBiMaterialRankTwo pairs=module:xfem system:materials

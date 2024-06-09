@@ -15,3 +15,5 @@ opening mode mixity ratio.
 !syntax inputs /AuxKernels/CohesiveZoneMortarUserObjectAux
 
 !syntax children /AuxKernels/CohesiveZoneMortarUserObjectAux
+
+!tag name=CohesiveZoneMortarUserObjectAux pairs=module:contact system:auxkernels

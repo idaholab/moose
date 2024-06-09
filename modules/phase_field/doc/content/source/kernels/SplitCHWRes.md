@@ -48,3 +48,5 @@ For an implementation with an anisotropic (tensorial) mobility see
 !syntax children /Kernels/SplitCHWRes
 
 !bibtex bibliography
+
+!tag name=SplitCHWRes pairs=module:phase_field system:kernels

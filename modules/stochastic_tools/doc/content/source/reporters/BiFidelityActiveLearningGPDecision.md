@@ -29,3 +29,5 @@ Third, instead of relying on [ActiveLearningGPDecision](ActiveLearningGPDecision
 !syntax inputs /Reporters/BiFidelityActiveLearningGPDecision
 
 !syntax children /Reporters/BiFidelityActiveLearningGPDecision
+
+!tag name=BiFidelityActiveLearningGPDecision pairs=module:stochastic_tools system:reporters

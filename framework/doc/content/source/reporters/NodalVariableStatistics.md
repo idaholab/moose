@@ -21,3 +21,5 @@ name to each reporter.
 !syntax inputs /Reporters/NodalVariableStatistics
 
 !syntax children /Reporters/NodalVariableStatistics
+
+!tag name=NodalVariableStatistics pairs=module:framework system:reporters

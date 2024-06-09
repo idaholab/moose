@@ -12,3 +12,5 @@ The boundary user object is retrieved using the boundary name specified in the
 !syntax inputs /Postprocessors/ADFlowBoundaryFlux1Phase
 
 !syntax children /Postprocessors/ADFlowBoundaryFlux1Phase
+
+!tag name=ADFlowBoundaryFlux1Phase pairs=module:thermal_hydraulics system:postprocessors

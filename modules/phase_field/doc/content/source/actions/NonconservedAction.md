@@ -17,3 +17,5 @@ The kernels that are added are:
 - [ACInterface](/ACInterface.md)
 
 !syntax parameters /Modules/PhaseField/Nonconserved/NonconservedAction
+
+!tag name=NonconservedAction pairs=module:phase_field system:actions

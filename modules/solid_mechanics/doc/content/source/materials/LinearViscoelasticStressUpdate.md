@@ -19,3 +19,5 @@ This computes the inelastic strain increment resulting from a linear viscoelasti
 !syntax inputs /Materials/LinearViscoelasticStressUpdate
 
 !syntax children /Materials/LinearViscoelasticStressUpdate
+
+!tag name=LinearViscoelasticStressUpdate pairs=module:solid_mechanics system:materials

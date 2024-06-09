@@ -15,3 +15,5 @@ side. Constraint enforcement is done using lagrange multipliers.
 !syntax children /Constraints/GapConductanceConstraint
 
 !bibtex bibliography
+
+!tag name=GapConductanceConstraint pairs=module:heat_transfer system:constraints

@@ -33,3 +33,5 @@ of the function at the specified abscissa.
 !syntax inputs /Functions/PiecewiseConstant
 
 !syntax children /Functions/PiecewiseConstant
+
+!tag name=PiecewiseConstant pairs=module:framework system:functions

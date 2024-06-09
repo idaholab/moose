@@ -30,3 +30,5 @@ Alternatively, this kernel is added automatically by the [GrainGrowthLinearizedI
 !syntax inputs /Kernels/ACInterfaceChangedVariable
 
 !syntax children /Kernels/ACInterfaceChangedVariable
+
+!tag name=ACInterfaceChangedVariable pairs=module:phase_field system:kernels

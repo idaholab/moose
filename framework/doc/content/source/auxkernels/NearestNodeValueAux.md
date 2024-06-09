@@ -14,3 +14,5 @@ to copy the value of a solution field located on one body to another.
 !syntax inputs /AuxKernels/NearestNodeValueAux
 
 !syntax children /AuxKernels/NearestNodeValueAux
+
+!tag name=NearestNodeValueAux pairs=module:framework system:auxkernels

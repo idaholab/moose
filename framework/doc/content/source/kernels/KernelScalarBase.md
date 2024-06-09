@@ -215,3 +215,5 @@ There are also some optional parameters that can be supplied to
   to compute different rows (i.e. different variables) of the global residual,
   then some objects can be targeted to field variable rows and others to scalar
   variable rows.
+
+!tag name=KernelScalarBase pairs=module:framework system:kernels

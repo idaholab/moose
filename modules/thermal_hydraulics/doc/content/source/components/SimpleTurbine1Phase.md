@@ -56,3 +56,5 @@ Assuming that the process inside the turbine is isentropic, the pressure drop is
 - $\dot{m}$ is the mass flow rate entering the turbine,
 - $h$ in the specific enthalpy at the inlet of the turbine, and
 - $\gamma$ is the heat capacity ratio.
+
+!tag name=SimpleTurbine1Phase pairs=module:thermal_hydraulics system:components

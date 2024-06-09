@@ -62,3 +62,5 @@ F_{j,i} = \frac{A_i}{A_j} \eqp
 !syntax inputs /Components/HeatStructure2DRadiationCouplerRZ
 
 !syntax children /Components/HeatStructure2DRadiationCouplerRZ
+
+!tag name=HeatStructure2DRadiationCouplerRZ pairs=module:thermal_hydraulics system:components

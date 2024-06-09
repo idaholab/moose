@@ -19,3 +19,5 @@ use [/FVCoupledForce.md].
 !syntax children /Kernels/CoefReaction
 
 !bibtex bibliography
+
+!tag name=CoefReaction pairs=module:framework system:kernels

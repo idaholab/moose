@@ -124,3 +124,5 @@ The step (Heaviside) function $\frac{\langle-\delta_3\rangle}{-\delta_3}$ in [tr
 !syntax parameters /Materials/BiLinearMixedModeTraction
 !syntax inputs /Materials/BiLinearMixedModeTraction
 !syntax children /Materials/BiLinearMixedModeTraction
+
+!tag name=BiLinearMixedModeTraction pairs=module:solid_mechanics system:materials

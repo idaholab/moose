@@ -19,3 +19,5 @@ boundary `rightleft` across from boundary `leftright`.
 !syntax inputs /AuxKernels/GapValueAux
 
 !syntax children /AuxKernels/GapValueAux
+
+!tag name=GapValueAux pairs=module:framework system:auxkernels

@@ -143,3 +143,5 @@ model are given in Dunne and Petrinic.
 <!-- !syntax children /Materials/RadialReturnStressUpdate -->
 
 !bibtex bibliography
+
+!tag name=RadialReturnStressUpdate pairs=module:solid_mechanics system:materials

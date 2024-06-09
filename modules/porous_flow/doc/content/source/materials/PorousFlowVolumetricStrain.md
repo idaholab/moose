@@ -21,3 +21,5 @@ This Material provides the time-derivative of the volumetric strain to the [Poro
 !syntax inputs /Materials/PorousFlowVolumetricStrain
 
 !syntax children /Materials/PorousFlowVolumetricStrain
+
+!tag name=PorousFlowVolumetricStrain pairs=module:porous_flow system:materials

@@ -22,3 +22,5 @@ Example:
 !listing test/tests/auxkernels/ghosting_aux/ghosting_aux.i block=Mesh
 
 !bibtex bibliography
+
+!tag name=DisplayGhostingAction pairs=module:framework system:actions

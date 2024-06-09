@@ -5,3 +5,5 @@
 ## Template parameters
 
 !listing framework/include/materials/CompileTimeDerivativesMaterial.h start=MaxD end=static
+
+!tag name=CompileTimeDerivativesMaterial pairs=module:framework system:materials

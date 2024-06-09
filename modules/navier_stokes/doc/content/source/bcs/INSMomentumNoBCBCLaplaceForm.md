@@ -7,3 +7,5 @@
 !syntax inputs /BCs/INSMomentumNoBCBCLaplaceForm
 
 !syntax children /BCs/INSMomentumNoBCBCLaplaceForm
+
+!tag name=INSMomentumNoBCBCLaplaceForm pairs=module:navier_stokes system:bcs

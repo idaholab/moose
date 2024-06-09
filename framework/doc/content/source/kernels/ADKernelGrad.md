@@ -12,3 +12,5 @@ factored out (see [KernelGrad](/KernelGrad.md)).
 
 The Jacobian in `ADKernelGrad` is computed using forward automatic
 differentiation.
+
+!tag name=ADKernelGrad pairs=module:framework system:kernels

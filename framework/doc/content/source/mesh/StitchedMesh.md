@@ -25,3 +25,5 @@ file snippet below, these three square meshes are joined into a single mesh as s
 !syntax inputs /Mesh/StitchedMesh
 
 !syntax children /Mesh/StitchedMesh
+
+!tag name=StitchedMesh pairs=module:framework system:mesh

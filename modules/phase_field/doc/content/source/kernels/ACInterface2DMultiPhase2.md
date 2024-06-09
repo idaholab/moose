@@ -18,3 +18,5 @@ and $\nabla \eta_{\beta}$.Therefore, kappa depends on multiple order parameters.
 !syntax inputs /Kernels/ACInterface2DMultiPhase2
 
 !syntax children /Kernels/ACInterface2DMultiPhase2
+
+!tag name=ACInterface2DMultiPhase2 pairs=module:phase_field system:kernels

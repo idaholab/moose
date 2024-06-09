@@ -18,3 +18,5 @@ mesh, sidesets named front and back.
 !syntax children /Mesh/PatchMeshGenerator
 
 !bibtex bibliography
+
+!tag name=PatchMeshGenerator pairs=module:framework system:meshgenerators

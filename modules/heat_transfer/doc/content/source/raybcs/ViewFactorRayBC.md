@@ -9,3 +9,5 @@ For more information, see [ViewFactorRayStudy.md] and [RayTracingViewFactor.md].
 !syntax inputs /RayBCs/ViewFactorRayBC
 
 !syntax children /RayBCs/ViewFactorRayBC
+
+!tag name=ViewFactorRayBC pairs=module:heat_transfer system:raybcs

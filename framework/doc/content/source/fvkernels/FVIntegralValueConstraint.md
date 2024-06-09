@@ -31,3 +31,5 @@ single numerical solution, and be well-posed.
 !syntax inputs /FVKernels/FVIntegralValueConstraint
 
 !syntax children /FVKernels/FVIntegralValueConstraint
+
+!tag name=FVIntegralValueConstraint pairs=module:framework system:fvkernels

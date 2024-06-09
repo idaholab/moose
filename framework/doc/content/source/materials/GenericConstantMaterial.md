@@ -17,3 +17,5 @@ In this example, we create an `GenericConstantMaterial` for the diffusion coeffi
 !syntax inputs /Materials/GenericConstantMaterial
 
 !syntax children /Materials/GenericConstantMaterial
+
+!tag name=GenericConstantMaterial pairs=module:framework system:materials

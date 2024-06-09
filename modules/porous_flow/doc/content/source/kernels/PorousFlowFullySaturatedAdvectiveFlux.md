@@ -21,3 +21,5 @@ This Kernel may be added automatically by the [PorousFlowFullySaturated](PorousF
 !syntax children /Kernels/PorousFlowFullySaturatedAdvectiveFlux
 
 !bibtex bibliography
+
+!tag name=PorousFlowFullySaturatedAdvectiveFlux pairs=module:porous_flow system:kernels

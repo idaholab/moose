@@ -22,3 +22,5 @@ setting up topology optimization Solid Isotropic Material Penalization-type of p
 !syntax inputs /Materials/ThermalCompliance
 
 !syntax children /Materials/ThermalCompliance
+
+!tag name=ThermalCompliance pairs=module:heat_transfer system:materials

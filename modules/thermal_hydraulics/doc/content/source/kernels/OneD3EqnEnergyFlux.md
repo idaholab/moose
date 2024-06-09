@@ -21,3 +21,5 @@ In THM, most kernels are added automatically by components. This kernel is no-lo
 !syntax inputs /Kernels/OneD3EqnEnergyFlux
 
 !syntax children /Kernels/OneD3EqnEnergyFlux
+
+!tag name=OneD3EqnEnergyFlux pairs=module:thermal_hydraulics system:kernels

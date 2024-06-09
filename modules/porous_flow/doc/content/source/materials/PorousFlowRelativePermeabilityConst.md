@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowRelativePermeabilityConst
 
 !syntax children /Materials/PorousFlowRelativePermeabilityConst
+
+!tag name=PorousFlowRelativePermeabilityConst pairs=module:porous_flow system:materials

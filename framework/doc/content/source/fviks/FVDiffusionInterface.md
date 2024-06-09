@@ -22,3 +22,5 @@ of the volumetric diffusivities as the interface diffusion coefficient.
 !syntax inputs /FVInterfaceKernels/FVDiffusionInterface
 
 !syntax children /FVInterfaceKernels/FVDiffusionInterface
+
+!tag name=FVDiffusionInterface pairs=module:framework system:fviks

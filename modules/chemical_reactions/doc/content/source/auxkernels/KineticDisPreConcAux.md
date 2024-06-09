@@ -14,3 +14,5 @@ Calculates the concentration of mineral using the kinetic reaction rate $I_m$ (c
 !syntax inputs /AuxKernels/KineticDisPreConcAux
 
 !syntax children /AuxKernels/KineticDisPreConcAux
+
+!tag name=KineticDisPreConcAux pairs=module:chemical_reactions system:auxkernels

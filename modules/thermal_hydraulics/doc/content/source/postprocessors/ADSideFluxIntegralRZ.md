@@ -20,3 +20,5 @@ Stay tuned!
 !syntax inputs /Postprocessors/ADSideFluxIntegralRZ
 
 !syntax children /Postprocessors/ADSideFluxIntegralRZ
+
+!tag name=ADSideFluxIntegralRZ pairs=module:thermal_hydraulics system:postprocessors

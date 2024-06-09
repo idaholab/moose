@@ -13,3 +13,5 @@ turbulent Prandtl number.
 !syntax inputs /FVKernels/INSFVMixingLengthScalarDiffusion
 
 !syntax children /FVKernels/INSFVMixingLengthScalarDiffusion
+
+!tag name=INSFVMixingLengthScalarDiffusion pairs=module:navier_stokes system:fvkernels

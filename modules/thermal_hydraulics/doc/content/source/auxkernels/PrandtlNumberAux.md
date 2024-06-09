@@ -19,3 +19,5 @@ To use pressure and temperature, you may consider using a [FluidPropertiesMateri
 !syntax inputs /AuxKernels/PrandtlNumberAux
 
 !syntax children /AuxKernels/PrandtlNumberAux
+
+!tag name=PrandtlNumberAux pairs=module:thermal_hydraulics system:auxkernels

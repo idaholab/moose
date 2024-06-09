@@ -26,3 +26,5 @@ This object is automatically added from the [Cohesive Zone Physics](CohesiveZone
 !syntax inputs /Materials/CZMComputeDisplacementJumpTotalLagrangian
 
 !syntax children /Materials/CZMComputeDisplacementJumpTotalLagrangian
+
+!tag name=CZMComputeDisplacementJumpTotalLagrangian pairs=module:solid_mechanics system:materials

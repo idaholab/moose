@@ -21,3 +21,5 @@ documentation clear for users.
 !syntax inputs /Kernels/PINSFEFluidTemperatureTimeDerivative
 
 !syntax children /Kernels/PINSFEFluidTemperatureTimeDerivative
+
+!tag name=PINSFEFluidTemperatureTimeDerivative pairs=module:navier_stokes system:kernels

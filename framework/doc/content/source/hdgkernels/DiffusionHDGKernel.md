@@ -38,3 +38,5 @@ Unlike MatDiffusion, the dependence of the diffusion coefficient on nonlinear va
 !syntax inputs /HDGKernels/DiffusionHDGKernel
 
 !syntax children /HDGKernels/DiffusionHDGKernel
+
+!tag name=DiffusionHDGKernel pairs=module:framework system:hdgkernels

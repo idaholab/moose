@@ -18,3 +18,5 @@ S_{\mathrm{eff}}(S) = \frac{S - S_{\mathrm{res}}^{\beta}}{1 -
 !syntax inputs /Materials/PorousFlowRelativePermeabilityBW
 
 !syntax children /Materials/PorousFlowRelativePermeabilityBW
+
+!tag name=PorousFlowRelativePermeabilityBW pairs=module:porous_flow system:materials

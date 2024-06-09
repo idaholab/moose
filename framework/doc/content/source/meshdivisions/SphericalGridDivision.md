@@ -32,3 +32,5 @@ that a warning is output, please reach out to a MOOSE (or any MOOSE app) develop
 !syntax inputs /MeshDivisions/SphericalGridDivision
 
 !syntax children /MeshDivisions/SphericalGridDivision
+
+!tag name=SphericalGridDivision pairs=module:framework system:meshdivisions

@@ -34,3 +34,5 @@ If a developer wants to implement the line-search with a solver other than Petsc
 they will have to create the class themself.
 
 !bibtex bibliography
+
+!tag name=ContactLineSearch pairs=module:contact system:linesearches

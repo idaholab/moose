@@ -15,3 +15,5 @@ $C_i$ is the concentration of the $i^{\mathrm{th}}$ secondary equilibrium specie
 !syntax inputs /Kernels/CoupledBEEquilibriumSub
 
 !syntax children /Kernels/CoupledBEEquilibriumSub
+
+!tag name=CoupledBEEquilibriumSub pairs=module:chemical_reactions system:kernels

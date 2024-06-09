@@ -40,3 +40,5 @@ The inlet temperature is specified using an energy and a mass flow rate postproc
 !syntax inputs /FVBCs/WCNSFVInletTemperatureBC
 
 !syntax children /FVBCs/WCNSFVInletTemperatureBC
+
+!tag name=WCNSFVInletTemperatureBC pairs=module:navier_stokes system:fvbcs

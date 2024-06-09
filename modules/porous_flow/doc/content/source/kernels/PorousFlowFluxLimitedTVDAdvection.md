@@ -11,3 +11,5 @@ where $u$ and $\mathbf{v}$ are defined via one of the `PorousFlowAdvectiveFluxCa
 !syntax inputs /Kernels/PorousFlowFluxLimitedTVDAdvection
 
 !syntax children /Kernels/PorousFlowFluxLimitedTVDAdvection
+
+!tag name=PorousFlowFluxLimitedTVDAdvection pairs=module:porous_flow system:kernels

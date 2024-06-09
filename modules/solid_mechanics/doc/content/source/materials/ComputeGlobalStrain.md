@@ -20,3 +20,5 @@ Objects that use `use_displaced_mesh = true` will operate on a displaced mesh th
 !syntax inputs /Materials/ComputeGlobalStrain
 
 !syntax children /Materials/ComputeGlobalStrain
+
+!tag name=ComputeGlobalStrain pairs=module:solid_mechanics system:materials

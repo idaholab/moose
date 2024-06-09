@@ -19,3 +19,5 @@ This reporter was created to compute the objective function from the misfit repo
 !syntax inputs /Reporters/ParsedScalarReporter
 
 !syntax children /Reporters/ParsedScalarReporter
+
+!tag name=ParsedScalarReporter pairs=module:optimization system:reporters

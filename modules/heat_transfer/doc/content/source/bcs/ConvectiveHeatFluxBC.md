@@ -13,3 +13,5 @@ See [CoupledConvectiveHeatFluxBC](CoupledConvectiveHeatFluxBC.md) for a similar 
 !syntax inputs /BCs/ConvectiveHeatFluxBC
 
 !syntax children /BCs/ConvectiveHeatFluxBC
+
+!tag name=ConvectiveHeatFluxBC pairs=module:heat_transfer system:bcs

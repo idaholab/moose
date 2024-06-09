@@ -16,3 +16,5 @@ with the mesh.
 !syntax children /UserObjects/NearestPointLayeredAverage
 
 !bibtex bibliography
+
+!tag name=NearestPointLayeredAverage pairs=module:framework system:userobjects

@@ -157,3 +157,5 @@ an [INSADMomentumAdvection.md] kernel was added as well.
 !syntax children /Problem/NavierStokesProblem
 
 !bibtex bibliography
+
+!tag name=NavierStokesProblem pairs=module:navier_stokes system:problems

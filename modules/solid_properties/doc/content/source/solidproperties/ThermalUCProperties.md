@@ -44,3 +44,5 @@ A default value is provided [!cite](Vasudevamurthy2022) as
 !syntax children /SolidProperties/ThermalUCProperties
 
 !bibtex bibliography
+
+!tag name=ThermalUCProperties pairs=module:solid_properties system:solidproperties

@@ -23,3 +23,5 @@ that arise from the gradient interface energy are handled separately in the
 !syntax children /Kernels/ADAllenCahn
 
 !bibtex bibliography
+
+!tag name=ADAllenCahn pairs=module:phase_field system:kernels

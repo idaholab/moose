@@ -14,3 +14,5 @@ as material properties by some other material object.
 !syntax inputs /Materials/SoundspeedMat
 
 !syntax children /Materials/SoundspeedMat
+
+!tag name=SoundspeedMat pairs=module:navier_stokes system:materials

@@ -9,3 +9,5 @@ More information about `Executioners` may be found on the
 [Executioners syntax documentation](syntax/Executioner/index.md).
 
 !syntax parameters /Executioner/CreateExecutionerAction
+
+!tag name=CreateExecutionerAction pairs=module:framework system:actions

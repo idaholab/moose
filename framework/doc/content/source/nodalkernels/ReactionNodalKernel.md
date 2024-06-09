@@ -18,3 +18,5 @@ being applied to.
 !syntax inputs /NodalKernels/ReactionNodalKernel
 
 !syntax children /NodalKernels/ReactionNodalKernel
+
+!tag name=ReactionNodalKernel pairs=module:framework system:nodalkernels

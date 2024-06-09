@@ -15,3 +15,5 @@ This material generates new material properties that sum up the values and deriv
 !syntax inputs /Materials/DerivativeSumMaterial
 
 !syntax children /Materials/DerivativeSumMaterial
+
+!tag name=DerivativeSumMaterial pairs=module:framework system:materials

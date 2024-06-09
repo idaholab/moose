@@ -21,3 +21,5 @@ on all boundaries using the `exact_fn` function. The `epsilon` and `sigma` param
 !syntax inputs /BCs/DGFunctionDiffusionDirichletBC
 
 !syntax children /BCs/DGFunctionDiffusionDirichletBC
+
+!tag name=DGFunctionDiffusionDirichletBC pairs=module:framework system:bcs

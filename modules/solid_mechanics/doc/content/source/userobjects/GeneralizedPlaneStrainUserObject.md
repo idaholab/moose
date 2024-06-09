@@ -33,3 +33,5 @@ A detailed description of generalized plane strain model can be found in the [fo
 !syntax inputs /UserObjects/GeneralizedPlaneStrainUserObject
 
 !syntax children /UserObjects/GeneralizedPlaneStrainUserObject
+
+!tag name=GeneralizedPlaneStrainUserObject pairs=module:solid_mechanics system:userobjects

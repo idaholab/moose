@@ -16,3 +16,5 @@ where $\mathcal{A}$ is solution domain, and $\sigma_{zz}$ is the normal out-of-p
 !syntax inputs /ScalarKernels/GeneralizedPlaneStrainPD
 
 !syntax children /ScalarKernels/GeneralizedPlaneStrainPD
+
+!tag name=GeneralizedPlaneStrainPD pairs=module:peridynamics system:scalarkernels

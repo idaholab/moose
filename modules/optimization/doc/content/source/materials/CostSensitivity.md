@@ -21,3 +21,5 @@ constraints are not only based on volume but also on an additional cost function
 !syntax inputs /Materials/CostSensitivity
 
 !syntax children /Materials/CostSensitivity
+
+!tag name=CostSensitivity pairs=module:optimization system:materials

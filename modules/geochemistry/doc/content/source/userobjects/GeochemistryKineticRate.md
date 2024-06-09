@@ -210,3 +210,5 @@ This is similar to the [sulfate reducer](bio_sulfate.md) model.
 !syntax inputs /UserObjects/GeochemistryKineticRate
 
 !syntax children /UserObjects/GeochemistryKineticRate
+
+!tag name=GeochemistryKineticRate pairs=module:geochemistry system:userobjects

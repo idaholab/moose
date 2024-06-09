@@ -11,3 +11,5 @@
 !syntax children /Kernels/ConservedLangevinNoise
 
 !bibtex bibliography
+
+!tag name=ConservedLangevinNoise pairs=module:phase_field system:kernels

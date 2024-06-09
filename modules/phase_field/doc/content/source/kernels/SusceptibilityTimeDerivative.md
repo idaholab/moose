@@ -21,3 +21,5 @@ See also [TimeDerivative](/TimeDerivative.md).
 !syntax inputs /Kernels/SusceptibilityTimeDerivative
 
 !syntax children /Kernels/SusceptibilityTimeDerivative
+
+!tag name=SusceptibilityTimeDerivative pairs=module:phase_field system:kernels

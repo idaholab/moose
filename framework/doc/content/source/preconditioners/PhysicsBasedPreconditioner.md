@@ -59,3 +59,5 @@ When using `type = PBP`, MOOSE will set `solve_type = JFNK` automatically.
 !syntax inputs /Preconditioning/PBP
 
 !syntax children /Preconditioning/PBP
+
+!tag name=PhysicsBasedPreconditioner pairs=module:framework system:preconditioners

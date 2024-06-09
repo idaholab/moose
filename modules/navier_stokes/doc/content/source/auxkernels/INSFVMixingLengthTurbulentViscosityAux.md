@@ -14,3 +14,5 @@ model:
 !syntax inputs /AuxKernels/INSFVMixingLengthTurbulentViscosityAux
 
 !syntax children /AuxKernels/INSFVMixingLengthTurbulentViscosityAux
+
+!tag name=INSFVMixingLengthTurbulentViscosityAux pairs=module:navier_stokes system:auxkernels

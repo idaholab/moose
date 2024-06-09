@@ -13,3 +13,5 @@ It can be added through the [GrainGrowthAction](/GrainGrowthAction.md).
 !syntax children /Kernels/ACGBPoly
 
 !bibtex bibliography
+
+!tag name=ACGBPoly pairs=module:phase_field system:kernels

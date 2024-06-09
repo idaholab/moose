@@ -40,3 +40,5 @@ block.
 !syntax inputs /AuxKernels/CylindricalRankTwoAux
 
 !syntax children /AuxKernels/CylindricalRankTwoAux
+
+!tag name=CylindricalRankTwoAux pairs=module:solid_mechanics system:auxkernels

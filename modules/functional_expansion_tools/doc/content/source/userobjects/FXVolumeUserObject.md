@@ -17,3 +17,5 @@ This `UserObject` captures the moments of an FX representing the field value ove
 !syntax inputs /UserObjects/FXVolumeUserObject
 
 !syntax children /UserObjects/FXVolumeUserObject
+
+!tag name=FXVolumeUserObject pairs=module:functional_expansion_tools system:userobjects

@@ -8,3 +8,5 @@
 
 !syntax children /Mesh/ParsedGenerateSideset
 
+
+!tag name=ParsedGenerateSideset pairs=module:framework system:meshgenerators

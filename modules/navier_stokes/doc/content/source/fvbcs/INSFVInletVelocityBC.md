@@ -14,3 +14,5 @@ from the interior.
 !syntax inputs /FVBCs/INSFVInletVelocityBC
 
 !syntax children /FVBCs/INSFVInletVelocityBC
+
+!tag name=INSFVInletVelocityBC pairs=module:navier_stokes system:fvbcs

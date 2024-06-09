@@ -40,3 +40,5 @@ satisfy the specified total volume integral.
 !syntax inputs /ICs/IntegralPreservingFunctionIC
 
 !syntax children /ICs/IntegralPreservingFunctionIC
+
+!tag name=IntegralPreservingFunctionIC pairs=module:framework system:ics

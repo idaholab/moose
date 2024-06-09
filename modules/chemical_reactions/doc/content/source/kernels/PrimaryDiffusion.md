@@ -13,3 +13,5 @@ where $\phi$ is porosity and $D$ is the diffusivity.
 !syntax inputs /Kernels/PrimaryDiffusion
 
 !syntax children /Kernels/PrimaryDiffusion
+
+!tag name=PrimaryDiffusion pairs=module:chemical_reactions system:kernels

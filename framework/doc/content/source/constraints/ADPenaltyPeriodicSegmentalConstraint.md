@@ -9,3 +9,5 @@ The `ADPenaltyPeriodicSegmentalConstraint` is the automatic differentiation vers
 !syntax inputs /Constraints/ADPenaltyPeriodicSegmentalConstraint
 
 !syntax children /Constraints/ADPenaltyPeriodicSegmentalConstraint
+
+!tag name=ADPenaltyPeriodicSegmentalConstraint pairs=module:framework system:constraints

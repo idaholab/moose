@@ -19,3 +19,5 @@ Unlike [FVDivergence.md], this kernel expects the face flux
 !syntax inputs /LinearFVKernels/LinearFVDivergence
 
 !syntax children /LinearFVKernels/LinearFVDivergence
+
+!tag name=LinearFVDivergence pairs=module:navier_stokes system:linearfvkernels

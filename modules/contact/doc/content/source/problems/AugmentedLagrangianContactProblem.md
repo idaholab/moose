@@ -13,3 +13,5 @@ The AugmentedLagrangianContactProblem manages the nested solution procedure desc
 !syntax inputs /Problem/AugmentedLagrangianContactProblem
 
 !syntax children /Problem/AugmentedLagrangianContactProblem
+
+!tag name=AugmentedLagrangianContactProblem pairs=module:contact system:problems

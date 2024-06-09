@@ -41,3 +41,5 @@ specified via [!param](/Components/HeatStructurePlate/depth).
 !syntax inputs /Components/HeatStructurePlate
 
 !syntax children /Components/HeatStructurePlate
+
+!tag name=HeatStructurePlate pairs=module:thermal_hydraulics system:components

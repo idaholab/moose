@@ -9,3 +9,5 @@ The `GeneralizedPlaneStrainUserObjectOSPD` UserObject is used to provide the res
 !syntax inputs /UserObjects/GeneralizedPlaneStrainUserObjectOSPD
 
 !syntax children /UserObjects/GeneralizedPlaneStrainUserObjectOSPD
+
+!tag name=GeneralizedPlaneStrainUserObjectOSPD pairs=module:peridynamics system:userobjects

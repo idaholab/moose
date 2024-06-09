@@ -12,3 +12,5 @@ implementation described in detail in [PCNSFVHLLC.md].
 !syntax inputs /FVKernels/PCNSFVMassHLLC
 
 !syntax children /FVKernels/PCNSFVMassHLLC
+
+!tag name=PCNSFVMassHLLC pairs=module:navier_stokes system:fvkernels

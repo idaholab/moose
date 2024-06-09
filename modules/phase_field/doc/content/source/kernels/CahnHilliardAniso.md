@@ -13,3 +13,5 @@ interface energy are handled separately in the [`CHInterface`](/CHInterface.md) 
 !syntax inputs /Kernels/CahnHilliardAniso
 
 !syntax children /Kernels/CahnHilliardAniso
+
+!tag name=CahnHilliardAniso pairs=module:phase_field system:kernels

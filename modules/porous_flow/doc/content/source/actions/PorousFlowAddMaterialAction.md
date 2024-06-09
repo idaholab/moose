@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowAddMaterialAction
 
 !syntax children /Materials/PorousFlowAddMaterialAction
+
+!tag name=PorousFlowAddMaterialAction pairs=module:porous_flow system:actions

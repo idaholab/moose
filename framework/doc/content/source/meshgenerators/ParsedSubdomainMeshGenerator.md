@@ -31,3 +31,5 @@ The final mesh output is:
 !syntax inputs /Mesh/ParsedSubdomainMeshGenerator
 
 !syntax children /Mesh/ParsedSubdomainMeshGenerator
+
+!tag name=ParsedSubdomainMeshGenerator pairs=module:framework system:meshgenerators

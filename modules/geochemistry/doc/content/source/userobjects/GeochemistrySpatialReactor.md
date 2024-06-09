@@ -10,3 +10,5 @@ Advanced users may also add `GeochemistrySpatialReactor` objects manually to the
 
 !syntax children /UserObjects/GeochemistrySpatialReactor
 
+
+!tag name=GeochemistrySpatialReactor pairs=module:geochemistry system:userobjects

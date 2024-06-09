@@ -19,3 +19,5 @@ is not guaranteed to be a point contained in the sideset.
 !syntax inputs /VectorPostprocessors/SidesetInfoVectorPostprocessor
 
 !syntax children /VectorPostprocessors/SidesetInfoVectorPostprocessor
+
+!tag name=SidesetInfoVectorPostprocessor pairs=module:framework system:vectorpostprocessors

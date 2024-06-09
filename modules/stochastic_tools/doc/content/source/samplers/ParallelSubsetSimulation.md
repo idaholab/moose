@@ -158,3 +158,5 @@ all the processors.
 !syntax inputs /Samplers/ParallelSubsetSimulation
 
 !syntax children /Samplers/ParallelSubsetSimulation
+
+!tag name=ParallelSubsetSimulation pairs=module:stochastic_tools system:samplers

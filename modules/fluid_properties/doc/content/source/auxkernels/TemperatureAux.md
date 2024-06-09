@@ -11,3 +11,5 @@ Calculates the temperature given specific volume and specific internal energy.
 !syntax children /AuxKernels/TemperatureAux
 
 !bibtex bibliography
+
+!tag name=TemperatureAux pairs=module:fluid_properties system:auxkernels

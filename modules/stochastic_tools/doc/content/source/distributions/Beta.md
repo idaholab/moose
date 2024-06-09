@@ -28,3 +28,5 @@ I_x(a,b) = \frac{1}{\Beta(a,b)}\int_0^x t^{a-1}(1-t)^{b-1}dt
 !syntax inputs /Distributions/Beta
 
 !syntax children /Distributions/Beta
+
+!tag name=Beta pairs=module:stochastic_tools system:distributions

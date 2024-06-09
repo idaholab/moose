@@ -16,3 +16,5 @@ To sample AD material properties, use `ADSampler1DReal`.
 !syntax children /VectorPostprocessors/Sampler1DReal
 
 !bibtex bibliography
+
+!tag name=Sampler1DReal pairs=module:thermal_hydraulics system:vectorpostprocessors

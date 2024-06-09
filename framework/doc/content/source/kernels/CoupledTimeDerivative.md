@@ -47,3 +47,5 @@ below:
 !syntax inputs /Kernels/CoupledTimeDerivative
 
 !syntax children /Kernels/CoupledTimeDerivative
+
+!tag name=CoupledTimeDerivative pairs=module:framework system:kernels

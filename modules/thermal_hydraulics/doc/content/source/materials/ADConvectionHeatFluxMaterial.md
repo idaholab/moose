@@ -15,3 +15,5 @@ $T_{wall}$ the wall temperature, and $T$ the fluid temperature.
 !syntax inputs /Materials/ADConvectionHeatFluxMaterial
 
 !syntax children /Materials/ADConvectionHeatFluxMaterial
+
+!tag name=ADConvectionHeatFluxMaterial pairs=module:thermal_hydraulics system:materials

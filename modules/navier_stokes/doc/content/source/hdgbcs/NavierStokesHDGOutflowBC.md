@@ -15,3 +15,5 @@ pressure, $\nu$ is the kinematic viscosity, and $\vec{u}$ is the velocity.
 !syntax inputs /HDGBCs/NavierStokesHDGOutflowBC
 
 !syntax children /HDGBCs/NavierStokesHDGOutflowBC
+
+!tag name=NavierStokesHDGOutflowBC pairs=module:navier_stokes system:hdgbcs

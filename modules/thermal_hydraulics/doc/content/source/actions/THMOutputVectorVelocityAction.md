@@ -7,3 +7,5 @@ The vector-valued option is on by default.
 !syntax parameters /Outputs/THMOutputVectorVelocityAction
 
 !bibtex bibliography
+
+!tag name=THMOutputVectorVelocityAction pairs=module:thermal_hydraulics system:actions

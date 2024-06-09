@@ -10,3 +10,5 @@ between two functions in time or along a spatial axis.
 !syntax inputs /Functions/CubicTransitionFunction
 
 !syntax children /Functions/CubicTransitionFunction
+
+!tag name=CubicTransitionFunction pairs=module:thermal_hydraulics system:functions

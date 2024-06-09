@@ -14,3 +14,5 @@ The expression of the diffusive flux in this object is generic, as described, an
 !syntax inputs /Postprocessors/SideDiffusiveFluxAverage
 
 !syntax children /Postprocessors/SideDiffusiveFluxAverage
+
+!tag name=SideDiffusiveFluxAverage pairs=module:framework system:postprocessors

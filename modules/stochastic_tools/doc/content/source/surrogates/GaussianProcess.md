@@ -15,3 +15,5 @@ A desirable aspect of Gaussian process modeling is that in addition to returning
 !syntax inputs /Surrogates/GaussianProcess
 
 !syntax children /Surrogates/GaussianProcess
+
+!tag name=GaussianProcess pairs=module:stochastic_tools system:surrogates

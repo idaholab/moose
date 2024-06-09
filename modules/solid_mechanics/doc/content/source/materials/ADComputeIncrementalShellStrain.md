@@ -11,3 +11,5 @@ This class computes the incremental small strain for shell elements. Please refe
 !syntax inputs /Materials/ADComputeIncrementalShellStrain
 
 !syntax children /Materials/ADComputeIncrementalShellStrain
+
+!tag name=ADComputeIncrementalShellStrain pairs=module:solid_mechanics system:materials

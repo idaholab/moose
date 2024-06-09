@@ -10,3 +10,5 @@ of a [ShaftConnectedCompressor1Phase.md].
 !syntax children /Postprocessors/ShaftConnectedCompressor1PhasePostprocessor
 
 !bibtex bibliography
+
+!tag name=ShaftConnectedCompressor1PhasePostprocessor pairs=module:thermal_hydraulics system:postprocessors

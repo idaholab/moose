@@ -19,3 +19,5 @@ Note that the grains are created with sharp interfaces.
 !syntax inputs /ICs/TricrystalTripleJunctionIC
 
 !syntax children /ICs/TricrystalTripleJunctionIC
+
+!tag name=TricrystalTripleJunctionIC pairs=module:phase_field system:ics

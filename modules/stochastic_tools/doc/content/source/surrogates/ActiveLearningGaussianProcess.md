@@ -30,3 +30,4 @@ using active learning.
 !syntax inputs /Trainers/ActiveLearningGaussianProcess
 
 !syntax children /Trainers/ActiveLearningGaussianProcess
+!tag name=ActiveLearningGaussianProcess pairs=module:stochastic_tools system:surrogates

@@ -27,3 +27,5 @@ Two-dimensional Cartesian geometries are not restricted to be in or parallel to 
 !syntax inputs /BCs/GapHeatTransfer
 
 !syntax children /BCs/GapHeatTransfer
+
+!tag name=GapHeatTransfer pairs=module:heat_transfer system:bcs

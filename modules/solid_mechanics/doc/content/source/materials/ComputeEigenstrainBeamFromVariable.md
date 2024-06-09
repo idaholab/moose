@@ -15,3 +15,5 @@
 !syntax inputs /Materials/ComputeEigenstrainBeamFromVariable
 
 !syntax children /Materials/ComputeEigenstrainBeamFromVariable
+
+!tag name=ComputeEigenstrainBeamFromVariable pairs=module:solid_mechanics system:materials

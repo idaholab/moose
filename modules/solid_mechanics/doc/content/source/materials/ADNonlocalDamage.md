@@ -17,3 +17,5 @@ material properties generated can be used with automatic differentiation.
 !syntax children /Materials/ADNonlocalDamage
 
 !bibtex bibliography
+
+!tag name=ADNonlocalDamage pairs=module:solid_mechanics system:materials

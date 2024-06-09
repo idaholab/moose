@@ -7,3 +7,5 @@
 !syntax inputs /AuxKernels/NSVelocityAux
 
 !syntax children /AuxKernels/NSVelocityAux
+
+!tag name=NSVelocityAux pairs=module:navier_stokes system:auxkernels

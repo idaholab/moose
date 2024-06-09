@@ -23,3 +23,5 @@ to ([tosub]) and from ([fromsub]) sub-applications.
 !syntax inputs /Transfers/MultiAppScalarToAuxScalarTransfer
 
 !syntax children /Transfers/MultiAppScalarToAuxScalarTransfer
+
+!tag name=MultiAppScalarToAuxScalarTransfer pairs=module:framework system:transfers

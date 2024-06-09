@@ -19,3 +19,5 @@ The PointwiseRenormalizeVector user object is derived from `GeneralUserObject` a
 !syntax children /UserObjects/PointwiseRenormalizeVector
 
 !bibtex bibliography
+
+!tag name=PointwiseRenormalizeVector pairs=module:framework system:userobjects

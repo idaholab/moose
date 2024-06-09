@@ -19,3 +19,5 @@ independently.
 !syntax inputs /Mesh/GeneratedMeshGenerator
 
 !syntax children /Mesh/GeneratedMeshGenerator
+
+!tag name=GeneratedMeshGenerator pairs=module:framework system:meshgenerators

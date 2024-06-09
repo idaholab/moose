@@ -28,3 +28,5 @@ norms and errors of field variables.
 !syntax inputs /AuxKernels/ElementLpNormAux
 
 !syntax children /AuxKernels/ElementLpNormAux
+
+!tag name=ElementLpNormAux pairs=module:framework system:auxkernels

@@ -77,3 +77,5 @@ J &=& \phi_j \frac{\partial R}{\partial v} \\
 !syntax inputs /Kernels/KKSMultiACBulkC
 
 !syntax children /Kernels/KKSMultiACBulkC
+
+!tag name=KKSMultiACBulkC pairs=module:phase_field system:kernels

@@ -13,3 +13,5 @@ This file sets up a small system of 2 grains and uses ExpressionBuilder to creat
 !syntax inputs /Materials/EBCoupledVarTest
 
 !syntax children /Materials/EBCoupledVarTest
+
+!tag name=EBCoupledVarTest pairs=module:test system:materials

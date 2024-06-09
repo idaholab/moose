@@ -11,3 +11,5 @@ This class computes the inertial force using a consistent mass matrix and also c
 !syntax inputs /Kernels/InertialForce
 
 !syntax children /Kernels/InertialForce
+
+!tag name=InertialForce pairs=module:solid_mechanics system:kernels

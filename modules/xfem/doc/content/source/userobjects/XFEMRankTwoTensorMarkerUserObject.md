@@ -19,3 +19,5 @@ The determination of whether an element cracks is based either on the maximum va
 !syntax inputs /UserObjects/XFEMRankTwoTensorMarkerUserObject
 
 !syntax children /UserObjects/XFEMRankTwoTensorMarkerUserObject
+
+!tag name=XFEMRankTwoTensorMarkerUserObject pairs=module:xfem system:userobjects

@@ -12,3 +12,5 @@ In the training input file we setup a GaussianProcessTrainer, with a SquaredExpo
 In the surrogate input file, the GaussianProcess surrogate recreates the covariance function used in training and links to it.
 
 !listing test/tests/surrogates/gaussian_process/GP_squared_exponential_testing.i block=Surrogates
+
+!tag name=LoadCovarianceDataAction pairs=module:stochastic_tools system:actions

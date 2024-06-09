@@ -18,3 +18,5 @@ governing conservation laws.
 !syntax children /Materials/ConstantDensityThermalSolidPropertiesMaterial
 
 !bibtex bibliography
+
+!tag name=ConstantDensityThermalSolidPropertiesMaterial pairs=module:solid_properties system:materials

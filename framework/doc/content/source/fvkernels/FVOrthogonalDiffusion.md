@@ -22,3 +22,5 @@ the `neighbor` centroid.
 !syntax inputs /FVKernels/FVOrthogonalDiffusion
 
 !syntax children /FVKernels/FVOrthogonalDiffusion
+
+!tag name=FVOrthogonalDiffusion pairs=module:framework system:fvkernels

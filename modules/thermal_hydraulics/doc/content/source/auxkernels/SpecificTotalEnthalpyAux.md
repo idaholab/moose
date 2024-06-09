@@ -18,3 +18,5 @@ $\rho E A$, $\rho A$ and $\rho$ are variables usually defined by the [Components
 !syntax inputs /AuxKernels/SpecificTotalEnthalpyAux
 
 !syntax children /AuxKernels/SpecificTotalEnthalpyAux
+
+!tag name=SpecificTotalEnthalpyAux pairs=module:thermal_hydraulics system:auxkernels

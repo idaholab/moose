@@ -17,3 +17,5 @@ The computed $u$ and $\mathbf{v}$ may then be used by the [PorousFlowFluxLimited
 !syntax inputs /UserObjects/PorousFlowAdvectiveFluxCalculatorSaturated
 
 !syntax children /UserObjects/PorousFlowAdvectiveFluxCalculatorSaturated
+
+!tag name=PorousFlowAdvectiveFluxCalculatorSaturated pairs=module:porous_flow system:userobjects

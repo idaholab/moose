@@ -11,3 +11,5 @@ The displacement field consists of the summation of the standard displacements a
 !syntax inputs /Kernels/CrackTipEnrichmentStressDivergenceTensors
 
 !syntax children /Kernels/CrackTipEnrichmentStressDivergenceTensors
+
+!tag name=CrackTipEnrichmentStressDivergenceTensors pairs=module:xfem system:kernels

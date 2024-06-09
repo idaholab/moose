@@ -40,3 +40,5 @@ respectively.
 !syntax parameters /OptimizationReporter/GeneralOptimization
 
 !syntax inputs /OptimizationReporter/GeneralOptimization
+
+!tag name=GeneralOptimization pairs=module:optimization system:optimizationreporters

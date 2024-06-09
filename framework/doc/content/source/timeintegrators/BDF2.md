@@ -24,3 +24,5 @@ U(t+2\Delta t) = \dfrac{4}{3}U(t+\Delta t) - \dfrac{1}{3}U(t) + \dfrac{2}{3} \De
 !syntax inputs /Executioner/TimeIntegrator/BDF2
 
 !syntax children /Executioner/TimeIntegrator/BDF2
+
+!tag name=BDF2 pairs=module:framework system:timeintegrators

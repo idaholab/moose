@@ -9,3 +9,5 @@
 !syntax children /Materials/ADFanningFrictionFactorMaterial
 
 !bibtex bibliography
+
+!tag name=ADFanningFrictionFactorMaterial pairs=module:test system:materials

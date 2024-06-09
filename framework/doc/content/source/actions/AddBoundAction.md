@@ -6,3 +6,5 @@ Additional documentation may be found on the [syntax page](syntax/Bounds/index.m
 in each `Bounds` object's individual documentation.
 
 !syntax parameters /Bounds/AddBoundAction
+
+!tag name=AddBoundAction pairs=module:framework system:actions

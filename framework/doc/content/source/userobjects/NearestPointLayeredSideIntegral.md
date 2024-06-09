@@ -13,3 +13,5 @@ is computed for the sides on each individual subdomain separately.
 !syntax children /UserObjects/NearestPointLayeredSideIntegral
 
 !bibtex bibliography
+
+!tag name=NearestPointLayeredSideIntegral pairs=module:framework system:userobjects

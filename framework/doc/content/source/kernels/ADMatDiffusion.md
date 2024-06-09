@@ -24,3 +24,5 @@ is given using an `ADMaterial` derived object.
 !syntax children /Kernels/ADMatDiffusion
 
 !bibtex bibliography
+
+!tag name=ADMatDiffusion pairs=module:framework system:kernels

@@ -7,3 +7,5 @@ It builds a mapping between elements/faces for one of the following cases:
 - 2D-to-3D: A 2D boundary and a 3D boundary
 
 Each element on the primary side maps to multiple elements on the secondary side.
+
+!tag name=MeshAlignmentOneToMany pairs=module:thermal_hydraulics system:utils

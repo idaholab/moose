@@ -14,3 +14,5 @@ chosen variable's value across the boundary with each of its face neighbors.
 !syntax inputs /Adaptivity/Indicators/ValueJumpIndicator
 
 !syntax children /Adaptivity/Indicators/ValueJumpIndicator
+
+!tag name=ValueJumpIndicator pairs=module:framework system:indicators

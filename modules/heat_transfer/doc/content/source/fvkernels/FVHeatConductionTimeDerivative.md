@@ -16,3 +16,5 @@ constant pressure and $u$ the temperature variable.
 !syntax inputs /FVKernels/FVHeatConductionTimeDerivative
 
 !syntax children /FVKernels/FVHeatConductionTimeDerivative
+
+!tag name=FVHeatConductionTimeDerivative pairs=module:heat_transfer system:fvkernels

@@ -15,3 +15,5 @@ custom mapping from coupled variable to function parameters can be supplied.
 !syntax inputs /Materials/CoupledValueFunctionMaterial
 
 !syntax children /Materials/CoupledValueFunctionMaterial
+
+!tag name=CoupledValueFunctionMaterial pairs=module:framework system:materials

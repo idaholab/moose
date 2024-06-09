@@ -25,3 +25,5 @@ For an implementation with an anisotropic (tensorial) mobility see
 !syntax children /Kernels/ADSplitCHWRes
 
 !bibtex bibliography
+
+!tag name=ADSplitCHWRes pairs=module:phase_field system:kernels

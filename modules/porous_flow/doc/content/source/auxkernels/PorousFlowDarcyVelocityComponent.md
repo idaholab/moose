@@ -17,3 +17,5 @@ can be used.
 !syntax inputs /AuxKernels/PorousFlowDarcyVelocityComponent
 
 !syntax children /AuxKernels/PorousFlowDarcyVelocityComponent
+
+!tag name=PorousFlowDarcyVelocityComponent pairs=module:porous_flow system:auxkernels

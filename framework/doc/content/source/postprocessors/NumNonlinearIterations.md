@@ -16,3 +16,5 @@ solve.
 !syntax inputs /Postprocessors/NumNonlinearIterations
 
 !syntax children /Postprocessors/NumNonlinearIterations
+
+!tag name=NumNonlinearIterations pairs=module:framework system:postprocessors

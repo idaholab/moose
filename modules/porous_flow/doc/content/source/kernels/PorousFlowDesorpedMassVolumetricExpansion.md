@@ -13,3 +13,5 @@ where all parameters are defined in the [nomenclature](/nomenclature.md).
 !syntax inputs /Kernels/PorousFlowDesorpedMassVolumetricExpansion
 
 !syntax children /Kernels/PorousFlowDesorpedMassVolumetricExpansion
+
+!tag name=PorousFlowDesorpedMassVolumetricExpansion pairs=module:porous_flow system:kernels

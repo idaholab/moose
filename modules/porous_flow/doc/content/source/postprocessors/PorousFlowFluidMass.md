@@ -26,3 +26,5 @@ The flag `use_displaced_mesh = false` is set internally by this Postprocessor, a
 !syntax inputs /Postprocessors/PorousFlowFluidMass
 
 !syntax children /Postprocessors/PorousFlowFluidMass
+
+!tag name=PorousFlowFluidMass pairs=module:porous_flow system:postprocessors

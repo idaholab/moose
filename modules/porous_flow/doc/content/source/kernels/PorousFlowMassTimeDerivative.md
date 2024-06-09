@@ -24,3 +24,5 @@ Because it contains volumetric strain, this Kernel always sets `use_displaced_me
 !syntax inputs /Kernels/PorousFlowMassTimeDerivative
 
 !syntax children /Kernels/PorousFlowMassTimeDerivative
+
+!tag name=PorousFlowMassTimeDerivative pairs=module:porous_flow system:kernels

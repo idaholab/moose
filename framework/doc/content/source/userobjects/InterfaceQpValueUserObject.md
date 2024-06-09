@@ -27,3 +27,5 @@ The stored value can be converted into an AuxVariable by using [InterfaceValueUs
 !syntax inputs /UserObjects/InterfaceQpValueUserObject
 
 !syntax children /UserObjects/InterfaceQpValueUserObject
+
+!tag name=InterfaceQpValueUserObject pairs=module:framework system:userobjects

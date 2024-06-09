@@ -9,3 +9,5 @@ calculation from the standard wall function [INSFVWallFunctionBC](source/fvbcs/I
 !syntax inputs /AuxKernels/WallFunctionYPlusAux
 
 !syntax children /AuxKernels/WallFunctionYPlusAux
+
+!tag name=WallFunctionYPlusAux pairs=module:navier_stokes system:auxkernels

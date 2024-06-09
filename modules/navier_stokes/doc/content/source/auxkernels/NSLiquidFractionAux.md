@@ -30,3 +30,5 @@ The capping of the liquid fraction is done via a smooth function in `MOOSE` to a
 !syntax inputs /AuxKernels/NSLiquidFractionAux
 
 !syntax children /AuxKernels/NSLiquidFractionAux
+
+!tag name=NSLiquidFractionAux pairs=module:navier_stokes system:auxkernels

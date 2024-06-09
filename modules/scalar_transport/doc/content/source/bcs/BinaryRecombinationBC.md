@@ -20,3 +20,5 @@ reactions occurring at a boundary.
 !syntax inputs /BCs/BinaryRecombinationBC
 
 !syntax children /BCs/BinaryRecombinationBC
+
+!tag name=BinaryRecombinationBC pairs=module:scalar_transport system:bcs

@@ -24,3 +24,5 @@ listing test/tests/materials/compliance_sensitivity/2d_mbb.i block=UserObjects/c
 !syntax inputs /UserObjects/SensitivityFilter
 
 !syntax children /UserObjects/SensitivityFilter
+
+!tag name=SensitivityFilter pairs=module:optimization system:userobjects

@@ -43,3 +43,5 @@ The follow example configures a large deformation Neo-Hookean model with $\lambd
 !syntax inputs /Materials/ComputeNeoHookeanStress
 
 !syntax children /Materials/ComputeNeoHookeanStress
+
+!tag name=ComputeNeoHookeanStress pairs=module:solid_mechanics system:materials

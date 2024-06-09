@@ -20,3 +20,5 @@ The Jacobian is computed with automatic differentiation.
 !syntax inputs /FVKernels/WCNSFVEnergyTimeDerivative
 
 !syntax children /FVKernels/WCNSFVEnergyTimeDerivative
+
+!tag name=WCNSFVEnergyTimeDerivative pairs=module:navier_stokes system:fvkernels

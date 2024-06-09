@@ -18,3 +18,5 @@ field and store it in the `id` auxiliary variable.
 !syntax inputs /AuxKernels/ElementIntegerAux
 
 !syntax children /AuxKernels/ElementIntegerAux
+
+!tag name=ElementIntegerAux pairs=module:framework system:auxkernels

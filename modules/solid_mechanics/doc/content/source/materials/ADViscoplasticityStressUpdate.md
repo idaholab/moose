@@ -187,3 +187,5 @@ provided in the [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/in
 !syntax children /Materials/ADViscoplasticityStressUpdate
 
 !bibtex bibliography
+
+!tag name=ADViscoplasticityStressUpdate pairs=module:solid_mechanics system:materials

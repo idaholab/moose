@@ -13,3 +13,5 @@ It currently assumes:
 !syntax inputs /Materials/MeshAlignmentVariableTransferMaterial
 
 !syntax children /Materials/MeshAlignmentVariableTransferMaterial
+
+!tag name=MeshAlignmentVariableTransferMaterial pairs=module:thermal_hydraulics system:materials

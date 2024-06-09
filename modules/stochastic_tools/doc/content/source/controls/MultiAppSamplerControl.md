@@ -64,3 +64,5 @@ If `[]` is used, it must be provided to every parameter. By default, if the `[]`
 !syntax children /Controls/MultiAppSamplerControl
 
 !bibtex bibliography
+
+!tag name=MultiAppSamplerControl pairs=module:stochastic_tools system:controls

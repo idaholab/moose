@@ -22,3 +22,5 @@ see the paper [!cite](jeong1995).
 !syntax inputs /AuxKernels/INSQCriterionAux
 
 !syntax children /AuxKernels/INSQCriterionAux
+
+!tag name=INSQCriterionAux pairs=module:navier_stokes system:auxkernels

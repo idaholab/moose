@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowPorosityHMBiotModulus
 
 !syntax children /Materials/PorousFlowPorosityHMBiotModulus
+
+!tag name=PorousFlowPorosityHMBiotModulus pairs=module:porous_flow system:materials

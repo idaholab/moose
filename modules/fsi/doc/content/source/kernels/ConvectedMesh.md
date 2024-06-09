@@ -20,3 +20,5 @@ dynamic, e.g. in simulations of fluid-structure interaction.
 !syntax inputs /Kernels/ConvectedMesh
 
 !syntax children /Kernels/ConvectedMesh
+
+!tag name=ConvectedMesh pairs=module:fsi system:kernels

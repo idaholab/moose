@@ -15,3 +15,5 @@ This class is used to define an evolving cutting plane for 2D XFEM simulations b
 !syntax inputs /UserObjects/MeshCut2DFunctionUserObject
 
 !syntax children /UserObjects/MeshCut2DFunctionUserObject
+
+!tag name=MeshCut2DFunctionUserObject pairs=module:xfem system:userobjects

@@ -26,3 +26,5 @@ Note the negative sign, which does *not* appear in [Reaction](/Reaction.md) or
 !syntax inputs /Kernels/ADMatReaction
 
 !syntax children /Kernels/ADMatReaction
+
+!tag name=ADMatReaction pairs=module:framework system:kernels

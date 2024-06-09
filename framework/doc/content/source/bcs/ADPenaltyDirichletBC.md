@@ -81,3 +81,5 @@ in MOOSE some time in the future.
 !syntax inputs /BCs/ADPenaltyDirichletBC
 
 !syntax children /BCs/ADPenaltyDirichletBC
+
+!tag name=ADPenaltyDirichletBC pairs=module:framework system:bcs

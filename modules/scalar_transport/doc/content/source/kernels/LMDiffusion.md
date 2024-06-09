@@ -14,3 +14,5 @@ on-diagonal dependence in the LM equation. See [LMKernel.md] for more details.
 !syntax inputs /Kernels/LMDiffusion
 
 !syntax children /Kernels/LMDiffusion
+
+!tag name=LMDiffusion pairs=module:scalar_transport system:kernels

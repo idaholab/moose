@@ -51,3 +51,5 @@ For three-dimensional problems, a norm of the stress difference and a representa
 !syntax children /Materials/ADHillCreepStressUpdate
 
 !bibtex bibliography
+
+!tag name=HillCreepStressUpdate pairs=module:solid_mechanics system:materials

@@ -26,3 +26,5 @@ The use of scalar variables is intended for coupling with thermal hydraulics com
 !syntax inputs /BCs/INSFEFluidEnergyBC
 
 !syntax children /BCs/INSFEFluidEnergyBC
+
+!tag name=INSFEFluidEnergyBC pairs=module:navier_stokes system:bcs

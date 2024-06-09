@@ -21,3 +21,4 @@ stick constraint.
 !syntax inputs /Constraints/NodalStickConstraint
 
 !syntax children /Constraints/NodalStickConstraint
+!tag name=NodalStickConstraint pairs=module:solid_mechanics system:constraints

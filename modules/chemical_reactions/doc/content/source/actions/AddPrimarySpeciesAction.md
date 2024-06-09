@@ -16,3 +16,5 @@ scaling.
 !syntax inputs /ReactionNetwork/SolidKineticReactions/AddPrimarySpeciesAction
 
 !syntax children /ReactionNetwork/AqueousEquilibriumReactions/AddPrimarySpeciesAction
+
+!tag name=AddPrimarySpeciesAction pairs=module:chemical_reactions system:actions

@@ -12,3 +12,5 @@ function evaluates negative, then this kernel is a sink term.
 !syntax inputs /Kernels/INSADEnergySource
 
 !syntax children /Kernels/INSADEnergySource
+
+!tag name=INSADEnergySource pairs=module:navier_stokes system:kernels

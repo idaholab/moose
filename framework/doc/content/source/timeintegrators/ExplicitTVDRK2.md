@@ -40,3 +40,5 @@ which should never be marked "implicit=false".
 !syntax inputs /Executioner/TimeIntegrator/ExplicitTVDRK2
 
 !syntax children /Executioner/TimeIntegrator/ExplicitTVDRK2
+
+!tag name=ExplicitTVDRK2 pairs=module:framework system:timeintegrators

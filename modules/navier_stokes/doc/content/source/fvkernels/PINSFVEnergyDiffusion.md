@@ -27,3 +27,5 @@ conductivity is not well-defined and will be automatically changed to an average
 !syntax inputs /FVKernels/PINSFVEnergyDiffusion
 
 !syntax children /FVKernels/PINSFVEnergyDiffusion
+
+!tag name=PINSFVEnergyDiffusion pairs=module:navier_stokes system:fvkernels

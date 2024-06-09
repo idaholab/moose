@@ -41,3 +41,5 @@ as well as between the inlet and a midsection.
 !syntax inputs /Postprocessors/PressureDrop
 
 !syntax children /Postprocessors/PressureDrop
+
+!tag name=PressureDrop pairs=module:navier_stokes system:postprocessors

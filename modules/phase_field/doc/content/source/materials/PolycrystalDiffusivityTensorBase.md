@@ -19,3 +19,5 @@ tensor in your model.
 !syntax children /Materials/PolycrystalDiffusivityTensorBase
 
 !bibtex bibliography
+
+!tag name=PolycrystalDiffusivityTensorBase pairs=module:phase_field system:materials

@@ -19,3 +19,5 @@ component, users do not need to add it to an input file.
 !syntax inputs /UserObjects/ADHeatFluxFromHeatStructure3EqnUserObject
 
 !syntax children /UserObjects/ADHeatFluxFromHeatStructure3EqnUserObject
+
+!tag name=ADHeatFluxFromHeatStructure3EqnUserObject pairs=module:thermal_hydraulics system:userobjects

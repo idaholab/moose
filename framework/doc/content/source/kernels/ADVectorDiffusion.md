@@ -11,3 +11,5 @@ computed automatically using automatic differentiation.
 !syntax inputs /Kernels/ADVectorDiffusion
 
 !syntax children /Kernels/ADVectorDiffusion
+
+!tag name=ADVectorDiffusion pairs=module:framework system:kernels

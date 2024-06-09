@@ -19,3 +19,5 @@ Please refer to [ADOneDEnergyWallHeating.md] for the heat flux formulation.
 !syntax inputs /Components/HeatTransferFromExternalAppTemperature1Phase
 
 !syntax children /Components/HeatTransferFromExternalAppTemperature1Phase
+
+!tag name=HeatTransferFromExternalAppTemperature1Phase pairs=module:thermal_hydraulics system:components

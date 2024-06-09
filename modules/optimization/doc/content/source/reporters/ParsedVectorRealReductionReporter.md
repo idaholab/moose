@@ -24,3 +24,5 @@ The scalar reporter computed by `ParsedVectorRealReductionReporter` is then be t
 !syntax inputs /Reporters/ParsedVectorRealReductionReporter
 
 !syntax children /Reporters/ParsedVectorRealReductionReporter
+
+!tag name=ParsedVectorRealReductionReporter pairs=module:optimization system:reporters

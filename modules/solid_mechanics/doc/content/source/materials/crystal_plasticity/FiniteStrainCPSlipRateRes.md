@@ -81,3 +81,5 @@ of crystal defects (e.g. dislocations, point defects) should be given in
 !syntax children /Materials/FiniteStrainCPSlipRateRes
 
 !bibtex bibliography
+
+!tag name=FiniteStrainCPSlipRateRes pairs=module:solid_mechanics system:materials

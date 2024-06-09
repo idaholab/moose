@@ -14,3 +14,5 @@ represents a physical location, e.g. on an element or a face.
 !syntax inputs /FunctorMaterials/RhoFromPTFunctorMaterial
 
 !syntax children /FunctorMaterials/RhoFromPTFunctorMaterial
+
+!tag name=RhoFromPTFunctorMaterial pairs=module:navier_stokes system:functormaterials

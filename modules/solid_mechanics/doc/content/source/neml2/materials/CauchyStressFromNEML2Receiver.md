@@ -12,3 +12,5 @@ include stress, derivative of stress w.r.t. strain, and internal variables.
 ## Example Input Syntax
 
 !syntax parameters /Materials/CauchyStressFromNEML2Receiver
+
+!tag name=CauchyStressFromNEML2Receiver pairs=module:solid_mechanics system:neml2

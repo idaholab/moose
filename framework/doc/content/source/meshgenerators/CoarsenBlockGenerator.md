@@ -52,3 +52,5 @@ side. This is not implemented.
 !syntax inputs /Mesh/CoarsenBlockGenerator
 
 !syntax children /Mesh/CoarsenBlockGenerator
+
+!tag name=CoarsenBlockGenerator pairs=module:framework system:meshgenerators

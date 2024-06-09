@@ -11,3 +11,5 @@ More information about `VectorPostprocessors` may be found on the
 [VectorPostprocessors syntax documentation](syntax/VectorPostprocessors/index.md).
 
 !syntax parameters /VectorPostprocessors/AddVectorPostprocessorAction
+
+!tag name=AddVectorPostprocessorAction pairs=module:framework system:actions

@@ -22,3 +22,5 @@ In this example, the `min` and `max` postprocessors are combined in the `min_max
 !syntax inputs /VectorPostprocessors/VectorOfPostprocessors
 
 !syntax children /VectorPostprocessors/VectorOfPostprocessors
+
+!tag name=VectorOfPostprocessors pairs=module:framework system:vectorpostprocessors

@@ -22,3 +22,5 @@ about the different template instantiations are given below.
 !syntax inputs /FVBCs/PCNSFVHLLCSpecifiedPressureMassBC
 
 !syntax children /FVBCs/PCNSFVHLLCSpecifiedPressureMassBC
+
+!tag name=PCNSFVHLLCMassBC pairs=module:navier_stokes system:fvbcs

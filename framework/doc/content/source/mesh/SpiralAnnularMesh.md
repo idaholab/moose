@@ -40,3 +40,4 @@ The resulting mesh looks like this :
 !syntax inputs /Mesh/SpiralAnnularMesh
 
 !syntax children /Mesh/SpiralAnnularMesh
+!tag name=SpiralAnnularMesh pairs=module:framework system:mesh

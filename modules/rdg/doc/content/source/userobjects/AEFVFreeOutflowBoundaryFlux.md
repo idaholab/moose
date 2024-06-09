@@ -7,3 +7,5 @@
 !syntax inputs /UserObjects/AEFVFreeOutflowBoundaryFlux
 
 !syntax children /UserObjects/AEFVFreeOutflowBoundaryFlux
+
+!tag name=AEFVFreeOutflowBoundaryFlux pairs=module:rdg system:userobjects

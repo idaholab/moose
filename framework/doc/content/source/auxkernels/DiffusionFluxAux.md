@@ -16,3 +16,5 @@ The expression of the diffusive flux in this object is generic, as described, an
 !syntax inputs /AuxKernels/DiffusionFluxAux
 
 !syntax children /AuxKernels/DiffusionFluxAux
+
+!tag name=DiffusionFluxAux pairs=module:framework system:auxkernels

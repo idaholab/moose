@@ -120,3 +120,5 @@ Convergence for those variables that are not given in `group_variables` is check
 !syntax inputs /Problem/ReferenceResidualProblem
 
 !syntax children /Problem/ReferenceResidualProblem
+
+!tag name=ReferenceResidualProblem pairs=module:framework system:problems

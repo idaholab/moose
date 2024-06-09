@@ -10,3 +10,5 @@ This action creates the [DynamicStressDivergenceTensors](/DynamicStressDivergenc
 This action is deprecated. Please use the [DynamicSolidMechanicsPhysics.md] `Physics` syntax instead.
 
 !syntax parameters /Kernels/DynamicTensorMechanics/LegacyDynamicTensorMechanicsAction
+
+!tag name=DynamicTensorMechanicsAction pairs=module:solid_mechanics system:actions

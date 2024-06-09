@@ -51,3 +51,5 @@ names, otherwise it is not clear what the boundary value of the diffusion coeffi
 !syntax inputs /FVKernels/FVDiffusion
 
 !syntax children /FVKernels/FVDiffusion
+
+!tag name=FVDiffusion pairs=module:framework system:fvkernels

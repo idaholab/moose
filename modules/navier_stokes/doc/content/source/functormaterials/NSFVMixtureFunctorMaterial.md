@@ -20,3 +20,5 @@ The name of the output properties can be defined using the [!param](/FunctorMate
 !syntax inputs /FunctorMaterials/NSFVMixtureFunctorMaterial
 
 !syntax children /FunctorMaterials/NSFVMixtureFunctorMaterial
+
+!tag name=NSFVMixtureFunctorMaterial pairs=module:navier_stokes system:functormaterials

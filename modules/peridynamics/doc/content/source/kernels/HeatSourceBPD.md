@@ -9,3 +9,5 @@ The `HeatSourceBPD` Kernel considers the heat source as a directly contribution 
 !syntax inputs /Kernels/HeatSourceBPD
 
 !syntax children /Kernels/HeatSourceBPD
+
+!tag name=HeatSourceBPD pairs=module:peridynamics system:kernels

@@ -21,3 +21,5 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 !syntax inputs /Physics/NavierStokes/Turbulence/WCNSFVTurbulencePhysics
 
 !syntax children /Physics/NavierStokes/Turbulence/WCNSFVTurbulencePhysics
+
+!tag name=WCNSFVTurbulencePhysics pairs=module:navier_stokes system:physics

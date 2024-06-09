@@ -10,3 +10,5 @@ variables, specific volume and specific internal energy.
 !syntax inputs /AuxKernels/SoundSpeedAux
 
 !syntax children /AuxKernels/SoundSpeedAux
+
+!tag name=SoundSpeedAux pairs=module:thermal_hydraulics system:auxkernels

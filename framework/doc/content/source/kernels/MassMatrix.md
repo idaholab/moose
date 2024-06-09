@@ -12,3 +12,5 @@ parameter value for [!param](/Kernels/MassMatrix/matrix_tags) or
 !syntax inputs /Kernels/MassMatrix
 
 !syntax children /Kernels/MassMatrix
+
+!tag name=MassMatrix pairs=module:framework system:kernels

@@ -11,3 +11,5 @@ This class assigns the value of the first/second time derivative of the coupled 
 !syntax inputs /AuxKernels/TestNewmarkTI
 
 !syntax children /AuxKernels/TestNewmarkTI
+
+!tag name=TestNewmarkTI pairs=module:solid_mechanics system:auxkernels

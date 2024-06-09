@@ -24,3 +24,5 @@ the `AbaqusUExternalDB` user object to correctly inform user routines.
 !syntax inputs /UserObjects/AbaqusUExternalDB
 
 !syntax children /UserObjects/AbaqusUExternalDB
+
+!tag name=AbaqusUExternalDB pairs=module:solid_mechanics system:userobjects

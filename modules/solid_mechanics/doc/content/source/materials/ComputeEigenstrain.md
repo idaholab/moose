@@ -28,3 +28,5 @@ Based on the number and values of constants provided as the argument to the `eig
 !syntax children /Materials/ComputeEigenstrain
 
 !bibtex bibliography
+
+!tag name=ComputeEigenstrain pairs=module:solid_mechanics system:materials

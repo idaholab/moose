@@ -149,3 +149,5 @@ with $r = X + u$.  However, both $n$ and $r$ depend on the displacements.  Thus,
 !syntax inputs /BCs/Pressure
 
 !syntax children /BCs/Pressure
+
+!tag name=Pressure pairs=module:solid_mechanics system:bcs

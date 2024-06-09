@@ -13,3 +13,5 @@ added to a new nodeset, which is specified by the user.
 !syntax inputs /Mesh/BoundingBoxNodeSetGenerator
 
 !syntax children /Mesh/BoundingBoxNodeSetGenerator
+
+!tag name=BoundingBoxNodeSetGenerator pairs=module:framework system:meshgenerators

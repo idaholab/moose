@@ -28,3 +28,5 @@ single numerical solution, and be well-posed.
 !syntax inputs /FVBCs/FVBoundaryIntegralValueConstraint
 
 !syntax children /FVBCs/FVBoundaryIntegralValueConstraint
+
+!tag name=FVBoundaryIntegralValueConstraint pairs=module:framework system:fvbcs

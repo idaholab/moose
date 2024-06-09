@@ -40,3 +40,5 @@ where $r_{s,copy}$ is the ghosted residual. The penalty parameter must be select
 !syntax inputs /Constraints/EqualValueEmbeddedConstraint
 
 !syntax children /Constraints/EqualValueEmbeddedConstraint
+
+!tag name=EqualValueEmbeddedConstraint pairs=module:framework system:constraints

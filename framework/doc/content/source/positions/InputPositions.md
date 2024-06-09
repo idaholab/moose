@@ -10,3 +10,5 @@ if there are many positions.
 !syntax inputs /Positions/InputPositions
 
 !syntax children /Positions/InputPositions
+
+!tag name=InputPositions pairs=module:framework system:positions

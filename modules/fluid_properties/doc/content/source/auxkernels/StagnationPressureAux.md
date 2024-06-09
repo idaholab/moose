@@ -13,3 +13,5 @@ Stagnation pressure is computed from the fluid properties using the static entro
 !syntax inputs /AuxKernels/StagnationPressureAux
 
 !syntax children /AuxKernels/StagnationPressureAux
+
+!tag name=StagnationPressureAux pairs=module:fluid_properties system:auxkernels

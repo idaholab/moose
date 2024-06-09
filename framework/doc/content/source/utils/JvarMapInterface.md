@@ -65,3 +65,5 @@ obtained using
 
 A negative return value indicates that the `jvar` value does not point to a
 variable in the couple variable vector corresponding to the mapped parameter.
+
+!tag name=JvarMapInterface pairs=module:framework system:utils

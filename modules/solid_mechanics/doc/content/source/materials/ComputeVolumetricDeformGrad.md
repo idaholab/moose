@@ -13,3 +13,5 @@ This class sets the volumetric deformation gradient to identity and transforms t
 !syntax children /Materials/ComputeVolumetricDeformGrad
 
 !bibtex bibliography
+
+!tag name=ComputeVolumetricDeformGrad pairs=module:solid_mechanics system:materials

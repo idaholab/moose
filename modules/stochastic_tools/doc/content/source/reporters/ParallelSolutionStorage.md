@@ -27,3 +27,5 @@ global sample index. External objects can deposit data in this container using t
 !syntax inputs /Reporters/ParallelSolutionStorage
 
 !syntax children /Reporters/ParallelSolutionStorage
+
+!tag name=ParallelSolutionStorage pairs=module:stochastic_tools system:reporters

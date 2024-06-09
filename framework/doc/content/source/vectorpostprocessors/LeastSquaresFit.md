@@ -19,3 +19,5 @@ The user must define whether the output should be in the form of polynomial coef
 !syntax inputs /VectorPostprocessors/LeastSquaresFit
 
 !syntax children /VectorPostprocessors/LeastSquaresFit
+
+!tag name=LeastSquaresFit pairs=module:framework system:vectorpostprocessors

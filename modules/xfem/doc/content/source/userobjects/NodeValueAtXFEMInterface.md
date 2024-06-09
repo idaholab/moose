@@ -17,3 +17,5 @@ The values of field variables on either side of a moving interface are often nee
 !syntax inputs /UserObjects/NodeValueAtXFEMInterface
 
 !syntax children /UserObjects/NodeValueAtXFEMInterface
+
+!tag name=NodeValueAtXFEMInterface pairs=module:xfem system:userobjects

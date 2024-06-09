@@ -11,3 +11,5 @@ wave speed material property.
 !syntax inputs /UserObjects/NodalWaveSpeed
 
 !syntax children /UserObjects/NodalWaveSpeed
+
+!tag name=NodalWaveSpeed pairs=module:contact system:userobjects

@@ -7,3 +7,5 @@ The `AdvectiveFluxCalculatorConstantVelocity` computes $K$, $R^{+}$ and $R^{-}$ 
 !syntax inputs /UserObjects/AdvectiveFluxCalculatorConstantVelocity
 
 !syntax children /UserObjects/AdvectiveFluxCalculatorConstantVelocity
+
+!tag name=AdvectiveFluxCalculatorConstantVelocity pairs=module:porous_flow system:userobjects

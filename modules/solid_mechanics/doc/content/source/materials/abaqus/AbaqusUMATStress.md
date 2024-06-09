@@ -107,3 +107,5 @@ routine via the present object, 2) It allows to pass the step number to the [Aba
 !syntax children /Materials/AbaqusUMATStress
 
 !bibtex bibliography
+
+!tag name=AbaqusUMATStress pairs=module:solid_mechanics system:materials

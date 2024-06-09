@@ -34,3 +34,5 @@ a coupled application, using a [Receiver.md] postprocessor.
 !syntax inputs /FVBCs/PWCNSFVMomentumFluxBC
 
 !syntax children /FVBCs/PWCNSFVMomentumFluxBC
+
+!tag name=PWCNSFVMomentumFluxBC pairs=module:navier_stokes system:fvbcs

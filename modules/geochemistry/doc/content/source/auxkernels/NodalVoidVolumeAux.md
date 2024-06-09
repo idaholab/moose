@@ -13,3 +13,5 @@ $V_{i}$ is allows translation between moles of reactant at a node, $M_{i}$, and 
 !syntax inputs /AuxKernels/NodalVoidVolumeAux
 
 !syntax children /AuxKernels/NodalVoidVolumeAux
+
+!tag name=NodalVoidVolumeAux pairs=module:geochemistry system:auxkernels

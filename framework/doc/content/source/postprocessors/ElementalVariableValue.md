@@ -19,3 +19,5 @@ element and then returned.
 !syntax inputs /Postprocessors/ElementalVariableValue
 
 !syntax children /Postprocessors/ElementalVariableValue
+
+!tag name=ElementalVariableValue pairs=module:framework system:postprocessors

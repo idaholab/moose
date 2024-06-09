@@ -28,3 +28,5 @@ For Hessian based inversion, `FunctorElementalGradientAux` provides the advectio
 !syntax inputs /AuxKernels/FunctorElementalGradientAux
 
 !syntax children /AuxKernels/FunctorElementalGradientAux
+
+!tag name=FunctorElementalGradientAux pairs=module:framework system:auxkernels

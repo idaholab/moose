@@ -50,3 +50,5 @@ associated with the processor, as shown in the three files below.
 !syntax inputs /Outputs/XMLOutput
 
 !syntax children /Outputs/XMLOutput
+
+!tag name=XMLOutput pairs=module:framework system:outputs

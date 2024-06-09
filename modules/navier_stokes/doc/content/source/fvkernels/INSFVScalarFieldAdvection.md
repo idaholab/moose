@@ -25,3 +25,5 @@ $\bm{v}_{d} = \bm{v} + \bm{v}_{slip,d}$, where $\bm{v}$ is the mixture velocity.
 !syntax inputs /FVKernels/INSFVScalarFieldAdvection
 
 !syntax children /FVKernels/INSFVScalarFieldAdvection
+
+!tag name=INSFVScalarFieldAdvection pairs=module:navier_stokes system:fvkernels

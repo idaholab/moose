@@ -61,3 +61,5 @@ constraint as shown below:
 !syntax children /UserObjects/GapFluxModelPressureDependentConduction
 
 !bibtex bibliography
+
+!tag name=GapFluxModelPressureDependentConduction pairs=module:heat_transfer system:userobjects

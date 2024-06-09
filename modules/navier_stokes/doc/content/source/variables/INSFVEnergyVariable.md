@@ -11,3 +11,5 @@ gradient or just the boundary cell centroid value.
 !syntax inputs /Variables/INSFVEnergyVariable
 
 !syntax children /Variables/INSFVEnergyVariable
+
+!tag name=INSFVEnergyVariable pairs=module:navier_stokes system:variables

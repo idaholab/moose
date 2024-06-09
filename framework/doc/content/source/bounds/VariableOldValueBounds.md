@@ -21,3 +21,5 @@ PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`. A warning 
 !syntax inputs /Bounds/VariableOldValueBounds
 
 !syntax children /Bounds/VariableOldValueBounds
+
+!tag name=VariableOldValueBounds pairs=module:framework system:bounds

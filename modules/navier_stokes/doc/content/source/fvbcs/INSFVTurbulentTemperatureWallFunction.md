@@ -84,3 +84,5 @@ For resolving non-equilibrium phenomena, we recommend refining the mesh.
 !syntax inputs /FVBCs/INSFVTurbulentTemperatureWallFunction
 
 !syntax children /FVBCs/INSFVTurbulentTemperatureWallFunction
+
+!tag name=INSFVTurbulentTemperatureWallFunction pairs=module:navier_stokes system:fvbcs

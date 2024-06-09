@@ -11,3 +11,5 @@ Occurrence of singular shape tensor usually happens in material failure problems
 !syntax inputs /UserObjects/SingularShapeTensorEliminatorUserObjectPD
 
 !syntax children /UserObjects/SingularShapeTensorEliminatorUserObjectPD
+
+!tag name=SingularShapeTensorEliminatorUserObjectPD pairs=module:peridynamics system:userobjects

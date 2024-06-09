@@ -15,3 +15,5 @@ implicitly applied for the velocity on the `boundary`.
 !syntax inputs /FVBCs/INSFVOutletPressureBC
 
 !syntax children /FVBCs/INSFVOutletPressureBC
+
+!tag name=INSFVOutletPressureBC pairs=module:navier_stokes system:fvbcs

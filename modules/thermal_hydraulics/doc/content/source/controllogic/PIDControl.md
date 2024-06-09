@@ -21,3 +21,5 @@ To control a controllable value directly instead of a [ControlData.md], use the 
 !syntax inputs /ControlLogic/PIDControl
 
 !syntax children /ControlLogic/PIDControl
+
+!tag name=PIDControl pairs=module:thermal_hydraulics system:controllogic

@@ -15,3 +15,5 @@ passed to each [Component](syntax/Components/index.md).
 !syntax inputs /ICs/SpecificVolumeIC
 
 !syntax children /ICs/SpecificVolumeIC
+
+!tag name=SpecificVolumeIC pairs=module:thermal_hydraulics system:ics

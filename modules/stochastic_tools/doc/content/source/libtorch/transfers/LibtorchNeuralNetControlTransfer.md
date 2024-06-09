@@ -20,3 +20,5 @@ Transfer which copies a [LibtorchArtificialNeuralNet.md] from a neural net contr
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchNeuralNetControlTransfer pairs=module:stochastic_tools system:libtorch

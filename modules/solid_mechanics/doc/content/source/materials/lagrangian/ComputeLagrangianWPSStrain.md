@@ -11,3 +11,5 @@ The `ComputeLagrangianWPSStrain` inherits from [`ComputeLagrangianStrain`](Compu
 !syntax inputs /Materials/ComputeLagrangianWPSStrain
 
 !syntax children /Materials/ComputeLagrangianWPSStrain
+
+!tag name=ComputeLagrangianWPSStrain pairs=module:solid_mechanics system:materials

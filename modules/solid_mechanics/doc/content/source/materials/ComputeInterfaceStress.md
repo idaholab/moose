@@ -55,3 +55,5 @@ range is well defined - commonly 0 and 1 on the two sides of the interface).
 !syntax inputs /Materials/ComputeInterfaceStress
 
 !syntax children /Materials/ComputeInterfaceStress
+
+!tag name=ComputeInterfaceStress pairs=module:solid_mechanics system:materials

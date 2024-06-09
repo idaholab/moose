@@ -29,3 +29,5 @@ strain return mapping stress calculator such as
 !syntax children /Materials/ADMultiplePowerLawCreepStressUpdate
 
 !bibtex bibliography
+
+!tag name=ADMultiplePowerLawCreepStressUpdate pairs=module:solid_mechanics system:materials

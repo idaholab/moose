@@ -14,3 +14,5 @@ and + sides of the face. This object only takes elemental variables for its
 !syntax inputs /AuxKernels/HasPorosityJumpFace
 
 !syntax children /AuxKernels/HasPorosityJumpFace
+
+!tag name=HasPorosityJumpFace pairs=module:navier_stokes system:auxkernels

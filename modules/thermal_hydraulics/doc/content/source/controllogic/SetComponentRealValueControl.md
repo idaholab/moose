@@ -17,3 +17,5 @@ using the `value` [ControlData.md] of the `T_inlet_fn` ControlLogic.
 !syntax inputs /ControlLogic/SetComponentRealValueControl
 
 !syntax children /ControlLogic/SetComponentRealValueControl
+
+!tag name=SetComponentRealValueControl pairs=module:thermal_hydraulics system:controllogic

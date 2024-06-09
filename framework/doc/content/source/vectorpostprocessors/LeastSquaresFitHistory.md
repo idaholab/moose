@@ -19,3 +19,5 @@ By default, if an insufficient number of points is provided in these data vector
 !syntax inputs /VectorPostprocessors/LeastSquaresFitHistory
 
 !syntax children /VectorPostprocessors/LeastSquaresFitHistory
+
+!tag name=LeastSquaresFitHistory pairs=module:framework system:vectorpostprocessors

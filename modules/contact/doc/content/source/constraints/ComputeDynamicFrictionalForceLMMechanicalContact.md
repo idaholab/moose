@@ -11,3 +11,5 @@ The `capture_tolerance` is an optional contact parameter used in dynamic contact
 !syntax inputs /Constraints/ComputeDynamicFrictionalForceLMMechanicalContact
 
 !syntax children /Constraints/ComputeDynamicFrictionalForceLMMechanicalContact
+
+!tag name=ComputeDynamicFrictionalForceLMMechanicalContact pairs=module:contact system:constraints

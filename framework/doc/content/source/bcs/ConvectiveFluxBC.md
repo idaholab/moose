@@ -16,3 +16,5 @@ the initial and final values, the flux through the boundary and the duration of 
 !syntax inputs /BCs/ConvectiveFluxBC
 
 !syntax children /BCs/ConvectiveFluxBC
+
+!tag name=ConvectiveFluxBC pairs=module:framework system:bcs

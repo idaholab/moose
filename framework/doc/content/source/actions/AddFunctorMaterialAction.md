@@ -9,3 +9,5 @@ More information about `FunctorMaterials` and their parameters can be found on t
 [FunctorMaterials syntax documentation](syntax/FunctorMaterials/index.md).
 
 !syntax parameters /FunctorMaterials/AddFunctorMaterialAction
+
+!tag name=AddFunctorMaterialAction pairs=module:framework system:actions

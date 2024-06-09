@@ -202,3 +202,5 @@ name of the scalar strain variable
 !syntax children /Materials/ADComputePlaneFiniteStrain
 
 !bibtex bibliography
+
+!tag name=ADComputePlaneFiniteStrain pairs=module:solid_mechanics system:materials

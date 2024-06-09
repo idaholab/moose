@@ -21,3 +21,5 @@ determine if a given point is inside the cut plane.
 !syntax inputs /UserObjects/CircleCutUserObject
 
 !syntax children /UserObjects/CircleCutUserObject
+
+!tag name=CircleCutUserObject pairs=module:xfem system:userobjects

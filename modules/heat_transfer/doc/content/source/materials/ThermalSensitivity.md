@@ -22,3 +22,5 @@ other physics, such as a small deformation elastic problem
 !syntax inputs /Materials/ThermalSensitivity
 
 !syntax children /Materials/ThermalSensitivity
+
+!tag name=ThermalSensitivity pairs=module:heat_transfer system:materials

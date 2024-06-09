@@ -31,3 +31,5 @@ three layers, on every linear iteration. The result of this averaging is stored 
 !syntax inputs /UserObjects/LayeredSideIntegral
 
 !syntax children /UserObjects/LayeredSideIntegral
+
+!tag name=LayeredSideIntegral pairs=module:framework system:userobjects

@@ -10,3 +10,5 @@ a different executor when doing lazy binding. It should not be created by users.
 !syntax inputs /Executors/NullExecutor
 
 !syntax children /Executors/NullExecutor
+
+!tag name=NullExecutor pairs=module:framework system:executors

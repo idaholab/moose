@@ -237,3 +237,5 @@ There is one optional parameters that can be supplied to`MortarScalarBase` class
   testing when the scalar variable is an `AuxVariable` and not a solution variable
   in the system. This parameter has a similar usage as the `compute_lm_residuals`
   and `compute_primal_residuals` for all Mortar objects.
+
+!tag name=MortarScalarBase pairs=module:framework system:constraints

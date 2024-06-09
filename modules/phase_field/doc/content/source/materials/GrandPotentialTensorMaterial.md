@@ -14,3 +14,5 @@ diffusivity.
 !syntax children /Materials/GrandPotentialTensorMaterial
 
 !bibtex bibliography
+
+!tag name=GrandPotentialTensorMaterial pairs=module:phase_field system:materials

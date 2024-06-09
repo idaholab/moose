@@ -9,3 +9,5 @@ More information about `Materials` and their parameters can be found on the
 [Materials syntax documentation](syntax/Materials/index.md).
 
 !syntax parameters /Materials/AddMaterialAction
+
+!tag name=AddMaterialAction pairs=module:framework system:actions

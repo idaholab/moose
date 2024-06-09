@@ -20,3 +20,5 @@ called a St. Venant-Kirchhoff hyper elasticity model.
 !syntax children /Materials/ADComputeGreenLagrangeStrain
 
 !bibtex bibliography
+
+!tag name=ADComputeGreenLagrangeStrain pairs=module:solid_mechanics system:materials

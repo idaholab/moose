@@ -17,3 +17,5 @@ each timestep.
 !syntax inputs /Outputs/CSV
 
 !syntax children /Outputs/CSV
+
+!tag name=CSV pairs=module:framework system:outputs

@@ -41,3 +41,5 @@ for declaring two material properties and their values in the same material.
 !syntax inputs /FunctorMaterials/GenericVectorFunctorMaterial
 
 !syntax children /FunctorMaterials/GenericVectorFunctorMaterial
+
+!tag name=GenericVectorFunctorMaterial pairs=module:framework system:functormaterials

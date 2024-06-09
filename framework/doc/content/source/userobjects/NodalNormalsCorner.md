@@ -14,3 +14,5 @@ The corner normal is saved in the `nodal_normal_x`, `nodal_normal_y` and `nodal_
 !syntax inputs /UserObjects/NodalNormalsCorner
 
 !syntax children /UserObjects/NodalNormalsCorner
+
+!tag name=NodalNormalsCorner pairs=module:framework system:userobjects

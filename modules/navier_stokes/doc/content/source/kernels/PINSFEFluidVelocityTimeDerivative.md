@@ -21,3 +21,5 @@ documentation clear for users.
 !syntax inputs /Kernels/PINSFEFluidVelocityTimeDerivative
 
 !syntax children /Kernels/PINSFEFluidVelocityTimeDerivative
+
+!tag name=PINSFEFluidVelocityTimeDerivative pairs=module:navier_stokes system:kernels

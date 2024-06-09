@@ -15,3 +15,5 @@ In this example, we set the initial value of variable `u` using a [MooseParsedFu
 !syntax inputs /FVICs/FVFunctionIC
 
 !syntax children /FVICs/FVFunctionIC
+
+!tag name=FVFunctionIC pairs=module:framework system:fvics

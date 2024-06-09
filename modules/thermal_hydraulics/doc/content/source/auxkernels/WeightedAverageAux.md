@@ -15,3 +15,5 @@ If you need a more complex average, please consider using a [ParsedAux.md].
 !syntax inputs /AuxKernels/WeightedAverageAux
 
 !syntax children /AuxKernels/WeightedAverageAux
+
+!tag name=WeightedAverageAux pairs=module:thermal_hydraulics system:auxkernels

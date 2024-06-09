@@ -17,3 +17,5 @@ In this example, the `VolumeAux` object `volume_aux` samples the elemental volum
 !syntax inputs /AuxKernels/VolumeAux
 
 !syntax children /AuxKernels/VolumeAux
+
+!tag name=VolumeAux pairs=module:framework system:auxkernels

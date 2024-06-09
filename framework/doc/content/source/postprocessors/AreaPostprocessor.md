@@ -14,3 +14,5 @@ postprocessor may be applied to one or more boundaries simultaneously, the latte
 !syntax children /Postprocessors/AreaPostprocessor
 
 !bibtex bibliography
+
+!tag name=AreaPostprocessor pairs=module:framework system:postprocessors

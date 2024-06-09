@@ -14,3 +14,5 @@ This kernel implements the first two terms on the right side of eq. (3) of the p
 !syntax children /Kernels/ACInterfaceKobayashi1
 
 !bibtex bibliography
+
+!tag name=ACInterfaceKobayashi1 pairs=module:phase_field system:kernels

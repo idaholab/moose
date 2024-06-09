@@ -26,3 +26,5 @@ To assign the processor IDs the centroid of each element of the mesh to be parti
 !syntax children /Mesh/Partitioner/GridPartitioner
 
 !bibtex bibliography
+
+!tag name=GridPartitioner pairs=module:framework system:partitioner

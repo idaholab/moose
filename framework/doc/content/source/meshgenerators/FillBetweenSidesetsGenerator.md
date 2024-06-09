@@ -24,3 +24,5 @@ All the other meshing options are the same as [`FillBetweenPointVectorsGenerator
 !syntax inputs /Mesh/FillBetweenSidesetsGenerator
 
 !syntax children /Mesh/FillBetweenSidesetsGenerator
+
+!tag name=FillBetweenSidesetsGenerator pairs=module:framework system:meshgenerators

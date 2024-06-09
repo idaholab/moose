@@ -21,3 +21,5 @@ Two notable features of this Kernel are:
 
 !syntax children /Kernels/GeochemistryTimeDerivative
 
+
+!tag name=GeochemistryTimeDerivative pairs=module:geochemistry system:kernels

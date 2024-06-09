@@ -21,3 +21,5 @@ with a `1 0 0` velocity using [ADDGAdvection.md], the version of this kernel wit
 !syntax inputs /DGKernels/DGConvection
 
 !syntax children /DGKernels/DGConvection
+
+!tag name=DGConvection pairs=module:framework system:dgkernels

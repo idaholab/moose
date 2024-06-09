@@ -58,3 +58,5 @@ for the first term using the [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/
 !syntax inputs /LinearFVKernels/LinearWCNSFVMomentumFlux
 
 !syntax children /LinearFVKernels/LinearWCNSFVMomentumFlux
+
+!tag name=LinearWCNSFVMomentumFlux pairs=module:navier_stokes system:linearfvkernels

@@ -10,3 +10,5 @@ by the local circumference to achieve the desired RZ integral.
 !syntax inputs /Postprocessors/ADElementIntegralMaterialPropertyRZ
 
 !syntax children /Postprocessors/ADElementIntegralMaterialPropertyRZ
+
+!tag name=ADElementIntegralMaterialPropertyRZ pairs=module:thermal_hydraulics system:postprocessors

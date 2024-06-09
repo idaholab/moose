@@ -13,3 +13,5 @@ Gap offset can be provided to offset the gap distance between in or near contact
 !syntax inputs /AuxKernels/PenetrationAux
 
 !syntax children /AuxKernels/PenetrationAux
+
+!tag name=PenetrationAux pairs=module:framework system:auxkernels

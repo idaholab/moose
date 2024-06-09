@@ -46,3 +46,5 @@ $zx$, $zy$, and $zz$ terms are zero.
 !syntax inputs /Kernels/AnisotropicDiffusion
 
 !syntax children /Kernels/AnisotropicDiffusion
+
+!tag name=AnisotropicDiffusion pairs=module:framework system:kernels

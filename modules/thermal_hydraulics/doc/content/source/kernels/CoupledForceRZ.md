@@ -27,3 +27,5 @@ In THM, most kernels are added automatically by components. This kernel is creat
 !syntax inputs /Kernels/CoupledForceRZ
 
 !syntax children /Kernels/CoupledForceRZ
+
+!tag name=CoupledForceRZ pairs=module:thermal_hydraulics system:kernels

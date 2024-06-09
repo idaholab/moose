@@ -23,3 +23,5 @@ the ADGravity body force per unit mass.
 !syntax inputs /Kernels/ADGravity
 
 !syntax children /Kernels/ADGravity
+
+!tag name=ADGravity pairs=module:solid_mechanics system:kernels

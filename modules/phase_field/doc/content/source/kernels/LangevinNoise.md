@@ -19,3 +19,5 @@ noise system see [`ConservedLangevinNoise`](/ConservedLangevinNoise.md)
 !syntax inputs /Kernels/LangevinNoise
 
 !syntax children /Kernels/LangevinNoise
+
+!tag name=LangevinNoise pairs=module:phase_field system:kernels

@@ -31,3 +31,5 @@ the system.
 !syntax inputs /Materials/ADComputeFiniteStrainElasticStress
 
 !syntax children /Materials/ADComputeFiniteStrainElasticStress
+
+!tag name=ADComputeFiniteStrainElasticStress pairs=module:solid_mechanics system:materials

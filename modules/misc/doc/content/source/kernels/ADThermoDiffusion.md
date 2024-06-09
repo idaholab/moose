@@ -20,3 +20,5 @@ material property definition.
 !syntax children /Kernels/ADThermoDiffusion
 
 !bibtex bibliography
+
+!tag name=ADThermoDiffusion pairs=module:misc system:kernels

@@ -10,3 +10,5 @@ The initial time step must be set up independently.
 !syntax inputs /Executioner/TimeSteppers/LogConstantDT
 
 !syntax children /Executioner/TimeSteppers/LogConstantDT
+
+!tag name=LogConstantDT pairs=module:framework system:timesteppers

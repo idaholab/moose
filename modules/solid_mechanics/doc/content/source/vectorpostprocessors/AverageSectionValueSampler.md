@@ -44,3 +44,5 @@ components sharing the same mesh block is given below:
 !syntax inputs /VectorPostprocessors/AverageSectionValueSampler
 
 !syntax children /VectorPostprocessors/AverageSectionValueSampler
+
+!tag name=AverageSectionValueSampler pairs=module:solid_mechanics system:vectorpostprocessors

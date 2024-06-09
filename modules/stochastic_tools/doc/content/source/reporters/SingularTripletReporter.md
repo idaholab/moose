@@ -20,3 +20,5 @@ the [!param](/Reporters/SingularTripletReporter/variables) parameter.
 !syntax inputs /Reporters/SingularTripletReporter
 
 !syntax children /Reporters/SingularTripletReporter
+
+!tag name=SingularTripletReporter pairs=module:stochastic_tools system:reporters

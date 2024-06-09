@@ -11,3 +11,5 @@
     - `#include "NearestNodeLocator.h"`
     - call `getNearestNodeLocator(primary_id, secondary_id)` to create the object.
 - The functions `distance()` and `nearestNode()` both take a node ID and return either the distance to the nearest node or a `Node` pointer for the nearest node respectively.
+
+!tag name=NearestNodeLocator pairs=module:framework system:geomsearch

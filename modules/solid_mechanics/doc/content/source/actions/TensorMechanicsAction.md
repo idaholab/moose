@@ -6,3 +6,5 @@ This [Action.md] simplifies the input file syntax for creating a solid mechanics
 
 !alert warning
 This action is deprecated. Please use the [QuasiStaticSolidMechanicsPhysics.md] Action syntax instead.
+
+!tag name=TensorMechanicsAction pairs=module:solid_mechanics system:actions

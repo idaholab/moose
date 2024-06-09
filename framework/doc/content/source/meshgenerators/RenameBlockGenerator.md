@@ -85,3 +85,5 @@ In summary, the possibility of ordering-dependent results with the `RenameBlockG
 !syntax inputs /Mesh/RenameBlockGenerator
 
 !syntax children /Mesh/RenameBlockGenerator
+
+!tag name=RenameBlockGenerator pairs=module:framework system:meshgenerators

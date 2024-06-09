@@ -16,3 +16,5 @@ the postprocessor in non-zero.
 !syntax inputs /ControlLogic/THMSolvePostprocessorControl
 
 !syntax children /ControlLogic/THMSolvePostprocessorControl
+
+!tag name=THMSolvePostprocessorControl pairs=module:thermal_hydraulics system:controllogic

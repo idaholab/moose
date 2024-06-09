@@ -20,3 +20,5 @@ The diffusion coefficient is retrieved as an `ADMaterialProperty` by the diffusi
 !syntax inputs /Materials/GenericFunctionVectorMaterial
 
 !syntax children /Materials/GenericFunctionVectorMaterial
+
+!tag name=GenericFunctionVectorMaterial pairs=module:framework system:materials

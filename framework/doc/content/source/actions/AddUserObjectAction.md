@@ -9,3 +9,5 @@ More information about `UserObjects` may be found on the
 [UserObjects syntax documentation](syntax/UserObjects/index.md).
 
 !syntax parameters /UserObjects/AddUserObjectAction
+
+!tag name=AddUserObjectAction pairs=module:framework system:actions

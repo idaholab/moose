@@ -28,3 +28,5 @@ A_{mol} = tanh(\dfrac{C - C_{eq}}{ \text{mollifier} * \text{Langmuir density}})
 !syntax inputs /Materials/MollifiedLangmuirMaterial
 
 !syntax children /Materials/MollifiedLangmuirMaterial
+
+!tag name=MollifiedLangmuirMaterial pairs=module:chemical_reactions system:materials

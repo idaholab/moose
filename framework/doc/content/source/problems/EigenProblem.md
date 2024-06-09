@@ -115,3 +115,5 @@ in this system. There is a current list:
 !syntax inputs /Problem/EigenProblem
 
 !syntax children /Problem/EigenProblem
+
+!tag name=EigenProblem pairs=module:framework system:problems

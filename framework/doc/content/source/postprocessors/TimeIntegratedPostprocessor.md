@@ -14,3 +14,5 @@ and then integrate it over time using a `TimeIntegratedPostprocessor`.
 !syntax inputs /Postprocessors/TimeIntegratedPostprocessor
 
 !syntax children /Postprocessors/TimeIntegratedPostprocessor
+
+!tag name=TimeIntegratedPostprocessor pairs=module:framework system:postprocessors

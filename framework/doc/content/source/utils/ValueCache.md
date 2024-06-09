@@ -16,3 +16,5 @@ constructor, the state of the cache is saved to a file upon destruction of the c
 It is up to the developer to ensure that the cache state from previous runs is applicable to the following runs when the persistence feature is used!
 
 Note that overloads for `dataLoad` and `dataStore` for type `T` must be implemented. If full persistence is not desired the cache object can still be declared as restartable.
+
+!tag name=ValueCache pairs=module:framework system:utils

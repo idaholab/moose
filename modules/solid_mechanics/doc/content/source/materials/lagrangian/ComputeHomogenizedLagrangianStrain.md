@@ -32,3 +32,5 @@ small strain tensor (`false`) or a non-symmetric displacement gradient (`large`)
 !syntax inputs /Materials/ComputeHomogenizedLagrangianStrain
 
 !syntax children /Materials/ComputeHomogenizedLagrangianStrain
+
+!tag name=ComputeHomogenizedLagrangianStrain pairs=module:solid_mechanics system:materials

@@ -42,3 +42,5 @@ See [!cite](hales15homogenization) and [!cite](SONG2006710) for more details.
 !syntax children /Kernels/HomogenizedHeatConduction
 
 !bibtex bibliography
+
+!tag name=HomogenizedHeatConduction pairs=module:heat_transfer system:kernels

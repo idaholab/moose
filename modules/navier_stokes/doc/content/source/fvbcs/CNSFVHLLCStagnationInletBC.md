@@ -31,3 +31,5 @@ $\rho$, and specific total enthalpy $h_t$ for use the flux expressions of
 the derived [mass](CNSFVHLLCMassStagnationInletBC.md),
 [momentum](CNSFVHLLCMomentumStagnationInletBC.md), and
 [energy](CNSFVHLLCFluidEnergyStagnationInletBC.md) classes.
+
+!tag name=CNSFVHLLCStagnationInletBC pairs=module:navier_stokes system:fvbcs

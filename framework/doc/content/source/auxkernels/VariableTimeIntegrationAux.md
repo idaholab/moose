@@ -16,3 +16,5 @@ In this example, the `VariableTimeIntegrationAux` computes the time integral of 
 !syntax inputs /AuxKernels/VariableTimeIntegrationAux
 
 !syntax children /AuxKernels/VariableTimeIntegrationAux
+
+!tag name=VariableTimeIntegrationAux pairs=module:framework system:auxkernels

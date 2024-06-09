@@ -10,3 +10,5 @@ The `VariableValueElementSubdomainModifier` UserObject adjusts the element's sub
 !syntax inputs /UserObjects/VariableValueElementSubdomainModifier
 
 !syntax children /UserObjects/VariableValueElementSubdomainModifier
+
+!tag name=VariableValueElementSubdomainModifier pairs=module:framework system:userobjects

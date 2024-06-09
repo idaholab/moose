@@ -9,3 +9,5 @@ This damper limits the change in the Jacobians of elements. The damper becomes a
 !syntax inputs /Dampers/ElementJacobianDamper
 
 !syntax children /Dampers/ElementJacobianDamper
+
+!tag name=ElementJacobianDamper pairs=module:solid_mechanics system:dampers

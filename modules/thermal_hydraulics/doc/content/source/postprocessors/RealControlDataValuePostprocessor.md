@@ -17,3 +17,5 @@ and output as a postprocessor using the `T_ctrl` `RealControlDataValuePostproces
 !syntax inputs /Postprocessors/RealControlDataValuePostprocessor
 
 !syntax children /Postprocessors/RealControlDataValuePostprocessor
+
+!tag name=RealControlDataValuePostprocessor pairs=module:thermal_hydraulics system:postprocessors

@@ -195,3 +195,5 @@ name of the scalar strain variable
 !syntax children /Materials/ComputePlaneIncrementalStrain
 
 !bibtex bibliography
+
+!tag name=ComputePlaneIncrementalStrain pairs=module:solid_mechanics system:materials

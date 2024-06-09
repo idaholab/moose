@@ -12,3 +12,5 @@ Advanced users may wish to add `GeochemistryTimeDependentReactor` objects manual
 
 !syntax children /UserObjects/GeochemistryTimeDependentReactor
 
+
+!tag name=GeochemistryTimeDependentReactor pairs=module:geochemistry system:userobjects

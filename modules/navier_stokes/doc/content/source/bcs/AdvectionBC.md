@@ -31,3 +31,5 @@ still needs to be applied in the PDE. This is covered by AdvectionBC.
 !syntax inputs /BCs/AdvectionBC
 
 !syntax children /BCs/AdvectionBC
+
+!tag name=AdvectionBC pairs=module:navier_stokes system:bcs

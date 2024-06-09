@@ -42,3 +42,5 @@ The following adaptive Monte Carlo samplers have been implemented in MOOSE:
 !syntax inputs /Reporters/AdaptiveMonteCarloDecision
 
 !syntax children /Reporters/AdaptiveMonteCarloDecision
+
+!tag name=AdaptiveMonteCarloDecision pairs=module:stochastic_tools system:reporters

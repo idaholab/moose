@@ -23,3 +23,5 @@ added using a `TimeDerivativeNodalKernel`.
 !syntax inputs /NodalKernels/TimeDerivativeNodalKernel
 
 !syntax children /NodalKernels/TimeDerivativeNodalKernel
+
+!tag name=TimeDerivativeNodalKernel pairs=module:framework system:nodalkernels

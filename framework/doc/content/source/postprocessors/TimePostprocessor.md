@@ -7,3 +7,5 @@
 !syntax inputs /Postprocessors/TimePostprocessor
 
 !syntax children /Postprocessors/TimePostprocessor
+
+!tag name=TimePostprocessor pairs=module:framework system:postprocessors

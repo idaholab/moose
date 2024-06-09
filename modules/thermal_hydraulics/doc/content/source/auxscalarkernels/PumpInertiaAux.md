@@ -14,3 +14,5 @@ automatically added to the simulation by the [ShaftConnectedPump1Phase.md] compo
 !syntax inputs /AuxScalarKernels/PumpInertiaAux
 
 !syntax children /AuxScalarKernels/PumpInertiaAux
+
+!tag name=PumpInertiaAux pairs=module:thermal_hydraulics system:auxscalarkernels

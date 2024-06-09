@@ -27,3 +27,5 @@ Two combination types are possible: `Maximum` (default) and `Product`:
 !syntax children /Materials/CombinedScalarDamage
 
 !bibtex bibliography
+
+!tag name=CombinedScalarDamage pairs=module:solid_mechanics system:materials

@@ -52,3 +52,5 @@ where $\sigma$ is the Stefan-Boltzmann constant.
 
 Note that the convention here is that a positive heat flux corresponds to heat
 moving from the inner surface to the outer surface.
+
+!tag name=HeatTransferModels pairs=module:heat_transfer system:utils

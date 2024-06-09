@@ -12,3 +12,5 @@ It is equivalent to using [FunctionDiffusion.md] or [MatDiffusion.md] with a con
 !syntax children /Kernels/CoefDiffusion
 
 !bibtex bibliography
+
+!tag name=CoefDiffusion pairs=module:misc system:kernels

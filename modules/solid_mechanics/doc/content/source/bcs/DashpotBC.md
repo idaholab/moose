@@ -20,3 +20,4 @@ contribution to the Jacobian.
 !syntax inputs /BCs/DashpotBC
 
 !syntax children /BCs/DashpotBC
+!tag name=DashpotBC pairs=module:solid_mechanics system:bcs

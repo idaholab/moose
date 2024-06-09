@@ -26,3 +26,5 @@ This action simplifies the input file syntax for global strain calculation requi
 
 
 !syntax parameters /Physics/SolidMechanics/GlobalStrain/GlobalStrainAction
+
+!tag name=GlobalStrainAction pairs=module:solid_mechanics system:actions

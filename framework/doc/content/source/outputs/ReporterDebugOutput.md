@@ -12,3 +12,5 @@ more information.
 !syntax inputs /Outputs/ReporterDebugOutput
 
 !syntax children /Outputs/ReporterDebugOutput
+
+!tag name=ReporterDebugOutput pairs=module:framework system:outputs

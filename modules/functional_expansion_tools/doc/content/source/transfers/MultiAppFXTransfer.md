@@ -17,3 +17,5 @@ It searches the associated `MultiApp` objects for the named objects to perform t
 !syntax inputs /Transfers/MultiAppFXTransfer
 
 !syntax children /Transfers/MultiAppFXTransfer
+
+!tag name=MultiAppFXTransfer pairs=module:functional_expansion_tools system:transfers

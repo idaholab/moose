@@ -33,3 +33,5 @@ is set to true will transfer whatever the last computed value of the postprocess
 !syntax inputs /Transfers/SamplerPostprocessorTransfer
 
 !syntax children /Transfers/SamplerPostprocessorTransfer
+
+!tag name=SamplerPostprocessorTransfer pairs=module:stochastic_tools system:transfers

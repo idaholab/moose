@@ -47,3 +47,5 @@ The following code blocks demonstrate this utilization of `OptimizationData`. Th
 !syntax inputs /Reporters/OptimizationData
 
 !syntax children /Reporters/OptimizationData
+
+!tag name=OptimizationData pairs=module:optimization system:reporters

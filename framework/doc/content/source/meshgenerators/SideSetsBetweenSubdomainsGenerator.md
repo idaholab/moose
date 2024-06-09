@@ -7,3 +7,5 @@
 !syntax inputs /Mesh/SideSetsBetweenSubdomainsGenerator
 
 !syntax children /Mesh/SideSetsBetweenSubdomainsGenerator
+
+!tag name=SideSetsBetweenSubdomainsGenerator pairs=module:framework system:meshgenerators

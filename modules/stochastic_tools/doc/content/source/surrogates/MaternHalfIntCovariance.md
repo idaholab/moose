@@ -35,3 +35,5 @@ r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right
 !syntax inputs /Covariance/MaternHalfIntCovariance
 
 !syntax children /Covariance/MaternHalfIntCovariance
+
+!tag name=MaternHalfIntCovariance pairs=module:stochastic_tools system:surrogates

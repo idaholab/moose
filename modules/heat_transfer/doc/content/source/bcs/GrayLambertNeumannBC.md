@@ -35,3 +35,5 @@ block=BCs
 !syntax inputs /BCs/GrayLambertNeumannBC
 
 !syntax children /BCs/GrayLambertNeumannBC
+
+!tag name=GrayLambertNeumannBC pairs=module:heat_transfer system:bcs

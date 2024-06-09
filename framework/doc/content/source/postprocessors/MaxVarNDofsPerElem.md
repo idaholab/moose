@@ -13,3 +13,5 @@ it is recommended that the developer [reach out to the MOOSE development team](h
 so that the object can be moved from `test/src` or create a new Pull Request (with contribution 
 guidelines found [here](https://mooseframework.inl.gov/framework/contributing.html))
 containing the move.
+
+!tag name=MaxVarNDofsPerElem pairs=module:framework system:postprocessors

@@ -9,3 +9,5 @@ The ray is killed by setting the Ray to not be continued:
 !syntax parameters /RayBCs/KillRayBC
 
 !syntax inputs /RayBCs/KillRayBC
+
+!tag name=KillRayBC pairs=module:ray_tracing system:raybcs

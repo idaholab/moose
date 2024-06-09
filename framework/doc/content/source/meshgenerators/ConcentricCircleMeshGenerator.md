@@ -46,3 +46,5 @@ If one needs to enhance `ConcentricCircleMeshGenerator,` Laplace smoothing has t
 !syntax inputs /Mesh/ConcentricCircleMeshGenerator
 
 !syntax children /Mesh/ConcentricCircleMeshGenerator
+
+!tag name=ConcentricCircleMeshGenerator pairs=module:framework system:meshgenerators

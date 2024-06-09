@@ -25,3 +25,5 @@ The $W_{ij}$ is a matrix of all coefficients for the pair terms.
 !syntax inputs /Materials/CrossTermBarrierFunctionMaterial
 
 !syntax children /Materials/CrossTermBarrierFunctionMaterial
+
+!tag name=CrossTermBarrierFunctionMaterial pairs=module:phase_field system:materials

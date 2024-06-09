@@ -11,3 +11,5 @@ equation.  Typically used with [ADCHSplitChemicalPotential](/ADCHSplitChemicalPo
 !syntax inputs /Kernels/ADCHSoretMobility
 
 !syntax children /Kernels/ADCHSoretMobility
+
+!tag name=ADCHSoretMobility pairs=module:phase_field system:kernels

@@ -35,3 +35,5 @@ passed in to the strain calculator as shown:
 !syntax inputs /Materials/ADComputeVolumetricEigenstrain
 
 !syntax children /Materials/ADComputeVolumetricEigenstrain
+
+!tag name=ADComputeVolumetricEigenstrain pairs=module:solid_mechanics system:materials

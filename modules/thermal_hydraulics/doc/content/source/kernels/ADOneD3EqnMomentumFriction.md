@@ -19,3 +19,5 @@ In THM, most kernels are added automatically by components or flow models. This 
 !syntax inputs /Kernels/ADOneD3EqnMomentumFriction
 
 !syntax children /Kernels/ADOneD3EqnMomentumFriction
+
+!tag name=ADOneD3EqnMomentumFriction pairs=module:thermal_hydraulics system:kernels

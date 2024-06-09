@@ -57,3 +57,5 @@ using the following `FVKernel` parameter [!param](/FVKernels/FVDiffusion/ghost_l
 !syntax inputs /Variables/BernoulliPressureVariable
 
 !syntax children /Variables/BernoulliPressureVariable
+
+!tag name=BernoulliPressureVariable pairs=module:navier_stokes system:variables

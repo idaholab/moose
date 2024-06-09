@@ -25,3 +25,5 @@ object. They should be aware of the following:
 !syntax inputs /VectorPostprocessors/WaveSpeedVPP
 
 !syntax children /VectorPostprocessors/WaveSpeedVPP
+
+!tag name=WaveSpeedVPP pairs=module:navier_stokes system:vectorpostprocessors

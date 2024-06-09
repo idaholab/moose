@@ -13,3 +13,5 @@ a pressure variable at which to evaluate the saturation temperature and a
 !syntax children /AuxKernels/SaturationTemperatureAux
 
 !bibtex bibliography
+
+!tag name=SaturationTemperatureAux pairs=module:fluid_properties system:auxkernels

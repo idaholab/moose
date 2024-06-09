@@ -118,3 +118,5 @@ Heat conduction input file:
 Flow channel input file:
 
 !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
+
+!tag name=CoupledHeatTransferAction pairs=module:thermal_hydraulics system:actions

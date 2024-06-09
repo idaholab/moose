@@ -7,3 +7,5 @@ For discussion and a worked example, see [tutorial page 8](/tutorial_08.md).
 !syntax parameters /PorousFlowUnsaturated/PorousFlowUnsaturated
 
 !syntax inputs /PorousFlowUnsaturated/PorousFlowUnsaturated
+
+!tag name=PorousFlowUnsaturated pairs=module:porous_flow system:actions

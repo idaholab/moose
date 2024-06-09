@@ -11,3 +11,5 @@ More information about finite volume boundary conditions may be found on the
 [FVBCs syntax documentation](syntax/FVBCs/index.md).
 
 !syntax parameters /FVBCs/CheckFVBCAction
+
+!tag name=CheckFVBCAction pairs=module:framework system:actions

@@ -52,3 +52,5 @@ have a saddle point problem. However, by adding the strong form of the species
 mass transport equation to the LM residual equation, on-diagonal dependence is
 restored because of the presence of the LM in the primal equation. This removes
 the saddle point and allows use of a much wider range of preconditioners.
+
+!tag name=LMKernel pairs=module:scalar_transport system:kernels

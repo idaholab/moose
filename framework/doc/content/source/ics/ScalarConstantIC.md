@@ -7,3 +7,5 @@
 !syntax inputs /ICs/ScalarConstantIC
 
 !syntax children /ICs/ScalarConstantIC
+
+!tag name=ScalarConstantIC pairs=module:framework system:ics

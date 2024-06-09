@@ -7,3 +7,5 @@
 !syntax inputs /AuxKernels/NodalPatchRecoveryAux
 
 !syntax children /AuxKernels/NodalPatchRecoveryAux
+
+!tag name=NodalPatchRecoveryAux pairs=module:framework system:auxkernels

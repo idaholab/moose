@@ -129,3 +129,5 @@ An example that simply outputs equilibrium reactions involving the clinoptilolit
 !syntax inputs /UserObjects/GeochemicalModelDefinition
 
 !syntax children /UserObjects/GeochemicalModelDefinition
+
+!tag name=GeochemicalModelDefinition pairs=module:geochemistry system:userobjects

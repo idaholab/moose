@@ -42,3 +42,4 @@ v(t) = \mu(t) + \eta(t) \left\{ K_p \tilde{u}(t-\tau(t)) + K_i \int_{0}^{t} \til
 !syntax children /Postprocessors/GeneralSensorPostprocessor
 
 !bibtex bibliography
+!tag name=GeneralSensorPostprocessor pairs=module:misc system:postprocessors

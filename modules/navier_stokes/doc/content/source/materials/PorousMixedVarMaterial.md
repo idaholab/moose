@@ -27,3 +27,5 @@ equations.
 !syntax inputs /Materials/PorousMixedVarMaterial
 
 !syntax children /Materials/PorousMixedVarMaterial
+
+!tag name=PorousMixedVarMaterial pairs=module:navier_stokes system:materials

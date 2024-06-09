@@ -139,3 +139,5 @@ Input file:
 !syntax inputs /Mesh/FileMeshGenerator
 
 !syntax children /Mesh/FileMeshGenerator
+
+!tag name=FileMeshGenerator pairs=module:framework system:meshgenerators

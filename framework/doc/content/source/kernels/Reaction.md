@@ -29,3 +29,5 @@ There is no FV (finite volume) version of `Reaction`. If you wish to use FV, use
 !syntax inputs /Kernels/Reaction
 
 !syntax children /Kernels/Reaction
+
+!tag name=Reaction pairs=module:framework system:kernels

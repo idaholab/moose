@@ -52,3 +52,5 @@ conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
 !syntax children /SolidProperties/ThermalMonolithicSiCProperties
 
 !bibtex bibliography
+
+!tag name=ThermalMonolithicSiCProperties pairs=module:solid_properties system:solidproperties

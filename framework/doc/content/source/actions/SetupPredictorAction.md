@@ -9,3 +9,5 @@ More information about predictors may be found on the
 [Predictor syntax documentation](syntax/Executioner/Predictor/index.md).
 
 !syntax parameters /Executioner/Predictor/SetupPredictorAction
+
+!tag name=SetupPredictorAction pairs=module:framework system:actions

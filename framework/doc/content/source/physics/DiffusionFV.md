@@ -37,3 +37,5 @@ are a few percent faster, depending on the case.
 !syntax inputs /Physics/Diffusion/FiniteVolume/DiffusionFV
 
 !syntax children /Physics/Diffusion/FiniteVolume/DiffusionFV
+
+!tag name=DiffusionFV pairs=module:framework system:physics

@@ -18,3 +18,5 @@ its response depends on the usage:
 !syntax inputs /LinearFVBCs/LinearFVExtrapolatedPressureBC
 
 !syntax children /LinearFVBCs/LinearFVExtrapolatedPressureBC
+
+!tag name=LinearFVExtrapolatedPressureBC pairs=module:navier_stokes system:linearfvbcs

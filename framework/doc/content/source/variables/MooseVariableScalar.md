@@ -18,3 +18,5 @@ for the `Kernel` class, can be used as described here:
 !syntax inputs /Variables/MooseVariableScalar
 
 !syntax children /Variables/MooseVariableScalar
+
+!tag name=MooseVariableScalar pairs=module:framework system:variables

@@ -27,3 +27,5 @@ Through the `existing_subdomains`, `layers`, and `new_ids` options, it is possib
 !syntax inputs /Mesh/MeshExtruderGenerator
 
 !syntax children /Mesh/MeshExtruderGenerator
+
+!tag name=MeshExtruderGenerator pairs=module:framework system:meshgenerators

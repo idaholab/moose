@@ -26,3 +26,5 @@ respectively.  Here $\gamma$ is called the `porepressure_coefficient`: usually i
 !syntax inputs /FluidProperties/SimpleFluidProperties
 
 !syntax children /FluidProperties/SimpleFluidProperties
+
+!tag name=SimpleFluidProperties pairs=module:fluid_properties system:fluidproperties

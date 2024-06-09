@@ -31,3 +31,5 @@ each phase.
 !syntax inputs /FVKernels/WCNSFV2PMomentumDriftFlux
 
 !syntax children /FVKernels/WCNSFV2PMomentumDriftFlux
+
+!tag name=WCNSFV2PMomentumDriftFlux pairs=module:navier_stokes system:fvkernels

@@ -36,3 +36,5 @@ r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right
 !syntax inputs /Covariance/SquaredExponentialCovariance
 
 !syntax children /Covariance/SquaredExponentialCovariance
+
+!tag name=SquaredExponentialCovariance pairs=module:stochastic_tools system:surrogates

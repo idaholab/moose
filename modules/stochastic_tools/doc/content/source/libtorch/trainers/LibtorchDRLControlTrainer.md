@@ -22,3 +22,5 @@ using the Proximal Policy Optimization (PPO) algorithm [!cite](schulman2017proxi
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchDRLControlTrainer pairs=module:stochastic_tools system:libtorch

@@ -15,3 +15,5 @@
 !syntax inputs /Postprocessors/TimestepSize
 
 !syntax children /Postprocessors/TimestepSize
+
+!tag name=TimestepSize pairs=module:framework system:postprocessors

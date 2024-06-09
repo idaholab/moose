@@ -20,3 +20,5 @@ Material properties are currently not supported, but it would be really easy to 
 !syntax inputs /AuxKernels/ParsedVectorAux
 
 !syntax children /AuxKernels/ParsedVectorAux
+
+!tag name=ParsedVectorAux pairs=module:framework system:auxkernels

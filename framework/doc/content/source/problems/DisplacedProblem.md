@@ -20,3 +20,5 @@ when the [!param](/Mesh/SetupMeshAction/displacements) parameter is set in the `
 !syntax inputs /Problem/DisplacedProblem
 
 !syntax children /Problem/DisplacedProblem
+
+!tag name=DisplacedProblem pairs=module:framework system:problems

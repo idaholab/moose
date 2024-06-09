@@ -7,3 +7,5 @@ The displaced problem is created by setting the `displacements` variables in the
 using a displaced problem may be found in the [Mesh syntax documentation](syntax/Mesh/index.md).
 
 !syntax parameters /Mesh/CreateDisplacedProblemAction
+
+!tag name=CreateDisplacedProblemAction pairs=module:framework system:actions

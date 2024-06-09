@@ -94,3 +94,5 @@ returns different weights for all elements in a block.
 !syntax inputs /Mesh/Partitioner/PetscExternalPartitioner
 
 !syntax children /Mesh/Partitioner/PetscExternalPartitioner
+
+!tag name=PetscExternalPartitioner pairs=module:framework system:partitioner

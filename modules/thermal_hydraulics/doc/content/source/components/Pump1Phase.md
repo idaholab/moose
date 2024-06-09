@@ -16,3 +16,5 @@ head terms added to the momentum and energy equations.
 !syntax children /Components/Pump1Phase
 
 !bibtex bibliography
+
+!tag name=Pump1Phase pairs=module:thermal_hydraulics system:components

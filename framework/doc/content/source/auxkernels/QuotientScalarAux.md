@@ -11,3 +11,5 @@
 !syntax inputs /AuxScalarKernels/QuotientScalarAux
 
 !syntax children /AuxScalarKernels/QuotientScalarAux
+
+!tag name=QuotientScalarAux pairs=module:framework system:auxkernels

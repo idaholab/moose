@@ -9,3 +9,5 @@
 !syntax children /Functions/TimeRampFunction
 
 !bibtex bibliography
+
+!tag name=TimeRampFunction pairs=module:thermal_hydraulics system:functions

@@ -55,3 +55,5 @@ class would then be used to compute the last term in [weakform].
 !syntax inputs /BCs/DiffusionFluxBC
 
 !syntax children /BCs/DiffusionFluxBC
+
+!tag name=DiffusionFluxBC pairs=module:framework system:bcs

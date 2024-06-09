@@ -11,3 +11,5 @@ This kernel functions the same way as [`TotalLagrangianStressDivergence`](TotalL
 !syntax inputs /Kernels/TotalLagrangianStressDivergenceCentrosymmetricSpherical
 
 !syntax children /Kernels/TotalLagrangianStressDivergenceCentrosymmetricSpherical
+
+!tag name=TotalLagrangianStressDivergenceCentrosymmetricSpherical pairs=module:solid_mechanics system:kernels

@@ -43,3 +43,5 @@ stress calculator as shown below:
 !syntax children /Materials/IsotropicPlasticityStressUpdate
 
 !bibtex bibliography
+
+!tag name=IsotropicPlasticityStressUpdate pairs=module:solid_mechanics system:materials

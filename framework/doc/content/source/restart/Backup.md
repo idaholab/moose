@@ -5,3 +5,5 @@ global simulation state data along with a separate vector for holding individual
 The Backup object is part of the larger [Restart/Recovery](restart_recover.md optional=True) system in MOOSE.
 
 The Backup object contains the serialized data from MOOSE's `dataLoad/dataStore` routines found in [DataIO.h](/DataIO.h).
+
+!tag name=Backup pairs=module:framework system:restart

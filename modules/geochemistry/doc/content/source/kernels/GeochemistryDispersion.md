@@ -17,3 +17,5 @@ which is part of the [transport](theory/index.md) equations.  Here
 
 !syntax children /Kernels/GeochemistryDispersion
 
+
+!tag name=GeochemistryDispersion pairs=module:geochemistry system:kernels

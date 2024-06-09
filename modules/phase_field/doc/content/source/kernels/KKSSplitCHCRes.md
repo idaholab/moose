@@ -54,3 +54,5 @@ J &=& \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a
 !syntax inputs /Kernels/KKSSplitCHCRes
 
 !syntax children /Kernels/KKSSplitCHCRes
+
+!tag name=KKSSplitCHCRes pairs=module:phase_field system:kernels

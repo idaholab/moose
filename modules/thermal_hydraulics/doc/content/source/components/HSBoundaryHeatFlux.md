@@ -35,3 +35,5 @@ q_b = f q \eqp
 !syntax inputs /Components/HSBoundaryHeatFlux
 
 !syntax children /Components/HSBoundaryHeatFlux
+
+!tag name=HSBoundaryHeatFlux pairs=module:thermal_hydraulics system:components

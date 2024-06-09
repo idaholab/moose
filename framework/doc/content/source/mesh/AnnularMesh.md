@@ -35,3 +35,5 @@ An example of using sidesets
 !syntax inputs /Mesh/AnnularMesh
 
 !syntax children /Mesh/AnnularMesh
+
+!tag name=AnnularMesh pairs=module:framework system:mesh

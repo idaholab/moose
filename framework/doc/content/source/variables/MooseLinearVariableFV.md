@@ -42,3 +42,5 @@ explicitly define the type of the variable.
 !syntax inputs /Variables/MooseLinearVariableFVReal
 
 !syntax children /Variables/MooseLinearVariableFVReal
+
+!tag name=MooseLinearVariableFV pairs=module:framework system:variables

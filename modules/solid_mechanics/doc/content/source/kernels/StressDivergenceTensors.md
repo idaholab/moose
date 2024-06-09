@@ -52,3 +52,5 @@ Cartesian system.
 !syntax inputs /Kernels/StressDivergenceTensors
 
 !syntax children /Kernels/StressDivergenceTensors
+
+!tag name=StressDivergenceTensors pairs=module:solid_mechanics system:kernels

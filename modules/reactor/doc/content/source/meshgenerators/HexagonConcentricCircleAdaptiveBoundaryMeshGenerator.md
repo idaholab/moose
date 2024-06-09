@@ -40,3 +40,5 @@ Here, a simple hexagon mesh stored in an Exodus file is used as the input of `He
 !syntax inputs /Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
 
 !syntax children /Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
+
+!tag name=HexagonConcentricCircleAdaptiveBoundaryMeshGenerator pairs=module:reactor system:meshgenerators

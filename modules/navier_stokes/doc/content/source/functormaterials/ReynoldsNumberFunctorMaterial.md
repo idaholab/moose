@@ -14,3 +14,5 @@ $\rho$ and $\mu$ are the density and dynamic viscosity of the fluid.
 !syntax inputs /FunctorMaterials/ReynoldsNumberFunctorMaterial
 
 !syntax children /FunctorMaterials/ReynoldsNumberFunctorMaterial
+
+!tag name=ReynoldsNumberFunctorMaterial pairs=module:navier_stokes system:functormaterials

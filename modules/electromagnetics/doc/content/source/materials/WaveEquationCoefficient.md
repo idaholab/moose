@@ -30,3 +30,5 @@ the user as material properties.
 !syntax inputs /Materials/WaveEquationCoefficient
 
 !syntax children /Materials/WaveEquationCoefficient
+
+!tag name=WaveEquationCoefficient pairs=module:electromagnetics system:materials

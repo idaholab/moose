@@ -59,3 +59,5 @@ the other terms in the Allen-Cahn equation.
 !syntax inputs /Kernels/KKSACBulkF
 
 !syntax children /Kernels/KKSACBulkF
+
+!tag name=KKSACBulkF pairs=module:phase_field system:kernels

@@ -54,3 +54,5 @@ Density is taken as a constant value; a default value is provided based on
 !syntax children /SolidProperties/ThermalGraphiteProperties
 
 !bibtex bibliography
+
+!tag name=ThermalGraphiteProperties pairs=module:solid_properties system:solidproperties

@@ -39,3 +39,5 @@ should not be used to calculate the strain energy density for cyclic loading cas
 !syntax children /Materials/StrainEnergyDensity
 
 !bibtex bibliography
+
+!tag name=StrainEnergyDensity pairs=module:solid_mechanics system:materials

@@ -17,3 +17,5 @@ In this example, the volume of block 1, 2 and 3 are computed by three separate `
 !syntax inputs /Postprocessors/VolumePostprocessor
 
 !syntax children /Postprocessors/VolumePostprocessor
+
+!tag name=VolumePostprocessor pairs=module:framework system:postprocessors

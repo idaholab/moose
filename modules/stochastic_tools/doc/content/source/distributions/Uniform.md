@@ -26,3 +26,5 @@ where $a$ and $b$ are the lower bound and upper bound for the uniform distributi
 !syntax inputs /Distributions/Uniform
 
 !syntax children /Distributions/Uniform
+
+!tag name=Uniform pairs=module:stochastic_tools system:distributions

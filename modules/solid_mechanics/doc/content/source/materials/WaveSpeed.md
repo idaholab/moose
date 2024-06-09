@@ -13,3 +13,5 @@ wave speed for use in explicit dynamic simulations.
 !syntax inputs /Materials/WaveSpeed
 
 !syntax children /Materials/WaveSpeed
+
+!tag name=WaveSpeed pairs=module:solid_mechanics system:materials

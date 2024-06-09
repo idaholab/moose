@@ -15,3 +15,5 @@ heat flux over the boundary.
 !syntax children /Components/HSBoundaryExternalAppConvection
 
 !bibtex bibliography
+
+!tag name=HSBoundaryExternalAppConvection pairs=module:thermal_hydraulics system:components

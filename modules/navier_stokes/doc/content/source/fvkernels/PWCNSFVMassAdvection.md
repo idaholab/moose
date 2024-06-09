@@ -11,3 +11,5 @@ of mass across cell/element faces.
 !syntax inputs /FVKernels/PWCNSFVMassAdvection
 
 !syntax children /FVKernels/PWCNSFVMassAdvection
+
+!tag name=PWCNSFVMassAdvection pairs=module:navier_stokes system:fvkernels

@@ -50,3 +50,5 @@ The trained neural network can then be evaluated using [LibtorchANNSurrogate.md]
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchANNTrainer pairs=module:stochastic_tools system:libtorch

@@ -13,3 +13,5 @@ be configured with the `--enable-vtk` option.
 !syntax inputs /Outputs/VTK
 
 !syntax children /Outputs/VTK
+
+!tag name=VTKOutput pairs=module:framework system:outputs

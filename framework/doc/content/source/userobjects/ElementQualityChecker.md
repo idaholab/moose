@@ -15,3 +15,5 @@ UserObject based on available libMesh quality metrics to check the quality of ea
 !syntax inputs /UserObjects/ElementQualityChecker
 
 !syntax children /UserObjects/ElementQualityChecker
+
+!tag name=ElementQualityChecker pairs=module:framework system:userobjects

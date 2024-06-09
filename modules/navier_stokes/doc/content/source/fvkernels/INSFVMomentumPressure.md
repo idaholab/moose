@@ -9,3 +9,5 @@ Multiplier that ensures the incompressibility constraint.
 !syntax inputs /FVKernels/INSFVMomentumPressure
 
 !syntax children /FVKernels/INSFVMomentumPressure
+
+!tag name=INSFVMomentumPressure pairs=module:navier_stokes system:fvkernels

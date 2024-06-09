@@ -16,3 +16,5 @@ functions to fill the tensor. The input of the functions should be column major-
 !syntax inputs /Materials/ADGenericFunctionRankTwoTensor
 
 !syntax children /Materials/ADGenericFunctionRankTwoTensor
+
+!tag name=ADGenericFunctionRankTwoTensor pairs=module:framework system:materials

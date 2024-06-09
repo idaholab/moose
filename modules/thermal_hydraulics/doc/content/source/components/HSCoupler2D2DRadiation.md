@@ -128,3 +128,5 @@ used to apply the heat fluxes computed by `HSCoupler2D2DRadiationUserObject` to 
 boundary.
 
 !bibtex bibliography
+
+!tag name=HSCoupler2D2DRadiation pairs=module:thermal_hydraulics system:components

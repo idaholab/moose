@@ -26,3 +26,5 @@ The name of the AuxVariable is used as the argument for the `variable` input par
 !syntax inputs /AuxKernels/GlobalDisplacementAux
 
 !syntax children /AuxKernels/GlobalDisplacementAux
+
+!tag name=GlobalDisplacementAux pairs=module:solid_mechanics system:auxkernels

@@ -85,3 +85,5 @@ saturation pressure).
 !syntax inputs /FluidProperties/SodiumSaturationFluidProperties
 
 !syntax children /FluidProperties/SodiumSaturationFluidProperties
+
+!tag name=SodiumSaturationFluidProperties pairs=module:fluid_properties system:fluidproperties

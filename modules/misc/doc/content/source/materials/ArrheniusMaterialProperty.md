@@ -24,3 +24,5 @@ to temperature.
 !syntax children /Materials/ArrheniusMaterialProperty
 
 !bibtex bibliography
+
+!tag name=ArrheniusMaterialProperty pairs=module:misc system:materials

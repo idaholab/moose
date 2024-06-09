@@ -139,3 +139,5 @@ Ergun Forchheimer coefficient outlined in [FunctorErgunDragCoefficients.md].
 !syntax inputs /FVKernels/PINSFVMomentumFriction
 
 !syntax children /FVKernels/PINSFVMomentumFriction
+
+!tag name=PINSFVMomentumFriction pairs=module:navier_stokes system:fvkernels

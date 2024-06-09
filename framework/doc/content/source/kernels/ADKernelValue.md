@@ -12,3 +12,5 @@ the test function  $\psi_i$ (`_test[_i][_qp]`) to be factored out (see
 
 The Jacobian in `ADKernelValue` is computed using forward automatic
 differentiation.
+
+!tag name=ADKernelValue pairs=module:framework system:kernels

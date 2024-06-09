@@ -102,3 +102,5 @@ The `EBSDReader` supports additional custom data columns.
 !syntax inputs /UserObjects/EBSDReader
 
 !syntax children /UserObjects/EBSDReader
+
+!tag name=EBSDReader pairs=module:phase_field system:userobjects

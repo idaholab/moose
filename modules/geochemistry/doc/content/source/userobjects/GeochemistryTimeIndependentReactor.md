@@ -12,3 +12,5 @@ Advanced users may wish to add `GeochemistryTimeIndependentReactor` objects manu
 
 !syntax children /UserObjects/GeochemistryTimeIndependentReactor
 
+
+!tag name=GeochemistryTimeIndependentReactor pairs=module:geochemistry system:userobjects

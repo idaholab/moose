@@ -23,3 +23,5 @@ When performing stochastic analysis with many perturbations of a sub-application
 !syntax inputs /Transfers/SamplerReporterTransfer
 
 !syntax children /Transfers/SamplerReporterTransfer
+
+!tag name=SamplerReporterTransfer pairs=module:stochastic_tools system:transfers

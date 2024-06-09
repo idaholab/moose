@@ -45,3 +45,5 @@ These IDs can optionally be assigned names using the `Mesh/add_subdomain_names` 
 
 When inheriting from MooseMesh, the developer is responsible for creating the mesh and cloning the mesh (used for displaced mesh problems).
 The methods that need to be overridden are "buildMesh" and "safeClone".
+
+!tag name=MooseMesh pairs=module:framework system:mesh

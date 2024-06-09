@@ -7,3 +7,5 @@ every object may be restricted to one or more subdomains simultaneously. Subdoma
 either as numeric IDs or strings (when supported by the Mesh format or named entities are used).
 Finally, this interface handles queries about the set of subdomains that an object is restricted
 to when no restrictions are supplied.
+
+!tag name=BlockRestrictable pairs=module:framework system:interfaces

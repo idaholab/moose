@@ -15,3 +15,5 @@
 !syntax inputs /UserObjects/CutElementSubdomainModifier
 
 !syntax children /UserObjects/CutElementSubdomainModifier
+
+!tag name=CutElementSubdomainModifier pairs=module:xfem system:userobjects

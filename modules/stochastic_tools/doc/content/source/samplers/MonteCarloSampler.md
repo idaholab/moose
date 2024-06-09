@@ -12,3 +12,5 @@ The MonteCarlo object samples the provided distribution using a traditional
 !syntax inputs /Samplers/MonteCarloSampler
 
 !syntax children /Samplers/MonteCarloSampler
+
+!tag name=MonteCarloSampler pairs=module:stochastic_tools system:samplers

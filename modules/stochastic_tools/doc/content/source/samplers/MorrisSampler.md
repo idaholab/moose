@@ -49,3 +49,5 @@ The following input generates a 3-dimensional sampling matrix with 4 trajectorie
 !syntax children /Samplers/MorrisSampler
 
 !bibtex bibliography
+
+!tag name=MorrisSampler pairs=module:stochastic_tools system:samplers

@@ -20,3 +20,5 @@ of interest, $\vec{n}$ the normal to the boundary, and $\vec{r}$ indicates the p
 !syntax inputs /UserObjects/LayeredSideDiffusiveFluxAverage
 
 !syntax children /UserObjects/LayeredSideDiffusiveFluxAverage
+
+!tag name=LayeredSideDiffusiveFluxAverage pairs=module:framework system:userobjects

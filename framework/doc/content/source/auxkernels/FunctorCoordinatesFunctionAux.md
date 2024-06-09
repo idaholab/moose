@@ -31,3 +31,5 @@ is passed as the time functor.
 !syntax inputs /AuxKernels/FunctorCoordinatesFunctionAux
 
 !syntax children /AuxKernels/FunctorCoordinatesFunctionAux
+
+!tag name=FunctorCoordinatesFunctionAux pairs=module:framework system:auxkernels

@@ -86,3 +86,5 @@ This is the resulting "region_id" extra element integer layout, which was chosen
 !syntax inputs /Mesh/AssemblyMeshGenerator
 
 !syntax children /Mesh/AssemblyMeshGenerator
+
+!tag name=AssemblyMeshGenerator pairs=module:reactor system:meshgenerators

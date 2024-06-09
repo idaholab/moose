@@ -22,3 +22,5 @@ properties.
 !syntax children /Kernels/MaterialPropertyValue
 
 !bibtex bibliography
+
+!tag name=MaterialPropertyValue pairs=module:framework system:kernels

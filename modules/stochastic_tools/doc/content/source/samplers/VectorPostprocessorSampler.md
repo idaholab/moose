@@ -24,3 +24,5 @@ The samples file used in the above examples, `samples.csv`, is listed below.
 !syntax inputs /Samplers/VectorPostprocessorSampler
 
 !syntax children /Samplers/VectorPostprocessorSampler
+
+!tag name=VectorPostprocessorSampler pairs=module:stochastic_tools system:samplers

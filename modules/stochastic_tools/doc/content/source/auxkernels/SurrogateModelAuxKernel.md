@@ -11,3 +11,5 @@ This aux-kernel sets the value of an auxiliary variable by evaluating a [surroga
 !syntax inputs /AuxKernels/SurrogateModelAuxKernel
 
 !syntax children /AuxKernels/SurrogateModelAuxKernel
+
+!tag name=SurrogateModelAuxKernel pairs=module:stochastic_tools system:auxkernels

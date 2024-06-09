@@ -30,3 +30,5 @@ file, as shown below, to create the pattern shown in Figure 3.
 !syntax inputs /Mesh/PatternedMeshGenerator
 
 !syntax children /Mesh/PatternedMeshGenerator
+
+!tag name=PatternedMeshGenerator pairs=module:framework system:meshgenerators

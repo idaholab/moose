@@ -22,3 +22,5 @@ The [PerfGraphReporterReader](PerfGraphReporterReader.md optional=True) is a Pyt
 !syntax inputs /Reporters/PerfGraphReporter
 
 !syntax children /Reporters/PerfGraphReporter
+
+!tag name=PerfGraphReporter pairs=module:framework system:reporters

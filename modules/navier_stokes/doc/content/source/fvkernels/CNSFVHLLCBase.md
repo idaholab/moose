@@ -102,3 +102,5 @@ b_{R}}{\sqrt{\rho_L} + \sqrt{\rho_R}}
 where $b$ can be any quantity such as $a_n$ or $c$.
 
 !bibtex bibliography
+
+!tag name=CNSFVHLLCBase pairs=module:navier_stokes system:fvkernels

@@ -38,3 +38,5 @@ this simulation.
 !syntax inputs /FunctorMaterials/VectorMagnitudeFunctorMaterial
 
 !syntax children /FunctorMaterials/VectorMagnitudeFunctorMaterial
+
+!tag name=VectorMagnitudeFunctorMaterial pairs=module:framework system:functormaterials

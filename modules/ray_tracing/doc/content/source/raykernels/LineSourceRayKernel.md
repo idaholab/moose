@@ -30,3 +30,5 @@ The force is constructed through a user supplied constant $c$, [function](/Funct
 !syntax inputs /RayKernels/LineSourceRayKernel
 
 !syntax children /RayKernels/LineSourceRayKernel
+
+!tag name=LineSourceRayKernel pairs=module:ray_tracing system:raykernels

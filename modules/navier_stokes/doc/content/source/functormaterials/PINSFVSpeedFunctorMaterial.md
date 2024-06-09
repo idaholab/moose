@@ -10,3 +10,5 @@ that are often used in pressure drop and heat transfer correlations.
 !syntax inputs /FunctorMaterials/PINSFVSpeedFunctorMaterial
 
 !syntax children /FunctorMaterials/PINSFVSpeedFunctorMaterial
+
+!tag name=PINSFVSpeedFunctorMaterial pairs=module:navier_stokes system:functormaterials

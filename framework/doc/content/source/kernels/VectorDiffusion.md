@@ -10,3 +10,5 @@ except it is applied to vector finite element variables.
 !syntax inputs /Kernels/VectorDiffusion
 
 !syntax children /Kernels/VectorDiffusion
+
+!tag name=VectorDiffusion pairs=module:framework system:kernels

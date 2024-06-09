@@ -23,3 +23,5 @@ the union of boundaries.
 !syntax inputs /Physics/HeatConduction/FiniteElement/HeatConductionCG
 
 !syntax children /Physics/HeatConduction/FiniteElement/HeatConductionCG
+
+!tag name=HeatConductionCG pairs=module:heat_transfer system:physics

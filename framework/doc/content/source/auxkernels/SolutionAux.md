@@ -9,3 +9,5 @@ This AuxKernel works in conjunction with a [SolutionUserObject](/SolutionUserObj
 !syntax inputs /AuxKernels/SolutionAux
 
 !syntax children /AuxKernels/SolutionAux
+
+!tag name=SolutionAux pairs=module:framework system:auxkernels

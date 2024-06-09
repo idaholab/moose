@@ -38,3 +38,5 @@ variable that the kernel acts on.
 !syntax inputs /Kernels/MassEigenKernel
 
 !syntax children /Kernels/MassEigenKernel
+
+!tag name=MassEigenKernel pairs=module:framework system:kernels

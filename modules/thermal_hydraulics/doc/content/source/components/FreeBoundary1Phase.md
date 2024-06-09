@@ -24,3 +24,5 @@ entirely using the interior solution:
 \begin{equation}
   \mathbf{F}_\text{b} = \mathcal{f}(\mathbf{U}_i) \eqp
 \end{equation}
+
+!tag name=FreeBoundary1Phase pairs=module:thermal_hydraulics system:components

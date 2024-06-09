@@ -24,3 +24,5 @@ scalar (use the input parameter `factor`) or a `function` parameter.
 !syntax inputs /DiracKernels/XFEMPressure
 
 !syntax children /DiracKernels/XFEMPressure
+
+!tag name=XFEMPressure pairs=module:xfem system:dirackernels

@@ -17,3 +17,5 @@ passed to each [Component](syntax/Components/index.md).
 !syntax inputs /ICs/SpecificTotalEnthalpyIC
 
 !syntax children /ICs/SpecificTotalEnthalpyIC
+
+!tag name=SpecificTotalEnthalpyIC pairs=module:thermal_hydraulics system:ics

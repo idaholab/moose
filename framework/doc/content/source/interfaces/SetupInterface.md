@@ -146,3 +146,5 @@ a custom method that uses the `EXEC_ADAPT_MESH` flag to perform
 an additional [`MultiAppTransfer`](Transfers/index.md) execution.
 
 !listing modules/level_set/src/base/LevelSetProblem.C strip-leading-whitespace=1 line=LevelSet::EXEC_ADAPT_MESH
+
+!tag name=SetupInterface pairs=module:framework system:interfaces

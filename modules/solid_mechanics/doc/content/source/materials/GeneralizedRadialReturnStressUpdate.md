@@ -11,3 +11,5 @@ details on the anisotropic plasticity and anisotropic elasto-plasticity algorith
 [!cite](versino2018generalized).
 
 !bibtex bibliography
+
+!tag name=GeneralizedRadialReturnStressUpdate pairs=module:solid_mechanics system:materials

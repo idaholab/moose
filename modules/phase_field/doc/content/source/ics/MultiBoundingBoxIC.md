@@ -22,3 +22,5 @@ each box.
 !syntax children /ICs/MultiBoundingBoxIC
 
 !bibtex bibliography
+
+!tag name=MultiBoundingBoxIC pairs=module:phase_field system:ics

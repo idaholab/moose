@@ -30,3 +30,5 @@ is everywhere positive.
 !syntax inputs /FVKernels/FVBoundedValueConstraint
 
 !syntax children /FVKernels/FVBoundedValueConstraint
+
+!tag name=FVBoundedValueConstraint pairs=module:framework system:fvkernels

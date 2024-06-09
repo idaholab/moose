@@ -20,3 +20,5 @@ them in successively and add merge them into a single block hierarchy. Later
 inputs add to and override parameters to previous inputs. This permits the user
 to factor out common parts of a set of inputs and reuse them in multiple
 simulations.
+
+!tag name=Parser pairs=module:framework system:parser

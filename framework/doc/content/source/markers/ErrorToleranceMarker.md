@@ -21,3 +21,5 @@ element is define for coarsening or refinement using a hard tolerances:
 !syntax inputs /Adaptivity/Markers/ErrorToleranceMarker
 
 !syntax children /Adaptivity/Markers/ErrorToleranceMarker
+
+!tag name=ErrorToleranceMarker pairs=module:framework system:markers

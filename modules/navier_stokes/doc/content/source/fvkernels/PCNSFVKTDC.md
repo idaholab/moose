@@ -33,3 +33,5 @@ quicker if the `steady_state_tolerance` is not tight.
 !syntax inputs /FVKernels/PCNSFVKTDC
 
 !syntax children /FVKernels/PCNSFVKTDC
+
+!tag name=PCNSFVKTDC pairs=module:navier_stokes system:fvkernels

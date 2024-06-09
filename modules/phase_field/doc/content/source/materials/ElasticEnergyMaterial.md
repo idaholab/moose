@@ -37,3 +37,5 @@ derivatives of $E$, which are required by the phase field equations.
 !syntax inputs /Materials/ElasticEnergyMaterial
 
 !syntax children /Materials/ElasticEnergyMaterial
+
+!tag name=ElasticEnergyMaterial pairs=module:phase_field system:materials

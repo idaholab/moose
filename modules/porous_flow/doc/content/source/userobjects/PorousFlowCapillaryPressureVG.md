@@ -39,3 +39,5 @@ This can be disabled by setting `log_extension = false`.
 
 
 !bibtex bibliography
+
+!tag name=PorousFlowCapillaryPressureVG pairs=module:porous_flow system:userobjects

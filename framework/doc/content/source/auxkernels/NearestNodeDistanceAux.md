@@ -16,3 +16,5 @@ from all nodes in one body to some boundary.
 !syntax inputs /AuxKernels/NearestNodeDistanceAux
 
 !syntax children /AuxKernels/NearestNodeDistanceAux
+
+!tag name=NearestNodeDistanceAux pairs=module:framework system:auxkernels

@@ -10,3 +10,5 @@ incompressible porous media Navier Stokes momentum equation as an elemental sour
 !syntax inputs /FVKernels/PINSFVMomentumPressurePorosityGradient
 
 !syntax children /FVKernels/PINSFVMomentumPressurePorosityGradient
+
+!tag name=PINSFVMomentumPressurePorosityGradient pairs=module:navier_stokes system:fvkernels

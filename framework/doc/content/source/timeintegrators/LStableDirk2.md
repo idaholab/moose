@@ -36,3 +36,5 @@ so may be more suitable for "stiff" problems.
 !syntax inputs /Executioner/TimeIntegrator/LStableDirk2
 
 !syntax children /Executioner/TimeIntegrator/LStableDirk2
+
+!tag name=LStableDirk2 pairs=module:framework system:timeintegrators

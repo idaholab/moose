@@ -28,3 +28,5 @@ In this example, the average of the variable `c` is computed for `10` layers (=b
 !syntax inputs /VectorPostprocessors/SphericalAverage
 
 !syntax children /VectorPostprocessors/SphericalAverage
+
+!tag name=SphericalAverage pairs=module:framework system:vectorpostprocessors

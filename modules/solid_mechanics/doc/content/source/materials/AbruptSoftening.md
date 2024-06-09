@@ -64,3 +64,5 @@ to compute the softened cracked material stiffness.
 !syntax children /Materials/AbruptSoftening
 
 !bibtex bibliography
+
+!tag name=AbruptSoftening pairs=module:solid_mechanics system:materials

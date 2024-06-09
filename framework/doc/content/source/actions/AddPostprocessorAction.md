@@ -9,3 +9,5 @@ More information about `Postprocessors` may be found on the
 [Postprocessors syntax documentation](syntax/Postprocessors/index.md).
 
 !syntax parameters /Postprocessors/AddPostprocessorAction
+
+!tag name=AddPostprocessorAction pairs=module:framework system:actions

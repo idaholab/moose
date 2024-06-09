@@ -18,3 +18,5 @@ See [PenaltyEqualValueConstraint](/PenaltyEqualValueConstraint.md) for penalty-b
 !syntax children /Constraints/EqualValueConstraint
 
 !bibtex bibliography
+
+!tag name=EqualValueConstraint pairs=module:framework system:constraints

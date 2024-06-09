@@ -12,3 +12,5 @@ A detailed description of the MOOSE variable system is given in the [base class 
 !syntax inputs /Variables/MooseVariable
 
 !syntax children /Variables/MooseVariable
+
+!tag name=AuxVariable pairs=module:framework system:variables

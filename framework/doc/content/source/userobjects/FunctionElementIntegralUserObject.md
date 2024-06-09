@@ -17,3 +17,5 @@ preferred way of performing this spatial function integration.
 !syntax inputs /UserObjects/FunctionElementIntegralUserObject
 
 !syntax children /UserObjects/FunctionElementIntegralUserObject
+
+!tag name=FunctionElementIntegralUserObject pairs=module:framework system:userobjects

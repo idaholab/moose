@@ -23,3 +23,5 @@ radiation heat flux $q_\text{rad}$, and total heat flux $q$, with names given by
 !syntax inputs /FunctorMaterials/CylindricalGapHeatFluxFunctorMaterial
 
 !syntax children /FunctorMaterials/CylindricalGapHeatFluxFunctorMaterial
+
+!tag name=CylindricalGapHeatFluxFunctorMaterial pairs=module:heat_transfer system:functormaterials

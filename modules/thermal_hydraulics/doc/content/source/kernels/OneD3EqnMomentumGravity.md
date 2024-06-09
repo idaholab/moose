@@ -20,3 +20,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /Kernels/OneD3EqnMomentumGravity
 
 !syntax children /Kernels/OneD3EqnMomentumGravity
+
+!tag name=OneD3EqnMomentumGravity pairs=module:thermal_hydraulics system:kernels

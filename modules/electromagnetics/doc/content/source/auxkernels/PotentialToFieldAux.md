@@ -33,3 +33,5 @@ electrodynamics texts by default.
 !syntax inputs /AuxKernels/PotentialToFieldAux
 
 !syntax children /AuxKernels/PotentialToFieldAux
+
+!tag name=PotentialToFieldAux pairs=module:electromagnetics system:auxkernels

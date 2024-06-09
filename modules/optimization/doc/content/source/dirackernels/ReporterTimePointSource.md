@@ -84,3 +84,5 @@ During the simulation, only the values where the time value (fourth column) is a
 !syntax inputs /DiracKernels/ReporterTimePointSource
 
 !syntax children /DiracKernels/ReporterTimePointSource
+
+!tag name=ReporterTimePointSource pairs=module:optimization system:dirackernels

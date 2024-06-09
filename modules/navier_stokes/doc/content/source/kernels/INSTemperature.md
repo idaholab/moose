@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSTemperature
 
 !syntax children /Kernels/INSTemperature
+
+!tag name=INSTemperature pairs=module:navier_stokes system:kernels

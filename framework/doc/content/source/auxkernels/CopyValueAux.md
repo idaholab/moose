@@ -11,3 +11,5 @@ result in a separate variable. The use of a `CopyValueAux` can often be avoided 
 !syntax inputs /AuxKernels/CopyValueAux
 
 !syntax children /AuxKernels/CopyValueAux
+
+!tag name=CopyValueAux pairs=module:framework system:auxkernels

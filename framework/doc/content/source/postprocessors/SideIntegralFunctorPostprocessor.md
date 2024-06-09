@@ -16,3 +16,5 @@ for finite element variables.
 !syntax inputs /Postprocessors/SideIntegralFunctorPostprocessor
 
 !syntax children /Postprocessors/SideIntegralFunctorPostprocessor
+
+!tag name=SideIntegralFunctorPostprocessor pairs=module:framework system:postprocessors

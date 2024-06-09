@@ -42,3 +42,5 @@ problems.
 !syntax inputs /LinearFVBCs/LinearFVAdvectionDiffusionOutflowBC
 
 !syntax children /LinearFVBCs/LinearFVAdvectionDiffusionOutflowBC
+
+!tag name=LinearFVAdvectionDiffusionOutflowBC pairs=module:framework system:linearfvbcs

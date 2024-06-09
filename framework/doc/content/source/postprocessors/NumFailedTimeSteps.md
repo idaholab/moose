@@ -15,3 +15,5 @@
 !syntax inputs /Postprocessors/NumFailedTimeSteps
 
 !syntax children /Postprocessors/NumFailedTimeSteps
+
+!tag name=NumFailedTimeSteps pairs=module:framework system:postprocessors

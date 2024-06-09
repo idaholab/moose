@@ -17,3 +17,5 @@ The `MeshCutLevelSetAux` calculates level set values for an interface that is de
 !syntax children /AuxKernels/MeshCutLevelSetAux
 
 !bibtex bibliography
+
+!tag name=MeshCutLevelSetAux pairs=module:xfem system:auxkernels

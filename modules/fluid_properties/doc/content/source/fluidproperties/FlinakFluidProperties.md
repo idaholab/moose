@@ -46,3 +46,5 @@ not be used outside this range.
 !syntax inputs /FluidProperties/FlinakFluidProperties
 
 !syntax children /FluidProperties/FlinakFluidProperties
+
+!tag name=FlinakFluidProperties pairs=module:fluid_properties system:fluidproperties

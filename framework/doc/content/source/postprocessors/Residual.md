@@ -20,3 +20,5 @@ scheme is used and the `Residual` postprocessor reports the residual.
 !syntax inputs /Postprocessors/Residual
 
 !syntax children /Postprocessors/Residual
+
+!tag name=Residual pairs=module:framework system:postprocessors

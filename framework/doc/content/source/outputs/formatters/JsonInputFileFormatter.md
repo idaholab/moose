@@ -53,3 +53,5 @@ This is output for every hierarchical level in the syntax.
                                         # Group: ""
       [../]
 ```
+
+!tag name=JsonInputFileFormatter pairs=module:framework system:outputs

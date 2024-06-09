@@ -20,3 +20,5 @@ process is repeated at time $t+\Delta t$.
 !syntax inputs /UserObjects/LevelSetOlssonTerminator
 
 !syntax children /UserObjects/LevelSetOlssonTerminator
+
+!tag name=LevelSetOlssonTerminator pairs=module:level_set system:userobjects

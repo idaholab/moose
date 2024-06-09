@@ -53,3 +53,5 @@ Many `NaK` properties are computed from a mix of `Na` and `K` properties and the
 !syntax children /FluidProperties/NaKFluidProperties
 
 !bibtex bibliography
+
+!tag name=NaKFluidProperties pairs=module:fluid_properties system:fluidproperties

@@ -10,3 +10,5 @@ pressure-stabilized and streamline-upwind kernels.
 !syntax inputs /Materials/INSADTauMaterial
 
 !syntax children /Materials/INSADTauMaterial
+
+!tag name=INSADTauMaterial pairs=module:navier_stokes system:materials

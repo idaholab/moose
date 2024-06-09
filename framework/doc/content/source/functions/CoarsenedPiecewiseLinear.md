@@ -20,3 +20,5 @@ for data reduction.
 !syntax inputs /Functions/CoarsenedPiecewiseLinear
 
 !syntax children /Functions/CoarsenedPiecewiseLinear
+
+!tag name=CoarsenedPiecewiseLinear pairs=module:framework system:functions

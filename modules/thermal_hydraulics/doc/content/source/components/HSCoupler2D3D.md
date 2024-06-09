@@ -194,3 +194,5 @@ used to apply the heat fluxes computed by `HSCoupler2D3DUserObject` to each
 boundary (2D and 3D).
 
 !bibtex bibliography
+
+!tag name=HSCoupler2D3D pairs=module:thermal_hydraulics system:components

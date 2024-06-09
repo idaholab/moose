@@ -20,3 +20,5 @@ point values, but instead passes the element argument to the functor.
 !syntax inputs /Postprocessors/ElementExtremeFunctorValue
 
 !syntax children /Postprocessors/ElementExtremeFunctorValue
+
+!tag name=ElementExtremeFunctorValue pairs=module:framework system:postprocessors

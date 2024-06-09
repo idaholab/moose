@@ -15,3 +15,5 @@ Equations (15), (21), (26) and (29).
 !syntax inputs /Constraints/ExplicitDynamicsContactConstraint
 
 !syntax children /Constraints/ExplicitDynamicsContactConstraint
+
+!tag name=ExplicitDynamicsContactConstraint pairs=module:contact system:constraints

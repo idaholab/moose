@@ -12,3 +12,5 @@ $t$, $x$, $y$, or $z$ axis.
 !syntax children /Functions/PiecewiseFunction
 
 !bibtex bibliography
+
+!tag name=PiecewiseFunction pairs=module:thermal_hydraulics system:functions

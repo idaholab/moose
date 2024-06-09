@@ -41,3 +41,5 @@ set the parameter "standard_friction_formulation = false"
 !syntax inputs /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial
 
 !syntax children /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial
+
+!tag name=INSFVMushyPorousFrictionFunctorMaterial pairs=module:navier_stokes system:functormaterials

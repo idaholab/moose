@@ -12,3 +12,5 @@ information for debugging purposes. Please refer to the [Debug/index.md] for mor
 !syntax inputs /Outputs/TopResidualDebugOutput
 
 !syntax children /Outputs/TopResidualDebugOutput
+
+!tag name=TopResidualDebugOutput pairs=module:framework system:outputs

@@ -46,3 +46,5 @@ to compute the approximate values of the target function at the new sample point
 
 !else
 !include libtorch/libtorch_warning.md
+
+!tag name=LibtorchANNSurrogate pairs=module:stochastic_tools system:libtorch

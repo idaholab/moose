@@ -21,3 +21,5 @@ problem.
 !syntax inputs /Materials/GenericConstantArray
 
 !syntax children /Materials/GenericConstantArray
+
+!tag name=GenericConstantArray pairs=module:framework system:materials

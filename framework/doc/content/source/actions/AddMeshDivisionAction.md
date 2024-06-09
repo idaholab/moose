@@ -9,3 +9,5 @@ More information about `MeshDivisions` may be found on the
 [MeshDivisions syntax documentation](syntax/MeshDivisions/index.md).
 
 !syntax parameters /MeshDivisions/AddMeshDivisionAction
+
+!tag name=AddMeshDivisionAction pairs=module:framework system:actions

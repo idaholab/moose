@@ -17,3 +17,5 @@ The function providing the area must have the gradient routine implemented.
 !syntax inputs /Functions/GeneralizedCircumference
 
 !syntax children /Functions/GeneralizedCircumference
+
+!tag name=GeneralizedCircumference pairs=module:thermal_hydraulics system:functions

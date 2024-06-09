@@ -78,3 +78,5 @@ The viscosity returned by the FluidProperties module is multiplied by $1/(3600\t
 !syntax inputs /Materials/PorousFlowMultiComponentFluid
 
 !syntax children /Materials/PorousFlowMultiComponentFluid
+
+!tag name=PorousFlowMultiComponentFluid pairs=module:porous_flow system:materials

@@ -21,3 +21,5 @@ documentation clear for users.
 !syntax inputs /Materials/INSFEMaterial
 
 !syntax children /Materials/INSFEMaterial
+
+!tag name=INSFEMaterial pairs=module:navier_stokes system:materials

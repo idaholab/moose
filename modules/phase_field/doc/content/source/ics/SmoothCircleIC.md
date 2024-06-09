@@ -49,3 +49,5 @@ rise to the factor of $\pi$ in eq. [eq-tanh]).
 !syntax children /ICs/SmoothCircleIC
 
 !bibtex bibliography
+
+!tag name=SmoothCircleIC pairs=module:phase_field system:ics

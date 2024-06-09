@@ -9,3 +9,5 @@ applications. Disabling scalar variables output is often desirable in THM due
 to the potentially large number of scalar variables in systems simulations.
 
 !syntax parameters /Outputs/THMSetupOutputAction
+
+!tag name=THMSetupOutputAction pairs=module:thermal_hydraulics system:actions

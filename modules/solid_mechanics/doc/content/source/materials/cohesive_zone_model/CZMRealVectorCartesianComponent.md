@@ -24,3 +24,5 @@ The `CZMRealVectorCartesianComponent` takes as arguments the values of the `inde
 !syntax inputs /Materials/CZMRealVectorCartesianComponent
 
 !syntax children /Materials/CZMRealVectorCartesianComponent
+
+!tag name=CZMRealVectorCartesianComponent pairs=module:solid_mechanics system:materials

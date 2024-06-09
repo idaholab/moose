@@ -16,3 +16,5 @@ Use the [!param](/UserObjects/SidesetAroundSubdomainUpdater/execution_order_grou
 !syntax inputs /UserObjects/SidesetAroundSubdomainUpdater
 
 !syntax children /UserObjects/SidesetAroundSubdomainUpdater
+
+!tag name=SidesetAroundSubdomainUpdater pairs=module:framework system:userobjects

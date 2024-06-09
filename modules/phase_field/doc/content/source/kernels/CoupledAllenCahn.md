@@ -23,3 +23,5 @@ For the more common case where $\eta$ is the variable the kernel is acting on se
 !syntax inputs /Kernels/CoupledAllenCahn
 
 !syntax children /Kernels/CoupledAllenCahn
+
+!tag name=CoupledAllenCahn pairs=module:phase_field system:kernels

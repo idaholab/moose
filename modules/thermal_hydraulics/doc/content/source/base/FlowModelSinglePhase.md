@@ -14,3 +14,5 @@ The full list of the objects created is listed in the [FlowChannel1Phase documen
 !alert note
 The `FlowModelSinglePhase` is created by [FlowChannel1Phase.md] components. It is not specified directly
 in the input file.
+
+!tag name=FlowModelSinglePhase pairs=module:thermal_hydraulics system:base

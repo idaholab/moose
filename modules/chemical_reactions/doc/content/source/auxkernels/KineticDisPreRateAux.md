@@ -36,3 +36,5 @@ module.
 !syntax inputs /AuxKernels/KineticDisPreRateAux
 
 !syntax children /AuxKernels/KineticDisPreRateAux
+
+!tag name=KineticDisPreRateAux pairs=module:chemical_reactions system:auxkernels

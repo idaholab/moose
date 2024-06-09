@@ -11,3 +11,5 @@ This class computes the $i^{th}$ component of internal forces/moments for a beam
 !syntax inputs /Kernels/StressDivergenceBeam
 
 !syntax children /Kernels/StressDivergenceBeam
+
+!tag name=StressDivergenceBeam pairs=module:solid_mechanics system:kernels

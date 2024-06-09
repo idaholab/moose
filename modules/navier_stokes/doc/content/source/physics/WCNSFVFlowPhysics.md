@@ -58,3 +58,5 @@ Please see [the Bernoulli pressure variable documentation](BernoulliPressureVari
 !syntax inputs /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 
 !syntax children /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
+
+!tag name=WCNSFVFlowPhysics pairs=module:navier_stokes system:physics

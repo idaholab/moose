@@ -22,3 +22,5 @@ The complementary kernel for the second phase is needed to preserve the phase fr
 !syntax inputs /FVKernels/NSFVMixturePhaseInterface
 
 !syntax children /FVKernels/NSFVMixturePhaseInterface
+
+!tag name=NSFVMixturePhaseInterface pairs=module:navier_stokes system:fvkernels

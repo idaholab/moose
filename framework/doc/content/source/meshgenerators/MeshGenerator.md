@@ -188,3 +188,5 @@ to a generator that is data-driven.
 This is an advanced method that requires a heavy understanding of all generators that
 exist in the generation tree, and thus it is not enabled by default. To enable it, the
 parameter `allow_data_driven_mesh_generation` on your application can be set to true.
+
+!tag name=MeshGenerator pairs=module:framework system:meshgenerators

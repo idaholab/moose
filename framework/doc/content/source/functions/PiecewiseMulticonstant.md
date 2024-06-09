@@ -33,3 +33,5 @@ A `direction` has to be provided for each dimension.
 !syntax children /Functions/PiecewiseMulticonstant
 
 !bibtex bibliography
+
+!tag name=PiecewiseMulticonstant pairs=module:framework system:functions

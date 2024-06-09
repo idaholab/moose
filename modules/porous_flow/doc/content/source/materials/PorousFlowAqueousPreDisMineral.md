@@ -30,3 +30,5 @@ for more details.
 !syntax inputs /Materials/PorousFlowAqueousPreDisMineral
 
 !syntax children /Materials/PorousFlowAqueousPreDisMineral
+
+!tag name=PorousFlowAqueousPreDisMineral pairs=module:porous_flow system:materials

@@ -17,3 +17,5 @@
 !syntax inputs /UserObjects/GlobalStrainUserObject
 
 !syntax children /UserObjects/GlobalStrainUserObject
+
+!tag name=GlobalStrainUserObject pairs=module:solid_mechanics system:userobjects

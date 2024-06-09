@@ -13,3 +13,5 @@ This object is not typically directly defined by a user, but is defined using th
 !syntax inputs /AuxKernels/DomainIntegralQFunction
 
 !syntax children /AuxKernels/DomainIntegralQFunction
+
+!tag name=DomainIntegralQFunction pairs=module:solid_mechanics system:auxkernels

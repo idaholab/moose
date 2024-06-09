@@ -55,3 +55,5 @@ suppresses the `advected_quantity` parameter in order to advect the `variable`.
 !syntax inputs /FVKernels/INSFVMeshAdvection
 
 !syntax children /FVKernels/INSFVMeshAdvection
+
+!tag name=INSFVMeshAdvection pairs=module:navier_stokes system:fvkernels

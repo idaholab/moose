@@ -10,3 +10,5 @@ vector.
 !syntax inputs /FVKernels/PINSFVMomentumGravity
 
 !syntax children /FVKernels/PINSFVMomentumGravity
+
+!tag name=PINSFVMomentumGravity pairs=module:navier_stokes system:fvkernels

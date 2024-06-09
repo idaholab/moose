@@ -9,3 +9,5 @@ boundary.
 !syntax inputs /UserObjects/HSCoupler2D3DUserObject
 
 !syntax children /UserObjects/HSCoupler2D3DUserObject
+
+!tag name=HSCoupler2D3DUserObject pairs=module:thermal_hydraulics system:userobjects

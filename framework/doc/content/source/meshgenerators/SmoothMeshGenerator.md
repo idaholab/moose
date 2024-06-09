@@ -21,3 +21,5 @@ As an example here is an original mesh going through 12 iterations of this smoot
 !syntax inputs /Mesh/SmoothMeshGenerator
 
 !syntax children /Mesh/SmoothMeshGenerator
+
+!tag name=SmoothMeshGenerator pairs=module:framework system:meshgenerators

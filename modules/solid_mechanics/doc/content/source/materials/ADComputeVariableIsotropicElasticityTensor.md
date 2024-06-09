@@ -18,3 +18,5 @@ elastic constants.
 !syntax inputs /Materials/ADComputeVariableIsotropicElasticityTensor
 
 !syntax children /Materials/ADComputeVariableIsotropicElasticityTensor
+
+!tag name=ADComputeVariableIsotropicElasticityTensor pairs=module:solid_mechanics system:materials

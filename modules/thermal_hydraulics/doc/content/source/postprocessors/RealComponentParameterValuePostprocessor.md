@@ -9,3 +9,5 @@ This is mostly used to debug inputs using the [ControlLogic](syntax/ControlLogic
 !syntax inputs /Postprocessors/RealComponentParameterValuePostprocessor
 
 !syntax children /Postprocessors/RealComponentParameterValuePostprocessor
+
+!tag name=RealComponentParameterValuePostprocessor pairs=module:thermal_hydraulics system:postprocessors

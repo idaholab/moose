@@ -106,3 +106,5 @@ The user can set [!param](/Mesh/PolygonConcentricCircleMeshGenerator/create_inwa
 !syntax inputs /Mesh/PolygonConcentricCircleMeshGenerator
 
 !syntax children /Mesh/PolygonConcentricCircleMeshGenerator
+
+!tag name=PolygonConcentricCircleMeshGenerator pairs=module:reactor system:meshgenerators

@@ -10,3 +10,5 @@ When the `THMProblem` advances state, this advances the `FEProblem` and then the
 !syntax inputs /Problem/THMProblem
 
 !syntax children /Problem/THMProblem
+
+!tag name=THMProblem pairs=module:thermal_hydraulics system:problems

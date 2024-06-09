@@ -15,3 +15,5 @@ $A$ the local area, and $H$ the specific total enthalpy.
 !syntax inputs /Postprocessors/NodalEnergyFluxPostprocessor
 
 !syntax children /Postprocessors/NodalEnergyFluxPostprocessor
+
+!tag name=NodalEnergyFluxPostprocessor pairs=module:thermal_hydraulics system:postprocessors

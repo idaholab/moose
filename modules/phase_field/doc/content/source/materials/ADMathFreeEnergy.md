@@ -21,3 +21,5 @@ equation ([`ADSplitCHWRes`](/ADSplitCHWRes.md) and
 !syntax children /Materials/ADMathFreeEnergy
 
 !bibtex bibliography
+
+!tag name=ADMathFreeEnergy pairs=module:phase_field system:materials

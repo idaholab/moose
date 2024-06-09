@@ -23,3 +23,5 @@ stop the simulation and prints `Threshold exceeded`.
 !syntax inputs /ControlLogic/TerminateControl
 
 !syntax children /ControlLogic/TerminateControl
+
+!tag name=TerminateControl pairs=module:thermal_hydraulics system:controllogic

@@ -11,3 +11,5 @@
 !syntax inputs /Kernels/ADMatCoupledForce
 
 !syntax children /Kernels/ADMatCoupledForce
+
+!tag name=ADMatCoupledForce pairs=module:framework system:kernels

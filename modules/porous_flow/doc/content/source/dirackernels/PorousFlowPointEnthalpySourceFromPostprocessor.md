@@ -34,3 +34,5 @@ value is being used within the timestep.
 !syntax inputs /DiracKernels/PorousFlowPointEnthalpySourceFromPostprocessor
 
 !syntax children /DiracKernels/PorousFlowPointEnthalpySourceFromPostprocessor
+
+!tag name=PorousFlowPointEnthalpySourceFromPostprocessor pairs=module:porous_flow system:dirackernels

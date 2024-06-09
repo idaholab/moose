@@ -46,3 +46,5 @@ The method is *not* L-stable; it is only A-stable:
 !syntax inputs /Executioner/TimeIntegrator/AStableDirk4
 
 !syntax children /Executioner/TimeIntegrator/AStableDirk4
+
+!tag name=AStableDirk4 pairs=module:framework system:timeintegrators

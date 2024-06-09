@@ -13,3 +13,5 @@ This object is deprecated. See [SideDiffusiveFluxIntegral](/SideDiffusiveFluxInt
 !syntax inputs /Postprocessors/SideFluxIntegral
 
 !syntax children /Postprocessors/SideFluxIntegral
+
+!tag name=SideFluxIntegral pairs=module:framework system:postprocessors

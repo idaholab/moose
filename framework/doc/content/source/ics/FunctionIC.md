@@ -17,3 +17,5 @@ In this example, we set the initial value of variable `u` using a [MooseParsedFu
 !syntax inputs /ICs/FunctionIC
 
 !syntax children /ICs/FunctionIC
+
+!tag name=FunctionIC pairs=module:framework system:ics

@@ -12,3 +12,4 @@ All Cosserat rotation variables should also be specified to each instance of thi
 !syntax inputs /Kernels/CosseratStressDivergenceTensors
 
 !syntax children /Kernels/CosseratStressDivergenceTensors
+!tag name=CosseratStressDivergenceTensors pairs=module:solid_mechanics system:kernels

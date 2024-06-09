@@ -39,3 +39,5 @@ The resulting Cartesian sampling is provided in the output file, as shown below.
 !syntax inputs /Samplers/Cartesian1D
 
 !syntax children /Samplers/Cartesian1D
+
+!tag name=Cartesian1DSampler pairs=module:stochastic_tools system:samplers

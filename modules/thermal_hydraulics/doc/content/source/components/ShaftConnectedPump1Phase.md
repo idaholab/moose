@@ -159,3 +159,5 @@ I_{\text{pump}} = I_{\text{coeff}}[0] + I_{\text{coeff}}[1] \mid \alpha \mid + I
 
 
 !bibtex bibliography
+
+!tag name=ShaftConnectedPump1Phase pairs=module:thermal_hydraulics system:components

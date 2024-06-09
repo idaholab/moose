@@ -12,3 +12,5 @@ implementation described in detail in [PCNSFVHLLC.md].
 !syntax inputs /FVKernels/PCNSFVFluidEnergyHLLC
 
 !syntax children /FVKernels/PCNSFVFluidEnergyHLLC
+
+!tag name=PCNSFVFluidEnergyHLLC pairs=module:navier_stokes system:fvkernels

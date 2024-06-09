@@ -45,3 +45,5 @@ It should be immediately apparent that the bottom right partitioning is best (wi
 !syntax children /AuxKernels/HardwareIDAux
 
 !bibtex bibliography
+
+!tag name=HardwareIDAux pairs=module:framework system:auxkernels

@@ -40,3 +40,5 @@ The following input can be executed with the MOOSE Phase Field module executable
 !syntax inputs /UserObjects/SolutionRasterizer
 
 !syntax children /UserObjects/SolutionRasterizer
+
+!tag name=SolutionRasterizer pairs=module:phase_field system:userobjects

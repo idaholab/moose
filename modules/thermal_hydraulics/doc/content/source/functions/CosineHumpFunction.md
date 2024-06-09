@@ -13,3 +13,5 @@ smoothly varying functions, for instance, for initial conditions.
 !syntax children /Functions/CosineHumpFunction
 
 !bibtex bibliography
+
+!tag name=CosineHumpFunction pairs=module:thermal_hydraulics system:functions

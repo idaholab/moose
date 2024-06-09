@@ -18,3 +18,5 @@ auxiliary variable should be of type `LAGRANGE`.
 !syntax inputs /AuxKernels/VectorVariableMagnitudeAux
 
 !syntax children /AuxKernels/VectorVariableMagnitudeAux
+
+!tag name=VectorVariableMagnitudeAux pairs=module:framework system:auxkernels

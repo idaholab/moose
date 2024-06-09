@@ -5,3 +5,5 @@ calculate residual vector contributions of nonlinear scalar field variables.
 
 This effectively allows a class to either inherit from [Kernel](Kernel.md) for
 the non-AD or ADKernel for the AD case via the boolean `<is_ad>`.
+
+!tag name=GenericKernel pairs=module:framework system:kernels

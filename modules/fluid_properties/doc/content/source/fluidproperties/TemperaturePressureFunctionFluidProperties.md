@@ -48,3 +48,5 @@ pressure variables.
 !syntax inputs /FluidProperties/TemperaturePressureFunctionFluidProperties
 
 !syntax children /FluidProperties/TemperaturePressureFunctionFluidProperties
+
+!tag name=TemperaturePressureFunctionFluidProperties pairs=module:fluid_properties system:fluidproperties

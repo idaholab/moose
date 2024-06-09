@@ -30,3 +30,5 @@ CSV file using a [SpatialUserObjectVectorPostprocessor.md].
 !syntax inputs /UserObjects/LayeredIntegral
 
 !syntax children /UserObjects/LayeredIntegral
+
+!tag name=LayeredIntegral pairs=module:framework system:userobjects

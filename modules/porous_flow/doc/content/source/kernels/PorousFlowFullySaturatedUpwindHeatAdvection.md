@@ -20,3 +20,5 @@ See [upwinding](/upwinding.md) for details.  If you desire no upwinding, use [Po
 !syntax inputs /Kernels/PorousFlowFullySaturatedUpwindHeatAdvection
 
 !syntax children /Kernels/PorousFlowFullySaturatedUpwindHeatAdvection
+
+!tag name=PorousFlowFullySaturatedUpwindHeatAdvection pairs=module:porous_flow system:kernels

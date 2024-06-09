@@ -16,3 +16,5 @@ variable.
 !syntax inputs /Kernels/GradientComponent
 
 !syntax children /Kernels/GradientComponent
+
+!tag name=GradientComponent pairs=module:phase_field system:kernels

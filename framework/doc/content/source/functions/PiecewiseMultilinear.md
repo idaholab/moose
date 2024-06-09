@@ -29,3 +29,5 @@ and Ni = number of grid points along the first AXIS, etc.
 !syntax children /Functions/PiecewiseMultilinear
 
 !bibtex bibliography
+
+!tag name=PiecewiseMultilinear pairs=module:framework system:functions

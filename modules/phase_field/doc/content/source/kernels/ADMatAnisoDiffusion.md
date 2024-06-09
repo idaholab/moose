@@ -10,3 +10,5 @@ expects a tensor valued diffusion coefficient $D$ (`diffusivity`).
 !syntax inputs /Kernels/ADMatAnisoDiffusion
 
 !syntax children /Kernels/ADMatAnisoDiffusion
+
+!tag name=ADMatAnisoDiffusion pairs=module:phase_field system:kernels

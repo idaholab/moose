@@ -43,3 +43,5 @@ is exactly equal to $f Q$.
 !syntax inputs /Components/HeatSourceFromTotalPower
 
 !syntax children /Components/HeatSourceFromTotalPower
+
+!tag name=HeatSourceFromTotalPower pairs=module:thermal_hydraulics system:components

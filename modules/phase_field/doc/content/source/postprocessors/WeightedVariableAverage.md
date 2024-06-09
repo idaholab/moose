@@ -18,3 +18,5 @@ For constant weight values $w$ this object is equivalent to
 !syntax children /Postprocessors/WeightedVariableAverage
 
 !bibtex bibliography
+
+!tag name=WeightedVariableAverage pairs=module:phase_field system:postprocessors

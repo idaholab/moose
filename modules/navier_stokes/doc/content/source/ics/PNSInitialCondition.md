@@ -16,3 +16,5 @@ an interstitial velocity and the porosity.
 !syntax inputs /ICs/PNSInitialCondition
 
 !syntax children /ICs/PNSInitialCondition
+
+!tag name=PNSInitialCondition pairs=module:navier_stokes system:ics

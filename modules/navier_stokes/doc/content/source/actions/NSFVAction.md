@@ -23,3 +23,5 @@ In this example, the equations, the wall/inlet/outlet boundary conditions and th
 !listing test/tests/finite_volume/ins/channel-flow/2d-rc-ambient-convection-action.i block=Modules/NavierStokesFV
 
 !syntax parameters /Modules/NavierStokesFV
+
+!tag name=NSFVAction pairs=module:navier_stokes system:actions

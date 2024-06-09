@@ -27,3 +27,5 @@ $p(T, v)$.
 !syntax inputs /FluidProperties/IdealRealGasMixtureFluidProperties
 
 !syntax children /FluidProperties/IdealRealGasMixtureFluidProperties
+
+!tag name=IdealRealGasMixtureFluidProperties pairs=module:fluid_properties system:fluidproperties

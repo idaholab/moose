@@ -42,3 +42,5 @@ The Solution Invalidity warnings are detected but silenced! Use Problem/allow_in
 The Solution Invalid Warning can also be printed out immediately after it is detected by setting [!param](/Problem/FEProblem/immediately_print_invalid_solution) to `true`.
 
 
+
+!tag name=SolutionInvalidity pairs=module:framework system:problems

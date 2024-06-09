@@ -20,3 +20,5 @@ total of 9 Edge2 elements.
 !syntax parameters /Mesh/PolyLineMeshGenerator
 
 !syntax inputs /Mesh/PolyLineMeshGenerator
+
+!tag name=PolyLineMeshGenerator pairs=module:framework system:meshgenerators

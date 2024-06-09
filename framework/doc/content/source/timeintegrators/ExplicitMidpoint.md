@@ -43,3 +43,5 @@ should be used with caution.
 !syntax inputs /Executioner/TimeIntegrator/ExplicitMidpoint
 
 !syntax children /Executioner/TimeIntegrator/ExplicitMidpoint
+
+!tag name=ExplicitMidpoint pairs=module:framework system:timeintegrators

@@ -28,3 +28,5 @@ The flag `use_displaced_mesh = false` is set internally by this Postprocessor, a
 !syntax inputs /Postprocessors/PorousFlowHeatEnergy
 
 !syntax children /Postprocessors/PorousFlowHeatEnergy
+
+!tag name=PorousFlowHeatEnergy pairs=module:porous_flow system:postprocessors

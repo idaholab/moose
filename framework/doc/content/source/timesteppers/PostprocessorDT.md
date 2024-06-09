@@ -24,3 +24,5 @@ a fluid flow simulation in a shock tube.
 !syntax inputs /Executioner/TimeSteppers/PostprocessorDT
 
 !syntax children /Executioner/TimeSteppers/PostprocessorDT
+
+!tag name=PostprocessorDT pairs=module:framework system:timesteppers

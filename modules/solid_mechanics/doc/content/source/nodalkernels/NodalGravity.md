@@ -15,3 +15,5 @@ For example, the below csv file has two rows with 4 columns. The first three col
 !syntax inputs /NodalKernels/NodalGravity
 
 !syntax children /NodalKernels/NodalGravity
+
+!tag name=NodalGravity pairs=module:solid_mechanics system:nodalkernels

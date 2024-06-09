@@ -33,3 +33,5 @@ The non-advanced results that are available are as follows:
 !syntax inputs /VectorPostprocessors/PerProcessorRayTracingResultsVectorPostprocessor
 
 !syntax children /VectorPostprocessors/PerProcessorRayTracingResultsVectorPostprocessor
+
+!tag name=PerProcessorRayTracingResultsVectorPostprocessor pairs=module:ray_tracing system:vectorpostprocessors

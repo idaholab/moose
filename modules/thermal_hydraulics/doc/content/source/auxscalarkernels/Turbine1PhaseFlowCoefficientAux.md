@@ -14,3 +14,5 @@ automatically added to the simulation by the [ShaftConnectedTurbine1Phase.md] co
 !syntax inputs /AuxScalarKernels/Turbine1PhaseFlowCoefficientAux
 
 !syntax children /AuxScalarKernels/Turbine1PhaseFlowCoefficientAux
+
+!tag name=Turbine1PhaseFlowCoefficientAux pairs=module:thermal_hydraulics system:auxscalarkernels

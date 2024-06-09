@@ -231,3 +231,5 @@ in `solveStage()`.
 !syntax children /Executioner/TimeIntegrator/ExplicitSSPRungeKutta
 
 !bibtex bibliography
+
+!tag name=ExplicitSSPRungeKutta pairs=module:framework system:timeintegrators

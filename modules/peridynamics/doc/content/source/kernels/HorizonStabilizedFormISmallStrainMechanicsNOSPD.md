@@ -12,3 +12,5 @@ Details of the various forms of the horizon stabilization approaches are provide
 !syntax inputs /Kernels/HorizonStabilizedFormISmallStrainMechanicsNOSPD
 
 !syntax children /Kernels/HorizonStabilizedFormISmallStrainMechanicsNOSPD
+
+!tag name=HorizonStabilizedFormISmallStrainMechanicsNOSPD pairs=module:peridynamics system:kernels

@@ -38,3 +38,5 @@ time step to perform a first update step.
 !syntax inputs /Executioner/Predictor/AdamsPredictor
 
 !syntax children /Executioner/Predictor/AdamsPredictor
+
+!tag name=AdamsPredictor pairs=module:framework system:predictors

@@ -23,3 +23,5 @@ such as GB vacancy segregation and stoichiometry effects.
 !syntax children /Materials/ElectrochemicalDefectMaterial
 
 !bibtex bibliography
+
+!tag name=ElectrochemicalDefectMaterial pairs=module:phase_field system:materials

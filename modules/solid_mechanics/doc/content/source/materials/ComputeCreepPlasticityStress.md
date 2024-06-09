@@ -236,3 +236,5 @@ inelastic models and the damage model.
 !syntax children /Materials/ComputeCreepPlasticityStress
 
 !bibtex bibliography
+
+!tag name=ComputeCreepPlasticityStress pairs=module:solid_mechanics system:materials

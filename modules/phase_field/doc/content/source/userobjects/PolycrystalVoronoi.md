@@ -38,3 +38,5 @@ An example of activating `KDTree` is provided below:
 !syntax inputs /Postprocessors/PolycrystalVoronoi
 
 !syntax children /Postprocessors/PolycrystalVoronoi
+
+!tag name=PolycrystalVoronoi pairs=module:phase_field system:userobjects

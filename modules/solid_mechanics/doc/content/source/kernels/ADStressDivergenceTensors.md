@@ -24,3 +24,5 @@ calculator for the Cartesian system.
 !syntax inputs /Kernels/ADStressDivergenceTensors
 
 !syntax children /Kernels/ADStressDivergenceTensors
+
+!tag name=ADStressDivergenceTensors pairs=module:solid_mechanics system:kernels

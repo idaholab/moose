@@ -8,3 +8,5 @@ This time integrator is an implementation of forward/explicit Euler based on
 !syntax inputs /Executioner/TimeIntegrator/ActuallyExplicitEuler
 
 !syntax children /Executioner/TimeIntegrator/ActuallyExplicitEuler
+
+!tag name=ActuallyExplicitEuler pairs=module:framework system:timeintegrators

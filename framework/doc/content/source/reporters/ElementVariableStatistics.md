@@ -21,3 +21,5 @@ name to each reporter.
 !syntax inputs /Reporters/ElementVariableStatistics
 
 !syntax children /Reporters/ElementVariableStatistics
+
+!tag name=ElementVariableStatistics pairs=module:framework system:reporters

@@ -11,3 +11,5 @@ MOOSE permits variables to be restricted to specific blocks, but currently does 
 !syntax inputs /BCs/CrackTipEnrichmentCutOffBC
 
 !syntax children /BCs/CrackTipEnrichmentCutOffBC
+
+!tag name=CrackTipEnrichmentCutOffBC pairs=module:xfem system:bcs

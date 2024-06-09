@@ -18,3 +18,5 @@ objects in THM.
 !syntax inputs /Materials/ADSolidMaterial
 
 !syntax children /Materials/ADSolidMaterial
+
+!tag name=ADSolidMaterial pairs=module:thermal_hydraulics system:materials

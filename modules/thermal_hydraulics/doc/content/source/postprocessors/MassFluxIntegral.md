@@ -14,3 +14,5 @@ with $\alpha \rho u A$ the conserved phase momentum at the boundary.
 !syntax inputs /Postprocessors/MassFluxIntegral
 
 !syntax children /Postprocessors/MassFluxIntegral
+
+!tag name=MassFluxIntegral pairs=module:thermal_hydraulics system:postprocessors

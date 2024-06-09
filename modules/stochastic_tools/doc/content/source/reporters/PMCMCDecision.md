@@ -24,3 +24,5 @@ A decision making class for a new MCMC sampler should derive from `PMCMCDecision
 !syntax inputs /Reporters/PMCMCDecision
 
 !syntax children /Reporters/PMCMCDecision
+
+!tag name=PMCMCDecision pairs=module:stochastic_tools system:reporters

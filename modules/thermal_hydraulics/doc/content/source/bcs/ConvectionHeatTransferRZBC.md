@@ -18,3 +18,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /BCs/ConvectionHeatTransferRZBC
 
 !syntax children /BCs/ConvectionHeatTransferRZBC
+
+!tag name=ConvectionHeatTransferRZBC pairs=module:thermal_hydraulics system:bcs

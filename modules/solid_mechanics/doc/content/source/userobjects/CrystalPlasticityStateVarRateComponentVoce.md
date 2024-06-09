@@ -65,3 +65,5 @@ In this example illustrate a BCC in which slip systems have been grouped by slip
 !syntax inputs /UserObjects/CrystalPlasticityStateVarRateComponentVoce
 
 !syntax children /UserObjects/CrystalPlasticityStateVarRateComponentVoce
+
+!tag name=CrystalPlasticityStateVarRateComponentVoce pairs=module:solid_mechanics system:userobjects

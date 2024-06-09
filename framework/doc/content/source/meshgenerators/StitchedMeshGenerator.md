@@ -26,3 +26,5 @@ Note that the way that the meshes are merged gives precedence to the left-most m
 !syntax inputs /Mesh/StitchedMeshGenerator
 
 !syntax children /Mesh/StitchedMeshGenerator
+
+!tag name=StitchedMeshGenerator pairs=module:framework system:meshgenerators

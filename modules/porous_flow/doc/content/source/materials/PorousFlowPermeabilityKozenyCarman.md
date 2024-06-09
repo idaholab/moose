@@ -23,3 +23,5 @@ The parameters $A$ and $B$ are then converted to the correct form internally.
 !syntax inputs /Materials/PorousFlowPermeabilityKozenyCarman
 
 !syntax children /Materials/PorousFlowPermeabilityKozenyCarman
+
+!tag name=PorousFlowPermeabilityKozenyCarman pairs=module:porous_flow system:materials

@@ -26,3 +26,5 @@ In this example, the variables `u` and `v` are sampled at three points, `(0.1 0.
 !syntax inputs /VectorPostprocessors/PointValueSampler
 
 !syntax children /VectorPostprocessors/PointValueSampler
+
+!tag name=PointValueSampler pairs=module:framework system:vectorpostprocessors

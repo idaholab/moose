@@ -20,3 +20,5 @@ to a field variable in the parent application.
 !syntax inputs /Transfers/MultiAppPostprocessorInterpolationTransfer
 
 !syntax children /Transfers/MultiAppPostprocessorInterpolationTransfer
+
+!tag name=MultiAppPostprocessorInterpolationTransfer pairs=module:framework system:transfers

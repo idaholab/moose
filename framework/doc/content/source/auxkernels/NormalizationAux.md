@@ -22,3 +22,5 @@ power level. The power, used for normalization, is stored in `unorm`, an
 !syntax inputs /AuxKernels/NormalizationAux
 
 !syntax children /AuxKernels/NormalizationAux
+
+!tag name=NormalizationAux pairs=module:framework system:auxkernels

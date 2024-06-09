@@ -10,3 +10,5 @@ if there are many times.
 !syntax inputs /Times/InputTimes
 
 !syntax children /Times/InputTimes
+
+!tag name=InputTimes pairs=module:framework system:times

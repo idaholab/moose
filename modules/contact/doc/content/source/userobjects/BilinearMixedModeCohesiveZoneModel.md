@@ -152,3 +152,5 @@ Example of usage:
 !syntax inputs /UserObjects/BilinearMixedModeCohesiveZoneModel
 
 !syntax children /UserObjects/BilinearMixedModeCohesiveZoneModel
+
+!tag name=BilinearMixedModeCohesiveZoneModel pairs=module:contact system:userobjects

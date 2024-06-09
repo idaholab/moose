@@ -14,3 +14,5 @@ where $\mu$ is the bond status parameter whose value is computed using AuxKernel
 !syntax inputs /UserObjects/NodalDamageIndexPD
 
 !syntax children /UserObjects/NodalDamageIndexPD
+
+!tag name=NodalDamageIndexPD pairs=module:peridynamics system:userobjects

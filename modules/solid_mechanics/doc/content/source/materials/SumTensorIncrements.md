@@ -30,3 +30,5 @@ where the argument for the `coupled_tensor_increment_names` parameter in the
 !syntax children /Materials/SumTensorIncrements
 
 !bibtex bibliography
+
+!tag name=SumTensorIncrements pairs=module:solid_mechanics system:materials

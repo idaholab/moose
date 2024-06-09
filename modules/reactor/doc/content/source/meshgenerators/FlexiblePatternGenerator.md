@@ -94,3 +94,5 @@ In both [!param](/Mesh/FlexiblePatternGenerator/hex_patterns) and [!param](/Mesh
 !syntax inputs /Mesh/FlexiblePatternGenerator
 
 !syntax children /Mesh/FlexiblePatternGenerator
+
+!tag name=FlexiblePatternGenerator pairs=module:reactor system:meshgenerators

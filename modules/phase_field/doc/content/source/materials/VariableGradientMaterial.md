@@ -10,3 +10,5 @@ The material creates a material property with the name given by the parameter
 !syntax inputs /Materials/VariableGradientMaterial
 
 !syntax children /Materials/VariableGradientMaterial
+
+!tag name=VariableGradientMaterial pairs=module:phase_field system:materials

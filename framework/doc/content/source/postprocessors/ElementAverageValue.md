@@ -21,3 +21,5 @@ In this example, we compute the average of a variable $u$ over the whole domain.
 !syntax inputs /Postprocessors/ElementAverageValue
 
 !syntax children /Postprocessors/ElementAverageValue
+
+!tag name=ElementAverageValue pairs=module:framework system:postprocessors

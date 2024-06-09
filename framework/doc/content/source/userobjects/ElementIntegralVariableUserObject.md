@@ -26,3 +26,5 @@ preferred way of performing this spatial variable integration.
 !syntax inputs /UserObjects/ElementIntegralVariableUserObject
 
 !syntax children /UserObjects/ElementIntegralVariableUserObject
+
+!tag name=ElementIntegralVariableUserObject pairs=module:framework system:userobjects

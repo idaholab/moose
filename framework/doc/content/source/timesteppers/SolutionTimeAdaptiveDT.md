@@ -29,3 +29,5 @@ The sign of the update is chosen as explained above.
 !syntax inputs /Executioner/TimeSteppers/SolutionTimeAdaptiveDT
 
 !syntax children /Executioner/TimeSteppers/SolutionTimeAdaptiveDT
+
+!tag name=SolutionTimeAdaptiveDT pairs=module:framework system:timesteppers

@@ -21,3 +21,5 @@ between primary and secondary faces times the normal vector.
 !syntax inputs /AuxKernels/WeightedGapVelAux
 
 !syntax children /AuxKernels/WeightedGapVelAux
+
+!tag name=WeightedGapVelAux pairs=module:contact system:auxkernels

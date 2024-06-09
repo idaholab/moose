@@ -18,3 +18,5 @@ version of this object.
 !syntax children /Kernels/CoefCoupledTimeDerivative
 
 !bibtex bibliography
+
+!tag name=CoefCoupledTimeDerivative pairs=module:phase_field system:kernels

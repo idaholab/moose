@@ -13,3 +13,5 @@ This `BC` provides *strongly encouraged* FE-based Dirichlet boundary condition. 
 !syntax inputs /BCs/FXValuePenaltyBC
 
 !syntax children /BCs/FXValuePenaltyBC
+
+!tag name=FXValuePenaltyBC pairs=module:functional_expansion_tools system:bcs

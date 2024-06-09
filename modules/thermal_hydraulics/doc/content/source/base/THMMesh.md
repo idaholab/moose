@@ -18,3 +18,5 @@ file.
 !syntax inputs /Mesh/THMMesh
 
 !syntax children /Mesh/THMMesh
+
+!tag name=THMMesh pairs=module:thermal_hydraulics system:base

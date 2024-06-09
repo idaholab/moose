@@ -25,3 +25,5 @@ for each phases' derivatives.
 !syntax inputs /Materials/MultiPhaseStressMaterial
 
 !syntax children /Materials/MultiPhaseStressMaterial
+
+!tag name=MultiPhaseStressMaterial pairs=module:solid_mechanics system:materials

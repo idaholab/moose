@@ -70,3 +70,5 @@ C++ type, their default, or their description.
   subblocks:
 
 ```
+
+!tag name=YAMLFormatter pairs=module:framework system:outputs

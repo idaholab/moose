@@ -22,3 +22,5 @@ More information about the `Mesh` may be found on the
 [Mesh syntax documentation](syntax/Mesh/index.md).
 
 !syntax parameters /Mesh/SetupMeshAction
+
+!tag name=SetupMeshAction pairs=module:framework system:actions

@@ -31,3 +31,5 @@ numerical convergence.
 !syntax inputs /BCs/StickyBC
 
 !syntax children /BCs/StickyBC
+
+!tag name=StickyBC pairs=module:solid_mechanics system:bcs

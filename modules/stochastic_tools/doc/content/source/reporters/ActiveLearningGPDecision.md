@@ -89,3 +89,5 @@ The following samplers are also supported with the `ActiveLearningGPDecision` re
 !syntax inputs /Reporters/ActiveLearningGPDecision
 
 !syntax children /Reporters/ActiveLearningGPDecision
+
+!tag name=ActiveLearningGPDecision pairs=module:stochastic_tools system:reporters

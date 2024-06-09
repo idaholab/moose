@@ -35,3 +35,5 @@ In this example, a `LibmeshPartitioner` is used to perform linear partitioning o
 !syntax inputs /Mesh/Partitioner/LibmeshPartitioner
 
 !syntax children /Mesh/Partitioner/LibmeshPartitioner
+
+!tag name=LibmeshPartitioner pairs=module:framework system:partitioner

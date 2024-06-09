@@ -27,3 +27,5 @@ q_\text{wall} = \mathcal{H}(T_\text{wall} - T) \eqp
 !syntax inputs /Components/HeatTransferFromSpecifiedTemperature1Phase
 
 !syntax children /Components/HeatTransferFromSpecifiedTemperature1Phase
+
+!tag name=HeatTransferFromSpecifiedTemperature1Phase pairs=module:thermal_hydraulics system:components

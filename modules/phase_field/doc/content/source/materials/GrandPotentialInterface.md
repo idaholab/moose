@@ -54,3 +54,5 @@ and indirectly used by the
 !syntax children /Materials/GrandPotentialInterface
 
 !bibtex bibliography
+
+!tag name=GrandPotentialInterface pairs=module:phase_field system:materials

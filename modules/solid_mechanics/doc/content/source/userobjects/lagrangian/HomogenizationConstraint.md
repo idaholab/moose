@@ -38,3 +38,5 @@ updated integral values when required by the kernels.
 !syntax inputs /UserObjects/HomogenizationConstraint
 
 !syntax children /UserObjects/HomogenizationConstraint
+
+!tag name=HomogenizationConstraint pairs=module:solid_mechanics system:userobjects

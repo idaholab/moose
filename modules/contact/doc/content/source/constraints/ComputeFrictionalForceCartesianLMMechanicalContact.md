@@ -43,3 +43,5 @@ Cartesian Lagrange multipliers is recommended when condensing Lagrange multiplie
 !syntax inputs /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact
 
 !syntax children /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact
+
+!tag name=ComputeFrictionalForceCartesianLMMechanicalContact pairs=module:contact system:constraints

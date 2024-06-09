@@ -27,3 +27,5 @@ This class is available both for manually coded Jacobian and automatic different
 !syntax children /Materials/StrainEnergyRateDensity
 
 !bibtex bibliography
+
+!tag name=StrainEnergyRateDensity pairs=module:solid_mechanics system:materials

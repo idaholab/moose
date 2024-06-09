@@ -26,3 +26,5 @@ where $D_{ijkl}$ is the elasticity tensor.  See [!cite](hales15homogenization).
 !syntax children /Postprocessors/AsymptoticExpansionHomogenizationElasticConstants
 
 !bibtex bibliography
+
+!tag name=AsymptoticExpansionHomogenizationElasticConstants pairs=module:solid_mechanics system:postprocessors

@@ -34,3 +34,5 @@ the physics to which the penalty method is being applied.
 !syntax inputs /Constraints/XFEMSingleVariableConstraint
 
 !syntax children /Constraints/XFEMSingleVariableConstraint
+
+!tag name=XFEMSingleVariableConstraint pairs=module:xfem system:constraints

@@ -23,3 +23,5 @@ constraint (like a `DirichletBC` is also active).
 !syntax inputs /NodalKernels/UpperBoundNodalKernel
 
 !syntax children /NodalKernels/UpperBoundNodalKernel
+
+!tag name=UpperBoundNodalKernel pairs=module:framework system:nodalkernels

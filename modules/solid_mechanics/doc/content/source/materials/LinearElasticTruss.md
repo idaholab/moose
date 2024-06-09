@@ -13,3 +13,5 @@ This class computes the elastic stretch for a truss element by removing the stre
 !syntax children /Materials/LinearElasticTruss
 
 !bibtex bibliography
+
+!tag name=LinearElasticTruss pairs=module:solid_mechanics system:materials

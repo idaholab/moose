@@ -33,3 +33,5 @@ heat transfer module test `transient_ad_jouleheating.i`.
 !syntax inputs /Kernels/ADJouleHeatingSource
 
 !syntax children /Kernels/ADJouleHeatingSource
+
+!tag name=ADJouleHeatingSource pairs=module:heat_transfer system:kernels

@@ -102,3 +102,5 @@ of which can significantly affect convergence.
 !syntax inputs /Materials/ComputeSmearedCrackingStress
 
 !syntax children /Materials/ComputeSmearedCrackingStress
+
+!tag name=ComputeSmearedCrackingStress pairs=module:solid_mechanics system:materials

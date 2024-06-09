@@ -21,3 +21,5 @@ this material also defines +zero+ material properties for the derivatives of the
 !syntax inputs /Materials/WallFrictionFunctionMaterial
 
 !syntax children /Materials/WallFrictionFunctionMaterial
+
+!tag name=WallFrictionFunctionMaterial pairs=module:thermal_hydraulics system:materials

@@ -11,3 +11,5 @@ More information about `Partitioners` may be found on the
 [Partitioners syntax documentation](syntax/Mesh/Partitioner/index.md).
 
 !syntax parameters /Mesh/Partitioner/PartitionerAction
+
+!tag name=PartitionerAction pairs=module:framework system:actions

@@ -94,3 +94,5 @@ dataLoad(std::istream & stream, Foo & foo, void * context)
   loadHelper(stream, foo.qux, context);
 }
 ```
+
+!tag name=DataIO pairs=module:framework system:restart

@@ -17,3 +17,5 @@ This `BC` provides *fixed* FE-based Dirichlet boundary condition. It subclasses 
 !syntax inputs /BCs/FXValueBC
 
 !syntax children /BCs/FXValueBC
+
+!tag name=FXValueBC pairs=module:functional_expansion_tools system:bcs

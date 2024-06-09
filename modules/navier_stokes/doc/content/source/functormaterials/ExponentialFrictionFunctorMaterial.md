@@ -15,3 +15,5 @@ where $C_1$ and $C_2$ are (potentially space-dependent) constants supplied by th
 !syntax inputs /FunctorMaterials/ExponentialFrictionFunctorMaterial
 
 !syntax children /FunctorMaterials/ExponentialFrictionFunctorMaterial
+
+!tag name=ExponentialFrictionFunctorMaterial pairs=module:navier_stokes system:functormaterials

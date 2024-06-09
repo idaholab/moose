@@ -21,3 +21,5 @@ boundary conditions and constraints according the user-defined loading steps.
 !syntax inputs /UserObjects/StepUserObject
 
 !syntax children /UserObjects/StepUserObject
+
+!tag name=StepUserObject pairs=module:solid_mechanics system:userobjects

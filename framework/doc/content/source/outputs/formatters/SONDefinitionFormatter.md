@@ -168,3 +168,5 @@ set in the input file.
     } % end parameter vars
   } % end block ADParsedFunction_type
 ```
+
+!tag name=SONDefinitionFormatter pairs=module:framework system:outputs

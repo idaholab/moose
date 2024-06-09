@@ -23,3 +23,5 @@ with their own sets of PETSc options, is set up for two groups of variables.
 !syntax inputs /Preconditioning/Split
 
 !syntax children /Preconditioning/Split
+
+!tag name=Split pairs=module:framework system:splits

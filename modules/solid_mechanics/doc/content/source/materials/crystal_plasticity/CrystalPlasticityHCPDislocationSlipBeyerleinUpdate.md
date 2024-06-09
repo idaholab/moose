@@ -112,3 +112,5 @@ plasticity specific  stress calculator as shown below:
 !syntax children /Materials/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate
 
 !bibtex bibliography
+
+!tag name=CrystalPlasticityHCPDislocationSlipBeyerleinUpdate pairs=module:solid_mechanics system:materials

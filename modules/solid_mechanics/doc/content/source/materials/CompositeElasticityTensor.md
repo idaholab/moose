@@ -23,3 +23,5 @@ where $\boldsymbol{T}$ is a Rank-4 tensor and $w$ is the weighting factor for ea
 !syntax inputs /Materials/CompositeElasticityTensor
 
 !syntax children /Materials/CompositeElasticityTensor
+
+!tag name=CompositeElasticityTensor pairs=module:solid_mechanics system:materials

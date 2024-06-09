@@ -33,3 +33,5 @@ with SUPG stabilization.
 
 
 !bibtex bibliography
+
+!tag name=LevelSetAdvectionSUPG pairs=module:level_set system:kernels

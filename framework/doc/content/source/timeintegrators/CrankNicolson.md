@@ -33,3 +33,5 @@ This method can be expressed as a Runge-Kutta method with the following Butcher 
 !syntax inputs /Executioner/TimeIntegrator/CrankNicolson
 
 !syntax children /Executioner/TimeIntegrator/CrankNicolson
+
+!tag name=CrankNicolson pairs=module:framework system:timeintegrators

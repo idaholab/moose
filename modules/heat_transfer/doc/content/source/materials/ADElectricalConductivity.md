@@ -45,3 +45,5 @@ heat transfer module test `transient_ad_jouleheating.i`.
 !syntax inputs /Materials/ADElectricalConductivity
 
 !syntax children /Materials/ADElectricalConductivity
+
+!tag name=ADElectricalConductivity pairs=module:heat_transfer system:materials

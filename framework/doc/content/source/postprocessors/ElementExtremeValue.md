@@ -19,3 +19,5 @@ evaluated at nodes is [NodalExtremeValue](NodalExtremeValue.md)
 !syntax inputs /Postprocessors/ElementExtremeValue
 
 !syntax children /Postprocessors/ElementExtremeValue
+
+!tag name=ElementExtremeValue pairs=module:framework system:postprocessors

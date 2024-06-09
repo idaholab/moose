@@ -31,3 +31,5 @@ Scalar Variable Values:
 And to CSV files:
 
 !listing modules/navier_stokes/test/tests/postprocessors/rayleigh/gold/natural_convection_out.csv
+
+!tag name=TableOutput pairs=module:framework system:outputs

@@ -22,3 +22,5 @@ by the [HeatSourceVolumetric1Phase.md].
 !syntax inputs /Kernels/OneD3EqnEnergyHeatSource
 
 !syntax children /Kernels/OneD3EqnEnergyHeatSource
+
+!tag name=OneD3EqnEnergyHeatSource pairs=module:thermal_hydraulics system:kernels

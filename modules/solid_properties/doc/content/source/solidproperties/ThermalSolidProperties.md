@@ -20,3 +20,5 @@ To create a new userobject providing thermal properties, derive from this
 userobject and specify implementations of the above functions.
 
 !bibtex bibliography
+
+!tag name=ThermalSolidProperties pairs=module:solid_properties system:solidproperties

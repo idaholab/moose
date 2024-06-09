@@ -23,3 +23,5 @@ the [Incremental Finite Strain Class](ComputeIncrementalSmallStrain.md) page.
 !syntax inputs /Materials/ComputeAxisymmetricRZIncrementalStrain
 
 !syntax children /Materials/ComputeAxisymmetricRZIncrementalStrain
+
+!tag name=ComputeAxisymmetricRZIncrementalStrain pairs=module:solid_mechanics system:materials

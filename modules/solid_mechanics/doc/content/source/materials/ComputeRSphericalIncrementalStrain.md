@@ -60,3 +60,5 @@ to ensure consistency between the test function gradients and the strain formula
 !syntax inputs /Materials/ComputeRSphericalIncrementalStrain
 
 !syntax children /Materials/ComputeRSphericalIncrementalStrain
+
+!tag name=ComputeRSphericalIncrementalStrain pairs=module:solid_mechanics system:materials

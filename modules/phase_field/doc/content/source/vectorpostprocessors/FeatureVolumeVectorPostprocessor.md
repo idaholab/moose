@@ -50,3 +50,5 @@ There is no loss of volume to grain boundaries or anything else using this assum
 !syntax children /VectorPostprocessors/FeatureVolumeVectorPostprocessor
 
 !bibtex bibliography
+
+!tag name=FeatureVolumeVectorPostprocessor pairs=module:phase_field system:vectorpostprocessors

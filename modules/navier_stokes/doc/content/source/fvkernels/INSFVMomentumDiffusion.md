@@ -27,3 +27,5 @@ dynamic viscosity is used.
 !syntax inputs /FVKernels/INSFVMomentumDiffusion
 
 !syntax children /FVKernels/INSFVMomentumDiffusion
+
+!tag name=INSFVMomentumDiffusion pairs=module:navier_stokes system:fvkernels

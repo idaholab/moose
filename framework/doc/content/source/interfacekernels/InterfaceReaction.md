@@ -40,3 +40,5 @@ Two examples (steady-state and transient-state) are shown in the MOOSE test dire
 !syntax inputs /InterfaceKernels/InterfaceReaction
 
 !syntax children /InterfaceKernels/InterfaceReaction
+
+!tag name=InterfaceReaction pairs=module:framework system:interfacekernels

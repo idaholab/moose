@@ -10,3 +10,5 @@ formulation.
 !syntax inputs /FVKernels/INSFVMixingLengthReynoldsStress
 
 !syntax children /FVKernels/INSFVMixingLengthReynoldsStress
+
+!tag name=INSFVMixingLengthReynoldsStress pairs=module:navier_stokes system:fvkernels

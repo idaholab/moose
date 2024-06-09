@@ -16,3 +16,5 @@ adjacent cells.
 !syntax inputs /DGKernels/NumericalFlux3EqnDGKernel
 
 !syntax children /DGKernels/NumericalFlux3EqnDGKernel
+
+!tag name=NumericalFlux3EqnDGKernel pairs=module:thermal_hydraulics system:dgkernels

@@ -18,3 +18,5 @@ boundaries to be stitched, and the vertical height of the bottom of the final me
 !syntax inputs /Mesh/StackGenerator
 
 !syntax children /Mesh/StackGenerator
+
+!tag name=StackGenerator pairs=module:framework system:meshgenerators

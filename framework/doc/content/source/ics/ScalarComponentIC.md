@@ -15,3 +15,5 @@ In this example, the initial values of scalar variables `v` and `a`, both of siz
 !syntax inputs /ICs/ScalarComponentIC
 
 !syntax children /ICs/ScalarComponentIC
+
+!tag name=ScalarComponentIC pairs=module:framework system:ics

@@ -25,3 +25,5 @@ k(2\eta^2-\eta^4)+(1-k)(3\eta^4-2\eta^6)
 !syntax inputs /Materials/MixedSwitchingFunctionMaterial
 
 !syntax children /Materials/MixedSwitchingFunctionMaterial
+
+!tag name=MixedSwitchingFunctionMaterial pairs=module:phase_field system:materials

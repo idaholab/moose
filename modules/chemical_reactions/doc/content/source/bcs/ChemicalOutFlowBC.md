@@ -14,3 +14,5 @@ where $\phi$ is porosity and $D$ is the diffusivity.
 !syntax inputs /BCs/ChemicalOutFlowBC
 
 !syntax children /BCs/ChemicalOutFlowBC
+
+!tag name=ChemicalOutFlowBC pairs=module:chemical_reactions system:bcs

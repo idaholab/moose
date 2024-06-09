@@ -30,3 +30,5 @@ The answer is verified with the postprocessor:
 !syntax inputs /Kernels/MatCoupledForce
 
 !syntax children /Kernels/MatCoupledForce
+
+!tag name=MatCoupledForce pairs=module:framework system:kernels

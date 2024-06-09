@@ -27,3 +27,5 @@ constraint as shown below:
 !syntax children /UserObjects/FunctorGapFluxModelRadiation
 
 !bibtex bibliography
+
+!tag name=FunctorGapFluxModelRadiation pairs=module:heat_transfer system:userobjects

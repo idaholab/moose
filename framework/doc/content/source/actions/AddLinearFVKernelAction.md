@@ -10,3 +10,5 @@ More information about linear finite volume kernels can be found on the
 [LinearFVKernels syntax documentation](syntax/LinearFVKernels/index.md).
 
 !syntax parameters /LinearFVKernels/AddLinearFVKernelAction
+
+!tag name=AddLinearFVKernelAction pairs=module:framework system:actions

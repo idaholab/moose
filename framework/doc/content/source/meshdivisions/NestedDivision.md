@@ -14,3 +14,5 @@ the innermost indexing. Each division object specified may have its own nesting 
 !syntax inputs /MeshDivisions/NestedDivision
 
 !syntax children /MeshDivisions/NestedDivision
+
+!tag name=NestedDivision pairs=module:framework system:meshdivisions

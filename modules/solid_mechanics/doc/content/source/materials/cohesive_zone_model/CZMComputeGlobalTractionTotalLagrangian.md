@@ -83,3 +83,5 @@ This object is automatically added from the [Cohesive Zone Physics](CohesiveZone
 !syntax inputs /Materials/CZMComputeGlobalTractionTotalLagrangian
 
 !syntax children /Materials/CZMComputeGlobalTractionTotalLagrangian
+
+!tag name=CZMComputeGlobalTractionTotalLagrangian pairs=module:solid_mechanics system:materials

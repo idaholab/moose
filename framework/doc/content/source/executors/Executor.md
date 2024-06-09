@@ -183,3 +183,5 @@ FooExecutor::run()
   return r;
 }
 ```
+
+!tag name=Executor pairs=module:framework system:executors

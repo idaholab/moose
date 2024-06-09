@@ -12,3 +12,5 @@ supplied to select a scalar component from the supplied material property (e.g.
 !syntax inputs /Postprocessors/SideAverageMaterialProperty
 
 !syntax children /Postprocessors/SideAverageMaterialProperty
+
+!tag name=SideAverageMaterialProperty pairs=module:framework system:postprocessors

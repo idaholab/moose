@@ -20,3 +20,5 @@ Please refer to [GlobalStrainUserObject](/GlobalStrainUserObject.md) for informa
 !syntax inputs /ScalarKernels/GlobalStrain
 
 !syntax children /ScalarKernels/GlobalStrain
+
+!tag name=GlobalStrain pairs=module:solid_mechanics system:scalarkernels

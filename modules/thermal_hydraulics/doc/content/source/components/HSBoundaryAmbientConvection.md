@@ -41,3 +41,5 @@ where
 !syntax inputs /Components/HSBoundaryAmbientConvection
 
 !syntax children /Components/HSBoundaryAmbientConvection
+
+!tag name=HSBoundaryAmbientConvection pairs=module:thermal_hydraulics system:components

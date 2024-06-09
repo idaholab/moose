@@ -16,3 +16,5 @@ major axis that is parallel to the gradient of the coupled variable $v$
 !syntax inputs /Materials/PhaseNormalTensor
 
 !syntax children /Materials/PhaseNormalTensor
+
+!tag name=PhaseNormalTensor pairs=module:phase_field system:materials

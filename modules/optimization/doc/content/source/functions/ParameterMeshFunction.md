@@ -31,3 +31,5 @@ Running this input will create a `create_mesh_out.e` exodus file and `create_mes
 !syntax inputs /Functions/ParameterMeshFunction
 
 !syntax children /Functions/ParameterMeshFunction
+
+!tag name=ParameterMeshFunction pairs=module:optimization system:functions

@@ -11,3 +11,5 @@ This object provides a boundary condition that enforces a displacement field aro
 !syntax inputs /BCs/InteractionIntegralBenchmarkBC
 
 !syntax children /BCs/InteractionIntegralBenchmarkBC
+
+!tag name=InteractionIntegralBenchmarkBC pairs=module:solid_mechanics system:bcs

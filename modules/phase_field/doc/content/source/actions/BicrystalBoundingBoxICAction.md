@@ -17,3 +17,5 @@ The `BicrystalBoundingBoxICAction` is accessed through the `ICs/PolycrystalICs` 
 !syntax parameters /ICs/PolycrystalICs/BicrystalBoundingBoxIC/BicrystalBoundingBoxICAction
 
 !syntax children /ICs/PolycrystalICs/BicrystalBoundingBoxIC/BicrystalBoundingBoxICAction
+
+!tag name=BicrystalBoundingBoxICAction pairs=module:phase_field system:actions

@@ -33,3 +33,5 @@ with weighting schemes and make a contribution to MOOSE if they are valuable.
 !syntax inputs /FunctorMaterials/FunctorSmoother
 
 !syntax children /FunctorMaterials/FunctorSmoother
+
+!tag name=FunctorSmoother pairs=module:framework system:functormaterials

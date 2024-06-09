@@ -26,3 +26,5 @@ that only the conversion to an AD functor from a regular functor (from a regular
 !syntax inputs /FunctorMaterials/FunctorADConverter
 
 !syntax children /FunctorMaterials/FunctorADConverter
+
+!tag name=FunctorADConverter pairs=module:framework system:functormaterials

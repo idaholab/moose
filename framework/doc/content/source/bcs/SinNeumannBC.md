@@ -46,3 +46,5 @@ non-physical solutions in nonlinear PDEs.
 !syntax inputs /BCs/SinNeumannBC
 
 !syntax children /BCs/SinNeumannBC
+
+!tag name=SinNeumannBC pairs=module:framework system:bcs

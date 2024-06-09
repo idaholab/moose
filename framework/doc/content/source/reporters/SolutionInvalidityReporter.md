@@ -15,3 +15,5 @@ The [/SolutionInvalidity.md] holds solution invalid warning information for MOOS
 !syntax inputs /Reporters/SolutionInvalidityReporter
 
 !syntax children /Reporters/SolutionInvalidityReporter
+
+!tag name=SolutionInvalidityReporter pairs=module:framework system:reporters

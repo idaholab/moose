@@ -11,3 +11,5 @@ This strain calculator functions the same way as [`ComputeLagrangianStrain`](Com
 !syntax inputs /Materials/ComputeLagrangianStrainCentrosymmetricSpherical
 
 !syntax children /Materials/ComputeLagrangianStrainCentrosymmetricSpherical
+
+!tag name=ComputeLagrangianStrainCentrosymmetricSpherical pairs=module:solid_mechanics system:materials

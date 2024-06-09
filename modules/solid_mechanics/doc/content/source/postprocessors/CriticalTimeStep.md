@@ -13,3 +13,5 @@ time step for explicit integration scheme. Please refer to
 !syntax inputs /Postprocessors/CriticalTimeStep
 
 !syntax children /Postprocessors/CriticalTimeStep
+
+!tag name=CriticalTimeStep pairs=module:solid_mechanics system:postprocessors

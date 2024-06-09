@@ -22,3 +22,5 @@ variable and the variables specified in `args`.
 !syntax inputs /Kernels/MatDiffusion
 
 !syntax children /Kernels/MatDiffusion
+
+!tag name=MatDiffusion pairs=module:framework system:kernels

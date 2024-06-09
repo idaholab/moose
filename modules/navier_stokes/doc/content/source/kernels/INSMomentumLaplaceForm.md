@@ -27,3 +27,5 @@ the designation the "Laplace" form.
 !syntax inputs /Kernels/INSMomentumLaplaceForm
 
 !syntax children /Kernels/INSMomentumLaplaceForm
+
+!tag name=INSMomentumLaplaceForm pairs=module:navier_stokes system:kernels

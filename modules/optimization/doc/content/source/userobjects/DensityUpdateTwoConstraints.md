@@ -26,3 +26,5 @@ listing test/tests/materials/compliance_sensitivity/2d_mmb_2material_cost_initia
 !syntax inputs /UserObjects/DensityUpdateTwoConstraints
 
 !syntax children /UserObjects/DensityUpdateTwoConstraints
+
+!tag name=DensityUpdateTwoConstraints pairs=module:optimization system:userobjects

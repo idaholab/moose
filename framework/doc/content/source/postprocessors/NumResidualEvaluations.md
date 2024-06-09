@@ -9,3 +9,5 @@ This postprocessor helps to understand where the computation time is being spent
 !syntax inputs /Postprocessors/NumResidualEvaluations
 
 !syntax children /Postprocessors/NumResidualEvaluations
+
+!tag name=NumResidualEvaluations pairs=module:framework system:postprocessors

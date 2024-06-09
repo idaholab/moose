@@ -13,3 +13,5 @@ transferring data from a [Postprocessor](/Postprocessors/index.md) to a
 !syntax inputs /VectorPostprocessors/StochasticResults
 
 !syntax children /VectorPostprocessors/StochasticResults
+
+!tag name=StochasticResults pairs=module:stochastic_tools system:vectorpostprocessors

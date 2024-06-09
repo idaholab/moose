@@ -17,3 +17,5 @@ In THM, most boundary conditions are added automatically by components. This bou
 !syntax inputs /BCs/ADHSHeatFluxRZBC
 
 !syntax children /BCs/ADHSHeatFluxRZBC
+
+!tag name=ADHSHeatFluxRZBC pairs=module:thermal_hydraulics system:bcs

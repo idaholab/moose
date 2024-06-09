@@ -40,3 +40,5 @@ The values for the constants $a$, $b_1$, and $b_2$ are given in tables (9.5a) an
 !syntax inputs /Materials/ADWallFrictionChengMaterial
 
 !syntax children /Materials/ADWallFrictionChengMaterial
+
+!tag name=ADWallFrictionChengMaterial pairs=module:thermal_hydraulics system:materials

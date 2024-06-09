@@ -12,3 +12,5 @@ natural convection.
 !syntax inputs /FVKernels/INSFVMomentumBoussinesq
 
 !syntax children /FVKernels/INSFVMomentumBoussinesq
+
+!tag name=INSFVMomentumBoussinesq pairs=module:navier_stokes system:fvkernels

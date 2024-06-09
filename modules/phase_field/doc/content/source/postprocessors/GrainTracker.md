@@ -232,3 +232,5 @@ status uses an independent bit so it can exist simultaneously with another statu
 !syntax inputs /Postprocessors/GrainTracker
 
 !syntax children /Postprocessors/GrainTracker
+
+!tag name=GrainTracker pairs=module:phase_field system:postprocessors

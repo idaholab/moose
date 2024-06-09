@@ -11,3 +11,5 @@ Currently, the two adaptive samplers are [AdaptiveImportanceSampler](AdaptiveImp
 
 
 !syntax parameters /Samplers/AdaptiveSamplerAction
+
+!tag name=AdaptiveSamplerAction pairs=module:stochastic_tools system:actions

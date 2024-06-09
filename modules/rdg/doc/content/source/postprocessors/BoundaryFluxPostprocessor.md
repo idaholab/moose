@@ -16,3 +16,5 @@ needs to integrate the post-processor over time; this is done with the
 !syntax inputs /Postprocessors/BoundaryFluxPostprocessor
 
 !syntax children /Postprocessors/BoundaryFluxPostprocessor
+
+!tag name=BoundaryFluxPostprocessor pairs=module:rdg system:postprocessors

@@ -89,3 +89,5 @@ Loading a mapping object:
 !syntax inputs /VariableMappings/PODMapping
 
 !syntax children /VariableMappings/PODMapping
+
+!tag name=PODMapping pairs=module:stochastic_tools system:variablemappings

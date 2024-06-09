@@ -23,3 +23,5 @@ Stay tuned!
 !syntax inputs /Postprocessors/ADHeatStructureEnergyRZ
 
 !syntax children /Postprocessors/ADHeatStructureEnergyRZ
+
+!tag name=ADHeatStructureEnergyRZ pairs=module:thermal_hydraulics system:postprocessors

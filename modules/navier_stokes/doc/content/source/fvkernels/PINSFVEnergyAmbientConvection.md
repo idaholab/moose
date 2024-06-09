@@ -21,3 +21,5 @@ where $h$ is the heat transfer coefficient, $T_s$ the solid temperature and $T_f
 !syntax inputs /FVKernels/PINSFVEnergyAmbientConvection
 
 !syntax children /FVKernels/PINSFVEnergyAmbientConvection
+
+!tag name=PINSFVEnergyAmbientConvection pairs=module:navier_stokes system:fvkernels

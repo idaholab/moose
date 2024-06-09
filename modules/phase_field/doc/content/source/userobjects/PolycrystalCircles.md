@@ -13,3 +13,5 @@ See [Polycrystal Initial Conditions](ICs/PolycrystalICs.md) for more information
 !syntax inputs /Postprocessors/PolycrystalCircles
 
 !syntax children /Postprocessors/PolycrystalCircles
+
+!tag name=PolycrystalCircles pairs=module:phase_field system:userobjects

@@ -24,3 +24,5 @@ are provided using `ADMaterial` derived objects.
 !syntax inputs /Kernels/ADHeatConductionTimeDerivative
 
 !syntax children /Kernels/ADHeatConductionTimeDerivative
+
+!tag name=ADHeatConductionTimeDerivative pairs=module:heat_transfer system:kernels

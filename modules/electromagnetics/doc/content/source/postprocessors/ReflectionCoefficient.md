@@ -45,3 +45,5 @@ R_{power} = |R|^2
 !syntax inputs /Postprocessors/ReflectionCoefficient
 
 !syntax children /Postprocessors/ReflectionCoefficient
+
+!tag name=ReflectionCoefficient pairs=module:electromagnetics system:postprocessors

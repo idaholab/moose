@@ -33,3 +33,5 @@ component, users do not need to add it to an input file.
 !syntax inputs /UserObjects/ADSimpleTurbine1PhaseUserObject
 
 !syntax children /UserObjects/ADSimpleTurbine1PhaseUserObject
+
+!tag name=ADSimpleTurbine1PhaseUserObject pairs=module:thermal_hydraulics system:userobjects

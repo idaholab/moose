@@ -16,3 +16,5 @@ $N_c$ is the number of primary species.
 !syntax inputs /AuxKernels/AqueousEquilibriumRxnAux
 
 !syntax children /AuxKernels/AqueousEquilibriumRxnAux
+
+!tag name=AqueousEquilibriumRxnAux pairs=module:chemical_reactions system:auxkernels

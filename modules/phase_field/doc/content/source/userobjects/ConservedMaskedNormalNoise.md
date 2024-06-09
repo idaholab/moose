@@ -12,3 +12,5 @@
 !syntax inputs /UserObjects/ConservedMaskedNormalNoise
 
 !syntax children /UserObjects/ConservedMaskedNormalNoise
+
+!tag name=ConservedMaskedNormalNoise pairs=module:phase_field system:userobjects

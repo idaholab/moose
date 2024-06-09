@@ -9,3 +9,5 @@ More information about `Variables` may be found on the
 [Variables syntax documentation](syntax/Variables/index.md).
 
 !syntax parameters /Variables/AddVariableAction
+
+!tag name=AddVariableAction pairs=module:framework system:actions

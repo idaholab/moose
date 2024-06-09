@@ -11,3 +11,5 @@ faces.
 !syntax inputs /FVKernels/WCNSFVMassAdvection
 
 !syntax children /FVKernels/WCNSFVMassAdvection
+
+!tag name=WCNSFVMassAdvection pairs=module:navier_stokes system:fvkernels

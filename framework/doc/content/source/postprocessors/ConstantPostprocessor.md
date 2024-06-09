@@ -21,3 +21,5 @@ a [RealFunctionControl](source/controls/RealFunctionControl.md).
 !syntax inputs /Postprocessors/ConstantPostprocessor
 
 !syntax children /Postprocessors/ConstantPostprocessor
+
+!tag name=ConstantPostprocessor pairs=module:framework system:postprocessors

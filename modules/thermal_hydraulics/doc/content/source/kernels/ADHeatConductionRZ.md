@@ -21,3 +21,5 @@ In THM, most kernels are added automatically by components. This kernel is creat
 !syntax inputs /Kernels/ADHeatConductionRZ
 
 !syntax children /Kernels/ADHeatConductionRZ
+
+!tag name=ADHeatConductionRZ pairs=module:thermal_hydraulics system:kernels

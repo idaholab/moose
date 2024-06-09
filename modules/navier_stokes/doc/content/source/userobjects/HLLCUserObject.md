@@ -16,3 +16,5 @@ objects like [WaveSpeedVPP.md]
 !syntax inputs /UserObjects/HLLCUserObject
 
 !syntax children /UserObjects/HLLCUserObject
+
+!tag name=HLLCUserObject pairs=module:navier_stokes system:userobjects

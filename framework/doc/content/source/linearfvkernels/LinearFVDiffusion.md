@@ -58,3 +58,5 @@ The input file below shows a pure diffusion problem on a two-dimensional domain.
 !syntax inputs /LinearFVKernels/LinearFVDiffusion
 
 !syntax children /LinearFVKernels/LinearFVDiffusion
+
+!tag name=LinearFVDiffusion pairs=module:framework system:linearfvkernels

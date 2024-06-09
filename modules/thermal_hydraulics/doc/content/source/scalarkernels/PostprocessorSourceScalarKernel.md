@@ -12,3 +12,5 @@ This scalar kernel adds a post-processor value $q(t)$ as a source term for an OD
 !syntax inputs /ScalarKernels/PostprocessorSourceScalarKernel
 
 !syntax children /ScalarKernels/PostprocessorSourceScalarKernel
+
+!tag name=PostprocessorSourceScalarKernel pairs=module:thermal_hydraulics system:scalarkernels

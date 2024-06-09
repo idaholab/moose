@@ -16,3 +16,5 @@ where $\mathbf{A}_{\boldsymbol{\xi}_n}$ is the bond-associated rank two tensor, 
 !syntax inputs /UserObjects/NodalRankTwoComponentPD
 
 !syntax children /UserObjects/NodalRankTwoComponentPD
+
+!tag name=NodalRankTwoComponentPD pairs=module:peridynamics system:userobjects

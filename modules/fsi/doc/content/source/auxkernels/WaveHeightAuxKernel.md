@@ -20,3 +20,5 @@ the fluid density, and $d_w$ is the wave height.
 !syntax inputs /AuxKernels/WaveHeightAuxKernel
 
 !syntax children /AuxKernels/WaveHeightAuxKernel
+
+!tag name=WaveHeightAuxKernel pairs=module:fsi system:auxkernels

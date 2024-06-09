@@ -27,3 +27,5 @@ For more information on these fields and processes, we suggest visiting [SIMPLE.
 !syntax inputs /UserObjects/RhieChowMassFlux
 
 !syntax children /UserObjects/RhieChowMassFlux
+
+!tag name=RhieChowMassFlux pairs=module:navier_stokes system:userobjects

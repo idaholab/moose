@@ -27,3 +27,5 @@ All tests use a "fuzzy" comparison; see the corresponding functions in
 !syntax children /Postprocessors/VectorPostprocessorComparison
 
 !bibtex bibliography
+
+!tag name=VectorPostprocessorComparison pairs=module:framework system:postprocessors

@@ -13,3 +13,5 @@ please see [CoupledPenaltyInterfaceDiffusion.md].
 !syntax inputs /InterfaceKernels/ADPenaltyVelocityContinuity
 
 !syntax children /InterfaceKernels/ADPenaltyVelocityContinuity
+
+!tag name=ADPenaltyVelocityContinuity pairs=module:fsi system:interfacekernels

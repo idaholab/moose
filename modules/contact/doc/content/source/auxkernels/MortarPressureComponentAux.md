@@ -22,3 +22,5 @@ where $z_n$ is the component that is normal to the contact surface,  $\boldsymbo
 !syntax inputs /AuxKernels/MortarPressureComponentAux
 
 !syntax children /AuxKernels/MortarPressureComponentAux
+
+!tag name=MortarPressureComponentAux pairs=module:contact system:auxkernels

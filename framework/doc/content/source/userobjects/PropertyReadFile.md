@@ -75,3 +75,5 @@ In this example, the same CSV file as the nearest neighbor case is used. It is h
 !syntax children /UserObjects/PropertyReadFile
 
 !bibtex bibliography
+
+!tag name=PropertyReadFile pairs=module:framework system:userobjects

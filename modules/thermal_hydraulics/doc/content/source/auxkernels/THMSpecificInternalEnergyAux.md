@@ -18,3 +18,5 @@ $\rho E$, $\rho u$ and $\rho$ are variables usually defined by the [Components](
 !syntax inputs /AuxKernels/THMSpecificInternalEnergyAux
 
 !syntax children /AuxKernels/THMSpecificInternalEnergyAux
+
+!tag name=THMSpecificInternalEnergyAux pairs=module:thermal_hydraulics system:auxkernels

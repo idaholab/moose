@@ -18,3 +18,5 @@ of variable `u` over the sideset of id `0`.
 !syntax inputs /Postprocessors/SideIntegralVariablePostprocessor
 
 !syntax children /Postprocessors/SideIntegralVariablePostprocessor
+
+!tag name=SideIntegralVariablePostprocessor pairs=module:framework system:postprocessors

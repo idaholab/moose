@@ -103,3 +103,5 @@ variable:
 !syntax children /Materials/ComputeAxisymmetric1DFiniteStrain
 
 !bibtex bibliography
+
+!tag name=ComputeAxisymmetric1DFiniteStrain pairs=module:solid_mechanics system:materials

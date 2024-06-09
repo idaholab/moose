@@ -32,3 +32,5 @@ We don't distinguish Cauchy stress with the first Piola-Kirchhoff stress under i
 !syntax inputs /Kernels/ForceStabilizedSmallStrainMechanicsNOSPD
 
 !syntax children /Kernels/ForceStabilizedSmallStrainMechanicsNOSPD
+
+!tag name=ForceStabilizedSmallStrainMechanicsNOSPD pairs=module:peridynamics system:kernels

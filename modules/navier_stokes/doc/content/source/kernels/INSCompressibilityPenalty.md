@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSCompressibilityPenalty
 
 !syntax children /Kernels/INSCompressibilityPenalty
+
+!tag name=INSCompressibilityPenalty pairs=module:navier_stokes system:kernels

@@ -17,3 +17,5 @@ this transfer is performed by the [LevelSetMeshRefinementTransfer](#).
 !syntax inputs /Transfers/LevelSetMeshRefinementTransfer
 
 !syntax children /Transfers/LevelSetMeshRefinementTransfer
+
+!tag name=LevelSetMeshRefinementTransfer pairs=module:level_set system:transfers

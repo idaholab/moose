@@ -22,3 +22,5 @@ respectively.
 !syntax inputs /BCs/PostprocessorDirichletBC
 
 !syntax children /BCs/PostprocessorDirichletBC
+
+!tag name=PostprocessorDirichletBC pairs=module:framework system:bcs

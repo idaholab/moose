@@ -19,3 +19,5 @@ where output is coming from in a more complex simulation.
 !syntax children /Outputs/Console
 
 !bibtex bibliography
+
+!tag name=Console pairs=module:framework system:outputs

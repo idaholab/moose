@@ -7,3 +7,5 @@
 
 ExplicitDynamicsContactAction is a MOOSE action that constructs objects needed for mechanical contact enforcement for explicit dynamics finite element simulations.
 
+
+!tag name=ExplicitDynamicsContactAction pairs=module:contact system:actions

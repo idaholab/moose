@@ -10,3 +10,5 @@ variance-based sensitivity analysis, refer to [!cite](saltelli2002making) for co
 !syntax children /Samplers/SobolSampler
 
 !bibtex bibliography
+
+!tag name=SobolSampler pairs=module:stochastic_tools system:samplers

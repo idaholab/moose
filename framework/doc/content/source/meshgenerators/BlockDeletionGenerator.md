@@ -32,3 +32,5 @@ This leaves only block 2 in the simulation.
 !syntax inputs /Mesh/BlockDeletionGenerator
 
 !syntax children /Mesh/BlockDeletionGenerator
+
+!tag name=BlockDeletionGenerator pairs=module:framework system:meshgenerators

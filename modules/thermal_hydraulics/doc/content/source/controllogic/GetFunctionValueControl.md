@@ -11,3 +11,5 @@ The function is evaluated at the current simulation time and at the (0,0,0) poin
 !syntax inputs /ControlLogic/GetFunctionValueControl
 
 !syntax children /ControlLogic/GetFunctionValueControl
+
+!tag name=GetFunctionValueControl pairs=module:thermal_hydraulics system:controllogic

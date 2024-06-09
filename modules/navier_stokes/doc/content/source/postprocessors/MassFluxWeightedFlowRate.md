@@ -32,3 +32,5 @@ $\rho \vec{v}$ over the face.
 !syntax inputs /Postprocessors/MassFluxWeightedFlowRate
 
 !syntax children /Postprocessors/MassFluxWeightedFlowRate
+
+!tag name=MassFluxWeightedFlowRate pairs=module:navier_stokes system:postprocessors

@@ -20,3 +20,5 @@ dimensions of the problem.
 !syntax inputs /Adaptivity/Markers/BoxMarker
 
 !syntax children /Adaptivity/Markers/BoxMarker
+
+!tag name=BoxMarker pairs=module:framework system:markers

@@ -28,3 +28,5 @@ where $k$ is the fluid thermal conductivity.
 !syntax inputs /Materials/ADWallHeatTransferCoefficientLyonMaterial
 
 !syntax children /Materials/ADWallHeatTransferCoefficientLyonMaterial
+
+!tag name=ADWallHeatTransferCoefficientLyonMaterial pairs=module:thermal_hydraulics system:materials

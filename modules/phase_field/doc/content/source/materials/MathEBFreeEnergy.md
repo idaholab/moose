@@ -16,3 +16,5 @@ $c=-1$. See also [`SplitCHMath`](/SplitCHMath.md).
 !syntax inputs /Materials/MathEBFreeEnergy
 
 !syntax children /Materials/MathEBFreeEnergy
+
+!tag name=MathEBFreeEnergy pairs=module:phase_field system:materials

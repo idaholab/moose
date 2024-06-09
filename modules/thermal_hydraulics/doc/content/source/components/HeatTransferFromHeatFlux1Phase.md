@@ -22,3 +22,5 @@ specifies the wall heat flux function $q_\text{wall}$.
 !syntax inputs /Components/HeatTransferFromHeatFlux1Phase
 
 !syntax children /Components/HeatTransferFromHeatFlux1Phase
+
+!tag name=HeatTransferFromHeatFlux1Phase pairs=module:thermal_hydraulics system:components

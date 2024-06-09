@@ -21,3 +21,5 @@ parameter scalar variable, depending on which is specified. The use of scalar va
 !syntax inputs /BCs/INSFEFluidEnergyDirichletBC
 
 !syntax children /BCs/INSFEFluidEnergyDirichletBC
+
+!tag name=INSFEFluidEnergyDirichletBC pairs=module:navier_stokes system:bcs

@@ -8,3 +8,5 @@ RZ geometry.
 !syntax inputs /BCs/RadiativeHeatFluxRZBC
 
 !syntax children /BCs/RadiativeHeatFluxRZBC
+
+!tag name=RadiativeHeatFluxRZBC pairs=module:thermal_hydraulics system:bcs

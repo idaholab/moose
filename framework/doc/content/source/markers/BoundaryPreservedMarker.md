@@ -23,3 +23,5 @@ These elements might be coarsened later if the boundary moves to a different loc
 !syntax inputs /Adaptivity/Markers/BoundaryPreservedMarker
 
 !syntax children /Adaptivity/Markers/BoundaryPreservedMarker
+
+!tag name=BoundaryPreservedMarker pairs=module:framework system:markers

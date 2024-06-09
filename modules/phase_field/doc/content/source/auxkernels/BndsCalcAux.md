@@ -21,3 +21,5 @@ grain boundaries).
 !syntax children /AuxKernels/BndsCalcAux
 
 !bibtex bibliography
+
+!tag name=BndsCalcAux pairs=module:phase_field system:auxkernels

@@ -22,3 +22,5 @@ In this example the functor, a constant value of 10, is defined using a [Generic
 !syntax inputs /FVBCs/FVFunctorDirichletBC
 
 !syntax children /FVBCs/FVFunctorDirichletBC
+
+!tag name=FVFunctorDirichletBC pairs=module:framework system:fvbcs

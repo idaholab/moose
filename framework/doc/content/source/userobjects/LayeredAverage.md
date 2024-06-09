@@ -69,3 +69,5 @@ two layers. The result of this averaging is stored in the variable `layered_aver
 !syntax inputs /UserObjects/LayeredAverage
 
 !syntax children /UserObjects/LayeredAverage
+
+!tag name=LayeredAverage pairs=module:framework system:userobjects

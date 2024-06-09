@@ -31,3 +31,5 @@ supplied based upon a function form:
 
 !syntax children /LinearFVKernels/LinearFVReaction
 
+
+!tag name=LinearFVReaction pairs=module:framework system:linearfvkernels

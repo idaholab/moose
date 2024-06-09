@@ -31,3 +31,5 @@ For more details, refer to the non-AD class [PowerLawSoftening](/PowerLawSofteni
 !syntax children /Materials/ADPowerLawSoftening
 
 !bibtex bibliography
+
+!tag name=ADPowerLawSoftening pairs=module:solid_mechanics system:materials

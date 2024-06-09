@@ -35,3 +35,5 @@ material models that inherit from `ADStressUpdateBase`.
 !syntax children /Materials/ADComputeMultiplePorousInelasticStress
 
 !bibtex bibliography
+
+!tag name=ADComputeMultiplePorousInelasticStress pairs=module:solid_mechanics system:materials

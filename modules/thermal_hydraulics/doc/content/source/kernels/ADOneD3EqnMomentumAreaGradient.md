@@ -19,3 +19,5 @@ In THM, most kernels are added automatically by components or flow models. This 
 !syntax inputs /Kernels/ADOneD3EqnMomentumAreaGradient
 
 !syntax children /Kernels/ADOneD3EqnMomentumAreaGradient
+
+!tag name=ADOneD3EqnMomentumAreaGradient pairs=module:thermal_hydraulics system:kernels

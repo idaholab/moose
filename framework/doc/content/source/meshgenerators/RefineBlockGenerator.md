@@ -13,3 +13,5 @@ The user has to provide the ids of the blocks to be modified, as well as the cor
 !syntax inputs /Mesh/RefineBlockGenerator
 
 !syntax children /Mesh/RefineBlockGenerator
+
+!tag name=RefineBlockGenerator pairs=module:framework system:meshgenerators

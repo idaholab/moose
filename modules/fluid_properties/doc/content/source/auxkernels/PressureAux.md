@@ -11,3 +11,5 @@ Calculates the pressure given specific volume and specific internal energy.
 !syntax children /AuxKernels/PressureAux
 
 !bibtex bibliography
+
+!tag name=PressureAux pairs=module:fluid_properties system:auxkernels

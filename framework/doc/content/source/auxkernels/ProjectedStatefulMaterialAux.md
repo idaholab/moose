@@ -26,3 +26,5 @@ See also [ProjectedMaterialPropertyNodalPatchRecoveryAux](ProjectedMaterialPrope
 !syntax inputs /AuxKernels/ProjectedStatefulMaterialRealAux
 
 !syntax children /AuxKernels/ProjectedStatefulMaterialRealAux
+
+!tag name=ProjectedStatefulMaterialAux pairs=module:framework system:auxkernels

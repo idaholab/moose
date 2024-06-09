@@ -20,3 +20,5 @@ This object uses a `SinglePhaseFluidProperties` derived-object to compute
 !syntax inputs /Materials/GeneralFluidProps
 
 !syntax children /Materials/GeneralFluidProps
+
+!tag name=GeneralFluidProps pairs=module:navier_stokes system:materials

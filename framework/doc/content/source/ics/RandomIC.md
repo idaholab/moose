@@ -19,3 +19,5 @@ the "seed" parameter. The RandomIC object produces a parallel agnostic random fi
 !syntax children /ICs/RandomIC
 
 !bibtex bibliography
+
+!tag name=RandomIC pairs=module:framework system:ics

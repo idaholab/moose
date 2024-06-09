@@ -27,3 +27,5 @@ where $\lambda = e$ if $i==1$ or $\lambda = \sqrt{2 e}$ if $i == 2,3$. The param
 !syntax parameters /Materials/SalehaniIrani3DCTraction
 !syntax inputs /Materials/SalehaniIrani3DCTraction
 !syntax children /Materials/SalehaniIrani3DCTraction
+
+!tag name=SalehaniIrani3DCTraction pairs=module:solid_mechanics system:materials

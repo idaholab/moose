@@ -21,3 +21,5 @@ the three `ElemSideNeighborLayersGeomTester` on each rank.
 !syntax inputs /AuxKernels/ElementUOAux
 
 !syntax children /AuxKernels/ElementUOAux
+
+!tag name=ElementUOAux pairs=module:framework system:auxkernels

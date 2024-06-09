@@ -22,3 +22,5 @@ In this example, variable `u` and `v` are the solutions of two boundary value di
 !syntax inputs /VectorPostprocessors/SideValueSampler
 
 !syntax children /VectorPostprocessors/SideValueSampler
+
+!tag name=SideValueSampler pairs=module:framework system:vectorpostprocessors

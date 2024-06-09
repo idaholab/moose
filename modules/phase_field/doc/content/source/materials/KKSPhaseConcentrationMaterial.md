@@ -27,3 +27,5 @@ The parameters Fa_material and Fb_material must have *compute=false*. This mater
 !syntax inputs /Materials/KKSPhaseConcentrationMaterial
 
 !syntax children /Materials/KKSPhaseConcentrationMaterial
+
+!tag name=KKSPhaseConcentrationMaterial pairs=module:phase_field system:materials

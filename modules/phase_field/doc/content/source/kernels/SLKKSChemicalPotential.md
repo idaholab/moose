@@ -14,3 +14,5 @@ where $c_{ijk}$ and $c_{ijk}$ are two sublattice concentrations (for sublattices
 !syntax inputs /Kernels/SLKKSChemicalPotential
 
 !syntax children /Kernels/SLKKSChemicalPotential
+
+!tag name=SLKKSChemicalPotential pairs=module:phase_field system:kernels

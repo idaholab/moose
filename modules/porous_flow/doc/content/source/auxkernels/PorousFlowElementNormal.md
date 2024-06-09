@@ -29,3 +29,5 @@ Only elemental (`Monomial`) `AuxVariables` can be used with this `AuxKernel`
 !syntax inputs /AuxKernels/PorousFlowElementNormal
 
 !syntax children /AuxKernels/PorousFlowElementNormal
+
+!tag name=PorousFlowElementNormal pairs=module:porous_flow system:auxkernels

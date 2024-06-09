@@ -18,3 +18,5 @@ where $u$ corresponds to the `variable` parameter.
 !syntax inputs /FVKernels/FVPorosityTimeDerivative
 
 !syntax children /FVKernels/FVPorosityTimeDerivative
+
+!tag name=FVPorosityTimeDerivative pairs=module:navier_stokes system:fvkernels

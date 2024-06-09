@@ -33,3 +33,5 @@ adjacent edges can be found. Use at your own risk.
 !syntax inputs /Mesh/LowerDBlockFromSidesetGenerator
 
 !syntax children /Mesh/LowerDBlockFromSidesetGenerator
+
+!tag name=LowerDBlockFromSidesetGenerator pairs=module:framework system:meshgenerators

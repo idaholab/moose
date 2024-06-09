@@ -20,3 +20,5 @@ to said line/plane. The normal vector establishes the slope of the plane of refl
 !syntax inputs /Mesh/SymmetryTransformGenerator
 
 !syntax children /Mesh/SymmetryTransformGenerator
+
+!tag name=SymmetryTransformGenerator pairs=module:framework system:meshgenerators

@@ -19,3 +19,5 @@ assuming ideal gas.
 !syntax inputs /UserObjects/ADNumericalFlux3EqnHLLC
 
 !syntax children /UserObjects/ADNumericalFlux3EqnHLLC
+
+!tag name=ADNumericalFlux3EqnHLLC pairs=module:thermal_hydraulics system:userobjects

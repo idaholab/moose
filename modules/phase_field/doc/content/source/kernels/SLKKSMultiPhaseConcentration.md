@@ -20,3 +20,5 @@ is [SLKKSPhaseConcentration](/SLKKSPhaseConcentration.md).
 !syntax inputs /Kernels/SLKKSMultiPhaseConcentration
 
 !syntax children /Kernels/SLKKSMultiPhaseConcentration
+
+!tag name=SLKKSMultiPhaseConcentration pairs=module:phase_field system:kernels

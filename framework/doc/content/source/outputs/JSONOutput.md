@@ -41,3 +41,5 @@ for the `MooseApp` object.
 !syntax inputs /Outputs/JSON
 
 !syntax children /Outputs/JSON
+
+!tag name=JSONOutput pairs=module:framework system:outputs

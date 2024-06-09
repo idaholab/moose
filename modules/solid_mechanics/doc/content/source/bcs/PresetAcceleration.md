@@ -11,3 +11,5 @@ The PresetAcceleration class takes an acceleration time history (provided using 
 !syntax children /BCs/PresetAcceleration
 
 !bibtex bibliography
+
+!tag name=PresetAcceleration pairs=module:solid_mechanics system:bcs

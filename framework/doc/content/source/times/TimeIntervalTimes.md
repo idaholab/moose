@@ -12,3 +12,5 @@ end of the last time interval, then the end time is only included if the paramet
 !syntax inputs /Times/TimeIntervalTimes
 
 !syntax children /Times/TimeIntervalTimes
+
+!tag name=TimeIntervalTimes pairs=module:framework system:times

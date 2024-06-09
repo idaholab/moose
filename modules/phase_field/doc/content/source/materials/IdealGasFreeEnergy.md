@@ -16,3 +16,5 @@ where
 !syntax inputs /Materials/IdealGasFreeEnergy
 
 !syntax children /Materials/IdealGasFreeEnergy
+
+!tag name=IdealGasFreeEnergy pairs=module:phase_field system:materials

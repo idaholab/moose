@@ -20,3 +20,5 @@ The `DiscreteNucleationMap` is part of the [Discrete Nucleation system](Nucleati
 !syntax inputs /UserObjects/DiscreteNucleationMap
 
 !syntax children /UserObjects/DiscreteNucleationMap
+
+!tag name=DiscreteNucleationMap pairs=module:phase_field system:userobjects

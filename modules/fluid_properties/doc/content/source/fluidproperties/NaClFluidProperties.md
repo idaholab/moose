@@ -33,3 +33,5 @@ The NaClFluidProperties UserObject is valid for the solid phase region only
 !syntax children /FluidProperties/NaClFluidProperties
 
 !bibtex bibliography
+
+!tag name=NaClFluidProperties pairs=module:fluid_properties system:fluidproperties

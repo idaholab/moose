@@ -31,3 +31,5 @@ The computation of the plastic heat energy assumes a first order Euler time inte
 !syntax inputs /Materials/ComputePlasticHeatEnergy
 
 !syntax children /Materials/ComputePlasticHeatEnergy
+
+!tag name=ComputePlasticHeatEnergy pairs=module:solid_mechanics system:materials

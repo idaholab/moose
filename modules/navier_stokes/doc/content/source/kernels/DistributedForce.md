@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/DistributedForce
 
 !syntax children /Kernels/DistributedForce
+
+!tag name=DistributedForce pairs=module:navier_stokes system:kernels

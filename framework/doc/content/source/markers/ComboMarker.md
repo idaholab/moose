@@ -17,3 +17,5 @@ of an element takes precedence.
 !syntax inputs /Adaptivity/Markers/ComboMarker
 
 !syntax children /Adaptivity/Markers/ComboMarker
+
+!tag name=ComboMarker pairs=module:framework system:markers

@@ -28,3 +28,5 @@ No system parameters are passed, so the equations are solved in a fully coupled 
 !syntax inputs /Physics/NavierStokes/FluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
 
 !syntax children /Physics/NavierStokes/FluidHeatTransfer/WCNSFVFluidHeatTransferPhysics
+
+!tag name=WCNSFVFluidHeatTransferPhysics pairs=module:navier_stokes system:physics

@@ -134,3 +134,5 @@ The input syntax for this executioner is identical to [SteadyAndAdjoint.md]. One
 !syntax inputs /Executioner/TransientAndAdjoint
 
 !syntax children /Executioner/TransientAndAdjoint
+
+!tag name=TransientAndAdjoint pairs=module:optimization system:executioners

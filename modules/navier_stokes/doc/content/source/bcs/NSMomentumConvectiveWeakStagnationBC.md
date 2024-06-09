@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSMomentumConvectiveWeakStagnationBC
 
 !syntax children /BCs/NSMomentumConvectiveWeakStagnationBC
+
+!tag name=NSMomentumConvectiveWeakStagnationBC pairs=module:navier_stokes system:bcs

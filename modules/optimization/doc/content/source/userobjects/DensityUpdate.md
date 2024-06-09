@@ -23,3 +23,5 @@ listing test/tests/materials/compliance_sensitivity/2d_mbb.i block=UserObjects/u
 !syntax inputs /UserObjects/DensityUpdate
 
 !syntax children /UserObjects/DensityUpdate
+
+!tag name=DensityUpdate pairs=module:optimization system:userobjects

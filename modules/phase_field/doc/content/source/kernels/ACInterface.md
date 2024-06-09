@@ -19,3 +19,5 @@ parameter, and $\psi_m$ is the test function.
 !syntax inputs /Kernels/ACInterface
 
 !syntax children /Kernels/ACInterface
+
+!tag name=ACInterface pairs=module:phase_field system:kernels

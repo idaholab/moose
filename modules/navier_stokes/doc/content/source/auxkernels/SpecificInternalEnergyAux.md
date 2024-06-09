@@ -14,3 +14,5 @@ fluid momentum.
 !syntax inputs /AuxKernels/SpecificInternalEnergyAux
 
 !syntax children /AuxKernels/SpecificInternalEnergyAux
+
+!tag name=SpecificInternalEnergyAux pairs=module:navier_stokes system:auxkernels

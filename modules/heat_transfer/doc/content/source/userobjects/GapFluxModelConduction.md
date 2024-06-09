@@ -17,3 +17,5 @@ The user is required to select the appropriate `gap_geometry_type` parameter (PL
 !syntax children /UserObjects/GapFluxModelConduction
 
 !bibtex bibliography
+
+!tag name=GapFluxModelConduction pairs=module:heat_transfer system:userobjects

@@ -15,3 +15,5 @@ and a vector named after each variable sampled, containing the variable values a
 !syntax inputs /VectorPostprocessors/NodalValueSampler
 
 !syntax children /VectorPostprocessors/NodalValueSampler
+
+!tag name=NodalValueSampler pairs=module:framework system:vectorpostprocessors

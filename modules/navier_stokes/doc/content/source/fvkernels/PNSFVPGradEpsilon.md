@@ -34,3 +34,5 @@ behavior has been observed both with [Kurganov-Tadmor](PCNSFVKT.md) and
 !syntax inputs /FVKernels/PNSFVPGradEpsilon
 
 !syntax children /FVKernels/PNSFVPGradEpsilon
+
+!tag name=PNSFVPGradEpsilon pairs=module:navier_stokes system:fvkernels

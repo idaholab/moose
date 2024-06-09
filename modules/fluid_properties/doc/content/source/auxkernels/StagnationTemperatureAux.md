@@ -13,3 +13,5 @@ specific internal energy.
 !syntax inputs /AuxKernels/StagnationTemperatureAux
 
 !syntax children /AuxKernels/StagnationTemperatureAux
+
+!tag name=StagnationTemperatureAux pairs=module:fluid_properties system:auxkernels

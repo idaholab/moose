@@ -17,3 +17,5 @@ using the `state` [ControlData.md] of the `trip_ctrl` ControlLogic.
 !syntax inputs /ControlLogic/SetComponentBoolValueControl
 
 !syntax children /ControlLogic/SetComponentBoolValueControl
+
+!tag name=SetComponentBoolValueControl pairs=module:thermal_hydraulics system:controllogic

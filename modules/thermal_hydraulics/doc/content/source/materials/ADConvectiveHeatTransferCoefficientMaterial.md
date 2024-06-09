@@ -10,3 +10,5 @@ Please refer to the regular version for additional documentation.
 !syntax inputs /Materials/ADConvectiveHeatTransferCoefficientMaterial
 
 !syntax children /Materials/ADConvectiveHeatTransferCoefficientMaterial
+
+!tag name=ADConvectiveHeatTransferCoefficientMaterial pairs=module:thermal_hydraulics system:materials

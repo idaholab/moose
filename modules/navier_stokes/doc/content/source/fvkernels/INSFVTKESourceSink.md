@@ -106,3 +106,5 @@ Otherwise, the results obtained won't not physically correct
 !syntax inputs /FVKernels/INSFVTKESourceSink
 
 !syntax children /FVKernels/INSFVTKESourceSink
+
+!tag name=INSFVTKESourceSink pairs=module:navier_stokes system:fvkernels

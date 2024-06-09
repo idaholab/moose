@@ -15,3 +15,5 @@ will then look for a material property named `porosity`.
 !syntax inputs /FVBCs/CNSFVMomImplicitPressureBC
 
 !syntax children /FVBCs/CNSFVMomImplicitPressureBC
+
+!tag name=CNSFVMomImplicitPressureBC pairs=module:navier_stokes system:fvbcs

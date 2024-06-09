@@ -15,3 +15,5 @@ This object is primarily designed to test the Sampler output.
 !syntax inputs /VectorPostprocessors/SamplerData
 
 !syntax children /VectorPostprocessors/SamplerData
+
+!tag name=SamplerData pairs=module:stochastic_tools system:vectorpostprocessors

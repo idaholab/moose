@@ -15,3 +15,5 @@ prevent new nonzero allocations during execution of `INSADDisplaceBoundaryBC`.
 !syntax inputs /BCs/INSADDummyDisplaceBoundaryIntegratedBC
 
 !syntax children /BCs/INSADDummyDisplaceBoundaryIntegratedBC
+
+!tag name=INSADDummyDisplaceBoundaryIntegratedBC pairs=module:navier_stokes system:bcs

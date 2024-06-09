@@ -27,3 +27,5 @@ Many other useful member variables exist that describe the [Ray.md] segment. For
 The integrated value produced by a class that derives from this should be obtained using the [RayIntegralValue.md] postprocessor. For example:
 
 !listing test/tests/raykernels/variable_integral_ray_kernel/variable_integral_ray_kernel.i start=RayKernels end=Problem
+
+!tag name=IntegralRayKernel pairs=module:ray_tracing system:raykernels

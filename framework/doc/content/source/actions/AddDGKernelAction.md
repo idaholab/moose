@@ -9,3 +9,5 @@ More information about discontinuous Galerkin kernels (`DGKernels`) may be
 found on the [DGKernels syntax page](syntax/DGKernels/index.md).
 
 !syntax parameters /DGKernels/AddDGKernelAction
+
+!tag name=AddDGKernelAction pairs=module:framework system:actions

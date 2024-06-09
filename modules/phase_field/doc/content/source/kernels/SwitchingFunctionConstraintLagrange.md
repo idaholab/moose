@@ -10,3 +10,5 @@ See [Multiphase models](/MultiPhase/WBM.md) for the full derivation.
 !syntax inputs /Kernels/SwitchingFunctionConstraintLagrange
 
 !syntax children /Kernels/SwitchingFunctionConstraintLagrange
+
+!tag name=SwitchingFunctionConstraintLagrange pairs=module:phase_field system:kernels

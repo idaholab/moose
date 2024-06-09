@@ -18,3 +18,5 @@ temperature and heat transfer coefficients provided by an external application.
 !syntax inputs /BCs/ADExternalAppConvectionHeatTransferRZBC
 
 !syntax children /BCs/ADExternalAppConvectionHeatTransferRZBC
+
+!tag name=ADExternalAppConvectionHeatTransferRZBC pairs=module:thermal_hydraulics system:bcs

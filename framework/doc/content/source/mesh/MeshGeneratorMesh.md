@@ -17,3 +17,5 @@ is really indicating an issue with the chaining of mesh generators.
 !syntax inputs /Mesh/MeshGeneratorMesh
 
 !syntax children /Mesh/MeshGeneratorMesh
+
+!tag name=MeshGeneratorMesh pairs=module:framework system:mesh

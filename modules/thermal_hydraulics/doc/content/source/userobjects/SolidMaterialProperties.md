@@ -17,3 +17,5 @@ Its equivalent in the module is the [ThermalFunctionSolidProperties.md].
 !syntax inputs /HeatStructureMaterials/SolidMaterialProperties
 
 !syntax children /HeatStructureMaterials/SolidMaterialProperties
+
+!tag name=SolidMaterialProperties pairs=module:thermal_hydraulics system:userobjects

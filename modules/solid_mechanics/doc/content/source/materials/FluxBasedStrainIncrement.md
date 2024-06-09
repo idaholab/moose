@@ -29,3 +29,5 @@ The computation of the flux based strain increment assumes a first order Euler t
 !syntax inputs /Materials/FluxBasedStrainIncrement
 
 !syntax children /Materials/FluxBasedStrainIncrement
+
+!tag name=FluxBasedStrainIncrement pairs=module:solid_mechanics system:materials

@@ -25,3 +25,5 @@ Note that Material `ComputeSmallStrainNOSPD` can be used in general 3D and plane
 !syntax inputs /Materials/ComputeSmallStrainNOSPD
 
 !syntax children /Materials/ComputeSmallStrainNOSPD
+
+!tag name=ComputeSmallStrainNOSPD pairs=module:peridynamics system:materials

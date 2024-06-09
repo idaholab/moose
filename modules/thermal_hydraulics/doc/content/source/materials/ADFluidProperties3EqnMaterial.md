@@ -11,3 +11,5 @@ Because it uses AD, it does not declare additional material properties for the d
 !syntax inputs /Materials/ADFluidProperties3EqnMaterial
 
 !syntax children /Materials/ADFluidProperties3EqnMaterial
+
+!tag name=ADFluidProperties3EqnMaterial pairs=module:thermal_hydraulics system:materials

@@ -7,3 +7,5 @@
 !syntax inputs /Executioner/Eigenvalue
 
 !syntax children /Executioner/Eigenvalue
+
+!tag name=Eigenvalue pairs=module:framework system:executioners

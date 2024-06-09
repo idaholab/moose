@@ -33,3 +33,5 @@ parameter setting is shown below:
 !syntax inputs /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
 
 !syntax children /Materials/ComputeInstantaneousThermalExpansionFunctionEigenstrain
+
+!tag name=ComputeInstantaneousThermalExpansionFunctionEigenstrain pairs=module:solid_mechanics system:materials

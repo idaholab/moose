@@ -10,3 +10,5 @@ such that $0 < \tau \leq 1$.
 !syntax inputs /Materials/PorousFlowDiffusivityConst
 
 !syntax children /Materials/PorousFlowDiffusivityConst
+
+!tag name=PorousFlowDiffusivityConst pairs=module:porous_flow system:materials

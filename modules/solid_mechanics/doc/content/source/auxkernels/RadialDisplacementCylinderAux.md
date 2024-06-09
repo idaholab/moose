@@ -33,3 +33,5 @@ u_r = u_n \cdot \frac{p_{r}}{\left\lVert{p_{r}}\right\rVert}.
 !syntax children /AuxKernels/RadialDisplacementCylinderAux
 
 !bibtex bibliography
+
+!tag name=RadialDisplacementCylinderAux pairs=module:solid_mechanics system:auxkernels

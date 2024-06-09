@@ -14,3 +14,5 @@ where $q$ is the user-provided heat flux function.
 !syntax inputs /Postprocessors/HeatRateHeatFluxRZ
 
 !syntax children /Postprocessors/HeatRateHeatFluxRZ
+
+!tag name=HeatRateHeatFluxRZ pairs=module:thermal_hydraulics system:postprocessors

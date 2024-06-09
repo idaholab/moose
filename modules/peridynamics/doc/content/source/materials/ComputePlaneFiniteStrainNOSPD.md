@@ -11,3 +11,5 @@ Note that Material `ComputePlaneFiniteStrainNOSPD` must be used for _weak_ plane
 !syntax inputs /Materials/ComputePlaneFiniteStrainNOSPD
 
 !syntax children /Materials/ComputePlaneFiniteStrainNOSPD
+
+!tag name=ComputePlaneFiniteStrainNOSPD pairs=module:peridynamics system:materials

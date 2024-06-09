@@ -14,3 +14,5 @@ The formula used for computing the output value is:
 !syntax inputs /ControlLogic/DelayControl
 
 !syntax children /ControlLogic/DelayControl
+
+!tag name=DelayControl pairs=module:thermal_hydraulics system:controllogic

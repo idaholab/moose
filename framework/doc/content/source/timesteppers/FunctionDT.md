@@ -32,3 +32,5 @@ If no `growth_factor` is provided by the user, the time step will only be govern
 !syntax inputs /Executioner/TimeSteppers/FunctionDT
 
 !syntax children /Executioner/TimeSteppers/FunctionDT
+
+!tag name=FunctionDT pairs=module:framework system:timesteppers

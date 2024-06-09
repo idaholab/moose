@@ -12,3 +12,5 @@ Its standard variable version is [HFEMDiffusion.md].
 !syntax inputs /DGKernels/ArrayHFEMDiffusion
 
 !syntax children /DGKernels/ArrayHFEMDiffusion
+
+!tag name=ArrayHFEMDiffusion pairs=module:framework system:dgkernels

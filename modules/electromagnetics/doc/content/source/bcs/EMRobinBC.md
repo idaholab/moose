@@ -85,3 +85,5 @@ valid on any non-spherical smooth surface with a trade-off in accuracy.
 !syntax inputs /BCs/EMRobinBC
 
 !syntax children /BCs/EMRobinBC
+
+!tag name=EMRobinBC pairs=module:electromagnetics system:bcs

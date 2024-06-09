@@ -34,3 +34,5 @@ This mesh generator creates the same `MeshMetaData` as `PolygonConcentricCircleM
 !syntax inputs /Mesh/SimpleHexagonGenerator
 
 !syntax children /Mesh/SimpleHexagonGenerator
+
+!tag name=SimpleHexagonGenerator pairs=module:reactor system:meshgenerators

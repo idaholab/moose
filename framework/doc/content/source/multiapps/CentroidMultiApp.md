@@ -20,3 +20,5 @@ The following code snippet demonstrates the creation of a CentroidMultiApp objec
 !syntax inputs /MultiApps/CentroidMultiApp
 
 !syntax children /MultiApps/CentroidMultiApp
+
+!tag name=CentroidMultiApp pairs=module:framework system:multiapps

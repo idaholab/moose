@@ -57,3 +57,5 @@ the initial stiffness reduction factor.
 !syntax children /Materials/PowerLawSoftening
 
 !bibtex bibliography
+
+!tag name=PowerLawSoftening pairs=module:solid_mechanics system:materials

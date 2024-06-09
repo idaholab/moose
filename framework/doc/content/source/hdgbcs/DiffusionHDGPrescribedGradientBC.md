@@ -17,3 +17,5 @@ parameter. This boundary condition should be paired with a
 !syntax inputs /HDGBCs/DiffusionHDGPrescribedGradientBC
 
 !syntax children /HDGBCs/DiffusionHDGPrescribedGradientBC
+
+!tag name=DiffusionHDGPrescribedGradientBC pairs=module:framework system:hdgbcs

@@ -11,3 +11,5 @@ This class computes the $i^{th}$ component of the torque due to rotational inert
 !syntax inputs /NodalKernels/NodalRotationalInertia
 
 !syntax children /NodalKernels/NodalRotationalInertia
+
+!tag name=NodalRotationalInertia pairs=module:solid_mechanics system:nodalkernels

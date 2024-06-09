@@ -11,3 +11,5 @@ y(t) = \frac{1}{V} \int\limits_V f(\mathbf{x}, t) dV \,.
 !syntax inputs /Postprocessors/FunctionElementAverage
 
 !syntax children /Postprocessors/FunctionElementAverage
+
+!tag name=FunctionElementAverage pairs=module:framework system:postprocessors

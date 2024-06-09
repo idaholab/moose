@@ -15,3 +15,5 @@ Override
 - `precomputeQpResidual()` instead of `computeQpResidual()` (do not multiply by `_test[_i][_qp]`)
 - `precomputeQpJacobian()` instead of `computeQpJacobian()` (do not multiply by `_test[_i][_qp]`)
 - `computeOffDiagJacobian` still has to be implemented as if deriving from `Kernel`.
+
+!tag name=KernelValue pairs=module:framework system:kernels

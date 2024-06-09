@@ -9,3 +9,5 @@ More information about `Samplers` may be found on the
 [Samplers syntax documentation](syntax/Samplers/index.md).
 
 !syntax parameters /Samplers/AddSamplerAction
+
+!tag name=AddSamplerAction pairs=module:framework system:actions

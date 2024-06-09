@@ -17,3 +17,5 @@ In this example, the `INSFVBodyForce` is used to apply a forcing function to the
 !syntax inputs /FVKernels/INSFVBodyForce
 
 !syntax children /FVKernels/INSFVBodyForce
+
+!tag name=INSFVBodyForce pairs=module:navier_stokes system:fvkernels

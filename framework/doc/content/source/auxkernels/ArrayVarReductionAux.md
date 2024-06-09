@@ -33,3 +33,5 @@ f = \max\limits_{i=1,I} g_i.
 !syntax inputs /AuxKernels/ArrayVarReductionAux
 
 !syntax children /AuxKernels/ArrayVarReductionAux
+
+!tag name=ArrayVarReductionAux pairs=module:framework system:auxkernels

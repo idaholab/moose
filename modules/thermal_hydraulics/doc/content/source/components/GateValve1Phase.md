@@ -9,3 +9,5 @@ given the status of the valve.
 !syntax inputs /Components/GateValve1Phase
 
 !syntax children /Components/GateValve1Phase
+
+!tag name=GateValve1Phase pairs=module:thermal_hydraulics system:components

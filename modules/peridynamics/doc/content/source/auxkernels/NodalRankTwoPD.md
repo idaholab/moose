@@ -13,3 +13,5 @@ For stress calculation, material constants, i.e., Young's modulus and Poisson's 
 !syntax inputs /AuxKernels/NodalRankTwoPD
 
 !syntax children /AuxKernels/NodalRankTwoPD
+
+!tag name=NodalRankTwoPD pairs=module:peridynamics system:auxkernels

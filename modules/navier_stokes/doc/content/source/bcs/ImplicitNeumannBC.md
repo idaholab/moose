@@ -7,3 +7,5 @@
 !syntax inputs /BCs/ImplicitNeumannBC
 
 !syntax children /BCs/ImplicitNeumannBC
+
+!tag name=ImplicitNeumannBC pairs=module:navier_stokes system:bcs

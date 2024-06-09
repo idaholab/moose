@@ -19,3 +19,5 @@ This quantity is computed during the initial stage of the simulation and is kept
 !syntax inputs /Materials/PorousFlowConstantThermalExpansionCoefficient
 
 !syntax children /Materials/PorousFlowConstantThermalExpansionCoefficient
+
+!tag name=PorousFlowConstantThermalExpansionCoefficient pairs=module:porous_flow system:materials

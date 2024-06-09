@@ -35,3 +35,5 @@ outward normals as necessary.
 !syntax inputs /BCs/VectorNeumannBC
 
 !syntax children /BCs/VectorNeumannBC
+
+!tag name=VectorNeumannBC pairs=module:framework system:bcs

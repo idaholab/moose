@@ -11,3 +11,5 @@ Users are required to specify:
 - `flux_function` - The flux out of the medium
 
 !listing modules/porous_flow/test/tests/sinks/s11_act.i block=/Modules/PorousFlow/BCs/left
+
+!tag name=PorousFlowSinkBC pairs=module:porous_flow system:bcs

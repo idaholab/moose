@@ -15,3 +15,5 @@ diffusion contributions will be skipped for that element over all faces.
 !syntax inputs /FVKernels/INSFVTurbulentDiffusion
 
 !syntax children /FVKernels/INSFVTurbulentDiffusion
+
+!tag name=INSFVTurbulentDiffusion pairs=module:navier_stokes system:fvkernels

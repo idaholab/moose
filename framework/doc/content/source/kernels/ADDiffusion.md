@@ -23,3 +23,5 @@ differentiation.
 !syntax inputs /Kernels/ADDiffusion
 
 !syntax children /Kernels/ADDiffusion
+
+!tag name=ADDiffusion pairs=module:framework system:kernels

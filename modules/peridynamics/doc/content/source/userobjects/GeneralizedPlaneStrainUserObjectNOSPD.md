@@ -9,3 +9,5 @@ The `GeneralizedPlaneStrainUserObjectNOSPD` UserObject is used to provide the re
 !syntax inputs /UserObjects/GeneralizedPlaneStrainUserObjectNOSPD
 
 !syntax children /UserObjects/GeneralizedPlaneStrainUserObjectNOSPD
+
+!tag name=GeneralizedPlaneStrainUserObjectNOSPD pairs=module:peridynamics system:userobjects

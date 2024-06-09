@@ -15,3 +15,5 @@ In this input file we obtain both the maximum value of variable `u` using a [Nod
 !syntax inputs /Postprocessors/NodalMaxValueId
 
 !syntax children /Postprocessors/NodalMaxValueId
+
+!tag name=NodalMaxValueId pairs=module:framework system:postprocessors

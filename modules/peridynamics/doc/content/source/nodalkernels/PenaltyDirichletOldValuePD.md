@@ -15,3 +15,5 @@ The `PenaltyDirichletOldValuePD` NodalKernel is used to apply Dirichlet boundary
 !syntax inputs /NodalKernels/PenaltyDirichletOldValuePD
 
 !syntax children /NodalKernels/PenaltyDirichletOldValuePD
+
+!tag name=PenaltyDirichletOldValuePD pairs=module:peridynamics system:nodalkernels

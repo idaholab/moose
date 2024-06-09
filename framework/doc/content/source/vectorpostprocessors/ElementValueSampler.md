@@ -16,3 +16,5 @@ along with its ID as well as a vector named after each variable sampled, contain
 !syntax inputs /VectorPostprocessors/ElementValueSampler
 
 !syntax children /VectorPostprocessors/ElementValueSampler
+
+!tag name=ElementValueSampler pairs=module:framework system:vectorpostprocessors

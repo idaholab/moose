@@ -16,3 +16,5 @@ In this example, the divergence of a finite volume vector field `(u, v)` is comp
 !syntax inputs /AuxKernels/DivergenceAux
 
 !syntax children /AuxKernels/DivergenceAux
+
+!tag name=DivergenceAux pairs=module:framework system:auxkernels

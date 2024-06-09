@@ -39,3 +39,5 @@ block for a transient diffusion problem that demonstrates the
 !syntax inputs /Kernels/VectorTimeDerivative
 
 !syntax children /Kernels/VectorTimeDerivative
+
+!tag name=VectorTimeDerivative pairs=module:framework system:kernels

@@ -27,3 +27,5 @@ as `group/comp1`.
 !syntax inputs /Components/ComponentGroup
 
 !syntax children /Components/ComponentGroup
+
+!tag name=ComponentGroup pairs=module:thermal_hydraulics system:components

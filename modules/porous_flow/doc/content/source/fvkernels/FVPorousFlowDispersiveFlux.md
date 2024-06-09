@@ -27,3 +27,5 @@ All parameters are defined in the [nomenclature](/nomenclature.md).
 !syntax inputs /FVKernels/FVPorousFlowDispersiveFlux
 
 !syntax children /FVKernels/FVPorousFlowDispersiveFlux
+
+!tag name=FVPorousFlowDispersiveFlux pairs=module:porous_flow system:fvkernels

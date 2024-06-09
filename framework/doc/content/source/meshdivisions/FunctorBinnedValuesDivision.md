@@ -24,3 +24,5 @@ that a warning is output, please reach out to a MOOSE (or any MOOSE app) develop
 !syntax inputs /MeshDivisions/FunctorBinnedValuesDivision
 
 !syntax children /MeshDivisions/FunctorBinnedValuesDivision
+
+!tag name=FunctorBinnedValuesDivision pairs=module:framework system:meshdivisions

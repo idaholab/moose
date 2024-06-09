@@ -12,3 +12,5 @@ for finite element variables.
 !syntax inputs /Postprocessors/SideAverageFunctorPostprocessor
 
 !syntax children /Postprocessors/SideAverageFunctorPostprocessor
+
+!tag name=SideAverageFunctorPostprocessor pairs=module:framework system:postprocessors

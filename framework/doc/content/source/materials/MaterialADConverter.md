@@ -21,3 +21,5 @@ these components need to be included.
 !syntax inputs /Materials/MaterialADConverter
 
 !syntax children /Materials/MaterialADConverter
+
+!tag name=MaterialADConverter pairs=module:framework system:materials

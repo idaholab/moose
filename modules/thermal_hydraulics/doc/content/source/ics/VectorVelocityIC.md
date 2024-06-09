@@ -15,3 +15,5 @@ and $u_d$ is a user-provided function for the component of velocity in the direc
 !syntax inputs /ICs/VectorVelocityIC
 
 !syntax children /ICs/VectorVelocityIC
+
+!tag name=VectorVelocityIC pairs=module:thermal_hydraulics system:ics

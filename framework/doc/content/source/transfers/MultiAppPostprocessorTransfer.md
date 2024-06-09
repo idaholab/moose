@@ -23,3 +23,5 @@ each of the sub-applications.
 !syntax inputs /Transfers/MultiAppPostprocessorTransfer
 
 !syntax children /Transfers/MultiAppPostprocessorTransfer
+
+!tag name=MultiAppPostprocessorTransfer pairs=module:framework system:transfers

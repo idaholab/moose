@@ -26,3 +26,5 @@ that a warning is output, please reach out to a MOOSE (or any MOOSE app) develop
 !syntax inputs /MeshDivisions/HexagonalGridDivision
 
 !syntax children /MeshDivisions/HexagonalGridDivision
+
+!tag name=HexagonalGridDivision pairs=module:reactor system:meshdivisions

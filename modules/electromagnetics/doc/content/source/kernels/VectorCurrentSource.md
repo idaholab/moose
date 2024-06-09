@@ -31,3 +31,5 @@ parameters for the real and imaginary components respectively.
 !syntax inputs /Kernels/VectorCurrentSource
 
 !syntax children /Kernels/VectorCurrentSource
+
+!tag name=VectorCurrentSource pairs=module:electromagnetics system:kernels

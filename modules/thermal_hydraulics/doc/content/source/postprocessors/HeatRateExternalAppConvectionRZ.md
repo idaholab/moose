@@ -9,3 +9,5 @@ that transfers these quantities into auxiliary variables.
 !syntax inputs /Postprocessors/HeatRateExternalAppConvectionRZ
 
 !syntax children /Postprocessors/HeatRateExternalAppConvectionRZ
+
+!tag name=HeatRateExternalAppConvectionRZ pairs=module:thermal_hydraulics system:postprocessors

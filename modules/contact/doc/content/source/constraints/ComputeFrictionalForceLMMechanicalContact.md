@@ -30,3 +30,5 @@ The preliminary recommendation is to select  `c` to be on the order of the modul
 !syntax inputs /Constraints/ComputeFrictionalForceLMMechanicalContact
 
 !syntax children /Constraints/ComputeFrictionalForceLMMechanicalContact
+
+!tag name=ComputeFrictionalForceLMMechanicalContact pairs=module:contact system:constraints

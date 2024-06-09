@@ -28,3 +28,5 @@ properties material, to auxiliary variables, to examine them in an Exodus output
 !syntax inputs /AuxKernels/FunctorAux
 
 !syntax children /AuxKernels/FunctorAux
+
+!tag name=FunctorAux pairs=module:framework system:auxkernels

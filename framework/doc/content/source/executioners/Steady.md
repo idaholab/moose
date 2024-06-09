@@ -115,3 +115,5 @@ PETSc parameters can either be set on the command line or by using the [!param](
 !syntax inputs /Executioner/Steady
 
 !syntax children /Executioner/Steady
+
+!tag name=Steady pairs=module:framework system:executioners

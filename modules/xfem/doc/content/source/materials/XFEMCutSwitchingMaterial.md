@@ -39,3 +39,5 @@ This class has four instantiations described below that are used to switch betwe
 ## Example Input File Syntax
 
 !syntax parameters /Materials/XFEMCutSwitchingMaterialRankFourTensor
+
+!tag name=XFEMCutSwitchingMaterial pairs=module:xfem system:materials

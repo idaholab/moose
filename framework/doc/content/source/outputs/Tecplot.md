@@ -12,3 +12,5 @@ The Tecplot output writes variable data in a format suitable for use with
 !syntax inputs /Outputs/Tecplot
 
 !syntax children /Outputs/Tecplot
+
+!tag name=Tecplot pairs=module:framework system:outputs

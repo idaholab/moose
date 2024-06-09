@@ -9,3 +9,5 @@ More information about `Constraints` may be found on the
 [Constraints syntax documentation](syntax/Constraints/index.md).
 
 !syntax parameters /Constraints/AddConstraintAction
+
+!tag name=AddConstraintAction pairs=module:framework system:actions

@@ -15,3 +15,5 @@ and its up to third order derivatives.
 !syntax children /Materials/MathFreeEnergy
 
 !bibtex bibliography
+
+!tag name=MathFreeEnergy pairs=module:phase_field system:materials

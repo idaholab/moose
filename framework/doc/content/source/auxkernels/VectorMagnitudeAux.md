@@ -14,3 +14,5 @@ a cavity problem. The components of the velocity vector are the problem variable
 !syntax inputs /AuxKernels/VectorMagnitudeAux
 
 !syntax children /AuxKernels/VectorMagnitudeAux
+
+!tag name=VectorMagnitudeAux pairs=module:framework system:auxkernels

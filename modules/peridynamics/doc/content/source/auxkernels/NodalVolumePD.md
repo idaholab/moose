@@ -9,3 +9,5 @@ The `NodalVolumePD` AuxKernel is used to output the area or volume of a material
 !syntax inputs /AuxKernels/NodalVolumePD
 
 !syntax children /AuxKernels/NodalVolumePD
+
+!tag name=NodalVolumePD pairs=module:peridynamics system:auxkernels

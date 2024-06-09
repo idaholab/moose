@@ -9,3 +9,5 @@ More information about `Dampers` may be found on the
 [Dampers syntax documentation](syntax/Dampers/index.md).
 
 !syntax parameters /Dampers/AddDamperAction
+
+!tag name=AddDamperAction pairs=module:framework system:actions

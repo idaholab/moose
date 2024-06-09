@@ -153,3 +153,5 @@ We then use the three argument version of the `nonlinear` method
 ```
 solver.nonlinear(solution, computeResidual, computeJacobian);
 ```
+
+!tag name=NestedSolve pairs=module:framework system:utils

@@ -9,3 +9,5 @@ The `HeatConductionBPD` Kernel calculates the residual and jacobian of the heat 
 !syntax inputs /Kernels/HeatConductionBPD
 
 !syntax children /Kernels/HeatConductionBPD
+
+!tag name=HeatConductionBPD pairs=module:peridynamics system:kernels

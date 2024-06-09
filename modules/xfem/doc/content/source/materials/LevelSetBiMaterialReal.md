@@ -19,3 +19,5 @@ This switching between material properties is done based on the `LevelSetBiMater
 !syntax children /Materials/LevelSetBiMaterialReal
 
 !bibtex bibliography
+
+!tag name=LevelSetBiMaterialReal pairs=module:xfem system:materials

@@ -9,3 +9,5 @@ More information about `NodalKernels` may be found on the
 [NodalKernels syntax documentation](syntax/NodalKernels/index.md).
 
 !syntax parameters /NodalKernels/AddNodalKernelAction
+
+!tag name=AddNodalKernelAction pairs=module:framework system:actions

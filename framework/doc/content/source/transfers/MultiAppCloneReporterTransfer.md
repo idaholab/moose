@@ -50,3 +50,5 @@ The resulting output in serial and the root processor in parallel will contain t
 !syntax inputs /Transfers/MultiAppCloneReporterTransfer
 
 !syntax children /Transfers/MultiAppCloneReporterTransfer
+
+!tag name=MultiAppCloneReporterTransfer pairs=module:framework system:transfers

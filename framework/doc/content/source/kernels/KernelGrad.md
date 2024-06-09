@@ -17,3 +17,5 @@ Override
 - `computeOffDiagJacobian` still has to be implemented as if deriving from `Kernel`.
 
 Note that `precomputeQpResidual()` and `precomputeQpJacobian()` return a `RealGradient` type.
+
+!tag name=KernelGrad pairs=module:framework system:kernels

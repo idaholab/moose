@@ -15,3 +15,5 @@ The PolycrystalVoronoiVoidIC generates a Voronoi tessellation to produce a grain
 !syntax inputs /ICs/PolycrystalVoronoiVoidIC
 
 !syntax children /ICs/PolycrystalVoronoiVoidIC
+
+!tag name=PolycrystalVoronoiVoidIC pairs=module:phase_field system:ics

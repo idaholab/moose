@@ -21,3 +21,5 @@ would then require algebraic ghosting of the solution vectors.
 !syntax inputs /UserObjects/PINSFVRhieChowInterpolator
 
 !syntax children /UserObjects/PINSFVRhieChowInterpolator
+
+!tag name=PINSFVRhieChowInterpolator pairs=module:navier_stokes system:userobjects

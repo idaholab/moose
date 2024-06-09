@@ -28,3 +28,5 @@ where $x,\alpha,\beta > 0$ and $0\leq p \leq 1$. $\Gamma(a)$ is the gamma functi
 !syntax inputs /Distributions/Gamma
 
 !syntax children /Distributions/Gamma
+
+!tag name=Gamma pairs=module:stochastic_tools system:distributions

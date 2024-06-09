@@ -14,3 +14,5 @@ should be of type `LAGRANGE`.
 !syntax inputs /AuxKernels/VectorVariableComponentAux
 
 !syntax children /AuxKernels/VectorVariableComponentAux
+
+!tag name=VectorVariableComponentAux pairs=module:framework system:auxkernels

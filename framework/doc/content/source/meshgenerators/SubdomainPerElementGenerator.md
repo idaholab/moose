@@ -7,3 +7,5 @@
 !syntax inputs /Mesh/SubdomainPerElementGenerator
 
 !syntax children /Mesh/SubdomainPerElementGenerator
+
+!tag name=SubdomainPerElementGenerator pairs=module:framework system:meshgenerators

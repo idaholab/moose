@@ -145,3 +145,5 @@ objects with zeroes in all entries.
 Knowing this, kernels utilizing the derivatives should always implement the most
 complete expressions including all possible derivatives, even though they might
 not be provided in every simulation.
+
+!tag name=DerivativeMaterialInterface pairs=module:framework system:materials

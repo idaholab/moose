@@ -151,3 +151,5 @@ The following options are available for tuning the hyperparameters:
 !syntax inputs /Trainers/GaussianProcessTrainer
 
 !syntax children /Trainers/GaussianProcessTrainer
+
+!tag name=GaussianProcessTrainer pairs=module:stochastic_tools system:trainers

@@ -17,3 +17,5 @@ The `BicrystalCircleGrainICAction` is accessed through the `ICs/PolycrystalICs` 
 !syntax parameters /ICs/PolycrystalICs/BicrystalCircleGrainIC/BicrystalCircleGrainICAction
 
 !syntax children /ICs/PolycrystalICs/BicrystalCircleGrainIC/BicrystalCircleGrainICAction
+
+!tag name=BicrystalCircleGrainICAction pairs=module:phase_field system:actions

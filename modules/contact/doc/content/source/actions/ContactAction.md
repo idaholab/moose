@@ -23,3 +23,5 @@ If so, each nodal pair distance from different boundaries less than the `automat
 distance will create a contact pair. Repeated contact pairs are automatically eliminated. In order to
 activate this feature, in addition to `automatic_pairing_boundaries` and `automatic_pairing_distance`, the
 user needs to set the input parameter `automatic_pairing_method = NODE`.
+
+!tag name=ContactAction pairs=module:contact system:actions

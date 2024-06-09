@@ -9,3 +9,5 @@ More information about interface kernels can be found on the
 [InterfaceKernels syntax page](syntax/InterfaceKernels/index.md).
 
 !syntax parameters /InterfaceKernels/AddInterfaceKernelAction
+
+!tag name=AddInterfaceKernelAction pairs=module:framework system:actions

@@ -37,3 +37,5 @@ The functions that specify the heat source moving path:
 !syntax inputs /Materials/FunctionPathEllipsoidHeatSource
 
 !syntax children /Materials/FunctionPathEllipsoidHeatSource
+
+!tag name=FunctionPathEllipsoidHeatSource pairs=module:heat_transfer system:materials

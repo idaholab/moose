@@ -16,3 +16,5 @@ This kernel should only be used for 1D line elements, which can be used to model
 !syntax inputs /Kernels/TrussHeatConductionTimeDerivative
 
 !syntax children /Kernels/TrussHeatConductionTimeDerivative
+
+!tag name=TrussHeatConductionTimeDerivative pairs=module:heat_transfer system:kernels

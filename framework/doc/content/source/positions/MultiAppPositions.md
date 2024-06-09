@@ -23,3 +23,5 @@ In this example, the `MultiAppPositions` is obtaining the positions of three `Mu
 !syntax inputs /Positions/MultiAppPositions
 
 !syntax children /Positions/MultiAppPositions
+
+!tag name=MultiAppPositions pairs=module:framework system:positions

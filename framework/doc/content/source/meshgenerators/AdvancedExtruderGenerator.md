@@ -46,3 +46,5 @@ By default, the rotation is performed in a clockwise direction around the axis o
 !syntax inputs /Mesh/AdvancedExtruderGenerator
 
 !syntax children /Mesh/AdvancedExtruderGenerator
+
+!tag name=AdvancedExtruderGenerator pairs=module:framework system:meshgenerators

@@ -28,3 +28,5 @@ a variable that results in the solver being notified that the solution has diver
 (NaN) entries in the residual vector during the next residual evaluation. This in turn results
 in the time step being cut and the solution being attempted again, in the same manner that other failed
 solutions of a time step are handled.
+
+!tag name=MooseException pairs=module:framework system:base

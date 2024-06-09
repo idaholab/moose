@@ -43,3 +43,5 @@ The reported uncertainties in [!citep](Fazio) for lead fluid properties are:
 !syntax children /FluidProperties/LeadFluidProperties
 
 !bibtex bibliography
+
+!tag name=LeadFluidProperties pairs=module:fluid_properties system:fluidproperties

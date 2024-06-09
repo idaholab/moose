@@ -32,3 +32,5 @@ An example:
 !syntax inputs /Mesh/Partitioner/BlockWeightedPartitioner
 
 !syntax children /Mesh/Partitioner/BlockWeightedPartitioner
+
+!tag name=BlockWeightedPartitioner pairs=module:framework system:partitioner

@@ -11,3 +11,5 @@
 !syntax inputs /Kernels/VectorFunctionReaction
 
 !syntax children /Kernels/VectorFunctionReaction
+
+!tag name=VectorFunctionReaction pairs=module:framework system:kernels

@@ -41,3 +41,5 @@ at some level below the timestep limitation.
 !syntax inputs /Postprocessors/LevelSetCFLCondition
 
 !syntax children /Postprocessors/LevelSetCFLCondition
+
+!tag name=LevelSetCFLCondition pairs=module:level_set system:postprocessors

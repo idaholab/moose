@@ -10,3 +10,5 @@ initial condition is used on. Subdomains are matched using their name.
 !syntax inputs /ICs/SolutionIC
 
 !syntax children /ICs/SolutionIC
+
+!tag name=SolutionIC pairs=module:framework system:ics

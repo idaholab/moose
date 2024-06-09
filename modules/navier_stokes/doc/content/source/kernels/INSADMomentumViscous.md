@@ -13,3 +13,5 @@ stress. The `laplace` and `traction` forms are described in [INSMomentumLaplaceF
 !syntax inputs /Kernels/INSADMomentumViscous
 
 !syntax children /Kernels/INSADMomentumViscous
+
+!tag name=INSADMomentumViscous pairs=module:navier_stokes system:kernels

@@ -40,3 +40,5 @@ surface times the x-component of the normal of the surface.
 !syntax inputs /Postprocessors/InternalVolume
 
 !syntax children /Postprocessors/InternalVolume
+
+!tag name=InternalVolume pairs=module:misc system:postprocessors

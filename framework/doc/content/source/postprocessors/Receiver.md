@@ -27,3 +27,5 @@ the value of a variable 'parent_aux' in the main application.
 !syntax inputs /Postprocessors/Receiver
 
 !syntax children /Postprocessors/Receiver
+
+!tag name=Receiver pairs=module:framework system:postprocessors

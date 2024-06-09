@@ -13,3 +13,5 @@ the variable average is computed over each individual subdomain separately.
 !syntax inputs /UserObjects/NearestPointAverage
 
 !syntax children /UserObjects/NearestPointAverage
+
+!tag name=NearestPointAverage pairs=module:framework system:userobjects
