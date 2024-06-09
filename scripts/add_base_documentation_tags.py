@@ -36,5 +36,5 @@ for folder, subs, files in os.walk("../"):
                     print("Skipping file", file_path)
                     continue
                 file1 = open(file_path, 'a')
-                file1.write("\n!tag name=" + file.split(".md")[0] + " module=" + module + " system=" + system + "\n")
+                file1.write("\n!tag name=" + file.split(".md")[0] + " pairs=module:" + module + " system:" + system + "\n")
                 file1.close()

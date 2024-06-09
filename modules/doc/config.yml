@@ -209,11 +209,9 @@ Extensions:
     MooseDocs.extensions.tagging:
         active: True
         js_file: index-6fae072b.js
-        landing_page: filter/index_framework.html
-        automatic_keys:
-            - folder system -2
-            - folder modules -6
-            - name_affix data_type Vector Array Tensor
+        allowed_keys:
+            - module
+            - system
     MooseDocs.extensions.algorithm:
         active: True
     MooseDocs.extensions.analytics:

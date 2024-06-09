@@ -225,7 +225,7 @@ class TaggingCommand(command.CommandComponent):
             name=settings['name']
         if settings['pairs'] is None:
             msg = "%s: No key:value pairs provided; check markdown file and add desired pairs."
-            LOG.error(msg, page.name)
+            LOG.warning(msg, page.name)
             keylist=''
         else:
             keylist=settings['pairs'].split()
