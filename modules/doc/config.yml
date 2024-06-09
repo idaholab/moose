@@ -211,9 +211,10 @@ Extensions:
         js_file: index-6fae072b.js
         landing_page: filter/index_framework.html
         automatic_keys:
-            - folder system -2
             - folder modules -6
+            - folder system -2
             - name_affix data_type Vector Array Tensor
+            - name_affix discretization FV
     MooseDocs.extensions.algorithm:
         active: True
     MooseDocs.extensions.analytics:
