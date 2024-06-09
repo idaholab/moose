@@ -1801,7 +1801,7 @@ private:
   void buildLowerDMesh();
 
   /// Type of coordinate system per subdomain
-  std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
+  std::map<SubdomainID, Moose::CoordinateSystemType> & _coord_sys;
 
   /// Storage for RZ axis selection
   unsigned int _rz_coord_axis;

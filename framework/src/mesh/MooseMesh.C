@@ -225,6 +225,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _allow_remote_element_removal(true),
     _need_ghost_ghosted_boundaries(true),
     _is_displaced(false),
+    _coord_sys(
+        declareRestartableData<std::map<SubdomainID, Moose::CoordinateSystemType>>("coord_sys")),
     _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
     _coord_system_set(false),
     _doing_p_refinement(false)
