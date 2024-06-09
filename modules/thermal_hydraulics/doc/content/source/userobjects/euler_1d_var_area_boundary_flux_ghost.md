@@ -1,3 +1,5 @@
+# Euler1DVarAreaBoundaryFluxGhost
+
 This boundary flux $\mathbf{F}_b$ is computed using a numerical flux function $\mathcal{F}$ with the interior solution $\mathbf{U}_i$ and the ghost cell
 solution $\mathbf{U}_b$:
 \begin{equation}
