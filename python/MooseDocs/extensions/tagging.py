@@ -54,6 +54,7 @@ class TaggingExtension(command.CommandExtension):
         config['js_file'] = (None,
                              "Javascript file used for filtering / search page.")
         config['csv_file'] = (None, "CSV file used for examining the tag database")
+        config['landing_page'] = ("filter/index.html", "Landing page for the search engine")
         config['automatic_keys'] = ([], "List of the hard-coded (in tagging.py) keys containing first the type of the automatic key "\
                                         "(currently only based on the folder name, or the file name), "\
                                         ", then the name to use to display each of these, and finally the allowed values. "\
@@ -95,7 +96,7 @@ class TaggingExtension(command.CommandExtension):
     @property
     def automatic_keys(self):
         return self._automatic_keys
-    
+
     def postExecute(self):
         """
         At completion execution process, collect and process all current data attributes. Then,
@@ -128,16 +129,16 @@ class TaggingExtension(command.CommandExtension):
                         else:
                             path_value_cut = path_value.split('/')[-1]
 
-                        # Find the relative path from the filter page (assumed at filter/index.html)
+                        # Find the relative path from the filter page
                         # Check that there is no ambiguity
                         target_page = self.translator.findPages(path_value_cut)
-                        filter_page = self.translator.findPages("filter/index.html")
+                        filter_page = self.translator.findPages(self['landing_page'])
                         if len(target_page) != 1:
                             LOG.error(str(len(target_page)) + " pages found after truncating address when "
                                       "tagging for page initially at address: " + path_value)
                         if len(filter_page) != 1:
-                            LOG.warning(str(len(filter_page)) + " pages have been found for the filter page "
-                                        "when building relative links for tagged pages!")
+                            LOG.error(str(len(filter_page)) + " pages have been found for the filter page "
+                                      "when building relative links for tagged pages!")
                         # We did not find the pages, thus cannot search for their relative path
                         # So we simply take the full path value and use it to create the link
                         if (len(target_page) == 0 or len(filter_page) == 0):
@@ -213,7 +214,6 @@ class TaggingExtension(command.CommandExtension):
 class TaggingCommand(command.CommandComponent):
     COMMAND= 'tag'
     SUBCOMMAND= None
-    HAS_AUTO_KEYS = (self.extension.automatic_keys == [])
 
     @staticmethod
     def defaultSettings():
@@ -234,10 +234,11 @@ class TaggingCommand(command.CommandComponent):
             name = ''
         else:
             name=settings['name']
-        if settings['pairs'] is None and not HAS_AUTO_KEYS:
-            msg = "%s: No key:value pairs provided; check markdown file and add desired pairs."
-            LOG.error(msg, page.name)
+        if settings['pairs'] is None:
             keylist=''
+            if self.extension.automatic_keys is None:
+                msg = "%s: No key:value pairs provided; check markdown file and add desired pairs."
+                LOG.error(msg, page.name)
         else:
             keylist=settings['pairs'].split()
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
@@ -249,7 +250,7 @@ class TaggingCommand(command.CommandComponent):
         good_keys=[]
         # Add keys specified in the documentation files
         for pair in entry_key_values:
-            if pair[0] not in self.extension.allowed_keys and len(self.extension.allowed_keys) > 0:
+            if pair[0] not in self.extension.allowed_keys:
                 msg = "%s: Provided 'key' not in allowed_keys (see config.yml); not adding the " \
                        "following to the database: %s"
                 LOG.warning(msg, page.name, pair[0])
@@ -260,53 +261,45 @@ class TaggingCommand(command.CommandComponent):
                 good_keys.append([pair[0], pair[1]])
 
         # Add automatic tagging with some simple data extracted from file path/name. Notably for:
-        # - system
-        # - discretization, if known from the name
-        # - modules
+        # - system or modules, through the folder name
+        # - discretization or data type, if known from the name
         # Note: - we only add the key if the hard-coded search succeeds
-        #       - careful for multiple matches
-        #       - careful for override of manual key
+        #       - we do not support more than one match per key
+        #       - as a consequence, we do not override manual keys
         for data_raw in self.extension.automatic_keys:
+
+            # Parse the specifications of the automatic keys
             data = data_raw.split(' ')
             if data == []:
                 break
             key = data[0]
             name_to_use = data[1]
-            if (len(data) > 2):
-                expected_values = data[2:]
+            if key == "folder":
+                start_expected = 3
+            else:
+                start_expected = 2
+            if (len(data) > start_expected):
+                expected_values = data[start_expected:]
             else:
                 expected_values = []
-            print(key, name_to_use, expected_values)
-            if key == "source_folder":
-                print("folder", mpath)
-                if "source/" in mpath:
-                    system = mpath.split("source/")[-1]
-                    print("sys", system)
-                    if "/" in system:
-                        system = system.split("/")[0]
-                        print("sys", system)
-                        if (expected_values == []) or (key in expected_values):
-                            print("saving")
-                            good_keys.append([name_to_use, system])
+
+            # Examine tag data in light of the hard-coded tagging keys, append if correct
+            if key == "folder":
+                system = mpath.split("/")[int(data[2])]
+                if (expected_values == []) or (key in expected_values):
+                    if (name_to_use not in [item[0] for item in good_keys]):
+                        good_keys.append([name_to_use, system])
             elif key == "name_affix":
                 for name_affix in expected_values:
                     if name_affix in name:
                         if (expected_values == []) or (name_affix in expected_values):
-                            good_keys.append([name_to_use, name_affix])
-            elif key == "head_folder":
-                if "/doc/" in mpath:
-                    top_folder = mpath.split("/doc/")[0]
-                    print(top_folder)
-                    if "/" in top_folder:
-                        top_folder = top_folder.split("/")[-1]
-                        print(top_folder)
-                        if (expected_values == []) or (top_folder in expected_values):
-                            print("appending")
-                            good_keys.append([name_to_use, top_folder])
+                            if (name_to_use not in [item[0] for item in good_keys]):
+                                good_keys.append([name_to_use, name_affix])
             else:
                 LOG.error("Unrecognized automatic tagging key:", key)
 
-        if len(name) != 0: # Only add to tag database if 'name' is provided
+        # Only add to tag database if 'name' is provided
+        if len(name) != 0:
             page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
             tag_id_name = ''
