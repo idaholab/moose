@@ -206,10 +206,16 @@ Extensions:
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects
+    MooseDocs.extensions.tagging:
+        active: True
+        js_file: index-6fae072b.js
+        landing_page: filter/index_framework.html
+        automatic_keys:
+            - folder system -2
+            - folder modules -6
+            - name_affix data_type Vector Array Tensor
     MooseDocs.extensions.algorithm:
         active: True
     MooseDocs.extensions.analytics:
         active: True
         google_measurement_id: G-RH7BY5XXNW
-    # Used to create a reference/example page for the tagging extension (see PR #25388)
-    MooseDocs.extensions.tagging: !include modules/electromagnetics/doc/config.yml Extensions MooseDocs.extensions.tagging
