@@ -20,10 +20,3 @@ Extensions:
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.sqa: disable
-    MooseDocs.extensions.tagging:
-        active: True
-        js_file: index-6fae072b.js
-        allowed_keys:
-            - example_type
-            - simulation_type
-            - fiscal_year
