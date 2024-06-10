@@ -268,6 +268,7 @@ petscSetOptions(const PetscOptions & po, const SolverParams & solver_params)
 PetscErrorCode
 petscSetupOutput(CommandLine * cmd_line)
 {
+  PetscFunctionBegin;
   char code[10] = {45, 45, 109, 111, 111, 115, 101};
   const std::vector<std::string> argv = cmd_line->getArguments();
   for (const auto & arg : argv)
@@ -278,7 +279,7 @@ petscSetupOutput(CommandLine * cmd_line)
       break;
     }
   }
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -290,6 +291,7 @@ petscNonlinearConverged(SNES snes,
                         SNESConvergedReason * reason,
                         void * ctx)
 {
+  PetscFunctionBegin;
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
 
   // Let's be nice and always check PETSc error codes.
@@ -346,7 +348,7 @@ petscNonlinearConverged(SNES snes,
   if (domainerror)
   {
     *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
-    return PETSC_SUCCESS;
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
 
   // Error message that will be set by the FEProblemBase.
@@ -418,7 +420,7 @@ petscNonlinearConverged(SNES snes,
       break;
   }
 
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PCSide
