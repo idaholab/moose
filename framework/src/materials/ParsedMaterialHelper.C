@@ -10,6 +10,7 @@
 #include "ParsedMaterialHelper.h"
 
 #include "libmesh/quadrature.h"
+#include "Conversion.h"
 
 template <bool is_ad>
 InputParameters
@@ -27,6 +28,10 @@ ParsedMaterialHelper<is_ad>::validParams()
       "extra_symbols",
       extra_symbols,
       "Special symbols, like point coordinates, time, and timestep size.");
+  params.addParam<std::vector<MaterialName>>(
+      "upstream_materials",
+      std::vector<MaterialName>(),
+      "List of upstream material properties that must be evaluated when compute=false");
   return params;
 }
 
@@ -40,6 +45,7 @@ ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parame
         this->template getParam<MultiMooseEnum>("extra_symbols").template getEnum<ExtraSymbols>()),
     _tol(0),
     _map_mode(map_mode),
+    _upstream_mat_names(this->template getParam<std::vector<MaterialName>>("upstream_materials")),
     _error_on_missing_material_properties(
         this->template getParam<bool>("error_on_missing_material_properties"))
 {
@@ -236,6 +242,15 @@ ParsedMaterialHelper<is_ad>::functionsPostParse()
 
 template <bool is_ad>
 void
+ParsedMaterialHelper<is_ad>::initialSetup()
+{
+  _upstream_mat.resize(_upstream_mat_names.size());
+  for (const auto i : make_range(_upstream_mat_names.size()))
+    _upstream_mat[i] = &this->getMaterialByName(_upstream_mat_names[i]);
+}
+
+template <bool is_ad>
+void
 ParsedMaterialHelper<is_ad>::initQpStatefulProperties()
 {
   computeQpProperties();
@@ -245,8 +260,13 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::computeQpProperties()
 {
+  if (!(this->_compute))
+  {
+    for (const auto i : make_range(_upstream_mat_names.size()))
+      _upstream_mat[i]->computePropertiesAtQp(_qp);
+  }
   // fill the parameter vector, apply tolerances
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (const auto i : make_range(_nargs))
   {
     if (_tol[i] < 0.0)
       _func_params[i] = (*_args[i])[_qp];
