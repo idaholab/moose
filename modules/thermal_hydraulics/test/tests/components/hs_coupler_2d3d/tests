@@ -31,6 +31,16 @@
       exodiff = conduction_only.e
       detail = 'using conduction only.'
     []
+    [convection_only]
+      type = Exodiff
+      input = hs_coupler_2d3d.i
+      cli_args = "
+        Components/hs_coupler/gap_thermal_conductivity=0
+        Components/hs_coupler/gap_htc=100
+        Outputs/file_base=convection_only"
+      exodiff = convection_only.e
+      detail = 'using convection only.'
+    []
   []
 
   [error_reporting]

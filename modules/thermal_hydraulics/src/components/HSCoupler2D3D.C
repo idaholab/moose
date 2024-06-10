@@ -39,6 +39,8 @@ HSCoupler2D3D::validParams()
   params.addRequiredParam<FunctionName>(
       "gap_thermal_conductivity",
       "Gap thermal conductivity [W/(m-K)] as a function of temperature [K]");
+  params.addParam<FunctionName>(
+      "gap_htc", 0, "Gap heat transfer coefficient [W/(m^2-K)] as a function of temperature [K]");
 
   params.addClassDescription("Couples a 2D heat structure boundary to a 3D heat structure boundary "
                              "using gap heat transfer.");
@@ -183,6 +185,7 @@ HSCoupler2D3D::addMooseObjects()
     params.set<FunctionName>("gap_thickness") = getParam<FunctionName>("gap_thickness");
     params.set<FunctionName>("gap_thermal_conductivity") =
         getParam<FunctionName>("gap_thermal_conductivity");
+    params.set<FunctionName>("gap_htc") = getParam<FunctionName>("gap_htc");
     params.set<UserObjectName>("temperature_2d_uo") = temperature_2d_uo_name;
     params.set<MeshAlignment2D3D *>("mesh_alignment") = &_mesh_alignment;
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};

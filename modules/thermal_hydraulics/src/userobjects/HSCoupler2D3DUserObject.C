@@ -36,6 +36,8 @@ HSCoupler2D3DUserObject::validParams()
   params.addRequiredParam<FunctionName>(
       "gap_thermal_conductivity",
       "Gap thermal conductivity [W/(m-K)] as a function of temperature [K]");
+  params.addParam<FunctionName>(
+      "gap_htc", 0, "Gap heat transfer coefficient [W/(m^2-K)] as a function of temperature [K]");
   params.addRequiredParam<UserObjectName>(
       "temperature_2d_uo",
       "StoreVariableByElemIDSideUserObject containing the temperature values on the 2D boundary");
@@ -56,6 +58,7 @@ HSCoupler2D3DUserObject::HSCoupler2D3DUserObject(const InputParameters & paramet
     _include_radiation(isParamSetByUser("emissivity_2d") && isParamSetByUser("emissivity_3d")),
     _gap_thickness_fn(getFunction("gap_thickness")),
     _k_gap_fn(getFunction("gap_thermal_conductivity")),
+    _htc_gap_fn(getFunction("gap_htc")),
     _temperature_2d_uo(getUserObject<StoreVariableByElemIDSideUserObject>("temperature_2d_uo")),
     _mesh_alignment(*getParam<MeshAlignment2D3D *>("mesh_alignment"))
 {
@@ -101,6 +104,9 @@ HSCoupler2D3DUserObject::execute()
     const auto heat_flux_cond =
         HeatTransferModels::cylindricalGapConductionHeatFlux(k_gap, _r_2d, r_3d, T_2d, T_3d);
     auto heat_flux = heat_flux_cond;
+
+    const auto htc = evaluateTemperatureFunction(_htc_gap_fn, T_gap);
+    heat_flux += htc * (T_2d - T_3d);
 
     if (_include_radiation)
     {
