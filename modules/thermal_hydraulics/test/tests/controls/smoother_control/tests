@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#27831'
+  design = 'SmootherControl.md'
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to smooth an input signal using a moving average.'
+  []
+[]
