@@ -34,7 +34,6 @@
                  mkdir -p ../../../make_install_test'
       use_shell = True
       installation_type = IN_TREE
-      hpc = False
 
       detail = 'from a pre-determined user-readable location;'
     []
