@@ -711,6 +711,10 @@ class Tester(MooseObject):
         if not self.specs['hpc'] and options.hpc:
             reasons['hpc'] = 'hpc=false'
 
+        # Use shell not supported for HPC
+        if self.specs['use_shell'] and options.hpc:
+            reasons['use_shell'] = 'no use_shell with hpc'
+
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
