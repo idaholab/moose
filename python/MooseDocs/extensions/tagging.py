@@ -55,10 +55,6 @@ class TaggingExtension(command.CommandExtension):
                              "Javascript file used for filtering / search page.")
         config['csv_file'] = (None, "CSV file used for examining the tag database")
         config['landing_page'] = ("filter/index.html", "Landing page for the search engine")
-        config['automatic_keys'] = ([], "List of the hard-coded (in tagging.py) keys containing first the type of the automatic key "\
-                                        "(currently only based on the folder name, or the file name), "\
-                                        ", then the name to use to display each of these, and finally the allowed values. "\
-                                        "If no allowed values are specified, all values found are allowed.")
 
         # Disable by default
         config['active'] = (False, config['active'][1])
@@ -71,7 +67,6 @@ class TaggingExtension(command.CommandExtension):
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
         self._allowed_keys = self['allowed_keys']
-        self._automatic_keys = self['automatic_keys']
 
         if self['js_file'] is None:
             msg = "No javascript file identified. The tagging extension will be disabled."
@@ -92,10 +87,6 @@ class TaggingExtension(command.CommandExtension):
     @property
     def allowed_keys(self):
         return self._allowed_keys
-
-    @property
-    def automatic_keys(self):
-        return self._automatic_keys
 
     def postExecute(self):
         """
@@ -236,9 +227,8 @@ class TaggingCommand(command.CommandComponent):
             name=settings['name']
         if settings['pairs'] is None:
             keylist=''
-            if self.extension.automatic_keys is None:
-                msg = "%s: No key:value pairs provided; check markdown file and add desired pairs."
-                LOG.error(msg, page.name)
+            msg = "%s: No key:value pairs provided; check markdown file and add desired pairs."
+            LOG.error(msg, page.name)
         else:
             keylist=settings['pairs'].split()
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
@@ -259,44 +249,6 @@ class TaggingCommand(command.CommandComponent):
                 LOG.error(msg, page.name, pair[0])
             else:
                 good_keys.append([pair[0], pair[1]])
-
-        # Add automatic tagging with some simple data extracted from file path/name. Notably for:
-        # - system or modules, through the folder name
-        # - discretization or data type, if known from the name
-        # Note: - we only add the key if the hard-coded search succeeds
-        #       - we do not support more than one match per key
-        #       - as a consequence, we do not override manual keys
-        for data_raw in self.extension.automatic_keys:
-
-            # Parse the specifications of the automatic keys
-            data = data_raw.split(' ')
-            if data == []:
-                break
-            key = data[0]
-            name_to_use = data[1]
-            if key == "folder":
-                start_expected = 3
-            else:
-                start_expected = 2
-            if (len(data) > start_expected):
-                expected_values = data[start_expected:]
-            else:
-                expected_values = []
-
-            # Examine tag data in light of the hard-coded tagging keys, append if correct
-            if key == "folder":
-                system = mpath.split("/")[int(data[2])]
-                if (expected_values == []) or (key in expected_values):
-                    if (name_to_use not in [item[0] for item in good_keys]):
-                        good_keys.append([name_to_use, system])
-            elif key == "name_affix":
-                for name_affix in expected_values:
-                    if name_affix in name:
-                        if (expected_values == []) or (name_affix in expected_values):
-                            if (name_to_use not in [item[0] for item in good_keys]):
-                                good_keys.append([name_to_use, name_affix])
-            else:
-                LOG.error("Unrecognized automatic tagging key:", key)
 
         # Only add to tag database if 'name' is provided
         if len(name) != 0:
