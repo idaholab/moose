@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NestedKKSSplitCHCRes.h"
+#include "NestedKKSMultiSplitCHCRes.h"
 
-registerMooseObject("PhaseFieldApp", NestedKKSSplitCHCRes);
+registerMooseObject("PhaseFieldApp", NestedKKSMultiSplitCHCRes);
 
 InputParameters
-NestedKKSSplitCHCRes::validParams()
+NestedKKSMultiSplitCHCRes::validParams()
 {
   InputParameters params = JvarMapKernelInterface<Kernel>::validParams();
   params.addClassDescription(
@@ -22,14 +22,14 @@ NestedKKSSplitCHCRes::validParams()
   params.addRequiredCoupledVar("global_cs", "The interpolated concentrations c, b, etc.");
   params.addCoupledVar("w", "Chemical potential non-linear helper variable for the split solve.");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "ca_names",
+      "c1_names",
       "Phase concentrations in the frist phase of all_etas. The order must match global_cs, for "
       "example, c1, b1, etc.");
-  params.addParam<MaterialPropertyName>("fa_name", "Free energy of the first phase in all_etas.");
+  params.addParam<MaterialPropertyName>("F1_name", "Free energy of the first phase in all_etas.");
   return params;
 }
 
-NestedKKSSplitCHCRes::NestedKKSSplitCHCRes(const InputParameters & parameters)
+NestedKKSMultiSplitCHCRes::NestedKKSMultiSplitCHCRes(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _eta_names(coupledNames("all_etas")),
     _num_j(_eta_names.size()),
@@ -40,13 +40,13 @@ NestedKKSSplitCHCRes::NestedKKSSplitCHCRes(const InputParameters & parameters)
     _o(-1),
     _w_var(coupled("w")),
     _w(coupledValue("w")),
-    _ca_names(getParam<std::vector<MaterialPropertyName>>("ca_names")),
-    _Fa_name(getParam<MaterialPropertyName>("fa_name")),
-    _dFadca(_num_c),
-    _d2Fadcadba(_num_c),
-    _dcadb(_num_c),
-    _dcadetaj(_num_c),
-    _d2Fadcadarg(_n_args)
+    _c1_names(getParam<std::vector<MaterialPropertyName>>("c1_names")),
+    _F1_name(getParam<MaterialPropertyName>("F1_name")),
+    _dF1dc1(_num_c),
+    _d2F1dc1db1(_num_c),
+    _dc1db(_num_c),
+    _dc1detaj(_num_c),
+    _d2F1dc1darg(_n_args)
 
 {
   for (const auto i : make_range(_num_c))
@@ -59,47 +59,47 @@ NestedKKSSplitCHCRes::NestedKKSSplitCHCRes(const InputParameters & parameters)
   // _dcideta and _dcidb are computed in KKSPhaseConcentrationDerivatives
   for (const auto m : make_range(_num_c))
   {
-    _dcadetaj[m].resize(_num_j);
+    _dc1detaj[m].resize(_num_j);
     for (const auto n : make_range(_num_j))
-      _dcadetaj[m][n] = &getMaterialPropertyDerivative<Real>(_ca_names[m], _eta_names[n]);
+      _dc1detaj[m][n] = &getMaterialPropertyDerivative<Real>(_c1_names[m], _eta_names[n]);
 
-    _dcadb[m].resize(_num_c);
+    _dc1db[m].resize(_num_c);
     for (const auto n : make_range(_num_c))
-      _dcadb[m][n] = &getMaterialPropertyDerivative<Real>(_ca_names[m], _c_names[n]);
+      _dc1db[m][n] = &getMaterialPropertyDerivative<Real>(_c1_names[m], _c_names[n]);
   }
 
-  // _dFaca and _d2Fadcadba are computed in KKSPhaseConcentrationMaterial
+  // _dF1dc1 and _d2F1dc1db1 are computed in KKSPhaseConcentrationMaterial
   for (const auto m : make_range(_num_c))
   {
-    _dFadca[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fa_name, _ca_names[m]);
-    _d2Fadcadba[m] =
-        &getMaterialPropertyDerivative<Real>("cp" + _Fa_name, _ca_names[_o], _ca_names[m]);
+    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[m]);
+    _d2F1dc1db1[m] =
+        &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[_o], _c1_names[m]);
   }
 
-  // _d2Fadcadarg is computed in KKSPhaseConcentrationMaterial
+  // _d2F1dc1darg is computed in KKSPhaseConcentrationMaterial
   for (const auto m : make_range(_n_args))
-    _d2Fadcadarg[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fa_name, _ca_names[_o], m);
+    _d2F1dc1darg[m] = &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[_o], m);
 }
 
 Real
-NestedKKSSplitCHCRes::computeQpResidual()
+NestedKKSMultiSplitCHCRes::computeQpResidual()
 {
-  return ((*_dFadca[_o])[_qp] - _w[_qp]) * _test[_i][_qp];
+  return ((*_dF1dc1[_o])[_qp] - _w[_qp]) * _test[_i][_qp];
 }
 
 Real
-NestedKKSSplitCHCRes::computeQpJacobian()
+NestedKKSMultiSplitCHCRes::computeQpJacobian()
 {
   Real sum = 0.0;
 
   for (const auto m : make_range(_num_c))
-    sum += (*_d2Fadcadba[m])[_qp] * (*_dcadb[m][_o])[_qp];
+    sum += (*_d2F1dc1db1[m])[_qp] * (*_dc1db[m][_o])[_qp];
 
   return sum * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 Real
-NestedKKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
+NestedKKSMultiSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real sum = 0.0;
 
@@ -112,7 +112,7 @@ NestedKKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
   if (compvar >= 0)
   {
     for (const auto m : make_range(_num_c))
-      sum += (*_d2Fadcadba[m])[_qp] * (*_dcadb[m][compvar])[_qp];
+      sum += (*_d2F1dc1db1[m])[_qp] * (*_dc1db[m][compvar])[_qp];
 
     return sum * _phi[_j][_qp] * _test[_i][_qp];
   }
@@ -122,12 +122,13 @@ NestedKKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
   if (etavar >= 0)
   {
     for (const auto m : make_range(_num_c))
-      sum += (*_d2Fadcadba[m])[_qp] * (*_dcadetaj[m][etavar])[_qp];
+      sum += (*_d2F1dc1db1[m])[_qp] * (*_dc1detaj[m][etavar])[_qp];
 
     return sum * _phi[_j][_qp] * _test[_i][_qp];
   }
 
   // for all other vars get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
-  return (*_d2Fadcadarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+
+  return (*_d2F1dc1darg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
