@@ -71,14 +71,13 @@ NestedKKSSplitCHCRes::NestedKKSSplitCHCRes(const InputParameters & parameters)
   // _dFaca and _d2Fadcadba are computed in KKSPhaseConcentrationMaterial
   for (const auto m : make_range(_num_c))
   {
-    _dFadca[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fa_name, _ca_names[m]);
-    _d2Fadcadba[m] =
-        &getMaterialPropertyDerivative<Real>("cp" + _Fa_name, _ca_names[_o], _ca_names[m]);
+    _dFadca[m] = &getMaterialPropertyDerivative<Real>(_Fa_name, _ca_names[m]);
+    _d2Fadcadba[m] = &getMaterialPropertyDerivative<Real>(_Fa_name, _ca_names[_o], _ca_names[m]);
   }
 
   // _d2Fadcadarg is computed in KKSPhaseConcentrationMaterial
   for (const auto m : make_range(_n_args))
-    _d2Fadcadarg[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fa_name, _ca_names[_o], m);
+    _d2Fadcadarg[m] = &getMaterialPropertyDerivative<Real>(_Fa_name, _ca_names[_o], m);
 }
 
 Real
