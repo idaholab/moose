@@ -73,6 +73,7 @@
       cli_args = 'Mesh/final_generator=triang
                   --mesh-only'
       exodiff = 'xydelaunay_stitching_in.e'
+      exodiff_opts = '-pedantic'
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh"
     []

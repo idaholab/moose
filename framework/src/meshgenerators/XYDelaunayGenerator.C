@@ -371,6 +371,7 @@ XYDelaunayGenerator::generate()
       {
         free_boundary_id =
             std::max(free_boundary_id, MooseMeshUtils::getNextFreeBoundaryID(*hole_ptrs[hole_i]));
+        hole_ptrs[hole_i]->comm().max(free_boundary_id);
       }
     }
     for (auto h : index_range(hole_ptrs))
