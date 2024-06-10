@@ -11,6 +11,7 @@ from RunParallel import RunParallel
 import threading, os, re, sys, datetime, shlex, socket, threading, time
 import paramiko
 import jinja2
+import shlex
 from multiprocessing.pool import ThreadPool
 from timeit import default_timer as clock
 
@@ -310,15 +311,23 @@ class RunHPC(RunParallel):
         if self.source_contents:
             submission_env['SOURCE_CONTENTS'] = self.source_contents
 
-        # The command to be ran. We're going to wrap this command in single quotes
-        # so that we don't bash evaluate anything, hence the replacement of a
-        # single quote. Yes, this truly is madness. But it looks like it works.
-        # Pro tip: don't ever have to run things in bash with complex syntax
-        # that is quite bash like.
+        # Get the unescaped command
         command = tester.getCommand(options)
+
+        # Parse out the mpi command from the command if we're running in apptainer.
+        # We do this before any of the other escaping
+        APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
+        apptainer_command_prefix = ''
+        if APPTAINER_CONTAINER:
+            mpi_command = self.parseMPICommand(command)
+            if mpi_command:
+                apptainer_command_prefix = mpi_command
+                command = command.replace(mpi_command, '')
+
+        # Replace newlines, clean up spaces, escape all shell commands
         command = command.replace('\n', ' ')
-        command = command.replace('"', "'")
-        command = command.replace("'", "\'\\'\'")
+        command = ' '.join(command.split())
+        command = shlex.quote(command)
 
         # Special logic for when we're running with apptainer, in which case
         # we need to manipulate the command like such
@@ -326,20 +335,9 @@ class RunHPC(RunParallel):
         # New command: <mpiexec ...> apptainer exec /path/to/image '</path/to/binary ...>'
         # This is also the reason why we have to form job_command_printable;
         # the extra quotes around </path/to/binary ...> need to be escaped.
-        APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
         if APPTAINER_CONTAINER:
-            # Separate out the MPI command
-            mpi_command = self.parseMPICommand(command)
-            # Add MPI command as the prefix and remove it from the base command
-            if mpi_command:
-                command_prefix = mpi_command
-                command = command.replace(mpi_command, '')
-            # No MPI command; nothing to do
-            else:
-                command_prefix = ''
-
-            job_command = command_prefix
-            job_command_printable = command_prefix
+            job_command = apptainer_command_prefix
+            job_command_printable = apptainer_command_prefix
 
             # The root filesystem path that we're in so that we can be sure to bind
             # it into the container, if not already set
@@ -354,15 +352,15 @@ class RunHPC(RunParallel):
             apptainer_command.append(APPTAINER_CONTAINER)
             apptainer_command = shlex.join(apptainer_command)
             # Append the apptainer command along with the command to be ran
-            job_command += f"{apptainer_command} '{command}'"
-            job_command_printable += f"{apptainer_command} \'\\'\'{command}\'\\'\'"
+            job_command += f"{apptainer_command} {command}"
+            job_command_printable += f"{apptainer_command} \'\\'\'{command[1:-1]}\'\\'\'"
 
             # Set that we're using apptainer
             submission_env['USING_APPTAINER'] = '1'
         # Not in apptainer, so we can just use the escaped command as is
         else:
-            job_command = f"'{command}'"
-            job_command_printable += f"\'\\'\'{command}\'\\'\'"
+            job_command = command
+            job_command_printable += f"\'\\'\'{command[1:-1]}\'\\'\'"
 
         submission_env['COMMAND'] = job_command
         submission_env['COMMAND_PRINTABLE'] = job_command_printable
