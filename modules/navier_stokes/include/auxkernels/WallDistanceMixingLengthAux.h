@@ -29,4 +29,7 @@ protected:
   const Moose::Functor<Real> & _von_karman_const;
   const Moose::Functor<Real> & _von_karman_const_0;
   const Moose::Functor<Real> & _delta;
+
+  /// Whether the variable being populated is a FV variable or not
+  const bool _fv;
 };

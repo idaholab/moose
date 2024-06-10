@@ -19,14 +19,22 @@ INSADSmagorinskyEddyViscosity::validParams()
   params.addParam<Real>("smagorinsky_constant", 0.18, "Value of Smagorinsky's constant to use");
   params.addParam<MaterialPropertyName>(
       "rho_name", "rho", "The name of the density material property");
+  params.addCoupledVar(
+      "mixing_length",
+      "Turbulent eddy mixing length. If this is not provided, then the product of the Smagorinsky "
+      "constant and the cube root of the element volume will be used instead.");
   return params;
 }
 
 INSADSmagorinskyEddyViscosity::INSADSmagorinskyEddyViscosity(const InputParameters & parameters)
   : ADVectorKernelGrad(parameters),
     _rho(getADMaterialProperty<Real>("rho_name")),
-    _smagorinsky_constant(getParam<Real>("smagorinsky_constant"))
+    _smagorinsky_constant(getParam<Real>("smagorinsky_constant")),
+    _mixing_length(isCoupled("mixing_length") ? &coupledValue("mixing_length") : nullptr)
 {
+  if (isParamSetByUser("smagorinsky_constant") && _mixing_length)
+    paramError("smagorinsky_constant",
+               "The Smagorinsky constant is not used if the mixing length is provided");
 }
 
 ADRealTensorValue
@@ -40,8 +48,9 @@ INSADSmagorinskyEddyViscosity::precomputeQpResidual()
       Utility::pow<2>(_grad_u[_qp](0, 1) + _grad_u[_qp](1, 0)) +
       Utility::pow<2>(_grad_u[_qp](1, 2) + _grad_u[_qp](2, 1)) + offset);
   constexpr Real one_third = 1.0 / 3.0;
-  return strain_rate_tensor_mag *
-         Utility::pow<2>(_smagorinsky_constant * std::pow(_current_elem_volume, one_third) /
-                         _current_elem->default_order()) *
-         _rho[_qp] * _grad_u[_qp];
+  const auto lc = _mixing_length
+                      ? (*_mixing_length)[_qp]
+                      : _smagorinsky_constant * std::pow(_current_elem_volume, one_third) /
+                            _current_elem->default_order();
+  return strain_rate_tensor_mag * Utility::pow<2>(lc) * _rho[_qp] * _grad_u[_qp];
 }

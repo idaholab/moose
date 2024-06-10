@@ -1,7 +1,7 @@
 # This input file tests inlet, wall, symmetry, and outflow boundary conditions
 # for a conservative weak form of the incompressible NS equations
 U_in = 1
-mu = 1
+mu = 1e-3
 rho = 1
 
 [Mesh]
@@ -38,6 +38,22 @@ rho = 1
   []
 []
 
+[AuxVariables]
+  [mixing_length]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [mixing_length]
+    type = WallDistanceMixingLengthAux
+    walls = 'top'
+    variable = mixing_length
+    execute_on = 'initial'
+  []
+[]
+
 [Kernels]
   [mass]
     type = INSADConservativeMass
@@ -52,6 +68,11 @@ rho = 1
   [momentum_viscous]
     type = INSADMomentumViscous
     variable = vel
+  []
+  [momentum_eddy]
+    type = INSADSmagorinskyEddyViscosity
+    variable = vel
+    mixing_length = mixing_length
   []
   [momentum_pressure]
     type = INSADMomentumPressure
@@ -156,7 +177,7 @@ rho = 1
 
 [Executioner]
   type = Steady
-  line_search = none
+  solve_type = NEWTON
 []
 
 [Outputs]

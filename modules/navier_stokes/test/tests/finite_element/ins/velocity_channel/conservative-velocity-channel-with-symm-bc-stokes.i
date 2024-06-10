@@ -1,5 +1,4 @@
 U_in = 1
-gamma = ${U_in}
 mu = 1
 rho = 1
 
@@ -47,7 +46,7 @@ rho = 1
     type = MassMatrix
     variable = p
     matrix_tags = 'mass'
-    density = ${fparse -1/(gamma + mu)}
+    density = ${fparse -1/mu}
   []
   [momentum_viscous]
     type = INSADMomentumViscous
@@ -58,11 +57,6 @@ rho = 1
     variable = vel
     pressure = p
     integrate_p_by_parts = true
-  []
-  [momentum_graddiv]
-    type = INSADMomentumGradDiv
-    variable = vel
-    gamma = ${gamma}
   []
 []
 
