@@ -26,13 +26,6 @@
     0.875 0.75 0
     0.875 0.875 0'
   []
-  [side_sets]
-    type = SideSetsFromNormalsGenerator
-    input = triangulate
-    new_boundary = ' top bottom left right'
-    normals = '0 1 0 0 -1 0 -1 0 0 1 0 0'
-    fixed_normal = true
-  []
 []
 
 [Problem]

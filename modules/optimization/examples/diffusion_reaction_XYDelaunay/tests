@@ -8,6 +8,7 @@
         type = Exodiff
         input = parameter_mesh.i
         exodiff = parameter_mesh_out.e
+        recover = false
         detail = 'creating a mesh defining parameter space using the XYDelaunayGenerator, '
       []
 
