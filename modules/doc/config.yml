@@ -206,13 +206,13 @@ Extensions:
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects
-    MooseDocs.extensions.tagging:
+    MooseDocs.extensions.source_tagging:
         active: True
         js_file: index-6fae072b.js
         landing_page: filter/index_framework.html
         automatic_keys:
-            - folder modules -6
-            - folder system -2
+            - module module
+            - system system
             - name_affix data_type Vector Array Tensor
             - name_affix discretization FV
     MooseDocs.extensions.algorithm:
