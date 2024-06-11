@@ -7,13 +7,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import urllib.parse
 from RunParallel import RunParallel
-import threading, os, re, sys, datetime, shlex, socket, threading, time
+import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib
 import paramiko
 import jinja2
-import shlex
 from multiprocessing.pool import ThreadPool
-from timeit import default_timer as clock
 
 class HPCJob:
     """
@@ -324,20 +323,24 @@ class RunHPC(RunParallel):
                 apptainer_command_prefix = mpi_command
                 command = command.replace(mpi_command, '')
 
-        # Replace newlines, clean up spaces, escape all shell commands
+        # Replace newlines, clean up spaces, and encode the command. We encode the
+        # command here to be able to pass it to a python script to run later without
+        # dealing with any substitution or evaluation within a shell. Thus, this is
+        # akin to the SubprocessRunner also running commands. It's a bit complicated,
+        # but I promise that it's much better than the alternative
         command = command.replace('\n', ' ')
         command = ' '.join(command.split())
-        command = shlex.quote(command)
+        command_encoded = urllib.parse.quote(command)
+
+        # Script used to decode the command as described above
+        hpc_run = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_run.py')
 
         # Special logic for when we're running with apptainer, in which case
         # we need to manipulate the command like such
         # Original command: <mpiexec ...> </path/to/binary ...>
         # New command: <mpiexec ...> apptainer exec /path/to/image '</path/to/binary ...>'
-        # This is also the reason why we have to form job_command_printable;
-        # the extra quotes around </path/to/binary ...> need to be escaped.
         if APPTAINER_CONTAINER:
             job_command = apptainer_command_prefix
-            job_command_printable = apptainer_command_prefix
 
             # The root filesystem path that we're in so that we can be sure to bind
             # it into the container, if not already set
@@ -351,19 +354,17 @@ class RunHPC(RunParallel):
                 apptainer_command.append('--no-home')
             apptainer_command.append(APPTAINER_CONTAINER)
             apptainer_command = shlex.join(apptainer_command)
+
             # Append the apptainer command along with the command to be ran
-            job_command += f"{apptainer_command} {command}"
-            job_command_printable += f"{apptainer_command} \'\\'\'{command[1:-1]}\'\\'\'"
+            job_command += f"{apptainer_command} {hpc_run} {command_encoded}"
 
             # Set that we're using apptainer
             submission_env['USING_APPTAINER'] = '1'
         # Not in apptainer, so we can just use the escaped command as is
         else:
-            job_command = command
-            job_command_printable += f"\'\\'\'{command[1:-1]}\'\\'\'"
+            job_command = f'{hpc_run} {command_encoded}'
 
         submission_env['COMMAND'] = job_command
-        submission_env['COMMAND_PRINTABLE'] = job_command_printable
 
         # The output files that we're expected to generate so that the
         # HPC job can add a terminator for them so that we can verify

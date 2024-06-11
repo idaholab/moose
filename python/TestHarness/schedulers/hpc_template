@@ -35,7 +35,6 @@ echo "TestHarness {{ SCHEDULER_NAME }} job on $(hostname) in job ${{ JOB_ID_VARI
 echo "Time: $(date)"
 echo 'Test: {{ TEST_SPEC }}:{{ TEST_NAME }}'
 echo 'Directory: {{ CWD }}'
-echo 'Command: {{ COMMAND_PRINTABLE }}'
 echo 'Submitted hostname: {{ SUBMITTED_HOSTNAME }}'
 echo 'Submission script: {{ SUBMISSION_SCRIPT }}'
 echo 'Output: {{ OUTPUT }}'
