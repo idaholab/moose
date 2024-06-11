@@ -121,7 +121,7 @@ where $\sigma$ is the Stefan-Boltzmann constant.
 The convection heat flux is computed as
 
 !equation
-q^\text{conv}_{z,\theta} = h^\text{gap}_{z,\theta} (T_z^4 - T_{z,\theta}^4) \,,
+q^\text{conv}_{z,\theta} = h^\text{gap}_{z,\theta} (T_z - T_{z,\theta}) \,,
 
 where the gap heat transfer coefficient is evaluated at the gap temperature:
 
