@@ -1,6 +1,6 @@
 [Tests]
   design = 'HSCoupler2D3D.md'
-  issues = '#23059'
+  issues = '#23059 #27830'
 
   [check_input_mesh]
     type = RunApp
@@ -11,10 +11,36 @@
   []
 
   [test]
-    type = Exodiff
-    input = hs_coupler_2d3d.i
-    exodiff = hs_coupler_2d3d_out.e
-    requirement = 'The system shall couple a 2D heat structure with a 3D heat structure.'
+    requirement = 'The system shall couple a 2D heat structure with a 3D heat structure'
+
+    [conduction_plus_radiation]
+      type = Exodiff
+      input = hs_coupler_2d3d.i
+      cli_args = "
+        Components/hs_coupler/include_radiation=true
+        Components/hs_coupler/emissivity_2d=0.4
+        Components/hs_coupler/emissivity_3d=0.6
+        Outputs/file_base=conduction_plus_radiation"
+      exodiff = conduction_plus_radiation.e
+      detail = 'using conduction and radiation.'
+    []
+    [conduction_only]
+      type = Exodiff
+      input = hs_coupler_2d3d.i
+      cli_args = 'Outputs/file_base=conduction_only'
+      exodiff = conduction_only.e
+      detail = 'using conduction only.'
+    []
+    [convection_only]
+      type = Exodiff
+      input = hs_coupler_2d3d.i
+      cli_args = "
+        Components/hs_coupler/gap_thermal_conductivity=0
+        Components/hs_coupler/gap_htc=100
+        Outputs/file_base=convection_only"
+      exodiff = convection_only.e
+      detail = 'using convection only.'
+    []
   []
 
   [error_reporting]
@@ -69,6 +95,20 @@
       cli_args = 'Components/hs_coupler/gap_thickness=0'
       expect_err = 'Gap thickness must be > 0.'
       detail = 'If the gap thickness is less than or equal to zero.'
+    []
+    [radiation_missing_emissivities]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs_coupler/include_radiation=true'
+      expect_err = "If 'include_radiation' is 'true', then 'emissivity_2d' and 'emissivity_3d' are required."
+      detail = 'If radiation is specified to be included but the emissivities are not provided.'
+    []
+    [no_radiation_but_provided_emissivity]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs_coupler/emissivity_2d=0.4'
+      expect_err = "If 'include_radiation' is 'false', then neither 'emissivity_2d' nor 'emissivity_3d' can be specified."
+      detail = 'If radiation is specified to not be included but an emissivity is provided.'
     []
   []
 []

@@ -23,17 +23,21 @@ HSCoupler2D3DUserObject::validParams()
 
   params.addRequiredCoupledVar("temperature", "Temperature");
   params.addRequiredParam<Real>("radius_2d", "Radius of the 2D heat structure boundary [m]");
-  params.addRequiredParam<FunctionName>(
+  params.addParam<FunctionName>(
       "emissivity_2d",
+      0,
       "Emissivity of the 2D heat structure boundary as a function of temperature [K]");
-  params.addRequiredParam<FunctionName>(
+  params.addParam<FunctionName>(
       "emissivity_3d",
+      0,
       "Emissivity of the 3D heat structure boundary as a function of temperature [K]");
   params.addRequiredParam<FunctionName>("gap_thickness",
                                         "Gap thickness [m] as a function of temperature [K]");
   params.addRequiredParam<FunctionName>(
       "gap_thermal_conductivity",
       "Gap thermal conductivity [W/(m-K)] as a function of temperature [K]");
+  params.addParam<FunctionName>(
+      "gap_htc", 0, "Gap heat transfer coefficient [W/(m^2-K)] as a function of temperature [K]");
   params.addRequiredParam<UserObjectName>(
       "temperature_2d_uo",
       "StoreVariableByElemIDSideUserObject containing the temperature values on the 2D boundary");
@@ -51,8 +55,10 @@ HSCoupler2D3DUserObject::HSCoupler2D3DUserObject(const InputParameters & paramet
     _r_2d(getParam<Real>("radius_2d")),
     _emissivity_2d_fn(getFunction("emissivity_2d")),
     _emissivity_3d_fn(getFunction("emissivity_3d")),
+    _include_radiation(isParamSetByUser("emissivity_2d") && isParamSetByUser("emissivity_3d")),
     _gap_thickness_fn(getFunction("gap_thickness")),
     _k_gap_fn(getFunction("gap_thermal_conductivity")),
+    _htc_gap_fn(getFunction("gap_htc")),
     _temperature_2d_uo(getUserObject<StoreVariableByElemIDSideUserObject>("temperature_2d_uo")),
     _mesh_alignment(*getParam<MeshAlignment2D3D *>("mesh_alignment"))
 {
@@ -87,8 +93,6 @@ HSCoupler2D3DUserObject::execute()
     const auto & T_3d = _T_3d[qp_3d];
     const auto T_gap = 0.5 * (T_2d + T_3d);
 
-    const auto emissivity_2d = evaluateTemperatureFunction(_emissivity_2d_fn, T_2d);
-    const auto emissivity_3d = evaluateTemperatureFunction(_emissivity_3d_fn, T_3d);
     const auto gap_thickness = evaluateTemperatureFunction(_gap_thickness_fn, T_gap);
     const auto k_gap = evaluateTemperatureFunction(_k_gap_fn, T_gap);
 
@@ -96,13 +100,22 @@ HSCoupler2D3DUserObject::execute()
       mooseError("Gap thickness must be > 0.");
 
     const auto r_3d = _r_2d + gap_thickness;
-    const auto r_gap = 0.5 * (_r_2d + r_3d);
 
     const auto heat_flux_cond =
         HeatTransferModels::cylindricalGapConductionHeatFlux(k_gap, _r_2d, r_3d, T_2d, T_3d);
-    const auto heat_flux_rad = HeatTransferModels::cylindricalGapRadiationHeatFlux(
-        _r_2d, r_3d, emissivity_2d, emissivity_3d, T_2d, T_3d);
-    const auto heat_flux = heat_flux_cond + heat_flux_rad;
+    auto heat_flux = heat_flux_cond;
+
+    const auto htc = evaluateTemperatureFunction(_htc_gap_fn, T_gap);
+    heat_flux += htc * (T_2d - T_3d);
+
+    if (_include_radiation)
+    {
+      const auto emissivity_2d = evaluateTemperatureFunction(_emissivity_2d_fn, T_2d);
+      const auto emissivity_3d = evaluateTemperatureFunction(_emissivity_3d_fn, T_3d);
+
+      heat_flux += HeatTransferModels::cylindricalGapRadiationHeatFlux(
+          _r_2d, r_3d, emissivity_2d, emissivity_3d, T_2d, T_3d);
+    }
 
     heat_flux_3d[qp_3d] = heat_flux;
     heat_flux_2d[qp_2d] -= _JxW[qp_3d] * _coord[qp_3d] * heat_flux / area_2d[qp_2d];
