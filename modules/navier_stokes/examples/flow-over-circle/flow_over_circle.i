@@ -1,4 +1,6 @@
+# Numerical schemes
 velocity_interp_method = 'rc'
+advected_interp_method = 'average'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'

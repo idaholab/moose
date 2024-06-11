@@ -34,6 +34,3 @@ rho = 1
 
 # Boundary conditions
 inlet_velocity = 1.5
-
-# Numerical schemes
-advected_interp_method = 'average'

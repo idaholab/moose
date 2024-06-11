@@ -1,3 +1,5 @@
+advected_interp_method = 'average'
+
 [Modules]
   [NavierStokesFV]
     compressibility = incompressible

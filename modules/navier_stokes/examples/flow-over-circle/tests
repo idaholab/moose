@@ -5,7 +5,7 @@
     type = 'CSVDiff'
     input = 'header.i mesh.i flow_over_circle.i executioner_postprocessor.i'
     csvdiff = 'flow_over_circle_out.csv'
-    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the finite volume method'
+    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the finite volume method.'
     cli_args = 'refinement=2 Executioner/end_time=2e-3 Outputs/file_base=flow_over_circle_out'
     mesh_mode = replicated
     valgrind = 'none'
@@ -14,9 +14,19 @@
     type = 'CSVDiff'
     input = 'header.i mesh.i flow_over_circle-action.i executioner_postprocessor.i'
     csvdiff = 'flow_over_circle-action_out.csv'
-    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the NSFVAction syntax'
+    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the NSFVAction syntax.'
     cli_args = 'refinement=2 Executioner/end_time=2e-3 Outputs/file_base=flow_over_circle-action_out'
     mesh_mode = replicated
     valgrind = 'none'
+  []
+  [vortex_shedding_fe]
+    type = 'CSVDiff'
+    input = 'header.i mesh.i flow-over-circle-fe.i'
+    csvdiff = 'flow-over-circle-fe_out.csv'
+    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the finite element method.'
+    cli_args = 'refinement=1 Executioner/end_time=2e-3 -options_file harmonic.rc'
+    mesh_mode = replicated
+    valgrind = 'none'
+    min_parallel = 2
   []
 []

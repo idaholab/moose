@@ -1,0 +1,78 @@
+-prefix_push fieldsplit_others_
+    -ksp_type fgmres
+    -ksp_max_it 100
+    -ksp_gmres_restart 100
+    -ksp_converged_reason
+    -pc_type fieldsplit
+    -pc_fieldsplit_type schur
+    -pc_fieldsplit_schur_precondition self
+    -pc_fieldsplit_schur_fact_type full
+    -prefix_push fieldsplit_u_
+        # -ksp_converged_reason
+        -ksp_type fgmres
+        -ksp_rtol 1.0E-4
+        -pc_type hpddm
+        -prefix_push pc_hpddm_
+            -harmonic_overlap 1
+            -define_subdomains
+            -prefix_push levels_1_
+                -pc_asm_type restrict
+                -svd_nsv 100
+                -st_share_sub_ksp
+                -svd_type lanczos
+                -svd_max_it 100
+                -svd_tol 1.0E-2
+                -svd_relative_threshold 0.001
+                -prefix_push sub_
+                    -pc_type lu
+                    -pc_factor_mat_solver_type mumps
+                -prefix_pop
+            -prefix_pop
+            -prefix_push coarse_
+                -p 1
+                -pc_type lu
+                -mat_type aij
+                -mat_filter 1.0E-6
+                -pc_factor_mat_solver_type mumps
+                # -mat_view ::ascii_info
+                -correction deflated
+            -prefix_pop
+        -prefix_pop
+    -prefix_pop
+    -prefix_push fieldsplit_p_
+        -ksp_type fgmres
+        -ksp_rtol 1.0E-1
+        -ksp_max_it 100
+        -ksp_gmres_restart 100
+        -ksp_converged_reason
+        -pc_type hpddm
+        -prefix_push pc_hpddm_
+            -has_neumann
+            -define_subdomains
+            -ksp_type fgmres
+            -ksp_rtol 1.0E-1
+            -ksp_max_it 100
+            -ksp_gmres_restart 100
+            -schur_precondition geneo
+            -prefix_push levels_1_
+                -pc_asm_type none
+                -eps_nev 20
+                # -eps_threshold 0.4
+                -st_share_sub_ksp
+                -eps_gen_non_hermitian
+                -prefix_push sub_
+                    -pc_type lu
+                    -pc_factor_mat_solver_type mumps
+                -prefix_pop
+            -prefix_pop
+            -prefix_push coarse_
+                -p 1
+                -pc_type lu
+                -mat_type aij
+                -pc_factor_mat_solver_type mumps
+                # -mat_view ::ascii_info
+                -correction balanced
+            -prefix_pop
+        -prefix_pop
+    -prefix_pop
+-prefix_pop
