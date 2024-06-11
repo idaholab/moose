@@ -81,7 +81,7 @@ CentralDifference::computeTimeDerivatives()
 
   // Computing derivatives
   computeTimeDerivativeHelper(u_dot, u_dotdot, _solution_old, _solution_older);
-
+ 
   // make sure _u_dotdot and _u_dot are in good state
   u_dotdot.close();
   u_dot.close();
@@ -113,4 +113,63 @@ CentralDifference::computeTimeDerivatives()
     u_dot_factor *= 1.0 / (2.0 * _dt);
     u_dot_factor.close();
   }
+}
+
+template <typename T, typename T2, typename T3, typename T4>
+void
+CentralDifference::computeTimeDerivativeHelper(T & u_dot,
+                                               T2 & u_dotdot,
+                                               const T3 & u_old,
+                                               const T4 & u_older) const
+{
+  if (_t_step!=1){
+    // computing first derivative
+    // using the Central Difference method
+    // u_dot_old = (first_term - second_term) / 2 / dt
+    //       first_term = u
+    //      second_term = u_older
+    u_dot -= u_older; // 'older than older' solution
+    u_dot *= 1.0 / (2.0 * _dt);
+
+    // computing second derivative
+    // using the Central Difference method
+    // u_dotdot_old = (first_term - second_term + third_term) / dt / dt
+    //       first_term = u
+    //      second_term = 2 * u_old
+    //       third_term = u_older
+    u_dotdot -= u_old;
+    u_dotdot -= u_old;
+    u_dotdot += u_older;
+    u_dotdot *= 1.0 / (_dt * _dt);
+  }
+  else if (_t_step==1) { // overriding derivatives in case there were initial conditions
+
+    auto & u_older_from_IC = *_sys.solutionUDot();
+    u_older_from_IC = *_solution;
+    u_older_from_IC.add(-2*_dt*100);
+
+    auto & u_old_from_IC = *_sys.solutionUDot();
+    u_old_from_IC = *_solution;
+    u_old_from_IC.add(-1*_dt*100);
+
+    // computing first derivative
+    // using the Central Difference method
+    // u_dot_old = (first_term - second_term) / 2 / dt
+    //       first_term = u
+    //      second_term = u_older
+    u_dot -= u_older_from_IC; // 'older than older' solution
+    u_dot *= 1.0 / (2.0 * _dt);
+
+    // computing second derivative
+    // using the Central Difference method
+    // u_dotdot_old = (first_term - second_term + third_term) / dt / dt
+    //       first_term = u
+    //      second_term = 2 * u_old
+    //       third_term = u_older
+    u_dotdot -= u_old_from_IC;
+    u_dotdot -= u_old_from_IC;
+    u_dotdot += u_older_from_IC;
+    u_dotdot *= 1.0 / (_dt * _dt);
+  }
+  
 }
