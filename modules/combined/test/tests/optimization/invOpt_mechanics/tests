@@ -1,7 +1,7 @@
 [Tests]
-  issues = '#21885'
+  issues = '#21885 #27807'
   design = 'InvOptTheory.md'
-  requirement = "The system shall invert for a mechanical load using a Hessian based optimimization"
+  requirement = "The system shall invert for a mechanical load "
   [hessian]
     type = CSVDiff
     rel_err = 1e-3
@@ -11,5 +11,17 @@
     max_threads = 1
     # steady solve
     recover = false
+    detail = 'using a Hessian based optimimization,'
+  []
+  [both_disp]
+    type = CSVDiff
+    rel_err = 1e-5
+    abs_zero = 1e-6
+    input = main_auto_adjoint.i
+    csvdiff = main_auto_adjoint_out_OptimizationReporter_0001.csv
+    max_threads = 1
+    # steady solve
+    recover = false
+    detail = 'using both displacement measurement points.'
   []
 []
