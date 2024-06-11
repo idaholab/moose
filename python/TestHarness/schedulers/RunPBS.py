@@ -48,11 +48,13 @@ class RunPBS(RunHPC):
             # If we were running but now we're done, we're not running anymore
             if exit_code is not None:
                 job = hpc_job.job
-                # Negative exit code, means PBS set a reason
                 if exit_code < 0:
                     name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
-                    job.setStatus(job.error, f'PBS ERROR: {name}')
-                    job.appendOutput(util.outputHeader(f'PBS terminated job with reason: {reason}'))
+                    if name == 'JOB_EXEC_KILL_WALLTIME':
+                        job.setStatus(job.timeout, 'TIMEOUT')
+                    else:
+                        job.setStatus(job.error, f'PBS ERROR: {name}')
+                        job.appendOutput(util.outputHeader(f'PBS terminated job with reason: {reason}'))
                 # Job was killed with a signal
                 elif exit_code >= 128:
                     job.setStatus(job.error, f'PBS JOB KILLED')
