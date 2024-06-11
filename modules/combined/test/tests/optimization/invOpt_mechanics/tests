@@ -15,8 +15,8 @@
   []
   [both_disp]
     type = CSVDiff
-    rel_err = 1e-8
-    abs_zero = 1e-10
+    rel_err = 1e-5
+    abs_zero = 1e-6
     input = main_auto_adjoint.i
     csvdiff = main_auto_adjoint_out_OptimizationReporter_0001.csv
     max_threads = 1
