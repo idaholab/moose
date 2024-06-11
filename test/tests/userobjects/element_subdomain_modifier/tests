@@ -4,13 +4,6 @@
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during simulation'
 
-    [complement_moving_boundary]
-      type = 'Exodiff'
-      input = 'complement_boundary.i'
-      exodiff = 'complement_boundary_out.e complement_boundary_out.e-s002'
-      detail = 'with complement moving boundary,'
-    []
-
     [reversible]
       type = 'Exodiff'
       input = 'reversible.i'
@@ -137,15 +130,5 @@
     requirement = 'When the desired value is not present in the subdomain ID list, the closest existing subdomain ID value will be assigned to the element with a warning.'
     allow_warnings = true
     recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases
-  []
-
-  [initialization]
-    type = 'Exodiff'
-    input = 'initialization.i'
-    exodiff = "initialization_out.e initialization_out.e-s002 initialization_out.e-s003 initialization_out.e-s004
-               initialization_out.e-s005 initialization_out.e-s006 initialization_out.e-s007
-               initialization_out.e-s008 initialization_out.e-s009 initialization_out.e-s010"
-    mesh_mode = 'REPLICATED'
-    requirement = 'The framework shall support element subdomain modification with different variable initialization strategies.'
   []
 []

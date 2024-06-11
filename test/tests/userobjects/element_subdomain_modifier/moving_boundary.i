@@ -67,7 +67,10 @@
     threshold = 0
     subdomain_id = 1
     active_subdomains = 1
-    moving_boundary_name = 'moving'
+    moving_boundaries = "moving
+                         moving"
+    moving_boundary_subdomain_pairs = "1 2;
+                                       1"
     execute_on = 'TIMESTEP_BEGIN'
   []
 []
