@@ -13,6 +13,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'gen'
     block_id = 1
+    block_name = 'left'
     bottom_left = '0 0 0'
     top_right = '0.25 1 1'
   []
@@ -20,8 +21,16 @@
     type = SubdomainBoundingBoxGenerator
     input = 'left'
     block_id = 2
+    block_name = 'right'
     bottom_left = '0.25 0 0'
     top_right = '1 1 1'
+  []
+  [moving_boundary]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = 'right'
+    new_boundary = 'moving_boundary'
+    primary_block = 'left'
+    paired_block = 'right'
   []
 []
 
@@ -33,7 +42,8 @@
     threshold = 0
     subdomain_id = 1
     complement_subdomain_id = 2
-    moving_boundary_name = moving_boundary
+    moving_boundaries = 'moving_boundary'
+    moving_boundary_subdomain_pairs = 'left right'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []

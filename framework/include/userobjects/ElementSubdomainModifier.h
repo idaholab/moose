@@ -31,11 +31,16 @@ protected:
   /// Compute the subdomain ID of the current element
   virtual SubdomainID computeSubdomainID() = 0;
 
+  bool subdomainIsActive(SubdomainID id) const;
+
   /// Range of activated elements
   ConstElemRange & activatedElemRange(bool displaced = false);
 
   /// Range of activated boundary nodes
   ConstBndNodeRange & activatedBndNodeRange(bool displaced = false);
+
+  /// Initialize internal data for moving boundary definitions
+  virtual void initializeMovingBoundaries();
 
   /// Pointer to the displaced problem
   DisplacedProblem * _displaced_problem;
@@ -49,51 +54,83 @@ protected:
   /// Auxiliary system
   AuxiliarySystem & _aux_sys;
 
-private:
-  /// Create moving boundaries
-  void createMovingBoundaries(MooseMesh & mesh);
-
-  bool nodeIsNewlyActivated(dof_id_type node_id) const;
-
-  /// Update the moving boundary (both the underlying sideset and nodeset)
-  void updateMovingBoundaryInfo(MooseMesh & mesh);
-
-  /// Change the subdomain ID of all ancestor elements
-  void setAncestorsSubdomainIDs(const SubdomainID & subdomain_id, const dof_id_type & elem_id);
-
-  /// Elements on the undisplaced mesh whose subdomain IDs have changed
-  std::unordered_set<dof_id_type> _moved_elems;
-
   /// Newly activated elements
   std::unordered_set<dof_id_type> _activated_elems;
 
   /// Newly activated nodes
   std::unordered_set<dof_id_type> _activated_nodes;
 
-  // @{ For variable initialization
   /// The active subdomains on which the problem is being solved
   const std::vector<SubdomainID> _active_subdomains;
+
   /// Variables to initialize
   const std::vector<VariableName> _init_vars;
+
+  const dof_id_type _dbg_elem_id;
+
+  /// Boundary names associated with each moving boundary ID
+  std::unordered_map<BoundaryID, BoundaryName> _moving_boundary_names;
+
+  /// Moving boundaries associated with each subdomain pair
+  typedef std::pair<SubdomainID, SubdomainID> SubdomainPair;
+  std::unordered_map<SubdomainPair, BoundaryID> _moving_boundaries;
+
+  /**
+   * Element subdomain changes for the current execution are stored in this map
+   *
+   * Key of this map is the element ID, first element of the value is the subdomain ID this element
+   * is moving _from_, and the second element of the value is the subdomain ID this element is
+   * moving _to_.
+   */
+  std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> _moved_elems;
+
+private:
+  /// Create moving boundaries
+  void createMovingBoundaries(MooseMesh & mesh);
+
+  /// Determine if a node is newly activated
+  bool nodeIsNewlyActivated(dof_id_type node_id) const;
+
+  void applySubdomainChanges(MooseMesh & mesh);
+
+  /// Change the subdomain ID of all ancestor elements
+  void setAncestorsSubdomainIDs(const SubdomainID & subdomain_id, const dof_id_type & elem_id);
+
+  void removeInactiveMovingBoundary(MooseMesh & mesh);
+
+  void gatherMovingBoundaryChanges();
+
+  void gatherMovingBoundaryChangesHelper(const Elem * elem,
+                                         const Elem * neigh,
+                                         SubdomainID to_subdomain);
+
+  void applyMovingBoundaryChanges(MooseMesh & mesh);
+
+  void applyIC(bool displaced);
+
+  void initElementStatefulProps(bool displaced);
+
+  /// Element sides to be added
+  std::unordered_map<dof_id_type, std::unordered_map<unsigned short, BoundaryID>>
+      _add_element_sides;
+
+  /// Element sides to be removed
+  std::unordered_map<dof_id_type, std::unordered_map<unsigned short, BoundaryID>>
+      _remove_element_sides;
+
+  /// Neighbor sides to be added
+  std::unordered_map<dof_id_type, std::unordered_map<unsigned short, BoundaryID>>
+      _add_neighbor_sides;
+
+  /// Neighbor sides to be removed
+  std::unordered_map<dof_id_type, std::unordered_map<unsigned short, BoundaryID>>
+      _remove_neighbor_sides;
+
   /// Range of activated elements
   std::unique_ptr<ConstElemRange> _activated_elem_range;
   std::unique_ptr<ConstElemRange> _activated_displaced_elem_range;
+
   /// Range of activated boundary nodes
   std::unique_ptr<ConstBndNodeRange> _activated_bnd_node_range;
   std::unique_ptr<ConstBndNodeRange> _activated_displaced_bnd_node_range;
-  // @}
-
-  // @{ For moving boundary
-  const std::vector<BoundaryName> _moving_boundary_names;
-  struct MovingBoundary
-  {
-    BoundaryName name;
-    BoundaryID id;
-    std::vector<SubdomainID> subdomains;
-  };
-  std::vector<MovingBoundary> _moving_boundaries;
-  // @}
-
-  /// Any subdomain change is stored in this map and only applied in finalize to avoid messing up other UOs
-  std::unordered_map<dof_id_type, SubdomainID> _moved_elems;
 };
