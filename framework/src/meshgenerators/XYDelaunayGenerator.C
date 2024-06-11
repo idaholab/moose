@@ -48,10 +48,14 @@ XYDelaunayGenerator::validParams()
   params.addParam<SubdomainName>("output_subdomain_name",
                                  "Subdomain name to set on new triangles.");
 
-  params.addParam<BoundaryName>("output_boundary",
-                                "Boundary name to set on new outer boundary.  Default ID 0.");
+  params.addParam<BoundaryName>(
+      "output_boundary",
+      "Boundary name to set on new outer boundary.  Default ID: 0 if no hole meshes are stitched; "
+      "or maximum boundary ID of all the stitched hole meshes + 1.");
   params.addParam<std::vector<BoundaryName>>(
-      "hole_boundaries", "Boundary names to set on holes.  Default IDs are numbered up from 1.");
+      "hole_boundaries",
+      "Boundary names to set on holes.  Default IDs are numbered up from 1 if no hole meshes are "
+      "stitched; or from maximum boundary ID of all the stitched hole meshes + 2.");
 
   params.addParam<bool>(
       "verify_holes",
@@ -354,14 +358,33 @@ XYDelaunayGenerator::generate()
   // be sure it isn't also already in use on the hole's mesh and so we
   // won't be able to safely clear it afterwards.
   const boundary_id_type end_bcid = hole_ptrs.size() + 1;
-  boundary_id_type new_hole_bcid = end_bcid;
+
+  // For the hole meshes that need to be stitched, we would like to make sure the hole boundary ids
+  // and output boundary id are not conflicting with the existing boundary ids of the hole meshes to
+  // be stitched.
+  BoundaryID free_boundary_id = 0;
+  if (_stitch_holes.size())
+  {
+    for (auto hole_i : index_range(hole_ptrs))
+    {
+      if (_stitch_holes[hole_i])
+      {
+        free_boundary_id =
+            std::max(free_boundary_id, MooseMeshUtils::getNextFreeBoundaryID(*hole_ptrs[hole_i]));
+        hole_ptrs[hole_i]->comm().max(free_boundary_id);
+      }
+    }
+    for (auto h : index_range(hole_ptrs))
+      libMesh::MeshTools::Modification::change_boundary_id(*mesh, h + 1, h + 1 + free_boundary_id);
+  }
+  boundary_id_type new_hole_bcid = end_bcid + free_boundary_id;
 
   // We might be overriding the default bcid numbers.  We have to be
   // careful about how we renumber, though.  We pick unused temporary
   // numbers because e.g. "0->2, 2->0" is impossible to do
   // sequentially, but "0->N, 2->N+2, N->2, N+2->0" works.
-  if (isParamValid("output_boundary"))
-    libMesh::MeshTools::Modification::change_boundary_id(*mesh, 0, end_bcid);
+  libMesh::MeshTools::Modification::change_boundary_id(
+      *mesh, 0, (isParamValid("output_boundary") ? end_bcid : 0) + free_boundary_id);
 
   if (isParamValid("hole_boundaries"))
   {
@@ -372,12 +395,13 @@ XYDelaunayGenerator::generate()
       paramError("hole_boundary_ids", "Need one hole_boundary_ids entry per hole, if specified.");
 
     for (auto h : index_range(hole_ptrs))
-      libMesh::MeshTools::Modification::change_boundary_id(*mesh, h + 1, h + 1 + end_bcid);
+      libMesh::MeshTools::Modification::change_boundary_id(
+          *mesh, h + 1 + free_boundary_id, h + 1 + free_boundary_id + end_bcid);
 
     for (auto h : index_range(hole_ptrs))
     {
       libMesh::MeshTools::Modification::change_boundary_id(
-          *mesh, h + 1 + end_bcid, hole_boundary_ids[h]);
+          *mesh, h + 1 + free_boundary_id + end_bcid, hole_boundary_ids[h]);
       mesh->get_boundary_info().sideset_name(hole_boundary_ids[h]) = hole_boundaries[h];
       new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(hole_boundary_ids[h] + 1));
     }
@@ -389,7 +413,8 @@ XYDelaunayGenerator::generate()
     const std::vector<BoundaryID> output_boundary_id =
         MooseMeshUtils::getBoundaryIDs(*mesh, {output_boundary}, true);
 
-    libMesh::MeshTools::Modification::change_boundary_id(*mesh, end_bcid, output_boundary_id[0]);
+    libMesh::MeshTools::Modification::change_boundary_id(
+        *mesh, end_bcid + free_boundary_id, output_boundary_id[0]);
     mesh->get_boundary_info().sideset_name(output_boundary_id[0]) = output_boundary;
 
     new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(output_boundary_id[0] + 1));

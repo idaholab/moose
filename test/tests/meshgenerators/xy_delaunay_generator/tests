@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYDelaunayGenerator.md'
-  issues = '#20192 #26776 #27545'
+  issues = '#20192 #26776 #27545 #27828'
   [xydelaunay]
     requirement = "The system shall have the capability of triangulating a polyline boundary"
     [basic]
@@ -73,6 +73,7 @@
       cli_args = 'Mesh/final_generator=triang
                   --mesh-only'
       exodiff = 'xydelaunay_stitching_in.e'
+      exodiff_opts = '-pedantic'
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh"
     []
