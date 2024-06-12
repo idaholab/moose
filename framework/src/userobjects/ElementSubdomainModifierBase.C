@@ -287,6 +287,13 @@ ElementSubdomainModifierBase::applyMovingBoundaryChanges(MooseMesh & mesh)
 {
   auto & bnd_info = mesh.getMesh().get_boundary_info();
 
+  // Remove all boundary nodes from the previous moving boundaries
+  auto nodesets = bnd_info.get_nodeset_map();
+  for (const auto & [node_id, bnd] : nodesets)
+    if (_moving_boundary_names.count(bnd))
+      bnd_info.remove_node(node_id, bnd);
+
+  // Keep track of ghost element changes
   std::unordered_map<processor_id_type,
                      std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>>>
       add_ghost_sides, remove_ghost_sides;
