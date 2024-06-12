@@ -228,6 +228,14 @@
   []
   [error]
     requirement = "The system shall throw an error if "
+    [err_3d_input]
+      type = 'RunException'
+      input = 'revolve_2d.i'
+      cli_args = '--mesh-only err_revolve_2d.e 
+                  Mesh/gmg/dim=3'
+      expect_err = 'This mesh generator only works for 1D and 2D input meshes.'
+      detail = "if input mesh has an inappropriate dimension."
+    []
     [err_1d_nonverticle]
       type = 'RunException'
       input = 'revolve_1d.i'
@@ -244,13 +252,21 @@
       expect_err = 'The input mesh is either across the axis or overlapped with the axis'
       detail = "if the input 1D mesh has its centroid overlapped with the rotation axis."
     []
-    [err_input_across_axis]
+    [err_1d_input_across_axis]
       type = 'RunException'
       input = 'revolve_1d.i'
       cli_args = '--mesh-only err_revolve_1d.e 
                   Mesh/rg/axis_point="0.3 0.0 0.0"'
       expect_err = 'The input mesh is across the axis'
       detail = "if the input 1D mesh is across the rotation axis."
+    []
+    [err_2d_input_across_axis]
+      type = 'RunException'
+      input = 'revolve_2d.i'
+      cli_args = '--mesh-only err_revolve_2d.e 
+                  Mesh/rg/axis_point="0.3 0.0 0.0"'
+      expect_err = 'The input mesh is across the axis'
+      detail = "if the input 2D mesh is across the rotation axis."
     []
     [err_input_off_plane]
       type = 'RunException'

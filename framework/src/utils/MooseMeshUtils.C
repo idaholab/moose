@@ -499,26 +499,29 @@ extraElemIntegerSwapParametersProcessor(
     const unsigned int num_sections,
     const unsigned int num_integers,
     const std::vector<std::vector<std::vector<dof_id_type>>> & elem_integers_swaps,
-    std::vector<std::unordered_map<unsigned int, unsigned int>> & elem_integers_swap_pairs)
+    std::vector<std::unordered_map<dof_id_type, dof_id_type>> & elem_integers_swap_pairs)
 {
-  elem_integers_swap_pairs.resize(num_sections * num_integers);
+  elem_integers_swap_pairs.reserve(num_sections * num_integers);
   for (const auto i : make_range(num_integers))
   {
-    for (const auto j : make_range(num_sections))
+    const auto & elem_integer_swaps = elem_integers_swaps[i];
+    std::vector<std::unordered_map<dof_id_type, dof_id_type>> elem_integer_swap_pairs;
+    try
     {
-      const auto & extra_swaps = elem_integers_swaps[i][j];
-      auto & extra_swap_pairs = elem_integers_swap_pairs[i * num_sections + j];
-
-      if (extra_swaps.size() % 2)
-        throw MooseException("Row ",
-                             i * num_sections + j + 1,
-                             " of elem_integers_swaps in ",
-                             class_name,
-                             " does not contain an even number of entries! Num entries: ",
-                             extra_swaps.size());
-      for (unsigned int k = 0; k < extra_swaps.size(); k += 2)
-        extra_swap_pairs[extra_swaps[k]] = extra_swaps[k + 1];
+      MooseMeshUtils::idSwapParametersProcessor(class_name,
+                                                "elem_integers_swaps",
+                                                elem_integer_swaps,
+                                                elem_integer_swap_pairs,
+                                                i * num_sections);
     }
+    catch (const MooseException & e)
+    {
+      throw MooseException(e.what());
+    }
+
+    elem_integers_swap_pairs.insert(elem_integers_swap_pairs.end(),
+                                    elem_integer_swap_pairs.begin(),
+                                    elem_integer_swap_pairs.end());
   }
 }
 }

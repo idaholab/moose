@@ -331,13 +331,16 @@ void swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2
  * @param id_name name of the parameter to be swapped used for exception messages
  * @param id_swaps vector of vectors of the ids to be swapped
  * @param id_swap_pairs vector of maps of the swapped pairs
+ * @param row_index_shift shift to be applied to the row index in the exception messages (useful
+ * when this method is utilized to process a fraction of a long vector)
  */
 template <typename T>
 void
 idSwapParametersProcessor(const std::string & class_name,
                           const std::string & id_name,
                           const std::vector<std::vector<T>> & id_swaps,
-                          std::vector<std::unordered_map<T, T>> & id_swap_pairs)
+                          std::vector<std::unordered_map<T, T>> & id_swap_pairs,
+                          const unsigned int row_index_shift = 0)
 {
   id_swap_pairs.resize(id_swaps.size());
   for (const auto i : index_range(id_swaps))
@@ -347,7 +350,7 @@ idSwapParametersProcessor(const std::string & class_name,
 
     if (swaps.size() % 2)
       throw MooseException("Row ",
-                           i + 1,
+                           row_index_shift + i + 1,
                            " of ",
                            id_name,
                            " in ",
@@ -355,6 +358,7 @@ idSwapParametersProcessor(const std::string & class_name,
                            " does not contain an even number of entries! Num entries: ",
                            swaps.size());
 
+    swap_pairs.reserve(swaps.size() / 2);
     for (unsigned int j = 0; j < swaps.size(); j += 2)
       swap_pairs[swaps[j]] = swaps[j + 1];
   }
@@ -373,5 +377,5 @@ void extraElemIntegerSwapParametersProcessor(
     const unsigned int num_sections,
     const unsigned int num_integers,
     const std::vector<std::vector<std::vector<dof_id_type>>> & elem_integers_swaps,
-    std::vector<std::unordered_map<unsigned int, unsigned int>> & elem_integers_swap_pairs);
+    std::vector<std::unordered_map<dof_id_type, dof_id_type>> & elem_integers_swap_pairs);
 }

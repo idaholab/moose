@@ -58,7 +58,7 @@ protected:
   std::vector<std::unordered_map<boundary_id_type, boundary_id_type>> _boundary_swap_pairs;
 
   /// Easier to work with version of _elem_integers_swaps
-  std::vector<std::unordered_map<unsigned int, unsigned int>> _elem_integers_swap_pairs;
+  std::vector<std::unordered_map<dof_id_type, dof_id_type>> _elem_integers_swap_pairs;
 
   /// The direction of the extrusion
   Point _direction;

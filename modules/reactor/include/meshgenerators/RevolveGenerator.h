@@ -74,7 +74,7 @@ protected:
   std::vector<std::unordered_map<boundary_id_type, boundary_id_type>> _boundary_swap_pairs;
 
   /// Easier to work with version of _elem_integers_swaps
-  std::vector<std::unordered_map<unsigned int, unsigned int>> _elem_integers_swap_pairs;
+  std::vector<std::unordered_map<dof_id_type, dof_id_type>> _elem_integers_swap_pairs;
 
   /// Whether to revolve for a full circle or not
   bool _full_circle_revolving;
@@ -116,7 +116,7 @@ protected:
    * Categorize the nodes of an element into two groups: nodes on the axis and nodes off the axis.
    * @param elem the element whose nodes are to be categorized
    * @param nodes_on_axis a list of node IDs on the axis
-   * @return a pair of two lists of node IDs: the first list is for nodes on the axis, and the
+   * @return a pair of lists of node IDs: the first list is for nodes on the axis, and the
    * second list is for nodes off the axis
    */
   std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>>
