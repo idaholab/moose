@@ -361,7 +361,7 @@ idSwapParametersProcessor(const std::string & class_name,
 }
 
 /**
- *  Reprocess the elem_integers_swaps to make pairs out of them so they are easier to use
+ * Reprocess the elem_integers_swaps into maps so they are easier to use
  * @param class_name name of the mesh generator class used for exception messages
  * @param num_sections number of sections in the mesh
  * @param num_integers number of extra element integers in the mesh

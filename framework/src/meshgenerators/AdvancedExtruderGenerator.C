@@ -472,7 +472,7 @@ AdvancedExtruderGenerator::generate()
       for (unsigned int k = 0; k != num_layers; ++k)
       {
         std::unique_ptr<Elem> new_elem;
-        bool isFlipped(false);
+        bool is_flipped(false);
         switch (etype)
         {
           case EDGE2:
@@ -551,7 +551,7 @@ AdvancedExtruderGenerator::generate()
               MooseMeshUtils::swapNodesInElem(*new_elem, 0, 3);
               MooseMeshUtils::swapNodesInElem(*new_elem, 1, 4);
               MooseMeshUtils::swapNodesInElem(*new_elem, 2, 5);
-              isFlipped = true;
+              is_flipped = true;
             }
 
             break;
@@ -611,7 +611,7 @@ AdvancedExtruderGenerator::generate()
               MooseMeshUtils::swapNodesInElem(*new_elem, 6, 12);
               MooseMeshUtils::swapNodesInElem(*new_elem, 7, 13);
               MooseMeshUtils::swapNodesInElem(*new_elem, 8, 14);
-              isFlipped = true;
+              is_flipped = true;
             }
 
             break;
@@ -678,7 +678,7 @@ AdvancedExtruderGenerator::generate()
               MooseMeshUtils::swapNodesInElem(*new_elem, 7, 13);
               MooseMeshUtils::swapNodesInElem(*new_elem, 8, 14);
               MooseMeshUtils::swapNodesInElem(*new_elem, 18, 19);
-              isFlipped = true;
+              is_flipped = true;
             }
 
             break;
@@ -718,7 +718,7 @@ AdvancedExtruderGenerator::generate()
               MooseMeshUtils::swapNodesInElem(*new_elem, 1, 5);
               MooseMeshUtils::swapNodesInElem(*new_elem, 2, 6);
               MooseMeshUtils::swapNodesInElem(*new_elem, 3, 7);
-              isFlipped = true;
+              is_flipped = true;
             }
 
             break;
@@ -786,7 +786,7 @@ AdvancedExtruderGenerator::generate()
               MooseMeshUtils::swapNodesInElem(*new_elem, 9, 17);
               MooseMeshUtils::swapNodesInElem(*new_elem, 10, 18);
               MooseMeshUtils::swapNodesInElem(*new_elem, 11, 19);
-              isFlipped = true;
+              is_flipped = true;
             }
 
             break;
@@ -869,7 +869,7 @@ AdvancedExtruderGenerator::generate()
               MooseMeshUtils::swapNodesInElem(*new_elem, 10, 18);
               MooseMeshUtils::swapNodesInElem(*new_elem, 11, 19);
               MooseMeshUtils::swapNodesInElem(*new_elem, 20, 25);
-              isFlipped = true;
+              is_flipped = true;
             }
 
             break;
@@ -908,7 +908,7 @@ AdvancedExtruderGenerator::generate()
           for (unsigned int i = 0; i < _upward_boundary_source_blocks[e].size(); i++)
             if (new_elem->subdomain_id() == _upward_boundary_source_blocks[e][i])
               boundary_info.add_side(
-                  new_elem.get(), isFlipped ? 0 : top_id, _upward_boundary_ids[e][i]);
+                  new_elem.get(), is_flipped ? 0 : top_id, _upward_boundary_ids[e][i]);
         }
         // define downward boundaries
         if (k == 0)
@@ -918,7 +918,7 @@ AdvancedExtruderGenerator::generate()
           for (unsigned int i = 0; i < _downward_boundary_source_blocks[e].size(); i++)
             if (new_elem->subdomain_id() == _downward_boundary_source_blocks[e][i])
               boundary_info.add_side(
-                  new_elem.get(), isFlipped ? top_id : 0, _downward_boundary_ids[e][i]);
+                  new_elem.get(), is_flipped ? top_id : 0, _downward_boundary_ids[e][i]);
         }
 
         if (_subdomain_swap_pairs.size())
@@ -999,9 +999,9 @@ AdvancedExtruderGenerator::generate()
           const unsigned short top_id =
               added_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
           if (_has_bottom_boundary)
-            boundary_info.add_side(added_elem, isFlipped ? top_id : 0, _bottom_boundary);
+            boundary_info.add_side(added_elem, is_flipped ? top_id : 0, _bottom_boundary);
           else
-            boundary_info.add_side(added_elem, isFlipped ? top_id : 0, next_side_id);
+            boundary_info.add_side(added_elem, is_flipped ? top_id : 0, next_side_id);
         }
 
         if (current_layer == total_num_layers - 1)
@@ -1013,10 +1013,10 @@ AdvancedExtruderGenerator::generate()
               added_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
 
           if (_has_top_boundary)
-            boundary_info.add_side(added_elem, isFlipped ? 0 : top_id, _top_boundary);
+            boundary_info.add_side(added_elem, is_flipped ? 0 : top_id, _top_boundary);
           else
             boundary_info.add_side(
-                added_elem, isFlipped ? 0 : top_id, cast_int<boundary_id_type>(next_side_id + 1));
+                added_elem, is_flipped ? 0 : top_id, cast_int<boundary_id_type>(next_side_id + 1));
         }
 
         current_layer++;

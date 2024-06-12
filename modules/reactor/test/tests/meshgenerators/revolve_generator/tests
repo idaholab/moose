@@ -258,7 +258,7 @@
       cli_args = '--mesh-only err_revolve_1d.e 
                   Mesh/rg/axis_point="0.0 0.0 1.0"'
       expect_err = 'The input mesh is not in the same plane with the rotation axis'
-      detail = "the input 1D mesh is not in the same plane with the rotation axis."
+      detail = "the input 1D mesh is not coplanar to the rotation axis."
     []
   []  
 []

@@ -24,7 +24,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// Mesh that comes from another generator
+  /// Lower dimensional mesh from another generator
   std::unique_ptr<MeshBase> & _input;
 
   /// A point of the axis of revolution
@@ -33,10 +33,10 @@ protected:
   /// A direction vector of the axis of revolution
   const Point & _axis_direction;
 
-  /// Angles of revolution
+  /// Angles of revolution delineating each azimuthal section
   const std::vector<Real> _revolving_angles;
 
-  /// Subdomains to swap out for each elevation
+  /// Subdomains to swap out for each azimuthal section
   const std::vector<std::vector<subdomain_id_type>> & _subdomain_swaps;
 
   /// Boundaries to swap out for each elevation
@@ -52,7 +52,7 @@ protected:
   /// Revolving direction
   const bool & _clockwise;
 
-  /// Numbers of azimuthal intervals
+  /// Numbers of azimuthal mesh intervals in each azimuthal section
   const std::vector<unsigned int> & _nums_azimuthal_intervals;
 
   /// Volume preserving function is optional
@@ -79,7 +79,7 @@ protected:
   /// Whether to revolve for a full circle or not
   bool _full_circle_revolving;
 
-  /// Unit angles of all sections of revolving
+  /// Unit angles of all azimuthal sections of revolution
   std::vector<Real> _unit_angles;
 
   /// Boundary ID of the ending boundary
@@ -89,26 +89,28 @@ protected:
   Real _radius_correction_factor;
 
   /**
-   * Get the rotation center and radius of the cicular rotation based on the rotation axis and the
+   * Get the rotation center and radius of the circular rotation based on the rotation axis and the
    * external point.
    * @param p_ext external point that needs to be rotated
    * @param p_axis a point on the rotation axis
    * @param dir_axis direction vector of the rotation axis
    * @return a pair of the rotation center and the radius of the circular rotation
    */
-  std::pair<Real, Point>
-  getRototionCenterAndRadius(const Point & p_ext, const Point & p_axis, const Point & dir_axis);
+  std::pair<Real, Point> getRotationCenterAndRadius(const Point & p_ext,
+                                                    const Point & p_axis,
+                                                    const Point & dir_axis) const;
 
   /**
-   * Calculate the transform matrix between the rotation coordination system and the original
-   * coordination system.
+   * Calculate the transform matrix between the rotation coordinate system and the original
+   * coordinate system.
    * @param p_axis a point on the rotation axis
    * @param dir_axis direction vector of the rotation axis
    * @param p_input a point in the input mesh
-   * @return a transform matrix
+   * @return a transform matrix, stored as 3 points in a vector (each point represents a row of the
+   * matrix)
    */
   std::vector<Point>
-  rotationVectors(const Point & p_axis, const Point & dir_axis, const Point & p_input);
+  rotationVectors(const Point & p_axis, const Point & dir_axis, const Point & p_input) const;
 
   /**
    * Categorize the nodes of an element into two groups: nodes on the axis and nodes off the axis.
@@ -118,7 +120,12 @@ protected:
    * second list is for nodes off the axis
    */
   std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>>
-  onAxisNodesIdentifier(Elem & elem, const std::vector<dof_id_type> & nodes_on_axis);
+  onAxisNodesIdentifier(const Elem & elem, const std::vector<dof_id_type> & nodes_on_axis) const;
+
+  /**
+   * Modify the position of a node to account for radius correction.
+   * @param node the node to be modified
+   */
   void nodeModification(Node & node);
 
   /**
@@ -127,12 +134,13 @@ protected:
    * @param elem the EDGE element to be revolved
    * @param mesh the mesh that the new QUAD element will be added to
    * @param new_elem the new QUAD element
-   * @param current_layer the current layer of the revolving
+   * @param current_layer the current azimuthal layer
    * @param orig_nodes the number of nodes in the original mesh
    * @param total_num_azimuthal_intervals the total number of azimuthal intervals for revolving
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
-   * @param isFlipped a flag to indicate whether the new element is flipped after creation
+   * @param is_flipped a flag to indicate whether the new element is flipped after creation (to
+   * ensure a positive element volume)
    */
   void createQUADfromEDGE(const ElemType quad_elem_type,
                           const Elem * elem,
@@ -142,7 +150,7 @@ protected:
                           const unsigned int orig_nodes,
                           const unsigned int total_num_azimuthal_intervals,
                           std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
-                          bool & isFlipped);
+                          bool & is_flipped) const;
 
   /**
    * Create a new TRI element from an existing EDGE element by revolving it.
@@ -158,7 +166,8 @@ protected:
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
    * @param axis_node_case  a parameter to record on-axis node(s)
-   * @param isFlipped a flag to indicate whether the new element is flipped after creation
+   * @param is_flipped a flag to indicate whether the new element is flipped after creation (to
+   * ensure a positive element volume)
    */
   void createTRIfromEDGE(
       const std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>> & nodes_cates,
@@ -171,10 +180,10 @@ protected:
       const unsigned int total_num_azimuthal_intervals,
       std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
       dof_id_type & axis_node_case,
-      bool & isFlipped);
+      bool & is_flipped) const;
 
   /**
-   * Create a new TET element from an existing TRI element by revolving it.
+   * Create a new PRISM element from an existing TRI element by revolving it.
    * @param prism_elem_type the type of the new TET element
    * @param elem the TRI element to be revolved
    * @param mesh the mesh that the new TET element will be added to
@@ -184,7 +193,8 @@ protected:
    * @param total_num_azimuthal_intervals the total number of azimuthal intervals for revolving
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
-   * @param isFlipped a flag to indicate whether the new element is flipped after creation
+   * @param is_flipped a flag to indicate whether the new element is flipped after creation (to
+   * ensure a positive element volume)
    */
   void createPRISMfromTRI(const ElemType prism_elem_type,
                           const Elem * elem,
@@ -194,7 +204,7 @@ protected:
                           const unsigned int orig_nodes,
                           const unsigned int total_num_azimuthal_intervals,
                           std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
-                          bool & isFlipped);
+                          bool & is_flipped) const;
 
   /**
    * Create a new PYRAMID element from an existing TRI element by revolving it.
@@ -210,7 +220,8 @@ protected:
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
    * @param axis_node_case a parameter to record on-axis node(s)
-   * @param isFlipped a flag to indicate whether the new element is flipped after creation
+   * @param is_flipped a flag to indicate whether the new element is flipped after creation (to
+   * ensure a positive element volume)
    */
   void createPYRAMIDfromTRI(
       const std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>> & nodes_cates,
@@ -223,7 +234,7 @@ protected:
       const unsigned int total_num_azimuthal_intervals,
       std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
       dof_id_type & axis_node_case,
-      bool & isFlipped);
+      bool & is_flipped) const;
 
   /**
    * Create a new TET element from an existing TRI element by revolving it.
@@ -239,7 +250,8 @@ protected:
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
    * @param axis_node_case a parameter to record on-axis node(s)
-   * @param isFlipped a flag to indicate whether the new element is flipped after creation
+   * @param is_flipped a flag to indicate whether the new element is flipped after creation (to
+   * ensure a positive element volume)
    */
   void createTETfromTRI(
       const std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>> & nodes_cates,
@@ -252,7 +264,7 @@ protected:
       const unsigned int total_num_azimuthal_intervals,
       std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
       dof_id_type & axis_node_case,
-      bool & isFlipped);
+      bool & is_flipped) const;
 
   /**
    * Create a new HEX element from an existing QUAD element by revolving it.
@@ -265,7 +277,8 @@ protected:
    * @param total_num_azimuthal_intervals the total number of azimuthal intervals for revolving
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
-   * @param isFlipped a flag to indicate whether the new element is flipped after creation
+   * @param is_flipped a flag to indicate whether the new element is flipped after creation (to
+   * ensure a positive element volume)
    */
   void createHEXfromQUAD(const ElemType hex_elem_type,
                          const Elem * elem,
@@ -275,7 +288,7 @@ protected:
                          const unsigned int orig_nodes,
                          const unsigned int total_num_azimuthal_intervals,
                          std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
-                         bool & isFlipped);
+                         bool & is_flipped) const;
 
   /**
    * Create a new PRISM element from an existing QUAD element by revolving it.
@@ -291,7 +304,8 @@ protected:
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
    * @param axis_node_case a parameter to record on-axis node(s)
-   * @param isFlipped a flag to indicate whether the new element is flipped after creation
+   * @param is_flipped a flag to indicate whether the new element is flipped after creation (to
+   * ensure a positive element volume)
    */
   void createPRISMfromQUAD(
       const std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>> & nodes_cates,
@@ -304,10 +318,11 @@ protected:
       const unsigned int total_num_azimuthal_intervals,
       std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
       dof_id_type & axis_node_case,
-      bool & isFlipped);
+      bool & is_flipped) const;
 
   /**
-   * Create a new PYRAMID element from an existing QUAD element by revolving it.
+   * Create a new PYRAMID element and a new PRISM element from an existing QUAD element by revolving
+   * it.
    * @param nodes_cates a pair of two lists of node IDs: the first list is for nodes on the axis,
    * and the second list is for nodes off the axis
    * @param pyramid_elem_type the type of the new PYRAMID element
@@ -322,8 +337,10 @@ protected:
    * @param side_pairs a vector of pairs to record the corresponding side indices of the original
    * and the new elements
    * @param axis_node_case a parameter to record on-axis node(s)
-   * @param isFlipped a flag to indicate whether the PYRAMID element is flipped after creation
-   * @param isFlipped_1 a flag to indicate whether the PRISM element is flipped after creation
+   * @param is_flipped a flag to indicate whether the PYRAMID element is flipped after creation (to
+   * ensure a positive element volume)
+   * @param is_flipped_additional a flag to indicate whether the PRISM element is flipped after (to
+   * ensure a positive element volume) creation
    */
   void createPYRAMIDPRISMfromQUAD(
       const std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>> & nodes_cates,
@@ -338,6 +355,6 @@ protected:
       const unsigned int total_num_azimuthal_intervals,
       std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
       dof_id_type & axis_node_case,
-      bool & isFlipped,
-      bool & isFlipped_1);
+      bool & is_flipped,
+      bool & is_flipped_additional) const;
 };

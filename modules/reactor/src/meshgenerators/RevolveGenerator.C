@@ -47,9 +47,10 @@ RevolveGenerator::validParams()
 
   params.addRequiredParam<Point>("axis_direction", "The direction of the axis of revolution");
 
-  params.addRangeCheckedParam<std::vector<Real>>("revolving_angles",
-                                                 "revolving_angles<=360.0 & revolving_angles>0.0",
-                                                 "The angles to revolve around the axis");
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "revolving_angles",
+      "revolving_angles<=360.0 & revolving_angles>0.0",
+      "The angles delineating each azimuthal section of revolution around the axis in degrees");
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "subdomain_swaps",
@@ -77,7 +78,8 @@ RevolveGenerator::validParams()
       "'elem_integer_names_to_swap' to form the third dimension.");
 
   params.addParam<boundary_id_type>(
-      "start_boundary", "The boundary ID to set on the starting boundary for partial revolving.");
+      "start_boundary",
+      "The boundary ID to set on the starting boundary for a partial revolution.");
 
   params.addParam<boundary_id_type>(
       "end_boundary", "The boundary ID to set on the ending boundary for partial revolving.");
@@ -88,10 +90,10 @@ RevolveGenerator::validParams()
   params.addRequiredParam<std::vector<unsigned int>>(
       "nums_azimuthal_intervals", "The numbers of azimuthal intervals to revolve around the axis");
 
-  params.addParam<bool>(
-      "preserve_volumes",
-      false,
-      "Whether the volume of the revolved mesh is preserved by fixing the radius.");
+  params.addParam<bool>("preserve_volumes",
+                        false,
+                        "Whether the volume of the revolved mesh is preserving the circular area "
+                        "by modifying (expanding) the radius to account for polygonization.");
 
   return params;
 }
@@ -116,7 +118,8 @@ RevolveGenerator::RevolveGenerator(const InputParameters & parameters)
     _start_boundary(isParamValid("start_boundary") ? getParam<boundary_id_type>("start_boundary")
                                                    : 0),
     _has_end_boundary(isParamValid("end_boundary")),
-    _end_boundary(isParamValid("end_boundary") ? getParam<boundary_id_type>("end_boundary") : 0)
+    _end_boundary(isParamValid("end_boundary") ? getParam<boundary_id_type>("end_boundary") : 0),
+    _radius_correction_factor(1.0)
 {
   if (_revolving_angles.size() != _nums_azimuthal_intervals.size())
     paramError("nums_azimuthal_intervals",
@@ -153,8 +156,6 @@ RevolveGenerator::RevolveGenerator(const InputParameters & parameters)
           std::accumulate(_revolving_angles.begin(), _revolving_angles.end(), 0), 360.0))
     paramError("revolving_angles",
                "The sum of revolving angles should be less than or equal to 360.");
-
-  _radius_correction_factor = 1.0;
 
   if ((_has_start_boundary && _full_circle_revolving) ||
       (_has_end_boundary && _full_circle_revolving))
@@ -430,7 +431,7 @@ RevolveGenerator::generate()
   {
     // Calculate the radius and corresponding center point on the rotation axis
     // If the radius is 0, then the node is on the axis
-    const auto radius_and_center = getRototionCenterAndRadius(*node, _axis_point, _axis_direction);
+    const auto radius_and_center = getRotationCenterAndRadius(*node, _axis_point, _axis_direction);
     const bool isOnAxis = MooseUtils::absoluteFuzzyEqual(radius_and_center.first, 0.0);
     if (isOnAxis)
     {
@@ -457,7 +458,7 @@ RevolveGenerator::generate()
                    (e == num_rotations - 1 ? (unsigned int)_full_circle_revolving : 0);
            ++k)
       {
-        bool isNodeCreated(false);
+        bool is_node_created(false);
         if (!isOnAxis)
         {
           // For the first layer we don't need to move
@@ -468,7 +469,6 @@ RevolveGenerator::generate()
             auto layer_index = (k - (e == 0 ? 1 : 0)) + 1;
 
             // Calculate the rotation angle in XY Plane
-
             const Point vector_xy =
                 Point(-2.0 * radius_and_center.first *
                           std::sin((base_angle + angle * (Real)layer_index) / 2.0) *
@@ -482,16 +482,16 @@ RevolveGenerator::generate()
                                      rotation_vectors[2] * vector_xy);
           }
 
-          isNodeCreated = true;
+          is_node_created = true;
         }
         else if (e == 0 && k == 0)
         {
           // On-axis nodes are only added once
           current_distance.zero();
-          isNodeCreated = true;
+          is_node_created = true;
         }
 
-        if (isNodeCreated)
+        if (is_node_created)
         {
           Node * new_node = mesh->add_point(*node + current_distance,
                                             node->id() + (current_node_layer * orig_nodes),
@@ -544,8 +544,8 @@ RevolveGenerator::generate()
       {
         std::unique_ptr<Elem> new_elem;
         std::unique_ptr<Elem> new_elem_1;
-        bool isFlipped(false);
-        bool isFlipped_1(false);
+        bool is_flipped(false);
+        bool is_flipped_additional(false);
         dof_id_type axis_node_case(-1);
         std::vector<std::pair<dof_id_type, dof_id_type>> side_pairs;
         switch (etype)
@@ -568,7 +568,7 @@ RevolveGenerator::generate()
                                  orig_nodes,
                                  total_num_azimuthal_intervals,
                                  side_pairs,
-                                 isFlipped);
+                                 is_flipped);
             }
             else
             {
@@ -582,7 +582,7 @@ RevolveGenerator::generate()
                                 total_num_azimuthal_intervals,
                                 side_pairs,
                                 axis_node_case,
-                                isFlipped);
+                                is_flipped);
             }
             break;
           }
@@ -604,7 +604,7 @@ RevolveGenerator::generate()
                                  orig_nodes,
                                  total_num_azimuthal_intervals,
                                  side_pairs,
-                                 isFlipped);
+                                 is_flipped);
             }
             else
             {
@@ -618,7 +618,7 @@ RevolveGenerator::generate()
                                 total_num_azimuthal_intervals,
                                 side_pairs,
                                 axis_node_case,
-                                isFlipped);
+                                is_flipped);
             }
             break;
           }
@@ -642,7 +642,7 @@ RevolveGenerator::generate()
                                  orig_nodes,
                                  total_num_azimuthal_intervals,
                                  side_pairs,
-                                 isFlipped);
+                                 is_flipped);
             }
             else if (nodes_cates.first.size() == 1)
             {
@@ -656,7 +656,7 @@ RevolveGenerator::generate()
                                    total_num_azimuthal_intervals,
                                    side_pairs,
                                    axis_node_case,
-                                   isFlipped);
+                                   is_flipped);
             }
             else if (nodes_cates.first.size() == 2)
             {
@@ -670,7 +670,7 @@ RevolveGenerator::generate()
                                total_num_azimuthal_intervals,
                                side_pairs,
                                axis_node_case,
-                               isFlipped);
+                               is_flipped);
             }
             else
               mooseError("impossible situation");
@@ -698,7 +698,7 @@ RevolveGenerator::generate()
                                  orig_nodes,
                                  total_num_azimuthal_intervals,
                                  side_pairs,
-                                 isFlipped);
+                                 is_flipped);
             }
             else if (nodes_cates.first.size() == 1)
             {
@@ -712,7 +712,7 @@ RevolveGenerator::generate()
                                    total_num_azimuthal_intervals,
                                    side_pairs,
                                    axis_node_case,
-                                   isFlipped);
+                                   is_flipped);
             }
             else if (nodes_cates.first.size() == 3)
             {
@@ -726,7 +726,7 @@ RevolveGenerator::generate()
                                total_num_azimuthal_intervals,
                                side_pairs,
                                axis_node_case,
-                               isFlipped);
+                               is_flipped);
             }
             else
               mooseError("impossible situation");
@@ -753,7 +753,7 @@ RevolveGenerator::generate()
                                  orig_nodes,
                                  total_num_azimuthal_intervals,
                                  side_pairs,
-                                 isFlipped);
+                                 is_flipped);
             }
             else if (nodes_cates.first.size() == 1)
             {
@@ -767,7 +767,7 @@ RevolveGenerator::generate()
                                    total_num_azimuthal_intervals,
                                    side_pairs,
                                    axis_node_case,
-                                   isFlipped);
+                                   is_flipped);
             }
             else if (nodes_cates.first.size() == 3)
             {
@@ -781,7 +781,7 @@ RevolveGenerator::generate()
                                total_num_azimuthal_intervals,
                                side_pairs,
                                axis_node_case,
-                               isFlipped);
+                               is_flipped);
             }
             else
               mooseError("impossible situation");
@@ -807,7 +807,7 @@ RevolveGenerator::generate()
                                 orig_nodes,
                                 total_num_azimuthal_intervals,
                                 side_pairs,
-                                isFlipped);
+                                is_flipped);
             }
             else if (nodes_cates.first.size() == 1)
             {
@@ -823,8 +823,8 @@ RevolveGenerator::generate()
                                          total_num_azimuthal_intervals,
                                          side_pairs,
                                          axis_node_case,
-                                         isFlipped,
-                                         isFlipped_1);
+                                         is_flipped,
+                                         is_flipped_additional);
             }
             else if (nodes_cates.first.size() == 2)
             {
@@ -838,11 +838,12 @@ RevolveGenerator::generate()
                                   total_num_azimuthal_intervals,
                                   side_pairs,
                                   axis_node_case,
-                                  isFlipped);
+                                  is_flipped);
             }
 
             else
-              mooseError("impossible situation");
+              mooseError(
+                  "Degenerate element with 3 or more aligned nodes cannot be azimuthally revolved");
 
             break;
           }
@@ -868,7 +869,7 @@ RevolveGenerator::generate()
                                 orig_nodes,
                                 total_num_azimuthal_intervals,
                                 side_pairs,
-                                isFlipped);
+                                is_flipped);
             }
             else if (nodes_cates.first.size() == 3)
             {
@@ -882,7 +883,7 @@ RevolveGenerator::generate()
                                   total_num_azimuthal_intervals,
                                   side_pairs,
                                   axis_node_case,
-                                  isFlipped);
+                                  is_flipped);
             }
             else
               mooseError("impossible situation");
@@ -911,7 +912,7 @@ RevolveGenerator::generate()
                                 orig_nodes,
                                 total_num_azimuthal_intervals,
                                 side_pairs,
-                                isFlipped);
+                                is_flipped);
             }
             else if (nodes_cates.first.size() == 1)
             {
@@ -927,8 +928,8 @@ RevolveGenerator::generate()
                                          total_num_azimuthal_intervals,
                                          side_pairs,
                                          axis_node_case,
-                                         isFlipped,
-                                         isFlipped_1);
+                                         is_flipped,
+                                         is_flipped_additional);
             }
             else if (nodes_cates.first.size() == 3)
             {
@@ -942,7 +943,7 @@ RevolveGenerator::generate()
                                   total_num_azimuthal_intervals,
                                   side_pairs,
                                   axis_node_case,
-                                  isFlipped);
+                                  is_flipped);
             }
             break;
           }
@@ -1406,20 +1407,22 @@ RevolveGenerator::generate()
         if (current_layer == 0 && _has_start_boundary)
         {
           boundary_info.add_side(
-              added_elem, isFlipped ? side_pairs[0].second : side_pairs[0].first, _start_boundary);
+              added_elem, is_flipped ? side_pairs[0].second : side_pairs[0].first, _start_boundary);
           if (side_pairs.size() > 1)
             boundary_info.add_side(added_elem_1,
-                                   isFlipped_1 ? side_pairs[1].second : side_pairs[1].first,
+                                   is_flipped_additional ? side_pairs[1].second
+                                                         : side_pairs[1].first,
                                    _start_boundary);
         }
 
         if (current_layer == num_layers - 1 && _has_end_boundary)
         {
           boundary_info.add_side(
-              added_elem, isFlipped ? side_pairs[0].first : side_pairs[0].second, _end_boundary);
+              added_elem, is_flipped ? side_pairs[0].first : side_pairs[0].second, _end_boundary);
           if (side_pairs.size() > 1)
             boundary_info.add_side(added_elem_1,
-                                   isFlipped_1 ? side_pairs[1].first : side_pairs[1].second,
+                                   is_flipped_additional ? side_pairs[1].first
+                                                         : side_pairs[1].second,
                                    _end_boundary);
         }
         current_layer++;
@@ -1445,9 +1448,9 @@ RevolveGenerator::generate()
 }
 
 std::pair<Real, Point>
-RevolveGenerator::getRototionCenterAndRadius(const Point & p_ext,
+RevolveGenerator::getRotationCenterAndRadius(const Point & p_ext,
                                              const Point & p_axis,
-                                             const Point & dir_axis)
+                                             const Point & dir_axis) const
 {
   // First use point product to get the distance between the axis point and the projection of the
   // external point on the axis
@@ -1461,7 +1464,7 @@ RevolveGenerator::getRototionCenterAndRadius(const Point & p_ext,
 std::vector<Point>
 RevolveGenerator::rotationVectors(const Point & p_axis,
                                   const Point & dir_axis,
-                                  const Point & p_input)
+                                  const Point & p_input) const
 {
   // To make the rotation mathematically simple, we perform rotation in a coordination system
   // (x',y',z') defined by rotation axis and the mesh to be rotated.
@@ -1478,7 +1481,8 @@ RevolveGenerator::rotationVectors(const Point & p_axis,
 }
 
 std::pair<std::vector<dof_id_type>, std::vector<dof_id_type>>
-RevolveGenerator::onAxisNodesIdentifier(Elem & elem, const std::vector<dof_id_type> & nodes_on_axis)
+RevolveGenerator::onAxisNodesIdentifier(const Elem & elem,
+                                        const std::vector<dof_id_type> & nodes_on_axis) const
 {
   std::vector<dof_id_type> nodes_on_axis_in_elem;
   std::vector<dof_id_type> nodes_not_on_axis_in_elem;
@@ -1515,10 +1519,10 @@ RevolveGenerator::createQUADfromEDGE(const ElemType quad_elem_type,
                                      const unsigned int orig_nodes,
                                      const unsigned int total_num_azimuthal_intervals,
                                      std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
-                                     bool & isFlipped)
+                                     bool & is_flipped) const
 {
   if (quad_elem_type != QUAD4 && quad_elem_type != QUAD9)
-    mooseError("unsupported situation");
+    mooseError("Unsupported element type", quad_elem_type);
 
   side_pairs.push_back(std::make_pair(0, 2));
   const unsigned int order = quad_elem_type == QUAD4 ? 1 : 2;
@@ -1563,7 +1567,7 @@ RevolveGenerator::createQUADfromEDGE(const ElemType quad_elem_type,
     MooseMeshUtils::swapNodesInElem(*new_elem, 1, 2);
     if (quad_elem_type == QUAD9)
       MooseMeshUtils::swapNodesInElem(*new_elem, 4, 6);
-    isFlipped = true;
+    is_flipped = true;
   }
 }
 
@@ -1579,10 +1583,10 @@ RevolveGenerator::createTRIfromEDGE(
     const unsigned int total_num_azimuthal_intervals,
     std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
     dof_id_type & axis_node_case,
-    bool & isFlipped)
+    bool & is_flipped) const
 {
   if (tri_elem_type != TRI3 && tri_elem_type != TRI7)
-    mooseError("unsupported situation");
+    mooseError("Unsupported element type", tri_elem_type);
 
   side_pairs.push_back(std::make_pair(0, 2));
   const unsigned int order = tri_elem_type == TRI3 ? 1 : 2;
@@ -1619,7 +1623,7 @@ RevolveGenerator::createTRIfromEDGE(
     MooseMeshUtils::swapNodesInElem(*new_elem, 1, 2);
     if (tri_elem_type == TRI7)
       MooseMeshUtils::swapNodesInElem(*new_elem, 3, 5);
-    isFlipped = true;
+    is_flipped = true;
   }
 }
 
@@ -1632,7 +1636,7 @@ RevolveGenerator::createPRISMfromTRI(const ElemType prism_elem_type,
                                      const unsigned int orig_nodes,
                                      const unsigned int total_num_azimuthal_intervals,
                                      std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
-                                     bool & isFlipped)
+                                     bool & is_flipped) const
 {
   if (prism_elem_type != PRISM6 && prism_elem_type != PRISM18 && prism_elem_type != PRISM21)
     mooseError("unsupported situation");
@@ -1729,7 +1733,7 @@ RevolveGenerator::createPRISMfromTRI(const ElemType prism_elem_type,
         MooseMeshUtils::swapNodesInElem(*new_elem, 18, 19);
       }
     }
-    isFlipped = true;
+    is_flipped = true;
   }
 }
 
@@ -1745,7 +1749,7 @@ RevolveGenerator::createPYRAMIDfromTRI(
     const unsigned int total_num_azimuthal_intervals,
     std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
     dof_id_type & axis_node_case,
-    bool & isFlipped)
+    bool & is_flipped) const
 {
   if (pyramid_elem_type != PYRAMID5 && pyramid_elem_type != PYRAMID13 &&
       pyramid_elem_type != PYRAMID18)
@@ -1833,7 +1837,7 @@ RevolveGenerator::createPYRAMIDfromTRI(
         MooseMeshUtils::swapNodesInElem(*new_elem, 14, 16);
       }
     }
-    isFlipped = true;
+    is_flipped = true;
   }
 }
 
@@ -1849,7 +1853,7 @@ RevolveGenerator::createTETfromTRI(
     const unsigned int total_num_azimuthal_intervals,
     std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
     dof_id_type & axis_node_case,
-    bool & isFlipped)
+    bool & is_flipped) const
 {
   if (tet_elem_type != TET4 && tet_elem_type != TET10 && tet_elem_type != TET14)
     mooseError("unsupported situation");
@@ -1935,7 +1939,7 @@ RevolveGenerator::createTETfromTRI(
         MooseMeshUtils::swapNodesInElem(*new_elem, 10, 11);
       }
     }
-    isFlipped = true;
+    is_flipped = true;
   }
 }
 
@@ -1948,7 +1952,7 @@ RevolveGenerator::createHEXfromQUAD(const ElemType hex_elem_type,
                                     const unsigned int orig_nodes,
                                     const unsigned int total_num_azimuthal_intervals,
                                     std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
-                                    bool & isFlipped)
+                                    bool & is_flipped) const
 {
   if (hex_elem_type != HEX8 && hex_elem_type != HEX20 && hex_elem_type != HEX27)
     mooseError("unsupported situation");
@@ -2064,7 +2068,7 @@ RevolveGenerator::createHEXfromQUAD(const ElemType hex_elem_type,
         MooseMeshUtils::swapNodesInElem(*new_elem, 20, 25);
       }
     }
-    isFlipped = true;
+    is_flipped = true;
   }
 }
 
@@ -2080,7 +2084,7 @@ RevolveGenerator::createPRISMfromQUAD(
     const unsigned int total_num_azimuthal_intervals,
     std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
     dof_id_type & axis_node_case,
-    bool & isFlipped)
+    bool & is_flipped) const
 {
   if (prism_elem_type != PRISM6 && prism_elem_type != PRISM15 && prism_elem_type != PRISM18)
     mooseError("unsupported situation");
@@ -2174,7 +2178,7 @@ RevolveGenerator::createPRISMfromQUAD(
         MooseMeshUtils::swapNodesInElem(*new_elem, 15, 17);
       }
     }
-    isFlipped = true;
+    is_flipped = true;
   }
 }
 
@@ -2192,8 +2196,8 @@ RevolveGenerator::createPYRAMIDPRISMfromQUAD(
     const unsigned int total_num_azimuthal_intervals,
     std::vector<std::pair<dof_id_type, dof_id_type>> & side_pairs,
     dof_id_type & axis_node_case,
-    bool & isFlipped,
-    bool & isFlipped_1)
+    bool & is_flipped,
+    bool & is_flipped_additional) const
 {
   if (!(pyramid_elem_type == PYRAMID5 && prism_elem_type == PRISM6) &&
       !(pyramid_elem_type == PYRAMID14 && prism_elem_type == PRISM18))
@@ -2260,7 +2264,7 @@ RevolveGenerator::createPYRAMIDPRISMfromQUAD(
       MooseMeshUtils::swapNodesInElem(*new_elem, 10, 11);
       MooseMeshUtils::swapNodesInElem(*new_elem, 9, 12);
     }
-    isFlipped = true;
+    is_flipped = true;
   }
 
   side_pairs.push_back(std::make_pair(0, 4));
@@ -2335,6 +2339,6 @@ RevolveGenerator::createPYRAMIDPRISMfromQUAD(
       MooseMeshUtils::swapNodesInElem(*new_elem_1, 7, 13);
       MooseMeshUtils::swapNodesInElem(*new_elem_1, 8, 14);
     }
-    isFlipped_1 = true;
+    is_flipped_additional = true;
   }
 }

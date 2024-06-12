@@ -427,7 +427,7 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
                     std::vector<dof_id_type> & ordered_elem_id_list)
 {
   // a flag to indicate if the ordered_node_list has been reversed
-  bool isFlipped = false;
+  bool is_flipped = false;
   // Start from the first element, try to find a chain of nodes
   mooseAssert(node_assm.size(), "Node list must not be empty");
   ordered_node_list.push_back(node_assm.front().first);
@@ -471,12 +471,12 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
     // been examined yet.
     else
     {
-      if (isFlipped)
+      if (is_flipped)
         // Flipped twice; this means the node list has at least two segments.
         throw MooseException("The node list provided has more than one segments.");
 
       // mark the first flip event.
-      isFlipped = true;
+      is_flipped = true;
       std::reverse(ordered_node_list.begin(), ordered_node_list.end());
       std::reverse(ordered_elem_id_list.begin(), ordered_elem_id_list.end());
       // As this iteration is wasted, set the iterator backward

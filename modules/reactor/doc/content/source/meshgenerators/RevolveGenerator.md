@@ -27,7 +27,7 @@ Extra element integer ID remapping works in a similar manner as subdomain ID rem
 
 ## Boundary ID Remapping
 
-Boundary ID remapping also works similarly to subdomain ID remapping. During revolving, the lower-dimension boundaries are also converted into higher-dimension boundaries. A double indexed array input parameter, [!param](/Mesh/RevolveGenerator/boundary_swaps), can be used to remap the boundary ids. Here, the boundary ids to be remapped must exist in the `input` mesh, otherwise, dedicated boundary defining mesh generators, such as [SideSetsBetweenSubdomainsGenerator](SideSetsBetweenSubdomainsGenerator.md) and [SideSetsAroundSubdomainGenerator](SideSetsAroundSubdomainGenerator.md), need to be used to define new boundary ids along different axial heights.
+Boundary ID remapping also works similarly to subdomain ID remapping. During revolving, the lower-dimension boundaries are also converted into higher-dimension boundaries. A double indexed array input parameter, [!param](/Mesh/RevolveGenerator/boundary_swaps), can be used to remap the boundary ids. Here, the boundary ids to be remapped must exist in the `input` mesh, otherwise, dedicated boundary defining mesh generators, such as [SideSetsBetweenSubdomainsGenerator](SideSetsBetweenSubdomainsGenerator.md) and [SideSetsAroundSubdomainGenerator](SideSetsAroundSubdomainGenerator.md), need to be used to define new boundary ids along different azimuthal sections.
 
 ## Example Syntax
 
