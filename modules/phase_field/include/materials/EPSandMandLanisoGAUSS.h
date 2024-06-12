@@ -1,6 +1,6 @@
 
 // 5D Gaussian anisotropy material object
-// Material properties adding anysotroopy to ε [or also called k], m  and L.
+// Material properties adding anysotroopy to epsilon [or also called k], m  and L.
 
 
 #pragma once

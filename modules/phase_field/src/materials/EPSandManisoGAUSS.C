@@ -1,6 +1,6 @@
 
 // 5D Gaussian anisotropy material object
-// Material properties adding anysotroopy to ε [or also called k] and m;
+// Material properties adding anysotroopy to epsilon [or also called k] and m;
 // L  is isotropic and computed from a given mobility.
 
 
@@ -290,26 +290,26 @@ EPSandManisoGAUSS::computeQpProperties()
         std::ifstream File1;
         File1.open(_Quaternion_file_name.c_str());
 
-      	std::vector<double> qwR;
+        std::vector<double> qwR;
         std::vector<double> qxR;
         std::vector<double> qyR;
         std::vector<double> qzR;
 
-      	double QuatW;
+        double QuatW;
         double QuatX;
         double QuatY;
         double QuatZ;
 
-      	while (!File1.eof())
-      	{
-      		File1 >> QuatW >> QuatX >> QuatY >> QuatZ;
-      		qwR.push_back(QuatW);
+        while (!File1.eof())
+        {
+          File1 >> QuatW >> QuatX >> QuatY >> QuatZ;
+          qwR.push_back(QuatW);
           qxR.push_back(QuatX);
           qyR.push_back(QuatY);
           qzR.push_back(QuatZ);
-      	}
+        }
 
-      	File1.close();
+        File1.close();
 
 
         //************************ Read Library file *************************************

@@ -251,7 +251,7 @@
 [Materials]
 
   [5DGaussian]
-    # Material properties adding anisotropy to ε [or also called k] and m;
+    # Material properties adding anisotropy to epsilon [or also called k] and m;
     # L is isotropic and computed from a given mobility.
 
     # Minima Library file: Normalized_Axis_X  Normalized_Axis_Y Normalized_Axis_Z  Angle(Radian) GB_Normal_X  GB_Normal_Y  GB_Normal_Z  Minimun_GB_energy(J/m^2)
@@ -365,7 +365,7 @@
   []
 
   [gamma_asymm]
-  # MAINTAIN γ AT 1.5 --- γ is constant in Epsiilon model
+  # MAINTAIN gamma AT 1.5 --- gamma is constant in Epsiilon model
     type = GenericConstantMaterial
     prop_names = 'gamma_asymm'
     prop_values = '1.5'

@@ -251,7 +251,7 @@
 [Materials]
 
   [5DGaussian]
-    # Material properties adding anisotropy to γ;
+    # Material properties adding anisotropy to gamma;
     # L is isotropic and computed from a given mobility.
 
     # Minima Library file: Normalized_Axis_X  Normalized_Axis_Y Normalized_Axis_Z  Angle(Radian) GB_Normal_X  GB_Normal_Y  GB_Normal_Z  Minimun_GB_energy(J/m^2)
@@ -340,8 +340,8 @@
 
     Quaternion_file_name = "3grains_Quaternions" # Name given to the grains orientation quaternions file
 
-    gammaBASE = 1.500000 # Base value of γ from which gaussian is substracted or added
-    GgammaBASE =  0.471404 # Value of g(γ) corresponding to gammaBASE
+    gammaBASE = 1.500000 # Base value of gamma from which gaussian is substracted or added
+    GgammaBASE =  0.471404 # Value of g(gamma) corresponding to gammaBASE
     f0gammaBASE =  0.124961 # Value of function f corresponding to gammaBASE
 
     sigmaBASE = 1.5 # (J/m^2); Base value of energy from  which gaussian is substracted or added

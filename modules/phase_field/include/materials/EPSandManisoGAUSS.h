@@ -1,6 +1,6 @@
 
 // 5D Gaussian anisotropy material object
-// Material properties adding anysotroopy to ε [or also called k] and m;
+// Material properties adding anysotroopy to epsilon [or also called k] and m;
 // L  is isotropic and computed from a given mobility.
 
 
