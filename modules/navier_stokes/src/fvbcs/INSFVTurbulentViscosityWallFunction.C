@@ -87,51 +87,52 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
-    mut_log = mu_wall-mu; 
+    mut_log = mu_wall - mu;
   }
   else if (_wall_treatment == "eq_incremental")
   {
     // Incremental solve on y_plus to get the near-wall quantities
     y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
     mu_wall = mu * (NS::von_karman_constant * y_plus /
-                        std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
-    mut_log = mu_wall-mu;
+                    std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
+    mut_log = mu_wall - mu;
   }
   else if (_wall_treatment == "eq_linearized")
   {
     // Linearized approximation to the wall function to find the near-wall quantities faster
     const ADReal a_c = 1 / NS::von_karman_constant;
     const ADReal b_c = 1 / NS::von_karman_constant *
-                        (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
+                       (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
     const ADReal c_c = parallel_speed;
-    
+
     u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
-    mut_log = mu_wall-mu; 
+    mut_log = mu_wall - mu;
   }
   else if (_wall_treatment == "neq")
   {
     // Assign non-equilibrium wall function value
-    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, old_state)) * rho / mu;
+    y_plus =
+        std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, old_state)) * rho / mu;
     mu_wall = mu * (NS::von_karman_constant * y_plus /
-                        std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
-    mut_log = mu_wall-mu;
+                    std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
+    mut_log = mu_wall - mu;
   }
   if (y_plus <= 5.0)
     // sub-laminar layer
     return 0.0;
   else if (y_plus >= 30.0)
     // log-layer
-    return std::max(mut_log,1e-12);
+    return std::max(mut_log, 1e-12);
   else
   {
     // buffer layer
     const auto blending_function = (y_plus - 5.0) / 25.0;
     // the blending depends on the mut_log at y+=30
     const auto mut_log = mu * (NS::von_karman_constant * 30.0 /
-                        std::log(std::max(NS::E_turb_constant * 30.0, 1 + 1e-4)) -
-                    1.0); 
-    return blending_function * std::max(mut_log,1e-12);
+                                   std::log(std::max(NS::E_turb_constant * 30.0, 1 + 1e-4)) -
+                               1.0);
+    return blending_function * std::max(mut_log, 1e-12);
   }
 }

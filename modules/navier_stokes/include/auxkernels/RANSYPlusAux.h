@@ -9,25 +9,25 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
-
+#include "AuxKernel.h"
+#include "INSFVVelocityVariable.h"
 /**
- * This boundary condition applies a wall function for the energy equation for turbulent flows
+ * Computes wall y+ based on wall functions.
  */
-class INSFVTurbulentTemperatureWallFunction : public FVFluxBC
+class RANSYPlusAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
-  INSFVTurbulentTemperatureWallFunction(const InputParameters & parameters);
+
+  virtual void initialSetup() override;
+
+  RANSYPlusAux(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  virtual Real computeValue() override;
 
-  /// the dimension of the domain
+  /// the dimension of the simulation
   const unsigned int _dim;
-
-  /// Wall Temperature
-  const Moose::Functor<ADReal> & _T_w;
 
   /// x-velocity
   const Moose::Functor<ADReal> & _u_var;
@@ -36,20 +36,28 @@ protected:
   /// z-velocity
   const Moose::Functor<ADReal> * _w_var;
 
-  /// Density
-  const Moose::Functor<ADReal> & _rho;
-  /// Dynamic viscosity
-  const Moose::Functor<ADReal> & _mu;
-  /// The specific heat at constant pressure
-  const Moose::Functor<ADReal> & _cp;
-  /// Thermal conductivity
-  const Moose::Functor<ADReal> & _kappa;
-  /// Turbulent Prandtl number near the wall
-  const Moose::Functor<ADReal> & _Pr_t;
   /// Turbulent kinetic energy
   const Moose::Functor<ADReal> & _k;
-  /// C_mu turbulent coefficient
-  const Real _C_mu;
+
+  /// Density
+  const Moose::Functor<ADReal> & _rho;
+
+  /// Dynamic viscosity
+  const Moose::Functor<ADReal> & _mu;
+
+  /// Wall boundaries
+  const std::vector<BoundaryName> & _wall_boundary_names;
+
   /// Method used for wall treatment
   const MooseEnum _wall_treatment;
+
+  /// C_mu constant
+  const Real _C_mu;
+
+  ///@{
+  /// Maps for wall treatement
+  std::map<const Elem *, bool> _wall_bounded;
+  std::map<const Elem *, std::vector<Real>> _dist;
+  std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
+  ///@}
 };
