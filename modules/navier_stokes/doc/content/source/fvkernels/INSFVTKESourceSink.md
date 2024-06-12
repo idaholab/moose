@@ -71,7 +71,11 @@ G_k = 0.0 \,,
 In the `logarithmic` boundary layers the production term is no longer negligible and is defined as:
 
 \begin{equation}
+<<<<<<< HEAD
 G_k = \tau_w ||\nabla \vec{u}|| = \mu_w ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} \sqrt(k)}{\kappa y_p} \,,
+=======
+G_k = \tau_w ||\nabla \vec{u}|| = \left( \mu_t + \mu \right) ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} \sqrt(k)}{\kappa y_p} \,,
+>>>>>>> 2b754e7515 (Enhancements to the k-epsilon model. #27887)
 \end{equation}
 
 where:
@@ -81,12 +85,16 @@ where:
 - $||\nabla \vec{u}||$ is the near wall velocity gradient norm, which is defined as $||\nabla \vec{u}|| = (\nabla \vec{u} \cdot \hat{n}) \cdot \hat{n}$,
 - $\kappa = 0.41$ is the von Kármán constant.
 
-The formulation assumes that the near wall value is already imposed in the $\mu_t$ functor. 
+The formulation assumes that the near wall value is already imposed in the $\mu_t$ functor.
 
 When solving a linear problem, instead of the nonlinear formulation, the production term is formulated as:
 
 \begin{equation}
+<<<<<<< HEAD
 G_k =  \mu_w ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} k}{\sqrt{k_{old}} \kappa y_p} \,.
+=======
+G_k =  \left( \mu_t + \mu \right) ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} k}{\sqrt{k_{old}} \kappa y_p} \,.
+>>>>>>> 2b754e7515 (Enhancements to the k-epsilon model. #27887)
 \end{equation}
 
 where:

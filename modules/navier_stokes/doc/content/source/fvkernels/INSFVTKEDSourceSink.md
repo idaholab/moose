@@ -8,7 +8,11 @@ A different treatment is used for the bulk and the near wall regions.
 
 ## Bulk formulation:
 
+<<<<<<< HEAD
 The production of turbulent kinetic energy dissipation $G_\epsilon$ is modeled as follows:
+=======
+The turbulent production $G_\epsilon$ is modeled as follows:
+>>>>>>> 2b754e7515 (Enhancements to the k-epsilon model. #27887)
 
 \begin{equation}
 G_{\epsilon} = C_{1,\epsilon} \frac{\epsilon}{k} G_k \,,
@@ -40,9 +44,9 @@ A separate formulation is used for the `sub-laminar` and `logarithmic` boundary 
 The determination of whether the near-wall cell lies in the laminar or logarithmic region
 is performed via the non-dimensional wall distance $y^+$.
 The non-dimensional wall distance can be defined differently according to the
-[!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) parameter. 
+[!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) parameter.
 
-The four formulations are described in more detail in [INSFVTurbulentViscosityWallFunction.md]. 
+The four formulations are described in more detail in [INSFVTurbulentViscosityWallFunction.md].
 
 If an equilibrium [!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) is defined, i.e. `eq_newton`,`eq_incremental` or `eq_linearized`, the standard wall function formulations are used in which $y^+$ is found:
 
