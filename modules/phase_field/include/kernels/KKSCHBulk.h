@@ -37,8 +37,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  ///@{
-  /// Phase concnetration variables
+  ///@{ Phase concentration variables
   unsigned int _ca_var;
   const VariableName _ca_name;
   unsigned int _cb_var;

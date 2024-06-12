@@ -24,8 +24,9 @@ NestedSolveTempl<is_ad>::validParams()
   params.addParam<Real>("absolute_tolerance",
                         absoluteToleranceDefault(),
                         "Absolute convergence tolerance for Newton iteration");
-  params.addParam<Real>(
-      "x_tolerance", xToleranceDefault(), "Threshold for minimum step size of linear iterations");
+  params.addParam<Real>("step_size_tolerance",
+                        xToleranceDefault(),
+                        "Minimum step size of linear iterations relative to value of the solution");
   params.addParam<unsigned int>(
       "min_iterations",
       minIterationsDefault(),
@@ -37,6 +38,13 @@ NestedSolveTempl<is_ad>::validParams()
                         "Factor applied to relative and absolute "
                         "tolerance for acceptable nonlinear convergence if "
                         "iterations are no longer making progress");
+  params.addParam<Real>("damping_factor",
+                        dampingFactorDefault(),
+                        "Factor applied to step size if guess does not satisfy damping criteria");
+  params.addParam<unsigned int>(
+      "max_damping_iterations",
+      maxDampingIterationsDefault(),
+      "Maximum number of damping steps per linear iteration of nested solve");
   return params;
 }
 
@@ -44,7 +52,9 @@ template <bool is_ad>
 NestedSolveTempl<is_ad>::NestedSolveTempl()
   : _relative_tolerance_square(Utility::pow<2>(relativeToleranceDefault())),
     _absolute_tolerance_square(Utility::pow<2>(absoluteToleranceDefault())),
-    _x_tolerance_square(Utility::pow<2>(xToleranceDefault())),
+    _delta_thresh(xToleranceDefault()),
+    _damping_factor(dampingFactorDefault()),
+    _max_damping_iterations(maxDampingIterationsDefault()),
     _min_iterations(minIterationsDefault()),
     _max_iterations(maxIterationsDefault()),
     _acceptable_multiplier(acceptableMultiplierDefault()),
@@ -57,7 +67,9 @@ template <bool is_ad>
 NestedSolveTempl<is_ad>::NestedSolveTempl(const InputParameters & params)
   : _relative_tolerance_square(Utility::pow<2>(params.get<Real>("relative_tolerance"))),
     _absolute_tolerance_square(Utility::pow<2>(params.get<Real>("absolute_tolerance"))),
-    _x_tolerance_square(Utility::pow<2>(params.get<Real>("x_tolerance"))),
+    _delta_thresh(params.get<Real>("step_size_tolerance")),
+    _damping_factor(params.get<Real>("damping_factor")),
+    _max_damping_iterations(params.get<unsigned int>("max_damping_iterations")),
     _min_iterations(params.get<unsigned int>("min_iterations")),
     _max_iterations(params.get<unsigned int>("max_iterations")),
     _acceptable_multiplier(params.get<Real>("acceptable_multiplier")),
@@ -90,14 +102,46 @@ template <bool is_ad>
 Real
 NestedSolveTempl<is_ad>::normSquare(const NSReal & v)
 {
-  return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
+  return Utility::pow<2>(MetaPhysicL::raw_value(v));
 }
 
 template <bool is_ad>
 Real
 NestedSolveTempl<is_ad>::normSquare(const NSRealVectorValue & v)
 {
-  return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
+  return (MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v));
+}
+
+template <bool is_ad>
+bool
+NestedSolveTempl<is_ad>::isRelSmall(const NSReal & a, const NSReal & b, const NSReal & c)
+{
+  return (abs(MetaPhysicL::raw_value(a)) <
+          abs(MetaPhysicL::raw_value(c) * MetaPhysicL::raw_value(b)));
+}
+
+template <bool is_ad>
+bool
+NestedSolveTempl<is_ad>::isRelSmall(const NSRealVectorValue & a,
+                                    const NSRealVectorValue & b,
+                                    const NSReal & c)
+{
+  for (const auto i : make_range(LIBMESH_DIM))
+  {
+    if (abs(MetaPhysicL::raw_value(a)(i)) >=
+        abs(MetaPhysicL::raw_value(b)(i) * MetaPhysicL::raw_value(c)))
+      return false;
+  }
+  return true;
+}
+
+template <bool is_ad>
+bool
+NestedSolveTempl<is_ad>::isRelSmall(const DynamicVector & a,
+                                    const DynamicVector & b,
+                                    const NSReal & c)
+{
+  return (a.cwiseAbs().array() < b.cwiseAbs().array() * MetaPhysicL::raw_value(c)).all();
 }
 
 template class NestedSolveTempl<false>;

@@ -1,5 +1,5 @@
 #
-# Two-phase nested KKS toy problem
+# Two-phase damped nested KKS with log-free energies
 #
 
 [Mesh]
@@ -51,8 +51,8 @@
     x1 = 0.0
     y1 = 0.0
     radius = 1.5
-    invalue = 0.2
-    outvalue = 0.1
+    invalue = 1
+    outvalue = 0.0
     int_width = 0.75
   []
   [c]
@@ -61,8 +61,8 @@
     x1 = 0.0
     y1 = 0.0
     radius = 1.5
-    invalue = 0.6
-    outvalue = 0.4
+    invalue = 0.9
+    outvalue = 0.1
     int_width = 0.75
   []
 []
@@ -81,7 +81,7 @@
   [fm]
     type = DerivativeParsedMaterial
     property_name = fm
-    expression = '(0.1-cm)^2'
+    expression = 'cm*log(cm/1e-4) + (1-cm)*log((1-cm)/(1-1e-4))'
     material_property_names = 'cm'
     additional_derivative_symbols = 'cm'
     compute = false
@@ -91,27 +91,37 @@
   [fd]
     type = DerivativeParsedMaterial
     property_name = fd
-    expression = '(0.9-cd)^2'
+    expression = 'cd*log(cd/0.9999) + (1-cd)*log((1-cd)/(1-0.9999))'
     material_property_names = 'cd'
     additional_derivative_symbols = 'cd'
     compute = false
   []
-
+  [C]
+    type = DerivativeParsedMaterial
+    property_name = 'C'
+    material_property_names = 'cm cd'
+    expression = '(cm>0)&(cm<1)&(cd>0)&(cd<1)'
+    compute = false
+  []
   # Compute phase concentrations
   [PhaseConcentrationMaterial]
     type = KKSPhaseConcentrationMaterial
     global_cs = 'c'
     ci_names = 'cm cd'
-    ci_IC = '0 0'
+    ci_IC = '0.1 0.9'
     fa_name = fm
     fb_name = fd
     h_name = h
     min_iterations = 1
     max_iterations = 100
-    absolute_tolerance = 1e-9
-    relative_tolerance = 1e-9
+    absolute_tolerance = 1e-15
+    relative_tolerance = 1e-8
+    step_size_tolerance = 1e-05
     nested_iterations = iter
     outputs = exodus
+    damped_Newton = true
+    conditions = C
+    damping_factor = 0.8
   []
 
   # Compute chain rule terms
@@ -224,16 +234,17 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  scheme = bdf2
+    solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type -pc_factor_shift_type'
-  petsc_options_value = ' asm    lu          nonzero                    nonzero'
+    petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type -pc_factor_shift_type'
+    petsc_options_value = ' asm    lu          nonzero                    nonzero'
 
   l_max_its = 100
   nl_max_its = 100
   num_steps = 3
 
-  dt = 0.1
+  dt = 1e-5
 []
 
 #
@@ -247,6 +258,6 @@
 []
 
 [Outputs]
-  file_base = kks_example_nested
+  file_base = kks_example_nested_damped
   exodus = true
 []

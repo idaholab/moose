@@ -10,14 +10,13 @@
 #pragma once
 
 #include "DerivativeMaterialInterface.h"
-#include "NestedSolve.h"
 
-class KKSPhaseConcentrationDerivatives : public DerivativeMaterialInterface<Material>
+class KKSPhaseConcentrationMultiPhaseDerivatives : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  KKSPhaseConcentrationDerivatives(const InputParameters & parameters);
+  KKSPhaseConcentrationMultiPhaseDerivatives(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -28,33 +27,36 @@ protected:
   /// Names of global concentrations
   const std::vector<VariableName> _c_names;
 
-  /// Phase parameter
-  const VariableName _eta_name;
+  /// Phase parameters
+  const std::vector<VariableName> _eta_names;
+
+  /// Number of phase parameters
+  const unsigned int _num_j;
 
   ///@{ Phase concentrations
-  const std::vector<MaterialPropertyName> _ci_names;
   std::vector<const MaterialProperty<Real> *> _prop_ci;
+  std::vector<MaterialPropertyName> _ci_names;
   ///@}
+
+  /// Derivative of phase concentrations wrt etaj \f$ \frac d{d{eta_j}} c_i \f$
+  std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _dcidetaj;
 
   /// Derivative of phase concentrations wrt global concentrations \f$ \frac d{db} c_i \f$
   std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _dcidb;
 
-  /// Derivative of phase concentrations wrt eta \f$ \frac d{d{eta}} c_i \f$
-  std::vector<std::vector<MaterialProperty<Real> *>> _dcideta;
-
-  ///@{ Free energy names
-  const MaterialName _Fa_name;
-  const MaterialName _Fb_name;
-  ///@}
+  /// Free energy names
+  std::vector<MaterialName> _Fj_names;
 
   /** Second derivative of phase concentrations wrt two phase concentrations \f$ \frac {d^2}{dc_i
-   db_i} F_i \f$
+  db_i} F_i \f$
   */
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _d2Fidcidbi;
 
-  /// Switching function
-  const MaterialProperty<Real> & _prop_h;
+  ///@{ Switching functions
+  std::vector<MaterialPropertyName> _hj_names;
+  std::vector<const MaterialProperty<Real> *> _prop_hj;
+  ///@}
 
-  /// Derivative of switching function
-  const MaterialProperty<Real> & _prop_dh;
+  /// Derivatives of switching functions
+  std::vector<std::vector<const MaterialProperty<Real> *>> _dhjdetai;
 };
