@@ -101,7 +101,9 @@ private:
   void gatherMovingBoundaryChanges();
 
   void gatherMovingBoundaryChangesHelper(const Elem * elem,
+                                         unsigned short side,
                                          const Elem * neigh,
+                                         unsigned short neigh_side,
                                          SubdomainID to_subdomain);
 
   void applyMovingBoundaryChanges(MooseMesh & mesh);

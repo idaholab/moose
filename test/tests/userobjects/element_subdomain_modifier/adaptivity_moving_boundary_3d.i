@@ -18,6 +18,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'gen'
     block_id = 1
+    block_name = 'left'
     bottom_left = '-1 -1 0'
     top_right = '0 1 1'
   []
@@ -25,27 +26,30 @@
     type = SubdomainBoundingBoxGenerator
     input = 'left'
     block_id = 2
+    block_name = 'right'
     bottom_left = '0 -1 0'
     top_right = '1 1 1'
   []
   [moving_boundary]
-    type = SideSetsAroundSubdomainGenerator
+    type = SideSetsBetweenSubdomainsGenerator
     input = 'right'
-    block = 1
     new_boundary = 'moving_boundary'
-    normal = '1 0 0'
+    primary_block = 'left'
+    paired_block = 'right'
   []
 []
 
 [UserObjects]
   [moving_circle]
+    debug_element_id = 0
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
     block = 2
     criterion_type = ABOVE
     threshold = 0.5
     subdomain_id = 1
-    moving_boundary_name = moving_boundary
+    moving_boundaries = 'moving_boundary'
+    moving_boundary_subdomain_pairs = 'left right'
     execute_on = 'TIMESTEP_BEGIN'
   []
 []
@@ -103,5 +107,4 @@
 
 [Outputs]
   exodus = true
-
 []

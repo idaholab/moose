@@ -40,7 +40,7 @@
 
 [UserObjects]
   [moving_circle]
-    debug_element_id = 652
+    debug_element_id = 592
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
     block = 2
@@ -86,17 +86,17 @@
     []
   []
   [Markers]
-    [marker]
+    [efm]
       type = ErrorFractionMarker
       indicator = indicator
       coarsen = 0.2
       refine = 0.5
     []
-    # [marker]
-    #   type = BoundaryPreservedMarker
-    #   preserved_boundary = moving_boundary
-    #   marker = 'efm'
-    # []
+    [marker]
+      type = BoundaryPreservedMarker
+      preserved_boundary = moving_boundary
+      marker = 'efm'
+    []
   []
 []
 

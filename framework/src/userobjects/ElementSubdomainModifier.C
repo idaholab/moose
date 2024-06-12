@@ -313,6 +313,9 @@ ElementSubdomainModifier::removeInactiveMovingBoundary(MooseMesh & mesh)
     auto bnd = i.second.second;
     if (_moving_boundary_names.count(bnd) && !elem->active())
     {
+      if (elem->id() == _dbg_elem_id)
+        std::cout << "**removing side** elem " << elem->id() << " side " << side << " bnd " << bnd
+                  << std::endl;
       bnd_info.remove_side(elem, side, bnd);
 
       std::vector<const Elem *> elem_family;
@@ -341,12 +344,14 @@ ElementSubdomainModifier::gatherMovingBoundaryChanges()
     const auto & [from_subdomain, to_subdomain] = subdomain_assignment;
 
     // The existing moving boundaries on the element side should be removed
-    std::vector<const Elem *> elem_family;
-    elem->top_parent()->family_tree(elem_family);
-    for (auto felem : elem_family)
-      for (auto itr = sidesets.lower_bound(felem); itr != sidesets.upper_bound(felem); itr++)
-        if (_moving_boundary_names.count(itr->second.second))
-          _remove_element_sides[felem->id()].emplace(itr->second.first, itr->second.second);
+    for (auto itr = sidesets.lower_bound(elem); itr != sidesets.upper_bound(elem); itr++)
+      if (_moving_boundary_names.count(itr->second.second))
+      {
+        if (elem->id() == _dbg_elem_id)
+          std::cout << "    removing side: elem " << elem->id() << " side " << itr->second.first
+                    << " bnd " << itr->second.second << std::endl;
+        _remove_element_sides[elem->id()].emplace(itr->second.first, itr->second.second);
+      }
 
     for (auto side : elem->side_index_range())
     {
@@ -357,10 +362,12 @@ ElementSubdomainModifier::gatherMovingBoundaryChanges()
         continue;
       // If neighbor doesn't exist
       else if (!neigh)
-        gatherMovingBoundaryChangesHelper(elem, nullptr, to_subdomain);
+        gatherMovingBoundaryChangesHelper(elem, side, nullptr, 0, to_subdomain);
       // If neighbor exists
       else
       {
+        auto neigh_side = neigh->which_neighbor_am_i(elem);
+
         if (elem_id == _dbg_elem_id)
           std::cout << "side " << side << " neighbor " << neigh->id() << std::endl;
 
@@ -368,7 +375,7 @@ ElementSubdomainModifier::gatherMovingBoundaryChanges()
         {
           if (elem_id == _dbg_elem_id)
             std::cout << "  active" << std::endl;
-          gatherMovingBoundaryChangesHelper(elem, neigh, to_subdomain);
+          gatherMovingBoundaryChangesHelper(elem, side, neigh, neigh_side, to_subdomain);
         }
         else
         {
@@ -378,9 +385,10 @@ ElementSubdomainModifier::gatherMovingBoundaryChanges()
           neigh->top_parent()->active_family_tree_by_neighbor(active_neighs, elem);
           for (auto active_neigh : active_neighs)
           {
-            if (elem_id == _dbg_elem_id)
-              std::cout << "    neighbor child " << active_neigh->id() << std::endl;
-            gatherMovingBoundaryChangesHelper(elem, active_neigh, to_subdomain);
+            if (elem_id == _dbg_elem_id || active_neigh->id() == _dbg_elem_id)
+              std::cout << "    elem " << elem_id << " neighbor child " << active_neigh->id()
+                        << std::endl;
+            gatherMovingBoundaryChangesHelper(elem, side, active_neigh, neigh_side, to_subdomain);
           }
         }
       }
@@ -390,13 +398,14 @@ ElementSubdomainModifier::gatherMovingBoundaryChanges()
 
 void
 ElementSubdomainModifier::gatherMovingBoundaryChangesHelper(const Elem * elem,
+                                                            unsigned short side,
                                                             const Elem * neigh,
+                                                            unsigned short neigh_side,
                                                             SubdomainID to_subdomain)
 {
   const auto & sidesets = _mesh.getMesh().get_boundary_info().get_sideset_map();
 
   // Detect element side change
-  auto side = elem->which_neighbor_am_i(neigh);
   SubdomainPair subdomain_pair = {to_subdomain,
                                   neigh ? neigh->subdomain_id() : Moose::INVALID_BLOCK_ID};
   if (_moving_boundaries.count(subdomain_pair))
@@ -405,16 +414,15 @@ ElementSubdomainModifier::gatherMovingBoundaryChangesHelper(const Elem * elem,
   // Detect neighbor side change (by reversing the subdomain pair)
   if (neigh)
   {
-    auto neigh_side = neigh->which_neighbor_am_i(elem);
     subdomain_pair = {subdomain_pair.second, subdomain_pair.first};
     if (_moving_boundaries.count(subdomain_pair))
       _add_neighbor_sides[neigh->id()].emplace(neigh_side, _moving_boundaries.at(subdomain_pair));
 
     // The existing moving boundaries on the neighbor side should be removed
     for (auto itr = sidesets.lower_bound(neigh); itr != sidesets.upper_bound(neigh); itr++)
-      if (_moving_boundary_names.count(itr->second.second))
+      if (itr->second.first == neigh_side && _moving_boundary_names.count(itr->second.second))
       {
-        if (elem->id() == _dbg_elem_id)
+        if (elem->id() == _dbg_elem_id || neigh->id() == _dbg_elem_id)
           std::cout << "      removing neighbor side " << neigh_side << std::endl;
         _remove_neighbor_sides[neigh->id()].emplace(itr->second.first, itr->second.second);
       }
@@ -426,12 +434,21 @@ ElementSubdomainModifier::applyMovingBoundaryChanges(MooseMesh & mesh)
 {
   auto & bnd_info = mesh.getMesh().get_boundary_info();
 
+  std::unordered_map<processor_id_type,
+                     std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>>>
+      add_ghost_sides, remove_ghost_sides;
+
   // Remove element sides from moving boundaries
   for (const auto & [elem_id, sides] : _remove_element_sides)
   {
     auto elem = mesh.elemPtr(elem_id);
     for (const auto & [side, bnd] : sides)
+    {
+      if (elem->id() == _dbg_elem_id)
+        std::cout << "**removing element side** elem " << elem->id() << " side " << side << " bnd "
+                  << bnd << std::endl;
       bnd_info.remove_side(elem, side, bnd);
+    }
   }
 
   // Remove neighbor sides from moving boundaries
@@ -439,7 +456,14 @@ ElementSubdomainModifier::applyMovingBoundaryChanges(MooseMesh & mesh)
   {
     auto elem = mesh.elemPtr(elem_id);
     for (const auto & [side, bnd] : sides)
+    {
+      if (elem->id() == _dbg_elem_id)
+        std::cout << "**removing neighbor side** elem " << elem->id() << " side " << side << " bnd "
+                  << bnd << std::endl;
       bnd_info.remove_side(elem, side, bnd);
+      if (elem->processor_id() != processor_id())
+        remove_ghost_sides[elem->processor_id()].push_back({elem_id, side, bnd});
+    }
   }
 
   // Add element sides to moving boundaries
@@ -455,75 +479,38 @@ ElementSubdomainModifier::applyMovingBoundaryChanges(MooseMesh & mesh)
   {
     auto elem = mesh.elemPtr(elem_id);
     for (const auto & [side, bnd] : sides)
+    {
       bnd_info.add_side(elem, side, bnd);
+      if (elem->processor_id() != processor_id())
+        add_ghost_sides[elem->processor_id()].push_back({elem_id, side, bnd});
+    }
   }
+
+  Parallel::push_parallel_vector_data(
+      bnd_info.comm(),
+      add_ghost_sides,
+      [&mesh, &bnd_info, this](
+          processor_id_type,
+          const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
+      {
+        for (const auto & [elem_id, side, bnd] : received)
+          bnd_info.add_side(mesh.elemPtr(elem_id), side, bnd);
+      });
+
+  Parallel::push_parallel_vector_data(
+      bnd_info.comm(),
+      remove_ghost_sides,
+      [&mesh, &bnd_info, this](
+          processor_id_type,
+          const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
+      {
+        for (const auto & [elem_id, side, bnd] : received)
+          bnd_info.remove_side(mesh.elemPtr(elem_id), side, bnd);
+      });
 
   bnd_info.parallel_sync_side_ids();
   bnd_info.parallel_sync_node_ids();
   mesh.update();
-
-  // for (auto side : elem->side_index_range())
-  // {
-  //   auto neigh = elem->neighbor_ptr(side);
-
-  //   if (neigh)
-  //   {
-  //     if (subdomainIsActive(neigh->subdomain_id()))
-  //   }
-
-  //   if (neigh)
-  //     subdomain_pair.second = neigh->subdomain_id();
-  //   auto bnd = _moving_boundaries.count(subdomain_pair) ? _moving_boundaries[subdomain_pair]
-  //                                                       : Moose::INVALID_BOUNDARY_ID;
-
-  //   else if (neigh->active() && neigh != libMesh::remote_elem)
-  //   {
-  //     if (subdomainIsActive(neigh->subdomain_id()))
-  //       remove_sides[neigh->id()].push_back(neigh->which_neighbor_am_i(elem));
-  //     else
-  //       add_sides[elem->id()].push_back(side);
-  //   }
-  //   else if (!neigh->active() && neigh != libMesh::remote_elem)
-  //   {
-  //     std::vector<const Elem *> neigh_children;
-  //     neigh->top_parent()->active_family_tree_by_neighbor(neigh_children, elem);
-
-  //     bool neigh_children_on_active_subdomain =
-  //         std::all_of(neigh_children.begin(),
-  //                     neigh_children.end(),
-  //                     [this](const Elem * neigh_child)
-  //                     { return subdomainIsActive(neigh_child->subdomain_id()); });
-
-  //     bool neigh_children_on_inactive_subdomain =
-  //         std::all_of(neigh_children.begin(),
-  //                     neigh_children.end(),
-  //                     [this](const Elem * neigh_child)
-  //                     { return !subdomainIsActive(neigh_child->subdomain_id()); });
-
-  //     if (neigh_children_on_active_subdomain)
-  //       for (auto neigh_child : neigh_children)
-  //         remove_sides[neigh_child->id()].push_back(neigh_child->which_neighbor_am_i(elem));
-  //     else if (neigh_children_on_inactive_subdomain)
-  //       add_sides[elem->id()].push_back(side);
-  //     else
-  //       mooseException(
-  //           "The neighbor element of a newly activated element ",
-  //           elem->id(),
-  //           " has been adaptively refined. Part of the neighbor element is on the "
-  //           "active subdomain, while other part is on the inactive subdomain. It is therefore "
-  //           "not possible to update the element side on the moving boundary consistently.");
-  //   }
-  // }
-  // Parallel::push_parallel_vector_data(
-  //     bnd_info.comm(),
-  //     remove_ghosted_sides,
-  //     [&mesh, &bnd_info, this](processor_id_type,
-  //                              const std::vector<std::pair<dof_id_type, unsigned short>> &
-  //                              received)
-  //     {
-  //       for (const auto & [elem_id, side] : received)
-  //         bnd_info.remove_side(mesh.elemPtr(elem_id), side, _moving_boundary_id);
-  //     });
 }
 
 ConstElemRange &
