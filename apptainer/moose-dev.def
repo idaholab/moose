@@ -9,6 +9,7 @@
 {#- CONDA_ALT_CHANNEL: An alternate channel to add to conda                                   -#}
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
+{#- LIBTORCH_DISTRIBUTION: The libtorch distribution to use (e.g. cpu, cu121, etc)            -#}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
@@ -21,6 +22,10 @@
 
 {#- The installation location for wasp                                                        -#}
 {%- set WASP_DIR = '/opt/wasp' -%}
+{#- The installation location for libtorch                                                    -#}
+{%- set LIBTORCH_DEST = '/opt' -%}
+{#- The version of libtorch to be defined                                                     -#}
+{%- set LIBTORCH_VER = '2.1.0' -%}
 
 {#- The script used to install wasp                                                           -#}
 {%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
@@ -34,6 +39,10 @@ From: {{ APPTAINER_FROM }}
 
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
+    export LIBTORCH_DIR={{ LIBTORCH_DEST }}/libtorch
+
+    export HAS_CUDA=$([ [ -d /usr/local/cuda ] && /usr/bin/nvidia-smi &> /dev/null ] && 1 || 0)
+    export MPIR_CVAR_ENABLE_GPU=$(HAS_CUDA)
 %post
     umask 022
 
@@ -49,6 +58,11 @@ From: {{ APPTAINER_FROM }}
     WASP_GIT_REMOTE={{ WASP_GIT_REMOTE }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
 
+    # Libtorch-related vars
+    LIBTORCH_DEST={{ LIBTORCH_DEST }}
+    LIBTORCH_VER={{ LIBTORCH_VER }}
+    LIBTORCH_DISTRIBUTION={{ LIBTORCH_DISTRIBUTION or "cpu" }}
+
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
     PYTHON_VERSION=3.10
@@ -59,6 +73,9 @@ From: {{ APPTAINER_FROM }}
     cd ${WASP_SRC_DIR}
     git checkout ${WASP_GIT_SHA}
     git submodule update --init --recursive
+
+    # Install libtorch from a precompiled package
+    ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest=${LIBTORCH_DEST} --libtorch-distribution=${LIBTORCH_DISTRIBUTION}
 
     # Install miniforge in MOOSE_MINIFORGE
     MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
@@ -99,3 +116,4 @@ From: {{ APPTAINER_FROM }}
 %files
     {{ MOOSE_DIR }}/scripts/{{ WASP_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ WASP_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_wasp.sh {{ ROOT_BUILD_DIR }}/configure_wasp.sh
+    {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
