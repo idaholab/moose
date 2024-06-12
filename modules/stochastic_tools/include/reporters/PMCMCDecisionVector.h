@@ -11,19 +11,19 @@
 
 #include "GeneralReporter.h"
 #include "PMCMCBase.h"
-#include "LikelihoodFunctionBase.h"
+#include "LikelihoodFunctionBaseVector.h"
 #include "LikelihoodInterface.h"
 #include "Distribution.h"
 
 /**
- * PMCMCDecision will help making sample accept/reject decisions in MCMC
+ * PMCMCDecisionVector will help making sample accept/reject decisions in MCMC
  * schemes (for e.g., when performing Bayesian inference).
  */
-class PMCMCDecision : public GeneralReporter, public LikelihoodInterface
+class PMCMCDecisionVector : public GeneralReporter, public LikelihoodInterface
 {
 public:
   static InputParameters validParams();
-  PMCMCDecision(const InputParameters & parameters);
+  PMCMCDecisionVector(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void finalize() override {}
   virtual void execute() override;
@@ -63,10 +63,10 @@ protected:
   virtual void nextSeeds() {}
 
   /// Model output value from SubApp
-  const std::vector<Real> & _output_value;
+  const std::vector<std::vector<Real>> & _output_value;
 
   /// Transfer the right outputs to the file
-  std::vector<Real> & _outputs_required;
+  std::vector<std::vector<Real>> & _outputs_required;
 
   /// Model input data that is uncertain
   std::vector<std::vector<Real>> & _inputs;
@@ -81,8 +81,7 @@ protected:
   Real & _noise;
 
   /// Storage for the likelihood objects to be utilized
-  std::vector<const LikelihoodFunctionBase *> _likelihoods;
-  std::vector<const LikelihoodFunctionBaseVector *> _likelihood_vectors;
+  std::vector<const LikelihoodFunctionBaseVector *> _likelihoods;
 
   /// The MCMC sampler
   Sampler & _sampler;
@@ -118,7 +117,7 @@ protected:
   std::vector<Real> _var_prev;
 
   /// Storage for previous outputs
-  std::vector<Real> _outputs_prev;
+  std::vector<std::vector<Real>> _outputs_prev;
 
 private:
   /// Communicator that was split based on samples that have rows

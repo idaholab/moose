@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PMCMCDecision.h"
+#include "PMCMCDecisionVector.h"
 #include "Sampler.h"
 #include "DenseMatrix.h"
 
-registerMooseObject("StochasticToolsApp", PMCMCDecision);
+registerMooseObject("StochasticToolsApp", PMCMCDecisionVector);
 
 InputParameters
-PMCMCDecision::validParams()
+PMCMCDecisionVector::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params += LikelihoodInterface::validParams();
@@ -36,11 +36,11 @@ PMCMCDecision::validParams()
   return params;
 }
 
-PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
+PMCMCDecisionVector::PMCMCDecisionVector(const InputParameters & parameters)
   : GeneralReporter(parameters),
     LikelihoodInterface(parameters),
-    _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
-    _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
+    _output_value(getReporterValue<std::vector<std::vector<Real>>>("output_value", REPORTER_MODE_DISTRIBUTED)),
+    _outputs_required(declareValue<std::vector<std::vector<Real>>>("outputs_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _tpm(declareValue<std::vector<Real>>("tpm")),
     _variance(declareValue<std::vector<Real>>("variance")),
@@ -56,20 +56,11 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
-  {
-    if (queryLikelihoodFunctionType(name) == LikelihoodFunctionTypes::SCALAR)
-      _likelihoods.push_back(getLikelihoodFunctionByName(name));
-    else if (queryLikelihoodFunctionType(name) == LikelihoodFunctionTypes::VECTOR)
-      _likelihood_vectors.push_back(getLikelihoodVectorFunctionByName(name));
-  }
-  if (_likelihoods.size() > 0 && _likelihood_vectors.size() > 0)
-    mooseError(
-        "Currently unable to simultaneously handle vector and scalar likelihoods simultaneously");
+    _likelihoods.push_back(getLikelihoodVectorFunctionByName(name));
 
   // Check whether the selected sampler is an MCMC sampler or not
   if (!_pmcmc)
     paramError("sampler", "The selected sampler is not of type MCMC.");
-
   // Fetching the sampler characteristics
   _props = _pmcmc->getNumParallelProposals();
   _num_confg_values = _pmcmc->getNumberOfConfigValues();
@@ -79,16 +70,17 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   _inputs.resize(_props);
   for (unsigned int i = 0; i < _props; ++i)
     _inputs[i].resize(_sampler.getNumberOfCols() - _num_confg_params);
-  _outputs_required.resize(_sampler.getNumberOfRows());
-  _tpm.resize(_props);
-  _variance.resize(_props);
+_tpm.resize(_props);
+_variance.resize(_props);
 }
 
 void
-PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<Real> & input_matrix)
+PMCMCDecisionVector::computeEvidence(std::vector<Real> & evidence,
+                                     const DenseMatrix<Real> & input_matrix)
 {
-  std::vector<Real> out1(_num_confg_values);
-  std::vector<Real> out2(_num_confg_values);
+  std::vector<std::vector<Real>> out1(_num_confg_values);
+  std::vector<std::vector<Real>> out2(_num_confg_values);
+  
   for (unsigned int i = 0; i < evidence.size(); ++i)
   {
     evidence[i] = 0.0;
@@ -112,56 +104,23 @@ PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<R
         evidence[i] -= _likelihoods[j]->function(out2);
     }
     else
-    {
       for (unsigned int j = 0; j < _likelihoods.size(); ++j)
         evidence[i] += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(out2));
-    }
-  }
-  std::vector<std::vector<Real>> out1v(_num_confg_values);
-  std::vector<std::vector<Real>> out2v(_num_confg_values);
-  for (unsigned int i = 0; i < evidence.size(); ++i)
-  {
-    evidence[i] = 0.0;
-    for (unsigned int j = 0; j < _priors.size(); ++j)
-      evidence[i] += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
-                      std::log(_priors[j]->pdf(_data_prev(i, j))));
-    for (unsigned int j = 0; j < _num_confg_values; ++j)
-    {
-      out1v[i][j] = _outputs_required[j * _props + i];
-      out2v[i][j] = _outputs_prev[j * _props + i];
-    }
-    if (_var_prior)
-    {
-      evidence[i] += (std::log(_var_prior->pdf(_new_var_samples[i])) -
-                      std::log(_var_prior->pdf(_var_prev[i])));
-      _noise = std::sqrt(_new_var_samples[i]);
-      for (unsigned int j = 0; j < _likelihood_vectors.size(); ++j)
-        evidence[i] += _likelihood_vectors[j]->function(out1v);
-      _noise = std::sqrt(_var_prev[i]);
-      for (unsigned int j = 0; j < _likelihood_vectors.size(); ++j)
-        evidence[i] -= _likelihood_vectors[j]->function(out2v);
-    }
-    else
-    {
-      for (unsigned int j = 0; j < _likelihood_vectors.size(); ++j)
-        evidence[i] +=
-            (_likelihood_vectors[j]->function(out1v) - _likelihood_vectors[j]->function(out2v));
-    }
   }
 }
 
 void
-PMCMCDecision::computeTransitionVector(std::vector<Real> & tv,
-                                       const std::vector<Real> & /*evidence*/)
+PMCMCDecisionVector::computeTransitionVector(std::vector<Real> & tv,
+                                             const std::vector<Real> & /*evidence*/)
 {
   tv.assign(_props, 1.0);
 }
 
 void
-PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
-                           DenseMatrix<Real> & input_matrix,
-                           const std::vector<Real> & tv,
-                           const unsigned int & parallel_index)
+PMCMCDecisionVector::nextSamples(std::vector<Real> & req_inputs,
+                                 DenseMatrix<Real> & input_matrix,
+                                 const std::vector<Real> & tv,
+                                 const unsigned int & parallel_index)
 {
   if (tv[parallel_index] >= _rnd_vec[parallel_index])
   {
@@ -184,7 +143,7 @@ PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
 }
 
 void
-PMCMCDecision::execute()
+PMCMCDecisionVector::execute()
 {
   if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _t_step)
   {

@@ -15,16 +15,15 @@
 /**
  * All Likelihoods should inherit from this class
  */
-class LikelihoodFunctionBase : public MooseObject
+class LikelihoodFunctionBaseVector : public MooseObject
 {
 public:
   static InputParameters validParams();
-  LikelihoodFunctionBase(const InputParameters & parameters);
+  LikelihoodFunctionBaseVector(const InputParameters & parameters);
 
   /**
    * Return the probability density or mass function at vector x
    * @param x The input vector x
    */
-  virtual Real function(const std::vector<Real> & x) const = 0;
-  //virtual Real function(const std::vector<std::vector<Real>> & x) const = 0;
+  virtual Real function(const std::vector<std::vector<Real>> & x) const = 0;
 };
