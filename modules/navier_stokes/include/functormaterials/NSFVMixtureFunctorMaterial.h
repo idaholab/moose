@@ -29,13 +29,13 @@ protected:
   std::vector<const Moose::Functor<ADReal> *> _phase_2_properties;
 
   /// Vector of phase 1 properties names
-  std::vector<MooseFunctorName> _phase_1_names;
+  const std::vector<MooseFunctorName> _phase_1_names;
 
   /// Vector of phase 2 properties names
-  std::vector<MooseFunctorName> _phase_2_names;
+  const std::vector<MooseFunctorName> _phase_2_names;
 
   /// Vector of mixture properties names
-  std::vector<MooseFunctorName> _mixture_names;
+  const std::vector<MooseFunctorName> _mixture_names;
 
   /// Phase 1 fraction
   const Moose::Functor<ADReal> & _phase_1_fraction;

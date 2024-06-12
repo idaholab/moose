@@ -101,22 +101,22 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
     if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     {
-      if (_index == 1)
+      if (_index == 0)
         _ae = uslipdotn * _u_slip(elemArg(), state);
-      if (_index == 2)
+      if (_index == 1)
         _ae = uslipdotn * (*_v_slip)(elemArg(), state);
-      if (_index == 3)
+      if (_index == 2)
         _ae = uslipdotn * (*_w_slip)(elemArg(), state);
       _ae *= -face_rho_fd;
     }
     if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     {
-      if (_index == 1)
+      if (_index == 0)
         _ae = uslipdotn * _u_slip(neighborArg(), state);
-      if (_index == 2)
+      if (_index == 1)
         _ae = uslipdotn * (*_v_slip)(neighborArg(), state);
-      if (_index == 3)
+      if (_index == 2)
         _ae = uslipdotn * (*_w_slip)(neighborArg(), state);
       _an *= face_rho_fd;
     }
