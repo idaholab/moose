@@ -42,9 +42,10 @@
     criterion_type = BELOW
     threshold = 0
     subdomain_id = 1
+    active_subdomains = 'left'
     moving_boundaries = 'moving_boundary'
     moving_boundary_subdomain_pairs = 'left right'
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
@@ -74,14 +75,14 @@
     type = StatefulMaterial
     initial_diffusivity = 0.5
     multiplier = 2
-    block = 1
+    block = 'left'
     outputs = exodus
   []
   [non_stateful]
     type = GenericConstantMaterial
     prop_names = 'diffusivity'
-    prop_values = '0.5'
-    block = 2
+    prop_values = '-1'
+    block = 'right'
     outputs = exodus
   []
 []

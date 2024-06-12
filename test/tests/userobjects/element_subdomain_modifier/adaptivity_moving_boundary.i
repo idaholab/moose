@@ -40,7 +40,6 @@
 
 [UserObjects]
   [moving_circle]
-    debug_element_id = 592
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
     block = 2
