@@ -104,7 +104,8 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _neighbor_vel_y(isCoupled("vel_y") ? coupledNeighborValue("vel_y") : _zero),
     _neighbor_vel_z((_mesh.dimension() == 3 && isCoupled("vel_z")) ? coupledNeighborValue("vel_z")
                                                                    : _zero),
-    _overwrite_current_solution(getParam<bool>("overwrite_current_solution"))
+    _overwrite_current_solution(getParam<bool>("overwrite_current_solution")),
+    _u_old_old_old(_sys.solutionState(3))
 {
   _overwrite_secondary_residual = false;
 
@@ -306,7 +307,6 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
 
   auto & u_dot = *_sys.solutionUDot();
   auto & u_old = _sys.solutionOld();
-  auto & u_old_old_old = _sys.solutionState(3);
 
   // Mass proxy for secondary node.
   const Real mass_proxy = density_secondary * wave_speed_secondary * _dt * nodal_area;
@@ -376,13 +376,13 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
 
   _gap_rate->setNodalValue(gap_rate);
 
-  u_old.set(dof_x, u_old_old_old(dof_x) + 2.0 * velocity_x * _dt);
-  u_old.set(dof_y, u_old_old_old(dof_y) + 2.0 * velocity_y * _dt);
-  u_old.set(dof_z, u_old_old_old(dof_z) + 2.0 * velocity_z * _dt);
+  u_old.set(dof_x, _u_old_old_old(dof_x) + 2.0 * velocity_x * _dt);
+  u_old.set(dof_y, _u_old_old_old(dof_y) + 2.0 * velocity_y * _dt);
+  u_old.set(dof_z, _u_old_old_old(dof_z) + 2.0 * velocity_z * _dt);
 
-  _dof_to_position[dof_x] = u_old_old_old(dof_x) + 2.0 * velocity_x * _dt;
-  _dof_to_position[dof_y] = u_old_old_old(dof_y) + 2.0 * velocity_y * _dt;
-  _dof_to_position[dof_z] = u_old_old_old(dof_z) + 2.0 * velocity_z * _dt;
+  _dof_to_position[dof_x] = _u_old_old_old(dof_x) + 2.0 * velocity_x * _dt;
+  _dof_to_position[dof_y] = _u_old_old_old(dof_y) + 2.0 * velocity_y * _dt;
+  _dof_to_position[dof_z] = _u_old_old_old(dof_z) + 2.0 * velocity_z * _dt;
 
   pinfo->_contact_force = pinfo->_normal * lambda_iteration;
 }
