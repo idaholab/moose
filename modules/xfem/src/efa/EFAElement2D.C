@@ -351,7 +351,7 @@ EFAElement2D::getMasterInfo(EFANode * node,
   }
 
   if (!masters_found)
-    EFAError("In EFAelement2D::getMaterInfo, cannot find the given EFAnode");
+    EFAError("In EFAelement2D::getMasterInfo, cannot find the given EFAnode");
 }
 
 unsigned int
@@ -575,15 +575,18 @@ EFAElement2D::initCrackTip(std::set<EFAElement *> & CrackTipElements)
           EFAError("Element has a neighbor that overlays itself");
 
         // Make sure the current elment hasn't been flagged as a tip element
-        if (_crack_tip_split_element)
-          EFAError("crack_tip_split_element already flagged.  In elem: ",
-                   _id,
-                   " flags: ",
-                   _crack_tip_split_element,
-                   " ",
-                   _edge_neighbors[edge_iter][0]->isCrackTipSplit(),
-                   " ",
-                   _edge_neighbors[edge_iter][1]->isCrackTipSplit());
+        // BWS TODO this error needs to be commented out for branching
+        // from a single element to work
+        // Commented out to allow branching from a single element
+        // if (_crack_tip_split_element)
+        //  EFAError("crack_tip_split_element already flagged.  In elem: ",
+        //           _id,
+        //           " flags: ",
+        //           _crack_tip_split_element,
+        //           " ",
+        //           _edge_neighbors[edge_iter][0]->isCrackTipSplit(),
+        //           " ",
+        //           _edge_neighbors[edge_iter][1]->isCrackTipSplit());
 
         _edge_neighbors[edge_iter][0]->setCrackTipSplit();
         _edge_neighbors[edge_iter][1]->setCrackTipSplit();
@@ -602,7 +605,7 @@ EFAElement2D::getCrackTipSplitElementID() const
   {
     for (unsigned int edge_iter = 0; edge_iter < _num_edges; ++edge_iter)
     {
-      if ((_edge_neighbors[edge_iter].size() == 2) && (_edges[edge_iter]->hasIntersection()))
+      if ((_edge_neighbors[edge_iter].size() >= 2) && (_edges[edge_iter]->hasIntersection()))
       {
         if (_edge_neighbors[edge_iter][0] != nullptr &&
             _edge_neighbors[edge_iter][0]->isCrackTipSplit())
@@ -751,24 +754,25 @@ EFAElement2D::willCrackTipExtend(std::vector<unsigned int> & split_neighbors) co
                  neigh_idx);
 
       EFAElement2D * neighbor_elem = _edge_neighbors[neigh_idx][0];
-      if (neighbor_elem->numFragments() > 2)
-        EFAError("in will_crack_tip_extend() element: ",
-                 neighbor_elem->id(),
-                 " has: ",
-                 neighbor_elem->numFragments(),
-                 " fragments");
-      else if (neighbor_elem->numFragments() == 2)
+      if (neighbor_elem->numFragments() >= 2)
       {
-        EFAFragment2D * frag1 = neighbor_elem->getFragment(0);
-        EFAFragment2D * frag2 = neighbor_elem->getFragment(1);
-        std::vector<EFANode *> neigh_cut_nodes = frag1->getCommonNodes(frag2);
-        if (neigh_cut_nodes.size() != 2)
-          EFAError("2 frags in a elem does not share 2 common nodes");
-        if (_edges[neigh_idx]->isEmbeddedNode(neigh_cut_nodes[0]) ||
-            _edges[neigh_idx]->isEmbeddedNode(neigh_cut_nodes[1]))
+        std::vector<EFAFragment2D *> frags = {};
+        for (unsigned int fragNum = 0; fragNum < neighbor_elem->numFragments(); ++fragNum)
         {
-          split_neighbors.push_back(neigh_idx);
-          will_extend = true;
+          frags.push_back(neighbor_elem->getFragment(fragNum));
+        }
+        std::vector<EFANode *> neigh_cut_nodes;
+        for (unsigned int fragIdx = 1; fragIdx < frags.size() - 1; ++fragIdx)
+        {
+          neigh_cut_nodes = frags[fragIdx - 1]->getCommonNodes(frags[fragIdx]);
+          if (neigh_cut_nodes.size() != 2)
+            EFAError("2 frags in a elem does not share 2 common nodes");
+          if (_edges[neigh_idx]->isEmbeddedNode(neigh_cut_nodes[0]) ||
+              _edges[neigh_idx]->isEmbeddedNode(neigh_cut_nodes[1]))
+          {
+            split_neighbors.push_back(neigh_idx);
+            will_extend = true;
+          }
         }
       }
     } // i
@@ -840,9 +844,12 @@ EFAElement2D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
   // count fragment's cut edges
   unsigned int num_cut_frag_edges = _fragments[0]->getNumCuts();
   unsigned int num_cut_nodes = _fragments[0]->getNumCutNodes();
+
+  unsigned int num_cuts_from_idx = 0;
+  for (unsigned cut_idx = 0; cut_idx < _cut_plane_nodes.size(); ++cut_idx)
+    num_cuts_from_idx += _cut_plane_nodes[cut_idx].size();
+
   unsigned int num_frag_edges = _fragments[0]->numEdges();
-  if (num_cut_frag_edges > 3)
-    EFAError("In element ", _id, " there are more than 2 cut fragment edges");
 
   if (num_cut_frag_edges == 0 && num_cut_nodes == 0)
   {
@@ -857,27 +864,46 @@ EFAElement2D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
     return;
   }
 
+  // check for solo nodes and pair them off to make cuts
+  unsigned int soloNodes = numSoloNodes();
+  if (soloNodes == 2)
+    pairSoloNodes();
+
   // split one fragment into one, two or three new fragments
   std::vector<EFAFragment2D *> new_frags;
-  if (num_cut_frag_edges == 3)
-    new_frags = branchingSplit(EmbeddedNodes);
+  if (num_cut_frag_edges == 3 && num_cut_nodes == 0)
+  {
+    if (isPartial())
+      EFAError("branching is only allowed for an uncut element");
+    new_frags = _fragments[0]->branchingSplit(EmbeddedNodes);
+
+    delete _fragments[0]; // delete old fragment
+    _fragments.clear();
+    _cut_plane_idx.clear();
+    _cut_plane_nodes.clear();
+    for (unsigned int i = 0; i < new_frags.size(); ++i)
+      _fragments.push_back(new_frags[i]);
+
+    fragmentSanityCheck(num_frag_edges, num_cut_frag_edges);
+  }
   else
-    new_frags = _fragments[0]->split();
+  {
+    new_frags = _fragments[0]->split(EmbeddedNodes);
 
-  delete _fragments[0]; // delete the old fragment
-  _fragments.clear();
-  for (unsigned int i = 0; i < new_frags.size(); ++i)
-    _fragments.push_back(new_frags[i]);
+    delete _fragments[0]; // delete the old fragment
+    _fragments.clear();
+    _cut_plane_idx.clear();
+    _cut_plane_nodes.clear();
+    for (unsigned int i = 0; i < new_frags.size(); ++i)
+      _fragments.push_back(new_frags[i]);
 
-  fragmentSanityCheck(num_frag_edges, num_cut_frag_edges);
+    fragmentSanityCheck(num_frag_edges, num_cuts_from_idx);
+  }
 }
 
 void
 EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_old_frag_cuts) const
 {
-  if (n_old_frag_cuts > 3)
-    EFAError("Sanity check: in element ", _id, " frag has more than 3 cut edges");
-
   // count permanent and embedded nodes for new fragments
   std::vector<unsigned int> num_emb;
   std::vector<unsigned int> num_perm;
@@ -915,10 +941,6 @@ EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_
     if (num_emb_perm[i] != 0)
       return;
 
-  unsigned int n_interior_nodes = numInteriorNodes();
-  if (n_interior_nodes > 0 && n_interior_nodes != 1)
-    EFAError("After update_fragments this element has ", n_interior_nodes, " interior nodes");
-
   if (n_old_frag_cuts == 0)
   {
     if (_fragments.size() != 1 || _fragments[0]->numEdges() != n_old_frag_edges)
@@ -927,22 +949,30 @@ EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_
   else if (n_old_frag_cuts == 1) // crack tip case
   {
     if (_fragments.size() != 1 || _fragments[0]->numEdges() != n_old_frag_edges + 1)
-      EFAError("Incorrect link size for element with 1 cut");
+      EFAError("Incorrect link size for element with 1 cut. _fragments.size() is ",
+               _fragments.size(),
+               " should be 1. _fragments[0]->numEdges() is ",
+               _fragments[0]->numEdges(),
+               " should be equal to n_old_frag_edges+1 which is ",
+               n_old_frag_edges + 1);
   }
-  else if (n_old_frag_cuts == 2)
-  {
-    if (_fragments.size() != 2 ||
-        (_fragments[0]->numEdges() + _fragments[1]->numEdges()) != n_old_frag_edges + 4)
-      EFAError("Incorrect link size for element with 2 cuts");
-  }
-  else if (n_old_frag_cuts == 3)
-  {
-    if (_fragments.size() != 3 || (_fragments[0]->numEdges() + _fragments[1]->numEdges() +
-                                   _fragments[2]->numEdges()) != n_old_frag_edges + 9)
-      EFAError("Incorrect link size for element with 3 cuts");
-  }
+  // BWS TODO: Do we really want to comment out these checks?
+  //  else if (n_old_frag_cuts == 2)
+  //  {
+  //    if (_fragments.size() != 2 ||
+  //        (_fragments[0]->numEdges() + _fragments[1]->numEdges()) != n_old_frag_edges + 4)
+  //      EFAError("Incorrect link size for element with 2 cuts");
+  //  }
+  //  else if (n_old_frag_cuts == 3)
+  //  {
+  //    if (_fragments.size() != 3 || (_fragments[0]->numEdges() + _fragments[1]->numEdges() +
+  //                                   _fragments[2]->numEdges()) != n_old_frag_edges + 9)
+  //      EFAError("Incorrect link size for element with 3 cuts");
+  //  }
   else
-    EFAError("Unexpected number of old fragment cuts");
+  {
+    // TODO: fix this to check any size frag
+  }
 }
 
 void
@@ -1007,9 +1037,6 @@ EFAElement2D::createChild(const std::set<EFAElement *> & CrackTipElements,
   if (_fragments.size() > 1 || shouldDuplicateForCrackTip(CrackTipElements) ||
       shouldDuplicateForCutNodeElement)
   {
-    if (_fragments.size() > 3)
-      EFAError("More than 3 fragments not yet supported");
-
     // set up the children
     ParentElements.push_back(this);
     for (unsigned int ichild = 0; ichild < _fragments.size(); ++ichild)
@@ -1408,9 +1435,9 @@ EFAElement2D::getEdgeNodes(unsigned int edge_id) const
 }
 
 bool
-EFAElement2D::getEdgeNodeParametricCoordinate(EFANode * node, std::vector<double> & para_coor) const
+EFAElement2D::getEdgeNodeParametricCoordinates(EFANode * node,
+                                               std::vector<double> & para_coor) const
 {
-  // get the parametric coords of a node in an element edge
   unsigned int edge_id = std::numeric_limits<unsigned int>::max();
   bool edge_found = false;
   for (unsigned int i = 0; i < _num_edges; ++i)
@@ -1730,6 +1757,7 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
     EFANode * old_emb = _edges[edge_id]->getEmbeddedNode(emb_id);
     if (embedded_node && embedded_node != old_emb)
     {
+      //      addNodeToCutPlaneIdx(old_emb, getCurrentCutPlaneIdx());
       EFAError("Attempting to add edge intersection when one already exists with different node.",
                " elem: ",
                _id,
@@ -1772,8 +1800,9 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
       }
       else
       {
-        EFAWarning("attempting to add new cut to a cut fragment edge");
-        add2elem = false; // DO NOT ADD INTERSECT IN THIS CASE
+        // BWS TODO: Get rid of warning?
+        // EFAWarning("attempting to add new cut to a cut fragment edge");
+        add2elem = true; // Add anyway since multiple cuts are allowed
       }
     }
 
@@ -1800,6 +1829,10 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
       if (frag_edge->numEmbeddedNodes() > 1)
         EFAError("fragment edge can't have >1 embedded nodes");
     }
+
+    if (add2elem || add2frag)
+      addNodeToCutPlaneIdx(local_embedded, getCurrentCutPlaneIdx()); // cut plane tracking
+
   } // IF the input embedded node already exists on this elem edge
 
   if (add_to_neighbor)
@@ -1825,17 +1858,27 @@ EFAElement2D::addNodeCut(unsigned int node_id,
   EFANode * local_embedded_permanent = nullptr;
   EFANode * node = _nodes[node_id];
   if (embedded_permanent_node) // use the existing embedded node if it was passed in
+  {
     local_embedded_permanent = embedded_permanent_node;
+    addNodeToCutPlaneIdx(local_embedded_permanent, getCurrentCutPlaneIdx()); // cut plane tracking
+  }
 
   if (node->category() == EFANode::N_CATEGORY_PERMANENT)
   {
     node->setCategory(EFANode::N_CATEGORY_EMBEDDED_PERMANENT);
     local_embedded_permanent = node;
+    addNodeToCutPlaneIdx(node, getCurrentCutPlaneIdx()); // cut plane tracking
+    addNodeCutToNeighbors(local_embedded_permanent);
     EmbeddedPermanentNodes.insert(std::make_pair(node->id(), local_embedded_permanent));
     if (!Efa::deleteFromMap(PermanentNodes, local_embedded_permanent, false))
       EFAError("Attempted to delete node: ",
                local_embedded_permanent->id(),
                " from PermanentNodes, but couldn't find it");
+  }
+  else if (node->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+  {
+    local_embedded_permanent = node;
+    addNodeToCutPlaneIdx(node, getCurrentCutPlaneIdx()); // cut plane tracking
   }
 }
 
@@ -1881,18 +1924,12 @@ EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id,
     }
     else // blank edge - in fact, it can only be a blank element interior edge
     {
-      if (!_fragments[0]->isEdgeInterior(frag_edge_id) ||
-          _fragments[0]->isSecondaryInteriorEdge(frag_edge_id))
-        EFAError("Attemping to add intersection to an invalid fragment edge. Element: ",
-                 _id,
-                 " fragment_edge: ",
-                 frag_edge_id);
-
       // create the embedded node and add it to the fragment's boundary edge
       unsigned int new_node_id = Efa::getNewID(EmbeddedNodes);
       local_embedded = new EFANode(new_node_id, EFANode::N_CATEGORY_EMBEDDED);
       EmbeddedNodes.insert(std::make_pair(new_node_id, local_embedded));
       frag_edge->addIntersection(position, local_embedded, edge_node1);
+      addNodeToCutPlaneIdx(local_embedded, getCurrentCutPlaneIdx()); // cut plane tracking
 
       // save this interior embedded node to FaceNodes
       // TODO: for unstructured elements, the following calution gives you inaccurate position of
@@ -1900,8 +1937,8 @@ EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id,
       // must solve this issue for 3D!
       std::vector<double> node1_para_coor(2, 0.0);
       std::vector<double> node2_para_coor(2, 0.0);
-      if (getEdgeNodeParametricCoordinate(edge_node1, node1_para_coor) &&
-          getEdgeNodeParametricCoordinate(edge_node2, node2_para_coor))
+      if (getEdgeNodeParametricCoordinates(edge_node1, node1_para_coor) &&
+          getEdgeNodeParametricCoordinates(edge_node2, node2_para_coor))
       {
         double xi = (1.0 - position) * node1_para_coor[0] + position * node2_para_coor[0];
         double eta = (1.0 - position) * node1_para_coor[1] + position * node2_para_coor[1];
@@ -1914,7 +1951,6 @@ EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id,
     // neighbor fragment, the neighbor has already been treated in addEdgeIntersection;
     // for an interior edge, there is no neighbor fragment
   }
-
   return isValidIntersection;
 }
 
@@ -1941,7 +1977,12 @@ EFAElement2D::branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes)
     }
   }
   if (three_nodes.size() != 3)
-    EFAError("three_nodes.size() != 3");
+    EFAError("three_nodes.size() != 3, size is ",
+             three_nodes.size(),
+             " num cuts size is ",
+             _fragments[0]->getNumCuts(),
+             " element num cuts is ",
+             getNumCuts());
 
   // get the parent coords of the braycenter of the three nodes
   // TODO: may need a better way to compute this "branching point"
@@ -1949,7 +1990,7 @@ EFAElement2D::branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes)
   for (unsigned int i = 0; i < 3; ++i)
   {
     std::vector<double> xi_2d(2, 0.0);
-    getEdgeNodeParametricCoordinate(three_nodes[i], xi_2d);
+    getEdgeNodeParametricCoordinates(three_nodes[i], xi_2d);
     center_xi[0] += xi_2d[0];
     center_xi[1] += xi_2d[1];
   }
@@ -2071,4 +2112,295 @@ EFAElement2D::getCommonNodes(const EFAElement2D * other_elem) const
   std::set<EFANode *> e2nodes(other_elem->_nodes.begin(), other_elem->_nodes.begin() + _num_edges);
   std::vector<EFANode *> common_nodes = Efa::getCommonElems(e1nodes, e2nodes);
   return common_nodes;
+}
+
+void
+EFAElement2D::addInteriorNode(EFAFaceNode * faceNode)
+{
+  _interior_nodes.push_back(faceNode);
+}
+
+bool
+EFAElement2D::isInteriorNode(EFANode * node) const
+{
+  for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
+    if (node == _interior_nodes[i]->getNode())
+      return true;
+  return false;
+}
+
+EFAFaceNode *
+EFAElement2D::getFaceNode(EFANode * node) const
+{
+  EFAFaceNode * faceNode = nullptr;
+  EFANode * interiorNode = nullptr;
+  for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
+  {
+    interiorNode = _interior_nodes[i]->getNode();
+    if (node == interiorNode)
+      faceNode = _interior_nodes[i];
+  }
+  return faceNode;
+}
+
+bool
+EFAElement2D::getNodeParametricCoordinates(EFANode * node, std::vector<double> & para_coor) const
+{
+  para_coor.resize(2, 0.0);
+  if (isInteriorNode(node))
+  {
+    EFAFaceNode * faceNode = getFaceNode(node);
+    para_coor[0] = faceNode->getParametricCoordinates(0);
+    para_coor[1] = faceNode->getParametricCoordinates(1);
+    return true;
+  }
+  else // get the parametric coords of a node in an element edge
+    return getEdgeNodeParametricCoordinates(node, para_coor);
+}
+
+void
+EFAElement2D::getNewCutPlaneIdx()
+{
+  if (_cut_plane_nodes.size() > 0)
+    if (_cut_plane_nodes[getCurrentCutPlaneIdx()].size() > 0)
+      ++_current_cut_plane_idx;
+}
+
+unsigned int
+EFAElement2D::getCurrentCutPlaneIdx()
+{
+  return _current_cut_plane_idx;
+}
+
+void
+EFAElement2D::addNodeToCutPlaneIdx(EFANode * node, unsigned int cut)
+{
+  unsigned int index = std::numeric_limits<unsigned int>::max();
+  for (unsigned int cutplaneidx = 0; cutplaneidx < _cut_plane_nodes.size(); ++cutplaneidx)
+  {
+    if (_cut_plane_idx[cutplaneidx] == cut)
+    {
+      index = cutplaneidx;
+      break;
+    }
+  }
+  if (index == std::numeric_limits<unsigned int>::max()) // if not found make a new index
+  {
+    _cut_plane_idx.push_back(cut);
+    _cut_plane_nodes.push_back({node});
+  }
+  else
+  {
+    for (unsigned int inode = 0; inode < _cut_plane_nodes[index].size(); ++inode)
+    {
+      if (_cut_plane_nodes[index][inode] == node)
+        return;
+    }
+    if (_cut_plane_nodes[index].size() >= 2)
+      addNodeToCutPlaneIdx(node, cut + 1);
+    else
+      _cut_plane_nodes[index].push_back(node);
+  }
+}
+
+void
+EFAElement2D::reassignNodeToCutPlaneIdx(EFANode * node, unsigned int cut)
+{
+  if (_cut_plane_nodes.size() > 0)
+  {
+    for (unsigned int cutplane = 0; cutplane < _cut_plane_nodes.size(); ++cutplane)
+    {
+      for (unsigned int inode = 0; inode < _cut_plane_nodes[cutplane].size(); ++inode)
+      {
+        if (_cut_plane_nodes[cutplane][inode] == node)
+        {
+          removeCutPlaneNode(node, _cut_plane_idx[cutplane]);
+          addNodeToCutPlaneIdx(node, cut);
+          return;
+        }
+      }
+    }
+    EFAError("node was not found in any cut plane. Cannot reassign to cut.");
+  }
+  else
+    EFAError("_cut_plane_nodes.size() is zero and node cannot assigned to a cutplaneidx");
+}
+
+std::vector<std::vector<EFANode *>>
+EFAElement2D::getCutPlaneNodes()
+{
+  return _cut_plane_nodes;
+}
+
+std::vector<unsigned int>
+EFAElement2D::getCutPlaneIndices()
+{
+  return _cut_plane_idx;
+}
+
+void
+EFAElement2D::removeCutPlaneNode(EFANode * node, unsigned int cut)
+{
+  unsigned int index = std::numeric_limits<unsigned int>::max();
+  for (unsigned int cutplaneidx = 0; cutplaneidx < _cut_plane_nodes.size(); ++cutplaneidx)
+  {
+    if (_cut_plane_idx[cutplaneidx] == cut)
+    {
+      index = cutplaneidx;
+      break;
+    }
+  }
+  if (index == std::numeric_limits<unsigned int>::max())
+    EFAError("Attempt to delete cut plane node but that cut index was not found");
+  bool found = false;
+  for (unsigned int inode = 0; inode < _cut_plane_nodes[index].size(); ++inode)
+  {
+    if (_cut_plane_nodes[index][inode] == node)
+    {
+      _cut_plane_nodes[index].erase(_cut_plane_nodes[index].begin() + inode);
+      found = true;
+      break;
+    }
+  }
+  if (!found)
+    EFAError("Attempt to delete cut plane node but that node was not found");
+  if (_cut_plane_nodes[index].empty())
+  {
+    _cut_plane_nodes.erase(_cut_plane_nodes.begin() + index);
+    _cut_plane_idx.erase(_cut_plane_idx.begin() + index);
+  }
+}
+
+void
+EFAElement2D::removeCutPlane(unsigned int cut)
+{
+  bool found = false;
+  unsigned int index;
+  for (unsigned int cutplaneidx = 0; cutplaneidx < _cut_plane_idx.size(); ++cutplaneidx)
+  {
+    if (_cut_plane_idx[cutplaneidx] == cut)
+    {
+      index = cutplaneidx;
+      found = true;
+      break;
+    }
+  }
+  if (!found)
+    EFAError("Attempt to delete cut plane but that cut plane was not found");
+  if (_cut_plane_nodes[index].empty())
+  {
+    _cut_plane_nodes.erase(_cut_plane_nodes.begin() + index);
+    _cut_plane_idx.erase(_cut_plane_idx.begin() + index);
+  }
+  else
+    EFAError("Attempted to delete cut plane but cut plane nodes were not empty!");
+}
+
+bool
+EFAElement2D::hasSameCut(EFANode * otherNode, unsigned int cut)
+{
+  unsigned int position = std::numeric_limits<unsigned int>::max();
+  for (unsigned int pos = 0; pos < _cut_plane_idx.size(); ++pos)
+  {
+    if (_cut_plane_idx[pos] == cut)
+    {
+      position = pos;
+      break;
+    }
+  }
+  if (position == std::numeric_limits<unsigned int>::max())
+    return false;
+  for (unsigned int i = 0; i < _cut_plane_nodes[position].size(); ++i)
+  {
+    if (otherNode == _cut_plane_nodes[position][i])
+      return true;
+  }
+  return false;
+}
+
+unsigned int
+EFAElement2D::numSoloNodes()
+{
+  unsigned int numSoloNodes = 0;
+  for (unsigned int cutplane = 0; cutplane < _cut_plane_nodes.size(); ++cutplane)
+  {
+    if (_cut_plane_nodes[cutplane].size() == 1)
+      ++numSoloNodes;
+  }
+  return numSoloNodes;
+}
+
+void
+EFAElement2D::pairSoloNodes()
+{
+  EFANode * nodeOne = nullptr;
+  EFANode * nodeTwo = nullptr;
+  for (unsigned int cutplane = 0; cutplane < _cut_plane_nodes.size(); ++cutplane)
+  {
+    if (_cut_plane_nodes[cutplane].size() == 1)
+    {
+      if (nodeOne == nullptr)
+        nodeOne = _cut_plane_nodes[cutplane][0];
+      else if (nodeTwo == nullptr)
+        nodeTwo = _cut_plane_nodes[cutplane][0];
+      else
+        EFAError("More than two solo nodes to pair!");
+    }
+  }
+  if (nodeOne == nullptr || nodeTwo == nullptr)
+    EFAError("One or more null nodes. Not enough solo nodes found.");
+
+  reassignNodeToCutPlaneIdx(nodeOne, getCurrentCutPlaneIdx());
+  reassignNodeToCutPlaneIdx(nodeTwo, getCurrentCutPlaneIdx());
+  getNewCutPlaneIdx();
+}
+
+void
+EFAElement2D::addNodeCutToNeighbors(EFANode * cut_node)
+{
+  std::vector<EFAElement2D *> node_neighbors = {
+      this}; // add self so as not to add it when neighbors see it
+
+  // add neighbors to node_neighbors
+  for (unsigned int i = 0; i < node_neighbors.size();
+       ++i) // loop grows with more node neighbors checking them as well, finishing after each is
+            // checked
+  {
+    std::vector<unsigned int> node_edges = {};
+    EFAElement2D * current_neighbor = node_neighbors[i];
+
+    // find which neighbors edges contain the cut_node, then note that neighbor of the edge
+    for (unsigned int iedge = 0; iedge < current_neighbor->_edges.size(); ++iedge)
+      // BWS TODO Verify that calling containsNode does what we want here
+      if (current_neighbor->_edges[iedge]->containsNode(cut_node))
+        node_edges.push_back(iedge);
+
+    // add all direct node neighbors to node_neighbors and check it hasnt been added previously
+    std::vector<EFAElement2D *> current_neighbors;
+    for (unsigned int iedge = 0; iedge < node_edges.size(); ++iedge)
+    {
+      current_neighbors = current_neighbor->_edge_neighbors[node_edges[iedge]];
+      for (unsigned int icurrent = 0; icurrent < current_neighbors.size(); ++icurrent)
+      {
+        if (current_neighbors[icurrent] != NULL)
+        {
+          bool added_before = false;
+          for (unsigned int ipast = 0; ipast < node_neighbors.size(); ++ipast)
+          { // check past elements before new one is added
+            if (current_neighbors[icurrent] == node_neighbors[ipast])
+            {
+              added_before = true;
+              break;
+            }
+          }
+
+          if (!added_before)
+            node_neighbors.push_back(current_neighbors[icurrent]);
+        }
+      }
+    }
+  }
+  // add cut planes to each element, start at 1 to skip self
+  for (unsigned int i = 1; i < node_neighbors.size(); ++i)
+    node_neighbors[i]->addNodeToCutPlaneIdx(cut_node, node_neighbors[i]->getCurrentCutPlaneIdx());
 }

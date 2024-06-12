@@ -38,14 +38,14 @@ protected:
    * @param direction Normal direction of crack if it is cracked
    * @return bool true if element cracks
    */
-  virtual bool doesElementCrack(RealVectorValue & direction);
+  virtual bool doesElementCrack(RealVectorValue & direction) = 0;
 
 private:
   MooseMesh & _mesh;
   std::vector<BoundaryID> _initiation_boundary_ids;
   bool _secondary_cracks;
   std::shared_ptr<XFEM> _xfem;
-  std::map<unsigned int, RealVectorValue> _marked_elems;
+  std::map<unsigned int, std::vector<RealVectorValue>> _marked_elems;
   std::set<unsigned int> _marked_frags;
   std::map<unsigned int, unsigned int> _marked_elem_sides;
 };

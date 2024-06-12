@@ -155,6 +155,13 @@ public:
                           bool add_to_adjacent);
   std::vector<EFANode *> getCommonNodes(const EFAElement3D * other_elem) const;
 
+  // BWS TODO rename to index. Also, should it be 'current' rather than new?
+  /**
+   * Get the index for the current cut plane
+   * @return index of the cut plane
+   */
+  unsigned int getNewCutPlaneIdx();
+
 private:
   // EFAelement3D specific methods
   void checkNeighborFaceCut(unsigned int face_id,
