@@ -36,7 +36,7 @@ ThresholdElementSubdomainModifier::ThresholdElementSubdomainModifier(
     _subdomain_id(getParam<SubdomainID>("subdomain_id")),
     _complement_subdomain_id(isParamValid("complement_subdomain_id")
                                  ? getParam<SubdomainID>("complement_subdomain_id")
-                                 : std::numeric_limits<SubdomainID>::max())
+                                 : Moose::INVALID_BLOCK_ID)
 {
 }
 
