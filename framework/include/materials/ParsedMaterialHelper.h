@@ -83,7 +83,7 @@ protected:
 
   void initQpStatefulProperties() override;
   void computeQpProperties() override;
-  void initialSetup() override final;
+  virtual void initialSetup() override final;
 
   // tasks to perform after parsing the primary function
   virtual void functionsPostParse();
@@ -121,7 +121,8 @@ protected:
    */
   const VariableNameMappingMode _map_mode;
 
-  /**Vector to hold list of material names that must be updated prior to evaluating current material
+  /**
+   * Vector to hold list of material names that must be updated prior to evaluating current material
    * (for compute = false materials)
    */
   std::vector<MaterialName> _upstream_mat_names;
