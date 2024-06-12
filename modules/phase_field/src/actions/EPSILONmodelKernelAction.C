@@ -5,15 +5,15 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
-
 registerMooseAction("PhaseFieldApp", EPSILONmodelKernelAction, "add_kernel");
 
 InputParameters
 EPSILONmodelKernelAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription(
-      "Set up ACGrGrPoly, ACInterface, TimeDerivative, ACGBPoly, EPSILONmodelKERNEL1stV2GAUSS, EPSILONmodelKERNEL2ndV2GAUSS, EPSILONmodelKERNEL1stGAUSS, EPSILONmodelKERNEL2ndGAUSS kernels");
+  params.addClassDescription("Set up ACGrGrPoly, ACInterface, TimeDerivative, ACGBPoly, "
+                             "EPSILONmodelKERNEL1stV2GAUSS, EPSILONmodelKERNEL2ndV2GAUSS, "
+                             "EPSILONmodelKERNEL1stGAUSS, EPSILONmodelKERNEL2ndGAUSS kernels");
   params.addRequiredParam<unsigned int>(
       "op_num", "specifies the total number of grains (deformed + recrystallized) to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
@@ -30,7 +30,6 @@ EPSILONmodelKernelAction::validParams()
                         "entire domain!)");
   params.addParam<std::vector<VariableName>>("args", "Vector of variable arguments L depends on");
   return params;
-
 }
 
 EPSILONmodelKernelAction::EPSILONmodelKernelAction(const InputParameters & params)
@@ -99,66 +98,61 @@ EPSILONmodelKernelAction::act()
       std::string kernel_name = "IE_" + var_name;
       _problem->addKernel("TimeDerivative", kernel_name, params);
     }
-
-
   }
 
-//*******************************************************************************************************
-//*******************************************************************************************************
+  //*******************************************************************************************************
+  //*******************************************************************************************************
 
-     for (unsigned int m = 0; m < _op_num - 1; ++m)
-     {
-                  std::string var_name_plus  = _var_name_base + Moose::stringify(m);
-                  std::vector<VariableName> vplus;
-                  vplus.resize(_op_num - 1);
-                  unsigned int indplus  = 0;
-                  for (unsigned int l = 0; l < _op_num; ++l)
-                    if (l != m)
-                      vplus[indplus ++] = _var_name_base + Moose::stringify(m);
-                      {
-                        InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL1stV2GAUSS");
-                        params.set<NonlinearVariableName>("variable") = var_name_plus;
-                        params.set<std::vector<VariableName>>("vplus") = vplus;
-                        params.applyParameters(parameters());
+  for (unsigned int m = 0; m < _op_num - 1; ++m)
+  {
+    std::string var_name_plus = _var_name_base + Moose::stringify(m);
+    std::vector<VariableName> vplus;
+    vplus.resize(_op_num - 1);
+    unsigned int indplus = 0;
+    for (unsigned int l = 0; l < _op_num; ++l)
+      if (l != m)
+        vplus[indplus++] = _var_name_base + Moose::stringify(m);
+    {
+      InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL1stV2GAUSS");
+      params.set<NonlinearVariableName>("variable") = var_name_plus;
+      params.set<std::vector<VariableName>>("vplus") = vplus;
+      params.applyParameters(parameters());
 
-                        std::string kernel_name = "EPSILONmodelKERNEL1stV2GAUSS" + var_name_plus;
-                        _problem->addKernel("EPSILONmodelKERNEL1stV2GAUSS", kernel_name, params);
-                      }
-                      {
-                        InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL2ndV2GAUSS");
-                        params.set<NonlinearVariableName>("variable") = var_name_plus;
-                        params.applyParameters(parameters());
+      std::string kernel_name = "EPSILONmodelKERNEL1stV2GAUSS" + var_name_plus;
+      _problem->addKernel("EPSILONmodelKERNEL1stV2GAUSS", kernel_name, params);
+    }
+    {
+      InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL2ndV2GAUSS");
+      params.set<NonlinearVariableName>("variable") = var_name_plus;
+      params.applyParameters(parameters());
 
-                        std::string kernel_name = "EPSILONmodelKERNEL2ndV2GAUSS" + var_name_plus;
-                        _problem->addKernel("EPSILONmodelKERNEL2ndV2GAUSS", kernel_name, params);
-                      }
+      std::string kernel_name = "EPSILONmodelKERNEL2ndV2GAUSS" + var_name_plus;
+      _problem->addKernel("EPSILONmodelKERNEL2ndV2GAUSS", kernel_name, params);
+    }
 
+    std::string var_name_minus = _var_name_base + Moose::stringify(m + 1);
+    std::vector<VariableName> vminus;
+    vminus.resize(_op_num - 1);
+    unsigned int indminus = 0;
+    for (unsigned int t = 0; t < _op_num; ++t)
+      if (t != (m + 1))
+        vminus[indminus++] = _var_name_base + Moose::stringify(m + 1);
+    {
+      InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL1stGAUSS");
+      params.set<NonlinearVariableName>("variable") = var_name_minus;
+      params.set<std::vector<VariableName>>("vminus") = vminus;
+      params.applyParameters(parameters());
 
-                   std::string var_name_minus = _var_name_base + Moose::stringify(m+1);
-                   std::vector<VariableName> vminus;
-                   vminus.resize(_op_num - 1);
-                   unsigned int indminus = 0;
-                   for (unsigned int t = 0; t < _op_num; ++t)
-                     if (t != (m+1))
-                       vminus[indminus++] = _var_name_base + Moose::stringify(m+1);
-                       {
-                         InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL1stGAUSS");
-                         params.set<NonlinearVariableName>("variable") = var_name_minus;
-                         params.set<std::vector<VariableName>>("vminus") = vminus;
-                         params.applyParameters(parameters());
+      std::string kernel_name = "EPSILONmodelKERNEL1stGAUSS" + var_name_minus;
+      _problem->addKernel("EPSILONmodelKERNEL1stGAUSS", kernel_name, params);
+    }
+    {
+      InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL2ndGAUSS");
+      params.set<NonlinearVariableName>("variable") = var_name_minus;
+      params.applyParameters(parameters());
 
-                         std::string kernel_name = "EPSILONmodelKERNEL1stGAUSS" + var_name_minus;
-                         _problem->addKernel("EPSILONmodelKERNEL1stGAUSS", kernel_name, params);
-
-                      }
-                      {
-                         InputParameters params = _factory.getValidParams("EPSILONmodelKERNEL2ndGAUSS");
-                         params.set<NonlinearVariableName>("variable") = var_name_minus;
-                         params.applyParameters(parameters());
-
-                         std::string kernel_name = "EPSILONmodelKERNEL2ndGAUSS" + var_name_minus;
-                         _problem->addKernel("EPSILONmodelKERNEL2ndGAUSS", kernel_name, params);
-                       }
-      }
-
+      std::string kernel_name = "EPSILONmodelKERNEL2ndGAUSS" + var_name_minus;
+      _problem->addKernel("EPSILONmodelKERNEL2ndGAUSS", kernel_name, params);
+    }
+  }
 }

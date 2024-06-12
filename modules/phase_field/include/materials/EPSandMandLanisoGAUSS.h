@@ -2,7 +2,6 @@
 // 5D Gaussian anisotropy material object
 // Material properties adding anysotroopy to epsilon [or also called k], m  and L.
 
-
 #pragma once
 
 #include "ADMaterial.h"
@@ -99,9 +98,9 @@ private:
 
   ADMaterialProperty<Real> & _TotGauss;
 
-  const Real  _sigmaBASE;
+  const Real _sigmaBASE;
 
-  const Real  _L_BASE;
+  const Real _L_BASE;
 
   const MaterialPropertyName _eps_name;
   const MaterialPropertyName _epsenergy_name;
@@ -118,21 +117,21 @@ private:
   const MaterialPropertyName _L_name;
   const MaterialPropertyName _L_energy_name;
 
-  const Real  _Gaussian_Tolerance;
+  const Real _Gaussian_Tolerance;
 
-  const Real  _gamma;
+  const Real _gamma;
 
-  const Real  _lgb;
+  const Real _lgb;
 
-  const Real  _alphaswitch;
+  const Real _alphaswitch;
 
-  const Real  _betaswitch;
+  const Real _betaswitch;
 
-  unsigned int  _libnum;
+  unsigned int _libnum;
 
-  const Real  _amplitudeScale;
+  const Real _amplitudeScale;
 
-  const Real  _sharpness;
+  const Real _sharpness;
 
   const FileName _Library_file_name;
 
@@ -146,14 +145,13 @@ private:
 
   const Real _JtoeV;
 
-  const Real  _BoundaryNormal;
+  const Real _BoundaryNormal;
 
   const unsigned int _op_num;
 
-        unsigned int _grain_num;
+  unsigned int _grain_num;
 
   const std::vector<const ADVariableValue *> _vals;
 
   const std::vector<const ADVariableGradient *> _grad_vals;
-
 };

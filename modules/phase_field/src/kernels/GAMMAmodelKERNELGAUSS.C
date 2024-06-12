@@ -7,9 +7,12 @@ InputParameters
 GAMMAmodelKERNELGAUSS::validParams()
 {
   InputParameters params = ADKernel::validParams();
-  params.addClassDescription("Implements the term:-L\\ m \\nabla \\cdot \\left( \\sum_{j \\neq i} \\left( \\frac{\\partial \\gamma_{ij}}{\\partial \\nabla\\eta_i} \\right) \\eta_i^2 \\eta_j^2 \\right)");
+  params.addClassDescription("Implements the term:-L\\ m \\nabla \\cdot \\left( \\sum_{j \\neq i} "
+                             "\\left( \\frac{\\partial \\gamma_{ij}}{\\partial \\nabla\\eta_i} "
+                             "\\right) \\eta_i^2 \\eta_j^2 \\right)");
 
-  params.addRequiredCoupledVar("vminus", "Array of coupled order parameter names for other order parameters");
+  params.addRequiredCoupledVar("vminus",
+                               "Array of coupled order parameter names for other order parameters");
 
   return params;
 }
@@ -25,7 +28,6 @@ GAMMAmodelKERNELGAUSS::GAMMAmodelKERNELGAUSS(const InputParameters & parameters)
 
     _op_num(coupledComponents("vminus")),
     _vals(adCoupledValues("vminus"))
-
 
 {
 }
@@ -43,7 +45,7 @@ GAMMAmodelKERNELGAUSS::computeQpResidual()
   for (unsigned int i = 0; i < _op_num; ++i)
     SumEtaj += (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
-
-  return  (1) * _L_AD[_qp] * _m[_qp] * SumEtaj * _u[_qp] * _u[_qp] * ( (( _dgammadx[_qp]) * gradtestx) + ((_dgammady[_qp]) * gradtesty) + ((_dgammadz[_qp]) * gradtestz) );
-
+  return (1) * _L_AD[_qp] * _m[_qp] * SumEtaj * _u[_qp] * _u[_qp] *
+         (((_dgammadx[_qp]) * gradtestx) + ((_dgammady[_qp]) * gradtesty) +
+          ((_dgammadz[_qp]) * gradtestz));
 }

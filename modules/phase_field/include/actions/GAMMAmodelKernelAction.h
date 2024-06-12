@@ -4,7 +4,6 @@
 
 #include "Action.h"
 
-
 class GAMMAmodelKernelAction : public Action
 {
 public:
@@ -20,5 +19,4 @@ protected:
 
   /// base name for the order parameter variables
   const std::string _var_name_base;
-
 };

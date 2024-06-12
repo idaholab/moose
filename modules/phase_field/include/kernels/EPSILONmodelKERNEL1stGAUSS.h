@@ -24,5 +24,4 @@ protected:
   const unsigned int _op_num;
   const std::vector<const ADVariableValue *> _vals;
   const std::vector<const ADVariableGradient *> _grad_vals;
-
 };

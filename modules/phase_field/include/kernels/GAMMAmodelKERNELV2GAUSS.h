@@ -23,5 +23,4 @@ protected:
 
   const unsigned int _op_num;
   const std::vector<const ADVariableValue *> _vals;
-
 };
