@@ -11,9 +11,8 @@
 
 #include "THMControl.h"
 
-/**
- * This block represents a controller that uses a moving average to make the input smoother.
- */
+/** Computes a moving average value of the input control with a user-specified number of points to average. The output control value is named " name:value ", where " name " is the name of the control object.
+ **/
 class SmootherControl : public THMControl
 {
 public:

@@ -1,3 +1,6 @@
+# Since post-processors execute before controls on INITIAL,
+# the first value in the gold file is 0 instead of 8.
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
