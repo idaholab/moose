@@ -28,13 +28,14 @@ send/receive its respective component of the vector based on its index. The main
 app reporter is assumed to be replicated while the subapp reporters are assumed
 to be root or replicated.
 
+!table caption=Distributed Transfer Examples
 | Main App | Sub App 1 | Sub App 2 | Sub App 3 | Sub App 4 |
 |---|---|---|---|---|
 | $\begin{pmatrix}1\\2\\3\\4\end{pmatrix}$ | 1 | 2 | 3 | 4 |
 |
 | $\begin{pmatrix}1\\2\end{pmatrix}$ $\begin{pmatrix}3\\4\\5\end{pmatrix}$ $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ $\begin{pmatrix}10\\11\\12\end{pmatrix}$ | $\begin{pmatrix}1\\2\end{pmatrix}$ | $\begin{pmatrix}3\\4\\5\end{pmatrix}$ | $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ | $\begin{pmatrix}10\\11\\12\end{pmatrix}$ |
 
-!alert warning title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector)  is only implemented for certain reporter modes.
+!alert note title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector)  is only implemented for certain reporter modes.
 The main
 app reporter is assumed to be `REPORTER_MODE_REPLICATED` while the subapp reporters are assumed
 to be `REPORTER_MODE_ROOT` or `REPORTER_MODE_REPLICATED`. This operation will
@@ -107,7 +108,8 @@ Here we are transferring a vector reporter and a vector of vectors reporter in a
 scatter fashion. The main application holds a vector of vectors and a
 single vector, while each subapp has a vector and a Real (scalar) reporter.
 During the transfer the subapp's reporters are populated from the scattering of
-the mainapp's vector reporter and a vector of vectors reporter.
+the main app's vector reporter. The main app can also use a vector of vectors reporter, in which case those vectors
+are distributed to the subapps.
 
 !listing dist_vector/main_send.i block=Reporters caption=Main application reporters
 
@@ -119,7 +121,7 @@ the mainapp's vector reporter and a vector of vectors reporter.
 
 #### Gather vector Reporter
 
-Here we are transferring a vector reporter and a vector of vectors reporter in a gather fashion. The main application holds a vector of vectors and a single vector, while each subapp has a vector and a Real (scalar) reporter. This test shows the gather operation by aggregating the same values from each subapp into a set of reporters in the main application.
+Here we are transferring a vector reporter and a vector of vectors reporter in a gather fashion. The main application holds a vector of vectors and a single vector, while each subapp has a vector and a Real (scalar) reporter. This test shows the gather operation by aggregating the same values from each subapp into a vector of reporters in the main application.
 
 !listing dist_vector/main_rec.i block=Reporters caption=Main application reporters
 

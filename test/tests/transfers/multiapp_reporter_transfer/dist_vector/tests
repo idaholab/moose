@@ -37,7 +37,7 @@
     []
   []
   [one_way_transfer]
-    requirement = 'The system shall support the ability to transfer reporter in a scatter/gather fashion'
+    requirement = 'The system shall support the ability to transfer reporter data in a vector scatter/gather fashion'
     [1_to_N]
       type = 'JSONDiff'
       input = 'main_send.i'
@@ -48,7 +48,7 @@
       type = 'JSONDiff'
       input = 'main_rec.i'
       jsondiff = 'N_to_1.json'
-      detail = "or from many subapps to one main app,"
+      detail = "or from many subapps to one main app."
     []
   []
 []

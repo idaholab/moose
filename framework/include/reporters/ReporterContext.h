@@ -146,7 +146,7 @@ public:
    * Helper for enabling generic transfer of a vector Reporter of values to a
    * single value
    * @param r_data The ReporterData on the app that this data is being transferred to
-   * @param r_name The name of the Report being transfered to
+   * @param r_name The name of the Reporter being transferred to
    *
    * @see ReporterTransferInterface
    */

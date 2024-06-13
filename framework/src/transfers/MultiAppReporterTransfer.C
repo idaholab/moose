@@ -32,11 +32,12 @@ MultiAppReporterTransfer::validParams()
       "sub-application. If unset and transferring to the sub-applications then all "
       "sub-applications will receive data. The value must be set when transferring from a "
       "sub-application.");
-  params.addParam<bool>("distribute_reporter_vector",
-                        false,
-                        "Transfer to/from a vector reporter to reporters on child applications. N "
-                        "to 1 or 1 to N type of transfer. The number of child applications must "
-                        "match the size of the vector reporter");
+  params.addParam<bool>(
+      "distribute_reporter_vector",
+      false,
+      "Transfer to/from a vector reporter from/to reporters on child applications. N "
+      "to 1 or 1 to N type of transfer. The number of child applications must "
+      "match the size of the vector reporter");
   return params;
 }
 
@@ -176,7 +177,7 @@ MultiAppReporterTransfer::executeFromMultiapp()
     indices = {_subapp_index};
 
   if (_distribute_reporter_vector)
-    for (unsigned int n : make_range(_to_reporter_names.size()))
+    for (const auto n : index_range(_to_reporter_names))
     {
       // Clear all vector reporters and resize to the number of subapps.
       // The summing process later will make sure the reporter values are
@@ -186,7 +187,7 @@ MultiAppReporterTransfer::executeFromMultiapp()
       resizeReporter(_to_reporter_names[n], getFromMultiApp()->problemBase(), size);
     }
 
-  for (const auto & ind : indices)
+  for (const auto ind : indices)
     if (getFromMultiApp()->hasLocalApp(ind) &&
         (!hasToMultiApp() || getToMultiApp()->hasLocalApp(ind)))
       for (const auto n : index_range(_from_reporter_names))
