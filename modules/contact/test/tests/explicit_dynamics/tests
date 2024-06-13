@@ -65,10 +65,10 @@
                   'during an impact-settling under gravity acceleration.'
     heavy = true
   []
-  [settlement_highvel]
+  [highvel]
     type = 'CSVDiff'
-    input = 'settlement_highvel.i'
-    csvdiff = 'settlement_highvel_out.csv'
+    input = 'highvel.i'
+    csvdiff = 'highvel_out.csv'
     abs_zero = 1.0e-4
     allow_warnings = true
     requirement = 'The system shall be able to solve a simple few-element normal contact problem with contact at an elevated velocity '

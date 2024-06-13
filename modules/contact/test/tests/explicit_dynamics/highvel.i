@@ -343,10 +343,11 @@
 []
 
 [Outputs]
-    interval = 1
+    interval = 2
     exodus = true
     csv = true
     execute_on = 'TIMESTEP_END'
+    file_base = highvel_out
 []
 
 [Postprocessors]
