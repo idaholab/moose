@@ -102,8 +102,8 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
         constexpr Real offset = 1e-15;
 
         const bool is_transient = _subproblem.isTransient();
-        ADRealVectorValue term_advection;
-        ADRealVectorValue term_transient;
+        ADRealVectorValue term_advection(0, 0, 0);
+        ADRealVectorValue term_transient(0, 0, 0);
         const ADRealVectorValue term_force(
             _force_scale * _force_postprocessor *
             _force_function.value(_t, _current_elem->vertex_average()) * _force_direction);

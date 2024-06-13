@@ -33,8 +33,6 @@ WCNSFV2PMomentumDriftFlux::validParams()
                              coeff_interp_method,
                              "Switch that can select face interpolation method for the density.");
 
-  // when using the fraction of the disperse phase, somehow
-  params.set<unsigned short>("ghost_layers") = 5;
   return params;
 }
 
@@ -71,15 +69,14 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
   if (onBoundary(*_face_info))
     face_arg = singleSidedFaceArg();
   else
-    face_arg =
-        Moose::FaceArg{_face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+    face_arg = makeCDFace(*_face_info);
 
   ADRealVectorValue u_slip_vel_vec;
   if (_dim == 1)
     u_slip_vel_vec = ADRealVectorValue(_u_slip(face_arg, state), 0.0, 0.0);
-  if (_dim == 2)
+  else if (_dim == 2)
     u_slip_vel_vec = ADRealVectorValue(_u_slip(face_arg, state), (*_v_slip)(face_arg, state), 0.0);
-  if (_dim == 3)
+  else
     u_slip_vel_vec = ADRealVectorValue(
         _u_slip(face_arg, state), (*_v_slip)(face_arg, state), (*_w_slip)(face_arg, state));
 
@@ -103,9 +100,9 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
     {
       if (_index == 0)
         _ae = uslipdotn * _u_slip(elemArg(), state);
-      if (_index == 1)
+      else if (_index == 1)
         _ae = uslipdotn * (*_v_slip)(elemArg(), state);
-      if (_index == 2)
+      else
         _ae = uslipdotn * (*_w_slip)(elemArg(), state);
       _ae *= -face_rho_fd;
     }
@@ -114,9 +111,9 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
     {
       if (_index == 0)
         _ae = uslipdotn * _u_slip(neighborArg(), state);
-      if (_index == 1)
+      else if (_index == 1)
         _ae = uslipdotn * (*_v_slip)(neighborArg(), state);
-      if (_index == 2)
+      else
         _ae = uslipdotn * (*_w_slip)(neighborArg(), state);
       _an *= face_rho_fd;
     }

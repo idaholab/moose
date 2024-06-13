@@ -105,7 +105,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
           " at ",
           _face_info->faceCentroid(),
           " limiting it to 0!\nFurther warnings for this issue will be silenced, but the "
-          "occurences will be recorded through the solution invalidity interface."));
+          "occurrences will be recorded through the solution invalidity interface."));
       flagInvalidSolution("Negative face dynamic viscosity has been encountered.");
     }
     // Keep face_mu here for sparsity pattern detection
