@@ -1,7 +1,7 @@
 [Mesh]
     [./fmg]
       type = FileMeshGenerator
-      file = 'perfect_in.cpr'
+      file = 'perfect.cpr'
     [../]
     parallel_type = distributed
 []
