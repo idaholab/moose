@@ -84,6 +84,9 @@ public:
   virtual unsigned int linearSysNum(const LinearSystemName & sys_name) const override;
   virtual unsigned int solverSysNum(const SolverSystemName & sys_name) const override;
 
+  /// Get the time integrators from the problem
+  void addTimeIntegrator();
+
   /**
    * Allocate vectors and save old solutions into them.
    */
