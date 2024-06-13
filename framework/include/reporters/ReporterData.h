@@ -518,6 +518,36 @@ ReporterContext<T>::transferToVector(ReporterData & r_data,
 // This is defined here to avoid cyclic includes, see ReporterContext.h
 template <typename T>
 void
+ReporterContext<T>::transferFromVector(ReporterData & r_data,
+                                       const ReporterName & r_name,
+                                       dof_id_type index,
+                                       unsigned int time_index) const
+{
+  if constexpr (is_std_vector<T>::value)
+  {
+    if (index >= _state.value().size())
+      mooseError("Requested index ",
+                 index,
+                 " is outside the bounds of the vector reporter value ",
+                 r_name);
+
+    using R = typename T::value_type;
+    r_data.setReporterValue<R>(r_name, _state.value()[index], time_index);
+  }
+  else
+  {
+    libmesh_ignore(r_data);
+    libmesh_ignore(r_name);
+    libmesh_ignore(index);
+    libmesh_ignore(time_index);
+    mooseError("transferFromVector can only be used for reporter types that are specializatons of "
+               "std::vector.");
+  }
+}
+
+// This is defined here to avoid cyclic includes, see ReporterContext.h
+template <typename T>
+void
 ReporterGeneralContext<T>::declareClone(ReporterData & r_data,
                                         const ReporterName & r_name,
                                         const ReporterMode & mode,

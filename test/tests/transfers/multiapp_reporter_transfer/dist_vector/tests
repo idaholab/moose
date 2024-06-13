@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#26953'
+  design = 'MultiAppReporterTransfer.md'
+  [vec_rep]
+    requirement = "The system shall support the ability to transfer reporter
+    data from N child apps to 1 parent app, and from 1 parent app to N child app when"
+    [reporter_transfer]
+      type = 'JSONDiff'
+      input = 'main.i'
+      jsondiff = 'main_out.json main_out_sub0_out.json  main_out_sub1_out.json main_out_sub2_out.json  main_out_sub3_out.json'
+      detail = "the number of procs per app is default,"
+    []
+    [reporter_transfer_limit_max_procs]
+      type = 'JSONDiff'
+      cli_args = "MultiApps/sub/max_procs_per_app=2 Outputs/file_base=main_2_out"
+      input = 'main.i'
+      jsondiff = 'main_2_out.json main_2_out_sub0_out.json main_2_out_sub1_out.json main_2_out_sub2_out.json main_2_out_sub3_out.json'
+      detail = "the number of procs per app limited,"
+    []
+  []
+  [bad_vec_reps]
+    requirement = 'The system shall error if the reporter being transferred'
+    [reporter_send_error]
+      type = 'RunException'
+      input = 'main_dist.i'
+      expect_err = 'The Reporter value "main/dis_vec" is being produced in DISTRIBUTED mode, but the MultiAppReporterTransfer "to_sub" is requesting to consume it in REPLICATED mode, which is not supported.'
+      allow_test_objects = true
+      detail = "is distributed in the main app,"
+    []
+    [reporter_rec_error]
+      type = 'RunException'
+      input = 'main_dist.i'
+      expect_err = 'The Reporter value "sub_rep/dis_vec" is being produced in DISTRIBUTED mode, but the MultiAppReporterTransfer "from_sub" is requesting to consume it in ROOT mode, which is not supported.'
+      cli_args = "Transfers/active=from_sub"
+      allow_test_objects = true
+      detail = "or when the reporter being tranferred is distributed in the sub app."
+    []
+  []
+  [one_way_transfer]
+    requirement = 'The system shall support the ability to transfer reporter data in a vector scatter/gather fashion'
+    [1_to_N]
+      type = 'JSONDiff'
+      input = 'main_send.i'
+      jsondiff = '1_to_N_sub0_out.json 1_to_N_sub1_out.json 1_to_N_sub2_out.json 1_to_N_sub3_out.json'
+      detail = "from one main app to many subapps,"
+    []
+    [N_to_1]
+      type = 'JSONDiff'
+      input = 'main_rec.i'
+      jsondiff = 'N_to_1.json'
+      detail = "or from many subapps to one main app."
+    []
+  []
+[]

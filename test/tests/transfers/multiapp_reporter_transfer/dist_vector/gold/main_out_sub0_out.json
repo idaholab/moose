@@ -1,0 +1,27 @@
+{
+    "reporters": {
+        "from_main_rep": {
+            "type": "ConstantReporter",
+            "values": {
+                "rec_real": {
+                    "type": "double"
+                },
+                "rec_vec": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "from_main_rep": {
+                "rec_real": 1.0,
+                "rec_vec": [
+                    1.0
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}
