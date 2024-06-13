@@ -29,9 +29,9 @@ ElementSubdomainModifier::validParams()
       "Boundary to modify when an element is moved. A boundary with the provided name will be "
       "created if does not already exist on the mesh.");
   params.addParam<BoundaryName>("complement_moving_boundary_name",
-                                "Boundary that associated with the unmoved domain when neighbor "
-                                "element(s) is moved. A boundary with the provided name will be "
-                                "created if not already exists on the mesh.");
+                                "Boundary associated with the unmoved domain when neighbor "
+                                "element(s) are moved. A boundary with the provided name will be "
+                                "created if does not already exist on the mesh.");
 
   params.addParam<std::vector<VariableName>>(
       "initialize_variables",
