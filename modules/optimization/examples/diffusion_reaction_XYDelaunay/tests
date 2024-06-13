@@ -1,6 +1,6 @@
 [Tests]
     design = 'materialInv_diffusion_reaction.md'
-    issues = '#22215'
+    issues = '#22215 #27722'
 
     [diffusion_reaction_xy_del]
       requirement = 'The system shall be able to perform material inversion on a nonlinear diffusion-reaction problem by'
