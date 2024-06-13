@@ -22,7 +22,7 @@ intensity = 0.01
 k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
