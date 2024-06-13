@@ -140,8 +140,6 @@ protected:
   /// Whether to overwrite contact boundary nodal solution
   const bool _overwrite_current_solution;
 
-  const NumericVector<Number> & _u_old_old_old;
-
 private:
   std::unordered_map<dof_id_type, Real> _dof_to_position;
 };
