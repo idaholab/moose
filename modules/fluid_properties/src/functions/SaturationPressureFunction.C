@@ -30,19 +30,24 @@ SaturationPressureFunction::SaturationPressureFunction(const InputParameters & p
   : Function(parameters),
     FunctionInterface(this),
 
-    _T_fn(getFunction("T")),
-    _fp_2phase(getUserObject<TwoPhaseFluidProperties>("fp_2phase"))
+    _T_fn(getFunction("T"))
 {
+}
+
+void
+SaturationPressureFunction::initialSetup()
+{
+  _fp_2phase = &getUserObject<TwoPhaseFluidProperties>("fp_2phase");
 }
 
 Real
 SaturationPressureFunction::value(Real t, const Point & point) const
 {
-  return _fp_2phase.p_sat(_T_fn.value(t, point));
+  return _fp_2phase->p_sat(_T_fn.value(t, point));
 }
 
 RealVectorValue
 SaturationPressureFunction::gradient(Real t, const Point & point) const
 {
-  return _T_fn.gradient(t, point) / _fp_2phase.dT_sat_dp(value(t, point));
+  return _T_fn.gradient(t, point) / _fp_2phase->dT_sat_dp(value(t, point));
 }
