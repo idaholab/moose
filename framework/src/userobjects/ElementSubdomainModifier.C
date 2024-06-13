@@ -42,11 +42,11 @@ ElementSubdomainModifier::validParams()
       "initialization_strategy",
       {init_strategy},
       "Which strategy to use when initializing variables on newly activated elements and nodes. "
-      "IC applies the variable initial condition to the newly activated dofs. NEAREST applies the "
-      "old value from the nearest element/node to the newly activated dofs. CONSTANT initializes "
-      "the newly activated dofs with a constant. This parameter should either have size of 1 or "
-      "size equal to that of 'initialize_variables'. If the size of this parameter is 1, then the "
-      "same strategy will be used for all variables listed in 'initialize_variables'.");
+      "This parameter should either have size of 1 or size equal to that of 'initialize_variables'."
+      "If the size of this parameter is 1, then the same strategy will be used for all the "
+      "variables listed in 'initialize_variables'. IC applies the variable's initial condition to "
+      "the newly activated dofs. NEAREST applies the old value from the nearest element/node to "
+      "the newly activated dofs. CONSTANT initializes the newly activated dofs with a constant.");
   params.addParam<std::vector<Real>>(
       "initialization_constant",
       "The constants to use when initialization_strategy = CONSTANT. This parameter should either "
