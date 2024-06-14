@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=HEVPRambergOsgoodHardening syntax=/UserObjects/HEVPRambergOsgoodHardening
+!tag name=HEVPRambergOsgoodHardening

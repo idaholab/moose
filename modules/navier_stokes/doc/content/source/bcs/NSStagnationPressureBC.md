@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSStagnationPressureBC
 
 !syntax children /BCs/NSStagnationPressureBC
+
+!tag name=NSStagnationPressureBC

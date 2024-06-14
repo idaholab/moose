@@ -24,3 +24,5 @@ applied:
 !syntax inputs /Adaptivity/Markers/ErrorFractionMarker
 
 !syntax children /Adaptivity/Markers/ErrorFractionMarker
+
+!tag name=ErrorFractionMarker

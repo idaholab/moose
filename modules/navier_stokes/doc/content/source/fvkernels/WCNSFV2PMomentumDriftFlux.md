@@ -36,3 +36,5 @@ not use a linear volume mixing for densities.
 !syntax inputs /FVKernels/WCNSFV2PMomentumDriftFlux
 
 !syntax children /FVKernels/WCNSFV2PMomentumDriftFlux
+
+!tag name=WCNSFV2PMomentumDriftFlux

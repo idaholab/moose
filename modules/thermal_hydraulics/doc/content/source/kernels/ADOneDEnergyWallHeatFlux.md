@@ -20,3 +20,5 @@ heat transfer components such as the [HeatTransferFromHeatFlux1Phase.md].
 !syntax inputs /Kernels/ADOneDEnergyWallHeatFlux
 
 !syntax children /Kernels/ADOneDEnergyWallHeatFlux
+
+!tag name=ADOneDEnergyWallHeatFlux

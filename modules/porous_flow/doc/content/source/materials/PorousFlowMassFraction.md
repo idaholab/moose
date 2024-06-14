@@ -34,3 +34,5 @@ Examples are:
 !syntax inputs /Materials/PorousFlowMassFraction
 
 !syntax children /Materials/PorousFlowMassFraction
+
+!tag name=PorousFlowMassFraction

@@ -17,3 +17,5 @@ is the test function.
 !syntax inputs /Kernels/CHInterfaceAniso
 
 !syntax children /Kernels/CHInterfaceAniso
+
+!tag name=CHInterfaceAniso

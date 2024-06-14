@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=RigidBodyMultiKernelAction syntax=/Kernels/RigidBodyMultiKernel/RigidBodyMultiKernelAction
+!tag name=RigidBodyMultiKernelAction

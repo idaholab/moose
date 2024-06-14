@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=EulerAngleUpdaterCheck syntax=/VectorPostprocessors/EulerAngleUpdaterCheck
+!tag name=EulerAngleUpdaterCheck

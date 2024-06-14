@@ -17,3 +17,5 @@
 !syntax inputs /UserObjects/GlobalStrainUserObject
 
 !syntax children /UserObjects/GlobalStrainUserObject
+
+!tag name=GlobalStrainUserObject

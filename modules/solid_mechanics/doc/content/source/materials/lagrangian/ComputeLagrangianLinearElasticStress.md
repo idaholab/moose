@@ -34,3 +34,5 @@ The following example sets up a hypoelastic, large deformation model based on th
 !syntax inputs /Materials/ComputeLagrangianLinearElasticStress
 
 !syntax children /Materials/ComputeLagrangianLinearElasticStress
+
+!tag name=ComputeLagrangianLinearElasticStress

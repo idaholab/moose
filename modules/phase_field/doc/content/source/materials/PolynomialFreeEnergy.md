@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=PolynomialFreeEnergy syntax=/Materials/PolynomialFreeEnergy
+!tag name=PolynomialFreeEnergy

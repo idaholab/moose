@@ -12,3 +12,5 @@ the thermal conductivity and specific heat at integration points.
 !syntax inputs /Materials/HeatConductionMaterial
 
 !syntax children /Materials/HeatConductionMaterial
+
+!tag name=HeatConductionMaterial

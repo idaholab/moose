@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=FauxGrainTracker syntax=/Postprocessors/FauxGrainTracker
+!tag name=FauxGrainTracker

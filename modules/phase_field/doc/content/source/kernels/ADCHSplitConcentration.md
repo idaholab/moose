@@ -12,3 +12,5 @@ non-linear variable.  Typically used with
 !syntax inputs /Kernels/ADCHSplitConcentration
 
 !syntax children /Kernels/ADCHSplitConcentration
+
+!tag name=ADCHSplitConcentration

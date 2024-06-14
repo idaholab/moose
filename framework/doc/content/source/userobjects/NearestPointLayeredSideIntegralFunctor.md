@@ -12,3 +12,5 @@ implemented for the [!param](/UserObjects/NearestPointLayeredSideIntegralFunctor
 !syntax inputs /UserObjects/NearestPointLayeredSideIntegralFunctor
 
 !syntax children /UserObjects/NearestPointLayeredSideIntegralFunctor
+
+!tag name=NearestPointLayeredSideIntegralFunctor

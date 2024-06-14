@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=SolidMechanicsPlasticMohrCoulomb syntax=/UserObjects/SolidMechanicsPlasticMohrCoulomb
+!tag name=SolidMechanicsPlasticMohrCoulomb

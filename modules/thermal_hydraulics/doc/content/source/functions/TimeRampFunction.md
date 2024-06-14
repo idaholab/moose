@@ -9,3 +9,5 @@
 !syntax children /Functions/TimeRampFunction
 
 !bibtex bibliography
+
+!tag name=TimeRampFunction

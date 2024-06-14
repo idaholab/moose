@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSTemperatureTimeDerivative
 
 !syntax children /Kernels/INSTemperatureTimeDerivative
+
+!tag name=INSTemperatureTimeDerivative

@@ -7,3 +7,5 @@
 !syntax inputs /Materials/AEFVMaterial
 
 !syntax children /Materials/AEFVMaterial
+
+!tag name=AEFVMaterial

@@ -195,3 +195,5 @@ name of the scalar strain variable
 !syntax children /Materials/ADComputePlaneIncrementalStrain
 
 !bibtex bibliography
+
+!tag name=ADComputePlaneIncrementalStrain

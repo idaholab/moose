@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=InterfaceDiffusionFluxMatch syntax=/InterfaceKernels/InterfaceDiffusionFluxMatch
+!tag name=InterfaceDiffusionFluxMatch

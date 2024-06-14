@@ -105,3 +105,5 @@ and the required Linear Viscoelasticity Manager User Object:
 !syntax inputs /Materials/GeneralizedKelvinVoigtModel
 
 !syntax children /Materials/GeneralizedKelvinVoigtModel
+
+!tag name=GeneralizedKelvinVoigtModel

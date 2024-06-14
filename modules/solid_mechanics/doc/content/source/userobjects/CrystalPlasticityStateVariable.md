@@ -12,3 +12,5 @@
 !syntax children /UserObjects/CrystalPlasticityStateVariable
 
 !bibtex bibliography
+
+!tag name=CrystalPlasticityStateVariable

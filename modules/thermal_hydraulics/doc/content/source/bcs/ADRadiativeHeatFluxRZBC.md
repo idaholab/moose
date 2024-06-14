@@ -17,3 +17,5 @@ In THM, most boundary conditions are added automatically by components. This bou
 !syntax inputs /BCs/ADRadiativeHeatFluxRZBC
 
 !syntax children /BCs/ADRadiativeHeatFluxRZBC
+
+!tag name=ADRadiativeHeatFluxRZBC

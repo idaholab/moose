@@ -35,3 +35,5 @@ parallel storage reporter with a name of `parallel_storage`.
 !syntax inputs /Transfers/SerializedSolutionTransfer
 
 !syntax children /Transfers/SerializedSolutionTransfer
+
+!tag name=SerializedSolutionTransfer

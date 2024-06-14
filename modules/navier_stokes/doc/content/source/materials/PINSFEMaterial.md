@@ -21,3 +21,5 @@ documentation clear for users.
 !syntax inputs /Materials/PINSFEMaterial
 
 !syntax children /Materials/PINSFEMaterial
+
+!tag name=PINSFEMaterial

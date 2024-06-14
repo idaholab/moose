@@ -22,3 +22,5 @@ material property definition.
 !syntax children /Kernels/ThermoDiffusion
 
 !bibtex bibliography
+
+!tag name=ThermoDiffusion

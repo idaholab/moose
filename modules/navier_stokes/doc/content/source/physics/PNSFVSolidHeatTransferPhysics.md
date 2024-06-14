@@ -60,3 +60,5 @@ with the `Physics` syntax. Please use a [FVConvectionCorrelationInterface.md] fo
 !syntax inputs /Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics
 
 !syntax children /Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics
+
+!tag name=PNSFVSolidHeatTransferPhysics

@@ -28,3 +28,5 @@ Creation of auxiliary kernel for computing worn-out depth:
 !syntax inputs /AuxKernels/MortarArchardsLawAux
 
 !syntax children /AuxKernels/MortarArchardsLawAux
+
+!tag name=MortarArchardsLawAux

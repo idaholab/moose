@@ -31,3 +31,5 @@ scale parameter 0.52.
 !syntax inputs /Distributions/Lognormal
 
 !syntax children /Distributions/Lognormal
+
+!tag name=Lognormal

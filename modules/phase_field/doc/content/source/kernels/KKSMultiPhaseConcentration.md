@@ -66,3 +66,5 @@ mobility.
 !syntax inputs /Kernels/KKSMultiPhaseConcentration
 
 !syntax children /Kernels/KKSMultiPhaseConcentration
+
+!tag name=KKSMultiPhaseConcentration

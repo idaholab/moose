@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSMomentumTimeDerivative
 
 !syntax children /Kernels/INSMomentumTimeDerivative
+
+!tag name=INSMomentumTimeDerivative

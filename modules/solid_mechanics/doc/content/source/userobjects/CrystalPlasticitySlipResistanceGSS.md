@@ -12,3 +12,5 @@
 !syntax children /UserObjects/CrystalPlasticitySlipResistanceGSS
 
 !bibtex bibliography
+
+!tag name=CrystalPlasticitySlipResistanceGSS

@@ -50,3 +50,5 @@ unless coupling with external codes that require different normalizations.
 !syntax inputs /Functions/FunctionSeries
 
 !syntax children /Functions/FunctionSeries
+
+!tag name=FunctionSeries

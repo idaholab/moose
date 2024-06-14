@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
 
 !syntax children /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
+
+!tag name=NSEnergyInviscidSpecifiedDensityAndVelocityBC

@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSPressureNeumannBC
 
 !syntax children /BCs/NSPressureNeumannBC
+
+!tag name=NSPressureNeumannBC

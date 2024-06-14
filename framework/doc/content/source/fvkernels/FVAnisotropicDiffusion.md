@@ -38,3 +38,5 @@ element and neighbor values.
 !syntax inputs /FVKernels/FVAnisotropicDiffusion
 
 !syntax children /FVKernels/FVAnisotropicDiffusion
+
+!tag name=FVAnisotropicDiffusion

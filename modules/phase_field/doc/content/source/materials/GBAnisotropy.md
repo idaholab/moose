@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=GBAnisotropy syntax=/Materials/GBAnisotropy
+!tag name=GBAnisotropy

@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSProjection
 
 !syntax children /Kernels/INSProjection
+
+!tag name=INSProjection

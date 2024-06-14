@@ -18,3 +18,5 @@ of the `INSADObjectTracker`.
 !syntax inputs /UserObjects/INSADObjectTracker
 
 !syntax children /UserObjects/INSADObjectTracker
+
+!tag name=INSADObjectTracker

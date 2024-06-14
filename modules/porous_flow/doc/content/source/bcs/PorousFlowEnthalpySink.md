@@ -24,3 +24,5 @@ For instance:
 !syntax inputs /BCs/PorousFlowEnthalpySink
 
 !syntax children /BCs/PorousFlowEnthalpySink
+
+!tag name=PorousFlowEnthalpySink

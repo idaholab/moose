@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=MaterialVectorGradAuxKernelAction syntax=/AuxKernels/MaterialVectorGradAuxKernel/MaterialVectorGradAuxKernelAction
+!tag name=MaterialVectorGradAuxKernelAction

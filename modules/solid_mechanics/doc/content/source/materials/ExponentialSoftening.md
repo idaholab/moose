@@ -58,3 +58,5 @@ to compute the softened cracked material stiffness.
 !syntax children /Materials/ExponentialSoftening
 
 !bibtex bibliography
+
+!tag name=ExponentialSoftening

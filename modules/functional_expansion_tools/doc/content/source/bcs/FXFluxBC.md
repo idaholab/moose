@@ -20,3 +20,5 @@ This `BC` provides a *strongly encouraged* FE-based Neumann boundary condition. 
 !syntax inputs /BCs/FXFluxBC
 
 !syntax children /BCs/FXFluxBC
+
+!tag name=FXFluxBC

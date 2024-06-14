@@ -12,3 +12,5 @@ is necessary to make the documentation clear for users.
 !syntax parameters /JacobianTest1PhaseRDG/JacobianTest1PhaseRDGAction
 
 !bibtex bibliography
+
+!tag name=JacobianTest1PhaseRDGAction

@@ -21,3 +21,5 @@ block=Postprocessors
 !syntax inputs /Postprocessors/LinearCombinationPostprocessor
 
 !syntax children /Postprocessors/LinearCombinationPostprocessor
+
+!tag name=LinearCombinationPostprocessor

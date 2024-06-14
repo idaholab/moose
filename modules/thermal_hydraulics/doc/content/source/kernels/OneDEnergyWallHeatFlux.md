@@ -24,3 +24,5 @@ designed to provide numerically exact contributions to the Jacobian.
 !syntax inputs /Kernels/OneDEnergyWallHeatFlux
 
 !syntax children /Kernels/OneDEnergyWallHeatFlux
+
+!tag name=OneDEnergyWallHeatFlux

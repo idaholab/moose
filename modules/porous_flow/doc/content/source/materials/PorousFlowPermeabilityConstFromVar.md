@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowPermeabilityConstFromVar
 
 !syntax children /Materials/PorousFlowPermeabilityConstFromVar
+
+!tag name=PorousFlowPermeabilityConstFromVar

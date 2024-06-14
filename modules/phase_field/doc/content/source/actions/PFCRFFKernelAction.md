@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=PFCRFFKernelAction syntax=/Kernels/PFCRFFKernel/PFCRFFKernelAction
+!tag name=PFCRFFKernelAction

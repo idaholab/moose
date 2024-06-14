@@ -7,3 +7,5 @@
 !syntax inputs /BCs/INSMomentumNoBCBCLaplaceForm
 
 !syntax children /BCs/INSMomentumNoBCBCLaplaceForm
+
+!tag name=INSMomentumNoBCBCLaplaceForm

@@ -30,3 +30,5 @@ of an anisotropic permeability.
 !syntax inputs /AuxKernels/MaterialStdVectorAux
 
 !syntax children /AuxKernels/MaterialStdVectorAux
+
+!tag name=MaterialStdVectorAux

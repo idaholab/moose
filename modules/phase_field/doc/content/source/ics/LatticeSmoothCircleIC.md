@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=LatticeSmoothCircleIC syntax=/ICs/LatticeSmoothCircleIC
+!tag name=LatticeSmoothCircleIC

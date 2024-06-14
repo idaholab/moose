@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlow2PhasePS
 
 !syntax children /Materials/PorousFlow2PhasePS
+
+!tag name=PorousFlow2PhasePS

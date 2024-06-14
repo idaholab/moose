@@ -14,3 +14,5 @@ diffusivity.
 !syntax children /Materials/GrandPotentialTensorMaterial
 
 !bibtex bibliography
+
+!tag name=GrandPotentialTensorMaterial

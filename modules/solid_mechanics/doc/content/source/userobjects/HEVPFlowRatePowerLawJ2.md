@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=HEVPFlowRatePowerLawJ2 syntax=/UserObjects/HEVPFlowRatePowerLawJ2
+!tag name=HEVPFlowRatePowerLawJ2

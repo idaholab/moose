@@ -12,3 +12,7 @@ XDR (binary) format.
 !syntax inputs /Outputs/XDA
 
 !syntax children /Outputs/XDA
+
+!tag name=XDA
+
+!tag name=XDR

@@ -33,3 +33,5 @@ dispersed phase is computed as follows [!cite](schiller1933drag):
 !syntax inputs /FunctorMaterials/NSFVDispersePhaseDragFunctorMaterial
 
 !syntax children /FunctorMaterials/NSFVDispersePhaseDragFunctorMaterial
+
+!tag name=NSFVDispersePhaseDragFunctorMaterial

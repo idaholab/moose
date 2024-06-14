@@ -20,3 +20,5 @@ AD is used in THM to compute numerically exact Jacobians.
 !syntax inputs /ScalarKernels/ADShaftComponentTorqueScalarKernel
 
 !syntax children /ScalarKernels/ADShaftComponentTorqueScalarKernel
+
+!tag name=ADShaftComponentTorqueScalarKernel

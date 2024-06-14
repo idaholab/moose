@@ -19,3 +19,5 @@ input file.
 !syntax inputs /Transfers/PODSamplerSolutionTransfer
 
 !syntax children /Transfers/PODSamplerSolutionTransfer
+
+!tag name=PODSamplerSolutionTransfer

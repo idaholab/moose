@@ -7,3 +7,4 @@
 !syntax inputs /Functions/MovingPlanarFront
 
 !syntax children /Functions/MovingPlanarFront
+!tag name=MovingPlanarFront

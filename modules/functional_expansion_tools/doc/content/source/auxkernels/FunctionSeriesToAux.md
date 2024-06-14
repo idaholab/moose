@@ -17,3 +17,5 @@ This `AuxKernel` expands an FX into the named `AuxVariable` before the initial n
 !syntax inputs /AuxKernels/FunctionSeriesToAux
 
 !syntax children /AuxKernels/FunctionSeriesToAux
+
+!tag name=FunctionSeriesToAux

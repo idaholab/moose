@@ -11,3 +11,5 @@ This class computes the finite strain increments for shell elements. Please refe
 !syntax inputs /Materials/ADComputeFiniteShellStrain
 
 !syntax children /Materials/ADComputeFiniteShellStrain
+
+!tag name=ADComputeFiniteShellStrain

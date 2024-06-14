@@ -11,3 +11,5 @@ parameter.
 !syntax inputs /Debug/THMDebugAction
 
 !syntax children /Debug/THMDebugAction
+
+!tag name=THMDebugAction

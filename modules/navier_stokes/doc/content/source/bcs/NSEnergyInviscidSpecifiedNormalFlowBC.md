@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
 
 !syntax children /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
+
+!tag name=NSEnergyInviscidSpecifiedNormalFlowBC

@@ -91,3 +91,5 @@ model:
 !syntax children /Materials/CrystalPlasticityTwinningKalidindiUpdate
 
 !bibtex bibliography
+
+!tag name=CrystalPlasticityTwinningKalidindiUpdate

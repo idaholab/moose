@@ -57,3 +57,5 @@ the [PerfGraphOutput.md].
 !syntax inputs /VectorPostprocessors/VectorMemoryUsage
 
 !syntax children /VectorPostprocessors/VectorMemoryUsage
+
+!tag name=VectorMemoryUsage

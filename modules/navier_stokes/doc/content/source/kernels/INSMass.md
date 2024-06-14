@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSMass
 
 !syntax children /Kernels/INSMass
+
+!tag name=INSMass

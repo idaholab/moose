@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=TotalFreeEnergy syntax=/AuxKernels/TotalFreeEnergy
+!tag name=TotalFreeEnergy

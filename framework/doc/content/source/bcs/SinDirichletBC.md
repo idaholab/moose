@@ -45,3 +45,5 @@ non-physical solutions in nonlinear PDEs.
 !syntax inputs /BCs/SinDirichletBC
 
 !syntax children /BCs/SinDirichletBC
+
+!tag name=SinDirichletBC

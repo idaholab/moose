@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=DeformedGrainMaterial syntax=/Materials/DeformedGrainMaterial
+!tag name=DeformedGrainMaterial

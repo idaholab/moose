@@ -24,3 +24,5 @@ where $\Delta \boldsymbol{\epsilon}$ is the strain increment; this strain measur
 !syntax inputs /Materials/ComputeFiniteStrainElasticStress
 
 !syntax children /Materials/ComputeFiniteStrainElasticStress
+
+!tag name=ComputeFiniteStrainElasticStress

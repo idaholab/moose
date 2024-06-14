@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=HEVPEqvPlasticStrainRate syntax=/UserObjects/HEVPEqvPlasticStrainRate
+!tag name=HEVPEqvPlasticStrainRate

@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=HEVPLinearHardening syntax=/UserObjects/HEVPLinearHardening
+!tag name=HEVPLinearHardening

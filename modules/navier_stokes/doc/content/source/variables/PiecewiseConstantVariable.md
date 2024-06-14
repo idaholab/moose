@@ -14,3 +14,5 @@ sharply discontinuous values.
 !syntax inputs /Variables/PiecewiseConstantVariable
 
 !syntax children /Variables/PiecewiseConstantVariable
+
+!tag name=PiecewiseConstantVariable

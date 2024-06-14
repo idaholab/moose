@@ -19,3 +19,5 @@ the surface.
 !syntax inputs /BCs/ADFunctionRadiativeBC
 
 !syntax children /BCs/ADFunctionRadiativeBC
+
+!tag name=ADFunctionRadiativeBC

@@ -28,3 +28,5 @@ eigenstrains in the system.
 !syntax inputs /Materials/ADComputeLinearElasticStress
 
 !syntax children /Materials/ADComputeLinearElasticStress
+
+!tag name=ADComputeLinearElasticStress

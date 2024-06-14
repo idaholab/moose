@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=CoupledConvectiveFlux syntax=/BCs/CoupledConvectiveFlux
+!tag name=CoupledConvectiveFlux

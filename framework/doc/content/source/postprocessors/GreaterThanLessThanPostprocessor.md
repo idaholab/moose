@@ -22,3 +22,5 @@ the parameter `subdomain`.
 !syntax children /Postprocessors/GreaterThanLessThanPostprocessor
 
 !bibtex bibliography
+
+!tag name=GreaterThanLessThanPostprocessor

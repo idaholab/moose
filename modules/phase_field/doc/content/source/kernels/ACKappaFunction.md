@@ -20,3 +20,5 @@ the ```DerivativeMaterialInterface```, such as ```DerivativeParsedMaterial```.
 !syntax inputs /Kernels/ACKappaFunction
 
 !syntax children /Kernels/ACKappaFunction
+
+!tag name=ACKappaFunction

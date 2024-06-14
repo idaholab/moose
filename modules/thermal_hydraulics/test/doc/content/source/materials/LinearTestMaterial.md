@@ -16,3 +16,5 @@ is necessary to make the documentation clear for users.
 !syntax children /Materials/LinearTestMaterial
 
 !bibtex bibliography
+
+!tag name=LinearTestMaterial

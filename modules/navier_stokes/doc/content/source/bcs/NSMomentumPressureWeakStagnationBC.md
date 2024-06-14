@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSMomentumPressureWeakStagnationBC
 
 !syntax children /BCs/NSMomentumPressureWeakStagnationBC
+
+!tag name=NSMomentumPressureWeakStagnationBC

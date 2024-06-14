@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=ThermalConductivity syntax=/Postprocessors/ThermalConductivity
+!tag name=ThermalConductivity

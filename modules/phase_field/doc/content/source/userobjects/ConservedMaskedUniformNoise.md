@@ -12,3 +12,5 @@
 !syntax inputs /UserObjects/ConservedMaskedUniformNoise
 
 !syntax children /UserObjects/ConservedMaskedUniformNoise
+
+!tag name=ConservedMaskedUniformNoise

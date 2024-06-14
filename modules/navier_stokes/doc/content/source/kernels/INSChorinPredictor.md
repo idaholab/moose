@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSChorinPredictor
 
 !syntax children /Kernels/INSChorinPredictor
+
+!tag name=INSChorinPredictor

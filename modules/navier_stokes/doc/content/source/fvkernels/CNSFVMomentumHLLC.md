@@ -12,3 +12,5 @@ Harten-Lax-Van Leer-Contact (HLLC) formulation described in [CNSFVHLLCBase.md].
 !syntax inputs /FVKernels/CNSFVMomentumHLLC
 
 !syntax children /FVKernels/CNSFVMomentumHLLC
+
+!tag name=CNSFVMomentumHLLC

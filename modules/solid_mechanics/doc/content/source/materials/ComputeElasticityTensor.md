@@ -346,3 +346,5 @@ order must be reversed.
 !syntax children /Materials/ComputeElasticityTensor
 
 !bibtex bibliography
+
+!tag name=ComputeElasticityTensor

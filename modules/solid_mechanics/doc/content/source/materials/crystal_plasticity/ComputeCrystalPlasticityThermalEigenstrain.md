@@ -107,3 +107,5 @@ The off-diagonal Jacobian contributions due to thermal expansion is currently *n
 !syntax inputs /Materials/ComputeCrystalPlasticityThermalEigenstrain
 
 !syntax children /Materials/ComputeCrystalPlasticityThermalEigenstrain
+
+!tag name=ComputeCrystalPlasticityThermalEigenstrain

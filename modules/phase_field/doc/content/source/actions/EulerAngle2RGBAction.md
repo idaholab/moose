@@ -1,1 +1,2 @@
 !template load file=stubs/moose_action.md.template name=EulerAngle2RGBAction syntax=/Modules/PhaseField/EulerAngles2RGB/EulerAngle2RGBAction
+!tag name=EulerAngle2RGBAction

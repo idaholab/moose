@@ -23,3 +23,5 @@ integrators as it is related to the
 !syntax inputs /AuxKernels/Courant
 
 !syntax children /AuxKernels/Courant
+
+!tag name=Courant

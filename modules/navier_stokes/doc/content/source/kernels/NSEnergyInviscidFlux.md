@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSEnergyInviscidFlux
 
 !syntax children /Kernels/NSEnergyInviscidFlux
+
+!tag name=NSEnergyInviscidFlux

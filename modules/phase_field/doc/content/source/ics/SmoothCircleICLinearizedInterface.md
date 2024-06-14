@@ -41,3 +41,5 @@ The input file syntax for the IC is:
 !syntax inputs /ICs/SmoothCircleICLinearizedInterface
 
 !syntax children /ICs/SmoothCircleICLinearizedInterface
+
+!tag name=SmoothCircleICLinearizedInterface

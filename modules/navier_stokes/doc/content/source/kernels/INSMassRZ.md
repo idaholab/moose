@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSMassRZ
 
 !syntax children /Kernels/INSMassRZ
+
+!tag name=INSMassRZ

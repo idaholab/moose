@@ -12,3 +12,5 @@ natural convection.
 !syntax inputs /Kernels/INSADBoussinesqBodyForce
 
 !syntax children /Kernels/INSADBoussinesqBodyForce
+
+!tag name=INSADBoussinesqBodyForce

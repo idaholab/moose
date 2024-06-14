@@ -15,3 +15,5 @@ and an [INSFVSymmetryPressureBC.md] should be applied on the pressure, on a symm
 !syntax inputs /FVBCs/INSFVSymmetryScalarBC
 
 !syntax children /FVBCs/INSFVSymmetryScalarBC
+
+!tag name=INSFVSymmetryScalarBC

@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=ComputeMultiPlasticityStress syntax=/Materials/ComputeMultiPlasticityStress
+!tag name=ComputeMultiPlasticityStress

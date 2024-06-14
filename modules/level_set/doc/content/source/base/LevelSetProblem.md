@@ -17,3 +17,5 @@ input file.
 !syntax inputs /Problem/LevelSetProblem
 
 !syntax children /Problem/LevelSetProblem
+
+!tag name=LevelSetProblem

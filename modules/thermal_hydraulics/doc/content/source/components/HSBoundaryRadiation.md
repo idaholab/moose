@@ -44,3 +44,5 @@ where
 !syntax inputs /Components/HSBoundaryRadiation
 
 !syntax children /Components/HSBoundaryRadiation
+
+!tag name=HSBoundaryRadiation

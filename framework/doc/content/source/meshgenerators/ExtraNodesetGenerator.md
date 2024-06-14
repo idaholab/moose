@@ -12,3 +12,5 @@ from 1 instead of from 0 like in MOOSE.
 !syntax inputs /Mesh/ExtraNodesetGenerator
 
 !syntax children /Mesh/ExtraNodesetGenerator
+
+!tag name=ExtraNodesetGenerator

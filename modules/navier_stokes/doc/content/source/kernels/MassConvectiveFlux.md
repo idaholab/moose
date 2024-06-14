@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/MassConvectiveFlux
 
 !syntax children /Kernels/MassConvectiveFlux
+
+!tag name=MassConvectiveFlux

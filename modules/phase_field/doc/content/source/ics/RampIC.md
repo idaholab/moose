@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=RampIC syntax=/ICs/RampIC
+!tag name=RampIC

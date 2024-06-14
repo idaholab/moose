@@ -28,3 +28,5 @@ to the location of our `boundary`.
 !syntax inputs /FVBCs/FVInfiniteCylinderRadiativeBC
 
 !syntax children /FVBCs/FVInfiniteCylinderRadiativeBC
+
+!tag name=FVInfiniteCylinderRadiativeBC

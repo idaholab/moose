@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSMassWeakStagnationBC
 
 !syntax children /BCs/NSMassWeakStagnationBC
+
+!tag name=NSMassWeakStagnationBC

@@ -37,3 +37,5 @@ Log free energies are only valid when the component phase mole fractions are wit
 !syntax inputs /Materials/KKSPhaseConcentrationMaterial
 
 !syntax children /Materials/KKSPhaseConcentrationMaterial
+
+!tag name=KKSPhaseConcentrationMaterial

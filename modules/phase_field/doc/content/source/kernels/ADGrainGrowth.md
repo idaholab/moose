@@ -33,3 +33,5 @@ material.
 !syntax children /Kernels/ADGrainGrowth
 
 !bibtex bibliography
+
+!tag name=ADGrainGrowth

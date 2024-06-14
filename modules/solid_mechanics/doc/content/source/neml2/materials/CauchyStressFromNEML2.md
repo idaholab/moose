@@ -15,3 +15,5 @@ point.
 ## Example Input Syntax
 
 !syntax parameters /Materials/CauchyStressFromNEML2
+
+!tag name=CauchyStressFromNEML2

@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=CappedWeakInclinedPlaneStressUpdate syntax=/Materials/CappedWeakInclinedPlaneStressUpdate
+!tag name=CappedWeakInclinedPlaneStressUpdate

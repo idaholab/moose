@@ -27,3 +27,5 @@ spanning the entire domain.
 !syntax inputs /FVInterfaceKernels/FVTwoVarContinuityConstraint
 
 !syntax children /FVInterfaceKernels/FVTwoVarContinuityConstraint
+
+!tag name=FVTwoVarContinuityConstraint

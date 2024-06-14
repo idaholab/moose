@@ -54,3 +54,5 @@ and indirectly used by the
 !syntax children /Materials/GrandPotentialInterface
 
 !bibtex bibliography
+
+!tag name=GrandPotentialInterface

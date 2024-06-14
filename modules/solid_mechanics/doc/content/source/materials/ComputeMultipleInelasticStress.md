@@ -339,3 +339,5 @@ step size.
 !syntax children /Materials/ComputeMultipleInelasticStress
 
 !bibtex bibliography
+
+!tag name=ComputeMultipleInelasticStress

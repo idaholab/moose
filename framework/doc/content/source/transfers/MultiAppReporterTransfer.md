@@ -135,3 +135,5 @@ Here we are transferring a vector reporter and a vector of vectors reporter in a
 !syntax inputs /Transfers/MultiAppReporterTransfer
 
 !syntax children /Transfers/MultiAppReporterTransfer
+
+!tag name=MultiAppReporterTransfer

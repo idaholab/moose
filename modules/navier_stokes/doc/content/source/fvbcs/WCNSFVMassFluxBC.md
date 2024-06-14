@@ -36,3 +36,5 @@ and the inlet area.
 !syntax inputs /FVBCs/WCNSFVMassFluxBC
 
 !syntax children /FVBCs/WCNSFVMassFluxBC
+
+!tag name=WCNSFVMassFluxBC

@@ -20,3 +20,5 @@ complete the model data is output using the SurrogateTrainerOutput object.
 !syntax inputs /Outputs/SurrogateTrainerOutput
 
 !syntax children /Outputs/SurrogateTrainerOutput
+
+!tag name=SurrogateTrainerOutput

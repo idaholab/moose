@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=PFCRFFEnergyDensity syntax=/AuxKernels/PFCRFFEnergyDensity
+!tag name=PFCRFFEnergyDensity

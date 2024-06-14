@@ -7,3 +7,5 @@
 !syntax inputs /Materials/PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
 
 !syntax children /Materials/PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
+
+!tag name=PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity

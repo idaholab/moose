@@ -30,3 +30,5 @@ CSV file using a [SpatialUserObjectVectorPostprocessor](/vectorpostprocessors/Sp
 !syntax inputs /UserObjects/FunctionLayeredIntegral
 
 !syntax children /UserObjects/FunctionLayeredIntegral
+
+!tag name=FunctionLayeredIntegral

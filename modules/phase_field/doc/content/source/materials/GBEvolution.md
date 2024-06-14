@@ -32,3 +32,5 @@ where $M_0$ is the mobility prefactor, $Q$ is the activation energy, and $k_b$ i
 !syntax inputs /Materials/GBEvolution
 
 !syntax children /Materials/GBEvolution
+
+!tag name=GBEvolution

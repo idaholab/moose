@@ -11,3 +11,5 @@ similar functionality when used with a [ConstantFunction.md].
 !syntax inputs /AuxScalarKernels/ConstantScalarAux
 
 !syntax children /AuxScalarKernels/ConstantScalarAux
+
+!tag name=ConstantScalarAux

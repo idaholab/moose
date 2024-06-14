@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSMomentumViscousFlux
 
 !syntax children /Kernels/NSMomentumViscousFlux
+
+!tag name=NSMomentumViscousFlux

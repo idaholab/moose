@@ -7,3 +7,5 @@
 !syntax inputs /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
 
 !syntax children /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
+
+!tag name=NSMomentumInviscidNoPressureImplicitFlowBC

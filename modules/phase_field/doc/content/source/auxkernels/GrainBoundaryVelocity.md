@@ -24,3 +24,5 @@ specified.
 !syntax inputs /AuxKernels/GrainBoundaryVelocity
 
 !syntax children /AuxKernels/GrainBoundaryVelocity
+
+!tag name=GrainBoundaryVelocity

@@ -7,3 +7,5 @@
 !syntax inputs /BCs/AEFVBC
 
 !syntax children /BCs/AEFVBC
+
+!tag name=AEFVBC

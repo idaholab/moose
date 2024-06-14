@@ -20,3 +20,5 @@ $f$ and $g$ are scalar functors.
 !syntax inputs /FunctorMaterials/LinearFrictionFactorFunctorMaterial
 
 !syntax children /FunctorMaterials/LinearFrictionFactorFunctorMaterial
+
+!tag name=LinearFrictionFactorFunctorMaterial

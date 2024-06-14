@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSMomentumInviscidFlux
 
 !syntax children /Kernels/NSMomentumInviscidFlux
+
+!tag name=NSMomentumInviscidFlux

@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/INSSplitMomentum
 
 !syntax children /Kernels/INSSplitMomentum
+
+!tag name=INSSplitMomentum

@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=FiniteStrainHyperElasticViscoPlastic syntax=/Materials/FiniteStrainHyperElasticViscoPlastic
+!tag name=FiniteStrainHyperElasticViscoPlastic

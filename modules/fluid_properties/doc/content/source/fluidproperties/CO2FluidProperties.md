@@ -40,3 +40,5 @@ The CO2FluidProperties UserObject is valid for:
 !syntax children /FluidProperties/CO2FluidProperties
 
 !bibtex bibliography
+
+!tag name=CO2FluidProperties

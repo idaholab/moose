@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=ACGrGrElasticDrivingForce syntax=/Kernels/ACGrGrElasticDrivingForce
+!tag name=ACGrGrElasticDrivingForce

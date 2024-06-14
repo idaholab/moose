@@ -71,3 +71,5 @@ and only two displacement variables are provided:
 !syntax inputs /Kernels/StressDivergenceRZTensors
 
 !syntax children /Kernels/StressDivergenceRZTensors
+
+!tag name=StressDivergenceRZTensors

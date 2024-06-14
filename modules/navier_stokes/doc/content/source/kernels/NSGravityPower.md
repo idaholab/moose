@@ -7,3 +7,5 @@
 !syntax inputs /Kernels/NSGravityPower
 
 !syntax children /Kernels/NSGravityPower
+
+!tag name=NSGravityPower

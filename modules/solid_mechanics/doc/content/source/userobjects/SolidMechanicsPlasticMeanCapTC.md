@@ -1,1 +1,2 @@
 !template load file=stubs/moose_object.md.template name=SolidMechanicsPlasticMeanCapTC syntax=/UserObjects/SolidMechanicsPlasticMeanCapTC
+!tag name=SolidMechanicsPlasticMeanCapTC

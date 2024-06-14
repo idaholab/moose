@@ -24,3 +24,5 @@ kernel is [DiscreteNucleationForce](/DiscreteNucleationForce.md).
 !syntax children /AuxKernels/DiscreteNucleationAux
 
 !bibtex bibliography
+
+!tag name=DiscreteNucleationAux

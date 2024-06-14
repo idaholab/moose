@@ -66,3 +66,5 @@ block=UserObjects
 !syntax inputs /UserObjects/RayTracingViewFactor
 
 !syntax children /UserObjects/RayTracingViewFactor
+
+!tag name=RayTracingViewFactor

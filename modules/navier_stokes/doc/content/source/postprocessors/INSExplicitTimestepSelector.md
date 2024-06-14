@@ -7,3 +7,5 @@
 !syntax inputs /Postprocessors/INSExplicitTimestepSelector
 
 !syntax children /Postprocessors/INSExplicitTimestepSelector
+
+!tag name=INSExplicitTimestepSelector
