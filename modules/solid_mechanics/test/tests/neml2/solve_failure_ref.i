@@ -15,7 +15,7 @@ N = 2
 []
 
 [NEML2]
-  input = 'models/${neml2_input}.i'
+  input = 'models/viscoplasticity_isokinharden.i'
   model = 'model'
   verbose = true
   mode = PARSE_ONLY
@@ -98,25 +98,6 @@ N = 2
   []
 []
 
-[Postprocessors]
-  [t]
-    type = TimePostprocessor
-    outputs = none
-  []
-  [dt]
-    type = TimestepSize
-    outputs = none
-  []
-[]
-
-[UserObjects]
-  [let_it_fail]
-    type = Terminator
-    expression = 't=3e-3 & dt=1e-3'
-    fail_mode = SOFT
-  []
-[]
-
 [Executioner]
   type = Transient
   solve_type = NEWTON
@@ -127,9 +108,12 @@ N = 2
   dtmin = 1e-4
   end_time = 5e-3
   residual_and_jacobian_together = true
+  [TimeStepper]
+    type = TimeSequenceStepper
+    time_sequence = '0.001 0.002 0.0025 0.0035 0.0045 0.005'
+  []
 []
 
 [Outputs]
-  file_base = '${neml2_input}'
   exodus = true
 []
