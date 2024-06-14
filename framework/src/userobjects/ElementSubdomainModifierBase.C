@@ -49,19 +49,15 @@ ElementSubdomainModifierBase::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "active_subdomains",
       {},
-      "The variables specified by the parameter 'initialize_variables' are initialized to their "
-      "initial conditions when elements are moved from 'inactive' subdomains to 'active' "
-      "subdomains, or from an 'active' subdomain to a different 'active' subdomain. The 'active' "
-      "subdomains are usually where the simulation is performed, i.e. the PDE's computational "
-      "domain. If this parameter is left empty, then the entire mesh is treated as the active "
-      "subdomain.");
-  params.addParam<bool>(
-      "amorphous_activation",
-      false,
-      "If set to false (default), only elements moving from inactive subdomains to active "
-      "subdomains are considered as 'activated'. When set to true, elements moving from an active "
-      "subdomain to another are _also_ considered to be 'activated'.");
-
+      "The subdomains in which to initialize variables. These usually correspond to the 'active' "
+      "subdomains where the simulation is performed, i.e. the PDE's computational domain. If this "
+      "parameter is left empty, then the entire mesh is the 'active_subdomain'.");
+  params.addParam<bool>("amorphous_activation",
+                        false,
+                        "If set to false (default), only elements which change from subdomains not "
+                        "listed in active_subdomains to ones that are listed, are initialized. "
+                        "When set to true, this will also "
+                        "include elements that are initially in the 'active_subdomains'");
   return params;
 }
 

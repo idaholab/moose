@@ -1,89 +1,58 @@
+[Problem]
+  solve = false
+[]
+
 [Mesh]
-  [gmg]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 1
-    ny = 3
-    xmax = 1
-    ymax = 3
+    nx = 16
+    ny = 16
   []
-  [block1]
+  [left]
     type = SubdomainBoundingBoxGenerator
-    input = gmg
+    input = 'gen'
     block_id = 1
-    block_name = active
     bottom_left = '0 0 0'
-    top_right = '1 1 0'
+    top_right = '0.25 1 1'
   []
-  [block2]
+  [right]
     type = SubdomainBoundingBoxGenerator
-    input = block1
+    input = 'left'
     block_id = 2
-    block_name = inactive
-    bottom_left = '0 1 0'
-    top_right = '1 3 0'
-  []
-  [moving_boundary]
-    type = SideSetsAroundSubdomainGenerator
-    input = block2
-    block = 1
-    new_boundary = moving
+    bottom_left = '0.25 0 0'
+    top_right = '1 1 1'
   []
 []
 
-[Variables]
-  [temperature]
-    initial_condition = 298
+[UserObjects]
+  [moving_circle]
+    type = CoupledVarThresholdElementSubdomainModifier
+    coupled_var = 'phi'
+    criterion_type = 'BELOW'
+    threshold = 0
+    subdomain_id = 1
+    moving_boundaries = 'moving_boundary'
+    moving_boundary_subdomain_pairs = '1 2'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
 [AuxVariables]
-  [u]
+  [phi]
     [AuxKernel]
-      type = FunctionAux
-      function = 't-y'
+      type = ParsedAux
+      expression = '(x-t)^2+(y)^2-0.5^2'
+      use_xyzt = true
       execute_on = 'INITIAL TIMESTEP_BEGIN'
     []
   []
 []
 
-[Kernels]
-  [Tdot]
-    type = TimeDerivative
-    variable = temperature
-  []
-  [heat_conduction]
-    type = Diffusion
-    variable = temperature
-  []
-[]
-
-[UserObjects]
-  [w_mvg_bnd]
-    type = CoupledVarThresholdElementSubdomainModifier
-    coupled_var = 'u'
-    block = '1 2'
-    criterion_type = ABOVE
-    threshold = 0
-    subdomain_id = 1
-    active_subdomains = 1
-    moving_boundaries = "moving
-                         moving"
-    moving_boundary_subdomain_pairs = "1 2;
-                                       1"
-    execute_on = 'TIMESTEP_BEGIN'
-  []
-[]
-
 [Executioner]
   type = Transient
-  end_time = 5
-  dt = 1
-  solve_type = NEWTON
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-  line_search = none
-  nl_abs_tol = 1e-10
+  dt = 0.3
+  num_steps = 3
 []
 
 [Outputs]

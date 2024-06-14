@@ -3,67 +3,65 @@
 []
 
 [Mesh]
-  [gen]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 16
-    ny = 16
+    nx = 3
+    ny = 1
+    xmax = 3
+    ymax = 1
   []
-  [left]
+  [block_1]
     type = SubdomainBoundingBoxGenerator
-    input = 'gen'
+    input = 'gmg'
     block_id = 1
-    block_name = 'left'
+    block_name = 'block_1'
     bottom_left = '0 0 0'
-    top_right = '0.25 1 1'
+    top_right = '1 1 0'
   []
-  [right]
+  [block_2]
     type = SubdomainBoundingBoxGenerator
-    input = 'left'
+    input = 'block_1'
     block_id = 2
-    block_name = 'right'
-    bottom_left = '0.25 0 0'
-    top_right = '1 1 1'
+    block_name = 'block_2'
+    bottom_left = '1 0 0'
+    top_right = '2 1 0'
+  []
+  [block_3]
+    type = SubdomainBoundingBoxGenerator
+    input = 'block_2'
+    block_id = 3
+    block_name = 'block_3'
+    bottom_left = '2 0 0'
+    top_right = '3 1 0'
+  []
+[]
+
+[AuxVariables]
+  [u]
+    [AuxKernel]
+      type = FunctionAux
+      function = 't-x'
+      execute_on = 'INITIAL TIMESTEP_BEGIN'
+    []
   []
 []
 
 [UserObjects]
-  [moving_circle]
+  [w_mvg_bnd]
     type = CoupledVarThresholdElementSubdomainModifier
-    coupled_var = 'phi'
-    block = 2
-    criterion_type = BELOW
+    coupled_var = 'u'
+    criterion_type = 'ABOVE'
     threshold = 0
     subdomain_id = 1
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
-[Functions]
-  [moving_circle]
-    type = ParsedFunction
-    expression = '(x-t)^2+(y)^2-0.5^2'
-  []
-[]
-
-[AuxVariables]
-  [phi]
-  []
-[]
-
-[AuxKernels]
-  [phi]
-    type = FunctionAux
-    variable = phi
-    function = moving_circle
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-[]
-
 [Executioner]
   type = Transient
-  dt = 0.1
-  num_steps = 3
+  end_time = 3
+  dt = 1
 []
 
 [Outputs]
