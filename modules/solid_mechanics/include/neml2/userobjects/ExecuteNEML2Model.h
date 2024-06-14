@@ -11,6 +11,7 @@
 
 #include "NEML2Utils.h"
 #include "ElementUserObject.h"
+#include "SolveFailedInterface.h"
 
 #ifndef NEML2_ENABLED
 NEML2ObjectStubHeader(ExecuteNEML2Model, ElementUserObject);
@@ -32,7 +33,8 @@ class MOOSEToNEML2;
  * While iterating it generates a map from element ID to batch index which is later used when
  * retrieving the NEML2 model outputs.
  */
-class ExecuteNEML2Model : public NEML2ModelInterface<ElementUserObject>
+class ExecuteNEML2Model : public NEML2ModelInterface<ElementUserObject>,
+                          protected SolveFailedInterface
 {
 public:
   static InputParameters validParams();
@@ -46,6 +48,8 @@ public:
   virtual void execute() override;
   virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
+
+  virtual void onSolveFailed() override;
 
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
@@ -66,6 +70,9 @@ protected:
 
   /// Advance state and forces in time
   virtual void advanceStep();
+
+  /// Revert state and forces in time
+  virtual void revertStep();
 
   /// Update the forces driving the material model update
   virtual void updateForces();

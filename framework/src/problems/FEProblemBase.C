@@ -46,6 +46,7 @@
 #include "MooseEigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
+#include "SolveFailedInterface.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ScalarInitialCondition.h"
 #include "FVInitialConditionTempl.h"
@@ -7728,6 +7729,22 @@ void
 FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 {
   _notify_when_mesh_changes.push_back(mci);
+}
+
+void
+FEProblemBase::solveFailed()
+{
+  TIME_SECTION("solveFailed", 3, "Handling Solve Failure");
+
+  // Let the SolveFailedInterface notify the registered objects to do stuff
+  for (const auto & sfi : _notify_on_solve_failed)
+    sfi->onSolveFailed();
+}
+
+void
+FEProblemBase::notifyOnSolveFailed(SolveFailedInterface * sfi)
+{
+  _notify_on_solve_failed.push_back(sfi);
 }
 
 void

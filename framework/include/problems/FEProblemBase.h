@@ -53,6 +53,7 @@ class NonlinearSystem;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
+class SolveFailedInterface;
 class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
@@ -1708,6 +1709,17 @@ public:
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
   /**
+   * Prepare for a solve failure
+   */
+  virtual void solveFailed() override;
+
+  /**
+   * Register an object that derives from SolveFailedInterface
+   * to be notified when the solve has failed.
+   */
+  void notifyOnSolveFailed(SolveFailedInterface * sfi);
+
+  /**
    * Initialize stateful properties for elements in a specific \p elem_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
    * at an intermediate step
@@ -2525,6 +2537,9 @@ protected:
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
+
+  /// Objects to be notified when the solve has failed
+  std::vector<SolveFailedInterface *> _notify_on_solve_failed;
 
   /**
    * Helper method to update some or all data after a mesh change.

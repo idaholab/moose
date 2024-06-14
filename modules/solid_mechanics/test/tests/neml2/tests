@@ -146,6 +146,27 @@
       recover = false
       valgrind = heavy
     []
+    [solve_failure_ref]
+      type = Exodiff
+      input = 'solve_failure_ref.i'
+      exodiff = 'solve_failure_ref_out.e'
+      detail = 'to generate a reference solution for testing the handling of solve failure events.'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      recover = false
+      valgrind = heavy
+    []
+    [solve_failure]
+      type = Exodiff
+      input = 'solve_failure.i'
+      cli_args = 'Outputs/file_base=solve_failure_ref_out'
+      exodiff = 'solve_failure_ref_out.e'
+      detail = 'and successfully handle a solve failure events'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      recover = false
+      valgrind = heavy
+    []
   []
   [neml2_to_moose_material]
     type = Exodiff

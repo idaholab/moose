@@ -47,6 +47,7 @@ ExecuteNEML2Model::validParams()
 
 ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
   : NEML2ModelInterface<ElementUserObject>(params),
+    SolveFailedInterface(params),
     _neml2_time(neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_time"))),
     _output_ready(false),
     _in_out_allocated(false)
@@ -117,6 +118,13 @@ ExecuteNEML2Model::timestepSetup()
 {
   if (_t_step > 0)
     advanceStep();
+}
+
+void
+ExecuteNEML2Model::onSolveFailed()
+{
+  if (_t_step > 0)
+    revertStep();
 }
 
 bool
@@ -226,6 +234,15 @@ ExecuteNEML2Model::advanceStep()
     _in.slice("old_state").fill(_out.slice("state"));
   if (model().input_axis().has_subaxis("old_forces") && model().input_axis().has_subaxis("forces"))
     _in.slice("old_forces").fill(_in.slice("forces"));
+}
+
+void
+ExecuteNEML2Model::revertStep()
+{
+  if (model().input_axis().has_subaxis("old_state") && model().output_axis().has_subaxis("state"))
+    _out.slice("state").fill(_in.slice("old_state"));
+  if (model().input_axis().has_subaxis("old_forces") && model().input_axis().has_subaxis("forces"))
+    _in.slice("forces").fill(_in.slice("old_forces"));
 }
 
 void

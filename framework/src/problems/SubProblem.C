@@ -744,6 +744,12 @@ SubProblem::meshChanged()
   mooseError("This system does not support changing the mesh");
 }
 
+void
+SubProblem::solveFailed()
+{
+  mooseError("This problem does not handle solve failure");
+}
+
 std::string
 SubProblem::restrictionSubdomainCheckName(SubdomainID check_id)
 {
