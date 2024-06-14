@@ -18,6 +18,10 @@ NSFVDispersePhaseDragFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes drag coefficient for dispersed phase.");
+  params.addParam<MooseFunctorName>("drag_coef_name",
+                                    "Darcy_coefficient",
+                                    "Name of the scalar friction coefficient defined. The vector "
+                                    "coefficient is suffixed with _vec");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -49,27 +53,35 @@ NSFVDispersePhaseDragFunctorMaterial::NSFVDispersePhaseDragFunctorMaterial(
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
 
-  addFunctorProperty<ADReal>(
-      "Darcy_coefficient",
-      [this](const auto & r, const auto & t) -> ADReal
-      {
-        ADRealVectorValue velocity(_u_var(r, t));
-        if (_dim > 1)
-          velocity(1) = (*_v_var)(r, t);
-        if (_dim > 2)
-          velocity(2) = (*_w_var)(r, t);
-        const auto speed = NS::computeSpeed(velocity);
+  const auto f = [this](const auto & r, const auto & t) -> ADReal
+  {
+    ADRealVectorValue velocity(_u_var(r, t));
+    if (_dim > 1)
+      velocity(1) = (*_v_var)(r, t);
+    if (_dim > 2)
+      velocity(2) = (*_w_var)(r, t);
+    const auto speed = NS::computeSpeed(velocity);
 
-        const auto Re_particle =
-            _particle_diameter(r, t) * speed * _rho_mixture(r, t) / _mu_mixture(r, t);
+    const auto Re_particle =
+        _particle_diameter(r, t) * speed * _rho_mixture(r, t) / _mu_mixture(r, t);
 
-        if (Re_particle <= 1000)
-        {
-          if (MetaPhysicL::raw_value(Re_particle) < 0)
-            mooseException("Cannot take a non-integer power of a negative number");
-          return 1.0 + 0.15 * std::pow(Re_particle, 0.687);
-        }
-        else
-          return 0.0183 * Re_particle;
-      });
+    if (Re_particle <= 1000)
+    {
+      if (MetaPhysicL::raw_value(Re_particle) < 0)
+        mooseException("Cannot take a non-integer power of a negative number");
+      return 1.0 + 0.15 * std::pow(Re_particle, 0.687);
+    }
+    else
+      return 0.0183 * Re_particle;
+  };
+  const auto & f_func = addFunctorProperty<ADReal>(getParam<MooseFunctorName>("drag_coef_name"), f);
+
+  // Define the vector friction coefficient
+  const auto f_vec = [&f_func](const auto & r, const auto & t) -> ADRealVectorValue
+  {
+    const auto f_value = f_func(r, t);
+    return ADRealVectorValue(f_value, f_value, f_value);
+  };
+  addFunctorProperty<ADRealVectorValue>(getParam<MooseFunctorName>("drag_coef_name") + "_vec",
+                                        f_vec);
 }

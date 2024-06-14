@@ -2,6 +2,70 @@
 
 !syntax description /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 
+## Equations
+
+This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the mass and momentum Navier Stokes equations for the flow.
+The time derivatives in the mass equations are omitted for incompressible flow.
+For regular flow in a non-porous medium:
+
+!equation
+\dfrac{\partial \rho}{\partial t} + \nabla \cdot \rho \vec{v} = 0
+
+!equation
+\dfrac{\partial \rho \mathbf{v}}{\partial t} + \nabla \cdot (\rho \mathbf{v} \otimes \mathbf{v}) = \nabla \cdot (\mu \nabla \mathbf{v}) - \nabla p + (\mathbf{F}_g + \mathbf{F}_f)
+
+For porous media flow:
+
+!equation
+\epsilon \dfrac{\partial \rho}{\partial t} + \nabla \cdot \rho \vec{v}_D = 0
+
+!equation
+\dfrac{\partial \rho \mathbf{v}_D}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \otimes \mathbf{v}_D) = \nabla \cdot (\mu \nabla \dfrac{\mathbf{v}_D}{\epsilon}) - \epsilon \nabla p + \epsilon (\mathbf{F}_g + \mathbf{F}_f)
+
+where:
+
+- $\rho$ is the density
+- $\mu$ is the dynamic viscosity
+- $\epsilon$ is the porosity
+- $\mathbf{v}$ is the velocity (non-porous flow)
+- $\mathbf{v}_D$ is the superficial velocity (porous flow)
+- $p$ is the pressure
+- $\mathbf{F}_g$ is the gravity term
+- $\mathbf{F}_f$ is the friction / inter-phase friction term
+
+
+!alert note
+Additional details on porous media flow equations can be found on this [page](navier_stokes/pinsfv.md).
+
+The kernels created for free flow for the mass equation:
+
+- [WCNSFVMassTimeDerivative.md] for weakly-compressible flow in a transient case
+- [INSFVMassAdvection.md] for the mass advection term
+
+for porous media flow:
+
+- [PWCNSFVMassTimeDerivative.md] for weakly-compressible flow
+- [PINSFVMassAdvection.md] for mass advection
+
+The kernels created for the momentum equation for free flow:
+
+- [WCNSFVMomentumTimeDerivative.md] for the time derivative for weakly-compressible flow in a transient case
+- [INSFVMomentumTimeDerivative.md] for the time derivative incompressible flow in a transient case
+- [INSFVMomentumAdvection.md] for the momentum advection term
+- [INSFVMomentumDiffusion.md] for the momentum diffusion term
+- [INSFVMomentumPressure.md] for the pressure gradient term
+- [PINSFVMomentumFriction.md] for the friction term if specified
+- [INSFVMomentumGravity.md] for the gravity term if specified
+
+for porous media flow:
+
+- [PINSFVMomentumTimeDerivative.md] for the time derivative
+- [PINSFVMomentumAdvection.md] for the momentum advection term
+- [PINSFVMomentumDiffusion.md] for the momentum diffusion term
+- [PINSFVMomentumPressure.md] for the pressure gradient term
+- [PINSFVMomentumFriction.md] for the friction term if specified
+- [PINSFVMomentumGravity.md] for the gravity term if specified
+
 ## Automatically defined variables
 
 The `WCNSFVFlowPhysics` automatically sets up the variables which are

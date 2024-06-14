@@ -47,6 +47,9 @@ private:
   /// Return true if we have vector thermal conductivity and false if scalar
   bool processThermalConductivity();
 
+  /// Battery of additional checks on parameters
+  void checkFluidAndSolidHeatTransferPhysicsParameters() const;
+
   /// Solid temperature name
   const NonlinearVariableName _solid_temperature_name;
   /// Fluid temperature name

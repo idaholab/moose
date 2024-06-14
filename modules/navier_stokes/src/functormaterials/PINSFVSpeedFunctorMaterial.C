@@ -40,6 +40,9 @@ PINSFVSpeedFunctorMaterial::validParams()
   add_property(NS::velocity_x);
   add_property(NS::velocity_y);
   add_property(NS::velocity_z);
+  params.addParam<bool>("define_interstitial_velocity_components",
+                        true,
+                        "Whether to define the interstitial velocity functors");
 
   return params;
 }
@@ -78,13 +81,18 @@ PINSFVSpeedFunctorMaterial::PINSFVSpeedFunctorMaterial(const InputParameters & p
                              [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
                              { return NS::computeSpeed(interstitial_velocity(r, t)); });
 
-  addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_x),
-                             [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
-                             { return interstitial_velocity(r, t)(0); });
-  addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_y),
-                             [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
-                             { return interstitial_velocity(r, t)(1); });
-  addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_z),
-                             [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
-                             { return interstitial_velocity(r, t)(2); });
+  // This is not needed for non-porous media, but they can use the 'speed' functor for some friction
+  // models
+  if (getParam<bool>("define_interstitial_velocity_components"))
+  {
+    addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_x),
+                               [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
+                               { return interstitial_velocity(r, t)(0); });
+    addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_y),
+                               [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
+                               { return interstitial_velocity(r, t)(1); });
+    addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_z),
+                               [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
+                               { return interstitial_velocity(r, t)(2); });
+  }
 }

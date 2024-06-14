@@ -47,6 +47,7 @@ INSFVMomentumDiffusion::validParams()
 
 INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
   : INSFVFluxKernel(params),
+    SolutionInvalidInterface(this),
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method"))),
@@ -97,12 +98,18 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   if (face_mu < 0.0)
   {
     if (!(_limit_interpolation))
-      mooseWarning("Negative face viscosity has been encountered. Value ",
-                   raw_value(face_mu),
-                   " at ",
-                   _face_info->faceCentroid(),
-                   " limiting it to 0!");
-    face_mu = 0;
+    {
+      mooseDoOnce(mooseWarning(
+          "Negative face viscosity has been encountered. Value ",
+          raw_value(face_mu),
+          " at ",
+          _face_info->faceCentroid(),
+          " limiting it to 0!\nFurther warnings for this issue will be silenced, but the "
+          "occurrences will be recorded through the solution invalidity interface."));
+      flagInvalidSolution("Negative face dynamic viscosity has been encountered.");
+    }
+    // Keep face_mu here for sparsity pattern detection
+    face_mu = 0 * face_mu;
   }
 
   if (populate_a_coeffs)

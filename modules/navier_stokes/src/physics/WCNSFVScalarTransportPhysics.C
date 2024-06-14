@@ -13,10 +13,7 @@
 #include "NSFVAction.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_variable");
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_ic");
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_fv_kernel");
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_fv_bc");
+registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
 
 InputParameters
 WCNSFVScalarTransportPhysics::validParams()
@@ -77,14 +74,14 @@ WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _has_scalar_equation(isParamValid("add_scalar_equation") ? getParam<bool>("add_scalar_equation")
                                                              : !usingNavierStokesFVSyntax()),
+    _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
+    _passive_scalar_inlet_functors(
+        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors")),
     _passive_scalar_sources(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_coupled_sources(
         getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
     _passive_scalar_sources_coef(
-        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
-    _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
-    _passive_scalar_inlet_functors(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors"))
+        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff"))
 {
   for (const auto & scalar_name : _passive_scalar_names)
     saveNonlinearVariableName(scalar_name);
@@ -193,6 +190,7 @@ WCNSFVScalarTransportPhysics::addScalarAdvectionKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("passive_scalar_advection_interpolation");
+  setSlipVelocityParams(params);
 
   for (const auto & vname : _passive_scalar_names)
   {

@@ -93,6 +93,7 @@ g = -9.81
     momentum_component = 'x'
     gravity = '0 ${g} 0'
   []
+  # NOTE: the friction terms for u and v are missing
 
   [v_time]
     type = INSFVMomentumTimeDerivative
@@ -233,6 +234,7 @@ g = -9.81
     rho_d = ${rho_d}
     particle_diameter = ${dp}
     linear_coef_name = 'Darcy_coefficient'
+    gravity = '0 ${g} 0'
   []
   [populate_v_slip]
     type = WCNSFV2PSlipVelocityFunctorMaterial
@@ -245,6 +247,7 @@ g = -9.81
     rho_d = ${rho_d}
     particle_diameter = ${dp}
     linear_coef_name = 'Darcy_coefficient'
+    gravity = '0 ${g} 0'
   []
   [compute_phase_1]
     type = ADParsedFunctorMaterial

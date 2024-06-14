@@ -1,0 +1,11 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:             2.5 @ t6
+
+# No GLOBAL VARIABLES
+
+ELEMENT VARIABLES relative 1.e-6 floor 1.e-12
+	vel_x    absolute 1.e-8
+	vel_y    absolute 1.e-8
+	pressure absolute 1.e-8
+	phase_2  absolute 1.e-8

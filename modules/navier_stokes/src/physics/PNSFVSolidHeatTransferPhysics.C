@@ -10,6 +10,7 @@
 #include "PNSFVSolidHeatTransferPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
+#include "WCNSFVFluidHeatTransferPhysics.h"
 #include "NSFVAction.h"
 
 registerPhysicsBaseTasks("NavierStokesApp", PNSFVSolidHeatTransferPhysics);
@@ -138,6 +139,10 @@ PNSFVSolidHeatTransferPhysics::PNSFVSolidHeatTransferPhysics(const InputParamete
     checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>(
         "ambient_convection_alpha", "ambient_convection_temperature");
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
+  if (_solid_temperature_name == _fluid_temperature_name)
+    paramError("solid_temperature_variable",
+               "Solid and fluid cannot share the same temperature variable");
+  // More parameter checks in ambient convection creation
 }
 
 void
@@ -164,6 +169,9 @@ PNSFVSolidHeatTransferPhysics::addNonlinearVariables()
 void
 PNSFVSolidHeatTransferPhysics::addFVKernels()
 {
+  // Check this physics against others
+  checkFluidAndSolidHeatTransferPhysicsParameters();
+
   if (isTransient())
     addPINSSolidEnergyTimeKernels();
 
@@ -246,6 +254,15 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyAmbientConvection()
 {
   const auto num_convection_blocks = _ambient_convection_blocks.size();
   const auto num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
+
+  // Check parameter. Late check in case the block was added by a Component
+  if (num_used_blocks != _ambient_convection_alpha.size())
+    paramError("ambient_convection_alpha",
+               "Number of ambient convection heat transfer coefficients (" +
+                   std::to_string(_ambient_convection_alpha.size()) +
+                   ") should match the number of "
+                   "blocks (" +
+                   std::to_string(num_convection_blocks) + ") each HTC is defined on.");
 
   const auto kernel_type = "PINSFVEnergyAmbientConvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -391,4 +408,71 @@ PNSFVSolidHeatTransferPhysics::getAdditionalRMParams() const
   params.template set<unsigned short>("ghost_layers") = necessary_layers;
 
   return params;
+}
+
+void
+PNSFVSolidHeatTransferPhysics::checkFluidAndSolidHeatTransferPhysicsParameters() const
+{
+  // Get a pointer to a flow physics and a heat transfer physics on the same blocks, if it exists
+  const WCNSFVFlowPhysics * flow_physics = nullptr;
+  const WCNSFVFluidHeatTransferPhysics * fluid_energy_physics = nullptr;
+  const auto all_flow_physics = getCoupledPhysics<const WCNSFVFlowPhysics>(/*allow_fail=*/true);
+  for (const auto physics : all_flow_physics)
+    if (checkBlockRestrictionIdentical(
+            physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
+    {
+      if (flow_physics)
+        mooseError("Two Fluid flow physics detected on the same blocks as the solid heat transfer "
+                   "physics");
+      flow_physics = physics;
+    }
+  const auto all_fluid_energy_physics =
+      getCoupledPhysics<const WCNSFVFluidHeatTransferPhysics>(/*allow_fail=*/true);
+  for (const auto physics : all_fluid_energy_physics)
+    if (checkBlockRestrictionIdentical(
+            physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
+    {
+      if (fluid_energy_physics)
+        mooseError("Two fluid heat transfer physics detected on the same blocks as the solid heat "
+                   "transfer physics");
+      fluid_energy_physics = physics;
+    }
+
+  if (!fluid_energy_physics && !flow_physics)
+    return;
+
+  // Check that the parameters seem reasonable
+  // Different material properties
+  // TODO: Does this error on numbers?
+  if (flow_physics && flow_physics->densityName() == _density_name)
+    paramError("rho_solid", "Fluid and solid density should be different");
+  if (fluid_energy_physics && fluid_energy_physics->getSpecificHeatName() == _specific_heat_name)
+    paramError("cp_solid", "Fluid and solid specific heat should be different");
+
+  // Check ambient convection parameters
+  if (fluid_energy_physics)
+  {
+    // The blocks should match
+    // We only use a warning in case the blocks are matching, just specified differently
+    // in the vector of vectors
+    auto fluid_convection_blocks = fluid_energy_physics->getAmbientConvectionBlocks();
+    std::sort(fluid_convection_blocks.begin(), fluid_convection_blocks.end());
+    std::vector<std::vector<SubdomainName>> copy_solid_blocks = _ambient_convection_blocks;
+    std::sort(copy_solid_blocks.begin(), copy_solid_blocks.end());
+    if (fluid_convection_blocks != _ambient_convection_blocks)
+      paramWarning("Ambient convection blocks in the solid phase :" +
+                   Moose::stringify(_ambient_convection_blocks) + " and in the fluid phase " +
+                   Moose::stringify(fluid_convection_blocks) + " do not seem to match.");
+
+    // The coefficients should also match
+    auto fluid_convection_coeffs = fluid_energy_physics->getAmbientConvectionHTCs();
+    fluid_convection_blocks = fluid_energy_physics->getAmbientConvectionBlocks();
+    for (const auto i : index_range(fluid_energy_physics->getAmbientConvectionBlocks()))
+      for (const auto j : index_range(_ambient_convection_blocks))
+        if (fluid_convection_blocks[i] == _ambient_convection_blocks[j] &&
+            fluid_convection_coeffs[i] != _ambient_convection_alpha[j])
+          paramWarning("Ambient convection HTCs in the solid phase :" +
+                       Moose::stringify(_ambient_convection_alpha) + " and in the fluid phase " +
+                       Moose::stringify(fluid_convection_coeffs) + " do not seem to match.");
+  }
 }
