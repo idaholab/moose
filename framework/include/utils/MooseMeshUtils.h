@@ -316,4 +316,66 @@ getIDFromName(const T & name)
 
   return id_Q;
 }
+
+/**
+ * Swap two nodes within an element
+ * @param elem element whose nodes need to be swapped
+ * @param nd1 index of the first node to be swapped
+ * @param nd2 index of the second node to be swapped
+ */
+void swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2);
+
+/**
+ * Reprocess the swap related input parameters to make pairs out of them to ease further processing
+ * @param class_name name of the mesh generator class used for exception messages
+ * @param id_name name of the parameter to be swapped used for exception messages
+ * @param id_swaps vector of vectors of the ids to be swapped
+ * @param id_swap_pairs vector of maps of the swapped pairs
+ * @param row_index_shift shift to be applied to the row index in the exception messages (useful
+ * when this method is utilized to process a fraction of a long vector)
+ */
+template <typename T>
+void
+idSwapParametersProcessor(const std::string & class_name,
+                          const std::string & id_name,
+                          const std::vector<std::vector<T>> & id_swaps,
+                          std::vector<std::unordered_map<T, T>> & id_swap_pairs,
+                          const unsigned int row_index_shift = 0)
+{
+  id_swap_pairs.resize(id_swaps.size());
+  for (const auto i : index_range(id_swaps))
+  {
+    const auto & swaps = id_swaps[i];
+    auto & swap_pairs = id_swap_pairs[i];
+
+    if (swaps.size() % 2)
+      throw MooseException("Row ",
+                           row_index_shift + i + 1,
+                           " of ",
+                           id_name,
+                           " in ",
+                           class_name,
+                           " does not contain an even number of entries! Num entries: ",
+                           swaps.size());
+
+    swap_pairs.reserve(swaps.size() / 2);
+    for (unsigned int j = 0; j < swaps.size(); j += 2)
+      swap_pairs[swaps[j]] = swaps[j + 1];
+  }
+}
+
+/**
+ * Reprocess the elem_integers_swaps into maps so they are easier to use
+ * @param class_name name of the mesh generator class used for exception messages
+ * @param num_sections number of sections in the mesh
+ * @param num_integers number of extra element integers in the mesh
+ * @param elem_integers_swaps vector of vectors of vectors of extra element ids to be swapped
+ * @param elem_integers_swap_pairs vector of maps of the swapped pairs
+ */
+void extraElemIntegerSwapParametersProcessor(
+    const std::string & class_name,
+    const unsigned int num_sections,
+    const unsigned int num_integers,
+    const std::vector<std::vector<std::vector<dof_id_type>>> & elem_integers_swaps,
+    std::vector<std::unordered_map<dof_id_type, dof_id_type>> & elem_integers_swap_pairs);
 }
