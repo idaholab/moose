@@ -1,4 +1,9 @@
+[Problem]
+  kernel_coverage_check = false
+[]
+
 [Mesh]
+    add_subdomain_ids = 100
     [gmg]
       type = GeneratedMeshGenerator
       dim = 2
@@ -7,17 +12,17 @@
       xmax = 3
       ymax = 2
     []
-    [active]
+    [base]
       type = SubdomainBoundingBoxGenerator
       input = 'gmg'
       block_id = 1
-      block_name = 'active'
+      block_name = 'base'
       bottom_left = '0 0 0'
       top_right = '3 1 0'
     []
     [block_1]
       type = SubdomainBoundingBoxGenerator
-      input = 'active'
+      input = 'base'
       block_id = 2
       block_name = 'block_1'
       bottom_left = '0 1 0'
@@ -50,16 +55,14 @@
   [Variables]
     [temperature]
       initial_condition = 298
+      block = 'base'
     []
   []
   
   [AuxVariables]
     [u]
-      [AuxKernel]
-        type = FunctionAux
-        function = 't-x'
-        execute_on = 'INITIAL TIMESTEP_BEGIN'
-      []
+      family = MONOMIAL
+      order = CONSTANT
     []
   []
   
@@ -67,10 +70,36 @@
     [Tdot]
       type = TimeDerivative
       variable = 'temperature'
+      block = 'base'
     []
     [heat_conduction]
       type = Diffusion
       variable = 'temperature'
+      block = 'base'
+    []
+  []
+
+  [AuxKernels]
+    [block_1]
+      type = ParsedAux
+      variable = 'u'
+      expression = 'if (t>=1,1,0)'
+      use_xyzt = true
+      block = 'block_1'
+    []
+    [block_2]
+      type = ParsedAux
+      variable = 'u'
+      expression = 'if (t>=2,1,0)'
+      use_xyzt = true
+      block = 'block_2'
+    []
+    [deact]
+      type = ParsedAux
+      variable = 'u'
+      expression = 'if (t>=4 & y < 1 & x < 1,0,1)'
+      use_xyzt = true
+      block = 'base'
     []
   []
   
@@ -79,11 +108,23 @@
       type = CoupledVarThresholdElementSubdomainModifier
       coupled_var = 'u'
       criterion_type = 'ABOVE'
-      threshold = 0
+      threshold = 0.5
       subdomain_id = 1
-      active_subdomains = 1
+    #   active_subdomains = 1
       moving_boundaries = 'moving moving moving moving'
       moving_boundary_subdomain_pairs = '1 3;1 4; 1 5;1'
+      block = 'block_1 block_2'
+    []
+    [deactivation]
+      type = CoupledVarThresholdElementSubdomainModifier
+      coupled_var = 'u'
+      criterion_type = 'BELOW'
+      threshold = 0.5
+      subdomain_id = 100
+    #   active_subdomains = 1
+      moving_boundaries = 'moving'
+      moving_boundary_subdomain_pairs = '1 100'
+      block = 'base'
     []
   []
   
