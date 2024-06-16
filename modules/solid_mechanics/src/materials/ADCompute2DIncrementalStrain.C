@@ -14,7 +14,7 @@
 InputParameters
 ADCompute2DIncrementalStrain::validParams()
 {
-  InputParameters params = ADComputeIncrementalSmallStrain::validParams();
+  InputParameters params = ADComputeIncrementalStrain::validParams();
   params.addClassDescription("Compute strain increment for incremental strains in 2D geometries.");
 
   MooseEnum outOfPlaneDirection("x y z", "z");
@@ -24,7 +24,7 @@ ADCompute2DIncrementalStrain::validParams()
 }
 
 ADCompute2DIncrementalStrain::ADCompute2DIncrementalStrain(const InputParameters & parameters)
-  : ADComputeIncrementalSmallStrain(parameters),
+  : ADComputeIncrementalStrain(parameters),
     _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
 }

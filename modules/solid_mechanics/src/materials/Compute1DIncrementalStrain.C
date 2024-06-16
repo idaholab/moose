@@ -14,14 +14,14 @@
 InputParameters
 Compute1DIncrementalStrain::validParams()
 {
-  InputParameters params = ComputeIncrementalSmallStrain::validParams();
+  InputParameters params = ComputeIncrementalStrain::validParams();
   params.addClassDescription("Compute strain increment for small strains in 1D problems.");
 
   return params;
 }
 
 Compute1DIncrementalStrain::Compute1DIncrementalStrain(const InputParameters & parameters)
-  : ComputeIncrementalSmallStrain(parameters)
+  : ComputeIncrementalStrain(parameters)
 {
 }
 

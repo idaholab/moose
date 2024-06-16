@@ -51,14 +51,14 @@ the stress and strain calculations are performed on the correct material configu
 | Theoretical Formulation                           | Solid Mechanics Classes    |
 |---------------------------------------------------|-----------------------------|
 | Linearized elasticity total small strain problems | [ComputeLinearElasticStress](/ComputeLinearElasticStress.md) and [ComputeSmallStrain](/ComputeSmallStrain.md) (in the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) use the argument `strain = SMALL`) |
-| Linearized elasticity incremental small strain    | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) and [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) (in the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) `strain = SMALL` and `incremental = true` ) |
+| Linearized elasticity incremental small strain    | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) and [ComputeIncrementalStrain](/ComputeIncrementalStrain.md) (in the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) `strain = SMALL` and `incremental = true` ) |
 | Large deformation problems, including elasticity and/or plasticity | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md), or other inelastic stress material class, and [ComputeFiniteStrain](/ComputeFiniteStrain.md) (in the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) use `strain = FINITE`) |
 
 ### Linearized Elasticity Problems
 
 The linearized elasticity problems are calculated on the reference mesh.  In the linearized
 elasticity total small strain formulation, [ComputeSmallStrain](/ComputeSmallStrain.md) a rotation
-increment is not used; in [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) the
+increment is not used; in [ComputeIncrementalStrain](/ComputeIncrementalStrain.md) the
 rotation increment is defined as the identity tensor.  Both the total small strain and the
 incremental small strain classes pass to the stress divergence kernel a stress calculated on the
 reference mesh, $\sigma(X)$.

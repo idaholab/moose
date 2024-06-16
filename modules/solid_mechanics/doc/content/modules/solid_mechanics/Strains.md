@@ -35,7 +35,7 @@ end=stress
 ## Incremental Small Strains
 
 Applicable for small linearized strains, MOOSE includes an incremental small
-strain material, [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md).
+strain material, [ComputeIncrementalStrain](/ComputeIncrementalStrain.md).
 As in the small strain material, the incremental small strain class assumes the
 gradient of displacement with respect to position is much smaller than unity,
 and the squared displacement gradient term is neglected in the small strain definition
@@ -43,7 +43,7 @@ to give:
 \begin{equation}
 \epsilon = \frac{1}{2} \left( u \nabla + \nabla u \right) \quad when \quad \frac{\partial u}{ \partial x} << 1
 \end{equation}
-As the class name suggests, `ComputeIncrementalSmallStrain` is an incremental formulation.
+As the class name suggests, `ComputeIncrementalStrain` is an incremental formulation.
 The stress increment is calculated from the current strain increment at each time
 step. In this class, the rotation tensor is defined to be the rank-2 Identity tensor:
 no rotations are allowed in the model. Stateful properties, including `strain_old`

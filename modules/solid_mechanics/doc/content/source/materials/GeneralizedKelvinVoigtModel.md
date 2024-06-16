@@ -65,7 +65,7 @@ the stress calculators listed in [stress_calculators_gkvm].
 | Strain | Stress | Additional Materials |
 |--------|--------|----------------------|
 | [ComputeSmallStrain](/ComputeSmallStrain.md) | [ComputeLinearViscoelasticStress](/ComputeLinearViscoelasticStress.md) | none |
-| [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) | [ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) | [LinearViscoelasticStressUpdate](/LinearViscoelasticStressUpdate.md) |
+| [ComputeIncrementalStrain](/ComputeIncrementalStrain.md) | [ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) | [LinearViscoelasticStressUpdate](/LinearViscoelasticStressUpdate.md) |
 | [ComputeFiniteStrain](/ComputeFiniteStrain.md) | [ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) | [LinearViscoelasticStressUpdate](/LinearViscoelasticStressUpdate.md) |
 
 The stress calculators use the actual elasticity tensor of the material $C_{ijkl}$, which is provided
