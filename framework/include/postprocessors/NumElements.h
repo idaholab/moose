@@ -11,12 +11,15 @@
 
 #include "GeneralPostprocessor.h"
 
-class NumElems : public GeneralPostprocessor
+/**
+ * Counts the number of elements in the entire mesh
+ */
+class NumElements : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  NumElems(const InputParameters & parameters);
+  NumElements(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
@@ -30,7 +33,9 @@ private:
     TOTAL,
   };
 
+  /// Whether to count all elements or only the active ones
   const ElemFilter _filt;
 
+  /// Mesh to act on
   const MeshBase & _mesh;
 };

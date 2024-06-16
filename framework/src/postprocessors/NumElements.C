@@ -8,14 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "NumElems.h"
+#include "NumElements.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
-registerMooseObject("MooseApp", NumElems);
+registerMooseObject("MooseApp", NumElements);
+registerMooseObjectRenamed("MooseApp", NumElems, "04/01/2025 00:00", NumElements);
 
 InputParameters
-NumElems::validParams()
+NumElements::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   MooseEnum filt("active total", "active");
@@ -28,7 +29,7 @@ NumElems::validParams()
   return params;
 }
 
-NumElems::NumElems(const InputParameters & parameters)
+NumElements::NumElements(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _filt(parameters.get<MooseEnum>("elem_filter").getEnum<ElemFilter>()),
     _mesh(_subproblem.mesh().getMesh())
@@ -36,7 +37,7 @@ NumElems::NumElems(const InputParameters & parameters)
 }
 
 Real
-NumElems::getValue() const
+NumElements::getValue() const
 {
   if (_filt == ElemFilter::ACTIVE)
     return _mesh.n_active_elem();
