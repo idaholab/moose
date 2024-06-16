@@ -53,7 +53,7 @@
 
 [Postprocessors]
   [./num_elems]
-    type = NumElems
+    type = NumElements
   [../]
 []
 
