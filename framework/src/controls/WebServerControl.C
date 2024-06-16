@@ -45,15 +45,25 @@ WebServerControl::validParams()
   InputParameters params = Control::validParams();
   params.addClassDescription("Starts a webserver for sending/receiving JSON messages to get data "
                              "and control a running MOOSE calculation");
-  params.addRequiredParam<unsigned int>(
-      "port",
-      "The port to utilize.  Note that normally you don't have access to ports lower than 1024");
+  params.addParam<unsigned int>("port",
+                                "The port to listen on; must provide either this or 'file_socket'");
+  params.addParam<FileName>(
+      "file_socket",
+      "The path to the unix file socket to listen on; must provide either this or 'port'");
   return params;
 }
 
 WebServerControl::WebServerControl(const InputParameters & parameters)
-  : Control(parameters), _currently_waiting(false), _port(getParam<unsigned int>("port"))
+  : Control(parameters), _currently_waiting(false)
 {
+  const auto has_port = isParamValid("port");
+  const auto has_file_socket = isParamValid("file_socket");
+  if (!has_port && !has_file_socket)
+    mooseError("You must provide either the parameter 'port' or 'file_socket' to designate where "
+               "to listen");
+  if (has_port && has_file_socket)
+    paramError("port", "Cannot provide both 'port' and 'file_socket'");
+
   if (processor_id() == 0)
     startServer();
 }
@@ -258,15 +268,24 @@ WebServerControl::startServer()
   _server_thread = std::make_unique<std::thread>(
       [this]
       {
-        try
+        if (this->isParamValid("port"))
         {
-          _server->startListening(this->_port);
+          const uint16_t port = this->getParam<unsigned int>("port");
+          try
+          {
+            _server->startListening(port);
+          }
+          catch (...)
+          {
+            this->mooseError("Failed to start the webserver; it is likely that the port ",
+                             port,
+                             " is not available");
+          }
         }
-        catch (...)
+        else if (this->isParamValid("file_socket"))
         {
-          this->mooseError("Failed to start the webserver; it is likely that the port ",
-                           this->_port,
-                           " is not available");
+          const auto & file_socket = this->getParam<FileName>("file_socket");
+          _server->startListening(file_socket);
         }
       });
 }
