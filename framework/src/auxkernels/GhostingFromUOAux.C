@@ -7,13 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GhostingAux.h"
+#include "GhostingFromUOAux.h"
 #include "GhostingUserObject.h"
 
-registerMooseObject("MooseApp", GhostingAux);
+registerMooseObject("MooseApp", GhostingFromUOAux);
+registerMooseObjectRenamed("MooseApp", GhostingAux, "04/01/2025 00:00", GhostingFromUOAux);
 
 InputParameters
-GhostingAux::validParams()
+GhostingFromUOAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
@@ -35,7 +36,7 @@ GhostingAux::validParams()
   return params;
 }
 
-GhostingAux::GhostingAux(const InputParameters & parameters)
+GhostingFromUOAux::GhostingFromUOAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _pid(getParam<processor_id_type>("pid")),
     _rm_type(getParam<MooseEnum>("functor_type") == "geometric"
@@ -46,11 +47,11 @@ GhostingAux::GhostingAux(const InputParameters & parameters)
     _ghost_uo(getUserObject<GhostingUserObject>("ghost_uo"))
 {
   if (isNodal())
-    mooseError("GhostingAux only works on elemental fields.");
+    mooseError("GhostingFromUOAux only works on elemental fields.");
 }
 
 void
-GhostingAux::precalculateValue()
+GhostingFromUOAux::precalculateValue()
 {
   if (_current_elem->processor_id() == _pid && _include_local)
     _value = 1;
@@ -61,7 +62,7 @@ GhostingAux::precalculateValue()
 }
 
 Real
-GhostingAux::computeValue()
+GhostingFromUOAux::computeValue()
 {
   return _value;
 }
