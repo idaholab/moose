@@ -7,11 +7,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform
-import requests
 import os
-import signal
-import socket
+import requests
+import string
+import random
 import subprocess
 import time
 import logging
@@ -44,10 +43,10 @@ class MooseControl:
         do not spawn a moose process.
 
         If "moose_command" is specified: Spawn a moose process and then connect to it
-        at an available port. "moose_control_name" must be specified so that the port
-        for the WebServerControl object can be set via this class, that is, via the
-        command line option Controls/<moose_control_name/port=<port>, where <port>
-        is the determined available port.
+        at an available port. "moose_control_name" must be specified so that the params
+        for the WebServerControl object can be set via this class, in specific, the
+        command line option Controls/<moose_control_name/file_socket=<file_socket>, where
+        <file_socket> is determined at random in the cwd by this class.
 
         Parameters:
             moose_command (list[str]): The command to use to start the moose process
@@ -90,12 +89,24 @@ class MooseControl:
         # Whether or not we called initialize()
         self._initialized = False
 
+        # The file socket we created, if any
+        self._file_socket = None
+
     def __del__(self):
         self.kill()
 
     def isProcessRunning(self):
         """Returns whether or not a moose process is running"""
         return self._moose_process is not None and self._moose_process.poll() is None
+
+    def possiblyRemoveSocket(self):
+        """Attempts to remove the file socket if one was created
+        and it exists."""
+        if self._file_socket and os.path.exists(self._file_socket):
+            try:
+                os.remove(self._file_socket)
+            except:
+                pass
 
     def kill(self):
         """Kills the underlying moose process if one is running"""
@@ -104,6 +115,7 @@ class MooseControl:
                 self._moose_process.kill()
             except:
                 pass
+        self.possiblyRemoveSocket()
 
     class ControlException(Exception):
         """Basic exception for an error within the MooseControl"""
@@ -114,6 +126,24 @@ class MooseControl:
         """Throws an exception if the moose process is not running (only if one was spwaned)"""
         if self._moose_process and not self.isProcessRunning():
             raise self.ControlException('The MOOSE process has ended')
+
+    def _requests_wrapper(self, function_name, *args, **kwargs):
+        """Helper for wrapping a request function with the name function_name
+        that uses a patch for dealing with file socket"""
+        if self._file_socket:
+            import requests_unixsocket
+            with requests_unixsocket.monkeypatch():
+                return getattr(requests, function_name)(*args, **kwargs)
+        else:
+            return getattr(requests, function_name)(*args, **kwargs)
+
+    def _requests_get(self, *args, **kwargs):
+        """Wrapper for requests.get that uses a patch for dealing with a file socket"""
+        return self._requests_wrapper('get', *args, **kwargs)
+
+    def _requests_post(self, *args, **kwargs):
+        """Wrapper for requests.post that uses a patch for dealing with a file socket"""
+        return self._requests_wrapper('post', *args, **kwargs)
 
     def _get(self, path: str):
         """Calls GET on the webserver
@@ -129,7 +159,7 @@ class MooseControl:
         self._requireMooseProcess()
         self._requireListening()
 
-        r = requests.get(f'{self._url}/{path}')
+        r = self._requests_get(f'{self._url}/{path}')
         r.raise_for_status()
 
         r_json = None
@@ -154,7 +184,7 @@ class MooseControl:
         self._requireListening()
         self._requireWaiting()
 
-        r = requests.post(f'{self._url}/{path}', json=data)
+        r = self._requests_post(f'{self._url}/{path}', json=data)
 
         r_json = None
         if r.headers.get('content-type') == 'application/json':
@@ -180,7 +210,7 @@ class MooseControl:
     def isListening(self) -> bool:
         """Returns whether or not the webserver is listening"""
         try:
-            r = requests.get(f'{self._url}/check')
+            r = self._requests_get(f'{self._url}/check')
         except requests.exceptions.ConnectionError:
             return False
         return r.status_code == 200
@@ -198,20 +228,18 @@ class MooseControl:
         if self._initialized:
             raise self.ControlException('Already called initialize()')
 
-        # The port we've decided on
+        # The port we'll use, if any
         port = None
 
         # MOOSE command is provided; start the process
         if self._moose_command:
-            # Setup the port moose will run on
-            sock = socket.socket()
-            sock.bind(('', 0))
-            port = int(sock.getsockname()[1])
-            sock.close()
-            logger.info(f'Determined port {port} for communication')
+            # Setup the file socket we will communicate with
+            suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+            self._file_socket = os.path.join(os.getcwd(), f'moose_control_{suffix}')
+            logger.info(f'Determined file socket {self._file_socket} for communication')
 
             # Build the command, including what port to run the WebServerControl on
-            moose_command = self._moose_command + [f'Controls/{self._moose_control_name}/port={port}']
+            moose_command = self._moose_command + [f'Controls/{self._moose_control_name}/file_socket={self._file_socket}']
 
             # Spawn the moose process
             logger.info(f'Spawning MOOSE with command "{moose_command}"')
@@ -235,7 +263,10 @@ class MooseControl:
             port = int(self._moose_port)
 
         # Set the URL for communication
-        self._url = f'http://localhost:{port}'
+        if port is not None:
+            self._url = f'http://localhost:{port}'
+        else:
+            self._url = f'http+unix://{self._file_socket.replace("/", "%2F")}'
 
         # Wait for the webserver to listen
         logger.info(f'Waiting for the webserver to start on "{self._url}"')
@@ -285,6 +316,9 @@ class MooseControl:
                 pass
             if waiting_flag is not None:
                 raise self.ControlException(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
+
+        # Remove the socket if we made one and it exists
+        self.possiblyRemoveSocket()
 
     def returnCode(self):
         """Gets the return code of the moose process"""
