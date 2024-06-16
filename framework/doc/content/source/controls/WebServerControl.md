@@ -1,6 +1,8 @@
 # WebServerControl
 
-The `WebServerControl` object is designed to allow an external process to control a MOOSE solve. It works by starting up a webserver on the chosen [!param](/Controls/WebServerControl/port) and exposing a REST API. As with all REST APIs the input and output are both JSON.
+The `WebServerControl` object is designed to allow an external process to control a MOOSE solve. It works by starting up a webserver which exposes a REST API. As with all REST APIs the input and output are both JSON.
+
+The server can either listen on a port via the [!param](/Controls/WebServerControl/port) parameter, or on a unix file socket via the [!param](/Controls/WebServerControl/file_socket) parameter. One of these two parameters must be provided.
 
 It can then be managed via the [MooseControl](MooseControl/index.md optional=true) python utility.
 
