@@ -22,7 +22,7 @@ SolveObject::SolveObject(Executioner & ex)
     _executioner(ex),
     _problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
-    _displaced_problem(_problem.getDisplacedProblem()),
+    _displaced_problem(_problem.getDisplacedProblem().get()),
     _mesh(_problem.mesh()),
     _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
     _solver_sys(_problem.numNonlinearSystems()
