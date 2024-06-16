@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#23359'
+  issues = '#23359 #27909'
   design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
 
   # Not really sure if all of these prereqs are required as I can't guarantee
@@ -132,6 +132,23 @@
       expect_err = 'The value \'1234\' of type number is not an array'
       detail = 'setting a controllable parameter with a type that does not match'
       valgrind = none
+    []
+  []
+
+  [param_errors]
+    requirement = 'The system that supports controlling parameters via a REST API should report a reasonable error when'
+    [no_port_and_socket]
+      type = RunException
+      input = 'errors.i'
+      expect_err = "You must provide either the parameter 'port' or 'file_socket'"
+      detail = 'a parameter was not provided that specifies where the server should listen'
+    []
+    [port_and_socket]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'Controls/web_server/port=1234 Controls/web_server/file_socket=foo'
+      expect_err = "Cannot provide both 'port' and 'file_socket'"
+      detail = 'both a port and a file were specified to listen on'
     []
   []
 []
