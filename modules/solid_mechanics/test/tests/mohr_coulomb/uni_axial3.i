@@ -211,7 +211,7 @@
     C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     block = 1
     displacements = 'disp_x disp_y disp_z'
   [../]

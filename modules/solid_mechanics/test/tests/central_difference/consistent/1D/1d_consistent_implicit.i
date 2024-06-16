@@ -82,7 +82,7 @@
     block = 0
   [../]
   [./strain_block]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     block = 0
     displacements = 'disp_x'
   [../]

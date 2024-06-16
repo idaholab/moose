@@ -152,7 +152,7 @@ porosity0 = 0.1
 
 [Materials]
   [strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     eigenstrain_names = eigenstrain_all
   []
 
