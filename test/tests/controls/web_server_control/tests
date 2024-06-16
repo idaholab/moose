@@ -28,7 +28,6 @@
       command_proxy = 'control_reporter.py real_value'
       recover = false
       detail = 'double precision number'
-      prereq = control/bool
     []
     [string]
       type = JSONDiff
@@ -40,7 +39,6 @@
       command_proxy = 'control_reporter.py string_value'
       recover = false
       detail = 'string'
-      prereq = control/real
     []
     [vec_real]
       type = JSONDiff
@@ -52,7 +50,6 @@
       command_proxy = 'control_reporter.py vec_real_value'
       recover = false
       detail = 'vector of double precision numbers'
-      prereq = control/string
     []
     [vec_string]
       type = JSONDiff
@@ -64,7 +61,6 @@
       command_proxy = 'control_reporter.py vec_string_value'
       recover = false
       detail = 'vector of strings'
-      prereq = control/vec_real
     []
   []
 
@@ -75,7 +71,6 @@
     command_proxy = get_postprocessor.py
     recover = false
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
-    prereq = control/vec_string
   []
 
   [parallel_consistent]
@@ -87,7 +82,6 @@
     command_proxy = 'control_reporter.py bool_value'
     recover = false
     requirement = 'The system shall support changing controllable parameters via a REST API in a manner that is parallel consistent'
-    prereq = get_postprocessor
     min_parallel = 2
     max_parallel = 2
   []
@@ -102,7 +96,6 @@
       command_proxy = 'errors.py set_controllable_no_exist'
       expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
       detail = 'setting a controllable parameter that does not exist'
-      prereq = parallel_consistent
       valgrind = none
     []
     [postprocessor_no_exist]
@@ -111,7 +104,6 @@
       command_proxy = 'errors.py postprocessor_no_exist'
       expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
       detail = 'getting a postprocessor that does not exist'
-      prereq = errors/set_controllable_no_exist
       valgrind = none
     []
     [set_controllable_unregistered_type]
@@ -120,7 +112,6 @@
       command_proxy = 'errors.py set_controllable_unregistered_type'
       expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
       detail = 'setting a controllable parameter whose type is not supported'
-      prereq = errors/postprocessor_no_exist
       valgrind = none
     []
     [set_controllable_bad_convert_json]
@@ -130,7 +121,6 @@
       cli_args = 'Outputs/json/type=JSON'
       expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
       detail = 'setting a controllable parameter with an incompatible JSON type'
-      prereq = errors/set_controllable_unregistered_type
       valgrind = none
     []
     [set_controllable_vector_non_array]
@@ -141,7 +131,6 @@
                   Reporters/test/vec_real_value=0'
       expect_err = 'The value \'1234\' of type number is not an array'
       detail = 'setting a controllable parameter with a type that does not match'
-      prereq = errors/set_controllable_bad_convert_json
       valgrind = none
     []
   []
