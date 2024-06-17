@@ -18,7 +18,6 @@ class RunPBS(RunHPC):
     Scheduler class for the PBS HPC scheduler.
     """
     def augmentJobSubmission(self, submission_env):
-        submission_env['PLACE'] = self.options.hpc_place
         if self.options.hpc_queue:
             submission_env['QUEUE'] = self.options.hpc_queue
 
