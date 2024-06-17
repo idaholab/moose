@@ -17,7 +17,7 @@ $\mu_w = \mu + \mu_t $ , such that the wall shear stress $\tau_w$ is accurately 
 without the need of fully resolving the gradients at the near wall region. 
 
 \begin{equation}
-    \tau_w = /frac{ \mu_w u_p}{y_p}
+    \tau_w = \frac{ \mu_w u_p}{y_p} \,,
 \end{equation}
 
 where:
@@ -28,7 +28,7 @@ where:
 - $\tau_w$ is the wall-shear stress
 - $u_p$ is the wall-parallel velocity at the centroid
 - $y_p$ is the wall normal distance to the centroid
-  
+
 To impose a correct boundary condition for $\mu_t$, as seen in the Equation above, we need to compute $\tau_w$ using analytical 
 relationships between the wall shear stress and the dimensionless wall distance $y^+$. For this purpose, four different
 formulations are supported as defined by the [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) parameter.
@@ -48,7 +48,7 @@ for the turbulent viscosity.
     \mu_t =
     \begin{cases}
         0 & \text{if } y^+ \le 5 \\
-        \frac{\rho u_{\tau}^2 y_p}{u_p} - \mu & \text{if } y^+ \ge 30
+        \frac{\rho u_{\tau}^2 y_p}{u_p} - \mu & \text{if } y^+ \ge 30 \,,
     \end{cases}
 \end{equation}
 
