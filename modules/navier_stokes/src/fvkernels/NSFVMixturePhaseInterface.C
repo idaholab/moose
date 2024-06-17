@@ -17,8 +17,8 @@ NSFVMixturePhaseInterface::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Implements a phase-to-phase volumetric exchange.");
-  params.addRequiredParam<MaterialPropertyName>(NS::alpha,
-                                                "Name of the volumetric exchange coefficient");
+  params.addRequiredParam<MooseFunctorName>(NS::alpha,
+                                            "Name of the volumetric exchange coefficient");
   params.addRequiredParam<MooseFunctorName>("phase_coupled", "The ambient temperature");
   return params;
 }

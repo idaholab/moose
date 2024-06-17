@@ -1190,8 +1190,9 @@ SubProblem::getFunctor(const std::string & name,
     if (functors.count("wraps_" + name) > 1)
       mooseError("Attempted to get a functor with the name '",
                  name,
-                 "' but multiple functors match. Make sure that you do not have functor material "
-                 "properties, functions, postprocessors or variables with the same names");
+                 "' but multiple (" + std::to_string(functors.count("wraps_" + name)) +
+                     ") functors match. Make sure that you do not have functor material "
+                     "properties, functions, postprocessors or variables with the same names.");
 
     auto & [true_functor_is, non_ad_functor, ad_functor] = find_ret->second;
     auto & functor_wrapper = requested_functor_is_ad ? *ad_functor : *non_ad_functor;
@@ -1396,6 +1397,19 @@ SubProblem::addFunctor(const std::string & name,
         existing_ad_wrapper->assign(std::make_unique<Moose::ADWrapperFunctor<ADType>>(functor));
       }
       return;
+    }
+    else if (!existing_wrapper)
+    {
+      // Functor was emplaced but the cast failed. This could be a double definition with
+      // different types, or it could be a request with one type then a definition with another
+      // type. Either way it is going to error later, but it is cleaner to catch it now
+      mooseError("Functor '",
+                 name,
+                 "' is being added with return type '",
+                 MooseUtils::prettyCppType<T>(),
+                 "' but it has already been defined or requested with return type '",
+                 existing_wrapper_base->returnType(),
+                 "'.");
     }
   }
 

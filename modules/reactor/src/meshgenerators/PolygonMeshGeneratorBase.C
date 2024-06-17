@@ -1137,18 +1137,24 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
 }
 
 Real
-PolygonMeshGeneratorBase::radiusCorrectionFactor(const std::vector<Real> & azimuthal_list) const
+PolygonMeshGeneratorBase::radiusCorrectionFactor(const std::vector<Real> & azimuthal_list,
+                                                 const bool full_circle) const
 {
   std::vector<Real> azimuthal_list_alt;
   Real tmp_acc = 0.0;
+  Real tmp_acc_azi = 0.0;
   azimuthal_list_alt.insert(azimuthal_list_alt.end(), azimuthal_list.begin(), azimuthal_list.end());
-  azimuthal_list_alt.push_back(azimuthal_list.front() + 360.0);
+  if (full_circle)
+    azimuthal_list_alt.push_back(azimuthal_list.front() + 360.0);
   // summation of triangles S = 0.5 * r * r * Sigma_i [sin (azi_i)]
   // Circle area S_c = pi * r_0 * r_0
   // r = sqrt{2 * pi / Sigma_i [sin (azi_i)]} * r_0
   for (unsigned int i = 1; i < azimuthal_list_alt.size(); i++)
+  {
     tmp_acc += std::sin((azimuthal_list_alt[i] - azimuthal_list_alt[i - 1]) / 180.0 * M_PI);
-  return std::sqrt(2 * M_PI / tmp_acc);
+    tmp_acc_azi += (azimuthal_list_alt[i] - azimuthal_list_alt[i - 1]) / 180.0 * M_PI;
+  }
+  return std::sqrt(tmp_acc_azi / tmp_acc);
 }
 
 std::unique_ptr<ReplicatedMesh>

@@ -29,6 +29,8 @@ NSFVMixtureFunctorMaterial::validParams()
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "prop_names", "The name of the mixture properties output from the material.");
   params.addRequiredParam<MooseFunctorName>("phase_1_fraction", "Phase 1 fraction.");
+  params.addParam<bool>(
+      "limit_phase_fraction", false, "Whether to bound the phase fraction between 0 and 1");
   return params;
 }
 
@@ -37,7 +39,8 @@ NSFVMixtureFunctorMaterial::NSFVMixtureFunctorMaterial(const InputParameters & p
     _phase_1_names(getParam<std::vector<MooseFunctorName>>("phase_1_names")),
     _phase_2_names(getParam<std::vector<MooseFunctorName>>("phase_2_names")),
     _mixture_names(getParam<std::vector<MooseFunctorName>>("prop_names")),
-    _phase_1_fraction(getFunctor<ADReal>("phase_1_fraction"))
+    _phase_1_fraction(getFunctor<ADReal>("phase_1_fraction")),
+    _limit_pf(getParam<bool>("limit_phase_fraction"))
 {
 
   if (_phase_1_names.size() != _phase_2_names.size())
@@ -55,8 +58,13 @@ NSFVMixtureFunctorMaterial::NSFVMixtureFunctorMaterial(const InputParameters & p
         _mixture_names[prop_index],
         [this, prop_index](const auto & r, const auto & t) -> ADReal
         {
-          return _phase_1_fraction(r, t) * (*_phase_1_properties[prop_index])(r, t) +
-                 (1.0 - _phase_1_fraction(r, t)) * (*_phase_2_properties[prop_index])(r, t);
+          // Avoid messing up the fluid properties, but keep the same dependencies
+          const auto phase_1_fraction =
+              _limit_pf ? std::max(std::min(_phase_1_fraction(r, t), (ADReal)1), (ADReal)0) +
+                              0 * _phase_1_fraction(r, t)
+                        : _phase_1_fraction(r, t);
+          return phase_1_fraction * (*_phase_1_properties[prop_index])(r, t) +
+                 (1.0 - phase_1_fraction) * (*_phase_2_properties[prop_index])(r, t);
         });
   }
 }

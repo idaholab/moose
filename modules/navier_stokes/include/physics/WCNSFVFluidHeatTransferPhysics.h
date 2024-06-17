@@ -24,9 +24,22 @@ public:
 
   WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters);
 
+  /// Get the name of the fluid temperature variable
+  const NonlinearVariableName & getFluidTemperatureName() const { return _fluid_temperature_name; }
+
   /// Get the name of the specific heat material property
-  const MooseFunctorName getSpecificHeatName() const { return _specific_heat_name; }
-  const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
+  const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
+  MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
+  /// Get the ambient convection parameters for parameter checking
+  const std::vector<std::vector<SubdomainName>> & getAmbientConvectionBlocks() const
+  {
+    return _ambient_convection_blocks;
+  }
+  /// Name of the ambient convection heat transfer coefficients for each block-group
+  const std::vector<MooseFunctorName> & getAmbientConvectionHTCs() const
+  {
+    return _ambient_convection_alpha;
+  }
 
   /// Whether the physics is actually creating the heat equation
   bool hasEnergyEquation() const { return _has_energy_equation; }

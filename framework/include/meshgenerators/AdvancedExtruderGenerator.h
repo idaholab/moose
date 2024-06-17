@@ -58,7 +58,7 @@ protected:
   std::vector<std::unordered_map<boundary_id_type, boundary_id_type>> _boundary_swap_pairs;
 
   /// Easier to work with version of _elem_integers_swaps
-  std::vector<std::unordered_map<unsigned int, unsigned int>> _elem_integers_swap_pairs;
+  std::vector<std::unordered_map<dof_id_type, dof_id_type>> _elem_integers_swap_pairs;
 
   /// The direction of the extrusion
   Point _direction;
@@ -83,12 +83,4 @@ protected:
 
   /// Axial pitch for a full rotation
   const Real _twist_pitch;
-
-  /**
-   * Swap two nodes within an element
-   * @param elem element whose nodes need to be swapped
-   * @param nd1 index of the first node to be swapped
-   * @param nd2 index of the second node to be swapped
-   */
-  void swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2);
 };

@@ -234,8 +234,11 @@ FEProblemBase::validParams()
                         "or transferring to/from Multiapps "
                         "(default: false)");
 
-  params.addParam<bool>(
-      "verbose_setup", false, "Set to True to have the problem report on any object created");
+  MooseEnum verbosity("false true extra", "false");
+  params.addParam<MooseEnum>("verbose_setup",
+                             verbosity,
+                             "Set to 'true' to have the problem report on any object created. Set "
+                             "to 'extra' to also display all parameters.");
   params.addParam<bool>("verbose_multiapps",
                         false,
                         "Set to True to enable verbose screen printing related to MultiApps");
@@ -408,7 +411,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_time_integrator(false),
     _has_exception(false),
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
-    _verbose_setup(getParam<bool>("verbose_setup")),
+    _verbose_setup(getParam<MooseEnum>("verbose_setup")),
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
@@ -2312,7 +2315,7 @@ FEProblemBase::addFunction(const std::string & type,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
-    logAdd("Function", name, type);
+    logAdd("Function", name, type, parameters);
     _functions.addObject(func, tid);
 
     if (auto * const functor = dynamic_cast<Moose::FunctorBase<Real> *>(func.get()))
@@ -2524,13 +2527,12 @@ FEProblemBase::addVariable(const std::string & var_type,
   if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
     return;
 
-  logAdd("Variable", var_name, var_type);
-
   params.set<FEProblemBase *>("_fe_problem_base") = this;
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_SOLVER;
   SolverSystemName sys_name = params.get<SolverSystemName>("solver_sys");
 
   const auto solver_system_number = solverSysNum(sys_name);
+  logAdd("Variable", var_name, var_type, params);
   _solver_systems[solver_system_number]->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
@@ -2596,7 +2598,7 @@ FEProblemBase::setResidualObjectParamsAndLog(const std::string & ro_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd(base_name, name, ro_name);
+  logAdd(base_name, name, ro_name, parameters);
 }
 
 void
@@ -2660,7 +2662,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
-  logAdd("NodalKernel", name, kernel_name);
+  logAdd("NodalKernel", name, kernel_name, parameters);
   _nl[nl_sys_num]->addNodalKernel(kernel_name, name, parameters);
 }
 
@@ -2697,7 +2699,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("ScalarKernel", name, kernel_name);
+  logAdd("ScalarKernel", name, kernel_name, parameters);
   _nl[nl_sys_num]->addScalarKernel(kernel_name, name, parameters);
 }
 
@@ -2713,6 +2715,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
     mooseError(
         "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
         "supported at the moment!");
+
   setResidualObjectParamsAndLog(
       bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
   _nl[nl_sys_num]->addBoundaryCondition(bc_name, name, parameters);
@@ -2783,7 +2786,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("Constraint", name, c_name);
+  logAdd("Constraint", name, c_name, parameters);
   _nl[nl_sys_num]->addConstraint(c_name, name, parameters);
 }
 
@@ -2803,7 +2806,7 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   params.set<FEProblemBase *>("_fe_problem_base") = this;
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
 
-  logAdd("AuxVariable", var_name, var_type);
+  logAdd("AuxVariable", var_name, var_type, params);
   _aux->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
@@ -2842,7 +2845,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
     for (const SubdomainID & id : *active_subdomains)
       params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
 
-  logAdd("AuxVariable", var_name, var_type);
+  logAdd("AuxVariable", var_name, var_type, params);
   _aux->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
@@ -2872,7 +2875,7 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
     for (const SubdomainID & id : *active_subdomains)
       params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
 
-  logAdd("Variable", var_name, "ArrayMooseVariable");
+  logAdd("Variable", var_name, "ArrayMooseVariable", params);
   _aux->addVariable("ArrayMooseVariable", var_name, params);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable("ArrayMooseVariable", var_name, params);
@@ -2906,7 +2909,7 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
     for (const SubdomainID & id : *active_subdomains)
       params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
 
-  logAdd("ScalarVariable", var_name, "MooseVariableScalar");
+  logAdd("ScalarVariable", var_name, "MooseVariableScalar", params);
   _aux->addVariable("MooseVariableScalar", var_name, params);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable("MooseVariableScalar", var_name, params);
@@ -2946,7 +2949,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_nl_sys") = _solver_systems[0].get();
   }
 
-  logAdd("AuxKernel", name, kernel_name);
+  logAdd("AuxKernel", name, kernel_name, parameters);
   _aux->addKernel(kernel_name, name, parameters);
 }
 
@@ -2978,7 +2981,7 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
-  logAdd("AuxScalarKernel", name, kernel_name);
+  logAdd("AuxScalarKernel", name, kernel_name, parameters);
   _aux->addScalarKernel(kernel_name, name, parameters);
 }
 
@@ -3016,7 +3019,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("DiracKernel", name, kernel_name);
+  logAdd("DiracKernel", name, kernel_name, parameters);
   _nl[nl_sys_num]->addDiracKernel(kernel_name, name, parameters);
 }
 
@@ -3056,7 +3059,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("DGKernel", name, dg_kernel_name);
+  logAdd("DGKernel", name, dg_kernel_name, parameters);
   _nl[nl_sys_num]->addDGKernel(dg_kernel_name, name, parameters);
 
   _has_internal_edge_residual_objects = true;
@@ -3147,7 +3150,7 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("InterfaceKernel", name, interface_kernel_name);
+  logAdd("InterfaceKernel", name, interface_kernel_name, parameters);
   _nl[nl_sys_num]->addInterfaceKernel(interface_kernel_name, name, parameters);
 
   _has_internal_edge_residual_objects = true;
@@ -3224,7 +3227,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
         mooseError("Your FE variable in initial condition ",
                    name,
                    " must be either of scalar or vector type");
-      logAdd("IC", name, ic_name);
+      logAdd("IC", name, ic_name, parameters);
       _ics.addObject(ic, tid);
     }
   }
@@ -3236,7 +3239,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
     parameters.set<SystemBase *>("_sys") = &var.sys();
     std::shared_ptr<ScalarInitialCondition> ic =
         _factory.create<ScalarInitialCondition>(ic_name, name, parameters);
-    logAdd("ScalarIC", name, ic_name);
+    logAdd("ScalarIC", name, ic_name, parameters);
     _scalar_ics.addObject(ic);
   }
 
@@ -3468,7 +3471,7 @@ FEProblemBase::addFunctorMaterial(const std::string & functor_material_name,
       // Create the general Block/Boundary MaterialBase object
       std::shared_ptr<MaterialBase> material =
           _factory.create<MaterialBase>(functor_material_name, name, parameters, tid);
-      logAdd("FunctorMaterial", name, functor_material_name);
+      logAdd("FunctorMaterial", name, functor_material_name, parameters);
       _all_materials.addObject(material, tid);
       _materials.addObject(material, tid);
     }
@@ -3533,7 +3536,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     // Create the general Block/Boundary MaterialBase object
     std::shared_ptr<MaterialBase> material =
         _factory.create<MaterialBase>(mat_name, name, parameters, tid);
-    logAdd("Material", name, mat_name);
+    logAdd("Material", name, mat_name, parameters);
     bool discrete = !material->getParam<bool>("compute");
 
     // If the object is boundary restricted or if it is a functor material we do not create the
@@ -3833,10 +3836,13 @@ FEProblemBase::swapBackMaterialsNeighbor(const THREAD_ID tid)
 void
 FEProblemBase::logAdd(const std::string & system,
                       const std::string & name,
-                      const std::string & type) const
+                      const std::string & type,
+                      const InputParameters & params) const
 {
-  if (_verbose_setup)
+  if (_verbose_setup != "false")
     _console << "[DBG] Adding " << system << " '" << name << "' of type " << type << std::endl;
+  if (_verbose_setup == "extra")
+    _console << params << std::endl;
 }
 
 void
@@ -3928,7 +3934,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     // Create the UserObject
     std::shared_ptr<UserObject> user_object =
         _factory.create<UserObject>(user_object_name, name, parameters, tid);
-    logAdd("UserObject", name, user_object_name);
+    logAdd("UserObject", name, user_object_name, parameters);
     uos.push_back(user_object);
 
     if (tid != 0)
@@ -4776,7 +4782,7 @@ FEProblemBase::addDamper(const std::string & damper_name,
   parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
 
   _has_dampers = true;
-  logAdd("Damper", name, damper_name);
+  logAdd("Damper", name, damper_name, parameters);
   _nl[nl_sys_num]->addDamper(damper_name, name, parameters);
 }
 
@@ -4820,7 +4826,7 @@ FEProblemBase::addIndicator(const std::string & indicator_name,
   {
     std::shared_ptr<Indicator> indicator =
         _factory.create<Indicator>(indicator_name, name, parameters, tid);
-    logAdd("Indicator", name, indicator_name);
+    logAdd("Indicator", name, indicator_name, parameters);
     std::shared_ptr<InternalSideIndicator> isi =
         std::dynamic_pointer_cast<InternalSideIndicator>(indicator);
     if (isi)
@@ -4862,7 +4868,7 @@ FEProblemBase::addMarker(const std::string & marker_name,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     std::shared_ptr<Marker> marker = _factory.create<Marker>(marker_name, name, parameters, tid);
-    logAdd("Marker", name, marker_name);
+    logAdd("Marker", name, marker_name, parameters);
     _markers.addObject(marker, tid);
   }
 }
@@ -4900,7 +4906,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
   }
 
   std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
-  logAdd("MultiApp", name, multi_app_name);
+  logAdd("MultiApp", name, multi_app_name, parameters);
   multi_app->setupPositions();
 
   _multi_apps.addObject(multi_app);
@@ -5266,7 +5272,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
 
   // Create the Transfer objects
   std::shared_ptr<Transfer> transfer = _factory.create<Transfer>(transfer_name, name, parameters);
-  logAdd("Transfer", name, transfer_name);
+  logAdd("Transfer", name, transfer_name, parameters);
 
   // Add MultiAppTransfer object
   std::shared_ptr<MultiAppTransfer> multi_app_transfer =
@@ -6314,7 +6320,7 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   parallel_object_only();
 
   parameters.set<SubProblem *>("_subproblem") = this;
-  logAdd("TimeIntegrator", name, type);
+  logAdd("TimeIntegrator", name, type, parameters);
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
   for (auto & sys : _solver_systems)
     sys->addTimeIntegrator(type, name + ":" + sys->name(), parameters);
@@ -6349,7 +6355,7 @@ FEProblemBase::addPredictor(const std::string & type,
 
   parameters.set<SubProblem *>("_subproblem") = this;
   std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
-  logAdd("Predictor", name, type);
+  logAdd("Predictor", name, type, parameters);
 
   for (auto & nl : _nl)
     nl->setPredictor(predictor);
@@ -8413,7 +8419,7 @@ FEProblemBase::addOutput(const std::string & object_type,
 
   // Create the object and add it to the warehouse
   std::shared_ptr<Output> output = _factory.create<Output>(object_type, object_name, parameters);
-  logAdd("Output", object_name, object_type);
+  logAdd("Output", object_name, object_type, parameters);
   output_warehouse.addOutput(output);
 }
 
@@ -8718,7 +8724,7 @@ FEProblemBase::doingPRefinement(const bool doing_p_refinement,
 void
 FEProblemBase::setVerboseProblem(bool verbose)
 {
-  _verbose_setup = verbose;
+  _verbose_setup = verbose ? "true" : "false";
   _verbose_multiapps = verbose;
 }
 

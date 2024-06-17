@@ -26,9 +26,9 @@ public:
   bool hasFlowEquations() const { return _has_flow_equations; }
 
   /// To interface with other Physics
-  std::vector<std::string> getVelocityNames() const { return _velocity_names; }
-  NonlinearVariableName getPressureName() const { return _pressure_name; }
-  NonlinearVariableName getFluidTemperatureName() const { return _fluid_temperature_name; }
+  const std::vector<std::string> & getVelocityNames() const { return _velocity_names; }
+  const NonlinearVariableName & getPressureName() const { return _pressure_name; }
+  const NonlinearVariableName & getFluidTemperatureName() const { return _fluid_temperature_name; }
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
   // Getters to interact with other WCNSFVPhysics classes
@@ -36,12 +36,19 @@ public:
   const MooseEnum & compressibility() const { return _compressibility; }
   /// Return whether a porous medium treatment is applied
   bool porousMediumTreatment() const { return _porous_medium_treatment; }
+  /// Return the gravity vector
+  RealVectorValue gravityVector() const { return getParam<RealVectorValue>("gravity"); }
   /// Return the name of the density functor
   const MooseFunctorName & densityName() const { return _density_name; }
   /// Return the name of the dynamic viscosity functor
   const MooseFunctorName & dynamicViscosityName() const { return _dynamic_viscosity_name; }
   /// Get the face interpolation method for velocity
   const MooseEnum & getVelocityFaceInterpolationMethod() const { return _velocity_interpolation; }
+  /// Get the face interpolation method for velocity
+  const MooseEnum & getMomentumFaceInterpolationMethod() const
+  {
+    return _momentum_face_interpolation;
+  }
   /// Get the inlet boundaries
   const std::vector<BoundaryName> & getInletBoundaries() const { return _inlet_boundaries; }
   /// Get the wall boundaries
@@ -50,6 +57,8 @@ public:
   const std::vector<Point> & getFluxInletDirections() const { return _flux_inlet_directions; }
   /// Get the inlet flux postprocessor if using a flux inlet
   const std::vector<PostprocessorName> & getFluxInletPPs() const { return _flux_inlet_pps; }
+  /// Get the name of the linear friction coefficient. Returns an empty string if no friction.
+  MooseFunctorName getLinearFrictionCoefName() const;
   /// Return the name of the Rhie Chow user object
   UserObjectName rhieChowUOName() const;
   /// Return the number of algebraic ghosting layers needed
@@ -95,6 +104,9 @@ private:
   void addINSInletBC();
   void addINSOutletBC();
   void addINSWallsBC();
+
+  /// Return whether a Forchheimer friction model is in use
+  bool hasForchheimerFriction() const;
 
   /// Add material to define the local speed in porous medium flows
   void addPorousMediumSpeedMaterial();
@@ -146,11 +158,15 @@ private:
 
   /// Name of the density material property
   const MooseFunctorName _density_name;
+  /// Name of the density material property used for gravity and Boussinesq terms
+  const MooseFunctorName _density_gravity_name;
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
 
-  /// The velocity / momentum face interpolation method for advecting other quantities
+  /// The velocity face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
+  /// The momentum face interpolation method for being advected
+  const MooseEnum _momentum_face_interpolation;
 
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;

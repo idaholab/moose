@@ -732,7 +732,7 @@ NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
       "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
       " sources for each equation are specified, major (outer) ordering by equation.");
 
-  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity", "fixed-value");
+  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity");
   params.addParam<MultiMooseEnum>(
       "passive_scalar_inlet_types",
       ps_inlet_types,
