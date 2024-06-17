@@ -12,19 +12,22 @@ MFEMProblem::validParams()
       "Number of timesteps between successive write outs of data collections to file.");
   params.addParam<bool>(
       "use_glvis", false, "Attempt to open GLVis ports to display variables during simulation");
+  params.addParam<std::string>(
+      "device", "cpu", "Run app on the chosen device.");
+
 
   return params;
 }
 
 MFEMProblem::MFEMProblem(const InputParameters & params)
   : ExternalProblem(params),
-    _device("cuda"),
     _input_mesh(_mesh.parameters().get<MeshFileName>("file")),
     _coefficients(),
     _outputs(),
     _exec_params()
 {
   hephaestus::logger.set_level(spdlog::level::info);
+  _device.Configure(getParam<std::string>("device"));
   _device.Print(std::cout);
 }
 
