@@ -299,7 +299,7 @@
     output_properties = __all__
   []
   [strain_block]
-    type = ComputeFiniteStrain # ComputeIncrementalSmallStrain
+    type = ComputeFiniteStrain # ComputeIncrementalStrain
     displacements = 'disp_x disp_y disp_z'
     implicit = false
   []

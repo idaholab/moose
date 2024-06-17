@@ -35,7 +35,7 @@
     input = 'incremental_small_elastic-noad.i'
     exodiff = 'incremental_small_elastic_out.e'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation using automatic differentiation. (non-AD reference)'
-    design = 'ComputeIncrementalSmallStrain.md'
+    design = 'ComputeIncrementalStrain.md'
   [../]
   [./incremental_small_elastic]
     type = 'Exodiff'
@@ -43,7 +43,7 @@
     exodiff = 'incremental_small_elastic_out.e'
     prereq = 'incremental_small_elastic-noad'
     requirement = 'We shall be able to reproduce incremental small strain elasticity results of the hand-coded simulation using automatic differentiation.'
-    design = 'ADComputeIncrementalSmallStrain.md'
+    design = 'ADComputeIncrementalStrain.md'
   [../]
   [./incremental_small_elastic-jac]
     type = 'PetscJacobianTester'
@@ -52,7 +52,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e0
     requirement = 'The Jacobian for the AD incremental small strain elasticity problem shall be perfect'
-    design = 'ADComputeIncrementalSmallStrain.md'
+    design = 'ADComputeIncrementalStrain.md'
   [../]
 
   [./green-lagrange]

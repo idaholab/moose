@@ -139,7 +139,7 @@ AbaqusUMATStress::initialSetup()
                name(),
                "': Incremental strain quantities are not available. You likely are using a total "
                "strain formulation. Specify `incremental = true` in the tensor mechanics action, "
-               "or use ComputeIncrementalSmallStrain in your input file.");
+               "or use ComputeIncrementalStrain in your input file.");
 
   // Let's automatically detect uos and identify the one we are interested in.
   // If there is more than one, we assume something is off and error out.

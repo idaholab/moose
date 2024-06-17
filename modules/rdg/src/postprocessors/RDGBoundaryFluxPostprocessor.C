@@ -7,13 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BoundaryFluxPostprocessor.h"
+#include "RDGBoundaryFluxPostprocessor.h"
 #include "BoundaryFluxBase.h"
 
-registerMooseObject("RdgApp", BoundaryFluxPostprocessor);
+registerMooseObject("RdgApp", RDGBoundaryFluxPostprocessor);
+registerMooseObjectRenamed("RdgApp",
+                           BoundaryFluxPostprocessor,
+                           "04/01/2025 00:00",
+                           RDGBoundaryFluxPostprocessor);
 
 InputParameters
-BoundaryFluxPostprocessor::validParams()
+RDGBoundaryFluxPostprocessor::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
 
@@ -29,7 +33,7 @@ BoundaryFluxPostprocessor::validParams()
   return params;
 }
 
-BoundaryFluxPostprocessor::BoundaryFluxPostprocessor(const InputParameters & parameters)
+RDGBoundaryFluxPostprocessor::RDGBoundaryFluxPostprocessor(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
 
     _boundary_flux_uo(getUserObject<BoundaryFluxBase>("boundary_flux_uo")),
@@ -41,7 +45,7 @@ BoundaryFluxPostprocessor::BoundaryFluxPostprocessor(const InputParameters & par
 }
 
 Real
-BoundaryFluxPostprocessor::computeQpIntegral()
+RDGBoundaryFluxPostprocessor::computeQpIntegral()
 {
   std::vector<Real> U(_n_components);
   for (unsigned int i = 0; i < _n_components; i++)

@@ -149,7 +149,7 @@
 
 [Postprocessors]
   [./numel]
-    type = NumElems
+    type = NumElements
     execute_on = timestep_end
   [../]
   [./integral]

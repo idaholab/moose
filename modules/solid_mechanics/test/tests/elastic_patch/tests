@@ -13,14 +13,14 @@
   [./elastic_patch_incremental_small]
     type = 'Exodiff'
     input = 'elastic_patch.i'
-    cli_args = 'Materials/strain/type=ComputeIncrementalSmallStrain Kernels/SolidMechanics/use_displaced_mesh=false Outputs/file_base=elastic_patch_small_out'
+    cli_args = 'Materials/strain/type=ComputeIncrementalStrain Kernels/SolidMechanics/use_displaced_mesh=false Outputs/file_base=elastic_patch_small_out'
     exodiff = 'elastic_patch_small_out.e'
     requirement = 'The tensor mechanics module shall have the ability to '
                   'compute spatially uniform stresses under prescribed '
                   'linearly varying displacements on a set of irregular hexes '
                   'using an incremental small-strain calculation.'
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
-             'ComputeIncrementalSmallStrain.md ComputeFiniteStrainElasticStress.md'
+             'ComputeIncrementalStrain.md ComputeFiniteStrainElasticStress.md'
     issues = '#12584'
   [../]
   [./elastic_patch_total_small]
@@ -41,7 +41,7 @@
     prereq = elastic_patch_total_small
     type = 'Exodiff'
     input = 'elastic_patch.i'
-    cli_args = 'Mesh/use_displaced_mesh=false Materials/strain/type=ComputeIncrementalSmallStrain Kernels/SolidMechanics/use_displaced_mesh=false Outputs/file_base=elastic_patch_small_out'
+    cli_args = 'Mesh/use_displaced_mesh=false Materials/strain/type=ComputeIncrementalStrain Kernels/SolidMechanics/use_displaced_mesh=false Outputs/file_base=elastic_patch_small_out'
     exodiff = 'elastic_patch_small_out.e'
     requirement = 'The tensor mechanics module shall have the ability to '
                   'compute spatially uniform stresses under prescribed '
@@ -49,7 +49,7 @@
                   'using an incremental small-strain calculation with no displaced '
                   'mesh created.'
     design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
-             'ComputeIncrementalSmallStrain.md ComputeFiniteStrainElasticStress.md'
+             'ComputeIncrementalStrain.md ComputeFiniteStrainElasticStress.md'
     issues = '#12584 #12580'
   [../]
   [./elastic_patch_Bbar]

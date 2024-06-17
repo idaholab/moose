@@ -206,7 +206,7 @@
     coupled_tensor_increment_names = diffuse
   [../]
   [./strain]
-   type = ComputeIncrementalSmallStrain
+   type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y'
   [../]
   [./stress]

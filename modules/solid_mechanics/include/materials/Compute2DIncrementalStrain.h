@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeIncrementalSmallStrain.h"
+#include "ComputeIncrementalStrain.h"
 
 /**
  * Compute2DIncrementalStrain defines a strain increment only for
@@ -18,7 +18,7 @@
  * as a general nonzero value in the inherited classes ComputePlaneIncrementalStrain
  * and ComputeAxisymmetricRZIncrementalStrain.
  */
-class Compute2DIncrementalStrain : public ComputeIncrementalSmallStrain
+class Compute2DIncrementalStrain : public ComputeIncrementalStrain
 {
 public:
   static InputParameters validParams();

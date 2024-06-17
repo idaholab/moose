@@ -16,12 +16,12 @@ class BoundaryFluxBase;
 /**
  * Computes the side integral of a flux entry from a BoundaryFluxBase user object
  */
-class BoundaryFluxPostprocessor : public SideIntegralPostprocessor
+class RDGBoundaryFluxPostprocessor : public SideIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  BoundaryFluxPostprocessor(const InputParameters & parameters);
+  RDGBoundaryFluxPostprocessor(const InputParameters & parameters);
 
   virtual Real computeQpIntegral() override;
 

@@ -379,7 +379,7 @@
     shear_modulus = 6.4e9 # young 16MPa, Poisson 0.25
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

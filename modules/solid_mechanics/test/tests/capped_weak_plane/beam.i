@@ -387,7 +387,7 @@
     C_ijkl = '6.4E9 6.4E9'  # young 16MPa, Poisson 0.25
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

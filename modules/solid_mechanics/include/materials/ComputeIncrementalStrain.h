@@ -12,15 +12,15 @@
 #include "ComputeIncrementalStrainBase.h"
 
 /**
- * ComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small
+ * ComputeIncrementalStrain defines a strain increment and rotation increment (=1), for small
  * strains.
  */
-class ComputeIncrementalSmallStrain : public ComputeIncrementalStrainBase
+class ComputeIncrementalStrain : public ComputeIncrementalStrainBase
 {
 public:
   static InputParameters validParams();
 
-  ComputeIncrementalSmallStrain(const InputParameters & parameters);
+  ComputeIncrementalStrain(const InputParameters & parameters);
 
   virtual void computeProperties() override;
 

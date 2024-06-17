@@ -18,7 +18,7 @@
 [Postprocessors]
   [./num_elems]
     # number of elements, equal to 2
-    type = NumElems
+    type = NumElements
   [../]
   [./num_nodes]
     # number of nodes, equal to 3

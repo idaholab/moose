@@ -138,7 +138,7 @@ the $y$-direction are zeros.
 Once the incremental deformation gradient is calculated for the specific 2D geometry,
 the deformation gradient is passed to the strain and rotation methods used by the
 3D Cartesian simulations, as described in the
-[Compute Incremental Small Strain](ComputeIncrementalSmallStrain.md) documentation.
+[Compute Incremental Small Strain](ComputeIncrementalStrain.md) documentation.
 
 If selected by the user, the incremental strain tensor is conditioned with
 a $\bar{B}$ formulation to mitigate volumetric locking of the elements.

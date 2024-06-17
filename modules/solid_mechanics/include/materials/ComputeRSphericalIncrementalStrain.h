@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeIncrementalSmallStrain.h"
+#include "ComputeIncrementalStrain.h"
 
 /**
  * ComputeRSphericalIncrementalStrain defines a strain increment only
@@ -17,7 +17,7 @@
  * polar and azimuthal directions are functions of the radial displacement.
 
  */
-class ComputeRSphericalIncrementalStrain : public ComputeIncrementalSmallStrain
+class ComputeRSphericalIncrementalStrain : public ComputeIncrementalStrain
 {
 public:
   static InputParameters validParams();
