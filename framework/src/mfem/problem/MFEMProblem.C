@@ -18,12 +18,14 @@ MFEMProblem::validParams()
 
 MFEMProblem::MFEMProblem(const InputParameters & params)
   : ExternalProblem(params),
+    _device("cuda"),
     _input_mesh(_mesh.parameters().get<MeshFileName>("file")),
     _coefficients(),
     _outputs(),
     _exec_params()
 {
   hephaestus::logger.set_level(spdlog::level::info);
+  _device.Print(std::cout);
 }
 
 MFEMProblem::~MFEMProblem() {}
