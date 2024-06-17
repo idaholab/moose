@@ -1,4 +1,4 @@
-# PatchMeshGenerator
+# ExamplePatchMeshGenerator
 
 ## Overview
 
@@ -11,10 +11,10 @@ these meshes.
 The resulting mesh has sidesets named left, right, top, and bottom, and if a 3D
 mesh, sidesets named front and back.
 
-!syntax parameters /Mesh/PatchMeshGenerator
+!syntax parameters /Mesh/ExamplePatchMeshGenerator
 
-!syntax inputs /Mesh/PatchMeshGenerator
+!syntax inputs /Mesh/ExamplePatchMeshGenerator
 
-!syntax children /Mesh/PatchMeshGenerator
+!syntax children /Mesh/ExamplePatchMeshGenerator
 
 !bibtex bibliography

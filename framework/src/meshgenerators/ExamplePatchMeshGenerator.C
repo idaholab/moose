@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PatchMeshGenerator.h"
+#include "ExamplePatchMeshGenerator.h"
 #include "CastUniquePointer.h"
 
 // libMesh includes
@@ -23,10 +23,14 @@
 #include "libmesh/cell_hex20.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("MooseApp", PatchMeshGenerator);
+registerMooseObject("MooseApp", ExamplePatchMeshGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           PatchMeshGenerator,
+                           "06/30/2025 24:00",
+                           ExamplePatchMeshGenerator);
 
 InputParameters
-PatchMeshGenerator::validParams()
+ExamplePatchMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   MooseEnum dims("2=2 3", "2");
@@ -51,7 +55,7 @@ PatchMeshGenerator::validParams()
   return params;
 }
 
-PatchMeshGenerator::PatchMeshGenerator(const InputParameters & parameters)
+ExamplePatchMeshGenerator::ExamplePatchMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _elem_type(getParam<MooseEnum>("elem_type")),
@@ -97,7 +101,7 @@ PatchMeshGenerator::PatchMeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-PatchMeshGenerator::generate()
+ExamplePatchMeshGenerator::generate()
 {
   auto mesh = buildMeshBaseObject();
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -256,7 +260,7 @@ PatchMeshGenerator::generate()
 }
 
 void
-PatchMeshGenerator::makeQuad4Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
+ExamplePatchMeshGenerator::makeQuad4Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   std::vector<std::vector<int>> element_connectivity{
@@ -278,7 +282,7 @@ PatchMeshGenerator::makeQuad4Elems(MeshBase & mesh, const std::vector<Node *> & 
 }
 
 void
-PatchMeshGenerator::makeQuad8Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
+ExamplePatchMeshGenerator::makeQuad8Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   std::vector<std::vector<int>> element_connectivity{{0, 1, 5, 4, 8, 13, 16, 12},
@@ -303,7 +307,7 @@ PatchMeshGenerator::makeQuad8Elems(MeshBase & mesh, const std::vector<Node *> & 
 }
 
 void
-PatchMeshGenerator::makeHex8Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
+ExamplePatchMeshGenerator::makeHex8Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   std::vector<std::vector<int>> element_connectivity{{12, 13, 14, 15, 4, 5, 6, 7},
@@ -329,7 +333,7 @@ PatchMeshGenerator::makeHex8Elems(MeshBase & mesh, const std::vector<Node *> & n
 }
 
 void
-PatchMeshGenerator::makeHex20Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
+ExamplePatchMeshGenerator::makeHex20Elems(MeshBase & mesh, const std::vector<Node *> & nodes)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   std::vector<std::vector<int>> element_connectivity{
