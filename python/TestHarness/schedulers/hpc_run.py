@@ -33,7 +33,6 @@ if __name__ == '__main__':
     process = subprocess.run(command,
                              stdout=sys.stdout,
                              stderr=sys.stderr,
-                             close_fds=False,
-                             preexec_fn=os.setsid)
+                             close_fds=False)
     # This is a wrapper so just exit with the code of whatever we ran
     sys.exit(process.returncode)
