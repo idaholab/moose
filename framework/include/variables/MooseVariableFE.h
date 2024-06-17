@@ -504,6 +504,8 @@ public:
 
   virtual void setDofValue(const OutputData & value, unsigned int index) override;
 
+  virtual void setDofValueOld(const OutputData & value, unsigned int index) override;
+
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */

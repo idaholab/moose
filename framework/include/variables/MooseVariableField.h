@@ -98,6 +98,13 @@ public:
   virtual void setDofValue(const OutputData & value, unsigned int index) = 0;
   ///@}
 
+  ///@{
+  /**
+   * Degree of freedom value setters
+   */
+  virtual void setDofValueOld(const OutputData & value, unsigned int index) = 0;
+  ///@}
+
   /**
    * AD solution getter
    */
