@@ -107,6 +107,11 @@ public:
   void setDofValue(const OutputData & value, unsigned int index);
 
   /**
+   * Set local DOF value at \p index to \p value .
+   */
+  void setDofValueOld(const OutputData & value, unsigned int index);
+
+  /**
    * Get the dof indices for an element.
    * @param elem The element on which the dof indices shall be queried
    * @param dof_indices The container in which the dof indices will be copied

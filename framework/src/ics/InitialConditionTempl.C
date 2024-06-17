@@ -22,8 +22,7 @@ InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & paramete
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(getParam<THREAD_ID>("_tid")),
     _t(_fe_problem.time()),
-    _var(_sys.getActualFieldVariable<T>(parameters.get<THREAD_ID>("_tid"),
-                                        parameters.get<VariableName>("variable"))),
+    _var(_sys.getActualFieldVariable<T>(parameters.get<THREAD_ID>("_tid"), parameters.get<VariableName>("variable"))),
     _fe_var(dynamic_cast<MooseVariableFE<T> *>(&_var)),
     _assembly(
         _fe_problem.assembly(_tid, _var.kind() == Moose::VAR_SOLVER ? _var.sys().number() : 0)),
@@ -45,6 +44,11 @@ template <typename T>
 void
 InitialConditionTempl<T>::compute()
 {
+   // bail out right away if _cuurent_ic_state != _my_ic_state (add input parameter)
+   if (_my_state != _fe_problem.global_current_state){
+    return;
+   }
+   
   // -- NOTE ----
   // The following code is a copy from libMesh project_vector.C plus it adds some features, so we
   // can couple variable values

@@ -3297,8 +3297,20 @@ FEProblemBase::projectSolution()
   FloatingPointExceptionGuard fpe_guard(_app);
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeInitialConditionThread cic(*this);
-  Threads::parallel_reduce(elem_range, cic);
+
+  // loop over _current_ic_state = 1, 0
+  for (global_current_state=2; global_current_state>=0; global_current_state--){
+    ComputeInitialConditionThread cic(*this);
+    Threads::parallel_reduce(elem_range, cic);
+    if (global_current_state>0){
+      for (auto & nl : _nl){
+        nl->copyOldSolutions();
+      }
+      _aux->copyOldSolutions();
+    }
+  }
+  // ComputeInitialConditionThread cic(*this);
+  // Threads::parallel_reduce(elem_range, cic); // in IC class only act if _fe_problem._current_ic_state == my state parameter
 
   if (haveFV())
   {

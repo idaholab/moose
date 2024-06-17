@@ -1247,8 +1247,7 @@ SystemBase::copyOldSolutions()
     const auto states = _solution_states[iteration_index].size();
     if (states > 1)
       for (unsigned int i = states - 1; i > 0; --i)
-        solutionState(i, Moose::SolutionIterationType(iteration_index)) =
-            solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
+        solutionState(i, Moose::SolutionIterationType(iteration_index)) = solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
   }
 
   if (solutionUDotOld())
@@ -1317,7 +1316,10 @@ SystemBase::initSolutionState()
 
   // Add additional states as required by the variable states requested
   for (const auto & var : getVariables(/* tid = */ 0))
+  {
+    mooseInfoRepeated("oldest state for '", var->name() ,"' is ", var->oldestSolutionStateRequested() );
     state = std::max(state, var->oldestSolutionStateRequested());
+  }
   for (const auto & var : getScalarVariables(/* tid = */ 0))
     state = std::max(state, var->oldestSolutionStateRequested());
 

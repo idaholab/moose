@@ -91,6 +91,9 @@ public:
 
   virtual const std::set<std::string> & getSuppliedItems() override;
 
+  // variable used when applying initial conditions to previous states
+  int _my_state;
+
 protected:
   /// The system object
   SystemBase & _sys;

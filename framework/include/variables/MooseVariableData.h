@@ -373,6 +373,13 @@ public:
   void setDofValue(const OutputData & value, unsigned int index);
   ///@}
 
+  ///@{
+  /**
+   * dof value old state setters
+   */
+  void setDofValueOld(const OutputData & value, unsigned int index);
+  ///@}
+
   /**
    * Write a nodal value to the passed-in solution vector
    */

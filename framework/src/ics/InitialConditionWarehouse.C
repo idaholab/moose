@@ -55,32 +55,32 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialConditionBase> objec
   }
 
   // Block Restricted
-  else if (object->blockRestricted())
-  {
-    std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
-        _block_ics[tid].find(var.name());
-    if (iter != _block_ics[tid].end() &&
-        (object->hasBlocks(iter->second) ||
-         (iter->second.find(Moose::ANY_BLOCK_ID) != iter->second.end())))
-      mooseError("The initial condition '",
-                 object->name(),
-                 "' is being defined on a block that already has an initial condition defined.");
-    else
-      _block_ics[tid][var.name()].insert(object->blockIDs().begin(), object->blockIDs().end());
-  }
+  // else if (object->blockRestricted())
+  // {
+  //   std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
+  //       _block_ics[tid].find(var.name());
+  //   if (iter != _block_ics[tid].end() &&
+  //       (object->hasBlocks(iter->second) ||
+  //        (iter->second.find(Moose::ANY_BLOCK_ID) != iter->second.end())))
+  //     mooseError("The initial condition '",
+  //                object->name(),
+  //                "' is being defined on a block that already has an initial condition defined.");
+  //   else
+  //     _block_ics[tid][var.name()].insert(object->blockIDs().begin(), object->blockIDs().end());
+  // }
 
-  // Non-restricted
-  else
-  {
-    std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
-        _block_ics[tid].find(var.name());
-    if (iter != _block_ics[tid].end())
-      mooseError("The initial condition '",
-                 object->name(),
-                 "' is being defined on a block that already has an initial condition defined.");
-    else
-      _block_ics[tid][var.name()].insert(Moose::ANY_BLOCK_ID);
-  }
+  // // Non-restricted
+  // else
+  // {
+  //   std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
+  //       _block_ics[tid].find(var.name());
+  //   if (iter != _block_ics[tid].end())
+  //     mooseError("The initial condition '",
+  //                object->name(),
+  //                "' is being defined on a block that already has an initial condition defined.");
+  //   else
+  //     _block_ics[tid][var.name()].insert(Moose::ANY_BLOCK_ID);
+  // }
 
   // Add the IC to the storage
   MooseObjectWarehouseBase<InitialConditionBase>::addObject(object, tid, recurse);

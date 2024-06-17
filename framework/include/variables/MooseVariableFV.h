@@ -165,6 +165,8 @@ public:
 
   virtual void setDofValue(const OutputData & value, unsigned int index) override;
 
+  virtual void setDofValueOld(const OutputData & value, unsigned int index) override;
+
   void clearDofIndices() override;
 
   virtual void prepareIC() override;
