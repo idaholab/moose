@@ -65,11 +65,18 @@ class RunSlurm(RunHPC):
                 exit_code = int(status['exitcode'])
                 if state == 'FAILED' and exit_code == 0:
                     raise Exception(f'Job {hpc_job.id} has unexpected exit code {exit_code} with FAILED state')
+
+                job = hpc_job.job
+
+                # Job has timed out; setting a timeout status means that this
+                # state is recoverable
+                if state == 'TIMEOUT':
+                    job.setStatus(job.timeout, 'TIMEOUT')
                 # If a job COMPLETED, it's done with exit code 0 so everything
                 # went well. If it FAILED, it finished but returned with a
                 # non-zero exit code, which will be handled by the Tester.
-                if state not in ['FAILED', 'COMPLETED']:
-                    hpc_job.job.setStatus(hpc_job.job.error, f'SLURM ERROR: {state}')
+                elif state not in ['FAILED', 'COMPLETED']:
+                    job.setStatus(job.error, f'SLURM ERROR: {state}')
 
                 self.setHPCJobDone(hpc_job, exit_code)
 
