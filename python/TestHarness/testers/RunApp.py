@@ -124,6 +124,14 @@ class RunApp(Tester):
             self.setStatus(self.skip)
             return False
 
+        # We have non-deterministic issues when running with the HPC python wrapper
+        # and using --redirected-output. If the user explicitly requested more
+        # parallel procs, we can't run this
+        if options.hpc and self.specs['redirect_output'] == True and int(self.specs['min_parallel']) > 1:
+            self.addCaveats('hpc min_cpus=1')
+            self.setStatus(self.skip)
+            return False
+
         return True
 
     def getThreads(self, options):
@@ -153,10 +161,19 @@ class RunApp(Tester):
         else:
             default_ncpus = options.parallel
 
+        min_parallel = int(self.specs['min_parallel'])
+
         # Raise the floor
-        ncpus = max(default_ncpus, int(self.specs['min_parallel']))
+        ncpus = max(default_ncpus, min_parallel)
         # Lower the ceiling
         ncpus = min(ncpus, int(self.specs['max_parallel']))
+
+        # We have non-deterministic issues when running with the HPC python wrapper
+        # and using --redirected-output. Here, if the user didn't explicitly request
+        # to use more parallel procs, we'll limit it to 1
+        if options.hpc and self.specs['redirect_output'] == True and min_parallel == 1 and ncpus > 1:
+            self.addCaveats('hpc min_cpus=1')
+            return 1
 
         if ncpus > default_ncpus:
             self.addCaveats('min_cpus=' + str(ncpus))
