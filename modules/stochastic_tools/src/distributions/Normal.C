@@ -40,8 +40,8 @@ Normal::Normal(const InputParameters & parameters)
 Real
 Normal::pdf(const Real & x, const Real & mean, const Real & std_dev)
 {
-  return 1.0 / (std_dev * std::sqrt(2.0 * M_PI)) *
-         std::exp(-0.5 * Utility::pow<2>((x - mean) / std_dev));
+  return std::log(1.0 / (std_dev * std::sqrt(2.0 * M_PI))) +
+         (-0.5 * Utility::pow<2>((x - mean) / std_dev)); // std::exp
 }
 
 Real

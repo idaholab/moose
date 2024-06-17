@@ -11,28 +11,24 @@
 
 #include "GeneralReporter.h"
 #include "Sampler.h"
-#include "BayesianGPrySampler.h"
+#include "GPryTest.h"
 #include "ActiveLearningGaussianProcess.h"
 #include "GaussianProcess.h"
 #include "SurrogateModel.h"
 #include "SurrogateModelInterface.h"
 #include "Standardizer.h"
 #include "GaussianProcess.h"
-#include "LikelihoodFunctionBase.h"
-#include "LikelihoodInterface.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: NN and GP training step
  */
-class BayesianGPryLearner : public GeneralReporter,
-                            public LikelihoodInterface,
-                            // public CovarianceInterface,
-                            public SurrogateModelInterface
+class GPryTestLearner : public GeneralReporter,
+                        public SurrogateModelInterface
 
 {
 public:
   static InputParameters validParams();
-  BayesianGPryLearner(const InputParameters & parameters);
+  GPryTestLearner(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void finalize() override {}
   virtual void execute() override;
@@ -54,12 +50,6 @@ protected:
   /// Modified value of model output by this reporter class
   std::vector<Real> & _output_comm;
 
-  /// Model output value from SubApp
-  const std::vector<Real> & _output_value1;
-
-  /// Modified value of model output by this reporter class
-  std::vector<Real> & _output_comm1;
-
 private:
   // StochasticTools::GaussianProcessHandler & _gp_handler;
 
@@ -68,14 +58,6 @@ private:
    * @param data_in The data matrix containing the inputs to the NNs
    */
   void setupNNGPData(const std::vector<Real> & log_posterior, const DenseMatrix<Real> & data_in);
-
-  /**
-   * Compute the log of the un-normalized posterior (aka likelihood times the prior)
-   * @param log_posterior The evidence vector to be filled
-   * @param input_matrix The matrix of proposed inputs that are provided
-   */
-  void computeLogPosterior(std::vector<Real> & log_posterior,
-                           const DenseMatrix<Real> & input_matrix);
 
   /**
    * Modify the acqusition function by considering correlations between the inputs
@@ -92,58 +74,33 @@ private:
    * @param input2 The second input
    * @param corr The computed correlation
    */
-  void computeCorrelation(const unsigned int & ind1,
-                          const unsigned int & ind2,
+  void computeCorrelation(const std::vector<Real> & input1,
+                          const std::vector<Real> & input2,
                           Real & corr);
-
-  void computeGPOutput(std::vector<Real> & eval_outputs,
-                       const std::vector<std::vector<Real>> & eval_inputs);
 
   void computeGPOutput2(std::vector<Real> & eval_outputs, const DenseMatrix<Real> & eval_inputs);
 
-  void computeDistance(const std::vector<Real> & current_input,
-                       unsigned int & req_index);
-
-  /**
-   * Fill in the provided vector with random samples given the distributions
-   * @param vector The vector to be filled
-   */
-  void fillVector(std::vector<Real> & vector);
+  void computeFunction(const DenseMatrix<Real> & data_in);
 
   /// The adaptive Monte Carlo sampler
   Sampler & _sampler;
 
   /// Adaptive Importance Sampler
-  const BayesianGPrySampler * const _gpry_sampler;
+  const GPryTest * const _gpry_sampler;
 
   /// The selected sample indices to evaluate the subApp
   std::vector<unsigned int> & _sorted_indices;
 
-  /// Storage for the likelihood objects to be utilized
-  std::vector<const LikelihoodFunctionBase *> _likelihoods;
-
   /// Storage for all the proposed samples
   const std::vector<std::vector<Real>> & _inputs_all;
-
-  /// Storage for all the proposed variance samples
-  const std::vector<Real> & _var_all;
 
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
   /// The GP evaluator object that permits re-evaluations
   const SurrogateModel & _gp_eval;
 
-  /// Storage for new proposed variance samples
-  const std::vector<Real> & _new_var_samples;
-
   /// Storage for the priors
-  const std::vector<const Distribution *> _priors;
-
-  /// Storage for the prior over the variance
-  const Distribution * _var_prior;
-
-  /// Model noise term to pass to Likelihoods object
-  Real & _noise;
+//   const std::vector<const Distribution *> _priors;
 
   /// The maximum value of the acquistion function in the current iteration
   std::vector<Real> & _acquisition_function;
@@ -174,19 +131,8 @@ private:
   /// Storage for the number of parallel proposals
   dof_id_type _props;
 
-  /// Storage for the number of experimental configuration values
-  dof_id_type _num_confg_values;
-
-  /// Storage for the number of experimental configuration parameters
-  dof_id_type _num_confg_params;
-
   /// Storage for the length scales after the GP training 
   std::vector<Real> _length_scales;
 
-  unsigned int _seed;
-  unsigned int _eval_points;
-  std::vector<std::vector<Real>> _eval_inputs;
-  // std::vector<Real> _eval_inputs_density;
   std::vector<Real> _eval_outputs_current;
-  std::vector<Real> _eval_outputs_previous;
 };
