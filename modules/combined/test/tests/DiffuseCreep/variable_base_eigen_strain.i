@@ -166,7 +166,7 @@
     eigenstrain_name = eigenstrain
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]

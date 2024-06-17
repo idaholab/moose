@@ -1,10 +1,10 @@
-# GhostingAux
+# GhostingFromUOAux
 
-!syntax description /AuxKernels/GhostingAux
+!syntax description /AuxKernels/GhostingFromUOAux
 
 # Description
 
-`GhostingAux` allows you to visualize what the current algebraic and geometric ghosting functors (and RelationshipManagers) are going to do.  This is useful in tracking down both under and over-ghosting.
+`GhostingFromUOAux` allows you to visualize what the current algebraic and geometric ghosting functors (and RelationshipManagers) are going to do.  This is useful in tracking down both under and over-ghosting.
 
 At any one time it will only show you the ghosted elements for one processor ID.
 
@@ -29,10 +29,10 @@ Normally, this class shouldn't be used directly. Instead set it up through the [
 
 !row-end!
 
-!syntax parameters /AuxKernels/GhostingAux
+!syntax parameters /AuxKernels/GhostingFromUOAux
 
-!syntax inputs /AuxKernels/GhostingAux
+!syntax inputs /AuxKernels/GhostingFromUOAux
 
-!syntax children /AuxKernels/GhostingAux
+!syntax children /AuxKernels/GhostingFromUOAux
 
 !bibtex bibliography

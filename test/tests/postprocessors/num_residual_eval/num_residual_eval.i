@@ -63,7 +63,7 @@
   [../]
 
   [./elements]
-    type = NumElems
+    type = NumElements
     execute_on = 'initial timestep_end'
   [../]
 

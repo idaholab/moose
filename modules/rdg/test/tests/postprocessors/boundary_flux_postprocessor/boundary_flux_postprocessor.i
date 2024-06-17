@@ -1,4 +1,4 @@
-# This input file is used to test BoundaryFluxPostprocessor, which queries
+# This input file is used to test RDGBoundaryFluxPostprocessor, which queries
 # fluxes computed using user objects derived from BoundaryFluxBase. The boundary
 # flux used in this test is TestBoundaryFlux, which expects a solution vector
 # of size 3 (call this U = {A, B, C}) and computes a flux of size 2 with the
@@ -37,26 +37,26 @@ flux1_boundary0 = ${fparse A * B * nx_boundary0}
 
 [Postprocessors]
   [./flux0_boundary0]
-    type = BoundaryFluxPostprocessor
+    type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux0_boundary0
     boundary = 0
     flux_index = 0
   [../]
   [./flux0_boundary1]
-    type = BoundaryFluxPostprocessor
+    type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux0_boundary1
     boundary = 1
     flux_index = 0
   [../]
   [./flux0_provided]
-    type = BoundaryFluxPostprocessor
+    type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux0_provided
     boundary = 0
     flux_index = 0
     normal = '${nx_provided} 0 0'
   [../]
   [./flux1_boundary0]
-    type = BoundaryFluxPostprocessor
+    type = RDGBoundaryFluxPostprocessor
     boundary_flux_uo = boundary_flux_flux1_boundary0
     boundary = 0
     flux_index = 1

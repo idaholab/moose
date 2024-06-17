@@ -78,7 +78,7 @@
 
 [Materials]
   [./strain]
-    type = ADComputeIncrementalSmallStrain
+    type = ADComputeIncrementalStrain
   [../]
   [./stress]
     type = ADComputeFiniteStrainElasticStress

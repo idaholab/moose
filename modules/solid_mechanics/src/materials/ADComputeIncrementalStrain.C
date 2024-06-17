@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADComputeIncrementalSmallStrain.h"
+#include "ADComputeIncrementalStrain.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
@@ -15,12 +15,15 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("SolidMechanicsApp", ADComputeIncrementalSmallStrain);
-registerMooseObject("SolidMechanicsApp", ADSymmetricIncrementalSmallStrain);
+registerMooseObject("SolidMechanicsApp", ADComputeIncrementalStrain);
+registerMooseObjectRenamed("SolidMechanicsApp",
+                           ADComputeIncrementalSmallStrain,
+                           "06/30/2025 24:00",
+                           ADComputeIncrementalStrain);
 
 template <typename R2>
 InputParameters
-ADComputeIncrementalSmallStrainTempl<R2>::validParams()
+ADComputeIncrementalStrainTempl<R2>::validParams()
 {
   InputParameters params = ADComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
@@ -29,7 +32,7 @@ ADComputeIncrementalSmallStrainTempl<R2>::validParams()
 }
 
 template <typename R2>
-ADComputeIncrementalSmallStrainTempl<R2>::ADComputeIncrementalSmallStrainTempl(
+ADComputeIncrementalStrainTempl<R2>::ADComputeIncrementalStrainTempl(
     const InputParameters & parameters)
   : ADComputeIncrementalStrainBaseTempl<R2>(parameters)
 {
@@ -37,7 +40,7 @@ ADComputeIncrementalSmallStrainTempl<R2>::ADComputeIncrementalSmallStrainTempl(
 
 template <typename R2>
 void
-ADComputeIncrementalSmallStrainTempl<R2>::computeProperties()
+ADComputeIncrementalStrainTempl<R2>::computeProperties()
 {
   ADReal volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -83,7 +86,7 @@ ADComputeIncrementalSmallStrainTempl<R2>::computeProperties()
 
 template <typename R2>
 void
-ADComputeIncrementalSmallStrainTempl<R2>::computeTotalStrainIncrement(ADR2 & total_strain_increment)
+ADComputeIncrementalStrainTempl<R2>::computeTotalStrainIncrement(ADR2 & total_strain_increment)
 {
   // Deformation gradient (symmetrized)
   const auto A = ADR2::initializeSymmetric(
@@ -95,5 +98,5 @@ ADComputeIncrementalSmallStrainTempl<R2>::computeTotalStrainIncrement(ADR2 & tot
   total_strain_increment = A - Fbar;
 }
 
-template class ADComputeIncrementalSmallStrainTempl<RankTwoTensor>;
-template class ADComputeIncrementalSmallStrainTempl<SymmetricRankTwoTensor>;
+template class ADComputeIncrementalStrainTempl<RankTwoTensor>;
+template class ADComputeIncrementalStrainTempl<SymmetricRankTwoTensor>;

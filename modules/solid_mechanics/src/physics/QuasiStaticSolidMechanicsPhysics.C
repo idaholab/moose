@@ -993,7 +993,7 @@ QuasiStaticSolidMechanicsPhysics::actStressDivergenceTensorsStrain()
   {
     std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
         {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputeSmallStrain"},
-        {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputeIncrementalSmallStrain"},
+        {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputeIncrementalStrain"},
         {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputeFiniteStrain"},
         {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetricRZSmallStrain"},
         {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},

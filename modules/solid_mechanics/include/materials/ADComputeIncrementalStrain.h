@@ -11,19 +11,19 @@
 
 #include "ADComputeIncrementalStrainBase.h"
 
-#define usingComputeIncrementalSmallStrainMembers usingComputeIncrementalStrainBaseMembers
+#define usingComputeIncrementalStrainMembers usingComputeIncrementalStrainBaseMembers
 
 /**
- * ADComputeIncrementalSmallStrainTempl defines a strain increment and rotation increment (=1), for
+ * ADComputeIncrementalStrainTempl defines a strain increment and rotation increment (=1), for
  * small strains.
  */
 template <typename R2>
-class ADComputeIncrementalSmallStrainTempl : public ADComputeIncrementalStrainBaseTempl<R2>
+class ADComputeIncrementalStrainTempl : public ADComputeIncrementalStrainBaseTempl<R2>
 {
 public:
   static InputParameters validParams();
 
-  ADComputeIncrementalSmallStrainTempl(const InputParameters & parameters);
+  ADComputeIncrementalStrainTempl(const InputParameters & parameters);
 
   virtual void computeProperties() override;
 
@@ -39,6 +39,5 @@ protected:
   usingComputeIncrementalStrainBaseMembers;
 };
 
-typedef ADComputeIncrementalSmallStrainTempl<RankTwoTensor> ADComputeIncrementalSmallStrain;
-typedef ADComputeIncrementalSmallStrainTempl<SymmetricRankTwoTensor>
-    ADSymmetricIncrementalSmallStrain;
+typedef ADComputeIncrementalStrainTempl<RankTwoTensor> ADComputeIncrementalStrain;
+typedef ADComputeIncrementalStrainTempl<SymmetricRankTwoTensor> ADSymmetricIncrementalSmallStrain;

@@ -6,7 +6,7 @@
 
 This material, `ADComputeFiniteStrainElasticStress` computes the elastic stress
 for an incremental formulation, both incremental small
-([ADComputeIncrementalSmallStrain](/ADComputeIncrementalSmallStrain.md) type) and
+([ADComputeIncrementalStrain](/ADComputeIncrementalStrain.md) type) and
 incremental finite ([ADComputeFiniteStrain](/ADComputeFiniteStrain.md) type)
 strain formulations. This stress class is compatible with both Cartesian and
 non-Cartesian strain calculators, including

@@ -15,12 +15,15 @@
 
 class GhostingUserObject;
 
-class GhostingAux : public AuxKernel
+/**
+ * Outputs to an auxiliary variable the ghosting of a GhostingUserObject
+ */
+class GhostingFromUOAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  GhostingAux(const InputParameters & parameters);
+  GhostingFromUOAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

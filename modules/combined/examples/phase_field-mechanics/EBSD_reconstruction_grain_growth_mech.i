@@ -214,7 +214,7 @@
     type = TimestepSize
   []
   [n_elements]
-    type = NumElems
+    type = NumElements
     execute_on = 'initial timestep_end'
   []
   [n_nodes]

@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeIncrementalSmallStrain.h"
+#include "ComputeIncrementalStrain.h"
 #include "Assembly.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("SolidMechanicsApp", ComputeIncrementalSmallStrain);
+registerMooseObject("SolidMechanicsApp", ComputeIncrementalStrain);
+registerMooseObjectRenamed("SolidMechanicsApp",
+                           ComputeIncrementalSmallStrain,
+                           "04/01/2025 00:00",
+                           ComputeIncrementalStrain);
 
 InputParameters
-ComputeIncrementalSmallStrain::validParams()
+ComputeIncrementalStrain::validParams()
 {
   InputParameters params = ComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
@@ -22,13 +26,13 @@ ComputeIncrementalSmallStrain::validParams()
   return params;
 }
 
-ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParameters & parameters)
+ComputeIncrementalStrain::ComputeIncrementalStrain(const InputParameters & parameters)
   : ComputeIncrementalStrainBase(parameters)
 {
 }
 
 void
-ComputeIncrementalSmallStrain::computeProperties()
+ComputeIncrementalStrain::computeProperties()
 {
   Real volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -74,7 +78,7 @@ ComputeIncrementalSmallStrain::computeProperties()
 }
 
 void
-ComputeIncrementalSmallStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
+ComputeIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
 {
   // Deformation gradient
   auto A = RankTwoTensor::initializeFromRows(

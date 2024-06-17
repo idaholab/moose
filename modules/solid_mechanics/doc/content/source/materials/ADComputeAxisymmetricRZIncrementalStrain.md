@@ -12,7 +12,7 @@ incremental strain for Axisymmetric systems.
 Once the deformation gradient is calculated for the specific 2D geometry, the
 deformation gradient is passed to the strain and rotation methods used by
 default 3D Cartesian simulations, as described in the
-[Incremental Finite Strain Class](ADComputeIncrementalSmallStrain.md) page.
+[Incremental Finite Strain Class](ADComputeIncrementalStrain.md) page.
 
 !syntax parameters /Materials/ADComputeAxisymmetricRZIncrementalStrain
 

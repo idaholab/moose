@@ -15,12 +15,12 @@
 /*
  * Mesh generator to generate 2D or 3D mesh patches
  */
-class PatchMeshGenerator : public MeshGenerator
+class ExamplePatchMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  PatchMeshGenerator(const InputParameters & parameters);
+  ExamplePatchMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

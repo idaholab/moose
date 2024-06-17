@@ -19,7 +19,7 @@ registerMooseObject("SolidMechanicsApp", ComputeRSphericalIncrementalStrain);
 InputParameters
 ComputeRSphericalIncrementalStrain::validParams()
 {
-  InputParameters params = ComputeIncrementalSmallStrain::validParams();
+  InputParameters params = ComputeIncrementalStrain::validParams();
   params.addClassDescription(
       "Compute a strain increment for incremental strains in 1D spherical symmetry problems.");
   return params;
@@ -27,7 +27,7 @@ ComputeRSphericalIncrementalStrain::validParams()
 
 ComputeRSphericalIncrementalStrain::ComputeRSphericalIncrementalStrain(
     const InputParameters & parameters)
-  : ComputeIncrementalSmallStrain(parameters), _disp_old_0(coupledValueOld("displacements", 0))
+  : ComputeIncrementalStrain(parameters), _disp_old_0(coupledValueOld("displacements", 0))
 {
 }
 
