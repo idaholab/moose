@@ -1064,6 +1064,7 @@ label: use_split                              text: use_split = ${1:false}      
 label: *                                      text: [block_name]\n  $0\n[]                              desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
 label: Partitioner                            text: [Partitioner]\n  $0\n[]                             desc: application named... pos: [6.0]-[6.0] kind: 22 format: snippet
 )INPUT";
+
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
