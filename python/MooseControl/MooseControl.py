@@ -37,16 +37,18 @@ class MooseControl:
                  moose_control_name: str = None):
         """Constructor
 
-        You must specify either "moose_port" or "moose_command" and "moose_control_name".
+        If "moose_port" is specified without "moose_command": Connect to the webserver at
+        this port and do not spawn a moose process.
 
-        If "moose_port" is specified: Connect to the webserver at this port and
-        do not spawn a moose process.
+        If "moose_command" is specified at all, "moose_control_name" is needed in order
+        to specify a command line argument to set either the port or the file socket.
 
-        If "moose_command" is specified: Spawn a moose process and then connect to it
-        at an available port. "moose_control_name" must be specified so that the params
-        for the WebServerControl object can be set via this class, in specific, the
-        command line option Controls/<moose_control_name/file_socket=<file_socket>, where
-        <file_socket> is determined at random in the cwd by this class.
+        If "moose_command" is specified with "moose_port": Spawn a moose process and then
+        connect to it at the specified port.
+
+        If "moose_command" is specified without "moose_port": Spawn a moose process and then
+        determine a file socket to connect to within the current working directory. This is
+        the preferred method of operation.
 
         Parameters:
             moose_command (list[str]): The command to use to start the moose process
@@ -63,13 +65,9 @@ class MooseControl:
         has_moose_port = moose_port is not None
         has_moose_control_name = moose_control_name is not None
         if not has_moose_command and not has_moose_port:
-            raise ValueError('One of "moose_command" or "moose_port" must be provided')
-        if has_moose_command and has_moose_port:
-            raise ValueError('"moose_command" and "moose_port" cannot be provided together')
+            raise ValueError('One of "moose_command" or "moose_port" must at least be provided')
         if has_moose_command and not has_moose_control_name:
             raise ValueError('"moose_control_name" must be specified with "moose_command"')
-        if not has_moose_control_name and has_moose_port:
-            raise ValueError('"moose_control_name" is unused with "moose_port"')
         if has_moose_command and not isinstance(moose_command, list):
             raise ValueError('"moose_command" is not a list')
 
@@ -228,18 +226,27 @@ class MooseControl:
         if self._initialized:
             raise self.ControlException('Already called initialize()')
 
-        # The port we'll use, if any
+        # The port to listen on, if any
         port = None
 
         # MOOSE command is provided; start the process
         if self._moose_command:
-            # Setup the file socket we will communicate with
-            suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-            self._file_socket = os.path.join(os.getcwd(), f'moose_control_{suffix}')
-            logger.info(f'Determined file socket {self._file_socket} for communication')
+            # The command line argument we'll append to set where to listen in the app
+            listen_command = None
 
-            # Build the command, including what port to run the WebServerControl on
-            moose_command = self._moose_command + [f'Controls/{self._moose_control_name}/file_socket={self._file_socket}']
+            # Specify the port command
+            if self._moose_port is not None:
+                port = int(self._moose_port)
+                listen_command = f'Controls/{self._moose_control_name}/port={port}'
+            # Specify the socket command, determining a randon socket to connect to
+            else:
+                suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+                self._file_socket = os.path.join(os.getcwd(), f'moose_control_{suffix}')
+                logger.info(f'Determined file socket {self._file_socket} for communication')
+                listen_command = f'Controls/{self._moose_control_name}/file_socket={self._file_socket}'
+
+            # Append the listen command
+            moose_command = self._moose_command + [listen_command]
 
             # Spawn the moose process
             logger.info(f'Spawning MOOSE with command "{moose_command}"')
@@ -269,7 +276,7 @@ class MooseControl:
             self._url = f'http+unix://{self._file_socket.replace("/", "%2F")}'
 
         # Wait for the webserver to listen
-        url_clean = self._url.replace('%2F', '/')
+        url_clean = self._url.replace('%2F', '/') # cleanup %2F for socket listening
         logger.info(f'Waiting for the webserver to start on "{url_clean}"')
         while True:
             time.sleep(self._poll_time)
