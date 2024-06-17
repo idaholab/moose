@@ -59,24 +59,17 @@ AffineInvariantDifferentialDecisionwithGPry::computeEvidence(std::vector<Real> &
     }
     estimated_evidence +=
         -0.5 * _gp_eval.evaluate(tmp, std_dev1) +
-        20.0 * std::log(1.0 / std::sqrt(2.0 * M_PI *
-                                        _new_var_samples[i])); // (estimated_class > 0.5) ?
-                                                               // _gp_eval.evaluate(tmp) : -10000.0;
-    std::cout << "Est. val " << _gp_eval.evaluate(tmp) << std::endl;
-    // std::cout << "std_dev " << std_dev1 << std::endl;
+        20.0 * std::log(1.0 / std::sqrt(2.0 * M_PI * 0.25 * 0.25)); // _new_var_samples[i]
     for (unsigned int j = 0; j < _priors.size(); ++j)
       tmp[j] = _data_prev(i, j);
     if (_var_prior)
       tmp[_priors.size()] = _var_prev[i];
-    estimated_evidence -=
-        -0.5 * _gp_eval.evaluate(tmp) +
-        20.0 * std::log(1.0 /
-                        std::sqrt(2.0 * M_PI * _var_prev[i])); // (estimated_class > 0.5) ?
-                                                               // _gp_eval.evaluate(tmp) : -10000.0;
+    estimated_evidence -= -0.5 * _gp_eval.evaluate(tmp) +
+                          20.0 * std::log(1.0 / std::sqrt(2.0 * M_PI * 0.25 * 0.25)); // _var_prev[i]
     evidence[i] = estimated_evidence;
   }
-  // std::cout << "GP EVIDENCE" << std::endl;
-  // std::cout << Moose::stringify(evidence) << std::endl;
+  std::cout << "GP EVIDENCE" << std::endl;
+  std::cout << Moose::stringify(evidence) << std::endl;
   
   // TRUE COMPUTATIONS  
   std::vector<Real> out1(_num_confg_values);
@@ -111,8 +104,8 @@ AffineInvariantDifferentialDecisionwithGPry::computeEvidence(std::vector<Real> &
       //                  20.0 * std::log(1.0 / std::sqrt(2.0 * M_PI * _new_var_samples[i]))
       //           << std::endl;
       
-      std::cout << "True val " << std::log(_likelihoods[2]->function(out1)) + std::log(_likelihoods[3]->function(out11))
-                << std::endl;
+      // std::cout << "True val " << std::log(_likelihoods[2]->function(out1)) + std::log(_likelihoods[3]->function(out11))
+      //           << std::endl;
       _noise = std::sqrt(_var_prev[i]);
       evidence[i] -= _likelihoods[0]->function(out2);
       evidence[i] -= _likelihoods[1]->function(out21);
@@ -121,16 +114,16 @@ AffineInvariantDifferentialDecisionwithGPry::computeEvidence(std::vector<Real> &
     {
       evidence[i] += _likelihoods[0]->function(out1);
       evidence[i] += _likelihoods[1]->function(out11);
-      std::cout << "True val "
-                << std::log(_likelihoods[2]->function(out1)) +
-                       std::log(_likelihoods[3]->function(out11))
-                << std::endl;
+      // std::cout << "True val "
+      //           << std::log(_likelihoods[2]->function(out1)) +
+      //                  std::log(_likelihoods[3]->function(out11))
+      //           << std::endl;
       evidence[i] -= _likelihoods[0]->function(out2);
       evidence[i] -= _likelihoods[1]->function(out21);
     }
   }
-  // std::cout << "TRUE EVIDENCE" << std::endl;
-  // std::cout << Moose::stringify(evidence) << std::endl;
+  std::cout << "TRUE EVIDENCE" << std::endl;
+  std::cout << Moose::stringify(evidence) << std::endl;
 }
 
 void
