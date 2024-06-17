@@ -32,7 +32,7 @@ G_k = min \left( G_k , C_{PL} \rho \epsilon \right) \,,
 
 where:
 
-- $C_{PL}$ it the limiter constant, and set to a recommended value of 10 .
+- $C_{PL}$ it the limiter constant, and set by default to a recommended value of 10 \cite{durbin1996k}.
 
 ## Wall formulation:
 
@@ -59,6 +59,8 @@ incremental fixed-point search algorithm.
 The cells belonging to the `sub-laminar` boundary layers are defined as those
 for which $y^+ < 11.25$.
 The ones belonging to the `logarithmic` boundary layer are those for which $y^+ \ge 11.25$.
+The imposed threshold of $y^+ = 11.25$ is given by the value of $y^+$ at which the `sub-laminar`
+and `logarithmic` boundary profiles intersect.
 
 In the `sub-laminar` region production of turbulent kinetic energy is negligible, therefore, if $y^+ \lt 11.25$:
 
@@ -69,7 +71,7 @@ G_k = 0.0 \,,
 In the `logarithmic` boundary layers the production term is no longer negligible and is defined as:
 
 \begin{equation}
-G_k = \tau_w ||\nabla \vec{u}|| = \left( \mu_t + \mu \right) ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} \sqrt(k)}{\kappa y_p} \,,
+G_k = \tau_w ||\nabla \vec{u}|| = \mu_w ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} \sqrt(k)}{\kappa y_p} \,,
 \end{equation}
 
 where:
@@ -84,7 +86,7 @@ The formulation assumes that the near wall value is already imposed in the $\mu_
 When solving a linear problem, instead of the nonlinear formulation, the production term is formulated as:
 
 \begin{equation}
-G_k =  \left( \mu_t + \mu \right) ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} k}{\sqrt{k_{old}} \kappa y_p} \,.
+G_k =  \mu_w ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} k}{\sqrt{k_{old}} \kappa y_p} \,.
 \end{equation}
 
 where:

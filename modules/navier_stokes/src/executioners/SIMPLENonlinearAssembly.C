@@ -479,6 +479,8 @@ SIMPLENonlinearAssembly::execute()
       size_t residual_index = 0;
 
       // Execute all objects tagged as nonlinear
+      // This will execute everything in the problem at nonlinear, including the aux kernels.
+      // This way we compute the aux kernels before the momentum equations are solved.
       _problem.execute(EXEC_NONLINEAR);
 
       // We clear the caches in the momentum and pressure variables

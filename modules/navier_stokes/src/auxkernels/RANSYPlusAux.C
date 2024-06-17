@@ -19,12 +19,12 @@ InputParameters
 RANSYPlusAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Calculates y+ value");
+  params.addClassDescription("Calculates non-dimensional wall distance (y+) value.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
-  params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
+  params.addRequiredParam<MooseFunctorName>(NS::TKE, "Turbulent kinetic energy functor.");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Fluid density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
@@ -33,7 +33,7 @@ RANSYPlusAux::validParams()
                              wall_treatment,
                              "The method used for computing the wall functions "
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
-  params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
+  params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure coefficient.");
 
   return params;
 }
@@ -74,7 +74,6 @@ RANSYPlusAux::computeValue()
   const auto elem_arg = makeElemArg(_current_elem);
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
-  const auto TKE = _k(elem_arg, state);
   ADReal y_plus;
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
@@ -99,19 +98,18 @@ RANSYPlusAux::computeValue()
       if (_wall_treatment == "neq")
       {
         // Non-equilibrium / Non-iterative
-        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt(TKE) * rho / mu;
+        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt(_k(elem_arg, state)) * rho / mu;
       }
       else
       {
         // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
       }
+      y_plus_vec.push_back(raw_value(y_plus));
     }
-    // return *std::max_element(y_plus_vec.begin(), y_plus_vec.end());
-    return raw_value(y_plus);
+    // Return average of y+ for cells with multiple wall faces
+    return 1.0 * std::accumulate(y_plus_vec.begin(), y_plus_vec.end(), 0.0) / y_plus_vec.size();
   }
   else
-  {
     return 0.;
-  }
 }

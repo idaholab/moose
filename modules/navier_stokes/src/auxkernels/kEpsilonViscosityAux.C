@@ -36,7 +36,7 @@ kEpsilonViscosityAux::validParams()
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
   params.addParam<MooseEnum>("wall_treatment",
                              wall_treatment,
-                             "The method used for computing the wall functions "
+                             "The method used for computing the wall functions."
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
   MooseEnum scale_limiter("none standard", "standard");
   params.addParam<MooseEnum>("scale_limiter",
@@ -76,15 +76,6 @@ kEpsilonViscosityAux::initialSetup()
         _wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _face_infos);
   }
 }
-///////////////////////////////////////////////
-// TO BE REMOVED DURING THE PR REVIEW PROCESS//
-///////////////////////////////////////////////
-// Removed the method findUstar to make this file more compact and similar to
-// the viscosity wall function bc. I also incorporated the initial guess for
-// the Newton method to obtain Ustar in the findUstar method, previously present
-// in this file, in the findUstar routine in NavierStokesMethods.C.
-// If there was a specific reason I missed why it was there in the first place let's
-// bring the findUstar method in this file back.
 
 Real
 kEpsilonViscosityAux::computeValue()
@@ -126,7 +117,6 @@ kEpsilonViscosityAux::computeValue()
 
     // Switch for determining the near wall quantities
     // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
-    ADReal u_tau;
     ADReal y_plus;
     ADReal mut_log; // turbulent log-layer viscosity
     ADReal mu_wall; // total wall viscosity to obtain the shear stress at the wall
@@ -134,7 +124,7 @@ kEpsilonViscosityAux::computeValue()
     if (_wall_treatment == "eq_newton")
     {
       // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-      u_tau = NS::findUStar(mu, rho, parallel_speed, min_wall_dist);
+      const auto u_tau = NS::findUStar(mu, rho, parallel_speed, min_wall_dist);
       y_plus = min_wall_dist * u_tau * rho / mu;
       mu_wall = rho * Utility::pow<2>(u_tau) * min_wall_dist / parallel_speed;
       mut_log = mu_wall - mu;
@@ -155,7 +145,7 @@ kEpsilonViscosityAux::computeValue()
                          (std::log(NS::E_turb_constant * std::max(min_wall_dist, 1.0) / mu) + 1.0);
       const ADReal c_c = parallel_speed;
 
-      u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
+      const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
       y_plus = min_wall_dist * u_tau * rho / mu;
       mu_wall = rho * Utility::pow<2>(u_tau) * min_wall_dist / parallel_speed;
       mut_log = mu_wall - mu;
@@ -169,13 +159,15 @@ kEpsilonViscosityAux::computeValue()
                       std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
       mut_log = mu_wall - mu;
     }
+    else
+      mooseAssert(false, "Should not reach here");
 
     if (y_plus <= 5.0)
       // sub-laminar layer
       mu_t = 0.0;
     else if (y_plus >= 30.0)
       // log-layer
-      mu_t = std::max(mut_log.value(), 1e-12);
+      mu_t = std::max(mut_log.value(), NS::mu_t_low_limit);
     else
     {
       // buffer layer
@@ -184,7 +176,7 @@ kEpsilonViscosityAux::computeValue()
       const auto mut_log = mu * (NS::von_karman_constant * 30.0 /
                                      std::log(std::max(NS::E_turb_constant * 30.0, 1 + 1e-4)) -
                                  1.0);
-      mu_t = std::max(raw_value(blending_function * mut_log), 1e-12);
+      mu_t = std::max(raw_value(blending_function * mut_log), NS::mu_t_low_limit);
     }
   }
   else

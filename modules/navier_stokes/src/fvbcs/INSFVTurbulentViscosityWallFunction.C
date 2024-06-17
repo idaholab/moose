@@ -75,16 +75,14 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
 
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
-  ADReal u_tau;
   ADReal y_plus;
-  const ADReal mut_visc = mu; // laminar sublayer viscosity
   ADReal mut_log;             // turbulent log-layer viscosity
   ADReal mu_wall;             // total wall viscosity to obtain the shear stress at the wall
 
   if (_wall_treatment == "eq_newton")
   {
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-    u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
+    const auto u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
@@ -105,7 +103,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
                        (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
     const ADReal c_c = parallel_speed;
 
-    u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
+    const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
@@ -119,12 +117,15 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
                     std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
     mut_log = mu_wall - mu;
   }
+  else
+    mooseAssert(false, "Should not reach here");
+
   if (y_plus <= 5.0)
     // sub-laminar layer
     return 0.0;
   else if (y_plus >= 30.0)
     // log-layer
-    return std::max(mut_log, 1e-12);
+    return std::max(mut_log, NS::mu_t_low_limit);
   else
   {
     // buffer layer
@@ -133,6 +134,6 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     const auto mut_log = mu * (NS::von_karman_constant * 30.0 /
                                    std::log(std::max(NS::E_turb_constant * 30.0, 1 + 1e-4)) -
                                1.0);
-    return blending_function * std::max(mut_log, 1e-12);
+    return blending_function * std::max(mut_log, NS::mu_t_low_limit);
   }
 }
