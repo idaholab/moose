@@ -73,6 +73,14 @@
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
   []
 
+  [connect_port]
+    type = RunApp
+    input = wait_initial.i
+    command_proxy = use_port.py
+    recover = False
+    requirement = 'The system shall support connecting to a REST API via a port'
+  []
+
   [parallel_consistent]
     type = JSONDiff
     input = control_reporter.i
@@ -92,7 +100,7 @@
     requirement = 'The system shall report a reasonable error when interacting with the REST API when'
     [set_controllable_no_exist]
       type = RunException
-      input = 'errors.i'
+      input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_no_exist'
       expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
       detail = 'setting a controllable parameter that does not exist'
@@ -100,7 +108,7 @@
     []
     [postprocessor_no_exist]
       type = RunException
-      input = 'errors.i'
+      input = 'wait_initial.i'
       command_proxy = 'errors.py postprocessor_no_exist'
       expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
       detail = 'getting a postprocessor that does not exist'
@@ -108,7 +116,7 @@
     []
     [set_controllable_unregistered_type]
       type = RunException
-      input = 'errors.i'
+      input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_unregistered_type'
       expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
       detail = 'setting a controllable parameter whose type is not supported'
@@ -116,7 +124,7 @@
     []
     [set_controllable_bad_convert_json]
       type = RunException
-      input = 'errors.i'
+      input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_bad_convert'
       cli_args = 'Outputs/json/type=JSON'
       expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
@@ -139,13 +147,13 @@
     requirement = 'The system that supports controlling parameters via a REST API should report a reasonable error when'
     [no_port_and_socket]
       type = RunException
-      input = 'errors.i'
+      input = 'wait_initial.i'
       expect_err = "You must provide either the parameter 'port' or 'file_socket'"
       detail = 'a parameter was not provided that specifies where the server should listen'
     []
     [port_and_socket]
       type = RunException
-      input = 'errors.i'
+      input = 'wait_initial.i'
       cli_args = 'Controls/web_server/port=1234 Controls/web_server/file_socket=foo'
       expect_err = "Cannot provide both 'port' and 'file_socket'"
       detail = 'both a port and a file were specified to listen on'
