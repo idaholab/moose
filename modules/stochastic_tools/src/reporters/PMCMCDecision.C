@@ -120,7 +120,12 @@ PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<R
     }
     else
       for (unsigned int j = 0; j < _likelihoods.size(); ++j)
-        evidence[i] += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(out2));
+      {
+        evidence[i] += _likelihoods[0]->function(out1);
+        evidence[i] += _likelihoods[1]->function(out11);
+        evidence[i] -= _likelihoods[0]->function(out2);
+        evidence[i] -= _likelihoods[1]->function(out21);
+      }
   }
 }
 

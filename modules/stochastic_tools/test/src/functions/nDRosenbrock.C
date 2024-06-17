@@ -43,7 +43,7 @@ nDRosenbrock::execute()
     for (std::size_t i = 0; i < x.size() - 1; ++i)
       y -= (10.0 * Utility::pow<2>(x[i + 1] - Utility::pow<2>(x[i])) + Utility::pow<2>(1 - x[i])) / 20.0;
     if (!_classify)
-      _values.push_back(std::exp(y));
+      _values.push_back(y); // std::exp(y)
     else
     {
       if (std::exp(y) > _limiting_value)
@@ -57,6 +57,6 @@ nDRosenbrock::execute()
 void
 nDRosenbrock::finalize()
 {
-  if (_parallel_type == "DISTRIBUTED") // REPLICATED
+  if (_parallel_type == "REPLICATED") // DISTRIBUTED
     _communicator.gather(0, _values);
 }
