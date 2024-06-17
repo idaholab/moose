@@ -131,8 +131,8 @@ class MooseControl:
         """Helper for wrapping a request function with the name function_name
         that uses a patch for dealing with file socket"""
         if self._file_socket:
-            import requests_unixsocket
-            accessor = requests_unixsocket.Session()
+            from .requests_unixsocket import Session
+            accessor = Session()
         else:
             accessor = requests
         return getattr(accessor, function_name)(*args, **kwargs)
