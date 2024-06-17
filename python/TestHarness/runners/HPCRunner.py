@@ -102,7 +102,7 @@ class HPCRunner(Runner):
 
             # We've waited for files for too long
             if (wait_files or incomplete_files) and waited_time >= self.options.hpc_file_timeout:
-                self.job.setStatus(self.job.error, 'FILE TIMEOUT')
+                self.job.setStatus(self.job.timeout, 'FILE TIMEOUT')
                 if not self.output_completed:
                     self.trySetOutput()
                 def print_files(files, type):
