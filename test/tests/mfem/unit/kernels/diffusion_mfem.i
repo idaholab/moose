@@ -7,7 +7,7 @@
 [Problem]
   type = MFEMProblem
   use_glvis = true
-  device = "cuda"
+  device = "cpu"
 []
 
 [Formulation]
