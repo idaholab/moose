@@ -51,11 +51,7 @@ SplitMeshAction::act()
   // 4.) Any other file extension -> mooseError
 
   // Get the file extension without the dot.
-  // TODO: Maybe this should be in MooseUtils?
-  std::string split_file_arg_ext;
-  auto pos = split_file_arg.rfind(".");
-  if (pos != std::string::npos)
-    split_file_arg_ext = split_file_arg.substr(pos + 1, std::string::npos);
+  std::string split_file_arg_ext = MooseUtils::getExtension(split_file_arg);
 
   // If stripExtension() returns the original string, then there is no
   // file extension or the original string was empty.

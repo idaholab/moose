@@ -410,9 +410,20 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
 }
 
 std::string
-stripExtension(const std::string & s)
+getExtension(const std::string & filename, const bool rfind)
 {
-  auto pos = s.rfind(".");
+  std::string file_ext = "";
+  auto pos = rfind ? filename.rfind(".") : filename.find(".");
+  if (pos != std::string::npos)
+    file_ext += filename.substr(pos + 1, std::string::npos);
+
+  return file_ext;
+}
+
+std::string
+stripExtension(const std::string & s, const bool rfind)
+{
+  auto pos = rfind ? s.rfind(".") : s.find(".");
   if (pos != std::string::npos)
     return s.substr(0, pos);
   return s;

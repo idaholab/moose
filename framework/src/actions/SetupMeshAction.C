@@ -207,10 +207,7 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
   // Get the split_file extension, if there is one, and use that to decide
   // between .cpr and .cpa.gz
   auto split_file = _split_file;
-  std::string split_file_ext;
-  auto pos = split_file.rfind(".");
-  if (pos != std::string::npos)
-    split_file_ext = split_file.substr(pos + 1, std::string::npos);
+  std::string split_file_ext = MooseUtils::getExtension(split_file);
 
   // If split_file already has the .cpr or .cpa.gz extension, we go with
   // that, otherwise we strip off the extension and append ".cpa.gz".

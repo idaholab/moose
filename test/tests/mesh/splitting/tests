@@ -26,7 +26,17 @@
       min_parallel = 3
       max_parallel = 3
 
-      detail = 'set by command line'
+      detail = 'set by command line, no split extension specified'
+    []
+    [from_cli_ext]
+      type = 'RunApp'
+      input = 'simple_diffusion.i'
+      cli_args = '--use-split --split-file foo.cpa.gz UserObjects/splittester/type=SplitTester'
+      prereq = 'make_split'
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = 'set by command line, with a specified split extension'
     []
     [from_input]
       type = 'Exodiff'
