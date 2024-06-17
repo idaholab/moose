@@ -132,10 +132,10 @@ class MooseControl:
         that uses a patch for dealing with file socket"""
         if self._file_socket:
             import requests_unixsocket
-            with requests_unixsocket.monkeypatch():
-                return getattr(requests, function_name)(*args, **kwargs)
+            accessor = requests_unixsocket.Session()
         else:
-            return getattr(requests, function_name)(*args, **kwargs)
+            accessor = requests
+        return getattr(accessor, function_name)(*args, **kwargs)
 
     def _requests_get(self, *args, **kwargs):
         """Wrapper for requests.get that uses a patch for dealing with a file socket"""
