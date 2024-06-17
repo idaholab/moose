@@ -14,6 +14,7 @@ import random
 import subprocess
 import time
 import logging
+import tempfile
 from threading import Thread
 
 # Common logger for the MooseControl
@@ -103,6 +104,7 @@ class MooseControl:
         if self._file_socket and os.path.exists(self._file_socket):
             try:
                 os.remove(self._file_socket)
+                self._file_socket = None
             except:
                 pass
 
@@ -241,7 +243,7 @@ class MooseControl:
             # Specify the socket command, determining a randon socket to connect to
             else:
                 suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-                self._file_socket = os.path.join(os.getcwd(), f'moose_control_{suffix}')
+                self._file_socket = os.path.join(tempfile.gettempdir(), f'moose_control_{suffix}')
                 logger.info(f'Determined file socket {self._file_socket} for communication')
                 listen_command = f'Controls/{self._moose_control_name}/file_socket={self._file_socket}'
 
@@ -312,7 +314,7 @@ class MooseControl:
                     self._moose_process.wait()
                     return_code = self._moose_process.returncode
                     logger.info(f'App process has exited with code {return_code}')
-                return
+                break
 
             # Make sure that the control isn't waiting for input
             # while we think we should be done, because this will
@@ -325,7 +327,7 @@ class MooseControl:
             if waiting_flag is not None:
                 raise self.ControlException(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
 
-        # Remove the socket if we made one and it exists
+        # Clean this up if it exists
         self.possiblyRemoveSocket()
 
     def returnCode(self):
