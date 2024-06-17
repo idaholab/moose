@@ -17,6 +17,9 @@
 #SBATCH --time={{ WALLTIME }}
 #SBATCH --wckey={{ PROJECT }}
 #SBATCH --output={{ OUTPUT }}
+{%- if PLACE == "scatter" %}
+#SBATCH --ntasks-per-node=1
+{%- endif %}
 {%- endif %}
 
 # Exit on failure
