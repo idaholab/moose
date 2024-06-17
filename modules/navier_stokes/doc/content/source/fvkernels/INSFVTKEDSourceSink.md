@@ -8,11 +8,7 @@ A different treatment is used for the bulk and the near wall regions.
 
 ## Bulk formulation:
 
-<<<<<<< HEAD
 The production of turbulent kinetic energy dissipation $G_\epsilon$ is modeled as follows:
-=======
-The turbulent production $G_\epsilon$ is modeled as follows:
->>>>>>> 2b754e7515 (Enhancements to the k-epsilon model. #27887)
 
 \begin{equation}
 G_{\epsilon} = C_{1,\epsilon} \frac{\epsilon}{k} G_k \,,
