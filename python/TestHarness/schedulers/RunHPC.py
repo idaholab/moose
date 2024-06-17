@@ -304,7 +304,8 @@ class RunHPC(RunParallel):
                           'NUM_PROCS': tester.getProcs(options),
                           'NUM_THREADS': tester.getThreads(options),
                           'ENDING_COMMENT': self.getOutputEndingComment(f'${self.getHPCJobIDVariable()}'),
-                          'JOB_ID_VARIABLE': self.getHPCJobIDVariable()}
+                          'JOB_ID_VARIABLE': self.getHPCJobIDVariable(),
+                          'PLACE': self.options.hpc_place}
         if self.options.hpc_pre_source:
             submission_env['SOURCE_FILE'] = options.hpc_pre_source
         if self.source_contents:
