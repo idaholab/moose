@@ -32,6 +32,8 @@ class MFEMProblem : public ExternalProblem
 public:
   static InputParameters validParams();
 
+  mfem::Device _device;
+
   MFEMProblem(const InputParameters & params);
   virtual ~MFEMProblem();
 
