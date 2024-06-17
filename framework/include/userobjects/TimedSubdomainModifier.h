@@ -24,7 +24,7 @@ public:
   TimedSubdomainModifier(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<Real> onGetTimes() override;
+  virtual std::set<Real> getTimes() override { return _times; }
 
   virtual SubdomainID computeSubdomainID() override;
 
@@ -34,7 +34,7 @@ private:
 
   /// Times to change the subdomains on. If the time steps do not align with the times,
   /// the subdomain changes will happen at the end of the time step
-  std::vector<Real> _times;
+  std::set<Real> _times;
 
   /// Source subdomains to change from
   std::vector<SubdomainID> _blocks_from;

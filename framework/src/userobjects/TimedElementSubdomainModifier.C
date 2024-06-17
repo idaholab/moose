@@ -28,17 +28,15 @@ void
 TimedElementSubdomainModifier::initialize()
 {
   // ask for all times (must NOT be sorted)
-  const auto _times = onGetTimes();
-  const auto n = _times.size();
+  const auto times = getTimes();
 
   // copy data to local storage
-  _times_and_indices.resize(n);
-  for (auto i : make_range(n))
+  unsigned int i = 0;
+  for (const auto time : times)
   {
-    _times_and_indices[i].time = _times[i];
-    _times_and_indices[i].index = i;
-  };
-
-  // sort the times
-  std::sort(_times_and_indices.begin(), _times_and_indices.end());
+    timeIndexPair pair;
+    pair.time = time;
+    pair.index = i++;
+    _times_and_indices.insert(pair);
+  }
 }

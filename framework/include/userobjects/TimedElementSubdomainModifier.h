@@ -25,11 +25,11 @@ public:
 
 protected:
   /**
-   * Requests a vector of all points in time from the inheriting class
+   * Requests a vector of all times from the inheriting class
    * (these do not have to be sorted).
-   * @returns Unsorted vector of points in time.
+   * @returns Unsorted vector of times.
    */
-  virtual std::vector<Real> onGetTimes() = 0;
+  virtual std::set<Real> getTimes() = 0;
 
   /// storage for the times including their original index.
   struct timeIndexPair
@@ -47,5 +47,5 @@ protected:
   };
 
   /// Times and subdomain changes to make
-  std::vector<timeIndexPair> _times_and_indices;
+  std::set<timeIndexPair> _times_and_indices;
 };

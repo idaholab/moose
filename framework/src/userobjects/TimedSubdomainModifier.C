@@ -114,7 +114,8 @@ void
 TimedSubdomainModifier::buildFromParameters()
 {
 
-  _times = getParam<std::vector<Real>>("times");
+  const auto times = getParam<std::vector<Real>>("times");
+  _times = std::set<Real>(times.begin(), times.end());
   const auto n = _times.size();
 
   const auto raw_from = getParam<std::vector<SubdomainName>>("blocks_from");
@@ -248,14 +249,13 @@ TimedSubdomainModifier::buildFromFile()
                strBlockTo.size());
 
   // resize variables to fit the data
-  _times.resize(n_rows);
   _blocks_from.resize(n_rows);
   _blocks_to.resize(n_rows);
 
   // fill the to and from blocks vectors
   const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
-  std::transform(
-      strTimes.begin(), strTimes.end(), _times.begin(), [](std::string x) { return std::stod(x); });
+  for (const auto & time_str : strTimes)
+    _times.insert(std::stod(time_str));
   std::transform(strBlockFrom.begin(),
                  strBlockFrom.end(),
                  _blocks_from.begin(),
@@ -266,13 +266,6 @@ TimedSubdomainModifier::buildFromFile()
                  [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
 }
 
-std::vector<Real>
-TimedSubdomainModifier::onGetTimes()
-{
-  // just return our local array of times
-  return _times;
-}
-
 SubdomainID
 TimedSubdomainModifier::computeSubdomainID()
 {
@@ -281,14 +274,13 @@ TimedSubdomainModifier::computeSubdomainID()
 
   // check for all the subdomain changes that can have been requested between the previous and the
   // current time
-  const auto n_rows = _times_and_indices.size();
-  for (const auto i : make_range(n_rows))
+  for (const auto time_pair : _times_and_indices)
   {
     // time of the data point
-    const auto t = _times_and_indices[i].time;
+    const auto t = time_pair.time;
 
     // original data point index
-    const auto j = _times_and_indices[i].index;
+    const auto j = time_pair.index;
 
     // do we have to apply?
     if (t > _t_old && t <= _t && resulting_subdomain_id == _blocks_from[j])
