@@ -65,7 +65,7 @@ Gaussian::function(const std::vector<Real> & exp,
   for (unsigned i = 0; i < exp.size(); ++i)
   {
     val1 = Normal::pdf(exp[i], model[i], noise);
-    val1 = std::log(val1);
+    // val1 = std::log(val1);
     result += val1;
   }
   if (!log_likelihood)
