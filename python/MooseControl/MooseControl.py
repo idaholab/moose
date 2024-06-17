@@ -269,7 +269,8 @@ class MooseControl:
             self._url = f'http+unix://{self._file_socket.replace("/", "%2F")}'
 
         # Wait for the webserver to listen
-        logger.info(f'Waiting for the webserver to start on "{self._url}"')
+        url_clean = self._url.replace('%2F', '/')
+        logger.info(f'Waiting for the webserver to start on "{url_clean}"')
         while True:
             time.sleep(self._poll_time)
             self._requireMooseProcess()
@@ -277,7 +278,7 @@ class MooseControl:
                 break
 
         self._initialized = True
-        logger.info(f'Webserver is listening on "{self._url}"')
+        logger.info(f'Webserver is listening on "{url_clean}"')
 
     def finalize(self):
         """Waits for the MOOSE webserver to stop listening and for
