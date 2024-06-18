@@ -41,7 +41,6 @@ protected:
   ///@{Free energies
   const std::vector<MaterialName> _Fj_names;
   std::vector<const MaterialProperty<Real> *> _prop_Fi;
-  std::vector<MaterialProperty<Real> *> _Fi_copy;
   ///@}
 
   ///@{Phase concentrations
@@ -53,13 +52,11 @@ protected:
 
   ///@{Derivative of free energies wrt phase concentrations \f$ \frac d{dc_i} F_i \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _dFidci;
-  std::vector<std::vector<MaterialProperty<Real> *>> _dFidci_copy;
   ///@}
 
   ///@{Second derivative of free energies wrt phase concentrations \f$ \frac {d^2}{dc_i db_i} F_i
   /// \f$
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _d2Fidcidbi;
-  std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _d2Fidcidbi_copy;
   ///@}
 
   /// Coupled variables of free energies
@@ -70,13 +67,11 @@ protected:
 
   ///@{Derivative of free energies wrt coupled variables \f$ \frac d{dq} F_i \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _dFidarg;
-  std::vector<std::vector<MaterialProperty<Real> *>> _dFidarg_copy;
   ///@}
 
   ///@{Second derivative of free energy Fa wrt phase concentration ca and a coupled variable \f$
   /// \frac{d^2}{dc_a dq} F_a \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _d2F1dc1darg;
-  std::vector<std::vector<MaterialProperty<Real> *>> _d2F1dc1darg_copy;
   ///@}
 
   /// Number of nested Newton iteration

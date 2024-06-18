@@ -100,12 +100,12 @@ NestedKKSMultiACBulkC::NestedKKSMultiACBulkC(const InputParameters & parameters)
   // _dF1dc1 and _d2F1dc1db1 are computed in KKSPhaseConcentrationMultiPhaseMaterial
   for (const auto m : make_range(_num_c))
   {
-    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
+    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>(_Fj_names[0], _ci_names[m * _num_j]);
     _d2F1dc1db1[m].resize(_num_c);
 
     for (const auto n : make_range(_num_c))
       _d2F1dc1db1[m][n] = &getMaterialPropertyDerivative<Real>(
-          "cp" + _Fj_names[0], _ci_name_matrix[m][0], _ci_name_matrix[n][0]);
+          _Fj_names[0], _ci_name_matrix[m][0], _ci_name_matrix[n][0]);
   }
 
   // _d2F1dc1darg are computed in KKSPhaseConcentrationMultiPhaseMaterial
@@ -115,7 +115,7 @@ NestedKKSMultiACBulkC::NestedKKSMultiACBulkC(const InputParameters & parameters)
 
     for (const auto n : make_range(_n_args))
       _d2F1dc1darg[m][n] =
-          &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_name_matrix[m][0], n);
+          &getMaterialPropertyDerivative<Real>(_Fj_names[0], _ci_name_matrix[m][0], n);
   }
 }
 

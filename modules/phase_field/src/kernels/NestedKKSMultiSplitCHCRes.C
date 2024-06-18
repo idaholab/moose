@@ -71,14 +71,13 @@ NestedKKSMultiSplitCHCRes::NestedKKSMultiSplitCHCRes(const InputParameters & par
   // _dF1dc1 and _d2F1dc1db1 are computed in KKSPhaseConcentrationMaterial
   for (const auto m : make_range(_num_c))
   {
-    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[m]);
-    _d2F1dc1db1[m] =
-        &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[_o], _c1_names[m]);
+    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>(_F1_name, _c1_names[m]);
+    _d2F1dc1db1[m] = &getMaterialPropertyDerivative<Real>(_F1_name, _c1_names[_o], _c1_names[m]);
   }
 
   // _d2F1dc1darg is computed in KKSPhaseConcentrationMaterial
   for (const auto m : make_range(_n_args))
-    _d2F1dc1darg[m] = &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[_o], m);
+    _d2F1dc1darg[m] = &getMaterialPropertyDerivative<Real>(_F1_name, _c1_names[_o], m);
 }
 
 Real

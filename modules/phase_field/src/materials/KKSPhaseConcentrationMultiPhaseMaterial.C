@@ -57,21 +57,16 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _prop_hj(_num_j),
     _Fj_names(getParam<std::vector<MaterialName>>("Fj_names")),
     _prop_Fi(_num_j),
-    _Fi_copy(_num_j),
     _ci_names(getParam<std::vector<MaterialPropertyName>>("ci_names")),
     _prop_ci(_num_c * _num_j),
     _ci_old(_num_c * _num_j),
     _ci_IC(getParam<std::vector<Real>>("ci_IC")),
     _dFidci(_num_j),
-    _dFidci_copy(_num_j),
     _d2Fidcidbi(_num_j),
-    _d2Fidcidbi_copy(_num_j),
     _args_names(coupledNames("args")),
     _n_args(coupledComponents("args")),
     _dFidarg(_num_j),
-    _dFidarg_copy(_num_j),
     _d2F1dc1darg(_num_c),
-    _d2F1dc1darg_copy(_num_c),
     _iter(declareProperty<Real>("nested_iterations")),
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
@@ -89,10 +84,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
 
   // free energies
   for (const auto m : make_range(_num_j))
-  {
     _prop_Fi[m] = &getMaterialPropertyByName<Real>(_Fj_names[m]);
-    _Fi_copy[m] = &declareProperty<Real>("cp" + _Fj_names[m]);
-  }
 
   // free energy derivatives w.r.t. phase concentrations
   for (const auto m : make_range(_num_j))
@@ -100,25 +92,18 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _prop_hj[m] = &getMaterialPropertyByName<Real>(_hj_names[m]);
 
     _dFidci[m].resize(_num_c);
-    _dFidci_copy[m].resize(_num_c);
     _d2Fidcidbi[m].resize(_num_c);
-    _d2Fidcidbi_copy[m].resize(_num_c);
 
     for (const auto n : make_range(_num_c))
     {
       _dFidci[m][n] = &getMaterialPropertyDerivative<Real>(_Fj_names[m], _ci_names[m + n * _num_j]);
-      _dFidci_copy[m][n] =
-          &declarePropertyDerivative<Real>("cp" + _Fj_names[m], _ci_names[m + n * _num_j]);
 
       _d2Fidcidbi[m][n].resize(_num_c);
-      _d2Fidcidbi_copy[m][n].resize(_num_c);
 
       for (unsigned int l = 0; l < _num_c; ++l)
       {
         _d2Fidcidbi[m][n][l] = &getMaterialPropertyDerivative<Real>(
             _Fj_names[m], _ci_names[m + n * _num_j], _ci_names[m + l * _num_j]);
-        _d2Fidcidbi_copy[m][n][l] = &declarePropertyDerivative<Real>(
-            "cp" + _Fj_names[m], _ci_names[m + n * _num_j], _ci_names[m + l * _num_j]);
       }
     }
   }
@@ -127,27 +112,20 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
   for (const auto m : make_range(_num_j))
   {
     _dFidarg[m].resize(_n_args);
-    _dFidarg_copy[m].resize(_n_args);
 
     for (const auto n : make_range(_n_args))
-    {
       _dFidarg[m][n] = &getMaterialPropertyDerivative<Real>(_Fj_names[m], _args_names[n]);
-      _dFidarg_copy[m][n] = &declarePropertyDerivative<Real>("cp" + _Fj_names[m], _args_names[n]);
-    }
   }
 
   // second derivatives of F1 wrt c1 and other coupled variables
   for (const auto m : make_range(_num_c))
   {
     _d2F1dc1darg[m].resize(_n_args);
-    _d2F1dc1darg_copy[m].resize(_n_args);
 
     for (const auto n : make_range(_n_args))
     {
       _d2F1dc1darg[m][n] =
           &getMaterialPropertyDerivative<Real>(_Fj_names[0], _ci_names[m * _num_j], _args_names[n]);
-      _d2F1dc1darg_copy[m][n] = &declarePropertyDerivative<Real>(
-          "cp" + _Fj_names[0], _ci_names[m * _num_j], _args_names[n]);
     }
   }
 
@@ -253,31 +231,4 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
   // assign solution to ci
   for (const auto m : make_range(_num_c * _num_j))
     (*_prop_ci[m])[_qp] = solution[m];
-
-  // assign to the copied parameters to be used in kernels
-  for (const auto m : make_range(_num_j))
-    (*_Fi_copy[m])[_qp] = (*_prop_Fi[m])[_qp];
-
-  for (const auto m : make_range(_num_j))
-  {
-    for (const auto n : make_range(_num_c))
-    {
-      (*_dFidci_copy[m][n])[_qp] = (*_dFidci[m][n])[_qp];
-
-      for (const auto l : make_range(_num_c))
-        (*_d2Fidcidbi_copy[m][n][l])[_qp] = (*_d2Fidcidbi[m][n][l])[_qp];
-    }
-  }
-
-  for (const auto m : make_range(_num_j))
-  {
-    for (const auto n : make_range(_n_args))
-      (*_dFidarg_copy[m][n])[_qp] = (*_dFidarg[m][n])[_qp];
-  }
-
-  for (const auto m : make_range(_num_c))
-  {
-    for (const auto n : make_range(_n_args))
-      (*_d2F1dc1darg_copy[m][n])[_qp] = (*_d2F1dc1darg[m][n])[_qp];
-  }
 }
