@@ -62,7 +62,7 @@ class RunSlurm(RunHPC):
 
             # Fail if the job is held
             if state in ['JobHeldUser']:
-                self.setHPCJobError(hpc_job, f'SLURM STATE {state}', f'has state {state}')
+                self.setHPCJobError(hpc_job, f'SLURM STATE {state}', f'has state "{state}"')
                 self.setHPCJobDone(hpc_job, 1)
 
             # Job was running and isn't running anymore, so it's done
@@ -81,7 +81,7 @@ class RunSlurm(RunHPC):
                 # went well. If it FAILED, it finished but returned with a
                 # non-zero exit code, which will be handled by the Tester.
                 elif state not in ['FAILED', 'COMPLETED']:
-                    self.setHPCJobError(hpc_job, f'SLURM ERROR: {state}', f'encountered SLURM state {state}')
+                    self.setHPCJobError(hpc_job, f'SLURM ERROR: {state}', f'has state "{state}"')
 
                 self.setHPCJobDone(hpc_job, exit_code)
 
