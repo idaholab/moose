@@ -1,6 +1,7 @@
 ###############################################################################
 # Validation test based on Hibiki and Ishii experiment [1] reported in Figure 5
-# [1] Hibiki, T., & Ishii, M. (2000). One-group interfacial area transport of bubbly flows in vertical round tubes.
+# [1] Hibiki, T., & Ishii, M. (2000). One-group interfacial area transport of
+# bubbly flows in vertical round tubes.
 # International Journal of Heat and Mass Transfer, 43(15), 2711-2726.
 ###############################################################################
 
