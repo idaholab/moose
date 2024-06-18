@@ -49,13 +49,17 @@ class RunPBS(RunHPC):
             # The job is held, so we're going to consider it a failure and
             # will also try to cancel it so that it doesn't hang around
             if state == 'H':
-                job.setStatus(job.error, f'PBS JOB HELD')
-                job.appendOutput(util.outputHeader('The submitted PBS job was held; killed job'))
+                self.setHPCJobError(hpc_job, 'PBS JOB HELD', 'was held; killed job')
                 exit_code = 1
                 try:
                     self.killJob(job, lock=False) # no lock; we're already in one
                 except:
                     pass
+
+            # Job finished before it started, so something killed it
+            if state == 'F' and exit_code is None:
+                self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed')
+                exit_code = 1
 
             # If we were running but now we're done, we're not running anymore
             if exit_code is not None:
@@ -72,8 +76,7 @@ class RunPBS(RunHPC):
                         continue
                     # Everything else should be an error
                     else:
-                        job.setStatus(job.error, f'PBS ERROR: {name}')
-                        job.appendOutput(util.outputHeader(f'PBS terminated job with reason: {reason}'))
+                        self.setHPCJobError(hpc_job, f'PBS ERROR: {name}', f'was terminated with reason: {reason}')
                 # Job was killed with a signal
                 elif exit_code >= 128:
                     job.setStatus(job.error, f'PBS JOB KILLED')

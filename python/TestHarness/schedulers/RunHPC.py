@@ -13,6 +13,7 @@ import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib,
 import paramiko
 import jinja2
 from multiprocessing.pool import ThreadPool
+from TestHarness import util
 
 class HPCJob:
     """
@@ -669,3 +670,15 @@ class RunHPC(RunParallel):
         if find_mpi is not None:
             return find_mpi.group(0)
         return None
+
+    @staticmethod
+    def setHPCJobError(hpc_job, message, output=None):
+        """
+        Helper for setting an error within a HPC job.
+
+        Should be used within the derived classes updateHPCJobs().
+        """
+        job = hpc_job.job
+        job.setStatus(job.error, message)
+        if output:
+            job.appendOutput(util.outputHeader(f'Job {hpc_job.id} {output}'))
