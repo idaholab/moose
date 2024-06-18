@@ -79,7 +79,7 @@ class RunPBS(RunHPC):
                         self.setHPCJobError(hpc_job, f'PBS ERROR: {name}', f'was terminated with reason: {reason}')
                 # Job was killed with a signal
                 elif exit_code >= 128:
-                    job.setStatus(job.error, f'PBS JOB KILLED')
+                    self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed by a signal')
 
                 self.setHPCJobDone(hpc_job, exit_code)
 
