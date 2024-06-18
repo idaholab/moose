@@ -33,6 +33,8 @@ class RunPBS(RunHPC):
         job_results = json_result['Jobs']
 
         for hpc_job in active_hpc_jobs:
+            job = hpc_job.job
+
             # This job's result from the qstat command
             job_result = job_results[hpc_job.id]
             exit_code = job_result.get('Exit_status')
@@ -40,13 +42,23 @@ class RunPBS(RunHPC):
                 exit_code = int(exit_code)
             state = job_result.get('job_state')
 
-            # Get the job state, and report running if it switched to running
+            # The job has switched to running
             if state == 'R' and not hpc_job.getRunning():
                 self.setHPCJobRunning(hpc_job)
 
+            # The job is held, so we're going to consider it a failure and
+            # will also try to cancel it so that it doesn't hang around
+            if state == 'H':
+                job.setStatus(job.error, f'PBS JOB HELD')
+                job.appendOutput(util.outputHeader('The submitted PBS job was held; killed job'))
+                exit_code = 1
+                try:
+                    self.killJob(job, lock=False) # no lock; we're already in one
+                except:
+                    pass
+
             # If we were running but now we're done, we're not running anymore
             if exit_code is not None:
-                job = hpc_job.job
                 if exit_code < 0:
                     name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
                     # Job timed out; give this a special timeout status because
