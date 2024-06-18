@@ -71,7 +71,7 @@ class RunPBS(RunHPC):
                         job.setStatus(job.timeout, 'TIMEOUT')
                     # Special status where the job failed to start due to a PBS
                     # issue and will be started again, so there's nothing to do
-                    elif name == 'JOB_EXEC_HOOK_RERUN':
+                    elif name in ['JOB_EXEC_HOOK_RERUN', 'JOB_EXEC_RETRY']:
                         self.setHPCJobQueued(hpc_job)
                         continue
                     # Everything else should be an error
