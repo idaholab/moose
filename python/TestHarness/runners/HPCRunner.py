@@ -56,8 +56,9 @@ class HPCRunner(Runner):
         # The PBS output (stdout+stderr)
         output_file = self.run_hpc.getHPCJobOutputPath(self.job)
 
-        # If the Job is already finished, something happened in PBS
-        # so we have an invalid state for processing in the Tester
+        # If the Job is already finished, something happened in the
+        # HPC scheduler so we have an invalid state for processing
+        # in the Tester
         if self.job.isFinished():
             # If we have _some_ output, at least try to load it. However, don't wait
             # a while for this one.
