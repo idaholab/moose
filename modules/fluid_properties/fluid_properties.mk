@@ -21,7 +21,7 @@ SODIUM_CONTENT            := $(shell ls $(SODIUM_DIR) 2> /dev/null)
 
 # AIR
 ifneq ($(AIR_CONTENT),)
-ifneq ($(BUILDING_FP_APP), true)
+ifneq ($(BUILDING_FP_APP), yes)
 	AIR_DIR            ?= ${MOOSE_DIR}/modules/fluid_properties/contrib/air
 	APPLICATION_DIR    := $(AIR_DIR)
 	APPLICATION_NAME   := air
@@ -34,7 +34,7 @@ endif
 
 # CARBON_DIOXIDE
 ifneq ($(CARBON_DIOXIDE_CONTENT),)
-ifneq ($(BUILDING_FP_APP), true)
+ifneq ($(BUILDING_FP_APP), yes)
 	CARBON_DIOXIDE_DIR ?= ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide
 	APPLICATION_DIR    := $(CARBON_DIOXIDE_DIR)
 	APPLICATION_NAME   := carbon_dioxide
@@ -47,7 +47,7 @@ endif
 
 # NITROGEN
 ifneq ($(NITROGEN_CONTENT),)
-ifneq ($(BUILDING_FP_APP), true)
+ifneq ($(BUILDING_FP_APP), yes)
 	NITROGEN_DIR       ?= ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen
 	APPLICATION_DIR    := $(NITROGEN_DIR)
 	APPLICATION_NAME   := nitrogen
@@ -60,7 +60,7 @@ endif
 
 # HELIUM
 ifneq ($(HELIUM_CONTENT),)
-ifneq ($(BUILDING_FP_APP), true)
+ifneq ($(BUILDING_FP_APP), yes)
 	HELIUM_DIR         ?= ${MOOSE_DIR}/modules/fluid_properties/contrib/helium
 	APPLICATION_DIR    := $(HELIUM_DIR)
 	APPLICATION_NAME   := helium
@@ -73,7 +73,7 @@ endif
 
 # SODIUM
 ifneq ($(SODIUM_CONTENT),)
-ifneq ($(BUILDING_FP_APP), true)
+ifneq ($(BUILDING_FP_APP), yes)
 	SODIUM_DIR         ?= ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium
 	APPLICATION_DIR    := $(SODIUM_DIR)
 	APPLICATION_NAME   := sodium
@@ -86,7 +86,7 @@ endif
 
 # POTASSIUM
 ifneq ($(POTASSIUM_CONTENT),)
-ifneq ($(BUILDING_FP_APP), true)
+ifneq ($(BUILDING_FP_APP), yes)
 	POTASSIUM_DIR      ?= ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium
 	APPLICATION_DIR    := $(POTASSIUM_DIR)
 	APPLICATION_NAME   := potassium
