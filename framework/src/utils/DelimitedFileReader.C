@@ -21,8 +21,9 @@
 namespace MooseUtils
 {
 
-DelimitedFileReader::DelimitedFileReader(const std::string & filename,
-                                         const libMesh::Parallel::Communicator * comm)
+template <typename T>
+DelimitedFileReaderTempl<T>::DelimitedFileReaderTempl(const std::string & filename,
+                                                      const libMesh::Parallel::Communicator * comm)
   : _filename(filename),
     _header_flag(HeaderFlag::AUTO),
     _ignore_empty_lines(true),
@@ -31,14 +32,15 @@ DelimitedFileReader::DelimitedFileReader(const std::string & filename,
 {
 }
 
+template <typename T>
 void
-DelimitedFileReader::read()
+DelimitedFileReaderTempl<T>::read()
 {
   // Number of columns
   std::size_t n_cols;
 
   // Storage for the raw data
-  std::vector<double> raw;
+  std::vector<T> raw;
   std::size_t size_raw = 0;
   std::size_t size_offsets = 0;
 
@@ -97,10 +99,10 @@ DelimitedFileReader::read()
   // Process "row" formatted data
   if (_format_flag == FormatFlag::ROWS)
   {
-    std::vector<double>::iterator start = raw.begin();
+    typename std::vector<T>::iterator start = raw.begin();
     for (std::size_t j = 0; j < n_cols; ++j)
     {
-      _data[j] = std::vector<double>(start, start + _row_offsets[j]);
+      _data[j] = std::vector<T>(start, start + _row_offsets[j]);
       std::advance(start, _row_offsets[j]);
     }
   }
@@ -120,8 +122,9 @@ DelimitedFileReader::read()
   }
 }
 
+template <typename T>
 std::size_t
-DelimitedFileReader::numEntries() const
+DelimitedFileReaderTempl<T>::numEntries() const
 {
   std::size_t n_entries = 0;
   for (std::size_t i = 0; i < _data.size(); ++i)
@@ -130,20 +133,23 @@ DelimitedFileReader::numEntries() const
   return n_entries;
 }
 
+template <typename T>
 const std::vector<std::string> &
-DelimitedFileReader::getNames() const
+DelimitedFileReaderTempl<T>::getNames() const
 {
   return _names;
 }
 
-const std::vector<std::vector<double>> &
-DelimitedFileReader::getData() const
+template <typename T>
+const std::vector<std::vector<T>> &
+DelimitedFileReaderTempl<T>::getData() const
 {
   return _data;
 }
 
+template <>
 const std::vector<Point>
-DelimitedFileReader::getDataAsPoints() const
+DelimitedFileReaderTempl<double>::getDataAsPoints() const
 {
   std::vector<Point> point_data;
 
@@ -173,8 +179,16 @@ DelimitedFileReader::getDataAsPoints() const
   return point_data;
 }
 
-const std::vector<double> &
-DelimitedFileReader::getData(const std::string & name) const
+template <typename T>
+const std::vector<Point>
+DelimitedFileReaderTempl<T>::getDataAsPoints() const
+{
+  mooseError("Not implemented");
+}
+
+template <typename T>
+const std::vector<T> &
+DelimitedFileReaderTempl<T>::getData(const std::string & name) const
 {
   const auto it = find(_names.begin(), _names.end(), name);
   if (it == _names.end())
@@ -182,8 +196,9 @@ DelimitedFileReader::getData(const std::string & name) const
   return _data[std::distance(_names.begin(), it)];
 }
 
-const std::vector<double> &
-DelimitedFileReader::getData(std::size_t index) const
+template <typename T>
+const std::vector<T> &
+DelimitedFileReaderTempl<T>::getData(std::size_t index) const
 {
   if (index >= _data.size())
     mooseError("The supplied index ",
@@ -196,12 +211,13 @@ DelimitedFileReader::getData(std::size_t index) const
   return _data[index];
 }
 
+template <typename T>
 void
-DelimitedFileReader::readColumnData(std::ifstream & stream_data, std::vector<double> & output)
+DelimitedFileReaderTempl<T>::readColumnData(std::ifstream & stream_data, std::vector<T> & output)
 {
   // Local storage for the data being read
   std::string line;
-  std::vector<double> row;
+  std::vector<T> row;
 
   // Keep track of the line number for error reporting
   unsigned int count = 0;
@@ -266,12 +282,13 @@ DelimitedFileReader::readColumnData(std::ifstream & stream_data, std::vector<dou
   }
 }
 
+template <typename T>
 void
-DelimitedFileReader::readRowData(std::ifstream & stream_data, std::vector<double> & output)
+DelimitedFileReaderTempl<T>::readRowData(std::ifstream & stream_data, std::vector<T> & output)
 {
   // Local storage for the data being read
   std::string line;
-  std::vector<double> row;
+  std::vector<T> row;
   unsigned int linenum = 0; // line number in file
 
   // Clear existing data
@@ -319,8 +336,9 @@ DelimitedFileReader::readRowData(std::ifstream & stream_data, std::vector<double
   }
 }
 
+template <typename T>
 bool
-DelimitedFileReader::preprocessLine(std::string & line, const unsigned int & num)
+DelimitedFileReaderTempl<T>::preprocessLine(std::string & line, const unsigned int & num)
 {
   // Handle row comments
   std::size_t index = _row_comment.empty() ? line.size() : line.find_first_of(_row_comment);
@@ -337,13 +355,14 @@ DelimitedFileReader::preprocessLine(std::string & line, const unsigned int & num
   return false;
 }
 
+template <typename T>
 void
-DelimitedFileReader::processLine(const std::string & line,
-                                 std::vector<double> & row,
-                                 const unsigned int & num)
+DelimitedFileReaderTempl<T>::processLine(const std::string & line,
+                                         std::vector<T> & row,
+                                         const unsigned int & num)
 {
   // Separate the row and error if it fails
-  bool status = MooseUtils::tokenizeAndConvert<double>(line, row, delimiter(line));
+  bool status = MooseUtils::tokenizeAndConvert<T>(line, row, delimiter(line));
   if (!status)
     mooseError("Failed to convert a delimited data into double when reading line ",
                num,
@@ -355,8 +374,9 @@ DelimitedFileReader::processLine(const std::string & line,
                line);
 }
 
+template <typename T>
 const std::string &
-DelimitedFileReader::delimiter(const std::string & line)
+DelimitedFileReaderTempl<T>::delimiter(const std::string & line)
 {
   if (_delimiter.empty())
   {
@@ -370,8 +390,9 @@ DelimitedFileReader::delimiter(const std::string & line)
   return _delimiter;
 }
 
+template <typename T>
 bool
-DelimitedFileReader::header(const std::string & line)
+DelimitedFileReaderTempl<T>::header(const std::string & line)
 {
   switch (_header_flag)
   {
@@ -392,49 +413,6 @@ DelimitedFileReader::header(const std::string & line)
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// DEPRECATED METHODS (TODO: To be removed after applications are updated)
-////////////////////////////////////////////////////////////////////////////////////////////////////
-DelimitedFileReader::DelimitedFileReader(const std::string & filename,
-                                         const bool header,
-                                         const std::string delimiter,
-                                         const libMesh::Parallel::Communicator * comm)
-  : _filename(filename),
-    _header_flag(header ? HeaderFlag::ON : HeaderFlag::AUTO),
-    _delimiter(delimiter),
-    _ignore_empty_lines(true),
-    _communicator(comm),
-    _format_flag(FormatFlag::COLUMNS)
-{
-  mooseDeprecated("Use setHeader and setDelimiter method rather than specifying in constructor.");
-}
-
-const std::vector<std::string> &
-DelimitedFileReader::getColumnNames() const
-{
-  mooseDeprecated("Use getNames instead.");
-  return getNames();
-}
-
-const std::vector<std::vector<double>> &
-DelimitedFileReader::getColumnData() const
-{
-  mooseDeprecated("Use getData instead.");
-  return getData();
-}
-
-const std::vector<double> &
-DelimitedFileReader::getColumnData(const std::string & name) const
-{
-  mooseDeprecated("Use getData instead.");
-  return getData(name);
-}
-
-void
-DelimitedFileReader::setHeaderFlag(bool value)
-{
-  mooseDeprecated("Use header method with HeaderFlag input.");
-  _header_flag = value ? HeaderFlag::ON : HeaderFlag::OFF;
-}
-
+template class DelimitedFileReaderTempl<Real>;
+template class DelimitedFileReaderTempl<std::string>;
 } // MooseUtils
