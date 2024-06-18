@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 from base_controller import *
-import csv
-import math
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
