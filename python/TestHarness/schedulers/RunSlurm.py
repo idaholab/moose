@@ -76,7 +76,7 @@ class RunSlurm(RunHPC):
                 # went well. If it FAILED, it finished but returned with a
                 # non-zero exit code, which will be handled by the Tester.
                 elif state not in ['FAILED', 'COMPLETED']:
-                    job.setStatus(job.error, f'SLURM ERROR: {state}')
+                    self.setHPCJobError(hpc_job, f'SLURM ERROR: {state}', f'encountered SLURM state {state}')
 
                 self.setHPCJobDone(hpc_job, exit_code)
 
