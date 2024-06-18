@@ -139,7 +139,11 @@ PhysicsBase::act()
 
   // Exodus restart capabilities
   if (_current_task == "copy_vars_physics")
-    copyVariablesFromMesh(nonlinearVariableNames());
+  {
+    copyVariablesFromMesh(nonlinearVariableNames(), true);
+    if (_aux_var_names.size() > 0)
+      copyVariablesFromMesh(auxVariableNames(), false);
+  }
 
   // Lets a derived Physics class implement additional tasks
   actOnAdditionalTasks();
@@ -217,11 +221,13 @@ PhysicsBase::checkIntegrityEarly() const
 }
 
 void
-PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy)
+PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy,
+                                   bool are_nonlinear)
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
-    SystemBase & system = getProblem().getNonlinearSystemBase(_sys_number);
+    SystemBase & system = are_nonlinear ? getProblem().getNonlinearSystemBase(_sys_number)
+                                        : getProblem().systemBaseAuxiliary();
     _console << "Adding Exodus restart for " << variables_to_copy.size()
              << " variables: " << Moose::stringify(variables_to_copy) << std::endl;
     // TODO Check that the variable types and orders are actually supported for exodus restart

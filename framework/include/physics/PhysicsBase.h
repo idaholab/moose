@@ -100,19 +100,29 @@ protected:
 
   /// Tell the app if we want to use Exodus restart
   void prepareCopyVariablesFromMesh() const;
-  /// Copy variables from the mesh file
-  void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy);
+  /**
+   * Copy nonlinear or aux variables from the mesh file
+   *
+   * @param variables_to_copy  Nonlinear or aux (not a mix) variables
+   * @param are_nonlinear  True if \c variables_to_copy are nonlinear; else, aux
+   */
+  void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy,
+                             bool are_nonlinear = true);
 
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
 
   /// Return the list of nonlinear variables in this physics
   const std::vector<VariableName> & nonlinearVariableNames() const { return _nl_var_names; };
+  /// Return the list of aux variables in this physics
+  const std::vector<VariableName> & auxVariableNames() const { return _aux_var_names; };
   /// Keep track of the name of a nonlinear variable defined in the Physics
   void saveNonlinearVariableName(const VariableName & var_name)
   {
     _nl_var_names.push_back(var_name);
   }
+  /// Keep track of the name of an aux variable defined in the Physics
+  void saveAuxVariableName(const VariableName & var_name) { _aux_var_names.push_back(var_name); }
 
   /// Check whether a nonlinear variable already exists
   bool nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
@@ -200,6 +210,8 @@ private:
 
   /// Vector of the nonlinear variables in the Physics
   std::vector<VariableName> _nl_var_names;
+  /// Vector of the aux variables in the Physics
+  std::vector<VariableName> _aux_var_names;
 
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
   /// NOTE: this is not known at construction time, only after initializePhysics which is a huge bummer
