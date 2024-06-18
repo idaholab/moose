@@ -321,12 +321,17 @@ protected:
                                                      completions_array));
     EXPECT_TRUE(response_errors.str().empty());
     EXPECT_EQ(req_id, response_id);
-    EXPECT_EQ(expect_count, completions_array.size());
+
+    // check greater than or equal to allow syntax be added without failing
+    EXPECT_GE(completions_array.size(), expect_count);
 
     // make formatted list from completion items and check it is as expected
     std::ostringstream actual_items;
     format_completions(completions_array, actual_items);
-    EXPECT_EQ(expect_items, "\n" + actual_items.str());
+
+    // check that each line exists to allow syntax be added without failing
+    for (const auto & line : MooseUtils::split(expect_items, "label:"))
+      EXPECT_NE(actual_items.str().find(line), std::string::npos);
   }
 
   // build hover request, handle request with moose_server, check response
@@ -1005,55 +1010,11 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
       moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
 
   // completion test parameters - in Mesh default FileMesh already with params
-
   int request_id = 4;
-  int line = 6;
-  int character = 0;
-
-  // build completion request with the test parameters
-
-  wasp::DataObject completion_request;
-  std::stringstream completion_errors;
-
-  EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
-      completion_request, completion_errors, request_id, doc_uri, line, character));
-
-  EXPECT_TRUE(completion_errors.str().empty());
-
-  // handle the built completion request with the moose_server
-
-  wasp::DataObject completion_response;
-
-  EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
-
-  EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check the dissected values of the moose_server completion response
-
-  std::stringstream response_errors;
-  int response_id;
-  bool response_is_incomplete;
-  wasp::DataArray completions_array;
-
-  EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
-                                                   response_errors,
-                                                   response_id,
-                                                   response_is_incomplete,
-                                                   completions_array));
-
-  EXPECT_TRUE(response_errors.str().empty());
-
-  EXPECT_EQ(request_id, response_id);
-
-  EXPECT_EQ(48u, completions_array.size());
-
-  std::ostringstream completions_actual;
-
-  format_completions(completions_array, completions_actual);
-
-  // expected completions with zero-based lines and columns
-
-  std::string completions_expect = R"INPUT(
+  int request_line = 6;
+  int request_char = 0;
+  std::size_t expect_count = 48;
+  std::string expect_items = R"INPUT(
 label: active                                 text: active = '${1:__all__}'                             desc: If specified only... pos: [6.0]-[6.0] kind:  7 format: snippet
 label: add_subdomain_ids                      text: add_subdomain_ids =                                 desc: The listed subdom... pos: [6.0]-[6.0] kind: 14 format: regular
 label: add_subdomain_names                    text: add_subdomain_names =                               desc: Optional list of ... pos: [6.0]-[6.0] kind: 14 format: regular
@@ -1103,64 +1064,18 @@ label: use_split                              text: use_split = ${1:false}      
 label: *                                      text: [block_name]\n  $0\n[]                              desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
 label: Partitioner                            text: [Partitioner]\n  $0\n[]                             desc: application named... pos: [6.0]-[6.0] kind: 22 format: snippet
 )INPUT";
-
-  EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
 TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 {
   // completion test parameters - at document root level outside of all blocks
-
-  int request_id = 5;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 42;
-  int character = 0;
-
-  // build completion request with the test parameters
-
-  wasp::DataObject completion_request;
-  std::stringstream completion_errors;
-
-  EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
-      completion_request, completion_errors, request_id, doc_uri, line, character));
-
-  EXPECT_TRUE(completion_errors.str().empty());
-
-  // handle the built completion request with the moose_server
-
-  wasp::DataObject completion_response;
-
-  EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
-
-  EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check the dissected values of the moose_server completion response
-
-  std::stringstream response_errors;
-  int response_id;
-  bool response_is_incomplete;
-  wasp::DataArray completions_array;
-
-  EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
-                                                   response_errors,
-                                                   response_id,
-                                                   response_is_incomplete,
-                                                   completions_array));
-
-  EXPECT_TRUE(response_errors.str().empty());
-
-  EXPECT_EQ(request_id, response_id);
-
-  // If the array grows with new syntax, let it grow
-  EXPECT_GE(completions_array.size(), 50u);
-
-  std::ostringstream completions_actual;
-
-  format_completions(completions_array, completions_actual);
-
-  // expected completions with zero-based lines and columns
-
-  std::string completions_expect = R"INPUT(
+  int request_id = 5;
+  int request_line = 42;
+  int request_char = 0;
+  std::size_t expect_count = 50;
+  std::string expect_items = R"INPUT(
 label: active                           text: active = '${1:__all__}'                      desc: If specified only... pos: [42.0]-[42.0] kind:  7 format: snippet
 label: inactive                         text: inactive =                                   desc: If specified bloc... pos: [42.0]-[42.0] kind:  7 format: regular
 label: Adaptivity                       text: [Adaptivity]\n  $0\n[]                       desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
@@ -1212,317 +1127,89 @@ label: UserObjects                      text: [UserObjects]\n  $0\n[]           
 label: Variables                        text: [Variables]\n  $0\n[]                        desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: VectorPostprocessors             text: [VectorPostprocessors]\n  $0\n[]             desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 )INPUT";
-
-  // Check that each line added when the test was created is still output
-  for (const auto & line : MooseUtils::split(completions_expect, "label:"))
-    EXPECT_TRUE(completions_actual.str().find(line) != std::string::npos);
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
 TEST_F(MooseServerTest, CompletionValueActiveBlocks)
 {
   // completion test parameters - on active parameter value in Variables block
-
-  int request_id = 6;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 9;
-  int character = 12;
-
-  // build completion request with the test parameters
-
-  wasp::DataObject completion_request;
-  std::stringstream completion_errors;
-
-  EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
-      completion_request, completion_errors, request_id, doc_uri, line, character));
-
-  EXPECT_TRUE(completion_errors.str().empty());
-
-  // handle the built completion request with the moose_server
-
-  wasp::DataObject completion_response;
-
-  EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
-
-  EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check the dissected values of the moose_server completion response
-
-  std::stringstream response_errors;
-  int response_id;
-  bool response_is_incomplete;
-  wasp::DataArray completions_array;
-
-  EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
-                                                   response_errors,
-                                                   response_id,
-                                                   response_is_incomplete,
-                                                   completions_array));
-
-  EXPECT_TRUE(response_errors.str().empty());
-
-  EXPECT_EQ(request_id, response_id);
-
-  EXPECT_EQ(2u, completions_array.size());
-
-  std::ostringstream completions_actual;
-
-  format_completions(completions_array, completions_actual);
-
-  // expected completions with zero-based lines and columns
-
-  std::string completions_expect = R"INPUT(
+  int request_id = 6;
+  int request_line = 9;
+  int request_char = 12;
+  std::size_t expect_count = 2;
+  std::string expect_items = R"INPUT(
 label: u text: u desc: subblock name pos: [9.12]-[9.19] kind:  7 format: regular
 label: v text: v desc: subblock name pos: [9.12]-[9.19] kind:  7 format: regular
 )INPUT";
-
-  EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
 TEST_F(MooseServerTest, CompletionValueBooleanParam)
 {
   // completion test parameters - on boolean value of solve param from Problem
-
-  int request_id = 7;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 33;
-  int character = 10;
-
-  // build completion request with the test parameters
-
-  wasp::DataObject completion_request;
-  std::stringstream completion_errors;
-
-  EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
-      completion_request, completion_errors, request_id, doc_uri, line, character));
-
-  EXPECT_TRUE(completion_errors.str().empty());
-
-  // handle the built completion request with the moose_server
-
-  wasp::DataObject completion_response;
-
-  EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
-
-  EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check the dissected values of the moose_server completion response
-
-  std::stringstream response_errors;
-  int response_id;
-  bool response_is_incomplete;
-  wasp::DataArray completions_array;
-
-  EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
-                                                   response_errors,
-                                                   response_id,
-                                                   response_is_incomplete,
-                                                   completions_array));
-
-  EXPECT_TRUE(response_errors.str().empty());
-
-  EXPECT_EQ(request_id, response_id);
-
-  EXPECT_EQ(2u, completions_array.size());
-
-  std::ostringstream completions_actual;
-
-  format_completions(completions_array, completions_actual);
-
-  // expected completions with zero-based lines and columns
-
-  std::string completions_expect = R"INPUT(
+  int request_id = 7;
+  int request_line = 33;
+  int request_char = 10;
+  std::size_t expect_count = 2;
+  std::string expect_items = R"INPUT(
 label: false text: false desc:  pos: [33.10]-[33.15] kind:  8 format: regular
 label: true  text: true  desc:  pos: [33.10]-[33.15] kind:  8 format: regular
 )INPUT";
-
-  EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
 TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
 {
   // completion test parameters - on error_level enum in Terminator UserObject
-
-  int request_id = 8;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 39;
-  int character = 18;
-
-  // build completion request with the test parameters
-
-  wasp::DataObject completion_request;
-  std::stringstream completion_errors;
-
-  EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
-      completion_request, completion_errors, request_id, doc_uri, line, character));
-
-  EXPECT_TRUE(completion_errors.str().empty());
-
-  // handle the built completion request with the moose_server
-
-  wasp::DataObject completion_response;
-
-  EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
-
-  EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check the dissected values of the moose_server completion response
-
-  std::stringstream response_errors;
-  int response_id;
-  bool response_is_incomplete;
-  wasp::DataArray completions_array;
-
-  EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
-                                                   response_errors,
-                                                   response_id,
-                                                   response_is_incomplete,
-                                                   completions_array));
-
-  EXPECT_TRUE(response_errors.str().empty());
-
-  EXPECT_EQ(request_id, response_id);
-
-  EXPECT_EQ(4u, completions_array.size());
-
-  std::ostringstream completions_actual;
-
-  format_completions(completions_array, completions_actual);
-
-  // expected completions with zero-based lines and columns
-
-  std::string completions_expect = R"INPUT(
+  int request_id = 8;
+  int request_line = 39;
+  int request_char = 18;
+  std::size_t expect_count = 4;
+  std::string expect_items = R"INPUT(
 label: ERROR   text: ERROR   desc: Throw a MOOSE err... pos: [39.18]-[39.22] kind: 20 format: regular
 label: INFO    text: INFO    desc: Output an informa... pos: [39.18]-[39.22] kind: 20 format: regular
 label: NONE    text: NONE    desc: No message will b... pos: [39.18]-[39.22] kind: 20 format: regular
 label: WARNING text: WARNING desc: Output a warning ... pos: [39.18]-[39.22] kind: 20 format: regular
 )INPUT";
-
-  EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
 TEST_F(MooseServerTest, CompletionValueAllowedTypes)
 {
   // completion test parameters - on type parameter value in Executioner block
-
-  int request_id = 9;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 30;
-  int character = 9;
-
-  // build completion request with the test parameters
-
-  wasp::DataObject completion_request;
-  std::stringstream completion_errors;
-
-  EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
-      completion_request, completion_errors, request_id, doc_uri, line, character));
-
-  EXPECT_TRUE(completion_errors.str().empty());
-
-  // handle the built completion request with the moose_server
-
-  wasp::DataObject completion_response;
-
-  EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
-
-  EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check the dissected values of the moose_server completion response
-
-  std::stringstream response_errors;
-  int response_id;
-  bool response_is_incomplete;
-  wasp::DataArray completions_array;
-
-  EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
-                                                   response_errors,
-                                                   response_id,
-                                                   response_is_incomplete,
-                                                   completions_array));
-
-  EXPECT_TRUE(response_errors.str().empty());
-
-  EXPECT_EQ(request_id, response_id);
-
-  EXPECT_EQ(5u, completions_array.size());
-
-  std::ostringstream completions_actual;
-
-  format_completions(completions_array, completions_actual);
-
-  // expected completions with zero-based lines and columns
-
-  std::string completions_expect = R"INPUT(
+  int request_id = 9;
+  int request_line = 30;
+  int request_char = 9;
+  std::size_t expect_count = 5;
+  std::string expect_items = R"INPUT(
 label: Eigenvalue         text: Eigenvalue         desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: regular
 label: InversePowerMethod text: InversePowerMethod desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: regular
 label: NonlinearEigen     text: NonlinearEigen     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: regular
 label: Steady             text: Steady             desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: regular
 label: Transient          text: Transient          desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: regular
 )INPUT";
-
-  EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
 TEST_F(MooseServerTest, CompletionValueInputLookups)
 {
   // completion test parameters - on displacements parameter value in VacuumBC
-
-  int request_id = 10;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 26;
-  int character = 21;
-
-  // build completion request with the test parameters
-
-  wasp::DataObject completion_request;
-  std::stringstream completion_errors;
-
-  EXPECT_TRUE(wasp::lsp::buildCompletionRequest(
-      completion_request, completion_errors, request_id, doc_uri, line, character));
-
-  EXPECT_TRUE(completion_errors.str().empty());
-
-  // handle the built completion request with the moose_server
-
-  wasp::DataObject completion_response;
-
-  EXPECT_TRUE(moose_server->handleCompletionRequest(completion_request, completion_response));
-
-  EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check the dissected values of the moose_server completion response
-
-  std::stringstream response_errors;
-  int response_id;
-  bool response_is_incomplete;
-  wasp::DataArray completions_array;
-
-  EXPECT_TRUE(wasp::lsp::dissectCompletionResponse(completion_response,
-                                                   response_errors,
-                                                   response_id,
-                                                   response_is_incomplete,
-                                                   completions_array));
-
-  EXPECT_TRUE(response_errors.str().empty());
-
-  EXPECT_EQ(request_id, response_id);
-
-  EXPECT_EQ(4u, completions_array.size());
-
-  std::ostringstream completions_actual;
-
-  format_completions(completions_array, completions_actual);
-
-  // expected completions with zero-based lines and columns
-
-  std::string completions_expect = R"INPUT(
+  int request_id = 10;
+  int request_line = 26;
+  int request_char = 21;
+  std::size_t expect_count = 4;
+  std::string expect_items = R"INPUT(
 label: disp_x text: disp_x desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: regular
 label: disp_y text: disp_y desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: regular
 label: u      text: u      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: regular
 label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: regular
 )INPUT";
-
-  EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
 
 TEST_F(MooseServerTest, DefinitionObjectTypeSource)
