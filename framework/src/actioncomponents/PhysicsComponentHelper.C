@@ -19,7 +19,7 @@ PhysicsComponentHelper::validParams()
 }
 
 PhysicsComponentHelper::PhysicsComponentHelper(const InputParameters & params)
-  : ComponentAction(params), _physics_names(getParam<std::vector<PhysicsName>>("physics"))
+  : ActionComponent(params), _physics_names(getParam<std::vector<PhysicsName>>("physics"))
 {
   // Should be done later?
   for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))

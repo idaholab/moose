@@ -18,7 +18,7 @@ registerMooseAction("MooseApp", MeshGeneratorComponent, "init_physics");
 InputParameters
 MeshGeneratorComponent::validParams()
 {
-  InputParameters params = ComponentAction::validParams();
+  InputParameters params = ActionComponent::validParams();
   params.addClassDescription("Component with a mesh coming from a mesh generator.");
   params.addRequiredParam<MeshGeneratorName>("mesh_generator", "Mesh generator providing the mesh");
   params.addRequiredParam<std::string>("saved_mesh_name", "Name used to generate the mesh");
@@ -29,7 +29,7 @@ MeshGeneratorComponent::validParams()
 }
 
 MeshGeneratorComponent::MeshGeneratorComponent(const InputParameters & params)
-  : ComponentAction(params), PhysicsComponentHelper(params)
+  : ActionComponent(params), PhysicsComponentHelper(params)
 {
 }
 

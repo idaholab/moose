@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"
 #include "PhysicsBase.h"
@@ -19,7 +19,7 @@
  * TODO: Should this be an Interface rather than a Helper?
  * Note: Trying out virtual inheritance
  */
-class PhysicsComponentHelper : public virtual ComponentAction
+class PhysicsComponentHelper : public virtual ActionComponent
 {
 public:
   static InputParameters validParams();

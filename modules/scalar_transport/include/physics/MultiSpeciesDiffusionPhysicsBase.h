@@ -11,7 +11,7 @@
 
 #include "PhysicsBase.h"
 
-class ComponentAction;
+class ActionComponent;
 
 #define registerMultiSpeciesDiffusionPhysicsBaseTasks(app_name, derived_name)                      \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
@@ -29,7 +29,7 @@ public:
 
   MultiSpeciesDiffusionPhysicsBase(const InputParameters & parameters);
 
-  void addComponent(const ComponentAction & component);
+  void addComponent(const ActionComponent & component);
 
 protected:
   /// Name of the diffused variables

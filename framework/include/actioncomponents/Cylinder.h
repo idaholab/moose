@@ -10,12 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 
 /**
  * Cylinder on which one can define a Physics. The mesh is automatically created
  */
-class Cylinder : public ComponentAction
+class Cylinder : public ActionComponent
 {
 public:
   /**
