@@ -61,16 +61,22 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/xfem/doc/content
     air:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content
+        external: True
     carbon_dioxide:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/doc/content
+        external: True
     helium:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/doc/content
+        external: True
     nitrogen:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/doc/content
+        external: True
     potassium:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/doc/content
+        external: True
     sodium:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/doc/content
+        external: True
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     favicon: media/moose.ico
