@@ -421,7 +421,6 @@ class RunHPC(RunParallel):
         # Here we append job_id if the ID is just a number so that it's more
         # obvious what it is
         job.addCaveats(f'job={job_id}' if job_id.isdigit() else job_id)
-        self.setAndOutputJobStatus(job, job.queued, caveats=True)
 
         # Setup the job in the status map
         with self.hpc_jobs_lock:
@@ -429,6 +428,9 @@ class RunHPC(RunParallel):
                 raise Exception('Job has already been submitted')
             hpc_job = HPCJob(job, job_id, job_command)
             self.hpc_jobs[job] = hpc_job
+
+            # Set the job as queued and print out that it is queued
+            self.setHPCJobQueued(hpc_job)
 
             # If the updater hasn't been started yet, start it.
             # We do this here because it's locked within hpc_jobs_lock
@@ -508,6 +510,25 @@ class RunHPC(RunParallel):
         hpc_job.set(running=True)
         # Print out that the job is now running
         self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.running, caveats=True)
+
+    def setHPCJobQueued(self, hpc_job):
+        """
+        Sets the given HPC job as being queued.
+
+        This can be used when the HPC scheduler re-schedules the job.
+
+        This should be called within the overridden updateHPCJobs().
+        """
+        # Guard against setting this as requeued multiple times
+        if hpc_job.job.getStatus() == hpc_job.job.queued:
+            return
+
+        # This is currently thread safe because we only ever change
+        # it within updateJobs(), which is only ever executed serially
+        # within the thread the calls _updateHPCJobs()
+        hpc_job.set(running=False)
+        # Print out that the job is queued again
+        self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.queued, caveats=True)
 
     def setHPCJobDone(seflf, hpc_job, exit_code):
         """
