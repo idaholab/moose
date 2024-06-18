@@ -1,3 +1,6 @@
+# Simple run that does no solve and just has a web server waiting
+# on the flag INITIAL
+
 [Mesh/gmg]
   type = GeneratedMeshGenerator
   dim = 1
@@ -5,7 +8,6 @@
 
 [Controls/web_server]
   type = WebServerControl
-  port = 8000 # will get overridden by the script to find an available port
   execute_on = 'INITIAL'
 []
 
