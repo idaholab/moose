@@ -10,13 +10,13 @@
 #pragma once
 
 // MOOSE includes
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 #include "PhysicsComponentHelper.h"
 
 /**
  * Component whose mesh is generated in the [Mesh] block on which one can define a Physics.
  */
-class MeshGeneratorComponent : public virtual ComponentAction, public PhysicsComponentHelper
+class MeshGeneratorComponent : public virtual ActionComponent, public PhysicsComponentHelper
 {
 public:
   /**

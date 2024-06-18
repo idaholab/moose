@@ -18,7 +18,7 @@ registerMooseAction("MooseApp", Cylinder, "init_physics");
 InputParameters
 Cylinder::validParams()
 {
-  InputParameters params = ComponentAction::validParams();
+  InputParameters params = ActionComponent::validParams();
   params.addClassDescription("Cylindrical component.");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
@@ -43,7 +43,7 @@ Cylinder::validParams()
 }
 
 Cylinder::Cylinder(const InputParameters & params)
-  : ComponentAction(params), _radius(getParam<Real>("radius")), _height(getParam<Real>("height"))
+  : ActionComponent(params), _radius(getParam<Real>("radius")), _height(getParam<Real>("height"))
 {
   _dimension = getParam<MooseEnum>("dimension");
 }

@@ -19,7 +19,7 @@ class FEProblem;
 /**
  * Base class for components that are defined using an action
  */
-class ComponentAction : public Action
+class ActionComponent : public Action
 {
 public:
   /**
@@ -27,7 +27,7 @@ public:
    */
   static InputParameters validParams();
 
-  ComponentAction(const InputParameters & params);
+  ActionComponent(const InputParameters & params);
 
   virtual void act() override final;
 
@@ -61,7 +61,7 @@ protected:
   // These routines can help define a component that also defines a Physics
   virtual void addNonlinearVariables() {}
 
-  /// Use this if registering a new task to the derived ComponentAction
+  /// Use this if registering a new task to the derived ActionComponent
   virtual void actOnAdditionalTasks() {}
 
   virtual void addPhysics() {}

@@ -12,7 +12,7 @@
 #include "Action.h"
 #include "ActionWarehouse.h"
 #include "InputParametersChecksUtils.h"
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 
 // We include these headers for all the derived classes that will be building objects
 #include "FEProblemBase.h"
@@ -86,10 +86,10 @@ public:
 
   // Coupling with Components //
   /// Get a component with the requested name
-  const ComponentAction & getComponent(const ComponentName & comp_name);
+  const ActionComponent & getComponent(const ComponentName & comp_name);
   /// Check that the component is of the desired type
   template <typename T>
-  void checkComponentType(const ComponentAction & component) const;
+  void checkComponentType(const ActionComponent & component) const;
 
 protected:
   /// Return whether the Physics is solved using a transient
@@ -276,7 +276,7 @@ PhysicsBase::getCoupledPhysics(const bool allow_fail) const
 
 template <typename T>
 void
-PhysicsBase::checkComponentType(const ComponentAction & component) const
+PhysicsBase::checkComponentType(const ActionComponent & component) const
 {
   // TODO figure out why dynamic_cast is not enough
   if (!dynamic_cast<const T *>(&component) && MooseUtils::prettyCppType<T>() != component.type())

@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
 #include "PhysicsBase.h"
 
 InputParameters
-ComponentAction::validParams()
+ActionComponent::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Base class for components that are defined using action.");
@@ -23,13 +23,13 @@ ComponentAction::validParams()
   return params;
 }
 
-ComponentAction::ComponentAction(const InputParameters & params)
+ActionComponent::ActionComponent(const InputParameters & params)
   : Action(params), _dimension(libMesh::invalid_uint), _verbose(getParam<bool>("verbose"))
 {
 }
 
 void
-ComponentAction::act()
+ActionComponent::act()
 {
   // This is inspired by the PhysicsBase definition of act(). We register components to the
   // task they use, and the base class calls the appropriate virtual member functions
@@ -52,6 +52,6 @@ ComponentAction::act()
   else if (_current_task == "add_variable")
     addNonlinearVariables();
   else
-    // For a new task that isn't registered to ComponentAction in the framework
+    // For a new task that isn't registered to ActionComponent in the framework
     actOnAdditionalTasks();
 }

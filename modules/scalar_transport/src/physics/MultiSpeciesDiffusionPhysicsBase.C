@@ -12,7 +12,7 @@
 #include "MoosePreconditioner.h"
 #include "PetscSupport.h"
 #include "MooseEnumItem.h"
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 
 InputParameters
 MultiSpeciesDiffusionPhysicsBase::validParams()
@@ -132,7 +132,7 @@ MultiSpeciesDiffusionPhysicsBase::addPostprocessors()
 }
 
 void
-MultiSpeciesDiffusionPhysicsBase::addComponent(const ComponentAction & component)
+MultiSpeciesDiffusionPhysicsBase::addComponent(const ActionComponent & component)
 {
   for (const auto & block : component.blocks())
     _blocks.push_back(block);

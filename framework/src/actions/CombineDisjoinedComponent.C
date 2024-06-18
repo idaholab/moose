@@ -12,7 +12,7 @@
 #include "MooseMesh.h"
 #include "ActionWarehouse.h"
 #include "MeshGeneratorSystem.h"
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 
 registerMooseAction("MooseApp", CombineDisjoinedComponent, "append_mesh_generator");
 
@@ -37,7 +37,7 @@ CombineDisjoinedComponent::act()
   {
     // Get the list of components
     std::vector<MeshGeneratorName> combined;
-    std::vector<const ComponentAction *> components = _awh.getActions<ComponentAction>();
+    std::vector<const ActionComponent *> components = _awh.getActions<ActionComponent>();
     for (const auto comp : components)
       combined.push_back(comp->meshName());
 
