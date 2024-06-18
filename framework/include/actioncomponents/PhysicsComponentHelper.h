@@ -35,7 +35,7 @@ protected:
   bool physicsExists(const PhysicsName & name);
 
   virtual void addPhysics() override { initComponentPhysics(); }
-  virtual void initComponentPhysics() = 0;
+  virtual void initComponentPhysics();
 
   /// Names of the Physics defined on the component
   std::vector<PhysicsName> _physics_names;

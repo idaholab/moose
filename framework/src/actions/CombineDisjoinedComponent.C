@@ -39,7 +39,7 @@ CombineDisjoinedComponent::act()
     std::vector<MeshGeneratorName> combined;
     std::vector<const ActionComponent *> components = _awh.getActions<ActionComponent>();
     for (const auto comp : components)
-      combined.push_back(comp->meshName());
+      combined.push_back(comp->meshGeneratorName());
 
     // TODO once we have junctions
     // Get the list of disconnected components

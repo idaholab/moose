@@ -8,17 +8,17 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "Cylinder.h"
+#include "CylinderComponent.h"
 #include "RotationMatrix.h"
 
-registerMooseAction("MooseApp", Cylinder, "add_mesh_generator");
-registerMooseAction("MooseApp", Cylinder, "add_positions");
-registerMooseAction("MooseApp", Cylinder, "init_physics");
+registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
+registerMooseAction("MooseApp", CylinderComponent, "init_component_physics");
 
 InputParameters
-Cylinder::validParams()
+CylinderComponent::validParams()
 {
   InputParameters params = ActionComponent::validParams();
+  params += PhysicsComponentHelper::validParams();
   params.addClassDescription("Cylindrical component.");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
@@ -36,20 +36,20 @@ Cylinder::validParams()
 
   params.addParam<std::vector<SubdomainName>>("block", "Block for the cylinder");
 
-  params.addParam<std::vector<PhysicsName>>(
-      "physics", {}, "Physics object(s) active on the Component");
-
   return params;
 }
 
-Cylinder::Cylinder(const InputParameters & params)
-  : ActionComponent(params), _radius(getParam<Real>("radius")), _height(getParam<Real>("height"))
+CylinderComponent::CylinderComponent(const InputParameters & params)
+  : ActionComponent(params),
+    PhysicsComponentHelper(params),
+    _radius(getParam<Real>("radius")),
+    _height(getParam<Real>("height"))
 {
   _dimension = getParam<MooseEnum>("dimension");
 }
 
 void
-Cylinder::addMeshGenerators()
+CylinderComponent::addMeshGenerators()
 {
   if (_dimension == 1 || _dimension == 2)
   {
@@ -109,29 +109,5 @@ Cylinder::addMeshGenerators()
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "TransformGenerator", name() + "_rotated", params);
     _mg_name = name() + "_rotated";
-  }
-}
-
-void
-Cylinder::addPositionsObject()
-{
-  std::cout << "add_position got registered, wow. My name is " << name() << std::endl;
-}
-
-void
-Cylinder::addPhysics()
-{
-  for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
-    _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
-
-  if (isParamValid("block"))
-  {
-    std::cout << "Block " << Moose::stringify(getParam<std::vector<SubdomainName>>("block"))
-              << std::endl;
-    for (auto physics : _physics)
-    {
-      _console << "adding " << physics->name() << std::endl;
-      physics->addBlocks(getParam<std::vector<SubdomainName>>("block"));
-    }
   }
 }

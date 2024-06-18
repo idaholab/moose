@@ -14,7 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 
 InputParameters
 PhysicsBase::validParams()
@@ -202,16 +202,23 @@ PhysicsBase::addBlocksById(const std::vector<SubdomainID> & block_ids)
 }
 
 void
+PhysicsBase::addComponent(const ActionComponent & component)
+{
+  for (const auto & block : component.blocks())
+    _blocks.push_back(block);
+}
+
+void
 PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   InputParameters params = getAdditionalRMParams();
   Action::addRelationshipManagers(input_rm_type, params);
 }
 
-const ComponentAction &
+const ActionComponent &
 PhysicsBase::getComponent(const ComponentName & comp_name)
 {
-  return _awh.getAction<ComponentAction>(comp_name);
+  return _awh.getAction<ActionComponent>(comp_name);
 }
 
 void

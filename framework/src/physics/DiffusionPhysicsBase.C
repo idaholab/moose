@@ -12,7 +12,7 @@
 #include "MoosePreconditioner.h"
 #include "PetscSupport.h"
 #include "MooseEnumItem.h"
-#include "ComponentAction.h"
+#include "ActionComponent.h"
 
 InputParameters
 DiffusionPhysicsBase::validParams()
@@ -117,11 +117,4 @@ DiffusionPhysicsBase::addPostprocessors()
         EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR, EXEC_LINEAR};
     getProblem().addPostprocessor(pp_type, prefix() + "diffusive_flux_" + boundary_name, params);
   }
-}
-
-void
-DiffusionPhysicsBase::addComponent(const ComponentAction & component)
-{
-  for (const auto & block : component.blocks())
-    _blocks.push_back(block);
 }

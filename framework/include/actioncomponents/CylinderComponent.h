@@ -11,32 +11,24 @@
 
 // MOOSE includes
 #include "ActionComponent.h"
+#include "PhysicsComponentHelper.h"
 
 /**
  * Cylinder on which one can define a Physics. The mesh is automatically created
  */
-class Cylinder : public ActionComponent
+class CylinderComponent : public virtual ActionComponent, public PhysicsComponentHelper
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
-
-  Cylinder(const InputParameters & params);
+  CylinderComponent(const InputParameters & params);
 
 protected:
   virtual void addMeshGenerators() override;
-  virtual void addPositionsObject() override;
-  virtual void addPhysics() override;
 
   /// Radius of the cylinder
   const Real _radius;
   /// Height of the cylinder
   const Real _height;
-
-  /// Pointers to the Physics defined on the component
-  std::vector<PhysicsBase *> _physics;
 
   virtual Real volume() const override { return _height * libMesh::pi * Utility::pow<2>(_radius); }
   virtual Real outerSurfaceArea() const override

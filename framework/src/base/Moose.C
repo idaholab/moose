@@ -313,8 +313,8 @@ addActionTypes(Syntax & syntax)
                            "(init_displaced_problem)" // Problem must be init-ed before we start adding functors
                            "(add_function)"  // Functions can depend on scalar variables & PPs, but this dependence can be
                                              // added on initialSetup() rather than construction
-                           "(init_physics)"  // Components add their blocks to Physics, and components need functions at initialization
-                           "(init_component_physics)"
+                           "(init_component_physics)" // components must add their blocks to physics before init_physics
+                           "(init_physics)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
