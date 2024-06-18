@@ -68,7 +68,7 @@ class RunPBS(RunHPC):
                     # Job timed out; give this a special timeout status because
                     # it is then marked as recoverable (could try running again)
                     if name == 'JOB_EXEC_KILL_WALLTIME':
-                        job.setStatus(job.timeout, 'TIMEOUT')
+                        job.setStatus(job.timeout, 'PBS TIMEOUT')
                     # Special status where the job failed to start due to a PBS
                     # issue and will be started again, so there's nothing to do
                     elif name in ['JOB_EXEC_HOOK_RERUN', 'JOB_EXEC_RETRY']:
