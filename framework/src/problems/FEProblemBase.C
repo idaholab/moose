@@ -7737,14 +7737,8 @@ FEProblemBase::solveFailed()
   TIME_SECTION("solveFailed", 3, "Handling Solve Failure");
 
   // Let the SolveFailedInterface notify the registered objects to do stuff
-  for (const auto & sfi : _notify_on_solve_failed)
+  for (const auto & sfi : _app.getInterfaceObjects<SolveFailedInterface>())
     sfi->onSolveFailed();
-}
-
-void
-FEProblemBase::notifyOnSolveFailed(SolveFailedInterface * sfi)
-{
-  _notify_on_solve_failed.push_back(sfi);
 }
 
 void

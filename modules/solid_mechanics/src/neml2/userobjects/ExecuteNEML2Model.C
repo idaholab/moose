@@ -47,7 +47,7 @@ ExecuteNEML2Model::validParams()
 
 ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
   : NEML2ModelInterface<ElementUserObject>(params),
-    SolveFailedInterface(params),
+    SolveFailedInterface(this),
     _neml2_time(neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_time"))),
     _output_ready(false),
     _in_out_allocated(false)

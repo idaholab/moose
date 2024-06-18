@@ -11,27 +11,17 @@
 
 #include "MooseEnum.h"
 
-// Forward declarations
-class FEProblemBase;
-class InputParameters;
-
 /**
  * Interface for notifying objects that the solve has failed
  */
 class SolveFailedInterface
 {
 public:
-  static InputParameters validParams();
-
-  SolveFailedInterface(const InputParameters & params);
+  SolveFailedInterface(const MooseObject * moose_object);
   virtual ~SolveFailedInterface() = default;
 
   /**
    * Called on this object immediately after the solve failed
    */
   virtual void onSolveFailed() {}
-
-protected:
-  /// Reference to FEProblemBase instance
-  FEProblemBase & _sfi_feproblem;
 };

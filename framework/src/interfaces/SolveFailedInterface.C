@@ -8,18 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolveFailedInterface.h"
+#include "MooseApp.h"
 
-#include "FEProblem.h"
-
-InputParameters
-SolveFailedInterface::validParams()
+SolveFailedInterface::SolveFailedInterface(const MooseObject * moose_object)
 {
-  InputParameters params = emptyInputParameters();
-  return params;
-}
-
-SolveFailedInterface::SolveFailedInterface(const InputParameters & params)
-  : _sfi_feproblem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
-{
-  _sfi_feproblem.notifyOnSolveFailed(this);
+  moose_object->getMooseApp().registerInterfaceObject(*this);
 }
