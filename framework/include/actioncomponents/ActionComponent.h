@@ -22,9 +22,6 @@ class FEProblem;
 class ActionComponent : public Action
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   ActionComponent(const InputParameters & params);
@@ -32,7 +29,9 @@ public:
   virtual void act() override final;
 
   /// Get the name of the mesh generator created by this component that generates the mesh for it
-  const MeshGeneratorName & meshName() const { return _mg_name; }
+  /// - this could be a mesh generator in the [Mesh] block
+  /// - or a mesh generator created by the component
+  const MeshGeneratorName & meshGeneratorName() const { return _mg_name; }
 
   /// Returns the subdomains for the component mesh, if any
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
@@ -40,7 +39,7 @@ public:
   /// Return the outer surface boundaries
   virtual const std::vector<BoundaryName> & outerSurfaceBoundaries() const
   {
-    return _outer_boundaries;
+    mooseError("Not implemented");
   };
 
   /// Return the component volume

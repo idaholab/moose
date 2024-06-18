@@ -11,7 +11,7 @@
 
 #include "PhysicsBase.h"
 
-class ComponentAction;
+class ActionComponent;
 
 #define registerDiffusionPhysicsBaseTasks(app_name, derived_name)                                  \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
@@ -28,8 +28,6 @@ public:
   static InputParameters validParams();
 
   DiffusionPhysicsBase(const InputParameters & parameters);
-
-  void addComponent(const ComponentAction & component);
 
 protected:
   /// Name of the diffused variable

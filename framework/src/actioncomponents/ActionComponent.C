@@ -9,10 +9,6 @@
 
 // MOOSE includes
 #include "ActionComponent.h"
-#include "FEProblem.h"
-#include "Factory.h"
-#include "MooseApp.h"
-#include "PhysicsBase.h"
 
 InputParameters
 ActionComponent::validParams()

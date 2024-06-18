@@ -90,6 +90,9 @@ public:
   /// Check that the component is of the desired type
   template <typename T>
   void checkComponentType(const ActionComponent & component) const;
+  /// Most basic way of adding a component: simply adding the blocks to the block
+  /// restriction of the Physics. More complex behavior should be implemented by overriding
+  virtual void addComponent(const ActionComponent & component);
 
 protected:
   /// Return whether the Physics is solved using a transient

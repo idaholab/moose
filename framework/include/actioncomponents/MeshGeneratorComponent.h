@@ -28,5 +28,5 @@ public:
 
 protected:
   virtual void addMeshGenerators() override;
-  virtual void initComponentPhysics() override;
+  virtual void setupComponent() override;
 };

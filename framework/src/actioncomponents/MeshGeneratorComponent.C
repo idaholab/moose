@@ -19,11 +19,10 @@ InputParameters
 MeshGeneratorComponent::validParams()
 {
   InputParameters params = ActionComponent::validParams();
-  params.addClassDescription("Component with a mesh coming from a mesh generator.");
+  params += PhysicsComponentHelper::validParams();
   params.addRequiredParam<MeshGeneratorName>("mesh_generator", "Mesh generator providing the mesh");
   params.addRequiredParam<std::string>("saved_mesh_name", "Name used to generate the mesh");
-  params.addParam<std::vector<PhysicsName>>(
-      "physics", {}, "Physics object(s) active on the Component");
+  params.addClassDescription("Component with a mesh coming from a mesh generator.");
 
   return params;
 }
@@ -41,7 +40,7 @@ MeshGeneratorComponent::addMeshGenerators()
 }
 
 void
-MeshGeneratorComponent::initComponentPhysics()
+MeshGeneratorComponent::setupComponent()
 {
   // Get list of blocks from the saved mesh
   const auto saved_mesh =
@@ -51,11 +50,4 @@ MeshGeneratorComponent::initComponentPhysics()
   std::vector<SubdomainName> blocks_vec;
   for (const auto bid : blocks)
     blocks_vec.push_back(saved_mesh->subdomain_name(bid));
-
-  for (auto physics : _physics)
-  {
-    _console << "Adding Physics " << physics->name() << " on component " << name() << " on blocks "
-             << Moose::stringify(blocks_vec) << std::endl;
-    physics->addBlocks(blocks_vec);
-  }
 }

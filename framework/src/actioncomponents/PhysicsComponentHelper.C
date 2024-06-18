@@ -25,3 +25,15 @@ PhysicsComponentHelper::PhysicsComponentHelper(const InputParameters & params)
   for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
     _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
 }
+
+void
+PhysicsComponentHelper::initComponentPhysics()
+{
+  for (auto physics : _physics)
+  {
+    if (_verbose)
+      _console << "Adding Physics '" << physics->name() << "' on component '" << name()
+               << "' on blocks '" << Moose::stringify(_blocks) << "'" << std::endl;
+    physics->addBlocks(_blocks);
+  }
+}
