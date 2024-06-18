@@ -2,6 +2,23 @@
 
 !syntax description /Physics/NavierStokes/Turbulence/WCNSFVTurbulencePhysics
 
+## Mixing length turbulence model
+
+See the [mixing length theory page](rans_theory.md) for additional information.
+
+If the turbulence model is selected to be the mixing-length model, a field variable representing the mixing length
+is computed using the [WallDistanceMixingLengthAux.md].
+
+The turbulent dynamic viscosity is then computed using a [MixingLengthTurbulentViscosityFunctorMaterial.md].
+The following kernels are then added:
+
+- [INSFVTurbulentDiffusion.md] to the flow equation if the flow equations are being solved
+- [WCNSFVMixingLengthEnergyDiffusion.md] to the fluid energy equation if the fluid energy equation is being solved
+- [INSFVMixingLengthScalarDiffusion.md] to the scalar transport equations if the scalar transport is being solved
+
+!alert note
+These kernels are only added if each of these equations are being defined using their respective `Physics`.
+
 ## Coupling with other Physics
 
 A turbulence model can be added to a heat advection solve by using both a `WCNSFVTurbulencePhysics` and a [WCNSFVFluidHeatTransferPhysics.md].

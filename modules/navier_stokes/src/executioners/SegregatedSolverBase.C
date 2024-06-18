@@ -674,7 +674,7 @@ SegregatedSolverBase::relaxMatrix(SparseMatrix<Number> & matrix,
   diff_diag->insert(new_diagonal, indices);
 
   // Time to modify the diagonal of the matrix. TODO: add this function to libmesh
-  MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES);
+  LIBMESH_CHKERR(MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES));
   mat->close();
   diff_diag->close();
 

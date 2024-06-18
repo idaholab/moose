@@ -4,7 +4,6 @@
 Upcoming MOOSE related training in chronological order:
 !style-end!
 
-- [MOOSE Framework Fundamentals (2024 June 4-6, Idaho Falls)](more_detail/MOOSE_2024_06_04-06_IF.md)
 - [MOOSE Framework Fundamentals (2024 October 15-17, University of Illinois Urbana-Champaign)](more_detail/MOOSE_2024_10_15-17_UIUC.md)
 
 # Conferences
@@ -13,9 +12,11 @@ Upcoming MOOSE related training in chronological order:
 Upcoming MOOSE related Conferences:
 !style-end!
 
-- MOOSE Conference (2025 March 10-14, Idaho Falls) - Registration link coming soon.
+- [MOOSE International Workshop (2025 March 10-14, Idaho Falls)](https://inl.gov/mooseworkshop2025/)
 
 #### Past Training:
+
+- MOOSE Framework Fundamentals (2024 June 4-6, Idaho Falls)
 
 - ART/NEAMS M&S Molten Salt Reactors @PHYSOR24 (2024 April 21)
 

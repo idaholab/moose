@@ -26,6 +26,11 @@ a different `WCNSFV2PMomentumDriftFlux` kernel should be added for each
 of the transported phases with the corresponding slip velocity for
 each phase.
 
+!alert note
+Because the mixture density is computed inside `WCNSFV2PMomentumDriftFlux`, this kernel
+is not compatible with mixture fluid properties in the fluid properties module that do
+not use a linear volume mixing for densities.
+
 !syntax parameters /FVKernels/WCNSFV2PMomentumDriftFlux
 
 !syntax inputs /FVKernels/WCNSFV2PMomentumDriftFlux

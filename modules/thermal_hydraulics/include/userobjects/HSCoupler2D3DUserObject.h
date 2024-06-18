@@ -55,10 +55,14 @@ protected:
   const Function & _emissivity_2d_fn;
   /// Emissivity of the 3D heat structure boundary as a function of temperature
   const Function & _emissivity_3d_fn;
+  /// Include radiation?
+  const bool _include_radiation;
   /// Gap thickness as a function of temperature
   const Function & _gap_thickness_fn;
   /// Gap thermal conductivity as a function of temperature
   const Function & _k_gap_fn;
+  /// Gap heat transfer coefficient as a function of temperature
+  const Function & _htc_gap_fn;
 
   /// User object containing the temperature values on the 2D boundary
   const StoreVariableByElemIDSideUserObject & _temperature_2d_uo;

@@ -81,11 +81,17 @@ NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters) : F
 
 NavierStokesProblem::~NavierStokesProblem()
 {
+  auto ierr = (PetscErrorCode)0;
   if (_Q_scale)
-    // We're destructing so don't check for errors which can throw
-    MatDestroy(&_Q_scale);
+  {
+    ierr = MatDestroy(&_Q_scale);
+    CHKERRABORT(this->comm().get(), ierr);
+  }
   if (_L)
-    MatDestroy(&_L);
+  {
+    ierr = MatDestroy(&_L);
+    CHKERRABORT(this->comm().get(), ierr);
+  }
 }
 
 KSP
@@ -95,7 +101,7 @@ NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
   if (it == _schur_fs_index.end())
     return node;
 
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
   PC fs_pc;
   PetscInt num_splits;
   KSP * subksp;
@@ -110,7 +116,7 @@ NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
   LIBMESH_CHKERR2(this->comm(), ierr);
 
   // Verify the preconditioner is a field split preconditioner
-  PetscObjectTypeCompare((PetscObject)fs_pc, PCFIELDSPLIT, &is_fs);
+  ierr = PetscObjectTypeCompare((PetscObject)fs_pc, PCFIELDSPLIT, &is_fs);
   LIBMESH_CHKERR2(this->comm(), ierr);
   if (!is_fs)
     mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
@@ -156,12 +162,12 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   PetscBool is_lsc, is_fs;
   std::vector<Mat> intermediate_Qs;
   std::vector<Mat> intermediate_Ls;
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
 
   // Get the preconditioner for the linear solver. It must be a field split preconditioner
   ierr = KSPGetPC(schur_ksp, &schur_pc);
   LIBMESH_CHKERR2(this->comm(), ierr);
-  PetscObjectTypeCompare((PetscObject)schur_pc, PCFIELDSPLIT, &is_fs);
+  ierr = PetscObjectTypeCompare((PetscObject)schur_pc, PCFIELDSPLIT, &is_fs);
   LIBMESH_CHKERR2(this->comm(), ierr);
   if (!is_fs)
     mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
@@ -395,7 +401,7 @@ NavierStokesProblem::initPetscOutputAndSomeSolverSettings()
   }
 
   // Set the pre-KSP solve callback. At that time we will setup our Schur complement preconditioning
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
   KSP ksp;
   auto snes = currentNonlinearSystem().getSNES();
   ierr = SNESGetKSP(snes, &ksp);

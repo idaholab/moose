@@ -220,7 +220,7 @@
     coupled_tensor_increment_names = 'diffuse gb_relax'
   [../]
   [./strain]
-   type = ComputeIncrementalSmallStrain
+   type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y'
   [../]
   [./stress]

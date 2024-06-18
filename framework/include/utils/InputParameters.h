@@ -371,6 +371,13 @@ public:
   void addParamNamesToGroup(const std::string & space_delim_names, const std::string group_name);
 
   /**
+   * This method renames a parameter group
+   * @param old_name previous name of the parameter group
+   * @param new_name new name of the parameter group
+   */
+  void renameParameterGroup(const std::string & old_name, const std::string & new_name);
+
+  /**
    * This method retrieves the group name for the passed parameter name if one exists.  Otherwise an
    * empty string is returned.
    */

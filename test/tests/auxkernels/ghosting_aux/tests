@@ -1,7 +1,7 @@
 [Tests]
 
   [ghosting]
-    design = 'GhostingAux.md'
+    design = 'GhostingFromUOAux.md'
     issues = '#12298'
     requirement = "The system shall support viewing the elements that would be ghosted"
 
@@ -37,7 +37,7 @@
     mesh_mode = replicated
 
     requirement = "The system shall utilize the minimum of ghosting necessary for the problem"
-    design = 'GhostingAux.md RelationshipManager.md'
+    design = 'GhostingFromUOAux.md RelationshipManager.md'
     issues = '#12327'
   []
 []

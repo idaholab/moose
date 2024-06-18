@@ -152,7 +152,7 @@ SIMPLE::solveMomentumPredictor()
 
     // Very important, for deciding the convergence, we need the unpreconditioned
     // norms in the linear solve
-    KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+    LIBMESH_CHKERR(KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
     // Solve this component. We don't update the ghosted solution yet, that will come at the end
     // of the corrector step. Also setting the linear tolerances and maximum iteration counts.
     _momentum_linear_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
@@ -226,7 +226,7 @@ SIMPLE::solvePressureCorrector()
   Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
   // We need the non-preconditioned norm to be consistent with the norm factor
-  KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+  LIBMESH_CHKERR(KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
 
   // Setting the linear tolerances and maximum iteration counts
   _pressure_linear_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;

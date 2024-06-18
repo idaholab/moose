@@ -25,11 +25,18 @@ DumpObjectsProblem::validParams()
                              "objects and variables.");
   params.addRequiredParam<std::string>(
       "dump_path", "Syntax path of the action of which to dump the generated syntax");
+  params.addParam<bool>(
+      "include_all_user_specified_params",
+      true,
+      "Whether to include all parameters that have been specified by a user in the dump, even if "
+      "they match the default value of the parameter in the Factory");
   return params;
 }
 
 DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
-  : FEProblemBase(parameters), _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0"))
+  : FEProblemBase(parameters),
+    _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0")),
+    _include_all_user_specified_params(getParam<bool>("include_all_user_specified_params"))
 {
   _nl[0] = _nl_sys;
   _solver_systems[0] = std::dynamic_pointer_cast<SolverSystem>(_nl[0]);
@@ -57,8 +64,12 @@ DumpObjectsProblem::deduceNecessaryParameters(const std::string & type,
     const auto & param_name = value_pair.first;
     const auto & param_value = value_pair.second;
 
+    // determine whether to include the parameter
     auto factory_it = factory_params.find(param_name);
-    if (factory_it == factory_params.end() || factory_it->second != param_value)
+    bool include_param = (factory_it->second != param_value);
+    if (_include_all_user_specified_params)
+      include_param = include_param || parameters.isParamSetByUser(param_name);
+    if (factory_it == factory_params.end() || include_param)
       param_text += "    " + param_name + " = " + param_value + '\n';
   }
 
@@ -76,10 +87,10 @@ DumpObjectsProblem::dumpObjectHelper(const std::string & system,
 
   // clang-format off
   _generated_syntax[path][system] +=
-        "  [./" + name + "]\n"
+        "  [" + name + "]\n"
       + "    type = " + type + '\n'
       +      param_text
-      + "  [../]\n";
+      + "  []\n";
   // clang-format on
 }
 
@@ -124,9 +135,9 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 
   // clang-format off
   _generated_syntax[path][system] +=
-        "  [./" + var_name + "]\n"
+        "  [" + var_name + "]\n"
       +      param_text
-      + "  [../]\n";
+      + "  []\n";
   // clang-format on
 }
 

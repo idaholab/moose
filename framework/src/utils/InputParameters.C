@@ -889,6 +889,14 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
                  '.');
 }
 
+void
+InputParameters::renameParameterGroup(const std::string & old_name, const std::string & new_name)
+{
+  for (auto & param : _params)
+    if (param.second._group == old_name)
+      param.second._group = new_name;
+}
+
 bool
 InputParameters::isCommandLineParameter(const std::string & name) const
 {

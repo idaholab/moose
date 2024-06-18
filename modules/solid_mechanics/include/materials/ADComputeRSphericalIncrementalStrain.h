@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADComputeIncrementalSmallStrain.h"
+#include "ADComputeIncrementalStrain.h"
 
 /**
  * ADComputeRSphericalIncrementalStrain defines a strain increment only
@@ -17,7 +17,7 @@
  * polar and azimuthal directions are functions of the radial displacement.
 
  */
-class ADComputeRSphericalIncrementalStrain : public ADComputeIncrementalSmallStrain
+class ADComputeRSphericalIncrementalStrain : public ADComputeIncrementalStrain
 {
 public:
   static InputParameters validParams();

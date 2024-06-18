@@ -17,6 +17,31 @@ in the source MultiApp matches the number of subapps in the target MultiApp, and
 the same way on the parallel processes. Each source app is then matched to the target app with the same
 subapp index.
 
+## Distributed Vector Transfer
+
+The MultiAppReporterTransfer also supports transferring reporter vectors in a distributed fashion using the [!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector) parameter.
+In this mode, the transfer assumes a one-to-many or many-to-one relationship
+between the reporter values in the main application and the sub-applications.
+The reporter value in the main application is expected to be a vector with a
+size matching the number of sub-applications. Each sub-application will
+send/receive its respective component of the vector based on its index. The main
+app reporter is assumed to be replicated while the subapp reporters are assumed
+to be root or replicated.
+
+!table caption=Distributed Transfer Examples
+| Main App | Sub App 1 | Sub App 2 | Sub App 3 | Sub App 4 |
+|---|---|---|---|---|
+| $\begin{pmatrix}1\\2\\3\\4\end{pmatrix}$ | 1 | 2 | 3 | 4 |
+|
+| $\begin{pmatrix}1\\2\end{pmatrix}$ $\begin{pmatrix}3\\4\\5\end{pmatrix}$ $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ $\begin{pmatrix}10\\11\\12\end{pmatrix}$ | $\begin{pmatrix}1\\2\end{pmatrix}$ | $\begin{pmatrix}3\\4\\5\end{pmatrix}$ | $\begin{pmatrix}6\\7\\8\\9\end{pmatrix}$ | $\begin{pmatrix}10\\11\\12\end{pmatrix}$ |
+
+!alert note title=[!param](/Transfers/MultiAppReporterTransfer/distribute_reporter_vector)  is only implemented for certain reporter modes.
+The main
+app reporter is assumed to be `REPORTER_MODE_REPLICATED` while the subapp reporters are assumed
+to be `REPORTER_MODE_ROOT` or `REPORTER_MODE_REPLICATED`. This operation will
+error out with any reporter that
+are `REPORTER_MODE_DISTRIBUTED`.
+
 ## Example Input File Syntax
 
 !alert! tip
@@ -71,6 +96,38 @@ Here, we are transferring integer and string data between reporters:
 !listing reporter_transfer/sub0.i block=Reporters caption=Sub-application reporters
 
 !listing reporter_transfer/main.i block=int_to_int int_from_int string_from_string string_to_string caption=Main application reporter transfers
+   indent=2 header=[Transfers] footer=[]
+
+
+
+### Distribution of a vector Reporter
+
+#### Scatter vector Reporter
+
+Here we are transferring a vector reporter and a vector of vectors reporter in a
+scatter fashion. The main application holds a vector of vectors and a
+single vector, while each subapp has a vector and a Real (scalar) reporter.
+During the transfer the subapp's reporters are populated from the scattering of
+the main app's vector reporter. The main app can also use a vector of vectors reporter, in which case those vectors
+are distributed to the subapps.
+
+!listing dist_vector/main_send.i block=Reporters caption=Main application reporters
+
+!listing dist_vector/sub.i block=Reporters caption=Sub-application reporters
+
+!listing dist_vector/main_send.i block=Transfers caption=Main application reporter transfers
+   indent=2 header=[Transfers] footer=[]
+
+
+#### Gather vector Reporter
+
+Here we are transferring a vector reporter and a vector of vectors reporter in a gather fashion. The main application holds a vector of vectors and a single vector, while each subapp has a vector and a Real (scalar) reporter. This test shows the gather operation by aggregating the same values from each subapp into a vector of reporters in the main application.
+
+!listing dist_vector/main_rec.i block=Reporters caption=Main application reporters
+
+!listing dist_vector/sub.i block=Reporters caption=Sub-application reporters
+
+!listing dist_vector/main_rec.i block=Transfers caption=Main application reporter transfers
    indent=2 header=[Transfers] footer=[]
 
 !syntax parameters /Transfers/MultiAppReporterTransfer

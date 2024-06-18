@@ -30,6 +30,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/diagonal_matrix.h"
 #include "libmesh/petsc_shell_matrix.h"
+#include "libmesh/petsc_solver_exception.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
 
@@ -82,7 +83,11 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
                          eigen_nl.eigenMatrixTag());
 #if LIBMESH_HAVE_SLEPC
     if (p->negativeSignEigenKernel())
-      MatScale(static_cast<PetscMatrix<Number> &>(eigen_system.get_matrix_B()).mat(), -1.0);
+    {
+      auto ierr =
+          MatScale(static_cast<PetscMatrix<Number> &>(eigen_system.get_matrix_B()).mat(), -1.0);
+      LIBMESH_CHKERR(ierr);
+    }
 #endif
     return;
   }
@@ -341,7 +346,8 @@ NonlinearEigenSystem::getSNES()
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
     SNES snes = nullptr;
-    Moose::SlepcSupport::mooseSlepcEPSGetSNES(eps, &snes);
+    auto ierr = Moose::SlepcSupport::mooseSlepcEPSGetSNES(eps, &snes);
+    LIBMESH_CHKERR(ierr);
     return snes;
   }
   else
@@ -427,7 +433,8 @@ NonlinearEigenSystem::attachPreconditioner(Preconditioner<Number> * precondition
   // We need to let PETSc know that
   if (_preconditioner)
   {
-    Moose::SlepcSupport::registerPCToPETSc();
+    auto ierr = Moose::SlepcSupport::registerPCToPETSc();
+    LIBMESH_CHKERR(ierr);
     // Mark this, and then we can setup correct petsc options
     _eigen_problem.solverParams()._customized_pc_for_eigen = true;
     _eigen_problem.solverParams()._type = Moose::ST_JFNK;

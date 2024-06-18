@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADComputeIncrementalSmallStrain.h"
+#include "ADComputeIncrementalStrain.h"
 
 /**
  * ADCompute1DIncrementalStrain defines a strain increment only for incremental
@@ -17,7 +17,7 @@
  * ADCompute1DIncrementalStrain contains virtual methods to define the displacement gradients
  * as a general nonzero value.
  */
-class ADCompute1DIncrementalStrain : public ADComputeIncrementalSmallStrain
+class ADCompute1DIncrementalStrain : public ADComputeIncrementalStrain
 {
 public:
   static InputParameters validParams();

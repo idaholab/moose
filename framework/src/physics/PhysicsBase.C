@@ -222,8 +222,9 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
     SystemBase & system = getProblem().getNonlinearSystemBase(_sys_number);
-    _console << "Adding restart for " << variables_to_copy.size() << " variables " << std::endl;
-
+    _console << "Adding Exodus restart for " << variables_to_copy.size()
+             << " variables: " << Moose::stringify(variables_to_copy) << std::endl;
+    // TODO Check that the variable types and orders are actually supported for exodus restart
     for (const auto & var_name : variables_to_copy)
       system.addVariableToCopy(
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
@@ -324,6 +325,7 @@ PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
 bool
 PhysicsBase::allMeshBlocks(const std::vector<SubdomainName> & blocks) const
 {
+  mooseAssert(_mesh, "The mesh should exist already");
   for (const auto mesh_block : _mesh->meshSubdomains())
     if (std::find(blocks.begin(), blocks.end(), _mesh->getSubdomainName(mesh_block)) ==
         blocks.end())

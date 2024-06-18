@@ -20,6 +20,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/enum_solver_package.h"
+#include "libmesh/petsc_solver_exception.h"
 
 template <>
 void
@@ -696,13 +697,16 @@ void
 dataLoad(std::istream & stream, Vec & v, void * context)
 {
   PetscInt local_size;
-  VecGetLocalSize(v, &local_size);
+  auto ierr = VecGetLocalSize(v, &local_size);
+  LIBMESH_CHKERR(ierr);
   PetscScalar * array;
-  VecGetArray(v, &array);
+  ierr = VecGetArray(v, &array);
+  LIBMESH_CHKERR(ierr);
   for (PetscInt i = 0; i < local_size; i++)
     dataLoad(stream, array[i], context);
 
-  VecRestoreArray(v, &array);
+  ierr = VecRestoreArray(v, &array);
+  LIBMESH_CHKERR(ierr);
 }
 
 template <>
@@ -710,11 +714,14 @@ void
 dataStore(std::ostream & stream, Vec & v, void * context)
 {
   PetscInt local_size;
-  VecGetLocalSize(v, &local_size);
+  auto ierr = VecGetLocalSize(v, &local_size);
+  LIBMESH_CHKERR(ierr);
   PetscScalar * array;
-  VecGetArray(v, &array);
+  ierr = VecGetArray(v, &array);
+  LIBMESH_CHKERR(ierr);
   for (PetscInt i = 0; i < local_size; i++)
     dataStore(stream, array[i], context);
 
-  VecRestoreArray(v, &array);
+  ierr = VecRestoreArray(v, &array);
+  LIBMESH_CHKERR(ierr);
 }

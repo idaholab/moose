@@ -2,7 +2,7 @@
 
 # HOME style=visibility:hidden;
 
-!media large_media/organization_logos/2025-conference-webbanner.png style=display:block;margin-left:auto;margin-right:auto;width:80%;
+!media large_media/organization_logos/2025-conference-webbanner.png link=https://inl.gov/mooseworkshop2025/ style=display:block;margin-left:auto;margin-right:auto;width:80%;
 
 !style! halign=center fontsize=140%
 [Abstract submission form](https://inlhrfedramp.gov1.qualtrics.com/jfe/form/SV_1zeoLEagiVVm9wO)

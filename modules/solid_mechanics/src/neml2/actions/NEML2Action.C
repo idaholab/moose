@@ -27,8 +27,8 @@ NEML2Action::validParams()
 {
   InputParameters params = Action::validParams();
   NEML2Utils::addClassDescription(params, "Parse and set up NEML2 objects");
-  params.addRequiredParam<FileName>("input",
-                                    "Path to the NEML2 input file containing the NEML2 model(s)");
+  params.addRequiredParam<DataFileName>(
+      "input", "Path to the NEML2 input file containing the NEML2 model(s)");
   params.addRequiredParam<std::string>(
       "model",
       "Name of the NEML2 model, i.e., the string inside the brackets [] in the NEML2 input file "
@@ -73,7 +73,7 @@ NEML2Action::act()
 
 NEML2Action::NEML2Action(const InputParameters & parameters)
   : Action(parameters),
-    _fname(getParam<FileName>("input")),
+    _fname(getDataFileName("input")),
     _mname(getParam<std::string>("model")),
     _verbose(getParam<bool>("verbose")),
     _mode(getParam<MooseEnum>("mode")),

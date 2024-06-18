@@ -31,6 +31,9 @@ protected:
   std::vector<T *> declareConstantReporterValues(const std::string & prefix);
   template <typename T>
   std::vector<std::vector<T> *> declareConstantVectorReporterValues(const std::string & prefix);
+  template <typename T>
+  std::vector<std::vector<std::vector<T>> *>
+  declareConstantVectorVectorReporterValues(const std::string & prefix);
   ///@}
 };
 
@@ -49,6 +52,12 @@ ConstantReporter::addReporterTypeParams(const std::string & prefix, bool add_vec
         prefix + "_vector_names", "Names for each vector of " + prefix + "s value.");
     params.addParam<std::vector<std::vector<T>>>(prefix + "_vector_values",
                                                  "Values for vectors of " + prefix + "s.");
+
+    params.addParam<std::vector<ReporterValueName>>(prefix + "_vector_vector_names",
+                                                    "Names for each vector of vectors of " +
+                                                        prefix + "s value.");
+    params.addParam<std::vector<std::vector<std::vector<T>>>>(
+        prefix + "_vector_vector_values", "Values for vectors of vectors of " + prefix + "s.");
   }
 
   return params;
@@ -89,4 +98,12 @@ std::vector<std::vector<T> *>
 ConstantReporter::declareConstantVectorReporterValues(const std::string & prefix)
 {
   return this->declareConstantReporterValues<std::vector<T>>(prefix + "_vector");
+}
+
+template <typename T>
+std::vector<std::vector<std::vector<T>> *>
+ConstantReporter::declareConstantVectorVectorReporterValues(const std::string & prefix)
+{
+  return this->declareConstantReporterValues<std::vector<std::vector<T>>>(prefix +
+                                                                          "_vector_vector");
 }

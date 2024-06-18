@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeIncrementalSmallStrain.h"
+#include "ComputeIncrementalStrain.h"
 
 /**
  * Compute1DIncrementalStrain defines a strain increment only for incremental
@@ -17,7 +17,7 @@
  * Compute1DIncrementalStrain contains virtual methods to define the displacement gradients
  * as a general nonzero value.
  */
-class Compute1DIncrementalStrain : public ComputeIncrementalSmallStrain
+class Compute1DIncrementalStrain : public ComputeIncrementalStrain
 {
 public:
   static InputParameters validParams();

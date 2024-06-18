@@ -8,7 +8,7 @@
     csvdiff = thermal-me.csv
     method = '!dbg'
     valgrind = 'none'
-    rel_err = 1e-4
+    rel_err = 2e-4
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []

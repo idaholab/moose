@@ -83,7 +83,7 @@ PETScExternalSolverCreate(MPI_Comm comm, TS * ts)
   CHKERRQ(ierr);
   ierr = TSSetFromOptions(*ts);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -94,7 +94,7 @@ PETScExternalSolverDestroy(TS ts)
   PetscFunctionBeginUser;
   ierr = TSDestroy(&ts);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /*
@@ -129,13 +129,19 @@ externalPETScDiffusionFDMSolve(
   CHKERRQ(ierr);
 
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
-  PetscOptionsSetValue(NULL, "-ts_monitor", NULL);
-  PetscOptionsSetValue(NULL, "-snes_monitor", NULL);
-  PetscOptionsSetValue(NULL, "-ksp_monitor", NULL);
+  ierr = PetscOptionsSetValue(NULL, "-ts_monitor", NULL);
+  CHKERRQ(ierr);
+  ierr = PetscOptionsSetValue(NULL, "-snes_monitor", NULL);
+  CHKERRQ(ierr);
+  ierr = PetscOptionsSetValue(NULL, "-ksp_monitor", NULL);
+  CHKERRQ(ierr);
 #else
-  PetscOptionsSetValue("-ts_monitor", NULL);
-  PetscOptionsSetValue("-snes_monitor", NULL);
-  PetscOptionsSetValue("-ksp_monitor", NULL);
+  ierr = PetscOptionsSetValue("-ts_monitor", NULL);
+  CHKERRQ(ierr);
+  ierr = PetscOptionsSetValue("-snes_monitor", NULL);
+  CHKERRQ(ierr);
+  ierr = PetscOptionsSetValue("-ksp_monitor", NULL);
+  CHKERRQ(ierr);
 #endif
 
   /*ierr = TSSetMaxTime(ts,1.0);CHKERRQ(ierr);*/
@@ -179,7 +185,7 @@ externalPETScDiffusionFDMSolve(
   CHKERRQ(ierr);
   *converged = reason > 0 ? PETSC_TRUE : PETSC_FALSE;
 
-  PetscFunctionReturn(0);
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /* --------------------------------------------------------------------- */
@@ -329,7 +335,7 @@ FormIFunction(TS ts, PetscReal /*t*/, Vec U, Vec Udot, Vec F, void * /*ctx*/)
   CHKERRQ(ierr);
   ierr = PetscLogFlops(11.0 * ym * xm);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /* --------------------------------------------------------------------- */
@@ -456,7 +462,7 @@ FormIJacobian(
     CHKERRQ(ierr);
   }
 
-  PetscFunctionReturn(0);
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 /* ------------------------------------------------------------------- */
@@ -518,5 +524,5 @@ FormInitialSolution(TS ts, Vec U, void * /*ptr*/)
   /* Restore vectors */
   ierr = DMDAVecRestoreArray(da, U, &u);
   CHKERRQ(ierr);
-  PetscFunctionReturn(0);
+  PetscFunctionReturn(PETSC_SUCCESS);
 }

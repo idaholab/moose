@@ -28,6 +28,12 @@ INSFVMushyPorousFrictionFunctorMaterial::validParams()
   params.addRequiredParam<MooseFunctorName>("rho_l", "The liquid density (not the mixture one).");
   params.addParam<MooseFunctorName>(
       "dendrite_spacing_scaling", "1e-4", "The dendrite spacing scaling.");
+  params.addParam<MooseFunctorName>(
+      "Darcy_coef_name", "Darcy_coefficient", "Name of the Darcy friction coefficient");
+  params.addParam<MooseFunctorName>("Forchheimer_coef_name",
+                                    "Forchheimer_coefficient",
+                                    "Name of the Forchheimer friction coefficient");
+
   return params;
 }
 
@@ -41,7 +47,7 @@ INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial
 {
 
   addFunctorProperty<ADReal>(
-      "Darcy_coefficient",
+      getParam<MooseFunctorName>("Darcy_coef_name"),
       [this](const auto & r, const auto & t) -> ADReal
       {
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
@@ -56,7 +62,7 @@ INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial
       });
 
   addFunctorProperty<ADReal>(
-      "Forchheimer_coefficient",
+      getParam<MooseFunctorName>("Forchheimer_coef_name"),
       [this](const auto & r, const auto & t) -> ADReal
       {
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity

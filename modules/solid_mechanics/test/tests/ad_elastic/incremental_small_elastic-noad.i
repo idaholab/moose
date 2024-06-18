@@ -75,7 +75,7 @@
     youngs_modulus = 1e10
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress

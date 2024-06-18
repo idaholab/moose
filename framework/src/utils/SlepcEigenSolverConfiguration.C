@@ -28,7 +28,7 @@ SlepcEigenSolverConfiguration::SlepcEigenSolverConfiguration(
 void
 SlepcEigenSolverConfiguration::configure_solver()
 {
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
 
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
@@ -47,7 +47,8 @@ SlepcEigenSolverConfiguration::configure_solver()
     // Let set a default PC side. I would like to have the setting be consistent with
     // what we do in regular nonlinear executioner. Petsc options are able to override
     // this setting
-    Moose::SlepcSupport::mooseSlepcEPSSNESKSPSetPCSide(_eigen_problem, _slepc_solver.eps());
+    ierr = Moose::SlepcSupport::mooseSlepcEPSSNESKSPSetPCSide(_eigen_problem, _slepc_solver.eps());
+    LIBMESH_CHKERR(ierr);
     // A customized stopping test for nonlinear free power iterations.
     // Nonlinear power iterations need to be marked as converged in EPS to
     // retrieve solution from SLEPc EPS.

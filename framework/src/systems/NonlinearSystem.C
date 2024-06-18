@@ -29,6 +29,7 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/diagonal_matrix.h"
 #include "libmesh/default_coupling.h"
+#include "libmesh/petsc_solver_exception.h"
 
 namespace Moose
 {
@@ -207,7 +208,10 @@ NonlinearSystem::solve()
   checkInvalidSolution();
 
   if (_use_coloring_finite_difference)
-    MatFDColoringDestroy(&_fdcoloring);
+  {
+    auto ierr = MatFDColoringDestroy(&_fdcoloring);
+    LIBMESH_CHKERR(ierr);
+  }
 }
 
 void
@@ -218,7 +222,8 @@ NonlinearSystem::stopSolve(const ExecFlagType & exec_flag)
 
   if (exec_flag == EXEC_LINEAR || exec_flag == EXEC_POSTCHECK)
   {
-    SNESSetFunctionDomainError(solver.snes());
+    auto ierr = SNESSetFunctionDomainError(solver.snes());
+    LIBMESH_CHKERR(ierr);
 
     // Clean up by getting vectors into a valid state for a
     // (possible) subsequent solve.  There may be more than just
@@ -229,7 +234,10 @@ NonlinearSystem::stopSolve(const ExecFlagType & exec_flag)
     _Re_non_time->close();
   }
   else if (exec_flag == EXEC_NONLINEAR)
-    SNESSetJacobianDomainError(solver.snes());
+  {
+    auto ierr = SNESSetJacobianDomainError(solver.snes());
+    LIBMESH_CHKERR(ierr);
+  }
   else
     mooseError("Unsupported execute flag: ", Moose::stringify(exec_flag));
 }
@@ -270,11 +278,12 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
   PetscMatrix<Number> * petsc_mat =
       static_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
 
-  SNESSetJacobian(petsc_nonlinear_solver->snes(),
-                  petsc_mat->mat(),
-                  petsc_mat->mat(),
-                  SNESComputeJacobianDefault,
-                  nullptr);
+  auto ierr = SNESSetJacobian(petsc_nonlinear_solver->snes(),
+                              petsc_mat->mat(),
+                              petsc_mat->mat(),
+                              SNESComputeJacobianDefault,
+                              nullptr);
+  LIBMESH_CHKERR(ierr);
 }
 
 void
@@ -297,7 +306,7 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 
   petsc_mat->close();
 
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
   ISColoring iscoloring;
 
   // PETSc 3.5.x
@@ -313,22 +322,28 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
   ierr = MatColoringDestroy(&matcoloring);
   CHKERRABORT(_communicator.get(), ierr);
 
-  MatFDColoringCreate(petsc_mat->mat(), iscoloring, &_fdcoloring);
-  MatFDColoringSetFromOptions(_fdcoloring);
+  ierr = MatFDColoringCreate(petsc_mat->mat(), iscoloring, &_fdcoloring);
+  CHKERRABORT(_communicator.get(), ierr);
+  ierr = MatFDColoringSetFromOptions(_fdcoloring);
+  CHKERRABORT(_communicator.get(), ierr);
   // clang-format off
-  MatFDColoringSetFunction(_fdcoloring,
+  ierr =MatFDColoringSetFunction(_fdcoloring,
                            (PetscErrorCode(*)(void))(void (*)(void)) &
                                libMesh::libmesh_petsc_snes_fd_residual,
                            &petsc_nonlinear_solver);
+  CHKERRABORT(_communicator.get(), ierr);
   // clang-format on
-  MatFDColoringSetUp(petsc_mat->mat(), iscoloring, _fdcoloring);
-  SNESSetJacobian(petsc_nonlinear_solver.snes(),
-                  petsc_mat->mat(),
-                  petsc_mat->mat(),
-                  SNESComputeJacobianDefaultColor,
-                  _fdcoloring);
+  ierr = MatFDColoringSetUp(petsc_mat->mat(), iscoloring, _fdcoloring);
+  CHKERRABORT(_communicator.get(), ierr);
+  ierr = SNESSetJacobian(petsc_nonlinear_solver.snes(),
+                         petsc_mat->mat(),
+                         petsc_mat->mat(),
+                         SNESComputeJacobianDefaultColor,
+                         _fdcoloring);
+  CHKERRABORT(_communicator.get(), ierr);
   // PETSc >=3.3.0
-  ISColoringDestroy(&iscoloring);
+  ierr = ISColoringDestroy(&iscoloring);
+  CHKERRABORT(_communicator.get(), ierr);
 }
 
 bool

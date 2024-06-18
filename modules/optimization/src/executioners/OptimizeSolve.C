@@ -85,17 +85,19 @@ PetscErrorCode
 OptimizeSolve::taoSolve()
 {
   // Petsc error code to be checked after each petsc call
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
 
+  PetscFunctionBegin;
   // Initialize tao object
   ierr = TaoCreate(_my_comm.get(), &_tao);
   CHKERRQ(ierr);
 
 #if PETSC_RELEASE_LESS_THAN(3, 21, 0)
-  TaoSetMonitor(_tao, monitor, this, nullptr);
+  ierr = TaoSetMonitor(_tao, monitor, this, nullptr);
 #else
-  TaoMonitorSet(_tao, monitor, this, nullptr);
+  ierr = TaoMonitorSet(_tao, monitor, this, nullptr);
 #endif
+  CHKERRQ(ierr);
 
   switch (_tao_solver_enum)
   {
@@ -217,7 +219,10 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
 
   if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD)
-    taoALCreate();
+  {
+    ierr = taoALCreate();
+    CHKERRQ(ierr);
+  }
 
   // Backup multiapps so transient problems start with the same initial condition
   _problem.backupMultiApps(OptimizationAppTypes::EXEC_FORWARD);
@@ -242,7 +247,10 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
 
   if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD)
-    taoALDestroy();
+  {
+    ierr = taoALDestroy();
+    CHKERRQ(ierr);
+  }
 
   return ierr;
 }
@@ -332,30 +340,34 @@ OptimizeSolve::monitor(Tao tao, void * ctx)
   PetscInt its;
   PetscReal f, gnorm, cnorm, xdiff;
 
-  TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
+  PetscFunctionBegin;
+  auto ierr = TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
+  CHKERRQ(ierr);
 
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   solver->setTaoSolutionStatus((double)f, (int)its, (double)gnorm, (double)cnorm, (double)xdiff);
 
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, void * ctx)
 {
+  PetscFunctionBegin;
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
   *solver->_parameters = param;
 
   (*objective) = solver->objectiveFunction();
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::objectiveAndGradientFunctionWrapper(
     Tao /*tao*/, Vec x, Real * objective, Vec gradient, void * ctx)
 {
+  PetscFunctionBegin;
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
@@ -366,12 +378,13 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
 
   solver->gradientFunction(grad);
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /*pc*/, void * ctx)
 {
+  PetscFunctionBegin;
   // Define Hessian-vector multiplication routine
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
@@ -379,14 +392,18 @@ OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /
   PetscErrorCode ierr = MatShellSetOperation(
       solver->_hessian, MATOP_MULT, (void (*)(void))OptimizeSolve::applyHessianWrapper);
   CHKERRQ(ierr);
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::applyHessianWrapper(Mat H, Vec s, Vec Hs)
 {
   void * ctx;
-  MatShellGetContext(H, &ctx);
+
+  PetscFunctionBegin;
+  auto ierr = MatShellGetContext(H, &ctx);
+  CHKERRQ(ierr);
+
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   libMesh::PetscVector<Number> sbar(s, solver->_my_comm);
   libMesh::PetscVector<Number> Hsbar(Hs, solver->_my_comm);
@@ -396,6 +413,7 @@ OptimizeSolve::applyHessianWrapper(Mat H, Vec s, Vec Hs)
 PetscErrorCode
 OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx)
 {
+  PetscFunctionBegin;
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   PetscErrorCode ierr = solver->variableBounds(tao);
@@ -446,6 +464,7 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 PetscErrorCode
 OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVector<Number> & Hs)
 {
+  PetscFunctionBegin;
   TIME_SECTION("applyHessian", 2, "Hessian forward/adjoint solve");
   // What happens for material inversion when the Hessian
   // is dependent on the parameters? Deal with it later???
@@ -476,12 +495,13 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
 
   _obj_function->computeGradient(Hs);
   _hess_iterate++;
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::variableBounds(Tao tao)
 {
+  PetscFunctionBegin;
   unsigned int sz = _obj_function->getNumParams();
 
   libMesh::PetscVector<Number> xl(_my_comm, sz);
@@ -502,19 +522,21 @@ OptimizeSolve::variableBounds(Tao tao)
 PetscErrorCode
 OptimizeSolve::equalityFunctionWrapper(Tao /*tao*/, Vec /*x*/, Vec ce, void * ctx)
 {
+  PetscFunctionBegin;
   // grab the solver
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   libMesh::PetscVector<Number> eq_con(ce, solver->_my_comm);
   // use the OptimizationReporterBase class to actually compute equality constraints
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeEqualityConstraints(eq_con);
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::equalityGradientFunctionWrapper(
     Tao /*tao*/, Vec /*x*/, Mat gradient_e, Mat /*gradient_epre*/, void * ctx)
 {
+  PetscFunctionBegin;
   // grab the solver
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   libMesh::PetscMatrix<Number> grad_eq(gradient_e, solver->_my_comm);
@@ -522,25 +544,27 @@ OptimizeSolve::equalityGradientFunctionWrapper(
   // constraints gradient
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeEqualityGradient(grad_eq);
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::inequalityFunctionWrapper(Tao /*tao*/, Vec /*x*/, Vec ci, void * ctx)
 {
+  PetscFunctionBegin;
   // grab the solver
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   libMesh::PetscVector<Number> ineq_con(ci, solver->_my_comm);
   // use the OptimizationReporterBase class to actually compute equality constraints
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeInequalityConstraints(ineq_con);
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::inequalityGradientFunctionWrapper(
     Tao /*tao*/, Vec /*x*/, Mat gradient_i, Mat /*gradient_ipre*/, void * ctx)
 {
+  PetscFunctionBegin;
   // grab the solver
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   libMesh::PetscMatrix<Number> grad_ineq(gradient_i, solver->_my_comm);
@@ -548,14 +572,15 @@ OptimizeSolve::inequalityGradientFunctionWrapper(
   // constraints gradient
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeInequalityGradient(grad_ineq);
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::taoALCreate()
 {
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
 
+  PetscFunctionBegin;
   if (_obj_function->getNumEqCons())
   {
     // Create equality vector
@@ -623,13 +648,15 @@ OptimizeSolve::taoALCreate()
         _tao, _gradient_i, _gradient_i, inequalityGradientFunctionWrapper, this);
     CHKERRQ(ierr);
   }
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 OptimizeSolve::taoALDestroy()
 {
-  PetscErrorCode ierr = 0;
+  auto ierr = (PetscErrorCode)0;
+
+  PetscFunctionBegin;
   if (_obj_function->getNumEqCons())
   {
     ierr = VecDestroy(&_ce);
@@ -646,5 +673,5 @@ OptimizeSolve::taoALDestroy()
     CHKERRQ(ierr);
   }
 
-  return 0;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }

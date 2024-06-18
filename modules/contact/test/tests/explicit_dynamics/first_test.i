@@ -210,7 +210,7 @@
     block = 2
   []
   [strain_block]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y disp_z'
     implicit = false
   []

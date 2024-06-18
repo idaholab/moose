@@ -104,7 +104,7 @@
     C_ijkl = '0.5 0.25'
   []
   [strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y disp_z'
   []
   [admissible]

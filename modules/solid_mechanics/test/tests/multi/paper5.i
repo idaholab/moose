@@ -306,7 +306,7 @@
     C_ijkl = '1.2E9 1.2E9'
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]

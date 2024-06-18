@@ -423,7 +423,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     // Now we set the diagonal of our system matrix to 0 so we can create H*u
     // TODO: Add a function for this in libmesh
     *working_vector_petsc = 0.0;
-    MatDiagonalSet(mmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
+    LIBMESH_CHKERR(MatDiagonalSet(mmat->mat(), working_vector_petsc->vec(), INSERT_VALUES));
 
     if (verbose)
     {

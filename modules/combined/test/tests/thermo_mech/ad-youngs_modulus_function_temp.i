@@ -22,7 +22,7 @@
 #          700              0.001              9.93e6              9.93e3
 #
 #    The tensor mechanics results align exactly with the analytical results above
-#    when this test is run with ComputeIncrementalSmallStrain.  When the test is
+#    when this test is run with ComputeIncrementalStrain.  When the test is
 #    run with ComputeFiniteStrain, a 0.05% discrepancy between the analytical
 #    strains and the simulation strain results is observed, and this discrepancy
 #    is carried over into the calculation of the elastic stress.
@@ -154,7 +154,7 @@
     poissons_ratio = 0.0
   [../]
   [./strain]
-    type = ADComputeIncrementalSmallStrain
+    type = ADComputeIncrementalStrain
   [../]
   [./stress]
     type = ADComputeFiniteStrainElasticStress

@@ -342,7 +342,7 @@ VariableCondensationPreconditioner::init()
 void
 VariableCondensationPreconditioner::condenseSystem()
 {
-  PetscErrorCode ierr = 0;
+  PetscErrorCode ierr = (PetscErrorCode)0;
 
   // extract _M from the original matrix
   _matrix->create_submatrix(*_M, _rows, _lm_dofs);
@@ -403,7 +403,7 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
                                                              const std::vector<dof_id_type> & grows,
                                                              PetscMatrix<Number> & block_mat)
 {
-  PetscErrorCode ierr = 0;
+  PetscErrorCode ierr = (PetscErrorCode)0;
 
   // obtain entries from the original matrix
   PetscInt pc_ncols = 0, block_ncols = 0;
@@ -505,7 +505,7 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
   // condensed matrix
   std::vector<dof_id_type> n_nz, n_oz;
 
-  PetscErrorCode ierr = 0;
+  PetscErrorCode ierr = (PetscErrorCode)0;
 
   // Get number of nonzeros from original_mat and block_mat for each row
   for (const auto & row_id : _rows)
@@ -652,7 +652,7 @@ VariableCondensationPreconditioner::getCondensedXY(const NumericVector<Number> &
                                                    NumericVector<Number> & x)
 {
   Mat mdinv;
-  PetscErrorCode ierr = 0;
+  PetscErrorCode ierr = (PetscErrorCode)0;
   // calculate mdinv
   ierr = MatMatMult(_M->mat(), _dinv, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &mdinv);
   LIBMESH_CHKERR(ierr);
@@ -755,7 +755,7 @@ VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat
   for (PetscInt i = 0; i < nrows; ++i)
     indices.push_back(petsc_idx[i]);
 
-  ISRestoreIndices(zerodiags_all, &petsc_idx);
+  ierr = ISRestoreIndices(zerodiags_all, &petsc_idx);
   LIBMESH_CHKERR(ierr);
   ierr = ISDestroy(&zerodiags);
   LIBMESH_CHKERR(ierr);

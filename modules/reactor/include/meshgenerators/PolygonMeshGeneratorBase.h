@@ -506,10 +506,12 @@ protected:
   /**
    * Makes radial correction to preserve ring area.
    * @param azimuthal_list azimuthal angles (in degrees) of all the nodes on the circle
+   * @param full_circle whether the circle is a full or partial circle
    * @return a correction factor to preserve the area of the circle after polygonization during
    * meshing
    */
-  Real radiusCorrectionFactor(const std::vector<Real> & azimuthal_list) const;
+  Real radiusCorrectionFactor(const std::vector<Real> & azimuthal_list,
+                              const bool full_circle = true) const;
 
   /**
    * Creates peripheral area mesh for the patterned hexagon mesh. Note that the function create the
