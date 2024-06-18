@@ -60,6 +60,11 @@ class RunSlurm(RunHPC):
             if state != 'PENDING' and not hpc_job.getRunning():
                 self.setHPCJobRunning(hpc_job)
 
+            # Fail if the job is held
+            if state in ['JobHeldUser']:
+                self.setHPCJobError(hpc_job, f'SLURM STATE {state}', f'has state {state}')
+                self.setHPCJobDone(hpc_job, 1)
+
             # Job was running and isn't running anymore, so it's done
             if hpc_job.getRunning() and state not in ['RUNNING', 'COMPLETING']:
                 exit_code = int(status['exitcode'])
