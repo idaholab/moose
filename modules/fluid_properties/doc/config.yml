@@ -34,12 +34,12 @@ Extensions:
         includes:
             - framework/include
             - modules/fluid_properties/include
-            - ${AIR_DIR}/include
-            - ${CARBON_DIOXIDE_DIR}/include
-            - ${HELIUM_DIR}/include
-            - ${NITROGEN_DIR}/include
-            - ${POTASSIUM_DIR}/include
-            - ${SODIUM_DIR}/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/air/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
