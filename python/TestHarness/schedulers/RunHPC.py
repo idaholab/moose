@@ -9,7 +9,7 @@
 
 import urllib.parse
 from RunParallel import RunParallel
-import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib
+import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib, contextlib
 import paramiko
 import jinja2
 from multiprocessing.pool import ThreadPool
@@ -559,9 +559,9 @@ class RunHPC(RunParallel):
             if max_time == tester.getDefaultMaxTime():
                 tester.setMaxTime(max_time * 2)
 
-    def killJob(self, job):
+    def killJob(self, job, lock=True):
         """Kills a HPC job"""
-        with self.hpc_jobs_lock:
+        with self.hpc_jobs_lock if lock else contextlib.suppress():
             hpc_job = self.hpc_jobs.get(job)
             if hpc_job is None or hpc_job.getDone() or hpc_job.getKilled():
                 return
