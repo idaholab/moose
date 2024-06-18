@@ -49,8 +49,16 @@ class RunPBS(RunHPC):
                 job = hpc_job.job
                 if exit_code < 0:
                     name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
+                    # Job timed out; give this a special timeout status because
+                    # it is then marked as recoverable (could try running again)
                     if name == 'JOB_EXEC_KILL_WALLTIME':
                         job.setStatus(job.timeout, 'TIMEOUT')
+                    # Special status where the job failed to start due to a PBS
+                    # issue and will be started again, so there's nothing to do
+                    elif name == 'JOB_EXEC_HOOK_RERUN':
+                        self.setHPCJobQueued(hpc_job)
+                        continue
+                    # Everything else should be an error
                     else:
                         job.setStatus(job.error, f'PBS ERROR: {name}')
                         job.appendOutput(util.outputHeader(f'PBS terminated job with reason: {reason}'))
