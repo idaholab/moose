@@ -3312,28 +3312,47 @@ FEProblemBase::projectSolution()
   // ComputeInitialConditionThread cic(*this);
   // Threads::parallel_reduce(elem_range, cic); // in IC class only act if _fe_problem._current_ic_state == my state parameter
 
-  if (haveFV())
+  // loop over _current_ic_state = 1, 0
+  for (global_current_state = 2; global_current_state >= 0; global_current_state--)
   {
-    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-    ElemInfoRange elem_info_range(_mesh.ownedElemInfoBegin(), _mesh.ownedElemInfoEnd());
+    ComputeInitialConditionThread cic(*this);
+    Threads::parallel_reduce(elem_range, cic);
+    // ComputeInitialConditionThread cic(*this);
+    // Threads::parallel_reduce(elem_range, cic); // in IC class only act if
+    // _fe_problem._current_ic_state == my state parameter
 
-    ComputeFVInitialConditionThread cfvic(*this);
-    Threads::parallel_reduce(elem_info_range, cfvic);
+    if (haveFV())
+    {
+      using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+      ElemInfoRange elem_info_range(_mesh.ownedElemInfoBegin(), _mesh.ownedElemInfoEnd());
+
+      ComputeFVInitialConditionThread cfvic(*this);
+      Threads::parallel_reduce(elem_info_range, cfvic);
+    }
+
+    // Need to close the solution vector here so that boundary ICs take precendence
+    for (auto & nl : _nl)
+      nl->solution().close();
+    _aux->solution().close();
+
+    // now run boundary-restricted initial conditions
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    ComputeBoundaryInitialConditionThread cbic(*this);
+    Threads::parallel_reduce(bnd_nodes, cbic);
+
+    for (auto & nl : _nl)
+      nl->solution().close();
+    _aux->solution().close();
+
+    if (global_current_state > 0)
+    {
+      for (auto & nl : _nl)
+      {
+        nl->copyOldSolutions();
+      }
+      _aux->copyOldSolutions();
+    }
   }
-
-  // Need to close the solution vector here so that boundary ICs take precendence
-  for (auto & nl : _nl)
-    nl->solution().close();
-  _aux->solution().close();
-
-  // now run boundary-restricted initial conditions
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  ComputeBoundaryInitialConditionThread cbic(*this);
-  Threads::parallel_reduce(bnd_nodes, cbic);
-
-  for (auto & nl : _nl)
-    nl->solution().close();
-  _aux->solution().close();
 
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the
