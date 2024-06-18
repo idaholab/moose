@@ -11,20 +11,10 @@ M(1)\xrightleftharpoons[k_b]{k_f}M(2)
 With the first order reaction rate assuming a quasi-steady-state
 
 \begin{equation}
-Reaction Rate = \frac {\partial C_1} {\partial t} = k_f C_1 - k_b C_2 \approx 0
+\textrm{Reaction Rate} = \frac {\partial C_1} {\partial t} = k_f C_1 - k_b C_2 \approx 0
 \end{equation}
 
-where $C_1$ is the specie concentration in domain 1, $C_2$ is the specie concentration in domain 2, $k_f$ is the forward reaction coefficient, and $k_b$ is the backward reaction coefficient. `ADMatInterfaceReaction` object is used to impose this condition. Associated kernel is:
-
-!syntax description /InterfaceKernels/ADMatInterfaceReaction
-
-## Overview
-
-!! Replace these lines with information regarding the ADMatInterfaceReaction object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADMatInterfaceReaction object.
+where $C_1$ is the specie concentration in domain 1, $C_2$ is the specie concentration in domain 2, $k_f$ is the forward reaction coefficient, and $k_b$ is the backward reaction coefficient. `ADMatInterfaceReaction` object is used to impose this condition.
 
 !syntax parameters /InterfaceKernels/ADMatInterfaceReaction
 
@@ -33,20 +23,9 @@ where $C_1$ is the specie concentration in domain 1, $C_2$ is the specie concent
 !syntax children /InterfaceKernels/ADMatInterfaceReaction
 
 
-[/ADMatInterfaceReaction.C]
-
-[/ADMatInterfaceReaction.h]
-
 In addition, fluxes are matched from both domains, this could be achieved by  [`InterfaceDiffusion`](/InterfaceKernels/index.md). 
 
 Both kernels at the interface work together to give full mathematical and physical meaning of the problem.
-
-Two examples (steady-state and transient-state) are shown in the MOOSE test directory, 
-
-[1d_interface/reaction_1D_steady.i]
-
-[1d_interface/reaction_1D_transient.i]
-
 
 ## Example Input Syntax
 

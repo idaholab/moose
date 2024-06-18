@@ -15,8 +15,7 @@
  * Implements a reaction to establish ReactionRate=k_f*u-k_b*v
  * at interface.
  */
-
-class ADMatInterfaceReaction : public ADInterfaceKernel ///ADInterfaceKernel ??
+class ADMatInterfaceReaction : public ADInterfaceKernel
 {
 public:
   static InputParameters validParams();
@@ -25,7 +24,6 @@ public:
 
 protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
-  // virtual ADReal computeQpJacobian(Moose::DGJacobianType type) override;
 
   /// Forward reaction rate coefficient
   const ADMaterialProperty<Real> & _kf;

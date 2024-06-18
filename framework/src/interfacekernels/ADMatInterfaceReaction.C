@@ -27,7 +27,7 @@ ADMatInterfaceReaction::validParams()
 ADMatInterfaceReaction::ADMatInterfaceReaction(const InputParameters & parameters)
   : ADInterfaceKernel(parameters),
     _kf(getADMaterialProperty<Real>("forward_rate")),
-    _kb(getADMaterialProperty<Real>("backward_rate"))
+    _kb(getNeighborADMaterialProperty<Real>("backward_rate"))
 {
 }
 
