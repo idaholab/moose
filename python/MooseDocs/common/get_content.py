@@ -63,7 +63,7 @@ def _find_files(filenames, pattern):
         out.add(pattern)
     return out
 
-def _doc_import(root_dir, content=None):
+def _doc_import(root_dir, content=None, optional=False):
     """
     Creates a list of files to "include" from patterns.
 
@@ -74,8 +74,12 @@ def _doc_import(root_dir, content=None):
     """
     # Check root_dir
     if not os.path.isdir(root_dir):
-        LOG.error('The "root_dir" must be a valid directory: %s', root_dir)
-        return None
+        if not optional:
+            LOG.error('The "root_dir" must be a valid directory: %s', root_dir)
+        else:
+            LOG.warning("Part of the content specified in 'config.yml' is not included in documentation since " +
+                        root_dir + ' is not a valid directory')
+        return set()
 
     # Loop through the base directory and create a set of matching filenames
     filenames = set()
@@ -140,11 +144,14 @@ def get_files(items, in_ext):
             LOG.error('The supplied items must be a list of dict items, each with a "root_dir" and '
                       'optionally a "content" entry.')
 
+        # Get path from specified root_dir
         root = mooseutils.eval_path(value['root_dir'])
         if not os.path.isabs(root):
             root = os.path.join(MooseDocs.ROOT_DIR, root)
 
-        for fname in _doc_import(root, content=value.get('content', None)):
+        # We default external content to be optional because we wont always have
+        # all the submodules downloaded
+        for fname in _doc_import(root, content=value.get('content', None), optional=value.get('external', False)):
             filenames.append((root, fname, value.get('external', False)))
 
     return filenames
