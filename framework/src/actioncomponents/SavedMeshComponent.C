@@ -42,9 +42,11 @@ SavedMeshComponent::addMeshGenerators()
 void
 SavedMeshComponent::setupComponent()
 {
-  // Get list of blocks from the saved mesh
+  // TODO: consider supporting the final mesh generator
   const auto saved_mesh =
       _app.getMeshGeneratorSystem().getSavedMesh(getParam<std::string>("saved_mesh_name"));
+
+  // Get list of blocks from the saved mesh
   std::set<subdomain_id_type> blocks;
   saved_mesh->subdomain_ids(blocks);
   std::vector<SubdomainName> blocks_vec;

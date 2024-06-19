@@ -16,10 +16,8 @@
       [block_specified]
         diffusivity_functor = 1
         block = '2 cyl1'
-        #this BC gets added on all three meshes because the 'left' is shared
-        #This is something we will want component to prevent
         dirichlet_boundaries = 'left cylinder_1_left'
-        boundary_values = '3 1'
+        boundary_values = '1 3'
         source_functor = '1'
         source_coef = '1'
       []
@@ -30,16 +28,14 @@
         source_coef = '1'
         dirichlet_boundaries = 'cylinder_2_right'
         boundary_values = '2'
-
       []
     []
   []
 []
 
-[Components]
-
+[ActionComponents]
   [cylinder_1]
-    type = Cylinder
+    type = CylinderComponent
     dimension = 2
     radius = 2
     height = 10
@@ -48,14 +44,14 @@
     block = 'cyl1'
   []
   [cylinder_2]
-    type = Cylinder
+    type = CylinderComponent
     dimension = 2
     radius = 4
     height = 1
     position = '2 0 0'
     direction = '0 0 1'
     physics = 'added_from_component'
-    block = cyl2
+    block = 'cyl2'
   []
 []
 
@@ -63,6 +59,41 @@
   type = Steady
 []
 
+[Postprocessors]
+  [min_u]
+    type = ElementExtremeValue
+    value_type = min
+    variable = u
+    block = '2 cyl1'
+  []
+  [min_v]
+    type = ElementExtremeValue
+    value_type = min
+    variable = v
+    block = 'cyl2'
+  []
+  [max_u]
+    type = ElementExtremeValue
+    variable = u
+    block = '2 cyl1'
+  []
+  [max_v]
+    type = ElementExtremeValue
+    variable = v
+    block = 'cyl2'
+  []
+  [ave_u]
+    type = ElementAverageValue
+    variable = u
+    block = '2 cyl1'
+  []
+  [ave_v]
+    type = ElementAverageValue
+    variable = v
+    block = 'cyl2'
+  []
+[]
+
 [Outputs]
-  exodus = true
+  csv = true
 []
