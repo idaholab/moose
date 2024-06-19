@@ -79,22 +79,12 @@ CentralDifference::computeTimeDerivatives()
   u_dot = *_solution;
   u_dotdot = *_solution;
 
-  // std::cout << "*_solution\n" << *_solution << "\n";
-
   // Computing derivatives
-  std::cout << "\n*_solution\n" << *_solution << "\n";
-  std::cout << "*_solution_old\n" << _solution_old << "\n";
-  std::cout << "*_solution_older\n" << _solution_older << "\n";
-
   computeTimeDerivativeHelper(u_dot, u_dotdot, _solution_old, _solution_older);
  
   // make sure _u_dotdot and _u_dot are in good state
   u_dotdot.close();
   u_dot.close();
-  // if(_sys.name()=="nl0")
-  //   std::cout << "\nCentralDifference.C::*solutionUDot()\n" << *_sys.solutionUDot() << "\n";
-  // // std::cout << "*_sys.solutionUDot\n" << u_dot << "\n";
-  // // std::cout << "*_sys.solutionUDotDot\n" << u_dotdot << "\n";
 
   // used for Jacobian calculations
   _du_dot_du = 1.0 / (2 * _dt);

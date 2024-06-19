@@ -1250,8 +1250,6 @@ SystemBase::copyOldSolutions()
       while (i > 0)
         {
           solutionState(i, Moose::SolutionIterationType(iteration_index)) = solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
-          // std::cout << "Solution State " << i << "\n" << solutionState(i, Moose::SolutionIterationType(iteration_index)) << "\n";
-          // std::cout << "Solution State " << i -1 << "\n" << solutionState(i-1, Moose::SolutionIterationType(iteration_index)) << "\n";
           --i;
         }
     }
@@ -1263,8 +1261,6 @@ SystemBase::copyOldSolutions()
     *solutionUDotDotOld() = *solutionUDotDot();
   if (solutionPreviousNewton())
     *solutionPreviousNewton() = *currentSolution();
-
-  std::cout << "SystemBase.C::*solutionUDot()\n" << *solutionUDot() << "\n";
 
 }
 
@@ -1326,10 +1322,7 @@ SystemBase::initSolutionState()
 
   // Add additional states as required by the variable states requested
   for (const auto & var : getVariables(/* tid = */ 0))
-  {
-    mooseInfoRepeated("oldest state for '", var->name() ,"' is ", var->oldestSolutionStateRequested() );
     state = std::max(state, var->oldestSolutionStateRequested());
-  }
   for (const auto & var : getScalarVariables(/* tid = */ 0))
     state = std::max(state, var->oldestSolutionStateRequested());
 
