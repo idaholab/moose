@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#24103'
+  [physics]
+    type = CSVDiff
+    input = 'component_with_physics.i'
+    csvdiff = 'component_with_physics_out.csv'
+    design = 'PhysicsComponentHelper.md'
+    requirement = 'The system shall be able to add equations onto the mesh of (action)components using the Physics syntax.'
+  []
+  [combining_meshes]
+    type = Exodiff
+    input = 'two_same_components.i'
+    exodiff = 'two_same_components_out.e'
+    design = 'CombineComponentsMeshes.md'
+    requirement = 'The system shall be able to combine two (action)components in a single simulation.'
+  []
+  [saved_mesh_component]
+    type = Exodiff
+    input = 'saved_mesh_component.i'
+    exodiff = 'saved_mesh_component_out.e'
+    design = 'SavedMeshComponent.md'
+    requirement = 'The system shall be able to use a mesh produced by a mesh generator for an (action)component.'
+  []
+[]

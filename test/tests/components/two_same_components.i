@@ -1,21 +1,6 @@
-[Mesh]
-  [cmg]
-    type = CartesianMeshGenerator
-    dim = 2
-    ix = 2
-    iy = 2
-    dx = 1
-    dy = 1
-    
-  []
-
-  final_generator = 'cmg'
- 
-[]
-
-[Components]
+[ActionComponents]
   [cylinder_1]
-    type = Cylinder
+    type = CylinderComponent
     dimension = 2
     radius = 2
     height = 10
@@ -23,12 +8,12 @@
     direction = '0 1 0'
   []
   [cylinder_2]
-    type = Cylinder
+    type = CylinderComponent
     dimension = 2
     radius = 4
     height = 1
-    position = '2 0 0'
-    direction = '0 0 1'
+    position = '0 0 0'
+    direction = '1 0 0'
   []
 []
 
@@ -38,4 +23,13 @@
 
 [Executioner]
   type = Steady
+[]
+
+[AuxVariables]
+  [dummy]
+  []
+[]
+
+[Outputs]
+  exodus = true
 []
