@@ -21,9 +21,9 @@ class RunPBS(RunHPC):
         if self.options.hpc_queue:
             submission_env['QUEUE'] = self.options.hpc_queue
 
-    def updateHPCJobs(self, active_hpc_jobs):
+    def updateHPCJobs(self, hpc_jobs):
         # Poll for all of the jobs within a single call
-        cmd = ['qstat', '-xf', '-F', 'json'] + [x.id for x in active_hpc_jobs]
+        cmd = ['qstat', '-xf', '-F', 'json'] + [x.id for x in hpc_jobs]
         exit_code, result, _ = self.callHPC(self.CallHPCPoolType.status, ' '.join(cmd))
         if exit_code != 0:
             return False
@@ -32,7 +32,7 @@ class RunPBS(RunHPC):
         json_result = json.loads(result)
         job_results = json_result['Jobs']
 
-        for hpc_job in active_hpc_jobs:
+        for hpc_job in hpc_jobs:
             # This job's result from the qstat command
             job_result = job_results[hpc_job.id]
             exit_code = job_result.get('Exit_status')
