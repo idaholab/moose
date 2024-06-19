@@ -31,7 +31,7 @@ public:
   /// Get the name of the mesh generator created by this component that generates the mesh for it
   /// - this could be a mesh generator in the [Mesh] block
   /// - or a mesh generator created by the component
-  const MeshGeneratorName & meshGeneratorName() const { return _mg_name; }
+  const std::vector<MeshGeneratorName> & meshGeneratorNames() const { return _mg_names; }
 
   /// Returns the subdomains for the component mesh, if any
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
@@ -76,7 +76,7 @@ protected:
   unsigned int _dimension;
 
   /// Name of the final mesh generator creating the mesh for the component
-  MeshGeneratorName _mg_name;
+  std::vector<MeshGeneratorName> _mg_names;
 
   /// Names of the blocks the component is comprised of
   std::vector<SubdomainName> _blocks;

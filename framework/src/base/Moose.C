@@ -470,7 +470,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("SetupMeshAction", "Mesh");
   // Components could create a Mesh without a Mesh block
-  registerSyntax("SetupMeshAction", "SystemComponents");
+  registerSyntax("SetupMeshAction", "ActionComponents");
   registerSyntax("SetupMeshCompleteAction", "Mesh");
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");

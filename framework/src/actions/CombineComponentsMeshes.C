@@ -32,41 +32,54 @@ CombineComponentsMeshes::act()
   // Create the mesh generator to combine them
   if (_current_task == "append_mesh_generator")
   {
-    // Get the list of components
-    std::vector<MeshGeneratorName> combined;
+    // Get the list of components meshes (from their last mesh generators)
+    std::vector<MeshGeneratorName> all_components_mgs;
+    std::vector<MeshGeneratorName> mgs_to_combine;
     std::vector<const ActionComponent *> components = _awh.getActions<ActionComponent>();
     for (const auto comp : components)
-      combined.push_back(comp->meshGeneratorName());
+    {
+      // Keep track of all mesh generators used in components
+      for (const auto & mg_name : comp->meshGeneratorNames())
+        all_components_mgs.push_back(mg_name);
+      mgs_to_combine.push_back(comp->meshGeneratorNames().back());
+    }
 
     // TODO once we have junctions
-    // Get the list of disconnected components
-    // Solve for disjoint groups
+    // - Get the list of disconnected components
+    // - Find the disjoint groups
+    // - Use a combiner generators on the vector of disjoint groups
 
-    // Add the main mesh from the Mesh block
+    // Add the main mesh from the Mesh block, only if it was not already used in
+    // making component meshes
     bool all_mgs_from_components = true;
     const auto final_mg = _app.getMeshGeneratorSystem().getFinalMeshGeneratorName();
     if (_app.getMeshGeneratorSystem().getMeshGeneratorNames().size())
     {
-      // Check that there are mesh generators that do not come from Components
+      // Check whether there are mesh generators that do not come from Components
       for (const auto & mg : _app.getMeshGeneratorSystem().getMeshGeneratorNames())
-        if (std::find(combined.begin(), combined.end(), mg) == combined.end())
+        if (std::find(all_components_mgs.begin(), all_components_mgs.end(), mg) ==
+            all_components_mgs.end())
           all_mgs_from_components = false;
-      // If a component is already defined on the final MG, no need to add it
-      if (final_mg != "" && std::find(combined.begin(), combined.end(), final_mg) == combined.end())
-        combined.push_back(final_mg);
+
+      // If a component is already defined on the final mesh MG, no need to add it
+      if (final_mg != "" &&
+          std::find(all_components_mgs.begin(), all_components_mgs.end(), final_mg) ==
+              all_components_mgs.end())
+        mgs_to_combine.push_back(final_mg);
       if (final_mg == "" && !all_mgs_from_components)
-        mooseError("Final mesh generator should be set for Mesh+Components to work together");
+        mooseError(
+            "Final mesh generator should be set for[Mesh] and [ActionComponents] to work together");
     }
 
     // Combine everyone into a combiner
     InputParameters params = _factory.getValidParams("CombinerGenerator");
-    params.set<std::vector<MeshGeneratorName>>("inputs") = combined;
+    params.set<std::vector<MeshGeneratorName>>("inputs") = mgs_to_combine;
     params.set<bool>("avoid_merging_subdomains") = true;
     params.set<bool>("avoid_merging_boundaries") = true;
     params.set<bool>("output") = true;
 
     // Single component case
-    if (combined.size() == 1)
+    if (mgs_to_combine.size() == 1)
       params.set<std::vector<Point>>("positions") = {Point(0, 0, 0)};
 
     // Replace the current final MG if there are mesh generators
