@@ -43,12 +43,7 @@ InitialConditionTempl<T>::~InitialConditionTempl()
 template <typename T>
 void
 InitialConditionTempl<T>::compute()
-{
-   // bail out right away if _cuurent_ic_state != _my_ic_state (add input parameter)
-   if (_my_state != _fe_problem.global_current_state){
-    return;
-   }
-   
+{  
   // -- NOTE ----
   // The following code is a copy from libMesh project_vector.C plus it adds some features, so we
   // can couple variable values
