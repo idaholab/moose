@@ -29,6 +29,7 @@ public:
   void computeADTimeDerivatives(ADReal & ad_u_dot,
                                 const dof_id_type & dof,
                                 ADReal & ad_u_dotdot) const override;
+  virtual void computeDirectTimeDerivatives(NumericVector<Number> & residual) override;
 
 protected:
   /// solution vector for \f$ {du^dotdot}\over{du} \f$

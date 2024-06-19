@@ -21,7 +21,8 @@ ExplicitTimeIntegrator::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
 
-  MooseEnum solve_type("consistent lumped lump_preconditioned", "consistent");
+  MooseEnum solve_type("consistent lumped lump_preconditioned lumped_central_difference",
+                       "consistent");
 
   params.addParam<MooseEnum>(
       "solve_type",
@@ -49,7 +50,8 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
   // so that it is valid to not supply solve_type in the Executioner block:
   _fe_problem.solverParams()._type = Moose::ST_LINEAR;
 
-  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
+  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED ||
+      _solve_type == LUMPED_CENTRAL_DIFFERENCE)
     _ones = &_nl.addVector("ones", false, PARALLEL);
 }
 
@@ -76,8 +78,11 @@ void
 ExplicitTimeIntegrator::meshChanged()
 {
   // Can only be done after the system is initialized
-  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
+  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED ||
+      _solve_type == LUMPED_CENTRAL_DIFFERENCE)
     *_ones = 1.;
+  if (_solve_type == LUMPED_CENTRAL_DIFFERENCE)
+    _is_direct = true;
 
   if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
     _linear_solver = LinearSolver<Number>::build(comm());
@@ -135,6 +140,51 @@ ExplicitTimeIntegrator::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
 
       converged = solveLinearSystem(mass_matrix);
 
+      break;
+    }
+    case LUMPED_CENTRAL_DIFFERENCE:
+    {
+      // if (_t_step == 15)
+      // {
+      //   std::cout << "debug" << std::endl;
+      // }
+      mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+
+      // "Invert" the diagonal mass matrix
+      _mass_matrix_diag.reciprocal();
+
+      // Calculate acceleration
+      auto & accel = *_sys.solutionUDotDot();
+      accel.pointwise_mult(_mass_matrix_diag, _explicit_residual);
+      // accel.print();
+      auto & vel = *_sys.solutionUDot();
+      vel.zero();
+
+      auto accel_scaled = accel.clone();
+
+      // Scaling the acceleration
+      accel_scaled->scale(_dt);
+
+      // Adding old vel to new vel
+      auto old_vel = _sys.solutionUDotOld();
+      vel += *old_vel;
+      vel += *accel_scaled;
+
+      auto vel_scaled = vel.clone();
+
+      vel_scaled->scale(_dt);
+
+      _solution_update = *vel_scaled;
+
+      // Checking for convergence
+      auto sum = _solution_update.sum();
+      converged = std::isfinite(sum);
+
+      // Linear iterations remain zero
+      _n_linear_iterations = 0;
+
+      vel.close();
+      accel.close();
       break;
     }
     default:

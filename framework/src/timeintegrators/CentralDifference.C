@@ -62,6 +62,30 @@ CentralDifference::initialSetup()
 }
 
 void
+CentralDifference::computeDirectTimeDerivatives(NumericVector<Number> & residual)
+{
+  auto & u_dotdot = *_sys.solutionUDotDot();
+  auto & u_dot = *_sys.solutionUDot();
+
+  _mass_matrix_diag.reciprocal();
+
+  u_dotdot.pointwise_mult(_mass_matrix_diag, residual);
+
+  auto u_dotdot_scaled = u_dotdot.clone();
+  u_dotdot_scaled->scale(_dt);
+
+  auto old_vel = _sys.solutionUDotOld();
+  u_dot += *old_vel;
+  u_dot += *u_dotdot_scaled;
+
+  // Account for resid being on RHS
+  u_dotdot.scale(-1);
+
+  u_dotdot.close();
+  u_dot.close();
+}
+
+void
 CentralDifference::computeTimeDerivatives()
 {
   if (!_sys.solutionUDot())
@@ -71,6 +95,12 @@ CentralDifference::computeTimeDerivatives()
   if (!_sys.solutionUDotDot())
     mooseError("CentralDifference: Time derivative of solution (`u_dotdot`) is not stored. Please "
                "set uDotDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+
+  // Compute direct time derivative if in main solver
+  if (_sys.name() == "nl0" && _is_direct)
+  {
+    return;
+  }
 
   // Declaring u_dot and u_dotdot
   auto & u_dot = *_sys.solutionUDot();
@@ -83,6 +113,7 @@ CentralDifference::computeTimeDerivatives()
   computeTimeDerivativeHelper(u_dot, u_dotdot, _solution_old, _solution_older);
 
   // make sure _u_dotdot and _u_dot are in good state
+
   u_dotdot.close();
   u_dot.close();
 

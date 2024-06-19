@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
+#include "libmesh/id_types.h"
+#include "libmesh/libmesh_common.h"
 
 class FEProblemBase;
 class SystemBase;
@@ -139,6 +141,11 @@ public:
   virtual const bool & isLumped() const { return _is_lumped; }
 
   /**
+   * Returns whether or not time integrator is using a direct acceleration calculation
+   */
+  virtual const bool & isDirect() const { return _is_direct; }
+
+  /**
    * Returns the tag for the nodal multiplication factor for the residual calculation of the udot
    * term.
    *
@@ -152,6 +159,12 @@ public:
    * By default, this tag will be associated with udotdot.
    */
   TagID uDotDotFactorTag() const { return _u_dotdot_factor_tag; }
+
+  virtual void computeDirectTimeDerivatives(NumericVector<Number> & residual)
+  {
+    residual.type();
+    std::cout << "not using direct" << std::endl;
+  }
 
 protected:
   /**
@@ -195,6 +208,9 @@ protected:
 
   /// Boolean flag that is set to true if lumped mass matrix is used
   bool _is_lumped;
+
+  /// Boolean flag that is set to true if direct acceleration calculation is used
+  bool _is_direct;
 
   /// The vector tag for the nodal multiplication factor for the residual calculation of the udot term
   const TagID _u_dot_factor_tag;

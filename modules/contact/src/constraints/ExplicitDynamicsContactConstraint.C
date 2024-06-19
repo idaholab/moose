@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "AuxiliarySystem.h"
+#include "MooseError.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "SystemBase.h"
@@ -23,6 +24,7 @@
 #include "ContactLineSearchBase.h"
 #include "ExplicitDynamicsContactAction.h"
 
+#include "libmesh/libmesh_common.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
@@ -66,6 +68,14 @@ ExplicitDynamicsContactConstraint::validParams()
                         false,
                         "Whether to overwrite the position of contact boundaries with the velocity "
                         "computed with the contact algorithm.");
+  params.addParam<bool>(
+      "direct",
+      false,
+      "Where or not you are using a direct calculation of the acceleration in the "
+      "time integrator");
+  params.addParam<bool>(
+      "penalty_enforcement", false, "Whether or not to use a penalty contact enforcement");
+  params.addParam<Real>("penalty_stiffness", 1e6, "The stiffness for the penalty method");
   params.addClassDescription(
       "Apply non-penetration constraints on the mechanical deformation in explicit dynamics "
       "using a node on face formulation by solving uncoupled momentum-balance equations.");
@@ -104,7 +114,10 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _neighbor_vel_y(isCoupled("vel_y") ? coupledNeighborValue("vel_y") : _zero),
     _neighbor_vel_z((_mesh.dimension() == 3 && isCoupled("vel_z")) ? coupledNeighborValue("vel_z")
                                                                    : _zero),
-    _overwrite_current_solution(getParam<bool>("overwrite_current_solution"))
+    _overwrite_current_solution(getParam<bool>("overwrite_current_solution")),
+    _direct(getParam<bool>("direct")),
+    _penalty_enforcement(getParam<bool>("penalty_enforcement")),
+    _penalty_stiffness(getParam<Real>("penalty_stiffness"))
 {
   _overwrite_secondary_residual = false;
 
@@ -149,6 +162,8 @@ ExplicitDynamicsContactConstraint::timestepSetup()
     updateContactStatefulData(/* beginning_of_step = */ true);
     _update_stateful_data = false;
     _dof_to_position.clear();
+    // Setting up to store contact velocities
+    _dof_to_vel.clear();
   }
 }
 
@@ -255,7 +270,10 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
       pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * pen_force);
       break;
     case ExplicitDynamicsContactModel::FRICTIONLESS_BALANCE:
-      solveImpactEquations(node, pinfo, distance_vec);
+      if (_penalty_enforcement)
+        penaltyEnforcement(pinfo);
+      else
+        solveImpactEquations(node, pinfo, distance_vec);
       break;
     default:
       mooseError("Invalid or unavailable contact model");
@@ -271,6 +289,40 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
       pinfo->_contact_force.zero();
     }
   }
+}
+
+void
+ExplicitDynamicsContactConstraint::penaltyEnforcement(PenetrationInfo * pinfo)
+{
+  Real gap_threshold = 1e-6;  // Target gap length
+  Real max_iteration = 20000; // Max iterations
+  Real tolerance = 1e-8;      // Convergence tolerance
+  Real penalty_force = 0.0;   // Initialize forces
+  Real force = 0.0;
+  Real gap = pinfo->_distance; // Positive distance indicates penetration
+  double disp = 0.0;
+  // Penalty Method
+  for (unsigned int iteration = 0; iteration < max_iteration; ++iteration)
+  {
+    // Update gap distance
+    gap = pinfo->_distance - disp;
+    if (gap >= gap_threshold)
+    {
+      // Get penalty force
+      penalty_force = _penalty_stiffness * (gap - gap_threshold);
+      force += penalty_force;
+    }
+    // Update displacement
+    double new_disp = force / _penalty_stiffness;
+    // Check convergence
+    if (abs(new_disp - disp) < tolerance)
+      break;
+    disp = new_disp;
+    if (iteration + 1 == penalty_force)
+      mooseError("Hit max it");
+  }
+  // Update contact force
+  pinfo->_contact_force = pinfo->_normal * -force;
 }
 
 void
@@ -454,21 +506,23 @@ void
 ExplicitDynamicsContactConstraint::overwriteBoundaryVariables(NumericVector<Number> & soln,
                                                               const Node & secondary_node) const
 {
-  if (_component == 0 && _overwrite_current_solution)
   {
-    dof_id_type dof_x = secondary_node.dof_number(_sys.number(), _var_objects[0]->number(), 0);
-    dof_id_type dof_y = secondary_node.dof_number(_sys.number(), _var_objects[1]->number(), 0);
-    dof_id_type dof_z = secondary_node.dof_number(_sys.number(), _var_objects[2]->number(), 0);
-
-    if (_dof_to_position.find(dof_x) != _dof_to_position.end())
+    if (_component == 0 && _overwrite_current_solution)
     {
-      const auto & position_x = libmesh_map_find(_dof_to_position, dof_x);
-      const auto & position_y = libmesh_map_find(_dof_to_position, dof_y);
-      const auto & position_z = libmesh_map_find(_dof_to_position, dof_z);
+      dof_id_type dof_x = secondary_node.dof_number(_sys.number(), _var_objects[0]->number(), 0);
+      dof_id_type dof_y = secondary_node.dof_number(_sys.number(), _var_objects[1]->number(), 0);
+      dof_id_type dof_z = secondary_node.dof_number(_sys.number(), _var_objects[2]->number(), 0);
 
-      soln.set(dof_x, position_x);
-      soln.set(dof_y, position_y);
-      soln.set(dof_z, position_z);
+      if (_dof_to_position.find(dof_x) != _dof_to_position.end())
+      {
+        const auto & position_x = libmesh_map_find(_dof_to_position, dof_x);
+        const auto & position_y = libmesh_map_find(_dof_to_position, dof_y);
+        const auto & position_z = libmesh_map_find(_dof_to_position, dof_z);
+
+        soln.set(dof_x, position_x);
+        soln.set(dof_y, position_y);
+        soln.set(dof_z, position_z);
+      }
     }
   }
 }
