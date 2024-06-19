@@ -34,7 +34,10 @@ moose_libgfortran5:
   - libgfortran5 13.2.0 hf226fd6_3                          # [arm64]
 
 moose_gcc:                                                  # [linux]
-  - gcc 12.3.0                                              # [linux]
+  - gcc 12.3.0 h915e2ae_7                                   # [linux]
+
+moose_gcc_impl:                                             # [linux]
+  - gcc_impl_linux-64 12.3.0 h58ffeeb_7                     # [linux]
 
 moose_clangcc:                                              # [osx]
   - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]

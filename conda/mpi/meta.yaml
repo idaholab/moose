@@ -37,6 +37,7 @@ requirements:
     - {{ moose_libzlib }}
     - {{ moose_clangcc }}                     # [osx]
     - {{ moose_clangxx }}                     # [osx]
+    - {{ moose_gcc_impl }}                    # [linux]
     - {{ moose_gcc }}                         # [linux]
     - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
     - gfortran

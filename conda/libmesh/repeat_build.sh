@@ -3,6 +3,6 @@ LIBMESH_DIR=${PREFIX}/libmesh \
                     --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${VTK_VERSION} \
                     $*
 
-CORES=${MOOSE_JOBS:-2}
+CORES=${MOOSE_JOBS:-6}
 make -j $CORES
-make install
+make install -j $CORES
