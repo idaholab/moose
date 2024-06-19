@@ -1,0 +1,23 @@
+[Tests]
+  design = 'FileMeshPhysicsComponent.md'
+  issues = '#23794 #24103'
+
+  [generate_mesh]
+    type = RunApp
+    input = rectangle.i
+    recover = false # No transient, just mesh generation
+    cli_args = "--mesh-only rectangle.e"
+    requirement = 'The system shall be able to generate a simple rectangular mesh for the physics component tests.'
+  []
+  [single_physics]
+    type = Exodiff
+    input = single_physics.i
+    exodiff = single_physics_out.e
+    abs_zero = 5e-6
+    prereq = 'generate_mesh'
+    method = "!dbg"
+    installation_type = in_tree
+    max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
+    requirement = 'The system shall be able to create a component leveraging the Physics syntax to define equations.'
+  []
+[]

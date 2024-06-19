@@ -67,9 +67,6 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
 
     for (unsigned int i = 0; i < n_threads; ++i)
       _assembly[i].emplace_back(std::make_unique<Assembly>(*displaced_nl, i));
-
-    displaced_nl->addTimeIntegrator(
-        _mproblem.getNonlinearSystemBase(nl_sys_num).getSharedTimeIntegrator());
   }
 
   _nl_solution.resize(_displaced_solver_systems.size(), nullptr);
@@ -80,7 +77,6 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
                                         _mproblem.getAuxiliarySystem(),
                                         "displaced_" + _mproblem.getAuxiliarySystem().name(),
                                         Moose::VAR_AUXILIARY);
-  _displaced_aux->addTimeIntegrator(_mproblem.getAuxiliarySystem().getSharedTimeIntegrator());
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
   // // well before our Problem(s) are constructed. Historically, in MooseMesh we have a bunch of
@@ -193,6 +189,15 @@ DisplacedProblem::init()
 void
 DisplacedProblem::initAdaptivity()
 {
+}
+
+void
+DisplacedProblem::addTimeIntegrator()
+{
+  for (const auto nl_sys_num : make_range(_mproblem.numNonlinearSystems()))
+    _displaced_solver_systems[nl_sys_num]->addTimeIntegrator(
+        _mproblem.getNonlinearSystemBase(nl_sys_num).getSharedTimeIntegrator());
+  _displaced_aux->addTimeIntegrator(_mproblem.getAuxiliarySystem().getSharedTimeIntegrator());
 }
 
 void

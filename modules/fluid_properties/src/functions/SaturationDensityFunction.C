@@ -32,21 +32,26 @@ SaturationDensityFunction::SaturationDensityFunction(const InputParameters & par
     FunctionInterface(this),
 
     _T_fn(getFunction("T")),
-    _fp_2phase(getUserObject<TwoPhaseFluidProperties>("fp_2phase")),
-    _fp_liquid(getUserObjectByName<SinglePhaseFluidProperties>(_fp_2phase.getLiquidName())),
-    _fp_vapor(getUserObjectByName<SinglePhaseFluidProperties>(_fp_2phase.getVaporName())),
     _use_liquid(getParam<bool>("use_liquid"))
 {
+}
+
+void
+SaturationDensityFunction::initialSetup()
+{
+  _fp_2phase = &getUserObject<TwoPhaseFluidProperties>("fp_2phase");
+  _fp_liquid = &getUserObjectByName<SinglePhaseFluidProperties>(_fp_2phase->getLiquidName());
+  _fp_vapor = &getUserObjectByName<SinglePhaseFluidProperties>(_fp_2phase->getVaporName());
 }
 
 Real
 SaturationDensityFunction::value(Real t, const Point & point) const
 {
   const Real T = _T_fn.value(t, point);
-  const Real p = _fp_2phase.p_sat(T);
+  const Real p = _fp_2phase->p_sat(T);
 
   if (_use_liquid)
-    return _fp_liquid.rho_from_p_T(p, T);
+    return _fp_liquid->rho_from_p_T(p, T);
   else
-    return _fp_vapor.rho_from_p_T(p, T);
+    return _fp_vapor->rho_from_p_T(p, T);
 }

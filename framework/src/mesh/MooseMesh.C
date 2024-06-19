@@ -171,6 +171,15 @@ MooseMesh::validParams()
       "Optional list of subdomain names to be applied to the ids given in add_subdomain_ids. "
       "This list must contain the same number of items as add_subdomain_ids.");
 
+  params.addParam<std::vector<BoundaryID>>(
+      "add_sideset_ids",
+      "The listed sideset ids will be assumed valid for the mesh. This permits setting up boundary "
+      "restrictions for sidesets initially containing no sides.");
+  params.addParam<std::vector<BoundaryName>>(
+      "add_sideset_names",
+      "The listed sideset names will be assumed valid for the mesh. This permits setting up "
+      "boundary restrictions for sidesets initially containing no sides.");
+
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -424,7 +433,33 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   }
   else if (isParamValid("add_subdomain_names"))
     // the user has defined add_subdomain_names, but not add_subdomain_ids
-    mooseError("In combination with add_subdomain_names, add_subdomain_ids must be defined.");
+    paramError("add_subdomain_names",
+               "In combination with add_subdomain_names, add_subdomain_ids must be defined.");
+
+  // Add explicitly requested sidesets
+  if (isParamValid("add_sideset_ids") && !isParamValid("add_sideset_names"))
+  {
+    const auto & add_sideset_ids = getParam<std::vector<BoundaryID>>("add_sideset_ids");
+    _mesh_boundary_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
+    _mesh_sideset_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
+  }
+  else if (isParamValid("add_sideset_ids") && isParamValid("add_sideset_names"))
+  {
+    const auto add_sidesets =
+        getParam<BoundaryID, BoundaryName>("add_sideset_ids", "add_sideset_names");
+    for (const auto & [sideset_id, sideset_name] : add_sidesets)
+    {
+      // add sideset id
+      _mesh_boundary_ids.insert(sideset_id);
+      _mesh_sideset_ids.insert(sideset_id);
+      // set name of the sideset just added
+      setBoundaryName(sideset_id, sideset_name);
+    }
+  }
+  else if (isParamValid("add_sideset_names"))
+    // the user has defined add_sideset_names, but not add_sideset_ids
+    paramError("add_sideset_names",
+               "In combination with add_sideset_names, add_sideset_ids must be defined.");
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();

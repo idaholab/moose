@@ -65,4 +65,15 @@
                   'during an impact-settling under gravity acceleration.'
     heavy = true
   []
+  [highvel]
+    type = 'CSVDiff'
+    input = 'highvel.i'
+    csvdiff = 'highvel_out.csv'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem with contact at an elevated velocity '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
+                  'during an impact-settling under increased gravity acceleration.'
+    heavy = true
+  []
 []
