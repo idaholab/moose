@@ -114,8 +114,7 @@ void
 TimedSubdomainModifier::buildFromParameters()
 {
 
-  const auto times = getParam<std::vector<Real>>("times");
-  _times = std::set<Real>(times.begin(), times.end());
+  _times = getParam<std::vector<Real>>("times");
   const auto n = _times.size();
 
   const auto raw_from = getParam<std::vector<SubdomainName>>("blocks_from");
@@ -255,7 +254,7 @@ TimedSubdomainModifier::buildFromFile()
   // fill the to and from blocks vectors
   const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
   for (const auto & time_str : strTimes)
-    _times.insert(std::stod(time_str));
+    _times.push_back(std::stod(time_str));
   std::transform(strBlockFrom.begin(),
                  strBlockFrom.end(),
                  _blocks_from.begin(),
