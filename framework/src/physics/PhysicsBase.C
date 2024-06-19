@@ -265,8 +265,8 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
   {
     SystemBase & system = are_nonlinear ? getProblem().getNonlinearSystemBase(_sys_number)
                                         : getProblem().systemBaseAuxiliary();
-    _console << "Adding Exodus restart for " << variables_to_copy.size()
-             << " variables: " << Moose::stringify(variables_to_copy) << std::endl;
+    mooseInfoRepeated("Adding Exodus restart for " + std::to_string(variables_to_copy.size()) +
+                      " variables: " + Moose::stringify(variables_to_copy));
     // TODO Check that the variable types and orders are actually supported for exodus restart
     for (const auto & var_name : variables_to_copy)
       system.addVariableToCopy(
