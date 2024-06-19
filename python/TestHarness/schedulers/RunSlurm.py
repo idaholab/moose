@@ -18,8 +18,9 @@ class RunSlurm(RunHPC):
     def __init__(self, harness, params):
         super().__init__(harness, params)
 
-        # Slurm is quite a bit faster at updating
-        self.hpc_jobs_update_interval = 5
+        # Slurm is significantly better at job status, so we can
+        # update all at the same time
+        self.update_hpc_jobs_chunk_size = 1000
 
     def updateHPCJobs(self, hpc_jobs):
         # Poll for all of the jobs within a single call
