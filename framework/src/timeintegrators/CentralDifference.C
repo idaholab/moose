@@ -24,6 +24,8 @@ CentralDifference::validParams()
 
   params.addClassDescription("Implementation of explicit, Central Difference integration without "
                              "invoking any of the nonlinear solver");
+  params.addParam<bool>(
+      "use_direct", false, "Whether or not to use a direct acceleration calculation");
 
   return params;
 }
@@ -31,10 +33,13 @@ CentralDifference::validParams()
 CentralDifference::CentralDifference(const InputParameters & parameters)
   : ActuallyExplicitEuler(parameters),
     _du_dotdot_du(_sys.duDotDotDu()),
-    _solution_older(_sys.solutionState(2))
+    _solution_older(_sys.solutionState(2)),
+    _use_direct(getParam<bool>("use_direct"))
 {
   if (_solve_type == LUMPED)
     _is_lumped = true;
+  if (_use_direct)
+    _is_direct = true;
 
   _fe_problem.setUDotOldRequested(true);
   _fe_problem.setUDotDotRequested(true);
@@ -71,6 +76,32 @@ CentralDifference::computeTimeDerivatives()
   if (!_sys.solutionUDotDot())
     mooseError("CentralDifference: Time derivative of solution (`u_dotdot`) is not stored. Please "
                "set uDotDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+
+  // Compute direct time derivative if in main solver
+  if (_sys.name() == "nl0" && _is_direct)
+  {
+    auto & u_dotdot = *_sys.solutionUDotDot();
+    auto & u_dot = *_sys.solutionUDot();
+    _mass_matrix_diag.reciprocal();
+
+    // a = M^(-1)F
+    u_dotdot.pointwise_mult(_mass_matrix_diag, _explicit_residual);
+
+    auto u_dotdot_scaled = u_dotdot.clone();
+    u_dotdot_scaled->scale(_dt);
+
+    // v_(n+1/2) = v_(n-1/2)+dt*a
+    auto old_vel = _sys.solutionUDotOld();
+    u_dot += *old_vel;
+    u_dot += *u_dotdot_scaled;
+
+    // Account for resid being on RHS
+    u_dotdot.scale(-1);
+
+    u_dotdot.close();
+    u_dot.close();
+    return;
+  }
 
   // Declaring u_dot and u_dotdot
   auto & u_dot = *_sys.solutionUDot();
