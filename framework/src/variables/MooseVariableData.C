@@ -1312,24 +1312,6 @@ MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned in
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::setDofValueOld(const OutputData & value, unsigned int index)
-{
-  auto & dof_values = _vector_tags_dof_u[_old_solution_tag];
-  dof_values[index] = value;
-  _has_dof_values = true;
-
-  auto & u_old = _vector_tag_u[_old_solution_tag];
-  for (unsigned int qp = 0; qp < u_old.size(); qp++)
-  {
-    u_old[qp] = (*_phi)[0][qp] * dof_values[0];
-
-    for (unsigned int i = 1; i < dof_values.size(); i++)
-      u_old[qp] += (*_phi)[i][qp] * dof_values[i];
-  }
-}
-
-template <typename OutputType>
-void
 MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   auto & dof_values = _vector_tags_dof_u[_solution_tag];

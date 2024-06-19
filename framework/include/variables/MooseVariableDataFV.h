@@ -231,13 +231,6 @@ public:
   void setDofValue(const OutputData & value, unsigned int index);
   ///@}
 
-  ///@{
-  /**
-   * dof value setters
-   */
-  void setDofValueOld(const OutputData & value, unsigned int index);
-  ///@}
-
   OutputData
   getElementalValue(const Elem * elem, Moose::SolutionState state, unsigned int idx = 0) const;
 

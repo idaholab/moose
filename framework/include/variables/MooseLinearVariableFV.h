@@ -252,8 +252,6 @@ public:
   // *********************************************************************************
 
   virtual void setDofValue(const OutputData & /*value*/, unsigned int /*index*/) override;
-  
-  virtual void setDofValueOld(const OutputData & /*value*/, unsigned int /*index*/) override;
 
   virtual void getDofIndices(const Elem * elem,
                              std::vector<dof_id_type> & dof_indices) const override;

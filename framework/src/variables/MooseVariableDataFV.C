@@ -623,25 +623,6 @@ MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned 
 
 template <typename OutputType>
 void
-MooseVariableDataFV<OutputType>::setDofValueOld(const OutputData & value, unsigned int index)
-{
-  mooseAssert(index == 0, "We only ever have one dof value locally");
-  _vector_tags_dof_u[_old_solution_tag][index] = value;
-  _has_dof_values = true;
-
-  auto & u_old = _vector_tag_u[_solution_tag];
-  // Update the qp values as well
-  for (const auto qp : index_range(u_old))
-    u_old[qp] = value;
-
-  // Don't know if setDofValueOld should be implemented for finite volume
-  // if (_need_ad_u)
-  //   for (const auto qp : index_range(_ad_u))
-  //     _ad_u[qp] = value;
-}
-
-template <typename OutputType>
-void
 MooseVariableDataFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   auto & dof_values = _vector_tags_dof_u[_solution_tag];

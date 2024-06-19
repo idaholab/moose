@@ -383,13 +383,6 @@ MooseVariableFV<OutputType>::setDofValue(const OutputData & value, unsigned int 
 
 template <typename OutputType>
 void
-MooseVariableFV<OutputType>::setDofValueOld(const OutputData & value, unsigned int index)
-{
-  _element_data->setDofValueOld(value, index);
-}
-
-template <typename OutputType>
-void
 MooseVariableFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   _element_data->setDofValues(values);
