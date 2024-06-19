@@ -21,9 +21,9 @@ class RunSlurm(RunHPC):
         # Slurm is quite a bit faster at updating
         self.hpc_jobs_update_interval = 5
 
-    def updateHPCJobs(self, active_hpc_jobs):
+    def updateHPCJobs(self, hpc_jobs):
         # Poll for all of the jobs within a single call
-        active_job_ids = ','.join([x.id for x in active_hpc_jobs])
+        active_job_ids = ','.join([x.id for x in hpc_jobs])
         cmd = ['sacct', '-j', active_job_ids, '--parsable2', '--noheader',
                '-o', 'jobid,exitcode,state,reason']
         exit_code, result, _ = self.callHPC(self.CallHPCPoolType.status, ' '.join(cmd))
@@ -46,7 +46,7 @@ class RunSlurm(RunHPC):
                             'reason': status_split[3]}
 
         # Update the jobs that we can
-        for hpc_job in active_hpc_jobs:
+        for hpc_job in hpc_jobs:
             # Slurm jobs are sometimes not immediately available
             status = statuses.get(hpc_job.id)
             if status is None:
