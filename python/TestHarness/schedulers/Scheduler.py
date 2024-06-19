@@ -190,8 +190,21 @@ class Scheduler(MooseObject):
         Sort by largest DAG and launch
         """
         sorted_jobs = sorted(self.__dag_bank, key=lambda x: len(x[1].topological_sort()), reverse=True)
-        for jobs, _ in sorted_jobs:
-            self.queueJobs(jobs)
+        for job_dag, _ in sorted_jobs:
+            # Allow derived schedulers access to the jobs before they launch
+            # We purposely call this one here so that we augment the Jobs
+            # in the order that they're launched
+            self.augmentJobs(job_dag.getJobs())
+            # And launch
+            self.queueJobs(job_dag)
+
+    def outputJobStatus(self, job, caveats=None):
+        """
+        Forces a Job's status to be output asap
+        """
+        with job.getLock():
+            job.force_report_status = True
+        self.handleJobStatus(job, caveats=caveats)
 
     def setAndOutputJobStatus(self, job, status, caveats=None):
         """
@@ -199,8 +212,7 @@ class Scheduler(MooseObject):
         """
         with job.getLock():
             job.setStatus(status)
-            job.force_report_status = True
-        self.handleJobStatus(job, caveats=caveats)
+        self.outputJobStatus(job, caveats=caveats)
 
     def isRunning(self):
         """
@@ -271,9 +283,6 @@ class Scheduler(MooseObject):
         jobs = JobDAG(self.options, parallel_scheduling)
         j_dag = jobs.createJobs(testers)
 
-        # Allow derived schedulers access to the jobs before they launch
-        self.augmentJobs(jobs.getJobs())
-
         # job-count to tester-count sanity check
         if j_dag.size() != len(testers):
             raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
@@ -287,7 +296,7 @@ class Scheduler(MooseObject):
         # Store all scheduled jobs
         self.__scheduled_jobs.append(j_dag.topological_sort())
 
-    def queueJobs(self, jobs):
+    def queueJobs(self, job_dag):
         """
         Determine which queue jobs should enter. Finished jobs are placed in the status
         pool to be printed while all others are placed in the runner pool to perform work.
@@ -296,8 +305,8 @@ class Scheduler(MooseObject):
         jobs to become available and ready to enter the runner pool (dependency jobs).
         """
         state = self.getStatusPoolState()
-        with jobs.getLock():
-            concurrent_jobs = jobs.getJobsAndAdvance()
+        with job_dag.getLock():
+            concurrent_jobs = job_dag.getJobsAndAdvance()
             for job in concurrent_jobs:
                 if job.isFinished():
                     if not state:
@@ -306,7 +315,7 @@ class Scheduler(MooseObject):
                 elif job.isHold():
                     if not state:
                         job.setStatus(job.queued)
-                        self.run_pool.apply_async(self.runJob, (job, jobs,))
+                        self.run_pool.apply_async(self.runJob, (job, job_dag,))
 
     def getLoad(self):
         """ Method to return current load average """

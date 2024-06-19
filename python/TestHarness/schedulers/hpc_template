@@ -4,6 +4,9 @@
 #PBS -l select={{ NUM_PROCS }}:mpiprocs=1:ncpus={{ NUM_THREADS }}
 #PBS -l walltime={{ WALLTIME }}
 #PBS -P {{ PROJECT }}
+{%- if HOLD is defined %}
+#PBS -h
+{%- endif %}
 {%- if QUEUE is defined %}
 #PBS -q {{ QUEUE }}
 {%- endif %}
@@ -17,6 +20,9 @@
 #SBATCH --time={{ WALLTIME }}
 #SBATCH --wckey={{ PROJECT }}
 #SBATCH --output={{ OUTPUT }}
+{%- if HOLD is defined %}
+#SBATCH --hold
+{%- endif %}
 {%- if PLACE == "scatter" %}
 #SBATCH --ntasks-per-node=1
 {%- endif %}

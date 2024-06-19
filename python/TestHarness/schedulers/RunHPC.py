@@ -10,32 +10,31 @@
 import urllib.parse
 from RunParallel import RunParallel
 import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib, contextlib
+from enum import Enum
 import paramiko
 import jinja2
+import copy
 from multiprocessing.pool import ThreadPool
 from TestHarness import util
 
 class HPCJob:
+    # The valid job states for a HPC job
+    State = Enum('State', ['waiting', 'held', 'queued', 'running', 'done', 'killed'])
+
     """
     Structure that represents the cached information about an HPC job
     """
-    def __init__(self, job, id, command):
-        # The underlying Job (only set on init, _should_ be thread safe)
+    def __init__(self, job):
+        # The underlying Job
         self.job = job
-        # The job identifier (only set on init, _should_ be thread safe)
-        self.id = id
+        # The ID of the HPC job
+        self.id = None
         # The command that was ran within the job
-        self.command = command
-        # Whether or not this job is done; here done doesn't mean if it
-        # was successful or not, just if it is not running/queued anymore
-        self.done = False
+        self.command = None
+        # The state that this job is in
+        self.state = self.State.waiting
         # The exit code of the command that was ran (if any)
         self.exit_code = None
-        # Whether or not this job was killed; used so what we don't
-        # bother killing a job multiple times
-        self.killed = False
-        # Whether or not the job is currently running
-        self.running = False
         # Lock for accessing this object
         self.lock = threading.Lock()
 
@@ -45,47 +44,29 @@ class HPCJob:
         """
         return self.lock
 
-    def set(self, **kwargs):
+    def get(self, key):
         """
-        Thread-safe setter.
-        """
-        with self.getLock():
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-
-    def getExitCode(self):
-        """
-        Gets the thread-safe exit code.
-
-        This exit code is what is read by the HPCRunner,
-        which means that it needs to be locked as we're
-        also updating it at the same time.
+        Thread-safe getter for a key
         """
         with self.getLock():
-            return self.exit_code
+            return getattr(self, key)
 
-    def getRunning(self):
+    def getState(self):
         """
-        Gets the thread-safe running state.
+        Thread-safe getter for the state
         """
-        with self.getLock():
-            return self.running
+        return self.get('state')
 
-    def getKilled(self):
+    def isKilled(self):
         """
-        Gets the thread-safe killed state.
+        Thread-safe getter for whether or not this was killed
         """
-        with self.getLock():
-            return self.killed
-
-    def getDone(self):
-        """
-        Gets the thread-safe done state.
-        """
-        with self.getLock():
-            return self.done
+        return self.getState() == self.State.killed
 
 class RunHPC(RunParallel):
+    # The types for the pools for calling HPC commands
+    CallHPCPoolType = Enum('CallHPCPoolType', ['submit', 'queue', 'status', 'kill'])
+
     """
     Base scheduler for jobs that are ran on HPC.
     """
@@ -106,18 +87,28 @@ class RunHPC(RunParallel):
         # Lock for accessing self.hpc_jobs
         self.hpc_jobs_lock = threading.Lock()
         # How often to poll for status updates in getHPCJob()
-        self.hpc_jobs_update_interval = 10
-        # Map of Job -> HPCJob
+        self.hpc_jobs_update_interval = 5
+        # Map of Job ID -> HPCJob
         self.hpc_jobs = {}
         # The thread that will update the HPCJobs
         self.hpc_jobs_updater = None
+
+        # The pool of processes for running HPC scheduler commands
+        # We have a pool so that we don't overwhelm the login node
+        # with commands, and have a pool for each interaction type
+        # so that those commands only compete with commands of the
+        # other type
+        self.call_hpc_pool = {}
+        self.call_hpc_pool[self.CallHPCPoolType.submit] = ThreadPool(processes=5)
+        if not self.options.hpc_no_hold: # only used with holding jobs
+            self.call_hpc_pool[self.CallHPCPoolType.queue] = ThreadPool(processes=5)
+        for val in [self.CallHPCPoolType.status, self.CallHPCPoolType.kill]:
+            self.call_hpc_pool[val] = ThreadPool(processes=1)
 
         # The jump hostname for running commands, if any
         self.ssh_hosts = self.options.hpc_host
         # The SSH key to use for connections
         self.ssh_key_filenames = None
-        # The pool of processes for running threaded SSH comments
-        self.ssh_pool = None
         # The threaded SSHClient objects, mapped by thread identifier
         # Tuple of (paramiko.SSHClient, str) where str is the hostname
         self.ssh_clients = None
@@ -128,7 +119,7 @@ class RunHPC(RunParallel):
         if self.ssh_hosts:
             if isinstance(self.ssh_hosts, str):
                 self.ssh_hosts = [self.ssh_hosts]
-            self.ssh_pool = ThreadPool(processes=5)
+
             self.ssh_clients = {}
             self.ssh_clients_lock = threading.Lock()
 
@@ -146,8 +137,15 @@ class RunHPC(RunParallel):
                 except:
                     pass
 
-            # Make sure that we can connect up front
-            self.callHPC('hostname')
+        # Make sure that we can call commands up front
+        for val in self.CallHPCPoolType:
+            if self.options.hpc_no_hold and val == self.CallHPCPoolType.queue:
+                continue
+            self.callHPC(val, 'hostname')
+
+        # Pool for submitJob(), so that we can submit jobs to be
+        # held in the background without blocking
+        self.submit_job_pool = None if self.options.hpc_no_hold else ThreadPool(processes=10)
 
         if os.environ.get('APPTAINER_CONTAINER'):
             if not self.ssh_hosts:
@@ -228,7 +226,7 @@ class RunHPC(RunParallel):
         """
         Calls a SSH command.
 
-        Should only be used via apply with the self.ssh_pool.
+        Should only be used via apply with the self.call_hpc_pool.
         """
         client, host = self._getSSHClient()
 
@@ -252,15 +250,18 @@ class RunHPC(RunParallel):
         full_command = f"ssh {host} '{command}'"
         return exit_code, result.rstrip(), full_command
 
-    def callHPC(self, command):
+    def callHPC(self, pool_type, command):
         """
         Wrapper for calling a HPC command (qsub, qstat, etc) that supports
         SSH-ing to another host as needed when calling from within apptainer
+
+        Requires the "pool" to specify which command pool to use, of the
+        RunHPC.CallHPCPoolType types.
         """
         if not self.ssh_hosts:
             raise Exception('HPC not currently supported outside of a container')
 
-        return self.ssh_pool.apply(self._callSSH, (command,))
+        return self.call_hpc_pool[pool_type].apply(self._callSSH, (command,))
 
     def getJobSlots(self, job):
         # Jobs only use one slot because they are ran externally
@@ -270,168 +271,208 @@ class RunHPC(RunParallel):
         # Support managing 250 HPC jobs concurrently
         return 250, False
 
-    def submitJob(self, job):
+    def submitJob(self, job, hold):
         """
         Method for submitting an HPC job for the given Job.
 
-        Returns the job's ID and the command to be ran in the job.
+        The "hold" flag specifies whether or not to submit
+        the job in a held state.
+
+        Returns the resulting HPCJob.
         """
-        tester = job.getTester()
-        options = self.options
+        # If we're submitting this Job to be held, but the Job status isn't
+        # currently held, it means that we've hit job in the submit_job_pool
+        # that was submitted previously but has already been set to be skipped
+        # (likely due to a prereq failure)
+        # NOTE: This _is_ thread safe because StatusSystem is blocking
+        if hold and not job.isHold():
+            return None
 
-        submission_script = self.getHPCJobSubmissionPath(job)
-        output_file = self.getHPCJobOutputPath(job)
-
-        # Clean these two files
-        for file in [submission_script, output_file]:
-            if os.path.exists(file):
-                os.remove(file)
-
-        # Add MOOSE's python path for python scripts
-        moose_python = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..'))
-
-        # Start building the jinja environment for the submission script
-        submission_env = {'SCHEDULER_NAME': self.getHPCSchedulerName(),
-                          'NAME': self.getHPCJobName(job),
-                          'CWD': tester.getTestDir(),
-                          'OUTPUT': output_file,
-                          'SUBMISSION_SCRIPT': submission_script,
-                          'WALLTIME': str(datetime.timedelta(seconds=tester.getMaxTime())),
-                          'PROJECT': self.options.hpc_project,
-                          'TEST_SPEC': tester.getSpecFile(),
-                          'TEST_NAME': tester.getTestNameShort(),
-                          'SUBMITTED_HOSTNAME': socket.gethostname(),
-                          'MOOSE_PYTHONPATH': moose_python,
-                          'NUM_PROCS': tester.getProcs(options),
-                          'NUM_THREADS': tester.getThreads(options),
-                          'ENDING_COMMENT': self.getOutputEndingComment(f'${self.getHPCJobIDVariable()}'),
-                          'JOB_ID_VARIABLE': self.getHPCJobIDVariable(),
-                          'PLACE': self.options.hpc_place}
-        if self.options.hpc_pre_source:
-            submission_env['SOURCE_FILE'] = options.hpc_pre_source
-        if self.source_contents:
-            submission_env['SOURCE_CONTENTS'] = self.source_contents
-
-        # Get the unescaped command
-        command = tester.getCommand(options)
-
-        # Parse out the mpi command from the command if we're running in apptainer.
-        # We do this before any of the other escaping
-        APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
-        apptainer_command_prefix = ''
-        if APPTAINER_CONTAINER:
-            mpi_command = self.parseMPICommand(command)
-            if mpi_command:
-                apptainer_command_prefix = mpi_command
-                command = command.replace(mpi_command, '')
-
-        # Replace newlines, clean up spaces, and encode the command. We encode the
-        # command here to be able to pass it to a python script to run later without
-        # dealing with any substitution or evaluation within a shell. Thus, this is
-        # akin to the SubprocessRunner also running commands. It's a bit complicated,
-        # but I promise that it's much better than the alternative
-        command = command.replace('\n', ' ')
-        command = ' '.join(command.split())
-        command_encoded = urllib.parse.quote(command)
-
-        # Script used to decode the command as described above
-        hpc_run = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_run.py')
-
-        # Special logic for when we're running with apptainer, in which case
-        # we need to manipulate the command like such
-        # Original command: <mpiexec ...> </path/to/binary ...>
-        # New command: <mpiexec ...> apptainer exec /path/to/image '</path/to/binary ...>'
-        if APPTAINER_CONTAINER:
-            job_command = apptainer_command_prefix
-
-            # The root filesystem path that we're in so that we can be sure to bind
-            # it into the container, if not already set
-            if self.options.hpc_apptainer_bindpath:
-                bindpath = self.options.hpc_apptainer_bindpath
-            else:
-                bindpath = '/' + os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
-            # The apptainer command that will get sandwiched in the middle
-            apptainer_command = ['apptainer', 'exec', '-B', bindpath]
-            if self.options.hpc_apptainer_no_home:
-                apptainer_command.append('--no-home')
-            apptainer_command.append(APPTAINER_CONTAINER)
-            apptainer_command = shlex.join(apptainer_command)
-
-            # Append the apptainer command along with the command to be ran
-            job_command += f"{apptainer_command} {hpc_run} {command_encoded}"
-
-            # Set that we're using apptainer
-            submission_env['USING_APPTAINER'] = '1'
-        # Not in apptainer, so we can just use the escaped command as is
-        else:
-            job_command = f'{hpc_run} {command_encoded}'
-
-        submission_env['COMMAND'] = job_command
-
-        # The output files that we're expected to generate so that the
-        # HPC job can add a terminator for them so that we can verify
-        # they are complete on the executing host
-        additional_output = []
-        for file in tester.getOutputFiles(options):
-            additional_output.append(f'"{os.path.join(tester.getTestDir(), file)}"')
-        submission_env['ADDITIONAL_OUTPUT_FILES'] = ' '.join(additional_output)
-
-        # Let the derived scheduler add additional variables
-        self.augmentJobSubmission(submission_env)
-
-        # Build the script
-        jinja_env = jinja2.Environment()
-        definition_template = jinja_env.from_string(self.submission_template)
-        jinja_env.trim_blocks = True
-        jinja_env.lstrip_blocks = True
-        script = definition_template.render(**submission_env)
-
-        # Write the script
-        open(submission_script, 'w').write(script)
-
-        # Submission command. Here we have a simple bash loop
-        # that will try to wait for the file if it doesn't exist yet
-        submission_command = self.getHPCSubmissionCommand()
-        cmd = [f'cd {tester.getTestDir()}',
-               f'FILE="{submission_script}"',
-                'for i in {1..40}',
-                    'do if [ -e "$FILE" ]',
-                       f'then {self.getHPCSubmissionCommand()} $FILE',
-                             'exit $?',
-                        'else sleep 0.25',
-                    'fi',
-                'done',
-                'exit 1']
-        cmd = '; '.join(cmd)
-
-        # Do the submission; this is thread safe
-        exit_code, result, full_cmd = self.callHPC(cmd)
-
-        # Set what we've ran for this job so that we can
-        # potentially get the context in an error
-        tester.setCommandRan(full_cmd)
-
-        # Nonzero return code
-        if exit_code != 0:
-            raise self.CallHPCException(self, f'{submission_command} failed', full_cmd, result)
-
-        # Parse the job ID from the command
-        job_id = self.parseHPCSubmissionJobID(result)
-
-        # Job has been submitted, so set it as queued
-        # Here we append job_id if the ID is just a number so that it's more
-        # obvious what it is
-        job.addCaveats(f'job={job_id}' if job_id.isdigit() else job_id)
-
-        # Setup the job in the status map
         with self.hpc_jobs_lock:
-            if job in self.hpc_jobs:
-                raise Exception('Job has already been submitted')
-            hpc_job = HPCJob(job, job_id, job_command)
-            self.hpc_jobs[job] = hpc_job
+            hpc_job = self.hpc_jobs.get(job.getID())
 
-            # Set the job as queued and print out that it is queued
-            self.setHPCJobQueued(hpc_job)
+            # Job hasn't been recorded yet; set up with a waiting state
+            if hpc_job is None:
+                self.hpc_jobs[job.getID()] = HPCJob(job)
+                hpc_job = self.hpc_jobs.get(job.getID())
+
+        with hpc_job.getLock():
+            # Job has already been submitted
+            if hpc_job.state != hpc_job.State.waiting:
+                return hpc_job
+
+            tester = job.getTester()
+            options = self.options
+
+            submission_script = self.getHPCJobSubmissionPath(job)
+            output_file = self.getHPCJobOutputPath(job)
+
+            # Clean these two files
+            for file in [submission_script, output_file]:
+                if os.path.exists(file):
+                    os.remove(file)
+
+            # Add MOOSE's python path for python scripts
+            moose_python = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..'))
+
+            # Start building the jinja environment for the submission script
+            submission_env = {'SCHEDULER_NAME': self.getHPCSchedulerName(),
+                              'NAME': self.getHPCJobName(job),
+                              'CWD': tester.getTestDir(),
+                              'OUTPUT': output_file,
+                              'SUBMISSION_SCRIPT': submission_script,
+                              'WALLTIME': str(datetime.timedelta(seconds=tester.getMaxTime())),
+                              'PROJECT': self.options.hpc_project,
+                              'TEST_SPEC': tester.getSpecFile(),
+                              'TEST_NAME': tester.getTestNameShort(),
+                              'SUBMITTED_HOSTNAME': socket.gethostname(),
+                              'MOOSE_PYTHONPATH': moose_python,
+                              'NUM_PROCS': tester.getProcs(options),
+                              'NUM_THREADS': tester.getThreads(options),
+                              'ENDING_COMMENT': self.getOutputEndingComment(f'${self.getHPCJobIDVariable()}'),
+                              'JOB_ID_VARIABLE': self.getHPCJobIDVariable(),
+                              'PLACE': self.options.hpc_place}
+            if hold:
+                submission_env['HOLD'] = 1
+            if self.options.hpc_pre_source:
+                submission_env['SOURCE_FILE'] = options.hpc_pre_source
+            if self.source_contents:
+                submission_env['SOURCE_CONTENTS'] = self.source_contents
+
+            # Get the unescaped command
+            command = tester.getCommand(options)
+
+            # Parse out the mpi command from the command if we're running in apptainer.
+            # We do this before any of the other escaping
+            APPTAINER_CONTAINER = os.environ.get('APPTAINER_CONTAINER')
+            apptainer_command_prefix = ''
+            if APPTAINER_CONTAINER:
+                mpi_command = self.parseMPICommand(command)
+                if mpi_command:
+                    apptainer_command_prefix = mpi_command
+                    command = command.replace(mpi_command, '')
+
+            # Replace newlines, clean up spaces, and encode the command. We encode the
+            # command here to be able to pass it to a python script to run later without
+            # dealing with any substitution or evaluation within a shell. Thus, this is
+            # akin to the SubprocessRunner also running commands. It's a bit complicated,
+            # but I promise that it's much better than the alternative
+            command = command.replace('\n', ' ')
+            command = ' '.join(command.split())
+            command_encoded = urllib.parse.quote(command)
+
+            # Script used to decode the command as described above
+            hpc_run = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_run.py')
+
+            # Special logic for when we're running with apptainer, in which case
+            # we need to manipulate the command like such
+            # Original command: <mpiexec ...> </path/to/binary ...>
+            # New command: <mpiexec ...> apptainer exec /path/to/image '</path/to/binary ...>'
+            if APPTAINER_CONTAINER:
+                job_command = apptainer_command_prefix
+
+                # The root filesystem path that we're in so that we can be sure to bind
+                # it into the container, if not already set
+                if self.options.hpc_apptainer_bindpath:
+                    bindpath = self.options.hpc_apptainer_bindpath
+                else:
+                    bindpath = '/' + os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
+                # The apptainer command that will get sandwiched in the middle
+                apptainer_command = ['apptainer', 'exec', '-B', bindpath]
+                if self.options.hpc_apptainer_no_home:
+                    apptainer_command.append('--no-home')
+                apptainer_command.append(APPTAINER_CONTAINER)
+                apptainer_command = shlex.join(apptainer_command)
+
+                # Append the apptainer command along with the command to be ran
+                job_command += f"{apptainer_command} {hpc_run} {command_encoded}"
+
+                # Set that we're using apptainer
+                submission_env['USING_APPTAINER'] = '1'
+            # Not in apptainer, so we can just use the escaped command as is
+            else:
+                job_command = f'{hpc_run} {command_encoded}'
+
+            submission_env['COMMAND'] = job_command
+
+            # The output files that we're expected to generate so that the
+            # HPC job can add a terminator for them so that we can verify
+            # they are complete on the executing host
+            additional_output = []
+            for file in tester.getOutputFiles(options):
+                additional_output.append(f'"{os.path.join(tester.getTestDir(), file)}"')
+            submission_env['ADDITIONAL_OUTPUT_FILES'] = ' '.join(additional_output)
+
+            # Let the derived scheduler add additional variables
+            self.augmentJobSubmission(submission_env)
+
+            # Build the script
+            jinja_env = jinja2.Environment()
+            definition_template = jinja_env.from_string(self.submission_template)
+            jinja_env.trim_blocks = True
+            jinja_env.lstrip_blocks = True
+            script = definition_template.render(**submission_env)
+
+            # Write the script
+            open(submission_script, 'w').write(script)
+
+            # Submission command. Here we have a simple bash loop
+            # that will try to wait for the file if it doesn't exist yet
+            submission_command = self.getHPCSubmissionCommand()
+            cmd = [f'cd {tester.getTestDir()}',
+                f'FILE="{submission_script}"',
+                    'for i in {1..40}',
+                        'do if [ -e "$FILE" ]',
+                        f'then {self.getHPCSubmissionCommand()} $FILE',
+                                'exit $?',
+                            'else sleep 0.25',
+                        'fi',
+                    'done',
+                    'exit 1']
+            cmd = '; '.join(cmd)
+
+            # Do the submission; this is thread safe
+            exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.submit, cmd)
+
+            # Set what we've ran for this job so that we can
+            # potentially get the context in an error
+            tester.setCommandRan(full_cmd)
+
+            # Nonzero return code
+            if exit_code != 0:
+                raise self.CallHPCException(self, f'{submission_command} failed', full_cmd, result)
+
+            # Parse the job ID from the command
+            job_id = self.parseHPCSubmissionJobID(result)
+
+            # Job has been submitted, so set it as queued
+            # Here we append job_id if the ID is just a number so that it's more
+            # obvious what it is
+            job.addCaveats(f'job={job_id}' if job_id.isdigit() else job_id)
+
+            # Print the job as it's been submitted
+            job_status = job.hold if hold else job.queued
+            self.setAndOutputJobStatus(hpc_job.job, job_status, caveats=True)
+
+            hpc_job.id = job_id
+            hpc_job.command = job_command
+            hpc_job.state = hpc_job.State.held if hold else hpc_job.State.queued
+
+        return hpc_job
+
+    def queueJob(self, job):
+        """
+        Method for queuing a Job to start.
+
+        Should be called from within the HPCRunner to get a job going.
+
+        If the job is not submitted yet, it will submit it in a
+        non-held state. If the job is submitted but held, it will
+        release the job.
+        """
+        # See if the job has been submitted yet in the background
+        with self.hpc_jobs_lock:
+            hpc_job = self.hpc_jobs.get(job.getID())
 
             # If the updater hasn't been started yet, start it.
             # We do this here because it's locked within hpc_jobs_lock
@@ -441,7 +482,28 @@ class RunHPC(RunParallel):
                 self.hpc_jobs_updater = threading.Thread(target=self._updateHPCJobs)
                 self.hpc_jobs_updater.start()
 
-        return hpc_job
+        # Job has not been submitted yet, so submit it in non-held state
+        if hpc_job is None:
+            return self.submitJob(job, False)
+
+        # Job has been submitted but is held, so queue it
+        with hpc_job.getLock():
+            if hpc_job.state == hpc_job.State.held:
+                if self.options.hpc_no_hold:
+                    raise Exception('Job should not be held with holding disabled')
+
+                cmd = f'{self.getHPCQueueCommand()} {hpc_job.id}'
+                exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.queue, cmd)
+                if exit_code != 0:
+                    try:
+                        self.killHPCJob(hpc_job, lock=False) # already locked
+                    except:
+                        pass
+                    raise self.CallHPCException(self, f'{cmd} failed', full_cmd, result)
+
+                self.setHPCJobQueued(hpc_job)
+
+            return hpc_job
 
     def augmentJobSubmission(self, submission_env):
         """
@@ -463,18 +525,31 @@ class RunHPC(RunParallel):
 
         try:
             while True:
+                # Here we want to store our own list to these objects
+                # so that we don't hold onto the lock while we loop
+                # through the jobs
                 with self.hpc_jobs_lock:
-                    active_hpc_jobs = [x for x in self.hpc_jobs.values() if not x.done]
-                    if active_hpc_jobs:
-                        success = self.updateHPCJobs(active_hpc_jobs)
-                        if not success:
-                            if update_jobs_failed:
-                                self.triggerErrorState()
-                                print('ERROR: Failed to get HPC job status')
-                                return
-                            update_jobs_failed = True
-                        else:
-                            update_jobs_failed = False
+                    all_hpc_jobs = []
+                    for hpc_job in self.hpc_jobs.values():
+                        all_hpc_jobs.append(hpc_job)
+
+                # Get all of the HPC jobs that are currently active
+                active_hpc_jobs = []
+                for hpc_job in all_hpc_jobs:
+                    with hpc_job.getLock():
+                        if hpc_job.state in [hpc_job.State.queued, hpc_job.State.running]:
+                            active_hpc_jobs.append(hpc_job)
+
+                if active_hpc_jobs:
+                    success = self.updateHPCJobs(active_hpc_jobs)
+                    if not success:
+                        if update_jobs_failed:
+                            self.triggerErrorState()
+                            print('ERROR: Failed to get HPC job status')
+                            return
+                        update_jobs_failed = True
+                    else:
+                        update_jobs_failed = False
 
                 # Update on the interval requested, but also make sure
                 # that we're still running
@@ -503,12 +578,15 @@ class RunHPC(RunParallel):
         """
         Sets the given HPC job as running.
 
-        This should be called within the overridden updateHPCJobs().
+        Should be called within a lock for the given HPCJob.
+
+        This should be called within the overridden updateHPCJobs() to
+        set a HPCJob as running.
         """
         # This is currently thread safe because we only ever change
         # it within updateJobs(), which is only ever executed serially
         # within the thread the calls _updateHPCJobs()
-        hpc_job.set(running=True)
+        hpc_job.state = hpc_job.State.running
         # Print out that the job is now running
         self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.running, caveats=True)
 
@@ -516,28 +594,29 @@ class RunHPC(RunParallel):
         """
         Sets the given HPC job as being queued.
 
+        Should be called within a lock for the given HPCJob.
+
         This can be used when the HPC scheduler re-schedules the job.
 
         This should be called within the overridden updateHPCJobs().
         """
         # Guard against setting this as requeued multiple times
-        if hpc_job.job.getStatus() == hpc_job.job.queued:
+        if hpc_job.state == hpc_job.State.queued:
             return
+        hpc_job.state = hpc_job.State.queued
 
-        # This is currently thread safe because we only ever change
-        # it within updateJobs(), which is only ever executed serially
-        # within the thread the calls _updateHPCJobs()
-        hpc_job.set(running=False)
         # Print out that the job is queued again
         self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.queued, caveats=True)
 
-    def setHPCJobDone(seflf, hpc_job, exit_code):
+    def setHPCJobDone(self, hpc_job, exit_code):
         """
         Sets the given HPC job as done.
 
-        This should be called within the overridden updateHPCJobs().
+        This should be called within the overridden updateHPCJobs(),
+        within a thread lock for that HPCJob.
         """
-        hpc_job.set(running=False, done=True, exit_code=exit_code)
+        hpc_job.state = hpc_job.State.done
+        hpc_job.exit_code = exit_code
 
         # We've actually ran something now that didn't fail, so update
         # the command to what was ran there
@@ -552,37 +631,53 @@ class RunHPC(RunParallel):
     def augmentJobs(self, jobs):
         super().augmentJobs(jobs)
 
-        # If a job has its default time, double it. We grant a little more time
-        # to small jobs on HPC due to slower IO, etc
+        # Augment only jobs that are to be ran
         for job in jobs:
-            tester = job.getTester()
-            max_time = tester.getMaxTime()
-            if max_time == tester.getDefaultMaxTime():
-                tester.setMaxTime(max_time * 2)
+            if job.isHold():
+                # If a job has its default time, double it. We grant a
+                # little more time to small jobs on HPC due to slower IO, etc
+                tester = job.getTester()
+                max_time = tester.getMaxTime()
+                if max_time == tester.getDefaultMaxTime():
+                    tester.setMaxTime(max_time * 2)
 
-    def killJob(self, job, lock=True):
-        """Kills a HPC job"""
-        with self.hpc_jobs_lock if lock else contextlib.suppress():
-            hpc_job = self.hpc_jobs.get(job)
-            if hpc_job is None or hpc_job.getDone() or hpc_job.getKilled():
+                # Add the Job to the pool to be submitted as a job in
+                # a held state. We do this as early as possible so that
+                # we can get a better priority in the HPC queue. This
+                # is an asynchronous call so it will happen later when
+                # available. If the Job actually runs before we have
+                # a chance to get to this in the pool, when it finally
+                # executes in the pool, it will do nothing because the
+                # HPCJob will already exist.
+                if not self.options.hpc_no_hold:
+                    self.submit_job_pool.apply_async(self.submitJob, (job, True,))
+
+    def killHPCJob(self, hpc_job, lock=True):
+        """
+        Kills the given HPCJob if it is in a state to be killed.
+        """
+        with hpc_job.getLock() if lock else contextlib.suppress():
+            if hpc_job.state in [hpc_job.State.killed, hpc_job.State.done]:
                 return
             job_id = hpc_job.id
-            hpc_job.set(killed=True)
+            hpc_job.state = hpc_job.State.killed
 
         # Don't care about whether or not this failed
-        self.callHPC(f'{self.getHPCCancelCommand()} {job_id}')
+        self.callHPC(self.CallHPCPoolType.kill, f'{self.getHPCCancelCommand()} {job_id}')
 
     def killRemaining(self, keyboard=False):
         """Kills all currently running HPC jobs"""
         job_ids = []
         with self.hpc_jobs_lock:
             for hpc_job in self.hpc_jobs.values():
-                if not hpc_job.getDone() and not hpc_job.getKilled():
+                with hpc_job.getLock():
+                    if hpc_job.state in [hpc_job.State.killed, hpc_job.State.done]:
+                        continue
                     job_ids.append(hpc_job.id)
-                    hpc_job.set(killed=True)
+                    hpc_job.state = hpc_job.State.killed
 
         # Don't care about whether or not this failed
-        self.callHPC(f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
+        self.callHPC(self.CallHPCPoolType.kill, f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
 
         super().killRemaining(keyboard)
 
@@ -603,7 +698,15 @@ class RunHPC(RunParallel):
 
         Should be overridden.
         """
-        raise Exception('Unimplemented getHPCSchedulerName()')
+        raise Exception('Unimplemented getHPCSubmissionCommand()')
+
+    def getHPCQueueCommand(self):
+        """
+        Returns command used for submitting jobs.
+
+        Should be overridden.
+        """
+        raise Exception('Unimplemented getHPCQueueCommand()')
 
     def getHPCCancelCommand(self):
         """
@@ -682,3 +785,10 @@ class RunHPC(RunParallel):
         job.setStatus(job.error, message)
         if output:
             job.appendOutput(util.outputHeader(f'Job {hpc_job.id} {output}'))
+
+    def waitFinish(self):
+        super().waitFinish()
+
+        # Kill everything else that is left, which could be jobs in a held
+        # state that ended up not running because their dependencies failed
+        self.killRemaining()
