@@ -142,8 +142,11 @@ class Tester(MooseObject):
         if self.specs["allow_test_objects"]:
             self.specs["cli_args"].append("--allow-test-objects")
 
-        ### Enumerate the tester statuses we want to use
-        self.test_status = StatusSystem()
+        # The Tester status; here we do not use locks because we need to
+        # do deep copy operations of a Tester object, and thread locks
+        # cannot be deep copied.
+        self.test_status = StatusSystem(locking=False)
+        # Enumerate the tester statuses we want to use
         self.no_status = self.test_status.no_status
         self.queued = self.test_status.queued
         self.skip = self.test_status.skip
