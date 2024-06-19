@@ -32,8 +32,10 @@ PhysicsComponentHelper::initComponentPhysics()
   for (auto physics : _physics)
   {
     if (_verbose)
-      _console << "Adding Physics '" << physics->name() << "' on component '" << name()
-               << "' on blocks '" << Moose::stringify(_blocks) << "'" << std::endl;
+      mooseInfoRepeated("Adding Physics '" + physics->name() + "' on component '" + name() +
+                        "' on blocks '" + Moose::stringify(_blocks) + "'");
     physics->addBlocks(_blocks);
+    // NOTE: we could use addComponent instead.
+    // Or keep addComponent for adding Components from Physics
   }
 }

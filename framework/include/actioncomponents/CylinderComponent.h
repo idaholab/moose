@@ -24,6 +24,7 @@ public:
 
 protected:
   virtual void addMeshGenerators() override;
+  virtual void setupComponent() override;
 
   /// Radius of the cylinder
   const Real _radius;

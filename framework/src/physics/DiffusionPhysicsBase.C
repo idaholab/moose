@@ -75,6 +75,7 @@ DiffusionPhysicsBase::DiffusionPhysicsBase(const InputParameters & parameters)
     checkParamsBothSetOrNotSet("source_functor", "source_coef");
 
   addRequiredPhysicsTask("add_preconditioning");
+  addRequiredPhysicsTask("add_postprocessor");
 }
 
 void

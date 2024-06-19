@@ -65,20 +65,19 @@ CylinderComponent::addMeshGenerators()
     }
     if (isParamValid("block"))
     {
-      params.set<SubdomainName>("subdomain_name") =
-          getParam<std::vector<SubdomainName>>("block")[0];
-      mooseAssert(getParam<std::vector<SubdomainName>>("block").size() == 1,
-                  "Coded only for size 1");
+      const auto block_names = getParam<std::vector<SubdomainName>>("block");
+      if (block_names.size() > 1)
+        paramError("block", "Currently only implemented for a single block.");
+      params.set<SubdomainName>("subdomain_name") = block_names[0];
+      _blocks.push_back(block_names[0]);
     }
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "GeneratedMeshGenerator", name() + "_base", params);
     _mg_names.push_back(name() + "_base");
-
-    // TODO: Change coordinate system of block
   }
   else
   {
-    mooseError("3D unsupported");
+    mooseError("3D is currently unsupported");
   }
 
   // Place it in position
@@ -110,4 +109,11 @@ CylinderComponent::addMeshGenerators()
         "TransformGenerator", name() + "_rotated", params);
     _mg_names.push_back(name() + "_rotated");
   }
+}
+
+void
+CylinderComponent::setupComponent()
+{
+  if (_dimension == 2)
+    _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
 }
