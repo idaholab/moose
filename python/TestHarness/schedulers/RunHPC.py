@@ -541,7 +541,8 @@ class RunHPC(RunParallel):
                 # Helper for splitting a list into chunks. We won't update
                 # everything together because PBS is particularly bad
                 # at processing the status for a ton of jobs at once...
-                def in_chunks(l, N):
+                def in_chunks(l):
+                    N = self.update_hpc_jobs_chunk_size
                     for i in range(0, len(l), N):
                         yield l[i:i + N]
 
@@ -549,7 +550,7 @@ class RunHPC(RunParallel):
                 success = True
 
                 # Process a subset of jobs at a time
-                for chunked_hpc_jobs in in_chunks(active_hpc_jobs, self.update_hpc_jobs_chunk_size):
+                for chunked_hpc_jobs in in_chunks(active_hpc_jobs):
                     # Returns whether or not it failed
                     if not self.updateHPCJobs(chunked_hpc_jobs):
                         success = False
