@@ -14,9 +14,7 @@
 InputParameters
 TimedElementSubdomainModifier::validParams()
 {
-  InputParameters params = ElementSubdomainModifier::validParams();
-  params.addParam<std::vector<Real>>("times", "The times of the subdomain modifications.");
-  return params;
+  return ElementSubdomainModifier::validParams();
 }
 
 TimedElementSubdomainModifier::TimedElementSubdomainModifier(const InputParameters & parameters)
@@ -31,12 +29,7 @@ TimedElementSubdomainModifier::initialize()
   const auto times = getTimes();
 
   // copy data to local storage
-  unsigned int i = 0;
+  std::size_t i = 0;
   for (const auto time : times)
-  {
-    timeIndexPair pair;
-    pair.time = time;
-    pair.index = i++;
-    _times_and_indices.insert(pair);
-  }
+    _times_and_indices.insert(TimeIndexPair{time, i++});
 }

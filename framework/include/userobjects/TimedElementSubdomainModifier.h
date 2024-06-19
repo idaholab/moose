@@ -32,12 +32,12 @@ protected:
   virtual std::vector<Real> getTimes() = 0;
 
   /// storage for the times including their original index.
-  struct timeIndexPair
+  struct TimeIndexPair
   {
     Real time;
     std::size_t index;
 
-    bool operator<(const timeIndexPair & a) const
+    bool operator<(const TimeIndexPair & a) const
     {
       if (time == a.time)
         return index < a.index;
@@ -47,5 +47,5 @@ protected:
   };
 
   /// Times and subdomain changes to make
-  std::set<timeIndexPair> _times_and_indices;
+  std::set<TimeIndexPair> _times_and_indices;
 };
