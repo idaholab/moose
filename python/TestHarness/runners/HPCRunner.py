@@ -34,22 +34,27 @@ class HPCRunner(Runner):
         self.output_completed = False
 
     def spawn(self, timer):
-        # Rely on the RunHPC object to submit the job
-        self.hpc_job = self.run_hpc.submitJob(self.job)
+        # Rely on the RunHPC object to queue the job
+        self.hpc_job = self.run_hpc.queueJob(self.job)
 
         timer.start()
 
     def wait(self, timer):
+        # The states that we should wait on. Anything else should
+        # be an invalid state for waiting
+        wait_states = [self.hpc_job.State.held,
+                       self.hpc_job.State.queued,
+                       self.hpc_job.State.running]
+
         # Poll loop waiting for the job to be finished
         # This gets a structure that represents the job, and the
         # polling itself is only done on occasion within RunHPC
         while True:
             time.sleep(self.job_status_poll_time)
-            self.exit_code = self.hpc_job.getExitCode()
-
-            # We're done
-            if self.exit_code is not None:
-                break
+            with self.hpc_job.getLock():
+                if self.hpc_job.state not in wait_states:
+                    self.exit_code = self.hpc_job.exit_code
+                    break
 
         timer.stop()
 
@@ -60,6 +65,10 @@ class HPCRunner(Runner):
         # HPC scheduler so we have an invalid state for processing
         # in the Tester
         if self.job.isFinished():
+            # Don't bother if we've been killed
+            if self.hpc_job.isKilled():
+                return
+
             # If we have _some_ output, at least try to load it. However, don't wait
             # a while for this one.
             for i in range(int(60 / self.file_completion_poll_time)):
@@ -84,6 +93,10 @@ class HPCRunner(Runner):
         # Wait for all of the files to be available
         waited_time = 0
         while wait_files or incomplete_files:
+            # Don't bother if we've been killed
+            if self.hpc_job.isKilled():
+                return
+
             # Look for each file
             for file in wait_files.copy():
                 if os.path.exists(file) and os.path.isfile(file):
@@ -118,7 +131,8 @@ class HPCRunner(Runner):
             time.sleep(self.file_completion_poll_time)
 
     def kill(self):
-        self.run_hpc.killJob(self.job)
+        if self.hpc_job:
+            self.run_hpc.killHPCJob(self.hpc_job)
 
     def trySetOutput(self, required=False):
         """

@@ -24,7 +24,7 @@ class RunPBS(RunHPC):
     def updateHPCJobs(self, active_hpc_jobs):
         # Poll for all of the jobs within a single call
         cmd = ['qstat', '-xf', '-F', 'json'] + [x.id for x in active_hpc_jobs]
-        exit_code, result, _ = self.callHPC(' '.join(cmd))
+        exit_code, result, _ = self.callHPC(self.CallHPCPoolType.status, ' '.join(cmd))
         if exit_code != 0:
             return False
 
@@ -33,8 +33,6 @@ class RunPBS(RunHPC):
         job_results = json_result['Jobs']
 
         for hpc_job in active_hpc_jobs:
-            job = hpc_job.job
-
             # This job's result from the qstat command
             job_result = job_results[hpc_job.id]
             exit_code = job_result.get('Exit_status')
@@ -42,46 +40,49 @@ class RunPBS(RunHPC):
                 exit_code = int(exit_code)
             state = job_result.get('job_state')
 
-            # The job has switched to running
-            if state == 'R' and not hpc_job.getRunning():
-                self.setHPCJobRunning(hpc_job)
+            with hpc_job.getLock():
+                job = hpc_job.job
 
-            # The job is held, so we're going to consider it a failure and
-            # will also try to cancel it so that it doesn't hang around
-            if state == 'H':
-                self.setHPCJobError(hpc_job, 'PBS JOB HELD', 'was held; killed job')
-                exit_code = 1
-                try:
-                    self.killJob(job, lock=False) # no lock; we're already in one
-                except:
-                    pass
+                # The job has switched to running
+                if state == 'R' and hpc_job.state != hpc_job.State.running:
+                    self.setHPCJobRunning(hpc_job)
 
-            # Job finished before it started, so something killed it
-            if state == 'F' and exit_code is None:
-                self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed')
-                exit_code = 1
+                # The job is held, so we're going to consider it a failure and
+                # will also try to cancel it so that it doesn't hang around
+                if state == 'H' and (job_result.get('Hold_Types') != 'u' or self.options.hpc_no_hold):
+                    self.setHPCJobError(hpc_job, 'PBS JOB HELD', 'was held; killed job')
+                    exit_code = 1
+                    try:
+                        self.killHPCJob(hpc_job, lock=False) # no lock; we're already in one
+                    except:
+                        pass
 
-            # If we were running but now we're done, we're not running anymore
-            if exit_code is not None:
-                if exit_code < 0:
-                    name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
-                    # Job timed out; give this a special timeout status because
-                    # it is then marked as recoverable (could try running again)
-                    if name == 'JOB_EXEC_KILL_WALLTIME':
-                        job.setStatus(job.timeout, 'PBS TIMEOUT')
-                    # Special status where the job failed to start due to a PBS
-                    # issue and will be started again, so there's nothing to do
-                    elif name in ['JOB_EXEC_HOOK_RERUN', 'JOB_EXEC_RETRY']:
-                        self.setHPCJobQueued(hpc_job)
-                        continue
-                    # Everything else should be an error
-                    else:
-                        self.setHPCJobError(hpc_job, f'PBS ERROR: {name}', f'was terminated with reason: {reason}')
-                # Job was killed with a signal
-                elif exit_code >= 128:
-                    self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed by a signal')
+                # Job finished before it started, so something killed it
+                if state == 'F' and exit_code is None:
+                    self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed')
+                    exit_code = 1
 
-                self.setHPCJobDone(hpc_job, exit_code)
+                # If we were running but now we're done, we're not running anymore
+                if exit_code is not None:
+                    if exit_code < 0:
+                        name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
+                        # Job timed out; give this a special timeout status because
+                        # it is then marked as recoverable (could try running again)
+                        if name == 'JOB_EXEC_KILL_WALLTIME':
+                            job.setStatus(job.timeout, 'PBS JOB TIMEOUT')
+                        # Special status where the job failed to start due to a PBS
+                        # issue and will be started again, so there's nothing to do
+                        elif name in ['JOB_EXEC_HOOK_RERUN', 'JOB_EXEC_RETRY']:
+                            self.setHPCJobQueued(hpc_job)
+                            continue
+                        # Everything else should be an error
+                        else:
+                            self.setHPCJobError(hpc_job, f'PBS ERROR: {name}', f'was terminated with reason: {reason}')
+                    # Job was killed with a signal
+                    elif exit_code >= 128:
+                        self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed by a signal')
+
+                    self.setHPCJobDone(hpc_job, exit_code)
 
         # Success
         return True
@@ -91,6 +92,9 @@ class RunPBS(RunHPC):
 
     def getHPCSubmissionCommand(self):
         return 'qsub'
+
+    def getHPCQueueCommand(self):
+        return 'qrls'
 
     def getHPCCancelCommand(self):
         return 'qdel'
