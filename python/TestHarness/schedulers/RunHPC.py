@@ -677,7 +677,8 @@ class RunHPC(RunParallel):
                     hpc_job.state = hpc_job.State.killed
 
         # Don't care about whether or not this failed
-        self.callHPC(self.CallHPCPoolType.kill, f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
+        if job_ids:
+            self.callHPC(self.CallHPCPoolType.kill, f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
 
         super().killRemaining(keyboard)
 
