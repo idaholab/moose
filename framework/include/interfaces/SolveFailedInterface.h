@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MooseEnum.h"
+#include "MooseObject.h"
 
 /**
  * Interface for notifying objects that the solve has failed
