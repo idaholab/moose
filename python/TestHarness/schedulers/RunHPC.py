@@ -526,30 +526,41 @@ class RunHPC(RunParallel):
         try:
             while True:
                 # Here we want to store our own list to these objects
-                # so that we don't hold onto the lock while we loop
-                # through the jobs
+                # so that we don't hold onto the lock while we work
+                # on each job individually
                 with self.hpc_jobs_lock:
-                    all_hpc_jobs = []
-                    for hpc_job in self.hpc_jobs.values():
-                        all_hpc_jobs.append(hpc_job)
+                    hpc_jobs = [x for x in self.hpc_jobs.values()]
 
                 # Get all of the HPC jobs that are currently active
-                active_hpc_jobs = []
-                for hpc_job in all_hpc_jobs:
-                    with hpc_job.getLock():
-                        if hpc_job.state in [hpc_job.State.queued, hpc_job.State.running]:
-                            active_hpc_jobs.append(hpc_job)
+                active_states = [HPCJob.State.queued, HPCJob.State.running]
+                active_hpc_jobs = [x for x in hpc_jobs if x.getState() in active_states]
 
-                if active_hpc_jobs:
-                    success = self.updateHPCJobs(active_hpc_jobs)
-                    if not success:
-                        if update_jobs_failed:
-                            self.triggerErrorState()
-                            print('ERROR: Failed to get HPC job status')
-                            return
-                        update_jobs_failed = True
-                    else:
-                        update_jobs_failed = False
+                # Helper for splitting a list into chunks. We won't update
+                # everything together because PBS is particularly bad
+                # at processing the status for a ton of jobs at once...
+                def in_chunks(l, N):
+                    for i in range(0, len(l), N):
+                        yield l[i:i + N]
+
+                # Whether or not all of the updates suceeded
+                success = True
+
+                # Process 50 jobs at a time (thanks PBS)
+                for chunked_hpc_jobs in in_chunks(active_hpc_jobs, 50):
+                    # Returns whether or not it failed
+                    if not self.updateHPCJobs(chunked_hpc_jobs):
+                        success = False
+
+                # At least one of the updates failed; allow this to
+                # happen only once
+                if not success:
+                    if update_jobs_failed:
+                        self.triggerErrorState()
+                        print('ERROR: Failed to get HPC job status')
+                        return
+                    update_jobs_failed = True
+                else:
+                    update_jobs_failed = False
 
                 # Update on the interval requested, but also make sure
                 # that we're still running
@@ -562,7 +573,7 @@ class RunHPC(RunParallel):
             self.triggerErrorState()
             raise
 
-    def updateHPCJobs(self, active_hpc_jobs):
+    def updateHPCJobs(self, hpc_jobs):
         """
         Updates the underlying jobs.
 
