@@ -9,9 +9,11 @@
 
 #include "FEProblemBase.h"
 #include "AuxiliarySystem.h"
+#include "InitialConditionTempl.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
 #include "Factory.h"
+#include "MooseTypes.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
 #include "SystemBase.h"
@@ -1047,8 +1049,9 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering() && !_app.isRestarting())
   {
-    // During initial setup the solution is copied to the older solution states (old, older, etc)
-    copySolutionsBackwards();
+    // This functionality was moved to FEProblemBase.C::projectSolution()
+    // // During initial setup the solution is copied to the older solution states (old, older, etc)
+    // // copySolutionsBackwards();
   }
 
   if (!_app.isRecovering())
@@ -3298,17 +3301,6 @@ FEProblemBase::projectSolution()
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-  // loop over _current_ic_state = 1, 0
-  for (global_current_state=2; global_current_state>=0; global_current_state--){
-    ComputeInitialConditionThread cic(*this);
-    Threads::parallel_reduce(elem_range, cic);
-    if (global_current_state>0){
-      for (auto & nl : _nl){
-        nl->copyOldSolutions();
-      }
-      _aux->copyOldSolutions();
-    }
-  }
   // ComputeInitialConditionThread cic(*this);
   // Threads::parallel_reduce(elem_range, cic); // in IC class only act if _fe_problem._current_ic_state == my state parameter
 
@@ -3343,7 +3335,7 @@ FEProblemBase::projectSolution()
     for (auto & nl : _nl)
       nl->solution().close();
     _aux->solution().close();
-
+    
     if (global_current_state > 0)
     {
       for (auto & nl : _nl)

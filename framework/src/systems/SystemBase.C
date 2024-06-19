@@ -1245,9 +1245,16 @@ SystemBase::copyOldSolutions()
   for (const auto iteration_index : index_range(_solution_states))
   {
     const auto states = _solution_states[iteration_index].size();
-    if (states > 1)
-      for (unsigned int i = states - 1; i > 0; --i)
-        solutionState(i, Moose::SolutionIterationType(iteration_index)) = solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
+    if (states > 1){
+      unsigned int i = states - 1;
+      while (i > 0)
+        {
+          solutionState(i, Moose::SolutionIterationType(iteration_index)) = solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
+          // std::cout << "Solution State " << i << "\n" << solutionState(i, Moose::SolutionIterationType(iteration_index)) << "\n";
+          // std::cout << "Solution State " << i -1 << "\n" << solutionState(i-1, Moose::SolutionIterationType(iteration_index)) << "\n";
+          --i;
+        }
+    }
   }
 
   if (solutionUDotOld())
@@ -1256,6 +1263,9 @@ SystemBase::copyOldSolutions()
     *solutionUDotDotOld() = *solutionUDotDot();
   if (solutionPreviousNewton())
     *solutionPreviousNewton() = *currentSolution();
+
+  std::cout << "SystemBase.C::*solutionUDot()\n" << *solutionUDot() << "\n";
+
 }
 
 /**
