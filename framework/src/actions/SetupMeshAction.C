@@ -251,6 +251,12 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
+    // Only run this once per simulation
+    bool continue_act = false;
+    mooseDoOnce(continue_act = true;);
+    if (!continue_act)
+      return;
+
     if (_app.masterMesh())
       _mesh = _app.masterMesh()->safeClone();
     else
@@ -302,8 +308,13 @@ SetupMeshAction::act()
 
   else if (_current_task == "set_mesh_base")
   {
-
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true);
+
+    // Only run this once per simulation
+    bool continue_act = false;
+    mooseDoOnce(continue_act = true;);
+    if (!continue_act)
+      return;
 
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
     {
@@ -352,6 +363,12 @@ SetupMeshAction::act()
   else if (_current_task == "init_mesh")
   {
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Initializing Mesh", true);
+
+    // Only run this once per simulation
+    bool continue_act = false;
+    mooseDoOnce(continue_act = true;);
+    if (!continue_act)
+      return;
 
     if (_app.masterMesh())
     {

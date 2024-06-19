@@ -246,8 +246,10 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
     // Note: if performance becomes an issue, this is overkill for just getting the max node id
     std::set<subdomain_id_type> source_ids;
     std::set<subdomain_id_type> dest_ids;
-    source.subdomain_ids(source_ids, false);
-    destination.subdomain_ids(dest_ids, false);
+    source.subdomain_ids(source_ids, true);
+    destination.subdomain_ids(dest_ids, true);
+    mooseAssert(source_ids.size(), "Should have a subdomain");
+    mooseAssert(dest_ids.size(), "Should have a subdomain");
     unsigned int max_dest_bid = *dest_ids.rbegin();
     unsigned int min_source_bid = *source_ids.begin();
     _communicator.max(max_dest_bid);
