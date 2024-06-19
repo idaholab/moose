@@ -72,7 +72,7 @@ CylinderComponent::addMeshGenerators()
     }
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "GeneratedMeshGenerator", name() + "_base", params);
-    _mg_name = name() + "_base";
+    _mg_names.push_back(name() + "_base");
 
     // TODO: Change coordinate system of block
   }
@@ -85,18 +85,18 @@ CylinderComponent::addMeshGenerators()
   if (isParamValid("position"))
   {
     InputParameters params = _factory.getValidParams("TransformGenerator");
-    params.set<MeshGeneratorName>("input") = _mg_name;
+    params.set<MeshGeneratorName>("input") = _mg_names.back();
     params.set<MooseEnum>("transform") = "TRANSLATE";
     params.set<RealVectorValue>("vector_value") = getParam<Point>("position");
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "TransformGenerator", name() + "_translated", params);
-    _mg_name = name() + "_translated";
+    _mg_names.push_back(name() + "_translated");
   }
   // Rotate it as desired
   if (isParamValid("direction"))
   {
     InputParameters params = _factory.getValidParams("TransformGenerator");
-    params.set<MeshGeneratorName>("input") = _mg_name;
+    params.set<MeshGeneratorName>("input") = _mg_names.back();
     params.set<MooseEnum>("transform") = "ROTATE";
     const RealVectorValue direction = getParam<Point>("direction");
     const auto rotation_matrix =
@@ -108,6 +108,6 @@ CylinderComponent::addMeshGenerators()
     params.set<RealVectorValue>("vector_value") = angles / M_PI_2 * 90;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "TransformGenerator", name() + "_rotated", params);
-    _mg_name = name() + "_rotated";
+    _mg_names.push_back(name() + "_rotated");
   }
 }

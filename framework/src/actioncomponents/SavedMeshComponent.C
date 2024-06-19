@@ -36,7 +36,7 @@ void
 SavedMeshComponent::addMeshGenerators()
 {
   // The mesh generator will end up as an input to the final combiner generator
-  _mg_name = getParam<MeshGeneratorName>("mesh_generator");
+  _mg_names.push_back(getParam<MeshGeneratorName>("mesh_generator"));
 }
 
 void
