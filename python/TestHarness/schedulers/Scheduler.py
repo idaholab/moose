@@ -198,21 +198,14 @@ class Scheduler(MooseObject):
             # And launch
             self.queueJobs(job_dag)
 
-    def outputJobStatus(self, job, caveats=None):
-        """
-        Forces a Job's status to be output asap
-        """
-        with job.getLock():
-            job.force_report_status = True
-        self.handleJobStatus(job, caveats=caveats)
-
     def setAndOutputJobStatus(self, job, status, caveats=None):
         """
         Sets a Job's status and forces the status to be output asap
         """
+        job.setStatus(status)
         with job.getLock():
-            job.setStatus(status)
-        self.outputJobStatus(job, caveats=caveats)
+            job.force_report_status = True
+        self.handleJobStatus(job, caveats=caveats)
 
     def isRunning(self):
         """
