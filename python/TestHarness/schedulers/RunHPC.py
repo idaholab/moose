@@ -86,8 +86,11 @@ class RunHPC(RunParallel):
 
         # Lock for accessing self.hpc_jobs
         self.hpc_jobs_lock = threading.Lock()
-        # How often to poll for status updates in getHPCJob()
+        # How often to poll (in sec) for status updates in getHPCJob()
         self.hpc_jobs_update_interval = 5
+        # How many HPC jobs to update at a time in updateHPCJobs()
+        # This needs to be an option because PBS is awful
+        self.update_hpc_jobs_chunk_size = 50
         # Map of Job ID -> HPCJob
         self.hpc_jobs = {}
         # The thread that will update the HPCJobs
@@ -545,8 +548,8 @@ class RunHPC(RunParallel):
                 # Whether or not all of the updates suceeded
                 success = True
 
-                # Process 50 jobs at a time (thanks PBS)
-                for chunked_hpc_jobs in in_chunks(active_hpc_jobs, 50):
+                # Process a subset of jobs at a time
+                for chunked_hpc_jobs in in_chunks(active_hpc_jobs, self.update_hpc_jobs_chunk_size):
                     # Returns whether or not it failed
                     if not self.updateHPCJobs(chunked_hpc_jobs):
                         success = False
