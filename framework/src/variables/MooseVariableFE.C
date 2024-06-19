@@ -1144,9 +1144,12 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::DotType
 MooseVariableFE<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  mooseAssert(_time_integrator && _time_integrator->dt(),
+  mooseAssert(_time_integrator,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
+  mooseAssert(_time_integrator->dt(),
+              "A time derivative is being requested but the time integrator wants to perform a 0s "
+              "time step");
   evaluateOnElement(elem_qp, state, /*query_cache=*/true);
   const auto qp = elem_qp.qp;
   mooseAssert(qp < _current_elem_qp_functor_dot.size(),
@@ -1158,9 +1161,12 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::DotType
 MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateArg & state) const
 {
-  mooseAssert(_time_integrator && _time_integrator->dt(),
+  mooseAssert(_time_integrator,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
+  mooseAssert(_time_integrator->dt(),
+              "A time derivative is being requested but the time integrator wants to perform a 0s "
+              "time step");
   const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
@@ -1172,9 +1178,12 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::GradientType
 MooseVariableFE<OutputType>::evaluateGradDot(const ElemArg & elem_arg, const StateArg & state) const
 {
-  mooseAssert(_time_integrator && _time_integrator->dt(),
+  mooseAssert(_time_integrator,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
+  mooseAssert(_time_integrator->dt(),
+              "A time derivative is being requested but the time integrator wants to perform a 0s "
+              "time step");
   const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};

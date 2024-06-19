@@ -6341,6 +6341,10 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
     if (!nl->hasVector(tag_udotdot) && uDotDotRequested())
       nl->associateVectorToTag(*nl->solutionUDotDot(), tag_udotdot);
   }
+
+  if (_displaced_problem)
+    // Time integrator does not exist when displaced problem is created.
+    _displaced_problem->addTimeIntegrator();
 }
 
 void
