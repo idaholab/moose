@@ -14,11 +14,11 @@
 /**
  * Action to combine the meshes of disjoined components
  */
-class CombineDisjoinedComponent : public Action
+class CombineComponentsMeshes : public Action
 {
 public:
   static InputParameters validParams();
 
-  CombineDisjoinedComponent(const InputParameters & params);
+  CombineComponentsMeshes(const InputParameters & params);
   virtual void act() override;
 };

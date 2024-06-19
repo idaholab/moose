@@ -16,7 +16,7 @@
 /**
  * Component whose mesh is generated in the [Mesh] block on which one can define a Physics.
  */
-class MeshGeneratorComponent : public virtual ActionComponent, public PhysicsComponentHelper
+class SavedMeshComponent : public virtual ActionComponent, public PhysicsComponentHelper
 {
 public:
   /**
@@ -24,7 +24,7 @@ public:
    */
   static InputParameters validParams();
 
-  MeshGeneratorComponent(const InputParameters & params);
+  SavedMeshComponent(const InputParameters & params);
 
 protected:
   virtual void addMeshGenerators() override;

@@ -8,15 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "MeshGeneratorComponent.h"
+#include "SavedMeshComponent.h"
 #include "RotationMatrix.h"
 
-registerMooseAction("MooseApp", MeshGeneratorComponent, "add_mesh_generator");
-registerMooseAction("MooseApp", MeshGeneratorComponent, "add_positions");
-registerMooseAction("MooseApp", MeshGeneratorComponent, "init_physics");
+registerMooseAction("MooseApp", SavedMeshComponent, "add_mesh_generator");
+registerMooseAction("MooseApp", SavedMeshComponent, "add_positions");
+registerMooseAction("MooseApp", SavedMeshComponent, "init_physics");
 
 InputParameters
-MeshGeneratorComponent::validParams()
+SavedMeshComponent::validParams()
 {
   InputParameters params = ActionComponent::validParams();
   params += PhysicsComponentHelper::validParams();
@@ -27,20 +27,20 @@ MeshGeneratorComponent::validParams()
   return params;
 }
 
-MeshGeneratorComponent::MeshGeneratorComponent(const InputParameters & params)
+SavedMeshComponent::SavedMeshComponent(const InputParameters & params)
   : ActionComponent(params), PhysicsComponentHelper(params)
 {
 }
 
 void
-MeshGeneratorComponent::addMeshGenerators()
+SavedMeshComponent::addMeshGenerators()
 {
   // The mesh generator will end up as an input to the final combiner generator
   _mg_name = getParam<MeshGeneratorName>("mesh_generator");
 }
 
 void
-MeshGeneratorComponent::setupComponent()
+SavedMeshComponent::setupComponent()
 {
   // Get list of blocks from the saved mesh
   const auto saved_mesh =
