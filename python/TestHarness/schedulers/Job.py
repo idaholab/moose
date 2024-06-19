@@ -81,7 +81,7 @@ class Job(object):
         self.__job_message = ''
 
         ### Enumerate the job statuses we want to use
-        self.job_status = StatusSystem()
+        self.job_status = StatusSystem(locking=True)
 
         self.hold = self.job_status.hold
         self.queued = self.job_status.queued

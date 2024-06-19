@@ -9,6 +9,7 @@
 
 from collections import namedtuple
 import threading
+import contextlib
 
 def initStatus():
     status = namedtuple('status', 'status color code sort_value')
@@ -20,6 +21,8 @@ class StatusSystemError(Exception):
 class StatusSystem(object):
     """
     A Class for supplying statuses, with status text color and corresponding exit codes.
+
+    Set locking=True within the initializer to enable thread-safe access.
 
     Syntax:
     status = StatusSystem()
@@ -104,11 +107,23 @@ class StatusSystem(object):
                           queued,
                           running]
 
-    def __init__(self):
+    def __init__(self, locking=False):
         # The underlying status
         self.__status = self.no_status
-        # The lock for reading/changing the status
-        self.__lock = threading.Lock()
+        # The lock for reading/changing the status, if any
+        if locking:
+            self.__lock = threading.Lock()
+        else:
+            self.__lock = None
+
+    def getLock(self):
+        """
+        Gets the thread lock for this system, if any.
+
+        This is safe to use in a with statement even if locking
+        is not enabled.
+        """
+        return self.__lock if self.__lock else contextlib.suppress()
 
     def createStatus(self, status_key='NA'):
         """ return a specific status object based on supplied status name """
@@ -118,9 +133,11 @@ class StatusSystem(object):
 
     def getStatus(self):
         """
-        Return the thread-safe status object.
+        Return the status object.
+
+        This is thread-safe if initialized with locking=True.
         """
-        with self.__lock:
+        with self.getLock():
             return self.__status
 
     @staticmethod
@@ -148,8 +165,10 @@ class StatusSystem(object):
         Set the current status to status. If status is not supplied, 'no_status' is implied.
         There is a validation check during this process to ensure the named tuple adheres to
         this class's set statuses.
+
+        This is thread-safe if initialized with locking=True.
         """
-        with self.__lock:
+        with self.getLock():
             if self.isValid(status):
                 self.__status = status
             else:
