@@ -665,21 +665,27 @@ class RunHPC(RunParallel):
         # Don't care about whether or not this failed
         self.callHPC(self.CallHPCPoolType.kill, f'{self.getHPCCancelCommand()} {job_id}')
 
-    def killRemaining(self, keyboard=False):
-        """Kills all currently running HPC jobs"""
+    def killHPCJobs(self, functor):
+        """
+        Kills the HPC jobs the meet the criteria of the functor.
+
+        The functor should take a single object, the HPCJob, and
+        should return a bool stating whether or not to kill that job.
+        """
         job_ids = []
         with self.hpc_jobs_lock:
             for hpc_job in self.hpc_jobs.values():
                 with hpc_job.getLock():
-                    if hpc_job.state in [hpc_job.State.killed, hpc_job.State.done]:
-                        continue
-                    job_ids.append(hpc_job.id)
-                    hpc_job.state = hpc_job.State.killed
+                    if functor(hpc_job):
+                        job_ids.append(hpc_job.id)
 
-        # Don't care about whether or not this failed
         if job_ids:
             self.callHPC(self.CallHPCPoolType.kill, f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
 
+    def killRemaining(self, keyboard=False):
+        """Kills all currently running HPC jobs"""
+        functor = lambda hpc_job: hpc_job.state not in [hpc_job.State.killed, hpc_job.State.done]
+        self.killHPCJobs(functor)
         super().killRemaining(keyboard)
 
     def getHPCSchedulerName(self):
@@ -790,6 +796,8 @@ class RunHPC(RunParallel):
     def waitFinish(self):
         super().waitFinish()
 
-        # Kill everything else that is left, which could be jobs in a held
-        # state that ended up not running because their dependencies failed
-        self.killRemaining()
+        # Kill the remaining jobs that are held, which would exist if things
+        # fail and jobs that we pre-submitted were skipped due to a failed
+        # dependency above them
+        functor = lambda hpc_job: hpc_job.state == hpc_job.State.held
+        self.killHPCJobs(functor)
