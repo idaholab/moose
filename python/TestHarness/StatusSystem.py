@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from collections import namedtuple
+import threading
 
 def initStatus():
     status = namedtuple('status', 'status color code sort_value')
@@ -104,7 +105,10 @@ class StatusSystem(object):
                           running]
 
     def __init__(self):
+        # The underlying status
         self.__status = self.no_status
+        # The lock for reading/changing the status
+        self.__lock = threading.Lock()
 
     def createStatus(self, status_key='NA'):
         """ return a specific status object based on supplied status name """
@@ -114,25 +118,30 @@ class StatusSystem(object):
 
     def getStatus(self):
         """
-        Return the status object.
+        Return the thread-safe status object.
         """
-        return self.__status
+        with self.__lock:
+            return self.__status
 
-    def getAllStatuses(self):
+    @staticmethod
+    def getAllStatuses():
         """ return list of named tuples containing all status types """
-        return self.__all_statuses
+        return StatusSystem.__all_statuses
 
-    def getFailingStatuses(self):
+    @staticmethod
+    def getFailingStatuses():
         """ return list of named tuples containing failing status types """
-        return self.__exit_nonzero_statuses
+        return StatusSystem.__exit_nonzero_statuses
 
-    def getSuccessStatuses(self):
+    @staticmethod
+    def getSuccessStatuses():
         """ return list of named tuples containing exit code zero status types """
-        return self.__exit_zero_statuses
+        return StatusSystem.__exit_zero_statuses
 
-    def getPendingStatuses(self):
+    @staticmethod
+    def getPendingStatuses():
         """ return list of named tuples containing pending status types """
-        return self.__pending_statuses
+        return StatusSystem.__pending_statuses
 
     def setStatus(self, status=no_status):
         """
@@ -140,14 +149,16 @@ class StatusSystem(object):
         There is a validation check during this process to ensure the named tuple adheres to
         this class's set statuses.
         """
-        if self.isValid(status):
-            self.__status = status
-        else:
-            raise StatusSystemError('Invalid status! %s' % (str(status)))
-        return self.__status
+        with self.__lock:
+            if self.isValid(status):
+                self.__status = status
+            else:
+                raise StatusSystemError('Invalid status! %s' % (str(status)))
+            return self.__status
 
-    def isValid(self, status):
-        original = set(self.no_status._asdict().keys())
+    @staticmethod
+    def isValid(status):
+        original = set(StatusSystem.no_status._asdict().keys())
         altered = set(status._asdict().keys())
-        if not original.difference(altered) or status in self.__all_statuses:
+        if not original.difference(altered) or status in StatusSystem.getAllStatuses():
             return True

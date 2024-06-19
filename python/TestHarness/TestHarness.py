@@ -1067,6 +1067,7 @@ class TestHarness:
         hpcgroup.add_argument('--hpc-apptainer-bindpath', nargs=1, action='store', type=str, dest='hpc_apptainer_bindpath', help='Sets the apptainer bindpath for HPC jobs')
         hpcgroup.add_argument('--hpc-apptainer-no-home', action='store_true', dest='hpc_apptainer_no_home', help='Passes --no-home to apptainer for HPC jobs')
         hpcgroup.add_argument('--hpc-project', nargs=1, action='store', dest='hpc_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
+        hpcgroup.add_argument('--hpc-no-hold', nargs=1, action='store', type=bool, default=False, dest='hpc_no_hold', help='Do not pre-create hpc jobs to be held')
         hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
 
         # Try to find the terminal size if we can
