@@ -38,6 +38,13 @@ ParsedAux::validParams()
       "constant_expressions",
       {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<std::string>>(
+      "functor_names", {}, "Functors to use in the parsed expression");
+  params.addParam<std::vector<std::string>>(
+      "functor_symbols",
+      {},
+      "Symbolic name to use for each functor in 'functor_names' in the parsed expression. If not "
+      "provided, then the actual functor names must be used in the parsed expression.");
 
   return params;
 }
@@ -48,7 +55,10 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     _function(getParam<std::string>("expression")),
     _nargs(coupledComponents("coupled_variables")),
     _args(coupledValues("coupled_variables")),
-    _use_xyzt(getParam<bool>("use_xyzt"))
+    _use_xyzt(getParam<bool>("use_xyzt")),
+    _functor_names(getParam<std::vector<std::string>>("functor_names")),
+    _n_functors(_functor_names.size()),
+    _functor_symbols(getParam<std::vector<std::string>>("functor_symbols"))
 {
   // build variables argument
   std::string variables;
@@ -56,6 +66,14 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   // coupled field variables
   for (std::size_t i = 0; i < _nargs; ++i)
     variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
+
+  // adding functors to the expression
+  if (_functor_symbols.size() > 0)
+    for (const auto & symbol : _functor_symbols)
+      variables += (variables.empty() ? "" : ",") + symbol;
+  else
+    for (const auto & name : _functor_names)
+      variables += (variables.empty() ? "" : ",") + name;
 
   // "system" variables
   const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
@@ -98,7 +116,10 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   }
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs + (_use_xyzt ? 4 : 0));
+  _func_params.resize(_nargs + +_n_functors + (_use_xyzt ? 4 : 0));
+
+  for (const auto & name : _functor_names)
+    _functors.push_back(&getFunctor<Real>(name));
 }
 
 Real
@@ -107,11 +128,25 @@ ParsedAux::computeValue()
   for (std::size_t j = 0; j < _nargs; ++j)
     _func_params[j] = (*_args[j])[_qp];
 
+  const auto state = determineState();
+  if (isNodal())
+  {
+    const Moose::NodeArg node_arg = {_current_node, Moose::INVALID_BLOCK_ID};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(node_arg, state);
+  }
+  else
+  {
+    const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(qp_arg, state);
+  }
+
   if (_use_xyzt)
   {
     for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
-      _func_params[_nargs + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
-    _func_params[_nargs + 3] = _t;
+      _func_params[_nargs + _n_functors + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
+    _func_params[_nargs + _n_functors + 3] = _t;
   }
 
   return evaluate(_func_F);

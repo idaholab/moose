@@ -39,4 +39,16 @@ protected:
   SymFunctionPtr _func_F;
 
   usingFunctionParserUtilsMembers(false);
+
+  /// Functors to use in the parsed expression
+  const std::vector<std::string> & _functor_names;
+
+  /// Number of functors
+  const unsigned int _n_functors;
+
+  /// Symbolic name to use for each functor
+  std::vector<std::string> _functor_symbols;
+
+  /// Vector of pointers to functors
+  std::vector<const Moose::Functor<Real> *> _functors;
 };
