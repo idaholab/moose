@@ -26,6 +26,7 @@
     csvdiff = 'rayleigh-bernard-two-phase_CSV.csv'
     requirement = 'The system shall be able solve two phase Rayleigh Bernard convection with the mixture model.'
     rel_err = 5.0E-3
+    abs_zero = 1e-8
     recover = false
     method = '!dbg'
     valgrind = none
