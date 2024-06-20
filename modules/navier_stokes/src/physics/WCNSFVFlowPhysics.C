@@ -20,6 +20,7 @@ registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_material");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_user_object");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_postprocessor");
+registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "get_turbulence_physics");
 
 InputParameters
 WCNSFVFlowPhysics::validParams()
@@ -186,14 +187,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
       getParam<std::vector<MooseFunctorName>>("pressure_functors").size())
     paramError("pin_pressure", "Cannot pin the pressure if a pressure boundary exists");
 
-  // Create maps for boundary-restricted parameters
-  _momentum_inlet_functors =
-      Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
-          _inlet_boundaries,
-          getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
-  _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
-      _outlet_boundaries, getParam<std::vector<MooseFunctorName>>("pressure_functors"));
-
   // Friction parameter checks
   if (_friction_blocks.size())
     checkVectorParamsSameLength<std::vector<SubdomainName>, std::vector<std::string>>(
@@ -259,15 +252,28 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
                        " is already reserved for the automatically-computed interstitial velocity. "
                        "Please choose another name for your external velocity variable!");
     }
+
+  // Create maps for boundary-restricted parameters
+  _momentum_inlet_functors =
+      Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
+          _inlet_boundaries,
+          getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
+  _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
+      _outlet_boundaries, getParam<std::vector<MooseFunctorName>>("pressure_functors"));
 }
 
 void
 WCNSFVFlowPhysics::initializePhysicsAdditional()
 {
   getProblem().needFV();
+}
 
-  // Turbulence physics cannot have been created before
-  _turbulence_physics = getCoupledTurbulencePhysics();
+void
+WCNSFVFlowPhysics::actOnAdditionalTasks()
+{
+  // Turbulence physics would not be initialized before this task
+  if (_current_task == "get_turbulence_physics")
+    _turbulence_physics = getCoupledTurbulencePhysics();
 }
 
 void

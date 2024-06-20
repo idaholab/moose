@@ -69,6 +69,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("WCNSFVScalarTransportPhysics", "Modules/NavierStokesFV");
   registerSyntax("WCNSFVTurbulencePhysics", "Modules/NavierStokesFV");
 
+  // Additional tasks to make the Physics work out
+  registerTask("get_turbulence_physics", /*is_required=*/false);
+  addTaskDependency("get_turbulence_physics", "init_physics");
+  addTaskDependency("check_integrity_early_physics", "get_turbulence_physics");
+
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_variables", "add_variable");
