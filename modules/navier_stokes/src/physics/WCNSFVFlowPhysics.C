@@ -9,8 +9,11 @@
 
 #include "WCNSFVFlowPhysics.h"
 #include "WCNSFVTurbulencePhysics.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
+#include "INSFVMomentumAdvection.h"
+#include "INSFVRhieChowInterpolator.h"
 #include "MapConversionUtils.h"
+#include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
@@ -29,7 +32,7 @@ WCNSFVFlowPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible mass and momentum equations");
 
-  params += NSFVAction::commonMomentumEquationParams();
+  params += NSFVBase::commonMomentumEquationParams();
   params.addParam<bool>("add_flow_equations",
                         true,
                         "Whether to add the flow equations. This parameter is not necessary when "
@@ -42,7 +45,7 @@ WCNSFVFlowPhysics::validParams()
   // a restricted MooseEnum, or place an error in the constructor for unsupported configurations
   // We mostly pull the boundary parameters from NSFV Action
 
-  params += NSFVAction::commonNavierStokesFlowParams();
+  params += NSFVBase::commonNavierStokesFlowParams();
 
   // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
   params.addParam<MooseFunctorName>(
@@ -51,31 +54,31 @@ WCNSFVFlowPhysics::validParams()
 
   // Most downstream physics implementations are valid for porous media too
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
-  params.transferParam<bool>(NSFVAction::validParams(), "porous_medium_treatment");
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "porosity");
-  params.transferParam<unsigned short>(NSFVAction::validParams(), "porosity_smoothing_layers");
+  params.transferParam<bool>(NSFVBase::validParams(), "porous_medium_treatment");
+  params.transferParam<MooseFunctorName>(NSFVBase::validParams(), "porosity");
+  params.transferParam<unsigned short>(NSFVBase::validParams(), "porosity_smoothing_layers");
 
   // Momentum boundary conditions are important for advection problems as well
-  params += NSFVAction::commonMomentumBoundaryTypesParams();
+  params += NSFVBase::commonMomentumBoundaryTypesParams();
 
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
-  params += NSFVAction::commonMomentumBoundaryFluxesParams();
+  params += NSFVBase::commonMomentumBoundaryFluxesParams();
 
   // New functor boundary conditions
   params.deprecateParam("momentum_inlet_function", "momentum_inlet_functors", "01/01/2025");
   params.deprecateParam("pressure_function", "pressure_functors", "01/01/2025");
 
   // Initialization parameters
-  params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "initial_velocity");
-  params.transferParam<FunctionName>(NSFVAction::validParams(), "initial_pressure");
+  params.transferParam<std::vector<FunctionName>>(NSFVBase::validParams(), "initial_velocity");
+  params.transferParam<FunctionName>(NSFVBase::validParams(), "initial_pressure");
 
   // Techniques to limit or remove oscillations at porosity jump interfaces
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "porosity_interface_pressure_treatment");
 
   // Friction correction, a technique to limit oscillations at friction interfaces
-  params.transferParam<bool>(NSFVAction::validParams(), "use_friction_correction");
-  params.transferParam<Real>(NSFVAction::validParams(), "consistent_scaling");
+  params.transferParam<bool>(NSFVBase::validParams(), "use_friction_correction");
+  params.transferParam<Real>(NSFVBase::validParams(), "consistent_scaling");
 
   // Couple to turbulence physics
   params.addParam<PhysicsName>("coupled_turbulence_physics",
@@ -83,15 +86,15 @@ WCNSFVFlowPhysics::validParams()
 
   // Spatial discretization scheme
   // Specify the numerical schemes for interpolations of velocity and pressure
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "velocity_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "pressure_face_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_face_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "mass_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_advection_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "pressure_two_term_bc_expansion");
-  params.transferParam<bool>(NSFVAction::validParams(),
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "velocity_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "pressure_face_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_face_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "mass_advection_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_advection_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "pressure_two_term_bc_expansion");
+  params.transferParam<bool>(NSFVBase::validParams(),
                              "pressure_allow_expansion_on_bernoulli_faces");
-  params.transferParam<bool>(NSFVAction::validParams(), "momentum_two_term_bc_expansion");
+  params.transferParam<bool>(NSFVBase::validParams(), "momentum_two_term_bc_expansion");
   params.transferParam<Real>(INSFVMomentumAdvection::validParams(), "characteristic_speed");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>("mu_interp_method",
@@ -99,8 +102,8 @@ WCNSFVFlowPhysics::validParams()
                              "Switch that can select face interpolation method for the viscosity.");
 
   // Nonlinear solver parameters
-  params.transferParam<Real>(NSFVAction::validParams(), "mass_scaling");
-  params.transferParam<Real>(NSFVAction::validParams(), "momentum_scaling");
+  params.transferParam<Real>(NSFVBase::validParams(), "mass_scaling");
+  params.transferParam<Real>(NSFVBase::validParams(), "momentum_scaling");
 
   // Parameter groups
   params.addParamNamesToGroup(
