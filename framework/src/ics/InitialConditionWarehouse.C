@@ -84,6 +84,11 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialConditionBase> objec
       _block_ics[tid][ic_key].insert(Moose::ANY_BLOCK_ID);
   }
 
+  std::cout << "\n\n var.name     state\n";
+  for (auto iter2 = _block_ics[tid].begin(); iter2!=_block_ics[tid].end(); iter2++){
+    std::cout << std::get<0>(iter2->first) << "     " << std::get<1>(iter2->first) << "\n";
+  }
+
   // Add the IC to the storage
   MooseObjectWarehouseBase<InitialConditionBase>::addObject(object, tid, recurse);
 }
