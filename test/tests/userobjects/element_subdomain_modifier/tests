@@ -144,7 +144,7 @@
     [direct]
       type = 'Exodiff'
       input = 'tsm_direct.i'
-      exodiff = 'tsm_direct_out.e-s006'
+      exodiff = 'tsm_direct_out.e-s004 tsm_direct_out.e-s006'
       detail = 'listed in the input file,'
       exodiff_opts = '-pedantic'
     []

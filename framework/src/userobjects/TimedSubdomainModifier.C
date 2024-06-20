@@ -19,7 +19,8 @@ TimedSubdomainModifier::validParams()
 {
   InputParameters params = TimedElementSubdomainModifier::validParams();
 
-  // parameters for direct input (additionally to 'times')
+  // parameters for direct input
+  params.addParam<std::vector<Real>>("times", "The times of the subdomain modifications.");
   params.addParam<std::vector<SubdomainName>>("blocks_from",
                                               "Names or ids of the 'old' block(s), to be renamed.");
   params.addParam<std::vector<SubdomainName>>("blocks_to", "Names or ids of the 'new' block.");
@@ -31,11 +32,11 @@ TimedSubdomainModifier::validParams()
                         "Indicates whether the file contains a header with the column names");
   params.addParam<std::string>("delimiter", ",", "Delimiter used to parse the file");
   params.addParam<std::string>("comment", ";", "Comment character used to parse the file");
-  params.addParam<size_t>(
+  params.addParam<std::size_t>(
       "time_column_index", 0, "Zero-based index of the time column. Default is '0'.");
-  params.addParam<size_t>(
+  params.addParam<std::size_t>(
       "blocks_from_column_index", 1, "Zero-based index of the blocks_from column. Default is '1'.");
-  params.addParam<size_t>(
+  params.addParam<std::size_t>(
       "blocks_to_column_index", 2, "Zero-based index of the blocks_to column. Default is '2'.");
   params.addParam<std::string>("time_column_text", "Header text of the time column.");
   params.addParam<std::string>("blocks_from_column_text", "Header text of the blocks_from column.");
@@ -113,9 +114,7 @@ TimedSubdomainModifier::TimedSubdomainModifier(const InputParameters & parameter
 void
 TimedSubdomainModifier::buildFromParameters()
 {
-
-  const auto times = getParam<std::vector<Real>>("times");
-  _times = std::set<Real>(times.begin(), times.end());
+  _times = getParam<std::vector<Real>>("times");
   const auto n = _times.size();
 
   const auto raw_from = getParam<std::vector<SubdomainName>>("blocks_from");
@@ -130,11 +129,10 @@ TimedSubdomainModifier::buildFromParameters()
   _blocks_from.resize(n);
   _blocks_to.resize(n);
 
-  const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
   for (const auto i : index_range(raw_from))
   {
-    _blocks_from[i] = _mesh->getSubdomainID(raw_from[i]);
-    _blocks_to[i] = _mesh->getSubdomainID(raw_to[i]);
+    _blocks_from[i] = _mesh.getSubdomainID(raw_from[i]);
+    _blocks_to[i] = _mesh.getSubdomainID(raw_to[i]);
   }
 }
 
@@ -171,7 +169,7 @@ TimedSubdomainModifier::buildFromFile()
   file.setComment(_comment);
   file.read();
 
-  size_t _time_column = 0;
+  std::size_t _time_column = 0;
   if (isParamValid("time_column_text"))
   {
     const auto s = getParam<std::string>("time_column_text");
@@ -183,10 +181,10 @@ TimedSubdomainModifier::buildFromFile()
   }
   else if (isParamValid("time_column_index"))
   {
-    _time_column = getParam<size_t>("time_column_index");
+    _time_column = getParam<std::size_t>("time_column_index");
   }
 
-  size_t _blocks_from_column = 1;
+  std::size_t _blocks_from_column = 1;
   if (isParamValid("blocks_from_column_text"))
   {
     const auto s = getParam<std::string>("blocks_from_column_text");
@@ -198,10 +196,10 @@ TimedSubdomainModifier::buildFromFile()
   }
   else if (isParamValid("blocks_from_column_index"))
   {
-    _blocks_from_column = getParam<size_t>("blocks_from_column_index");
+    _blocks_from_column = getParam<std::size_t>("blocks_from_column_index");
   }
 
-  size_t _blocks_to_column = 2;
+  std::size_t _blocks_to_column = 2;
   if (isParamValid("blocks_to_column_text"))
   {
     const auto s = getParam<std::string>("blocks_to_column_text");
@@ -212,7 +210,7 @@ TimedSubdomainModifier::buildFromFile()
     _blocks_to_column = std::distance(_names.begin(), it);
   }
   else if (isParamValid("blocks_to_column_index"))
-    _blocks_to_column = getParam<size_t>("blocks_to_column_index");
+    _blocks_to_column = getParam<std::size_t>("blocks_to_column_index");
 
   const auto max_needed_column_index =
       std::max({_time_column, _blocks_from_column, _blocks_to_column});
@@ -253,17 +251,16 @@ TimedSubdomainModifier::buildFromFile()
   _blocks_to.resize(n_rows);
 
   // fill the to and from blocks vectors
-  const std::shared_ptr<MooseMesh> _mesh = _app.actionWarehouse().mesh();
   for (const auto & time_str : strTimes)
-    _times.insert(std::stod(time_str));
+    _times.push_back(std::stod(time_str));
   std::transform(strBlockFrom.begin(),
                  strBlockFrom.end(),
                  _blocks_from.begin(),
-                 [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
+                 [this](const std::string & x) { return _mesh.getSubdomainID(x); });
   std::transform(strBlockTo.begin(),
                  strBlockTo.end(),
                  _blocks_to.begin(),
-                 [_mesh](std::string x) { return _mesh->getSubdomainID(x); });
+                 [this](const std::string & x) { return _mesh.getSubdomainID(x); });
 }
 
 SubdomainID
@@ -274,7 +271,7 @@ TimedSubdomainModifier::computeSubdomainID()
 
   // check for all the subdomain changes that can have been requested between the previous and the
   // current time
-  for (const auto time_pair : _times_and_indices)
+  for (const auto & time_pair : _times_and_indices)
   {
     // time of the data point
     const auto t = time_pair.time;
