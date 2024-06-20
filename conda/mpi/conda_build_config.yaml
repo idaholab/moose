@@ -39,6 +39,9 @@ moose_gcc:                                                  # [linux]
 moose_gcc_impl:                                             # [linux]
   - gcc_impl_linux-64 12.3.0 h58ffeeb_7                     # [linux]
 
+moose_gfortran_impl:                                        # [linux]
+  - gfortran_impl_linux-64 12.3.0 h1645026_7                # [linux]
+
 moose_clangcc:                                              # [osx]
   - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
   - clang 16.0.6 h30cc82d_6                                 # [arm64]
