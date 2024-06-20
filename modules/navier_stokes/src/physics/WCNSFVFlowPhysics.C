@@ -71,8 +71,7 @@ WCNSFVFlowPhysics::validParams()
   params.transferParam<FunctionName>(NSFVAction::validParams(), "initial_pressure");
 
   // Techniques to limit or remove oscillations at porosity jump interfaces
-  params.transferParam<MooseEnum>(NSFVAction::validParams(),
-                                  "porosity_interface_pressure_treatment");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "porosity_interface_pressure_treatment");
 
   // Friction correction, a technique to limit oscillations at friction interfaces
   params.transferParam<bool>(NSFVAction::validParams(), "use_friction_correction");
@@ -165,10 +164,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
-    _momentum_inlet_types(Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
-        _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"))),
-    _momentum_outlet_types(Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
-        _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"))),
     _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions")),
@@ -254,12 +249,41 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     }
 
   // Create maps for boundary-restricted parameters
-  _momentum_inlet_functors =
-      Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
-          _inlet_boundaries,
-          getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
-  _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
-      _outlet_boundaries, getParam<std::vector<MooseFunctorName>>("pressure_functors"));
+  _momentum_inlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+      _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"));
+  _momentum_outlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+      _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"));
+  if (isParamSetByUser("momentum_inlet_functors"))
+  {
+    // Not all inlet boundary types require the specification of an inlet functor
+    std::vector<BoundaryName> inlet_boundaries_with_functors;
+    for (const auto & boundary : _inlet_boundaries)
+      if (libmesh_map_find(_momentum_inlet_types, boundary) == "fixed-velocity" ||
+          libmesh_map_find(_momentum_inlet_types, boundary) == "fixed-pressure")
+        inlet_boundaries_with_functors.push_back(boundary);
+    _momentum_inlet_functors =
+        Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
+            inlet_boundaries_with_functors,
+            getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
+  }
+  if (isParamSetByUser("pressure_functors"))
+  {
+    // Not all inlet boundary types require the specification of an inlet functor
+    std::vector<BoundaryName> outlet_boundaries_with_functors;
+    for (const auto & boundary : _outlet_boundaries)
+      if (libmesh_map_find(_momentum_outlet_types, boundary) == "fixed-pressure-zero-gradient" ||
+          libmesh_map_find(_momentum_outlet_types, boundary) == "fixed-pressure")
+        outlet_boundaries_with_functors.push_back(boundary);
+    const auto & pressure_functors = getParam<std::vector<MooseFunctorName>>("pressure_functors");
+    if (outlet_boundaries_with_functors.size() != pressure_functors.size())
+      paramError("pressure_functors",
+                 "Size (" + std::to_string(pressure_functors.size()) +
+                     ") is not the same as the number of pressure outlet boundaries in "
+                     "'fixed-pressure/fixed-pressure-zero-gradient' (size " +
+                     std::to_string(outlet_boundaries_with_functors.size()) + ")");
+    _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
+        outlet_boundaries_with_functors, pressure_functors);
+  }
 }
 
 void
@@ -1160,7 +1184,7 @@ WCNSFVFlowPhysics::addUserObjects()
 void
 WCNSFVFlowPhysics::addMaterials()
 {
-  if (hasForchheimerFriction())
+  if (hasForchheimerFriction() || _porous_medium_treatment)
     addPorousMediumSpeedMaterial();
   else
     addNonPorousMediumSpeedMaterial();
