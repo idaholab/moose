@@ -330,8 +330,8 @@ class RunHPC(RunParallel):
                               'TEST_NAME': tester.getTestNameShort(),
                               'SUBMITTED_HOSTNAME': socket.gethostname(),
                               'MOOSE_PYTHONPATH': moose_python,
-                              'NUM_PROCS': tester.getProcs(options),
-                              'NUM_THREADS': tester.getThreads(options),
+                              'NUM_PROCS': int(tester.getProcs(options)),
+                              'NUM_THREADS': int(tester.getThreads(options)),
                               'ENDING_COMMENT': self.getOutputEndingComment(f'${self.getHPCJobIDVariable()}'),
                               'JOB_ID_VARIABLE': self.getHPCJobIDVariable(),
                               'PLACE': self.options.hpc_place}
