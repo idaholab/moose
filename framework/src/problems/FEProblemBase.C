@@ -3304,6 +3304,10 @@ FEProblemBase::projectSolution()
   // loop over global_current_state = 2, 1, 0
   for (global_current_state = 2; global_current_state >= 0; global_current_state--)
   {
+    for (auto & nl : _nl)
+      nl->solution().zero();
+    _aux->solution().zero();
+
     ComputeInitialConditionThread cic(*this);
     Threads::parallel_reduce(elem_range, cic);
 

@@ -113,9 +113,6 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
 
       // Now that all dofs are set for this variable, solemnize the solution.
       var->insert(var->sys().solution());
-      if (loop_state==0 && break_loop==false) {
-        var->sys().solution().zero();
-      }
     }
   }
 }
