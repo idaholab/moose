@@ -1,20 +1,31 @@
 # INSFEMaterial
 
-!alert construction title=Undocumented Class
-The INSFEMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/INSFEMaterial
 
-## Overview
+The fluid properties are computed as [material properties](Materials/index.md)
+from the flow variables -- velocity, pressure, temperature -- and from the fluid properties.
+The fluid properties computed are:
 
-!! Replace these lines with information regarding the INSFEMaterial object.
+- density
+- dynamic viscosity
+- thermal diffusivity
+- specific heat capacity
 
-## Example Input File Syntax
 
-!! Describe and include an example of how to use the INSFEMaterial object.
+Additionally, several turbulence quantities are computed using a mixing length
+model:
+
+- the turbulent dynamic viscosity
+- the turbulent heat conductivity
+- the viscous stress tensor from both dynamic and turbulent viscosity
+
+
+The stabilization terms for [PSPG/ SUPG stabilization](navier_stokes/cgfe.md) are also computed:
+
+- the minimum dimension of the element 'hmin'
+- the mass PSPG stabilization term $\tau_c$
+- the momentum and energy equation SUPG stabilization $\tau$ terms
+
 
 !syntax parameters /Materials/INSFEMaterial
 
