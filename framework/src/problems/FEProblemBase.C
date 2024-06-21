@@ -3301,17 +3301,11 @@ FEProblemBase::projectSolution()
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-  // ComputeInitialConditionThread cic(*this);
-  // Threads::parallel_reduce(elem_range, cic); // in IC class only act if _fe_problem._current_ic_state == my state parameter
-
-  // loop over _current_ic_state = 1, 0
+  // loop over global_current_state = 2, 1, 0
   for (global_current_state = 2; global_current_state >= 0; global_current_state--)
   {
     ComputeInitialConditionThread cic(*this);
     Threads::parallel_reduce(elem_range, cic);
-    // ComputeInitialConditionThread cic(*this);
-    // Threads::parallel_reduce(elem_range, cic); // in IC class only act if
-    // _fe_problem._current_ic_state == my state parameter
 
     if (haveFV())
     {
@@ -3332,16 +3326,18 @@ FEProblemBase::projectSolution()
     ComputeBoundaryInitialConditionThread cbic(*this);
     Threads::parallel_reduce(bnd_nodes, cbic);
 
+    // close the solution vectors to make sure the solutions are in good state before copyOldSolutions()
     for (auto & nl : _nl)
       nl->solution().close();
     _aux->solution().close();
     
+    // calling copyOldSolutions() to send ICs for old and older states back to where they 
+    // should be before the start of the time-looping.
+    // Functionality moved here from FEProblemBase::initialSetup().
     if (global_current_state > 0)
     {
       for (auto & nl : _nl)
-      {
         nl->copyOldSolutions();
-      }
       _aux->copyOldSolutions();
     }
   }
