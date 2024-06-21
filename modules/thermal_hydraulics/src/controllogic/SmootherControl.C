@@ -15,13 +15,13 @@ InputParameters
 SmootherControl::validParams()
 {
   InputParameters params = THMControl::validParams();
-  params.addRequiredParam<std::string>("input", "The name of the dataset.");
+  params.addRequiredParam<std::string>("input", "Control data value to smooth.");
   params.addRequiredParam<unsigned int>("n_points",
                                         "The number of points to use in the moving average.");
   params.addClassDescription("Computes a moving average value of the input control "
                              "with a user-specified number of points to average. "
-                             "The output control value is named " name ":" value ", "
-                             "where " name " is the name of the control object.");
+                             "The output control value is named 'name:value', "
+                             "where 'name' is the name of the control object.");
   return params;
 }
 
@@ -29,7 +29,8 @@ SmootherControl::SmootherControl(const InputParameters & parameters)
   : THMControl(parameters),
     _input(getControlData<Real>("input")),
     _n_points(getParam<unsigned int>("n_points")),
-    _output(declareComponentControlData<Real>("value"))
+    _output(declareComponentControlData<Real>("value")),
+    _values(declareRestartableData<std::vector<Real>>("values"))
 {
 }
 

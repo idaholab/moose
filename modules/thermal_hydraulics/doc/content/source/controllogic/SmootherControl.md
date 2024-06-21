@@ -11,9 +11,6 @@ s(v) \leq N
 
 where $v$ is the vector containing the input values, $s(v)$ is the current size of the vector, and $N$ is the maximum size of the vector, defined by [!param](/ControlLogic/SmootherControl/n_points).
 
-Since, by default, the control logic is executed on the initial condition, the first output will be 0.
-
-
 !syntax parameters /ControlLogic/SmootherControl
 
 !syntax inputs /ControlLogic/SmootherControl

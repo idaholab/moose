@@ -11,8 +11,12 @@
 
 #include "THMControl.h"
 
-/** Computes a moving average value of the input control with a user-specified number of points to average. The output control value is named " name:value ", where " name " is the name of the control object.
+/**
+ * Computes a moving average value of the input control with a user-specified
+ * number of points to average. The output control value is named " name:value ",
+ * where " name " is the name of the control object.
  **/
+
 class SmootherControl : public THMControl
 {
 public:
@@ -24,10 +28,10 @@ public:
 protected:
   /// Input data
   const Real & _input;
-  /// Maximum number of data points to be used in the average calculation
+  /// The number of points to use in the moving average
   const unsigned int _n_points;
-  /// Output computed by the Smooth control
+  /// Output control value
   Real & _output;
   /// Vector to store values
-  std::vector<Real> _values;
+  std::vector<Real> & _values;
 };
