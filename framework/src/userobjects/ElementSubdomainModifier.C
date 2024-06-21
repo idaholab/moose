@@ -80,6 +80,14 @@ ElementSubdomainModifier::ElementSubdomainModifier(const InputParameters & param
     if (!_nl_sys.hasVariable(var_name) && !_aux_sys.hasVariable(var_name))
       paramError("initialize_variables", "Variable ", var_name, " does not exist.");
 
+  // Only monomial and Lagrange families are supported
+  for (auto i : index_range(_init_vars)) {
+    auto family = _fe_problem.getVariable(_tid, _init_vars[i]).feType().family;
+    if (family != LAGRANGE && family != MONOMIAL)
+      paramError("initialize_variables","Variable must be of type MONOMIAL OR LAGRANGE. "
+                  "Other types are not supported for this object.");
+  }
+
   // The size of _init_strategy must be 1 or equal to the number of variables to initialize
   const auto init_strategy_in = getParam<std::vector<MooseEnum>>("initialization_strategy");
   if (_init_vars.size() == init_strategy_in.size())
