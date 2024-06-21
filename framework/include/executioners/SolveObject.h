@@ -41,7 +41,7 @@ protected:
   /// Reference to FEProblem
   FEProblemBase & _problem;
   /// Displaced problem
-  std::shared_ptr<DisplacedProblem> _displaced_problem;
+  DisplacedProblem * _displaced_problem;
   /// Mesh
   MooseMesh & _mesh;
   /// Displaced mesh

@@ -54,6 +54,7 @@
 #include <fstream>
 #include <list>
 #include <chrono>
+#include <variant>
 
 #ifdef TINYHTTP_THREADING
 #include <thread>
@@ -549,7 +550,7 @@ class HttpServer {
             return h;
         }
 
-        void startListening(uint16_t port);
+        void startListening(const std::variant<uint16_t, std::string> listen_on);
         void shutdown();
 };
 

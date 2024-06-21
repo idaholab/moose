@@ -24,7 +24,7 @@ public:
   TimedSubdomainModifier(const InputParameters & parameters);
 
 protected:
-  virtual std::set<Real> getTimes() override { return _times; }
+  virtual std::vector<Real> getTimes() override { return _times; }
 
   virtual SubdomainID computeSubdomainID() override;
 
@@ -33,8 +33,9 @@ private:
   void buildFromFile();
 
   /// Times to change the subdomains on. If the time steps do not align with the times,
-  /// the subdomain changes will happen at the end of the time step
-  std::set<Real> _times;
+  /// the subdomain changes will happen at the end of the time step.
+  /// The sort order of this vector must match _blocks_from and _blocks_to.
+  std::vector<Real> _times;
 
   /// Source subdomains to change from
   std::vector<SubdomainID> _blocks_from;

@@ -306,7 +306,10 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_custom)"
                            "(create_problem_default)"
                            "(create_problem_complete)"
-                           "(init_physics)"
+                           "(init_displaced_problem)" // Problem must be init-ed before we start adding functors
+                           "(add_function)"  // Functions can depend on scalar variables & PPs, but this dependence can be
+                                             // added on initialSetup() rather than construction
+                           "(init_physics)"  // Components add their blocks to Physics, and components need functions at initialization
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
@@ -316,13 +319,11 @@ addActionTypes(Syntax & syntax)
                            "(check_integrity_early)"
                            "(check_integrity_early_physics)"
                            "(setup_predictor)"
-                           "(init_displaced_problem)"
                            "(add_aux_variable, add_variable, add_elemental_field_variable,"
                            " add_external_aux_variables)"
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
-                           "(add_function)"
                            "(add_periodic_bc)"
                            "(add_user_object)"
                            "(add_distribution)"

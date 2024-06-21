@@ -26,18 +26,18 @@ public:
 protected:
   /**
    * Requests a vector of all times from the inheriting class
-   * (these do not have to be sorted).
+   * (these do not have to be sorted and may have duplicates).
    * @returns Unsorted vector of times.
    */
-  virtual std::set<Real> getTimes() = 0;
+  virtual std::vector<Real> getTimes() = 0;
 
   /// storage for the times including their original index.
-  struct timeIndexPair
+  struct TimeIndexPair
   {
     Real time;
     std::size_t index;
 
-    bool operator<(const timeIndexPair & a) const
+    bool operator<(const TimeIndexPair & a) const
     {
       if (time == a.time)
         return index < a.index;
@@ -47,5 +47,5 @@ protected:
   };
 
   /// Times and subdomain changes to make
-  std::set<timeIndexPair> _times_and_indices;
+  std::set<TimeIndexPair> _times_and_indices;
 };

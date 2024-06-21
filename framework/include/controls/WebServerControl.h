@@ -159,8 +159,6 @@ private:
   /// Whether or not the Control is currently waiting
   std::atomic<bool> _currently_waiting;
 
-  /// The port to run on
-  const unsigned int _port;
   /// The server
   std::unique_ptr<HttpServer> _server;
   /// The server thread

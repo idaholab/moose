@@ -81,7 +81,7 @@ NestedKKSMultiACBulkF::NestedKKSMultiACBulkF(const InputParameters & parameters)
 
   // _dF1dc1 is computed in KKSPhaseConcentrationMaterial
   for (const auto m : make_range(_num_c))
-    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
+    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>(_Fj_names[0], _ci_names[m * _num_j]);
 
   for (const auto m : make_range(_num_j))
   {
@@ -98,7 +98,7 @@ NestedKKSMultiACBulkF::NestedKKSMultiACBulkF(const InputParameters & parameters)
     _dFidarg[m].resize(_n_args);
 
     for (const auto n : make_range(_n_args))
-      _dFidarg[m][n] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[m], m);
+      _dFidarg[m][n] = &getMaterialPropertyDerivative<Real>(_Fj_names[m], m);
   }
 }
 

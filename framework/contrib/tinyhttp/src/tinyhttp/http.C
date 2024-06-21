@@ -4,6 +4,7 @@
 #include <vector>
 #include <iterator>
 #include <sstream>
+#include <sys/un.h>
 
 /*static*/ TCPClientStream TCPClientStream::acceptFrom(short listener) {
     struct sockaddr_in client;
@@ -322,11 +323,12 @@ HttpServer::HttpServer() {
     #endif
 }
 
-void HttpServer::startListening(uint16_t port) {
+void HttpServer::startListening(const std::variant<uint16_t, std::string> listen_on) {
     if (mSocket != -1)
         throw std::runtime_error("Server is already running");
 
-    mSocket = socket(AF_INET, SOCK_STREAM, 0);
+    const auto listen_on_port = std::holds_alternative<uint16_t>(listen_on);
+    mSocket = socket(listen_on_port ? AF_INET : AF_LOCAL, SOCK_STREAM, 0);
 
     if (mSocket == -1)
         throw std::runtime_error("Could not create socket");
@@ -337,18 +339,32 @@ void HttpServer::startListening(uint16_t port) {
         throw std::runtime_error("Could not set SO_REUSEADDR option");
     }
 
-    struct sockaddr_in remote;
+    if (listen_on_port)
+    {
+        const auto port = std::get<uint16_t>(listen_on);
+        struct sockaddr_in remote;
+        remote.sin_family = AF_INET;
+        remote.sin_addr.s_addr = htonl(INADDR_ANY);
+        remote.sin_port = htons(port);
+        const auto retval = bind(mSocket, reinterpret_cast<struct sockaddr*>(&remote), sizeof(remote));
+        if (retval < 0)
+            throw std::runtime_error("Failed to bind to socket on port " + std::to_string(port));
+    }
+    else
+    {
+        const auto filename = std::get<std::string>(listen_on);
+        struct sockaddr_un remote;
+        remote.sun_family = AF_LOCAL;
+        strncpy (remote.sun_path, filename.c_str(), sizeof (remote.sun_path));
+        remote.sun_path[sizeof (remote.sun_path) - 1] = '\0';
+        const auto remote_size = offsetof (struct sockaddr_un, sun_path) + strlen (remote.sun_path);
+        const auto retval = bind(mSocket, reinterpret_cast<struct sockaddr*>(&remote), remote_size);
+        if (retval < 0)
+            throw std::runtime_error("Failed to bind to socket at " + filename);
+    }
 
-    remote.sin_family = AF_INET;
-    remote.sin_addr.s_addr = htonl(INADDR_ANY);
-    remote.sin_port = htons(port);
-    int iRetval = bind(mSocket, reinterpret_cast<struct sockaddr*>(&remote), sizeof(remote));
-
-    if (iRetval < 0)
-        throw std::runtime_error("Failed to find socket");
-
-    iRetval = ::listen(mSocket, 3);
-    if (iRetval < 0)
+    const auto retval = ::listen(mSocket, 3);
+    if (retval < 0)
         throw std::runtime_error("listen() failed");
 
     while (mSocket != -1) {
