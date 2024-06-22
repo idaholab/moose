@@ -54,6 +54,23 @@ namespace NEML2Utils
 
 #ifdef NEML2_ENABLED
 
+neml2::VariableName
+getOldName(const neml2::VariableName & var)
+{
+  if (var.start_with("forces"))
+    return var.slice(1).on("old_forces");
+
+  if (var.start_with("state"))
+    return var.slice(1).on("old_state");
+
+  mooseError("An error occurred when trying to map a stateful NEML2 variable name '",
+             var,
+             "' onto its old counterpart. The leading sub-axis of the variable should either be "
+             "'state' or 'forces'. However, we got '",
+             var.slice(0, 1),
+             "'");
+}
+
 template <>
 neml2::BatchTensor
 toNEML2(const Real & v)

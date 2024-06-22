@@ -40,7 +40,6 @@ public:
   ExecuteNEML2Model(const InputParameters & params);
 
   virtual void initialSetup() override;
-  virtual void timestepSetup() override;
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -61,11 +60,14 @@ public:
   bool outputReady() const { return _output_ready; }
 
 protected:
+  /// Register a variable gathered by a gatherer UO
+  virtual void addUOVariable(const UserObjectName & uo_name, const neml2::VariableName & uo_var);
+
+  /// Prevent output and derivative retrieval after construction
+  virtual void checkExecutionStage() const final;
+
   /// Determine whether the material model should be called
   virtual bool shouldCompute();
-
-  /// Advance state and forces in time
-  virtual void advanceStep();
 
   /// Update the forces driving the material model update
   virtual void updateForces();
@@ -76,11 +78,20 @@ protected:
   /// Perform the material update
   virtual void solve();
 
+  // set of variables to skip
+  std::set<neml2::VariableName> _skip_vars;
+
+  // set of provided and required inputs
+  std::set<neml2::VariableName> _provided_inputs;
+
   /// MOOSE data gathering user objects
   std::vector<const MOOSEToNEML2 *> _gather_uos;
 
   /// (optional) NEML2 time input
   const neml2::VariableName _neml2_time;
+
+  /// (optional) NEML2 old time input
+  const neml2::VariableName _neml2_time_old;
 
   /// The input vector of the material model
   neml2::LabeledVector _in;
@@ -112,8 +123,8 @@ protected:
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
 
-  /// are the input and output tensors allocated yet?
-  bool _in_out_allocated;
+  /// set of output variables that were retrieved
+  mutable std::set<neml2::VariableName> _retrieved_outputs;
 
   /// set of derivatives that were retrieved
   mutable std::set<std::tuple<neml2::VariableName, neml2::VariableName, neml2::BatchTensor *>>
