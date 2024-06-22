@@ -23,6 +23,8 @@ PINSFEFluidTemperatureTimeDerivative::validParams()
   params.addRequiredCoupledVar("pressure", "coupled pressure");
   params.addRequiredCoupledVar("porosity", "porosity");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
+  params.addClassDescription(
+      "Adds the transient term of the porous media energy conservation equation");
 
   return params;
 }
