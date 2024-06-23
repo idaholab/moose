@@ -3302,7 +3302,7 @@ FEProblemBase::projectSolution()
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
   // loop over global_current_state = 2, 1, 0
-  for (global_current_state = 2; global_current_state >= 0; global_current_state--)
+  for (global_current_state = 1; global_current_state >= 0; global_current_state--)
   {
     for (auto & nl : _nl)
       nl->solution().zero();
@@ -3334,50 +3334,50 @@ FEProblemBase::projectSolution()
     for (auto & nl : _nl)
       nl->solution().close();
     _aux->solution().close();
-    
+
+    // Also, load values into the SCALAR dofs
+    // Note: We assume that all SCALAR dofs are on the
+    // processor with highest ID
+    if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
+    {
+      const auto & ics = _scalar_ics.getActiveObjects();
+      for (const auto & ic : ics)
+      {
+        MooseVariableScalar & var = ic->variable();
+        var.reinit();
+
+        DenseVector<Number> vals(var.order());
+        ic->compute(vals);
+
+        const unsigned int n_SCALAR_dofs = var.dofIndices().size();
+        for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+        {
+          const dof_id_type global_index = var.dofIndices()[i];
+          var.sys().solution().set(global_index, vals(i));
+          var.setValue(i, vals(i));
+        }
+      }
+    }
+
+    for (auto & sys : _solver_systems)
+    {
+      sys->solution().close();
+      sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
+    }
+
+    _aux->solution().close();
+    _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+
     // calling copyOldSolutions() to send ICs for old and older states back to where they 
     // should be before the start of the time-looping.
     // Functionality moved here from FEProblemBase::initialSetup().
     if (global_current_state > 0)
     {
       for (auto & nl : _nl)
-        nl->copyOldSolutions();
-      _aux->copyOldSolutions();
+        nl->copySolutionsBackwards();
+      _aux->copySolutionsBackwards();
     }
   }
-
-  // Also, load values into the SCALAR dofs
-  // Note: We assume that all SCALAR dofs are on the
-  // processor with highest ID
-  if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
-  {
-    const auto & ics = _scalar_ics.getActiveObjects();
-    for (const auto & ic : ics)
-    {
-      MooseVariableScalar & var = ic->variable();
-      var.reinit();
-
-      DenseVector<Number> vals(var.order());
-      ic->compute(vals);
-
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
-      {
-        const dof_id_type global_index = var.dofIndices()[i];
-        var.sys().solution().set(global_index, vals(i));
-        var.setValue(i, vals(i));
-      }
-    }
-  }
-
-  for (auto & sys : _solver_systems)
-  {
-    sys->solution().close();
-    sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
-  }
-
-  _aux->solution().close();
-  _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
 void
