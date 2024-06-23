@@ -151,7 +151,7 @@ The action of the Jacobian is approximated by:
 
 !equation id=jfnk
 \begin{aligned}
-\mathbf{J}\mathbf{v} \approx \frac{\mathbf{R}(\mathbf{u}+\epsilon \mathbf{v})-\mathbf{R}(\mathbf{u})}{\epsilon}
+\mathbf{J}(\mathbf{u})\mathbf{v} \approx \frac{\mathbf{R}(\mathbf{u}+\epsilon \mathbf{v})-\mathbf{R}(\mathbf{u})}{\epsilon}
 \end{aligned}
 
 The `Kernel` method `computeQpResidual` is called to compute

@@ -79,7 +79,7 @@ if the value has not been computed via a `declareProperty` call within a `Materi
 
 Output of `Material` properties is enabled by setting the "outputs" parameter.
 
-The following example creates two additional variables called "mat1" and "mat2" that will show up in
+The following example creates additional variables called "real_property", "tensor_property", and "vector_property" that will show up in
 the output file.
 
 !listing output_block.i block=Materials Outputs
