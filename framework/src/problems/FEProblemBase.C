@@ -3371,13 +3371,17 @@ FEProblemBase::projectSolution()
     // calling copyOldSolutions() to send ICs for old and older states back to where they 
     // should be before the start of the time-looping.
     // Functionality moved here from FEProblemBase::initialSetup().
-    if (global_current_state > 0)
-    {
-      for (auto & nl : _nl)
-        nl->copySolutionsBackwards();
+    // if (global_current_state > 0)
+    // {
+      for (auto & sys : _solver_systems)
+        sys->copySolutionsBackwards();
       _aux->copySolutionsBackwards();
-    }
+    // }
   }
+
+  // Resetting global_current_state to 0 in case anyone needs to run ICs again (which they do sometimes).
+  global_current_state = 0;
+  
 }
 
 void
