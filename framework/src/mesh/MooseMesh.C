@@ -162,14 +162,18 @@ MooseMesh::validParams()
 
   params.addParam<std::vector<SubdomainID>>(
       "add_subdomain_ids",
-      "The listed subdomains will be assumed valid for the mesh. This permits setting up subdomain "
+      "The listed subdomain ids will be assumed valid for the mesh. This permits setting up subdomain "
       "restrictions for subdomains initially containing no elements, which can occur, for example, "
-      "in additive manufacturing simulations which dynamically add and remove elements.");
-
+      "in additive manufacturing simulations which dynamically add and remove elements. "
+      "Names for this subdomains may be provided using add_subdomain_names. In this case this "
+      "list and add_subdomain_names must contain the same number of items.");
   params.addParam<std::vector<SubdomainName>>(
       "add_subdomain_names",
-      "Optional list of subdomain names to be applied to the ids given in add_subdomain_ids. "
-      "This list must contain the same number of items as add_subdomain_ids.");
+      "The listed subdomain names will be assumed valid for the mesh. This permits setting up subdomain "
+      "restrictions for subdomains initially containing no elements, which can occur, for example, "
+      "in additive manufacturing simulations which dynamically add and remove elements. "
+      "IDs for this subdomains may be provided using add_subdomain_ids. Otherwise IDs are automatically "
+      "assigned. In case add_subdomain_ids is set too, both lists must contain the same number of items.");
 
   params.addParam<std::vector<BoundaryID>>(
       "add_sideset_ids",
@@ -432,9 +436,25 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     }
   }
   else if (isParamValid("add_subdomain_names"))
+  {
     // the user has defined add_subdomain_names, but not add_subdomain_ids
-    paramError("add_subdomain_names",
-               "In combination with add_subdomain_names, add_subdomain_ids must be defined.");
+    const auto & add_subdomain_names = getParam<std::vector<SubdomainName>>("add_subdomain_names");
+
+    // to define subdomain ids, we need the largest subdomain id defined yet.
+    subdomain_id_type offset = 0; 
+    if (!_mesh_subdomains.empty()) 
+        offset = *_mesh_subdomains.rbegin(); 
+
+    // add all subdomains (and auto-assign ids)
+    for (const SubdomainName & sub_name : add_subdomain_names)
+    {
+      const auto sub_id = ++offset;
+      // add subdomain id
+      _mesh_subdomains.insert(sub_id);
+      // set name of the subdomain just added
+      setSubdomainName(sub_id, sub_name);
+    }
+  }
 
   // Add explicitly requested sidesets
   if (isParamValid("add_sideset_ids") && !isParamValid("add_sideset_names"))
