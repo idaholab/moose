@@ -162,18 +162,19 @@ MooseMesh::validParams()
 
   params.addParam<std::vector<SubdomainID>>(
       "add_subdomain_ids",
-      "The listed subdomain ids will be assumed valid for the mesh. This permits setting up subdomain "
-      "restrictions for subdomains initially containing no elements, which can occur, for example, "
-      "in additive manufacturing simulations which dynamically add and remove elements. "
-      "Names for this subdomains may be provided using add_subdomain_names. In this case this "
-      "list and add_subdomain_names must contain the same number of items.");
+      "The listed subdomain ids will be assumed valid for the mesh. This permits setting up "
+      "subdomain restrictions for subdomains initially containing no elements, which can occur, "
+      "for example, in additive manufacturing simulations which dynamically add and remove "
+      "elements. Names for this subdomains may be provided using add_subdomain_names. In this case "
+      "this list and add_subdomain_names must contain the same number of items.");
   params.addParam<std::vector<SubdomainName>>(
       "add_subdomain_names",
-      "The listed subdomain names will be assumed valid for the mesh. This permits setting up subdomain "
-      "restrictions for subdomains initially containing no elements, which can occur, for example, "
-      "in additive manufacturing simulations which dynamically add and remove elements. "
-      "IDs for this subdomains may be provided using add_subdomain_ids. Otherwise IDs are automatically "
-      "assigned. In case add_subdomain_ids is set too, both lists must contain the same number of items.");
+      "The listed subdomain names will be assumed valid for the mesh. This permits setting up "
+      "subdomain restrictions for subdomains initially containing no elements, which can occur, "
+      "for example, in additive manufacturing simulations which dynamically add and remove "
+      "elements. IDs for this subdomains may be provided using add_subdomain_ids. Otherwise IDs "
+      "are automatically assigned. In case add_subdomain_ids is set too, both lists must contain "
+      "the same number of items.");
 
   params.addParam<std::vector<BoundaryID>>(
       "add_sideset_ids",
@@ -441,9 +442,9 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     const auto & add_subdomain_names = getParam<std::vector<SubdomainName>>("add_subdomain_names");
 
     // to define subdomain ids, we need the largest subdomain id defined yet.
-    subdomain_id_type offset = 0; 
-    if (!_mesh_subdomains.empty()) 
-        offset = *_mesh_subdomains.rbegin(); 
+    subdomain_id_type offset = 0;
+    if (!_mesh_subdomains.empty())
+      offset = *_mesh_subdomains.rbegin();
 
     // add all subdomains (and auto-assign ids)
     for (const SubdomainName & sub_name : add_subdomain_names)
