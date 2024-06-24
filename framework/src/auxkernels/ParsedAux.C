@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParsedAux.h"
-#include "ParsedAux.C"
 
 registerMooseObject("MooseApp", ParsedAux);
 
@@ -78,7 +77,8 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     {
       // Make sure symbol is not x, y, z, or t
       if (_use_xyzt && (std::find(xyzt.begin(), xyzt.end(), symbol) != xyzt.end()))
-        paramError("functor_symbols", "x, y, z, and t cannot be used as a functor symbol when use_xyzt=true.");
+        paramError("functor_symbols",
+                   "x, y, z, and t cannot be used as a functor symbol when use_xyzt=true.");
       variables += (variables.empty() ? "" : ",") + symbol;
     }
   else
@@ -125,7 +125,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   }
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs +_n_functors + (_use_xyzt ? 4 : 0));
+  _func_params.resize(_nargs + _n_functors + (_use_xyzt ? 4 : 0));
 
   for (const auto & name : _functor_names)
     _functors.push_back(&getFunctor<Real>(name));

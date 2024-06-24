@@ -50,5 +50,5 @@ protected:
   const std::vector<std::string> _functor_symbols;
 
   /// Vector of pointers to functors
-  const std::vector<const Moose::Functor<Real> *> _functors;
+  std::vector<const Moose::Functor<Real> *> _functors;
 };
