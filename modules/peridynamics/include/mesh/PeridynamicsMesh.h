@@ -130,7 +130,7 @@ public:
    * Function to return the volume of a horizon subset for bond-associated deformation gradient
    * calculation for bond connecting node node_id and its neighbor neighbor_id
    * @param node_id   The ID of the node
-   * @param neighbor_id   The ID of the querying neighbor
+   * @param neighbor_id   The ID of the querying neighbor in the list of node node_id
    * @return The horizon subset volume
    */
   Real getHorizonSubsetVolume(dof_id_type node_id, dof_id_type neighbor_id);
@@ -146,7 +146,7 @@ public:
    * Function to return the volume fraction of a horizon subset used for bond-associated deformation
    * gradient calculation for bond connecting node node_id and its neighbor neighbor_id
    * @param node_id   The ID of the node
-   * @param neighbor_id   The ID of the querying neighbor
+   * @param neighbor_id   The ID of the querying neighbor in the list of node node_id
    * @return The horizon subset volume fraction for neighbor neighbor_id of node node_id
    */
   Real getHorizonSubsetVolumeFraction(dof_id_type node_id, dof_id_type neighbor_id);
@@ -171,6 +171,15 @@ public:
    * @return The offset
    */
   Real getBoundaryOffset(dof_id_type node_id);
+
+  /**
+   * Function to return normalized weight for neighbor neighbor_id of node node_id based on
+   * predefined weight function
+   * @param node_id   The ID of the node
+   * @param neighbor_id   The ID of the querying neighbor in the list of node node_id
+   * @return The normalized weight for neighbor neighbor_id of node node_id
+   */
+  Real getNeighborWeight(dof_id_type node_id, dof_id_type neighbor_id);
 
 protected:
   ///@{ Horizon size control parameters
@@ -223,6 +232,9 @@ protected:
 
   /// Offset of each boundary node to its original FE element boundary edge or face
   std::map<dof_id_type, Real> & _boundary_node_offset;
+
+  /// normalizer for calculating weighted values at a node from elemental values within its horizon
+  std::vector<Real> & _pdnode_weight_normalizer;
 
   /**
    * Function to create neighbors and other data for each material point with given horizon

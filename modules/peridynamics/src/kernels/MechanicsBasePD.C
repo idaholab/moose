@@ -53,9 +53,14 @@ MechanicsBasePD::prepare()
   PeridynamicsKernelBase::prepare();
 
   _ivardofs.resize(_nnodes);
-
+  _weights.resize(_nnodes);
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
+  {
     _ivardofs[nd] = _current_elem->node_ptr(nd)->dof_number(_sys.number(), _var.number(), 0);
+    _weights[nd] = _pdmesh.getNeighborWeight(
+        _current_elem->node_id(nd),
+        _pdmesh.getNeighborIndex(_current_elem->node_id(nd), _current_elem->node_id(1 - nd)));
+  }
 
   for (unsigned int i = 0; i < _dim; ++i)
     _current_vec(i) = _origin_vec(i) + _disp_var[i]->getNodalValue(*_current_elem->node_ptr(1)) -
