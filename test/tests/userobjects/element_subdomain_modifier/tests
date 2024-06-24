@@ -3,6 +3,28 @@
   design = 'CoupledVarThresholdElementSubdomainModifier.md VariableValueElementSubdomainModifier.md'
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during simulation'
+    
+    [moving_boundary]
+      type = 'Exodiff'
+      input = 'moving_boundary.i'
+      exodiff = 'moving_boundary_out.e moving_boundary_out.e-s002 moving_boundary_out.e-s003'
+      detail = 'with a specified boundary,'
+    []
+
+    [complementary_moving_boundary]
+      type = 'Exodiff'
+      input = 'moving_boundary.i'
+      cli_args = "UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs='3 1; 1' Outputs/file_base='complementary_moving_boundary'
+      exodiff = 'complementary_moving_boundary_out.e complementary_moving_boundary_out.e-s002 complementary_moving_boundary_out.e-s003'
+      detail = 'with a complementary boundary,'
+    []
+
+    [no_moving_boundary]
+      type = 'Exodiff'
+      input = 'no_moving_boundary.i'
+      exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 no_moving_boundary_out.e-s003 no_moving_boundary_out.e-s004'
+      detail = 'without a specified boundary,'
+    []
 
     [reversible]
       type = 'Exodiff'
@@ -16,13 +38,6 @@
       input = 'block_restricted.i'
       exodiff = 'block_restricted_out.e block_restricted_out.e-s002 block_restricted_out.e-s003 block_restricted_out.e-s004'
       detail = 'irreversibly, '
-    []
-
-    [no_moving_boundary]
-      type = 'Exodiff'
-      input = 'no_moving_boundary.i'
-      exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 no_moving_boundary_out.e-s003 no_moving_boundary_out.e-s004'
-      detail = 'with and without a specified boundary,'
     []
 
     [initial_condition]

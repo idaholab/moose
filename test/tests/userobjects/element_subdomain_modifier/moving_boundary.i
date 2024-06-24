@@ -35,6 +35,12 @@
     bottom_left = '2 0 0'
     top_right = '3 1 0'
   []
+  [moving_boundary]
+    type = SideSetsAroundSubdomainGenerator
+    input = 'block_3'
+    block = 1
+    new_boundary = 'moving'
+  []
 []
 
 [AuxVariables]
@@ -54,6 +60,8 @@
     criterion_type = 'ABOVE'
     threshold = 0
     subdomain_id = 1
+    moving_boundaries = 'moving moving'
+    moving_boundary_subdomain_pairs = '1 3; 1'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
