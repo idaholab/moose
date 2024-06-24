@@ -27,6 +27,7 @@ projectQPoints3d(const Elem * const msm_elem,
                  const Elem * const primal_elem,
                  const unsigned int sub_elem_index,
                  const QBase & qrule_msm,
+                 const RealVectorValue boundary_offset,
                  std::vector<Point> & q_pts)
 {
   auto && msm_order = msm_elem->default_order();
@@ -205,7 +206,7 @@ projectQPoints3d(const Elem * const msm_elem,
     for (auto n : make_range(msm_elem->n_nodes()))
       x0 += Moose::fe_lagrange_2D_shape(
                 msm_type, msm_order, n, static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp))) *
-            msm_elem->point(n);
+            (msm_elem->point(n) - boundary_offset);
 
     // Use msm_elem quadrature point as initial guess
     // (will be correct for aligned meshes)
@@ -270,6 +271,7 @@ projectQPoints3d(const Elem * const msm_elem,
         if (qp_back(0) < -TOLERANCE || qp_back(1) < -TOLERANCE ||
             qp_back(0) + qp_back(1) > (1 + TOLERANCE))
           mooseException("Quadrature point: ", qp_back, " out of bounds, truncating.");
+        // For some reason, this message never prints to the terminal, which is not helpful!
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD8 ||
                primal_elem->type() == QUAD9)
@@ -277,6 +279,7 @@ projectQPoints3d(const Elem * const msm_elem,
         if (qp_back(0) < (-1 - TOLERANCE) || qp_back(0) > (1 + TOLERANCE) ||
             qp_back(1) < (-1 - TOLERANCE) || qp_back(1) > (1 + TOLERANCE))
           mooseException("Quadrature point: ", qp_back, " out of bounds, truncating");
+        // For some reason, this message never prints to the terminal, which is not helpful!
       }
     }
     else

@@ -12,6 +12,17 @@
     map = False
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable'
   [../]
+  [./conforming-offset]
+    type = 'Exodiff'
+    input = 'conforming-offset.i'
+    exodiff = 'conforming-offset_out.e'
+    max_parallel = 2
+    max_threads = 2
+    custom_cmp = 'one-variable-u.cmp'
+    partial = True
+    map = False
+    requirement = 'Allow offset of the two blocks for a mortaring surface in 2d'
+  [../]
   [./equalgradient]
     type = 'Exodiff'
     input = 'equalgradient.i'
