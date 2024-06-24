@@ -26,6 +26,7 @@ LibtorchANNSurrogate::LibtorchANNSurrogate(const InputParameters & parameters)
     _nn(getModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn")),
     _input_standardizer(getModelData<StochasticTools::Standardizer>("input_standardizer")),
     _output_standardizer(getModelData<StochasticTools::Standardizer>("output_standardizer"))
+
 {
   // We check if MOOSE is compiled with torch, if not this throws an error
   StochasticToolsApp::requiresTorch(*this);

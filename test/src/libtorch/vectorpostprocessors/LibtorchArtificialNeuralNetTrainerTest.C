@@ -98,6 +98,7 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
   optim_options.print_loss = true;
   optim_options.print_epoch_loss = 20;
   optim_options.parallel_processes = getParam<unsigned int>("max_processes");
+  optim_options.classify = false;
 
   trainer.train(dataset, optim_options);
 

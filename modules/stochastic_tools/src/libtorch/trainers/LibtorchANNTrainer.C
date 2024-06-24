@@ -59,6 +59,8 @@ LibtorchANNTrainer::validParams()
   params.addParam<bool>(
       "standardize_output", true, "Standardize (center and scale) training outputs (y values)");
 
+  params.addParam<bool>("classify", false, "Train NN for classification or regression");
+
   params.suppressParameter<MooseEnum>("response_type");
   return params;
 }
@@ -90,6 +92,7 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   _optim_options.print_loss = getParam<unsigned int>("print_epoch_loss") > 0;
   _optim_options.print_epoch_loss = getParam<unsigned int>("print_epoch_loss");
   _optim_options.parallel_processes = getParam<unsigned int>("max_processes");
+  _optim_options.classify = getParam<bool>("classify");
 }
 
 void
@@ -122,8 +125,12 @@ LibtorchANNTrainer::postTrain()
   unsigned int num_inputs = _n_dims;
 
   // We create a neural net (for the definition of the net see the header file)
-  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      _nn_filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
+  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(_nn_filename,
+                                                             num_inputs,
+                                                             1,
+                                                             _num_neurons_per_layer,
+                                                             _activation_function,
+                                                             _optim_options.classify);
 
   if (_read_from_file)
     try
