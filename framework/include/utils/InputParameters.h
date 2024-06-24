@@ -1140,6 +1140,7 @@ private:
     std::string _range_function;
     /// directions for auto build vectors (base_, 5) -> "base_0 base_1 base_2 base_3 base_4")
     std::pair<std::string, std::string> _autobuild_vecs;
+    bool _added = false;
     /// True for parameters that are required (i.e. will cause an abort if not supplied)
     bool _required = false;
     /**
@@ -1301,6 +1302,13 @@ T &
 InputParameters::set(const std::string & name_in, bool quiet_mode)
 {
   const auto name = checkForRename(name_in);
+
+  if (!_params[name]._added)
+    mooseError("The parameter '",
+               name,
+               "' of type '",
+               demangle(typeid(T).name()),
+               "' has not been added.");
 
   checkParamName(name);
   checkConsistentType<T>(name);
@@ -1505,6 +1513,7 @@ InputParameters::addRequiredParam(const std::string & name, const std::string & 
 
   InputParameters::insert<T>(name);
   auto & metadata = _params[name];
+  metadata._added = true;
   metadata._required = true;
   if (std::is_same_v<T, MooseFunctorName>)
     metadata._doc_string = appendFunctorDescription(doc_string);
@@ -1529,8 +1538,9 @@ InputParameters::addParam(const std::string & name, const S & value, const std::
   checkParamName(name);
   checkConsistentType<T>(name);
 
-  T & l_value = InputParameters::set<T>(name);
   auto & metadata = _params[name];
+  metadata._added = true;
+  T & l_value = InputParameters::set<T>(name);
   if (std::is_same_v<T, MooseFunctorName>)
     metadata._doc_string = appendFunctorDescription(doc_string);
   else
@@ -1553,10 +1563,12 @@ InputParameters::addParam(const std::string & name, const std::string & doc_stri
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
+  auto & metadata = _params[name];
+  metadata._added = true;
   if (std::is_same_v<T, MooseFunctorName>)
-    _params[name]._doc_string = appendFunctorDescription(doc_string);
+    metadata._doc_string = appendFunctorDescription(doc_string);
   else
-    _params[name]._doc_string = doc_string;
+    metadata._doc_string = doc_string;
 }
 
 template <typename T, typename S>
@@ -1670,8 +1682,11 @@ InputParameters::addPrivateParam(const std::string & name)
   checkParamName(name);
   checkConsistentType<T>(name);
 
+  auto & metadata = _params[name];
+  metadata._is_private = true;
+  metadata._added = true;
+
   InputParameters::insert<T>(name);
-  _params[name]._is_private = true;
 }
 
 template <typename T>
@@ -1681,10 +1696,12 @@ InputParameters::addPrivateParam(const std::string & name, const T & value)
   checkParamName(name);
   checkConsistentType<T>(name);
 
-  InputParameters::set<T>(name) = value;
   auto & metadata = _params[name];
+  metadata._added = true;
   metadata._is_private = true;
   metadata._set_by_add_param = true;
+
+  InputParameters::set<T>(name) = value;
 }
 
 template <typename T>
