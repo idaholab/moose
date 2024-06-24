@@ -58,9 +58,20 @@ HexagonalGridPositions::HexagonalGridPositions(const InputParameters & parameter
         std::set<unsigned int>(getParam<std::vector<unsigned int>>("include_in_pattern").begin(),
                                getParam<std::vector<unsigned int>>("include_in_pattern").end()))
 {
-  if (MooseUtils::absoluteFuzzyGreaterThan(_nr * _pin_pitch * sqrt(3), _lattice_flat_to_flat))
-    paramError("lattice_flat_to_flat",
-               "Bundle pitch is too small to fit this many rings at that pin pitch");
+  if (_nr == 1)
+  {
+    if (MooseUtils::absoluteFuzzyGreaterThan(_pin_pitch, _lattice_flat_to_flat))
+      paramError("lattice_flat_to_flat",
+                 "For one ring, the lattice flat to flat must be at least the pin pitch");
+  }
+  else
+  {
+    if (MooseUtils::absoluteFuzzyGreaterThan((3 * _nr - 1) * _pin_pitch / sqrt(3),
+                                             _lattice_flat_to_flat))
+      paramError("lattice_flat_to_flat",
+                 "Lattice flat to flat distance is less than the minimum (3 * nr - 1) * pin_pitch "
+                 "/ sqrt(3) given nr rings with a pitch of pin_pitch");
+  }
   if ((_include_in_pattern.empty() && _pattern.size()) ||
       (_include_in_pattern.size() && _pattern.empty()))
     paramError(
