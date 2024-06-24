@@ -7,7 +7,7 @@ specific constitutive models.
 
 ### Algorithm References
 
-The radial return mapping method, introduced by Simo and Taylor (1985), uses a von Mises yield
+The radial return mapping method, introduced by [!cite](simo2006computational), uses a von Mises yield
 surface to determine the increment of plastic strain necessary to return the stress state to the
 yield surface after a trial stress increment takes the computed stress state across the yield
 surface.  Because the von Mises yield surface in the deviatoric stress space has the shape of a
@@ -32,6 +32,7 @@ as is required to achieve convergence.
        style=width:30%;margin-left:2%;float:right
        caption=A trial stress is shown outside of the deviatoric yield surface and the radial return
                  stress which is normal to the yield surface.
+       id=fig:yield_surface
 
 !include modules/solid_mechanics/common/supplementalRadialReturnStressUpdate.md
 
@@ -112,6 +113,12 @@ allowed by substepping. A value of $1.0\cdot10^4$ will work for many cases. An e
 The `adaptive_substepping` parameter enables adaptive substepping, where the number of substeps is successively doubled until the
 return mapping model successfully converges or the doubled number of substeps exceeds the user specified maximum number of substeps.
 
+### Initializing Inelastic Strain Increment
+
+The scalar inelastic strain increment $\Delta p$ is normally intialized to zero and the constitutive model at the start of each timestep is intialized around a trial stress $\sigma^{trial}_{effective}$ computed from a fully elastic strain increment predictor.  [!param](/Materials/PowerLawCreepStressUpdate/scale_strain_predictor)  allows a scaled value of the previous timesteps final $\Delta p$ to initialize the current timesteps intial $\Delta p$.  The predicted $\Delta p$ is removed from the elastic strain increment when computing $\sigma^{trial}_{effective}$.  This new $\sigma^{trial}_{effective}$ is then used to intialize the constitutive model around a state that is closer to the final state.  Initializing $\Delta p$ to a value close to its converged value also results in fewer nonlinear Newton iterations for the radial return mapping.  However, using too large of a value to intialize $\Delta p$ will result in $\sigma^{trial}_{effective}$ that does not satify the yield criterion, i.e., it is inside the deviatoric yield surface shown in [fig:yield_surface] and should be avoided as it will not work with all constituitive models.
+
+The scaling factor [!param](/Materials/PowerLawCreepStressUpdate/scale_strain_predictor) ranges between zero and one.  Zero is the default which will not use the previous timestep's $\Delta p$.  The entire previous step's $\Delta p$ is used by setting `scale_strain_predictor`$=1$ which is usually too large of a guess for $\Delta p$ resulting in a $\sigma^{trial}_{effective}$ that does not satisfy the yield criterion.  A check is done to ensure $\sigma^{trial}_{effective}$ is outside the yield surface, and if it violates this condition, `scale_strain_predictor` is set to zero, reverting back to no $\Delta p$ predictor being used for the current timestep.  This capability works best when used with a [SimplePredictor.md] which predicts a solution state that should be close the final state.  Most nonlinear constitutive models such as [Power Law Creep](PowerLawCreepStressUpdate.md) or [Isotropic Plastic Hardening](IsotropicPowerLawHardeningStressUpdate.md) do not need this capability as their yield functions and derivatives for the radial return mapping are smooth and easy to evaluate.  However, this capability is beneficial for more complicated nonlinear models such as the [LaRomance](LAROMANCE.md) models where it is important to intialize the consitutive model using $\sigma^{trial}_{effective}$ that is close to the converged value and the model evaluations required by each iteration of the Newton solve are more expensive.
+
 ## Writing a New Stress Update Material
 
 New radial return models must inherit from `RadialReturnStressUpdate` and must
@@ -138,7 +145,7 @@ the MOOSE `Material` class.
   at the start the iteration.  This method is necessary to avoid incorrect material property values.
 
 More details on how to write the equivalent yield surface equation for a creep
-model are given in Dunne and Petrinic.
+model are given in [!cite](dunne2005introduction).
 
 <!-- !syntax children /Materials/RadialReturnStressUpdate -->
 

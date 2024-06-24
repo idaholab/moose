@@ -21,6 +21,7 @@
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
+    incremental = true
     add_variables = true
     generate_output = 'stress_zz elastic_strain_zz creep_strain_zz'
     use_automatic_differentiation = false
