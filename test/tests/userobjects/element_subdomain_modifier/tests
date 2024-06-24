@@ -21,8 +21,9 @@
 
     [no_moving_boundary]
       type = 'Exodiff'
-      input = 'no_moving_boundary.i'
-      exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 no_moving_boundary_out.e-s003 no_moving_boundary_out.e-s004'
+      input = 'moving_boundary.i'
+      cli_args = "UserObjects/w_mvg_bnd/moving_boundaries="" UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs="" Outputs/file_base='complementary_moving_boundary'
+      exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 no_moving_boundary_out.e-s003'
       detail = 'without a specified boundary,'
     []
 
