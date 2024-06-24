@@ -271,6 +271,10 @@ CommandLine::printUsage() const
 
   Moose::out << "\nSolver Options:\n"
              << "  See solver manual for details (Petsc or Trilinos)" << std::endl;
+
+  // If we get here, we are not running a simulation and should silence petsc's unused options
+  // warning
+  Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
 }
 
 template <>
