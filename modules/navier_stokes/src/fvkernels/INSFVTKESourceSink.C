@@ -35,7 +35,7 @@ INSFVTKESourceSink::validParams()
       "linearized_model",
       true,
       "Boolean to determine if the problem should be use in a linear or nonlinear solve.");
-  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>("wall_treatment",
                              wall_treatment,
                              "The method used for computing the wall functions "
