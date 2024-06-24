@@ -58,10 +58,12 @@ The content of each `Output` can customized, see for example for an [Exodus](Exo
 ```text
 [Outputs]
   interval = 10 # this is a time step interval
-  exodus = true
-  [all]
+  [exo]
     type = Exodus
     interval = 1 # overrides interval from top-level
+  []
+  [cp]
+    type = Checkpoint # Uses interval specified from top-level
   []
 []
 ```
@@ -87,8 +89,6 @@ using the short-cut syntax.  sub-blocks use the actual sub-block name as the suf
   []
 []
 ```
-
-The use of 'file_base' anywhere in the `[Outputs]` block disables all default naming behavior.
 
 !---
 
