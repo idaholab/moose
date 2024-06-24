@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParsedAux.h"
-#include "MooseApp.h"
+#include "ParsedAux.C"
 
 registerMooseObject("MooseApp", ParsedAux);
 
@@ -38,13 +38,13 @@ ParsedAux::validParams()
       "constant_expressions",
       {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<MooseFunctorName>>(
       "functor_names", {}, "Functors to use in the parsed expression");
   params.addParam<std::vector<std::string>>(
       "functor_symbols",
       {},
       "Symbolic name to use for each functor in 'functor_names' in the parsed expression. If not "
-      "provided, then the actual functor names must be used in the parsed expression.");
+      "provided, then the actual functor names will be used in the parsed expression.");
 
   return params;
 }
@@ -56,27 +56,36 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     _nargs(coupledComponents("coupled_variables")),
     _args(coupledValues("coupled_variables")),
     _use_xyzt(getParam<bool>("use_xyzt")),
-    _functor_names(getParam<std::vector<std::string>>("functor_names")),
+    _functor_names(getParam<std::vector<MooseFunctorName>>("functor_names")),
     _n_functors(_functor_names.size()),
     _functor_symbols(getParam<std::vector<std::string>>("functor_symbols"))
 {
+  // sanity checks
+  if (!_functor_symbols.empty() && (_functor_symbols.size() != _n_functors))
+    paramError("functor_symbols", "functor_symbols must be the same length as functor_names.");
+
   // build variables argument
   std::string variables;
 
   // coupled field variables
-  for (std::size_t i = 0; i < _nargs; ++i)
+  for (const auto i : make_range(_nargs))
     variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
 
   // adding functors to the expression
-  if (_functor_symbols.size() > 0)
+  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
+  if (_functor_symbols.size())
     for (const auto & symbol : _functor_symbols)
+    {
+      // Make sure symbol is not x, y, z, or t
+      if (_use_xyzt && (std::find(xyzt.begin(), xyzt.end(), symbol) != xyzt.end()))
+        paramError("functor_symbols", "x, y, z, and t cannot be used as a functor symbol when use_xyzt=true.");
       variables += (variables.empty() ? "" : ",") + symbol;
+    }
   else
     for (const auto & name : _functor_names)
       variables += (variables.empty() ? "" : ",") + name;
 
   // "system" variables
-  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
   if (_use_xyzt)
     for (auto & v : xyzt)
       variables += (variables.empty() ? "" : ",") + v;
@@ -116,7 +125,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   }
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs + +_n_functors + (_use_xyzt ? 4 : 0));
+  _func_params.resize(_nargs +_n_functors + (_use_xyzt ? 4 : 0));
 
   for (const auto & name : _functor_names)
     _functors.push_back(&getFunctor<Real>(name));
@@ -125,10 +134,10 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
 Real
 ParsedAux::computeValue()
 {
-  for (std::size_t j = 0; j < _nargs; ++j)
+  for (const auto j : make_range(_nargs))
     _func_params[j] = (*_args[j])[_qp];
 
-  const auto state = determineState();
+  const auto & state = determineState();
   if (isNodal())
   {
     const Moose::NodeArg node_arg = {_current_node, Moose::INVALID_BLOCK_ID};
@@ -144,7 +153,7 @@ ParsedAux::computeValue()
 
   if (_use_xyzt)
   {
-    for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(LIBMESH_DIM))
       _func_params[_nargs + _n_functors + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
     _func_params[_nargs + _n_functors + 3] = _t;
   }

@@ -48,28 +48,28 @@
   [left_u]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = top
     value = 0
   []
 
   [right_u]
     type = DirichletBC
     variable = u
-    boundary = 0
+    boundary = bottom
     value = 1
   []
 
   [left_v]
     type = DirichletBC
     variable = v
-    boundary = 3
+    boundary = left
     value = 0
   []
 
   [right_v]
     type = DirichletBC
     variable = v
-    boundary = 1
+    boundary = right
     value = 1
   []
 []
@@ -91,6 +91,5 @@
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []
