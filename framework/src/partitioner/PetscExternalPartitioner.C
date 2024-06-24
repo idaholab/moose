@@ -14,6 +14,7 @@
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/linear_partitioner.h"
+#include "libmesh/sfc_partitioner.h"
 #include "libmesh/elem.h"
 #include "libmesh/mesh_base.h"
 
@@ -92,6 +93,15 @@ PetscExternalPartitioner::partition(MeshBase & mesh, const unsigned int n_parts)
   // handle this
   if (mesh.is_replicated() && n_parts > 1)
     preLinearPartition(mesh);
+
+  if ((mesh.n_elem() / n_parts < 28) && _part_package == "parmetis")
+  {
+    Moose::out
+        << "Number of elements per compute node must be less than 28, otherwise we switch to "
+           "PTScotch"
+        << std::endl;
+    _part_package = "ptscotch";
+  }
 
   Partitioner::partition(mesh, n_parts);
 }
