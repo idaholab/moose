@@ -192,6 +192,12 @@ protected:
   void assignTaggedLocalResidual();
 
   /**
+   * Local residual blocks will be subject to boolean masking by the current local kernel.
+   * It should be called after the local element vector has been computed.
+   */
+  void maskTaggedLocalResidual(const DenseVector<Number> & mask);
+
+  /**
    * Local Jacobian blocks  will be appended by adding the current local kernel Jacobian.
    * It should be called after the local element matrix has been computed.
    */
@@ -219,6 +225,12 @@ protected:
    * It should be called after the local element matrix has been computed.
    */
   void assignTaggedLocalMatrix();
+
+  /**
+   * Local Jacobian blocks will be subject to boolean masking by the current local kernel.
+   * It should be called after the local element vector has been computed.
+   */
+  void maskTaggedLocalMatrix(const DenseMatrix<Number> & mask);
 
   /**
    * Add the provided incoming residuals corresponding to the provided dof indices
