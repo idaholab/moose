@@ -270,7 +270,6 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, genName(_comp_name, "rho_ie"), params);
   }
-
   // Momentum equation, for 1-D flow channel, x-momentum equation only
   // (transient term + remaining terms[advection, pressure, body force, etc])
   if (_flow_channel.problemIsTransient())
