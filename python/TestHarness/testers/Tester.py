@@ -130,6 +130,7 @@ class Tester(MooseObject):
         self.outfile = None
         self.errfile = None
         self.joined_out = ''
+        self.max_memory = None
         self.exit_code = 0
         self.process = None
         self.tags = params['tags']
@@ -289,6 +290,10 @@ class Tester(MooseObject):
         """ Return the contents of stdout and stderr """
         return self.joined_out
 
+    def getMaxMemory(self):
+        """ Return the max memory used by rank 0 of the process, if available in MB """
+        return self.max_memory
+
     def getCheckInput(self):
         return self.check_input
 
@@ -387,7 +392,16 @@ class Tester(MooseObject):
             f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
             e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
 
-            popen_args = [cmd]
+            # Wrap the run in a time command if available so that we can
+            # track the memory usage
+            time_args = []
+            if os.path.exists('/usr/bin/time'):
+                if platform.system() == 'Linux':
+                    time_args = ['/usr/bin/time', '-f', 'TESTER_TIME_MEMORY=%M']
+                elif platform.system() == 'Darwin':
+                    time_args = ['/usr/bin/time', '-al']
+
+            popen_args = [time_args + cmd]
             popen_kwargs = {'stdout': f,
                             'stderr': e,
                             'close_fds': False,
@@ -430,6 +444,17 @@ class Tester(MooseObject):
         self.exit_code = self.process.poll()
         self.outfile.flush()
         self.errfile.flush()
+
+        # Search for the time result if exists to load memory usage
+        self.errfile.seek(0)
+        stderr = self.errfile.read().decode('utf-8')
+        time_re = None
+        if platform.system() == 'Linux':
+            time_re = re.search(r'TESTER_TIME_MEMORY=(\d+)', stderr)
+        elif platform.system() == 'Darwin':
+            time_re = re.search(r'(\d+)\s+maximum resident set size', stderr)
+        if time_re:
+            self.max_memory = int(time_re.group(1)) / 1024
 
         # store the contents of output, and close the file
         self.joined_out = util.readOutput(self.outfile, self.errfile, self)
