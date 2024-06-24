@@ -79,7 +79,7 @@ def _doc_import(root_dir, content=None, optional=False):
         else:
             LOG.warning("Part of the content specified in 'config.yml' is not included in documentation since " +
                         root_dir + ' is not a valid directory')
-        return set()
+        return None
 
     # Loop through the base directory and create a set of matching filenames
     filenames = set()
@@ -149,10 +149,12 @@ def get_files(items, in_ext):
         if not os.path.isabs(root):
             root = os.path.join(MooseDocs.ROOT_DIR, root)
 
-        # We default external content to be optional because we wont always have
+        # We default external content to be optional because we won't always have
         # all the submodules downloaded
-        for fname in _doc_import(root, content=value.get('content', None), optional=value.get('external', False)):
-            filenames.append((root, fname, value.get('external', False)))
+        files = _doc_import(root, content=value.get('content', None), optional=value.get('external', False))
+        if files is not None:
+            for fname in files:
+                filenames.append((root, fname, value.get('external', False)))
 
     return filenames
 
