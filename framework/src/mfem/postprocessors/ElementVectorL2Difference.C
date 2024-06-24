@@ -47,13 +47,15 @@ ElementVectorL2Difference::computeQpIntegral()
   return difference_vector.norm_sq(); // dot product of difference vector.
 }
 
-void ElementVectorL2Difference::checkVectorVariables() const
+void
+ElementVectorL2Difference::checkVectorVariables() const
 {
   auto & coupled_vector_variables = getCoupledVectorMooseVars();
 
   if (coupled_vector_variables.size() != 2)
   {
-    mooseError("There are ", coupled_vector_variables.size(), " coupled vector variables. Expected 2.");
+    mooseError(
+        "There are ", coupled_vector_variables.size(), " coupled vector variables. Expected 2.");
   }
 
   auto first = coupled_vector_variables[0];
