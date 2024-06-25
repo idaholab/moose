@@ -11,34 +11,35 @@
       detail = 'with a specified boundary,'
     []
 
-    [complementary_moving_boundary]
+    [complement_moving_boundary]
       type = 'Exodiff'
       input = 'moving_boundary.i'
-      cli_args = "UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs='3 1; 1' Outputs/file_base='complementary_moving_boundary'
-      exodiff = 'complementary_moving_boundary_out.e complementary_moving_boundary_out.e-s002 complementary_moving_boundary_out.e-s003'
-      detail = 'with a complementary boundary,'
+      cli_args = "UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs='3 1; 1' Outputs/file_base='complement_moving_boundary_out'"
+      exodiff = 'complement_moving_boundary_out.e complement_moving_boundary_out.e-s002 complement_moving_boundary_out.e-s003'
+      detail = 'with a complement boundary,'
     []
 
     [no_moving_boundary]
       type = 'Exodiff'
       input = 'moving_boundary.i'
-      cli_args = "UserObjects/w_mvg_bnd/moving_boundaries="" UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs="" Outputs/file_base='complementary_moving_boundary'
+      cli_args = "UserObjects/w_mvg_bnd/moving_boundaries="" UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs="" Outputs/file_base='no_moving_boundary_out'"
       exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 no_moving_boundary_out.e-s003'
       detail = 'without a specified boundary,'
     []
 
-    [reversible]
+    [irreversible]
       type = 'Exodiff'
-      input = 'reversible.i'
-      exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
-      detail = 'reversibly,'
+      input = 'irreversible.i'
+      exodiff = 'irreversible_out.e irreversible_out.e-s002 irreversible_out.e-s003 irreversible_out.e-s004'
+      detail = 'irreversibly, '
     []
 
-    [block_restricted]
+    [reversible]
       type = 'Exodiff'
-      input = 'block_restricted.i'
-      exodiff = 'block_restricted_out.e block_restricted_out.e-s002 block_restricted_out.e-s003 block_restricted_out.e-s004'
-      detail = 'irreversibly, '
+      input = 'irreversible.i'
+      cli_args = "UserObjects/moving_circle/complement_subdomain_id=2 Outputs/file_base='reversible_out'"
+      exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
+      detail = 'reversibly,'
     []
 
     [initial_condition]
