@@ -32,11 +32,6 @@ public:
 
   static InputParameters validParams();
 
-  /**
-   * This function must be overriden by application codes to add
-   * required elements from (range_begin, range_end) to the
-   * coupled_elements map.
-   */
   virtual void operator()(const MeshBase::const_element_iterator & /*range_begin*/,
                           const MeshBase::const_element_iterator & /*range_end*/,
                           processor_id_type p,
