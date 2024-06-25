@@ -17,6 +17,8 @@ HeatConductionPhysics::validParams()
 
   params.addParam<VariableName>("temperature_name", "T", "Variable name for the temperature");
   params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
+  params.addParam<std::vector<SubdomainName>>("heat_source_blocks",
+                                              "Block restriction of the heat source");
 
   params.addParam<FunctionName>(
       "initial_temperature", 300, "Initial value of the temperature variable");
