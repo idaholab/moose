@@ -28,7 +28,7 @@ class GhostBoundary : public RelationshipManager
 public:
   GhostBoundary(const InputParameters &);
 
-  GhostBoundary(const GhostBoundary & others);
+  GhostBoundary(const GhostBoundary & other);
 
   static InputParameters validParams();
 
