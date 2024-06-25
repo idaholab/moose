@@ -775,7 +775,10 @@ class RenderParameterToken(components.RenderComponent):
         doc_unit = param['doc_unit']
         p = html.Tag(body, 'p', class_='moose-parameter-description-doc-unit')
         html.Tag(p, 'span', string='Unit:')
-        html.String(p, content=doc_unit)
+        if not doc_unit:
+            html.String(p, content='(no unit assumed for this parameter)')
+        else:
+            html.String(p, content=doc_unit)
 
         if param['options']:
             p = html.Tag(body, 'p', class_='moose-parameter-description-options')
