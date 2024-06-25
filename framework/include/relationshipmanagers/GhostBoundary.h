@@ -44,10 +44,6 @@ public:
 
   virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
-  /**
-   * Update the cached _lower_to_upper map whenever our Mesh has been
-   * redistributed.  We'll be lazy and just recalculate from scratch.
-   */
   virtual void redistribute() override { this->mesh_reinit(); }
 
   std::string getInfo() const override;
