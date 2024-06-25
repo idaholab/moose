@@ -44,6 +44,9 @@ protected:
   /// the path/name of the file containing the mesh
   const MeshFileName & _file_name;
 
+  /// the path/name of any file containing a matrix of mesh constraints
+  const MatrixFileName & _matrix_file_name;
+
   /// whether to skip partitioning after loading the mesh
   const bool _skip_partitioning;
 

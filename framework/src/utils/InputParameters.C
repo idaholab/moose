@@ -661,6 +661,7 @@ InputParameters::finalize(const std::string & parsing_syntax)
     set_if_filename(FileName);
     set_if_filename(FileNameNoExtension);
     set_if_filename(MeshFileName);
+    set_if_filename(MatrixFileName);
 #undef set_if_filename
   }
 

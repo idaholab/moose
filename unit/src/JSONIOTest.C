@@ -57,6 +57,7 @@ TEST(JSONIOTest, derivativeStringClasses)
   testDerivativeStringClass<FileName>();
   testDerivativeStringClass<FileNameNoExtension>();
   testDerivativeStringClass<MeshFileName>();
+  testDerivativeStringClass<MatrixFileName>();
   testDerivativeStringClass<OutFileBase>();
   testDerivativeStringClass<NonlinearVariableName>();
   testDerivativeStringClass<AuxVariableName>();

@@ -199,12 +199,15 @@ SideSetsGeneratorBase::flood(const Elem * elem,
 
   _visited[side_id].insert(elem);
 
+  // Request to compute normal vectors
+  const std::vector<Point> & face_normals = _fe_face->get_normals();
+
   for (const auto side : make_range(elem->n_sides()))
   {
 
     _fe_face->reinit(elem, side);
     // We'll just use the normal of the first qp
-    const Point face_normal = _fe_face->get_normals()[0];
+    const Point face_normal = face_normals[0];
 
     if (!elemSideSatisfiesRequirements(elem, side, mesh, normal, face_normal))
       continue;
