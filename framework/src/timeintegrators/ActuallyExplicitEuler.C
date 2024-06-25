@@ -123,6 +123,8 @@ ActuallyExplicitEuler::solve()
   _nl.setSolution(*_nonlinear_implicit_system->current_local_solution);
 
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
+  if (_is_direct)
+    _nl.setNodalBCs();
 }
 
 void

@@ -987,6 +987,43 @@ NonlinearSystemBase::setInitialSolution()
 }
 
 void
+NonlinearSystemBase::setNodalBCs()
+{
+  NumericVector<Number> & initial_solution(solution());
+
+  TIME_SECTION("initialBCs", 2, "Applying BCs To Initial Condition");
+
+  const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
+  for (const auto & bnode : bnd_nodes)
+  {
+    BoundaryID boundary_id = bnode->_bnd_id;
+    Node * node = bnode->_node;
+
+    if (node->processor_id() == processor_id())
+    {
+      // reinit variables in nodes
+      _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+      if (_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+      {
+        const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
+        for (const auto & preset_bc : preset_bcs)
+          preset_bc->computeValue(initial_solution);
+      }
+      if (_ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+      {
+        const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
+        for (const auto & preset_bc : preset_bcs_res)
+          preset_bc->computeValue(initial_solution);
+      }
+    }
+  }
+
+  _sys.solution->close();
+  update();
+}
+
+void
 NonlinearSystemBase::setPredictor(std::shared_ptr<Predictor> predictor)
 {
   _predictor = predictor;
