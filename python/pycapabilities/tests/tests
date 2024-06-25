@@ -4,6 +4,6 @@
   [capabilities]
     type = PythonUnitTest
     input = test_capabilities.py
-    requirement = "The system shall ..."
+    requirement = "The system shall contain a python utility parsing and evaluating application capability requirements."
   []
 []

@@ -635,7 +635,6 @@ MooseApp::MooseApp(InputParameters parameters)
     // Finish up the command
     command_stream << "\""
                    << " & ";
-
     std::string command_string = command_stream.str();
     Moose::out << "Running: " << command_string << std::endl;
 
@@ -791,15 +790,6 @@ MooseApp::registerCapabilities()
   {
     const std::string method = QUOTE(METHOD);
     addCapability("method", method, "The executable was built with METHOD=\"" + method + "\"");
-  }
-
-  {
-    const auto doc = "Workbench Analysis Sequence Processors (WASP) parser library";
-#ifdef WASP_ENABLED
-    haveCapability("wasp", doc);
-#else
-    missingCapability("wasp", doc, " Unable to parse input files.");
-#endif
   }
 
   {
@@ -1393,12 +1383,12 @@ MooseApp::setupOptions()
       }
       if (status == CapabilityUtils::UNKNOWN)
       {
-        mooseInfo("Required capabilities '",
-                  required_capabilities,
-                  "' are not specific enough. A comparison test is performed on an undefined "
-                  "capability. Disambiguate this requirement by adding an existence/non-existence "
-                  "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
-                  "or '!unknown | unknown<1.2.3'");
+        mooseError("Required capabilities '",
+                   required_capabilities,
+                   "' are not specific enough. A comparison test is performed on an undefined "
+                   "capability. Disambiguate this requirement by adding an existence/non-existence "
+                   "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
+                   "or '!unknown | unknown<1.2.3'");
         _ready_to_exit = true;
         // we use code 77 as "skip" in the Testharness
         _exit_code = 77;
