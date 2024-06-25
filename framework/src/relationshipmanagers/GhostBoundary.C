@@ -92,7 +92,6 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & /*range_begin
       // We've finished generating our mesh so we can be selective and only ghost elements lying on our boundary
 
       const BoundaryInfo & binfo = _mesh->get_boundary_info();
-
       for (auto side : elem->side_index_range())
         for (auto boundary_id : boundary_ids)
           if ((elem->processor_id() != p) && (binfo.has_boundary_id(elem, side, boundary_id)))
