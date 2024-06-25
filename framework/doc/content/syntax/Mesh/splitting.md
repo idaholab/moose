@@ -63,7 +63,8 @@ There are two ways of using referring to meshes in parallel in MOOSE, as split o
 A split mesh, i.e. a `.cpr` file, may be loaded using a [FileMeshGenerator.md] if access to the mesh is needed before the full simulation case is set-up. In fact this approach is reccomended for cases where unforseen access to the mesh is needed, for example communicating ghost points etc. 
 
 ### Loading a split mesh using `--use-split`
-Alternatively, split configuration use the `--use-split` flag (which takes no arguments):
+
+Alternatively, a previously split mesh can be loaded using the `--use-split` flag (which takes no arguments):
 
 ```
 $ mpiexec -n 42 moose-app-opt -i your_input.i --use-split
