@@ -77,8 +77,8 @@ From: {{ APPTAINER_FROM }}
 
 {%- if MPI_FLAVOUR != "openmpi" %}
     # Test PETSc
-    # cd petsc
-    # make SLEPC_DIR=${PETSC_DIR} PETSC_DIR=${PETSC_DIR} PETSC_ARCH= check
+    cd petsc
+    make SLEPC_DIR=${PETSC_DIR} PETSC_DIR=${PETSC_DIR} PETSC_ARCH= check
 {%- endif %}
 
     # Fix possibly bad permissions
