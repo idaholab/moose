@@ -318,7 +318,7 @@ class RunApp(Tester):
             # since a message to standard error might actually be a real error.  This case should be handled
             # in the derived class.
             if self.exit_code == 77:
-                self.setStatus(self.skip, "ABORT")
+                self.setStatus(self.skip, "CAPABILITIES")
                 self.addCaveats(specs['capabilities'])
                 return ''
 

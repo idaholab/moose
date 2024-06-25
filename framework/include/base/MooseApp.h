@@ -135,7 +135,7 @@ public:
    * Get the shell exit code for the application
    * @return The shell exit code
    */
-  int exitCode() { return _exit_code; }
+  int exitCode() const { return _exit_code; }
 
   /**
    * Get the parameters of the object

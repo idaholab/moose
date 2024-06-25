@@ -759,15 +759,6 @@ MooseApp::registerCapabilities()
   }
 
   {
-    const auto doc = "Workbench Analysis Sequence Processors (WASP) parser library";
-#ifdef WASP_ENABLED
-    haveCapability("wasp", doc);
-#else
-    missingCapability("wasp", doc, " Unable to parse input files.");
-#endif
-  }
-
-  {
     const std::string version = QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
         LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR);
     addCapability("petsc", version, "Using PETSc version " + version + ".");
@@ -1374,12 +1365,12 @@ MooseApp::setupOptions()
       }
       if (status == CapabilityUtils::UNKNOWN)
       {
-        mooseInfo("Required capabilities '",
-                  required_capabilities,
-                  "' are not specific enough. A comparison test is performed on an undefined "
-                  "capability. Disambiguate this requirement by adding an existence/non-existence "
-                  "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
-                  "or '!unknown | unknown<1.2.3'");
+        mooseError("Required capabilities '",
+                   required_capabilities,
+                   "' are not specific enough. A comparison test is performed on an undefined "
+                   "capability. Disambiguate this requirement by adding an existence/non-existence "
+                   "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
+                   "or '!unknown | unknown<1.2.3'");
         _ready_to_exit = true;
         // we use code 77 as "skip" in the Testharness
         _exit_code = 77;
