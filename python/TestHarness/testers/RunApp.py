@@ -353,8 +353,8 @@ class RunApp(Tester):
             # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
             # since a message to standard error might actually be a real error.  This case should be handled
             # in the derived class.
-            if self.exit_code == 77:
-                self.setStatus(self.skip, "ABORT")
+            if exit_code == 77:
+                self.setStatus(self.skip, "CAPABILITIES")
                 self.addCaveats(specs['capabilities'])
                 return ''
             elif options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
