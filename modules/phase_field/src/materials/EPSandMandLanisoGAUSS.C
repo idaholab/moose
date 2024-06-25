@@ -500,9 +500,9 @@ EPSandMandLanisoGAUSS::computeQpProperties()
 
               if (sumval == 0.0)
               {
-                vsmallbax == 0.0;
-                vsmallbay == 0.0;
-                vsmallbaz == 0.0;
+                vsmallbax = 0.0;
+                vsmallbay = 0.0;
+                vsmallbaz = 0.0;
                 _Vx[_qp] = 0.0;
                 _Vy[_qp] = 0.0;
                 _Vz[_qp] = 0.0;
@@ -601,10 +601,10 @@ EPSandMandLanisoGAUSS::computeQpProperties()
 
                 if (sumval == 0.0)
                 {
-                  miubalibwR == 0.0;
-                  miubalibxR == 0.0;
-                  miubalibyR == 0.0;
-                  miubalibzR == 0.0;
+                  miubalibwR = 0.0;
+                  miubalibxR = 0.0;
+                  miubalibyR = 0.0;
+                  miubalibzR = 0.0;
 
                   _VwlibR[_qp] = 0.0;
                   _VxlibR[_qp] = 0.0;
