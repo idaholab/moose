@@ -44,12 +44,12 @@ inactive_domain_block_names = '${Box2_inactive_name} ${Box3_inactive_name} ${Box
   []
 
   [Box3]
-      type = SubdomainBoundingBoxGenerator
-      input = "Box2"
-      block_id = 3
-      location = "INSIDE"
-      bottom_left = "0 -3 +2"
-      top_right = "+4 +3 0"
+    type = SubdomainBoundingBoxGenerator
+    input = "Box2"
+    block_id = 3
+    location = "INSIDE"
+    bottom_left = "0 -3 +2"
+    top_right = "+4 +3 0"
   []
 
   add_subdomain_names = ${inactive_domain_block_names}
