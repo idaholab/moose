@@ -8,7 +8,7 @@
     max_parallel = 1 # number of VTK output files changes with num processes, so we are sticking w/ one for now
     xmldiff = 'cframe_iga_out_001.pvtu cframe_iga_out_001_0.vtu'
     # See #24187
-    capabilities = 'petsc>=3.12.0 & !DBG'
+    capabilities = 'petsc>=3.12.0 & method!=dbg'
     valgrind = none
   []
 []
