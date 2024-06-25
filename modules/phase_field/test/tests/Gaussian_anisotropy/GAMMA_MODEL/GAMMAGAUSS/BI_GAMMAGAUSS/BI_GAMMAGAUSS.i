@@ -440,7 +440,7 @@
   nl_max_its = 40
   nl_rel_tol = 1e-10
 
-  num_steps = 20
+  num_steps = 10
   dt = 50
 []
 
