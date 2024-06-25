@@ -89,8 +89,7 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & /*range_begin
     }
     else
     {
-      // We've finished generating our mesh so we can be selective and only ghost elements lying
-      // in our lower-dimensional subdomains and their interior parents
+      // We've finished generating our mesh so we can be selective and only ghost elements lying on our boundary
 
       // mooseAssert(boundary_ids != Moose::INVALID_BOUNDARY_ID, "Boundary id should exist by now");
 
