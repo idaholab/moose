@@ -413,9 +413,14 @@ std::string
 getExtension(const std::string & filename, const bool rfind)
 {
   std::string file_ext = "";
-  auto pos = rfind ? filename.rfind(".") : filename.find(".");
-  if (pos != std::string::npos)
-    file_ext += filename.substr(pos + 1, std::string::npos);
+  if (filename != "")
+  {
+    // The next line splits filename at the last "/" and gives the file name after "/"
+    const std::string stripped_filename = splitFileName<std::string>(filename).second;
+    auto pos = rfind ? stripped_filename.rfind(".") : stripped_filename.find(".");
+    if (pos != std::string::npos)
+      file_ext += stripped_filename.substr(pos + 1, std::string::npos);
+  }
 
   return file_ext;
 }
@@ -423,10 +428,10 @@ getExtension(const std::string & filename, const bool rfind)
 std::string
 stripExtension(const std::string & s, const bool rfind)
 {
-  auto pos = rfind ? s.rfind(".") : s.find(".");
-  if (pos != std::string::npos)
-    return s.substr(0, pos);
-  return s;
+  const std::string ext = getExtension(s, rfind);
+  const bool offset = (ext.size() != 0);
+  // -1 offset accounts for the extension's leading dot ("."), if there is an extension
+  return s.substr(0, s.size() - ext.size() - offset);
 }
 
 std::string

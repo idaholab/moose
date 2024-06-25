@@ -53,8 +53,6 @@ SplitMeshAction::act()
   // Get the file extension without the dot.
   std::string split_file_arg_ext = MooseUtils::getExtension(split_file_arg);
 
-  // If stripExtension() returns the original string, then there is no
-  // file extension or the original string was empty.
   bool checkpoint_binary_flag = false;
 
   if (split_file_arg_ext != "")
