@@ -8,7 +8,7 @@
       type = 'Exodiff'
       input = 'moving_boundary.i'
       exodiff = 'moving_boundary_out.e moving_boundary_out.e-s002 moving_boundary_out.e-s003'
-      detail = 'with a specified boundary,'
+      detail = 'with a specified boundary, '
     []
 
     [complement_moving_boundary]
@@ -16,7 +16,7 @@
       input = 'moving_boundary.i'
       cli_args = "UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs='3 1; 1' Outputs/file_base='complement_moving_boundary_out'"
       exodiff = 'complement_moving_boundary_out.e complement_moving_boundary_out.e-s002 complement_moving_boundary_out.e-s003'
-      detail = 'with a complement boundary,'
+      detail = 'with a complement boundary, '
     []
 
     [no_moving_boundary]
@@ -24,7 +24,7 @@
       input = 'moving_boundary.i'
       cli_args = "UserObjects/w_mvg_bnd/moving_boundaries="" UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs="" Outputs/file_base='no_moving_boundary_out'"
       exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 no_moving_boundary_out.e-s003'
-      detail = 'without a specified boundary,'
+      detail = 'without a specified boundary, '
     []
 
     [irreversible]
@@ -39,21 +39,21 @@
       input = 'irreversible.i'
       cli_args = "UserObjects/moving_circle/complement_subdomain_id=2 Outputs/file_base='reversible_out'"
       exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
-      detail = 'reversibly,'
+      detail = 'reversibly, '
     []
 
     [parallel]
       type = 'Exodiff'
       input = 'parallel.i'
       exodiff = 'parallel_out.e parallel_out.e-s002'
-      requirement = 'run in parallel,'
+      requirement = 'run in parallel, '
     []
 
     [initial_condition]
       type = 'Exodiff'
       input = 'initial_condition.i'
       exodiff = 'initial_condition_out.e initial_condition_out.e-s002 initial_condition_out.e-s003 initial_condition_out.e-s004'
-      detail = 'with solution,'
+      detail = 'with solution, '
     []
 
     [displaced]
@@ -61,7 +61,7 @@
       input = 'initial_condition.i'
       cli_args = 'AuxVariables/inactive="" Mesh/displacements="disp_x disp_y" Outputs/file_base=displaced_out Outputs/out/use_displaced=true'
       exodiff = "displaced_out.e displaced_out.e-s002 displaced_out.e-s003 displaced_out.e-s004"
-      detail = 'with a displaced mesh,'
+      detail = 'with a displaced mesh, '
     []
 
     [stateful_property]

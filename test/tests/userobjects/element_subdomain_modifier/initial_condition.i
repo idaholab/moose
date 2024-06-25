@@ -39,19 +39,12 @@
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
     block = 2
-    criterion_type = BELOW
+    criterion_type = 'BELOW'
     threshold = 0
     subdomain_id = 1
     moving_boundaries = 'moving_boundary'
     moving_boundary_subdomain_pairs = 'left right'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-[]
-
-[Functions]
-  [moving_circle]
-    type = ParsedFunction
-    expression = '(x-t)^2+(y)^2-0.5^2'
   []
 []
 
@@ -75,15 +68,16 @@
 
 [AuxKernels]
   [phi]
-    type = FunctionAux
-    variable = phi
-    function = moving_circle
+    type = ParsedAux
+    variable = 'phi'
+    expression = '(x-t)^2+(y)^2-0.5^2'
+    use_xyzt = true
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [double_u]
     type = StatefulAux
-    variable = u
-    coupled = u
+    variable = 'u'
+    coupled = 'u'
     block = 1
   []
 []
@@ -93,8 +87,8 @@
   active = ''
   [average]
     type = SideAverageValue
-    variable = u
-    boundary = bottom
+    variable = 'u'
+    boundary = 'bottom'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
@@ -110,3 +104,4 @@
     type = Exodus
   []
 []
+
