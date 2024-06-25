@@ -42,6 +42,9 @@ namespace NEML2Utils
 
 #ifdef NEML2_ENABLED
 
+/// Map a variable name onto the old_xxx sub-axis
+neml2::VariableName getOldName(const neml2::VariableName & var);
+
 /**
  * Convert a MOOSE data structure to its NEML2 counterpart
  */
@@ -183,7 +186,7 @@ set(neml2::LabeledVector & v,
 
   // Recursively act on the rest of the data
   // The compiler should be able to easily deduce the rest of the template parameters...
-  if constexpr (sizeof...(Ts) > 1)
+  if constexpr (sizeof...(Ts) > 0)
     set<I + 1>(v, indices, t...);
 }
 

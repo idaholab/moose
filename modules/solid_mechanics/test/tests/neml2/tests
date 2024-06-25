@@ -29,7 +29,10 @@
     [elasticity]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=elasticity'
+      cli_args = "neml2_input=elasticity
+                  UserObjects/active='model input_strain'
+                  UserObjects/model/gather_uos='input_strain'
+                  Materials/active='output_stress_jacobian'"
       exodiff = 'elasticity.e'
       detail = 'to solve an elasticity problem;'
       required_submodule = 'contrib/neml2'
@@ -40,7 +43,10 @@
     [viscoplasticity_perfect]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=viscoplasticity_perfect'
+      cli_args = "neml2_input=viscoplasticity_perfect
+                  UserObjects/active='model input_strain input_old_strain input_old_stress'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress'
+                  Materials/active='output_stress_jacobian'"
       exodiff = 'viscoplasticity_perfect.e'
       detail = 'to solve a perfect viscoplasticity problem;'
       required_submodule = 'contrib/neml2'
@@ -51,7 +57,10 @@
     [viscoplasticity_isoharden]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=viscoplasticity_isoharden'
+      cli_args = "neml2_input=viscoplasticity_isoharden
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_ep'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_ep'
+                  Materials/active='output_stress_jacobian output_ep'"
       exodiff = 'viscoplasticity_isoharden.e'
       detail = 'to solve a viscoplasticity problem with isotropic hardening;'
       required_submodule = 'contrib/neml2'
@@ -62,7 +71,10 @@
     [viscoplasticity_kinharden]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=viscoplasticity_kinharden'
+      cli_args = "neml2_input=viscoplasticity_kinharden
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_Kp'
+                  Materials/active='output_stress_jacobian output_Kp'"
       exodiff = 'viscoplasticity_kinharden.e'
       detail = 'to solve a viscoplasticity problem with kinematic hardening;'
       required_submodule = 'contrib/neml2'
@@ -73,7 +85,10 @@
     [viscoplasticity_isokinharden]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=viscoplasticity_isokinharden'
+      cli_args = "neml2_input=viscoplasticity_isokinharden
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_ep input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_ep input_old_Kp'
+                  Materials/active='output_stress_jacobian output_ep output_Kp'"
       exodiff = 'viscoplasticity_isokinharden.e'
       detail = 'to solve a viscoplasticity problem with both isotropic and kinematic hardening;'
       required_submodule = 'contrib/neml2'
@@ -84,7 +99,10 @@
     [viscoplasticity_chaboche]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=viscoplasticity_chaboche'
+      cli_args = "neml2_input=viscoplasticity_chaboche
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_ep input_old_X1 input_old_X2'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_ep input_old_X1 input_old_X2'
+                  Materials/active='output_stress_jacobian output_ep output_X1 output_X2'"
       exodiff = 'viscoplasticity_chaboche.e'
       detail = 'to solve a viscoplasticity problem with non-associative Chaboche hardening;'
       required_submodule = 'contrib/neml2'
@@ -95,7 +113,10 @@
     [viscoplasticity_radial_return]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=viscoplasticity_radial_return'
+      cli_args = "neml2_input=viscoplasticity_radial_return
+                  UserObjects/active='model input_strain input_old_Ep input_old_gamma'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_gamma'
+                  Materials/active='output_stress_jacobian output_Ep output_gamma'"
       exodiff = 'viscoplasticity_radial_return.e'
       detail = 'to solve a viscoplasticity problem using radial return;'
       required_submodule = 'contrib/neml2'
@@ -105,7 +126,10 @@
     [rate_independent_plasticity_perfect]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=rate_independent_plasticity_perfect'
+      cli_args = "neml2_input=rate_independent_plasticity_perfect
+                  UserObjects/active='model input_strain input_old_Ep'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep'
+                  Materials/active='output_stress_jacobian output_Ep'"
       exodiff = 'rate_independent_plasticity_perfect.e'
       detail = 'to solve a rate-independent problem with perfect plasticity;'
       required_submodule = 'contrib/neml2'
@@ -116,7 +140,10 @@
     [rate_independent_plasticity_isoharden]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=rate_independent_plasticity_isoharden'
+      cli_args = "neml2_input=rate_independent_plasticity_isoharden
+                  UserObjects/active='model input_strain input_old_Ep input_old_ep'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_ep'
+                  Materials/active='output_stress_jacobian output_Ep output_ep'"
       exodiff = 'rate_independent_plasticity_isoharden.e'
       detail = 'to solve a rate-independent problem with isotropic hardening;'
       required_submodule = 'contrib/neml2'
@@ -127,7 +154,10 @@
     [rate_independent_plasticity_kinharden]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=rate_independent_plasticity_kinharden'
+      cli_args = "neml2_input=rate_independent_plasticity_kinharden
+                  UserObjects/active='model input_strain input_old_Ep input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_Kp'
+                  Materials/active='output_stress_jacobian output_Ep output_Kp'"
       exodiff = 'rate_independent_plasticity_kinharden.e'
       detail = 'to solve a rate-independent problem with kinematic hardening;'
       required_submodule = 'contrib/neml2'
@@ -138,7 +168,10 @@
     [rate_independent_plasticity_isokinharden]
       type = Exodiff
       input = 'fem_modular.i'
-      cli_args = 'neml2_input=rate_independent_plasticity_isokinharden'
+      cli_args = "neml2_input=rate_independent_plasticity_isokinharden
+                  UserObjects/active='model input_strain input_old_Ep input_old_ep input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_ep input_old_Kp'
+                  Materials/active='output_stress_jacobian output_Ep output_ep output_Kp'"
       exodiff = 'rate_independent_plasticity_isokinharden.e'
       detail = 'to solve a rate-independent problem with both isotropic and kinematic hardening.'
       required_submodule = 'contrib/neml2'
