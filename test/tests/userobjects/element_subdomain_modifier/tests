@@ -42,11 +42,18 @@
       detail = 'reversibly,'
     []
 
+    [parallel]
+      type = 'Exodiff'
+      input = 'parallel.i'
+      exodiff = 'parallel_out.e parallel_out.e-s002'
+      requirement = 'run in parallel,'
+    []
+
     [initial_condition]
       type = 'Exodiff'
       input = 'initial_condition.i'
       exodiff = 'initial_condition_out.e initial_condition_out.e-s002 initial_condition_out.e-s003 initial_condition_out.e-s004'
-      detail = 'with solution'
+      detail = 'with solution,'
     []
 
     [displaced]
@@ -54,7 +61,7 @@
       input = 'initial_condition.i'
       cli_args = 'AuxVariables/inactive="" Mesh/displacements="disp_x disp_y" Outputs/file_base=displaced_out Outputs/out/use_displaced=true'
       exodiff = "displaced_out.e displaced_out.e-s002 displaced_out.e-s003 displaced_out.e-s004"
-      detail = 'with a displaced mesh'
+      detail = 'with a displaced mesh,'
     []
 
     [stateful_property]
