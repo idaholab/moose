@@ -16,6 +16,10 @@
 #
 # (b) First-order reaction is R = kf*u - kb*v
 #
+# This results in the weakly enforced interface condition
+#
+# -D1∇u = -D2∇v + kf*u - kb*v
+#
 # Analytical solution is
 # u = -0.2*u+1,    0<=u<=1
 # v = -0.4*v+0.8,  1<v<=2
