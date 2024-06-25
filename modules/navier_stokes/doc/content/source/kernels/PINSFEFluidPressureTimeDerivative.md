@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/PINSFEFluidPressureTimeDerivative
 
-The time derivative for the porous media mass equation is computed as:
+Assuming porosity not changing with time, the time derivative for the porous media mass equation is computed as:
 
 !equation
 \epsilon (\dfrac{\partial \rho}{\partial T} \dot{T} + \dfrac{\partial \rho}{\partial p} \dot{p}) \psi

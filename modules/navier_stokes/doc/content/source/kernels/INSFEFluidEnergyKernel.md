@@ -13,7 +13,8 @@ The following terms are implemented:
 
 
 If selecting the conservative form using the [!param](/Kernels/INSFEFluidEnergyKernel/conservative_form) boolean
-parameter, the equations are written using the `enthalpy` material property instead of its approximation by `cp * T`.
+parameter, the convective term of the equation is expressed in the conservative form, i.e., $\nabla \cdot (\rho \vec{v} h)$, and integration by parts is applied to obtain the weak form.
+Otherwise, the primitive form, i.e., $\rho c_p \vec{v} \cdot \nabla T$, is used, and integration by parts is **not** applied.
 
 !syntax parameters /Kernels/INSFEFluidEnergyKernel
 
