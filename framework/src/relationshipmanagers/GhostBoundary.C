@@ -28,17 +28,6 @@ GhostBoundary::validParams()
   InputParameters params = RelationshipManager::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>("boundary",
                                                      "The name of the primary boundary sideset.");
-
-  params.addParam<bool>("ghost_point_neighbors",
-                        false,
-                        "Whether we should ghost point neighbors of the paired boundary.");
-
-  // We want to wait until our mortar mesh has been built before trying to delete remote elements.
-  // And our mortar mesh cannot be built until the entire mesh has been generated. By setting this
-  // parameter to false we will make sure that any prepare_for_use calls during the mesh generation
-  // phase will not delete remote elements *and* we will set a flag on the moose mesh saying that we
-  // need to delete remote elements after the addition of late geometric ghosting functors
-  // (including this ghosting functor)
   return params;
 }
 
