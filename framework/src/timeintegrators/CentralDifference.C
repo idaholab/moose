@@ -24,6 +24,8 @@ CentralDifference::validParams()
 
   params.addClassDescription("Implementation of explicit, Central Difference integration without "
                              "invoking any of the nonlinear solver");
+  params.addParam<bool>(
+      "use_direct", false, "Whether or not to use a direct acceleration calculation");
 
   return params;
 }
@@ -31,10 +33,13 @@ CentralDifference::validParams()
 CentralDifference::CentralDifference(const InputParameters & parameters)
   : ActuallyExplicitEuler(parameters),
     _du_dotdot_du(_sys.duDotDotDu()),
-    _solution_older(_sys.solutionState(2))
+    _solution_older(_sys.solutionState(2)),
+    _use_direct(getParam<bool>("use_direct"))
 {
   if (_solve_type == LUMPED)
     _is_lumped = true;
+  if (_use_direct)
+    _is_direct = true;
 
   _fe_problem.setUDotOldRequested(true);
   _fe_problem.setUDotDotRequested(true);

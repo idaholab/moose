@@ -76,13 +76,11 @@ ActuallyExplicitEuler::solve()
 
   // Compute the mass matrix
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
-  if ((!_constant_mass || (_constant_mass && _t_step == 1)) &&
-      _solve_type == LUMPED_CENTRAL_DIFFERENCE)
+  if ((!_constant_mass || (_constant_mass && _t_step == 1)) && _is_direct)
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);
 
-  if (_solve_type == LUMPED || _solve_type == LUMPED_CENTRAL_DIFFERENCE ||
-      _solve_type == LUMP_PRECONDITIONED)
+  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
 
   // Compute the residual
@@ -95,8 +93,7 @@ ActuallyExplicitEuler::solve()
 
   // Compute the mass matrix
   mass_matrix = _nonlinear_implicit_system->get_system_matrix();
-  if ((!_constant_mass || (_constant_mass && _t_step == 1)) &&
-      _solve_type != LUMPED_CENTRAL_DIFFERENCE)
+  if ((!_constant_mass || (_constant_mass && _t_step == 1)) && !_is_direct)
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);
 
@@ -123,8 +120,10 @@ ActuallyExplicitEuler::solve()
   _nl.setSolution(*_nonlinear_implicit_system->current_local_solution);
 
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
+
+  // Setting nodal BC's if using a direct time integrator
   if (_is_direct)
-    _nl.setNodalBCs();
+    _nl.setInitialSolution();
 }
 
 void
