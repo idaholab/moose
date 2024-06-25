@@ -63,6 +63,44 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   if (!_functor_symbols.empty() && (_functor_symbols.size() != _n_functors))
     paramError("functor_symbols", "functor_symbols must be the same length as functor_names.");
 
+  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
+  std::vector<std::string> variable_names;
+  for (const auto i : make_range(_nargs))
+    variable_names.push_back(getFieldVar("coupled_variables", i)->name());
+
+  if (_functor_symbols.size())
+  {
+    for (const auto & symbol : _functor_symbols)
+    {
+      // Make sure symbol is not x, y, z, or t
+      if (_use_xyzt && (std::find(xyzt.begin(), xyzt.end(), symbol) != xyzt.end()))
+        paramError("functor_symbols",
+                   "x, y, z, and t cannot be used as a functor symbol when use_xyzt=true.");
+      // Make sure symbol is not a variable name
+      if (variable_names.size() &&
+          (std::find(variable_names.begin(), variable_names.end(), symbol) != variable_names.end()))
+        paramError("functor_symbols",
+                   "Functor symbols cannot overlap with coupled variable names.");
+    }
+  }
+  else
+    for (const auto & name : _functor_names)
+    {
+      // Make sure symbol is not x, y, z, or t
+      if (_use_xyzt && (std::find(xyzt.begin(), xyzt.end(), std::string(name)) != xyzt.end()))
+        paramError("functor_names",
+                   "x, y, z, and t cannot be used as a functor name when use_xyzt=true. Use "
+                   "'functor_symbols' to disambiguate.");
+      // Make sure symbol is not a variable name
+      if (variable_names.size() &&
+          (std::find(variable_names.begin(), variable_names.end(), std::string(name)) !=
+           variable_names.end()))
+        paramError(
+            "functor_names",
+            "Functor names cannot overlap with coupled variable names. Use 'functor_symbols' to "
+            "disambiguate.");
+    }
+
   // build variables argument
   std::string variables;
 
@@ -71,16 +109,9 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
 
   // adding functors to the expression
-  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
   if (_functor_symbols.size())
     for (const auto & symbol : _functor_symbols)
-    {
-      // Make sure symbol is not x, y, z, or t
-      if (_use_xyzt && (std::find(xyzt.begin(), xyzt.end(), symbol) != xyzt.end()))
-        paramError("functor_symbols",
-                   "x, y, z, and t cannot be used as a functor symbol when use_xyzt=true.");
       variables += (variables.empty() ? "" : ",") + symbol;
-    }
   else
     for (const auto & name : _functor_names)
       variables += (variables.empty() ? "" : ",") + name;

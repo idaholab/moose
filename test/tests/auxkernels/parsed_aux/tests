@@ -25,6 +25,7 @@
     requirement = "The system shall be capable of computing values from a functor."
   [../]
   [errors]
+    issues = '#21244'
     requirement = 'The system shall report an error if'
     [functor_symbol_length]
       type = RunException
@@ -44,8 +45,8 @@
       type = RunException
       input = 'parsed_aux_functors_test.i'
       cli_args = "AuxKernels/set_parsed/functor_symbols='u v' AuxKernels/set_parsed/coupled_variables='u v'"
-      expect_err = "Functor symbols cannot overlap with variable names."
-      detail = "functor symbols cannot overlap with variable names"
+      expect_err = "Functor symbols cannot overlap with coupled variable names."
+      detail = "functor symbols cannot overlap with coupled variable names"
     [../]
     [invalid_functor_name]
       type = RunException
@@ -58,15 +59,15 @@
       type = RunException
       input = 'parsed_aux_functors_test.i'
       cli_args = "AuxKernels/set_parsed/functor_names='u v' AuxKernels/set_parsed/coupled_variables='u v' AuxKernels/set_parsed/functor_symbols=''"
-      expect_err = "Functor names cannot overlap with variable names. Use 'functor_symbols' to disambiguate."
-      detail = "functor names cannot overlap with variable names"
+      expect_err = "Functor names cannot overlap with coupled variable names. Use 'functor_symbols' to disambiguate."
+      detail = "functor names cannot overlap with coupled variable names"
     [../]
     [expression]
       type = RunException
       input = 'parsed_aux_functors_test.i'
       cli_args = "AuxKernels/set_parsed/expression='l'"
       expect_err = "Invalid function"
-      detail = "Invalid function passed in. Please pass in a valid function."
+      detail = "an invalid function is provided."
     [../]
   []
 []
