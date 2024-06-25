@@ -14,7 +14,7 @@
 #include <map>
 
 /**
- * Shared code for the Capabilities Registry and the python bindings to teh Capabilities system.
+ * Shared code for the Capabilities Registry and the python bindings to the Capabilities system.
  */
 namespace CapabilityUtils
 {

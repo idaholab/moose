@@ -76,10 +76,10 @@
     requirement = 'The system shall start a simulation if a requested capability does not have the wrong version.'
   []
   [negative_nonexisting_comparison]
-    type = RunApp
+    type = RunException
     input = input.i
     cli_args = "--required-capabilities !(doesnotexist<1.0.3)"
-    expect_out = 'Required capabilities \'!\(doesnotexist<1.0.3\)\' are not specific enough\.'
+    expect_err = 'Required capabilities \'!\(doesnotexist<1.0.3\)\' are not specific enough\.'
     requirement = 'The system shall start a simulation if a negated test involves a capability that is not registered.'
   []
 []

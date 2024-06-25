@@ -41,15 +41,15 @@ Capabilities::add(const std::string & raw_capability,
   auto it_pair = _capability_registry.lower_bound(capability);
   if (it_pair == _capability_registry.end() || it_pair->first != capability ||
       it_pair->second.first == value)
-    it_pair = _capability_registry.emplace_hint(it_pair, capability, std::make_pair(value, doc));
+    _capability_registry.emplace_hint(it_pair, capability, std::make_pair(value, doc));
   else
-    mooseWarning("Capability '",
-                 capability,
-                 "' was already registered with a different value. ('",
-                 Moose::stringify(it_pair->second.first),
-                 "' instead of '",
-                 Moose::stringify(value),
-                 "')");
+    mooseError("Capability '",
+               capability,
+               "' was already registered with a different value. ('",
+               Moose::stringify(it_pair->second.first),
+               "' instead of '",
+               Moose::stringify(value),
+               "')");
 }
 
 void
