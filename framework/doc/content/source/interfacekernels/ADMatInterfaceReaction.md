@@ -16,7 +16,7 @@ With the first order reaction rate assuming a quasi-steady-state
 
 where $C_1$ is the specie concentration in domain 1, $C_2$ is the specie concentration in domain 2, $k_f$ is the forward reaction coefficient, and $k_b$ is the backward reaction coefficient. `ADMatInterfaceReaction` object is used to impose this condition.
 
-[`InterfaceDiffusion`](/InterfaceKernels/index.md) is also used in this case to control flux at  the interface. However, the flux is not well-defined at boundaries. To address this issue, InterfaceReaction kernel applies a condition to constrain the discontinuity across the interface.
+[InterfaceDiffusion](/InterfaceKernels/index.md) is also used in this case to control flux at  the interface. However, the flux is not [well-defined](https://en.wikipedia.org/wiki/Well-defined_expression) across the interface. The InterfaceReaction interfacekernel applies a condition to constrain the potential discontinuity across the interface.
 
 Both kernels at the interface work together to give full mathematical and physical meaning of the problem.
 
