@@ -449,6 +449,9 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     // add all subdomains (and auto-assign ids)
     for (const SubdomainName & sub_name : add_subdomain_names)
     {
+      // to avoid two subdomains with the same ID (notably on recover)
+      if (getSubdomainID(sub_name) != libMesh::Elem::invalid_subdomain_id)
+        continue;
       const auto sub_id = ++offset;
       // add subdomain id
       _mesh_subdomains.insert(sub_id);
