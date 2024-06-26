@@ -56,6 +56,10 @@ cp_solid = 1000
         specific_heat = 'cp'
         initial_temperature = 300
 
+        # Reference file sets effective_conductivity that way
+        # so the conductivity is multiplied by the porosity in the kernel
+        effective_conductivity = false
+
         # See Flow for inlet and wall boundaries
         energy_inlet_types = 'fixed-temperature'
         energy_inlet_function = '300'

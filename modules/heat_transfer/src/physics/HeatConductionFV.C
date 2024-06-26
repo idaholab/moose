@@ -68,6 +68,9 @@ HeatConductionFV::addFVKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("v") = getParam<VariableName>("heat_source_var");
+    if (isParamValid("heat_source_blocks"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("heat_source_blocks");
     getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_source", params);
   }
   if (isTransient())

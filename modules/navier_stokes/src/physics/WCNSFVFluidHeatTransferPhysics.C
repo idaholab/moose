@@ -10,6 +10,7 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
+#include "PINSFVEnergyAnisotropicDiffusion.h"
 #include "NSFVAction.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
@@ -27,6 +28,8 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params.addClassDescription("Define the Navier Stokes weakly-compressible energy equation");
 
   params += NSFVAction::commonFluidEnergyEquationParams();
+  params.transferParam<bool>(PINSFVEnergyAnisotropicDiffusion::validParams(),
+                             "effective_conductivity");
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>("add_energy_equation",
@@ -261,7 +264,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
     if (num_blocks)
       block_name = Moose::stringify(_thermal_conductivity_blocks[block_i]);
     else
-      block_name = std::to_string(block_i);
+      block_name = "all";
 
     if (_porous_medium_treatment)
     {
@@ -276,6 +279,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
       params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) =
           _flow_equations_physics->getPorosityFunctorName(true);
+      params.set<bool>("effective_conductivity") = getParam<bool>("effective_conductivity");
 
       getProblem().addFVKernel(
           kernel_type, prefix() + "pins_energy_diffusion_" + block_name, params);

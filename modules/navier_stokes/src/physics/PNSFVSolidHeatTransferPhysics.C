@@ -88,6 +88,9 @@ PNSFVSolidHeatTransferPhysics::validParams()
                         false,
                         "To indicate if the enthalpy material is set up outside of the action.");
 
+  params.suppressParameter<VariableName>("heat_source_var");
+  params.suppressParameter<std::vector<SubdomainName>>("heat_source_blocks");
+
   // Numerical scheme
   params.addParam<unsigned short>(
       "ghost_layers", 2, "Number of layers of elements to ghost near process domain boundaries");
