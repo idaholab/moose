@@ -16,7 +16,7 @@ With the first order reaction rate assuming a quasi-steady-state
 
 where $C_1$ is the specie concentration in domain 1, $C_2$ is the specie concentration in domain 2, $k_f$ is the forward reaction coefficient, and $k_b$ is the backward reaction coefficient. `ADMatInterfaceReaction` object is used to impose this condition.
 
-[InterfaceDiffusion](/InterfaceKernels/index.md) is also used in this case to control flux at the interface.
+[InterfaceDiffusion.md] is also used in this case to control flux at the interface.
 
 \begin{equation}
 D_1 \frac {\partial C_1} {\partial n} = D_2 \frac {\partial C_2} {\partial n}
@@ -24,7 +24,7 @@ D_1 \frac {\partial C_1} {\partial n} = D_2 \frac {\partial C_2} {\partial n}
 
 However, the flux is not [well-defined](https://en.wikipedia.org/wiki/Well-defined_expression) across the interface. The `ADMatInterfaceReaction` interfacekernel applies a condition to constrain the potential discontinuity across the interface.
 
-Both kernels at the interface work together to give full mathematical and physical meaning of the problem. Together, the implicit equations represented by `ADMatInterfaceReaction` and [InterfaceDiffusion](/InterfaceKernels/index.md) combine to provide the following relationship at the interface.
+Both kernels at the interface work together to give full mathematical and physical meaning of the problem. Together, the implicit equations represented by `ADMatInterfaceReaction` and [InterfaceDiffusion.md] combine to provide the following relationship at the interface.
 
 \begin{equation}
 D_1 \frac {\partial C_1} {\partial n} = D_2 \frac {\partial C_2} {\partial n} + k_f C_1 - k_b C_2
