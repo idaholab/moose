@@ -118,7 +118,7 @@
   [amr_nbc]
     type = 'Exodiff'
     input = 'amr_bc.i'
-    cli_args = "BCs/active='mbc leftright' Outputs/file_base=amr_integral_bc_out"
+    cli_args = "BCs/active='nbc leftright' Outputs/file_base=amr_integral_bc_out"
     exodiff = 'amr_integral_bc_out.e amr_integral_bc_out.e-s002
     amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
@@ -137,7 +137,7 @@
   [var_block_id]
     type = 'Exodiff'
     input = 'var_block_id.i'
-    exodiff = 'var_block_id_out.e-s002 var_block_id_out.e-s005'
+    exodiff = 'var_block_id_out.e var_block_id_out.e-s002 var_block_id_out.e-s003 var_block_id_out.e-s004 var_block_id_out.e-s005'
     requirement = 'The system shall be able to change element subdomain IDs based on the average coupled variable value in the element.'
     recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases
   []
