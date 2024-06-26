@@ -44,6 +44,16 @@
       libtorch = true
       allow_test_objects = True
     []
+    [relu_gpu]
+      type = CSVDiff
+      input = 'test_ann.i'
+      csvdiff = 'relu_test_0001.csv'
+      detail = 'rectified linear unit (ReLU) on a graphics processing unit;'
+      cli_args = "Outputs/file_base=relu"
+      libtorch = true
+      libtorch_gpu = true
+      allow_test_objects = True
+    []
     [sigmoid]
       type = CSVDiff
       input = 'test_ann.i'
@@ -90,7 +100,7 @@
       input = 'test_ann_trainer.i'
       csvdiff = 'adagrad_test_trainer_0001.csv'
       detail = 'Adaptive Gradient (AdaGrad);'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' 
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad'
                   VectorPostprocessors/test_trainer/num_epochs=40
                   Outputs/file_base=adagrad"
       libtorch = true

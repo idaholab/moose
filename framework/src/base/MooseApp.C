@@ -322,7 +322,7 @@ MooseApp::validParams()
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
   params.addCommandLineParam<std::string>(
-      "libtorch_device", "--libtorch_device", "cpu", "The device type we want to run libtorch on.");
+      "libtorch_device", "--libtorch-device", "cpu", "The device type we want to run libtorch on.");
 
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(

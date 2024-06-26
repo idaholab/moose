@@ -288,7 +288,7 @@ class TestHarness:
             checks['boost'] = set(['ALL'])
             checks['fparser_jit'] = set(['ALL'])
             checks['libpng'] = set(['ALL'])
-            checks['liborch'] = set(['ALL'])
+            checks['libtorch'] = set(['ALL'])
             checks['libtorch_version'] = 'N/A'
         else:
             checks['compiler'] = util.getCompilers(self.libmesh_dir)
@@ -323,6 +323,11 @@ class TestHarness:
             checks['libpng'] = util.getMooseConfigOption(self.moose_dir, 'libpng')
             checks['libtorch'] = util.getMooseConfigOption(self.moose_dir, 'libtorch')
             checks['libtorch_version'] = util.getLibtorchVersion(self.moose_dir)
+
+        if (self.options.libtorch_gpu):
+            checks['libtorch_gpu'] = set(['ALL', 'TRUE'])
+        else:
+            checks['libtorch_gpu'] = set(['ALL', 'FALSE'])
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
@@ -485,6 +490,8 @@ class TestHarness:
 
         if self.options.enable_recover:
             testers = self.appendRecoverableTests(testers)
+        if self.options.libtorch_gpu:
+            self.addLibtorchGPUCLIParam(testers)
 
         return testers
 
@@ -579,6 +586,14 @@ class TestHarness:
                 part1.setStatus(part1.silent)
 
         testers.extend(new_tests)
+        return testers
+
+    def addLibtorchGPUCLIParam(self, testers):
+
+        for test in testers:
+            if test.parameters()['libtorch_gpu']:
+                test.parameters()['cli_args'].append('--libtorch-device gpu')
+
         return testers
 
     def checkExpectError(self, output, expect_error):
@@ -1032,6 +1047,7 @@ class TestHarness:
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
         parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
+        parser.add_argument('--libtorch-gpu', action='store_true', dest='libtorch_gpu', help='Pass "--libtorch-gpu" to executable')
         parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
         parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
         parser.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations')
