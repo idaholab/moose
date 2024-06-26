@@ -24,8 +24,6 @@
 {%- set WASP_DIR = '/opt/wasp' -%}
 {#- The installation location for libtorch                                                    -#}
 {%- set LIBTORCH_DEST = '/opt' -%}
-{#- The version of libtorch to be defined                                                     -#}
-{%- set LIBTORCH_VER = '2.1.0' -%}
 
 {#- The script used to install wasp                                                           -#}
 {%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
@@ -60,9 +58,8 @@ From: {{ APPTAINER_FROM }}
 
     # Libtorch-related vars
     LIBTORCH_DEST={{ LIBTORCH_DEST }}
-    LIBTORCH_VER={{ LIBTORCH_VER }}
+    LIBTORCH_VER=2.1.0
     LIBTORCH_DISTRIBUTION={{ WITH_LIBTORCH or "cpu" }}
-    CUDA_PREFIX="cu"
 
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
@@ -80,7 +77,7 @@ From: {{ APPTAINER_FROM }}
 
     # We install CUDA Toolkit if the user wants cuda-based libtorch.
     # Right now this assumes that cuda-based distributions start with -cu-
-    if [[ ${LIBTORCH_DISTRIBUTION} == $CUDA_PREFIX* ]]; then
+    if [[ ${LIBTORCH_DISTRIBUTION} == cu* ]]; then
         dnf -y install epel-release
         CUDA_RPM=${BUILD_DIR}/cuda.rpm
         curl -L https://developer.download.nvidia.com/compute/cuda/11.4.0/local_installers/cuda-repo-rhel8-11-4-local-11.4.0_470.42.01-1.x86_64.rpm -o ${CUDA_RPM}

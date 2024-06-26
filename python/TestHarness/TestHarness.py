@@ -589,12 +589,9 @@ class TestHarness:
         return testers
 
     def addLibtorchGPUCLIParam(self, testers):
-
         for test in testers:
             if test.parameters()['libtorch_gpu']:
                 test.parameters()['cli_args'].append('--libtorch-device gpu')
-
-        return testers
 
     def checkExpectError(self, output, expect_error):
         if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:

@@ -86,7 +86,7 @@ class MooseApp : public ConsoleStreamInterface,
 public:
 #ifdef LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.
-  torch::DeviceType getLibtorchDevice() { return _libtorch_device; }
+  torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
 #endif
 
   /**
@@ -968,9 +968,9 @@ private:
    * Function to determine the device which should be used by libtorch on this
    * application. We use this function to decide what is available on different
    * builds.
-   * @param device String to describe if a cpu or a gpu should be used.
+   * @param device Enum to describe if a cpu or a gpu should be used.
    */
-  torch::DeviceType determineLibtorchDeviceType(const std::string & device);
+  torch::DeviceType determineLibtorchDeviceType(const MooseEnum & device) const;
 #endif
 
 public:
