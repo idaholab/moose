@@ -109,11 +109,13 @@ you to visualize and process the results of your simulations.
 
 !style! halign=left
 MOOSE can be customized by running a `configure` script in
-{{PATH}}/moose. Note that the `configure` script *must* be invoked from
-{{PATH}}/moose. Below we summarize the configuration options available:
+`{{PATH}}/moose`. Note that the `configure` script *must* be invoked from
+`{{PATH}}/moose`. Below we summarize the configuration options available:
 !style-end!
 
 - `--prefix`: Specify a target installation path. Useful if you plan on running `make install`.
+
+- See [MOOSE Build System](application_development/build_system.md) for in-depth information.
 
 ### Automatic Differentiation
 
