@@ -149,8 +149,8 @@
     type = 'Exodiff'
     input = 'var_block_id.i'
     cli_args = "Functions/fcn/expression='100' Executioner/num_steps=1 "
-               "Outputs/file_base='var_block_id_warning'"
-    exodiff = 'var_block_id_warning.e-s002'
+               "Outputs/file_base='var_block_id_warning_out'"
+    exodiff = 'var_block_id_warning_out.e'
     requirement = 'When the desired value is not present in the subdomain ID list, the closest existing subdomain ID value will be assigned to the element with a warning.'
     allow_warnings = true
     recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases

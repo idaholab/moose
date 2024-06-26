@@ -39,7 +39,7 @@
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
     block = 2
-    criterion_type = BELOW
+    criterion_type = 'BELOW'
     threshold = 0
     subdomain_id = 1
     moving_boundaries = 'moving_boundary'
@@ -48,24 +48,14 @@
   []
 []
 
-[Functions]
-  [moving_circle]
-    type = ParsedFunction
-    expression = '(x-t)^2+(y)^2-0.5^2'
-  []
-[]
-
 [AuxVariables]
   [phi]
-  []
-[]
-
-[AuxKernels]
-  [phi]
-    type = FunctionAux
-    variable = phi
-    function = moving_circle
-    execute_on = 'INITIAL'
+    [AuxKernel]
+      type = ParsedAux
+      expression = '(x-t)^2+(y)^2-0.5^2'
+      use_xyzt = true
+      execute_on = 'INITIAL'
+    []
   []
 []
 
