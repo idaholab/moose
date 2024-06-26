@@ -10,6 +10,14 @@ For information on developing or running MOOSE-based NCRC applications (not the 
 document), please head over to [NCRC Applications](help/inl/applications.md) instead, and choose the
 application applicable to you.
 
+At the time of this writing the following [!ac](INL) [!ac](HPC) clusters are available for use:
+
+!include ncrc/hpc_cluster_information.md
+
+!alert! warning
+In order to build MOOSE, you +*must*+ be on one of the above login nodes!
+!alert-end!
+
 ## Environment id=environment
 
 !style! halign=left
@@ -17,18 +25,13 @@ While operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load
 modules to obtain a proper developer environment:
 !style-end!
 
-- +[!ac](HPC) Sawtooth1 or Lemhi1+ (required each time you log in):
+```bash
+module load use.moose moose-dev
+```
 
-  ```bash
-  module load use.moose moose-dev
-  ```
-
-!alert! warning title=Do not use [!ac](HPC) Visualization machines to build or run MOOSE
-Visualization machines are intended to be used for viewing results created by MOOSE-based
-applications. An [!ac](HPC) Visualization machine can be obtained through
-[HPC Ondemand](hpc_ondemand.md), Interactive Apps, Linux Desktop (and Linux Desktop with
-visualization)
-!alert-end!
+!style! style=position:relative;top:-15px;left:5px;font-style:italic;font-size:small;
+(required each time you log in)
+!style-end!
 
 If you would prefer not having to perform the above step each time you log in, you can append the
 above command to your shell initialization file:
@@ -40,15 +43,15 @@ echo "module load use.moose moose-dev" >> ~/.bash_profile
 ## Cloning MOOSE
 
 !style! halign=left
-Follow the below instructions, and replace `cluster_name` placeholder with either `lemhi` or
-`sawtooth` accordingly.
+Follow the below instructions, and replace all occurrences of `cluster_name` with either `lemhi`,
+`sawtooth`, or `bitterroot` accordingly with the machine you chose to operate on.
 !style-end!
 
-!alert! warning title=Replace +'cluster_name'+ accordingly!
-[!ac](INL) [!ac](HPC) machines use a shared home directory structure (things you create/do on Lemhi
-will be available on Sawtooth). If you do not separate your projects directory based on the cluster
-you are operating on (or some other identifier), you risk developing under one environment and then
-executing on another. Mistakes like this will cause the odd failure and cost you time to solve/fix.
+!alert! warning title=Replace occurrences of +'cluster_name'+ accordingly!
+The results of your activity is shared amongst all [!ac](INL) [!ac](HPC) cluster machines. Therefore
+it is important to use a directory naming convention to separate your work as you jump from cluster
+to cluster. Example: if you are operating on `Sawtooth` you should also operate while in
+`~/sawtooth/projects`.
 !alert-end!
 
 !style! halign=left

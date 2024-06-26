@@ -42,8 +42,8 @@ The following represents some of the more useful features, and is not an exhaust
 
   - Launches a new browser tab granting an interactive shell prompt to the [!ac](HPC) machine
    selected. The interactive shell will be one of the more useful tools when needing direct access
-   to things like: launching PBS jobs manually, building MOOSE, obtain a
-   [Civet-like testing environment](moosetainer.md) and more.
+   to things like: launching PBS jobs manually, building MOOSE, obtaining a
+   [Civet-like testing environment](faq/apptainer.md) and more.
 
 <!-- intentional double space -->
 
