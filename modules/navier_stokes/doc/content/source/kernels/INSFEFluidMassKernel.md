@@ -1,20 +1,28 @@
 # INSFEFluidMassKernel
 
-!alert construction title=Undocumented Class
-The INSFEFluidMassKernel has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/INSFEFluidMassKernel
 
-## Overview
+This kernel supports both regular and porous media flow, with the porosity specified
+as a material property using the [!param](/Kernels/INSFEFluidMassKernel/porosity) parameter.
 
-!! Replace these lines with information regarding the INSFEFluidMassKernel object.
+The mass equation is computed with the following residual for incompressible flow:
 
-## Example Input File Syntax
+!equation
+- \rho \vec{v} \nabla \psi
 
-!! Describe and include an example of how to use the INSFEFluidMassKernel object.
+This kernel computes the PSPG stabilization terms from the momentum equation:
+
+- the transient term $\rho \dot{\vec{v}} \psi_{pspg}$
+- the convection term $\rho \ \epsilon \vec{v} * \nabla \vec{v} \psi_{pspg}$
+- the pressure term $\epsilon \nabla p \psi_{pspg}$
+- the gravity term $-\epsilon \rho \vec{g} \psi_{pspg}$
+- a viscous term for regular media flow
+- a viscous and a friction term for porous media flow
+
+
+with $\psi_{pspg} = \tau_c \nabla \psi$, $\rho$ the density, $\vec{v}$ the superficial velocity,
+$\vec{g}$ the gravity vector, $\epsilon$ the porosity, $p$ the pressure, $\tau_c$ a stabilization term computed by
+the [INSFEMaterial.md], $\psi$ the test functions.
 
 !syntax parameters /Kernels/INSFEFluidMassKernel
 
