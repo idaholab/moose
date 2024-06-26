@@ -22,6 +22,6 @@
     input = add_sideset_names.i
     csvdiff = add_sideset_names_out.csv
     design = MooseMesh.md
-    requirement = 'The system shall allow specifying valid sideset Names that do not exist on the initial mesh (and assign IDs automatically).'
+    requirement = 'The system shall allow specifying valid sideset names that do not exist on the initial mesh, and assign IDs automatically.'
   []
 []
