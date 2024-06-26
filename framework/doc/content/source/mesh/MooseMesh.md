@@ -40,6 +40,8 @@ To declare subdomains which are not found on the mesh right after the mesh is se
 specified using the [!param](/Mesh/MeshGeneratorMesh/add_subdomain_ids) parameter and/or a list of names can be specified using the
 [!param](/Mesh/MeshGeneratorMesh/add_subdomain_names) parameter. This permits setting up block restricted objects that will only act
 on subdomains created during the simulation (e.g. using the [CoupledVarThresholdElementSubdomainModifier.md]).
+Likewise, sidesets which are not found on the mesh right after the mesh is setup, can be added with the parameters
+[!param](/Mesh/MeshGeneratorMesh/add_sideset_ids) and [!param](/Mesh/MeshGeneratorMesh/add_sideset_names).
 
 ## Minimal interface
 

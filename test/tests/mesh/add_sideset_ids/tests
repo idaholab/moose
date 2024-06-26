@@ -17,4 +17,11 @@
                "UserObjects/side_updater/update_sideset_name=future"
     requirement = 'The system shall allow specifying valid sideset IDs and names that do not exist on the initial mesh.'
   []
+  [add_sideset_names]
+    type = CSVDiff
+    input = add_sideset_names.i
+    csvdiff = add_sideset_names_out.csv
+    design = MooseMesh.md
+    requirement = 'The system shall allow specifying valid sideset Names that do not exist on the initial mesh (and assign IDs automatically).'
+  []
 []
