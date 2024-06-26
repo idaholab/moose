@@ -1,5 +1,9 @@
 [Mesh]
-  file = new_dt_out_cp/0010-mesh.cpa.gz
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+  parallel_type = replicated
 []
 
 [Variables]
@@ -36,24 +40,13 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
-
-  # Here we are supplying a different dt
-  dt = 0.25
-  start_time = 1.0
-
+  num_steps = 11
+  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  [./exodus]
-    type = Exodus
-    execute_on = 'timestep_end final'
-  [../]
-[]
-
-[Problem]
-  restart_file_base = new_dt_out_cp/0010
+  execute_on = 'timestep_end'
 []

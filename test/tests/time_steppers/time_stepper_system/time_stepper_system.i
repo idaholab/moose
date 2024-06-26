@@ -1,5 +1,5 @@
 [Mesh]
-  file = restart_test_cp/0005-mesh.cpr
+  file = restart_test_cp/0005-mesh.cpa.gz
 []
 
 [Variables]

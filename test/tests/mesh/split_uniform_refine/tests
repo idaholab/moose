@@ -15,9 +15,9 @@
    min_parallel = 3
    max_parallel = 3
    max_threads = 1
-   issues = '#18575'
-   # Binary restart files are platform dependent
+   # Restart files are platform-dependent
    platform = LINUX
+   issues = '#18575 #27240'
    requirement = 'The system shall support optionally allowing uniform refinements when using a pre-split mesh'
  [../]
 []

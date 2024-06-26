@@ -1,6 +1,6 @@
 [Tests]
   design = "Restartable.md Receiver.md"
-  issues = "#25414"
+  issues = "#25414 #27240"
 
   [checkpoint]
     type = 'CSVDiff'

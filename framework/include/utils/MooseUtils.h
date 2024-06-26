@@ -213,10 +213,19 @@ void serialEnd(const libMesh::Parallel::Communicator & comm, bool warn = true);
 bool hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext = false);
 
 /**
+ * Gets the extension of the passed file name.
+ * @param filename The filename of which to get the extension
+ * @param rfind When true, searches for last "." in filename. Otherwise, searches for first "."
+ * @return file_ext The extension of filename (does not include the leading "."). If filename has no
+ * extension, returns "".
+ */
+std::string getExtension(const std::string & filename, const bool rfind = false);
+
+/**
  * Removes any file extension from the given string s (i.e. any ".[extension]" suffix of s) and
  * returns the result.
  */
-std::string stripExtension(const std::string & s);
+std::string stripExtension(const std::string & s, const bool rfind = false);
 
 /**
  * Function for splitting path and filename
