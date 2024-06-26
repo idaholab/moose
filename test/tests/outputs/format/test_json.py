@@ -95,7 +95,7 @@ class TestJSONBase(unittest.TestCase):
 
         f = data["Functions"]["star"]
         self.assertIn("associated_types", f)
-        self.assertEquals(["FunctionName"], f["associated_types"])
+        self.assertEqual(["FunctionName"], f["associated_types"])
         self.assertEqual(f["subblock_types"]["ParsedFunction"]["class"], "MooseParsedFunction")
         self.assertEqual(f["subblock_types"]["ParsedFunction"]["label"], "MooseApp")
 
