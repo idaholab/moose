@@ -991,8 +991,6 @@ NonlinearSystemBase::setNodalBCs()
 {
   NumericVector<Number> & initial_solution(solution());
 
-  TIME_SECTION("initialBCs", 2, "Applying BCs To Initial Condition");
-
   const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
   for (const auto & bnode : bnd_nodes)
   {

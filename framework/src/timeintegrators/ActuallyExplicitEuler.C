@@ -120,7 +120,7 @@ ActuallyExplicitEuler::solve()
 
   // Setting nodal BC's if using a direct time integrator
   if (_is_direct)
-    _nl.setInitialSolution();
+    _nl.setNodalBCs();
 }
 
 void
