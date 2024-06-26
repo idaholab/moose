@@ -3,73 +3,56 @@
 []
 
 [Mesh]
-  [gmg]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 3
-    ny = 1
-    xmax = 3
-    ymax = 1
+    nx = 16
+    ny = 16
   []
-  [block_1]
+  [left]
     type = SubdomainBoundingBoxGenerator
-    input = 'gmg'
+    input = 'gen'
     block_id = 1
-    block_name = 'block_1'
     bottom_left = '0 0 0'
-    top_right = '1 1 0'
+    top_right = '0.25 1 1'
   []
-  [block_2]
+  [right]
     type = SubdomainBoundingBoxGenerator
-    input = 'block_1'
+    input = 'left'
     block_id = 2
-    block_name = 'block_2'
-    bottom_left = '1 0 0'
-    top_right = '2 1 0'
+    bottom_left = '0.25 0 0'
+    top_right = '1 1 1'
   []
-  [block_3]
-    type = SubdomainBoundingBoxGenerator
-    input = 'block_2'
-    block_id = 3
-    block_name = 'block_3'
-    bottom_left = '2 0 0'
-    top_right = '3 1 0'
-  []
-  [moving_boundary]
-    type = SideSetsAroundSubdomainGenerator
-    input = 'block_3'
-    block = 1
-    new_boundary = 'moving'
+[]
+
+[UserObjects]
+  [moving_circle]
+    type = CoupledVarThresholdElementSubdomainModifier
+    coupled_var = 'phi'
+    criterion_type = 'BELOW'
+    threshold = 0
+    subdomain_id = 1
+    moving_boundaries = 'moving_boundary'
+    moving_boundary_subdomain_pairs = '1 2'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
 [AuxVariables]
-  [u]
+  [phi]
     [AuxKernel]
-      type = FunctionAux
-      function = 't-x'
+      type = ParsedAux
+      expression = '(x-t)^2+(y)^2-0.5^2'
+      use_xyzt = true
       execute_on = 'INITIAL TIMESTEP_BEGIN'
     []
   []
 []
 
-[UserObjects]
-  [w_mvg_bnd]
-    type = CoupledVarThresholdElementSubdomainModifier
-    coupled_var = 'u'
-    criterion_type = 'ABOVE'
-    threshold = 0
-    subdomain_id = 1
-    moving_boundaries = 'moving moving'
-    moving_boundary_subdomain_pairs = '1 3; 1'
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-[]
-
 [Executioner]
   type = Transient
-  end_time = 3
-  dt = 1
+  dt = 0.3
+  num_steps = 3
 []
 
 [Outputs]

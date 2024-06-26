@@ -4,29 +4,6 @@
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during simulation'
     
-    [moving_boundary]
-      type = 'Exodiff'
-      input = 'moving_boundary.i'
-      exodiff = 'moving_boundary_out.e moving_boundary_out.e-s002 moving_boundary_out.e-s003'
-      detail = 'with a specified boundary, '
-    []
-
-    [complement_moving_boundary]
-      type = 'Exodiff'
-      input = 'moving_boundary.i'
-      cli_args = "UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs='3 1; 1' Outputs/file_base='complement_moving_boundary_out'"
-      exodiff = 'complement_moving_boundary_out.e complement_moving_boundary_out.e-s002 complement_moving_boundary_out.e-s003'
-      detail = 'with a complement boundary, '
-    []
-
-    [no_moving_boundary]
-      type = 'Exodiff'
-      input = 'moving_boundary.i'
-      cli_args = "UserObjects/w_mvg_bnd/moving_boundaries="" UserObjects/w_mvg_bnd/moving_boundary_subdomain_pairs="" Outputs/file_base='no_moving_boundary_out'"
-      exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 no_moving_boundary_out.e-s003'
-      detail = 'without a specified boundary, '
-    []
-
     [irreversible]
       type = 'Exodiff'
       input = 'irreversible.i'
@@ -36,10 +13,31 @@
 
     [reversible]
       type = 'Exodiff'
-      input = 'irreversible.i'
-      cli_args = "UserObjects/moving_circle/complement_subdomain_id=2 Outputs/file_base='reversible_out'"
+      input = 'reversible.i'
       exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
       detail = 'reversibly, '
+    []
+    
+    [moving_boundary]
+      type = 'Exodiff'
+      input = 'moving_boundary.i'
+      exodiff = 'moving_boundary_out.e moving_boundary_out.e-s002 moving_boundary_out.e-s003 moving_boundary_out.e-s004'
+      detail = 'with a moving boundary, '
+    []
+
+    [complement_moving_boundary]
+      type = 'Exodiff'
+      input = 'moving_boundary.i'
+      cli_args = "UserObjects/moving_circle/moving_boundary_subdomain_pairs='2 1' Outputs/file_base='complement_moving_boundary_out'"
+      exodiff = 'complement_moving_boundary_out.e complement_moving_boundary_out.e-s002 complement_moving_boundary_out.e-s003 complement_moving_boundary_out.e-s004'
+      detail = 'with a complement moving boundary, '
+    []
+
+    [external_moving_boundary]
+      type = 'Exodiff'
+      input = 'external_moving_boundary.i'
+      exodiff = 'external_moving_boundary_out.e external_moving_boundary_out.e-s002 external_moving_boundary_out.e-s003 external_moving_boundary_out.e-s004'
+      detail = 'with an external moving boundary, '
     []
 
     [parallel]

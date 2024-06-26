@@ -32,6 +32,7 @@
     criterion_type = 'BELOW'
     threshold = 0
     subdomain_id = 1
+    complement_subdomain_id = 2
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
@@ -56,4 +57,3 @@
 [Outputs]
   exodus = true
 []
-
