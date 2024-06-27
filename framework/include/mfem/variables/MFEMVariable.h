@@ -1,8 +1,7 @@
 #pragma once
 
 #include "MFEMFESpace.h"
-#include "inputs.hpp"
-#include "gridfunctions.hpp"
+#include "GeneralUserObject.h"
 
 class MFEMVariable : public GeneralUserObject
 {
