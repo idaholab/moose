@@ -7,7 +7,7 @@ is included in the final simulation mesh.
 !alert! note
 There are large constraints when using a `SavedMeshComponent`:
 
-- the final mesh generator should be specified in the `[Mesh] block (this is true for most components)
+- the final mesh generator should be specified in the `[Mesh]` block (this is true for most components)
 - the mesh used by a `SavedMeshComponent` should be a saved mesh, using the `save_in` parameter of mesh generators
 - the mesh used should likely not be present in the `[Mesh]` block final mesh, as they would overlap with the
 `SavedMeshComponent` mesh.

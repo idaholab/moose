@@ -34,6 +34,11 @@ AddActionComponentAction::AddActionComponentAction(const InputParameters & param
     _component_params(_action_factory.getValidParams(_type))
 {
   _component_params.blockFullpath() = params.blockFullpath();
+
+  // Verify that a Mesh syntax has been passed, as we use the mesh creation tasks
+  // from SetupMeshAction, etc
+  if (!_awh.hasTask("setup_mesh") || !_awh.hasTask("init_mesh"))
+    mooseError("ActionComponents require a [Mesh] block to be defined, even if empty");
 }
 
 void

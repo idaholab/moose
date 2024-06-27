@@ -54,9 +54,12 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
     mooseError("Can only call appendMeshGenerator() during the append_mesh_generator task");
   const auto param_name_mg_name_pairs = getMeshGeneratorParamDependencies(params, true);
 
-  // Make sure this mesh generator has one and _only_ one input, as "input"
-  if ((param_name_mg_name_pairs.size() != 1 || param_name_mg_name_pairs[0].first != "input") &&
-      param_name_mg_name_pairs[0].first != "inputs")
+  // Make sure this mesh generator has one and _only_ one input, in the "input" parameter,
+  // Or several, listed in the "inputs" parameter
+  if ((param_name_mg_name_pairs.size() == 0) ||
+      (param_name_mg_name_pairs.size() == 1 && param_name_mg_name_pairs[0].first != "input" &&
+       param_name_mg_name_pairs[0].first != "inputs") ||
+      (param_name_mg_name_pairs.size() > 1 && param_name_mg_name_pairs[0].first != "inputs"))
     mooseError("While adding ",
                type,
                " '",

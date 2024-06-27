@@ -260,7 +260,7 @@ class TestComplete(AppSyntaxTestCase):
     def testAST(self):
         ast = self.tokenize(self.TEXT)
         self.assertToken(ast(0), 'Heading', level=2, size=1)
-        self.assertToken(ast(0,0), 'AutoLink', page=u'syntax/Adaptivity/index.md', string=u'Adaptivity')
+        self.assertToken(ast(0,0), 'AutoLink', page=u'syntax/ActionComponents/index.md', string=u'ActionComponents')
 
         self.assertToken(ast(1), 'SyntaxList')
         self.assertToken(ast(1,0), 'SyntaxListItem', string=u'Moose App')
