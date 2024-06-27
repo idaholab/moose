@@ -12,7 +12,6 @@
 #include "MooseTypes.h"
 #include "InputParameters.h"
 
-// Forward declarations
 class InputParameters;
 class MooseObject;
 
