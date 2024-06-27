@@ -38,7 +38,6 @@
   [moving_circle]
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
-    block = 2
     criterion_type = 'BELOW'
     threshold = 0
     subdomain_id = 1
