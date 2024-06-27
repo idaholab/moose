@@ -37,7 +37,7 @@ void
 DivFreeSource::Init(platypus::GridFunctions & gridfunctions,
                     const platypus::FESpaces & fespaces,
                     platypus::BCMap & bc_map,
-                    Coefficients & coefficients)
+                    platypus::Coefficients & coefficients)
 {
   _h1_fe_space = fespaces.Get(_h1_fespace_name);
   _h_curl_fe_space = fespaces.Get(_hcurl_fespace_name);

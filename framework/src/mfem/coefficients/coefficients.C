@@ -1,6 +1,9 @@
 #include "coefficients.h"
 #include <utility>
 
+namespace platypus
+{
+
 double
 prodFunc(double a, double b)
 {
@@ -104,3 +107,5 @@ Coefficients::AddGlobalCoefficientsFromSubdomains()
     }
   }
 }
+
+} // namespace platypus.

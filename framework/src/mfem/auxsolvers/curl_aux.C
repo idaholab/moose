@@ -11,7 +11,8 @@ CurlAuxSolver::CurlAuxSolver(std::string input_gf_name, std::string curl_gf_name
 }
 
 void
-CurlAuxSolver::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
+CurlAuxSolver::Init(const platypus::GridFunctions & gridfunctions,
+                    platypus::Coefficients & coefficients)
 {
   _u = gridfunctions.Get(_input_gf_name);
   _curl_u = gridfunctions.Get(_curl_gf_name);

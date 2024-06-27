@@ -32,7 +32,7 @@ ScaledVectorGridFunctionAux::ScaledVectorGridFunctionAux(std::string input_gf_na
 
 void
 ScaledVectorGridFunctionAux::Init(const platypus::GridFunctions & gridfunctions,
-                                  Coefficients & coefficients)
+                                  platypus::Coefficients & coefficients)
 {
   _input_gf = gridfunctions.Get(_input_gf_name);
   _scaled_gf = gridfunctions.Get(_scaled_gf_name);

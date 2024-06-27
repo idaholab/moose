@@ -21,7 +21,7 @@ class AuxSolvers : public platypus::NamedFieldsMap<platypus::AuxSolver>
 private:
 public:
   std::vector<std::pair<std::shared_ptr<platypus::AuxSolver>, std::string>> _aux_queue;
-  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients);
+  void Init(const platypus::GridFunctions & gridfunctions, platypus::Coefficients & coefficients);
   void Solve(double t = 0.0);
 };
 

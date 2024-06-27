@@ -42,7 +42,7 @@ public:
   void Init(platypus::GridFunctions & gridfunctions,
             const platypus::FESpaces & fespaces,
             platypus::BCMap & bc_map,
-            Coefficients & coefficients) override;
+            platypus::Coefficients & coefficients) override;
   void AddKernels() override;
 
   std::string _a_name, _v_name, _coupled_variable_name, _alpha_coef_name, _beta_coef_name,

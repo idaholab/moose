@@ -20,7 +20,7 @@ public:
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
   platypus::BCMap _bc_map;
-  Coefficients _coefficients;
+  platypus::Coefficients _coefficients;
   platypus::AuxSolvers _preprocessors;
   platypus::AuxSolvers _postprocessors;
   platypus::Sources _sources;
@@ -76,7 +76,7 @@ public:
   void SetSolverOptions(platypus::InputParameters & solver_options);
   void SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner);
   void SetJacobianSolver(std::shared_ptr<mfem::Solver> solver);
-  void SetCoefficients(Coefficients & coefficients);
+  void SetCoefficients(platypus::Coefficients & coefficients);
 
   void AddFESpace(std::string fespace_name,
                   std::string fec_name,

@@ -128,7 +128,7 @@ DualFormulation::RegisterGridFunctions()
 void
 DualFormulation::RegisterCoefficients()
 {
-  Coefficients & coefficients = GetProblem()->_coefficients;
+  platypus::Coefficients & coefficients = GetProblem()->_coefficients;
 
   if (!coefficients._scalars.Has(_alpha_coef_name))
   {
@@ -153,7 +153,7 @@ void
 WeakCurlEquationSystem::Init(platypus::GridFunctions & gridfunctions,
                              const platypus::FESpaces & fespaces,
                              platypus::BCMap & bc_map,
-                             Coefficients & coefficients)
+                             platypus::Coefficients & coefficients)
 {
   coefficients._scalars.Register(
       _dtalpha_coef_name,

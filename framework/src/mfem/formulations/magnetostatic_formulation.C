@@ -71,7 +71,7 @@ MagnetostaticFormulation::RegisterLorentzForceDensityAux(const std::string & f_f
 void
 MagnetostaticFormulation::RegisterCoefficients()
 {
-  Coefficients & coefficients = GetProblem()->_coefficients;
+  platypus::Coefficients & coefficients = GetProblem()->_coefficients;
   if (!coefficients._scalars.Has(_magnetic_permeability_name))
   {
     MFEM_ABORT(_magnetic_permeability_name + " coefficient not found.");

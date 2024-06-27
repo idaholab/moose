@@ -11,7 +11,7 @@ L2ErrorVectorPostprocessor::L2ErrorVectorPostprocessor(const platypus::InputPara
 
 void
 L2ErrorVectorPostprocessor::Init(const platypus::GridFunctions & gridfunctions,
-                                 Coefficients & coefficients)
+                                 platypus::Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_var_name);
   _vec_coeff = coefficients._vectors.Get(_vec_coef_name);

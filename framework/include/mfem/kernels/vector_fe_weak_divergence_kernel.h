@@ -17,7 +17,7 @@ public:
   void Init(platypus::GridFunctions & gridfunctions,
             const platypus::FESpaces & fespaces,
             platypus::BCMap & bc_map,
-            Coefficients & coefficients) override;
+            platypus::Coefficients & coefficients) override;
   void Apply(mfem::ParMixedBilinearForm * mblf) override;
   std::string _coef_name;
   mfem::Coefficient * _coef{nullptr};

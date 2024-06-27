@@ -16,7 +16,7 @@ public:
   virtual void initialize() override {}
   virtual void finalize() override {}
 
-  virtual void storeCoefficients(Subdomain & subdomain) {}
+  virtual void storeCoefficients(platypus::Subdomain & subdomain) {}
 
   std::vector<SubdomainName> blocks;
 };

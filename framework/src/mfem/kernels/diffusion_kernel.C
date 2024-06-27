@@ -12,7 +12,7 @@ void
 DiffusionKernel::Init(platypus::GridFunctions & gridfunctions,
                       const platypus::FESpaces & fespaces,
                       platypus::BCMap & bc_map,
-                      Coefficients & coefficients)
+                      platypus::Coefficients & coefficients)
 {
   _coef = coefficients._scalars.Get(_coef_name);
 }

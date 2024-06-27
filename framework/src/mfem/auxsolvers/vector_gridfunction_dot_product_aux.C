@@ -53,7 +53,7 @@ VectorGridFunctionDotProductAux::VectorGridFunctionDotProductAux(
 
 void
 VectorGridFunctionDotProductAux::Init(const platypus::GridFunctions & gridfunctions,
-                                      Coefficients & coefficients)
+                                      platypus::Coefficients & coefficients)
 {
   if (_scaling_coef_name.empty())
   {

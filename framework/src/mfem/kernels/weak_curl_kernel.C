@@ -15,7 +15,7 @@ void
 WeakCurlKernel::Init(platypus::GridFunctions & gridfunctions,
                      const platypus::FESpaces & fespaces,
                      platypus::BCMap & bc_map,
-                     Coefficients & coefficients)
+                     platypus::Coefficients & coefficients)
 {
   _u = gridfunctions.Get(_hcurl_gf_name);
   _v = gridfunctions.Get(_hdiv_gf_name);

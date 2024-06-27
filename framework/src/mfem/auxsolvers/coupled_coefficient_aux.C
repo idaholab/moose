@@ -9,7 +9,8 @@ CoupledCoefficient::CoupledCoefficient(const platypus::InputParameters & params)
 }
 
 void
-CoupledCoefficient::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
+CoupledCoefficient::Init(const platypus::GridFunctions & gridfunctions,
+                         platypus::Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_coupled_var_name);
 }

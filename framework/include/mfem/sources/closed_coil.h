@@ -35,7 +35,7 @@ public:
   void Init(platypus::GridFunctions & gridfunctions,
             const platypus::FESpaces & fespaces,
             platypus::BCMap & bc_map,
-            Coefficients & coefficients) override;
+            platypus::Coefficients & coefficients) override;
   void Apply(mfem::ParLinearForm * lf) override;
   void SubtractSource(mfem::ParGridFunction * gf) override;
 
@@ -85,7 +85,7 @@ private:
   std::shared_ptr<mfem::Coefficient> _itotal{nullptr};
   std::vector<int> _old_dom_attrs;
   platypus::InputParameters _solver_options;
-  Coefficients _ccs_coefs;
+  platypus::Coefficients _ccs_coefs;
 
   // Here, we are solving for -(σ∇Va,∇ψ) = (σ∇Vt,∇ψ), where ∇Vt is grad_phi_t (within its relevant
   // mesh), ∇Va is grad_phi_aux, and their sum ∇Vt+∇Va is the full grad_phi, which is, up to an

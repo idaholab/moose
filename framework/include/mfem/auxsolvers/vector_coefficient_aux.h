@@ -14,7 +14,8 @@ public:
 
   ~VectorCoefficientAux() override = default;
 
-  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions,
+            platypus::Coefficients & coefficients) override;
 
   virtual void BuildBilinearForm();
   virtual void BuildLinearForm();

@@ -18,7 +18,7 @@ public:
 
   inline virtual std::shared_ptr<platypus::AuxSolver> getAuxSolver() const { return _auxsolver; }
 
-  virtual void storeCoefficients(Coefficients & coefficients) {}
+  virtual void storeCoefficients(platypus::Coefficients & coefficients) {}
 
 protected:
   std::shared_ptr<platypus::AuxSolver> _auxsolver{nullptr};

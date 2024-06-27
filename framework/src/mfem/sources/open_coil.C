@@ -47,7 +47,7 @@ void
 OpenCoilSolver::Init(platypus::GridFunctions & gridfunctions,
                      const platypus::FESpaces & fespaces,
                      platypus::BCMap & bc_map,
-                     Coefficients & coefficients)
+                     platypus::Coefficients & coefficients)
 {
   if (!coefficients._scalars.Has(_i_coef_name))
   {
@@ -253,7 +253,7 @@ OpenCoilSolver::SPSCurrent()
   gridfunctions.Register("GradPhi", _grad_phi_child);
   gridfunctions.Register("V", _phi_child);
 
-  Coefficients coefs;
+  platypus::Coefficients coefs;
   coefs._scalars.Register("electric_conductivity", _sigma);
 
   platypus::ScalarPotentialSource sps(
@@ -279,7 +279,7 @@ OpenCoilSolver::SPSCurrent()
     aux_gf.Register("grad_phi_child", _grad_phi_child);
     aux_gf.Register("source_current_density", _j_child);
 
-    Coefficients aux_coef;
+    platypus::Coefficients aux_coef;
     aux_coef._scalars.Register("electrical_conductivity", _sigma);
 
     platypus::ScaledVectorGridFunctionAux current_density_auxsolver(

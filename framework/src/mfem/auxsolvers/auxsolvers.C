@@ -4,7 +4,8 @@ namespace platypus
 {
 
 void
-AuxSolvers::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
+AuxSolvers::Init(const platypus::GridFunctions & gridfunctions,
+                 platypus::Coefficients & coefficients)
 {
   for (const auto & [name, auxsolver] : *this)
   {

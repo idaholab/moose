@@ -14,7 +14,7 @@ public:
   void Init(platypus::GridFunctions & gridfunctions,
             const platypus::FESpaces & fespaces,
             platypus::BCMap & bc_map,
-            Coefficients & coefficients);
+            platypus::Coefficients & coefficients);
   void Apply(mfem::ParLinearForm * lf);
   void SubtractSources(mfem::ParGridFunction * gf);
 };

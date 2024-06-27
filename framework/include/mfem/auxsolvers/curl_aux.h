@@ -12,7 +12,8 @@ public:
 
   ~CurlAuxSolver() override = default;
 
-  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions,
+            platypus::Coefficients & coefficients) override;
 
   void Solve(double t = 0.0) override;
 

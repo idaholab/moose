@@ -18,7 +18,7 @@ public:
   {
   }
 
-  void Init(const platypus::GridFunctions & variables, Coefficients & coefficients)
+  void Init(const platypus::GridFunctions & variables, platypus::Coefficients & coefficients)
   {
     // To ensure conductivity on subdomains is converted into global coefficient
     // Hephaestus update for coefficients initialisation could address this
@@ -71,7 +71,7 @@ public:
     return joule_heating_aux;
   }
 
-  virtual void storeCoefficients(Coefficients & coefficients) override;
+  virtual void storeCoefficients(platypus::Coefficients & coefficients) override;
 
 protected:
   platypus::InputParameters joule_heating_params;

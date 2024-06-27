@@ -61,7 +61,8 @@ public:
 
   ~VectorGridFunctionDotProductAux() override = default;
 
-  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions,
+            platypus::Coefficients & coefficients) override;
 };
 
 } // namespace platypus

@@ -79,7 +79,8 @@ FluxMonitorAux::FluxMonitorAux(std::string var_name, int face_attr, std::string 
 }
 
 void
-FluxMonitorAux::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
+FluxMonitorAux::Init(const platypus::GridFunctions & gridfunctions,
+                     platypus::Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_var_name);
   if (coefficients._scalars.Has(_coef_name))

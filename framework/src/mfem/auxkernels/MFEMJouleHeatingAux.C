@@ -20,7 +20,7 @@ MFEMJouleHeatingAux::MFEMJouleHeatingAux(const InputParameters & parameters)
 }
 
 void
-MFEMJouleHeatingAux::storeCoefficients(Coefficients & coefficients)
+MFEMJouleHeatingAux::storeCoefficients(platypus::Coefficients & coefficients)
 {
   coefficients._scalars.Register("JouleHeating", joule_heating_aux);
 }

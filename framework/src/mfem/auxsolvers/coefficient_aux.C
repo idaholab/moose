@@ -15,7 +15,8 @@ CoefficientAux::CoefficientAux(std::string gf_name,
 }
 
 void
-CoefficientAux::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
+CoefficientAux::Init(const platypus::GridFunctions & gridfunctions,
+                     platypus::Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_gf_name);
   _coef = coefficients._scalars.Get(_coef_name);

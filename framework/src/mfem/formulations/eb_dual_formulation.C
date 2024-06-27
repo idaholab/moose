@@ -76,7 +76,7 @@ EBDualFormulation::RegisterJouleHeatingDensityAux(const std::string & p_field_na
 void
 EBDualFormulation::RegisterCoefficients()
 {
-  Coefficients & coefficients = GetProblem()->_coefficients;
+  platypus::Coefficients & coefficients = GetProblem()->_coefficients;
   if (!coefficients._scalars.Has(_magnetic_permeability_name))
   {
     MFEM_ABORT(_magnetic_permeability_name + " coefficient not found.");

@@ -21,7 +21,8 @@ public:
 
   ~ScaledVectorGridFunctionAux() override = default;
 
-  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions,
+            platypus::Coefficients & coefficients) override;
   virtual void BuildBilinearForm();
   virtual void BuildMixedBilinearForm();
   void Solve(double t = 0.0) override;

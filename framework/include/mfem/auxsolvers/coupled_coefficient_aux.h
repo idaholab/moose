@@ -20,7 +20,8 @@ public:
 
   ~CoupledCoefficient() override = default;
 
-  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions,
+            platypus::Coefficients & coefficients) override;
 
   double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 

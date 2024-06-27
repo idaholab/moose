@@ -18,7 +18,7 @@ public:
   virtual void Init(platypus::GridFunctions & gridfunctions,
                     const platypus::FESpaces & fespaces,
                     platypus::BCMap & bc_map,
-                    Coefficients & coefficients)
+                    platypus::Coefficients & coefficients)
   {
   }
 

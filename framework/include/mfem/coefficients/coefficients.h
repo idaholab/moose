@@ -6,6 +6,8 @@
 #include <memory>
 #include <unordered_set>
 
+namespace platypus
+{
 double prodFunc(double a, double b);
 double fracFunc(double a, double b);
 
@@ -20,7 +22,7 @@ public:
   platypus::NamedFieldsMap<mfem::VectorCoefficient> _vector_coefficients;
 };
 
-// Coefficients - stores all scalar and vector coefficients
+// platypus::Coefficients - stores all scalar and vector coefficients
 //--SetTime
 //--scalars
 //--vectors
@@ -43,3 +45,4 @@ public:
   platypus::NamedFieldsMap<mfem::VectorCoefficient> _vectors;
   std::vector<Subdomain> _subdomains;
 };
+} // namespace platypus

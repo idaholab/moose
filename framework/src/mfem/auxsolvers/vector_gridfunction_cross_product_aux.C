@@ -39,7 +39,7 @@ VectorGridFunctionCrossProductAux::VectorGridFunctionCrossProductAux(
 
 void
 VectorGridFunctionCrossProductAux::Init(const platypus::GridFunctions & gridfunctions,
-                                        Coefficients & coefficients)
+                                        platypus::Coefficients & coefficients)
 {
   _u_gf = gridfunctions.Get(_u_gf_name);
   _v_gf = gridfunctions.Get(_v_gf_name);

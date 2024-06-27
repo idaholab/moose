@@ -52,7 +52,7 @@ void
 ClosedCoilSolver::Init(platypus::GridFunctions & gridfunctions,
                        const platypus::FESpaces & fespaces,
                        platypus::BCMap & bc_map,
-                       Coefficients & coefficients)
+                       platypus::Coefficients & coefficients)
 {
   // Retrieving the parent FE space and mesh
   _h_curl_fe_space_parent = fespaces.Get(_hcurl_fespace_name);
@@ -183,7 +183,7 @@ ClosedCoilSolver::Apply(mfem::ParLinearForm * lf)
     aux_gf.Register("source_electric_field", _source_electric_field);
     aux_gf.Register("source_current_density", _source_current_density);
 
-    Coefficients aux_coef;
+    platypus::Coefficients aux_coef;
     aux_coef._scalars.Register("electrical_conductivity", _sigma);
 
     platypus::ScaledVectorGridFunctionAux current_density_auxsolver(
@@ -360,7 +360,7 @@ ClosedCoilSolver::AddWedgeToPWCoefs(std::vector<int> & wedge_els)
 
   // First, define what in which of the old subdomains the wedge elements of the new subdomain lie
   std::vector<Subdomain> subdomains = _ccs_coefs._subdomains;
-  Subdomain new_domain("wedge", _new_domain_attr);
+  platypus::Subdomain new_domain("wedge", _new_domain_attr);
   int wedge_old_att = -1;
 
   int ref_rank = -1;
@@ -508,7 +508,7 @@ ClosedCoilSolver::SolveTransition()
   platypus::FESpaces fespaces;
   platypus::BCMap bc_maps;
 
-  Coefficients coefs;
+  platypus::Coefficients coefs;
   coefs._scalars.Register("electrical_conductivity", _sigma);
 
   platypus::GridFunctions gridfunctions;

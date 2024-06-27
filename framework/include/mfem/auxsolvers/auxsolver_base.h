@@ -20,7 +20,8 @@ public:
   // NB: require virtual destructor to avoid leaks.
   virtual ~AuxSolver() = default;
 
-  virtual void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) = 0;
+  virtual void Init(const platypus::GridFunctions & gridfunctions,
+                    platypus::Coefficients & coefficients) = 0;
 
   virtual void Solve(double t = 0.0) = 0;
 

@@ -46,7 +46,8 @@ public:
                                     std::string u_gf_name,
                                     std::string v_gf_name);
 
-  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions,
+            platypus::Coefficients & coefficients) override;
 };
 
 } // namespace platypus

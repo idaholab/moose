@@ -68,7 +68,7 @@ ComplexMaxwellFormulation::RegisterGridFunctions()
 void
 ComplexMaxwellFormulation::RegisterCoefficients()
 {
-  Coefficients & coefficients = GetProblem()->_coefficients;
+  platypus::Coefficients & coefficients = GetProblem()->_coefficients;
 
   if (!coefficients._scalars.Has(_frequency_coef_name))
   {
