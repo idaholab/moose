@@ -25,7 +25,9 @@ NSFVActionDeprecation::NSFVActionDeprecation(const InputParameters & parameters)
 {
   mooseDeprecated(
       "The NSFVAction, used through the [Modules/NavierStokesFV] syntax is deprecated. "
-      "Please convert your input file to using the [Physics/NavierStokes/WCNSFV...] syntax.");
+      "Please convert your input file to using the [Physics/NavierStokes/WCNSFV...] syntax.\n"
+      "A help section for this transition is available on the MOOSE website: "
+      "https://mooseframework.inl.gov/syntax/Modules/NavierStokesFV/index.html");
 }
 
 void
