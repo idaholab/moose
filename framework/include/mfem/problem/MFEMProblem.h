@@ -173,7 +173,7 @@ protected:
   std::string _formulation_name;
   int _order;
 
-  Coefficients _coefficients;
+  platypus::Coefficients _coefficients;
   platypus::InputParameters _solver_options;
   platypus::Outputs _outputs;
   platypus::InputParameters _exec_params;
