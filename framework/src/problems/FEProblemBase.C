@@ -2458,7 +2458,7 @@ FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid) con
   // Threads::spin_mutex::scoped_lock lock(get_function_mutex);
   auto * const ret = dynamic_cast<Convergence *>(_convergences.getActiveObject(name, tid).get());
   if (!ret)
-    mooseError("No convergence criteria named ", name, " of appropriate type");
+    mooseError("The Convergence object '", name, "' does not exist.");
 
   return *ret;
 }
