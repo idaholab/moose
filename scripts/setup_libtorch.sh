@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 # For now, 2.1 is the default version of torchlib
-VERSION=2.1
+VERSION=2.2.0
 IGNORE_CERT=""
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -44,8 +44,8 @@ if [[ -n "$HELP" ]]; then
 fi
 
 # We need to do this because 1.12 is lower than 1.9 if parsed as a single number
-MAINVERSION=${VERSION%%.*}
-SUBVERSION=${VERSION##*.}
+MAINVERSION=$(echo $VERSION | cut -d. -f1)
+SUBVERSION=$(echo $VERSION | cut -d. -f2)
 
 if (( $MAINVERSION < 1  || ( $MAINVERSION == 1  &&  $SUBVERSION < 4 ) )); then
   echo "The current implementation does not support libtorch versions below 1.4!"
@@ -57,12 +57,25 @@ if [ -d $TORCH_DIR ]; then
   rm -rf $TORCH_DIR
 fi
 
-# Checking the operating system
-UNAME_OUT="$(uname -s)"
-case "${UNAME_OUT}" in
+# Checking the operating system and architecture type
+UNAME_SYS="$(uname -s)"
+UNAME_ARCH="$(uname -m)"
+case "${UNAME_SYS}" in
   Linux*)     OP_SYS=linux;;
   Darwin*)    OP_SYS=mac;;
 esac
+
+# We do some sanity checking on the version number. They started distributing
+# precompiled libraries afer version 2.2. Before that it was x86 without the
+# tag
+if (( $OP_SYS == mac && UNAME_ARCH == "arm64" )); then
+  if (( $MAINVERSION < 2  || ( $MAINVERSION == 2 && $SUBVERSION < 2 ) )); then
+    echo "Precompiled libraries below version 2.2 are not available for ARM architecture!"
+    exit 1
+  fi
+else
+  UNAME_ARCH=""
+fi
 
 # Checking if the available GLIBC version is sufficient for proper linkig. Only
 # causes issues on linux distributions. Considering that most Macs use the
@@ -84,9 +97,9 @@ fi
 # Also, if another installation is present for libtorch, we overwrite the files.
 FILENAME=""
 if [[ $OP_SYS == linux ]]; then
-  FILENAME=libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip
+  FILENAME=libtorch-cxx11-abi-shared-with-deps-$VERSION%2Bcpu.zip
 elif [[ $OP_SYS == mac ]]; then
-  FILENAME=libtorch-macos-$VERSION.0.zip
+  FILENAME=libtorch-macos-$UNAME_ARCH-$VERSION.zip
 else
   echo "Unknown operating system! We only support Linux/Mac machines!"
   exit 1
