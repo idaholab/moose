@@ -9,7 +9,6 @@
 #include "vector_coefficient_aux.h"
 #include "vector_gridfunction_cross_product_aux.h"
 #include "vector_gridfunction_dot_product_aux.h"
-#include "line_sampler_aux.h"
 #include "flux_monitor_aux.h"
 
 // Specify classes that perform auxiliary calculations on GridFunctions or
