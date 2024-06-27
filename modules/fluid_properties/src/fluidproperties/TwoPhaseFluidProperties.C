@@ -14,13 +14,14 @@ InputParameters
 TwoPhaseFluidProperties::validParams()
 {
   InputParameters params = FluidProperties::validParams();
-  params.set<std::string>("fp_type") = "two-phase-fp";
-
+  params.addCustomTypeParam<std::string>(
+      "fp_type", "two-phase-fp", "FPType", "Type of the fluid property object");
   params.addParam<UserObjectName>("fp_liquid",
                                   "Liquid single-phase fluid properties user object name");
   params.addParam<UserObjectName>("fp_vapor",
                                   "Vapor single-phase fluid properties user object name");
 
+  params.addParamNamesToGroup("fp_type", "Advanced");
   return params;
 }
 
@@ -106,7 +107,8 @@ TwoPhaseFluidProperties::L_fusion() const
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
-Real TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
+Real
+TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
 {
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
@@ -123,7 +125,8 @@ TwoPhaseFluidProperties::sigma_from_T(const ADReal & T) const
   return sigma;
 }
 
-Real TwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const
+Real
+TwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const
 {
   mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
