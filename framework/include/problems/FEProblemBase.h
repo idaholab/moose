@@ -2438,7 +2438,7 @@ protected:
   /// functions
   MooseObjectWarehouse<Function> _functions;
 
-  // convergence
+  /// convergence warehouse
   MooseObjectWarehouse<Convergence> _convergences;
 
   /// nonlocal kernels
