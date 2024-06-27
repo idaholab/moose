@@ -50,7 +50,7 @@ public:
             platypus::BCMap & bc_map,
             platypus::Coefficients & coefficients) override;
   void Apply(mfem::ParLinearForm * lf) override;
-  void SubtractSource(mfem::ParGridFunction * gf) override {};
+  void SubtractSource(mfem::ParGridFunction * gf) override{};
 
   // Initialises the child submesh.
   void InitChildMesh();
