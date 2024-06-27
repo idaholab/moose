@@ -77,7 +77,7 @@ CentralDifference::computeTimeDerivatives()
     mooseError("CentralDifference: Time derivative of solution (`u_dotdot`) is not stored. Please "
                "set uDotDotRequested() to true in FEProblemBase before requesting `u_dot`.");
 
-  // Don't update time derivate
+  // Don't update time derivate if using reference configuration
   if (_sys.name() == "nl0" && _is_direct)
   {
     return;
