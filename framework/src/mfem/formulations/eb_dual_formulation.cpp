@@ -1,4 +1,4 @@
-#include "eb_dual_formulation.hpp"
+#include "eb_dual_formulation.h"
 
 #include <utility>
 

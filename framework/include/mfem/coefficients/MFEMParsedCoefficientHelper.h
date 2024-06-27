@@ -3,7 +3,7 @@
 #include "FunctionParserUtils.h"
 #include "MFEMCoefficient.h"
 #include "PlatypusUtils.h"
-#include "auxsolvers.h
+#include "auxsolvers.h"
 #include "libmesh/fparser_ad.hh"
 #include "libmesh/quadrature.h"
 

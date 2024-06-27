@@ -12,7 +12,7 @@
 //* Magnetic field H = ν∇×A
 //* Current density J = Jᵉ
 
-#include "magnetostatic_formulation.hpp"
+#include "magnetostatic_formulation.h"
 
 #include <utility>
 

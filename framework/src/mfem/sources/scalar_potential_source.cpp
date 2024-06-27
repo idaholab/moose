@@ -1,4 +1,4 @@
-#include "scalar_potential_source.hpp"
+#include "scalar_potential_source.h"
 
 namespace hephaestus
 {
@@ -34,10 +34,10 @@ ScalarPotentialSource::Init(hephaestus::GridFunctions & gridfunctions,
 
   if (!gridfunctions.Has(_phi_gf_name))
   {
-    logger.info("{} not found in gridfunctions when creating {}. Creating new "
-                "ParGridFunction.",
-                _phi_gf_name,
-                typeid(this).name());
+    // logger.info("{} not found in gridfunctions when creating {}. Creating new "
+    //             "ParGridFunction.",
+    //             _phi_gf_name,
+    //             typeid(this).name());
     _phi = std::make_shared<mfem::ParGridFunction>(_h1_fe_space);
     gridfunctions.Register(_phi_gf_name, _phi);
   }

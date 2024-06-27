@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "factory.h"
+#include "problem_builder_base.h"
 
 class MFEMFormulation : public GeneralUserObject
 {

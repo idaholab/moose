@@ -1,4 +1,4 @@
-#include "time_domain_problem_builder.hpp"
+#include "time_domain_problem_builder.h"
 
 namespace hephaestus
 {

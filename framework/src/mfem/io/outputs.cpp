@@ -1,4 +1,4 @@
-#include "outputs.hpp"
+#include "outputs.h"
 
 namespace hephaestus
 {

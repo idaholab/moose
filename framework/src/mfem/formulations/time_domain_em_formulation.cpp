@@ -1,4 +1,4 @@
-#include "time_domain_em_formulation.hpp"
+#include "time_domain_em_formulation.h"
 
 namespace hephaestus
 {

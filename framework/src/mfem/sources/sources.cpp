@@ -1,4 +1,4 @@
-#include "sources.hpp"
+#include "sources.h"
 
 namespace hephaestus
 {
@@ -11,10 +11,7 @@ Sources::Init(hephaestus::GridFunctions & gridfunctions,
 {
   for (const auto & [name, source] : *this)
   {
-    logger.info("Initialising {} Source", name);
-    spdlog::stopwatch sw;
     source->Init(gridfunctions, fespaces, bc_map, coefficients);
-    logger.info("{} Init: {} seconds", name, sw);
   }
 }
 
@@ -23,10 +20,7 @@ Sources::Apply(mfem::ParLinearForm * lf)
 {
   for (const auto & [name, source] : *this)
   {
-    logger.info("Applying {} Source", name);
-    spdlog::stopwatch sw;
     source->Apply(lf);
-    logger.info("{} Apply: {} seconds", name, sw);
   }
 }
 
@@ -35,10 +29,7 @@ Sources::SubtractSources(mfem::ParGridFunction * gf)
 {
   for (const auto & [name, source] : *this)
   {
-    logger.info("Subtracting {} Source", name);
-    spdlog::stopwatch sw;
     source->SubtractSource(gf);
-    logger.info("{} SubtractSource: {} seconds", name, sw);
   }
 }
 

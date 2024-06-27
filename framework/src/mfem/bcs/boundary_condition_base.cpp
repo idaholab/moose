@@ -1,4 +1,4 @@
-#include "boundary_condition_base.hpp"
+#include "boundary_condition_base.h"
 
 #include <utility>
 

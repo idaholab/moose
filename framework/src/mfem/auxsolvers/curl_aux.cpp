@@ -1,4 +1,4 @@
-#include "curl_aux.hpp"
+#include "curl_aux.h"
 
 #include <utility>
 

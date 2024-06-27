@@ -146,7 +146,7 @@ protected:
                                               ._tolerance = 1e-16,
                                               ._abs_tolerance = 1e-16,
                                               ._max_iteration = 1000,
-                                              ._print_level = GetGlobalPrintLevel(),
+                                              ._print_level = 2,//GetGlobalPrintLevel(),
                                               ._k_dim = 10});
 
   /// Overridden in derived classes.

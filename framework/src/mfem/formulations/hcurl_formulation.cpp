@@ -36,7 +36,7 @@
 // b0(p') = <n.s0, p'>
 // a1(u, u') = (βu, u') + (αdt∇×u, ∇×u')
 // b1(u') = (s0_{n+1}, u') - (α∇×u_{n}, ∇×u') + <(α∇×u_{n+1}) × n, u'>
-#include "hcurl_formulation.hpp"
+#include "hcurl_formulation.h"
 
 #include <utility>
 
@@ -130,8 +130,6 @@ CurlCurlEquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
 void
 CurlCurlEquationSystem::AddKernels()
 {
-  spdlog::stopwatch sw;
-
   AddTrialVariableNameIfMissing(_h_curl_var_name);
   std::string dh_curl_var_dt = GetTimeDerivativeName(_h_curl_var_name);
 
@@ -152,8 +150,6 @@ CurlCurlEquationSystem::AddKernels()
   vector_fe_mass_params.SetParam("CoefficientName", _beta_coef_name);
   AddKernel(dh_curl_var_dt,
             std::make_shared<hephaestus::VectorFEMassKernel>(vector_fe_mass_params));
-
-  logger.info("{} AddKernels: {} seconds", typeid(this).name(), sw);
 }
 
 void

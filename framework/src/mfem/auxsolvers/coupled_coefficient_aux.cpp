@@ -1,4 +1,4 @@
-#include "coupled_coefficient_aux.hpp"
+#include "coupled_coefficient_aux.h"
 
 namespace hephaestus
 {

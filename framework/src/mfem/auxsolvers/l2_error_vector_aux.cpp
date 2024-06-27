@@ -1,4 +1,4 @@
-#include "l2_error_vector_aux.hpp"
+#include "l2_error_vector_aux.h"
 
 namespace hephaestus
 {

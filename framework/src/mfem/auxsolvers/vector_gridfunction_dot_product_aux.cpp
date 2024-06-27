@@ -1,4 +1,4 @@
-#include "vector_gridfunction_dot_product_aux.hpp"
+#include "vector_gridfunction_dot_product_aux.h"
 
 #include <utility>
 

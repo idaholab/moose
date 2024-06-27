@@ -1,4 +1,4 @@
-#include "vector_coefficient_aux.hpp"
+#include "vector_coefficient_aux.h"
 
 #include <utility>
 

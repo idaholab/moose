@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 
-#include "logging.h"
+//#include "logging.h"
 #include "../common/pfem_extras.hpp"
 #include "gridfunctions.h"
 #include "mesh_extras.hpp"
@@ -134,20 +134,19 @@ private:
   }
 
   // Write out summary of last timestep to console
-  void WriteConsoleSummary(int _my_rank, double t) { logger.info("step {}, \tt = {}", _cycle, t); }
+  void WriteConsoleSummary(int _my_rank, double t) 
+  { 
+    //logger.info("step {}, \tt = {}", _cycle, t); 
+  }
 
   // Initialize GLVis sockets and fields
   void InitializeGLVis(int _my_rank)
   {
-    logger.info("Opening GLVis sockets.");
-
     for (auto & gridfunction : *_gridfunctions)
     {
       _socks[gridfunction.first] = new mfem::socketstream;
       _socks[gridfunction.first]->precision(8);
     }
-
-    logger.info("GLVis sockets open.");
   }
 
   // Update GLVis display of output fields (gridfunctions)

@@ -1,4 +1,4 @@
-#include "helmholtz_projector.hpp"
+#include "helmholtz_projector.h"
 
 namespace hephaestus
 {
@@ -21,7 +21,7 @@ HelmholtzProjector::HelmholtzProjector(const hephaestus::InputParameters & param
   default_pars.SetParam("Tolerance", float(1.0e-20));
   default_pars.SetParam("AbsTolerance", float(1.0e-20));
   default_pars.SetParam("MaxIter", (unsigned int)1000);
-  default_pars.SetParam("PrintLevel", GetGlobalPrintLevel());
+  default_pars.SetParam("PrintLevel", 2); // GetGlobalPrintLevel());
 
   _solver_options =
       params.GetOptionalParam<hephaestus::InputParameters>("SolverOptions", default_pars);
@@ -38,10 +38,10 @@ HelmholtzProjector::Project(hephaestus::GridFunctions & gridfunctions,
 
   if (!fespaces.Has(_hcurl_fespace_name))
   {
-    logger.info("{} not found in fespaces when creating {}. Obtaining from vector "
-                "GridFunction.",
-                _hcurl_fespace_name,
-                typeid(this).name());
+    // logger.info("{} not found in fespaces when creating {}. Obtaining from vector "
+    //             "GridFunction.",
+    //             _hcurl_fespace_name,
+    //             typeid(this).name());
     _h_curl_fe_space = _div_free_src_gf->ParFESpace();
   }
   else
@@ -53,9 +53,9 @@ HelmholtzProjector::Project(hephaestus::GridFunctions & gridfunctions,
 
   if (!fespaces.Has(_h1_fespace_name))
   {
-    logger.info("{} not found in fespaces when creating {}. Extracting from GridFunction",
-                _h1_fespace_name,
-                typeid(this).name());
+    // logger.info("{} not found in fespaces when creating {}. Extracting from GridFunction",
+    //             _h1_fespace_name,
+    //             typeid(this).name());
 
     // Creates an H1 FES on the same mesh and with the same order as the HCurl
     // FES
@@ -72,9 +72,9 @@ HelmholtzProjector::Project(hephaestus::GridFunctions & gridfunctions,
 
   if (!gridfunctions.Has(_gf_name))
   {
-    logger.info("{} not found in gridfunctions when creating {}. Creating new GridFunction",
-                _gf_name,
-                typeid(this).name());
+    // logger.info("{} not found in gridfunctions when creating {}. Creating new GridFunction",
+    //             _gf_name,
+    //             typeid(this).name());
     _q = std::make_shared<mfem::ParGridFunction>(_h1_fe_space.get());
   }
   else

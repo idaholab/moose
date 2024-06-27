@@ -1,4 +1,4 @@
-#include "scaled_curl_vector_gridfunction_aux.hpp"
+#include "scaled_curl_vector_gridfunction_aux.h"
 
 namespace hephaestus
 {

@@ -14,7 +14,7 @@ public:
       _tol(params.GetOptionalParam<float>("Tolerance", 1.0e-9)),
       _abstol(params.GetOptionalParam<float>("AbsTolerance", 1e-16)),
       _max_iter(params.GetOptionalParam<unsigned int>("MaxIter", 1000)),
-      _print_level(params.GetOptionalParam<int>("PrintLevel", GetGlobalPrintLevel()))
+      _print_level(params.GetOptionalParam<int>("PrintLevel", 2)) // GetGlobalPrintLevel()))
   {
 
     _amg.SetPrintLevel(_print_level);
@@ -40,7 +40,7 @@ public:
       _tol(params.GetOptionalParam<float>("Tolerance", 1.0e-9)),
       _abstol(params.GetOptionalParam<float>("AbsTolerance", 1e-16)),
       _max_iter(params.GetOptionalParam<unsigned int>("MaxIter", 1000)),
-      _print_level(params.GetOptionalParam<int>("PrintLevel", GetGlobalPrintLevel()))
+      _print_level(params.GetOptionalParam<int>("PrintLevel", 2)) // GetGlobalPrintLevel()))
   {
 
     SetTol(_tol);
@@ -67,7 +67,7 @@ public:
       _tol(params.GetOptionalParam<float>("Tolerance", 1.0e-16)),
       _abstol(params.GetOptionalParam<float>("AbsTolerance", 1e-16)),
       _max_iter(params.GetOptionalParam<unsigned int>("MaxIter", 1000)),
-      _print_level(params.GetOptionalParam<int>("PrintLevel", GetGlobalPrintLevel()))
+      _print_level(params.GetOptionalParam<int>("PrintLevel", 2)) // GetGlobalPrintLevel()))
   {
 
     _ams.SetSingularProblem();
@@ -96,7 +96,7 @@ public:
       _tol(params.GetOptionalParam<float>("Tolerance", 1e-16)),
       _max_iter(params.GetOptionalParam<unsigned int>("MaxIter", 100)),
       _k_dim(params.GetOptionalParam<unsigned int>("KDim", 10)),
-      _print_level(params.GetOptionalParam<int>("PrintLevel", GetGlobalPrintLevel()))
+      _print_level(params.GetOptionalParam<int>("PrintLevel", 2)) // GetGlobalPrintLevel()))
   {
 
     _ams.SetSingularProblem();
@@ -123,7 +123,7 @@ public:
       _tol(params.GetOptionalParam<float>("Tolerance", 1e-16)),
       _abstol(params.GetOptionalParam<float>("AbsTolerance", 1e-16)),
       _max_iter(params.GetOptionalParam<unsigned int>("MaxIter", 1000)),
-      _print_level(params.GetOptionalParam<int>("PrintLevel", GetGlobalPrintLevel()))
+      _print_level(params.GetOptionalParam<int>("PrintLevel", 2)) // GetGlobalPrintLevel()))
   {
 
     _amg.SetPrintLevel(_print_level);

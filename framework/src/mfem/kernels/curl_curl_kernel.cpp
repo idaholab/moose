@@ -1,4 +1,4 @@
-#include "curl_curl_kernel.hpp"
+#include "curl_curl_kernel.h"
 
 namespace hephaestus
 {

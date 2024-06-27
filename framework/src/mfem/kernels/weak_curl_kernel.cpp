@@ -1,4 +1,4 @@
-#include "weak_curl_kernel.hpp"
+#include "weak_curl_kernel.h"
 
 namespace hephaestus
 {

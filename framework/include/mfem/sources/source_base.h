@@ -1,5 +1,5 @@
 #pragma once
-#include "../common/pfem_extras.h"
+#include "../common/pfem_extras.hpp"
 #include "utils.h"
 #include "coefficients.h"
 #include "hephaestus_solvers.h"

@@ -1,4 +1,4 @@
-#include "flux_monitor_aux.hpp"
+#include "flux_monitor_aux.h"
 
 namespace hephaestus
 {

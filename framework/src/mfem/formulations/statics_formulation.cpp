@@ -25,7 +25,7 @@
 // where
 // a1(u, u') = (α∇×u, ∇×u')
 // b1(u') = (s0, u') + <(α∇×u) × n, u'>
-#include "statics_formulation.hpp"
+#include "statics_formulation.h"
 
 #include <utility>
 
@@ -131,8 +131,6 @@ Fully discretised equations
 void
 StaticsOperator::Solve(mfem::Vector & X)
 {
-  spdlog::stopwatch sw;
-
   mfem::ParGridFunction & gf(*_trial_variables.at(0));
   gf = 0.0;
   mfem::ParLinearForm lf(gf.ParFESpace());
@@ -156,8 +154,6 @@ StaticsOperator::Solve(mfem::Vector & X)
   _problem._jacobian_solver->SetOperator(curl_mu_inv_curl);
   _problem._jacobian_solver->Mult(rhs_tdofs, sol_tdofs);
   blf.RecoverFEMSolution(sol_tdofs, lf, gf);
-
-  logger.info("{} Solve: {} seconds", typeid(this).name(), sw);
 }
 
 } // namespace hephaestus

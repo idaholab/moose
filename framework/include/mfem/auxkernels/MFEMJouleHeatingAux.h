@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MFEMAuxSolver.h"
+#include "coupled_coefficient_aux.h"
 
 class JouleHeatingCoefficient : public hephaestus::CoupledCoefficient
 {

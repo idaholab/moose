@@ -1,4 +1,4 @@
-#include "frequency_domain_em_formulation.hpp"
+#include "frequency_domain_em_formulation.h"
 
 namespace hephaestus
 {

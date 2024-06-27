@@ -11,7 +11,7 @@
 //* Magnetic flux density, B = Bᵉ + μH
 //* Current density J = ∇×H
 
-#include "h_formulation.hpp"
+#include "h_formulation.h"
 
 #include <utility>
 

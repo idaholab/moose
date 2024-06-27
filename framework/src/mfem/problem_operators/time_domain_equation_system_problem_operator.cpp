@@ -1,4 +1,4 @@
-#include "time_domain_equation_system_problem_operator.hpp"
+#include "time_domain_equation_system_problem_operator.h"
 
 namespace hephaestus
 {

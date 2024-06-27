@@ -1,4 +1,4 @@
-#include "equation_system_problem_operator.hpp"
+#include "equation_system_problem_operator.h"
 
 namespace hephaestus
 {

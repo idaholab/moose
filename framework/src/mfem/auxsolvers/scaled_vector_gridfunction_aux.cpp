@@ -1,4 +1,4 @@
-#include "scaled_vector_gridfunction_aux.hpp"
+#include "scaled_vector_gridfunction_aux.h"
 
 #include <utility>
 

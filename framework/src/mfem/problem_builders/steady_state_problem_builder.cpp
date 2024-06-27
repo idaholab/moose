@@ -1,4 +1,4 @@
-#include "steady_state_problem_builder.hpp"
+#include "steady_state_problem_builder.h"
 
 namespace hephaestus
 {

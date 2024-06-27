@@ -1,4 +1,4 @@
-#include "integrated_bc_base.hpp"
+#include "integrated_bc_base.h"
 
 namespace hephaestus
 {

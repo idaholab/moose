@@ -1,4 +1,4 @@
-#include "essential_bc_base.hpp"
+#include "essential_bc_base.h"
 
 namespace hephaestus
 {

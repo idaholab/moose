@@ -1,4 +1,4 @@
-#include "boundary_conditions.hpp"
+#include "boundary_conditions.h"
 
 namespace hephaestus
 {

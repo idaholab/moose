@@ -1,4 +1,4 @@
-#include "vector_dirichlet_bc.hpp"
+#include "vector_dirichlet_bc.h"
 
 namespace hephaestus
 {

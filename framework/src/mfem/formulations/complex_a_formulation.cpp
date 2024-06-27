@@ -1,4 +1,4 @@
-#include "complex_a_formulation.hpp"
+#include "complex_a_formulation.h"
 
 namespace hephaestus
 {

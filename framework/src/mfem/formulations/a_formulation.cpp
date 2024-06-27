@@ -13,7 +13,7 @@
 //* Magnetic field H = ν∇×A
 //* Current density J = Jᵉ -σdA/dt
 
-#include "a_formulation.hpp"
+#include "a_formulation.h"
 
 #include <utility>
 

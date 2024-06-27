@@ -1,5 +1,5 @@
-#include "div_free_source.hpp"
-#include "helmholtz_projector.hpp"
+#include "div_free_source.h"
+#include "helmholtz_projector.h"
 
 namespace hephaestus
 {

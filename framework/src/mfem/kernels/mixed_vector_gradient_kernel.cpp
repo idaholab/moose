@@ -1,4 +1,4 @@
-#include "mixed_vector_gradient_kernel.hpp"
+#include "mixed_vector_gradient_kernel.h"
 
 namespace hephaestus
 {

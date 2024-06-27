@@ -1,4 +1,4 @@
-#include "vector_gridfunction_cross_product_aux.hpp"
+#include "vector_gridfunction_cross_product_aux.h"
 
 #include <utility>
 

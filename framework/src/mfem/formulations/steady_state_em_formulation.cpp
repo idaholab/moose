@@ -1,4 +1,4 @@
-#include "steady_state_em_formulation.hpp"
+#include "steady_state_em_formulation.h"
 
 namespace hephaestus
 {

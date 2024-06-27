@@ -1,4 +1,4 @@
-#include "closed_coil.hpp"
+#include "closed_coil.h"
 
 #include <utility>
 
@@ -67,9 +67,9 @@ ClosedCoilSolver::Init(hephaestus::GridFunctions & gridfunctions,
   // Optional FE Spaces and parameters
   if (!fespaces.Has(_h1_fespace_name))
   {
-    logger.info("{} not found in fespaces when creating {}. Creating from mesh.",
-                _h1_fespace_name,
-                typeid(this).name());
+    // logger.info("{} not found in fespaces when creating {}. Creating from mesh.",
+    //             _h1_fespace_name,
+    //             typeid(this).name());
 
     // Need to free this memory after use. FEC not freed by ParFiniteElementSpace destructor!
     _h1_fe_space_parent_fec =
@@ -85,9 +85,9 @@ ClosedCoilSolver::Init(hephaestus::GridFunctions & gridfunctions,
 
   if (!gridfunctions.Has(_source_electric_field_name))
   {
-    logger.info("{} not found in gridfunctions when creating {}. Creating new GridFunction.",
-                _source_electric_field_name,
-                typeid(this).name());
+    // logger.info("{} not found in gridfunctions when creating {}. Creating new GridFunction.",
+    //             _source_electric_field_name,
+    //             typeid(this).name());
     _source_electric_field = std::make_shared<mfem::ParGridFunction>(_h_curl_fe_space_parent);
   }
   else
@@ -120,9 +120,9 @@ ClosedCoilSolver::Init(hephaestus::GridFunctions & gridfunctions,
 
   if (!coefficients._scalars.Has(_i_coef_name))
   {
-    logger.info("{} not found in coefficients when creating {}. Assuming unit current.",
-                _i_coef_name,
-                typeid(this).name());
+    // logger.info("{} not found in coefficients when creating {}. Assuming unit current.",
+    //             _i_coef_name,
+    //             typeid(this).name());
     _itotal = std::make_shared<mfem::ConstantCoefficient>(1.0);
   }
   else
@@ -132,11 +132,11 @@ ClosedCoilSolver::Init(hephaestus::GridFunctions & gridfunctions,
 
   if (!coefficients._scalars.Has(_cond_coef_name))
   {
-    logger.info("{} not found in coefficients when creating {}. Assuming unit conductivity.",
-                _cond_coef_name,
-                typeid(this).name());
-    logger.warn(
-        "GradPhi field undefined. The GridFunction associated with it will be set to zero.");
+    // logger.info("{} not found in coefficients when creating {}. Assuming unit conductivity.",
+    //             _cond_coef_name,
+    //             typeid(this).name());
+    // logger.warn(
+    //     "GradPhi field undefined. The GridFunction associated with it will be set to zero.");
     _sigma = std::make_shared<mfem::ConstantCoefficient>(1.0);
 
     _electric_field_transfer = false;
@@ -432,9 +432,10 @@ ClosedCoilSolver::AddWedgeToPWCoefs(std::vector<int> & wedge_els)
     }
     else
     {
-      logger.warn("Could not find old attribute for wedge defined in the coefficient subdomains! "
-                  "Setting null coefficient for {} in wedge",
-                  name);
+      // logger.warn("Could not find old attribute for wedge defined in the coefficient subdomains!
+      // "
+      //             "Setting null coefficient for {} in wedge",
+      //             name);
       new_domain._scalar_coefficients.Register(name,
                                                std::make_shared<mfem::ConstantCoefficient>(0.0));
       _ccs_coefs._scalars.Deregister(name);
@@ -451,9 +452,10 @@ ClosedCoilSolver::AddWedgeToPWCoefs(std::vector<int> & wedge_els)
     }
     else
     {
-      logger.warn("Could not find old attribute for wedge defined in the coefficient subdomains! "
-                  "Setting null coefficient for {} in wedge",
-                  name);
+      // logger.warn("Could not find old attribute for wedge defined in the coefficient subdomains!
+      // "
+      //             "Setting null coefficient for {} in wedge",
+      //             name);
       mfem::Vector zero_vec(_mesh_parent->Dimension());
       zero_vec = 0.0;
       new_domain._vector_coefficients.Register(

@@ -1,4 +1,4 @@
-#include "vector_fe_weak_divergence_kernel.hpp"
+#include "vector_fe_weak_divergence_kernel.h"
 
 namespace hephaestus
 {

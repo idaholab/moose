@@ -1,4 +1,4 @@
-#include "line_sampler_aux.hpp"
+#include "line_sampler_aux.h"
 
 namespace hephaestus
 {

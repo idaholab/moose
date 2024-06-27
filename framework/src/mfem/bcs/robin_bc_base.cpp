@@ -1,4 +1,4 @@
-#include "robin_bc_base.hpp"
+#include "robin_bc_base.h"
 
 namespace hephaestus
 {

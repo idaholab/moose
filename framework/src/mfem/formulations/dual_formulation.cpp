@@ -40,7 +40,7 @@
 // a1(u, u') = (βu, u') + (αdt∇×u, ∇×u')
 // b1(u') = (s0_{n+1}, u') + (αv_{n}, ∇×u') + <(αdt∇×u_{n+1}) × n, u'>
 
-#include "dual_formulation.hpp"
+#include "dual_formulation.h"
 
 #include <utility>
 
@@ -165,8 +165,6 @@ WeakCurlEquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
 void
 WeakCurlEquationSystem::AddKernels()
 {
-  spdlog::stopwatch sw;
-
   AddTrialVariableNameIfMissing(_h_curl_var_name);
   AddTrialVariableNameIfMissing(_h_div_var_name);
   std::string dh_curl_var_dt = GetTimeDerivativeName(_h_curl_var_name);
@@ -188,8 +186,6 @@ WeakCurlEquationSystem::AddKernels()
   vector_fe_mass_params.SetParam("CoefficientName", _beta_coef_name);
   AddKernel(_h_curl_var_name,
             std::make_shared<hephaestus::VectorFEMassKernel>(vector_fe_mass_params));
-
-  logger.info("{} AddKernels: {} seconds", typeid(this).name(), sw);
 }
 
 void
@@ -215,16 +211,12 @@ DualOperator::Init(mfem::Vector & X)
 void
 DualOperator::ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt)
 {
-  spdlog::stopwatch sw;
-
   TimeDomainEquationSystemProblemOperator::ImplicitSolve(dt, X, dX_dt);
   // Subtract off contribution from source
   _problem._sources.SubtractSources(_u);
   // dv/dt_{n+1} = -∇×u
   _curl->Mult(*_u, *_dv);
   *_dv *= -1.0;
-
-  logger.info("{} ImplicitSolve: {} seconds", typeid(this).name(), sw);
 }
 
 void

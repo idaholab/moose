@@ -1,4 +1,4 @@
-#include "coefficient_aux.hpp"
+#include "coefficient_aux.h"
 
 #include <utility>
 

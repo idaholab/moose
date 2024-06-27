@@ -1,4 +1,4 @@
-#include "vector_fe_mass_kernel.hpp"
+#include "vector_fe_mass_kernel.h"
 
 namespace hephaestus
 {

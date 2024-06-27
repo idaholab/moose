@@ -1,4 +1,4 @@
-#include "rwte10_port_rbc.hpp"
+#include "rwte10_port_rbc.h"
 
 namespace hephaestus
 {

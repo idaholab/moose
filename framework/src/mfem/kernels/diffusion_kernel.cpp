@@ -1,4 +1,4 @@
-#include "diffusion_kernel.hpp"
+#include "diffusion_kernel.h"
 
 namespace hephaestus
 {

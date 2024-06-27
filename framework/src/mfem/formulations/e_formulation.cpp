@@ -12,7 +12,7 @@
 //* Magnetic flux density, dB/dt = -∇×E
 //* Magnetic field dH/dt = -ν∇×E
 
-#include "e_formulation.hpp"
+#include "e_formulation.h"
 
 #include <utility>
 
