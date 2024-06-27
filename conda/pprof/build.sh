@@ -10,11 +10,10 @@ rm -rf ${GOPATH}/pkg
 # Set GPERF_DIR path (influential environment variable in MOOSE make files)
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export GPERF_DIR=${PREFIX}
-export PPROF_OLDPATH=\${PATH}
+export GPERF_DIR=${PREFIX}/pprof
 export PATH=${PREFIX}/pprof/bin:\${PATH}
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset GPERF_DIR
-export PATH=\${PPROF_OLDPATH}
+export PATH=\${PATH%":${PREFIX}/pprof/bin"}
 EOF
