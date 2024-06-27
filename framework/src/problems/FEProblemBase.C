@@ -973,7 +973,7 @@ FEProblemBase::initialSetup()
     computeUserObjects(EXEC_INITIAL, Moose::PRE_IC);
 
     {
-      TIME_SECTION("ICinitalSetup", 5, "Setting Up Initial Conditions");
+      TIME_SECTION("ICinitialSetup", 5, "Setting Up Initial Conditions");
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
         _ics.initialSetup(tid);
