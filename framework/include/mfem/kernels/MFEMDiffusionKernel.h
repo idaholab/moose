@@ -1,6 +1,6 @@
 #pragma once
 #include "MFEMBilinearFormKernel.h"
-#include "kernels.hpp"
+#include "kernels.h"
 
 class MFEMDiffusionKernel : public MFEMBilinearFormKernel
 {
