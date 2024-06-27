@@ -19,11 +19,10 @@ public:
   void SolveLinearSystem();
 
 private:
-  std::string _hcurl_fespace_name;
   std::string _h1_fespace_name;
+  std::string _hcurl_fespace_name;
   std::string _gf_grad_name;
   std::string _gf_name;
-  hephaestus::InputParameters _solver_options;
 
   std::shared_ptr<mfem::ParFiniteElementSpace> _h1_fe_space{nullptr};
   mfem::ParFiniteElementSpace * _h_curl_fe_space{nullptr};
@@ -31,17 +30,18 @@ private:
 
   // H(Curl) projection of user specified source
   std::unique_ptr<mfem::ParGridFunction> _g;
+  std::unique_ptr<mfem::ParLinearForm> _g_div;
+  std::unique_ptr<mfem::ParMixedBilinearForm> _weak_div;
+  std::unique_ptr<mfem::ParDiscreteLinearOperator> _grad;
+  std::unique_ptr<mfem::ParBilinearForm> _a0;
 
   // Divergence free projected source.
   mfem::ParGridFunction * _div_free_src_gf{nullptr};
 
-  std::unique_ptr<mfem::ParLinearForm> _g_div;
-  std::unique_ptr<mfem::ParBilinearForm> _a0;
-  std::unique_ptr<mfem::ParMixedBilinearForm> _weak_div;
-  std::unique_ptr<mfem::ParDiscreteLinearOperator> _grad;
-
   mfem::Array<int> _ess_bdr_tdofs;
   hephaestus::BCMap * _bc_map;
+
+  hephaestus::InputParameters _solver_options;
 };
 
 } // namespace hephaestus

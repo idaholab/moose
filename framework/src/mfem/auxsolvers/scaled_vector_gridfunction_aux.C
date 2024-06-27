@@ -15,16 +15,15 @@ ScaledVectorGridFunctionAux::ScaledVectorGridFunctionAux(std::string input_gf_na
                                                          const double & bConst,
                                                          std::string shift_gf_name,
                                                          hephaestus::InputParameters solver_options)
-  : _input_gf_name(std::move(input_gf_name)),
+  : _a(nullptr),
+    _a_mixed(nullptr),
+    _input_gf_name(std::move(input_gf_name)),
     _scaled_gf_name(std::move(scaled_gf_name)),
     _shift_gf_name(std::move(shift_gf_name)),
     _coef_name(std::move(coef_name)),
     _a_const(aConst),
     _b_const(bConst),
     _solver_options(std::move(solver_options)),
-
-    _a(nullptr),
-    _a_mixed(nullptr),
     _a_mat(nullptr),
     _mixed_mat(nullptr),
     _solver(nullptr)

@@ -36,14 +36,14 @@ ClosedCoilSolver::ClosedCoilSolver(std::string source_efield_gf_name,
                                    bool electric_field_transfer,
                                    std::string source_jfield_gf_name,
                                    hephaestus::InputParameters solver_options)
-  : _hcurl_fespace_name(std::move(hcurl_fespace_name)),
+  : _coil_domains(std::move(coil_dom)),
+    _electric_field_transfer(std::move(electric_field_transfer)),
+    _hcurl_fespace_name(std::move(hcurl_fespace_name)),
+    _cond_coef_name(std::move(cond_coef_name)),
     _h1_fespace_name(std::move(h1_fespace_name)),
     _source_electric_field_name(std::move(source_efield_gf_name)),
     _source_current_density_name(std::move(source_jfield_gf_name)),
-    _i_coef_name(std::move(i_coef_name)),
-    _cond_coef_name(std::move(cond_coef_name)),
-    _electric_field_transfer(std::move(electric_field_transfer)),
-    _coil_domains(std::move(coil_dom))
+    _i_coef_name(std::move(i_coef_name))
 {
   _elec_attrs.first = electrode_face;
 }
