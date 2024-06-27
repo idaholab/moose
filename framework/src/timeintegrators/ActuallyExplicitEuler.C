@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "ActuallyExplicitEuler.h"
+#include "MooseError.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
@@ -36,6 +37,10 @@ ActuallyExplicitEuler::validParams()
 ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters), _constant_mass(getParam<bool>("use_constant_mass"))
 {
+  if (_is_direct && _solve_type != LUMPED)
+  {
+    mooseError("Direct time integration must be used with a lumped mass matrix!");
+  }
 }
 
 void
