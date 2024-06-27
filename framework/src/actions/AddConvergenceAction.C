@@ -29,5 +29,4 @@ void
 AddConvergenceAction::act()
 {
   _problem->addConvergence(_type, _name, _moose_object_pars);
-  Moose::out << "AddConvergenceAction::act()" << std::endl;
 }
