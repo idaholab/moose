@@ -1318,7 +1318,7 @@ void
 SystemBase::initSolutionState()
 {
   // Default is the current solution
-  unsigned int state = 2;
+  unsigned int state = 0;
 
   // Add additional states as required by the variable states requested
   for (const auto & var : getVariables(/* tid = */ 0))
