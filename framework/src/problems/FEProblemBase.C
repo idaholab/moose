@@ -2345,7 +2345,6 @@ FEProblemBase::addConvergence(const std::string & type,
     std::shared_ptr<Convergence> conv = _factory.create<Convergence>(type, name, parameters, tid);
     _convergences.addObject(conv, tid);
   }
-  _set_nonlinear_convergence_name = true;
 }
 
 void
