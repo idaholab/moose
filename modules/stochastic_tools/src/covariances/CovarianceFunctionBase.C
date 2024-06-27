@@ -19,7 +19,7 @@ CovarianceFunctionBase::validParams()
       "num_outputs", 1, "The number of outputs expected for this covariance function.");
   params.addClassDescription("Base class for covariance functions");
   params.registerBase("CovarianceFunctionBase");
-  params.registerSystemAttributeName("CovarianceFunctionBase");
+  params.registerSystemAttributeName("CovarianceFunction");
   return params;
 }
 
@@ -82,11 +82,7 @@ CovarianceFunctionBase::isTunable(const std::string & name) const
     return true;
   else if (_hp_map_real.find(name) != _hp_map_real.end() ||
            _hp_map_vector_real.find(name) != _hp_map_vector_real.end())
-    mooseError("We found hyperparameter ",
-               name,
-               " in ",
-               this->name(),
-               " but it was not declared tunable!");
+    mooseError("We found hyperparameter ", name, " but it was not declared tunable!");
 
   return false;
 }

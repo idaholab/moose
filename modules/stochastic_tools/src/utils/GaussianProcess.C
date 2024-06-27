@@ -248,7 +248,7 @@ GaussianProcess::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 }
 
 std::vector<Real>
-GaussianProcess::getGradient(RealEigenMatrix & inputs)
+GaussianProcess::getGradient(RealEigenMatrix & inputs) const
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
@@ -276,7 +276,7 @@ GaussianProcess::mapToVec(
         tuning_data,
     const std::unordered_map<std::string, Real> & scalar_map,
     const std::unordered_map<std::string, std::vector<Real>> & vector_map,
-    std::vector<Real> & vec)
+    std::vector<Real> & vec) const
 {
   for (auto iter : tuning_data)
   {
@@ -300,7 +300,7 @@ GaussianProcess::vecToMap(
         tuning_data,
     std::unordered_map<std::string, Real> & scalar_map,
     std::unordered_map<std::string, std::vector<Real>> & vector_map,
-    const std::vector<Real> & vec)
+    const std::vector<Real> & vec) const
 {
   for (auto iter : tuning_data)
   {

@@ -41,9 +41,6 @@ public:
   /// Methods for computing and setting mean and standard deviation
   void computeSet(const RealEigenMatrix & input);
 
-  /// Method for computing and setting the sample covariance matrix and colwise mean
-  void computeCovariance(const RealEigenMatrix & input);
-
   /// Helper for dataStore
   void storeHelper(std::ostream & stream, void * context) const;
 
@@ -53,23 +50,12 @@ public:
   /// De-standardizes (de-centered and de-scaled) the assumed standardized input
   void getDestandardized(RealEigenMatrix & input) const;
 
-  /// Returns the standardized (centered and scaled) of the provided input considering covariances
-  void getStandardizedCovariance(RealEigenMatrix & input) const;
-
-  /// De-standardizes (de-centered and de-scaled) the assumed standardized input considering covariances
-  void getDestandardizedCovariance(RealEigenMatrix & input) const;
-
-  /// De-scales the assumed standardized input considering covariances
-  void getDescaledCovariance(RealEigenVector & input) const;
-
   /// De-scales the assumed scaled input
   void getDescaled(RealEigenMatrix & input) const;
 
 protected:
   std::vector<Real> _mean;
   std::vector<Real> _stdev;
-  RealEigenMatrix _mean_colwise;
-  RealEigenMatrix _cov;
 };
 
 } // StochasticTools namespace

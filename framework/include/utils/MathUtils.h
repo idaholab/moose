@@ -455,6 +455,12 @@ timeDerivName(const T & base_prop_name)
   return "d" + base_prop_name + "_dt";
 }
 
+/**
+ * Computes the Kronecker product of two matrices.
+ * @param product Reference to the product matrix
+ * @param mat_A Reference to the first matrix
+ * @param mat_B Reference to the other matrix
+ */
 void kron(RealEigenMatrix & product, const RealEigenMatrix & mat_A, const RealEigenMatrix & mat_B);
 
 } // namespace MathUtils

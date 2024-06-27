@@ -134,7 +134,7 @@ public:
   Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
 
   // Computes Gradient of the loss function
-  std::vector<Real> getGradient(RealEigenMatrix & inputs);
+  std::vector<Real> getGradient(RealEigenMatrix & inputs) const;
 
   /// Function used to convert the hyperparameter maps in this object to
   /// vectors
@@ -143,7 +143,7 @@ public:
           tuning_data,
       const std::unordered_map<std::string, Real> & scalar_map,
       const std::unordered_map<std::string, std::vector<Real>> & vector_map,
-      std::vector<Real> & vec);
+      std::vector<Real> & vec) const;
 
   /// Function used to convert the vectors back to hyperparameter maps
   void vecToMap(
@@ -151,7 +151,7 @@ public:
           tuning_data,
       std::unordered_map<std::string, Real> & scalar_map,
       std::unordered_map<std::string, std::vector<Real>> & vector_map,
-      const std::vector<Real> & vec);
+      const std::vector<Real> & vec) const;
 
   /// @{
   /**
@@ -221,15 +221,19 @@ protected:
   /// Number of tunable hyperparameters
   unsigned int _num_tunable;
 
-  /// Type of covariance function used for this surrogate
+  /// Type of covariance function used for this GP
   std::string _covar_type;
 
+  /// The name of the covariance function used in this GP
   std::string _covar_name;
 
+  /// The names of the covariance functions the used covariance function depends on
   std::vector<UserObjectName> _dependent_covar_names;
 
+  /// The types of the covariance functions the used covariance function depends on
   std::map<UserObjectName, std::string> _dependent_covar_types;
 
+  /// The number of outputs of the GP
   unsigned int _num_outputs;
 
   /// Scalar hyperparameters. Stored for use in surrogate
