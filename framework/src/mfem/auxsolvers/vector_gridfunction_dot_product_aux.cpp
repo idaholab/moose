@@ -53,7 +53,7 @@ VectorGridFunctionDotProductAux::VectorGridFunctionDotProductAux(
 
 void
 VectorGridFunctionDotProductAux::Init(const hephaestus::GridFunctions & gridfunctions,
-                                      hephaestus::Coefficients & coefficients)
+                                      Coefficients & coefficients)
 {
   if (_scaling_coef_name.empty())
   {

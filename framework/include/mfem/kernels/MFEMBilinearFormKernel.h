@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "kernels.hpp"
-#include "gridfunctions.hpp"
+#include "kernels.h"
+#include "gridfunctions.h"
 
 class MFEMBilinearFormKernel : public GeneralUserObject
 {

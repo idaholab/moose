@@ -89,7 +89,7 @@ ProblemBuilder::SetJacobianSolver(std::shared_ptr<mfem::Solver> jacobian_solver)
 }
 
 void
-ProblemBuilder::SetCoefficients(hephaestus::Coefficients & coefficients)
+ProblemBuilder::SetCoefficients(Coefficients & coefficients)
 {
   logger.info("Setting Coefficients");
   GetProblem()->_coefficients = coefficients;

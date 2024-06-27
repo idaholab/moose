@@ -118,7 +118,7 @@ void
 CurlCurlEquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
                              const hephaestus::FESpaces & fespaces,
                              hephaestus::BCMap & bc_map,
-                             hephaestus::Coefficients & coefficients)
+                             Coefficients & coefficients)
 {
   coefficients._scalars.Register(
       _dtalpha_coef_name,
@@ -159,7 +159,7 @@ CurlCurlEquationSystem::AddKernels()
 void
 HCurlFormulation::RegisterCoefficients()
 {
-  hephaestus::Coefficients & coefficients = GetProblem()->_coefficients;
+  Coefficients & coefficients = GetProblem()->_coefficients;
   if (!coefficients._scalars.Has(_alpha_coef_name))
   {
     MFEM_ABORT(_alpha_coef_name + " coefficient not found.");

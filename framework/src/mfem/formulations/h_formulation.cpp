@@ -116,7 +116,7 @@ HFormulation::RegisterJouleHeatingDensityAux(const std::string & p_field_name,
 void
 HFormulation::RegisterCoefficients()
 {
-  hephaestus::Coefficients & coefficients = GetProblem()->_coefficients;
+  Coefficients & coefficients = GetProblem()->_coefficients;
   if (!coefficients._scalars.Has(_electric_conductivity_name))
   {
     MFEM_ABORT(_electric_conductivity_name + " coefficient not found.");

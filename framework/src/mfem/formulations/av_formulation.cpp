@@ -100,7 +100,7 @@ AVFormulation::RegisterGridFunctions()
 void
 AVFormulation::RegisterCoefficients()
 {
-  hephaestus::Coefficients & coefficients = GetProblem()->_coefficients;
+  Coefficients & coefficients = GetProblem()->_coefficients;
   if (!coefficients._scalars.Has(_inv_alpha_coef_name))
   {
     MFEM_ABORT(_inv_alpha_coef_name + " coefficient not found.");
@@ -131,7 +131,7 @@ void
 AVEquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
                        const hephaestus::FESpaces & fespaces,
                        hephaestus::BCMap & bc_map,
-                       hephaestus::Coefficients & coefficients)
+                       Coefficients & coefficients)
 {
   coefficients._scalars.Register(
       _dtalpha_coef_name,

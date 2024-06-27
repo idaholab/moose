@@ -23,7 +23,7 @@
 #include "SystemBase.h"
 #include "Transient.h"
 #include "Steady.h"
-#include "hephaestus.hpp"
+#include "hephaestus.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/point.h"
 
@@ -173,7 +173,7 @@ protected:
   std::string _formulation_name;
   int _order;
 
-  hephaestus::Coefficients _coefficients;
+  Coefficients _coefficients;
   hephaestus::InputParameters _solver_options;
   hephaestus::Outputs _outputs;
   hephaestus::InputParameters _exec_params;

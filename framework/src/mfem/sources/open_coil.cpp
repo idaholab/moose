@@ -47,7 +47,7 @@ void
 OpenCoilSolver::Init(hephaestus::GridFunctions & gridfunctions,
                      const hephaestus::FESpaces & fespaces,
                      hephaestus::BCMap & bc_map,
-                     hephaestus::Coefficients & coefficients)
+                     Coefficients & coefficients)
 {
   if (!coefficients._scalars.Has(_i_coef_name))
   {
@@ -252,7 +252,7 @@ OpenCoilSolver::SPSCurrent()
   gridfunctions.Register("GradPhi", _grad_phi_child);
   gridfunctions.Register("V", _phi_child);
 
-  hephaestus::Coefficients coefs;
+  Coefficients coefs;
   coefs._scalars.Register("electric_conductivity", _sigma);
 
   hephaestus::ScalarPotentialSource sps(
@@ -278,7 +278,7 @@ OpenCoilSolver::SPSCurrent()
     aux_gf.Register("grad_phi_child", _grad_phi_child);
     aux_gf.Register("source_current_density", _j_child);
 
-    hephaestus::Coefficients aux_coef;
+    Coefficients aux_coef;
     aux_coef._scalars.Register("electrical_conductivity", _sigma);
 
     hephaestus::ScaledVectorGridFunctionAux current_density_auxsolver(

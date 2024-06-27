@@ -4,8 +4,7 @@ namespace hephaestus
 {
 
 void
-AuxSolvers::Init(const hephaestus::GridFunctions & gridfunctions,
-                 hephaestus::Coefficients & coefficients)
+AuxSolvers::Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients)
 {
   for (const auto & [name, auxsolver] : *this)
   {

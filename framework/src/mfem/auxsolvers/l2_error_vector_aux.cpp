@@ -11,7 +11,7 @@ L2ErrorVectorPostprocessor::L2ErrorVectorPostprocessor(const hephaestus::InputPa
 
 void
 L2ErrorVectorPostprocessor::Init(const hephaestus::GridFunctions & gridfunctions,
-                                 hephaestus::Coefficients & coefficients)
+                                 Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_var_name);
   _vec_coeff = coefficients._vectors.Get(_vec_coef_name);

@@ -117,7 +117,7 @@ MFEMParsedCoefficientHelper::functionsOptimize()
 
 void
 MFEMParsedCoefficientHelper::Init(const hephaestus::GridFunctions & variables,
-                                  hephaestus::Coefficients & coefficients)
+                                  Coefficients & coefficients)
 {
   auto nmfem_gfs = _gridfunction_names.size();
   for (MooseIndex(_gridfunction_names) i = 0; i < nmfem_gfs; ++i)

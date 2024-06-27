@@ -17,7 +17,7 @@ public:
   {
   }
 
-  void Init(const hephaestus::GridFunctions & variables, hephaestus::Coefficients & coefficients)
+  void Init(const hephaestus::GridFunctions & variables, Coefficients & coefficients)
   {
     // To ensure conductivity on subdomains is converted into global coefficient
     // Hephaestus update for coefficients initialisation could address this
@@ -70,7 +70,7 @@ public:
     return joule_heating_aux;
   }
 
-  virtual void storeCoefficients(hephaestus::Coefficients & coefficients) override;
+  virtual void storeCoefficients(Coefficients & coefficients) override;
 
 protected:
   hephaestus::InputParameters joule_heating_params;

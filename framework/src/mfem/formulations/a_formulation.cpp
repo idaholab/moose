@@ -128,7 +128,7 @@ AFormulation::RegisterJouleHeatingDensityAux(const std::string & p_field_name,
 void
 AFormulation::RegisterCoefficients()
 {
-  hephaestus::Coefficients & coefficients = GetProblem()->_coefficients;
+  Coefficients & coefficients = GetProblem()->_coefficients;
   if (!coefficients._scalars.Has(_magnetic_permeability_name))
   {
     MFEM_ABORT(_magnetic_permeability_name + " coefficient not found.");

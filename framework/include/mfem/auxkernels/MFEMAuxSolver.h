@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "coefficients.hpp"
-#include "auxsolver_base.hpp"
+#include "coefficients.h"
+#include "auxsolver_base.h"
 
 class MFEMAuxSolver : public GeneralUserObject
 {
@@ -18,7 +18,7 @@ public:
 
   inline virtual std::shared_ptr<hephaestus::AuxSolver> getAuxSolver() const { return _auxsolver; }
 
-  virtual void storeCoefficients(hephaestus::Coefficients & coefficients) {}
+  virtual void storeCoefficients(Coefficients & coefficients) {}
 
 protected:
   std::shared_ptr<hephaestus::AuxSolver> _auxsolver{nullptr};

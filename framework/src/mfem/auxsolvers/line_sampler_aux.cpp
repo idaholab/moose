@@ -74,8 +74,7 @@ LineSampler::WriteToFile(std::ofstream & filestream, std::string sep)
 }
 
 void
-LineSamplerAux::Init(const hephaestus::GridFunctions & gridfunctions,
-                     hephaestus::Coefficients & coefficients)
+LineSamplerAux::Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_gridfunction_name);
   _line_sampler = std::make_shared<LineSampler>(*_gf, _start_pos, _end_pos, _num_pts);

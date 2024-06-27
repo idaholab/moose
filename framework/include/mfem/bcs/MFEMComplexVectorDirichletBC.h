@@ -2,7 +2,7 @@
 
 #include "MFEMBoundaryCondition.h"
 #include "MFEMVectorFunctionCoefficient.h"
-#include "boundary_conditions.hpp"
+#include "boundary_conditions.h"
 
 class MFEMComplexVectorDirichletBC : public MFEMBoundaryCondition
 {

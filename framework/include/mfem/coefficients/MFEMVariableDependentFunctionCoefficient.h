@@ -1,7 +1,7 @@
 #pragma once
 #include "MFEMCoefficient.h"
 #include "PlatypusUtils.h"
-#include "auxsolvers.hpp"
+#include "auxsolvers.h"
 
 class MFEMVariableDependentFunctionCoefficient : public MFEMCoefficient,
                                                  public hephaestus::CoupledCoefficient

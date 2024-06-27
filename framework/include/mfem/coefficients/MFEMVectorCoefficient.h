@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "coefficients.hpp"
+#include "coefficients.h"
 #include "Function.h"
 
 class MFEMVectorCoefficient : public GeneralUserObject

@@ -15,8 +15,7 @@ CoefficientAux::CoefficientAux(std::string gf_name,
 }
 
 void
-CoefficientAux::Init(const hephaestus::GridFunctions & gridfunctions,
-                     hephaestus::Coefficients & coefficients)
+CoefficientAux::Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_gf_name);
   _coef = coefficients._scalars.Get(_coef_name);

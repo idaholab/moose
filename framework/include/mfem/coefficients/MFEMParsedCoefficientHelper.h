@@ -3,7 +3,7 @@
 #include "FunctionParserUtils.h"
 #include "MFEMCoefficient.h"
 #include "PlatypusUtils.h"
-#include "auxsolvers.hpp"
+#include "auxsolvers.h
 #include "libmesh/fparser_ad.hh"
 #include "libmesh/quadrature.h"
 
@@ -52,8 +52,7 @@ public:
                      const std::vector<std::string> & constant_expressions,
                      const std::vector<std::string> & _mfem_coefficient_names,
                      const std::vector<std::string> & _mfem_gridfunction_names);
-  void Init(const hephaestus::GridFunctions & variables,
-            hephaestus::Coefficients & coefficients) override;
+  void Init(const hephaestus::GridFunctions & variables, Coefficients & coefficients) override;
 
   double Eval(mfem::ElementTransformation & trans, const mfem::IntegrationPoint & ip) override;
 

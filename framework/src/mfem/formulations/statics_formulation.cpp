@@ -88,7 +88,7 @@ StaticsFormulation::RegisterGridFunctions()
 void
 StaticsFormulation::RegisterCoefficients()
 {
-  hephaestus::Coefficients & coefficients = GetProblem()->_coefficients;
+  Coefficients & coefficients = GetProblem()->_coefficients;
   if (!coefficients._scalars.Has(_alpha_coef_name))
   {
     MFEM_ABORT(_alpha_coef_name + " coefficient not found.");

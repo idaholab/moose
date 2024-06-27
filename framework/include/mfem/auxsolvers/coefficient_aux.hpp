@@ -1,5 +1,5 @@
 #pragma once
-#include "auxsolver_base.hpp"
+#include "auxsolver_base.h"
 
 namespace hephaestus
 {
@@ -15,8 +15,7 @@ public:
 
   ~CoefficientAux() override = default;
 
-  void Init(const hephaestus::GridFunctions & gridfunctions,
-            hephaestus::Coefficients & coefficients) override;
+  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 
   virtual void BuildBilinearForm();
   virtual void BuildLinearForm();

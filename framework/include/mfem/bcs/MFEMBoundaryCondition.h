@@ -1,9 +1,9 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "boundary_conditions.hpp"
-#include "gridfunctions.hpp"
-#include "coefficients.hpp"
+#include "boundary_conditions.h"
+#include "gridfunctions.h"
+#include "coefficients.h"
 #include "Function.h"
 
 class MFEMBoundaryCondition : public GeneralUserObject

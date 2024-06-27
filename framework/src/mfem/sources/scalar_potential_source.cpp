@@ -27,7 +27,7 @@ void
 ScalarPotentialSource::Init(hephaestus::GridFunctions & gridfunctions,
                             const hephaestus::FESpaces & fespaces,
                             hephaestus::BCMap & bc_map,
-                            hephaestus::Coefficients & coefficients)
+                            Coefficients & coefficients)
 {
   _h1_fe_space = fespaces.Get(_h1_fespace_name);
   _h_curl_fe_space = fespaces.Get(_hcurl_fespace_name);

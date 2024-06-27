@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MFEMFormulation.h"
-#include "factory.hpp"
+#include "factory.h"
 
 class CustomFormulation : public MFEMFormulation
 {

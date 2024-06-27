@@ -16,7 +16,7 @@ VectorCoefficientAux::VectorCoefficientAux(std::string gf_name,
 
 void
 VectorCoefficientAux::Init(const hephaestus::GridFunctions & gridfunctions,
-                           hephaestus::Coefficients & coefficients)
+                           Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_gf_name);
   _vec_coef = coefficients._vectors.Get(_vec_coef_name);

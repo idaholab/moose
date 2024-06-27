@@ -174,7 +174,7 @@ MFEMProblem::addMaterial(const std::string & kernel_name,
   for (unsigned int bid = 0; bid < mfem_material.blocks.size(); ++bid)
   {
     int block = std::stoi(mfem_material.blocks[bid]);
-    hephaestus::Subdomain mfem_subdomain(name, block);
+    Subdomain mfem_subdomain(name, block);
     mfem_material.storeCoefficients(mfem_subdomain);
     _coefficients._subdomains.push_back(mfem_subdomain);
   }

@@ -225,7 +225,7 @@ void
 EquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
                      const hephaestus::FESpaces & fespaces,
                      hephaestus::BCMap & bc_map,
-                     hephaestus::Coefficients & coefficients)
+                     Coefficients & coefficients)
 {
 
   // Add optional kernels to the EquationSystem

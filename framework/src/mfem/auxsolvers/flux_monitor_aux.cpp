@@ -79,8 +79,7 @@ FluxMonitorAux::FluxMonitorAux(std::string var_name, int face_attr, std::string 
 }
 
 void
-FluxMonitorAux::Init(const hephaestus::GridFunctions & gridfunctions,
-                     hephaestus::Coefficients & coefficients)
+FluxMonitorAux::Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_var_name);
   if (coefficients._scalars.Has(_coef_name))
