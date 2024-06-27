@@ -1753,7 +1753,13 @@ $as_echo "#define LIBTORCH_ENABLED 1" >>confdefs.h
         libtorch_support=true
 
         if test "$libtorch_library" = yes; then :
+
+                    if test "${LIBTORCH_DIR+set}" = set; then :
+  libtorch_library="${LIBTORCH_DIR}"
+else
   libtorch_library="$ac_pwd/framework/contrib/libtorch"
+fi
+
 fi
 
 cat >>confdefs.h <<_ACEOF

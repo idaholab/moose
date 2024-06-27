@@ -48,7 +48,11 @@ AS_IF([test "$libtorch_support" = yes],
         AC_DEFINE(LIBTORCH_ENABLED, 1, [Whether to use libtorch-related code or not])
         AC_SUBST([libtorch_support],[true])
         AS_IF([test "$libtorch_library" = yes],
-              [libtorch_library="$ac_pwd/framework/contrib/libtorch"])
+              [
+                    AS_IF([test "${LIBTORCH_DIR+set}" = set],
+                          [libtorch_library="${LIBTORCH_DIR}"],
+                          [libtorch_library="$ac_pwd/framework/contrib/libtorch"])
+              ])
         AC_DEFINE_UNQUOTED(LIBTORCH_DIR, [$libtorch_library], [The directory where libtorch is installed])
         AC_SUBST([libtorch_library])
         AC_MSG_RESULT([Libtorch library path: $libtorch_library])
