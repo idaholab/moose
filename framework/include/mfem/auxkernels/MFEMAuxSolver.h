@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "auxsolvers.hpp"
-#include "gridfunctions.hpp"
+#include "coefficients.hpp"
+#include "auxsolver_base.hpp"
 
 class MFEMAuxSolver : public GeneralUserObject
 {
