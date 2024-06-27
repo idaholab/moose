@@ -1,4 +1,4 @@
-# Reference Residual Convergence
+# ReferenceResidualConvergence
 
 The `ReferenceResidualConvergence` object facilitates the assesment of convergence properties of MOOSE applications and allows extensions to provide the user more control over the application behaviour. This convergence object replaces [ReferenceResidualProblem.md], and as such the capabilities are similar to `ReferenceResidualProblem`.
 
