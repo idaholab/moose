@@ -102,6 +102,7 @@ addActionTypes(Syntax & syntax)
   // TODO Organize these somewhere
   registerTask("init_physics", false);
   registerTask("init_component_physics", false);
+  registerTask("component_meta", false);
   registerTask("setup_component", false);
 
   // This task does not construct an object, but it needs all of the parameters that
@@ -284,6 +285,7 @@ addActionTypes(Syntax & syntax)
 
   // clang-format off
   syntax.addDependencySets("(meta_action)"
+                           "(component_meta)"
                            "(dynamic_object_registration)"
                            "(common_output)"
                            "(set_global_params)"
@@ -469,9 +471,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("DynamicObjectRegistrationAction", "Problem");
 
   registerSyntax("SetupMeshAction", "Mesh");
-  // Components could create a Mesh without a Mesh block
-  registerSyntax("SetupMeshAction", "ActionComponents");
   registerSyntax("SetupMeshCompleteAction", "Mesh");
+  // Components should be able create a Mesh without a Mesh block
+  registerSyntax("CreateMeshSetupActionsForComponents", "ActionComponents");
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");
   registerSyntax("AddMeshGeneratorAction", "Mesh/*");

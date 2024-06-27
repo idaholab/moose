@@ -176,19 +176,14 @@ public:
   template <class T>
   std::vector<T *> getPhysics()
   {
-    // we need to create the map first to ensure that all physics in the map are unique
-    // and the physics are sorted by their names
-    typename std::map<std::string, const std::shared_ptr<T>> physics;
-    for (auto act_ptr : _all_ptrs)
-    {
-      auto p = std::dynamic_pointer_cast<T>(act_ptr);
-      if (p)
-        physics.insert(std::make_pair(act_ptr->name(), p));
-    }
-    // construct the vector from the map entries
-    std::vector<T *> physics_vector;
-    for (auto & pair : physics)
-      physics_vector.push_back(pair.second.get());
+    const auto physics_vector = getActions<T>();
+    for (const auto phys_ptr : physics_vector)
+      if (!dynamic_cast<PhysicsBase *>(phys_ptr))
+        mooseError("The Physics requested of type '",
+                   MooseUtils::prettyCppType<T>(),
+                   "' and name '",
+                   phys_ptr->name(),
+                   "' is not derived from the PhysicsBase class");
     return physics_vector;
   }
 
