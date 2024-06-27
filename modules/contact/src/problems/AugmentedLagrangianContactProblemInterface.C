@@ -7,25 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AugmentedLagrangianContactProblem.h"
-
-// MOOSE includes
-#include "AuxiliarySystem.h"
-#include "DisplacedProblem.h"
-#include "MooseApp.h"
-#include "MooseMesh.h"
-#include "MooseVariable.h"
-#include "NearestNodeLocator.h"
-#include "NonlinearSystem.h"
-#include "PenetrationLocator.h"
-
-#include "SystemBase.h"
-#include "Assembly.h"
-#include "Executioner.h"
-#include "AddVariableAction.h"
-#include "ConstraintWarehouse.h"
-#include "MortarUserObject.h"
-#include "AugmentedLagrangeInterface.h"
 #include "AugmentedLagrangianContactProblemInterface.h"
 
 InputParameters
