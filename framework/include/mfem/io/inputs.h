@@ -9,7 +9,7 @@
 #include "coefficients.h"
 #include "outputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class InputParameters
@@ -54,4 +54,4 @@ public:
   };
 };
 
-} // namespace hephaestus
+} // namespace platypus

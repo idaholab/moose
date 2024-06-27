@@ -1,10 +1,10 @@
 #include "auxsolvers.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 void
-AuxSolvers::Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients)
+AuxSolvers::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
 {
   for (const auto & [name, auxsolver] : *this)
   {
@@ -24,4 +24,4 @@ AuxSolvers::Solve(double t)
   }
 }
 
-} // namespace hephaestus
+} // namespace platypus

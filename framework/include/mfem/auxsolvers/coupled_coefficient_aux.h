@@ -3,7 +3,7 @@
 
 // Specify classes that perform auxiliary calculations on GridFunctions or
 // Coefficients.
-namespace hephaestus
+namespace platypus
 {
 
 // Class to allow creation of scalar coefficients that are coupled to
@@ -16,11 +16,11 @@ protected:
   double _scalar_val;
 
 public:
-  CoupledCoefficient(const hephaestus::InputParameters & params);
+  CoupledCoefficient(const platypus::InputParameters & params);
 
   ~CoupledCoefficient() override = default;
 
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 
   double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 
@@ -29,4 +29,4 @@ public:
   std::string _coupled_var_name; // name of the variable
 };
 
-} // namespace hephaestus
+} // namespace platypus

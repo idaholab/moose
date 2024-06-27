@@ -6,10 +6,10 @@
 #include "inputs.h"
 #include "kernels.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class Source : public hephaestus::Kernel<mfem::ParLinearForm>
+class Source : public platypus::Kernel<mfem::ParLinearForm>
 {
 public:
   Source() = default;
@@ -17,9 +17,9 @@ public:
   // NB: must be virtual to avoid leaks (ensure correct subclass destructor!)
   ~Source() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override
   {
   }
@@ -28,4 +28,4 @@ public:
   virtual void SubtractSource(mfem::ParGridFunction * gf) = 0;
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -6,7 +6,7 @@
 #include <vector>
 #include <mfem.hpp>
 
-namespace hephaestus
+namespace platypus
 {
 
 /// Lightweight adaptor over an std::map from strings to pointer to T
@@ -172,4 +172,4 @@ protected:
 private:
   MapType _field_map{};
 };
-} // namespace hephaestus
+} // namespace platypus

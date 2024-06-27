@@ -1,6 +1,6 @@
 #include "problem_builder.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 Problem::~Problem()
@@ -21,56 +21,56 @@ ProblemBuilder::SetMesh(std::shared_ptr<mfem::ParMesh> pmesh)
 }
 
 void
-ProblemBuilder::SetFESpaces(hephaestus::FESpaces & fespaces)
+ProblemBuilder::SetFESpaces(platypus::FESpaces & fespaces)
 {
   // logger.info("Setting FE Spaces");
   GetProblem()->_fespaces = fespaces;
 }
 
 void
-ProblemBuilder::SetGridFunctions(hephaestus::GridFunctions & gridfunctions)
+ProblemBuilder::SetGridFunctions(platypus::GridFunctions & gridfunctions)
 {
   // logger.info("Setting GridFunctions");
   GetProblem()->_gridfunctions = gridfunctions;
 }
 
 void
-ProblemBuilder::SetBoundaryConditions(hephaestus::BCMap & bc_map)
+ProblemBuilder::SetBoundaryConditions(platypus::BCMap & bc_map)
 {
   // logger.info("Setting Boundary Conditions");
   GetProblem()->_bc_map = bc_map;
 }
 
 void
-ProblemBuilder::SetAuxSolvers(hephaestus::AuxSolvers & preprocessors)
+ProblemBuilder::SetAuxSolvers(platypus::AuxSolvers & preprocessors)
 {
   // logger.info("Setting AuxSolvers");
   GetProblem()->_preprocessors = preprocessors;
 }
 
 void
-ProblemBuilder::SetPostprocessors(hephaestus::AuxSolvers & postprocessors)
+ProblemBuilder::SetPostprocessors(platypus::AuxSolvers & postprocessors)
 {
   // logger.info("Setting Postprocessors");
   GetProblem()->_postprocessors = postprocessors;
 }
 
 void
-ProblemBuilder::SetSources(hephaestus::Sources & sources)
+ProblemBuilder::SetSources(platypus::Sources & sources)
 {
   // logger.info("Setting Sources");
   GetProblem()->_sources = sources;
 }
 
 void
-ProblemBuilder::SetOutputs(hephaestus::Outputs & outputs)
+ProblemBuilder::SetOutputs(platypus::Outputs & outputs)
 {
   // logger.info("Setting Outputs");
   GetProblem()->_outputs = outputs;
 }
 
 void
-ProblemBuilder::SetSolverOptions(hephaestus::InputParameters & solver_options)
+ProblemBuilder::SetSolverOptions(platypus::InputParameters & solver_options)
 {
   // logger.info("Setting Solver Options");
   GetProblem()->_solver_options = solver_options;
@@ -154,7 +154,7 @@ ProblemBuilder::AddGridFunction(std::string gridfunction_name, std::string fespa
 
 void
 ProblemBuilder::AddBoundaryCondition(std::string bc_name,
-                                     std::shared_ptr<hephaestus::BoundaryCondition> bc)
+                                     std::shared_ptr<platypus::BoundaryCondition> bc)
 {
   if (GetProblem()->_bc_map.Has(bc_name))
   {
@@ -166,7 +166,7 @@ ProblemBuilder::AddBoundaryCondition(std::string bc_name,
 }
 
 void
-ProblemBuilder::AddAuxSolver(std::string auxsolver_name, std::shared_ptr<hephaestus::AuxSolver> aux)
+ProblemBuilder::AddAuxSolver(std::string auxsolver_name, std::shared_ptr<platypus::AuxSolver> aux)
 {
   if (GetProblem()->_preprocessors.Has(auxsolver_name))
   {
@@ -179,7 +179,7 @@ ProblemBuilder::AddAuxSolver(std::string auxsolver_name, std::shared_ptr<hephaes
 
 void
 ProblemBuilder::AddPostprocessor(std::string auxsolver_name,
-                                 std::shared_ptr<hephaestus::AuxSolver> aux)
+                                 std::shared_ptr<platypus::AuxSolver> aux)
 {
   if (GetProblem()->_postprocessors.Has(auxsolver_name))
   {
@@ -191,7 +191,7 @@ ProblemBuilder::AddPostprocessor(std::string auxsolver_name,
 }
 
 void
-ProblemBuilder::AddSource(std::string source_name, std::shared_ptr<hephaestus::Source> source)
+ProblemBuilder::AddSource(std::string source_name, std::shared_ptr<platypus::Source> source)
 {
   if (GetProblem()->_sources.Has(source_name))
   {
@@ -296,7 +296,7 @@ ProblemBuilder::ConstructJacobianSolverWithOptions(SolverType type, SolverParams
     }
     case SolverType::SUPER_LU:
     {
-      auto solver = std::make_shared<hephaestus::SuperLUSolver>(GetProblem()->_comm);
+      auto solver = std::make_shared<platypus::SuperLUSolver>(GetProblem()->_comm);
 
       GetProblem()->_jacobian_solver = solver;
       break;
@@ -372,4 +372,4 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
   InitializeOutputs();
 }
 
-} // namespace hephaestus
+} // namespace platypus

@@ -1,7 +1,7 @@
 #pragma once
 #include "mfem.hpp"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Specifies interface specific to EM formulations.
@@ -63,4 +63,4 @@ public:
     MFEM_ABORT("Joule heating auxsolver not available for this formulation");
   }
 };
-} // namespace hephaestus
+} // namespace platypus

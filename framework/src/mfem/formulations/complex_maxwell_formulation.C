@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 ComplexMaxwellFormulation::ComplexMaxwellFormulation(std::string alpha_coef_name,
@@ -33,13 +33,13 @@ ComplexMaxwellFormulation::ConstructJacobianSolver()
 void
 ComplexMaxwellFormulation::ConstructOperator()
 {
-  auto new_operator = std::make_unique<hephaestus::ComplexMaxwellOperator>(*GetProblem(),
-                                                                           _h_curl_var_complex_name,
-                                                                           _h_curl_var_real_name,
-                                                                           _h_curl_var_imag_name,
-                                                                           _alpha_coef_name,
-                                                                           _mass_coef_name,
-                                                                           _loss_coef_name);
+  auto new_operator = std::make_unique<platypus::ComplexMaxwellOperator>(*GetProblem(),
+                                                                         _h_curl_var_complex_name,
+                                                                         _h_curl_var_real_name,
+                                                                         _h_curl_var_imag_name,
+                                                                         _alpha_coef_name,
+                                                                         _mass_coef_name,
+                                                                         _loss_coef_name);
 
   GetProblem()->SetOperator(std::move(new_operator));
 }
@@ -48,8 +48,8 @@ void
 ComplexMaxwellFormulation::RegisterGridFunctions()
 {
   int & myid = GetProblem()->_myid;
-  hephaestus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
-  hephaestus::FESpaces & fespaces = GetProblem()->_fespaces;
+  platypus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
+  platypus::FESpaces & fespaces = GetProblem()->_fespaces;
 
   // Register default ParGridFunctions of state gridfunctions if not provided
   if (!gridfunctions.Has(_h_curl_var_real_name))
@@ -125,7 +125,7 @@ ComplexMaxwellFormulation::RegisterCoefficients()
           &_one_coef, coefficients._scalars.Get("magnetic_permeability"), fracFunc));
 }
 
-ComplexMaxwellOperator::ComplexMaxwellOperator(hephaestus::Problem & problem,
+ComplexMaxwellOperator::ComplexMaxwellOperator(platypus::Problem & problem,
                                                std::string h_curl_var_complex_name,
                                                std::string h_curl_var_real_name,
                                                std::string h_curl_var_imag_name,
@@ -221,4 +221,4 @@ ComplexMaxwellOperator::Solve(mfem::Vector & X)
   _problem._gridfunctions.GetRef(_trial_var_names.at(1)) = _u->imag();
 }
 
-} // namespace hephaestus
+} // namespace platypus

@@ -1,17 +1,17 @@
 #include "vector_fe_mass_kernel.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-VectorFEMassKernel::VectorFEMassKernel(const hephaestus::InputParameters & params)
+VectorFEMassKernel::VectorFEMassKernel(const platypus::InputParameters & params)
   : Kernel(params), _coef_name(params.GetParam<std::string>("CoefficientName"))
 {
 }
 
 void
-VectorFEMassKernel::Init(hephaestus::GridFunctions & gridfunctions,
-                         const hephaestus::FESpaces & fespaces,
-                         hephaestus::BCMap & bc_map,
+VectorFEMassKernel::Init(platypus::GridFunctions & gridfunctions,
+                         const platypus::FESpaces & fespaces,
+                         platypus::BCMap & bc_map,
                          Coefficients & coefficients)
 {
   _coef = coefficients._scalars.Get(_coef_name);
@@ -23,4 +23,4 @@ VectorFEMassKernel::Apply(mfem::ParBilinearForm * blf)
   blf->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(*_coef));
 };
 
-} // namespace hephaestus
+} // namespace platypus

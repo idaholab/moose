@@ -7,7 +7,7 @@
 
 // Specify classes that perform auxiliary calculations on GridFunctions or
 // Coefficients.
-namespace hephaestus
+namespace platypus
 {
 
 class AuxSolver;
@@ -20,8 +20,7 @@ public:
   // NB: require virtual destructor to avoid leaks.
   virtual ~AuxSolver() = default;
 
-  virtual void Init(const hephaestus::GridFunctions & gridfunctions,
-                    Coefficients & coefficients) = 0;
+  virtual void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) = 0;
 
   virtual void Solve(double t = 0.0) = 0;
 
@@ -31,8 +30,8 @@ public:
   [[nodiscard]] inline int Priority() const { return _priority; }
 
   static bool PriorityComparator(
-      const std::pair<std::shared_ptr<hephaestus::AuxSolver>, std::string> & first_comp,
-      const std::pair<std::shared_ptr<hephaestus::AuxSolver>, std::string> & second_comp)
+      const std::pair<std::shared_ptr<platypus::AuxSolver>, std::string> & first_comp,
+      const std::pair<std::shared_ptr<platypus::AuxSolver>, std::string> & second_comp)
   {
     return (first_comp.first->Priority() < second_comp.first->Priority());
   }
@@ -41,4 +40,4 @@ private:
   int _priority{0};
 };
 
-} // namespace hephaestus
+} // namespace platypus

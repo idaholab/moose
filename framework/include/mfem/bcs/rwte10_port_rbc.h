@@ -1,7 +1,7 @@
 #pragma once
 #include "robin_bc_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class RWTE10PortRBC : public RobinBC
@@ -53,4 +53,4 @@ public:
   std::unique_ptr<mfem::VectorFunctionCoefficient> _u_imag;
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -2,12 +2,12 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 VectorCoefficientAux::VectorCoefficientAux(std::string gf_name,
                                            std::string vec_coef_name,
-                                           hephaestus::InputParameters solver_options)
+                                           platypus::InputParameters solver_options)
   : _gf_name(std::move(gf_name)),
     _vec_coef_name(std::move(vec_coef_name)),
     _solver_options(std::move(solver_options))
@@ -15,7 +15,7 @@ VectorCoefficientAux::VectorCoefficientAux(std::string gf_name,
 }
 
 void
-VectorCoefficientAux::Init(const hephaestus::GridFunctions & gridfunctions,
+VectorCoefficientAux::Init(const platypus::GridFunctions & gridfunctions,
                            Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_gf_name);
@@ -25,7 +25,7 @@ VectorCoefficientAux::Init(const hephaestus::GridFunctions & gridfunctions,
   BuildBilinearForm();
   BuildLinearForm();
   _a_mat = std::unique_ptr<mfem::HypreParMatrix>(_a->ParallelAssemble());
-  _solver = std::make_unique<hephaestus::DefaultJacobiPCGSolver>(_solver_options, *_a_mat);
+  _solver = std::make_unique<platypus::DefaultJacobiPCGSolver>(_solver_options, *_a_mat);
 }
 
 void
@@ -74,4 +74,4 @@ VectorCoefficientAux::Solve(double t)
   _gf->SetFromTrueDofs(x);
 }
 
-} // namespace hephaestus
+} // namespace platypus

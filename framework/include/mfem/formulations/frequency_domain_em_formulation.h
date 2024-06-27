@@ -2,12 +2,12 @@
 #include "complex_em_formulation_interface.h"
 #include "steady_state_problem_builder.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Specifies output interfaces of a frequency-domain EM formulation.
-class FrequencyDomainEMFormulation : public hephaestus::SteadyStateProblemBuilder,
-                                     public hephaestus::ComplexEMFormulationInterface
+class FrequencyDomainEMFormulation : public platypus::SteadyStateProblemBuilder,
+                                     public platypus::ComplexEMFormulationInterface
 {
 public:
   FrequencyDomainEMFormulation();
@@ -16,4 +16,4 @@ public:
 protected:
   mfem::ConstantCoefficient * _freq_coef{nullptr};
 };
-} // namespace hephaestus
+} // namespace platypus

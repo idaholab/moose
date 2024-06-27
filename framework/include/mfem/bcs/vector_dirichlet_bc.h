@@ -1,7 +1,7 @@
 #pragma once
 #include "essential_bc_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class VectorDirichletBC : public EssentialBC
@@ -32,4 +32,4 @@ public:
   APPLY_TYPE _boundary_apply_type;
 };
 
-} // namespace hephaestus
+} // namespace platypus

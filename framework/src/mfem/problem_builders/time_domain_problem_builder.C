@@ -1,11 +1,11 @@
 #include "time_domain_problem_builder.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 std::vector<mfem::ParGridFunction *>
 TimeDomainProblemBuilder::RegisterTimeDerivatives(std::vector<std::string> gridfunction_names,
-                                                  hephaestus::GridFunctions & gridfunctions)
+                                                  platypus::GridFunctions & gridfunctions)
 {
   std::vector<mfem::ParGridFunction *> time_derivatives;
 
@@ -63,4 +63,4 @@ TimeDomainProblemBuilder::ConstructTimestepper()
   GetProblem()->_ode_solver->Init(*(GetProblem()->GetOperator()));
 }
 
-} // namespace hephaestus
+} // namespace platypus

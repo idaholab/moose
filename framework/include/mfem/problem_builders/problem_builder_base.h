@@ -8,7 +8,7 @@
 #include <iostream>
 #include <memory>
 
-namespace hephaestus
+namespace platypus
 {
 
 /// Base problem class.
@@ -19,13 +19,13 @@ public:
   virtual ~Problem();
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
-  hephaestus::BCMap _bc_map;
+  platypus::BCMap _bc_map;
   Coefficients _coefficients;
-  hephaestus::AuxSolvers _preprocessors;
-  hephaestus::AuxSolvers _postprocessors;
-  hephaestus::Sources _sources;
-  hephaestus::Outputs _outputs;
-  hephaestus::InputParameters _solver_options;
+  platypus::AuxSolvers _preprocessors;
+  platypus::AuxSolvers _postprocessors;
+  platypus::Sources _sources;
+  platypus::Outputs _outputs;
+  platypus::InputParameters _solver_options;
 
   std::unique_ptr<mfem::ODESolver> _ode_solver{nullptr};
   std::unique_ptr<mfem::BlockVector> _f{nullptr};
@@ -34,9 +34,9 @@ public:
   std::shared_ptr<mfem::Solver> _jacobian_solver{nullptr};
   std::shared_ptr<mfem::NewtonSolver> _nonlinear_solver{nullptr};
 
-  hephaestus::FECollections _fecs;
-  hephaestus::FESpaces _fespaces;
-  hephaestus::GridFunctions _gridfunctions;
+  platypus::FECollections _fecs;
+  platypus::FESpaces _fespaces;
+  platypus::GridFunctions _gridfunctions;
 
   MPI_Comm _comm;
   int _myid;
@@ -66,14 +66,14 @@ public:
   }
 
   void SetMesh(std::shared_ptr<mfem::ParMesh> pmesh);
-  void SetFESpaces(hephaestus::FESpaces & fespaces);
-  void SetGridFunctions(hephaestus::GridFunctions & gridfunctions);
-  void SetBoundaryConditions(hephaestus::BCMap & bc_map);
-  void SetAuxSolvers(hephaestus::AuxSolvers & preprocessors);
-  void SetPostprocessors(hephaestus::AuxSolvers & postprocessors);
-  void SetSources(hephaestus::Sources & sources);
-  void SetOutputs(hephaestus::Outputs & outputs);
-  void SetSolverOptions(hephaestus::InputParameters & solver_options);
+  void SetFESpaces(platypus::FESpaces & fespaces);
+  void SetGridFunctions(platypus::GridFunctions & gridfunctions);
+  void SetBoundaryConditions(platypus::BCMap & bc_map);
+  void SetAuxSolvers(platypus::AuxSolvers & preprocessors);
+  void SetPostprocessors(platypus::AuxSolvers & postprocessors);
+  void SetSources(platypus::Sources & sources);
+  void SetOutputs(platypus::Outputs & outputs);
+  void SetSolverOptions(platypus::InputParameters & solver_options);
   void SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner);
   void SetJacobianSolver(std::shared_ptr<mfem::Solver> solver);
   void SetCoefficients(Coefficients & coefficients);
@@ -84,10 +84,10 @@ public:
                   int ordering = mfem::Ordering::byNODES);
   void AddGridFunction(std::string gridfunction_name, std::string fespace_name);
 
-  void AddBoundaryCondition(std::string bc_name, std::shared_ptr<hephaestus::BoundaryCondition> bc);
-  void AddAuxSolver(std::string auxsolver_name, std::shared_ptr<hephaestus::AuxSolver> aux);
-  void AddPostprocessor(std::string auxsolver_name, std::shared_ptr<hephaestus::AuxSolver> aux);
-  void AddSource(std::string source_name, std::shared_ptr<hephaestus::Source> source);
+  void AddBoundaryCondition(std::string bc_name, std::shared_ptr<platypus::BoundaryCondition> bc);
+  void AddAuxSolver(std::string auxsolver_name, std::shared_ptr<platypus::AuxSolver> aux);
+  void AddPostprocessor(std::string auxsolver_name, std::shared_ptr<platypus::AuxSolver> aux);
+  void AddSource(std::string source_name, std::shared_ptr<platypus::Source> source);
 
   virtual void RegisterFESpaces() = 0;
   virtual void RegisterGridFunctions() = 0;
@@ -114,7 +114,7 @@ public:
 
 protected:
   /// Protected constructor. Derived classes must call this constructor.
-  ProblemBuilder(hephaestus::Problem * problem) : _problem{problem} {}
+  ProblemBuilder(platypus::Problem * problem) : _problem{problem} {}
 
   /// Supported Jacobian solver types.
   enum class SolverType
@@ -146,11 +146,11 @@ protected:
                                               ._tolerance = 1e-16,
                                               ._abs_tolerance = 1e-16,
                                               ._max_iteration = 1000,
-                                              ._print_level = 2,//GetGlobalPrintLevel(),
+                                              ._print_level = 2, // GetGlobalPrintLevel(),
                                               ._k_dim = 10});
 
   /// Overridden in derived classes.
-  [[nodiscard]] virtual hephaestus::Problem * GetProblem() const = 0;
+  [[nodiscard]] virtual platypus::Problem * GetProblem() const = 0;
 
   /// Helper template getter with safety check.
   template <class TDerivedProblem>
@@ -158,7 +158,7 @@ protected:
   {
     if (!_problem)
     {
-      MFEM_ABORT("hephaestus::Problem instance is NULL.");
+      MFEM_ABORT("platypus::Problem instance is NULL.");
     }
 
     return static_cast<TDerivedProblem *>(_problem);
@@ -179,7 +179,7 @@ protected:
   mfem::ConstantCoefficient _one_coef{1.0};
 
 private:
-  hephaestus::Problem * _problem{nullptr};
+  platypus::Problem * _problem{nullptr};
 };
 
 /// Interface for problem builders that are constructing problems with an equation system.
@@ -191,7 +191,7 @@ public:
 
   /// Add a kernel to the problem's equation system.
   template <class T>
-  void AddKernel(std::string var_name, std::shared_ptr<hephaestus::Kernel<T>> kernel)
+  void AddKernel(std::string var_name, std::shared_ptr<platypus::Kernel<T>> kernel)
   {
     GetEquationSystem()->AddTrialVariableNameIfMissing(var_name);
     GetEquationSystem()->AddKernel(var_name, std::move(kernel));
@@ -199,7 +199,7 @@ public:
 
 protected:
   /// Implemented in derived classes. Returns a pointer to the problem operator's equation system.
-  [[nodiscard]] virtual hephaestus::EquationSystem * GetEquationSystem() const = 0;
+  [[nodiscard]] virtual platypus::EquationSystem * GetEquationSystem() const = 0;
 };
 
-} // namespace hephaestus
+} // namespace platypus

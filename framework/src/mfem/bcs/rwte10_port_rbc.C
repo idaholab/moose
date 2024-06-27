@@ -1,6 +1,6 @@
 #include "rwte10_port_rbc.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 RWTE10PortRBC::RWTE10PortRBC(const std::string & name_,
@@ -79,4 +79,4 @@ RWTE10PortRBC::RWTE10Imag(const mfem::Vector & x, mfem::Vector & v)
   }
 }
 
-} // namespace hephaestus
+} // namespace platypus

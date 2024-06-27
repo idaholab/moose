@@ -1,6 +1,6 @@
 #include "time_domain_equation_system_problem_builder.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 void
@@ -14,4 +14,4 @@ TimeDomainEquationSystemProblemBuilder::InitializeKernels()
                             GetProblem()->_coefficients);
 }
 
-} // namespace hephaestus
+} // namespace platypus

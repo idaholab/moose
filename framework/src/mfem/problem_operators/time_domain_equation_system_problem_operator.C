@@ -1,6 +1,6 @@
 #include "time_domain_equation_system_problem_operator.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 void
@@ -58,4 +58,4 @@ TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(double dt)
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 }
 
-} // namespace hephaestus
+} // namespace platypus

@@ -2,7 +2,7 @@
 #include "executioner_base.h"
 #include "time_domain_problem_builder.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class TransientExecutioner : public Executioner
@@ -11,7 +11,7 @@ public:
   mutable double _t_step; // Time step
 
   TransientExecutioner() = default;
-  explicit TransientExecutioner(const hephaestus::InputParameters & params);
+  explicit TransientExecutioner(const platypus::InputParameters & params);
 
   ~TransientExecutioner() override = default;
 
@@ -28,7 +28,7 @@ private:
   mutable int _it;         // Time index
   int _vis_steps;          // Number of cyces between each output update
   mutable bool _last_step; // Flag to check if current step is final
-  hephaestus::TimeDomainProblem * _problem{nullptr};
+  platypus::TimeDomainProblem * _problem{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

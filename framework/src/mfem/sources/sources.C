@@ -1,12 +1,12 @@
 #include "sources.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 void
-Sources::Init(hephaestus::GridFunctions & gridfunctions,
-              const hephaestus::FESpaces & fespaces,
-              hephaestus::BCMap & bc_map,
+Sources::Init(platypus::GridFunctions & gridfunctions,
+              const platypus::FESpaces & fespaces,
+              platypus::BCMap & bc_map,
               Coefficients & coefficients)
 {
   for (const auto & [name, source] : *this)
@@ -33,4 +33,4 @@ Sources::SubtractSources(mfem::ParGridFunction * gf)
   }
 }
 
-} // namespace hephaestus
+} // namespace platypus

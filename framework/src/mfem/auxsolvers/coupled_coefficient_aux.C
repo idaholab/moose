@@ -1,16 +1,15 @@
 #include "coupled_coefficient_aux.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-CoupledCoefficient::CoupledCoefficient(const hephaestus::InputParameters & params)
+CoupledCoefficient::CoupledCoefficient(const platypus::InputParameters & params)
   : _coupled_var_name(params.GetParam<std::string>("CoupledVariableName"))
 {
 }
 
 void
-CoupledCoefficient::Init(const hephaestus::GridFunctions & gridfunctions,
-                         Coefficients & coefficients)
+CoupledCoefficient::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_coupled_var_name);
 }
@@ -21,4 +20,4 @@ CoupledCoefficient::Eval(mfem::ElementTransformation & T, const mfem::Integratio
   return _gf->GetValue(T, ip);
 }
 
-} // namespace hephaestus
+} // namespace platypus

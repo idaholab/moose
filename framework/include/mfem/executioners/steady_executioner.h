@@ -2,21 +2,21 @@
 #include "executioner_base.h"
 #include "steady_state_problem_builder.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class SteadyExecutioner : public Executioner
 {
 public:
   SteadyExecutioner() = default;
-  explicit SteadyExecutioner(const hephaestus::InputParameters & params);
+  explicit SteadyExecutioner(const platypus::InputParameters & params);
 
   void Solve() const override;
 
   void Execute() const override;
 
 private:
-  hephaestus::SteadyStateProblem * _problem{nullptr};
+  platypus::SteadyStateProblem * _problem{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

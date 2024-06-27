@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 BoundaryCondition::BoundaryCondition(std::string name_, mfem::Array<int> bdr_attributes_)
@@ -17,4 +17,4 @@ BoundaryCondition::GetMarkers(mfem::Mesh & mesh)
   return _markers;
 }
 
-} // namespace hephaestus
+} // namespace platypus

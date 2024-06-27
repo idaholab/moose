@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 // Pushes an element into a vector if the vector does not yet contain that same
@@ -35,7 +35,7 @@ ClosedCoilSolver::ClosedCoilSolver(std::string source_efield_gf_name,
                                    const int electrode_face,
                                    bool electric_field_transfer,
                                    std::string source_jfield_gf_name,
-                                   hephaestus::InputParameters solver_options)
+                                   platypus::InputParameters solver_options)
   : _coil_domains(std::move(coil_dom)),
     _electric_field_transfer(std::move(electric_field_transfer)),
     _hcurl_fespace_name(std::move(hcurl_fespace_name)),
@@ -49,9 +49,9 @@ ClosedCoilSolver::ClosedCoilSolver(std::string source_efield_gf_name,
 }
 
 void
-ClosedCoilSolver::Init(hephaestus::GridFunctions & gridfunctions,
-                       const hephaestus::FESpaces & fespaces,
-                       hephaestus::BCMap & bc_map,
+ClosedCoilSolver::Init(platypus::GridFunctions & gridfunctions,
+                       const platypus::FESpaces & fespaces,
+                       platypus::BCMap & bc_map,
                        Coefficients & coefficients)
 {
   // Retrieving the parent FE space and mesh
@@ -179,14 +179,14 @@ ClosedCoilSolver::Apply(mfem::ParLinearForm * lf)
 
   if (_source_current_density)
   {
-    hephaestus::GridFunctions aux_gf;
+    platypus::GridFunctions aux_gf;
     aux_gf.Register("source_electric_field", _source_electric_field);
     aux_gf.Register("source_current_density", _source_current_density);
 
     Coefficients aux_coef;
     aux_coef._scalars.Register("electrical_conductivity", _sigma);
 
-    hephaestus::ScaledVectorGridFunctionAux current_density_auxsolver(
+    platypus::ScaledVectorGridFunctionAux current_density_auxsolver(
         "source_electric_field", "source_current_density", "electrical_conductivity", 1.0);
     current_density_auxsolver.Init(aux_gf, aux_coef);
     current_density_auxsolver.Solve();
@@ -505,25 +505,25 @@ ClosedCoilSolver::SolveTransition()
   auto v_parent = std::make_shared<mfem::ParGridFunction>(_h1_fe_space_parent.get());
   *v_parent = 0.0;
 
-  hephaestus::FESpaces fespaces;
-  hephaestus::BCMap bc_maps;
+  platypus::FESpaces fespaces;
+  platypus::BCMap bc_maps;
 
   Coefficients coefs;
   coefs._scalars.Register("electrical_conductivity", _sigma);
 
-  hephaestus::GridFunctions gridfunctions;
+  platypus::GridFunctions gridfunctions;
   gridfunctions.Register("ElectricField_parent", _source_electric_field);
   gridfunctions.Register("V_parent", v_parent);
 
-  hephaestus::OpenCoilSolver opencoil("ElectricField_parent",
-                                      "V_parent",
-                                      "I",
-                                      "electrical_conductivity",
-                                      _transition_domain,
-                                      _elec_attrs,
-                                      true,
-                                      "",
-                                      _solver_options);
+  platypus::OpenCoilSolver opencoil("ElectricField_parent",
+                                    "V_parent",
+                                    "I",
+                                    "electrical_conductivity",
+                                    _transition_domain,
+                                    _elec_attrs,
+                                    true,
+                                    "",
+                                    _solver_options);
 
   opencoil.Init(gridfunctions, fespaces, bc_maps, coefs);
   opencoil.Apply(_final_lf.get());
@@ -548,7 +548,7 @@ ClosedCoilSolver::SolveCoil()
   mfem::ParLinearForm b_coil(_h1_fe_space_coil.get());
   b_coil = 0.0;
 
-  hephaestus::AttrToMarker(_transition_domain, _transition_markers, _mesh_coil->attributes.Max());
+  platypus::AttrToMarker(_transition_domain, _transition_markers, _mesh_coil->attributes.Max());
   a_t.AddDomainIntegrator(new mfem::DiffusionIntegrator(*_sigma), _transition_markers);
   a_t.Assemble();
   a_t.Finalize();
@@ -590,7 +590,7 @@ ClosedCoilSolver::SolveCoil()
   mfem::Vector x0_coil;
   mfem::Vector b0_coil;
   a_coil.FormLinearSystem(ess_bdr_tdofs_coil, vaux_coil, b_coil, a0_coil, x0_coil, b0_coil);
-  hephaestus::DefaultH1PCGSolver a_coil_solver(_solver_options, a0_coil);
+  platypus::DefaultH1PCGSolver a_coil_solver(_solver_options, a0_coil);
   a_coil_solver.Mult(b0_coil, x0_coil);
   a_coil.RecoverFEMSolution(x0_coil, b_coil, vaux_coil);
 
@@ -609,7 +609,7 @@ ClosedCoilSolver::SolveCoil()
   _mesh_coil->Transfer(*_electric_field_aux_coil, *_source_electric_field);
 
   mfem::ParBilinearForm m1(_h_curl_fe_space_parent);
-  hephaestus::AttrToMarker(_coil_domains, _coil_markers, _mesh_parent->attributes.Max());
+  platypus::AttrToMarker(_coil_domains, _coil_markers, _mesh_parent->attributes.Max());
 
   m1.AddDomainIntegrator(new mfem::VectorFEMassIntegrator(_sigma.get()), _coil_markers);
   m1.Assemble();
@@ -755,4 +755,4 @@ Plane3D::Side(const mfem::Vector v)
     return 0;
 }
 
-} // namespace hephaestus
+} // namespace platypus

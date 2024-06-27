@@ -1,10 +1,10 @@
 #pragma once
 #include "source_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class DivFreeSource : public hephaestus::Source
+class DivFreeSource : public platypus::Source
 {
 public:
   DivFreeSource(std::string src_coef_name,
@@ -12,15 +12,15 @@ public:
                 std::string hcurl_fespace_name,
                 std::string h1_fespace_name,
                 std::string potential_gf_name = "_source_potential",
-                hephaestus::InputParameters solver_options = hephaestus::InputParameters(),
+                platypus::InputParameters solver_options = platypus::InputParameters(),
                 bool perform_helmholtz_projection = true);
 
   // Override virtual Source destructor to avoid leaks.
   ~DivFreeSource() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void Apply(mfem::ParLinearForm * lf) override;
   void SubtractSource(mfem::ParGridFunction * gf) override;
@@ -31,7 +31,7 @@ public:
   std::string _hcurl_fespace_name;
   std::string _h1_fespace_name;
   std::string _potential_gf_name;
-  const hephaestus::InputParameters _solver_options;
+  const platypus::InputParameters _solver_options;
   bool _perform_helmholtz_projection;
   std::unique_ptr<mfem::ParBilinearForm> _h_curl_mass;
 
@@ -40,9 +40,9 @@ public:
 
   std::shared_ptr<mfem::ParGridFunction> _q; // Potential
 
-  hephaestus::BCMap * _bc_map{nullptr};
-  hephaestus::GridFunctions * _gridfunctions{nullptr};
-  const hephaestus::FESpaces * _fespaces{nullptr};
+  platypus::BCMap * _bc_map{nullptr};
+  platypus::GridFunctions * _gridfunctions{nullptr};
+  const platypus::FESpaces * _fespaces{nullptr};
 
   mfem::VectorCoefficient * _source_vec_coef{nullptr};
 
@@ -55,4 +55,4 @@ public:
   mfem::Solver * _solver{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

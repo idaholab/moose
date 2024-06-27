@@ -1,17 +1,17 @@
 #pragma once
 #include "auxsolver_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class HelmholtzProjector
 {
 public:
-  HelmholtzProjector(const hephaestus::InputParameters & params);
+  HelmholtzProjector(const platypus::InputParameters & params);
 
-  void Project(hephaestus::GridFunctions & gridfunctions,
-               const hephaestus::FESpaces & fespaces,
-               hephaestus::BCMap & bc_map);
+  void Project(platypus::GridFunctions & gridfunctions,
+               const platypus::FESpaces & fespaces,
+               platypus::BCMap & bc_map);
 
   void SetForms();
   void SetGrad();
@@ -39,9 +39,9 @@ private:
   mfem::ParGridFunction * _div_free_src_gf{nullptr};
 
   mfem::Array<int> _ess_bdr_tdofs;
-  hephaestus::BCMap * _bc_map;
+  platypus::BCMap * _bc_map;
 
-  hephaestus::InputParameters _solver_options;
+  platypus::InputParameters _solver_options;
 };
 
-} // namespace hephaestus
+} // namespace platypus

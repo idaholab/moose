@@ -4,10 +4,10 @@
 #include "named_fields_map.h"
 #include "robin_bcs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class BCMap : public hephaestus::NamedFieldsMap<hephaestus::BoundaryCondition>
+class BCMap : public platypus::NamedFieldsMap<platypus::BoundaryCondition>
 {
 public:
   mfem::Array<int> GetEssentialBdrMarkers(const std::string & name_, mfem::Mesh * mesh_);
@@ -33,4 +33,4 @@ public:
                           mfem::Mesh * mesh_);
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -5,7 +5,7 @@
 #include "scaled_vector_gridfunction_aux.h"
 #include "source_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 double highV(const mfem::Vector & x, double t);
@@ -16,16 +16,16 @@ void inheritBdrAttributes(const mfem::ParMesh * parent_mesh, mfem::ParSubMesh * 
 // Applies the HelmholtzProjector onto the J GridFunction to clean it of any
 // divergences. This is for the simplest case with no BCs
 void cleanDivergence(std::shared_ptr<mfem::ParGridFunction> Vec_GF,
-                     hephaestus::InputParameters solve_pars);
+                     platypus::InputParameters solve_pars);
 
 // The more complicated case where BCs are needed
-void cleanDivergence(const hephaestus::GridFunctions & gfs,
-                     const hephaestus::BCMap & bcs,
+void cleanDivergence(const platypus::GridFunctions & gfs,
+                     const platypus::BCMap & bcs,
                      const std::string vec_gf_name,
                      const std::string scalar_gf_name,
-                     hephaestus::InputParameters solve_pars);
+                     platypus::InputParameters solve_pars);
 
-class OpenCoilSolver : public hephaestus::Source
+class OpenCoilSolver : public platypus::Source
 {
 
 public:
@@ -37,17 +37,17 @@ public:
                  const std::pair<int, int> electrodes,
                  bool electric_field_transfer = true,
                  std::string source_jfield_gf_name = "",
-                 hephaestus::InputParameters solver_options = hephaestus::InputParameters(
-                     {{"Tolerance", float(1.0e-20)},
-                      {"AbsTolerance", float(1.0e-20)},
-                      {"MaxIter", (unsigned int)1000},
-                      {"PrintLevel", 2}})); // GetGlobalPrintLevel()}}));
+                 platypus::InputParameters solver_options =
+                     platypus::InputParameters({{"Tolerance", float(1.0e-20)},
+                                                {"AbsTolerance", float(1.0e-20)},
+                                                {"MaxIter", (unsigned int)1000},
+                                                {"PrintLevel", 2}})); // GetGlobalPrintLevel()}}));
 
   ~OpenCoilSolver() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void Apply(mfem::ParLinearForm * lf) override;
   void SubtractSource(mfem::ParGridFunction * gf) override {};
@@ -97,7 +97,7 @@ private:
 
   bool _electric_field_transfer;
 
-  hephaestus::InputParameters _solver_options;
+  platypus::InputParameters _solver_options;
 
   mfem::Array<int> _coil_domains;
   std::pair<int, int> _elec_attrs;
@@ -148,10 +148,10 @@ private:
   std::unique_ptr<mfem::ParBilinearForm> _m1{nullptr};
 
   // BC Map
-  hephaestus::BCMap _bc_maps;
+  platypus::BCMap _bc_maps;
 
   // Final LinearForm
   std::unique_ptr<mfem::ParLinearForm> _final_lf{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

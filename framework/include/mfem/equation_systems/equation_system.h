@@ -5,7 +5,7 @@
 #include "named_fields_map.h"
 #include "sources.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 /*
@@ -15,10 +15,10 @@ mixed and nonlinear forms) and build methods
 class EquationSystem : public mfem::Operator
 {
 public:
-  using ParBilinearFormKernel = hephaestus::Kernel<mfem::ParBilinearForm>;
-  using ParLinearFormKernel = hephaestus::Kernel<mfem::ParLinearForm>;
-  using ParNonlinearFormKernel = hephaestus::Kernel<mfem::ParNonlinearForm>;
-  using ParMixedBilinearFormKernel = hephaestus::Kernel<mfem::ParMixedBilinearForm>;
+  using ParBilinearFormKernel = platypus::Kernel<mfem::ParBilinearForm>;
+  using ParLinearFormKernel = platypus::Kernel<mfem::ParLinearForm>;
+  using ParNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
+  using ParMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
 
   EquationSystem() = default;
   ~EquationSystem() override;
@@ -35,10 +35,10 @@ public:
   std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
 
   // Components of weak form. // Named according to test variable
-  hephaestus::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
-  hephaestus::NamedFieldsMap<mfem::ParLinearForm> _lfs;
-  hephaestus::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  hephaestus::NamedFieldsMap<hephaestus::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+  platypus::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
+  platypus::NamedFieldsMap<mfem::ParLinearForm> _lfs;
+  platypus::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
+  platypus::NamedFieldsMap<platypus::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
 
   // add test variable to EquationSystem;
@@ -58,20 +58,20 @@ public:
                  const std::string & test_var_name,
                  std::shared_ptr<ParMixedBilinearFormKernel> mblf_kernel);
 
-  virtual void ApplyBoundaryConditions(hephaestus::BCMap & bc_map);
+  virtual void ApplyBoundaryConditions(platypus::BCMap & bc_map);
 
   // override to add kernels
   virtual void AddKernels() {}
 
   // Build forms
-  virtual void Init(hephaestus::GridFunctions & gridfunctions,
-                    const hephaestus::FESpaces & fespaces,
-                    hephaestus::BCMap & bc_map,
+  virtual void Init(platypus::GridFunctions & gridfunctions,
+                    const platypus::FESpaces & fespaces,
+                    platypus::BCMap & bc_map,
                     Coefficients & coefficients);
-  virtual void BuildLinearForms(hephaestus::BCMap & bc_map, hephaestus::Sources & sources);
+  virtual void BuildLinearForms(platypus::BCMap & bc_map, platypus::Sources & sources);
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
-  virtual void BuildEquationSystem(hephaestus::BCMap & bc_map, hephaestus::Sources & sources);
+  virtual void BuildEquationSystem(platypus::BCMap & bc_map, platypus::Sources & sources);
 
   // Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -89,7 +89,7 @@ public:
 
   // Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  hephaestus::GridFunctions & gridfunctions);
+                                  platypus::GridFunctions & gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
@@ -104,14 +104,14 @@ protected:
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
-  hephaestus::NamedFieldsMap<std::vector<std::shared_ptr<ParBilinearFormKernel>>> _blf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParBilinearFormKernel>>> _blf_kernels_map;
 
-  hephaestus::NamedFieldsMap<std::vector<std::shared_ptr<ParLinearFormKernel>>> _lf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParLinearFormKernel>>> _lf_kernels_map;
 
-  hephaestus::NamedFieldsMap<std::vector<std::shared_ptr<ParNonlinearFormKernel>>> _nlf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParNonlinearFormKernel>>> _nlf_kernels_map;
 
-  hephaestus::NamedFieldsMap<
-      hephaestus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>
+  platypus::NamedFieldsMap<
+      platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>
       _mblf_kernels_map_map;
 
   mutable mfem::OperatorHandle _jacobian;
@@ -134,9 +134,9 @@ public:
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 
   virtual void SetTimeStep(double dt);
-  virtual void UpdateEquationSystem(hephaestus::BCMap & bc_map, hephaestus::Sources & sources);
+  virtual void UpdateEquationSystem(platypus::BCMap & bc_map, platypus::Sources & sources);
   mfem::ConstantCoefficient _dt_coef; // Coefficient for timestep scaling
   std::vector<std::string> _trial_var_time_derivative_names;
 };
 
-} // namespace hephaestus
+} // namespace platypus

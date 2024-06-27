@@ -1,7 +1,7 @@
 #pragma once
 #include "kernel_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 /*
@@ -10,13 +10,13 @@ namespace hephaestus
 class DiffusionKernel : public Kernel<mfem::ParBilinearForm>
 {
 public:
-  DiffusionKernel(const hephaestus::InputParameters & params);
+  DiffusionKernel(const platypus::InputParameters & params);
 
   ~DiffusionKernel() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void Apply(mfem::ParBilinearForm * blf) override;
 
@@ -24,4 +24,4 @@ public:
   mfem::Coefficient * _coef{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

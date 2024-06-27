@@ -1,7 +1,7 @@
 #pragma once
 #include "kernel_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 /*
@@ -10,13 +10,13 @@ namespace hephaestus
 class WeakCurlCurlKernel : public Kernel<mfem::ParLinearForm>
 {
 public:
-  WeakCurlCurlKernel(const hephaestus::InputParameters & params);
+  WeakCurlCurlKernel(const platypus::InputParameters & params);
 
   ~WeakCurlCurlKernel() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void Apply(mfem::ParLinearForm * lf) override;
 
@@ -29,4 +29,4 @@ public:
   std::unique_ptr<mfem::ParBilinearForm> _curl_curl;
 };
 
-} // namespace hephaestus
+} // namespace platypus

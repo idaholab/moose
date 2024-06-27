@@ -1,6 +1,6 @@
 #include "problem_operator_interface.h"
 
-namespace hephaestus
+namespace platypus
 {
 void
 ProblemOperatorInterface::SetGridFunctions()

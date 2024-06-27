@@ -4,7 +4,7 @@
 #include "auxsolvers.h"
 
 class MFEMVariableDependentFunctionCoefficient : public MFEMCoefficient,
-                                                 public hephaestus::CoupledCoefficient
+                                                 public platypus::CoupledCoefficient
 {
 public:
   static InputParameters validParams();

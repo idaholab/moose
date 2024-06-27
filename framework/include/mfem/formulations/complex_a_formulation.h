@@ -1,7 +1,7 @@
 #pragma once
 #include "complex_maxwell_formulation.h"
 
-namespace hephaestus
+namespace platypus
 {
 /*
 Formulation for solving:
@@ -25,7 +25,7 @@ Robin boundaries weakly constrain (ν∇×A)×n + γ(n×n×A) = F
 Divergence cleaning (such as via Helmholtz projection)
 should be performed on J before use in this operator.
 */
-class ComplexAFormulation : public hephaestus::ComplexMaxwellFormulation
+class ComplexAFormulation : public platypus::ComplexMaxwellFormulation
 {
 
 public:
@@ -73,16 +73,16 @@ public:
 
 protected:
   const std::string & _magnetic_reluctivity_name =
-      hephaestus::ComplexMaxwellFormulation::_alpha_coef_name;
+      platypus::ComplexMaxwellFormulation::_alpha_coef_name;
   const std::string & _electric_conductivity_name =
-      hephaestus::ComplexMaxwellFormulation::_beta_coef_name;
+      platypus::ComplexMaxwellFormulation::_beta_coef_name;
   const std::string & _electric_permittivity_name =
-      hephaestus::ComplexMaxwellFormulation::_zeta_coef_name;
+      platypus::ComplexMaxwellFormulation::_zeta_coef_name;
   const std::string & _magnetic_vector_potential_complex_name =
-      hephaestus::ComplexMaxwellFormulation::_h_curl_var_complex_name;
+      platypus::ComplexMaxwellFormulation::_h_curl_var_complex_name;
   const std::string & _magnetic_vector_potential_real_name =
-      hephaestus::ComplexMaxwellFormulation::_h_curl_var_real_name;
+      platypus::ComplexMaxwellFormulation::_h_curl_var_real_name;
   const std::string & _magnetic_vector_potential_imag_name =
-      hephaestus::ComplexMaxwellFormulation::_h_curl_var_imag_name;
+      platypus::ComplexMaxwellFormulation::_h_curl_var_imag_name;
 };
-} // namespace hephaestus
+} // namespace platypus

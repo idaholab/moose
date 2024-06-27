@@ -4,7 +4,7 @@
 #include "problem_operator_interface.h"
 #include "equation_system_interface.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 /// Problem operator for time-dependent problems with an equation system.
@@ -12,10 +12,10 @@ class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator
                                                 public EquationSystemInterface
 {
 public:
-  TimeDomainEquationSystemProblemOperator(hephaestus::Problem &) = delete;
+  TimeDomainEquationSystemProblemOperator(platypus::Problem &) = delete;
   TimeDomainEquationSystemProblemOperator(
-      hephaestus::Problem & problem,
-      std::unique_ptr<hephaestus::TimeDependentEquationSystem> equation_system)
+      platypus::Problem & problem,
+      std::unique_ptr<platypus::TimeDependentEquationSystem> equation_system)
     : TimeDomainProblemOperator(problem), _equation_system{std::move(equation_system)}
   {
   }
@@ -25,7 +25,7 @@ public:
 
   void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override;
 
-  [[nodiscard]] hephaestus::TimeDependentEquationSystem * GetEquationSystem() const override
+  [[nodiscard]] platypus::TimeDependentEquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
     {
@@ -40,7 +40,7 @@ protected:
 
 private:
   std::vector<mfem::ParGridFunction *> _trial_variable_time_derivatives;
-  std::unique_ptr<hephaestus::TimeDependentEquationSystem> _equation_system{nullptr};
+  std::unique_ptr<platypus::TimeDependentEquationSystem> _equation_system{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

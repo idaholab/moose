@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 void
@@ -22,7 +22,7 @@ VectorGridFunctionCrossProductCoefficient::Eval(mfem::Vector & uxv,
   mfem::Vector u_vec, v_vec;
   _u_gf.GetVectorValue(T, ip, u_vec);
   _v_gf.GetVectorValue(T, ip, v_vec);
-  hephaestus::cross_product(u_vec, v_vec, uxv);
+  platypus::cross_product(u_vec, v_vec, uxv);
 }
 
 VectorGridFunctionCrossProductAux::VectorGridFunctionCrossProductAux(
@@ -38,7 +38,7 @@ VectorGridFunctionCrossProductAux::VectorGridFunctionCrossProductAux(
 }
 
 void
-VectorGridFunctionCrossProductAux::Init(const hephaestus::GridFunctions & gridfunctions,
+VectorGridFunctionCrossProductAux::Init(const platypus::GridFunctions & gridfunctions,
                                         Coefficients & coefficients)
 {
   _u_gf = gridfunctions.Get(_u_gf_name);
@@ -46,9 +46,9 @@ VectorGridFunctionCrossProductAux::Init(const hephaestus::GridFunctions & gridfu
 
   coefficients._vectors.Register(
       _vec_coef_name,
-      std::make_shared<hephaestus::VectorGridFunctionCrossProductCoefficient>(*_u_gf, *_v_gf));
+      std::make_shared<platypus::VectorGridFunctionCrossProductCoefficient>(*_u_gf, *_v_gf));
 
   VectorCoefficientAux::Init(gridfunctions, coefficients);
 }
 
-} // namespace hephaestus
+} // namespace platypus

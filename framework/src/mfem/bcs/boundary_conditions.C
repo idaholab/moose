@@ -1,6 +1,6 @@
 #include "boundary_conditions.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 mfem::Array<int>
@@ -15,7 +15,7 @@ BCMap::GetEssentialBdrMarkers(const std::string & name_, mfem::Mesh * mesh_)
   {
     if (bc_->_name == name_)
     {
-      auto bc = std::dynamic_pointer_cast<hephaestus::EssentialBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<platypus::EssentialBC>(bc_);
       if (bc != nullptr)
       {
         ess_bdrs = bc->GetMarkers(*mesh_);
@@ -39,7 +39,7 @@ BCMap::ApplyEssentialBCs(const std::string & name_,
   {
     if (bc_->_name == name_)
     {
-      auto bc = std::dynamic_pointer_cast<hephaestus::EssentialBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<platypus::EssentialBC>(bc_);
       if (bc != nullptr)
       {
         bc->ApplyBC(gridfunc, mesh_);
@@ -60,7 +60,7 @@ BCMap::ApplyEssentialBCs(const std::string & name_,
   {
     if (bc_->_name == name_)
     {
-      auto bc = std::dynamic_pointer_cast<hephaestus::EssentialBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<platypus::EssentialBC>(bc_);
       if (bc != nullptr)
       {
         bc->ApplyBC(gridfunc, mesh_);
@@ -79,7 +79,7 @@ BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::LinearForm & lf, mfem
   {
     if (bc_->_name == name_)
     {
-      auto bc = std::dynamic_pointer_cast<hephaestus::IntegratedBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<platypus::IntegratedBC>(bc_);
       if (bc != nullptr)
       {
         bc->GetMarkers(*mesh_);
@@ -99,7 +99,7 @@ BCMap::ApplyIntegratedBCs(const std::string & name_,
   {
     if (bc_->_name == name_)
     {
-      auto bc = std::dynamic_pointer_cast<hephaestus::IntegratedBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<platypus::IntegratedBC>(bc_);
       if (bc != nullptr)
       {
         bc->GetMarkers(*mesh_);
@@ -118,7 +118,7 @@ BCMap::ApplyIntegratedBCs(const std::string & name_,
   {
     if (bc_->_name == name_)
     {
-      auto bc = std::dynamic_pointer_cast<hephaestus::RobinBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<platypus::RobinBC>(bc_);
       if (bc != nullptr)
       {
         bc->GetMarkers(*mesh_);
@@ -128,4 +128,4 @@ BCMap::ApplyIntegratedBCs(const std::string & name_,
   }
 };
 
-} // namespace hephaestus
+} // namespace platypus

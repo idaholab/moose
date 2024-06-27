@@ -1,8 +1,8 @@
 #include "frequency_domain_em_formulation.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 FrequencyDomainEMFormulation::FrequencyDomainEMFormulation() = default;
 
-} // namespace hephaestus
+} // namespace platypus

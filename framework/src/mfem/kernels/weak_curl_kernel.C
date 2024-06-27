@@ -1,9 +1,9 @@
 #include "weak_curl_kernel.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-WeakCurlKernel::WeakCurlKernel(const hephaestus::InputParameters & params)
+WeakCurlKernel::WeakCurlKernel(const platypus::InputParameters & params)
   : Kernel(params),
     _hcurl_gf_name(params.GetParam<std::string>("HCurlVarName")),
     _hdiv_gf_name(params.GetParam<std::string>("HDivVarName")),
@@ -12,9 +12,9 @@ WeakCurlKernel::WeakCurlKernel(const hephaestus::InputParameters & params)
 }
 
 void
-WeakCurlKernel::Init(hephaestus::GridFunctions & gridfunctions,
-                     const hephaestus::FESpaces & fespaces,
-                     hephaestus::BCMap & bc_map,
+WeakCurlKernel::Init(platypus::GridFunctions & gridfunctions,
+                     const platypus::FESpaces & fespaces,
+                     platypus::BCMap & bc_map,
                      Coefficients & coefficients)
 {
   _u = gridfunctions.Get(_hcurl_gf_name);
@@ -34,4 +34,4 @@ WeakCurlKernel::Apply(mfem::ParLinearForm * lf)
   _weak_curl->AddMultTranspose(*_v, *lf);
 }
 
-} // namespace hephaestus
+} // namespace platypus

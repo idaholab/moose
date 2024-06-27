@@ -1,7 +1,7 @@
 #pragma once
 #include "integrated_bc_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class RobinBC : public IntegratedBC
@@ -21,4 +21,4 @@ public:
   virtual void ApplyBC(mfem::ParSesquilinearForm & a);
 };
 
-} // namespace hephaestus
+} // namespace platypus

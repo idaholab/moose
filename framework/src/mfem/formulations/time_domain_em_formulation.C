@@ -1,6 +1,6 @@
 #include "time_domain_em_formulation.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // enum EMField {
@@ -55,4 +55,4 @@ namespace hephaestus
 TimeDomainEMFormulation::TimeDomainEMFormulation() = default;
 ;
 
-} // namespace hephaestus
+} // namespace platypus

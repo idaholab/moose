@@ -3,22 +3,22 @@
 #include <iostream>
 #include <memory>
 
-//#include "logging.h"
+// #include "logging.h"
 #include "../common/pfem_extras.hpp"
 #include "gridfunctions.h"
 #include "mesh_extras.hpp"
 #include "named_fields_map.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class Outputs : public hephaestus::NamedFieldsMap<mfem::DataCollection>
+class Outputs : public platypus::NamedFieldsMap<mfem::DataCollection>
 {
   friend class ProblemBuilder;
 
 public:
   Outputs();
-  Outputs(hephaestus::GridFunctions & gridfunctions);
+  Outputs(platypus::GridFunctions & gridfunctions);
 
   ~Outputs();
 
@@ -74,7 +74,7 @@ public:
 
 private:
   std::map<std::string, mfem::socketstream *> _socks;
-  hephaestus::GridFunctions * _gridfunctions;
+  platypus::GridFunctions * _gridfunctions;
   std::vector<std::string> _output_field_names{};
   int _cycle{0};
   bool _use_glvis{false};
@@ -82,13 +82,13 @@ private:
   int _n_ranks, _my_rank;
 
   // Initialize Outputs with Gridfunctions; used in ProblemBuilder
-  void Init(hephaestus::GridFunctions & gridfunctions)
+  void Init(platypus::GridFunctions & gridfunctions)
   {
     SetGridFunctions(gridfunctions);
     Reset();
   }
 
-  void SetGridFunctions(hephaestus::GridFunctions & gridfunctions)
+  void SetGridFunctions(platypus::GridFunctions & gridfunctions)
   {
     _gridfunctions = &gridfunctions;
   }
@@ -134,9 +134,9 @@ private:
   }
 
   // Write out summary of last timestep to console
-  void WriteConsoleSummary(int _my_rank, double t) 
-  { 
-    //logger.info("step {}, \tt = {}", _cycle, t); 
+  void WriteConsoleSummary(int _my_rank, double t)
+  {
+    // logger.info("step {}, \tt = {}", _cycle, t);
   }
 
   // Initialize GLVis sockets and fields
@@ -175,4 +175,4 @@ private:
   }
 };
 
-} // namespace hephaestus
+} // namespace platypus

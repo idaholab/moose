@@ -1,7 +1,7 @@
 #pragma once
 #include "boundary_condition_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class IntegratedBC : public BoundaryCondition
@@ -21,4 +21,4 @@ public:
   void ApplyBC(mfem::ParComplexLinearForm & b) override;
 };
 
-} // namespace hephaestus
+} // namespace platypus

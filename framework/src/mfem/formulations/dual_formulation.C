@@ -44,7 +44,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 DualFormulation::DualFormulation(std::string alpha_coef_name,
@@ -79,23 +79,23 @@ DualFormulation::ConstructJacobianSolver()
 void
 DualFormulation::ConstructOperator()
 {
-  hephaestus::InputParameters weak_form_params;
+  platypus::InputParameters weak_form_params;
   weak_form_params.SetParam("HCurlVarName", _h_curl_var_name);
   weak_form_params.SetParam("HDivVarName", _h_div_var_name);
   weak_form_params.SetParam("AlphaCoefName", _alpha_coef_name);
   weak_form_params.SetParam("BetaCoefName", _beta_coef_name);
 
-  auto equation_system = std::make_unique<hephaestus::WeakCurlEquationSystem>(weak_form_params);
+  auto equation_system = std::make_unique<platypus::WeakCurlEquationSystem>(weak_form_params);
 
   GetProblem()->SetOperator(
-      std::make_unique<hephaestus::DualOperator>(*GetProblem(), std::move(equation_system)));
+      std::make_unique<platypus::DualOperator>(*GetProblem(), std::move(equation_system)));
 }
 
 void
 DualFormulation::RegisterGridFunctions()
 {
   int & myid = GetProblem()->_myid;
-  hephaestus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
+  platypus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
 
   // Register default ParGridFunctions of state gridfunctions if not provided
   if (!gridfunctions.Has(_h_curl_var_name))
@@ -140,7 +140,7 @@ DualFormulation::RegisterCoefficients()
   }
 }
 
-WeakCurlEquationSystem::WeakCurlEquationSystem(const hephaestus::InputParameters & params)
+WeakCurlEquationSystem::WeakCurlEquationSystem(const platypus::InputParameters & params)
   : _h_curl_var_name(params.GetParam<std::string>("HCurlVarName")),
     _h_div_var_name(params.GetParam<std::string>("HDivVarName")),
     _alpha_coef_name(params.GetParam<std::string>("AlphaCoefName")),
@@ -150,9 +150,9 @@ WeakCurlEquationSystem::WeakCurlEquationSystem(const hephaestus::InputParameters
 }
 
 void
-WeakCurlEquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
-                             const hephaestus::FESpaces & fespaces,
-                             hephaestus::BCMap & bc_map,
+WeakCurlEquationSystem::Init(platypus::GridFunctions & gridfunctions,
+                             const platypus::FESpaces & fespaces,
+                             platypus::BCMap & bc_map,
                              Coefficients & coefficients)
 {
   coefficients._scalars.Register(
@@ -170,29 +170,29 @@ WeakCurlEquationSystem::AddKernels()
   std::string dh_curl_var_dt = GetTimeDerivativeName(_h_curl_var_name);
 
   // (αv_{n}, ∇×u')
-  hephaestus::InputParameters weak_curl_params;
+  platypus::InputParameters weak_curl_params;
   weak_curl_params.SetParam("HCurlVarName", _h_curl_var_name);
   weak_curl_params.SetParam("HDivVarName", _h_div_var_name);
   weak_curl_params.SetParam("CoefficientName", _alpha_coef_name);
-  AddKernel(_h_curl_var_name, std::make_shared<hephaestus::WeakCurlKernel>(weak_curl_params));
+  AddKernel(_h_curl_var_name, std::make_shared<platypus::WeakCurlKernel>(weak_curl_params));
 
   // (αdt∇×u_{n+1}, ∇×u')
-  hephaestus::InputParameters curl_curl_params;
+  platypus::InputParameters curl_curl_params;
   curl_curl_params.SetParam("CoefficientName", _dtalpha_coef_name);
-  AddKernel(_h_curl_var_name, std::make_shared<hephaestus::CurlCurlKernel>(curl_curl_params));
+  AddKernel(_h_curl_var_name, std::make_shared<platypus::CurlCurlKernel>(curl_curl_params));
 
   // (βu_{n+1}, u')
-  hephaestus::InputParameters vector_fe_mass_params;
+  platypus::InputParameters vector_fe_mass_params;
   vector_fe_mass_params.SetParam("CoefficientName", _beta_coef_name);
   AddKernel(_h_curl_var_name,
-            std::make_shared<hephaestus::VectorFEMassKernel>(vector_fe_mass_params));
+            std::make_shared<platypus::VectorFEMassKernel>(vector_fe_mass_params));
 }
 
 void
 DualOperator::Init(mfem::Vector & X)
 {
   TimeDomainEquationSystemProblemOperator::Init(X);
-  auto * eqs = dynamic_cast<hephaestus::WeakCurlEquationSystem *>(GetEquationSystem());
+  auto * eqs = dynamic_cast<platypus::WeakCurlEquationSystem *>(GetEquationSystem());
 
   _h_curl_var_name = eqs->_h_curl_var_name;
   _h_div_var_name = eqs->_h_div_var_name;
@@ -238,4 +238,4 @@ DualOperator::SetGridFunctions()
   _true_rhs.Update(_block_true_offsets);
 }
 
-} // namespace hephaestus
+} // namespace platypus

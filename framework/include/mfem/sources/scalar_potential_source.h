@@ -1,10 +1,10 @@
 #pragma once
 #include "source_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class ScalarPotentialSource : public hephaestus::Source
+class ScalarPotentialSource : public platypus::Source
 {
 public:
   ScalarPotentialSource(std::string grad_phi_gf_name,
@@ -13,14 +13,14 @@ public:
                         std::string h1_fespace_name,
                         std::string coef_name,
                         int source_sign = -1,
-                        hephaestus::InputParameters solver_options = hephaestus::InputParameters());
+                        platypus::InputParameters solver_options = platypus::InputParameters());
 
   // Override virtual Source destructor to prevent leaks.
   ~ScalarPotentialSource() override;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void Apply(mfem::ParLinearForm * lf) override;
   void SubtractSource(mfem::ParGridFunction * gf) override;
@@ -36,12 +36,12 @@ public:
   std::string _h1_fespace_name;
   std::string _coef_name;
   int _source_sign;
-  const hephaestus::InputParameters _solver_options;
+  const platypus::InputParameters _solver_options;
 
   mfem::ParFiniteElementSpace * _h1_fe_space{nullptr};
   mfem::ParFiniteElementSpace * _h_curl_fe_space{nullptr};
   std::shared_ptr<mfem::ParGridFunction> _phi{nullptr}; // Potential
-  hephaestus::BCMap * _bc_map{nullptr};
+  platypus::BCMap * _bc_map{nullptr};
   mfem::Coefficient * _beta_coef{nullptr};
 
   std::unique_ptr<mfem::ParBilinearForm> _a0{nullptr};
@@ -57,7 +57,7 @@ public:
   std::unique_ptr<mfem::Vector> _b0_tdofs{nullptr};
 
   mutable mfem::HypreSolver * _amg_a0{nullptr};
-  mutable std::unique_ptr<hephaestus::DefaultH1PCGSolver> _a0_solver{nullptr};
+  mutable std::unique_ptr<platypus::DefaultH1PCGSolver> _a0_solver{nullptr};
 
   std::unique_ptr<mfem::ParLinearForm> _b0{nullptr};
   std::shared_ptr<mfem::ParGridFunction> _grad_phi{nullptr};
@@ -69,4 +69,4 @@ public:
   int _ir_order, _geom;
 };
 
-} // namespace hephaestus
+} // namespace platypus

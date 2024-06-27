@@ -1,6 +1,6 @@
 #include "steady_state_problem_builder.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 void
@@ -24,4 +24,4 @@ SteadyStateProblemBuilder::ConstructState()
       std::make_unique<mfem::BlockVector>(problem_operator->_true_offsets); // Vector of dofs
   problem_operator->Init(*(GetProblem()->_f)); // Set up initial conditions
 }
-} // namespace hephaestus
+} // namespace platypus

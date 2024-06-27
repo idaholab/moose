@@ -5,7 +5,7 @@
 
 #include "mesh_extras.hpp"
 
-namespace hephaestus
+namespace platypus
 {
 
 class BoundaryCondition
@@ -23,4 +23,4 @@ public:
   virtual void ApplyBC(mfem::ParComplexLinearForm & b) {}
 };
 
-} // namespace hephaestus
+} // namespace platypus

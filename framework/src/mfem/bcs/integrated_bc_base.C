@@ -1,6 +1,6 @@
 #include "integrated_bc_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 IntegratedBC::IntegratedBC(const std::string & name_, mfem::Array<int> bdr_attributes_)
@@ -37,4 +37,4 @@ IntegratedBC::ApplyBC(mfem::ParComplexLinearForm & b)
   b.AddBoundaryIntegrator(_lfi_re.release(), _lfi_im.release(), _markers);
 }
 
-} // namespace hephaestus
+} // namespace platypus

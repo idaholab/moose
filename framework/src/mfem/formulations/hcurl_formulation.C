@@ -40,7 +40,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 HCurlFormulation::HCurlFormulation(std::string alpha_coef_name,
@@ -55,14 +55,14 @@ HCurlFormulation::HCurlFormulation(std::string alpha_coef_name,
 void
 HCurlFormulation::ConstructOperator()
 {
-  hephaestus::InputParameters weak_form_params;
+  platypus::InputParameters weak_form_params;
   weak_form_params.SetParam("HCurlVarName", _h_curl_var_name);
   weak_form_params.SetParam("AlphaCoefName", _alpha_coef_name);
   weak_form_params.SetParam("BetaCoefName", _beta_coef_name);
 
-  auto equation_system = std::make_unique<hephaestus::CurlCurlEquationSystem>(weak_form_params);
+  auto equation_system = std::make_unique<platypus::CurlCurlEquationSystem>(weak_form_params);
 
-  GetProblem()->SetOperator(std::make_unique<hephaestus::TimeDomainEquationSystemProblemOperator>(
+  GetProblem()->SetOperator(std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(
       *GetProblem(), std::move(equation_system)));
 }
 
@@ -88,8 +88,8 @@ void
 HCurlFormulation::RegisterGridFunctions()
 {
   int & myid = GetProblem()->_myid;
-  hephaestus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
-  hephaestus::FESpaces & fespaces = GetProblem()->_fespaces;
+  platypus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
+  platypus::FESpaces & fespaces = GetProblem()->_fespaces;
 
   // Register default ParGridFunctions of state gridfunctions if not provided
   if (!gridfunctions.Has(_h_curl_var_name))
@@ -106,7 +106,7 @@ HCurlFormulation::RegisterGridFunctions()
   TimeDomainEquationSystemProblemBuilder::RegisterGridFunctions();
 };
 
-CurlCurlEquationSystem::CurlCurlEquationSystem(const hephaestus::InputParameters & params)
+CurlCurlEquationSystem::CurlCurlEquationSystem(const platypus::InputParameters & params)
   : _h_curl_var_name(params.GetParam<std::string>("HCurlVarName")),
     _alpha_coef_name(params.GetParam<std::string>("AlphaCoefName")),
     _beta_coef_name(params.GetParam<std::string>("BetaCoefName")),
@@ -115,9 +115,9 @@ CurlCurlEquationSystem::CurlCurlEquationSystem(const hephaestus::InputParameters
 }
 
 void
-CurlCurlEquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
-                             const hephaestus::FESpaces & fespaces,
-                             hephaestus::BCMap & bc_map,
+CurlCurlEquationSystem::Init(platypus::GridFunctions & gridfunctions,
+                             const platypus::FESpaces & fespaces,
+                             platypus::BCMap & bc_map,
                              Coefficients & coefficients)
 {
   coefficients._scalars.Register(
@@ -134,22 +134,20 @@ CurlCurlEquationSystem::AddKernels()
   std::string dh_curl_var_dt = GetTimeDerivativeName(_h_curl_var_name);
 
   // (α∇×u_{n}, ∇×u')
-  hephaestus::InputParameters weak_curl_curl_params;
+  platypus::InputParameters weak_curl_curl_params;
   weak_curl_curl_params.SetParam("CoupledVariableName", _h_curl_var_name);
   weak_curl_curl_params.SetParam("CoefficientName", _alpha_coef_name);
-  AddKernel(dh_curl_var_dt,
-            std::make_shared<hephaestus::WeakCurlCurlKernel>(weak_curl_curl_params));
+  AddKernel(dh_curl_var_dt, std::make_shared<platypus::WeakCurlCurlKernel>(weak_curl_curl_params));
 
   // (αdt∇×du/dt_{n+1}, ∇×u')
-  hephaestus::InputParameters curl_curl_params;
+  platypus::InputParameters curl_curl_params;
   curl_curl_params.SetParam("CoefficientName", _dtalpha_coef_name);
-  AddKernel(dh_curl_var_dt, std::make_shared<hephaestus::CurlCurlKernel>(curl_curl_params));
+  AddKernel(dh_curl_var_dt, std::make_shared<platypus::CurlCurlKernel>(curl_curl_params));
 
   // (βdu/dt_{n+1}, u')
-  hephaestus::InputParameters vector_fe_mass_params;
+  platypus::InputParameters vector_fe_mass_params;
   vector_fe_mass_params.SetParam("CoefficientName", _beta_coef_name);
-  AddKernel(dh_curl_var_dt,
-            std::make_shared<hephaestus::VectorFEMassKernel>(vector_fe_mass_params));
+  AddKernel(dh_curl_var_dt, std::make_shared<platypus::VectorFEMassKernel>(vector_fe_mass_params));
 }
 
 void
@@ -166,4 +164,4 @@ HCurlFormulation::RegisterCoefficients()
   }
 }
 
-} // namespace hephaestus
+} // namespace platypus

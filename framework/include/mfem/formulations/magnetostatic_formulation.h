@@ -3,10 +3,10 @@
 #include "inputs.h"
 #include "statics_formulation.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class MagnetostaticFormulation : public hephaestus::StaticsFormulation
+class MagnetostaticFormulation : public platypus::StaticsFormulation
 {
 public:
   MagnetostaticFormulation(const std::string & magnetic_reluctivity_name,
@@ -32,6 +32,6 @@ public:
 
 protected:
   const std::string _magnetic_permeability_name;
-  const std::string & _magnetic_reluctivity_name = hephaestus::StaticsFormulation::_alpha_coef_name;
+  const std::string & _magnetic_reluctivity_name = platypus::StaticsFormulation::_alpha_coef_name;
 };
-} // namespace hephaestus
+} // namespace platypus

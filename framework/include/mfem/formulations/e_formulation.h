@@ -3,10 +3,10 @@
 #include "hcurl_formulation.h"
 #include "inputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class EFormulation : public hephaestus::HCurlFormulation
+class EFormulation : public platypus::HCurlFormulation
 {
 public:
   EFormulation(const std::string & magnetic_reluctivity_name,
@@ -31,8 +31,8 @@ public:
 
 protected:
   const std::string _magnetic_permeability_name;
-  const std::string & _magnetic_reluctivity_name = hephaestus::HCurlFormulation::_alpha_coef_name;
-  const std::string & _electric_conductivity_name = hephaestus::HCurlFormulation::_beta_coef_name;
+  const std::string & _magnetic_reluctivity_name = platypus::HCurlFormulation::_alpha_coef_name;
+  const std::string & _electric_conductivity_name = platypus::HCurlFormulation::_beta_coef_name;
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -16,7 +16,7 @@ MFEMVariableDependentFunctionCoefficient::validParams()
 MFEMVariableDependentFunctionCoefficient::MFEMVariableDependentFunctionCoefficient(
     const InputParameters & parameters)
   : MFEMCoefficient(parameters),
-    hephaestus::CoupledCoefficient(hephaestus::InputParameters(
+    platypus::CoupledCoefficient(platypus::InputParameters(
         {{"CoupledVariableName", getParam<std::string>("coupled_variable")}})),
     _func(getFunction("function"))
 {
@@ -26,7 +26,7 @@ double
 MFEMVariableDependentFunctionCoefficient::Eval(mfem::ElementTransformation & trans,
                                                const mfem::IntegrationPoint & ip)
 {
-  auto gf_value{hephaestus::CoupledCoefficient::Eval(trans, ip)};
+  auto gf_value{platypus::CoupledCoefficient::Eval(trans, ip)};
   return _func.value(gf_value);
 };
 

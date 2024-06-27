@@ -1,6 +1,6 @@
 #include "vector_dirichlet_bc.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 VectorDirichletBC::VectorDirichletBC(const std::string & name_, mfem::Array<int> bdr_attributes_)
@@ -58,4 +58,4 @@ VectorDirichletBC::ApplyBC(mfem::ParComplexGridFunction & gridfunc, mfem::Mesh *
   gridfunc.ProjectBdrCoefficientTangent(*(_vec_coeff), *(_vec_coeff_im), ess_bdrs);
 }
 
-} // namespace hephaestus
+} // namespace platypus

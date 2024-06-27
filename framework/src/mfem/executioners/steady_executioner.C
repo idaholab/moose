@@ -1,10 +1,10 @@
 #include "steady_executioner.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-SteadyExecutioner::SteadyExecutioner(const hephaestus::InputParameters & params)
-  : Executioner(params), _problem(params.GetParam<hephaestus::SteadyStateProblem *>("Problem"))
+SteadyExecutioner::SteadyExecutioner(const platypus::InputParameters & params)
+  : Executioner(params), _problem(params.GetParam<platypus::SteadyStateProblem *>("Problem"))
 {
 }
 
@@ -26,4 +26,4 @@ SteadyExecutioner::Execute() const
 {
   Solve();
 }
-} // namespace hephaestus
+} // namespace platypus

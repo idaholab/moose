@@ -1,9 +1,9 @@
 #include "helmholtz_projector.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-HelmholtzProjector::HelmholtzProjector(const hephaestus::InputParameters & params)
+HelmholtzProjector::HelmholtzProjector(const platypus::InputParameters & params)
   : _h1_fespace_name(params.GetOptionalParam<std::string>("H1FESpaceName", "H1FES_Name")),
     _hcurl_fespace_name(params.GetOptionalParam<std::string>("HCurlFESpaceName", "HCurlFES_Name")),
     _gf_grad_name(params.GetParam<std::string>("VectorGridFunctionName")),
@@ -17,20 +17,20 @@ HelmholtzProjector::HelmholtzProjector(const hephaestus::InputParameters & param
     _a0(nullptr)
 {
 
-  hephaestus::InputParameters default_pars;
+  platypus::InputParameters default_pars;
   default_pars.SetParam("Tolerance", float(1.0e-20));
   default_pars.SetParam("AbsTolerance", float(1.0e-20));
   default_pars.SetParam("MaxIter", (unsigned int)1000);
   default_pars.SetParam("PrintLevel", 2); // GetGlobalPrintLevel());
 
   _solver_options =
-      params.GetOptionalParam<hephaestus::InputParameters>("SolverOptions", default_pars);
+      params.GetOptionalParam<platypus::InputParameters>("SolverOptions", default_pars);
 }
 
 void
-HelmholtzProjector::Project(hephaestus::GridFunctions & gridfunctions,
-                            const hephaestus::FESpaces & fespaces,
-                            hephaestus::BCMap & bc_map)
+HelmholtzProjector::Project(platypus::GridFunctions & gridfunctions,
+                            const platypus::FESpaces & fespaces,
+                            platypus::BCMap & bc_map)
 {
 
   // Retrieving vector GridFunction. This is the only mandatory one
@@ -176,10 +176,10 @@ HelmholtzProjector::SolveLinearSystem()
   mfem::Vector b0;
   _a0->FormLinearSystem(_ess_bdr_tdofs, *_q, *_g_div, a0, x0, b0);
 
-  hephaestus::DefaultGMRESSolver a0_solver(_solver_options, a0);
+  platypus::DefaultGMRESSolver a0_solver(_solver_options, a0);
 
   a0_solver.Mult(b0, x0);
   _a0->RecoverFEMSolution(x0, *_g_div, *_q);
 }
 
-} // namespace hephaestus
+} // namespace platypus

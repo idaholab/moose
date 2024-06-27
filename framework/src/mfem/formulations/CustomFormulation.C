@@ -12,7 +12,7 @@ CustomFormulation::validParams()
 CustomFormulation::CustomFormulation(const InputParameters & parameters)
   : MFEMFormulation(parameters)
 {
-  formulation = std::make_shared<hephaestus::TimeDomainEMFormulation>();
+  formulation = std::make_shared<platypus::TimeDomainEMFormulation>();
 }
 
 CustomFormulation::~CustomFormulation() {}

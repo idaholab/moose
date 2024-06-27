@@ -1,7 +1,7 @@
 #include "div_free_source.h"
 #include "helmholtz_projector.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 /*
@@ -20,7 +20,7 @@ DivFreeSource::DivFreeSource(std::string src_coef_name,
                              std::string hcurl_fespace_name,
                              std::string h1_fespace_name,
                              std::string potential_gf_name,
-                             hephaestus::InputParameters solver_options,
+                             platypus::InputParameters solver_options,
                              bool perform_helmholtz_projection)
   : _src_coef_name(std::move(src_coef_name)),
     _src_gf_name(std::move(src_gf_name)),
@@ -34,9 +34,9 @@ DivFreeSource::DivFreeSource(std::string src_coef_name,
 }
 
 void
-DivFreeSource::Init(hephaestus::GridFunctions & gridfunctions,
-                    const hephaestus::FESpaces & fespaces,
-                    hephaestus::BCMap & bc_map,
+DivFreeSource::Init(platypus::GridFunctions & gridfunctions,
+                    const platypus::FESpaces & fespaces,
+                    platypus::BCMap & bc_map,
                     Coefficients & coefficients)
 {
   _h1_fe_space = fespaces.Get(_h1_fespace_name);
@@ -93,15 +93,15 @@ DivFreeSource::Apply(mfem::ParLinearForm * lf)
   if (_perform_helmholtz_projection)
   {
 
-    hephaestus::InputParameters projector_pars;
+    platypus::InputParameters projector_pars;
     projector_pars.SetParam("VectorGridFunctionName", _src_gf_name);
     projector_pars.SetParam("ScalarGridFunctionName", _potential_gf_name);
     projector_pars.SetParam("H1FESpaceName", _h1_fespace_name);
     projector_pars.SetParam("HCurlFESpaceName", _hcurl_fespace_name);
 
-    hephaestus::BCMap bcs;
+    platypus::BCMap bcs;
 
-    hephaestus::HelmholtzProjector projector(projector_pars);
+    platypus::HelmholtzProjector projector(projector_pars);
     projector.Project(*_gridfunctions, *_fespaces, bcs);
   }
 
@@ -119,4 +119,4 @@ DivFreeSource::SubtractSource(mfem::ParGridFunction * gf)
   _h_curl_mass->AddMult(*_div_free_src_gf, *gf, -1.0);
 }
 
-} // namespace hephaestus
+} // namespace platypus

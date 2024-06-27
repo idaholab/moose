@@ -3,7 +3,7 @@
 #include "MFEMAuxSolver.h"
 #include "coupled_coefficient_aux.h"
 
-class JouleHeatingCoefficient : public hephaestus::CoupledCoefficient
+class JouleHeatingCoefficient : public platypus::CoupledCoefficient
 {
 private:
   mfem::Coefficient * sigma{nullptr};
@@ -12,13 +12,13 @@ private:
   // std::string var_name;
 
 public:
-  JouleHeatingCoefficient(const hephaestus::InputParameters & params)
-    : hephaestus::CoupledCoefficient(params),
+  JouleHeatingCoefficient(const platypus::InputParameters & params)
+    : platypus::CoupledCoefficient(params),
       conductivity_coef_name(params.GetParam<std::string>("ConductivityCoefName"))
   {
   }
 
-  void Init(const hephaestus::GridFunctions & variables, Coefficients & coefficients)
+  void Init(const platypus::GridFunctions & variables, Coefficients & coefficients)
   {
     // To ensure conductivity on subdomains is converted into global coefficient
     // Hephaestus update for coefficients initialisation could address this
@@ -31,7 +31,7 @@ public:
     //       true);
     // }
 
-    hephaestus::CoupledCoefficient::Init(variables, coefficients);
+    platypus::CoupledCoefficient::Init(variables, coefficients);
     std::cout << "Intialising JouleHeating";
     sigma = coefficients._scalars.Get(conductivity_coef_name);
 
@@ -66,7 +66,7 @@ public:
   virtual void initialize() override {}
   virtual void finalize() override {}
 
-  inline std::shared_ptr<hephaestus::AuxSolver> getAuxSolver() const override
+  inline std::shared_ptr<platypus::AuxSolver> getAuxSolver() const override
   {
     return joule_heating_aux;
   }
@@ -74,6 +74,6 @@ public:
   virtual void storeCoefficients(Coefficients & coefficients) override;
 
 protected:
-  hephaestus::InputParameters joule_heating_params;
+  platypus::InputParameters joule_heating_params;
   std::shared_ptr<JouleHeatingCoefficient> joule_heating_aux{nullptr};
 };

@@ -25,7 +25,7 @@
  * function expression.
  */
 class MFEMParsedCoefficientHelper : public MFEMCoefficient,
-                                    public hephaestus::CoupledCoefficient,
+                                    public platypus::CoupledCoefficient,
                                     public FunctionParserUtils<false>
 {
 public:
@@ -52,7 +52,7 @@ public:
                      const std::vector<std::string> & constant_expressions,
                      const std::vector<std::string> & _mfem_coefficient_names,
                      const std::vector<std::string> & _mfem_gridfunction_names);
-  void Init(const hephaestus::GridFunctions & variables, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & variables, Coefficients & coefficients) override;
 
   double Eval(mfem::ElementTransformation & trans, const mfem::IntegrationPoint & ip) override;
 

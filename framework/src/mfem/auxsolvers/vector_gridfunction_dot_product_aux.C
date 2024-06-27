@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 double
@@ -52,7 +52,7 @@ VectorGridFunctionDotProductAux::VectorGridFunctionDotProductAux(
 }
 
 void
-VectorGridFunctionDotProductAux::Init(const hephaestus::GridFunctions & gridfunctions,
+VectorGridFunctionDotProductAux::Init(const platypus::GridFunctions & gridfunctions,
                                       Coefficients & coefficients)
 {
   if (_scaling_coef_name.empty())
@@ -83,4 +83,4 @@ VectorGridFunctionDotProductAux::Init(const hephaestus::GridFunctions & gridfunc
   CoefficientAux::Init(gridfunctions, coefficients);
 }
 
-} // namespace hephaestus
+} // namespace platypus

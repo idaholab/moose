@@ -1,9 +1,9 @@
 #include "transient_executioner.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-TransientExecutioner::TransientExecutioner(const hephaestus::InputParameters & params)
+TransientExecutioner::TransientExecutioner(const platypus::InputParameters & params)
   : Executioner(params),
     _t_step(params.GetParam<float>("TimeStep")),
     _t_initial(params.GetParam<float>("StartTime")),
@@ -12,7 +12,7 @@ TransientExecutioner::TransientExecutioner(const hephaestus::InputParameters & p
     _it(0),
     _vis_steps(params.GetOptionalParam<int>("VisualisationSteps", 1)),
     _last_step(false),
-    _problem(params.GetParam<hephaestus::TimeDomainProblem *>("Problem"))
+    _problem(params.GetParam<platypus::TimeDomainProblem *>("Problem"))
 {
 }
 
@@ -57,4 +57,4 @@ TransientExecutioner::Execute() const
   }
 }
 
-} // namespace hephaestus
+} // namespace platypus

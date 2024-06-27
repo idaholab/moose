@@ -1,7 +1,7 @@
 #pragma once
 #include "auxsolver_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Interpolate a stored scalar Coefficient onto a (scalar) GridFunction
@@ -11,11 +11,11 @@ class CoefficientAux : public AuxSolver
 public:
   CoefficientAux(std::string gf_name,
                  std::string coef_name,
-                 hephaestus::InputParameters solver_options = hephaestus::InputParameters());
+                 platypus::InputParameters solver_options = platypus::InputParameters());
 
   ~CoefficientAux() override = default;
 
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 
   virtual void BuildBilinearForm();
   virtual void BuildLinearForm();
@@ -36,13 +36,13 @@ protected:
   std::unique_ptr<mfem::ParLinearForm> _b{nullptr};
 
 private:
-  const hephaestus::InputParameters _solver_options;
+  const platypus::InputParameters _solver_options;
 
   // Operator matrices
   std::unique_ptr<mfem::HypreParMatrix> _a_mat{nullptr};
 
   // Solver
-  std::unique_ptr<hephaestus::DefaultJacobiPCGSolver> _solver{nullptr};
+  std::unique_ptr<platypus::DefaultJacobiPCGSolver> _solver{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

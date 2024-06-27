@@ -3,16 +3,16 @@
 #include "problem_operator_interface.h"
 #include "equation_system_interface.h"
 
-namespace hephaestus
+namespace platypus
 {
 /// Steady-state problem operator with an equation system.
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
-  EquationSystemProblemOperator(hephaestus::Problem &) = delete;
+  EquationSystemProblemOperator(platypus::Problem &) = delete;
 
-  EquationSystemProblemOperator(hephaestus::Problem & problem,
-                                std::unique_ptr<hephaestus::EquationSystem> equation_system)
+  EquationSystemProblemOperator(platypus::Problem & problem,
+                                std::unique_ptr<platypus::EquationSystem> equation_system)
     : ProblemOperator(problem), _equation_system(std::move(equation_system))
   {
   }
@@ -22,7 +22,7 @@ public:
 
   ~EquationSystemProblemOperator() override = default;
 
-  [[nodiscard]] hephaestus::EquationSystem * GetEquationSystem() const override
+  [[nodiscard]] platypus::EquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
     {
@@ -33,7 +33,7 @@ public:
   }
 
 private:
-  std::unique_ptr<hephaestus::EquationSystem> _equation_system{nullptr};
+  std::unique_ptr<platypus::EquationSystem> _equation_system{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

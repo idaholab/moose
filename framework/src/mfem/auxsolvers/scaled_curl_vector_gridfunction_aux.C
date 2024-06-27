@@ -1,6 +1,6 @@
 #include "scaled_curl_vector_gridfunction_aux.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 ScaledCurlVectorGridFunctionAux::ScaledCurlVectorGridFunctionAux(
@@ -10,7 +10,7 @@ ScaledCurlVectorGridFunctionAux::ScaledCurlVectorGridFunctionAux(
     const double & aConst,
     const double & bConst,
     const std::string & shift_gf_name,
-    const hephaestus::InputParameters & solver_options)
+    const platypus::InputParameters & solver_options)
   : ScaledVectorGridFunctionAux(
         input_gf_name, scaled_gf_name, coef_name, aConst, bConst, shift_gf_name, solver_options)
 {
@@ -25,4 +25,4 @@ ScaledCurlVectorGridFunctionAux::BuildMixedBilinearForm()
   _a_mixed->Finalize();
 }
 
-} // namespace hephaestus
+} // namespace platypus

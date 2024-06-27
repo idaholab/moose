@@ -2,14 +2,14 @@
 #include "problem_builder_base.h"
 #include "time_domain_problem_operator.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 /// Time-dependent problems with no equation system.
 class TimeDomainProblem : public Problem
 {
 public:
-  [[nodiscard]] hephaestus::TimeDomainProblemOperator * GetOperator() const override
+  [[nodiscard]] platypus::TimeDomainProblemOperator * GetOperator() const override
   {
     if (!_problem_operator)
     {
@@ -19,7 +19,7 @@ public:
     return _problem_operator.get();
   }
 
-  void SetOperator(std::unique_ptr<hephaestus::TimeDomainProblemOperator> problem_operator)
+  void SetOperator(std::unique_ptr<platypus::TimeDomainProblemOperator> problem_operator)
   {
     _problem_operator.reset();
     _problem_operator = std::move(problem_operator);
@@ -28,18 +28,18 @@ public:
   void ConstructOperator() override
   {
     _problem_operator.reset();
-    _problem_operator = std::make_unique<hephaestus::TimeDomainProblemOperator>(*this);
+    _problem_operator = std::make_unique<platypus::TimeDomainProblemOperator>(*this);
   }
 
 private:
-  std::unique_ptr<hephaestus::TimeDomainProblemOperator> _problem_operator{nullptr};
+  std::unique_ptr<platypus::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 
 /// Problem-builder for TimeDomainProblem.
 class TimeDomainProblemBuilder : public ProblemBuilder
 {
 public:
-  TimeDomainProblemBuilder() : ProblemBuilder(new hephaestus::TimeDomainProblem) {}
+  TimeDomainProblemBuilder() : ProblemBuilder(new platypus::TimeDomainProblem) {}
 
   ~TimeDomainProblemBuilder() override = default;
 
@@ -47,7 +47,7 @@ public:
 
   static std::vector<mfem::ParGridFunction *>
   RegisterTimeDerivatives(std::vector<std::string> gridfunction_names,
-                          hephaestus::GridFunctions & gridfunctions);
+                          platypus::GridFunctions & gridfunctions);
 
   void RegisterFESpaces() override {}
 
@@ -67,12 +67,12 @@ public:
 
 protected:
   /// NB: constructor called in derived classes.
-  TimeDomainProblemBuilder(hephaestus::TimeDomainProblem * problem) : ProblemBuilder(problem) {}
+  TimeDomainProblemBuilder(platypus::TimeDomainProblem * problem) : ProblemBuilder(problem) {}
 
-  [[nodiscard]] hephaestus::TimeDomainProblem * GetProblem() const override
+  [[nodiscard]] platypus::TimeDomainProblem * GetProblem() const override
   {
-    return ProblemBuilder::GetProblem<hephaestus::TimeDomainProblem>();
+    return ProblemBuilder::GetProblem<platypus::TimeDomainProblem>();
   };
 };
 
-} // namespace hephaestus
+} // namespace platypus

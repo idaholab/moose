@@ -4,7 +4,7 @@
 #include "hephaestus_solvers.h"
 #include "inputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 template <typename T>
@@ -14,10 +14,10 @@ public:
   Kernel() = default;
   virtual ~Kernel() = default;
 
-  Kernel(const hephaestus::InputParameters & params) {}
-  virtual void Init(hephaestus::GridFunctions & gridfunctions,
-                    const hephaestus::FESpaces & fespaces,
-                    hephaestus::BCMap & bc_map,
+  Kernel(const platypus::InputParameters & params) {}
+  virtual void Init(platypus::GridFunctions & gridfunctions,
+                    const platypus::FESpaces & fespaces,
+                    platypus::BCMap & bc_map,
                     Coefficients & coefficients)
   {
   }
@@ -25,4 +25,4 @@ public:
   virtual void Apply(T * form) = 0;
 };
 
-} // namespace hephaestus
+} // namespace platypus

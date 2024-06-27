@@ -1,6 +1,6 @@
 #include "scalar_potential_source.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Create a scalar potential source that can add terms of the form
@@ -12,7 +12,7 @@ ScalarPotentialSource::ScalarPotentialSource(std::string grad_phi_gf_name,
                                              std::string h1_fespace_name,
                                              std::string coef_name,
                                              int source_sign,
-                                             hephaestus::InputParameters solver_options)
+                                             platypus::InputParameters solver_options)
   : _grad_phi_gf_name(std::move(grad_phi_gf_name)),
     _phi_gf_name(std::move(phi_gf_name)),
     _hcurl_fespace_name(std::move(hcurl_fespace_name)),
@@ -24,9 +24,9 @@ ScalarPotentialSource::ScalarPotentialSource(std::string grad_phi_gf_name,
 }
 
 void
-ScalarPotentialSource::Init(hephaestus::GridFunctions & gridfunctions,
-                            const hephaestus::FESpaces & fespaces,
-                            hephaestus::BCMap & bc_map,
+ScalarPotentialSource::Init(platypus::GridFunctions & gridfunctions,
+                            const platypus::FESpaces & fespaces,
+                            platypus::BCMap & bc_map,
                             Coefficients & coefficients)
 {
   _h1_fe_space = fespaces.Get(_h1_fespace_name);
@@ -119,7 +119,7 @@ ScalarPotentialSource::Apply(mfem::ParLinearForm * lf)
 
   if (_a0_solver == nullptr)
   {
-    _a0_solver = std::make_unique<hephaestus::DefaultH1PCGSolver>(_solver_options, *_diffusion_mat);
+    _a0_solver = std::make_unique<platypus::DefaultH1PCGSolver>(_solver_options, *_diffusion_mat);
   }
   // Solve
   _a0_solver->Mult(*_b0_tdofs, *_p_tdofs);
@@ -140,4 +140,4 @@ ScalarPotentialSource::SubtractSource(mfem::ParGridFunction * gf)
   _grad->AddMult(*_phi, *gf, -_source_sign);
 }
 
-} // namespace hephaestus
+} // namespace platypus

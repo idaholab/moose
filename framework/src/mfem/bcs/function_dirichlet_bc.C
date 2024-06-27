@@ -1,6 +1,6 @@
 #include "function_dirichlet_bc.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 ScalarDirichletBC::ScalarDirichletBC(const std::string & name_, mfem::Array<int> bdr_attributes_)
@@ -24,4 +24,4 @@ ScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_)
   gridfunc.ProjectBdrCoefficient(*(_coeff), ess_bdrs);
 }
 
-} // namespace hephaestus
+} // namespace platypus

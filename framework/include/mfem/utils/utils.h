@@ -5,7 +5,7 @@
 #include "hephaestus_solvers.h"
 #include "inputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Useful functions available to all classes
@@ -24,14 +24,14 @@ void AttrToMarker(const mfem::Array<int> attr_list, mfem::Array<int> & marker_li
 
 // Uses the HelmholtzProjector auxsolver to return a divergence-free GridFunction. This version of
 // the function assumes all natural boundary conditions for the HelmholtzProjector equal zero.
-void CleanDivergence(mfem::ParGridFunction & Vec_GF, hephaestus::InputParameters solve_pars);
+void CleanDivergence(mfem::ParGridFunction & Vec_GF, platypus::InputParameters solve_pars);
 
 // Uses the HelmholtzProjector auxsolver to return a divergence-free GridFunction. This version of
 // the function allows the user to set up boundary conditions for the HelmholtzProjector.
-void CleanDivergence(hephaestus::GridFunctions & gfs,
-                     hephaestus::BCMap & bcs,
+void CleanDivergence(platypus::GridFunctions & gfs,
+                     platypus::BCMap & bcs,
                      const std::string vec_gf_name,
                      const std::string scalar_gf_name,
-                     hephaestus::InputParameters solve_pars);
+                     platypus::InputParameters solve_pars);
 
-} // namespace hephaestus
+} // namespace platypus

@@ -2,7 +2,7 @@
 #include "vector_coefficient_aux.h"
 
 // Specify postprocessors that depend on one or more gridfunctions
-namespace hephaestus
+namespace platypus
 {
 
 void cross_product(mfem::Vector & va, mfem::Vector & vb, mfem::Vector & V);
@@ -46,7 +46,7 @@ public:
                                     std::string u_gf_name,
                                     std::string v_gf_name);
 
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 };
 
-} // namespace hephaestus
+} // namespace platypus

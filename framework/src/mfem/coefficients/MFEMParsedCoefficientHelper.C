@@ -13,7 +13,7 @@ MFEMParsedCoefficientHelper::validParams()
 MFEMParsedCoefficientHelper::MFEMParsedCoefficientHelper(const InputParameters & parameters,
                                                          VariableNameMappingMode map_mode)
   : MFEMCoefficient(parameters),
-    hephaestus::CoupledCoefficient(hephaestus::InputParameters(
+    platypus::CoupledCoefficient(platypus::InputParameters(
         std::map<std::string, std::any>({{"CoupledVariableName", std::string("dummy_variable")}}))),
     FunctionParserUtils<false>(parameters),
     _symbol_names(0),
@@ -116,7 +116,7 @@ MFEMParsedCoefficientHelper::functionsOptimize()
 }
 
 void
-MFEMParsedCoefficientHelper::Init(const hephaestus::GridFunctions & variables,
+MFEMParsedCoefficientHelper::Init(const platypus::GridFunctions & variables,
                                   Coefficients & coefficients)
 {
   auto nmfem_gfs = _gridfunction_names.size();

@@ -4,7 +4,7 @@
 #include "steady_state_problem_builder.h"
 #include "equation_system_interface.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 /// Steady-state problems with an equation system.
@@ -26,14 +26,14 @@ public:
 
   void ConstructOperator() override
   {
-    auto equation_system = std::make_unique<hephaestus::EquationSystem>();
-    auto problem_operator = std::make_unique<hephaestus::EquationSystemProblemOperator>(
+    auto equation_system = std::make_unique<platypus::EquationSystem>();
+    auto problem_operator = std::make_unique<platypus::EquationSystemProblemOperator>(
         *this, std::move(equation_system));
 
     SetOperator(std::move(problem_operator));
   }
 
-  [[nodiscard]] hephaestus::EquationSystem * GetEquationSystem() const override
+  [[nodiscard]] platypus::EquationSystem * GetEquationSystem() const override
   {
     return GetOperator()->GetEquationSystem();
   }
@@ -59,15 +59,15 @@ public:
   auto ReturnProblem() { return ProblemBuilder::ReturnProblem<SteadyStateEquationSystemProblem>(); }
 
 protected:
-  [[nodiscard]] hephaestus::SteadyStateEquationSystemProblem * GetProblem() const override
+  [[nodiscard]] platypus::SteadyStateEquationSystemProblem * GetProblem() const override
   {
-    return ProblemBuilder::GetProblem<hephaestus::SteadyStateEquationSystemProblem>();
+    return ProblemBuilder::GetProblem<platypus::SteadyStateEquationSystemProblem>();
   }
 
-  [[nodiscard]] hephaestus::EquationSystem * GetEquationSystem() const override
+  [[nodiscard]] platypus::EquationSystem * GetEquationSystem() const override
   {
     return GetProblem()->GetEquationSystem();
   }
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -13,16 +13,16 @@
 
 // Specify classes that perform auxiliary calculations on GridFunctions or
 // Coefficients.
-namespace hephaestus
+namespace platypus
 {
 
-class AuxSolvers : public hephaestus::NamedFieldsMap<hephaestus::AuxSolver>
+class AuxSolvers : public platypus::NamedFieldsMap<platypus::AuxSolver>
 {
 private:
 public:
-  std::vector<std::pair<std::shared_ptr<hephaestus::AuxSolver>, std::string>> _aux_queue;
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients);
+  std::vector<std::pair<std::shared_ptr<platypus::AuxSolver>, std::string>> _aux_queue;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients);
   void Solve(double t = 0.0);
 };
 
-} // namespace hephaestus
+} // namespace platypus

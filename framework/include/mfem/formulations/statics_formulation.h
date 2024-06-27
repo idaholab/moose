@@ -4,7 +4,7 @@
 #include "inputs.h"
 #include "sources.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class StaticsFormulation : public SteadyStateEMFormulation
@@ -32,7 +32,7 @@ protected:
 class StaticsOperator : public ProblemOperator
 {
 public:
-  StaticsOperator(hephaestus::Problem & problem,
+  StaticsOperator(platypus::Problem & problem,
                   std::string h_curl_var_name,
                   std::string stiffness_coef_name);
 
@@ -48,4 +48,4 @@ private:
   mfem::Coefficient * _stiff_coef{nullptr}; // Stiffness Material Coefficient
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -4,7 +4,7 @@
 #include "inputs.h"
 #include "sources.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class AVFormulation : public TimeDomainEMFormulation
@@ -35,13 +35,13 @@ protected:
 class AVEquationSystem : public TimeDependentEquationSystem
 {
 public:
-  AVEquationSystem(const hephaestus::InputParameters & params);
+  AVEquationSystem(const platypus::InputParameters & params);
 
   ~AVEquationSystem() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void AddKernels() override;
 
@@ -50,4 +50,4 @@ public:
   mfem::ConstantCoefficient _neg_coef;
 };
 
-} // namespace hephaestus
+} // namespace platypus

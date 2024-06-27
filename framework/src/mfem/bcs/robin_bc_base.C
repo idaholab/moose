@@ -1,6 +1,6 @@
 #include "robin_bc_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 RobinBC::RobinBC(const std::string & name_,
@@ -29,4 +29,4 @@ RobinBC::ApplyBC(mfem::ParSesquilinearForm & a)
   a.AddBoundaryIntegrator(_blfi_re.release(), _blfi_im.release(), _markers);
 }
 
-} // namespace hephaestus
+} // namespace platypus

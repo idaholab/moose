@@ -4,7 +4,7 @@
 #include "problem_builder_base.h"
 #include "problem_operator_interface.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 std::string GetTimeDerivativeName(const std::string & name);
@@ -17,7 +17,7 @@ class TimeDomainProblemOperator : public mfem::TimeDependentOperator,
                                   public ProblemOperatorInterface
 {
 public:
-  TimeDomainProblemOperator(hephaestus::Problem & problem) : ProblemOperatorInterface(problem) {}
+  TimeDomainProblemOperator(platypus::Problem & problem) : ProblemOperatorInterface(problem) {}
   ~TimeDomainProblemOperator() override = default;
 
   void SetGridFunctions() override;
@@ -25,4 +25,4 @@ public:
   void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override {}
 };
 
-} // namespace hephaestus
+} // namespace platypus

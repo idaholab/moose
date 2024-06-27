@@ -1,17 +1,17 @@
 #include "curl_curl_kernel.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-CurlCurlKernel::CurlCurlKernel(const hephaestus::InputParameters & params)
+CurlCurlKernel::CurlCurlKernel(const platypus::InputParameters & params)
   : Kernel(params), _coef_name(params.GetParam<std::string>("CoefficientName"))
 {
 }
 
 void
-CurlCurlKernel::Init(hephaestus::GridFunctions & gridfunctions,
-                     const hephaestus::FESpaces & fespaces,
-                     hephaestus::BCMap & bc_map,
+CurlCurlKernel::Init(platypus::GridFunctions & gridfunctions,
+                     const platypus::FESpaces & fespaces,
+                     platypus::BCMap & bc_map,
                      Coefficients & coefficients)
 {
   _coef = coefficients._scalars.Get(_coef_name);
@@ -23,4 +23,4 @@ CurlCurlKernel::Apply(mfem::ParBilinearForm * blf)
   blf->AddDomainIntegrator(new mfem::CurlCurlIntegrator(*_coef));
 }
 
-} // namespace hephaestus
+} // namespace platypus

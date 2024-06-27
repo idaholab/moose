@@ -1,7 +1,7 @@
 #pragma once
 #include "scaled_vector_gridfunction_aux.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Scale the curl of a gridfunction in H(Curl) by a scalar Coefficient, and
@@ -17,10 +17,10 @@ public:
       const double & aConst = 1.0,
       const double & bConst = 1.0,
       const std::string & shift_gf_name = "",
-      const hephaestus::InputParameters & solver_options = hephaestus::InputParameters());
+      const platypus::InputParameters & solver_options = platypus::InputParameters());
 
   ~ScaledCurlVectorGridFunctionAux() override = default;
 
   void BuildMixedBilinearForm() override;
 };
-} // namespace hephaestus
+} // namespace platypus

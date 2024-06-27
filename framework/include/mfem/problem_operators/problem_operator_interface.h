@@ -1,13 +1,13 @@
 #pragma once
 #include "problem_builder_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 /// Interface inherited by ProblemOperator and TimeDomainProblemOperator. Removes duplicated code in both classes.
 class ProblemOperatorInterface
 {
 public:
-  ProblemOperatorInterface(hephaestus::Problem & problem) : _problem(problem) {}
+  ProblemOperatorInterface(platypus::Problem & problem) : _problem(problem) {}
   virtual ~ProblemOperatorInterface() = default;
 
   virtual void SetGridFunctions();
@@ -20,7 +20,7 @@ public:
 
 protected:
   // Reference to the current problem.
-  hephaestus::Problem & _problem;
+  platypus::Problem & _problem;
 
   // Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   // vector during solve.

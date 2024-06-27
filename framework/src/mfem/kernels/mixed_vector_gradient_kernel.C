@@ -1,17 +1,17 @@
 #include "mixed_vector_gradient_kernel.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-MixedVectorGradientKernel::MixedVectorGradientKernel(const hephaestus::InputParameters & params)
+MixedVectorGradientKernel::MixedVectorGradientKernel(const platypus::InputParameters & params)
   : Kernel(params), _coef_name(params.GetParam<std::string>("CoefficientName"))
 {
 }
 
 void
-MixedVectorGradientKernel::Init(hephaestus::GridFunctions & gridfunctions,
-                                const hephaestus::FESpaces & fespaces,
-                                hephaestus::BCMap & bc_map,
+MixedVectorGradientKernel::Init(platypus::GridFunctions & gridfunctions,
+                                const platypus::FESpaces & fespaces,
+                                platypus::BCMap & bc_map,
                                 Coefficients & coefficients)
 {
   _coef = coefficients._scalars.Get(_coef_name);
@@ -23,4 +23,4 @@ MixedVectorGradientKernel::Apply(mfem::ParMixedBilinearForm * mblf)
   mblf->AddDomainIntegrator(new mfem::MixedVectorGradientIntegrator(*_coef));
 }
 
-} // namespace hephaestus
+} // namespace platypus

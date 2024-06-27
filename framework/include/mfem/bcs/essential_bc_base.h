@@ -1,7 +1,7 @@
 #pragma once
 #include "boundary_condition_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class EssentialBC : public BoundaryCondition
@@ -13,4 +13,4 @@ public:
   virtual void ApplyBC(mfem::ParComplexGridFunction & gridfunc, mfem::Mesh * mesh_) {}
 };
 
-} // namespace hephaestus
+} // namespace platypus

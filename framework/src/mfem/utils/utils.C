@@ -1,6 +1,6 @@
 #include "utils.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 template <typename T>
@@ -48,38 +48,37 @@ AttrToMarker(const mfem::Array<int> attr_list, mfem::Array<int> & marker_list, i
 }
 
 void
-CleanDivergence(std::shared_ptr<mfem::ParGridFunction> Vec_GF,
-                hephaestus::InputParameters solve_pars)
+CleanDivergence(std::shared_ptr<mfem::ParGridFunction> Vec_GF, platypus::InputParameters solve_pars)
 {
 
-  hephaestus::InputParameters pars;
-  hephaestus::GridFunctions gfs;
-  hephaestus::FESpaces fes;
-  hephaestus::BCMap bcs;
+  platypus::InputParameters pars;
+  platypus::GridFunctions gfs;
+  platypus::FESpaces fes;
+  platypus::BCMap bcs;
 
   gfs.Register("Vector_GF", Vec_GF);
   pars.SetParam("VectorGridFunctionName", std::string("Vector_GF"));
   pars.SetParam("SolverOptions", solve_pars);
-  hephaestus::HelmholtzProjector projector(pars);
+  platypus::HelmholtzProjector projector(pars);
   projector.Project(gfs, fes, bcs);
 }
 
 void
-CleanDivergence(hephaestus::GridFunctions & gfs,
-                hephaestus::BCMap & bcs,
+CleanDivergence(platypus::GridFunctions & gfs,
+                platypus::BCMap & bcs,
                 const std::string vec_gf_name,
                 const std::string scalar_gf_name,
-                hephaestus::InputParameters solve_pars)
+                platypus::InputParameters solve_pars)
 {
 
-  hephaestus::InputParameters pars;
-  hephaestus::FESpaces fes;
+  platypus::InputParameters pars;
+  platypus::FESpaces fes;
 
   pars.SetParam("VectorGridFunctionName", vec_gf_name);
   pars.SetParam("ScalarGridFunctionName", scalar_gf_name);
   pars.SetParam("SolverOptions", solve_pars);
-  hephaestus::HelmholtzProjector projector(pars);
+  platypus::HelmholtzProjector projector(pars);
   projector.Project(gfs, fes, bcs);
 }
 
-} // namespace hephaestus
+} // namespace platypus

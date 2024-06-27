@@ -4,7 +4,7 @@
 #include "inputs.h"
 #include "sources.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class HCurlFormulation : public TimeDomainEMFormulation
@@ -35,15 +35,15 @@ protected:
 class CurlCurlEquationSystem : public TimeDependentEquationSystem
 {
 public:
-  CurlCurlEquationSystem(const hephaestus::InputParameters & params);
+  CurlCurlEquationSystem(const platypus::InputParameters & params);
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void AddKernels() override;
 
   std::string _h_curl_var_name, _alpha_coef_name, _beta_coef_name, _dtalpha_coef_name;
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -29,7 +29,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 StaticsFormulation::StaticsFormulation(std::string alpha_coef_name, std::string h_curl_var_name)
@@ -59,7 +59,7 @@ StaticsFormulation::ConstructJacobianSolver()
 void
 StaticsFormulation::ConstructOperator()
 {
-  auto new_operator = std::make_unique<hephaestus::StaticsOperator>(
+  auto new_operator = std::make_unique<platypus::StaticsOperator>(
       *GetProblem(), _h_curl_var_name, _alpha_coef_name);
 
   GetProblem()->SetOperator(std::move(new_operator));
@@ -69,8 +69,8 @@ void
 StaticsFormulation::RegisterGridFunctions()
 {
   int & myid = GetProblem()->_myid;
-  hephaestus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
-  hephaestus::FESpaces & fespaces = GetProblem()->_fespaces;
+  platypus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
+  platypus::FESpaces & fespaces = GetProblem()->_fespaces;
 
   // Register default ParGridFunctions of state gridfunctions if not provided
   if (!gridfunctions.Has(_h_curl_var_name))
@@ -95,7 +95,7 @@ StaticsFormulation::RegisterCoefficients()
   }
 }
 
-StaticsOperator::StaticsOperator(hephaestus::Problem & problem,
+StaticsOperator::StaticsOperator(platypus::Problem & problem,
                                  std::string h_curl_var_name,
                                  std::string stiffness_coef_name)
   : ProblemOperator(problem),
@@ -156,4 +156,4 @@ StaticsOperator::Solve(mfem::Vector & X)
   blf.RecoverFEMSolution(sol_tdofs, lf, gf);
 }
 
-} // namespace hephaestus
+} // namespace platypus

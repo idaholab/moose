@@ -1,7 +1,7 @@
 #pragma once
 #include "essential_bc_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class ScalarDirichletBC : public EssentialBC
@@ -19,4 +19,4 @@ public:
   mfem::Coefficient * _coeff_im{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

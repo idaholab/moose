@@ -2,7 +2,7 @@
 #include "coefficient_aux.h"
 
 // Specify postprocessors that depend on one or more gridfunctions
-namespace hephaestus
+namespace platypus
 {
 
 // The VectorGridFunctionDotProductCoefficient evaluates the dot product of two
@@ -61,7 +61,7 @@ public:
 
   ~VectorGridFunctionDotProductAux() override = default;
 
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 };
 
-} // namespace hephaestus
+} // namespace platypus

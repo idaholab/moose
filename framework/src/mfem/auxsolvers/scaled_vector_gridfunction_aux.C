@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 // result = ax+by vector gridfunction aux
 // y should be in same FESpace as result
@@ -14,7 +14,7 @@ ScaledVectorGridFunctionAux::ScaledVectorGridFunctionAux(std::string input_gf_na
                                                          const double & aConst,
                                                          const double & bConst,
                                                          std::string shift_gf_name,
-                                                         hephaestus::InputParameters solver_options)
+                                                         platypus::InputParameters solver_options)
   : _a(nullptr),
     _a_mixed(nullptr),
     _input_gf_name(std::move(input_gf_name)),
@@ -31,7 +31,7 @@ ScaledVectorGridFunctionAux::ScaledVectorGridFunctionAux(std::string input_gf_na
 }
 
 void
-ScaledVectorGridFunctionAux::Init(const hephaestus::GridFunctions & gridfunctions,
+ScaledVectorGridFunctionAux::Init(const platypus::GridFunctions & gridfunctions,
                                   Coefficients & coefficients)
 {
   _input_gf = gridfunctions.Get(_input_gf_name);
@@ -49,7 +49,7 @@ ScaledVectorGridFunctionAux::Init(const hephaestus::GridFunctions & gridfunction
   BuildMixedBilinearForm();
   _a_mat = std::unique_ptr<mfem::HypreParMatrix>(_a->ParallelAssemble());
 
-  _solver = std::make_unique<hephaestus::DefaultJacobiPCGSolver>(_solver_options, *_a_mat);
+  _solver = std::make_unique<platypus::DefaultJacobiPCGSolver>(_solver_options, *_a_mat);
 }
 
 void
@@ -96,4 +96,4 @@ ScaledVectorGridFunctionAux::Solve(double t)
   }
 }
 
-} // namespace hephaestus
+} // namespace platypus

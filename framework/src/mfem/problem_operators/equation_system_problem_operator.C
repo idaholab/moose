@@ -1,6 +1,6 @@
 #include "equation_system_problem_operator.h"
 
-namespace hephaestus
+namespace platypus
 {
 void
 EquationSystemProblemOperator::SetGridFunctions()
@@ -17,4 +17,4 @@ EquationSystemProblemOperator::Init(mfem::Vector & X)
   GetEquationSystem()->BuildEquationSystem(_problem._bc_map, _problem._sources);
 }
 
-} // namespace hephaestus
+} // namespace platypus

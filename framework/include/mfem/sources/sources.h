@@ -5,18 +5,18 @@
 #include "open_coil.h"
 #include "scalar_potential_source.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class Sources : public hephaestus::NamedFieldsMap<hephaestus::Source>
+class Sources : public platypus::NamedFieldsMap<platypus::Source>
 {
 public:
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients);
   void Apply(mfem::ParLinearForm * lf);
   void SubtractSources(mfem::ParGridFunction * gf);
 };
 
-} // namespace hephaestus
+} // namespace platypus

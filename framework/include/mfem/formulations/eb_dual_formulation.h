@@ -3,10 +3,10 @@
 #include "dual_formulation.h"
 #include "inputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-class EBDualFormulation : public hephaestus::DualFormulation
+class EBDualFormulation : public platypus::DualFormulation
 {
 public:
   EBDualFormulation(const std::string & magnetic_reluctivity_name,
@@ -37,8 +37,8 @@ public:
 
 protected:
   const std::string _magnetic_permeability_name;
-  const std::string & _magnetic_reluctivity_name = hephaestus::DualFormulation::_alpha_coef_name;
-  const std::string & _electric_conductivity_name = hephaestus::DualFormulation::_beta_coef_name;
+  const std::string & _magnetic_reluctivity_name = platypus::DualFormulation::_alpha_coef_name;
+  const std::string & _electric_conductivity_name = platypus::DualFormulation::_beta_coef_name;
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -1,8 +1,8 @@
 #include "steady_state_em_formulation.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 SteadyStateEMFormulation::SteadyStateEMFormulation() = default;
 
-} // namespace hephaestus
+} // namespace platypus

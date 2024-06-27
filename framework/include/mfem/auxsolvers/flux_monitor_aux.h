@@ -2,7 +2,7 @@
 #include "auxsolver_base.h"
 
 // Specify postprocessors that depend on one or more gridfunctions
-namespace hephaestus
+namespace platypus
 {
 
 double calcFlux(mfem::GridFunction * v_field, int face_attr);
@@ -20,7 +20,7 @@ public:
 
   ~FluxMonitorAux() override = default;
 
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 
   void Solve(double t = 0.0) override;
 
@@ -35,4 +35,4 @@ public:
   int _face_attr;
 };
 
-} // namespace hephaestus
+} // namespace platypus

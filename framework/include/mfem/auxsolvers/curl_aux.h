@@ -1,7 +1,7 @@
 #pragma once
 #include "auxsolver_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Calculate the curl of a gridfunction.
@@ -12,7 +12,7 @@ public:
 
   ~CurlAuxSolver() override = default;
 
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 
   void Solve(double t = 0.0) override;
 
@@ -26,4 +26,4 @@ private:
   std::unique_ptr<mfem::ParDiscreteLinearOperator> _curl{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

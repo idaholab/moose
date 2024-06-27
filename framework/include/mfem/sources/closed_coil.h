@@ -3,14 +3,14 @@
 #include "scalar_potential_source.h"
 #include "source_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 // Calculates the flux of a vector field v_field through the face with boundary
 // attribute face_attr.
 double calcFluxCC(mfem::GridFunction * v_field, int face_attr);
 
-class ClosedCoilSolver : public hephaestus::Source
+class ClosedCoilSolver : public platypus::Source
 {
 
 public:
@@ -23,18 +23,18 @@ public:
                    const int electrode_face,
                    bool electric_field_transfer = false,
                    std::string source_jfield_gf_name = "",
-                   hephaestus::InputParameters solver_options =
-                       hephaestus::InputParameters({{"Tolerance", float(1.0e-18)},
-                                                    {"AbsTolerance", float(1.0e-18)},
-                                                    {"MaxIter", (unsigned int)1000},
-                                                    {"PrintLevel", 2}}));//GetGlobalPrintLevel()}}));
+                   platypus::InputParameters solver_options = platypus::InputParameters(
+                       {{"Tolerance", float(1.0e-18)},
+                        {"AbsTolerance", float(1.0e-18)},
+                        {"MaxIter", (unsigned int)1000},
+                        {"PrintLevel", 2}})); // GetGlobalPrintLevel()}}));
 
   // Override virtual Source destructor to avoid leaks.
   ~ClosedCoilSolver() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void Apply(mfem::ParLinearForm * lf) override;
   void SubtractSource(mfem::ParGridFunction * gf) override;
@@ -84,7 +84,7 @@ private:
   std::shared_ptr<mfem::Coefficient> _sigma{nullptr};
   std::shared_ptr<mfem::Coefficient> _itotal{nullptr};
   std::vector<int> _old_dom_attrs;
-  hephaestus::InputParameters _solver_options;
+  platypus::InputParameters _solver_options;
   Coefficients _ccs_coefs;
 
   // Here, we are solving for -(σ∇Va,∇ψ) = (σ∇Vt,∇ψ), where ∇Vt is grad_phi_t (within its relevant
@@ -149,4 +149,4 @@ private:
   double _d{0};
 };
 
-} // namespace hephaestus
+} // namespace platypus

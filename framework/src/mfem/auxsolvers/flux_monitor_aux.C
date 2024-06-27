@@ -1,6 +1,6 @@
 #include "flux_monitor_aux.h"
 
-namespace hephaestus
+namespace platypus
 {
 double
 calcFlux(mfem::GridFunction * v_field, int face_attr, mfem::Coefficient & q)
@@ -79,7 +79,7 @@ FluxMonitorAux::FluxMonitorAux(std::string var_name, int face_attr, std::string 
 }
 
 void
-FluxMonitorAux::Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients)
+FluxMonitorAux::Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_var_name);
   if (coefficients._scalars.Has(_coef_name))
@@ -105,4 +105,4 @@ FluxMonitorAux::Solve(double t)
   _fluxes.Append(flux);
 }
 
-} // namespace hephaestus
+} // namespace platypus

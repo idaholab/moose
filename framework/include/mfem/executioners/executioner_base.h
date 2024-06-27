@@ -1,14 +1,14 @@
 #pragma once
 #include "inputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class Executioner
 {
 public:
   Executioner() = default;
-  explicit Executioner(const hephaestus::InputParameters & params) {}
+  explicit Executioner(const platypus::InputParameters & params) {}
 
   virtual ~Executioner() = default;
 
@@ -19,4 +19,4 @@ public:
   virtual void Execute() const = 0;
 };
 
-} // namespace hephaestus
+} // namespace platypus

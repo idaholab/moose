@@ -4,13 +4,13 @@
 #include "problem_builder_base.h"
 #include "problem_operator_interface.h"
 
-namespace hephaestus
+namespace platypus
 {
 /// Steady-state problem operator with no equation system.
 class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
 {
 public:
-  ProblemOperator(hephaestus::Problem & problem) : ProblemOperatorInterface(problem) {}
+  ProblemOperator(platypus::Problem & problem) : ProblemOperatorInterface(problem) {}
   ~ProblemOperator() override = default;
 
   void SetGridFunctions() override;
@@ -19,4 +19,4 @@ public:
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override {}
 };
 
-} // namespace hephaestus
+} // namespace platypus

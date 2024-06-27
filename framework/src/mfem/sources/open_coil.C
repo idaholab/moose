@@ -3,7 +3,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 double
@@ -25,7 +25,7 @@ OpenCoilSolver::OpenCoilSolver(std::string source_efield_gf_name,
                                const std::pair<int, int> electrodes,
                                bool electric_field_transfer,
                                std::string source_jfield_gf_name,
-                               hephaestus::InputParameters solver_options)
+                               platypus::InputParameters solver_options)
   : _source_efield_gf_name(std::move(source_efield_gf_name)),
     _source_jfield_gf_name(std::move(source_jfield_gf_name)),
     _phi_gf_name(std::move(phi_gf_name)),
@@ -44,9 +44,9 @@ OpenCoilSolver::OpenCoilSolver(std::string source_efield_gf_name,
 }
 
 void
-OpenCoilSolver::Init(hephaestus::GridFunctions & gridfunctions,
-                     const hephaestus::FESpaces & fespaces,
-                     hephaestus::BCMap & bc_map,
+OpenCoilSolver::Init(platypus::GridFunctions & gridfunctions,
+                     const platypus::FESpaces & fespaces,
+                     platypus::BCMap & bc_map,
                      Coefficients & coefficients)
 {
   if (!coefficients._scalars.Has(_i_coef_name))
@@ -238,25 +238,25 @@ void
 OpenCoilSolver::SPSCurrent()
 {
   _bc_maps.Register("high_potential",
-                    std::make_shared<hephaestus::ScalarDirichletBC>(
+                    std::make_shared<platypus::ScalarDirichletBC>(
                         std::string("V"), _high_terminal, _high_src.get()));
 
   _bc_maps.Register("low_potential",
-                    std::make_shared<hephaestus::ScalarDirichletBC>(
+                    std::make_shared<platypus::ScalarDirichletBC>(
                         std::string("V"), _low_terminal, _low_src.get()));
 
-  hephaestus::FESpaces fespaces;
+  platypus::FESpaces fespaces;
   fespaces.Register("HCurl", _h_curl_fe_space_child);
   fespaces.Register("H1", _h1_fe_space_child);
 
-  hephaestus::GridFunctions gridfunctions;
+  platypus::GridFunctions gridfunctions;
   gridfunctions.Register("GradPhi", _grad_phi_child);
   gridfunctions.Register("V", _phi_child);
 
   Coefficients coefs;
   coefs._scalars.Register("electric_conductivity", _sigma);
 
-  hephaestus::ScalarPotentialSource sps(
+  platypus::ScalarPotentialSource sps(
       "GradPhi", "V", "HCurl", "H1", "electric_conductivity", 1, _solver_options);
   sps.Init(gridfunctions, fespaces, _bc_maps, coefs);
 
@@ -275,14 +275,14 @@ OpenCoilSolver::SPSCurrent()
 
   if (_source_current_density)
   {
-    hephaestus::GridFunctions aux_gf;
+    platypus::GridFunctions aux_gf;
     aux_gf.Register("grad_phi_child", _grad_phi_child);
     aux_gf.Register("source_current_density", _j_child);
 
     Coefficients aux_coef;
     aux_coef._scalars.Register("electrical_conductivity", _sigma);
 
-    hephaestus::ScaledVectorGridFunctionAux current_density_auxsolver(
+    platypus::ScaledVectorGridFunctionAux current_density_auxsolver(
         "grad_phi_child", "source_current_density", "electrical_conductivity", -1.0);
     current_density_auxsolver.Init(aux_gf, aux_coef);
     current_density_auxsolver.Solve();
@@ -303,7 +303,7 @@ OpenCoilSolver::BuildM1()
   if (_m1 == nullptr)
   {
     _m1 = std::make_unique<mfem::ParBilinearForm>(_source_electric_field->ParFESpace());
-    hephaestus::AttrToMarker(_coil_domains, _coil_markers, _mesh_parent->attributes.Max());
+    platypus::AttrToMarker(_coil_domains, _coil_markers, _mesh_parent->attributes.Max());
     _m1->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(_sigma.get()), _coil_markers);
     _m1->Assemble();
     _m1->Finalize();
@@ -316,4 +316,4 @@ OpenCoilSolver::SetRefFace(const int face)
   _ref_face = face;
 }
 
-} // namespace hephaestus
+} // namespace platypus

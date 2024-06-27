@@ -2,7 +2,7 @@
 #include "auxsolver_base.h"
 
 // Specify postprocessors that depend on one or more gridfunctions
-namespace hephaestus
+namespace platypus
 {
 
 // Class to calculate and store the L2 error
@@ -12,11 +12,11 @@ class L2ErrorVectorPostprocessor : public AuxSolver
 
 public:
   L2ErrorVectorPostprocessor() = default;
-  L2ErrorVectorPostprocessor(const hephaestus::InputParameters & params);
+  L2ErrorVectorPostprocessor(const platypus::InputParameters & params);
 
   ~L2ErrorVectorPostprocessor() override = default;
 
-  void Init(const hephaestus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
+  void Init(const platypus::GridFunctions & gridfunctions, Coefficients & coefficients) override;
 
   void Solve(double t = 0.0) override;
 
@@ -31,4 +31,4 @@ public:
   mfem::VectorCoefficient * _vec_coeff{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus

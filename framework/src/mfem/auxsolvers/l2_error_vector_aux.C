@@ -1,16 +1,16 @@
 #include "l2_error_vector_aux.h"
 
-namespace hephaestus
+namespace platypus
 {
 
-L2ErrorVectorPostprocessor::L2ErrorVectorPostprocessor(const hephaestus::InputParameters & params)
+L2ErrorVectorPostprocessor::L2ErrorVectorPostprocessor(const platypus::InputParameters & params)
   : _var_name(params.GetParam<std::string>("VariableName")),
     _vec_coef_name(params.GetParam<std::string>("VectorCoefficientName"))
 {
 }
 
 void
-L2ErrorVectorPostprocessor::Init(const hephaestus::GridFunctions & gridfunctions,
+L2ErrorVectorPostprocessor::Init(const platypus::GridFunctions & gridfunctions,
                                  Coefficients & coefficients)
 {
   _gf = gridfunctions.Get(_var_name);
@@ -28,4 +28,4 @@ L2ErrorVectorPostprocessor::Solve(double t)
   _ndofs.Append(ndof);
 }
 
-} // namespace hephaestus
+} // namespace platypus

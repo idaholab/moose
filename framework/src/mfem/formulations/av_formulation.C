@@ -30,7 +30,7 @@
 
 #include <utility>
 
-namespace hephaestus
+namespace platypus
 {
 
 AVFormulation::AVFormulation(std::string alpha_coef_name,
@@ -49,15 +49,15 @@ AVFormulation::AVFormulation(std::string alpha_coef_name,
 void
 AVFormulation::ConstructOperator()
 {
-  hephaestus::InputParameters av_system_params;
+  platypus::InputParameters av_system_params;
   av_system_params.SetParam("VectorPotentialName", _vector_potential_name);
   av_system_params.SetParam("ScalarPotentialName", _scalar_potential_name);
   av_system_params.SetParam("AlphaCoefName", _alpha_coef_name);
   av_system_params.SetParam("BetaCoefName", _beta_coef_name);
 
-  auto equation_system = std::make_unique<hephaestus::AVEquationSystem>(av_system_params);
+  auto equation_system = std::make_unique<platypus::AVEquationSystem>(av_system_params);
 
-  GetProblem()->SetOperator(std::make_unique<hephaestus::TimeDomainEquationSystemProblemOperator>(
+  GetProblem()->SetOperator(std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(
       *GetProblem(), std::move(equation_system)));
 }
 
@@ -65,7 +65,7 @@ void
 AVFormulation::RegisterGridFunctions()
 {
   int & myid = GetProblem()->_myid;
-  hephaestus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
+  platypus::GridFunctions & gridfunctions = GetProblem()->_gridfunctions;
 
   // Register default ParGridFunctions of state gridfunctions if not provided
   if (!gridfunctions.Has(_vector_potential_name))
@@ -116,7 +116,7 @@ AVFormulation::RegisterCoefficients()
           &_one_coef, coefficients._scalars.Get(_inv_alpha_coef_name), fracFunc));
 }
 
-AVEquationSystem::AVEquationSystem(const hephaestus::InputParameters & params)
+AVEquationSystem::AVEquationSystem(const platypus::InputParameters & params)
   : _a_name(params.GetParam<std::string>("VectorPotentialName")),
     _v_name(params.GetParam<std::string>("ScalarPotentialName")),
     _alpha_coef_name(params.GetParam<std::string>("AlphaCoefName")),
@@ -128,9 +128,9 @@ AVEquationSystem::AVEquationSystem(const hephaestus::InputParameters & params)
 }
 
 void
-AVEquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
-                       const hephaestus::FESpaces & fespaces,
-                       hephaestus::BCMap & bc_map,
+AVEquationSystem::Init(platypus::GridFunctions & gridfunctions,
+                       const platypus::FESpaces & fespaces,
+                       platypus::BCMap & bc_map,
                        Coefficients & coefficients)
 {
   coefficients._scalars.Register(
@@ -155,40 +155,40 @@ AVEquationSystem::AddKernels()
   std::string dv_dt_name = GetTimeDerivativeName(_v_name);
 
   // (α∇×A_{n}, ∇×dA'/dt)
-  hephaestus::InputParameters weak_curl_curl_params;
+  platypus::InputParameters weak_curl_curl_params;
   weak_curl_curl_params.SetParam("CoupledVariableName", _a_name);
   weak_curl_curl_params.SetParam("CoefficientName", _alpha_coef_name);
-  AddKernel(da_dt_name, std::make_shared<hephaestus::WeakCurlCurlKernel>(weak_curl_curl_params));
+  AddKernel(da_dt_name, std::make_shared<platypus::WeakCurlCurlKernel>(weak_curl_curl_params));
 
   // (αdt∇×dA/dt_{n+1}, ∇×dA'/dt)
-  hephaestus::InputParameters curl_curl_params;
+  platypus::InputParameters curl_curl_params;
   curl_curl_params.SetParam("CoefficientName", _dtalpha_coef_name);
-  AddKernel(da_dt_name, std::make_shared<hephaestus::CurlCurlKernel>(curl_curl_params));
+  AddKernel(da_dt_name, std::make_shared<platypus::CurlCurlKernel>(curl_curl_params));
 
   // (βdA/dt_{n+1}, dA'/dt)
-  hephaestus::InputParameters vector_fe_mass_params;
+  platypus::InputParameters vector_fe_mass_params;
   vector_fe_mass_params.SetParam("CoefficientName", _beta_coef_name);
-  AddKernel(da_dt_name, std::make_shared<hephaestus::VectorFEMassKernel>(vector_fe_mass_params));
+  AddKernel(da_dt_name, std::make_shared<platypus::VectorFEMassKernel>(vector_fe_mass_params));
 
   // (σ ∇ V, dA'/dt)
-  hephaestus::InputParameters mixed_vector_gradient_params;
+  platypus::InputParameters mixed_vector_gradient_params;
   mixed_vector_gradient_params.SetParam("CoefficientName", _beta_coef_name);
   AddKernel(_v_name,
             da_dt_name,
-            std::make_shared<hephaestus::MixedVectorGradientKernel>(mixed_vector_gradient_params));
+            std::make_shared<platypus::MixedVectorGradientKernel>(mixed_vector_gradient_params));
 
   // (σ ∇ V, ∇ V')
-  hephaestus::InputParameters diffusion_params;
+  platypus::InputParameters diffusion_params;
   diffusion_params.SetParam("CoefficientName", _beta_coef_name);
-  AddKernel(_v_name, std::make_shared<hephaestus::DiffusionKernel>(diffusion_params));
+  AddKernel(_v_name, std::make_shared<platypus::DiffusionKernel>(diffusion_params));
 
   // (σdA/dt, ∇ V')
-  hephaestus::InputParameters vector_fe_weak_divergence_params;
+  platypus::InputParameters vector_fe_weak_divergence_params;
   vector_fe_weak_divergence_params.SetParam("CoefficientName", _beta_coef_name);
   AddKernel(
       da_dt_name,
       _v_name,
-      std::make_shared<hephaestus::VectorFEWeakDivergenceKernel>(vector_fe_weak_divergence_params));
+      std::make_shared<platypus::VectorFEWeakDivergenceKernel>(vector_fe_weak_divergence_params));
 }
 
-} // namespace hephaestus
+} // namespace platypus

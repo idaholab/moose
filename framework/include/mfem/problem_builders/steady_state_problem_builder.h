@@ -1,7 +1,7 @@
 #pragma once
 #include "problem_operator.h"
 #include "problem_builder_base.h"
-namespace hephaestus
+namespace platypus
 {
 
 /// Class for steady-state problems with no equation system.
@@ -11,7 +11,7 @@ public:
   SteadyStateProblem() = default;
   ~SteadyStateProblem() override = default;
 
-  [[nodiscard]] hephaestus::ProblemOperator * GetOperator() const override
+  [[nodiscard]] platypus::ProblemOperator * GetOperator() const override
   {
     if (!_problem_operator)
     {
@@ -21,7 +21,7 @@ public:
     return _problem_operator.get();
   }
 
-  void SetOperator(std::unique_ptr<hephaestus::ProblemOperator> problem_operator)
+  void SetOperator(std::unique_ptr<platypus::ProblemOperator> problem_operator)
   {
     _problem_operator.reset();
     _problem_operator = std::move(problem_operator);
@@ -30,17 +30,17 @@ public:
   void ConstructOperator() override
   {
     _problem_operator.reset();
-    _problem_operator = std::make_unique<hephaestus::ProblemOperator>(*this);
+    _problem_operator = std::make_unique<platypus::ProblemOperator>(*this);
   }
 
 private:
-  std::unique_ptr<hephaestus::ProblemOperator> _problem_operator{nullptr};
+  std::unique_ptr<platypus::ProblemOperator> _problem_operator{nullptr};
 };
 
 class SteadyStateProblemBuilder : public ProblemBuilder
 {
 public:
-  SteadyStateProblemBuilder() : ProblemBuilder(new hephaestus::SteadyStateProblem) {}
+  SteadyStateProblemBuilder() : ProblemBuilder(new platypus::SteadyStateProblem) {}
 
   ~SteadyStateProblemBuilder() override = default;
 
@@ -64,12 +64,12 @@ public:
 
 protected:
   // NB: constructor for derived classes.
-  SteadyStateProblemBuilder(hephaestus::SteadyStateProblem * problem) : ProblemBuilder(problem) {}
+  SteadyStateProblemBuilder(platypus::SteadyStateProblem * problem) : ProblemBuilder(problem) {}
 
-  [[nodiscard]] hephaestus::SteadyStateProblem * GetProblem() const override
+  [[nodiscard]] platypus::SteadyStateProblem * GetProblem() const override
   {
-    return ProblemBuilder::GetProblem<hephaestus::SteadyStateProblem>();
+    return ProblemBuilder::GetProblem<platypus::SteadyStateProblem>();
   }
 };
 
-} // namespace hephaestus
+} // namespace platypus

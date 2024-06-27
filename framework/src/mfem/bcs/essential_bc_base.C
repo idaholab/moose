@@ -1,6 +1,6 @@
 #include "essential_bc_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 EssentialBC::EssentialBC(const std::string & name_, mfem::Array<int> bdr_attributes_)
@@ -8,4 +8,4 @@ EssentialBC::EssentialBC(const std::string & name_, mfem::Array<int> bdr_attribu
 {
 }
 
-} // namespace hephaestus
+} // namespace platypus

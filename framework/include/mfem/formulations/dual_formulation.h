@@ -3,7 +3,7 @@
 #include "formulation.h"
 #include "inputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class DualFormulation : public TimeDomainEMFormulation
@@ -36,12 +36,12 @@ protected:
 class WeakCurlEquationSystem : public TimeDependentEquationSystem
 {
 public:
-  WeakCurlEquationSystem(const hephaestus::InputParameters & params);
+  WeakCurlEquationSystem(const platypus::InputParameters & params);
   ~WeakCurlEquationSystem() override = default;
 
-  void Init(hephaestus::GridFunctions & gridfunctions,
-            const hephaestus::FESpaces & fespaces,
-            hephaestus::BCMap & bc_map,
+  void Init(platypus::GridFunctions & gridfunctions,
+            const platypus::FESpaces & fespaces,
+            platypus::BCMap & bc_map,
             Coefficients & coefficients) override;
   void AddKernels() override;
 
@@ -52,7 +52,7 @@ public:
 class DualOperator : public TimeDomainEquationSystemProblemOperator
 {
 public:
-  DualOperator(hephaestus::Problem & problem,
+  DualOperator(platypus::Problem & problem,
                std::unique_ptr<TimeDependentEquationSystem> equation_system)
     : TimeDomainEquationSystemProblemOperator(problem, std::move(equation_system))
   {
@@ -74,4 +74,4 @@ public:
 protected:
   std::unique_ptr<mfem::ParDiscreteLinearOperator> _curl;
 };
-} // namespace hephaestus
+} // namespace platypus

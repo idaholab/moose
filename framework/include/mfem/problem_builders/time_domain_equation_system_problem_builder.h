@@ -4,7 +4,7 @@
 #include "time_domain_equation_system_problem_operator.h"
 #include "equation_system_interface.h"
 
-namespace hephaestus
+namespace platypus
 {
 /// Time-depent problems with an equation system.
 class TimeDomainEquationSystemProblem : public TimeDomainProblem, public EquationSystemInterface
@@ -13,22 +13,22 @@ public:
   TimeDomainEquationSystemProblem() = default;
   ~TimeDomainEquationSystemProblem() override = default;
 
-  [[nodiscard]] hephaestus::TimeDomainEquationSystemProblemOperator * GetOperator() const override
+  [[nodiscard]] platypus::TimeDomainEquationSystemProblemOperator * GetOperator() const override
   {
-    return static_cast<hephaestus::TimeDomainEquationSystemProblemOperator *>(
+    return static_cast<platypus::TimeDomainEquationSystemProblemOperator *>(
         TimeDomainProblem::GetOperator());
   }
 
   void
-  SetOperator(std::unique_ptr<hephaestus::TimeDomainEquationSystemProblemOperator> problem_operator)
+  SetOperator(std::unique_ptr<platypus::TimeDomainEquationSystemProblemOperator> problem_operator)
   {
     TimeDomainProblem::SetOperator(std::move(problem_operator));
   }
 
   void ConstructOperator() override
   {
-    auto equation_system = std::make_unique<hephaestus::TimeDependentEquationSystem>();
-    auto problem_operator = std::make_unique<hephaestus::TimeDomainEquationSystemProblemOperator>(
+    auto equation_system = std::make_unique<platypus::TimeDependentEquationSystem>();
+    auto problem_operator = std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(
         *this, std::move(equation_system));
 
     SetOperator(std::move(problem_operator));
@@ -47,7 +47,7 @@ class TimeDomainEquationSystemProblemBuilder : public TimeDomainProblemBuilder,
 public:
   /// NB: set "_problem" member variable in parent class.
   TimeDomainEquationSystemProblemBuilder()
-    : TimeDomainProblemBuilder(new hephaestus::TimeDomainEquationSystemProblem)
+    : TimeDomainProblemBuilder(new platypus::TimeDomainEquationSystemProblem)
   {
   }
 
@@ -59,15 +59,15 @@ public:
   auto ReturnProblem() { return ProblemBuilder::ReturnProblem<TimeDomainEquationSystemProblem>(); }
 
 protected:
-  [[nodiscard]] hephaestus::TimeDomainEquationSystemProblem * GetProblem() const override
+  [[nodiscard]] platypus::TimeDomainEquationSystemProblem * GetProblem() const override
   {
-    return ProblemBuilder::GetProblem<hephaestus::TimeDomainEquationSystemProblem>();
+    return ProblemBuilder::GetProblem<platypus::TimeDomainEquationSystemProblem>();
   }
 
-  [[nodiscard]] hephaestus::TimeDependentEquationSystem * GetEquationSystem() const override
+  [[nodiscard]] platypus::TimeDependentEquationSystem * GetEquationSystem() const override
   {
     return GetProblem()->GetEquationSystem();
   }
 };
 
-} // namespace hephaestus
+} // namespace platypus

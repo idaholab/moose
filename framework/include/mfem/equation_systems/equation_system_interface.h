@@ -1,7 +1,7 @@
 #pragma once
 #include "problem_builder_base.h"
 
-namespace hephaestus
+namespace platypus
 {
 /**
  * Interface required for:
@@ -17,6 +17,6 @@ public:
   virtual ~EquationSystemInterface() = default;
 
   /// Returns a pointer to the operator's equation system.
-  [[nodiscard]] virtual hephaestus::EquationSystem * GetEquationSystem() const = 0;
+  [[nodiscard]] virtual platypus::EquationSystem * GetEquationSystem() const = 0;
 };
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "frequency_domain_em_formulation.h"
 
-namespace hephaestus
+namespace platypus
 {
 /*
 Formulation for solving:
@@ -25,7 +25,7 @@ Robin boundaries weakly constrain (α∇×u)×n + γ(n×n×u) = F
 Divergence cleaning (such as via Helmholtz projection)
 should be performed on g before use in this operator.
 */
-class ComplexMaxwellFormulation : public hephaestus::FrequencyDomainEMFormulation
+class ComplexMaxwellFormulation : public platypus::FrequencyDomainEMFormulation
 {
 public:
   ComplexMaxwellFormulation(std::string frequency_coef_name,
@@ -62,7 +62,7 @@ protected:
 class ComplexMaxwellOperator : public ProblemOperator
 {
 public:
-  ComplexMaxwellOperator(hephaestus::Problem & problem,
+  ComplexMaxwellOperator(platypus::Problem & problem,
                          std::string h_curl_var_complex_name,
                          std::string h_curl_var_real_name,
                          std::string h_curl_var_imag_name,
@@ -89,4 +89,4 @@ public:
   mfem::Array<int> _ess_bdr_tdofs;
 };
 
-} // namespace hephaestus
+} // namespace platypus

@@ -2,13 +2,13 @@
 #include "../common/pfem_extras.hpp"
 #include "inputs.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 class DefaultH1PCGSolver : public mfem::HyprePCG
 {
 public:
-  DefaultH1PCGSolver(const hephaestus::InputParameters & params, const mfem::HypreParMatrix & M)
+  DefaultH1PCGSolver(const platypus::InputParameters & params, const mfem::HypreParMatrix & M)
     : mfem::HyprePCG(M),
       _amg(M),
       _tol(params.GetOptionalParam<float>("Tolerance", 1.0e-9)),
@@ -34,7 +34,7 @@ public:
 class DefaultJacobiPCGSolver : public mfem::HyprePCG
 {
 public:
-  DefaultJacobiPCGSolver(const hephaestus::InputParameters & params, const mfem::HypreParMatrix & M)
+  DefaultJacobiPCGSolver(const platypus::InputParameters & params, const mfem::HypreParMatrix & M)
     : mfem::HyprePCG(M),
       _jacobi(M),
       _tol(params.GetOptionalParam<float>("Tolerance", 1.0e-9)),
@@ -59,7 +59,7 @@ public:
 class DefaultHCurlPCGSolver : public mfem::HyprePCG
 {
 public:
-  DefaultHCurlPCGSolver(const hephaestus::InputParameters & params,
+  DefaultHCurlPCGSolver(const platypus::InputParameters & params,
                         const mfem::HypreParMatrix & M,
                         mfem::ParFiniteElementSpace * edge_fespace)
     : mfem::HyprePCG(M),
@@ -88,7 +88,7 @@ public:
 class DefaultHCurlFGMRESSolver : public mfem::HypreFGMRES
 {
 public:
-  DefaultHCurlFGMRESSolver(const hephaestus::InputParameters & params,
+  DefaultHCurlFGMRESSolver(const platypus::InputParameters & params,
                            const mfem::HypreParMatrix & M,
                            mfem::ParFiniteElementSpace * edge_fespace)
     : mfem::HypreFGMRES(M),
@@ -117,7 +117,7 @@ public:
 class DefaultGMRESSolver : public mfem::HypreGMRES
 {
 public:
-  DefaultGMRESSolver(const hephaestus::InputParameters & params, const mfem::HypreParMatrix & M)
+  DefaultGMRESSolver(const platypus::InputParameters & params, const mfem::HypreParMatrix & M)
     : mfem::HypreGMRES(M),
       _amg(M),
       _tol(params.GetOptionalParam<float>("Tolerance", 1e-16)),
@@ -154,4 +154,4 @@ private:
   std::unique_ptr<mfem::SuperLURowLocMatrix> _a_superlu{nullptr};
 };
 
-} // namespace hephaestus
+} // namespace platypus
