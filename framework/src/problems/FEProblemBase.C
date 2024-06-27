@@ -2453,9 +2453,6 @@ FEProblemBase::hasConvergence(const std::string & name, const THREAD_ID tid) con
 Convergence &
 FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid) const
 {
-  // This thread lock is necessary since this method will create functions
-  // for all threads if one is missing.
-  // Threads::spin_mutex::scoped_lock lock(get_function_mutex);
   auto * const ret = dynamic_cast<Convergence *>(_convergences.getActiveObject(name, tid).get());
   if (!ret)
     mooseError("The Convergence object '", name, "' does not exist.");
