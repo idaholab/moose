@@ -1016,9 +1016,6 @@ FEProblemBase::initialSetup()
       _scalar_ics.initialSetup();
     }
 
-    // if (!_nonlinear_convergence_name.empty())
-    // getConvergence(_nonlinear_convergence_name).initialSetup();
-
     projectSolution();
   }
 
