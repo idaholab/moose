@@ -1,6 +1,5 @@
 # ResidualConvergence
 
-The `ResidualConvergence` object facilitates the assessment of convergence properties of MOOSE applications and allows extensions to provide the user more control over the application behaviour. 
 
 
 ## Description
