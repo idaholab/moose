@@ -72,4 +72,15 @@
     design = "Dynamics.md"
     issues = "#18687"
   []
+
+  [direct]
+    type = 'Exodiff'
+    input = 'direct.i'
+    exodiff = 'direct_out.e'
+    abs_zero = 1e-09
+
+    requirement = "The mechanics system shall support explicit time integration with a direct calculation of acceleration"
+    design = "Dynamics.md"
+  []
 []
+
