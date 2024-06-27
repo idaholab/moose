@@ -50,10 +50,6 @@ protected:
 
   const std::vector<BoundaryName> _boundary_name;
 
-  /// Whether this relationship manager is called when coupling functors are called when building
-  /// the matrix sparsity pattern
-  const bool _is_coupling_functor;
-
   /// Whether to ghost point neighbors of secondary lower subdomain elements and their
   /// cross mortar interface counterparts for applications such as mortar nodal auxiliary kernels
   const bool _ghost_point_neighbors;

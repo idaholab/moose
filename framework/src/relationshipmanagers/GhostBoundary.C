@@ -28,13 +28,23 @@ GhostBoundary::validParams()
   InputParameters params = RelationshipManager::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>("boundary",
                                                      "The name of the primary boundary sideset.");
+  params.addParam<bool>("ghost_point_neighbors",
+                        false,
+                        "Whether we should ghost point neighbors of the paired boundary.");
+
+  // We want to wait until our mortar mesh has been built before trying to delete remote elements.
+  // And our mortar mesh cannot be built until the entire mesh has been generated. By setting this
+  // parameter to false we will make sure that any prepare_for_use calls during the mesh generation
+  // phase will not delete remote elements *and* we will set a flag on the moose mesh saying that we
+  // need to delete remote elements after the addition of late geometric ghosting functors
+  // (including this ghosting functor)
+
   return params;
 }
 
 GhostBoundary::GhostBoundary(const InputParameters & params)
   : RelationshipManager(params),
     _boundary_name(getParam<std::vector<BoundaryName>>("boundary")),
-    _is_coupling_functor(isType(Moose::RelationshipManagerType::GEOMETRIC)),
     _ghost_point_neighbors(getParam<bool>("ghost_point_neighbors"))
 {
 }
@@ -42,7 +52,6 @@ GhostBoundary::GhostBoundary(const InputParameters & params)
 GhostBoundary::GhostBoundary(const GhostBoundary & other)
   : RelationshipManager(other),
     _boundary_name(other._boundary_name),
-    _is_coupling_functor(other._is_coupling_functor),
     _ghost_point_neighbors(other._ghost_point_neighbors)
 {
 }
@@ -81,22 +90,18 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & /*range_begin
       // elements who have parents on a boundary
       if (elem->on_boundary())
         coupled_elements.insert(std::make_pair(elem, _null_mat));
-      else if (const Elem * const ip = elem->interior_parent())
-      {
-        if (ip->on_boundary())
-          coupled_elements.insert(std::make_pair(elem, _null_mat));
-      }
     }
     else
     {
       // We've finished generating our mesh so we can be selective and only ghost elements lying on
       // our boundary
-
       const BoundaryInfo & binfo = _mesh->get_boundary_info();
       for (auto side : elem->side_index_range())
         for (auto boundary_id : boundary_ids)
           if ((elem->processor_id() != p) && (binfo.has_boundary_id(elem, side, boundary_id)))
-            coupled_elements.insert(std::make_pair(elem, _null_mat));
+            goto countBreak;
+    countBreak:
+      coupled_elements.insert(std::make_pair(elem, _null_mat));
     }
   }
 }
