@@ -151,9 +151,9 @@ protected:
    * builders.
    */
   template <class T>
-  void addKernel(std::string var_name, std::shared_ptr<hephaestus::Kernel<T>> kernel)
+  void addKernel(std::string var_name, std::shared_ptr<platypus::Kernel<T>> kernel)
   {
-    using namespace hephaestus;
+    using namespace platypus;
 
     EquationSystemProblemBuilderInterface * eqn_system_problem_builder{nullptr};
 
@@ -174,12 +174,12 @@ protected:
   int _order;
 
   Coefficients _coefficients;
-  hephaestus::InputParameters _solver_options;
-  hephaestus::Outputs _outputs;
-  hephaestus::InputParameters _exec_params;
+  platypus::InputParameters _solver_options;
+  platypus::Outputs _outputs;
+  platypus::InputParameters _exec_params;
 
-  std::shared_ptr<hephaestus::ProblemBuilder> mfem_problem_builder{nullptr};
+  std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
 
-  std::unique_ptr<hephaestus::Problem> mfem_problem{nullptr};
-  std::unique_ptr<hephaestus::Executioner> executioner{nullptr};
+  std::unique_ptr<platypus::Problem> mfem_problem{nullptr};
+  std::unique_ptr<platypus::Executioner> executioner{nullptr};
 };

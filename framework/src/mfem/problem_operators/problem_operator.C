@@ -1,6 +1,6 @@
 #include "problem_operator.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 void
@@ -10,4 +10,4 @@ ProblemOperator::SetGridFunctions()
   width = height = _true_offsets[_trial_variables.size()];
 };
 
-} // namespace hephaestus
+} // namespace platypus

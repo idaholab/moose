@@ -1,6 +1,6 @@
 #include "equation_system.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 EquationSystem::~EquationSystem() { _h_blocks.DeleteAll(); }
@@ -94,7 +94,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
   if (!_mblf_kernels_map_map.Has(test_var_name))
   {
     auto kernel_field_map = std::make_shared<
-        hephaestus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>();
+        platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>();
 
     _mblf_kernels_map_map.Register(test_var_name, std::move(kernel_field_map));
   }
@@ -114,7 +114,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
 }
 
 void
-EquationSystem::ApplyBoundaryConditions(hephaestus::BCMap & bc_map)
+EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
 {
   _ess_tdof_lists.resize(_test_var_names.size());
   for (int i = 0; i < _test_var_names.size(); i++)
@@ -211,7 +211,7 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
 void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                   hephaestus::GridFunctions & gridfunctions)
+                                   platypus::GridFunctions & gridfunctions)
 {
   for (int i = 0; i < _test_var_names.size(); i++)
   {
@@ -222,9 +222,9 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 }
 
 void
-EquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
-                     const hephaestus::FESpaces & fespaces,
-                     hephaestus::BCMap & bc_map,
+EquationSystem::Init(platypus::GridFunctions & gridfunctions,
+                     const platypus::FESpaces & fespaces,
+                     platypus::BCMap & bc_map,
                      Coefficients & coefficients)
 {
 
@@ -285,7 +285,7 @@ EquationSystem::Init(hephaestus::GridFunctions & gridfunctions,
 }
 
 void
-EquationSystem::BuildLinearForms(hephaestus::BCMap & bc_map, hephaestus::Sources & sources)
+EquationSystem::BuildLinearForms(platypus::BCMap & bc_map, platypus::Sources & sources)
 {
   // Register linear forms
   for (int i = 0; i < _test_var_names.size(); i++)
@@ -356,7 +356,7 @@ EquationSystem::BuildMixedBilinearForms()
   for (int i = 0; i < _test_var_names.size(); i++)
   {
     auto test_var_name = _test_var_names.at(i);
-    auto test_mblfs = std::make_shared<hephaestus::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    auto test_mblfs = std::make_shared<platypus::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (int j = 0; j < _test_var_names.size(); j++)
     {
       auto trial_var_name = _test_var_names.at(j);
@@ -388,7 +388,7 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
-EquationSystem::BuildEquationSystem(hephaestus::BCMap & bc_map, hephaestus::Sources & sources)
+EquationSystem::BuildEquationSystem(platypus::BCMap & bc_map, platypus::Sources & sources)
 {
   BuildLinearForms(bc_map, sources);
   BuildBilinearForms();
@@ -426,12 +426,12 @@ TimeDependentEquationSystem::SetTimeStep(double dt)
 }
 
 void
-TimeDependentEquationSystem::UpdateEquationSystem(hephaestus::BCMap & bc_map,
-                                                  hephaestus::Sources & sources)
+TimeDependentEquationSystem::UpdateEquationSystem(platypus::BCMap & bc_map,
+                                                  platypus::Sources & sources)
 {
   BuildLinearForms(bc_map, sources);
   BuildBilinearForms();
   BuildMixedBilinearForms();
 }
 
-} // namespace hephaestus
+} // namespace platypus

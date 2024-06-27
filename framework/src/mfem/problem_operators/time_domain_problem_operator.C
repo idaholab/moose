@@ -1,6 +1,6 @@
 #include "time_domain_problem_operator.h"
 
-namespace hephaestus
+namespace platypus
 {
 
 std::string
@@ -27,4 +27,4 @@ TimeDomainProblemOperator::SetGridFunctions()
   width = height = _true_offsets[_trial_variables.size()];
 }
 
-} // namespace hephaestus
+} // namespace platypus

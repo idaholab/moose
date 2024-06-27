@@ -68,13 +68,13 @@ MFEMProblem::initialSetup()
   // NB: set to false to avoid reconstructing problem operator.
   mfem_problem_builder->FinalizeProblem(false);
 
-  hephaestus::InputParameters exec_params;
+  platypus::InputParameters exec_params;
 
   Transient * _moose_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
   if (_moose_executioner != nullptr)
   {
     auto mfem_transient_problem_builder =
-        std::dynamic_pointer_cast<hephaestus::TimeDomainProblemBuilder>(mfem_problem_builder);
+        std::dynamic_pointer_cast<platypus::TimeDomainProblemBuilder>(mfem_problem_builder);
     if (mfem_transient_problem_builder == nullptr)
     {
       mooseError("Specified formulation does not support Transient executioners");
@@ -86,15 +86,14 @@ MFEMProblem::initialSetup()
     exec_params.SetParam("TimeStep", float(dt()));
     exec_params.SetParam("EndTime", float(_moose_executioner->endTime()));
     exec_params.SetParam("VisualisationSteps", getParam<int>("vis_steps"));
-    exec_params.SetParam("Problem",
-                         static_cast<hephaestus::TimeDomainProblem *>(mfem_problem.get()));
+    exec_params.SetParam("Problem", static_cast<platypus::TimeDomainProblem *>(mfem_problem.get()));
 
-    executioner = std::make_unique<hephaestus::TransientExecutioner>(exec_params);
+    executioner = std::make_unique<platypus::TransientExecutioner>(exec_params);
   }
   else if (dynamic_cast<Steady *>(_app.getExecutioner()))
   {
     auto mfem_steady_problem_builder =
-        std::dynamic_pointer_cast<hephaestus::SteadyStateProblemBuilder>(mfem_problem_builder);
+        std::dynamic_pointer_cast<platypus::SteadyStateProblemBuilder>(mfem_problem_builder);
     if (mfem_steady_problem_builder == nullptr)
     {
       mooseError("Specified formulation does not support Steady executioners");
@@ -103,9 +102,9 @@ MFEMProblem::initialSetup()
     mfem_problem = mfem_steady_problem_builder->ReturnProblem();
 
     exec_params.SetParam("Problem",
-                         static_cast<hephaestus::SteadyStateProblem *>(mfem_problem.get()));
+                         static_cast<platypus::SteadyStateProblem *>(mfem_problem.get()));
 
-    executioner = std::make_unique<hephaestus::SteadyExecutioner>(exec_params);
+    executioner = std::make_unique<platypus::SteadyExecutioner>(exec_params);
   }
   else
   {
@@ -129,7 +128,7 @@ MFEMProblem::externalSolve()
     return;
   }
 
-  auto * transient_mfem_exec = dynamic_cast<hephaestus::TransientExecutioner *>(executioner.get());
+  auto * transient_mfem_exec = dynamic_cast<platypus::TransientExecutioner *>(executioner.get());
   if (transient_mfem_exec != nullptr)
   {
     transient_mfem_exec->_t_step = dt();
@@ -189,7 +188,7 @@ MFEMProblem::addCoefficient(const std::string & user_object_name,
   _coefficients._scalars.Register(name, mfem_coef->getCoefficient());
 
   // Add associated auxsolvers for CoupledCoefficients
-  auto coupled_coef = std::dynamic_pointer_cast<hephaestus::CoupledCoefficient>(
+  auto coupled_coef = std::dynamic_pointer_cast<platypus::CoupledCoefficient>(
       _coefficients._scalars.GetShared(name));
   if (coupled_coef != nullptr)
   {
