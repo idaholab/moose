@@ -12,19 +12,17 @@
 #include "MooseUtils.h"
 #include "OutputWarehouse.h"
 
-std::mutex _stream_mutex;
+std::mutex ConsoleStream::_stream_mutex;
 
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse)
   : _output_warehouse(output_warehouse), _oss(std::make_shared<std::ostringstream>())
 {
 }
 
-static std::mutex manip_mutex;
-
 const ConsoleStream &
 ConsoleStream::operator<<(const StandardEndLine & manip) const
 {
-  const std::lock_guard<std::mutex> lock(manip_mutex);
+  const std::lock_guard<std::mutex> lock(_stream_mutex);
 
   if (manip == (std::basic_ostream<char> & (*)(std::basic_ostream<char> &)) & std::endl)
     (*_oss) << '\n';

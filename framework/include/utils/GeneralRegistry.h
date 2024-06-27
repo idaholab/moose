@@ -11,7 +11,7 @@
 
 #include <unordered_map>
 #include <mutex>
-#include <vector>
+#include <deque>
 
 #include "MooseError.h"
 
@@ -63,18 +63,13 @@ protected:
   template <typename CreateItem>
   std::size_t registerItem(const Key & key, CreateItem & create_item);
 
-  /**
-   * Reserves \p size entires in the item vector, _id_to_item
-   */
-  void reserve(const std::size_t size);
-
   /// The name of this registry; used in error handling
   const std::string _name;
 
   /// Map of keys to IDs
   std::unordered_map<Key, std::size_t, KeyHash> _key_to_id;
   /// Vector of IDs to Items
-  std::vector<Item> _id_to_item;
+  std::deque<Item> _id_to_item;
 
   /// Mutex for locking access to _key_to_id
   /// NOTE: These can be changed to shared_mutexes once we get C++17
@@ -159,12 +154,4 @@ GeneralRegistry<Key, Item, KeyHash>::registerItem(const Key & key, CreateItem & 
   _key_to_id.emplace(key, id);
   _id_to_item.emplace_back(std::move(create_item(id)));
   return id;
-}
-
-template <class Key, class Item, class KeyHash>
-void
-GeneralRegistry<Key, Item, KeyHash>::reserve(const std::size_t size)
-{
-  std::lock_guard<std::mutex> lock(_id_to_item_mutex);
-  _id_to_item.reserve(size);
 }
