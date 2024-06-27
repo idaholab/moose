@@ -37,7 +37,10 @@ GaussianProcessTrainer::validParams()
   params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
-  params.addParam<bool>("show_optimization_details", false, "Switch to show Adam solver results");
+  params.addParam<unsigned int>(
+      "show_every_nth_iteration",
+      0,
+      "Switch to show Adam optimization loss values at every nth step. If 0, nothing is showed.");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
@@ -55,7 +58,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
     _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
-        getParam<bool>("show_optimization_details"),
+        getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
         getParam<Real>("learning_rate"))),

@@ -27,7 +27,7 @@ public:
 
 protected:
   /// Reference to GaussianProcess
-  const GaussianProcessSurrogate & _gp_uo;
+  const GaussianProcessSurrogate & _gp_surrogate;
 
   /// Vector of hyperparamater values
   std::vector<VectorPostprocessorValue *> _hp_vector;

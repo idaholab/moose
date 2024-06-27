@@ -24,22 +24,22 @@
 namespace StochasticTools
 {
 
-GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool inp_show_optimization_details,
-                                                        const unsigned int inp_num_iter,
-                                                        const unsigned int inp_batch_size,
-                                                        const Real inp_learning_rate,
-                                                        const Real inp_b1,
-                                                        const Real inp_b2,
-                                                        const Real inp_eps,
-                                                        const Real inp_lambda)
-  : show_optimization_details(inp_show_optimization_details),
-    num_iter(inp_num_iter),
-    batch_size(inp_batch_size),
-    learning_rate(inp_learning_rate),
-    b1(inp_b1),
-    b2(inp_b2),
-    eps(inp_eps),
-    lambda(inp_lambda)
+GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nth_iteration,
+                                                        const unsigned int num_iter,
+                                                        const unsigned int batch_size,
+                                                        const Real learning_rate,
+                                                        const Real b1,
+                                                        const Real b2,
+                                                        const Real eps,
+                                                        const Real lambda)
+  : show_every_nth_iteration(show_every_nth_iteration),
+    num_iter(num_iter),
+    batch_size(batch_size),
+    learning_rate(learning_rate),
+    b1(b1),
+    b2(b2),
+    eps(eps),
+    lambda(lambda)
 {
 }
 
@@ -177,7 +177,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
   RealEigenMatrix inputs(_batch_size, training_params.cols());
   RealEigenMatrix outputs(_batch_size, training_data.cols());
-  if (opts.show_optimization_details)
+  if (opts.show_every_nth_iteration)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
   {
@@ -196,7 +196,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     }
 
     store_loss = getLoss(inputs, outputs);
-    if (opts.show_optimization_details)
+    if (opts.show_every_nth_iteration && ((ss + 1) % opts.show_every_nth_iteration == 0))
       Moose::out << "Iteration: " << ss + 1 << " LOSS: " << store_loss << std::endl;
     grad1 = getGradient(inputs);
     for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
@@ -222,7 +222,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
     _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   }
-  if (opts.show_optimization_details)
+  if (opts.show_every_nth_iteration)
   {
     Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
     Moose::out << Moose::stringify(theta) << std::endl;

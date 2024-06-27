@@ -107,7 +107,6 @@
     num_iters = 1000
     batch_size = 20
     learning_rate = 0.005
-    show_optimization_details = false
   []
 []
 

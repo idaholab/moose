@@ -110,7 +110,7 @@
     tune_parameters = 'covar:signal_variance covar:length_factor'
     num_iters = 5000
     learning_rate = 0.001
-    show_optimization_details = true
+    show_every_nth_iteration = 1
     batch_size = 200
   []
 []

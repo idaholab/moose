@@ -48,18 +48,30 @@ public:
   {
     /// Default constructor
     GPOptimizerOptions();
-    /// Construct using user-input
-    GPOptimizerOptions(const bool inp_show_optimization_details,
-                       const unsigned int inp_num_iter = 1000,
-                       const unsigned int inp_batch_size = 0,
-                       const Real inp_learning_rate = 1e-3,
-                       const Real inp_b1 = 0.9,
-                       const Real inp_b2 = 0.999,
-                       const Real inp_eps = 1e-7,
-                       const Real inp_lambda = 0.0);
+    /**
+     * Construct a new GPOptimizerOptions object using
+     * input parameters that will control the optimization
+     * @param show_every_nth_iteration To show the loss value at every n-th iteration, if set to 0,
+     * nothing is displayed
+     * @param num_iter The number of iterations we want in the optimization of the GP
+     * @param batch_size The number of samples in each batch
+     * @param learning_rate The learning rate for parameter updates
+     * @param b1 Tuning constant for the Adam algorithm
+     * @param b2 Tuning constant for the Adam algorithm
+     * @param eps Tuning constant for the Adam algorithm
+     * @param lambda Tuning constant for the Adam algorithm
+     */
+    GPOptimizerOptions(const bool show_every_nth_iteration = 1,
+                       const unsigned int num_iter = 1000,
+                       const unsigned int batch_size = 0,
+                       const Real learning_rate = 1e-3,
+                       const Real b1 = 0.9,
+                       const Real b2 = 0.999,
+                       const Real eps = 1e-7,
+                       const Real lambda = 0.0);
 
-    /// Switch to enable verbose output for parameter tuning
-    const bool show_optimization_details = false;
+    /// Switch to enable verbose output for parameter tuning at every n-th iteration
+    const unsigned int show_every_nth_iteration = false;
     /// The number of iterations for Adam optimizer
     const unsigned int num_iter = 1000;
     /// The batch isize for Adam optimizer
