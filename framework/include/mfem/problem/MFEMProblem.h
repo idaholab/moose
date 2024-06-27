@@ -23,7 +23,7 @@
 #include "SystemBase.h"
 #include "Transient.h"
 #include "Steady.h"
-#include "hephaestus.h"
+#include "platypus.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/point.h"
 
