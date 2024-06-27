@@ -26,13 +26,14 @@ public:
   void SubtractSource(mfem::ParGridFunction * gf) override;
   void BuildHCurlMass();
 
-  std::string _src_gf_name;
   std::string _src_coef_name;
-  std::string _potential_gf_name;
+  std::string _src_gf_name;
   std::string _hcurl_fespace_name;
   std::string _h1_fespace_name;
+  std::string _potential_gf_name;
   const hephaestus::InputParameters _solver_options;
   bool _perform_helmholtz_projection;
+  std::unique_ptr<mfem::ParBilinearForm> _h_curl_mass;
 
   mfem::ParFiniteElementSpace * _h1_fe_space{nullptr};
   mfem::ParFiniteElementSpace * _h_curl_fe_space{nullptr};
@@ -42,8 +43,6 @@ public:
   hephaestus::BCMap * _bc_map{nullptr};
   hephaestus::GridFunctions * _gridfunctions{nullptr};
   const hephaestus::FESpaces * _fespaces{nullptr};
-
-  std::unique_ptr<mfem::ParBilinearForm> _h_curl_mass;
 
   mfem::VectorCoefficient * _source_vec_coef{nullptr};
 

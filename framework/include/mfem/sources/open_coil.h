@@ -37,11 +37,11 @@ public:
                  const std::pair<int, int> electrodes,
                  bool electric_field_transfer = true,
                  std::string source_jfield_gf_name = "",
-                 hephaestus::InputParameters solver_options =
-                     hephaestus::InputParameters({{"Tolerance", float(1.0e-20)},
-                                                  {"AbsTolerance", float(1.0e-20)},
-                                                  {"MaxIter", (unsigned int)1000},
-                                                  {"PrintLevel", 2}}));// GetGlobalPrintLevel()}}));
+                 hephaestus::InputParameters solver_options = hephaestus::InputParameters(
+                     {{"Tolerance", float(1.0e-20)},
+                      {"AbsTolerance", float(1.0e-20)},
+                      {"MaxIter", (unsigned int)1000},
+                      {"PrintLevel", 2}})); // GetGlobalPrintLevel()}}));
 
   ~OpenCoilSolver() override = default;
 
@@ -79,27 +79,38 @@ public:
 
 private:
   // Parameters
-  std::pair<int, int> _elec_attrs;
-  mfem::Array<int> _coil_domains;
   mfem::Array<int> _coil_markers;
-  hephaestus::InputParameters _solver_options;
 
   int _order_h1;
   int _order_hcurl;
   int _order_hdiv;
-  int _ref_face;
-  bool _electric_field_transfer;
 
   std::shared_ptr<mfem::Coefficient> _sigma{nullptr};
   std::shared_ptr<mfem::Coefficient> _itotal{nullptr};
 
   // Names
-  std::string _grad_phi_name;
+  std::string _source_efield_gf_name;
+  std::string _source_jfield_gf_name;
   std::string _phi_gf_name;
   std::string _i_coef_name;
   std::string _cond_coef_name;
-  std::string _source_efield_gf_name;
-  std::string _source_jfield_gf_name;
+
+  bool _electric_field_transfer;
+
+  hephaestus::InputParameters _solver_options;
+
+  mfem::Array<int> _coil_domains;
+  std::pair<int, int> _elec_attrs;
+
+  // Child boundary condition objects
+  std::shared_ptr<mfem::FunctionCoefficient> _high_src{nullptr};
+  std::shared_ptr<mfem::FunctionCoefficient> _low_src{nullptr};
+  mfem::Array<int> _high_terminal;
+  mfem::Array<int> _low_terminal;
+
+  int _ref_face;
+
+  std::string _grad_phi_name;
 
   // Parent mesh, FE space, and current
   mfem::ParMesh * _mesh_parent{nullptr};
@@ -132,13 +143,6 @@ private:
   std::shared_ptr<mfem::ParGridFunction> _grad_phi_child{nullptr};
   std::shared_ptr<mfem::ParGridFunction> _phi_child{nullptr};
   std::shared_ptr<mfem::ParGridFunction> _j_child{nullptr};
-
-  // Child boundary condition objects
-  std::shared_ptr<mfem::FunctionCoefficient> _high_src{nullptr};
-  std::shared_ptr<mfem::FunctionCoefficient> _low_src{nullptr};
-
-  mfem::Array<int> _high_terminal;
-  mfem::Array<int> _low_terminal;
 
   // Mass Matrix
   std::unique_ptr<mfem::ParBilinearForm> _m1{nullptr};
