@@ -55,58 +55,28 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     _nargs(coupledComponents("coupled_variables")),
     _args(coupledValues("coupled_variables")),
     _use_xyzt(getParam<bool>("use_xyzt")),
+    _xyzt({"x", "y", "z", "t"}),
     _functor_names(getParam<std::vector<MooseFunctorName>>("functor_names")),
     _n_functors(_functor_names.size()),
     _functor_symbols(getParam<std::vector<std::string>>("functor_symbols"))
 {
+
+  for (const auto i : make_range(_nargs))
+    _coupled_variable_names.push_back(getFieldVar("coupled_variables", i)->name());
+
   // sanity checks
   if (!_functor_symbols.empty() && (_functor_symbols.size() != _n_functors))
     paramError("functor_symbols", "functor_symbols must be the same length as functor_names.");
 
-  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
-  std::vector<std::string> variable_names;
-  for (const auto i : make_range(_nargs))
-    variable_names.push_back(getFieldVar("coupled_variables", i)->name());
-
-  if (_functor_symbols.size())
-  {
-    for (const auto & symbol : _functor_symbols)
-    {
-      // Make sure symbol is not x, y, z, or t
-      if (_use_xyzt && (std::find(xyzt.begin(), xyzt.end(), symbol) != xyzt.end()))
-        paramError("functor_symbols",
-                   "x, y, z, and t cannot be used as a functor symbol when use_xyzt=true.");
-      // Make sure symbol is not a variable name
-      if (variable_names.size() &&
-          (std::find(variable_names.begin(), variable_names.end(), symbol) != variable_names.end()))
-        paramError("functor_symbols",
-                   "Functor symbols cannot overlap with coupled variable names.");
-    }
-  }
-  else
-    for (const auto & name : _functor_names)
-    {
-      // Make sure symbol is not x, y, z, or t
-      if (_use_xyzt && (std::find(xyzt.begin(), xyzt.end(), std::string(name)) != xyzt.end()))
-        paramError("functor_names",
-                   "x, y, z, and t cannot be used as a functor name when use_xyzt=true. Use "
-                   "'functor_symbols' to disambiguate.");
-      // Make sure symbol is not a variable name
-      if (variable_names.size() &&
-          (std::find(variable_names.begin(), variable_names.end(), std::string(name)) !=
-           variable_names.end()))
-        paramError(
-            "functor_names",
-            "Functor names cannot overlap with coupled variable names. Use 'functor_symbols' to "
-            "disambiguate.");
-    }
+  validateFunctorSymbols();
+  validateFunctorNames();
 
   // build variables argument
   std::string variables;
 
   // coupled field variables
-  for (const auto i : make_range(_nargs))
-    variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
+  for (const auto i : index_range(_coupled_variable_names))
+    variables += (i == 0 ? "" : ",") + _coupled_variable_names[i];
 
   // adding functors to the expression
   if (_functor_symbols.size())
@@ -118,7 +88,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
 
   // "system" variables
   if (_use_xyzt)
-    for (auto & v : xyzt)
+    for (auto & v : _xyzt)
       variables += (variables.empty() ? "" : ",") + v;
 
   // base function object
@@ -190,4 +160,16 @@ ParsedAux::computeValue()
   }
 
   return evaluate(_func_F);
+}
+
+void
+ParsedAux::validateFunctorSymbols()
+{
+  validateGenericVectorNames(_functor_symbols, "functor_symbols");
+}
+
+void
+ParsedAux::validateFunctorNames()
+{
+  validateGenericVectorNames(_functor_names, "functor_names");
 }
