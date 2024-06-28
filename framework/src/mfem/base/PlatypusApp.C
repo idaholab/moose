@@ -31,9 +31,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("add_elemental_field_variable", "add_mfem_formulation");
   addTaskDependency("add_kernel", "add_mfem_formulation");
 
-  // add MFEM auxkernel base
-  appendMooseObjectTask("add_aux_kernel", MFEMAuxKernel);
-
   // add coefficients
   registerMooseObjectTask("add_mfem_coefficients", MFEMCoefficient, false);
   registerSyntaxTask("AddCoefficientAction", "Coefficients/*", "add_mfem_coefficients");
