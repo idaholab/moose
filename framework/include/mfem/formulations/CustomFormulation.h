@@ -16,7 +16,10 @@ public:
   virtual void finalize() override {}
 
   /// Returns a shared pointer to the time-domain equation system problem builder.
-  std::shared_ptr<platypus::ProblemBuilder> getProblemBuilder() const override { return _formulation; }
+  std::shared_ptr<platypus::ProblemBuilder> getProblemBuilder() const override
+  {
+    return _formulation;
+  }
 
 private:
   const std::shared_ptr<platypus::TimeDomainEquationSystemProblemBuilder> _formulation{nullptr};

@@ -264,7 +264,7 @@ ProblemBuilder::ConstructNonlinearSolver()
   GetProblem()->_nonlinear_solver = nl_solver;
 }
 
-void 
+void
 ProblemBuilder::InitializeKernels()
 {
 }
