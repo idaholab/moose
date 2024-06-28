@@ -4,6 +4,13 @@
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during simulation'
     
+    [reversible]
+      type = 'Exodiff'
+      input = 'reversible.i'
+      exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
+      detail = 'reversibly, '
+    []
+
     [irreversible]
       type = 'Exodiff'
       input = 'irreversible.i'
@@ -11,13 +18,6 @@
       detail = 'irreversibly, '
     []
 
-    [reversible]
-      type = 'Exodiff'
-      input = 'reversible.i'
-      exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
-      detail = 'reversibly, '
-    []
-    
     [moving_boundary]
       type = 'Exodiff'
       input = 'moving_boundary.i'
