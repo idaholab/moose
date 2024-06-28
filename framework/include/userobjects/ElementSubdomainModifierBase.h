@@ -79,7 +79,7 @@ private:
 
   void removeInactiveMovingBoundary(MooseMesh & mesh);
 
-  void findActivatedElemsAndNodes(
+  void findReinitializedElemsAndNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
   /// Determine if a node is newly activated
@@ -96,10 +96,10 @@ private:
   ConstBndNodeRange & activatedBndNodeRange(bool displaced = false);
 
   /// The active subdomains on which the problem is being solved
-  const std::vector<SubdomainID> _active_subdomains;
+  const std::vector<SubdomainID> _subdomains_to_reinitialize;
 
   /// Whether to consider active->active subdomain changes as "activated"
-  const bool _amorphous_activation;
+  const bool _original_subdomain_not_in_list;
 
   /// Moving boundaries associated with each subdomain pair
   typedef std::pair<SubdomainID, SubdomainID> SubdomainPair;
