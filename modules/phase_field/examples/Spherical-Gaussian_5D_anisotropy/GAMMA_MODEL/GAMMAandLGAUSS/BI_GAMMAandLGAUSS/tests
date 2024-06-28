@@ -1,0 +1,10 @@
+[Tests]
+  [BI_GAMMAandLGAUSS_test]
+    type = RunApp
+    input = 'BI_GAMMAandLGAUSS.i'
+    check_input = True
+    requirement = "BI_GAMMAandLGAUSS shall have a bicrystal example"
+    design = 'GAMMAandLanisoGAUSS.md GAMMAmodelKERNELGAUSS.md GAMMAmodelKERNELV2GAUSS.md GAMMAmodelKernelAction.md'
+    issues = '#27774'
+  []
+[]

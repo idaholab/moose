@@ -1,0 +1,10 @@
+[Tests]
+  [TRI_GAMMAGAUSS_test]
+    type = RunApp
+    input = 'TRI_GAMMAGAUSS.i'
+    check_input = True
+    requirement = "TRI_GAMMAGAUSS shall have a tricrystal example"
+    design = 'GAMMAanisoGAUSS.md GAMMAmodelKERNELGAUSS.md GAMMAmodelKERNELV2GAUSS.md GAMMAmodelKernelAction.md'
+    issues = '#27774'
+  []
+[]
