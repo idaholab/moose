@@ -25,12 +25,34 @@
     bottom_left = '0.25 0 0'
     top_right = '1 1 1'
   []
-  [moving_boundary]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = 'right'
-    new_boundary = 'moving_boundary'
-    primary_block = 'left'
-    paired_block = 'right'
+[]
+
+[AuxVariables]
+  [u]
+  []
+  [phi]
+  []
+
+  # for the 'displaced' test only
+  inactive = 'disp_x disp_y'
+  [disp_x]
+  []
+  [disp_y]
+  []
+[]
+
+[ICs]
+  [u_1]
+    type = ConstantIC
+    variable = 'u'
+    value = 1
+    block = 1
+  []
+  [u_2]
+    type = ConstantIC
+    variable = 'u'
+    value = -0.5
+    block = 2
   []
 []
 
@@ -41,27 +63,7 @@
     criterion_type = 'BELOW'
     threshold = 0
     subdomain_id = 1
-    moving_boundaries = 'moving_boundary'
-    moving_boundary_subdomain_pairs = 'left right'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-[]
-
-[AuxVariables]
-  [u]
-    [InitialCondition]
-      type = ConstantIC
-      value = 1
-    []
-  []
-  [phi]
-  []
-
-  # for the 'displaced' test only
-  inactive = 'disp_x disp_y'
-  [disp_x]
-  []
-  [disp_y]
   []
 []
 
@@ -103,4 +105,3 @@
     type = Exodus
   []
 []
-

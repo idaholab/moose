@@ -34,8 +34,8 @@ protected:
    *   2. Active (in the context of adaptivity) elements' subdomain IDs are modified per request.
    *   3. Existing moving boundaries are updated according to the new subdomains.
    *   4. The equation system is reinitialized to (de)allocate for the new subdomains.
-   *   5. Variables and stateful material properties on newly activated elements and nodes are
-   *      initialized.
+   *   5. Variables and stateful material properties on elements which have moved into specified
+          subdomains are reinitialized.
    *
    * @param moved_elems A dictionary of element subdomain assignments. Key of this dictionary is the
    * element ID, first entry of the value pair is the subdomain ID this element is moving _from_,
@@ -44,8 +44,8 @@ protected:
   virtual void
   modify(const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
-  /// Determine if a subdomain is active
-  bool subdomainIsActive(SubdomainID id) const;
+  /// Determine if a subdomain is to be reinitialized
+  bool subdomainIsReinitialized(SubdomainID id) const;
 
   /// Pointer to the displaced problem
   DisplacedProblem * _displaced_problem;
@@ -79,27 +79,32 @@ private:
 
   void removeInactiveMovingBoundary(MooseMesh & mesh);
 
-  void findActivatedElemsAndNodes(
+  void findReinitializedElemsAndNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
+  /// Set old and older solutions to reinitialized elements and nodes
+  void setOldAndOlderSolutions(SystemBase & sys,
+                               ConstElemRange & elem_range,
+                               ConstBndNodeRange & bnd_node_range);
+
   /// Determine if a node is newly activated
-  bool nodeIsNewlyActivated(dof_id_type node_id) const;
+  bool nodeIsNewlyReinitialized(dof_id_type node_id) const;
 
   void applyIC(bool displaced);
 
   void initElementStatefulProps(bool displaced);
 
-  /// Range of activated elements
-  ConstElemRange & activatedElemRange(bool displaced = false);
+  /// Range of reinitialized elements
+  ConstElemRange & reinitializedElemRange(bool displaced = false);
 
-  /// Range of activated boundary nodes
-  ConstBndNodeRange & activatedBndNodeRange(bool displaced = false);
+  /// Range of reinitialized boundary nodes
+  ConstBndNodeRange & reinitializedBndNodeRange(bool displaced = false);
 
-  /// The active subdomains on which the problem is being solved
-  const std::vector<SubdomainID> _active_subdomains;
+  /// Reinitialize moved elements whose new subdomain is in this list
+  std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
 
-  /// Whether to consider active->active subdomain changes as "activated"
-  const bool _amorphous_activation;
+  /// Whether to reinitialize moved elements whose old subdomain was in _reinitialize_subdomains
+  const bool _previous_subdomain_reinitialized;
 
   /// Moving boundaries associated with each subdomain pair
   typedef std::pair<SubdomainID, SubdomainID> SubdomainPair;
@@ -121,13 +126,13 @@ private:
   std::unordered_map<dof_id_type, std::unordered_map<unsigned short, BoundaryID>>
       _remove_neighbor_sides;
 
-  /// Range of activated elements
-  std::unordered_set<dof_id_type> _activated_elems;
-  std::unique_ptr<ConstElemRange> _activated_elem_range;
-  std::unique_ptr<ConstElemRange> _activated_displaced_elem_range;
+  /// Range of reinitialized elements
+  std::unordered_set<dof_id_type> _reinitialized_elems;
+  std::unique_ptr<ConstElemRange> _reinitialized_elem_range;
+  std::unique_ptr<ConstElemRange> _reinitialized_displaced_elem_range;
 
-  /// Range of activated boundary nodes
-  std::unordered_set<dof_id_type> _activated_nodes;
-  std::unique_ptr<ConstBndNodeRange> _activated_bnd_node_range;
-  std::unique_ptr<ConstBndNodeRange> _activated_displaced_bnd_node_range;
+  /// Range of reinitialized boundary nodes
+  std::unordered_set<dof_id_type> _reinitialized_nodes;
+  std::unique_ptr<ConstBndNodeRange> _reinitialized_bnd_node_range;
+  std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
 };

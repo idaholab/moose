@@ -34,8 +34,10 @@ ElementSubdomainModifierBase::validParams()
       {},
       "Moving boundaries between subdomains. These boundaries (both sidesets and nodesets) will be "
       "updated as elements change their subdomain. The corresponding subdomains of each moving "
-      "boundary shall be specified using the parameter 'moving_boundary_subdomain_pairs'. A "
-      "boundary will be created on the mesh if it does not already exist.");
+      "boundary shall be specified using the parameter 'moving_boundary_subdomain_pairs'. If one "
+      "boundary and multiple subdomain pairs are specified, then it is assumed that the pairs all "
+      "apply to the boundary. A boundary will be created on the mesh if it does not already "
+      "exist.");
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "moving_boundary_subdomain_pairs",
       {},
@@ -47,17 +49,17 @@ ElementSubdomainModifierBase::validParams()
       "elements.");
 
   params.addParam<std::vector<SubdomainName>>(
-      "active_subdomains",
-      {},
-      "The subdomains in which to initialize variables. These usually correspond to the 'active' "
-      "subdomains where the simulation is performed, i.e. the PDE's computational domain. If this "
-      "parameter is left empty, then the entire mesh is the 'active_subdomain'.");
-  params.addParam<bool>("amorphous_activation",
-                        false,
-                        "If set to false (default), only elements which change from subdomains not "
-                        "listed in active_subdomains to ones that are listed, are initialized. "
-                        "When set to true, this will also "
-                        "include elements that are initially in the 'active_subdomains'");
+      "reinitialize_subdomains",
+      {"ANY_BLOCK_ID"},
+      "By default, any element which changes subdomain is reinitialized. If a list of subdomains "
+      "(IDs or names) is set, then only elements which change to a subdomain in the list will be "
+      "reinitialized. If an empty list is set, then no elements will be reinitialized.");
+  params.addParam<bool>(
+      "previous_subdomain_reinitialized",
+      true,
+      "If set to false, only elements which change from subdomains not listed in "
+      "'reinitialize_subdomains', to ones that are listed, are reinitialized. "
+      "This parameter must be set with a non-empty list in 'reinitialize_subdomains'.");
   return params;
 }
 
@@ -65,27 +67,60 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
   : ElementUserObject(parameters),
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
     _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
-    _active_subdomains(
-        _mesh.getSubdomainIDs(getParam<std::vector<SubdomainName>>("active_subdomains"))),
-    _amorphous_activation(getParam<bool>("amorphous_activation"))
+    _previous_subdomain_reinitialized(getParam<bool>("previous_subdomain_reinitialized"))
 {
 }
 
 void
 ElementSubdomainModifierBase::initialSetup()
 {
-  const auto bnd_names = getParam<std::vector<BoundaryName>>("moving_boundaries");
-  const auto bnd_ids = _mesh.getBoundaryIDs(bnd_names, true);
+  const std::vector<SubdomainName> subdomain_names_to_reinitialize =
+      getParam<std::vector<SubdomainName>>("reinitialize_subdomains");
+  if (std::find(subdomain_names_to_reinitialize.begin(),
+                subdomain_names_to_reinitialize.end(),
+                "ANY_BLOCK_ID") != subdomain_names_to_reinitialize.end())
+    _subdomain_ids_to_reinitialize.push_back(Moose::ANY_BLOCK_ID);
+  else
+    _subdomain_ids_to_reinitialize = _mesh.getSubdomainIDs(subdomain_names_to_reinitialize);
+
+  std::set<SubdomainID> set_subdomain_ids_to_reinitialize(_subdomain_ids_to_reinitialize.begin(),
+                                                          _subdomain_ids_to_reinitialize.end());
+
+  if (_previous_subdomain_reinitialized == false &&
+      (std::find(_subdomain_ids_to_reinitialize.begin(),
+                 _subdomain_ids_to_reinitialize.end(),
+                 Moose::ANY_BLOCK_ID) != _subdomain_ids_to_reinitialize.end() ||
+       set_subdomain_ids_to_reinitialize == _mesh.meshSubdomains()))
+    paramError("previous_subdomain_reinitialized",
+               "'previous_subdomain_reinitialized' can only be set to false if "
+               "reinitialize_subdomains does "
+               "not cover the whole model, otherwise no elements will be reinitialized as it is "
+               "impossible for an element to begin in a subdomain not in the list.");
+  else if (_previous_subdomain_reinitialized == false && _subdomain_ids_to_reinitialize.empty())
+    paramError("previous_subdomain_reinitialized",
+               "'previous_subdomain_reinitialized' can only be set to false if "
+               "reinitialize_subdomains is set to a non-empty list of subdomains, otherwise no "
+               "elements will be reinitialized as it is impossible for an element to change to a "
+               "subdomain in the list.");
+
+  auto bnd_names = getParam<std::vector<BoundaryName>>("moving_boundaries");
+  auto bnd_ids = _mesh.getBoundaryIDs(bnd_names, true);
   const auto bnd_subdomains =
       getParam<std::vector<std::vector<SubdomainName>>>("moving_boundary_subdomain_pairs");
 
-  if (bnd_names.size() != bnd_subdomains.size())
+  if (bnd_names.size() == 1 && bnd_subdomains.size() > 1)
+  {
+    bnd_names.insert(bnd_names.end(), bnd_subdomains.size() - 1, bnd_names[0]);
+    bnd_ids.insert(bnd_ids.end(), bnd_subdomains.size() - 1, bnd_ids[0]);
+  }
+  else if (bnd_names.size() != bnd_subdomains.size())
     paramError("moving_boundary_subdomain_pairs",
                "Each moving boundary must correspond to a pair of subdomains. ",
                bnd_names.size(),
                " boundaries are specified by the parameter 'moving_boundaries', while ",
                bnd_subdomains.size(),
-               " subdomain paris are provided.");
+               " subdomain pairs are provided. Alternatively, if one boundary and multiple "
+               "subdomain pairs are provided, then the subdomain pairs all apply to one boundary.");
 
   for (auto i : index_range(bnd_names))
   {
@@ -126,7 +161,7 @@ ElementSubdomainModifierBase::modify(
     return;
 
   // This has to be done _before_ subdomain changes are applied
-  findActivatedElemsAndNodes(moved_elems);
+  findReinitializedElemsAndNodes(moved_elems);
 
   // Apply cached subdomain changes
   applySubdomainChanges(moved_elems, _mesh);
@@ -361,10 +396,10 @@ void
 ElementSubdomainModifierBase::meshChanged()
 {
   // Clear cached ranges
-  _activated_elem_range.reset();
-  _activated_displaced_elem_range.reset();
-  _activated_bnd_node_range.reset();
-  _activated_displaced_bnd_node_range.reset();
+  _reinitialized_elem_range.reset();
+  _reinitialized_displaced_elem_range.reset();
+  _reinitialized_bnd_node_range.reset();
+  _reinitialized_displaced_bnd_node_range.reset();
 
   removeInactiveMovingBoundary(_mesh);
   if (_displaced_mesh)
@@ -397,50 +432,62 @@ ElementSubdomainModifierBase::removeInactiveMovingBoundary(MooseMesh & mesh)
 }
 
 void
-ElementSubdomainModifierBase::findActivatedElemsAndNodes(
+ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
     const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems)
 {
-  // Clear cached element activation data
-  _activated_elems.clear();
-  _activated_nodes.clear();
+  // Clear cached element reinitialization data
+  _reinitialized_elems.clear();
+  _reinitialized_nodes.clear();
 
   for (const auto & [elem_id, subdomain] : moved_elems)
   {
-    const auto & [from, to] = subdomain;
-    const bool from_subdomain_is_active = subdomainIsActive(from);
-    const bool to_subdomain_is_active = subdomainIsActive(to);
-
-    if (!from_subdomain_is_active && to_subdomain_is_active)
-      _activated_elems.insert(elem_id);
-    else if (from_subdomain_is_active && to_subdomain_is_active && _amorphous_activation)
-      _activated_elems.insert(elem_id);
-    else
-      continue;
+    // Default: any element that changes subdomain is reinitialized
+    if (std::find(_subdomain_ids_to_reinitialize.begin(),
+                  _subdomain_ids_to_reinitialize.end(),
+                  Moose::ANY_BLOCK_ID) != _subdomain_ids_to_reinitialize.end())
+      _reinitialized_elems.insert(elem_id);
+    else // Reinitialize if new subdomain is in list of subdomains to be reinitialized
+    {
+      const auto & [from, to] = subdomain;
+      if (subdomainIsReinitialized(to) && _previous_subdomain_reinitialized)
+        _reinitialized_elems.insert(elem_id);
+      // Only reinitialize if original subdomain is not in list of subdomains
+      else if (subdomainIsReinitialized(to) && !_previous_subdomain_reinitialized &&
+               !subdomainIsReinitialized(from))
+        _reinitialized_elems.insert(elem_id);
+      else // New subdomain is not in list of subdomains
+        continue;
+    }
 
     const auto elem = _mesh.elemPtr(elem_id);
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
-      if (nodeIsNewlyActivated(elem->node_id(i)))
-        _activated_nodes.insert(elem->node_id(i));
+      if (nodeIsNewlyReinitialized(elem->node_id(i)))
+        _reinitialized_nodes.insert(elem->node_id(i));
   }
 }
 
 bool
-ElementSubdomainModifierBase::subdomainIsActive(SubdomainID id) const
+ElementSubdomainModifierBase::subdomainIsReinitialized(SubdomainID id) const
 {
-  // If no active subdomain is specified, the entire mesh is treated as active
-  if (_active_subdomains.empty())
+  // Default: any element that changes subdomain is reinitialized
+  if (std::find(_subdomain_ids_to_reinitialize.begin(),
+                _subdomain_ids_to_reinitialize.end(),
+                Moose::ANY_BLOCK_ID) != _subdomain_ids_to_reinitialize.end())
     return true;
 
-  return std::find(_active_subdomains.begin(), _active_subdomains.end(), id) !=
-         _active_subdomains.end();
+  // Is subdomain in list of subdomains to be reinitialized
+  return std::find(_subdomain_ids_to_reinitialize.begin(),
+                   _subdomain_ids_to_reinitialize.end(),
+                   id) != _subdomain_ids_to_reinitialize.end();
 }
 
 bool
-ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
+ElementSubdomainModifierBase::nodeIsNewlyReinitialized(dof_id_type node_id) const
 {
-  // If any of the node neighbors is already active, then the node is NOT newly activated.
+  // If any of the node neighbors are already reinitialized, then the node is NOT newly
+  // reinitialized.
   for (auto neighbor_elem_id : _mesh.nodeToElemMap().at(node_id))
-    if (subdomainIsActive(_mesh.elemPtr(neighbor_elem_id)->subdomain_id()))
+    if (subdomainIsReinitialized(_mesh.elemPtr(neighbor_elem_id)->subdomain_id()))
       return false;
   return true;
 }
@@ -448,28 +495,39 @@ ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
 void
 ElementSubdomainModifierBase::applyIC(bool displaced)
 {
-  _fe_problem.projectInitialConditionOnCustomRange(activatedElemRange(displaced),
-                                                   activatedBndNodeRange(displaced));
+  _fe_problem.projectInitialConditionOnCustomRange(reinitializedElemRange(displaced),
+                                                   reinitializedBndNodeRange(displaced));
+
+  // Set old and older solutions on the reinitialized dofs to the reinitialized values
+  setOldAndOlderSolutions(_fe_problem.getNonlinearSystemBase(_sys.number()),
+                          reinitializedElemRange(displaced),
+                          reinitializedBndNodeRange(displaced));
+  setOldAndOlderSolutions(_fe_problem.getAuxiliarySystem(),
+                          reinitializedElemRange(displaced),
+                          reinitializedBndNodeRange(displaced));
+
+  // Note: Need method to handle solve failures at timesteps where subdomain changes. The old
+  // solutions are now set to the reinitialized values. Does this impact restoring solutions
 }
 
 void
 ElementSubdomainModifierBase::initElementStatefulProps(bool displaced)
 {
-  _fe_problem.initElementStatefulProps(activatedElemRange(displaced), /*threaded=*/true);
+  _fe_problem.initElementStatefulProps(reinitializedElemRange(displaced), /*threaded=*/true);
 }
 
 ConstElemRange &
-ElementSubdomainModifierBase::activatedElemRange(bool displaced)
+ElementSubdomainModifierBase::reinitializedElemRange(bool displaced)
 {
-  if (!displaced && _activated_elem_range)
-    return *_activated_elem_range.get();
+  if (!displaced && _reinitialized_elem_range)
+    return *_reinitialized_elem_range.get();
 
-  if (displaced && _activated_displaced_elem_range)
-    return *_activated_displaced_elem_range.get();
+  if (displaced && _reinitialized_displaced_elem_range)
+    return *_reinitialized_displaced_elem_range.get();
 
-  // Create a vector of the newly activated elements
+  // Create a vector of the newly reinitialized elements
   std::vector<Elem *> elems;
-  for (auto elem_id : _activated_elems)
+  for (auto elem_id : _reinitialized_elems)
     elems.push_back(displaced ? _displaced_mesh->elemPtr(elem_id) : _mesh.elemPtr(elem_id));
 
   // Make some fake element iterators defining this vector of elements
@@ -482,29 +540,29 @@ ElementSubdomainModifierBase::activatedElemRange(bool displaced)
       elem_itr_end, elem_itr_end, Predicates::NotNull<Elem * const *>());
 
   if (!displaced)
-    _activated_elem_range = std::make_unique<ConstElemRange>(elems_begin, elems_end);
+    _reinitialized_elem_range = std::make_unique<ConstElemRange>(elems_begin, elems_end);
   else
-    _activated_displaced_elem_range = std::make_unique<ConstElemRange>(elems_begin, elems_end);
+    _reinitialized_displaced_elem_range = std::make_unique<ConstElemRange>(elems_begin, elems_end);
 
-  return activatedElemRange(displaced);
+  return reinitializedElemRange(displaced);
 }
 
 ConstBndNodeRange &
-ElementSubdomainModifierBase::activatedBndNodeRange(bool displaced)
+ElementSubdomainModifierBase::reinitializedBndNodeRange(bool displaced)
 {
-  if (!displaced && _activated_bnd_node_range)
-    return *_activated_bnd_node_range.get();
+  if (!displaced && _reinitialized_bnd_node_range)
+    return *_reinitialized_bnd_node_range.get();
 
-  if (displaced && _activated_displaced_bnd_node_range)
-    return *_activated_displaced_bnd_node_range.get();
+  if (displaced && _reinitialized_displaced_bnd_node_range)
+    return *_reinitialized_displaced_bnd_node_range.get();
 
-  // Create a vector of the newly activated boundary nodes
+  // Create a vector of the newly reinitialized boundary nodes
   std::vector<const BndNode *> nodes;
   auto bnd_nodes =
       displaced ? _displaced_mesh->getBoundaryNodeRange() : _mesh.getBoundaryNodeRange();
   for (auto bnd_node : *bnd_nodes)
     if (bnd_node->_node)
-      if (_activated_nodes.count(bnd_node->_node->id()))
+      if (_reinitialized_nodes.count(bnd_node->_node->id()))
         nodes.push_back(bnd_node);
 
   // Make some fake node iterators defining this vector of nodes
@@ -517,10 +575,55 @@ ElementSubdomainModifierBase::activatedBndNodeRange(bool displaced)
       bnd_node_itr_end, bnd_node_itr_end, Predicates::NotNull<const BndNode * const *>());
 
   if (!displaced)
-    _activated_bnd_node_range = std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
+    _reinitialized_bnd_node_range =
+        std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
   else
-    _activated_displaced_bnd_node_range =
+    _reinitialized_displaced_bnd_node_range =
         std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
 
-  return activatedBndNodeRange(displaced);
+  return reinitializedBndNodeRange(displaced);
+}
+
+void
+ElementSubdomainModifierBase::setOldAndOlderSolutions(SystemBase & sys,
+                                                      ConstElemRange & elem_range,
+                                                      ConstBndNodeRange & bnd_node_range)
+{
+  // Don't do anything if this is a steady simulation
+  if (!sys.hasSolutionState(1))
+    return;
+
+  NumericVector<Number> & current_solution = *sys.system().current_local_solution;
+  NumericVector<Number> & old_solution = sys.solutionOld();
+  NumericVector<Number> * older_solution = sys.hasSolutionState(2) ? &sys.solutionOlder() : nullptr;
+
+  // Get dofs for the reinitialized elements and nodes
+  DofMap & dof_map = sys.dofMap();
+  std::vector<dof_id_type> dofs;
+
+  for (auto & elem : elem_range)
+  {
+    std::vector<dof_id_type> elem_dofs;
+    dof_map.dof_indices(elem, elem_dofs);
+    dofs.insert(dofs.end(), elem_dofs.begin(), elem_dofs.end());
+  }
+
+  for (auto & bnd_node : bnd_node_range)
+  {
+    std::vector<dof_id_type> bnd_node_dofs;
+    dof_map.dof_indices(bnd_node->_node, bnd_node_dofs);
+    dofs.insert(dofs.end(), bnd_node_dofs.begin(), bnd_node_dofs.end());
+  }
+
+  // Set the old and older solutions to match the reinitialization
+  for (auto dof : dofs)
+  {
+    old_solution.set(dof, current_solution(dof));
+    if (older_solution)
+      older_solution->set(dof, current_solution(dof));
+  }
+
+  old_solution.close();
+  if (older_solution)
+    older_solution->close();
 }
