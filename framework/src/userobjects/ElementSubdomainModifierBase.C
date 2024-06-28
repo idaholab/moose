@@ -52,11 +52,12 @@ ElementSubdomainModifierBase::validParams()
       "The subdomains in which to initialize variables. These usually correspond to the 'active' "
       "subdomains where the simulation is performed, i.e. the PDE's computational domain. If this "
       "parameter is left empty, then the entire mesh is the 'active_subdomain'.");
-  params.addParam<bool>(
-      "amorphous_activation",
-      false,
-      "If set to false (default), only elements which change from subdomains not listed in active_subdomains to ones that are listed, are initialized. When set to true, this will also "
-      "include elements that are initially in the 'active_subdomains'");
+  params.addParam<bool>("amorphous_activation",
+                        false,
+                        "If set to false (default), only elements which change from subdomains not "
+                        "listed in active_subdomains to ones that are listed, are initialized. "
+                        "When set to true, this will also "
+                        "include elements that are initially in the 'active_subdomains'");
   return params;
 }
 
