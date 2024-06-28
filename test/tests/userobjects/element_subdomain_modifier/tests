@@ -127,8 +127,7 @@
     type = RunException
     input = 'amr_bc.i'
     expect_err = "Cannot use BoundaryPreservedMarker with DistributedMesh"
-    requirement = "The system shall produce an error when a boundary preserved marker is used with "
-                  "distributed mesh."
+    requirement = "The system shall produce an error when a boundary preserved marker is used with distributed mesh."
     mesh_mode = 'DISTRIBUTED'
   []
 
