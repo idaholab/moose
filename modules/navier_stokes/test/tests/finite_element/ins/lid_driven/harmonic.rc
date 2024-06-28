@@ -1,0 +1,73 @@
+-prefix_push fieldsplit_others_
+-ksp_converged_reason
+# -ksp_view_final_residual
+# -ksp_monitor_true_residual
+-ksp_type fgmres
+# -ksp_view
+-pc_type fieldsplit
+-pc_fieldsplit_type schur
+-pc_fieldsplit_schur_precondition self
+-prefix_push fieldsplit_p_
+# -ksp_monitor
+-ksp_rtol 1.0E-1
+-ksp_type fgmres
+-ksp_max_it 100
+-ksp_gmres_restart 100
+-pc_type hpddm
+-pc_hpddm_has_neumann
+-ksp_converged_reason
+-pc_hpddm_ksp_type fgmres
+# -pc_hpddm_ksp_converged_reason
+# -pc_hpddm_ksp_monitor
+-pc_hpddm_ksp_rtol 1.0E-1
+-pc_hpddm_ksp_max_it 100
+-pc_hpddm_ksp_gmres_restart 100
+-pc_hpddm_schur_precondition geneo
+-prefix_push pc_hpddm_levels_1_
+-eps_nev 40
+-eps_threshold 0.6
+-st_share_sub_ksp
+-eps_gen_non_hermitian
+-sub_pc_factor_mat_solver_type mumps
+-sub_mat_mumps_icntl_14 400
+-sub_pc_type lu
+-eps_tol 1.0E-2
+-prefix_pop
+-prefix_push pc_hpddm_coarse_
+-correction balanced
+-pc_type lu
+-mat_type baij
+-pc_factor_mat_solver_type mumps
+-mat_mumps_icntl_14 400
+-p 1
+-prefix_pop
+-prefix_pop
+-prefix_push fieldsplit_u_
+-ksp_rtol 1.0E-4
+-ksp_max_it 100
+-ksp_gmres_restart 100
+-pc_type hpddm
+# -ksp_converged_reason
+-ksp_type fgmres
+-ksp_pc_side right
+-pc_hpddm_define_subdomains
+-pc_hpddm_harmonic_overlap 1
+-prefix_push pc_hpddm_levels_1_
+-svd_type lanczos
+-svd_relative_threshold 1E-6
+-svd_nsv 200
+-st_share_sub_ksp
+-sub_pc_factor_mat_solver_type mumps
+-sub_mat_mumps_icntl_14 400
+-sub_pc_type lu
+-prefix_pop
+-prefix_push pc_hpddm_coarse_
+-pc_type lu
+-correction deflated
+-pc_factor_mat_solver_type mumps
+-mat_type baij
+-mat_mumps_icntl_14 400
+-p 1
+-prefix_pop
+-prefix_pop
+-prefix_pop
