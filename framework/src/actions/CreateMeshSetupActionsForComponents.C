@@ -10,6 +10,7 @@
 #include "CreateMeshSetupActionsForComponents.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
+#include "MooseObjectAction.h"
 
 registerMooseAction("MooseApp", CreateMeshSetupActionsForComponents, "component_meta");
 
