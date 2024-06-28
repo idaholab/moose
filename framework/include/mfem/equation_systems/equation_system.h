@@ -3,7 +3,6 @@
 #include "inputs.h"
 #include "kernel_base.h"
 #include "named_fields_map.h"
-#include "sources.h"
 
 namespace platypus
 {
@@ -68,10 +67,10 @@ public:
                     const platypus::FESpaces & fespaces,
                     platypus::BCMap & bc_map,
                     platypus::Coefficients & coefficients);
-  virtual void BuildLinearForms(platypus::BCMap & bc_map, platypus::Sources & sources);
+  virtual void BuildLinearForms(platypus::BCMap & bc_map);
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
-  virtual void BuildEquationSystem(platypus::BCMap & bc_map, platypus::Sources & sources);
+  virtual void BuildEquationSystem(platypus::BCMap & bc_map);
 
   // Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -134,7 +133,7 @@ public:
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 
   virtual void SetTimeStep(double dt);
-  virtual void UpdateEquationSystem(platypus::BCMap & bc_map, platypus::Sources & sources);
+  virtual void UpdateEquationSystem(platypus::BCMap & bc_map);
   mfem::ConstantCoefficient _dt_coef; // Coefficient for timestep scaling
   std::vector<std::string> _trial_var_time_derivative_names;
 };
