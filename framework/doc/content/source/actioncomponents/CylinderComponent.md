@@ -11,12 +11,12 @@ reference in 2D, and a true cylindrical mesh (not implemented) in 3D.
 parameter. This parameter accepts a vector of names of `Physics`. The name of the `Physics` is generally
 found in the innermost block. For example, in the snippet below, the diffusion `Physics` is called `diff`.
 
-!listing test/tests/actioncomponents/cylinder.i block=Physics
+!listing test/tests/actioncomponents/component_with_physics.i block=Physics
 
-The cylinder component on which the `diff` [DiffusionPhysicsCG.md] is active is then
+The cylinder component on which the `diff` [DiffusionCG.md] is active is then
 created as shown below:
 
-!listing test/tests/actioncomponents/cylinder.i block=Components
+!listing test/tests/actioncomponents/component_with_physics.i block=Components
 
 !syntax parameters /ActionComponents/CylinderComponent
 

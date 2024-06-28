@@ -18,6 +18,6 @@ be used. For example:
 - `outerSurfaceArea()` should return the total outer surface area of the component.
 
 !alert note
-`ActionComponents` are not compatible with [Components](Components/index.md). `ActionComponents` are intended
+`ActionComponents` are not compatible with [Components](Components/index.md optional=True). `ActionComponents` are intended
 to be a rework on `Components` that does not hard-code the equations to be defined on the components and
 can co-exist with the `[Mesh]` block.
