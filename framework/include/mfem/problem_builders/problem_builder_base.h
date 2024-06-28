@@ -1,9 +1,7 @@
 #pragma once
-#include "auxsolvers.h"
 #include "equation_system.h"
 #include "gridfunctions.h"
 #include "inputs.h"
-#include "sources.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -21,9 +19,6 @@ public:
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
   platypus::BCMap _bc_map;
   platypus::Coefficients _coefficients;
-  platypus::AuxSolvers _preprocessors;
-  platypus::AuxSolvers _postprocessors;
-  platypus::Sources _sources;
   platypus::Outputs _outputs;
   platypus::InputParameters _solver_options;
 
@@ -69,9 +64,6 @@ public:
   void SetFESpaces(platypus::FESpaces & fespaces);
   void SetGridFunctions(platypus::GridFunctions & gridfunctions);
   void SetBoundaryConditions(platypus::BCMap & bc_map);
-  void SetAuxSolvers(platypus::AuxSolvers & preprocessors);
-  void SetPostprocessors(platypus::AuxSolvers & postprocessors);
-  void SetSources(platypus::Sources & sources);
   void SetOutputs(platypus::Outputs & outputs);
   void SetSolverOptions(platypus::InputParameters & solver_options);
   void SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner);
@@ -85,13 +77,9 @@ public:
   void AddGridFunction(std::string gridfunction_name, std::string fespace_name);
 
   void AddBoundaryCondition(std::string bc_name, std::shared_ptr<platypus::BoundaryCondition> bc);
-  void AddAuxSolver(std::string auxsolver_name, std::shared_ptr<platypus::AuxSolver> aux);
-  void AddPostprocessor(std::string auxsolver_name, std::shared_ptr<platypus::AuxSolver> aux);
-  void AddSource(std::string source_name, std::shared_ptr<platypus::Source> source);
 
   virtual void RegisterFESpaces() = 0;
   virtual void RegisterGridFunctions() = 0;
-  virtual void RegisterAuxSolvers() = 0;
   virtual void RegisterCoefficients() = 0;
 
   virtual void SetOperatorGridFunctions() = 0;
@@ -104,7 +92,6 @@ public:
 
   virtual void InitializeKernels();
 
-  void InitializeAuxSolvers();
   void InitializeOutputs();
 
   /// @brief Call @a FinalizeProblem to setup a problem.

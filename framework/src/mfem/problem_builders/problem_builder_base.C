@@ -42,27 +42,6 @@ ProblemBuilder::SetBoundaryConditions(platypus::BCMap & bc_map)
 }
 
 void
-ProblemBuilder::SetAuxSolvers(platypus::AuxSolvers & preprocessors)
-{
-  // logger.info("Setting AuxSolvers");
-  GetProblem()->_preprocessors = preprocessors;
-}
-
-void
-ProblemBuilder::SetPostprocessors(platypus::AuxSolvers & postprocessors)
-{
-  // logger.info("Setting Postprocessors");
-  GetProblem()->_postprocessors = postprocessors;
-}
-
-void
-ProblemBuilder::SetSources(platypus::Sources & sources)
-{
-  // logger.info("Setting Sources");
-  GetProblem()->_sources = sources;
-}
-
-void
 ProblemBuilder::SetOutputs(platypus::Outputs & outputs)
 {
   // logger.info("Setting Outputs");
@@ -163,43 +142,6 @@ ProblemBuilder::AddBoundaryCondition(std::string bc_name,
     mfem::mfem_error(error_message.c_str());
   }
   GetProblem()->_bc_map.Register(bc_name, std::move(bc));
-}
-
-void
-ProblemBuilder::AddAuxSolver(std::string auxsolver_name, std::shared_ptr<platypus::AuxSolver> aux)
-{
-  if (GetProblem()->_preprocessors.Has(auxsolver_name))
-  {
-    const std::string error_message = "An auxsolver with the name " + auxsolver_name +
-                                      " has already been added to the problem preprocessors.";
-    mfem::mfem_error(error_message.c_str());
-  }
-  GetProblem()->_preprocessors.Register(auxsolver_name, std::move(aux));
-}
-
-void
-ProblemBuilder::AddPostprocessor(std::string auxsolver_name,
-                                 std::shared_ptr<platypus::AuxSolver> aux)
-{
-  if (GetProblem()->_postprocessors.Has(auxsolver_name))
-  {
-    const std::string error_message = "An auxsolver with the name " + auxsolver_name +
-                                      " has already been added to the problem postprocessors.";
-    mfem::mfem_error(error_message.c_str());
-  }
-  GetProblem()->_postprocessors.Register(auxsolver_name, std::move(aux));
-}
-
-void
-ProblemBuilder::AddSource(std::string source_name, std::shared_ptr<platypus::Source> source)
-{
-  if (GetProblem()->_sources.Has(source_name))
-  {
-    const std::string error_message =
-        "A source with the name " + source_name + " has already been added to the problem sources.";
-    mfem::mfem_error(error_message.c_str());
-  }
-  GetProblem()->_sources.Register(source_name, std::move(source));
 }
 
 void
@@ -322,22 +264,9 @@ ProblemBuilder::ConstructNonlinearSolver()
   GetProblem()->_nonlinear_solver = nl_solver;
 }
 
-void
+void 
 ProblemBuilder::InitializeKernels()
 {
-  GetProblem()->_preprocessors.Init(GetProblem()->_gridfunctions, GetProblem()->_coefficients);
-
-  GetProblem()->_sources.Init(GetProblem()->_gridfunctions,
-                              GetProblem()->_fespaces,
-                              GetProblem()->_bc_map,
-                              GetProblem()->_coefficients);
-}
-
-void
-ProblemBuilder::InitializeAuxSolvers()
-{
-  GetProblem()->_preprocessors.Init(GetProblem()->_gridfunctions, GetProblem()->_coefficients);
-  GetProblem()->_postprocessors.Init(GetProblem()->_gridfunctions, GetProblem()->_coefficients);
 }
 
 void
@@ -351,7 +280,6 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
 {
   RegisterFESpaces();
   RegisterGridFunctions();
-  RegisterAuxSolvers();
   RegisterCoefficients();
 
   if (build_operator)
@@ -368,7 +296,6 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
 
   ConstructState();
   ConstructTimestepper();
-  InitializeAuxSolvers();
   InitializeOutputs();
 }
 

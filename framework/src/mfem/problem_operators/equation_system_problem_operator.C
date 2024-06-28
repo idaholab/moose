@@ -14,7 +14,7 @@ EquationSystemProblemOperator::Init(mfem::Vector & X)
 {
   ProblemOperator::Init(X);
 
-  GetEquationSystem()->BuildEquationSystem(_problem._bc_map, _problem._sources);
+  GetEquationSystem()->BuildEquationSystem(_problem._bc_map);
 }
 
 } // namespace platypus

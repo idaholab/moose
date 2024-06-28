@@ -26,9 +26,7 @@ TransientExecutioner::Step(double dt, int it) const
   }
 
   // Advance time step.
-  _problem->_preprocessors.Solve(_t);
   _problem->_ode_solver->Step(*(_problem->_f), _t, dt);
-  _problem->_postprocessors.Solve(_t);
 
   // Output data
   if (_last_step || (it % _vis_steps) == 0)

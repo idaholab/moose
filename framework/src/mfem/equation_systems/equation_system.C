@@ -285,7 +285,7 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
 }
 
 void
-EquationSystem::BuildLinearForms(platypus::BCMap & bc_map, platypus::Sources & sources)
+EquationSystem::BuildLinearForms(platypus::BCMap & bc_map)
 {
   // Register linear forms
   for (int i = 0; i < _test_var_names.size(); i++)
@@ -312,11 +312,6 @@ EquationSystem::BuildLinearForms(platypus::BCMap & bc_map, platypus::Sources & s
       {
         lf_kernel->Apply(lf);
       }
-    }
-
-    if (test_var_name == _test_var_names.at(0))
-    {
-      sources.Apply(lf);
     }
   }
 }
@@ -388,9 +383,9 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
-EquationSystem::BuildEquationSystem(platypus::BCMap & bc_map, platypus::Sources & sources)
+EquationSystem::BuildEquationSystem(platypus::BCMap & bc_map)
 {
-  BuildLinearForms(bc_map, sources);
+  BuildLinearForms(bc_map);
   BuildBilinearForms();
   BuildMixedBilinearForms();
 }
@@ -426,10 +421,9 @@ TimeDependentEquationSystem::SetTimeStep(double dt)
 }
 
 void
-TimeDependentEquationSystem::UpdateEquationSystem(platypus::BCMap & bc_map,
-                                                  platypus::Sources & sources)
+TimeDependentEquationSystem::UpdateEquationSystem(platypus::BCMap & bc_map)
 {
-  BuildLinearForms(bc_map, sources);
+  BuildLinearForms(bc_map);
   BuildBilinearForms();
   BuildMixedBilinearForms();
 }

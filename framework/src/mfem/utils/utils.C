@@ -46,39 +46,4 @@ AttrToMarker(const mfem::Array<int> attr_list, mfem::Array<int> & marker_list, i
   for (auto a : attr_list)
     marker_list[a - 1] = 1;
 }
-
-void
-CleanDivergence(std::shared_ptr<mfem::ParGridFunction> Vec_GF, platypus::InputParameters solve_pars)
-{
-
-  platypus::InputParameters pars;
-  platypus::GridFunctions gfs;
-  platypus::FESpaces fes;
-  platypus::BCMap bcs;
-
-  gfs.Register("Vector_GF", Vec_GF);
-  pars.SetParam("VectorGridFunctionName", std::string("Vector_GF"));
-  pars.SetParam("SolverOptions", solve_pars);
-  platypus::HelmholtzProjector projector(pars);
-  projector.Project(gfs, fes, bcs);
-}
-
-void
-CleanDivergence(platypus::GridFunctions & gfs,
-                platypus::BCMap & bcs,
-                const std::string vec_gf_name,
-                const std::string scalar_gf_name,
-                platypus::InputParameters solve_pars)
-{
-
-  platypus::InputParameters pars;
-  platypus::FESpaces fes;
-
-  pars.SetParam("VectorGridFunctionName", vec_gf_name);
-  pars.SetParam("ScalarGridFunctionName", scalar_gf_name);
-  pars.SetParam("SolverOptions", solve_pars);
-  platypus::HelmholtzProjector projector(pars);
-  projector.Project(gfs, fes, bcs);
-}
-
 } // namespace platypus

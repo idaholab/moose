@@ -53,8 +53,6 @@ public:
 
   void RegisterGridFunctions() override;
 
-  void RegisterAuxSolvers() override {}
-
   void RegisterCoefficients() override {}
 
   void SetOperatorGridFunctions() override;

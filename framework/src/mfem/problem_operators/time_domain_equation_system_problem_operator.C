@@ -24,7 +24,7 @@ TimeDomainEquationSystemProblemOperator::Init(mfem::Vector & X)
     *(_trial_variable_time_derivatives.at(i)) = 0.0;
   }
 
-  GetEquationSystem()->BuildEquationSystem(_problem._bc_map, _problem._sources);
+  GetEquationSystem()->BuildEquationSystem(_problem._bc_map);
 }
 
 void
@@ -54,7 +54,7 @@ void
 TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(double dt)
 {
   GetEquationSystem()->SetTimeStep(dt);
-  GetEquationSystem()->UpdateEquationSystem(_problem._bc_map, _problem._sources);
+  GetEquationSystem()->UpdateEquationSystem(_problem._bc_map);
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 }
 

@@ -186,14 +186,6 @@ MFEMProblem::addCoefficient(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   MFEMCoefficient * mfem_coef(&getUserObject<MFEMCoefficient>(name));
   _coefficients._scalars.Register(name, mfem_coef->getCoefficient());
-
-  // Add associated auxsolvers for CoupledCoefficients
-  auto coupled_coef = std::dynamic_pointer_cast<platypus::CoupledCoefficient>(
-      _coefficients._scalars.GetShared(name));
-  if (coupled_coef != nullptr)
-  {
-    mfem_problem_builder->AddAuxSolver(name, std::move(coupled_coef));
-  }
 }
 
 void
@@ -271,16 +263,8 @@ MFEMProblem::addAuxKernel(const std::string & kernel_name,
 {
   std::string base_auxkernel = parameters.get<std::string>("_moose_base");
 
-  if (base_auxkernel == "MFEMAuxKernel") // MFEM auxsolver.
-  {
-    FEProblemBase::addUserObject(kernel_name, name, parameters);
-    MFEMAuxSolver * mfem_auxsolver(&getUserObject<MFEMAuxSolver>(name));
-
-    mfem_problem_builder->AddPostprocessor(name, mfem_auxsolver->getAuxSolver());
-    mfem_auxsolver->storeCoefficients(_coefficients);
-  }
-  else if (base_auxkernel == "AuxKernel" || base_auxkernel == "VectorAuxKernel" ||
-           base_auxkernel == "ArrayAuxKernel") // MOOSE auxkernels.
+  if (base_auxkernel == "AuxKernel" || base_auxkernel == "VectorAuxKernel" ||
+      base_auxkernel == "ArrayAuxKernel") // MOOSE auxkernels.
   {
     FEProblemBase::addAuxKernel(kernel_name, name, parameters);
   }

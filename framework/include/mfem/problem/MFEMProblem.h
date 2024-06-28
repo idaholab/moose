@@ -15,7 +15,6 @@
 #include "MFEMBilinearFormKernel.h"
 #include "MFEMLinearFormKernel.h"
 #include "MFEMFormulation.h"
-#include "MFEMAuxSolver.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "Function.h"
@@ -109,9 +108,7 @@ public:
                  const std::string & name,
                  InputParameters & parameters) override;
   /**
-   * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
-   * GeneralUserObject representing the auxkernel in MOOSE, and creates corresponding MFEM auxsolver
-   * to be used in the MFEM solve.
+   * Override of ExternalProblem::addAuxKernel.
    */
   void addAuxKernel(const std::string & kernel_name,
                     const std::string & name,
