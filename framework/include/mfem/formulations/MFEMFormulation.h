@@ -9,13 +9,13 @@ public:
   static InputParameters validParams();
 
   MFEMFormulation(const InputParameters & parameters);
-  virtual ~MFEMFormulation();
+  virtual ~MFEMFormulation() override = default;
 
   virtual void execute() override {}
   virtual void initialize() override {}
   virtual void finalize() override {}
 
-  virtual std::shared_ptr<platypus::ProblemBuilder> getProblemBuilder()
+  virtual std::shared_ptr<platypus::ProblemBuilder> getProblemBuilder() const
   {
     mooseError(
         "Base class MFEMFormulation cannot return a valid ProblemBuilder. Use a child class.");

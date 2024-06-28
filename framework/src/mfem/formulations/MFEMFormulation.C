@@ -13,5 +13,3 @@ MFEMFormulation::validParams()
 MFEMFormulation::MFEMFormulation(const InputParameters & parameters) : GeneralUserObject(parameters)
 {
 }
-
-MFEMFormulation::~MFEMFormulation() {}

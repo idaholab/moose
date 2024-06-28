@@ -10,9 +10,7 @@ CustomFormulation::validParams()
 }
 
 CustomFormulation::CustomFormulation(const InputParameters & parameters)
-  : MFEMFormulation(parameters)
+  : MFEMFormulation(parameters),
+    _formulation(std::make_shared<platypus::TimeDomainEquationSystemProblemBuilder>())
 {
-  formulation = std::make_shared<platypus::TimeDomainEMFormulation>();
 }
-
-CustomFormulation::~CustomFormulation() {}
