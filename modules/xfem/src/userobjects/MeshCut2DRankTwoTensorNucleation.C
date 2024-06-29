@@ -121,7 +121,7 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
       circumference += edge->length(0, 1);
     }
 
-    // Temproraries for doing things below
+    // Temporaries for doing things below
     Real intersection_distance;
 
     Point point_0;
@@ -175,15 +175,22 @@ MeshCut2DRankTwoTensorNucleation::doesElementCrack(
     point_0 = point_0 - extend_length * crack_dir.unit();
     point_1 = point_1 + extend_length * crack_dir.unit();
 
-    // modify edges of cut should go so that they are on the edge of the domain and have a length
+    // modify edges of cut to put them on the edge of the domain and have a length
     // equal to nucleation_length
     if (is_point_0_on_external_boundary)
     {
+      // first move point back to edge
+      point_0 = point_0 + extend_length * crack_dir.unit();
+      // second move point a little bit over edge
       point_0 = point_0 - (traverse_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
+      // third, move point 1 so that crack equals nucleation length
+      point_1 = point_1 + extend_length * crack_dir.unit();
     }
     else if (is_point_1_on_external_boundary)
     {
+      point_1 = point_1 - extend_length * crack_dir.unit();
       point_1 = point_1 + (traverse_length * _edge_extension_factor) / 2.0 * crack_dir.unit();
+      point_0 = point_0 - extend_length * crack_dir.unit();
     }
     cutterElemNodes = {point_0, point_1};
   }

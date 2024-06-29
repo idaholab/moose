@@ -1,0 +1,43 @@
+[Tests]
+  issues = '#23572 #27659'
+  design = 'MeshCut2DFunctionUserObject.md'
+  [2D]
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, '
+    'where the crack is defined using a topologically defined surface cutting mesh by MeshCut2DFunctionUserObject'
+    [k_growth]
+      type = Exodiff
+      input = edge_crack_2d_propagation.i
+      exodiff = 'edge_crack_2d_propagation_xfemcutter_XFEMCutMeshOutput.e-s0004 edge_crack_2d_propagation_out.e-s002'
+      abs_zero = 1e-8
+      map = false
+      # XFEM requires --enable-unique-ids in libmesh
+      unique_id = true
+      detail = ' and crack growth and direction is computed by a fracture integral.'
+    []
+    [k_stress_growth]
+      type = Exodiff
+      input = edge_crack_2d_propagation.i
+      cli_args = 'Outputs/file_base=k_stress_growth '
+                 'UserObjects/cut_mesh2/stress_vectorpostprocessor=CrackFrontNonlocalStressVpp '
+                 'UserObjects/cut_mesh2/stress_threshold=120'
+      exodiff = 'k_stress_growth.e-s003 k_stress_growth_XFEMCutMeshOutput.e-s0004'
+      abs_zero = 1e-8
+      map = false
+      # XFEM requires --enable-unique-ids in libmesh
+      unique_id = true
+      detail = ' and crack growth and direction is computed by a fracture integral or maximum stress criterion.'
+    []
+    [stress_check]
+      type = CSVDiff
+      input = crack_front_stress_function_growth.i
+      csvdiff = 'stress_check_CrackFrontNonlocalStress_0001.csv '
+                'stress_check_CrackFrontNonlocalStress_0002.csv '
+                'stress_check_CrackFrontNonlocalStress_0003.csv '
+                'stress_check_CrackFrontNonlocalStress_0004.csv'
+      # XFEM requires --enable-unique-ids in libmesh
+      unique_id = true
+      detail = ' and crack growth is defined by a function.  The average crack tip stress changes with crack orientation '
+               'and properly accounts volume averaging near surfaces.'
+    []
+  []
+[]

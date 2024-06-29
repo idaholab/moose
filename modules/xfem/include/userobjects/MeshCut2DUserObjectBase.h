@@ -11,6 +11,7 @@
 
 #include "GeometricCutUserObject.h"
 class MeshCut2DNucleationBase;
+class CrackFrontDefinition;
 /**
  * MeshCut2DUserObjectBase: (1) reads in a mesh describing the crack surface,
  * (2) Fills xfem cut element ojbects.
@@ -23,6 +24,9 @@ public:
   static InputParameters validParams();
 
   MeshCut2DUserObjectBase(const InputParameters & parameters);
+
+  // initialSetup needs to be called by every derived class
+  virtual void initialSetup() override final;
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
@@ -62,7 +66,7 @@ protected:
 
   /**
    * This vector of pairs orders crack tips to make the order used in this class the same as those
-   * for the fracture integrals vectorpostProcessorsin created by CrackFrontDefinition.
+   * for the fracture integrals VectorPostprocessors created by CrackFrontDefinition.
    * The original crack front node ids found in the cutter mesh are put in pair.first and the
    * assosciated current crack front node id that grew from the original crack front node id is in
    * pair.second.  This vector is sorted on pair.first which makes the ordering of this vector the
@@ -72,6 +76,9 @@ protected:
 
   /// contains the active node ids and their growth vectors
   std::vector<std::pair<dof_id_type, Point>> _active_front_node_growth_vectors;
+
+  /// user object for communicating between solid_mechanics interaction integrals and xfem cutter mesh
+  CrackFrontDefinition * _crack_front_definition;
 
   /**
   Find growth direction at each active node
