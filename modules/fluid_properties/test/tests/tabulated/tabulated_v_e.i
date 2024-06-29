@@ -111,8 +111,16 @@
   [tabulated]
     type = TabulatedBicubicFluidProperties
     interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
+
+    # Uncomment this to read the tabulation
     # fluid_property_file = fluid_properties.csv
-    save_file = true
+    # Uncomment this to use the CO2 fluid properties above
+    # fp = 'co2'
+
+    # Uncomment this to write out a tabulation
+    # fluid_property_output_file = 'fluid_properties.csv'
+
+    # Enable the use of the (v,e) variables
     construct_pT_from_ve = true
     construct_pT_from_vh = true
     error_on_out_of_bounds = false
