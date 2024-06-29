@@ -61,6 +61,25 @@
       detail = 'using a linear specific volume grid and a log-spaced grid in specific internal energy'
     []
   []
+  [file_writing]
+    requirement = "The system shall be able to output tabulated fluid property data when requested "
+                  "by the user"
+    [ve]
+      type = CSVDiff
+      input = 'tabulated_v_e.i'
+      csvdiff = 'fluid_properties_out_ve.csv'
+      cli_args = "FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
+                  FluidProperties/tabulated/num_v=10
+                  FluidProperties/tabulated/num_e=10
+                  FluidProperties/tabulated/fluid_property_file='fluid_properties.csv'
+                  FluidProperties/tabulated/fluid_property_output_file='fluid_properties_out.csv'"
+      detail = 'for the (specific volume, internal energy) conversion grids.'
+      prereq = tabulated_bicubic
+
+      # Some conversions are going to fail
+      allow_warnings = true
+    []
+  []
   [exceptions]
     requirement = "The system shall throw an error if"
     [bad_pressure_bounds]

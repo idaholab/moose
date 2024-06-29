@@ -1179,12 +1179,6 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
       MooseUtils::checkFileWriteable(file_name_ve);
       std::ofstream file_out(file_name_ve.c_str());
 
-      // Write out date and fluid type
-      time_t now = std::time(&now);
-      file_out
-          << "# (v,e) to (p,T) conversion grid and results created by TabulatedFluidProperties on "
-          << ctime(&now) << "\n";
-
       // Write out column names
       file_out << "specific_volume, internal_energy, pressure, temperature";
       file_out << "\n";
