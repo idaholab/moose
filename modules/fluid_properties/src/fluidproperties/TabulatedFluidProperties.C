@@ -150,6 +150,27 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
 
   // Lines starting with # in the data file are treated as comments
   _csv_reader.setComment("#");
+
+  // Can only and must receive one source of data
+  if (_fp && !_file_name_in.empty())
+    paramError("fluid_property_file",
+               "Cannot supply both a fluid properties object with 'fp' and a source tabulation "
+               "file with 'fluid_property_file'");
+  if (!_fp && _file_name_in.empty())
+    paramError("fluid_property_file",
+               "Either a fluid properties object with the parameter 'fp' and a source tabulation "
+               "file with the parameter 'fluid_property_file' should be provided.");
+
+  // Some parameters are not used when reading a tabulation
+  if (!_fp && (isParamSetByUser("pressure_min") || isParamSetByUser("pressure_max") ||
+               isParamSetByUser("temperature_min") || isParamSetByUser("temperature_max")))
+    mooseWarning("User-specified bounds in pressure and temperature are ignored when reading a "
+                 "'fluid_property_file'. The tabulation bounds are selected "
+                 "from the bounds of the input tabulation.");
+  if (!_fp && (isParamSetByUser("num_p") || isParamSetByUser("num_T")))
+    mooseWarning("User-specified grid sizes in pressure and temperature are ignored when reading a "
+                 "'fluid_property_file'. The tabulation bounds are selected "
+                 "from the bounds of the input tabulation.");
 }
 
 void
@@ -1341,7 +1362,7 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
 void
 TabulatedFluidProperties::checkInitialGuess() const
 {
-  if (_construct_pT_from_ve || _construct_pT_from_vh)
+  if (_fp && (_construct_pT_from_ve || _construct_pT_from_vh))
   {
     if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
       mooseWarning("Pressure initial guess for (p,T), (v,e) conversions " +

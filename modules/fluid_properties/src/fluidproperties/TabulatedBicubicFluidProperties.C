@@ -420,13 +420,15 @@ TabulatedBicubicFluidProperties::outputWarnings(unsigned int num_nans_p,
   std::string T_nans = "- " + std::to_string(num_nans_T) + " nans generated out of " +
                        std::to_string(number_points) + " points for temperature\n";
   std::string p_oob = "- " + std::to_string(num_out_bounds_p) + " of " +
-                      std::to_string(number_points) +
-                      " pressure values were out of user defined bounds\n";
+                      std::to_string(number_points) + " pressure values were out of bounds\n";
   std::string T_oob = "- " + std::to_string(num_out_bounds_T) + " of " +
-                      std::to_string(number_points) +
-                      " temperature values were out of user defined bounds\n";
+                      std::to_string(number_points) + " temperature values were out of bounds\n";
   std::string outcome = "The pressure and temperature values were replaced with their respective "
-                        "user-defined min and max values.\n";
+                        "min and max values.\n";
+
+  // bounds are different depending on how the object is used
+  std::string source = (_fp ? "from input parameters" : "from tabulation file");
+
   // if any of these do not exist, do not want to print them
   if (convergence_failures)
     warning_message += converge_fails;
@@ -435,9 +437,17 @@ TabulatedBicubicFluidProperties::outputWarnings(unsigned int num_nans_p,
   if (num_nans_T)
     warning_message += T_nans;
   if (num_out_bounds_p)
+  {
     warning_message += p_oob;
+    warning_message += ("Pressure bounds " + source + ": [" + std::to_string(_pressure_min) + ", " +
+                        std::to_string(_pressure_max) + "]\n");
+  }
   if (num_out_bounds_T)
+  {
     warning_message += T_oob;
+    warning_message += ("Temperature bounds " + source + ": [" + std::to_string(_temperature_min) +
+                        ", " + std::to_string(_temperature_max) + "]\n");
+  }
   // print warning
   if (num_nans_p || num_nans_T || num_out_bounds_p || num_out_bounds_T || convergence_failures)
     mooseWarning(warning_message + outcome);
