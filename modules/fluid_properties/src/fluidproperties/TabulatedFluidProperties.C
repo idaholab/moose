@@ -127,7 +127,8 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
     _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds")),
-    _log_space_v(getParam<bool>("use_log_grid_v"))
+    _log_space_v(getParam<bool>("use_log_grid_v")),
+    _log_space_e(getParam<bool>("use_log_grid_e"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
   checkInitialGuess();

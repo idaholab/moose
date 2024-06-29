@@ -117,12 +117,28 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       _e_min = *min_element(_properties[_internal_energy_idx].begin(),
                             _properties[_internal_energy_idx].end());
     }
-    Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
 
     // Create e grid for interpolation
     _internal_energy.resize(_num_e);
-    for (unsigned int j = 0; j < _num_e; ++j)
-      _internal_energy[j] = _e_min + j * de;
+    if (_log_space_e)
+    {
+      // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
+      // the power of 10
+      if (_e_min < 0)
+        mooseError("Logarithmic grid in specific energy can only be used with a positive specific "
+                   "energy. Current minimum: " +
+                   std::to_string(_e_min));
+      Real de = (std::log10(_e_max) - std::log10(_e_min)) / ((Real)_num_e - 1);
+      Real log_e_min = std::log10(_e_min);
+      for (const auto j : make_range(_num_e))
+        _internal_energy[j] = std::pow(10, log_e_min + j * de);
+    }
+    else
+    {
+      Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
+      for (const auto j : make_range(_num_e))
+        _internal_energy[j] = _e_min + j * de;
+    }
 
     // initialize vectors for interpolation
     std::vector<std::vector<Real>> p_from_v_e(_num_v);
