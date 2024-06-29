@@ -170,8 +170,10 @@ protected:
    */
   virtual void generateTabulatedData();
 
-  /// File name of tabulated data file
-  FileName _file_name;
+  /// File name of input tabulated data file
+  FileName _file_name_in;
+  /// File name of output tabulated data file
+  FileName _file_name_out;
   /// Pressure vector
   std::vector<Real> _pressure;
   /// Temperature vector
