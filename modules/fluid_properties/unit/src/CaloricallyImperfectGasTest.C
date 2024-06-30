@@ -454,6 +454,8 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
   }
 
   // test out of bounds call for temperature
+  bool toe = Moose::_throw_on_error;
+  Moose::_throw_on_error = true;
   {
     try
     {
@@ -477,6 +479,7 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
       ASSERT_TRUE(pos != std::string::npos);
     }
   }
+  Moose::_throw_on_error = toe;
 }
 
 TEST_F(CaloricallyImperfectGasTest, nonMonotonicError1)
@@ -500,6 +503,8 @@ TEST_F(CaloricallyImperfectGasTest, nonMonotonicError1)
   _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_bad_e_fn", uo_pars_bad_e_fn);
   fp_bad_e_fn = &_fe_problem->getUserObject<CaloricallyImperfectGas>("fp_bad_e_fn");
 
+  bool toe = Moose::_throw_on_error;
+  Moose::_throw_on_error = true;
   try
   {
     const_cast<CaloricallyImperfectGas *>(fp_bad_e_fn)->initialSetup();
@@ -510,6 +515,7 @@ TEST_F(CaloricallyImperfectGasTest, nonMonotonicError1)
     std::size_t pos = std::string(err.what()).find("e(T) is not monotonically increasing with T");
     ASSERT_TRUE(pos != std::string::npos);
   }
+  Moose::_throw_on_error = toe;
 }
 
 TEST_F(CaloricallyImperfectGasTest, nonMonotonicError2)
@@ -533,6 +539,8 @@ TEST_F(CaloricallyImperfectGasTest, nonMonotonicError2)
   _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_bad_e_fn2", uo_pars_bad_e_fn2);
   fp_bad_e_fn2 = &_fe_problem->getUserObject<CaloricallyImperfectGas>("fp_bad_e_fn2");
 
+  bool toe = Moose::_throw_on_error;
+  Moose::_throw_on_error = true;
   try
   {
     const_cast<CaloricallyImperfectGas *>(fp_bad_e_fn2)->initialSetup();
@@ -543,6 +551,7 @@ TEST_F(CaloricallyImperfectGasTest, nonMonotonicError2)
     std::size_t pos = std::string(err.what()).find("e(T) is not monotonically increasing with T");
     ASSERT_TRUE(pos != std::string::npos);
   }
+  Moose::_throw_on_error = toe;
 }
 
 TEST_F(CaloricallyImperfectGasTest, compareWithIdeal)

@@ -58,8 +58,10 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
   const ADReal T_ad(T, dTdU);
 
   const auto & fp_2phase = buildTwoPhaseFluidProperties();
-  const auto & fp_liquid = _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getLiquidName());
-  const auto & fp_vapor = _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getVaporName());
+  const auto & fp_liquid =
+      _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getLiquidName());
+  const auto & fp_vapor =
+      _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getVaporName());
 
   // Latent heat
 
@@ -121,15 +123,16 @@ TEST_F(ADFluidPropsTest, error_imperfect_jacobian)
   ADReal e = 214000;
 
   // This throws because g_from_v_e has no derivatives version implemented:
+  bool toe = Moose::_throw_on_error;
+  Moose::_throw_on_error = true;
   EXPECT_THROW(_fp->g_from_v_e(v, e), std::runtime_error);
 
   // create fp with allow_imperfect_jacobians on - but warnings are errors still
   auto & fp = buildObj("fp2", true);
   EXPECT_THROW(fp.g_from_v_e(v, e), std::runtime_error);
 
-  // missing derivs become warnings instead of errors
+  // missing derivatives become warnings instead of errors
   bool wae = Moose::_warnings_are_errors;
-  bool toe = Moose::_throw_on_error;
   Moose::_warnings_are_errors = false;
   Moose::_throw_on_error = false;
   EXPECT_NO_THROW(fp.g_from_v_e(v, e));

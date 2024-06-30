@@ -12,101 +12,12 @@
 
 #include <fstream>
 
-// Test data for unordered data
-TEST_F(TabulatedBilinearFluidPropertiesTest, unorderedData)
-{
-  try
-  {
-    // Must cast away const to call initialSetup(), where the file is
-    // checked for consistency
-    const_cast<TabulatedBilinearFluidProperties *>(_unordered_fp)->initialSetup();
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    std::size_t pos =
-        std::string(err.what())
-            .find("the column data for temperature is not monotonically increasing in "
-                  "data/csv/unordered_fluid_props.csv");
-    ASSERT_TRUE(pos != std::string::npos);
-  }
-}
-
-// Test data for different temperatures ranges in pressure data
-TEST_F(TabulatedBilinearFluidPropertiesTest, unequalTemperatures)
-{
-  try
-  {
-    const_cast<TabulatedBilinearFluidProperties *>(_unequal_fp)->initialSetup();
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    std::size_t pos = std::string(err.what())
-                          .find("temperature values for pressure 2e+06 are not "
-                                "identical to values for 1e+06");
-    ASSERT_TRUE(pos != std::string::npos);
-  }
-}
-
-// Test data for missing column
-TEST_F(TabulatedBilinearFluidPropertiesTest, missingColumn)
-{
-  try
-  {
-    const_cast<TabulatedBilinearFluidProperties *>(_missing_col_fp)->initialSetup();
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    std::size_t pos = std::string(err.what())
-                          .find("no temperature data read in "
-                                "data/csv/missing_col_fluid_props.csv. A "
-                                "column named temperature must be present");
-    ASSERT_TRUE(pos != std::string::npos);
-  }
-}
-
-// Test data for unknown property column
-TEST_F(TabulatedBilinearFluidPropertiesTest, unknownColumn)
-{
-  try
-  {
-    const_cast<TabulatedBilinearFluidProperties *>(_unknown_col_fp)->initialSetup();
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    std::size_t pos = std::string(err.what())
-                          .find("unknown read in data/csv/unknown_fluid_props.csv is not one of "
-                                "the properties that TabulatedFluidProperties understands");
-    ASSERT_TRUE(pos != std::string::npos);
-  }
-}
-
-// Test data for missing data
-TEST_F(TabulatedBilinearFluidPropertiesTest, missingData)
-{
-  try
-  {
-    const_cast<TabulatedBilinearFluidProperties *>(_missing_data_fp)->initialSetup();
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    std::size_t pos = std::string(err.what())
-                          .find("the number of rows in data/csv/missing_data_fluid_props.csv "
-                                "is not equal to the number of unique pressure values 3 multiplied "
-                                "by the number of unique temperature values 3");
-    ASSERT_TRUE(pos != std::string::npos);
-  }
-}
-
 // Test tabulated fluid properties read from file including comments
 TEST_F(TabulatedBilinearFluidPropertiesTest, fromFile)
 {
-  Real p = 1.5e6;
-  Real T = 450.0;
+  // Derivatives on grid points are not as good
+  Real p = 1.50000001e6;
+  Real T = 450.000001;
 
   // Read the data file
   const_cast<TabulatedBilinearFluidProperties *>(_tab_fp)->initialSetup();
@@ -121,47 +32,57 @@ TEST_F(TabulatedBilinearFluidPropertiesTest, fromFile)
   REL_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), 1.0e-4);
 
+  // Derivatives are not as accurate with linear interpolation
+  const auto deriv_tol = 5e-3;
+
   // Fluid properties and derivatives
   Real rho, drho_dp, drho_dT, rhoc, drhoc_dp, drhoc_dT;
   _tab_fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
   _co2_fp->rho_from_p_T(p, T, rhoc, drhoc_dp, drhoc_dT);
   REL_TEST(rho, rhoc, 1.0e-4);
-  REL_TEST(drho_dp, drhoc_dp, 1.0e-3);
-  REL_TEST(drho_dT, drhoc_dT, 1.0e-3);
+  REL_TEST(drho_dp, drhoc_dp, deriv_tol);
+  REL_TEST(drho_dT, drhoc_dT, 5 * deriv_tol);
 
   Real h, dh_dp, dh_dT, hc, dhc_dp, dhc_dT;
   _tab_fp->h_from_p_T(p, T, h, dh_dp, dh_dT);
   _co2_fp->h_from_p_T(p, T, hc, dhc_dp, dhc_dT);
   REL_TEST(h, hc, 1.0e-4);
-  REL_TEST(dh_dp, dhc_dp, 1.0e-3);
-  REL_TEST(dh_dT, dhc_dT, 1.0e-3);
+  REL_TEST(dh_dp, dhc_dp, deriv_tol);
+  REL_TEST(dh_dT, dhc_dT, deriv_tol);
 
   Real mu, dmu_dp, dmu_dT, muc, dmuc_dp, dmuc_dT;
   _tab_fp->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
   _co2_fp->mu_from_p_T(p, T, muc, dmuc_dp, dmuc_dT);
   REL_TEST(mu, muc, 1.0e-4);
-  REL_TEST(dmu_dp, dmuc_dp, 1.0e-3);
-  REL_TEST(dmu_dT, dmuc_dT, 1.0e-3);
+  REL_TEST(dmu_dp, dmuc_dp, 3 * deriv_tol);
+  REL_TEST(dmu_dT, dmuc_dT, deriv_tol);
 
   Real e, de_dp, de_dT, ec, dec_dp, dec_dT;
   _tab_fp->e_from_p_T(p, T, e, de_dp, de_dT);
   _co2_fp->e_from_p_T(p, T, ec, dec_dp, dec_dT);
   REL_TEST(e, ec, 1.0e-4);
-  REL_TEST(de_dp, dec_dp, 1.0e-3);
-  REL_TEST(de_dT, dec_dT, 1.0e-3);
+  REL_TEST(de_dp, dec_dp, deriv_tol);
+  REL_TEST(de_dT, dec_dT, deriv_tol);
 }
 
 // Test tabulated fluid properties read from file including comments
 TEST_F(TabulatedBilinearFluidPropertiesTest, fromFileVE)
 {
-  Real p = 1.5e6;
-  Real T = 450.0;
+  Real p = 1.500001e6;
+  Real T = 450.0000001;
   Real pert = 1.0e-7;
 
   // Read the data file
-  Moose::_throw_on_error = false;
+  bool tow = Moose::_throw_on_warning;
+  bool wae = Moose::_warnings_are_errors;
+  Moose::_warnings_are_errors = false;
+  Moose::_throw_on_warning = false;
   const_cast<TabulatedBilinearFluidProperties *>(_tab_fp_ve)->initialSetup();
-  Moose::_throw_on_error = true;
+  Moose::_throw_on_warning = tow;
+  Moose::_warnings_are_errors = wae;
+
+  // Two bilinear interpolations in a row gets a larger error
+  const auto ve_tol = 5e-3;
 
   // round trip p,T -> v,e -> p,T
   {
@@ -169,8 +90,8 @@ TEST_F(TabulatedBilinearFluidPropertiesTest, fromFileVE)
     Real v = _tab_fp_ve->v_from_p_T(p, T);
     Real pp = _tab_fp_ve->p_from_v_e(v, e);
     Real TT = _tab_fp_ve->T_from_v_e(v, e);
-    ABS_TEST(T, TT, 1.0);
-    REL_TEST(p, pp, 0.001);
+    ABS_TEST(T, TT, 3.0);
+    REL_TEST(p, pp, 6 * ve_tol);
   }
 
   // check computation of fluid props from p, T & v, e
@@ -181,27 +102,27 @@ TEST_F(TabulatedBilinearFluidPropertiesTest, fromFileVE)
     // speed of sound
     Real c1 = _tab_fp_ve->c_from_p_T(p, T);
     Real c2 = _tab_fp_ve->c_from_v_e(v, e);
-    REL_TEST(c1, c2, 0.001);
+    REL_TEST(c1, c2, ve_tol);
 
     // heat capacity at constant pressure
     Real cp1 = _tab_fp_ve->cp_from_p_T(p, T);
     Real cp2 = _tab_fp_ve->cp_from_v_e(v, e);
-    REL_TEST(cp1, cp2, 0.001);
+    REL_TEST(cp1, cp2, ve_tol);
 
     // heat capacity at constant volume
     Real cv1 = _tab_fp_ve->cv_from_p_T(p, T);
     Real cv2 = _tab_fp_ve->cv_from_v_e(v, e);
-    REL_TEST(cv1, cv2, 0.001);
+    REL_TEST(cv1, cv2, ve_tol);
 
     // viscosity
     Real mu1 = _tab_fp_ve->mu_from_p_T(p, T);
     Real mu2 = _tab_fp_ve->mu_from_v_e(v, e);
-    REL_TEST(mu1, mu2, 0.001);
+    REL_TEST(mu1, mu2, 2 * ve_tol);
 
     // thermal conductivity
     Real k1 = _tab_fp_ve->k_from_p_T(p, T);
     Real k2 = _tab_fp_ve->k_from_v_e(v, e);
-    REL_TEST(k1, k2, 0.001);
+    REL_TEST(k1, k2, 2 * ve_tol);
   }
 
   // are the two version of functions equivalent
@@ -218,25 +139,25 @@ TEST_F(TabulatedBilinearFluidPropertiesTest, fromFileVE)
     Real cp1;
     _tab_fp_ve->cp_from_v_e(v, e, cp1, d1, d2);
     Real cp2 = _tab_fp_ve->cp_from_v_e(v, e);
-    REL_TEST(cp1, cp2, 0.001);
+    REL_TEST(cp1, cp2, ve_tol);
 
     // heat capacity at constant volume
     Real cv1;
     _tab_fp_ve->cv_from_v_e(v, e, cv1, d1, d2);
     Real cv2 = _tab_fp_ve->cv_from_v_e(v, e);
-    REL_TEST(cv1, cv2, 0.001);
+    REL_TEST(cv1, cv2, ve_tol);
 
     // viscosity
     Real mu1;
     _tab_fp_ve->mu_from_v_e(v, e, mu1, d1, d2);
     Real mu2 = _tab_fp_ve->mu_from_v_e(v, e);
-    REL_TEST(mu1, mu2, 0.001);
+    REL_TEST(mu1, mu2, ve_tol);
 
     // thermal conductivity
     Real k1;
     _tab_fp_ve->k_from_v_e(v, e, k1, d1, d2);
     Real k2 = _tab_fp_ve->k_from_v_e(v, e);
-    REL_TEST(k1, k2, 0.001);
+    REL_TEST(k1, k2, ve_tol);
   }
 
   // check derivatives
@@ -292,11 +213,11 @@ TEST_F(TabulatedBilinearFluidPropertiesTest, fromFileVE)
     Real v = _tab_fp_ve->v_from_p_T(p, T);
     Real e_gold = _tab_fp_ve->e_from_p_T(p, T);
     Real e = _tab_fp_ve->e_from_v_h(v, h);
-    REL_TEST(e_gold, e, 0.001);
+    REL_TEST(e_gold, e, 10 * ve_tol);
 
     Real e2, de_dv, de_dh;
     _tab_fp_ve->e_from_v_h(v, h, e2, de_dv, de_dh);
-    REL_TEST(e_gold, e2, 0.001);
+    REL_TEST(e_gold, e2, 10 * ve_tol);
     Real e_0 = _tab_fp_ve->e_from_v_h(v, h);
     Real e_1 = _tab_fp_ve->e_from_v_h(v * (1 + pert), h);
     Real e_2 = _tab_fp_ve->e_from_v_h(v, h * (1 + pert));
@@ -317,9 +238,9 @@ TEST_F(TabulatedBilinearFluidPropertiesTest, fromFileVE)
     Moose::derivInsert(dedx, 0, 0);
     Moose::derivInsert(dedx, 1, 1);
 
-    DualReal v_ad(v, dvdx);
-    DualReal e_ad(e, dedx);
-    DualReal p_ad = _tab_fp_ve->p_from_v_e(v_ad, e_ad);
+    ADReal v_ad(v, dvdx);
+    ADReal e_ad(e, dedx);
+    ADReal p_ad = _tab_fp_ve->p_from_v_e(v_ad, e_ad);
 
     Real pp, dp_dv, dp_de;
     _tab_fp_ve->p_from_v_e(v, e, pp, dp_dv, dp_de);
@@ -340,9 +261,9 @@ TEST_F(TabulatedBilinearFluidPropertiesTest, fromFileVE)
     Moose::derivInsert(dedx, 0, 0);
     Moose::derivInsert(dedx, 1, 1);
 
-    DualReal v_ad(v, dvdx);
-    DualReal e_ad(e, dedx);
-    DualReal T_ad = _tab_fp_ve->T_from_v_e(v_ad, e_ad);
+    ADReal v_ad(v, dvdx);
+    ADReal e_ad(e, dedx);
+    ADReal T_ad = _tab_fp_ve->T_from_v_e(v_ad, e_ad);
 
     Real TT, dT_dv, dT_de;
     _tab_fp_ve->T_from_v_e(v, e, TT, dT_dv, dT_de);

@@ -293,9 +293,10 @@ TabulatedBilinearFluidProperties::reshapeData2D(unsigned int nrow,
 {
   if (!vec.empty())
   {
+    // Data is flipped in BilinearInterpolation because of the column major indexing
     for (unsigned int i = 0; i < nrow; ++i)
       for (unsigned int j = 0; j < ncol; ++j)
-        mat(i, j) = vec[i * ncol + j];
+        mat(i, j) = vec[j * nrow + i];
   }
 }
 
