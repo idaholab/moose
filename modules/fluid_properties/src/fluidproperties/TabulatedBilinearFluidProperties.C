@@ -63,8 +63,8 @@ TabulatedBilinearFluidProperties::constructInterpolation()
     for (unsigned int i = 0; i < _num_v; ++i)
       for (unsigned int j = 0; j < _num_e; ++j)
       {
-        T_from_v_e_m(i, j) = T_from_v_e[i][j];
-        p_from_v_e_m(i, j) = p_from_v_e[i][j];
+        T_from_v_e_m(j, i) = T_from_v_e[i][j];
+        p_from_v_e_m(j, i) = p_from_v_e[i][j];
       }
 
     // the bicubic interpolation object are init'ed now
@@ -87,8 +87,8 @@ TabulatedBilinearFluidProperties::constructInterpolation()
     for (unsigned int i = 0; i < _num_v; ++i)
       for (unsigned int j = 0; j < _num_h; ++j)
       {
-        T_from_v_h_m(i, j) = T_from_v_h[i][j];
-        p_from_v_h_m(i, j) = p_from_v_h[i][j];
+        T_from_v_h_m(j, i) = T_from_v_h[i][j];
+        p_from_v_h_m(j, i) = p_from_v_h[i][j];
       }
 
     _p_from_v_h_ipol =

@@ -127,6 +127,9 @@ elem_id = 10
     pressure_min = 1e5
     pressure_max = 7e5
 
+    num_e = 400
+    num_v = 300
+
     # Newton parameters
     tolerance = 1e-8
     T_initial_guess = 310
