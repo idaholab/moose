@@ -1181,6 +1181,9 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 
       // Write out column names
       file_out << "specific_volume, internal_energy, pressure, temperature";
+      for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
+        if (_interpolated_properties[i] != "internal_energy")
+          file_out << ", " << _interpolated_properties[i];
       file_out << "\n";
 
       // Write out the fluid property data
@@ -1189,8 +1192,29 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
         {
           const auto v_val = _specific_volume[v];
           const auto e_val = _internal_energy[e];
-          file_out << v_val << ", " << e_val << ", " << _p_from_v_e_ipol->sample(v_val, e_val)
-                   << ", " << _T_from_v_e_ipol->sample(v_val, e_val);
+          const auto pressure = _p_from_v_e_ipol->sample(v_val, e_val);
+          const auto temperature = _T_from_v_e_ipol->sample(v_val, e_val);
+          file_out << v_val << ", " << e_val << ", " << pressure << ", " << temperature;
+          for (std::size_t i = 0; i < _properties.size(); ++i)
+          {
+            if (i == _density_idx)
+              file_out << 1 / v_val << ", ";
+            else if (i == _enthalpy_idx)
+              file_out << h_from_p_T(pressure, temperature) << ", ";
+            else if (i == _viscosity_idx)
+              file_out << mu_from_v_e(v_val, e_val) << ", ";
+            else if (i == _k_idx)
+              file_out << k_from_v_e(v_val, e_val) << ", ";
+            else if (i == _c_idx)
+              file_out << c_from_v_e(v_val, e_val) << ", ";
+            else if (i == _cp_idx)
+              file_out << cp_from_v_e(v_val, e_val) << ", ";
+            else if (i == _cv_idx)
+              file_out << cv_from_v_e(v_val, e_val) << ", ";
+            else if (i == _entropy_idx)
+              file_out << s_from_v_e(v_val, e_val) << ", ";
+          }
+
           file_out << "\n";
         }
 
