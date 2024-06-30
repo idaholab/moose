@@ -96,6 +96,14 @@ LinearFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Rea
 
 Real LinearFluidProperties::cv_from_v_e(Real, Real) const { return _cv; }
 
+void
+LinearFluidProperties::cv_from_v_e(Real v, Real e, Real & cp, Real & dcv_dv, Real & dcv_de) const
+{
+  cv = cv_from_v_e(v, e);
+  dcv_de = 0;
+  dcv_dv = 0;
+}
+
 Real LinearFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
 
 Real LinearFluidProperties::k_from_v_e(Real, Real) const { return _k; }
@@ -144,7 +152,7 @@ LinearFluidProperties::rho_from_p_s(Real, Real, Real &, Real &, Real &) const
   mooseError(name(), ": rho_from_p_s() not implemented.");
 }
 
-Real LinearFluidProperties::e_from_v_h(Real, Real) const
+Real LinearFluidProperties::e_from_v_h(Real v, Real h) const
 {
   mooseError(name(), ": e_from_v_h() not implemented.");
 }
