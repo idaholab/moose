@@ -196,9 +196,17 @@ NewtonSolve2D(const T & f,
     for (const auto i : make_range(system_size))
     {
       const auto rowmax = std::max(std::abs(J(i, 0)), std::abs(J(i, 1)));
-      for (const auto j : make_range(system_size))
-        J(i, j) /= rowmax;
-      minus_R(i) /= rowmax;
+      if (rowmax > 0)
+      {
+        for (const auto j : make_range(system_size))
+          J(i, j) /= rowmax;
+        minus_R(i) /= rowmax;
+      }
+      else
+      {
+        assign_solution();
+        mooseException("Null derivatives in Newton solve");
+      }
     }
 
 #ifndef NDEBUG
