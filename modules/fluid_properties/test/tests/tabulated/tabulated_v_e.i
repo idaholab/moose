@@ -19,19 +19,7 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [rho]
-    family = MONOMIAL
-    order = CONSTANT
-  []
   [mu]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [e]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [h]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -62,16 +50,6 @@
 []
 
 [AuxKernels]
-  [viscosity]
-    type = MaterialRealAux
-    variable = mu
-    property = mu
-  []
-  [thermal_conductivity]
-    type = MaterialRealAux
-    variable = k
-    property = k
-  []
   [pressure]
     type = MaterialRealAux
     variable = p
@@ -81,6 +59,16 @@
     type = MaterialRealAux
     variable = T
     property = temperature
+  []
+  [viscosity]
+    type = MaterialRealAux
+    variable = mu
+    property = mu
+  []
+  [s]
+    type = MaterialRealAux
+    variable = 's'
+    property = 's'
   []
   [cv]
     type = MaterialRealAux
@@ -96,6 +84,11 @@
     type = MaterialRealAux
     variable = c
     property = c
+  []
+  [thermal_conductivity]
+    type = MaterialRealAux
+    variable = k
+    property = k
   []
   [g]
     type = MaterialRealAux
@@ -157,15 +150,25 @@
 []
 
 [Postprocessors]
+  [p]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = p
+  []
+  [T]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = T
+  []
   [mu]
     type = ElementalVariableValue
     elementid = 0
     variable = mu
   []
-  [e]
+  [s]
     type = ElementalVariableValue
     elementid = 0
-    variable = e
+    variable = s
   []
   [cv]
     type = ElementalVariableValue
@@ -181,16 +184,6 @@
     type = ElementalVariableValue
     elementid = 0
     variable = c
-  []
-  [p]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = p
-  []
-  [T]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = T
   []
   [k]
     type = ElementalVariableValue

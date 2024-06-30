@@ -51,6 +51,7 @@
       cli_args = "FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
                   FluidProperties/tabulated/fp=co2
                   FluidProperties/tabulated/temperature_min=400
+                  FluidProperties/tabulated/temperature_max=800
                   FluidProperties/tabulated/pressure_min=2e5
                   FluidProperties/tabulated/use_log_grid_e=true
                   Outputs/file_base=tabulated_v_e_loge_out"
@@ -99,14 +100,16 @@
     [bad_pressure_guess]
       type = RunException
       input = 'tabulated_v_e.i'
-      cli_args = 'FluidProperties/tabulated/p_initial_guess=10 FluidProperties/tabulated/save_file=false'
+      cli_args = "FluidProperties/tabulated/p_initial_guess=10 "
+                 "FluidProperties/tabulated/save_file=false FluidProperties/tabulated/fp=co2"
       expect_err = 'Pressure initial guess for \(p,T\), \(v,e\) conversions 10 is outside the range of tabulated pressure'
       detail = 'if the user-specified pressure initial guess for variable set inversions is out of bounds'
     []
     [bad_temperature_guess]
       type = RunException
       input = 'tabulated_v_e.i'
-      cli_args = 'FluidProperties/tabulated/T_initial_guess=1e5 FluidProperties/tabulated/save_file=false'
+      cli_args = "FluidProperties/tabulated/T_initial_guess=1e5 "
+                 "FluidProperties/tabulated/save_file=false FluidProperties/tabulated/fp=co2"
       expect_err = 'Temperature initial guess for \(p,T\), \(v,e\) conversions 100000 is outside the range of tabulated temperature'
       detail = 'if the user-specified temperature initial guess for variable set inversions is out of bounds'
     []
