@@ -23,8 +23,8 @@ public:
 
   ResidualConvergence(const InputParameters & parameters);
 
-  Convergence::MooseAlgebraicConvergence
-  checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
+  Convergence::MooseConvergenceStatus
+  checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
 protected:
   /**

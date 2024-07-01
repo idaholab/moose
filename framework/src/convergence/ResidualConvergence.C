@@ -195,13 +195,13 @@ ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
   return false;
 }
 
-Convergence::MooseAlgebraicConvergence
-ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm)
+Convergence::MooseConvergenceStatus
+ResidualConvergence::checkConvergence(int it, Real xnorm, Real snorm, Real fnorm)
 {
   TIME_SECTION(_perf_nonlinear);
 
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
-  MooseAlgebraicConvergence reason = MooseAlgebraicConvergence::ITERATING;
+  MooseConvergenceStatus reason = MooseConvergenceStatus::ITERATING;
 
   // Needed by ResidualReferenceConvergence
   nonlinearConvergenceSetup();
@@ -210,7 +210,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
   if (_fe_problem.getFailNextNonlinearConvergenceCheck())
   {
     _fe_problem.resetFailNextNonlinearConvergenceCheck();
-    return MooseAlgebraicConvergence::DIVERGED;
+    return MooseConvergenceStatus::DIVERGED;
   }
 
   // To check PETSc error codes.
@@ -256,7 +256,7 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
   CHKERRABORT(_fe_problem.comm().get(), ierr);
   if (domainerror)
   {
-    reason = MooseAlgebraicConvergence::DIVERGED;
+    reason = MooseConvergenceStatus::DIVERGED;
   }
 
   Real fnorm_old;
@@ -292,51 +292,51 @@ ResidualConvergence::checkAlgebraicConvergence(int it, Real xnorm, Real snorm, R
   if (fnorm != fnorm)
   {
     oss << "Failed to converge, function norm is NaN\n";
-    reason = MooseAlgebraicConvergence::DIVERGED;
+    reason = MooseConvergenceStatus::DIVERGED;
   }
   else if ((it >= _nl_forced_its) && fnorm < _atol)
   {
     oss << "Converged due to function norm " << fnorm << " < " << _atol << '\n';
-    reason = MooseAlgebraicConvergence::CONVERGED;
+    reason = MooseConvergenceStatus::CONVERGED;
   }
   else if (_nfuncs >= _maxf)
   {
     oss << "Exceeded maximum number of function evaluations: " << _nfuncs << " > " << _maxf << '\n';
-    reason = MooseAlgebraicConvergence::DIVERGED;
+    reason = MooseConvergenceStatus::DIVERGED;
   }
   else if ((it >= _nl_forced_its) && it && fnorm > system._last_nl_rnorm && fnorm >= _div_threshold)
   {
     oss << "Nonlinear solve was blowing up!\n";
-    reason = MooseAlgebraicConvergence::DIVERGED;
+    reason = MooseConvergenceStatus::DIVERGED;
   }
-  if ((it >= _nl_forced_its) && it && reason == MooseAlgebraicConvergence::ITERATING)
+  if ((it >= _nl_forced_its) && it && reason == MooseConvergenceStatus::ITERATING)
   {
     // Set the reference residual depending on what the user asks us to use.
     const auto the_residual = system.referenceResidual();
     if (checkRelativeConvergence(it, fnorm, the_residual, _rtol, _atol, oss))
-      reason = MooseAlgebraicConvergence::CONVERGED;
+      reason = MooseConvergenceStatus::CONVERGED;
     else if (snorm < _stol * xnorm)
     {
       oss << "Converged due to small update length: " << snorm << " < " << _stol << " * " << xnorm
           << '\n';
-      reason = MooseAlgebraicConvergence::CONVERGED;
+      reason = MooseConvergenceStatus::CONVERGED;
     }
     else if (_divtol > 0 && fnorm > the_residual * _divtol)
     {
       oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
           << _divtol << " * initial residual " << the_residual << '\n';
-      reason = MooseAlgebraicConvergence::DIVERGED;
+      reason = MooseConvergenceStatus::DIVERGED;
     }
     else if (_nl_abs_div_tol > 0 && fnorm > _nl_abs_div_tol)
     {
       oss << "Diverged due to residual " << fnorm << " > absolute divergence tolerance "
           << _nl_abs_div_tol << '\n';
-      reason = MooseAlgebraicConvergence::DIVERGED;
+      reason = MooseConvergenceStatus::DIVERGED;
     }
     else if (_n_nl_pingpong > _n_max_nl_pingpong)
     {
       oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
-      reason = MooseAlgebraicConvergence::DIVERGED;
+      reason = MooseConvergenceStatus::DIVERGED;
     }
   }
 
