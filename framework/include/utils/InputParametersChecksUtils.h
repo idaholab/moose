@@ -439,7 +439,8 @@ InputParametersChecksUtils<C>::checkBlockwiseConsistency(
           if (std::find(object_blocks.begin(), object_blocks.end(), block) == object_blocks.end())
             forwardParamError(block_param_name,
                               "Block '" + block + "' is not present in the block restriction of " +
-                                  forwardName() + "!");
+                                  forwardName() +
+                                  "!\nBlock restriction: " + Moose::stringify(object_blocks));
 
     for (const auto & param_name : parameter_names)
     {

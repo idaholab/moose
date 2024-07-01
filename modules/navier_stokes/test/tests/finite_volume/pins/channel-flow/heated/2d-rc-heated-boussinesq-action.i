@@ -45,6 +45,10 @@ T_inlet = 200
     gravity = '0 -9.81 0'
     ref_temperature = 150
 
+    # Reference file sets effective_conductivity by default that way
+    # so the conductivity is multiplied by the porosity in the kernel
+    effective_conductivity = false
+
     initial_velocity = '1e-6 ${v_inlet} 0'
     initial_pressure = 0.0
     initial_temperature = 0.0

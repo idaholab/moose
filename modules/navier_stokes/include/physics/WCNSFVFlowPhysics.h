@@ -66,6 +66,7 @@ public:
 
 protected:
   void initializePhysicsAdditional() override;
+  void actOnAdditionalTasks() override;
 
 private:
   void addNonlinearVariables() override;

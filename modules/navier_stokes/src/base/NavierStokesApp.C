@@ -62,7 +62,17 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("INSAction", "Modules/IncompressibleNavierStokes");
 
   // Deprecated action syntax for NavierStokesFV
-  registerSyntax("NSFVAction", "Modules/NavierStokesFV");
+  registerTask("nsfv_action_deprecation_task", /*is_required=*/false);
+  registerSyntax("NSFVActionDeprecation", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVFlowPhysics", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVFluidHeatTransferPhysics", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVScalarTransportPhysics", "Modules/NavierStokesFV");
+  registerSyntax("WCNSFVTurbulencePhysics", "Modules/NavierStokesFV");
+
+  // Additional tasks to make the Physics work out
+  registerTask("get_turbulence_physics", /*is_required=*/false);
+  addTaskDependency("get_turbulence_physics", "init_physics");
+  addTaskDependency("check_integrity_early_physics", "get_turbulence_physics");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);

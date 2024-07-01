@@ -1,5 +1,6 @@
 [Tests]
-  design = 'FlowComponentNS.md'
+  # The 'FlowComponentNS' was removed and is now replaced by the FileMeshPhysicsComponent
+  design = 'FileMeshPhysicsComponent.md'
   issues = '#23794'
 
   [generate_mesh]
@@ -8,7 +9,7 @@
     exodiff = rectangle.e
     recover = false # No transient, just mesh generation
     cli_args = "--mesh-only rectangle.e"
-    requirement = 'The system shall generate a mesh for the FlowComponentNS tests.'
+    requirement = 'The system shall generate a mesh for a test creating a Navier Stokes flow simulation with components.'
   []
   [pincns]
     type = Exodiff

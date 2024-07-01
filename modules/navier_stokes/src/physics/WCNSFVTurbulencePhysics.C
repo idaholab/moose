@@ -12,7 +12,7 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVScalarTransportPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVTurbulencePhysics);
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_variable");
@@ -35,8 +35,8 @@ WCNSFVTurbulencePhysics::validParams()
       "turbulence_handling",
       turbulence_type,
       "The way turbulent diffusivities are determined in the turbulent regime.");
-  params += NSFVAction::commonTurbulenceParams();
-  params.transferParam<bool>(NSFVAction::validParams(), "mixing_length_two_term_bc_expansion");
+  params += NSFVBase::commonTurbulenceParams();
+  params.transferParam<bool>(NSFVBase::validParams(), "mixing_length_two_term_bc_expansion");
 
   // TODO Added to facilitate transition, remove default once NavierStokesFV action is removed
   params.addParam<AuxVariableName>(

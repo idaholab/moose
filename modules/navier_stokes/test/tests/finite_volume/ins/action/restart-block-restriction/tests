@@ -13,10 +13,12 @@
     type = 'RunException'
     input = ns-restart-transient.i
     requirement = 'The system shall throw an error if the block-restrictions of the external variable and the action are different.'
-    cli_args = "Modules/NavierStokesFV/block='1 2'"
+    cli_args = "Modules/NavierStokesFV/block='1 2' "
+               "Problem/allow_initial_conditions_with_restart=true"
     expect_err = "(The suppled variable \(vel_x\) does not have the same block-restriction as the "
                  "NSFVAction. The restriction of the variable is: \(ANY_BLOCK_ID\) while the "
-                 "restriction for the action is: \(1, 2\)|Physics 'NavierStokesFV' and object 'vel_x' have different block restrictions.)"
+                 "restriction for the action is: \(1, 2\)|Physics 'NavierStokesFV' and object "
+                 "'vel_x' have different block restrictions.)"
     prereq = restricted-data-save
     recover = false
   []

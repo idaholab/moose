@@ -59,19 +59,23 @@ advected_interp_method = 'upwind'
         passive_scalar_advection_interpolation = ${advected_interp_method}
       []
     []
-    [Turbulence]
-      [mixing-length]
-        turbulence_handling = 'mixing-length'
-        coupled_flow_physics = flow
-        scalar_transport_physics = scalars
+  []
+[]
+# This separation is introduced for documentation purposes.
+# Both could be nested under Physics/NavierStokes
+[Physics/NavierStokes]
+  [Turbulence]
+    [mixing-length]
+      turbulence_handling = 'mixing-length'
+      coupled_flow_physics = flow
+      scalar_transport_physics = scalars
 
-        passive_scalar_schmidt_number = 1.0
+      passive_scalar_schmidt_number = 1.0
 
-        von_karman_const = ${von_karman_const}
-        mixing_length_delta = 1e9
-        mixing_length_walls = 'top bottom'
-        mixing_length_aux_execute_on = 'initial'
-      []
+      von_karman_const = ${von_karman_const}
+      mixing_length_delta = 1e9
+      mixing_length_walls = 'top bottom'
+      mixing_length_aux_execute_on = 'initial'
     []
   []
 []

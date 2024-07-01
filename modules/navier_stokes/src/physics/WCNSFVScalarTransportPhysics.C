@@ -10,7 +10,8 @@
 #include "WCNSFVScalarTransportPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
+#include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
@@ -23,7 +24,7 @@ WCNSFVScalarTransportPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible scalar field transport equation(s)");
 
-  params += NSFVAction::commonScalarFieldAdvectionParams();
+  params += NSFVBase::commonScalarFieldAdvectionParams();
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>(
@@ -45,10 +46,10 @@ WCNSFVScalarTransportPhysics::validParams()
   params.addParam<std::vector<MooseFunctorName>>("passive_scalar_source", "Passive scalar sources");
 
   // Spatial finite volume discretization scheme
-  params.transferParam<MooseEnum>(NSFVAction::validParams(),
+  params.transferParam<MooseEnum>(NSFVBase::validParams(),
                                   "passive_scalar_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "passive_scalar_face_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "passive_scalar_two_term_bc_expansion");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "passive_scalar_face_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "passive_scalar_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
   params.addRangeCheckedParam<std::vector<Real>>(

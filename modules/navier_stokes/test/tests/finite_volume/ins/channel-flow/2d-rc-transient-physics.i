@@ -50,24 +50,28 @@ h_fs = 0.01
         momentum_advection_interpolation = 'average'
       []
     []
-    [FluidHeatTransfer]
-      [heat]
-        thermal_conductivity = 'k'
-        specific_heat = 'cp'
+  []
+[]
+# This separation is introduced for documentation purposes.
+# Both Physics could be nested under Physics/NavierStokes
+[Physics/NavierStokes]
+  [FluidHeatTransfer]
+    [heat]
+      thermal_conductivity = 'k'
+      specific_heat = 'cp'
 
-        fluid_temperature_variable = 'T_fluid'
-        initial_temperature = '${T_inlet}'
-        energy_inlet_types = 'heatflux'
-        energy_inlet_functors = '${fparse u_inlet * rho * cp * T_inlet}'
+      fluid_temperature_variable = 'T_fluid'
+      initial_temperature = '${T_inlet}'
+      energy_inlet_types = 'heatflux'
+      energy_inlet_functors = '${fparse u_inlet * rho * cp * T_inlet}'
 
-        energy_wall_types = 'heatflux heatflux'
-        energy_wall_functors = '0 0'
+      energy_wall_types = 'heatflux heatflux'
+      energy_wall_functors = '0 0'
 
-        ambient_convection_alpha = 'h_cv'
-        ambient_temperature = 'T_solid'
+      ambient_convection_alpha = 'h_cv'
+      ambient_temperature = 'T_solid'
 
-        energy_advection_interpolation = 'average'
-      []
+      energy_advection_interpolation = 'average'
     []
   []
 []
