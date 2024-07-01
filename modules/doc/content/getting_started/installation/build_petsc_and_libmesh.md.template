@@ -8,8 +8,9 @@ export MOOSE_JOBS=6 METHODS=opt
 
 !alert! tip
 `MOOSE_JOBS` is a loose influential environment variable that dictates how many cores to use when
-executing many of our scripts. While operating on [!ac](INL) [!ac](HPC) login nodes along side
-everyone else, it is courtesy to limit your CPU Core usage. We prefer folks limit themselves to 6:
+executing many of our scripts. While operating on [!ac](INL) [!ac](HPC) login nodes alongside
+everyone else, it is courtesy to limit your CPU core usage. We prefer that users limit themselves to
+6:
 
 - `export MOOSE_JOBS=6`
 
