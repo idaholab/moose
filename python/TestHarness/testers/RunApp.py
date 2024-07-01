@@ -196,6 +196,14 @@ class RunApp(Tester):
         if options.scaling and specs['scale_refine'] > 0:
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
+        if specs['libtorch']:
+            if options.libtorch_gpu and specs['libtorch_gpu']:
+                cli_args.append('--libtorch-device gpu')
+            else:
+                cli_args.append('--libtorch-device cpu')
+        elif specs['libtorch_gpu']:
+            self.setStatus(self.fail, 'libtorch_gpu=True with libtorch=False')
+
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)

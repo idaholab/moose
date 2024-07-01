@@ -654,7 +654,7 @@ class Tester(MooseObject):
                         'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
                         'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release',
                         'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
-                        'threading', 'libpng', 'libtorch', 'libtorch_gpu']
+                        'threading', 'libpng', 'libtorch']
 
         for check in local_checks:
             test_platforms = set()

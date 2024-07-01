@@ -490,8 +490,6 @@ class TestHarness:
 
         if self.options.enable_recover:
             testers = self.appendRecoverableTests(testers)
-        if self.options.libtorch_gpu:
-            self.addLibtorchGPUCLIParam(testers)
 
         return testers
 
@@ -1044,7 +1042,7 @@ class TestHarness:
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
         parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
-        parser.add_argument('--libtorch-gpu', action='store_true', dest='libtorch_gpu', help='Pass "--libtorch-gpu" to executable')
+        parser.add_argument('--libtorch-gpu', action='store_true', dest='libtorch_gpu', help='Run supported libtorch tests with a GPU')
         parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
         parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
         parser.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations')
