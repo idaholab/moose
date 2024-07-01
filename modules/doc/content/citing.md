@@ -398,3 +398,18 @@ The following paper documents functionalities and demonstration of the MOOSE sto
   url = {https://www.sciencedirect.com/science/article/pii/S0927025617300885},
 }
 ```
+
+### Optimization Module
+
+```
+@article{PRINCE2024101754,
+author = {Zachary M. Prince and Lynn Munday and Dewen Yushu and Max Nezdyur and Murthy Guddati}
+title = {MOOSE Optimization Module: Physics-constrained optimization},
+journal = {SoftwareX},
+volume = {26},
+pages = {101754},
+year = {2024},
+doi = {https://doi.org/10.1016/j.softx.2024.101754},
+url = {https://www.sciencedirect.com/science/article/pii/S2352711024001250},
+}
+```
