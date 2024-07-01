@@ -159,7 +159,7 @@ create the exact same objects in the background. We currently do not expect any 
 notably because `/Modules/NavierStokes` has been changed to create the relevant `Physics` under the hood!
 
 To transition, you will have to split the `/Modules/NavierStokes` parameters into four groups below.
-Your simulation may only feature only one of these groups, in which case you will only need to create a single `Physics`.
+Your simulation may only feature only one of these groups, in which case you will only need to create a single `Physics`:
 
 - mass and momentum (conservation) equations
 - heat transfer / energy (conservation) equation
@@ -184,7 +184,7 @@ and finally the turbulence parameters into this `[Physics/NavierStokes/Turbulenc
 !listing finite_volume/ins/channel-flow/2d-mixing-length-physics.i start=Physics/NavierStokes end=[Executioner]
 
 !alert note
-All `NavierStokes` `Physics` and be nested under the same `[NavierStokes]` sub-block. The separation in the examples into different `Physics` blocks is only for the purpose of simplifying the examples.
+All `NavierStokes` `Physics` may be nested under the same `[NavierStokes]` sub-block. The separation in the examples into different `Physics` blocks is only for the purpose of simplifying the examples.
 
 
 If all goes well, the input will give exactly the same result. Some parameters have been renamed but the old names are currently still supported, even in the new syntax. If it does not go well, you can use the [DumpObjectsProblem.md] with the [!param](/Problem/DumpObjectsProblem/dump_path) parameter set to:
