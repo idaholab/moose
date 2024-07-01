@@ -42,15 +42,6 @@
       detail = 'rectified linear unit (ReLU);'
       cli_args = "Outputs/file_base=relu"
       libtorch = true
-      allow_test_objects = True
-    []
-    [relu_gpu]
-      type = CSVDiff
-      input = 'test_ann.i'
-      csvdiff = 'relu_test_0001.csv'
-      detail = 'rectified linear unit (ReLU) on a graphics processing unit;'
-      cli_args = "Outputs/file_base=relu"
-      libtorch = true
       libtorch_gpu = true
       allow_test_objects = True
     []
