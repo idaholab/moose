@@ -166,4 +166,18 @@
     design = 'Mesh/splitting.md FileMeshGenerator.md'
     requirement = 'The system should be able to load a pre-split mesh and perform additional mesh generation on it.'
   []
+
+  [simple_diffusion_split]
+    type = 'Exodiff'
+    prereq = grid_from_generated
+    input = 'simple_diffusion_split.i'
+    exodiff = 'simple_diffusion_out.e'
+    cli_args = 'Outputs/file_base=simple_diffusion_out'
+    requirement = "The system shall solve a diffusion problem using a mesh loaded as distributed across 4 processes."
+    design = "Mesh/splitting.md FileMeshGenerator.md"
+    min_parallel = 4
+    max_parallel = 4
+    issues = "#27203"
+[../]
+
 []

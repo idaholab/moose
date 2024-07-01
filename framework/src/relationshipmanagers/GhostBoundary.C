@@ -103,7 +103,7 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & /*range_begin
             coupled_elements.insert(std::make_pair(elem, _null_mat));
             goto countBreak;
           }
-      countBreak:
+    countBreak:;
     }
   }
 }
