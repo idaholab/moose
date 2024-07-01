@@ -2888,7 +2888,7 @@ MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
 #endif
   }
 
-  mooseAssert(device_num == "cpu", "Should be cpu");
+  mooseAssert(device_enum == "cpu", "Should be cpu");
   return torch::kCPU;
 }
 #endif
