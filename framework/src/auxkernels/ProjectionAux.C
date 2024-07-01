@@ -43,7 +43,7 @@ ProjectionAux::validParams()
 ProjectionAux::ProjectionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _v(coupledValue("v")),
-    _source_variable(*getVar("v", 0)),
+    _source_variable(*getFieldVar("v", 0)),
     _source_sys(_c_fe_problem.getSystem(coupledName("v")))
 {
   // Output some messages to user

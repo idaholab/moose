@@ -29,7 +29,7 @@ public:
    * We pick one of the following:
    * - If the path just exists, use it
    * - If not, but a path with the new suffix exists instead (i.e.,
-   *   /path/to/xxxx_mesh.cpr was provided but /path/to/xxxx-mesh.cpr
+   *   /path/to/xxxx_mesh.cpa.gz was provided but /path/to/xxxx-mesh.cpa.gz
    *   exists), use that path and provide a param warning via \p object
    * - If not, but it is LATEST and we can find a latest checkpoint,
    *   use the latest checkpoint

@@ -538,6 +538,7 @@ public:
    * Get the OutputWarehouse objects
    */
   OutputWarehouse & getOutputWarehouse();
+  const OutputWarehouse & getOutputWarehouse() const;
 
   /**
    * Get SystemInfo object
