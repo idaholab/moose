@@ -13,5 +13,8 @@
     # the execution slows down so much that the set delays in SlowProblem become
     # small compared to the overall execution overhead and the test fails.
     valgrind = NONE
+
+    # HPC runtime isn't reliable enough
+    hpc = false
   []
 []

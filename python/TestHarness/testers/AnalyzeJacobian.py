@@ -28,7 +28,7 @@ class AnalyzeJacobian(FileTester):
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         # analizejacobian.py outputs files prefixed with the input file name
         return [self.specs['input']]
 
@@ -71,20 +71,35 @@ class AnalyzeJacobian(FileTester):
         return command
 
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
-            out_ok = util.checkOutputForPattern(output, specs['expect_out'])
-            if (out_ok and self.exit_code != 0):
+            out_ok = util.checkOutputForPattern(runner_output, specs['expect_out'])
+            if (out_ok and exit_code != 0):
                 reason = 'OUT FOUND BUT CRASH'
             elif (not out_ok):
                 reason = 'NO EXPECTED OUT'
         if reason == '':
-            if self.exit_code != 0 :
+            if exit_code != 0:
                 reason = 'CRASH'
 
         if reason != '':
             self.setStatus(self.fail, reason)
 
-        return output
+        return ''
+
+    def checkRunnable(self, options):
+        # We cannot rely on an external script running things within HPC
+        if options.hpc:
+            self.addCaveats('hpc unsupported')
+            self.setStatus(self.skip)
+            return False
+
+        # This doesn't pass valgrind arguments
+        if options.valgrind_mode:
+            self.addCaveats('valgrind=false')
+            self.setStatus(self.skip)
+            return False
+
+        return FileTester.checkRunnable(self, options)

@@ -108,8 +108,8 @@ class CSVValidationTester(FileTester):
         # formatting
         self.file_name_len = 40
 
-    def processResults(self, moose_dir, options, output):
-        FileTester.processResults(self, moose_dir, options, output)
+    def processResults(self, moose_dir, options, exit_code, runner_output):
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
 
         if self.isFail() or self.specs['skip_checks']:
             return output
@@ -118,7 +118,6 @@ class CSVValidationTester(FileTester):
         if options.scaling and self.specs['scale_refine']:
             return output
 
-        output = ""
         # Make sure that all of the CSVDiff files are actually available
         for file in self.specs['csvdiff']:
             if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):

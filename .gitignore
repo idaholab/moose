@@ -326,3 +326,9 @@ share/
 /modules/misc/misc.yaml
 /tutorials/tutorial01_app_development/*/babbler.yaml
 /tutorials/darcy_thermo_mech/*/darcy_thermo_mech.yaml
+
+# test harness hpc output
+pbs_*.qsub
+pbs_*.out
+slurm_*.sbatch
+slurm_*.out

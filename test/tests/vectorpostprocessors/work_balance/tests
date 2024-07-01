@@ -13,7 +13,7 @@
       min_parallel = 2
       max_parallel = 2
       mesh_mode = replicated
-
+      hpc = False # different MPI partitioning
       detail = 'on replicated meshes, and'
     []
 
@@ -25,6 +25,7 @@
       min_parallel = 2
       max_parallel = 2
       mesh_mode = distributed
+      hpc = False # different MPI partitioning
 
       detail = 'on distributed meshes.'
     []

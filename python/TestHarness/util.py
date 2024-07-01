@@ -15,9 +15,6 @@ import json
 import yaml
 import sys
 
-TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
-TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
-
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
                            'default'   : '64'
@@ -262,7 +259,7 @@ def formatStatusMessage(job, status, message, options):
 # 2) the color parameter is False.
 def formatResult(job, options, result='', color=True, **kwargs):
     # Support only one instance of a format identifier, but obey the order
-    terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
+    terminal_format = list(OrderedDict.fromkeys(list(options.term_format)))
     status, message, message_color, exit_code, sort_value = job.getJointStatus()
 
     color_opts = {'code' : options.code, 'colored' : options.colored}
@@ -322,12 +319,12 @@ def formatResult(job, options, result='', color=True, **kwargs):
         character_count = resultCharacterCount(formatted_results) + len(f_caveats) + 1
 
         # If caveats are the last items the user wants printed, or -e (extra_info) is
-        # called, allow caveats to consume available character count beyond TERM_COLS.
+        # called, allow caveats to consume available character count beyond options.term_cols.
         # Else, we trim caveats:
         if terminal_format[-1].lower() != 'c' \
            and not options.extra_info \
-           and character_count > TERM_COLS:
-            over_by_amount = character_count - TERM_COLS
+           and character_count > options.term_cols:
+            over_by_amount = character_count - options.term_cols
             f_caveats = '[' + caveats[:len(caveats) - (over_by_amount + 3)] + '...]'
 
         formatCase(caveat_index, (f_caveats, caveat_color), formatted_results)
@@ -337,9 +334,9 @@ def formatResult(job, options, result='', color=True, **kwargs):
         j_dot = None
         # +1 space created later by join
         character_count = resultCharacterCount(formatted_results) + 1
-        if character_count < TERM_COLS:
-            j_dot = ('.'*max(0, (TERM_COLS - character_count)), 'GREY')
-        elif character_count == TERM_COLS:
+        if character_count < options.term_cols:
+            j_dot = ('.'*max(0, (options.term_cols - character_count)), 'GREY')
+        elif character_count == options.term_cols:
             j_dot = ('', 'GREY')
 
         formatCase(justification_index, j_dot, formatted_results)
@@ -872,42 +869,6 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                     # TL;DR; Just pass...
                     pass
 
-# Check if test has any redirected output, and if its ready to be read
-def checkOutputReady(tester, options):
-    checked_files = []
-    for redirected_file in tester.getRedirectedOutputFiles(options):
-        file_path = os.path.join(tester.getTestDir(), redirected_file)
-        if os.access(file_path, os.R_OK):
-            checked_files.append(file_path)
-    return checked_files
-
-# return concatenated output from tests with redirected output
-def getOutputFromFiles(tester, options):
-    file_output = ''
-    output_files = checkOutputReady(tester, options)
-    for file_path in output_files:
-        with open(file_path, 'r+b') as f:
-            file_output += "#"*80 + "\nOutput from " + file_path \
-                           + "\n" + "#"*80 + "\n" + readOutput(f, None, tester)
-    return file_output
-
-# Read stdout and stderr file objects, append error and return the string
-def readOutput(stdout, stderr, tester):
-    output = ''
-    try:
-        if stdout:
-            stdout.seek(0)
-            output += stdout.read().decode('utf-8')
-        if stderr:
-            stderr.seek(0)
-            output += stderr.read().decode('utf-8')
-    except UnicodeDecodeError:
-        tester.setStatus(tester.fail, 'non-unicode characters in output')
-    except:
-        tester.setStatus(tester.fail, 'error while attempting to read output files')
-
-    return output
-
 # Trimming routines for job output
 def trimOutput(job, options):
     output = job.getOutput()
@@ -929,3 +890,14 @@ def trimOutput(job, options):
                                                    "#"*80,
                                                    "#"*80,
                                                    output[-second_part:])
+
+def outputHeader(header, ending=True):
+    """
+    Returns text for output with a visual separator, i.e.:
+    ##############################...
+    <header>
+    ##############################...
+    """
+    begin_sep = '#' * 80
+    end_sep = f'{begin_sep}\n' if ending else ''
+    return f'{begin_sep}\n{header}\n{end_sep}'

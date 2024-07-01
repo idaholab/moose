@@ -35,23 +35,20 @@ class RunException(RunApp):
             self.addCaveats('type=RunException')
             self.setStatus(self.skip)
             return False
+        # We seem to have issues with --redirect-output causing
+        # "Inappropriate ioctl for device (25)" errors, so if this test
+        # requires more procs, we can't run it
+        if options.hpc and int(self.specs['min_parallel'] > 1):
+            self.addCaveats('hpc max_cpus=1')
+            return False
         return RunApp.checkRunnable(self, options)
 
     def prepare(self, options):
-        if self.getProcs(options) > 1:
-            file_paths = []
-            for processor_id in range(self.getProcs(options)):
-                file_paths.append(self.name() + '.processor.{}'.format(processor_id))
-            util.deleteFilesAndFolders(self.getTestDir(), file_paths, False)
-
-    def processResults(self, moose_dir, options, output):
-        # Exceptions are written to stderr, which can be interleaved so we normally redirect these
-        # separate files. Here we must gather those file outputs before processing
         if self.hasRedirectedOutput(options):
-            redirected_output = util.getOutputFromFiles(self, options)
-            output += redirected_output
+            files = self.getRedirectedOutputFiles(options)
+            util.deleteFilesAndFolders(self.getTestDir(), files, False)
 
-        output += self.testFileOutput(moose_dir, options, output)
-        output += self.testExitCodes(moose_dir, options, output)
-
-        return output
+    def getOutputFiles(self, options):
+        if self.hasRedirectedOutput(options):
+            return self.getRedirectedOutputFiles(options)
+        return []
