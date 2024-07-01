@@ -324,11 +324,6 @@ class TestHarness:
             checks['libtorch'] = util.getMooseConfigOption(self.moose_dir, 'libtorch')
             checks['libtorch_version'] = util.getLibtorchVersion(self.moose_dir)
 
-        if (self.options.libtorch_gpu):
-            checks['libtorch_gpu'] = set(['ALL', 'TRUE'])
-        else:
-            checks['libtorch_gpu'] = set(['ALL', 'FALSE'])
-
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
         if (self.options.parallel_mesh == True or self.options.distributed_mesh == True) or \

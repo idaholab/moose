@@ -86,7 +86,7 @@ class Tester(MooseObject):
         params.addParam('fparser_jit',   ['ALL'], "A test that runs only if FParser JIT is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('libtorch_gpu',  ['ALL'], "A test that runs only if GPU support of libtorch is available ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('libtorch_gpu',  False,   "A test that runs only if GPU support of libtorch is available")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
