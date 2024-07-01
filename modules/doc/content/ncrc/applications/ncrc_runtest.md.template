@@ -1,8 +1,7 @@
 ## Running Tests id=runtests
 
-!style! halign=left
+!style halign=left
 With {{ApplicationName}} built, we can now run tests to verify a working binary (and environment).
-!style-end!
 
 - If +Personal Machine+:
 

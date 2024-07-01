@@ -1,17 +1,18 @@
 # Civet-like Environment
 
-!style! halign=left
-Inevitably, PRs will fail during [Civet's](https://civet.inl.gov) [!ac](CI) testing while they
-appear to pass on your own machine. Apptainer containers can help you reproduce the error, in an
-interactive fashion.
-!style-end!
+[!ac](CIVET)
+
+!style halign=left
+Inevitably, PRs will fail [CIVET](https://civet.inl.gov) while they appear to pass on your own
+machine. Apptainer can help you reproduce the error, in an interactive fashion using the same
+container [!ac](CIVET) used when the error occurred.
 
 ## Launch Container
 
-!style! halign=left
+!style halign=left
 First, we need the [!ac](URI) detailing what container the job is failing in. By capturing the first
-few lines from any Civet step that failed (red box), the [!ac](URI) will be listed. As an example:
-!style-end!
+few lines from any [!ac](CIVET) step that failed (red box), the [!ac](URI) will be listed. As an
+example:
 
 ```language=yaml
 //: Running in versioned apptainer container moose-dev
@@ -43,37 +44,41 @@ lengthy prompt)
 
 ## Troubleshoot
 
-!style! halign=left
+!style halign=left
 You are now operating from within the same container that which your PR is failing. By default,
-your home directory should be available. And by extension, your `~/projects` directory containing
-your project.
-!style-end!
+your home directory should be available. And by extension, your `~/cluster_name/projects` directory
+containing your project.
+
+!alert! tip
+See [Apptainer Features](help/faq/apptainer.md#features) below if you are operating from your
+`/scratch` directory.
+!alert-end!
 
 Next, simply put; Clone your application (if you have not). Build it. Run it. Test it. Do whatever
-it is that Civet failed to do.
+it is that [!ac](CIVET) failed to do.
 
 ### Troubleshooting Hints
 
-- Be absolutely certain that your project is clean. It might even be best to do exactly what Civet
-  does: Clone your project accordingly just as the `Fetch and Branch` step. Don't use the one you
-  been developing in.
+- Be absolutely certain that your project is clean. It might even be best to do exactly what
+  [!ac](CIVET) does: Clone your project accordingly just as the `Fetch and Branch` step. Don't use
+  the one you been developing in.
 
-- Re-visit the failing step occurring in Civet, and scrutinize with the utmost care all commands,
-  arguments used, environment variables set, etc. Even going so far as checking the steps that
-  precede the failing step to determine if those results are cause for concern (cloning succeeded,
-  but perhaps a submodule was not).
+- Re-visit the failing step occurring in [!ac](CIVET), and scrutinize with the utmost care all
+  commands, arguments used, environment variables set, etc. Even going so far as checking the steps
+  that precede the failing step to determine if those results are cause for concern (cloning
+  succeeded, but perhaps a submodule was not).
 
-- Perhaps Civet was instructed to treat warnings as errors (`make -Werror`). Or perhaps Civet is
-  building in debug mode (`METHOD=dbg make`), etc.
+- Perhaps [!ac](CIVET) was instructed to treat warnings as errors (`make -Werror`). Or perhaps
+  [!ac](CIVET) is building using a different method (`METHOD=dbg make`), etc.
 
 - Missing files not included in your PR (a missing `git add`).
 
 If you're still unable to reproduce the error, please keep in mind one golden truth:
 +Containers are immutable+. The lack of reproducibility is being caused by *something* that is
-different in your environment compared to Civet's. Things like Network connectivity, shell flavor
-(tsch, zsh, bash), CPU microachitechture (extremely rare), and the like.
+different in your environment compared to [!ac](CIVET)'s. Things like Network connectivity, shell
+flavor (tsch, zsh, bash), CPU microachitechture (exceedingly rare), and the like.
 
-!alert! note title=Many Civet steps +do not+ have network access
+!alert! note title=Many [!ac](CIVET) steps +do not+ have network access
 Beyond the initial cloning of the application, most steps are barred from network access. You
 can mimmic these behaviors if need be. See [Apptainer Features](help/faq/apptainer.md#features)
 below for details.
@@ -81,17 +86,15 @@ below for details.
 
 ## Apptainer Features id=features
 
-!style! halign=left
+!style halign=left
 The following are only a few of the many available features Apptainer has to offer.
-!style-end!
 
-#### Paths and Mounts
+#### Paths and Mounts (e.g. your `/scratch` directory)
 
-!style! halign=left
-You can instruct Apptainer to mount any path you have access to, to be made available inside the
-container. On [!ac](INL) [!ac](HPC) machines, this is most useful if you enjoy operating in your
+!style halign=left
+You can instruct Apptainer to mount any path you have access to, to be made available while inside
+the container. On [!ac](INL) [!ac](HPC) machines, this is most useful if you enjoy operating in your
 `/scratch` directory. You can instruct Apptainer to mount this location by way of the `-B` argument:
-!style-end!
 
 ```bash
 apptainer shell -B /scratch oras://...
@@ -117,11 +120,10 @@ apptainer shell -B /scratch:/somewhere_else:ro,/projects oras://...
 
 #### Inherited Environment Variables
 
-!style! halign=left
+!style halign=left
 If you wish to have some environment variable made available as the container passes control over to
 you, you only need to prefix your variable with the following Apptainer influential variable
 `APPTAINERENV_`, as so:
-!style-end!
 
 ```bash
 [~]> export APPTAINERENV_foo=bar
@@ -154,7 +156,27 @@ There is an all encompasing `$CUSTOM_PROMPT` variable that allows you to pass yo
 <!-- NOTE to editor: sub children elements require less top possitioning (-15 vs -7) -->
 
 !style! style=position:relative;top:-7px;left:5px;font-style:italic;font-size:small;
-(it is not possible to replicate color codes occurring in above prompt, here in documentation)
+(it is not possible to replicate color codes here in documentation, but they are being honored)
 !style-end!
 !alert-end!
 
+#### Helpful Arguments
+
+!style halign=left
+The following illistrates some of the more useful arguments we employ on our [!ac](CI) build
+machines.
+
+`exec||shell` means to use `exec` or `shell` sub-command arguments.
+
+- `apptainer exec oras://... "moose-app -i some_inputfile.i"`
+
+  - Executes `moose-app` with arguments `-i some_inputfile.i` from inside the container, then exits.
+
+- `apptainer exec||shell --containall`
+
+  - Use minimal `/dev` and empty other directories (e.g. `/tmp` and `$HOME`) instead of sharing
+   filesystems from your host. As well as also PID, IPC, and environment.
+
+- `apptainer exec||shell --network none`
+
+  - No network.
