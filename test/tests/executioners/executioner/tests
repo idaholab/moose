@@ -39,7 +39,6 @@
     input = 'steady.i'
     cli_args = "Executioner/automatic_scaling=true Executioner/verbose=true Outputs/exodus=false"
     expect_out = "Automatic scaling factors:\s+u: 0\.175781"
-    petsc_version = '>=3.9.0'
     max_parallel = 4
     requirement = "The system shall print automatic scaling factors if specified."
     issues = '#13795'
@@ -50,7 +49,6 @@
     input = 'steady.i'
     cli_args = "Executioner/automatic_scaling=true Outputs/exodus=false"
     absent_out = "Automatic scaling factors:"
-    petsc_version = '>=3.9.0'
     max_parallel = 4
     requirement = "The system shall not print automatic scaling factors if not specified."
     issues = '#13795'

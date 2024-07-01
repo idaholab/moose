@@ -48,14 +48,22 @@ CommandLine::addArgument(std::string arg)
   auto arg_value = std::string(arg);
 
   // Handle using a "="
-  if (arg_value.find("=") != std::string::npos)
+  if (const auto pos = arg_value.find("="); pos != std::string::npos)
   {
-    std::vector<std::string> arg_split;
+    if (arg_value[0] == '-')
+    {
+      _args.push_back(arg_value.substr(0, pos));
+      _args.push_back(arg_value.substr(pos + 1));
+    }
+    else
+    {
+      std::vector<std::string> arg_split;
 
-    MooseUtils::tokenize(arg_value, arg_split, 1, "=");
+      MooseUtils::tokenize(arg_value, arg_split, 1, "=");
 
-    for (auto & arg_piece : arg_split)
-      _args.push_back(MooseUtils::trim(arg_piece));
+      for (auto & arg_piece : arg_split)
+        _args.push_back(MooseUtils::trim(arg_piece));
+    }
   }
   else
     _args.push_back(arg_value);

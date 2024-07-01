@@ -11,7 +11,7 @@
       cli_args = 'VectorPostprocessors/test/activation_functions=sad'
       expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear\".'
       detail = 'an unsupported activation function;'
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
     [wrong-activation-number]
@@ -20,7 +20,7 @@
       cli_args = "VectorPostprocessors/test/activation_functions='relu sigmoid elu'"
       expect_err = 'The number of activation functions should be either one or the same as the number of hidden layers'
       detail = 'the wrong number of activation functions;'
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
     [wrong-optimizer]
@@ -29,7 +29,7 @@
       cli_args = "VectorPostprocessors/test_trainer/optimizer_type='random'"
       expect_err = 'Invalid option "random" in MooseEnum.'
       detail = 'a non-supported optimizer.'
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
   []
@@ -41,7 +41,7 @@
       csvdiff = 'relu_test_0001.csv'
       detail = 'rectified linear unit (ReLU);'
       cli_args = "Outputs/file_base=relu"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
     [sigmoid]
@@ -51,7 +51,7 @@
       detail = 'sigmoid;'
       cli_args = "VectorPostprocessors/test/activation_functions='sigmoid sigmoid' "
                  "Outputs/file_base=sigmoid"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
     [gelu]
@@ -60,7 +60,7 @@
       csvdiff = 'gelu_test_0001.csv'
       detail = 'Gaussian Error Linear Unit (GELU);'
       cli_args = "VectorPostprocessors/test/activation_functions='gelu gelu' Outputs/file_base=gelu"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
     [elu]
@@ -69,7 +69,7 @@
       csvdiff = 'elu_test_0001.csv'
       detail = 'Exponential Linear Unit (ELU);'
       cli_args = "VectorPostprocessors/test/activation_functions='elu elu' Outputs/file_base=elu"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
     [linear]
@@ -79,7 +79,7 @@
       detail = 'linear;'
       cli_args = "VectorPostprocessors/test/activation_functions='linear linear' "
                  "Outputs/file_base=linear"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
     []
   []
@@ -90,10 +90,10 @@
       input = 'test_ann_trainer.i'
       csvdiff = 'adagrad_test_trainer_0001.csv'
       detail = 'Adaptive Gradient (AdaGrad);'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' 
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad'
                   VectorPostprocessors/test_trainer/num_epochs=40
                   Outputs/file_base=adagrad"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
       rel_err = 2e-4
     []
@@ -103,7 +103,7 @@
       csvdiff = 'adam_test_trainer_0001.csv'
       detail = 'Adam;'
       cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base='adam'"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
       rel_err = 1e-5
     []
@@ -114,7 +114,7 @@
       detail = 'Root Mean Squared Propagation (RMSProp);'
       cli_args = "VectorPostprocessors/test_trainer/optimizer_type='rmsprop' "
                  "Outputs/file_base='rmsprop'"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
       rel_err = 1e-5
     []
@@ -124,7 +124,7 @@
       csvdiff = 'sgd_test_trainer_0001.csv'
       detail = 'Stochastic Gradient Descent (CGD);'
       cli_args = "VectorPostprocessors/test_trainer/optimizer_type='sgd' Outputs/file_base='sgd'"
-      libtorch = true
+      capabilities = 'libtorch'
       allow_test_objects = True
       rel_err = 1e-5
     []
