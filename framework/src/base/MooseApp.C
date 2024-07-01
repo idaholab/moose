@@ -321,7 +321,7 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
-  MooseEnum libtorch_device_type("cpu gpu", "cpu");
+  MooseEnum libtorch_device_type("cpu cuda mps", "cpu");
   params.addCommandLineParam<MooseEnum>("libtorch_device",
                                         "--libtorch-device",
                                         libtorch_device_type,
@@ -2867,23 +2867,28 @@ MooseApp::constructingMeshGenerators() const
 torch::DeviceType
 MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
 {
-  if (device_enum == "gpu")
+  if (device_enum == "cuda")
+  {
+#ifdef __linux__
+    if (!torch::cuda::is_available())
+      mooseError("--libtorch-device=cuda: CUDA is not available");
+    return torch::kCUDA;
+#else
+    mooseError("--libtorch-device=cuda: CUDA is not supported on your platform");
+#endif
+  }
+  else if (device_enum == "mps")
   {
 #ifdef __APPLE__
     if (!torch::mps::is_available())
-      mooseError("MPS is not available for GPU usage! We only support MPS-based GPU libtorch "
-                 "operations on Mac(R) systems!");
+      mooseError("--libtorch-device=mps: MPS is not available");
     return torch::kMPS;
-#elif __linux__
-    if (!torch::cuda::is_available())
-      mooseError("CUDA is not available for GPU usage! We only support CUDA-based GPU libtorch "
-                 "operations on Linux systems!");
-    return torch::kCUDA;
 #else
-    mooseError("We only support GPU-based libtorch on Linux and Mac systems!");
+    mooseError("--libtorch-device=mps: MPS is not supported on your platform");
 #endif
   }
-  else
-    return torch::kCPU;
+
+  mooseAssert(device_num == "cpu", "Should be cpu");
+  return torch::kCPU;
 }
 #endif

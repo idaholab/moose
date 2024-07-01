@@ -50,6 +50,8 @@ class RunApp(Tester):
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
+        params.addParam('libtorch_devices', ['CPU'], "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS'); default ('CPU')")
+
         return params
 
     def __init__(self, name, params):
@@ -70,6 +72,10 @@ class RunApp(Tester):
             # Not compatible with each other due to the return break in runCommand()
             if params['no_additional_cli_args']:
                 raise Exception('The parameters "command_proxy" and "no_additional_cli_args" cannot be supplied together')
+
+        for value in params['libtorch_devices']:
+            if value.lower() not in ['cpu', 'cuda', 'mps']:
+                raise Exception(f'Unknown libtorch_device "{value}')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
@@ -103,6 +109,13 @@ class RunApp(Tester):
         if self.specs.isValid('min_threads') or self.specs.isValid('max_threads'):
             if 'NONE' in options._checks['threading'] and self.getThreads(options) > 1:
                 self.addCaveats('threading_model=None')
+                self.setStatus(self.skip)
+                return False
+
+        if self.specs['libtorch']:
+            devices_lower = [x.lower() for x in self.specs['libtorch_devices']]
+            if options.libtorch_device not in devices_lower:
+                self.addCaveats(f'{options.libtorch_device} not in libtorch_devices')
                 self.setStatus(self.skip)
                 return False
 
@@ -197,12 +210,7 @@ class RunApp(Tester):
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
         if specs['libtorch']:
-            if options.libtorch_gpu and specs['libtorch_gpu']:
-                cli_args.append('--libtorch-device gpu')
-            else:
-                cli_args.append('--libtorch-device cpu')
-        elif specs['libtorch_gpu']:
-            self.setStatus(self.fail, 'libtorch_gpu=True with libtorch=False')
+            cli_args.append(f'--libtorch-device {options.libtorch_device}')
 
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
