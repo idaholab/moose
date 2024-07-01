@@ -152,7 +152,7 @@ if [[ "$kind" == "app" ]]; then
     echo "following steps after adding your git repository remote:"
     echo ""
     echo "    1. Navigate to $dir/doc"
-    echo "    2. Run './moosedocs.py init sqa --app '$dstnamespace' --category $dstnamelow'"
+    echo "    2. Run './moosedocs.py init sqa --app '$dstnamespace' --category '$dstnamelow'"
     echo "    3. Commit the initial SQA changes using the following commands:"
     echo "         git add $dir/doc"
     echo '         git commit -m "Initial SQA changes"'
@@ -181,7 +181,7 @@ if [[ "$kind" == "module" ]]; then
     echo "       a. Add the module to the content listing (alphabetical)"
     echo "    5. Initialize module SQA (reach out to the MOOSE development team with questions)"
     echo "       a. Navigate to moose/modules/$dstnamelow/doc"
-    echo "       b. Run './moosedocs.py init sqa --module '$dstnamespace' --category $dstnamelow'"
+    echo "       b. Run './moosedocs.py init sqa --module '$dstnamespace' --category '$dstnamelow'"
     echo "       c. Add new module to SQA extension categories in modules/doc/config.yml (alphabetical)"
     echo "       d. Add new module to Applications and Requirements sections of modules/doc/sqa_reports.yml (alphabetical)"
     echo "    6. Ensure that no stork files hang around before committing"

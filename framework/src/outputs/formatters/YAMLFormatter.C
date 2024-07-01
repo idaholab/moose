@@ -102,6 +102,12 @@ YAMLFormatter::printParams(const std::string & prefix,
       oss << "'" << group_name << "'";
     oss << "\n";
 
+    oss << indent << "    doc_unit: ";
+    std::string doc_unit = params.getDocUnit(iter.first);
+    if (!doc_unit.empty())
+      oss << "'" << doc_unit << "'";
+    oss << "\n";
+
     if (params.have_parameter<MooseEnum>(name))
       addEnumOptionsAndDocs(oss, params.get<MooseEnum>(name), indent);
     if (params.have_parameter<MultiMooseEnum>(name))
