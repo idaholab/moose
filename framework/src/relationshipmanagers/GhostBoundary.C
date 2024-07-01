@@ -99,9 +99,11 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & /*range_begin
       for (auto side : elem->side_index_range())
         for (auto boundary_id : boundary_ids)
           if ((elem->processor_id() != p) && (binfo.has_boundary_id(elem, side, boundary_id)))
+          {
+            coupled_elements.insert(std::make_pair(elem, _null_mat));
             goto countBreak;
-    countBreak:
-      coupled_elements.insert(std::make_pair(elem, _null_mat));
+          }
+      countBreak:
     }
   }
 }
