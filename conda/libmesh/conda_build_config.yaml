@@ -1,8 +1,19 @@
+mpi:
+  - mpich
+  - openmpi
+
 moose_petsc:
-  - moose-petsc 3.20.3 build_1
+  - moose-petsc 3.20.3 mpich_1
+  - moose-petsc 3.20.3 openmpi_1
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.2.6 build_9
+  - moose-libmesh-vtk 9.3.0 mpich_0
+  - moose-libmesh-vtk 9.3.0 openmpi_0
+
+zip_keys:
+  - mpi
+  - moose_petsc
+  - moose_libmesh_vtk
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]

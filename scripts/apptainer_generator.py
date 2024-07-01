@@ -571,7 +571,7 @@ class ApptainerGenerator:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
                 if os.path.exists(meta_yaml):
                     with open(meta_yaml, 'r') as meta_contents:
-                        _, version, _, _ = Versioner.conda_meta_jinja(meta_contents.read())
+                        _, version, _, _, _, = Versioner.conda_meta_jinja(meta_contents.read())
                         variable_name = 'MOOSE_'
                         variable_name += package.upper().replace('-', '_')
                         variable_name += '_VERSION'
@@ -580,10 +580,16 @@ class ApptainerGenerator:
             package = 'libmesh-vtk'
             meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
             with open(meta_yaml, 'r') as meta_contents:
-                _, _, _, meta = Versioner.conda_meta_jinja(meta_contents.read())
+                _, _, _, _, meta = Versioner.conda_meta_jinja(meta_contents.read())
+
+            # Jinja returns a list of dictionaries, when variants are involved.
+            # Dictionary comprehensions: https://stackoverflow.com/questions/28243504/convert-list-of-dictionaries-into-dict
+            # Thankfully, the value of 'var' below will always be the same no matter the variant
+            kv_pairs = {k:v for element in meta['source'] for k,v in element.items()}
+
             for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
-                jinja_data[jinja_var] = meta['source'][var]
+                jinja_data[jinja_var] = kv_pairs[var]
 
         # Set petsc and libmesh versions
         need_versions = {'petsc': {'package': 'petsc', 'submodule': 'petsc'},

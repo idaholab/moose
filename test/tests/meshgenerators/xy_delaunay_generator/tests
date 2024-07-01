@@ -84,6 +84,8 @@
       exodiff = 'xydelaunay_nested_in.e'
       recover = false
       detail = "allowing deep nesting of triangulations within triangulations"
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [smoothed]
       type = 'Exodiff'
@@ -92,6 +94,8 @@
       exodiff = 'xydelaunay_smoothed_in.e'
       recover = false
       detail = "with optional Laplacian mesh smoothing."
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [area_func]
       type = 'Exodiff'

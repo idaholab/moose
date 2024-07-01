@@ -197,6 +197,8 @@
                  'Outputs/file_base=coupled_electrostatics_tet14'
       abs_zero = 1e-7
       detail = 'TET14, '
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [tri6]
       type = Exodiff

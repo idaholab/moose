@@ -267,3 +267,9 @@ ac6326aa71015a55b71b7d3aa860cf3df5390c1b: #27923
   libmesh: 9fefe49
   moose-dev: f616f32
   wasp: 33b8e6b
+98e168a7999093ca32661ecd004dec30f1548a18: #26839
+  mpi: 872177c
+  petsc: 9817598
+  libmesh: 8a33877
+  moose-dev: b1e4be8
+  wasp: 33b8e6b

@@ -983,7 +983,7 @@ convertStringToInt(const std::string & str, bool throw_on_failure)
   }
 
   // Check to see if it's an integer (and within range of an integer)
-  if (double_val == static_cast<T>(double_val))
+  if (double_val == static_cast<long double>(static_cast<T>(double_val)))
     return use_int ? val : static_cast<T>(double_val);
 
   // Still failure

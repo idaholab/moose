@@ -44,7 +44,7 @@ function env_test()
     printf "Influential Environment Variables\n\n"
     reg_exp='^LD\|^DYLD\|^PATH\|^CFLAGS\|^CPP\|^CC\|^CXX\|^FFLAGS\|^FC\|^F90\|^F95\|^F77\|^CONDA'
     reg_exp+='\|^HDF5\|^MOOSE\|^PETSC\|^LIBMESH\|^WASP\|^APPTAINER\|^MODULES\|^PBS\|^SLURM\|^http'
-    reg_exp+='\|^HTTPS\|^REQUESTS_CA_BUNDLE\|^SSL_CERT_FILE\|^CURL_CA_BUNDLE'
+    reg_exp+='\|^HTTPS\|^REQUESTS_CA_BUNDLE\|^SSL_CERT_FILE\|^CURL_CA_BUNDLE\|^FI_PROVIDER'
     reg_not='CONDA_BACKUP'
     env | sort | grep "${reg_exp}" | grep -v "${reg_not}"
 }
@@ -142,10 +142,10 @@ function conda_test()
         printf "Unable to run Conda tests due to missing Python modules\n\n"
         return 1
     fi
-    if [[ -n "${CONDA_PREFIX}" ]] && [[ -n "${MOOSE_NO_CODESIGN}" ]]; then
+    if [[ -n "${CONDA_EXE}" ]] && [[ -n "${MOOSE_NO_CODESIGN}" ]]; then
         # right to left dependency
         moose_packages=(dev wasp libmesh petsc)
-        conda_list=`conda list | grep 'moose-'`
+        conda_list=`${CONDA_EXE} list | grep 'moose-'`
 
         # iterate over and break on the top-most level we find installed
         for package in ${moose_packages[@]}; do

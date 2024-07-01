@@ -88,7 +88,7 @@ class PreMake:
         Exception that denotes the mismatch of a version or build
         in a conda packages
         """
-        def __init__(self, package, version, required_version, build, required_build, msg=None):
+        def __init__(self, package, version, build, required_version, required_build, msg=None):
             self.package = package
             self.version = version
             self.required_version = required_version
@@ -157,15 +157,14 @@ class PreMake:
         if package:
             if versioner_name is None:
                 versioner_name = package_name
-            version = package['version']
-            versioner_version = self.versioner_meta[versioner_name]['conda']['version']
-            build = package['build_string']
-            # we store the integer in Version, not the full string
-            versioner_build = f"build_{self.versioner_meta[versioner_name]['conda']['build']}"
-            if version != versioner_version or (versioner_build is not None and build != versioner_build):
-                raise self.CondaVersionMismatch(package_name, version, versioner_version,
-                                                build, versioner_build)
-
+            package_tuple = (package['version'], package['build_number'])
+            version_tuple = (self.versioner_meta[versioner_name]['conda']['version'],
+                             self.versioner_meta[versioner_name]['conda']['build'])
+            if package_tuple != version_tuple:
+                raise self.CondaVersionMismatch(package_name,
+                                                *package_tuple,
+                                                *version_tuple,
+                                                version_tuple[1])
 
     def _check(self):
         """
@@ -176,7 +175,7 @@ class PreMake:
             self._checkCondaPackage('moose-dev')
             self._checkCondaPackage('moose-libmesh', 'libmesh')
             self._checkCondaPackage('moose-petsc', 'petsc')
-            self._checkCondaPackage('moose-mpich', 'mpich')
+            self._checkCondaPackage('moose-mpi', 'mpi')
             self._checkCondaPackage('moose-wasp', 'wasp')
 
 if __name__ == '__main__':

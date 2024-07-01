@@ -77,7 +77,7 @@ a more serious networking issue which may indicate your inability to build MOOSE
 Possible solutions:
 
 \tYou should contact your network support team and inform them of this issue.
-\tDisable any VPN software for the time being, if available.
+\tDisable any VPN software for the time being, if possible.
 \tYou can attempt to disable SSL Verification in several ways:
 
 \t\texport GIT_SSL_NO_VERIFY=true
@@ -203,12 +203,6 @@ function build_application()
 {
     print_sep
     clone_moose
-    # Do the dumb necessary things we do in 'moose-mpich' package
-    # TODO: remove this when 'moose-mpi' becomes available
-    TEMP_CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
-    ACTIVATION_CXXFLAGS=${TEMP_CXXFLAGS%%-fdebug-prefix-map*}-std=c++17
-    export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77 C_INCLUDE_PATH=${CONDA_PREFIX}/include MOOSE_NO_CODESIGN=true MPIHOME=${CONDA_PREFIX} CXXFLAGS="$ACTIVATION_CXXFLAGS" HDF5_DIR=${CONDA_PREFIX} FI_PROVIDER=tcp
-
     local LIBS=(petsc libmesh wasp)
     for lib in ${LIBS[@]}; do
         build_library ${lib}
