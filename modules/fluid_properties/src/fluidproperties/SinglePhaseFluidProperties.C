@@ -13,7 +13,8 @@ InputParameters
 SinglePhaseFluidProperties::validParams()
 {
   InputParameters params = FluidProperties::validParams();
-  params.set<std::string>("fp_type") = "single-phase-fp";
+  params.addCustomTypeParam<std::string>(
+      "fp_type", "single-phase-fp", "FPType", "Type of the fluid property object");
 
   // Variable set conversion parameters
   params.addRangeCheckedParam<Real>(
@@ -31,6 +32,7 @@ SinglePhaseFluidProperties::validParams()
   params.addParamNamesToGroup("tolerance T_initial_guess p_initial_guess",
                               "Variable set conversions Newton solve");
 
+  params.addParamNamesToGroup("fp_type", "Advanced");
   return params;
 }
 
@@ -345,7 +347,8 @@ SinglePhaseFluidProperties::gamma_from_p_T(
   gamma = gamma_from_p_T(p, T);
 }
 
-Real SinglePhaseFluidProperties::vaporPressure(Real) const
+Real
+SinglePhaseFluidProperties::vaporPressure(Real) const
 {
   mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
@@ -380,7 +383,8 @@ SinglePhaseFluidProperties::vaporPressure(const ADReal & T) const
   return result;
 }
 
-Real SinglePhaseFluidProperties::vaporTemperature(Real) const
+Real
+SinglePhaseFluidProperties::vaporTemperature(Real) const
 {
   mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
@@ -454,7 +458,8 @@ SinglePhaseFluidProperties::rho_mu_from_p_T(const ADReal & p,
   mu = mu_from_p_T(p, T);
 }
 
-Real SinglePhaseFluidProperties::e_spndl_from_v(Real) const
+Real
+SinglePhaseFluidProperties::e_spndl_from_v(Real) const
 {
   mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
