@@ -8,12 +8,16 @@ timestep drops below a relative tolerance, the solution is considered converged.
 
 Parameters for setting absolute convergence, relative convergence etc. are usually set in the `Executioner` block. However, now they can also prescribed in the `Convergence` block.
 
-We shall provide a few guidelines for setting convergence parameters.
+We shall provide a few guidelines for setting convergence parameters. In the following presume we have a partial differential equation, given as 
+$\mathcal{P}(\mathbf u)=f$, and subsequent residual $\mathcal R(\mathbf u)=\mathcal P(\mathbf u)-f=0$. Convergence with respect to a tolerance $\tau$, implies $|\mathcal R (\mathbf u)|<\tau$, while divergence is encountered when the residual cannot decrease below the value of $\tau$.
+
+If we consider an iterative process to determine the solution $\mathbf u$, we have a set of intermediary solutions $\mathbf u_i$ required to verify the equation $\mathcal R(\mathbf u)\approx 0$, but do not meet the required tolerance $\tau$.
 
 #### 1. Absolute and relative tolerances
 
-- +Absolute Tolerance (`abs_tol`)+: This is a parameter that determines the threshold at which the residual norm of the solution is deemed small enough in absolute terms.
-- +Relative Tolerance (`rel_tol`)+: This parameter sets the threshold for the residual norm in relation to the norm of the right-hand side of the equation.
+- +Absolute Tolerance (`abs_tol`)+: This is a parameter that determines the threshold at which the residual norm of the solution is deemed small enough in absolute terms. For a system of equation this translates into $|\mathbf u_{i+1}-\mathbf u_i|<\tau$.
+ 
+- +Relative Tolerance (`rel_tol`)+: This parameter sets the threshold for the residual norm in relation to the norm of the right-hand side of the equation. For a system of equation this translates into $|\mathbf u_{i+1}-\mathbf u_i|/|\mathbf u_{i+1}|<\tau$.
 
 
 Considering that nonlinear systems are ultimately solved via linearization the user should append `l_` for linear systems, or `nl_` for nonlinear ones, on a per case bases.
