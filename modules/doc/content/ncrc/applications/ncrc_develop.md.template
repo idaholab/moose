@@ -15,10 +15,9 @@ effectively performs an update each time.
 
 ## Environment
 
-!style! halign=left
+!style halign=left
 If you plan on using your personal machine we recommend using our Conda packages. If you are instead
 operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of modules.
-!style-end!
 
 - If +Personal Machine+: Follow the [Conda Installation](ncrc/applications/ncrc_install_conda.md)
   instructions and then install our MOOSE Conda packages:
@@ -44,18 +43,16 @@ clusters, this flexibility potentially comes at the cost of the optimizations de
 
 ## Cloning {{ApplicationName}} id=cloning
 
-!style! halign=left
+!style halign=left
 Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
 [NCRC/{{ApplicationName}}](ncrc/applications/ncrc_level4_{{ApplicationLower}}.md).
-!style-end!
 
 ## Building {{ApplicationName}} id=build
 
-!style! halign=left
+!style halign=left
 Building {{ApplicationName}} involves applying upstream changes, updating your submodules and/or
 Conda packages, and finally running make. Before we begin, +remember these two important
 warnings+:
-!style-end!
 
 !alert warning title=If you updated Conda
 `Then you should also perform a submodule update`.
@@ -70,10 +67,9 @@ to stay on top of any Conda updates (if Personal Machine), or rebuilding PETSc a
 
 ### Applying Upstream Changes
 
-!style! halign=left
+!style halign=left
 Changes being made by other developers become available to you via the upstream remote. This section
 will show you how to apply these changes to your local {{ApplicationName}} repository.
-!style-end!
 
 First, perform a fetch operation:
 
@@ -106,10 +102,9 @@ With {{ApplicationName}} updated, we can update its submodules.
 
 ### Updating Submodules and Conda Packages
 
-!style! halign=left
+!style halign=left
 Most MOOSE-based applications require additional support libraries available in the form of git
 submodules. To update submodules, perform the following:
-!style-end!
 
 ```bash
 cd ~/projects/{{binary}}
@@ -154,9 +149,8 @@ either a Conda update, or rebuild PETSc/libMesh:
 
 ### Running Make
 
-!style! halign=left
+!style halign=left
 With everything up to date, we can now build the application:
-!style-end!
 
 ```bash
 cd ~/projects/{{binary}}
