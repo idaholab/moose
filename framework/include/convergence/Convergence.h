@@ -29,9 +29,7 @@ public:
 
   static InputParameters commonParams();
 
-  virtual void initialSetup(){};
-
-  virtual void timestepSetup(){};
+  virtual void initialSetup() override{};
 
   virtual MooseConvergenceStatus checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
 
