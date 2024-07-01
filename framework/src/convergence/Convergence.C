@@ -17,10 +17,6 @@ Convergence::validParams()
   params += PerfGraphInterface::validParams();
 
   params.registerBase("Convergence");
-  params.addClassDescription("Base class for convergence criteria. This class is responsible for "
-                             "checking the convergence of the nonlinear solution. It is also "
-                             "responsible for interacting with the solver at every iteration "
-                             "and generate a performance graph.");
 
   return params;
 }
