@@ -79,9 +79,7 @@ CentralDifference::computeTimeDerivatives()
 
   // Don't update time derivate if using reference configuration
   if (_sys.name() == "nl0" && _is_direct)
-  {
     return;
-  }
 
   // Declaring u_dot and u_dotdot
   auto & u_dot = *_sys.solutionUDot();

@@ -123,22 +123,18 @@ ExplicitTimeIntegrator::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
         auto & accel = *_sys.solutionUDotDot();
         accel.pointwise_mult(_mass_matrix_diag, _explicit_residual);
 
-        auto & vel = *_sys.solutionUDot();
-        vel.zero();
-
-        auto accel_scaled = accel.clone();
-
         // Scaling the acceleration
-        accel_scaled->scale((_dt + _dt_old) / 2);
+        auto accel_scaled = accel.clone();
+        = accel_scaled->scale((_dt + _dt_old) / 2);
 
         // Adding old vel to new vel
-        auto old_vel = _sys.solutionUDotOld();
-        vel += *old_vel;
+        auto & vel = *_sys.solutionUDot();
+        const auto & old_vel = _sys.solutionUDotOld();
+        vel = *old_vel;
         vel += *accel_scaled;
 
-        auto vel_scaled = vel.clone();
-
         // Scale velocity by dt
+        auto vel_scaled = vel.clone();
         vel_scaled->scale(_dt);
 
         _solution_update = *vel_scaled;
