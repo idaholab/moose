@@ -163,20 +163,13 @@ There is an all encompasing `$CUSTOM_PROMPT` variable that allows you to pass yo
 #### Helpful Arguments
 
 !style halign=left
-The following illistrates some of the more useful arguments we employ on our [!ac](CI) build
-machines.
+The following highlights some of the more influential arguments [!ac](CIVET) employs during your PR.
 
-`exec||shell` means to use `exec` or `shell` sub-command arguments.
 
-- `apptainer exec oras://... "moose-app -i some_inputfile.i"`
+`[exec,shell]` means to use `exec` or `shell` sub-command arguments.
 
-  - Executes `moose-app` with arguments `-i some_inputfile.i` from inside the container, then exits.
-
-- `apptainer exec||shell --containall`
-
-  - Use minimal `/dev` and empty other directories (e.g. `/tmp` and `$HOME`) instead of sharing
-   filesystems from your host. As well as also PID, IPC, and environment.
-
-- `apptainer exec||shell --network none`
-
-  - No network.
+| Argument | Description |
+| :- | :- |
+| `exec oras://... echo hello world` | Executes `echo hello world` in side the container, then exits |
+| `[exec,shell] --containall` | Minimalistic container (empty `/dev`, `/tmp`, `$HOME`) |
+| `[exec,shell] --network none` | No network |
