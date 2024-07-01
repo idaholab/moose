@@ -1005,7 +1005,7 @@ INSAction::addINSNoBCBC()
 {
   if (_use_ad)
   {
-    const std::string kernel_type = "INSADMomentumNoBCBC";
+    const std::string kernel_type = "INSADMomentumImplicitStressBC";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = NS::velocity;
     if (_blocks.size() > 0)

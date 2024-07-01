@@ -18,15 +18,16 @@
  * This class implements the "No BC" boundary condition based on the
  * "Laplace" form of the viscous stress tensor.
  */
-class INSADMomentumNoBCBC : public ADVectorIntegratedBC
+class INSADMomentumImplicitStressBC : public ADVectorIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  INSADMomentumNoBCBC(const InputParameters & parameters);
+  INSADMomentumImplicitStressBC(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual ADReal viscousStress();
+  virtual ADReal computeQpResidual() override;
 
   const ADVariableValue & _p;
   const bool _integrate_p_by_parts;
