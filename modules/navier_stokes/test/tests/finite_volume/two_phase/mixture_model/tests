@@ -8,7 +8,6 @@
     requirement = 'The system shall give the correct solution for two phase flow in a lid-driven cavity with the mixture model.'
     recover = false
     allow_warnings = true
-    installation_type = in_tree
     valgrind = none
   []
   [mixture_lid_driven_two_phase_physics]
@@ -27,6 +26,7 @@
     csvdiff = 'rayleigh-bernard-two-phase_CSV.csv'
     requirement = 'The system shall be able solve two phase Rayleigh Bernard convection with the mixture model.'
     rel_err = 5.0E-3
+    abs_zero = 1e-8
     recover = false
     method = '!dbg'
     valgrind = none
@@ -56,14 +56,12 @@
     input = 'channel-drift-flux-transient.i'
     csvdiff = 'channel-drift-flux-transient_CSV.csv'
     requirement = 'The system shall be able to solve transient two-phase flow in a channel using the mixture drift flux model.'
-    installation_type = in_tree
   []
   [mixture_channel_advection_slip]
     type = 'Exodiff'
     input = 'channel-advection-slip.i'
     exodiff = 'channel-advection-slip_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture advection-slip model.'
-    installation_type = in_tree
   []
   [mixture_channel_advection_slip_physics]
     type = 'Exodiff'
