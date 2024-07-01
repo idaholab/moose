@@ -22,9 +22,12 @@ LinearFluidProperties::validParams()
   params.addRequiredParam<Real>("cv", "Specific heat");
   params.addRequiredParam<Real>("e_0", "Reference internal energy");
   params.addRequiredParam<Real>("T_0", "Reference internal energy");
-  params.addParam<Real>("mu", 0, "Dynamic viscosity, Pa.s");
-  params.addParam<Real>("k", 0, "Thermal conductivity, W/(m-K)");
-  params.addParam<Real>("Pr", 0, "Prandtl Number, [-]");
+  params.addRequiredParam<Real>("mu", "Dynamic viscosity, Pa.s");
+  params.addRequiredParam<Real>("k", "Thermal conductivity, W/(m-K)");
+  params.addDeprecatedParam<Real>(
+      "Pr",
+      "Prandtl Number, [-]",
+      "This parameter is no longer required. It is computed from the other parameters.");
   params.addClassDescription(
       "Fluid properties for a fluid with density linearly dependent on temperature and pressure");
   return params;
@@ -40,9 +43,16 @@ LinearFluidProperties::LinearFluidProperties(const InputParameters & parameters)
     _e_0(getParam<Real>("e_0")),
     _T_0(getParam<Real>("T_0")),
     _mu(getParam<Real>("mu")),
-    _k(getParam<Real>("k")),
-    _Pr(getParam<Real>("Pr"))
+    _k(getParam<Real>("k"))
 {
+  if (isParamValid("Pr"))
+    _Pr = getParam<Real>("Pr");
+  else
+    _Pr = _cv / _k * _mu;
+
+  // Sanity checks
+  if (!MooseUtils::absoluteFuzzyEqual(_Pr, _cv / _k * _mu))
+    paramError("Pr", "Prandtl number should be equal to cv * mu / k");
 }
 
 Real
@@ -74,7 +84,11 @@ LinearFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real &
   dT_de = 1 / _cv;
 }
 
-Real LinearFluidProperties::c_from_v_e(Real, Real) const { return std::sqrt(_a2); }
+Real
+LinearFluidProperties::c_from_v_e(Real, Real) const
+{
+  return std::sqrt(_a2);
+}
 
 void
 LinearFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
@@ -84,7 +98,11 @@ LinearFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real &
   dc_de = 0;
 }
 
-Real LinearFluidProperties::cp_from_v_e(Real, Real) const { return _cv; }
+Real
+LinearFluidProperties::cp_from_v_e(Real, Real) const
+{
+  return _cv;
+}
 
 void
 LinearFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
@@ -94,7 +112,11 @@ LinearFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Rea
   dcp_dv = 0;
 }
 
-Real LinearFluidProperties::cv_from_v_e(Real, Real) const { return _cv; }
+Real
+LinearFluidProperties::cv_from_v_e(Real, Real) const
+{
+  return _cv;
+}
 
 void
 LinearFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
@@ -104,11 +126,20 @@ LinearFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Rea
   dcv_dv = 0;
 }
 
-Real LinearFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
+Real
+LinearFluidProperties::mu_from_v_e(Real, Real) const
+{
+  return _mu;
+}
 
-Real LinearFluidProperties::k_from_v_e(Real, Real) const { return _k; }
+Real
+LinearFluidProperties::k_from_v_e(Real, Real) const
+{
+  return _k;
+}
 
-Real LinearFluidProperties::s_from_v_e(Real, Real) const
+Real
+LinearFluidProperties::s_from_v_e(Real, Real) const
 {
   mooseError(name(), ": s_from_v_e() not implemented.");
 }
@@ -119,7 +150,8 @@ LinearFluidProperties::s_from_v_e(Real, Real, Real &, Real &, Real &) const
   mooseError(name(), ": s_from_v_e() not implemented.");
 }
 
-Real LinearFluidProperties::s_from_p_T(Real, Real) const
+Real
+LinearFluidProperties::s_from_p_T(Real, Real) const
 {
   mooseError(name(), ": s_from_p_T() not implemented.");
 }
@@ -130,7 +162,8 @@ LinearFluidProperties::s_from_p_T(Real, Real, Real &, Real &, Real &) const
   mooseError(name(), ": s_from_p_T() not implemented.");
 }
 
-Real LinearFluidProperties::s_from_h_p(Real, Real) const
+Real
+LinearFluidProperties::s_from_h_p(Real, Real) const
 {
   mooseError(name(), ": s(h,p) is not implemented");
 }
@@ -141,7 +174,8 @@ LinearFluidProperties::s_from_h_p(Real, Real, Real &, Real &, Real &) const
   mooseError(name(), ": s(h,p) is not implemented");
 }
 
-Real LinearFluidProperties::rho_from_p_s(Real, Real) const
+Real
+LinearFluidProperties::rho_from_p_s(Real, Real) const
 {
   mooseError(name(), ": rho_from_p_s() not implemented.");
 }
@@ -170,7 +204,11 @@ LinearFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real &
           denum / denum;
 }
 
-Real LinearFluidProperties::beta_from_p_T(Real, Real) const { return _beta; }
+Real
+LinearFluidProperties::beta_from_p_T(Real, Real) const
+{
+  return _beta;
+}
 
 void
 LinearFluidProperties::beta_from_p_T(
@@ -250,7 +288,8 @@ LinearFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real &
   dh_dT = _cv - p / rho / rho * drho_dT;
 }
 
-Real LinearFluidProperties::p_from_h_s(Real, Real) const
+Real
+LinearFluidProperties::p_from_h_s(Real, Real) const
 {
   mooseError(name(), ": p_from_h_s() not implemented");
 }
@@ -261,7 +300,8 @@ LinearFluidProperties::p_from_h_s(Real, Real, Real &, Real &, Real &) const
   mooseError(name(), ": p_from_h_s() not implemented");
 }
 
-Real LinearFluidProperties::g_from_v_e(Real, Real) const
+Real
+LinearFluidProperties::g_from_v_e(Real, Real) const
 {
   mooseError(name(), ": g_from_v_e(v, e) not implemented");
 }
@@ -272,4 +312,8 @@ LinearFluidProperties::molarMass() const
   mooseError(name(), ": molarMass() not implemented");
 }
 
-Real LinearFluidProperties::Pr(Real, Real) const { return _Pr; }
+Real
+LinearFluidProperties::Pr(Real, Real) const
+{
+  return _Pr;
+}

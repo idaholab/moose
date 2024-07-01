@@ -68,16 +68,16 @@ public:
 #pragma GCC diagnostic pop
 
 protected:
-  Real _rho_0;
-  Real _p_0;
-  Real _a2;
-  Real _beta;
-  Real _cv;
-  Real _e_0;
-  Real _T_0;
+  const Real _rho_0;
+  const Real _p_0;
+  const Real _a2;
+  const Real _beta;
+  const Real _cv;
+  const Real _e_0;
+  const Real _T_0;
 
-  Real _mu;
-  Real _k;
+  const Real _mu;
+  const Real _k;
   Real _Pr;
 
 public:

@@ -114,5 +114,5 @@ TEST_F(LinearFluidPropertiesTest, test)
 
   // Pr
   const Real Pr = _fp->Pr(rho, T);
-  REL_TEST(Pr, 0.76, REL_TOL_SAVED_VALUE);
+  REL_TEST(Pr, (1000 * 0.3) / 0.89, REL_TOL_SAVED_VALUE);
 }
