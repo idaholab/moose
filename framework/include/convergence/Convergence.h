@@ -18,7 +18,7 @@ class Convergence : public MooseObject, public SetupInterface, public PerfGraphI
 public:
   static InputParameters validParams();
 
-  enum class MooseAlgebraicConvergence
+  enum class MooseConvergenceStatus
   {
     ITERATING = 0,
     CONVERGED = 2,
@@ -33,13 +33,12 @@ public:
 
   virtual void timestepSetup(){};
 
-  virtual MooseAlgebraicConvergence
-  checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
+  virtual MooseConvergenceStatus checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
 
 protected:
   PerfID _perf_nonlinear;
   /**
-   * Performs setup necessary for each call to checkAlgebraicConvergence
+   * Performs setup necessary for each call to checkConvergence
    */
   virtual void nonlinearConvergenceSetup(){};
 };

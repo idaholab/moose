@@ -54,22 +54,21 @@ AugmentedLagrangianContactConvergence<T>::AugmentedLagrangianContactConvergence(
 }
 
 template <class T>
-Convergence::MooseAlgebraicConvergence
-AugmentedLagrangianContactConvergence<T>::checkAlgebraicConvergence(int it,
-                                                                    Real xnorm,
-                                                                    Real snorm,
-                                                                    Real fnorm)
+Convergence::MooseConvergenceStatus
+AugmentedLagrangianContactConvergence<T>::checkConvergence(int it,
+                                                           Real xnorm,
+                                                           Real snorm,
+                                                           Real fnorm)
 {
 
-  Convergence::MooseAlgebraicConvergence reason =
-      T::checkAlgebraicConvergence(it, xnorm, snorm, fnorm);
+  Convergence::MooseConvergenceStatus reason = T::checkConvergence(it, xnorm, snorm, fnorm);
 
   auto aug_contact = dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem);
   _lagrangian_iteration_number = aug_contact->getLagrangianIterationNumber();
 
   bool repeat_augmented_lagrange_step = false;
 
-  if (reason == Convergence::MooseAlgebraicConvergence::CONVERGED)
+  if (reason == Convergence::MooseConvergenceStatus::CONVERGED)
   {
     if (_lagrangian_iteration_number < _maximum_number_lagrangian_iterations)
     {
@@ -159,7 +158,7 @@ AugmentedLagrangianContactConvergence<T>::checkAlgebraicConvergence(int it,
           pmuo->augmentedLagrangianSetup();
 
         // force it to keep iterating
-        reason = Convergence::MooseAlgebraicConvergence::ITERATING;
+        reason = Convergence::MooseConvergenceStatus::ITERATING;
         Moose::out << "Augmented Lagrangian Multiplier needs updating.";
       }
       else
@@ -169,7 +168,7 @@ AugmentedLagrangianContactConvergence<T>::checkAlgebraicConvergence(int it,
     {
       // maxed out
       Moose::out << "Maximum Augmented Lagrangian contact iterations have been reached.";
-      reason = Convergence::MooseAlgebraicConvergence::DIVERGED;
+      reason = Convergence::MooseConvergenceStatus::DIVERGED;
     }
   }
 

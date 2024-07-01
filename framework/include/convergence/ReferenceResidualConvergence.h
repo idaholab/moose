@@ -60,8 +60,8 @@ protected:
                                         const Real abstol,
                                         std::ostringstream & oss) override;
 
-  // Convergence::MooseAlgebraicConvergence
-  // checkAlgebraicConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
+  // Convergence::MooseConvergenceStatus
+  // checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
 
   /**
    * Check the convergence by comparing the norm of each variable separately against

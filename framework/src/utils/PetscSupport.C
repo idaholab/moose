@@ -299,8 +299,8 @@ petscAlgebraicTest(SNES snes,
   std::string msg;
 
   auto & convergence = problem.getConvergence(problem.getActiveConvergenceName());
-  Convergence::MooseAlgebraicConvergence mreason =
-      convergence.checkAlgebraicConvergence(it, xnorm, snorm, fnorm);
+  Convergence::MooseConvergenceStatus mreason =
+      convergence.checkConvergence(it, xnorm, snorm, fnorm);
 
   // if (msg.length() > 0)
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
@@ -312,15 +312,15 @@ petscAlgebraicTest(SNES snes,
 
   switch (mreason)
   {
-    case Convergence::MooseAlgebraicConvergence::ITERATING:
+    case Convergence::MooseConvergenceStatus::ITERATING:
       *reason = SNES_CONVERGED_ITERATING;
       break;
 
-    case Convergence::MooseAlgebraicConvergence::CONVERGED:
+    case Convergence::MooseConvergenceStatus::CONVERGED:
       *reason = SNES_CONVERGED_FNORM_ABS;
       break;
 
-    case Convergence::MooseAlgebraicConvergence::DIVERGED:
+    case Convergence::MooseConvergenceStatus::DIVERGED:
       *reason = SNES_DIVERGED_DTOL;
       break;
   }
