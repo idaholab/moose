@@ -20,7 +20,7 @@ If we consider an iterative process to determine the solution $\mathbf u$, we ha
 - +Relative Tolerance (`rel_tol`)+: This parameter sets the threshold for the residual norm in relation to the norm of the right-hand side of the equation. For a system of equation this translates into $|\mathbf u_{i+1}-\mathbf u_i|/|\mathbf u_{i+1}|<\tau$.
 
 
-Considering that nonlinear systems are ultimately solved via linearization the user should append `l_` for linear systems, or `nl_` for nonlinear ones, on a per case bases.
+Considering that nonlinear systems are ultimately solved via linearization the user should append `l_` for linear systems, or `nl_` for nonlinear ones, on a per case base.
 
 #### 2. Choosing appropiate `abs_tol` and `rel_tol`
 
