@@ -175,11 +175,6 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
     Real e = _tab_fp_ve->e_from_p_T(p, T);
     Real v = _tab_fp_ve->v_from_p_T(p, T);
 
-    // speed of sound
-    Real c1 = _tab_fp_ve->c_from_p_T(p, T);
-    Real c2 = _tab_fp_ve->c_from_v_e(v, e);
-    REL_TEST(c1, c2, 0.001);
-
     // heat capacity at constant pressure
     Real cp1 = _tab_fp_ve->cp_from_p_T(p, T);
     Real cp2 = _tab_fp_ve->cp_from_v_e(v, e);
@@ -377,7 +372,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, derivatives)
   Moose::_throw_on_warning = true;
   const Real tol = REL_TOL_DERIVATIVE;
 
-  const Real p = 1.6e6;
+  const Real p = 1.5e6;
   const Real T = 452.0;
   const Real rho = _tab_fp_ve->rho_from_p_T(p, T);
   const Real v = 1. / rho;

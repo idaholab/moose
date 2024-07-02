@@ -261,7 +261,6 @@
   []
 []
 
-
 [BCs]
   [roller_tmax]
     type = DirichletBC
@@ -308,7 +307,7 @@
     type = DirichletBC
     boundary = injection_area
     variable = T
-    value = 290  # injection temperature
+    value = 290 # injection temperature
     use_displaced_mesh = false
   []
   [constant_co2_injection]
@@ -356,7 +355,9 @@
     temperature_min = 275
     pressure_max = 1E8
     interpolated_properties = 'density viscosity enthalpy internal_energy'
-    fluid_property_file = water97_tabulated_11.csv
+    fluid_property_output_file = water97_tabulated_11.csv
+    # Comment out the fp parameter and uncomment below to use the newly generated tabulation
+    # fluid_property_file = water97_tabulated_11.csv
   []
   [true_co2]
     type = CO2FluidProperties
@@ -367,7 +368,9 @@
     temperature_min = 275
     pressure_max = 1E8
     interpolated_properties = 'density viscosity enthalpy internal_energy'
-    fluid_property_file = co2_tabulated_11.csv
+    fluid_property_output_file = co2_tabulated_11.csv
+    # Comment out the fp parameter and uncomment below to use the newly generated tabulation
+    # fluid_property_file = co2_tabulated_11.csv
   []
 []
 

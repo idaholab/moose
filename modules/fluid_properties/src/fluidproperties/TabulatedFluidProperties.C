@@ -18,6 +18,7 @@
 #include <fstream>
 #include <ctime>
 #include <cmath>
+#include <regex>
 
 InputParameters
 TabulatedFluidProperties::validParams()
@@ -27,12 +28,11 @@ TabulatedFluidProperties::validParams()
       "Single phase fluid properties computed using bi-dimensional interpolation of tabulated "
       "values.");
 
-  params.addParam<FileName>(
-      "fluid_property_file",
-      "fluid_properties.csv",
-      "Name of the csv file containing the tabulated fluid property data. If "
-      "no file exists and save_file = true, then one will be written to "
-      "fluid_properties.csv using the temperature and pressure range specified.");
+  params.addParam<FileName>("fluid_property_file",
+                            "Name of the csv file containing the tabulated fluid property data.");
+  params.addParam<FileName>("fluid_property_output_file",
+                            "Name of the CSV file which can be output with the tabulation. This "
+                            "file can then be read as a 'fluid_property_file'");
   params.addRangeCheckedParam<Real>(
       "temperature_min", 300, "temperature_min > 0", "Minimum temperature for tabulated data.");
   params.addParam<Real>("temperature_max", 500, "Maximum temperature for tabulated data.");
@@ -49,7 +49,7 @@ TabulatedFluidProperties::validParams()
   params.addParam<MultiMooseEnum>("interpolated_properties",
                                   properties,
                                   "Properties to interpolate if no data file is provided");
-  params.addParam<bool>("save_file", true, "Whether to save the csv fluid properties file");
+  params.addParam<bool>("save_file", "Whether to save the csv fluid properties file");
   params.addParam<bool>("construct_pT_from_ve",
                         false,
                         "If the lookup table (p, T) as functions of (v, e) should be constructed.");
@@ -76,6 +76,17 @@ TabulatedFluidProperties::validParams()
       false,
       "Option to use a base-10 logarithmically-spaced grid for specific volume instead of a "
       "linearly-spaced grid.");
+  params.addParam<bool>(
+      "use_log_grid_e",
+      false,
+      "Option to use a base-10 logarithmically-spaced grid for specific internal energy instead "
+      "of a linearly-spaced grid.");
+
+  // This is generally a bad idea. However, several properties have not been tabulated so several
+  // tests are relying on the original fp object to provide the value (for example for the
+  // vaporPressure())
+  params.addParam<bool>(
+      "allow_fp_and_tabulation", false, "Whether to allow the two sources of data concurrently");
 
   params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
@@ -91,15 +102,21 @@ TabulatedFluidProperties::validParams()
 
 TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters),
-    _file_name(getParam<FileName>("fluid_property_file")),
+    _file_name_in(isParamValid("fluid_property_file") ? getParam<FileName>("fluid_property_file")
+                                                      : ""),
+    _file_name_out(isParamValid("fluid_property_output_file")
+                       ? getParam<FileName>("fluid_property_output_file")
+                       : ""),
     _temperature_min(getParam<Real>("temperature_min")),
     _temperature_max(getParam<Real>("temperature_max")),
     _pressure_min(getParam<Real>("pressure_min")),
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
-    _save_file(getParam<bool>("save_file")),
+    _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
+                                         : isParamValid("fluid_property_output_file")),
     _fp(isParamValid("fp") ? &getUserObject<SinglePhaseFluidProperties>("fp") : nullptr),
+    _allow_fp_and_tabulation(getParam<bool>("allow_fp_and_tabulation")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
     _interpolated_properties(),
     _interpolate_density(false),
@@ -111,23 +128,24 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _interpolate_cp(false),
     _interpolate_cv(false),
     _interpolate_entropy(false),
-    _density_idx(0),
-    _enthalpy_idx(0),
-    _internal_energy_idx(0),
-    _viscosity_idx(0),
-    _k_idx(0),
-    _c_idx(0),
-    _cp_idx(0),
-    _cv_idx(0),
-    _entropy_idx(0),
-    _csv_reader(_file_name, &_communicator),
+    _density_idx(libMesh::invalid_uint),
+    _enthalpy_idx(libMesh::invalid_uint),
+    _internal_energy_idx(libMesh::invalid_uint),
+    _viscosity_idx(libMesh::invalid_uint),
+    _k_idx(libMesh::invalid_uint),
+    _c_idx(libMesh::invalid_uint),
+    _cp_idx(libMesh::invalid_uint),
+    _cv_idx(libMesh::invalid_uint),
+    _entropy_idx(libMesh::invalid_uint),
+    _csv_reader(_file_name_in, &_communicator),
     _construct_pT_from_ve(getParam<bool>("construct_pT_from_ve")),
     _construct_pT_from_vh(getParam<bool>("construct_pT_from_vh")),
     _initial_setup_done(false),
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
     _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds")),
-    _log_space_v(getParam<bool>("use_log_grid_v"))
+    _log_space_v(getParam<bool>("use_log_grid_v")),
+    _log_space_e(getParam<bool>("use_log_grid_e"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
   checkInitialGuess();
@@ -139,6 +157,27 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
 
   // Lines starting with # in the data file are treated as comments
   _csv_reader.setComment("#");
+
+  // Can only and must receive one source of data
+  if (_fp && !_file_name_in.empty() && !_allow_fp_and_tabulation)
+    paramError("fluid_property_file",
+               "Cannot supply both a fluid properties object with 'fp' and a source tabulation "
+               "file with 'fluid_property_file', unless 'allow_fp_and_tabulation' is set to true");
+  if (!_fp && _file_name_in.empty())
+    paramError("fluid_property_file",
+               "Either a fluid properties object with the parameter 'fp' and a source tabulation "
+               "file with the parameter 'fluid_property_file' should be provided.");
+
+  // Some parameters are not used when reading a tabulation
+  if (!_fp && (isParamSetByUser("pressure_min") || isParamSetByUser("pressure_max") ||
+               isParamSetByUser("temperature_min") || isParamSetByUser("temperature_max")))
+    mooseWarning("User-specified bounds in pressure and temperature are ignored when reading a "
+                 "'fluid_property_file'. The tabulation bounds are selected "
+                 "from the bounds of the input tabulation.");
+  if (!_fp && (isParamSetByUser("num_p") || isParamSetByUser("num_T")))
+    mooseWarning("User-specified grid sizes in pressure and temperature are ignored when reading a "
+                 "'fluid_property_file'. The tabulation bounds are selected "
+                 "from the bounds of the input tabulation.");
 }
 
 void
@@ -148,13 +187,11 @@ TabulatedFluidProperties::initialSetup()
     return;
   _initial_setup_done = true;
 
-  // Check to see if _file_name supplied exists. If it does, that data
-  // will be used. If it does not exist, data will be generated and then
-  // written to _file_name.
-  std::ifstream file(_file_name.c_str());
-  if (file.good())
+  // If the user specified a tabulation to read, use that
+  if (!_file_name_in.empty())
   {
-    _console << name() + ": Reading tabulated properties from " << _file_name << std::endl;
+    std::ifstream file(_file_name_in.c_str());
+    _console << name() + ": Reading tabulated properties from " << _file_name_in << std::endl;
     _csv_reader.read();
 
     const std::vector<std::string> & column_names = _csv_reader.getNames();
@@ -167,7 +204,7 @@ TabulatedFluidProperties::initialSetup()
         mooseError("No ",
                    _required_columns[i],
                    " data read in ",
-                   _file_name,
+                   _file_name_in,
                    ". A column named ",
                    _required_columns[i],
                    " must be present");
@@ -185,7 +222,7 @@ TabulatedFluidProperties::initialSetup()
             _property_columns.end())
           mooseError(column_names[i],
                      " read in ",
-                     _file_name,
+                     _file_name_in,
                      " is not one of the properties that TabulatedFluidProperties understands");
         else
           _interpolated_properties.push_back(column_names[i]);
@@ -208,7 +245,7 @@ TabulatedFluidProperties::initialSetup()
     // Pressure and temperature data contains duplicates due to the csv format.
     // First, check that pressure is monotonically increasing
     if (!std::is_sorted(_pressure.begin(), _pressure.end()))
-      mooseError("The column data for pressure is not monotonically increasing in ", _file_name);
+      mooseError("The column data for pressure is not monotonically increasing in ", _file_name_in);
 
     // The first pressure value is repeated for each temperature value. Counting the
     // number of repeats provides the number of temperature values
@@ -222,7 +259,7 @@ TabulatedFluidProperties::initialSetup()
     // Check that the number of rows in the csv file is equal to _num_p * _num_T
     if (column_data[0].size() != _num_p * static_cast<unsigned int>(num_T))
       mooseError("The number of rows in ",
-                 _file_name,
+                 _file_name_in,
                  " is not equal to the number of unique pressure values ",
                  _num_p,
                  " multiplied by the number of unique temperature values ",
@@ -232,7 +269,8 @@ TabulatedFluidProperties::initialSetup()
     // as well as duplicated for each pressure value
     std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
     if (!std::is_sorted(temp0.begin(), temp0.end()))
-      mooseError("The column data for temperature is not monotonically increasing in ", _file_name);
+      mooseError("The column data for temperature is not monotonically increasing in ",
+                 _file_name_in);
 
     auto it_temp = _temperature.begin() + num_T;
     for (std::size_t i = 1; i < _pressure.size(); ++i)
@@ -266,19 +304,12 @@ TabulatedFluidProperties::initialSetup()
   else
   {
     if (!_fp)
-      mooseError("No csv file or fp object exist.");
-    _console << name() + ": No tabulated properties file named " << _file_name << " exists.\n";
+      mooseError("No FluidProperties (specified with 'fp') exists. Either specify a 'fp' or "
+                 "specify a tabulation file with the 'fluid_property_file' parameter");
     _console << name() + ": Generating tabulated data\n";
-    if (_save_file)
-      _console << name() + ": Writing tabulated data to " << _file_name << "\n";
-
     _console << std::flush;
 
     generateTabulatedData();
-
-    // Write tabulated data to file
-    if (_save_file)
-      writeTabulatedData(_file_name);
   }
 
   // At this point, all properties read or generated are able to be used by
@@ -333,6 +364,13 @@ TabulatedFluidProperties::initialSetup()
     }
   }
   constructInterpolation();
+
+  // Write tabulated data to file
+  if (_save_file)
+  {
+    _console << name() + ": Writing tabulated data to " << _file_name_out << "\n";
+    writeTabulatedData(_file_name_out);
+  }
 }
 
 std::string
@@ -350,7 +388,7 @@ TabulatedFluidProperties::molarMass() const
   if (_fp)
     return _fp->molarMass();
   else
-    mooseError("Molar Mass not specified.");
+    mooseError("Molar mass can currently only be computed by providing a 'fp' object.");
 }
 
 Real
@@ -874,7 +912,7 @@ TabulatedFluidProperties::henryCoefficients() const
   if (_fp)
     return _fp->henryCoefficients();
   else
-    mooseError("henryCoefficients not specified.");
+    mooseError("Henry coefficients can currently only be computed by providing a 'fp' object.");
 }
 
 Real
@@ -883,7 +921,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature) const
   if (_fp)
     return _fp->vaporPressure(temperature);
   else
-    mooseError("vaporPres not specified.");
+    mooseError("Vapor pressure can currently only be computed by providing a 'fp' object.");
 }
 
 void
@@ -892,7 +930,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
   if (_fp)
     _fp->vaporPressure(temperature, psat, dpsat_dT);
   else
-    mooseError("vaporPressure not specified.");
+    mooseError("Vapor pressure can currently only be computed by providing a 'fp' object.");
 }
 
 Real
@@ -1104,38 +1142,97 @@ TabulatedFluidProperties::s_from_h_p(Real h, Real pressure) const
 void
 TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 {
+  file_name = file_name.empty() ? "fluid_properties_" + name() + "_out.csv" : file_name;
   if (processor_id() == 0)
   {
-    MooseUtils::checkFileWriteable(file_name);
+    {
+      MooseUtils::checkFileWriteable(file_name);
 
-    std::ofstream file_out(file_name.c_str());
+      std::ofstream file_out(file_name.c_str());
 
-    // Write out date and fluid type
-    time_t now = std::time(&now);
-    if (_fp)
-      file_out << "# " << _fp->fluidName() << " properties created by TabulatedFluidProperties on "
-               << ctime(&now) << "\n";
-    else
-      mooseError("fluidName not specified.");
+      // Write out date and fluid type
+      time_t now = std::time(&now);
+      if (_fp)
+        file_out << "# " << _fp->fluidName()
+                 << " properties created by TabulatedFluidProperties on " << ctime(&now) << "\n";
+      else
+        file_out << "# tabulated properties created by TabulatedFluidProperties on " << ctime(&now)
+                 << "\n";
 
-    // Write out column names
-    file_out << "pressure, temperature";
-    for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
-      file_out << ", " << _interpolated_properties[i];
-    file_out << "\n";
+      // Write out column names
+      file_out << "pressure, temperature";
+      for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
+        file_out << ", " << _interpolated_properties[i];
+      file_out << "\n";
 
-    // Write out the fluid property data
-    for (unsigned int p = 0; p < _num_p; ++p)
-      for (unsigned int t = 0; t < _num_T; ++t)
-      {
-        file_out << _pressure[p] << ", " << _temperature[t];
-        for (std::size_t i = 0; i < _properties.size(); ++i)
-          file_out << ", " << _properties[i][p * _num_T + t];
-        file_out << "\n";
-      }
+      // Write out the fluid property data
+      for (unsigned int p = 0; p < _num_p; ++p)
+        for (unsigned int t = 0; t < _num_T; ++t)
+        {
+          file_out << _pressure[p] << ", " << _temperature[t];
+          for (std::size_t i = 0; i < _properties.size(); ++i)
+            file_out << ", " << _properties[i][p * _num_T + t];
+          file_out << "\n";
+        }
 
-    file_out << std::flush;
-    file_out.close();
+      file_out << std::flush;
+      file_out.close();
+    }
+
+    // Write out the (v,e) to (p,T) conversions
+    if (_construct_pT_from_ve)
+    {
+      const auto file_name_ve = std::regex_replace(file_name, std::regex("\\.csv"), "_ve.csv");
+      MooseUtils::checkFileWriteable(file_name_ve);
+      std::ofstream file_out(file_name_ve.c_str());
+
+      // Write out column names
+      file_out << "specific_volume, internal_energy, pressure, temperature";
+      for (const auto i : index_range(_properties))
+        if (_interpolated_properties[i] != "internal_energy")
+          file_out << ", " << _interpolated_properties[i];
+      file_out << "\n";
+
+      // Write out the fluid property data
+      for (const auto v : make_range(_num_v))
+        for (const auto e : make_range(_num_e))
+        {
+          const auto v_val = _specific_volume[v];
+          const auto e_val = _internal_energy[e];
+          const auto pressure = _p_from_v_e_ipol->sample(v_val, e_val);
+          const auto temperature = _T_from_v_e_ipol->sample(v_val, e_val);
+          file_out << v_val << ", " << e_val << ", " << pressure << ", " << temperature << ", ";
+          for (const auto i : index_range(_properties))
+          {
+            bool add_comma = true;
+            if (i == _density_idx)
+              file_out << 1 / v_val;
+            else if (i == _enthalpy_idx)
+              file_out << h_from_p_T(pressure, temperature);
+            else if (i == _viscosity_idx)
+              file_out << mu_from_v_e(v_val, e_val);
+            else if (i == _k_idx)
+              file_out << k_from_v_e(v_val, e_val);
+            else if (i == _c_idx)
+              file_out << c_from_v_e(v_val, e_val);
+            else if (i == _cv_idx)
+              file_out << cv_from_v_e(v_val, e_val);
+            else if (i == _cp_idx)
+              file_out << cp_from_v_e(v_val, e_val);
+            else if (i == _entropy_idx)
+              file_out << s_from_v_e(v_val, e_val);
+            else
+              add_comma = false;
+            if (i != _properties.size() - 1 && add_comma)
+              file_out << ", ";
+          }
+
+          file_out << "\n";
+        }
+
+      file_out << std::flush;
+      file_out.close();
+    }
   }
 }
 
@@ -1295,7 +1392,7 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
 void
 TabulatedFluidProperties::checkInitialGuess() const
 {
-  if (_construct_pT_from_ve || _construct_pT_from_vh)
+  if (_fp && (_construct_pT_from_ve || _construct_pT_from_vh))
   {
     if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
       mooseWarning("Pressure initial guess for (p,T), (v,e) conversions " +

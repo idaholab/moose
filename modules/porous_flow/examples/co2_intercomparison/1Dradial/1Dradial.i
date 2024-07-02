@@ -147,8 +147,9 @@
     fp = water
     temperature_min = 273.15
     temperature_max = 573.15
-    fluid_property_file = water_fluid_properties.csv
-    save_file = false
+    fluid_property_output_file = water_fluid_properties.csv
+    # Comment out the fp parameter and uncomment below to use the newly generated tabulation
+    # fluid_property_file = water_fluid_properties.csv
   []
   [brine]
     type = BrineFluidProperties

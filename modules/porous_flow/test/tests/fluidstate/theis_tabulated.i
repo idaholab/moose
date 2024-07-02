@@ -120,6 +120,12 @@
     type = TabulatedBicubicFluidProperties
     fp = co2
     fluid_property_file = fluid_properties.csv
+    # We try to avoid using both, but some properties are not implemented in the tabulation
+    allow_fp_and_tabulation = true
+    # Test was design prior to bounds check
+    error_on_out_of_bounds = false
+    # Comment out the fp parameter and uncomment below to use the newly generated tabulation
+    # fluid_property_file = fluid_properties.csv
   []
   [water]
     type = Water97FluidProperties

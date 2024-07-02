@@ -90,8 +90,8 @@ With a (specific volume, specific energy) variable set, the syntax shown in the 
 
 ### Writing data file
 
-If no tabulated fluid property data file exists, then data for the properties specified in the
-input file parameter *interpolated_properties* will be generated using the pressure and temperature
+The `TabulatedFluidProperties`-derived classes can write a file containing the data for the properties specified in the
+input file parameter *interpolated_properties*. It will use the pressure and temperature
 ranges specified in the input file at the beginning of the simulation.
 
 For example, if we wish to generate a file containing tabulated properties for CO$_2$ density, enthalpy
@@ -106,7 +106,7 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
   [tabulated]
     type = TabulatedBicubicFluidProperties
     fp = co2
-    fluid_property_file = fluid_properties.csv
+    fluid_property_output_file = fluid_properties.csv
     interpolated_properties = 'density enthalpy viscosity'
 
     # Bounds of interpolation
@@ -130,6 +130,11 @@ that the number of data points required to generate the tabulated data is smalle
 times the property members in the FluidProperties object are used, the initial time to generate
 the data and the subsequent interpolation time can be much less than using the original
 FluidProperties object.
+
+Using the  [!param](/FluidProperties/TabulatedFluidProperties/construct_pT_from_ve) parameter and the
+[!param](/FluidProperties/TabulatedFluidProperties/fluid_property_output_file) parameters, a tabulation
+using the (specific volume, specific internal energy) variables can be generated. The output file name
+for this additional tabulation will be suffixed with `_ve.csv`.
 
 !alert note
 All fluid properties read from a file or specified in the input file (and their derivatives with
@@ -179,6 +184,7 @@ alternative variable sets. This is done in several sets, described for the $(v,e
   the specified bounds on pressure and temperature : $e_{min/max} = e(p_{min/max}, T_{min/max})$, else the bounds
   are chosen from the tabulated data. The number of points in the grid in both dimensions are user-selected parameters.
   The v grid may be created using base-10 log-spacing by setting [!param](/FluidProperties/TabulatedFluidProperties/use_log_grid_v).
+  The e grid may be created using base-10 log-spacing by setting [!param](/FluidProperties/TabulatedFluidProperties/use_log_grid_e).
 
 - These bounds may not be physically realizable simultaneously. It could be that the fluid may not have both $v=v_{min}$
   and $e=e_{min}$. Part of the grid may not be physical.
