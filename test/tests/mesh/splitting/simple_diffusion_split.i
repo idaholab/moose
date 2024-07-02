@@ -1,8 +1,8 @@
 [Mesh]
-    [./fmg]
+    [fmg]
       type = FileMeshGenerator
       file = 'grid_from_generated.cpr'
-    [../]
+    []
     parallel_type = distributed
 []
 
