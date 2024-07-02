@@ -53,17 +53,17 @@ protected:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Maximum mixing length allowed for the domain
-  const Real _max_mixing_length;
-
   /// Linearized model?
   const bool _linearized_model;
 
-  /// No equilibrium treatement
-  const bool _non_equilibrium_treatment;
+  /// Method used for wall treatment
+  const MooseEnum _wall_treatment;
 
   /// C_mu constant
   const Real _C_mu;
+
+  // Production Limiter Constant
+  const Real _C_pl;
 
   ///@{
   /// Maps for wall treatement

@@ -1,4 +1,3 @@
-
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -12,24 +11,22 @@
 
 #include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
-
 /**
- * Computes the turbuent viscosity for the k-Epsilon model.
- * Implements two near-wall treatments: equilibrium and non-equilibrium wall functions.
+ * Computes wall y+ based on wall functions.
  */
-class kEpsilonViscosityAux : public AuxKernel
+class RANSYPlusAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
   virtual void initialSetup() override;
 
-  kEpsilonViscosityAux(const InputParameters & parameters);
+  RANSYPlusAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
-  /// The dimension of the domain
+  /// the dimension of the simulation
   const unsigned int _dim;
 
   /// x-velocity
@@ -41,39 +38,24 @@ protected:
 
   /// Turbulent kinetic energy
   const Moose::Functor<ADReal> & _k;
-  /// Turbulent kinetic energy dissipation rate
-  const Moose::Functor<ADReal> & _epsilon;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
+
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
-
-  /// C-mu closure coefficient
-  const Real _C_mu;
 
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// If the user wants to enable bulk wall treatment
-  const bool _bulk_wall_treatment;
-
   /// Method used for wall treatment
   const MooseEnum _wall_treatment;
 
-  /// Method used to limit the k-e time scale
-  const MooseEnum _scale_limiter;
-
-  // -- Parameters of the wall function method
-
-  /// Maximum number of iterations to find the friction velocity
-  static constexpr int _MAX_ITERS_U_TAU{50};
-
-  /// Relative tolerance to find the friction velocity
-  static constexpr Real _REL_TOLERANCE{1e-4};
+  /// C_mu constant
+  const Real _C_mu;
 
   ///@{
-  /// Maps for wall bounded elements
+  /// Maps for wall treatement
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;

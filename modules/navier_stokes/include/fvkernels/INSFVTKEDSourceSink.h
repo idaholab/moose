@@ -55,14 +55,11 @@ protected:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Maximum mixing length allowed for the domain
-  const Real _max_mixing_length;
-
   /// If the user wants to use the linearized model
   const bool _linearized_model;
 
-  /// No equilibrium treatement
-  const bool _non_equilibrium_treatment;
+  /// Method used for wall treatment
+  const MooseEnum _wall_treatment;
 
   /// Value of the first epsilon closure coefficient
   const Real _C1_eps;
@@ -72,6 +69,9 @@ protected:
 
   /// C_mu constant
   const Real _C_mu;
+
+  // Production Limiter Constant
+  const Real _C_pl;
 
   /// Stored strain rate
   std::map<const Elem *, Real> _symmetric_strain_tensor_norm_old;
