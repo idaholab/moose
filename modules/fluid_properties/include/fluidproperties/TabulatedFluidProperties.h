@@ -170,6 +170,64 @@ protected:
    */
   virtual void generateTabulatedData();
 
+  /**
+   * Computes 2D vectors of pressure and temperature on a 2D (v,e) grid
+   *
+   * @param p_from_v_e 2D vector of pressures
+   * @param T_from_v_e 2D vector of temperatures
+   */
+  void generatePTFromVE(std::vector<std::vector<Real>> & p_from_v_e,
+                        std::vector<std::vector<Real>> & T_from_v_e);
+
+  /**
+   * Computes 2D vectors of pressure and temperature on a 2D (v,h) grid
+   *
+   * @param p_from_v_h 2D vector of pressures
+   * @param T_from_v_h 2D vector of temperatures
+   */
+  void generatePTFromVH(std::vector<std::vector<Real>> & p_from_v_h,
+                        std::vector<std::vector<Real>> & T_from_v_h);
+
+  /**
+   * If Newton Method jacobian produces NaNs, set variable to min or max depending on situation
+   * @param min_1 minimum value of pressure
+   * @param max_1 maximum value of pressure
+   * @param min_2 minimum value of temperature
+   * @param max_2 maximum value of temperature
+   * @param i track iteration to get correct data point
+   * @param variable_1 pressure value
+   * @param variable_2 temperature value
+   * @param num_nans_1 track number of nans produced for pressure
+   * @param num_nans_2 track number of nans produced for temperature
+   */
+  void checkNaNs(Real min_1,
+                 Real max_1,
+                 Real min_2,
+                 Real max_2,
+                 unsigned int i,
+                 Real & variable_1,
+                 Real & variable_2,
+                 unsigned int & num_nans_1,
+                 unsigned int & num_nans_2);
+  /**
+   * If values go out of user defined range during Newton Method inversion, set variable to min or
+   * max depending on situation
+   * @param min minimum value of variable
+   * @param max maximum value of variable
+   * @param variable variable of interest (pressure or temperature)
+   * @param num_out_bounds track number of values out of user defined bounds
+   */
+  void checkOutofBounds(Real min, Real max, Real & variable, unsigned int & num_out_bounds);
+  // If values go out of user defined range or NaNs are produced during
+  // Newton Method inversion, produce warnings to inform the user
+  void outputWarnings(unsigned int num_nans_p,
+                      unsigned int num_nans_T,
+                      unsigned int num_out_bounds_p,
+                      unsigned int num_out_bounds_T,
+                      unsigned int convergence_failures,
+                      unsigned int number_points,
+                      std::string variable_set);
+
   /// File name of tabulated data file
   FileName _file_name;
   /// Pressure vector
@@ -242,8 +300,10 @@ protected:
   bool _initial_setup_done;
   /// Number of specific volume points in the tabulated data
   unsigned int _num_v;
-  /// Number of internal energy points in tabulated data
+  /// Number of specific internal energy points in tabulated data
   unsigned int _num_e;
+  /// Number of specific enthalpy points in tabulated data
+  unsigned int _num_h;
   /// to error or not on out-of-bounds check
   bool _error_on_out_of_bounds;
   /// log-space the specific volume instead of linear

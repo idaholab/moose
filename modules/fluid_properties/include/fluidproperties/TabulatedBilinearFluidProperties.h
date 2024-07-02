@@ -9,10 +9,13 @@
 
 #pragma once
 
+#include "SinglePhaseFluidProperties.h"
+#include "DelimitedFileReader.h"
 #include "TabulatedFluidProperties.h"
 
-class SinglePhaseFluidProperties;
-class BicubicInterpolation;
+class SinglePhaseFluidPropertiesPT;
+class BilinearInterpolation;
+class TabulatedFluidProperties;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -81,30 +84,30 @@ class BicubicInterpolation;
  * less than using the original FluidProperties UserObject.
  *
  * Properties specified in the data file or listed in the input file (and their derivatives
- * wrt pressure and temperature) will be calculated using bicubic interpolation, while all
+ * wrt pressure and temperature) will be calculated using bilinear interpolation, while all
  * remaining fluid properties are calculated using the supplied FluidProperties UserObject.
  */
-class TabulatedBicubicFluidProperties : public TabulatedFluidProperties
+class TabulatedBilinearFluidProperties : public TabulatedFluidProperties
 {
 public:
   static InputParameters validParams();
 
-  TabulatedBicubicFluidProperties(const InputParameters & parameters);
+  TabulatedBilinearFluidProperties(const InputParameters & parameters);
 
   virtual void constructInterpolation() override;
 
 protected:
   /**
-   * Forms a 2D matrix from a single std::vector.
+   * Forms a Column Major Matrix from a single std::vector.
    * @param nrow number of rows in the matrix
    * @param ncol number of columns in the matrix
    * @param vec 1D vector to reshape into a 2D matrix
-   * @param[out] 2D matrix formed by reshaping vec
+   * @param[out] Column Major Matrix
    */
   void reshapeData2D(unsigned int nrow,
                      unsigned int ncol,
                      const std::vector<Real> & vec,
-                     std::vector<std::vector<Real>> & mat);
+                     ColumnMajorMatrix & mat);
 };
 
 #pragma GCC diagnostic pop

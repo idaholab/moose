@@ -2,6 +2,10 @@
 # Calculations for density, internal energy and enthalpy using bicubic or bilinear
 # interpolation of data generated using CO2FluidProperties.
 
+# Element to use for the check
+# We changed element as elem 0 had conditions which failed the inversion
+elem_id = 10
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -123,6 +127,9 @@
     pressure_min = 1e5
     pressure_max = 7e5
 
+    num_e = 400
+    num_v = 300
+
     # Newton parameters
     tolerance = 1e-8
     T_initial_guess = 310
@@ -151,47 +158,47 @@
 [Postprocessors]
   [mu]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = mu
   []
   [e]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = e
   []
   [cv]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = cv
   []
   [cp]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = cp
   []
   [c]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = c
   []
   [p]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = p
   []
   [T]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = T
   []
   [k]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = k
   []
   [g]
     type = ElementalVariableValue
-    elementid = 0
+    elementid = ${elem_id}
     variable = g
   []
 []
