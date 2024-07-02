@@ -302,7 +302,6 @@ SetupMeshAction::act()
 
   else if (_current_task == "set_mesh_base")
   {
-
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true);
 
     if (!_app.masterMesh() && !_mesh->hasMeshBase())

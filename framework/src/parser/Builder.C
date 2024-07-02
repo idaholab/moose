@@ -15,6 +15,7 @@
 #include "Action.h"
 #include "Factory.h"
 #include "MooseObjectAction.h"
+#include "AddActionComponentAction.h"
 #include "ActionWarehouse.h"
 #include "EmptyAction.h"
 #include "FEProblem.h"
@@ -285,6 +286,17 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
         object_params.setHitNode(*n, {});
         extractParams(curr_identifier, object_params);
         object_params.set<std::vector<std::string>>("control_tags")
+            .push_back(MooseUtils::baseName(curr_identifier));
+      }
+      // extract the Component params if necessary
+      std::shared_ptr<AddActionComponentAction> component_action =
+          std::dynamic_pointer_cast<AddActionComponentAction>(action_obj);
+      if (component_action)
+      {
+        auto & component_params = component_action->getComponentParams();
+        component_params.setHitNode(*n, {});
+        extractParams(curr_identifier, component_params);
+        component_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
       }
     }
@@ -1067,6 +1079,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(FileNameNoExtension, string);
         setscalar(RelativeFileName, string);
         setscalar(DataFileName, string);
+        setscalar(ComponentName, string);
         setscalar(PhysicsName, string);
         setscalar(OutFileBase, string);
         setscalar(VariableName, string);
@@ -1168,6 +1181,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ExtraElementIDName, string);
         setvector(ReporterName, string);
         setvector(CLIArgString, string);
+        setvector(ComponentName, string);
         setvector(PhysicsName, string);
         setvector(PositionsName, string);
         setvector(TimesName, string);
