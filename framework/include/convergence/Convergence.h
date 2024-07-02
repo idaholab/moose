@@ -27,7 +27,7 @@ public:
 
   Convergence(const InputParameters & parameters);
 
-  static InputParameters commonParams();
+  static InputParameters residualConvergenceParams();
 
   virtual void initialSetup() override{};
 

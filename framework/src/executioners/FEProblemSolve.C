@@ -23,7 +23,7 @@ FEProblemSolve::mooseLineSearches()
 }
 
 InputParameters
-FEProblemSolve::commonParams()
+FEProblemSolve::residualConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
@@ -56,7 +56,7 @@ InputParameters
 FEProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params += FEProblemSolve::commonParams();
+  params += FEProblemSolve::residualConvergenceParams();
 
   params.addParam<std::vector<std::string>>("splitting",
                                             {},

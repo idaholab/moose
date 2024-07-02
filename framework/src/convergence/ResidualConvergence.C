@@ -30,7 +30,7 @@ InputParameters
 ResidualConvergence::validParams()
 {
   InputParameters params = Convergence::validParams();
-  params += FEProblemSolve::commonParams();
+  params += FEProblemSolve::residualConvergenceParams();
 
   params.addClassDescription(
       "Checks convergence based on absolute and relative error of the residual.");
