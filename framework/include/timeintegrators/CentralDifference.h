@@ -37,6 +37,7 @@ protected:
   /// The older solution
   const NumericVector<Number> & _solution_older;
 
+  bool _use_direct;
   /**
    * Helper function that actually does the math for computing the time derivative
    */

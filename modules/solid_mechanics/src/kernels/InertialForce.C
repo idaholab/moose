@@ -126,6 +126,10 @@ InertialForceTempl<is_ad>::computeQpResidual()
            (accel + vel * _eta[_qp] * (1.0 + _alpha) - _alpha * _eta[_qp] * (*_vel_old)[_qp]);
   }
 
+  // If using a direct calculation of the acceleration return 0.
+  else if (_time_integrator.isDirect())
+    return 0;
+
   // Lumped mass option
   // Only lumping the masses here
   // will multiply by corresponding residual multiplier after lumping the matrix
@@ -182,6 +186,13 @@ InertialForceTempl<false>::computeQpJacobian()
       return _test[_i][_qp] * _density[_qp] / (_beta * _dt * _dt) * _phi[this->_j][_qp] +
              _eta[_qp] * (1 + _alpha) * _test[_i][_qp] * _density[_qp] * _gamma / _beta / _dt *
                  _phi[this->_j][_qp];
+
+    // Used for mass matrix calculation. Add in damping here?
+    // Returning unmodified mass matrix
+    else if (_time_integrator.isDirect())
+    {
+      return _test[_i][_qp] * _density[_qp] * _phi[this->_j][_qp];
+    }
     else
       return _test[_i][_qp] * _density[_qp] * (*_du_dotdot_du)[_qp] * _phi[this->_j][_qp] +
              _eta[_qp] * (1 + _alpha) * _test[_i][_qp] * _density[_qp] * (*_du_dot_du)[_qp] *
