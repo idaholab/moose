@@ -31,6 +31,7 @@ public:
   virtual Real cp_from_v_e(Real v, Real e) const override;
   virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
   virtual Real cv_from_v_e(Real v, Real e) const override;
+  virtual void cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const override;
   virtual Real mu_from_v_e(Real v, Real e) const override;
   virtual Real k_from_v_e(Real v, Real e) const override;
   virtual Real s_from_v_e(Real v, Real e) const override;
@@ -47,6 +48,8 @@ public:
   virtual Real rho_from_p_T(Real p, Real T) const override;
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual Real e_from_p_T(Real p, Real T) const override;
+  virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
   virtual Real e_from_p_rho(Real p, Real rho) const override;
   virtual void
   e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
@@ -65,16 +68,16 @@ public:
 #pragma GCC diagnostic pop
 
 protected:
-  Real _rho_0;
-  Real _p_0;
-  Real _a2;
-  Real _beta;
-  Real _cv;
-  Real _e_0;
-  Real _T_0;
+  const Real _rho_0;
+  const Real _p_0;
+  const Real _a2;
+  const Real _beta;
+  const Real _cv;
+  const Real _e_0;
+  const Real _T_0;
 
-  Real _mu;
-  Real _k;
+  const Real _mu;
+  const Real _k;
   Real _Pr;
 
 public:

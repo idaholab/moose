@@ -47,12 +47,12 @@ TEST_F(LinearFluidPropertiesTest, test)
   NOT_IMPLEMENTED_TEST_DERIV(_fp->rho_from_p_s);
 
   // e
-  // TODO: REL_TEST(e_from_p_rho, e_saved, REL_TOL_SAVED_VALUE);
-  // TODO: REL_TEST(_fp->e_from_v_h(v, h), e, REL_TOL_CONSISTENCY);
-  NOT_IMPLEMENTED_TEST_VALUE(_fp->e_from_v_h);
+  REL_TEST(_fp->e_from_p_T(p, T), e, REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->e_from_p_rho(p, rho), e, REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->e_from_v_h(v, h), e, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->e_from_p_T, p, T, 1e-5);
   DERIV_TEST(_fp->e_from_p_rho, p, rho, 1e-5);
-  // TODO: DERIV_TEST(_fp->e_from_v_h, v, h, REL_TOL_DERIVATIVE);
-  NOT_IMPLEMENTED_TEST_DERIV(_fp->e_from_v_h);
+  DERIV_TEST(_fp->e_from_v_h, v, h, REL_TOL_DERIVATIVE);
 
   // c
   // TODO: const Real c = _fp->c_from_v_e(v, e);
@@ -61,12 +61,13 @@ TEST_F(LinearFluidPropertiesTest, test)
 
   // cp
   const Real cp = _fp->cp_from_v_e(v, e);
-  REL_TEST(cp, 0., REL_TOL_SAVED_VALUE);
+  REL_TEST(cp, 1000, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
 
   // cv
   const Real cv = _fp->cv_from_v_e(v, e);
   REL_TEST(cv, 1000, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->cv_from_v_e, v, e, REL_TOL_DERIVATIVE);
 
   // mu
   const Real mu = _fp->mu_from_v_e(v, e);
@@ -93,7 +94,7 @@ TEST_F(LinearFluidPropertiesTest, test)
   NOT_IMPLEMENTED_TEST_VALUE(_fp->g_from_v_e);
 
   // h
-  REL_TEST(h, 300100, REL_TOL_SAVED_VALUE);
+  REL_TEST(h, 1000100, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->h_from_p_T, p, T, 5e-3);
 
   // beta
@@ -113,5 +114,5 @@ TEST_F(LinearFluidPropertiesTest, test)
 
   // Pr
   const Real Pr = _fp->Pr(rho, T);
-  REL_TEST(Pr, 0.76, REL_TOL_SAVED_VALUE);
+  REL_TEST(Pr, (1000 * 0.3) / 0.89, REL_TOL_SAVED_VALUE);
 }
