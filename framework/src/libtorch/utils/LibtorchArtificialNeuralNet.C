@@ -185,10 +185,10 @@ dataStore<Moose::LibtorchArtificialNeuralNet>(
 
   dataStore(stream, items, context);
 
-  int8_t device_type = static_cast<std::underlying_type<torch::DeviceType>::type>(nn->deviceType());
+  auto device_type = static_cast<std::underlying_type<torch::DeviceType>::type>(nn->deviceType());
   dataStore(stream, device_type, context);
 
-  int8_t data_type = static_cast<std::underlying_type<torch::ScalarType>::type>(nn->dataType());
+  auto data_type = static_cast<std::underlying_type<torch::ScalarType>::type>(nn->dataType());
   dataStore(stream, data_type, context);
 
   torch::save(nn, nn->name());
@@ -222,11 +222,11 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   activation_functions.resize(num_activation_items);
   dataLoad(stream, activation_functions, context);
 
-  int8_t device_type;
+  std::underlying_type<torch::DeviceType>::type device_type;
   dataLoad(stream, device_type, context);
   const torch::DeviceType divt(static_cast<torch::DeviceType>(device_type));
 
-  int8_t data_type;
+  std::underlying_type<torch::ScalarType>::type data_type;
   dataLoad(stream, data_type, context);
   const torch::ScalarType datt(static_cast<torch::ScalarType>(data_type));
 
