@@ -214,6 +214,10 @@ public:
   void
   h_from_p_T_template(const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const;
 
+  virtual Real s_from_h_p(Real enthalpy, Real pressure) const override;
+  FPADReal s_from_h_p(const FPADReal & enthalpy, const FPADReal & pressure) const;
+  void virtual s_from_h_p(Real enthalpy, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const;
+
   virtual Real vaporPressure(Real temperature) const override;
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
@@ -329,6 +333,7 @@ public:
    */
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
   virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
+  virtual ADReal T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const override;
 
   /**
    * Boundary between subregions b and c in region 2.

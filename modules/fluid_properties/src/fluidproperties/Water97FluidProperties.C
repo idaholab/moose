@@ -446,6 +446,38 @@ Water97FluidProperties::s_from_p_T(
   s_from_p_T_template(pressure, temperature, s, ds_dp, ds_dT);
 }
 
+Real
+Water97FluidProperties::s_from_h_p(Real enthalpy, Real pressure) const
+{
+  Real T = T_from_p_h(pressure, enthalpy);
+  return s_from_p_T(pressure, T);
+}
+
+FPADReal
+Water97FluidProperties::s_from_h_p(const FPADReal & enthalpy, const FPADReal & pressure) const
+{
+  FPADReal temperature = T_from_p_h_ad(pressure, enthalpy);
+  return s_from_p_T_template(pressure, temperature);
+}
+
+void
+Water97FluidProperties::s_from_h_p(
+    const Real enthalpy, const Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const
+{
+  FPADReal p = pressure;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
+
+  FPADReal h = enthalpy;
+  Moose::derivInsert(h.derivatives(), 1, 1.0);
+
+  FPADReal T = T_from_p_h_ad(p, h);
+  FPADReal entropy = s_from_p_T_template(p, T);
+
+  ds_dh = entropy.derivatives()[0];
+  ds_dp = entropy.derivatives()[1];
+  s = entropy.value();
+}
+
 void
 Water97FluidProperties::s_from_p_T(const ADReal & pressure,
                                    const ADReal & temperature,
@@ -699,6 +731,17 @@ Water97FluidProperties::T_from_p_h(
   temperature = T.value();
   dT_dp = T.derivatives()[0];
   dT_dh = T.derivatives()[1];
+}
+
+ADReal
+Water97FluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const
+{
+  const Real p = pressure.value();
+  const Real h = enthalpy.value();
+  const Real T = T_from_p_h(p, h);
+
+  ADReal Tad = T;
+  return Tad;
 }
 
 FPADReal
