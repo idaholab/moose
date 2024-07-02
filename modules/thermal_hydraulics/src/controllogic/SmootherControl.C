@@ -37,10 +37,13 @@ SmootherControl::SmootherControl(const InputParameters & parameters)
 void
 SmootherControl::execute()
 {
-  if (_values.size() == _n_points)
-    _values.erase(_values.begin());
+  if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_TIMESTEP_BEGIN)
+  {
+    if (_values.size() == _n_points)
+      _values.erase(_values.begin());
 
-  _values.push_back(_input);
+    _values.push_back(_input);
 
-  _output = std::accumulate(_values.begin(), _values.end(), 0.0) / _values.size();
+    _output = std::accumulate(_values.begin(), _values.end(), 0.0) / _values.size();
+  }
 }
