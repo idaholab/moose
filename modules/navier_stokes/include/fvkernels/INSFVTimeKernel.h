@@ -43,6 +43,9 @@ protected:
    */
   void addResidualAndJacobian(const ADReal & residual, dof_id_type dof);
 
+  /// Whether to contribute to RC coefficients
+  const bool _contribute_to_rc_coeffs;
+
 private:
   using FVFunctorTimeKernel::_current_elem;
 };
