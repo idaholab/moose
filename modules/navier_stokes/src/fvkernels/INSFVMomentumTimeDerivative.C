@@ -37,7 +37,8 @@ INSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   const Real a = residual.derivatives()[dof_number];
 
-  _rc_uo.addToA(&elem, _index, a);
+  if (_contribute_to_rc_coeffs)
+    _rc_uo.addToA(&elem, _index, a);
 
   addResidualAndJacobian(residual, dof_number);
 }
