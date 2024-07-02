@@ -32,17 +32,23 @@ If the `CoupledVarThresholdElementSubdomainModifier` is applied onto the entire 
 
 However, in many applications, e.g. element death and activation, the equivalent movement of element subdomains is not reversible. In this case, omitting the parameter `complement_subdomain_id` will make the subdomain modification irreversible:
 
-!listing test/tests/userobjects/element_subdomain_modifier/block_restricted.i start=[moving_circle] end=[] include-end=true
+!listing test/tests/userobjects/element_subdomain_modifier/irreversible.i start=[moving_circle] end=[] include-end=true
 
 !media media/userobjects/esm_irreversible.jpg style=float:center;width:100%; caption=The result of an irreversible element subdomain modifier at three different time steps
 
 ## Moving boundary/interface nodeset/sideset modification
 
-The change of element subdomains will alter the definition of certain sidesets and nodesets. The `CoupledVarThresholdElementSubdomainModifier` optionally takes the parameter `moving_boundary_name` to help modify the corresponding sideset/nodeset. If the boundary provided through the `moving_boundary_name` parameter already exists, the modifier will attempt to modify the provided sideset/nodeset whenever an element changes subdomain. If the boundary does not exist, the modifier will create a sideset and a nodeset with the provided name.
+The change of element subdomains will alter the definition of certain sidesets and nodesets. The `CoupledVarThresholdElementSubdomainModifier` optionally takes the parameter `moving_boundaries` to help modify the corresponding sideset/nodeset. If the boundary provided through the `moving_boundaries` parameter already exists, the modifier will attempt to modify the provided sideset/nodeset whenever an element changes subdomain. If the boundary does not exist, the modifier will create a sideset and a nodeset with the provided name. This parameter must also be set with `moving_boundary_subdomain_pairs`, for the subdomains the boundary lies between. 
 
-!media media/userobjects/esm_sideset.jpg style=float:center;width:100%; caption=The evolving sideset (green) at three different time steps
+!listing test/tests/userobjects/element_subdomain_modifier/moving_boundary.i start=[moving_circle] end=[] include-end=true
 
-!media media/userobjects/esm_nodeset.jpg style=float:center;width:100%; caption=The evolving nodeset (green) at three different time steps
+!media media/userobjects/esm_sideset.jpg style=float:center;width:100%; caption=The evolving sideset (green) at three different time steps, without a provided boundary from the user.
+
+!media media/userobjects/esm_nodeset.jpg style=float:center;width:100%; caption=The evolving nodeset (green) at three different time steps, without a provided boundary from the user.
+
+The parameter `moving_boundary_subdomain_pairs` also allows for the external parts of the boundary to be included by setting the subdomain pair to only one subdomain.
+
+!listing test/tests/userobjects/element_subdomain_modifier/external_moving_boundary.i start=[moving_circle] end=[] include-end=true
 
 Nodal and integrated BCs can be applied on the moving boundary.
 
