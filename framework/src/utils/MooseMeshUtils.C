@@ -451,6 +451,7 @@ hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name)
 void
 makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
                     std::vector<dof_id_type> & elem_id_list,
+                    std::vector<dof_id_type> & midpoint_node_list,
                     std::vector<dof_id_type> & ordered_node_list,
                     std::vector<dof_id_type> & ordered_elem_id_list)
 {
@@ -459,10 +460,13 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
   // Start from the first element, try to find a chain of nodes
   mooseAssert(node_assm.size(), "Node list must not be empty");
   ordered_node_list.push_back(node_assm.front().first);
+  if (midpoint_node_list.front() != DofObject::invalid_id)
+    ordered_node_list.push_back(midpoint_node_list.front());
   ordered_node_list.push_back(node_assm.front().second);
   ordered_elem_id_list.push_back(elem_id_list.front());
   // Remove the element that has just been added to ordered_node_list
   node_assm.erase(node_assm.begin());
+  midpoint_node_list.erase(midpoint_node_list.begin());
   elem_id_list.erase(elem_id_list.begin());
   const unsigned int node_assm_size_0 = node_assm.size();
   for (unsigned int i = 0; i < node_assm_size_0; i++)
@@ -487,9 +491,12 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
     // If found, add the node to boundary_ordered_node_list
     if (result != node_assm.end())
     {
+      const auto elem_index = std::distance(node_assm.begin(), result);
+      if (midpoint_node_list[elem_index] != DofObject::invalid_id)
+        ordered_node_list.push_back(midpoint_node_list[elem_index]);
       ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
       node_assm.erase(result);
-      const auto elem_index = std::distance(node_assm.begin(), result);
+      midpoint_node_list.erase(midpoint_node_list.begin() + elem_index);
       ordered_elem_id_list.push_back(elem_id_list[elem_index]);
       elem_id_list.erase(elem_id_list.begin() + elem_index);
     }
@@ -506,11 +513,23 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
       // mark the first flip event.
       is_flipped = true;
       std::reverse(ordered_node_list.begin(), ordered_node_list.end());
+      std::reverse(midpoint_node_list.begin(), midpoint_node_list.end());
       std::reverse(ordered_elem_id_list.begin(), ordered_elem_id_list.end());
       // As this iteration is wasted, set the iterator backward
       i--;
     }
   }
+}
+
+void
+makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+                    std::vector<dof_id_type> & elem_id_list,
+                    std::vector<dof_id_type> & ordered_node_list,
+                    std::vector<dof_id_type> & ordered_elem_id_list)
+{
+  std::vector<dof_id_type> dummy_midpoint_node_list(node_assm.size(), DofObject::invalid_id);
+  makeOrderedNodeList(
+      node_assm, elem_id_list, dummy_midpoint_node_list, ordered_node_list, ordered_elem_id_list);
 }
 
 void

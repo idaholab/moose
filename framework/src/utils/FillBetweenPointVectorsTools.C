@@ -509,6 +509,7 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list_tmp = boundary_info.build_side_list();
   std::vector<std::pair<dof_id_type, dof_id_type>> boundary_node_assm;
+  std::vector<dof_id_type> boundary_midpoint_node_list;
   for (unsigned int i = 0; i < side_list_tmp.size(); i++)
   {
     if (std::get<2>(side_list_tmp[i]) == bid)
@@ -520,6 +521,15 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
                                                   mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
                                                       ->side_ptr(std::get<1>(side_list_tmp[i]))
                                                       ->node_id(1)));
+      // see if there is a midpoint
+      if (mesh.elem_ptr(std::get<0>(side_list_tmp[i]))->side_type(std::get<1>(side_list_tmp[i])) ==
+          EDGE3)
+        boundary_midpoint_node_list.push_back(
+            mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
+                ->node_id(mesh.elem_ptr(std::get<0>(side_list_tmp[i]))->n_vertices() +
+                          std::get<1>(side_list_tmp[i])));
+      else
+        boundary_midpoint_node_list.push_back(DofObject::invalid_id);
     }
   }
   bool is_closed_loop;
@@ -527,6 +537,7 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
                max_node_radius,
                boundary_ordered_node_list,
                boundary_node_assm,
+               boundary_midpoint_node_list,
                origin_pt,
                "external boundary",
                is_closed_loop);
@@ -658,6 +669,7 @@ isClosedLoop(MeshBase & mesh,
              Real & max_node_radius,
              std::vector<dof_id_type> & ordered_node_list,
              std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+             std::vector<dof_id_type> & midpoint_node_list,
              const Point origin_pt,
              const std::string input_type,
              bool & is_closed_loop,
@@ -671,7 +683,7 @@ isClosedLoop(MeshBase & mesh,
   std::vector<dof_id_type> ordered_dummy_elem_list;
   is_closed_loop = false;
   MooseMeshUtils::makeOrderedNodeList(
-      node_assm, dummy_elem_list, ordered_node_list, ordered_dummy_elem_list);
+      node_assm, dummy_elem_list, midpoint_node_list, ordered_node_list, ordered_dummy_elem_list);
   // If the code ever gets here, node_assm is empty.
   // If the ordered_node_list front and back are not the same, the boundary is not a loop.
   // This is not done inside the loop just for some potential applications in the future.
@@ -712,6 +724,28 @@ isClosedLoop(MeshBase & mesh,
     else
       is_closed_loop = true;
   }
+}
+
+void
+isClosedLoop(MeshBase & mesh,
+             Real & max_node_radius,
+             std::vector<dof_id_type> & ordered_node_list,
+             std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+             const Point origin_pt,
+             const std::string input_type,
+             bool & is_closed_loop,
+             const bool suppress_exception)
+{
+  std::vector<dof_id_type> dummy_midpoint_node_list(node_assm.size(), DofObject::invalid_id);
+  isClosedLoop(mesh,
+               max_node_radius,
+               ordered_node_list,
+               node_assm,
+               dummy_midpoint_node_list,
+               origin_pt,
+               input_type,
+               is_closed_loop,
+               suppress_exception);
 }
 
 bool

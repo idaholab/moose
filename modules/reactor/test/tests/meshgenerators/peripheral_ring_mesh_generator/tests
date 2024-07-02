@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PeripheralRingMeshGenerator.md'
-  issues = '#19978 #20637 #22138'
+  issues = '#19978 #20637 #22138 #28169'
   [core_peripheral_ring_nonpreserved]
     type = 'Exodiff'
     input = 'core_ring.i'
@@ -74,6 +74,15 @@
                 Mesh/inactive=tg
                 --mesh-only core_ring_boundary_layers_in.e'
     requirement ='The system shall be able to add a peripheral ring with boundary layers to the input mesh and preserve volumes even with polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [peripheral_ring_boundary_layers_quadratic]
+    type = 'Exodiff'
+    input = 'ring_quadratic.i'
+    exodiff = 'ring_boundary_layers_quadratic_in.e'
+    cli_args = '--mesh-only ring_boundary_layers_quadratic_in.e'
+    requirement ='The system shall be able to add a peripheral ring consistin of quandratic with boundary layers to the input mesh and preserve volumes even with polygonization.'
     recover = false
     mesh_mode = 'REPLICATED'
   []
