@@ -321,6 +321,12 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
+  MooseEnum libtorch_device_type("cpu cuda mps", "cpu");
+  params.addCommandLineParam<MooseEnum>("libtorch_device",
+                                        "--libtorch-device",
+                                        libtorch_device_type,
+                                        "The device type we want to run libtorch on.");
+
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(
       "gperf_profiler_on",
@@ -425,6 +431,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
+#ifdef LIBTORCH_ENABLED
+    ,
+    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
+#endif
 {
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
@@ -2858,3 +2868,33 @@ MooseApp::constructingMeshGenerators() const
   return _action_warehouse.getCurrentTaskName() == "create_added_mesh_generators" ||
          _mesh_generator_system.appendingMeshGenerators();
 }
+
+#ifdef LIBTORCH_ENABLED
+torch::DeviceType
+MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
+{
+  if (device_enum == "cuda")
+  {
+#ifdef __linux__
+    if (!torch::cuda::is_available())
+      mooseError("--libtorch-device=cuda: CUDA is not available");
+    return torch::kCUDA;
+#else
+    mooseError("--libtorch-device=cuda: CUDA is not supported on your platform");
+#endif
+  }
+  else if (device_enum == "mps")
+  {
+#ifdef __APPLE__
+    if (!torch::mps::is_available())
+      mooseError("--libtorch-device=mps: MPS is not available");
+    return torch::kMPS;
+#else
+    mooseError("--libtorch-device=mps: MPS is not supported on your platform");
+#endif
+  }
+
+  mooseAssert(device_enum == "cpu", "Should be cpu");
+  return torch::kCPU;
+}
+#endif

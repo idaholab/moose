@@ -12,6 +12,7 @@
       expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear\".'
       detail = 'an unsupported activation function;'
       libtorch = true
+      libtorch_devices = 'cpu cuda mps'
       allow_test_objects = True
     []
     [wrong-activation-number]
@@ -21,6 +22,7 @@
       expect_err = 'The number of activation functions should be either one or the same as the number of hidden layers'
       detail = 'the wrong number of activation functions;'
       libtorch = true
+      libtorch_devices = 'cpu cuda mps'
       allow_test_objects = True
     []
     [wrong-optimizer]
@@ -30,6 +32,7 @@
       expect_err = 'Invalid option "random" in MooseEnum.'
       detail = 'a non-supported optimizer.'
       libtorch = true
+      libtorch_devices = 'cpu cuda mps'
       allow_test_objects = True
     []
   []
@@ -42,6 +45,7 @@
       detail = 'rectified linear unit (ReLU);'
       cli_args = "Outputs/file_base=relu"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
     []
     [sigmoid]
@@ -52,6 +56,7 @@
       cli_args = "VectorPostprocessors/test/activation_functions='sigmoid sigmoid' "
                  "Outputs/file_base=sigmoid"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
     []
     [gelu]
@@ -61,6 +66,7 @@
       detail = 'Gaussian Error Linear Unit (GELU);'
       cli_args = "VectorPostprocessors/test/activation_functions='gelu gelu' Outputs/file_base=gelu"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
     []
     [elu]
@@ -70,6 +76,7 @@
       detail = 'Exponential Linear Unit (ELU);'
       cli_args = "VectorPostprocessors/test/activation_functions='elu elu' Outputs/file_base=elu"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
     []
     [linear]
@@ -80,6 +87,7 @@
       cli_args = "VectorPostprocessors/test/activation_functions='linear linear' "
                  "Outputs/file_base=linear"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
     []
   []
@@ -90,10 +98,11 @@
       input = 'test_ann_trainer.i'
       csvdiff = 'adagrad_test_trainer_0001.csv'
       detail = 'Adaptive Gradient (AdaGrad);'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' 
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad'
                   VectorPostprocessors/test_trainer/num_epochs=40
                   Outputs/file_base=adagrad"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
       rel_err = 2e-4
     []
@@ -104,6 +113,7 @@
       detail = 'Adam;'
       cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base='adam'"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
       rel_err = 1e-5
     []
@@ -115,6 +125,7 @@
       cli_args = "VectorPostprocessors/test_trainer/optimizer_type='rmsprop' "
                  "Outputs/file_base='rmsprop'"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
       rel_err = 1e-5
     []
@@ -125,6 +136,7 @@
       detail = 'Stochastic Gradient Descent (CGD);'
       cli_args = "VectorPostprocessors/test_trainer/optimizer_type='sgd' Outputs/file_base='sgd'"
       libtorch = true
+      libtorch_devices = 'cpu cuda'
       allow_test_objects = True
       rel_err = 1e-5
     []

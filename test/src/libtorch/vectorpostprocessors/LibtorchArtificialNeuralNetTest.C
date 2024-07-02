@@ -22,14 +22,22 @@ LibtorchArtificialNeuralNetTest::validParams()
 
   params.addParam<std::vector<std::string>>(
       "activation_functions", std::vector<std::string>({"relu"}), "Test activation functions");
+  MooseEnum torch_data_type("float double", "double");
+  params.addParam<MooseEnum>(
+      "data_type", torch_data_type, "The data type we would like to use in torch.");
 
   return params;
 }
 
 LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputParameters & params)
-  : GeneralVectorPostprocessor(params), _nn_values(declareVector("nn_values"))
+  : GeneralVectorPostprocessor(params),
+    _nn_values(declareVector("nn_values")),
+    _data_type(determineTorchDataType(getParam<MooseEnum>("data_type")))
 {
   torch::manual_seed(11);
+
+  torch::TensorOptions options(
+      torch::TensorOptions().dtype(_data_type).device(_app.getLibtorchDevice()));
 
   // Define neurons per hidden layer: we will have two hidden layers with 4 neurons each
   std::vector<unsigned int> num_neurons_per_layer({4, 4});
@@ -41,16 +49,18 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
           3,
           1,
           num_neurons_per_layer,
-          getParam<std::vector<std::string>>("activation_functions"));
+          getParam<std::vector<std::string>>("activation_functions"),
+          _app.getLibtorchDevice(),
+          _data_type);
 
   // Create an Adam optimizer
   torch::optim::Adam optimizer(nn->parameters(), torch::optim::AdamOptions(0.02));
   // reset the gradients
   optimizer.zero_grad();
   // This is our test input
-  torch::Tensor input = at::ones({1, 3}, at::kDouble);
+  torch::Tensor input = at::ones({1, 3}, options);
   // This is our test output (we know the result)
-  torch::Tensor output = at::ones({1}, at::kDouble);
+  torch::Tensor output = at::ones({1, 1}, options);
   // This is our prediction for the test input
   torch::Tensor prediction = nn->forward(input);
   // We save our first prediction
@@ -65,6 +75,15 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   prediction = nn->forward(input);
   // We save our second prediction
   _nn_values.push_back(prediction.item<double>());
+}
+
+torch::ScalarType
+LibtorchArtificialNeuralNetTest::determineTorchDataType(const MooseEnum & data_enum)
+{
+  if (data_enum == "float")
+    return torch::kFloat;
+  else
+    return torch::kDouble;
 }
 
 #endif
