@@ -113,8 +113,7 @@ GhostBoundary::operator>=(const RelationshipManager & other) const
 {
   if (auto asoi = dynamic_cast<const GhostBoundary *>(&other))
   {
-    if (_boundary_name == asoi->_boundary_name &&
-        _ghost_point_neighbors >= asoi->_ghost_point_neighbors)
+    if (_boundary_name == asoi->_boundary_name)
       return true;
   }
   return false;
