@@ -198,7 +198,7 @@ ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
 Convergence::MooseConvergenceStatus
 ResidualConvergence::checkConvergence(int it, Real xnorm, Real snorm, Real fnorm)
 {
-  TIME_SECTION(_perf_nonlinear);
+  TIME_SECTION(_perf_check_convergence);
 
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
   MooseConvergenceStatus reason = MooseConvergenceStatus::ITERATING;

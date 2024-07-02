@@ -25,7 +25,7 @@ Convergence::Convergence(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     PerfGraphInterface(this),
-    _perf_nonlinear(
+    _perf_check_convergence(
         registerTimedSection("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence"))
 {
 }

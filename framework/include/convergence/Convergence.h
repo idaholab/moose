@@ -34,7 +34,7 @@ public:
   virtual MooseConvergenceStatus checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
 
 protected:
-  PerfID _perf_nonlinear;
+  PerfID _perf_check_convergence;
   /**
    * Performs setup necessary for each call to checkConvergence
    */
