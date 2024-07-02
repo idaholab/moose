@@ -789,8 +789,9 @@ FEProblemBase::initialSetup()
 
   if (!_nonlinear_convergence_name.empty())
     getConvergence(_nonlinear_convergence_name).initialSetup();
+  else
 
-  SubProblem::initialSetup();
+    SubProblem::initialSetup();
 
   if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) > 1)
     mooseError("Checkpoint recovery and restart and exodus restart are all mutually exclusive.");

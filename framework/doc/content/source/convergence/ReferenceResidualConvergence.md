@@ -6,7 +6,7 @@ The `ReferenceResidualConvergence` object facilitates the assesment of convergen
 
 See [ReferenceResidualProblem.md]. Similar input as the one used in the `[Problem]` block can now be prescribed in the `[Convergence]` block as below
 
-!listing test/tests/convergence/reference_residual.i block=Convergence
+!listing test/tests/convergence/reference_residual/reference_residual.i block=Convergence
 
 
 !syntax parameters /Convergence/ReferenceResidualConvergence

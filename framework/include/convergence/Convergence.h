@@ -27,16 +27,10 @@ public:
 
   Convergence(const InputParameters & parameters);
 
-  static InputParameters residualConvergenceParams();
-
   virtual void initialSetup() override{};
 
   virtual MooseConvergenceStatus checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
 
 protected:
   PerfID _perf_check_convergence;
-  /**
-   * Performs setup necessary for each call to checkConvergence
-   */
-  virtual void nonlinearConvergenceSetup(){};
 };

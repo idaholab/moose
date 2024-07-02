@@ -31,13 +31,13 @@ Considering that nonlinear systems are ultimately solved via linearization the u
 
 #### Other stopping criteria
 
-Presuming the user gathered enough knowledge about the solver behaviour and the nature of the problem, addtional stopping requirements can be added, such as `nl_max_its` which instructs after how many iterations to abort the solver, or `nl_abs_step_tol`, which indicates what tolerance to be accpeted at each solver step.  
+Presuming the user gathered enough knowledge about the solver behaviour and the nature of the problem, addtional stopping requirements can be added, such as `nl_max_its` which instructs after how many iterations to abort the solver, or `nl_abs_step_tol`, which indicates what tolerance to be accepted at each solver step.  
 
 ## Example input syntax
 
-!listing test/tests/convergence/diffusion_convergence.i block=Convergence
+!listing test/tests/convergence/residual_convergence/diffusion_convergence.i block=Convergence
 
-!listing test/tests/convergence/diffusion_convergence.i block=Executioner
+!listing test/tests/convergence/residual_convergence/diffusion_convergence.i block=Executioner
 where the [!param](/Executioner/nonlinear_convergence) indicates the convergence type to be `ResidualConvergence` and additional parameters. Curently convergence specific parameters can be still specified in the Executioner block.
 
 !syntax parameters /Convergence/ResidualConvergence

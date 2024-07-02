@@ -21,6 +21,8 @@ class ResidualConvergence : public Convergence
 public:
   static InputParameters validParams();
 
+  static InputParameters residualConvergenceParams();
+
   ResidualConvergence(const InputParameters & parameters);
 
   Convergence::MooseConvergenceStatus
@@ -41,6 +43,11 @@ protected:
                                         const Real rtol,
                                         const Real abstol,
                                         std::ostringstream & oss);
+
+  /**
+   * Performs setup necessary for each call to checkConvergence
+   */
+  virtual void nonlinearConvergenceSetup(){};
 
   FEProblemBase & _fe_problem;
 
