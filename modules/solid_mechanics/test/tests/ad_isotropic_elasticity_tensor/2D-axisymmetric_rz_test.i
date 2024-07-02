@@ -2,6 +2,7 @@
   type = GeneratedMesh
   dim = 2
   elem_type = QUAD8
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

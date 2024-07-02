@@ -11,6 +11,7 @@
     nx = 2
     ny = 2
   []
+  use_dispalced_mesh = false
 []
 
 [Variables]

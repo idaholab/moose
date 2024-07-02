@@ -11,6 +11,7 @@
   ny = 5
   nz = 5
   elem_type = HEX8
+  use_displaced_mesh = false
 []
 
 [Physics/SolidMechanics/QuasiStatic]

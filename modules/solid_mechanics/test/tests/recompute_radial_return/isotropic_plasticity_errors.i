@@ -14,6 +14,7 @@
   nx = 1
   ny = 1
   nz = 1
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

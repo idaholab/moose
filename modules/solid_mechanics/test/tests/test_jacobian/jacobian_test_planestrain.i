@@ -14,6 +14,7 @@
   dim = 2
   nx = 1
   ny = 1
+  use_displaced_mesh = false
 []
 
 [Variables]

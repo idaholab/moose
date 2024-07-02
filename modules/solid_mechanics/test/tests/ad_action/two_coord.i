@@ -21,6 +21,7 @@
     top_right = '1 1 0'
     input = block1
   []
+  use_displaced_mesh = false
 []
 
 [Problem]

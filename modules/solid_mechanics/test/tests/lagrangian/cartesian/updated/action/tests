@@ -26,7 +26,7 @@
     exodiff = 'L_small_stab.e'
     requirement = "Action produces identical results for small deformations/with stabilization"
     abs_zero = 1e-6
-    cli_args = "Outputs/out/file_base=L_small_stab Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
+    cli_args = "Outputs/out/file_base=L_small_stab Mesh/use_displaced_mesh=false Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
   [../]
   [./action_small_no_stab]
     type = Exodiff
@@ -34,7 +34,7 @@
     exodiff = 'L_small_nostab.e'
     requirement = "Action produces identical results for small deformations/no stabilization"
     abs_zero = 1e-4
-    cli_args = "Outputs/out/file_base=L_small_nostab Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
+    cli_args = "Outputs/out/file_base=L_small_nostab Mesh/use_displaced_mesh=false Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
   [../]
   [./action_1D]
     type = Exodiff

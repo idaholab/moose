@@ -23,6 +23,7 @@
 
 [Mesh]
   file = 42_node_side.e
+  use_displaced_mesh = false
 []
 
 [Physics]

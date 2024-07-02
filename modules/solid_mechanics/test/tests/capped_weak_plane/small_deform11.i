@@ -33,6 +33,7 @@
   ymax = 0.5
   zmin = -0.5
   zmax = 0.5
+  use_displaced_mesh = false
 []
 
 

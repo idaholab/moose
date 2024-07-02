@@ -11,6 +11,7 @@
 
 [Mesh]
   file = 1x1x1cube.e
+  use_displaced_mesh = false
 []
 
 [Functions]

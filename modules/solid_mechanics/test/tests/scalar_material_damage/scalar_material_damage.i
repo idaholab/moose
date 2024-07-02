@@ -18,6 +18,7 @@
   ny = 1
   nz = 1
   elem_type = HEX8
+  use_displaced_mesh = false
 []
 
 [AuxVariables]

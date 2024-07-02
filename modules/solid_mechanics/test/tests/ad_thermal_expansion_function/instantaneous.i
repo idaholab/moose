@@ -7,6 +7,7 @@
     type = GeneratedMeshGenerator
     dim = 3
   [../]
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

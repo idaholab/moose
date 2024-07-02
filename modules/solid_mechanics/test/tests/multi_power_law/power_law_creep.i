@@ -4,6 +4,7 @@
   nx = 2
   ny = 2
   second_order = true
+  use_displaced_mesh = false
 []
 
 [GlobalParams]
