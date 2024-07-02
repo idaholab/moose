@@ -32,16 +32,12 @@ GhostBoundary::validParams()
 }
 
 GhostBoundary::GhostBoundary(const InputParameters & params)
-  : RelationshipManager(params),
-    _boundary_name(getParam<std::vector<BoundaryName>>("boundary")),
-    _ghost_point_neighbors(getParam<bool>("ghost_point_neighbors"))
+  : RelationshipManager(params), _boundary_name(getParam<std::vector<BoundaryName>>("boundary"))
 {
 }
 
 GhostBoundary::GhostBoundary(const GhostBoundary & other)
-  : RelationshipManager(other),
-    _boundary_name(other._boundary_name),
-    _ghost_point_neighbors(other._ghost_point_neighbors)
+  : RelationshipManager(other), _boundary_name(other._boundary_name)
 {
 }
 
