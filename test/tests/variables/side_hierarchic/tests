@@ -8,4 +8,13 @@
     design = 'syntax/Variables/index.md'
     requirement = 'The system shall initialize SIDE_HIERARCHIC variables as instructed'
   [../]
+  [side_hierarchic_array]
+      type = Exodiff
+      input = 'side_hierarchic_array.i'
+      exodiff = 'side_hierarchic_array_out.e'
+
+      issues = '#27639'
+      design = 'syntax/Variables/index.md'
+      requirement = 'The system shall initialize SIDE_HIERARCHIC array variables as instructed'
+  []
 []

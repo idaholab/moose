@@ -1354,6 +1354,7 @@ FEProblemBase::timestepSetup()
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
     //     we're ready to update the sparsity pattern
     es().reinit_systems();
+    setStrides();
   }
 
   if (_line_search)
@@ -4759,6 +4760,8 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects(const bool mortar_changed
 
     if (_displaced_mesh)
       _displaced_problem->es().reinit();
+
+    setStrides();
   }
 }
 
@@ -5894,6 +5897,7 @@ FEProblemBase::init()
   if (_displaced_problem)
     _displaced_problem->init();
 
+  setStrides();
   _initialized = true;
 }
 
@@ -7542,6 +7546,7 @@ FEProblemBase::adaptMesh()
   if (mesh_changed)
     es().reinit_systems();
 
+  setStrides();
   return mesh_changed;
 }
 #endif // LIBMESH_ENABLE_AMR
@@ -7629,6 +7634,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     es().reinit_solutions();
   else
     es().reinit();
+
+  setStrides();
 
   // Updating MooseMesh first breaks other adaptivity code, unless we
   // then *again* update the MooseMesh caches.  E.g. the definition of
@@ -8837,4 +8844,13 @@ FEProblemBase::setCurrentAlgebraicBndNodeRange(ConstBndNodeRange * range)
   }
 
   _current_algebraic_bnd_node_range = std::make_unique<ConstBndNodeRange>(*range);
+}
+void
+FEProblemBase::setStrides()
+{
+  for (auto & sys : _solver_systems)
+    sys->setStrides();
+  _aux->setStrides();
+  if (_displaced_problem)
+    _displaced_problem->setStrides();
 }

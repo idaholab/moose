@@ -937,6 +937,11 @@ public:
    */
   virtual void compute(ExecFlagType type) = 0;
 
+  /**
+   * Setup strides for array variables.
+   */
+  virtual void setStrides();
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.

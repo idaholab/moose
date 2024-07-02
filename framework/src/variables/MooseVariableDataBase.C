@@ -405,22 +405,14 @@ MooseVariableDataBase<RealEigenVector>::insert(NumericVector<Number> & residual)
   if (_has_dof_values)
   {
     auto & dof_values = _vector_tags_dof_u[_solution_tag];
-    if (isNodal())
-    {
-      for (unsigned int i = 0; i < _dof_indices.size(); ++i)
-        for (unsigned int j = 0; j < _count; ++j)
-          residual.set(_dof_indices[i] + j, dof_values[i](j));
-    }
-    else
-    {
-      unsigned int n = 0;
-      for (unsigned int j = 0; j < _count; ++j)
-      {
-        for (unsigned int i = 0; i < _dof_indices.size(); ++i)
-          residual.set(_dof_indices[i] + n, dof_values[i](j));
-        n += _dof_indices.size();
-      }
-    }
+    std::vector<std::vector<dof_id_type>> all_dofs_indices(_count);
+    all_dofs_indices[0] = _dof_indices;
+    for (unsigned int comp = 1; comp < _count; ++comp)
+      all_dofs_indices[comp] = _var.componentDofIndices(_dof_indices, comp);
+
+    for (const auto i : index_range(_dof_indices))
+      for (const auto j : make_range(_count))
+        residual.set(all_dofs_indices[j][i], dof_values[i](j));
   }
 }
 
@@ -442,22 +434,15 @@ MooseVariableDataBase<RealEigenVector>::add(NumericVector<Number> & residual)
   if (_has_dof_values)
   {
     auto & dof_values = _vector_tags_dof_u[_solution_tag];
-    if (isNodal())
-    {
-      for (unsigned int i = 0; i < _dof_indices.size(); ++i)
-        for (unsigned int j = 0; j < _count; ++j)
-          residual.add(_dof_indices[i] + j, dof_values[i](j));
-    }
-    else
-    {
-      unsigned int n = 0;
-      for (unsigned int j = 0; j < _count; ++j)
-      {
-        for (unsigned int i = 0; i < _dof_indices.size(); ++i)
-          residual.add(_dof_indices[i] + n, dof_values[i](j));
-        n += _dof_indices.size();
-      }
-    }
+
+    std::vector<std::vector<dof_id_type>> all_dofs_indices(_count);
+    all_dofs_indices[0] = _dof_indices;
+    for (unsigned int comp = 1; comp < _count; ++comp)
+      all_dofs_indices[comp] = _var.componentDofIndices(_dof_indices, comp);
+
+    for (const auto i : index_range(_dof_indices))
+      for (const auto j : make_range(_count))
+        residual.add(all_dofs_indices[j][i], dof_values[i](j));
   }
 }
 
@@ -617,27 +602,26 @@ MooseVariableDataBase<OutputType>::getArrayDoFValues(const NumericVector<Number>
                                                      MooseArray<RealEigenVector> & dof_values) const
 {
   dof_values.resize(n);
-  if (isNodal())
+
+  std::vector<std::vector<dof_id_type>> all_dofs_indices(_count);
+  all_dofs_indices[0] = _dof_indices;
+
+  // Populate all_dofs_indices with DoFs for each component
+  for (unsigned int comp = 1; comp < _count; ++comp)
   {
-    for (unsigned int i = 0; i < n; ++i)
-    {
-      dof_values[i].resize(_count);
-      auto dof = _dof_indices[i];
-      for (unsigned int j = 0; j < _count; ++j)
-        dof_values[i](j) = sol(dof++);
-    }
+    all_dofs_indices[comp] = _var.componentDofIndices(_dof_indices, comp);
   }
-  else
+  // Iterate over each entry to populate dof_values
+  for (unsigned int i = 0; i < n; ++i)
   {
-    for (unsigned int i = 0; i < n; ++i)
+    // Resize the inner vector to hold _count components
+    dof_values[i].resize(_count);
+    for (unsigned int j = 0; j < _count; ++j)
     {
-      dof_values[i].resize(_count);
-      auto dof = _dof_indices[i];
-      for (unsigned int j = 0; j < _count; ++j)
-      {
-        dof_values[i](j) = sol(dof);
-        dof += n;
-      }
+      // Retrieve the corresponding DoF index from the correct component
+      auto dof = all_dofs_indices[j][i];
+      // Assign the solution value to the dof_values array
+      dof_values[i](j) = sol(dof);
     }
   }
 }

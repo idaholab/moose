@@ -1211,6 +1211,17 @@ SystemBase::copyVars(ExodusII_IO & io)
 }
 
 void
+SystemBase::setStrides()
+{
+  for (MooseIndex(_vars) thread = 0; thread < _vars.size(); ++thread)
+  {
+    const std::vector<MooseVariableFieldBase *> & var_vec = _vars[thread].fieldVariables();
+    for (auto & var : var_vec)
+      var->setStride();
+  }
+}
+
+void
 SystemBase::update(const bool update_libmesh_system)
 {
   if (update_libmesh_system)

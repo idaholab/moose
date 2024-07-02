@@ -374,6 +374,11 @@ public:
 
   virtual bool hasNonlocalCoupling() const override;
 
+  /**
+   * Setup strides for array variables.
+   */
+  void setStrides();
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;
