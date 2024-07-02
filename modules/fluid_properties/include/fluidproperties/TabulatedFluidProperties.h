@@ -201,6 +201,8 @@ protected:
 
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidProperties * const _fp;
+  /// Whether to allow a fp object when a tabulation is in use
+  const bool _allow_fp_and_tabulation;
 
   /// List of required column names to be read
   const std::vector<std::string> _required_columns{"pressure", "temperature"};

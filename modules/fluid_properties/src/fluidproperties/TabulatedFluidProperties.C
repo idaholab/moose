@@ -82,6 +82,12 @@ TabulatedFluidProperties::validParams()
       "Option to use a base-10 logarithmically-spaced grid for specific internal energy instead "
       "of a linearly-spaced grid.");
 
+  // This is generally a bad idea. However, several properties have not been tabulated so several
+  // tests are relying on the original fp object to provide the value (for example for the
+  // vaporPressure())
+  params.addParam<bool>(
+      "allow_fp_and_tabulation", false, "Whether to allow the two sources of data concurrently");
+
   params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
                               "Variable set conversion");
@@ -110,6 +116,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
                                          : isParamValid("fluid_property_output_file")),
     _fp(isParamValid("fp") ? &getUserObject<SinglePhaseFluidProperties>("fp") : nullptr),
+    _allow_fp_and_tabulation(getParam<bool>("allow_fp_and_tabulation")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
     _interpolated_properties(),
     _interpolate_density(false),
@@ -152,10 +159,10 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
   _csv_reader.setComment("#");
 
   // Can only and must receive one source of data
-  if (_fp && !_file_name_in.empty())
+  if (_fp && !_file_name_in.empty() && !_allow_fp_and_tabulation)
     paramError("fluid_property_file",
                "Cannot supply both a fluid properties object with 'fp' and a source tabulation "
-               "file with 'fluid_property_file'");
+               "file with 'fluid_property_file', unless 'allow_fp_and_tabulation' is set to true");
   if (!_fp && _file_name_in.empty())
     paramError("fluid_property_file",
                "Either a fluid properties object with the parameter 'fp' and a source tabulation "
@@ -381,7 +388,7 @@ TabulatedFluidProperties::molarMass() const
   if (_fp)
     return _fp->molarMass();
   else
-    mooseError("Molar Mass not specified.");
+    mooseError("Molar mass can currently only be computed by providing a 'fp' object.");
 }
 
 Real
@@ -905,7 +912,7 @@ TabulatedFluidProperties::henryCoefficients() const
   if (_fp)
     return _fp->henryCoefficients();
   else
-    mooseError("henryCoefficients not specified.");
+    mooseError("Henry coefficients can currently only be computed by providing a 'fp' object.");
 }
 
 Real
@@ -914,7 +921,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature) const
   if (_fp)
     return _fp->vaporPressure(temperature);
   else
-    mooseError("vaporPres not specified.");
+    mooseError("Vapor pressure can currently only be computed by providing a 'fp' object.");
 }
 
 void
@@ -923,7 +930,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
   if (_fp)
     _fp->vaporPressure(temperature, psat, dpsat_dT);
   else
-    mooseError("vaporPressure not specified.");
+    mooseError("Vapor pressure can currently only be computed by providing a 'fp' object.");
 }
 
 Real
