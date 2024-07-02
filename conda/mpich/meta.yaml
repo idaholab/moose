@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 16 %}
+{% set build = 17 %}
 {% set version = "4.0.2" %}
 
 # permanent
@@ -26,6 +26,8 @@ build:
   pin_depends: strict
   run_exports:
     - {{ pin_subpackage('moose-mpich', max_pin='x.x') }}
+  ignore_exports:
+    - openssl
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
