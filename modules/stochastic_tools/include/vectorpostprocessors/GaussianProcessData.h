@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "GaussianProcess.h"
+#include "GaussianProcessSurrogate.h"
 #include "SurrogateModelInterface.h"
 
 class GaussianProcessData : public GeneralVectorPostprocessor, public SurrogateModelInterface
@@ -22,12 +22,12 @@ public:
   GaussianProcessData(const InputParameters & parameters);
 
   virtual void initialize() override;
-  virtual void execute() override{};
-  virtual void finalize() override{};
+  virtual void execute() override {}
+  virtual void finalize() override {}
 
 protected:
   /// Reference to GaussianProcess
-  const GaussianProcess & _gp_uo;
+  const GaussianProcessSurrogate & _gp_surrogate;
 
   /// Vector of hyperparamater values
   std::vector<VectorPostprocessorValue *> _hp_vector;

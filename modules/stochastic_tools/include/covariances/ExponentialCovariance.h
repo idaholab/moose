@@ -32,20 +32,10 @@ public:
                                   const Real gamma,
                                   const bool is_self_covariance);
 
-  /// Used for outputting Hyper-parameter settings
-  void buildAdditionalHyperParamMap(
-      std::unordered_map<std::string, Real> & map,
-      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
-
-  /// Used for setting Hyper-parameter settings
-  void loadAdditionalHyperParamMap(
-      std::unordered_map<std::string, Real> & map,
-      std::unordered_map<std::string, std::vector<Real>> & vec_map) override;
-
   /// Redirect dK/dhp for hyperparameter "hp"
-  void computedKdhyper(RealEigenMatrix & dKdhp,
+  bool computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
-                       std::string hyper_param_name,
+                       const std::string & hyper_param_name,
                        unsigned int ind) const override;
 
   /// Computes dK/dlf for individual length factors
@@ -57,6 +47,15 @@ public:
                            const int ind);
 
 private:
+  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
+  const std::vector<Real> & _length_factor;
+
+  /// signal variance (\sigma_f^2)
+  const Real & _sigma_f_squared;
+
+  /// noise variance (\sigma_n^2)
+  const Real & _sigma_n_squared;
+
   /// gamma exponential factor for use in kernel
-  Real _gamma;
+  const Real & _gamma;
 };

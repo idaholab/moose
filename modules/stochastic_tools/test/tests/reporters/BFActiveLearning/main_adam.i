@@ -94,9 +94,9 @@
     n_train = 8
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
-    learning_function='Ufunction'
+    learning_function = 'Ufunction'
     learning_function_parameter = 349.345
-    learning_function_threshold=2.0
+    learning_function_threshold = 2.0
     outputs_lf = constant/reporter_transfer_lf:avg:value
   []
 []
@@ -107,25 +107,24 @@
     covariance_function = 'covar'
     standardize_params = 'true'
     standardize_data = 'true'
-    tune_parameters = 'signal_variance length_factor'
-    tuning_algorithm = 'adam'
-    iter_adam = 5000
-    learning_rate_adam = 0.001
-    show_optimization_details = true
+    tune_parameters = 'covar:signal_variance covar:length_factor'
+    num_iters = 5000
+    learning_rate = 0.001
+    show_every_nth_iteration = 1
     batch_size = 200
   []
 []
 
 [Surrogates]
   [GP_eval]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = GP_al_trainer
   []
 []
 
 [Covariance]
   [covar]
-    type= SquaredExponentialCovariance
+    type = SquaredExponentialCovariance
     signal_variance = 1.0
     noise_variance = 1e-8
     length_factor = '1.0 1.0 1.0'

@@ -75,31 +75,33 @@
   [GP_avg_trainer]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    covariance_function = 'rbf'
-    standardize_params = 'true'               #Center and scale the training params
-    standardize_data = 'true'                 #Center and scale the training data
-    sampler = train_sample
     response = results/data:avg:value
-    tao_options = '-tao_bncg_type kd'
-    tune_parameters = ' signal_variance length_factor'
+    covariance_function = 'rbf'
+    standardize_params = 'true' #Center and scale the training params
+    standardize_data = 'true' #Center and scale the training data
+    sampler = train_sample
+    tune_parameters = 'rbf:signal_variance rbf:length_factor'
     tuning_min = ' 1e-9 1e-9'
     tuning_max = ' 1e16  1e16'
-    tuning_algorithm = 'tao'
+    num_iters = 10000
+    batch_size = 6
+    learning_rate = 0.0005
+    show_every_nth_iteration = 1
   []
 []
 
 [Covariance]
   [rbf]
-    type=SquaredExponentialCovariance
-    signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.38971'         #Select a length factor for each parameter (k and q)
+    type = SquaredExponentialCovariance
+    signal_variance = 1 #Use a signal variance of 1 in the kernel
+    noise_variance = 1e-3 #A small amount of noise can help with numerical stability
+    length_factor = '0.38971' #Select a length factor for each parameter (k and q)
   []
 []
 
 [Surrogates]
   [gauss_process_avg]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = 'GP_avg_trainer'
   []
 []
@@ -131,7 +133,6 @@
     execute_on = final
   []
 []
-
 
 [Outputs]
   csv = true

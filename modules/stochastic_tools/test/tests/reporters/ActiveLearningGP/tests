@@ -35,25 +35,5 @@
                  "Outputs/file_base='cov_squared_exp'"
       detail = 'a single row in the sampler using the COV learning function and automatically increase the number of steps when re-training is needed;'
     []
-    [SingleProc_SingleRow_Ufunction_tao]
-      type = 'JSONDiff'
-      input = main_tao.i
-      jsondiff = 'ufunction_tao.json'
-      rel_err = 1e-3
-      abs_zero = 1e-3
-      detail = 'TAO optimization and automatically increase the number of steps when re-training is needed;'
-    []
-  []
-
-  [errors]
-    requirement = 'The system shall throw an error when performing active learning when '
-    [batch_with_tao]
-      type = RunException
-      input = main_tao.i
-      cli_args = "Trainers/GP_al_trainer/batch_size=5"
-      detail = 'mini-batching is requested with the TAO optimization library;'
-      expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please "
-                   "use Adam optimization."
-    []
   []
 []

@@ -30,22 +30,17 @@ ActiveLearningGaussianProcess::validParams()
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
-  MooseEnum tuning_type("tao adam none", "none");
-  params.addRequiredParam<MooseEnum>(
-      "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
-  params.addParam<unsigned int>("iter_adam", 1000, "Tolerance value for Adam optimization");
+  params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
-  params.addParam<Real>("learning_rate_adam", 0.001, "The learning rate for Adam optimization");
-  params.addParam<std::string>(
-      "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
-  params.addParam<bool>(
-      "show_optimization_details", false, "Switch to show TAO or Adam solver results");
+  params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
+  params.addParam<unsigned int>(
+      "show_every_nth_iteration",
+      0,
+      "Switch to show Adam optimization loss values at every nth step. If 0, nothing is showed.");
   params.addParam<std::vector<std::string>>(
       "tune_parameters", {}, "Select hyperparameters to be tuned");
-  params.addParam<std::vector<Real>>(
-      "tuning_min", std::vector<Real>(), "Minimum allowable tuning value");
-  params.addParam<std::vector<Real>>(
-      "tuning_max", std::vector<Real>(), "Maximum allowable tuning value");
+  params.addParam<std::vector<Real>>("tuning_min", {}, "Minimum allowable tuning value");
+  params.addParam<std::vector<Real>>("tuning_max", {}, "Maximum allowable tuning value");
   return params;
 }
 
@@ -53,28 +48,20 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
   : SurrogateTrainerBase(parameters),
     CovarianceInterface(parameters),
     SurrogateModelInterface(this),
-    _gp_handler(declareModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
+    _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    _optimization_opts(StochasticTools::GaussianProcessHandler::GPOptimizerOptions(
-        getParam<MooseEnum>("tuning_algorithm"),
-        getParam<std::string>("tao_options"),
-        getParam<bool>("show_optimization_details"),
-        getParam<unsigned int>("iter_adam"),
+    _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
+        getParam<unsigned int>("show_every_nth_iteration"),
+        getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
-        getParam<Real>("learning_rate_adam")))
+        getParam<Real>("learning_rate")))
 {
-  if (getParam<unsigned int>("batch_size") > 0 && _optimization_opts.opt_type == "tao")
-    paramError("batch_size",
-               "Mini-batch sampling is not compatible with the TAO optimization library. Please "
-               "use Adam optimization.");
-
-  _gp_handler.initialize(
-      getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")),
-      getParam<std::vector<std::string>>("tune_parameters"),
-      getParam<std::vector<Real>>("tuning_min"),
-      getParam<std::vector<Real>>("tuning_max"));
+  _gp.initialize(getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")),
+                 getParam<std::vector<std::string>>("tune_parameters"),
+                 getParam<std::vector<Real>>("tuning_min"),
+                 getParam<std::vector<Real>>("tuning_max"));
 }
 
 void
@@ -105,18 +92,18 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
 
   // Standardize (center and scale) training params
   if (_standardize_params)
-    _gp_handler.standardizeParameters(_training_params);
+    _gp.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp_handler.paramStandardizer().set(0, 1, inputs[0].size());
+    _gp.paramStandardizer().set(0, 1, inputs[0].size());
 
   // Standardize (center and scale) training data
   if (_standardize_data)
-    _gp_handler.standardizeData(training_data);
+    _gp.standardizeData(training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp_handler.dataStandardizer().set(0, 1, inputs[0].size());
+    _gp.dataStandardizer().set(0, 1, inputs[0].size());
 
   // Setup the covariance
-  _gp_handler.setupCovarianceMatrix(_training_params, training_data, _optimization_opts);
+  _gp.setupCovarianceMatrix(_training_params, training_data, _optimization_opts);
 }

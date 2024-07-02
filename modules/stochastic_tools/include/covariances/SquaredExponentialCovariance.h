@@ -32,9 +32,9 @@ public:
                                          const bool is_self_covariance);
 
   /// Redirect dK/dhp for hyperparameter "hp"
-  void computedKdhyper(RealEigenMatrix & dKdhp,
+  bool computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
-                       std::string hyper_param_name,
+                       const std::string & hyper_param_name,
                        unsigned int ind) const override;
 
   /// Computes dK/dlf for individual length factors
@@ -43,4 +43,14 @@ public:
                            const std::vector<Real> & length_factor,
                            const Real sigma_f_squared,
                            const int ind);
+
+protected:
+  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
+  const std::vector<Real> & _length_factor;
+
+  /// signal variance (\sigma_f^2)
+  const Real & _sigma_f_squared;
+
+  /// noise variance (\sigma_n^2)
+  const Real & _sigma_n_squared;
 };

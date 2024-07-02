@@ -4,7 +4,7 @@ The GaussianProcessData object simply coverts a the covariance function hyperpar
 
 ## Example Syntax
 
-!listing modules/stochastic_tools/test/tests/surrogates/gaussian_process/GP_squared_exponential_tuned.i block=VectorPostprocessors
+!listing modules/stochastic_tools/test/tests/surrogates/gaussian_process/GP_squared_exponential_tuned_adam.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/GaussianProcessData
 

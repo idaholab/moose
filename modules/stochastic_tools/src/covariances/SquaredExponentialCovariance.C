@@ -17,18 +17,24 @@ SquaredExponentialCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
   params.addClassDescription("Squared Exponential covariance function.");
-  params.makeParamRequired<std::vector<Real>>("length_factor");
-  params.makeParamRequired<Real>("signal_variance");
-  params.makeParamRequired<Real>("noise_variance");
+  params.addRequiredParam<std::vector<Real>>("length_factor",
+                                             "Length factors to use for Covariance Kernel");
+  params.addRequiredParam<Real>("signal_variance",
+                                "Signal Variance ($\\sigma_f^2$) to use for kernel calculation.");
+  params.addParam<Real>(
+      "noise_variance", 0.0, "Noise Variance ($\\sigma_n^2$) to use for kernel calculation.");
   return params;
 }
 
 SquaredExponentialCovariance::SquaredExponentialCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters)
+  : CovarianceFunctionBase(parameters),
+    _length_factor(addVectorRealHyperParameter(
+        "length_factor", getParam<std::vector<Real>>("length_factor"), true)),
+    _sigma_f_squared(
+        addRealHyperParameter("signal_variance", getParam<Real>("signal_variance"), true)),
+    _sigma_n_squared(
+        addRealHyperParameter("noise_variance", getParam<Real>("noise_variance"), true))
 {
-  _tunable_hp.insert("noise_variance");
-  _tunable_hp.insert("signal_variance");
-  _tunable_hp.insert("length_factor");
 }
 
 void
@@ -75,20 +81,36 @@ SquaredExponentialCovariance::SquaredExponentialFunction(RealEigenMatrix & K,
   }
 }
 
-void
+bool
 SquaredExponentialCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
                                               const RealEigenMatrix & x,
-                                              std::string hyper_param_name,
+                                              const std::string & hyper_param_name,
                                               unsigned int ind) const
 {
-  if (hyper_param_name == "noise_variance")
+  if (name().length() + 1 > hyper_param_name.length())
+    return false;
+
+  const std::string name_without_prefix = hyper_param_name.substr(name().length() + 1);
+
+  if (name_without_prefix == "noise_variance")
+  {
     SquaredExponentialFunction(dKdhp, x, x, _length_factor, 0, 1, true);
+    return true;
+  }
 
-  if (hyper_param_name == "signal_variance")
+  if (name_without_prefix == "signal_variance")
+  {
     SquaredExponentialFunction(dKdhp, x, x, _length_factor, 1, 0, false);
+    return true;
+  }
 
-  if (hyper_param_name == "length_factor")
+  if (name_without_prefix == "length_factor")
+  {
     computedKdlf(dKdhp, x, _length_factor, _sigma_f_squared, ind);
+    return true;
+  }
+
+  return false;
 }
 
 void

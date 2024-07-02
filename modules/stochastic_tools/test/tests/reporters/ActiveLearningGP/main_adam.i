@@ -85,17 +85,15 @@
     covariance_function = 'covar'
     standardize_params = 'true'
     standardize_data = 'true'
-    tune_parameters = 'signal_variance length_factor'
-    tuning_algorithm = 'adam'
-    iter_adam = 1000
-    learning_rate_adam = 0.005
-    # show_optimization_details = true
+    tune_parameters = 'covar:signal_variance covar:length_factor'
+    num_iters = 1000
+    learning_rate = 0.005
   []
 []
 
 [Surrogates]
   [GP_eval]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = GP_al_trainer
   []
 []

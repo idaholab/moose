@@ -13,6 +13,17 @@
 namespace MathUtils
 {
 
+void
+kron(RealEigenMatrix & product, const RealEigenMatrix & mat_A, const RealEigenMatrix & mat_B)
+{
+  product.resize(mat_A.rows() * mat_B.rows(), mat_A.cols() * mat_B.cols());
+  for (unsigned int i = 0; i < mat_A.rows(); i++)
+    for (unsigned int j = 0; j < mat_A.cols(); j++)
+      for (unsigned int k = 0; k < mat_B.rows(); k++)
+        for (unsigned int l = 0; l < mat_B.cols(); l++)
+          product(((i * mat_B.rows()) + k), ((j * mat_B.cols()) + l)) = mat_A(i, j) * mat_B(k, l);
+}
+
 Real
 plainLog(Real x, unsigned int derivative_order)
 {

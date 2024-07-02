@@ -18,7 +18,7 @@
 #include "CovarianceFunctionBase.h"
 #include "CovarianceInterface.h"
 
-#include "GaussianProcessHandler.h"
+#include "GaussianProcess.h"
 
 class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
 {
@@ -29,21 +29,21 @@ public:
   virtual void train() override;
   virtual void postTrain() override;
 
-  StochasticTools::GaussianProcessHandler & gpHandler() { return _gp_handler; }
-  const StochasticTools::GaussianProcessHandler & getGPHandler() const { return _gp_handler; }
+  StochasticTools::GaussianProcess & gp() { return _gp; }
+  const StochasticTools::GaussianProcess & gp() const { return _gp; }
 
 private:
   /// Data from the current predictor row
   const std::vector<Real> & _predictor_row;
 
   /// Gaussian process handler responsible for managing training related tasks
-  StochasticTools::GaussianProcessHandler & _gp_handler;
+  StochasticTools::GaussianProcess & _gp;
 
   /// Parameters (x) used for training -- we'll allgather these in postTrain().
   std::vector<std::vector<Real>> _params_buffer;
 
   /// Data (y) used for training.
-  std::vector<Real> _data_buffer;
+  std::vector<std::vector<Real>> _data_buffer;
 
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
@@ -61,17 +61,8 @@ private:
   bool _do_tuning;
 
   /// Struct holding parameters necessary for parameter tuning
-  const StochasticTools::GaussianProcessHandler::GPOptimizerOptions _optimization_opts;
+  const StochasticTools::GaussianProcess::GPOptimizerOptions _optimization_opts;
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
-
-  /// Predictor values from reporters
-  std::vector<const Real *> _pvals;
-
-  /// Columns from sampler for predictors
-  std::vector<unsigned int> _pcols;
-
-  /// Total number of parameters/dimensions
-  unsigned int _n_params;
 };

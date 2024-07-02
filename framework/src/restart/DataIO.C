@@ -51,6 +51,14 @@ dataStore(std::ostream & stream, VariableName & v, void * context)
 
 template <>
 void
+dataStore(std::ostream & stream, UserObjectName & v, void * context)
+{
+  auto & name = static_cast<std::string &>(v);
+  dataStore(stream, name, context);
+}
+
+template <>
+void
 dataStore(std::ostream & stream, bool & v, void * /*context*/)
 {
   stream.write((char *)&v, sizeof(v));
@@ -376,6 +384,14 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 template <>
 void
 dataLoad(std::istream & stream, VariableName & v, void * context)
+{
+  auto & name = static_cast<std::string &>(v);
+  dataLoad(stream, name, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, UserObjectName & v, void * context)
 {
   auto & name = static_cast<std::string &>(v);
   dataLoad(stream, name, context);

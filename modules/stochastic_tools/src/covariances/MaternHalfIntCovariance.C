@@ -17,36 +17,27 @@ MaternHalfIntCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
   params.addClassDescription("Matern half-integer covariance function.");
-  params.makeParamRequired<std::vector<Real>>("length_factor");
-  params.makeParamRequired<Real>("signal_variance");
-  params.makeParamRequired<Real>("noise_variance");
+  params.addRequiredParam<std::vector<Real>>("length_factor",
+                                             "Length factors to use for Covariance Kernel");
+  params.addRequiredParam<Real>("signal_variance",
+                                "Signal Variance ($\\sigma_f^2$) to use for kernel calculation.");
+  params.addParam<Real>(
+      "noise_variance", 0.0, "Noise Variance ($\\sigma_n^2$) to use for kernel calculation.");
   params.addRequiredParam<unsigned int>(
       "p", "Integer p to use for Matern Half Integer Covariance Kernel");
   return params;
 }
 
 MaternHalfIntCovariance::MaternHalfIntCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters), _p(getParam<unsigned int>("p"))
+  : CovarianceFunctionBase(parameters),
+    _length_factor(addVectorRealHyperParameter(
+        "length_factor", getParam<std::vector<Real>>("length_factor"), true)),
+    _sigma_f_squared(
+        addRealHyperParameter("signal_variance", getParam<Real>("signal_variance"), true)),
+    _sigma_n_squared(
+        addRealHyperParameter("noise_variance", getParam<Real>("noise_variance"), true)),
+    _p(addRealHyperParameter("p", getParam<unsigned int>("p"), false))
 {
-  _tunable_hp.insert("noise_variance");
-  _tunable_hp.insert("signal_variance");
-  _tunable_hp.insert("length_factor");
-}
-
-void
-MaternHalfIntCovariance::buildAdditionalHyperParamMap(
-    std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/) const
-{
-  map["p"] = _p;
-}
-
-void
-MaternHalfIntCovariance::loadAdditionalHyperParamMap(
-    std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/)
-{
-  _p = map["p"];
 }
 
 void
@@ -105,20 +96,36 @@ MaternHalfIntCovariance::maternHalfIntFunction(RealEigenMatrix & K,
   }
 }
 
-void
+bool
 MaternHalfIntCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
                                          const RealEigenMatrix & x,
-                                         std::string hyper_param_name,
+                                         const std::string & hyper_param_name,
                                          unsigned int ind) const
 {
-  if (hyper_param_name == "noise_variance")
+  if (name().length() + 1 > hyper_param_name.length())
+    return false;
+
+  const std::string name_without_prefix = hyper_param_name.substr(name().length() + 1);
+
+  if (name_without_prefix == "noise_variance")
+  {
     maternHalfIntFunction(dKdhp, x, x, _length_factor, 0, 1, _p, true);
+    return true;
+  }
 
-  if (hyper_param_name == "signal_variance")
+  if (name_without_prefix == "signal_variance")
+  {
     maternHalfIntFunction(dKdhp, x, x, _length_factor, 1, 0, _p, false);
+    return true;
+  }
 
-  if (hyper_param_name == "length_factor")
+  if (name_without_prefix == "length_factor")
+  {
     computedKdlf(dKdhp, x, _length_factor, _sigma_f_squared, _p, ind);
+    return true;
+  }
+
+  return false;
 }
 
 void

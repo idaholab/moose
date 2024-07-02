@@ -48,30 +48,6 @@
 
   [tuning]
     requirement = 'The system shall be be able to tune hyperparameters of a Gaussian process surrogate with'
-    [GP_squared_exponential_tuned]
-      type = CSVDiff
-      input = GP_squared_exponential_tuned.i
-      allow_test_objects = true
-      csvdiff = 'GP_squared_exponential_tuned_out_samp_avg_0002.csv GP_squared_exponential_tuned_out_results_0002.csv GP_squared_exponential_tuned_out_hyperparams_0002.csv'
-      petsc_version = '>=3.10.0'
-      detail = 'a squared exponential kernel using TAO;'
-    []
-    [GP_exponential_tuned]
-      type = CSVDiff
-      input = GP_exponential_tuned.i
-      allow_test_objects = true
-      csvdiff = 'GP_exponential_tuned_out_samp_avg_0002.csv GP_exponential_tuned_out_results_0002.csv GP_exponential_tuned_out_hyperparams_0002.csv'
-      petsc_version = '>=3.10.0'
-      detail = 'an exponential kernel using TAO;'
-    []
-    [GP_Matern_half_int_tuned]
-      type = CSVDiff
-      input = GP_Matern_half_int_tuned.i
-      allow_test_objects = true
-      csvdiff = 'GP_Matern_half_int_tuned_out_samp_avg_0002.csv GP_Matern_half_int_tuned_out_results_0002.csv GP_Matern_half_int_tuned_out_hyperparams_0002.csv'
-      petsc_version = '>=3.10.0'
-      detail = 'a Matern half integer kernel using TAO;'
-    []
 
     [GP_squared_exponential_tuned_adam]
       type = CSVDiff
@@ -105,20 +81,6 @@
   []
   [errors]
     requirement = 'The system shall throw an error when '
-    [optimization]
-      type = RunException
-      input = GP_squared_exponential_tuned.i
-      cli_args = "Trainers/GP_avg_trainer/tuning_algorithm='none'"
-      detail = 'the no optimization is selected while parameter tuning is required. '
-      expect_err = "No tuning algorithm is selected for the hyper parameter optimization!"
-    []
-    [optimization_adam_batch_tao]
-      type = RunException
-      input = GP_squared_exponential_tuned_adam.i
-      cli_args = "Trainers/GP_avg_trainer/tuning_algorithm='tao'"
-      detail = 'mini-batching is requested with the TAO optimization library. '
-      expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please use Adam optimization."
-    []
     [optimization_adam_batch_size]
       type = RunException
       input = GP_squared_exponential_tuned_adam.i
