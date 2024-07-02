@@ -9,26 +9,25 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
-#include "NS.h"
 
 /**
- * Computes source the sink terms for the turbulent kinetic energy.
+ * Computes the turbuent viscosity for the k-Epsilon model.
+ * Implements two near-wall treatments: equilibrium and non-equilibrium wall functions.
  */
-class INSFVTKESourceSink : public FVElementalKernel
+class kOmegaSSTViscosityAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
   virtual void initialSetup() override;
 
-  INSFVTKESourceSink(const InputParameters & parameters);
+  kOmegaSSTViscosityAux(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual Real computeValue() override;
 
-protected:
   /// The dimension of the domain
   const unsigned int _dim;
 
@@ -39,61 +38,48 @@ protected:
   /// z-velocity
   const Moose::Functor<ADReal> * _w_var;
 
-  /// epsilon - dissipation rate of TKE
-  const Moose::Functor<ADReal> * _epsilon;
-
-  /// omega - dissipation rate of TKE
-  const Moose::Functor<ADReal> * _omega;
+  /// Turbulent kinetic energy
+  const Moose::Functor<ADReal> & _k;
+  /// Turbulent kinetic energy specific dissipation rate
+  const Moose::Functor<ADReal> & _omega;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
-
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
 
-  /// Turbulent dynamic viscosity
-  const Moose::Functor<ADReal> & _mu_t;
+  /// F2 blending function
+  const Moose::Functor<ADReal> & _F2;
 
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Linearized model?
-  const bool _linearized_model;
+  /// If the user wants to enable bulk wall treatment
+  const bool _bulk_wall_treatment;
 
   /// Method used for wall treatment
-  NS::WallTreatmentEnum _wall_treatment;
-
-  /// C_mu constant
-  const Real _C_mu;
-
-  // Production Limiter Constant
-  const Real _C_pl;
-
-  /// For Newton solves we want to add extra zero-valued terms regardless of y-plus to avoid sparsity pattern changes as y-plus changes near the walls
-  const bool _newton_solve;
-
-  /// F1 blending function
-  const Moose::Functor<ADReal> * _F1;
-
-  /// Activate free-shear modification bool
-  const bool _bool_free_shear_modficiation;
+  const MooseEnum _wall_treatment;
 
   /// Activate free-shear modification bool
   const bool _bool_low_Re_modification;
 
+  /// F1 blending function
+  const Moose::Functor<ADReal> * _F1;
+
   ///@{
-  /// Maps for wall treatement
+  /// Maps for wall bounded elements
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}
 
-  /// Closure coefficients for kOmega SST model
-  static constexpr Real _beta_infty = 0.09;
+  /// Model constants
+  static constexpr Real _C_mu = 0.09;
+  static constexpr Real _a_1 = 0.31;
+
+  // Specific to low-Re corrections
   static constexpr Real _beta_i_1 = 0.075;
   static constexpr Real _beta_i_2 = 0.0828;
-  // Limiting
-  static constexpr Real _c_pl = 10.0;
-  // Low-Re specific
-  static constexpr Real _Re_beta = 8.0;
+  static constexpr Real _alpha_2_star = 1.0;
+  static constexpr Real _Re_k = 6.0;
 };

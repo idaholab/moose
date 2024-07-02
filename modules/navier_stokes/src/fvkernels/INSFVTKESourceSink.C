@@ -23,8 +23,9 @@ INSFVTKESourceSink::validParams()
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>(NS::TKED,
-                                            "Coupled turbulent kinetic energy dissipation rate.");
+  params.addParam<MooseFunctorName>(NS::TKED, "Coupled turbulent kinetic energy dissipation rate.");
+  params.addParam<MooseFunctorName>(NS::TKESD,
+                                    "Coupled specific turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "Turbulent viscosity.");
@@ -41,6 +42,12 @@ INSFVTKESourceSink::validParams()
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>("C_pl", 10.0, "Production Limiter Constant Multiplier.");
+  params.addParam<MooseFunctorName>("F1", 1.0, "The F1 blending function.");
+  params.addParam<bool>("free_shear_modification",
+                        false,
+                        "Activate free shear modification for the turbulent kinetic energy.");
+  params.addParam<bool>(
+      "low_Re_modification", false, "Activate low Reynolds number modifications.");
   params.set<unsigned short>("ghost_layers") = 2;
   params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
   params.addParamNamesToGroup("newton_solve", "Advanced");
@@ -54,7 +61,8 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _u_var(getFunctor<ADReal>("u")),
     _v_var(params.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
     _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
-    _epsilon(getFunctor<ADReal>(NS::TKED)),
+    _epsilon(params.isParamValid(NS::TKED) ? &(getFunctor<ADReal>(NS::TKED)) : nullptr),
+    _omega(params.isParamValid(NS::TKESD) ? &(getFunctor<ADReal>(NS::TKESD)) : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
@@ -63,13 +71,23 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
     _C_pl(getParam<Real>("C_pl")),
-    _newton_solve(getParam<bool>("newton_solve"))
+    _newton_solve(getParam<bool>("newton_solve")),
+    _F1(params.isParamValid("F1") ? &(getFunctor<ADReal>("F1")) : nullptr),
+    _bool_free_shear_modficiation(getParam<bool>("free_shear_modification")),
+    _bool_low_Re_modification(getParam<bool>("low_Re_modification"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
 
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three or more dimensions, the w velocity must be supplied!");
+
+  if (_epsilon && _omega)
+    mooseError("Both epsilon and omega where provided to the TKESourceSink kernel, only one of "
+               "them can be provided.");
+
+  if (!(_epsilon || _omega))
+    mooseError("Neither epsilon, nor omega where provided to the TKESourceSink kernel.");
 }
 
 void
@@ -84,10 +102,12 @@ INSFVTKESourceSink::initialSetup()
 ADReal
 INSFVTKESourceSink::computeQpResidual()
 {
+  // Variables to build up the residual
   ADReal residual = 0.0;
   ADReal production = 0.0;
   ADReal destruction = 0.0;
 
+  // Convenient variables
   const auto state = determineState();
   const auto elem_arg = makeElemArg(_current_elem);
   const auto old_state =
@@ -103,6 +123,7 @@ INSFVTKESourceSink::computeQpResidual()
   if (_newton_solve)
     TKE = std::max(TKE, 1e-10);
 
+  // Near-wal formulation
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
     std::vector<ADReal> y_plus_vec, velocity_grad_norm_vec;
@@ -157,8 +178,8 @@ INSFVTKESourceSink::computeQpResidual()
 
     for (unsigned int i = 0; i < y_plus_vec.size(); i++)
     {
+      // Convenient arguments
       const auto y_plus = y_plus_vec[i];
-
       const auto fi = face_info_vec[i];
       const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
       const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
@@ -166,19 +187,74 @@ INSFVTKESourceSink::computeQpResidual()
           fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
       const ADReal wall_mut = _mu_t(facearg, state);
       const ADReal wall_mu = _mu(facearg, state);
-
-      const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
-      const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 0.5) /
-                                   (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
-      // Additional 0-value terms to make sure new derivative entries are not added during the solve
-      if (y_plus < 11.25)
-        destruction += destruction_visc;
-      if (_newton_solve)
-        destruction += 0 * destruction_log + 0 * tau_w;
+      if (_epsilon) // wall functions for epsilon-based formulation
+      {
+        const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
+        const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
+                                     std::pow(_var(elem_arg, old_state), 0.5) /
+                                     (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+        if (y_plus < 11.25)
+        {
+          destruction += destruction_visc;
+          if (_newton_solve)
+            destruction += 0 * destruction_log + 0 * tau_w;
+        }
+        else
+        {
+          destruction += destruction_log;
+          production += tau_w * std::pow(_C_mu, 0.25) /
+                        std::sqrt(_var(elem_arg, old_state) + 1e-10) /
+                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+        }
+      }
+      else // wall fucntions for omega-based formulation
+      {
+        const auto omegaVis =
+            6.0 * _mu(facearg, state) / (_beta_i_1 * Utility::pow<2>(distance_vec[i]));
+        const auto omegaLog = std::sqrt(_var(elem_arg, old_state)) * rho /
+                              (std::pow(_C_mu, 0.25) * NS::von_karman_constant * distance_vec[i]);
+
+        // Using blending wall functions for omega
+        const auto Re_d = std::sqrt(_var(elem_arg, old_state)) * distance_vec[i] * rho / wall_mu;
+        const auto gamma = std::exp(-Re_d / 11.0);
+        destruction += (gamma * omegaVis + (1.0 - gamma) * omegaLog) * _beta_infty / tot_weight;
+        production += (1.0 - gamma) * tau_w * std::pow(_C_mu, 0.25) /
+                      std::sqrt(_var(elem_arg, old_state) + 1e-10) /
+                      (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+      }
     }
-    else
+
+    residual = (destruction - production) * _var(elem_arg, state);
+  }
+  // Bulk formulation
+  else
+  {
+
+    // ***** Computing shear strain rate ***** //
+    // *************************************** //
+    const auto & grad_u = _u_var.gradient(elem_arg, state);
+    const auto Sij_xx = 2.0 * grad_u(0);
+    ADReal Sij_xy = 0.0;
+    ADReal Sij_xz = 0.0;
+    ADReal Sij_yy = 0.0;
+    ADReal Sij_yz = 0.0;
+    ADReal Sij_zz = 0.0;
+
+    const auto grad_xx = grad_u(0);
+    ADReal grad_xy = 0.0;
+    ADReal grad_xz = 0.0;
+    ADReal grad_yx = 0.0;
+    ADReal grad_yy = 0.0;
+    ADReal grad_yz = 0.0;
+    ADReal grad_zx = 0.0;
+    ADReal grad_zy = 0.0;
+    ADReal grad_zz = 0.0;
+
+    auto trace = Sij_xx / 3.0;
+
+    if (_dim >= 2)
     {
       destruction += destruction_log;
       if (_newton_solve)
@@ -186,6 +262,86 @@ INSFVTKESourceSink::computeQpResidual()
       production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(TKE) /
                     (NS::von_karman_constant * distance_vec[i]) / tot_weight;
     }
+
+    const auto symmetric_strain_tensor_sq_norm =
+        (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
+        (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
+        (Sij_zz - trace) * grad_zz;
+    // *************************************** //
+
+    // ************ TKE production *********** //
+    // *************************************** //
+    production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+    // *************************************** //
+
+    // ***** TKE destriction and production modifiers ***** //
+    // *************************************** //
+    if (_epsilon) // epsilon-based formulation
+    {
+      // Computing time scale
+      const auto time_scale =
+          raw_value(_var(elem_arg, old_state) / (*_epsilon)(elem_arg, old_state));
+
+      // Computing desctruction
+      destruction = rho * _var(elem_arg, state) / time_scale;
+
+      // k-Production limiter (needed for flows with stagnation zones)
+      const ADReal production_limit = _C_pl * rho * _epsilon(elem_arg, old_state);
+
+      // Apply production limiter
+      production = std::min(production, production_limit);
+    }
+    else if (_omega) // omega-based formulation
+    {
+
+      // Modifications due to free-shear corrections
+      ADReal f_beta_star(1.0);
+      if (_bool_free_shear_modficiation)
+      {
+        const auto & grad_k = _var.gradient(elem_arg, old_state);
+        const auto & grad_omega = _omega->gradient(elem_arg, old_state);
+        auto contraction_prod = grad_k(0) * grad_omega(0);
+        if (_dim > 1)
+          contraction_prod += grad_k(1) * grad_omega(1);
+        if (_dim > 2)
+          contraction_prod += grad_k(2) * grad_omega(2);
+        const auto blending_limit =
+            contraction_prod / Utility::pow<3>(((*_omega)(elem_arg, old_state) + 1e-12));
+        if (blending_limit > 0)
+        {
+          const auto sqr_blending_limit = Utility::pow<2>(blending_limit);
+          f_beta_star = (1.0 + 680.0 * sqr_blending_limit) / (1.0 + 400.0 * sqr_blending_limit);
+        }
+      }
+
+      // Modifications due to low Reynolds number corrections
+      ADReal beta_star;
+      if (_bool_low_Re_modification)
+      {
+        const auto omega_capped = std::max((*_omega)(elem_arg, old_state), 1e-10);
+        const auto Re_shear = rho * _var(elem_arg, old_state) / (mu * omega_capped);
+        const auto Re_ratio_4 = Utility::pow<4>(Re_shear / _Re_beta);
+        const auto beta_i_1_star = _beta_i_2 * ((4.0 / 15.0 + Re_ratio_4) / (1.0 + Re_ratio_4));
+        beta_star =
+            (*_F1)(elem_arg, state) * beta_i_1_star + (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
+      }
+      else
+        beta_star =
+            (*_F1)(elem_arg, state) * _beta_i_1 + (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
+
+      // Destruction
+      destruction =
+          rho * f_beta_star * beta_star * _var(elem_arg, state) * (*_omega)(elem_arg, old_state);
+
+      // Limited production
+      production = std::min(production,
+                            _c_pl * rho * beta_star * _var(elem_arg, old_state) *
+                                (*_omega)(elem_arg, old_state));
+    }
+    // *************************************** //
+
+    // Returning destruction and production residual
+    residual = destruction - production;
   }
 
   residual = (destruction - production) * _var(elem_arg, state);
