@@ -25,7 +25,7 @@
   [neml2_modular]
     issues = '#27493'
     collections = 'SYSTEM'
-    requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update on the cpu '
+    requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update on cpu '
     [elasticity]
       type = Exodiff
       input = 'fem_modular.i'
@@ -194,7 +194,7 @@
   [neml2_modular_cuda]
     issues = '#27493'
     collections = 'SYSTEM'
-    requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update on the cpu '
+    requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update on cuda '
     [elasticity]
       type = Exodiff
       input = 'fem_modular.i'
