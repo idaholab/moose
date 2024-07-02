@@ -50,10 +50,6 @@ protected:
 
   const std::vector<BoundaryName> _boundary_name;
 
-  /// Whether to ghost point neighbors of secondary lower subdomain elements and their
-  /// cross mortar interface counterparts for applications such as mortar nodal auxiliary kernels
-  const bool _ghost_point_neighbors;
-
   /// null matrix for generating full variable coupling
   const CouplingMatrix * const _null_mat = nullptr;
 };
