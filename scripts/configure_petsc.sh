@@ -78,6 +78,15 @@ function configure_petsc()
     fi
   fi
 
+  # Patch for PETSc-TAO in order to make TaoSolve more thread-safe. This should be removed when the
+  # patch contents have been added to a PETSc release.
+  # See: https://gitlab.com/petsc/petsc/-/merge_requests/7047
+  if [[ $PETSC_ARCH == 'arch-moose' ]]; then
+    echo 'INFO: Patching PETSc to improve thread safety for TAO...'
+    PATCH_DIR=$PETSC_DIR/../scripts/tao_restore_viewer.patch
+    git apply $PATCH_DIR 2>/dev/null || (git apply $PATCH_DIR -R --check && echo 'INFO: PETSc-TAO patch already applied.')
+    fi
+
   # When manually building PETSc on Apple Silicon, set FFLAGS to the proper arch, otherwise MUMPS
   # will fail to find MPI libraries
   MUMPS_ARM_STR=''
@@ -92,9 +101,11 @@ function configure_petsc()
       --with-fortran-bindings=0 \
       --with-mpi=1 \
       --with-openmp=1 \
+      --with-strict-petscerrorcode=1 \
       --with-shared-libraries=1 \
       --with-sowing=0 \
       --download-fblaslapack=1 \
+      --download-hpddm=1 \
       --download-hypre=1 \
       --download-metis=1 \
       --download-mumps=1 \

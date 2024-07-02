@@ -1,5 +1,5 @@
 moose_libmesh:
-  - moose-libmesh 2024.05.05 build_0
+  - moose-libmesh 2024.05.05 build_1
 
 moose_wasp:
   - moose-wasp 2024.05.08

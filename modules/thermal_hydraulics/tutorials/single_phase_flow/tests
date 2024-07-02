@@ -37,6 +37,7 @@
       type = CSVDiff
       input = '05_secondary_side.i'
       csvdiff = '05_secondary_side_out.csv'
+      comparison_file = 05_secondary_side.cmp
       cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       recover = false
       max_parallel = 1
