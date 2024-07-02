@@ -18,11 +18,18 @@ INSFVTimeKernel::validParams()
 {
   auto params = FVFunctorTimeKernel::validParams();
   params += INSFVMomentumResidualObject::validParams();
+  params.addParam<bool>(
+      "contribute_to_rc",
+      true,
+      "Whether the time derivative term should contribute to Rhie-Chow coefficients");
+  params.addParamNamesToGroup("contribute_to_rc", "Advanced");
   return params;
 }
 
 INSFVTimeKernel::INSFVTimeKernel(const InputParameters & params)
-  : FVFunctorTimeKernel(params), INSFVMomentumResidualObject(*this)
+  : FVFunctorTimeKernel(params),
+    INSFVMomentumResidualObject(*this),
+    _contribute_to_rc_coeffs(getParam<bool>("contribute_to_rc"))
 {
 }
 
