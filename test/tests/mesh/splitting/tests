@@ -178,6 +178,6 @@
     min_parallel = 4
     max_parallel = 4
     issues = "#27203"
-[../]
+  []
 
 []
