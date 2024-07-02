@@ -22,10 +22,10 @@ namespace StochasticTools
  * Gaussian Processes. It can be used to standardize parameters, manipulate
  * covariance data and compute additional stored matrices.
  */
-class GaussianProcessHandler
+class GaussianProcess
 {
 public:
-  GaussianProcessHandler();
+  GaussianProcess();
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -38,9 +38,9 @@ public:
    * @param max List of upper bounds for parameter tuning.
    */
   void initialize(CovarianceFunctionBase * covariance_function,
-                  const std::vector<std::string> params_to_tune,
-                  std::vector<Real> min = std::vector<Real>(),
-                  std::vector<Real> max = std::vector<Real>());
+                  const std::vector<std::string> & params_to_tune,
+                  const std::vector<Real> & min = std::vector<Real>(),
+                  const std::vector<Real> & max = std::vector<Real>());
 
   /// Structure containing the optimization options for
   /// hyperparameter-tuning
@@ -48,26 +48,44 @@ public:
   {
     /// Default constructor
     GPOptimizerOptions();
-    /// Construct using user-input
-    GPOptimizerOptions(const MooseEnum & inp_opt_type,
-                       const std::string & inp_tao_options,
-                       const bool inp_show_optimization_details,
-                       const unsigned int inp_iter_adam_ = 1000,
-                       const unsigned int inp_batch_size = 0,
-                       const Real inp_learning_rate_adam = 1e-3);
+    /**
+     * Construct a new GPOptimizerOptions object using
+     * input parameters that will control the optimization
+     * @param show_every_nth_iteration To show the loss value at every n-th iteration, if set to 0,
+     * nothing is displayed
+     * @param num_iter The number of iterations we want in the optimization of the GP
+     * @param batch_size The number of samples in each batch
+     * @param learning_rate The learning rate for parameter updates
+     * @param b1 Tuning constant for the Adam algorithm
+     * @param b2 Tuning constant for the Adam algorithm
+     * @param eps Tuning constant for the Adam algorithm
+     * @param lambda Tuning constant for the Adam algorithm
+     */
+    GPOptimizerOptions(const bool show_every_nth_iteration = 1,
+                       const unsigned int num_iter = 1000,
+                       const unsigned int batch_size = 0,
+                       const Real learning_rate = 1e-3,
+                       const Real b1 = 0.9,
+                       const Real b2 = 0.999,
+                       const Real eps = 1e-7,
+                       const Real lambda = 0.0);
 
-    /// The optimizer type
-    MooseEnum opt_type = MooseEnum("adam tao none", "adam");
-    /// String defining the options for TAO optimizers
-    std::string tao_options = "";
-    /// Switch to enable verbose output for parameter tuning
-    bool show_optimization_details = false;
+    /// Switch to enable verbose output for parameter tuning at every n-th iteration
+    const unsigned int show_every_nth_iteration = false;
     /// The number of iterations for Adam optimizer
-    unsigned int iter_adam = 1000;
+    const unsigned int num_iter = 1000;
     /// The batch isize for Adam optimizer
-    unsigned int batch_size = 0;
+    const unsigned int batch_size = 0;
     /// The learning rate for Adam optimizer
-    Real learning_rate_adam = 1e-3;
+    const Real learning_rate = 1e-3;
+    /// Tuning parameter from the paper
+    const Real b1 = 0.9;
+    /// Tuning parameter from the paper
+    const Real b2 = 0.999;
+    /// Tuning parameter from the paper
+    const Real eps = 1e-7;
+    /// Tuning parameter from the paper
+    const Real lambda = 0.0;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
@@ -101,9 +119,9 @@ public:
    * @param min List of lower bounds for the parameter tuning.
    * @param max List of upper bounds for parameter tuning.
    */
-  void generateTuningMap(const std::vector<std::string> params_to_tune,
-                         std::vector<Real> min = std::vector<Real>(),
-                         std::vector<Real> max = std::vector<Real>());
+  void generateTuningMap(const std::vector<std::string> & params_to_tune,
+                         const std::vector<Real> & min = std::vector<Real>(),
+                         const std::vector<Real> & max = std::vector<Real>());
 
   /**
    * Standardizes the vector of input parameters (x values).
@@ -119,64 +137,33 @@ public:
    */
   void standardizeData(RealEigenMatrix & data, bool keep_moments = false);
 
-  /**
-   * Tune the hyper parameters in the covariance function using PETSc-TAO.
-   * @param training_params The training parameter values (x values) for the
-   *                        covariance matrix.
-   * @param training_data The training data (y values) for the inversion of the
-   *                      covariance matrix.
-   * @param tao_options Additional options for TAO.
-   * @param show_optimization_details Switch to show details of TAO or Adam optimization.
-   */
-  PetscErrorCode tuneHyperParamsTAO(const RealEigenMatrix & training_params,
-                                    const RealEigenMatrix & training_data,
-                                    std::string tao_options = "",
-                                    bool verbose = false);
-
-  /// Used to form initial guesses in the TAO optimization routines
-  PetscErrorCode formInitialGuessTAO(Vec theta_vec);
-
-  /// Build the bounds for the hyper parameter optimization with TAO
-  void buildHyperParamBoundsTAO(libMesh::PetscVector<Number> & theta_l,
-                                libMesh::PetscVector<Number> & theta_u) const;
-
-  // Wrapper for PETSc function callback
-  static PetscErrorCode
-  formFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
-
-  // Computes Gradient of the loss function for TAO usage
-  void formFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
-
   // Tune hyperparameters using Adam
   void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                            const RealEigenMatrix & training_data,
-                           unsigned int iter,
-                           const unsigned int & batch_size,
-                           const Real & learning_rate,
-                           const bool & verbose);
+                           const GPOptimizerOptions & opts);
 
-  // Computes the loss function for Adam usage
-  Real getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
+  // Computes the loss function
+  Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
 
-  // Computes Gradient of the loss function for Adam usage
-  std::vector<Real> getGradientAdam(RealEigenMatrix & inputs);
+  // Computes Gradient of the loss function
+  std::vector<Real> getGradient(RealEigenMatrix & inputs) const;
 
   /// Function used to convert the hyperparameter maps in this object to
-  /// Petsc vectors
-  void mapToPetscVec(
+  /// vectors
+  void mapToVec(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
       const std::unordered_map<std::string, Real> & scalar_map,
       const std::unordered_map<std::string, std::vector<Real>> & vector_map,
-      libMesh::PetscVector<Number> & petsc_vec);
+      std::vector<Real> & vec) const;
 
-  /// Function used to convert the PETSc vectors back to hyperparameter maps
-  void petscVecToMap(
+  /// Function used to convert the vectors back to hyperparameter maps
+  void vecToMap(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
       std::unordered_map<std::string, Real> & scalar_map,
       std::unordered_map<std::string, std::vector<Real>> & vector_map,
-      const libMesh::PetscVector<Number> & petsc_vec);
+      const std::vector<Real> & vec) const;
 
   /// @{
   /**
@@ -190,6 +177,16 @@ public:
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const std::string & getCovarType() const { return _covar_type; }
+  const std::string & getCovarName() const { return _covar_name; }
+  const std::vector<UserObjectName> & getDependentCovarNames() const
+  {
+    return _dependent_covar_names;
+  }
+  const std::map<UserObjectName, std::string> & getDependentCovarTypes() const
+  {
+    return _dependent_covar_types;
+  }
+  const unsigned int & getCovarNumOutputs() const { return _num_outputs; }
   const unsigned int & getNumTunableParams() const { return _num_tunable; }
   const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
   const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVectorMap() const
@@ -211,6 +208,10 @@ public:
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   std::string & covarType() { return _covar_type; }
+  std::string & covarName() { return _covar_name; }
+  std::map<UserObjectName, std::string> & dependentCovarTypes() { return _dependent_covar_types; }
+  std::vector<UserObjectName> & dependentCovarNames() { return _dependent_covar_names; }
+  unsigned int & covarNumOutputs() { return _num_outputs; }
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> & tuningData()
   {
     return _tuning_data;
@@ -232,11 +233,20 @@ protected:
   /// Number of tunable hyperparameters
   unsigned int _num_tunable;
 
-  /// Type of covariance function used for this surrogate
+  /// Type of covariance function used for this GP
   std::string _covar_type;
 
-  /// Tao Communicator
-  Parallel::Communicator _tao_comm;
+  /// The name of the covariance function used in this GP
+  std::string _covar_name;
+
+  /// The names of the covariance functions the used covariance function depends on
+  std::vector<UserObjectName> _dependent_covar_names;
+
+  /// The types of the covariance functions the used covariance function depends on
+  std::map<UserObjectName, std::string> _dependent_covar_types;
+
+  /// The number of outputs of the GP
+  unsigned int _num_outputs;
 
   /// Scalar hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, Real> _hyperparam_map;
@@ -277,9 +287,6 @@ template <>
 void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
 template <>
-void dataStore(std::ostream & stream,
-               StochasticTools::GaussianProcessHandler & gp_utils,
-               void * context);
+void dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
 template <>
-void
-dataLoad(std::istream & stream, StochasticTools::GaussianProcessHandler & gp_utils, void * context);
+void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);

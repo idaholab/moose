@@ -94,23 +94,23 @@
     sampler = train_sample
     response = results/data:avg:value
     covariance_function = 'rbf'
-    standardize_params = 'true'               #Center and scale the training params
-    standardize_data = 'true'                 #Center and scale the training data
+    standardize_params = 'true' #Center and scale the training params
+    standardize_data = 'true' #Center and scale the training data
   []
 []
 
 [Covariance]
   [rbf]
-    type=SquaredExponentialCovariance
-    signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.38971'         #Select a length factor for each parameter (k and q)
+    type = SquaredExponentialCovariance
+    signal_variance = 1 #Use a signal variance of 1 in the kernel
+    noise_variance = 1e-3 #A small amount of noise can help with numerical stability
+    length_factor = '0.38971' #Select a length factor for each parameter (k and q)
   []
 []
 
 [Surrogates]
   [gauss_process_avg]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = 'GP_avg_trainer'
   []
 []

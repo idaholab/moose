@@ -11,7 +11,8 @@
 
 #include "InputParameters.h"
 #include "FEProblemBase.h"
-#include "CovarianceFunctionBase.h"
+
+class CovarianceFunctionBase;
 
 class CovarianceInterface
 {

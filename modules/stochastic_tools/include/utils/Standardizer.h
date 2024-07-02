@@ -38,7 +38,7 @@ public:
   /// Get the standard deviation vector
   const std::vector<Real> & getStdDev() const { return _stdev; }
 
-  /// Methods for computing and setting mean and standard
+  /// Methods for computing and setting mean and standard deviation
   void computeSet(const RealEigenMatrix & input);
 
   /// Helper for dataStore

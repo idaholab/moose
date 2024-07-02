@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LoadCovarianceDataAction.h"
-#include "GaussianProcess.h"
+#include "GaussianProcessSurrogate.h"
 #include "FEProblem.h"
 #include "StochasticToolsApp.h"
 
@@ -34,31 +34,90 @@ LoadCovarianceDataAction::act()
   _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
   for (auto model_ptr : objects)
   {
-    auto * gp = dynamic_cast<GaussianProcess *>(model_ptr);
-    if (gp && model_ptr->isParamValid("filename"))
-      load(*gp);
+    auto * gp_gen = dynamic_cast<GaussianProcessSurrogate *>(model_ptr);
+    if (gp_gen && model_ptr->isParamValid("filename"))
+      load(*gp_gen);
   }
 }
 
 void
-LoadCovarianceDataAction::load(GaussianProcess & model)
+LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
 {
-  const std::string & covar_type = model.getGPHandler().getCovarType();
-  const std::unordered_map<std::string, Real> & map = model.getGPHandler().getHyperParamMap();
+  // We grab all the necessary information that is needed to reconstruct the
+  // covariance structure for the GP
+  const std::string & covar_type = model.getGP().getCovarType();
+  const std::string & covar_name = model.getGP().getCovarName();
+  const std::map<UserObjectName, std::string> & dep_covar_types =
+      model.getGP().getDependentCovarTypes();
+  const std::vector<UserObjectName> & dep_covar_names = model.getGP().getDependentCovarNames();
+
+  // This is for the covariance on the very top, the lower-level covariances are
+  // all assumed to have num_outputs=1.
+  const unsigned int num_outputs = model.getGP().getCovarNumOutputs();
+  const std::unordered_map<std::string, Real> & map = model.getGP().getHyperParamMap();
   const std::unordered_map<std::string, std::vector<Real>> & vec_map =
-      model.getGPHandler().getHyperParamVectorMap();
-  const UserObjectName & covar_name = model.name() + "_covar_func";
+      model.getGP().getHyperParamVectorMap();
+
+  // We start by creating and loading the lower-level covariances if they need
+  // to be present. Right now we can only load a complex covariance which has
+  // a one-level dependency depth.
+  // TODO: Extend this to arbitrary dependency depths. Maybe we could use a graph.
+  for (const auto & it : dep_covar_types)
+  {
+    const auto & name = it.first;
+    const auto & type = it.second;
+    InputParameters covar_params = _factory.getValidParams(type);
+
+    // We make sure that every required parameter is added so that the object
+    // can be constructed. The non-required hyperparameters (if present in the
+    // parameter maps) will be inserted later.
+    const auto param_list = covar_params.getParametersList();
+    for (const auto & param : param_list)
+      if (covar_params.isParamRequired(param))
+      {
+        const std::string expected_name = name + ":" + param;
+        for (const auto & it_map : map)
+        {
+          const auto pos = it_map.first.find(expected_name);
+          if (pos != std::string::npos)
+            covar_params.set<Real>(param) = it_map.second;
+        }
+        for (const auto & it_map : vec_map)
+        {
+          const auto pos = it_map.first.find(expected_name);
+          if (pos != std::string::npos)
+            covar_params.set<std::vector<Real>>(param) = it_map.second;
+        }
+      }
+
+    _problem->addObject<CovarianceFunctionBase>(type, name, covar_params, /*threaded=*/false);
+  }
 
   InputParameters covar_params = _factory.getValidParams(covar_type);
+  covar_params.set<unsigned int>("num_outputs") = num_outputs;
+  covar_params.set<std::vector<UserObjectName>>("covariance_functions") = dep_covar_names;
 
-  for (auto & p : map)
-    covar_params.set<Real>(p.first) = p.second;
+  const auto param_list = covar_params.getParametersList();
+  for (const auto & param : param_list)
+    // We make sure that every required parameter is added so that the object
+    // can be constructed. The non-required hyperparameters (if present in the
+    // parameter maps) will be inserted later.
+    if (covar_params.isParamRequired(param))
+    {
+      const std::string expected_name = covar_name + ":" + param;
 
-  for (auto & p : vec_map)
-    covar_params.set<std::vector<Real>>(p.first) = p.second;
+      const auto & map_it = map.find(expected_name);
+      if (map_it != map.end())
+        covar_params.set<Real>(param) = map_it->second;
 
-  _problem->addObject<CovarianceFunctionBase>(
+      const auto & vec_map_it = vec_map.find(expected_name);
+      if (vec_map_it != vec_map.end())
+        covar_params.set<std::vector<Real>>(param) = vec_map_it->second;
+    }
+
+  auto covar_object = _problem->addObject<CovarianceFunctionBase>(
       covar_type, covar_name, covar_params, /* threaded = */ false);
+  covar_object[0]->loadHyperParamMap(map, vec_map);
 
   model.setupCovariance(covar_name);
 }
