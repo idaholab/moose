@@ -512,7 +512,13 @@ QuasiStaticSolidMechanicsPhysics::actSubdomainChecks()
   {
     // get subdomain IDs
     for (auto & name : _subdomain_names)
-      _subdomain_ids.insert(_mesh->getSubdomainID(name));
+    {
+      auto id = _mesh->getSubdomainID(name);
+      if (id == Moose::INVALID_BLOCK_ID)
+        mooseError("Subdomain \"" + name + "\" not found in mesh.");
+      else
+        _subdomain_ids.insert(id);
+    }
   }
 
   if (_current_task == "validate_coordinate_systems")
@@ -739,8 +745,7 @@ QuasiStaticSolidMechanicsPhysics::actEigenstrainNames()
             verified_eigenstrain_names.end(),
             _eigenstrain_names.begin());
 
-  Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***"
-             << "\n"
+  Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***" << "\n"
              << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n"
              << COLOR_DEFAULT << std::flush;
 }
@@ -774,8 +779,7 @@ QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
         std::vector<std::string>(_generate_output.size(), _material_output_order[0]);
 
   if (_verbose)
-    Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
-               << "\n"
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***" << "\n"
                << _name << ": " << Moose::stringify(_material_output_order) << "\n"
                << COLOR_DEFAULT << std::flush;
 
@@ -789,8 +793,7 @@ QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
         std::vector<std::string>(_generate_output.size(), _material_output_family[0]);
 
   if (_verbose)
-    Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
-               << "\n"
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***" << "\n"
                << _name << ": " << Moose::stringify(_material_output_family) << "\n"
                << COLOR_DEFAULT << std::flush;
 }
