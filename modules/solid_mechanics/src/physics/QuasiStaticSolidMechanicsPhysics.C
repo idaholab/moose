@@ -745,7 +745,8 @@ QuasiStaticSolidMechanicsPhysics::actEigenstrainNames()
             verified_eigenstrain_names.end(),
             _eigenstrain_names.begin());
 
-  Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***" << "\n"
+  Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***"
+             << "\n"
              << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n"
              << COLOR_DEFAULT << std::flush;
 }
@@ -779,7 +780,8 @@ QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
         std::vector<std::string>(_generate_output.size(), _material_output_order[0]);
 
   if (_verbose)
-    Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***" << "\n"
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
+               << "\n"
                << _name << ": " << Moose::stringify(_material_output_order) << "\n"
                << COLOR_DEFAULT << std::flush;
 
@@ -793,7 +795,8 @@ QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
         std::vector<std::string>(_generate_output.size(), _material_output_family[0]);
 
   if (_verbose)
-    Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***" << "\n"
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
+               << "\n"
                << _name << ": " << Moose::stringify(_material_output_family) << "\n"
                << COLOR_DEFAULT << std::flush;
 }
