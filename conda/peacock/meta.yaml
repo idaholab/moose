@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.04.11" %}
+{% set version = "2024.07.02" %}
 
 package:
   name: moose-peacock
@@ -25,7 +25,7 @@ requirements:
     - numpy
     - pandas
     - pyqt
-    - matplotlib
+    - matplotlib !=3.9.0
     - vtk
     # TODO: Try to remove when this version settles down among other conda-forge packages
     - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
