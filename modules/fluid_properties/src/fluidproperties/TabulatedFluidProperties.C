@@ -121,15 +121,15 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _interpolate_cp(false),
     _interpolate_cv(false),
     _interpolate_entropy(false),
-    _density_idx(0),
-    _enthalpy_idx(0),
-    _internal_energy_idx(0),
-    _viscosity_idx(0),
-    _k_idx(0),
-    _c_idx(0),
-    _cp_idx(0),
-    _cv_idx(0),
-    _entropy_idx(0),
+    _density_idx(libMesh::invalid_uint),
+    _enthalpy_idx(libMesh::invalid_uint),
+    _internal_energy_idx(libMesh::invalid_uint),
+    _viscosity_idx(libMesh::invalid_uint),
+    _k_idx(libMesh::invalid_uint),
+    _c_idx(libMesh::invalid_uint),
+    _cp_idx(libMesh::invalid_uint),
+    _cv_idx(libMesh::invalid_uint),
+    _entropy_idx(libMesh::invalid_uint),
     _csv_reader(_file_name_in, &_communicator),
     _construct_pT_from_ve(getParam<bool>("construct_pT_from_ve")),
     _construct_pT_from_vh(getParam<bool>("construct_pT_from_vh")),
@@ -1175,7 +1175,7 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
     // Write out the (v,e) to (p,T) conversions
     if (_construct_pT_from_ve)
     {
-      const auto file_name_ve = std::regex_replace(file_name, std::regex(".csv"), "_ve.csv");
+      const auto file_name_ve = std::regex_replace(file_name, std::regex("\\.csv"), "_ve.csv");
       MooseUtils::checkFileWriteable(file_name_ve);
       std::ofstream file_out(file_name_ve.c_str());
 
