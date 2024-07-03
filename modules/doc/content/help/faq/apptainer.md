@@ -92,9 +92,10 @@ The following are only a few of the many available features Apptainer has to off
 #### Paths and Mounts (e.g. your `/scratch` directory)
 
 !style halign=left
-You can instruct Apptainer to mount any path you have access to, to be made available while inside
-the container. On [!ac](INL) [!ac](HPC) machines, this is most useful if you enjoy operating in your
-`/scratch` directory. You can instruct Apptainer to mount this location by way of the `-B` argument:
+You can instruct Apptainer to mount any path you have access to, so that it is available while
+inside the container. On [!ac](INL) [!ac](HPC) machines, this is most useful if you enjoy operating
+in your `/scratch` directory. You can instruct Apptainer to mount this location by way of the `-B`
+argument:
 
 ```bash
 apptainer shell -B /scratch oras://...
@@ -102,7 +103,7 @@ apptainer shell -B /scratch oras://...
 [moose-dev][~]> ls /scratch  # contents of scratch is displayed
 ```
 
-Do you want to mount something somewhere else? Also with read-only permissions?
+Do you want to mount something somewhere else - perhaps also with read-only permissions?
 
 ```bash
 apptainer shell -B /scratch:/somewhere_else:ro oras://...
@@ -144,7 +145,7 @@ displayed:
 ```
 
 !alert! tip title=Custom Prompt
-There is an all encompasing `$CUSTOM_PROMPT` variable that allows you to pass your own prompt:
+There is an all-encompasing `$CUSTOM_PROMPT` variable that allows you to pass your own prompt:
 
 ```bash
 [~]> export APPTAINERENV_CUSTOM_PROMPT="\[\033[1;34m\][my-container]\[\033[1;32m\][\t]\[\033[0m\]> "
@@ -153,7 +154,7 @@ There is an all encompasing `$CUSTOM_PROMPT` variable that allows you to pass yo
 [my-container][12:17:43]>
 ```
 
-<!-- NOTE to editor: sub children elements require less top possitioning (-15 vs -7) -->
+<!-- NOTE to editor: sub children elements require less top positioning (-7 vs -15) -->
 
 !style! style=position:relative;top:-7px;left:5px;font-style:italic;font-size:small;
 (it is not possible to replicate color codes here in documentation, but they are being honored)
