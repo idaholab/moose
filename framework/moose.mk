@@ -100,7 +100,12 @@ ifeq ($(ENABLE_LIBTORCH),true)
 		libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/c10
 
     # Dynamically linking with the available pytorch library
-    libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(LIBTORCH_DIR)/lib
+		libtorch_flag := "--copy-dt-needed-entries"
+		ifeq ($(shell uname -s),Darwin)
+			libtorch_flag := ""
+		endif
+
+    libmesh_LDFLAGS += -Wl,$(libtorch_flag),-rpath,$(LIBTORCH_DIR)/lib
     libmesh_LDFLAGS += -L$(LIBTORCH_DIR)/lib -ltorch
   else
     $(error ERROR! Cannot locate any dynamic libraries of libtorch. Make sure to install libtorch (manually or using scripts/setup_libtorch.sh) and to run the configure --with-libtorch before compiling moose!)
