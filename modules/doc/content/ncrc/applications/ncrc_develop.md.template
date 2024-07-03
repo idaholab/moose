@@ -81,7 +81,7 @@ git fetch upstream
 The `fetch upstream` git command updates your local references with that of the upstream remote. It
 does not modify any source files. If nothing returns, then there are no upstream updates. If you
 have built {{ApplicationName}} once before, you are finished and can safely exit this documentation.
-First time users will of course need to continue.
+First-time users will of course need to continue.
 
 You need to know your upstream head branch. This will be the branch to continuously rebase on. That
 is, keeping your local {{binary}} repository up to date with upstream.

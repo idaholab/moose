@@ -1,9 +1,7 @@
-# Civet-like Environment
-
-[!ac](CIVET)
+# Apptainer
 
 !style halign=left
-Inevitably, PRs will fail [CIVET](https://civet.inl.gov) while they appear to pass on your own
+Inevitably, PRs will fail [!ac](CIVET) while they appear to pass on your own
 machine. Apptainer can help you reproduce the error, in an interactive fashion using the same
 container [!ac](CIVET) used when the error occurred.
 
@@ -27,7 +25,7 @@ oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-x86_64:4b79189
 ```
 
 With the [!ac](URI) known, launch an interactive shell using
-[HPC Ondemand](hpc_ondemand.md#interactive-shell-idinteractive-shell) for any of the [!ac](INL)
+[HPC OnDemand](hpc_ondemand.md#interactive-shell-idinteractive-shell) for any of the [!ac](INL)
 [!ac](HPC) cluster machine login nodes, and perform the following:
 
 ```bash
@@ -45,7 +43,7 @@ lengthy prompt)
 ## Troubleshoot
 
 !style halign=left
-You are now operating from within the same container that which your PR is failing. By default,
+You are now operating from within the same container within which your PR is failing. By default,
 your home directory should be available. And by extension, your `~/cluster_name/projects` directory
 containing your project.
 
@@ -54,8 +52,8 @@ See [Apptainer Features](help/faq/apptainer.md#features) below if you are operat
 `/scratch` directory.
 !alert-end!
 
-Next, simply put; Clone your application (if you have not). Build it. Run it. Test it. Do whatever
-it is that [!ac](CIVET) failed to do.
+Next, simply put: Clone your application (if you have not); build it; run it; and test it. Do
+whatever it is that [!ac](CIVET) failed to do.
 
 ### Troubleshooting Hints
 
@@ -76,7 +74,7 @@ it is that [!ac](CIVET) failed to do.
 If you're still unable to reproduce the error, please keep in mind one golden truth:
 +Containers are immutable+. The lack of reproducibility is being caused by *something* that is
 different in your environment compared to [!ac](CIVET)'s. Things like Network connectivity, shell
-flavor (tsch, zsh, bash), CPU microachitechture (exceedingly rare), and the like.
+flavor (tsch, zsh, bash), CPU microarchitecture (exceedingly rare), and the like.
 
 !alert! note title=Many [!ac](CIVET) steps +do not+ have network access
 Beyond the initial cloning of the application, most steps are barred from network access. You
