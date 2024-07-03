@@ -9,21 +9,24 @@
 
 #pragma once
 
-#include "LaplacianSplit.h"
+#include "ADKernelGrad.h"
+
+// Forward Declarations
 
 /**
- * Split with a variable that holds the Laplacian of the phase field with a constant prefactor.
+ * Split with a variable that holds the Laplacian of the phase field.
  */
-class PrefactorLaplacianSplit : public LaplacianSplit
+class ADLaplacianSplit : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
 
-  PrefactorLaplacianSplit(const InputParameters & parameters);
+  ADLaplacianSplit(const InputParameters & parameters);
 
 protected:
-  virtual RealGradient precomputeQpResidual() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual ADRealGradient precomputeQpResidual();
 
-  const Real _prefactor;
+private:
+  const ADVariableValue & _var_c;
+  const ADVariableGradient & _grad_c;
 };
