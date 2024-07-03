@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.06.18" %}
+{% set version = "2024.07.03" %}
 
 # HDF5 Version
 {% set hdf5_version = "1.14.3" %}
@@ -22,6 +22,8 @@ build:
   number: 0
   string: {{ mpi }}
   pin_depends: strict
+  ignore_exports:
+    - openssl
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
