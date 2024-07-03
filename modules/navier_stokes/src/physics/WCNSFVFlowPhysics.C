@@ -12,6 +12,7 @@
 #include "NSFVBase.h"
 #include "INSFVMomentumAdvection.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "INSFVTimeKernel.h"
 #include "MapConversionUtils.h"
 #include "NS.h"
 
@@ -46,6 +47,10 @@ WCNSFVFlowPhysics::validParams()
   // We mostly pull the boundary parameters from NSFV Action
 
   params += NSFVBase::commonNavierStokesFlowParams();
+
+  // Time derivative term correction
+  params.transferParam<bool>(INSFVTimeKernel::validParams(), "contribute_to_rc");
+  params.addParamNamesToGroup("contribute_to_rc", "Advanced");
 
   // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
   params.addParam<MooseFunctorName>(
@@ -529,6 +534,7 @@ WCNSFVFlowPhysics::addINSMomentumTimeKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
 
   for (const auto d : make_range(dimension()))
   {
@@ -547,6 +553,7 @@ WCNSFVFlowPhysics::addWCNSMomentumTimeKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
 
   for (const auto d : make_range(dimension()))
   {
