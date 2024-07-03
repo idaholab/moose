@@ -183,8 +183,12 @@ Checkpoint::output()
 void
 Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 {
-  // Update the list of stored files
-  _file_names.push_back(file_struct);
+  // Update the list of stored files if it does not already contain file_struct
+  // This ensures that we don't store duplicates, which will cause issues when
+  // we delete files later and only pop one of the duplicates off.
+  auto it = std::find(_file_names.begin(), _file_names.end(), file_struct);
+  if (it == _file_names.end())
+    _file_names.push_back(file_struct);
 
   // Remove the file and the corresponding directory if it's empty
   const auto remove_file = [this](const std::filesystem::path & path)
