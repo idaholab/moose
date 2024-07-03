@@ -4,4 +4,4 @@
 | Sawtooth | `sawtooth1`, `sawtooth2` | `48` | `2052` | `168` |
 | Lemhi | `lemhi1`, `lemhi2` | `20` | `504` | `72` |
 
-Additional information for each cluster can be found at [INL HPC](https://inl.gov/hpc).
+Additional information for each cluster can be found at the [INL HPC](https://inl.gov/hpc).
