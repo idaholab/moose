@@ -67,6 +67,10 @@ temp_ref = '${fparse hot_temp / 2.}'
     type = ParsedFunction
     expression = '4*x*(1-x)'
   []
+  [rho_error]
+    type = ParsedFunction
+    expression = '4*x*(1-x)'
+  []
 []
 
 [Executioner]
