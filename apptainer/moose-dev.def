@@ -83,7 +83,7 @@ From: {{ APPTAINER_FROM }}
     LIBTORCH_DISTRIBUTION={{ WITH_LIBTORCH }}
 
     # Install libtorch from a precompiled package
-    ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest=${LIBTORCH_DEST} --libtorch-distribution=${LIBTORCH_DISTRIBUTION}
+    ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest=${LIBTORCH_DEST} --libtorch-distribution=${LIBTORCH_DISTRIBUTION} --cleanup
 
 {%- if WITH_LIBTORCH.startswith('cu') %}
     # We install CUDA Toolkit if the user wants cuda-based libtorch.

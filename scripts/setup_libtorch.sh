@@ -20,7 +20,9 @@ TORCH_DISTRIBUTION="cpu"
 for i in "$@"
 do
   shift
-  if [[ "$i" == "--version="* ]]; then
+  if [[ "$i" == "--cleanup" ]]; then
+    CLEANUP=1
+  elif [[ "$i" == "--version="* ]]; then
     VSTR="$i"
     VERSION=${VSTR#*=};
   elif [[ "$i" == "--libtorch-dest="* ]]; then
@@ -42,6 +44,7 @@ if [[ -n "$HELP" ]]; then
   echo
   echo "-h | --help              Display this message and list of available setup options"
   echo "-k                       Ignore certifications while downloading packages with curl"
+  echo "--cleanup                Remove the downloaded tarball after the install"
   echo "--version=VERSION_NUMBER Specify the version number of libtorch"
   echo "*************************************************************************************"
   echo ""
@@ -101,10 +104,17 @@ else
 fi
 
 # Check if it is necessary to download a new package or we already have one
-if [[ -f $TORCH_DEST/$FILENAME ]]; then
+PACKAGE=${TORCH_DEST}/${FILENAME}
+if [[ -f $PACKAGE ]]; then
   echo "Found requested package for libtorch v. $VERSION, no need to download."
 else
-  curl -L $IGNORE_CERT -o $TORCH_DEST/$FILENAME https://download.pytorch.org/libtorch/$TORCH_DISTRIBUTION/$FILENAME
+  curl -L $IGNORE_CERT -o $PACKAGE https://download.pytorch.org/libtorch/$TORCH_DISTRIBUTION/$FILENAME
 fi
-echo "Extracting $FILENAME."
-unzip -q -o $TORCH_DEST/$FILENAME -d $TORCH_DEST
+echo "Extracting $PACKAGE."
+unzip -q -o $PACKAGE -d $TORCH_DEST
+
+# Clean it up after if requested
+if [[ $CLEANUP == 1 ]]; then
+  echo "Removing $PACKAGE."
+  rm $PACKAGE
+fi
