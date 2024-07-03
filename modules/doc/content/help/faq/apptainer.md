@@ -62,9 +62,9 @@ whatever it is that [!ac](CIVET) failed to do.
   the one you been developing in.
 
 - Re-visit the failing step occurring in [!ac](CIVET), and scrutinize with the utmost care all
-  commands, arguments used, environment variables set, etc. Even going so far as checking the steps
-  that precede the failing step to determine if those results are cause for concern (cloning
-  succeeded, but perhaps a submodule was not).
+  commands, arguments used, environment variables set, etc. One should even go so far as checking
+  the steps that precede the failing step to determine if those results are cause for concern
+  (cloning succeeded, but perhaps a submodule was not).
 
 - Perhaps [!ac](CIVET) was instructed to treat warnings as errors (`make -Werror`). Or perhaps
   [!ac](CIVET) is building using a different method (`METHOD=dbg make`), etc.
@@ -73,7 +73,7 @@ whatever it is that [!ac](CIVET) failed to do.
 
 If you're still unable to reproduce the error, please keep in mind one golden truth:
 +Containers are immutable+. The lack of reproducibility is being caused by *something* that is
-different in your environment compared to [!ac](CIVET)'s. Things like Network connectivity, shell
+different in your environment compared to [!ac](CIVET)'s. Things like network connectivity, shell
 flavor (tsch, zsh, bash), CPU microarchitecture (exceedingly rare), and the like.
 
 !alert! note title=Many [!ac](CIVET) steps +do not+ have network access

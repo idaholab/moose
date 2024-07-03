@@ -1,6 +1,6 @@
 # HPC OnDemand
 
-[HPC OnDemand](https://hpcondemand.inl.gov/pun/sys/dashboard), is a service provided by INL, which
+[HPC OnDemand](https://hpcondemand.inl.gov/pun/sys/dashboard), is a service provided by INL which
 allows a user direct access to the resources contained within the HPC enclave via their web browser.
 In order to utilize this service, you must first [request an account](https://inl.gov/ncrc).
 
