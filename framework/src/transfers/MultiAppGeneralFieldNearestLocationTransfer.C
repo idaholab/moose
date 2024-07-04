@@ -33,7 +33,7 @@ MultiAppGeneralFieldNearestLocationTransfer::validParams()
   params.addClassDescription(
       "Transfers field data at the MultiApp position by finding the value at the nearest "
       "neighbor(s) in the origin application.");
-  params.addParam<unsigned int>("num_nearest_points",
+  params.addParam<long unsigned int>("num_nearest_points",
                                 1,
                                 "Number of nearest source (from) points will be chosen to "
                                 "construct a value for the target point. All points will be "
@@ -67,8 +67,7 @@ MultiAppGeneralFieldNearestLocationTransfer::MultiAppGeneralFieldNearestLocation
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters),
     SolutionInvalidInterface(this),
-    _num_nearest_points(getParam<unsigned int>("num_nearest_points")),
-    _group_subapps(getParam<bool>("group_subapps"))
+    _num_nearest_points(getParam<long unsigned int>("num_nearest_points")),
 {
   if (_source_app_must_contain_point && _nearest_positions_obj)
     paramError("use_nearest_position",
@@ -382,9 +381,14 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
       if (!checkRestrictionsForSource(pt, mesh_div, i_from))
         continue;
 
+      // To prevent possible segfault, check number of nearest points is not greater than
+      // num_candidates
+      const auto num_candidates = _local_kdtrees[i_from]->numberCandidatePoints();
+      const auto num_search_points_robust = std::min(_num_nearest_points, num_candidates);
+
       // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
-      std::vector<std::size_t> return_index(_num_nearest_points);
-      std::vector<Real> return_dist_sqr(_num_nearest_points);
+      std::vector<std::size_t> return_index(num_search_points_robust);
+      std::vector<Real> return_dist_sqr(num_search_points_robust);
 
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
       if (_local_kdtrees[i_from]->numberCandidatePoints())
@@ -393,7 +397,7 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
         // Note that we do not need to use the transformed_pt (in the source app frame)
         // because the KDTree has been created in the reference frame
         _local_kdtrees[i_from]->neighborSearch(
-            pt, _num_nearest_points, return_index, return_dist_sqr);
+            pt, num_search_points_robust, return_index, return_dist_sqr);
         Real val_sum = 0, dist_sum = 0;
         for (const auto index : return_index)
         {
@@ -426,13 +430,17 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
         if (!checkRestrictionsForSource(pt, mesh_div, i_from))
           continue;
 
+        // To prevent possible segfault, check number of nearest points is not greater than
+        // num_candidates
+        const auto num_candidates = _local_kdtrees[i_from]->numberCandidatePoints();
+        const auto num_search = std::min(_num_nearest_points+1, num_candidates);
+
         // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
-        std::vector<std::size_t> return_index(_num_nearest_points + 1);
-        std::vector<Real> return_dist_sqr(_num_nearest_points + 1);
+        std::vector<std::size_t> return_index(num_search);
+        std::vector<Real> return_dist_sqr(num_search);
 
         // NOTE: app_index is not valid if _group_subapps = true
         const auto app_index = i_from / getNumDivisions();
-        const auto num_search = _num_nearest_points + 1;
 
         if (_local_kdtrees[i_from]->numberCandidatePoints())
         {
