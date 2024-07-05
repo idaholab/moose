@@ -117,12 +117,28 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       _e_min = *min_element(_properties[_internal_energy_idx].begin(),
                             _properties[_internal_energy_idx].end());
     }
-    Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
 
     // Create e grid for interpolation
     _internal_energy.resize(_num_e);
-    for (unsigned int j = 0; j < _num_e; ++j)
-      _internal_energy[j] = _e_min + j * de;
+    if (_log_space_e)
+    {
+      // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
+      // the power of 10
+      if (_e_min < 0)
+        mooseError("Logarithmic grid in specific energy can only be used with a positive specific "
+                   "energy. Current minimum: " +
+                   std::to_string(_e_min));
+      Real de = (std::log10(_e_max) - std::log10(_e_min)) / ((Real)_num_e - 1);
+      Real log_e_min = std::log10(_e_min);
+      for (const auto j : make_range(_num_e))
+        _internal_energy[j] = std::pow(10, log_e_min + j * de);
+    }
+    else
+    {
+      Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
+      for (const auto j : make_range(_num_e))
+        _internal_energy[j] = _e_min + j * de;
+    }
 
     // initialize vectors for interpolation
     std::vector<std::vector<Real>> p_from_v_e(_num_v);
@@ -404,13 +420,15 @@ TabulatedBicubicFluidProperties::outputWarnings(unsigned int num_nans_p,
   std::string T_nans = "- " + std::to_string(num_nans_T) + " nans generated out of " +
                        std::to_string(number_points) + " points for temperature\n";
   std::string p_oob = "- " + std::to_string(num_out_bounds_p) + " of " +
-                      std::to_string(number_points) +
-                      " pressure values were out of user defined bounds\n";
+                      std::to_string(number_points) + " pressure values were out of bounds\n";
   std::string T_oob = "- " + std::to_string(num_out_bounds_T) + " of " +
-                      std::to_string(number_points) +
-                      " temperature values were out of user defined bounds\n";
+                      std::to_string(number_points) + " temperature values were out of bounds\n";
   std::string outcome = "The pressure and temperature values were replaced with their respective "
-                        "user-defined min and max values.\n";
+                        "min and max values.\n";
+
+  // bounds are different depending on how the object is used
+  std::string source = (_fp ? "from input parameters" : "from tabulation file");
+
   // if any of these do not exist, do not want to print them
   if (convergence_failures)
     warning_message += converge_fails;
@@ -419,9 +437,17 @@ TabulatedBicubicFluidProperties::outputWarnings(unsigned int num_nans_p,
   if (num_nans_T)
     warning_message += T_nans;
   if (num_out_bounds_p)
+  {
     warning_message += p_oob;
+    warning_message += ("Pressure bounds " + source + ": [" + std::to_string(_pressure_min) + ", " +
+                        std::to_string(_pressure_max) + "]\n");
+  }
   if (num_out_bounds_T)
+  {
     warning_message += T_oob;
+    warning_message += ("Temperature bounds " + source + ": [" + std::to_string(_temperature_min) +
+                        ", " + std::to_string(_temperature_max) + "]\n");
+  }
   // print warning
   if (num_nans_p || num_nans_T || num_out_bounds_p || num_out_bounds_T || convergence_failures)
     mooseWarning(warning_message + outcome);

@@ -170,8 +170,10 @@ protected:
    */
   virtual void generateTabulatedData();
 
-  /// File name of tabulated data file
-  FileName _file_name;
+  /// File name of input tabulated data file
+  FileName _file_name_in;
+  /// File name of output tabulated data file
+  FileName _file_name_out;
   /// Pressure vector
   std::vector<Real> _pressure;
   /// Temperature vector
@@ -199,6 +201,8 @@ protected:
 
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidProperties * const _fp;
+  /// Whether to allow a fp object when a tabulation is in use
+  const bool _allow_fp_and_tabulation;
 
   /// List of required column names to be read
   const std::vector<std::string> _required_columns{"pressure", "temperature"};
@@ -246,8 +250,10 @@ protected:
   unsigned int _num_e;
   /// to error or not on out-of-bounds check
   bool _error_on_out_of_bounds;
-  /// log-space the specific volume instead of linear
+  /// log-space the specific volume interpolation grid axis instead of linear
   bool _log_space_v;
+  /// log-space the internal energy interpolation grid axis instead of linear
+  bool _log_space_e;
 
   /// Bi-dimensional interpolation of temperature from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_e_ipol;
