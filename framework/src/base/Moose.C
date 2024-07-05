@@ -104,6 +104,8 @@ addActionTypes(Syntax & syntax)
   registerTask("init_component_physics", false);
   registerTask("component_meta", false);
   registerTask("setup_component", false);
+  // 'list_component' is used to retrieve ActionComponents for the syntax JSON
+  registerTask("list_component", false);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
