@@ -11,6 +11,7 @@
 #include "SavedMeshComponent.h"
 #include "RotationMatrix.h"
 
+registerActionComponent("MooseApp", SavedMeshComponent);
 registerMooseAction("MooseApp", SavedMeshComponent, "add_mesh_generator");
 registerMooseAction("MooseApp", SavedMeshComponent, "add_positions");
 registerMooseAction("MooseApp", SavedMeshComponent, "init_physics");

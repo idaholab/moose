@@ -13,6 +13,7 @@
 
 registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
 registerMooseAction("MooseApp", CylinderComponent, "init_component_physics");
+registerActionComponent("MooseApp", CylinderComponent);
 
 InputParameters
 CylinderComponent::validParams()
