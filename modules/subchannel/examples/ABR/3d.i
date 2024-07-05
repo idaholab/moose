@@ -10,13 +10,9 @@ inter_assembly_gap = ${fparse 0.432*scale_factor}
 duct_thickness = ${fparse 0.394*scale_factor}
 fuel_pin_pitch = ${fparse 0.8909*scale_factor}
 fuel_pin_diameter= ${fparse 0.755*scale_factor}
-#wire_z_spacing = ${fparse 20.32*scale_factor}
-#wire_diameter = ${fparse 0.1307*scale_factor}
 length_entry_fuel = ${fparse 160.02*scale_factor}
 length_heated_fuel = ${fparse 81.28*scale_factor}
 length_outlet_fuel = ${fparse 236.22*scale_factor}
-#height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
-#orifice_plate_height = ${fparse 5*scale_factor}
 duct_outside = ${fparse fuel_element_pitch - inter_assembly_gap}
 duct_inside = ${fparse duct_outside -  2 * duct_thickness}
 n_rings = 10
@@ -32,21 +28,7 @@ n_rings = 10
     unheated_length_exit = '${fparse length_outlet_fuel}'
     rod_diameter = '${fparse fuel_pin_diameter}'
     pitch = '${fparse fuel_pin_pitch}'
-   # spacer_z = '${fparse orifice_plate_height} ${fparse length_entry_fuel}'
-   # spacer_k = '0.5 0.5'
   []
-
- # [fuel_pins]
- #   type = DetailedTriPinMeshGenerator
- #   input = subchannel
- #   nrings = '${fparse n_rings}'
- #   n_cells = 100
- #   unheated_length_entry = '${fparse length_entry_fuel}'
- #   heated_length = '${fparse length_heated_fuel}'
- #   unheated_length_exit = '${fparse length_outlet_fuel}'
- #   pitch = '${fparse fuel_pin_pitch}'
- #   rod_diameter = '${fparse fuel_pin_diameter}'
- # []
 []
 
 [AuxVariables]
@@ -80,12 +62,6 @@ n_rings = 10
   [w_perim]
     block = subchannel
   []
- # [q_prime]
- #   block = fuel_pins
- # []
- # [Tpin]
- #   block = fuel_pins
- # []
 []
 
 [Problem]

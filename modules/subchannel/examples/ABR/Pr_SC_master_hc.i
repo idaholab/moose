@@ -18,12 +18,7 @@ pin_diameter = ${fparse 0.755*scale_factor}
 wire_pitch = ${fparse 20.32*scale_factor}
 wire_diameter = ${fparse 0.1307*scale_factor}
 flat_to_flat = ${fparse 14.922*scale_factor}
-# n_rings = 5
-#heated_length = ${fparse 34.3*scale_factor}
-#unheated_length_exit = ${fparse 26.9*scale_factor}
-#length = ${fparse heated_length + unheated_length_exit}
 inter_wrapper_width = ${fparse 0.432*scale_factor}
-#outer_duct_in = ${fparse 14.922*scale_factor}
 ###################################################
 #inter_wall_width = ${fparse outer_duct_in - inner_duct_out}
 
@@ -68,15 +63,11 @@ k_sodium = 15
 cp_sodium = 300
 rho_sodium = 7800
 
-# hydraulic diameters
+# hydraulic diameter
 D_hydraulic_interwrapper = ${fparse 2 * inter_wrapper_width}
-#D_hydraulic_interwall = ${fparse 2 * inter_wall_width}
-#D_hydraulic_fuel = 0.00297 # Why?
 
 wrapper_blocks = 'wall'
 inter_wrapper_blocks = 'inter_wrapper'
-#porous_flow = 'porous_flow_01 porous_flow_02 porous_flow_03 porous_flow_04 porous_flow_05 porous_flow_06'
-#ramp_time = 1.0
 
 [Mesh]
   [fmesh]
