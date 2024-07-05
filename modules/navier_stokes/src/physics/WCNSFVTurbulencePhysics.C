@@ -53,9 +53,10 @@ WCNSFVTurbulencePhysics::validParams()
       "tke_name", NS::TKE, "Name of the turbulent kinetic energy variable");
   params.addParam<MooseFunctorName>(
       "tked_name", NS::TKED, "Name of the turbulent kinetic energy dissipation variable");
-  params.addParam<FunctionName>("initial_tke", "Initial value for the turbulence kinetic energy");
-  params.addParam<FunctionName>("initial_tked",
-                                "Initial value for the turbulence kinetic energy dissipation");
+  params.addParam<FunctionName>(
+      "initial_tke", "0", "Initial value for the turbulence kinetic energy");
+  params.addParam<FunctionName>(
+      "initial_tked", "0", "Initial value for the turbulence kinetic energy dissipation");
   params.addParam<FunctionName>("initial_mu_t", "Initial value for the turbulence viscosity");
 
   params.addParam<Real>("C1_eps",
@@ -343,6 +344,8 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
 void
 WCNSFVTurbulencePhysics::addFVKernels()
 {
+  if (_turbulence_model == "mixing-length" || _turbulence_model == "none")
+    return;
   if (_has_flow_equations)
     addFlowTurbulenceKernels();
   if (_has_energy_equation)
@@ -451,7 +454,7 @@ WCNSFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
           kernel_type, prefix() + "ins_energy_mixing_length_diffusion", params);
   }
   else if (_turbulence_model == "k-epsilon")
-    mooseError("Not implemented");
+    mooseError("Energy advection with k-epsilon turbulence is not implemented");
 }
 
 void
@@ -471,6 +474,8 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
     const auto & passive_scalar_schmidt_number =
         getParam<std::vector<Real>>("passive_scalar_schmidt_number");
+    _console << "checking " << passive_scalar_schmidt_number.size() << passive_scalar_names.size()
+             << std::endl;
     if (passive_scalar_schmidt_number.size() != passive_scalar_names.size() &&
         passive_scalar_schmidt_number.size() != 1)
       paramError("passive_scalar_schmidt_number",
@@ -492,7 +497,7 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     }
   }
   else if (_turbulence_model == "k-epsilon")
-    mooseError("Not implemented");
+    mooseError("Passive scalar advection with k-epsilon turbulence is not implemented");
 }
 
 void
@@ -667,19 +672,25 @@ WCNSFVTurbulencePhysics::addFVBCs()
 void
 WCNSFVTurbulencePhysics::addInitialConditions()
 {
+  if (_turbulence_model == "mixing-length" || _turbulence_model == "none")
+    return;
   const std::string ic_type = "FunctionIC";
   InputParameters params = getFactory().getValidParams(ic_type);
   const auto rho_name = _flow_equations_physics->densityName();
+  // If we can compute the initialization value from the user parameters, we do that
   if (MooseUtils::isFloat(rho_name) && MooseUtils::isFloat(getParam<FunctionName>("initial_tke")) &&
       MooseUtils::isFloat(getParam<FunctionName>("initial_tked")))
     params.set<FunctionName>("function") =
         std::to_string(std::atof(rho_name.c_str()) * getParam<Real>("C_mu") *
                        std::pow(std::atof(getParam<FunctionName>("initial_tke").c_str()), 2) /
                        std::atof(getParam<FunctionName>("initial_tked").c_str()));
+  // Else we require the user provide it
   else if (isParamValid("initial_mu_t"))
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_mu_t");
   else
-    paramError("Initial turbulent viscosity should be provided");
+    paramError("initial_mu_t",
+               "Initial turbulent viscosity should be provided. A sensible value is "
+               "C_mu TKE_initial^2 / TKED_initial");
 
   params.set<VariableName>("variable") = _turbulent_viscosity_name;
   getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_eff", params);
