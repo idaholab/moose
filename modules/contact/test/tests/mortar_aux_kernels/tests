@@ -10,7 +10,7 @@
     abs_zero = 1.0e-5
     min_parallel = 1
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     requirement = 'The contact module shall be able to compute nodal weighted gap distance velocity values via a '
                   'mortar auxiliary kernel.'
   []
@@ -22,11 +22,10 @@
     abs_zero = 1.0e-5
     min_parallel = 1
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50 & method!=dbg'
     valgrind = 'none'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'
-    method = '!dbg'
   []
   [block-dynamics-aux-wear-vel]
     type = 'Exodiff'
@@ -36,9 +35,8 @@
     abs_zero = 5.0e-3
     min_parallel = 1
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50 & method=opt'
     heavy = true
-    method = 'opt'
     valgrind = 'none'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels in the same '
@@ -51,7 +49,7 @@
     input = 'frictional-mortar-3d-status.i'
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
-    min_ad_size = '100'
+    capabilities = 'ad_size>=100'
     cli_args = 'AuxKernels/frictional_state/tangent_two=mortar_tangential_3d_lm'
     requirement = 'Contact module shall compute nodal frictional status of mortar surfaces for a '
                   'simple problem in which nodes are in stick and slip states.'
@@ -63,7 +61,7 @@
                  'Lagrange multiplier for three-dimensional problems'
     min_parallel = 1
     max_parallel = 2
-    min_ad_size = '100'
+    capabilities = 'ad_size>=100'
     requirement = 'The contact module shall be able to generate an informative error if the nodal frictional status '
                   'auxiliary kernel is not provided a second frictional Lagrange multiplier for a '
                   'three-dimensional problem.'
@@ -76,7 +74,7 @@
     abs_zero = 1.0e-4
     min_parallel = 1
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     cli_args = 'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick_out'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
@@ -90,7 +88,7 @@
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
     abs_zero = 2.0e-4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     map = False
     partial = True
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections.e '
@@ -111,7 +109,7 @@
     abs_zero = 1.0e-4
     min_parallel = 1
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     map = False
     partial = True
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections-lowerd.e '
@@ -147,7 +145,7 @@
     abs_zero = 5.0e-4
     min_parallel = 1
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     map = False
     partial = True
     cli_args = 'Executioner/end_time=0.15 '
@@ -164,7 +162,7 @@
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
     max_parallel = 1
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     map = False
     partial = True
     requirement = 'The system shall allow for a user controllable input such that the mortar segment '
@@ -177,7 +175,7 @@
     input = 'pressure-aux-frictionless.i'
     csvdiff = 'pressure-aux-frictionless_out_normal_lm_0011.csv'
     abs_zero = 1.0e-4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall produce the correct normal contact pressure '
                   'value for frictionless mortar contact when using an auxiliary kernel.'
@@ -187,7 +185,7 @@
     input = 'pressure-aux-frictionless-3d.i'
     csvdiff = 'pressure-aux-frictionless-3d_out_normal_lm_0003.csv'
     abs_zero = 1.0e-4
-    min_ad_size = '150'
+    capabilities = 'ad_size>=150'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to  produce the correct normal contact pressure '
                   'value in 3D for frictionless mortar contact when using an auxiliary kernel.'
@@ -197,7 +195,7 @@
     input = 'pressure-aux-friction.i'
     csvdiff = 'pressure-aux-friction_out_tangent_lm_0011.csv'
     abs_zero = 1.0e-4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to produce the correct tangential contact pressure '
                   'value for frictional mortar contact when using an auxiliary kernel.'
@@ -207,7 +205,7 @@
     input = 'pressure-aux-friction-3d.i'
     csvdiff = 'pressure-aux-friction-3d_out_tangent2_lm_0003.csv'
     abs_zero = 1.0e-4
-    min_ad_size = '150'
+    capabilities = 'ad_size>=150'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to produce the correct tangential contact pressure '
                   'value in 3D for frictional mortar contact when using an auxiliary kernel.'

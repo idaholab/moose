@@ -28,7 +28,7 @@ class FileChecker(object):
         """ Method to get the names and last_modified_times of all files within current test location """
         for dirpath, dirnames, filenames in os.walk(job.getTestDir(), followlinks=True):
 
-            # When perfoming a snapshot, don't traverse into directories that have test
+            # When performing a snapshot, don't traverse into directories that have test
             # specifications of their own
             if os.path.exists(os.path.join(dirpath, self.__input_file_name)):
                 dirnames[:] = []

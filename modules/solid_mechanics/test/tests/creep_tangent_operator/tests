@@ -38,14 +38,12 @@
   [./ten_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
-    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
     requirement = "The system shall produce the correct Jacobians for radial return isotropic power law creep models."
   [../]
   [./zero_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
-    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero"'
     prereq = ten_jacobian
     requirement = "The system shall produce the correct Jacobians for radial return isotropic power law creep "
@@ -54,7 +52,6 @@
   [./sum_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
-    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one"'
     prereq = zero_jacobian
     requirement = "The system shall produce the correct Jacobians for summed radial return isotropic power law creep "
@@ -63,7 +60,6 @@
   [./cycle_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
-    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true'
     prereq = sum_jacobian
     requirement = "The systam shall produce the correct Jacobians for cyclic creep model evaluation."
