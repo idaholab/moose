@@ -298,8 +298,10 @@ PorousFlowFullySaturated::addMaterials()
   {
     // saturation is always unity, so is trivially calculated using PorousFlow1PhaseFullySaturated
     std::string material_type = "PorousFlow1PhaseFullySaturated";
-    InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowFullySaturated_1PhaseP_qp";
+    InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<bool>("at_nodes") = false;
@@ -309,8 +311,10 @@ PorousFlowFullySaturated::addMaterials()
   if (_deps.dependsOn(_included_objects, "pressure_saturation_nodal"))
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
-    InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowFullySaturated_1PhaseP";
+    InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<bool>("at_nodes") = true;
