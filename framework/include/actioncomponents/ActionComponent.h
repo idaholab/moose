@@ -16,6 +16,9 @@
 class PhysicsBase;
 class FEProblem;
 
+#define registerActionComponent(app_name, component_name)                                          \
+  registerMooseAction(app_name, component_name, "list_component")
+
 /**
  * Base class for components that are defined using an action
  */
