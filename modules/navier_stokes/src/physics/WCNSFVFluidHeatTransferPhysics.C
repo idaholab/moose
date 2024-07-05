@@ -347,28 +347,6 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addWCNSEnergyMixingLengthKernels()
-{
-  const std::string u_names[3] = {"u", "v", "w"};
-  const std::string kernel_type = "WCNSFVMixingLengthEnergyDiffusion";
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
-  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
-  params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-
-  for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
-    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
-
-  if (_porous_medium_treatment)
-    getProblem().addFVKernel(kernel_type, prefix() + "pins_energy_mixing_length_diffusion", params);
-  else
-    getProblem().addFVKernel(kernel_type, prefix() + "ins_energy_mixing_length_diffusion", params);
-}
-
-void
 WCNSFVFluidHeatTransferPhysics::addFVBCs()
 {
   // For compatibility with Modules/NavierStokesFV syntax

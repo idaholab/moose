@@ -65,7 +65,6 @@ private:
   void addINSEnergyAdvectionKernels();
   void addINSEnergyAmbientConvection();
   void addINSEnergyExternalHeatSource();
-  void addWCNSEnergyMixingLengthKernels();
 
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.

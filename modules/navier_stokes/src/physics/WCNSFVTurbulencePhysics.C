@@ -15,6 +15,7 @@
 #include "INSFVTurbulentViscosityWallFunction.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVTurbulencePhysics);
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "get_turbulence_physics");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_bc");
@@ -177,6 +178,48 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
     _console << "Creating a " << std::string(_turbulence_model) << " turbulence model."
              << std::endl;
 
+  // Parameter checks
+  if (_turbulence_model == "none")
+    errorInconsistentDependentParameter("turbulence_handling", "none", {"turbulence_walls"});
+  if (_turbulence_model != "mixing-length")
+    errorDependentParameter("turbulence_handling",
+                            "mixing-length",
+                            {"mixing_length_delta",
+                             "mixing_length_aux_execute_on",
+                             "von_karman_const",
+                             "von_karman_const_0",
+                             "mixing_length_two_term_bc_expansion"});
+  else if (_turbulence_model != "k-epsilon")
+    errorDependentParameter("turbulence_handling",
+                            "k-epsilon",
+                            {"C_mu",
+                             "C1_eps",
+                             "C2_eps",
+                             "linearized_yplus",
+                             "bulk_wall_treatment",
+                             "non_equilibrium_treatment",
+                             "tke_scaling",
+                             "tke_face_interpolation",
+                             "tke_two_term_bc_expansion",
+                             "tked_scaling",
+                             "tked_face_interpolation",
+                             "tked_two_term_bc_expansion",
+                             "turbulent_viscosity_two_term_bc_expansion"});
+}
+
+void
+WCNSFVTurbulencePhysics::actOnAdditionalTasks()
+{
+  // Other Physics may not exist or be initialized at construction time, so
+  // we retrieve them now, on this task which occurs after 'init_physics'
+  if (_current_task == "get_turbulence_physics")
+    retrieveCoupledPhysics();
+}
+
+void
+WCNSFVTurbulencePhysics::retrieveCoupledPhysics()
+{
+  // _flow_equations_physics is initialized by 'WCNSFVCoupledAdvectionPhysicsHelper'
   if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations())
     _has_flow_equations = true;
   else
@@ -241,34 +284,6 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
     else
       mooseInfoRepeated("No scalar transport equations considered by this turbulence physics.");
   }
-
-  // Parameter checks
-  if (_turbulence_model == "none")
-    errorInconsistentDependentParameter("turbulence_handling", "none", {"turbulence_walls"});
-  if (_turbulence_model != "mixing-length")
-    errorDependentParameter("turbulence_handling",
-                            "mixing-length",
-                            {"mixing_length_delta",
-                             "mixing_length_aux_execute_on",
-                             "von_karman_const",
-                             "von_karman_const_0",
-                             "mixing_length_two_term_bc_expansion"});
-  else if (_turbulence_model != "k-epsilon")
-    errorDependentParameter("turbulence_handling",
-                            "k-epsilon",
-                            {"C_mu",
-                             "C1_eps",
-                             "C2_eps",
-                             "linearized_yplus",
-                             "bulk_wall_treatment",
-                             "non_equilibrium_treatment",
-                             "tke_scaling",
-                             "tke_face_interpolation",
-                             "tke_two_term_bc_expansion",
-                             "tked_scaling",
-                             "tked_face_interpolation",
-                             "tked_two_term_bc_expansion",
-                             "turbulent_viscosity_two_term_bc_expansion"});
 }
 
 void
@@ -344,14 +359,18 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
 void
 WCNSFVTurbulencePhysics::addFVKernels()
 {
-  if (_turbulence_model == "mixing-length" || _turbulence_model == "none")
+  if (_turbulence_model == "none")
     return;
+
+  // Turbulence terms in other equations
   if (_has_flow_equations)
     addFlowTurbulenceKernels();
   if (_has_energy_equation)
     addFluidEnergyTurbulenceKernels();
   if (_has_scalar_equations)
     addScalarAdvectionTurbulenceKernels();
+
+  // Turbulence models with their own set of equations
   if (_turbulence_model == "k-epsilon")
   {
     if (isTransient())
