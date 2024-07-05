@@ -360,9 +360,9 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
     cp = ${cp}
