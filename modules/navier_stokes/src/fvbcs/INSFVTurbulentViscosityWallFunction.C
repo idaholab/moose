@@ -24,7 +24,8 @@ INSFVTurbulentViscosityWallFunction::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "The turbulent viscosity.");
-  params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
+  params.addParam<MooseFunctorName>("k", "The turbulent kinetic energy.");
+  params.deprecateParam("k", NS::TKE, "01/01/2025");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
