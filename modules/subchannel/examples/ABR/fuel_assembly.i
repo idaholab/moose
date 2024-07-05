@@ -5,9 +5,7 @@ T_in = 653.15
 P_out = 758423 # Pa
 reactor_power = 1000e6 #WTh
 fuel_assemblies_per_power_unit = '${fparse 180}'
-#fuel_pins_per_assembly = 271
 flow_area = 0.00678363
-#pin_power = ${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)} # Approx.
 mass_flux_in = '${fparse 1256*4/fuel_assemblies_per_power_unit/flow_area}' # kg/(m2.s)
 
 ###################################################
@@ -28,7 +26,6 @@ n_rings = 10
 length_entry_fuel = '${fparse 160.02*scale_factor}'
 length_heated_fuel = '${fparse 81.28*scale_factor}'
 length_outlet_fuel = '${fparse 236.22*scale_factor}'
-#height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 orifice_plate_height = '${fparse 5*scale_factor}'
 duct_outside = '${fparse fuel_element_pitch - inter_assembly_gap}'
 duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
@@ -51,17 +48,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     spacer_k = '0.5 0.5'
   []
 
-  #  [fuel_pins]
-  #    type = TriPinMeshGenerator
-  #    input = subchannel
-  #    nrings = '${fparse n_rings}'
-  #    n_cells = 100
-  #    unheated_length_entry = '${fparse length_entry_fuel}'
-  #    heated_length = '${fparse length_heated_fuel}'
-  #    unheated_length_exit = '${fparse length_outlet_fuel}'
-  #    pitch = '${fparse fuel_pin_pitch}'
-  #  []
-  #
   [duct]
     type = TriDuctMeshGenerator
     input = subchannel #fuel_pins
@@ -76,13 +62,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 []
 
 [Functions]
-  #  [axial_heat_rate]
-  #    type = ParsedFunction
-  #    value = 'if(z>l1 & z<l2, 1.0, 1.0)'
-  #    #'(pi/2)*sin(pi*z/L)'
-  #    vars = 'l1 l2'
-  #    vals = '${length_entry_fuel} ${fparse length_entry_fuel+length_heated_fuel}'
-  #  []
   [axial_heat_rate]
     type = ParsedFunction
     value = '(pi/2)*sin(pi*z/L)'
@@ -260,18 +239,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 []
 
-#[UserObjects]
-#  [Tpin_avg_uo]
-#    type = NearestPointLayeredAverage
-#    direction = z
-#    num_layers = 1000
-#    variable = Tpin
-#    block = fuel_pins
-#    points = '${fparse 0.012} 0.0 0.0'
-#    execute_on = timestep_end
-#  []
-#[]
-
 [Outputs]
   exodus = true
 []
@@ -289,24 +256,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 # A multiapp that projects data to a detailed mesh
 ################################################################################
 [MultiApps]
-  #  # Multiapp to pin heat conduction module
-  #  [pin_map]
-  #    type = FullSolveMultiApp
-  #    input_files = pin.i # seperate file for multiapps due to radial power profile
-  #    execute_on = 'timestep_end'
-  #    positions = '0  0   0'
-  #    bounding_box_padding = '0 0 0.01'
-  #  []
-
-  # Multiapp to duct heat conduction module
-  #  [duct_map]
-  #    type = FullSolveMultiApp
-  #    input_files = wrapper.i # seperate file for duct heat conduction
-  #    execute_on = 'timestep_end'
-  #    positions = '0   0   0'
-  #    bounding_box_padding = '0.0 0.0 0.01'
-  #  []
-
   [viz]
     type = FullSolveMultiApp
     input_files = "3d.i"
@@ -315,41 +264,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 []
 
 [Transfers]
-
-  # [Tpin] # send pin surface temperature to bison,
-  #   type = MultiAppInterpolationTransfer
-  #   to_multi_app = pin_map
-  #   source_variable = Tpin
-  #   variable = Pin_surface_temperature
-  # []
-  # [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
-  #   type = MultiAppInterpolationTransfer
-  #   from_multi_app = pin_map
-  #   source_variable = q_prime_pin
-  #   variable = q_prime
-  # []
-
-  #  [duct_temperature_transfer] # Send duct temperature to heat conduction
-  #    type = MultiAppInterpolationTransfer
-  #    to_multi_app = duct_map
-  #    source_variable = Tduct
-  #    variable = duct_surface_temperature
-  #  []
-  #  [q_prime_duct] # Recover q_prime from heat conduction solve
-  #    type = MultiAppInterpolationTransfer
-  #    from_multi_app = duct_map
-  #    source_variable = q_prime_d
-  #    variable = q_prime_duct
-  #  []
-
   [subchannel_transfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S'
   []
-  # [pin_transfer]
-  #   type = MultiAppDetailedPinSolutionTransfer
-  #   to_multi_app = viz
-  #   variable = 'Tpin q_prime'
-  # []
 []

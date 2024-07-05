@@ -2,7 +2,7 @@ Content:
     - ${ROOT_DIR}/doc/content
     - ${MOOSE_DIR}/framework/doc/content
     - ${MOOSE_DIR}/modules/fluid_properties/doc/content
-    - ${MOOSE_DIR}/modules/heat_conduction/doc/content
+    - ${MOOSE_DIR}/modules/heat_transfer/doc/content
     - ${MOOSE_DIR}/modules/ray_tracing/doc/content
     - ${MOOSE_DIR}/modules/navier_stokes/doc/content
     - ${MOOSE_DIR}/modules/reactor/doc/content
