@@ -13,19 +13,21 @@
 
 class NavierStokesPhysicsBase;
 class WCNSFVFlowPhysics;
+class WCNSFVTurbulencePhysics;
 
 /**
- * Helper class to interact with a WCNSFVFlowPhysics
+ * Helper class to interact with a flow and turbulence physics for a Physics that solves
+ * an advection problem using incompressible or weakly-compressible finite volume
  */
 class WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVCoupledAdvectionPhysicsHelper(const InputParameters & parameters,
-                                      const NavierStokesPhysicsBase * derived_physics);
+  WCNSFVCoupledAdvectionPhysicsHelper(const NavierStokesPhysicsBase * derived_physics);
 
-  const WCNSFVFlowPhysics * getCoupledFlowPhysics(const InputParameters & parameters) const;
+  const WCNSFVFlowPhysics * getCoupledFlowPhysics() const;
+  const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
 
   /// Return the porosity functor name.
   /// It is important to forward to the Physics so we do not get the smoothing status wrong
@@ -39,6 +41,8 @@ protected:
   const NavierStokesPhysicsBase * _advection_physics;
   /// Flow physics
   const WCNSFVFlowPhysics * _flow_equations_physics;
+  /// Turbulence
+  const WCNSFVTurbulencePhysics * _turbulence_physics;
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;

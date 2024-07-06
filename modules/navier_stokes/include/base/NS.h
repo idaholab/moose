@@ -124,11 +124,14 @@ static const std::string mu_t = "mu_t";
 // Effective viscosity = sum of viscosities
 static const std::string mu_eff = "mu_eff";
 static const std::string k = "k";
+// Turbulence 'conductivity'
+static const std::string k_t = "k_t";
 static const std::string thermal_diffusivity = "thermal_diffusivity";
 static const std::string alpha = "alpha";
 static const std::string alpha_wall = "alpha_wall";
 static const std::string solid = "solid";
 static const std::string Prandtl = "Pr";
+static const std::string turbulent_Prandtl = "Pr_t";
 static const std::string Reynolds = "Re";
 static const std::string Reynolds_hydraulic = "Re_h";
 static const std::string Reynolds_interstitial = "Re_i";
