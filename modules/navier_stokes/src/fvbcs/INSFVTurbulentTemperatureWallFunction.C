@@ -25,7 +25,7 @@ INSFVTurbulentTemperatureWallFunction::validParams()
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
-  params.addRequiredParam<MooseFunctorName>(NS::cp, "The spcific heat at constant pressure.");
+  params.addRequiredParam<MooseFunctorName>(NS::cp, "The specific heat at constant pressure.");
   params.addParam<MooseFunctorName>(NS::kappa, "The thermal conductivity.");
   params.addParam<MooseFunctorName>("Pr_t", 0.58, "The turbulent Prandtl number.");
   params.addParam<MooseFunctorName>("k", "Turbulent kinetic energy functor.");
@@ -81,7 +81,9 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     velocity(2) = (*_w_var)(current_argument, state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  const ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
+  const VectorValue offset = {1e-42, 1e-42, 1e-42};
+  const ADReal parallel_speed =
+      NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()) + offset);
 
   // Computing friction velocity and y+
   ADReal u_tau, y_plus;
@@ -137,15 +139,19 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   {
     const auto alpha_lam = kappa / (rho * cp);
     const auto Pr = cp * mu / kappa;
-    const auto Pr_ratio = Pr / _Pr_t(current_argument, state);
+    const auto Pr_t = _Pr_t(current_argument, state);
+    const auto Pr_ratio = Pr / Pr_t;
     const auto jayatilleke_P =
         9.24 * (std::pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * std::exp(-0.007 * Pr_ratio));
     const auto wall_scaling =
         1.0 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus) + jayatilleke_P;
-    const auto alpha_turb = u_tau * wall_dist / (_Pr_t(current_argument, state) * wall_scaling);
+    const auto alpha_turb = u_tau * wall_dist / (Pr_t * wall_scaling);
     const auto blending_function = (y_plus - 5.0) / 25.0;
     alpha = blending_function * alpha_turb + (1.0 - blending_function) * alpha_lam;
   }
+
+  // To make sure new derivatives are not introduced as the solve progresses
+  alpha += 0 * kappa * (rho * cp) + 0 * u_tau * _Pr_t(current_argument, state);
 
   const auto face_arg = singleSidedFaceArg();
   return -rho * cp * alpha * (_T_w(face_arg, state) - _var(current_argument, state)) / wall_dist;
