@@ -14,6 +14,7 @@
 #include "NSFVBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
+registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "get_turbulence_physics");
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_fv_kernel");
@@ -65,7 +66,7 @@ WCNSFVFluidHeatTransferPhysics::validParams()
 
 WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
-    WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
+    WCNSFVCoupledAdvectionPhysicsHelper(this),
     _has_energy_equation(
         isParamValid("add_energy_equation")
             ? getParam<bool>("add_energy_equation")
@@ -436,6 +437,14 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyInletBC()
 }
 
 void
+WCNSFVFluidHeatTransferPhysics::actOnAdditionalTasks()
+{
+  // Turbulence physics would not be initialized before this task
+  if (_current_task == "get_turbulence_physics")
+    _turbulence_physics = getCoupledTurbulencePhysics();
+}
+
+void
 WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
 {
   const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
@@ -473,6 +482,39 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
 
       getProblem().addFVBC(
           bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
+    }
+    // We add this boundary condition here to facilitate the input of wall boundaries / functors for
+    // energy. If there are too many turbulence options and this gets out of hand we will have to
+    // move this to the turbulence Physics
+    else if (_energy_wall_types[bc_ind] == "wallfunction")
+    {
+      if (!_turbulence_physics)
+        paramError("coupled_turbulence_physics",
+                   "A coupled turbulence Physics was not found for defining the wall function "
+                   "boundary condition on boundary: " +
+                       wall_boundaries[bc_ind]);
+      const std::string bc_type = "INSFVTurbulentTemperatureWallFunction";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
+      params.set<bool>("linearized_yplus") =
+          _turbulence_physics->getParam<bool>("linearized_yplus");
+      params.set<MooseFunctorName>("T_w") = _energy_wall_functors[bc_ind];
+      params.set<MooseFunctorName>(NS::density) = _density_name;
+      params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+      if (_thermal_conductivity_name.size() != 1)
+        mooseError("Several anisotropic thermal conductivity (kappa) regions have been specified. "
+                   "Selecting the right kappa coefficient for the turbulence boundaries is not "
+                   "currently implemented.\nBoundaries:\n" +
+                   Moose::stringify(_turbulence_physics->turbulenceWalls()) +
+                   "\nKappa(s) specified:\n" + Moose::stringify(_thermal_conductivity_name));
+      params.set<MooseFunctorName>(NS::kappa) = _thermal_conductivity_name[0];
+      params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+      const std::string u_names[3] = {"u", "v", "w"};
+      for (const auto d : make_range(dimension()))
+        params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+
+      getProblem().addFVBC(bc_type, prefix() + "wallfunction_" + wall_boundaries[bc_ind], params);
     }
   }
 }

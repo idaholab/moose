@@ -30,6 +30,10 @@ public:
 
   /// Whether a turbulence model is in use
   bool hasTurbulenceModel() const { return _turbulence_model != "none"; }
+  /// The names of the boundaries with turbulence wall functions
+  std::vector<BoundaryName> turbulenceWalls() const { return _turbulence_walls; }
+  /// The turbulence wall treatment (same for all turbulence walls currently)
+  MooseEnum turbulenceWallTreatment() const { return _wall_treatment; }
 
 protected:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
@@ -80,6 +84,8 @@ private:
   const VariableName _mixing_length_name;
   /// List of boundaries to act as walls for turbulence models
   std::vector<BoundaryName> _turbulence_walls;
+  /// Turbulence wall treatment (same for all walls currently)
+  MooseEnum _wall_treatment;
   /// Name of the turbulent kinetic energy
   const VariableName _tke_name;
   /// Name of the turbulent kinetic energy dissipation
