@@ -110,10 +110,14 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     const auto & face_info_vec = libmesh_map_find(_face_infos, _current_elem);
     const auto & distance_vec = libmesh_map_find(_dist, _current_elem);
+    mooseAssert(distance_vec.size(), "Should have found a distance vector");
+    mooseAssert(distance_vec.size() == face_info_vec.size(),
+                "Should be as many distance vectors as face info vectors");
 
     for (unsigned int i = 0; i < distance_vec.size(); i++)
     {
       const auto distance = distance_vec[i];
+      mooseAssert(distance > 0, "Should be at a non-zero distance");
 
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
         y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
@@ -131,7 +135,7 @@ INSFVTKEDSourceSink::computeQpResidual()
       tot_weight += 1.0;
     }
 
-    for (unsigned int i = 0; i < y_plus_vec.size(); i++)
+    for (const auto i : index_range(y_plus_vec))
     {
       const auto y_plus = y_plus_vec[i];
 
@@ -146,7 +150,7 @@ INSFVTKEDSourceSink::computeQpResidual()
             2.0 * TKE * _mu(facearg, state) / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
       }
       else
-        destruction += std::pow(_C_mu, 0.75) * std::pow(TKE, 1.5) /
+        destruction += std::pow(_C_mu, 0.75) * rho * std::pow(std::max(ADReal(0), TKE), 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
     }
 

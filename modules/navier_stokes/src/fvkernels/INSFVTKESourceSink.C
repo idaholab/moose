@@ -162,14 +162,23 @@ INSFVTKESourceSink::computeQpResidual()
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
+      // Additional 0-value terms to make sure new derivative entries are not added during the solve
       if (y_plus < 11.25)
+      {
         destruction += destruction_visc;
+        if (_nonlinear_solve)
+          destruction += 0 * destruction_log;
+      }
       else
       {
         destruction += destruction_log;
+        if (_nonlinear_solve)
+          destruction += 0 * destruction_visc;
         production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(_var(elem_arg, old_state) + 1e-10) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       }
+
+      if
     }
 
     residual = (destruction - production) * _var(elem_arg, state);
