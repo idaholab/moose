@@ -131,8 +131,8 @@ TimedSubdomainModifier::buildFromParameters()
 
   for (const auto i : index_range(raw_from))
   {
-    _blocks_from[i] = _mesh.getSubdomainID(raw_from[i]);
-    _blocks_to[i] = _mesh.getSubdomainID(raw_to[i]);
+    _blocks_from[i] = getSubdomainIDAndCheck(raw_from[i]);
+    _blocks_to[i] = getSubdomainIDAndCheck(raw_to[i]);
   }
 }
 
@@ -256,11 +256,20 @@ TimedSubdomainModifier::buildFromFile()
   std::transform(strBlockFrom.begin(),
                  strBlockFrom.end(),
                  _blocks_from.begin(),
-                 [this](const std::string & x) { return _mesh.getSubdomainID(x); });
+                 [this](const std::string & x) { return getSubdomainIDAndCheck(x); });
   std::transform(strBlockTo.begin(),
                  strBlockTo.end(),
                  _blocks_to.begin(),
-                 [this](const std::string & x) { return _mesh.getSubdomainID(x); });
+                 [this](const std::string & x) { return getSubdomainIDAndCheck(x); });
+}
+
+SubdomainID
+TimedSubdomainModifier::getSubdomainIDAndCheck(const std::string & subdomain_name)
+{
+  const auto id = _mesh.getSubdomainID(subdomain_name);
+  if (id == Moose::INVALID_BLOCK_ID)
+    mooseError("block", "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+  return id;
 }
 
 SubdomainID

@@ -32,6 +32,8 @@ private:
   void buildFromParameters();
   void buildFromFile();
 
+  SubdomainID getSubdomainIDAndCheck(const std::string & subdomain_name);
+
   /// Times to change the subdomains on. If the time steps do not align with the times,
   /// the subdomain changes will happen at the end of the time step.
   /// The sort order of this vector must match _blocks_from and _blocks_to.
