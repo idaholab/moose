@@ -73,6 +73,8 @@ WCNSFVTurbulencePhysics::validParams()
       "non_equilibrium_treatment",
       false,
       "Whether to apply a non-equilibrium treatment for the source and sink terms");
+  params.addParam<MooseFunctorName>(
+      NS::turbulent_Prandtl, NS::turbulent_Prandtl, "Turbulent Prandtl number");
 
   // Boundary parameters
   params.addParam<bool>("linearized_yplus", false, "Whether to use a linearized Y-plus model");
@@ -167,10 +169,11 @@ WCNSFVTurbulencePhysics::validParams()
 
 WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
-    WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
+    WCNSFVCoupledAdvectionPhysicsHelper(this),
     _turbulence_model(getParam<MooseEnum>("turbulence_handling")),
     _mixing_length_name(getParam<AuxVariableName>("mixing_length_name")),
     _turbulence_walls(getParam<std::vector<BoundaryName>>("turbulence_walls")),
+    _wall_treatment(getParam<MooseEnum>("wall_treatment")),
     _tke_name(getParam<MooseFunctorName>("tke_name")),
     _tked_name(getParam<MooseFunctorName>("tked_name"))
 {
@@ -235,7 +238,8 @@ WCNSFVTurbulencePhysics::retrieveCoupledPhysics()
         !getCoupledPhysics<const WCNSFVFluidHeatTransferPhysics>(true).empty())
       paramError("fluid_heat_transfer_physics",
                  "We currently do not support creating both turbulence physics and fluid heat "
-                 "transfer physics that are not coupled together");
+                 "transfer physics that are not coupled together. Use "
+                 "'fluid_heat_transfer_physics' to explicitly specify the coupling");
     if (_fluid_energy_physics && _fluid_energy_physics->hasEnergyEquation())
       _has_energy_equation = true;
     else
@@ -473,12 +477,29 @@ WCNSFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
           kernel_type, prefix() + "ins_energy_mixing_length_diffusion", params);
   }
   else if (_turbulence_model == "k-epsilon")
-    mooseError("Energy advection with k-epsilon turbulence is not implemented");
+  {
+    const std::string kernel_type = "FVDiffusion";
+    const auto T_fluid_name = _flow_equations_physics->getFluidTemperatureName();
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    params.set<NonlinearVariableName>("variable") = T_fluid_name;
+    params.set<MooseFunctorName>("coeff") = NS::k_t;
+    getProblem().addFVKernel(kernel_type, prefix() + T_fluid_name + "_turbulent_diffusion", params);
+  }
 }
 
 void
 WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
 {
+  const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
+  const auto & passive_scalar_schmidt_number =
+      getParam<std::vector<Real>>("passive_scalar_schmidt_number");
+  if (passive_scalar_schmidt_number.size() != passive_scalar_names.size() &&
+      passive_scalar_schmidt_number.size() != 1)
+    paramError("passive_scalar_schmidt_number",
+               "The number of Schmidt numbers defined is not equal to the number of passive "
+               "scalar fields!");
+
   if (_turbulence_model == "mixing-length")
   {
     const std::string u_names[3] = {"u", "v", "w"};
@@ -486,20 +507,8 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
-
     for (const auto dim_i : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
-
-    const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
-    const auto & passive_scalar_schmidt_number =
-        getParam<std::vector<Real>>("passive_scalar_schmidt_number");
-    _console << "checking " << passive_scalar_schmidt_number.size() << passive_scalar_names.size()
-             << std::endl;
-    if (passive_scalar_schmidt_number.size() != passive_scalar_names.size() &&
-        passive_scalar_schmidt_number.size() != 1)
-      paramError("passive_scalar_schmidt_number",
-                 "The number of Schmidt numbers defined is not equal to the number of passive "
-                 "scalar fields!");
 
     for (const auto & name_i : index_range(passive_scalar_names))
     {
@@ -516,7 +525,18 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     }
   }
   else if (_turbulence_model == "k-epsilon")
-    mooseError("Passive scalar advection with k-epsilon turbulence is not implemented");
+  {
+    const std::string kernel_type = "FVDiffusion";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+
+    for (const auto & name_i : index_range(passive_scalar_names))
+    {
+      params.set<NonlinearVariableName>("variable") = passive_scalar_names[name_i];
+      getProblem().addFVKernel(
+          kernel_type, prefix() + passive_scalar_names[name_i] + "_turbulent_diffusion", params);
+    }
+  }
 }
 
 void
@@ -669,9 +689,11 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
 void
 WCNSFVTurbulencePhysics::addFVBCs()
 {
+  const std::string u_names[3] = {"u", "v", "w"};
+
   if (_turbulence_model == "k-epsilon")
   {
-    const std::string u_names[3] = {"u", "v", "w"};
+    mooseAssert(_flow_equations_physics, "Should have a flow equation physics");
     const std::string bc_type = "INSFVTurbulentViscosityWallFunction";
     InputParameters params = getFactory().getValidParams(bc_type);
     params.set<std::vector<BoundaryName>>("boundary") = _turbulence_walls;
@@ -680,11 +702,14 @@ WCNSFVTurbulencePhysics::addFVBCs()
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<MooseFunctorName>(NS::TKE) = _tke_name;
-    params.set<MooseEnum>("wall_treatment") = getParam<MooseEnum>("wall_treatment");
+    params.set<MooseEnum>("wall_treatment") = _wall_treatment;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
 
     getProblem().addFVBC(bc_type, prefix() + "turbulence_walls", params);
+    // Energy wall function boundary conditions are added in the WCNSFVFluidEnergyPhysics
+    // because it facilitates counting the number of walls, specifying energy wall functors
+    // the same way as for boundary conditions
   }
 }
 
@@ -745,12 +770,13 @@ WCNSFVTurbulencePhysics::addMaterials()
   }
   else if (_turbulence_model == "k-epsilon")
   {
-
     if (!getProblem().hasFunctor(NS::mu_eff, /*thread_id=*/0))
     {
       InputParameters params = getFactory().getValidParams("ADParsedFunctorMaterial");
       assignBlocks(params, _blocks);
       const auto mu_name = _flow_equations_physics->dynamicViscosityName();
+
+      // Avoid defining floats as functors in the parsed expression
       if (!MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(mu_name))
         params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name,
                                                                  mu_name};
@@ -770,6 +796,33 @@ WCNSFVTurbulencePhysics::addMaterials()
       params.set<MooseFunctorName>(NS::TKE) = _tke_name;
       params.set<MooseFunctorName>(NS::TKED) = _tked_name;
       params.set<MooseFunctorName>(NS::density) = _density_name;
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+      getProblem().addMaterial("INSFVkEpsilonViscosityMaterial", prefix() + "compute_mu_t", params);
+    }
+
+    if (_has_energy_equation && !getProblem().hasFunctor(NS::k_t, /*thread_id=*/0))
+    {
+      InputParameters params = getFactory().getValidParams("ADParsedFunctorMaterial");
+      assignBlocks(params, _blocks);
+      const auto mu_t_name = NS::mu_t;
+      const auto cp_name = _fluid_energy_physics->getSpecificHeatName();
+      const auto Pr_t_name = getParam<MooseFunctorName>("Pr_t");
+
+      // Avoid defining floats as functors in the parsed expression
+      if (!MooseUtils::isFloat(cp_name) && !MooseUtils::isFloat(Pr_t_name))
+        params.set<std::vector<std::string>>("functor_names") = {cp_name, Pr_t_name, mu_t_name};
+      else if (MooseUtils::isFloat(cp_name) && !MooseUtils::isFloat(Pr_t_name))
+        params.set<std::vector<std::string>>("functor_names") = {Pr_t_name, mu_t_name};
+      else if (!MooseUtils::isFloat(cp_name) && MooseUtils::isFloat(Pr_t_name))
+        params.set<std::vector<std::string>>("functor_names") = {cp_name, mu_t_name};
+      else
+        params.set<std::vector<std::string>>("functor_names") = {mu_t_name};
+
+      params.set<std::string>("expression") = mu_t_name + "*" + cp_name + "/" + Pr_t_name;
+      params.set<std::string>("property_name") = NS::k_t;
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+      getProblem().addMaterial(
+          "ADParsedFunctorMaterial", prefix() + "turbulent_heat_eff_conductivity", params);
     }
   }
 }
