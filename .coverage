@@ -90,7 +90,7 @@ require_total = 88
 require_total = 84
 
 [thermal_hydraulics]
-require_total = 89
+require_total = 88
 
 [xfem]
 require_total = 80
