@@ -175,6 +175,9 @@ MooseMesh::validParams()
       "elements. IDs for this subdomains may be provided using add_subdomain_ids. Otherwise IDs "
       "are automatically assigned. In case add_subdomain_ids is set too, both lists must contain "
       "the same number of items.");
+  params.addParam<bool>("add_subdomain_show_info",
+                        false,
+                        "Whether or not to show info after generating additional subdomains.");
 
   params.addParam<std::vector<BoundaryID>>(
       "add_sideset_ids",
@@ -188,6 +191,9 @@ MooseMesh::validParams()
       "boundary restrictions for sidesets initially containing no sides. Ids for this sidesets may "
       "be provided using add_sideset_ids. In this case this list and add_sideset_ids must contain "
       "the same number of items.");
+  params.addParam<bool>("add_sideset_show_info",
+                        false,
+                        "Whether or not to show info after generating additional sidesets.");
 
   params += MooseAppCoordTransform::validParams();
 
@@ -205,6 +211,7 @@ MooseMesh::validParams()
       "dim nemesis patch_update_strategy construct_node_list_from_side_list patch_size",
       "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
+  params.addParamNamesToGroup("add_subdomain_show_info add_sideset_show_info", "Debugging");
 
   return params;
 }
@@ -422,14 +429,24 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     _mesh_subdomains.insert(elem->subdomain_id());
 
   // add explicitly requested subdomains
+  const auto add_subdomain_show_info = getParam<bool>("add_subdomain_show_info");
+  std::stringstream add_subdomain_info;
   if (isParamValid("add_subdomain_ids") && !isParamValid("add_subdomain_names"))
   {
     // only subdomain ids are explicitly given
     const auto & add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
     _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
+    // on user demand: print info on subdomains added
+    if (add_subdomain_show_info)
+    {
+      for (const auto & sub_id : add_subdomain_id)
+        add_subdomain_info << COLOR_CYAN << "additional subdomain (id only): " << COLOR_DEFAULT
+                           << sub_id << std::endl;
+    }
   }
   else if (isParamValid("add_subdomain_ids") && isParamValid("add_subdomain_names"))
   {
+    // subdomain ids and names are explicitly given
     const auto add_subdomain =
         getParam<SubdomainID, SubdomainName>("add_subdomain_ids", "add_subdomain_names");
     for (const auto & [sub_id, sub_name] : add_subdomain)
@@ -438,6 +455,12 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       _mesh_subdomains.insert(sub_id);
       // set name of the subdomain just added
       setSubdomainName(sub_id, sub_name);
+      // on user demand: print info on subdomains added
+      if (add_subdomain_show_info)
+      {
+        add_subdomain_info << COLOR_CYAN << "additional subdomain: " << COLOR_DEFAULT << sub_name
+                           << " (" << sub_id << ")" << std::endl;
+      }
     }
   }
   else if (isParamValid("add_subdomain_names"))
@@ -461,8 +484,31 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       _mesh_subdomains.insert(sub_id);
       // set name of the subdomain just added
       setSubdomainName(sub_id, sub_name);
+      // on user demand: print info on subdomains added
+      if (add_subdomain_show_info)
+      {
+        add_subdomain_info << COLOR_CYAN
+                           << "additional subdomain (id automatically assigned): " << COLOR_DEFAULT
+                           << sub_name << " (" << sub_id << ")" << std::endl;
+      }
     }
   }
+  else
+  {
+    // no additional subdomains given
+    if (add_subdomain_show_info)
+    {
+      add_subdomain_info << COLOR_CYAN << "no additional subdomains requested in MESH section"
+                         << std::endl;
+    }
+  }
+
+  // on user demand: send info on subdomains added to console
+  if (add_subdomain_show_info)
+    if (add_subdomain_info.tellp() != std::streampos(0))
+      _console << add_subdomain_info.str() << std::flush;
+    else
+      _console << COLOR_CYAN << "no additional subdomains generated" << std::endl << std::flush;
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
@@ -481,14 +527,25 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 
   // Add explicitly requested sidesets
   // This is done *after* the side boundaries (e.g. "right", ...) have been generated.
+  const auto add_sideset_show_info = getParam<bool>("add_sideset_show_info");
+  std::stringstream add_sideset_info;
   if (isParamValid("add_sideset_ids") && !isParamValid("add_sideset_names"))
   {
+    // only sideset ids are explicitly given
     const auto & add_sideset_ids = getParam<std::vector<BoundaryID>>("add_sideset_ids");
     _mesh_boundary_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
     _mesh_sideset_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
+    // on user demand: print info on sidesets added
+    if (add_sideset_show_info)
+    {
+      for (const auto & sideset_id : add_sideset_ids)
+        add_sideset_info << COLOR_CYAN << "additional sideset (id only): " << COLOR_DEFAULT
+                         << sideset_id << std::endl;
+    }
   }
   else if (isParamValid("add_sideset_ids") && isParamValid("add_sideset_names"))
   {
+    // sideset ids and names are explicitly given
     const auto add_sidesets =
         getParam<BoundaryID, BoundaryName>("add_sideset_ids", "add_sideset_names");
     for (const auto & [sideset_id, sideset_name] : add_sidesets)
@@ -498,6 +555,12 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       _mesh_sideset_ids.insert(sideset_id);
       // set name of the sideset just added
       setBoundaryName(sideset_id, sideset_name);
+      // on user demand: print info on sidesets added
+      if (add_sideset_show_info)
+      {
+        add_sideset_info << COLOR_CYAN << "additional sidesets: " << COLOR_DEFAULT << sideset_name
+                         << " (" << sideset_id << ")" << std::endl;
+      }
     }
   }
   else if (isParamValid("add_sideset_names"))
@@ -524,8 +587,31 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       _mesh_sideset_ids.insert(sideset_id);
       // set name of the sideset just added
       setBoundaryName(sideset_id, sideset_name);
+      // on user demand: print info on sidesets added
+      if (add_sideset_show_info)
+      {
+        add_sideset_info << COLOR_CYAN
+                         << "additional sideset (id automatically assigned): " << COLOR_DEFAULT
+                         << sideset_name << " (" << sideset_id << ")" << std::endl;
+      }
     }
   }
+  else
+  {
+    // no additional sidesets given
+    if (add_sideset_show_info)
+    {
+      add_sideset_info << COLOR_CYAN << "no additional sidesets requested in MESH section"
+                       << std::endl;
+    }
+  }
+
+  // on user demand: send info on sidesets added to console
+  if (add_sideset_show_info)
+    if (add_sideset_info.tellp() != std::streampos(0))
+      _console << add_sideset_info.str() << std::flush;
+    else
+      _console << COLOR_CYAN << "no additional sidesets generated" << std::endl << std::flush;
 
   // Communicate subdomain and boundary IDs if this is a parallel mesh
   if (!getMesh().is_serial())
