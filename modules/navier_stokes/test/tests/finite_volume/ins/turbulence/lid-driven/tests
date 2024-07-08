@@ -2,7 +2,7 @@
   # Testing summary
   # Input                        Wall function           Solver         Energy   Energy wall function
   # lid-driven-turb-std-wall.i      std                  segregated     no
-  # lid-driven-turb-std-wall.i      std + bulk-wall       segregated    no
+  # lid-driven-turb-std-wall.i      std + bulk-wall      segregated     no
   # lid-driven-turb-non-eq-wall.i   non-eq               segregated     no
   # lid-driven-turb-linear-wall.i   linear               segregated     no
   # lid-driven-turb-inc-wall.i      incremental          segregated     no
@@ -232,9 +232,18 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-energy-wall.i'
       exodiff = 'lid-driven-turb-energy-wall_short.e'
-      detail = 'and pass debugging checks.'
+      detail = 'and pass debugging checks,'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-energy-wall_short'
+    []
+    [result_physics]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-energy-wall-physics.i'
+      exodiff = 'lid-driven-turb-energy-wall-physics_out.e'
+      detail = 'using the Navier Stokes Physics shorthand syntax.'
+      abs_zero = 1e-6
+      cli_args = 'Outputs/file_base=lid-driven-turb-energy-wall-physics_out'
+      heavy = true
     []
   []
   [lid_driven_turb_energy_wall_linear]
@@ -294,9 +303,18 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-capped.i'
       exodiff = 'lid-driven-turb-capped_short.e'
-      detail = 'and pass debugging checks.'
+      detail = 'and pass debugging checks,'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-capped_short'
+    []
+    [result_physics]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-capped-physics.i'
+      exodiff = 'lid-driven-turb-capped-physics_out.e'
+      detail = 'using the Navier Stokes Physics shorthand syntax.'
+      abs_zero = 1e-6
+      cli_args = 'Outputs/file_base=lid-driven-turb-capped-physics_out'
+      heavy = true
     []
   []
   [lid_driven_turb_std_wall_nonlinear]
@@ -316,10 +334,20 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall-nonlinear.i'
       exodiff = 'lid-driven-turb-std-wall-nonlinear_short.e'
-      detail = 'and pass debugging checks.'
+      detail = 'and pass debugging checks,'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_steps=3 Outputs/file_base=lid-driven-turb-std-wall-nonlinear_short'
       min_parallel = 4
+    []
+    [result_physics]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-std-wall-nonlinear-physics.i'
+      exodiff = 'lid-driven-turb-std-wall-nonlinear-physics_out.e'
+      detail = 'using the Navier Stokes Physics shorthand syntax.'
+      abs_zero = 1e-6
+      cli_args = 'Outputs/execute_on=final Outputs/file_base=lid-driven-turb-std-wall-nonlinear-physics_out'
+      min_parallel = 4
+      heavy = true
     []
   []
 []
