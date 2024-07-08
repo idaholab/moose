@@ -199,6 +199,14 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[Postprocessors]
+  [PinTemp]
+    type = PinSurfaceTemperature
+    index = 10
+    height = 0.5
+  []
+[]
+
 [Executioner]
   type = Steady
 []

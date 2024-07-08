@@ -202,6 +202,12 @@ P_out = 2.0e5 # Pa
     execute_on = 'TIMESTEP_END'
     height = 0.5
   []
+
+  [PinTemp]
+    type = PinSurfaceTemperature
+    index = 10
+    height = 1
+  []
 []
 
 [Executioner]
