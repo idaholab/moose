@@ -1,5 +1,8 @@
 # NavierStokesFV System
 
+!alert warning
+This syntax is deprecated. Please refer to the [section on how to transition to the new Physics syntax](transition) for guidance on how to use the current syntax.
+
 ## Overview
 
 The NavierStokesFV system is dedicated to decrease the effort required by the user to
@@ -147,6 +150,50 @@ We note that the weakly-compressible handling can be enabled by setting
 As shown in the example, an arbitrary
 energy source function can also be supplied to the incorporated
 energy equation using the [!param](/Modules/NavierStokesFV/external_heat_source) parameter.
+
+
+## How to transition to the Physics syntax id=transition
+
+The `/Modules/NavierStokes` action syntax and (`Physics/NavierStokes/Flow/..`, `Physics/NavierStokes/FluidHeatTransfer/..`, `Physics/NavierStokes/ScalarTransport/..`, `Physics/NavierStokes/Turbulence/..`) syntax
+create the exact same objects in the background. We currently do not expect any difference in results,
+notably because `/Modules/NavierStokes` has been changed to create the relevant `Physics` under the hood!
+
+To transition, you will have to split the `/Modules/NavierStokes` parameters into four groups below.
+Your simulation may only feature only one of these groups, in which case you will only need to create a single `Physics`:
+
+- mass and momentum (conservation) equations
+- heat transfer / energy (conservation) equation
+- scalar conservation equations
+- turbulence parameters
+
+
+and copy paste the mass/momentum parameters into the  `[Physics/NavierStokes/Flow/<name>]` syntax as shown in this example:
+
+!listing finite_volume/ins/channel-flow/2d-rc-transient-physics.i start=Physics end=FluidHeatTransfer
+
+the energy conservation parameters into this `[Physics/NavierStokes/FluidHeatTransfer/<name>]` syntax:
+
+!listing finite_volume/ins/channel-flow/2d-rc-transient-physics.i start=Physics/NavierStokes end=[FunctorMaterials]
+
+the scalar conservation equations parameters into this `[Physics/NavierStokes/ScalarTransport/<name>]` syntax:
+
+!listing finite_volume/ins/channel-flow/2d-scalar-transport-physics.i start=Physics/NavierStokes end=[AuxVariables]
+
+and finally the turbulence parameters into this `[Physics/NavierStokes/Turbulence/<name>]` syntax:
+
+!listing finite_volume/ins/channel-flow/2d-mixing-length-physics.i start=Physics/NavierStokes end=[Executioner]
+
+!alert note
+All `NavierStokes` `Physics` may be nested under the same `[NavierStokes]` sub-block. The separation in the examples into different `Physics` blocks is only for the purpose of simplifying the examples.
+
+
+If all goes well, the input will give exactly the same result. Some parameters have been renamed but the old names are currently still supported, even in the new syntax. If it does not go well, you can use the [DumpObjectsProblem.md] with the [!param](/Problem/DumpObjectsProblem/dump_path) parameter set to:
+
+- `Modules/NavierStokesFV` for the initial input
+- `Physics/NavierStokes/...` for the new input
+
+
+to compare all the objects and parameters of both syntaxes. They should match rigorously. Any difference should be reported on the [MOOSE discussions forum](https://github.com/idaholab/moose/discussions). Please attach both inputs and a description of the differences found to facilitate our analysis.
 
 
 !syntax list /Modules/NavierStokesFV objects=True actions=False subsystems=False

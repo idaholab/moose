@@ -11,7 +11,7 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
 #include "PINSFVEnergyAnisotropicDiffusion.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_variable");
@@ -27,7 +27,7 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params += WCNSFVCoupledAdvectionPhysicsHelper::validParams();
   params.addClassDescription("Define the Navier Stokes weakly-compressible energy equation");
 
-  params += NSFVAction::commonFluidEnergyEquationParams();
+  params += NSFVBase::commonFluidEnergyEquationParams();
   params.transferParam<bool>(PINSFVEnergyAnisotropicDiffusion::validParams(),
                              "effective_conductivity");
 
@@ -43,12 +43,12 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params.deprecateParam("energy_wall_function", "energy_wall_functors", "01/01/2025");
 
   // Spatial finite volume discretization scheme
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_face_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "energy_two_term_bc_expansion");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_advection_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "energy_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
-  params.transferParam<Real>(NSFVAction::validParams(), "energy_scaling");
+  params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
 
   params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks "
                               "use_external_enthalpy_material",

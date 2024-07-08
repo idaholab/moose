@@ -8,21 +8,29 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# For now, 2.1 is the default version of torchlib
-VERSION=2.1
+# For now, 2.1.0 is the default version of torchlib
+VERSION=2.1.0
 IGNORE_CERT=""
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-TORCH_DESTINATION=$SCRIPT_DIR/../framework/contrib
-TORCH_DIR=$TORCH_DESTINATION/libtorch
+TORCH_DEST=$SCRIPT_DIR/../framework/contrib
+TORCH_DISTRIBUTION="cpu"
 
 # Parse the input arguments
 for i in "$@"
 do
   shift
-  if [[ "$i" == "--version="* ]]; then
+  if [[ "$i" == "--cleanup" ]]; then
+    CLEANUP=1
+  elif [[ "$i" == "--version="* ]]; then
     VSTR="$i"
     VERSION=${VSTR#*=};
+  elif [[ "$i" == "--libtorch-dest="* ]]; then
+    VSTR="$i"
+    TORCH_DEST=${VSTR#*=};
+  elif [[ "$i" == "--libtorch-distribution="* ]]; then
+    VSTR="$i"
+    TORCH_DISTRIBUTION=${VSTR#*=};
   elif [[ "$i" == "-h" || "$i" == "--help" ]]; then
     HELP=1;
   elif [[ "$i" == "-k" ]]; then
@@ -30,22 +38,25 @@ do
   fi
 done
 
-
 # Show how to use the script
 if [[ -n "$HELP" ]]; then
   echo "Usage: $0 [-h | --help | -k | --version=VERSION_NUMBER ]"
   echo
   echo "-h | --help              Display this message and list of available setup options"
   echo "-k                       Ignore certifications while downloading packages with curl"
+  echo "--cleanup                Remove the downloaded tarball after the install"
   echo "--version=VERSION_NUMBER Specify the version number of libtorch"
   echo "*************************************************************************************"
   echo ""
   exit 0
 fi
 
+# Create a directory path
+TORCH_DIR=$TORCH_DEST/libtorch
+
 # We need to do this because 1.12 is lower than 1.9 if parsed as a single number
-MAINVERSION=${VERSION%%.*}
-SUBVERSION=${VERSION##*.}
+MAINVERSION=$(echo $VERSION | cut -d. -f1)
+SUBVERSION=$(echo $VERSION | cut -d. -f2)
 
 if (( $MAINVERSION < 1  || ( $MAINVERSION == 1  &&  $SUBVERSION < 4 ) )); then
   echo "The current implementation does not support libtorch versions below 1.4!"
@@ -84,19 +95,26 @@ fi
 # Also, if another installation is present for libtorch, we overwrite the files.
 FILENAME=""
 if [[ $OP_SYS == linux ]]; then
-  FILENAME=libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip
+  FILENAME=libtorch-cxx11-abi-shared-with-deps-$VERSION%2B$TORCH_DISTRIBUTION.zip
 elif [[ $OP_SYS == mac ]]; then
-  FILENAME=libtorch-macos-$VERSION.0.zip
+  FILENAME=libtorch-macos-$VERSION.zip
 else
   echo "Unknown operating system! We only support Linux/Mac machines!"
   exit 1
 fi
 
 # Check if it is necessary to download a new package or we already have one
-if [[ -f $TORCH_DESTINATION/$FILENAME ]]; then
+PACKAGE=${TORCH_DEST}/${FILENAME}
+if [[ -f $PACKAGE ]]; then
   echo "Found requested package for libtorch v. $VERSION, no need to download."
 else
-  curl -L $IGNORE_CERT -o $TORCH_DESTINATION/$FILENAME https://download.pytorch.org/libtorch/cpu/$FILENAME
+  curl -L $IGNORE_CERT -o $PACKAGE https://download.pytorch.org/libtorch/$TORCH_DISTRIBUTION/$FILENAME
 fi
-echo "Extracting $FILENAME."
-unzip -q -o $TORCH_DESTINATION/$FILENAME -d $TORCH_DESTINATION
+echo "Extracting $PACKAGE."
+unzip -q -o $PACKAGE -d $TORCH_DEST
+
+# Clean it up after if requested
+if [[ $CLEANUP == 1 ]]; then
+  echo "Removing $PACKAGE."
+  rm $PACKAGE
+fi
