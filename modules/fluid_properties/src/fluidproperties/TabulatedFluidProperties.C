@@ -28,11 +28,27 @@ TabulatedFluidProperties::validParams()
       "Single phase fluid properties computed using bi-dimensional interpolation of tabulated "
       "values.");
 
+  // Input / output
+  params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
   params.addParam<FileName>("fluid_property_file",
                             "Name of the csv file containing the tabulated fluid property data.");
   params.addParam<FileName>("fluid_property_output_file",
                             "Name of the CSV file which can be output with the tabulation. This "
                             "file can then be read as a 'fluid_property_file'");
+  params.addDeprecatedParam<bool>(
+      "save_file",
+      "Whether to save the csv fluid properties file",
+      "This parameter is no longer required. Whether to save a tabulation is file is controlled by "
+      "specifying the 'fluid_property_output_file' parameter");
+
+  // Data source on a per-property basis
+  MultiMooseEnum properties("density enthalpy internal_energy viscosity k c cv cp entropy",
+                            "density enthalpy internal_energy viscosity");
+  params.addParam<MultiMooseEnum>("interpolated_properties",
+                                  properties,
+                                  "Properties to interpolate if no data file is provided");
+
+  // (p,T) grid parameters
   params.addRangeCheckedParam<Real>(
       "temperature_min", 300, "temperature_min > 0", "Minimum temperature for tabulated data.");
   params.addParam<Real>("temperature_max", 500, "Maximum temperature for tabulated data.");
@@ -43,13 +59,14 @@ TabulatedFluidProperties::validParams()
       "num_T", 100, "num_T > 0", "Number of points to divide temperature range.");
   params.addRangeCheckedParam<unsigned int>(
       "num_p", 100, "num_p > 0", "Number of points to divide pressure range.");
-  params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
-  MultiMooseEnum properties("density enthalpy internal_energy viscosity k c cv cp entropy",
-                            "density enthalpy internal_energy viscosity");
-  params.addParam<MultiMooseEnum>("interpolated_properties",
-                                  properties,
-                                  "Properties to interpolate if no data file is provided");
-  params.addParam<bool>("save_file", "Whether to save the csv fluid properties file");
+
+  // (v,e) grid parameters
+  params.addParam<Real>("e_min", "Minimum specific internal energy for tabulated data.");
+  params.addParam<Real>("e_max", "Maximum specific internal energy for tabulated data.");
+  params.addRangeCheckedParam<Real>(
+      "v_min", "v_min > 0", "Minimum specific volume for tabulated data.");
+  params.addRangeCheckedParam<Real>(
+      "v_max", "v_max > 0", "Maximum specific volume for tabulated data.");
   params.addParam<bool>("construct_pT_from_ve",
                         false,
                         "If the lookup table (p, T) as functions of (v, e) should be constructed.");
@@ -67,11 +84,6 @@ TabulatedFluidProperties::validParams()
                                             "Number of points to divide specific internal energy "
                                             "range for (v,e) lookups.");
   params.addParam<bool>(
-      "error_on_out_of_bounds",
-      true,
-      "Whether pressure or temperature from tabulation exceeding user-specified bounds leads to "
-      "an error.");
-  params.addParam<bool>(
       "use_log_grid_v",
       false,
       "Option to use a base-10 logarithmically-spaced grid for specific volume instead of a "
@@ -82,6 +94,13 @@ TabulatedFluidProperties::validParams()
       "Option to use a base-10 logarithmically-spaced grid for specific internal energy instead "
       "of a linearly-spaced grid.");
 
+  // Out of bounds behavior
+  params.addParam<bool>(
+      "error_on_out_of_bounds",
+      true,
+      "Whether pressure or temperature from tabulation exceeding user-specified bounds leads to "
+      "an error.");
+
   // This is generally a bad idea. However, several properties have not been tabulated so several
   // tests are relying on the original fp object to provide the value (for example for the
   // vaporPressure())
@@ -91,9 +110,9 @@ TabulatedFluidProperties::validParams()
   params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
                               "Variable set conversion");
-  params.addParamNamesToGroup(
-      "temperature_min temperature_max pressure_min pressure_max error_on_out_of_bounds",
-      "Tabulation and interpolation bounds");
+  params.addParamNamesToGroup("temperature_min temperature_max pressure_min pressure_max e_min "
+                              "e_max v_min v_max error_on_out_of_bounds",
+                              "Tabulation and interpolation bounds");
   params.addParamNamesToGroup("num_T num_p num_v num_e use_log_grid_v",
                               "Tabulation and interpolation discretization");
 
@@ -154,6 +173,32 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     mooseError("temperature_max must be greater than temperature_min");
   if (_pressure_max <= _pressure_min)
     mooseError("pressure_max must be greater than pressure_min");
+
+  // Set (v,e) bounds if specified by the user
+  if (isParamValid("e_min") && isParamValid("e_max"))
+  {
+    _e_min = getParam<Real>("e_min");
+    _e_max = getParam<Real>("e_max");
+    _e_bounds_specified = true;
+  }
+  else if (isParamValid("e_min") || isParamValid("e_max"))
+    paramError("e_min",
+               "Either both or none of the min and max values of the specific internal energy "
+               "should be specified");
+  else
+    _e_bounds_specified = false;
+  if (isParamValid("v_min") && isParamValid("v_max"))
+  {
+    _v_min = getParam<Real>("v_min");
+    _v_max = getParam<Real>("v_max");
+    _v_bounds_specified = true;
+  }
+  else if (isParamValid("v_min") || isParamValid("v_max"))
+    paramError("v_min",
+               "Either both or none of the min and max values of the specific internal energy "
+               "should be specified");
+  else
+    _v_bounds_specified = false;
 
   // Lines starting with # in the data file are treated as comments
   _csv_reader.setComment("#");

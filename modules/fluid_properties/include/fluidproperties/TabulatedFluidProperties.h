@@ -267,13 +267,17 @@ protected:
   /// Bidimensional interpolation of pressure from (v,h)
   std::unique_ptr<BidimensionalInterpolation> _p_from_v_h_ipol;
 
-  /// Minimum internal energy in tabulated data
+  /// Whether the specific internal energy bounds were set by the user
+  bool _e_bounds_specified;
+  /// Whether the specific volume bounds were set by the user
+  bool _v_bounds_specified;
+  /// Minimum internal energy in tabulated data (can be user-specified)
   Real _e_min;
-  /// Maximum internal energy in tabulated data
+  /// Maximum internal energy in tabulated data (can be user-specified)
   Real _e_max;
-  /// Minimum specific volume in tabulated data
+  /// Minimum specific volume in tabulated data (can be user-specified)
   Real _v_min;
-  /// Maximum specific volume in tabulated data
+  /// Maximum specific volume in tabulated data (can be user-specified)
   Real _v_max;
   /// Minimum specific enthalpy in tabulated data
   Real _h_min;

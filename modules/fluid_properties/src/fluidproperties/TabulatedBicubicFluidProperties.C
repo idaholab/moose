@@ -57,25 +57,28 @@ TabulatedBicubicFluidProperties::constructInterpolation()
   // Create specific volume (v) grid
   if (_construct_pT_from_ve || _construct_pT_from_vh)
   {
-    if (_fp)
+    if (!_v_bounds_specified)
     {
-      // extreme values of specific volume for the grid bounds
-      Real v1 = v_from_p_T(_pressure_min, _temperature_min);
-      Real v2 = v_from_p_T(_pressure_max, _temperature_min);
-      Real v3 = v_from_p_T(_pressure_min, _temperature_max);
-      Real v4 = v_from_p_T(_pressure_max, _temperature_max);
-      _v_min = std::min({v1, v2, v3, v4});
-      _v_max = std::max({v1, v2, v3, v4});
-    }
-    // if csv exists, get max and min values from csv file
-    else
-    {
-      Real rho_max =
-          *max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
-      Real rho_min =
-          *min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
-      _v_max = 1 / rho_min;
-      _v_min = 1 / rho_max;
+      if (_fp)
+      {
+        // extreme values of specific volume for the grid bounds
+        Real v1 = v_from_p_T(_pressure_min, _temperature_min);
+        Real v2 = v_from_p_T(_pressure_max, _temperature_min);
+        Real v3 = v_from_p_T(_pressure_min, _temperature_max);
+        Real v4 = v_from_p_T(_pressure_max, _temperature_max);
+        _v_min = std::min({v1, v2, v3, v4});
+        _v_max = std::max({v1, v2, v3, v4});
+      }
+      // if csv exists, get max and min values from csv file
+      else
+      {
+        Real rho_max =
+            *max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
+        Real rho_min =
+            *min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
+        _v_max = 1 / rho_min;
+        _v_min = 1 / rho_max;
+      }
     }
 
     // Create v grid for interpolation
@@ -99,23 +102,26 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
   if (_construct_pT_from_ve)
   {
-    if (_fp)
+    if (!_e_bounds_specified)
     {
-      // extreme values of internal energy for the grid bounds
-      Real e1 = e_from_p_T(_pressure_min, _temperature_min);
-      Real e2 = e_from_p_T(_pressure_max, _temperature_min);
-      Real e3 = e_from_p_T(_pressure_min, _temperature_max);
-      Real e4 = e_from_p_T(_pressure_max, _temperature_max);
-      _e_min = std::min({e1, e2, e3, e4});
-      _e_max = std::max({e1, e2, e3, e4});
-    }
-    // if csv exists, get max and min values from csv file
-    else
-    {
-      _e_max = *max_element(_properties[_internal_energy_idx].begin(),
-                            _properties[_internal_energy_idx].end());
-      _e_min = *min_element(_properties[_internal_energy_idx].begin(),
-                            _properties[_internal_energy_idx].end());
+      if (_fp)
+      {
+        // extreme values of internal energy for the grid bounds
+        Real e1 = e_from_p_T(_pressure_min, _temperature_min);
+        Real e2 = e_from_p_T(_pressure_max, _temperature_min);
+        Real e3 = e_from_p_T(_pressure_min, _temperature_max);
+        Real e4 = e_from_p_T(_pressure_max, _temperature_max);
+        _e_min = std::min({e1, e2, e3, e4});
+        _e_max = std::max({e1, e2, e3, e4});
+      }
+      // if csv exists, get max and min values from csv file
+      else
+      {
+        _e_max = *max_element(_properties[_internal_energy_idx].begin(),
+                              _properties[_internal_energy_idx].end());
+        _e_min = *min_element(_properties[_internal_energy_idx].begin(),
+                              _properties[_internal_energy_idx].end());
+      }
     }
 
     // Create e grid for interpolation
