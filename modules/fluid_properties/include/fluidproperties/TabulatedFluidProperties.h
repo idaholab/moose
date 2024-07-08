@@ -160,6 +160,15 @@ protected:
   void checkInputVariables(T & pressure, T & temperature) const;
 
   /**
+   * Checks that the inputs are within the range of the tabulated data, and throws
+   * an error if they are not.
+   * @param v specific volume (m3/kg)
+   * @param e specific internal energy (J/kg)
+   */
+  template <typename T>
+  void checkInputVariablesVE(T & v, T & e) const;
+
+  /**
    * Checks initial guess for Newton Method
    */
   virtual void checkInitialGuess() const;

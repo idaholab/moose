@@ -983,6 +983,7 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  checkInputVariablesVE(v, e);
   return _p_from_v_e_ipol->sample(v, e);
 }
 
@@ -991,6 +992,7 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  checkInputVariablesVE(v, e);
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
 }
 
@@ -999,6 +1001,7 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling T_from_v_e.");
+  checkInputVariablesVE(v, e);
   return _T_from_v_e_ipol->sample(v, e);
 }
 
@@ -1007,6 +1010,7 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling T_from_v_e.");
+  checkInputVariablesVE(v, e);
   _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
 }
 
@@ -1015,6 +1019,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
   return c_from_p_T(p, T);
@@ -1025,6 +1030,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p, dp_dv, dp_de;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T, dT_dv, dT_de;
@@ -1040,6 +1046,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
   return cp_from_p_T(p, T);
@@ -1050,6 +1057,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, 
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p, dp_dv, dp_de;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T, dT_dv, dT_de;
@@ -1065,6 +1073,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
   return cv_from_p_T(p, T);
@@ -1075,6 +1084,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, 
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p, dp_dv, dp_de;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T, dT_dv, dT_de;
@@ -1090,6 +1100,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
   return mu_from_p_T(p, T);
@@ -1100,6 +1111,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, 
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p, dp_dv, dp_de;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T, dT_dv, dT_de;
@@ -1115,6 +1127,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling k_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
   Real p = _p_from_v_e_ipol->sample(v, e);
   return k_from_p_T(p, T);
@@ -1125,6 +1138,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Rea
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling k_from_v_e.");
+  checkInputVariablesVE(v, e);
   Real p, dp_dv, dp_de;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T, dT_dv, dT_de;
@@ -1138,6 +1152,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Rea
 Real
 TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
 {
+  checkInputVariablesVE(v, e);
   Real p0 = _p_initial_guess;
   Real T0 = _T_initial_guess;
   Real p, T;
@@ -1431,6 +1446,31 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
                  ").");
     else
       temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
+  }
+}
+
+template <typename T>
+void
+TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
+{
+  if (e < _e_min || e > _e_max)
+  {
+    if (_error_on_out_of_bounds)
+      throw MooseException("Specific internal energy " + Moose::stringify(e) +
+                           " is outside the range of tabulated internal energies (" +
+                           Moose::stringify(_e_min) + ", " + Moose::stringify(_e_max) + ").");
+    else
+      e = std::max(_e_min, std::min(e, _e_max));
+  }
+
+  if (v < _v_min || v > _v_max)
+  {
+    if (_error_on_out_of_bounds)
+      mooseError("Specific volume " + Moose::stringify(v) +
+                 " is outside the range of tabulated specific volumes (" +
+                 Moose::stringify(_v_min) + ", " + Moose::stringify(_v_max) + ").");
+    else
+      v = std::max(T(_v_min), std::min(v, T(_v_max)));
   }
 }
 
