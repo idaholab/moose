@@ -39,7 +39,6 @@ NodalNormalsCorner::NodalNormalsCorner(const InputParameters & parameters)
 void
 NodalNormalsCorner::execute()
 {
-  std::scoped_lock lock(NodalNormalsPreprocessor::_nodal_normals_mutex);
   NumericVector<Number> & sln = _aux.solution();
 
   // Get a reference to our BoundaryInfo object

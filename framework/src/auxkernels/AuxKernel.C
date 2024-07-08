@@ -108,7 +108,7 @@ template <>
 void
 AuxKernelTempl<Real>::setDofValueHelper(const Real & value)
 {
-  mooseAssert(_n_local_dofs == 1,
+  mooseAssert(_n_shapes == 1,
               "Should only be calling setDofValue if there is one dof for the aux var");
   _var.setDofValue(value, 0);
 }
@@ -151,7 +151,7 @@ AuxKernelTempl<ComputeValueType>::compute()
   }
   else /* elemental variables */
   {
-    _n_local_dofs = _coincident_lower_d_calc ? _var.dofIndicesLower().size() : _var.numberOfDofs();
+    _n_shapes = _coincident_lower_d_calc ? _var.dofIndicesLower().size() : _var.numberOfDofs();
 
     if (_coincident_lower_d_calc)
     {
@@ -159,11 +159,11 @@ AuxKernelTempl<ComputeValueType>::compute()
                                              "lower-d block that is a superset of the boundary";
       if (!_current_lower_d_elem)
         mooseError("No lower-dimensional element. ", lower_error);
-      if (!_n_local_dofs)
+      if (!_n_shapes)
         mooseError("No degrees of freedom. ", lower_error);
     }
 
-    if (_n_local_dofs == 1) /* p0 */
+    if (_n_shapes == 1) /* p0 */
     {
       ComputeValueType value = 0;
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -191,9 +191,9 @@ AuxKernelTempl<ComputeValueType>::compute()
     }
     else /* high-order */
     {
-      _local_re.resize(_n_local_dofs);
+      _local_re.resize(_n_shapes);
       _local_re.zero();
-      _local_ke.resize(_n_local_dofs, _n_local_dofs);
+      _local_ke.resize(_n_shapes, _n_shapes);
       _local_ke.zero();
 
       const auto & test = _coincident_lower_d_calc ? _var.phiLower() : _test;
@@ -208,7 +208,7 @@ AuxKernelTempl<ComputeValueType>::compute()
             _local_ke(i, j) += t * test[j][_qp];
         }
       // mass matrix is always SPD but in case of boundary restricted, it will be rank deficient
-      _local_sol.resize(_n_local_dofs);
+      _local_sol.resize(_n_shapes);
       if (_bnd)
         _local_ke.svd_solve(_local_re, _local_sol);
       else
@@ -237,8 +237,11 @@ AuxKernelTempl<RealEigenVector>::compute()
   }
   else /* elemental variables */
   {
-    _n_local_dofs = _var.numberOfDofs();
-    if (_n_local_dofs == 1) /* p0 */
+    mooseAssert(
+        _var.numberOfDofs() % _var.count() == 0,
+        "The number of degrees of freedom should be cleanly divisible by the variable count");
+    _n_shapes = _var.numberOfDofs() / _var.count();
+    if (_n_shapes == 1) /* p0 */
     {
       RealEigenVector value = RealEigenVector::Zero(_var.count());
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -251,10 +254,10 @@ AuxKernelTempl<RealEigenVector>::compute()
     }
     else /* high-order */
     {
-      _local_re.resize(_n_local_dofs);
+      _local_re.resize(_n_shapes);
       for (unsigned int i = 0; i < _local_re.size(); ++i)
         _local_re(i) = RealEigenVector::Zero(_var.count());
-      _local_ke.resize(_n_local_dofs, _n_local_dofs);
+      _local_ke.resize(_n_shapes, _n_shapes);
       _local_ke.zero();
 
       // assemble the local mass matrix and the load
@@ -268,14 +271,14 @@ AuxKernelTempl<RealEigenVector>::compute()
         }
 
       // mass matrix is always SPD
-      _local_sol.resize(_n_local_dofs);
+      _local_sol.resize(_n_shapes);
       for (unsigned int i = 0; i < _local_re.size(); ++i)
         _local_sol(i) = RealEigenVector::Zero(_var.count());
-      DenseVector<Number> re(_n_local_dofs);
-      DenseVector<Number> sol(_n_local_dofs);
+      DenseVector<Number> re(_n_shapes);
+      DenseVector<Number> sol(_n_shapes);
       for (unsigned int i = 0; i < _var.count(); ++i)
       {
-        for (unsigned int j = 0; j < _n_local_dofs; ++j)
+        for (unsigned int j = 0; j < _n_shapes; ++j)
           re(j) = _local_re(j)(i);
 
         if (_bnd)
@@ -283,7 +286,7 @@ AuxKernelTempl<RealEigenVector>::compute()
         else
           _local_ke.cholesky_solve(re, sol);
 
-        for (unsigned int j = 0; j < _n_local_dofs; ++j)
+        for (unsigned int j = 0; j < _n_shapes; ++j)
           _local_sol(j)(i) = sol(j);
       }
 

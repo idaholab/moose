@@ -183,19 +183,11 @@ InterfaceKernelTempl<T>::computeElemNeighResidual(Moose::DGResidualType type)
 
   // To save the diagonal of the Jacobian
   if (_has_primary_residuals_saved_in && is_elem)
-  {
-    Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
     for (const auto & var : _primary_save_in_residual_variables)
-    {
       var->sys().solution().add_vector(_local_re, var->dofIndices());
-    }
-  }
   else if (_has_secondary_residuals_saved_in && !is_elem)
-  {
-    Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
     for (const auto & var : _secondary_save_in_residual_variables)
       var->sys().solution().add_vector(_local_re, var->dofIndicesNeighbor());
-  }
 }
 
 template <typename T>
@@ -278,7 +270,6 @@ InterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
     for (decltype(rows) i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _primary_save_in_jacobian_variables)
       var->sys().solution().add_vector(diag, var->dofIndices());
   }
@@ -289,7 +280,6 @@ InterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
     for (decltype(rows) i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _secondary_save_in_jacobian_variables)
       var->sys().solution().add_vector(diag, var->dofIndicesNeighbor());
   }

@@ -104,11 +104,8 @@ Kernel::computeResidual()
   accumulateTaggedLocalResidual();
 
   if (_has_save_in)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _save_in)
       var->sys().solution().add_vector(_local_re, var->dofIndices());
-  }
 }
 
 void
@@ -127,7 +124,6 @@ Kernel::computeJacobian()
   if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
       var->sys().solution().add_vector(diag, var->dofIndices());
   }
@@ -143,8 +139,14 @@ Kernel::computeOffDiagJacobian(const unsigned int jvar_num)
     const auto & jvar = getVariable(jvar_num);
     prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
+    // It's possible that this variable has not been requested for coupling anywhere for our
+    // associated system/assembly. E.g. in one ALE simulation, the displacement diffusion kernel
+    // runs on the reference mesh and all the velocity variable couplings are on the displaced mesh
+    if (jvar.dofIndices().empty())
+      return;
+
     // phi_size may not be equal to _phi.size(), e.g. when jvar is a vector variable
-    const auto phi_size = jvar.dofIndices().size();
+    const auto phi_size = jvar.phiSize();
     mooseAssert(
         phi_size * jvar.count() == _local_ke.n(),
         "The size of the phi container does not match the number of local Jacobian columns");

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADReal.h"
+#include "libmesh/int_range.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
 
@@ -75,6 +76,21 @@ struct RawType<Eigen::Matrix<T, M, N, O, M2, N2>>
   static value_type value(const Eigen::Matrix<T, M, N, O, M2, N2> & in)
   {
     return value_type::NullaryExpr([&in](Eigen::Index i) { return raw_value(in(i)); });
+  }
+};
+
+// specialized for RealEigenVector
+template <typename T, int Options, int MaxSize>
+struct RawType<Eigen::Matrix<T, -1, 1, Options, MaxSize, 1>>
+{
+  typedef Eigen::Matrix<typename RawType<T>::value_type, -1, 1, Options, MaxSize, 1> value_type;
+
+  static value_type value(const Eigen::Matrix<T, -1, 1, Options, MaxSize, 1> & in)
+  {
+    value_type ret(in.size());
+    for (const auto i : libMesh::make_range(in.size()))
+      ret(i) = raw_value(in(i));
+    return ret;
   }
 };
 

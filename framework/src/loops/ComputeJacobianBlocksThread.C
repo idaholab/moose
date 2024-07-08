@@ -39,8 +39,6 @@ ComputeJacobianBlocksThread::postElement(const Elem * elem)
 {
   _dof_indices.clear();
 
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
   for (const auto & block : _blocks)
   {
     const auto & dof_map = block->_precond_system.get_dof_map();
@@ -62,7 +60,6 @@ ComputeJacobianBlocksThread::postInternalSide(const Elem * elem, unsigned int si
     // Pointer to the neighbor we are currently working on.
     const Elem * neighbor = elem->neighbor_ptr(side);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     // Get the global id of the element and the neighbor
     const auto elem_id = elem->id(), neighbor_id = neighbor->id();
 
