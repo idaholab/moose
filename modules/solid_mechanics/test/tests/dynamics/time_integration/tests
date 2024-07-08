@@ -81,6 +81,7 @@
 
     requirement = "The mechanics system shall support explicit time integration with a direct calculation of acceleration"
     design = "Dynamics.md"
+    issues = "#28008"
   []
 []
 
