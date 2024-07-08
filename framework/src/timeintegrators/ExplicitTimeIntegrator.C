@@ -125,7 +125,7 @@ ExplicitTimeIntegrator::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
 
         // Scaling the acceleration
         auto accel_scaled = accel.clone();
-        = accel_scaled->scale((_dt + _dt_old) / 2);
+        accel_scaled->scale((_dt + _dt_old) / 2);
 
         // Adding old vel to new vel
         auto & vel = *_sys.solutionUDot();

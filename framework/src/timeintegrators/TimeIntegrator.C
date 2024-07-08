@@ -42,7 +42,7 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _n_nonlinear_iterations(0),
     _n_linear_iterations(0),
     _is_lumped(false),
-    _is_direct(false),
+    _is_direct(isParamValid("use_direct") ? getParam<bool>("use_direct") : false),
     _u_dot_factor_tag(_fe_problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
     _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION))
 {

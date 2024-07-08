@@ -33,13 +33,12 @@ CentralDifference::validParams()
 CentralDifference::CentralDifference(const InputParameters & parameters)
   : ActuallyExplicitEuler(parameters),
     _du_dotdot_du(_sys.duDotDotDu()),
-    _solution_older(_sys.solutionState(2)),
-    _use_direct(getParam<bool>("use_direct"))
+    _solution_older(_sys.solutionState(2))
 {
   if (_solve_type == LUMPED)
     _is_lumped = true;
-  if (_use_direct)
-    _is_direct = true;
+  // if (_use_direct)
+  //   _is_direct = true;
 
   _fe_problem.setUDotOldRequested(true);
   _fe_problem.setUDotDotRequested(true);
