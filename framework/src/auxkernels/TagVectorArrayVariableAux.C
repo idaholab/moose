@@ -32,9 +32,9 @@ TagVectorArrayVariableAux::TagVectorArrayVariableAux(const InputParameters & par
 void
 TagVectorArrayVariableAux::compute()
 {
-  const auto n_local_dofs = _var.numberOfDofs();
-  _local_sol.resize(n_local_dofs);
-  for (const auto i : make_range(n_local_dofs))
+  const auto n_shapes = _var.numberOfDofs() / _var.count();
+  _local_sol.resize(n_shapes);
+  for (const auto i : make_range(n_shapes))
     _local_sol(i) = _v[i];
   _var.setDofValues(_local_sol);
 }

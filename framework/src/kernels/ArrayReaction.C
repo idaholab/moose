@@ -55,7 +55,7 @@ ArrayReaction::computeQpResidual(RealEigenVector & residual)
                 "reaction_coefficient size is inconsistent with the number of components of array "
                 "variable");
     // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
-    residual.noalias() = (*_r_array)[_qp].asDiagonal() * _u[_qp] * _test[_i][_qp];
+    residual.noalias() = (*_r_array)[_qp].cwiseProduct(_u[_qp]) * _test[_i][_qp];
   }
 
   else
