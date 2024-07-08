@@ -57,9 +57,11 @@ whatever it is that [!ac](CIVET) failed to do.
 
 ### Troubleshooting Hints
 
-- Be absolutely certain that your project is clean. It might be best to do exactly what [!ac](CIVET)
-  does: Clone your project identically, just as the `Fetch and Branch` step details. Don't use the
-  one you been developing in.
+If you are having difficulty reproducing the failure:
+
+- Be absolutely certain your project repo is clean. Also, it might be best to create a new clone of
+  your project. A clone identical to how [!ac](CIVET) clones your project during the
+  `Fetch and Branch` step.
 
 - Re-visit the failing step occurring in [!ac](CIVET), and scrutinize with the utmost care all
   commands, arguments used, environment variables set, etc. One should even go so far as checking
