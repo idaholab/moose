@@ -36,7 +36,7 @@ With the [!ac](URI) known, launch an interactive shell using
 ```
 
 !style! style=position:relative;top:-15px;left:5px;font-style:italic;font-size:small;
-(see [Apptainer Features](help/faq/apptainer.md#features) section below on how to control the
+(see [Apptainer Features](help/inl/apptainer.md#features) section below on how to control the
 lengthy prompt)
 !style-end!
 
@@ -48,7 +48,7 @@ your home directory should be available. And by extension, your `~/cluster_name/
 containing your project.
 
 !alert! tip
-See [Apptainer Features](help/faq/apptainer.md#features) below if you are operating from your
+See [Apptainer Features](help/inl/apptainer.md#features) below if you are operating from your
 `/scratch` directory.
 !alert-end!
 
@@ -57,9 +57,9 @@ whatever it is that [!ac](CIVET) failed to do.
 
 ### Troubleshooting Hints
 
-- Be absolutely certain that your project is clean. It might even be best to do exactly what
-  [!ac](CIVET) does: Clone your project accordingly just as the `Fetch and Branch` step. Don't use
-  the one you been developing in.
+- Be absolutely certain that your project is clean. It might be best to do exactly what [!ac](CIVET)
+  does: Clone your project identically, just as the `Fetch and Branch` step details. Don't use the
+  one you been developing in.
 
 - Re-visit the failing step occurring in [!ac](CIVET), and scrutinize with the utmost care all
   commands, arguments used, environment variables set, etc. One should even go so far as checking
@@ -67,7 +67,7 @@ whatever it is that [!ac](CIVET) failed to do.
   (cloning succeeded, but perhaps a submodule was not).
 
 - Perhaps [!ac](CIVET) was instructed to treat warnings as errors (`make -Werror`). Or perhaps
-  [!ac](CIVET) is building using a different method (`METHOD=dbg make`), etc.
+  [!ac](CIVET) is building and using a different method (`METHOD=dbg make`), etc.
 
 - Missing files not included in your PR (a missing `git add`).
 
@@ -78,7 +78,7 @@ flavor (tsch, zsh, bash), CPU microarchitecture (exceedingly rare), and the like
 
 !alert! note title=Many [!ac](CIVET) steps +do not+ have network access
 Beyond the initial cloning of the application, most steps are barred from network access. You
-can mimmic these behaviors if need be. See [Apptainer Features](help/faq/apptainer.md#features)
+can mimmic these behaviors if need be. See [Apptainer Features](help/inl/apptainer.md#features)
 below for details.
 !alert-end!
 

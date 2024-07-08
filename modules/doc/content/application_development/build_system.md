@@ -64,7 +64,7 @@ as a suffix like: `something-$METHOD`. The valid options are:
 
 `METHODS` is used to specify the full set (space separated) of the above options that you will
  _ever_ want to used.  It is used in the build of `libMesh` to build a `libMesh` library for each of
- the `METHODS`, so that a rebuild of `libMesh` is not required every time a rebuild of MOOSE.
+ the `METHODS`, so that a rebuild of `libMesh` is not required for every rebuild of MOOSE.
 
 ## Build Optimization
 
@@ -115,9 +115,9 @@ using both header symlinking and unity builds.
         style=width:50%;float:right;margin-left:20px;
        caption=Compile speed on Falcon.
 
-The way we achieve a unity build in MOOSE is by compiling multiple `.C` files together by create a
-`.C` file that `#include`s all of the other `.C` files. In MOOSE this happens in a directory called
-`build/unity_src` in each application / module.
+The way we achieve a unity build in MOOSE is by compiling multiple `.C` files together by createing
+a `.C` file that `#include`s all of the other `.C` files. In MOOSE this happens in a directory
+called `build/unity_src` in each application / module.
 
 By default this behavior is +on+. To turn it off you can set `MOOSE_UNITY=false` in your
 environment.  Further, an application can disable it permanently by putting `MOOSE_UNITY := false`
