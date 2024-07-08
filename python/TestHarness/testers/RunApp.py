@@ -119,7 +119,7 @@ class RunApp(Tester):
                 self.setStatus(self.skip)
                 return False
 
-        if options.pbs and self.specs.isValid('command_proxy') and os.environ.get('APPTAINER_CONTAINER') is not None:
+        if options.hpc and self.specs.isValid('command_proxy') and os.environ.get('APPTAINER_CONTAINER') is not None:
             self.addCaveats('hpc unsupported')
             self.setStatus(self.skip)
             return False
