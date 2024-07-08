@@ -1,20 +1,20 @@
 # INSFEFluidEnergyKernel
 
-!alert construction title=Undocumented Class
-The INSFEFluidEnergyKernel has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/INSFEFluidEnergyKernel
 
-## Overview
+This kernel implements most terms in the conservation of energy equation for a continuous Galerkin discretization.
+Both regular and porous media flow can be represented in this kernel, by specifying the [!param](/Kernels/INSFEFluidEnergyKernel/porosity) parameter.
+The following terms are implemented:
 
-!! Replace these lines with information regarding the INSFEFluidEnergyKernel object.
+- a convective term, modeling the advection of energy
+- a diffusive term, including turbulence effects through the thermal conductivity computed by an [INSFEMaterial.md]
+- a volumetric heat source term. It can be provided as a field using the [!param](/Kernels/INSFEFluidEnergyKernel/power_density)
+  parameter or as a scalar variable (single value, uniform over the volume) with the [!param](/Kernels/INSFEFluidEnergyKernel/pke_power_var)
 
-## Example Input File Syntax
 
-!! Describe and include an example of how to use the INSFEFluidEnergyKernel object.
+If selecting the conservative form using the [!param](/Kernels/INSFEFluidEnergyKernel/conservative_form) boolean
+parameter, the convective term of the equation is expressed in the conservative form, i.e., $\nabla \cdot (\rho \vec{v} h)$, and integration by parts is applied to obtain the weak form.
+Otherwise, the primitive form, i.e., $\rho c_p \vec{v} \cdot \nabla T$, is used, and integration by parts is **not** applied.
 
 !syntax parameters /Kernels/INSFEFluidEnergyKernel
 

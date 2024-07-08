@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Action.h"
-class GaussianProcess;
+class GaussianProcessSurrogate;
 
 class LoadCovarianceDataAction : public Action
 {
@@ -20,5 +20,5 @@ public:
   virtual void act() override;
 
 private:
-  void load(GaussianProcess & model);
+  void load(GaussianProcessSurrogate & model);
 };

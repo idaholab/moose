@@ -6,6 +6,8 @@ The parsed expression may contain:
 
 - variables (`coupled_variables` parameter)
 
+- functors (`functor_names` or `functor_symbols` parameter)
+
 - coordinates in space and time (`use_xyzt` parameter)
 
 - constants (`constant_names` for their name in the expression and `constant_expressions` for their values)

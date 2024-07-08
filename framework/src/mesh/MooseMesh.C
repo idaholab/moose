@@ -162,23 +162,32 @@ MooseMesh::validParams()
 
   params.addParam<std::vector<SubdomainID>>(
       "add_subdomain_ids",
-      "The listed subdomains will be assumed valid for the mesh. This permits setting up subdomain "
-      "restrictions for subdomains initially containing no elements, which can occur, for example, "
-      "in additive manufacturing simulations which dynamically add and remove elements.");
-
+      "The listed subdomain ids will be assumed valid for the mesh. This permits setting up "
+      "subdomain restrictions for subdomains initially containing no elements, which can occur, "
+      "for example, in additive manufacturing simulations which dynamically add and remove "
+      "elements. Names for this subdomains may be provided using add_subdomain_names. In this case "
+      "this list and add_subdomain_names must contain the same number of items.");
   params.addParam<std::vector<SubdomainName>>(
       "add_subdomain_names",
-      "Optional list of subdomain names to be applied to the ids given in add_subdomain_ids. "
-      "This list must contain the same number of items as add_subdomain_ids.");
+      "The listed subdomain names will be assumed valid for the mesh. This permits setting up "
+      "subdomain restrictions for subdomains initially containing no elements, which can occur, "
+      "for example, in additive manufacturing simulations which dynamically add and remove "
+      "elements. IDs for this subdomains may be provided using add_subdomain_ids. Otherwise IDs "
+      "are automatically assigned. In case add_subdomain_ids is set too, both lists must contain "
+      "the same number of items.");
 
   params.addParam<std::vector<BoundaryID>>(
       "add_sideset_ids",
       "The listed sideset ids will be assumed valid for the mesh. This permits setting up boundary "
-      "restrictions for sidesets initially containing no sides.");
+      "restrictions for sidesets initially containing no sides. Names for this sidesets may be "
+      "provided using add_sideset_names. In this case this list and add_sideset_names must contain "
+      "the same number of items.");
   params.addParam<std::vector<BoundaryName>>(
       "add_sideset_names",
       "The listed sideset names will be assumed valid for the mesh. This permits setting up "
-      "boundary restrictions for sidesets initially containing no sides.");
+      "boundary restrictions for sidesets initially containing no sides. Ids for this sidesets may "
+      "be provided using add_sideset_ids. In this case this list and add_sideset_ids must contain "
+      "the same number of items.");
 
   params += MooseAppCoordTransform::validParams();
 
@@ -432,11 +441,46 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     }
   }
   else if (isParamValid("add_subdomain_names"))
+  {
     // the user has defined add_subdomain_names, but not add_subdomain_ids
-    paramError("add_subdomain_names",
-               "In combination with add_subdomain_names, add_subdomain_ids must be defined.");
+    const auto & add_subdomain_names = getParam<std::vector<SubdomainName>>("add_subdomain_names");
+
+    // to define subdomain ids, we need the largest subdomain id defined yet.
+    subdomain_id_type offset = 0;
+    if (!_mesh_subdomains.empty())
+      offset = *_mesh_subdomains.rbegin();
+
+    // add all subdomains (and auto-assign ids)
+    for (const SubdomainName & sub_name : add_subdomain_names)
+    {
+      // to avoid two subdomains with the same ID (notably on recover)
+      if (getSubdomainID(sub_name) != libMesh::Elem::invalid_subdomain_id)
+        continue;
+      const auto sub_id = ++offset;
+      // add subdomain id
+      _mesh_subdomains.insert(sub_id);
+      // set name of the subdomain just added
+      setSubdomainName(sub_id, sub_name);
+    }
+  }
+
+  // Make sure nodesets have been generated
+  buildNodeListFromSideList();
+
+  // Collect (local) boundary IDs
+  const std::set<BoundaryID> & local_bids = getMesh().get_boundary_info().get_boundary_ids();
+  _mesh_boundary_ids.insert(local_bids.begin(), local_bids.end());
+
+  const std::set<BoundaryID> & local_node_bids =
+      getMesh().get_boundary_info().get_node_boundary_ids();
+  _mesh_nodeset_ids.insert(local_node_bids.begin(), local_node_bids.end());
+
+  const std::set<BoundaryID> & local_side_bids =
+      getMesh().get_boundary_info().get_side_boundary_ids();
+  _mesh_sideset_ids.insert(local_side_bids.begin(), local_side_bids.end());
 
   // Add explicitly requested sidesets
+  // This is done *after* the side boundaries (e.g. "right", ...) have been generated.
   if (isParamValid("add_sideset_ids") && !isParamValid("add_sideset_names"))
   {
     const auto & add_sideset_ids = getParam<std::vector<BoundaryID>>("add_sideset_ids");
@@ -457,24 +501,31 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     }
   }
   else if (isParamValid("add_sideset_names"))
+  {
     // the user has defined add_sideset_names, but not add_sideset_ids
-    paramError("add_sideset_names",
-               "In combination with add_sideset_names, add_sideset_ids must be defined.");
+    const auto & add_sideset_names = getParam<std::vector<BoundaryName>>("add_sideset_names");
 
-  // Make sure nodesets have been generated
-  buildNodeListFromSideList();
+    // to define sideset ids, we need the largest sideset id defined yet.
+    boundary_id_type offset = 0;
+    if (!_mesh_sideset_ids.empty())
+      offset = *_mesh_sideset_ids.rbegin();
+    if (!_mesh_boundary_ids.empty())
+      offset = std::max(offset, *_mesh_boundary_ids.rbegin());
 
-  // Collect (local) boundary IDs
-  const std::set<BoundaryID> & local_bids = getMesh().get_boundary_info().get_boundary_ids();
-  _mesh_boundary_ids.insert(local_bids.begin(), local_bids.end());
-
-  const std::set<BoundaryID> & local_node_bids =
-      getMesh().get_boundary_info().get_node_boundary_ids();
-  _mesh_nodeset_ids.insert(local_node_bids.begin(), local_node_bids.end());
-
-  const std::set<BoundaryID> & local_side_bids =
-      getMesh().get_boundary_info().get_side_boundary_ids();
-  _mesh_sideset_ids.insert(local_side_bids.begin(), local_side_bids.end());
+    // add all sidesets (and auto-assign ids)
+    for (const BoundaryName & sideset_name : add_sideset_names)
+    {
+      // to avoid two sidesets with the same ID (notably on recover)
+      if (getBoundaryID(sideset_name) != Moose::INVALID_BOUNDARY_ID)
+        continue;
+      const auto sideset_id = ++offset;
+      // add sideset id
+      _mesh_boundary_ids.insert(sideset_id);
+      _mesh_sideset_ids.insert(sideset_id);
+      // set name of the sideset just added
+      setBoundaryName(sideset_id, sideset_name);
+    }
+  }
 
   // Communicate subdomain and boundary IDs if this is a parallel mesh
   if (!getMesh().is_serial())

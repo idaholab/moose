@@ -36,7 +36,7 @@ Checkpoint::validParams()
   // Controls whether the checkpoint will actually run. Should only ever be changed by the
   // auto-checkpoint created by AutoCheckpointAction, which does not write unless a signal
   // is received.
-  params.addPrivateParam<CheckpointType>("checkpoint_type", CheckpointType::NONE);
+  params.addPrivateParam<CheckpointType>("checkpoint_type", CheckpointType::USER_CREATED);
 
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
@@ -46,9 +46,13 @@ Checkpoint::validParams()
       "suffix",
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
-  // For checkpoints, set the wall time output interval to defualt of 10 minutes (600 s)
+  // For checkpoints, set the wall time output interval to defualt of 1 hour (3600 s)
   params.addParam<Real>(
-      "wall_time_interval", 600, "The target wall time interval (in seconds) at which to output");
+      "wall_time_interval", 3600, "The target wall time interval (in seconds) at which to output");
+
+  // Parameter to turn off wall time checkpoints
+  params.addParam<bool>(
+      "wall_time_checkpoint", true, "Whether to enable checkpoints based on elapsed wall time");
 
   // Since it makes the most sense to write checkpoints at the end of time steps,
   // change the default value of execute_on to TIMESTEP_END
@@ -66,37 +70,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
 {
   // Prevent the checkpoint from executing at any time other than INITIAL,
   // TIMESTEP_END, and FINAL
-  const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
-
-  // Create a vector containing all valid values of execute_on
-  std::vector<ExecFlagEnum> valid_execute_on_values(7);
-  {
-    ExecFlagEnum valid_execute_on_value = execute_on;
-    valid_execute_on_value = {EXEC_INITIAL};
-    valid_execute_on_values[0] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_TIMESTEP_END};
-    valid_execute_on_values[1] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_FINAL};
-    valid_execute_on_values[2] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    valid_execute_on_values[3] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_TIMESTEP_END, EXEC_FINAL};
-    valid_execute_on_values[4] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_INITIAL, EXEC_FINAL};
-    valid_execute_on_values[5] = valid_execute_on_value;
-    valid_execute_on_value = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_FINAL};
-    valid_execute_on_values[6] = valid_execute_on_value;
-  }
-
-  // Check if the value of execute_on is valid
-  auto it = std::find(valid_execute_on_values.begin(), valid_execute_on_values.end(), execute_on);
-  const bool is_valid_value = (it != valid_execute_on_values.end());
-  if (!is_valid_value)
-    paramError("execute_on",
-               "The checkpoint system may only be used with execute_on values ",
-               "INITIAL, TIMESTEP_END, and FINAL, not '",
-               execute_on,
-               "'.");
+  validateExecuteOn();
 
   // The following updates the value of _wall_time_interval if the
   // '--output-wall-time-interval' command line parameter is used.
@@ -104,6 +78,10 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   // 'The --output-wall-time-interval parameter is necessary for testing
   // and should only be used in the test suite.
   Output::setWallTimeIntervalFromCommandLineParam();
+
+  // We want to do this here so it overrides --output-wall-time-interval
+  if (!getParam<bool>("wall_time_checkpoint"))
+    _wall_time_interval = std::numeric_limits<Real>::max();
 }
 
 std::string
@@ -177,7 +155,7 @@ Checkpoint::output()
 
   // Create the libMesh Checkpoint_IO object
   MeshBase & mesh = _es_ptr->get_mesh();
-  CheckpointIO io(mesh, true);
+  CheckpointIO io(mesh, false);
 
   // Create checkpoint file structure
   CheckpointFileNames curr_file_struct;
@@ -247,4 +225,55 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       CheckpointIO::cleanup(delete_files.checkpoint,
                             _problem_ptr->mesh().isDistributedMesh() ? comm().size() : 1);
   }
+}
+
+void
+Checkpoint::validateExecuteOn() const
+{
+  const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
+  const std::set<ExecFlagType> allowed = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_FINAL};
+  for (const auto & value : execute_on)
+    if (!allowed.count(value))
+      paramError("execute_on",
+                 "The exec flag ",
+                 value,
+                 " is not allowed. Allowed flags are INITIAL, TIMESTEP_END, and FINAL.");
+}
+
+std::stringstream
+Checkpoint::checkpointInfo() const
+{
+  static const unsigned int console_field_width = 27;
+  std::stringstream checkpoint_info;
+
+  std::string interval_info;
+  if (getParam<bool>("wall_time_checkpoint"))
+    interval_info = "Every " + std::to_string(_wall_time_interval) + " s";
+  else
+    interval_info = "Disabled";
+
+  checkpoint_info << std::left << std::setw(console_field_width)
+                  << "  Wall Time Interval:" << interval_info << "\n";
+
+  std::string user_info;
+  if (_checkpoint_type == CheckpointType::SYSTEM_CREATED)
+    user_info = "Disabled";
+  else
+    user_info = "Outputs/" + name();
+
+  checkpoint_info << std::left << std::setw(console_field_width)
+                  << "  User Checkpoint:" << user_info << "\n";
+
+  if (!((interval_info == "Disabled") && (user_info == "Disabled")))
+  {
+    checkpoint_info << std::left << std::setw(console_field_width)
+                    << "  # Checkpoints Kept:" << std::to_string(_num_files) << "\n";
+    std::string exec_on_values = "";
+    for (const auto & item : _execute_on)
+      exec_on_values += item.name() + " ";
+    checkpoint_info << std::left << std::setw(console_field_width)
+                    << "  Execute On:" << exec_on_values << "\n";
+  }
+
+  return checkpoint_info;
 }

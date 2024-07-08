@@ -10,7 +10,8 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
-#include "NSFVAction.h"
+#include "PINSFVEnergyAnisotropicDiffusion.h"
+#include "NSFVBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_variable");
@@ -26,7 +27,9 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params += WCNSFVCoupledAdvectionPhysicsHelper::validParams();
   params.addClassDescription("Define the Navier Stokes weakly-compressible energy equation");
 
-  params += NSFVAction::commonFluidEnergyEquationParams();
+  params += NSFVBase::commonFluidEnergyEquationParams();
+  params.transferParam<bool>(PINSFVEnergyAnisotropicDiffusion::validParams(),
+                             "effective_conductivity");
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>("add_energy_equation",
@@ -40,12 +43,12 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params.deprecateParam("energy_wall_function", "energy_wall_functors", "01/01/2025");
 
   // Spatial finite volume discretization scheme
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_face_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "energy_two_term_bc_expansion");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_advection_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "energy_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
-  params.transferParam<Real>(NSFVAction::validParams(), "energy_scaling");
+  params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
 
   params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks "
                               "use_external_enthalpy_material",
@@ -261,7 +264,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
     if (num_blocks)
       block_name = Moose::stringify(_thermal_conductivity_blocks[block_i]);
     else
-      block_name = std::to_string(block_i);
+      block_name = "all";
 
     if (_porous_medium_treatment)
     {
@@ -276,6 +279,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
       params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) =
           _flow_equations_physics->getPorosityFunctorName(true);
+      params.set<bool>("effective_conductivity") = getParam<bool>("effective_conductivity");
 
       getProblem().addFVKernel(
           kernel_type, prefix() + "pins_energy_diffusion_" + block_name, params);

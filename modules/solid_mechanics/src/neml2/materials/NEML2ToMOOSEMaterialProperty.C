@@ -39,6 +39,12 @@ NEML2ToMOOSEMaterialProperty<T>::validParams()
   params.addParam<std::string>(
       "neml2_input_derivative",
       "If supplied return the derivative of neml2_variable with respect to this");
+
+  // provide an optional initialization of the moose property (because we don't really know if it is
+  // going to become stateful or not)
+  params.addParam<MaterialPropertyName>("moose_material_property_init",
+                                        "Optional material property as the initial condition");
+
   return params;
 }
 
@@ -47,6 +53,9 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
   : Material(params),
     _execute_neml2_model(getUserObject<ExecuteNEML2Model>("execute_neml2_model_uo")),
     _prop(declareProperty<T>(getParam<MaterialPropertyName>("moose_material_property"))),
+    _prop0(isParamValid("moose_material_property_init")
+               ? &getMaterialProperty<T>("moose_material_property_init")
+               : nullptr),
     _output_view(
         !isParamValid("neml2_input_derivative")
             ? _execute_neml2_model.getOutputView(
@@ -56,6 +65,14 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
                   neml2::utils::parse<neml2::VariableName>(
                       getParam<std::string>("neml2_input_derivative"))))
 {
+}
+
+template <typename T>
+void
+NEML2ToMOOSEMaterialProperty<T>::initQpStatefulProperties()
+{
+  if (_prop0)
+    _prop[_qp] = (*_prop0)[_qp];
 }
 
 template <typename T>

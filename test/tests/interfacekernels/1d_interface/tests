@@ -124,7 +124,22 @@
     delete_output_before_running = false
     prereq = 'reaction_1D_steady_CSVDiff'
   []
-
+  [matreaction_1D_steady_CSVDiff]
+    type = CSVDiff
+    input = 'ADMatreaction_1D_steady.i'
+    csvdiff = 'ADMatreaction_1D_steady_out.csv'
+    issues = '#27736'
+    requirement = "The result of an interface reaction kernel computed using automatic differentiation shall match the analytic solution in a steady-state simulation"
+    design = 'ADMatInterfaceReaction.md'
+  []
+  [matreaction_1D_transient_CSVDiff]
+    type = Exodiff
+    input = 'ADMatreaction_1D_transient.i'
+    exodiff = 'ADMatreaction_1D_transient_out.e'
+    issues = '#27736'
+    requirement = "The result of an interface reaction kernel computed using automatic differentiation shall be consistent with the results of the non-AD transient interface reaction test."
+    design = 'ADMatInterfaceReaction.md'
+  []
   [reaction_1D_transient]
     type = Exodiff
     input = 'reaction_1D_transient.i'

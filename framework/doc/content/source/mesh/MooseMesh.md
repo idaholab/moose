@@ -36,10 +36,12 @@ You could also use the [SideSetsFromNodeSetsGenerator.md] class to construct sid
 sets (or the [NodeSetsFromSideSetsGenerator.md] for vice versa). These objects allow you to manually
 construct the relevant side sets and node sets earlier in the mesh generation process.
 
-To declare subdomain IDs which are not found on the mesh right after the mesh is setup, a list of IDs can be 
-specified using the `Mesh/add_subdomain_ids` parameter. This permits setting up block restricted objects that
-will only act on subdomains created during the simulation (e.g. using the [CoupledVarThresholdElementSubdomainModifier.md]).
-These IDs can optionally be assigned names using the `Mesh/add_subdomain_names` parameter.
+To declare subdomains which are not found on the mesh right after the mesh is setup, a list of IDs can be
+specified using the [!param](/Mesh/MeshGeneratorMesh/add_subdomain_ids) parameter and/or a list of names can be specified using the
+[!param](/Mesh/MeshGeneratorMesh/add_subdomain_names) parameter. This permits setting up block restricted objects that will only act
+on subdomains created during the simulation (e.g. using the [CoupledVarThresholdElementSubdomainModifier.md]).
+Likewise, sidesets which are not found on the mesh right after the mesh is setup, can be added with the parameters
+[!param](/Mesh/MeshGeneratorMesh/add_sideset_ids) and [!param](/Mesh/MeshGeneratorMesh/add_sideset_names).
 
 ## Minimal interface
 

@@ -62,6 +62,7 @@ packages:
       - conda/tools/conda_build_config.yaml
       - conda/moose-dev/meta.yaml
       - conda/moose-dev/conda_build_config.yaml
+      - scripts/setup_libtorch.sh
   app:
     dependencies:
       - moose-dev

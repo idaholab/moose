@@ -30,7 +30,7 @@ protected:
     eos_pars.set<Real>("T_0") = 300;
     eos_pars.set<Real>("mu") = 0.3;
     eos_pars.set<Real>("k") = 0.89;
-    eos_pars.set<Real>("Pr") = 0.76;
+    eos_pars.set<Real>("Pr") = (1000 * 0.3) / 0.89;
     _fe_problem->addUserObject("LinearFluidProperties", "fp", eos_pars);
     _fp = &_fe_problem->getUserObject<LinearFluidProperties>("fp");
   }

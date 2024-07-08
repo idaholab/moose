@@ -9,8 +9,12 @@
 
 #include "WCNSFVFlowPhysics.h"
 #include "WCNSFVTurbulencePhysics.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
+#include "INSFVMomentumAdvection.h"
+#include "INSFVRhieChowInterpolator.h"
+#include "INSFVTimeKernel.h"
 #include "MapConversionUtils.h"
+#include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
@@ -20,6 +24,7 @@ registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_material");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_user_object");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_postprocessor");
+registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "get_turbulence_physics");
 
 InputParameters
 WCNSFVFlowPhysics::validParams()
@@ -28,7 +33,7 @@ WCNSFVFlowPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible mass and momentum equations");
 
-  params += NSFVAction::commonMomentumEquationParams();
+  params += NSFVBase::commonMomentumEquationParams();
   params.addParam<bool>("add_flow_equations",
                         true,
                         "Whether to add the flow equations. This parameter is not necessary when "
@@ -41,7 +46,11 @@ WCNSFVFlowPhysics::validParams()
   // a restricted MooseEnum, or place an error in the constructor for unsupported configurations
   // We mostly pull the boundary parameters from NSFV Action
 
-  params += NSFVAction::commonNavierStokesFlowParams();
+  params += NSFVBase::commonNavierStokesFlowParams();
+
+  // Time derivative term correction
+  params.transferParam<bool>(INSFVTimeKernel::validParams(), "contribute_to_rc");
+  params.addParamNamesToGroup("contribute_to_rc", "Advanced");
 
   // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
   params.addParam<MooseFunctorName>(
@@ -50,32 +59,31 @@ WCNSFVFlowPhysics::validParams()
 
   // Most downstream physics implementations are valid for porous media too
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
-  params.transferParam<bool>(NSFVAction::validParams(), "porous_medium_treatment");
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "porosity");
-  params.transferParam<unsigned short>(NSFVAction::validParams(), "porosity_smoothing_layers");
+  params.transferParam<bool>(NSFVBase::validParams(), "porous_medium_treatment");
+  params.transferParam<MooseFunctorName>(NSFVBase::validParams(), "porosity");
+  params.transferParam<unsigned short>(NSFVBase::validParams(), "porosity_smoothing_layers");
 
   // Momentum boundary conditions are important for advection problems as well
-  params += NSFVAction::commonMomentumBoundaryTypesParams();
+  params += NSFVBase::commonMomentumBoundaryTypesParams();
 
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
-  params += NSFVAction::commonMomentumBoundaryFluxesParams();
+  params += NSFVBase::commonMomentumBoundaryFluxesParams();
 
   // New functor boundary conditions
   params.deprecateParam("momentum_inlet_function", "momentum_inlet_functors", "01/01/2025");
   params.deprecateParam("pressure_function", "pressure_functors", "01/01/2025");
 
   // Initialization parameters
-  params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "initial_velocity");
-  params.transferParam<FunctionName>(NSFVAction::validParams(), "initial_pressure");
+  params.transferParam<std::vector<FunctionName>>(NSFVBase::validParams(), "initial_velocity");
+  params.transferParam<FunctionName>(NSFVBase::validParams(), "initial_pressure");
 
   // Techniques to limit or remove oscillations at porosity jump interfaces
-  params.transferParam<MooseEnum>(NSFVAction::validParams(),
-                                  "porosity_interface_pressure_treatment");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "porosity_interface_pressure_treatment");
 
   // Friction correction, a technique to limit oscillations at friction interfaces
-  params.transferParam<bool>(NSFVAction::validParams(), "use_friction_correction");
-  params.transferParam<Real>(NSFVAction::validParams(), "consistent_scaling");
+  params.transferParam<bool>(NSFVBase::validParams(), "use_friction_correction");
+  params.transferParam<Real>(NSFVBase::validParams(), "consistent_scaling");
 
   // Couple to turbulence physics
   params.addParam<PhysicsName>("coupled_turbulence_physics",
@@ -83,15 +91,15 @@ WCNSFVFlowPhysics::validParams()
 
   // Spatial discretization scheme
   // Specify the numerical schemes for interpolations of velocity and pressure
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "velocity_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "pressure_face_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_face_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "mass_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_advection_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "pressure_two_term_bc_expansion");
-  params.transferParam<bool>(NSFVAction::validParams(),
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "velocity_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "pressure_face_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_face_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "mass_advection_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_advection_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "pressure_two_term_bc_expansion");
+  params.transferParam<bool>(NSFVBase::validParams(),
                              "pressure_allow_expansion_on_bernoulli_faces");
-  params.transferParam<bool>(NSFVAction::validParams(), "momentum_two_term_bc_expansion");
+  params.transferParam<bool>(NSFVBase::validParams(), "momentum_two_term_bc_expansion");
   params.transferParam<Real>(INSFVMomentumAdvection::validParams(), "characteristic_speed");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>("mu_interp_method",
@@ -99,8 +107,8 @@ WCNSFVFlowPhysics::validParams()
                              "Switch that can select face interpolation method for the viscosity.");
 
   // Nonlinear solver parameters
-  params.transferParam<Real>(NSFVAction::validParams(), "mass_scaling");
-  params.transferParam<Real>(NSFVAction::validParams(), "momentum_scaling");
+  params.transferParam<Real>(NSFVBase::validParams(), "mass_scaling");
+  params.transferParam<Real>(NSFVBase::validParams(), "momentum_scaling");
 
   // Parameter groups
   params.addParamNamesToGroup(
@@ -164,10 +172,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
-    _momentum_inlet_types(Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
-        _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"))),
-    _momentum_outlet_types(Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
-        _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"))),
     _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions")),
@@ -185,14 +189,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   if (getParam<bool>("pin_pressure") &&
       getParam<std::vector<MooseFunctorName>>("pressure_functors").size())
     paramError("pin_pressure", "Cannot pin the pressure if a pressure boundary exists");
-
-  // Create maps for boundary-restricted parameters
-  _momentum_inlet_functors =
-      Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
-          _inlet_boundaries,
-          getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
-  _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
-      _outlet_boundaries, getParam<std::vector<MooseFunctorName>>("pressure_functors"));
 
   // Friction parameter checks
   if (_friction_blocks.size())
@@ -259,15 +255,57 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
                        " is already reserved for the automatically-computed interstitial velocity. "
                        "Please choose another name for your external velocity variable!");
     }
+
+  // Create maps for boundary-restricted parameters
+  _momentum_inlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+      _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"));
+  _momentum_outlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+      _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"));
+  if (isParamSetByUser("momentum_inlet_functors"))
+  {
+    // Not all inlet boundary types require the specification of an inlet functor
+    std::vector<BoundaryName> inlet_boundaries_with_functors;
+    for (const auto & boundary : _inlet_boundaries)
+      if (libmesh_map_find(_momentum_inlet_types, boundary) == "fixed-velocity" ||
+          libmesh_map_find(_momentum_inlet_types, boundary) == "fixed-pressure")
+        inlet_boundaries_with_functors.push_back(boundary);
+    _momentum_inlet_functors =
+        Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
+            inlet_boundaries_with_functors,
+            getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
+  }
+  if (isParamSetByUser("pressure_functors"))
+  {
+    // Not all inlet boundary types require the specification of an inlet functor
+    std::vector<BoundaryName> outlet_boundaries_with_functors;
+    for (const auto & boundary : _outlet_boundaries)
+      if (libmesh_map_find(_momentum_outlet_types, boundary) == "fixed-pressure-zero-gradient" ||
+          libmesh_map_find(_momentum_outlet_types, boundary) == "fixed-pressure")
+        outlet_boundaries_with_functors.push_back(boundary);
+    const auto & pressure_functors = getParam<std::vector<MooseFunctorName>>("pressure_functors");
+    if (outlet_boundaries_with_functors.size() != pressure_functors.size())
+      paramError("pressure_functors",
+                 "Size (" + std::to_string(pressure_functors.size()) +
+                     ") is not the same as the number of pressure outlet boundaries in "
+                     "'fixed-pressure/fixed-pressure-zero-gradient' (size " +
+                     std::to_string(outlet_boundaries_with_functors.size()) + ")");
+    _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
+        outlet_boundaries_with_functors, pressure_functors);
+  }
 }
 
 void
 WCNSFVFlowPhysics::initializePhysicsAdditional()
 {
   getProblem().needFV();
+}
 
-  // Turbulence physics cannot have been created before
-  _turbulence_physics = getCoupledTurbulencePhysics();
+void
+WCNSFVFlowPhysics::actOnAdditionalTasks()
+{
+  // Turbulence physics would not be initialized before this task
+  if (_current_task == "get_turbulence_physics")
+    _turbulence_physics = getCoupledTurbulencePhysics();
 }
 
 void
@@ -496,6 +534,7 @@ WCNSFVFlowPhysics::addINSMomentumTimeKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
 
   for (const auto d : make_range(dimension()))
   {
@@ -514,6 +553,7 @@ WCNSFVFlowPhysics::addWCNSMomentumTimeKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
 
   for (const auto d : make_range(dimension()))
   {
@@ -1154,7 +1194,7 @@ WCNSFVFlowPhysics::addUserObjects()
 void
 WCNSFVFlowPhysics::addMaterials()
 {
-  if (hasForchheimerFriction())
+  if (hasForchheimerFriction() || _porous_medium_treatment)
     addPorousMediumSpeedMaterial();
   else
     addNonPorousMediumSpeedMaterial();

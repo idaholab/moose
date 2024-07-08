@@ -11,7 +11,7 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
 #include "WCNSFVFluidHeatTransferPhysics.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
 
 registerPhysicsBaseTasks("NavierStokesApp", PNSFVSolidHeatTransferPhysics);
 registerMooseAction("NavierStokesApp", PNSFVSolidHeatTransferPhysics, "add_variable");
@@ -49,7 +49,7 @@ PNSFVSolidHeatTransferPhysics::validParams()
 
   // Porous media parameters
   // TODO: ensure consistency with fluid energy physics
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "porosity");
+  params.transferParam<MooseFunctorName>(NSFVBase::validParams(), "porosity");
 
   // Material properties
   params.suppressParameter<MaterialPropertyName>("specific_heat");
@@ -87,6 +87,9 @@ PNSFVSolidHeatTransferPhysics::validParams()
   params.addParam<bool>("use_external_enthalpy_material",
                         false,
                         "To indicate if the enthalpy material is set up outside of the action.");
+
+  params.suppressParameter<VariableName>("heat_source_var");
+  params.suppressParameter<std::vector<SubdomainName>>("heat_source_blocks");
 
   // Numerical scheme
   params.addParam<unsigned short>(

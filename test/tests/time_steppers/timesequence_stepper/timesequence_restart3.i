@@ -1,5 +1,5 @@
 [Mesh]
-  file = timesequence_restart1_cp/0002-mesh.cpr
+  file = timesequence_restart1_cp/0002-mesh.cpa.gz
 []
 
 [Problem]

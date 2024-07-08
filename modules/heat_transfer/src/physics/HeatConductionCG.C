@@ -57,6 +57,9 @@ HeatConductionCG::addFEKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
+    if (isParamValid("heat_source_blocks"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("heat_source_blocks");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source", params);
   }
   if (isTransient())

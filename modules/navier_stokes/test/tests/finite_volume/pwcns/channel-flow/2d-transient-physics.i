@@ -75,6 +75,7 @@ top_side_temperature = 150
     [FluidHeatTransfer]
       [fluid]
         thermal_conductivity = 'k'
+        effective_conductivity = true
         specific_heat = 'cp'
 
         initial_temperature = '${T_inlet}'

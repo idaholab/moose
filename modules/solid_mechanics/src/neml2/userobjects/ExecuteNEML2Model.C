@@ -33,7 +33,15 @@ ExecuteNEML2Model::validParams()
   params.addParam<std::vector<UserObjectName>>("gather_uos", "List of MOOSE*ToNEML2 user objects");
 
   // time input
-  params.addParam<std::string>("neml2_time", "forces/t", "NEML2 variable accessor for time");
+  params.addParam<std::string>("neml2_time", "forces/t", "(optional) NEML2 variable name for time");
+
+  // allow user to explicit skip required input variables
+  params.addParam<std::vector<std::string>>(
+      "skip_variables",
+      {},
+      "List of NEML2 variables to skip when setting up the model input. If an input variable is "
+      "skipped, its value will stay zero. If a required input variable is not skipped, an error "
+      "will be raised.");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -48,8 +56,8 @@ ExecuteNEML2Model::validParams()
 ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
   : NEML2ModelInterface<ElementUserObject>(params),
     _neml2_time(neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_time"))),
-    _output_ready(false),
-    _in_out_allocated(false)
+    _neml2_time_old(NEML2Utils::getOldName(_neml2_time)),
+    _output_ready(false)
 {
   const auto gather_uo_names = getParam<std::vector<UserObjectName>>("gather_uos");
 
@@ -67,20 +75,28 @@ ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
       _doutputs[std::make_pair(output, uo_name)] = neml2::BatchTensor();
   }
 
+  for (const auto & var_name : getParam<std::vector<std::string>>("skip_variables"))
+    _skip_vars.insert(neml2::utils::parse<neml2::VariableName>(var_name));
+
   validateModel();
 }
 
 void
 ExecuteNEML2Model::initialSetup()
 {
-  // set of provided and required inputs
-  std::set<neml2::VariableName> _provided_inputs;
-
-  // deal with the time input
+  // deal with the (old) time input
   if (model().input_axis().has_variable(_neml2_time))
     _provided_inputs.insert(_neml2_time);
-  else if (isParamSetByUser("neml2_time"))
-    paramError("neml2_time", "The provided model has no time input `", _neml2_time, "`.");
+  if (model().input_axis().has_variable(_neml2_time_old))
+    _provided_inputs.insert(_neml2_time_old);
+  if (isParamSetByUser("neml2_time") && !model().input_axis().has_variable(_neml2_time) &&
+      !model().input_axis().has_variable(_neml2_time_old))
+    paramError("neml2_time",
+               "The provided model has no time input `",
+               _neml2_time,
+               "` nor old time input `",
+               _neml2_time_old,
+               "`, and so the parameter neml2_time is not needed");
 
   // deal with user object provided inputs
   for (const auto & uo_name : getParam<std::vector<UserObjectName>>("gather_uos"))
@@ -90,33 +106,56 @@ ExecuteNEML2Model::initialSetup()
     const auto & uo = getUserObjectByName<MOOSEToNEML2>(uo_name, /*is_dependency = */ false);
     _gather_uos.push_back(&uo);
 
-    const auto uo_var = uo.getNEML2Variable();
-    // check if the model actually has an input corresponding to this UO
-    if (!model().input_axis().has_variable(uo_var))
-    {
-      paramError("gather_uos",
-                 "The supplied user object `",
-                 uo_name,
-                 "` connects to a model input that does not exist (`",
-                 uo_var,
-                 "`).");
-    }
-    _provided_inputs.insert(uo_var);
+    addUOVariable(uo_name, uo.getNEML2Variable());
   }
 
+  std::set<neml2::VariableName> required_inputs = model().input_axis().variable_accessors(true);
+
   // iterate over set of required inputs and error out if we find one that is not provided
-  std::set<neml2::VariableName> _required_inputs = model().input_axis().variable_accessors(true);
-  for (const auto & input : _required_inputs)
-    if (!_provided_inputs.count(input) && input.start_with("forces"))
-      paramWarning(
-          "gather_uos", "No user object is providing the required model input `", input, "`");
+  for (const auto & input : required_inputs)
+    if (!_skip_vars.count(input))
+      if (!_provided_inputs.count(input) &&
+          (input.start_with("forces") || input.start_with("old_forces") ||
+           input.start_with("old_state")))
+        paramError(
+            "gather_uos", "No user object is providing the required model input `", input, "`");
+
+  // if a variable is stateful, then it'd better been retrieved by someone! In theory that's not
+  // sufficient for stateful data management, but that's the best we can do here without being toooo
+  // restrictive.
+  for (const auto & input : required_inputs)
+    if (input.start_with("old_state") && !_retrieved_outputs.count(input.slice(1).on("state")))
+      mooseError(
+          "The NEML2 model requires a stateful input variable `",
+          input,
+          "`, but its state counterpart on the output axis has not been retrieved by any object. "
+          "Therefore, there is no way to properly propagate the corresponding stateful data in "
+          "time. The common solution to this problem is to add a NEML2-to-MOOSE transfer material "
+          "such as those called `NEML2ToXXXMOOSEMaterialProperty`.");
 }
 
 void
-ExecuteNEML2Model::timestepSetup()
+ExecuteNEML2Model::addUOVariable(const UserObjectName & uo_name, const neml2::VariableName & uo_var)
 {
-  if (_t_step > 0)
-    advanceStep();
+  // check if the model actually has an input corresponding to this UO
+  if (!model().input_axis().has_variable(uo_var))
+    paramError("gather_uos",
+               "The supplied user object `",
+               uo_name,
+               "` connects to a model input that does not exist (`",
+               uo_var,
+               "`).");
+
+  // make sure the variable is not provided by other UOs
+  if (_provided_inputs.count(uo_var))
+    paramError("gather_uos",
+               "The variable `",
+               uo_var,
+               "` gathered by UO '",
+               uo_name,
+               "' is already gathered by another UO.");
+
+  _provided_inputs.insert(uo_var);
 }
 
 bool
@@ -171,13 +210,9 @@ ExecuteNEML2Model::finalize()
   {
     initModel(_batch_index);
 
-    // Allocate the input and output once
-    if (!_in_out_allocated)
-    {
+    // Reallocate the input only when the batch size has changed
+    if (_in.batch_sizes() != neml2::TorchShapeRef{neml2::TorchSize(_batch_index)})
       _in = neml2::LabeledVector::zeros(_batch_index, {&model().input_axis()});
-      _out = neml2::LabeledVector::zeros(_batch_index, {&model().output_axis()});
-      _in_out_allocated = true;
-    }
 
     // Steps before stress update
     // preCompute();
@@ -219,34 +254,23 @@ ExecuteNEML2Model::finalize()
 }
 
 void
-ExecuteNEML2Model::advanceStep()
-{
-  // Set old state variables and old forces
-  if (model().input_axis().has_subaxis("old_state") && model().output_axis().has_subaxis("state"))
-    _in.slice("old_state").fill(_out.slice("state"));
-  if (model().input_axis().has_subaxis("old_forces") && model().input_axis().has_subaxis("forces"))
-    _in.slice("old_forces").fill(_in.slice("forces"));
-}
-
-void
 ExecuteNEML2Model::updateForces()
 {
   for (const auto & uo : _gather_uos)
   {
-    // we can do this check upfront
-    if (model().input_axis().has_variable(uo->getNEML2Variable()))
-      uo->insertIntoInput(_in);
-    else
-      mooseError("Unknown axis ", uo->getNEML2Variable());
+    mooseAssert(model().input_axis().has_variable(uo->getNEML2Variable()),
+                "Variable gathered by the UO does not connect to a NEML2 input force variable");
+    uo->insertIntoInput(_in);
   }
 
   NEML2Utils::set(
       // The input LabeledVector
       _in,
       // NEML2 variable accessors
-      {_neml2_time},
+      {_neml2_time, _neml2_time_old},
       // Pointer to the unbatched data
-      model().input_axis().has_variable(_neml2_time) ? &_t : nullptr);
+      _provided_inputs.count(_neml2_time) ? &_t : nullptr,
+      _provided_inputs.count(_neml2_time_old) ? &_t_old : nullptr);
 }
 
 void
@@ -297,9 +321,19 @@ ExecuteNEML2Model::getBatchIndex(dof_id_type elem_id) const
   return it->second;
 }
 
+void
+ExecuteNEML2Model::checkExecutionStage() const
+{
+  if (_fe_problem.startedInitialSetup())
+    mooseError("NEML2 variable views must be retrieved during object construction. This is a code "
+               "problem.");
+}
+
 const neml2::BatchTensor &
 ExecuteNEML2Model::getOutputView(const neml2::VariableName & output_name) const
 {
+  checkExecutionStage();
+
   // find output_name in batch tensor map
   const auto it = _outputs.find(output_name);
   if (it == _outputs.end())
@@ -308,6 +342,11 @@ ExecuteNEML2Model::getOutputView(const neml2::VariableName & output_name) const
                "` not found in ExecuteNEML2Model object `",
                name(),
                "`.");
+
+  // save retrieved output variables so that we can later check if all stateful variables are
+  // retrieved and stored in MOOSE datastructures.
+  _retrieved_outputs.insert(output_name);
+
   return it->second;
 }
 
@@ -315,6 +354,8 @@ const neml2::BatchTensor &
 ExecuteNEML2Model::getOutputDerivativeView(const neml2::VariableName & output_name,
                                            const neml2::VariableName & input_name) const
 {
+  checkExecutionStage();
+
   const auto gather_uo_names = getParam<std::vector<UserObjectName>>("gather_uos");
 
   // look up user object name for the requested input

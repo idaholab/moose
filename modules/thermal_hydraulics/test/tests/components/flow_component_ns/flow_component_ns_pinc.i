@@ -12,63 +12,50 @@ p_outlet = 0
   []
 []
 
+[Physics]
+  [NavierStokes]
+    [Flow]
+      [flow]
+        compressibility = 'incompressible'
+        porous_medium_treatment = true
+
+        density = 'rho'
+        dynamic_viscosity = 'mu'
+
+        initial_velocity = '${u_inlet} 0 0'
+        initial_pressure = '${p_outlet}'
+
+        mass_advection_interpolation = 'upwind'
+        momentum_advection_interpolation = 'upwind'
+
+        inlet_boundaries = 'comp1:left comp2:left'
+        momentum_inlet_types = 'fixed-velocity fixed-velocity'
+        momentum_inlet_function = '${u_inlet} 0; ${u_inlet} 0'
+
+        wall_boundaries = 'comp1:top comp1:bottom comp2:top comp2:bottom'
+        momentum_wall_types = 'noslip symmetry noslip symmetry'
+
+        outlet_boundaries = 'comp1:right comp2:right'
+        momentum_outlet_types = 'fixed-pressure fixed-pressure'
+        pressure_function = '${p_outlet} ${p_outlet}'
+      []
+    []
+  []
+[]
+
 [Components]
   [comp1]
-    type = FlowComponentNS
+    type = FileMeshPhysicsComponent
     file = rectangle.e
     position = '0 0 0'
-
-    compressibility = 'incompressible'
-    porous_medium_treatment = true
-
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-
-    initial_velocity = '${u_inlet} 0 0'
-    initial_pressure = '${p_outlet}'
-
-    mass_advection_interpolation = 'upwind'
-    momentum_advection_interpolation = 'upwind'
-
-    inlet_boundaries = 'comp1:left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${u_inlet} 0'
-
-    wall_boundaries = 'comp1:top comp1:bottom'
-    momentum_wall_types = 'noslip symmetry'
-
-    outlet_boundaries = 'comp1:right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${p_outlet}'
+    physics = 'flow'
   []
 
   [comp2]
-    type = FlowComponentNS
+    type = FileMeshPhysicsComponent
     file = rectangle.e
     position = '0 2 0'
-
-    compressibility = 'incompressible'
-    porous_medium_treatment = true
-
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-
-    initial_velocity = '${u_inlet} 0 0'
-    initial_pressure = '${p_outlet}'
-
-    inlet_boundaries = 'comp2:left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${u_inlet} 0'
-
-    wall_boundaries = 'comp2:top comp2:bottom'
-    momentum_wall_types = 'noslip symmetry'
-
-    outlet_boundaries = 'comp2:right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${p_outlet}'
-
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
+    physics = 'flow'
   []
 []
 

@@ -33,7 +33,8 @@ protected:
   const VariableValue & _v;
 
   /// A reference to the variable to project from
-  const MooseVariable & _source_variable;
+  /// We must use a field variable to support finite volume variables
+  const MooseVariableFieldBase & _source_variable;
 
   /// The system owning the source variable
   const System & _source_sys;

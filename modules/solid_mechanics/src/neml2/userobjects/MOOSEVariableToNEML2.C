@@ -11,35 +11,60 @@
 #include "NEML2Utils.h"
 
 registerMooseObject("SolidMechanicsApp", MOOSEVariableToNEML2);
+registerMooseObject("SolidMechanicsApp", MOOSEOldVariableToNEML2);
 
 #ifndef NEML2_ENABLED
-NEML2ObjectStubImplementationOpen(MOOSEVariableToNEML2, MOOSEToNEML2);
-NEML2ObjectStubParam(std::vector<VariableName>, "moose_variable");
-NEML2ObjectStubParam(std::string, "neml2_variable");
-NEML2ObjectStubImplementationClose(MOOSEVariableToNEML2, MOOSEToNEML2);
+#define MOOSEMVariableToNEML2Stub(name)                                                            \
+  NEML2ObjectStubImplementationOpen(name, MOOSEToNEML2);                                           \
+  NEML2ObjectStubParam(std::vector<VariableName>, "moose_variable");                               \
+  NEML2ObjectStubParam(std::string, "neml2_variable");                                             \
+  NEML2ObjectStubImplementationClose(name, MOOSEToNEML2)
+MOOSEMVariableToNEML2Stub(MOOSEVariableToNEML2);
+MOOSEMVariableToNEML2Stub(MOOSEOldVariableToNEML2);
 #else
 
+template <unsigned int state>
 InputParameters
-MOOSEVariableToNEML2::validParams()
+MOOSEVariableToNEML2Templ<state>::validParams()
 {
   auto params = MOOSEToNEML2::validParams();
   params.addClassDescription("Gather a MOOSE variable for insertion into the specified input of a "
-                             "NEML2 model using the .");
+                             "NEML2 model.");
 
   params.addRequiredCoupledVar("moose_variable", "MOOSE variable to read from");
   return params;
 }
 
-MOOSEVariableToNEML2::MOOSEVariableToNEML2(const InputParameters & params)
+template <>
+MOOSEVariableToNEML2Templ<0>::MOOSEVariableToNEML2Templ(const InputParameters & params)
   : MOOSEToNEML2(params), _moose_variable(coupledValue("moose_variable"))
 {
+  if (!_neml2_variable.start_with("forces") && !_neml2_variable.start_with("state"))
+    paramError("neml2_variable",
+               "neml2_variable should be defined on the forces or the state sub-axis, got ",
+               _neml2_variable.slice(0, 1),
+               " instead");
 }
 
-void
-MOOSEVariableToNEML2::execute()
+template <>
+MOOSEVariableToNEML2Templ<1>::MOOSEVariableToNEML2Templ(const InputParameters & params)
+  : MOOSEToNEML2(params), _moose_variable(coupledValueOld("moose_variable"))
 {
-  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-    _buffer.push_back(NEML2Utils::toNEML2<Real>(_moose_variable[qp]));
+  if (!_neml2_variable.start_with("old_forces") && !_neml2_variable.start_with("old_state"))
+    paramError("neml2_variable",
+               "neml2_variable should be defined on the old_forces or the old_state sub-axis, got ",
+               _neml2_variable.slice(0, 1),
+               " instead");
 }
+
+template <unsigned int state>
+torch::Tensor
+MOOSEVariableToNEML2Templ<state>::convertQpMOOSEData() const
+{
+  return NEML2Utils::toNEML2<Real>(_moose_variable[_qp]);
+}
+
+template class MOOSEVariableToNEML2Templ<0>;
+template class MOOSEVariableToNEML2Templ<1>;
 
 #endif

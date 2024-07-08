@@ -179,6 +179,7 @@ class Versioner:
     @staticmethod
     def git_file(file, commit, repo_dir=MOOSE_DIR, allow_missing=False):
         """ gets the contents of a file at a given git commit """
+        repo_dir = repo_dir.rstrip(os.sep)
         file = file.replace(repo_dir, '.')
         command = ['git', 'show', f'{commit}:{file}']
         process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,

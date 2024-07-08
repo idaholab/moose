@@ -3,11 +3,11 @@
     type = 'CheckFiles'
     input = 'simple_diffusion.i'
     cli_args = '--split-mesh 3 --split-file foo Mesh/parallel_type=replicated'
-    check_files = 'foo.cpr/3/header.cpr foo.cpr/3/split-3-0.cpr foo.cpr/3/split-3-1.cpr '
-                  'foo.cpr/3/split-3-2.cpr'
+    check_files = 'foo.cpa.gz/3/header.gz foo.cpa.gz/3/split-3-0.gz foo.cpa.gz/3/split-3-1.gz '
+                  'foo.cpa.gz/3/split-3-2.gz'
     recover = false
 
-    issues = '#10623'
+    issues = '#10623 #27240'
     design = 'Mesh/splitting.md'
     requirement = 'A mesh can be split into a specified number of files using command line options.'
   []
@@ -26,7 +26,17 @@
       min_parallel = 3
       max_parallel = 3
 
-      detail = 'set by command line'
+      detail = 'set by command line, no split extension specified'
+    []
+    [from_cli_ext]
+      type = 'RunApp'
+      input = 'simple_diffusion.i'
+      cli_args = '--use-split --split-file foo.cpa.gz UserObjects/splittester/type=SplitTester'
+      prereq = 'make_split'
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = 'set by command line, with a specified split extension'
     []
     [from_input]
       type = 'Exodiff'
@@ -91,13 +101,13 @@
     type = 'CheckFiles'
     input = 'geometric_neighbors.i'
     cli_args = '--split-mesh 2 --split-file geometric_neighbors Mesh/parallel_type=replicated'
-    check_files = 'geometric_neighbors.cpr/2/header.cpr geometric_neighbors.cpr/2/split-2-0.cpr '
-                  'geometric_neighbors.cpr/2/split-2-1.cpr'
+    check_files = 'geometric_neighbors.cpa.gz/2/header.gz geometric_neighbors.cpa.gz/2/split-2-0.gz '
+                  'geometric_neighbors.cpa.gz/2/split-2-1.gz'
     recover = false
     compiler = '!INTEL'
     petsc_version = '>=3.8.0'
 
-    issues = '#11434'
+    issues = '#11434 #27240'
     design = 'Mesh/splitting.md'
     requirement = 'The mesh splitter capability will honor geometric RelationshipManager objects.'
   []
@@ -126,7 +136,7 @@
     type = 'CheckFiles'
     input = 'grid_from_file.i'
     cli_args = '--split-mesh 4'
-    check_files = 'grid_from_file.cpr/4/header.cpr grid_from_file.cpr/4/split-4-0.cpr grid_from_file.cpr/4/split-4-1.cpr grid_from_file.cpr/4/split-4-2.cpr grid_from_file.cpr/4/split-4-3.cpr'
+    check_files = 'grid_from_file.cpa.gz/4/header.gz grid_from_file.cpa.gz/4/split-4-0.gz grid_from_file.cpa.gz/4/split-4-1.gz grid_from_file.cpa.gz/4/split-4-2.gz grid_from_file.cpa.gz/4/split-4-3.gz'
     recover = false
     min_parallel = 2
     max_parallel = 2
@@ -140,7 +150,7 @@
     type = 'CheckFiles'
     input = 'grid_from_generated.i'
     cli_args = '--split-mesh=4 --split-file=grid_from_generated'
-    check_files = 'grid_from_generated.cpr/4/header.cpr grid_from_generated.cpr/4/split-4-0.cpr grid_from_generated.cpr/4/split-4-1.cpr grid_from_generated.cpr/4/split-4-2.cpr grid_from_generated.cpr/4/split-4-3.cpr'
+    check_files = 'grid_from_generated.cpa.gz/4/header.gz grid_from_generated.cpa.gz/4/split-4-0.gz grid_from_generated.cpa.gz/4/split-4-1.gz grid_from_generated.cpa.gz/4/split-4-2.gz grid_from_generated.cpa.gz/4/split-4-3.gz'
     recover = false
     min_parallel = 2
     max_parallel = 2
@@ -162,7 +172,7 @@
     max_parallel = 3
     prereq = 'use_split/from_input'
 
-    issues = '#18635'
+    issues = '#18635 #27240'
     design = 'Mesh/splitting.md FileMeshGenerator.md'
     requirement = 'The system should be able to load a pre-split mesh and perform additional mesh generation on it.'
   []

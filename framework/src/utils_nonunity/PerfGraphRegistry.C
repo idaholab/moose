@@ -28,10 +28,6 @@ getPerfGraphRegistry()
 PerfGraphRegistry::PerfGraphRegistry()
   : GeneralRegistry<std::string, PerfGraphSectionInfo>("PerfGraphRegistry")
 {
-  // Reserve space so that re-allocation doesn't need to happen much
-  // This does not take much memory and, for most cases, will keep a single
-  // reallocation from happening
-  reserve(5000);
 }
 
 unsigned int

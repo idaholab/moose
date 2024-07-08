@@ -21,6 +21,7 @@
 #include "NonlinearSystem.h"
 #include "OutputWarehouse.h"
 #include "SystemInfo.h"
+#include "Checkpoint.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -41,6 +42,14 @@ outputFrameworkInformation(const MooseApp & app)
 
   if (app.getSystemInfo() != NULL)
     oss << app.getSystemInfo()->getInfo();
+
+  const auto checkpoints = app.getOutputWarehouse().getOutputs<Checkpoint>();
+  if (checkpoints.size())
+  {
+    oss << std::left << "Checkpoint:\n";
+    oss << checkpoints[0]->checkpointInfo().str();
+    oss << std::endl;
+  }
 
   oss << std::left << "Parallelism:\n"
       << std::setw(console_field_width)

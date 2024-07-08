@@ -1,20 +1,37 @@
 # INSFEFluidMomentumKernel
 
-!alert construction title=Undocumented Class
-The INSFEFluidMomentumKernel has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/INSFEFluidMomentumKernel
 
-## Overview
+This kernel supports both regular and porous media flow, with the porosity specified
+as a material property using the [!param](/Kernels/INSFEFluidMassKernel/porosity) parameter.
 
-!! Replace these lines with information regarding the INSFEFluidMomentumKernel object.
+This kernel computes the following terms in the momentum equation:
 
-## Example Input File Syntax
+- the convection term $\rho \ \epsilon \vec{v} * \nabla \vec{v} \psi$ (non-conservative form)
+- the pressure term $\epsilon \nabla p \psi$ (volumetric form)
+- the gravity term $-\epsilon \rho \vec{g} \psi$
+- a viscous term for regular media flow
+- a viscous and a friction term for porous media flow
 
-!! Describe and include an example of how to use the INSFEFluidMomentumKernel object.
+
+!alert note
+The pressure term can also be computed with an integration by parts. If so, the
+boundary conditions for the momentum equations should also use an integration by parts.
+
+!alert note
+The convection term can also be computed using a conservative form. If so, other kernels
+such as the [PINSFEFluidVelocityTimeDerivative.md] must also use a conservative form.
+
+
+This kernel computes the SUPG stabilization terms for the momentum equation:
+
+- the transient term $\rho \dot{\vec{v}} \psi_{supg}$
+- the convection term $\rho \ \epsilon \vec{v} * \nabla \vec{v} \psi_{supg}$
+- the pressure term $\epsilon \nabla p \psi_{supg}$
+- the gravity term $-\epsilon \rho \vec{g} \psi_{supg}$
+- a viscous term for regular media flow
+- a viscous and a friction term for porous media flow
+
 
 !syntax parameters /Kernels/INSFEFluidMomentumKernel
 

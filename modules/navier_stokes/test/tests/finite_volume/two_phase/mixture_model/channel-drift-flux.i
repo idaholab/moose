@@ -243,6 +243,7 @@ velocity_interp_method = 'rc'
     linear_coef_name = 'Darcy_coefficient'
     outputs = 'out'
     output_properties = 'vel_slip_x'
+    ghost_layers = 5
   []
   [populate_v_slip]
     type = WCNSFV2PSlipVelocityFunctorMaterial
@@ -257,6 +258,7 @@ velocity_interp_method = 'rc'
     linear_coef_name = 'Darcy_coefficient'
     outputs = 'out'
     output_properties = 'vel_slip_y'
+    ghost_layers = 5
   []
   [compute_phase_1]
     type = ADParsedFunctorMaterial
