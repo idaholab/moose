@@ -97,7 +97,7 @@ class RunPBS(RunHPC):
         return 'qrls'
 
     def getHPCCancelCommand(self):
-        return 'qdel'
+        return 'qdel -W force'
 
     def getHPCJobIDVariable(self):
         return 'PBS_JOBID'
