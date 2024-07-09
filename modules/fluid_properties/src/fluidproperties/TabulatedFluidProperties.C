@@ -28,6 +28,16 @@ TabulatedFluidProperties::validParams()
       "Single phase fluid properties computed using bi-dimensional interpolation of tabulated "
       "values.");
 
+  // Which interpolations to create
+  params.addParam<bool>("create_pT_interpolations",
+                        true,
+                        "Whether to load (from file) or create (from a fluid property object) "
+                        "properties interpolations from pressure and temperature");
+  params.addParam<bool>("create_ve_interpolations",
+                        false,
+                        "Whether to load (from file) or create (from a fluid property object) "
+                        "properties interpolations from pressure and temperature");
+
   // Input / output
   params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
   params.addParam<FileName>("fluid_property_file",
@@ -147,7 +157,8 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
                           : ""),
     _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
                                          : isParamValid("fluid_property_output_file")),
-    _create_direct_ve_interpolations(true),
+    _create_direct_pT_interpolations(getParam<bool>("create_pT_interpolations")),
+    _create_direct_ve_interpolations(getParam<bool>("create_ve_interpolations")),
     _temperature_min(getParam<Real>("temperature_min")),
     _temperature_max(getParam<Real>("temperature_max")),
     _pressure_min(getParam<Real>("pressure_min")),
@@ -259,129 +270,40 @@ TabulatedFluidProperties::initialSetup()
     return;
   _initial_setup_done = true;
 
-  // If the user specified a tabulation to read, use that
-  if (!_file_name_in.empty())
+  if (_create_direct_pT_interpolations)
   {
-    std::ifstream file(_file_name_in.c_str());
-    _console << name() + ": Reading tabulated properties from " << _file_name_in << std::endl;
-    _csv_reader.read();
-
-    const std::vector<std::string> & column_names = _csv_reader.getNames();
-
-    // Check that all required columns are present
-    for (std::size_t i = 0; i < _required_columns.size(); ++i)
+    // If the user specified a (p, T) tabulation to read, use that
+    if (!_file_name_in.empty())
+      buildSourceDataVectorsForInterpolation();
+    else
     {
-      if (std::find(column_names.begin(), column_names.end(), _required_columns[i]) ==
-          column_names.end())
-        mooseError("No ",
-                   _required_columns[i],
-                   " data read in ",
-                   _file_name_in,
-                   ". A column named ",
-                   _required_columns[i],
-                   " must be present");
+      if (!_fp)
+        mooseError(
+            "No FluidProperties (specified with 'fp' parameter) exists. Either specify a 'fp' or "
+            "specify a (p, T) tabulation file with the 'fluid_property_file' parameter");
+      _console << name() + ": Generating (p, T) tabulated data\n";
+      _console << std::flush;
+
+      generateTabulatedData();
     }
-
-    // Check that any property names read from the file are present in the list of possible
-    // properties, and if they are, add them to the list of read properties
-    for (std::size_t i = 0; i < column_names.size(); ++i)
-    {
-      // Only check properties not in _required_columns
-      if (std::find(_required_columns.begin(), _required_columns.end(), column_names[i]) ==
-          _required_columns.end())
-      {
-        if (std::find(_property_columns.begin(), _property_columns.end(), column_names[i]) ==
-            _property_columns.end())
-          mooseError(column_names[i],
-                     " read in ",
-                     _file_name_in,
-                     " is not one of the properties that TabulatedFluidProperties understands");
-        else
-          _interpolated_properties.push_back(column_names[i]);
-      }
-    }
-
-    std::map<std::string, unsigned int> data_index;
-    for (std::size_t i = 0; i < column_names.size(); ++i)
-    {
-      auto it = std::find(column_names.begin(), column_names.end(), column_names[i]);
-      data_index[column_names[i]] = std::distance(column_names.begin(), it);
-    }
-
-    const std::vector<std::vector<Real>> & column_data = _csv_reader.getData();
-
-    // Extract the pressure and temperature data vectors
-    _pressure = column_data[data_index.find("pressure")->second];
-    _temperature = column_data[data_index.find("temperature")->second];
-
-    // Pressure and temperature data contains duplicates due to the csv format.
-    // First, check that pressure is monotonically increasing
-    if (!std::is_sorted(_pressure.begin(), _pressure.end()))
-      mooseError("The column data for pressure is not monotonically increasing in ", _file_name_in);
-
-    // The first pressure value is repeated for each temperature value. Counting the
-    // number of repeats provides the number of temperature values
-    auto num_T = std::count(_pressure.begin(), _pressure.end(), _pressure.front());
-
-    // Now remove the duplicates in the pressure vector
-    auto last_unique = std::unique(_pressure.begin(), _pressure.end());
-    _pressure.erase(last_unique, _pressure.end());
-    _num_p = _pressure.size();
-
-    // Check that the number of rows in the csv file is equal to _num_p * _num_T
-    if (column_data[0].size() != _num_p * static_cast<unsigned int>(num_T))
-      mooseError("The number of rows in ",
-                 _file_name_in,
-                 " is not equal to the number of unique pressure values ",
-                 _num_p,
-                 " multiplied by the number of unique temperature values ",
-                 num_T);
-
-    // Need to make sure that the temperature values are provided in ascending order
-    // as well as duplicated for each pressure value
-    std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
-    if (!std::is_sorted(temp0.begin(), temp0.end()))
-      mooseError("The column data for temperature is not monotonically increasing in ",
-                 _file_name_in);
-
-    auto it_temp = _temperature.begin() + num_T;
-    for (std::size_t i = 1; i < _pressure.size(); ++i)
-    {
-      std::vector<Real> temp(it_temp, it_temp + num_T);
-      if (temp != temp0)
-        mooseError("Temperature values for pressure ",
-                   _pressure[i],
-                   " are not identical to values for ",
-                   _pressure[0]);
-
-      std::advance(it_temp, num_T);
-    }
-
-    // At this point, all temperature data has been provided in ascending order
-    // identically for each pressure value, so we can just keep the first range
-    _temperature.erase(_temperature.begin() + num_T, _temperature.end());
-    _num_T = _temperature.size();
-
-    // Minimum and maximum pressure and temperature. Note that _pressure and
-    // _temperature are sorted
-    _pressure_min = _pressure.front();
-    _pressure_max = _pressure.back();
-    _temperature_min = _temperature.front();
-    _temperature_max = _temperature.back();
-
-    // Extract the fluid property data from the file
-    for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
-      _properties.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
   }
-  else
-  {
-    if (!_fp)
-      mooseError("No FluidProperties (specified with 'fp') exists. Either specify a 'fp' or "
-                 "specify a tabulation file with the 'fluid_property_file' parameter");
-    _console << name() + ": Generating tabulated data\n";
-    _console << std::flush;
 
-    generateTabulatedData();
+  if (_create_direct_ve_interpolations)
+  {
+    // If the user specified a (v, e) tabulation to read, use that
+    if (!_file_name_in.empty())
+      buildSourceDataVectorsForInterpolation();
+    else
+    {
+      if (!_fp)
+        mooseError(
+            "No FluidProperties (specified with 'fp' parameter) exists. Either specify a 'fp' or "
+            "specify a (v, e) tabulation file with the 'fluid_property_ve_file' parameter");
+      _console << name() + ": Generating (v, e) tabulated data\n";
+      _console << std::flush;
+
+      generateTabulatedData();
+    }
   }
 
   computePropertyIndicesInInterpolationVectors();
@@ -416,7 +338,7 @@ TabulatedFluidProperties::molarMass() const
 Real
 TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_density)
+  if (_interpolate_density && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure, temperature);
@@ -435,7 +357,7 @@ TabulatedFluidProperties::v_from_p_T(
     Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const
 {
   Real rho = 0, drho_dp = 0, drho_dT = 0;
-  if (_interpolate_density)
+  if (_interpolate_density && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_density_idx]->sampleValueAndDerivatives(
@@ -457,7 +379,7 @@ TabulatedFluidProperties::v_from_p_T(
 Real
 TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_density)
+  if (_interpolate_density && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_density_idx]->sample(pressure, temperature);
@@ -475,7 +397,7 @@ void
 TabulatedFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  if (_interpolate_density)
+  if (_interpolate_density && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_density_idx]->sampleValueAndDerivatives(
@@ -497,7 +419,7 @@ TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
                                        ADReal & drho_dp,
                                        ADReal & drho_dT) const
 {
-  if (_interpolate_density)
+  if (_interpolate_density && _create_direct_pT_interpolations)
   {
     ADReal p = pressure, T = temperature;
     checkInputVariables(p, T);
@@ -534,7 +456,7 @@ TabulatedFluidProperties::rho_from_p_s(
 Real
 TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_internal_energy)
+  if (_interpolate_internal_energy && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_internal_energy_idx]->sample(pressure, temperature);
@@ -552,7 +474,7 @@ void
 TabulatedFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  if (_interpolate_internal_energy)
+  if (_interpolate_internal_energy && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_internal_energy_idx]->sampleValueAndDerivatives(
@@ -655,7 +577,7 @@ TabulatedFluidProperties::T_from_p_s(
 Real
 TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_enthalpy)
+  if (_interpolate_enthalpy && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
@@ -673,7 +595,7 @@ void
 TabulatedFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  if (_interpolate_enthalpy)
+  if (_interpolate_enthalpy && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(
@@ -691,7 +613,7 @@ TabulatedFluidProperties::h_from_p_T(
 Real
 TabulatedFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_viscosity)
+  if (_interpolate_viscosity && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_viscosity_idx]->sample(pressure, temperature);
@@ -709,7 +631,7 @@ void
 TabulatedFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  if (_interpolate_viscosity)
+  if (_interpolate_viscosity && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_viscosity_idx]->sampleValueAndDerivatives(
@@ -727,7 +649,7 @@ TabulatedFluidProperties::mu_from_p_T(
 Real
 TabulatedFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_c)
+  if (_interpolate_c && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_c_idx]->sample(pressure, temperature);
@@ -745,7 +667,7 @@ void
 TabulatedFluidProperties::c_from_p_T(
     Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const
 {
-  if (_interpolate_c)
+  if (_interpolate_c && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_c_idx]->sampleValueAndDerivatives(pressure, temperature, c, dc_dp, dc_dT);
@@ -762,7 +684,7 @@ TabulatedFluidProperties::c_from_p_T(
 Real
 TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_cp)
+  if (_interpolate_cp && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_cp_idx]->sample(pressure, temperature);
@@ -781,7 +703,7 @@ void
 TabulatedFluidProperties::cp_from_p_T(
     Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
-  if (_interpolate_cp)
+  if (_interpolate_cp && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_cp_idx]->sampleValueAndDerivatives(pressure, temperature, cp, dcp_dp, dcp_dT);
@@ -799,7 +721,7 @@ TabulatedFluidProperties::cp_from_p_T(
 Real
 TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_cv)
+  if (_interpolate_cv && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_cv_idx]->sample(pressure, temperature);
@@ -836,7 +758,7 @@ TabulatedFluidProperties::cv_from_p_T(
 Real
 TabulatedFluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_k)
+  if (_interpolate_k && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_k_idx]->sample(pressure, temperature);
@@ -854,7 +776,7 @@ void
 TabulatedFluidProperties::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  if (_interpolate_k)
+  if (_interpolate_k && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_k_idx]->sampleValueAndDerivatives(
@@ -872,7 +794,7 @@ TabulatedFluidProperties::k_from_p_T(
 Real
 TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_entropy)
+  if (_interpolate_entropy && _create_direct_pT_interpolations)
   {
     checkInputVariables(pressure, temperature);
     return _property_ipol[_entropy_idx]->sample(pressure, temperature);
@@ -889,7 +811,7 @@ TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
 void
 TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  if (_interpolate_entropy)
+  if (_interpolate_entropy && _create_direct_pT_interpolations)
   {
     checkInputVariables(p, T);
     _property_ipol[_entropy_idx]->sampleValueAndDerivatives(p, T, s, ds_dp, ds_dT);
@@ -1584,6 +1506,121 @@ TabulatedFluidProperties::checkInitialGuess() const
                    Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
                    ").");
   }
+}
+
+void
+TabulatedFluidProperties::buildSourceDataVectorsForInterpolation()
+{
+  std::ifstream file(_file_name_in.c_str());
+  _console << name() + ": Reading tabulated properties from " << _file_name_in << std::endl;
+  _csv_reader.read();
+
+  const std::vector<std::string> & column_names = _csv_reader.getNames();
+
+  // Check that all required columns are present
+  for (std::size_t i = 0; i < _required_columns.size(); ++i)
+  {
+    if (std::find(column_names.begin(), column_names.end(), _required_columns[i]) ==
+        column_names.end())
+      mooseError("No ",
+                 _required_columns[i],
+                 " data read in ",
+                 _file_name_in,
+                 ". A column named ",
+                 _required_columns[i],
+                 " must be present");
+  }
+
+  // Check that any property names read from the file are present in the list of possible
+  // properties, and if they are, add them to the list of read properties
+  for (std::size_t i = 0; i < column_names.size(); ++i)
+  {
+    // Only check properties not in _required_columns
+    if (std::find(_required_columns.begin(), _required_columns.end(), column_names[i]) ==
+        _required_columns.end())
+    {
+      if (std::find(_property_columns.begin(), _property_columns.end(), column_names[i]) ==
+          _property_columns.end())
+        mooseError(column_names[i],
+                   " read in ",
+                   _file_name_in,
+                   " is not one of the properties that TabulatedFluidProperties understands");
+      else
+        _interpolated_properties.push_back(column_names[i]);
+    }
+  }
+
+  std::map<std::string, unsigned int> data_index;
+  for (std::size_t i = 0; i < column_names.size(); ++i)
+  {
+    auto it = std::find(column_names.begin(), column_names.end(), column_names[i]);
+    data_index[column_names[i]] = std::distance(column_names.begin(), it);
+  }
+
+  const std::vector<std::vector<Real>> & column_data = _csv_reader.getData();
+
+  // Extract the pressure and temperature data vectors
+  _pressure = column_data[data_index.find("pressure")->second];
+  _temperature = column_data[data_index.find("temperature")->second];
+
+  // Pressure and temperature data contains duplicates due to the csv format.
+  // First, check that pressure is monotonically increasing
+  if (!std::is_sorted(_pressure.begin(), _pressure.end()))
+    mooseError("The column data for pressure is not monotonically increasing in ", _file_name_in);
+
+  // The first pressure value is repeated for each temperature value. Counting the
+  // number of repeats provides the number of temperature values
+  auto num_T = std::count(_pressure.begin(), _pressure.end(), _pressure.front());
+
+  // Now remove the duplicates in the pressure vector
+  auto last_unique = std::unique(_pressure.begin(), _pressure.end());
+  _pressure.erase(last_unique, _pressure.end());
+  _num_p = _pressure.size();
+
+  // Check that the number of rows in the csv file is equal to _num_p * _num_T
+  if (column_data[0].size() != _num_p * static_cast<unsigned int>(num_T))
+    mooseError("The number of rows in ",
+               _file_name_in,
+               " is not equal to the number of unique pressure values ",
+               _num_p,
+               " multiplied by the number of unique temperature values ",
+               num_T);
+
+  // Need to make sure that the temperature values are provided in ascending order
+  // as well as duplicated for each pressure value
+  std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
+  if (!std::is_sorted(temp0.begin(), temp0.end()))
+    mooseError("The column data for temperature is not monotonically increasing in ",
+               _file_name_in);
+
+  auto it_temp = _temperature.begin() + num_T;
+  for (std::size_t i = 1; i < _pressure.size(); ++i)
+  {
+    std::vector<Real> temp(it_temp, it_temp + num_T);
+    if (temp != temp0)
+      mooseError("Temperature values for pressure ",
+                 _pressure[i],
+                 " are not identical to values for ",
+                 _pressure[0]);
+
+    std::advance(it_temp, num_T);
+  }
+
+  // At this point, all temperature data has been provided in ascending order
+  // identically for each pressure value, so we can just keep the first range
+  _temperature.erase(_temperature.begin() + num_T, _temperature.end());
+  _num_T = _temperature.size();
+
+  // Minimum and maximum pressure and temperature. Note that _pressure and
+  // _temperature are sorted
+  _pressure_min = _pressure.front();
+  _pressure_max = _pressure.back();
+  _temperature_min = _temperature.front();
+  _temperature_max = _temperature.back();
+
+  // Extract the fluid property data from the file
+  for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
+    _properties.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
 }
 
 void

@@ -173,6 +173,9 @@ protected:
    */
   virtual void checkInitialGuess() const;
 
+  /// Read tabulation data from file
+  void readFileTabulationData();
+
   /**
    * Generates a table of fluid properties by looping over pressure and temperature
    * and calculating properties using the FluidProperties UserObject _fp.
@@ -207,6 +210,8 @@ protected:
   /// Specific enthalpy vector
   std::vector<Real> _enthalpy;
 
+  /// Whether to create direct (p,T) interpolations
+  const bool _create_direct_pT_interpolations;
   /// Whether to create direct (v,e) interpolations
   const bool _create_direct_ve_interpolations;
 
