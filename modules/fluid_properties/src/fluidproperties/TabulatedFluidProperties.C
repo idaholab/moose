@@ -384,57 +384,7 @@ TabulatedFluidProperties::initialSetup()
     generateTabulatedData();
   }
 
-  // At this point, all properties read or generated are able to be used by
-  // TabulatedFluidProperties. Now set flags and indexes for each property in
-  //_interpolated_properties to use in property calculations
-  for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
-  {
-    if (_interpolated_properties[i] == "density")
-    {
-      _interpolate_density = true;
-      _density_idx = i;
-    }
-    if (_interpolated_properties[i] == "enthalpy")
-    {
-      _interpolate_enthalpy = true;
-      _enthalpy_idx = i;
-    }
-    if (_interpolated_properties[i] == "internal_energy")
-    {
-      _interpolate_internal_energy = true;
-      _internal_energy_idx = i;
-    }
-    if (_interpolated_properties[i] == "viscosity")
-    {
-      _interpolate_viscosity = true;
-      _viscosity_idx = i;
-    }
-    if (_interpolated_properties[i] == "k")
-    {
-      _interpolate_k = true;
-      _k_idx = i;
-    }
-    if (_interpolated_properties[i] == "c")
-    {
-      _interpolate_c = true;
-      _c_idx = i;
-    }
-    if (_interpolated_properties[i] == "cp")
-    {
-      _interpolate_cp = true;
-      _cp_idx = i;
-    }
-    if (_interpolated_properties[i] == "cv")
-    {
-      _interpolate_cv = true;
-      _cv_idx = i;
-    }
-    if (_interpolated_properties[i] == "entropy")
-    {
-      _interpolate_entropy = true;
-      _entropy_idx = i;
-    }
-  }
+  computePropertyIndicesInInterpolationVectors();
   constructInterpolation();
 
   // Write tabulated data to file
@@ -1008,9 +958,8 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
 Real
 TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _p_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_pressure && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1022,9 +971,8 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 void
 TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _p_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_pressure && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1036,9 +984,8 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
 Real
 TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _T_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_temperature && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1050,9 +997,8 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 void
 TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _T_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_temperature && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1064,9 +1010,8 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
 Real
 TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _c_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_c && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1082,9 +1027,8 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
 void
 TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _c_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_c && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1105,9 +1049,8 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
 Real
 TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _cp_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_cp && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1123,9 +1066,8 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
 void
 TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _cp_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_cp && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1146,9 +1088,8 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, 
 Real
 TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _cv_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_cv && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1164,9 +1105,8 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
 void
 TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _cv_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_cv && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1187,9 +1127,8 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, 
 Real
 TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _mu_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_viscosity && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1205,9 +1144,8 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
 void
 TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _mu_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_viscosity & !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1228,9 +1166,8 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, 
 Real
 TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _k_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_k && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1246,9 +1183,8 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
 void
 TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
 {
-  if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _k_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+  if (_interpolate_k && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   if (_create_direct_ve_interpolations)
@@ -1270,9 +1206,9 @@ Real
 TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve &&
-      (!_create_direct_ve_interpolations || _s_idx == libMesh::invalid_uint ||
-       _h_idx == libMesh::invalid_uint || _T_idx == libMesh::invalid_uint))
-    missingVEInterpolationError(__PRETTY_FUNCTION);
+      (!_create_direct_ve_interpolations || _entropy_idx == libMesh::invalid_uint ||
+       _enthalpy_idx == libMesh::invalid_uint || _T_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
   Real h, T, s;
@@ -1286,7 +1222,7 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   {
     Real p0 = _p_initial_guess;
     Real T0 = _T_initial_guess;
-    Real p, T;
+    Real p;
     bool conversion_succeeded;
     p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
     s = s_from_p_T(p, T);
@@ -1651,7 +1587,78 @@ TabulatedFluidProperties::checkInitialGuess() const
 }
 
 void
-TabulatedFluidProperties::missingInterpolationError(const std::string & function_name) const
+TabulatedFluidProperties::computePropertyIndicesInInterpolationVectors()
+{
+  // At this point, all properties read or generated are able to be used by
+  // TabulatedFluidProperties. Now set flags and indexes for each property in
+  //_interpolated_properties to use in property calculations
+  for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
+  {
+    if (_interpolated_properties[i] == "density")
+    {
+      _interpolate_density = true;
+      _density_idx = i;
+    }
+    else if (_interpolated_properties[i] == "enthalpy")
+    {
+      _interpolate_enthalpy = true;
+      _enthalpy_idx = i;
+    }
+    else if (_interpolated_properties[i] == "internal_energy")
+    {
+      _interpolate_internal_energy = true;
+      _internal_energy_idx = i;
+    }
+    else if (_interpolated_properties[i] == "viscosity")
+    {
+      _interpolate_viscosity = true;
+      _viscosity_idx = i;
+    }
+    else if (_interpolated_properties[i] == "k")
+    {
+      _interpolate_k = true;
+      _k_idx = i;
+    }
+    else if (_interpolated_properties[i] == "c")
+    {
+      _interpolate_c = true;
+      _c_idx = i;
+    }
+    else if (_interpolated_properties[i] == "cp")
+    {
+      _interpolate_cp = true;
+      _cp_idx = i;
+    }
+    else if (_interpolated_properties[i] == "cv")
+    {
+      _interpolate_cv = true;
+      _cv_idx = i;
+    }
+    else if (_interpolated_properties[i] == "entropy")
+    {
+      _interpolate_entropy = true;
+      _entropy_idx = i;
+    }
+    else if (_interpolated_properties[i] == "pressure")
+    {
+      _interpolate_pressure = true;
+      _p_idx = i;
+    }
+    else if (_interpolated_properties[i] == "temperature")
+    {
+      _interpolate_temperature = true;
+      _T_idx = i;
+    }
+    else
+      mooseError("Specified property '" + _interpolated_properties[i] +
+                 "' is present in the tabulation but is not currently leveraged by the code in the "
+                 "TabulatedFluidProperties. If it is spelled correctly, then please contact a "
+                 "MOOSE or fluid properties module developer.");
+  }
+}
+
+void
+TabulatedFluidProperties::missingVEInterpolationError(const std::string & function_name) const
 {
   mooseError(function_name +
              ": to call this function you must:\n-add this property to the list to the list of "

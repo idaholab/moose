@@ -179,6 +179,9 @@ protected:
    */
   virtual void generateTabulatedData();
 
+  /// Retrieves the index for each property in the vector of interpolations
+  void computePropertyIndicesInInterpolationVectors();
+
   /// Standardized error message for missing interpolation
   void missingVEInterpolationError(const std::string & function_name) const;
 
@@ -254,6 +257,8 @@ protected:
   bool _interpolate_cp;
   bool _interpolate_cv;
   bool _interpolate_entropy;
+  bool _interpolate_pressure;
+  bool _interpolate_temperature;
 
   /// Index of each property
   unsigned int _density_idx;
