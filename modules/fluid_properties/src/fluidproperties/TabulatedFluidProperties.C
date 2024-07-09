@@ -118,7 +118,7 @@ TabulatedFluidProperties::validParams()
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
                               "Variable set conversion");
   params.addParamNamesToGroup("temperature_min temperature_max pressure_min pressure_max e_min "
-                              "e_max v_min v_max error_on_out_of_bounds",
+                              "e_max v_min v_max error_on_out_of_bounds out_of_bounds_behavior",
                               "Tabulation and interpolation bounds");
   params.addParamNamesToGroup("num_T num_p num_v num_e use_log_grid_v",
                               "Tabulation and interpolation discretization");
@@ -212,7 +212,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
       _OOBBehavior != Throw)
     paramError("out_of_bounds_behavior", "Inconsistent selection of out of bounds behavior.");
   else if (isParamValid("error_on_out_of_bounds") && !getParam<bool>("error_on_out_of_bounds"))
-    _OOBBehavior = Ignore;
+    _OOBBehavior = SetToClosestBound;
 
   // Lines starting with # in the data file are treated as comments
   _csv_reader.setComment("#");
@@ -1442,17 +1442,19 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
 {
   if (_OOBBehavior == Ignore)
     return;
-  if (pressure < _pressure_min || pressure > _pressure_max)
+  else if (pressure < _pressure_min || pressure > _pressure_max)
   {
     if (_OOBBehavior == Throw)
       throw MooseException("Pressure " + Moose::stringify(pressure) +
                            " is outside the range of tabulated pressure (" +
                            Moose::stringify(_pressure_min) + ", " +
                            Moose::stringify(_pressure_max) + ").");
-    else if (_OOBBehavior == SetToClosestBound)
-      pressure = std::max(_pressure_min, std::min(pressure, _pressure_max));
     else
-      flagInvalidSolution("Out of bounds pressure");
+    {
+      pressure = std::max(_pressure_min, std::min(pressure, _pressure_max));
+      if (_OOBBehavior == DeclareInvalid)
+        flagInvalidSolution("Pressure out of bounds");
+    }
   }
 
   if (temperature < _temperature_min || temperature > _temperature_max)
@@ -1462,10 +1464,12 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
                  " is outside the range of tabulated temperature (" +
                  Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
                  ").");
-    else if (_OOBBehavior == SetToClosestBound)
-      temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
     else
-      flagInvalidSolution("Out of bounds temperature");
+    {
+      temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
+      if (_OOBBehavior == DeclareInvalid)
+        flagInvalidSolution("Temperature out of bounds");
+    }
   }
 }
 
@@ -1473,14 +1477,20 @@ template <typename T>
 void
 TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
 {
-  if (e < _e_min || e > _e_max)
+  if (_OOBBehavior == Ignore)
+    return;
+  else if (e < _e_min || e > _e_max)
   {
     if (_OOBBehavior == Throw)
       throw MooseException("Specific internal energy " + Moose::stringify(e) +
                            " is outside the range of tabulated specific internal energies (" +
                            Moose::stringify(_e_min) + ", " + Moose::stringify(_e_max) + ").");
     else
+    {
       e = std::max(_e_min, std::min(e, _e_max));
+      if (_OOBBehavior == DeclareInvalid)
+        flagInvalidSolution("Specific internal energy out of bounds");
+    }
   }
 
   if (v < _v_min || v > _v_max)
@@ -1490,7 +1500,11 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
                  " is outside the range of tabulated specific volumes (" +
                  Moose::stringify(_v_min) + ", " + Moose::stringify(_v_max) + ").");
     else
+    {
       v = std::max(T(_v_min), std::min(v, T(_v_max)));
+      if (_OOBBehavior == DeclareInvalid)
+        flagInvalidSolution("Specific volume out of bounds");
+    }
   }
 }
 
@@ -1518,6 +1532,7 @@ TabulatedFluidProperties::checkInitialGuess() const
 
 template void TabulatedFluidProperties::checkInputVariables(Real & pressure,
                                                             Real & temperature) const;
-
 template void TabulatedFluidProperties::checkInputVariables(ADReal & pressure,
                                                             ADReal & temperature) const;
+template void TabulatedFluidProperties::checkInputVariablesVE(Real & v, Real & e) const;
+template void TabulatedFluidProperties::checkInputVariablesVE(ADReal & v, ADReal & e) const;
