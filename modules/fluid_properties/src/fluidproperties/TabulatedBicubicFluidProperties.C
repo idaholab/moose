@@ -71,7 +71,7 @@ TabulatedBicubicFluidProperties::constructInterpolation()
   {
     // Grids in specific volume and internal energy can be either linear or logarithmic
     // NOTE: this could have been called already when generating tabulated data
-    computeVEGridVectors();
+    createVEGridVectors();
 
     // initialize vectors for interpolation
     std::vector<std::vector<Real>> p_from_v_e(_num_v);

@@ -174,7 +174,17 @@ protected:
   virtual void checkInitialGuess() const;
 
   /// Read tabulation data from file
-  void readFileTabulationData();
+  void readFileTabulationData(bool use_pT);
+
+  /// Check that the tabulation grids in the file are correct (no repeats etc)
+  /// @param v1 the first grid axis (pressure for pT grid)
+  /// @param v2 the second grid axis (temperature for pT grid)
+  /// @param file_name the name of the tabulation file
+  void checkFileTabulationGrids(std::vector<Real> & v1,
+                                std::vector<Real> & v2,
+                                const std::string & file_name,
+                                const std::string & v1_name,
+                                const std::string & v2_name);
 
   /**
    * Generates a table of fluid properties by looping over pressure and temperature

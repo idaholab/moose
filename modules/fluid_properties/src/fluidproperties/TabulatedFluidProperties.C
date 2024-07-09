@@ -274,7 +274,7 @@ TabulatedFluidProperties::initialSetup()
   {
     // If the user specified a (p, T) tabulation to read, use that
     if (!_file_name_in.empty())
-      readFileTabulationData();
+      readFileTabulationData(true);
     else
     {
       if (!_fp)
@@ -292,7 +292,7 @@ TabulatedFluidProperties::initialSetup()
   {
     // If the user specified a (v, e) tabulation to read, use that
     if (!_file_name_in.empty())
-      readFileTabulationData();
+      readFileTabulationData(false);
     else
     {
       if (!_fp)
@@ -1384,6 +1384,7 @@ TabulatedFluidProperties::generateVETabulatedData()
   for (const auto i : index_range(_properties_ve))
     _properties_ve[i].resize(_num_v * _num_e);
 
+  // Grids in (v,e) are not read, so we either use user input or rely on (p,T) data
   createVEGridVectors();
 
   // Generate the tabulated data at the pressure and temperature points
@@ -1548,10 +1549,19 @@ TabulatedFluidProperties::checkInitialGuess() const
 }
 
 void
-TabulatedFluidProperties::readFileTabulationData()
+TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
 {
-  _console << name() + ": Reading tabulated properties from " << _file_name_in << std::endl;
-  _csv_reader.read();
+  if (use_pT)
+  {
+    _console << name() + ": Reading tabulated properties from " << _file_name_in << std::endl;
+    _csv_reader.read();
+  }
+  else
+  {
+    _console << name() + ": Reading tabulated properties from " << _file_name_ve_in << std::endl;
+    _csv_reader.setFileName(_file_name_ve_in);
+    _csv_reader.read();
+  }
 
   const std::vector<std::string> & column_names = _csv_reader.getNames();
 
@@ -1584,6 +1594,7 @@ TabulatedFluidProperties::readFileTabulationData()
                    _file_name_in,
                    " is not one of the properties that TabulatedFluidProperties understands");
       else
+        // TODO prevent double insertion on double read
         _interpolated_properties.push_back(column_names[i]);
     }
   }
@@ -1598,67 +1609,129 @@ TabulatedFluidProperties::readFileTabulationData()
   const std::vector<std::vector<Real>> & column_data = _csv_reader.getData();
 
   // Extract the pressure and temperature data vectors
-  _pressure = column_data[data_index.find("pressure")->second];
-  _temperature = column_data[data_index.find("temperature")->second];
-
-  // Pressure and temperature data contains duplicates due to the csv format.
-  // First, check that pressure is monotonically increasing
-  if (!std::is_sorted(_pressure.begin(), _pressure.end()))
-    mooseError("The column data for pressure is not monotonically increasing in ", _file_name_in);
-
-  // The first pressure value is repeated for each temperature value. Counting the
-  // number of repeats provides the number of temperature values
-  auto num_T = std::count(_pressure.begin(), _pressure.end(), _pressure.front());
-
-  // Now remove the duplicates in the pressure vector
-  auto last_unique = std::unique(_pressure.begin(), _pressure.end());
-  _pressure.erase(last_unique, _pressure.end());
-  _num_p = _pressure.size();
-
-  // Check that the number of rows in the csv file is equal to _num_p * _num_T
-  if (column_data[0].size() != _num_p * static_cast<unsigned int>(num_T))
-    mooseError("The number of rows in ",
-               _file_name_in,
-               " is not equal to the number of unique pressure values ",
-               _num_p,
-               " multiplied by the number of unique temperature values ",
-               num_T);
-
-  // Need to make sure that the temperature values are provided in ascending order
-  // as well as duplicated for each pressure value
-  std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
-  if (!std::is_sorted(temp0.begin(), temp0.end()))
-    mooseError("The column data for temperature is not monotonically increasing in ",
-               _file_name_in);
-
-  auto it_temp = _temperature.begin() + num_T;
-  for (std::size_t i = 1; i < _pressure.size(); ++i)
+  if (use_pT)
   {
-    std::vector<Real> temp(it_temp, it_temp + num_T);
-    if (temp != temp0)
-      mooseError("Temperature values for pressure ",
-                 _pressure[i],
-                 " are not identical to values for ",
-                 _pressure[0]);
-
-    std::advance(it_temp, num_T);
+    _pressure = column_data[data_index.find("pressure")->second];
+    _temperature = column_data[data_index.find("temperature")->second];
+  }
+  else
+  {
+    _specific_volume = column_data[data_index.find("specific_volume")->second];
+    _internal_energy = column_data[data_index.find("internal_energy")->second];
   }
 
-  // At this point, all temperature data has been provided in ascending order
-  // identically for each pressure value, so we can just keep the first range
-  _temperature.erase(_temperature.begin() + num_T, _temperature.end());
-  _num_T = _temperature.size();
+  if (use_pT)
+    checkFileTabulationGrids(_pressure, _temperature, _file_name_in, "pressure", "temperature");
+  else
+    checkFileTabulationGrids(_specific_volume,
+                             _internal_energy,
+                             _file_name_ve_in,
+                             "specific volume",
+                             "specific internal energy");
 
-  // Minimum and maximum pressure and temperature. Note that _pressure and
-  // _temperature are sorted
-  _pressure_min = _pressure.front();
-  _pressure_max = _pressure.back();
-  _temperature_min = _temperature.front();
-  _temperature_max = _temperature.back();
+  if (use_pT)
+  {
+    _num_p = _pressure.size();
+    _num_T = _temperature.size();
 
-  // Extract the fluid property data from the file
-  for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
-    _properties.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
+    // Minimum and maximum pressure and temperature. Note that _pressure and
+    // _temperature are sorted
+    _pressure_min = _pressure.front();
+    _pressure_max = _pressure.back();
+    _temperature_min = _temperature.front();
+    _temperature_max = _temperature.back();
+
+    // Extract the fluid property data from the file
+    for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
+      _properties.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
+  }
+  else
+  {
+    _num_v = _specific_volume.size();
+    _num_e = _internal_energy.size();
+
+    // Minimum and maximum specific internal energy and specific volume
+    _v_min = _specific_volume.front();
+    _v_max = _specific_volume.back();
+    _e_min = _internal_energy.front();
+    _e_max = _internal_energy.back();
+
+    // We cannot overwrite the tabulated data grid with a grid generated from user-input for the
+    // purpose of creating (p,T) to (v,e) interpolations
+    if (_construct_pT_from_ve)
+      paramError("construct_pT_from_ve",
+                 "Reading a (v,e) tabulation and generating (p,T) to (v,e) interpolation tables is "
+                 "not supported at this time.");
+    if (_construct_pT_from_vh)
+      paramError("construct_pT_from_vh",
+                 "Reading a (v,e) tabulation and generating (p,T) to (v,h) interpolation tables is "
+                 "not supported at this time.");
+
+    // Make sure we use the tabulation bounds
+    _e_bounds_specified = true;
+    _v_bounds_specified = true;
+
+    // Extract the fluid property data from the file
+    for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
+      _properties_ve.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
+  }
+}
+
+void
+TabulatedFluidProperties::checkFileTabulationGrids(std::vector<Real> & v1,
+                                                   std::vector<Real> & v2,
+                                                   const std::string & file_name,
+                                                   const std::string & v1_name,
+                                                   const std::string & v2_name)
+{
+  // NOTE: We kept the comments in terms of pressure & temperature for clarity
+  // Pressure (v1) and temperature (v2) data contains duplicates due to the csv format.
+  // First, check that pressure (v1) is monotonically increasing
+  if (!std::is_sorted(v1.begin(), v1.end()))
+    mooseError("The column data for ", v1_name, " is not monotonically increasing in ", file_name);
+
+  // The first pressure (v1) value is repeated for each temperature (v2) value. Counting the
+  // number of repeats provides the number of temperature (v2) values
+  auto num_v2 = std::count(v1.begin(), v1.end(), v1.front());
+
+  // Now remove the duplicates in the pressure (v1) vector
+  auto last_unique = std::unique(v1.begin(), v1.end());
+  v1.erase(last_unique, v1.end());
+
+  // Check that the number of rows in the csv file is equal to _num_v1 * _num_v2
+  // v2 is currently the same size as the column_data (will get trimmed at the end)
+  if (v2.size() != v1.size() * static_cast<unsigned int>(num_v2))
+    mooseError("The number of rows in ",
+               file_name,
+               " is not equal to the number of unique ",
+               v1_name,
+               " values ",
+               v1.size(),
+               " multiplied by the number of unique ",
+               v2_name,
+               " values ",
+               num_v2);
+
+  // Need to make sure that the temperature (v2) values are provided in ascending order
+  std::vector<Real> base_v2(v2.begin(), v2.begin() + num_v2);
+  if (!std::is_sorted(base_v2.begin(), base_v2.end()))
+    mooseError("The column data for ", v2_name, " is not monotonically increasing in ", file_name);
+
+  // Need to make sure that the temperature (v2) are repeated for each pressure (v1) grid point
+  auto it_v2 = v2.begin() + num_v2;
+  for (const auto i : make_range(v1.size() - 1))
+  {
+    std::vector<Real> repeated_v2(it_v2, it_v2 + num_v2);
+    if (repeated_v2 != base_v2)
+      mooseError(
+          v2_name, " values for ", v1_name, " ", v1[i], " are not identical to values for ", v1[0]);
+
+    std::advance(it_v2, num_v2);
+  }
+
+  // At this point, all temperature (v2) data has been provided in ascending order
+  // identically for each pressure (v1) value, so we can just keep the first range
+  v2.erase(v2.begin() + num_v2, v2.end());
 }
 
 void
@@ -1735,6 +1808,7 @@ TabulatedFluidProperties::computePropertyIndicesInInterpolationVectors()
 void
 TabulatedFluidProperties::createVEGridVectors()
 {
+  mooseAssert(_file_name_ve_in.empty(), "We should be reading the (v, e) grid from file");
   if (!_v_bounds_specified)
   {
     if (_fp)
