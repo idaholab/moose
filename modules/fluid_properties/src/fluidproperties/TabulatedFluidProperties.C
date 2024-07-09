@@ -274,7 +274,7 @@ TabulatedFluidProperties::initialSetup()
   {
     // If the user specified a (p, T) tabulation to read, use that
     if (!_file_name_in.empty())
-      buildSourceDataVectorsForInterpolation();
+      readFileTabulationData();
     else
     {
       if (!_fp)
@@ -292,7 +292,7 @@ TabulatedFluidProperties::initialSetup()
   {
     // If the user specified a (v, e) tabulation to read, use that
     if (!_file_name_in.empty())
-      buildSourceDataVectorsForInterpolation();
+      readFileTabulationData();
     else
     {
       if (!_fp)
@@ -302,7 +302,7 @@ TabulatedFluidProperties::initialSetup()
       _console << name() + ": Generating (v, e) tabulated data\n";
       _console << std::flush;
 
-      generateTabulatedData();
+      generateVETabulatedData();
     }
   }
 
@@ -1291,6 +1291,7 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 void
 TabulatedFluidProperties::generateTabulatedData()
 {
+  mooseAssert(_fp, "We should not try to generate (p,T) tabulated data without a _fp user object");
   _pressure.resize(_num_p);
   _temperature.resize(_num_T);
 
@@ -1301,7 +1302,7 @@ TabulatedFluidProperties::generateTabulatedData()
   for (std::size_t i = 0; i < _interpolated_properties_enum.size(); ++i)
     _interpolated_properties[i] = _interpolated_properties_enum[i];
 
-  for (std::size_t i = 0; i < _properties.size(); ++i)
+  for (const auto i : index_range(_properties))
     _properties[i].resize(_num_p * _num_T);
 
   // Temperature is divided equally into _num_T segments
@@ -1317,100 +1318,124 @@ TabulatedFluidProperties::generateTabulatedData()
     _pressure[i] = _pressure_min + i * delta_p;
 
   // Generate the tabulated data at the pressure and temperature points
-  for (std::size_t i = 0; i < _properties.size(); ++i)
+  for (const auto i : index_range(_properties))
   {
     if (_interpolated_properties[i] == "density")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->rho_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("fp", "No fluid properties or csv data provided for density.");
-        }
+          _properties[i][p * _num_T + t] = _fp->rho_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "enthalpy")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->h_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("fp", "No fluid properties or csv data provided for enthalpy.");
-        }
+          _properties[i][p * _num_T + t] = _fp->h_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "internal_energy")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->e_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("fp", "No fluid properties or csv data provided for internal energy.");
-        }
+          _properties[i][p * _num_T + t] = _fp->e_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "viscosity")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->mu_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("fp", "No fluid properties or csv data provided for viscosity.");
-        }
+          _properties[i][p * _num_T + t] = _fp->mu_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "k")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->k_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("interpolated_properties",
-                       "No data to interpolate for thermal conductivity.");
-        }
+          _properties[i][p * _num_T + t] = _fp->k_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "c")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->c_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("interpolated_properties", "No data to interpolate for speed of sound.");
-        }
+          _properties[i][p * _num_T + t] = _fp->c_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "cv")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->cv_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("interpolated_properties",
-                       "No data to interpolate for specific heat capacity at constant volume.");
-        }
+          _properties[i][p * _num_T + t] = _fp->cv_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "cp")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->cp_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("interpolated_properties",
-                       "No data to interpolate for specific heat capacity at constant pressure.");
-        }
+          _properties[i][p * _num_T + t] = _fp->cp_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "entropy")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-        {
-          if (_fp)
-            _properties[i][p * _num_T + t] = _fp->s_from_p_T(_pressure[p], _temperature[t]);
-          else
-            paramError("interpolated_properties", "No data to interpolate for entropy.");
-        }
+          _properties[i][p * _num_T + t] = _fp->s_from_p_T(_pressure[p], _temperature[t]);
+  }
+}
+
+void
+TabulatedFluidProperties::generateVETabulatedData()
+{
+  mooseAssert(_fp, "We should not try to generate (v,e) tabulated data without a _fp user object");
+  _specific_volume.resize(_num_v);
+  _internal_energy.resize(_num_e);
+
+  // Generate data for all properties entered in input file
+  _properties_ve.resize(_interpolated_properties_enum.size());
+  _interpolated_properties.resize(_interpolated_properties_enum.size());
+
+  for (std::size_t i = 0; i < _interpolated_properties_enum.size(); ++i)
+    _interpolated_properties[i] = _interpolated_properties_enum[i];
+
+  for (const auto i : index_range(_properties_ve))
+    _properties_ve[i].resize(_num_v * _num_e);
+
+  // Generate the tabulated data at the pressure and temperature points
+  for (const auto i : index_range(_properties_ve))
+  {
+    if (_interpolated_properties[i] == "density")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] = 1. / _specific_volume[v];
+
+    if (_interpolated_properties[i] == "enthalpy")
+      mooseWarning("Enthalpy is not currently computed from (v,e) so a tabulation cannot be "
+                   "generated directly from a 'fp' fluid properties object.");
+
+    if (_interpolated_properties[i] == "internal_energy")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] = _internal_energy[e];
+
+    if (_interpolated_properties[i] == "viscosity")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] =
+              _fp->mu_from_v_e(_specific_volume[v], _internal_energy[e]);
+
+    if (_interpolated_properties[i] == "k")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] =
+              _fp->k_from_v_e(_specific_volume[v], _internal_energy[e]);
+
+    if (_interpolated_properties[i] == "c")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] =
+              _fp->c_from_v_e(_specific_volume[v], _internal_energy[e]);
+
+    if (_interpolated_properties[i] == "cv")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] =
+              _fp->cv_from_v_e(_specific_volume[v], _internal_energy[e]);
+
+    if (_interpolated_properties[i] == "cp")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] =
+              _fp->cp_from_v_e(_specific_volume[v], _internal_energy[e]);
+
+    if (_interpolated_properties[i] == "entropy")
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties[i][v * _num_e + e] =
+              _fp->s_from_v_e(_specific_volume[v], _internal_energy[e]);
   }
 }
 
@@ -1509,9 +1534,8 @@ TabulatedFluidProperties::checkInitialGuess() const
 }
 
 void
-TabulatedFluidProperties::buildSourceDataVectorsForInterpolation()
+TabulatedFluidProperties::readFileTabulationData()
 {
-  std::ifstream file(_file_name_in.c_str());
   _console << name() + ": Reading tabulated properties from " << _file_name_in << std::endl;
   _csv_reader.read();
 
