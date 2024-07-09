@@ -179,6 +179,9 @@ protected:
    */
   virtual void generateTabulatedData();
 
+  /// Standardized error message for missing interpolation
+  void missingVEInterpolationError(const std::string & function_name) const;
+
   /// File name of input tabulated data file
   FileName _file_name_in;
   /// File name of input (v,e) tabulated data file
@@ -200,6 +203,9 @@ protected:
   std::vector<Real> _internal_energy;
   /// Specific enthalpy vector
   std::vector<Real> _enthalpy;
+
+  /// Whether to create direct (v,e) interpolations
+  const bool _create_direct_ve_interpolations;
 
   /// Tabulated fluid properties (read from file OR computed from _fp)
   std::vector<std::vector<Real>> _properties;
@@ -259,6 +265,8 @@ protected:
   unsigned int _cp_idx;
   unsigned int _cv_idx;
   unsigned int _entropy_idx;
+  unsigned int _p_idx;
+  unsigned int _T_idx;
 
   /// The MOOSE delimited file reader.
   MooseUtils::DelimitedFileReader _csv_reader;

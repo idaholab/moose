@@ -44,11 +44,23 @@ TabulatedBicubicFluidProperties::constructInterpolation()
   std::vector<std::vector<Real>> data_matrix;
   _property_ipol.resize(_properties.size());
 
-  for (std::size_t i = 0; i < _property_ipol.size(); ++i)
+  for (const auto i : index_range(_property_ipol))
   {
     reshapeData2D(_num_p, _num_T, _properties[i], data_matrix);
     _property_ipol[i] =
         std::make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
+  }
+
+  if (_create_direct_ve_interpolations)
+  {
+    _property_ve_ipol.resize(_properties.size());
+
+    for (const auto i : index_range(_property_ve_ipol))
+    {
+      reshapeData2D(_num_v, _num_e, _properties_ve[i], data_matrix);
+      _property_ve_ipol[i] =
+          std::make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, data_matrix);
+    }
   }
 
   bool conversion_succeeded = true;

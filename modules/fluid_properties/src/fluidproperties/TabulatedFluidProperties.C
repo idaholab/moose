@@ -147,6 +147,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
                           : ""),
     _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
                                          : isParamValid("fluid_property_output_file")),
+    _create_direct_ve_interpolations(true),
     _temperature_min(getParam<Real>("temperature_min")),
     _temperature_max(getParam<Real>("temperature_max")),
     _pressure_min(getParam<Real>("pressure_min")),
@@ -1007,185 +1008,290 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
 Real
 TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _p_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  return _p_from_v_e_ipol->sample(v, e);
+
+  if (_create_direct_ve_interpolations)
+    return _property_ve_ipol[_p_idx]->sample(v, e);
+  else
+    return _p_from_v_e_ipol->sample(v, e);
 }
 
 void
 TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _p_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+
+  if (_create_direct_ve_interpolations)
+    _property_ve_ipol[_p_idx]->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+  else
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
 }
 
 Real
 TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling T_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _T_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  return _T_from_v_e_ipol->sample(v, e);
+
+  if (_create_direct_ve_interpolations)
+    return _property_ve_ipol[_T_idx]->sample(v, e);
+  else
+    return _T_from_v_e_ipol->sample(v, e);
 }
 
 void
 TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling T_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _T_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+
+  if (_create_direct_ve_interpolations)
+    _property_ve_ipol[_T_idx]->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+  else
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
 }
 
 Real
 TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _c_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  return c_from_p_T(p, T);
+
+  if (_create_direct_ve_interpolations)
+    return _property_ve_ipol[_c_idx]->sample(v, e);
+  else
+  {
+    Real p = _p_from_v_e_ipol->sample(v, e);
+    Real T = _T_from_v_e_ipol->sample(v, e);
+    return c_from_p_T(p, T);
+  }
 }
 
 void
 TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _c_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p, dp_dv, dp_de;
-  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
-  Real T, dT_dv, dT_de;
-  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
-  Real dc_dp, dc_dT;
-  c_from_p_T(p, T, c, dc_dp, dc_dT);
-  dc_dv = dc_dp * dp_dv + dc_dT * dT_dv;
-  dc_de = dc_dp * dp_de + dc_dT * dT_de;
+
+  if (_create_direct_ve_interpolations)
+    _property_ve_ipol[_c_idx]->sampleValueAndDerivatives(v, e, c, dc_dv, dc_de);
+  else
+  {
+    Real p, dp_dv, dp_de;
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+    Real T, dT_dv, dT_de;
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+    Real dc_dp, dc_dT;
+    c_from_p_T(p, T, c, dc_dp, dc_dT);
+    dc_dv = dc_dp * dp_dv + dc_dT * dT_dv;
+    dc_de = dc_dp * dp_de + dc_dT * dT_de;
+  }
 }
 
 Real
 TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _cp_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  return cp_from_p_T(p, T);
+
+  if (_create_direct_ve_interpolations)
+    return _property_ve_ipol[_cp_idx]->sample(v, e);
+  else
+  {
+    Real p = _p_from_v_e_ipol->sample(v, e);
+    Real T = _T_from_v_e_ipol->sample(v, e);
+    return cp_from_p_T(p, T);
+  }
 }
 
 void
 TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _cp_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p, dp_dv, dp_de;
-  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
-  Real T, dT_dv, dT_de;
-  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
-  Real dcp_dp, dcp_dT;
-  cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
-  dcp_dv = dcp_dp * dp_dv + dcp_dT * dT_dv;
-  dcp_de = dcp_dp * dp_de + dcp_dT * dT_de;
+
+  if (_create_direct_ve_interpolations)
+    _property_ve_ipol[_cp_idx]->sampleValueAndDerivatives(v, e, cp, dcp_dv, dcp_de);
+  else
+  {
+    Real p, dp_dv, dp_de;
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+    Real T, dT_dv, dT_de;
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+    Real dcp_dp, dcp_dT;
+    cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
+    dcp_dv = dcp_dp * dp_dv + dcp_dT * dT_dv;
+    dcp_de = dcp_dp * dp_de + dcp_dT * dT_de;
+  }
 }
 
 Real
 TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _cv_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  return cv_from_p_T(p, T);
+
+  if (_create_direct_ve_interpolations)
+    return _property_ve_ipol[_cv_idx]->sample(v, e);
+  else
+  {
+    Real p = _p_from_v_e_ipol->sample(v, e);
+    Real T = _T_from_v_e_ipol->sample(v, e);
+    return cv_from_p_T(p, T);
+  }
 }
 
 void
 TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _cv_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p, dp_dv, dp_de;
-  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
-  Real T, dT_dv, dT_de;
-  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
-  Real dcv_dp, dcv_dT;
-  cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
-  dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
-  dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
+
+  if (_create_direct_ve_interpolations)
+    _property_ve_ipol[_cv_idx]->sampleValueAndDerivatives(v, e, cv, dcv_dv, dcv_de);
+  else
+  {
+    Real p, dp_dv, dp_de;
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+    Real T, dT_dv, dT_de;
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+    Real dcv_dp, dcv_dT;
+    cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
+    dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
+    dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
+  }
 }
 
 Real
 TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _mu_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  return mu_from_p_T(p, T);
+
+  if (_create_direct_ve_interpolations)
+    return _property_ve_ipol[_viscosity_idx]->sample(v, e);
+  else
+  {
+    Real p = _p_from_v_e_ipol->sample(v, e);
+    Real T = _T_from_v_e_ipol->sample(v, e);
+    return mu_from_p_T(p, T);
+  }
 }
 
 void
 TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _mu_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p, dp_dv, dp_de;
-  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
-  Real T, dT_dv, dT_de;
-  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
-  Real dmu_dp, dmu_dT;
-  mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
-  dmu_dv = dmu_dp * dp_dv + dmu_dT * dT_dv;
-  dmu_de = dmu_dp * dp_de + dmu_dT * dT_de;
+
+  if (_create_direct_ve_interpolations)
+    _property_ve_ipol[_viscosity_idx]->sampleValueAndDerivatives(v, e, mu, dmu_dv, dmu_de);
+  else
+  {
+    Real p, dp_dv, dp_de;
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+    Real T, dT_dv, dT_de;
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+    Real dmu_dp, dmu_dT;
+    mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
+    dmu_dv = dmu_dp * dp_dv + dmu_dT * dT_dv;
+    dmu_de = dmu_dp * dp_de + dmu_dT * dT_de;
+  }
 }
 
 Real
 TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling k_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _k_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  return k_from_p_T(p, T);
+
+  if (_create_direct_ve_interpolations)
+    return _property_ve_ipol[_k_idx]->sample(v, e);
+  else
+  {
+    Real T = _T_from_v_e_ipol->sample(v, e);
+    Real p = _p_from_v_e_ipol->sample(v, e);
+    return k_from_p_T(p, T);
+  }
 }
 
 void
 TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling k_from_v_e.");
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _k_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p, dp_dv, dp_de;
-  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
-  Real T, dT_dv, dT_de;
-  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
-  Real dk_dp, dk_dT;
-  k_from_p_T(p, T, k, dk_dp, dk_dT);
-  dk_dv = dk_dp * dp_dv + dk_dT * dT_dv;
-  dk_de = dk_dp * dp_de + dk_dT * dT_de;
+
+  if (_create_direct_ve_interpolations)
+    _property_ve_ipol[_k_idx]->sampleValueAndDerivatives(v, e, k, dk_dv, dk_de);
+  else
+  {
+    Real p, dp_dv, dp_de;
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+    Real T, dT_dv, dT_de;
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+    Real dk_dp, dk_dT;
+    k_from_p_T(p, T, k, dk_dp, dk_dT);
+    dk_dv = dk_dp * dp_dv + dk_dT * dT_dv;
+    dk_de = dk_dp * dp_de + dk_dT * dT_de;
+  }
 }
 
 Real
 TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
 {
+  if (!_construct_pT_from_ve &&
+      (!_create_direct_ve_interpolations || _s_idx == libMesh::invalid_uint ||
+       _h_idx == libMesh::invalid_uint || _T_idx == libMesh::invalid_uint))
+    missingVEInterpolationError(__PRETTY_FUNCTION);
   checkInputVariablesVE(v, e);
-  Real p0 = _p_initial_guess;
-  Real T0 = _T_initial_guess;
-  Real p, T;
-  bool conversion_succeeded;
-  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
-  const Real s = s_from_p_T(p, T);
-  const Real h = h_from_p_T(p, T);
+
+  Real h, T, s;
+  if (_create_direct_ve_interpolations)
+  {
+    s = _property_ve_ipol[_entropy_idx]->sample(v, e);
+    h = _property_ve_ipol[_enthalpy_idx]->sample(v, e);
+    T = _property_ve_ipol[_T_idx]->sample(v, e);
+  }
+  else
+  {
+    Real p0 = _p_initial_guess;
+    Real T0 = _T_initial_guess;
+    Real p, T;
+    bool conversion_succeeded;
+    p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
+    s = s_from_p_T(p, T);
+    h = h_from_p_T(p, T);
+  }
   return h - T * s;
 }
 
@@ -1542,6 +1648,16 @@ TabulatedFluidProperties::checkInitialGuess() const
                    Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
                    ").");
   }
+}
+
+void
+TabulatedFluidProperties::missingInterpolationError(const std::string & function_name) const
+{
+  mooseError(function_name +
+             ": to call this function you must:\n-add this property to the list to the list of "
+             "'interpolated_properties'\n and then either:\n-construct (p, T) from (v, e) "
+             "tabulations using the 'construct_pT_from_ve' parameter\n-load (v,e) interpolation "
+             "tables using the 'fluid_properties_ve_file' parameter");
 }
 
 template void TabulatedFluidProperties::checkInputVariables(Real & pressure,
