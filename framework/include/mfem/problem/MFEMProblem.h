@@ -174,7 +174,6 @@ protected:
   int _order;
   mfem::Device _device;
 
-
   hephaestus::Coefficients _coefficients;
   hephaestus::InputParameters _solver_options;
   hephaestus::Outputs _outputs;
