@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 registerMooseObject("PhaseFieldApp", EPSandManisoGAUSS);
 
@@ -669,7 +670,7 @@ EPSandManisoGAUSS::computeQpProperties()
                     g_gamma;
 
                 ADReal tol = _Gaussian_Tolerance;
-                if (abs(normvsmallba) > tol) // if R < tol
+                if (std::fabs(normvsmallba) > tol) // if R < tol
                 {
 
                   ADReal Gaussian = _JtoeV * _length_scale * _amplitudeScale * amplitudes *
@@ -808,7 +809,7 @@ EPSandManisoGAUSS::computeQpProperties()
 
   //************************************* Caluculation anisotropy and the derivatives
   //*****************************************
-  _eps[_qp] = abs(sumeps / sumval);
+  _eps[_qp] = std::fabs(sumeps / sumval);
   _epsenergy[_qp] = MetaPhysicL::raw_value(sumeps / sumval);
   _depsdx[_qp] = sumepsx / sumval;
   _depsdy[_qp] = sumepsy / sumval;

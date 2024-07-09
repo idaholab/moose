@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 registerMooseObject("PhaseFieldApp", GAMMAanisoGAUSS);
 
@@ -747,7 +748,7 @@ GAMMAanisoGAUSS::computeQpProperties()
                 ADReal exponent = _sharpness * (dot_product - 1.0);
 
                 ADReal tol = _Gaussian_Tolerance;
-                if (abs(normvsmallba) > tol) // if R < tol, no contributions from gaussians 1e-20
+                if (std::fabs(normvsmallba) > tol) // if R < tol, no contributions from gaussians 1e-20
                 {
 
                   ADReal Gaussian =
@@ -886,7 +887,7 @@ GAMMAanisoGAUSS::computeQpProperties()
 
   //************************************* Caluculation  of Ggamma and the derivatives
   //*****************************************
-  _Ggamma[_qp] = abs(sumGgamma / sumval);
+  _Ggamma[_qp] = std::fabs(sumGgamma / sumval);
   _Ggamma_EN[_qp] = MetaPhysicL::raw_value(sumGgamma / sumval);
 
   _dGgammadx[_qp] = sumGgammax / sumval;

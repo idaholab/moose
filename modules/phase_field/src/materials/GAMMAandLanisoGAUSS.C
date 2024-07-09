@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 registerMooseObject("PhaseFieldApp", GAMMAandLanisoGAUSS);
 
@@ -703,7 +704,7 @@ GAMMAandLanisoGAUSS::computeQpProperties()
 
                 ADReal amplitudes = _GgammaBASE - Ggamma_Minima;
 
-                ADReal amplitudesL = abs(_L_BASE - MinimaL[l]);
+                ADReal amplitudesL = std::fabs(_L_BASE - MinimaL[l]);
 
                 ADReal g2_Minima = Ggamma_Minima * Ggamma_Minima;
 
@@ -740,7 +741,7 @@ GAMMAandLanisoGAUSS::computeQpProperties()
                 ADReal exponent = _sharpness * (dot_product - 1.0);
 
                 ADReal tol = _Gaussian_Tolerance;
-                if (abs(normvsmallba) > tol) // if R < tol, no contributions from gaussians 1e-20
+                if (std::fabs(normvsmallba) > tol) // if R < tol, no contributions from gaussians 1e-20
                 {
 
                   ADReal Gaussian =
@@ -886,10 +887,10 @@ GAMMAandLanisoGAUSS::computeQpProperties()
 
   //************************************* Caluculation  of Ggamma, L and the derivatives
   //**s***************************************
-  _L[_qp] = abs(sumL / sumval);
+  _L[_qp] = std::fabs(sumL / sumval);
   _L_EN[_qp] = MetaPhysicL::raw_value(sumL / sumval);
 
-  _Ggamma[_qp] = abs(sumGgamma / sumval);
+  _Ggamma[_qp] = std::fabs(sumGgamma / sumval);
   _Ggamma_EN[_qp] = MetaPhysicL::raw_value(sumGgamma / sumval);
 
   _dGgammadx[_qp] = sumGgammax / sumval;
