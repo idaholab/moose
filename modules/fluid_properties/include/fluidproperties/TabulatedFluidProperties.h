@@ -181,17 +181,35 @@ protected:
 
   /// File name of input tabulated data file
   FileName _file_name_in;
+  /// File name of input (v,e) tabulated data file
+  FileName _file_name_ve_in;
   /// File name of output tabulated data file
   FileName _file_name_out;
+  /// File name of output (v,e) tabulated data file
+  FileName _file_name_ve_out;
+  /// Whether to save a generated fluid properties file to disk
+  const bool _save_file;
+
   /// Pressure vector
   std::vector<Real> _pressure;
   /// Temperature vector
   std::vector<Real> _temperature;
-  /// Tabulated fluid properties
+  /// Specific volume vector
+  std::vector<Real> _specific_volume;
+  /// Specific internal energy vector
+  std::vector<Real> _internal_energy;
+  /// Specific enthalpy vector
+  std::vector<Real> _enthalpy;
+
+  /// Tabulated fluid properties (read from file OR computed from _fp)
   std::vector<std::vector<Real>> _properties;
+  /// Tabulated fluid properties in (v,e) (read from file OR computed from _fp)
+  std::vector<std::vector<Real>> _properties_ve;
 
   /// Vector of bi-dimensional interpolation of fluid properties
   std::vector<std::unique_ptr<BidimensionalInterpolation>> _property_ipol;
+  /// Vector of bi-dimensional interpolation of fluid properties directly in (v,e)
+  std::vector<std::unique_ptr<BidimensionalInterpolation>> _property_ve_ipol;
 
   /// Minimum temperature in tabulated data
   Real _temperature_min;
@@ -205,8 +223,6 @@ protected:
   unsigned int _num_T;
   /// Number of pressure points in the tabulated data
   unsigned int _num_p;
-  /// Whether to save a generated fluid properties file to disk
-  const bool _save_file;
 
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidProperties * const _fp;
@@ -301,13 +317,6 @@ protected:
   Real _h_min;
   /// Maximum specific enthalpy in tabulated data
   Real _h_max;
-
-  /// specific volume vector
-  std::vector<Real> _specific_volume;
-  /// internal energy vector
-  std::vector<Real> _internal_energy;
-  /// enthalpy vector
-  std::vector<Real> _enthalpy;
 };
 
 #pragma GCC diagnostic pop

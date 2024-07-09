@@ -32,9 +32,16 @@ TabulatedFluidProperties::validParams()
   params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
   params.addParam<FileName>("fluid_property_file",
                             "Name of the csv file containing the tabulated fluid property data.");
+  params.addParam<FileName>(
+      "fluid_property_ve_file",
+      "Name of the csv file containing the tabulated (v,e) fluid property data.");
   params.addParam<FileName>("fluid_property_output_file",
                             "Name of the CSV file which can be output with the tabulation. This "
                             "file can then be read as a 'fluid_property_file'");
+  params.addParam<FileName>(
+      "fluid_property_ve_output_file",
+      "Name of the CSV file which can be output with the (v,e) tabulation. This "
+      "file can then be read as a 'fluid_property_ve_file'");
   params.addDeprecatedParam<bool>(
       "save_file",
       "Whether to save the csv fluid properties file",
@@ -130,17 +137,22 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
   : SinglePhaseFluidProperties(parameters),
     _file_name_in(isParamValid("fluid_property_file") ? getParam<FileName>("fluid_property_file")
                                                       : ""),
+    _file_name_ve_in(
+        isParamValid("fluid_property_ve_file") ? getParam<FileName>("fluid_property_ve_file") : ""),
     _file_name_out(isParamValid("fluid_property_output_file")
                        ? getParam<FileName>("fluid_property_output_file")
                        : ""),
+    _file_name_ve_out(isParamValid("fluid_property_ve_output_file")
+                          ? getParam<FileName>("fluid_property_ve_output_file")
+                          : ""),
+    _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
+                                         : isParamValid("fluid_property_output_file")),
     _temperature_min(getParam<Real>("temperature_min")),
     _temperature_max(getParam<Real>("temperature_max")),
     _pressure_min(getParam<Real>("pressure_min")),
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
-    _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
-                                         : isParamValid("fluid_property_output_file")),
     _fp(isParamValid("fp") ? &getUserObject<SinglePhaseFluidProperties>("fp") : nullptr),
     _allow_fp_and_tabulation(getParam<bool>("allow_fp_and_tabulation")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
@@ -1256,7 +1268,9 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
     // Write out the (v,e) to (p,T) conversions
     if (_construct_pT_from_ve)
     {
-      const auto file_name_ve = std::regex_replace(file_name, std::regex("\\.csv"), "_ve.csv");
+      const auto file_name_ve = (_file_name_ve_out == "")
+                                    ? std::regex_replace(file_name, std::regex("\\.csv"), "_ve.csv")
+                                    : _file_name_ve_out;
       MooseUtils::checkFileWriteable(file_name_ve);
       std::ofstream file_out(file_name_ve.c_str());
 
