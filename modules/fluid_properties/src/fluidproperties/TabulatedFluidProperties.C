@@ -38,8 +38,8 @@ TabulatedFluidProperties::validParams()
   params.addDeprecatedParam<bool>(
       "save_file",
       "Whether to save the csv fluid properties file",
-      "This parameter is no longer required. Whether to save a tabulation is file is controlled by "
-      "specifying the 'fluid_property_output_file' parameter");
+      "This parameter is no longer required. Whether to save a CSV tabulation file is controlled "
+      "by specifying the 'fluid_property_output_file' parameter");
 
   // Data source on a per-property basis
   MultiMooseEnum properties("density enthalpy internal_energy viscosity k c cv cp entropy",
@@ -95,11 +95,18 @@ TabulatedFluidProperties::validParams()
       "of a linearly-spaced grid.");
 
   // Out of bounds behavior
-  params.addParam<bool>(
+  params.addDeprecatedParam<bool>(
       "error_on_out_of_bounds",
-      true,
       "Whether pressure or temperature from tabulation exceeding user-specified bounds leads to "
-      "an error.");
+      "an error.",
+      "This parameter has been replaced by the 'out_of_bounds_behavior' parameter which offers "
+      "more flexibility. The option to error is called 'throw' in that parameter.");
+  // NOTE: this enum must remain the same as OOBBehavior in the header
+  MooseEnum OOBBehavior("ignore throw declare_invalid set_to_closest_bound", "throw");
+  params.addParam<MooseEnum>("out_of_bounds_behavior",
+                             OOBBehavior,
+                             "Property evaluation behavior when evaluated outside the "
+                             "user-specified or tabulation-specified bounds");
 
   // This is generally a bad idea. However, several properties have not been tabulated so several
   // tests are relying on the original fp object to provide the value (for example for the
@@ -162,9 +169,9 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _initial_setup_done(false),
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
-    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds")),
     _log_space_v(getParam<bool>("use_log_grid_v")),
-    _log_space_e(getParam<bool>("use_log_grid_e"))
+    _log_space_e(getParam<bool>("use_log_grid_e")),
+    _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
   checkInitialGuess();
@@ -199,6 +206,13 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
                "should be specified");
   else
     _v_bounds_specified = false;
+
+  // Handle out of bounds behavior parameters and deprecation
+  if (isParamValid("error_on_out_of_bounds") && getParam<bool>("error_on_out_of_bounds") &&
+      _OOBBehavior != Throw)
+    paramError("out_of_bounds_behavior", "Inconsistent selection of out of bounds behavior.");
+  else if (isParamValid("error_on_out_of_bounds") && !getParam<bool>("error_on_out_of_bounds"))
+    _OOBBehavior = Ignore;
 
   // Lines starting with # in the data file are treated as comments
   _csv_reader.setComment("#");
@@ -1426,26 +1440,32 @@ template <typename T>
 void
 TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) const
 {
+  if (_OOBBehavior == Ignore)
+    return;
   if (pressure < _pressure_min || pressure > _pressure_max)
   {
-    if (_error_on_out_of_bounds)
+    if (_OOBBehavior == Throw)
       throw MooseException("Pressure " + Moose::stringify(pressure) +
                            " is outside the range of tabulated pressure (" +
                            Moose::stringify(_pressure_min) + ", " +
                            Moose::stringify(_pressure_max) + ").");
-    else
+    else if (_OOBBehavior == SetToClosestBound)
       pressure = std::max(_pressure_min, std::min(pressure, _pressure_max));
+    else
+      flagInvalidSolution("Out of bounds pressure");
   }
 
   if (temperature < _temperature_min || temperature > _temperature_max)
   {
-    if (_error_on_out_of_bounds)
+    if (_OOBBehavior == Throw)
       mooseError("Temperature " + Moose::stringify(temperature) +
                  " is outside the range of tabulated temperature (" +
                  Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
                  ").");
-    else
+    else if (_OOBBehavior == SetToClosestBound)
       temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
+    else
+      flagInvalidSolution("Out of bounds temperature");
   }
 }
 
@@ -1455,9 +1475,9 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
 {
   if (e < _e_min || e > _e_max)
   {
-    if (_error_on_out_of_bounds)
+    if (_OOBBehavior == Throw)
       throw MooseException("Specific internal energy " + Moose::stringify(e) +
-                           " is outside the range of tabulated internal energies (" +
+                           " is outside the range of tabulated specific internal energies (" +
                            Moose::stringify(_e_min) + ", " + Moose::stringify(_e_max) + ").");
     else
       e = std::max(_e_min, std::min(e, _e_max));
@@ -1465,7 +1485,7 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
 
   if (v < _v_min || v > _v_max)
   {
-    if (_error_on_out_of_bounds)
+    if (_OOBBehavior == Throw)
       mooseError("Specific volume " + Moose::stringify(v) +
                  " is outside the range of tabulated specific volumes (" +
                  Moose::stringify(_v_min) + ", " + Moose::stringify(_v_max) + ").");

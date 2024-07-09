@@ -175,8 +175,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         {
           // The inversion may step outside of the domain of definition of the interpolations,
           // which are restricted to the range of the input CSV file
-          const bool old_error_behavior = _error_on_out_of_bounds;
-          _error_on_out_of_bounds = false;
+          const auto old_error_behavior = _OOBBehavior;
+          _OOBBehavior = SetToClosestBound;
           p_T_from_v_e(_specific_volume[i],
                        _internal_energy[j],
                        p_guess,
@@ -184,7 +184,7 @@ TabulatedBicubicFluidProperties::constructInterpolation()
                        p_ve,
                        T_ve,
                        conversion_succeeded);
-          _error_on_out_of_bounds = old_error_behavior;
+          _OOBBehavior = old_error_behavior;
           // track number of times convergence failed
           if (!conversion_succeeded)
             ++fail_counter_ve;
@@ -284,8 +284,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         {
           // The inversion may step outside of the domain of definition of the interpolations,
           // which are restricted to the range of the input CSV file
-          const bool old_error_behavior = _error_on_out_of_bounds;
-          _error_on_out_of_bounds = false;
+          const auto old_error_behavior = _OOBBehavior;
+          _OOBBehavior = SetToClosestBound;
           p_T_from_v_h(_specific_volume[i],
                        _enthalpy[j],
                        p_guess,
@@ -293,7 +293,7 @@ TabulatedBicubicFluidProperties::constructInterpolation()
                        p_vh,
                        T_vh,
                        conversion_succeeded);
-          _error_on_out_of_bounds = old_error_behavior;
+          _OOBBehavior = old_error_behavior;
           // track number of times convergence failed
           if (!conversion_succeeded)
             ++fail_counter_vh;

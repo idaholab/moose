@@ -257,12 +257,21 @@ protected:
   unsigned int _num_v;
   /// Number of internal energy points in tabulated data
   unsigned int _num_e;
-  /// to error or not on out-of-bounds check
-  bool _error_on_out_of_bounds;
   /// log-space the specific volume interpolation grid axis instead of linear
   bool _log_space_v;
   /// log-space the internal energy interpolation grid axis instead of linear
   bool _log_space_e;
+
+  /// User-selected out-of-bounds behavior
+  MooseEnum _OOBBehavior;
+  /// Enum specifying all the behavior on out of bounds data options
+  enum OOBBehavior
+  {
+    Ignore,
+    Throw,
+    DeclareInvalid,
+    SetToClosestBound
+  };
 
   /// Bi-dimensional interpolation of temperature from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_e_ipol;
