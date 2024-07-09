@@ -182,8 +182,21 @@ protected:
    */
   virtual void generateTabulatedData();
 
+  /**
+   * Generates a table of fluid properties by looping over specific volume and internal energy
+   * and calculating properties using the FluidProperties UserObject _fp.
+   */
+  virtual void generateVETabulatedData();
+
   /// Retrieves the index for each property in the vector of interpolations
   void computePropertyIndicesInInterpolationVectors();
+
+  /// Create (or reset) the grid vectors for the specific volume and internal energy interpolations
+  /// The order of priority for determining the range boundaries in v and e:
+  /// - if user-specified, use _v_min/max and _e_min/max
+  /// - if reading a (v,e) interpolation, the bounds of that range
+  /// - if a _fp exist find the min/max v/e from T_min/max and p_min/max
+  void createVEGridVectors();
 
   /// Standardized error message for missing interpolation
   void missingVEInterpolationError(const std::string & function_name) const;
