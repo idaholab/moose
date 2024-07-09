@@ -748,7 +748,8 @@ GAMMAanisoGAUSS::computeQpProperties()
                 ADReal exponent = _sharpness * (dot_product - 1.0);
 
                 ADReal tol = _Gaussian_Tolerance;
-                if (std::fabs(normvsmallba) > tol) // if R < tol, no contributions from gaussians 1e-20
+                if (std::fabs(normvsmallba) >
+                    tol) // if R < tol, no contributions from gaussians 1e-20
                 {
 
                   ADReal Gaussian =
