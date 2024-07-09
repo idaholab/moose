@@ -136,6 +136,7 @@ public:
   virtual Real T_from_p_s(Real p, Real s) const;
   virtual void T_from_p_s(Real p, Real s, Real & T, Real & dT_dp, Real & dT_ds) const;
   virtual Real T_from_h_p(Real h, Real pressure) const override;
+  virtual Real s_from_v_e(Real v, Real e) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
 
   /// AD implementations needed
@@ -266,11 +267,6 @@ protected:
   /// Whether to allow a fp object when a tabulation is in use
   const bool _allow_fp_and_tabulation;
 
-  /// List of required column names to be read
-  const std::vector<std::string> _required_columns{"pressure", "temperature"};
-  /// List of possible property column names to be read
-  const std::vector<std::string> _property_columns{
-      "density", "enthalpy", "internal_energy", "viscosity", "k", "c", "cv", "cp", "entropy"};
   /// Properties to be interpolated entered in the input file
   MultiMooseEnum _interpolated_properties_enum;
   /// List of properties to be interpolated
