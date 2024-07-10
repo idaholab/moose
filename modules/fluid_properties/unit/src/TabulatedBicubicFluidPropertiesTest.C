@@ -41,7 +41,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, unequalTemperatures)
   catch (const std::exception & err)
   {
     std::size_t pos = std::string(err.what())
-                          .find("Temperature values for pressure 2e+06 are not "
+                          .find("temperature values for pressure 2e+06 are not "
                                 "identical to values for 1e+06");
     ASSERT_TRUE(pos != std::string::npos);
   }
@@ -52,7 +52,10 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, missingColumn)
 {
   try
   {
+    const auto tow = Moose::_throw_on_warning;
+    Moose::_throw_on_warning = true;
     const_cast<TabulatedBicubicFluidProperties *>(_missing_col_fp)->initialSetup();
+    Moose::_throw_on_warning = tow;
     FAIL();
   }
   catch (const std::exception & err)
@@ -75,7 +78,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, unknownColumn)
   catch (const std::exception & err)
   {
     std::size_t pos = std::string(err.what())
-                          .find("data/csv/unknown_fluid_props.csv is not one of "
+                          .find("data/csv/unknown_fluid_props.csv tabulation file is not one of "
                                 "the properties that TabulatedFluidProperties understands");
     ASSERT_TRUE(pos != std::string::npos);
   }

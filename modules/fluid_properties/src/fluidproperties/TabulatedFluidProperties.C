@@ -1247,7 +1247,7 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  Real h, T, s;
+  Real h, T = 0, s;
   if (_create_direct_ve_interpolations)
   {
     s = _property_ve_ipol[_entropy_idx]->sample(v, e);
@@ -1258,7 +1258,7 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   {
     Real p0 = _p_initial_guess;
     Real T0 = _T_initial_guess;
-    Real p;
+    Real p = 0;
     bool conversion_succeeded;
     p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
     s = s_from_p_T(p, T);
@@ -1871,8 +1871,13 @@ TabulatedFluidProperties::checkFileTabulationGrids(std::vector<Real> & v1,
   {
     std::vector<Real> repeated_v2(it_v2, it_v2 + num_v2);
     if (repeated_v2 != base_v2)
-      mooseError(
-          v2_name, " values for ", v1_name, " ", v1[i], " are not identical to values for ", v1[0]);
+      mooseError(v2_name,
+                 " values for ",
+                 v1_name,
+                 " ",
+                 v1[i + 1],
+                 " are not identical to values for ",
+                 v1[0]);
 
     std::advance(it_v2, num_v2);
   }
