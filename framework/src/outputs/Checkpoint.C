@@ -183,12 +183,24 @@ Checkpoint::output()
 void
 Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 {
-  // Update the list of stored files if it does not already contain file_struct
-  // This ensures that we don't store duplicates, which will cause issues when
-  // we delete files later and only pop one of the duplicates off.
-  auto it = std::find(_file_names.begin(), _file_names.end(), file_struct);
-  if (it == _file_names.end())
-    _file_names.push_back(file_struct);
+  // It is possible to have already written a checkpoint with the same file
+  // names contained in file_struct. If this is the case, file_struct will
+  // already be stored in _file_names. When this happens, the current state of
+  // the simulation is likely different than the state when the duplicately
+  // named checkpoint was last written. Because of this, we want to go ahead and
+  // rewrite the duplicately named checkpoint, overwritting the files
+  // representing the old state. For accurate bookkeeping, we will delete the
+  // existing instance of file_struct from _file_names and re-append it to the
+  // end of _file_names (to keep the order in which checkpoints are written
+  // accurate).
+
+  const auto it = std::find(_file_names.begin(), _file_names.end(), file_struct);
+  // file_struct was found in _file_names.
+  // Delete it so it can be re-added as the last element.
+  if (it != _file_names.end())
+    _file_names.erase(it);
+
+  _file_names.push_back(file_struct);
 
   // Remove the file and the corresponding directory if it's empty
   const auto remove_file = [this](const std::filesystem::path & path)
