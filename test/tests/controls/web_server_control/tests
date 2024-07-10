@@ -29,6 +29,17 @@
       recover = false
       detail = 'double precision number'
     []
+    [int]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_int.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_int
+                  Reporters/test/int_value=-1234'
+      command_proxy = 'control_reporter.py int_value'
+      recover = false
+      detail = 'integer'
+    []
     [string]
       type = JSONDiff
       input = control_reporter.i
@@ -50,6 +61,17 @@
       command_proxy = 'control_reporter.py vec_real_value'
       recover = false
       detail = 'vector of double precision numbers'
+    []
+    [vec_int]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_vec_int.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_vec_int
+                  Reporters/test/vec_int_value="0 -100 12345"'
+      command_proxy = 'control_reporter.py vec_int_value'
+      recover = false
+      detail = 'vector of integers'
     []
     [vec_string]
       type = JSONDiff

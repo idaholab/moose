@@ -458,6 +458,18 @@ class MooseControl:
         self._requireNumeric(value)
         self._setControllable(path, 'Real', float(value))
 
+    def setControllableInt(self, path: str, value: int):
+        """Sets a controllable int-valued parameter
+
+        The provided value must be numeric
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (int): The value to set
+        """
+        self._requireNumeric(value)
+        self._setControllable(path, 'int', int(value))
+
     def setControllableVectorReal(self, path: str, value: list[float]):
         """Sets a controllable vector-of-Real parameter
 
@@ -473,6 +485,22 @@ class MooseControl:
             self._requireNumeric(entry)
             value_list.append(entry)
         self._setControllable(path, 'std::vector<Real>', value_list)
+
+    def setControllableVectorInt(self, path: str, value: list[int]):
+        """Sets a controllable vector-of-int parameter
+
+        The provided value must be a list of numeric values
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (list): The value to set
+        """
+        self._requireType(value, list)
+        value_list = []
+        for entry in value:
+            self._requireNumeric(entry)
+            value_list.append(int(entry))
+        self._setControllable(path, 'std::vector<int>', value_list)
 
     def setControllableString(self, path: str, value: str):
         """Sets a controllable string parameter
