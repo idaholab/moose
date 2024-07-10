@@ -35,7 +35,7 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdow
     else:
         raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
         if (len(raw.split('**START JSON DATA**\n')) == 1):
-            LOG.error("JSON syntax file creation failed. Do you have a working executable built?")
+            logging.getLogger('MooseSyntax.GetSyntaxTree').error("JSON syntax file creation failed. Do you have a working executable built?")
         raw = raw.split('**START JSON DATA**\n')[1]
         raw = raw.split('**END JSON DATA**')[0]
         tree = mooseutils.json_parse(raw)
