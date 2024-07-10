@@ -12,22 +12,22 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#ifdef AIR_ENABLED
+#ifdef AIR_FP_ENABLED
 #include "AirApp.h"
 #endif
-#ifdef CARBON_DIOXIDE_ENABLED
+#ifdef CARBON_DIOXIDE_FP_ENABLED
 #include "CarbonDioxideApp.h"
 #endif
-#ifdef HELIUM_ENABLED
+#ifdef HELIUM_FP_ENABLED
 #include "HeliumApp.h"
 #endif
-#ifdef NITROGEN_ENABLED
+#ifdef NITROGEN_FP_ENABLED
 #include "NitrogenApp.h"
 #endif
-#ifdef POTASSIUM_ENABLED
+#ifdef POTASSIUM_FP_ENABLED
 #include "PotassiumApp.h"
 #endif
-#ifdef SODIUM_ENABLED
+#ifdef SODIUM_FP_ENABLED
 #include "SodiumApp.h"
 #endif
 
@@ -79,22 +79,22 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 void
 FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-#ifdef AIR_ENABLED
+#ifdef AIR_FP_ENABLED
   mooseDoOnce(AirApp::registerAll(f, af, s));
 #endif
-#ifdef CARBON_DIOXIDE_ENABLED
+#ifdef CARBON_DIOXIDE_FP_ENABLED
   mooseDoOnce(CarbonDioxideApp::registerAll(f, af, s));
 #endif
-#ifdef HELIUM_ENABLED
+#ifdef HELIUM_FP_ENABLED
   mooseDoOnce(HeliumApp::registerAll(f, af, s));
 #endif
-#ifdef NITROGEN_ENABLED
+#ifdef NITROGEN_FP_ENABLED
   mooseDoOnce(NitrogenApp::registerAll(f, af, s));
 #endif
-#ifdef POTASSIUM_ENABLED
+#ifdef POTASSIUM_FP_ENABLED
   mooseDoOnce(PotassiumApp::registerAll(f, af, s));
 #endif
-#ifdef SODIUM_ENABLED
+#ifdef SODIUM_FP_ENABLED
   mooseDoOnce(SodiumApp::registerAll(f, af, s));
 #endif
 
