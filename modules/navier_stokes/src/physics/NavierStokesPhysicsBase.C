@@ -22,7 +22,9 @@ NavierStokesPhysicsBase::validParams()
   params.addParam<bool>(
       "define_variables",
       true,
-      "Whether to define variables if the variables with the specified names do not exist");
+      "Whether to define variables if the variables with the specified names do not exist. Note "
+      "that if the variables are defined externally from the Physics, the initial conditions will "
+      "not be created in the Physics either.");
 
   params.addParam<unsigned short>(
       "ghost_layers", 2, "Number of layers of elements to ghost near process domain boundaries");
