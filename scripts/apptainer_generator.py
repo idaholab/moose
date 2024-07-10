@@ -288,13 +288,13 @@ class ApptainerGenerator:
         self.run(command)
         return file
 
-    def apptainer_push(self, project: str, name: str, from_tag: str, to_tag=None):
+    def apptainer_push(self, project: str, name: str, from_tag: str, to_tag=None, project_suffix=None):
         """
         Pushes the given image via apptainer
         """
         if to_tag is None:
             to_tag = from_tag
-        oras_uri = self.oras_uri(project, name, to_tag)
+        oras_uri = self.oras_uri(project, name, to_tag, project_suffix=project_suffix)
         file = self.container_path(name, from_tag)
         self.print(f'Pushing {file}')
         command = ['apptainer', 'push', file, oras_uri]
@@ -762,7 +762,7 @@ class ApptainerGenerator:
             else:
                 self.error(f'Tag {uri} already exists')
 
-        self.apptainer_push(self.project, self.name, from_tag, to_tag)
+        self.apptainer_push(self.project, self.name, from_tag, to_tag, project_suffix=self.args.to_project_suffix)
 
     def _action_path(self):
         """
