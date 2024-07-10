@@ -14,7 +14,6 @@ package:
 source:
   - path: ../../libmesh
   - path: ../../scripts/configure_libmesh.sh
-  - path: ./repeat_build.sh
 
 build:
   number: {{ build }}

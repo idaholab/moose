@@ -19,48 +19,78 @@ CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
 #
 #  CXXFLAGS+=" -I${PREFIX}/nsight-compute-2024.1.0/host/target-linux-x64/nvtx/include/nvtx3"
 #  CFLAGS+=" -I${PREFIX}/nsight-compute-2024.1.0/host/target-linux-x64/nvtx/include/nvtx3"
-#  ADDITIONAL_ARGS+=" --download-slate=1 --with-cuda=1 --with-cudac=${PREFIX}/bin/nvcc --with-cuda-dir=${PREFIX}/targets/x86_64-linux --CUDAFLAGS=-I${PREFIX}/targets/x86_64-linux/include"
+#  ADDITIONAL_ARGS+=" --download-slate=1 --with-cuda=1 --with-cudac=${PREFIX}/bin/nvcc \
+#                     --with-cuda-dir=${PREFIX}/targets/x86_64-linux \
+#                     --CUDAFLAGS=-I${PREFIX}/targets/x86_64-linux/include"
 #fi
 # Now add ADDITIONAL_ARGS to the below configure_petsc arguments
 
-# Manualy download these troublesome packages (due to our network)
-mkdir downloads; cd downloads
-curl -L -O https://web.cels.anl.gov/projects/petsc/download/externalpackages/MUMPS_5.6.1.tar.gz
-curl -L -O https://github.com/live-clones/scotch/archive/refs/tags/v7.0.4.tar.gz
-cd ../
-
 # Tired of failing on build events that can be fixed by an invalidation on Civet.
-# Handle retries for this one step so as to not need an entire 4 hour build target redo.
-TRY_AGAIN_REASON="Library not loaded"
-try_count=0
-while true; do
+function build_petsc() {
+  # made available by contents of meta.yaml (source: path ../../scripts)
+  # shellcheck disable=SC1091
+  source "$SRC_DIR"/configure_petsc.sh
+
+  # set forth by MPI conda-forge package
+  # shellcheck disable=SC2153
+  configure_petsc \
+      --COPTFLAGS=-O3 \
+      --CXXOPTFLAGS=-O3 \
+      --FOPTFLAGS=-O3 \
+      --with-x=0 \
+      --with-ssl=0 \
+      --with-mpi-dir="$PREFIX" \
+      AR="$AR" \
+      RANLIB="$RANLIB" \
+      CFLAGS="$CFLAGS" \
+      CXXFLAGS="$CXXFLAGS" \
+      CPPFLAGS="$CPPFLAGS" \
+      FFLAGS="$FFLAGS" \
+      FCFLAGS="$FFLAGS" \
+      LDFLAGS="$LDFLAGS" \
+      --prefix="$PREFIX"/petsc
+
+  make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH all
+  make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH install
+  # set forth by MPI conda-forge package
+  # shellcheck disable=SC2154
+  if [[ "${mpi}" == 'mpich' ]]; then
+      make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH check
+  fi
+}
+
+function no_exit_failure(){
   set +e
   (
     set -o pipefail
-    source repeat_build.sh 2>&1 | tee -a output.log
+    build_petsc 2>&1 | tee -a output.log
   )
-  if [[ $? -eq 0 ]]; then
+}
+
+# Handle retries for this one step so as to not need an entire 4 hour build target redo.
+TRY_AGAIN_REASON="Library not loaded"
+while true; do
+  if no_exit_failure; then
+    set -e
     break
-  elif [[ $(cat output.log | grep -c "${TRY_AGAIN_REASON}") -eq 0 ]]; then
-    tail -600 output.log
-    exit 1
-  elif [[ ${try_count} > 2 ]]; then
-    tail -600 output.log
-    printf "Exhausted retry attempts: ${try_count}\n"
+  elif [[ $(grep -c "${TRY_AGAIN_REASON}" output.log) -eq 0 ]]; then
+    tail -600 output.log && exit 1
+  elif [[ ${try_count} -gt 2 ]]; then
+    tail -100 output.log
+    printf "Exhausted retry attempts: %s\n" "${try_count}"
     exit 1
   fi
-  let try_count+=1
-  tail -600 output.log
+  (( try_count++ )) || true
+  tail -100 output.log
   printf "\n\nLibrary not loaded Conda bug. YUCK. Trying again.\n"
   # Start anew, clean.
-  rm -rf ${PREFIX}/petsc ${SRC_DIR}/arch-conda-c-opt
-  > output.log
+  rm -rf "${PREFIX}"/petsc "${SRC_DIR}"/arch-conda-c-opt
+  true > output.log
 done
-set -e
 
 # Remove unneeded files
-rm -f ${PREFIX}/petsc/lib/petsc/conf/configure-hash
-find ${PREFIX}/petsc/lib/petsc -name '*.pyc' -delete
+rm -f "${PREFIX}"/petsc/lib/petsc/conf/configure-hash
+find "${PREFIX}"/petsc/lib/petsc -name '*.pyc' -delete
 
 sedinplace() {
   if [[ $(uname) == Darwin ]]; then
@@ -71,17 +101,17 @@ sedinplace() {
 }
 
 # Replace ${BUILD_PREFIX} after installation
-for f in $(grep -l "${BUILD_PREFIX}" -R "${PREFIX}/petsc/lib/petsc"); do
-  echo "Fixing ${BUILD_PREFIX} in $f"
-  sedinplace s%${BUILD_PREFIX}%${PREFIX}%g $f
+grep -l "${BUILD_PREFIX}" -R "${PREFIX}/petsc/lib/petsc" | while IFS= read -r line; do
+  echo "Fixing ${BUILD_PREFIX} in $line"
+  sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$line"
 done
 
 echo "Removing example files"
-du -hs $PREFIX/petsc/share/petsc/examples/src
-rm -fr $PREFIX/petsc/share/petsc/examples/src
+du -hs "$PREFIX"/petsc/share/petsc/examples/src
+rm -fr "$PREFIX"/petsc/share/petsc/examples/src
 echo "Removing data files"
-du -hs $PREFIX/petsc/share/petsc/datafiles/*
-rm -fr $PREFIX/petsc/share/petsc/datafiles
+du -hs "$PREFIX"/petsc/share/petsc/datafiles/*
+rm -fr "$PREFIX"/petsc/share/petsc/datafiles
 
 # Set PETSC_DIR environment variable for those that need it
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
