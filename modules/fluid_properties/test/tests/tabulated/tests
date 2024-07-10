@@ -14,7 +14,7 @@
     threading = '!pthreads'
     requirement = 'The system shall be able to generate a tabulation of fluid properties based on pressure and temperature, and use a tabulated interplation of these properties.'
   []
-  [tabulated_v_e_bicubic]
+  [tabulated_v_e_bicubic_from_pT]
     requirement = 'The system shall be able to read a tabulation of fluid properties, then compute these fluid properties using (volume, energy) primary variables'
     [regular_grids]
       type = CSVDiff
@@ -80,6 +80,23 @@
       # Some conversions are going to fail
       allow_warnings = true
     []
+  []
+  [tabulated_v_e_bicubic_direct]
+    # Note: the output of this test depends on the gold file from the file_writing/ve
+    type = CSVDiff
+    requirement = 'The system shall be able to read a tabulation of fluid properties with a (specific volume, specific internal energy) grid and use this tabulation directly.'
+    input = 'tabulated_v_e.i'
+    csvdiff = 'tabulated_direct_v_e_out.csv'
+    cli_args = "FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
+                FluidProperties/tabulated/create_pT_interpolations=false
+                FluidProperties/tabulated/construct_pT_from_ve=false
+                FluidProperties/tabulated/construct_pT_from_vh=false
+                FluidProperties/tabulated/create_ve_interpolations=true
+                FluidProperties/tabulated/fluid_property_ve_file='gold/fluid_properties_out_ve.csv'
+                Outputs/file_base=tabulated_direct_v_e_out"
+    rel_err = 1e-4
+    threading = '!pthreads'
+    allow_warnings = true
   []
   [exceptions]
     requirement = "The system shall throw an error if"
