@@ -129,6 +129,7 @@ Extensions:
                 Component: Components/*/*
         remove:
             framework: !include framework/doc/remove.yml
+            fluid_properties: !include modules/fluid_properties/doc/remove.yml
             richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
     MooseDocs.extensions.common:
@@ -251,6 +252,8 @@ Extensions:
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml
             helium: !include modules/fluid_properties/contrib/helium/doc/sqa_helium.yml
+            nitrogen: !include modules/fluid_properties/contrib/nitrogen/doc/sqa_nitrogen.yml
+            potassium: !include modules/fluid_properties/contrib/potassium/doc/sqa_potassium.yml
             sodium: !include modules/fluid_properties/contrib/sodium/doc/sqa_sodium.yml
 
         requirement-groups:
