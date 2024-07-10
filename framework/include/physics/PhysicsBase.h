@@ -75,11 +75,12 @@ public:
   template <typename T>
   const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
 
+  /// Return the maximum dimension of the blocks the Physics is active on
+  unsigned int dimension() const;
+
 protected:
   /// Return whether the Physics is solved using a transient
   bool isTransient() const;
-  /// Return the maximum dimension of the blocks the Physics is active on
-  unsigned int dimension() const;
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
