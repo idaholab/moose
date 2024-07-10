@@ -51,6 +51,8 @@ public:
   }
   /// Get the inlet boundaries
   const std::vector<BoundaryName> & getInletBoundaries() const { return _inlet_boundaries; }
+  /// Get the outlet boundaries
+  const std::vector<BoundaryName> & getOutletBoundaries() const { return _outlet_boundaries; }
   /// Get the wall boundaries
   const std::vector<BoundaryName> & getWallBoundaries() const { return _wall_boundaries; }
   /// Get the inlet direction if using a flux inlet
