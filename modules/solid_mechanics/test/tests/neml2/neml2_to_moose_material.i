@@ -67,6 +67,7 @@
   [model]
     type = ExecuteNEML2Model
     model = model
+    enable_AD = true
     gather_uos = 'gather_a gather_b'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []

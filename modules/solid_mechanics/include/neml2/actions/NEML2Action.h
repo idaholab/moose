@@ -44,5 +44,8 @@ protected:
 
   /// The device on which to evaluate the NEML2 model
   const torch::Device _device;
+
+  /// Whether AD is enabled
+  const bool _enable_AD;
 #endif
 };

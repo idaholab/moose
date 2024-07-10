@@ -21,8 +21,8 @@ operator<<(std::ostream & os, const Model & model)
 {
   auto print_axis = [](std::ostream & os, const LabeledAxis & axis)
   {
-    VariadicTable<std::string, TorchSize> table({"Variable", "Storage size"});
-    for (const auto & var : axis.variable_accessors(/*recursive=*/true))
+    VariadicTable<std::string, Size> table({"Variable", "Storage size"});
+    for (const auto & var : axis.variable_names())
       table.addRow(utils::stringify(var), axis.storage_size(var));
     table.print(os);
   };
@@ -40,7 +40,7 @@ operator<<(std::ostream & os, const Model & model)
   os << "Parameters: " << std::endl;
   VariadicTable<std::string, std::string> table({"Parameter", "Requires grad"});
   for (auto && [name, param] : model.named_parameters())
-    table.addRow(name, BatchTensor(param).requires_grad() ? "True" : "False");
+    table.addRow(name, Tensor(param).requires_grad() ? "True" : "False");
   table.print(os);
 
   return os;
@@ -58,10 +58,10 @@ neml2::VariableName
 getOldName(const neml2::VariableName & var)
 {
   if (var.start_with("forces"))
-    return var.slice(1).on("old_forces");
+    return var.slice(1).prepend("old_forces");
 
   if (var.start_with("state"))
-    return var.slice(1).on("old_state");
+    return var.slice(1).prepend("old_state");
 
   mooseError("An error occurred when trying to map a stateful NEML2 variable name '",
              var,
@@ -72,7 +72,7 @@ getOldName(const neml2::VariableName & var)
 }
 
 template <>
-neml2::BatchTensor
+neml2::Tensor
 toNEML2(const Real & v)
 {
   return neml2::Scalar(v, neml2::default_tensor_options());
@@ -82,36 +82,36 @@ toNEML2(const Real & v)
 // symmetric tensors everywhere. Once I tested all the models with full tensors (i.e. not in Mandel
 // notation), I should be able to "fix" this specialization.
 template <>
-neml2::BatchTensor
+neml2::Tensor
 toNEML2(const RankTwoTensor & r2t)
 {
   return neml2::SR2::fill(r2t(0, 0), r2t(1, 1), r2t(2, 2), r2t(1, 2), r2t(0, 2), r2t(0, 1));
 }
 
 template <>
-neml2::BatchTensor
+neml2::Tensor
 toNEML2(const SymmetricRankTwoTensor & r2t)
 {
   return neml2::SR2::fill(r2t(0, 0), r2t(1, 1), r2t(2, 2), r2t(1, 2), r2t(0, 2), r2t(0, 1));
 }
 
 template <>
-neml2::BatchTensor
+neml2::Tensor
 toNEML2(const std::vector<Real> & v)
 {
-  return neml2::BatchTensor(torch::tensor(v, neml2::default_tensor_options()), 0);
+  return neml2::Tensor(torch::tensor(v, neml2::default_tensor_options()), 0);
 }
 
 template <>
 Real
-toMOOSE(const neml2::BatchTensor & t)
+toMOOSE(const neml2::Tensor & t)
 {
   return t.item<Real>();
 }
 
 template <>
 SymmetricRankTwoTensor
-toMOOSE(const neml2::BatchTensor & t)
+toMOOSE(const neml2::Tensor & t)
 {
   using symr2t = SymmetricRankTwoTensor;
   return symr2t(t.base_index({0}).item<neml2::Real>() / symr2t::mandelFactor(0),
@@ -124,7 +124,7 @@ toMOOSE(const neml2::BatchTensor & t)
 
 template <>
 std::vector<Real>
-toMOOSE(const neml2::BatchTensor & t)
+toMOOSE(const neml2::Tensor & t)
 {
   auto tc = t.contiguous();
   return std::vector<Real>(tc.data_ptr<neml2::Real>(), tc.data_ptr<neml2::Real>() + tc.numel());
@@ -132,7 +132,7 @@ toMOOSE(const neml2::BatchTensor & t)
 
 template <>
 SymmetricRankFourTensor
-toMOOSE(const neml2::BatchTensor & t)
+toMOOSE(const neml2::Tensor & t)
 {
   // Well I don't see a good constructor for this, so let me fill out all the components.
   SymmetricRankFourTensor symsymr4t;

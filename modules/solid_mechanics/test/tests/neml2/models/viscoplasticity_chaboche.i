@@ -11,7 +11,7 @@
     saturation_rate = 1.2
   []
   [kinharden]
-    type = SR2SumModel
+    type = SR2LinearCombination
     from_var = 'state/internal/X1 state/internal/X2'
     to_var = 'state/internal/X'
   []

@@ -44,7 +44,7 @@ MOOSEToNEML2::MOOSEToNEML2(const InputParameters & params)
 void
 MOOSEToNEML2::insertIntoInput(neml2::LabeledVector & input) const
 {
-  input.set(neml2::BatchTensor(torch::stack(_buffer, 0), 1), _neml2_variable);
+  input.set(neml2::Tensor(torch::stack(_buffer, 0), 1), _neml2_variable);
 }
 
 void

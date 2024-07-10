@@ -12,6 +12,7 @@
 #ifdef NEML2_ENABLED
 
 #include "neml2/models/Model.h"
+#include "neml2/misc/parser_utils.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
@@ -49,22 +50,22 @@ neml2::VariableName getOldName(const neml2::VariableName & var);
  * Convert a MOOSE data structure to its NEML2 counterpart
  */
 template <typename T>
-neml2::BatchTensor toNEML2(const T &);
+neml2::Tensor toNEML2(const T &);
 
 /**
  * Convert a wrapped (batched) MOOSE data structure to its NEML2 counterpart
  * The wrapper should implement size()
  */
 template <typename T>
-neml2::BatchTensor toNEML2Batched(const T & data);
+neml2::Tensor toNEML2Batched(const T & data);
 
 // @{ Template specializations
 template <>
-neml2::BatchTensor toNEML2(const Real & v);
+neml2::Tensor toNEML2(const Real & v);
 template <>
-neml2::BatchTensor toNEML2(const RankTwoTensor & r2t);
+neml2::Tensor toNEML2(const RankTwoTensor & r2t);
 template <>
-neml2::BatchTensor toNEML2(const std::vector<Real> & v);
+neml2::Tensor toNEML2(const std::vector<Real> & v);
 // @}
 
 /**
@@ -87,17 +88,17 @@ void homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
  * Convert a NEML2 data structure to its MOOSE counterpart
  */
 template <typename T>
-T toMOOSE(const neml2::BatchTensor &);
+T toMOOSE(const neml2::Tensor &);
 
 // @{ Template specializations
 template <>
-Real toMOOSE(const neml2::BatchTensor & t);
+Real toMOOSE(const neml2::Tensor & t);
 template <>
-SymmetricRankTwoTensor toMOOSE(const neml2::BatchTensor & t);
+SymmetricRankTwoTensor toMOOSE(const neml2::Tensor & t);
 template <>
-std::vector<Real> toMOOSE(const neml2::BatchTensor & t);
+std::vector<Real> toMOOSE(const neml2::Tensor & t);
 template <>
-SymmetricRankFourTensor toMOOSE(const neml2::BatchTensor & t);
+SymmetricRankFourTensor toMOOSE(const neml2::Tensor & t);
 // @}
 
 /**
@@ -138,13 +139,13 @@ To debug NEML2 related issues:
 // Implementations
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T>
-neml2::BatchTensor
+neml2::Tensor
 toNEML2Batched(const T & data)
 {
   std::vector<torch::Tensor> res(data.size());
   for (const auto i : index_range(data))
     res[i] = toNEML2<typename T::value_type>(data[i]);
-  return neml2::BatchTensor(torch::stack(res, 0), 1);
+  return neml2::Tensor(torch::stack(res, 0), 1);
 }
 
 template <typename... Args>

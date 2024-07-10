@@ -16,7 +16,7 @@
 NEML2ObjectStubHeader(NEML2StressToMOOSE, Material);
 #else
 
-#include "neml2/tensors/BatchTensorBase.h"
+#include "neml2/tensors/TensorBase.h"
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
 
@@ -41,9 +41,9 @@ protected:
   std::size_t _batch_index;
 
   /// labeled view of the small stress output
-  const neml2::BatchTensor & _output_stress;
+  const neml2::Tensor & _output_stress;
   /// labeled view of the small Jacobian output
-  const neml2::BatchTensor & _output_jacobian;
+  const neml2::Tensor & _output_jacobian;
 };
 
 #endif

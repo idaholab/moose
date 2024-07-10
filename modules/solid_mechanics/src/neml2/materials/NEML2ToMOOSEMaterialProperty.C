@@ -86,7 +86,7 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
   const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
 
   for (std::size_t qp = 0; qp < _qrule->n_points(); qp++)
-    _prop[qp] = NEML2Utils::toMOOSE<T>(_output_view.batch_index({neml2::TorchSize(i + qp)}));
+    _prop[qp] = NEML2Utils::toMOOSE<T>(_output_view.batch_index({neml2::Size(i + qp)}));
 }
 
 template class NEML2ToMOOSEMaterialProperty<Real>;
