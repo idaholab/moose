@@ -5,16 +5,22 @@ Content:
         root_dir: modules/fluid_properties/doc/content
     air:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content
+        external: True
     carbon_dioxide:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/doc/content
+        external: True
     helium:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/doc/content
+        external: True
     nitrogen:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/doc/content
+        external: True
     potassium:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/doc/content
+        external: True
     sodium:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/doc/content
+        external: True
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -52,3 +58,9 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
+            air:
+            carbon_dioxide:
+            helium:
+            nitrogen:
+            potassium:
+            sodium:

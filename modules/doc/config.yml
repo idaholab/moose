@@ -250,6 +250,12 @@ Extensions:
             solid_mechanics: !include modules/solid_mechanics/doc/sqa_solid_mechanics.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml
+            air:
+            carbon_dioxide:
+            helium:
+            nitrogen:
+            potassium:
+            sodium:
 
         requirement-groups:
             dgkernels: DGKernel Objects
