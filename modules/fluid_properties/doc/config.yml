@@ -58,9 +58,5 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
-            air:
-            carbon_dioxide:
-            helium:
-            nitrogen:
-            potassium:
-            sodium:
+            helium: !include modules/fluid_properties/contrib/helium/doc/sqa_helium.yml
+            sodium: !include modules/fluid_properties/contrib/sodium/doc/sqa_sodium.yml
