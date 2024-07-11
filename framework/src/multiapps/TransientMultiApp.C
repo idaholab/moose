@@ -597,12 +597,6 @@ TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
   }
 }
 
-bool
-TransientMultiApp::needsRestoration()
-{
-  return _sub_cycling || _catch_up || _auto_advance || _tolerate_failure || _detect_steady_state;
-}
-
 Real
 TransientMultiApp::computeDT()
 {
