@@ -4,9 +4,9 @@
 
 The [/SolutionInvalidity.md] object holds solution invalid warning information for MOOSE. This object allows you to mark a solution as "invalid" under certain conditions and output in which objects and how many times the conditions occurs. An invalid solution means that the solution somehow does not satisfy requirements, such as a value being out of the bounds of a correlation.  Solutions are allowed to be invalid *during* the nonlinear solve, but they are not allowed to be invalid once the solve has converged. A "converged" solution that is marked as invalid will cause MOOSE to behave as if the solution did NOT converge - including cutting back timesteps, etc.
 
-To declare a solution as "invalid", use the macros in the following code to mark it. The user can provide a message to describe the reason for invalidity:
+To declare a solution as "invalid", use the macro in the following code to mark it. The user can provide a message to describe the reason for invalidity:
 
-!listing /test/src/materials/NonsafeMaterial.C  re=\s+if \(_fe_problem.dt() < 1 && _test_invalid_recover\)(?:.|\n)*\}
+!listing /test/src/materials/NonsafeMaterial.C  re=\s+if \(_fe_problem.dt\(\) < 1 && _test_invalid_recover\)(?:.|\n)*\}
 
 The `flagInvalidSolution` macro will mark solution as not converged when invalid solution is detected while the `flagSolutionWarning` marco doesn't affect solution convergence but still count invalid solution occurrences.
 

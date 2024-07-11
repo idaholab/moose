@@ -12,7 +12,7 @@
     type = 'RunException'
     input = 'solution_invalid.i'
     cli_args = 'Problem/allow_invalid_solution=true'
-    expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show invalid solution counts'
+    expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show solution counts'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall allow overriding the solution validity checks.'
@@ -26,7 +26,7 @@
       type = 'RunException'
       input = 'solution_invalid.i'
       cli_args = 'Materials/filter/flag_solution_warning=true'
-      expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show invalid solution counts'
+      expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show solution counts'
       detail = 'in a json file'
     []
     [console_output]

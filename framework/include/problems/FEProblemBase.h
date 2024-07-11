@@ -1842,17 +1842,35 @@ public:
   }
 
   /**
-   * Whether or not allow convergence with invalid solutions
+   * Whether or not has solution warning flagged
    */
-  bool allowInvalidSolution(bool state) { return _allow_invalid_solution = state; }
+  bool hasSolutionWarning() { return _has_solution_warning; }
 
+  bool hasSolutionWarning(bool state) { return _has_solution_warning = state; }
+
+  /**
+   * Whether or not has invalid solution flagged
+   */
+  bool hasInvalidSolution() { return _has_invalid_solution; }
+
+  bool hasInvalidSolution(bool state) { return _has_invalid_solution = state; }
+
+  /**
+   * Whether or not to allow convergence of the solution
+   */
+  bool allowSolutionConverged()
+  {
+    return (hasSolutionWarning() && !hasInvalidSolution()) || allowInvalidSolution();
+  }
+
+  /**
+   * Allow use to decide whether to allow invalid solution or not
+   */
   bool allowInvalidSolution() const { return _allow_invalid_solution; }
 
   /**
    * Whether or not allow print out invalid solutions summary table in console
    */
-  bool showInvalidSolutionConsole(bool state) { return _show_invalid_solution_console = state; }
-
   bool showInvalidSolutionConsole() const { return _show_invalid_solution_console; }
 
   /**
@@ -2797,6 +2815,8 @@ private:
   bool _allow_invalid_solution;
   bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
+  bool _has_solution_warning;
+  bool _has_invalid_solution;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;
