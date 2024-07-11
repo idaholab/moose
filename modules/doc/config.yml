@@ -60,22 +60,22 @@ Content:
     xfem:
         root_dir: ${MOOSE_DIR}/modules/xfem/doc/content
     air:
-        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content/source
         external: True
     carbon_dioxide:
-        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/doc/content
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/doc/content/source
         external: True
     helium:
-        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/doc/content
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/doc/content/source
         external: True
     nitrogen:
-        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/doc/content
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/doc/content/source
         external: True
     potassium:
-        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/doc/content
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/doc/content/source
         external: True
     sodium:
-        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/doc/content
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/doc/content/source
         external: True
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -251,10 +251,6 @@ Extensions:
             solid_mechanics: !include modules/solid_mechanics/doc/sqa_solid_mechanics.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml
-            helium: !include modules/fluid_properties/contrib/helium/doc/sqa_helium.yml
-            nitrogen: !include modules/fluid_properties/contrib/nitrogen/doc/sqa_nitrogen.yml
-            potassium: !include modules/fluid_properties/contrib/potassium/doc/sqa_potassium.yml
-            sodium: !include modules/fluid_properties/contrib/sodium/doc/sqa_sodium.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects
