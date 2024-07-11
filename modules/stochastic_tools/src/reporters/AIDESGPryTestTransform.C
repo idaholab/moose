@@ -46,7 +46,7 @@ AIDESGPryTestTransform::AIDESGPryTestTransform(const InputParameters & parameter
     _new_var_samples(_pmcmc->getVarSamples()),
     _priors(_pmcmc->getPriors()),
     _var_prior(_pmcmc->getVarPrior()),
-    _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
+    _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     _check_step(std::numeric_limits<int>::max()),
     _local_comm(_sampler.getLocalComm()),
     _estimated_loglikelihood(declareValue<std::vector<Real>>("estimated_loglikelihood"))
