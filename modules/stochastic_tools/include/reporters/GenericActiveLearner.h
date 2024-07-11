@@ -11,24 +11,24 @@
 
 #include "GeneralReporter.h"
 #include "Sampler.h"
-#include "GPryTest.h"
+#include "GenericActiveLearningSampler.h"
 #include "ActiveLearningGaussianProcess.h"
 #include "GaussianProcess.h"
 #include "SurrogateModel.h"
 #include "SurrogateModelInterface.h"
 #include "Standardizer.h"
-#include "GaussianProcess.h"
+#include "GaussianProcessSurrogate.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: NN and GP training step
  */
-class GPryTestLearner : public GeneralReporter,
-                        public SurrogateModelInterface
+class GenericActiveLearner : public GeneralReporter,
+                            public SurrogateModelInterface
 
 {
 public:
   static InputParameters validParams();
-  GPryTestLearner(const InputParameters & parameters);
+  GenericActiveLearner(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void finalize() override {}
   virtual void execute() override;
@@ -57,7 +57,7 @@ private:
    * Sets up the training data for the neural network classifier and GP model
    * @param data_in The data matrix containing the inputs to the NNs
    */
-  void setupNNGPData(const std::vector<Real> & log_posterior, const DenseMatrix<Real> & data_in);
+  void setupGPData(const std::vector<Real> & log_posterior, const DenseMatrix<Real> & data_in);
 
   /**
    * Modify the acqusition function by considering correlations between the inputs
@@ -74,19 +74,29 @@ private:
    * @param input2 The second input
    * @param corr The computed correlation
    */
-  void computeCorrelation(const std::vector<Real> & input1,
-                          const std::vector<Real> & input2,
+  void computeCorrelation(const unsigned int & ind1,
+                          const unsigned int & ind2,
                           Real & corr);
+
+  void computeGPOutput(std::vector<Real> & eval_outputs,
+                       const std::vector<std::vector<Real>> & eval_inputs);
 
   void computeGPOutput2(std::vector<Real> & eval_outputs, const DenseMatrix<Real> & eval_inputs);
 
-  void computeFunction(const DenseMatrix<Real> & data_in);
+  void computeDistance(const std::vector<Real> & current_input,
+                       unsigned int & req_index);
+
+  /**
+   * Fill in the provided vector with random samples given the distributions
+   * @param vector The vector to be filled
+   */
+//   void fillVector(std::vector<Real> & vector);
 
   /// The adaptive Monte Carlo sampler
   Sampler & _sampler;
 
   /// Adaptive Importance Sampler
-  const GPryTest * const _gpry_sampler;
+  const GenericActiveLearningSampler * const _al_sampler;
 
   /// The selected sample indices to evaluate the subApp
   std::vector<unsigned int> & _sorted_indices;
@@ -97,7 +107,7 @@ private:
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
   /// The GP evaluator object that permits re-evaluations
-  const SurrogateModel & _gp_eval; //
+  const SurrogateModel & _gp_eval;
 
   /// Storage for the priors
 //   const std::vector<const Distribution *> _priors;
@@ -122,6 +132,9 @@ private:
   /// Maximum number of subApp calls in each iteration
   unsigned int _num_samples;
 
+  /// The input dimension
+  unsigned int _n_dim;
+
   /// Outputs for GP model for the try samples
   std::vector<Real> _gp_outputs_try;
 
@@ -134,5 +147,10 @@ private:
   /// Storage for the length scales after the GP training 
   std::vector<Real> _length_scales;
 
+  unsigned int _seed;
+  unsigned int _eval_points;
+  std::vector<std::vector<Real>> _eval_inputs;
+  // std::vector<Real> _eval_inputs_density;
   std::vector<Real> _eval_outputs_current;
+  std::vector<Real> _eval_outputs_previous;
 };
