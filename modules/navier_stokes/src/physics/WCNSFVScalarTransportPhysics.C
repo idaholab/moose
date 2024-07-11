@@ -365,6 +365,12 @@ WCNSFVScalarTransportPhysics::addInitialConditions()
     paramError("initial_scalar_variables",
                "Scalar variables are defined externally of NavierStokesFV, so should their inital "
                "conditions");
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+  // do not set initial conditions if we are not defining variables
+  if (!_define_variables)
+    return;
 
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
