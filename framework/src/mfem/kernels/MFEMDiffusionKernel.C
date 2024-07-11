@@ -20,6 +20,6 @@ MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
   : MFEMBilinearFormKernel(parameters),
     _kernel_params{{{"VariableName", getParam<std::string>("variable")},
                     {"CoefficientName", getParam<std::string>("coefficient")}}},
-    _kernel{std::make_shared<hephaestus::DiffusionKernel>(_kernel_params)}
+    _kernel{std::make_shared<platypus::DiffusionKernel>(_kernel_params)}
 {
 }
