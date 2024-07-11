@@ -17,6 +17,6 @@ MFEMVectorDirichletBC::MFEMVectorDirichletBC(const InputParameters & parameters)
     _vec_coef(const_cast<MFEMVectorCoefficient *>(
         &getUserObject<MFEMVectorCoefficient>("vector_coefficient")))
 {
-  _boundary_condition = std::make_shared<hephaestus::VectorDirichletBC>(
+  _boundary_condition = std::make_shared<platypus::VectorDirichletBC>(
       getParam<std::string>("variable"), bdr_attr, _vec_coef->getVectorCoefficient().get());
 }

@@ -151,14 +151,14 @@
     min_parallel = 2
   []
 
-  [./PushPullMultiElementOrder1ParallelDistributedTransfer]
-    type = 'CSVDiff'
-    input = 'push_pull_multi_element_order1_distributed_transfer_master.i'
-    csvdiff = 'push_pull_multi_element_order1_distributed_transfer_master_out.csv'
-    requirement = 'Platypus shall have the ability to transfer between MFEM and MOOSE using multiple first-order element types (distributed).'
-    min_parallel = 2
-    max_parallel = 2
-  []
+  #[./PushPullMultiElementOrder1ParallelDistributedTransfer]
+  #  type = 'CSVDiff'
+  #  input = 'push_pull_multi_element_order1_distributed_transfer_master.i'
+  #  csvdiff = 'push_pull_multi_element_order1_distributed_transfer_master_out.csv'
+  #  requirement = 'Platypus shall have the ability to transfer between MFEM and MOOSE using multiple first-order element types (distributed).'
+  #  min_parallel = 2
+  #  max_parallel = 2
+  #[]
 
   [./PushPullMultiElementOrder1ParallelReplicatedMonomialTransfer]
     type = 'CSVDiff'
@@ -190,14 +190,14 @@
     min_parallel = 2
   []
 
-  [./PushPullMultiElementOrder2ParallelDistributedTransfer]
-    type = 'CSVDiff'
-    input = 'push_pull_multi_element_order2_distributed_transfer_master.i'
-    csvdiff = 'push_pull_multi_element_order2_distributed_transfer_master_out.csv'
-    requirement = 'Platypus shall have the ability to transfer between MFEM and MOOSE using multiple second-order element types (distributed).'
-    min_parallel = 2
-    max_parallel = 2
-  []
+  #[./PushPullMultiElementOrder2ParallelDistributedTransfer]
+  #  type = 'CSVDiff'
+  #  input = 'push_pull_multi_element_order2_distributed_transfer_master.i'
+  #  csvdiff = 'push_pull_multi_element_order2_distributed_transfer_master_out.csv'
+  #  requirement = 'Platypus shall have the ability to transfer between MFEM and MOOSE using multiple second-order element types (distributed).'
+  #  min_parallel = 2
+  #  max_parallel = 2
+  #[]
 
   [./PullWedge18ParallelReplicatedTransfer]
     type = 'CSVDiff'

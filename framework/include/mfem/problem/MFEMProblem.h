@@ -15,7 +15,6 @@
 #include "MFEMBilinearFormKernel.h"
 #include "MFEMLinearFormKernel.h"
 #include "MFEMFormulation.h"
-#include "MFEMAuxSolver.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "Function.h"
@@ -23,7 +22,7 @@
 #include "SystemBase.h"
 #include "Transient.h"
 #include "Steady.h"
-#include "hephaestus.hpp"
+#include "platypus.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/point.h"
 
@@ -109,9 +108,7 @@ public:
                  const std::string & name,
                  InputParameters & parameters) override;
   /**
-   * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
-   * GeneralUserObject representing the auxkernel in MOOSE, and creates corresponding MFEM auxsolver
-   * to be used in the MFEM solve.
+   * Override of ExternalProblem::addAuxKernel.
    */
   void addAuxKernel(const std::string & kernel_name,
                     const std::string & name,
@@ -151,9 +148,9 @@ protected:
    * builders.
    */
   template <class T>
-  void addKernel(std::string var_name, std::shared_ptr<hephaestus::Kernel<T>> kernel)
+  void addKernel(std::string var_name, std::shared_ptr<platypus::Kernel<T>> kernel)
   {
-    using namespace hephaestus;
+    using namespace platypus;
 
     EquationSystemProblemBuilderInterface * eqn_system_problem_builder{nullptr};
 
@@ -173,13 +170,13 @@ protected:
   std::string _formulation_name;
   int _order;
 
-  hephaestus::Coefficients _coefficients;
-  hephaestus::InputParameters _solver_options;
-  hephaestus::Outputs _outputs;
-  hephaestus::InputParameters _exec_params;
+  platypus::Coefficients _coefficients;
+  platypus::InputParameters _solver_options;
+  platypus::Outputs _outputs;
+  platypus::InputParameters _exec_params;
 
-  std::shared_ptr<hephaestus::ProblemBuilder> mfem_problem_builder{nullptr};
+  std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
 
-  std::unique_ptr<hephaestus::Problem> mfem_problem{nullptr};
-  std::unique_ptr<hephaestus::Executioner> executioner{nullptr};
+  std::unique_ptr<platypus::Problem> mfem_problem{nullptr};
+  std::unique_ptr<platypus::Executioner> executioner{nullptr};
 };

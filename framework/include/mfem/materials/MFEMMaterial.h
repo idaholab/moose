@@ -2,7 +2,7 @@
 
 #include "GeneralUserObject.h"
 #include "MFEMCoefficient.h"
-#include "coefficients.hpp"
+#include "coefficients.h"
 
 class MFEMMaterial : public GeneralUserObject
 {
@@ -16,7 +16,7 @@ public:
   virtual void initialize() override {}
   virtual void finalize() override {}
 
-  virtual void storeCoefficients(hephaestus::Subdomain & subdomain) {}
+  virtual void storeCoefficients(platypus::Subdomain & subdomain) {}
 
   std::vector<SubdomainName> blocks;
 };

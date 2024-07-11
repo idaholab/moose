@@ -26,8 +26,8 @@ MFEMComplexVectorDirichletBC::MFEMComplexVectorDirichletBC(const InputParameters
         &getUserObject<MFEMVectorCoefficient>("imag_vector_coefficient")))
 {
   _boundary_condition =
-      std::make_shared<hephaestus::VectorDirichletBC>(getParam<std::string>("variable"),
-                                                      bdr_attr,
-                                                      _vec_coef_re->getVectorCoefficient().get(),
-                                                      _vec_coef_im->getVectorCoefficient().get());
+      std::make_shared<platypus::VectorDirichletBC>(getParam<std::string>("variable"),
+                                                    bdr_attr,
+                                                    _vec_coef_re->getVectorCoefficient().get(),
+                                                    _vec_coef_im->getVectorCoefficient().get());
 }

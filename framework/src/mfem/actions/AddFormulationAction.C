@@ -6,7 +6,7 @@ InputParameters
 AddFormulationAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Set the Hephaestus formulation to solve in the simulation.");
+  params.addClassDescription("Set the platypus formulation to solve in the simulation.");
   return params;
 }
 
