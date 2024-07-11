@@ -207,7 +207,7 @@ public:
    * Whether or not this MultiApp should be restored at the beginning of
    * each Picard iteration.
    */
-  virtual bool needsRestoration() { return true; }
+  bool needsRestoration() { return !_no_restore; }
 
   /**
    * @param app The global app number to get the Executioner for
@@ -593,6 +593,9 @@ protected:
 
   /// Flag indicates if or not restart from the latest solution
   bool _keep_solution_during_restore;
+
+  /// Whether or not to skip restoring completely
+  const bool _no_restore;
 
   /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
   std::vector<std::unique_ptr<NumericVector<Real>>> _end_solutions;
