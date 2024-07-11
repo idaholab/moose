@@ -43,6 +43,12 @@ struct CheckpointFileNames
 
   /// Filenames for restartable data
   std::vector<std::filesystem::path> restart;
+
+  bool operator==(const CheckpointFileNames & rhs) const
+  {
+    // Compare the relevant members for equality
+    return (this->checkpoint == rhs.checkpoint) && (this->restart == rhs.restart);
+  }
 };
 
 /**

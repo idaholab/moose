@@ -40,7 +40,7 @@
 
 [MultiApps]
   [sub_app]
-    type = TransientMultiApp
+    type = FullSolveMultiApp
     input_files = "checkpoint_child.i"
     positions = '0 0 0'
   []
