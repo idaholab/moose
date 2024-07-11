@@ -12,10 +12,30 @@
     type = 'RunException'
     input = 'solution_invalid.i'
     cli_args = 'Problem/allow_invalid_solution=true'
-    expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/allow_invalid_solution=false to activate'
+    expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show invalid solution counts'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall allow overriding the solution validity checks.'
+  []
+
+  [solution_invalid_warning]
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall let the solution converge with the invalid solution but still provide invalid solution occurrences counts.'
+    [no_console_output]
+      type = 'RunException'
+      input = 'solution_invalid.i'
+      cli_args = 'Materials/filter/flag_solution_warning=true'
+      expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show invalid solution counts'
+      detail = 'in a json file'
+    []
+    [console_output]
+      type = 'JSONDiff'
+      input = 'solution_invalid.i'
+      cli_args = "Materials/filter/flag_solution_warning=true Problem/show_invalid_solution_console=true Outputs/file_base='solution_invalid_warning'"
+      jsondiff = 'solution_invalid_warning.json'
+      detail = 'in console window and a json file'
+    []
   []
 
   [immediately_print_invalid_solution]

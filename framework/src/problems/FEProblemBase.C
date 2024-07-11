@@ -292,6 +292,10 @@ FEProblemBase::validParams()
       "allow_invalid_solution",
       false,
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
+  params.addParam<bool>(
+      "show_invalid_solution_console",
+      false,
+      "Set to true to allow convergence but still show the invalid solution occurance in console");
   params.addParam<bool>("immediately_print_invalid_solution",
                         false,
                         "Whether or not to report invalid solution warnings at the time the "
@@ -325,8 +329,9 @@ FEProblemBase::validParams()
       "Null space removal");
   params.addParamNamesToGroup("extra_tag_vectors extra_tag_matrices extra_tag_solutions",
                               "Tagging");
-  params.addParamNamesToGroup("allow_invalid_solution immediately_print_invalid_solution",
-                              "Solution validity control");
+  params.addParamNamesToGroup(
+      "allow_invalid_solution show_invalid_solution_console immediately_print_invalid_solution",
+      "Solution validity control");
 
   return params;
 }
@@ -428,6 +433,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
+    _show_invalid_solution_console(getParam<bool>("show_invalid_solution_console")),
     _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),

@@ -31,6 +31,14 @@ SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID invalid_
   return solution_invalidity.flagInvalidSolutionInternal(invalid_solution_id);
 }
 
+void
+SolutionInvalidInterface::flagSolutionWarningInternal(InvalidSolutionID invalid_solution_id) const
+{
+  auto & solution_invalidity = _si_moose_object.getMooseApp().solutionInvalidity();
+  _si_problem.allowInvalidSolution(true);
+  return solution_invalidity.flagInvalidSolutionInternal(invalid_solution_id);
+}
+
 InvalidSolutionID
 SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message) const
 {

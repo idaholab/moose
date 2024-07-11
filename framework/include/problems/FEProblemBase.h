@@ -1842,9 +1842,18 @@ public:
   }
 
   /**
-   * Whether or not the invalid solutions are allowed
+   * Whether or not allow convergence with invalid solutions
    */
+  bool allowInvalidSolution(bool state) { return _allow_invalid_solution = state; }
+
   bool allowInvalidSolution() const { return _allow_invalid_solution; }
+
+  /**
+   * Whether or not allow print out invalid solutions summary table in console
+   */
+  bool showInvalidSolutionConsole(bool state) { return _show_invalid_solution_console = state; }
+
+  bool showInvalidSolutionConsole() const { return _show_invalid_solution_console; }
 
   /**
    * Whether or not the solution invalid warnings are printed out immediately
@@ -2785,7 +2794,8 @@ private:
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
-  const bool & _allow_invalid_solution;
+  bool _allow_invalid_solution;
+  bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
 
   /// At or beyond initialSteup stage

@@ -1,0 +1,37 @@
+{
+    "app_name": "main",
+    "current_time": "Thu Jul 11 10:35:37 2024",
+    "executable": "/Users/lim2/Research/MOOSE/framework/worktrees/solutioninvalid_warning/test/tests/misc/solution_invalid/../../../moose_test-opt",
+    "executable_time": "Thu Jul 11 10:35:30 2024",
+    "libmesh_version": "",
+    "moose_version": "git commit f756407ba4 on 2024-07-09",
+    "petsc_version": "3.20.3",
+    "reporters": {
+        "solution_invalidity": {
+            "type": "SolutionInvalidityReporter",
+            "values": {
+                "solution_invalidity": {
+                    "type": "SolutionInvalidity const*"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.20.1",
+    "time_steps": [
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "converged_counts": 16,
+                        "message": "Solution invalid warning!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 48,
+                        "total_counts": 48
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

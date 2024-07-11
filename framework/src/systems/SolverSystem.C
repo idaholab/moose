@@ -118,8 +118,12 @@ SolverSystem::checkInvalidSolution()
     _app.solutionInvalidity().sync();
 
     if (_fe_problem.allowInvalidSolution())
-      mooseWarning("The Solution Invalidity warnings are detected but silenced! "
-                   "Use Problem/allow_invalid_solution=false to activate ");
+      if (_fe_problem.showInvalidSolutionConsole())
+        _app.solutionInvalidity().print(_console);
+      else
+        mooseWarning(
+            "The Solution Invalidity warnings are detected but silenced! "
+            "Use Problem/show_invalid_solution_console=true to show invalid solution counts");
     else
       // output the occurrence of solution invalid in a summary table
       _app.solutionInvalidity().print(_console);
