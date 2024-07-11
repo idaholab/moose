@@ -183,6 +183,45 @@ StitchedMeshGenerator::generate()
         }
       }
     }
+    else
+    {
+      // In this scenario we might hit issues when we have the same boundary ID with
+      // different names. The stitcher would merge them and use the boundary name
+      // from the first mesh, which would result in unexpectedly altered boundary names.
+      // For this reason we check if we have boundary the same boundary ID with
+      // different names here and if so we throw a warning.
+      const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
+      const auto & other_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
+
+      std::set<boundary_id_type> intersection;
+      std::set_intersection(base_mesh_bids.begin(),
+                            base_mesh_bids.end(),
+                            other_mesh_bids.begin(),
+                            other_mesh_bids.end(),
+                            std::inserter(intersection, intersection.begin()));
+
+      for (const auto bid : intersection)
+      {
+        const auto & sideset_name_on_first_mesh = mesh->get_boundary_info().get_sideset_name(bid);
+        const auto & sideset_name_on_second_mesh =
+            meshes[i]->get_boundary_info().get_sideset_name(bid);
+
+        if (sideset_name_on_first_mesh != sideset_name_on_second_mesh)
+          mooseWarning("Boundary ID ",
+                       bid,
+                       " corresponds to different boundary names on the input meshes! On the first "
+                       "mesh it corresponds to ",
+                       sideset_name_on_first_mesh,
+                       " while on the second mesh it corresponds to ",
+                       sideset_name_on_second_mesh,
+                       " The final mesh will assign the boundary on ",
+                       sideset_name_on_second_mesh,
+                       " to ",
+                       sideset_name_on_first_mesh,
+                       " To avoid this situation, use the `prevent_boundary_ids_overlap` parameter "
+                       "in combination with the RepairMeshGenerator!");
+      }
+    }
 
     mesh->stitch_meshes(*meshes[i],
                         first,
