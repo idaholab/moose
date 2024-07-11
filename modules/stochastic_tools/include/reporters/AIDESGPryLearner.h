@@ -10,7 +10,7 @@
 #pragma once
 
 #include "PMCMCDecision.h"
-#include "GaussianProcess.h"
+#include "GaussianProcessSurrogate.h"
 #include "SurrogateModelInterface.h"
 #include "LibtorchANNSurrogate.h"
 #include "ActiveLearningGaussianProcess.h"
