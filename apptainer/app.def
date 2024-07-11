@@ -119,6 +119,9 @@ From: {{ APPTAINER_FROM }}
     MOOSE_PREFIX=/opt/${BINARY_NAME}
 {%- endif %}
     cd ${MOOSE_DIR}
+    if [ -n "$LIBTORCH_DIR" ]; then
+        MOOSE_OPTIONS+=" --with-libtorch=${LIBTORCH_DIR}"
+    fi
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
     # Build and install
 {%- if BINARY_NAME == 'moose' %}
