@@ -34,7 +34,7 @@ AIDESGPryLearner::AIDESGPryLearner(const InputParameters & parameters)
   : PMCMCDecision(parameters),
     SurrogateModelInterface(this),
     _al_gp(getUserObject<ActiveLearningGaussianProcess>("al_gp")),
-    _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
+    _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     // _acquisition_function(declareValue<std::vector<Real>>("acquisition_function")),
     _new_samples(_pmcmc->getSamples()),
     _convergence_value(declareValue<Real>("convergence_value"))
