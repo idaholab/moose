@@ -37,7 +37,7 @@ ActuallyExplicitEuler::validParams()
 ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters), _constant_mass(getParam<bool>("use_constant_mass"))
 {
-  if (_is_direct && _solve_type != LUMPED)
+  if (isDirect() && _solve_type != LUMPED)
     mooseError("Direct time integration must be used with a lumped mass matrix!");
 }
 
@@ -117,7 +117,7 @@ ActuallyExplicitEuler::solve()
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
 
   // Setting nodal BC's if using a direct time integrator
-  if (_is_direct)
+  if (isDirect())
     _nl.setNodalBCs();
 }
 

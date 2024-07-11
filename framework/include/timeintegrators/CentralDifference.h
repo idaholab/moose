@@ -29,6 +29,7 @@ public:
   void computeADTimeDerivatives(ADReal & ad_u_dot,
                                 const dof_id_type & dof,
                                 ADReal & ad_u_dotdot) const override;
+  virtual bool isDirect() const override;
 
 protected:
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
@@ -36,6 +37,9 @@ protected:
 
   /// The older solution
   const NumericVector<Number> & _solution_older;
+
+  /// Checking if using a direct solver
+  bool _is_direct;
 
   /**
    * Helper function that actually does the math for computing the time derivative

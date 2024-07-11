@@ -117,7 +117,7 @@ ExplicitTimeIntegrator::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
       _mass_matrix_diag.reciprocal();
 
       // Calculate acceleration directly if using direct method
-      if (_is_direct)
+      if (isDirect())
       {
         // Calculate acceleration
         auto & accel = *_sys.solutionUDotDot();

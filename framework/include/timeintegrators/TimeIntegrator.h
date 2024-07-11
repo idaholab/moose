@@ -142,7 +142,7 @@ public:
   /**
    * Returns whether or not time integrator is using a direct acceleration calculation
    */
-  virtual const bool & isDirect() const { return _is_direct; }
+  virtual bool isDirect() const { return false; }
 
   /**
    * Returns the tag for the nodal multiplication factor for the residual calculation of the udot
@@ -201,9 +201,6 @@ protected:
 
   /// Boolean flag that is set to true if lumped mass matrix is used
   bool _is_lumped;
-
-  /// Boolean flag that is set to true if direct acceleration calculation is used
-  bool _is_direct;
 
   /// The vector tag for the nodal multiplication factor for the residual calculation of the udot term
   const TagID _u_dot_factor_tag;
