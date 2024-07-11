@@ -2,7 +2,7 @@
 
 #include "MFEMBoundaryCondition.h"
 #include "MFEMFunctionCoefficient.h"
-#include "boundary_conditions.hpp"
+#include "boundary_conditions.h"
 
 class MFEMScalarDirichletBC : public MFEMBoundaryCondition
 {

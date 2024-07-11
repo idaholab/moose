@@ -23,7 +23,6 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
     _outputs(),
     _exec_params()
 {
-  hephaestus::logger.set_level(spdlog::level::info);
 }
 
 MFEMProblem::~MFEMProblem() {}
@@ -69,13 +68,13 @@ MFEMProblem::initialSetup()
   // NB: set to false to avoid reconstructing problem operator.
   mfem_problem_builder->FinalizeProblem(false);
 
-  hephaestus::InputParameters exec_params;
+  platypus::InputParameters exec_params;
 
   Transient * _moose_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
   if (_moose_executioner != nullptr)
   {
     auto mfem_transient_problem_builder =
-        std::dynamic_pointer_cast<hephaestus::TimeDomainProblemBuilder>(mfem_problem_builder);
+        std::dynamic_pointer_cast<platypus::TimeDomainProblemBuilder>(mfem_problem_builder);
     if (mfem_transient_problem_builder == nullptr)
     {
       mooseError("Specified formulation does not support Transient executioners");
@@ -87,15 +86,14 @@ MFEMProblem::initialSetup()
     exec_params.SetParam("TimeStep", float(dt()));
     exec_params.SetParam("EndTime", float(_moose_executioner->endTime()));
     exec_params.SetParam("VisualisationSteps", getParam<int>("vis_steps"));
-    exec_params.SetParam("Problem",
-                         static_cast<hephaestus::TimeDomainProblem *>(mfem_problem.get()));
+    exec_params.SetParam("Problem", static_cast<platypus::TimeDomainProblem *>(mfem_problem.get()));
 
-    executioner = std::make_unique<hephaestus::TransientExecutioner>(exec_params);
+    executioner = std::make_unique<platypus::TransientExecutioner>(exec_params);
   }
   else if (dynamic_cast<Steady *>(_app.getExecutioner()))
   {
     auto mfem_steady_problem_builder =
-        std::dynamic_pointer_cast<hephaestus::SteadyStateProblemBuilder>(mfem_problem_builder);
+        std::dynamic_pointer_cast<platypus::SteadyStateProblemBuilder>(mfem_problem_builder);
     if (mfem_steady_problem_builder == nullptr)
     {
       mooseError("Specified formulation does not support Steady executioners");
@@ -104,9 +102,9 @@ MFEMProblem::initialSetup()
     mfem_problem = mfem_steady_problem_builder->ReturnProblem();
 
     exec_params.SetParam("Problem",
-                         static_cast<hephaestus::SteadyStateProblem *>(mfem_problem.get()));
+                         static_cast<platypus::SteadyStateProblem *>(mfem_problem.get()));
 
-    executioner = std::make_unique<hephaestus::SteadyExecutioner>(exec_params);
+    executioner = std::make_unique<platypus::SteadyExecutioner>(exec_params);
   }
   else
   {
@@ -130,7 +128,7 @@ MFEMProblem::externalSolve()
     return;
   }
 
-  auto * transient_mfem_exec = dynamic_cast<hephaestus::TransientExecutioner *>(executioner.get());
+  auto * transient_mfem_exec = dynamic_cast<platypus::TransientExecutioner *>(executioner.get());
   if (transient_mfem_exec != nullptr)
   {
     transient_mfem_exec->_t_step = dt();
@@ -174,7 +172,7 @@ MFEMProblem::addMaterial(const std::string & kernel_name,
   for (unsigned int bid = 0; bid < mfem_material.blocks.size(); ++bid)
   {
     int block = std::stoi(mfem_material.blocks[bid]);
-    hephaestus::Subdomain mfem_subdomain(name, block);
+    platypus::Subdomain mfem_subdomain(name, block);
     mfem_material.storeCoefficients(mfem_subdomain);
     _coefficients._subdomains.push_back(mfem_subdomain);
   }
@@ -188,14 +186,6 @@ MFEMProblem::addCoefficient(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   MFEMCoefficient * mfem_coef(&getUserObject<MFEMCoefficient>(name));
   _coefficients._scalars.Register(name, mfem_coef->getCoefficient());
-
-  // Add associated auxsolvers for CoupledCoefficients
-  auto coupled_coef = std::dynamic_pointer_cast<hephaestus::CoupledCoefficient>(
-      _coefficients._scalars.GetShared(name));
-  if (coupled_coef != nullptr)
-  {
-    mfem_problem_builder->AddAuxSolver(name, std::move(coupled_coef));
-  }
 }
 
 void
@@ -273,16 +263,8 @@ MFEMProblem::addAuxKernel(const std::string & kernel_name,
 {
   std::string base_auxkernel = parameters.get<std::string>("_moose_base");
 
-  if (base_auxkernel == "MFEMAuxKernel") // MFEM auxsolver.
-  {
-    FEProblemBase::addUserObject(kernel_name, name, parameters);
-    MFEMAuxSolver * mfem_auxsolver(&getUserObject<MFEMAuxSolver>(name));
-
-    mfem_problem_builder->AddPostprocessor(name, mfem_auxsolver->getAuxSolver());
-    mfem_auxsolver->storeCoefficients(_coefficients);
-  }
-  else if (base_auxkernel == "AuxKernel" || base_auxkernel == "VectorAuxKernel" ||
-           base_auxkernel == "ArrayAuxKernel") // MOOSE auxkernels.
+  if (base_auxkernel == "AuxKernel" || base_auxkernel == "VectorAuxKernel" ||
+      base_auxkernel == "ArrayAuxKernel") // MOOSE auxkernels.
   {
     FEProblemBase::addAuxKernel(kernel_name, name, parameters);
   }
