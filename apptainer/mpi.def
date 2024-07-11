@@ -21,6 +21,9 @@
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
 Bootstrap: docker
 From: rockylinux:8.8.20230518
+{%- elif ALTERNATE_FROM == "cuda" %}
+BootStrap: oras
+From: mooseharbor.hpc.inl.gov/moose-base/gpu:gcc12-cuda12.3-ucx1.15.0-openmpi4.1.6-0
 {%- else %}
 BootStrap: oras
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
@@ -45,7 +48,7 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
 
     # Install prefix for mpich
     export MOOSE_MPICH_DIR=/opt/mpich
-{%- if ALTERNATE_FROM is not defined %}
+{%- if ALTERNATE_FROM is not defined or ALTERNATE_FROM == "cuda" %}
     # Install prefix for openmpi
     export MOOSE_OPENMPI_DIR=/opt/openmpi
 {%- endif %}
@@ -215,14 +218,16 @@ export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
+{%- if ALTERNATE_FROM != "cuda" %}
     # Add script for loading mpich environment
     cat << EOF > /opt/mpi/use-mpich
 #!/bin/bash
 export MOOSE_MPI_DIR=${MOOSE_MPICH_DIR}
 ${USE_MPI_SCRIPT}
 EOF
+{%- endif %}
 
-{%- if ALTERNATE_FROM is not defined %}
+{%- if ALTERNATE_FROM is not defined or ALTERNATE_FROM == "cuda" %}
     # Add script for loading openmpi environment
     cat << EOF > /opt/mpi/use-openmpi
 #!/bin/bash
