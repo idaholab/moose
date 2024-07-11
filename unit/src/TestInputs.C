@@ -2,7 +2,7 @@
 #include "inputs.h"
 
 /**
- * TODO: - this test should be removed once we fully switch over to using 
+ * TODO: - this test should be removed once we fully switch over to using
  * moose InputParameters.
  */
 TEST(CheckData, InputParameters)
