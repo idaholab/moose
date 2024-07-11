@@ -69,7 +69,7 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
     _inputs_all(_gpry_sampler->getSampleTries()),
     _var_all(_gpry_sampler->getVarSampleTries()),
     _al_gp(getUserObject<ActiveLearningGaussianProcess>("al_gp")),
-    _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
+    _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     _new_var_samples(_gpry_sampler->getVarSamples()),
     _priors(_gpry_sampler->getPriors()),
     _var_prior(_gpry_sampler->getVarPrior()),

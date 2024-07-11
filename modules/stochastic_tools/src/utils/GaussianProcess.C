@@ -154,6 +154,24 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                                      const GPOptimizerOptions & opts)
 {
   std::vector<Real> theta(_num_tunable, 0.0);
+  // _batch_size = batch_size;
+  unsigned int req_iter;
+  if (training_params.rows() <= 100)
+  {
+    // _covariance_function->buildHyperParamMapInitial(_hyperparam_map, _hyperparam_vec_map);
+    req_iter = opts.num_iter;
+  }
+  else if (training_params.rows() > 100 && training_params.rows() <= 250)
+  {
+    // _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+    req_iter = 800;
+  }
+  else
+  {
+    // _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+    req_iter = 300;
+  }
+
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
   mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
@@ -162,6 +180,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
   Real b1 = opts.b1;
   Real b2 = opts.b2;
   Real eps = opts.eps;
+  Real lambda = opts.lambda;
 
   std::vector<Real> m0(_num_tunable, 0.0);
   std::vector<Real> v0(_num_tunable, 0.0);
@@ -177,9 +196,9 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
   RealEigenMatrix inputs(_batch_size, training_params.cols());
   RealEigenMatrix outputs(_batch_size, training_data.cols());
-  if (opts.show_every_nth_iteration)
-    Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
-  for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
+  // if (opts.show_every_nth_iteration)
+  Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
+  for (unsigned int ss = 0; ss < req_iter; ++ss)
   {
     // Shuffle data
     MooseRandom generator;
@@ -196,7 +215,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     }
 
     store_loss = getLoss(inputs, outputs);
-    if (opts.show_every_nth_iteration && ((ss + 1) % opts.show_every_nth_iteration == 0))
+    if (((ss + 1) % 500 == 0)) // opts.show_every_nth_iteration &&
       Moose::out << "Iteration: " << ss + 1 << " LOSS: " << store_loss << std::endl;
     grad1 = getGradient(inputs);
     for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
@@ -211,7 +230,11 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
             b2 * v0[global_index] + (1 - b2) * grad1[global_index] * grad1[global_index];
         m_hat = m0[global_index] / (1 - std::pow(b1, (ss + 1)));
         v_hat = v0[global_index] / (1 - std::pow(b2, (ss + 1)));
-        new_val = theta[global_index] - opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+        // new_val = theta[global_index] - opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+
+        new_val =
+            theta[global_index] - 1.0 * (opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps) +
+                                         lambda * theta[global_index]);
 
         const auto min_value = std::get<2>(iter->second);
         const auto max_value = std::get<3>(iter->second);
@@ -222,11 +245,25 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
     _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   }
-  if (opts.show_every_nth_iteration)
+  Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
+  Moose::out << Moose::stringify(theta) << std::endl;
+  Moose::out << "FINAL LOSS: " << store_loss << std::endl;
+  unsigned int count = 2;
+  _length_scales.resize(_num_tunable - count);
+  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
   {
-    Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
-    Moose::out << Moose::stringify(theta) << std::endl;
-    Moose::out << "FINAL LOSS: " << store_loss << std::endl;
+    const auto first_index = std::get<0>(iter->second);
+    const auto num_entries = std::get<1>(iter->second);
+    std::string hyper_param_name = iter->first;
+    for (unsigned int ii = 0; ii < num_entries; ++ii)
+    {
+      const auto global_index = first_index + ii;
+      if (global_index >= count)
+      {
+        _length_scales[count - 2] = theta[count];
+        ++count;
+      }
+    }
   }
 }
 
@@ -267,6 +304,27 @@ GaussianProcess::getGradient(RealEigenMatrix & inputs) const
       grad_vec[global_index] = -tmp.trace() / 2.0;
     }
   }
+  // int count;
+  // count = 2;
+  // for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
+  // {
+  //   std::string hyper_param_name = iter->first;
+  //   for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+  //   {
+  //     _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
+  //     RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
+  //     Real grad1 = -tmp.trace() / 2.0; // - std::log(theta(ii)) / theta(ii);
+  //     if (hyper_param_name.compare("length_factor") == 0)
+  //     {
+  //       grad_vec[count] = grad1;
+  //       ++count;
+  //     }
+  //     else if (hyper_param_name.compare("noise_variance") == 0)
+  //       grad_vec[1] = grad1;
+  //     else
+  //       grad_vec[0] = grad1;
+  //   }
+  // }
   return grad_vec;
 }
 

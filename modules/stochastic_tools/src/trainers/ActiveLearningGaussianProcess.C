@@ -111,5 +111,5 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
 void
 ActiveLearningGaussianProcess::getLengthScales(std::vector<Real> & length_scales) const
 {
-  length_scales = _gp_handler.getScales();
+  length_scales = _gp.getScales();
 }

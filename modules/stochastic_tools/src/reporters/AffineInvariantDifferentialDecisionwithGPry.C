@@ -25,7 +25,7 @@ AffineInvariantDifferentialDecisionwithGPry::AffineInvariantDifferentialDecision
     const InputParameters & parameters)
   : PMCMCDecision(parameters),
     SurrogateModelInterface(this),
-    _gp_eval(getSurrogateModel<GaussianProcess>("gp_evaluator")),
+    _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     _new_samples(_pmcmc->getSamples())
 {
 }
