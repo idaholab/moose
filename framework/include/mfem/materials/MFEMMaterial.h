@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 #include "MFEMCoefficient.h"
 #include "coefficients.h"
 
-class MFEMMaterial : public GeneralUserObject
+class MFEMMaterial : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();

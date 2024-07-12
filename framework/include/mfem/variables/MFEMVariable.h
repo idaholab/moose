@@ -1,9 +1,9 @@
 #pragma once
 
 #include "MFEMFESpace.h"
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 
-class MFEMVariable : public GeneralUserObject
+class MFEMVariable : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
