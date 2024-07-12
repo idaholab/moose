@@ -172,6 +172,6 @@ protected:
 
   std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
 
-  std::unique_ptr<platypus::Problem> mfem_problem{nullptr};
+  std::shared_ptr<platypus::Problem> mfem_problem{nullptr};
   std::unique_ptr<platypus::Executioner> executioner{nullptr};
 };
