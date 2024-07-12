@@ -12,10 +12,6 @@ public:
   MFEMVectorNormalIntegratedBC(const InputParameters & parameters);
   ~MFEMVectorNormalIntegratedBC() override {}
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
 protected:
   MFEMVectorCoefficient * _vec_coef{nullptr};
 };
