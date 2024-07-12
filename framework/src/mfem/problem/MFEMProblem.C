@@ -1,4 +1,5 @@
 #include "MFEMProblem.h"
+#include "MFEMSolverBase.h"
 
 registerMooseObject("PlatypusApp", MFEMProblem);
 
@@ -149,6 +150,17 @@ MFEMProblem::setFormulation(const std::string & user_object_name,
   mfem_problem_builder->ConstructOperator();
 
   mfem_problem = mfem_problem_builder->ReturnProblem();
+}
+
+void
+MFEMProblem::addMFEMSolver(const std::string & user_object_name,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+  const MFEMSolverBase & mfem_solver = getUserObject<MFEMSolverBase>(name);
+
+  mfem_problem_builder->SetJacobianSolver(mfem_solver.getSolver());
 }
 
 void

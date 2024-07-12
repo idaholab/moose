@@ -1,6 +1,8 @@
 #include "AddMFEMSolverAction.h"
 #include "MFEMProblem.h"
 
+registerMooseAction("PlatypusApp", AddMFEMSolverAction, "add_mfem_solver");
+
 InputParameters
 AddMFEMSolverAction::validParams()
 {
@@ -21,5 +23,5 @@ AddMFEMSolverAction::act()
 {
   MFEMProblem & mfem_problem = static_cast<MFEMProblem &>(*_problem);
 
-  // TODO: - get the MFEMProblem to set the solver here with a public method.
+  mfem_problem.addMFEMSolver(_type, _name, _moose_object_pars);
 }
