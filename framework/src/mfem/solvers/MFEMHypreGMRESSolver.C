@@ -28,7 +28,7 @@ MFEMHypreGMRESSolver::MFEMHypreGMRESSolver(const InputParameters & parameters)
 void
 MFEMHypreGMRESSolver::constructSolver(const InputParameters & parameters)
 {
-  _solver = std::make_shared<mfem::HypreGMRES>(getMFEMProblem().getProblemData()._comm);
+  _solver = std::make_shared<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 
   // Set solver options.
   _solver->SetTol(parameters.get<double>("tolerance"));
