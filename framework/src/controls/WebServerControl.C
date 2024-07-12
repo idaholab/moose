@@ -35,8 +35,10 @@ registerMooseObject("MooseApp", WebServerControl);
 // Registration of the types that we can accept in the web server for controlling parameters
 registerWebServerControlScalarBool(bool);
 registerWebServerControlScalarNumber(Real);
+registerWebServerControlScalarNumber(int);
 registerWebServerControlScalarString(std::string);
 registerWebServerControlVectorNumber(Real);
+registerWebServerControlVectorNumber(int);
 registerWebServerControlVectorString(std::string);
 
 InputParameters

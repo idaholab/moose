@@ -21,9 +21,15 @@ if __name__ == '__main__':
     elif value == 'real_value':
       values = [1.5, 3.2]
       set_name = 'setControllableReal'
+    elif value == 'int_value':
+      values = [-5000, 1]
+      set_name = 'setControllableInt'
     elif value == 'vec_real_value':
       values = [[1, 2, 3, 4, 5], [6, 100]]
       set_name = 'setControllableVectorReal'
+    elif value == 'vec_int_value':
+      values = [[-1, -2, -3, 4, 5], [888, -1000]]
+      set_name = 'setControllableVectorInt'
     elif value == 'string_value':
       values = ['foo', 'bar']
       set_name = 'setControllableString'

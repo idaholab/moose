@@ -13,6 +13,7 @@
 {#- METHOD: The method to build; defaults to "opt"                                            -#}
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
 {#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
+{#- EXTRA_BINARIES: Colon separated list of extra binaries that this application installs     -#}
 
 {#- Civet Specific jinja arguments                                                            -#}
 {#- CIVET_STEP_ALLOWED_TO_FAIL: BOOL, specific to Civet. Available in %post, %test section    -#}
@@ -24,6 +25,13 @@
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
+
+{%- if METHOD is not defined %}
+{%- set METHOD = 'opt' -%}
+{%- endif %}
+{%- if TEST_DIRS is not defined %}
+{%- set TEST_DIRS = 'tests' -%}
+{%- endif %}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
@@ -69,10 +77,15 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
+    export INSTALLED_BINARIES={{ BINARY_NAME }}-{{ METHOD }}:exodiff:hit
 {%- if BINARY_NAME == 'moose' %}
     export PATH=/opt/moose/bin:$PATH
+    export INSTALLED_BINARIES=${INSTALLED_BINARIES}:moose_test-{{ METHOD }}
 {%- else %}
     export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
+{%- endif %}
+{%- if EXTRA_BINARIES is defined %}
+    export INSTALLED_BINARIES=${INSTALLED_BINARIES}:{{ EXTRA_BINARIES }}
 {%- endif %}
 {%- if SECTION_ENVIRONMENT is defined %}
     {{ SECTION_ENVIRONMENT }}
@@ -85,7 +98,7 @@ From: {{ APPTAINER_FROM }}
     # Load jinja vars
     APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
     BINARY_NAME={{ BINARY_NAME }}
-    export METHOD={{ METHOD or "opt" }}
+    export METHOD={{ METHOD }}
     MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
     MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
@@ -119,6 +132,9 @@ From: {{ APPTAINER_FROM }}
     MOOSE_PREFIX=/opt/${BINARY_NAME}
 {%- endif %}
     cd ${MOOSE_DIR}
+    if [ -n "$LIBTORCH_DIR" ]; then
+        MOOSE_OPTIONS+=" --with-libtorch=${LIBTORCH_DIR}"
+    fi
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
     # Build and install
 {%- if BINARY_NAME == 'moose' %}
@@ -145,7 +161,7 @@ From: {{ APPTAINER_FROM }}
     make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=1
     # Create moose-opt symlink to combined-opt
     cd /opt/moose/bin
-    ln -s combined-opt moose-opt
+    ln -s combined-${METHOD} moose-${METHOD}
 {%- endif %}
 
     # Fix permissions for installed application
@@ -162,8 +178,8 @@ From: {{ APPTAINER_FROM }}
 
     # Load jinja vars
     export BINARY_NAME={{ BINARY_NAME }}
-    export METHOD={{ METHOD or "opt" }}
-    TEST_DIRS="{{ TEST_DIRS or "tests" }}"
+    export METHOD={{ METHOD }}
+    TEST_DIRS="{{ TEST_DIRS }}"
     # Temp location for copying and running in
     export TEMP_LOC=$(mktemp -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances

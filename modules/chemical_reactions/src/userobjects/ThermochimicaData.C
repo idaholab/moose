@@ -571,7 +571,7 @@ ThermochimicaDataBase<is_nodal>::reinitDataMooseToTc()
     if (d._reinit_available)
     {
       Thermochimica::resetReinit();
-      Thermochimica::reinitData data;
+      Thermochimica::ReinitializationData data;
       data.assemblage = d._assemblage;
       data.molesPhase = d._moles_phase;
       data.elementPotential = d._element_potential;

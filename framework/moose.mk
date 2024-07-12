@@ -388,10 +388,11 @@ endif
 wasp_submodule_status:
 	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
 
-# pre-make for checking current dependency versions and showing useful warnings
-# if things like conda packages are out of date. the "-" in "@-" means that
-# it is allowed to not exit 0
-prebuild:
+# Pre-make for checking current dependency versions and showing useful warnings
+# if things like conda packages are out of date. The "-" in "@-" means that
+# it is allowed to not exit 0. "::" means that the rule can be appended by
+# applications that require prebuild steps.
+prebuild::
 	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
