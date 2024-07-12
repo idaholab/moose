@@ -16,7 +16,7 @@
 [AuxVariables]
   [mfem_diffused]
     family = LAGRANGE
-    order = FIRST 
+    order = FIRST
   []
 []
 
