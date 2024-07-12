@@ -12,10 +12,6 @@ public:
   MFEMMaterial(const InputParameters & parameters);
   virtual ~MFEMMaterial();
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
   virtual void storeCoefficients(platypus::Subdomain & subdomain) {}
 
   std::vector<SubdomainName> blocks;
