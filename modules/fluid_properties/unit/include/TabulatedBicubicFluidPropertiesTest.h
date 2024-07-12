@@ -59,6 +59,25 @@ protected:
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_gen_fp", tab_gen_uo_params);
     _tab_gen_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_gen_fp");
 
+    InputParameters tab_direct_ve_params =
+        _factory.getValidParams("TabulatedBicubicFluidProperties");
+    // TODO: Add a case with a file
+    tab_direct_ve_params.set<UserObjectName>("fp") = "co2_fp";
+    // tab_direct_ve_params.set<bool>("allow_fp_and_tabulation") = true;
+    // tab_direct_ve_params.set<FileName>("fluid_property_ve_file") = "data/csv/fluid_props_ve.csv";
+    tab_direct_ve_params.set<bool>("create_pT_interpolations") = false;
+    tab_direct_ve_params.set<bool>("create_ve_interpolations") = true;
+    tab_direct_ve_params.set<Real>("temperature_min") = 400;
+    tab_direct_ve_params.set<Real>("temperature_max") = 500;
+    tab_direct_ve_params.set<Real>("pressure_min") = 1e6;
+    tab_direct_ve_params.set<Real>("pressure_max") = 2e6;
+    MultiMooseEnum properties_ve("density enthalpy viscosity k cv cp entropy pressure temperature");
+    tab_direct_ve_params.set<MultiMooseEnum>("interpolated_properties") = properties_ve;
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "tab_direct_ve", tab_direct_ve_params);
+    _tab_direct_ve = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_direct_ve");
+
+    // To test errors
     InputParameters unordered_uo_params =
         _factory.getValidParams("TabulatedBicubicFluidProperties");
     unordered_uo_params.set<FileName>("fluid_property_file") = "data/csv/unordered_fluid_props.csv";
@@ -102,6 +121,9 @@ protected:
   const TabulatedBicubicFluidProperties * _tab_fp;
   const TabulatedBicubicFluidProperties * _tab_fp_ve;
   const TabulatedBicubicFluidProperties * _tab_gen_fp;
+  const TabulatedBicubicFluidProperties * _tab_direct_ve;
+
+  // These properties are for testing errors and warnings
   const TabulatedBicubicFluidProperties * _unordered_fp;
   const TabulatedBicubicFluidProperties * _unequal_fp;
   const TabulatedBicubicFluidProperties * _missing_col_fp;

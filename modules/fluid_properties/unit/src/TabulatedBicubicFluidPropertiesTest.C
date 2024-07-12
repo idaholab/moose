@@ -103,7 +103,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, missingData)
 }
 
 // Test tabulated fluid properties read from file including comments
-TEST_F(TabulatedBicubicFluidPropertiesTest, fromFile)
+TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFile)
 {
   Real p = 1.5e6;
   Real T = 450.0;
@@ -152,7 +152,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFile)
 }
 
 // Test tabulated fluid properties read from file including comments
-TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
+TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
 {
   Real p = 1.5e6;
   Real T = 450.0;
@@ -254,6 +254,18 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
     Real v = _tab_fp_ve->v_from_p_T(p, T);
 
     Real deriv1, deriv2;
+
+    // pressure
+    Real p1;
+    _tab_fp_ve->p_from_v_e(v, e, p1, deriv1, deriv2);
+    Real p2 = _tab_fp_ve->p_from_v_e(v, e);
+    REL_TEST(p1, p2, 0.001);
+
+    // temperature
+    Real T1;
+    _tab_fp_ve->T_from_v_e(v, e, T1, deriv1, deriv2);
+    Real T2 = _tab_fp_ve->T_from_v_e(v, e);
+    REL_TEST(T1, T2, 0.001);
 
     // speed of sound errors bc co2 props don't
     // implement enough
@@ -363,46 +375,267 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
   // implement enough
 }
 
+// Test tabulated fluid properties read from file including comments
+TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
+{
+  Real p = 1.5e6;
+  Real T = 450.0;
+  Real pert = 1.0e-7;
+
+  // Read the data file
+  Moose::_throw_on_warning = false;
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_direct_ve)->initialSetup();
+  Moose::_throw_on_warning = true;
+
+  // Use as a reference
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_fp)->initialSetup();
+  Real e = _tab_fp->e_from_p_T(p, T);
+  Real v = _tab_fp->v_from_p_T(p, T);
+
+  // NOTE: direct from (v,e) currently does not support
+  //       calls with (p, T), (p, rho), (p, s).
+
+  // check computation of fluid props from v, e
+  {
+    // heat capacity at constant pressure
+    Real cp1 = _tab_fp->cp_from_v_e(v, e);
+    Real cp2 = _tab_direct_ve->cp_from_v_e(v, e);
+    REL_TEST(cp1, cp2, 0.001);
+
+    // heat capacity at constant volume
+    Real cv1 = _tab_fp->cv_from_v_e(v, e);
+    Real cv2 = _tab_direct_ve->cv_from_v_e(v, e);
+    REL_TEST(cv1, cv2, 0.001);
+
+    // viscosity
+    Real mu1 = _tab_fp->mu_from_v_e(v, e);
+    Real mu2 = _tab_direct_ve->mu_from_v_e(v, e);
+    REL_TEST(mu1, mu2, 0.001);
+
+    // thermal conductivity
+    Real k1 = _tab_fp->k_from_v_e(v, e);
+    Real k2 = _tab_direct_ve->k_from_v_e(v, e);
+    REL_TEST(k1, k2, 0.001);
+  }
+
+  // are the two version of functions equivalent
+  {
+    Real d1, d2;
+
+    // pressure
+    Real p1;
+    _tab_direct_ve->p_from_v_e(v, e, p1, d1, d2);
+    Real p2 = _tab_direct_ve->p_from_v_e(v, e);
+    REL_TEST(p1, p2, 0.001);
+
+    // temperature
+    Real T1;
+    _tab_direct_ve->T_from_v_e(v, e, T1, d1, d2);
+    Real T2 = _tab_direct_ve->T_from_v_e(v, e);
+    REL_TEST(T1, T2, 0.001);
+
+    // speed of sound errors bc co2 props don't
+    // implement enough
+
+    // heat capacity at constant pressure
+    Real cp1;
+    _tab_direct_ve->cp_from_v_e(v, e, cp1, d1, d2);
+    Real cp2 = _tab_direct_ve->cp_from_v_e(v, e);
+    REL_TEST(cp1, cp2, 0.001);
+
+    // heat capacity at constant volume
+    Real cv1;
+    _tab_direct_ve->cv_from_v_e(v, e, cv1, d1, d2);
+    Real cv2 = _tab_direct_ve->cv_from_v_e(v, e);
+    REL_TEST(cv1, cv2, 0.001);
+
+    // viscosity
+    Real mu1;
+    _tab_direct_ve->mu_from_v_e(v, e, mu1, d1, d2);
+    Real mu2 = _tab_direct_ve->mu_from_v_e(v, e);
+    REL_TEST(mu1, mu2, 0.001);
+
+    // thermal conductivity
+    Real k1;
+    _tab_direct_ve->k_from_v_e(v, e, k1, d1, d2);
+    Real k2 = _tab_direct_ve->k_from_v_e(v, e);
+    REL_TEST(k1, k2, 0.001);
+  }
+
+  // check derivatives
+  {
+    Real deriv1, deriv2;
+
+    // speed of sound errors bc co2 props don't
+    // implement enough
+
+    // heat capacity at constant pressure
+    Real cp1;
+    _tab_direct_ve->cp_from_v_e(v, e, cp1, deriv1, deriv2);
+    Real cp_0 = _tab_direct_ve->cp_from_v_e(v, e);
+    Real cp_1 = _tab_direct_ve->cp_from_v_e(v * (1 + pert), e);
+    Real cp_2 = _tab_direct_ve->cp_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (cp_1 - cp_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (cp_2 - cp_0) / (e * pert), 0.001);
+
+    // heat capacity at constant volume
+    Real cv1;
+    _tab_direct_ve->cv_from_v_e(v, e, cv1, deriv1, deriv2);
+    Real cv_0 = _tab_direct_ve->cv_from_v_e(v, e);
+    Real cv_1 = _tab_direct_ve->cv_from_v_e(v * (1 + pert), e);
+    Real cv_2 = _tab_direct_ve->cv_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (cv_1 - cv_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (cv_2 - cv_0) / (e * pert), 0.001);
+
+    // viscosity
+    Real mu1;
+    _tab_direct_ve->mu_from_v_e(v, e, mu1, deriv1, deriv2);
+    Real mu_0 = _tab_direct_ve->mu_from_v_e(v, e);
+    Real mu_1 = _tab_direct_ve->mu_from_v_e(v * (1 + pert), e);
+    Real mu_2 = _tab_direct_ve->mu_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (mu_1 - mu_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (mu_2 - mu_0) / (e * pert), 0.001);
+
+    // thermal conductivity
+    Real k1;
+    _tab_direct_ve->k_from_v_e(v, e, k1, deriv1, deriv2);
+    Real k_0 = _tab_direct_ve->k_from_v_e(v, e);
+    Real k_1 = _tab_direct_ve->k_from_v_e(v * (1 + pert), e);
+    Real k_2 = _tab_direct_ve->k_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (k_1 - k_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (k_2 - k_0) / (e * pert), 0.001);
+  }
+
+  // test enthalpy relationships (v,h)
+  {
+    Real h = _tab_fp->h_from_p_T(p, T);
+    Real v = _tab_fp->v_from_p_T(p, T);
+    Real e_gold = _tab_fp->e_from_p_T(p, T);
+    Real e0 = _tab_direct_ve->e_from_v_h(v, h);
+    REL_TEST(e_gold, e0, 0.001);
+
+    Real e2, de_dv, de_dh;
+    _tab_direct_ve->e_from_v_h(v, h, e2, de_dv, de_dh);
+    REL_TEST(e_gold, e2, 0.001);
+    Real e_0 = _tab_direct_ve->e_from_v_h(v, h);
+    Real e_1 = _tab_direct_ve->e_from_v_h(v * (1 + pert), h);
+    Real e_2 = _tab_direct_ve->e_from_v_h(v, h * (1 + pert));
+    REL_TEST(de_dv, (e_1 - e_0) / (v * pert), 0.001);
+    REL_TEST(de_dh, (e_2 - e_0) / (h * pert), 0.001);
+  }
+
+  // AD p_from_v_e
+  {
+    DNDerivativeType dvdx;
+    DNDerivativeType dedx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dvdx, 0, 1);
+    Moose::derivInsert(dvdx, 1, 0);
+    Moose::derivInsert(dedx, 0, 0);
+    Moose::derivInsert(dedx, 1, 1);
+
+    ADReal v_ad(v, dvdx);
+    ADReal e_ad(e, dedx);
+    ADReal p_ad = _tab_direct_ve->p_from_v_e(v_ad, e_ad);
+
+    Real pp, dp_dv, dp_de;
+    _tab_direct_ve->p_from_v_e(v, e, pp, dp_dv, dp_de);
+    REL_TEST(p_ad.derivatives()[0], dp_dv, 0.0001);
+    REL_TEST(p_ad.derivatives()[1], dp_de, 0.0001);
+  }
+
+  // AD T_from_v_e
+  {
+    DNDerivativeType dvdx;
+    DNDerivativeType dedx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dvdx, 0, 1);
+    Moose::derivInsert(dvdx, 1, 0);
+    Moose::derivInsert(dedx, 0, 0);
+    Moose::derivInsert(dedx, 1, 1);
+
+    ADReal v_ad(v, dvdx);
+    ADReal e_ad(e, dedx);
+    ADReal T_ad = _tab_direct_ve->T_from_v_e(v_ad, e_ad);
+
+    Real TT, dT_dv, dT_de;
+    _tab_direct_ve->T_from_v_e(v, e, TT, dT_dv, dT_de);
+    REL_TEST(T_ad.derivatives()[0], dT_dv, 0.0001);
+    REL_TEST(T_ad.derivatives()[1], dT_de, 0.0001);
+  }
+
+  // cannot test AD c_from_v_e because co2 props do not
+  // implement enough
+}
+
 /**
  * Verify calculation of the derivatives of tabulated properties by comparing with finite
  * differences
  */
 TEST_F(TabulatedBicubicFluidPropertiesTest, derivatives)
 {
-  // Read the data file
-  Moose::_throw_on_warning = false;
-  const_cast<TabulatedBicubicFluidProperties *>(_tab_fp_ve)->initialSetup();
-  Moose::_throw_on_warning = true;
-  const Real tol = REL_TOL_DERIVATIVE;
 
   const Real p = 1.5e6;
   const Real T = 452.0;
-  const Real rho = _tab_fp_ve->rho_from_p_T(p, T);
-  const Real v = 1. / rho;
-  const Real e = _tab_fp_ve->e_from_p_T(p, T);
-  const Real s = _tab_fp_ve->s_from_p_T(p, T);
 
-  DERIV_TEST(_tab_fp_ve->rho_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->e_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->v_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->h_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->k_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->cp_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->cv_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->mu_from_p_T, p, T, tol);
+  {
+    // Read the data file and generate (v,e) to (p,T) interpolations
+    Moose::_throw_on_warning = false;
+    const_cast<TabulatedBicubicFluidProperties *>(_tab_fp_ve)->initialSetup();
+    Moose::_throw_on_warning = true;
+    const Real tol = REL_TOL_DERIVATIVE;
 
-  DERIV_TEST(_tab_fp_ve->p_from_v_e, v, e, tol);
-  DERIV_TEST(_tab_fp_ve->mu_from_v_e, v, e, tol);
-  DERIV_TEST(_tab_fp_ve->k_from_v_e, v, e, tol);
-  DERIV_TEST(_tab_fp_ve->T_from_v_e, v, e, tol);
-  DERIV_TEST(_tab_fp_ve->cp_from_v_e, v, e, tol);
-  DERIV_TEST(_tab_fp_ve->cv_from_v_e, v, e, tol);
+    const Real rho = _tab_fp_ve->rho_from_p_T(p, T);
+    const Real v = 1. / rho;
+    const Real e = _tab_fp_ve->e_from_p_T(p, T);
+    const Real s = _tab_fp_ve->s_from_p_T(p, T);
 
-  DERIV_TEST(_tab_fp_ve->T_from_p_rho, p, rho, tol);
-  DERIV_TEST(_tab_fp_ve->e_from_p_rho, p, rho, tol);
+    DERIV_TEST(_tab_fp_ve->rho_from_p_T, p, T, tol);
+    DERIV_TEST(_tab_fp_ve->e_from_p_T, p, T, tol);
+    DERIV_TEST(_tab_fp_ve->v_from_p_T, p, T, tol);
+    DERIV_TEST(_tab_fp_ve->h_from_p_T, p, T, tol);
+    DERIV_TEST(_tab_fp_ve->k_from_p_T, p, T, tol);
+    DERIV_TEST(_tab_fp_ve->cp_from_p_T, p, T, tol);
+    DERIV_TEST(_tab_fp_ve->cv_from_p_T, p, T, tol);
+    DERIV_TEST(_tab_fp_ve->mu_from_p_T, p, T, tol);
 
-  DERIV_TEST(_tab_fp_ve->T_from_p_s, p, s, tol);
-  DERIV_TEST(_tab_fp_ve->rho_from_p_s, p, s, tol);
+    DERIV_TEST(_tab_fp_ve->p_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_fp_ve->mu_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_fp_ve->k_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_fp_ve->T_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_fp_ve->cp_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_fp_ve->cv_from_v_e, v, e, tol);
+
+    DERIV_TEST(_tab_fp_ve->T_from_p_rho, p, rho, tol);
+    DERIV_TEST(_tab_fp_ve->e_from_p_rho, p, rho, tol);
+
+    DERIV_TEST(_tab_fp_ve->T_from_p_s, p, s, tol);
+    DERIV_TEST(_tab_fp_ve->rho_from_p_s, p, s, tol);
+  }
+
+  {
+    // Read the data file with direct to (v,e) interpolations
+    Moose::_throw_on_warning = false;
+    const_cast<TabulatedBicubicFluidProperties *>(_tab_direct_ve)->initialSetup();
+    Moose::_throw_on_warning = true;
+    const Real tol = REL_TOL_DERIVATIVE;
+
+    const Real rho = _tab_direct_ve->rho_from_p_T(p, T);
+    const Real v = 1. / rho;
+    const Real e = _tab_direct_ve->e_from_p_T(p, T);
+    const Real h = e + p * v;
+
+    DERIV_TEST(_tab_direct_ve->p_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_direct_ve->mu_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_direct_ve->k_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_direct_ve->T_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_direct_ve->cp_from_v_e, v, e, tol);
+    DERIV_TEST(_tab_direct_ve->cv_from_v_e, v, e, tol);
+
+    DERIV_TEST(_tab_direct_ve->e_from_v_h, v, h, tol);
+  }
 }
 
 // Test generation of tabulated fluid properties
