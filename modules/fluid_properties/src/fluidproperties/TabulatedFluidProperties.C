@@ -850,26 +850,68 @@ TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Rea
 Real
 TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
 {
-  if (!_construct_pT_from_vh)
-    mooseError("You must construct pT from vh tables when calling e_from_v_h.");
-  const Real p = _p_from_v_h_ipol->sample(v, h);
-  const Real T = _T_from_v_h_ipol->sample(v, h);
-  return e_from_p_T(p, T);
+  if (_construct_pT_from_vh)
+  {
+    const Real p = _p_from_v_h_ipol->sample(v, h);
+    const Real T = _T_from_v_h_ipol->sample(v, h);
+    return e_from_p_T(p, T);
+  }
+  else if (_create_pT_from_ve)
+  {
+    // Lambda computes h from v and the current_e
+    auto lambda = [&](Real v, Real current_e, Real & new_h, Real & dh_dv, Real & dh_de)
+    { h_from_v_e(v, current_e, new_h, dh_dv, dh_de); };
+    Real e = FluidPropertiesUtils::NewtonSolve(v,
+                                               h,
+                                               /*e initial guess*/ h - _p_initial_guess * v,
+                                               _tolerance,
+                                               lambda,
+                                               name() + "::e_from_v_h")
+                 .first;
+    return e;
+  }
+  else if (_fp)
+    return _fp->e_from_v_h(v, h);
+  else
+    mooseError(__PRETTY_FUNCTION__,
+               "\nNo tabulation or fluid property 'fp' object to compute value");
 }
 
 void
 TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
 {
-  if (!_construct_pT_from_vh)
-    mooseError("You must construct pT from vh tables when calling e_from_v_h.");
-  Real p = 0, dp_dv = 0, dp_dh = 0;
-  _p_from_v_h_ipol->sampleValueAndDerivatives(v, h, p, dp_dv, dp_dh);
-  Real T = 0, dT_dv = 0, dT_dh = 0;
-  _T_from_v_h_ipol->sampleValueAndDerivatives(v, h, T, dT_dv, dT_dh);
-  Real de_dp, de_dT;
-  e_from_p_T(p, T, e, de_dp, de_dT);
-  de_dv = de_dp * dp_dv + de_dT * dT_dv;
-  de_dh = de_dp * dp_dh + de_dT * dT_dh;
+  if (_construct_pT_from_vh)
+  {
+    Real p = 0, dp_dv = 0, dp_dh = 0;
+    _p_from_v_h_ipol->sampleValueAndDerivatives(v, h, p, dp_dv, dp_dh);
+    Real T = 0, dT_dv = 0, dT_dh = 0;
+    _T_from_v_h_ipol->sampleValueAndDerivatives(v, h, T, dT_dv, dT_dh);
+    Real de_dp, de_dT;
+    e_from_p_T(p, T, e, de_dp, de_dT);
+    de_dv = de_dp * dp_dv + de_dT * dT_dv;
+    de_dh = de_dp * dp_dh + de_dT * dT_dh;
+  }
+  else if (_create_pT_from_ve)
+  {
+    // Lambda computes h from v and the current_e
+    auto lambda = [&](Real v, Real current_e, Real & new_h, Real & dh_dv, Real & dh_de)
+    { h_from_v_e(v, current_e, new_h, dh_dv, dh_de); };
+    const auto e_data =
+        FluidPropertiesUtils::NewtonSolve(v,
+                                          h,
+                                          /*e initial guess*/ h - _p_initial_guess * v,
+                                          _tolerance,
+                                          lambda,
+                                          name() + "::e_from_v_h");
+    e = e_data.first;
+    de_dv = -p_from_v_e(v, e);
+    de_dh = e_data.second;
+  }
+  else if (_fp)
+    _fp->e_from_v_h(v, h, e, de_dv, de_dh);
+  else
+    mooseError(__PRETTY_FUNCTION__,
+               "\nNo tabulation or fluid property 'fp' object to compute value");
 }
 
 std::vector<Real>
