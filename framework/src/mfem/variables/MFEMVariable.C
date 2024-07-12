@@ -1,4 +1,5 @@
 #include "MFEMVariable.h"
+#include "mfem.hpp"
 
 registerMooseObject("PlatypusApp", MFEMVariable);
 
@@ -9,12 +10,11 @@ MFEMVariable::validParams()
 
   params.registerBase("MooseVariableBase");
 
-  // Create user-facing 'boundary' input for restricting inheriting object to boundaries
-
+  // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
   params.addRequiredParam<UserObjectName>("fespace",
                                           "The finite element space this variable is defined on.");
 
-  // Remaining params are for compatibility with MOOSE AuxVariable interface
+  // Remaining params are for compatibility with MOOSE AuxVariable interface.
   params.addRangeCheckedParam<unsigned int>(
       "components", 3, "components>0", "Number of components for an array variable");
 
@@ -36,9 +36,13 @@ MFEMVariable::validParams()
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    fespace(getUserObject<MFEMFESpace>("fespace")),
-    components(parameters.get<unsigned int>("components"))
+    _fespace(getUserObject<MFEMFESpace>("fespace")),
+    _gridfunction(buildGridFunction())
 {
 }
 
-MFEMVariable::~MFEMVariable() {}
+const std::shared_ptr<mfem::ParGridFunction>
+MFEMVariable::buildGridFunction()
+{
+  return std::make_shared<mfem::ParGridFunction>(_fespace.getFESpace().get());
+}
