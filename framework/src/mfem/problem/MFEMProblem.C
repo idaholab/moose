@@ -216,12 +216,11 @@ MFEMProblem::addAuxVariable(const std::string & var_type,
                             const std::string & var_name,
                             InputParameters & parameters)
 {
-  mooseAssert(var_type == "MFEMVariable", "Only MFEMVariable types supported.");
-
   FEProblemBase::addUserObject(var_type, var_name, parameters);
-  MFEMVariable & var(getUserObject<MFEMVariable>(var_name));
+  MFEMVariable & mfem_variable(getUserObject<MFEMVariable>(var_name));
 
-  mfem_problem_builder->AddGridFunction(var_name, var.fespace.name());
+  // Register gridfunction.
+  mfem_problem->_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
 }
 
 void
