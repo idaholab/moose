@@ -1,4 +1,6 @@
 #include "MFEMVariable.h"
+#include "MooseVariableBase.h"
+#include "mfem.hpp"
 
 registerMooseObject("PlatypusApp", MFEMVariable);
 
@@ -7,38 +9,28 @@ MFEMVariable::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
 
-  params.registerBase("MooseVariableBase");
-
-  // Create user-facing 'boundary' input for restricting inheriting object to boundaries
-
+  // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
   params.addRequiredParam<UserObjectName>("fespace",
                                           "The finite element space this variable is defined on.");
 
-  // Remaining params are for compatibility with MOOSE AuxVariable interface
-  params.addRangeCheckedParam<unsigned int>(
-      "components", 3, "components>0", "Number of components for an array variable");
+  // Require moose variable parameters (not used!)
+  params += MooseVariableBase::validParams();
 
-  params.addParam<std::vector<Real>>("scaling",
-                                     "Specifies a scaling factor to apply to this variable");
-  params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
-  params.addParam<bool>("fv", false, "True to make this variable a finite volume variable");
-  params.addParam<bool>("array",
-                        false,
-                        "True to make this variable a array variable regardless of number of "
-                        "components. If 'components' > 1, this will automatically be set to"
-                        "true.");
-  params.addParamNamesToGroup("scaling eigen", "Advanced");
-
-  params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
+  params.addClassDescription("Class for MFEM variables (gridfunctions).");
+  params.registerBase("MFEMVariable");
 
   return params;
 }
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    fespace(getUserObject<MFEMFESpace>("fespace")),
-    components(parameters.get<unsigned int>("components"))
+    _fespace(getUserObject<MFEMFESpace>("fespace")),
+    _gridfunction(buildGridFunction())
 {
 }
 
-MFEMVariable::~MFEMVariable() {}
+const std::shared_ptr<mfem::ParGridFunction>
+MFEMVariable::buildGridFunction()
+{
+  return std::make_shared<mfem::ParGridFunction>(_fespace.getFESpace().get());
+}
