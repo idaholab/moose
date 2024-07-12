@@ -80,8 +80,6 @@ MFEMProblem::initialSetup()
       mooseError("Specified formulation does not support Transient executioners");
     }
 
-    mfem_problem = mfem_transient_problem_builder->ReturnProblem();
-
     exec_params.SetParam("StartTime", float(_moose_executioner->getStartTime()));
     exec_params.SetParam("TimeStep", float(dt()));
     exec_params.SetParam("EndTime", float(_moose_executioner->endTime()));
@@ -98,8 +96,6 @@ MFEMProblem::initialSetup()
     {
       mooseError("Specified formulation does not support Steady executioners");
     }
-
-    mfem_problem = mfem_steady_problem_builder->ReturnProblem();
 
     exec_params.SetParam("Problem",
                          static_cast<platypus::SteadyStateProblem *>(mfem_problem.get()));
@@ -149,6 +145,8 @@ MFEMProblem::setFormulation(const std::string & user_object_name,
 
   mfem_problem_builder->SetMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
   mfem_problem_builder->ConstructOperator();
+
+  mfem_problem = mfem_problem_builder->ReturnProblem();
 }
 
 void
