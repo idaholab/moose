@@ -54,6 +54,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("add_aux_variable", "add_mfem_fespaces");
   addTaskDependency("add_elemental_field_variable", "add_mfem_fespaces");
   addTaskDependency("add_kernel", "add_mfem_fespaces");
+
+  // add solver.
+  registerMooseObjectTask("add_mfem_solver", MFEMSolverBase, true);
+  registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
+  addTaskDependency("add_mfem_solver", "add_mfem_formulation");
 }
 
 void

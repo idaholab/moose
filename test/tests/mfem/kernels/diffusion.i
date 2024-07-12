@@ -77,6 +77,10 @@
   []
 []
 
+[Solver]
+  type = MFEMHypreGMRESSolver
+[]
+
 [Executioner]
   type = Transient
   dt = 1.0
