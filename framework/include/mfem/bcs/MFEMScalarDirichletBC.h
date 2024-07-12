@@ -12,10 +12,6 @@ public:
   MFEMScalarDirichletBC(const InputParameters & parameters);
   ~MFEMScalarDirichletBC() override {}
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
 protected:
   MFEMCoefficient * _coef{nullptr};
 };

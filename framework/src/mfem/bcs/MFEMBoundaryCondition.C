@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMBoundaryCondition);
 InputParameters
 MFEMBoundaryCondition::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
 
   params.registerBase("BoundaryCondition");
 
@@ -18,7 +18,7 @@ MFEMBoundaryCondition::validParams()
 }
 
 MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+  : MFEMGeneralUserObject(parameters),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
     bdr_attr(_boundary_names.size())
 {

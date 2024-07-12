@@ -101,14 +101,16 @@ public:
 
   /**
    * Override of ExternalProblem::addKernel. Uses ExternalProblem::addKernel to create a
-   * GeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
+   * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
    */
   void addKernel(const std::string & kernel_name,
                  const std::string & name,
                  InputParameters & parameters) override;
   /**
-   * Override of ExternalProblem::addAuxKernel.
+   * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
+   * MFEMGeneralUserObject representing the auxkernel in MOOSE, and creates corresponding MFEM
+   * auxsolver to be used in the MFEM solve.
    */
   void addAuxKernel(const std::string & kernel_name,
                     const std::string & name,
