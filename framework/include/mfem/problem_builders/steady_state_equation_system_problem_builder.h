@@ -56,8 +56,6 @@ public:
   /// equation system is initialized.
   void InitializeKernels() final;
 
-  auto ReturnProblem() { return ProblemBuilder::ReturnProblem<SteadyStateEquationSystemProblem>(); }
-
 protected:
   [[nodiscard]] platypus::SteadyStateEquationSystemProblem * GetProblem() const override
   {

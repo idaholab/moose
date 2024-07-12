@@ -47,6 +47,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // add FESpaces
   registerMooseObjectTask("add_mfem_fespaces", MFEMFESpace, false);
+  appendMooseObjectTask("add_mfem_fespaces", MFEMFECollection);
   registerSyntaxTask("AddFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   addTaskDependency("add_variable", "add_mfem_fespaces");
   addTaskDependency("add_aux_variable", "add_mfem_fespaces");
