@@ -324,9 +324,15 @@ MeshCut2DUserObjectBase::growFront()
       Point new_node_offset = direction_iter->second;
       Point x = this_point + new_node_offset;
 
-      // FIXME LYNN check if line between this_point and x crosses an element in the cutter mesh or
-      // solid mesh boundary
-      // use MeshCut2DRankTwoTensorNucleation::lineLineIntersect2D
+      // TODO:  Should check if cut line segment created between "this_point" and "x" crosses
+      // another line element in the cutter mesh or solid mesh boundary.
+      // Crossing another line element would be a special case that still needs to be handled,
+      // however, it doesnot cause an error, it will just ignore the other line segment and recut
+      // the solid mesh element.
+      // Crossing a solid mesh boundary would be for aesthetics reasons so
+      // that element was trimmed close to the boundary but would have not effect on the simulation.
+      // Crossing a solid mesh boundary should be handled by something like
+      // MeshCut2DRankTwoTensorNucleation::lineLineIntersect2D
 
       // add node to front
       this_node = Node::build(x, _cutter_mesh->n_nodes()).release();

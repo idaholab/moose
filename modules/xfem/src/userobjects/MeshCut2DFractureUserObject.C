@@ -46,8 +46,9 @@ MeshCut2DFractureUserObject::MeshCut2DFractureUserObject(const InputParameters &
     _growth_increment(getParam<Real>("growth_increment")),
     _use_k(isParamValid("k_critical")),
     _use_stress(isParamValid("stress_threshold")),
-    _k_critical(_use_k ? getParam<Real>("k_critical") : 1.0e12),
-    _stress_threshold(_use_stress ? getParam<Real>("stress_threshold") : 1.0e12),
+    _k_critical(_use_k ? getParam<Real>("k_critical") : std::numeric_limits<Real>::max()),
+    _stress_threshold(_use_stress ? getParam<Real>("stress_threshold")
+                                  : std::numeric_limits<Real>::max()),
     _ki_vpp(_use_k ? &getVectorPostprocessorValue(
                          "ki_vectorpostprocessor",
                          getParam<VectorPostprocessorName>("ki_vectorpostprocessor"))

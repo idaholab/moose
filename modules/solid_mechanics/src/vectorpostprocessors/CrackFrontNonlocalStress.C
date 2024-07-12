@@ -29,7 +29,7 @@ CrackFrontNonlocalStress::validParams()
                                           "The CrackFrontDefinition user object name");
   params.addRequiredParam<Real>("box_length", "Distance in front of crack front.");
   params.addRequiredParam<Real>("box_height", "Distance normal to front of crack front.");
-  params.addParam<Real>("box_width", 1, "Distance tangent to front of crack front.");
+  params.addParam<Real>("box_width", "Distance tangent to front of crack front.");
 
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
@@ -45,7 +45,7 @@ CrackFrontNonlocalStress::validParams()
 CrackFrontNonlocalStress::CrackFrontNonlocalStress(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _box_length(getParam<Real>("box_length")),
-    _box_width(getParam<Real>("box_width")),
+    _box_width(isParamValid("box_width") ? getParam<Real>("box_width") : 1),
     _box_height(getParam<Real>("box_height")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),

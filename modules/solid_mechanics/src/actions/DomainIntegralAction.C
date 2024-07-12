@@ -375,7 +375,7 @@ DomainIntegralAction::act()
       // TODO the xfem_flags should be something like this:
       // xfem_exec_flags = {item, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
       // but the item=XFEM_MARK flag causes xfem tests to diverge
-      xfem_exec_flags = {EXEC_NONLINEAR, EXEC_TIMESTEP_END};
+      xfem_exec_flags = {EXEC_INITIAL, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
     }
   }
 
