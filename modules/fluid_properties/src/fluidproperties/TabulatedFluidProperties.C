@@ -1562,8 +1562,7 @@ TabulatedFluidProperties::generateVETabulatedData()
       for (unsigned int v = 0; v < _num_v; ++v)
         for (unsigned int e = 0; e < _num_e; ++e)
           _properties_ve[i][v * _num_e + e] =
-              _internal_energy[e] +
-              _fp->p_from_v_e(_specific_volume[v], _internal_energy[e]) * _specific_volume[v];
+              _fp->h_from_v_e(_specific_volume[v], _internal_energy[e]);
 
     if (_interpolated_properties[i] == "internal_energy")
       for (unsigned int v = 0; v < _num_v; ++v)

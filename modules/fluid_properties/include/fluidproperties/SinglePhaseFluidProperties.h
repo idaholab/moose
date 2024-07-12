@@ -206,6 +206,7 @@ public:
   propfunc(s, T, v)
   propfunc(cv, T, v)
   propfunc(h, p, T)
+  propfuncWithDefault(h, v, e)
   propfunc(g, v, e)
   propfuncWithDefault(p, h, s)
   propfunc(T, h, p)  // temporary, until uniformization

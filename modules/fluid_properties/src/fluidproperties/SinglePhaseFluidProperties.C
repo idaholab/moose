@@ -186,12 +186,6 @@ SinglePhaseFluidProperties::k_from_p_T(Real p, Real T) const
   return k_from_v_e(v, e);
 }
 
-Real
-SinglePhaseFluidProperties::h_from_v_e(Real v, Real e) const
-{
-  return e - v * p_from_v_e(v, e);
-}
-
 void
 SinglePhaseFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const
 {
@@ -202,6 +196,22 @@ SinglePhaseFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, R
   k_from_v_e(v, e, k, dk_dv, dk_de);
   dk_dp = dk_dv * dv_dp + dk_de * de_dp;
   dk_dT = dk_dv * dv_dT + dk_de * de_dT;
+}
+
+Real
+SinglePhaseFluidProperties::h_from_v_e(Real v, Real e) const
+{
+  return e - v * p_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::h_from_v_e(Real v, Real e, Real & h, Real & dh_dv, Real & dh_de) const
+{
+  Real p, dp_dv, dp_de;
+  p_from_v_e(v, e, p, dp_dv, dp_de);
+  h = e - v * p;
+  dh_dv = -p_from_v_e(v, e) - v * dp_dv;
+  dh_de = 1 - v * dp_de;
 }
 
 Real
