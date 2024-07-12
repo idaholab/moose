@@ -1,4 +1,5 @@
 #include "MFEMVariable.h"
+#include "MooseVariableBase.h"
 #include "mfem.hpp"
 
 registerMooseObject("PlatypusApp", MFEMVariable);
@@ -6,24 +7,24 @@ registerMooseObject("PlatypusApp", MFEMVariable);
 InputParameters
 MFEMVariable::validParams()
 {
-  InputParameters params = MooseVariableBase::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
 
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
   params.addRequiredParam<UserObjectName>("fespace",
                                           "The finite element space this variable is defined on.");
 
-  // Set moose required parameters with dummy options since we never actually use them.
-  params.set<MooseEnum>("order") = "CONSTANT";
-  params.set<MooseEnum>("family") = "SCALAR";
+  // Require moose variable parameters (not used!)
+  params += MooseVariableBase::validParams();
 
   params.addClassDescription("Class for MFEM variables (gridfunctions).");
+  params.registerBase("MFEMVariable");
 
   return params;
 }
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
-  : MooseVariableBase(parameters),
-    _fespace(parameters.get<MFEMFESpace>("fespace")),
+  : MFEMGeneralUserObject(parameters),
+    _fespace(getUserObject<MFEMFESpace>("fespace")),
     _gridfunction(buildGridFunction())
 {
 }
