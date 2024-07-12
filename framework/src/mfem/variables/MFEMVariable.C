@@ -6,37 +6,24 @@ registerMooseObject("PlatypusApp", MFEMVariable);
 InputParameters
 MFEMVariable::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
-
-  params.registerBase("MooseVariableBase");
+  InputParameters params = MooseVariableBase::validParams();
 
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
   params.addRequiredParam<UserObjectName>("fespace",
                                           "The finite element space this variable is defined on.");
 
-  // Remaining params are for compatibility with MOOSE AuxVariable interface.
-  params.addRangeCheckedParam<unsigned int>(
-      "components", 3, "components>0", "Number of components for an array variable");
+  // Set moose required parameters with dummy options since we never actually use them.
+  params.set<MooseEnum>("order") = "CONSTANT";
+  params.set<MooseEnum>("family") = "SCALAR";
 
-  params.addParam<std::vector<Real>>("scaling",
-                                     "Specifies a scaling factor to apply to this variable");
-  params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
-  params.addParam<bool>("fv", false, "True to make this variable a finite volume variable");
-  params.addParam<bool>("array",
-                        false,
-                        "True to make this variable a array variable regardless of number of "
-                        "components. If 'components' > 1, this will automatically be set to"
-                        "true.");
-  params.addParamNamesToGroup("scaling eigen", "Advanced");
-
-  params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
+  params.addClassDescription("Class for MFEM variables (gridfunctions).");
 
   return params;
 }
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
-    _fespace(getUserObject<MFEMFESpace>("fespace")),
+  : MooseVariableBase(parameters),
+    _fespace(parameters.get<MFEMFESpace>("fespace")),
     _gridfunction(buildGridFunction())
 {
 }
