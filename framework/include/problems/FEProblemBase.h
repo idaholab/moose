@@ -153,6 +153,16 @@ public:
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
+  enum class CoverageCheckMode
+  {
+    FALSE,
+    TRUE,
+    OFF,
+    ON,
+    SKIP_LIST,
+    ONLY_LIST,
+  };
+
   virtual EquationSystems & es() override { return _req.set().es(); }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
@@ -1735,7 +1745,16 @@ public:
    * Set flag to indicate whether kernel coverage checks should be performed. This check makes
    * sure that at least one kernel is active on all subdomains in the domain (default: true).
    */
-  void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
+  void setKernelCoverageCheck(CoverageCheckMode mode) { _kernel_coverage_check = mode; }
+
+  /**
+   * Set flag to indicate whether kernel coverage checks should be performed. This check makes
+   * sure that at least one kernel is active on all subdomains in the domain (default: true).
+   */
+  void setKernelCoverageCheck(bool flag)
+  {
+    _kernel_coverage_check = flag ? CoverageCheckMode::TRUE : CoverageCheckMode::FALSE;
+  }
 
   /**
    * Set flag to indicate whether material coverage checks should be performed. This check makes
@@ -1743,7 +1762,18 @@ public:
    * supplied. If no materials are supplied anywhere, a simulation is still considered OK as long as
    * no properties are being requested anywhere.
    */
-  void setMaterialCoverageCheck(bool flag) { _material_coverage_check = flag; }
+  void setMaterialCoverageCheck(CoverageCheckMode mode) { _material_coverage_check = mode; }
+
+  /**
+   * Set flag to indicate whether material coverage checks should be performed. This check makes
+   * sure that at least one material is active on all subdomains in the domain if any material is
+   * supplied. If no materials are supplied anywhere, a simulation is still considered OK as long as
+   * no properties are being requested anywhere.
+   */
+  void setMaterialCoverageCheck(bool flag)
+  {
+    _material_coverage_check = flag ? CoverageCheckMode::TRUE : CoverageCheckMode::FALSE;
+  }
 
   /**
    * Toggle parallel barrier messaging (defaults to on).
@@ -2640,8 +2670,9 @@ protected:
 
   SolverParams _solver_params;
 
-  /// Determines whether a check to verify an active kernel on every subdomain
-  bool _kernel_coverage_check;
+  /// Determines whether and which subdomains are to be checked to ensure that they have an active kernel
+  CoverageCheckMode _kernel_coverage_check;
+  std::vector<SubdomainName> _kernel_coverage_blocks;
 
   /// whether to perform checking of boundary restricted nodal object variable dependencies,
   /// e.g. whether the variable dependencies are defined on the selected boundaries
@@ -2651,8 +2682,9 @@ protected:
   /// e.g. whether the variable dependencies are defined on the selected boundaries
   const bool _boundary_restricted_elem_integrity_check;
 
-  /// Determines whether a check to verify an active material on every subdomain
-  bool _material_coverage_check;
+  /// Determines whether and which subdomains are to be checked to ensure that they have an active material
+  CoverageCheckMode _material_coverage_check;
+  std::vector<SubdomainName> _material_coverage_blocks;
 
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
   bool _fv_bcs_integrity_check;
