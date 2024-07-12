@@ -125,6 +125,11 @@ public:
 
   platypus::Coefficients _coefficients;
 
+  /**
+   * Returns a const-reference to the problem data.
+   */
+  const platypus::Problem & getProblemData() const { return *mfem_problem; }
+
 protected:
   /**
    * Template method for adding kernels. We can only add kernels using equation system problem
