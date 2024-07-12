@@ -1,12 +1,12 @@
 #pragma once
 
 #include "MFEMFESpace.h"
-#include "MFEMGeneralUserObject.h"
+#include "MooseVariableBase.h"
 
 /**
  * Constructs and stores an mfem::ParGridFunction object.
  */
-class MFEMVariable : public MFEMGeneralUserObject
+class MFEMVariable : public MooseVariableBase
 {
 public:
   static InputParameters validParams();
