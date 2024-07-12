@@ -856,7 +856,7 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
     const Real T = _T_from_v_h_ipol->sample(v, h);
     return e_from_p_T(p, T);
   }
-  else if (_create_pT_from_ve)
+  else if (_create_direct_ve_interpolations)
   {
     // Lambda computes h from v and the current_e
     auto lambda = [&](Real v, Real current_e, Real & new_h, Real & dh_dv, Real & dh_de)
@@ -891,7 +891,7 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
     de_dv = de_dp * dp_dv + de_dT * dT_dv;
     de_dh = de_dp * dp_dh + de_dT * dT_dh;
   }
-  else if (_create_pT_from_ve)
+  else if (_create_direct_ve_interpolations)
   {
     // Lambda computes h from v and the current_e
     auto lambda = [&](Real v, Real current_e, Real & new_h, Real & dh_dv, Real & dh_de)
@@ -1559,8 +1559,11 @@ TabulatedFluidProperties::generateVETabulatedData()
           _properties_ve[i][v * _num_e + e] = 1. / _specific_volume[v];
 
     if (_interpolated_properties[i] == "enthalpy")
-      mooseWarning("Enthalpy is not currently computed from (v,e) so a tabulation cannot be "
-                   "generated directly from a 'fp' fluid properties object.");
+      for (unsigned int v = 0; v < _num_v; ++v)
+        for (unsigned int e = 0; e < _num_e; ++e)
+          _properties_ve[i][v * _num_e + e] =
+              _internal_energy[e] +
+              _fp->p_from_v_e(_specific_volume[v], _internal_energy[e]) * _specific_volume[v];
 
     if (_interpolated_properties[i] == "internal_energy")
       for (unsigned int v = 0; v < _num_v; ++v)
