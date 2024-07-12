@@ -2,6 +2,8 @@
 #include "MFEMHypreGMRESSolver.h"
 #include "MFEMProblem.h"
 
+registerMooseObject("PlatypusApp", MFEMHypreGMRESSolver);
+
 InputParameters
 MFEMHypreGMRESSolver::validParams()
 {
