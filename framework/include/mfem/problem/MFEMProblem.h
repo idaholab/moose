@@ -125,13 +125,6 @@ public:
   void setMFEMVarData(const std::string & var_name);
   void setMOOSEVarData(const std::string & var_name);
 
-  /**
-   * Method used to get an mfem FEC depending on the variable family specified in the input file.
-   * This method is used in addAuxVariable to help create the MFEM grid function that corresponds to
-   * a given MOOSE aux-variable.
-   */
-  InputParameters addMFEMFESpaceFromMOOSEVariable(InputParameters & moosevar_params);
-
 protected:
   /**
    * Called internally by setMFEMVarData.
