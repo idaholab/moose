@@ -1,22 +1,18 @@
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 #include "coefficients.h"
 #include "Function.h"
 
 libMesh::Point PointFromMFEMVector(const mfem::Vector & vec);
 
-class MFEMCoefficient : public GeneralUserObject
+class MFEMCoefficient : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   MFEMCoefficient(const InputParameters & parameters);
   virtual ~MFEMCoefficient();
-
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
 
   virtual std::shared_ptr<mfem::Coefficient> getCoefficient() const
   {

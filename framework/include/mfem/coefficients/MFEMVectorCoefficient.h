@@ -1,20 +1,16 @@
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 #include "coefficients.h"
 #include "Function.h"
 
-class MFEMVectorCoefficient : public GeneralUserObject
+class MFEMVectorCoefficient : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   MFEMVectorCoefficient(const InputParameters & parameters);
   virtual ~MFEMVectorCoefficient();
-
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
 
   virtual std::shared_ptr<mfem::VectorCoefficient> getVectorCoefficient() const
   {

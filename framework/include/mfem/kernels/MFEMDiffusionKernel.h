@@ -10,10 +10,6 @@ public:
   MFEMDiffusionKernel(const InputParameters & parameters);
   ~MFEMDiffusionKernel() override {}
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
   std::shared_ptr<platypus::Kernel<mfem::ParBilinearForm>> getKernel() override { return _kernel; }
 
 protected:

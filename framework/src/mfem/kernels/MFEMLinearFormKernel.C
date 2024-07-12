@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMLinearFormKernel);
 InputParameters
 MFEMLinearFormKernel::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
 
   params.registerBase("Kernel");
   params.addParam<std::string>("variable", "Variable on which to apply the kernel");
@@ -14,7 +14,7 @@ MFEMLinearFormKernel::validParams()
 }
 
 MFEMLinearFormKernel::MFEMLinearFormKernel(const InputParameters & parameters)
-  : GeneralUserObject(parameters)
+  : MFEMGeneralUserObject(parameters)
 {
 }
 
