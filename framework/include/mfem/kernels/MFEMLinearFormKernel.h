@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 #include "kernels.h"
 #include "gridfunctions.h"
 
-class MFEMLinearFormKernel : public GeneralUserObject
+class MFEMLinearFormKernel : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();

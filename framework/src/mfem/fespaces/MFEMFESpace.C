@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMFESpace);
 InputParameters
 MFEMFESpace::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMFESpace");
   MooseEnum fespace_types("H1 ND RT L2", "H1", true);
   params.addParam<MooseEnum>(
@@ -31,7 +31,7 @@ MFEMFESpace::validParams()
 }
 
 MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+  : MFEMGeneralUserObject(parameters),
     order(parameters.get<MooseEnum>("order")),
     vdim(parameters.get<int>("vdim")),
     fespace_type(parameters.get<MooseEnum>("fespace_type")),

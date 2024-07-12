@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 #include "problem_builder_base.h"
 
-class MFEMFormulation : public GeneralUserObject
+class MFEMFormulation : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();

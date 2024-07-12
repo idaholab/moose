@@ -1,12 +1,12 @@
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 #include "boundary_conditions.h"
 #include "gridfunctions.h"
 #include "coefficients.h"
 #include "Function.h"
 
-class MFEMBoundaryCondition : public GeneralUserObject
+class MFEMBoundaryCondition : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();

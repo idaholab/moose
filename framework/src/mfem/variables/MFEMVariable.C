@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMVariable);
 InputParameters
 MFEMVariable::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
 
   params.registerBase("MooseVariableBase");
 
@@ -35,7 +35,7 @@ MFEMVariable::validParams()
 }
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+  : MFEMGeneralUserObject(parameters),
     fespace(getUserObject<MFEMFESpace>("fespace")),
     components(parameters.get<unsigned int>("components"))
 {
