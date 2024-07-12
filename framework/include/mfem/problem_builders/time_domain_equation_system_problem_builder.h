@@ -56,8 +56,6 @@ public:
   /// NB: - note use of final. Ensure that the equation system is initialized.
   void InitializeKernels() final;
 
-  auto ReturnProblem() { return ProblemBuilder::ReturnProblem<TimeDomainEquationSystemProblem>(); }
-
 protected:
   [[nodiscard]] platypus::TimeDomainEquationSystemProblem * GetProblem() const override
   {

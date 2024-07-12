@@ -44,8 +44,6 @@ public:
 
   ~SteadyStateProblemBuilder() override = default;
 
-  auto ReturnProblem() { return ProblemBuilder::ReturnProblem<SteadyStateProblem>(); }
-
   void RegisterFESpaces() override {}
 
   void RegisterGridFunctions() override {}

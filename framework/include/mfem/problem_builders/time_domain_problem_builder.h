@@ -43,8 +43,6 @@ public:
 
   ~TimeDomainProblemBuilder() override = default;
 
-  auto ReturnProblem() { return ProblemBuilder::ReturnProblem<TimeDomainProblem>(); }
-
   static std::vector<mfem::ParGridFunction *>
   RegisterTimeDerivatives(std::vector<std::string> gridfunction_names,
                           platypus::GridFunctions & gridfunctions);

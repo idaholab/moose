@@ -52,13 +52,7 @@ public:
   ProblemBuilder() = delete;
 
   // Virtual destructor required to prevent leaks.
-  virtual ~ProblemBuilder()
-  {
-    if (_problem != nullptr)
-    {
-      delete _problem;
-    }
-  }
+  virtual ~ProblemBuilder() = default;
 
   void SetMesh(std::shared_ptr<mfem::ParMesh> pmesh);
   void SetFESpaces(platypus::FESpaces & fespaces);
@@ -99,9 +93,15 @@ public:
   /// operator has already been constructed earlier to avoid rebuilding it.
   void FinalizeProblem(bool build_operator = true);
 
+  /// Returns a shared pointer to the problem.
+  std::shared_ptr<platypus::Problem> ReturnProblem() { return _problem; }
+
 protected:
   /// Protected constructor. Derived classes must call this constructor.
-  ProblemBuilder(platypus::Problem * problem) : _problem{problem} {}
+  ProblemBuilder(platypus::Problem * problem)
+    : _problem(std::shared_ptr<platypus::Problem>(problem))
+  {
+  }
 
   /// Supported Jacobian solver types.
   enum class SolverType
@@ -148,25 +148,14 @@ protected:
       MFEM_ABORT("platypus::Problem instance is NULL.");
     }
 
-    return static_cast<TDerivedProblem *>(_problem);
-  }
-
-  /// Helper template for returning a unique pointer of the correct class.
-  /// Sets _problem = nullptr to avoid double-free.
-  template <class TDerivedProblem>
-  [[nodiscard]] std::unique_ptr<TDerivedProblem> ReturnProblem()
-  {
-    auto * problem = GetProblem<TDerivedProblem>();
-    _problem = nullptr; // Avoid double-free.
-
-    return std::unique_ptr<TDerivedProblem>(problem);
+    return static_cast<TDerivedProblem *>(_problem.get());
   }
 
   /// Coefficient used in some derived classes.
   mfem::ConstantCoefficient _one_coef{1.0};
 
 private:
-  platypus::Problem * _problem{nullptr};
+  std::shared_ptr<platypus::Problem> _problem{nullptr};
 };
 
 /// Interface for problem builders that are constructing problems with an equation system.
