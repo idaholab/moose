@@ -69,6 +69,13 @@ public:
   const RealVectorValue & getCrackFrontTangent(const std::size_t point_index) const;
 
   /**
+   * Get the vector normal to the crack front at a specified position
+   * @param point_index Index of the point
+   * @return normal vector
+   */
+  const RealVectorValue & getCrackFrontNormal(const std::size_t point_index) const;
+
+  /**
    * Get the length of the line segment on the crack front ahead of the specified position
    * @param point_index Index of the point
    * @return Line segment length
@@ -330,9 +337,7 @@ protected:
   std::vector<BoundaryID> _intersecting_boundary_ids;
   /// Coordinates of crack mouth
   RealVectorValue _crack_mouth_coordinates;
-  /// Vector normal to the crack plane of a planar crack
-  RealVectorValue _crack_plane_normal;
-  /// Vector normals to a nonplanar crack described by the cutter mesh when _use_mesh_cutter = true
+  /// Vector normals to a nonplanar crack
   std::vector<RealVectorValue> _crack_plane_normals;
   /// Whether to treat the model as 2D for computation of fracture integrals
   bool _treat_as_2d;
@@ -437,10 +442,15 @@ protected:
   void updateCrackFrontGeometry();
 
   /**
-   * Update the data structures used to determine the crack front direction
-   * vectors such as crack mouth coordinates.
+   * compute node and coordinate data for crack fronts defined by crack_mouth_boundary_ids sidesets
    */
-  void updateDataForCrackDirection();
+  void computeCrackMouthNodes();
+
+  /**
+   * Compute crack plane face normals for cracks that have a curved crack front but do not use a
+   * mesh cutter.
+   */
+  void computeCurvedCrackFrontCrackPlaneNormals();
 
   /**
    * Compute the direction of crack extension for a given point on the crack front.
