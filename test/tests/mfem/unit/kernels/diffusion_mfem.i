@@ -13,18 +13,10 @@
   type = CustomFormulation
 []
 
-[FESpaces]
-  [mfem_fespace]
-    type = MFEMFESpace 
-    fec_order = FIRST 
-    fec_type = H1
-  []
-[]
-
 [AuxVariables]
   [mfem_diffused]
-    type = MFEMVariable
-    fespace = mfem_fespace
+    family = LAGRANGE
+    order = FIRST 
   []
 []
 
