@@ -11,10 +11,6 @@ public:
   MFEMFormulation(const InputParameters & parameters);
   virtual ~MFEMFormulation() override = default;
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
   virtual std::shared_ptr<platypus::ProblemBuilder> getProblemBuilder() const
   {
     mooseError(

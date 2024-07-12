@@ -9,10 +9,6 @@ public:
   MFEMVectorFunctionCoefficient(const InputParameters & parameters);
   virtual ~MFEMVectorFunctionCoefficient();
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
   std::shared_ptr<mfem::VectorCoefficient> getVectorCoefficient() const override
   {
     return _vector_coefficient;

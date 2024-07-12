@@ -12,9 +12,5 @@ public:
   MFEMBilinearFormKernel(const InputParameters & parameters);
   virtual ~MFEMBilinearFormKernel() {}
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
   virtual std::shared_ptr<platypus::Kernel<mfem::ParBilinearForm>> getKernel() { return nullptr; }
 };

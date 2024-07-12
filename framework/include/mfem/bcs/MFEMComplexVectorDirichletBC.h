@@ -12,10 +12,6 @@ public:
   MFEMComplexVectorDirichletBC(const InputParameters & parameters);
   ~MFEMComplexVectorDirichletBC() override {}
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
 protected:
   MFEMVectorCoefficient * _vec_coef_re{nullptr};
   MFEMVectorCoefficient * _vec_coef_im{nullptr};

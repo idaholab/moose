@@ -11,11 +11,6 @@ public:
   CustomFormulation(const InputParameters & parameters);
   ~CustomFormulation() override = default;
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
-  /// Returns a shared pointer to the time-domain equation system problem builder.
   std::shared_ptr<platypus::ProblemBuilder> getProblemBuilder() const override
   {
     return _formulation;
