@@ -1,4 +1,5 @@
 #include "MFEMGeneralUserObject.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMGeneralUserObject);
 
