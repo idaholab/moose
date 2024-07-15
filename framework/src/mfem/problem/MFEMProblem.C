@@ -24,7 +24,7 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
     _outputs(),
     _exec_params()
 {
-  hephaestus::logger.set_level(spdlog::level::info);
+  logger.set_level(spdlog::level::info);
   _device.Configure(getParam<std::string>("device"));
   _device.Print(std::cout);
 }
