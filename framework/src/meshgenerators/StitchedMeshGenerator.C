@@ -217,15 +217,15 @@ StitchedMeshGenerator::generate()
               "Boundary ID ",
               bid,
               " corresponds to different boundary names on the input meshes! On the first "
-              "mesh it corresponds to ",
+              "mesh it corresponds to `",
               sideset_name_on_first_mesh,
-              " while on the second mesh it corresponds to ",
+              "` while on the second mesh it corresponds to `",
               sideset_name_on_second_mesh,
-              ". The final mesh will assign the boundary on ",
+              "`. The final mesh will assign the boundary on `",
               sideset_name_on_second_mesh,
-              " to ",
+              "` to `",
               sideset_name_on_first_mesh,
-              ". To avoid this situation, use the `prevent_boundary_ids_overlap` parameter!");
+              "`. To avoid this situation, use the `prevent_boundary_ids_overlap` parameter!");
       }
     }
 
