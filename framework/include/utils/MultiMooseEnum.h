@@ -146,8 +146,8 @@ public:
    * Returns a begin/end iterator to all of the items in the enum. Items will
    * always be capitalized.
    */
-  MooseEnumIterator begin() const { return _current.begin(); }
-  MooseEnumIterator end() const { return _current.end(); }
+  MooseEnumIterator begin() const { return _current_values.begin(); }
+  MooseEnumIterator end() const { return _current_values.end(); }
   ///@}
 
   /**
@@ -164,7 +164,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const override { return !_current.empty(); }
+  virtual bool isValid() const override { return !_current_values.empty(); }
 
   // InputParameters and Output is allowed to create an empty enum but is responsible for
   // filling it in after the fact
@@ -192,10 +192,10 @@ protected:
   /**
    * Set the current items.
    */
-  void setCurrentItems(const std::vector<MooseEnumItem> & current);
+  void setCurrentItems(const std::vector<MooseEnumItem> & current_items);
 
-  /// The current id
-  std::vector<MooseEnumItem> _current;
+  /// The current value(s) of the MultiMooseEnum.
+  std::vector<MooseEnumItem> _current_values;
 
   /**
    * Protected constructor for use by libmesh::Parameters
@@ -218,7 +218,7 @@ MultiMooseEnum::getEnum() const
                 "The type requested from MooseEnum::getEnum must be an enum type!\n\n");
 #endif
   std::vector<T> enum_vec;
-  for (const auto & current : _current)
-    enum_vec.push_back(static_cast<T>(current.id()));
+  for (const auto & current_value : _current_values)
+    enum_vec.push_back(static_cast<T>(current_value.id()));
   return enum_vec;
 }

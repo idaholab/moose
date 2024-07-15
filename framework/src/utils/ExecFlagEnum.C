@@ -86,5 +86,5 @@ ExecFlagEnum::appendCurrent(const ExecFlagType & item)
                item,
                "' is not an available item for the "
                "ExecFlagEnum object, thus it cannot be set as current.");
-  _current.push_back(item);
+  _current_values.push_back(item);
 }

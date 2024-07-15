@@ -28,7 +28,7 @@ MultiMooseEnum::MultiMooseEnum(std::string names,
 }
 
 MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum)
-  : MooseEnumBase(other_enum), _current(other_enum._current)
+  : MooseEnumBase(other_enum), _current_values(other_enum._current_values)
 {
 }
 
@@ -60,34 +60,34 @@ MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const std::string & value) const
 {
-  return std::find_if(_current.begin(),
-                      _current.end(),
+  return std::find_if(_current_values.begin(),
+                      _current_values.end(),
                       [&value](const MooseEnumItem & item)
-                      { return item == value; }) != _current.end();
+                      { return item == value; }) != _current_values.end();
 }
 
 bool
 MultiMooseEnum::contains(int value) const
 {
-  return std::find_if(_current.begin(),
-                      _current.end(),
+  return std::find_if(_current_values.begin(),
+                      _current_values.end(),
                       [&value](const MooseEnumItem & item)
-                      { return item == value; }) != _current.end();
+                      { return item == value; }) != _current_values.end();
 }
 
 bool
 MultiMooseEnum::contains(unsigned short value) const
 {
-  return std::find_if(_current.begin(),
-                      _current.end(),
+  return std::find_if(_current_values.begin(),
+                      _current_values.end(),
                       [&value](const MooseEnumItem & item)
-                      { return item == value; }) != _current.end();
+                      { return item == value; }) != _current_values.end();
 }
 
 bool
 MultiMooseEnum::contains(const MultiMooseEnum & value) const
 {
-  for (const auto & item : value._current)
+  for (const auto & item : value._current_values)
     if (!contains(item))
       return false;
   return true;
@@ -96,10 +96,10 @@ MultiMooseEnum::contains(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const MooseEnumItem & value) const
 {
-  return std::find_if(_current.begin(),
-                      _current.end(),
+  return std::find_if(_current_values.begin(),
+                      _current_values.end(),
                       [&value](const MooseEnumItem & item)
-                      { return item == value; }) != _current.end();
+                      { return item == value; }) != _current_values.end();
 }
 
 MultiMooseEnum &
@@ -171,21 +171,21 @@ MultiMooseEnum::push_back(const MultiMooseEnum & other_enum)
 const std::string &
 MultiMooseEnum::operator[](unsigned int i) const
 {
-  mooseAssert(i < _current.size(),
-              "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current.size()
-                                                            << ")");
+  mooseAssert(i < _current_values.size(),
+              "Access out of bounds in MultiMooseEnum (i: " << i << " size: "
+                                                            << _current_values.size() << ")");
 
-  return _current[i].rawName();
+  return _current_values[i].rawName();
 }
 
 unsigned int
 MultiMooseEnum::get(unsigned int i) const
 {
-  mooseAssert(i < _current.size(),
-              "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current.size()
-                                                            << ")");
+  mooseAssert(i < _current_values.size(),
+              "Access out of bounds in MultiMooseEnum (i: " << i << " size: "
+                                                            << _current_values.size() << ")");
 
-  return _current[i].id();
+  return _current_values[i].id();
 }
 
 template <typename InputIterator>
@@ -210,11 +210,11 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
       {
         MooseEnumItem created(*it, getNextValidID());
         addEnumerationItem(created);
-        _current.push_back(created);
+        _current_values.push_back(created);
       }
     }
     else
-      _current.push_back(*iter);
+      _current_values.push_back(*iter);
   }
   checkDeprecated();
   return *this;
@@ -227,35 +227,37 @@ MultiMooseEnum::remove(InputIterator first, InputIterator last)
   // Create a new list of enumerations by striping out the supplied values
   for (InputIterator it = first; it != last; ++it)
   {
-    std::vector<MooseEnumItem>::iterator iter = std::find_if(
-        _current.begin(), _current.end(), [it](const MooseEnumItem & item) { return item == *it; });
-    if (iter != _current.end())
-      _current.erase(iter);
+    std::vector<MooseEnumItem>::iterator iter =
+        std::find_if(_current_values.begin(),
+                     _current_values.end(),
+                     [it](const MooseEnumItem & item) { return item == *it; });
+    if (iter != _current_values.end())
+      _current_values.erase(iter);
   }
 }
 
 void
 MultiMooseEnum::clear()
 {
-  _current.clear();
+  _current_values.clear();
 }
 
 unsigned int
 MultiMooseEnum::size() const
 {
-  return _current.size();
+  return _current_values.size();
 }
 
 void
 MultiMooseEnum::checkDeprecated() const
 {
-  for (const auto & item : _current)
+  for (const auto & item : _current_values)
     MooseEnumBase::checkDeprecated(item);
 }
 
 std::ostream &
 operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
-  out << Moose::stringify(obj._current, " ");
+  out << Moose::stringify(obj._current_values, " ");
   return out;
 }
