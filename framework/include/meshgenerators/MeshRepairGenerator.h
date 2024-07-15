@@ -39,6 +39,9 @@ private:
   /// whether to split subdomains using each element's type
   const bool _elem_type_separation;
 
+  /// Whether to merge boundaries with the same name but different ID
+  const bool _boundary_id_merge;
+
   /// @brief Removes the elements with an volume value below the user threshold
   /// @param mesh the mesh to modify
   void removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
@@ -51,4 +54,8 @@ private:
   ///        do not support mixed element types
   /// @param mesh the mesh to modify
   void separateSubdomainsByElementType(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Merge boundary IDs of boundaries with the same name
+  /// @param mesh the mesh to modify
+  void mergeBDIDsWithSameName(std::unique_ptr<MeshBase> & mesh) const;
 };

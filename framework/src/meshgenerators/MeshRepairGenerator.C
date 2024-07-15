@@ -37,6 +37,10 @@ MeshRepairGenerator::validParams()
                         false,
                         "Create new blocks if multiple element types are present in a block");
 
+  params.addParam<bool>("merge_boundary_ids_with_same_name",
+                        false,
+                        "Create new blocks if multiple element types are present in a block");
+
   return params;
 }
 
@@ -46,7 +50,8 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _fix_overlapping_nodes(getParam<bool>("fix_node_overlap")),
     _node_overlap_tol(getParam<Real>("node_overlap_tol")),
     _fix_element_orientation(getParam<bool>("fix_elements_orientation")),
-    _elem_type_separation(getParam<bool>("separate_blocks_by_element_types"))
+    _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
+    _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation)
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
@@ -72,6 +77,10 @@ MeshRepairGenerator::generate()
   // Disambiguate any block that has elements of multiple types
   if (_elem_type_separation)
     separateSubdomainsByElementType(mesh);
+
+  // Assign a single boundary ID to boundaries that have the same name
+  if (_boundary_id_merge)
+    mergeBDIDsWithSameName(mesh);
 
   mesh->set_isnt_prepared();
   return mesh;
@@ -194,4 +203,9 @@ MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> &
       }
     }
   }
+}
+
+void
+MeshRepairGenerator::mergeBDIDsWithSameName(std::unique_ptr<MeshBase> & mesh) const
+{
 }
