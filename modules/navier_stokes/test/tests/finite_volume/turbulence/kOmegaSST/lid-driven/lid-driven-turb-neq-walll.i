@@ -1,36 +1,29 @@
 ##########################################################
-# ERCOFTAC test case foe turbulent channel flow
-# Case Number: 032
+# Lid-driven cavity test
+# Reynolds: 5,000
 # Author: Dr. Mauricio Tano
-# Last Update: Novomber, 2023
+# Last Update: November, 2023
 # Turbulent model using:
-# k-epsilon model
-# Equilibrium + Newton wall treatement
-# SIMPLE solve
+# k-omega-SST model
+# Standard wall functions
+# SIMPLE Solve
 ##########################################################
 
-H = 1 #halfwidth of the channel
-L = 120
+### Thermophysical Properties ###
+Re = 5000
+rho = 1.0
+lid_velocity = 1.0
+side_length = 0.1
+mu = ${fparse rho*lid_velocity*side_length/Re}
 
-Re = 22250
-
-rho = 1
-bulk_u = 1
-mu = '${fparse rho * bulk_u * 2 * H / Re}'
-
-advected_interp_method = 'upwind'
-
-pressure_tag = "pressure_grad"
-
-### Initial and Boundary Conditions ###
+### Initial Conditions
 intensity = 0.01
-k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
-# omega_init = '${fparse 1e-2 * k_init^0.5 / H}'
-omega_init = 0.166
+k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
+omega_init = '${fparse k_init^0.5 / side_length}'
 
-### Modeling parameters ###
+### Modeling parameters
 bulk_wall_treatment = false
-walls = 'top'
+walls = 'left top right bottom'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 ### Model corrections
@@ -38,26 +31,30 @@ low_Re_modification = false
 free_shear_modification = false
 vortex_stretching_modficiation = false
 
+pressure_tag = "pressure_grad"
+
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+  advected_interp_method = 'upwind'
+  velocity_interp_method = 'rc'
+[]
+
 [Mesh]
   [gen]
-    type = CartesianMeshGenerator
+    type = GeneratedMeshGenerator
     dim = 2
-    dx = '${L}'
-    dy = '0.84 0.16'
-    ix = '400'
-    iy = '35 1'
+    xmin = 0
+    xmax = ${side_length}
+    ymin = 0
+    ymax = ${side_length}
+    nx = 12
+    ny = 12
   []
 []
 
 [Problem]
   nl_sys_names = 'u_system v_system pressure_system TKE_system TKESD_system'
   previous_nl_solution_required = true
-[]
-
-[GlobalParams]
-  rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
-  velocity_interp_method = 'rc'
 []
 
 [UserObjects]
@@ -72,20 +69,20 @@ vortex_stretching_modficiation = false
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
-    initial_condition = ${bulk_u}
+    initial_condition = 0.0
     solver_sys = u_system
     two_term_boundary_expansion = false
   []
   [vel_y]
     type = INSFVVelocityVariable
-    initial_condition = 0
+    initial_condition = 0.0
     solver_sys = v_system
     two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
-    initial_condition = 1e-8
     solver_sys = pressure_system
+    initial_condition = 0.2
     two_term_boundary_expansion = false
   []
   [TKE]
@@ -101,7 +98,6 @@ vortex_stretching_modficiation = false
 []
 
 [FVKernels]
-
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
@@ -122,6 +118,7 @@ vortex_stretching_modficiation = false
     complete_expansion = true
     u = vel_x
     v = vel_y
+    mu_interp_method = 'average'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -130,7 +127,6 @@ vortex_stretching_modficiation = false
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
-
   [v_advection]
     type = INSFVMomentumAdvection
     variable = vel_y
@@ -151,6 +147,7 @@ vortex_stretching_modficiation = false
     complete_expansion = true
     u = vel_x
     v = vel_y
+    mu_interp_method = 'average'
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -159,7 +156,6 @@ vortex_stretching_modficiation = false
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
-
   [p_diffusion]
     type = FVAnisotropicDiffusion
     variable = pressure
@@ -188,45 +184,43 @@ vortex_stretching_modficiation = false
     variable = TKE
     coeff = 'mu_t_k_omega'
     scaling_coef = 'sigma_k'
+    coeff_interp_method = 'average'
   []
   [TKE_source_sink]
     type = INSFVTKESourceSink
     variable = TKE
     u = vel_x
     v = vel_y
-    omega = TKESD
+    omega = 'TKESD'
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t_k_omega'
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    F1 = F1
-    free_shear_modification = ${free_shear_modification}
-    low_Re_modification = ${low_Re_modification}
   []
 
   [TKESD_advection]
     type = INSFVTurbulentAdvection
-    variable = TKESD
+    variable = 'TKESD'
     rho = ${rho}
     walls = ${walls}
   []
   [TKESD_diffusion]
     type = INSFVTurbulentDiffusion
-    variable = TKESD
+    variable = 'TKESD'
     coeff = ${mu}
     walls = ${walls}
   []
   [TKESD_diffusion_turbulent]
     type = INSFVTurbulentDiffusion
-    variable = TKESD
+    variable = 'TKESD'
     coeff = 'mu_t_k_omega'
     scaling_coef = 'sigma_omega'
     walls = ${walls}
   []
   [TKESD_source_sink]
     type = INSFVTKESDSourceSink
-    variable = TKESD
+    variable = 'TKESD'
     u = vel_x
     v = vel_y
     k = TKE
@@ -244,54 +238,27 @@ vortex_stretching_modficiation = false
 []
 
 [FVBCs]
-  [inlet-u]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
+  [top_x]
+    type = INSFVNoSlipWallBC
     variable = vel_x
-    function = '${bulk_u}'
+    boundary = 'top'
+    function = ${lid_velocity}
   []
-  [inlet-v]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = vel_y
+  [no_slip_x]
+    type = INSFVNoSlipWallBC
+    variable = vel_x
+    boundary = 'left right bottom'
     function = 0
   []
-  [walls-u]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = vel_x
-    value = 0
-  []
-  [walls-v]
-    type = FVDirichletBC
-    boundary = 'top'
+  [no_slip_y]
+    type = INSFVNoSlipWallBC
     variable = vel_y
-    value = 0
-  []
-  [outlet_p]
-    type = INSFVOutletPressureBC
-    boundary = 'right'
-    variable = pressure
+    boundary = 'left right top bottom'
     function = 0
-  []
-  [inlet_TKE]
-    type = INSFVInletIntensityTKEBC
-    boundary = 'left'
-    variable = TKE
-    u = vel_x
-    v = vel_y
-    intensity = ${intensity}
-  []
-  [inlet_TKESD]
-    type = INSFVMixingLengthTKESDBC
-    boundary = 'left'
-    variable = TKESD
-    k = TKE
-    characteristic_length = '${fparse 2*H}'
   []
   [walls_mu_t]
     type = INSFVTurbulentViscosityWallFunction
-    boundary = 'top'
+    boundary = 'left right top bottom'
     variable = 'mu_t_k_omega'
     u = vel_x
     v = vel_y
@@ -300,39 +267,6 @@ vortex_stretching_modficiation = false
     mu_t = 'mu_t_k_omega'
     k = TKE
     wall_treatment = ${wall_treatment}
-  []
-  [sym-u]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    mu = 'mu_t_k_omega'
-    momentum_component = x
-  []
-  [sym-v]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    mu = 'mu_t_k_omega'
-    momentum_component = y
-  []
-  [symmetry_pressure]
-    type = INSFVSymmetryPressureBC
-    boundary = 'bottom'
-    variable = pressure
-  []
-  [symmetry_TKE]
-    type = INSFVSymmetryScalarBC
-    boundary = 'bottom'
-    variable = TKE
-  []
-  [symmetry_TKESD]
-    type = INSFVSymmetryScalarBC
-    boundary = 'bottom'
-    variable = TKESD
   []
 []
 
@@ -343,11 +277,11 @@ vortex_stretching_modficiation = false
   []
   [F1]
     type = MooseVariableFVReal
-    initial_condition = 1.0
+    initial_condition = 0.0
   []
   [F2]
     type = MooseVariableFVReal
-    initial_condition = 1.0
+    initial_condition = 0.0
   []
   [sigma_k]
     type = MooseVariableFVReal
@@ -442,8 +376,8 @@ vortex_stretching_modficiation = false
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.5
-  turbulence_equation_relaxation = '0.7 0.7'
-  num_iterations = 3000
+  turbulence_equation_relaxation = '0.8 0.8'
+  num_iterations = 500
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
   turbulence_absolute_tolerance = '1e-12 1e-12'
@@ -461,8 +395,16 @@ vortex_stretching_modficiation = false
   pressure_l_tol = 0.0
   turbulence_l_tol = 0.0
   print_fields = false
+
+  pin_pressure = true
+  pressure_pin_value = 0.0
+  pressure_pin_point = '0.01 0.099 0.0'
 []
 
 [Outputs]
   exodus = true
+  csv = false
+  perf_graph = false
+  print_nonlinear_residuals = false
+  print_linear_residuals = true
 []

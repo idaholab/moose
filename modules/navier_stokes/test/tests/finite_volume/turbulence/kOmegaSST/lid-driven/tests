@@ -1,0 +1,157 @@
+[Tests]
+  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  issues = '#28130'
+  [lid_driven_turb_std_wall]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with standard wall functions, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-std-wall.i'
+      exodiff = 'lid-driven-turb-std-wall_out.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-std-wall.i'
+      exodiff = 'lid-driven-turb-std-wall_short.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-std-wall_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_linear_wall]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with linearized wall functions, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-linearized-wall.i'
+      exodiff = 'lid-driven-turb-linearized-wall_out.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-linearized-wall.i'
+      exodiff = 'lid-driven-turb-linearized-wall_short.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-linearized-wall_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_inc_wall]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with incremental wall functions, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-inc-wall.i'
+      exodiff = 'lid-driven-turb-inc-wall_out.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-inc-wall.i'
+      exodiff = 'lid-driven-turb-inc-wall_short.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-inc-wall_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_non_eq_wall]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with non-equilibium wall functions, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-neq-wall.i'
+      exodiff = 'lid-driven-turb-neq-wall_out.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-neq-wall.i'
+      exodiff = 'lid-driven-turb-neq-wallshort.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-neq-wall_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_enhanced_no_corr]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with enhanced wall treatment without corrections, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-no-corr.i'
+      exodiff = 'lid-driven-turb-enhaced-wall-no-corr_out.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-no-corr.i'
+      exodiff = 'lid-driven-turb-enhaced-wall-no-corr_short.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-enhaced-wall-no-corr_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_enhanced_low_Re_corr]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with enhanced wall treatment with low Reynolds number corrections, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-low-Re.i'
+      exodiff = 'lid-driven-turb-enhaced-wall-low-Re_out.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-low-Re.i'
+      exodiff = 'lid-driven-turb-enhaced-wall-low-Re_short.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-enhaced-wall-low-Re_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_enhanced_free_shear_corr]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with enhanced wall treatment with free shear corrections, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-free-shear.i'
+      exodiff = 'lid-driven-turb-enhaced-wall-free-shear.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-free-shear.i'
+      exodiff = 'lid-driven-turb-enhaced-wall-free-shear_short.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-enhaced-wall-free-shear_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_enhanced_vortex_stretch_corr]
+    requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with enhanced wall treatment with vortex stretching corrections, '
+    [result]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-vortex_stretching.i'
+      exodiff = 'lid-driven-turb-enhaced-wall-vortex_stretching.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'lid-driven-turb-enhaced-wall-vortex_stretchingi'
+      exodiff = 'lid-driven-turb-enhaced-wall-vortex_stretching_short.e'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-enhaced-wall-vortex_stretching_short'
+      abs_zero = 1e-6
+    []
+  []
+[]
