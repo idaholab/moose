@@ -98,20 +98,17 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
       */
       bool break_loop = false;
       int loop_state;
-      for (loop_state = _fe_problem.global_current_state; loop_state >= 0; loop_state--)
+      for (loop_state = _fe_problem.getGlobalCurrentState(); loop_state >= 0; loop_state--)
       {
         for (auto ic : vec)
-        {
-          if (ic->_my_state == loop_state)
+          if (ic->getMyState() == loop_state)
           {
             ic->compute();
             break_loop = true;
           }
-        }
+
         if (break_loop == true)
-        {
           break;
-        }
       }
       vec.clear();
 

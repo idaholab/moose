@@ -12,7 +12,6 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 #include "UserObject.h"
-#include "libmesh/libmesh_common.h"
 
 InputParameters
 InitialConditionBase::validParams()
@@ -32,9 +31,17 @@ InitialConditionBase::validParams()
                         "this IC");
   params.addParamNamesToGroup("ignore_uo_dependency", "Advanced");
 
-  params.addParam<int>("state", 0, "Specify which state being set.");
-
-  params.addParamNamesToGroup("state", "Advanced");
+  MooseEnum stateEnum("CURRENT=0 OLD=1 OLDER=2", "CURRENT");
+  params.addParam<MooseEnum>(
+      "state",
+      stateEnum,
+      "This parameter is used to set old state solutions at the start of simulation. If specifying "
+      "multiple states at the start of simulation, use one IC object for each state being "
+      "specified. The states are CURRENT=0 OLD=1 OLDER=2. States older than 2 are not currently "
+      "supported. When the user only specifies current state, the solution is copied to the old "
+      "and older states, as expected. This functionality is mainly used for dynamic simulations "
+      "with explicit time integration schemes, where old solution states are used in the velocity "
+      "and acceleration approximations.");
 
   params.registerBase("InitialCondition");
 
@@ -57,9 +64,9 @@ InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
     DependencyResolverInterface(),
     Restartable(this, "InitialConditionBases"),
     ElementIDInterface(this),
-    _my_state(getParam<int>("state")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _ignore_uo_dependency(getParam<bool>("ignore_uo_dependency"))
+    _ignore_uo_dependency(getParam<bool>("ignore_uo_dependency")),
+    _my_state(getParam<MooseEnum>("state"))
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
@@ -95,4 +102,10 @@ InitialConditionBase::addPostprocessorDependencyHelper(const PostprocessorName &
 {
   if (!_ignore_uo_dependency)
     _depend_uo.insert(name);
+}
+
+int &
+InitialConditionBase::getMyState()
+{
+  return _my_state;
 }

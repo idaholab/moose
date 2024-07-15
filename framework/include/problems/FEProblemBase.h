@@ -884,6 +884,8 @@ public:
 
   void projectSolution();
 
+  int getGlobalCurrentState();
+
   /**
    * Project initial conditions for custom \p elem_range and \p bnd_node_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
@@ -2348,9 +2350,6 @@ public:
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
   virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid) override;
 
-  // Used for setting previous states
-  int global_current_state;
-
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2750,6 +2749,9 @@ protected:
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property
   bool _using_ad_mat_props;
+
+  // Used for setting previous states
+  int _global_current_state;
 
 private:
   /**

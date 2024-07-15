@@ -1082,13 +1082,6 @@ FEProblemBase::initialSetup()
 
 #endif // LIBMESH_ENABLE_AMR
 
-  if (!_app.isRecovering() && !_app.isRestarting())
-  {
-    // This functionality was moved to FEProblemBase.C::projectSolution()
-    // // During initial setup the solution is copied to the older solution states (old, older, etc)
-    // // copySolutionsBackwards();
-  }
-
   if (!_app.isRecovering())
   {
     if (haveXFEM())
@@ -3336,8 +3329,8 @@ FEProblemBase::projectSolution()
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-  // loop over global_current_state = 2, 1, 0
-  for (global_current_state = 1; global_current_state >= 0; global_current_state--)
+  // loop over _global_current_state = 2, 1, 0
+  for (_global_current_state = 2; _global_current_state >= 0; _global_current_state--)
   {
     ComputeInitialConditionThread cic(*this);
     Threads::parallel_reduce(elem_range, cic);
@@ -3404,7 +3397,7 @@ FEProblemBase::projectSolution()
     // calling copyOldSolutions() to send ICs for old and older states back to where they
     // should be before the start of the time-looping.
     // Functionality moved here from FEProblemBase::initialSetup().
-    if (global_current_state > 0)
+    if (_global_current_state > 0)
     {
       for (auto & sys : _solver_systems)
         sys->copySolutionsBackwards();
@@ -3412,9 +3405,9 @@ FEProblemBase::projectSolution()
     }
   }
 
-  // Resetting global_current_state to 0 in case anyone needs to run ICs again (which they do
+  // Resetting _global_current_state to 0 in case anyone needs to run ICs again (which they do
   // sometimes).
-  global_current_state = 0;
+  _global_current_state = 0;
 }
 
 void
@@ -8954,4 +8947,10 @@ FEProblemBase::setCurrentAlgebraicBndNodeRange(ConstBndNodeRange * range)
   }
 
   _current_algebraic_bnd_node_range = std::make_unique<ConstBndNodeRange>(*range);
+}
+
+int
+FEProblemBase::getGlobalCurrentState()
+{
+  return _global_current_state;
 }
