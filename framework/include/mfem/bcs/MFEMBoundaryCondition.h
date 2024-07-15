@@ -1,12 +1,12 @@
 #pragma once
 
-#include "GeneralUserObject.h"
-#include "boundary_conditions.hpp"
-#include "gridfunctions.hpp"
-#include "coefficients.hpp"
+#include "MFEMGeneralUserObject.h"
+#include "boundary_conditions.h"
+#include "gridfunctions.h"
+#include "coefficients.h"
 #include "Function.h"
 
-class MFEMBoundaryCondition : public GeneralUserObject
+class MFEMBoundaryCondition : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
@@ -14,18 +14,14 @@ public:
   MFEMBoundaryCondition(const InputParameters & parameters);
   ~MFEMBoundaryCondition() override {}
 
-  inline virtual std::shared_ptr<hephaestus::BoundaryCondition> getBC() const
+  inline virtual std::shared_ptr<platypus::BoundaryCondition> getBC() const
   {
     return _boundary_condition;
   }
-
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
 
 protected:
   std::vector<BoundaryName> _boundary_names;
   mfem::Array<int> bdr_attr;
 
-  std::shared_ptr<hephaestus::BoundaryCondition> _boundary_condition{nullptr};
+  std::shared_ptr<platypus::BoundaryCondition> _boundary_condition{nullptr};
 };

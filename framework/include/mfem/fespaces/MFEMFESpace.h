@@ -1,23 +1,38 @@
 #pragma once
+#include "MFEMGeneralUserObject.h"
+#include "MFEMFECollection.h"
 
-#include "GeneralUserObject.h"
-#include "inputs.hpp"
-#include "gridfunctions.hpp"
-
-class MFEMFESpace : public GeneralUserObject
+/**
+ * Constructs and stores an mfem::ParFiniteElementSpace object. Access using the
+ * getFESpace() accessor.
+ */
+class MFEMFESpace : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   MFEMFESpace(const InputParameters & parameters);
-  virtual ~MFEMFESpace();
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
 
-  static const std::string createFECName(const std::string & fespace_type, const int order);
-  const int order;
-  const int vdim;
-  const std::string fespace_type;
-  const std::string fec_name;
+  /// Returns a shared pointer to the constructed fespace.
+  inline std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace() const { return _fespace; }
+
+  /// Returns a shared pointer to the constructed fec.
+  inline std::shared_ptr<mfem::FiniteElementCollection> getFEC() const { return _fec.getFEC(); }
+
+protected:
+  /// Vector dimension (number of unknowns per degree of freedom).
+  const int _vdim;
+
+  /// Type of ordering of the vector dofs when _vdim > 1.
+  const int _ordering;
+
+  /// Constructs and stores the fec.
+  const MFEMFECollection _fec;
+
+private:
+  /// Constructs the fespace.
+  const std::shared_ptr<mfem::ParFiniteElementSpace> buildFESpace();
+
+  /// Stores the constructed fespace.
+  const std::shared_ptr<mfem::ParFiniteElementSpace> _fespace{nullptr};
 };

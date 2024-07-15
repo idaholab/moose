@@ -15,6 +15,6 @@ MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMBoundaryCondition(parameters),
     _coef(const_cast<MFEMCoefficient *>(&getUserObject<MFEMCoefficient>("coefficient")))
 {
-  _boundary_condition = std::make_shared<hephaestus::ScalarDirichletBC>(
+  _boundary_condition = std::make_shared<platypus::ScalarDirichletBC>(
       getParam<std::string>("variable"), bdr_attr, _coef->getCoefficient().get());
 }
