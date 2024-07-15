@@ -27,13 +27,15 @@ typedef std::vector<MooseEnumItem>::const_iterator MooseEnumIterator;
 
 /**
  * This is a "smart" enum class intended to replace many of the
- * shortcomings in the C++ enum type It should be initialized with a
- * comma-separated list of strings which become the enum values.  You
- * may also optionally supply numeric ints for one or more values
- * similar to a C++ enum.  This is done with the "=" sign. It can be
- * used any place where an integer (switch statements), const char* or
- * std::string is expected.  In addition the InputParameters system
- * has full support for this Enum type
+ * shortcomings in the C++ enum type. There are two parts to a MultiMooseEnum:
+ * 1) The list of all possible values that a variable can have and
+ * 2) The subset of these values that the variable is actually set to.
+ * It should be initialized with a comma-separated list of strings which
+ * become the possible enum values. You may also optionally supply numeric
+ * ints for one or more values similar to a C++ enum. This is done with the
+ * "=" sign. It can be used any place where an integer (switch statements),
+ * const char* or * std::string is expected. In addition the
+ * InputParameters system has full support for this Enum type.
  */
 class MultiMooseEnum : public MooseEnumBase
 {
@@ -41,11 +43,11 @@ public:
   /**
    * Constructor that takes a list of enumeration values, and a separate string to set a default for
    * this instance
-   * @param names - a list of names for this enumeration
-   * @param default_names - the default value for this enumeration instance
+   * @param names - a list of all possible values (names) for this enumeration
+   * @param default_names - the value(s), if any, to set this enumeration instance to
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
-   * it's range of
-   *                       defined values.
+   * it's range of initially defined values, allowing for the possiblity to add additional valid
+   * values to an object after it has been initialized.
    */
   MultiMooseEnum(std::string names,
                  std::string default_names = "",
@@ -76,8 +78,8 @@ public:
 
   ///@{
   /**
-   * Contains methods for seeing if a value is in the MultiMooseEnum.
-   * @return bool - the truth value indicating whether the value is present
+   * Contains methods for seeing if a value is set in the MultiMooseEnum.
+   * @return bool - the truth value indicating whether the value is set
    */
   bool contains(const std::string & value) const;
   bool contains(int value) const;
@@ -88,7 +90,7 @@ public:
 
   ///@{
   /**
-   * Assignment operators
+   * Assignment operators to set the objects value from the list of possible values.
    * @param names - a string, set, or vector representing one of the enumeration values.
    * @return A reference to this object for chaining
    */
@@ -99,7 +101,7 @@ public:
 
   ///@{
   /**
-   * Un-assign a value
+   * Un-assign, or unset a value
    * @param names - a string, set, or vector giving the name to erase from the enumeration values
    */
   void erase(const std::string & names);
@@ -112,7 +114,7 @@ public:
    * Insert operators
    * Operator to insert (push_back) values into the enum. Existing values are preserved and
    * duplicates are stored.
-   * @param names - a string, set, or vector representing one of the enumeration values.
+   * @param names - a string, set, or vector representing the enumeration values to set.
    */
   void push_back(const std::string & names);
   void push_back(const std::vector<std::string> & names);
@@ -190,7 +192,7 @@ protected:
   void remove(InputIterator first, InputIterator last);
 
   /**
-   * Set the current items.
+   * Set the current items/values.
    */
   void setCurrentItems(const std::vector<MooseEnumItem> & current_items);
 
