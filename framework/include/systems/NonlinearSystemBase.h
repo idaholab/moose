@@ -293,7 +293,7 @@ public:
   void setInitialSolution();
 
   // Used for enforcing nodal BC's when using a direct acceleration calculation
-  void setNodalBCs();
+  void setDirichletBCs();
   /**
    * Sets the value of constrained variables in the solution vector.
    */

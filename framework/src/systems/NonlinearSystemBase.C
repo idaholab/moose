@@ -987,7 +987,7 @@ NonlinearSystemBase::setInitialSolution()
 }
 
 void
-NonlinearSystemBase::setNodalBCs()
+NonlinearSystemBase::setDirichletBCs()
 {
   NumericVector<Number> & initial_solution(solution());
 
