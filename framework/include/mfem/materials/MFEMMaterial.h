@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MFEMGeneralUserObject.h"
 #include "MFEMCoefficient.h"
-#include "coefficients.hpp"
+#include "coefficients.h"
 
-class MFEMMaterial : public GeneralUserObject
+class MFEMMaterial : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
@@ -12,11 +12,7 @@ public:
   MFEMMaterial(const InputParameters & parameters);
   virtual ~MFEMMaterial();
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
-  virtual void storeCoefficients(hephaestus::Subdomain & subdomain) {}
+  virtual void storeCoefficients(platypus::Subdomain & subdomain) {}
 
   std::vector<SubdomainName> blocks;
 };

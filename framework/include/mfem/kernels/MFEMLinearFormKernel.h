@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GeneralUserObject.h"
-#include "kernels.hpp"
-#include "gridfunctions.hpp"
+#include "MFEMGeneralUserObject.h"
+#include "kernels.h"
+#include "gridfunctions.h"
 
-class MFEMLinearFormKernel : public GeneralUserObject
+class MFEMLinearFormKernel : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
@@ -12,9 +12,5 @@ public:
   MFEMLinearFormKernel(const InputParameters & parameters);
   virtual ~MFEMLinearFormKernel();
 
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
-
-  virtual std::shared_ptr<hephaestus::Kernel<mfem::ParLinearForm>> getKernel() { return nullptr; }
+  virtual std::shared_ptr<platypus::Kernel<mfem::ParLinearForm>> getKernel() { return nullptr; }
 };

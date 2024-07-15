@@ -11,12 +11,13 @@ PointFromMFEMVector(const mfem::Vector & vec)
 InputParameters
 MFEMCoefficient::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMCoefficient");
   return params;
 }
 
-MFEMCoefficient::MFEMCoefficient(const InputParameters & parameters) : GeneralUserObject(parameters)
+MFEMCoefficient::MFEMCoefficient(const InputParameters & parameters)
+  : MFEMGeneralUserObject(parameters)
 {
 }
 

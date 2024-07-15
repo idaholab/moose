@@ -19,7 +19,7 @@ MFEMVectorNormalIntegratedBC::MFEMVectorNormalIntegratedBC(const InputParameters
         &getUserObject<MFEMVectorCoefficient>("vector_coefficient")))
 {
 
-  _boundary_condition = std::make_shared<hephaestus::IntegratedBC>(
+  _boundary_condition = std::make_shared<platypus::IntegratedBC>(
       getParam<std::string>("variable"),
       bdr_attr,
       std::make_unique<mfem::BoundaryNormalLFIntegrator>(*_vec_coef->getVectorCoefficient()));

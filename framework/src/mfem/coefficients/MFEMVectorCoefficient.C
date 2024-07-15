@@ -5,13 +5,13 @@ registerMooseObject("PlatypusApp", MFEMVectorCoefficient);
 InputParameters
 MFEMVectorCoefficient::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMVectorCoefficient");
   return params;
 }
 
 MFEMVectorCoefficient::MFEMVectorCoefficient(const InputParameters & parameters)
-  : GeneralUserObject(parameters)
+  : MFEMGeneralUserObject(parameters)
 {
 }
 
