@@ -23,7 +23,7 @@ For a variable, $u$, at time $t$ with a time step, $\Delta t$, the central diffe
 This leads to the following solution update,
 
 \begin{equation}
-    \mathbf{u}(t+\Delta t)=\mathbf{u(t)}+\left[\frac{1}{\Delta t^2}\mathbf{M}+\frac{1}{2\Delta t}\mathbf{C}\right]^{-1}\left[\mathbf{M}\left[\frac{1}{\Delta t^2}(\mathbf{u}(t-\Delta t)\right]-\mathbf{C}\left[\frac{1}{2\Delta t}\left(\mathbf{u}(t-\Delta t)-\mathbf{u}(t)\right)\right]+\mathbf{F}^{\text{ext}}-\mathbf{F}^{\text{int}}(\mathbf{u}(t))\right]
+    \mathbf{u}(t+\Delta t)=\mathbf{u(t)}+\left[\frac{1}{\Delta t^2}\mathbf{M}+\frac{1}{2\Delta t}\mathbf{C}\right]^{-1}\left[\mathbf{M}\left[\frac{1}{\Delta t^2}(\mathbf{u}(t-\Delta t)\right]-\mathbf{C}\left[\frac{1}{2\Delta t}\left(\mathbf{u}(t-\Delta t)-\mathbf{u}(t)\right)\right]+\mathbf{F}^{\text{ext}}+\mathbf{F}^{\text{int}}(\mathbf{u}(t))\right]
 \end{equation},
 
 where $\mathbf{M}$ represents the mass matrix, $\mathbf{C}$ represents the damping matrix, $\mathbf{F}^{\text{ext}}$ represents the external forces, and $\mathbf{F}^{\text{int}}(\mathbf{u}(t))$ represents the internal forces.
@@ -34,7 +34,7 @@ Here, the solution update will be based on a direct calculation of the accelerat
 
 \begin{equation},
     \begin{aligned}
-        \mathbf{\ddot{u}}(t) &= \mathbf{M}^{-1}\left[F^{\text{ext}}-F^{\text{int}}\left(\mathbf{u}(t)\right)\right] \\
+        \mathbf{\ddot{u}}(t) &= \mathbf{M}^{-1}\left[F^{\text{ext}}+F^{\text{int}}\left(\mathbf{u}(t)\right)\right] \\
         \mathbf{\dot{u}}(t+\frac{\Delta t}{2}) &= \mathbf{u}(t-\frac{\Delta t}{2}) + \Delta t_{\text{avg}} \mathbf{\ddot{u}}(t) \\
         \mathbf{u}(t + \Delta t) &= \mathbf{u}(t)+\Delta t \mathbf{\dot{u}}(t+\frac{\Delta t}{2})
     \end{aligned}
