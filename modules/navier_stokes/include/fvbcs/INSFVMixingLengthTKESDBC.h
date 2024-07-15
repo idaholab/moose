@@ -12,7 +12,7 @@
 #include "FVDirichletBCBase.h"
 
 /**
- * A class for turbulent kinetic energy dissipation rate inlet boundary conditions
+ * A class for turbulent kinetic energy specific dissipation rate inlet boundary conditions
  */
 class INSFVMixingLengthTKESDBC : public FVDirichletBCBase
 {
