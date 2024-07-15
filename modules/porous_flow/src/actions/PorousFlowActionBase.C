@@ -29,6 +29,10 @@ PorousFlowActionBase::validParams()
   params.addClassDescription("Adds the PorousFlowDictator UserObject.  This class also contains "
                              "many utility functions for adding other pieces of an input file, "
                              "which may be used by derived classes.");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "The list of block ids (SubdomainID) on which the porous flow is defined on");
+  params.addParamNamesToGroup("block", "Advanced");
+
   params.addParam<RealVectorValue>("gravity",
                                    RealVectorValue(0.0, 0.0, -10.0),
                                    "Gravitational acceleration vector downwards (m/s^2)");
@@ -98,6 +102,8 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
     PorousFlowDependencies(),
     _included_objects(),
     _dictator_name(getParam<std::string>("dictator_name")),
+    _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
+    _subdomain_names_set(isParamSetByUser("block")),
     _num_aqueous_equilibrium(getParam<unsigned int>("number_aqueous_equilibrium")),
     _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
     _gravity(getParam<RealVectorValue>("gravity")),
@@ -135,8 +141,21 @@ PorousFlowActionBase::act()
   // Check if the simulation is transient (note: can't do this in the ctor)
   _transient = _problem->isTransient();
 
+  // get subdomain IDs
+  std::set<SubdomainID> _subdomain_ids;
+  for (auto & name : _subdomain_names)
+  {
+    auto id = _mesh->getSubdomainID(name);
+    if (id == Moose::INVALID_BLOCK_ID)
+      paramError("block", "Subdomain \"" + name + "\" not found in mesh.");
+    else
+      _subdomain_ids.insert(id);
+  }
+
   // Make sure that all mesh subdomains have the same coordinate system
-  const auto & all_subdomains = _problem->mesh().meshSubdomains();
+  const auto & all_subdomains =
+      _subdomain_names.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
+
   if (all_subdomains.empty())
     mooseError("No subdomains found");
   _coord_system = _problem->getCoordSystem(*all_subdomains.begin());
@@ -227,6 +246,8 @@ PorousFlowActionBase::addSaturationAux(unsigned phase)
   if (_current_task == "add_aux_variable")
   {
     auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
+    if (_subdomain_names_set)
+      var_params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     _problem->addAuxVariable("MooseVariableConstMonomial", "saturation" + phase_str, var_params);
   }
 
@@ -250,6 +271,8 @@ PorousFlowActionBase::addDarcyAux(const RealVectorValue & gravity)
   if (_current_task == "add_aux_variable")
   {
     auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
+    if (_subdomain_names_set)
+      var_params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     _problem->addAuxVariable("MooseVariableConstMonomial", "darcy_vel_x", var_params);
     _problem->addAuxVariable("MooseVariableConstMonomial", "darcy_vel_y", var_params);
@@ -260,6 +283,8 @@ PorousFlowActionBase::addDarcyAux(const RealVectorValue & gravity)
   {
     std::string aux_kernel_type = "PorousFlowDarcyVelocityComponent";
     InputParameters params = _factory.getValidParams(aux_kernel_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<RealVectorValue>("gravity") = gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -288,6 +313,8 @@ PorousFlowActionBase::addStressAux()
   if (_current_task == "add_aux_variable")
   {
     auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
+    if (_subdomain_names_set)
+      var_params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     _problem->addAuxVariable("MooseVariableConstMonomial", "stress_xx", var_params);
     _problem->addAuxVariable("MooseVariableConstMonomial", "stress_xy", var_params);
     _problem->addAuxVariable("MooseVariableConstMonomial", "stress_xz", var_params);
@@ -374,6 +401,8 @@ PorousFlowActionBase::addTemperatureMaterial(bool at_nodes)
 
     std::string material_type = "PorousFlowTemperature";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.applySpecificParameters(parameters(), {"temperature"});
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -399,6 +428,8 @@ PorousFlowActionBase::addMassFractionMaterial(bool at_nodes)
 
     std::string material_type = "PorousFlowMassFraction";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.applySpecificParameters(parameters(), {"mass_fraction_vars"});
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -419,6 +450,8 @@ PorousFlowActionBase::addEffectiveFluidPressureMaterial(bool at_nodes)
   {
     std::string material_type = "PorousFlowEffectiveFluidPressure";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
 
@@ -438,6 +471,8 @@ PorousFlowActionBase::addNearestQpMaterial()
   {
     std::string material_type = "PorousFlowNearestQp";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<bool>("nodal_material") = true;
@@ -455,6 +490,8 @@ PorousFlowActionBase::addVolumetricStrainMaterial(const std::vector<VariableName
   {
     std::string material_type = "PorousFlowVolumetricStrain";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     std::string material_name = "PorousFlowActionBase_VolumetricStrain";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -480,6 +517,8 @@ PorousFlowActionBase::addSingleComponentFluidMaterial(bool at_nodes,
   {
     std::string material_type = "PorousFlowSingleComponentFluid";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<unsigned int>("phase") = phase;
@@ -513,6 +552,8 @@ PorousFlowActionBase::addBrineMaterial(VariableName nacl_brine,
   {
     std::string material_type = "PorousFlowBrine";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<std::vector<VariableName>>("xnacl") = {nacl_brine};
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -538,6 +579,8 @@ PorousFlowActionBase::addRelativePermeabilityConst(bool at_nodes, unsigned phase
   {
     std::string material_type = "PorousFlowRelativePermeabilityConst";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<unsigned int>("phase") = phase;
@@ -559,6 +602,8 @@ PorousFlowActionBase::addRelativePermeabilityCorey(
   {
     std::string material_type = "PorousFlowRelativePermeabilityCorey";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<Real>("n") = n;
@@ -583,6 +628,8 @@ PorousFlowActionBase::addRelativePermeabilityFLAC(
   {
     std::string material_type = "PorousFlowRelativePermeabilityFLAC";
     InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<Real>("m") = m;
@@ -606,6 +653,8 @@ PorousFlowActionBase::addCapillaryPressureVG(Real m, Real alpha, std::string use
   {
     std::string userobject_type = "PorousFlowCapillaryPressureVG";
     InputParameters params = _factory.getValidParams(userobject_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<Real>("m") = m;
     params.set<Real>("alpha") = alpha;
     _problem->addUserObject(userobject_type, userobject_name, params);
@@ -621,6 +670,8 @@ PorousFlowActionBase::addAdvectiveFluxCalculatorSaturated(unsigned phase,
   {
     const std::string userobject_type = "PorousFlowAdvectiveFluxCalculatorSaturated";
     InputParameters params = _factory.getValidParams(userobject_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<MooseEnum>("flux_limiter_type") = _flux_limiter_type;
     params.set<RealVectorValue>("gravity") = _gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -639,6 +690,8 @@ PorousFlowActionBase::addAdvectiveFluxCalculatorUnsaturated(unsigned phase,
   {
     const std::string userobject_type = "PorousFlowAdvectiveFluxCalculatorUnsaturated";
     InputParameters params = _factory.getValidParams(userobject_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<MooseEnum>("flux_limiter_type") = _flux_limiter_type;
     params.set<RealVectorValue>("gravity") = _gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -657,6 +710,8 @@ PorousFlowActionBase::addAdvectiveFluxCalculatorSaturatedHeat(unsigned phase,
   {
     const std::string userobject_type = "PorousFlowAdvectiveFluxCalculatorSaturatedHeat";
     InputParameters params = _factory.getValidParams(userobject_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<MooseEnum>("flux_limiter_type") = _flux_limiter_type;
     params.set<RealVectorValue>("gravity") = _gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -675,6 +730,8 @@ PorousFlowActionBase::addAdvectiveFluxCalculatorUnsaturatedHeat(unsigned phase,
   {
     const std::string userobject_type = "PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat";
     InputParameters params = _factory.getValidParams(userobject_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<MooseEnum>("flux_limiter_type") = _flux_limiter_type;
     params.set<RealVectorValue>("gravity") = _gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -694,6 +751,8 @@ PorousFlowActionBase::addAdvectiveFluxCalculatorSaturatedMultiComponent(unsigned
   {
     const std::string userobject_type = "PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent";
     InputParameters params = _factory.getValidParams(userobject_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<MooseEnum>("flux_limiter_type") = _flux_limiter_type;
     params.set<RealVectorValue>("gravity") = _gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -713,6 +772,8 @@ PorousFlowActionBase::addAdvectiveFluxCalculatorUnsaturatedMultiComponent(
     const std::string userobject_type =
         "PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent";
     InputParameters params = _factory.getValidParams(userobject_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<MooseEnum>("flux_limiter_type") = _flux_limiter_type;
     params.set<RealVectorValue>("gravity") = _gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;

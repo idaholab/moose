@@ -80,6 +80,8 @@ PorousFlowBasicTHM::addKernels()
   std::string kernel_name = "PorousFlowBasicTHM_DarcyFlow";
   std::string kernel_type = "PorousFlowFullySaturatedDarcyBase";
   InputParameters params = _factory.getValidParams(kernel_type);
+  if (_subdomain_names_set)
+    params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
   params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
   params.set<RealVectorValue>("gravity") = _gravity;
   params.set<bool>("multiply_by_density") = _multiply_by_density;
@@ -91,6 +93,8 @@ PorousFlowBasicTHM::addKernels()
     std::string kernel_name = "PorousFlowBasicTHM_MassTimeDerivative";
     std::string kernel_type = "PorousFlowFullySaturatedMassTimeDerivative";
     InputParameters params = _factory.getValidParams(kernel_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<NonlinearVariableName>("variable") = _pp_var;
     params.set<Real>("biot_coefficient") = _biot_coefficient;
@@ -107,6 +111,8 @@ PorousFlowBasicTHM::addKernels()
     std::string kernel_name = "PorousFlowBasicTHM_HeatAdvection";
     std::string kernel_type = "PorousFlowFullySaturatedHeatAdvection";
     InputParameters params = _factory.getValidParams(kernel_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<NonlinearVariableName>("variable") = _temperature_var[0];
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<RealVectorValue>("gravity") = _gravity;
@@ -122,8 +128,10 @@ PorousFlowBasicTHM::addMaterials()
   if (_deps.dependsOn(_included_objects, "pressure_saturation_qp"))
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
-    InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowBasicTHM_1PhaseP_qp";
+    InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<bool>("at_nodes") = false;
@@ -133,8 +141,10 @@ PorousFlowBasicTHM::addMaterials()
   if (_deps.dependsOn(_included_objects, "pressure_saturation_nodal"))
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
-    InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowBasicTHM_1PhaseP";
+    InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<bool>("at_nodes") = true;

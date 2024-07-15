@@ -116,6 +116,8 @@ PorousFlowUnsaturated::addKernels()
   {
     const std::string kernel_type = "PorousFlowAdvectiveFlux";
     InputParameters params = _factory.getValidParams(kernel_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<RealVectorValue>("gravity") = _gravity;
 
@@ -136,6 +138,8 @@ PorousFlowUnsaturated::addKernels()
   {
     const std::string kernel_type = "PorousFlowFluxLimitedTVDAdvection";
     InputParameters params = _factory.getValidParams(kernel_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
@@ -159,6 +163,8 @@ PorousFlowUnsaturated::addKernels()
     std::string kernel_name = "PorousFlowUnsaturated_MassTimeDerivative";
     std::string kernel_type = "PorousFlowMassTimeDerivative";
     InputParameters params = _factory.getValidParams(kernel_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
     if (!_base_name.empty())
@@ -188,6 +194,8 @@ PorousFlowUnsaturated::addKernels()
     std::string kernel_name = "PorousFlowUnsaturated_MassVolumetricExpansion";
     std::string kernel_type = "PorousFlowMassVolumetricExpansion";
     InputParameters params = _factory.getValidParams(kernel_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
 
@@ -212,6 +220,8 @@ PorousFlowUnsaturated::addKernels()
       const std::string kernel_name = "PorousFlowUnsaturated_HeatAdvection";
       const std::string kernel_type = "PorousFlowHeatAdvection";
       InputParameters params = _factory.getValidParams(kernel_type);
+      if (_subdomain_names_set)
+        params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
       params.set<NonlinearVariableName>("variable") = _temperature_var[0];
       params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
       params.set<RealVectorValue>("gravity") = _gravity;
@@ -222,6 +232,8 @@ PorousFlowUnsaturated::addKernels()
       const std::string kernel_name = "PorousFlowUnsaturated_HeatAdvection";
       const std::string kernel_type = "PorousFlowFluxLimitedTVDAdvection";
       InputParameters params = _factory.getValidParams(kernel_type);
+      if (_subdomain_names_set)
+        params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
       params.set<NonlinearVariableName>("variable") = _temperature_var[0];
       params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
       params.set<UserObjectName>("advective_flux_calculator") = "PorousFlowUnsaturatedHeat_AC";
@@ -270,8 +282,10 @@ PorousFlowUnsaturated::addMaterials()
   if (_deps.dependsOn(_included_objects, "pressure_saturation_qp"))
   {
     const std::string material_type = "PorousFlow1PhaseP";
-    InputParameters params = _factory.getValidParams(material_type);
     const std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_qp";
+    InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<UserObjectName>("capillary_pressure") = _capillary_pressure_name;
@@ -281,8 +295,10 @@ PorousFlowUnsaturated::addMaterials()
   if (_deps.dependsOn(_included_objects, "pressure_saturation_nodal"))
   {
     const std::string material_type = "PorousFlow1PhaseP";
-    InputParameters params = _factory.getValidParams(material_type);
     const std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_nodal";
+    InputParameters params = _factory.getValidParams(material_type);
+    if (_subdomain_names_set)
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<UserObjectName>("capillary_pressure") = _capillary_pressure_name;
