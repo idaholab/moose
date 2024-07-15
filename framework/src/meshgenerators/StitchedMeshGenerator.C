@@ -183,44 +183,77 @@ StitchedMeshGenerator::generate()
         }
       }
     }
-    else
+
+    // We'll do some error checking here for two different scenarios:
+    // 1) When we disable the boundary ID renumbering:
+    //    We might hit issues when we have the same boundary ID with
+    //    different names. The stitcher would merge them and use the boundary name
+    //    from the first mesh, which would result in unexpectedly altered boundary names.
+    //    For this reason we check if we have boundary the same boundary ID with
+    //    different names here and if so we throw a warning.
+    // 2) When we enable the boundary ID renumbering:
+    //    Sometimes we get into situations when the same boundary name shows up with
+    //    different IDs which can result in errors in visualization tools and potentially
+    //    undefined behavior
+    const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
+    const auto & other_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
+
+    const auto & base_bd_name_map = mesh->get_boundary_info().get_sideset_name_map();
+    const auto & other_bd_name_map = meshes[i]->get_boundary_info().get_sideset_name_map();
+
+    // First, we check if we have the same names in the two meshes
+    std::vector<std::string> bd_name_intersection;
+    std::vector<boundary_id_type> base_ids, other_ids;
+    for (const auto & base_pair : base_bd_name_map)
+      for (const auto & other_pair : other_bd_name_map)
+        if (other_pair.second == base_pair.second && other_pair.first != base_pair.first)
+        {
+          bd_name_intersection.push_back(base_pair.second);
+          base_ids.push_back(base_pair.first);
+          other_ids.push_back(other_pair.first);
+        }
+
+    // Now, throw a warning if these are not emptt:
+    for (const auto i : index_range(bd_name_intersection))
+      mooseWarning(
+          "Boundary name ",
+          bd_name_intersection[i],
+          " corresponds to different boundary IDs on the input meshes! On the first "
+          "mesh it corresponds to ",
+          base_ids[i],
+          " while on the second mesh it corresponds to ",
+          other_ids[i],
+          ". This can result in incorrect results and error messages during visualization!",
+          "Use the MeshRepairGenerator object to merge the boundary IDs!");
+
+    // Now, we check if the same ID is present with different names
+    std::set<boundary_id_type> bd_id_intersection;
+    std::set_intersection(base_mesh_bids.begin(),
+                          base_mesh_bids.end(),
+                          other_mesh_bids.begin(),
+                          other_mesh_bids.end(),
+                          std::inserter(intersection, intersection.begin()));
+
+    for (const auto bid : intersection)
     {
-      // In this scenario we might hit issues when we have the same boundary ID with
-      // different names. The stitcher would merge them and use the boundary name
-      // from the first mesh, which would result in unexpectedly altered boundary names.
-      // For this reason we check if we have boundary the same boundary ID with
-      // different names here and if so we throw a warning.
-      const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
-      const auto & other_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
+      const auto & sideset_name_on_first_mesh = mesh->get_boundary_info().get_sideset_name(bid);
+      const auto & sideset_name_on_second_mesh =
+          meshes[i]->get_boundary_info().get_sideset_name(bid);
 
-      std::set<boundary_id_type> intersection;
-      std::set_intersection(base_mesh_bids.begin(),
-                            base_mesh_bids.end(),
-                            other_mesh_bids.begin(),
-                            other_mesh_bids.end(),
-                            std::inserter(intersection, intersection.begin()));
-
-      for (const auto bid : intersection)
-      {
-        const auto & sideset_name_on_first_mesh = mesh->get_boundary_info().get_sideset_name(bid);
-        const auto & sideset_name_on_second_mesh =
-            meshes[i]->get_boundary_info().get_sideset_name(bid);
-
-        if (sideset_name_on_first_mesh != sideset_name_on_second_mesh)
-          mooseWarning("Boundary ID ",
-                       bid,
-                       " corresponds to different boundary names on the input meshes! On the first "
-                       "mesh it corresponds to ",
-                       sideset_name_on_first_mesh,
-                       " while on the second mesh it corresponds to ",
-                       sideset_name_on_second_mesh,
-                       " The final mesh will assign the boundary on ",
-                       sideset_name_on_second_mesh,
-                       " to ",
-                       sideset_name_on_first_mesh,
-                       " To avoid this situation, use the `prevent_boundary_ids_overlap` parameter "
-                       "in combination with the RepairMeshGenerator!");
-      }
+      if (sideset_name_on_first_mesh != sideset_name_on_second_mesh)
+        mooseWarning("Boundary ID ",
+                     bid,
+                     " corresponds to different boundary names on the input meshes! On the first "
+                     "mesh it corresponds to ",
+                     sideset_name_on_first_mesh,
+                     " while on the second mesh it corresponds to ",
+                     sideset_name_on_second_mesh,
+                     ". The final mesh will assign the boundary on ",
+                     sideset_name_on_second_mesh,
+                     " to ",
+                     sideset_name_on_first_mesh,
+                     ". To avoid this situation, use the `prevent_boundary_ids_overlap` parameter "
+                     "in combination with the MeshRepairGenerator!");
     }
 
     mesh->stitch_meshes(*meshes[i],
