@@ -1,0 +1,90 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   petsc/*
+#   libmesh-vtk/*
+#   peacock/*
+#
+# As well as any directions pertaining to modifying those files.
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set version = "2024.07.10" %}
+
+# HDF5 Version
+{% set hdf5_version = "1.14.3" %}
+
+package:
+  name: moose-mpi
+  version: {{ version }}
+
+source:
+  - path: .
+
+build:
+  number: 0
+  string: {{ mpi }}
+  pin_depends: strict
+  ignore_exports:
+    - openssl
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+
+requirements:
+  build:
+    - {{ mpi }} {{ mpi_version }}
+    - {{ mpi }}-mpicc
+    - {{ mpi }}-mpicxx
+    - {{ mpi }}-mpifort
+    - {{ moose_libgfortran5 }}
+    - {{ moose_libzlib }}
+    - {{ moose_clangcc }}                     # [osx]
+    - {{ moose_clangxx }}                     # [osx]
+    - {{ moose_gcc_impl }}                    # [linux]
+    - {{ moose_gfortran_impl }}               # [linux]
+    - {{ moose_gcc }}                         # [linux]
+    - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+    - libcxx <18
+    - gfortran
+  run:
+    - {{ mpi }} {{ mpi_version }}
+    - {{ mpi }}-mpicc
+    - {{ mpi }}-mpicxx
+    - {{ mpi }}-mpifort
+    - {{ moose_libgfortran5 }}
+    - {{ moose_libzlib }}
+    - {{ moose_clangcc }}                     # [osx]
+    - {{ moose_clangxx }}                     # [osx]
+    - {{ moose_gcc }}                         # [linux]
+    - {{ moose_gfortran_impl }}               # [linux]
+    - gxx                                     # [linux]
+    - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+    - libcxx <18
+    - automake 1.16.5
+    - libexpat 2.5.0
+    - bison 3.4
+    - zfp 0.5.5
+    - gfortran
+    - autoconf
+    - libtool
+    - cmake
+    - make
+    - m4
+  run_constrained:
+    - python <{{3.12}}
+
+test:
+  commands:
+    - test -f $PREFIX/etc/conda/activate.d/activate_moose-mpi.sh
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: Provides MPI wrapper and toolchain for MOOSE based development.
+  description: {{ mpi_friendly_name }} is a high performance and widely portable implementation of the Message Passing Interface (MPI) standard.
+  doc_url: {{ mpi_website }}
+  dev_url: {{ mpi_dev_website }}
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour

@@ -7,15 +7,16 @@ maximum_clang: 16.0.6
 python_default: 3.10
 minimum_python: 3.7
 maximum_python: 3.11
-mpich: 4.0.2
+mpich: 4.2.1
+openmpi: 4.1.6
 petsc_alt: 3.11.4
 petsc: 3.20.3
-moose_dev: 2024.07.03
-moose_tools: 2024.06.17
+moose_dev: 2024.07.10
+moose_tools: 2024.07.10
 apptainer_rockylinux: 8.8.20230518
 apptainer_mpich: 3.4.3
 apptainer_gcc: 12.2.1
 conda_version: 23.11.0-0
-conda_mpi: moose-mpich
-mpi: mpich
+conda_mpi: moose-mpi
+default_mpi: mpich
 python_packages: packaging pyaml jinja2

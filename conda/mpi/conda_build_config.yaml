@@ -1,0 +1,68 @@
+mpi:
+  - mpich
+  - openmpi
+
+mpi_version:
+  - 4.2.1
+  - 4.1.6
+
+mpi_friendly_name:
+  - MPICH
+  - OpenMPI
+
+mpi_website:
+  - http://www.mpich.org/documentation/guides
+  - https://www.open-mpi.org/doc/
+
+mpi_dev_website:
+  - https://github.com/pmodels/mpich
+  - https://github.com/open-mpi/ompi
+
+zip_keys:
+  - mpi
+  - mpi_version
+  - mpi_friendly_name
+  - mpi_website
+  - mpi_dev_website
+
+moose_libzlib:
+  - libzlib 1.2.13
+
+moose_libgfortran5:
+  - libgfortran5 13.2.0 ha4646dd_5                          # [linux]
+  - libgfortran5 13.2.0 h2873a65_3                          # [not arm64 and osx]
+  - libgfortran5 13.2.0 hf226fd6_3                          # [arm64]
+
+moose_gcc:                                                  # [linux]
+  - gcc 12.3.0 h915e2ae_7                                   # [linux]
+
+moose_gcc_impl:                                             # [linux]
+  - gcc_impl_linux-64 12.3.0 h58ffeeb_7                     # [linux]
+
+moose_gfortran_impl:                                        # [linux]
+  - gfortran_impl_linux-64 12.3.0 h1645026_7                # [linux]
+
+moose_clangcc:                                              # [osx]
+  - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
+  - clang 16.0.6 h30cc82d_6                                 # [arm64]
+
+moose_clangxx:                                              # [osx]
+  - clangxx 16.0.6 default_h7151d67_6                       # [not arm64 and osx]
+  - clangxx 16.0.6 default_h4cf2255_6                       # [arm64]
+
+#### Darwin SDK SYSROOT
+CONDA_BUILD_SYSROOT:                                        # [osx]
+  - /opt/MacOSX10.15.sdk                                    # [not arm64 and osx]
+  - /opt/MacOSX11.3.sdk                                     # [arm64]
+
+macos_min_version:                                          # [osx]
+  - 10.15                                                   # [not arm64 and osx]
+  - 11.3                                                    # [arm64]
+
+macos_machine:                                              # [osx]
+  - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
+  - arm64-apple-darwin20.0.0                                # [arm64]
+
+MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
+  - 10.15                                                   # [not arm64 and osx]
+  - 11.3                                                    # [arm64]

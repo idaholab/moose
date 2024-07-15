@@ -13,7 +13,7 @@ source:
 
 build:
   number: 0
-  string: build_0
+  string: {{ mpi }}
   skip: true # [win]
   pin_depends: strict
   script_env:
@@ -24,9 +24,11 @@ build:
     - SSL_CERT_FILE
 requirements:
   build:
+    - {{ mpi }}
     - {{ moose_dev }}
 
   run:
+    - {{ mpi }}
     - {{ moose_dev }}
 
 test:

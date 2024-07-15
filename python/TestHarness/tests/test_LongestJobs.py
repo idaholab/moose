@@ -21,10 +21,10 @@ class TestHarnessTester(TestHarnessTestCase):
         output = cm.exception.output.decode('utf-8')
 
         self.assertIn('4 longest running jobs', output)
-        self.assertRegex(output, r'longest running jobs(?s).*run_1')
-        self.assertRegex(output, r'longest running jobs(?s).*run_2')
-        self.assertRegex(output, r'longest running jobs(?s).*run_fail')
-        self.assertNotRegex(output, r'longest running jobs(?s).*run_skip')
+        self.assertRegex(output, r'(?s)longest running jobs.*run_1')
+        self.assertRegex(output, r'(?s)longest running jobs.*run_2')
+        self.assertRegex(output, r'(?s)longest running jobs.*run_fail')
+        self.assertNotRegex(output, r'(?s)longest running jobs.*run_skip')
 
     def testLongestJobsNoneCompleted(self):
         """
@@ -33,4 +33,4 @@ class TestHarnessTester(TestHarnessTestCase):
         output = self.runTests('-i', 'longest_jobs', '--re', 'foo', '--longest-jobs', '100').decode('utf-8')
 
         self.assertIn('100 longest running jobs', output)
-        self.assertNotRegex(output, r'longest running jobs(?s).*<No jobs were completed>')
+        self.assertNotRegex(output, r'(?s)longest running jobs.*<No jobs were completed>')

@@ -6,6 +6,8 @@
       input = 'top_opt_2d.i'
       exodiff = 'top_opt_2d_out.e'
       requirement = 'The system shall be able to solve a 2D topology optimization problem using the solid isotropic material with penalization method(SIMP) to find the optimal solution and avoid grayscale boundaries/elements.'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [top_opt_3d]
       type = 'Exodiff'

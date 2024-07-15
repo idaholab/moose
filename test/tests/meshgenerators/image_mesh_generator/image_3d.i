@@ -11,7 +11,7 @@
     input = gen
     file_base = stack/test
     file_suffix = png
-    threshold = 2.7e4
+    threshold = 6e4
   []
 []
 
