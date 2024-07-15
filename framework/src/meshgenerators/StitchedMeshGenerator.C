@@ -238,21 +238,7 @@ StitchedMeshGenerator::generate()
                         use_binary_search);
 
     if (_merge_boundaries_with_same_name)
-    {
-      // We check if we have the same boundary name with different IDs. If we do, we assign the
-      // first ID to every occurrence.
-      const auto & bd_name_map = mesh->get_boundary_info().get_sideset_name_map();
-      std::map<boundary_id_type, boundary_id_type> same_name_ids;
-      for (const auto & pair_outer : bd_name_map)
-        for (const auto & pair_inner : bd_name_map)
-          // The last condition is needed to make sure we only store one combination
-          if (pair_outer.second == pair_inner.second && pair_outer.first != pair_inner.first &&
-              same_name_ids.find(pair_inner.first) == same_name_ids.end())
-            same_name_ids[pair_outer.first] = pair_inner.first;
-
-      for (const auto & [id1, id2] : same_name_ids)
-        mesh->get_boundary_info().renumber_id(id2, id1);
-    }
+      MooseMeshUtils::mergeBoundaryIDsWithSameName(*mesh);
   }
 
   mesh->set_isnt_prepared();

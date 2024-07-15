@@ -54,8 +54,4 @@ private:
   ///        do not support mixed element types
   /// @param mesh the mesh to modify
   void separateSubdomainsByElementType(std::unique_ptr<MeshBase> & mesh) const;
-
-  /// @brief Merge boundary IDs of boundaries with the same name
-  /// @param mesh the mesh to modify
-  void mergeBDIDsWithSameName(std::unique_ptr<MeshBase> & mesh) const;
 };
