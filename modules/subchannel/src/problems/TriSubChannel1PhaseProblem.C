@@ -144,6 +144,42 @@ TriSubChannel1PhaseProblem::initializeSolution()
         auto subchannel_area =
             standard_area + additional_area + displaced_area - rod_area - wire_area;
 
+        /// Correct subchannel area and wetted perimeter in case of overlapping pins
+        auto overlapping_pin_area = 0.0;
+        auto overlapping_wetted_perimeter = 0.0;
+        for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+        {
+          auto gap_pins = _subchannel_mesh.getGapPins(i_gap);
+          auto pin_1 = gap_pins.first;
+          auto pin_2 = gap_pins.second;
+          auto * pin_node_1 = _subchannel_mesh.getPinNode(pin_1, iz);
+          auto * pin_node_2 = _subchannel_mesh.getPinNode(pin_2, iz);
+          auto Diameter1 = (*_Dpin_soln)(pin_node_1);
+          auto Radius1 = Diameter1 / 2.0;
+          auto Diameter2 = (*_Dpin_soln)(pin_node_2);
+          auto Radius2 = Diameter2 / 2.0;
+          auto pitch = _subchannel_mesh.getPitch();
+
+          if (pitch < (Radius1 + Radius2)) // overlapping pins
+          {
+            auto cos1 =
+                (pitch * pitch + Radius1 * Radius1 - Radius2 * Radius2) / (2 * pitch * Radius1);
+            auto cos2 =
+                (pitch * pitch + Radius2 * Radius2 - Radius1 * Radius1) / (2 * pitch * Radius2);
+            auto angle1 = 2.0 * acos(cos1);
+            auto angle2 = 2.0 * acos(cos2);
+            // half of the intersecting arc-length
+            overlapping_wetted_perimeter += 0.5 * angle1 * Radius1 + 0.5 * angle2 * Radius2;
+            // Half of the overlapping area
+            overlapping_pin_area +=
+                0.5 * Radius1 * Radius1 * acos(cos1) + 0.5 * Radius2 * Radius2 * acos(cos2) -
+                0.25 * sqrt((-pitch + Radius1 + Radius2) * (pitch + Radius1 - Radius2) *
+                            (pitch - Radius1 + Radius2) * (pitch + Radius1 + Radius2));
+          }
+        }
+        subchannel_area += overlapping_pin_area;           // correct surface area
+        wetted_perimeter += -overlapping_wetted_perimeter; // correct wetted perimeter
+
         /// Apply area reduction on subchannels affected by blockage
         auto index = 0;
         for (const auto & i_blockage : index_blockage)
@@ -194,6 +230,8 @@ TriSubChannel1PhaseProblem::initializeSolution()
           _tri_sch_mesh._gij_map[iz][i_gap] =
               pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0;
         }
+        if (_tri_sch_mesh._gij_map[iz][i_gap] <= 0.0)
+          _tri_sch_mesh._gij_map[iz][i_gap] = 0.0;
       }
     }
   }

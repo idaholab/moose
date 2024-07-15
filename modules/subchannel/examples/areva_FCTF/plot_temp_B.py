@@ -11,21 +11,37 @@ EXP_B4 = np.genfromtxt("EXP_temp_B4.csv", skip_header=0, delimiter=',')
 EXP_B6 = np.genfromtxt("EXP_temp_B6.csv", skip_header=0, delimiter=',')
 EXP_B = (EXP_B4 + EXP_B6) / 2.0
 EXP_BE = np.genfromtxt("EXP_temp_BE.csv", skip_header=0, delimiter=',')
+CFD_B4 = np.genfromtxt("CFD_temp_B4.csv", skip_header=0, delimiter=',')
+CFD_B6 = np.genfromtxt("CFD_temp_B6.csv", skip_header=0, delimiter=',')
+CFD_B = (CFD_B4 + CFD_B6) / 2.0
+CFD_BE = np.genfromtxt("CFD_temp_BE.csv", skip_header=0, delimiter=',')
 ###
 EXP_B4_ND = np.genfromtxt("EXP_temp_B4_ND.csv", skip_header=0, delimiter=',')
 EXP_B6_ND = np.genfromtxt("EXP_temp_B6_ND.csv", skip_header=0, delimiter=',')
 EXP_B_ND = (EXP_B4_ND + EXP_B6_ND) / 2.0
 EXP_BE_ND = np.genfromtxt("EXP_temp_BE_ND.csv", skip_header=0, delimiter=',')
+CFD_B4_ND = np.genfromtxt("CFD_temp_B4_ND.csv", skip_header=0, delimiter=',')
+CFD_B6_ND = np.genfromtxt("CFD_temp_B6_ND.csv", skip_header=0, delimiter=',')
+CFD_B_ND = (CFD_B4_ND + CFD_B6_ND) / 2.0
+CFD_BE_ND = np.genfromtxt("CFD_temp_BE_ND.csv", skip_header=0, delimiter=',')
 #### Plane C
 EXP_C8 = np.genfromtxt("EXP_temp_C8.csv", skip_header=0, delimiter=',')
 EXP_C10 = np.genfromtxt("EXP_temp_C10.csv", skip_header=0, delimiter=',')
 EXP_C = (EXP_C8 + EXP_C10) / 2.0
 EXP_CE = np.genfromtxt("EXP_temp_CE.csv", skip_header=0, delimiter=',')
+CFD_C8 = np.genfromtxt("CFD_temp_C8.csv", skip_header=0, delimiter=',')
+CFD_C10 = np.genfromtxt("CFD_temp_C10.csv", skip_header=0, delimiter=',')
+CFD_C = (CFD_C8 + CFD_C10) / 2.0
+CFD_CE = np.genfromtxt("CFD_temp_CE.csv", skip_header=0, delimiter=',')
 ###
 EXP_C8_ND = np.genfromtxt("EXP_temp_C8_ND.csv", skip_header=0, delimiter=',')
 EXP_C10_ND = np.genfromtxt("EXP_temp_C10_ND.csv", skip_header=0, delimiter=',')
 EXP_C_ND = (EXP_C8_ND + EXP_C10_ND) / 2.0
 EXP_CE_ND = np.genfromtxt("EXP_temp_CE_ND.csv", skip_header=0, delimiter=',')
+CFD_C8_ND = np.genfromtxt("CFD_temp_C8_ND.csv", skip_header=0, delimiter=',')
+CFD_C10_ND = np.genfromtxt("CFD_temp_C10_ND.csv", skip_header=0, delimiter=',')
+CFD_C_ND = (CFD_C8_ND + CFD_C10_ND) / 2.0
+CFD_CE_ND = np.genfromtxt("CFD_temp_CE_ND.csv", skip_header=0, delimiter=',')
 
 ### Deformed Duct SCM Results
 SC_DATA = np.genfromtxt("FCTF_deformed_out.csv", skip_header=2, delimiter=',')
@@ -71,7 +87,7 @@ DP8_ND = Pressure_SC_ND[8] - Pressure_SC_ND[9]
 ##############################
 # Define the error
 error = 2
-# ##############################
+##############################
 # ## EXP Deformed Duct
 # plt.figure()
 # for i in range(5):
@@ -103,7 +119,7 @@ error = 2
 # plt.xticks([-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9])
 # # Set grid lines
 # plt.grid(which='both', linestyle='--', linewidth=0.5)
-# plt.savefig("DP-FaceB.png")
+# # plt.savefig("DP-FaceB.png")
 # plt.show()
 
 # ##############################
@@ -148,41 +164,42 @@ error = 2
 # plt.xticks([-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9])
 # # Set grid lines
 # plt.grid(which='both', linestyle='--', linewidth=0.5)
-# plt.savefig("DP-FaceB_ND.png")
+# # plt.savefig("DP-FaceB_ND.png")
 # plt.show()
 
-############################
-############################
-### Figure with temperatures at pin surfaces at plane B
-plt.figure(figsize=(8, 5))
-# Plot the data points without error bars
-plt.plot(EXP_B[:, 0], EXP_B[:, 1], "ks", markerfacecolor='None', label="EXP")
-plt.plot(EXP_B[:, 0], SC_TEMP - Mean, "rx", label="SC")
+# ############################
+# ############################
+# ### Figure with temperatures at pin surfaces at plane B
+# plt.figure(figsize=(8, 5))
+# # Plot the data points without error bars
+# plt.plot(EXP_B_ND[:, 0], EXP_B_ND[:, 1], "ks", markerfacecolor='None', label="EXP")
+# plt.plot(CFD_B_ND[:, 0], CFD_B_ND[:, 1], "gx", markerfacecolor='None', label="CFD")
+# plt.plot(EXP_B_ND[:, 0], SC_TEMP_ND - Mean, "rx", label="SCM")
 
-# Plot the error bars with dashed linestyle
-plt.errorbar(EXP_B[:, 0], EXP_B[:, 1], yerr=error, fmt="none", ecolor="k", capsize=5, linestyle='dashdot')
-plt.title(r'Temperature measurements at plane B''\n' 'on pin surface (4+6 o\'clock locations)', fontsize=13)
-plt.xlabel(r'$Pin~Number~\#$', fontsize=14)
-plt.ylabel(r'Temperature Difference from' '\n' 'Planar Mean [C]', fontsize=14)
-plt.legend(fontsize=12)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.ylim(-10, 20)
+# # Plot the error bars with dashed linestyle
+# plt.errorbar(EXP_B_ND[:, 0], EXP_B_ND[:, 1], yerr=error, fmt="none", ecolor="k", capsize=5, linestyle='dashdot')
+# plt.title(r'Temperature measurements at plane B''\n' 'on pin surface (4+6 o\'clock locations)', fontsize=13)
+# plt.xlabel(r'$Pin~Number~\#$', fontsize=14)
+# plt.ylabel(r'Temperature Difference from' '\n' 'Planar Mean [C]', fontsize=14)
+# plt.legend(fontsize=12)
+# plt.xticks(fontsize=14)
+# plt.yticks(fontsize=14)
+# plt.ylim(-10, 20)
 
-# Set major ticks at every 5 units
-plt.xticks([1, 5, 10, 15, 20])
+# # Set major ticks at every 5 units
+# plt.xticks([1, 5, 10, 15, 20])
 
-# Set minor ticks at every 1 unit
-minor_ticks = range(int(min(EXP_B[:, 0])), int(max(EXP_B[:, 0])) + 1, 1)
-plt.xticks(minor_ticks, minor=True)
+# # Set minor ticks at every 1 unit
+# minor_ticks = range(int(min(EXP_B[:, 0])), int(max(EXP_B[:, 0])) + 1, 1)
+# plt.xticks(minor_ticks, minor=True)
 
-# Set grid lines
-plt.grid(which='both', linestyle='--', linewidth=0.5)
+# # Set grid lines
+# plt.grid(which='both', linestyle='--', linewidth=0.5)
 
-# Save the figure with a specified DPI (e.g., 300)
-plt.savefig("TEMP-PlaneB.png", dpi=300, bbox_inches='tight')  # Specify DPI directly in the savefig call
-plt.show()
-######################
+# # Save the figure with a specified DPI (e.g., 300)
+# plt.savefig("TEMP-PlaneB_ND.png", dpi=300, bbox_inches='tight')  # Specify DPI directly in the savefig call
+# plt.show()
+# ######################
 
 #############################
 #############################
@@ -190,7 +207,8 @@ plt.show()
 plt.figure(figsize=(8, 5))
 # Plot the data points without error bars
 plt.plot(EXP_BE[:, 0], EXP_BE[:, 1], "ks", markerfacecolor= 'None', label="EXP")
-plt.plot(EXP_BE[:, 0], SC_TEMP_BE - Mean, "rx", label="SC")
+plt.plot(CFD_BE[:, 0], CFD_BE[:, 1], "gx", markerfacecolor= 'None', label="CFD")
+plt.plot([1,2,4,5], SC_TEMP_BE - Mean, "rx", label="SCM")
 # Plot the error bars with dashed linestyle
 plt.errorbar(EXP_BE[:, 0], EXP_BE[:, 1], yerr=error, fmt="none", ecolor="k", capsize=5, linestyle='dashdot')
 plt.title(r"Temperature measurements at plane B and Face E", fontsize=13)
@@ -212,6 +230,7 @@ plt.show()
 # plt.figure(figsize=(8, 5))
 # # Plot the data points without error bars
 # plt.plot(EXP_C[:, 0], EXP_C[:, 1], "ks", markerfacecolor= 'None', label="EXP")
+# plt.plot(CFD_C[:, 0], CFD_C[:, 1], "gx", markerfacecolor= 'None', label="CFD")
 # plt.plot(EXP_C[:, 0], SC_TEMP - Mean, "rx", label="SCM")
 # # Plot the error bars with dashed linestyle
 # plt.errorbar(EXP_C[:, 0], EXP_C[:, 1], yerr=error, fmt="none", ecolor="k", capsize=5, linestyle='dashdot')
@@ -229,7 +248,7 @@ plt.show()
 # plt.xticks(minor_ticks, minor=True)
 # # Set grid lines
 # plt.grid(which='both', linestyle='--', linewidth=0.5)
-# plt.savefig("TEMP-PlaneC.png", dpi=300, bbox_inches='tight')
+# # plt.savefig("TEMP-PlaneC.png", dpi=300, bbox_inches='tight')
 # plt.show()
 # ######################
 
@@ -238,10 +257,11 @@ plt.show()
 # #### Figure with temperatures at face E and plane C
 # plt.figure(figsize=(8, 5))
 # # Plot the data points without error bars
-# plt.plot(EXP_CE[:, 0], EXP_CE[:, 1], "ks", markerfacecolor= 'None', label="EXP")
-# plt.plot(EXP_CE[:, 0], SC_TEMP_BE - Mean, "rx", label="SCM")
+# plt.plot(EXP_CE_ND[:, 0], EXP_CE_ND[:, 1], "ks", markerfacecolor= 'None', label="EXP")
+# plt.plot(CFD_CE_ND[:, 0], CFD_CE_ND[:, 1], "gx", markerfacecolor= 'None', label="CFD")
+# plt.plot([1,2,4,5], SC_TEMP_BE_ND - Mean, "rx", label="SCM")
 # # Plot the error bars with dashed linestyle
-# plt.errorbar(EXP_CE[:, 0], EXP_CE[:, 1], yerr=error, fmt="none", ecolor="k", capsize=5, linestyle='dashdot')
+# plt.errorbar(EXP_CE_ND[:, 0], EXP_CE_ND[:, 1], yerr=error, fmt="none", ecolor="k", capsize=5, linestyle='dashdot')
 
 # plt.title(r"Temperature measurements at plane C and Face E", fontsize=13)
 # plt.xlabel(r'$TC~Number~\#$', fontsize=14)
@@ -249,9 +269,9 @@ plt.show()
 # plt.legend(fontsize=12)
 # plt.xticks(range(1,6), fontsize=14)
 # plt.yticks(fontsize=14)
-# plt.ylim(-6, 4)
+# plt.ylim(-8, 4)
 # # Set grid lines
 # plt.grid(which='both', linestyle='--', linewidth=0.5)
-# plt.savefig("TEMP-FaceE-PlaneC.png", dpi=300, bbox_inches='tight')
+# plt.savefig("TEMP-FaceE-PlaneC_ND.png", dpi=300, bbox_inches='tight')
 # plt.show()
-# ########################################
+# # ########################################

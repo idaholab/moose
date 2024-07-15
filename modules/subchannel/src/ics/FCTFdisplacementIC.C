@@ -84,6 +84,12 @@ FCTFdisplacementIC::value(const Point & p)
       return 0.0;
     }
   }
+  else if (subch_type == EChannelType::CORNER)
+  {
+    auto xprime = P + Side / 4.0;
+    return ((Dmax / 2.0) * cos(xprime * pi / (Side / 2.0)) + Dmax / 2) *
+           sin(((z - LIN) / (L)) * pi);
+  }
   else
   {
     return 0.0;
