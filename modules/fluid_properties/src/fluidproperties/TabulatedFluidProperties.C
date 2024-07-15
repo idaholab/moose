@@ -2102,7 +2102,7 @@ TabulatedFluidProperties::missingVEInterpolationError(const std::string & functi
              ": to call this function you must:\n-add this property to the list to the list of "
              "'interpolated_properties'\n and then either:\n-construct (p, T) from (v, e) "
              "tabulations using the 'construct_pT_from_ve' parameter\n-load (v,e) interpolation "
-             "tables using the 'fluid_properties_ve_file' parameter");
+             "tables using the 'fluid_property_ve_file' parameter");
 }
 
 template void TabulatedFluidProperties::checkInputVariables(Real & pressure,
