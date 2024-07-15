@@ -118,7 +118,7 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
     bubble_added_mass = 2. / 3. * _mass_exchange_coefficient(elem_arg, state) *
                         (1.0 / (f_d + libMesh::TOLERANCE) - 2.0);
 
-  // // Model parameters
+  // Model parameters
   const auto db = _shape_factor * f_d_o_xi_old + libMesh::TOLERANCE;
 
   ADRealVectorValue velocity(u);
