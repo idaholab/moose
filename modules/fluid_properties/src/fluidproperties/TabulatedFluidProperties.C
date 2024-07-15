@@ -904,8 +904,10 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
                                           lambda,
                                           name() + "::e_from_v_h");
     e = e_data.first;
-    de_dv = -p_from_v_e(v, e);
-    de_dh = e_data.second;
+    // Finite difference approximation
+    const auto e2 = e_from_v_h(v * (1 + TOLERANCE), h);
+    de_dv = (e2 - e) / (TOLERANCE * v);
+    de_dh = 1. / e_data.second;
   }
   else if (_fp)
     _fp->e_from_v_h(v, h, e, de_dv, de_dh);
@@ -948,7 +950,7 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_pressure)
     return _property_ve_ipol[_p_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
     return _p_from_v_e_ipol->sample(v, e);
@@ -966,7 +968,7 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_pressure)
     _property_ve_ipol[_p_idx]->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   else if (_construct_pT_from_ve)
     _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
@@ -984,7 +986,7 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_temperature)
     return _property_ve_ipol[_T_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
     return _T_from_v_e_ipol->sample(v, e);
@@ -1002,7 +1004,7 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_temperature)
     _property_ve_ipol[_T_idx]->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
   else if (_construct_pT_from_ve)
     _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
@@ -1020,7 +1022,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_c)
     return _property_ve_ipol[_c_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
   {
@@ -1042,7 +1044,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_c)
     _property_ve_ipol[_c_idx]->sampleValueAndDerivatives(v, e, c, dc_dv, dc_de);
   else if (_construct_pT_from_ve)
   {
@@ -1069,7 +1071,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_cp)
     return _property_ve_ipol[_cp_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
   {
@@ -1091,7 +1093,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, 
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_cp)
     _property_ve_ipol[_cp_idx]->sampleValueAndDerivatives(v, e, cp, dcp_dv, dcp_de);
   else if (_construct_pT_from_ve)
   {
@@ -1118,7 +1120,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_cv)
     return _property_ve_ipol[_cv_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
   {
@@ -1140,7 +1142,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, 
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_cv)
     _property_ve_ipol[_cv_idx]->sampleValueAndDerivatives(v, e, cv, dcv_dv, dcv_de);
   else if (_construct_pT_from_ve)
   {
@@ -1167,7 +1169,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_viscosity)
     return _property_ve_ipol[_viscosity_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
   {
@@ -1189,7 +1191,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, 
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_viscosity)
     _property_ve_ipol[_viscosity_idx]->sampleValueAndDerivatives(v, e, mu, dmu_dv, dmu_de);
   else if (_construct_pT_from_ve)
   {
@@ -1216,7 +1218,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_k)
     return _property_ve_ipol[_k_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
   {
@@ -1238,7 +1240,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Rea
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_k)
     _property_ve_ipol[_k_idx]->sampleValueAndDerivatives(v, e, k, dk_dv, dk_de);
   else if (_construct_pT_from_ve)
   {
@@ -1265,7 +1267,7 @@ TabulatedFluidProperties::s_from_v_e(Real v, Real e) const
     missingVEInterpolationError(__PRETTY_FUNCTION__);
   checkInputVariablesVE(v, e);
 
-  if (_create_direct_ve_interpolations)
+  if (_create_direct_ve_interpolations && _interpolate_entropy)
     return _property_ve_ipol[_entropy_idx]->sample(v, e);
   else if (_construct_pT_from_ve)
   {
