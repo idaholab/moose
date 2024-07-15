@@ -987,7 +987,7 @@ NonlinearSystemBase::setInitialSolution()
 }
 
 void
-NonlinearSystemBase::setDirichletBCs()
+NonlinearSystemBase::setDirichletBCs(const WriteKey)
 {
   NumericVector<Number> & initial_solution(solution());
 

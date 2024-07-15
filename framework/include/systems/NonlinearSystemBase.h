@@ -67,6 +67,15 @@ class DiagonalMatrix;
 class NonlinearSystemBase : public SolverSystem, public PerfGraphInterface
 {
 public:
+  class WriteKey
+  {
+    // Writing a key. Currently used for restricting access to setDirichletBCs
+    friend class ActuallyExplicitEuler;
+
+    WriteKey() {}
+    WriteKey(const WriteKey &) {}
+  };
+
   NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
   virtual ~NonlinearSystemBase();
 
@@ -293,7 +302,7 @@ public:
   void setInitialSolution();
 
   // Used for enforcing nodal BC's when using a direct acceleration calculation
-  void setDirichletBCs();
+  void setDirichletBCs(const WriteKey);
   /**
    * Sets the value of constrained variables in the solution vector.
    */

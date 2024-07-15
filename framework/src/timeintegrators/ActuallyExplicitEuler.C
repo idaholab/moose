@@ -14,6 +14,7 @@
 #include "FEProblem.h"
 
 // libMesh includes
+#include "NonlinearSystemBase.h"
 #include "libmesh/nonlinear_solver.h"
 
 registerMooseObject("MooseApp", ActuallyExplicitEuler);
@@ -118,7 +119,7 @@ ActuallyExplicitEuler::solve()
 
   // Setting nodal BC's if using a direct time integrator
   if (isDirect())
-    _nl.setDirichletBCs();
+    _nl.setDirichletBCs(NonlinearSystemBase::WriteKey());
 }
 
 void
