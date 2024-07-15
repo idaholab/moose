@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMMaterial);
 InputParameters
 MFEMMaterial::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = MFEMGeneralUserObject::validParams();
 
   params.set<std::string>("_moose_base") = "MaterialBase";
   params.addPrivateParam<bool>("_neighbor", false);
@@ -17,7 +17,7 @@ MFEMMaterial::validParams()
 }
 
 MFEMMaterial::MFEMMaterial(const InputParameters & parameters)
-  : GeneralUserObject(parameters), blocks(getParam<std::vector<SubdomainName>>("block"))
+  : MFEMGeneralUserObject(parameters), blocks(getParam<std::vector<SubdomainName>>("block"))
 {
 }
 

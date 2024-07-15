@@ -2,7 +2,7 @@
 
 #include "MFEMBoundaryCondition.h"
 #include "MFEMFunctionCoefficient.h"
-#include "boundary_conditions.hpp"
+#include "boundary_conditions.h"
 
 class MFEMScalarDirichletBC : public MFEMBoundaryCondition
 {
@@ -11,10 +11,6 @@ public:
 
   MFEMScalarDirichletBC(const InputParameters & parameters);
   ~MFEMScalarDirichletBC() override {}
-
-  virtual void execute() override {}
-  virtual void initialize() override {}
-  virtual void finalize() override {}
 
 protected:
   MFEMCoefficient * _coef{nullptr};
