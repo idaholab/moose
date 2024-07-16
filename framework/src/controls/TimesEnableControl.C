@@ -17,7 +17,7 @@ TimesEnableControl::validParams()
 {
   InputParameters params = ConditionalEnableControl::validParams();
 
-  params.addRequiredParam<TimesName>(
+  params.addRequiredParam<UserObjectName>(
       "times", "The Times object providing the list of times to turn on/off the objects.");
 
   params.addParam<Real>(
@@ -51,7 +51,7 @@ TimesEnableControl::conditionMet(const unsigned int & /*i*/)
 {
   // Retrieve time points around the current time
   const auto prev_time_point = _times.getPreviousTime(_t);
-  const auto next_time_point = _times.getNextTime(_t);
+  const auto next_time_point = _times.getNextTime(_t, false);
 
   // Check if we are near a time point
   // We could have just missed the previous one or be right before the next one
