@@ -1858,7 +1858,7 @@ public:
   /**
    * Whether or not to allow convergence of the solution
    */
-  bool allowSolutionConverged()
+  bool allowInvalidSolutionWithConvergence()
   {
     return (hasSolutionWarning() && !hasInvalidSolution()) || allowInvalidSolution();
   }

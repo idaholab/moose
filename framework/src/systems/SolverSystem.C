@@ -117,7 +117,7 @@ SolverSystem::checkInvalidSolution()
     // sync all solution invalid counts to rank 0 process
     _app.solutionInvalidity().sync();
 
-    if (_fe_problem.allowSolutionConverged())
+    if (_fe_problem.allowInvalidSolutionWithConvergence())
       if (_fe_problem.showInvalidSolutionConsole())
         _app.solutionInvalidity().print(_console);
       else
