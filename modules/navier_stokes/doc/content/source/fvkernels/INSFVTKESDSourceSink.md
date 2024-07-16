@@ -86,11 +86,11 @@ where:
 - $CD_{\omega, y}$ is a cross diffusion limiter, which is formulated as follows:
 
 \begin{equation}
-CD_{\omega, y} = \sigma_d \frac{\rho}{\omega} \frac{\partial k}{\partial y} \frac{\partial omega}{\partial y}\,,
+CD_{\omega, y} = \sigma_d \frac{\rho}{\omega} \frac{\partial k}{\partial y} \frac{\partial \omega}{\partial y}\,,
 \end{equation}
 
 where:
-- $\sigma_d$ is a conditional activation function that is $\sigma_d = 1/8$ when $\frac{\partial k}{\partial y} \frac{\partial omega}{\partial y} > 0$ and $\sigma_d = 0$ otherwise,
+- $\sigma_d$ is a conditional activation function that is $\sigma_d = 1/8$ when $\frac{\partial k}{\partial y} \frac{\partial \omega}{\partial y} > 0$ and $\sigma_d = 0$ otherwise,
 
 The cross-diffusion limiter acts only in the distance perpendicular to the wall $y$.
 For this purpose, the normal to the nearest wall needs to be defined via the [!param](/FVKernels/INSFVTKESDSourceSink/wall_normal_unit_vectors) parameter.
