@@ -87,7 +87,7 @@ Times::getNextTime(const Real current_time, const bool error_if_no_next) const
                ". Maximum time in vector is ",
                *_times.rbegin());
   else if (!error_if_no_next)
-    return *_times.rbegin();
+    return std::numeric_limits<Real>::max();
   else
     mooseError("Times vector has not been initialized.");
 }

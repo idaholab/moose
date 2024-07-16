@@ -36,6 +36,10 @@ private:
   /// Whether to consider that going past a time point should trigger the control
   const bool _act_on_time_stepping_across_time_point;
 
-  /// To keep track of the next time point to hit (which when hit should be the previous time point)
+  /// To keep track of the current threshold to hit
+  Real _prev_time_point_current;
+  /// To keep track of the next threshold to hit
   Real _prev_time_point;
+  /// To keep track of the current time step
+  Real _t_current;
 };
