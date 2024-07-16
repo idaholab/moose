@@ -153,8 +153,7 @@ kEpsilonViscosityAux::computeValue()
     else if (_wall_treatment == "neq")
     {
       // Assign non-equilibrium wall function value
-      y_plus =
-          min_wall_dist * std::sqrt(std::sqrt(_C_mu)*_k(current_argument, state)) * rho / mu;
+      y_plus = min_wall_dist * std::sqrt(std::sqrt(_C_mu) * _k(current_argument, state)) * rho / mu;
       mu_wall = mu * (NS::von_karman_constant * y_plus /
                       std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
       mut_log = mu_wall - mu;

@@ -241,8 +241,7 @@ INSFVTKESourceSink::computeQpResidual()
 
     production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    const auto time_scale =
-        raw_value(_var(elem_arg, old_state) / _epsilon(elem_arg, old_state));
+    const auto time_scale = raw_value(_var(elem_arg, old_state) / _epsilon(elem_arg, old_state));
 
     destruction = rho * _var(elem_arg, state) / time_scale;
 
