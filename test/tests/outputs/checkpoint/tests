@@ -350,8 +350,9 @@
   []
 
   [subapp]
+    issues = "#24777 #20998"
+    requirement = "The system shall support outputting checkpoint files at the subapp level with checkpoints disabled in the main app:"
     [subapp_only_cp_transient]
-      issues = "#24777"
       type = CheckFiles
       recover = false
       input = checkpoint_parent.i
@@ -362,10 +363,9 @@
                     "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/1/split-1-0.gz "
                     "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/meta_data_mesh.rd/data "
                     "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/meta_data_mesh.rd/header"
-      requirement = "The system shall support outputting checkpoint files at the subapp level for transient simulations with checkpoints disabled in the main app"
+      detail = "for transient simulations"
     []
     [subapp_only_cp_steady_state]
-      issues = "#20998"
       type = CheckFiles
       recover = false
       input = checkpoint_parent_ss.i
@@ -375,7 +375,7 @@
                     "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-mesh.cpa.gz/1/split-1-0.gz "
                     "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-mesh.cpa.gz/meta_data_mesh.rd/data "
                     "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-mesh.cpa.gz/meta_data_mesh.rd/header"
-      requirement = "The system shall support outputting checkpoint files at the subapp level for steady-state simulations with checkpoints disabled in the main app"
+      detail = "for steady-state simulations"
     []
   []
 []
