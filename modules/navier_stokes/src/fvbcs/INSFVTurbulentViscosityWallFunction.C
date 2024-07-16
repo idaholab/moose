@@ -28,7 +28,7 @@ INSFVTurbulentViscosityWallFunction::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
-  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>("wall_treatment",
                              wall_treatment,
                              "The method used for computing the wall functions "
@@ -76,8 +76,8 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
   ADReal y_plus;
-  ADReal mut_log;             // turbulent log-layer viscosity
-  ADReal mu_wall;             // total wall viscosity to obtain the shear stress at the wall
+  ADReal mut_log; // turbulent log-layer viscosity
+  ADReal mu_wall; // total wall viscosity to obtain the shear stress at the wall
 
   if (_wall_treatment == "eq_newton")
   {
@@ -131,9 +131,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     // buffer layer
     const auto blending_function = (y_plus - 5.0) / 25.0;
     // the blending depends on the mut_log at y+=30
-    const auto mut_log = mu * (NS::von_karman_constant * 30.0 /
-                                   std::log(std::max(NS::E_turb_constant * 30.0, 1 + 1e-4)) -
-                               1.0);
+    const auto mut_log = mu * _mut_30;
     return blending_function * std::max(mut_log, NS::mu_t_low_limit);
   }
 }

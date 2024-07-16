@@ -50,4 +50,7 @@ private:
 
   /// Method used for wall treatment
   const MooseEnum _wall_treatment;
+
+  static constexpr Real _mut_30 =
+      (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);
 };

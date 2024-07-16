@@ -218,8 +218,7 @@ INSFVTKEDSourceSink::computeQpResidual()
     // Apply production limiter
     production_k = std::min(production_k, production_limit);
 
-    const auto time_scale =
-        raw_value(_k(elem_arg, old_state) / (_var(elem_arg, old_state) + 1e-15) + 1e-15);
+    const auto time_scale = raw_value(_k(elem_arg, old_state) / _var(elem_arg, old_state));
 
     production = _C1_eps * production_k / time_scale;
 

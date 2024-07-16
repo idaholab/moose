@@ -27,8 +27,8 @@ RANSYPlusAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Fluid density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<std::vector<BoundaryName>>(
-      "walls", {}, "Boundaries where the wall treatment is enabled.");
-  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
+      "walls", {}, "Boundaries that correspond to solid walls.");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>("wall_treatment",
                              wall_treatment,
                              "The method used for computing the y_plus in the wall functions "
