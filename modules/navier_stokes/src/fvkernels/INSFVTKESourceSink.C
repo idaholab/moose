@@ -35,7 +35,7 @@ INSFVTKESourceSink::validParams()
       "linearized_model",
       true,
       "Boolean to determine if the problem should be use in a linear or nonlinear solve.");
-  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>("wall_treatment",
                              wall_treatment,
                              "The method used for computing the wall functions "
@@ -163,8 +163,7 @@ INSFVTKESourceSink::computeQpResidual()
       const ADReal wall_mut = _mu_t(facearg, state);
       const ADReal wall_mu = _mu(facearg, state);
 
-      const auto destruction_visc =
-          2.0 * wall_mu / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
+      const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
       const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
                                    std::pow(_var(elem_arg, old_state), 0.5) /
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
