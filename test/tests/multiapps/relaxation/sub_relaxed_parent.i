@@ -93,6 +93,9 @@
     input_files = sub_relaxed_sub.i
     transformed_variables = v
     relaxation_factor = 0.94
+    # The input was originally created with effectively no restore
+    # see the changes made for #5554 then reverted in #28115
+    no_restore = true
   []
 []
 
