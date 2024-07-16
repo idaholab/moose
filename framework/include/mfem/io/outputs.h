@@ -136,7 +136,6 @@ private:
   // Write out summary of last timestep to console
   void WriteConsoleSummary(int _my_rank, double t)
   {
-    // logger.info("step {}, \tt = {}", _cycle, t);
   }
 
   // Initialize GLVis sockets and fields

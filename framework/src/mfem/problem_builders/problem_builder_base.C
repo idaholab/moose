@@ -13,7 +13,6 @@ Problem::~Problem()
 void
 ProblemBuilder::SetMesh(std::shared_ptr<mfem::ParMesh> pmesh)
 {
-  // logger.info("Setting Mesh");
   GetProblem()->_pmesh = pmesh;
   GetProblem()->_comm = pmesh->GetComm();
   MPI_Comm_size(pmesh->GetComm(), &(GetProblem()->_num_procs));
@@ -23,35 +22,30 @@ ProblemBuilder::SetMesh(std::shared_ptr<mfem::ParMesh> pmesh)
 void
 ProblemBuilder::SetFESpaces(platypus::FESpaces & fespaces)
 {
-  // logger.info("Setting FE Spaces");
   GetProblem()->_fespaces = fespaces;
 }
 
 void
 ProblemBuilder::SetGridFunctions(platypus::GridFunctions & gridfunctions)
 {
-  // logger.info("Setting GridFunctions");
   GetProblem()->_gridfunctions = gridfunctions;
 }
 
 void
 ProblemBuilder::SetBoundaryConditions(platypus::BCMap & bc_map)
 {
-  // logger.info("Setting Boundary Conditions");
   GetProblem()->_bc_map = bc_map;
 }
 
 void
 ProblemBuilder::SetOutputs(platypus::Outputs & outputs)
 {
-  // logger.info("Setting Outputs");
   GetProblem()->_outputs = outputs;
 }
 
 void
 ProblemBuilder::SetSolverOptions(platypus::InputParameters & solver_options)
 {
-  // logger.info("Setting Solver Options");
   GetProblem()->_solver_options = solver_options;
 }
 
@@ -70,14 +64,12 @@ ProblemBuilder::SetJacobianSolver(std::shared_ptr<mfem::Solver> jacobian_solver)
 void
 ProblemBuilder::SetCoefficients(platypus::Coefficients & coefficients)
 {
-  // logger.info("Setting Coefficients");
   GetProblem()->_coefficients = coefficients;
 }
 
 void
 ProblemBuilder::AddFESpace(std::string fespace_name, std::string fec_name, int vdim, int ordering)
 {
-  // logger.info("Adding {} FE Space to problem", fespace_name);
   if (GetProblem()->_fespaces.Has(fespace_name))
   {
     const std::string error_message = "A fespace with the name " + fespace_name +
