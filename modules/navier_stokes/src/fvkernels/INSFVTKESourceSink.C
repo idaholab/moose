@@ -118,7 +118,7 @@ INSFVTKESourceSink::computeQpResidual()
       if (_wall_treatment == "neq")
       {
         // Non-equilibrium / Non-iterative
-        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt(_var(elem_arg, old_state)) * rho / mu;
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * _var(elem_arg, old_state)) * rho / mu;
       }
       else
       {
@@ -171,9 +171,7 @@ INSFVTKESourceSink::computeQpResidual()
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
       if (y_plus < 11.25)
-      {
         destruction += destruction_visc;
-      }
       else
       {
         destruction += destruction_log;

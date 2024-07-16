@@ -8,7 +8,7 @@ A different treatment is used for the bulk and the near wall regions.
 
 ## Bulk formulation:
 
-The turbulent production $G_\epsilon$ is modeled as follows:
+The production of turbulent kinetic energy dissipation $G_\epsilon$ is modeled as follows:
 
 \begin{equation}
 G_{\epsilon} = C_{1,\epsilon} \frac{\epsilon}{k} G_k \,,
@@ -29,6 +29,7 @@ where:
 
 - $C_{2,\epsilon} = 1.92$ is a closure parameter,
 - $\epsilon$ is the solution variable, i.e., the dissipation rate of the turbulent kinetic energy,
+- $k$ is the turbulent kinetic energy,
 - $t_k = \frac{k}{\epsilon}$ is the turbulent time scale; if the [!param](/FVKernels/INSFVTKEDSourceSink/linearized_model) is `true`, this timescale is computed from the previous iteration; if [!param](/FVKernels/INSFVTKEDSourceSink/linearized_model) is `false`, in a nonlinear solve, this timescale is aded to the Jacobian.
 
 ## Wall formulation:

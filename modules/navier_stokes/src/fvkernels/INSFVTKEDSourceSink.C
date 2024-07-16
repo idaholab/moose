@@ -118,7 +118,7 @@ INSFVTKEDSourceSink::computeQpResidual()
       if (_wall_treatment == "neq")
       {
         // Non-equilibrium / Non-iterative
-        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt(TKE) * rho / mu;
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
       }
       else
       {
@@ -145,14 +145,12 @@ INSFVTKEDSourceSink::computeQpResidual()
         const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
         const Moose::FaceArg facearg = {
             fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
-        const ADReal wall_mu = _mu(facearg, state);
-        destruction += 2.0 * TKE * wall_mu / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
+        destruction +=
+            2.0 * TKE * _mu(facearg, state) / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
       }
       else
-      {
         destruction += std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
-      }
     }
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;
