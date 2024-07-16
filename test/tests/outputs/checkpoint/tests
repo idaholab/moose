@@ -349,3 +349,18 @@
     expect_err = "Shortcut checkpoint syntax cannot be used with another Checkpoint object in the 'Outputs' block"
   []
 []
+
+[subapp_only_cp]
+  issues = "#24777"
+  type = CheckFiles
+  recover = false
+  input = checkpoint_parent.i
+  cli_args = 'Outputs/checkpoint=false sub_app:Outputs/cp/type=Checkpoint sub_app:Outputs/cp/num_files=1 sub_app:Outputs/cp/execute_on=final'
+  check_files = "checkpoint_parent_out_sub_app0_cp_cp/0003-restart-0.rd/data "
+                "checkpoint_parent_out_sub_app0_cp_cp/0003-restart-0.rd/header "
+                "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/1/header.gz "
+                "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/1/split-1-0.gz "
+                "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/meta_data_mesh.rd/data "
+                "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/meta_data_mesh.rd/header"
+  requirement = "The system shall support outputting checkpoint files at the subapp level with checkpoints disabled in the main app"
+[]

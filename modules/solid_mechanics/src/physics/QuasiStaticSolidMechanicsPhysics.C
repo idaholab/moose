@@ -512,7 +512,13 @@ QuasiStaticSolidMechanicsPhysics::actSubdomainChecks()
   {
     // get subdomain IDs
     for (auto & name : _subdomain_names)
-      _subdomain_ids.insert(_mesh->getSubdomainID(name));
+    {
+      auto id = _mesh->getSubdomainID(name);
+      if (id == Moose::INVALID_BLOCK_ID)
+        paramError("block", "Subdomain \"" + name + "\" not found in mesh.");
+      else
+        _subdomain_ids.insert(id);
+    }
   }
 
   if (_current_task == "validate_coordinate_systems")

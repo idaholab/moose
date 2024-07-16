@@ -10,85 +10,85 @@
 []
 
 [Mesh]
-[gen]
-  type = GeneratedMeshGenerator
-  dim = 2
-  nx = 60
-  ny = 10
-  xmin = -3
-  xmax = 3
-  ymin = 0.0
-  ymax = 1.0
-  elem_type = QUAD4
-[]
-[top_left]
-  type = BoundingBoxNodeSetGenerator
-  new_boundary = pull_top_left
-  bottom_left = '-3.01 0.99 0'
-  top_right = '-2.99 1.01 0'
-  input = gen
-[]
-[top_mid_left]
-  type = BoundingBoxNodeSetGenerator
-  new_boundary = pull_mid_left
-  bottom_left = '-1.01 0.99 0'
-  top_right = '-0.99 1.01 0'
-  input = top_left
-[]
-[top_mid_right]
-  type = BoundingBoxNodeSetGenerator
-  new_boundary = pull_mid_right
-  bottom_left = '0.99 0.99 0'
-  top_right = '1.01 1.01 0'
-  input = top_mid_left
-[]
-[top_right]
-  type = BoundingBoxNodeSetGenerator
-  new_boundary = pull_top_right
-  bottom_left = '2.99 0.99 0'
-  top_right = '3.01 1.01 0'
-  input = top_mid_right
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 60
+    ny = 10
+    xmin = -3
+    xmax = 3
+    ymin = 0.0
+    ymax = 1.0
+    elem_type = QUAD4
+  []
+  [top_left]
+    type = BoundingBoxNodeSetGenerator
+    new_boundary = pull_top_left
+    bottom_left = '-3.01 0.99 0'
+    top_right = '-2.99 1.01 0'
+    input = gen
+  []
+  [top_mid_left]
+    type = BoundingBoxNodeSetGenerator
+    new_boundary = pull_mid_left
+    bottom_left = '-1.01 0.99 0'
+    top_right = '-0.99 1.01 0'
+    input = top_left
+  []
+  [top_mid_right]
+    type = BoundingBoxNodeSetGenerator
+    new_boundary = pull_mid_right
+    bottom_left = '0.99 0.99 0'
+    top_right = '1.01 1.01 0'
+    input = top_mid_left
+  []
+  [top_right]
+    type = BoundingBoxNodeSetGenerator
+    new_boundary = pull_top_right
+    bottom_left = '2.99 0.99 0'
+    top_right = '3.01 1.01 0'
+    input = top_mid_right
+  []
 
-[top_mid_left_ss]
-  type = SideSetsFromBoundingBoxGenerator
-  input = top_right
-  bottom_left = '-2.21 0.89 0'
-  top_right = '-1.79 1.01 0'
-  boundary_new = top_mid_left_ss
-  boundaries_old = top
-[]
-[top_mid_ss]
-  type = SideSetsFromBoundingBoxGenerator
-  input = top_mid_left_ss
-  bottom_left = '-0.21 0.89 0'
-  top_right = '0.21 1.01 0'
-  boundary_new = top_mid_ss
-  boundaries_old = top
-[]
-[top_mid_right_ss]
-  type = SideSetsFromBoundingBoxGenerator
-  input = top_mid_ss
-  bottom_left = '1.79 0.89 0'
-  top_right = '2.21 1.01 0'
-  boundary_new = top_mid_right_ss
-  boundaries_old = top
-[]
+  [top_mid_left_ss]
+    type = SideSetsFromBoundingBoxGenerator
+    input = top_right
+    bottom_left = '-2.21 0.89 0'
+    top_right = '-1.79 1.01 0'
+    boundary_new = top_mid_left_ss
+    boundaries_old = top
+  []
+  [top_mid_ss]
+    type = SideSetsFromBoundingBoxGenerator
+    input = top_mid_left_ss
+    bottom_left = '-0.21 0.89 0'
+    top_right = '0.21 1.01 0'
+    boundary_new = top_mid_ss
+    boundaries_old = top
+  []
+  [top_mid_right_ss]
+    type = SideSetsFromBoundingBoxGenerator
+    input = top_mid_ss
+    bottom_left = '1.79 0.89 0'
+    top_right = '2.21 1.01 0'
+    boundary_new = top_mid_right_ss
+    boundaries_old = top
+  []
 
-[nucleation_strip]
-  # strip in middle of domain where cracks can nucleate
-  type = ParsedSubdomainMeshGenerator
-  input = top_mid_right_ss
-  combinatorial_geometry = 'y > 0.39 & y < 0.51'
-  block_id = 10
-[]
+  [nucleation_strip]
+    # strip in middle of domain where cracks can nucleate
+    type = ParsedSubdomainMeshGenerator
+    input = top_mid_right_ss
+    combinatorial_geometry = 'y > 0.39 & y < 0.51'
+    block_id = 10
+  []
 []
 
 [DomainIntegral]
   integrals = 'InteractionIntegralKI InteractionIntegralKII'
   displacements = 'disp_x disp_y'
   crack_front_points_provider = cut_mesh2
-  2d=true
+  2d = true
   number_points_from_provider = 0
   crack_direction_method = CurvedCrackFront
   radius_inner = '0.15'
@@ -113,9 +113,10 @@
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
     mesh_file = make_edge_crack_in.e
-    k_critical=230
+    k_critical = 230
     growth_increment = 0.11
     nucleate_uo = nucleate
+    execute_on = 'XFEM_MARK'
   []
 []
 [AuxVariables]
@@ -125,13 +126,13 @@
   []
 []
 [ICs]
-   [nucleation_bulk]
-     type = ConstantIC
-     value = 10000
-     variable = nucleation_threshold
-     block = 0
-   []
-   [nucleation_weak]
+  [nucleation_bulk]
+    type = ConstantIC
+    value = 10000
+    variable = nucleation_threshold
+    block = 0
+  []
+  [nucleation_weak]
     type = FunctionIC
     function = nucleation_x
     variable = nucleation_threshold
@@ -169,16 +170,16 @@
 
 [BCs]
   [top_edge_nodes]
-      type = FunctionDirichletBC
-      boundary = 'pull_top_left pull_top_right'
-      variable = disp_y
-      function = bc_pull_edge
+    type = FunctionDirichletBC
+    boundary = 'pull_top_left pull_top_right'
+    variable = disp_y
+    function = bc_pull_edge
   []
   [top_mid_nodes]
-      type = FunctionDirichletBC
-      boundary = 'pull_mid_left pull_mid_right'
-      variable = disp_y
-      function = bc_pull_mid
+    type = FunctionDirichletBC
+    boundary = 'pull_mid_left pull_mid_right'
+    variable = disp_y
+    function = bc_pull_mid
   []
   # [top_middle]
   #   type = NeumannBC
@@ -207,14 +208,14 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -226,24 +227,24 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
-  reuse_preconditioner=true
+  reuse_preconditioner = true
   reuse_preconditioner_max_linear_its = 25
 
-# controls for linear iterations
+  # controls for linear iterations
   l_max_its = 100
   l_tol = 1e-2
 
-# controls for nonlinear iterations
+  # controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-9
 
-# time control
+  # time control
   start_time = 0.0
   dt = 1.0
   end_time = 10
@@ -251,16 +252,16 @@
 []
 
 [Outputs]
-  csv=true
+  csv = true
   execute_on = FINAL
-  # exodus=true
+  # exodus = true
   # [xfemcutter]
-  #   type=XFEMCutMeshOutput
-  #   xfem_cutter_uo=cut_mesh2
+  #   type = XFEMCutMeshOutput
+  #   xfem_cutter_uo = cut_mesh2
   # []
-  [./console]
+  [console]
     type = Console
     output_linear = false
     output_nonlinear = false
-  [../]
+  []
 []

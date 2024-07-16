@@ -166,7 +166,7 @@ WCNSFVTurbulencePhysics::addNonlinearVariables()
 void
 WCNSFVTurbulencePhysics::addAuxiliaryVariables()
 {
-  if (_turbulence_model == "mixing-length")
+  if (_turbulence_model == "mixing-length" && _define_variables)
   {
     auto params = getFactory().getValidParams("MooseVariableFVReal");
     assignBlocks(params, _blocks);
@@ -288,6 +288,7 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
 void
 WCNSFVTurbulencePhysics::addAuxiliaryKernels()
 {
+  // Note that if we are restarting this will overwrite the restarted mixing-length
   if (_turbulence_model == "mixing-length")
   {
     const std::string ml_kernel_type = "WallDistanceMixingLengthAux";

@@ -214,6 +214,8 @@ PorousFlowSinglePhaseBase::addKernels()
       if (_coord_system == Moose::COORD_RZ)
         kernel_type = "StressDivergenceRZTensors";
       InputParameters params = _factory.getValidParams(kernel_type);
+      if (_subdomain_names_set)
+        params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
       params.set<NonlinearVariableName>("variable") = _displacements[i];
       params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
       if (_thermal)
@@ -234,6 +236,8 @@ PorousFlowSinglePhaseBase::addKernels()
         kernel_name = "PorousFlowUnsaturated_gravity" + Moose::stringify(i);
         kernel_type = "Gravity";
         params = _factory.getValidParams(kernel_type);
+        if (_subdomain_names_set)
+          params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
         params.set<NonlinearVariableName>("variable") = _displacements[i];
         params.set<Real>("value") = _gravity(i);
         params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
@@ -243,6 +247,8 @@ PorousFlowSinglePhaseBase::addKernels()
       kernel_name = "PorousFlowUnsaturated_EffStressCoupling" + Moose::stringify(i);
       kernel_type = "PorousFlowEffectiveStressCoupling";
       params = _factory.getValidParams(kernel_type);
+      if (_subdomain_names_set)
+        params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
       params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
       params.set<NonlinearVariableName>("variable") = _displacements[i];
       params.set<Real>("biot_coefficient") = _biot_coefficient;
