@@ -13,7 +13,7 @@ boundary layer are identified as follows:
 - Logarithmic region: $y^+ \ge 30$
 
 The wall function goal is to set the total viscosity at the wall $\mu_w$, decomposed as
-$\mu_w = \mu + \mu_t $ , such that the wall shear stress $\tau_w$ is accurately captured 
+$\mu_w = \mu + \mu_t$, such that the wall shear stress $\tau_w$ is accurately captured 
 without the need of fully resolving the gradients at the near wall region. 
 
 \begin{equation}
@@ -24,7 +24,7 @@ where:
 
 - $\mu_w = \mu + \mu_t$  is the total viscosity evaluated at the wall face
 - $\mu_t$ is the turbulent viscosity, evaluated at the wall for the purpose of this boundary condition
-- $\mu$ is the kinematic viscosity, evaluated at the wall for the purpose of this boundary condition
+- $\mu$ is the dynamic viscosity, evaluated at the wall for the purpose of this boundary condition
 - $\tau_w$ is the wall-shear stress
 - $u_p$ is the wall-parallel velocity at the centroid
 - $y_p$ is the wall normal distance to the centroid
@@ -33,8 +33,7 @@ To impose a correct boundary condition for $\mu_t$, as seen in the Equation abov
 relationships between the wall shear stress and the dimensionless wall distance $y^+$. For this purpose, four different
 formulations are supported as defined by the [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) parameter.
 
-To set the grid spacing for the first cell near the wall in your mesh, we recommend using the Auxiliary Kernel
-[RANSYPlusAux.md] 
+To set the grid spacing for the first cell near the wall in your mesh, we recommend using the [RANSYPlusAux.md] auxiliary kernel. 
 to estimate the dimensionless wall distance $y^+$.
 
 ## Equilibrium wall functions using a Newton solve

@@ -42,7 +42,7 @@ is performed via the non-dimensional wall distance $y^+$.
 The non-dimensional wall distance can be defined differently according to the
 [!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) parameter. 
 
-The four formulations are described in more detail in [INSFVTurbulentViscosityWallFunction](source/fvbcs/INSFVTurbulentViscosityWallFunction.md). 
+The four formulations are described in more detail in [INSFVTurbulentViscosityWallFunction.md]. 
 
 If an equilibrium [!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) is defined, i.e. `eq_newton`,`eq_incremental` or `eq_linearized`, the standard wall function formulations are used in which $y^+$ is found:
 

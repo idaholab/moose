@@ -420,10 +420,8 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
                  "The number of absolute tolerances does not match the number of "
                  "turbulence equations!");
     if (_turbulence_field_min_limit.empty())
-    {
       // If no minimum bounds are given, initialize to default value 1e-8
       _turbulence_field_min_limit.resize(_turbulence_system_names.size(), 1e-8);
-    }
     else if (_turbulence_system_names.size() != _turbulence_field_min_limit.size())
       paramError("turbulence_field_min_limit",
                  "The number of lower bounds for turbulent quantities does not match the "
