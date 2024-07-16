@@ -205,5 +205,6 @@
     requirement = "The system shall be able to block-restrict the definition of the porous flow equations."
     issues = '#28030'
     design = 'actions/PorousFlowFullySaturated.md actions/PorousFlowBasicTHM.md actions/PorousFlowUnsaturated.md'
+    valgrind = 'heavy'
   []
 []
