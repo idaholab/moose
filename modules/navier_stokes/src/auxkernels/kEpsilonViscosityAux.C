@@ -29,6 +29,7 @@ kEpsilonViscosityAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<Real>("C_mu", "Coupled turbulent kinetic energy closure.");
+  params.addParam<Real>("mu_t_ratio_max", 1e5, "Maximum allowable mu_t_ratio : mu/mu_t.");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
   params.addParam<bool>("bulk_wall_treatment", false, "Activate bulk wall treatment.");
@@ -56,6 +57,7 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
     _C_mu(getParam<Real>("C_mu")),
+    _mu_t_ratio_max(getParam<Real>("mu_t_ratio_max")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
@@ -195,5 +197,5 @@ kEpsilonViscosityAux::computeValue()
     mu_t = mu_t_nl.value();
   }
   // Turbulent viscosity limiter
-  return std::min(mu_t, 1e5 * raw_value(mu));
+  return std::min(mu_t, _mu_t_ratio_max * raw_value(mu));
 }

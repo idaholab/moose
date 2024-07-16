@@ -53,6 +53,9 @@ protected:
   /// C-mu closure coefficient
   const Real _C_mu;
 
+  // Maximum allowable mu_t_ratio : mu/mu_t
+  const Real _mu_t_ratio_max;
+
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
