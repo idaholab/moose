@@ -66,7 +66,7 @@ From: {{ APPTAINER_FROM }}
     PETSC_OPTIONS+=" --download-cmake"
     # Additional options with cuda
     if [ -n "$CUDA_PATH" ]; then
-        PETSC_OPTIONS+="--download-kokkos --download-kokkos-kernels --with-cuda --with-cuda-arch=70 --download-slate"
+        PETSC_OPTIONS+=" --download-kokkos --download-kokkos-kernels --with-cuda --with-cuda-arch=70 --download-slate"
     fi
 
     PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh

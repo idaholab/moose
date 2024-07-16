@@ -103,12 +103,14 @@ EOF
 {%- if WITH_LIBTORCH.startswith('cu') %}
     # We install CUDA Toolkit if the user wants cuda-based libtorch.
     # Right now this assumes that cuda-based distributions start with -cu-
+    if [ -z "$CUDA_PATH" ]; then
         dnf -y install epel-release
         CUDA_RPM=${BUILD_DIR}/cuda.rpm
         curl -L https://developer.download.nvidia.com/compute/cuda/11.4.0/local_installers/cuda-repo-rhel8-11-4-local-11.4.0_470.42.01-1.x86_64.rpm -o ${CUDA_RPM}
         rpm -i ${CUDA_RPM}
         dnf -y install cuda
         rm -rf ${CUDA_RPM}
+    fi
 {%- endif %}
 {%- endif %}
 
