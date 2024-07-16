@@ -591,7 +591,7 @@ SIMPLENonlinearAssembly::execute()
 
           auto & current_solution =
               *(_turbulence_systems[system_i]->system().current_local_solution.get());
-          limitSolutionUpdate(current_solution);
+          limitSolutionUpdate(current_solution, _turbulence_field_min_limit[system_i]);
 
           // Relax the turbulence update for the next momentum predictor
           auto & old_solution = *(_turbulence_systems[system_i]->solutionPreviousNewton());

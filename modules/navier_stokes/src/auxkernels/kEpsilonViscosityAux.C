@@ -197,6 +197,6 @@ kEpsilonViscosityAux::computeValue()
         _rho(current_argument, state) * _C_mu * _k(current_argument, state) * time_scale;
     mu_t = mu_t_nl.value();
   }
-
-  return mu_t;
+  // Turbulent viscosity limiter
+  return std::min(mu_t, 1e5 * raw_value(mu));
 }
