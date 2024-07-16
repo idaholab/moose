@@ -11,6 +11,8 @@
 
 #include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
+
 /**
  * Computes wall y+ based on wall functions.
  */
@@ -37,7 +39,7 @@ protected:
   const Moose::Functor<ADReal> * _w_var;
 
   /// Turbulent kinetic energy
-  const Moose::Functor<ADReal> & _k;
+  const Moose::Functor<ADReal> * _k;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
@@ -49,7 +51,7 @@ protected:
   const std::vector<BoundaryName> & _wall_boundary_names;
 
   /// Method used for wall treatment
-  const MooseEnum _wall_treatment;
+  NS::WallTreatmentEnum _wall_treatment;
 
   /// C_mu constant
   const Real _C_mu;

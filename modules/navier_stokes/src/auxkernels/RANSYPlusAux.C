@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RANSYPlusAux.h"
-#include "NS.h"
 #include "NonlinearSystemBase.h"
 #include "NavierStokesMethods.h"
 #include "libmesh/nonlinear_solver.h"
@@ -23,7 +22,7 @@ RANSYPlusAux::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>(NS::TKE, "Turbulent kinetic energy functor.");
+  params.addParam<MooseFunctorName>(NS::TKE, "Turbulent kinetic energy functor.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Fluid density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<std::vector<BoundaryName>>(
@@ -44,11 +43,11 @@ RANSYPlusAux::RANSYPlusAux(const InputParameters & params)
     _u_var(getFunctor<ADReal>("u")),
     _v_var(params.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
     _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
-    _k(getFunctor<ADReal>(NS::TKE)),
+    _k(params.isParamValid(NS::TKE) ? &(getFunctor<ADReal>(NS::TKE)) : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment")),
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu"))
 {
   if (_dim >= 2 && !_v_var)
@@ -56,6 +55,9 @@ RANSYPlusAux::RANSYPlusAux(const InputParameters & params)
 
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three or more dimensions, the w velocity must be supplied!");
+
+  if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
+    paramError(NS::TKE, "In the non-equilibrium wall treatment the TKE must be supplied!");
 }
 
 void
@@ -96,10 +98,10 @@ RANSYPlusAux::computeValue()
           velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
       const auto distance = distance_vec[i];
 
-      if (_wall_treatment == "neq")
+      if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
       {
         // Non-equilibrium / Non-iterative
-        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt(_k(elem_arg, state)) * rho / mu;
+        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
       }
       else
       {
