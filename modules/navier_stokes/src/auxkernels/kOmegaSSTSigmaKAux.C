@@ -36,8 +36,6 @@ Real
 kOmegaSSTSigmaKAux::computeValue()
 {
   const auto F1 = _F1(makeElemArg(_current_elem), determineState());
-  // const auto blend_coef = F1 / _sigma_k_1 + (1.0 - F1) / _sigma_k_2;
-  // return (1.0 / blend_coef).value();
   const auto blend_coef = 1.0 / (F1 * _sigma_k_1 + (1.0 - F1) * _sigma_k_2);
   return blend_coef.value();
 }

@@ -17,8 +17,8 @@ WallNormalUnitVectorAux::validParams()
 {
   InputParameters params = VectorAuxKernel::validParams();
   params.addClassDescription("Computes unit normal vector to the nearest wall for every cell.");
-  params.addParam<std::vector<BoundaryName>>(
-      "walls", {}, "Boundaries that correspond to solid walls.");
+  params.addRequiredParam<std::vector<BoundaryName>>("walls",
+                                                     "Boundaries that correspond to solid walls.");
   return params;
 }
 
@@ -28,6 +28,11 @@ WallNormalUnitVectorAux::WallNormalUnitVectorAux(const InputParameters & paramet
   const MeshBase & mesh = _subproblem.mesh().getMesh();
   if (!mesh.is_replicated())
     mooseError("WallNormalUnitVectorAux only supports replicated meshes");
+
+  if (_wall_boundary_names.empty())
+    paramError("walls",
+               "At least one wall boundary needs to be specifid to which the wall normals will be "
+               "computed for each cell.")
 }
 
 RealVectorValue

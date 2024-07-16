@@ -28,6 +28,6 @@ protected:
   const Moose::Functor<ADReal> & _F1;
 
   /// C-mu closure coefficient
-  static constexpr Real _sigma_omega_1 = 0.5; //2.000;
-  static constexpr Real _sigma_omega_2 = 0.856; //1.168;
+  static constexpr Real _sigma_omega_1 = 0.5;
+  static constexpr Real _sigma_omega_2 = 0.856;
 };

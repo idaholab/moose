@@ -30,7 +30,6 @@ kOmegaSSTViscosityAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("F2", "The F2 blending function.");
-  params.addParam<Real>("C_mu", "Coupled turbulent kinetic energy closure.");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
   params.addParam<bool>("bulk_wall_treatment", false, "Activate bulk wall treatment.");
