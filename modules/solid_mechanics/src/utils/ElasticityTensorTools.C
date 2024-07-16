@@ -138,4 +138,36 @@ toVoigtNotationIndexConversion(int k, int & a, int & b)
     mooseError("\nIndex out of bound while converting from tensor to voigt notation in "
                "toVoigtNotationIndexConversion");
 }
+
+// MOOSE uses the stress tensor with components ordered as (11, 22, 33, 12, 23, 13) in voigt form.
+// This is in conflict with the voigt notation used in literature which has components ordered as
+// (11, 22, 33, 23, 13, 12). Whenever an operation involving the voigt forms of stress and
+// elasticity tensor has to be performed the voigt form of the elasticity tensor should be built
+// taking into account this difference in component-ordering for stress. The
+// toMooseVoigtNotationIndexConversion function facilitates that.
+
+void
+toMooseVoigtNotationIndexConversion(int k, int & a, int & b)
+{
+  if (k < 3 && k >= 0)
+    a = b = k;
+  else if (k == 3)
+  {
+    a = 0;
+    b = 1;
+  }
+  else if (k == 4)
+  {
+    a = 1;
+    b = 2;
+  }
+  else if (k == 5)
+  {
+    a = 0;
+    b = 2;
+  }
+  else
+    mooseError("\nIndex out of bound while converting from tensor to MOOSE voigt notation in "
+               "toMooseVoigtNotationIndexConversion");
+}
 }
