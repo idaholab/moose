@@ -181,22 +181,37 @@ findContactPoint(PenetrationInfo & p_info,
 
     jac.lu_solve(rhs, update);
 
-    ref_point(0) += update(0);
+    // Improvised line search in case the update is too large and gets out of the element so bad
+    // that we cannot reinit at the new point
+    Real mult = 1;
+    bool success = false;
+    while (!success)
+    {
+      try
+      {
+        ref_point(0) += mult * update(0);
 
-    if (dim - 1 == 2)
-      ref_point(1) += update(1);
+        if (dim - 1 == 2)
+          ref_point(1) += mult * update(1);
 
-    points[0] = ref_point;
-    fe_side->reinit(side, &points);
-    d = secondary_point - phys_point[0];
+        points[0] = ref_point;
+        fe_side->reinit(side, &points);
+        success = true;
+        d = secondary_point - phys_point[0];
 
-    update_size = update.l2_norm();
+        update_size = mult * update.l2_norm();
+      }
+      catch (libMesh::LogicError & e)
+      {
+        mult *= 0.9;
+        if (mult < 1e-6)
+          mooseWarning("We could not solve for the contact point.", e.what());
+      }
+    }
   }
 
-  /*
-    if (nit == 12 && update_size > TOLERANCE*TOLERANCE)
-      Moose::err<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
-  */
+  if (nit == 12 && update_size > TOLERANCE * TOLERANCE)
+    Moose::err << "Warning!  Newton solve for contact point failed to converge!" << std::endl;
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
