@@ -56,7 +56,7 @@ RANSYPlusAux::RANSYPlusAux(const InputParameters & params)
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three or more dimensions, the w velocity must be supplied!");
 
-  if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
+  if (_wall_treatment == NS::WallTreatmentEnum::NEQ && !_k)
     paramError(NS::TKE, "In the non-equilibrium wall treatment the TKE must be supplied!");
 }
 
@@ -99,15 +99,19 @@ RANSYPlusAux::computeValue()
       const auto distance = distance_vec[i];
 
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
+<<<<<<< HEAD
       {
         // Non-equilibrium / Non-iterative
         y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
       }
+=======
+        // Non-equilibrium / Non-iterative
+        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
+>>>>>>> fc6f6f1656 (Allow TKE in RANSYPlusAux to not be supplied in equilibrium wall treatment. 27888.)
       else
-      {
         // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
-      }
+
       y_plus_vec.push_back(raw_value(y_plus));
     }
     // Return average of y+ for cells with multiple wall faces
