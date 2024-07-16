@@ -7,5 +7,6 @@
     method = '!DBG'
     valgrind = NONE
     recover = false
+    rel_err = 7e-5
   []
 []
