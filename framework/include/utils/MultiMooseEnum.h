@@ -40,18 +40,35 @@ typedef std::vector<MooseEnumItem>::const_iterator MooseEnumIterator;
 class MultiMooseEnum : public MooseEnumBase
 {
 public:
+  ///@{
   /**
-   * Constructor that takes a list of enumeration values, and a separate string to set a default for
-   * this instance
+   * Constructor that takes a list of valid enumeration values, and a separate string to set default
+   * values for this instance
    * @param valid_names - a list of all possible values (names) for this enumeration
-   * @param initialization_values - the value(s), if any, to set this enumeration instance to
+   * @param initialization_values - the value(s) to set this enumeration instance to
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
    * it's range of initially defined values, allowing for the possiblity to add additional valid
    * values to an object after it has been initialized.
    */
   MultiMooseEnum(std::string valid_names,
-                 std::string initialization_values = "",
+                 std::string initialization_values,
                  bool allow_out_of_range = false);
+  // We need to explicitly define this version so MultiMooseEnum("one two", "one")
+  // doesn't implicitly convert "one" to a bool use use the 2-parameter constructor
+  MultiMooseEnum(std::string valid_names,
+                 const char * initialization_values,
+                 bool allow_out_of_range = false);
+  ///@}
+
+  /**
+   * Constructor that takes a list of valid enumeration values, and does not set this instance to
+   * any particular value.
+   * @param valid_names - a list of all possible values (names) for this enumeration
+   * @param allow_out_of_range - determines whether this enumeration will accept values outside of
+   * it's range of initially defined values, allowing for the possiblity to add additional valid
+   * values to an object after it has been initialized.
+   */
+  MultiMooseEnum(std::string valid_names, bool allow_out_of_range = false);
 
   /**
    * Copy Constructor

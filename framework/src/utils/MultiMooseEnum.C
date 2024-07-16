@@ -27,6 +27,19 @@ MultiMooseEnum::MultiMooseEnum(std::string valid_names,
   *this = initialization_values;
 }
 
+MultiMooseEnum::MultiMooseEnum(std::string valid_names,
+                               const char * initialization_values,
+                               bool allow_out_of_range)
+  : MultiMooseEnum(valid_names, std::string(initialization_values), allow_out_of_range)
+{
+}
+
+MultiMooseEnum::MultiMooseEnum(std::string valid_names, bool allow_out_of_range)
+  // Set default variable value to nothing ("")
+  : MultiMooseEnum(valid_names, "", allow_out_of_range)
+{
+}
+
 MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum)
   : MooseEnumBase(other_enum), _current_values(other_enum._current_values)
 {
