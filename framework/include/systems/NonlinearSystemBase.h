@@ -301,7 +301,7 @@ public:
 
   void setInitialSolution();
 
-  // Used for enforcing nodal BC's when using a direct acceleration calculation
+  /// Used for enforcing nodal BC's when using a direct acceleration calculation
   void setDirichletBCs(const WriteKey);
   /**
    * Sets the value of constrained variables in the solution vector.

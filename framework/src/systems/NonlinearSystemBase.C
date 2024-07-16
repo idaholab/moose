@@ -989,7 +989,7 @@ NonlinearSystemBase::setInitialSolution()
 void
 NonlinearSystemBase::setDirichletBCs(const WriteKey)
 {
-  NumericVector<Number> & initial_solution(solution());
+  auto & soln = solution();
 
   const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
   for (const auto & bnode : bnd_nodes)
@@ -1006,18 +1006,18 @@ NonlinearSystemBase::setDirichletBCs(const WriteKey)
       {
         const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
         for (const auto & preset_bc : preset_bcs)
-          preset_bc->computeValue(initial_solution);
+          preset_bc->computeValue(soln);
       }
       if (_ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
       {
         const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
         for (const auto & preset_bc : preset_bcs_res)
-          preset_bc->computeValue(initial_solution);
+          preset_bc->computeValue(soln);
       }
     }
   }
 
-  _sys.solution->close();
+  soln.close();
   update();
 }
 
