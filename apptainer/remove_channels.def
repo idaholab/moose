@@ -6,6 +6,12 @@
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
 
+%environment
+    #
+    # Begin environment for {{ PROJECT_NAME }}:{{ TAG }}
+    #
+    export APPTAINER_GENERATOR_VERSION="{{ PROJECT_NAME }}:{{ TAG }}"
+
 %post
     readarray -t channels <<< "$(conda config --show channels)"
     for line in "${channels[@]}"; do
