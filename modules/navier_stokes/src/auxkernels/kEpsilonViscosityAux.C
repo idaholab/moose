@@ -183,13 +183,12 @@ kEpsilonViscosityAux::computeValue()
     ADReal time_scale;
     if (_scale_limiter == "standard")
     {
-      time_scale =
-          std::max(_k(current_argument, state) / (_epsilon(current_argument, state) + 1e-15),
-                   std::sqrt(nu / (_epsilon(current_argument, state) + 1e-15)));
+      time_scale = std::max(_k(current_argument, state) / _epsilon(current_argument, state),
+                            std::sqrt(nu / _epsilon(current_argument, state)));
     }
     else
     {
-      time_scale = _k(current_argument, state) / (_epsilon(current_argument, state) + 1e-15);
+      time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
     }
 
     const ADReal mu_t_nl =
