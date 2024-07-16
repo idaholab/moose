@@ -470,7 +470,7 @@ Assembly::buildVectorFE(const FEType type) const
 
     _vector_fe[dim][type]->get_phi();
     _vector_fe[dim][type]->get_dphi();
-    if (type.family == NEDELEC_ONE)
+    if (_need_curl.count(type))
       _vector_fe[dim][type]->get_curl_phi();
     if (_need_div.count(type))
       _vector_fe[dim][type]->get_div_phi();
@@ -501,7 +501,7 @@ Assembly::buildVectorFaceFE(const FEType type) const
 
     _vector_fe_face[dim][type]->get_phi();
     _vector_fe_face[dim][type]->get_dphi();
-    if (type.family == NEDELEC_ONE)
+    if (_need_curl.count(type))
       _vector_fe_face[dim][type]->get_curl_phi();
     if (_need_face_div.count(type))
       _vector_fe_face[dim][type]->get_div_phi();
@@ -531,7 +531,7 @@ Assembly::buildVectorNeighborFE(const FEType type) const
 
     _vector_fe_neighbor[dim][type]->get_phi();
     _vector_fe_neighbor[dim][type]->get_dphi();
-    if (type.family == NEDELEC_ONE)
+    if (_need_curl.count(type))
       _vector_fe_neighbor[dim][type]->get_curl_phi();
     if (_need_neighbor_div.count(type))
       _vector_fe_neighbor[dim][type]->get_div_phi();
@@ -562,7 +562,7 @@ Assembly::buildVectorFaceNeighborFE(const FEType type) const
 
     _vector_fe_face_neighbor[dim][type]->get_phi();
     _vector_fe_face_neighbor[dim][type]->get_dphi();
-    if (type.family == NEDELEC_ONE)
+    if (_need_curl.count(type))
       _vector_fe_face_neighbor[dim][type]->get_curl_phi();
     if (_need_face_neighbor_div.count(type))
       _vector_fe_face_neighbor[dim][type]->get_div_phi();
