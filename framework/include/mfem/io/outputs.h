@@ -134,9 +134,7 @@ private:
   }
 
   // Write out summary of last timestep to console
-  void WriteConsoleSummary(int _my_rank, double t)
-  {
-  }
+  void WriteConsoleSummary(int _my_rank, double t) {}
 
   // Initialize GLVis sockets and fields
   void InitializeGLVis(int _my_rank)
