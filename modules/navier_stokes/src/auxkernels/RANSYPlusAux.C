@@ -99,15 +99,8 @@ RANSYPlusAux::computeValue()
       const auto distance = distance_vec[i];
 
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
-<<<<<<< HEAD
-      {
         // Non-equilibrium / Non-iterative
         y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
-      }
-=======
-        // Non-equilibrium / Non-iterative
-        y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
->>>>>>> fc6f6f1656 (Allow TKE in RANSYPlusAux to not be supplied in equilibrium wall treatment. 27888.)
       else
         // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);

@@ -95,8 +95,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   {
     // Incremental solve on y_plus to get the near-wall quantities
     y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
-    u_tau = parallel_speed /
-            (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) / NS::von_karman_constant);
+    u_tau = parallel_speed / (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) /
+                              NS::von_karman_constant);
   }
   else if (_wall_treatment == "eq_linearized")
   {
@@ -113,8 +113,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   {
     // Assign non-equilibrium wall function value
     y_plus = wall_dist * std::sqrt(std::sqrt(_C_mu) * _k(current_argument, old_state)) * rho / mu;
-    u_tau = parallel_speed /
-            (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) / NS::von_karman_constant);
+    u_tau = parallel_speed / (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) /
+                              NS::von_karman_constant);
   }
 
   ADReal alpha;
