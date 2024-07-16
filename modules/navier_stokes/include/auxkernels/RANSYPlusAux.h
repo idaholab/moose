@@ -45,7 +45,7 @@ protected:
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
 
-  /// Wall boundaries
+  /// Wall boundary names
   const std::vector<BoundaryName> & _wall_boundary_names;
 
   /// Method used for wall treatment

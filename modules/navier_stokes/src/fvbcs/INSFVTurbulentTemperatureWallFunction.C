@@ -113,7 +113,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   {
     // Assign non-equilibrium wall function value
     y_plus =
-        std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, old_state)) * rho / mu;
+        wall_dist * std::sqrt(std::sqrt(_C_mu)*_k(current_argument, old_state)) * rho / mu;
     u_tau = parallel_speed /
             (std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)) / NS::von_karman_constant);
   }

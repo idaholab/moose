@@ -41,7 +41,7 @@ kEpsilonViscosityAux::validParams()
   MooseEnum scale_limiter("none standard", "standard");
   params.addParam<MooseEnum>("scale_limiter",
                              scale_limiter,
-                             "The method used to limit the k-e time scale."
+                             "The method used to limit the k-epsilon time scale."
                              "'none', 'standard'");
   return params;
 }
@@ -154,7 +154,7 @@ kEpsilonViscosityAux::computeValue()
     {
       // Assign non-equilibrium wall function value
       y_plus =
-          std::pow(_C_mu, 0.25) * min_wall_dist * std::sqrt(_k(current_argument, state)) * rho / mu;
+          min_wall_dist * std::sqrt(std::sqrt(_C_mu)*_k(current_argument, state)) * rho / mu;
       mu_wall = mu * (NS::von_karman_constant * y_plus /
                       std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
       mut_log = mu_wall - mu;

@@ -247,7 +247,7 @@ INSFVTKESourceSink::computeQpResidual()
     destruction = rho * _var(elem_arg, state) / time_scale;
 
     // k-Production limiter (needed for flows with stagnation zones)
-    ADReal production_limit = _C_pl * rho * _epsilon(elem_arg, old_state);
+    const ADReal production_limit = _C_pl * rho * _epsilon(elem_arg, old_state);
 
     // Apply production limiter
     production = std::min(production, production_limit);

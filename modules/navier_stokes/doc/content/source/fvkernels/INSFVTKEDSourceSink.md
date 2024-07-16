@@ -61,7 +61,7 @@ If a non-equilibrium [!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) is 
 the $y^+$ is defined non-iteratively as follows:
 
 \begin{equation}
-y^+ = \frac{C_{\mu}^{0.25} y_p \sqrt{k}}{\mu} \,,
+y^+ = \frac{y_p \sqrt{\sqrt{C_{\mu}}k}}{\mu} \,,
 \end{equation}
 
 !alert note

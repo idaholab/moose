@@ -55,7 +55,7 @@ for the turbulent viscosity.
 where:
 
 - $\rho$ is the density
-- $\mu$ is the kinematic viscosity
+- $\mu$ is the dynamic viscosity
 - $u_{\tau} = \sqrt{\frac{\tau_w}{\rho}}$ is the friction velocity and $\tau_w$ is the wall friction
 - $y_p$ is the distance from the boundary to the center of the near-wall cell
 - $u_p$ is the parallel velocity to the boundary computed at the center of the near-wall cell

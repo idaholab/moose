@@ -42,7 +42,7 @@ INSFVTKEDSourceSink::validParams()
   params.addParam<Real>("C1_eps", 1.44, "First epsilon coefficient");
   params.addParam<Real>("C2_eps", 1.92, "Second epsilon coefficient");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
-  params.addParam<Real>("C_pl", 10.0, "Production Limiter Constant Multiplier.");
+  params.addParam<Real>("C_pl", 10.0, "Production limiter constant multiplier.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -214,7 +214,7 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     ADReal production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
     // Compute production limiter (needed for flows with stagnation zones)
-    ADReal production_limit = _C_pl * rho * _var(elem_arg, old_state);
+    const ADReal production_limit = _C_pl * rho * _var(elem_arg, old_state);
     // Apply production limiter
     production_k = std::min(production_k, production_limit);
 

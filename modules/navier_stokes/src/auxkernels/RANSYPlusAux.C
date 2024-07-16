@@ -27,11 +27,11 @@ RANSYPlusAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Fluid density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<std::vector<BoundaryName>>(
-      "walls", {}, "Boundaries that correspond to solid walls.");
+      "walls", {}, "Boundaries where the wall treatment is enabled.");
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
   params.addParam<MooseEnum>("wall_treatment",
                              wall_treatment,
-                             "The method used for computing the wall functions "
+                             "The method used for computing the y_plus in the wall functions "
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure coefficient.");
 
@@ -61,6 +61,7 @@ RANSYPlusAux::RANSYPlusAux(const InputParameters & params)
 void
 RANSYPlusAux::initialSetup()
 {
+  // Getting wall treatment maps
   NS::getWallBoundedElements(
       _wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _wall_bounded);
   NS::getWallDistance(_wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _dist);
@@ -70,14 +71,14 @@ RANSYPlusAux::initialSetup()
 Real
 RANSYPlusAux::computeValue()
 {
-  const auto state = determineState();
-  const auto elem_arg = makeElemArg(_current_elem);
-  const auto rho = _rho(elem_arg, state);
-  const auto mu = _mu(elem_arg, state);
-  ADReal y_plus;
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
+    const auto state = determineState();
+    const auto elem_arg = makeElemArg(_current_elem);
+    const auto rho = _rho(elem_arg, state);
+    const auto mu = _mu(elem_arg, state);
+    ADReal y_plus;
     std::vector<Real> y_plus_vec;
 
     ADRealVectorValue velocity(_u_var(elem_arg, state));
@@ -108,7 +109,7 @@ RANSYPlusAux::computeValue()
       y_plus_vec.push_back(raw_value(y_plus));
     }
     // Return average of y+ for cells with multiple wall faces
-    return 1.0 * std::accumulate(y_plus_vec.begin(), y_plus_vec.end(), 0.0) / y_plus_vec.size();
+    return std::accumulate(y_plus_vec.begin(), y_plus_vec.end(), 0.0) / y_plus_vec.size();
   }
   else
     return 0.;
