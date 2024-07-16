@@ -338,6 +338,8 @@ SubChannel1PhaseProblem::populateDenseFromVector(const Vec & x,
 {
   PetscErrorCode ierr;
   PetscScalar * xx;
+
+  PetscFunctionBegin;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
@@ -350,7 +352,7 @@ SubChannel1PhaseProblem::populateDenseFromVector(const Vec & x,
   }
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 template <class T>
@@ -363,6 +365,8 @@ SubChannel1PhaseProblem::populateVectorFromHandle(Vec & x,
 {
   PetscErrorCode ierr;
   PetscScalar * xx;
+
+  PetscFunctionBegin;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
@@ -376,5 +380,5 @@ SubChannel1PhaseProblem::populateVectorFromHandle(Vec & x,
   }
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
