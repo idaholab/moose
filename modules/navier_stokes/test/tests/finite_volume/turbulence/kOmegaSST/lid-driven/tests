@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  design = 'INSFVMixingLengthTKESDBC.md kOmegaSSTF1BlendingAux.md kOmegaSSTF2BlendingAux.md kOmegaSSTSigmaKAux.md kOmegaSSTSigmaOmegaAux.md kOmegaSSTViscosityAux.md WallNormalUnitVectorAux.md WallDistanceAux.md INSFVTKESDSourceSink.md INSFVTKESourceSink'
   issues = '#28130'
   [lid_driven_turb_std_wall]
     requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with standard wall functions, '
@@ -30,7 +30,6 @@
       abs_zero = 1e-6
       heavy = true
     []
-
     [run]
       type = 'Exodiff'
       input = 'lid-driven-turb-linearized-wall.i'
@@ -72,7 +71,7 @@
     [run]
       type = 'Exodiff'
       input = 'lid-driven-turb-neq-wall.i'
-      exodiff = 'lid-driven-turb-neq-wallshort.e'
+      exodiff = 'lid-driven-turb-neq-wall_short.e'
       detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-neq-wall_short'
       abs_zero = 1e-6
@@ -121,7 +120,7 @@
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-enhaced-wall-free-shear.i'
-      exodiff = 'lid-driven-turb-enhaced-wall-free-shear.e'
+      exodiff = 'lid-driven-turb-enhaced-wall-free-shear_out.e'
       detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
@@ -140,14 +139,14 @@
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-enhaced-wall-vortex_stretching.i'
-      exodiff = 'lid-driven-turb-enhaced-wall-vortex_stretching.e'
+      exodiff = 'lid-driven-turb-enhaced-wall-vortex_stretching_out.e'
       detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
     [run]
       type = 'Exodiff'
-      input = 'lid-driven-turb-enhaced-wall-vortex_stretchingi'
+      input = 'lid-driven-turb-enhaced-wall-vortex_stretching.i'
       exodiff = 'lid-driven-turb-enhaced-wall-vortex_stretching_short.e'
       detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-enhaced-wall-vortex_stretching_short'

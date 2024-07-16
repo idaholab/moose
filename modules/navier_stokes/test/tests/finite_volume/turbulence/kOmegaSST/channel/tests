@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  design = 'INSFVMixingLengthTKESDBC.md kOmegaSSTF1BlendingAux.md kOmegaSSTF2BlendingAux.md kOmegaSSTSigmaKAux.md kOmegaSSTSigmaOmegaAux.md kOmegaSSTViscosityAux.md WallNormalUnitVectorAux.md WallDistanceAux.md INSFVTKESDSourceSink.md INSFVTKESourceSink'
   issues = '#28130'
   [channel_ERCOFTAC]
     requirement = 'The system shall be able to solve fluid flow problems with k-omega-SST turbulence model for a standard channel, '

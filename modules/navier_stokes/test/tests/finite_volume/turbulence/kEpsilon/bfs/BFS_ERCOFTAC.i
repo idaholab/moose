@@ -38,7 +38,7 @@ walls = 'bottom wall-side top'
 wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
-  uniform_refine = 3
+  uniform_refine = 0
   [gen]
     type = CartesianMeshGenerator
     dim = 2
