@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVTKESourceSink.h"
-#include "NS.h"
 #include "NonlinearSystemBase.h"
 #include "NavierStokesMethods.h"
 #include "libmesh/nonlinear_solver.h"
@@ -59,7 +58,7 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _linearized_model(getParam<bool>("linearized_model")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment")),
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
     _C_pl(getParam<Real>("C_pl"))
 {
@@ -115,7 +114,7 @@ INSFVTKESourceSink::computeQpResidual()
       const auto distance = distance_vec[i];
 
       ADReal y_plus;
-      if (_wall_treatment == "neq") // Non-equilibrium / Non-iterative
+      if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
         y_plus = distance * std::sqrt(std::sqrt(_C_mu) * _var(elem_arg, old_state)) * rho / mu;
       else // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);

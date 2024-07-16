@@ -12,6 +12,7 @@
 
 #include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 /**
  * Computes the turbuent viscosity for the k-Epsilon model.
@@ -59,7 +60,7 @@ protected:
   const bool _bulk_wall_treatment;
 
   /// Method used for wall treatment
-  const MooseEnum _wall_treatment;
+  NS::WallTreatmentEnum _wall_treatment;
 
   /// Method used to limit the k-e time scale
   const MooseEnum _scale_limiter;

@@ -11,6 +11,7 @@
 
 #include "FVElementalKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 /**
  * Computes source the sink terms for the turbulent kinetic energy.
@@ -57,7 +58,7 @@ protected:
   const bool _linearized_model;
 
   /// Method used for wall treatment
-  const MooseEnum _wall_treatment;
+  NS::WallTreatmentEnum _wall_treatment;
 
   /// C_mu constant
   const Real _C_mu;

@@ -11,6 +11,7 @@
 
 #include "FVDirichletBCBase.h"
 #include "FVFluxBC.h"
+#include "NS.h"
 
 /**
  * Applies a wall function to the turbulent viscosity field
@@ -49,16 +50,7 @@ private:
   const Real _C_mu;
 
   /// Method used for wall treatment
-  const MooseEnum _wall_treatment;
-
-  // Declare enum structure for wall treatment
-  enum wall_treatment_options
-  {
-    NEWTON,
-    INCREMENTAL,
-    LINEARIZED,
-    NEQ
-  };
+  NS::WallTreatmentEnum _wall_treatment;
 
   // Mu_t evaluated at y+=30 for blending purposes
   static constexpr Real _mut_30 =

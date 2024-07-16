@@ -13,6 +13,7 @@
 #include "MathFVUtils.h"
 #include "INSFVMomentumResidualObject.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 /**
  * Computes the source and sink terms for the turbulent kinetic energy dissipation rate.
@@ -59,7 +60,7 @@ protected:
   const bool _linearized_model;
 
   /// Method used for wall treatment
-  const MooseEnum _wall_treatment;
+  NS::WallTreatmentEnum _wall_treatment;
 
   /// Value of the first epsilon closure coefficient
   const Real _C1_eps;
