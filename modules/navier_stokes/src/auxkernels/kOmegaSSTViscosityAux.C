@@ -266,7 +266,7 @@ kOmegaSSTViscosityAux::computeValue()
                             _a_1 / symmetric_strain_tensor_norm / _F2(current_argument, state));
 
     // Dynamic turbulent viscosity
-    mu_t = (rho * TKE * T).value();
+    mu_t = std::max((rho * TKE * T).value(), NS::mu_t_low_limit);
   }
 
   return mu_t;

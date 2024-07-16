@@ -92,6 +92,8 @@ protected:
   static constexpr Real _beta_infty = 0.09;
   static constexpr Real _beta_i_1 = 0.075;
   static constexpr Real _beta_i_2 = 0.0828;
+  static constexpr Real _beta_i_1_star = 0.09;
+  static constexpr Real _beta_i_2_star = 0.09;
   // Limiting
   static constexpr Real _c_pl = 10.0;
   // Low-Re specific
