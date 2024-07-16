@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.04.11" %}
+{% set version = "2024.07.10" %}
 
 package:
   name: moose-peacock
@@ -14,24 +14,21 @@ source:
 
 build:
   number: 0
+  string: {{ mpi }}_0
 
 requirements:
-  host:
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.2.0a # [osx]
   run:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
     - pyaml
     - numpy
     - pandas
     - pyqt
-    - matplotlib
+    - matplotlib !=3.9.0
     - vtk
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
-  # Python min/max constraints
   run_constrained:
-    - python <{{3.11}}
+    # Python max constraints
+    - python <{{3.12}}
 
 test:
   imports:

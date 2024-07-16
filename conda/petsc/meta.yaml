@@ -10,9 +10,6 @@
 {% set build = 1 %}
 {% set version = "3.20.3" %}
 
-# permanent
-{% set strbuild = "build_" + build|string %}
-
 package:
   name: moose-petsc
   version: {{ version }}
@@ -25,29 +22,31 @@ source:
 
 build:
   number: {{ build }}
-  string: {{ strbuild }}
+  string: {{ mpi }}_{{ build }}
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
   run_exports:
     - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
 
 requirements:
   build:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
     - pkg-config
-  host:
-    - {{ moose_mpich }}
   run:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - pkg-config
 
 test:
   requires:
     - pkg-config
-    - {{ moose_mpich }}
-
+    - {{ mpi }}
+    - {{ moose_mpi }}
   files:
     - tests/ex1.c
     - tests/ex1f.F90

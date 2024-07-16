@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
         package = 'moose-dev'
         version = copy.copy(pre_make.conda_env[package]['version'])
         current_version = copy.copy(pre_make.versioner_meta[package]['conda']['version'])
-        build = copy.copy(pre_make.conda_env[package]['build_string'])
+        build_number = copy.copy(pre_make.conda_env[package]['build_number'])
 
         # Same version and build
         pre_make = PreMake()
@@ -185,22 +185,21 @@ class Test(unittest.TestCase):
         self.assertEqual(e.exception.package, package)
         self.assertEqual(e.exception.version, 'foo')
         self.assertEqual(e.exception.required_version, current_version)
-        self.assertEqual(e.exception.build, build)
-        self.assertEqual(e.exception.required_build, build)
+        self.assertEqual(e.exception.build, build_number)
+        self.assertEqual(e.exception.required_build, build_number)
 
-        # Different build
+        # Different build number
         pre_make = PreMake()
         different_build = 100
-        different_build_string = f'build_{different_build}'
         pre_make.conda_env[package]['version'] = version
-        pre_make.conda_env[package]['build_string'] = different_build_string
+        pre_make.conda_env[package]['build_number'] = different_build
         with self.assertRaises(PreMake.CondaVersionMismatch) as e:
             pre_make._checkCondaPackage(package)
         self.assertEqual(e.exception.package, package)
         self.assertEqual(e.exception.version, version)
         self.assertEqual(e.exception.required_version, current_version)
-        self.assertEqual(e.exception.build, different_build_string)
-        self.assertEqual(e.exception.required_build, build)
+        self.assertEqual(e.exception.build, different_build)
+        self.assertEqual(e.exception.required_build, build_number)
 
         # Set this back once we're done
         os.environ['CONDA_PREFIX'] = CONDA_PREFIX

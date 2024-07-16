@@ -18,12 +18,6 @@ function create_env()
 {
     if [ "${PRISTINE_ENVIRONMENT}" == 0 ]; then return; fi
     printf "Creating Conda Environment..."
-    if [ ${FULL_BUILD} == 0 ]; then
-        MOOSE_PACKAGES='moose-dev'
-        printf " using moose-dev associated packages\n"
-    else
-        printf " using conda-forge only packages\n"
-    fi
     export CONDARC=$CTMP_DIR/.condarc
     export CONDA_ENVS_PATH=$CTMP_DIR/_env/.envs
     ${INSTANCE_EXE} config --env --set channel_priority strict
@@ -40,9 +34,7 @@ function create_env()
         || print_failure_and_exit 'installing Conda environment'
     fi
     source activate $CTMP_DIR/_env || print_failure_and_exit 'activating environment'
-    if [ ${FULL_BUILD} == 0 ]; then
-        printf "The following MOOSE packages were installed:\n\n"
-    fi
+    printf "The following MOOSE packages were installed:\n\n"
     ${INSTANCE_EXE} list | grep moose
 }
 

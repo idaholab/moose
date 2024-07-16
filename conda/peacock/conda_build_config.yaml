@@ -1,5 +1,9 @@
-moose_mpich:
-  - moose-mpich 4.0.2 build_16
+mpi:
+  - mpich
+  - openmpi
+
+moose_mpi:
+  - moose-mpi 2024.07.10
 
 # Pesky packages that break internal CI
 # Note: Modifying/Updating this will require changes to conda/mpich!

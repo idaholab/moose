@@ -1,7 +1,8 @@
 clang_format:
-  - clang-format 14
+  - clang-format 16
 
 moose_python:
+  - python 3.11
   - python 3.10
   - python 3.9
   - python 3.8

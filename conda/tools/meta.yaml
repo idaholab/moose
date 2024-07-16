@@ -6,7 +6,7 @@
 #   framework/doc/packages_config.yml
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.06.17" %}
+{% set version = "2024.07.10" %}
 
 package:
   name: moose-tools
@@ -25,9 +25,6 @@ requirements:
   build:
     - {{ moose_python }}
     - setuptools
-  host:
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.1.5 # [osx]
   run:
     - beautifulsoup4
     - {{ clang_format }}
@@ -41,7 +38,7 @@ requirements:
     - livereload
     - lxml
     - mako
-    - matplotlib-base
+    - matplotlib-base !=3.9.0
     - mock
     - numpy
     - packaging
@@ -63,8 +60,6 @@ requirements:
     - uncertainties
     - xmltodict
     - yaml
-    # TODO: Try to remove when this version settles down among other conda-forge packages
-    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
 test:
   commands:
     - clang-format --version

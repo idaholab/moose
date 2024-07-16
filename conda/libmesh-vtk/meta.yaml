@@ -3,39 +3,39 @@
 #   libmesh/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set build = 9 %}
-{% set vtk_version = "9.2.6" %}
-{% set vtk_friendly_version = "9.2" %}
-{% set sha256 = "06fc8d49c4e56f498c40fcb38a563ed8d4ec31358d0101e8988f0bb4d539dd12" %}
-
-# permanent
-{% set strbuild = "build_" + build|string %}
+{% set build = 0 %}
+{% set vtk_version = "9.3.0" %}
+{% set vtk_friendly_version = "9.3" %}
+{% set sha256 = "fdc7b9295225b34e4fdddc49cd06e66e94260cb00efee456e0f66568c9681be9" %}
 
 package:
   name: moose-libmesh-vtk
   version: {{ vtk_version }}
 
 source:
-  url: https://www.vtk.org/files/release/{{ vtk_friendly_version }}/VTK-{{ vtk_version }}.tar.gz
-  vtk_friendly_version: {{ vtk_friendly_version }}
-  sha256: {{ sha256 }}
+  - url: https://www.vtk.org/files/release/{{ vtk_friendly_version }}/VTK-{{ vtk_version }}.tar.gz
+  - vtk_friendly_version: {{ vtk_friendly_version }}
+  - sha256: {{ sha256 }}
 
 build:
   number: {{ build }}
-  string: {{ strbuild }}
+  string: {{ mpi }}_{{ build }}
   skip: true             # [win]
   script_env:
     - MOOSE_JOBS
     - vtk_friendly_version={{ vtk_friendly_version }}
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
 
 requirements:
   build:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
     - ninja
   run:
-    - {{ moose_mpich }}
+    - {{ mpi }}
+    - {{ moose_mpi }}
 
 test:
   commands:
