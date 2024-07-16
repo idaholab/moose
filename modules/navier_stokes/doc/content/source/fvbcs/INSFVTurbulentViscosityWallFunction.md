@@ -25,7 +25,7 @@ four different formulations are supportedas defined by the
 [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) parameter.
 
 To define a proper grid spacing during the meshing process, we recommend using the Auxiliary Kernel
-[RANSYplusAux](source/auxkernels/RANSYplusAux.md) 
+[RANSYPlusAux.md] 
 to estimate the dimensionless wall distance $y^+$.
 
 ## Equilibrium wall functions using a Newton solve

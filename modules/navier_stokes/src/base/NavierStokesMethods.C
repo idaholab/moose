@@ -81,8 +81,10 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   // Newton-Raphson method to solve for u_star (friction velocity).
   for (int i = 0; i < MAX_ITERS; ++i)
   {
-    ADReal residual = u_star / NS::von_karman_constant * std::log(NS::E_turb_constant * u_star * dist / nu) - u;
-    ADReal deriv = (1 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
+    ADReal residual =
+        u_star / NS::von_karman_constant * std::log(NS::E_turb_constant * u_star * dist / nu) - u;
+    ADReal deriv =
+        (1 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
     ADReal new_u_star = std::max(1e-20, u_star - residual / deriv);
 
     Real rel_err = std::abs((new_u_star.value() - u_star.value()) / new_u_star.value());
@@ -121,7 +123,7 @@ findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   {
     yPlusLast = yPlus;
     yPlus = (kappa_time_Re + yPlus) / (1.0 + std::log(NS::E_turb_constant * yPlus));
-  } while ( std::abs(rev_yPlusLam * (yPlus - yPlusLast)) > REL_TOLERANCE && ++iters < MAX_ITERS);
+  } while (std::abs(rev_yPlusLam * (yPlus - yPlusLast)) > REL_TOLERANCE && ++iters < MAX_ITERS);
 
   return std::max(0.0, yPlus);
 }

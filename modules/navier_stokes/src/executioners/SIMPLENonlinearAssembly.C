@@ -478,6 +478,9 @@ SIMPLENonlinearAssembly::execute()
       // Resdiual index
       size_t residual_index = 0;
 
+      // Execute all objects tagged as nonlinear
+      _problem.execute(EXEC_NONLINEAR);
+
       // We clear the caches in the momentum and pressure variables
       for (auto system_i : index_range(_momentum_systems))
         _momentum_systems[system_i]->residualSetup();
@@ -542,9 +545,6 @@ SIMPLENonlinearAssembly::execute()
 
       // Update residual index
       residual_index = momentum_residual.size();
-
-      // Execute all objects tagged as nonlinear
-      _problem.execute(EXEC_NONLINEAR);
 
       // If we have an energy equation, solve it here. We assume the material properties in the
       // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature

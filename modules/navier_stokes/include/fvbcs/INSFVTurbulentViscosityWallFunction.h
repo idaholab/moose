@@ -52,8 +52,6 @@ private:
   const MooseEnum _wall_treatment;
 };
 
-
-
 // //* This file is part of the MOOSE framework
 // //* https://www.mooseframework.org
 // //*
