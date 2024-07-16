@@ -203,10 +203,26 @@ findContactPoint(PenetrationInfo & p_info,
       }
       catch (libMesh::LogicError & e)
       {
+        ref_point(0) -= mult * update(0);
+        if (dim - 1 == 2)
+          ref_point(1) -= mult * update(1);
+
         mult *= 0.9;
         if (mult < 1e-6)
+        {
           mooseWarning("We could not solve for the contact point.", e.what());
+          update_size = mult * update.l2_norm();
+          d = (secondary_point - phys_point[0]) * mult;
+          success = true;
+        }
       }
+    }
+    // We failed the line search, make sure to trigger the error
+    if (mult < 1e-6)
+    {
+      nit = 12;
+      update_size = 1;
+      break;
     }
   }
 
@@ -220,7 +236,8 @@ findContactPoint(PenetrationInfo & p_info,
   if (dim - 1 == 2)
   {
     p_info._normal = dxyz_dxi[0].cross(dxyz_deta[0]);
-    p_info._normal /= p_info._normal.norm();
+    if (!MooseUtils::absoluteFuzzyEqual(p_info._normal.norm(), 0))
+      p_info._normal /= p_info._normal.norm();
   }
   else
   {
