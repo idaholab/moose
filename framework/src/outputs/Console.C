@@ -214,13 +214,13 @@ Console::Console(const InputParameters & parameters)
     // Honor the 'print_linear_residuals' option, only if 'linear' has not been set in 'execute_on'
     // by the user
     if (common && common->getParam<bool>("print_linear_residuals"))
-      _execute_on.push_back("linear");
+      _execute_on.setAdditionalValue("linear");
     else
-      _execute_on.erase("linear");
+      _execute_on.eraseSetValue("linear");
     if (common && common->getParam<bool>("print_nonlinear_residuals"))
-      _execute_on.push_back("nonlinear");
+      _execute_on.setAdditionalValue("nonlinear");
     else
-      _execute_on.erase("nonlinear");
+      _execute_on.eraseSetValue("nonlinear");
   }
 
   if (!_pars.isParamSetByUser("perf_log") && common && common->getParam<bool>("print_perf_log"))
@@ -235,12 +235,12 @@ Console::Console(const InputParameters & parameters)
   {
     const ExecFlagEnum & common_execute_on = common->getParam<ExecFlagEnum>("execute_on");
     for (auto & mme : common_execute_on)
-      _execute_on.push_back(mme);
+      _execute_on.setAdditionalValue(mme);
   }
 
   // If --show-outputs is used, enable it
   if (_app.getParam<bool>("show_outputs"))
-    _system_info_flags.push_back("output");
+    _system_info_flags.setAdditionalValue("output");
 }
 
 Console::~Console()
@@ -292,11 +292,11 @@ Console::initialSetup()
   if (_execute_on.contains("final"))
   {
     if (!_pars.isParamSetByUser("postprocessor_execute_on"))
-      _advanced_execute_on["postprocessors"].push_back("final");
+      _advanced_execute_on["postprocessors"].setAdditionalValue("final");
     if (!_pars.isParamSetByUser("scalars_execute_on"))
-      _advanced_execute_on["scalars"].push_back("final");
+      _advanced_execute_on["scalars"].setAdditionalValue("final");
     if (!_pars.isParamSetByUser("vector_postprocessor_execute_on"))
-      _advanced_execute_on["vector_postprocessors"].push_back("final");
+      _advanced_execute_on["vector_postprocessors"].setAdditionalValue("final");
   }
 }
 

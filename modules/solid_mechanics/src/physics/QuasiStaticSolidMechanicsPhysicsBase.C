@@ -275,11 +275,11 @@ QuasiStaticSolidMechanicsPhysicsBase::QuasiStaticSolidMechanicsPhysicsBase(
         getParam<MultiMooseEnum>("additional_material_output_family");
 
     for (auto & output : additional_generate_output)
-      generate_output.push_back(output);
+      generate_output.setAdditionalValue(output);
     for (auto & order : additional_material_output_order)
-      material_output_order.push_back(order);
+      material_output_order.setAdditionalValue(order);
     for (auto & family : additional_material_output_family)
-      material_output_family.push_back(family);
+      material_output_family.setAdditionalValue(family);
 
     pars.set<MultiMooseEnum>("generate_output") = generate_output;
     pars.set<MultiMooseEnum>("material_output_order") = material_output_order;

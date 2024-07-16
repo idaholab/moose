@@ -19,12 +19,12 @@
 #include <string>
 #include <iostream>
 
-MultiMooseEnum::MultiMooseEnum(std::string names,
-                               std::string default_names,
+MultiMooseEnum::MultiMooseEnum(std::string valid_names,
+                               std::string initialization_values,
                                bool allow_out_of_range)
-  : MooseEnumBase(names, allow_out_of_range)
+  : MooseEnumBase(valid_names, allow_out_of_range)
 {
-  *this = default_names;
+  *this = initialization_values;
 }
 
 MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum)
@@ -107,65 +107,65 @@ MultiMooseEnum::operator=(const std::string & names)
 {
   std::vector<std::string> names_vector;
   MooseUtils::tokenize(names, names_vector, 1, " ");
-  return assign(names_vector.begin(), names_vector.end(), false);
+  return assignValues(names_vector.begin(), names_vector.end(), false);
 }
 
 MultiMooseEnum &
 MultiMooseEnum::operator=(const std::vector<std::string> & names)
 {
-  return assign(names.begin(), names.end(), false);
+  return assignValues(names.begin(), names.end(), false);
 }
 
 MultiMooseEnum &
 MultiMooseEnum::operator=(const std::set<std::string> & names)
 {
-  return assign(names.begin(), names.end(), false);
+  return assignValues(names.begin(), names.end(), false);
 }
 
 void
-MultiMooseEnum::erase(const std::string & names)
+MultiMooseEnum::eraseSetValue(const std::string & names)
 {
   std::vector<std::string> names_vector;
   MooseUtils::tokenize(names, names_vector, 1, " ");
-  remove(names_vector.begin(), names_vector.end());
+  removeSetValues(names_vector.begin(), names_vector.end());
 }
 
 void
-MultiMooseEnum::erase(const std::vector<std::string> & names)
+MultiMooseEnum::eraseSetValue(const std::vector<std::string> & names)
 {
-  remove(names.begin(), names.end());
+  removeSetValues(names.begin(), names.end());
 }
 
 void
-MultiMooseEnum::erase(const std::set<std::string> & names)
+MultiMooseEnum::eraseSetValue(const std::set<std::string> & names)
 {
-  remove(names.begin(), names.end());
+  removeSetValues(names.begin(), names.end());
 }
 
 void
-MultiMooseEnum::push_back(const std::string & names)
+MultiMooseEnum::setAdditionalValue(const std::string & names)
 {
   std::vector<std::string> names_vector;
   MooseUtils::tokenize(names, names_vector, 1, " ");
-  assign(names_vector.begin(), names_vector.end(), true);
+  assignValues(names_vector.begin(), names_vector.end(), true);
 }
 
 void
-MultiMooseEnum::push_back(const std::vector<std::string> & names)
+MultiMooseEnum::setAdditionalValue(const std::vector<std::string> & names)
 {
-  assign(names.begin(), names.end(), true);
+  assignValues(names.begin(), names.end(), true);
 }
 
 void
-MultiMooseEnum::push_back(const std::set<std::string> & names)
+MultiMooseEnum::setAdditionalValue(const std::set<std::string> & names)
 {
-  assign(names.begin(), names.end(), true);
+  assignValues(names.begin(), names.end(), true);
 }
 
 void
-MultiMooseEnum::push_back(const MultiMooseEnum & other_enum)
+MultiMooseEnum::setAdditionalValue(const MultiMooseEnum & other_enum)
 {
-  assign(other_enum.begin(), other_enum.end(), true);
+  assignValues(other_enum.begin(), other_enum.end(), true);
 }
 
 const std::string &
@@ -190,10 +190,10 @@ MultiMooseEnum::get(unsigned int i) const
 
 template <typename InputIterator>
 MultiMooseEnum &
-MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
+MultiMooseEnum::assignValues(InputIterator first, InputIterator last, bool append)
 {
   if (!append)
-    clear();
+    clearSetValues();
 
   for (InputIterator it = first; it != last; ++it)
   {
@@ -222,7 +222,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
 
 template <typename InputIterator>
 void
-MultiMooseEnum::remove(InputIterator first, InputIterator last)
+MultiMooseEnum::removeSetValues(InputIterator first, InputIterator last)
 {
   // Create a new list of enumerations by striping out the supplied values
   for (InputIterator it = first; it != last; ++it)
@@ -237,7 +237,7 @@ MultiMooseEnum::remove(InputIterator first, InputIterator last)
 }
 
 void
-MultiMooseEnum::clear()
+MultiMooseEnum::clearSetValues()
 {
   _current_values.clear();
 }

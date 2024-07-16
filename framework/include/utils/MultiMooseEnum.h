@@ -43,14 +43,14 @@ public:
   /**
    * Constructor that takes a list of enumeration values, and a separate string to set a default for
    * this instance
-   * @param names - a list of all possible values (names) for this enumeration
-   * @param default_names - the value(s), if any, to set this enumeration instance to
+   * @param valid_names - a list of all possible values (names) for this enumeration
+   * @param initialization_values - the value(s), if any, to set this enumeration instance to
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
    * it's range of initially defined values, allowing for the possiblity to add additional valid
    * values to an object after it has been initialized.
    */
-  MultiMooseEnum(std::string names,
-                 std::string default_names = "",
+  MultiMooseEnum(std::string valid_names,
+                 std::string initialization_values = "",
                  bool allow_out_of_range = false);
 
   /**
@@ -78,7 +78,7 @@ public:
 
   ///@{
   /**
-   * Contains methods for seeing if a value is set in the MultiMooseEnum.
+   * Methods for seeing if a value is set in the MultiMooseEnum.
    * @return bool - the truth value indicating whether the value is set
    */
   bool contains(const std::string & value) const;
@@ -104,9 +104,9 @@ public:
    * Un-assign, or unset a value
    * @param names - a string, set, or vector giving the name to erase from the enumeration values
    */
-  void erase(const std::string & names);
-  void erase(const std::vector<std::string> & names);
-  void erase(const std::set<std::string> & names);
+  void eraseSetValue(const std::string & names);
+  void eraseSetValue(const std::vector<std::string> & names);
+  void eraseSetValue(const std::set<std::string> & names);
   ///@}
 
   ///@{
@@ -116,10 +116,10 @@ public:
    * duplicates are stored.
    * @param names - a string, set, or vector representing the enumeration values to set.
    */
-  void push_back(const std::string & names);
-  void push_back(const std::vector<std::string> & names);
-  void push_back(const std::set<std::string> & names);
-  void push_back(const MultiMooseEnum & other_enum);
+  void setAdditionalValue(const std::string & names);
+  void setAdditionalValue(const std::vector<std::string> & names);
+  void setAdditionalValue(const std::set<std::string> & names);
+  void setAdditionalValue(const MultiMooseEnum & other_enum);
   ///@}
 
   /**
@@ -133,20 +133,20 @@ public:
 
   /**
    * Indexing operator
-   * Operator to retrieve an item from the MultiMooseEnum.
-   * @param i index
+   * Operator to retrieve the id of an item from the MultiMooseEnum.
+   * @param i index corresponding to the desired item
    * @returns the id of the MooseEnumItem at the supplied index
    */
   unsigned int get(unsigned int i) const;
 
   /// get the current values cast to a vector of enum type T
   template <typename T>
-  std::vector<T> getEnum() const;
+  std::vector<T> getSetValueIDs() const;
 
   ///@{
   /**
-   * Returns a begin/end iterator to all of the items in the enum. Items will
-   * always be capitalized.
+   * Returns a begin/end iterator to all of the set values in the enum.
+   * Items will always be capitalized.
    */
   MooseEnumIterator begin() const { return _current_values.begin(); }
   MooseEnumIterator end() const { return _current_values.end(); }
@@ -155,7 +155,7 @@ public:
   /**
    * Clear the MultiMooseEnum
    */
-  void clear();
+  void clearSetValues();
 
   /**
    * Return the number of active items in the MultiMooseEnum
@@ -175,26 +175,42 @@ public:
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MultiMooseEnum & obj);
 
+  // If left enabled, the following functions would add possible values
+  // (to _items) that an enumerated variable can take. However "+=" is not a
+  // descriptive enough funtion name for this and should not be used in case
+  // users get confused that the operator actually changes the set values of the
+  // variable (_current_values). We should re-implement this logic under a method
+  // with a more descirptive name to force users to be informed.
+  MooseEnumBase & operator+=(const std::string & name) = delete;
+  MooseEnumBase & operator+=(const std::initializer_list<std::string> & names) = delete;
+
+  // The following replaces operator+= with a more descriptive name
+  /// Extends the range of possible values the variable can be set to
+  MooseEnumBase & addValidName(const std::string & name) { return MooseEnumBase::operator+=(name); }
+  MooseEnumBase & addValidName(const std::initializer_list<std::string> & names)
+  {
+    return MooseEnumBase::operator+=(names);
+  }
+
 protected:
   /// Check whether any of the current values are deprecated when called
   virtual void checkDeprecated() const override;
 
   /**
    * Helper method for all inserts and assignment operators
+   * @param first An iterator specifying the beginning of the range of values to set
+   * @param last An iterator specifying the end of the range of values to set
    */
   template <typename InputIterator>
-  MultiMooseEnum & assign(InputIterator first, InputIterator last, bool append);
+  MultiMooseEnum & assignValues(InputIterator first, InputIterator last, bool append);
 
   /**
    * Helper method for un-assigning enumeration values
+   * @param first An iterator specifying the beginning of the range of values to set
+   * @param last An iterator specifying the end of the range of values to set
    */
   template <typename InputIterator>
-  void remove(InputIterator first, InputIterator last);
-
-  /**
-   * Set the current items/values.
-   */
-  void setCurrentItems(const std::vector<MooseEnumItem> & current_items);
+  void removeSetValues(InputIterator first, InputIterator last);
 
   /// The current value(s) of the MultiMooseEnum.
   std::vector<MooseEnumItem> _current_values;
@@ -213,7 +229,7 @@ protected:
 
 template <typename T>
 std::vector<T>
-MultiMooseEnum::getEnum() const
+MultiMooseEnum::getSetValueIDs() const
 {
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
   static_assert(std::is_enum<T>::value == true,

@@ -495,7 +495,7 @@ AdvancedOutput::initExecutionTypes(const std::string & name, ExecFlagEnum & inpu
   else if (!_pars.have_parameter<ExecFlagEnum>(param_name))
   {
     input = _execute_on;
-    input.clear();
+    input.clearSetValues();
   }
 }
 

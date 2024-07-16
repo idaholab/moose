@@ -651,7 +651,7 @@ processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
 
     // Update the stored items, but do not create duplicates
     if (!po.flags.contains(option))
-      po.flags.push_back(option);
+      po.flags.setAdditionalValue(option);
   }
 }
 
@@ -1043,7 +1043,7 @@ disableNonlinearConvergedReason(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
 
-  petsc_options.flags.erase("-snes_converged_reason");
+  petsc_options.flags.eraseSetValue("-snes_converged_reason");
 
   auto & pairs = petsc_options.pairs;
   auto it = MooseUtils::findPair(pairs, "-snes_converged_reason", MooseUtils::Any);
@@ -1056,7 +1056,7 @@ disableLinearConvergedReason(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
 
-  petsc_options.flags.erase("-ksp_converged_reason");
+  petsc_options.flags.eraseSetValue("-ksp_converged_reason");
 
   auto & pairs = petsc_options.pairs;
   auto it = MooseUtils::findPair(pairs, "-ksp_converged_reason", MooseUtils::Any);

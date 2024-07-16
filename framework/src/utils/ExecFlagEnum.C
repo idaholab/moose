@@ -48,7 +48,7 @@ ExecFlagEnum::getDocString() const
 ExecFlagEnum &
 ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 {
-  clear();
+  clearSetValues();
   *this += flags;
   return *this;
 }
@@ -56,7 +56,7 @@ ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 ExecFlagEnum &
 ExecFlagEnum::operator=(const ExecFlagType & flag)
 {
-  clear();
+  clearSetValues();
   *this += flag;
   return *this;
 }
