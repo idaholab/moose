@@ -23,7 +23,6 @@
     stitch_boundaries_pairs = 'right left;'
     parallel_type = 'replicated'
     prevent_boundary_ids_overlap = false
-    merge_boundaries_with_same_name = false
   []
 []
 

@@ -221,9 +221,9 @@ StitchedMeshGenerator::generate()
               sideset_name_on_first_mesh,
               "` while on the second mesh it corresponds to `",
               sideset_name_on_second_mesh,
-              "`. The final mesh will assign the boundary on `",
+              "`. The final mesh will replace boundary `",
               sideset_name_on_second_mesh,
-              "` to `",
+              "` with `",
               sideset_name_on_first_mesh,
               "`. To avoid this situation, use the `prevent_boundary_ids_overlap` parameter!");
       }

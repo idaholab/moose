@@ -53,7 +53,8 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
     _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name"))
 {
-  if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation)
+  if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
+      !_boundary_id_merge)
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
