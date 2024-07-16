@@ -32,7 +32,7 @@ WallNormalUnitVectorAux::WallNormalUnitVectorAux(const InputParameters & paramet
   if (_wall_boundary_names.empty())
     paramError("walls",
                "At least one wall boundary needs to be specifid to which the wall normals will be "
-               "computed for each cell.")
+               "computed for each cell.");
 }
 
 RealVectorValue

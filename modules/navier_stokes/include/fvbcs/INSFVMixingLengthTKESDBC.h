@@ -22,7 +22,6 @@ public:
   ADReal boundaryValue(const FaceInfo & fi) const override;
 
 protected:
-
   /// turbulent kinetic energy
   const Moose::Functor<ADReal> & _k;
 
