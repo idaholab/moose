@@ -39,7 +39,7 @@ MeshRepairGenerator::validParams()
 
   params.addParam<bool>("merge_boundary_ids_with_same_name",
                         false,
-                        "Create new blocks if multiple element types are present in a block");
+                        "Merge boundaries if they have the same name but different boundary IDs");
 
   return params;
 }
