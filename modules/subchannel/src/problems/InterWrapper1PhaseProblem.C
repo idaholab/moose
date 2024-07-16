@@ -34,6 +34,8 @@ formFunctionIW(SNES, Vec x, Vec f, void * ctxIW)
   const PetscScalar * xx;
   PetscScalar * ff;
   PetscInt size;
+
+  PetscFunctionBegin;
   CtxIW * cc = static_cast<CtxIW *>(ctxIW);
   ierr = VecGetSize(x, &size);
   CHKERRQ(ierr);
@@ -58,7 +60,7 @@ formFunctionIW(SNES, Vec x, Vec f, void * ctxIW)
   ierr = VecRestoreArray(f, &ff);
   CHKERRQ(ierr);
 
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 InputParameters
@@ -326,6 +328,8 @@ PetscErrorCode
 InterWrapper1PhaseProblem::createPetscVector(Vec & v, PetscInt n)
 {
   PetscErrorCode ierr;
+
+  PetscFunctionBegin;
   ierr = VecCreate(PETSC_COMM_WORLD, &v);
   CHKERRQ(ierr);
   ierr = PetscObjectSetName((PetscObject)v, "Solution");
@@ -336,13 +340,15 @@ InterWrapper1PhaseProblem::createPetscVector(Vec & v, PetscInt n)
   CHKERRQ(ierr);
   ierr = VecZeroEntries(v);
   CHKERRQ(ierr);
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 PetscErrorCode
 InterWrapper1PhaseProblem::createPetscMatrix(Mat & M, PetscInt n, PetscInt m)
 {
   PetscErrorCode ierr;
+
+  PetscFunctionBegin;
   ierr = MatCreate(PETSC_COMM_WORLD, &M);
   CHKERRQ(ierr);
   ierr = MatSetSizes(M, PETSC_DECIDE, PETSC_DECIDE, n, m);
@@ -351,7 +357,7 @@ InterWrapper1PhaseProblem::createPetscMatrix(Mat & M, PetscInt n, PetscInt m)
   CHKERRQ(ierr);
   ierr = MatSetUp(M);
   CHKERRQ(ierr);
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 template <class T>
@@ -364,6 +370,8 @@ InterWrapper1PhaseProblem::populateVectorFromDense(Vec & x,
 {
   PetscErrorCode ierr;
   PetscScalar * xx;
+
+  PetscFunctionBegin;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int iz = first_axial_level; iz < last_axial_level; iz++)
@@ -377,7 +385,7 @@ InterWrapper1PhaseProblem::populateVectorFromDense(Vec & x,
   }
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 template <class T>
@@ -390,6 +398,8 @@ InterWrapper1PhaseProblem::populateVectorFromHandle(Vec & x,
 {
   PetscErrorCode ierr;
   PetscScalar * xx;
+
+  PetscFunctionBegin;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
@@ -403,7 +413,7 @@ InterWrapper1PhaseProblem::populateVectorFromHandle(Vec & x,
   }
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 template <class T>
@@ -416,6 +426,8 @@ InterWrapper1PhaseProblem::populateSolutionChan(const Vec & x,
 {
   PetscErrorCode ierr;
   PetscScalar * xx;
+
+  PetscFunctionBegin;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   Node * loc_node;
@@ -428,7 +440,7 @@ InterWrapper1PhaseProblem::populateSolutionChan(const Vec & x,
       loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
     }
   }
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 template <class T>
@@ -441,6 +453,8 @@ InterWrapper1PhaseProblem::populateSolutionGap(const Vec & x,
 {
   PetscErrorCode ierr;
   PetscScalar * xx;
+
+  PetscFunctionBegin;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
@@ -451,7 +465,7 @@ InterWrapper1PhaseProblem::populateSolutionGap(const Vec & x,
       loc_solution(iz * cross_dimension + i_l) = xx[iz_ind * cross_dimension + i_l];
     }
   }
-  return 0;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 void
@@ -2271,8 +2285,9 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
   PetscErrorCode ierr;
   PetscMPIInt size;
   PetscScalar * xx;
-  ierr = MPI_Comm_size(PETSC_COMM_WORLD, &size);
-  CHKERRMPI(ierr);
+
+  PetscFunctionBegin;
+  PetscCallMPI(MPI_Comm_size(PETSC_COMM_WORLD, &size));
   if (size > 1)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_SUP, "Example is only for sequential runs");
   ierr = SNESCreate(PETSC_COMM_WORLD, &snes);
@@ -2332,7 +2347,7 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
   CHKERRQ(ierr);
   ierr = SNESDestroy(&snes);
   CHKERRQ(ierr);
-  return ierr;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 PetscErrorCode
@@ -2343,6 +2358,8 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   KSP ksp;            /* linear solver context */
   PC pc;              /* preconditioner context */
   PetscErrorCode ierr;
+
+  PetscFunctionBegin;
   PetscInt Q = _monolithic_thermal_bool ? 4 : 3;
   std::vector<Mat> mat_array(Q * Q);
   std::vector<Vec> vec_array(Q);
@@ -2947,7 +2964,7 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   CHKERRQ(ierr);
   _console << "Solutions destroyed." << std::endl;
 
-  return ierr;
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 void
@@ -3123,4 +3140,7 @@ InterWrapper1PhaseProblem::externalSolve()
   _aux->update();
 }
 
-void InterWrapper1PhaseProblem::syncSolutions(Direction /*direction*/) {}
+void
+InterWrapper1PhaseProblem::syncSolutions(Direction /*direction*/)
+{
+}
