@@ -51,6 +51,16 @@ private:
   /// Method used for wall treatment
   const MooseEnum _wall_treatment;
 
+  // Declare enum structure for wall treatment
+  enum wall_treatment_options
+  {
+    NEWTON,
+    INCREMENTAL,
+    LINEARIZED,
+    NEQ
+  };
+
+  // Mu_t evaluated at y+=30 for blending purposes
   static constexpr Real _mut_30 =
       (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);
 };

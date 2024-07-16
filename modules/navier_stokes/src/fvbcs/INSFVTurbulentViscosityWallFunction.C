@@ -79,7 +79,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
   ADReal mut_log; // turbulent log-layer viscosity
   ADReal mu_wall; // total wall viscosity to obtain the shear stress at the wall
 
-  if (_wall_treatment == "eq_newton")
+  if (_wall_treatment == NEWTON)
   {
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
     const auto u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
@@ -87,7 +87,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
   }
-  else if (_wall_treatment == "eq_incremental")
+  else if (_wall_treatment == INCREMENTAL)
   {
     // Incremental solve on y_plus to get the near-wall quantities
     y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
@@ -95,7 +95,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
                     std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
     mut_log = mu_wall - mu;
   }
-  else if (_wall_treatment == "eq_linearized")
+  else if (_wall_treatment == LINEARIZED)
   {
     // Linearized approximation to the wall function to find the near-wall quantities faster
     const ADReal a_c = 1 / NS::von_karman_constant;
@@ -108,7 +108,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
   }
-  else if (_wall_treatment == "neq")
+  else if (_wall_treatment == NEQ)
   {
     // Assign non-equilibrium wall function value
     y_plus =
