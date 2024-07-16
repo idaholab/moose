@@ -72,7 +72,7 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   // Wall-function linearized guess
   const Real a_c = 1 / NS::von_karman_constant;
   const ADReal b_c =
-      1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
+      1.0 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
   const ADReal c_c = u;
 
   /// This is important to reduce the number of nonlinear iterations
@@ -84,7 +84,7 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
     ADReal residual =
         u_star / NS::von_karman_constant * std::log(NS::E_turb_constant * u_star * dist / nu) - u;
     ADReal deriv =
-        (1 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
+        (1.0 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
     ADReal new_u_star = std::max(1e-20, u_star - residual / deriv);
 
     Real rel_err = std::abs((new_u_star.value() - u_star.value()) / new_u_star.value());

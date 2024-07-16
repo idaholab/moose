@@ -115,16 +115,10 @@ INSFVTKESourceSink::computeQpResidual()
       const auto distance = distance_vec[i];
 
       ADReal y_plus;
-      if (_wall_treatment == "neq")
-      {
-        // Non-equilibrium / Non-iterative
+      if (_wall_treatment == "neq") // Non-equilibrium / Non-iterative
         y_plus = distance * std::sqrt(std::sqrt(_C_mu) * _var(elem_arg, old_state)) * rho / mu;
-      }
-      else
-      {
-        // Equilibrium / Iterative
+      else // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
-      }
 
       y_plus_vec.push_back(y_plus);
 

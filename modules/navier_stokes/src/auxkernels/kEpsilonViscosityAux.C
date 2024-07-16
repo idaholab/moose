@@ -159,7 +159,7 @@ kEpsilonViscosityAux::computeValue()
       mut_log = mu_wall - mu;
     }
     else
-      mooseAssert(false, "Should not reach here");
+      mooseAssert(false, "For `kEpsilonViscosityAux` , wall treatment should not reach here");
 
     if (y_plus <= 5.0)
       // sub-laminar layer

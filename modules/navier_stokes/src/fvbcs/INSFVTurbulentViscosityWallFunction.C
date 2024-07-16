@@ -114,7 +114,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     y_plus =
         std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, old_state)) * rho / mu;
     mu_wall = mu * (NS::von_karman_constant * y_plus /
-                    std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
+                    std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
     mut_log = mu_wall - mu;
   }
   else

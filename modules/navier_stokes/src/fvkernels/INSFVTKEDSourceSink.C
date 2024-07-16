@@ -115,11 +115,8 @@ INSFVTKEDSourceSink::computeQpResidual()
     {
       const auto distance = distance_vec[i];
 
-      if (_wall_treatment == "neq")
-      {
-        // Non-equilibrium / Non-iterative
+      if (_wall_treatment == "neq") // Non-equilibrium / Non-iterative
         y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
-      }
       else
       {
         // Equilibrium / Iterative
