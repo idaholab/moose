@@ -31,7 +31,7 @@
                 Mesh/pattern/duct_block_ids=30
                 Mesh/pattern/duct_block_names="duct_block"
                 Mesh/pattern/uniform_mesh_on_sides=true
-                Mesh/pattern/boundary_element_type=QUAD8
+                Mesh/pattern/boundary_region_element_type=QUAD8
                 Mesh/hex_1/tri_element_type=TRI6
                 Mesh/hex_1/quad_element_type=QUAD8
                 --mesh-only "patterned_hex_quad8.e"'
@@ -51,7 +51,7 @@
                 Mesh/pattern/duct_block_ids=30
                 Mesh/pattern/duct_block_names="duct_block"
                 Mesh/pattern/uniform_mesh_on_sides=true
-                Mesh/pattern/boundary_element_type=QUAD9
+                Mesh/pattern/boundary_region_element_type=QUAD9
                 Mesh/hex_1/tri_element_type=TRI6
                 Mesh/hex_1/quad_element_type=QUAD9
                 --mesh-only "patterned_hex_quad9.e"'

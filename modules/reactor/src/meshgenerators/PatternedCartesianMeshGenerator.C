@@ -120,7 +120,7 @@ PatternedCartesianMeshGenerator::validParams()
       "upper-left corner.");
   MooseEnum quad_elem_type("QUAD4 QUAD8 QUAD9", "QUAD4");
   params.addParam<MooseEnum>(
-      "boundary_element_type",
+      "boundary_region_element_type",
       quad_elem_type,
       "Type of the quadrilateral elements to be generated in the boundary region.");
   params.addParamNamesToGroup(
@@ -176,7 +176,7 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
     _use_exclude_id(isParamValid("exclude_id")),
     _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern")),
     _boundary_quad_elem_type(
-        getParam<MooseEnum>("boundary_element_type").template getEnum<QUAD_ELEM_TYPE>())
+        getParam<MooseEnum>("boundary_region_element_type").template getEnum<QUAD_ELEM_TYPE>())
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
   declareMeshProperty("input_pitch_meta", 0.0);
