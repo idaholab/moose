@@ -11,6 +11,7 @@
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/unstructured_mesh.h"
 
