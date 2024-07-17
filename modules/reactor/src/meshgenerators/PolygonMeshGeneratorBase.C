@@ -1225,7 +1225,7 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
 
       Elem * elem = mesh->add_elem(std::move(new_elem));
 
-      // add subdoamin/boundary IDs
+      // add subdoamin and boundary IDs
       elem->subdomain_id() = PERIPHERAL_ID_SHIFT + id_shift;
       if (i == 0)
       {
@@ -1245,8 +1245,6 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
         boundary_info.add_side(elem, 1, OUTER_SIDESET_ID);
     }
   }
-
-  mesh->remove_orphaned_nodes();
 
   // convert element to second order if needed
   if (quad_elem_type != QUAD_ELEM_TYPE::QUAD4)

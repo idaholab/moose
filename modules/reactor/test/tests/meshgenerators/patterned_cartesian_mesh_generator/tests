@@ -37,7 +37,7 @@
                   Mesh/square_2/tri_element_type=TRI6
                   Mesh/square_2/quad_element_type=QUAD8
                   --mesh-only "patterned_sq_quad8.e"'
-    requirement = 'The system shall stitch square meshes to form a large mesh with square boundary using QUAD8 elements.'
+    requirement = 'The system shall be able to stitch square meshes to form a larger patterned mesh with a square boundary using QUAD8 elements.'
     recover = false
   []
   [square_boundary_quad9]
@@ -59,7 +59,7 @@
                   Mesh/square_2/tri_element_type=TRI6
                   Mesh/square_2/quad_element_type=QUAD9
                   --mesh-only "patterned_sq_quad9.e"'
-    requirement = 'The system shall stitch square meshes to form a large mesh with square boundary using QUAD9 elements.'
+    requirement = 'The system shall be able to stitch square meshes to form a larger patterned mesh with a square boundary using QUAD9 elements.'
     recover = false
   []
   [square_boundary_no_interface]

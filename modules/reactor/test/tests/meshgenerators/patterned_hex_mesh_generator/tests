@@ -35,7 +35,7 @@
                 Mesh/hex_1/tri_element_type=TRI6
                 Mesh/hex_1/quad_element_type=QUAD8
                 --mesh-only "patterned_hex_quad8.e"'
-    requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary using QUAD8 elements.'
+    requirement ='The system shall be able to stitch hexagonal meshes to form a larger patterned mesh with a hexagonal boundary using QUAD8 elements.'
     recover = false
   []
   [hexagon_boundary_quad9]
@@ -55,7 +55,7 @@
                 Mesh/hex_1/tri_element_type=TRI6
                 Mesh/hex_1/quad_element_type=QUAD9
                 --mesh-only "patterned_hex_quad9.e"'
-    requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary using QUAD9 elements.'
+    requirement ='The system shall be able to stitch hexagonal meshes to form a larger patterned mesh with a hexagonal boundary using QUAD9 elements.'
     recover = false
   []
   [hexagon_boundary_no_interface]

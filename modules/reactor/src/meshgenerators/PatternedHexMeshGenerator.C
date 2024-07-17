@@ -878,15 +878,15 @@ PatternedHexMeshGenerator::generate()
         if (!(*elem)->on_boundary())
           continue;
 
-        // adjust point 5
+        // adjust right side mid-edge node
         Point pt_5 = ((*elem)->point(1) + (*elem)->point(2)) / 2.0;
         out_mesh->add_point(pt_5, (*elem)->node_ptr(5)->id());
 
-        // adjoin point 7
+        // adjust left side mid-edge node
         Point pt_7 = ((*elem)->point(0) + (*elem)->point(3)) / 2.0;
         out_mesh->add_point(pt_7, (*elem)->node_ptr(7)->id());
 
-        // adjust point 8 for QUAD9
+        // adjust central node when using QUAD9
         if (_boundary_quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
         {
           Point pt_8 = (*elem)->centroid();
