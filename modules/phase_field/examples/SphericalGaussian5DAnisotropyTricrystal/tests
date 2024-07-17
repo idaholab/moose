@@ -1,0 +1,35 @@
+[Tests]
+  [TricrystalEpsAndMAndLAnisoGaussIn]
+    type = RunApp
+    input = 'TricrystalEpsAndMAndLAnisoGauss.i'
+    check_input = True
+    requirement = "EpsAndMAndLAnisoGauss shall have a tricrystal example"
+    design = 'EpsAndMAndLAnisoGauss.md EpsilonModelKernel1stGauss.md EpsilonModelKernel1stV2Gauss.md EpsilonModelKernel2ndGauss.md EPSILONmodelKERNEL2ndV2GAUSS.md EpsilonModelKernel2ndV2Gauss.md'
+    issues = '#27774'
+  []
+  [TricrystalEpsAndMAnisoGaussIn]
+    type = RunApp
+    input = 'TricrystalEpsAndMAnisoGauss.i'
+    check_input = True
+    requirement = "EpsAndMAnisoGauss shall have a tricrystal example"
+    design = 'EpsAndMAndLAnisoGauss.md EpsilonModelKernel1stGauss.md EpsilonModelKernel1stV2Gauss.md EpsilonModelKernel2ndGauss.md EPSILONmodelKERNEL2ndV2GAUSS.md EpsilonModelKernel2ndV2Gauss.md'
+    issues = '#27774'
+  []
+
+  [TricrystalGammaAndLAnisoGaussIn]
+    type = RunApp
+    input = 'TricrystalGammaAndLAnisoGauss.i'
+    check_input = True
+    requirement = "GammaAndLAnisoGauss shall have a tricrystal example"
+    design = 'GammaAndLAnisoGauss.md GammaModelKernelGauss.md GammaModelKernelV2Gauss.md GammaModelKernelAction.md'
+    issues = '#27774'
+  []
+  [TricrystalGammaAnisoGaussIn]
+    type = RunApp
+    input = 'TricrystalGammaAnisoGauss.i'
+    check_input = True
+    requirement = "GammaAnisoGauss shall have a tricrystal example"
+    design = 'GammaAnisoGauss.md GammaModelKernelGauss.md GammaModelKernelV2Gauss.md GammaModelKernelAction.md'
+    issues = '#27774'
+  []
+[]
