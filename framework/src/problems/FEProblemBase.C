@@ -287,6 +287,11 @@ FEProblemBase::validParams()
       "nonlinear system the extra tag vectors should be added for");
 
   params.addParam<std::vector<std::vector<TagName>>>(
+      "not_zeroed_tag_vectors",
+      {},
+      "Extra vector tags which the sytem will not zero when other vector tags are zeroed");
+
+  params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_matrices",
       {},
       "Extra matrices to add to the system that can be filled "
@@ -593,7 +598,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _is_petsc_options_inserted = true;
   }
 }
-
 const MooseMesh &
 FEProblemBase::mesh(bool use_displaced) const
 {
@@ -613,6 +617,15 @@ FEProblemBase::createTagVectors()
     {
       auto tag = addVectorTag(vector);
       _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+    }
+
+  auto & not_zeroed_vectors = getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors");
+  for (const auto nl_sys_num : index_range(not_zeroed_vectors))
+    for (auto & vector : not_zeroed_vectors[nl_sys_num])
+    {
+      auto tag = addVectorTag(vector);
+      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+      addNotZeroedVectorTag(tag);
     }
 
   // add matrices and their tags

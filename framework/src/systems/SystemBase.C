@@ -651,7 +651,6 @@ SystemBase::closeTaggedVector(const TagID tag)
                "' in system '",
                name(),
                "' because there is no vector associated with that tag");
-
   getVector(tag).close();
 }
 
@@ -677,8 +676,8 @@ SystemBase::zeroTaggedVector(const TagID tag)
                "' in system '",
                name(),
                "' because there is no vector associated with that tag");
-
-  getVector(tag).zero();
+  if (!_subproblem.vectorTagNotZeroed(tag))
+    getVector(tag).zero();
 }
 
 void

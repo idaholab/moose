@@ -231,7 +231,6 @@ public:
    */
   void
   addSplit(const std::string & split_name, const std::string & name, InputParameters & parameters);
-
   /**
    * Retrieves a split by name
    * @param name The name of the split
@@ -821,7 +820,6 @@ protected:
 
   /// Vector tags to temporarily store all tags associated with the current system.
   std::set<TagID> _nl_vector_tags;
-
   /// Matrix tags to temporarily store all tags associated with the current system.
   std::set<TagID> _nl_matrix_tags;
 
