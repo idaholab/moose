@@ -234,9 +234,9 @@ findContactPoint(PenetrationInfo & p_info,
   if (nit == max_newton_its && update_size > tolerance_newton)
   {
     search_succeeded = false;
+#ifndef NDEBUG
     const auto initial_point =
         start_with_centroid ? side->vertex_average() : ref_point = p_info._closest_point_ref;
-#ifndef NDEBUG
     Moose::err << "Warning!  Newton solve for contact point failed to converge!\nLast update "
                   "distance was: "
                << update_size << "\nInitial point guess:   " << initial_point
