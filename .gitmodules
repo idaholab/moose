@@ -14,7 +14,7 @@
     update = none
 [submodule "modules/fluid_properties/contrib/saline"]
     path = modules/fluid_properties/contrib/saline
-    url = https://code.ornl.gov/neams/saline
+    url = https://code.ornl.gov/neams/saline.git
     update = none
 [submodule "framework/contrib/wasp"]
     path = framework/contrib/wasp
