@@ -4660,6 +4660,12 @@ Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative.insert(type);
   buildVectorFaceFE(type);
+
+  // If we're building for a face we probably need to build for a
+  // neighbor while _need_second_derivative is set;
+  // onInterface/reinitNeighbor/etc don't distinguish
+  buildVectorFaceNeighborFE(type);
+
   return _vector_fe_shape_data_face[type]->_second_phi;
 }
 
@@ -4728,6 +4734,12 @@ Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type) const
 {
   _need_curl.insert(type);
   buildVectorFaceFE(type);
+
+  // If we're building for a face we probably need to build for a
+  // neighbor while _need_curl is set;
+  // onInterface/reinitNeighbor/etc don't distinguish
+  buildVectorFaceNeighborFE(type);
+
   return _vector_fe_shape_data_face[type]->_curl_phi;
 }
 
@@ -4746,6 +4758,7 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_curl.insert(type);
   buildVectorFaceNeighborFE(type);
+
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
 
@@ -4764,6 +4777,12 @@ Assembly::feDivPhiFace<VectorValue<Real>>(FEType type) const
 {
   _need_face_div.insert(type);
   buildVectorFaceFE(type);
+
+  // If we're building for a face we probably need to build for a
+  // neighbor while _need_face_div is set;
+  // onInterface/reinitNeighbor/etc don't distinguish
+  buildVectorFaceNeighborFE(type);
+
   return _vector_fe_shape_data_face[type]->_div_phi;
 }
 
