@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, io
+import os, io
 import unittest
 import mock
 import TestHarness
@@ -21,7 +21,8 @@ class TestHarnessTester(unittest.TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             mocked_return.return_value=mocked
-            harness = TestHarness.TestHarness(['', '-i', 'always_ok', '-c'], MOOSE_DIR)
+            cmd = ['', '-i', 'always_ok', '-c', '--term-format', 'njCst']
+            harness = TestHarness.TestHarness(cmd, MOOSE_DIR)
             if expect_fail:
                 with self.assertRaises(SystemExit):
                     harness.findAndRunTests()
@@ -34,11 +35,11 @@ class TestHarnessTester(unittest.TestCase):
         Test should not be skipped, as it is set to run on any arch (ALL)
         """
         out = self.mocked_output(set(['ALL']), False)
-        self.assertRegex(out, r'.*?OK.*?always_ok')
+        self.assertRegex(out, r'tests\/test_harness\.always_ok[\s.]+OK')
 
     def testSkipped(self):
         """
         Test that a non existing machine type is skipped (remove default of ALL)
         """
         out = self.mocked_output(set(['']), False)
-        self.assertRegex(out, r'.*?SKIP.*?always_ok.*?MACHINE!=ALL')
+        self.assertRegex(out, r'tests\/test_harness\.always_ok[\s.]+\[MACHINE!=ALL\]\s+SKIP')

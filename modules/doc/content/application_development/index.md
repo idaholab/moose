@@ -20,8 +20,6 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Test System](/test_system.md) - How to create/maintain tests for your application
 
-[Performance Benchmarking](/performance_benchmarking.md) - How to perform benchmarking
-
 [Profiling](/profiling.md) - How to profile your application in order to determine what functions are hogging compute time.
 
 [Code Coverage](/coverage.md) - How to add automatic code coverage to your application, and use it in your development workflow

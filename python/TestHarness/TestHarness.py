@@ -208,19 +208,27 @@ class TestHarness:
         # Build a Warehouse to hold the MooseObjects
         self.warehouse = Warehouse()
 
-        # Get dependant applications and load dynamic tester plugins
-        # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
+        # Testers from this directory
         dirs = [os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))]
-        dirs.append(os.path.join(moose_dir, 'share', 'moose', 'python', 'TestHarness', 'testers'))
 
-        # Use the find_dep_apps script to get the dependant applications for an app
-        depend_app_dirs = findDepApps(app_name, use_current_only=True)
-        dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in depend_app_dirs.split('\n')])
+        # Get dependent applications and load dynamic tester plugins
+        # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
+        # Use the find_dep_apps script to get the dependent applications for an app
+        app_dirs = findDepApps(app_name, use_current_only=True).split('\n')
+        # For installed binaries, the apps will exist in RELEASE_PATH/scripts, where in
+        # this case RELEASE_PATH is moose_dir
+        share_dir = os.path.join(moose_dir, 'share')
+        if os.path.isdir(share_dir):
+            for dir in os.listdir(share_dir):
+                if dir != 'moose': # already included
+                    app_dirs.append(os.path.join(share_dir, dir))
+        # Add scripts/TestHarness for all of the above
+        dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in app_dirs])
 
         # Finally load the plugins!
         self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
 
-        self._infiles = ['tests', 'speedtests']
+        self._infiles = ['tests']
         self.parse_errors = []
         self.test_table = []
         self.num_passed = 0
@@ -420,7 +428,6 @@ class TestHarness:
                             # Create the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
 
-
                             # Schedule the testers (non blocking)
                             self.scheduler.schedule(testers)
 
@@ -516,8 +523,8 @@ class TestHarness:
 
         params['spec_file'] = filename
         params['test_name'] = formatted_name
+        params['test_name_short'] = relative_hitpath
         params['test_dir'] = test_dir
-        params['relative_path'] = relative_path
         params['executable'] = testroot_params.get("executable", self.executable)
         params['app_name'] = self.app_name
         params['hostname'] = self.host_name
@@ -531,8 +538,6 @@ class TestHarness:
             if type(params['prereq']) != list:
                 print(("Option 'prereq' needs to be of type list in " + params['test_name']))
                 sys.exit(1)
-            elif (params['prereq'] != ['ALL']):
-                params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
         # Double the alloted time for tests when running with the valgrind option
         tester.setValgrindMode(self.options.valgrind_mode)
@@ -558,8 +563,8 @@ class TestHarness:
                 part2 = copy.deepcopy(part1)
 
                 # Part 1:
+                part1.appendTestName('_part1')
                 part1_params = part1.parameters()
-                part1_params['test_name'] += '_part1'
                 part1_params['cli_args'].append('--test-checkpoint-half-transient')
                 if self.options.recoversuffix == 'cpa':
                     part1_params['cli_args'].append('Outputs/out/type=Checkpoint')
@@ -568,7 +573,7 @@ class TestHarness:
 
                 # Part 2:
                 part2_params = part2.parameters()
-                part2_params['prereq'].append(part1.parameters()['test_name'])
+                part2_params['prereq'].append(part1.getTestNameShort())
                 part2_params['delete_output_before_running'] = False
                 part2_params['cli_args'].append('--recover --recoversuffix ' + self.options.recoversuffix)
                 part2.addCaveats('recover')
@@ -592,7 +597,11 @@ class TestHarness:
         output = ''
         # Print what ever status the tester has at the time
         if self.options.verbose or (job.isFail() and not self.options.quiet):
-            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + job.getCommand() + '\n'
+            if job.getCommandRan():
+                command = job.getCommandRan()
+            else:
+                command = job.getCommand()
+            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + command + '\n'
             output += util.trimOutput(job, self.options)
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n')
@@ -603,7 +612,7 @@ class TestHarness:
                 print(output)
         return output
 
-    def handleJobStatus(self, job):
+    def handleJobStatus(self, job, caveats=None):
         """
         The Scheduler is calling back the TestHarness to inform us of a status change.
         The job may or may not be finished yet (RUNNING), or failing, passing, etc.
@@ -619,8 +628,9 @@ class TestHarness:
                 # perform printing of application output if so desired
                 self.printOutput(job, color)
 
-                # Print status with caveats
-                print((util.formatResult(job, self.options, caveats=True)))
+                # Print status with caveats (if caveats not overridden)
+                caveats = True if caveats is None else caveats
+                print((util.formatResult(job, self.options, caveats=caveats)))
 
                 timing = job.getTiming()
 
@@ -639,42 +649,32 @@ class TestHarness:
 
             # Just print current status without saving results
             else:
-                print((util.formatResult(job, self.options, result='RUNNING', caveats=False)))
+                caveats = False if caveats is None else caveats
+                print((util.formatResult(job, self.options, result=job.getStatus().status, caveats=caveats)))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
-        if self.options.queue_cleanup and self.options.results_file:
-            try:
-                os.remove(self.options.results_file)
-            except OSError:
-                pass
-            return
-
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if len(self.parse_errors) > 0:
-            print(('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS))))
+            print(('\n\nParser Errors:\n' + ('-' * (self.options.term_cols))))
             for err in self.parse_errors:
                 print((util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code)))
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print(('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS))))
+            print(('\n\nFinal Test Results:\n' + ('-' * (self.options.term_cols))))
             for (job, sort_value, timing) in sorted(self.test_table, key=lambda x: x[1]):
                 print((util.formatResult(job, self.options, caveats=True)))
 
         time = clock() - self.start_time
 
-        print(('-' * (util.TERM_COLS)))
+        print(('-' * (self.options.term_cols)))
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
         if len(self.parse_errors) > 0:
             fatal_error += ', <r>FATAL PARSER ERROR</r>'
             self.error_code = self.error_code | 0x80
-
-        # Alert the user to their session file
-        if self.options.queueing and not self.options.dry_run:
-            print(('Your session file is %s' % self.options.results_file))
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
@@ -722,7 +722,7 @@ class TestHarness:
                 sorted_tups = sorted(self.test_table, key=lambda tup: float(tup[0].getTiming()), reverse=True)
 
                 print('\n%d longest running jobs:' % self.options.longest_jobs)
-                print(('-' * (util.TERM_COLS)))
+                print(('-' * (self.options.term_cols)))
 
                 # Copy the current options and force timing to be true so that
                 # we get times when we call formatResult() below
@@ -739,7 +739,7 @@ class TestHarness:
                 # The TestHarness receives individual jobs out of order (can't realistically use self.test_table)
                 tester_dirs = {}
                 dag_table = []
-                for jobs, dag, thread_lock in self.scheduler.retrieveDAGs():
+                for jobs, dag in self.scheduler.retrieveDAGs():
                     original_dag = dag.getOriginalDAG()
                     total_time = float(0.0)
                     tester = None
@@ -755,10 +755,10 @@ class TestHarness:
                 sorted_table = sorted(dag_table, key=lambda dag_table: float(dag_table[1]), reverse=True)
                 if sorted_table[0:self.options.longest_jobs]:
                     print(f'\n{self.options.longest_jobs} longest running folders:')
-                    print(('-' * (util.TERM_COLS)))
+                    print(('-' * (self.options.term_cols)))
                     # We can't use util.formatResults, as we are representing a group of testers
                     for group in sorted_table[0:self.options.longest_jobs]:
-                        print(str(group[0]).ljust((util.TERM_COLS - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
+                        print(str(group[0]).ljust((self.options.term_cols - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
                     print('\n')
 
             # Perform any write-to-disc operations
@@ -786,8 +786,7 @@ class TestHarness:
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
         # Record that we are using --sep-files* options
-        self.options.results_storage['SEP_FILES'] = (True if self.options.pbs else False
-                                                     or self.options.ok_files
+        self.options.results_storage['SEP_FILES'] = (self.options.ok_files
                                                      or self.options.fail_files
                                                      or self.options.sep_files)
 
@@ -797,17 +796,13 @@ class TestHarness:
         # Write some useful data to our results_storage
         for job_group in all_jobs:
             for job in job_group:
-                # If queueing, do not store silent results in session file
-                if job.isSilent() and self.options.queueing:
-                    continue
-
                 status, message, message_color, status_code, sort_value = job.getJointStatus()
 
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
 
                 # If output has been stored in separate files, don't make additional copies by
-                # storing that data in this json results file (--pbs || --sep-files, etc options).
+                # storing that data in this json results file (--sep-files, etc options).
                 output = '' if job.getOutputFile() else job.getOutput()
 
                 self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
@@ -891,25 +886,24 @@ class TestHarness:
             print('Error while writing results to disc')
             sys.exit(1)
 
+    def determineScheduler(self):
+        if self.options.hpc_host and not self.options.hpc:
+            print(f'ERROR: --hpc must be set with --hpc-host for an unknown host')
+            sys.exit(1)
+
+        if self.options.hpc == 'pbs':
+            return 'RunPBS'
+        elif self.options.hpc == 'slurm':
+            return 'RunSlurm'
+        # The default scheduler plugin
+        return 'RunParallel'
+
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
         plugin_paths = [os.path.join(self.moose_dir, 'python', 'TestHarness'), os.path.join(self.moose_dir, 'share', 'moose', 'python', 'TestHarness')]
         self.factory.loadPlugins(plugin_paths, 'schedulers', "IS_SCHEDULER")
 
-        self.options.queueing = False
-        if self.options.pbs:
-            # original_storage will become the results file for each test being launched by PBS, and will be
-            # saved in the same directory as the test spec file. This is so we can launch multiple 'run_tests'
-            # without clobbering the parent results_file. Meanwhile, the new results_file is going to be
-            # renamed to whatever the user decided to identify their PBS launch with.
-            self.original_storage = self.options.results_file
-            self.options.results_file = os.path.abspath(self.options.pbs)
-            self.options.queueing = True
-            scheduler_plugin = 'RunPBS'
-
-        # The default scheduler plugin
-        else:
-            scheduler_plugin = 'RunParallel'
+        scheduler_plugin = self.determineScheduler()
 
         # Augment the Scheduler params with plugin params
         plugin_params = self.factory.validParams(scheduler_plugin)
@@ -978,7 +972,7 @@ class TestHarness:
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
         if (os.path.exists(self.options.results_file)
-            and (self.options.failed_tests or self.options.pbs or self.options.show_last_run)):
+            and (self.options.failed_tests or self.options.show_last_run)):
             return True
         elif ((self.options.failed_tests or self.options.show_last_run)
             and not os.path.exists(self.options.results_file)):
@@ -1063,13 +1057,36 @@ class TestHarness:
         outputgroup.add_argument("--results-file", nargs=1, default=self.results_file, help="Save run_tests results to an alternative json file (default: %(default)s)")
         outputgroup.add_argument("--show-last-run", action="store_true", dest="show_last_run", help="Display previous results without executing tests again")
 
-        queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
-        queuegroup.add_argument('--pbs', nargs=1, action='store', metavar='name', help='Launch tests using PBS as your scheduler. You must supply a name to identify this session with')
-        queuegroup.add_argument('--pbs-pre-source', nargs=1, action="store", dest='queue_source_command', metavar='', help='Source specified file before launching tests')
-        queuegroup.add_argument('--pbs-project', nargs=1, action='store', dest='queue_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
-        queuegroup.add_argument('--pbs-queue', nargs=1, action='store', dest='queue_queue', type=str, metavar='', help='Submit jobs to the specified queue')
-        queuegroup.add_argument('--pbs-node-cpus', nargs=1, action='store', type=int, default=None, metavar='', help='CPUS Per Node. The default (no setting), will always use only one node')
-        queuegroup.add_argument('--pbs-cleanup', nargs=1, action="store", dest='queue_cleanup', metavar='name', help='Clean up files generated by supplied --pbs name')
+        # Options for HPC execution
+        hpcgroup = parser.add_argument_group('HPC Options', 'Options controlling HPC execution')
+        hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
+        hpcgroup.add_argument('--hpc-host', nargs='+', action='store', dest='hpc_host', metavar='', help='The host(s) to use for submitting HPC jobs')
+        hpcgroup.add_argument('--hpc-pre-source', nargs=1, action="store", dest='hpc_pre_source', metavar='', help='Source specified file before launching HPC tests')
+        hpcgroup.add_argument('--hpc-file-timeout', nargs=1, type=int, action='store', dest='hpc_file_timeout', default=300, help='The time in seconds to wait for HPC output')
+        hpcgroup.add_argument('--hpc-place', nargs=1, action='store', dest='hpc_place', choices=['free', 'pack', 'scatter'], default='free', help='The default placement method for HPC jobs')
+        hpcgroup.add_argument('--hpc-apptainer-bindpath', nargs=1, action='store', type=str, dest='hpc_apptainer_bindpath', help='Sets the apptainer bindpath for HPC jobs')
+        hpcgroup.add_argument('--hpc-apptainer-no-home', action='store_true', dest='hpc_apptainer_no_home', help='Passes --no-home to apptainer for HPC jobs')
+        hpcgroup.add_argument('--hpc-project', nargs=1, action='store', dest='hpc_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
+        hpcgroup.add_argument('--hpc-no-hold', nargs=1, action='store', type=bool, default=False, dest='hpc_no_hold', help='Do not pre-create hpc jobs to be held')
+        hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
+
+        # Try to find the terminal size if we can
+        # Try/except here because the terminal size could fail w/o a display
+        term_cols = None
+        try:
+            term_cols = os.get_terminal_size().columns * 7/8
+        except:
+            term_cols = 110
+            pass
+
+        # Optionally load in the environment controlled values
+        term_cols = int(os.getenv('MOOSE_TERM_COLS', term_cols))
+        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
+
+        # Terminal options
+        termgroup = parser.add_argument_group('Terminal Options', 'Options for controlling the formatting of terminal output')
+        termgroup.add_argument('--term-cols', dest='term_cols', action='store', type=int, default=term_cols, help='The number columns to use in output')
+        termgroup.add_argument('--term-format', dest='term_format', action='store', type=str, default=term_format, help='The formatting to use when outputting job status')
 
         code = True
         if self.code.decode() in argv:
@@ -1077,6 +1094,16 @@ class TestHarness:
             code = False
         self.options = parser.parse_args(argv[1:])
         self.options.code = code
+
+        # Try to guess the --hpc option if --hpc-host is set
+        if self.options.hpc_host and not self.options.hpc:
+            hpc_host = self.options.hpc_host[0]
+            if 'sawtooth' in hpc_host or 'lemhi' in hpc_host:
+                self.options.hpc = 'pbs'
+            elif 'bitterroot' in hpc_host:
+                self.options.hpc = 'slurm'
+            if self.options.hpc:
+                print(f'INFO: Setting --hpc={self.options.hpc} for known host {hpc_host}')
 
         self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
 
@@ -1108,36 +1135,12 @@ class TestHarness:
         if opts.spec_file and not os.path.exists(opts.spec_file):
             print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
-        if opts.queue_cleanup and not opts.pbs:
-            print('ERROR: --queue-cleanup cannot be used without additional queue options')
-            sys.exit(1)
-        if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
-            print('ERROR: pre-source supplied but path does not exist')
-            sys.exit(1)
-        if opts.failed_tests and not opts.pbs and not os.path.exists(opts.results_file):
+        if opts.failed_tests and not os.path.exists(opts.results_file):
             print('ERROR: --failed-tests could not detect a previous run')
-            sys.exit(1)
-        if opts.pbs and opts.pedantic_checks:
-            print('ERROR: --pbs and --pedantic-checks cannot be used simultaneously')
-            sys.exit(1)
-        if opts.pbs and opts.jobs:
-            print('ERROR: --pbs and -j|--jobs cannot be used simultaneously')
-            sys.exit(1)
-        if opts.pbs and opts.extra_info:
-            print('ERROR: --pbs and -e (extra info) cannot be used simultaneously')
             sys.exit(1)
         if opts.verbose and opts.quiet:
             print('Do not be an oxymoron with --verbose and --quiet')
             sys.exit(1)
-
-        # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
-        # We can not support running two spec files during one launch into a third party queue manager.
-        # This is because Jobs created by spec files, have no way of accessing other jobs created by
-        # other spec files. They only know about the jobs a single spec file generates.
-        # NOTE: Which means, tests and speedtests running simultaneously currently have a chance to
-        # clobber each others output during normal operation!?
-        if opts.pbs and not opts.input_file_name:
-            self.options.input_file_name = 'tests'
 
         # Update any keys from the environment as necessary
         if not self.options.method:

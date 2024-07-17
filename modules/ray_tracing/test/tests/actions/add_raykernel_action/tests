@@ -29,7 +29,7 @@
     [multiple]
       type = RunException
       input = 'add_raykernel_action.i'
-      cli_args = 'RayKernels/active=multiple_studies "UserObjects/active=\'study another_study\'"'
+      cli_args = 'RayKernels/active=multiple_studies UserObjects/active="study another_study"'
       expect_err = "While constructing the NullRayKernel 'multiple_studies', multiple RayTracingStudy objects were found."
       allow_test_objects = true
 

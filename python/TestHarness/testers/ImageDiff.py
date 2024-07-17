@@ -33,16 +33,16 @@ class ImageDiff(FileTester):
         elif 'skimage' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' skimage'
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         return self.specs['imagediff']
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
         """
         Perform image diff
         """
 
         # Call base class processResults
-        FileTester.processResults(self, moose_dir, options, output)
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
         if self.isFail():
             return output
 
