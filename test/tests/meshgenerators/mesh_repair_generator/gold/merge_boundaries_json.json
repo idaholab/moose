@@ -35,36 +35,6 @@
                             {
                                 "elem_id": 1,
                                 "side": 0
-                            },
-                            {
-                                "elem_id": 4,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 6,
-                                "side": 3
-                            }
-                        ]
-                    },
-                    {
-                        "id": 1,
-                        "name": "side2",
-                        "sides": [
-                            {
-                                "elem_id": 1,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 3,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 4,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 5,
-                                "side": 0
                             }
                         ]
                     },
@@ -111,6 +81,20 @@
                                 "side": 2
                             }
                         ]
+                    },
+                    {
+                        "id": 4,
+                        "name": "side2",
+                        "sides": [
+                            {
+                                "elem_id": 4,
+                                "side": 0
+                            },
+                            {
+                                "elem_id": 5,
+                                "side": 0
+                            }
+                        ]
                     }
                 ],
                 "sidesets": [
@@ -119,16 +103,16 @@
                         "name": "side1"
                     },
                     {
-                        "id": 1,
-                        "name": "side2"
-                    },
-                    {
                         "id": 2,
                         "name": "side3"
                     },
                     {
                         "id": 3,
                         "name": "side4"
+                    },
+                    {
+                        "id": 4,
+                        "name": "side2"
                     }
                 ]
             },
