@@ -498,6 +498,9 @@ class RunHPC(RunParallel):
                 cmd = f'{self.getHPCQueueCommand()} {hpc_job.id}'
                 exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.queue, cmd)
                 if exit_code != 0:
+                    if 'Job has finished' in result:
+                        self.setHPCJobRunning(hpc_job)
+                        return hpc_job
                     try:
                         self.killHPCJob(hpc_job, lock=False) # already locked
                     except:
