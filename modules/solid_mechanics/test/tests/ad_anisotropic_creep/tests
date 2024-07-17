@@ -30,6 +30,45 @@
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
   []
+  [ad_aniso_creep_x_3d_aniso_elasticity]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_x_3d_anisoElasticity.i'
+    csvdiff = ad_aniso_creep_x_3d_anisoElasticity_out.csv
+    requirement = 'The system shall reproduce the creep strain as those evaluated with '
+                  'residual and derivative computations used for isotropic elasticity.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 5.0e-7
+    heavy = true
+    max_time = 900 
+  []
+  [ad_aniso_creep_x_3d_shear]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_x_3d_shear.i'
+    csvdiff = ad_aniso_creep_x_3d_shear_out.csv
+    requirement = 'The system shall compute shear creep strain in an element subject to shear load in one direction.'
+    rel_err = 1.0e-4
+    abs_zero = 5.0e-7
+  []
+  [ad_aniso_creep_xy_3d_shear]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_xy_3d_shear.i'
+    csvdiff = ad_aniso_creep_xy_3d_shear_out.csv
+    requirement = 'The system shall compute shear creep strain in an element subject to shear load in two directions.'
+    rel_err = 1.0e-4
+    abs_zero = 5.0e-7
+  []
+  [ad_aniso_creep_xy_3d_aniso_elasticity]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_xy_3d_anisoElasticity.i'
+    csvdiff = ad_aniso_creep_xy_3d_anisoElasticity_out.csv
+    requirement = 'The system shall compute creep strains in an element with anisotropic elasticity and subject to biaxial tensile load.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 5.0e-7
+    heavy = true
+    max_time = 900 
+  []
   [aniso_creep_x_3d_no_trafo]
     type = 'CSVDiff'
     input = 'aniso_creep_x_3d.i'
