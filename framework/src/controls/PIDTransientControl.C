@@ -54,9 +54,10 @@ PIDTransientControl::validParams()
   params.addParam<Real>("minimum_output_value",
                         -std::numeric_limits<Real>::max(),
                         "Can be used to limit the minimum value output by the PID controller.");
-  params.addParam<Real>("maximum_change_rate", 
-                        std::numeric_limits<Real>::max(),
-                        "Can be used to limit the rate of change per second of value output by the PID controller.");
+  params.addParam<Real>(
+      "maximum_change_rate",
+      std::numeric_limits<Real>::max(),
+      "Can be used to limit the rate of change per second of value output by the PID controller.");
   return params;
 }
 
@@ -113,7 +114,7 @@ PIDTransientControl::execute()
       value = getControllableValue<Real>("parameter");
     else
       value = getPostprocessorValueByName(getParam<std::string>("parameter_pp"));
-    
+
     // Save integral and controlled value at each time step
     // if the solver fails, a smaller time step will be used but _t_step is unchanged
     if (_t_step != _t_step_old)
@@ -152,10 +153,11 @@ PIDTransientControl::execute()
 
     // If the maxmimum rate of change by the pid is fixed
     if ((isParamSetByUser("maximum_change_rate")))
-      {   
-        value = std::min(std::max(_minimum_output_value, value), _maximum_output_value);
-        value = std::min(std::max(_value_old - _dt*_maximum_change_rate, value), _value_old + _dt*_maximum_change_rate);
-      }
+    {
+      value = std::min(std::max(_minimum_output_value, value), _maximum_output_value);
+      value = std::min(std::max(_value_old - _dt * _maximum_change_rate, value),
+                       _value_old + _dt * _maximum_change_rate);
+    }
     else
       value = std::min(std::max(_minimum_output_value, value), _maximum_output_value);
 
