@@ -40,6 +40,9 @@ namespace Moose
  * @param secondary_point The physical space coordinates of the secondary node
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the
  * element.
+ * @param search_succeeded whether or not the search for the contact point succeeded. If not it
+ * should likely be discarded
+ * @param verbose whether to output information about the search
  */
 void
 findContactPoint(PenetrationInfo & p_info,
@@ -49,8 +52,13 @@ findContactPoint(PenetrationInfo & p_info,
                  const Point & secondary_point,
                  bool start_with_centroid,
                  const Real tangential_tolerance,
-                 bool & contact_point_on_side)
+                 bool & contact_point_on_side,
+                 bool & search_succeeded,
+                 bool verbose)
 {
+  // Default to true and we'll switch on failures
+  search_succeeded = true;
+
   const Elem * primary_elem = p_info._elem;
 
   unsigned int dim = primary_elem->dim();
@@ -112,10 +120,14 @@ findContactPoint(PenetrationInfo & p_info,
 
   Real update_size = std::numeric_limits<Real>::max();
 
+  // Pre-allocate data structures
+  DenseMatrix<Real> jac(dim - 1, dim - 1);
+  DenseVector<Real> rhs(dim - 1);
+  DenseVector<Real> update(dim - 1);
+
   // Least squares
   for (unsigned int it = 0; it < 3 && update_size > TOLERANCE * 1e3; ++it)
   {
-    DenseMatrix<Real> jac(dim - 1, dim - 1);
 
     jac(0, 0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
 
@@ -126,14 +138,10 @@ findContactPoint(PenetrationInfo & p_info,
       jac(1, 1) = -(dxyz_deta[0] * dxyz_deta[0]);
     }
 
-    DenseVector<Real> rhs(dim - 1);
-
     rhs(0) = dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = dxyz_deta[0] * d;
-
-    DenseVector<Real> update(dim - 1);
 
     jac.lu_solve(rhs, update);
 
@@ -158,8 +166,6 @@ findContactPoint(PenetrationInfo & p_info,
   {
     d = secondary_point - phys_point[0];
 
-    DenseMatrix<Real> jac(dim - 1, dim - 1);
-
     jac(0, 0) = (d2xyz_dxi2[0] * d) - (dxyz_dxi[0] * dxyz_dxi[0]);
 
     if (dim - 1 == 2)
@@ -170,14 +176,10 @@ findContactPoint(PenetrationInfo & p_info,
       jac(1, 1) = (d2xyz_deta2[0] * d) - (dxyz_deta[0] * dxyz_deta[0]);
     }
 
-    DenseVector<Real> rhs(dim - 1);
-
     rhs(0) = -dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = -dxyz_deta[0] * d;
-
-    DenseVector<Real> update(dim - 1);
 
     jac.lu_solve(rhs, update);
 
@@ -199,7 +201,8 @@ findContactPoint(PenetrationInfo & p_info,
         success = true;
         d = secondary_point - phys_point[0];
 
-        update_size = mult * update.l2_norm();
+        // we don't multiply by 'mult' because it is used for convergence
+        update_size = update.l2_norm();
       }
       catch (libMesh::LogicError & e)
       {
@@ -210,8 +213,9 @@ findContactPoint(PenetrationInfo & p_info,
         mult *= 0.9;
         if (mult < 1e-6)
         {
-          mooseWarning("We could not solve for the contact point.", e.what());
-          update_size = mult * update.l2_norm();
+          if (verbose)
+            mooseWarning("We could not solve for the contact point.", e.what());
+          update_size = update.l2_norm();
           d = (secondary_point - phys_point[0]) * mult;
           success = true;
         }
@@ -227,7 +231,18 @@ findContactPoint(PenetrationInfo & p_info,
   }
 
   if (nit == 12 && update_size > TOLERANCE * TOLERANCE)
-    Moose::err << "Warning!  Newton solve for contact point failed to converge!" << std::endl;
+  {
+    search_succeeded = false;
+    const auto initial_point =
+        start_with_centroid ? side->vertex_average() : ref_point = p_info._closest_point_ref;
+    if (verbose)
+      Moose::err << "Warning!  Newton solve for contact point failed to converge!\nLast update "
+                    "distance was: "
+                 << update_size << "\nInitial point guess:   " << initial_point
+                 << "\nLast considered point: " << phys_point[0]
+                 << "\nThis potential contact pair (face, point) will be discarded." << std::endl;
+    return;
+  }
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
