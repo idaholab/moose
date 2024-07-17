@@ -19,6 +19,14 @@
       recover = false
       cli_args = 'Outputs/file_base=min_max_limits Controls/integral_value/maximum_output_value=4.0 Controls/integral_value/minimum_output_value=2.0 Executioner/nl_abs_tol=1e-12 Executioner/end_time=10'
       detail = 'allowing the Proportional Integral Derivative control to have limits for its maximum and minimum output,'
+    []
+    [abs_max_rate_change]
+      type = 'CSVDiff'
+      input = 'pid_control.i'
+      csvdiff = 'abs_max_rate_change.csv'
+      recover = false
+      cli_args = 'Outputs/file_base=abs_max_rate_change Controls/integral_value/maximum_change_rate=0.5 Executioner/nl_abs_tol=1e-12'
+      detail = 'allowing the Proportional Integral Derivative control to have limits for its absolute maximum rate of change of control variable,'
     []    
     [basic_postprocessor]
       type = 'CSVDiff'
