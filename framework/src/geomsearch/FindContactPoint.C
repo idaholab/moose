@@ -42,7 +42,6 @@ namespace Moose
  * element.
  * @param search_succeeded whether or not the search for the contact point succeeded. If not it
  * should likely be discarded
- * @param verbose whether to output information about the search
  */
 void
 findContactPoint(PenetrationInfo & p_info,
@@ -53,8 +52,7 @@ findContactPoint(PenetrationInfo & p_info,
                  bool start_with_centroid,
                  const Real tangential_tolerance,
                  bool & contact_point_on_side,
-                 bool & search_succeeded,
-                 bool verbose)
+                 bool & search_succeeded)
 {
   // Default to true and we'll switch on failures
   search_succeeded = true;
@@ -120,15 +118,10 @@ findContactPoint(PenetrationInfo & p_info,
 
   Real update_size = std::numeric_limits<Real>::max();
 
-  // Pre-allocate data structures
-  DenseMatrix<Real> jac(dim - 1, dim - 1);
-  DenseVector<Real> rhs(dim - 1);
-  DenseVector<Real> update(dim - 1);
-
   // Least squares
   for (unsigned int it = 0; it < 3 && update_size > TOLERANCE * 1e3; ++it)
   {
-
+    DenseMatrix<Real> jac(dim - 1, dim - 1);
     jac(0, 0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
 
     if (dim - 1 == 2)
@@ -138,11 +131,13 @@ findContactPoint(PenetrationInfo & p_info,
       jac(1, 1) = -(dxyz_deta[0] * dxyz_deta[0]);
     }
 
+    DenseVector<Real> rhs(dim - 1);
     rhs(0) = dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = dxyz_deta[0] * d;
 
+    DenseVector<Real> update(dim - 1);
     jac.lu_solve(rhs, update);
 
     ref_point(0) -= update(0);
@@ -162,10 +157,13 @@ findContactPoint(PenetrationInfo & p_info,
   unsigned nit = 0;
 
   // Newton Loop
-  for (; nit < 12 && update_size > TOLERANCE * TOLERANCE; nit++)
+  const auto max_newton_its = 25;
+  const auto tolerance_newton = 1e3 * TOLERANCE * TOLERANCE;
+  for (; nit < max_newton_its && update_size > tolerance_newton; nit++)
   {
     d = secondary_point - phys_point[0];
 
+    DenseMatrix<Real> jac(dim - 1, dim - 1);
     jac(0, 0) = (d2xyz_dxi2[0] * d) - (dxyz_dxi[0] * dxyz_dxi[0]);
 
     if (dim - 1 == 2)
@@ -176,11 +174,13 @@ findContactPoint(PenetrationInfo & p_info,
       jac(1, 1) = (d2xyz_deta2[0] * d) - (dxyz_deta[0] * dxyz_deta[0]);
     }
 
+    DenseVector<Real> rhs(dim - 1);
     rhs(0) = -dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = -dxyz_deta[0] * d;
 
+    DenseVector<Real> update(dim - 1);
     jac.lu_solve(rhs, update);
 
     // Improvised line search in case the update is too large and gets out of the element so bad
@@ -210,11 +210,12 @@ findContactPoint(PenetrationInfo & p_info,
         if (dim - 1 == 2)
           ref_point(1) -= mult * update(1);
 
-        mult *= 0.9;
+        mult *= 0.5;
         if (mult < 1e-6)
         {
-          if (verbose)
-            mooseWarning("We could not solve for the contact point.", e.what());
+#ifndef NDEBUG
+          mooseWarning("We could not solve for the contact point.", e.what());
+#endif
           update_size = update.l2_norm();
           d = (secondary_point - phys_point[0]) * mult;
           success = true;
@@ -224,23 +225,24 @@ findContactPoint(PenetrationInfo & p_info,
     // We failed the line search, make sure to trigger the error
     if (mult < 1e-6)
     {
-      nit = 12;
+      nit = max_newton_its;
       update_size = 1;
       break;
     }
   }
 
-  if (nit == 12 && update_size > TOLERANCE * TOLERANCE)
+  if (nit == max_newton_its && update_size > tolerance_newton)
   {
     search_succeeded = false;
     const auto initial_point =
         start_with_centroid ? side->vertex_average() : ref_point = p_info._closest_point_ref;
-    if (verbose)
-      Moose::err << "Warning!  Newton solve for contact point failed to converge!\nLast update "
-                    "distance was: "
-                 << update_size << "\nInitial point guess:   " << initial_point
-                 << "\nLast considered point: " << phys_point[0]
-                 << "\nThis potential contact pair (face, point) will be discarded." << std::endl;
+#ifndef NDEBUG
+    Moose::err << "Warning!  Newton solve for contact point failed to converge!\nLast update "
+                  "distance was: "
+               << update_size << "\nInitial point guess:   " << initial_point
+               << "\nLast considered point: " << phys_point[0]
+               << "\nThis potential contact pair (face, point) will be discarded." << std::endl;
+#endif
     return;
   }
 
