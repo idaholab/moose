@@ -43,5 +43,5 @@ TEST_F(TimesTest, getters)
   EXPECT_EQ(times.getTimeAtIndex(0), 0.2);
   EXPECT_EQ(times.getCurrentTime(), 0);
   EXPECT_EQ(times.getPreviousTime(1), 0.8);
-  EXPECT_EQ(times.getNextTime(1), 1.2);
+  EXPECT_EQ(times.getNextTime(1, true), 1.2);
 }

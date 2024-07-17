@@ -44,7 +44,10 @@ public:
 
   /// Find the next time in the times vector for a given time
   /// If current_time is also in the times vector within numerical precision, will return the next value
-  Real getNextTime(const Real current_time) const;
+  /// @param current_time the time we want the next time for
+  /// @param error_if_no_next whether to error if the current time is beyond all existing times in the vector
+  ///                         or return instead the largest Real number (from std::numeric_limits)
+  Real getNextTime(const Real current_time, const bool error_if_no_next) const;
 
 protected:
   /// In charge of computing / loading the times, unless all that could be done there is done
