@@ -869,7 +869,9 @@ PatternedHexMeshGenerator::generate()
       }
     }
 
-    // adjust quadratic mid-edge nodes after boundary node redistribution
+    // if quadratic elements are used, additional nodes need to be adjusted based on the new
+    // boundary node locations. adjust side mid-edge nodes to the midpoints of the corner
+    // points, and if QUAD9, adjust center point to new centroid.
     if (_boundary_quad_elem_type != QUAD_ELEM_TYPE::QUAD4)
     {
       for (auto elem = out_mesh->elements_begin(); elem != out_mesh->elements_end(); ++elem)
