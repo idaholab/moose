@@ -93,7 +93,7 @@ NEML2Action::act()
   const auto mode_name = std::string(_mode);
   if (_current_task == "parse_neml2")
   {
-    neml2::load_input(std::string(_fname));
+    neml2::reload_input(std::string(_fname));
 
     if (_verbose)
     {
