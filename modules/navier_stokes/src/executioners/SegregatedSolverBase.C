@@ -76,6 +76,12 @@ SegregatedSolverBase::validParams()
       "equations. (=1 for no relaxation, "
       "diagonal dominance will still be enforced)");
 
+  params.addParam<std::vector<Real>>(
+      "turbulence_field_min_limit",
+      std::vector<Real>(),
+      "The lower limit imposed on turbulent quantities. The recommended value for robustness "
+      "is 1e-8.");
+
   params.addParamNamesToGroup("pressure_variable_relaxation momentum_equation_relaxation "
                               "energy_equation_relaxation passive_scalar_equation_relaxation "
                               "turbulence_equation_relaxation",
@@ -363,6 +369,7 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
     _passive_scalar_equation_relaxation(
         getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
     _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
+    _turbulence_field_min_limit(getParam<std::vector<Real>>("turbulence_field_min_limit")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
@@ -412,6 +419,13 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
       paramError("turbulence_absolute_tolerance",
                  "The number of absolute tolerances does not match the number of "
                  "turbulence equations!");
+    if (_turbulence_field_min_limit.empty())
+      // If no minimum bounds are given, initialize to default value 1e-8
+      _turbulence_field_min_limit.resize(_turbulence_system_names.size(), 1e-8);
+    else if (_turbulence_system_names.size() != _turbulence_field_min_limit.size())
+      paramError("turbulence_field_min_limit",
+                 "The number of lower bounds for turbulent quantities does not match the "
+                 "number of turbulence equations!");
   }
 
   const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");

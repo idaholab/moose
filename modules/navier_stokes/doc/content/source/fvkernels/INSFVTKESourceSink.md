@@ -24,6 +24,16 @@ transport equation for $\epsilon$.
 However, for canonical or measured cases, e.g., isotropic decaying turbulence,
 the user can utilize predefined fields through functors in MOOSE.
 
+To avoid the overproduction of turbulent kinetic energy in stagnation zones \cite{durbin1996k}, a production limiter is imposed in relation to the dissipation using the formulation in \cite{menter1994two}:
+
+\begin{equation}
+G_k = min \left( G_k , C_{PL} \rho \epsilon \right) \,,
+\end{equation}
+
+where:
+
+- $C_{PL}$ it the limiter constant, and set by default to a recommended value of 10 \cite{durbin1996k}.
+
 ## Wall formulation:
 
 All cells in contact with a boundary identified in the [!param](/FVKernels/INSFVTKESourceSink/walls) list are applied a different
@@ -49,11 +59,19 @@ incremental fixed-point search algorithm.
 The cells belonging to the `sub-laminar` boundary layers are defined as those
 for which $y^+ < 11.25$.
 The ones belonging to the `logarithmic` boundary layer are those for which $y^+ \ge 11.25$.
+The imposed threshold of $y^+ = 11.25$ is given by the value of $y^+$ at which the `sub-laminar`
+and `logarithmic` boundary profiles intersect.
 
-For both the `sub-laminar` and `logarithmic` boundary layers the production term is defined as:
+In the `sub-laminar` region production of turbulent kinetic energy is negligible, therefore, if $y^+ \lt 11.25$:
 
 \begin{equation}
-G_k = C_{\mu}^{0.25} \mu_t \frac{k^{\frac{3}{2}} ||\nabla \vec{u}||}{\kappa y_p} \,,
+G_k = 0.0 \,,
+\end{equation}
+
+In the `logarithmic` boundary layers the production term is no longer negligible and is defined as:
+
+\begin{equation}
+G_k = \tau_w ||\nabla \vec{u}|| = \mu_w ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} \sqrt(k)}{\kappa y_p} \,,
 \end{equation}
 
 where:
@@ -63,12 +81,12 @@ where:
 - $||\nabla \vec{u}||$ is the near wall velocity gradient norm, which is defined as $||\nabla \vec{u}|| = (\nabla \vec{u} \cdot \hat{n}) \cdot \hat{n}$,
 - $\kappa = 0.41$ is the von Kármán constant.
 
-The formulation assumes that the near wall value is already imposed in the $\mu_t$ functor.
+The formulation assumes that the near wall value is already imposed in the $\mu_t$ functor. 
 
 When solving a linear problem, instead of the nonlinear formulation, the production term is formulated as:
 
 \begin{equation}
-G_k = C_{\mu}^{0.25} \mu_t \frac{k \sqrt{k_{old}}||\nabla \vec{u}||}{\kappa y_p} \,.
+G_k =  \mu_w ||\nabla \vec{u}|| \frac{ C_{\mu}^{0.25} k}{\sqrt{k_{old}} \kappa y_p} \,.
 \end{equation}
 
 where:
@@ -82,7 +100,7 @@ For the destruction, formulation is different for the `sub-laminar` and `logarit
 For the `sub-laminar` layer, the destruction is defined as follows:
 
 \begin{equation}
-\epsilon = \frac{2 \mu_t k}{y_p ^2} \,.
+\epsilon = \frac{2 \mu k}{y_p ^2} \,.
 \end{equation}
 
 For the `logarithmic` layer, the destruction is defined as follows:

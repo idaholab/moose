@@ -30,11 +30,8 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
 bulk_wall_treatment = false
 walls = 'left top right bottom'
-max_mixing_length = 1e10
-linearized_yplus_mu_t = false
 wall_treatment = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 pressure_tag = "pressure_grad"
@@ -199,8 +196,7 @@ pressure_tag = "pressure_grad"
     mu = ${mu}
     mu_t = 'mu_t'
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment}
   []
 
   [TKED_advection]
@@ -234,8 +230,7 @@ pressure_tag = "pressure_grad"
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment}
   []
 []
 
@@ -293,8 +288,7 @@ pressure_tag = "pressure_grad"
     v = vel_y
     bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
-    linearized_yplus = ${linearized_yplus_mu_t}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
+    wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
   []
 []

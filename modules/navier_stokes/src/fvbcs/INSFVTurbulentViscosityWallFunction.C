@@ -10,7 +10,6 @@
 #include "INSFVTurbulentViscosityWallFunction.h"
 #include "Function.h"
 #include "NavierStokesMethods.h"
-#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVTurbulentViscosityWallFunction);
 
@@ -28,7 +27,7 @@ INSFVTurbulentViscosityWallFunction::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
-  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>("wall_treatment",
                              wall_treatment,
                              "The method used for computing the wall functions "
@@ -48,7 +47,7 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _k(getFunctor<ADReal>(NS::TKE)),
     _C_mu(getParam<Real>("C_mu")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment"))
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>())
 {
 }
 
@@ -58,72 +57,81 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
   const Real wall_dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
   const auto current_argument = makeElemArg(&_current_elem);
-  const auto state = determineState();
-  const auto mu = _mu(current_argument, state);
-  const auto rho = _rho(current_argument, state);
+  // Get the previous non linear iteration values
+  const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
+  const auto mu = _mu(current_argument, old_state);
+  const auto rho = _rho(current_argument, old_state);
 
   // Get the velocity vector
-  ADRealVectorValue velocity(_u_var(current_argument, state));
+  ADRealVectorValue velocity(_u_var(current_argument, old_state));
   if (_v_var)
-    velocity(1) = (*_v_var)(current_argument, state);
+    velocity(1) = (*_v_var)(current_argument, old_state);
   if (_w_var)
-    velocity(2) = (*_w_var)(current_argument, state);
+    velocity(2) = (*_w_var)(current_argument, old_state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   const auto parallel_speed = NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
-  ADReal u_tau;
   ADReal y_plus;
-  const ADReal mut_visc = mu; // laminar sublayer viscosity
-  ADReal mut_log;             // turbulent log-layer viscosity
+  ADReal mut_log; // turbulent log-layer viscosity
+  ADReal mu_wall; // total wall viscosity to obtain the shear stress at the wall
 
-  if (_wall_treatment == "eq_newton")
+  if (_wall_treatment == NS::WallTreatmentEnum::EQ_NEWTON)
   {
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-    u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
+    const auto u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
-    mut_log = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
+    mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
+    mut_log = mu_wall - mu;
   }
-  else if (_wall_treatment == "eq_incremental")
+  else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
     // Incremental solve on y_plus to get the near-wall quantities
     y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
-    mut_log = mu * (NS::von_karman_constant * y_plus /
-                        std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)) -
-                    1.0);
+    mu_wall = mu * (NS::von_karman_constant * y_plus /
+                    std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
+    mut_log = mu_wall - mu;
   }
-  else if (_wall_treatment == "eq_linearized")
+  else if (_wall_treatment == NS::WallTreatmentEnum::EQ_LINEARIZED)
   {
     // Linearized approximation to the wall function to find the near-wall quantities faster
     const ADReal a_c = 1 / NS::von_karman_constant;
     const ADReal b_c = 1 / NS::von_karman_constant *
                        (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
     const ADReal c_c = parallel_speed;
-    u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
+
+    const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     y_plus = wall_dist * u_tau * rho / mu;
-    mut_log = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
+    mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
+    mut_log = mu_wall - mu;
   }
-  else if (_wall_treatment == "neq")
+  else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
   {
     // Assign non-equilibrium wall function value
-    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, state)) * rho / mu;
-    mut_log = mu * (NS::von_karman_constant * wall_dist /
-                        std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)) -
-                    1.0);
+    y_plus =
+        std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, old_state)) * rho / mu;
+    mu_wall = mu * (NS::von_karman_constant * y_plus /
+                    std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
+    mut_log = mu_wall - mu;
   }
+  else
+    mooseAssert(false,
+                "For `INSFVTurbulentViscosityWallFunction` , wall treatment should not reach here");
 
   if (y_plus <= 5.0)
     // sub-laminar layer
-    return mut_visc;
+    return 0.0;
   else if (y_plus >= 30.0)
     // log-layer
-    return mut_log + mut_visc;
+    return std::max(mut_log, NS::mu_t_low_limit);
   else
   {
     // buffer layer
     const auto blending_function = (y_plus - 5.0) / 25.0;
-    return blending_function * mut_log + mut_visc;
+    // the blending depends on the mut_log at y+=30
+    const auto mut_log = mu * _mut_30;
+    return blending_function * std::max(mut_log, NS::mu_t_low_limit);
   }
 }

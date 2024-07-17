@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVTKESourceSink.h"
-#include "NS.h"
 #include "NonlinearSystemBase.h"
 #include "NavierStokesMethods.h"
 #include "libmesh/nonlinear_solver.h"
@@ -31,20 +30,17 @@ INSFVTKESourceSink::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "Turbulent viscosity.");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
-
-  params.addParam<Real>("max_mixing_length",
-                        1e10,
-                        "Maximum mixing legth allowed for the domain - adjust for realizable "
-                        "k-epsilon to work properly.");
   params.addParam<bool>(
       "linearized_model",
       true,
       "Boolean to determine if the problem should be use in a linear or nonlinear solve.");
-  params.addParam<bool>("non_equilibrium_treatment",
-                        false,
-                        "Use non-equilibrium wall treatment (faster than standard wall treatment)");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
+  params.addParam<MooseEnum>("wall_treatment",
+                             wall_treatment,
+                             "The method used for computing the wall functions "
+                             "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
-
+  params.addParam<Real>("C_pl", 10.0, "Production Limiter Constant Multiplier.");
   params.set<unsigned short>("ghost_layers") = 2;
 
   return params;
@@ -61,10 +57,10 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _max_mixing_length(getParam<Real>("max_mixing_length")),
     _linearized_model(getParam<bool>("linearized_model")),
-    _non_equilibrium_treatment(getParam<bool>("non_equilibrium_treatment")),
-    _C_mu(getParam<Real>("C_mu"))
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
+    _C_mu(getParam<Real>("C_mu")),
+    _C_pl(getParam<Real>("C_pl"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -94,6 +90,7 @@ INSFVTKESourceSink::computeQpResidual()
   const auto old_state =
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto rho = _rho(elem_arg, state);
+  const auto mu = _mu(elem_arg, state);
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
@@ -116,8 +113,11 @@ INSFVTKESourceSink::computeQpResidual()
           velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
       const auto distance = distance_vec[i];
 
-      const auto y_plus =
-          NS::findyPlus(_mu(elem_arg, state), rho, std::max(parallel_speed, 1e-10), distance);
+      ADReal y_plus;
+      if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * _var(elem_arg, old_state)) * rho / mu;
+      else // Equilibrium / Iterative
+        y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
       y_plus_vec.push_back(y_plus);
 
@@ -154,20 +154,22 @@ INSFVTKESourceSink::computeQpResidual()
       const Moose::FaceArg facearg = {
           fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
       const ADReal wall_mut = _mu_t(facearg, state);
+      const ADReal wall_mu = _mu(facearg, state);
 
-      const auto destruction_visc = 2.0 * wall_mut / Utility::pow<2>(distance_vec[i]) / tot_weight;
+      const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
       const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
                                    std::pow(_var(elem_arg, old_state), 0.5) /
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+      const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
       if (y_plus < 11.25)
         destruction += destruction_visc;
       else
+      {
         destruction += destruction_log;
-
-      production += wall_mut * velocity_grad_norm_vec[i] * std::pow(_C_mu, 0.25) /
-                    std::sqrt(_var(elem_arg, old_state) + 1e-10) /
-                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(_var(elem_arg, old_state) + 1e-10) /
+                      (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+      }
     }
 
     residual = (destruction - production) * _var(elem_arg, state);
@@ -232,15 +234,15 @@ INSFVTKESourceSink::computeQpResidual()
 
     production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    const auto time_scale =
-        raw_value(_var(elem_arg, old_state) / (_epsilon(elem_arg, old_state) + 1e-15) + 1e-15);
+    const auto time_scale = raw_value(_var(elem_arg, old_state) / _epsilon(elem_arg, old_state));
 
     destruction = rho * _var(elem_arg, state) / time_scale;
 
-    // Production limiter - not needed for most applications
-    if (_max_mixing_length < 1e10)
-      if (std::pow(std::abs(production), 1.5) / std::abs(destruction) > _max_mixing_length)
-        production = std::pow(_max_mixing_length * std::abs(destruction.value()) + 1e-10, 2. / 3.);
+    // k-Production limiter (needed for flows with stagnation zones)
+    const ADReal production_limit = _C_pl * rho * _epsilon(elem_arg, old_state);
+
+    // Apply production limiter
+    production = std::min(production, production_limit);
 
     residual = destruction - production;
   }

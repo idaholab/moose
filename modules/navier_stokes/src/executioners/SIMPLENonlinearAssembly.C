@@ -478,6 +478,11 @@ SIMPLENonlinearAssembly::execute()
       // Resdiual index
       size_t residual_index = 0;
 
+      // Execute all objects tagged as nonlinear
+      // This will execute everything in the problem at nonlinear, including the aux kernels.
+      // This way we compute the aux kernels before the momentum equations are solved.
+      _problem.execute(EXEC_NONLINEAR);
+
       // We clear the caches in the momentum and pressure variables
       for (auto system_i : index_range(_momentum_systems))
         _momentum_systems[system_i]->residualSetup();
@@ -543,9 +548,6 @@ SIMPLENonlinearAssembly::execute()
       // Update residual index
       residual_index = momentum_residual.size();
 
-      // Execute all objects tagged as nonlinear
-      _problem.execute(EXEC_NONLINEAR);
-
       // If we have an energy equation, solve it here. We assume the material properties in the
       // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature
       // outside of the velocity-pressure loop
@@ -589,7 +591,7 @@ SIMPLENonlinearAssembly::execute()
 
           auto & current_solution =
               *(_turbulence_systems[system_i]->system().current_local_solution.get());
-          limitSolutionUpdate(current_solution);
+          limitSolutionUpdate(current_solution, _turbulence_field_min_limit[system_i]);
 
           // Relax the turbulence update for the next momentum predictor
           auto & old_solution = *(_turbulence_systems[system_i]->solutionPreviousNewton());
