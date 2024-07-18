@@ -36,6 +36,9 @@ INSFVTurbulentTemperatureWallFunction::validParams()
                              wall_treatment,
                              "The method used for computing the wall functions "
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
+
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
 }
 
@@ -54,7 +57,8 @@ INSFVTurbulentTemperatureWallFunction::INSFVTurbulentTemperatureWallFunction(
     _Pr_t(getFunctor<ADReal>("Pr_t")),
     _k(getFunctor<ADReal>(NS::TKE)),
     _C_mu(getParam<Real>("C_mu")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment"))
+    _wall_treatment(getParam<MooseEnum>("wall_treatment")),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
 }
 
@@ -151,7 +155,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   }
 
   // To make sure new derivatives are not introduced as the solve progresses
-  alpha += 0 * kappa * (rho * cp) + 0 * u_tau * _Pr_t(current_argument, state);
+  if (_newton_solve)
+    alpha += 0 * kappa * (rho * cp) + 0 * u_tau * _Pr_t(current_argument, state);
 
   const auto face_arg = singleSidedFaceArg();
   return -rho * cp * alpha * (_T_w(face_arg, state) - _var(current_argument, state)) / wall_dist;
