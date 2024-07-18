@@ -606,6 +606,9 @@ public:
    */
   virtual void saveOldSolutions();
 
+  /// Set whether you want the non linear solution to be saved
+  void setSavePreviousNLSolution(bool set) { _previous_nl_solution_required = set; }
+
   /**
    * Restore old solutions from the backup vectors and deallocate them.
    */
@@ -2677,6 +2680,9 @@ protected:
 
   /// Indicates that we need to compute variable values for previous Newton iteration
   bool _needs_old_newton_iter;
+
+  /// Indicates we need to save the previous NL iteration variable values
+  bool _previous_nl_solution_required;
 
   /// Indicates if nonlocal coupling is required/exists
   bool _has_nonlocal_coupling;

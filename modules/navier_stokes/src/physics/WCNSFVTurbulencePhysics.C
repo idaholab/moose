@@ -212,6 +212,13 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
 }
 
 void
+WCNSFVTurbulencePhysics::initializePhysicsAdditional()
+{
+  if (_turbulence_model == "k-epsilon")
+    getProblem().setSavePreviousNLSolution(true);
+}
+
+void
 WCNSFVTurbulencePhysics::actOnAdditionalTasks()
 {
   // Other Physics may not exist or be initialized at construction time, so
@@ -695,16 +702,17 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
     getProblem().addAuxKernel(mut_kernel_type, prefix() + "mixing_length_aux ", params);
   }
-  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
+  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable") &&
+      _has_energy_equation)
   {
-    const std::string kt_kernel_type = "TurbulenceConductivityAux";
+    const std::string kt_kernel_type = "TurbulentConductivityAux";
     InputParameters params = getFactory().getValidParams(kt_kernel_type);
     assignBlocks(params, _blocks);
     params.set<AuxVariableName>("variable") = NS::k_t;
     params.set<MooseFunctorName>(NS::cp) = _fluid_energy_physics->getSpecificHeatName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<MooseFunctorName>(NS::turbulent_Prandtl) = getParam<MooseFunctorName>("Pr_t");
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_NONLINEAR};
     getProblem().addAuxKernel(kt_kernel_type, prefix() + "turbulent_conductivity_aux ", params);
   }
 }
@@ -825,6 +833,7 @@ WCNSFVTurbulencePhysics::addMaterials()
     }
     if (!getProblem().hasFunctor(NS::mu_t, /*thread_id=*/0))
     {
+      mooseAssert(!getParam<bool>("mu_t_as_aux_variable"), "mu_t should exist");
       InputParameters params = getFactory().getValidParams("INSFVkEpsilonViscosityMaterial");
       params.set<MooseFunctorName>(NS::TKE) = _tke_name;
       params.set<MooseFunctorName>(NS::TKED) = _tked_name;
@@ -837,6 +846,7 @@ WCNSFVTurbulencePhysics::addMaterials()
 
     if (_has_energy_equation && !getProblem().hasFunctor(NS::k_t, /*thread_id=*/0))
     {
+      mooseAssert(!getParam<bool>("k_t_as_aux_variable"), "k_t should exist");
       InputParameters params = getFactory().getValidParams("ADParsedFunctorMaterial");
       assignBlocks(params, _blocks);
       const auto mu_t_name = NS::mu_t;
