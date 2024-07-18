@@ -69,10 +69,6 @@ WCNSFVTurbulencePhysics::validParams()
   params.addParam<MooseFunctorName>(
       "sigma_eps",
       "Scaling coefficient for the turbulent kinetic energy dissipation diffusion term");
-  params.addParam<bool>(
-      "non_equilibrium_treatment",
-      false,
-      "Whether to apply a non-equilibrium treatment for the source and sink terms");
   params.addParam<MooseFunctorName>(
       NS::turbulent_Prandtl, NS::turbulent_Prandtl, "Turbulent Prandtl number");
 
@@ -82,7 +78,6 @@ WCNSFVTurbulencePhysics::validParams()
   params.transferParam<MooseEnum>(INSFVTurbulentViscosityWallFunction::validParams(),
                                   "wall_treatment");
   params.transferParam<Real>(INSFVTurbulentViscosityWallFunction::validParams(), "C_mu");
-  params.addParam<Real>("max_mixing_length", 0.1, "Maximum value for the mixing length");
 
   // K-Epsilon numerical scheme parameters
   MooseEnum face_interpol_types("average skewness-corrected", "average");
@@ -153,8 +148,7 @@ WCNSFVTurbulencePhysics::validParams()
   params.addParamNamesToGroup("fluid_heat_transfer_physics turbulent_prandtl "
                               "scalar_transport_physics passive_scalar_schmidt_number",
                               "Coupled Physics");
-  params.addParamNamesToGroup("initial_tke initial_tked C1_eps C2_eps sigma_k sigma_eps "
-                              "non_equilibrium_treatment",
+  params.addParamNamesToGroup("initial_tke initial_tked C1_eps C2_eps sigma_k sigma_eps",
                               "K-Epsilon model");
   params.addParamNamesToGroup("C_mu linearized_yplus bulk_wall_treatment wall_treatment",
                               "K-Epsilon wall function");
@@ -200,7 +194,6 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
                              "C2_eps",
                              "linearized_yplus",
                              "bulk_wall_treatment",
-                             "non_equilibrium_treatment",
                              "tke_scaling",
                              "tke_face_interpolation",
                              "tke_two_term_bc_expansion",
@@ -559,6 +552,8 @@ WCNSFVTurbulencePhysics::addKEpsilonAdvection()
   InputParameters params = getFactory().getValidParams(kernel_type);
 
   assignBlocks(params, _blocks);
+  params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
+
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
@@ -612,8 +607,6 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-    params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
-    params.set<Real>("max_mixing_length") = getParam<Real>("max_mixing_length");
     // Currently only Newton method for WCNSFVTurbulencePhysics
     params.set<bool>("newton_solve") = true;
     for (const auto d : make_range(dimension()))
@@ -633,8 +626,6 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<Real>("C1_eps") = getParam<Real>("C1_eps");
     params.set<Real>("C2_eps") = getParam<Real>("C2_eps");
-    params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
-    params.set<Real>("max_mixing_length") = getParam<Real>("max_mixing_length");
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
     getProblem().addFVKernel(kernel_type, prefix() + "tked_source_sink", params);
@@ -681,7 +672,6 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     params.set<Real>("C_mu") = getParam<Real>("C_mu");
     params.set<bool>("linearized_yplus") = getParam<bool>("linearized_yplus");
     params.set<bool>("bulk_wall_treatment") = getParam<bool>("bulk_wall_treatment");
-    params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
     getProblem().addAuxKernel(mut_kernel_type, prefix() + "mixing_length_aux ", params);
