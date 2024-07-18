@@ -40,6 +40,8 @@ namespace Moose
  * @param secondary_point The physical space coordinates of the secondary node
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the
  * element.
+ * @param search_succeeded whether or not the search for the contact point succeeded. If not it
+ * should likely be discarded
  */
 void
 findContactPoint(PenetrationInfo & p_info,
@@ -49,8 +51,12 @@ findContactPoint(PenetrationInfo & p_info,
                  const Point & secondary_point,
                  bool start_with_centroid,
                  const Real tangential_tolerance,
-                 bool & contact_point_on_side)
+                 bool & contact_point_on_side,
+                 bool & search_succeeded)
 {
+  // Default to true and we'll switch on failures
+  search_succeeded = true;
+
   const Elem * primary_elem = p_info._elem;
 
   unsigned int dim = primary_elem->dim();
@@ -116,7 +122,6 @@ findContactPoint(PenetrationInfo & p_info,
   for (unsigned int it = 0; it < 3 && update_size > TOLERANCE * 1e3; ++it)
   {
     DenseMatrix<Real> jac(dim - 1, dim - 1);
-
     jac(0, 0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
 
     if (dim - 1 == 2)
@@ -127,14 +132,12 @@ findContactPoint(PenetrationInfo & p_info,
     }
 
     DenseVector<Real> rhs(dim - 1);
-
     rhs(0) = dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = dxyz_deta[0] * d;
 
     DenseVector<Real> update(dim - 1);
-
     jac.lu_solve(rhs, update);
 
     ref_point(0) -= update(0);
@@ -154,12 +157,13 @@ findContactPoint(PenetrationInfo & p_info,
   unsigned nit = 0;
 
   // Newton Loop
-  for (; nit < 12 && update_size > TOLERANCE * TOLERANCE; nit++)
+  const auto max_newton_its = 25;
+  const auto tolerance_newton = 1e3 * TOLERANCE * TOLERANCE;
+  for (; nit < max_newton_its && update_size > tolerance_newton; nit++)
   {
     d = secondary_point - phys_point[0];
 
     DenseMatrix<Real> jac(dim - 1, dim - 1);
-
     jac(0, 0) = (d2xyz_dxi2[0] * d) - (dxyz_dxi[0] * dxyz_dxi[0]);
 
     if (dim - 1 == 2)
@@ -171,32 +175,75 @@ findContactPoint(PenetrationInfo & p_info,
     }
 
     DenseVector<Real> rhs(dim - 1);
-
     rhs(0) = -dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = -dxyz_deta[0] * d;
 
     DenseVector<Real> update(dim - 1);
-
     jac.lu_solve(rhs, update);
 
-    ref_point(0) += update(0);
+    // Improvised line search in case the update is too large and gets out of the element so bad
+    // that we cannot reinit at the new point
+    Real mult = 1;
+    while (true)
+    {
+      try
+      {
+        ref_point(0) += mult * update(0);
 
-    if (dim - 1 == 2)
-      ref_point(1) += update(1);
+        if (dim - 1 == 2)
+          ref_point(1) += mult * update(1);
 
-    points[0] = ref_point;
-    fe_side->reinit(side, &points);
-    d = secondary_point - phys_point[0];
+        points[0] = ref_point;
+        fe_side->reinit(side, &points);
+        d = secondary_point - phys_point[0];
 
-    update_size = update.l2_norm();
+        // we don't multiply by 'mult' because it is used for convergence
+        update_size = update.l2_norm();
+        break;
+      }
+      catch (libMesh::LogicError & e)
+      {
+        ref_point(0) -= mult * update(0);
+        if (dim - 1 == 2)
+          ref_point(1) -= mult * update(1);
+
+        mult *= 0.5;
+        if (mult < 1e-6)
+        {
+#ifndef NDEBUG
+          mooseWarning("We could not solve for the contact point.", e.what());
+#endif
+          update_size = update.l2_norm();
+          d = (secondary_point - phys_point[0]) * mult;
+          break;
+        }
+      }
+    }
+    // We failed the line search, make sure to trigger the error
+    if (mult < 1e-6)
+    {
+      nit = max_newton_its;
+      update_size = 1;
+      break;
+    }
   }
 
-  /*
-    if (nit == 12 && update_size > TOLERANCE*TOLERANCE)
-      Moose::err<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
-  */
+  if (nit == max_newton_its && update_size > tolerance_newton)
+  {
+    search_succeeded = false;
+#ifndef NDEBUG
+    const auto initial_point =
+        start_with_centroid ? side->vertex_average() : ref_point = p_info._closest_point_ref;
+    Moose::err << "Warning!  Newton solve for contact point failed to converge!\nLast update "
+                  "distance was: "
+               << update_size << "\nInitial point guess:   " << initial_point
+               << "\nLast considered point: " << phys_point[0]
+               << "\nThis potential contact pair (face, point) will be discarded." << std::endl;
+#endif
+    return;
+  }
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
@@ -205,7 +252,8 @@ findContactPoint(PenetrationInfo & p_info,
   if (dim - 1 == 2)
   {
     p_info._normal = dxyz_dxi[0].cross(dxyz_deta[0]);
-    p_info._normal /= p_info._normal.norm();
+    if (!MooseUtils::absoluteFuzzyEqual(p_info._normal.norm(), 0))
+      p_info._normal /= p_info._normal.norm();
   }
   else
   {

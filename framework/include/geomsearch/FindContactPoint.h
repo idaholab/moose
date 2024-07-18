@@ -34,7 +34,8 @@ void findContactPoint(PenetrationInfo & p_info,
                       const Point & secondary_point,
                       bool start_with_centroid,
                       const Real tangential_tolerance,
-                      bool & contact_point_on_side);
+                      bool & contact_point_on_side,
+                      bool & search_succeeded);
 
 void restrictPointToFace(Point & p, const Elem * side, std::vector<const Node *> & off_edge_nodes);
 }

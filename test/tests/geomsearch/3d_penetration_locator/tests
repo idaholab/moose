@@ -1,22 +1,36 @@
 [Tests]
   issues = '5478df0f0897ed7ac3dd3a3de1785a7948c75cfe'
   design = 'source/auxkernels/PenetrationAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '3d_penetration_locator_test.i'
     exodiff = 'out.e'
     group = 'geometric'
     scale_refine = 1
     custom_cmp = exclude_elem_id.cmp
-    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, overlapping surfaces in 3D."
-  [../]
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential "
+                  "distance, normal, closest point, side id, and element id between two parallel, "
+                  "overlapping surfaces in 3D."
+  []
 
-  [./3d_tet]
+  [3d_tet]
     type = 'Exodiff'
     input = '3d_tet.i'
     exodiff = '3d_tet_out.e'
     group = 'geometric'
     scale_refine = 1
-    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, disjoint surfaces in 2D with tetrahedron elements."
-  [../]
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential "
+                  "distance, normal, closest point, side id, and element id between two parallel, "
+                  "disjoint surfaces in 2D with tetrahedron elements."
+  []
+
+  [rings_facing_each_other]
+    type = CSVDiff
+    input = '3d_rings.i'
+    csvdiff = '3d_rings_out_values_0001.csv'
+    recover = false # steady solve
+    requirement = "The system shall be able to find contact points on a geometry where the contact "
+                  "point search leads to element Jacobian computations too far from the element for "
+                  "the Jacobian to be non-negative."
+  []
 []
