@@ -1257,7 +1257,9 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
   return mesh;
 }
 
-void PolygonMeshGeneratorBase::adjustPeripheralQuadraticElements(MeshBase & out_mesh, const QUAD_ELEM_TYPE boundary_quad_elem_type) const
+void
+PolygonMeshGeneratorBase::adjustPeripheralQuadraticElements(
+    MeshBase & out_mesh, const QUAD_ELEM_TYPE boundary_quad_elem_type) const
 {
   const auto side_list = out_mesh.get_boundary_info().build_side_list();
 
@@ -1293,7 +1295,6 @@ void PolygonMeshGeneratorBase::adjustPeripheralQuadraticElements(MeshBase & out_
     }
   }
 }
-
 
 std::pair<Real, Real>
 PolygonMeshGeneratorBase::pointInterpolate(const Real pi_1_x,
