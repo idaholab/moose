@@ -6,23 +6,11 @@ if [ -z "$METHOD" ]; then
     export METHOD=opt
 fi
 
-# set the cwd to the directory run_tests is in
-cd `dirname $0` > /dev/null
-
-if [ -e ./$APPLICATION_NAME-unit-$METHOD ]
-then
-  ./$APPLICATION_NAME-unit-$METHOD $*
-
-  # This log file is produced for the update_stable script.
-  if [ $? -eq 0 ]
-  then
-    echo "unit" >> ../test_results.log
-  else
-    exit 1
-  fi
+if [ -e ./unit/"$APPLICATION_NAME"-unit-"$METHOD" ]; then
+    ./unit/"$APPLICATION_NAME"-unit-"$METHOD"
+elif [ -e ./"$APPLICATION_NAME"-unit-"$METHOD" ]; then
+    ./"$APPLICATION_NAME"-unit-"$METHOD"
 else
-  echo "Executable missing!"
-  exit 1
+    echo "Executable missing!"
+    exit 1
 fi
-
-exit 0
