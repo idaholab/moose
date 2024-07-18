@@ -30,11 +30,8 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
-walls = ''
-max_mixing_length = 1e10
+walls = '' # no walls for turbulence, to get 'standard' walls
 bulk_wall_treatment = false
-linearized_yplus_mu_t = false
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
@@ -66,12 +63,9 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         initial_pressure = 0.2
         initial_velocity = '0 0 0'
 
-        inlet_boundaries = 'top'
-        momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_functors = '${lid_velocity} 0'
-
-        wall_boundaries = 'left right bottom'
-        momentum_wall_types = 'noslip noslip noslip'
+        wall_boundaries = 'top left right bottom'
+        momentum_wall_types = 'noslip noslip noslip noslip'
+        momentum_wall_functors = '${lid_velocity} 0 0 0 0 0 0 0'
 
         pin_pressure = true
         pinned_pressure_type = point-value-uo
@@ -94,8 +88,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         initial_tked = ${eps_init}
 
         # Model parameters
-        non_equilibrium_treatment = ${non_equilibrium_treatment}
-        max_mixing_length = ${max_mixing_length}
         C1_eps = ${C1_eps}
         C2_eps = ${C2_eps}
         C_mu = ${C_mu}
@@ -106,7 +98,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Wall parameters
         turbulence_walls = ${walls}
         bulk_wall_treatment = ${bulk_wall_treatment}
-        linearized_yplus = ${linearized_yplus_mu_t}
         wall_treatment = ${wall_treatment}
 
         # Numerical parameters
