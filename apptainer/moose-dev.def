@@ -83,6 +83,14 @@ EOF
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
     PYTHON_VERSION=3.10
+    CODE_SERVER_VERSION=4.91.1
+
+    # Install code-server
+    CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
+    cd ${ROOT_BUILD_DIR}
+    curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
+    rpm -i ${CODE_SERVER_FILE}
+    rm ${CODE_SERVER_FILE}
 
     # Clone WASP
     WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
