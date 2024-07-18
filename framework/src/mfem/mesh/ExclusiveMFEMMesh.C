@@ -60,7 +60,8 @@ ExclusiveMFEMMesh::buildMFEMMesh()
 void
 ExclusiveMFEMMesh::buildMFEMParMesh()
 {
-  _mfem_par_mesh = std::make_shared<MFEMParMesh>(MPI_COMM_WORLD, getMFEMMesh());
+  _mfem_par_mesh =
+      std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, dynamic_cast<mfem::Mesh &>(getMFEMMesh()));
   _mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
 }
 
@@ -75,7 +76,7 @@ ExclusiveMFEMMesh::getMFEMMesh()
   return *_mfem_mesh;
 }
 
-MFEMParMesh &
+mfem::ParMesh &
 ExclusiveMFEMMesh::getMFEMParMesh()
 {
   if (!_mfem_par_mesh)

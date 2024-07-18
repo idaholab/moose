@@ -50,7 +50,7 @@ public:
    * build them.
    */
   MFEMMesh & getMFEMMesh();
-  MFEMParMesh & getMFEMParMesh();
+  mfem::ParMesh & getMFEMParMesh();
 
   /**
    * Calls buildDummyMesh.
@@ -91,5 +91,5 @@ protected:
    * Use the accessors instead.
    */
   std::shared_ptr<MFEMMesh> _mfem_mesh;
-  std::shared_ptr<MFEMParMesh> _mfem_par_mesh;
+  std::shared_ptr<mfem::ParMesh> _mfem_par_mesh;
 };
