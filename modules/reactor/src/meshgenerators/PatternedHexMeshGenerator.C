@@ -874,25 +874,37 @@ PatternedHexMeshGenerator::generate()
     // points, and if QUAD9, adjust center point to new centroid.
     if (_boundary_quad_elem_type != QUAD_ELEM_TYPE::QUAD4)
     {
-      for (auto elem = out_mesh->elements_begin(); elem != out_mesh->elements_end(); ++elem)
+      const auto side_list = out_mesh->get_boundary_info().build_side_list();
+
+      // select out elements on outer boundary
+      std::set<dof_id_type> elem_set;
+      for (auto side_item : side_list)
       {
-        // only adjust elements on outer boundary
-        if (!(*elem)->on_boundary())
-          continue;
+        boundary_id_type boundary_id = std::get<2>(side_item);
+        dof_id_type elem_id = std::get<0>(side_item);
+
+        if (boundary_id == OUTER_SIDESET_ID)
+          elem_set.insert(elem_id);
+      }
+
+      // adjust nodes for outer boundary elements
+      for (dof_id_type elem_id : elem_set)
+      {
+        Elem * elem = out_mesh->elem_ptr(elem_id);
 
         // adjust right side mid-edge node
-        Point pt_5 = ((*elem)->point(1) + (*elem)->point(2)) / 2.0;
-        out_mesh->add_point(pt_5, (*elem)->node_ptr(5)->id());
+        Point pt_5 = (elem->point(1) + elem->point(2)) / 2.0;
+        out_mesh->add_point(pt_5, elem->node_ptr(5)->id());
 
         // adjust left side mid-edge node
-        Point pt_7 = ((*elem)->point(0) + (*elem)->point(3)) / 2.0;
-        out_mesh->add_point(pt_7, (*elem)->node_ptr(7)->id());
+        Point pt_7 = (elem->point(0) + elem->point(3)) / 2.0;
+        out_mesh->add_point(pt_7, elem->node_ptr(7)->id());
 
         // adjust central node when using QUAD9
         if (_boundary_quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
         {
-          Point pt_8 = (*elem)->centroid();
-          out_mesh->add_point(pt_8, (*elem)->node_ptr(8)->id());
+          Point pt_8 = elem->centroid();
+          out_mesh->add_point(pt_8, elem->node_ptr(8)->id());
         }
       }
     }
