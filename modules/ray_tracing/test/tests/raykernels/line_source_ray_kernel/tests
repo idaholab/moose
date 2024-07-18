@@ -13,7 +13,7 @@
     [single_trace_test]
       type = 'Exodiff'
       input = 'single_trace_line_source_ray_kernel.i'
-      exodiff = 'single_trace_line_source_ray_kernel_out.e'
+      exodiff = 'single_trace_line_source_ray_kernel_out.e  '
       detail = 'while only tracing the ray once.'
       allow_test_objects = true
     []
