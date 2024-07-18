@@ -167,9 +167,22 @@ static const std::string mass_flux = "mass_flux";
 static const std::string TKE = "k";
 static const std::string TKED = "epsilon";
 
+/**
+ * Wall treatment options
+ */
+enum class WallTreatmentEnum
+{
+  EQ_NEWTON = 0,
+  EQ_INCREMENTAL = 1,
+  EQ_LINEARIZED = 2,
+  NEQ = 3
+};
+
 // Turbulence constants
 static constexpr Real von_karman_constant = 0.4187;
 static constexpr Real E_turb_constant = 9.793;
+// Lower limit for mu_t
+static constexpr Real mu_t_low_limit = 1.0e-8;
 }
 
 namespace NS_DEFAULT_VALUES

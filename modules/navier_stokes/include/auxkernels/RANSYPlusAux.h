@@ -9,29 +9,26 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
-#include "MathFVUtils.h"
-#include "INSFVMomentumResidualObject.h"
+#include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
 #include "NS.h"
 
 /**
- * Computes the source and sink terms for the turbulent kinetic energy dissipation rate.
+ * Computes wall y+ based on wall functions.
  */
-class INSFVTKEDSourceSink : public FVElementalKernel
+class RANSYPlusAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
   virtual void initialSetup() override;
 
-  INSFVTKEDSourceSink(const InputParameters & parameters);
+  RANSYPlusAux(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual Real computeValue() override;
 
-protected:
-  /// The dimension of the simulation
+  /// the dimension of the simulation
   const unsigned int _dim;
 
   /// x-velocity
@@ -42,7 +39,7 @@ protected:
   const Moose::Functor<ADReal> * _w_var;
 
   /// Turbulent kinetic energy
-  const Moose::Functor<ADReal> & _k;
+  const Moose::Functor<ADReal> * _k;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
@@ -50,40 +47,17 @@ protected:
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
 
-  /// Turbulent dynamic viscosity
-  const Moose::Functor<ADReal> & _mu_t;
-
-  /// Wall boundaries
+  /// Wall boundary names
   const std::vector<BoundaryName> & _wall_boundary_names;
-
-  /// If the user wants to use the linearized model
-  const bool _linearized_model;
 
   /// Method used for wall treatment
   NS::WallTreatmentEnum _wall_treatment;
 
-  /// Value of the first epsilon closure coefficient
-  const Real _C1_eps;
-
-  /// Value of the second epsilon closure coefficient
-  const Real _C2_eps;
-
   /// C_mu constant
   const Real _C_mu;
 
-  // Production Limiter Constant
-  const Real _C_pl;
-
-  /// Stored strain rate
-  std::map<const Elem *, Real> _symmetric_strain_tensor_norm_old;
-  /// Map for the previous destruction field
-  std::map<const Elem *, Real> _old_destruction;
-
-  /// Map for the previous nonlienar iterate
-  std::map<const Elem *, Real> _pevious_nl_sol;
-
   ///@{
-  /** Maps for wall treatment */
+  /// Maps for wall treatement
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;

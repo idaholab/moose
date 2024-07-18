@@ -9,7 +9,6 @@
 
 #include "kEpsilonViscosityAux.h"
 #include "NavierStokesMethods.h"
-#include "NS.h"
 #include "NonlinearSystemBase.h"
 #include "libmesh/nonlinear_solver.h"
 
@@ -30,17 +29,20 @@ kEpsilonViscosityAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<Real>("C_mu", "Coupled turbulent kinetic energy closure.");
+  params.addParam<Real>("mu_t_ratio_max", 1e5, "Maximum allowable mu_t_ratio : mu/mu_t.");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
-  params.addParam<bool>(
-      "linearized_yplus",
-      false,
-      "Boolean to indicate if yplus must be estimate locally for the blending functions.");
   params.addParam<bool>("bulk_wall_treatment", false, "Activate bulk wall treatment.");
-  params.addParam<bool>(
-      "non_equilibrium_treatment",
-      false,
-      "Use non-equilibrium wall treatement (faster than standard wall treatement)");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
+  params.addParam<MooseEnum>("wall_treatment",
+                             wall_treatment,
+                             "The method used for computing the wall functions."
+                             "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
+  MooseEnum scale_limiter("none standard", "standard");
+  params.addParam<MooseEnum>("scale_limiter",
+                             scale_limiter,
+                             "The method used to limit the k-epsilon time scale."
+                             "'none', 'standard'");
   return params;
 }
 
@@ -55,10 +57,11 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
     _C_mu(getParam<Real>("C_mu")),
+    _mu_t_ratio_max(getParam<Real>("mu_t_ratio_max")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _linearized_yplus(getParam<bool>("linearized_yplus")),
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
-    _non_equilibrium_treatment(getParam<bool>("non_equilibrium_treatment"))
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
+    _scale_limiter(getParam<MooseEnum>("scale_limiter"))
 {
 }
 
@@ -75,62 +78,6 @@ kEpsilonViscosityAux::initialSetup()
   }
 }
 
-ADReal
-kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
-{
-
-  /// Setting up convenient parameters
-  const auto state = determineState();
-  const auto rho = _rho(makeElemArg(_current_elem), state);
-  const auto mu = _mu(makeElemArg(_current_elem), state);
-  const auto nu = mu / rho;
-
-  const Real a_c = 1 / NS::von_karman_constant;
-  const ADReal b_c =
-      1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
-  const ADReal c_c = u;
-
-  /// Satrting with linear guess
-  /// This is important to reduce the number of nonlinear iterations
-  ADReal u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
-
-  if (_linearized_yplus)
-    return u_tau;
-  else
-  {
-    // Newton-Raphson method to solve for u_tau
-    ADReal residual;
-    for (int i = 0; i < _MAX_ITERS_U_TAU; ++i)
-    {
-      residual = u / u_tau -
-                 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist * u_tau / nu);
-
-      if (residual < _REL_TOLERANCE)
-        return u_tau;
-
-      const ADReal residual_derivative =
-          -1 / u_tau *
-          (u / u_tau + 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist / nu));
-      const ADReal new_u_tau =
-          std::max(std::numeric_limits<Real>::epsilon(), u_tau - residual / residual_derivative);
-      u_tau = new_u_tau;
-    }
-
-    mooseWarning("Could not find the wall friction velocity (mu: ",
-                 mu,
-                 " rho: ",
-                 rho,
-                 " velocity: ",
-                 u,
-                 " wall distance: ",
-                 dist,
-                 ") - Relative residual: ",
-                 residual.value());
-
-    return u_tau;
-  }
-}
-
 Real
 kEpsilonViscosityAux::computeValue()
 {
@@ -138,6 +85,9 @@ kEpsilonViscosityAux::computeValue()
   const Elem & elem = *_current_elem;
   const auto current_argument = makeElemArg(_current_elem);
   const Moose::StateArg state = determineState();
+  const auto rho = _rho(makeElemArg(_current_elem), state);
+  const auto mu = _mu(makeElemArg(_current_elem), state);
+  const auto nu = mu / rho;
 
   // Determine if the element is wall bounded
   // and if bulk wall treatment needs to be activated
@@ -166,60 +116,86 @@ kEpsilonViscosityAux::computeValue()
     // Compute the velocity and direction of the velocity component that is parallel to the wall
     const ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
 
-    ADReal y_plus, u_tau;
-    if (_non_equilibrium_treatment)
+    // Switch for determining the near wall quantities
+    // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
+    ADReal y_plus;
+    ADReal mut_log; // turbulent log-layer viscosity
+    ADReal mu_wall; // total wall viscosity to obtain the shear stress at the wall
+
+    if (_wall_treatment == NS::WallTreatmentEnum::EQ_NEWTON)
     {
-      // Computing non-equilibrium nondimensional wall distance and friction velocity
-      y_plus = _rho(current_argument, state) * std::pow(_C_mu, 0.25) *
-               std::pow(_k(current_argument, state), 0.5) * min_wall_dist /
-               _mu(current_argument, state);
-      const auto von_karman_value =
-          (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus));
-      u_tau = std::sqrt(std::pow(_C_mu, 0.25) * std::pow(_k(current_argument, state), 0.5) *
-                        parallel_speed / von_karman_value);
+      // Full Newton-Raphson solve to find the wall quantities from the law of the wall
+      const auto u_tau = NS::findUStar(mu, rho, parallel_speed, min_wall_dist);
+      y_plus = min_wall_dist * u_tau * rho / mu;
+      mu_wall = rho * Utility::pow<2>(u_tau) * min_wall_dist / parallel_speed;
+      mut_log = mu_wall - mu;
+    }
+    else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
+    {
+      // Incremental solve on y_plus to get the near-wall quantities
+      y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), min_wall_dist);
+      mu_wall = mu * (NS::von_karman_constant * y_plus /
+                      std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
+      mut_log = mu_wall - mu;
+    }
+    else if (_wall_treatment == NS::WallTreatmentEnum::EQ_LINEARIZED)
+    {
+      // Linearized approximation to the wall function to find the near-wall quantities faster
+      const ADReal a_c = 1 / NS::von_karman_constant;
+      const ADReal b_c = 1 / NS::von_karman_constant *
+                         (std::log(NS::E_turb_constant * std::max(min_wall_dist, 1.0) / mu) + 1.0);
+      const ADReal c_c = parallel_speed;
+
+      const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
+      y_plus = min_wall_dist * u_tau * rho / mu;
+      mu_wall = rho * Utility::pow<2>(u_tau) * min_wall_dist / parallel_speed;
+      mut_log = mu_wall - mu;
+    }
+    else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
+    {
+      // Assign non-equilibrium wall function value
+      y_plus = min_wall_dist * std::sqrt(std::sqrt(_C_mu) * _k(current_argument, state)) * rho / mu;
+      mu_wall = mu * (NS::von_karman_constant * y_plus /
+                      std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
+      mut_log = mu_wall - mu;
     }
     else
-    {
-      u_tau = this->findUStarLocalMethod(parallel_speed, min_wall_dist);
-      y_plus = min_wall_dist * u_tau * _rho(current_argument, state) / _mu(current_argument, state);
-    }
+      mooseAssert(false, "For `kEpsilonViscosityAux` , wall treatment should not reach here");
 
-    Real mu_t_wall;
-    if (y_plus <= 5.0) // sub-laminar layer
-      mu_t_wall = 0.0;
-    else if (y_plus >= 30.0) // log-layer
+    if (y_plus <= 5.0)
+      // sub-laminar layer
+      mu_t = 0.0;
+    else if (y_plus >= 30.0)
+      // log-layer
+      mu_t = std::max(mut_log.value(), NS::mu_t_low_limit);
+    else
     {
-      const auto wall_val =
-          _rho(current_argument, state) * u_tau * min_wall_dist /
-              (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus)) -
-          _mu(current_argument, state);
-      mu_t_wall = wall_val.value();
-    }
-    else // buffer layer
-    {
-      const auto wall_val_log =
-          _rho(current_argument, state) * u_tau * min_wall_dist /
-              (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus)) -
-          _mu(current_argument, state);
+      // buffer layer
       const auto blending_function = (y_plus - 5.0) / 25.0;
-      const auto wall_val = blending_function * wall_val_log;
-      mu_t_wall = wall_val.value();
+      // the blending depends on the mut_log at y+=30
+      const auto mut_log = mu * (NS::von_karman_constant * 30.0 /
+                                     std::log(std::max(NS::E_turb_constant * 30.0, 1 + 1e-4)) -
+                                 1.0);
+      mu_t = std::max(raw_value(blending_function * mut_log), NS::mu_t_low_limit);
     }
-    // Limiting the minimum turbulent viscosity to 1e-10
-    // The reason is that smaller values can result in over dissipation
-    // when solving the epsilon equation, leading to an instable coupling
-    // in the k-epsilon system
-    // Note: 1e-10 is 10e7 times smaller than the viscosity of water
-    mu_t = std::max(mu_t_wall, 1e-10);
   }
   else
   {
-    // Computing bulk value for turbulent dynamic visocisity
-    const auto time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
+    ADReal time_scale;
+    if (_scale_limiter == "standard")
+    {
+      time_scale = std::max(_k(current_argument, state) / _epsilon(current_argument, state),
+                            std::sqrt(nu / _epsilon(current_argument, state)));
+    }
+    else
+    {
+      time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
+    }
+
     const ADReal mu_t_nl =
         _rho(current_argument, state) * _C_mu * _k(current_argument, state) * time_scale;
     mu_t = mu_t_nl.value();
   }
-
-  return mu_t;
+  // Turbulent viscosity limiter
+  return std::min(mu_t, _mu_t_ratio_max * raw_value(mu));
 }

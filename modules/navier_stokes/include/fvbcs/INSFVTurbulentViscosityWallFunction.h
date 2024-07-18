@@ -1,5 +1,3 @@
-
-
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -13,6 +11,7 @@
 
 #include "FVDirichletBCBase.h"
 #include "FVFluxBC.h"
+#include "NS.h"
 
 /**
  * Applies a wall function to the turbulent viscosity field
@@ -51,5 +50,9 @@ private:
   const Real _C_mu;
 
   /// Method used for wall treatment
-  const MooseEnum _wall_treatment;
+  NS::WallTreatmentEnum _wall_treatment;
+
+  // Mu_t evaluated at y+=30 for blending purposes
+  const Real _mut_30 =
+      (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);
 };
