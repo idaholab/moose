@@ -95,11 +95,11 @@ kEpsilonViscosityAux::computeValue()
   const bool wall_bounded = _wall_bounded.find(_current_elem) != _wall_bounded.end();
   Real mu_t;
 
-  // Computing wall value for near-wall elements if bulk wall treatement is activated
-  // bulk_wall_treatement should only be used for very coarse mesh problems
+  // Computing wall value for near-wall elements if bulk wall treatment is activated
+  // bulk_wall_treatment should only be used for very coarse mesh problems
   if (wall_bounded && _bulk_wall_treatment)
   {
-    // Computing wall value for turbulent dynamic visocisity
+    // Computing wall value for turbulent dynamic viscosity
     const auto & elem_distances = _dist[&elem];
     const auto min_wall_distance_iterator =
         (std::min_element(elem_distances.begin(), elem_distances.end()));
@@ -195,7 +195,7 @@ kEpsilonViscosityAux::computeValue()
 
     const ADReal mu_t_nl =
         _rho(current_argument, state) * _C_mu * _k(current_argument, state) * time_scale;
-    mu_t = mu_t_nl.value();
+    mu_t = std::max(NS::mu_t_low_limit, mu_t_nl.value());
   }
   // Turbulent viscosity limiter
   return std::min(mu_t, _mu_t_ratio_max * raw_value(mu));
