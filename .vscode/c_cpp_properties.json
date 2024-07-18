@@ -2,6 +2,7 @@
     "configurations": [
         {
             "name": "Apptainer moose-dev",
+            "browse": {"databaseFilename": "${workspaceFolder}/.vscode/cpp_intellisense.db"},
             "includePath": [
                 "${workspaceFolder}/**",
                 "/opt/libmesh/include/**",
