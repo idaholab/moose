@@ -497,8 +497,6 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
       params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
-      params.set<bool>("linearized_yplus") =
-          _turbulence_physics->getParam<bool>("linearized_yplus");
       params.set<MooseFunctorName>("T_w") = _energy_wall_functors[bc_ind];
       params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
