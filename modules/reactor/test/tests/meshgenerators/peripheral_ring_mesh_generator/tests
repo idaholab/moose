@@ -82,7 +82,7 @@
     input = 'ring_quadratic.i'
     exodiff = 'ring_boundary_layers_quadratic_in.e'
     cli_args = '--mesh-only ring_boundary_layers_quadratic_in.e'
-    requirement ='The system shall be able to add a peripheral ring consistin of quandratic with boundary layers to the input mesh and preserve volumes even with polygonization.'
+    requirement ='The system shall be able to add a peripheral ring consisting of quadratic elements with boundary layers to the input mesh and preserve volumes despite polygonization.'
     recover = false
     mesh_mode = 'REPLICATED'
   []

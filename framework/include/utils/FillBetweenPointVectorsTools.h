@@ -296,11 +296,11 @@ bool isCurveOpenSingleSegment(MeshBase & mesh,
  * @param mesh input mesh that contains the node series to be examined
  * @param max_node_radius the maximum radius of the nodes in the series
  * @param ordered_node_list the ordered node ids on the given curve
- * @param node_assm the assembly of the node id pairs that correspond vertices of a series of sides
+ * @param node_assm the assembly of the node id pairs that correspond to vertices of the sides on the closed loop
  * @param midpoint_node_list the node ids of the midpoints of the sides for quadratic sides
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param is_closed_loop whether the series of nodes form a closed loop with consecutive nodes's
- * azimuthal angles change monotonically
+ * azimuthal angles changing monotonically
  * @param suppress_exception whether to suppress the exceptions thrown by this function if the
  * boundary is not closed
  */
