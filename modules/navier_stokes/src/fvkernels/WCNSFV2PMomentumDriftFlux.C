@@ -26,6 +26,7 @@ WCNSFV2PMomentumDriftFlux::validParams()
   params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
+  params.set<unsigned short>("ghost_layers") = 5;
   params.renameParam("fd", "fraction_dispersed", "");
 
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
@@ -65,7 +66,7 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
 {
   _normal = _face_info->normal();
   const auto state = determineState();
-  const auto fd_state = Moose ::oldState();
+
   Moose::FaceArg face_arg;
   if (onBoundary(*_face_info))
     face_arg = singleSidedFaceArg();
@@ -85,12 +86,12 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
 
   ADReal face_rho_fd;
   if (onBoundary(*_face_info))
-    face_rho_fd = _rho_d(makeCDFace(*_face_info), state) * _f_d(makeCDFace(*_face_info), fd_state);
+    face_rho_fd = _rho_d(makeCDFace(*_face_info), state) * _f_d(makeCDFace(*_face_info), state);
   else
     Moose::FV::interpolate(_density_interp_method,
                            face_rho_fd,
-                           _rho_d(elemArg(), state) * _f_d(elemArg(), fd_state),
-                           _rho_d(neighborArg(), state) * _f_d(neighborArg(), fd_state),
+                           _rho_d(elemArg(), state) * _f_d(elemArg(), state),
+                           _rho_d(neighborArg(), state) * _f_d(neighborArg(), state),
                            *_face_info,
                            true);
 
