@@ -3,7 +3,6 @@
 #include "DisplacedProblem.h"
 #include "ExternalProblem.h"
 #include "ExclusiveMFEMMesh.h"
-#include "CoupledMFEMMesh.h"
 #include "MFEMMesh.h"
 #include "MFEMCoefficient.h"
 #include "MFEMVectorCoefficient.h"
