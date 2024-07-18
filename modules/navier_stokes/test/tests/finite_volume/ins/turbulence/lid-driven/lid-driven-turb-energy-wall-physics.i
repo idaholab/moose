@@ -37,10 +37,8 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
 bulk_wall_treatment = false
 walls = 'left top right bottom'
-max_mixing_length = 1e10
 linearized_yplus_mu_t = false
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
@@ -120,8 +118,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         Pr_t = ${Pr_t}
 
         # Model parameters
-        non_equilibrium_treatment = ${non_equilibrium_treatment}
-        max_mixing_length = ${max_mixing_length}
         C1_eps = ${C1_eps}
         C2_eps = ${C2_eps}
         C_mu = ${C_mu}

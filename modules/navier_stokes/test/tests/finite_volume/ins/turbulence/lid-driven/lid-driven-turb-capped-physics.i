@@ -30,9 +30,7 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
 walls = 'left top right bottom'
-max_mixing_length = 0.1
 bulk_wall_treatment = false
 linearized_yplus_mu_t = false
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
@@ -62,12 +60,9 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         initial_pressure = 0.2
         initial_velocity = '0 0 0'
 
-        inlet_boundaries = 'top'
-        momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_functors = '${lid_velocity} 0'
-
-        wall_boundaries = 'left right bottom'
-        momentum_wall_types = 'noslip noslip noslip'
+        wall_boundaries = 'top left right bottom'
+        momentum_wall_types = 'noslip noslip noslip noslip'
+        momentum_wall_functors = '${lid_velocity} 0 0 0 0 0 0 0'
 
         pin_pressure = true
         pinned_pressure_type = point-value-uo
@@ -90,8 +85,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         initial_tked = ${eps_init}
 
         # Model parameters
-        non_equilibrium_treatment = ${non_equilibrium_treatment}
-        max_mixing_length = ${max_mixing_length}
         C1_eps = ${C1_eps}
         C2_eps = ${C2_eps}
         C_mu = ${C_mu}
@@ -119,11 +112,11 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [Executioner]
-  type = Transient
-  end_time = 200
-  dt = 0.01
-  steady_state_detection = true
-  steady_state_tolerance = 1e-3
+  type = Steady
+  # end_time = 200
+  # dt = 0.01
+  # steady_state_detection = true
+  # steady_state_tolerance = 1e-3
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
   petsc_options_value = 'lu        NONZERO               0.5'
