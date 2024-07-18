@@ -1585,7 +1585,7 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhi(FEType type) const
   {
-    _need_second_derivative[type] = true;
+    _need_second_derivative.insert(type);
     buildFE(type);
     return _fe_shape_data[type]->_second_phi;
   }
@@ -1626,7 +1626,7 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiFace(FEType type) const
   {
-    _need_second_derivative[type] = true;
+    _need_second_derivative.insert(type);
     buildFaceFE(type);
     return _fe_shape_data_face[type]->_second_phi;
   }
@@ -1648,7 +1648,7 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiNeighbor(FEType type) const
   {
-    _need_second_derivative_neighbor[type] = true;
+    _need_second_derivative_neighbor.insert(type);
     buildNeighborFE(type);
     return _fe_shape_data_neighbor[type]->_second_phi;
   }
@@ -1672,7 +1672,7 @@ public:
   const typename OutputTools<OutputType>::VariablePhiSecond &
   feSecondPhiFaceNeighbor(FEType type) const
   {
-    _need_second_derivative_neighbor[type] = true;
+    _need_second_derivative_neighbor.insert(type);
     buildFaceNeighborFE(type);
     return _fe_shape_data_face_neighbor[type]->_second_phi;
   }
@@ -1680,7 +1680,7 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhi(FEType type) const
   {
-    _need_curl[type] = true;
+    _need_curl.insert(type);
     buildFE(type);
     return _fe_shape_data[type]->_curl_phi;
   }
@@ -1688,7 +1688,7 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFace(FEType type) const
   {
-    _need_curl[type] = true;
+    _need_curl.insert(type);
     buildFaceFE(type);
     return _fe_shape_data_face[type]->_curl_phi;
   }
@@ -1696,7 +1696,7 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiNeighbor(FEType type) const
   {
-    _need_curl[type] = true;
+    _need_curl.insert(type);
     buildNeighborFE(type);
     return _fe_shape_data_neighbor[type]->_curl_phi;
   }
@@ -1704,7 +1704,7 @@ public:
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFaceNeighbor(FEType type) const
   {
-    _need_curl[type] = true;
+    _need_curl.insert(type);
     buildFaceNeighborFE(type);
     return _fe_shape_data_face_neighbor[type]->_curl_phi;
   }
@@ -2809,13 +2809,13 @@ protected:
   /// adCoordTransformation()
   mutable bool _calculate_ad_coord;
 
-  mutable std::map<FEType, bool> _need_second_derivative;
-  mutable std::map<FEType, bool> _need_second_derivative_neighbor;
-  mutable std::map<FEType, bool> _need_curl;
-  mutable std::map<FEType, bool> _need_div;
-  mutable std::map<FEType, bool> _need_face_div;
-  mutable std::map<FEType, bool> _need_neighbor_div;
-  mutable std::map<FEType, bool> _need_face_neighbor_div;
+  mutable std::set<FEType> _need_second_derivative;
+  mutable std::set<FEType> _need_second_derivative_neighbor;
+  mutable std::set<FEType> _need_curl;
+  mutable std::set<FEType> _need_div;
+  mutable std::set<FEType> _need_face_div;
+  mutable std::set<FEType> _need_neighbor_div;
+  mutable std::set<FEType> _need_face_neighbor_div;
 
   /// The map from global index to variable scaling factor
   const NumericVector<Real> * _scaling_vector = nullptr;
