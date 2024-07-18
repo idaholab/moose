@@ -1288,7 +1288,7 @@ void PolygonMeshGeneratorBase::adjustPeripheralQuadraticElements(MeshBase & out_
     // adjust central node when using QUAD9
     if (boundary_quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
     {
-      Point pt_8 = elem->centroid();
+      Point pt_8 = elem->true_centroid();
       out_mesh.add_point(pt_8, elem->node_ptr(8)->id());
     }
   }
