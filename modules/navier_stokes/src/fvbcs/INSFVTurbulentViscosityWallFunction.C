@@ -136,6 +136,6 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     const auto blending_function = (y_plus - 5.0) / 25.0;
     // the blending depends on the mut_log at y+=30
     const auto mut_log = mu * _mut_30;
-    return blending_function * std::max(mut_log, NS::mu_t_low_limit);
+    return std::max(blending_function * mut_log, NS::mu_t_low_limit);
   }
 }
