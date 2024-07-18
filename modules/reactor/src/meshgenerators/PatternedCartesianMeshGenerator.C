@@ -126,7 +126,7 @@ PatternedCartesianMeshGenerator::validParams()
   params.addParamNamesToGroup(
       "pattern_boundary background_block_id background_block_name duct_block_ids duct_block_names "
       "external_boundary_id external_boundary_name create_inward_interface_boundaries "
-      "create_outward_interface_boundaries",
+      "create_outward_interface_boundaries boundary_region_element_type",
       "Customized Subdomain/Boundary");
   params.addParamNamesToGroup(
       "generate_control_drum_positions_file assign_control_drum_id position_file", "Control Drum");
@@ -843,9 +843,8 @@ PatternedCartesianMeshGenerator::generate()
     // boundary node locations. adjust side mid-edge nodes to the midpoints of the corner
     // points, and if QUAD9, adjust center point to new centroid.
     if (_boundary_quad_elem_type != QUAD_ELEM_TYPE::QUAD4)
-    {
       adjustPeripheralQuadraticElements(*out_mesh, _boundary_quad_elem_type);
-    }
+
     MeshTools::Modification::rotate(*out_mesh, 45.0, 0.0, 0.0);
   }
 

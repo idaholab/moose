@@ -1264,6 +1264,7 @@ PolygonMeshGeneratorBase::adjustPeripheralQuadraticElements(
   const auto side_list = out_mesh.get_boundary_info().build_side_list();
 
   // select out elements on outer boundary
+  // std::set used to filter duplicate elem_ids
   std::set<dof_id_type> elem_set;
   for (auto side_item : side_list)
   {
@@ -1275,7 +1276,7 @@ PolygonMeshGeneratorBase::adjustPeripheralQuadraticElements(
   }
 
   // adjust nodes for outer boundary elements
-  for (dof_id_type elem_id : elem_set)
+  for (const auto elem_id : elem_set)
   {
     Elem * elem = out_mesh.elem_ptr(elem_id);
 

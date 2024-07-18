@@ -126,7 +126,7 @@ PatternedHexMeshGenerator::validParams()
       quad_elem_type,
       "Type of the quadrilateral elements to be generated in the boundary region.");
   params.addParamNamesToGroup(
-      "background_block_id background_block_name duct_block_ids "
+      "background_block_id background_block_name duct_block_ids boundary_region_element_type "
       "duct_block_names external_boundary_id external_boundary_name "
       "create_inward_interface_boundaries create_outward_interface_boundaries",
       "Customized Subdomain/Boundary");
@@ -873,9 +873,7 @@ PatternedHexMeshGenerator::generate()
     // boundary node locations. adjust side mid-edge nodes to the midpoints of the corner
     // points, and if QUAD9, adjust center point to new centroid.
     if (_boundary_quad_elem_type != QUAD_ELEM_TYPE::QUAD4)
-    {
       adjustPeripheralQuadraticElements(*out_mesh, _boundary_quad_elem_type);
-    }
   }
 
   MeshTools::Modification::rotate(*out_mesh, _rotate_angle, 0.0, 0.0);
