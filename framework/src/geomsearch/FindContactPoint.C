@@ -186,8 +186,7 @@ findContactPoint(PenetrationInfo & p_info,
     // Improvised line search in case the update is too large and gets out of the element so bad
     // that we cannot reinit at the new point
     Real mult = 1;
-    bool success = false;
-    while (!success)
+    while (true)
     {
       try
       {
@@ -198,11 +197,11 @@ findContactPoint(PenetrationInfo & p_info,
 
         points[0] = ref_point;
         fe_side->reinit(side, &points);
-        success = true;
         d = secondary_point - phys_point[0];
 
         // we don't multiply by 'mult' because it is used for convergence
         update_size = update.l2_norm();
+        break;
       }
       catch (libMesh::LogicError & e)
       {
@@ -218,7 +217,7 @@ findContactPoint(PenetrationInfo & p_info,
 #endif
           update_size = update.l2_norm();
           d = (secondary_point - phys_point[0]) * mult;
-          success = true;
+          break;
         }
       }
     }
