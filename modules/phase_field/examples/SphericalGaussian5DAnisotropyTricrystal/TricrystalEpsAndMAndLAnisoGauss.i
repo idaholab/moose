@@ -1,5 +1,5 @@
 
-# ############################### Tricrystal - Epsilon Model - EpsAndMAndLAnisoGauss ##########################
+# ############################### Tricrystal - Epsilon Model - EpsAndMAndLAnisoGauss  ###########################
 
 [Mesh]
 
