@@ -34,6 +34,8 @@ public:
   std::vector<BoundaryName> turbulenceWalls() const { return _turbulence_walls; }
   /// The turbulence wall treatment (same for all turbulence walls currently)
   MooseEnum turbulenceWallTreatment() const { return _wall_treatment; }
+  /// The name of the turbulent kinetic energy variable
+  MooseFunctorName tkeName() const { return _tke_name; }
 
 protected:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;

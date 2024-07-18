@@ -33,6 +33,8 @@ INSFVTurbulentViscosityWallFunction::validParams()
                              wall_treatment,
                              "The method used for computing the wall functions "
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
 }
 
@@ -48,7 +50,8 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _k(getFunctor<ADReal>(NS::TKE)),
     _C_mu(getParam<Real>("C_mu")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>())
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
 }
 

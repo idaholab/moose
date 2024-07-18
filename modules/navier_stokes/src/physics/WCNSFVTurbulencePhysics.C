@@ -614,6 +614,8 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<bool>("non_equilibrium_treatment") = getParam<bool>("non_equilibrium_treatment");
     params.set<Real>("max_mixing_length") = getParam<Real>("max_mixing_length");
+    // Currently only Newton method for WCNSFVTurbulencePhysics
+    params.set<bool>("newton_solve") = true;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
     getProblem().addFVKernel(kernel_type, prefix() + "tke_source_sink", params);
@@ -705,6 +707,8 @@ WCNSFVTurbulencePhysics::addFVBCs()
     params.set<MooseEnum>("wall_treatment") = _wall_treatment;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+    // Currently only Newton method for WCNSFVTurbulencePhysics
+    params.set<bool>("newton_solve") = true;
 
     getProblem().addFVBC(bc_type, prefix() + "turbulence_walls", params);
     // Energy wall function boundary conditions are added in the WCNSFVFluidEnergyPhysics

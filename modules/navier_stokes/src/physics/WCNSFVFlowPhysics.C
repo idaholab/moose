@@ -640,7 +640,8 @@ WCNSFVFlowPhysics::addINSMomentumViscousDissipationKernels()
 
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
-
+  // Currently only Newton method for WCNSFVFlowPhysics
+  params.set<bool>("newton_solve") = true;
   for (const auto d : make_range(dimension()))
   {
     params.set<NonlinearVariableName>("variable") = _velocity_names[d];

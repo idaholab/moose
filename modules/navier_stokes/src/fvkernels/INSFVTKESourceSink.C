@@ -42,6 +42,8 @@ INSFVTKESourceSink::validParams()
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>("C_pl", 10.0, "Production Limiter Constant Multiplier.");
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
 
   return params;
 }
@@ -60,7 +62,8 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _linearized_model(getParam<bool>("linearized_model")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
-    _C_pl(getParam<Real>("C_pl"))
+    _C_pl(getParam<Real>("C_pl")),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -166,19 +169,17 @@ INSFVTKESourceSink::computeQpResidual()
       if (y_plus < 11.25)
       {
         destruction += destruction_visc;
-        if (_nonlinear_solve)
+        if (_newton_solve)
           destruction += 0 * destruction_log;
       }
       else
       {
         destruction += destruction_log;
-        if (_nonlinear_solve)
+        if (_newton_solve)
           destruction += 0 * destruction_visc;
         production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(_var(elem_arg, old_state) + 1e-10) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       }
-
-      if
     }
 
     residual = (destruction - production) * _var(elem_arg, state);

@@ -502,6 +502,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
       params.set<MooseFunctorName>("T_w") = _energy_wall_functors[bc_ind];
       params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+      params.set<MooseFunctorName>(NS::TKE) = _turbulence_physics->tkeName();
       if (_thermal_conductivity_name.size() != 1)
         mooseError("Several anisotropic thermal conductivity (kappa) regions have been specified. "
                    "Selecting the right kappa coefficient for the turbulence boundaries is not "
@@ -513,7 +514,8 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
       const std::string u_names[3] = {"u", "v", "w"};
       for (const auto d : make_range(dimension()))
         params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
-
+      // Currently only Newton method for WCNSFVFluidHeatTransferPhysics
+      params.set<bool>("newton_solve") = true;
       getProblem().addFVBC(bc_type, prefix() + "wallfunction_" + wall_boundaries[bc_ind], params);
     }
   }
