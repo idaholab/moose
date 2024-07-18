@@ -542,6 +542,15 @@ protected:
                         const bool create_inward_interface_boundaries = false,
                         const bool create_outward_interface_boundaries = true);
 
+/**
+ * Adjusts the mid-edge node locations in boundary regions when using quadratic elements with
+ * uniform boundary node spacing enabled.
+ * @param out_mesh mesh to be adjusted.
+ * @param boundary_quad_elem_type boundary quad element type.
+ */
+void adjustPeripheralQuadraticElements(MeshBase & out_mesh,
+                                       const QUAD_ELEM_TYPE boundary_quad_elem_type) const;
+
   /**
    * Calculates the point coordinates of within a parallelogram region using linear interpolation.
    * @param pi_1_x x coordinate of the first inner side point (parallelogram vertex)
