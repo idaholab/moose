@@ -114,7 +114,7 @@ if [ ! -d $PETSC_DIR/lib/petsc ]; then exit 1; fi
 #-----------------------------------------------------------------------------#
 # Install Libmesh to system path
 #-----------------------------------------------------------------------------#
-ARG LIBMESH_REV=1c5369aa05eaae8ebeb7930845fce3b1d59cbb37
+ARG LIBMESH_REV=81a423f6eaa813c5d6d3a92eb2a24cc7cc2b8e34
 ARG LIBMESH_OPTIONS
 ARG LIBMESH_METHODS="opt dbg"
 ENV LIBMESH_DIR=/usr/local \
