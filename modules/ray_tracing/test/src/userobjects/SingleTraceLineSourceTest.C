@@ -8,9 +8,9 @@ InputParameters
 SingleTraceLineSourceTest::validParams()
 {
   auto params = RepeatableRayStudy::validParams();
-  params.set<ExecFlagEnum>("execute_on", "TIMESTEP_BEGIN PRE_KERNELS");
-  params.addParam<TagName>("residual_vector_tag", "the vector tag for the residual tag you will accumulate into");
-
+  params.addParam<TagName>("residual_vector_tag",
+                           "the vector tag for the residual tag you will accumulate into");
+  params.set<bool>("allow_other_flags_with_prekernels") = true;
   return params;
 }
 

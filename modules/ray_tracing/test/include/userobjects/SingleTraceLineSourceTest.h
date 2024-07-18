@@ -21,8 +21,6 @@ public:
   virtual void execute() override;
 
 protected:
-  void defineRays() override;
-
   const TagName & _residual_tag_name;
 
   bool _has_traced;
