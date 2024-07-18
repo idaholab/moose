@@ -1164,12 +1164,14 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
     const std::vector<std::pair<Real, Real>> & positions_inner,
     const std::vector<std::pair<Real, Real>> & d_positions_outer,
     const subdomain_id_type id_shift,
+    const QUAD_ELEM_TYPE quad_elem_type,
     const bool create_inward_interface_boundaries,
     const bool create_outward_interface_boundaries)
 {
   auto mesh = buildReplicatedMesh(2);
   std::pair<Real, Real> positions_p;
 
+  // generate node positions
   for (unsigned int i = 0; i <= peripheral_invervals; i++)
   {
     for (unsigned int j = 0; j <= num_sectors_per_side / 2; j++)
@@ -1213,32 +1215,86 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
   {
     for (unsigned int j = 0; j < num_sectors_per_side; j++)
     {
-      Elem * elem_Quad4 = mesh->add_elem(new Quad4);
-      elem_Quad4->set_node(0) = mesh->node_ptr(j + (num_sectors_per_side + 1) * i);
-      elem_Quad4->set_node(1) = mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * i);
-      elem_Quad4->set_node(2) = mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * (i + 1));
-      elem_Quad4->set_node(3) = mesh->node_ptr(j + (num_sectors_per_side + 1) * (i + 1));
-      elem_Quad4->subdomain_id() = PERIPHERAL_ID_SHIFT + id_shift;
+      std::unique_ptr<Elem> new_elem;
+
+      new_elem = std::make_unique<Quad4>();
+      new_elem->set_node(0) = mesh->node_ptr(j + (num_sectors_per_side + 1) * (i));
+      new_elem->set_node(1) = mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * (i));
+      new_elem->set_node(2) = mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * (i + 1));
+      new_elem->set_node(3) = mesh->node_ptr(j + (num_sectors_per_side + 1) * (i + 1));
+
+      Elem * elem = mesh->add_elem(std::move(new_elem));
+
+      // add subdoamin and boundary IDs
+      elem->subdomain_id() = PERIPHERAL_ID_SHIFT + id_shift;
       if (i == 0)
       {
-        boundary_info.add_side(elem_Quad4, 0, OUTER_SIDESET_ID);
+        boundary_info.add_side(elem, 0, OUTER_SIDESET_ID);
         if (create_inward_interface_boundaries)
-          boundary_info.add_side(elem_Quad4, 0, SLICE_ALT + id_shift * 2);
+          boundary_info.add_side(elem, 0, SLICE_ALT + id_shift * 2);
       }
       if (i == peripheral_invervals - 1)
       {
-        boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID);
+        boundary_info.add_side(elem, 2, OUTER_SIDESET_ID);
         if (create_outward_interface_boundaries)
-          boundary_info.add_side(elem_Quad4, 2, SLICE_ALT + id_shift * 2 + 1);
+          boundary_info.add_side(elem, 2, SLICE_ALT + id_shift * 2 + 1);
       }
       if (j == 0)
-        boundary_info.add_side(elem_Quad4, 3, OUTER_SIDESET_ID);
+        boundary_info.add_side(elem, 3, OUTER_SIDESET_ID);
       if (j == num_sectors_per_side - 1)
-        boundary_info.add_side(elem_Quad4, 1, OUTER_SIDESET_ID);
+        boundary_info.add_side(elem, 1, OUTER_SIDESET_ID);
     }
   }
 
+  // convert element to second order if needed
+  if (quad_elem_type != QUAD_ELEM_TYPE::QUAD4)
+  {
+    // full_ordered 2nd order element --> QUAD9, otherwise QUAD8
+    const bool full_ordered = (quad_elem_type == QUAD_ELEM_TYPE::QUAD9);
+    mesh->all_second_order(full_ordered);
+  }
+
   return mesh;
+}
+
+void
+PolygonMeshGeneratorBase::adjustPeripheralQuadraticElements(
+    MeshBase & out_mesh, const QUAD_ELEM_TYPE boundary_quad_elem_type) const
+{
+  const auto side_list = out_mesh.get_boundary_info().build_side_list();
+
+  // select out elements on outer boundary
+  // std::set used to filter duplicate elem_ids
+  std::set<dof_id_type> elem_set;
+  for (auto side_item : side_list)
+  {
+    boundary_id_type boundary_id = std::get<2>(side_item);
+    dof_id_type elem_id = std::get<0>(side_item);
+
+    if (boundary_id == OUTER_SIDESET_ID)
+      elem_set.insert(elem_id);
+  }
+
+  // adjust nodes for outer boundary elements
+  for (const auto elem_id : elem_set)
+  {
+    Elem * elem = out_mesh.elem_ptr(elem_id);
+
+    // adjust right side mid-edge node
+    Point pt_5 = (elem->point(1) + elem->point(2)) / 2.0;
+    out_mesh.add_point(pt_5, elem->node_ptr(5)->id());
+
+    // adjust left side mid-edge node
+    Point pt_7 = (elem->point(0) + elem->point(3)) / 2.0;
+    out_mesh.add_point(pt_7, elem->node_ptr(7)->id());
+
+    // adjust central node when using QUAD9
+    if (boundary_quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
+    {
+      Point pt_8 = elem->true_centroid();
+      out_mesh.add_point(pt_8, elem->node_ptr(8)->id());
+    }
+  }
 }
 
 std::pair<Real, Real>

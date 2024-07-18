@@ -21,6 +21,8 @@ In order to generate the square patterned mesh, three fundamental parameters are
 
 When [!param](/Mesh/PatternedCartesianMeshGenerator/pattern_boundary) is set as `expanded`, the user can also provide [!param](/Mesh/PatternedCartesianMeshGenerator/duct_sizes) in either `apothem` (center-to-face) or `radius` (center-to-vertex) style determined by [!param](/Mesh/PatternedCartesianMeshGenerator/duct_sizes_style) to add external duct regions to the generated square mesh. Also, [!param](/Mesh/PatternedCartesianMeshGenerator/square_size) must also be provided to define the external square boundary size. In some cases, if [!param](/Mesh/PatternedCartesianMeshGenerator/square_size) is small enough, the square external boundary may cut off some of the stitched square meshes. As long as the concentric circular (`rings`) regions are not cut off, the rest of the mesh is deformed to accommodate the limited external boundaries. Users can also set [!param](/Mesh/PatternedCartesianMeshGenerator/deform_non_circular_region) as `false` to prevent the non-circular regions from being deformed.
 
+ By default, the generated boundary mesh consists of linear elements. If quadratic elements are preferred, users can set [!param](/Mesh/PatternedCartesianMeshGenerator/boundary_region_element_type) as `QUAD8` or `QUAD9`.
+
 ## MeshMetaData of Input and Output Meshes
 
 As mentioned before, the `PatternedCartesianMeshGenerator` is capable of two modes of mesh patterning jobs, which require different mesh metadata from the input meshes to be patterned. These mesh metadata can be automatically assigned by the typical mesh generators that produce the input meshes. Alternatively, users can manually assign the required metadata using [`AddMetaDataGenerator`](/AddMetaDataGenerator.md).

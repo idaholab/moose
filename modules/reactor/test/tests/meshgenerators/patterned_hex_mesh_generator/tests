@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628 #20148 #20514 #23367 #24508 #26921'
+  issues = '#18628 #20148 #20514 #23367 #24508 #26921 #28164'
   [hexagon_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -16,6 +16,46 @@
                 Mesh/pattern/uniform_mesh_on_sides=true
                 --mesh-only "patterned_hex.e"'
     requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary.'
+    recover = false
+  []
+  [hexagon_boundary_quad8]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_hex_quad8.e'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
+                Mesh/pattern/background_block_name="assem_block"
+                Mesh/pattern/hexagon_size=18
+                Mesh/pattern/duct_sizes=17
+                Mesh/pattern/duct_intervals=1
+                Mesh/pattern/duct_block_ids=30
+                Mesh/pattern/duct_block_names="duct_block"
+                Mesh/pattern/uniform_mesh_on_sides=true
+                Mesh/pattern/boundary_region_element_type=QUAD8
+                Mesh/hex_1/tri_element_type=TRI6
+                Mesh/hex_1/quad_element_type=QUAD8
+                --mesh-only "patterned_hex_quad8.e"'
+    requirement ='The system shall be able to stitch hexagonal meshes to form a larger patterned mesh with a hexagonal boundary using QUAD8 elements.'
+    recover = false
+  []
+  [hexagon_boundary_quad9]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_hex_quad9.e'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
+                Mesh/pattern/background_block_name="assem_block"
+                Mesh/pattern/hexagon_size=18
+                Mesh/pattern/duct_sizes=17
+                Mesh/pattern/duct_intervals=1
+                Mesh/pattern/duct_block_ids=30
+                Mesh/pattern/duct_block_names="duct_block"
+                Mesh/pattern/uniform_mesh_on_sides=true
+                Mesh/pattern/boundary_region_element_type=QUAD9
+                Mesh/hex_1/tri_element_type=TRI6
+                Mesh/hex_1/quad_element_type=QUAD9
+                --mesh-only "patterned_hex_quad9.e"'
+    requirement ='The system shall be able to stitch hexagonal meshes to form a larger patterned mesh with a hexagonal boundary using QUAD9 elements.'
     recover = false
   []
   [hexagon_boundary_no_interface]
