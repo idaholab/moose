@@ -320,7 +320,7 @@ void isClosedLoop(MeshBase & mesh,
  * @param mesh input mesh that contains the node series to be examined
  * @param max_node_radius the maximum radius of the nodes in the series
  * @param ordered_node_list the ordered node ids on the given curve
-    * @param node_assm the assembly of the node id pairs that correspond vertices of a series of sides
+ * @param node_assm the assembly of the node id pairs that correspond vertices of a series of sides
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param is_closed_loop whether the series of nodes form a closed loop with consecutive nodes's
  * azimuthal angles change monotonically
@@ -335,7 +335,6 @@ void isClosedLoop(MeshBase & mesh,
                   const std::string input_type,
                   bool & is_closed_loop,
                   const bool suppress_exception = false);
-
 
 /**
  * Decides whether a boundary of a given mesh is an external boundary.

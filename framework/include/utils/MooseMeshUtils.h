@@ -290,7 +290,8 @@ bool hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name);
  * based on connectivity
  * @param node_assm vector of pairs of node ids that represent the sides
  * @param elem_id_list vector of element ids that represent the elements that contain the sides
- * @param midpoint_node_list vector of node ids that represent the midpoints of the sides for quadratic sides
+ * @param midpoint_node_list vector of node ids that represent the midpoints of the sides for
+ * quadratic sides
  * @param ordered_node_list vector of node ids that represent the ordered nodes
  * @param ordered_elem_id_list vector of element corresponding to the ordered nodes
  * */
