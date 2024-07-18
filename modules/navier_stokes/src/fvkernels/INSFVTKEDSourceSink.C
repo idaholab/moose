@@ -219,13 +219,19 @@ INSFVTKEDSourceSink::computeQpResidual()
     // Apply production limiter
     production_k = std::min(production_k, production_limit);
 
-    const auto time_scale = raw_value(_k(elem_arg, old_state) / _var(elem_arg, old_state));
+    const auto k = raw_value(_k(elem_arg, old_state));
+    const auto eps = raw_value(_var(elem_arg, old_state));
 
-    production = _C1_eps * production_k / time_scale;
-
-    destruction = _C2_eps * rho * _var(elem_arg, state) / time_scale;
+    production = _C1_eps * production_k;
+    destruction = _C2_eps * rho * _var(elem_arg, state);
 
     residual = destruction - production;
+    // Multiply by time scale
+    if (!MooseUtils::absoluteFuzzyEqual(k, 0))
+    {
+      residual /= k;
+      residual *= eps;
+    }
   }
 
   return residual;
