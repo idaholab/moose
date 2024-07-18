@@ -41,6 +41,7 @@ protected:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
 private:
+  virtual void initializePhysicsAdditional() override;
   virtual void actOnAdditionalTasks() override;
   /// Retrieve the other WCNSFVPhysics at play in the simulation to be able
   /// to add the relevant terms (turbulent diffusion notably)
