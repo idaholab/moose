@@ -244,12 +244,17 @@ INSFVTKESourceSink::computeQpResidual()
 
     production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    const auto time_scale = raw_value(_var(elem_arg, old_state) / _epsilon(elem_arg, old_state));
+    const auto time_scale_eps = raw_value(_var(elem_arg, old_state));
 
-    destruction = rho * _var(elem_arg, state) / time_scale;
+    if (MooseUtils::absoluteFuzzyEqual(time_scale_eps, 0))
+      destruction = rho * _var(elem_arg, state);
+    else
+      destruction =
+          rho * _var(elem_arg, state) / time_scale_eps * raw_value(_epsilon(elem_arg, old_state));
 
     // k-Production limiter (needed for flows with stagnation zones)
-    const ADReal production_limit = _C_pl * rho * _epsilon(elem_arg, old_state);
+    const ADReal production_limit =
+        _C_pl * rho * std::max(_epsilon(elem_arg, old_state), ADReal(0));
 
     // Apply production limiter
     production = std::min(production, production_limit);

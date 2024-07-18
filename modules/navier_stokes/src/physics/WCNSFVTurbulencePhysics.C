@@ -774,7 +774,7 @@ WCNSFVTurbulencePhysics::addInitialConditions()
                  "C_mu TKE_initial^2 / TKED_initial");
 
     params.set<VariableName>("variable") = _turbulent_viscosity_name;
-    getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_eff", params);
+    getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_turb", params);
   }
   else if (isParamSetByUser("initial_mu_t"))
     paramError("initial_mu_t",
