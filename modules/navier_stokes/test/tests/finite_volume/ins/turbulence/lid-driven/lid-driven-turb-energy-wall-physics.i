@@ -24,11 +24,6 @@ Pr_t = 0.9
 lid_velocity = 1.0
 side_length = 0.1
 
-### Initial Conditions ###
-intensity = 0.01
-k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
-eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
-
 ### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
@@ -36,10 +31,17 @@ C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
 
+### Initial Conditions ###
+intensity = 0.01
+k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
+eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
+mu_t_init = '${fparse rho * C_mu * k_init * k_init / eps_init}'
+
 ### Modeling parameters ###
 bulk_wall_treatment = false
 walls = 'left top right bottom'
-wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment_eps = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment_tem = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
   [gen]
@@ -66,6 +68,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 
         # Initial conditions
         initial_pressure = 0.2
+        # Need a non-zero starting velocity to avoid
+        # sparsity pattern + Newton error
         initial_velocity = '1e-10 1e-10 0'
 
         wall_boundaries = 'left right bottom top'
@@ -112,6 +116,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Initialization
         initial_tke = ${k_init}
         initial_tked = ${eps_init}
+        initial_mu_t = ${mu_t_init}
 
         # Fluid properties
         Pr_t = ${Pr_t}
@@ -126,7 +131,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Wall parameters
         turbulence_walls = ${walls}
         bulk_wall_treatment = ${bulk_wall_treatment}
-        wall_treatment = ${wall_treatment}
+        wall_treatment_eps = ${wall_treatment_eps}
+        wall_treatment_T = ${wall_treatment_tem}
 
         # Numerical parameters
         turbulent_viscosity_two_term_bc_expansion = false
@@ -142,6 +148,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
 
   # Necessary for these cases
   snesmf_reuse_base = false

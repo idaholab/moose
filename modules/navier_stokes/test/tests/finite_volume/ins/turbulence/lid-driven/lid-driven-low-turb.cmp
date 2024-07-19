@@ -1,0 +1,6 @@
+ELEMENT VARIABLES relative 5e-5 floor 1e-10
+	vel_x    absolute 5.e-3
+	vel_y    absolute 5.e-3
+	pressure absolute 1.e-3
+	TKE  absolute 5.e-5
+	TKED  absolute 5.e-5

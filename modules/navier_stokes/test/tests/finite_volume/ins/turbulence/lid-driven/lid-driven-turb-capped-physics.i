@@ -98,7 +98,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Wall parameters
         turbulence_walls = ${walls}
         bulk_wall_treatment = ${bulk_wall_treatment}
-        wall_treatment = ${wall_treatment}
+        wall_treatment_eps = ${wall_treatment}
 
         # Numerical parameters
         turbulent_viscosity_two_term_bc_expansion = false
@@ -145,8 +145,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   nl_rel_tol = 1e-8
   nl_max_its = 100
   line_search = none
-
-  # automatic_scaling = true
 []
 
 [Outputs]

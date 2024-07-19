@@ -61,23 +61,25 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         dynamic_viscosity = ${mu}
 
         initial_pressure = 0.2
-        initial_velocity = '0 0 0'
+        initial_velocity = '1e-10 1e-10 0'
 
-        wall_boundaries = 'top left right bottom'
+        wall_boundaries = 'left right top bottom'
         momentum_wall_types = 'noslip noslip noslip noslip'
-        momentum_wall_functors = '${lid_velocity} 0 0 0 0 0 0 0'
+        momentum_wall_functors = '0 0 0 0 ${lid_velocity} 0 0 0'
 
         pin_pressure = true
         pinned_pressure_type = average
         pinned_pressure_value = 0
 
-        momentum_two_term_bc_expansion = false
-        pressure_two_term_bc_expansion = false
+        mu_interp_method = 'average'
       []
     []
     [Turbulence]
       [keps]
         turbulence_handling = 'k-epsilon'
+
+        # only needed for comparing input syntax with DumpObjectsProblem
+        transient = true
 
         tke_name = TKE
         tked_name = TKED
@@ -97,13 +99,13 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Wall parameters
         turbulence_walls = ${walls}
         bulk_wall_treatment = ${bulk_wall_treatment}
-        wall_treatment = ${wall_treatment}
+        wall_treatment_eps = ${wall_treatment}
 
         # Numerical parameters
         turbulent_viscosity_two_term_bc_expansion = false
         turbulent_viscosity_interp_method = 'average'
-        # output_mu_t = false
-        mu_t_as_aux_variable = true
+        mu_t_as_aux_variable = false
+        output_mu_t = false
       []
     []
   []
@@ -128,8 +130,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   type = Transient
   end_time = 200
   dt = 0.01
-  steady_state_detection = true
-  steady_state_tolerance = 1e-3
+  # To force it to end on the same step as the gold file
+  num_steps = 160
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
   petsc_options_value = 'lu        NONZERO               0.5'
