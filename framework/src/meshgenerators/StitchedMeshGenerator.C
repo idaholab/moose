@@ -156,18 +156,17 @@ StitchedMeshGenerator::generate()
 
     const bool use_binary_search = (_algorithm == "BINARY");
 
+    // Meshes must be prepared to get the global boundary ids
+    if (!mesh->is_prepared())
+      mesh->prepare_for_use();
+    if (!meshes[i]->is_prepared())
+      meshes[i]->prepare_for_use();
+
     // Avoid chaotic boundary merging due to overlapping ids in meshes by simply renumbering the
     // boundaries in the meshes we are going to stitch onto the base mesh
     // This is only done if there is an overlap
     if (_prevent_boundary_ids_overlap)
     {
-      // Meshes must be prepared to get the global boundary ids and global boundary ids
-      // must be used in parallel to be sure to renumber boundaries consistently across processes
-      if (!mesh->is_prepared())
-        mesh->prepare_for_use();
-      if (!meshes[i]->is_prepared())
-        meshes[i]->prepare_for_use();
-
       const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
       const auto stitched_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
 

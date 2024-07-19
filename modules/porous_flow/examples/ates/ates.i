@@ -231,6 +231,7 @@ cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/d
     inputs = 'aq_bottom_fine cap_bottom_fine'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'bottom top'
+    merge_boundaries_with_same_name = false
   []
   [aq_and_cap_fine]
     type = StitchedMeshGenerator
