@@ -17,22 +17,23 @@ rho = 1.0
 lid_velocity = 1.0
 side_length = 0.1
 
-### Initial Conditions ###
-intensity = 0.01
-k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
-eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
-
 ### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
+C_pl = 0.1
+
+### Initial Conditions ###
+intensity = 0.01
+k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
+eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
+mu_t_init = '${fparse rho * C_mu * k_init * k_init / eps_init}'
 
 ### Modeling parameters ###
 walls = 'left top right bottom'
 bulk_wall_treatment = false
-linearized_yplus_mu_t = false
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
@@ -83,11 +84,13 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Initialization
         initial_tke = ${k_init}
         initial_tked = ${eps_init}
+        initial_mu_t = ${mu_t_init}
 
         # Model parameters
         C1_eps = ${C1_eps}
         C2_eps = ${C2_eps}
         C_mu = ${C_mu}
+        C_pl = ${C_pl}
 
         sigma_k = ${sigma_k}
         sigma_eps = ${sigma_eps}
@@ -95,11 +98,11 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Wall parameters
         turbulence_walls = ${walls}
         bulk_wall_treatment = ${bulk_wall_treatment}
-        linearized_yplus = ${linearized_yplus_mu_t}
         wall_treatment = ${wall_treatment}
 
         # Numerical parameters
         turbulent_viscosity_two_term_bc_expansion = false
+        mu_t_as_aux_variable = true
       []
     []
   []
@@ -111,19 +114,39 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   error_on_jacobian_nonzero_reallocation = false
 []
 
+[AuxVariables]
+  [dummy]
+    type = MooseVariableConstMonomial
+  []
+[]
+[Bounds]
+  [min_tke]
+    type = ConstantBounds
+    variable = dummy
+    bound_value = 1e-8
+    bounded_variable = TKE
+    bound_type = lower
+  []
+  [min_eps]
+    type = ConstantBounds
+    variable = dummy
+    bound_value = 1e-8
+    bounded_variable = TKED
+    bound_type = lower
+  []
+[]
+
 [Executioner]
   type = Steady
-  # end_time = 200
-  # dt = 0.01
-  # steady_state_detection = true
-  # steady_state_tolerance = 1e-3
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
-  petsc_options_value = 'lu        NONZERO               0.5'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_type'
+  petsc_options_value = 'lu        NONZERO              vinewtonrsls '
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
-  nl_max_its = 50
+  nl_max_its = 100
   line_search = none
+
+  # automatic_scaling = true
 []
 
 [Outputs]

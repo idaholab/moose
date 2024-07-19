@@ -68,9 +68,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         momentum_wall_functors = '${lid_velocity} 0 0 0 0 0 0 0'
 
         pin_pressure = true
-        pinned_pressure_type = point-value-uo
+        pinned_pressure_type = average
         pinned_pressure_value = 0
-        pinned_pressure_point = '0.01 0.099 0.0'
 
         momentum_two_term_bc_expansion = false
         pressure_two_term_bc_expansion = false
@@ -102,6 +101,9 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 
         # Numerical parameters
         turbulent_viscosity_two_term_bc_expansion = false
+        turbulent_viscosity_interp_method = 'average'
+        # output_mu_t = false
+        mu_t_as_aux_variable = true
       []
     []
   []

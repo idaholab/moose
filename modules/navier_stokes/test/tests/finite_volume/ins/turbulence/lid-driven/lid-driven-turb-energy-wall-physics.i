@@ -39,7 +39,6 @@ C_mu = 0.09
 ### Modeling parameters ###
 bulk_wall_treatment = false
 walls = 'left top right bottom'
-linearized_yplus_mu_t = false
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
@@ -74,7 +73,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         momentum_wall_functors = '0 0 0 0 0 0 ${lid_velocity} 0'
 
         pin_pressure = true
-        pinned_pressure_type = point-value-uo
+        pinned_pressure_type = point-value
         pinned_pressure_value = 0
         pinned_pressure_point = '0.01 0.099 0.0'
 
@@ -127,11 +126,12 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         # Wall parameters
         turbulence_walls = ${walls}
         bulk_wall_treatment = ${bulk_wall_treatment}
-        linearized_yplus = ${linearized_yplus_mu_t}
         wall_treatment = ${wall_treatment}
 
         # Numerical parameters
         turbulent_viscosity_two_term_bc_expansion = false
+        mu_t_as_aux_variable = true
+        k_t_as_aux_variable = true
       []
     []
   []
@@ -141,7 +141,11 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   type = Steady
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-10
+
+  # Necessary for these cases
+  snesmf_reuse_base = false
+  line_search = none
 []
 
 [Outputs]
