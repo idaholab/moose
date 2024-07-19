@@ -12,14 +12,16 @@
 #include "CentralDifference.h"
 #include "CentralDifferenceDirect.h"
 #include "MooseTypes.h"
+#include "MooseVariableFieldBase.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 // libMesh includes
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "DirichletBCBase.h"
+#include "libmesh/vector_value.h"
 
-registerMooseObject("MooseApp", CentralDifferenceDirect);
+registerMooseObject("SolidMechanicsApp", CentralDifferenceDirect);
 
 InputParameters
 CentralDifferenceDirect::validParams()
@@ -46,6 +48,7 @@ CentralDifferenceDirect::CentralDifferenceDirect(const InputParameters & paramet
     _constant_mass(getParam<bool>("use_constant_mass")),
     _mass_matrix(getParam<TagName>("mass_matrix_tag"))
 {
+  _fe_problem.setUDotRequested(true);
   _fe_problem.setUDotOldRequested(true);
   _fe_problem.setUDotDotRequested(true);
   _fe_problem.setUDotDotOldRequested(true);
@@ -66,7 +69,6 @@ CentralDifferenceDirect::computeTimeDerivatives()
 void
 CentralDifferenceDirect::solve()
 {
-
   // Getting the tagID for the mass matrix
   auto mass_tag = _sys.subproblem().getMatrixTagID(_mass_matrix);
 
@@ -75,6 +77,13 @@ CentralDifferenceDirect::solve()
   _n_linear_iterations = 0;
 
   _current_time = _fe_problem.time();
+
+  auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
+
+  // Compute the mass matrix
+  if (!_constant_mass || (_constant_mass && _t_step == 1))
+    _fe_problem.computeJacobianTag(
+        *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
 
   // Set time to the time at which to evaluate the residual
   _fe_problem.time() = _fe_problem.timeOld();
@@ -88,57 +97,18 @@ CentralDifferenceDirect::solve()
   // Move the residual to the RHS
   _explicit_residual *= -1.0;
 
-  auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
-
-  // Compute the mass matrix
-  if (!_constant_mass || (_constant_mass && _t_step == 1))
-    _fe_problem.computeJacobianTag(
-        *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
-
   // Perform the linear solve
   bool converged = performExplicitSolve(mass_matrix);
+  _nl.overwriteNodeFace(*_nonlinear_implicit_system->solution);
 
   // Update the solution
   *_nonlinear_implicit_system->solution = _nl.solutionOld();
   *_nonlinear_implicit_system->solution += _solution_update;
 
+  _nonlinear_implicit_system->update();
+
+  _nl.setSolution(*_nonlinear_implicit_system->current_local_solution);
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
-
-  // Applying preset BCs
-  setPresetBCs();
-}
-
-void
-CentralDifferenceDirect::setPresetBCs()
-{
-  // Apply preset nodal BC's
-  NumericVector<Number> & initial_solution(*_nonlinear_implicit_system->solution);
-
-  auto & nodal_bcs = _nl.getPresetBCWarehouse();
-  const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
-  for (const auto & bnode : bnd_nodes)
-  {
-    BoundaryID boundary_id = bnode->_bnd_id;
-    Node * node = bnode->_node;
-    if (node->processor_id() == processor_id())
-    {
-      // reinit variables in nodes
-      _fe_problem.reinitNodeFace(node, boundary_id, 0);
-
-      if (nodal_bcs.hasActiveBoundaryObjects(boundary_id))
-      {
-        const auto & preset_bcs = nodal_bcs.getActiveBoundaryObjects(boundary_id);
-        for (const auto & preset_bc : preset_bcs)
-          preset_bc->computeValue(initial_solution);
-      }
-      if (nodal_bcs.hasActiveBoundaryObjects(boundary_id))
-      {
-        const auto & preset_bcs_res = nodal_bcs.getActiveBoundaryObjects(boundary_id);
-        for (const auto & preset_bc : preset_bcs_res)
-          preset_bc->computeValue(initial_solution);
-      }
-    }
-  }
 }
 
 void
@@ -155,16 +125,12 @@ CentralDifferenceDirect::postResidual(NumericVector<Number> & residual)
 bool
 CentralDifferenceDirect::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
 {
-  bool converged = false;
-
-  // Computes the sum of each row (lumping)
-  // Note: This is actually how PETSc does it
-  // It's not "perfectly optimal" - but it will be fast (and universal)
   mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+
+  bool converged = false;
 
   // "Invert" the diagonal mass matrix
   _mass_matrix_diag.reciprocal();
-
   // Calculate acceleration
   auto & accel = *_sys.solutionUDotDot();
   accel.pointwise_mult(_mass_matrix_diag, _explicit_residual);
@@ -176,16 +142,11 @@ CentralDifferenceDirect::performExplicitSolve(SparseMatrix<Number> & mass_matrix
   // Adding old vel to new vel
   auto & vel = *_sys.solutionUDot();
   const auto & old_vel = _sys.solutionUDotOld();
-  vel = *old_vel;
+  vel = *old_vel->clone();
   vel += *accel_scaled;
 
-  // Scale velocity by dt
-  auto vel_scaled = vel.clone();
-  vel_scaled->scale(_dt);
-  _solution_update = *vel_scaled;
-
-  vel.close();
-  accel.close();
+  _solution_update = vel;
+  _solution_update.scale(_dt);
 
   // Check for convergence by seeing if there is a nan or inf
   auto sum = _solution_update.sum();
@@ -193,5 +154,7 @@ CentralDifferenceDirect::performExplicitSolve(SparseMatrix<Number> & mass_matrix
 
   // The linear iteration count remains zero
   _n_linear_iterations = 0;
+  vel.close();
+  accel.close();
   return converged;
 }
