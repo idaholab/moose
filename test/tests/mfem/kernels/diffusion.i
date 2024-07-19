@@ -6,18 +6,24 @@
 
 [Problem]
   type = MFEMProblem
-  use_glvis = true
-  device = "cpu"
 []
 
 [Formulation]
   type = CustomFormulation
 []
 
+[FESpaces]
+  [H1FESpace]
+    type = MFEMFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
+[]
+
 [AuxVariables]
-  [mfem_diffused]
-    family = LAGRANGE
-    order = FIRST
+  [diffused]
+    type = MFEMVariable
+    fespace = H1FESpace
   []
 []
 
@@ -35,13 +41,13 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = mfem_diffused
+    variable = diffused
     boundary = '1'
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = mfem_diffused
+    variable = diffused
     boundary = '2'
     coefficient = TopValue
   []
@@ -65,7 +71,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = mfem_diffused
+    variable = diffused
     coefficient = one
   []
 []
@@ -81,8 +87,8 @@
 []
 
 [Outputs]
-  [VisItDataCollection]
-    type = MFEMVisItDataCollection
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
     file_base = OutputData/Diffusion
   []
 []

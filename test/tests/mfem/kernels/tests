@@ -1,9 +1,11 @@
 [Tests]
   design = 'syntax/Problem/index.md'
   [./MFEMDiffusion]
-    type = 'CSVDiff'
-    input = 'diffusion_master.i'
-    csvdiff = 'diffusion_master_out.csv'
+    type = XMLDiff
+    input = diffusion.i
+    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
+                OutputData/Diffusion/Run0/Cycle000000/data.pvtu
+                OutputData/Diffusion/Run0/Cycle000001/data.pvtu'
     requirement = 'Platypus shall have the ability to solve a diffusion problem set up from MOOSE and produce the same result as a native run.'
   []
 []
