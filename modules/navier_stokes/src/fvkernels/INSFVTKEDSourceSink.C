@@ -93,7 +93,7 @@ INSFVTKEDSourceSink::computeQpResidual()
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto mu = _mu(elem_arg, state);
   const auto rho = _rho(elem_arg, state);
-  const auto TKE = _k(elem_arg, old_state);
+  const auto TKE_old = _k(elem_arg, old_state);
   ADReal y_plus;
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
@@ -120,7 +120,7 @@ INSFVTKEDSourceSink::computeQpResidual()
       mooseAssert(distance > 0, "Should be at a non-zero distance");
 
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
-        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE_old) * rho / mu;
       else
       {
         // Equilibrium / Iterative
@@ -146,11 +146,11 @@ INSFVTKEDSourceSink::computeQpResidual()
         const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
         const Moose::FaceArg facearg = {
             fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
-        destruction +=
-            2.0 * TKE * _mu(facearg, state) / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
+        destruction += 2.0 * TKE_old * _mu(facearg, state) / rho /
+                       Utility::pow<2>(distance_vec[i]) / tot_weight;
       }
       else
-        destruction += std::pow(_C_mu, 0.75) * rho * std::pow(std::max(ADReal(0), TKE), 1.5) /
+        destruction += std::pow(_C_mu, 0.75) * std::pow(std::max(ADReal(0), TKE_old), 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
     }
 
@@ -215,22 +215,23 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     ADReal production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
     // Compute production limiter (needed for flows with stagnation zones)
-    const ADReal production_limit = _C_pl * rho * _var(elem_arg, old_state);
+    const auto eps_old = _var(elem_arg, old_state);
+    const ADReal production_limit = _C_pl * rho * eps_old;
     // Apply production limiter
     production_k = std::min(production_k, production_limit);
 
-    const auto k = raw_value(_k(elem_arg, old_state));
-    const auto eps = raw_value(_var(elem_arg, old_state));
+    const auto raw_k = raw_value(TKE_old);
+    const auto raw_eps = raw_value(eps_old);
 
     production = _C1_eps * production_k;
     destruction = _C2_eps * rho * _var(elem_arg, state);
 
     residual = destruction - production;
     // Multiply by time scale
-    if (!MooseUtils::absoluteFuzzyEqual(k, 0))
+    if (!MooseUtils::absoluteFuzzyEqual(raw_k, 0))
     {
-      residual /= k;
-      residual *= eps;
+      residual /= raw_k;
+      residual *= raw_eps;
     }
   }
 

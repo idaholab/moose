@@ -101,6 +101,7 @@ WCNSFVTurbulencePhysics::validParams()
                              adv_interpol_types,
                              "The numerical scheme to interpolate the TKE to the "
                              "face when in the advection kernel.");
+  params.addParam<bool>("linearize_sink_sources", true, "Whether to linearize the source term");
   params.addParam<bool>(
       "tke_two_term_bc_expansion",
       true,
@@ -170,7 +171,7 @@ WCNSFVTurbulencePhysics::validParams()
       "tke_scaling tke_face_interpolation tke_two_term_bc_expansion tked_scaling "
       "tked_face_interpolation tked_two_term_bc_expansion "
       "turbulent_viscosity_two_term_bc_expansion turbulent_viscosity_interp_method "
-      "mu_t_as_aux_variable k_t_as_aux_variable",
+      "mu_t_as_aux_variable k_t_as_aux_variable linearize_sink_sources",
       "K-Epsilon model numerical");
 
   return params;
@@ -451,6 +452,8 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<MooseFunctorName>("mu") = _turbulent_viscosity_name;
+    params.set<MooseEnum>("mu_interp_method") =
+        getParam<MooseEnum>("turbulent_viscosity_interp_method");
     params.set<bool>("complete_expansion") = true;
 
     std::string kernel_name = prefix() + "ins_momentum_k_epsilon_reynolds_stress_";
@@ -646,6 +649,7 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<Real>("C_pl") = getParam<Real>("C_pl");
+    params.set<bool>("linearized_model") = getParam<bool>("linearize_sink_sources");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     // Currently only Newton method for WCNSFVTurbulencePhysics
@@ -665,6 +669,7 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<Real>("C_pl") = getParam<Real>("C_pl");
+    params.set<bool>("linearized_model") = getParam<bool>("linearize_sink_sources");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     params.set<Real>("C1_eps") = getParam<Real>("C1_eps");
@@ -740,7 +745,7 @@ WCNSFVTurbulencePhysics::addFVBCs()
 {
   const std::string u_names[3] = {"u", "v", "w"};
 
-  if (_turbulence_model == "k-epsilon")
+  if (_turbulence_model == "k-epsilon" && getParam<bool>("mu_t_as_aux_variable"))
   {
     mooseAssert(_flow_equations_physics, "Should have a flow equation physics");
     const std::string bc_type = "INSFVTurbulentViscosityWallFunction";
@@ -849,17 +854,17 @@ WCNSFVTurbulencePhysics::addMaterials()
       params.set<std::string>("property_name") = NS::mu_eff;
       getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "effective_viscosity", params);
     }
-    if (!getProblem().hasFunctor(NS::mu_t, /*thread_id=*/0))
+    if (!getParam<bool>("mu_t_as_aux_variable"))
     {
-      mooseAssert(!getParam<bool>("mu_t_as_aux_variable"), "mu_t should exist");
-      InputParameters params = getFactory().getValidParams("INSFVkEpsilonViscosityMaterial");
+      InputParameters params = getFactory().getValidParams("INSFVkEpsilonViscosityFunctorMaterial");
       params.set<MooseFunctorName>(NS::TKE) = _tke_name;
       params.set<MooseFunctorName>(NS::TKED) = _tked_name;
       params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
       if (getParam<bool>("output_mu_t"))
         params.set<std::vector<OutputName>>("outputs") = {"all"};
-      getProblem().addMaterial("INSFVkEpsilonViscosityMaterial", prefix() + "compute_mu_t", params);
+      getProblem().addMaterial(
+          "INSFVkEpsilonViscosityFunctorMaterial", prefix() + "compute_mu_t", params);
     }
 
     if (_has_energy_equation && !getProblem().hasFunctor(NS::k_t, /*thread_id=*/0))

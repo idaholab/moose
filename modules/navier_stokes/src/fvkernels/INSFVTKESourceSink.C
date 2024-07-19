@@ -94,7 +94,7 @@ INSFVTKESourceSink::computeQpResidual()
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
-  const auto TKE = _var(elem_arg, old_state);
+  const auto TKE = std::max(_var(elem_arg, old_state), ADReal(0) * _var(elem_arg, old_state));
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
@@ -119,7 +119,7 @@ INSFVTKESourceSink::computeQpResidual()
 
       ADReal y_plus;
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
-        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE + 1e-10) * rho / mu;
       else // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
@@ -161,7 +161,7 @@ INSFVTKESourceSink::computeQpResidual()
       const ADReal wall_mu = _mu(facearg, state);
 
       const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
-      const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 0.5) /
+      const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE + 1e-10, 0.5) /
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
@@ -254,12 +254,16 @@ INSFVTKESourceSink::computeQpResidual()
       destruction = rho * _var(elem_arg, state) / time_scale_eps * raw_value(epsilon);
 
     // k-Production limiter (needed for flows with stagnation zones)
-    ADReal production_limit = _C_pl * rho * std::max(epsilon, ADReal(0));
+    const ADReal production_limit = _C_pl * rho * std::max(epsilon, ADReal(0));
 
     // Apply production limiter
     production = std::min(production, production_limit);
 
     residual = destruction - production;
+
+    // Sparsity pattern preservation
+    if (_newton_solve)
+      residual += 0 * epsilon;
   }
 
   return residual;
