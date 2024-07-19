@@ -3,7 +3,7 @@ mpi:
   - openmpi
 
 moose_dev:
-  - moose-dev 2024.07.18
+  - moose-dev 2024.07.19
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
