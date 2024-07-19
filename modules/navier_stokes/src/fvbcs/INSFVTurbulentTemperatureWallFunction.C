@@ -32,10 +32,8 @@ INSFVTurbulentTemperatureWallFunction::validParams()
   params.deprecateParam("k", NS::TKE, "01/01/2025");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
-  params.addParam<MooseEnum>("wall_treatment",
-                             wall_treatment,
-                             "The method used for computing the wall functions "
-                             "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
+  params.addParam<MooseEnum>(
+      "wall_treatment", wall_treatment, "The method used for computing the wall functions");
 
   params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
   params.addParamNamesToGroup("newton_solve", "Advanced");
@@ -156,7 +154,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
 
   // To make sure new derivatives are not introduced as the solve progresses
   if (_newton_solve)
-    alpha += 0 * kappa * (rho * cp) + 0 * u_tau * _Pr_t(current_argument, state);
+    alpha += 0 * kappa * (rho * cp) + 0 * u_tau * _Pr_t(current_argument, state) * y_plus;
 
   const auto face_arg = singleSidedFaceArg();
   return -rho * cp * alpha * (_T_w(face_arg, state) - _var(current_argument, state)) / wall_dist;
