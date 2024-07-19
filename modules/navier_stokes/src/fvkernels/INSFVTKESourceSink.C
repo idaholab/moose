@@ -94,6 +94,7 @@ INSFVTKESourceSink::computeQpResidual()
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
+  const auto TKE = _var(elem_arg, old_state);
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
@@ -118,7 +119,7 @@ INSFVTKESourceSink::computeQpResidual()
 
       ADReal y_plus;
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
-        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * _var(elem_arg, old_state)) * rho / mu;
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
       else // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
@@ -160,8 +161,7 @@ INSFVTKESourceSink::computeQpResidual()
       const ADReal wall_mu = _mu(facearg, state);
 
       const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
-      const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
-                                   std::pow(_var(elem_arg, old_state), 0.5) /
+      const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 0.5) /
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
@@ -170,23 +170,24 @@ INSFVTKESourceSink::computeQpResidual()
       {
         destruction += destruction_visc;
         if (_newton_solve)
-          destruction += 0 * destruction_log;
+          destruction += 0 * destruction_log + 0 * tau_w;
       }
       else
       {
         destruction += destruction_log;
         if (_newton_solve)
           destruction += 0 * destruction_visc;
-        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(_var(elem_arg, old_state) + 1e-10) /
+        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(TKE + 1e-10) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       }
     }
 
     residual = (destruction - production) * _var(elem_arg, state);
+    if (_newton_solve)
+      residual += 0 * _epsilon(elem_arg, old_state);
   }
   else
   {
-
     const auto & grad_u = _u_var.gradient(elem_arg, state);
     const auto Sij_xx = 2.0 * grad_u(0);
     ADReal Sij_xy = 0.0;
@@ -244,17 +245,16 @@ INSFVTKESourceSink::computeQpResidual()
 
     production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    const auto time_scale_eps = raw_value(_var(elem_arg, old_state));
+    const auto time_scale_eps = raw_value(TKE);
+    const auto epsilon = _epsilon(elem_arg, old_state);
 
     if (MooseUtils::absoluteFuzzyEqual(time_scale_eps, 0))
       destruction = rho * _var(elem_arg, state);
     else
-      destruction =
-          rho * _var(elem_arg, state) / time_scale_eps * raw_value(_epsilon(elem_arg, old_state));
+      destruction = rho * _var(elem_arg, state) / time_scale_eps * raw_value(epsilon);
 
     // k-Production limiter (needed for flows with stagnation zones)
-    const ADReal production_limit =
-        _C_pl * rho * std::max(_epsilon(elem_arg, old_state), ADReal(0));
+    ADReal production_limit = _C_pl * rho * std::max(epsilon, ADReal(0));
 
     // Apply production limiter
     production = std::min(production, production_limit);

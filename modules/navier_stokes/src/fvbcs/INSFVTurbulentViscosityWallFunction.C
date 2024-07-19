@@ -29,10 +29,8 @@ INSFVTurbulentViscosityWallFunction::validParams()
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
-  params.addParam<MooseEnum>("wall_treatment",
-                             wall_treatment,
-                             "The method used for computing the wall functions "
-                             "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
+  params.addParam<MooseEnum>(
+      "wall_treatment", wall_treatment, "The method used for computing the wall functions");
   params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
   params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
@@ -124,18 +122,24 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     mooseAssert(false,
                 "For `INSFVTurbulentViscosityWallFunction` , wall treatment should not reach here");
 
+  ADReal residual = 0;
+  // To keep the same sparsity pattern
+  if (_newton_solve)
+    residual = 0 * mut_log * y_plus;
+
   if (y_plus <= 5.0)
     // sub-laminar layer
-    return 0.0;
+    residual += 0.0;
   else if (y_plus >= 30.0)
     // log-layer
-    return std::max(mut_log, NS::mu_t_low_limit);
+    residual += std::max(mut_log, NS::mu_t_low_limit);
   else
   {
     // buffer layer
     const auto blending_function = (y_plus - 5.0) / 25.0;
     // the blending depends on the mut_log at y+=30
     const auto mut_log = mu * _mut_30;
-    return std::max(blending_function * mut_log, NS::mu_t_low_limit);
+    residual += std::max(blending_function * mut_log, NS::mu_t_low_limit);
   }
+  return residual;
 }
