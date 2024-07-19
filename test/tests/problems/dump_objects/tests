@@ -1,10 +1,20 @@
 [Tests]
-  [./add_mat_and_kernel]
+  design = "DumpObjectsProblem.md"
+  [add_mat_and_kernel]
     type = RunApp
     input = 'add_mat_and_kernel.i'
     expect_out = '\[Kernels\]\n  \[kern1\]\n    type = MatDiffusionTest\n    prop_name = prop1\n    variable = var1\n  \[\]\n\[\]\n\n\[Materials\]\n  \[mat1\]\n    type = GenericConstantMaterial\n    constant_on = SUBDOMAIN\n    outputs = none\n    prop_names = prop1\n    prop_values = 42\n  \[\]\n\[\]\n\n\[Variables\]\n  \[var1\]\n    type = MooseVariable\n    family = LAGRANGE\n    order = FIRST\n  \[\]\n\[\]\n'
     issues = "#8875"
-    design = "DumpObjectsProblem.md"
-    requirement = "The system shall have a capability to dump the equivalent input file syntax for all objects added by a given action."
-  [../]
+    requirement = "The system shall have a capability to dump the equivalent input file syntax for "
+                  "all objects added by a given action."
+  []
+  [add_all]
+    type = RunApp
+    input = 'add_mat_and_kernel.i'
+    cli_args = 'Problem/dump_path=all'
+    expect_out = '\[Kernels\]\n  \[kern1\]\n    type = MatDiffusionTest\n    prop_name = prop1\n    variable = var1\n  \[\]\n\[\]\n\n\[Materials\]\n  \[mat1\]\n    type = GenericConstantMaterial\n    constant_on = SUBDOMAIN\n    outputs = none\n    prop_names = prop1\n    prop_values = 42\n  \[\]\n\[\]\n\n\[Variables\]\n  \[var1\]\n    type = MooseVariable\n    family = LAGRANGE\n    order = FIRST\n  \[\]\n\[\]\n'
+    issues = "#8875"
+    requirement = "The system shall have a capability to dump the equivalent input file syntax for "
+                  "all objects created by the problem."
+  []
 []

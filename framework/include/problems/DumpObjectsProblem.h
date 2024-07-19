@@ -36,6 +36,8 @@ public:
 
   /// output input blocks for a given action path
   void dumpGeneratedSyntax(const std::string path);
+  /// output input blocks for all paths
+  void dumpAllGeneratedSyntax() const;
 
   /// output data in solve
   virtual void solve(unsigned int nl_sys_num) override;
