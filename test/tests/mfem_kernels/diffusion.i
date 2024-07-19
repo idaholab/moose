@@ -6,6 +6,7 @@
 
 [Problem]
   type = MFEMProblem
+  device = "cpu"
 []
 
 [Formulation]
