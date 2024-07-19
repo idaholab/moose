@@ -1711,21 +1711,22 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     std::vector<RealGradient> dxyzdeta;
     std::vector<RealGradient> d2xyzdxideta;
 
-    PenetrationInfo * pen_info = new PenetrationInfo(elem,
-                                                     side,
-                                                     sides[i],
-                                                     normal,
-                                                     distance,
-                                                     tangential_distance,
-                                                     contact_phys,
-                                                     contact_ref,
-                                                     contact_on_face_ref,
-                                                     off_edge_nodes,
-                                                     side_phi,
-                                                     side_grad_phi,
-                                                     dxyzdxi,
-                                                     dxyzdeta,
-                                                     d2xyzdxideta);
+    std::unique_ptr<PenetrationInfo> pen_info =
+        std::make_unique<PenetrationInfo>(elem,
+                                          side,
+                                          sides[i],
+                                          normal,
+                                          distance,
+                                          tangential_distance,
+                                          contact_phys,
+                                          contact_ref,
+                                          contact_on_face_ref,
+                                          off_edge_nodes,
+                                          side_phi,
+                                          side_grad_phi,
+                                          dxyzdxi,
+                                          dxyzdeta,
+                                          d2xyzdxideta);
 
     bool search_succeeded = false;
     Moose::findContactPoint(*pen_info,
@@ -1741,8 +1742,8 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     // Do not add contact info from failed searches
     if (search_succeeded)
     {
-      thisElemInfo.push_back(pen_info);
-      p_info.push_back(pen_info);
+      thisElemInfo.push_back(pen_info.get());
+      p_info.push_back(pen_info.release());
     }
   }
 }
