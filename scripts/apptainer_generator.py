@@ -43,6 +43,7 @@ class ApptainerGenerator:
         self.project = library_meta['name_base']
         self.name = library_meta['name']
         self.tag = library_meta['tag']
+        self.version = library_meta['tag']
 
         if hasattr(self.args, 'modify') and self.args.modify is not None:
             self.def_path = os.path.abspath(self.args.modify)
@@ -463,6 +464,33 @@ class ApptainerGenerator:
             contents += f'{name}.civet.job {civet_server}/job/{civet_job_id}\n'
         return definition + '\n\n' + self.add_def_whitespace(contents)
 
+    def _add_definition_environment(self, definition):
+        """
+        Adds to the definition environment
+        """
+        if self.version == self.tag:
+            name_summary = f'{self.name}:{self.tag}'
+        else:
+            name_summary = f'{self.name}:{self.tag}({self.version})'
+
+        content = [f'#',
+                   f'# Begin environment for {name_summary}',
+                   f'#',
+                   f'export MOOSE_APPTAINER_GENERATOR_LIBRARY="{self.args.library}"',
+                   f'export MOOSE_APPTAINER_GENERATOR_NAME="{self.name}"',
+                   f'export MOOSE_APPTAINER_GENERATOR_NAME_SUMMARY="{name_summary}"',
+                   f'export MOOSE_APPTAINER_GENERATOR_TAG="{self.tag}"',
+                   f'export MOOSE_APPTAINER_GENERATOR_VERSION="{self.version}"']
+        content = '\n    ' + '\n    '.join(content) + '\n'
+
+        env_header = '%environment'
+        if env_header in definition:
+            definition = definition.replace(env_header, env_header + content)
+        else:
+            definition += '\n' + env_header + content
+
+        return definition
+
     @staticmethod
     def create_filename(app_root, section_key, actions):
         """
@@ -555,8 +583,6 @@ class ApptainerGenerator:
         Adds conditional apptainer definition vars to jinja data
         """
         jinja_data['ARCH'] = platform.machine()
-        jinja_data['PROJECT_NAME'] = self.name
-        jinja_data['TAG'] = self.tag
 
         # Set application-related variables
         if self.args.library == 'app':
@@ -704,6 +730,9 @@ class ApptainerGenerator:
 
         # Add in a few labels
         new_definition = self._add_definition_labels(new_definition)
+
+        # Add in the environment which contains the version strings
+        new_definition = self._add_definition_environment(new_definition)
 
         # Definition file checks
         container_definition_path = self.container_path(self.name, self.tag, image=False)
