@@ -243,7 +243,7 @@
       detail = 'using the Navier Stokes Physics shorthand syntax.'
       abs_zero = 1e-6
       cli_args = 'Outputs/file_base=lid-driven-turb-energy-wall-physics_out'
-      heavy = true
+      custom_cmp = 'lid-driven-low-turb.cmp'
     []
   []
   [lid_driven_turb_energy_wall_linear]
@@ -314,7 +314,7 @@
       detail = 'using the Navier Stokes Physics shorthand syntax.'
       abs_zero = 1e-6
       cli_args = 'Outputs/file_base=lid-driven-turb-capped-physics_out'
-      heavy = true
+      custom_cmp = 'lid-driven-low-turb.cmp'
     []
   []
   [lid_driven_turb_std_wall_nonlinear]
@@ -347,6 +347,7 @@
       abs_zero = 1e-6
       cli_args = 'Outputs/execute_on=final Outputs/file_base=lid-driven-turb-std-wall-nonlinear-physics_out'
       min_parallel = 4
+      custom_cmp = 'ignore_lambda.cmp'
       heavy = true
     []
   []

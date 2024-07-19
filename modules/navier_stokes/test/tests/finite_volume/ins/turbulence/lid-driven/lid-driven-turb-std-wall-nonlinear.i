@@ -178,7 +178,6 @@ linearized_model = false
   [TKE_time]
     type = FVFunctorTimeKernel
     variable = TKE
-    functor = TKE
   []
   [TKE_advection]
     type = INSFVTurbulentAdvection
@@ -213,7 +212,6 @@ linearized_model = false
   [TKED_time]
     type = FVFunctorTimeKernel
     variable = TKED
-    functor = TKED
   []
   [TKED_advection]
     type = INSFVTurbulentAdvection
@@ -226,7 +224,6 @@ linearized_model = false
     variable = TKED
     coeff = ${mu}
     walls = ${walls}
-    coeff_interp_method = average
   []
   [TKED_diffusion_turbulent]
     type = INSFVTurbulentDiffusion
@@ -285,9 +282,9 @@ linearized_model = false
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [mu_t_material]
-    type = INSFVkEpsilonViscosityMaterial
+    type = INSFVkEpsilonViscosityFunctorMaterial
     tke = TKE
     epsilon = TKED
     rho = ${rho}
