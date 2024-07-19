@@ -5,7 +5,9 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000000/data.pvtu
-                OutputData/Diffusion/Run0/Cycle000001/data.pvtu'
+                OutputData/Diffusion/Run0/Cycle000001/data.pvtu
+                OutputData/Diffusion/Run0/Cycle000000/proc000000.vtu
+                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a diffusion problem set up from MOOSE and produce the same result as a native run.'
   []
 []
