@@ -32,8 +32,10 @@ public:
   bool hasTurbulenceModel() const { return _turbulence_model != "none"; }
   /// The names of the boundaries with turbulence wall functions
   std::vector<BoundaryName> turbulenceWalls() const { return _turbulence_walls; }
-  /// The turbulence wall treatment (same for all turbulence walls currently)
-  MooseEnum turbulenceWallTreatment() const { return _wall_treatment; }
+  /// The turbulence epsilon wall treatment (same for all turbulence walls currently)
+  MooseEnum turbulenceEpsilonWallTreatment() const { return _wall_treatment_eps; }
+  /// The turbulence temperature wall treatment (same for all turbulence walls currently)
+  MooseEnum turbulenceTemperatureWallTreatment() const { return _wall_treatment_temp; }
   /// The name of the turbulent kinetic energy variable
   MooseFunctorName tkeName() const { return _tke_name; }
 
@@ -87,8 +89,10 @@ private:
   const VariableName _mixing_length_name;
   /// List of boundaries to act as walls for turbulence models
   std::vector<BoundaryName> _turbulence_walls;
-  /// Turbulence wall treatment (same for all walls currently)
-  MooseEnum _wall_treatment;
+  /// Turbulence wall treatment for epsilon (same for all walls currently)
+  MooseEnum _wall_treatment_eps;
+  /// Turbulence wall treatment for temperature (same for all walls currently)
+  MooseEnum _wall_treatment_temp;
   /// Name of the turbulent kinetic energy
   const VariableName _tke_name;
   /// Name of the turbulent kinetic energy dissipation

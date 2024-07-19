@@ -76,8 +76,13 @@ WCNSFVTurbulencePhysics::validParams()
 
   // Boundary parameters
   params.addParam<bool>("bulk_wall_treatment", true, "Whether to treat the wall cell as bulk");
-  params.transferParam<MooseEnum>(INSFVTurbulentViscosityWallFunction::validParams(),
-                                  "wall_treatment");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
+  params.addParam<MooseEnum>("wall_treatment_eps",
+                             wall_treatment,
+                             "The method used for computing the epsilon wall functions");
+  params.addParam<MooseEnum>("wall_treatment_T",
+                             wall_treatment,
+                             "The method used for computing the temperature wall functions");
   params.transferParam<Real>(INSFVTurbulentViscosityWallFunction::validParams(), "C_mu");
 
   // K-Epsilon numerical scheme parameters
@@ -159,7 +164,8 @@ WCNSFVTurbulencePhysics::validParams()
                               "Coupled Physics");
   params.addParamNamesToGroup("initial_tke initial_tked C1_eps C2_eps sigma_k sigma_eps",
                               "K-Epsilon model");
-  params.addParamNamesToGroup("C_mu bulk_wall_treatment wall_treatment", "K-Epsilon wall function");
+  params.addParamNamesToGroup("C_mu bulk_wall_treatment wall_treatment_eps wall_treatment_T",
+                              "K-Epsilon wall function");
   params.addParamNamesToGroup(
       "tke_scaling tke_face_interpolation tke_two_term_bc_expansion tked_scaling "
       "tked_face_interpolation tked_two_term_bc_expansion "
@@ -176,7 +182,8 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
     _turbulence_model(getParam<MooseEnum>("turbulence_handling")),
     _mixing_length_name(getParam<AuxVariableName>("mixing_length_name")),
     _turbulence_walls(getParam<std::vector<BoundaryName>>("turbulence_walls")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment")),
+    _wall_treatment_eps(getParam<MooseEnum>("wall_treatment_eps")),
+    _wall_treatment_temp(getParam<MooseEnum>("wall_treatment_T")),
     _tke_name(getParam<MooseFunctorName>("tke_name")),
     _tked_name(getParam<MooseFunctorName>("tked_name"))
 {
@@ -618,6 +625,7 @@ WCNSFVTurbulencePhysics::addKEpsilonDiffusion()
         getParam<MooseEnum>("turbulent_viscosity_interp_method");
     getProblem().addFVKernel(kernel_type, prefix() + "tke_diffusion_mu_turb", params);
 
+    params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<NonlinearVariableName>("variable") = _tked_name;
     params.set<MooseFunctorName>("scaling_coef") = getParam<MooseFunctorName>("sigma_eps");
     getProblem().addFVKernel(kernel_type, prefix() + "tked_diffusion_mu_turb", params);
@@ -639,7 +647,7 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<Real>("C_pl") = getParam<Real>("C_pl");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-    params.set<MooseEnum>("wall_treatment") = getParam<MooseEnum>("wall_treatment");
+    params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     // Currently only Newton method for WCNSFVTurbulencePhysics
     params.set<bool>("newton_solve") = true;
     for (const auto d : make_range(dimension()))
@@ -658,7 +666,7 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<Real>("C_pl") = getParam<Real>("C_pl");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-    params.set<MooseEnum>("wall_treatment") = getParam<MooseEnum>("wall_treatment");
+    params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     params.set<Real>("C1_eps") = getParam<Real>("C1_eps");
     params.set<Real>("C2_eps") = getParam<Real>("C2_eps");
     for (const auto d : make_range(dimension()))
@@ -706,7 +714,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<Real>("C_mu") = getParam<Real>("C_mu");
-    params.set<MooseEnum>("wall_treatment") = getParam<MooseEnum>("wall_treatment");
+    params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     params.set<bool>("bulk_wall_treatment") = getParam<bool>("bulk_wall_treatment");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
@@ -743,7 +751,7 @@ WCNSFVTurbulencePhysics::addFVBCs()
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<MooseFunctorName>(NS::TKE) = _tke_name;
-    params.set<MooseEnum>("wall_treatment") = _wall_treatment;
+    params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
     // Currently only Newton method for WCNSFVTurbulencePhysics
