@@ -515,19 +515,14 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
     if (std::get<2>(side_list_tmp[i]) == bid)
     {
       // store two nodes of each side
-      boundary_node_assm.push_back(std::make_pair(mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
-                                                      ->side_ptr(std::get<1>(side_list_tmp[i]))
-                                                      ->node_id(0),
-                                                  mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
-                                                      ->side_ptr(std::get<1>(side_list_tmp[i]))
-                                                      ->node_id(1)));
+      const auto elem = mesh.elem_ptr(std::get<0>(side_list_tmp[i]));
+      const auto side = elem->side_ptr(std::get<1>(side_list_tmp[i]));
+      boundary_node_assm.push_back(std::make_pair(side->node_id(0), side->node_id(1)));
       // see if there is a midpoint
-      if (mesh.elem_ptr(std::get<0>(side_list_tmp[i]))->side_type(std::get<1>(side_list_tmp[i])) ==
-          EDGE3)
+      const auto & side_type = elem->side_type(std::get<1>(side_list_tmp[i]));
+      if (side_type == EDGE3)
         boundary_midpoint_node_list.push_back(
-            mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
-                ->node_id(mesh.elem_ptr(std::get<0>(side_list_tmp[i]))->n_vertices() +
-                          std::get<1>(side_list_tmp[i])));
+            elem->node_id(elem->n_vertices() + std::get<1>(side_list_tmp[i])));
       else
         boundary_midpoint_node_list.push_back(DofObject::invalid_id);
     }
