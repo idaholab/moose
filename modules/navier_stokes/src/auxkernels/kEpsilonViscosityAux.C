@@ -44,6 +44,9 @@ kEpsilonViscosityAux::validParams()
                              scale_limiter,
                              "The method used to limit the k-epsilon time scale."
                              "'none', 'standard'");
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
+
   return params;
 }
 
@@ -62,7 +65,8 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
-    _scale_limiter(getParam<MooseEnum>("scale_limiter"))
+    _scale_limiter(getParam<MooseEnum>("scale_limiter")),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
 }
 
@@ -115,7 +119,7 @@ kEpsilonViscosityAux::computeValue()
       velocity(2) = (*_w_var)(current_argument, state);
 
     // Compute the velocity and direction of the velocity component that is parallel to the wall
-    const ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
+    const auto parallel_speed = NS::computeSpeed(velocity - velocity * loc_normal * loc_normal);
 
     // Switch for determining the near wall quantities
     // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
@@ -192,10 +196,15 @@ kEpsilonViscosityAux::computeValue()
     {
       time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
     }
+    if (_newton_solve)
+      if (MooseUtils::absoluteFuzzyEqual(_epsilon(current_argument, state), 0))
+        time_scale = 1;
 
     const ADReal mu_t_nl =
         _rho(current_argument, state) * _C_mu * _k(current_argument, state) * time_scale;
-    mu_t = std::max(NS::mu_t_low_limit, mu_t_nl.value());
+    mu_t = mu_t_nl.value();
+    if (_newton_solve)
+      mu_t = std::max(mu_t, NS::mu_t_low_limit);
   }
   // Turbulent viscosity limiter
   return std::min(mu_t, _mu_t_ratio_max * raw_value(mu));
