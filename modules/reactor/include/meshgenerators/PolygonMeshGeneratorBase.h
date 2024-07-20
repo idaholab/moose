@@ -529,6 +529,7 @@ protected:
    * created
    * @param create_outward_interface_boundaries whether outward interface boundary sidesets are
    * created
+   * @param quad_elem_type type of quad element to be created
    * @return a mesh with the peripheral region added to a hexagon input mesh
    */
   std::unique_ptr<ReplicatedMesh>
@@ -537,8 +538,18 @@ protected:
                         const std::vector<std::pair<Real, Real>> & position_inner,
                         const std::vector<std::pair<Real, Real>> & d_position_outer,
                         const subdomain_id_type id_shift,
+                        const QUAD_ELEM_TYPE quad_elem_type,
                         const bool create_inward_interface_boundaries = false,
                         const bool create_outward_interface_boundaries = true);
+
+  /**
+   * Adjusts the mid-edge node locations in boundary regions when using quadratic elements with
+   * uniform boundary node spacing enabled.
+   * @param out_mesh mesh to be adjusted.
+   * @param boundary_quad_elem_type boundary quad element type.
+   */
+  void adjustPeripheralQuadraticElements(MeshBase & out_mesh,
+                                         const QUAD_ELEM_TYPE boundary_quad_elem_type) const;
 
   /**
    * Calculates the point coordinates of within a parallelogram region using linear interpolation.

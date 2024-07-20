@@ -51,7 +51,7 @@ MortarConstraintBase::validParams()
   // Neither is guaranteed to be a superset of the other. For instance ghosting of lower-d point
   // neighbors (AugmentSparsityOnInterface with ghost_point_neighbors = true) is only guaranteed to
   // ghost those lower-d point neighbors on *processes that own lower-d elements*. And you may have
-  // a process that only owns higher-dimensionsional elements
+  // a process that only owns higher-dimensional elements
   //
   // Note that in my experience it is only important for the higher-d lower-d point neighbors to be
   // ghosted when forming sparsity patterns and so I'm putting this here instead of at the
