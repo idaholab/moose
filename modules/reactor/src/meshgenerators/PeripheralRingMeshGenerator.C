@@ -13,6 +13,7 @@
 #include "MooseUtils.h"
 #include "LinearInterpolation.h"
 #include "FillBetweenPointVectorsTools.h"
+#include "libmesh/int_range.h"
 
 // C++ includes
 #include <cmath> // for atan2
@@ -167,7 +168,7 @@ PeripheralRingMeshGenerator::generate()
   auto side_list_tmp = input_mesh->get_boundary_info().build_side_list();
   bool linear_side = false;
   bool quadratic_side = false;
-  for (auto & side : side_list_tmp)
+  for (const auto & side : side_list_tmp)
   {
     if (std::get<2>(side) == _input_mesh_external_bid)
     {
@@ -266,7 +267,7 @@ PeripheralRingMeshGenerator::generate()
   boundary_ordered_node_list.pop_back();
   // Loop over all the boundary nodes
   // For quadratic sides, the middle points are included automatically
-  for (unsigned int i = 0; i < boundary_ordered_node_list.size(); ++i)
+  for (const auto i : index_range(boundary_ordered_node_list))
   {
     input_ext_node_num++;
     // Define nodes on the inner and outer boundaries of the peripheral region.
@@ -294,7 +295,7 @@ PeripheralRingMeshGenerator::generate()
   std::vector<Real> input_bdry_angles;
   // Normal directions of input boundary nodes
   std::vector<Point> input_bdry_nd;
-  for (unsigned int i = 0; i < azi_points.size(); i++)
+  for (const auto i : index_range(azi_points))
   {
     Point p1, p2;
     const Point pn = Point(0.0, 0.0, 1.0);
@@ -332,7 +333,7 @@ PeripheralRingMeshGenerator::generate()
   // Reference outmost layer of inner boundary layer
   std::vector<Point> ref_inner_bdry_surf;
   // First loop
-  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  for (const auto i : make_range(input_ext_node_num))
   {
     // Inner boundary nodes of the peripheral region
     points_array[0][i] = std::get<1>(azi_points[i]);
@@ -357,7 +358,7 @@ PeripheralRingMeshGenerator::generate()
                                points_array);
   const Real correction_factor = _preserve_volumes ? radiusCorrectionFactor(azi_array) : 1.0;
   // Loop to handle outer boundary layer and main region
-  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  for (const auto i : make_range(input_ext_node_num))
   {
     // Outer boundary nodes of the peripheral region
     points_array[total_peripheral_layer_num][i] = std::get<2>(azi_points[i]) * correction_factor;
@@ -368,7 +369,8 @@ PeripheralRingMeshGenerator::generate()
       const Point outer_boundary_shift =
           -Point(std::cos(std::get<0>(azi_points[i])), std::sin(std::get<0>(azi_points[i])), 0.0) *
           _peripheral_outer_boundary_layer_params.width;
-      for (unsigned int j = 1; j < _peripheral_outer_boundary_layer_params.intervals + 1; j++)
+      for (const auto j :
+           make_range(uint(1), _peripheral_outer_boundary_layer_params.intervals + 1))
         points_array[total_peripheral_layer_num - j][i] =
             points_array[total_peripheral_layer_num][i] +
             outer_boundary_shift * outer_peripheral_bias_terms[j - 1];
@@ -387,7 +389,7 @@ PeripheralRingMeshGenerator::generate()
                  "peripheral ring region.");
     }
 
-    for (unsigned int j = 1; j < _peripheral_layer_num * order; ++j)
+    for (const auto j : make_range(uint(1), _peripheral_layer_num * order))
       points_array[j + _peripheral_inner_boundary_layer_params.intervals][i] =
           points_array[_peripheral_inner_boundary_layer_params.intervals][i] *
               (1.0 - main_peripheral_bias_terms[j - 1]) +
@@ -400,8 +402,8 @@ PeripheralRingMeshGenerator::generate()
   dof_id_type node_id = 0;
 
   // Add nodes to the new mesh
-  for (unsigned int i = 0; i <= total_peripheral_layer_num; ++i)
-    for (unsigned int j = 0; j < input_ext_node_num; ++j)
+  for (const auto i : make_range(total_peripheral_layer_num + 1))
+    for (const auto j : make_range(input_ext_node_num))
     {
       nodes[node_id] = mesh->add_point(points_array[i][j], node_id);
       node_id_array[i][j] = node_id;
@@ -410,8 +412,8 @@ PeripheralRingMeshGenerator::generate()
   // Add elements to the new mesh
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   const unsigned int index_shift = is_first_node_vertex ? 0 : 1;
-  for (unsigned int i = 0; i < total_peripheral_layer_num / order; ++i)
-    for (unsigned int j = 0; j < input_ext_node_num / order; ++j)
+  for (const auto i : make_range(total_peripheral_layer_num / order))
+    for (const auto j : make_range(input_ext_node_num / order))
     {
       std::unique_ptr<Elem> new_elem;
       new_elem = std::make_unique<Quad4>();
@@ -487,7 +489,7 @@ PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
   std::vector<Real> interp_azi_data, interp_x_data, interp_y_data;
   std::unique_ptr<LinearInterpolation> linterp_x, linterp_y;
   // Mark the to-be-deleted elements
-  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  for (const auto i : make_range(input_ext_node_num))
   {
     // For a zig-zag external boundary, when we add a conformal layer onto it by translating the
     // nodes in the surface normal direction, it is possible that the azimuthal order is flipped.
@@ -534,7 +536,7 @@ PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
   // Create vectors for interpolation
   // Due to the flip issue, linear interpolation is used here to mark the location of the boundary
   // layer's outer boundary.
-  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  for (const auto i : make_range(input_ext_node_num))
   {
     if (!delete_mark[i])
     {
@@ -575,7 +577,7 @@ PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
   linterp_x = std::make_unique<LinearInterpolation>(interp_azi_data, interp_x_data);
   linterp_y = std::make_unique<LinearInterpolation>(interp_azi_data, interp_y_data);
   //  Loop to handle inner boundary layer
-  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  for (const auto i : make_range(input_ext_node_num))
   {
     // Outside point of the inner boundary layer
     // Using interpolation, the azimuthal angles do not need to be changed.
@@ -583,7 +585,7 @@ PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
                                              linterp_y->sample(azi_array[i] / 180.0 * M_PI),
                                              origin_pt(2)) -
                                        points_array[0][i];
-    for (unsigned int j = 1; j < _peripheral_inner_boundary_layer_params.intervals + 1; j++)
+    for (const auto j : make_range(uint(1), _peripheral_inner_boundary_layer_params.intervals + 1))
       points_array[j][i] =
           points_array[0][i] + inner_boundary_shift * inner_peripheral_bias_terms[j - 1];
   }

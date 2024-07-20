@@ -14,6 +14,7 @@
 #include "MooseError.h"
 
 // libMesh includes
+#include "libmesh/int_range.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh_serializer.h"
@@ -141,7 +142,7 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
   // Node counter
   unsigned int node_counter = 0;
 
-  for (unsigned int i = 0; i < num_layers + 1; i++)
+  for (const auto i : make_range(num_layers + 1))
   {
     // calculate number of nodes in each sublayer
     node_number_vec.push_back(
@@ -173,7 +174,7 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
                        vec_2_node_num,
                        i);
 
-    for (unsigned int j = 0; j < node_number_vec[i]; j++)
+    for (const auto j : make_range(node_number_vec[i]))
     {
       // Create surrogate Points on side #1 for Point #j on the sublayer
       Point surrogate_pos_1 = Point(linear_vec_1_x->sample(weighted_surrogate_index_1[j]),
@@ -259,8 +260,8 @@ elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
   const unsigned int node_number = node_number_vec.front();
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  for (unsigned int i = 0; i < num_layers; i++)
-    for (unsigned int j = 1; j < node_number; j++)
+  for (const auto i : make_range(num_layers))
+    for (const auto j : make_range(uint(1), node_number))
     {
       Elem * elem = mesh.add_elem(new Quad4);
       bool is_elem_flip = buildQuadElement(elem,
@@ -293,7 +294,7 @@ elementsCreationFromNodesVectors(MeshBase & mesh,
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  for (unsigned int i = 0; i < num_layers; i++)
+  for (const auto i : make_range(num_layers))
   {
     unsigned int nodes_up_it = 0;
     unsigned int nodes_down_it = 0;
@@ -383,7 +384,7 @@ weightedInterpolator(const unsigned int vec_node_num,
   std::vector<Real> dist_vec;
   std::vector<Real> pos_l;
 
-  for (unsigned int i = 0; i < vec_node_num; i++)
+  for (const auto i : make_range(vec_node_num))
   {
     // Unweighted, the index interval is just uniform
     // Normalized range 0~1
@@ -410,12 +411,12 @@ weightedInterpolator(const unsigned int vec_node_num,
                  index.begin(),
                  [dist_vec_total](Real & c) { return c / dist_vec_total; });
   // Use Gaussian blurring to smoothen local density
-  for (unsigned int i = 0; i < vec_node_num; i++)
+  for (const auto i : make_range(vec_node_num))
   {
     Real gaussian_factor(0.0);
     Real sum_tmp(0.0);
     // Use interval as parameter now, consider distance in the future
-    for (unsigned int j = 0; j < vec_node_num - 1; j++)
+    for (const auto j : make_range(vec_node_num - 1))
     {
       // dis_vec and index are off by 0.5
       const Real tmp_factor =
@@ -443,7 +444,7 @@ surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
   // First element is trivial
   weighted_surrogate_index.push_back(0.0);
   unweighted_surrogate_index.push_back(0.0);
-  for (unsigned int j = 1; j < node_number_vec[i]; j++)
+  for (const auto j : make_range(uint(1), node_number_vec[i]))
   {
     // uniform interval for unweighted index
     unweighted_surrogate_index.push_back((Real)j / ((Real)node_number_vec[i] - 1.0));
@@ -466,7 +467,7 @@ surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
       weighted_surrogate_index[j] += (*it_0 - unweighted_surrogate_index[j - 1]) * wt[it_start - 1];
       weighted_surrogate_index[j] +=
           (unweighted_surrogate_index[j] - *(it_1 - 1)) * wt[it_start + it_dist - 1];
-      for (unsigned int k = 1; k < it_dist; k++)
+      for (const auto k : make_range(long(1), it_dist))
         weighted_surrogate_index[j] += wt[it_start + k - 1] / ((Real)boundary_node_num - 1.0);
     }
   }
@@ -510,7 +511,7 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
   auto side_list_tmp = boundary_info.build_side_list();
   std::vector<std::pair<dof_id_type, dof_id_type>> boundary_node_assm;
   std::vector<dof_id_type> boundary_midpoint_node_list;
-  for (unsigned int i = 0; i < side_list_tmp.size(); i++)
+  for (const auto i : index_range(side_list_tmp))
   {
     if (std::get<2>(side_list_tmp[i]) == bid)
     {
@@ -592,7 +593,7 @@ isExternalBoundary(MeshBase & mesh, const boundary_id_type bid)
     mesh.find_neighbors();
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list = boundary_info.build_side_list();
-  for (unsigned int i = 0; i < side_list.size(); i++)
+  for (const auto i : index_range(side_list))
   {
     if (std::get<2>(side_list[i]) == bid)
       if (mesh.elem_ptr(std::get<0>(side_list[i]))->neighbor_ptr(std::get<1>(side_list[i])) !=
@@ -697,7 +698,7 @@ isClosedLoop(MeshBase & mesh,
     // If azimuthal angles change monotonically,
     // the z components of the cross products are always negative or positive.
     std::vector<Real> ordered_node_azi_list;
-    for (unsigned int i = 0; i < ordered_node_list.size() - 1; i++)
+    for (const auto i : make_range(ordered_node_list.size() - 1))
     {
       ordered_node_azi_list.push_back(
           (*mesh.node_ptr(ordered_node_list[i]) - origin_pt)
