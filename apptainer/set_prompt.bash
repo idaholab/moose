@@ -20,8 +20,8 @@ set_prompt () {
     PS1=""
 
     # Add the container version from ApptainerGenerator if it exists
-    if [ -n "${APPTAINER_GENERATOR_VERSION}" ]; then
-        PS1+="${YELLOW}${APPTAINER_GENERATOR_VERSION} "
+    if [ -n "${MOOSE_APPTAINER_GENERATOR_NAME_SUMMARY}" ]; then
+        PS1+="${YELLOW}${MOOSE_APPTAINER_GENERATOR_NAME_SUMMARY} "
     # Otherwise add the general container version if it exists
     elif [ -n "${SINGULARITY_NAME}" ]; then
         PS1+="${YELLOW}${SINGULARITY_NAME##*/} "

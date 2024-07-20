@@ -77,11 +77,6 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
-    #
-    # Begin environment for {{ PROJECT_NAME }}:{{ TAG }}
-    #
-    export APPTAINER_GENERATOR_VERSION="{{ PROJECT_NAME }}:{{ TAG }}"
-
     export INSTALLED_BINARIES={{ BINARY_NAME }}-{{ METHOD }}:exodiff:hit
 {%- if BINARY_NAME == 'moose' %}
     export PATH=/opt/moose/bin:$PATH

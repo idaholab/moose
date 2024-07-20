@@ -15,6 +15,7 @@ from datetime import date
 class PreMake:
     def __init__(self):
         self.conda_env = self.getCondaEnv()
+        self.apptainer_env = self.getApptainerEnv()
         self.versioner_meta = Versioner().version_meta()
 
     @staticmethod
@@ -83,7 +84,23 @@ class PreMake:
 
         return conda_env
 
-    class CondaVersionMismatch(Exception):
+    @staticmethod
+    def getApptainerEnv():
+        """
+        Gets the apptainer generator generated apptainer environment
+        information if it exists.
+        """
+        prefix = 'MOOSE_APPTAINER_GENERATOR_'
+        apptainer_env = {}
+        for key, value in os.environ.items():
+            if key.startswith(prefix):
+                apptainer_env[key.replace(prefix, '')] = value
+        return apptainer_env if apptainer_env else None
+
+    class VersionMismatch(Exception):
+        pass
+
+    class CondaVersionMismatch(VersionMismatch):
         """
         Exception that denotes the mismatch of a version or build
         in a conda packages
@@ -122,7 +139,7 @@ class PreMake:
 
             if msg:
                 full_message += f'\n{msg}'
-            Exception.__init__(self, full_message)
+            super().__init__(self, full_message)
 
         @staticmethod
         def parseVersionDate(version: str):
@@ -136,13 +153,16 @@ class PreMake:
                         int(version_date_re.group(2)),
                         int(version_date_re.group(3)))
 
+    class ApptainerVersionMismatch(VersionMismatch):
+        pass
+
     def check(self):
         """
         Checks for build issues
         """
         try:
             self._check()
-        except self.CondaVersionMismatch as e:
+        except self.VersionMismatch as e:
             self.warn(str(e))
         except Exception as e:
             warning = 'PreMake check failed; this may be ignored but may suggest an environment issue'
@@ -166,10 +186,42 @@ class PreMake:
                                                 *version_tuple,
                                                 version_tuple[1])
 
+    def _checkApptainer(self):
+        library = self.apptainer_env['LIBRARY']
+
+        library_meta = self.versioner_meta.get(library)
+        if not library_meta:
+            return
+
+        apptainer_meta = library_meta.get('apptainer')
+        if not apptainer_meta:
+            return
+
+        required_version = apptainer_meta['tag']
+        current_version = self.apptainer_env['VERSION']
+        if required_version != current_version:
+            name = self.apptainer_env['NAME']
+            name_base = apptainer_meta['name_base']
+            message = f'Container {name} is currently at version {current_version} '
+            message += f'and the required version is {required_version}.\n'
+            message += f'Before updating the container, make sure that your version '
+            message += f'of MOOSE is up to date.\n\n'
+            message += 'You can obtain the correct container at '
+            if name_base == 'moose-dev':
+                harbor = 'harbor.hpc.inl.gov'
+            else:
+                harbor = 'mooseharbor.hpc.inl.gov'
+            message += f'oras://{harbor}/{name_base}/{name}:{required_version}.'
+            raise self.ApptainerVersionMismatch(message)
+
     def _check(self):
         """
         Internal check method
         """
+        # We have apptainer available, check the version if we can
+        if self.apptainer_env:
+            self._checkApptainer()
+
         # We have conda available, check those environments
         if self.conda_env:
             self._checkCondaPackage('moose-dev')
