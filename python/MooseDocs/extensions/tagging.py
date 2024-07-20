@@ -54,6 +54,8 @@ class TaggingExtension(command.CommandExtension):
         config['js_file'] = (None,
                              "Javascript file used for filtering / search page.")
         config['csv_file'] = (None, "CSV file used for examining the tag database")
+        config['landing_page'] = ("filter/index.html", "Landing page for the search engine")
+
         # Disable by default
         config['active'] = (False, config['active'][1])
         return config
@@ -118,16 +120,16 @@ class TaggingExtension(command.CommandExtension):
                         else:
                             path_value_cut = path_value.split('/')[-1]
 
-                        # Find the relative path from the filter page (assumed at filter/index.html)
+                        # Find the relative path from the filter page
                         # Check that there is no ambiguity
                         target_page = self.translator.findPages(path_value_cut)
-                        filter_page = self.translator.findPages("filter/index.html")
+                        filter_page = self.translator.findPages(self['landing_page'])
                         if len(target_page) != 1:
                             LOG.error(str(len(target_page)) + " pages found after truncating address when "
                                       "tagging for page initially at address: " + path_value)
                         if len(filter_page) != 1:
-                            LOG.warning(str(len(filter_page)) + " pages have been found for the filter page "
-                                        "when building relative links for tagged pages!")
+                            LOG.error(str(len(filter_page)) + " pages have been found for the filter page "
+                                      "when building relative links for tagged pages!")
                         # We did not find the pages, thus cannot search for their relative path
                         # So we simply take the full path value and use it to create the link
                         if (len(target_page) == 0 or len(filter_page) == 0):
@@ -224,9 +226,9 @@ class TaggingCommand(command.CommandComponent):
         else:
             name=settings['name']
         if settings['pairs'] is None:
+            keylist=''
             msg = "%s: No key:value pairs provided; check markdown file and add desired pairs."
             LOG.error(msg, page.name)
-            keylist=''
         else:
             keylist=settings['pairs'].split()
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
@@ -236,8 +238,9 @@ class TaggingCommand(command.CommandComponent):
             entry_key_values.append([key_vals[0],key_vals[1]])
 
         good_keys=[]
+        # Add keys specified in the documentation files
         for pair in entry_key_values:
-            if pair[0] not in self.extension.allowed_keys and len(self.extension.allowed_keys) > 0:
+            if pair[0] not in self.extension.allowed_keys:
                 msg = "%s: Provided 'key' not in allowed_keys (see config.yml); not adding the " \
                        "following to the database: %s"
                 LOG.warning(msg, page.name, pair[0])
@@ -247,7 +250,8 @@ class TaggingCommand(command.CommandComponent):
             else:
                 good_keys.append([pair[0], pair[1]])
 
-        if len(name) != 0: # Only add to tag database if 'name' is provided
+        # Only add to tag database if 'name' is provided
+        if len(name) != 0:
             page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
             tag_id_name = ''

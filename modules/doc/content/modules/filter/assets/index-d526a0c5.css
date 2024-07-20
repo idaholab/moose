@@ -1,0 +1,151 @@
+#root {
+    max-width: 1280px;
+    padding: 2rem;
+    text-align: center;
+    position: absolute;
+    top: 0px;
+}
+.logo {
+    height: 6em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter .3s;
+}
+.logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+}
+@keyframes logo-spin {
+    0% {
+    transform: rotate(0);
+}
+to {
+    transform: rotate(360deg);
+}
+}@media (prefers-reduced-motion: no-preference) {
+    a: nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+}
+}.card {
+    padding: 2em;
+}
+.read-the-docs {
+    color: #888;
+}
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: light dark;
+    color: #ffffffde;
+    background-color: #242424;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    --inl-blue: rgba(0, 88, 151, 1.0);
+    --inl-blue-light: rgba(0, 104, 179, 1.0);
+    /* darkmode */
+    --darkmode-navigator: rgba(26, 26, 26, 1.0);
+    --darkmode-back: rgba(35, 35, 35, 1.0);
+    --darkmode-card: rgba(20, 20, 20, 1.0);
+    --darkmode-image-card: rgba(10, 10, 10, 1.0);
+    --darkmode-fore: rgba(200, 200, 200, 1.0);
+    --dark-navbar: rgba(39, 63, 99, 1.0);
+    --darker-highlight: rgba(100, 100, 100, 1.0);
+    --darker-embossed: rgba(80, 80, 80, 1.0);
+    --pre-textbox: rgba(10, 10, 10, 1.0);
+    --links-dark: rgba(119, 177, 250, 1.0);
+}
+a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+}
+a:hover {
+    color: #535bf2;
+}
+body {
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+}
+h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+}
+button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: .6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color .25s;
+}
+button:hover {
+    border-color: #646cff;
+}
+button:focus, button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+div.MuiPaper-root {
+    width: initial !important;
+}
+div.MuiListItem-root {
+    font-size: large !important;
+}
+label.MuiFormControlLabel-root {
+    margin-left: 5px !important;
+}
+span.MuiButtonBase-root {
+    padding: 1px !important;
+    color:#7b6b6b !important;
+}
+header.MuiPaper-root {
+    margin-left: 280px !important;
+    background-color:var(--inl-blue) !important;
+}
+.MuiPaper-root {
+    left: 2px !important;
+}
+.MuiListItem-root {
+    padding: 1px 8px !important;
+}
+div.MuiBox-root {
+    display: flow-root;
+    padding-left: 240px;
+}
+@media (prefers-color-scheme: light) {
+    :root {
+    color: #213547;
+    background-color: #ffffffde;
+    background-size: cover;
+    }
+    a:hover {
+        color: #747bff;
+    }
+    button {
+        background-color: #f9f9f9;
+    }
+}
+@media (prefers-color-scheme: dark), (prefers-dark-interface) {
+    body, table, a, main{
+      background: var(--darkmode-back) !important;
+      color: var(--darkmode-fore) !important;
+    }
+    .MuiDrawer-root >div {
+        background: var(--darkmode-back) !important;
+        color: var(--darkmode-fore) !important;
+    }
+    header.MuiPaper-root {
+        background-color:var(--dark-navbar) !important;
+    }
+}
