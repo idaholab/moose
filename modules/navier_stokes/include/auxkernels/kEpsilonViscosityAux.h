@@ -68,6 +68,9 @@ protected:
   /// Method used to limit the k-e time scale
   const MooseEnum _scale_limiter;
 
+  /// Whether we are using a newton solve
+  const bool _newton_solve;
+
   // -- Parameters of the wall function method
 
   /// Maximum number of iterations to find the friction velocity

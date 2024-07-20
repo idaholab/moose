@@ -14,6 +14,7 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "INSFVTurbulentViscosityWallFunction.h"
 #include "INSFVTKESourceSink.h"
+#include "NSFVBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVTurbulencePhysics);
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "get_turbulence_physics");
@@ -723,6 +724,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     params.set<bool>("bulk_wall_treatment") = getParam<bool>("bulk_wall_treatment");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+    params.set<bool>("newton_solve") = true;
     getProblem().addAuxKernel(mut_kernel_type, prefix() + "mixing_length_aux ", params);
   }
   if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable") &&

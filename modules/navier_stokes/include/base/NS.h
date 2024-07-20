@@ -188,6 +188,8 @@ static constexpr Real von_karman_constant = 0.4187;
 static constexpr Real E_turb_constant = 9.793;
 // Lower limit for mu_t
 static constexpr Real mu_t_low_limit = 1.0e-8;
+// Lower limit for y_plus
+static constexpr Real min_y_plus = 1e-10;
 }
 
 namespace NS_DEFAULT_VALUES

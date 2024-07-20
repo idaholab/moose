@@ -91,7 +91,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
     // Incremental solve on y_plus to get the near-wall quantities
-    y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
+    y_plus = NS::findyPlus(mu, rho, parallel_speed, wall_dist);
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
     mut_log = mu_wall - mu;

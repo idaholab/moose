@@ -94,7 +94,12 @@ INSFVTKESourceSink::computeQpResidual()
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
-  const auto TKE = std::max(_var(elem_arg, old_state), ADReal(0) * _var(elem_arg, old_state));
+  // To prevent negative values & preserve sparsity pattern
+  auto TKE = std::max(_var(elem_arg, old_state), ADReal(0) * _var(elem_arg, old_state));
+  // Prevent computation of sqrt(0) with undefined automatic derivatives
+  // This is not needed for segregated solves, as TKE has minimum bound in the solver
+  if (_newton_solve)
+    TKE += 1e-10;
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
@@ -119,7 +124,7 @@ INSFVTKESourceSink::computeQpResidual()
 
       ADReal y_plus;
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
-        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE + 1e-10) * rho / mu;
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
       else // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
@@ -161,7 +166,7 @@ INSFVTKESourceSink::computeQpResidual()
       const ADReal wall_mu = _mu(facearg, state);
 
       const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
-      const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE + 1e-10, 0.5) /
+      const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 0.5) /
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
@@ -177,7 +182,7 @@ INSFVTKESourceSink::computeQpResidual()
         destruction += destruction_log;
         if (_newton_solve)
           destruction += 0 * destruction_visc;
-        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(TKE + 1e-10) /
+        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(TKE) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       }
     }

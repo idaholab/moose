@@ -29,6 +29,8 @@ INSFVTKEDWallFunctionBC::validParams()
   params.addRequiredParam<MooseFunctorName>("k", "The turbulent kinetic energy.");
   params.deprecateParam("k", NS::TKE, "01/01/2025");
   params.addParam<MooseFunctorName>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
 }
 
@@ -42,7 +44,8 @@ INSFVTKEDWallFunctionBC::INSFVTKEDWallFunctionBC(const InputParameters & params)
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _k(getFunctor<ADReal>(NS::TKE)),
-    _C_mu(getFunctor<ADReal>("C_mu"))
+    _C_mu(getFunctor<ADReal>("C_mu")),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
 }
 
@@ -84,16 +87,23 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
   if (y_plus <= 5.0) // sub-laminar layer
   {
     const auto laminar_value = 2.0 * weight * TKE * mu / std::pow(dist, 2);
-    // Additional zero term to make sure new derivatives are not introduced as y_plus changes
-    return laminar_value + 0 * _mu_t(makeElemArg(&_current_elem), state);
+    if (!_newton_solve)
+      return laminar_value;
+    else
+      // Additional zero term to make sure new derivatives are not introduced as y_plus
+      // changes
+      return laminar_value + 0 * _mu_t(makeElemArg(&_current_elem), state);
   }
   else if (y_plus >= 30.0) // log-layer
   {
     const auto turbulent_value = weight * _C_mu(makeElemArg(&_current_elem), state) *
                                  std::pow(std::abs(TKE), 1.5) /
                                  (_mu_t(makeElemArg(&_current_elem), state) * dist);
-    // Additional zero term to make sure new derivatives are not introduced as y_plus changes
-    return turbulent_value + 0 * mu;
+    if (!_newton_solve)
+      return turbulent_value;
+    else
+      // Additional zero term to make sure new derivatives are not introduced as y_plus changes
+      return turbulent_value + 0 * mu;
   }
   else // blending function
   {
