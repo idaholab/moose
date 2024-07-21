@@ -80,6 +80,7 @@ PropertyReadFile::validParams()
 
 PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   : GeneralUserObject(parameters),
+    _prop_file_names(getFileNames()),
     _current_file_index(declareRestartableData<unsigned int>("file_index", 0)),
     // index of files must be capped if restarting after having read all files
     _reader(
@@ -111,23 +112,37 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   }
   _bounding_box = MooseUtils::buildBoundingBox(mesh_min, mesh_max);
 
-  // Retrieve the property file names
-  if (isParamValid("property_file_name"))
-    _property_file_names = getParam<std::vector<FileName>>("property_file_name");
-  else if (isParamValid("property_file_names_csv"))
-  {
-    MooseUtils::DelimitedFileOfStringReader file_name_reader(
-        getParam<FileName>("property_file_names_csv"));
-    file_name_reader.read();
-    _property_file_names = file_name_reader.getData()[0];
-  }
-  else
-    paramError("property_file_name",
-               "The names of the property files must be provided with either 'property_file_name' "
-               "or 'property_file_names_csv'");
-
   if (_load_on_construction)
     readData();
+}
+
+std::vector<FileName>
+PropertyReadFile::getFileNames()
+{
+  std::vector<FileName> prop_file_names;
+  // Retrieve the property file names
+  if (isParamValid("prop_file_name") && !isParamValid("prop_file_names_csv"))
+    prop_file_names = getParam<std::vector<FileName>>("prop_file_name");
+  else if (isParamValid("prop_file_names_csv") && !isParamValid("prop_file_name"))
+  {
+    MooseUtils::DelimitedFileOfStringReader file_name_reader(
+        getParam<FileName>("prop_file_names_csv"));
+    file_name_reader.setHeaderFlag(MooseUtils::DelimitedFileOfStringReader::HeaderFlag::OFF);
+    file_name_reader.read();
+    if (file_name_reader.getData().size())
+    {
+      const auto fdata = file_name_reader.getData(0);
+      for (const auto & fname : fdata)
+        prop_file_names.push_back(fname);
+    }
+  }
+  else
+    paramError("prop_file_name",
+               "The names of the property files must be provided with either 'prop_file_name' "
+               "or 'prop_file_names_csv'. Providing both or none is not supported.");
+  if (prop_file_names.empty())
+    paramError("prop_file_name", "A property file should have been specified.");
+  return prop_file_names;
 }
 
 void
