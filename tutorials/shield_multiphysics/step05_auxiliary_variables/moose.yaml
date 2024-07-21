@@ -1,0 +1,9 @@
+DMETHOD: devel
+Werror: reorder
+compiler_type: clang
+documentation: true
+installation_type: in_tree
+registered_apps:
+- WASPAPP
+- MOOSETESTAPP
+- MOOSEAPP
