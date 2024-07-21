@@ -67,27 +67,28 @@ MultiSpeciesDiffusionCG::addFEKernels()
       // Transfer the diffusivity parameter from the Physics to the kernel
       if (isParamValid("diffusivity_matprop"))
         params.set<MaterialPropertyName>("diffusivity") =
-            getParam<MaterialPropertyName>("diffusivity_matprop");
+            getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop")[s];
       else if (isParamValid("diffusivity_functor"))
         params.set<MaterialPropertyName>("diffusivity") =
-            getParam<MaterialPropertyName>("diffusivity_matprop");
+            getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop")[s];
 
       getProblem().addKernel(kernel_type, prefix() + var_name + "_diffusion", params);
     }
 
     // Source term
-    if (isParamValid("source_functor"))
+    if (isParamValid("source_functors"))
     {
       // Select the kernel type based on the user parameters
       std::string kernel_type;
-      const auto & source = getParam<MooseFunctorName>("source_functor");
+      const auto & sources = getParam<std::vector<MooseFunctorName>>("source_functors");
+      const auto & source = sources[s];
       if (MooseUtils::parsesToReal(source) || getProblem().hasFunction(source) ||
           getProblem().hasPostprocessorValueByName(source))
         kernel_type = _use_ad ? "ADBodyForce" : "BodyForce";
       else if (getProblem().hasVariable(source))
         kernel_type = _use_ad ? "ADCoupledForce" : "CoupledForce";
       else
-        paramError("source_functor",
+        paramError("source_functors",
                    "No kernel defined for a source term in CG for the type of '",
                    source,
                    "'");
@@ -97,7 +98,8 @@ MultiSpeciesDiffusionCG::addFEKernels()
       assignBlocks(params, _blocks);
 
       // Transfer the source and coefficient parameter from the Physics to the kernel
-      const auto coef = getParam<Real>("source_coef");
+      const auto coefs = getParam<std::vector<Real>>("source_coefs");
+      const auto coef = coefs[s];
       if (MooseUtils::parsesToReal(source))
         params.set<Real>("value") = MooseUtils::convert<Real>(source) * coef;
       else if (getProblem().hasFunction(source))
