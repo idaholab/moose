@@ -34,6 +34,8 @@ public:
 protected:
   /// Name of the diffused variables
   const std::vector<VariableName> & _species_names;
+  /// Number of species
+  const unsigned int _num_species;
   /// Boundaries on which a Neumann boundary condition is applied. Outer indexing is variables
   const std::vector<std::vector<BoundaryName>> & _neumann_boundaries;
   /// Boundaries on which a Dirichlet boundary condition is applied. Outer indexing is variables

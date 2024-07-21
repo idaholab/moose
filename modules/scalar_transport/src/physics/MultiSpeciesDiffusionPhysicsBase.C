@@ -28,12 +28,12 @@ MultiSpeciesDiffusionPhysicsBase::validParams()
       "diffusivity_matprops",
       "Material properties defining the diffusion coefficient for each species");
   params.addParam<std::vector<MooseFunctorName>>(
-      "diffusivity_functors", "Functors specifying the diffusivity for each species");
+     "diffusivity_functors", "Functors specifying the diffusivity for each species");
 
   // Source term
   params.addParam<std::vector<MooseFunctorName>>(
-      "source_functor", "Source terms in the diffusion problem for each species");
-  params.addParam<std::vector<Real>>("source_coef", {1}, "Coefficient multiplying the source");
+      "source_functors", "Source terms in the diffusion problem for each species");
+  params.addParam<std::vector<Real>>("source_coefs", {1}, "Coefficient multiplying the source");
 
   // Boundary conditions
   params.addParam<std::vector<std::vector<BoundaryName>>>(
@@ -67,7 +67,8 @@ MultiSpeciesDiffusionPhysicsBase::validParams()
 MultiSpeciesDiffusionPhysicsBase::MultiSpeciesDiffusionPhysicsBase(
     const InputParameters & parameters)
   : PhysicsBase(parameters),
-    _species_names(getParam<std::vector<VariableName>>("variable_name")),
+    _species_names(getParam<std::vector<VariableName>>("species")),
+    _num_species(_species_names.size()),
     _neumann_boundaries(getParam<std::vector<std::vector<BoundaryName>>>("neumann_boundaries")),
     _dirichlet_boundaries(getParam<std::vector<std::vector<BoundaryName>>>("dirichlet_boundaries"))
 {
@@ -82,8 +83,10 @@ MultiSpeciesDiffusionPhysicsBase::MultiSpeciesDiffusionPhysicsBase(
                                                                   "boundary_values");
   checkTwoDVectorParamsNoRespectiveOverlap<BoundaryName>(
       {"neumann_boundaries", "dirichlet_boundaries"});
-  if (isParamSetByUser("source_coef"))
-    checkParamsBothSetOrNotSet("source_functor", "source_coef");
+  if (isParamSetByUser("source_coefs"))
+    checkParamsBothSetOrNotSet("source_functors", "source_coefs");
+  if (isParamValid("source_functors"))
+    checkVectorParamsSameLength<VariableName, MooseFunctorName>("species", "source_functors");
 
   addRequiredPhysicsTask("add_preconditioning");
 }
