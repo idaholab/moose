@@ -25,10 +25,17 @@ PropertyReadFile::validParams()
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("User Object to read property data from an external file and assign "
                              "it to elements / nodes / subdomains etc.");
-  params.addRequiredParam<std::vector<FileName>>(
+
+  // Data source file(s)
+  params.addParam<std::vector<FileName>>(
       "prop_file_name",
       "Name(s) of the property file name. If specifying multiple files, the next file will be read "
       "at initialization right before every execution");
+  params.addParam<FileName>("prop_file_names_csv",
+                            "Name(s) of a CSV file containing the list of the property file names "
+                            "as its first column, with no header.");
+
+  // Data organization
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
   params.addParam<unsigned int>(
       "nvoronoi", 0, "Number of voronoi tesselations/grains/nearest neighbor regions");
@@ -54,6 +61,7 @@ PropertyReadFile::validParams()
   params.addParam<bool>(
       "use_zero_based_block_indexing", true, "Are the blocks numbered starting at zero?");
 
+  // Data reading schedule
   params.addParam<bool>(
       "load_first_file_on_construction",
       true,
@@ -72,7 +80,6 @@ PropertyReadFile::validParams()
 
 PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _prop_file_names(getParam<std::vector<FileName>>("prop_file_name")),
     _current_file_index(declareRestartableData<unsigned int>("file_index", 0)),
     // index of files must be capped if restarting after having read all files
     _reader(
@@ -103,6 +110,21 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
     mesh_max(i) = _mesh.getMaxInDimension(i);
   }
   _bounding_box = MooseUtils::buildBoundingBox(mesh_min, mesh_max);
+
+  // Retrieve the property file names
+  if (isParamValid("property_file_name"))
+    _property_file_names = getParam<std::vector<FileName>>("property_file_name");
+  else if (isParamValid("property_file_names_csv"))
+  {
+    MooseUtils::DelimitedFileOfStringReader file_name_reader(
+        getParam<FileName>("property_file_names_csv"));
+    file_name_reader.read();
+    _property_file_names = file_name_reader.getData()[0];
+  }
+  else
+    paramError("property_file_name",
+               "The names of the property files must be provided with either 'property_file_name' "
+               "or 'property_file_names_csv'");
 
   if (_load_on_construction)
     readData();
