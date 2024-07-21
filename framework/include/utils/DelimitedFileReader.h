@@ -94,7 +94,12 @@ public:
   ///@}
 
   /// Set the file name, used to change the file to read from
-  void setFileName(const std::string & new_file) { _filename = new_file; }
+  /// We also reset the column/row names as a second read might have different names
+  void setFileName(const std::string & new_file)
+  {
+    _filename = new_file;
+    _names.clear();
+  }
 
   /**
    * Return the column/row names.
