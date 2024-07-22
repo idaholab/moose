@@ -100,23 +100,25 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
     if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     {
+      const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
       if (_index == 0)
-        _ae = uslipdotn * _u_slip(elemArg(), state);
+        _ae = (uslipdotn * _u_slip(elemArg(), state)).derivatives()[dof_number];
       else if (_index == 1)
-        _ae = uslipdotn * (*_v_slip)(elemArg(), state);
+        _ae = (uslipdotn * (*_v_slip)(elemArg(), state)).derivatives()[dof_number];
       else
-        _ae = uslipdotn * (*_w_slip)(elemArg(), state);
+        _ae = (uslipdotn * (*_w_slip)(elemArg(), state)).derivatives()[dof_number];
       _ae *= -face_rho_fd;
     }
     if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     {
+      const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
       if (_index == 0)
-        _ae = uslipdotn * _u_slip(neighborArg(), state);
+        _an = (uslipdotn * _u_slip(neighborArg(), state)).derivatives()[dof_number];
       else if (_index == 1)
-        _ae = uslipdotn * (*_v_slip)(neighborArg(), state);
+        _an = (uslipdotn * (*_v_slip)(neighborArg(), state)).derivatives()[dof_number];
       else
-        _ae = uslipdotn * (*_w_slip)(neighborArg(), state);
+        _an = (uslipdotn * (*_w_slip)(neighborArg(), state)).derivatives()[dof_number];
       _an *= face_rho_fd;
     }
   }
