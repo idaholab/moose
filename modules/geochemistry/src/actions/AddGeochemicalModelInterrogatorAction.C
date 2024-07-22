@@ -59,7 +59,7 @@ AddGeochemicalModelInterrogatorAction::act()
     params.set<bool>("use_nonlinear") = true;
     params.set<bool>("solve") = false;
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
-    _problem->setKernelCoverageCheck(false);
+    _problem->setKernelCoverageCheck(FEProblemBase::CoverageCheckMode::FALSE);
   }
   // Set up an arbitrary steady executioner
   else if (_current_task == "setup_executioner")

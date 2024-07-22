@@ -18,6 +18,14 @@
 
 namespace MooseMeshUtils
 {
+
+/**
+ * Merges the boundary IDs of boundaries that have the same names
+ * but different IDs.
+ * @param mesh The input mesh whose boundaries we will modify
+ */
+void mergeBoundaryIDsWithSameName(MeshBase & mesh);
+
 /**
  * Changes the old boundary ID to a new ID in the mesh
  *

@@ -89,7 +89,7 @@ TestAction::act()
       std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
           _action_factory.create(class_name, "fe_problem", action_params));
 
-      action->getObjectParams().set<bool>("kernel_coverage_check") = false;
+      action->getObjectParams().set<MooseEnum>("kernel_coverage_check") = "false";
       _awh.addActionBlock(action);
     }
   }

@@ -38,4 +38,12 @@
       detail = "be able to utilize the resulting mesh in a simulation."
     []
   []
+  [samename-warning]
+    type = RunException
+    design = 'meshgenerators/StitchedMeshGenerator.md'
+    issues = '#28049'
+    requirement = "The system shall warn the user if boundary ID renumbering is disabled and it detects the same ID with different boundary names on the two meshes"
+    expect_err = "Boundary ID 1 corresponds to different boundary names on the input meshes! On the first mesh it corresponds to `right` while on the second mesh it corresponds to `bazinga`."
+    input = 'stitched_mesh_generator_sameid.i'
+  []
 []

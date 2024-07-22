@@ -16,6 +16,8 @@ The operations currently implemented are:
 - separating elements in subdomains into several subdomains depending on their element types. Subdomains with a mix of
   element types are not supported by [Exodus.md] output. The new split subdomains' names have the type of the element appended to their respective names.
 
+- merging boundaries with the same name but different boundary IDs.
+
 !syntax parameters /Mesh/MeshRepairGenerator
 
 !syntax inputs /Mesh/MeshRepairGenerator

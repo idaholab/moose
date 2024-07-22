@@ -1,12 +1,29 @@
 [Tests]
-  [./test]
+  [no_material_coverage_check]
     type = 'Exodiff'
     input = 'no_material_coverage_check.i'
     exodiff = 'no_material_coverage_check_out.e'
-
     requirement = 'The system shall support the ability to disable the check for'
                   ' active materials in all parts of the domain.'
     issues = '#5306'
     design = 'Problem/index.md'
-  [../]
+  []
+  [material_coverage_only_list]
+    type = 'Exodiff'
+    input = 'material_coverage_only_list.i'
+    exodiff = 'material_coverage_only_list_out.e'
+    requirement = 'The system shall support the ability to enable the check for'
+                  ' active materials only in some parts of the domain.'
+    issues = '#28117'
+    design = 'Problem/index.md'
+  []
+  [material_coverage_skip_list]
+    type = 'Exodiff'
+    input = 'material_coverage_skip_list.i'
+    exodiff = 'material_coverage_skip_list_out.e'
+    requirement = 'The system shall support the ability to disable the check for'
+                  ' active materials in some parts of the domain.'
+    issues = '#28117'
+    design = 'Problem/index.md'
+  []
 []

@@ -11,6 +11,7 @@
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/unstructured_mesh.h"
 
@@ -38,6 +39,10 @@ StitchedMeshGenerator::validParams()
                         true,
                         "Whether to re-number boundaries in stitched meshes to prevent merging of "
                         "unrelated boundaries");
+  params.addParam<bool>(
+      "merge_boundaries_with_same_name",
+      true,
+      "If the input meshes have boundaries with the same name (but different IDs), merge them");
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
@@ -52,7 +57,8 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
     _stitch_boundaries_pairs(
         getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
-    _prevent_boundary_ids_overlap(getParam<bool>("prevent_boundary_ids_overlap"))
+    _prevent_boundary_ids_overlap(getParam<bool>("prevent_boundary_ids_overlap")),
+    _merge_boundaries_with_same_name(getParam<bool>("merge_boundaries_with_same_name"))
 {
 }
 
@@ -150,20 +156,20 @@ StitchedMeshGenerator::generate()
 
     const bool use_binary_search = (_algorithm == "BINARY");
 
+    // Meshes must be prepared to get the global boundary ids
+    if (!mesh->is_prepared())
+      mesh->prepare_for_use();
+    if (!meshes[i]->is_prepared())
+      meshes[i]->prepare_for_use();
+
     // Avoid chaotic boundary merging due to overlapping ids in meshes by simply renumbering the
     // boundaries in the meshes we are going to stitch onto the base mesh
     // This is only done if there is an overlap
     if (_prevent_boundary_ids_overlap)
     {
-      // Meshes must be prepared to get the global boundary ids and global boundary ids
-      // must be used in parallel to be sure to renumber boundaries consistently across processes
-      if (!mesh->is_prepared())
-        mesh->prepare_for_use();
-      if (!meshes[i]->is_prepared())
-        meshes[i]->prepare_for_use();
-
       const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
       const auto stitched_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
+
       // Check for an overlap
       bool overlap_found = false;
       for (const auto & bid : stitched_mesh_bids)
@@ -183,6 +189,45 @@ StitchedMeshGenerator::generate()
         }
       }
     }
+    else
+    {
+      // If we don't have renumbering, we can get into situations where the same boundary ID is
+      // associated with different boundary names. In this case when we stitch, we assign the
+      // boundary name of the first mesh to the ID everywhere on the domain. We throw a warning
+      // here to warn the user if this is the case.
+      const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
+      const auto & other_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
+
+      // We check if the same ID is present with different names
+      std::set<boundary_id_type> bd_id_intersection;
+      std::set_intersection(base_mesh_bids.begin(),
+                            base_mesh_bids.end(),
+                            other_mesh_bids.begin(),
+                            other_mesh_bids.end(),
+                            std::inserter(bd_id_intersection, bd_id_intersection.begin()));
+
+      for (const auto bid : bd_id_intersection)
+      {
+        const auto & sideset_name_on_first_mesh = mesh->get_boundary_info().get_sideset_name(bid);
+        const auto & sideset_name_on_second_mesh =
+            meshes[i]->get_boundary_info().get_sideset_name(bid);
+
+        if (sideset_name_on_first_mesh != sideset_name_on_second_mesh)
+          mooseWarning(
+              "Boundary ID ",
+              bid,
+              " corresponds to different boundary names on the input meshes! On the first "
+              "mesh it corresponds to `",
+              sideset_name_on_first_mesh,
+              "` while on the second mesh it corresponds to `",
+              sideset_name_on_second_mesh,
+              "`. The final mesh will replace boundary `",
+              sideset_name_on_second_mesh,
+              "` with `",
+              sideset_name_on_first_mesh,
+              "`. To avoid this situation, use the `prevent_boundary_ids_overlap` parameter!");
+      }
+    }
 
     mesh->stitch_meshes(*meshes[i],
                         first,
@@ -191,6 +236,9 @@ StitchedMeshGenerator::generate()
                         _clear_stitched_boundary_ids,
                         /*verbose = */ true,
                         use_binary_search);
+
+    if (_merge_boundaries_with_same_name)
+      MooseMeshUtils::mergeBoundaryIDsWithSameName(*mesh);
   }
 
   mesh->set_isnt_prepared();

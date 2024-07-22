@@ -205,8 +205,29 @@ FEProblemBase::validParams()
                                        rz_coord_axis,
                                        "The rotation axis (X | Y) for axisymetric coordinates",
                                        "Please use 'Mesh/rz_coord_axis' instead");
-  params.addParam<bool>(
-      "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
+  auto coverage_check_description = [](std::string scope, std::string list_param_name)
+  {
+    return "Controls, if and how a " + scope +
+           " subdomain coverage check is performed. "
+           "With 'TRUE' or 'ON' all subdomains are checked (the default). Setting 'FALSE' or 'OFF' "
+           "will disable the check for all subdomains. "
+           "To exclude a predefined set of subdomains 'SKIP_LIST' is to "
+           "be used, while the subdomains to skip are to be defined in the parameter '" +
+           list_param_name +
+           "'. To limit the check to a list of subdomains, 'ONLY_LIST' is to "
+           "be used (again, using the parameter '" +
+           list_param_name + "').";
+  };
+  MooseEnum kernel_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
+  params.addParam<MooseEnum>("kernel_coverage_check",
+                             kernel_coverage_check_modes,
+                             coverage_check_description("kernel", "kernel_coverage_block_list"));
+  params.addParam<std::vector<SubdomainName>>(
+      "kernel_coverage_block_list",
+      {},
+      "List of subdomains for kernel coverage check. The meaning of this list is controlled by the "
+      "parameter 'kernel_coverage_check' (whether this is the list of subdomains to be checked, "
+      "not to be checked or not taken into account).");
   params.addParam<bool>(
       "boundary_restricted_node_integrity_check",
       true,
@@ -217,9 +238,17 @@ FEProblemBase::validParams()
                         "Set to false to disable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");
-  params.addParam<bool>("material_coverage_check",
-                        true,
-                        "Set to false to disable material->subdomain coverage check");
+  MooseEnum material_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
+  params.addParam<MooseEnum>(
+      "material_coverage_check",
+      material_coverage_check_modes,
+      coverage_check_description("material", "material_coverage_block_list"));
+  params.addParam<std::vector<SubdomainName>>(
+      "material_coverage_block_list",
+      {},
+      "List of subdomains for material coverage check. The meaning of this list is controlled by "
+      "the parameter 'material_coverage_check' (whether this is the list of subdomains to be "
+      "checked, not to be checked or not taken into account).");
   params.addParam<bool>("fv_bcs_integrity_check",
                         true,
                         "Set to false to disable checking of overlapping Dirichlet and Flux BCs "
@@ -309,8 +338,10 @@ FEProblemBase::validParams()
       "specific handling, immediately error instead of allowing the time step to be cut");
 
   params.addParamNamesToGroup(
-      "skip_nl_system_check kernel_coverage_check boundary_restricted_node_integrity_check "
-      "boundary_restricted_elem_integrity_check material_coverage_check fv_bcs_integrity_check "
+      "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
+      "boundary_restricted_node_integrity_check "
+      "boundary_restricted_elem_integrity_check material_coverage_check "
+      "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
@@ -397,12 +428,16 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _needs_old_newton_iter(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
-    _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
+    _kernel_coverage_check(
+        getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()),
+    _kernel_coverage_blocks(getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")),
     _boundary_restricted_node_integrity_check(
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
-    _material_coverage_check(getParam<bool>("material_coverage_check")),
+    _material_coverage_check(
+        getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
+    _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
@@ -7760,9 +7795,38 @@ FEProblemBase::checkProblemIntegrity()
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
 
   // Check kernel coverage of subdomains (blocks) in the mesh
-  if (!_skip_nl_system_check && _solve && _kernel_coverage_check)
-    for (auto & nl : _nl)
-      nl->checkKernelCoverage(mesh_subdomains);
+  if (!_skip_nl_system_check && _solve && _kernel_coverage_check != CoverageCheckMode::FALSE &&
+      _kernel_coverage_check != CoverageCheckMode::OFF)
+  {
+    std::set<SubdomainID> blocks;
+    if (_kernel_coverage_check == CoverageCheckMode::TRUE ||
+        _kernel_coverage_check == CoverageCheckMode::ON)
+      blocks = mesh_subdomains;
+    else if (_kernel_coverage_check == CoverageCheckMode::SKIP_LIST)
+    {
+      blocks = mesh_subdomains;
+      for (const auto & subdomain_name : _kernel_coverage_blocks)
+      {
+        const auto id = _mesh.getSubdomainID(subdomain_name);
+        if (id == Moose::INVALID_BLOCK_ID)
+          paramError("kernel_coverage_block_list",
+                     "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+        blocks.erase(id);
+      }
+    }
+    else if (_kernel_coverage_check == CoverageCheckMode::ONLY_LIST)
+      for (const auto & subdomain_name : _kernel_coverage_blocks)
+      {
+        const auto id = _mesh.getSubdomainID(subdomain_name);
+        if (id == Moose::INVALID_BLOCK_ID)
+          paramError("kernel_coverage_block_list",
+                     "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+        blocks.insert(id);
+      }
+    if (!blocks.empty())
+      for (auto & nl : _nl)
+        nl->checkKernelCoverage(blocks);
+  }
 
   // Check materials
   {
@@ -7778,7 +7842,8 @@ FEProblemBase::checkProblemIntegrity()
 
     std::set<SubdomainID> local_mesh_subs(mesh_subdomains);
 
-    if (_material_coverage_check)
+    if (_material_coverage_check != CoverageCheckMode::FALSE &&
+        _material_coverage_check != CoverageCheckMode::OFF)
     {
       /**
        * If a material is specified for any block in the simulation, then all blocks must
@@ -7790,6 +7855,33 @@ FEProblemBase::checkProblemIntegrity()
       {
         local_mesh_subs.erase(id);
         check_material_coverage = true;
+      }
+
+      // did the user limit the subdomains to be checked?
+      if (_material_coverage_check == CoverageCheckMode::SKIP_LIST)
+      {
+        for (const auto & subdomain_name : _material_coverage_blocks)
+        {
+          const auto id = _mesh.getSubdomainID(subdomain_name);
+          if (id == Moose::INVALID_BLOCK_ID)
+            paramError("material_coverage_block_list",
+                       "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+          local_mesh_subs.erase(id);
+        }
+      }
+      else if (_material_coverage_check == CoverageCheckMode::ONLY_LIST)
+      {
+        std::set<SubdomainID> blocks(local_mesh_subs);
+        for (const auto & subdomain_name : _material_coverage_blocks)
+        {
+          const auto id = _mesh.getSubdomainID(subdomain_name);
+          if (id == Moose::INVALID_BLOCK_ID)
+            paramError("material_coverage_block_list",
+                       "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+          blocks.erase(id);
+        }
+        for (const auto id : blocks)
+          local_mesh_subs.erase(id);
       }
 
       // also exclude mortar spaces from the material check
