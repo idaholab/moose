@@ -86,6 +86,14 @@
     recover = false
     mesh_mode = 'REPLICATED'
   []
+  [err_mixed_edge_types]
+    type = 'RunException'
+    input = 'err_mix_type.i'
+    cli_args = '--mesh-only err.e'
+    expect_err = 'Input contains mixed element types on the external boundary.'
+    requirement ='The system shall throw an error if the external sideset of input mesh contains mixed types of side elements.'
+    mesh_mode = 'REPLICATED'
+  []
   [err_overlapped_boundary_layers]
     type = 'RunException'
     input = 'core_ring.i'
