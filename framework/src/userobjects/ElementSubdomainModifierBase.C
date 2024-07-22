@@ -368,9 +368,9 @@ ElementSubdomainModifierBase::applyMovingBoundaryChanges(MooseMesh & mesh)
   Parallel::push_parallel_vector_data(
       bnd_info.comm(),
       add_ghost_sides,
-      [&mesh, &bnd_info, this](
-          processor_id_type,
-          const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
+      [&mesh,
+       &bnd_info](processor_id_type,
+                  const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
       {
         for (const auto & [elem_id, side, bnd] : received)
           bnd_info.add_side(mesh.elemPtr(elem_id), side, bnd);
@@ -379,9 +379,9 @@ ElementSubdomainModifierBase::applyMovingBoundaryChanges(MooseMesh & mesh)
   Parallel::push_parallel_vector_data(
       bnd_info.comm(),
       remove_ghost_sides,
-      [&mesh, &bnd_info, this](
-          processor_id_type,
-          const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
+      [&mesh,
+       &bnd_info](processor_id_type,
+                  const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
       {
         for (const auto & [elem_id, side, bnd] : received)
           bnd_info.remove_side(mesh.elemPtr(elem_id), side, bnd);

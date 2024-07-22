@@ -20,8 +20,7 @@
   [esm]
     type = CutElementSubdomainModifier
     geometric_cut_userobject = level_set_cut_uo
-    initialize_variables = 'disp_x disp_y'
-    initialization_strategy = 'NEAREST'
+    reinitialize_subdomains = '' #no reinitialization of variables or material properties
   []
 []
 
