@@ -87,7 +87,7 @@ AddFluidPropertiesInterrogatorAction::act()
     params.set<bool>("use_nonlinear") = true;
     params.set<bool>("solve") = false;
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
-    _problem->setKernelCoverageCheck(false);
+    _problem->setKernelCoverageCheck(FEProblemBase::CoverageCheckMode::FALSE);
   }
   // Add the fluid properties interrogator user object
   else if (_current_task == "add_user_object")

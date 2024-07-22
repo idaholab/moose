@@ -45,7 +45,7 @@ NavierStokesHDGKernel::NavierStokesHDGKernel(const InputParameters & parameters)
     _pressure_mms_forcing_function(getFunctor<Real>("pressure_mms_forcing_function"))
 {
   // This class handles residuals and Jacobians for multiple variables
-  _fe_problem.setKernelCoverageCheck(false);
+  _fe_problem.setKernelCoverageCheck(FEProblemBase::CoverageCheckMode::FALSE);
 
   _body_forces.push_back(&_body_force_x);
   _body_forces.push_back(&_body_force_y);
