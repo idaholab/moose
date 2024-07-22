@@ -116,7 +116,7 @@
     # Enable the use of the (v,e) variables
     construct_pT_from_ve = true
     construct_pT_from_vh = true
-    error_on_out_of_bounds = false
+    out_of_bounds_behavior = 'set_to_closest_bound'
 
     # Tabulation range
     temperature_min = 280

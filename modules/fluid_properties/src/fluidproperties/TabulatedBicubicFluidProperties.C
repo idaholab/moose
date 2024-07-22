@@ -42,103 +42,39 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 {
   // Construct bicubic interpolants from tabulated data
   std::vector<std::vector<Real>> data_matrix;
-  _property_ipol.resize(_properties.size());
 
-  for (std::size_t i = 0; i < _property_ipol.size(); ++i)
+  if (_create_direct_pT_interpolations)
   {
-    reshapeData2D(_num_p, _num_T, _properties[i], data_matrix);
-    _property_ipol[i] =
-        std::make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
+    _property_ipol.resize(_properties.size());
+    for (const auto i : index_range(_property_ipol))
+    {
+      reshapeData2D(_num_p, _num_T, _properties[i], data_matrix);
+      _property_ipol[i] =
+          std::make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
+    }
+  }
+
+  if (_create_direct_ve_interpolations)
+  {
+    _property_ve_ipol.resize(_properties_ve.size());
+
+    for (const auto i : index_range(_property_ve_ipol))
+    {
+      reshapeData2D(_num_v, _num_e, _properties_ve[i], data_matrix);
+      _property_ve_ipol[i] =
+          std::make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, data_matrix);
+    }
   }
 
   bool conversion_succeeded = true;
   unsigned int fail_counter_ve = 0;
   unsigned int fail_counter_vh = 0;
-  // Create specific volume (v) grid
+  // Create interpolations of (p,T) from (v,e) and (v,h)
   if (_construct_pT_from_ve || _construct_pT_from_vh)
   {
-    if (_fp)
-    {
-      // extreme values of specific volume for the grid bounds
-      Real v1 = v_from_p_T(_pressure_min, _temperature_min);
-      Real v2 = v_from_p_T(_pressure_max, _temperature_min);
-      Real v3 = v_from_p_T(_pressure_min, _temperature_max);
-      Real v4 = v_from_p_T(_pressure_max, _temperature_max);
-      _v_min = std::min({v1, v2, v3, v4});
-      _v_max = std::max({v1, v2, v3, v4});
-    }
-    // if csv exists, get max and min values from csv file
-    else
-    {
-      Real rho_max =
-          *max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
-      Real rho_min =
-          *min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
-      _v_max = 1 / rho_min;
-      _v_min = 1 / rho_max;
-    }
-
-    // Create v grid for interpolation
-    _specific_volume.resize(_num_v);
-    if (_log_space_v)
-    {
-      // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
-      // the power of 10
-      Real dv = (std::log10(_v_max) - std::log10(_v_min)) / ((Real)_num_v - 1);
-      Real log_v_min = std::log10(_v_min);
-      for (unsigned int j = 0; j < _num_v; ++j)
-        _specific_volume[j] = std::pow(10, log_v_min + j * dv);
-    }
-    else
-    {
-      Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
-      for (unsigned int j = 0; j < _num_v; ++j)
-        _specific_volume[j] = _v_min + j * dv;
-    }
-  }
-
-  if (_construct_pT_from_ve)
-  {
-    if (_fp)
-    {
-      // extreme values of internal energy for the grid bounds
-      Real e1 = e_from_p_T(_pressure_min, _temperature_min);
-      Real e2 = e_from_p_T(_pressure_max, _temperature_min);
-      Real e3 = e_from_p_T(_pressure_min, _temperature_max);
-      Real e4 = e_from_p_T(_pressure_max, _temperature_max);
-      _e_min = std::min({e1, e2, e3, e4});
-      _e_max = std::max({e1, e2, e3, e4});
-    }
-    // if csv exists, get max and min values from csv file
-    else
-    {
-      _e_max = *max_element(_properties[_internal_energy_idx].begin(),
-                            _properties[_internal_energy_idx].end());
-      _e_min = *min_element(_properties[_internal_energy_idx].begin(),
-                            _properties[_internal_energy_idx].end());
-    }
-
-    // Create e grid for interpolation
-    _internal_energy.resize(_num_e);
-    if (_log_space_e)
-    {
-      // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
-      // the power of 10
-      if (_e_min < 0)
-        mooseError("Logarithmic grid in specific energy can only be used with a positive specific "
-                   "energy. Current minimum: " +
-                   std::to_string(_e_min));
-      Real de = (std::log10(_e_max) - std::log10(_e_min)) / ((Real)_num_e - 1);
-      Real log_e_min = std::log10(_e_min);
-      for (const auto j : make_range(_num_e))
-        _internal_energy[j] = std::pow(10, log_e_min + j * de);
-    }
-    else
-    {
-      Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
-      for (const auto j : make_range(_num_e))
-        _internal_energy[j] = _e_min + j * de;
-    }
+    // Grids in specific volume and internal energy can be either linear or logarithmic
+    // NOTE: this could have been called already when generating tabulated data
+    createVEGridVectors();
 
     // initialize vectors for interpolation
     std::vector<std::vector<Real>> p_from_v_e(_num_v);
@@ -169,8 +105,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         {
           // The inversion may step outside of the domain of definition of the interpolations,
           // which are restricted to the range of the input CSV file
-          const bool old_error_behavior = _error_on_out_of_bounds;
-          _error_on_out_of_bounds = false;
+          const auto old_error_behavior = _OOBBehavior;
+          _OOBBehavior = SetToClosestBound;
           p_T_from_v_e(_specific_volume[i],
                        _internal_energy[j],
                        p_guess,
@@ -178,7 +114,7 @@ TabulatedBicubicFluidProperties::constructInterpolation()
                        p_ve,
                        T_ve,
                        conversion_succeeded);
-          _error_on_out_of_bounds = old_error_behavior;
+          _OOBBehavior = old_error_behavior;
           // track number of times convergence failed
           if (!conversion_succeeded)
             ++fail_counter_ve;
@@ -278,8 +214,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         {
           // The inversion may step outside of the domain of definition of the interpolations,
           // which are restricted to the range of the input CSV file
-          const bool old_error_behavior = _error_on_out_of_bounds;
-          _error_on_out_of_bounds = false;
+          const auto old_error_behavior = _OOBBehavior;
+          _OOBBehavior = SetToClosestBound;
           p_T_from_v_h(_specific_volume[i],
                        _enthalpy[j],
                        p_guess,
@@ -287,7 +223,7 @@ TabulatedBicubicFluidProperties::constructInterpolation()
                        p_vh,
                        T_vh,
                        conversion_succeeded);
-          _error_on_out_of_bounds = old_error_behavior;
+          _OOBBehavior = old_error_behavior;
           // track number of times convergence failed
           if (!conversion_succeeded)
             ++fail_counter_vh;
