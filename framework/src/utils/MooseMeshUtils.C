@@ -21,6 +21,34 @@ using namespace libMesh;
 
 namespace MooseMeshUtils
 {
+
+void
+mergeBoundaryIDsWithSameName(MeshBase & mesh)
+{
+  // We check if we have the same boundary name with different IDs. If we do, we assign the
+  // first ID to every occurrence.
+  const auto & side_bd_name_map = mesh.get_boundary_info().get_sideset_name_map();
+  const auto & node_bd_name_map = mesh.get_boundary_info().get_nodeset_name_map();
+  std::map<boundary_id_type, boundary_id_type> same_name_ids;
+
+  auto populate_map = [](const std::map<boundary_id_type, std::string> & map,
+                         std::map<boundary_id_type, boundary_id_type> & same_ids)
+  {
+    for (const auto & pair_outer : map)
+      for (const auto & pair_inner : map)
+        // The last condition is needed to make sure we only store one combination
+        if (pair_outer.second == pair_inner.second && pair_outer.first != pair_inner.first &&
+            same_ids.find(pair_inner.first) == same_ids.end())
+          same_ids[pair_outer.first] = pair_inner.first;
+  };
+
+  populate_map(side_bd_name_map, same_name_ids);
+  populate_map(node_bd_name_map, same_name_ids);
+
+  for (const auto & [id1, id2] : same_name_ids)
+    mesh.get_boundary_info().renumber_id(id2, id1);
+}
+
 void
 changeBoundaryId(MeshBase & mesh,
                  const boundary_id_type old_id,

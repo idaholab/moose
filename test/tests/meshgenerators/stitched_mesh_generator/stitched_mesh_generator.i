@@ -21,6 +21,7 @@
     stitch_boundaries_pairs = 'right left;
                                right left'
     parallel_type = 'replicated'
+    merge_boundaries_with_same_name = false
   []
 []
 
