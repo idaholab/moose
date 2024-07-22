@@ -1866,6 +1866,7 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
     _v_bounds_specified = true;
 
     // Extract the fluid property data from the file
+    _properties_ve.reserve(_interpolated_properties.size());
     for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
       _properties_ve.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
   }
@@ -1894,7 +1895,7 @@ TabulatedFluidProperties::checkFileTabulationGrids(std::vector<Real> & v1,
 
   // Check that the number of rows in the csv file is equal to _num_v1 * _num_v2
   // v2 is currently the same size as the column_data (will get trimmed at the end)
-  if (v2.size() != v1.size() * static_cast<unsigned int>(num_v2))
+  if (v2.size() != v1.size() * libMesh::cast_int<unsigned int>(num_v2))
     mooseError("The number of rows in ",
                file_name,
                " is not equal to the number of unique ",
@@ -2024,9 +2025,9 @@ TabulatedFluidProperties::createVEGridVectors()
     else
     {
       Real rho_max =
-          *max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
+          *std::max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
       Real rho_min =
-          *min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
+          *std::min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
@@ -2065,10 +2066,10 @@ TabulatedFluidProperties::createVEGridVectors()
     // if csv exists, get max and min values from csv file
     else
     {
-      _e_min = *min_element(_properties[_internal_energy_idx].begin(),
-                            _properties[_internal_energy_idx].end());
-      _e_max = *max_element(_properties[_internal_energy_idx].begin(),
-                            _properties[_internal_energy_idx].end());
+      _e_min = *std::min_element(_properties[_internal_energy_idx].begin(),
+                                 _properties[_internal_energy_idx].end());
+      _e_max = *std::max_element(_properties[_internal_energy_idx].begin(),
+                                 _properties[_internal_energy_idx].end());
     }
   }
 
