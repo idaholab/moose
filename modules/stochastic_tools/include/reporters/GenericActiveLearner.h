@@ -18,6 +18,9 @@
 #include "SurrogateModelInterface.h"
 #include "Standardizer.h"
 #include "GaussianProcessSurrogate.h"
+#include "DenseMatrix.h"
+#include "AdaptiveMonteCarloUtils.h"
+#include "StochasticToolsUtils.h"
 
 /**
  * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: NN and GP training step
