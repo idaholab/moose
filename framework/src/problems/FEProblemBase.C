@@ -790,6 +790,8 @@ FEProblemBase::initialSetup()
   if (!_nonlinear_convergence_name.empty())
     getConvergence(_nonlinear_convergence_name).initialSetup();
   else
+    Moose::out << "No convergence criteria specified. Using default convergence criteria."
+               << std::endl;
 
     SubProblem::initialSetup();
 
