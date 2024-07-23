@@ -7,18 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BayesianGPrySampler.h"
+#include "BayesianActiveLearningSampler.h"
 #include "Normal.h"
 #include "Uniform.h"
 
-registerMooseObject("StochasticToolsApp", BayesianGPrySampler);
+registerMooseObject("StochasticToolsApp", BayesianActiveLearningSampler);
 
 InputParameters
-BayesianGPrySampler::validParams()
+BayesianActiveLearningSampler::validParams()
 {
   InputParameters params = PMCMCBase::validParams();
-  params.addClassDescription(
-      "Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: sampler step.");
+  params.addClassDescription("Fast Bayesian inference with the parallel active learning (partly "
+                             "inspired from El Gammal et al. 2023).");
   params.addRequiredParam<ReporterName>("sorted_indices",
                                         "The sorted sample indices in order of importance to evaluate the subApp.");
   params.addRequiredRangeCheckedParam<unsigned int>(
@@ -28,7 +28,7 @@ BayesianGPrySampler::validParams()
   return params;
 }
 
-BayesianGPrySampler::BayesianGPrySampler(const InputParameters & parameters)
+BayesianActiveLearningSampler::BayesianActiveLearningSampler(const InputParameters & parameters)
   : PMCMCBase(parameters),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
     _num_tries(getParam<unsigned int>("num_tries"))
@@ -39,43 +39,29 @@ BayesianGPrySampler::BayesianGPrySampler(const InputParameters & parameters)
 }
 
 void
-BayesianGPrySampler::fillVector(std::vector<Real> & vector, const unsigned int & seed_value)
+BayesianActiveLearningSampler::fillVector(std::vector<Real> & vector, const unsigned int & seed_value)
 {
   for (unsigned int i = 0; i < _priors.size(); ++i)
     vector[i] = _priors[i]->quantile(getRand(seed_value));
 }
 
-void
-BayesianGPrySampler::fillVectorUnitBall(std::vector<Real> & vector,
-                                        const unsigned int & seed_value,
-                                        const std::vector<Real> & seed_vector)
-{
-  Real tmp_value;
-  for (unsigned int i = 0; i < _priors.size(); ++i)
-  {
-    tmp_value = Normal::quantile(
-        getRand(seed_value), Normal::quantile(_priors[i]->cdf(seed_vector[i]), 0.0, 1.0), 1.0);
-    vector[i] = _priors[i]->quantile(Normal::cdf(tmp_value, 0.0, 1.0));
-  }
-}
-
 const std::vector<std::vector<Real>> &
-BayesianGPrySampler::getSampleTries() const
+BayesianActiveLearningSampler::getSampleTries() const
 {
   return _inputs_all;
 }
 
 const std::vector<Real> &
-BayesianGPrySampler::getVarSampleTries() const
+BayesianActiveLearningSampler::getVarSampleTries() const
 {
   return _var_all;
 }
 
 void
-BayesianGPrySampler::proposeSamples(const unsigned int seed_value)
+BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value)
 {
-  // If step is 1, randomly generate the samples
-  // Else, generate the samples informed by the GP and NN combo from the reporter "sorted_indices"
+  /* If step is 1, randomly generate the samples.
+  Else, generate the samples informed by the GP from the reporter "sorted_indices" */
   for (dof_id_type i = 0; i < _num_parallel_proposals; ++i)
   {
     if (_t_step <= 1)
@@ -93,8 +79,8 @@ BayesianGPrySampler::proposeSamples(const unsigned int seed_value)
     }
   }
 
-  // Finally, generate several new samples randomly for the GP and NN to try and pass it to the
-  // reporter
+  /* Finally, generate several new samples randomly for the GP to try and pass it to the
+  reporter */
   for (dof_id_type i = 0; i < _num_tries; ++i)
   {
     fillVector(_sample_vector, seed_value);
