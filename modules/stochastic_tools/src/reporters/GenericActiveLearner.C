@@ -8,10 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GenericActiveLearner.h"
-#include "Sampler.h"
-#include "DenseMatrix.h"
-#include "AdaptiveMonteCarloUtils.h"
-#include "StochasticToolsUtils.h"
 
 registerMooseObject("StochasticToolsApp", GenericActiveLearner);
 
@@ -117,7 +113,6 @@ GenericActiveLearner::acqWithCorrelations(std::vector<Real> & acq,
   {
     for (unsigned int j = 0; j < _inputs_all.size(); ++j)
     {
-      // computeCorrelation(_inputs_all[j], _inputs_all[ind[0]], correlation);
       computeCorrelation(j, ind[0], correlation);
       acq[j] = acq[j] * correlation;
     }
