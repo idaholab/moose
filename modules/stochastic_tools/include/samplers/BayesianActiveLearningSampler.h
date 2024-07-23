@@ -13,22 +13,22 @@
 #include "ReporterInterface.h"
 
 /**
- * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: sampler step
+ * Fast Bayesian inference with the parallel active learning (partly inspired from El Gammal et al. 2023)
  */
-class BayesianGPrySampler : public PMCMCBase
+class BayesianActiveLearningSampler : public PMCMCBase
 {
 public:
   static InputParameters validParams();
 
-  BayesianGPrySampler(const InputParameters & parameters);
+  BayesianActiveLearningSampler(const InputParameters & parameters);
 
   /**
-   * Return the random samples for the GP and NN combo to try in the reporter class
+   * Return the random samples for the GP to try in the reporter class
    */
   const std::vector<std::vector<Real>> & getSampleTries() const;
 
   /**
-   * Return the random variance samples for the GP and NN combo to try in the reporter class
+   * Return the random variance samples for the GP to try in the reporter class
    */
   const std::vector<Real> & getVarSampleTries() const;
 
@@ -41,15 +41,6 @@ protected:
    * @param seed_value The seed value to generate random numbers
    */
   virtual void fillVector(std::vector<Real> & vector, const unsigned int & seed_value);
-
-  /**
-   * Fill in the provided vector with random samples around a unit ball of the seeds
-   * @param vector The vector to be filled
-   * @param seed_value The seed value to generate random numbers
-   */
-  virtual void fillVectorUnitBall(std::vector<Real> & vector,
-                                  const unsigned int & seed_value,
-                                  const std::vector<Real> & seed_vector);
 
   /// The selected sample indices to evaluate the subApp
   const std::vector<unsigned int> & _sorted_indices;
