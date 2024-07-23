@@ -31,11 +31,11 @@
 [Functions]
   [value_bottom]
     type = ParsedFunction
-    value = 1.0
+    expression = 1.0
   []
   [value_top]
     type = ParsedFunction
-    value = 0.0
+    expression = 0.0
   []
 []
 
