@@ -14,7 +14,7 @@
 #include "Distribution.h"
 
 /**
- * Fast Bayesian inference with the GPry algorithm by El Gammal et al. 2023: sampler step
+ * A generic sampler to support parallel active learning
  */
 class GenericActiveLearningSampler : public Sampler, public TransientInterface
 {
@@ -24,7 +24,7 @@ public:
   GenericActiveLearningSampler(const InputParameters & parameters);
 
   /**
-   * Return the random samples for the GP and NN combo to try in the reporter class
+   * Return random samples for the GP to try in the reporter class
    */
   const std::vector<std::vector<Real>> & getSampleTries() const;
 
@@ -55,7 +55,7 @@ protected:
   /// The selected sample indices to evaluate the subApp
   const std::vector<unsigned int> & _sorted_indices;
 
-  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
+  /// Ensure that the algorithm proceeds in a sequential fashion
   int _check_step;
 
   /// Vectors of new proposed samples
