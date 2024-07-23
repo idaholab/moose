@@ -9,6 +9,7 @@
 
 #include "MooseVariableData.h"
 #include "MooseVariableField.h"
+#include "MooseVariableDataBase.h"
 #include "Assembly.h"
 #include "MooseError.h"
 #include "DisplacedSystem.h"

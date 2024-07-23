@@ -93,8 +93,26 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
             e, "Cyclic dependency detected in object ordering");
       }
 
-      for (auto ic : vec)
-        ic->compute();
+      /* Logic for running only old state initial conditions if they exist, but
+          running ICs normally if the old state ICs don't exist.
+      */
+      bool break_loop = false;
+      int loop_state;
+      for (loop_state = _fe_problem.global_current_state; loop_state >= 0; loop_state--)
+      {
+        for (auto ic : vec)
+        {
+          if (ic->_my_state == loop_state)
+          {
+            ic->compute();
+            break_loop = true;
+          }
+        }
+        if (break_loop == true)
+        {
+          break;
+        }
+      }
       vec.clear();
 
       // Now that all dofs are set for this variable, solemnize the solution.

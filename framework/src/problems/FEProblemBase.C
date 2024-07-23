@@ -9,9 +9,11 @@
 
 #include "FEProblemBase.h"
 #include "AuxiliarySystem.h"
+#include "InitialConditionTempl.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
 #include "Factory.h"
+#include "MooseTypes.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
 #include "SystemBase.h"
@@ -1082,8 +1084,9 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering() && !_app.isRestarting())
   {
-    // During initial setup the solution is copied to the older solution states (old, older, etc)
-    copySolutionsBackwards();
+    // This functionality was moved to FEProblemBase.C::projectSolution()
+    // // During initial setup the solution is copied to the older solution states (old, older, etc)
+    // // copySolutionsBackwards();
   }
 
   if (!_app.isRecovering())
@@ -3332,64 +3335,86 @@ FEProblemBase::projectSolution()
   FloatingPointExceptionGuard fpe_guard(_app);
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeInitialConditionThread cic(*this);
-  Threads::parallel_reduce(elem_range, cic);
 
-  if (haveFV())
+  // loop over global_current_state = 2, 1, 0
+  for (global_current_state = 1; global_current_state >= 0; global_current_state--)
   {
-    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-    ElemInfoRange elem_info_range(_mesh.ownedElemInfoBegin(), _mesh.ownedElemInfoEnd());
+    ComputeInitialConditionThread cic(*this);
+    Threads::parallel_reduce(elem_range, cic);
 
-    ComputeFVInitialConditionThread cfvic(*this);
-    Threads::parallel_reduce(elem_info_range, cfvic);
-  }
-
-  // Need to close the solution vector here so that boundary ICs take precendence
-  for (auto & nl : _nl)
-    nl->solution().close();
-  _aux->solution().close();
-
-  // now run boundary-restricted initial conditions
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  ComputeBoundaryInitialConditionThread cbic(*this);
-  Threads::parallel_reduce(bnd_nodes, cbic);
-
-  for (auto & nl : _nl)
-    nl->solution().close();
-  _aux->solution().close();
-
-  // Also, load values into the SCALAR dofs
-  // Note: We assume that all SCALAR dofs are on the
-  // processor with highest ID
-  if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
-  {
-    const auto & ics = _scalar_ics.getActiveObjects();
-    for (const auto & ic : ics)
+    if (haveFV())
     {
-      MooseVariableScalar & var = ic->variable();
-      var.reinit();
+      using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+      ElemInfoRange elem_info_range(_mesh.ownedElemInfoBegin(), _mesh.ownedElemInfoEnd());
 
-      DenseVector<Number> vals(var.order());
-      ic->compute(vals);
+      ComputeFVInitialConditionThread cfvic(*this);
+      Threads::parallel_reduce(elem_info_range, cfvic);
+    }
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+    // Need to close the solution vector here so that boundary ICs take precendence
+    for (auto & nl : _nl)
+      nl->solution().close();
+    _aux->solution().close();
+
+    // now run boundary-restricted initial conditions
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    ComputeBoundaryInitialConditionThread cbic(*this);
+    Threads::parallel_reduce(bnd_nodes, cbic);
+
+    // close the solution vectors to make sure the solutions are in good state before
+    // copyOldSolutions()
+    for (auto & nl : _nl)
+      nl->solution().close();
+    _aux->solution().close();
+
+    // Also, load values into the SCALAR dofs
+    // Note: We assume that all SCALAR dofs are on the
+    // processor with highest ID
+    if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
+    {
+      const auto & ics = _scalar_ics.getActiveObjects();
+      for (const auto & ic : ics)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
-        var.sys().solution().set(global_index, vals(i));
-        var.setValue(i, vals(i));
+        MooseVariableScalar & var = ic->variable();
+        var.reinit();
+
+        DenseVector<Number> vals(var.order());
+        ic->compute(vals);
+
+        const unsigned int n_SCALAR_dofs = var.dofIndices().size();
+        for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+        {
+          const dof_id_type global_index = var.dofIndices()[i];
+          var.sys().solution().set(global_index, vals(i));
+          var.setValue(i, vals(i));
+        }
       }
+    }
+
+    for (auto & sys : _solver_systems)
+    {
+      sys->solution().close();
+      sys->solution().localize(*sys->system().current_local_solution,
+                               sys->dofMap().get_send_list());
+    }
+
+    _aux->solution().close();
+    _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+
+    // calling copyOldSolutions() to send ICs for old and older states back to where they
+    // should be before the start of the time-looping.
+    // Functionality moved here from FEProblemBase::initialSetup().
+    if (global_current_state > 0)
+    {
+      for (auto & sys : _solver_systems)
+        sys->copySolutionsBackwards();
+      _aux->copySolutionsBackwards();
     }
   }
 
-  for (auto & sys : _solver_systems)
-  {
-    sys->solution().close();
-    sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
-  }
-
-  _aux->solution().close();
-  _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+  // Resetting global_current_state to 0 in case anyone needs to run ICs again (which they do
+  // sometimes).
+  global_current_state = 0;
 }
 
 void

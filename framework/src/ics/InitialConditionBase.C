@@ -8,9 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InitialConditionBase.h"
+#include "MooseEnum.h"
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 #include "UserObject.h"
+#include "libmesh/libmesh_common.h"
 
 InputParameters
 InitialConditionBase::validParams()
@@ -28,8 +30,11 @@ InitialConditionBase::validParams()
                         "When set to true, a UserObject retrieved "
                         "by this IC will not be executed before the "
                         "this IC");
-
   params.addParamNamesToGroup("ignore_uo_dependency", "Advanced");
+
+  params.addParam<int>("state", 0, "Specify which state being set.");
+
+  params.addParamNamesToGroup("state", "Advanced");
 
   params.registerBase("InitialCondition");
 
@@ -52,6 +57,7 @@ InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
     DependencyResolverInterface(),
     Restartable(this, "InitialConditionBases"),
     ElementIDInterface(this),
+    _my_state(getParam<int>("state")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _ignore_uo_dependency(getParam<bool>("ignore_uo_dependency"))
 {
