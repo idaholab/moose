@@ -36,6 +36,6 @@ ReferenceResidualProblem::addDefaultConvergence()
   const std::string class_name = "ReferenceResidualConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(parameters());
-  setNonlinearConvergenceObject("reference_residual");
+  setNonlinearConvergenceName("reference_residual");
   addConvergence(class_name, _nonlinear_convergence_name, params);
 }

@@ -62,7 +62,7 @@ AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultConv
   std::string class_name = "AugmentedLagrangianContactReferenceConvergence";
   InputParameters params = this->_factory.getValidParams(class_name);
   params.applyParameters(parameters());
-  this->setNonlinearConvergenceObject("reference_residual");
+  this->setNonlinearConvergenceName("reference_residual");
   this->addConvergence(class_name, this->getActiveConvergenceName(), params);
 }
 
@@ -73,7 +73,7 @@ AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultConvergence()
   std::string class_name = "AugmentedLagrangianContactFEProblemConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(parameters());
-  this->setNonlinearConvergenceObject("default_convergence");
+  this->setNonlinearConvergenceName("default_convergence");
   this->addConvergence(class_name, this->getActiveConvergenceName(), params);
 }
 

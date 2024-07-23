@@ -2181,7 +2181,7 @@ public:
   /**
    * Sets the nonlinear convergence object name if there is one
    */
-  void setNonlinearConvergenceObject(const ConvergenceName & convergence)
+  void setNonlinearConvergenceName(const ConvergenceName & convergence)
   {
     _nonlinear_convergence_name = convergence;
     _set_nonlinear_convergence_name = true;
