@@ -118,7 +118,7 @@ section for what may look familiar, and follow those instructions:
   !package! code
   conda activate base
   conda env remove -n moose
-  conda create -n moose moose-dev=__MOOSE_DEV__
+  conda create -n moose moose-dev=__MOOSE_DEV__ __DEFAULT_MPI__
   conda activate moose
   !package-end!
 

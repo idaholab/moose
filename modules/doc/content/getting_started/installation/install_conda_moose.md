@@ -6,7 +6,7 @@ packages:
 !style-end!
 
 !package! code
-conda create -n moose moose-dev=__MOOSE_DEV__
+conda create -n moose moose-dev=__MOOSE_DEV__ __DEFAULT_MPI__
 !package-end!
 
 After the installation completes, activate the new environment:
