@@ -61,7 +61,7 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
     _output_value1(getReporterValue<std::vector<Real>>("output_value1", REPORTER_MODE_DISTRIBUTED)),
     _output_comm1(declareValue<std::vector<Real>>("output_comm1")),
     _sampler(getSampler("sampler")),
-    _gpry_sampler(dynamic_cast<const BayesianGPrySampler *>(&_sampler)),
+    _gpry_sampler(dynamic_cast<const BayesianActiveLearningSampler *>(&_sampler)),
     _sorted_indices(declareValue<std::vector<unsigned int>>(
         "sorted_indices",
         std::vector<unsigned int>(_gpry_sampler->getNumParallelProposals(),
@@ -81,7 +81,7 @@ BayesianGPryLearner::BayesianGPryLearner(const InputParameters & parameters)
 {
   // Check whether the selected sampler is an adaptive sampler or not
   if (!_gpry_sampler)
-    paramError("sampler", "The selected sampler is not of type BayesianGPrySampler.");
+    paramError("sampler", "The selected sampler is not of type BayesianActiveLearningSampler.");
   
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
@@ -191,7 +191,6 @@ BayesianGPryLearner::acqWithCorrelations(std::vector<Real> & acq,
   {
     for (unsigned int j = 0; j < _inputs_all.size(); ++j)
     {
-      // computeCorrelation(_inputs_all[j], _inputs_all[ind[0]], correlation);
       computeCorrelation(j, ind[0], correlation);
       acq[j] = acq[j] * correlation;
     }
