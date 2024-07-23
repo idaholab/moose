@@ -35,6 +35,7 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialConditionBase> objec
 {
   // Check that when object is boundary restricted that the variable is nodal
   const MooseVariableFEBase & var = object->variable();
+  const auto ic_key = std::tuple(var.name(), object->getState());
 
   // Boundary Restricted
   if (object->boundaryRestricted())
@@ -43,43 +44,42 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialConditionBase> objec
       mooseError("You are trying to set a boundary restricted variable on non-nodal variable. That "
                  "is not allowed.");
 
-    std::map<std::string, std::set<BoundaryID>>::const_iterator iter =
-        _boundary_ics[tid].find(var.name());
+    const auto iter = _boundary_ics[tid].find(ic_key);
     if (iter != _boundary_ics[tid].end() && object->hasBoundary(iter->second))
       mooseError("The initial condition '",
                  object->name(),
-                 "' is being defined on a boundary that already has an initial condition defined.");
+                 "' is being defined on a boundary that already has an initial condition defined "
+                 "with the same variable and state.");
     else
-      _boundary_ics[tid][var.name()].insert(object->boundaryIDs().begin(),
-                                            object->boundaryIDs().end());
+      _boundary_ics[tid][ic_key].insert(object->boundaryIDs().begin(), object->boundaryIDs().end());
   }
 
   // Block Restricted
   else if (object->blockRestricted())
   {
-    std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
-        _block_ics[tid].find(var.name());
+    auto iter = _block_ics[tid].find(ic_key);
     if (iter != _block_ics[tid].end() &&
         (object->hasBlocks(iter->second) ||
          (iter->second.find(Moose::ANY_BLOCK_ID) != iter->second.end())))
       mooseError("The initial condition '",
                  object->name(),
-                 "' is being defined on a block that already has an initial condition defined.");
+                 "' is being defined on a block that already has an initial condition defined "
+                 "with the same variable and state.");
     else
-      _block_ics[tid][var.name()].insert(object->blockIDs().begin(), object->blockIDs().end());
+      _block_ics[tid][ic_key].insert(object->blockIDs().begin(), object->blockIDs().end());
   }
 
   // Non-restricted
   else
   {
-    std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
-        _block_ics[tid].find(var.name());
+    auto iter = _block_ics[tid].find(ic_key);
     if (iter != _block_ics[tid].end())
       mooseError("The initial condition '",
                  object->name(),
-                 "' is being defined on a block that already has an initial condition defined.");
+                 "' is being defined on a block that already has an initial condition defined "
+                 "with the same variable and state.");
     else
-      _block_ics[tid][var.name()].insert(Moose::ANY_BLOCK_ID);
+      _block_ics[tid][ic_key].insert(Moose::ANY_BLOCK_ID);
   }
 
   // Add the IC to the storage

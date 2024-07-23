@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "InitialConditionInterface.h"
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
 #include "FunctionInterface.h"
@@ -30,6 +31,7 @@ class DenseVector;
  * InitialConditions are objects that set the initial value of variables.
  */
 class ScalarInitialCondition : public MooseObject,
+                               public InitialConditionInterface,
                                public ScalarCoupleable,
                                public FunctionInterface,
                                public UserObjectInterface,

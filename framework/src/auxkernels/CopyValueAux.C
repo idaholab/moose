@@ -19,11 +19,22 @@ CopyValueAux::validParams()
   params.addClassDescription("Returns the specified variable as an auxiliary variable with a "
                              "simple copy of the variable values.");
   params.addRequiredCoupledVar("source", "Variable to take the value of.");
+  MooseEnum stateEnum("CURRENT=0 OLD=1 OLDER=2", "CURRENT");
+  params.addParam<MooseEnum>(
+      "state",
+      stateEnum,
+      "This parameter specifies the state being copied. CURRENT=0 OLD=1 OLDER=2. Copying an older "
+      "state allows access to previous solution information if necessary.");
   return params;
 }
 
 CopyValueAux::CopyValueAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _v(coupledValue("source")), _source_variable(*getVar("source", 0))
+  : AuxKernel(parameters),
+    _state(getParam<MooseEnum>("state")),
+    _v(coupledValue("source")),
+    _v_old(_state == 1 ? coupledValueOld("source") : _v),
+    _v_older(_state == 2 ? coupledValueOlder("source") : _v),
+    _source_variable(*getVar("source", 0))
 {
   if (_var.feType().family != _source_variable.feType().family)
     paramError("variable",
@@ -42,5 +53,21 @@ CopyValueAux::CopyValueAux(const InputParameters & parameters)
 Real
 CopyValueAux::computeValue()
 {
-  return _v[_qp];
+
+  if (_state == 2)
+  {
+    return _v_older[_qp];
+  }
+  else if (_state == 1)
+  {
+    return _v_old[_qp];
+  }
+  else if (_state == 0)
+  {
+    return _v[_qp];
+  }
+  else
+  {
+    mooseError("state parameter only supports up to state 2");
+  }
 }
