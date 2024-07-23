@@ -11,7 +11,7 @@
 
 #include "GeneralReporter.h"
 #include "Sampler.h"
-#include "BayesianGPrySampler.h"
+#include "BayesianActiveLearningSampler.h"
 #include "ActiveLearningGaussianProcess.h"
 #include "GaussianProcess.h"
 #include "SurrogateModel.h"
@@ -114,7 +114,7 @@ private:
   Sampler & _sampler;
 
   /// Adaptive Importance Sampler
-  const BayesianGPrySampler * const _gpry_sampler;
+  const BayesianActiveLearningSampler * const _gpry_sampler;
 
   /// The selected sample indices to evaluate the subApp
   std::vector<unsigned int> & _sorted_indices;
