@@ -1,5 +1,5 @@
 [Mesh]
-  type = CoupledMFEMMesh
+  type = ExclusiveMFEMMesh
   file = gold/mug.e
   dim = 3
 []
