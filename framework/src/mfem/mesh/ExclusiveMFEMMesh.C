@@ -54,7 +54,7 @@ ExclusiveMFEMMesh::buildDummyMesh()
 void
 ExclusiveMFEMMesh::buildMFEMMesh()
 {
-  _mfem_mesh = std::make_shared<MFEMMesh>(getFileName());
+  _mfem_mesh = std::make_shared<mfem::Mesh>(getFileName());
 }
 
 void
@@ -65,7 +65,7 @@ ExclusiveMFEMMesh::buildMFEMParMesh()
   _mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
 }
 
-MFEMMesh &
+mfem::Mesh &
 ExclusiveMFEMMesh::getMFEMMesh()
 {
   if (!_mfem_mesh)

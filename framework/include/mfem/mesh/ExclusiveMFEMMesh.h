@@ -9,8 +9,6 @@
 
 #pragma once
 #include "FileMesh.h"
-#include "MFEMMesh.h"
-#include "MFEMParMesh.h"
 #include "memory"
 #include "libmesh/elem.h"
 #include "libmesh/enum_io_package.h"
@@ -49,7 +47,7 @@ public:
    * not been build, the methods will call the appropriate protected methods to
    * build them.
    */
-  MFEMMesh & getMFEMMesh();
+  mfem::Mesh & getMFEMMesh();
   mfem::ParMesh & getMFEMParMesh();
 
   /**
@@ -90,6 +88,6 @@ protected:
    * Smart pointers to MFEMMesh and MFEMParMesh objects. Do not access directly.
    * Use the accessors instead.
    */
-  std::shared_ptr<MFEMMesh> _mfem_mesh;
+  std::shared_ptr<mfem::Mesh> _mfem_mesh;
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh;
 };
