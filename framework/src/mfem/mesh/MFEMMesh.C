@@ -7,30 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ExclusiveMFEMMesh.h"
+#include "MFEMMesh.h"
 
-registerMooseObject("MooseApp", ExclusiveMFEMMesh);
+registerMooseObject("MooseApp", MFEMMesh);
 
 InputParameters
-ExclusiveMFEMMesh::validParams()
+MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
   return params;
 }
 
-ExclusiveMFEMMesh::ExclusiveMFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
+MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
 
-ExclusiveMFEMMesh::~ExclusiveMFEMMesh() {}
+MFEMMesh::~MFEMMesh() {}
 
 void
-ExclusiveMFEMMesh::buildMesh()
+MFEMMesh::buildMesh()
 {
   // Build a dummy MOOSE mesh to enable this class to work with other MOOSE classes.
   buildDummyMesh();
 }
 
 void
-ExclusiveMFEMMesh::buildDummyMesh()
+MFEMMesh::buildDummyMesh()
 {
   auto element = new Quad4;
   element->set_id() = 1;
@@ -52,13 +52,13 @@ ExclusiveMFEMMesh::buildDummyMesh()
 }
 
 void
-ExclusiveMFEMMesh::buildMFEMMesh()
+MFEMMesh::buildMFEMMesh()
 {
   _mfem_mesh = std::make_shared<mfem::Mesh>(getFileName());
 }
 
 void
-ExclusiveMFEMMesh::buildMFEMParMesh()
+MFEMMesh::buildMFEMParMesh()
 {
   _mfem_par_mesh =
       std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, dynamic_cast<mfem::Mesh &>(getMFEMMesh()));
@@ -66,7 +66,7 @@ ExclusiveMFEMMesh::buildMFEMParMesh()
 }
 
 mfem::Mesh &
-ExclusiveMFEMMesh::getMFEMMesh()
+MFEMMesh::getMFEMMesh()
 {
   if (!_mfem_mesh)
   {
@@ -77,7 +77,7 @@ ExclusiveMFEMMesh::getMFEMMesh()
 }
 
 mfem::ParMesh &
-ExclusiveMFEMMesh::getMFEMParMesh()
+MFEMMesh::getMFEMParMesh()
 {
   if (!_mfem_par_mesh)
   {
@@ -88,7 +88,7 @@ ExclusiveMFEMMesh::getMFEMParMesh()
 }
 
 std::unique_ptr<MooseMesh>
-ExclusiveMFEMMesh::safeClone() const
+MFEMMesh::safeClone() const
 {
-  return std::make_unique<ExclusiveMFEMMesh>(*this);
+  return std::make_unique<MFEMMesh>(*this);
 }

@@ -25,20 +25,20 @@
 #include "mfem.hpp"
 
 /**
- * ExclusiveMFEMMesh
+ * MFEMMesh
  *
- * ExclusiveMFEMMesh inherits a MOOSE mesh class which allows us to work with
+ * MFEMMesh inherits a MOOSE mesh class which allows us to work with
  * other MOOSE objects. It contains pointers to an MFEM serial and MFEM parallel
  * mesh.
  */
-class ExclusiveMFEMMesh : public FileMesh
+class MFEMMesh : public FileMesh
 {
 public:
   static InputParameters validParams();
 
-  ExclusiveMFEMMesh(const InputParameters & parameters);
+  MFEMMesh(const InputParameters & parameters);
 
-  virtual ~ExclusiveMFEMMesh();
+  virtual ~MFEMMesh();
 
   std::unique_ptr<MooseMesh> safeClone() const override;
 
