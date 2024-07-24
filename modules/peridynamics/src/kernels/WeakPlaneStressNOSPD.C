@@ -32,8 +32,8 @@ WeakPlaneStressNOSPD::WeakPlaneStressNOSPD(const InputParameters & parameters)
 void
 WeakPlaneStressNOSPD::computeLocalResidual()
 {
-  _local_re(0) = _stress[0](2, 2) * _dg_vol_frac[0] * _node_vol[0] * _bond_status;
-  _local_re(1) = _stress[1](2, 2) * _dg_vol_frac[1] * _node_vol[1] * _bond_status;
+  _local_re(0) = _stress[0](2, 2) * _weights[0] * _node_vol[0] * _bond_status;
+  _local_re(1) = _stress[1](2, 2) * _weights[1] * _node_vol[1] * _bond_status;
 }
 
 void
@@ -41,7 +41,7 @@ WeakPlaneStressNOSPD::computeLocalJacobian()
 {
   for (unsigned int i = 0; i < _nnodes; ++i)
     for (unsigned int j = 0; j < _nnodes; ++j)
-      _local_ke(i, j) += (i == j ? 1 : 0) * _Jacobian_mult[i](2, 2, 2, 2) * _dg_vol_frac[i] *
+      _local_ke(i, j) += (i == j ? 1 : 0) * _Jacobian_mult[i](2, 2, 2, 2) * _weights[i] *
                          _node_vol[i] * _bond_status;
 }
 
@@ -60,7 +60,7 @@ WeakPlaneStressNOSPD::computeLocalOffDiagJacobian(unsigned int jvar_num,
     for (unsigned int i = 0; i < _nnodes; ++i)
       for (unsigned int j = 0; j < _nnodes; ++j)
         _local_ke(i, j) +=
-            (i == j ? 1 : 0) * dSdT[i](2, 2) * _dg_vol_frac[i] * _node_vol[i] * _bond_status;
+            (i == j ? 1 : 0) * dSdT[i](2, 2) * _weights[i] * _node_vol[i] * _bond_status;
   }
   else // for coupled displacement variables
   {
@@ -69,7 +69,7 @@ WeakPlaneStressNOSPD::computeLocalOffDiagJacobian(unsigned int jvar_num,
     for (unsigned int i = 0; i < _nnodes; ++i)
       for (unsigned int j = 0; j < _nnodes; ++j)
         _local_ke(i, j) += (i == j ? 1 : 0) * computeDSDU(coupled_component, j)(2, 2) *
-                           _dg_vol_frac[j] * _node_vol[j] * _bond_status;
+                           _weights[j] * _node_vol[j] * _bond_status;
   }
 }
 
@@ -99,7 +99,7 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
       std::vector<dof_id_type> dg_neighbors =
           _pdmesh.getBondDeformationGradientNeighbors(_current_elem->node_id(nd), nb_index);
 
-      Real vol_nb;
+      Real vol_nb, weight_nb;
       RealGradient origin_vec_nb;
       RankTwoTensor dFdUk, dPdUk;
 
@@ -110,13 +110,14 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
               _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])->dof_number(_sys.number(), jvar_num, 0);
           vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
-          origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                          *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                          _pdmesh.getNodeCoord(_current_elem->node_id(nd));
+
+          weight_nb = _horizon_radius[nd] / origin_vec_nb.norm();
 
           dFdUk.zero();
           for (unsigned int i = 0; i < _dim; ++i)
-            dFdUk(coupled_component, i) =
-                _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(i) * vol_nb;
+            dFdUk(coupled_component, i) = weight_nb * origin_vec_nb(i) * vol_nb;
 
           dFdUk *= _shape2[nd].inverse();
 
@@ -124,7 +125,7 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                   (dFdUk.transpose() * _dgrad[nd] + _dgrad[nd].transpose() * dFdUk);
 
           _local_ke.zero();
-          _local_ke(nd, 1) = dPdUk(2, 2) * _dg_vol_frac[nd] * _node_vol[nd] * _bond_status;
+          _local_ke(nd, 1) = dPdUk(2, 2) * _weights[nd] * _node_vol[nd] * _bond_status;
 
           addJacobian(_assembly, _local_ke, _ivardofs, jvardofs, _var.scalingFactor());
         }

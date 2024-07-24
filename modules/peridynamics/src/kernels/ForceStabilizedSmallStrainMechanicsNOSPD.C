@@ -101,7 +101,8 @@ ForceStabilizedSmallStrainMechanicsNOSPD::computeNonlocalJacobian()
         vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
         // obtain bond ndnb's origin vector
-        origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb = _pdmesh.getNodeCoord(neighbor_nb->id()) -
+                        _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
         dFdUk.zero();
         for (unsigned int i = 0; i < _dim; ++i)
@@ -195,7 +196,8 @@ ForceStabilizedSmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(
           vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
           // obtain bond ndnb's origin vector
-          origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb = _pdmesh.getNodeCoord(neighbor_nb->id()) -
+                          _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
           dFdUk.zero();
           for (unsigned int i = 0; i < _dim; ++i)

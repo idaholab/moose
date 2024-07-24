@@ -158,7 +158,8 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
         vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
         // obtain bond nb's origin vector
-        origin_vec_nb = *dgneighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb = _pdmesh.getNodeCoord(dgneighbor_nb->id()) -
+                        _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
         dFdUk.zero();
         for (unsigned int i = 0; i < _dim; ++i)
