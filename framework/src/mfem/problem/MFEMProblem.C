@@ -644,12 +644,10 @@ MFEMProblem::syncSolutions(Direction direction)
   }
 }
 
-ExclusiveMFEMMesh &
+MFEMMesh &
 MFEMProblem::mesh()
 {
-  mooseAssert(ExternalProblem::mesh().type() == "ExclusiveMFEMMesh" ||
-                  ExternalProblem::mesh().type() == "CoupledMFEMMesh",
-              "Please choose a valid mesh type for an MFEMProblem\n(Either CoupledMFEMMesh or "
-              "ExclusiveMFEMMesh)");
-  return (ExclusiveMFEMMesh &)_mesh;
+  mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
+              "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
+  return (MFEMMesh &)_mesh;
 }

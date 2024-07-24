@@ -1,0 +1,94 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "MFEMMesh.h"
+
+registerMooseObject("MooseApp", MFEMMesh);
+
+InputParameters
+MFEMMesh::validParams()
+{
+  InputParameters params = FileMesh::validParams();
+  return params;
+}
+
+MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
+
+MFEMMesh::~MFEMMesh() {}
+
+void
+MFEMMesh::buildMesh()
+{
+  // Build a dummy MOOSE mesh to enable this class to work with other MOOSE classes.
+  buildDummyMesh();
+}
+
+void
+MFEMMesh::buildDummyMesh()
+{
+  auto element = new Quad4;
+  element->set_id() = 1;
+  element->processor_id() = 0;
+
+  _mesh->add_elem(element);
+
+  Point pt1(0.0, 0.0, 0.0);
+  Point pt2(1.0, 0.0, 0.0);
+  Point pt3(1.0, 1.0, 0.0);
+  Point pt4(0.0, 1.0, 0.0);
+
+  element->set_node(0) = _mesh->add_point(pt1);
+  element->set_node(1) = _mesh->add_point(pt2);
+  element->set_node(2) = _mesh->add_point(pt3);
+  element->set_node(3) = _mesh->add_point(pt4);
+
+  _mesh->prepare_for_use();
+}
+
+void
+MFEMMesh::buildMFEMMesh()
+{
+  _mfem_mesh = std::make_shared<mfem::Mesh>(getFileName());
+}
+
+void
+MFEMMesh::buildMFEMParMesh()
+{
+  _mfem_par_mesh =
+      std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, dynamic_cast<mfem::Mesh &>(getMFEMMesh()));
+  _mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
+}
+
+mfem::Mesh &
+MFEMMesh::getMFEMMesh()
+{
+  if (!_mfem_mesh)
+  {
+    buildMFEMMesh();
+  }
+
+  return *_mfem_mesh;
+}
+
+mfem::ParMesh &
+MFEMMesh::getMFEMParMesh()
+{
+  if (!_mfem_par_mesh)
+  {
+    buildMFEMParMesh();
+  }
+
+  return *_mfem_par_mesh;
+}
+
+std::unique_ptr<MooseMesh>
+MFEMMesh::safeClone() const
+{
+  return std::make_unique<MFEMMesh>(*this);
+}

@@ -2,7 +2,7 @@
 #include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
 #include "ExternalProblem.h"
-#include "ExclusiveMFEMMesh.h"
+#include "MFEMMesh.h"
 #include "MFEMCoefficient.h"
 #include "MFEMVectorCoefficient.h"
 #include "MFEMMaterial.h"
@@ -43,9 +43,9 @@ public:
 
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
-   * ExclusiveMFEMMesh.
+   * MFEMMesh.
    */
-  virtual ExclusiveMFEMMesh & mesh() override;
+  virtual MFEMMesh & mesh() override;
 
   /**
    * Returns all the variable names from the auxiliary system base. This is helpful in the
