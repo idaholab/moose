@@ -39,7 +39,7 @@ public:
 
   virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };
 
-  virtual void syncSolutions(Direction direction) override;
+  virtual void syncSolutions(Direction direction) override{};
 
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
@@ -122,15 +122,6 @@ public:
                     InputParameters & parameters) override;
 
   /**
-   * setMFEMVarData and setMOOSEVarData have very similar uses. They are both used to retrieve
-   * data from one of the variable types (either Moose AuxVar or MFEM grid function), and
-   * transfer it to the other. For example if you solve for temperature in MOOSE, you would use
-   * setMFEMVarData to get this temperature data into an MFEM grid function.
-   */
-  void setMFEMVarData(const std::string & var_name);
-  void setMOOSEVarData(const std::string & var_name);
-
-  /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
    * This method is used in addAuxVariable to help create the MFEM grid function that corresponds to
    * a given MOOSE aux-variable.
@@ -138,18 +129,6 @@ public:
   InputParameters addMFEMFESpaceFromMOOSEVariable(InputParameters & moosevar_params);
 
 protected:
-  /**
-   * Called internally by setMFEMVarData.
-   */
-  void setMFEMNodalVarData(MooseVariableFieldBase & moose_variable);
-  void setMFEMElementalVarData(MooseVariableFieldBase & moose_variable);
-
-  /**
-   * Called internally by setMOOSEVarData.
-   */
-  void setMOOSENodalVarData(MooseVariableFieldBase & moose_variable);
-  void setMOOSEElementalVarData(MooseVariableFieldBase & moose_variable);
-
   /**
    * Template method for adding kernels. We can only add kernels using equation system problem
    * builders.
