@@ -76,6 +76,23 @@ public:
                      const std::vector<PostprocessorName> & postprocessor_names,
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
+  void functionParse(const std::string & function_expression,
+                     const std::vector<std::string> & constant_names,
+                     const std::vector<std::string> & constant_expressions,
+                     const std::vector<std::string> & mat_prop_names,
+                     const std::vector<std::string> & tol_names,
+                     const std::vector<Real> & tol_values,
+                     const std::vector<MooseFunctorName> & functor_names,
+                     const std::vector<std::string> & functor_symbols);
+  void functionParse(const std::string & function_expression,
+                     const std::vector<std::string> & constant_names,
+                     const std::vector<std::string> & constant_expressions,
+                     const std::vector<std::string> & mat_prop_names,
+                     const std::vector<PostprocessorName> & postprocessor_names,
+                     const std::vector<std::string> & tol_names,
+                     const std::vector<Real> & tol_values,
+                     const std::vector<MooseFunctorName> & functor_names,
+                     const std::vector<std::string> & functor_symbols);
 
 protected:
   usingFunctionMaterialBaseMembers(is_ad);
@@ -84,6 +101,11 @@ protected:
   void initQpStatefulProperties() override;
   void computeQpProperties() override;
   virtual void initialSetup() override final;
+
+  /**
+   * Populates the given set with names not to be used as user-defined symbol (e.g. for a functor)
+   */
+  void insertReservedNames(std::set<std::string> & reserved_names);
 
   // tasks to perform after parsing the primary function
   virtual void functionsPostParse();
@@ -100,6 +122,9 @@ protected:
 
   /// Extra symbols
   const std::vector<ExtraSymbols> _extra_symbols;
+
+  /// Vector of pointers to functors
+  std::vector<const Moose::Functor<Real> *> _functors;
 
   /// convenience typedef for the material property descriptors
   typedef std::vector<FunctionMaterialPropertyDescriptor<is_ad>> MatPropDescriptorList;
