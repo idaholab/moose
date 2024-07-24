@@ -793,7 +793,7 @@ FEProblemBase::initialSetup()
     Moose::out << "No convergence criteria specified. Using default convergence criteria."
                << std::endl;
 
-    SubProblem::initialSetup();
+  SubProblem::initialSetup();
 
   if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) > 1)
     mooseError("Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
