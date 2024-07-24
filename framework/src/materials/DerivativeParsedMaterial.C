@@ -28,7 +28,7 @@ DerivativeParsedMaterialTempl<is_ad>::DerivativeParsedMaterialTempl(
     const InputParameters & parameters)
   : DerivativeParsedMaterialHelperTempl<is_ad>(parameters,
                                                VariableNameMappingMode::USE_MOOSE_NAMES),
-    ParsedMaterialBase(parameters)
+    ParsedMaterialBase(parameters, this)
 {
   // Build function, take derivatives, optimize
   functionParse(_function,
@@ -37,7 +37,9 @@ DerivativeParsedMaterialTempl<is_ad>::DerivativeParsedMaterialTempl(
                 this->template getParam<std::vector<std::string>>("material_property_names"),
                 this->template getParam<std::vector<PostprocessorName>>("postprocessor_names"),
                 _tol_names,
-                _tol_values);
+                _tol_values,
+                _functor_names,
+                _functor_symbols);
 }
 
 // explicit instantiation
