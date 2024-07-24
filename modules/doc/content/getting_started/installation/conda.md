@@ -7,8 +7,8 @@ on your machine using Conda.
 
 !alert tip
 Those interested in operating in their own optimized environment, please seek help from one of our
-'[From Source](getting_started/installation/index.md)' instructional pages. Our Conda packages are
-designed to 'just work', making them unsuitable for things like benchmark case studies.
+'[From Source](getting_started/installation/index.md optional=True)' instructional pages. Our Conda
+packages are designed to 'just work', making them unsuitable for things like benchmark case studies.
 
 !include getting_started/installation/install_miniconda.md
 
