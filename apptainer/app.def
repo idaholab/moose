@@ -153,6 +153,8 @@ export PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 24)
 for extension in {{ APP_CODE_SERVER_PREFIX }}/extensions/*; do
     code-server --force --install-extension=${extension}
 done
+# Expose the binary to use for the language server
+MOOSE_LANGUAGE_SERVER=${BINARY_NAME}-${METHOD}
 # Expose the password to the user
 echo "Connect to the instance with the password ${PASSWORD}"
 # Run the server
