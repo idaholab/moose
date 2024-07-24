@@ -25,13 +25,16 @@
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
-
+{#- Set method if not set                                                                     -#}
 {%- if METHOD is not defined %}
 {%- set METHOD = 'opt' -%}
 {%- endif %}
+{#- Set default test dirs if not set                                                          -#}
 {%- if TEST_DIRS is not defined %}
 {%- set TEST_DIRS = 'tests' -%}
 {%- endif %}
+{#- Set app code server prefix based on binary name                                           -#}
+{%- set APP_CODE_SERVER_PREFIX = '/opt/code-server-' + BINARY_NAME -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
@@ -77,12 +80,11 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
+    export PATH=/opt/{{ BINARY_NAME }}/bin:/opt/code-server-{{ BINARY_NAME }}/bin:$PATH
     export INSTALLED_BINARIES={{ BINARY_NAME }}-{{ METHOD }}:exodiff:hit
+    export MOOSE_LANGUAGE_SERVER={{ BINARY_NAME }}-{{ METHOD }}
 {%- if BINARY_NAME == 'moose' %}
-    export PATH=/opt/moose/bin:$PATH
     export INSTALLED_BINARIES=${INSTALLED_BINARIES}:moose_test-{{ METHOD }}
-{%- else %}
-    export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
 {%- endif %}
 {%- if EXTRA_BINARIES is defined %}
     export INSTALLED_BINARIES=${INSTALLED_BINARIES}:{{ EXTRA_BINARIES }}
@@ -97,6 +99,7 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
     # Load jinja vars
     APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
+    APP_CODE_SERVER_PREFIX={{ APP_CODE_SERVER_PREFIX }}
     BINARY_NAME={{ BINARY_NAME }}
     export METHOD={{ METHOD }}
     MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
@@ -125,12 +128,49 @@ From: {{ APPTAINER_FROM }}
         fi
     done
 
-    # Setup install
-{%- if BINARY_NAME == 'moose' %}
-    MOOSE_PREFIX=/opt/moose
-{%- else %}
+    umask 022
+
+    # Setup the directory server for the code-server app wrapper
+    mkdir ${APP_CODE_SERVER_PREFIX}
+    mkdir ${APP_CODE_SERVER_PREFIX}/bin
+    mkdir ${APP_CODE_SERVER_PREFIX}/extensions
+
+    # Download the language server extension; others can be put here
+    # and they'll also be installed
+    MOOSE_LANGUAGE_SUPPORT_VERSION=1.1.2
+    cd ${APP_CODE_SERVER_PREFIX}/extensions
+    curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/DanielSchwen.moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
+
+    # Setup the code-server wrapper
+    CODE_SERVER_BINARY=${APP_CODE_SERVER_PREFIX}/bin/code-server-${BINARY_NAME}
+    cat <<'EOF' > ${CODE_SERVER_BINARY}
+#!/bin/sh
+set -e
+# The port to run on, auto set to 8080
+PORT=${PORT:-8080}
+# The password to connect; randomly generated
+export PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 24)
+# Install the extensions
+for extension in {{ APP_CODE_SERVER_PREFIX }}/extensions/*; do
+    code-server --force --install-extension=${extension}
+done
+# Expose the password to the user in color
+GREEN='\033[0;32m'
+NC='\033[0m'
+printf "${GREEN}Connect to the instance at https://localhost:${PORT} with password ${PASSWORD}${NC}\n"
+# Run the server
+code-server --auth="password" \
+            --bind-addr=0.0.0.0:${PORT} \
+            --ignore-last-opened \
+            --disable-telemetry \
+            --disable-getting-started-override \
+            --disable-update-check \
+            "$@"
+EOF
+    chmod +x ${CODE_SERVER_BINARY}
+
+    # Install the application
     MOOSE_PREFIX=/opt/${BINARY_NAME}
-{%- endif %}
     cd ${MOOSE_DIR}
     if [ -n "$LIBTORCH_DIR" ]; then
         MOOSE_OPTIONS+=" --with-libtorch=${LIBTORCH_DIR}"
