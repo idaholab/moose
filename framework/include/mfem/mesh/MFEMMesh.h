@@ -55,19 +55,6 @@ public:
    */
   void buildMesh() override;
 
-  /**
-   * Override in derived classes.
-   */
-  virtual inline int getLocalMFEMNodeId(const int libmesh_global_node_id) const
-  {
-    mooseError("Not implemented.");
-  }
-
-  virtual inline int getLibmeshGlobalNodeId(const int mfem_local_node_id) const
-  {
-    mooseError("Not implemented.");
-  }
-
 protected:
   /**
    * Builds a placeholder mesh when no MOOSE mesh is required.
