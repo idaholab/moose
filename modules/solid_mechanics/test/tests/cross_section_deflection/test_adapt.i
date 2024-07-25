@@ -4,9 +4,10 @@
 []
 
 [Mesh]
+  use_displaced_mesh = false
   [file]
     type = FileMeshGenerator
-    file = two_ducts.e
+    file = duct_alt.e
   []
 []
 
@@ -14,39 +15,15 @@
   [pressure]
     type = PiecewiseLinear
     x = '0 10'
-    y = '0 0.05'
+    y = '0 0.005'
     scale_factor = 1
-  []
-[]
-
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
-  [disp_z]
-  []
-[]
-
-[AuxVariables]
-  [proc]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-[]
-
-[AuxKernels]
-  [proc]
-    type = ProcessorIDAux
-    variable = proc
-    execute_on = initial
   []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
-    strain = FINITE
+    strain = SMALL
     block = '1'
   []
 []
@@ -55,19 +32,19 @@
   [fix_y]
     type = DirichletBC
     variable = 'disp_y'
-    boundary = '1001 21001'
+    boundary = '1001'
     value = 0.0
   []
   [fix_x]
     type = DirichletBC
     variable = 'disp_x'
-    boundary = '16 216'
+    boundary = '16'
     value = 0.0
   []
   [fix_z]
     type = DirichletBC
     variable = 'disp_z'
-    boundary = '16 216'
+    boundary = '16'
     value = 0.0
   []
   [Pressure]
@@ -76,11 +53,6 @@
       function = pressure
       factor = 80
     []
-    [hex2_pressure]
-      boundary = '24'
-      function = pressure
-      factor = -80
-    []
   []
 []
 
@@ -88,20 +60,26 @@
   [section_output]
     type = AverageSectionValueSampler
     axis_direction = '0 0 1'
-    positions = '10.0 18.0'
     block = '1'
     variables = 'disp_x disp_y disp_z'
     reference_point = '0 0 0'
-    cross_section_maximum_radius = 1.5
+    require_equal_node_counts = false
   []
-  [section_output_two]
-    type = AverageSectionValueSampler
-    axis_direction = '0 0 1'
-    positions = '10.0 18.0'
-    block = '1'
-    variables = 'disp_x disp_y disp_z'
-    reference_point = '2.1 2.1 0'
-    cross_section_maximum_radius = 1.5
+[]
+
+[Adaptivity]
+  steps = 1
+  marker = box
+  max_h_level = 2
+  interval = 1
+  [Markers]
+    [box]
+      type = BoxMarker
+      bottom_left = '-2 -2 17.5'
+      top_right = '2 2 21'
+      inside = refine
+      outside = do_nothing
+    []
   []
 []
 
@@ -113,7 +91,7 @@
     poissons_ratio = 0.0
   []
   [hex_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLinearElasticStress
     block = '1'
   []
 []
@@ -135,12 +113,12 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-6
+  nl_rel_tol = 1e-10
 
   l_max_its = 20
   dt = 0.5
-  end_time = 0.5
+  end_time = 1.0
 []
 
 [Outputs]
