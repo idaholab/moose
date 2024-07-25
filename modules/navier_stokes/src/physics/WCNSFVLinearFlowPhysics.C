@@ -289,7 +289,7 @@ WCNSFVLinearFlowPhysics::addNonlinearVariables()
     saveNonlinearVariableName(_velocity_names[d]);
   saveNonlinearVariableName(_pressure_name);
 
-  const auto v_short = {"u", "v", "w"};
+  const std::vector<std::string> v_short = {"u", "v", "w"};
 
   // Check number of variables
   if (_velocity_names.size() != dimension() && _velocity_names.size() != 3)
@@ -314,7 +314,7 @@ WCNSFVLinearFlowPhysics::addNonlinearVariables()
       // TODO check if used
       params.set<std::vector<Real>>("scaling") = {getParam<Real>("momentum_scaling")};
 
-      params.set<SystemName>("solver_sys") = v_short[d] + "_system";
+      params.set<SolverSystemName>("solver_sys") = v_short[d] + "_system";
       getProblem().addVariable(variable_type, _velocity_names[d], params);
     }
     else
@@ -335,7 +335,7 @@ WCNSFVLinearFlowPhysics::addNonlinearVariables()
     assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("mass_scaling")};
 
-    params.set<SystemName>("solver_sys") = "pressure_system";
+    params.set<SolverSystemName>("solver_sys") = "pressure_system";
     getProblem().addVariable(pressure_type, _pressure_name, params);
   }
   else
@@ -376,114 +376,36 @@ WCNSFVLinearFlowPhysics::addFVKernels()
 }
 
 void
-WCNSFVLinearFlowPhysics::addWCNSMassTimeKernels()
-{
-  std::string mass_kernel_type = "WCNSFVMassTimeDerivative";
-  std::string kernel_name = prefix() + "wcns_mass_time";
-
-  if (_porous_medium_treatment)
-  {
-    mass_kernel_type = "PWCNSFVMassTimeDerivative";
-    kernel_name = prefix() + "pwcns_mass_time";
-  }
-
-  InputParameters params = getFactory().getValidParams(mass_kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<NonlinearVariableName>("variable") = _pressure_name;
-  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-  if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
-  getProblem().addFVKernel(mass_kernel_type, kernel_name, params);
-}
-
-void
 WCNSFVLinearFlowPhysics::addINSPressureCorrectionKernels()
 {
-    [p_diffusion]
-    type = FVAnisotropicDiffusion
-    variable = pressure
-    coeff = "Ainv"
-    coeff_interp_method = 'average'
-  []
-  [p_source]
-    type = FVDivergence
-    variable = pressure
-    vector_field = "HbyA"
-    force_boundary_execution = true
-  []
-
-  std::string kernel_type = "FVAnisotropicDiffusion";
-  std::string kernel_name = prefix() + "ins_pc_diffusion";
-
-  if (_porous_medium_treatment)
-    kernel_name = prefix() + "pins_pc_diffusion";
-
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<NonlinearVariableName>("variable") = _pressure_name;
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") =
-      getParam<MooseEnum>("mass_advection_interpolation");
-
-  getProblem().addFVKernel(kernel_type, kernel_name, params);
-}
-
-void
-WCNSFVLinearFlowPhysics::addINSMomentumTimeKernels()
-{
-  std::string kernel_type = "INSFVMomentumTimeDerivative";
-  std::string kernel_name = prefix() + "ins_momentum_time_";
-
-  if (_porous_medium_treatment)
   {
-    kernel_type = "PINSFVMomentumTimeDerivative";
-    kernel_name = prefix() + "pins_momentum_time_";
+    std::string kernel_type = "LinearFVAnisotropicDiffusion";
+    std::string kernel_name = prefix() + "p_diffusion";
+
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    params.set<NonlinearVariableName>("variable") = _pressure_name;
+    params.set<MooseFunctorName>("diffusion_tensor") = "Ainv";
+    params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
+
+    getProblem().addFVKernel(kernel_type, kernel_name, params);
   }
-
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
-
-  for (const auto d : make_range(dimension()))
   {
-    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+    std::string kernel_type = "LinearFVDivergence";
+    std::string kernel_name = prefix() + "p_divergence";
 
-    getProblem().addFVKernel(kernel_type, kernel_name + _velocity_names[d], params);
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    params.set<NonlinearVariableName>("variable") = _pressure_name;
+    params.set<MooseFunctorName>("face_flux") = "HbyA";
+    params.set<bool>("force_boundary_execution") = true;
+
+    getProblem().addFVKernel(kernel_type, kernel_name, params);
   }
 }
 
 void
-WCNSFVLinearFlowPhysics::addWCNSMomentumTimeKernels()
-{
-  const std::string mom_kernel_type = "WCNSFVMomentumTimeDerivative";
-  InputParameters params = getFactory().getValidParams(mom_kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
-
-  for (const auto d : make_range(dimension()))
-  {
-    params.set<MooseEnum>("momentum_component") = NS::directions[d];
-    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-
-    if (_porous_medium_treatment)
-      getProblem().addFVKernel(
-          mom_kernel_type, prefix() + "pwcns_momentum_" + NS::directions[d] + "_time", params);
-    else
-      getProblem().addFVKernel(
-          mom_kernel_type, prefix() + "wcns_momentum_" + NS::directions[d] + "_time", params);
-  }
-}
-
-void
-WCNSFVLinearFlowPhysics::addINSMomentumAdvectionKernels()
+WCNSFVLinearFlowPhysics::addINSMomentumFluxKernels()
 {
   std::string kernel_type = "INSFVMomentumAdvection";
   std::string kernel_name = prefix() + "ins_momentum_advection_";
@@ -503,36 +425,6 @@ WCNSFVLinearFlowPhysics::addINSMomentumAdvectionKernels()
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
   params.applySpecificParameters(parameters(), INSFVMomentumAdvection::listOfCommonParams());
-
-  for (const auto d : make_range(dimension()))
-  {
-    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-    params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
-  }
-}
-
-void
-WCNSFVLinearFlowPhysics::addINSMomentumViscousDissipationKernels()
-{
-  std::string kernel_type = "INSFVMomentumDiffusion";
-  std::string kernel_name = prefix() + "ins_momentum_diffusion_";
-
-  if (_porous_medium_treatment)
-  {
-    kernel_type = "PINSFVMomentumDiffusion";
-    kernel_name = prefix() + "pins_momentum_diffusion_";
-  }
-
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
-  params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
-
-  if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   for (const auto d : make_range(dimension()))
   {
@@ -1166,8 +1058,8 @@ WCNSFVLinearFlowPhysics::addRhieChowUserObjects()
     return;
 
   const std::string u_names[3] = {"u", "v", "w"};
-  const auto object_type = _porous_medium_treatment ? "PINSFVRhieChowMassFlux"
-                                                    : "INSFVRhieChowMassFlux";
+  const auto object_type =
+      _porous_medium_treatment ? "PINSFVRhieChowMassFlux" : "INSFVRhieChowMassFlux";
 
   auto params = getFactory().getValidParams(object_type);
   assignBlocks(params, _blocks);
@@ -1175,7 +1067,7 @@ WCNSFVLinearFlowPhysics::addRhieChowUserObjects()
     params.set<VariableName>(u_names[d]) = _velocity_names[d];
 
   params.set<VariableName>("pressure") = _pressure_name;
-  params.set<KernelName>("p_diffusion_kernel") = "p_diffusion";
+  params.set<KernelName>("p_diffusion_kernel") = prefix() + "p_diffusion";
 
   params.applySpecificParameters(parameters(), RhieChowMassFlux::validParams());
   getProblem().addUserObject(object_type, rhieChowUOName(), params);

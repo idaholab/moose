@@ -88,18 +88,10 @@ private:
    * If the material properties are not constant, these can be used for
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
-  void addINSMomentumTimeKernels();
-  void addINSMomentumViscousDissipationKernels();
-  void addINSMomentumMixingLengthKernels();
-  void addINSMomentumAdvectionKernels();
+  void addINSMomentumFluxKernels();
   void addINSMomentumPressureKernels();
   void addINSMomentumGravityKernels();
   void addINSMomentumBoussinesqKernels();
-  void addINSMomentumFrictionKernels();
-
-  /// Functions which add time kernels for transient, weakly-compressible simulations.
-  void addWCNSMassTimeKernels();
-  void addWCNSMomentumTimeKernels();
 
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.
@@ -108,7 +100,7 @@ private:
   void addINSWallsBC();
 
   /// Return whether a Forchheimer friction model is in use
-  bool hasForchheimerFriction() const;
+  bool hasForchheimerFriction() const { return false; };
 
   /// Add material to define the local speed in porous medium flows
   void addPorousMediumSpeedMaterial();
@@ -144,15 +136,6 @@ private:
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;
-
-  /// Switch to show if porous medium treatment is requested or not
-  const bool _porous_medium_treatment;
-  /// The name of the functor for the porosity field
-  const MooseFunctorName _porosity_name;
-  /// The name of the functor for the smoothed porosity field
-  const MooseFunctorName _flow_porosity_functor_name;
-  /// The number of smoothing layers if that treatment is used on porosity
-  const unsigned _porosity_smoothing_layers;
 
   /// Velocity names
   const std::vector<std::string> _velocity_names;
@@ -200,11 +183,4 @@ private:
   std::map<BoundaryName, std::vector<MooseFunctorName>> _momentum_inlet_functors;
   /// Functors describing the outlet pressure on each boundary
   std::map<BoundaryName, MooseFunctorName> _pressure_functors;
-
-  /// Subdomains where we want to have volumetric friction
-  std::vector<std::vector<SubdomainName>> _friction_blocks;
-  /// The friction correlation types used for each block
-  std::vector<std::vector<std::string>> _friction_types;
-  /// The coefficients used for each item if friction type
-  std::vector<std::vector<std::string>> _friction_coeffs;
 };
