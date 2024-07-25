@@ -289,7 +289,8 @@ FEProblemBase::validParams()
   params.addParam<std::vector<std::vector<TagName>>>(
       "not_zeroed_tag_vectors",
       {},
-      "Extra vector tags which the sytem will not zero when other vector tags are zeroed");
+      "Extra vector tags which the sytem will not zero when other vector tags are zeroed. "
+      "The outer index is for which nonlinear system the extra tag vectors should be added for");
 
   params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_matrices",
@@ -598,6 +599,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _is_petsc_options_inserted = true;
   }
 }
+
 const MooseMesh &
 FEProblemBase::mesh(bool use_displaced) const
 {
@@ -616,7 +618,7 @@ FEProblemBase::createTagVectors()
     for (auto & vector : vectors[nl_sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+      _nl[nl_sys_num]->addVector(tag, false, PARALLEL);
     }
 
   auto & not_zeroed_vectors = getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors");

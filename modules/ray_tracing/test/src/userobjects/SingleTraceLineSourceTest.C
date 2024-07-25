@@ -30,8 +30,12 @@ SingleTraceLineSourceTest::execute()
     return;
   }
 
-  if (_fe_problem.currentlyComputingJacobian())
+  if (_current_execute_flag == EXEC_NONLINEAR)
+  {
+    mooseAssert(_fe_problem.currentlyComputingJacobian(),
+                "Should be computing jacobian but is not.");
     return;
+  }
 
   const auto contribution_tag_id = _fe_problem.getVectorTagID(_residual_tag_name);
   auto & nl = _fe_problem.getNonlinearSystemBase(_sys.number());

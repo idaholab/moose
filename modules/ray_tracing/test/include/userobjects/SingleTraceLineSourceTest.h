@@ -21,7 +21,8 @@ public:
   virtual void execute() override;
 
 protected:
+  /// the name of the tag that stores the residuals calculated by ray kernels
   const TagName & _residual_tag_name;
-
+  /// whether or not the raytracing study has moved the rays on the current time step
   bool _has_traced;
 };
