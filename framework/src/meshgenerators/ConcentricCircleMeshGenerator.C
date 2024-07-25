@@ -282,7 +282,7 @@ ConcentricCircleMeshGenerator::generate()
   // adding elements
   int index = 0;
   int limit = 0;
-  int standard = static_cast<int>(_num_sectors);
+  int standard = libMesh::cast_int<int>(_num_sectors);
 
   // This is to set the limit for the index
   if (standard > 4)
@@ -390,7 +390,7 @@ ConcentricCircleMeshGenerator::generate()
     elem->set_node(2) = nodes[index + standard + 2];
     elem->set_node(3) = nodes[index + 1];
 
-    for (int i = 0; i < static_cast<int>(subdomainIDs.size() - 1); ++i)
+    for (int i = 0; i < libMesh::cast_int<int>(subdomainIDs.size() - 1); ++i)
       if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))
         elem->subdomain_id() = subdomainIDs[subdomainIDs.size() - 1 - i];
 
@@ -448,7 +448,7 @@ ConcentricCircleMeshGenerator::generate()
         elem->set_node(3) = nodes[index + 1 + _rings.back()];
         elem->subdomain_id() = subdomainIDs.back() + 1;
 
-        if (index < (initial2 + static_cast<int>(_rings.back())))
+        if (index < (initial2 + libMesh::cast_int<int>(_rings.back())))
           boundary_info.add_side(elem, 0, 1);
 
         if (index == initial)
@@ -458,10 +458,10 @@ ConcentricCircleMeshGenerator::generate()
 
         // As mentioned before, increment by 2 indices may be required depending on where the index
         // points to.
-        if ((index - initial) % static_cast<int>(_rings.back()) == 0)
+        if ((index - initial) % libMesh::cast_int<int>(_rings.back()) == 0)
         {
           ++index;
-          initial = initial + (static_cast<int>(_rings.back()) + 1);
+          initial = initial + (libMesh::cast_int<int>(_rings.back()) + 1);
         }
       }
 
@@ -484,18 +484,18 @@ ConcentricCircleMeshGenerator::generate()
         elem->set_node(0) = nodes[index + 1];
         elem->subdomain_id() = subdomainIDs.back() + 1;
 
-        if (index >= static_cast<int>(limit - (_rings.back() + 1)))
+        if (index >= libMesh::cast_int<int>(limit - (_rings.back() + 1)))
           boundary_info.add_side(elem, 1, 3);
 
-        if ((index - initial) % static_cast<int>(_rings.back() + 2) == 0)
+        if ((index - initial) % libMesh::cast_int<int>(_rings.back() + 2) == 0)
           boundary_info.add_side(elem, 2, 4);
 
         ++index;
 
-        if ((index - initial) % static_cast<int>(_rings.back() + 1) == 0)
+        if ((index - initial) % libMesh::cast_int<int>(_rings.back() + 1) == 0)
         {
           ++index;
-          initial = initial + (static_cast<int>(_rings.back()) + 2);
+          initial = initial + (libMesh::cast_int<int>(_rings.back()) + 2);
         }
       }
 
@@ -671,10 +671,10 @@ ConcentricCircleMeshGenerator::generate()
 
           ++index;
 
-          if ((index - initial) % static_cast<int>(_rings.back()) == 0)
+          if ((index - initial) % libMesh::cast_int<int>(_rings.back()) == 0)
           {
             ++index;
-            initial = initial + (static_cast<int>(_rings.back()) + 1);
+            initial = initial + (libMesh::cast_int<int>(_rings.back()) + 1);
           }
         }
       }

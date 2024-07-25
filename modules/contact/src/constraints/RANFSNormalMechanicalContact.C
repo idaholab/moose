@@ -105,7 +105,7 @@ RANFSNormalMechanicalContact::overwriteSecondaryResidual()
   if (_tie_nodes)
     return true;
   else
-    return _largest_component == libMesh::cast_int<unsigned int>(_component);
+    return _largest_component == static_cast<unsigned int>(_component);
 }
 
 bool
@@ -278,7 +278,7 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
         return (*_current_node - *_nearest_node)(_component);
       else
       {
-        if (_largest_component == libMesh::cast_int<unsigned int>(_component))
+        if (_largest_component == static_cast<unsigned int>(_component))
         {
           mooseAssert(_pinfo->_normal(_component) != 0,
                       "We should be selecting the largest normal component, hence it should be "
@@ -325,7 +325,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       else
       {
         // corresponds to gap equation
-        if (_largest_component == libMesh::cast_int<unsigned int>(_component))
+        if (_largest_component == static_cast<unsigned int>(_component))
           // _phi_secondary has been set such that it is 1 when _j corresponds to the degree of
           // freedom associated with the _current node and 0 otherwise
           return std::abs(_pinfo->_normal(_component)) * _phi_secondary[_j][_qp];
@@ -365,7 +365,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       }
       else
       {
-        if (_largest_component == libMesh::cast_int<unsigned int>(_component))
+        if (_largest_component == static_cast<unsigned int>(_component))
           return -std::abs(_pinfo->_normal(_component)) * _phi_primary[_j][_qp];
 
         // If we're not applying the gap constraint equation on this _component, then we're

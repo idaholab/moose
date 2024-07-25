@@ -67,7 +67,7 @@ StackGenerator::generate()
                _input_names[0],
                "is not a ReplicatedMesh.");
 
-  int dim = static_cast<int>(_dim);
+  int dim = libMesh::cast_int<int>(_dim);
 
   if (dim != int(mesh->mesh_dimension()))
     paramError("dim",
@@ -90,7 +90,7 @@ StackGenerator::generate()
       mooseError("StackGenerator only works with ReplicatedMesh : mesh from Meshgenerator ",
                  _input_names[i + 1],
                  "is not a ReplicatedMesh.");
-    if (static_cast<int>(_meshes[i]->mesh_dimension()) != dim)
+    if (libMesh::cast_int<int>(_meshes[i]->mesh_dimension()) != dim)
       mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in ", _dim, "D.");
   }
 

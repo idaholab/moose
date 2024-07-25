@@ -288,13 +288,13 @@ Exodus::setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io,
       if (mesh.getMesh().mesh_dimension() == 1)
         exodus_io.write_as_dimension(3);
       else
-        exodus_io.write_as_dimension(static_cast<int>(mesh.effectiveSpatialDimension()));
+        exodus_io.write_as_dimension(libMesh::cast_int<int>(mesh.effectiveSpatialDimension()));
       break;
 
     case OutputDimension::ONE:
     case OutputDimension::TWO:
     case OutputDimension::THREE:
-      exodus_io.write_as_dimension(static_cast<int>(output_dimension));
+      exodus_io.write_as_dimension(libMesh::cast_int<int>(output_dimension));
       break;
 
     case OutputDimension::PROBLEM_DIMENSION:

@@ -124,9 +124,9 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   // Compute the number of cells in the x and y direction based on
   // the user's cells_per_pixel parameter.  Note: we use ints here
   // because the GeneratedMesh params object uses ints for these...
-  _nx = static_cast<int>(_cells_per_pixel * xpixels);
-  _ny = static_cast<int>(_cells_per_pixel * ypixels);
-  _nz = static_cast<int>(_cells_per_pixel * zpixels);
+  _nx = libMesh::cast_int<int>(_cells_per_pixel * xpixels);
+  _ny = libMesh::cast_int<int>(_cells_per_pixel * ypixels);
+  _nz = libMesh::cast_int<int>(_cells_per_pixel * zpixels);
 
   // Actually build the Mesh
   MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh &>(getMesh()),
@@ -165,8 +165,8 @@ ImageMesh::buildMesh2D(const std::string & filename)
   // Compute the number of cells in the x and y direction based on
   // the user's cells_per_pixel parameter.  Note: we use ints here
   // because the GeneratedMesh params object uses ints for these...
-  _nx = static_cast<int>(_cells_per_pixel * xpixels);
-  _ny = static_cast<int>(_cells_per_pixel * ypixels);
+  _nx = libMesh::cast_int<int>(_cells_per_pixel * xpixels);
+  _ny = libMesh::cast_int<int>(_cells_per_pixel * ypixels);
 
   // Actually build the Mesh
   MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh &>(getMesh()),

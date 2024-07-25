@@ -247,7 +247,7 @@ GeneratedMesh::buildMesh()
     {
       pows[dir].resize(nelem[dir] + 1);
       for (unsigned int i = 0; i < pows[dir].size(); ++i)
-        pows[dir][i] = std::pow(bias[dir], static_cast<int>(i));
+        pows[dir][i] = std::pow(bias[dir], libMesh::cast_int<int>(i));
     }
 
     // Loop over the nodes and move them to the desired location
@@ -279,7 +279,8 @@ GeneratedMesh::buildMesh()
             // lot (e.g. we want 3.9999 to map to 4.0 instead of 3.0).
             int index = round(float_index);
 
-            mooseAssert(index >= static_cast<int>(0) && index < static_cast<int>(pows[dir].size()),
+            mooseAssert(index >= libMesh::cast_int<int>(0) &&
+                            index < libMesh::cast_int<int>(pows[dir].size()),
                         "Scaled \"index\" out of range");
 
             // Move node to biased location.

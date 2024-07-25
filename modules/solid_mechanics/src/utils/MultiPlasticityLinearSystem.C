@@ -670,6 +670,6 @@ MultiPlasticityLinearSystem::nrStep(const RankTwoTensor & stress,
     if (anyActiveSurfaces(model, active_not_deact))
       dintnl[model] = rhs[ind++];
 
-  mooseAssert(static_cast<int>(ind) == system_size,
+  mooseAssert(libMesh::cast_int<int>(ind) == system_size,
               "Incorrect extracting of changes from NR solution in nrStep");
 }

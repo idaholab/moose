@@ -278,7 +278,7 @@ INSFVRhieChowInterpolator::initialSetup()
     std::vector<MooseObject *> var_objects;
     _fe_problem.theWarehouse()
         .query()
-        .template condition<AttribVar>(static_cast<int>(var_num))
+        .template condition<AttribVar>(libMesh::cast_int<int>(var_num))
         .template condition<AttribResidualObject>(true)
         .template condition<AttribSysNum>(_u->sys().number())
         .queryInto(var_objects);

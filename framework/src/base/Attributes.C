@@ -110,7 +110,7 @@ AttribMatrixTags::initFrom(const MooseObject * obj)
   if (t)
   {
     for (auto & tag : t->getMatrixTags({}))
-      _vals.push_back(static_cast<int>(tag));
+      _vals.push_back(libMesh::cast_int<int>(tag));
   }
 }
 
@@ -122,7 +122,7 @@ AttribVectorTags::initFrom(const MooseObject * obj)
   if (t)
   {
     for (auto & tag : t->getVectorTags({}))
-      _vals.push_back(static_cast<int>(tag));
+      _vals.push_back(libMesh::cast_int<int>(tag));
   }
 }
 
@@ -455,7 +455,7 @@ AttribVar::initFrom(const MooseObject * obj)
 {
   auto vi = dynamic_cast<const MooseVariableInterface<Real> *>(obj);
   if (vi)
-    _val = static_cast<int>(vi->mooseVariableBase()->number());
+    _val = libMesh::cast_int<int>(vi->mooseVariableBase()->number());
 }
 bool
 AttribVar::isMatch(const Attribute & other) const

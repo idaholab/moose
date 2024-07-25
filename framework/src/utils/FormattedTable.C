@@ -544,7 +544,7 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
     gpfile << " '" << dat_name << "' using 1:" << column << " title '" << col_name
            << "' with linespoints";
     column++;
-    if (column - 2 < static_cast<int>(_column_names.size()))
+    if (column - 2 < libMesh::cast_int<int>(_column_names.size()))
       gpfile << ", \\\n";
   }
   gpfile << "\n\n";

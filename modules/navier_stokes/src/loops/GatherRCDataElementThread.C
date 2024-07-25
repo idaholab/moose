@@ -48,7 +48,8 @@ GatherRCDataElementThread::subdomainChanged()
     // both var number 0 and 1)
     auto copied_queries = queries;
     std::vector<FVElementalKernel *> var_eks;
-    copied_queries.template condition<AttribVar>(static_cast<int>(var_num)).queryInto(var_eks);
+    copied_queries.template condition<AttribVar>(libMesh::cast_int<int>(var_num))
+        .queryInto(var_eks);
     for (auto var_ek : var_eks)
       if (auto insfv_ek = dynamic_cast<INSFVMomentumResidualObject *>(var_ek))
         _insfv_elemental_kernels.push_back(insfv_ek);

@@ -27,7 +27,7 @@ HSBoundaryInterface::HSBoundaryInterface(Component * component)
   : _hs_name(component->getParam<std::string>("hs")),
     _hs_side_enum(component->getParam<MooseEnum>("hs_side")),
     _hs_side(component->getEnumParam<Component2D::ExternalBoundaryType>("hs_side")),
-    _hs_side_valid(static_cast<int>(_hs_side) >= 0)
+    _hs_side_valid(libMesh::cast_int<int>(_hs_side) >= 0)
 {
   component->addDependency(_hs_name);
 }

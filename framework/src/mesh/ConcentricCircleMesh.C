@@ -245,7 +245,7 @@ ConcentricCircleMesh::buildMesh()
   // adding elements
   int index = 0;
   int limit = 0;
-  int standard = static_cast<int>(_num_sectors);
+  int standard = libMesh::cast_int<int>(_num_sectors);
 
   // This is to set the limit for the index
   if (standard > 4)
@@ -330,7 +330,7 @@ ConcentricCircleMesh::buildMesh()
 
   // adding elements for other concentric circles
   index = Utility::pow<2>(_num_sectors / 2 + 1);
-  limit = static_cast<int>(num_total_nodes) - standard - 2;
+  limit = libMesh::cast_int<int>(num_total_nodes) - standard - 2;
   int num_nodes_boundary = Utility::pow<2>(_num_sectors / 2 + 1) + _num_sectors + 1;
 
   counter = 0;
@@ -343,7 +343,7 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(2) = nodes[index + _num_sectors + 2];
     elem->set_node(3) = nodes[index + 1];
 
-    for (int i = 0; i < static_cast<int>(subdomainIDs.size()) - 1; ++i)
+    for (int i = 0; i < libMesh::cast_int<int>(subdomainIDs.size()) - 1; ++i)
       if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))
         elem->subdomain_id() = subdomainIDs[subdomainIDs.size() - 1 - i];
 

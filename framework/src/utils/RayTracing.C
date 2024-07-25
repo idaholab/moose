@@ -47,7 +47,7 @@ sideIntersectedByLine(const Elem * elem,
   {
     // Don't search the "not_side"
     // Note: A linear search is fine here because this vector is going to be < n_sides
-    if (std::find(not_side.begin(), not_side.end(), static_cast<int>(i)) != not_side.end())
+    if (std::find(not_side.begin(), not_side.end(), libMesh::cast_int<int>(i)) != not_side.end())
       continue;
 
     // Get a simplified side element

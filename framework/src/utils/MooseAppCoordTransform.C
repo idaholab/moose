@@ -356,7 +356,7 @@ MooseAppCoordTransform::minimalDataDescription() const
           scale_factor,
           static_cast<short int>(bool(_rotate)),
           _euler_angles,
-          static_cast<int>(_coord_type),
+          libMesh::cast_int<int>(_coord_type),
           libMesh::cast_int<unsigned int>(_r_axis),
           libMesh::cast_int<unsigned int>(_z_axis),
           static_cast<short int>(_has_different_coord_sys),

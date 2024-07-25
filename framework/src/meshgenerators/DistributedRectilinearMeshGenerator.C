@@ -1368,7 +1368,7 @@ DistributedRectilinearMeshGenerator::generate()
     {
       pows[dir].resize(nelem[dir] + 1);
       for (dof_id_type i = 0; i < pows[dir].size(); ++i)
-        pows[dir][i] = std::pow(bias[dir], static_cast<int>(i));
+        pows[dir][i] = std::pow(bias[dir], libMesh::cast_int<int>(i));
     }
 
     // Loop over the nodes and move them to the desired location

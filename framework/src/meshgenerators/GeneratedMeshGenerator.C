@@ -302,7 +302,8 @@ GeneratedMeshGenerator::generate()
             // lot (e.g. we want 3.9999 to map to 4.0 instead of 3.0).
             int index = round(float_index);
 
-            mooseAssert(index >= static_cast<int>(0) && index < static_cast<int>(pows[dir].size()),
+            mooseAssert(index >= libMesh::cast_int<int>(0) &&
+                            index < libMesh::cast_int<int>(pows[dir].size()),
                         "Scaled \"index\" out of range");
 
             // Move node to biased location.

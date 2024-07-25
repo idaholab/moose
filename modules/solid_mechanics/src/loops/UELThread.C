@@ -69,7 +69,7 @@ UELThread::onElement(const Elem * elem)
     // sanity checks
     if (_variables[i]->scalingFactor() != 1)
       mooseError("Scaling factors other than unity are not yet supported");
-    if (static_cast<int>(_var_dof_indices.size()) != nnode)
+    if (libMesh::cast_int<int>(_var_dof_indices.size()) != nnode)
       mooseError("All coupled variables must be full order lagrangian");
 
     for (const auto j : make_range(nnode))
@@ -110,7 +110,7 @@ UELThread::onElement(const Elem * elem)
   {
     _aux_variables[i]->getDofIndices(elem, _aux_var_dof_indices);
 
-    if (static_cast<int>(_aux_var_dof_indices.size()) != nnode)
+    if (libMesh::cast_int<int>(_aux_var_dof_indices.size()) != nnode)
       mooseError("All auxiliary variables must be full order Lagrangian");
 
     for (const auto j : make_range(nnode))

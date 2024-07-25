@@ -204,7 +204,7 @@ GeneralSensorPostprocessor::getIntegral(std::vector<Real> integrand)
     {
       n = _time_values.size();
       // if interval is not a multiple of 3, make it
-      while (static_cast<int>(n) % 3 != 0)
+      while (libMesh::cast_int<int>(n) % 3 != 0)
         n = n + 1;
     }
 

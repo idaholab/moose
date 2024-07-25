@@ -76,7 +76,7 @@ SpatialAverageBase::execute()
     auto bin = computeDistance() / _deltaR;
 
     // add the volume contributed by the current quadrature point
-    if (bin >= 0 && bin < static_cast<int>(_nbins))
+    if (bin >= 0 && bin < libMesh::cast_int<int>(_nbins))
     {
       for (MooseIndex(_nvals) j = 0; j < _nvals; ++j)
         (*_average[j])[bin] += (*_values[j])[_qp];

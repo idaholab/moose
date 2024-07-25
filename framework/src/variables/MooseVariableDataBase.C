@@ -259,7 +259,7 @@ MooseVariableDataBase<OutputType>::stateToTagHelper(const Moose::SolutionState s
   if (state > 0)
   {
     // We need to request all states that are between current and the requested state
-    stateToTagHelper<ReturnType>(Moose::SolutionState(static_cast<int>(state) - 1), functor);
+    stateToTagHelper<ReturnType>(Moose::SolutionState(libMesh::cast_int<int>(state) - 1), functor);
     needSolutionState(cast_int<unsigned int>(state));
   }
 
