@@ -144,7 +144,7 @@ CommonOutputAction::validParams()
                         "screen. This parameter only affects the output of the third-party solver "
                         "(e.g. PETSc), not MOOSE itself.");
   params.addParam<bool>("print_linear_converged_reason",
-                        true,
+                        false,
                         "Enable/disable printing of the linear solver convergence reason to the "
                         "screen. This parameter only affects the output of the third-party solver "
                         "(e.g. PETSc), not MOOSE itself.");

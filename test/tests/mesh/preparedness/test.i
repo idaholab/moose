@@ -322,7 +322,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_factor_shift_type'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_shift_type'
   petsc_options_value = 'lu        100                NONZERO'
 
   # Tolerances.
