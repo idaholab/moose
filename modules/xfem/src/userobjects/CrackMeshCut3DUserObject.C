@@ -606,7 +606,7 @@ CrackMeshCut3DUserObject::refineBoundary()
 
     if (distance > _size_control)
     {
-      unsigned int n = static_cast<unsigned int>(distance / _size_control);
+      unsigned int n = libMesh::cast_int<unsigned int>(distance / _size_control);
       std::array<Real, 3> x1;
       std::array<Real, 3> x2;
 

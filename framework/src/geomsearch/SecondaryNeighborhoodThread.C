@@ -51,7 +51,7 @@ void
 SecondaryNeighborhoodThread::operator()(const NodeIdRange & range)
 {
   unsigned int patch_size =
-      std::min(_patch_size, static_cast<unsigned int>(_trial_primary_nodes.size()));
+      std::min(_patch_size, libMesh::cast_int<unsigned int>(_trial_primary_nodes.size()));
 
   std::vector<std::size_t> return_index(patch_size);
 

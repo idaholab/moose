@@ -371,7 +371,7 @@ LayeredBase::getLayer(Point p) const
 
     if (one_higher == _layer_bounds.end())
     {
-      return static_cast<unsigned int>(
+      return libMesh::cast_int<unsigned int>(
           _layer_bounds.size() -
           2); // Just return the last layer.  -2 because layers are "in-between" bounds
     }
@@ -380,7 +380,7 @@ LayeredBase::getLayer(Point p) const
     else
       // The -1 is because the interval that we fall in is just _before_ the number that is bigger
       // (which is what we found
-      return static_cast<unsigned int>(std::distance(_layer_bounds.begin(), one_higher - 1));
+      return libMesh::cast_int<unsigned int>(std::distance(_layer_bounds.begin(), one_higher - 1));
   }
 }
 

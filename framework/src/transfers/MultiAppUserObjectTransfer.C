@@ -453,7 +453,7 @@ MultiAppUserObjectTransfer::execute()
             const auto sub_app = findSubAppToTransferFrom(transformed_node);
 
             // Check to see if a sub-app was found
-            if (sub_app == static_cast<unsigned int>(-1))
+            if (sub_app == libMesh::cast_int<unsigned int>(-1))
               continue;
 
             const auto & from_transform = *_from_transforms[sub_app];
@@ -517,7 +517,7 @@ MultiAppUserObjectTransfer::execute()
             const auto sub_app = findSubAppToTransferFrom(point);
 
             // Check to see if a sub-app was found
-            if (sub_app == static_cast<unsigned int>(-1))
+            if (sub_app == libMesh::cast_int<unsigned int>(-1))
               continue;
 
             const auto & from_transform = *_from_transforms[sub_app];
@@ -649,7 +649,7 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
         _multi_app->getBoundingBox(i, _displaced_source_mesh, _from_transforms[i].get());
 
     if (_skip_bbox_check || app_box.contains_point(p))
-      return static_cast<unsigned int>(i);
+      return libMesh::cast_int<unsigned int>(i);
   }
 
   return -1;

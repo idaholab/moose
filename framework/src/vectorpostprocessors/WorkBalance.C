@@ -169,10 +169,10 @@ public:
     }
     else // Particular system
     {
-      auto n_vars = elem->n_vars(static_cast<unsigned int>(_system));
+      auto n_vars = elem->n_vars(libMesh::cast_int<unsigned int>(_system));
 
       for (decltype(n_vars) var = 0; var < n_vars; var++)
-        _local_num_dofs += elem->n_dofs(static_cast<unsigned int>(_system), var);
+        _local_num_dofs += elem->n_dofs(libMesh::cast_int<unsigned int>(_system), var);
     }
   }
 
@@ -278,10 +278,10 @@ public:
     }
     else // Particular system
     {
-      auto n_vars = node.n_vars(static_cast<unsigned int>(_system));
+      auto n_vars = node.n_vars(libMesh::cast_int<unsigned int>(_system));
 
       for (decltype(n_vars) var = 0; var < n_vars; var++)
-        _local_num_dofs += node.n_dofs(static_cast<unsigned int>(_system), var);
+        _local_num_dofs += node.n_dofs(libMesh::cast_int<unsigned int>(_system), var);
     }
   }
 

@@ -125,7 +125,7 @@ PiecewiseMultiInterpolation::getNeighborIndices(std::vector<Real> in_arr,
     // std::distance returns std::difference_type, which can be negative in theory, but
     // in this context will always be >=0.  Therefore the explicit cast is just to shut
     // the compiler up.
-    upper_x = static_cast<unsigned int>(std::distance(in_arr.begin(), up));
+    upper_x = libMesh::cast_int<unsigned int>(std::distance(in_arr.begin(), up));
     if (in_arr[upper_x] == x)
       lower_x = upper_x;
     else

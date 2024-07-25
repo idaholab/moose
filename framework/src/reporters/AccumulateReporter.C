@@ -57,7 +57,7 @@ AccumulateReporter::declareLateValues()
 void
 AccumulateReporter::execute()
 {
-  unsigned int ind = static_cast<unsigned int>(_t_step);
+  unsigned int ind = libMesh::cast_int<unsigned int>(_t_step);
   for (auto & val : _accumulated_values)
     val->accumulate(ind);
 }

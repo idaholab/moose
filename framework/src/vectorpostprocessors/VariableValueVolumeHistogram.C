@@ -69,7 +69,7 @@ VariableValueVolumeHistogram::execute()
     int bin = (_value[_qp] - _min_value) / _deltaV;
 
     // add the volume contributed by the current quadrature point
-    if (bin >= 0 && static_cast<unsigned int>(bin) < _nbins)
+    if (bin >= 0 && libMesh::cast_int<unsigned int>(bin) < _nbins)
       _volume[bin] += computeVolume();
   }
 }

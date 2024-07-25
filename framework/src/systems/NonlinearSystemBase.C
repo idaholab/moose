@@ -3818,7 +3818,7 @@ NonlinearSystemBase::setupScalingData()
 
     _num_scaling_groups = _scaling_group_variables.size() + var_numbers_not_covered.size();
 
-    auto index = static_cast<unsigned int>(_scaling_group_variables.size());
+    auto index = libMesh::cast_int<unsigned int>(_scaling_group_variables.size());
     for (auto var_number : var_numbers_not_covered)
       _var_to_group_var.emplace(var_number, index++);
   }

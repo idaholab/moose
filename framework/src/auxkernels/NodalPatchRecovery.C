@@ -32,14 +32,14 @@ NodalPatchRecovery::NodalPatchRecovery(const InputParameters & parameters)
   : AuxKernel(parameters),
     _patch_polynomial_order(
         isParamValid("patch_polynomial_order")
-            ? static_cast<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))
-            : static_cast<unsigned int>(_var.order())),
+            ? libMesh::cast_int<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))
+            : libMesh::cast_int<unsigned int>(_var.order())),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _multi_index(multiIndex(_mesh.dimension(), _patch_polynomial_order))
 {
   // if the patch polynomial order is lower than the variable order,
   // it is very likely that the patch recovery is not used at its max accuracy
-  if (_patch_polynomial_order < static_cast<unsigned int>(_var.order()))
+  if (_patch_polynomial_order < libMesh::cast_int<unsigned int>(_var.order()))
     mooseWarning("Specified 'patch_polynomial_order' is lower than the AuxVariable's order");
 
   // TODO remove the manual ghosting once relationship manager is working correctly

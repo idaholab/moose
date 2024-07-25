@@ -8280,7 +8280,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   }
 
   system._last_nl_rnorm = fnorm;
-  system._current_nl_its = static_cast<unsigned int>(it);
+  system._current_nl_its = libMesh::cast_int<unsigned int>(it);
 
   msg = oss.str();
   if (_app.multiAppLevel() > 0)

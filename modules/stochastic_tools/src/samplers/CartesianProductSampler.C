@@ -50,7 +50,7 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
                  "The third entry for each item must be positive; it provides the number of "
                  "entries in the resulting item vector.");
 
-    unsigned int div = static_cast<unsigned int>(items[i + 2]);
+    unsigned int div = libMesh::cast_int<unsigned int>(items[i + 2]);
     grid_items.emplace_back(std::vector<Real>(div));
     for (std::size_t j = 0; j < grid_items.back().size(); ++j)
       grid_items.back()[j] = items[i] + j * items[i + 1];

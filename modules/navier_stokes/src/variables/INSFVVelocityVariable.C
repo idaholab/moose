@@ -324,7 +324,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
         ebf_faces.size() < UINT_MAX,
         "You've created a mystical element that has more faces than can be held by unsigned "
         "int. I applaud you.");
-    const auto num_ebfs = static_cast<unsigned int>(ebf_faces.size());
+    const auto num_ebfs = libMesh::cast_int<unsigned int>(ebf_faces.size());
 
     // test for simple case
     if (num_ebfs == 0)
@@ -333,7 +333,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
     {
       // We have to solve a system
       const unsigned int sys_dim =
-          lm_dim + num_ebfs + lm_dim * static_cast<unsigned int>(fdf_grad_centroid_coeffs.size());
+          lm_dim + num_ebfs +
+          lm_dim * libMesh::cast_int<unsigned int>(fdf_grad_centroid_coeffs.size());
       DenseVector<ADReal> x(sys_dim), b(sys_dim);
       DenseMatrix<ADReal> A(sys_dim, sys_dim);
 

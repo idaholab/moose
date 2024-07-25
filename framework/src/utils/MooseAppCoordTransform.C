@@ -175,7 +175,7 @@ MooseAppCoordTransform::setCoordinateSystem(const MooseMesh & mesh)
   else
     setCoordinateSystem(
         map_it->second,
-        Direction(static_cast<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis")))));
+        Direction(libMesh::cast_int<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis")))));
   for (; map_it != coord_sys.end(); ++map_it)
     coord_types.insert(map_it->second);
 
@@ -292,7 +292,7 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseMesh & mesh)
     setRotation(alpha, beta, gamma);
   }
   else if (up_direction.isValid())
-    setUpDirection(Direction(static_cast<unsigned int>(int(up_direction))));
+    setUpDirection(Direction(libMesh::cast_int<unsigned int>(int(up_direction))));
 
   //
   // Scaling
@@ -357,8 +357,8 @@ MooseAppCoordTransform::minimalDataDescription() const
           static_cast<short int>(bool(_rotate)),
           _euler_angles,
           static_cast<int>(_coord_type),
-          static_cast<unsigned int>(_r_axis),
-          static_cast<unsigned int>(_z_axis),
+          libMesh::cast_int<unsigned int>(_r_axis),
+          libMesh::cast_int<unsigned int>(_z_axis),
           static_cast<short int>(_has_different_coord_sys),
           static_cast<short int>(_using_general_rz_coord_axes),
           static_cast<short int>(_mesh_transformed)};

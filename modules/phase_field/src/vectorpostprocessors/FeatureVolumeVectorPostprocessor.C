@@ -103,13 +103,13 @@ FeatureVolumeVectorPostprocessor::execute()
       _var_num[feature_num] = var_num;
 
     _intersects_bounds[feature_num] =
-        static_cast<unsigned int>(_feature_counter.doesFeatureIntersectBoundary(feature_num));
+        libMesh::cast_int<unsigned int>(_feature_counter.doesFeatureIntersectBoundary(feature_num));
 
-    _intersects_specified_bounds[feature_num] = static_cast<unsigned int>(
+    _intersects_specified_bounds[feature_num] = libMesh::cast_int<unsigned int>(
         _feature_counter.doesFeatureIntersectSpecifiedBoundary(feature_num));
 
     _percolated[feature_num] =
-        static_cast<unsigned int>(_feature_counter.isFeaturePercolated(feature_num));
+        libMesh::cast_int<unsigned int>(_feature_counter.isFeaturePercolated(feature_num));
   }
 
   if (_output_centroids)

@@ -146,7 +146,7 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id)
   point_cache_t::iterator it = _point_cache.find(id);
 
   // Was the point found in a _point_cache on at least one processor?
-  unsigned int i_found_it = static_cast<unsigned int>(it != _point_cache.end());
+  unsigned int i_found_it = libMesh::cast_int<unsigned int>(it != _point_cache.end());
   unsigned int we_found_it = i_found_it;
   comm().max(we_found_it);
 
@@ -296,7 +296,7 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id)
   // early in the code above...
 
   // Does we need to call findPoint() on all processors.
-  unsigned int we_need_find_point = static_cast<unsigned int>(i_need_find_point);
+  unsigned int we_need_find_point = libMesh::cast_int<unsigned int>(i_need_find_point);
   comm().max(we_need_find_point);
 
   if (we_need_find_point)

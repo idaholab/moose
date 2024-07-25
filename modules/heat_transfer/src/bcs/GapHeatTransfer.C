@@ -219,7 +219,7 @@ GapHeatTransfer::computeJacobian()
 
       for (_i = 0; _i < _test.size(); _i++)
         for (_secondary_j = 0;
-             _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
+             _secondary_j < libMesh::cast_int<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
           K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSecondaryQpJacobian();
 
@@ -285,7 +285,7 @@ GapHeatTransfer::computeOffDiagJacobian(const unsigned int jvar_num)
 
       for (_i = 0; _i < _test.size(); _i++)
         for (_secondary_j = 0;
-             _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
+             _secondary_j < libMesh::cast_int<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
           K_secondary(_i, _secondary_j) +=
               _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar_num);

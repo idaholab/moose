@@ -99,7 +99,7 @@ ComputeSmearedCrackingStress::ComputeSmearedCrackingStress(const InputParameters
         if (prescribed_crack_directions[i] == prescribed_crack_directions[j])
           mooseError("Entries in 'prescribed_crack_directions' cannot be repeated");
       _prescribed_crack_directions.push_back(
-          static_cast<unsigned int>(prescribed_crack_directions.get(i)));
+          libMesh::cast_int<unsigned int>(prescribed_crack_directions.get(i)));
     }
 
     // Fill in the last remaining direction if 2 are specified

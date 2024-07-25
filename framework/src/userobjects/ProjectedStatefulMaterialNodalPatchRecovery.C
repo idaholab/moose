@@ -73,7 +73,7 @@ ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>::
     _qp(0),
     _n_components(Moose::SerialAccess<T>::size()),
     _patch_polynomial_order(
-        static_cast<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))),
+        libMesh::cast_int<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))),
     _multi_index(MathUtils::multiIndex(_mesh.dimension(), _patch_polynomial_order)),
     _q(_multi_index.size()),
     _prop(getGenericMaterialProperty<T, is_ad>("property")),

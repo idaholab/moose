@@ -183,7 +183,7 @@ FileMeshComponent::buildMesh()
     // Map the zero-based Exodus side numbering to the libmesh side numbering
     unsigned int raw_side_index = exio_helper.side_list[e] - 1;
     std::size_t side_index_offset = conv.get_shellface_index_offset();
-    unsigned int side_index = static_cast<unsigned int>(raw_side_index - side_index_offset);
+    unsigned int side_index = libMesh::cast_int<unsigned int>(raw_side_index - side_index_offset);
     int mapped_side = conv.get_side_map(side_index);
 
     // Get the boundary ID and add the elem/side pair to the boundary

@@ -289,8 +289,8 @@ FiniteStrainCrystalPlasticity::getInitSlipSysRes()
       mooseError("FiniteStrainCrystalPLasticity: Error in reading slip system resistances: Values "
                  "specifying start and end number of slip system groups should be integer");
 
-    is = static_cast<unsigned int>(vs);
-    ie = static_cast<unsigned int>(ve);
+    is = libMesh::cast_int<unsigned int>(vs);
+    ie = libMesh::cast_int<unsigned int>(ve);
 
     if (is > ie)
       mooseError("FiniteStrainCrystalPLasticity: Start index is = ",
@@ -373,8 +373,8 @@ FiniteStrainCrystalPlasticity::getFlowRateParams()
       mooseError("FiniteStrainCrystalPLasticity: Error in reading flow props: Values specifying "
                  "start and end number of slip system groups should be integer");
 
-    is = static_cast<unsigned int>(vs);
-    ie = static_cast<unsigned int>(ve);
+    is = libMesh::cast_int<unsigned int>(vs);
+    ie = libMesh::cast_int<unsigned int>(ve);
 
     if (is > ie)
       mooseError("FiniteStrainCrystalPLasticity: Start index is = ",

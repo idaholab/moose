@@ -176,7 +176,7 @@ convertBytes(std::size_t bytes, MemUnits unit)
   if (unit == MemUnits::Bytes)
     return bytes;
 
-  unsigned int nunit = static_cast<unsigned int>(unit);
+  unsigned int nunit = libMesh::cast_int<unsigned int>(unit);
 
   // kibi, mebi, gibi
   if (nunit <= 3)
