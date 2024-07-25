@@ -94,7 +94,7 @@ RayTracingStudy::validParams()
 
   params.addParam<bool>("allow_other_flags_with_prekernels",
                         false,
-                        "Whether or not to error when a user provides a list of execition flags "
+                        "Whether or not to error when a user provides a list of execution flags "
                         "and PRE_KERNELS is in the list of flags.");
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);

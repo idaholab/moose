@@ -624,7 +624,7 @@ FEProblemBase::createTagVectors()
     for (auto & vector : not_zeroed_vectors[nl_sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+      _nl[nl_sys_num]->addVector(tag, false, PARALLEL);
       addNotZeroedVectorTag(tag);
     }
 
