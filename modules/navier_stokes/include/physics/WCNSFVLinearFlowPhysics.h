@@ -80,10 +80,8 @@ private:
   void addUserObjects() override;
   void addPostprocessors() override;
 
-  /// Function adding kernels for the incompressible continuity equation
-  void addINSMassKernels();
-  /// Function adding the pressure constraint
-  void addINSPressurePinKernel();
+  /// Function adding kernels for the incompressible pressure correction equation
+  void addINSPressureCorrectionKernels();
 
   /**
    * Functions adding kernels for the incompressible momentum equation
@@ -137,6 +135,9 @@ private:
 
   /// Find the turbulence physics
   const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
+
+  /// Name of the vector to hold pressure momentum equation contributions
+  const TagName _pressure_tag = "p_tag";
 
   /// Boolean to keep track of whether the flow equations should be created
   const bool _has_flow_equations;
