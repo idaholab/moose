@@ -289,7 +289,7 @@ Console::initialSetup()
   // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc.,
   // but only
   // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
-  if (_execute_on.contains("final"))
+  if (_execute_on.isValueSet("final"))
   {
     if (!_pars.isParamSetByUser("postprocessor_execute_on"))
       _advanced_execute_on["postprocessors"].setAdditionalValue("final");
@@ -342,16 +342,16 @@ Console::output()
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
   // We only write the initial and final here. All of the intermediate outputs will be written
   // through timestepSetup.
-  if (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL))
+  if (type == EXEC_INITIAL && _execute_on.isValueSet(EXEC_INITIAL))
     writeTimestepInformation(/*output_dt = */ false);
-  else if (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL))
+  else if (type == EXEC_FINAL && _execute_on.isValueSet(EXEC_FINAL))
   {
     if (wantOutput("postprocessors", type) || wantOutput("scalars", type))
       _console << "\nFINAL:\n";
   }
 
   // Print Non-linear Residual (control with "execute_on")
-  if (type == EXEC_NONLINEAR && _execute_on.contains(EXEC_NONLINEAR))
+  if (type == EXEC_NONLINEAR && _execute_on.isValueSet(EXEC_NONLINEAR))
   {
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
@@ -363,7 +363,7 @@ Console::output()
   }
 
   // Print Linear Residual (control with "execute_on")
-  else if (type == EXEC_LINEAR && _execute_on.contains(EXEC_LINEAR))
+  else if (type == EXEC_LINEAR && _execute_on.isValueSet(EXEC_LINEAR))
   {
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
@@ -698,13 +698,13 @@ Console::outputSystemInformation()
   if (_app.multiAppNumber() > 0)
     return;
 
-  if (_system_info_flags.contains("framework"))
+  if (_system_info_flags.isValueSet("framework"))
     _console << ConsoleUtils::outputFrameworkInformation(_app);
 
-  if (_system_info_flags.contains("mesh"))
+  if (_system_info_flags.isValueSet("mesh"))
     _console << ConsoleUtils::outputMeshInformation(*_problem_ptr);
 
-  if (_system_info_flags.contains("nonlinear"))
+  if (_system_info_flags.isValueSet("nonlinear"))
   {
     for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
     {
@@ -717,24 +717,24 @@ Console::outputSystemInformation()
     }
   }
 
-  if (_system_info_flags.contains("aux"))
+  if (_system_info_flags.isValueSet("aux"))
   {
     std::string output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
     if (!output.empty())
       _console << "Auxiliary System:\n" << output;
   }
 
-  if (_system_info_flags.contains("relationship"))
+  if (_system_info_flags.isValueSet("relationship"))
   {
     std::string output = ConsoleUtils::outputRelationshipManagerInformation(_app);
     if (!output.empty())
       _console << "Relationship Managers:\n" << output;
   }
 
-  if (_system_info_flags.contains("execution"))
+  if (_system_info_flags.isValueSet("execution"))
     _console << ConsoleUtils::outputExecutionInformation(_app, *_problem_ptr);
 
-  if (_system_info_flags.contains("output"))
+  if (_system_info_flags.isValueSet("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
 
   // Output the legacy flags, these cannot be turned off so they become annoying to people.

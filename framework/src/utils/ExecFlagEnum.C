@@ -29,7 +29,7 @@ ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag)
                flag,
                "' is not an available enum item for the "
                "MultiMooseEnum object, thus it cannot be removed.");
-  else if (contains(flag))
+  else if (isValueSet(flag))
     mooseError("The supplied item '", flag, "' is a selected item, thus it can not be removed.");
 
   _items.erase(flag);

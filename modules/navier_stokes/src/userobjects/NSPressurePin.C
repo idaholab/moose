@@ -77,7 +77,7 @@ NSPressurePin::initialSetup()
   if (_pressure_pin_type == "average" &&
       !_fe_problem.getUserObjectBase(getParam<PostprocessorName>("pressure_average"))
            .getExecuteOnEnum()
-           .contains(getExecuteOnEnum()))
+           .isValueSet(getExecuteOnEnum()))
     paramError("pressure_average",
                "Pressure average postprocessor must include the pin execute_on flags");
 }

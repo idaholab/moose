@@ -436,7 +436,7 @@ OptimizeSolve::objectiveFunction()
     _problem.outputStep(OptimizationAppTypes::EXEC_FORWARD);
     mooseError("Forward solve multiapp failed!");
   }
-  if (_solve_on.contains(OptimizationAppTypes::EXEC_FORWARD))
+  if (_solve_on.isValueSet(OptimizationAppTypes::EXEC_FORWARD))
     _inner_solve->solve();
 
   _obj_iterate++;
@@ -454,7 +454,7 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-  if (_solve_on.contains(OptimizationAppTypes::EXEC_ADJOINT))
+  if (_solve_on.isValueSet(OptimizationAppTypes::EXEC_ADJOINT))
     _inner_solve->solve();
 
   _grad_iterate++;
@@ -480,7 +480,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Homogeneous forward solve multiapp failed!");
-  if (_solve_on.contains(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
+  if (_solve_on.isValueSet(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     _inner_solve->solve();
 
   _obj_function->setMisfitToSimulatedValues();
@@ -490,7 +490,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-  if (_solve_on.contains(OptimizationAppTypes::EXEC_ADJOINT))
+  if (_solve_on.isValueSet(OptimizationAppTypes::EXEC_ADJOINT))
     _inner_solve->solve();
 
   _obj_function->computeGradient(Hs);

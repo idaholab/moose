@@ -45,13 +45,13 @@ ChangeOverTimePostprocessor::ChangeOverTimePostprocessor(const InputParameters &
     // ensure dependent post-processor is executed on initial
     const PostprocessorName & pp_name = getParam<PostprocessorName>("postprocessor");
     const UserObject & pp = _fe_problem.getUserObject<UserObject>(pp_name);
-    if (!pp.getExecuteOnEnum().contains(EXEC_INITIAL))
+    if (!pp.getExecuteOnEnum().isValueSet(EXEC_INITIAL))
       mooseError("When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for "
                  "the dependent post-processor ('" +
                  pp_name + "') must include 'initial'");
 
     // ensure THIS post-processor is executed on initial
-    if (!_execute_enum.contains(EXEC_INITIAL))
+    if (!_execute_enum.isValueSet(EXEC_INITIAL))
       mooseError("When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for "
                  "the ChangeOverTimePostprocessor ('" +
                  name() + "') must include 'initial'");

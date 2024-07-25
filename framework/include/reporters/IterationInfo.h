@@ -50,7 +50,7 @@ template <typename T>
 T &
 IterationInfo::declareHelper(const std::string & item_name, T & dummy, bool extra_check)
 {
-  return (extra_check && (!_items.isValid() || _items.contains(item_name)))
+  return (extra_check && (!_items.isValid() || _items.isValueSet(item_name)))
              ? declareValueByName<T>(item_name, REPORTER_MODE_REPLICATED)
              : dummy;
 }

@@ -193,7 +193,7 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
   }
 
   // Evaluating on residual and Jacobian evaluation
-  if (_execute_enum.contains(EXEC_PRE_KERNELS))
+  if (_execute_enum.isValueSet(EXEC_PRE_KERNELS))
   {
     if (_execute_enum.size() > 1)
       paramError("execute_on",
@@ -248,7 +248,7 @@ RayTracingStudy::initialSetup()
   std::vector<RayKernelBase *> ray_kernels;
   getRayKernels(ray_kernels, 0);
   for (const auto & rkb : ray_kernels)
-    if (dynamic_cast<RayKernel *>(rkb) && !_execute_enum.contains(EXEC_PRE_KERNELS))
+    if (dynamic_cast<RayKernel *>(rkb) && !_execute_enum.isValueSet(EXEC_PRE_KERNELS))
       mooseError("This study has RayKernel objects that contribute to residuals and Jacobians.",
                  "\nIn this case, the study must use the execute_on = PRE_KERNELS");
 

@@ -276,7 +276,7 @@ Output::outputStep(const ExecFlagType & type)
 bool
 Output::shouldOutput()
 {
-  if (_execute_on.contains(_current_execute_flag) || _current_execute_flag == EXEC_FORCED)
+  if (_execute_on.isValueSet(_current_execute_flag) || _current_execute_flag == EXEC_FORCED)
     return true;
   return false;
 }

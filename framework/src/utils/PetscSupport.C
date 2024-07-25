@@ -650,7 +650,7 @@ processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
     }
 
     // Update the stored items, but do not create duplicates
-    if (!po.flags.contains(option))
+    if (!po.flags.isValueSet(option))
       po.flags.setAdditionalValue(option);
   }
 }
@@ -667,7 +667,7 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
        std::make_pair(false, "-ksp_converged_reason")}};
 
   for (auto & reason_flag : reason_flags)
-    if (po.flags.contains(reason_flag.second))
+    if (po.flags.isValueSet(reason_flag.second))
       // We register the reason option as already existing
       reason_flag.first = true;
 

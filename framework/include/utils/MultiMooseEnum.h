@@ -99,6 +99,11 @@ public:
    * Methods for seeing if a value is set in the MultiMooseEnum.
    * @return bool - the truth value indicating whether the value is set
    */
+  bool isValueSet(const std::string & value) const;
+  bool isValueSet(int value) const;
+  bool isValueSet(unsigned short value) const;
+  bool isValueSet(const MultiMooseEnum & value) const;
+  bool isValueSet(const MooseEnumItem & value) const;
   bool contains(const std::string & value) const;
   bool contains(int value) const;
   bool contains(unsigned short value) const;

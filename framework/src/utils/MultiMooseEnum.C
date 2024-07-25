@@ -63,7 +63,7 @@ MultiMooseEnum::operator==(const MultiMooseEnum & value) const
 
   // Return false if this enum does not contain an item from the other, since they are the same
   // size at this point if this is true then they are equal.
-  return contains(value);
+  return isValueSet(value);
 }
 
 bool
@@ -73,7 +73,23 @@ MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
 }
 
 bool
+MultiMooseEnum::isValueSet(const std::string & value) const
+{
+  return std::find_if(_current_values.begin(),
+                      _current_values.end(),
+                      [&value](const MooseEnumItem & item)
+                      { return item == value; }) != _current_values.end();
+}
+
+bool
 MultiMooseEnum::contains(const std::string & value) const
+{
+  mooseDeprecated("MultiMooseEnum::contains is deprecated, use MultiMooseEnum::isValueSet");
+  return isValueSet(value);
+}
+
+bool
+MultiMooseEnum::isValueSet(int value) const
 {
   return std::find_if(_current_values.begin(),
                       _current_values.end(),
@@ -84,6 +100,13 @@ MultiMooseEnum::contains(const std::string & value) const
 bool
 MultiMooseEnum::contains(int value) const
 {
+  mooseDeprecated("MultiMooseEnum::contains is deprecated, use MultiMooseEnum::isValueSet");
+  return isValueSet(value);
+}
+
+bool
+MultiMooseEnum::isValueSet(unsigned short value) const
+{
   return std::find_if(_current_values.begin(),
                       _current_values.end(),
                       [&value](const MooseEnumItem & item)
@@ -93,28 +116,40 @@ MultiMooseEnum::contains(int value) const
 bool
 MultiMooseEnum::contains(unsigned short value) const
 {
-  return std::find_if(_current_values.begin(),
-                      _current_values.end(),
-                      [&value](const MooseEnumItem & item)
-                      { return item == value; }) != _current_values.end();
+  mooseDeprecated("MultiMooseEnum::contains is deprecated, use MultiMooseEnum::isValueSet");
+  return isValueSet(value);
 }
 
 bool
-MultiMooseEnum::contains(const MultiMooseEnum & value) const
+MultiMooseEnum::isValueSet(const MultiMooseEnum & value) const
 {
   for (const auto & item : value._current_values)
-    if (!contains(item))
+    if (!isValueSet(item))
       return false;
   return true;
 }
 
 bool
-MultiMooseEnum::contains(const MooseEnumItem & value) const
+MultiMooseEnum::contains(const MultiMooseEnum & value) const
+{
+  mooseDeprecated("MultiMooseEnum::contains is deprecated, use MultiMooseEnum::isValueSet");
+  return isValueSet(value);
+}
+
+bool
+MultiMooseEnum::isValueSet(const MooseEnumItem & value) const
 {
   return std::find_if(_current_values.begin(),
                       _current_values.end(),
                       [&value](const MooseEnumItem & item)
                       { return item == value; }) != _current_values.end();
+}
+
+bool
+MultiMooseEnum::contains(const MooseEnumItem & value) const
+{
+  mooseDeprecated("MultiMooseEnum::contains is deprecated, use MultiMooseEnum::isValueSet");
+  return isValueSet(value);
 }
 
 MultiMooseEnum &

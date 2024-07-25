@@ -38,19 +38,19 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
     _xdiff(declareHelper<std::vector<double>>("xdiff", REPORTER_MODE_REPLICATED)),
     _currentIterate(declareHelper<std::vector<int>>("current_iterate", REPORTER_MODE_REPLICATED)),
     _objectiveIterate(
-        (!_items.isValid() || _items.contains("current_iterate"))
+        (!_items.isValid() || _items.isValueSet("current_iterate"))
             ? declareValueByName<std::vector<int>>("objective_iterate", REPORTER_MODE_REPLICATED)
             : declareUnusedValue<std::vector<int>>()),
     _gradientIterate(
-        (!_items.isValid() || _items.contains("current_iterate"))
+        (!_items.isValid() || _items.isValueSet("current_iterate"))
             ? declareValueByName<std::vector<int>>("gradient_iterate", REPORTER_MODE_REPLICATED)
             : declareUnusedValue<std::vector<int>>()),
     _hessianIterate(
-        (!_items.isValid() || _items.contains("current_iterate"))
+        (!_items.isValid() || _items.isValueSet("current_iterate"))
             ? declareValueByName<std::vector<int>>("hessian_iterate", REPORTER_MODE_REPLICATED)
             : declareUnusedValue<std::vector<int>>()),
     _functionSolves(
-        (!_items.isValid() || _items.contains("current_iterate"))
+        (!_items.isValid() || _items.isValueSet("current_iterate"))
             ? declareValueByName<std::vector<int>>("function_solves", REPORTER_MODE_REPLICATED)
             : declareUnusedValue<std::vector<int>>())
 {
