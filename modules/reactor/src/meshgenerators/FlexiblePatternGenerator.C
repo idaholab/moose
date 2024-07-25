@@ -122,6 +122,8 @@ FlexiblePatternGenerator::validParams()
   params.addParam<boundary_id_type>(
       "external_boundary_id",
       "The boundary id of the external boundary in addition to the default 10000.");
+  params.addParam<std::string>(
+      "external_boundary_name", std::string(), "Optional boundary name for the external boundary.");
 
   params.addParam<bool>("delete_default_external_boundary_from_inputs",
                         true,
@@ -146,7 +148,7 @@ FlexiblePatternGenerator::validParams()
                               "auto_area_function_num_points auto_area_function_power",
                               "Background Area Delaunay");
   params.addParamNamesToGroup("boundary_type boundary_mesh boundary_sectors boundary_size "
-                              "delete_default_external_boundary_from_inputs external_boundary_id",
+                              "delete_default_external_boundary_from_inputs external_boundary_id external_boundary_name",
                               "Boundary");
 
   return params;
@@ -553,9 +555,20 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
 std::unique_ptr<MeshBase>
 FlexiblePatternGenerator::generate()
 {
-  if (isParamValid("external_boundary_id"))
+  const auto external_boundary_id = isParamValid("external_boundary_id") ? getParam<boundary_id_type>("external_boundary_id") : 0;
+  const auto external_boundary_name = isParamValid("external_boundary_name") ? getParam<std::string>("external_boundary_name") : "";
+  if (external_boundary_id > 0)
     MooseMesh::changeBoundaryId(
-        **_build_mesh, OUTER_SIDESET_ID, getParam<boundary_id_type>("external_boundary_id"), false);
+        **_build_mesh, OUTER_SIDESET_ID, external_boundary_id, false);
+  if (!external_boundary_name.empty())
+  {
+    (*_build_mesh)->get_boundary_info().sideset_name(
+        external_boundary_id > 0 ? external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
+        external_boundary_name;
+    (*_build_mesh)->get_boundary_info().nodeset_name(
+        external_boundary_id > 0 ? external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
+        external_boundary_name;
+  }
   (*_build_mesh)->find_neighbors();
   (*_build_mesh)->set_isnt_prepared();
   return std::move(*_build_mesh);

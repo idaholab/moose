@@ -31,6 +31,8 @@ static const std::string pin_region_ids = "pin_region_ids";
 static const std::string pin_block_names = "pin_block_names";
 static const std::string pin_region_id_map = "pin_region_id_map";
 static const std::string pin_block_name_map = "pin_block_name_map";
+static const std::string flexible_assembly_stitching = "flexible_assembly_stitching";
+static const std::string num_sectors_flexible_stitching = "num_sectors_flexible_stitching";
 
 // Geometrical quantities
 static const std::string pitch = "pitch";

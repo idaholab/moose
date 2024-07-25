@@ -195,6 +195,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   // Use special block id to designate TRI elements
   subdomain_id_type pin_block_id_tri = pin_block_id_start - 1;
 
+  const auto use_flexible_stitching = getReactorParam<bool>(RGMB::flexible_assembly_stitching);
   std::string build_mesh_name;
 
   // No subgenerators will be called if option to bypass mesh generators is enabled
@@ -202,6 +203,10 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   {
     if (_homogenized)
     {
+      // If flexible assembly stitching is invoked and this is a homogeneous assembly mesh, do not call mesh subgenerators here
+      // The homogeneous assembly mesh should be created entirely in generateFlexibleAssemblyBoundaries()
+      bool skip_assembly_generation = _is_assembly && use_flexible_stitching;
+
       auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
       params.set<Real>("hexagon_size") = _pitch / 2.0;
@@ -213,12 +218,15 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
                                                                              : pin_block_id_tri};
       params.set<MooseEnum>("element_type") = _quad_center ? "QUAD" : "TRI";
       auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R0";
-      if (_quad_center)
+      if (!_quad_center)
         block_name += "_TRI";
       params.set<std::vector<SubdomainName>>("block_name") = {block_name};
 
-      build_mesh_name = name() + "_2D";
-      addMeshSubgenerator("SimpleHexagonGenerator", build_mesh_name, params);
+      if (!skip_assembly_generation)
+      {
+        build_mesh_name = name() + "_2D";
+        addMeshSubgenerator("SimpleHexagonGenerator", build_mesh_name, params);
+      }
     }
     else
     {
@@ -313,6 +321,10 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         }
       }
 
+      // If flexible assembly stitching is invoked and this is an assembly mesh with only a background region, do not call mesh subgenerators here
+      // This assembly mesh should be created entirely in generateFlexibleAssemblyBoundaries()
+      bool skip_assembly_generation = _is_assembly && use_flexible_stitching && _intervals.size() == 1;
+
       // Generate Cartesian/hex pin using PolygonConcentricCircleMeshGenerator
       {
         // Get and assign parameters for the main geometry feature of the Pin
@@ -356,7 +368,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
           params.set<std::vector<unsigned int>>("duct_intervals") = duct_intervals;
         }
 
-        addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
+        if (!skip_assembly_generation)
+          addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
       }
 
       // Remove extra sidesets created by PolygonConcentricCircleMeshGenerator
@@ -372,17 +385,32 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
                                       {std::to_string(10001 + i), std::to_string(15001 + i)});
         params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-        build_mesh_name = name() + "_del_bds";
-        addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
+        if (!skip_assembly_generation)
+        {
+          build_mesh_name = name() + "_delbds";
+          addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
+        }
       }
     }
 
+    // For pin acting as assembly, modify outermost mesh interval to enable flexible assembly stitching
+    if (_is_assembly && use_flexible_stitching)
+    {
+      generateFlexibleAssemblyBoundaries();
+      build_mesh_name = name() + "_fpg_delbds";
+    }
+
     // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-    copyMeshProperty<Real>("pitch_meta", name() + "_2D");
-    copyMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D");
-    copyMeshProperty<Real>("max_radius_meta", name() + "_2D");
-    copyMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
-    copyMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
+    if (hasMeshProperty<Real>("pitch_meta", name() + "_2D"))
+      copyMeshProperty<Real>("pitch_meta", name() + "_2D");
+    if (hasMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D"))
+      copyMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D");
+    if (hasMeshProperty<Real>("max_radius_meta", name() + "_2D"))
+      copyMeshProperty<Real>("max_radius_meta", name() + "_2D");
+    if (hasMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"))
+      copyMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
+    if (hasMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"))
+      copyMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
 
     if (_is_assembly)
       declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>(RGMB::assembly_pitch));
@@ -399,8 +427,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       {
         auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
-        params.set<MeshGeneratorName>("input") =
-            _homogenized ? name() + "_2D" : name() + "_del_bds";
+        params.set<MeshGeneratorName>("input") = build_mesh_name;
         params.set<Point>("direction") = Point(0, 0, 1);
         params.set<std::vector<unsigned int>>("num_layers") =
             getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
@@ -444,6 +471,72 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   }
 
   generateMetadata();
+}
+
+void
+PinMeshGenerator::generateFlexibleAssemblyBoundaries()
+{
+  SubdomainName outermost_block_name;
+  bool has_single_mesh_interval;
+
+  // Assemblies that invoke this method are either homogenized or have a single pin. First check if the assembly only has a single region.
+  // Otherwise, determine the outermost region for deletion
+  if (_homogenized || (_intervals.size() == 1))
+  {
+    outermost_block_name = "RGMB_PIN" + std::to_string(_pin_type)+ "_R0";
+    has_single_mesh_interval = true;
+  }
+  else
+  {
+    outermost_block_name = "RGMB_PIN" + std::to_string(_pin_type)+ "_R" + std::to_string(_intervals.size() - 1);
+    has_single_mesh_interval = false;
+
+    // Invoke BlockDeletionGenerator to delete outermost mesh interval of assembly
+    auto params = _app.getFactory().getValidParams("BlockDeletionGenerator");
+
+    params.set<std::vector<SubdomainName>>("block") = {outermost_block_name};
+    params.set<MeshGeneratorName>("input") = _homogenized ? name() + "_2D" : name() + "_delbds";
+
+    addMeshSubgenerator("BlockDeletionGenerator", name() + "_del_outer", params);
+  }
+
+  {
+    // Invoke FlexiblePatternGenerator to triangulate deleted mesh interval
+    auto params = _app.getFactory().getValidParams("FlexiblePatternGenerator");
+
+    if (has_single_mesh_interval)
+      params.set<std::vector<MeshGeneratorName>>("inputs") = {};
+    else
+    {
+      params.set<std::vector<MeshGeneratorName>>("inputs") = {name() + "_del_outer"};
+      params.set<std::vector<libMesh::Point>>("extra_positions") = {libMesh::Point(0, 0, 0)};
+      params.set<std::vector<unsigned int>>("extra_positions_mg_indices") = {0};
+    }
+    params.set<bool>("use_auto_area_func") = true;
+    params.set<MooseEnum>("boundary_type") = (_mesh_geometry == "Hex") ? "HEXAGON" : "CARTESIAN";
+    params.set<unsigned int>("boundary_sectors") = getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
+    params.set<double>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
+    params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
+    params.set<std::string>("external_boundary_name") = "outer_assembly_" + std::to_string(_pin_type);
+    params.set<SubdomainName>("background_subdomain_name") = outermost_block_name + "_TRI";
+    // Allocate block ID 9998 for triangulated outer region, since 9999 is reserved for tri elements when
+    // quad_center_elements is false
+    params.set<unsigned short>("background_subdomain_id") = 9998;
+
+    addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);
+  }
+  {
+    // Delete extra boundary created by FlexiblePatternGenerator
+    auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
+
+    params.set<MeshGeneratorName>("input") = name() + "_fpg";
+    std::vector<BoundaryName> boundaries_to_delete = {};
+    if (!has_single_mesh_interval)
+      boundaries_to_delete.push_back(std::to_string(1));
+    params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
+
+    addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_fpg_delbds", params);
+  }
 }
 
 void
@@ -544,14 +637,17 @@ PinMeshGenerator::generate()
 
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
-  const auto max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_2D");
-  setMeshProperty("max_radius_meta", max_radius_meta);
-  const auto background_intervals_meta =
-      getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
-  setMeshProperty("background_intervals_meta", background_intervals_meta);
-  const auto node_id_background_meta =
-      getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
-  setMeshProperty("node_id_background_meta", node_id_background_meta);
+  if (hasMeshProperty<Real>("max_radius_meta", name() + "_2D"))
+  {
+    const auto max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_2D");
+    setMeshProperty("max_radius_meta", max_radius_meta);
+    const auto background_intervals_meta =
+        getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
+    setMeshProperty("background_intervals_meta", background_intervals_meta);
+    const auto node_id_background_meta =
+        getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
+    setMeshProperty("node_id_background_meta", node_id_background_meta);
+  }
 
   // This generate() method will be called once the subgenerators that we depend on
   // have been called. This is where we reassign subdomain ids/names according to what
