@@ -149,7 +149,7 @@ PIDTransientControl::execute()
     _integral += delta * _dt;
     value += _Kint * _integral + _Kpro * delta;
     if (_dt > 0)
-      value += _Kder * delta / _dt;
+      value += _Kder * (delta - _old_delta) / _dt;
 
     // If the maxmimum rate of change by the pid is fixed
     if ((isParamSetByUser("maximum_change_rate")))
