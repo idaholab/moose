@@ -161,7 +161,7 @@ An object that inherits from `PerfGraphInterface` can retrieve the data pertaini
 
 The `PerfGraph` object's main purpose is to store the complete call-graph of `PerfNode`s and the current call-stack of `PerfNode`s.  The graph is held by holding onto the `_root_node`.  All other scopes that are pushed into the graph are then children/descendants of the `_root_node`.
 
-The call-stack is held within the `_stack` variable.  The `_stack` is statically allocated to `MAX_STACK_SIZE` and `_current_position` is used to point at the most recent node on the stack.  When a `PerfGuard` tells the `PerfStack` about a new scope, the new scope is added a child to the `PerfNode` that is in the `_current_position`.  `_current_position` is then incremented and the new `PerfNode` is put there. When a scope is removed by the `PerfGuard` the `_current_position` is simply decremented - with no other action being necessary.
+The call-stack is held within the `_stack` variable.  The `_stack` is statically allocated to `MOOSE_MAX_STACK_SIZE` and `_current_position` is used to point at the most recent node on the stack.  When a `PerfGuard` tells the `PerfStack` about a new scope, the new scope is added a child to the `PerfNode` that is in the `_current_position`.  `_current_position` is then incremented and the new `PerfNode` is put there. When a scope is removed by the `PerfGuard` the `_current_position` is simply decremented - with no other action being necessary.
 
 In addition, the `_execution_list` is keeping a running list of every section that executes.  This is utilized by `PerfGraphLivePrint` to print messages out that are multiple levels deep.
 

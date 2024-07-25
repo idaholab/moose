@@ -33,7 +33,7 @@ class PerfGraphLivePrint;
 template <class... Ts>
 class VariadicTable;
 
-#define MAX_STACK_SIZE 100
+#define MOOSE_MAX_STACK_SIZE 100
 #define MAX_EXECUTION_LIST_SIZE 10000
 
 /**
@@ -187,7 +187,7 @@ public:
 
   template <typename Functor>
   void treeRecurse(const Functor & act,
-                   const unsigned int level = MAX_STACK_SIZE,
+                   const unsigned int level = MOOSE_MAX_STACK_SIZE,
                    const bool heaviest = false) const;
 
 protected:
@@ -352,7 +352,7 @@ protected:
   int _current_position;
 
   /// The full callstack.  Currently capped at a depth of 100
-  std::array<PerfNode *, MAX_STACK_SIZE> _stack;
+  std::array<PerfNode *, MOOSE_MAX_STACK_SIZE> _stack;
 
   /// A circular buffer for holding the execution list, this is read by the printing loop
   std::array<SectionIncrement, MAX_EXECUTION_LIST_SIZE> _execution_list;
@@ -471,7 +471,7 @@ PerfGraph::treeRecurseInternal(const PerfNode & node,
 template <typename Functor>
 void
 PerfGraph::treeRecurse(const Functor & act,
-                       const unsigned int level /* = MAX_STACK_SIZE */,
+                       const unsigned int level /* = MOOSE_MAX_STACK_SIZE */,
                        const bool heaviest /* = false */) const
 {
   mooseAssert(_root_node, "Root node does not exist; calling this too early");

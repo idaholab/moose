@@ -215,7 +215,7 @@ PerfGraph::push(const PerfID id)
 
   _current_position++;
 
-  if (_current_position >= MAX_STACK_SIZE)
+  if (_current_position >= MOOSE_MAX_STACK_SIZE)
     mooseError("PerfGraph is out of stack space!");
 
   _stack[_current_position] = new_node;
@@ -412,7 +412,7 @@ void
 PerfGraph::printHeaviestBranch(const ConsoleStream & console)
 {
   console << "\nHeaviest Branch:\n";
-  treeTable(MAX_STACK_SIZE, /* heaviest = */ true).print(console);
+  treeTable(MOOSE_MAX_STACK_SIZE, /* heaviest = */ true).print(console);
 }
 
 void
