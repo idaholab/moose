@@ -137,6 +137,12 @@ private:
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;
 
+  /// Whether to use the porous medium treatment
+  const bool _porous_medium_treatment;
+  /// Name of the porosity functor
+  const MooseFunctorName _porosity_name;
+  const MooseFunctorName _flow_porosity_functor_name;
+
   /// Velocity names
   const std::vector<std::string> _velocity_names;
   /// Pressure name
@@ -155,6 +161,8 @@ private:
   const MooseEnum _velocity_interpolation;
   /// The momentum face interpolation method for being advected
   const MooseEnum _momentum_face_interpolation;
+  /// Whether to use the correction term for non-orthogonality
+  const bool _non_orthogonal_correction;
 
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;

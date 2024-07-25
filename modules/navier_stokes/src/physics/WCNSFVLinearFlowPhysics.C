@@ -64,7 +64,6 @@ WCNSFVLinearFlowPhysics::validParams()
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
   params.transferParam<bool>(NSFVBase::validParams(), "porous_medium_treatment");
   params.transferParam<MooseFunctorName>(NSFVBase::validParams(), "porosity");
-  params.transferParam<unsigned short>(NSFVBase::validParams(), "porosity_smoothing_layers");
 
   // Momentum boundary conditions are important for advection problems as well
   params += NSFVBase::commonMomentumBoundaryTypesParams();
@@ -124,10 +123,8 @@ WCNSFVLinearFlowPhysics::WCNSFVLinearFlowPhysics(const InputParameters & paramet
     _compressibility(getParam<MooseEnum>("compressibility")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
     _porosity_name(getParam<MooseFunctorName>("porosity")),
-    _flow_porosity_functor_name(isParamValid("porosity_smoothing_layers") &&
-                                        getParam<unsigned short>("porosity_smoothing_layers")
-                                    ? NS::smoothed_porosity
-                                    : _porosity_name),
+    // Note: porosity smoothing not yet supported
+    _flow_porosity_functor_name(_porosity_name),
     _velocity_names(
         isParamValid("velocity_variable")
             ? getParam<std::vector<std::string>>("velocity_variable")
@@ -148,6 +145,7 @@ WCNSFVLinearFlowPhysics::WCNSFVLinearFlowPhysics(const InputParameters & paramet
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
+    _non_orthogonal_correction(getParam<bool>("orthogonality_correction")),
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
@@ -160,36 +158,6 @@ WCNSFVLinearFlowPhysics::WCNSFVLinearFlowPhysics(const InputParameters & paramet
   if (_flux_inlet_directions.size())
     checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
                                                                "flux_inlet_directions");
-
-  // Most likely to be a mistake
-  if (getParam<bool>("pin_pressure") &&
-      getParam<std::vector<MooseFunctorName>>("pressure_functors").size())
-    paramError("pin_pressure", "Cannot pin the pressure if a pressure boundary exists");
-
-  // Friction parameter checks
-  if (_friction_blocks.size())
-    checkVectorParamsSameLength<std::vector<SubdomainName>, std::vector<std::string>>(
-        "friction_blocks", "friction_types");
-  checkTwoDVectorParamsSameLength<std::string, std::string>("friction_types", "friction_coeffs");
-
-  // Pressure pin checks
-  checkSecondParamSetOnlyIfFirstOneTrue("pin_pressure", "pinned_pressure_type");
-  checkSecondParamSetOnlyIfFirstOneTrue("pin_pressure", "pinned_pressure_value");
-  if (getParam<bool>("pin_pressure"))
-  {
-    if ((std::string(getParam<MooseEnum>("pinned_pressure_type")).find("point") !=
-         std::string::npos) &&
-        !isParamSetByUser("pinned_pressure_point"))
-      paramError("pinned_pressure_point",
-                 "This parameter must be set to specify the pinned pressure point");
-    else if ((std::string(getParam<MooseEnum>("pinned_pressure_type")).find("point") ==
-              std::string::npos) &&
-             isParamSetByUser("pinned_pressure_point"))
-      paramError("pinned_pressure_point",
-                 "This parameter should not be given by the user with the corresponding "
-                 "pinned_pressure_type setting: " +
-                     std::string(getParam<MooseEnum>("pinned_pressure_type")) + ".");
-  }
 
   // Boussinesq parameters checks
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "ref_temperature");
@@ -209,7 +177,6 @@ WCNSFVLinearFlowPhysics::WCNSFVLinearFlowPhysics(const InputParameters & paramet
 
   // Porous media parameters
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");
-  checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity_smoothing_layers");
 
   if (_define_variables && _porous_medium_treatment)
     for (const auto & name : NS::velocity_vector)
@@ -302,6 +269,7 @@ WCNSFVLinearFlowPhysics::addNonlinearVariables()
   // Velocities
   for (const auto d : make_range(dimension()))
   {
+    // TODO switch to linear
     if (nonlinearVariableExists(_velocity_names[d], true))
       checkBlockRestrictionIdentical(_velocity_names[d],
                                      getProblem().getVariable(0, _velocity_names[d]).blocks());
@@ -366,10 +334,6 @@ WCNSFVLinearFlowPhysics::addFVKernels()
   // Momentum equation: gravity source term
   addINSMomentumGravityKernels();
 
-  // Momentum equation: friction kernels
-  if (_friction_types.size())
-    mooseError("Momentum friction terms not implemented");
-
   // Momentum equation: boussinesq approximation
   if (getParam<bool>("boussinesq_approximation"))
     addINSMomentumBoussinesqKernels();
@@ -388,7 +352,7 @@ WCNSFVLinearFlowPhysics::addINSPressureCorrectionKernels()
     params.set<MooseFunctorName>("diffusion_tensor") = "Ainv";
     params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
 
-    getProblem().addFVKernel(kernel_type, kernel_name, params);
+    getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
   }
   {
     std::string kernel_type = "LinearFVDivergence";
@@ -400,68 +364,52 @@ WCNSFVLinearFlowPhysics::addINSPressureCorrectionKernels()
     params.set<MooseFunctorName>("face_flux") = "HbyA";
     params.set<bool>("force_boundary_execution") = true;
 
-    getProblem().addFVKernel(kernel_type, kernel_name, params);
+    getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
   }
 }
 
 void
 WCNSFVLinearFlowPhysics::addINSMomentumFluxKernels()
 {
-  std::string kernel_type = "INSFVMomentumAdvection";
-  std::string kernel_name = prefix() + "ins_momentum_advection_";
-
-  if (_porous_medium_treatment)
-  {
-    kernel_type = "PINSFVMomentumAdvection";
-    kernel_name = prefix() + "pins_momentum_advection_";
-  }
+  const std::string u_names[3] = {"u", "v", "w"};
+  std::string kernel_type = "LinearWCNSFVMomentumFlux";
+  std::string kernel_name = prefix() + "ins_momentum_flux_";
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") = _momentum_face_interpolation;
-  if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
-  params.applySpecificParameters(parameters(), INSFVMomentumAdvection::listOfCommonParams());
+  params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
+
+  for (unsigned int i = 0; i < dimension(); ++i)
+    params.set<MooseFunctorName>(u_names[i]) = _velocity_names[i];
 
   for (const auto d : make_range(dimension()))
   {
     params.set<NonlinearVariableName>("variable") = _velocity_names[d];
     params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+    getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 }
 
 void
 WCNSFVLinearFlowPhysics::addINSMomentumPressureKernels()
 {
-  std::string kernel_type = "INSFVMomentumPressure";
+  std::string kernel_type = "LinearFVMomentumPressure";
   std::string kernel_name = prefix() + "ins_momentum_pressure_";
-
-  if (_porous_medium_treatment)
-  {
-    kernel_type = "PINSFVMomentumPressure";
-    kernel_name = prefix() + "pins_momentum_pressure_";
-  }
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>("pressure") = _pressure_name;
-  params.set<bool>("correct_skewness") =
-      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected";
-  if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
-  params.set<std::vector<TagName>>("extra_vector_tags") = {_pressure_tag};
 
   for (const auto d : make_range(dimension()))
   {
     params.set<MooseEnum>("momentum_component") = NS::directions[d];
     params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+    getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 }
 
@@ -910,16 +858,6 @@ WCNSFVLinearFlowPhysics::addMaterials()
     addNonPorousMediumSpeedMaterial();
 }
 
-bool
-WCNSFVLinearFlowPhysics::hasForchheimerFriction() const
-{
-  for (const auto block_i : index_range(_friction_types))
-    for (const auto type_i : index_range(_friction_types[block_i]))
-      if (MooseUtils::toUpper(_friction_types[block_i][type_i]) == "FORCHHEIMER")
-        return true;
-  return false;
-}
-
 void
 WCNSFVLinearFlowPhysics::addPorousMediumSpeedMaterial()
 {
@@ -1016,8 +954,6 @@ WCNSFVLinearFlowPhysics::getNumberAlgebraicGhostingLayersNeeded() const
       getParam<MooseEnum>("momentum_face_interpolation") == "skewness-corrected" ||
       getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected")
     ghost_layers = std::max(ghost_layers, (unsigned short)3);
-  if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
-    ghost_layers = std::max(getParam<unsigned short>("porosity_smoothing_layers"), ghost_layers);
   return ghost_layers;
 }
 
@@ -1025,9 +961,6 @@ void
 WCNSFVLinearFlowPhysics::addRhieChowUserObjects()
 {
   mooseAssert(dimension(), "0-dimension not supported");
-
-  // This means we are solving for velocity. We dont need external RC coefficients
-  bool has_flow_equations = nonlinearVariableExists(_velocity_names[0], false);
 
   // First make sure that we only add this object once
   // Potential cases:
@@ -1067,9 +1000,8 @@ WCNSFVLinearFlowPhysics::addRhieChowUserObjects()
     params.set<VariableName>(u_names[d]) = _velocity_names[d];
 
   params.set<VariableName>("pressure") = _pressure_name;
-  params.set<KernelName>("p_diffusion_kernel") = prefix() + "p_diffusion";
+  params.set<std::string>("p_diffusion_kernel") = prefix() + "p_diffusion";
 
-  params.applySpecificParameters(parameters(), RhieChowMassFlux::validParams());
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }
 
@@ -1130,57 +1062,10 @@ WCNSFVLinearFlowPhysics::getFlowVariableName(const std::string & short_name) con
 MooseFunctorName
 WCNSFVLinearFlowPhysics::getPorosityFunctorName(bool smoothed) const
 {
-  mooseAssert(!smoothed || !_porosity_smoothing_layers,
-              "Smooth porosity cannot be used without the smoothing treatment turned on");
   if (smoothed)
     return _flow_porosity_functor_name;
   else
     return _porosity_name;
-}
-
-MooseFunctorName
-WCNSFVLinearFlowPhysics::getLinearFrictionCoefName() const
-{
-  // Check all blocks. If more than one block, they would need to be consolidated #include in
-  // a single functor material. We won't implement this for now
-  if (_friction_types.empty())
-    return "";
-  else if (_friction_types.size() == 1)
-  {
-    for (const auto & type_i : index_range(_friction_types[0]))
-    {
-      const auto upper_name = MooseUtils::toUpper(_friction_types[0][type_i]);
-      if (upper_name == "DARCY")
-        return _friction_coeffs[0][type_i];
-    }
-    // No linear type found
-    return "";
-  }
-  else if (_friction_types.size() > 1)
-  {
-    bool linear_friction_factor_found = false;
-    MooseFunctorName linear_friction_factor;
-    for (const auto block_i : index_range(_friction_types))
-      for (const auto type_i : index_range(_friction_types[block_i]))
-      {
-        const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
-        if (upper_name == "DARCY" && !linear_friction_factor_found)
-        {
-          linear_friction_factor_found = true;
-          linear_friction_factor = _friction_types[block_i][type_i];
-        }
-        else if (upper_name == "DARCY" && !linear_friction_factor_found)
-          if (linear_friction_factor != _friction_types[block_i][type_i])
-            mooseError("Multiple linear friction factor with different names have been specified. "
-                       "This is not currently supported as a single name should be retrievable. "
-                       "Use a PiecewiseByBlockFunctorMaterial to consolidate them.");
-      }
-    if (linear_friction_factor_found)
-      return linear_friction_factor;
-    else
-      return "";
-  }
-  mooseError("Should not get here");
 }
 
 const WCNSFVTurbulencePhysics *
