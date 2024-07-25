@@ -203,8 +203,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   {
     if (_homogenized)
     {
-      // If flexible assembly stitching is invoked and this is a homogeneous assembly mesh, do not call mesh subgenerators here
-      // The homogeneous assembly mesh should be created entirely in generateFlexibleAssemblyBoundaries()
+      // If flexible assembly stitching is invoked and this is a homogeneous assembly mesh, do not
+      // call mesh subgenerators here The homogeneous assembly mesh should be created entirely in
+      // generateFlexibleAssemblyBoundaries()
       bool skip_assembly_generation = _is_assembly && use_flexible_stitching;
 
       auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
@@ -321,9 +322,11 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         }
       }
 
-      // If flexible assembly stitching is invoked and this is an assembly mesh with only a background region, do not call mesh subgenerators here
-      // This assembly mesh should be created entirely in generateFlexibleAssemblyBoundaries()
-      bool skip_assembly_generation = _is_assembly && use_flexible_stitching && _intervals.size() == 1;
+      // If flexible assembly stitching is invoked and this is an assembly mesh with only a
+      // background region, do not call mesh subgenerators here This assembly mesh should be created
+      // entirely in generateFlexibleAssemblyBoundaries()
+      bool skip_assembly_generation =
+          _is_assembly && use_flexible_stitching && _intervals.size() == 1;
 
       // Generate Cartesian/hex pin using PolygonConcentricCircleMeshGenerator
       {
@@ -393,7 +396,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       }
     }
 
-    // For pin acting as assembly, modify outermost mesh interval to enable flexible assembly stitching
+    // For pin acting as assembly, modify outermost mesh interval to enable flexible assembly
+    // stitching
     if (_is_assembly && use_flexible_stitching)
     {
       generateFlexibleAssemblyBoundaries();
@@ -479,16 +483,17 @@ PinMeshGenerator::generateFlexibleAssemblyBoundaries()
   SubdomainName outermost_block_name;
   bool has_single_mesh_interval;
 
-  // Assemblies that invoke this method are either homogenized or have a single pin. First check if the assembly only has a single region.
-  // Otherwise, determine the outermost region for deletion
+  // Assemblies that invoke this method are either homogenized or have a single pin. First check if
+  // the assembly only has a single region. Otherwise, determine the outermost region for deletion
   if (_homogenized || (_intervals.size() == 1))
   {
-    outermost_block_name = "RGMB_PIN" + std::to_string(_pin_type)+ "_R0";
+    outermost_block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R0";
     has_single_mesh_interval = true;
   }
   else
   {
-    outermost_block_name = "RGMB_PIN" + std::to_string(_pin_type)+ "_R" + std::to_string(_intervals.size() - 1);
+    outermost_block_name =
+        "RGMB_PIN" + std::to_string(_pin_type) + "_R" + std::to_string(_intervals.size() - 1);
     has_single_mesh_interval = false;
 
     // Invoke BlockDeletionGenerator to delete outermost mesh interval of assembly
@@ -514,13 +519,15 @@ PinMeshGenerator::generateFlexibleAssemblyBoundaries()
     }
     params.set<bool>("use_auto_area_func") = true;
     params.set<MooseEnum>("boundary_type") = (_mesh_geometry == "Hex") ? "HEXAGON" : "CARTESIAN";
-    params.set<unsigned int>("boundary_sectors") = getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
+    params.set<unsigned int>("boundary_sectors") =
+        getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
     params.set<double>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
     params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
-    params.set<std::string>("external_boundary_name") = "outer_assembly_" + std::to_string(_pin_type);
+    params.set<std::string>("external_boundary_name") =
+        "outer_assembly_" + std::to_string(_pin_type);
     params.set<SubdomainName>("background_subdomain_name") = outermost_block_name + "_TRI";
-    // Allocate block ID 9998 for triangulated outer region, since 9999 is reserved for tri elements when
-    // quad_center_elements is false
+    // Allocate block ID 9998 for triangulated outer region, since 9999 is reserved for tri elements
+    // when quad_center_elements is false
     params.set<unsigned short>("background_subdomain_id") = 9998;
 
     addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);

@@ -25,7 +25,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  // Delete outermost mesh interval of single-pin / homogenized assembly and replace with triangulated mesh with fixed number of nodes at outer boundary
+  // Delete outermost mesh interval of single-pin / homogenized assembly and replace with
+  // triangulated mesh with fixed number of nodes at outer boundary
   void generateFlexibleAssemblyBoundaries();
 
   // Define metadata associated with PinMeshGenerator

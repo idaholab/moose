@@ -190,9 +190,11 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[i]) != reactor_params)
       mooseError("The name of all reactor_params objects should be identical across all pins in "
                  "the input assemblies.\n");
-    if ((getMeshProperty<bool>(RGMB::is_homogenized, _inputs[i]) != assembly_homogenization) && !getMeshProperty<bool>(RGMB::flexible_assembly_stitching, reactor_params))
-      mooseError(
-          "In order to stitch heterogeneous assemblies with homogeneous assemblies in CoreMeshGenerator, ReactorMeshParams/flexible_assembly_stitching should be set to true\n");
+    if ((getMeshProperty<bool>(RGMB::is_homogenized, _inputs[i]) != assembly_homogenization) &&
+        !getMeshProperty<bool>(RGMB::flexible_assembly_stitching, reactor_params))
+      mooseError("In order to stitch heterogeneous assemblies with homogeneous assemblies in "
+                 "CoreMeshGenerator, ReactorMeshParams/flexible_assembly_stitching should be set "
+                 "to true\n");
 
     // Check assembly_types across constituent assemblies are uniquely defined
     const auto assembly_type = getMeshProperty<subdomain_id_type>(RGMB::assembly_type, _inputs[i]);
@@ -277,9 +279,14 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   // No subgenerators will be called if option to bypass mesh generators is enabled
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
-    // Check whether flexible stitching should be used for constituent assemblies and throw a warning if flexible stitching option is not enabled
-    if (!getReactorParam<bool>(RGMB::flexible_assembly_stitching) && constituentAssembliesNeedFlexibleStiching())
-      mooseWarning("Constituent assemblies do not share the same number of nodes at the outer boundary. In order to ensure that output mesh does not having hanging nodes, a flexible stitching approach should be used by setting ReactorMeshParams/flexible_assembly_stitching = true.");
+    // Check whether flexible stitching should be used for constituent assemblies and throw a
+    // warning if flexible stitching option is not enabled
+    if (!getReactorParam<bool>(RGMB::flexible_assembly_stitching) &&
+        constituentAssembliesNeedFlexibleStiching())
+      mooseWarning("Constituent assemblies do not share the same number of nodes at the outer "
+                   "boundary. In order to ensure that output mesh does not having hanging nodes, a "
+                   "flexible stitching approach should be used by setting "
+                   "ReactorMeshParams/flexible_assembly_stitching = true.");
 
     // Declare that all of the meshes in the "inputs" parameter are to be used by
     // a sub mesh generator.
@@ -629,25 +636,31 @@ CoreMeshGenerator::constituentAssembliesNeedFlexibleStiching()
   unsigned int n_constituent_pins = 0;
   unsigned int n_pin_sectors = 0;
 
-  // Loop through all non-dummy input assemblies. Flexible assembly stitching is needed if one of the following criteria are met:
+  // Loop through all non-dummy input assemblies. Flexible assembly stitching is needed if one of
+  // the following criteria are met:
   // 1. The number of constituent pins within the assembly does not match with another assembly
   // 2. The value of is_single_pin and is_homogenized metadata do not agree with another assembly
-  // 3. The number of sectors of the constituent pins of an assembly do not match with the constituent pins of another assembly
+  // 3. The number of sectors of the constituent pins of an assembly do not match with the
+  // constituent pins of another assembly
   for (const auto i : index_range(_inputs))
   {
     // Skip if assembly name is equal to dummy assembly name
     if (_inputs[i] == _empty_key)
       continue;
 
-    // Compute total number of constituent pins in assembly, as well as the number of sectors per side for each pin
-    // Note: number of sectors per side is defined uniformly across constituent pins of an assembly, so only first one needs to be checked
+    // Compute total number of constituent pins in assembly, as well as the number of sectors per
+    // side for each pin Note: number of sectors per side is defined uniformly across constituent
+    // pins of an assembly, so only first one needs to be checked
     unsigned int total_pins = 0;
     unsigned int pin_sectors_per_side = 0;
     if (!getMeshProperty<bool>(RGMB::is_single_pin, _inputs[i]))
     {
-      const auto first_pin_name = getMeshProperty<std::vector<std::string>>(RGMB::pin_names, _inputs[i])[0];
-      pin_sectors_per_side = getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", first_pin_name + "_2D")[0];
-      const auto pin_lattice = getMeshProperty<std::vector<std::vector<int>>>(RGMB::pin_lattice, _inputs[i]);
+      const auto first_pin_name =
+          getMeshProperty<std::vector<std::string>>(RGMB::pin_names, _inputs[i])[0];
+      pin_sectors_per_side = getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
+                                                                        first_pin_name + "_2D")[0];
+      const auto pin_lattice =
+          getMeshProperty<std::vector<std::vector<int>>>(RGMB::pin_lattice, _inputs[i]);
       for (const auto i : index_range(pin_lattice))
         total_pins += pin_lattice[i].size();
     }
@@ -663,7 +676,8 @@ CoreMeshGenerator::constituentAssembliesNeedFlexibleStiching()
       {
         // Assembly with single constituent pin
         total_pins = 1;
-        pin_sectors_per_side = getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", _inputs[i] + "_2D")[0];
+        pin_sectors_per_side = getMeshProperty<std::vector<unsigned int>>(
+            "num_sectors_per_side_meta", _inputs[i] + "_2D")[0];
       }
     }
 

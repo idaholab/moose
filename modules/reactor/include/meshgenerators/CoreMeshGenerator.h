@@ -29,7 +29,8 @@ protected:
   // Define metadata associated with CoreMeshGenerator
   void generateMetadata();
 
-  // Check constituent assemblies and determine whether they should be stitched into a core using flexible stitching
+  // Check constituent assemblies and determine whether they should be stitched into a core using
+  // flexible stitching
   bool constituentAssembliesNeedFlexibleStiching();
 
   ///The names of the assemblies that compose the core

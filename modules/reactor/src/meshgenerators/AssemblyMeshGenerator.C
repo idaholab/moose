@@ -498,12 +498,15 @@ AssemblyMeshGenerator::generateMetadata()
 void
 AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
 {
-  // Assemblies that invoke this method have constituent pin lattice, delete outermost background or duct region (if present)
+  // Assemblies that invoke this method have constituent pin lattice, delete outermost background or
+  // duct region (if present)
   SubdomainName block_to_delete = "";
   if (_background_region_id.size() == 0)
-    mooseError("Attempting to use flexible stitching on assembly " + name() + " that does not have a background region. This is not yet supported.");
+    mooseError("Attempting to use flexible stitching on assembly " + name() +
+               " that does not have a background region. This is not yet supported.");
   const auto radial_index = _duct_region_ids.size() == 0 ? 0 : _duct_region_ids[0].size();
-  block_to_delete = "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(radial_index);
+  block_to_delete =
+      "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(radial_index);
 
   {
     // Invoke BlockDeletionGenerator to delete outermost mesh interval of assembly
@@ -523,7 +526,8 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<std::vector<unsigned int>>("extra_positions_mg_indices") = {0};
     params.set<bool>("use_auto_area_func") = true;
     params.set<MooseEnum>("boundary_type") = (_geom_type == "Hex") ? "HEXAGON" : "CARTESIAN";
-    params.set<unsigned int>("boundary_sectors") = getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
+    params.set<unsigned int>("boundary_sectors") =
+        getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
     params.set<double>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
     params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
     params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
