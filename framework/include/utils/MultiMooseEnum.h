@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "Moose.h"
 #include "MooseEnumBase.h"
+#include "MooseError.h"
 
 // C++ includes
 #include <vector>
@@ -47,14 +48,14 @@ public:
    * @param valid_names - a list of all possible values (names) for this enumeration
    * @param initialization_values - the value(s) to set this enumeration instance to
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
-   * it's range of initially defined values, allowing for the possiblity to add additional valid
+   * its range of initially defined values. A value of true allows the addition of valid
    * values to an object after it has been initialized.
    */
   MultiMooseEnum(std::string valid_names,
                  std::string initialization_values,
                  bool allow_out_of_range = false);
   // We need to explicitly define this version so MultiMooseEnum("one two", "one")
-  // doesn't implicitly convert "one" to a bool use use the 2-parameter constructor
+  // doesn't implicitly convert "one" to a bool and use the 2-parameter constructor
   MultiMooseEnum(std::string valid_names,
                  const char * initialization_values,
                  bool allow_out_of_range = false);
@@ -65,7 +66,7 @@ public:
    * any particular value.
    * @param valid_names - a list of all possible values (names) for this enumeration
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
-   * it's range of initially defined values, allowing for the possiblity to add additional valid
+   * its range of initially defined values. A value of true allows the addition of valid
    * values to an object after it has been initialized.
    */
   MultiMooseEnum(std::string valid_names, bool allow_out_of_range = false);
@@ -124,6 +125,9 @@ public:
   void eraseSetValue(const std::string & names);
   void eraseSetValue(const std::vector<std::string> & names);
   void eraseSetValue(const std::set<std::string> & names);
+  void erase(const std::string & names);
+  void erase(const std::vector<std::string> & names);
+  void erase(const std::set<std::string> & names);
   ///@}
 
   ///@{
@@ -137,6 +141,10 @@ public:
   void setAdditionalValue(const std::vector<std::string> & names);
   void setAdditionalValue(const std::set<std::string> & names);
   void setAdditionalValue(const MultiMooseEnum & other_enum);
+  void push_back(const std::string & names);
+  void push_back(const std::vector<std::string> & names);
+  void push_back(const std::set<std::string> & names);
+  void push_back(const MultiMooseEnum & other_enum);
   ///@}
 
   /**
@@ -156,9 +164,13 @@ public:
    */
   unsigned int get(unsigned int i) const;
 
+  ///@{
   /// get the current values cast to a vector of enum type T
   template <typename T>
   std::vector<T> getSetValueIDs() const;
+  template <typename T>
+  std::vector<T> getEnum() const;
+  ///@}
 
   ///@{
   /**
@@ -169,10 +181,13 @@ public:
   MooseEnumIterator end() const { return _current_values.end(); }
   ///@}
 
+  ///@{
   /**
    * Clear the MultiMooseEnum
    */
   void clearSetValues();
+  void clear();
+  ///@}
 
   /**
    * Return the number of active items in the MultiMooseEnum
@@ -192,22 +207,19 @@ public:
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MultiMooseEnum & obj);
 
-  // If left enabled, the following functions would add possible values
+  // The following functions would add possible values
   // (to _items) that an enumerated variable can take. However "+=" is not a
   // descriptive enough funtion name for this and should not be used in case
   // users get confused that the operator actually changes the set values of the
-  // variable (_current_values). We should re-implement this logic under a method
-  // with a more descirptive name to force users to be informed.
-  MooseEnumBase & operator+=(const std::string & name) = delete;
-  MooseEnumBase & operator+=(const std::initializer_list<std::string> & names) = delete;
+  // variable (_current_values). We have re-implemented this logic under a method
+  // with a more descirptive name to force users to be informed. These are deprecated.
+  MooseEnumBase & operator+=(const std::string & name);
+  MooseEnumBase & operator+=(const std::initializer_list<std::string> & names);
 
   // The following replaces operator+= with a more descriptive name
   /// Extends the range of possible values the variable can be set to
-  MooseEnumBase & addValidName(const std::string & name) { return MooseEnumBase::operator+=(name); }
-  MooseEnumBase & addValidName(const std::initializer_list<std::string> & names)
-  {
-    return MooseEnumBase::operator+=(names);
-  }
+  void addValidName(const std::string & name);
+  void addValidName(const std::initializer_list<std::string> & names);
 
 protected:
   /// Check whether any of the current values are deprecated when called
@@ -256,4 +268,12 @@ MultiMooseEnum::getSetValueIDs() const
   for (const auto & current_value : _current_values)
     enum_vec.push_back(static_cast<T>(current_value.id()));
   return enum_vec;
+}
+
+template <typename T>
+std::vector<T>
+MultiMooseEnum::getEnum() const
+{
+  mooseDeprecated("MultiMooseEnum::getEnum is deprecated, use MultiMooseEnum::getSetValueIDs");
+  return MultiMooseEnum::getSetValueIDs<T>();
 }
