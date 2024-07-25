@@ -92,7 +92,7 @@ private:
   unsigned int _stack_level;
 
   /// The current stack for what the print thread has seen
-  std::array<PerfGraph::SectionIncrement, MAX_STACK_SIZE> _print_thread_stack;
+  std::array<PerfGraph::SectionIncrement, MOOSE_MAX_STACK_SIZE> _print_thread_stack;
 
   /// The end of the execution list
   /// This is (safely) copied from PerfGraph so that it is consistent for an
