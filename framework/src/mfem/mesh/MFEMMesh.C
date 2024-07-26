@@ -25,12 +25,18 @@ MFEMMesh::~MFEMMesh() {}
 void
 MFEMMesh::buildMesh()
 {
+  TIME_SECTION("buildMesh", 2, "Reading Mesh");
+
   // Build a dummy MOOSE mesh to enable this class to work with other MOOSE classes.
-  buildDummyMesh();
+  buildDummyMooseMesh();
+
+  // Build the MFEM ParMesh from a serial MFEM mesh
+  mfem::Mesh mfem_ser_mesh(getFileName());
+  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mfem_ser_mesh);
 }
 
 void
-MFEMMesh::buildDummyMesh()
+MFEMMesh::buildDummyMooseMesh()
 {
   auto element = new Quad4;
   element->set_id() = 1;
@@ -51,44 +57,8 @@ MFEMMesh::buildDummyMesh()
   _mesh->prepare_for_use();
 }
 
-void
-MFEMMesh::buildMFEMMesh()
-{
-  _mfem_mesh = std::make_shared<mfem::Mesh>(getFileName());
-}
-
-void
-MFEMMesh::buildMFEMParMesh()
-{
-  _mfem_par_mesh =
-      std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, dynamic_cast<mfem::Mesh &>(getMFEMMesh()));
-  _mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
-}
-
-mfem::Mesh &
-MFEMMesh::getMFEMMesh()
-{
-  if (!_mfem_mesh)
-  {
-    buildMFEMMesh();
-  }
-
-  return *_mfem_mesh;
-}
-
-mfem::ParMesh &
-MFEMMesh::getMFEMParMesh()
-{
-  if (!_mfem_par_mesh)
-  {
-    buildMFEMParMesh();
-  }
-
-  return *_mfem_par_mesh;
-}
-
 std::unique_ptr<MooseMesh>
 MFEMMesh::safeClone() const
 {
-  return std::make_unique<MFEMMesh>(*this);
+  return _app.getFactory().copyConstruct(*this);
 }
