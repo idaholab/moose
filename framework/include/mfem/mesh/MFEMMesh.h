@@ -28,8 +28,7 @@
  * MFEMMesh
  *
  * MFEMMesh inherits a MOOSE mesh class which allows us to work with
- * other MOOSE objects. It contains pointers to an MFEM serial and MFEM parallel
- * mesh.
+ * other MOOSE objects. It contains a pointer to the parallel MFEM mesh.
  */
 class MFEMMesh : public FileMesh
 {
@@ -43,15 +42,13 @@ public:
   std::unique_ptr<MooseMesh> safeClone() const override;
 
   /**
-   * Accessors for the _mfem_mesh and _mfem_par_mesh objects. If the objects have
+   * Accessors for the _mfem_par_mesh object. If the mesh has
    * not been build, the methods will call the appropriate protected methods to
    * build them.
    */
-  mfem::Mesh & getMFEMMesh();
-  mfem::ParMesh & getMFEMParMesh();
-
+  mfem::ParMesh & getMFEMParMesh() { return *_mfem_par_mesh; };
   /**
-   * Calls buildDummyMesh.
+   * Build MFEM ParMesh and a placeholder MOOSE mesh.
    */
   void buildMesh() override;
 
@@ -59,22 +56,12 @@ protected:
   /**
    * Builds a placeholder mesh when no MOOSE mesh is required.
    */
-  void buildDummyMesh();
+  void buildDummyMooseMesh();
 
+private:
   /**
-   * Builds an MFEMMesh object from a file. Override in derived classes.
-   */
-  virtual void buildMFEMMesh();
-
-  /**
-   * Builds an MFEMParMesh object from a file. Override in derived classes.
-   */
-  virtual void buildMFEMParMesh();
-
-  /**
-   * Smart pointers to MFEMMesh and MFEMParMesh objects. Do not access directly.
+   * Smart pointers to mfem::ParMesh object. Do not access directly.
    * Use the accessors instead.
    */
-  std::shared_ptr<mfem::Mesh> _mfem_mesh;
-  std::shared_ptr<mfem::ParMesh> _mfem_par_mesh;
+  std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
 };
