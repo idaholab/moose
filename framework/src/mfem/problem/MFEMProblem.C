@@ -213,6 +213,31 @@ MFEMProblem::addFESpace(const std::string & user_object_name,
 }
 
 void
+MFEMProblem::addVariable(const std::string & var_type,
+                         const std::string & var_name,
+                         InputParameters & parameters)
+{
+  if (var_type == "MFEMVariable")
+  {
+    // Add MFEM variable directly.
+    FEProblemBase::addUserObject(var_type, var_name, parameters);
+  }
+  else
+  {
+    // Add MOOSE auxvariable.
+    FEProblemBase::addVariable(var_type, var_name, parameters);
+
+    // Add MFEM variable indirectly ("gridfunction").
+    InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
+    FEProblemBase::addUserObject("MFEMVariable", var_name, mfem_variable_params);
+  }
+
+  // Register gridfunction.
+  MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
+  mfem_problem->_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+}
+
+void
 MFEMProblem::addAuxVariable(const std::string & var_type,
                             const std::string & var_name,
                             InputParameters & parameters)
@@ -234,7 +259,6 @@ MFEMProblem::addAuxVariable(const std::string & var_type,
 
   // Register gridfunction.
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-
   mfem_problem->_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
 }
 
