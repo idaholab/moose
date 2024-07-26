@@ -21,7 +21,7 @@
   []
 []
 
-[AuxVariables]
+[Variables]
   [diffused]
     type = MFEMVariable
     fespace = H1FESpace

@@ -91,9 +91,16 @@ public:
                       InputParameters & parameters);
 
   /**
-   * Override of ExternalProblem::addAuxVariable. Uses ExternalProblem::addAuxVariable to set the
-   * Moose aux var, and contains additional code to create a corresponding MFEM grid function to be
-   * used in the MFEM solve.
+   * Override of ExternalProblem::addVariable. Sets a
+   * MFEM grid function to be used in the MFEM solve.
+   */
+  void addVariable(const std::string & var_type,
+                   const std::string & var_name,
+                   InputParameters & parameters) override;
+
+  /**
+   * Override of ExternalProblem::addAuxVariable. Sets a
+   * MFEM grid function to be used in the MFEM solve.
    */
   void addAuxVariable(const std::string & var_type,
                       const std::string & var_name,
