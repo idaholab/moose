@@ -50,10 +50,10 @@ private:
   const unsigned int & _num_tries;
 
   /// Storage for all the proposed samples
-  std::vector<std::vector<Real>> _inputs_all;
+  std::vector<std::vector<Real>> _inputs_test;
 
   /// Storage for all the proposed variances
-  std::vector<Real> _var_all;
+  std::vector<Real> _var_test;
 
   /// A temporary vector to facilitate the sampling
   std::vector<Real> _sample_vector;
