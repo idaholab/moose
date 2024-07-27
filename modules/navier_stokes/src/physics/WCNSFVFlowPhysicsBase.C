@@ -60,10 +60,8 @@ WCNSFVFlowPhysicsBase::validParams()
   // Spatial discretization scheme
   // Specify the numerical schemes for interpolations of velocity and pressure
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "velocity_interpolation");
-  params.transferParam<MooseEnum>(NSFVBase::validParams(), "pressure_face_interpolation");
-  params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_face_interpolation");
-  params.transferParam<MooseEnum>(NSFVBase::validParams(), "mass_advection_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_advection_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "pressure_two_term_bc_expansion");
   params.transferParam<Real>(INSFVMomentumAdvection::validParams(), "characteristic_speed");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>("mu_interp_method",
@@ -80,6 +78,9 @@ WCNSFVFlowPhysicsBase::validParams()
   params.addParamNamesToGroup("outlet_boundaries momentum_outlet_types pressure_functors",
                               "Outlet boundary conditions");
   params.addParamNamesToGroup("wall_boundaries momentum_wall_types", "Wall boundary conditions");
+  params.addParamNamesToGroup(
+      "velocity_interpolation momentum_advection_interpolation pressure_two_term_bc_expansion",
+      "Numerical scheme");
 
   // TODO Add default preconditioning and move scaling parameters to a preconditioning group
   params.addParamNamesToGroup("thermal_expansion", "Gravity treatment");
@@ -93,6 +94,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
     _compressibility(getParam<MooseEnum>("compressibility")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
     _porosity_name(getParam<MooseFunctorName>("porosity")),
+    _flow_porosity_functor_name(_porosity_name),
     _velocity_names(
         isParamValid("velocity_variable")
             ? getParam<std::vector<std::string>>("velocity_variable")
@@ -112,7 +114,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                               : getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
-    _momentum_face_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
+    _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
@@ -315,11 +317,6 @@ unsigned short
 WCNSFVFlowPhysicsBase::getNumberAlgebraicGhostingLayersNeeded() const
 {
   unsigned short ghost_layers = 2;
-  if ((_porous_medium_treatment &&
-       getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic") ||
-      getParam<MooseEnum>("momentum_face_interpolation") == "skewness-corrected" ||
-      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected")
-    ghost_layers = std::max(ghost_layers, (unsigned short)3);
   return ghost_layers;
 }
 

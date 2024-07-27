@@ -52,12 +52,10 @@ WCNSFVFlowPhysics::validParams()
 
   // Spatial discretization scheme
   // Specify the numerical schemes for interpolations of velocity and pressure
-  params.transferParam<MooseEnum>(NSFVBase::validParams(), "velocity_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "pressure_face_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_face_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "mass_advection_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_advection_interpolation");
-  params.transferParam<bool>(NSFVBase::validParams(), "pressure_two_term_bc_expansion");
   params.transferParam<bool>(NSFVBase::validParams(),
                              "pressure_allow_expansion_on_bernoulli_faces");
   params.transferParam<bool>(NSFVBase::validParams(), "momentum_two_term_bc_expansion");
@@ -77,21 +75,16 @@ WCNSFVFlowPhysics::validParams()
       "porosity_interface_pressure_treatment pressure_allow_expansion_on_bernoulli_faces "
       "porosity_smoothing_layers use_friction_correction consistent_scaling",
       "Flow medium discontinuity treatment");
-  params.addParamNamesToGroup(
-      "velocity_interpolation pressure_face_interpolation momentum_face_interpolation "
-      "mass_advection_interpolation momentum_advection_interpolation "
-      "pressure_two_term_bc_expansion momentum_two_term_bc_expansion mass_scaling momentum_scaling",
-      "Numerical scheme");
+  params.addParamNamesToGroup("pressure_face_interpolation momentum_face_interpolation "
+                              "mass_advection_interpolation momentum_advection_interpolation "
+                              "momentum_two_term_bc_expansion mass_scaling momentum_scaling",
+                              "Numerical scheme");
 
   return params;
 }
 
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVFlowPhysicsBase(parameters),
-    _flow_porosity_functor_name(isParamValid("porosity_smoothing_layers") &&
-                                        getParam<unsigned short>("porosity_smoothing_layers")
-                                    ? NS::smoothed_porosity
-                                    : _porosity_name),
     _porosity_smoothing_layers(isParamValid("porosity_smoothing_layers")
                                    ? getParam<unsigned short>("porosity_smoothing_layers")
                                    : 0),
@@ -99,6 +92,11 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     _friction_types(getParam<std::vector<std::vector<std::string>>>("friction_types")),
     _friction_coeffs(getParam<std::vector<std::vector<std::string>>>("friction_coeffs"))
 {
+  _flow_porosity_functor_name = isParamValid("porosity_smoothing_layers") &&
+                                        getParam<unsigned short>("porosity_smoothing_layers")
+                                    ? NS::smoothed_porosity
+                                    : _porosity_name;
+
   // Most likely to be a mistake
   if (getParam<bool>("pin_pressure") &&
       getParam<std::vector<MooseFunctorName>>("pressure_functors").size())
@@ -422,7 +420,7 @@ WCNSFVFlowPhysics::addINSMomentumAdvectionKernels()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") = _momentum_face_interpolation;
+  params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
   params.applySpecificParameters(parameters(), INSFVMomentumAdvection::listOfCommonParams());
@@ -1064,6 +1062,11 @@ WCNSFVFlowPhysics::getNumberAlgebraicGhostingLayersNeeded() const
   auto ghost_layers = WCNSFVFlowPhysicsBase::getNumberAlgebraicGhostingLayersNeeded();
   if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
     ghost_layers = std::max(getParam<unsigned short>("porosity_smoothing_layers"), ghost_layers);
+  if ((_porous_medium_treatment &&
+       getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic") ||
+      getParam<MooseEnum>("momentum_face_interpolation") == "skewness-corrected" ||
+      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected")
+    ghost_layers = std::max(ghost_layers, (unsigned short)3);
   return ghost_layers;
 }
 

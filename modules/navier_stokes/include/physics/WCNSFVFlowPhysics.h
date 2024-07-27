@@ -72,8 +72,6 @@ private:
   /// for scalar or temperature advection by auxiliary variables
   void checkRhieChowFunctorsDefined() const;
 
-  /// The name of the functor for the smoothed porosity field
-  const MooseFunctorName _flow_porosity_functor_name;
   /// The number of smoothing layers if that treatment is used on porosity
   const unsigned _porosity_smoothing_layers;
 

@@ -37,6 +37,10 @@ WCNSFVLinearFlowPhysics::validParams()
   params.set<MooseFunctorName>("porosity") = "1";
   params.suppressParameter<MooseFunctorName>("porosity");
 
+  // No other options so far
+  params.set<MooseEnum>("velocity_interpolation") = "rc";
+  params.suppressParameter<MooseEnum>("velocity_interpolation");
+
   return params;
 }
 
@@ -191,7 +195,7 @@ WCNSFVLinearFlowPhysics::addINSMomentumFluxKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") = _momentum_face_interpolation;
+  params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
 
   for (unsigned int i = 0; i < dimension(); ++i)
@@ -389,6 +393,7 @@ WCNSFVLinearFlowPhysics::addINSOutletBC()
   const std::string u_names[3] = {"u", "v", "w"};
   for (const auto & [outlet_bdy, momentum_outlet_type] : _momentum_outlet_types)
   {
+    // Zero tangeantial gradient condition on velocity
     if (momentum_outlet_type == "zero-gradient" || momentum_outlet_type == "fixed-pressure" ||
         momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
@@ -405,6 +410,7 @@ WCNSFVLinearFlowPhysics::addINSOutletBC()
       }
     }
 
+    // Fixed pressure condition, coming in the pressure correction equation
     if (momentum_outlet_type == "fixed-pressure" ||
         momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
@@ -455,6 +461,17 @@ WCNSFVLinearFlowPhysics::addINSWallsBC()
       // Placeholder
       mooseError("Unsupported boundary condition type: " + _momentum_wall_types[bc_ind]);
     }
+  }
+
+  if (getParam<bool>("pressure_two_term_bc_expansion"))
+  {
+    const std::string bc_type = "LinearFVExtrapolatedPressureBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<std::vector<BoundaryName>>("boundary") = _wall_boundaries;
+    params.set<LinearVariableName>("variable") = _pressure_name;
+    params.set<bool>("use_two_term_expansion") = true;
+    getProblem().addLinearFVBC(
+        bc_type, _pressure_name + "_extrapolation_" + Moose::stringify(_wall_boundaries), params);
   }
 }
 

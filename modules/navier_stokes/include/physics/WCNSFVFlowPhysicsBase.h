@@ -54,10 +54,10 @@ public:
   const MooseFunctorName & dynamicViscosityName() const { return _dynamic_viscosity_name; }
   /// Get the face interpolation method for velocity
   const MooseEnum & getVelocityFaceInterpolationMethod() const { return _velocity_interpolation; }
-  /// Get the face interpolation method for velocity
+  /// Get the face interpolation method for momentum in the advection term
   const MooseEnum & getMomentumFaceInterpolationMethod() const
   {
-    return _momentum_face_interpolation;
+    return _momentum_advection_interpolation;
   }
   /// Get the inlet boundaries
   const std::vector<BoundaryName> & getInletBoundaries() const { return _inlet_boundaries; }
@@ -139,7 +139,8 @@ protected:
   const bool _porous_medium_treatment;
   /// Name of the porosity functor
   const MooseFunctorName _porosity_name;
-  const MooseFunctorName _flow_porosity_functor_name;
+  /// Name of the porosity functor for the flow equations (if smoothed)
+  MooseFunctorName _flow_porosity_functor_name;
 
   /// Velocity names
   const std::vector<std::string> _velocity_names;
@@ -158,7 +159,7 @@ protected:
   /// The velocity face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
   /// The momentum face interpolation method for being advected
-  const MooseEnum _momentum_face_interpolation;
+  const MooseEnum _momentum_advection_interpolation;
 
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;
