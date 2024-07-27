@@ -33,8 +33,8 @@ BayesianActiveLearningSampler::BayesianActiveLearningSampler(const InputParamete
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
     _num_tries(getParam<unsigned int>("num_tries"))
 {
-  _inputs_all.resize(_num_tries, std::vector<Real>(_priors.size()));
-  _var_all.resize(_num_tries);
+  _inputs_test.resize(_num_tries, std::vector<Real>(_priors.size()));
+  _var_test.resize(_num_tries);
   _sample_vector.resize(_priors.size());
 }
 
@@ -48,13 +48,13 @@ BayesianActiveLearningSampler::fillVector(std::vector<Real> & vector, const unsi
 const std::vector<std::vector<Real>> &
 BayesianActiveLearningSampler::getSampleTries() const
 {
-  return _inputs_all;
+  return _inputs_test;
 }
 
 const std::vector<Real> &
 BayesianActiveLearningSampler::getVarSampleTries() const
 {
-  return _var_all;
+  return _var_test;
 }
 
 void
@@ -73,9 +73,9 @@ BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value)
     }
     else
     {
-      _new_samples[i] = _inputs_all[_sorted_indices[i]];
+      _new_samples[i] = _inputs_test[_sorted_indices[i]];
       if (_var_prior)
-        _new_var_samples[i] = _var_all[_sorted_indices[i]];
+        _new_var_samples[i] = _var_test[_sorted_indices[i]];
     }
   }
 
@@ -84,8 +84,8 @@ BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value)
   for (dof_id_type i = 0; i < _num_tries; ++i)
   {
     fillVector(_sample_vector, seed_value);
-    _inputs_all[i] = _sample_vector;
+    _inputs_test[i] = _sample_vector;
     if (_var_prior)
-      _var_all[i] = _var_prior->quantile(getRand(seed_value));
+      _var_test[i] = _var_prior->quantile(getRand(seed_value));
   }
 }
