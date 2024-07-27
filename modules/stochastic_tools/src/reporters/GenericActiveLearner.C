@@ -15,14 +15,16 @@ InputParameters
 GenericActiveLearner::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addClassDescription("Generic active learning using GP.");
+  params += ParallelAcquisitionInterface::validParams();
+  params.addClassDescription("A generic reporter to support parallel active learning: re-trains GP "
+                             "and picks the next best batch.");
   params.addRequiredParam<ReporterName>("output_value",
                                         "Value of the model output from the SubApp.");
   params.addParam<ReporterValueName>(
       "output_comm", "output_comm", "Modified value of the model output from this reporter class.");
   params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
   params.addRequiredParam<UserObjectName>("al_gp", "Active learning GP trainer.");
-  params.addRequiredParam<UserObjectName>("gp_evaluator", "Evaluate the trained GP.");
+  params.addRequiredParam<UserObjectName>("gp_evaluator", "Evaluator for the trained GP.");
   params.addParam<ReporterValueName>(
       "sorted_indices",
       "sorted_indices",
@@ -33,12 +35,16 @@ GenericActiveLearner::validParams()
       "The values of the acquistion function in the current iteration.");
   params.addParam<ReporterValueName>("convergence_value",
                                      "convergence_value",
-                                     "Value to measure convergence of the GPry algorithm.");
+                                     "Value to measure convergence of active learning.");
+  params.addRequiredParam<UserObjectName>("acquisition", "Name of the acquisition function.");
+  params.addParam<bool>("penalize_acquisition", true,
+                        "Set true to prevent clustering of the best batch inputs when operating in parallel.");
   return params;
 }
 
 GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
   : GeneralReporter(parameters),
+    ParallelAcquisitionInterface(parameters),
     SurrogateModelInterface(this),
     _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
     _output_comm(declareValue<std::vector<Real>>("output_comm")),
@@ -46,133 +52,101 @@ GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
     _al_sampler(dynamic_cast<const GenericActiveLearningSampler *>(&_sampler)),
     _sorted_indices(declareValue<std::vector<unsigned int>>(
         "sorted_indices", std::vector<unsigned int>(_al_sampler->getNumParallelProposals(), 0))),
-    _inputs_all(_al_sampler->getSampleTries()),
+    _inputs_test(_al_sampler->getSampleTries()),
     _al_gp(getUserObject<ActiveLearningGaussianProcess>("al_gp")),
     _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
-    _acquisition_function(declareValue<std::vector<Real>>("acquisition_function")),
+    _acquisition_obj(getParallelAcquisitionFunctionByName(
+        parameters.get<UserObjectName>("acquisition"))),
+    _acquisition_value(declareValue<std::vector<Real>>("acquisition_function")),
     _convergence_value(declareValue<Real>("convergence_value")),
+    _penalize_acquisition(getParam<bool>("penalize_acquisition")),
     _check_step(std::numeric_limits<int>::max()),
     _local_comm(_sampler.getLocalComm())
 {
-  // Check whether the selected sampler is an adaptive sampler or not
+  // Check whether the selected sampler is the right type
   if (!_al_sampler)
-    paramError("sampler", "The selected sampler is not of type BayesianGPrySampler.");
-  
+    paramError("sampler", "The selected sampler is not of type GenericActiveLearningSampler.");
+
   // Fetching the sampler characteristics
-  _num_samples = _sampler.getNumberOfRows();
   _n_dim = _sampler.getNumberOfCols();
   _props = _al_sampler->getNumParallelProposals();
 
-  _gp_outputs_try.resize(_inputs_all.size());
-  _gp_std_try.resize(_inputs_all.size());
-  _acquisition_function.resize(_props); //
+  // Setting up the variable sizes to facilitate active learning
+  _gp_outputs_test.resize(_inputs_test.size());
+  _gp_std_test.resize(_inputs_test.size());
+  _acquisition_value.resize(_props);
   _length_scales.resize(_n_dim);
-
-  _eval_points = 10000;
-  // _eval_outputs_current.resize(_eval_points);
-  // _eval_outputs_previous.resize(_eval_points);
   _eval_outputs_current.resize(_props);
-  _eval_outputs_previous.resize(_props);
-  _eval_inputs.resize(_eval_points, std::vector<Real>(_n_dim, 0.0));
+  _generic.resize(1);
 }
 
-// void
-// GenericActiveLearner::setupCovariance(UserObjectName covar_name)
-// {
-//   if (_gp_handler.getCovarFunctionPtr() != nullptr)
-//     ::mooseError("Attempting to redefine covariance function using setupCovariance.");
-//   _gp_handler.linkCovarianceFunction(getCovarianceFunctionByName(covar_name));
-// }
-
 void
-GenericActiveLearner::setupGPData(const std::vector<Real> & log_posterior,
+GenericActiveLearner::setupGPData(const std::vector<Real> & data_out,
                                    const DenseMatrix<Real> & data_in)
 {
   std::vector<Real> tmp;
   tmp.resize(_n_dim);
-  for (unsigned int i = 0; i < log_posterior.size(); ++i)
+  for (unsigned int i = 0; i < data_out.size(); ++i)
   {
     for (unsigned int j = 0; j < _n_dim; ++j)
       tmp[j] = data_in(i, j);
     _gp_inputs.push_back(tmp);
-    _gp_outputs.push_back(log_posterior[i]);
+    _gp_outputs.push_back(data_out[i]);
   }
 }
 
 void
-GenericActiveLearner::acqWithCorrelations(std::vector<Real> & acq,
-                                         std::vector<unsigned int> & sorted,
-                                         std::vector<Real> & acq_new)
-{
-  Real correlation = 0.0;
-  std::vector<size_t> ind;
-  Moose::indirectSort(acq.begin(), acq.end(), ind);
-  sorted[0] = ind[0];
-  acq_new[0] = -acq[ind[0]];
-  for (unsigned int i = 0; i < _inputs_all.size() - 1; ++i)
-  {
-    for (unsigned int j = 0; j < _inputs_all.size(); ++j)
-    {
-      computeCorrelation(j, ind[0], correlation);
-      acq[j] = acq[j] * correlation;
-    }
-    Moose::indirectSort(acq.begin(), acq.end(), ind);
-    sorted[i + 1] = ind[0];
-    acq_new[i + 1] = -acq[ind[0]];
-  }
-}
-
-void
-GenericActiveLearner::computeCorrelation(const unsigned int & ind1,
-                                        const unsigned int & ind2,
-                                        Real & corr)
-{
-  corr = 0.0;
-  for (unsigned int i = 0; i < _n_dim; ++i)
-    corr -= Utility::pow<2>(_inputs_all[ind1][i] - _inputs_all[ind2][i]) /
-            (2.0 * Utility::pow<2>(_length_scales[i]));
-  corr = 1.0 - std::exp(corr); // 1.0 - std::exp(corr);
-}
-
-void
-GenericActiveLearner::computeGPOutput(std::vector<Real> & eval_outputs,
-                                     const std::vector<std::vector<Real>> & eval_inputs)
+GenericActiveLearner::computeGPOutput(std::vector<Real> & eval_outputs)
 {
   for (unsigned int i = 0; i < eval_outputs.size(); ++i)
-    eval_outputs[i] = _gp_eval.evaluate(eval_inputs[i]);
+    eval_outputs[i] = _gp_eval.evaluate(_gp_inputs[i]);
 }
 
 void
-GenericActiveLearner::computeGPOutput2(std::vector<Real> & eval_outputs,
-                                      const DenseMatrix<Real> & eval_inputs)
+GenericActiveLearner::setupGeneric()
+{
+  _generic.resize(1);
+}
+
+void
+GenericActiveLearner::includeAdditionalInputs()
+{
+  _inputs_test_modified = _inputs_test;
+}
+
+void
+GenericActiveLearner::getAcquisition(std::vector<Real> & acq_new,
+                                     std::vector<unsigned int> & indices)
+{
+  std::vector<Real> acq;
+  acq.resize(_inputs_test.size());
+  includeAdditionalInputs();
+  _acquisition_obj->computeAcquisition(
+      acq, _gp_outputs_test, _gp_std_test, _inputs_test_modified, _gp_inputs, _generic);
+  acq_new = acq;
+  if (_penalize_acquisition)
+    _acquisition_obj->penalizeAcquisition(
+        acq_new, indices, acq, _length_scales, _inputs_test_modified);
+}
+
+void
+GenericActiveLearner::computeConvergenceValue()
+{
+  for (unsigned int ii = 0; ii < _output_comm.size(); ++ii)
+    _convergence_value += Utility::pow<2>(_output_comm[ii] - _eval_outputs_current[ii]);
+  _convergence_value = std::sqrt(_convergence_value) / _output_comm.size();
+}
+
+void
+GenericActiveLearner::evaluateGPTest()
 {
   std::vector<Real> tmp;
   tmp.resize(_n_dim);
-  for (unsigned int i = 0; i < eval_outputs.size(); ++i)
+  for (unsigned int i = 0; i < _gp_outputs_test.size(); ++i)
   {
     for (unsigned int j = 0; j < _n_dim; ++j)
-      tmp[j] = eval_inputs(i, j);
-    eval_outputs[i] = _gp_eval.evaluate(tmp);
-  }
-}
-
-void
-GenericActiveLearner::computeDistance(const std::vector<Real> & current_input,
-                                     unsigned int & req_index)
-{
-  Real ref_distance = 1e10;
-  Real distance;
-  req_index = 0;
-  for (unsigned int i = 0; i < _gp_outputs.size(); ++i)
-  {
-    distance = 0.0;
-    for (unsigned int j = 0; j < current_input.size(); ++j)
-      distance += std::abs(current_input[j] - _gp_inputs[i][j]);
-    if (distance <= ref_distance)
-    {
-      ref_distance = distance;
-      req_index = i;
-    }
+      tmp[j] = _inputs_test[i][j];
+    _gp_outputs_test[i] = _gp_eval.evaluate(tmp, _gp_std_test[i]);
   }
 }
 
@@ -198,69 +172,44 @@ GenericActiveLearner::execute()
 
   if (_t_step > 1)
   {
+    // Setup the GP training data
     setupGPData(_output_comm, data_in);
+
+    // Compute the convergence value before re-training the GP
     _convergence_value = 0.0;
-    unsigned int num = 0.0;
     if (_t_step > 2)
     {
-      computeGPOutput2(_eval_outputs_current, data_in);
-      for (unsigned int ii = 0; ii < _output_comm.size(); ++ii)
-        _convergence_value += Utility::pow<2>(_output_comm[ii] - _eval_outputs_current[ii]);
+      computeGPOutput(_eval_outputs_current);
+      computeConvergenceValue();
     }
-    _convergence_value = std::sqrt(_convergence_value) / _output_comm.size();
-    // std::cout << "Num train points: " << _gp_outputs.size() << std::endl;
-    _al_gp.reTrain(_gp_inputs, _gp_outputs);
 
+    // Retrain the GP and get the length scales
+    _al_gp.reTrain(_gp_inputs, _gp_outputs);
     _al_gp.getLengthScales(_length_scales);
 
-    std::vector<Real> tmp;
-    tmp.resize(_n_dim);
-    for (unsigned int i = 0; i < _gp_outputs_try.size(); ++i)
-    {
-      for (unsigned int j = 0; j < _n_dim; ++j)
-        tmp[j] = _inputs_all[i][j];
-      _gp_outputs_try[i] = _gp_eval.evaluate(tmp, _gp_std_try[i]);
-    }
+    // Evaluate the GP on all the test samples sent by the Sampler
+    evaluateGPTest();
 
-    // Expected improvement in global fit
-    std::vector<Real> acq, acq_new;
-    acq.resize(_inputs_all.size());
-    acq_new.resize(_inputs_all.size());
-    Real gp_mean;
-    Real gp_std;
-    unsigned int ref_ind;
-    for (unsigned int i = 0; i < _inputs_all.size(); ++i)
-    {
-      gp_mean = _gp_outputs_try[i];
-      gp_std = _gp_std_try[i];
-      for (unsigned int j = 0; j < _n_dim; ++j)
-        tmp[j] = _inputs_all[i][j];
-      computeDistance(tmp, ref_ind);
-      acq[i] = -(std::pow((gp_mean - _gp_outputs[ref_ind]), 2) + std::pow(gp_std, 2));
-    }
+    // Setup the generic variable for acquisition computation (depends on the objective:
+    // optimization, UQ, etc.)
+    setupGeneric();
 
-    std::vector<unsigned int> tmp_indices;
-    tmp_indices.resize(_inputs_all.size());
-    acqWithCorrelations(acq, tmp_indices, acq_new);
+    // Get the acquisition function values and ordering of indices as per the acquisition
+    std::vector<Real> acq_new;
+    std::vector<unsigned int> indices;
+    indices.resize(_inputs_test.size());
+    getAcquisition(acq_new, indices);
+
+    // Output the acquisition function values and the best ordering of the indices
     for (unsigned int i = 0; i < _props; ++i)
     {
-      _sorted_indices[i] = tmp_indices[i];
-      _acquisition_function[i] = acq_new[i];
+      _sorted_indices[i] = indices[i];
+      _acquisition_value[i] = acq_new[i];
     }
-    
-    std::cout << "_convergence_value " << _convergence_value << std::endl;
   }
   else
-  {
     for (unsigned int i = 0; i < _props; ++i)
       _sorted_indices[i] = i;
-    // for (unsigned int i = 0; i < _eval_points; ++i)
-    // {
-    //   fillVector(_eval_inputs[i]);
-    //   if (_var_prior)
-    //     _eval_inputs[i][_priors.size()] = _var_prior->quantile(_sampler.getRand(_seed));
-    // }
-  }
 
   // Track the current step
   _check_step = _t_step;
