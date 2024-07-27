@@ -142,6 +142,8 @@ protected:
   /// Keep track of the name of an aux variable defined in the Physics
   void saveAuxVariableName(const VariableName & var_name) { _aux_var_names.push_back(var_name); }
 
+  /// Check whether a linear variable already exists
+  bool linearVariableExists(const VariableName & var_name, bool error_if_aux) const;
   /// Check whether a nonlinear variable already exists
   bool nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
 
