@@ -18,4 +18,13 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+  [linear-physics]
+    type = 'Exodiff'
+    prereq = nonlinear
+    input = segregated-linear-physics.i
+    exodiff = segregated-linear-physics_out.e
+    requirement = "The system shall give back the correct results for a channel flow with the SIMPLE algorithm using linear system assembly and the Physics shorthand syntax."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
 []
