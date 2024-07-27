@@ -11,16 +11,12 @@
 
 // MOOSE includes
 #include "MooseUtils.h"
-#include "MooseBase.h"
-#include "MooseBaseParameterInterface.h"
-#include "MooseBaseErrorInterface.h"
+#include "ParallelMooseBase.h"
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
 #include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
-
-#include "libmesh/parallel_object.h"
 
 #define usingMooseObjectMembers                                                                    \
   usingMooseBaseMembers;                                                                           \
@@ -30,10 +26,7 @@
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject : public MooseBase,
-                    public MooseBaseParameterInterface,
-                    public MooseBaseErrorInterface,
-                    public libMesh::ParallelObject,
+class MooseObject : public ParallelMooseBase,
                     public DataFileInterface<MooseObject>,
                     public std::enable_shared_from_this<MooseObject>
 {

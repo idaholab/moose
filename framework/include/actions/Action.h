@@ -9,17 +9,13 @@
 
 #pragma once
 
-#include "MooseBase.h"
-#include "MooseBaseParameterInterface.h"
-#include "MooseBaseErrorInterface.h"
+#include "ParallelMooseBase.h"
 #include "InputParameters.h"
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
 #include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
-
-#include "libmesh/parallel_object.h"
 
 #include <string>
 #include <ostream>
@@ -35,12 +31,9 @@ class Factory;
 /**
  * Base class for actions.
  */
-class Action : public MooseBase,
-               public MooseBaseParameterInterface,
-               public MooseBaseErrorInterface,
+class Action : public ParallelMooseBase,
                public MeshMetaDataInterface,
                public PerfGraphInterface,
-               public libMesh::ParallelObject,
                public DataFileInterface<Action>
 {
 public:
