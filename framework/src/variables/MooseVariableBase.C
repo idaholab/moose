@@ -128,8 +128,11 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   }
   else
   {
-    mooseAssert(_count == 1, "component size of normal variable (_count) must be one");
     _var_name = _sys.system().variable(_var_num).name();
+    if (_count != 1)
+      mooseError(
+          "Component size of normal variable (_count) must be one. This is not the case for '" +
+          _var_name + "' (_count equals " + std::to_string(_count) + ").");
   }
 
   if (!blockRestricted())
@@ -137,14 +140,20 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   else
   {
     const auto & blk_ids = blockIDs();
-    mooseAssert(!blk_ids.empty(), "Every variable should have at least one subdomain");
+    if (blk_ids.empty())
+      mooseError("Every variable should have at least one subdomain. For '" + _var_name +
+                 "' no subdomain is defined.");
 
     _is_lower_d = _mesh.isLowerD(*blk_ids.begin());
 #ifdef DEBUG
     for (auto it = ++blk_ids.begin(); it != blk_ids.end(); ++it)
-      mooseAssert(_is_lower_d == _mesh.isLowerD(*it),
-                  "A user should not specify a mix of lower-dimensional and higher-dimensional "
-                  "blocks for a variable");
+      if (_is_lower_d != _mesh.isLowerD(*it))
+        mooseError("A user should not specify a mix of lower-dimensional and higher-dimensional "
+                   "blocks for variable '" +
+                   _var_name + "'. This variable is " + (_is_lower_d ? "" : "not ") +
+                   "recognised as lower-dimensional, but is also defined for the " +
+                   (_is_lower_d ? "higher" : "lower") + "-dimensional block '" +
+                   _mesh.getSubdomainName(*it) + "' (block-id " + std::to_string(*it) + ").");
 #endif
   }
 }
