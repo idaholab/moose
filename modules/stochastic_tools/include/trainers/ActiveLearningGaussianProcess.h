@@ -40,6 +40,10 @@ public:
   virtual void reTrain(const std::vector<std::vector<Real>> & inputs,
                        const std::vector<Real> & outputs) const final;
 
+  /**
+   * Fill in the provided vector with the current length scales from GP training
+   * @param length_scales The vector to be filled with the length scales
+   */
   virtual void getLengthScales(std::vector<Real> & length_scales) const final;
 
   StochasticTools::GaussianProcess & gp() { return _gp; }
