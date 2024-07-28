@@ -41,7 +41,7 @@ AIDESGPryTestTransform::AIDESGPryTestTransform(const InputParameters & parameter
     _tpm(declareValue<std::vector<Real>>("tpm")),
     _variance(declareValue<std::vector<Real>>("variance")),
     _sampler(getSampler("sampler")),
-    _pmcmc(dynamic_cast<const AffineInvariantDESGPry *>(&_sampler)),
+    _pmcmc(dynamic_cast<const AffineInvariantDES *>(&_sampler)),
     _rnd_vec(_pmcmc->getRandomNumbers()),
     _new_var_samples(_pmcmc->getVarSamples()),
     _priors(_pmcmc->getPriors()),
@@ -53,7 +53,7 @@ AIDESGPryTestTransform::AIDESGPryTestTransform(const InputParameters & parameter
 {
   // Check whether the selected sampler is an MCMC sampler or not
   if (!_pmcmc)
-    paramError("sampler", "The selected sampler is not of type AffineInvariantDESGPry.");
+    paramError("sampler", "The selected sampler is not of type AffineInvariantDES.");
 
   // Fetching the sampler characteristics
   _props = _pmcmc->getNumParallelProposals();
