@@ -10,8 +10,11 @@
 #pragma once
 
 #include "GeneralReporter.h"
-#include "AffineInvariantDESGPry.h"
+#include "AffineInvariantDES.h"
+#include "GaussianProcess.h"
+#include "SurrogateModel.h"
 #include "SurrogateModelInterface.h"
+#include "GaussianProcessSurrogate.h"
 #include "Distribution.h"
 
 /**
@@ -79,7 +82,7 @@ protected:
   Sampler & _sampler;
 
   /// MCMC sampler base
-  const AffineInvariantDESGPry * const _pmcmc;
+  const AffineInvariantDES * const _pmcmc;
 
   /// Storage for the number of parallel proposals
   dof_id_type _props;
