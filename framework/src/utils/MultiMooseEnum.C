@@ -184,7 +184,7 @@ void
 MultiMooseEnum::erase(const std::string & names)
 {
   mooseDeprecated("MultiMooseEnum::erase is deprecated, use MultiMooseEnum::eraseSetValue");
-  MultiMooseEnum::erase(names);
+  MultiMooseEnum::eraseSetValue(names);
 }
 
 void
@@ -197,7 +197,7 @@ void
 MultiMooseEnum::erase(const std::vector<std::string> & names)
 {
   mooseDeprecated("MultiMooseEnum::erase is deprecated, use MultiMooseEnum::eraseSetValue");
-  MultiMooseEnum::erase(names);
+  MultiMooseEnum::eraseSetValue(names);
 }
 
 void
@@ -210,7 +210,7 @@ void
 MultiMooseEnum::erase(const std::set<std::string> & names)
 {
   mooseDeprecated("MultiMooseEnum::erase is deprecated, use MultiMooseEnum::eraseSetValue");
-  MultiMooseEnum::erase(names);
+  MultiMooseEnum::eraseSetValue(names);
 }
 
 void
