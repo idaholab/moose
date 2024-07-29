@@ -24,7 +24,7 @@
         species = 'A B C'
 
         diffusivity_matprops = 'da db 1'
-        
+
         source_functors = '0 2 0'
         source_coefs = '1 2 1'
 
