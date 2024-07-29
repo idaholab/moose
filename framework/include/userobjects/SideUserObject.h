@@ -13,8 +13,7 @@
 #include "UserObject.h"
 #include "BoundaryRestrictableRequired.h"
 #include "MaterialPropertyInterface.h"
-#include "Coupleable.h"
-#include "MooseVariableDependencyInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
 #include "ElementIDInterface.h"
 #include "FaceInfo.h"
@@ -26,8 +25,7 @@
 class SideUserObject : public UserObject,
                        public BoundaryRestrictableRequired,
                        public MaterialPropertyInterface,
-                       public Coupleable,
-                       public MooseVariableDependencyInterface,
+                       public CoupleableMooseVariableDependencyIntermediateInterface,
                        public TransientInterface,
                        public ElementIDInterface
 {

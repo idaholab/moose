@@ -13,8 +13,7 @@
 #include "UserObject.h"
 #include "BlockRestrictable.h"
 #include "ThreeMaterialPropertyInterface.h"
-#include "NeighborCoupleable.h"
-#include "MooseVariableDependencyInterface.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
 #include "RandomInterface.h"
 #include "ElementIDInterface.h"
@@ -43,8 +42,7 @@ class QBase;
 class DomainUserObject : public UserObject,
                          public BlockRestrictable,
                          public ThreeMaterialPropertyInterface,
-                         public NeighborCoupleable,
-                         public MooseVariableDependencyInterface,
+                         public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                          public TransientInterface,
                          public RandomInterface,
                          public ElementIDInterface

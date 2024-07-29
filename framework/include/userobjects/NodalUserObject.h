@@ -13,8 +13,7 @@
 #include "UserObject.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
-#include "Coupleable.h"
-#include "MooseVariableDependencyInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
 #include "RandomInterface.h"
 
@@ -25,8 +24,7 @@
 class NodalUserObject : public UserObject,
                         public BlockRestrictable,
                         public BoundaryRestrictable,
-                        public Coupleable,
-                        public MooseVariableDependencyInterface,
+                        public CoupleableMooseVariableDependencyIntermediateInterface,
                         public TransientInterface,
                         public RandomInterface
 {
