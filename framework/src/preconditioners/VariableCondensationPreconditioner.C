@@ -735,7 +735,7 @@ VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat
   const PetscInt * petsc_idx;
   PetscInt nrows;
   // make sure we have a PETSc matrix
-  PetscMatrix<Number> * petsc_mat = cast_ptr<PetscMatrix<Number> *>(&mat);
+  auto * const petsc_mat = cast_ptr<PetscMatrix<Number> *>(&mat);
   LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
                     MatFindZeroDiagonals(petsc_mat->mat(), &zerodiags));
   // synchronize all indices
