@@ -290,14 +290,13 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
       params.set<bool>("create_outward_interface_boundaries") = false;
 
-      unsigned int assembly_block_id_start = 20000;
       if (_background_intervals > 0)
       {
         params.set<unsigned int>("background_intervals") = _background_intervals;
         // Initial block id used to define peripheral regions of assembly
 
         const auto background_block_name = "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R0";
-        const auto background_block_id = assembly_block_id_start;
+        const auto background_block_id = RGMB::ASSEMBLY_BLOCK_ID_START;
         params.set<subdomain_id_type>("background_block_id") = background_block_id;
         params.set<SubdomainName>("background_block_name") = background_block_name;
       }
@@ -310,7 +309,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         {
           const auto duct_block_name =
               "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
-          const auto duct_block_id = assembly_block_id_start + duct_it + 1;
+          const auto duct_block_id = RGMB::ASSEMBLY_BLOCK_ID_START + duct_it + 1;
           duct_block_ids.push_back(duct_block_id);
           duct_block_names.push_back(duct_block_name);
         }
@@ -322,7 +321,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       }
 
       params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
-      params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
+      params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
 
       addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
 
@@ -532,7 +531,7 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
     params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
     params.set<SubdomainName>("background_subdomain_name") = block_to_delete + "_TRI";
-    params.set<unsigned short>("background_subdomain_id") = 19999;
+    params.set<unsigned short>("background_subdomain_id") = RGMB::ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE;
 
     addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);
   }

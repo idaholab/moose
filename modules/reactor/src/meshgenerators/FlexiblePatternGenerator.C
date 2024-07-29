@@ -212,7 +212,7 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : (boundary_id_type)OUTER_SIDESET_ID),
     _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
+                                ? getParam<BoundaryName>("external_boundary_name")
                                 : "")
 
 {

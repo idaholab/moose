@@ -190,11 +190,6 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   else
     _has_block_names = false;
 
-  // Initial block id used to define radial regions of pin
-  subdomain_id_type pin_block_id_start = 10000;
-  // Use special block id to designate TRI elements
-  subdomain_id_type pin_block_id_tri = pin_block_id_start - 1;
-
   const auto use_flexible_stitching = getReactorParam<bool>(RGMB::flexible_assembly_stitching);
   std::string build_mesh_name;
 
@@ -214,9 +209,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
       const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
                                               : "outer_pin_" + std::to_string(_pin_type);
-      params.set<BoundaryName>("external_boundary_name") = boundary_name;
-      params.set<std::vector<subdomain_id_type>>("block_id") = {_quad_center ? pin_block_id_start
-                                                                             : pin_block_id_tri};
+      params.set<std::string>("external_boundary_name") = boundary_name;
+      params.set<std::vector<subdomain_id_type>>("block_id") = {
+          _quad_center ? RGMB::PIN_BLOCK_ID_START : RGMB::PIN_BLOCK_ID_TRI};
       params.set<MooseEnum>("element_type") = _quad_center ? "QUAD" : "TRI";
       auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R0";
       if (!_quad_center)
@@ -245,7 +240,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       for (const auto i : index_range(_intervals))
       {
         const auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R" + std::to_string(i);
-        const auto block_id = pin_block_id_start + i;
+        const auto block_id = RGMB::PIN_BLOCK_ID_START + i;
 
         if (i < _ring_radii.size())
         {
@@ -281,7 +276,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
           else
           {
             const auto block_name = ring_blk_names.front() + "_TRI";
-            const auto block_id = pin_block_id_tri;
+            const auto block_id = RGMB::PIN_BLOCK_ID_TRI;
             ring_blk_ids.insert(ring_blk_ids.begin(), block_id);
             ring_blk_names.insert(ring_blk_names.begin(), block_name);
           }
@@ -289,7 +284,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         // Add _TRI suffix if only one radial region and tri center elements
         else if (!_quad_center)
         {
-          ring_blk_ids[0] = pin_block_id_tri;
+          ring_blk_ids[0] = RGMB::PIN_BLOCK_ID_TRI;
           ring_blk_names[0] += "_TRI";
         }
       }
@@ -308,7 +303,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
           else
           {
             const auto block_name = background_blk_names.front() + "_TRI";
-            const auto block_id = pin_block_id_tri;
+            const auto block_id = RGMB::PIN_BLOCK_ID_TRI;
             background_blk_ids.insert(background_blk_ids.begin(), block_id);
             background_blk_names.insert(background_blk_names.begin(), block_name);
           }
@@ -317,7 +312,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         // and no ring regions
         else if (!_quad_center)
         {
-          background_blk_ids[0] = pin_block_id_tri;
+          background_blk_ids[0] = RGMB::PIN_BLOCK_ID_TRI;
           background_blk_names[0] += "_TRI";
         }
       }
@@ -340,7 +335,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
         const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
                                                 : "outer_pin_" + std::to_string(_pin_type);
-        params.set<BoundaryName>("external_boundary_name") = boundary_name;
+        params.set<std::string>("external_boundary_name") = boundary_name;
         bool flat_side_up = (_mesh_geometry == "Square");
         params.set<bool>("flat_side_up") = flat_side_up;
         params.set<bool>("create_outward_interface_boundaries") = false;
@@ -526,9 +521,7 @@ PinMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<BoundaryName>("external_boundary_name") =
         "outer_assembly_" + std::to_string(_pin_type);
     params.set<SubdomainName>("background_subdomain_name") = outermost_block_name + "_TRI";
-    // Allocate block ID 9998 for triangulated outer region, since 9999 is reserved for tri elements
-    // when quad_center_elements is false
-    params.set<unsigned short>("background_subdomain_id") = 9998;
+    params.set<unsigned short>("background_subdomain_id") = RGMB::PIN_BLOCK_ID_TRI_FLEXIBLE;
 
     addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);
   }
