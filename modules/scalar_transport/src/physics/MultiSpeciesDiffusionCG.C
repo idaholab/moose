@@ -20,8 +20,8 @@ InputParameters
 MultiSpeciesDiffusionCG::validParams()
 {
   InputParameters params = MultiSpeciesDiffusionPhysicsBase::validParams();
-  params.addClassDescription(
-      "Discretizes a diffusion equation with the continuous Galerkin finite element method");
+  params.addClassDescription("Discretizes diffusion equations for several species with the "
+                             "continuous Galerkin finite element method");
   params.addParam<bool>(
       "use_automatic_differentiation",
       true,

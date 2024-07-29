@@ -12,7 +12,7 @@
 #include "ActionFactory.h"
 #include "MooseObjectAction.h"
 
-registerMooseAction("MooseApp", CreateMeshSetupActionsForComponents, "component_meta");
+registerMooseAction("MooseApp", CreateMeshSetupActionsForComponents, "meta_action_component");
 
 InputParameters
 CreateMeshSetupActionsForComponents::validParams()
@@ -33,7 +33,7 @@ CreateMeshSetupActionsForComponents::CreateMeshSetupActionsForComponents(
 void
 CreateMeshSetupActionsForComponents::act()
 {
-  if (_current_task == "component_meta")
+  if (_current_task == "meta_action_component")
   {
     // Create a default SetupMeshAction. If the user wants to use Mesh parameters, then
     // they must create a Mesh block in their input

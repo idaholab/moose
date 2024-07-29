@@ -86,7 +86,7 @@ public:
 
   // Coupling with Components //
   /// Get a component with the requested name
-  const ActionComponent & getComponent(const ComponentName & comp_name);
+  const ActionComponent & getActionComponent(const ComponentName & comp_name);
   /// Check that the component is of the desired type
   template <typename T>
   void checkComponentType(const ActionComponent & component) const;

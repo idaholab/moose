@@ -102,7 +102,7 @@ addActionTypes(Syntax & syntax)
   // TODO Organize these somewhere
   registerTask("init_physics", false);
   registerTask("init_component_physics", false);
-  registerTask("component_meta", false);
+  registerTask("meta_action_component", false);
   registerTask("setup_component", false);
   // 'list_component' is used to retrieve ActionComponents for the syntax JSON
   registerTask("list_component", false);
@@ -293,7 +293,7 @@ addActionTypes(Syntax & syntax)
 
   // clang-format off
   syntax.addDependencySets("(meta_action)"
-                           "(component_meta)"
+                           "(meta_action_component)"
                            "(dynamic_object_registration)"
                            "(common_output)"
                            "(set_global_params)"

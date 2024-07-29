@@ -31,7 +31,7 @@ public:
 
   virtual void act() override final;
 
-  /// Get the name of the mesh generator created by this component that generates the mesh for it
+  /// Get the name(s) of the mesh generator(s) created by this component that generates the mesh for it
   /// - this could be a mesh generator in the [Mesh] block
   /// - or a mesh generator created by the component
   const std::vector<MeshGeneratorName> & meshGeneratorNames() const { return _mg_names; }
@@ -78,7 +78,7 @@ protected:
   /// Maximum dimension of the component
   unsigned int _dimension;
 
-  /// Name of the final mesh generator creating the mesh for the component
+  /// Name(s) of the final mesh generator(s) creating the mesh for the component
   std::vector<MeshGeneratorName> _mg_names;
 
   /// Names of the blocks the component is comprised of

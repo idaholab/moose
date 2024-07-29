@@ -21,8 +21,8 @@ AddActionComponentAction::validParams()
   InputParameters params = Action::validParams();
   params.addClassDescription("Action responsible for creating component actions. A component "
                              "action is a component derived from an Action base class");
-  params.addRequiredParam<std::string>(
-      "type", "A string representing the Component that will be built by this Action");
+  params.addRequiredParam<std::string>("type",
+                                       "Type of the ComponentAction to create with this Action");
   params.addParam<bool>("isObjectAction", true, "Indicates that this is a MooseObjectAction.");
   params.addParamNamesToGroup("isObjectAction", "Advanced");
   return params;
