@@ -22,7 +22,7 @@ Since the potential grain boundaries would be AB, AC, and BC -in order, we get t
 
 Considering that the derivative of the anisotropic parameter with respect to the gradient of the order parameter ($\frac{\partial m(\theta, v)}{\partial \nabla \eta_i}$) depends on the time-changing boundary normal, the derivative would either be negative or positive since the material generates only one anisotropic parameter per pair of grains.
 
-The Spherical Gaussian materials output both positive and negative derivatives. This kernel is tied to an action kernel that implements one of the sets with either the positive or negative derivative, whichever is adequate.
+The Spherical Gaussian materials output both positive and negative derivatives. This kernel is tied to an action kernel that implements the first set with the positive derivative.
 
 Since all the parameters and derivatives are defined continuously across the entire domain and tied to each boundary specifically, similarly to [!cite](MOELANS2022110592), there are no conflicts between kernels.
 
