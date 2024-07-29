@@ -30,10 +30,10 @@ EpsilonModelKernel1stGauss::EpsilonModelKernel1stGauss(const InputParameters & p
 ADReal
 EpsilonModelKernel1stGauss::computeQpResidual()
 {
-  // Compute the squared gradient
+  // Compute the squared gradient.
   const ADReal SqrGrad = _grad_u[_qp] * _grad_u[_qp];
 
-  // Sum of squared gradients of the coupled variables
+  // Sum of squared gradients of the coupled variables.
   ADReal SumSqrGradEtaj = 0.0;
   for (unsigned int i = 0; i < _op_num; ++i)
     SumSqrGradEtaj += (*_grad_vals[i])[_qp] * (*_grad_vals[i])[_qp];

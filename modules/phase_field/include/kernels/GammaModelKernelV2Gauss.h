@@ -12,18 +12,18 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  // Material property L
+  // Material property L.
   const ADMaterialProperty<Real> & _L_AD;
 
-  // Material property m
+  // Material property m.
   const ADMaterialProperty<Real> & _m;
 
-  // Negative derivatives of gamma
+  // Negative derivatives of gamma.
   const ADMaterialProperty<RealGradient> & _dgamma_minus;
 
-  // Number of coupled order parameters
+  // Number of coupled order parameters.
   const unsigned int _op_num;
 
-  // Values of the coupled variables
+  // Values of the coupled variables.
   const std::vector<const ADVariableValue *> _vals;
 };

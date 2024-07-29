@@ -26,7 +26,7 @@ GammaModelKernelGauss::GammaModelKernelGauss(const InputParameters & parameters)
 ADReal
 GammaModelKernelGauss::computeQpResidual()
 {
-  // Sum of squares of all other order parameters
+  // Sum of squares of all other order parameters.
   ADReal sum_eta_j = 0.0;
   for (unsigned int i = 0; i < _op_num; ++i)
     sum_eta_j += (*_vals[i])[_qp] * (*_vals[i])[_qp];
