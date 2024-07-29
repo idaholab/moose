@@ -28,7 +28,7 @@ MultiSpeciesDiffusionPhysicsBase::validParams()
       "diffusivity_matprops",
       "Material properties defining the diffusion coefficient for each species");
   params.addParam<std::vector<MooseFunctorName>>(
-     "diffusivity_functors", "Functors specifying the diffusivity for each species");
+      "diffusivity_functors", "Functors specifying the diffusivity for each species");
 
   // Source term
   params.addParam<std::vector<MooseFunctorName>>(

@@ -345,7 +345,8 @@ SinglePhaseFluidProperties::gamma_from_p_T(
   gamma = gamma_from_p_T(p, T);
 }
 
-Real SinglePhaseFluidProperties::vaporPressure(Real) const
+Real
+SinglePhaseFluidProperties::vaporPressure(Real) const
 {
   mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
@@ -380,7 +381,8 @@ SinglePhaseFluidProperties::vaporPressure(const ADReal & T) const
   return result;
 }
 
-Real SinglePhaseFluidProperties::vaporTemperature(Real) const
+Real
+SinglePhaseFluidProperties::vaporTemperature(Real) const
 {
   mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
@@ -454,7 +456,8 @@ SinglePhaseFluidProperties::rho_mu_from_p_T(const ADReal & p,
   mu = mu_from_p_T(p, T);
 }
 
-Real SinglePhaseFluidProperties::e_spndl_from_v(Real) const
+Real
+SinglePhaseFluidProperties::e_spndl_from_v(Real) const
 {
   mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
