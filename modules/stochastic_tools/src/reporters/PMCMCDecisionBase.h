@@ -10,25 +10,21 @@
 #pragma once
 
 #include "GeneralReporter.h"
-#include "AffineInvariantDES.h"
-#include "GaussianProcess.h"
-#include "SurrogateModel.h"
-#include "SurrogateModelInterface.h"
-#include "GaussianProcessSurrogate.h"
+#include "PMCMCBase.h"
 #include "Distribution.h"
 
 /**
- * AIDESGPryTestTransform will help making sample accept/reject decisions in MCMC
+ * PMCMCDecisionBase will help making sample accept/reject decisions in MCMC
  * schemes (for e.g., when performing Bayesian inference).
  */
-class AIDESGPryTestTransform : public GeneralReporter, public SurrogateModelInterface
+class PMCMCDecisionBase : public GeneralReporter
 {
 public:
   static InputParameters validParams();
-  AIDESGPryTestTransform(const InputParameters & parameters);
+  PMCMCDecisionBase(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void finalize() override {}
-  virtual void execute() override;
+  virtual void execute() override {}
 
 protected:
   /**
@@ -37,16 +33,14 @@ protected:
    * @param input_matrix The matrix of proposed inputs that are provided
    */
   virtual void computeEvidence(std::vector<Real> & evidence,
-                               const DenseMatrix<Real> & input_matrix);
+                               const DenseMatrix<Real> & input_matrix) {}
 
   /**
    * Compute the transition probability vector (after the computation of evidence)
    * @param tv The transition probability vector to be filled
    * @param evidence The vector of evidences provided
    */
-  virtual void computeTransitionVector(std::vector<Real> & tv, const std::vector<Real> & evidence);
-
-  Real correctGP(const Real & GPoutput, const Real & trueVariance);
+  virtual void computeTransitionVector(std::vector<Real> & tv, const std::vector<Real> & evidence) {}
 
   /**
    * Resample inputs given the transition vector (after transition vector computed)
@@ -66,9 +60,6 @@ protected:
    */
   virtual void nextSeeds() {}
 
-  /// Transfer the right outputs to the file
-  std::vector<Real> & _outputs_required;
-
   /// Model input data that is uncertain
   std::vector<std::vector<Real>> & _inputs;
 
@@ -78,11 +69,14 @@ protected:
   /// Model variance term
   std::vector<Real> & _variance;
 
+  /// Model noise term to pass to Likelihoods object
+  Real & _noise;
+
   /// The MCMC sampler
   Sampler & _sampler;
 
   /// MCMC sampler base
-  const AffineInvariantDES * const _pmcmc;
+  const PMCMCBase * const _pmcmc;
 
   /// Storage for the number of parallel proposals
   dof_id_type _props;
@@ -99,24 +93,22 @@ protected:
   /// Storage for the prior over the variance
   const Distribution * _var_prior;
 
+  /// Storage for the number of experimental configuration values
+  dof_id_type _num_confg_values;
+
+  /// Storage for the number of experimental configuration parameters
+  dof_id_type _num_confg_params;
+
   /// Storage for previous inputs
   DenseMatrix<Real> _data_prev;
 
   /// Storage for previous variances
   std::vector<Real> _var_prev;
 
-  /// Storage for previous outputs
-  std::vector<Real> _outputs_prev;
-
-  /// The GP evaluator object
-  const SurrogateModel & _gp_eval;
-
-  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  int _check_step;
-
+private:
   /// Communicator that was split based on samples that have rows
   libMesh::Parallel::Communicator & _local_comm;
 
-  /// Transition probability matrix
-  std::vector<Real> & _estimated_loglikelihood;
+  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
+  int _check_step;
 };
