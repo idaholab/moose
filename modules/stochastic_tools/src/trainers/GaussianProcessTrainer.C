@@ -61,7 +61,8 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
-        getParam<Real>("learning_rate"))),
+        getParam<Real>("learning_rate")),
+        getParam<getParam<MooseEnum>("learning_function")>),
     _sampler_row(getSamplerData())
 {
   // Error Checking

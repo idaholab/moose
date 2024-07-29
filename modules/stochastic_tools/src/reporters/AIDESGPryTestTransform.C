@@ -53,7 +53,7 @@ AIDESGPryTestTransform::AIDESGPryTestTransform(const InputParameters & parameter
 {
   // Check whether the selected sampler is an MCMC sampler or not
   if (!_pmcmc)
-    paramError("sampler", "The selected sampler is not of type AffineInvariantDES.");
+    paramError("sampler", "The selected sampler is not of type AffineInvariantDESGPry.");
 
   // Fetching the sampler characteristics
   _props = _pmcmc->getNumParallelProposals();
