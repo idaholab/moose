@@ -356,6 +356,20 @@ InputParameters::setDocString(const std::string & name_in, const std::string & d
   it->second._doc_string = doc;
 }
 
+std::string
+InputParameters::getDocUnit(const std::string & name_in) const
+{
+  const auto name = checkForRename(name_in);
+  return _params.at(name)._doc_unit;
+}
+
+void
+InputParameters::setDocUnit(const std::string & name_in, const std::string & doc_unit)
+{
+  const auto name = checkForRename(name_in);
+  _params[name]._doc_unit = doc_unit;
+}
+
 bool
 InputParameters::isParamRequired(const std::string & name_in) const
 {

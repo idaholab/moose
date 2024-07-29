@@ -179,6 +179,11 @@ JsonInputFileFormatter::addParameters(const nlohmann::json & params)
     auto desc = nlohmann::to_string(param["description"]);
     addLine(l, max_len, desc);
 
+    const auto doc_unit = nlohmann::to_string(param["doc_unit"]);
+    if (!doc_unit.empty())
+      addLine("", max_len + 1,
+              "Unit: " + doc_unit); // a +1 to account for an empty line
+
     const auto group = nlohmann::to_string(param["group_name"]);
     if (!group.empty())
       addLine("", max_len + 1,
