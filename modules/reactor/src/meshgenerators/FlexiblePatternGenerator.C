@@ -123,7 +123,6 @@ FlexiblePatternGenerator::validParams()
       "external_boundary_id",
       "The boundary id of the external boundary in addition to the default 10000.");
   params.addParam<BoundaryName>("external_boundary_name",
-                                BoundaryName(),
                                 "Optional boundary name for the external boundary.");
 
   params.addParam<bool>("delete_default_external_boundary_from_inputs",
@@ -213,7 +212,7 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                               : (boundary_id_type)OUTER_SIDESET_ID),
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<BoundaryName>("external_boundary_name")
-                                : "")
+                                : BoundaryName())
 
 {
   declareMeshesForSub("inputs");
@@ -564,7 +563,8 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
 std::unique_ptr<MeshBase>
 FlexiblePatternGenerator::generate()
 {
-  MooseMesh::changeBoundaryId(**_build_mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
+  if (_external_boundary_id != OUTER_SIDESET_ID)
+    MooseMesh::changeBoundaryId(**_build_mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
   if (!_external_boundary_name.empty())
   {
     // Check if _external_boundary_name has been assigned to another boundary id

@@ -322,6 +322,7 @@
     input = 'core_flexible_assembly_stitching_hex.i'
     csvdiff = 'core_flexible_assembly_stitching_hex_out.csv'
     recover = false
+    mesh_mode = REPLICATED
   []
   [flexible_stitching_cart]
     requirement = 'The system shall generate a 3D Cartesian core mesh with flexible assembly patterning that avoids hanging nodes at assembly interfaces'
@@ -329,6 +330,7 @@
     input = 'core_flexible_assembly_stitching_cart.i'
     csvdiff = 'core_flexible_assembly_stitching_cart_out.csv'
     recover = false
+    mesh_mode = REPLICATED
   []
   [flexible_stitching_modify_num_sectors]
     requirement = 'The system shall generate a 3D core mesh with the number of sectors at the assembly boundary being set by the user'
@@ -337,5 +339,6 @@
     cli_args = "Mesh/rmp/num_sectors_at_flexible_boundary=3"
     csvdiff = 'core_flexible_assembly_stitching_hex_out.csv'
     recover = false
+    mesh_mode = REPLICATED
   []
 []
