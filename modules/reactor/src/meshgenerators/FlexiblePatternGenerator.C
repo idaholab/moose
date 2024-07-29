@@ -206,7 +206,14 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                                    ? getParam<SubdomainName>("background_subdomain_name")
                                    : SubdomainName()),
     _delete_default_external_boundary_from_inputs(
-        getParam<bool>("delete_default_external_boundary_from_inputs"))
+        getParam<bool>("delete_default_external_boundary_from_inputs")),
+    _external_boundary_id(isParamValid("external_boundary_id")
+                              ? getParam<boundary_id_type>("external_boundary_id")
+                              : OUTER_SIDESET_ID),
+    _external_boundary_name(isParamValid("external_boundary_name")
+                                ? getParam<std::string>("external_boundary_name")
+                                : "")
+
 {
   declareMeshesForSub("inputs");
 
@@ -556,24 +563,22 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
 std::unique_ptr<MeshBase>
 FlexiblePatternGenerator::generate()
 {
-  const auto external_boundary_id =
-      isParamValid("external_boundary_id") ? getParam<boundary_id_type>("external_boundary_id") : 0;
-  const auto external_boundary_name =
-      isParamValid("external_boundary_name") ? getParam<std::string>("external_boundary_name") : "";
-  if (external_boundary_id > 0)
-    MooseMesh::changeBoundaryId(**_build_mesh, OUTER_SIDESET_ID, external_boundary_id, false);
-  if (!external_boundary_name.empty())
+  MooseMesh::changeBoundaryId(**_build_mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
+  if (!_external_boundary_name.empty())
   {
-    (*_build_mesh)
-        ->get_boundary_info()
-        .sideset_name(external_boundary_id > 0 ? external_boundary_id
-                                               : (boundary_id_type)OUTER_SIDESET_ID) =
-        external_boundary_name;
-    (*_build_mesh)
-        ->get_boundary_info()
-        .nodeset_name(external_boundary_id > 0 ? external_boundary_id
-                                               : (boundary_id_type)OUTER_SIDESET_ID) =
-        external_boundary_name;
+    // Check if _external_boundary_name has been assigned to another boundary id
+    const auto external_id_by_name =
+        (*_build_mesh)->get_boundary_info().get_id_by_name(_external_boundary_name);
+    if ((external_id_by_name != Moose::INVALID_BOUNDARY_ID) &&
+        (external_id_by_name != _external_boundary_id))
+      mooseError("External boundary name " + _external_boundary_name + " is associated with id " +
+                 std::to_string(external_id_by_name) + ", which differs from " +
+                 std::to_string(_external_boundary_id));
+
+    (*_build_mesh)->get_boundary_info().sideset_name(_external_boundary_id) =
+        _external_boundary_name;
+    (*_build_mesh)->get_boundary_info().nodeset_name(_external_boundary_id) =
+        _external_boundary_name;
   }
   (*_build_mesh)->find_neighbors();
   (*_build_mesh)->set_isnt_prepared();
