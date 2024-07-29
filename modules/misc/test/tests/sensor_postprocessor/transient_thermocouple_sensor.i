@@ -17,7 +17,12 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = ADMatDiffusion
+    variable = temperature
+    diffusivity = thermal_conductivity
+  []
+  [heat_conduction_time_derivative]
+    type = ADTimeDerivative
     variable = temperature
   []
 []
@@ -45,28 +50,49 @@
   []
 []
 
+[Problem]
+  type = FEProblem
+[]
+
 [Postprocessors]
   [input_signal_pp]
     type = ElementAverageValue
     variable = temperature
   []
-  [thermo_sensor_pp_lum]
-    type = ThermocoupleSensorPostprocessor
-    input_signal = input_signal_pp
-    method = "lumped"
-  []
   [thermo_sensor_pp_num]
     type = ThermocoupleSensorPostprocessor
     input_signal = input_signal_pp
+    drift_function = '1'
+    delay_function = '0.1'
+    efficiency_function = '1'
+    signalToNoise_function = '1.0'
     method = "numerical"
+    noise_std_dev_function = '1'
+    uncertainty_std_dev_function = '1'
+  []
+  [thermo_sensor_pp_lum]
+    type = ThermocoupleSensorPostprocessor
+    input_signal = input_signal_pp
+    drift_function = '1'
+    delay_function = '0.1'
+    efficiency_function = '1'
+    signalToNoise_function = '1.0'
+    method = "lumped"
+    noise_std_dev_function = '1'
+    uncertainty_std_dev_function = '1'
   []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  line_search = none
+  dt = 0.1
+  num_steps = 50
   nl_rel_tol = 1e-02
   nl_abs_tol = 1e-8
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

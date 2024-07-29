@@ -9,9 +9,12 @@
 
 #pragma once
 
+#include "GeneralSensorPostprocessor.h"
+
 /**
- * A thermocouple Postprocessor
-  */
+ * A Thermocouple Sensor Postprocessor that allows the user to characterize a thermocouple's
+ * response by imposing noise, delay, drift, efficiency and uncertainty.
+ */
 class ThermocoupleSensorPostprocessor : public GeneralSensorPostprocessor
 {
 public:
@@ -22,11 +25,9 @@ public:
   virtual void initialize() override;
   virtual void execute() override {}
   using Postprocessor::getValue;
-  virtual PostprocessorValue getValue() const override; 
+  virtual PostprocessorValue getValue() const override;
 
 protected:
-  string _thermocouple_type;
-  string _method;
-  Real _sensor_value_old;
-  virtual Real getIntegral(std::vector<Real> integrand, std::vector<Real> time_values, Real delay_value) override;
+  /// Function to calculate R vector
+  virtual vector<Real> getRVector() override;
 };
