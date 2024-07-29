@@ -26,29 +26,33 @@ private:
 
   // Grains orientation quaternions.
   std::vector<double> _qwR, _qxR, _qyR, _qzR;
-  // Normalized_Axis_X  Normalized_Axis_Y Normalized_Axis_Z  Angle(Radian) GB_Normal_X  GB_Normal_Y  GB_Normal_Z  Minimun_GB_energy(J/m^2).
-  std::vector<double> _vbalibx, _vbaliby, _vbalibz, _thetabalib, _miubalibx, _miubaliby, _miubalibz, _MinimaEnergy;
+  // Normalized_Axis_X  Normalized_Axis_Y Normalized_Axis_Z  Angle(Radian) GB_Normal_X  GB_Normal_Y
+  // GB_Normal_Z  Minimun_GB_energy(J/m^2).
+  std::vector<double> _vbalibx, _vbaliby, _vbalibz, _thetabalib, _miubalibx, _miubaliby, _miubalibz,
+      _MinimaEnergy;
 
   // Names of material properties.
-  const MaterialPropertyName _eps_name; // The name of the anisotropic epsilon - AD.
-  const MaterialPropertyName _eps_EN_name; // The name of the anisotropic epsilon - NoAD.
+  const MaterialPropertyName _eps_name;        // The name of the anisotropic epsilon - AD.
+  const MaterialPropertyName _eps_EN_name;     // The name of the anisotropic epsilon - NoAD.
   const MaterialPropertyName _deps_minus_name; // Negative derivatives of epsilon - AD.
-  const MaterialPropertyName _deps_plus_name; // Positive derivatives of epsilon - AD.
-  const MaterialPropertyName _VlibR_name; // The name of the library boundary normals in the simulation reference frame.
-  const MaterialPropertyName _Vec_name; // The name of the normalized gradients in the simulation reference frame.
-  const MaterialPropertyName _dm_minus_name; // Negative derivatives of m - AD.
-  const MaterialPropertyName _dm_plus_name; // Positive derivatives of m - AD.
-  const MaterialPropertyName _S_switch_name; // The name of the switch property.
-  const MaterialPropertyName _m_name; // The name of the anisotropic m - AD.
-  const MaterialPropertyName _m_EN_name; // The name of the anisotropic m - NoAD.
-  const MaterialPropertyName _L_name; // The name of L - AD.
-  const MaterialPropertyName _L_EN_name; // The name of L - NoAD.
-  const MaterialPropertyName _sigma_name; // Grain boundary energy in eV/nm^2.
+  const MaterialPropertyName _deps_plus_name;  // Positive derivatives of epsilon - AD.
+  const MaterialPropertyName
+      _VlibR_name; // The name of the library boundary normals in the simulation reference frame.
+  const MaterialPropertyName
+      _Vec_name; // The name of the normalized gradients in the simulation reference frame.
+  const MaterialPropertyName _dm_minus_name;     // Negative derivatives of m - AD.
+  const MaterialPropertyName _dm_plus_name;      // Positive derivatives of m - AD.
+  const MaterialPropertyName _S_switch_name;     // The name of the switch property.
+  const MaterialPropertyName _m_name;            // The name of the anisotropic m - AD.
+  const MaterialPropertyName _m_EN_name;         // The name of the anisotropic m - NoAD.
+  const MaterialPropertyName _L_name;            // The name of L - AD.
+  const MaterialPropertyName _L_EN_name;         // The name of L - NoAD.
+  const MaterialPropertyName _sigma_name;        // Grain boundary energy in eV/nm^2.
   const MaterialPropertyName _sigmaORIUNIT_name; // Grain boundary energy in J/m^2.
-  const MaterialPropertyName _qwg_name; // w component of the quaternion.
-  const MaterialPropertyName _qxg_name; // x component of the quaternion.
-  const MaterialPropertyName _qyg_name; // y component of the quaternion.
-  const MaterialPropertyName _qzg_name; // z component of the quaternion.
+  const MaterialPropertyName _qwg_name;          // w component of the quaternion.
+  const MaterialPropertyName _qxg_name;          // x component of the quaternion.
+  const MaterialPropertyName _qyg_name;          // y component of the quaternion.
+  const MaterialPropertyName _qzg_name;          // z component of the quaternion.
 
   // Epsilon.
   ADMaterialProperty<Real> & _eps;

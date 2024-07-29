@@ -9,7 +9,8 @@ GammaModelKernelGauss::validParams()
   params.addClassDescription("Implements the term: -L m \\nabla \\cdot \\left( \\sum_{j \\neq i} "
                              "\\left( \\frac{\\partial \\gamma_{ij}}{\\partial \\nabla \\eta_i} "
                              "\\right) \\eta_i^2 \\eta_j^2 \\right)");
-  params.addRequiredCoupledVar("v", "Array of coupled order parameter names for other order parameters");
+  params.addRequiredCoupledVar("v",
+                               "Array of coupled order parameter names for other order parameters");
   return params;
 }
 

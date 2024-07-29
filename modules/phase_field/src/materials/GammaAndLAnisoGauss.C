@@ -17,35 +17,54 @@ GammaAndLAnisoGauss::validParams()
 {
   InputParameters params = ADMaterial::validParams();
 
-  params.addClassDescription("Material to provide an anisotropy field and its derivatives with respect to the gradient of the order parameter");
+  params.addClassDescription("Material to provide an anisotropy field and its derivatives with "
+                             "respect to the gradient of the order parameter");
 
-  params.addParam<MaterialPropertyName>("Ggamma_name", "Ggamma", "The name of the anisotropic Ggamma - AD.");
-  params.addParam<MaterialPropertyName>("dGgamma_minus_name", "dGgamma_minus", "Negative derivatives of Ggamma - AD.");
-  params.addParam<MaterialPropertyName>("dGgamma_plus_name", "dGgamma_plus", "Positive derivatives of Ggamma - AD.");
-  params.addParam<MaterialPropertyName>("VlibR_name", "VlibR", "The name of the library boundary normals in the simulation reference frame.");
-  params.addParam<MaterialPropertyName>("Vec_name", "Vec", "The name of the normalized gradients in the simulation reference frame.");
-  params.addParam<MaterialPropertyName>("gamma_name", "gamma", "The name of anisotropic gamma - AD.");
-  params.addParam<MaterialPropertyName>("gamma_EN_name", "gamma_asymm", "The name of anisotropic gamma - NoAD.");
-  params.addParam<MaterialPropertyName>("dgamma_minus_name", "dgamma_minus", "Negative derivatives of gamma - AD.");
-  params.addParam<MaterialPropertyName>("dgamma_plus_name", "dgamma_plus", "Positive derivatives of gamma - AD.");
-  params.addParam<MaterialPropertyName>("S_switch_name", "S_switch", "The name of the switch property.");
+  params.addParam<MaterialPropertyName>(
+      "Ggamma_name", "Ggamma", "The name of the anisotropic Ggamma - AD.");
+  params.addParam<MaterialPropertyName>(
+      "dGgamma_minus_name", "dGgamma_minus", "Negative derivatives of Ggamma - AD.");
+  params.addParam<MaterialPropertyName>(
+      "dGgamma_plus_name", "dGgamma_plus", "Positive derivatives of Ggamma - AD.");
+  params.addParam<MaterialPropertyName>(
+      "VlibR_name",
+      "VlibR",
+      "The name of the library boundary normals in the simulation reference frame.");
+  params.addParam<MaterialPropertyName>(
+      "Vec_name", "Vec", "The name of the normalized gradients in the simulation reference frame.");
+  params.addParam<MaterialPropertyName>(
+      "gamma_name", "gamma", "The name of anisotropic gamma - AD.");
+  params.addParam<MaterialPropertyName>(
+      "gamma_EN_name", "gamma_asymm", "The name of anisotropic gamma - NoAD.");
+  params.addParam<MaterialPropertyName>(
+      "dgamma_minus_name", "dgamma_minus", "Negative derivatives of gamma - AD.");
+  params.addParam<MaterialPropertyName>(
+      "dgamma_plus_name", "dgamma_plus", "Positive derivatives of gamma - AD.");
+  params.addParam<MaterialPropertyName>(
+      "S_switch_name", "S_switch", "The name of the switch property.");
   params.addParam<MaterialPropertyName>("m_name", "m", "The name of m - AD.");
   params.addParam<MaterialPropertyName>("m_EN_name", "mu", "The name of m - NoAD.");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa", "The name of kappa - AD.");
   params.addParam<MaterialPropertyName>("kappa_EN_name", "kappa_op", "The name of kappa - NoAD.");
   params.addParam<MaterialPropertyName>("L_name", "L_AD", "The name of the anisotropic L - AD.");
   params.addParam<MaterialPropertyName>("L_EN_name", "L", "The name of the anisotropic L - NoAD.");
-  params.addParam<MaterialPropertyName>("lgb_name", "lgb", "The name of anisotropic lgb (grain boundary width) - AD.");
-  params.addParam<MaterialPropertyName>("lgb_EN_name", "lgb_EN", "The name of anisotropic lgb (grain boundary width) - NoAD.");
+  params.addParam<MaterialPropertyName>(
+      "lgb_name", "lgb", "The name of anisotropic lgb (grain boundary width) - AD.");
+  params.addParam<MaterialPropertyName>(
+      "lgb_EN_name", "lgb_EN", "The name of anisotropic lgb (grain boundary width) - NoAD.");
   params.addParam<MaterialPropertyName>("sigma_name", "sigma", "Grain boundary energy in eV/nm^2.");
-  params.addParam<MaterialPropertyName>("sigmaORIUNIT_name", "sigmaORIUNIT", "Grain boundary energy in J//m^2.");
+  params.addParam<MaterialPropertyName>(
+      "sigmaORIUNIT_name", "sigmaORIUNIT", "Grain boundary energy in J//m^2.");
   params.addParam<MaterialPropertyName>("qwg_name", "qwg_name", "w component of quaternion.");
   params.addParam<MaterialPropertyName>("qxg_name", "qxg_name", "x component of quaternion.");
   params.addParam<MaterialPropertyName>("qyg_name", "qyg_name", "y component of quaternion.");
   params.addParam<MaterialPropertyName>("qzg_name", "qzg_name", "z component of quaternion.");
-  params.addRequiredParam<FileName>("Library_file_name", "Name of the file containing anisotropic data.");
-  params.addRequiredParam<FileName>("Quaternion_file_name", "Name of the file containing quaternion data.");
-  params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables.");
+  params.addRequiredParam<FileName>("Library_file_name",
+                                    "Name of the file containing anisotropic data.");
+  params.addRequiredParam<FileName>("Quaternion_file_name",
+                                    "Name of the file containing quaternion data.");
+  params.addRequiredCoupledVarWithAutoBuild(
+      "v", "var_name_base", "op_num", "Array of coupled variables.");
   params.addRequiredParam<Real>("sigmaBASE", "Value of sigma base energy in J/m^2.");
   params.addRequiredParam<Real>("gammaBASE", "Value of gamma at sigmaBASE energy.");
   params.addRequiredParam<Real>("GgammaBASE", "Value of Ggamma at gammaBASE energy.");
@@ -59,12 +78,18 @@ GammaAndLAnisoGauss::validParams()
   params.addRequiredParam<Real>("sharpness", "Sharpness of gaussians.");
   params.addRequiredParam<Real>("Gaussian_Tolerance", "Gaussian Tolerance.");
   params.addRequiredParam<UserObjectName>("grain_tracker", "Graintracker UserObject.");
-  params.addRequiredParam<bool>("ADDGaussian", "If this is true gaussians add to gammaBASE, else subtract.");
-  params.addRequiredParam<bool>("ADDGaussianL", "If this is true gaussians add to L_BASE, else subtract.");
+  params.addRequiredParam<bool>("ADDGaussian",
+                                "If this is true gaussians add to gammaBASE, else subtract.");
+  params.addRequiredParam<bool>("ADDGaussianL",
+                                "If this is true gaussians add to L_BASE, else subtract.");
   params.addParam<Real>("length_scale", 1.0e-9, "Conversion for 1/m to 1/nm.");
   params.addParam<Real>("time_scale", 1.0e-9, "Time scale in s, where default is ns.");
   params.addParam<Real>("JtoeV", 6.24150974e18, "Joule to eV conversion.");
-  params.addParam<Real>("BoundaryNormal", 0, "If 0, the boundary normal in the simulation reference frame is computed using the orientation quaternions, else it is taken directly from the minima library file.");
+  params.addParam<Real>(
+      "BoundaryNormal",
+      0,
+      "If 0, the boundary normal in the simulation reference frame is computed using the "
+      "orientation quaternions, else it is taken directly from the minima library file.");
 
   return params;
 }
@@ -72,14 +97,18 @@ GammaAndLAnisoGauss::validParams()
 GammaAndLAnisoGauss::GammaAndLAnisoGauss(const InputParameters & parameters)
   : ADMaterial(parameters),
     _Ggamma(declareADProperty<Real>(getParam<MaterialPropertyName>("Ggamma_name"))),
-    _dGgamma_minus(declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dGgamma_minus_name"))),
-    _dGgamma_plus(declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dGgamma_plus_name"))),
+    _dGgamma_minus(
+        declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dGgamma_minus_name"))),
+    _dGgamma_plus(
+        declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dGgamma_plus_name"))),
     _VlibR(declareADProperty<RealGradient>(getParam<MaterialPropertyName>("VlibR_name"))),
     _Vec(declareADProperty<RealGradient>(getParam<MaterialPropertyName>("Vec_name"))),
     _gamma(declareADProperty<Real>(getParam<MaterialPropertyName>("gamma_name"))),
     _gamma_EN(declareProperty<Real>(getParam<MaterialPropertyName>("gamma_EN_name"))),
-    _dgamma_minus(declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dgamma_minus_name"))),
-    _dgamma_plus(declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dgamma_plus_name"))),
+    _dgamma_minus(
+        declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dgamma_minus_name"))),
+    _dgamma_plus(
+        declareADProperty<RealGradient>(getParam<MaterialPropertyName>("dgamma_plus_name"))),
     _S_switch(declareADProperty<Real>(getParam<MaterialPropertyName>("S_switch_name"))),
     _ADDGaussian(getParam<bool>("ADDGaussian")),
     _ADDGaussianL(getParam<bool>("ADDGaussianL")),
@@ -154,7 +183,7 @@ GammaAndLAnisoGauss::readLibraryFile()
   if (!File2.is_open())
     mooseError("Unable to open library file");
 
-  double Lib1, Lib2, Lib3, Lib4, Lib5, Lib6, Lib7, Lib8 , Lib9;
+  double Lib1, Lib2, Lib3, Lib4, Lib5, Lib6, Lib7, Lib8, Lib9;
   while (File2 >> Lib1 >> Lib2 >> Lib3 >> Lib4 >> Lib5 >> Lib6 >> Lib7 >> Lib8 >> Lib9)
   {
     _vbalibx.push_back(Lib1);
@@ -197,11 +226,15 @@ GammaAndLAnisoGauss::computeQpProperties()
 
   const ADReal sigmaBASE = _sigmaBASE * _JtoeV * _length_scale * _length_scale;
 
-  _m[_qp] = std::sqrt((sigmaBASE * sigmaBASE) / ((_lgbBASE_minimum * _lgbBASE_minimum) * _f0gammaBASE * (_GgammaBASE * _GgammaBASE)));
-  _m_EN[_qp] = MetaPhysicL::raw_value(std::sqrt((sigmaBASE * sigmaBASE) / ((_lgbBASE_minimum * _lgbBASE_minimum) * _f0gammaBASE * (_GgammaBASE * _GgammaBASE))));
+  _m[_qp] = std::sqrt((sigmaBASE * sigmaBASE) / ((_lgbBASE_minimum * _lgbBASE_minimum) *
+                                                 _f0gammaBASE * (_GgammaBASE * _GgammaBASE)));
+  _m_EN[_qp] = MetaPhysicL::raw_value(
+      std::sqrt((sigmaBASE * sigmaBASE) / ((_lgbBASE_minimum * _lgbBASE_minimum) * _f0gammaBASE *
+                                           (_GgammaBASE * _GgammaBASE))));
 
   _kappa[_qp] = (sigmaBASE * sigmaBASE) / ((_GgammaBASE * _GgammaBASE) * _m[_qp]);
-  _kappa_EN[_qp] = MetaPhysicL::raw_value((sigmaBASE * sigmaBASE) / ((_GgammaBASE * _GgammaBASE) * _m[_qp]));
+  _kappa_EN[_qp] =
+      MetaPhysicL::raw_value((sigmaBASE * sigmaBASE) / ((_GgammaBASE * _GgammaBASE) * _m[_qp]));
 
   for (unsigned int m : make_range(0U, _op_num - 1))
     for (unsigned int n : make_range(m + 1, _op_num))
@@ -230,7 +263,8 @@ GammaAndLAnisoGauss::computeQpProperties()
               ADReal vsmalbax = (*_grad_vals[m])[_qp](0) - (*_grad_vals[n])[_qp](0);
               ADReal vsmalbay = (*_grad_vals[m])[_qp](1) - (*_grad_vals[n])[_qp](1);
               ADReal vsmalbaz = (*_grad_vals[m])[_qp](2) - (*_grad_vals[n])[_qp](2);
-              const ADReal normvsmallbavalue = vsmalbax * vsmalbax + vsmalbay * vsmalbay + vsmalbaz * vsmalbaz;
+              const ADReal normvsmallbavalue =
+                  vsmalbax * vsmalbax + vsmalbay * vsmalbay + vsmalbaz * vsmalbaz;
               const ADReal normvsmallba = std::sqrt(normvsmallbavalue);
               const ADReal vsmallbax = vsmalbax / normvsmallba;
               const ADReal vsmallbay = vsmalbay / normvsmallba;
@@ -246,10 +280,14 @@ GammaAndLAnisoGauss::computeQpProperties()
                 _Vec[_qp](2) = 0.0;
               }
 
-              const ADReal qbaw = (_qwR[a] * _qwR[b]) - (_qxR[a] * -1.0 * _qxR[b]) - (_qyR[a] * -1.0 * _qyR[b]) - (_qzR[a] * -1.0 * _qzR[b]);
-              const ADReal qbax = (_qwR[a] * _qxR[b]) + (_qxR[a] * -1.0 * _qwR[b]) + (_qyR[a] * -1.0 * _qzR[b]) - (_qzR[a] * -1.0 * _qyR[b]);
-              const ADReal qbay = (_qwR[a] * _qyR[b]) - (_qxR[a] * -1.0 * _qzR[b]) + (_qyR[a] * -1.0 * _qwR[b]) + (_qzR[a] * -1.0 * _qxR[b]);
-              const ADReal qbaz = (_qwR[a] * _qzR[b]) + (_qxR[a] * -1.0 * _qyR[b]) - (_qyR[a] * -1.0 * _qxR[b]) + (_qzR[a] * -1.0 * _qwR[b]);
+              const ADReal qbaw = (_qwR[a] * _qwR[b]) - (_qxR[a] * -1.0 * _qxR[b]) -
+                                  (_qyR[a] * -1.0 * _qyR[b]) - (_qzR[a] * -1.0 * _qzR[b]);
+              const ADReal qbax = (_qwR[a] * _qxR[b]) + (_qxR[a] * -1.0 * _qwR[b]) +
+                                  (_qyR[a] * -1.0 * _qzR[b]) - (_qzR[a] * -1.0 * _qyR[b]);
+              const ADReal qbay = (_qwR[a] * _qyR[b]) - (_qxR[a] * -1.0 * _qzR[b]) +
+                                  (_qyR[a] * -1.0 * _qwR[b]) + (_qzR[a] * -1.0 * _qxR[b]);
+              const ADReal qbaz = (_qwR[a] * _qzR[b]) + (_qxR[a] * -1.0 * _qyR[b]) -
+                                  (_qyR[a] * -1.0 * _qxR[b]) + (_qzR[a] * -1.0 * _qwR[b]);
               const ADReal thetaba = 2.0 * std::acos(qbaw);
               const ADReal vbaxori = qbax / std::sin(thetaba / 2.0);
               const ADReal vbayori = qbay / std::sin(thetaba / 2.0);
@@ -262,58 +300,82 @@ GammaAndLAnisoGauss::computeQpProperties()
 
               for (unsigned int l : make_range(0U, _libnum))
               {
-                const ADReal miuvalue = _miubalibx[l] * _miubalibx[l] + _miubaliby[l] * _miubaliby[l] + _miubalibz[l] * _miubalibz[l];
+                const ADReal miuvalue = _miubalibx[l] * _miubalibx[l] +
+                                        _miubaliby[l] * _miubaliby[l] +
+                                        _miubalibz[l] * _miubalibz[l];
                 const ADReal mmm = std::sqrt(miuvalue);
                 const ADReal miubalibx_norm = _miubalibx[l] / mmm;
                 const ADReal miubaliby_norm = _miubaliby[l] / mmm;
                 const ADReal miubalibz_norm = _miubalibz[l] / mmm;
-                const ADReal miuow = (_qwR[a] * 0.0) - (_qxR[a] * miubalibx_norm) - (_qyR[a] * miubaliby_norm) - (_qzR[a] * miubalibz_norm);
-                const ADReal miuox = (_qwR[a] * miubalibx_norm) + (_qxR[a] * 0.0) + (_qyR[a] * miubalibz_norm) - (_qzR[a] * miubaliby_norm);
-                const ADReal miuoy = (_qwR[a] * miubaliby_norm) - (_qxR[a] * miubalibz_norm) + (_qyR[a] * 0.0) + (_qzR[a] * miubalibx_norm);
-                const ADReal miuoz = (_qwR[a] * miubalibz_norm) + (_qxR[a] * miubaliby_norm) - (_qyR[a] * miubalibx_norm) + (_qzR[a] * 0.0);
+                const ADReal miuow = (_qwR[a] * 0.0) - (_qxR[a] * miubalibx_norm) -
+                                     (_qyR[a] * miubaliby_norm) - (_qzR[a] * miubalibz_norm);
+                const ADReal miuox = (_qwR[a] * miubalibx_norm) + (_qxR[a] * 0.0) +
+                                     (_qyR[a] * miubalibz_norm) - (_qzR[a] * miubaliby_norm);
+                const ADReal miuoy = (_qwR[a] * miubaliby_norm) - (_qxR[a] * miubalibz_norm) +
+                                     (_qyR[a] * 0.0) + (_qzR[a] * miubalibx_norm);
+                const ADReal miuoz = (_qwR[a] * miubalibz_norm) + (_qxR[a] * miubaliby_norm) -
+                                     (_qyR[a] * miubalibx_norm) + (_qzR[a] * 0.0);
                 ADReal miubalibwR = 0.0;
                 ADReal miubalibxR = miubalibx_norm;
                 ADReal miubalibyR = miubaliby_norm;
                 ADReal miubalibzR = miubalibz_norm;
                 if (_BoundaryNormal == 0)
                 {
-                  miubalibwR = miuow * _qwR[a] - miuox * _qxR[a] * -1.0 - miuoy * _qyR[a] * -1.0 - miuoz * _qzR[a] * -1.0;
-                  miubalibxR = miuow * _qxR[a] * -1.0 + miuox * _qwR[a] + miuoy * _qzR[a] * -1.0 - miuoz * _qyR[a] * -1.0;
-                  miubalibyR = miuow * _qyR[a] * -1.0 - miuox * _qzR[a] * -1.0 + miuoy * _qwR[a] + miuoz * _qxR[a] * -1.0;
-                  miubalibzR = miuow * _qzR[a] * -1.0 + miuox * _qyR[a] * -1.0 - miuoy * _qxR[a] * -1.0 + miuoz * _qwR[a];
+                  miubalibwR = miuow * _qwR[a] - miuox * _qxR[a] * -1.0 - miuoy * _qyR[a] * -1.0 -
+                               miuoz * _qzR[a] * -1.0;
+                  miubalibxR = miuow * _qxR[a] * -1.0 + miuox * _qwR[a] + miuoy * _qzR[a] * -1.0 -
+                               miuoz * _qyR[a] * -1.0;
+                  miubalibyR = miuow * _qyR[a] * -1.0 - miuox * _qzR[a] * -1.0 + miuoy * _qwR[a] +
+                               miuoz * _qxR[a] * -1.0;
+                  miubalibzR = miuow * _qzR[a] * -1.0 + miuox * _qyR[a] * -1.0 -
+                               miuoy * _qxR[a] * -1.0 + miuoz * _qwR[a];
                 }
-                _VlibR[_qp](0)  = miubalibxR;
-                _VlibR[_qp](1)  = miubalibyR;
-                _VlibR[_qp](2)  = miubalibzR;
+                _VlibR[_qp](0) = miubalibxR;
+                _VlibR[_qp](1) = miubalibyR;
+                _VlibR[_qp](2) = miubalibzR;
                 if (sumval == 0.0)
                 {
-                  _VlibR[_qp](0)  = 0.0;
-                  _VlibR[_qp](1)  = 0.0;
-                  _VlibR[_qp](2)  = 0.0;
+                  _VlibR[_qp](0) = 0.0;
+                  _VlibR[_qp](1) = 0.0;
+                  _VlibR[_qp](2) = 0.0;
                   miubalibwR = 0.0;
                   miubalibxR = 0.0;
                   miubalibyR = 0.0;
                   miubalibzR = 0.0;
                 }
 
-                const ADReal dot_product = miubalibxR * vsmallbax + miubalibyR * vsmallbay + miubalibzR * vsmallbaz;
+                const ADReal dot_product =
+                    miubalibxR * vsmallbax + miubalibyR * vsmallbay + miubalibzR * vsmallbaz;
                 if (_thetabalib[l] < 0.0)
-                  _thetabalib[l] = 6.28319 + _thetabalib[l]; // _thetabalib is in radians. 6.28319 radians is equivalent to 360 degrees. If the angle is negative, this converts it to its equivalent positive angle. -60deg around <111> = (360-60 = 300deg) around <111>.
+                  _thetabalib[l] =
+                      6.28319 +
+                      _thetabalib[l]; // _thetabalib is in radians. 6.28319 radians is equivalent to
+                                      // 360 degrees. If the angle is negative, this converts it to
+                                      // its equivalent positive angle. -60deg around <111> =
+                                      // (360-60 = 300deg) around <111>.
                 const ADReal thetadtheta = thetaba - _thetabalib[l];
                 const ADReal normvbavalue = vbax * vbax + vbay * vbay + vbaz * vbaz;
                 const ADReal normvba = std::sqrt(normvbavalue);
-                const ADReal normvbalibvalue = _vbalibx[l] * _vbalibx[l] + _vbaliby[l] * _vbaliby[l] + _vbalibz[l] * _vbalibz[l];
+                const ADReal normvbalibvalue = _vbalibx[l] * _vbalibx[l] +
+                                               _vbaliby[l] * _vbaliby[l] +
+                                               _vbalibz[l] * _vbalibz[l];
                 const ADReal normvbalib = std::sqrt(normvbalibvalue);
-                const ADReal cosinevalue1 = _vbalibx[l] * vbax + _vbaliby[l] * vbay + _vbalibz[l] * vbaz;
+                const ADReal cosinevalue1 =
+                    _vbalibx[l] * vbax + _vbaliby[l] * vbay + _vbalibz[l] * vbaz;
                 const ADReal cosinevalue2 = normvbalib * normvba;
                 const ADReal cosinevalue3 = cosinevalue1 / cosinevalue2;
                 const ADReal thetadv = std::acos(cosinevalue3);
-                const ADReal switchvalue = -100.0 * ((thetadv / _alphaswitch) * (thetadv / _alphaswitch) + (thetadtheta / _betaswitch) * (thetadtheta / _betaswitch));
-                      ADReal exp_switch_value = std::exp(switchvalue);
+                const ADReal switchvalue =
+                    -100.0 * ((thetadv / _alphaswitch) * (thetadv / _alphaswitch) +
+                              (thetadtheta / _betaswitch) * (thetadtheta / _betaswitch));
+                ADReal exp_switch_value = std::exp(switchvalue);
                 _S_switch[_qp] = exp_switch_value;
-                if (exp_switch_value < 0.001) // 0.001 is an arbritary threshold below which the switch is assumed negligible.
+                if (exp_switch_value < 0.001) // 0.001 is an arbritary threshold below which the
+                                              // switch is assumed negligible.
                   _S_switch[_qp] = 0.0;
-                const ADReal Ggamma_Minima = (_MinimaEnergy[l] * _JtoeV * _length_scale * _length_scale) /(std::sqrt(_kappa[_qp] * _m[_qp]));
+                const ADReal Ggamma_Minima =
+                    (_MinimaEnergy[l] * _JtoeV * _length_scale * _length_scale) /
+                    (std::sqrt(_kappa[_qp] * _m[_qp]));
                 const ADReal amplitudes = _GgammaBASE - Ggamma_Minima;
                 const ADReal amplitudesL = std::fabs(_L_BASE - _MinimaL[l]);
                 const ADReal exponent = _sharpness * (dot_product - 1.0);
@@ -329,17 +391,89 @@ GammaAndLAnisoGauss::computeQpProperties()
                   const ADReal finalGaussian = _ADDGaussian ? Gaussian : -Gaussian;
                   const ADReal GaussianL = amplitudesL * S_switch_value * exp_value;
                   const ADReal finalGaussianL = _ADDGaussianL ? GaussianL : -GaussianL;
-                  const ADReal Gaussian2 = _amplitudeScale * amplitudes * S_switch_value * _sharpness * std::exp(exponent) * (((-1.0 * miubalibxR * normvsmallba) - (miubalibxR * vsmalbax * (1.0 / (2.0 * normvsmallba)) * (-1.0 * 2.0 * vsmalbax))) / normvsmallbavalue + (((-1.0 * miubalibyR * vsmalbay) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbax))) / normvsmallbavalue) + (((-1.0 * miubalibzR * vsmalbaz) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbax))) / normvsmallbavalue));
+                  const ADReal Gaussian2 =
+                      _amplitudeScale * amplitudes * S_switch_value * _sharpness *
+                      std::exp(exponent) *
+                      (((-1.0 * miubalibxR * normvsmallba) -
+                        (miubalibxR * vsmalbax * (1.0 / (2.0 * normvsmallba)) *
+                         (-1.0 * 2.0 * vsmalbax))) /
+                           normvsmallbavalue +
+                       (((-1.0 * miubalibyR * vsmalbay) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbax))) /
+                        normvsmallbavalue) +
+                       (((-1.0 * miubalibzR * vsmalbaz) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbax))) /
+                        normvsmallbavalue));
                   const ADReal finalGaussian2 = _ADDGaussian ? Gaussian2 : -Gaussian2;
-                  const ADReal Gaussian3 = _amplitudeScale * amplitudes * S_switch_value * _sharpness * std::exp(exponent) * (((-1.0 * miubalibyR * normvsmallba) - (miubalibyR * vsmalbay * (1.0 / (2.0 * normvsmallba)) * (-1.0 * 2.0 * vsmalbay))) / normvsmallbavalue + (((-1.0 * miubalibxR * vsmalbax) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbay))) / normvsmallbavalue) + (((-1.0 * miubalibzR * vsmalbaz) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbay))) / normvsmallbavalue));
+                  const ADReal Gaussian3 =
+                      _amplitudeScale * amplitudes * S_switch_value * _sharpness *
+                      std::exp(exponent) *
+                      (((-1.0 * miubalibyR * normvsmallba) -
+                        (miubalibyR * vsmalbay * (1.0 / (2.0 * normvsmallba)) *
+                         (-1.0 * 2.0 * vsmalbay))) /
+                           normvsmallbavalue +
+                       (((-1.0 * miubalibxR * vsmalbax) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbay))) /
+                        normvsmallbavalue) +
+                       (((-1.0 * miubalibzR * vsmalbaz) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbay))) /
+                        normvsmallbavalue));
                   const ADReal finalGaussian3 = _ADDGaussian ? Gaussian3 : -Gaussian3;
-                  const ADReal Gaussian4 = _amplitudeScale * amplitudes * S_switch_value * _sharpness * std::exp(exponent) * (((-1.0 * miubalibzR * normvsmallba) - (miubalibzR * vsmalbaz * (1.0 / (2.0 * normvsmallba)) * (-1.0 * 2.0 * vsmalbaz))) / normvsmallbavalue + (((-1.0 * miubalibxR * vsmalbax) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbaz))) / normvsmallbavalue) + (((-1.0 * miubalibyR * vsmalbay) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbaz))) / normvsmallbavalue));
+                  const ADReal Gaussian4 =
+                      _amplitudeScale * amplitudes * S_switch_value * _sharpness *
+                      std::exp(exponent) *
+                      (((-1.0 * miubalibzR * normvsmallba) -
+                        (miubalibzR * vsmalbaz * (1.0 / (2.0 * normvsmallba)) *
+                         (-1.0 * 2.0 * vsmalbaz))) /
+                           normvsmallbavalue +
+                       (((-1.0 * miubalibxR * vsmalbax) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbaz))) /
+                        normvsmallbavalue) +
+                       (((-1.0 * miubalibyR * vsmalbay) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * -1.0 * vsmalbaz))) /
+                        normvsmallbavalue));
                   const ADReal finalGaussian4 = _ADDGaussian ? Gaussian4 : -Gaussian4;
-                  const ADReal Gaussian2plus = _amplitudeScale * amplitudes * S_switch_value  * _sharpness * std::exp(exponent) * (((1.0 * miubalibxR * normvsmallba) - (miubalibxR * vsmalbax * (1.0 / (2.0 * normvsmallba)) * (1.0 * 2.0 * vsmalbax))) / normvsmallbavalue + (((-1.0 * miubalibyR * vsmalbay) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) / normvsmallbavalue) + (((-1.0 * miubalibzR * vsmalbaz) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) / normvsmallbavalue));
+                  const ADReal Gaussian2plus =
+                      _amplitudeScale * amplitudes * S_switch_value * _sharpness *
+                      std::exp(exponent) *
+                      (((1.0 * miubalibxR * normvsmallba) -
+                        (miubalibxR * vsmalbax * (1.0 / (2.0 * normvsmallba)) *
+                         (1.0 * 2.0 * vsmalbax))) /
+                           normvsmallbavalue +
+                       (((-1.0 * miubalibyR * vsmalbay) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) /
+                        normvsmallbavalue) +
+                       (((-1.0 * miubalibzR * vsmalbaz) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) /
+                        normvsmallbavalue));
                   const ADReal finalGaussian2plus = _ADDGaussian ? Gaussian2plus : -Gaussian2plus;
-                  const ADReal Gaussian3plus = _amplitudeScale * amplitudes * S_switch_value  * _sharpness * std::exp(exponent) * (((1.0 * miubalibyR * normvsmallba) - (miubalibyR * vsmalbay * (1.0 / (2.0 * normvsmallba)) * (1.0 * 2.0 * vsmalbay))) / normvsmallbavalue + (((-1.0 * miubalibxR * vsmalbax) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbay))) / normvsmallbavalue) + (((-1.0 * miubalibzR * vsmalbaz) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbay))) / normvsmallbavalue));
+                  const ADReal Gaussian3plus =
+                      _amplitudeScale * amplitudes * S_switch_value * _sharpness *
+                      std::exp(exponent) *
+                      (((1.0 * miubalibyR * normvsmallba) -
+                        (miubalibyR * vsmalbay * (1.0 / (2.0 * normvsmallba)) *
+                         (1.0 * 2.0 * vsmalbay))) /
+                           normvsmallbavalue +
+                       (((-1.0 * miubalibxR * vsmalbax) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbay))) /
+                        normvsmallbavalue) +
+                       (((-1.0 * miubalibzR * vsmalbaz) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbay))) /
+                        normvsmallbavalue));
                   const ADReal finalGaussian3plus = _ADDGaussian ? Gaussian3plus : -Gaussian3plus;
-                  const ADReal Gaussian4plus = _amplitudeScale * amplitudes * S_switch_value  * _sharpness * std::exp(exponent) * (((1.0 * miubalibzR * normvsmallba) - (miubalibzR * vsmalbaz * (1.0 / (2.0 * normvsmallba)) * (1.0 * 2.0 * vsmalbaz))) / normvsmallbavalue + (((-1.0 * miubalibxR * vsmalbax) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) / normvsmallbavalue) + (((-1.0 * miubalibyR * vsmalbay) * ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) / normvsmallbavalue));
+                  const ADReal Gaussian4plus =
+                      _amplitudeScale * amplitudes * S_switch_value * _sharpness *
+                      std::exp(exponent) *
+                      (((1.0 * miubalibzR * normvsmallba) -
+                        (miubalibzR * vsmalbaz * (1.0 / (2.0 * normvsmallba)) *
+                         (1.0 * 2.0 * vsmalbaz))) /
+                           normvsmallbavalue +
+                       (((-1.0 * miubalibxR * vsmalbax) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) /
+                        normvsmallbavalue) +
+                       (((-1.0 * miubalibyR * vsmalbay) *
+                         ((1.0 / (2.0 * normvsmallba)) * (2.0 * 1.0 * vsmalbax))) /
+                        normvsmallbavalue));
                   const ADReal finalGaussian4plus = _ADDGaussian ? Gaussian4plus : -Gaussian4plus;
 
                   aniso += finalGaussian;
@@ -386,15 +520,19 @@ GammaAndLAnisoGauss::computeQpProperties()
   }
 
   const ADReal g2 = _Ggamma[_qp] * _Ggamma[_qp];
-  const ADReal p = -(3.0944 * (g2 * g2 * g2 * g2)) - (1.8169 * (g2 * g2 * g2)) + (10.323 * (g2 * g2)) - (8.1819 * (g2)) + 2.0033;
-  const ADReal dpdg2 = -((3.0944 * 4.0) * (g2 * g2 * g2)) - ((1.8169 * 3.0) * (g2 * g2)) + ((10.323 * 2.0) * (g2)) - 8.1819;
+  const ADReal p = -(3.0944 * (g2 * g2 * g2 * g2)) - (1.8169 * (g2 * g2 * g2)) +
+                   (10.323 * (g2 * g2)) - (8.1819 * (g2)) + 2.0033;
+  const ADReal dpdg2 = -((3.0944 * 4.0) * (g2 * g2 * g2)) - ((1.8169 * 3.0) * (g2 * g2)) +
+                       ((10.323 * 2.0) * (g2)) - 8.1819;
 
   _gamma[_qp] = 1.0 / p;
   _gamma_EN[_qp] = MetaPhysicL::raw_value(1 / p);
 
   const ADReal gamma = _gamma[_qp];
-  _dgamma_minus[_qp] = (-2.0) * (_Ggamma[_qp]) * (_gamma[_qp] * _gamma[_qp]) * (dpdg2)*_dGgamma_minus[_qp];
-  _dgamma_plus[_qp] = (-2.0) * (_Ggamma[_qp]) * (_gamma[_qp] * _gamma[_qp]) * (dpdg2)*_dGgamma_plus[_qp];
+  _dgamma_minus[_qp] =
+      (-2.0) * (_Ggamma[_qp]) * (_gamma[_qp] * _gamma[_qp]) * (dpdg2)*_dGgamma_minus[_qp];
+  _dgamma_plus[_qp] =
+      (-2.0) * (_Ggamma[_qp]) * (_gamma[_qp] * _gamma[_qp]) * (dpdg2)*_dGgamma_plus[_qp];
 
   if (sumval == 0.0)
   {
@@ -418,9 +556,13 @@ GammaAndLAnisoGauss::computeQpProperties()
   const ADReal Inversegamma2 = Inversegamma * Inversegamma;
   const ADReal Inversegamma3 = Inversegamma * Inversegamma * Inversegamma;
   const ADReal Inversegamma4 = Inversegamma * Inversegamma * Inversegamma * Inversegamma;
-  const ADReal Inversegamma5 = Inversegamma * Inversegamma * Inversegamma * Inversegamma * Inversegamma;
-  const ADReal Inversegamma6 = Inversegamma * Inversegamma * Inversegamma * Inversegamma * Inversegamma * Inversegamma;
-  const ADReal f0gamma = (0.0788 * Inversegamma6) - (0.4955 * Inversegamma5) + (1.2244 * Inversegamma4) - (1.5281 * Inversegamma3) + (1.0686 * Inversegamma2) - (0.5563 * Inversegamma) + 0.2907;
+  const ADReal Inversegamma5 =
+      Inversegamma * Inversegamma * Inversegamma * Inversegamma * Inversegamma;
+  const ADReal Inversegamma6 =
+      Inversegamma * Inversegamma * Inversegamma * Inversegamma * Inversegamma * Inversegamma;
+  const ADReal f0gamma = (0.0788 * Inversegamma6) - (0.4955 * Inversegamma5) +
+                         (1.2244 * Inversegamma4) - (1.5281 * Inversegamma3) +
+                         (1.0686 * Inversegamma2) - (0.5563 * Inversegamma) + 0.2907;
 
   _lgb[_qp] = std::sqrt(_kappa[_qp] / (_m[_qp] * f0gamma));
   _lgb_EN[_qp] = MetaPhysicL::raw_value((std::sqrt(_kappa[_qp] / (_m[_qp] * f0gamma))));

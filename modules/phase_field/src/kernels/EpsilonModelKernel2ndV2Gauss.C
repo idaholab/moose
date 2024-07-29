@@ -6,7 +6,8 @@ InputParameters
 EpsilonModelKernel2ndV2Gauss::validParams()
 {
   InputParameters params = ADKernel::validParams();
-  params.addClassDescription("Implements the term: -L \\nabla \\cdot \\left( \\frac{\\partial m(\\theta, v)}{\\partial \\nabla \\eta_i} f_0 \\right)");
+  params.addClassDescription("Implements the term: -L \\nabla \\cdot \\left( \\frac{\\partial "
+                             "m(\\theta, v)}{\\partial \\nabla \\eta_i} f_0 \\right)");
 
   params.addParam<MaterialPropertyName>("f_name", "F", "Base name of the free energy function");
 
