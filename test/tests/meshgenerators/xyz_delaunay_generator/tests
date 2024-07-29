@@ -1,0 +1,61 @@
+[Tests]
+  design = 'meshgenerators/XYZDelaunayGenerator.md'
+  issues = ''
+  [xyzdelaunay]
+    requirement = "The system shall have the capability of tetrahedralizing a triangulated boundary"
+    [basic]
+      type = 'Exodiff'
+      input = 'xyzdelaunay_mesh_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xyzdelaunay_mesh_generator_in.e'
+      recover = false
+      detail = "within an input polyline"
+    []
+    [with_holes]
+      type = 'Exodiff'
+      input = 'xyzdelaunay_with_holes.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xyzdelaunay_with_holes_in.e'
+      recover = false
+      detail = "respecting any specified interior 'hole' meshes"
+    []
+    [stitching]
+      type = 'Exodiff'
+      input = 'xyzdelaunay_stitching.i'
+      cli_args = 'Mesh/final_generator=triang
+                  --mesh-only'
+      exodiff = 'xyzdelaunay_stitching_in.e'
+      exodiff_opts = '-pedantic'
+      recover = false
+      detail = "selectively stitching 'hole' meshes into the final mesh"
+    []
+    [nested]
+      type = 'Exodiff'
+      input = 'xyzdelaunay_nested.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xyzdelaunay_nested_in.e'
+      recover = false
+      detail = "allowing deep nesting of tetrahedralizations within tetrahedralizations"
+    []
+    [smoothed]
+      type = 'Exodiff'
+      input = 'xyzdelaunay_smoothed.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xyzdelaunay_smoothed_in.e'
+      recover = false
+      detail = "with optional Laplacian mesh smoothing."
+    []
+  []
+  [errors]
+    requirement = "The system shall throw an error when tetrahedralizing a triangulated boundary"
+    [err_conflicting_name_map]
+      type = RunException
+      input = 'xyzdelaunay_stitching.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/triang/stitch_holes="true true"
+                  Mesh/triang/holes="hole_1_name hole_2_name_2"'
+      expect_err = "The hole meshes contain subdomain name maps with conflicts."
+      detail = "if the input hole meshes contain subdomain name maps with conflicts"
+    []
+  []
+[]
