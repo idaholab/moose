@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "ADKernel.h"
@@ -13,14 +12,18 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  // Material property L
   const ADMaterialProperty<Real> & _L_AD;
 
+  // Material property m
   const ADMaterialProperty<Real> & _m;
 
-  const ADMaterialProperty<Real> & _dgammadxplus;
-  const ADMaterialProperty<Real> & _dgammadyplus;
-  const ADMaterialProperty<Real> & _dgammadzplus;
+  // Negative derivatives of gamma
+  const ADMaterialProperty<RealGradient> & _dgamma_minus;
 
+  // Number of coupled order parameters
   const unsigned int _op_num;
+
+  // Values of the coupled variables
   const std::vector<const ADVariableValue *> _vals;
 };

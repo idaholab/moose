@@ -1,4 +1,3 @@
-
 #include "GammaModelKernelGauss.h"
 
 registerMooseObject("PhaseFieldApp", GammaModelKernelGauss);
@@ -7,45 +6,32 @@ InputParameters
 GammaModelKernelGauss::validParams()
 {
   InputParameters params = ADKernel::validParams();
-  params.addClassDescription("Implements the term:-L\\ m \\nabla \\cdot \\left( \\sum_{j \\neq i} "
-                             "\\left( \\frac{\\partial \\gamma_{ij}}{\\partial \\nabla\\eta_i} "
+  params.addClassDescription("Implements the term: -L m \\nabla \\cdot \\left( \\sum_{j \\neq i} "
+                             "\\left( \\frac{\\partial \\gamma_{ij}}{\\partial \\nabla \\eta_i} "
                              "\\right) \\eta_i^2 \\eta_j^2 \\right)");
-
-  params.addRequiredCoupledVar("vminus",
-                               "Array of coupled order parameter names for other order parameters");
-
+  params.addRequiredCoupledVar("v", "Array of coupled order parameter names for other order parameters");
   return params;
 }
 
 GammaModelKernelGauss::GammaModelKernelGauss(const InputParameters & parameters)
   : ADKernel(parameters),
     _L_AD(getADMaterialProperty<Real>("L_AD")),
-
     _m(getADMaterialProperty<Real>("m")),
-    _dgammadx(getADMaterialProperty<Real>("dgammadx")),
-    _dgammady(getADMaterialProperty<Real>("dgammady")),
-    _dgammadz(getADMaterialProperty<Real>("dgammadz")),
-
-    _op_num(coupledComponents("vminus")),
-    _vals(adCoupledValues("vminus"))
-
+    _dgamma_plus(getADMaterialProperty<RealGradient>("dgamma_plus")),
+    _op_num(coupledComponents("v")),
+    _vals(adCoupledValues("v"))
 {
 }
 
 ADReal
 GammaModelKernelGauss::computeQpResidual()
 {
-
-  ADReal gradtestx = (_grad_test[_i][_qp](0));
-  ADReal gradtesty = (_grad_test[_i][_qp](1));
-  ADReal gradtestz = (_grad_test[_i][_qp](2));
-
-  // Sum all other order parameters.
-  ADReal SumEtaj = 0.0;
+  // Sum of squares of all other order parameters
+  ADReal sum_eta_j = 0.0;
   for (unsigned int i = 0; i < _op_num; ++i)
-    SumEtaj += (*_vals[i])[_qp] * (*_vals[i])[_qp];
+    sum_eta_j += (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
-  return (1) * _L_AD[_qp] * _m[_qp] * SumEtaj * _u[_qp] * _u[_qp] *
-         (((_dgammadx[_qp]) * gradtestx) + ((_dgammady[_qp]) * gradtesty) +
-          ((_dgammadz[_qp]) * gradtestz));
+  const auto & grad_test = _grad_test[_i][_qp];
+
+  return _L_AD[_qp] * _m[_qp] * sum_eta_j * _u[_qp] * _u[_qp] * _dgamma_plus[_qp] * grad_test;
 }

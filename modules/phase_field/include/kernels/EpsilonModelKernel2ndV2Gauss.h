@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "ADKernel.h"
@@ -13,11 +12,12 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  // Material property L
   const ADMaterialProperty<Real> & _L_AD;
 
-  const ADMaterialProperty<Real> & _dmdxplus;
-  const ADMaterialProperty<Real> & _dmdyplus;
-  const ADMaterialProperty<Real> & _dmdzplus;
+  // Negative derivatives of m
+  const ADMaterialProperty<RealGradient> & _dm_minus;
 
+  // Base name of the free energy function
   const MaterialProperty<Real> & _F;
 };

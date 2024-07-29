@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "Action.h"
@@ -14,9 +12,9 @@ public:
   virtual void act();
 
 protected:
-  /// number of grains to create
+  // Number of grains to create
   const unsigned int _op_num;
 
-  /// base name for the order parameter variables
+  // Base name for the order parameter variables
   const std::string _var_name_base;
 };
