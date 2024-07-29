@@ -9,12 +9,12 @@
 
 #include "DataFileInterface.h"
 #include "MooseError.h"
-#include "ParallelMooseBase.h"
+#include "ParallelParamObject.h"
 #include "Registry.h"
 
 #include <filesystem>
 
-DataFileInterface::DataFileInterface(const ParallelMooseBase & parent) : _parent(parent) {}
+DataFileInterface::DataFileInterface(const ParallelParamObject & parent) : _parent(parent) {}
 
 std::string
 DataFileInterface::getDataFileName(const std::string & param) const

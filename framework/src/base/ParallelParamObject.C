@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ParallelMooseBase.h"
+#include "ParallelParamObject.h"
 
 #include "MooseApp.h"
 
-ParallelMooseBase::ParallelMooseBase(const std::string & type,
-                                     const std::string & name,
-                                     MooseApp & app,
-                                     const InputParameters & params)
+ParallelParamObject::ParallelParamObject(const std::string & type,
+                                         const std::string & name,
+                                         MooseApp & app,
+                                         const InputParameters & params)
   : MooseBase(type, name, app, params),
     MooseBaseParameterInterface(*this, params),
     MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),

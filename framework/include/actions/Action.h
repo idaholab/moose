@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ParallelMooseBase.h"
+#include "ParallelParamObject.h"
 #include "InputParameters.h"
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
@@ -30,7 +30,7 @@ class Factory;
 /**
  * Base class for actions.
  */
-class Action : public ParallelMooseBase, public MeshMetaDataInterface, public PerfGraphInterface
+class Action : public ParallelParamObject, public MeshMetaDataInterface, public PerfGraphInterface
 {
 public:
   static InputParameters validParams();

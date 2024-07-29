@@ -20,17 +20,17 @@
 /**
  * Base class shared by both Action and MooseObject.
  */
-class ParallelMooseBase : public MooseBase,
-                          public MooseBaseParameterInterface,
-                          public MooseBaseErrorInterface,
-                          public libMesh::ParallelObject,
-                          public DataFileInterface
+class ParallelParamObject : public MooseBase,
+                            public MooseBaseParameterInterface,
+                            public MooseBaseErrorInterface,
+                            public libMesh::ParallelObject,
+                            public DataFileInterface
 {
 public:
-  ParallelMooseBase(const std::string & type,
-                    const std::string & name,
-                    MooseApp & app,
-                    const InputParameters & params);
+  ParallelParamObject(const std::string & type,
+                      const std::string & name,
+                      MooseApp & app,
+                      const InputParameters & params);
 
-  virtual ~ParallelMooseBase() = default;
+  virtual ~ParallelParamObject() = default;
 };

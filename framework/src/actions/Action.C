@@ -42,7 +42,7 @@ Action::validParams()
 }
 
 Action::Action(const InputParameters & parameters)
-  : ParallelMooseBase(
+  : ParallelParamObject(
         parameters.get<std::string>("action_type"),
         parameters.get<std::string>("_action_name"),
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor"),

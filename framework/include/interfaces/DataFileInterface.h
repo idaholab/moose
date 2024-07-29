@@ -13,7 +13,7 @@
 
 #include <string>
 
-class ParallelMooseBase;
+class ParallelParamObject;
 
 /**
  * Interface for objects that need to resolve data file paths (MooseObject and Action)
@@ -30,7 +30,7 @@ public:
    * Constructing the object
    * @param parent Parent object (either MooseObject or Action) for params and  output
    */
-  DataFileInterface(const ParallelMooseBase & parent);
+  DataFileInterface(const ParallelParamObject & parent);
 
   /**
    * Returns the path of a data file for a given FileName type parameter, searching
@@ -51,5 +51,5 @@ public:
                                     const std::string * param = nullptr) const;
 
 private:
-  const ParallelMooseBase & _parent;
+  const ParallelParamObject & _parent;
 };
