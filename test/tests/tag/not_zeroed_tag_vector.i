@@ -1,13 +1,14 @@
 [Problem]
   extra_tag_vectors = zeroed_tag
-  not_zeroed_tag_vectors = manual_tag
+  not_zeroed_tag_vectors = not_zeroed_tag
 []
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  dim = 1
+  nx = 2
+  xmin = -1
+  xmax = 1
 []
 
 [Variables]
@@ -16,26 +17,41 @@
 []
 
 [Kernels]
-  [diff]
-    type = Diffusion
+  [null]
+    type = NullKernel
     variable = u
-    extra_vector_tags = 'manual_tag zeroed_tag'
   []
 []
 
+[Functions]
+  [switch_off]
+    type = ParsedFunction
+    expression = 'if(t < 1.0001, 1, 0)'
+  []
+[]
+
+[DiracKernels]
+  [point_source1]
+    type = FunctionDiracSource
+    variable = u
+    function = switch_off
+    point = '0 0 0'
+    vector_tags = 'zeroed_tag not_zeroed_tag'
+  []
+[]
 
 [AuxVariables]
-  [manual_tag]
+  [not_zeroed_tag]
   []
   [zeroed_tag]
   []
 []
 
 [AuxKernels]
-  [manual_tag_value]
+  [not_zeroed_tag_value]
     type = TagVectorAux
-    variable = manual_tag
-    vector_tag = manual_tag
+    variable = not_zeroed_tag
+    vector_tag = not_zeroed_tag
     v = u
   []
   [zeroed_tag_value]
@@ -46,26 +62,10 @@
   []
 []
 
-[BCs]
-  [left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-  []
-  [right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 1
-  []
-[]
-
 [Executioner]
-  type = Steady
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  type = Transient
+  dt = 1
+  num_steps = 2
 []
 
 [Outputs]
