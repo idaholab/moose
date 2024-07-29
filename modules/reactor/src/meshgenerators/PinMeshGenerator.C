@@ -204,7 +204,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     if (_homogenized)
     {
       // If flexible assembly stitching is invoked and this is a homogeneous assembly mesh, do not
-      // call mesh subgenerators here The homogeneous assembly mesh should be created entirely in
+      // call mesh subgenerators here. The homogeneous assembly mesh should be created entirely in
       // generateFlexibleAssemblyBoundaries()
       bool skip_assembly_generation = _is_assembly && use_flexible_stitching;
 

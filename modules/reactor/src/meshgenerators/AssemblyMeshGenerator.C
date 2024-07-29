@@ -362,7 +362,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     }
 
     // Modify outermost mesh interval to enable flexible assembly stitching
-    auto use_flexible_stitching = getReactorParam<bool>(RGMB::flexible_assembly_stitching);
+    const auto use_flexible_stitching = getReactorParam<bool>(RGMB::flexible_assembly_stitching);
     if (use_flexible_stitching)
     {
       generateFlexibleAssemblyBoundaries();
@@ -518,7 +518,7 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     addMeshSubgenerator("BlockDeletionGenerator", name() + "_del_outer", params);
   }
   {
-    // Invoke FlexiblePatternGenerator to triangulate deleted mesh interval
+    // Invoke FlexiblePatternGenerator to triangulate deleted mesh region
     auto params = _app.getFactory().getValidParams("FlexiblePatternGenerator");
 
     params.set<std::vector<MeshGeneratorName>>("inputs") = {name() + "_del_outer"};
