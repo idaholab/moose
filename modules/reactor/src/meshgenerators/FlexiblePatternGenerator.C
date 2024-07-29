@@ -122,8 +122,9 @@ FlexiblePatternGenerator::validParams()
   params.addParam<boundary_id_type>(
       "external_boundary_id",
       "The boundary id of the external boundary in addition to the default 10000.");
-  params.addParam<std::string>(
-      "external_boundary_name", std::string(), "Optional boundary name for the external boundary.");
+  params.addParam<BoundaryName>("external_boundary_name",
+                                BoundaryName(),
+                                "Optional boundary name for the external boundary.");
 
   params.addParam<bool>("delete_default_external_boundary_from_inputs",
                         true,

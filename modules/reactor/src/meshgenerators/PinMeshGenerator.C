@@ -214,7 +214,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
       const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
                                               : "outer_pin_" + std::to_string(_pin_type);
-      params.set<std::string>("external_boundary_name") = boundary_name;
+      params.set<BoundaryName>("external_boundary_name") = boundary_name;
       params.set<std::vector<subdomain_id_type>>("block_id") = {_quad_center ? pin_block_id_start
                                                                              : pin_block_id_tri};
       params.set<MooseEnum>("element_type") = _quad_center ? "QUAD" : "TRI";
@@ -340,7 +340,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
         const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
                                                 : "outer_pin_" + std::to_string(_pin_type);
-        params.set<std::string>("external_boundary_name") = boundary_name;
+        params.set<BoundaryName>("external_boundary_name") = boundary_name;
         bool flat_side_up = (_mesh_geometry == "Square");
         params.set<bool>("flat_side_up") = flat_side_up;
         params.set<bool>("create_outward_interface_boundaries") = false;
@@ -521,9 +521,9 @@ PinMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<MooseEnum>("boundary_type") = (_mesh_geometry == "Hex") ? "HEXAGON" : "CARTESIAN";
     params.set<unsigned int>("boundary_sectors") =
         getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
-    params.set<double>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
+    params.set<Real>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
     params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
-    params.set<std::string>("external_boundary_name") =
+    params.set<BoundaryName>("external_boundary_name") =
         "outer_assembly_" + std::to_string(_pin_type);
     params.set<SubdomainName>("background_subdomain_name") = outermost_block_name + "_TRI";
     // Allocate block ID 9998 for triangulated outer region, since 9999 is reserved for tri elements

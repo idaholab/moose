@@ -322,7 +322,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       }
 
       params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
-      params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
+      params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
 
       addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
 
@@ -528,9 +528,9 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<MooseEnum>("boundary_type") = (_geom_type == "Hex") ? "HEXAGON" : "CARTESIAN";
     params.set<unsigned int>("boundary_sectors") =
         getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
-    params.set<double>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
+    params.set<Real>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
     params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
-    params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
+    params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
     params.set<SubdomainName>("background_subdomain_name") = block_to_delete + "_TRI";
     params.set<unsigned short>("background_subdomain_id") = 19999;
 
