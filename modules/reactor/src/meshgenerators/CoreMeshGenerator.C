@@ -632,7 +632,6 @@ CoreMeshGenerator::constituentAssembliesNeedFlexibleStiching()
 {
   MeshGeneratorName first_nondummy_assembly = "";
   bool assembly_homogenization = false;
-  bool pin_as_assembly = false;
   unsigned int n_constituent_pins = 0;
   unsigned int n_pin_sectors = 0;
 
@@ -685,20 +684,30 @@ CoreMeshGenerator::constituentAssembliesNeedFlexibleStiching()
     {
       first_nondummy_assembly = MeshGeneratorName(_inputs[i]);
       assembly_homogenization = getMeshProperty<bool>(RGMB::is_homogenized, _inputs[i]);
-      pin_as_assembly = getMeshProperty<bool>(RGMB::is_single_pin, _inputs[i]);
       n_constituent_pins = total_pins;
       n_pin_sectors = pin_sectors_per_side;
     }
     else
     {
       if (getMeshProperty<bool>(RGMB::is_homogenized, _inputs[i]) != assembly_homogenization)
+      {
+        mooseWarning("Detected mix of homogenized and heterogeneous assemblies between " +
+                     first_nondummy_assembly + " and " + _inputs[i]);
         return true;
-      if (getMeshProperty<bool>(RGMB::is_single_pin, _inputs[i]) != pin_as_assembly)
-        return true;
+      }
       if (total_pins != n_constituent_pins)
+      {
+        mooseWarning(
+            "Detected assemblies with different number of total constituent pins between " +
+            first_nondummy_assembly + " and " + _inputs[i]);
         return true;
+      }
       if (pin_sectors_per_side != n_pin_sectors)
+      {
+        mooseWarning("Constituent pins in " + first_nondummy_assembly + " and " + _inputs[i] +
+                     " differ in terms of number of sectors per side");
         return true;
+      }
     }
   }
   return false;

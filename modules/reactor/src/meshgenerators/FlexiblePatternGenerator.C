@@ -210,7 +210,7 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
         getParam<bool>("delete_default_external_boundary_from_inputs")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
-                              : OUTER_SIDESET_ID),
+                              : (boundary_id_type)OUTER_SIDESET_ID),
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
                                 : "")
