@@ -18,6 +18,7 @@ ParallelMooseBase::ParallelMooseBase(const std::string & type,
   : MooseBase(type, name, app, params),
     MooseBaseParameterInterface(*this, params),
     MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
-    ParallelObject(app)
+    ParallelObject(app),
+    DataFileInterface(*this)
 {
 }

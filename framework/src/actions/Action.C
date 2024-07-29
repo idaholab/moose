@@ -62,7 +62,6 @@ Action::Action(const InputParameters & parameters)
             (parameters.isParamValid("task") && parameters.get<std::string>("task") != ""
                  ? std::string("::") + parameters.get<std::string>("task")
                  : "")),
-    DataFileInterface<Action>(*this),
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")
                                : ""),

@@ -13,6 +13,7 @@
 #include "MooseBase.h"
 #include "MooseBaseParameterInterface.h"
 #include "MooseBaseErrorInterface.h"
+#include "DataFileInterface.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -22,7 +23,8 @@
 class ParallelMooseBase : public MooseBase,
                           public MooseBaseParameterInterface,
                           public MooseBaseErrorInterface,
-                          public libMesh::ParallelObject
+                          public libMesh::ParallelObject,
+                          public DataFileInterface
 {
 public:
   ParallelMooseBase(const std::string & type,

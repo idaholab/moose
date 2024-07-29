@@ -14,7 +14,6 @@
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
-#include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
 
 #include <string>
@@ -31,10 +30,7 @@ class Factory;
 /**
  * Base class for actions.
  */
-class Action : public ParallelMooseBase,
-               public MeshMetaDataInterface,
-               public PerfGraphInterface,
-               public DataFileInterface<Action>
+class Action : public ParallelMooseBase, public MeshMetaDataInterface, public PerfGraphInterface
 {
 public:
   static InputParameters validParams();

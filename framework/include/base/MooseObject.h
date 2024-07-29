@@ -15,7 +15,6 @@
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
-#include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
 
 #define usingMooseObjectMembers                                                                    \
@@ -26,9 +25,7 @@
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject : public ParallelMooseBase,
-                    public DataFileInterface<MooseObject>,
-                    public std::enable_shared_from_this<MooseObject>
+class MooseObject : public ParallelMooseBase, public std::enable_shared_from_this<MooseObject>
 {
 public:
   static InputParameters validParams();

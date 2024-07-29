@@ -50,7 +50,6 @@ MooseObject::MooseObject(const InputParameters & parameters)
                       parameters.get<std::string>("_object_name"),
                       *parameters.getCheckedPointerParam<MooseApp *>("_moose_app"),
                       parameters),
-    DataFileInterface<MooseObject>(*this),
     _enabled(getParam<bool>("enable"))
 {
   if (Registry::isRegisteredObj(type()) && _app.getFactory().currentlyConstructing() != &parameters)
