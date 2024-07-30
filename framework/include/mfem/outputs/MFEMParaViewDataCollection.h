@@ -18,4 +18,5 @@ public:
 protected:
   bool _high_order_output;
   unsigned int _refinements;
+  const mfem::VTKFormat _vtk_format;
 };
