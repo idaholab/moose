@@ -13,10 +13,11 @@
 
 #include <string>
 
+class ParallelParamObject;
+
 /**
  * Interface for objects that need to resolve data file paths (MooseObject and Action)
  */
-template <class T>
 class DataFileInterface
 {
 public:
@@ -29,7 +30,7 @@ public:
    * Constructing the object
    * @param parent Parent object (either MooseObject or Action) for params and  output
    */
-  DataFileInterface(const T & parent);
+  DataFileInterface(const ParallelParamObject & parent);
 
   /**
    * Returns the path of a data file for a given FileName type parameter, searching
@@ -50,5 +51,5 @@ public:
                                     const std::string * param = nullptr) const;
 
 private:
-  const T & _parent;
+  const ParallelParamObject & _parent;
 };
