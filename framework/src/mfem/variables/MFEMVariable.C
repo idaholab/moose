@@ -17,7 +17,7 @@ MFEMVariable::validParams()
   params += MooseVariableBase::validParams();
 
   params.addClassDescription("Class for MFEM variables (gridfunctions).");
-  params.registerBase("MFEMVariable");
+  params.registerBase("MooseVariableBase");
 
   return params;
 }
