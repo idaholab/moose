@@ -23,6 +23,8 @@
 
 #include "libmesh/threads.h"
 
+Threads::spin_mutex ComputeJacobianThread::_add_mutex;
+
 ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
                                              const std::set<TagID> & tags)
   : NonlinearThread(fe_problem), _tags(tags)
@@ -151,7 +153,7 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
 
   if (_num_cached % 20 == 0)
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_add_mutex);
     _fe_problem.addCachedJacobian(_tid);
   }
 }

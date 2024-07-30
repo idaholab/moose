@@ -44,7 +44,7 @@ protected:
   void accumulateNeighbor() override;
   virtual void accumulateNeighborLower() override;
   virtual void accumulateLower() override;
-  virtual void accumulate() override{};
+  virtual void accumulate() override {};
 
   virtual void compute(ResidualObject &) override { mooseError("Not implemented"); };
   void compute(KernelBase & kernel) override;
@@ -54,4 +54,7 @@ protected:
   void compute(InterfaceKernelBase & ik) override;
 
   std::string objectType() const override { return "Jacobian"; }
+
+private:
+  static Threads::spin_mutex _add_mutex;
 };
