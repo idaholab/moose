@@ -1,0 +1,20 @@
+[Tests]
+  [test]
+    requirement = 'The system shall be able to solve a diffusion problem with penalty boundary conditions using a second order Lagrange basis'
+    [regular]
+      type = Exodiff
+      exodiff = test_out.e
+      input = test.i
+      cli_args = '-ksp_norm_type preconditioned'
+      detail = 'using an iterative preconditioner applied to all the degrees of freedom, and'
+    []
+    [sc]
+      type = Exodiff
+      exodiff = test_out.e
+      input = test.i
+      cli_args = '--nl0-static-condensation -nl0_condensed_ksp_norm_type preconditioned'
+      prereq = 'test/regular'
+      detail = 'using an iterative preconditioner applied to only degrees of freedom remaining after static condensation.'
+    []
+  []
+[]
