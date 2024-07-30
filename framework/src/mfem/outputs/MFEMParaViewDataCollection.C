@@ -18,13 +18,20 @@ MFEMParaViewDataCollection::validParams()
                         "high-order elements (false by default)."
                         "Reading high-order data requires ParaView"
                         "5.5 or later.");
+
+  MooseEnum vtk_format("ASCII BINARY BINARY32", "BINARY", true);
+  params.addParam<MooseEnum>(
+      "vtk_format",
+      vtk_format,
+      "Select VTK data format to use, choosing between BINARY, BINARY32, and ASCII.");
   return params;
 }
 
 MFEMParaViewDataCollection::MFEMParaViewDataCollection(const InputParameters & parameters)
   : MFEMDataCollection(parameters),
     _high_order_output(getParam<bool>("high_order_output")),
-    _refinements(getParam<unsigned int>("refinements"))
+    _refinements(getParam<unsigned int>("refinements")),
+    _vtk_format(parameters.get<MooseEnum>("vtk_format").getEnum<mfem::VTKFormat>())
 {
 }
 
@@ -36,6 +43,7 @@ MFEMParaViewDataCollection::createDataCollection(const std::string & collection_
   pv_dc->SetPrecision(9);
   pv_dc->SetHighOrderOutput(_high_order_output);
   pv_dc->SetLevelsOfDetail(_refinements + 1);
+  pv_dc->SetDataFormat(_vtk_format);
 
   return pv_dc;
 }
