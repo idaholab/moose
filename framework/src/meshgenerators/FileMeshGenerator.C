@@ -57,6 +57,9 @@ FileMeshGenerator::validParams()
   params.addParam<MatrixFileName>(
       "constraint_matrix", "", "The name of a constraint matrix file to apply to the mesh");
   params.addClassDescription("Read a mesh from a file.");
+  params.addParamNamesToGroup(
+      "clear_spline_nodes discontinuous_spline_extraction constraint_matrix",
+      "IsoGeometric Analysis (IGA) and other mesh constraint options");
   return params;
 }
 
