@@ -20,6 +20,7 @@
 #include "FVElementalKernel.h"
 #include "MaterialBase.h"
 #include "ConsoleUtils.h"
+#include "Assembly.h"
 
 #include "libmesh/threads.h"
 
@@ -151,7 +152,7 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
   _fe_problem.cacheJacobian(_tid);
   _num_cached++;
 
-  if (_num_cached % 20 == 0)
+  if (_num_cached % 20 == 0 || _fe_problem.assembly(_tid, _nl.number()).hasStaticCondensation())
   {
     Threads::spin_mutex::scoped_lock lock(_add_mutex);
     _fe_problem.addCachedJacobian(_tid);
