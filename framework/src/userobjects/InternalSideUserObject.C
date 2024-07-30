@@ -30,8 +30,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
   : UserObject(parameters),
     BlockRestrictable(this),
     TwoMaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
-    NeighborCoupleable(this, false, false),
-    MooseVariableDependencyInterface(this),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     TransientInterface(this),
     ElementIDInterface(this),
     _mesh(_subproblem.mesh()),
@@ -48,10 +47,6 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     _neighbor_elem(_assembly.neighbor()),
     _current_neighbor_volume(_assembly.neighborVolume())
 {
-  // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
 }
 
 const Real &

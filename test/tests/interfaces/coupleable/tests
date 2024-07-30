@@ -1,10 +1,26 @@
 [Tests]
-  design = 'NeighborCoupleable.md'
-  issues = '#21989'
   [neighbor_coupleable]
+    design = 'NeighborCoupleable.md'
+    issues = '#21989'
     type = CSVDiff
     input = 'states.i'
     csvdiff = 'states_out.csv'
     requirement = 'The system shall be able to compute the old and older values of a variable in the neighbor cell.'
+  []
+  [coupling_by_name]
+    design = 'Coupleable.md'
+    issues = '#28214'
+    type = Exodiff
+    input = 'coupling_by_name.i'
+    exodiff = 'coupling_by_name_out.e'
+    requirement = 'The system shall be able to couple a standard variable with its name directly through the coupling interface.'
+  []
+  [array_coupling_by_name]
+    design = 'Coupleable.md'
+    issues = '#28214'
+    type = Exodiff
+    input = 'array_coupling_by_name.i'
+    exodiff = 'array_coupling_by_name_out.e'
+    requirement = 'The system shall be able to couple an array variable with its name directly through the coupling interface.'
   []
 []
