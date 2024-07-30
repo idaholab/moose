@@ -53,12 +53,19 @@ FEProblem::FEProblem(const InputParameters & parameters)
   }
 
   if (_num_linear_sys)
+  {
+    if (_num_nl_sys)
+      // The logic below indexes _solver_systems as if there are no nonlinear systems, so add this
+      // error until that is fixed
+      mooseError("MOOSE is not currently equipped to handle both nonlinear and linear systems at "
+                 "the same time");
     for (const auto i : index_range(_linear_sys_names))
     {
       _linear_systems[i] = std::make_shared<LinearSystem>(*this, _linear_sys_names[i]);
       _solver_systems[_num_nl_sys + i] =
           std::dynamic_pointer_cast<SolverSystem>(_linear_systems[i]);
     }
+  }
 
   if (_solver_systems.size() > 1)
     for (auto & solver_system : _solver_systems)
