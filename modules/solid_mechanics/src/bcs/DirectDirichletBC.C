@@ -9,7 +9,7 @@
 
 #include "DirectDirichletBC.h"
 
-registerMooseObject("MooseApp", DirectDirichletBC);
+registerMooseObject("SolidMechanicsApp", DirectDirichletBC);
 
 InputParameters
 DirectDirichletBC::validParams()

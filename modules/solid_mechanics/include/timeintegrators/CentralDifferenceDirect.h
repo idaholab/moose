@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ExplicitTimeIntegrator.h"
+#include "MooseError.h"
 #include "libmesh/sparse_matrix.h"
 
 /**
@@ -40,10 +41,6 @@ public:
   }
 
 protected:
-  /**
-   * Helper function that actually does the math for computing the time derivative
-   */
-
   const bool & _constant_mass;
 
   const TagName & _mass_matrix;

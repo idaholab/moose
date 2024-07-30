@@ -12,7 +12,8 @@
 #include "DirectDirichletBCBase.h"
 
 /**
- * Boundary condition of a Dirichlet type
+ * Boundary condition of a Direct Dirichlet type
+ * For use with direct central difference time integrator
  *
  * Sets the value in the node
  */
