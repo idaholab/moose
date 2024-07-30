@@ -137,6 +137,72 @@ public:
    */
   void standardizeData(RealEigenMatrix & data, bool keep_moments = false);
 
+
+    void sq_dist(const RealEigenMatrix &X1_in, RealEigenMatrix &D_out, const RealEigenMatrix &X2_in = RealEigenMatrix(0,0));
+
+  struct Settings {
+    Real l;
+    Real u;
+    struct {
+      Real g;
+      Real theta;
+    } alpha, beta;
+  };
+
+  struct Initial {
+    RealEigenMatrix theta;
+    Real g;
+    Real tau2;
+  };
+
+  struct Output {
+    RealEigenMatrix x;
+    RealEigenMatrix y;
+    int nmcmc;
+    Settings settings;
+    Initial initial;
+    RealEigenMatrix g;
+    RealEigenMatrix theta;
+    RealEigenMatrix tau2;
+    RealEigenMatrix ll;
+  };
+
+  struct SampleGResult {
+    Real g;
+    Real ll;
+  };
+
+  struct SampleThetaResult {
+    Real theta;
+    Real ll;
+    Real tau2;
+  };
+
+  struct InvDetResult {
+    RealEigenMatrix Mi;
+    Real ldet;
+  };
+
+  struct LogLResult {
+    Real logl;
+    Real tau2;
+  };
+
+  void logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta, 
+          LogLResult & result, bool outer=true, bool tau2=false);
+
+  void sample_g(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g_t, const RealEigenMatrix theta, 
+              Real alpha, Real beta, Real l, Real u, Real ll_prev, SampleGResult & result);
+
+  void sample_theta(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_t,
+              unsigned int i, Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev);
+
+  void check_settings(Settings & settings);
+
+  // Tune hyperparameters using MCMC
+  void tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
+                           const RealEigenMatrix & training_data);
+
   // Tune hyperparameters using Adam
   void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                            const RealEigenMatrix & training_data,
