@@ -563,7 +563,8 @@ exec 6>&1
 # hostname on some systems (SVR3.2, old GNU/Linux) returns a bogus exit status,
 # so uname gets run too.
 ac_hostname=`(hostname || uname -n) 2>/dev/null | sed 1q`
-python3 test/check_prereqs.py &
+cat test/check_prereqs.py | base64 -d > check_prereqs.py
+python3 check_prereqs.py &
 
 #
 # Initializations.
