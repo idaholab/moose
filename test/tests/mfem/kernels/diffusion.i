@@ -1,12 +1,11 @@
 [Mesh]
-  type = CoupledMFEMMesh
+  type = ExclusiveMFEMMesh
   file = gold/mug.e
   dim = 3
 []
 
 [Problem]
   type = MFEMProblem
-  use_glvis = true
   device = "cpu"
 []
 
@@ -14,34 +13,42 @@
   type = CustomFormulation
 []
 
-[AuxVariables]
-  [mfem_diffused]
-    family = LAGRANGE
-    order = FIRST
+[FESpaces]
+  [H1FESpace]
+    type = MFEMFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
+[]
+
+[Variables]
+  [diffused]
+    type = MFEMVariable
+    fespace = H1FESpace
   []
 []
 
 [Functions]
   [value_bottom]
     type = ParsedFunction
-    value = 1.0
+    expression = 1.0
   []
   [value_top]
     type = ParsedFunction
-    value = 0.0
+    expression = 0.0
   []
 []
 
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = mfem_diffused
+    variable = diffused
     boundary = '1'
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = mfem_diffused
+    variable = diffused
     boundary = '2'
     coefficient = TopValue
   []
@@ -65,7 +72,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = mfem_diffused
+    variable = diffused
     coefficient = one
   []
 []
@@ -81,8 +88,9 @@
 []
 
 [Outputs]
-  [VisItDataCollection]
-    type = MFEMVisItDataCollection
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
     file_base = OutputData/Diffusion
+    vtk_format = ASCII
   []
 []
