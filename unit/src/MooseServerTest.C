@@ -1061,8 +1061,8 @@ label: uniform_refine                         text: uniform_refine = ${1:0}     
 label: up_direction                           text: up_direction =                                      desc: Specify what axis... pos: [6.0]-[6.0] kind: 13 format: regular
 label: use_displaced_mesh                     text: use_displaced_mesh = ${1:true}                      desc: Create the displa... pos: [6.0]-[6.0] kind:  8 format: snippet
 label: use_split                              text: use_split = ${1:false}                              desc: Use split distrib... pos: [6.0]-[6.0] kind:  8 format: snippet
-label: *                                      text: [block_name]\n  $0\n[]                              desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
-label: Partitioner                            text: [Partitioner]\n  $0\n[]                             desc: application named... pos: [6.0]-[6.0] kind: 22 format: snippet
+label: *                                      text: [block_name]\n  type = \n  $0\n[]                   desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
+label: Partitioner                            text: [Partitioner]\n  type = \n  $0\n[]                  desc: application named... pos: [6.0]-[6.0] kind: 22 format: snippet
 )INPUT";
 
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
@@ -1094,7 +1094,7 @@ label: Debug                            text: [Debug]\n  $0\n[]                 
 label: DeprecatedBlock                  text: [DeprecatedBlock]\n  $0\n[]                  desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: DiracKernels                     text: [DiracKernels]\n  $0\n[]                     desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Distributions                    text: [Distributions]\n  $0\n[]                    desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
-label: Executioner                      text: [Executioner]\n  $0\n[]                      desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
+label: Executioner                      text: [Executioner]\n  type = \n  $0\n[]           desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Executors                        text: [Executors]\n  $0\n[]                        desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: FVBCs                            text: [FVBCs]\n  $0\n[]                            desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: FVICs                            text: [FVICs]\n  $0\n[]                            desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
@@ -1107,7 +1107,7 @@ label: ICs                              text: [ICs]\n  $0\n[]                   
 label: InterfaceKernels                 text: [InterfaceKernels]\n  $0\n[]                 desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Kernels                          text: [Kernels]\n  $0\n[]                          desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Materials                        text: [Materials]\n  $0\n[]                        desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
-label: Mesh                             text: [Mesh]\n  $0\n[]                             desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
+label: Mesh                             text: [Mesh]\n  file = \n  $0\n[]                  desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: MeshDivisions                    text: [MeshDivisions]\n  $0\n[]                    desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: MultiApps                        text: [MultiApps]\n  $0\n[]                        desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: NodalKernels                     text: [NodalKernels]\n  $0\n[]                     desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
@@ -1187,11 +1187,11 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
   int request_char = 9;
   std::size_t expect_count = 5;
   std::string expect_items = R"INPUT(
-label: Eigenvalue         text: Eigenvalue         desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: regular
-label: InversePowerMethod text: InversePowerMethod desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: regular
-label: NonlinearEigen     text: NonlinearEigen     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: regular
-label: Steady             text: Steady             desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: regular
-label: Transient          text: Transient          desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: regular
+label: Eigenvalue         text: Eigenvalue                       desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: regular
+label: InversePowerMethod text: InversePowerMethod\nbx_norm = \n desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: regular
+label: NonlinearEigen     text: NonlinearEigen\nbx_norm = \n     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: regular
+label: Steady             text: Steady                           desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: regular
+label: Transient          text: Transient                        desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: regular
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
@@ -1425,7 +1425,7 @@ TEST_F(MooseServerTest, CompletionPartialInputCases)
 label: ghosted_boundaries           text: ghosted_boundaries =            desc: Boundaries to be ... pos: [3.2]-[3.6] kind: 14 format: regular
 label: ghosted_boundaries_inflation text: ghosted_boundaries_inflation =  desc: If you are using ... pos: [3.2]-[3.6] kind: 14 format: regular
 label: ghosting_patch_size          text: ghosting_patch_size =           desc: The number of nea... pos: [3.2]-[3.6] kind: 14 format: regular
-label: *                            text: [ghos]\n  $0\n[]                desc: custom user named... pos: [3.2]-[3.6] kind:  6 format: snippet
+label: *                            text: [ghos]\n  type = \n  $0\n[]     desc: custom user named... pos: [3.2]-[3.6] kind:  6 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
@@ -1435,8 +1435,8 @@ label: *                            text: [ghos]\n  $0\n[]                desc: 
   request_char = 5;
   expect_count = 2;
   expect_items = R"INPUT(
-label: FVInitialCondition text: FVInitialCondition]\n  $0\n[] desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
-label: InitialCondition   text: InitialCondition]\n  $0\n[]   desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
+label: FVInitialCondition text: FVInitialCondition]\n  type = \n  $0\n[] desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
+label: InitialCondition   text: InitialCondition]\n  type = \n  $0\n[]   desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
@@ -1457,9 +1457,9 @@ label: v text: v desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: r
   request_char = 6;
   expect_count = 3;
   expect_items = R"INPUT(
-label: TimeIntegrator text: TimeIntegrator]\n  $0\n[] desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
-label: TimeStepper    text: TimeStepper]\n  $0\n[]    desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
-label: TimeSteppers   text: TimeSteppers]\n  $0\n[]   desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeIntegrator text: TimeIntegrator]\n  type = \n  $0\n[] desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeStepper    text: TimeStepper]\n  type = \n  $0\n[]    desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeSteppers   text: TimeSteppers]\n  $0\n[]              desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 

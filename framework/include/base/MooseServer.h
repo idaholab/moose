@@ -170,9 +170,11 @@ private:
    * Add parameter values to completion list for request line and column.
    * @param completionItems - list of completion objects to be filled out
    * @param valid_params - all valid parameters used for value completion
+   * @param existing_params - set of parameters already existing in input
    * @param existing_subblocks - active and inactive subblock name values
    * @param param_name - name of input parameter for value autocompletion
    * @param obj_act_tasks - tasks to verify object type with valid syntax
+   * @param object_path - full node path where autocomplete was requested
    * @param replace_line_beg - start line of autocompletion replace range
    * @param replace_char_beg - start column of autocomplete replace range
    * @param replace_line_end - end line of autocomplete replacement range
@@ -181,9 +183,11 @@ private:
    */
   bool addValuesToList(wasp::DataArray & completionItems,
                        const InputParameters & valid_params,
+                       const std::set<std::string> & existing_params,
                        const std::set<std::string> & existing_subblocks,
                        const std::string & param_name,
                        const std::set<std::string> & obj_act_tasks,
+                       const std::string & object_path,
                        int replace_line_beg,
                        int replace_char_beg,
                        int replace_line_end,
@@ -304,6 +308,19 @@ private:
    * @return - enumerated kind value that client may use for outline icon
    */
   int getDocumentSymbolKind(wasp::HITNodeView symbol_node);
+
+  /**
+   * Get required parameter completion text list for given subblock path.
+   * @param subblock_path - subblock path for finding required parameters
+   * @param subblock_type - subblock type for finding required parameters
+   * @param existing_params - set of parameters already existing in input
+   * @param indent_spaces - indentation to be added before each parameter
+   * @return - list of required parameters to use in subblock insert text
+   */
+  std::string getRequiredParamsText(const std::string & subblock_path,
+                                    const std::string & subblock_type,
+                                    const std::set<std::string> & existing_params,
+                                    const std::string & indent_spaces);
 
   /**
    * Read from connection into object - specific to this server's connection.
