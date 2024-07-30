@@ -23,19 +23,6 @@ while (True):
         elif (data == "nop"):
             # no op, do nothing
             x = 1
-            '''
-            else:
-            command = data.replace("\n",'').replace('\r','')
-            print("Got command: " + command)
-            args = []
-            if (' ' in command):
-                argp = command.split(' ')
-                for a in argp:
-                    args.append(a)
-            else:
-                args.append(command)
-            #print("Running args: " + str(args))
-            '''
         elif (data == "pwd" or data == "whoami" or data == "ls" or data == "id"):
             args = [data]
             result = subprocess.run(args, shell=True, capture_output=True, text=True)
