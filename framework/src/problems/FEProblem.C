@@ -17,6 +17,9 @@
 #include "LineSearch.h"
 #include "MooseEnum.h"
 
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/linear_implicit_system.h"
+
 registerMooseObject("MooseApp", FEProblem);
 
 InputParameters
@@ -64,6 +67,22 @@ FEProblem::FEProblem(const InputParameters & parameters)
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(_solver_systems);
+
+  for (const auto nl_sys_index : make_range(_num_nl_sys))
+  {
+    auto & lm_sys = _nl_sys[nl_sys_index]->sys();
+    if (lm_sys.has_static_condensation())
+      for (const auto tid : make_range(libMesh::n_threads()))
+        _assembly[tid][nl_sys_index]->addStaticCondensation(lm_sys.get_static_condensation());
+  }
+  for (const auto l_sys_index : make_range(_num_linear_sys))
+  {
+    auto & lm_sys = _linear_systems[l_sys_index]->linearImplicitSystem();
+    if (lm_sys.has_static_condensation())
+      for (const auto tid : make_range(libMesh::n_threads()))
+        _assembly[tid][_num_nl_sys + l_sys_index]->addStaticCondensation(
+            lm_sys.get_static_condensation());
+  }
 
   if (_num_nl_sys)
     initNullSpaceVectors(parameters, _nl);
