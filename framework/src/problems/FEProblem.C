@@ -17,6 +17,9 @@
 #include "LineSearch.h"
 #include "MooseEnum.h"
 
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/linear_implicit_system.h"
+
 registerMooseObject("MooseApp", FEProblem);
 
 InputParameters
@@ -50,15 +53,38 @@ FEProblem::FEProblem(const InputParameters & parameters)
   }
 
   if (_num_linear_sys)
+  {
+    if (_num_nl_sys)
+      // The logic below indexes _solver_systems as if there are no nonlinear systems, so add this
+      // error until that is fixed
+      mooseError("MOOSE is not currently equipped to handle both nonlinear and linear systems at "
+                 "the same time");
     for (const auto i : index_range(_linear_sys_names))
     {
       _linear_systems[i] = std::make_shared<LinearSystem>(*this, _linear_sys_names[i]);
       _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(_linear_systems[i]);
     }
+  }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(_solver_systems);
+
+  for (const auto nl_sys_index : make_range(_num_nl_sys))
+  {
+    auto & lm_sys = _nl_sys[nl_sys_index]->sys();
+    if (lm_sys.has_static_condensation())
+      for (const auto tid : make_range(libMesh::n_threads()))
+        _assembly[tid][nl_sys_index]->addStaticCondensation(lm_sys.get_static_condensation());
+  }
+  for (const auto l_sys_index : make_range(_num_linear_sys))
+  {
+    auto & lm_sys = _linear_systems[l_sys_index]->linearImplicitSystem();
+    if (lm_sys.has_static_condensation())
+      for (const auto tid : make_range(libMesh::n_threads()))
+        _assembly[tid][_num_nl_sys + l_sys_index]->addStaticCondensation(
+            lm_sys.get_static_condensation());
+  }
 
   if (_num_nl_sys)
     initNullSpaceVectors(parameters, _nl);
