@@ -121,6 +121,13 @@ public:
                     const std::string & name,
                     InputParameters & parameters) override;
 
+  /**
+   * Method used to get an mfem FEC depending on the variable family specified in the input file.
+   * This method is used in addAuxVariable to help create the MFEM grid function that corresponds to
+   * a given MOOSE aux-variable.
+   */
+  InputParameters addMFEMFESpaceFromMOOSEVariable(InputParameters & moosevar_params);
+
 protected:
   /**
    * Template method for adding kernels. We can only add kernels using equation system problem
