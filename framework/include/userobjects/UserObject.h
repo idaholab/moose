@@ -48,7 +48,6 @@ class UserObject : public MooseObject,
                    protected Restartable,
                    protected MeshMetaDataInterface,
                    protected MeshChangedInterface,
-                   protected ScalarCoupleable,
                    protected PerfGraphInterface,
                    public DependencyResolverInterface
 {

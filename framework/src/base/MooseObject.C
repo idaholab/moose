@@ -46,14 +46,10 @@ MooseObject::validParams()
 }
 
 MooseObject::MooseObject(const InputParameters & parameters)
-  : MooseBase(parameters.get<std::string>("_type"),
-              parameters.get<std::string>("_object_name"),
-              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app"),
-              parameters),
-    MooseBaseParameterInterface(*this, parameters),
-    MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
-    ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    DataFileInterface<MooseObject>(*this),
+  : ParallelParamObject(parameters.get<std::string>("_type"),
+                        parameters.get<std::string>("_object_name"),
+                        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app"),
+                        parameters),
     _enabled(getParam<bool>("enable"))
 {
   if (Registry::isRegisteredObj(type()) && _app.getFactory().currentlyConstructing() != &parameters)

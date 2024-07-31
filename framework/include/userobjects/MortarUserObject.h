@@ -10,6 +10,7 @@
 #pragma once
 
 #include "UserObject.h"
+#include "ScalarCoupleable.h"
 #include "MortarConsumerInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "NeighborCoupleable.h"
@@ -18,6 +19,7 @@
  * Base class for creating new nodally-based mortar user objects
  */
 class MortarUserObject : public UserObject,
+                         public ScalarCoupleable,
                          public MortarConsumerInterface,
                          public TwoMaterialPropertyInterface,
                          public NeighborCoupleable

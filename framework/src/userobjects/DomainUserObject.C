@@ -33,8 +33,7 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(this),
     ThreeMaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
-    NeighborCoupleable(this, false, false),
-    MooseVariableDependencyInterface(this),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     TransientInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),
     ElementIDInterface(this),
@@ -56,11 +55,6 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
     _JxW_face(_assembly.JxWFace()),
     _coord(_assembly.coordTransformation())
 {
-  // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
-
   if (isParamValid("interface_boundaries"))
   {
     const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
