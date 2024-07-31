@@ -118,23 +118,7 @@ template <class T>
 void
 NEML2ModelInterface<T>::validateModel() const
 {
-  // Forces and old forces on the input axis must match, i.e. all the variables on the old_forces
-  // subaxis must also exist on the forces subaxis:
-  if (_model.input_axis().has_subaxis("old_forces"))
-    for (auto var : _model.input_axis().subaxis("old_forces").variable_names())
-      if (!_model.input_axis().subaxis("forces").has_variable(var))
-        mooseError("The NEML2 model has old force variable ",
-                   var,
-                   " as input, but does not have the corresponding force variable as input.");
-
-  // Similarly, state (on the output axis) and old state (on the input axis) must match, i.e. all
-  // the variables on the input's old_state subaxis must also exist on the output's state subaxis:
-  if (_model.input_axis().has_subaxis("old_state"))
-    for (auto var : _model.input_axis().subaxis("old_state").variable_names())
-      if (!_model.output_axis().subaxis("state").has_variable(var))
-        mooseError("The NEML2 model has old state variable ",
-                   var,
-                   " as input, but does not have the corresponding state variable as output.");
+  neml2::diagnose(_model);
 }
 
 template <class T>

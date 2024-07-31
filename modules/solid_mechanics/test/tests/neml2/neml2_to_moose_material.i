@@ -60,6 +60,7 @@
   model = 'model'
   device = 'cpu'
   mode = PARSE_ONLY
+  enable_AD = true
 []
 
 [UserObjects]
