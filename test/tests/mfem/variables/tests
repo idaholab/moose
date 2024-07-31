@@ -1,0 +1,8 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  [./MFEMVariableSetupFromMOOSEVariables]
+    type = RunApp
+    input = mfem_variables_from_moose.i
+    requirement = 'Platypus shall have the ability to add an MFEMVariable from a user specification of a MOOSE variable, inferring the FESpace.'
+  []
+[]
