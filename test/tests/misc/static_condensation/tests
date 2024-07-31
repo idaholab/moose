@@ -17,4 +17,14 @@
       detail = 'using an iterative preconditioner applied to only degrees of freedom remaining after static condensation.'
     []
   []
+  [mms]
+    requirement = 'The system shall show the expected cubic rate of convergence in the L2 norm for a quadratic Lagrange basis when using static condensation preconditioning.'
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestStaticCondensation
+    method = "!dbg"
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    valgrind = 'none'
+  []
 []
