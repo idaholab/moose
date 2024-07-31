@@ -42,19 +42,19 @@ MFEMMesh::buildDummyMooseMesh()
   element->set_id() = 1;
   element->processor_id() = 0;
 
-  _mesh->add_elem(element);
+  getMesh().add_elem(element);
 
   Point pt1(0.0, 0.0, 0.0);
   Point pt2(1.0, 0.0, 0.0);
   Point pt3(1.0, 1.0, 0.0);
   Point pt4(0.0, 1.0, 0.0);
 
-  element->set_node(0) = _mesh->add_point(pt1);
-  element->set_node(1) = _mesh->add_point(pt2);
-  element->set_node(2) = _mesh->add_point(pt3);
-  element->set_node(3) = _mesh->add_point(pt4);
+  element->set_node(0) = getMesh().add_point(pt1);
+  element->set_node(1) = getMesh().add_point(pt2);
+  element->set_node(2) = getMesh().add_point(pt3);
+  element->set_node(3) = getMesh().add_point(pt4);
 
-  _mesh->prepare_for_use();
+  getMesh().prepare_for_use();
 }
 
 std::unique_ptr<MooseMesh>
