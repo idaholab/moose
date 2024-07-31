@@ -144,13 +144,13 @@ CauchyStressFromNEML2::computeQpSmallStress()
 
   // Set the results into the corresponding MOOSE material properties
   _small_stress[_qp] =
-      NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(_out(stress()).batch_index({qp}));
+      NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(_out.base_index(stress()).batch_index({qp}));
 
   _small_jacobian[_qp] = RankFourTensor(NEML2Utils::toMOOSE<SymmetricRankFourTensor>(
-      _dout_din(stress(), strain()).batch_index({qp})));
+      _dout_din.base_index({stress(), strain()}).batch_index({qp})));
 
   for (auto && [var, prop] : _state_vars)
-    (*prop)[_qp] = NEML2Utils::toMOOSE<std::vector<Real>>(_out(var).batch_index({qp}));
+    (*prop)[_qp] = NEML2Utils::toMOOSE<std::vector<Real>>(_out.base_index(var).batch_index({qp}));
 }
 
 void

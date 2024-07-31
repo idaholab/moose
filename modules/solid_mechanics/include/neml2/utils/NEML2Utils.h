@@ -183,7 +183,7 @@ set(neml2::LabeledVector & v,
     const Ts *... t)
 {
   if (t0)
-    v.set(toNEML2(*t0), indices[I]);
+    v.base_index_put_(indices[I], toNEML2(*t0));
 
   // Recursively act on the rest of the data
   // The compiler should be able to easily deduce the rest of the template parameters...
@@ -199,7 +199,7 @@ setBatched(neml2::LabeledVector & v,
            const Ts *... t)
 {
   if (t0)
-    v.set(toNEML2Batched(*t0), indices[I]);
+    v.base_index_put_(indices[I], toNEML2Batched(*t0));
 
   // recursively act on the rest of the data
   // The compiler should be able to easily deduce the rest of the template parameters...

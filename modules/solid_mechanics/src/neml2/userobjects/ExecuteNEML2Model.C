@@ -234,11 +234,11 @@ ExecuteNEML2Model::finalize()
 
       // update output views
       for (auto & pair : _outputs)
-        pair.second = _out(pair.first);
+        pair.second = _out.base_index(pair.first);
 
       // output retrieved derivatives
       for (auto & [out, in, batch_tensor_ptr] : _retrieved_derivatives)
-        *batch_tensor_ptr = _dout_din(out, in);
+        *batch_tensor_ptr = _dout_din.base_index({out, in});
 
       // Additional calculations after stress update
       // postCompute();
