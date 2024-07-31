@@ -15,6 +15,7 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
+  params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
   return params;
 }
 

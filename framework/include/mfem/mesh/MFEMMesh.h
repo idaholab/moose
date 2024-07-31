@@ -9,19 +9,7 @@
 
 #pragma once
 #include "FileMesh.h"
-#include "memory"
-#include "libmesh/elem.h"
-#include "libmesh/enum_io_package.h"
-#include "libmesh/equation_systems.h"
 #include "libmesh/face_quad4.h"
-#include "libmesh/ignore_warnings.h"
-#include "libmesh/libmesh_config.h"
-#include "libmesh/mesh_base.h"
-#include "libmesh/mesh_input.h"
-#include "libmesh/node.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/system.h"
-#include "libmesh/vtk_io.h"
 #include "mfem.hpp"
 
 /**
@@ -39,26 +27,29 @@ public:
 
   virtual ~MFEMMesh();
 
-  std::unique_ptr<MooseMesh> safeClone() const override;
-
   /**
    * Accessors for the _mfem_par_mesh object. If the mesh has
    * not been build, the methods will call the appropriate protected methods to
    * build them.
    */
   mfem::ParMesh & getMFEMParMesh() { return *_mfem_par_mesh; };
+
   /**
    * Build MFEM ParMesh and a placeholder MOOSE mesh.
    */
   void buildMesh() override;
 
-protected:
+  /**
+   * Clones the mesh.
+   */
+  std::unique_ptr<MooseMesh> safeClone() const override;
+
+private:
   /**
    * Builds a placeholder mesh when no MOOSE mesh is required.
    */
   void buildDummyMooseMesh();
 
-private:
   /**
    * Smart pointers to mfem::ParMesh object. Do not access directly.
    * Use the accessors instead.
