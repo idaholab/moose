@@ -305,6 +305,61 @@ MFEMProblem::addAuxKernel(const std::string & kernel_name,
   }
 }
 
+InputParameters
+MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
+{
+  InputParameters fespace_params = _factory.getValidParams("MFEMFESpace");
+  InputParameters mfem_variable_params = _factory.getValidParams("MFEMVariable");
+
+  const FEFamily moose_family =
+      Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family"));
+
+  std::string mfem_family;
+  MooseEnum mfem_order = parameters.get<MooseEnum>("order");
+  int mfem_vdim = 1;
+
+  switch (moose_family)
+  {
+    case FEFamily::LAGRANGE:
+      mfem_family = "H1";
+      mfem_vdim = 1;
+      break;
+    case FEFamily::LAGRANGE_VEC:
+      mfem_family = "H1";
+      mfem_vdim = 3;
+      break;
+    case FEFamily::MONOMIAL:
+      mfem_family = "L2";
+      mfem_vdim = 1;
+      break;
+    case FEFamily::MONOMIAL_VEC:
+      mfem_family = "H1"; // Create L2 only for now.
+      mfem_vdim = 3;
+      break;
+    default:
+      mooseError("Unable to set MFEM FESpace for MOOSE variable");
+      break;
+  }
+
+  // Set all fespace parameters.
+  fespace_params.set<MooseEnum>("fec_order") = mfem_order;
+  fespace_params.set<MooseEnum>("fec_type") = mfem_family;
+  fespace_params.set<int>("vdim") = mfem_vdim;
+
+  // Create unique fespace name. If this already exists, we will reuse this for
+  // the mfem variable ("gridfunction").
+  const std::string fespace_name = mfem_family + "_3D_P" + std::string(mfem_order);
+
+  if (!hasUserObject(fespace_name)) // Create the fespace (implicit).
+  {
+    addFESpace("MFEMFESpace", fespace_name, fespace_params);
+  }
+
+  mfem_variable_params.set<UserObjectName>("fespace") = fespace_name;
+
+  return mfem_variable_params;
+}
+
 std::vector<VariableName>
 MFEMProblem::getAuxVariableNames()
 {
