@@ -287,24 +287,6 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   }
 }
 
-void
-MFEMProblem::addAuxKernel(const std::string & kernel_name,
-                          const std::string & name,
-                          InputParameters & parameters)
-{
-  std::string base_auxkernel = parameters.get<std::string>("_moose_base");
-
-  if (base_auxkernel == "AuxKernel" || base_auxkernel == "VectorAuxKernel" ||
-      base_auxkernel == "ArrayAuxKernel") // MOOSE auxkernels.
-  {
-    FEProblemBase::addAuxKernel(kernel_name, name, parameters);
-  }
-  else
-  {
-    mooseError("Unrecognized auxkernel base class '", base_auxkernel, "' detected.");
-  }
-}
-
 InputParameters
 MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 {

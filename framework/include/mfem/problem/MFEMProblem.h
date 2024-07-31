@@ -112,14 +112,6 @@ public:
   void addKernel(const std::string & kernel_name,
                  const std::string & name,
                  InputParameters & parameters) override;
-  /**
-   * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
-   * MFEMGeneralUserObject representing the auxkernel in MOOSE, and creates corresponding MFEM
-   * auxsolver to be used in the MFEM solve.
-   */
-  void addAuxKernel(const std::string & kernel_name,
-                    const std::string & name,
-                    InputParameters & parameters) override;
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
