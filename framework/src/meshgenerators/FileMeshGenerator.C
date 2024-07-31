@@ -82,7 +82,7 @@ FileMeshGenerator::generate()
 
   // If we have a constraint matrix, we need its numbering to match
   // the numbering in the mesh file
-  if (_matrix_file_name != "")
+  if (!_matrix_file_name.empty())
     mesh->allow_renumbering(false);
 
   // Figure out if we are reading an Exodus file, but not Tetgen (*.ele)
@@ -145,7 +145,7 @@ FileMeshGenerator::generate()
     _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, (std::string)file_name);
   }
 
-  if (_matrix_file_name != "")
+  if (!_matrix_file_name.empty())
   {
     auto matrix = SparseMatrix<Number>::build(mesh->comm());
     matrix->read_matlab(_matrix_file_name);

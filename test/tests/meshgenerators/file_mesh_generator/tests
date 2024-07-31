@@ -157,7 +157,7 @@
     issues = '#18768'
   []
 
-  [./iga_constraint_matrix]
+  [iga_constraint_matrix]
     type = Exodiff
     input = 'iga_constraint_matrix.i'
     expect_out = 'Solve Converged'
@@ -173,7 +173,7 @@
     issues = '#18768'
   []
 
-  [./iga_constraint_matrix_1d]
+  [iga_constraint_matrix_1d]
     type = Exodiff
     input = 'iga_constraint_matrix_1d.i'
     expect_out = 'Solve Converged'
