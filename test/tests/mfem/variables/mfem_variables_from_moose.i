@@ -93,3 +93,10 @@
   l_tol = 1e-16
   l_max_its = 1000
 []
+
+[Outputs]
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/VariableSetupTest
+  []
+[]
