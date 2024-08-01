@@ -157,7 +157,7 @@ done
 # Expose the password to the user in color
 GREEN='\033[0;32m'
 NC='\033[0m'
-printf "${GREEN}Connect to the instance at https://localhost:${PORT} with password ${PASSWORD}${NC}\n"
+printf "${GREEN}Connect to the instance at http://localhost:${PORT} with password ${PASSWORD}${NC}\n"
 # Run the server
 code-server --auth="password" \
             --bind-addr=0.0.0.0:${PORT} \
