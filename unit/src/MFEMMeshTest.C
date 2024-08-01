@@ -43,18 +43,109 @@ MFEMMeshTest::buildMFEMMesh(MeshFileName filename)
 /**
  * Test MFEMMesh can read Exodus II format meshes. Note that nodesets must be present.
  */
-TEST_F(MFEMMeshTest, ExodusIIFormatReader) { buildMFEMMesh("data/mug.e"); }
+TEST_F(MFEMMeshTest, ExodusIIFormatReader)
+{
+  buildMFEMMesh("data/mug.e");
+  mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
+
+  // Check expected number of vertices have been read
+  EXPECT_EQ(pmesh.GetNV(), 3774);
+  // Check expected number of elements have been read
+  EXPECT_EQ(pmesh.GetNE(), 2476);
+  // Check expected number of boundary elements have been read
+  EXPECT_EQ(pmesh.GetNBE(), 554);
+  // Check expected number of edges have been read
+  EXPECT_EQ(pmesh.GetNEdges(), 10001);
+  // Check expected number of faces have been read
+  EXPECT_EQ(pmesh.GetNFaces(), 8704);
+  // Check expected number of boundary attributes (sidesets) have been read
+  EXPECT_EQ(pmesh.bdr_attributes.Size(), 2);
+  // Check expected number of element attributes (blocks) have been read
+  EXPECT_EQ(pmesh.attributes.Size(), 1);
+
+  // Test MFEMMesh can be cloned
+  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
+}
+
+/**
+ * Test MFEMMesh can read second order Exodus II format mixed meshes
+ * containing multiple element types.
+ * Note that nodesets must be present.
+ */
+TEST_F(MFEMMeshTest, ExodusIIMixedMeshReader)
+{
+  buildMFEMMesh("data/simple-cube-multi-element-order2.e");
+  mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
+
+  // Check expected number of vertices have been read
+  EXPECT_EQ(pmesh.GetNV(), 162);
+  // Check expected number of elements have been read
+  EXPECT_EQ(pmesh.GetNE(), 322);
+  // Check expected number of boundary elements have been read
+  EXPECT_EQ(pmesh.GetNBE(), 70);
+  // Check expected number of edges have been read
+  EXPECT_EQ(pmesh.GetNEdges(), 614);
+  // Check expected number of faces have been read
+  EXPECT_EQ(pmesh.GetNFaces(), 776);
+  // Check expected number of boundary attributes (sidesets) have been read
+  EXPECT_EQ(pmesh.bdr_attributes.Size(), 2);
+  // Check expected number of element attributes (blocks) have been read
+  EXPECT_EQ(pmesh.attributes.Size(), 2);
+
+  // Test MFEMMesh can be cloned
+  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
+}
 
 /**
  * Test MFEMMesh can read MFEM format meshes.
  */
-TEST_F(MFEMMeshTest, MFEMMeshFormatReader) { buildMFEMMesh("data/beam-tet.mesh"); }
+TEST_F(MFEMMeshTest, MFEMMeshFormatReader)
+{
+  buildMFEMMesh("data/beam-tet.mesh");
+  mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
+
+  // Check expected number of vertices have been read
+  EXPECT_EQ(pmesh.GetNV(), 36);
+  // Check expected number of elements have been read
+  EXPECT_EQ(pmesh.GetNE(), 48);
+  // Check expected number of boundary elements have been read
+  EXPECT_EQ(pmesh.GetNBE(), 68);
+  // Check expected number of edges have been read
+  EXPECT_EQ(pmesh.GetNEdges(), 117);
+  // Check expected number of faces have been read
+  EXPECT_EQ(pmesh.GetNFaces(), 130);
+  // Check expected number of boundary attributes (sidesets) have been read
+  EXPECT_EQ(pmesh.bdr_attributes.Size(), 3);
+  // Check expected number of element attributes (blocks) have been read
+  EXPECT_EQ(pmesh.attributes.Size(), 2);
+
+  // Test MFEMMesh can be cloned
+  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
+}
 
 /**
- * Test MFEMMesh can be cloned.
+ * Test MFEMMesh can read a high order MFEM format mesh.
  */
-TEST_F(MFEMMeshTest, MFEMMeshClone)
+TEST_F(MFEMMeshTest, MFEMHighOrderMeshFormatReader)
 {
-  buildMFEMMesh("data/mug.e");
-  _mfem_mesh_ptr->safeClone();
+  buildMFEMMesh("data/fichera-q3.mesh");
+  mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
+
+  // Check expected number of vertices have been read
+  EXPECT_EQ(pmesh.GetNV(), 26);
+  // Check expected number of elements have been read
+  EXPECT_EQ(pmesh.GetNE(), 7);
+  // Check expected number of boundary elements have been read
+  EXPECT_EQ(pmesh.GetNBE(), 24);
+  // Check expected number of edges have been read
+  EXPECT_EQ(pmesh.GetNEdges(), 51);
+  // Check expected number of faces have been read
+  EXPECT_EQ(pmesh.GetNFaces(), 33);
+  // Check expected number of boundary attributes (sidesets) have been read
+  EXPECT_EQ(pmesh.bdr_attributes.Size(), 24);
+  // Check expected number of element attributes (blocks) have been read
+  EXPECT_EQ(pmesh.attributes.Size(), 1);
+
+  // Test MFEMMesh can be cloned
+  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
 }
