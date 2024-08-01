@@ -3,7 +3,9 @@
 ## Creating a Mesh
 
 - For complicated geometries, we generally use CUBIT from Sandia National Laboratories.
-- CUBIT can be licensed from CSimSoft for a fee depending on the type of organization you work for.
+  - Cubit® is available for US government use only and requires proof of a current US government contract. 
+- If your work is not US government use, you can use [Coreform Cubit](https://coreform.com/coreform-cubit/), the commercial version of Cubit®, available through [Coreform](https://coreform.com/), which is available for purchase for any use, including academic and commercial.
+  - Coreform also provides a free non-commercial-use "[Coreform Cubit Learn](https://coreform.com/coreform-cubit-learn/)" license, fully-functional with a 50k element export limit.
 - Other mesh generators can work as long as they output a file format that libMesh reads (next section).
 - If you have a specific mesh format you like, we can take a look at adding support for it to libMesh.
 
