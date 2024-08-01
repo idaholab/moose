@@ -10,6 +10,7 @@
 #include "NavierStokesMethods.h"
 #include "MooseError.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/parallel_algebra.h"
 #include "NS.h"
 
 namespace NS
@@ -210,6 +211,62 @@ getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
             }
         }
       }
+}
+
+/// Distance from all elements to the nearest wall
+void
+getWallDistanceAllElements(const std::vector<BoundaryName> & wall_boundary_name,
+                           const FEProblemBase & fe_problem,
+                           const SubProblem & subproblem,
+                           const std::set<SubdomainID> & block_ids,
+                           std::map<const Elem *, Real> & dist_map)
+{
+  /*
+    Method for computing the distances from each element to the nearest wall boundary
+    The method works as follows:
+    1. We compute a standard vector with the boundary points for each processor
+    2. We parallel gather the boundary points in each processor to get a single vector with the
+    positions of all boundaries
+    3. We loop over all elements in each processor and compute the minimum distance to the gathered
+    boundary points
+  */
+
+  // Cleaning and convenient variables
+  dist_map.clear();
+
+  // Construct a vector with all boundaries
+  std::vector<Point> boundary_points;
+  for (const auto & elem : fe_problem.mesh().getMesh().active_local_element_ptr_range())
+    if (block_ids.find(elem->subdomain_id()) != block_ids.end())
+      for (const auto i_side : elem->side_index_range())
+      {
+        const auto & side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
+        for (const auto & name : wall_boundary_name)
+        {
+          const auto wall_id = subproblem.mesh().getBoundaryID(name);
+          for (const auto side_id : side_bnds)
+            if (side_id == wall_id)
+            {
+              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem, i_side);
+              boundary_points.push_back(fi->faceCentroid());
+            }
+        }
+      }
+
+  // Use the comm from the problem this MultiApp is part of
+  fe_problem.comm().allgather(boundary_points);
+
+  // Get the minimum wall distance to the boundary points
+  for (const auto & elem : fe_problem.mesh().getMesh().active_local_element_ptr_range())
+    if (block_ids.find(elem->subdomain_id()) != block_ids.end())
+    {
+      Real min_dist2 = 1e9;
+      for (Point bdry_point : boundary_points)
+        min_dist2 =
+            std::min((bdry_point - elem->vertex_average()) * (bdry_point - elem->vertex_average()),
+                     min_dist2);
+      dist_map[elem] = std::sqrt(min_dist2);
+    }
 }
 
 /// Face arguments to wall-bounded faces for wall treatment

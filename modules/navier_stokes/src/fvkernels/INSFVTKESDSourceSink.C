@@ -172,36 +172,18 @@ INSFVTKESDSourceSink::computeQpResidual()
       const auto omegaLog =
           std::sqrt(TKE) / (std::pow(_C_mu, 0.25) * NS::von_karman_constant * distance_vec[i]);
 
-      const auto Re_d =
-          std::sqrt(_k(elem_arg, old_state)) * distance_vec[i] * rho / _mu(facearg, state);
-      const auto gamma = std::exp(-Re_d / 11.0);
-      // destruction += gamma * omegaVis + (1.0 - gamma) * omegaLog;
-      destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
-
-      // const auto omegaVis = 6.0 / (_beta_i_1 * Utility::pow<2>(y_plus));
-      // const auto omegaLog = 1.0 / (std::sqrt(_beta_infty) * NS::von_karman_constant * y_plus);
-      // const auto omega = std::sqrt(omegaVis + omegaLog) * rho * u_tau_2 / _mu(facearg, state);
-      // destruction += omega;
-
-      // // Convenient variables
-      // const auto y_plus = y_plus_vec[i];
-      // const auto fi = face_info_vec[i];
-      // const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
-      // const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
-      // const Moose::FaceArg facearg = {
-      //     fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
-      // const auto u_tau_2 = std::sqrt(_C_mu) * _k(elem_arg, old_state);
-
-      // // Blended wall functions
-      // const auto omegaVis = 6.0 * _mu(facearg, state) /
-      //                       (_rho(facearg, state) * _beta_i_1 *
-      //                       Utility::pow<2>(distance_vec[i]));
-      // const auto omegaLog = std::sqrt(_k(elem_arg, old_state)) /
-      //                       (std::pow(_C_mu, 0.25) * NS::von_karman_constant * distance_vec[i]);
       // const auto Re_d =
       //     std::sqrt(_k(elem_arg, old_state)) * distance_vec[i] * rho / _mu(facearg, state);
       // const auto gamma = std::exp(-Re_d / 11.0);
-      // destruction += gamma * omegaVis + (1.0 - gamma) * omegaLog;
+      // // destruction += gamma * omegaVis + (1.0 - gamma) * omegaLog;
+      destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
+
+      // if (y_plus < 11.25)
+      //   destruction += omegaVis / tot_weight;
+      // else
+      // {
+      //   destruction += omegaLog / tot_weight;
+      // }
     }
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;

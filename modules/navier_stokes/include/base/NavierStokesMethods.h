@@ -139,6 +139,16 @@ void getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                      const std::set<SubdomainID> & block_ids,
                      std::map<const Elem *, std::vector<Real>> & dist_map);
 
+
+/**
+ * Get distance for all active elements to the nearest active boundary
+ */
+void getWallDistanceAllElements(const std::vector<BoundaryName> & wall_boundary_name,
+                                const FEProblemBase & fe_problem,
+                                const SubProblem & subproblem,
+                                const std::set<SubdomainID> & block_ids,
+                                std::map<const Elem *, Real> & dist_map);
+
 /**
  * Map storing face arguments to wall bounded faces
  * The map passed in \p face_info_map gets cleared and re-populated

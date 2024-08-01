@@ -224,27 +224,21 @@ INSFVTKESourceSink::computeQpResidual()
         destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog)) *
                        _beta_infty / tot_weight;
 
-        // const auto new_tau_w =
-        //     ((1.0 - gamma) * wall_mut + gamma * wall_mu) * velocity_grad_norm_vec[i];
-        // production += new_tau_w * std::pow(_C_mu, 0.25) /
-        //               std::sqrt(_var(elem_arg, old_state) + 1e-10) /
-        //               (NS::von_karman_constant * distance_vec[i]) / tot_weight;
-
-        // const auto omegaVis =
-        //     6.0 * _mu(facearg, state) / (_beta_i_1 * Utility::pow<2>(distance_vec[i]));
-        // const auto omegaLog = std::sqrt(_var(elem_arg, old_state)) * rho /
-        //                       (std::pow(_C_mu, 0.25) * NS::von_karman_constant *
-        //                       distance_vec[i]);
-
-        // // Using blending wall functions for omega
-        // const auto Re_d = std::sqrt(_var(elem_arg, old_state)) * distance_vec[i] * rho / wall_mu;
-        // const auto gamma = std::exp(-Re_d / 11.0);
-        // destruction += (gamma * omegaVis + (1.0 - gamma) * omegaLog) * _beta_infty / tot_weight;
         const auto tau_w_blended =
             (wall_mu * gamma + wall_mut * (1.0 - gamma)) * velocity_grad_norm_vec[i];
         production += tau_w_blended * std::pow(_C_mu, 0.25) /
                       std::sqrt(_var(elem_arg, old_state) + 1e-10) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+
+        // if (y_plus < 11.25)
+        //   destruction += omegaVis * _beta_infty / tot_weight;
+        // else
+        // {
+        //   destruction += omegaLog * _beta_infty / tot_weight;
+        //   production += tau_w * std::pow(_C_mu, 0.25) /
+        //                 std::sqrt(_var(elem_arg, old_state) + 1e-10) /
+        //                 (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+        // }
       }
     }
 

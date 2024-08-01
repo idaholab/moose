@@ -19,6 +19,8 @@ class kOmegaSSTF2BlendingAux : public AuxKernel
 public:
   static InputParameters validParams();
 
+  virtual void initialSetup() override;
+
   kOmegaSSTF2BlendingAux(const InputParameters & parameters);
 
 protected:
@@ -37,8 +39,11 @@ protected:
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
 
-  /// Wall distance
-  const Moose::Functor<ADReal> & _wall_distance;
+  /// Wall boundaries
+  const std::vector<BoundaryName> & _wall_boundary_names;
+
+  /// Map for wall distance
+  std::map<const Elem *, Real> _dist;
 
   /// C-mu closure coefficient
   static constexpr Real _sigma_omega_2 = 1.168;

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "kOmegaSSTF1BlendingAux.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", kOmegaSSTF1BlendingAux);
 
@@ -21,7 +22,8 @@ kOmegaSSTF1BlendingAux::validParams()
                                             "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
-  params.addRequiredParam<MooseFunctorName>("wall_distance", "Distance to the nearest wall.");
+  params.addParam<std::vector<BoundaryName>>(
+      "walls", {}, "Boundaries that correspond to solid walls.");
   return params;
 }
 
@@ -32,7 +34,7 @@ kOmegaSSTF1BlendingAux::kOmegaSSTF1BlendingAux(const InputParameters & parameter
     _omega(getFunctor<ADReal>(NS::TKESD)),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
-    _wall_distance(getFunctor<ADReal>("wall_distance"))
+    _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
   if (!dynamic_cast<MooseVariableFV<Real> *>(&_var))
     paramError("variable",
@@ -41,6 +43,14 @@ kOmegaSSTF1BlendingAux::kOmegaSSTF1BlendingAux(const InputParameters & parameter
                "' is currently programmed to use finite volume machinery, so make sure that '",
                _var.name(),
                "' is a finite volume variable.");
+}
+
+void
+kOmegaSSTF1BlendingAux::initialSetup()
+{
+  if (!_wall_boundary_names.empty())
+    NS::getWallDistanceAllElements(
+        _wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _dist);
 }
 
 Real
@@ -56,7 +66,11 @@ kOmegaSSTF1BlendingAux::computeValue()
   const auto omega_capped = std::max(_omega(elem_arg, previous_state).value(), 1e-12);
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
-  const auto y = std::max(_wall_distance(elem_arg, state).value(), 1e-10);
+
+  // Computing wall distance
+  const Elem & elem = *_current_elem;
+  const auto & elem_distances = _dist[&elem];
+  const auto y = std::max(elem_distances, 1e-10);
 
   // Computing cross diffusion term
   const auto & grad_k = _k.gradient(elem_arg, previous_state);
