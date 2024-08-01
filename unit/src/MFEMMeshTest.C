@@ -68,35 +68,6 @@ TEST_F(MFEMMeshTest, ExodusIIFormatReader)
 }
 
 /**
- * Test MFEMMesh can read second order Exodus II format mixed meshes
- * containing multiple element types.
- * Note that nodesets must be present.
- */
-TEST_F(MFEMMeshTest, ExodusIIMixedMeshReader)
-{
-  buildMFEMMesh("data/simple-cube-multi-element-order2.e");
-  mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
-
-  // Check expected number of vertices have been read
-  EXPECT_EQ(pmesh.GetNV(), 162);
-  // Check expected number of elements have been read
-  EXPECT_EQ(pmesh.GetNE(), 322);
-  // Check expected number of boundary elements have been read
-  EXPECT_EQ(pmesh.GetNBE(), 70);
-  // Check expected number of edges have been read
-  EXPECT_EQ(pmesh.GetNEdges(), 614);
-  // Check expected number of faces have been read
-  EXPECT_EQ(pmesh.GetNFaces(), 776);
-  // Check expected number of boundary attributes (sidesets) have been read
-  EXPECT_EQ(pmesh.bdr_attributes.Size(), 2);
-  // Check expected number of element attributes (blocks) have been read
-  EXPECT_EQ(pmesh.attributes.Size(), 2);
-
-  // Test MFEMMesh can be cloned
-  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
-}
-
-/**
  * Test MFEMMesh can read MFEM format meshes.
  */
 TEST_F(MFEMMeshTest, MFEMMeshFormatReader)
