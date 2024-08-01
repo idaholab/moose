@@ -3,7 +3,7 @@
 
 [Mesh]
   type = ExclusiveMFEMMesh
-  file = gold/fichera.mesh
+  file = gold/small_fichera.mesh
   dim = 3
 []
 
@@ -107,6 +107,5 @@
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/CurlCurl
-    vtk_format = ASCII
   []
 []
