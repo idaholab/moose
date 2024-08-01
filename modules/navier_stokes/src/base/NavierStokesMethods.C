@@ -11,6 +11,7 @@
 #include "MooseError.h"
 #include "libmesh/vector_value.h"
 #include "NS.h"
+#include "RoughnessCorrec.h"
 
 namespace NS
 {
@@ -60,6 +61,7 @@ prandtlPropertyDerivative(const Real & mu,
   return (k * (mu * dcp + cp * dmu) - mu * cp * dk) / std::max(k * k, 1e-8);
 }
 
+// Method to find the non-roughness corrected friction velocity
 ADReal
 findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist)
 {
@@ -105,6 +107,21 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
                  ")");
 }
 
+// Method to find the roughness-corrected friction veleocity
+ADReal
+findUStar(
+    const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist, const Real rough_ks)
+{
+  ADReal u_star;
+  if (rough_ks > 1e-12)
+    u_star = RoughnessCorrec::roughness_correc_UStar(mu, rho, u, dist, rough_ks);
+  else
+    u_star = findUStar(mu, rho, u, dist);
+
+  return u_star;
+}
+
+// Method to find the non-dimmensional wall distance
 ADReal
 findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist)
 {

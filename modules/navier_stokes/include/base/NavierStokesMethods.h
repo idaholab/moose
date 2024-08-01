@@ -102,6 +102,20 @@ Real prandtlPropertyDerivative(const Real & mu,
 ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
 /**
+ * Finds the friction velocity using standard velocity wall functions formulation.
+ * It is used in WallFunctionWallShearStressAux, WallFunctionYPlusAux and
+ * INSFVWallFunctionBC.
+ * @param mu the dynamic viscosity
+ * @param rho the density
+ * @param u the centroid velocity
+ * @param dist the element centroid distance to the wall
+ * @param rough_ks equivalence roughness constant
+ * @return the velocity at the wall
+ */
+ADReal findUStar(
+    const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist, const Real rough_ks);
+
+/**
  * Finds the non-dimensional wall distance normalized with the friction velocity
  * Implements a fixed-point iteration in the wall function to get this velocity
  * @param mu the dynamic viscosity

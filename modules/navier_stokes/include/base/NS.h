@@ -166,6 +166,12 @@ static const std::string mass_flux = "mass_flux";
 // Turbulence variables
 static const std::string TKE = "k";
 static const std::string TKED = "epsilon";
+static const std::string rough_ks = "rough_ks";
+static const std::string curv_R = "curv_R";
+static const std::string convex = "convex";
+static const std::string x_curvature_axis = "x_curvature_axis";
+static const std::string y_curvature_axis = "y_curvature_axis";
+static const std::string z_curvature_axis = "z_curvature_axis";
 
 /**
  * Wall treatment options
@@ -181,6 +187,8 @@ enum class WallTreatmentEnum
 // Turbulence constants
 static constexpr Real von_karman_constant = 0.4187;
 static constexpr Real E_turb_constant = 9.793;
+static constexpr Real E_rough_constant = 26.6;
+static constexpr Real C_rough_constant = 0.366;
 // Lower limit for mu_t
 static constexpr Real mu_t_low_limit = 1.0e-8;
 }

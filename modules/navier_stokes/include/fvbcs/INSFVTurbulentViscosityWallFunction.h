@@ -55,4 +55,18 @@ private:
   // Mu_t evaluated at y+=30 for blending purposes
   const Real _mut_30 =
       (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);
+
+  /// Equivalent sand height wall roughness
+  const Real _rough_ks;
+
+  /// Curvature radius
+  const Moose::Functor<ADReal> * _curv_R;
+
+  /// Wall convexity parameter
+  const bool _convex;
+
+  /// Curvature axis
+  const Moose::Functor<ADReal> * _x_curvature_axis;
+  const Moose::Functor<ADReal> * _y_curvature_axis;
+  const Moose::Functor<ADReal> * _z_curvature_axis;
 };
