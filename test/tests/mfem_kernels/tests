@@ -1,5 +1,15 @@
 [Tests]
   design = 'syntax/Problem/index.md'
+  [./MFEMCurlCurl]
+    type = XMLDiff
+    input = curlcurl.i
+    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
+                OutputData/CurlCurl/Run0/Cycle000000/data.pvtu
+                OutputData/CurlCurl/Run0/Cycle000001/data.pvtu
+                OutputData/CurlCurl/Run0/Cycle000000/proc000000.vtu
+                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'Platypus shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind and produce results consistent with MFEM Example 3'
+  []
   [./MFEMDiffusion]
     type = XMLDiff
     input = diffusion.i
