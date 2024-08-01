@@ -17,7 +17,7 @@
 | Extension   | Description                              |
 | :-          | :-                                       |
 | .dat        | [Tecplot ASCII file](https://people.sc.fsu.edu/~jburkardt/data/tec/tec.html)                       |
-| .e, .exd    | [Sandia's ExodusII format](https://nalu.readthedocs.io/en/latest/source/user/nalu_run/nalu_mesh.html)                 |
+| .e, .exd    | [Sandia's ExodusII format](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodus-library)                 |
 | .fro        | [ACDL's surface triangulation file](https://www.reviversoft.com/file-extensions/fro)        |
 | .gmv        | [LANL's GMV (General Mesh Viewer) format](www.generalmeshviewer.com/)  |
 | .mat        | [Matlab triangular ASCII file](https://www.reviversoft.com/file-extensions/mat) (read only) |
