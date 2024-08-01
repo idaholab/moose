@@ -10,22 +10,15 @@
 #pragma once
 
 #include "NodalBC.h"
-#include "libmesh/libmesh_common.h"
-#include "libmesh/sparse_matrix.h"
-#include "libmesh/numeric_vector.h"
-
-namespace libMesh
-{
-template <typename T>
-class NumericVector;
-class NonlinearImplicitSystem;
-} // namespace libMesh
 
 // libMesh forward declarations
 namespace libMesh
 {
 template <typename T>
 class SparseMatrix;
+template <typename T>
+class NumericVector;
+class NonlinearImplicitSystem;
 }
 /**
  * Base boundary condition of a Dirichlet type

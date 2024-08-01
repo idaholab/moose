@@ -10,8 +10,14 @@
 #pragma once
 
 #include "ExplicitTimeIntegrator.h"
-#include "MooseError.h"
-#include "libmesh/sparse_matrix.h"
+
+// Forward declarations
+namespace libMesh
+{
+template <typename T>
+class SparseMatrix;
+}
+class MooseError;
 
 /**
  * Implements a truly explicit (no nonlinear solve) first-order, forward Euler
