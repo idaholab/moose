@@ -157,6 +157,8 @@ class ApptainerGenerator:
                                   help='Set to skip running the tests after the build')
         build_parser.add_argument('--no-cleanup', action='store_true',
                                   help='Pass to apptainer to not cleanup the build (for debugging)')
+        build_parser.add_argument('--nv', action='store_true',
+                                  help='Pass --nv to apptainer during the build')
 
         push_parser = action_parser.add_parser('push', parents=[parent],
                                                 help='Push a container')
@@ -317,6 +319,8 @@ class ApptainerGenerator:
         file = self.container_path(name, tag)
         self.print(f'Building {def_file} in {file}')
         command = ['apptainer', 'build', '--fakeroot']
+        if self.args.nv:
+            command.append('--nv')
         if args is not None:
             command += args
         if (hasattr(self.args, 'disable_cache') and

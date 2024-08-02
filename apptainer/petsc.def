@@ -61,14 +61,15 @@ From: {{ APPTAINER_FROM }}
     cd ${PETSC_SRC_DIR}
     git checkout ${PETSC_GIT_SHA}
 
-    PETSC_OPTIONS+=" --skip-submodule-update"
-{%- if PETSC_ALT is defined %}
-    PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc_alt.sh
-{%- else %}
+    PETSC_OPTIONS+=" --skip-submodule-update --download-cmake"
     # Need a newer cmake for current petsc
     PETSC_OPTIONS+=" --download-cmake"
+    # Additional options with cuda
+    if [ -n "$CUDA_PATH" ]; then
+        PETSC_OPTIONS+=" --download-kokkos --download-kokkos-kernels --with-cuda --with-cuda-arch=70 --download-slate"
+    fi
+
     PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh
-{%- endif %}
 
     # Build PETSc
     umask 022

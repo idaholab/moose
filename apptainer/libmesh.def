@@ -31,7 +31,7 @@ From: {{ APPTAINER_FROM }}
 %environment
     # From moose-libmesh
     export LIBMESH_DIR={{ LIBMESH_DIR }}
-    if ! $CC --version | grep --quiet "clang version 16"; then
+    if ! $CC --version | grep --quiet "clang version 16" && [ -z "$CUDA_PATH" ]; then
       export VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
       export VTKLIB_DIR={{ VTK_DIR }}/lib
     fi
@@ -51,7 +51,7 @@ From: {{ APPTAINER_FROM }}
 
     # Don't build VTK for clang 16; 9.2.6 currently doesn't build for clang 16.
     # VTK 9.3 does build for clang 16, but it diffs horribly due to a few bugs
-    if ! $CC --version | grep --quiet "clang version 16"; then
+    if ! $CC --version | grep --quiet "clang version 16" && [ -z "$CUDA_PATH" ]; then
         # Obtain VTK
         cd ${ROOT_BUILD_DIR}
         curl -L -O {{vtk_url}} || exit 1
