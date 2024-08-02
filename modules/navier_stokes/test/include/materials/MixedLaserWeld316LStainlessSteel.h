@@ -79,8 +79,11 @@ protected:
   /// Bounding temperature for the
   const Real _Tmax;
 
-  /// Melting point of the metal
+  /// Liquidus temperature
   const Real _Tl;
+
+  /// Solidus temperature
+  const Real _Ts;
 
   /// We need to know the temperature and the gradient of the temperature
   const ADVariableValue & _temperature;
