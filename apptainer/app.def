@@ -161,7 +161,6 @@ printf "${GREEN}Connect to the instance at http://localhost:${PORT} with passwor
 # Run the server
 code-server --auth="password" \
             --bind-addr=0.0.0.0:${PORT} \
-            --ignore-last-opened \
             --disable-telemetry \
             --disable-getting-started-override \
             --disable-update-check \
