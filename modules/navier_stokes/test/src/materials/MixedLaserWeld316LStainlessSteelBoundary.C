@@ -16,14 +16,14 @@ InputParameters
 MixedLaserWeld316LStainlessSteelBoundary::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addParam<Real>("P0", 0.15616, "The ambient pressure for the recoil pressure");
-  params.addParam<Real>("L_v", 0, "Latent heat from evaporation for the recoil pressure");
-  params.addParam<Real>("M", 1.851502e1, "Molar mass for the recoil pressure");
-  params.addParam<Real>("T_v", -1.96945e-1, "The vaporization temperature for recoil pressure");
-  params.addParam<Real>("R", 1.594124e-3, "The gas constant for recoil pressure");
-  params.addParam<Real>("c_gamma0", 0, "Constant term in the surface tension");
-  params.addParam<Real>("c_gamma1", -5.809553e1, "Linear term multiplier in the surface tension");
-  params.addParam<Real>("Tl", 4.610515e-1, "The liquidus temperature");
+  params.addParam<Real>("P0", 1e5, "The ambient pressure for the recoil pressure");
+  params.addParam<Real>("L_v", 7.45E6, "Latent heat from evaporation for the recoil pressure");
+  params.addParam<Real>("M", 56E-3, "Molar mass for the recoil pressure");
+  params.addParam<Real>("T_v", 3080, "The vaporization temperature for recoil pressure");
+  params.addParam<Real>("R", 8.314, "The gas constant for recoil pressure");
+  params.addParam<Real>("c_gamma0", 1.943, "Constant term in the surface tension");
+  params.addParam<Real>("c_gamma1", 4.3e-4, "Linear term multiplier in the surface tension");
+  params.addParam<Real>("Tl", 1708, "The liquidus temperature");
   params.addRequiredCoupledVar("temperature", "The temperature in K");
   params.addParam<MaterialPropertyName>("rc_pressure_name", "rc_pressure", "The recoil pressure");
   params.addParam<MaterialPropertyName>(
@@ -49,9 +49,11 @@ MixedLaserWeld316LStainlessSteelBoundary::MixedLaserWeld316LStainlessSteelBounda
         declareADProperty<Real>(getParam<MaterialPropertyName>("surface_tension_name"))),
     _grad_surface_tension(declareADProperty<RealVectorValue>(
         getParam<MaterialPropertyName>("grad_surface_tension_name"))),
+    _surface_term_curvature(declareADProperty<RealVectorValue>("surface_term_curvature")),
     _surface_term_gradient1(declareADProperty<RealVectorValue>("surface_term_gradient1")),
     _surface_term_gradient2(declareADProperty<RealVectorValue>("surface_term_gradient2")),
     _ad_normals(_assembly.adNormals()),
+    _ad_curvatures(_assembly.adCurvatures()),
     _temperature(adCoupledValue("temperature")),
     _grad_temperature(adCoupledGradient("temperature"))
 {
@@ -60,11 +62,16 @@ MixedLaserWeld316LStainlessSteelBoundary::MixedLaserWeld316LStainlessSteelBounda
 void
 MixedLaserWeld316LStainlessSteelBoundary::computeQpProperties()
 {
-  _rc_pressure[_qp] =
-      0.54 * _P0 *
-      std::exp(_L_v * _M / _R * (_temperature[_qp] - _T_v) / (_temperature[_qp] * _T_v));
+  if (_temperature[_qp] < _T_v)
+    _rc_pressure[_qp] = 0;
+  else
+    _rc_pressure[_qp] =
+        0.54 * _P0 *
+        std::exp(_L_v * _M / _R * (_temperature[_qp] - _T_v) / (_temperature[_qp] * _T_v));
   _surface_tension[_qp] = _c_gamma0 + _c_gamma1 * (_temperature[_qp] - _Tl);
   _grad_surface_tension[_qp] = _c_gamma1 * _grad_temperature[_qp];
+  _surface_term_curvature[_qp] =
+      -2. * _ad_curvatures[_qp] * _surface_tension[_qp] * _ad_normals[_qp];
   _surface_term_gradient1[_qp] = -_grad_surface_tension[_qp];
   _surface_term_gradient2[_qp] = _ad_normals[_qp] * (_ad_normals[_qp] * _grad_surface_tension[_qp]);
 }

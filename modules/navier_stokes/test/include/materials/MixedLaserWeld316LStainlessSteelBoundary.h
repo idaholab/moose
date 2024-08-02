@@ -58,9 +58,11 @@ protected:
   ADMaterialProperty<Real> & _rc_pressure;
   ADMaterialProperty<Real> & _surface_tension;
   ADMaterialProperty<RealVectorValue> & _grad_surface_tension;
+  ADMaterialProperty<RealVectorValue> & _surface_term_curvature;
   ADMaterialProperty<RealVectorValue> & _surface_term_gradient1;
   ADMaterialProperty<RealVectorValue> & _surface_term_gradient2;
   const MooseArray<ADPoint> & _ad_normals;
+  const MooseArray<ADReal> & _ad_curvatures;
 
   /// We need to know the temperature and the gradient of the temperature
   const ADVariableValue & _temperature;
