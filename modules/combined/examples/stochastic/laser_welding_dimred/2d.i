@@ -1,14 +1,14 @@
 scanning_speed=1 # m/s
 surfacetemp=300 # K
-power=70 # W
-R=1e-4 # m
-thickness=1.25e-3 # m
+power=79 # W
+R=1.25e-4 # m
+thickness=0.9e-4 # m
 xmin=-0.1e-3 # m
-xmax=1.0e-3 # m
+xmax=0.75e-3 # m
 ymin=${fparse -thickness}
 
-endtime=0.7e-3 # s
-timestep=${fparse endtime/300} # s
+endtime=0.1e-3 # s
+timestep=${fparse endtime/3000} # s
 
 [Mesh]
   [cmg]
@@ -16,11 +16,10 @@ timestep=${fparse endtime/300} # s
     dim = 2
     xmin = ${xmin}
     xmax = ${xmax}
-    ymin = ${fparse ymin/3}
+    ymin = ${fparse ymin}
     ymax = 0
-    bias_y = 0.93
-    nx = 256
-    ny = 32
+    nx = 161
+    ny = 50
   []
   displacements = 'disp_x disp_y'
 []
@@ -185,6 +184,12 @@ timestep=${fparse endtime/300} # s
     boundary = 'top'
     use_displaced_mesh = true
   []
+  [surface_tension]
+    type = INSADSurfaceTensionBC
+    variable = vel
+    boundary = 'top'
+    use_displaced_mesh = true
+  []
   [displace_x_top]
     type = INSADDisplaceBoundaryBC
     boundary = 'top'
@@ -226,13 +231,12 @@ timestep=${fparse endtime/300} # s
     use_displaced_mesh = true
   []
   [steel]
-    type = AriaLaserWeld304LStainlessSteel
+    type = MixedLaserWeld316LStainlessSteel
     temperature = T
-    beta = 1e7
     use_displaced_mesh = true
   []
   [steel_boundary]
-    type = AriaLaserWeld304LStainlessSteelBoundary
+    type = MixedLaserWeld316LStainlessSteelBoundary
     boundary = 'top'
     temperature = T
     use_displaced_mesh = true
@@ -257,26 +261,30 @@ timestep=${fparse endtime/300} # s
 [Executioner]
   type = Transient
   end_time = ${endtime}
-  dtmin = 1e-8
-  dtmax = ${timestep}
+  dtmin = 1e-10
+  dtmax = 1e-5
   petsc_options = '-snes_converged_reason -ksp_converged_reason -options_left'
   solve_type = 'NEWTON'
   line_search = 'none'
-  nl_max_its = 12
+  nl_max_its = 16
   l_max_its = 100
   [TimeStepper]
     type = IterationAdaptiveDT
-    optimal_iterations = 7
+    optimal_iterations = 10
+    iteration_window = 4
     dt = ${timestep}
     linear_iteration_ratio = 1e6
-    growth_factor = 1.5
+    growth_factor = 1.25
   []
 []
 
 [Outputs]
-  exodus = true
-  checkpoint = true
-  perf_graph = true
+  [exodus]
+    type = Exodus
+    output_material_properties = true
+    show_material_properties = 'mu rho cp k'
+    execute_on = FINAL
+  []
 []
 
 [Debug]
