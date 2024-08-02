@@ -13,19 +13,26 @@
   type = CustomFormulation
 []
 
-[FESpaces]
-  [H1FESpace]
-    type = MFEMFESpace
-    fec_type = H1
-    fec_order = FIRST
+[Variables]
+  [scalar_var]
+    family = LAGRANGE
+    order = FIRST
   []
+  [vector_var]
+    family = LAGRANGE_VEC
+    order = FIRST
+  []  
 []
 
-[Variables]
-  [diffused]
-    type = MFEMVariable
-    fespace = H1FESpace
+[AuxVariables]
+  [scalar_auxvar]
+    family = MONOMIAL
+    order = CONSTANT
   []
+  [vector_auxvar]
+    family = MONOMIAL_VEC
+    order = CONSTANT
+  []  
 []
 
 [Functions]
@@ -42,13 +49,13 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = scalar_var
     boundary = '1'
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = scalar_var
     boundary = '2'
     coefficient = TopValue
   []
@@ -72,7 +79,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = diffused
+    variable = scalar_var
     coefficient = one
   []
 []
@@ -90,7 +97,6 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
-    vtk_format = ASCII
+    file_base = OutputData/VariableSetupTest
   []
 []
