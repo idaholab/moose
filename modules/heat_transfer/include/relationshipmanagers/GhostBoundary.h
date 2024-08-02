@@ -24,11 +24,12 @@ using libMesh::MeshBase;
 using libMesh::processor_id_type;
 
 /**
- * GhostBoundary is used to communicate the ghost points across a boundary. It is
- * useful when non-local boundary points are required while operating with partioned meshes
- * via DistributedMesh capabilities.
+ * GhostBoundary is used to ghost elements on a boundary. It is
+ * useful when non-local elements are required for geometric searches or when
+ * residual objects such as \p GapHeatTransfer require access into nonlocal entries
+ * in the solution vector corresponding to degrees of freedom from the boundary
+ * elements
  */
-
 class GhostBoundary : public RelationshipManager
 {
 public:
@@ -54,7 +55,8 @@ public:
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
 
-  const std::vector<BoundaryName> _boundary_name;
+  /// The boundary for which we will ghost elements
+  const std::vector<BoundaryName> & _boundary_name;
 
   /// null matrix for generating full variable coupling
   const CouplingMatrix * const _null_mat = nullptr;
