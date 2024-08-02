@@ -2,7 +2,7 @@
 # based on MFEM Example 3.  
 
 [Mesh]
-  type = ExclusiveMFEMMesh
+  type = MFEMMesh
   file = gold/small_fichera.mesh
   dim = 3
 []
