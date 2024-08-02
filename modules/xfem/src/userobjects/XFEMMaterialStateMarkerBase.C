@@ -14,6 +14,7 @@
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel.h"
+#include "libmesh/parallel_sync.h"
 
 InputParameters
 XFEMMaterialStateMarkerBase::validParams()
@@ -66,8 +67,6 @@ XFEMMaterialStateMarkerBase::execute()
   bool isOnBoundary = false;
   unsigned int boundarySide = 99999;
   unsigned int _current_eid = _current_elem->id();
-  std::map<unsigned int, RealVectorValue>::iterator mit;
-  mit = _marked_elems.find(_current_eid);
 
   for (unsigned int i = 0; i < _initiation_boundary_ids.size(); ++i)
   {
@@ -80,28 +79,16 @@ XFEMMaterialStateMarkerBase::execute()
 
   if (isCTE && doesElementCrack(direction))
   {
-    if (mit != _marked_elems.end())
-    {
-      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
-    }
-    _marked_elems[_current_eid] = direction;
+    _marked_elems[_current_eid].push_back(direction);
   }
   else if (isOnBoundary && doesElementCrack(direction))
   {
-    if (mit != _marked_elems.end())
-    {
-      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
-    }
-    _marked_elems[_current_eid] = direction;
+    _marked_elems[_current_eid].push_back(direction);
     _marked_elem_sides[_current_eid] = boundarySide;
   }
   else if (isCut && _secondary_cracks && doesElementCrack(direction))
   {
-    if (mit != _marked_elems.end())
-    {
-      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
-    }
-    _marked_elems[_current_eid] = direction;
+    _marked_elems[_current_eid].push_back(direction);
     _marked_frags.insert(_current_eid);
   }
 }
@@ -111,42 +98,55 @@ XFEMMaterialStateMarkerBase::threadJoin(const UserObject & y)
 {
   const auto & xmuo = dynamic_cast<const XFEMMaterialStateMarkerBase &>(y);
 
-  for (std::map<unsigned int, RealVectorValue>::const_iterator mit = xmuo._marked_elems.begin();
+  for (std::map<unsigned int, std::vector<RealVectorValue>>::const_iterator mit =
+           xmuo._marked_elems.begin();
        mit != xmuo._marked_elems.end();
        ++mit)
   {
-    _marked_elems[mit->first] = mit->second; // TODO do error checking for duplicates here too
+    if (_marked_elems.find(mit->first) != _marked_elems.end())
+      mooseError("Element: " + Moose::stringify(mit->first) +
+                 " already in list of marked elements.");
+    _marked_elems[mit->first] = mit->second;
   }
 
   for (std::set<unsigned int>::const_iterator mit = xmuo._marked_frags.begin();
        mit != xmuo._marked_frags.end();
        ++mit)
   {
-    _marked_frags.insert(*mit); // TODO do error checking for duplicates here too
+    if (_marked_frags.find(*mit) != _marked_frags.end())
+      mooseError("Fragment: " + Moose::stringify(*mit) + " already in list of marked fragments.");
+    _marked_frags.insert(*mit);
   }
 
   for (std::map<unsigned int, unsigned int>::const_iterator mit = xmuo._marked_elem_sides.begin();
        mit != xmuo._marked_elem_sides.end();
        ++mit)
   {
-    _marked_elem_sides[mit->first] = mit->second; // TODO do error checking for duplicates here too
+    if (_marked_elem_sides.find(mit->first) != _marked_elem_sides.end())
+      mooseError("Element side: " + Moose::stringify(mit->first) +
+                 " already in list of marked element sides.");
+    _marked_elem_sides[mit->first] = mit->second;
   }
 }
 
 void
 XFEMMaterialStateMarkerBase::finalize()
 {
+
   _communicator.set_union(_marked_elems);
   _communicator.set_union(_marked_frags);
   _communicator.set_union(_marked_elem_sides);
 
   _xfem->clearStateMarkedElems();
-  std::map<unsigned int, RealVectorValue>::iterator mit;
+  std::map<unsigned int, std::vector<RealVectorValue>>::iterator mit;
   for (mit = _marked_elems.begin(); mit != _marked_elems.end(); ++mit)
   {
     if (_marked_elem_sides.find(mit->first) != _marked_elem_sides.end())
     {
-      _xfem->addStateMarkedElem(mit->first, mit->second, _marked_elem_sides[mit->first]);
+      _xfem->addStateMarkedElem(
+          mit->first,
+          mit->second,
+          _marked_elem_sides.find(mit->first)->second); //_marked_elem_sides[mit->first]
     }
     else if (_marked_frags.find(mit->first) != _marked_frags.end())
     {
@@ -160,11 +160,4 @@ XFEMMaterialStateMarkerBase::finalize()
   _marked_elems.clear();
   _marked_frags.clear();
   _marked_elem_sides.clear();
-}
-
-bool
-XFEMMaterialStateMarkerBase::doesElementCrack(RealVectorValue & direction)
-{
-  direction(1) = 1.0;
-  return true;
 }

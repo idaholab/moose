@@ -64,7 +64,17 @@ public:
   unsigned int numEmbeddedNodes() const;
   void consistencyCheck();
   void switchNode(EFANode * new_node, EFANode * old_node);
+  // BWS TODO add documentation to this
   bool containsNode(const EFANode * node) const;
   void removeEmbeddedNodes();
   void removeEmbeddedNode(EFANode * node);
+
+  // BWS TODO Delete this new method once I verify that it can be
+  // replaced with a call to containsNode() in EFAElement2D.C
+  /**
+   * Check whether the edge contains the specified EFANode
+   * @param node Pointer to the EFANode to be checked
+   * @return true if the edge contains node, false otherwise
+   */
+  bool hasNode(EFANode * node);
 };
