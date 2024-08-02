@@ -25,7 +25,7 @@
   []
 []
 
-[UserObjects]
+[MeshModifiers]
   [moving_circle]
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
