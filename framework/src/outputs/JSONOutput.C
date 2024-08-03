@@ -98,9 +98,9 @@ JSONOutput::outputReporters()
     // Add time/iteration information
     current_node["time"] = _problem_ptr->time();
     current_node["time_step"] = _problem_ptr->timeStep();
-    if (_execute_enum.contains(EXEC_LINEAR) && !_on_nonlinear_residual)
+    if (_execute_enum.isValueSet(EXEC_LINEAR) && !_on_nonlinear_residual)
       current_node["linear_iteration"] = _linear_iter;
-    if (_execute_enum.contains(EXEC_NONLINEAR))
+    if (_execute_enum.isValueSet(EXEC_NONLINEAR))
       current_node["nonlinear_iteration"] = _nonlinear_iter;
 
     // Inject processor info

@@ -66,7 +66,7 @@ AdvectiveFluxCalculatorBase::AdvectiveFluxCalculatorBase(const InputParameters &
     _pairs_to_send(),
     _allowable_MB_wastage(getParam<Real>("allowable_MB_wastage"))
 {
-  if (!_execute_enum.contains(EXEC_LINEAR))
+  if (!_execute_enum.isValueSet(EXEC_LINEAR))
     paramError(
         "execute_on",
         "The AdvectiveFluxCalculator UserObject " + name() +

@@ -101,7 +101,7 @@ VolumetricFlowRate::initialSetup()
     // - the time integrator is not ready to compute time derivatives
     // - the setup routine is called too early for porosity functions to be initialized
     // We must check that the boundaries requested are all external
-    if (getExecuteOnEnum().contains(EXEC_INITIAL))
+    if (getExecuteOnEnum().isValueSet(EXEC_INITIAL))
       for (const auto bid : boundaryIDs())
       {
         if (!_mesh.isBoundaryFullyExternalToSubdomains(bid, _rc_uo->blockIDs()))

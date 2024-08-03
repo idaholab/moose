@@ -41,8 +41,8 @@ ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parame
   : FunctionMaterialBase<is_ad>(parameters),
     FunctionParserUtils<is_ad>(parameters),
     _symbol_names(_nargs),
-    _extra_symbols(
-        this->template getParam<MultiMooseEnum>("extra_symbols").template getEnum<ExtraSymbols>()),
+    _extra_symbols(this->template getParam<MultiMooseEnum>("extra_symbols")
+                       .template getSetValueIDs<ExtraSymbols>()),
     _tol(0),
     _map_mode(map_mode),
     _upstream_mat_names(this->template getParam<std::vector<MaterialName>>("upstream_materials")),

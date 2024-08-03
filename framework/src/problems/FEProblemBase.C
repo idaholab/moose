@@ -5288,7 +5288,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   // flag so the set by user flag is not reset, calling set with the true flag causes the set
   // by user status to be reset, which should only be done if the EXEC_SAME_AS_MULTIAPP is
   // being applied to the object.
-  if (parameters.get<ExecFlagEnum>("execute_on").contains(EXEC_SAME_AS_MULTIAPP))
+  if (parameters.get<ExecFlagEnum>("execute_on").isValueSet(EXEC_SAME_AS_MULTIAPP))
   {
     ExecFlagEnum & exec_enum = parameters.set<ExecFlagEnum>("execute_on", true);
     std::shared_ptr<MultiApp> multiapp;
@@ -5314,11 +5314,11 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
       std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
   if (multi_app_transfer)
   {
-    if (multi_app_transfer->directions().contains(MultiAppTransfer::TO_MULTIAPP))
+    if (multi_app_transfer->directions().isValueSet(MultiAppTransfer::TO_MULTIAPP))
       _to_multi_app_transfers.addObject(multi_app_transfer);
-    if (multi_app_transfer->directions().contains(MultiAppTransfer::FROM_MULTIAPP))
+    if (multi_app_transfer->directions().isValueSet(MultiAppTransfer::FROM_MULTIAPP))
       _from_multi_app_transfers.addObject(multi_app_transfer);
-    if (multi_app_transfer->directions().contains(MultiAppTransfer::BETWEEN_MULTIAPP))
+    if (multi_app_transfer->directions().isValueSet(MultiAppTransfer::BETWEEN_MULTIAPP))
       _between_multi_app_transfers.addObject(multi_app_transfer);
   }
   else
@@ -8757,8 +8757,8 @@ FEProblemBase::shouldPrintExecution(const THREAD_ID tid) const
   if (tid != 0)
     return false;
 
-  if (_print_execution_on.contains(_current_execute_on_flag) ||
-      _print_execution_on.contains(EXEC_ALWAYS))
+  if (_print_execution_on.isValueSet(_current_execute_on_flag) ||
+      _print_execution_on.isValueSet(EXEC_ALWAYS))
     return true;
   else
     return false;

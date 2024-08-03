@@ -48,7 +48,7 @@ MultiAppSamplerControl::MultiAppSamplerControl(const InputParameters & parameter
     _sampler(SamplerInterface::getSampler("sampler")),
     _param_names(getParam<std::vector<std::string>>("param_names"))
 {
-  if (!_sampler.getParam<ExecFlagEnum>("execute_on").contains(EXEC_PRE_MULTIAPP_SETUP))
+  if (!_sampler.getParam<ExecFlagEnum>("execute_on").isValueSet(EXEC_PRE_MULTIAPP_SETUP))
     _sampler.paramError(
         "execute_on",
         "The sampler object, '",

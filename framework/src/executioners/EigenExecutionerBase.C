@@ -101,7 +101,7 @@ EigenExecutionerBase::init()
   // check when the postprocessors are evaluated
   const ExecFlagEnum & bx_exec =
       _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).getExecuteOnEnum();
-  if (!bx_exec.contains(EXEC_LINEAR))
+  if (!bx_exec.isValueSet(EXEC_LINEAR))
     mooseError("Postprocessor " + getParam<PostprocessorName>("bx_norm") +
                " requires execute_on = 'linear'");
 
@@ -112,7 +112,7 @@ EigenExecutionerBase::init()
     _norm_exec = bx_exec;
 
   // check if _source_integral has been evaluated during initialSetup()
-  if (!bx_exec.contains(EXEC_INITIAL))
+  if (!bx_exec.isValueSet(EXEC_INITIAL))
     _problem.execute(EXEC_LINEAR);
 
   if (_source_integral == 0.0)
@@ -185,7 +185,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   {
     solution_diff = &_problem.getPostprocessorValueByName(xdiff);
     const ExecFlagEnum & xdiff_exec = _problem.getUserObject<UserObject>(xdiff).getExecuteOnEnum();
-    if (!xdiff_exec.contains(EXEC_LINEAR))
+    if (!xdiff_exec.isValueSet(EXEC_LINEAR))
       mooseError("Postprocessor " + xdiff + " requires execute_on = 'linear'");
   }
 
@@ -391,14 +391,14 @@ EigenExecutionerBase::postExecute()
   }
 
   Real s = 1.0;
-  if (_norm_exec.contains(EXEC_CUSTOM))
+  if (_norm_exec.isValueSet(EXEC_CUSTOM))
   {
     _console << " Cannot let the normalization postprocessor on custom.\n";
     _console << " Normalization is abandoned!" << std::endl;
   }
   else
   {
-    bool force = _norm_exec.contains(EXEC_TIMESTEP_END) || _norm_exec.contains(EXEC_LINEAR);
+    bool force = _norm_exec.isValueSet(EXEC_TIMESTEP_END) || _norm_exec.isValueSet(EXEC_LINEAR);
     s = normalizeSolution(force);
     if (!MooseUtils::absoluteFuzzyEqual(s, 1.0))
       _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
