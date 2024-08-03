@@ -99,16 +99,24 @@ public:
    * Methods for seeing if a value is set in the MultiMooseEnum.
    * @return bool - the truth value indicating whether the value is set
    */
+  bool contains(const std::string & value) const { return isValueSet(value); }
+  bool contains(int value) const { return isValueSet(value); }
+  bool contains(unsigned short value) const { return isValueSet(value); }
+  bool contains(const MultiMooseEnum & value) const { return isValueSet(value); }
+  bool contains(const MooseEnumItem & value) const { return isValueSet(value); }
+  ///@}
+
+  // The following are aliases for contains with more descriptive name
+  ///@{
+  /**
+   * Methods for seeing if a value is set in the MultiMooseEnum.
+   * @return bool - the truth value indicating whether the value is set
+   */
   bool isValueSet(const std::string & value) const;
   bool isValueSet(int value) const;
   bool isValueSet(unsigned short value) const;
   bool isValueSet(const MultiMooseEnum & value) const;
   bool isValueSet(const MooseEnumItem & value) const;
-  bool contains(const std::string & value) const;
-  bool contains(int value) const;
-  bool contains(unsigned short value) const;
-  bool contains(const MultiMooseEnum & value) const;
-  bool contains(const MooseEnumItem & value) const;
   ///@}
 
   ///@{
@@ -124,17 +132,39 @@ public:
 
   ///@{
   /**
+   * Un-assign, or unset a value. Deprecated, use eraseSetValue instead.
+   * @param names - a string, set, or vector giving the name to erase from the enumeration values
+   */
+  void erase(const std::string & names);
+  void erase(const std::vector<std::string> & names);
+  void erase(const std::set<std::string> & names);
+  ///@}
+
+  // The following replaces erase with a more descriptive name
+  ///@{
+  /**
    * Un-assign, or unset a value
    * @param names - a string, set, or vector giving the name to erase from the enumeration values
    */
   void eraseSetValue(const std::string & names);
   void eraseSetValue(const std::vector<std::string> & names);
   void eraseSetValue(const std::set<std::string> & names);
-  void erase(const std::string & names);
-  void erase(const std::vector<std::string> & names);
-  void erase(const std::set<std::string> & names);
   ///@}
 
+  ///@{
+  /**
+   * Insert operators
+   * Operator to insert (push_back) values into the enum. Existing values are preserved and
+   * duplicates are stored. Deprecated, use setAdditionalValue instead.
+   * @param names - a string, set, or vector representing the enumeration values to set.
+   */
+  void push_back(const std::string & names);
+  void push_back(const std::vector<std::string> & names);
+  void push_back(const std::set<std::string> & names);
+  void push_back(const MultiMooseEnum & other_enum);
+  ///@}
+
+  // The following replaces push_back with a more descriptive name
   ///@{
   /**
    * Insert operators
@@ -146,10 +176,6 @@ public:
   void setAdditionalValue(const std::vector<std::string> & names);
   void setAdditionalValue(const std::set<std::string> & names);
   void setAdditionalValue(const MultiMooseEnum & other_enum);
-  void push_back(const std::string & names);
-  void push_back(const std::vector<std::string> & names);
-  void push_back(const std::set<std::string> & names);
-  void push_back(const MultiMooseEnum & other_enum);
   ///@}
 
   /**
@@ -169,13 +195,14 @@ public:
    */
   unsigned int get(unsigned int i) const;
 
-  ///@{
+  /// get the current values cast to a vector of enum type T. Deprecated, use getSetValueIDs instead.
+  template <typename T>
+  std::vector<T> getEnum() const;
+
+  // The following replaces getEnum with a more descriptive name
   /// get the current values cast to a vector of enum type T
   template <typename T>
   std::vector<T> getSetValueIDs() const;
-  template <typename T>
-  std::vector<T> getEnum() const;
-  ///@}
 
   ///@{
   /**
