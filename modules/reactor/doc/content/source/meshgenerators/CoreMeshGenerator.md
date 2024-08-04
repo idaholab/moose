@@ -41,7 +41,7 @@ By default, `CoreMeshGenerator` will stitch assemblies created by [`AssemblyMesh
 
 1. Two assemblies have the same constituent pin geometry but vary in total number of pins in the pin lattice
 2. Two assemblies have the same pin lattice structure and geometry, but the constituent pins of each assembly are subdivided into a different number of sectors per side.
-3. One assembly is defined as a heterogeneous mesh (contains one of more pins), and the other assembly is homogenized.
+3. One assembly is defined as a heterogeneous mesh (contains one or more pins), and the other assembly is homogenized.
 
 `CoreMeshGenerator` will throw a warning if it detects that assembly stitching may lead to hanging nodes. If this happens, the user can regenerate the core mesh by setting [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) to `true` to enable flexible assembly stitching. This flexible assembly stitching algorithm deletes the outermost mesh interval and replaces it with a triangulated region using [`FlexiblePatternGenerator`](FlexiblePatternGenerator.md). For a homogeneous assembly, the entire assembly region is triangulated. By doing so, the number of nodes at the outer boundary of each input assembly will be identical and positioned at the same locations, thus enabling stitching of dissimilar assemblies. In order to control the number of sectors at the outer assembly boundary after the triangulation step, the user can set this parameter using [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/num_sectors_at_flexible_boundary). The following three images describe how flexible assembly patterning can be used to address the issue of hanging nodes for the three cases listed above:
 

@@ -318,73 +318,72 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       }
 
       // If flexible assembly stitching is invoked and this is an assembly mesh with only a
-      // background region, do not call mesh subgenerators here This assembly mesh should be created
-      // entirely in generateFlexibleAssemblyBoundaries()
+      // background region, do not call mesh subgenerators here. This assembly mesh should be
+      // created entirely in generateFlexibleAssemblyBoundaries()
       bool skip_assembly_generation =
           _is_assembly && use_flexible_stitching && _intervals.size() == 1;
 
-      // Generate Cartesian/hex pin using PolygonConcentricCircleMeshGenerator
+      if (!skip_assembly_generation)
       {
-        // Get and assign parameters for the main geometry feature of the Pin
-        // which is created with a PolygonConcentricCircleMeshGenerator subgenerator
-        auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
-        params.set<bool>("preserve_volumes") = true;
-        params.set<bool>("quad_center_elements") = _quad_center;
-        params.set<MooseEnum>("polygon_size_style") = "apothem";
-        params.set<Real>("polygon_size") = _pitch / 2.0;
-        params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
-        const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
-                                                : "outer_pin_" + std::to_string(_pin_type);
-        params.set<std::string>("external_boundary_name") = boundary_name;
-        bool flat_side_up = (_mesh_geometry == "Square");
-        params.set<bool>("flat_side_up") = flat_side_up;
-        params.set<bool>("create_outward_interface_boundaries") = false;
-
-        const auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
-        params.set<unsigned int>("num_sides") = num_sides;
-        params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-            std::vector<unsigned int>(num_sides, _num_sectors);
-
-        if (ring_intervals.size() > 0)
+        // Generate Cartesian/hex pin using PolygonConcentricCircleMeshGenerator
         {
-          params.set<std::vector<Real>>("ring_radii") = _ring_radii;
-          params.set<std::vector<subdomain_id_type>>("ring_block_ids") = ring_blk_ids;
-          params.set<std::vector<SubdomainName>>("ring_block_names") = ring_blk_names;
-          params.set<std::vector<unsigned int>>("ring_intervals") = ring_intervals;
-        }
+          // Get and assign parameters for the main geometry feature of the Pin
+          // which is created with a PolygonConcentricCircleMeshGenerator subgenerator
+          auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
+          params.set<bool>("preserve_volumes") = true;
+          params.set<bool>("quad_center_elements") = _quad_center;
+          params.set<MooseEnum>("polygon_size_style") = "apothem";
+          params.set<Real>("polygon_size") = _pitch / 2.0;
+          params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
+          const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
+                                                  : "outer_pin_" + std::to_string(_pin_type);
+          params.set<std::string>("external_boundary_name") = boundary_name;
+          bool flat_side_up = (_mesh_geometry == "Square");
+          params.set<bool>("flat_side_up") = flat_side_up;
+          params.set<bool>("create_outward_interface_boundaries") = false;
 
-        params.set<std::vector<subdomain_id_type>>("background_block_ids") = background_blk_ids;
-        params.set<std::vector<SubdomainName>>("background_block_names") = background_blk_names;
-        params.set<unsigned int>("background_intervals") = background_intervals;
+          const auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
+          params.set<unsigned int>("num_sides") = num_sides;
+          params.set<std::vector<unsigned int>>("num_sectors_per_side") =
+              std::vector<unsigned int>(num_sides, _num_sectors);
 
-        if (duct_intervals.size() > 0)
-        {
-          params.set<MooseEnum>("duct_sizes_style") = "apothem";
-          params.set<std::vector<Real>>("duct_sizes") = _duct_halfpitch;
-          params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_blk_ids;
-          params.set<std::vector<SubdomainName>>("duct_block_names") = duct_blk_names;
-          params.set<std::vector<unsigned int>>("duct_intervals") = duct_intervals;
-        }
+          if (ring_intervals.size() > 0)
+          {
+            params.set<std::vector<Real>>("ring_radii") = _ring_radii;
+            params.set<std::vector<subdomain_id_type>>("ring_block_ids") = ring_blk_ids;
+            params.set<std::vector<SubdomainName>>("ring_block_names") = ring_blk_names;
+            params.set<std::vector<unsigned int>>("ring_intervals") = ring_intervals;
+          }
 
-        if (!skip_assembly_generation)
+          params.set<std::vector<subdomain_id_type>>("background_block_ids") = background_blk_ids;
+          params.set<std::vector<SubdomainName>>("background_block_names") = background_blk_names;
+          params.set<unsigned int>("background_intervals") = background_intervals;
+
+          if (duct_intervals.size() > 0)
+          {
+            params.set<MooseEnum>("duct_sizes_style") = "apothem";
+            params.set<std::vector<Real>>("duct_sizes") = _duct_halfpitch;
+            params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_blk_ids;
+            params.set<std::vector<SubdomainName>>("duct_block_names") = duct_blk_names;
+            params.set<std::vector<unsigned int>>("duct_intervals") = duct_intervals;
+          }
+
           addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
-      }
+        }
 
-      // Remove extra sidesets created by PolygonConcentricCircleMeshGenerator
-      {
-        auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
-
-        params.set<MeshGeneratorName>("input") = name() + "_2D";
-
-        auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
-        std::vector<BoundaryName> boundaries_to_delete = {};
-        for (const auto i : make_range(num_sides))
-          boundaries_to_delete.insert(boundaries_to_delete.end(),
-                                      {std::to_string(10001 + i), std::to_string(15001 + i)});
-        params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
-
-        if (!skip_assembly_generation)
+        // Remove extra sidesets created by PolygonConcentricCircleMeshGenerator
         {
+          auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
+
+          params.set<MeshGeneratorName>("input") = name() + "_2D";
+
+          auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
+          std::vector<BoundaryName> boundaries_to_delete = {};
+          for (const auto i : make_range(num_sides))
+            boundaries_to_delete.insert(boundaries_to_delete.end(),
+                                        {std::to_string(10001 + i), std::to_string(15001 + i)});
+          params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
+
           build_mesh_name = name() + "_delbds";
           addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
         }
@@ -641,9 +640,15 @@ PinMeshGenerator::generate()
   {
     const auto max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_2D");
     setMeshProperty("max_radius_meta", max_radius_meta);
+  }
+  if (hasMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"))
+  {
     const auto background_intervals_meta =
         getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
     setMeshProperty("background_intervals_meta", background_intervals_meta);
+  }
+  if (hasMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"))
+  {
     const auto node_id_background_meta =
         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
     setMeshProperty("node_id_background_meta", node_id_background_meta);

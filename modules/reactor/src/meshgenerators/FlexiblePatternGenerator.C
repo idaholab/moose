@@ -572,9 +572,11 @@ FlexiblePatternGenerator::generate()
         (*_build_mesh)->get_boundary_info().get_id_by_name(_external_boundary_name);
     if ((external_id_by_name != Moose::INVALID_BOUNDARY_ID) &&
         (external_id_by_name != _external_boundary_id))
-      mooseError("External boundary name " + _external_boundary_name + " is associated with id " +
-                 std::to_string(external_id_by_name) + ", which differs from " +
-                 std::to_string(_external_boundary_id));
+      paramError("external_boundary_name",
+                 "External boundary name " + _external_boundary_name +
+                     " is already associated with id " + std::to_string(external_id_by_name) +
+                     ", which differs from the user-specified external_boundary_id " +
+                     std::to_string(_external_boundary_id));
 
     (*_build_mesh)->get_boundary_info().sideset_name(_external_boundary_id) =
         _external_boundary_name;
