@@ -36,7 +36,7 @@
                 Outputs/json_out/file_base=core_square_datadriven_out'
     jsondiff = 'core_square_datadriven_out.json'
     # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries'
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
     recover = false
     allow_test_objects = true
   []
@@ -155,7 +155,7 @@
                 Outputs/json_out/file_base=core_hex_datadriven_out'
     jsondiff = 'core_hex_datadriven_out.json'
     # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries'
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
     recover = false
     allow_test_objects = true
   []
@@ -252,7 +252,7 @@
                 Outputs/json_out/file_base=core_hex_2d_datadriven_out'
     jsondiff = 'core_hex_2d_datadriven_out.json'
     # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries'
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
     recover = false
     allow_test_objects = true
   []
@@ -315,5 +315,30 @@
                 Outputs/out/extra_element_ids_to_output=depletion_id"
     exodiff = 'core_hex_depl_pin_type_in.e'
     recover = false
+  []
+  [flexible_stitching_hex]
+    requirement = 'The system shall generate a 3D hexagonal core mesh with flexible assembly patterning that avoids hanging nodes at assembly interfaces'
+    type = 'CSVDiff'
+    input = 'core_flexible_assembly_stitching_hex.i'
+    csvdiff = 'core_flexible_assembly_stitching_hex_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [flexible_stitching_cart]
+    requirement = 'The system shall generate a 3D Cartesian core mesh with flexible assembly patterning that avoids hanging nodes at assembly interfaces'
+    type = 'CSVDiff'
+    input = 'core_flexible_assembly_stitching_cart.i'
+    csvdiff = 'core_flexible_assembly_stitching_cart_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [flexible_stitching_modify_num_sectors]
+    requirement = 'The system shall generate a 3D core mesh with the number of sectors at the assembly boundary being set by the user'
+    type = 'CSVDiff'
+    input = 'core_flexible_assembly_stitching_hex.i'
+    cli_args = "Mesh/rmp/num_sectors_at_flexible_boundary=3"
+    csvdiff = 'core_flexible_assembly_stitching_hex_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
   []
 []
