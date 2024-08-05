@@ -9,8 +9,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "CentralDifference.h"
-#include "CentralDifferenceDirect.h"
+#include "DirectCentralDifference.h"
 #include "MooseTypes.h"
 #include "MooseVariableFieldBase.h"
 #include "NonlinearSystem.h"
@@ -21,10 +20,10 @@
 #include "DirichletBCBase.h"
 #include "libmesh/vector_value.h"
 
-registerMooseObject("SolidMechanicsApp", CentralDifferenceDirect);
+registerMooseObject("SolidMechanicsApp", DirectCentralDifference);
 
 InputParameters
-CentralDifferenceDirect::validParams()
+DirectCentralDifference::validParams()
 {
   InputParameters params = ExplicitTimeIntegrator::validParams();
 
@@ -43,7 +42,7 @@ CentralDifferenceDirect::validParams()
   return params;
 }
 
-CentralDifferenceDirect::CentralDifferenceDirect(const InputParameters & parameters)
+DirectCentralDifference::DirectCentralDifference(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _constant_mass(getParam<bool>("use_constant_mass")),
     _mass_matrix(getParam<TagName>("mass_matrix_tag"))
@@ -55,7 +54,7 @@ CentralDifferenceDirect::CentralDifferenceDirect(const InputParameters & paramet
 }
 
 void
-CentralDifferenceDirect::computeTimeDerivatives()
+DirectCentralDifference::computeTimeDerivatives()
 {
   /*
   Because this is called in NonLinearSystemBase
@@ -67,7 +66,7 @@ CentralDifferenceDirect::computeTimeDerivatives()
 }
 
 void
-CentralDifferenceDirect::solve()
+DirectCentralDifference::solve()
 {
   // Getting the tagID for the mass matrix
   auto mass_tag = _sys.subproblem().getMatrixTagID(_mass_matrix);
@@ -112,7 +111,7 @@ CentralDifferenceDirect::solve()
 }
 
 void
-CentralDifferenceDirect::postResidual(NumericVector<Number> & residual)
+DirectCentralDifference::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;
   residual += _Re_non_time;
@@ -123,7 +122,7 @@ CentralDifferenceDirect::postResidual(NumericVector<Number> & residual)
 }
 
 bool
-CentralDifferenceDirect::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
+DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
 {
   mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
 

@@ -81,7 +81,7 @@
     requirement = "The solid mechanics app shall support a form of central difference time integration
                    that uses a direct calculation of the acceleration from the residual forces to 
                    perform a solution update."
-    design = "CentralDifferenceDirect.md"
+    design = "DirectCentralDifference.md"
     issues = "#27833"
   []
 []

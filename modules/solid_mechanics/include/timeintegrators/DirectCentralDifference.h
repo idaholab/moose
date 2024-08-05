@@ -23,12 +23,12 @@ class MooseError;
  * Implements a truly explicit (no nonlinear solve) first-order, forward Euler
  * time integration scheme.
  */
-class CentralDifferenceDirect : public ExplicitTimeIntegrator
+class DirectCentralDifference : public ExplicitTimeIntegrator
 {
 public:
   static InputParameters validParams();
 
-  CentralDifferenceDirect(const InputParameters & parameters);
+  DirectCentralDifference(const InputParameters & parameters);
 
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;

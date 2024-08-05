@@ -96,7 +96,7 @@
     type = Transient
 
     [TimeIntegrator]
-        type = CentralDifferenceDirect
+        type = DirectCentralDifference
         mass_matrix_tag = 'system'
     []
 

@@ -4,7 +4,7 @@
 
 ## Overview
 
-This applies a Dirichlet BC meant to be used in conjunction with [CentralDifferenceDirect](source/timeintegrators/CentralDifferenceDirect.md).
+This applies a Dirichlet BC meant to be used in conjunction with [DirectCentralDifference](source/timeintegrators/DirectCentralDifference.md).
 
 BC's are applied by calculating the residual force needed,$\mathbf{F}_g$, to enforce BC's during a central difference solution update.
 

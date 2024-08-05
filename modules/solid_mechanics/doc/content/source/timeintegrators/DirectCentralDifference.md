@@ -1,10 +1,10 @@
-# CentralDifferenceDirect
+# DirectCentralDifference
 
-!syntax description /Executioner/TimeIntegrator/CentralDifferenceDirect
+!syntax description /Executioner/TimeIntegrator/DirectCentralDifference
 
 ## Overview
 
-`CentralDifferenceDirect` applies a time integrator for central difference in which the acceleration used for the solution update is calculated directly from the residual forces.
+`DirectCentralDifference` applies a time integrator for central difference in which the acceleration used for the solution update is calculated directly from the residual forces.
 
 \begin{equation}
     \begin{aligned}
@@ -57,10 +57,10 @@ An example input file is shown below:
 
 ```
 
-!! Describe and include an example of how to use the CentralDifferenceDirect object.
+!! Describe and include an example of how to use the DirectCentralDifference object.
 
-!syntax parameters /Executioner/TimeIntegrator/CentralDifferenceDirect
+!syntax parameters /Executioner/TimeIntegrator/DirectCentralDifference
 
-!syntax inputs /Executioner/TimeIntegrator/CentralDifferenceDirect
+!syntax inputs /Executioner/TimeIntegrator/DirectCentralDifference
 
-!syntax children /Executioner/TimeIntegrator/CentralDifferenceDirect
+!syntax children /Executioner/TimeIntegrator/DirectCentralDifference
