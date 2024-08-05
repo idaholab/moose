@@ -81,13 +81,12 @@
     type = 'CheckFiles'
     prereq = perfect
     input = 'perfect.i'
-    delete_output_before_running = false
     cli_args = '--split-mesh=2'
     mesh_mode = 'REPLICATED'
     check_files = 'perfect.cpa.gz/2/header.gz perfect.cpa.gz/2/split-2-0.gz perfect.cpa.gz/2/split-2-1.gz'
     recover = false
     requirement = "The system shall generate a parallel mesh split across 2 processes."
-    design = "/materials/GapConductance.md"
+    design = "Mesh/splitting.md"
     issues = "#27203"
   []
 

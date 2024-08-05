@@ -18,7 +18,7 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
 
-registerMooseObject("MooseApp", GhostBoundary);
+registerMooseObject("HeatTransferApp", GhostBoundary);
 
 using namespace libMesh;
 

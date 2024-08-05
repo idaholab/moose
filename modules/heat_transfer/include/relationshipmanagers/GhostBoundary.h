@@ -9,7 +9,7 @@
 
 #pragma once
 
-// App includes
+// Framework includes
 #include "AutomaticMortarGeneration.h"
 #include "RelationshipManager.h"
 

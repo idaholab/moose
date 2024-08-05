@@ -52,15 +52,15 @@ will be written to a binary file under the generated directory that can be loade
 split meshes.
 
 !alert note
-The mesh splitter commands do not work with DistributedMesh. You must only split with a ReplicatedMesh.
+The mesh splitter commands do not work with a [distributed mesh](syntax/Mesh/index.md#replicated-and-distributed-mesh). You can only split starting from a replicated mesh.
 
 ## Using Split Meshes
 
-There are two ways of using referring to meshes in parallel in MOOSE, as split or as distributed. While there is no conceptual difference between the two there is a difference in implementation and features.
+There are two ways of referring to distributed meshes in MOOSE, as split or as distributed. A split mesh is a distributed mesh. A split mesh is read from a pre-split mesh file (from a [Checkpoint.md] or using the instructions above). A distributed mesh can be generated in parallel or loaded entirely replicated then distributed.
 
 ### Loading a split mesh using [FileMeshGenerator.md]
 
-A split mesh, i.e. a `.cpr` file, may be loaded using a [FileMeshGenerator.md] if access to the mesh is needed before the full simulation case is set-up. In fact this approach is recommended; it leads to correct element ghosting whereas the approach we introduce in the following section may not.
+A split mesh, i.e. a `.cpr` file, may be loaded using a [FileMeshGenerator.md] if access to the mesh is needed before the full simulation case is set-up, notably for additional mesh generation with [mesh generators](syntax/Mesh/index.md#mesh-generators). In fact this approach is recommended; it leads to correct element ghosting whereas the approach we introduce in the following section may not.
 
 ### Loading a split mesh using `--use-split`
 
