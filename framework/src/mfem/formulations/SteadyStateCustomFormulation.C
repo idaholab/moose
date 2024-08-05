@@ -6,6 +6,9 @@ InputParameters
 SteadyStateCustomFormulation::validParams()
 {
   InputParameters params = MFEMFormulation::validParams();
+  params.addClassDescription(
+      "MFEM Formulation suitable for use with Steady executioners to the problem.");
+
   return params;
 }
 

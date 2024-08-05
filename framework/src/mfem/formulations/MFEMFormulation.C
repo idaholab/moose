@@ -7,6 +7,8 @@ MFEMFormulation::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMFormulation");
+
+  params.addClassDescription("Base class for addition of customised platypus::ProblemBuilders");
   return params;
 }
 

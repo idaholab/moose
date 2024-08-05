@@ -6,6 +6,9 @@ InputParameters
 TransientCustomFormulation::validParams()
 {
   InputParameters params = MFEMFormulation::validParams();
+  params.addClassDescription(
+      "Add an MFEM Formulation suitable for use with Transient executioners to the problem.");
+
   return params;
 }
 
