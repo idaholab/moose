@@ -251,8 +251,8 @@ protected:
       pcrecpp::RE(uri_pattern).Replace(uri_replace, &location_uri);
 
       locations_stream << "document_uri: \"" << location_uri << "\""
-                       << "    definition_start: [" << location_start_line << "."
-                       << location_start_character << "]    definition_end: [" << location_end_line
+                       << "    location_start: [" << location_start_line << "."
+                       << location_start_character << "]    location_end: [" << location_end_line
                        << "." << location_end_character << "]"
                        << "\n";
     }
@@ -469,7 +469,7 @@ TEST_F(MooseServerTest, InitializeAndInitialized)
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_definition_provider].to_bool());
 
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_references_provider].is_bool());
-  EXPECT_FALSE(server_capabilities[wasp::lsp::m_references_provider].to_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_references_provider].to_bool());
 
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].is_bool());
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].to_bool());
@@ -1262,7 +1262,7 @@ TEST_F(MooseServerTest, DefinitionObjectTypeSource)
   // expected locations with zero-based lines and columns
 
   std::string locations_expect = R"INPUT(
-document_uri: "file://...absolute.../framework/src/executioners/Transient.C"    definition_start: [38.0]    definition_end: [38.1000]
+document_uri: "file://...absolute.../framework/src/executioners/Transient.C"    location_start: [38.0]    location_end: [38.1000]
 )INPUT";
 
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
@@ -1317,9 +1317,9 @@ TEST_F(MooseServerTest, DefinitionInputFileLookups)
   // expected locations with zero-based lines and columns
 
   std::string locations_expect = R"INPUT(
-document_uri: "file:///test/input/path"    definition_start: [16.4]    definition_end: [16.10]
-document_uri: "file:///test/input/path"    definition_start: [17.7]    definition_end: [17.13]
-document_uri: "file:///test/input/path"    definition_start: [19.5]    definition_end: [19.11]
+document_uri: "file:///test/input/path"    location_start: [16.4]    location_end: [16.10]
+document_uri: "file:///test/input/path"    location_start: [17.7]    location_end: [17.13]
+document_uri: "file:///test/input/path"    location_start: [19.5]    location_end: [19.11]
 )INPUT";
 
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
@@ -1492,38 +1492,99 @@ label: linear_residual_start_time text: linear_residual_start_time =           d
 
 TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
-  // references test parameters
+  // didchange test parameters - update input to set up document references
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int doc_version = 5;
+  std::string doc_text_change = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Variables]
+  [u][]
+  [v][]
+[]
+[Kernels]
+  [diff]
+    type = Diffusion
+    variable = "u"
+  []
+[]
+[BCs]
+  [left]
+    type = VacuumBC
+    boundary = left
+    variable = u
+    prop_getter_suffix = u
+  []
+  [right]
+    type = VacuumBC
+    boundary = right
+    variable = v
+    displacements = 'u v u v u'
+  []
+[]
+[Executioner]
+  type = Transient
+[]
+[Problem]
+  solve = false
+[]
+)INPUT";
 
+  // build didchange notification from parameters and handle it with server
+  wasp::DataObject didchange_notification, diagnostics_notification;
+  std::stringstream errors;
+  EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
+      didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
+  EXPECT_TRUE(
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+
+  // references test parameters - on subblock declarator of variable name u
   int request_id = 25;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 0;
-  int character = 0;
-  bool include_declaration = false;
+  int request_line = 6;
+  int request_char = 4;
+  bool incl_decl = true;
 
-  // build references request with the test parameters
-
+  // build references request with the test parameters for the moose_server
   wasp::DataObject references_request;
   std::stringstream references_errors;
-
   EXPECT_TRUE(wasp::lsp::buildReferencesRequest(references_request,
                                                 references_errors,
                                                 request_id,
-                                                document_uri,
-                                                line,
-                                                character,
-                                                include_declaration));
-
+                                                doc_uri,
+                                                request_line,
+                                                request_char,
+                                                incl_decl));
   EXPECT_TRUE(references_errors.str().empty());
 
-  // handle the built references request with the moose_server
-
+  // handle references request built from parameters using the moose_server
   wasp::DataObject references_response;
-
   EXPECT_TRUE(moose_server->handleReferencesRequest(references_request, references_response));
-
   EXPECT_TRUE(moose_server->getErrors().empty());
 
-  // references response will be checked when capability is implemented
+  // check dissected values of references response sent by the moose_server
+  std::stringstream response_errors;
+  int response_id;
+  wasp::DataArray locations_array;
+  EXPECT_TRUE(wasp::lsp::dissectLocationsResponse(
+      references_response, response_errors, response_id, locations_array));
+  EXPECT_TRUE(response_errors.str().empty());
+  EXPECT_EQ(request_id, response_id);
+  EXPECT_EQ(6u, locations_array.size());
+
+  // make formatted list of response references and check it is as expected
+  std::ostringstream locations_actual;
+  format_locations(locations_array, locations_actual);
+  std::string locations_expect = R"INPUT(
+document_uri: "file:///test/input/path"    location_start: [6.3]    location_end: [6.4]
+document_uri: "file:///test/input/path"    location_start: [12.15]    location_end: [12.18]
+document_uri: "file:///test/input/path"    location_start: [19.15]    location_end: [19.16]
+document_uri: "file:///test/input/path"    location_start: [26.21]    location_end: [26.22]
+document_uri: "file:///test/input/path"    location_start: [26.25]    location_end: [26.26]
+document_uri: "file:///test/input/path"    location_start: [26.29]    location_end: [26.30]
+)INPUT";
+  EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
 
 TEST_F(MooseServerTest, DocumentFormattingRequest)
@@ -1537,7 +1598,7 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
   // didchange test parameters - update input to set up document formatting
 
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int doc_version = 5;
+  int doc_version = 6;
   std::string doc_text_change = R"INPUT(
 
 num_dim = 2
@@ -1735,7 +1796,7 @@ TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
 {
   // didchange test parameters - create empty diagnostic which is not added
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int doc_version = 6;
+  int doc_version = 7;
   std::string doc_text_change = R"INPUT(
 [Mesh]
   type = GeneratedMesh
