@@ -165,6 +165,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
     GenericReal<is_ad> & scalar,
     std::stringstream * iter_output)
 {
+
   scalar = initialGuess(effective_trial_stress);
   GenericReal<is_ad> scalar_old = scalar;
   GenericReal<is_ad> scalar_increment = 0.0;
@@ -181,116 +182,154 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
   Real reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
 
+  // we switch off forward mode derivatives until we have a converged solution
+  const auto did_derivatives = ADReal::do_derivatives;
+  if constexpr (is_ad)
+  {
+    // We have the option of using dual numbers to compute the newton solve derivatives. In those
+    // cases we cannot simply switch off derivative calculation, or the Newton iterations will never
+    // converge.
+    if (!_ad_derivative)
+      ADReal::do_derivatives = false;
+  }
+  else
+    libmesh_ignore(did_derivatives);
+
   if (converged(_residual, reference_residual))
   {
     iterationFinalize(scalar);
     outputIterationStep(iter_output, effective_trial_stress, scalar, reference_residual);
-    return SolveState::SUCCESS;
   }
-
-  _residual_history.assign(_num_resids, std::numeric_limits<Real>::max());
-  _residual_history[0] = MetaPhysicL::raw_value(_residual);
-
-  while (_iteration < _max_its && !converged(_residual, reference_residual) &&
-         !convergedAcceptable(_iteration, reference_residual))
+  else
   {
-    preStep(scalar_old, _residual, _derivative);
+    _residual_history.assign(_num_resids, std::numeric_limits<Real>::max());
+    _residual_history[0] = MetaPhysicL::raw_value(_residual);
 
-    scalar_increment = -_residual / _derivative;
-    scalar = scalar_old + scalar_increment;
-
-    if (_check_range)
-      checkPermissibleRange(scalar,
-                            scalar_increment,
-                            scalar_old,
-                            min_permissible_scalar,
-                            max_permissible_scalar,
-                            iter_output);
-
-    computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
-    reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
-    iterationFinalize(scalar);
-
-    if (_bracket_solution)
-      updateBounds(
-          scalar, _residual, init_resid_sign, scalar_upper_bound, scalar_lower_bound, iter_output);
-
-    if (converged(_residual, reference_residual))
+    while (_iteration < _max_its && !converged(_residual, reference_residual) &&
+           !convergedAcceptable(_iteration, reference_residual))
     {
-      outputIterationStep(iter_output, effective_trial_stress, scalar, reference_residual);
-      break;
-    }
-    else
-    {
-      bool modified_increment = false;
+      preStep(scalar_old, _residual, _derivative);
+      if (_derivative != 0.0)
+        scalar_increment = -_residual / _derivative;
+      else
+        scalar_increment = -_residual;
+      scalar = scalar_old + scalar_increment;
 
-      // Line Search
-      if (_line_search)
-      {
-        if (residual_old - _residual != 0.0)
-        {
-          GenericReal<is_ad> alpha = residual_old / (residual_old - _residual);
-          alpha = MathUtils::clamp(alpha, 1.0e-2, 1.0);
+      if (_check_range)
+        checkPermissibleRange(scalar,
+                              scalar_increment,
+                              scalar_old,
+                              min_permissible_scalar,
+                              max_permissible_scalar,
+                              iter_output);
 
-          if (alpha != 1.0)
-          {
-            modified_increment = true;
-            scalar_increment *= alpha;
-            if (iter_output)
-              *iter_output << "  Line search alpha = " << MetaPhysicL::raw_value(alpha)
-                           << " increment = " << MetaPhysicL::raw_value(scalar_increment)
-                           << std::endl;
-          }
-        }
-      }
+      computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+      reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
+      iterationFinalize(scalar);
 
       if (_bracket_solution)
+        updateBounds(scalar,
+                     _residual,
+                     init_resid_sign,
+                     scalar_upper_bound,
+                     scalar_lower_bound,
+                     iter_output);
+
+      if (converged(_residual, reference_residual))
       {
-        // Check to see whether trial scalar_increment is outside the bounds, and set it to a point
-        // within the bounds if it is
-        if (scalar_old + scalar_increment >= scalar_upper_bound ||
-            scalar_old + scalar_increment <= scalar_lower_bound)
+        outputIterationStep(iter_output, effective_trial_stress, scalar, reference_residual);
+        break;
+      }
+      else
+      {
+        bool modified_increment = false;
+
+        // Line Search
+        if (_line_search)
         {
-          if (scalar_upper_bound != max_permissible_scalar &&
-              scalar_lower_bound != min_permissible_scalar)
+          if (residual_old - _residual != 0.0)
           {
-            const Real frac = 0.5;
-            scalar_increment =
-                (1.0 - frac) * scalar_lower_bound + frac * scalar_upper_bound - scalar_old;
-            modified_increment = true;
-            if (iter_output)
-              *iter_output << "  Trial scalar_increment exceeded bounds.  Setting between "
-                              "lower/upper bounds. frac: "
-                           << frac << std::endl;
+            GenericReal<is_ad> alpha = residual_old / (residual_old - _residual);
+            alpha = MathUtils::clamp(alpha, 1.0e-2, 1.0);
+
+            if (alpha != 1.0)
+            {
+              modified_increment = true;
+              scalar_increment *= alpha;
+              if (iter_output)
+                *iter_output << "  Line search alpha = " << MetaPhysicL::raw_value(alpha)
+                             << " increment = " << MetaPhysicL::raw_value(scalar_increment)
+                             << std::endl;
+            }
           }
+        }
+
+        if (_bracket_solution)
+        {
+          // Check to see whether trial scalar_increment is outside the bounds, and set it to a
+          // point within the bounds if it is
+          if (scalar_old + scalar_increment >= scalar_upper_bound ||
+              scalar_old + scalar_increment <= scalar_lower_bound)
+          {
+            if (scalar_upper_bound != max_permissible_scalar &&
+                scalar_lower_bound != min_permissible_scalar)
+            {
+              constexpr Real frac = 0.5;
+              scalar_increment =
+                  (1.0 - frac) * scalar_lower_bound + frac * scalar_upper_bound - scalar_old;
+              modified_increment = true;
+              if (iter_output)
+                *iter_output << "  Trial scalar_increment exceeded bounds.  Setting between "
+                                "lower/upper bounds. frac: "
+                             << frac << std::endl;
+            }
+          }
+        }
+
+        // Update the trial scalar and recompute residual if the line search or bounds checking
+        // modified the increment
+        if (modified_increment)
+        {
+          scalar = scalar_old + scalar_increment;
+          computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+          reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
+          iterationFinalize(scalar);
+
+          if (_bracket_solution)
+            updateBounds(scalar,
+                         _residual,
+                         init_resid_sign,
+                         scalar_upper_bound,
+                         scalar_lower_bound,
+                         iter_output);
         }
       }
 
-      // Update the trial scalar and recompute residual if the line search or bounds checking
-      // modified the increment
-      if (modified_increment)
-      {
-        scalar = scalar_old + scalar_increment;
-        computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
-        reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
-        iterationFinalize(scalar);
+      outputIterationStep(iter_output, effective_trial_stress, scalar, reference_residual);
 
-        if (_bracket_solution)
-          updateBounds(scalar,
-                       _residual,
-                       init_resid_sign,
-                       scalar_upper_bound,
-                       scalar_lower_bound,
-                       iter_output);
+      ++_iteration;
+      residual_old = _residual;
+      scalar_old = scalar;
+      _residual_history[_iteration % _num_resids] = MetaPhysicL::raw_value(_residual);
+    }
+  }
+
+  // recover derivatives
+  if constexpr (is_ad)
+  {
+    ADReal::do_derivatives = did_derivatives;
+    if (did_derivatives && !_ad_derivative)
+    {
+      computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+      if (_derivative != 0.0)
+        scalar = scalar - _residual / _derivative;
+      else
+      {
+        scalar += _absolute_tolerance;
+        computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+        scalar = scalar - _residual / _derivative;
       }
     }
-
-    outputIterationStep(iter_output, effective_trial_stress, scalar, reference_residual);
-
-    ++_iteration;
-    residual_old = _residual;
-    scalar_old = scalar;
-    _residual_history[_iteration % _num_resids] = MetaPhysicL::raw_value(_residual);
   }
 
   if (std::isnan(_residual) || std::isinf(MetaPhysicL::raw_value(_residual)))
@@ -344,7 +383,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::convergedAcceptable(const unsig
   // Check to see whether the residual has dropped by convergence_history_factor over
   // the last _num_resids iterations. If it has (which means it's still making progress),
   // don't consider it to be converged within the acceptable limits.
-  const Real convergence_history_factor = 10.0;
+  constexpr Real convergence_history_factor = 10.0;
   if (std::abs(_residual * convergence_history_factor) <
       std::abs(_residual_history[(it + 1) % _num_resids]))
     return false;
