@@ -33,6 +33,7 @@ public:
   platypus::FESpaces _fespaces;
   platypus::GridFunctions _gridfunctions;
 
+  mfem::Device _device;
   MPI_Comm _comm;
   int _myid;
   int _num_procs;
@@ -63,6 +64,7 @@ public:
   void SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner);
   void SetJacobianSolver(std::shared_ptr<mfem::Solver> solver);
   void SetCoefficients(platypus::Coefficients & coefficients);
+  void SetDevice(const std::string & dev);
 
   void AddFESpace(std::string fespace_name,
                   std::string fec_name,

@@ -147,7 +147,6 @@ protected:
   std::string _input_mesh;
   std::string _formulation_name;
   int _order;
-  mfem::Device _device;
 
   platypus::Coefficients _coefficients;
   platypus::InputParameters _solver_options;
