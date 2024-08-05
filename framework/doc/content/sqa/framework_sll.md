@@ -10,10 +10,10 @@
 > of the library is to provide support for adaptive mesh refinement (AMR) computations in parallel
 > while allowing a research scientist to focus on the physics they are modeling.
 
-+Testing:+ libMesh is a core library providing significant funcitionality for MOOSE and MOOSE-based
++Testing:+ libMesh is a core library providing significant functionality for MOOSE and MOOSE-based
 applications. Every Functional test in the [framework RTM](framework_rtm.md) that manipulates a mesh
 or solves a problem is using an integrated piece of the libMesh library. For all practical purposes
-there is almost no differences to the set of tests for the framework and the set of tests for libMesh.
+there are almost no differences between the set of tests for the framework and the set of tests for libMesh.
 
 Current Version of libMesh: [!git!submodule-hash url=https://github.com/libmesh/libmesh/commit](libmesh)
 
@@ -28,10 +28,10 @@ Current Version of libMesh: [!git!submodule-hash url=https://github.com/libmesh/
 > (sometimes called PETSc/Tao) also contains the Tao optimization software library.
 >
 
-+Testing:+ PETSc is a core library providing significant funcitionality for MOOSE and MOOSE-based
++Testing:+ PETSc is a core library providing significant functionality for MOOSE and MOOSE-based
 applications. Every Functional test in the [framework RTM](framework_rtm.md) that
 solves a problem is using an integrated piece of the PETSc library. For all practical purposes
-there is almost no differences to the set of tests for the framework and the set of tests for PETSc.
+there are almost no differences between the set of tests for the framework and the set of tests for PETSc.
 
 
 Current Version of [!ac](PETSc): [!git!submodule-hash url=https://github.com/petsc/petsc/commit](petsc)
@@ -48,7 +48,7 @@ This project is summarized as follows on the project website:
 > solvers for large-scale scientific simulation, featuring parallel multigrid methods for both structured
 > and unstructured grid problems. The hypre library is highly portable and supports a number of languages.
 
-+Testing:+ [!ac](PETSc) is able to utilize several externally developed preconditioners in its solution
++Testing:+ [!ac](PETSc) is able to utilize several externally-developed preconditioners in its solution
 scheme. Explicit testing of the Hypre BoomerAMG preconditioner is not done by the MOOSE suite since it
 is an optional dependency and isn't strictly required to solve MOOSE's linear and nonlinear systems.
 However, this preconditioner option does appear in a number of the Functional tests in the
@@ -69,10 +69,10 @@ certain types of linear systems. This package is summarized as follows on the pr
 > for square matrices.
 
 +Testing:+ [!ac](PETSc) is able to utilize the SuperLU package to solve linear system matrices in parallel.
-This acceleration is suitable for certain small to moderatley sized linear systems that are not easily
+This acceleration is suitable for certain small-to-moderately-sized linear systems that are not easily
 solved with other schemes. Explicit testing of the SuperLU factorization package is not done by the MOOSE
 suite since it is an optional dependency. However, this solver option does appear in a number of
-Functional tests in the framework [framework RTM](framework_rtm.md) and module RTMs. Breaking changes
+Functional tests in the [framework RTM](framework_rtm.md) and module RTMs. Breaking changes
 would likely result in differences in many of these tests.
 
 ## MUMPS (optional)
@@ -97,9 +97,9 @@ certain types of linear systems. This package is summarized as follows on the pr
 > - Forward elimination during factorization 
 >
 
-+Testing:+ [!ac](PETSc) is able to utilize the MUMP package to solve linear system matrices in parallel.
-This acceleration is suitable for certain small to moderatley sized linear systems that are not easily
++Testing:+ [!ac](PETSc) is able to utilize the MUMPS package to solve linear system matrices in parallel.
+This acceleration is suitable for certain small-to-moderately-sized linear systems that are not easily
 solved with other schemes. Explicit testing of the MUMPS factorization package is not done by the MOOSE
 suite since it is an optional dependency. However, this solver option does appear in a number of
-Functional tests in the framework [framework RTM](framework_rtm.md) and module RTMs. Breaking changes
+Functional tests in the [framework RTM](framework_rtm.md) and module RTMs. Breaking changes
 would likely result in differences in many of these tests.
