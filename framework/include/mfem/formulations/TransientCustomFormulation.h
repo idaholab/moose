@@ -3,13 +3,13 @@
 #include "MFEMFormulation.h"
 #include "time_domain_equation_system_problem_builder.h"
 
-class CustomFormulation : public MFEMFormulation
+class TransientCustomFormulation : public MFEMFormulation
 {
 public:
   static InputParameters validParams();
 
-  CustomFormulation(const InputParameters & parameters);
-  ~CustomFormulation() override = default;
+  TransientCustomFormulation(const InputParameters & parameters);
+  ~TransientCustomFormulation() override = default;
 
   std::shared_ptr<platypus::ProblemBuilder> getProblemBuilder() const override
   {

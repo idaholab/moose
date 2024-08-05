@@ -10,7 +10,7 @@
 []
 
 [Formulation]
-  type = CustomFormulation
+  type = TransientCustomFormulation
 []
 
 [Variables]
