@@ -2,11 +2,21 @@
   design = 'LineSourceRayKernel.md'
   issues = '#16028'
 
-  [test]
-    type = 'Exodiff'
-    input = 'line_source_ray_kernel.i'
-    exodiff = 'line_source_ray_kernel_out.e'
-    requirement = 'The system shall provide an ability to produce a source term along a line.'
+  [line_source]
+    requirement = 'The system shall provide an ability to produce a source term along a line'
+    [test]
+      type = 'Exodiff'
+      input = 'line_source_ray_kernel.i'
+      exodiff = 'line_source_ray_kernel_out.e'
+      detail = 'while tracing the ray on every residual evaluation, and'
+    []
+    [single_trace_test]
+      type = 'Exodiff'
+      input = 'single_trace_line_source_ray_kernel.i'
+      exodiff = 'single_trace_line_source_ray_kernel_out.e'
+      detail = 'while only tracing the ray once.'
+      allow_test_objects = true
+    []
   []
   [simple_diffusion]
     requirement = 'The system shall provide an ability to solve a 2D diffusion problem with a line source term, with '

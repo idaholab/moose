@@ -135,6 +135,18 @@ SubProblem::vectorTagExists(const TagName & tag_name) const
   return false;
 }
 
+void
+SubProblem::addNotZeroedVectorTag(const TagID tag)
+{
+  _not_zeroed_tagged_vectors.insert(tag);
+}
+
+bool
+SubProblem::vectorTagNotZeroed(const TagID tag)
+{
+  return _not_zeroed_tagged_vectors.count(tag);
+}
+
 const VectorTag &
 SubProblem::getVectorTag(const TagID tag_id) const
 {

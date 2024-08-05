@@ -2,6 +2,13 @@
   issues = '#9669'
   design = 'interfaces/TaggingInterface.md'
 
+  [not_zeroed_vector_tag]
+    type = Exodiff
+    requirement = 'The system shall support the ability for a the user to create a tagged vector which is not automatically zeroed.'
+    input = 'not_zeroed_tag_vector.i'
+    exodiff = 'not_zeroed_tag_vector_out.e'
+  []
+
   [general]
     requirement = 'The system shall support the ability for a specific calculation to fill a labeled '
                   'or "tagged"'

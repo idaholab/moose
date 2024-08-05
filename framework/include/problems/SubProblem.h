@@ -145,6 +145,22 @@ public:
                              const Moose::VectorTagType type = Moose::VECTOR_TAG_RESIDUAL);
 
   /**
+   * Adds a vector tag to the list of vectors that will not be zeroed
+   * when other tagged vectors are
+   * @param tag the TagID of the vector that will be manually managed
+   */
+  void addNotZeroedVectorTag(const TagID tag);
+
+  /**
+   * Checks if a vector tag is in the list of vectors that will not be zeroed
+   * when other tagged vectors are
+   * @param tag the TagID of the vector that is currently being checked
+   * @returns false if the tag is not within the set of vectors that are
+   *          intended to not be zero or if the set is empty. returns true otherwise
+   */
+  bool vectorTagNotZeroed(const TagID tag);
+
+  /**
    * Get a VectorTag from a TagID.
    */
   virtual const VectorTag & getVectorTag(const TagID tag_id) const;
@@ -1079,6 +1095,9 @@ protected:
 
   /// AD flag indicating whether **any** AD objects have been added
   bool _have_ad_objects;
+
+  /// the list of vector tags that will not be zeroed when all other tags are
+  std::unordered_set<TagID> _not_zeroed_tagged_vectors;
 
 private:
   /**
