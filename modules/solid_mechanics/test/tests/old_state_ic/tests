@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#28073'
+  [velocity_ic]
+    type = CSVDiff
+    input = 'velocity_ic.i'
+    csvdiff = 'velocity_ic_out.csv'
+    requirement = 'The system shall be able to set initial conditions for old states, which makes setting an initial velocity possible for explicit dynamics.'
+  []
+[]
