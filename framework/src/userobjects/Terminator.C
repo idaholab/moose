@@ -55,21 +55,21 @@ Terminator::validParams()
 Terminator::Terminator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _fail_mode(getParam<MooseEnum>("fail_mode").getEnum<FailMode>()),
-    _error_level(getParam<MooseEnum>("error_level").getEnum<ErrorLevel>()),
+    _msg_type(getParam<MooseEnum>("error_level").getEnum<MessageType>()),
     _pp_names(),
     _pp_values(),
     _expression(getParam<std::string>("expression")),
     _fp()
 {
   // sanity check the parameters
-  if (_error_level == ErrorLevel::ERROR && _fail_mode != FailMode::HARD)
+  if (_msg_type == MessageType::ERROR && _fail_mode != FailMode::HARD)
     paramError("error_level",
                "Setting the error level to ERROR always causes a hard failure, which is "
                "incompatible with `fail_mode=SOFT or NONE`.");
-  if (_error_level == ErrorLevel::NONE && isParamValid("message"))
+  if (_msg_type == MessageType::NONE && isParamValid("message"))
     paramError("error_level",
                "Cannot specify `error_level=NONE` together with the `message` parameter.");
-  if (_error_level == ErrorLevel::NONE && _fail_mode == FailMode::NONE)
+  if (_msg_type == MessageType::NONE && _fail_mode == FailMode::NONE)
     paramWarning("error_level",
                  "With the current error level and fail mode settings, the terminator will not "
                  "error or output.");
@@ -124,17 +124,17 @@ Terminator::handleMessage()
   else
     message = getParam<std::string>("message");
 
-  switch (_error_level)
+  switch (_msg_type)
   {
-    case ErrorLevel::INFO:
+    case MessageType::INFO:
       mooseInfoRepeated(message);
       break;
 
-    case ErrorLevel::WARNING:
+    case MessageType::WARNING:
       mooseWarning(message);
       break;
 
-    case ErrorLevel::ERROR:
+    case MessageType::ERROR:
       mooseError(message);
       break;
 

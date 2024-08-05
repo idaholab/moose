@@ -51,8 +51,11 @@ protected:
   /// handle output of the optional message
   void handleMessage();
 
+  /// What action the terminator takes when the criteria is met
   const enum class FailMode { HARD, SOFT, NONE } _fail_mode;
-  const enum class ErrorLevel { INFO, WARNING, ERROR, NONE } _error_level;
+
+  /// What logging level the terminator message is output with
+  const enum class MessageType { INFO, WARNING, ERROR, NONE } _msg_type;
 
   /// Postprocessor names
   std::vector<std::string> _pp_names;
