@@ -68,6 +68,14 @@ ProblemBuilder::SetCoefficients(platypus::Coefficients & coefficients)
 }
 
 void
+ProblemBuilder::SetDevice(const std::string & dev)
+{
+
+  GetProblem()->_device.Configure(dev);
+  GetProblem()->_device.Print(std::cout);
+}
+
+void
 ProblemBuilder::AddFESpace(std::string fespace_name, std::string fec_name, int vdim, int ordering)
 {
   if (GetProblem()->_fespaces.Has(fespace_name))
