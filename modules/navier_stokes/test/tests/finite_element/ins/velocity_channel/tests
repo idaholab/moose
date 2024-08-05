@@ -39,4 +39,21 @@
       machine = X86_64
     []
   []
+  [conservative]
+    requirement = 'The system shall be able to solve a channel flow problem with a symmetry boundary condition using Taylor-Hood finite elements in which the mass and momentum advection terms are integrated by parts'
+    [stokes]
+      type = Exodiff
+      input = conservative-velocity-channel-with-symm-bc-stokes.i
+      exodiff = conservative-velocity-channel-with-symm-bc-stokes_out.e
+      detail = 'using Stokes equations with the pressure mass matrix preconditioning the Schur complement'
+    []
+    [ns_hpddm]
+      type = Exodiff
+      input = conservative-velocity-channel-hpddm.i
+      exodiff = conservative-velocity-channel-hpddm_out.e
+      detail = 'using Navier-Stokes equations with a Reynolds number of 1000, a mixing length turbulence model, and a field split high performance domain decomposition preconditioner.'
+      min_parallel = 2
+      cli_args = '-options_file harmonic.rc'
+    []
+  []
 []

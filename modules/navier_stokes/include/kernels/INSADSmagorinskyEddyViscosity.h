@@ -30,4 +30,7 @@ protected:
 
   /// Value of Smagorinsky constant (dimensionless). The theory predicts this to be 0.18.
   const Real _smagorinsky_constant;
+
+  /// Optionally provided mixing length
+  const VariableValue * const _mixing_length;
 };

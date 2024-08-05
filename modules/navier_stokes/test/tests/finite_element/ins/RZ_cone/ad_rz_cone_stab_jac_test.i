@@ -120,7 +120,7 @@
     function_x = 0
   []
   [outlet]
-    type = INSADMomentumNoBCBC
+    type = INSADMomentumImplicitStressBC
     variable = velocity
     pressure = p
     boundary = 'top'
