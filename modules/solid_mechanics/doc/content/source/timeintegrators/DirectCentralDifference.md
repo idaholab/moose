@@ -14,7 +14,24 @@
     \end{aligned}
 \end{equation}
 
-When using Dirichlet BCs, one must use the ([DirectDirichletBC](source/bcs/DirectDirichletBC.md),[DirectFunctionDirichletBC](source/bcs/DirectFunctionDirichletBC.md)) variations to enforce BC's properly.
+The formulation assumes a constant acceleration between midpoints. An average between the old and current time step is used to increment midpoint velocity to account for changing time steps, which is the same [method used in Abaqus](https://classes.engineering.wustl.edu/2009/spring/mase5513/abaqus/docs/v6.6/books/gsx/default.htm?startat=ch03s02.html).
+
+For example if,
+\begin{equation}
+    \begin{aligned}
+         t_{n-1}&=1\\
+         t_{n}&=2\\
+         t_{n+1}&=2.5
+    \end{aligned}
+\end{equation}
+then,
+\begin{equation}
+    \begin{aligned}
+         t_{n-\frac{1}{2}}+\frac{\Delta t_{n-1} + \Delta t_{n}}{2} = 1.5+\frac{1+0.5}{2} = 2.25 = t_{n+\frac{1}{2}}
+    \end{aligned}
+\end{equation}
+
+When using Dirichlet BCs, one must use the ([DirectDirichletBC](source/bcs/DirectDirichletBC.md),[DirectFunctionDirichletBC](source/bcs/DirectFunctionDirichletBC.md)) variations to enforce Dirichlet BC's properly.
 
 Additionally, the time integrator must be used with `MassMatrix`, with a properly tagged mass matrix.
 
