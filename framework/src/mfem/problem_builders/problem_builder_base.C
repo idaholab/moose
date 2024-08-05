@@ -68,7 +68,8 @@ ProblemBuilder::SetCoefficients(platypus::Coefficients & coefficients)
 }
 
 void
-ProblemBuilder::SetDevice(const std::string & dev){
+ProblemBuilder::SetDevice(const std::string & dev)
+{
 
   GetProblem()->_device.Configure(dev);
   GetProblem()->_device.Print(std::cout);
