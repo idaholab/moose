@@ -117,6 +117,7 @@
       detail = 'continue to compute the plastic shear due to twinning after '
                'a simulation restart.'
       prereq = 'constiutive_model/only_twinning_fcc'
+      method = "!dbg"
     []
     [combined_twinning_slip_111tension_restart]
       type = CSVDiff
