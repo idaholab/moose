@@ -29,6 +29,15 @@
                   "based on post-processing calculations performed within the simulation to cut the "
                   "timestep."
   []
+  [terminator_soft_solve_nochange]
+    type = 'CSVDiff'
+    input = 'terminator_soft.i'
+    csvdiff = 'terminator_soft_solve_nofail.csv'
+    issues = '#28273'
+    cli_args = "Outputs/file_base=terminator_soft_solve_nofail
+                UserObjects/arnold/fail_mode=NONE"
+    requirement = "The system shall be able to output a warning message if a given criterion is met based on post-processing calculations, with no additional consequences to the solve."
+  []
   [terminator_message_1]
     type = 'RunException'
     allow_warnings = true
@@ -40,7 +49,7 @@
   [terminator_message_2]
     type = 'RunException'
     expect_err = "Setting the error level to ERROR always causes a hard failure, which is "
-                 "incompatible with `fail_mode=SOFT`."
+                 "incompatible with `fail_mode=SOFT or NONE`"
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=ERROR'
     issues = '#17000'
