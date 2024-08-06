@@ -190,6 +190,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_control",                  Control,                   false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,          false);
 
+  registerMooseObjectTask("add_mesh_modifier",            MeshModifiers,             false);
+
   // clang-format on
 
   registerTask("dynamic_object_registration", false);
@@ -234,6 +236,8 @@ addActionTypes(Syntax & syntax)
   registerTask("check_integrity_early", true);
   registerTask("check_integrity_early_physics", false);
   registerTask("setup_quadrature", true);
+
+  registerTask("mesh_modifiers", false);
 
   /// Additional Actions
   registerTask("no_action", false); // Used for Empty Action placeholders
@@ -378,7 +382,8 @@ addActionTypes(Syntax & syntax)
                            "(add_control)"
                            "(check_output)"
                            "(check_integrity)"
-                           "(create_application_block)");
+                           "(create_application_block)"
+                           "(mesh_modifiers)");
   // clang-format on
 }
 
@@ -614,6 +619,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // Application Block System
   registerSyntax("CreateApplicationBlockAction", "Application");
+
+  // MeshModifiers
+  registerSyntax("MeshModifiers", "MeshModifiers/*");
+  syntax.registerSyntaxType("MeshModifiers/*", "MeshModifiersName");
 
   addActionTypes(syntax);
 }
