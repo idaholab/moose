@@ -19,6 +19,7 @@ public:
 
   void SetGridFunctions() override;
   void Init(mfem::Vector & X) override;
+  virtual void Solve(mfem::Vector & X) override;
 
   ~EquationSystemProblemOperator() override = default;
 
