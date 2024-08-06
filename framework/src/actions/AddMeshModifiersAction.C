@@ -28,5 +28,5 @@ AddMeshModifiersAction::AddMeshModifiersAction(const InputParameters & params)
 void
 AddMeshModifiersAction::act()
 {
-  _problem->addMeshModifiers(_type, _name, _moose_object_pars);
+  _problem->addUserObject(_type, _name, _moose_object_pars);
 }
