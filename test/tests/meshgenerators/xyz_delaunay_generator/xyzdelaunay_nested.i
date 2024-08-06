@@ -69,3 +69,21 @@
     desired_volume = 0.4
   []
 []
+
+[Executioner]
+  type = Steady
+[]
+
+[Postprocessors]
+  [volume]
+    type = VolumePostprocessor
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Outputs]
+  csv = true
+[]

@@ -72,3 +72,21 @@
     smooth_triangulation = true
   []
 []
+
+[Executioner]
+  type = Steady
+[]
+
+[Postprocessors]
+  [volume]
+    type = VolumePostprocessor
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Outputs]
+  csv = true
+[]

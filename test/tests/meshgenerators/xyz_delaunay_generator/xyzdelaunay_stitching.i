@@ -63,3 +63,21 @@
     output_subdomain_name = "triangles"
   []
 []
+
+[Executioner]
+  type = Steady
+[]
+
+[Postprocessors]
+  [volume]
+    type = VolumePostprocessor
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Outputs]
+  csv = true
+[]

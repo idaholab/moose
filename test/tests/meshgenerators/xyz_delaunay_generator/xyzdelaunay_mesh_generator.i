@@ -16,9 +16,25 @@
   [triang]
     type = XYZDelaunayGenerator
     boundary = 'outer_bdy'
-    add_nodes_per_boundary_segment = 3
-    refine_boundary = false
     # Let NetGen know interior points are okay
     desired_volume = 100000
   []
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+[Postprocessors]
+  [volume]
+    type = VolumePostprocessor
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Outputs]
+  csv = true
 []
