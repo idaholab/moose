@@ -107,5 +107,6 @@
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/CurlCurl
+    vtk_format = ASCII
   []
 []
