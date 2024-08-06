@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYZDelaunayGenerator.md'
-  issues = ''
+  issues = '#28297'
   [xyzdelaunay]
     requirement = "The system shall have the capability of tetrahedralizing a triangulated boundary"
     [basic]
