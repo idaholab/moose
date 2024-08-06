@@ -35,7 +35,7 @@ public:
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
-  virtual bool performExplicitSolve(SparseMatrix<Number> & mass_matrix) override;
+  virtual bool performExplicitSolve(SparseMatrix<Number> &) override;
 
   void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const override
   {

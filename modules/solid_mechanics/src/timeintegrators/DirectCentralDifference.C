@@ -85,6 +85,9 @@ DirectCentralDifference::solve()
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
 
+  // Calculating diag of mass matrix for use in residual calculation
+  mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+
   // Set time to the time at which to evaluate the residual
   _fe_problem.time() = _fe_problem.timeOld();
   _nonlinear_implicit_system->update();
