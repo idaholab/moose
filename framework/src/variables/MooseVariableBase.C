@@ -180,20 +180,44 @@ std::vector<dof_id_type>
 MooseVariableBase::componentDofIndices(const std::vector<dof_id_type> & dof_indices,
                                        unsigned int component) const
 {
+
+  // Initialize the new_dof_indices vector with the input dof_indices
   std::vector<dof_id_type> new_dof_indices(dof_indices);
+
+  // Only perform mapping if the component is not 0
   if (component != 0)
-  {
-    if (isNodal())
-      for (auto & id : new_dof_indices)
-        id += component;
-    else
-    {
-      unsigned int n = dof_indices.size();
-      for (auto & id : new_dof_indices)
-        id += component * n;
-    }
-  }
+    for (auto & id : new_dof_indices)
+      id += component * _stride[id];
+
   return new_dof_indices;
+}
+
+void
+MooseVariableBase::setStride() const
+{
+  // Stride is only needed for array variables with more than 1 component
+  if (!_is_array || _count == 1)
+    return;
+
+  std::vector<dof_id_type> comp_0_dofs;
+  _dof_map.local_variable_indices(comp_0_dofs, _mesh, _var_num);
+  // Determine the variable number for the specified component
+  auto comp_num = _var_num + 1;
+
+  // Grab all DOFs for the specified component
+  std::vector<dof_id_type> comp_1_dofs;
+  _dof_map.local_variable_indices(comp_1_dofs, _mesh, comp_num);
+
+  _communicator.allgather(comp_0_dofs);
+  _communicator.allgather(comp_1_dofs);
+
+  _stride.resize(*std::max_element(comp_0_dofs.begin(), comp_0_dofs.end()) + 1,
+                 std::numeric_limits<dof_id_type>::max());
+
+  // The stride is consistent from component n+1 to n. If we get the stride from
+  // 0 to 1, then 0 to N is just stride * N.
+  for (const auto i : index_range(comp_0_dofs))
+    _stride[comp_0_dofs[i]] = comp_1_dofs[i] - comp_0_dofs[i];
 }
 
 void

@@ -2811,6 +2811,11 @@ private:
    */
   virtual void resetState();
 
+  /**
+   * Setup strides for array variables.
+   */
+  void setStrides();
+
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
   const bool _force_restart;

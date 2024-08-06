@@ -1377,3 +1377,10 @@ DisplacedProblem::solverSysNum(const SolverSystemName & sys_name) const
 {
   return _mproblem.solverSysNum(sys_name);
 }
+void
+DisplacedProblem::setStrides()
+{
+  for (auto & sys : _displaced_solver_systems)
+    sys->setStrides();
+  _displaced_aux->setStrides();
+}

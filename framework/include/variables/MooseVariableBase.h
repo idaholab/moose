@@ -182,6 +182,12 @@ public:
    */
   bool isLowerD() const { return _is_lower_d; }
 
+  /**
+   * Set the stride if an array variable. Only needs to be done once or whenever
+   * the DofMap changes.
+   */
+  void setStride() const;
+
 protected:
   /**
    * @returns whether we should insert derivatives
@@ -244,6 +250,9 @@ protected:
 
   /// Whether this variable lives on lower dimensional blocks
   bool _is_lower_d;
+
+  /// Determines the stride from one component to another.
+  mutable std::vector<dof_id_type> _stride;
 };
 
 inline void
