@@ -531,6 +531,7 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
     params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
     params.set<SubdomainName>("background_subdomain_name") = block_to_delete + "_TRI";
+    params.set<bool>("verify_holes") = false;
     params.set<unsigned short>("background_subdomain_id") = RGMB::ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE;
 
     addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);

@@ -512,6 +512,7 @@ PinMeshGenerator::generateFlexibleAssemblyBoundaries()
       params.set<std::vector<unsigned int>>("extra_positions_mg_indices") = {0};
     }
     params.set<bool>("use_auto_area_func") = true;
+    params.set<bool>("verify_holes") = false;
     params.set<MooseEnum>("boundary_type") = (_mesh_geometry == "Hex") ? "HEXAGON" : "CARTESIAN";
     params.set<unsigned int>("boundary_sectors") =
         getReactorParam<unsigned int>(RGMB::num_sectors_flexible_stitching);
