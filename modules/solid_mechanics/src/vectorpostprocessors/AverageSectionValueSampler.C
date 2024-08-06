@@ -207,8 +207,7 @@ AverageSectionValueSampler::execute()
   for (const auto j : make_range(_variables.size()))
     *_output_vector[j] = output_vector_partial[j];
   const auto pos_idx = _variables.size();
-  for (const auto li : index_range(_positions))
-    (*_output_vector[pos_idx])[li] = _positions[li];
+  (*_output_vector[pos_idx]) = _positions;
 }
 
 Real
@@ -236,7 +235,7 @@ AverageSectionValueSampler::automaticallyLocatePositions()
   _positions.clear();
 
   // Data structure used to collect the locations with nodes on each processor,
-  // and gather into in parallel.
+  // and gather in parallel.
   std::vector<Real> pos_vec;
 
   // Data structure used to store parallel-gathered locations
