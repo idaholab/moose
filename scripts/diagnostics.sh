@@ -29,26 +29,38 @@ https://github.com/idaholab/moose/discussions\n"
     exit_on_failure 1
 }
 
+function print_reset()
+{
+    printf "\033[0m"
+}
 function print_sep()
 {
-    printf '\n'
-    printf '#%.0s' {1..98}
-    printf '\n'
+    max_len=$(tput cols)
+    if [[ $max_len -gt 100 ]]; then max_len=100; fi
+    printf -v foo "%${max_len}s" '' && echo "${foo//?/#}"
 }
 
+function print_bold()
+{
+    printf '\033[1m%b' "$@"
+    print_reset
+}
 function print_red()
 {
-    printf "\033[1;31m$@\033[0m"
+    printf '\033[1;31m%b' "$@"
+    print_reset
 }
 
 function print_orange()
 {
-    printf "\033[38;5;202m$@\033[0m"
+    printf "\033[38;5;202m%b" "$@"
+    print_reset
 }
 
 function print_green()
 {
-    printf "\033[1;32m$@\033[0m"
+    printf "\033[1;32m%b" "$@"
+    print_reset
 }
 
 function run_command()
@@ -56,7 +68,7 @@ function run_command()
     printf "\033[38;5;242m"
     $@
     exit_code=$?
-    printf "\033[0m"
+    print_reset
     return $exit_code
 }
 
