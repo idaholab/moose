@@ -8,10 +8,6 @@
 # method
 ###########################################################
 
-# [Problem]
-#     extra_tag_matrices = 'mass'
-# []
-
 [GlobalParams]
     displacements = 'disp_x disp_y'
 []

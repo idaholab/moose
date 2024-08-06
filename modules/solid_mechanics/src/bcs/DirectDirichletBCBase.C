@@ -20,7 +20,7 @@ DirectDirichletBCBase::validParams()
 }
 
 DirectDirichletBCBase::DirectDirichletBCBase(const InputParameters & parameters)
-  : NodalBC(parameters), _preset(false), _mass_matrix()
+  : NodalBC(parameters), _mass_matrix(nullptr)
 {
 }
 

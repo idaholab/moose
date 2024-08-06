@@ -17,11 +17,10 @@ namespace libMesh
 template <typename T>
 class SparseMatrix;
 }
-class MooseError;
 
 /**
- * Implements a truly explicit (no nonlinear solve) first-order, forward Euler
- * time integration scheme.
+ * Implements a form of the central difference time integrator that calculates acceleration directly
+ * from the residual forces.
  */
 class DirectCentralDifference : public ExplicitTimeIntegrator
 {
@@ -37,9 +36,6 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
 
   virtual bool performExplicitSolve(SparseMatrix<Number> & mass_matrix) override;
-
-  // // Applying pre-set nodal BCs
-  // void setPresetBCs();
 
   void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const override
   {
