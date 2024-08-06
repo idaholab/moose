@@ -190,7 +190,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_control",                  Control,                   false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,          false);
 
-  registerMooseObjectTask("add_mesh_modifier",            MeshModifiers,             false);
+  registerMooseObjectTask("add_mesh_modifier",            UserObject,             false);
 
   // clang-format on
 
