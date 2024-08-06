@@ -14,7 +14,6 @@
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/linear_partitioner.h"
-#include "libmesh/sfc_partitioner.h"
 #include "libmesh/elem.h"
 #include "libmesh/mesh_base.h"
 
