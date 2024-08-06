@@ -617,7 +617,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CreateApplicationBlockAction", "Application");
 
   // MeshModifiers
-  registerSyntax("MeshModifiers", "MeshModifiers/*");
+  registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
   syntax.registerSyntaxType("MeshModifiers/*", "MeshModifiersName");
 
   addActionTypes(syntax);
