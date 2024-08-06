@@ -18,6 +18,7 @@
 [Mesh]
   type = FileMesh
   file = pressure_test.e
+  use_displaced_mesh = false
 []
 
 [Functions]

@@ -14,6 +14,7 @@
     new_boundary = pin
     input = gen
   []
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

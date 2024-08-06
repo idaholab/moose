@@ -22,6 +22,7 @@
 
 [Mesh]
   file = 2D-RZ_mesh.e
+  use_displaced_mesh = false
 []
 
 [GlobalParams]

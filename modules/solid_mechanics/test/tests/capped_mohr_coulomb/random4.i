@@ -21,6 +21,7 @@
   ymax = 12
   zmin = 0
   zmax = 1
+  use_displaced_mesh = false
 []
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'

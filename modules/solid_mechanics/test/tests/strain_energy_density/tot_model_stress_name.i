@@ -14,6 +14,7 @@
   xmax = 1
   ymin = 0
   ymax = 2
+  use_displaced_mesh = false
 []
 
 [AuxVariables]

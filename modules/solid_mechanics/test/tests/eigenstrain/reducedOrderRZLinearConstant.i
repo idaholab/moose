@@ -24,6 +24,7 @@
   xmin = 1
   ymax = 1
   ymin = 0
+  use_displaced_mesh = false
 []
 
 [Functions]

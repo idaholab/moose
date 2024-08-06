@@ -24,6 +24,7 @@
     node_id = 6
     new_position = '9.9 1.1 1'
   []
+  use_displaced_mesh = false
 []
 
 [Functions]
