@@ -2,6 +2,9 @@
 #include "MFEMBilinearFormKernel.h"
 #include "kernels.h"
 
+/*
+(α∇×u, ∇×u')
+*/
 class MFEMCurlCurlKernel : public MFEMBilinearFormKernel
 {
 public:
@@ -10,9 +13,9 @@ public:
   MFEMCurlCurlKernel(const InputParameters & parameters);
   ~MFEMCurlCurlKernel() override {}
 
-  std::shared_ptr<platypus::Kernel<mfem::ParBilinearForm>> getKernel() override { return _kernel; }
+  virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 
 protected:
-  platypus::InputParameters _kernel_params;
-  std::shared_ptr<platypus::CurlCurlKernel> _kernel{nullptr};
+  std::string _coef_name;
+  mfem::Coefficient * _coef{nullptr};
 };

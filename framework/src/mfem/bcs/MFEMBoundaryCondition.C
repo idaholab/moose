@@ -1,7 +1,5 @@
 #include "MFEMBoundaryCondition.h"
 
-registerMooseObject("PlatypusApp", MFEMBoundaryCondition);
-
 InputParameters
 MFEMBoundaryCondition::validParams()
 {

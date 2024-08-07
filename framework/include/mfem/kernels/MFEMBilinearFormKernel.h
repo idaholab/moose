@@ -12,5 +12,9 @@ public:
   MFEMBilinearFormKernel(const InputParameters & parameters);
   virtual ~MFEMBilinearFormKernel() {}
 
-  virtual std::shared_ptr<platypus::Kernel<mfem::ParBilinearForm>> getKernel() { return nullptr; }
+  virtual mfem::BilinearFormIntegrator * createIntegrator() = 0;
+  mfem::Array<int> getMarkerArray() { return _elem_attr; };
+
+  // Array listing element attributes integrator shall be applied on
+  mfem::Array<int> _elem_attr;
 };
