@@ -298,7 +298,7 @@ petscAlgebraicTest(SNES snes,
   // Error message that was set by the FEProblemBase and now is not used
   std::string msg;
 
-  auto & convergence = problem.getConvergence(problem.getActiveConvergenceName());
+  auto & convergence = problem.getConvergence(problem.getNonlinearConvergenceName());
   Convergence::MooseConvergenceStatus mreason =
       convergence.checkConvergence(it, xnorm, snorm, fnorm);
 

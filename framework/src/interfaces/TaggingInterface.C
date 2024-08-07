@@ -133,7 +133,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
 
   if (fe_problem->hasConvergence("reference_residual"))
   {
-    const auto & conv = fe_problem->getConvergence(fe_problem->getActiveConvergenceName());
+    const auto & conv = fe_problem->getConvergence(fe_problem->getNonlinearConvergenceName());
     const auto * const ref_conv = dynamic_cast<const ReferenceResidualConvergence *>(&conv);
     const auto reference_tag = ref_conv->referenceVectorTagID({});
     auto create_tags_split =

@@ -2187,7 +2187,7 @@ public:
     _set_nonlinear_convergence_name = true;
   }
 
-  ConvergenceName getActiveConvergenceName() const { return _nonlinear_convergence_name; }
+  ConvergenceName getNonlinearConvergenceName() const { return _nonlinear_convergence_name; }
   /**
    * Setter for whether we're computing the scaling jacobian
    */
