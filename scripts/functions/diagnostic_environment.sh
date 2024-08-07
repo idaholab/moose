@@ -17,11 +17,13 @@ function compiler_test()
     for compiler in "${compiler_array[@]}"; do
         local no_show=0
         if [[ -n "${!compiler}" ]]; then
-            print_bold "\nwhich \$${compiler}"
+            print_bold "which \$${compiler}"
             if ! which "${!compiler}" &>/dev/null; then
-                printf ';\t(%s=%s)' "${compiler}" "${!compiler}"
-                print_bold " ${!compiler}"
-                print_red " not found"
+                printf ';\t(%s=%s) %s %s' \
+                 "${compiler}" \
+                 "${!compiler}" \
+                 "$(print_bold "${!compiler}")" \
+                 "$(print_red "not found")"
                 (( error_cnt+=1 ))
                 (( no_show+=1 ))
             else
@@ -43,6 +45,8 @@ function compiler_test()
                     print_bold "\$${compiler} -show"
                     printf '; %s\n' "$(${!compiler} -show)"
                 fi
+            else
+                printf '\n'
             fi
         else
             print_red "${compiler}\tnot set"
