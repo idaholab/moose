@@ -10,8 +10,8 @@
 
 !listing modules/xfem/test/tests/moving_interface/moving_bimaterial_finite_strain_esm.i block=UserObjects
 
-!syntax parameters /UserObjects/CutElementSubdomainModifier
+!syntax parameters /MeshModifiers/CutElementSubdomainModifier
 
-!syntax inputs /UserObjects/CutElementSubdomainModifier
+!syntax inputs /MeshModifiers/CutElementSubdomainModifier
 
-!syntax children /UserObjects/CutElementSubdomainModifier
+!syntax children /MeshModifiers/CutElementSubdomainModifier
