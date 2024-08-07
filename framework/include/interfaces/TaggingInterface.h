@@ -26,7 +26,6 @@ class InputParameters;
 class MooseObject;
 class SubProblem;
 class Assembly;
-class ReferenceResidualProblem;
 
 template <typename T>
 InputParameters validParams();
