@@ -632,6 +632,8 @@ public:
   virtual void
   addConvergence(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0) const;
+  virtual const std::vector<std::shared_ptr<Convergence>> &
+  getConvergenceObjects(const THREAD_ID tid = 0) const;
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0) const;
   virtual void addDefaultConvergence();
   /**

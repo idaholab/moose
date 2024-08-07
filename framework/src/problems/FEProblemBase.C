@@ -787,7 +787,7 @@ FEProblemBase::initialSetup()
 {
   TIME_SECTION("initialSetup", 2, "Performing Initial Setup");
 
-  if (!_nonlinear_convergence_name.empty())
+  if (_set_nonlinear_convergence_name)
     getConvergence(_nonlinear_convergence_name).initialSetup();
   else
     Moose::out << "No convergence criteria specified. Using default convergence criteria."
@@ -2460,6 +2460,12 @@ FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid) con
     mooseError("The Convergence object '", name, "' does not exist.");
 
   return *ret;
+}
+
+const std::vector<std::shared_ptr<Convergence>> &
+FEProblemBase::getConvergenceObjects(const THREAD_ID tid) const
+{
+  return _convergences.getActiveObjects(tid);
 }
 
 void

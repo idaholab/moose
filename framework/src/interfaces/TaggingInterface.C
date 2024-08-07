@@ -131,28 +131,48 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   const auto * const fe_problem =
       moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
 
-  if (fe_problem->hasConvergence("reference_residual"))
+  for (auto conv_obj : fe_problem->getConvergenceObjects())
   {
-    const auto & conv = fe_problem->getConvergence(fe_problem->getNonlinearConvergenceName());
-    const auto * const ref_conv = dynamic_cast<const ReferenceResidualConvergence *>(&conv);
-    const auto reference_tag = ref_conv->referenceVectorTagID({});
-    auto create_tags_split =
-        [reference_tag](const auto & tags, auto & non_ref_tags, auto & ref_tags)
+    if (conv_obj->name() == "ReferenceResidualProblem")
     {
-      for (const auto tag : tags)
-        if (tag == reference_tag)
-          ref_tags.insert(tag);
-        else
-          non_ref_tags.insert(tag);
-    };
-    create_tags_split(_vector_tags, _non_ref_vector_tags, _ref_vector_tags);
-    create_tags_split(_abs_vector_tags, _non_ref_abs_vector_tags, _ref_abs_vector_tags);
+      const auto * const ref_conv =
+          dynamic_cast<const ReferenceResidualConvergence *>(conv_obj.get());
+      const auto reference_tag = ref_conv->referenceVectorTagID({});
+      auto create_tags_split =
+          [reference_tag](const auto & tags, auto & non_ref_tags, auto & ref_tags)
+      {
+        for (const auto tag : tags)
+          if (tag == reference_tag)
+            ref_tags.insert(tag);
+          else
+            non_ref_tags.insert(tag);
+      };
+      create_tags_split(_vector_tags, _non_ref_vector_tags, _ref_vector_tags);
+      create_tags_split(_abs_vector_tags, _non_ref_abs_vector_tags, _ref_abs_vector_tags);
+    }
+    else
+    {
+      _non_ref_vector_tags = _vector_tags;
+      _non_ref_abs_vector_tags = _abs_vector_tags;
+    }
   }
-  else
+  /*if (fe_problem->hasConvergence("reference_residual"))
+{
+  const auto & conv = fe_problem->getConvergence(fe_problem->getNonlinearConvergenceName());
+  const auto * const ref_conv = dynamic_cast<const ReferenceResidualConvergence *>(&conv);
+  const auto reference_tag = ref_conv->referenceVectorTagID({});
+  auto create_tags_split =
+      [reference_tag](const auto & tags, auto & non_ref_tags, auto & ref_tags)
   {
-    _non_ref_vector_tags = _vector_tags;
-    _non_ref_abs_vector_tags = _abs_vector_tags;
-  }
+    for (const auto tag : tags)
+      if (tag == reference_tag)
+        ref_tags.insert(tag);
+      else
+        non_ref_tags.insert(tag);
+  };
+  create_tags_split(_vector_tags, _non_ref_vector_tags, _ref_vector_tags);
+  create_tags_split(_abs_vector_tags, _non_ref_abs_vector_tags, _ref_abs_vector_tags);
+}*/
 }
 
 void
