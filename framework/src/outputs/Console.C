@@ -522,6 +522,8 @@ Console::formatTime(const Real t) const
         oss << std::scientific;
       oss << second;
     }
+    else if (days == 0)
+      oss << "0s";
   }
   return oss.str();
 }
