@@ -329,7 +329,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_periodic_bc)"
-                           "(add_user_object)"
+                           "(add_user_object, add_mesh_modifier)"
                            "(add_distribution)"
                            "(add_sampler)"
                            "(setup_function_complete)"
@@ -380,8 +380,7 @@ addActionTypes(Syntax & syntax)
                            "(add_control)"
                            "(check_output)"
                            "(check_integrity)"
-                           "(create_application_block)"
-                           "(mesh_modifiers)");
+                           "(create_application_block)");
   // clang-format on
 }
 
