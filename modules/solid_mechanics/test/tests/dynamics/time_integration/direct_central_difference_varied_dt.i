@@ -4,8 +4,11 @@
 # direct calculation of acceleration.
 #
 # Testing that the first and second time derivatives
-# are calculated correctly using the Central Difference Direct
+# are calculated correctly using the Direct Central Difference
 # method
+
+# Testing the accuracy of the timestep averaging method within
+# the Direct Central Difference method
 ###########################################################
 
 [GlobalParams]
@@ -31,9 +34,13 @@
 []
 
 [Functions]
+    #Mid-step velocities
+    #0 0.00625 0.015 0.0075 0.25 0
+    #Accelerations
+    #0.025 0.01944 -0.01 0.48 -2.17
     [forcing_fn]
         type = PiecewiseLinear
-        x = '0.0 0.1 0.2    0.3  0.4    0.5  0.6'
+        x = '0.0 0.1 0.5    1.0  2.0   2.01 2.23'
         y = '0.0 0.0 0.0025 0.01 0.0175 0.02 0.02'
     []
 []
@@ -74,7 +81,7 @@
     [density]
         type = GenericConstantMaterial
         prop_names = 'density'
-        prop_values = 1
+        prop_values = 5
     []
 []
 
@@ -100,7 +107,10 @@
         type = DirectCentralDifference
         mass_matrix_tag = 'system'
     []
-
+    [TimeStepper]
+        type = TimeSequenceStepper
+        time_sequence = '0.0 0.1 0.5 1.0 2.0 2.01 2.23'
+    []
     start_time = 0.0
     num_steps = 6
     dt = 0.1
