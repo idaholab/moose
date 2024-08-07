@@ -20,7 +20,6 @@ InputParameters
 ThermocoupleSensorPostprocessor::validParams()
 {
   InputParameters params = GeneralSensorPostprocessor::validParams();
-  params.addParam<string>("method", "numerical", "The equation to be used (lumped or numerical).");
   params.addClassDescription("This is a ThermocoupleSensorPostprocessor for various classes of "
                              "thermocouples, described by the 'thermocouple_type' parameter");
   params.addParam<Real>("proportional_weight", 0, "The weight assigned to the proportional term");
@@ -29,7 +28,7 @@ ThermocoupleSensorPostprocessor::validParams()
 }
 
 ThermocoupleSensorPostprocessor::ThermocoupleSensorPostprocessor(const InputParameters & parameters)
-  : GeneralSensorPostprocessor(parameters), _method(getParam<string>("method"))
+  : GeneralSensorPostprocessor(parameters)
 {
   if (isParamSetByUser("R_function"))
     mooseError("In thermocouple postprocessor R function is fixed. If you want to change it, use "
@@ -71,38 +70,17 @@ ThermocoupleSensorPostprocessor::initialize()
     }
     Real _input_signal_delayed = getDelayedInputSignal();
 
-    if (_method == "numerical")
-    {
-      // computing integral term
-      Real term_for_integration = _input_signal + signalToNoise_value * noise_value;
-      _integrand.push_back(term_for_integration);
-      _integration_value = getIntegral(_integrand);
+    // computing integral term
+    Real term_for_integration = _input_signal + signalToNoise_value * noise_value;
+    _integrand.push_back(term_for_integration);
+    _integration_value = getIntegral(_integrand);
 
-      // output
-      Real proportional_value = _input_signal_delayed + signalToNoise_value * noise_value;
-      _sensor_value = drift_value +
-                      efficiency_value * (_proportional_weight * proportional_value +
-                                          _integral_weight * _integration_value) +
-                      uncertainty_value;
-    }
-
-    else if (_method == "lumped")
-    {
-      if (_t == _time_values[0])
-        _sensor_value = uncertainty_value + drift_value + 0;
-      else
-      {
-        _sensor_value = _sensor_value_old +
-                        (efficiency_value * (_input_signal + signalToNoise_value * noise_value) -
-                         _sensor_value_old) *
-                            (1 - exp(-_t / _delay_value)) +
-                        uncertainty_value + drift_value;
-      }
-      _sensor_value_old = _sensor_value - uncertainty_value - drift_value;
-    }
-
-    else
-      mooseError("The entered method is invalid.");
+    // output
+    Real proportional_value = _input_signal_delayed + signalToNoise_value * noise_value;
+    _sensor_value = drift_value +
+                    efficiency_value * (_proportional_weight * proportional_value +
+                                        _integral_weight * _integration_value) +
+                    uncertainty_value;
   }
 }
 

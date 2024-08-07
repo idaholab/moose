@@ -28,10 +28,6 @@ public:
   virtual PostprocessorValue getValue() const override;
 
 protected:
-  /// String to specify whether numerical or step-wise lumped formula to be used
-  const string _method;
-  /// Variable to store previous sensor value
-  Real _sensor_value_old;
   /// Function to calculate R vector
   virtual vector<Real> getRVector() override;
 };

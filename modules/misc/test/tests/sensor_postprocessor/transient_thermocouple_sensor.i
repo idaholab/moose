@@ -59,25 +59,13 @@
     type = ElementAverageValue
     variable = temperature
   []
-  [thermo_sensor_pp_num]
+  [thermo_sensor_pp]
     type = ThermocoupleSensorPostprocessor
     input_signal = input_signal_pp
     drift_function = '1'
     delay_function = '0.1'
     efficiency_function = '1'
     signalToNoise_function = '1.0'
-    method = "numerical"
-    noise_std_dev_function = '1'
-    uncertainty_std_dev_function = '1'
-  []
-  [thermo_sensor_pp_lum]
-    type = ThermocoupleSensorPostprocessor
-    input_signal = input_signal_pp
-    drift_function = '1'
-    delay_function = '0.1'
-    efficiency_function = '1'
-    signalToNoise_function = '1.0'
-    method = "lumped"
     noise_std_dev_function = '1'
     uncertainty_std_dev_function = '1'
   []
