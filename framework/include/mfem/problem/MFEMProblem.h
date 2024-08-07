@@ -10,7 +10,6 @@
 #include "MFEMScalarDirichletBC.h"
 #include "MFEMConstantCoefficient.h"
 #include "MFEMBoundaryCondition.h"
-#include "MFEMBilinearFormKernel.h"
 #include "MFEMLinearFormKernel.h"
 #include "MFEMFormulation.h"
 #include "MFEMDataCollection.h"
@@ -120,6 +119,12 @@ public:
    */
   InputParameters addMFEMFESpaceFromMOOSEVariable(InputParameters & moosevar_params);
 
+  std::string _input_mesh;
+  std::string _formulation_name;
+  int _order;
+
+  platypus::Coefficients _coefficients;
+
 protected:
   /**
    * Template method for adding kernels. We can only add kernels using equation system problem
@@ -144,11 +149,24 @@ protected:
     }
   }
 
-  std::string _input_mesh;
-  std::string _formulation_name;
-  int _order;
+  void addKernel(std::string var_name, std::shared_ptr<MFEMBilinearFormKernel> kernel)
+  {
+    using namespace platypus;
 
-  platypus::Coefficients _coefficients;
+    EquationSystemProblemBuilderInterface * eqn_system_problem_builder{nullptr};
+
+    if ((eqn_system_problem_builder =
+             dynamic_cast<EquationSystemProblemBuilderInterface *>(mfem_problem_builder.get())))
+    {
+      eqn_system_problem_builder->AddKernel(std::move(var_name), std::move(kernel));
+    }
+    else
+    {
+      mooseError("Cannot add kernel with name '" + var_name +
+                 "' because there is no equation system.");
+    }
+  }
+
   platypus::InputParameters _solver_options;
   platypus::Outputs _outputs;
   platypus::InputParameters _exec_params;

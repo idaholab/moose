@@ -18,8 +18,13 @@ MFEMDiffusionKernel::validParams()
 
 MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
   : MFEMBilinearFormKernel(parameters),
-    _kernel_params{{{"VariableName", getParam<std::string>("variable")},
-                    {"CoefficientName", getParam<std::string>("coefficient")}}},
-    _kernel{std::make_shared<platypus::DiffusionKernel>(_kernel_params)}
+    _coef_name(getParam<std::string>("coefficient")),
+    _coef(getMFEMProblem()._coefficients._scalars.Get(_coef_name))
 {
+}
+
+mfem::BilinearFormIntegrator *
+MFEMDiffusionKernel::createIntegrator()
+{
+  return new mfem::DiffusionIntegrator(*_coef);
 }

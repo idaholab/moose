@@ -3,6 +3,7 @@
 #include "inputs.h"
 #include "kernel_base.h"
 #include "named_fields_map.h"
+#include "MFEMBilinearFormKernel.h"
 
 namespace platypus
 {
@@ -14,7 +15,6 @@ mixed and nonlinear forms) and build methods
 class EquationSystem : public mfem::Operator
 {
 public:
-  using ParBilinearFormKernel = platypus::Kernel<mfem::ParBilinearForm>;
   using ParLinearFormKernel = platypus::Kernel<mfem::ParLinearForm>;
   using ParNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
   using ParMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
@@ -46,7 +46,7 @@ public:
 
   // Add kernels.
   void AddKernel(const std::string & test_var_name,
-                 std::shared_ptr<ParBilinearFormKernel> blf_kernel);
+                 std::shared_ptr<MFEMBilinearFormKernel> blf_kernel);
 
   void AddKernel(const std::string & test_var_name, std::shared_ptr<ParLinearFormKernel> lf_kernel);
 
@@ -103,7 +103,7 @@ protected:
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParBilinearFormKernel>>> _blf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
 
   platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParLinearFormKernel>>> _lf_kernels_map;
 

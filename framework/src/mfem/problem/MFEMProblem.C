@@ -276,9 +276,9 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   }
   else if (dynamic_cast<const MFEMBilinearFormKernel *>(kernel) != nullptr)
   {
-    MFEMBilinearFormKernel * blf_kernel(&getUserObject<MFEMBilinearFormKernel>(name));
-    addKernel<mfem::ParBilinearForm>(parameters.get<std::string>("variable"),
-                                     blf_kernel->getKernel());
+    auto object_ptr = getUserObject<MFEMBilinearFormKernel>(name).getSharedPtr();
+    auto blf_kernel = std::dynamic_pointer_cast<MFEMBilinearFormKernel>(object_ptr);
+    addKernel(parameters.get<std::string>("variable"), blf_kernel);
   }
   else
   {

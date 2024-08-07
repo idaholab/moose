@@ -35,14 +35,14 @@ EquationSystem::AddTestVariableNameIfMissing(const std::string & test_var_name)
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<ParBilinearFormKernel> blf_kernel)
+                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_blf_kernels_map.Has(test_var_name))
   {
     // 1. Create kernels vector.
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParBilinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>();
 
     // 2. Register with map to prevent leaks.
     _blf_kernels_map.Register(test_var_name, std::move(kernels));
@@ -250,10 +250,10 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
 
   for (const auto & [test_var_name, blf_kernels] : _blf_kernels_map)
   {
-    for (auto & i : *blf_kernels)
-    {
-      i->Init(gridfunctions, fespaces, bc_map, coefficients);
-    }
+    // for (auto & blf_kernel : *blf_kernels)
+    // {
+    //   i->Init(gridfunctions, fespaces, bc_map, coefficients);
+    // }
   }
   // Initialise linear form kernels
   for (const auto & [test_var_name, lf_kernels] : _lf_kernels_map)
@@ -333,7 +333,7 @@ EquationSystem::BuildBilinearForms()
 
       for (auto & blf_kernel : blf_kernels)
       {
-        blf_kernel->Apply(blf);
+        blf->AddDomainIntegrator(blf_kernel->createIntegrator());
       }
     }
     // Assemble
