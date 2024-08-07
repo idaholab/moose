@@ -382,24 +382,7 @@ QuasiStaticSolidMechanicsPhysics::act()
   // Add variables
   else if (_current_task == "add_variable")
   {
-    if (getParam<bool>("add_variables"))
-    {
-      auto params = _factory.getValidParams("MooseVariable");
-      // determine necessary order
-      const bool second = _problem->mesh().hasSecondOrderElements();
-
-      params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
-      params.set<MooseEnum>("family") = "LAGRANGE";
-      if (isParamValid("scaling"))
-        params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
-
-      // Loop through the displacement variables
-      for (const auto & disp : _displacements)
-      {
-        // Create displacement variables
-        _problem->addVariable("MooseVariable", disp, params);
-      }
-    }
+    // getParam<bool>("add_variables") is handled in CommonSolidMechanicsAction
 
     // Homogenization scalar
     if (_lk_homogenization)
