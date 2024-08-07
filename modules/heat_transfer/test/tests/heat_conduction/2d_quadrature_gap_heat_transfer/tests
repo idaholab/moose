@@ -76,4 +76,30 @@
     design = "/actions/ThermalContactAction.md"
     issues = "#13043"
   [../]
+
+  [perfect_prereq]
+    type = 'CheckFiles'
+    prereq = perfect
+    input = 'perfect.i'
+    cli_args = '--split-mesh=2'
+    mesh_mode = 'REPLICATED'
+    check_files = 'perfect.cpa.gz/2/header.gz perfect.cpa.gz/2/split-2-0.gz perfect.cpa.gz/2/split-2-1.gz'
+    recover = false
+    requirement = "The system shall generate a parallel mesh split across 2 processes."
+    design = "Mesh/splitting.md"
+    issues = "#27203"
+  []
+
+  [perfect_split_mesh]
+    type = 'Exodiff'
+    prereq = perfect_prereq
+    input = 'perfect_split.i'
+    exodiff = 'perfect_out.e'
+    cli_args = 'Outputs/file_base=perfect_out'
+    requirement = "The system shall read in parallel a mesh split across 2 processes."
+    design = "Mesh/splitting.md"
+    min_parallel = 2
+    max_parallel = 2
+    issues = "#27203"
+  []
 []
