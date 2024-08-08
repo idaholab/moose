@@ -1,9 +1,14 @@
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
-#include "kernels.h"
 #include "gridfunctions.h"
 
+/*
+Class to construct a mfem::BilinearFormIntegrator to apply to the
+equation system.
+
+TODO: Support for marker arrays specifying the block each kernel is applied on.
+*/
 class MFEMBilinearFormKernel : public MFEMGeneralUserObject
 {
 public:
@@ -13,8 +18,4 @@ public:
   virtual ~MFEMBilinearFormKernel() {}
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() = 0;
-  mfem::Array<int> getMarkerArray() { return _elem_attr; };
-
-  // Array listing element attributes integrator shall be applied on
-  mfem::Array<int> _elem_attr;
 };

@@ -1,7 +1,5 @@
 #include "MFEMLinearFormKernel.h"
 
-registerMooseObject("PlatypusApp", MFEMLinearFormKernel);
-
 InputParameters
 MFEMLinearFormKernel::validParams()
 {
@@ -17,5 +15,3 @@ MFEMLinearFormKernel::MFEMLinearFormKernel(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters)
 {
 }
-
-MFEMLinearFormKernel::~MFEMLinearFormKernel() {}

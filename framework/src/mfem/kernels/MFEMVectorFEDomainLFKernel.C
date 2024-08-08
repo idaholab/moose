@@ -16,8 +16,13 @@ MFEMVectorFEDomainLFKernel::validParams()
 
 MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & parameters)
   : MFEMLinearFormKernel(parameters),
-    _kernel_params{{{"VariableName", getParam<std::string>("variable")},
-                    {"VectorCoefficientName", getParam<std::string>("vector_coefficient")}}},
-    _kernel{std::make_shared<platypus::VectorFEDomainLFKernel>(_kernel_params)}
+    _vec_coef_name(getParam<std::string>("vector_coefficient")),
+    _vec_coef(getMFEMProblem()._coefficients._vectors.Get(_vec_coef_name))
 {
+}
+
+mfem::LinearFormIntegrator *
+MFEMVectorFEDomainLFKernel::createIntegrator()
+{
+  return new mfem::VectorFEDomainLFIntegrator(*_vec_coef);
 }

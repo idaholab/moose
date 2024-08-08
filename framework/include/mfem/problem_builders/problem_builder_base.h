@@ -181,6 +181,12 @@ public:
     GetEquationSystem()->AddKernel(var_name, std::move(kernel));
   }
 
+  void AddKernel(std::string var_name, std::shared_ptr<MFEMLinearFormKernel> kernel)
+  {
+    GetEquationSystem()->AddTrialVariableNameIfMissing(var_name);
+    GetEquationSystem()->AddKernel(var_name, std::move(kernel));
+  }
+
 protected:
   /// Implemented in derived classes. Returns a pointer to the problem operator's equation system.
   [[nodiscard]] virtual platypus::EquationSystem * GetEquationSystem() const = 0;

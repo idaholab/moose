@@ -4,13 +4,19 @@
 #include "kernels.h"
 #include "gridfunctions.h"
 
+/*
+Class to construct a mfem::LinearFormIntegrator to apply to the
+equation system.
+
+TODO: Support for marker arrays specifying the block each kernel is applied on.
+*/
 class MFEMLinearFormKernel : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   MFEMLinearFormKernel(const InputParameters & parameters);
-  virtual ~MFEMLinearFormKernel();
+  virtual ~MFEMLinearFormKernel() {}
 
-  virtual std::shared_ptr<platypus::Kernel<mfem::ParLinearForm>> getKernel() { return nullptr; }
+  virtual mfem::LinearFormIntegrator * createIntegrator() = 0;
 };
