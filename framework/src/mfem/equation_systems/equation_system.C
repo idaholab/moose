@@ -53,14 +53,13 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<MFEMKernel<mfem::LinearFormIntegrator>> lf_kernel)
+                          std::shared_ptr<MFEMLinearFormKernel> lf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_lf_kernels_map.Has(test_var_name))
   {
-    auto kernels =
-        std::make_shared<std::vector<std::shared_ptr<MFEMKernel<mfem::LinearFormIntegrator>>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMLinearFormKernel>>>();
 
     _lf_kernels_map.Register(test_var_name, std::move(kernels));
   }
@@ -70,13 +69,13 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<ParNonlinearFormKernel> nlf_kernel)
+                          std::shared_ptr<MFEMNonlinearFormKernel> nlf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_nlf_kernels_map.Has(test_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParNonlinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>>();
 
     _nlf_kernels_map.Register(test_var_name, std::move(kernels));
   }
@@ -87,7 +86,7 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 void
 EquationSystem::AddKernel(const std::string & trial_var_name,
                           const std::string & test_var_name,
-                          std::shared_ptr<ParMixedBilinearFormKernel> mblf_kernel)
+                          std::shared_ptr<MFEMMixedBilinearFormKernel> mblf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
@@ -95,7 +94,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
   if (!_mblf_kernels_map_map.Has(test_var_name))
   {
     auto kernel_field_map = std::make_shared<
-        platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>();
+        platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>();
 
     _mblf_kernels_map_map.Register(test_var_name, std::move(kernel_field_map));
   }
@@ -104,7 +103,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
   // pair
   if (!_mblf_kernels_map_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>();
 
     _mblf_kernels_map_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
   }
@@ -228,10 +227,6 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
                      platypus::BCMap & bc_map,
                      platypus::Coefficients & coefficients)
 {
-
-  // Add optional kernels to the EquationSystem
-  AddKernels();
-
   for (auto & test_var_name : _test_var_names)
   {
     if (!gridfunctions.Has(test_var_name))
