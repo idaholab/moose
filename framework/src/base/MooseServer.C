@@ -303,9 +303,11 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
       valid_params.getParametersList().count(parent_name))
     pass &= addValuesToList(completionItems,
                             valid_params,
+                            existing_params,
                             existing_subblocks,
                             parent_name,
                             obj_act_tasks,
+                            object_path,
                             replace_line_beg,
                             replace_char_beg,
                             replace_line_end,
@@ -598,6 +600,10 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
   // walk over subblock names if found or at root and build completion list
   if (!registered_syntax.empty() || object_path == "/")
   {
+    // choose format of insertion text based on if client supports snippets
+    int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
+                                             : wasp::lsp::m_text_format_plaintext;
+
     for (const auto & subblock_name : _syntax_to_subblocks[registered_syntax])
     {
       // filter subblock if it does not begin with prefix and one was given
@@ -608,24 +614,24 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       std::string insert_text;
       int complete_kind;
 
-      // choose format for insert text based on if client supports snippets
-      int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
-                                               : wasp::lsp::m_text_format_plaintext;
+      // build required parameter list for each block to use in insert text
+      const std::string full_block_path = object_path + "/" + subblock_name;
+      const std::string req_params = getRequiredParamsText(full_block_path, "", {}, "  ");
 
       // customize description and insert text for star and named subblocks
       if (subblock_name == "*")
       {
         doc_string = "custom user named block";
         insert_text = (request_on_block_decl ? "" : "[") +
-                      (filtering_prefix.size() ? filtering_prefix : "block_name") + "]\n  " +
-                      (client_snippet_support ? "$0" : "") + "\n[]";
+                      (filtering_prefix.size() ? filtering_prefix : "block_name") + "]" +
+                      req_params + "\n  " + (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
         doc_string = "application named block";
-        insert_text = (request_on_block_decl ? "" : "[") + subblock_name + "]\n  " +
-                      (client_snippet_support ? "$0" : "") + "\n[]";
+        insert_text = (request_on_block_decl ? "" : "[") + subblock_name + "]" + req_params +
+                      "\n  " + (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_struct;
       }
 
@@ -655,9 +661,11 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
 bool
 MooseServer::addValuesToList(wasp::DataArray & completionItems,
                              const InputParameters & valid_params,
+                             const std::set<std::string> & existing_params,
                              const std::set<std::string> & existing_subblocks,
                              const std::string & param_name,
                              const std::set<std::string> & obj_act_tasks,
+                             const std::string & object_path,
                              int replace_line_beg,
                              int replace_char_beg,
                              int replace_line_end,
@@ -714,6 +722,10 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
       const std::string & object_name = objects_iter.first;
       const InputParameters & object_params = objects_iter.second->buildParameters();
 
+      // build required parameter list for each block to use in insert text
+      std::string req_params = getRequiredParamsText(object_path, object_name, existing_params, "");
+      req_params += !req_params.empty() ? "\n" : "";
+
       // check if object has registered base parameter that can be verified
       if (!object_params.have_parameter<std::string>("_moose_base"))
         continue;
@@ -726,7 +738,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
           continue;
         std::string type_description = object_params.getClassDescription();
         MooseUtils::escape(type_description);
-        options_and_descs[object_name] = type_description;
+        options_and_descs[object_name + req_params] = type_description;
         break;
       }
     }
@@ -776,23 +788,24 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
   // walk over pairs of options with descriptions and build completion list
   for (const auto & option_and_desc : options_and_descs)
   {
-    const std::string & option = option_and_desc.first;
-    const std::string & dscrpt = option_and_desc.second;
+    const std::string & insert_text = option_and_desc.first;
+    const std::string & option_name = insert_text.substr(0, insert_text.find('\n'));
+    const std::string & description = option_and_desc.second;
 
     // add option name, insertion range, and description to completion list
     completionItems.push_back(wasp::DataObject());
     wasp::DataObject * item = completionItems.back().to_object();
     pass &= wasp::lsp::buildCompletionObject(*item,
                                              errors,
-                                             option,
+                                             option_name,
                                              replace_line_beg,
                                              replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
-                                             option,
+                                             insert_text,
                                              complete_kind,
                                              "",
-                                             dscrpt,
+                                             description,
                                              false,
                                              false,
                                              wasp::lsp::m_text_format_plaintext);
@@ -1360,6 +1373,32 @@ MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
     return wasp::lsp::m_symbol_kind_string;
   else
     return wasp::lsp::m_symbol_kind_property;
+}
+
+std::string
+MooseServer::getRequiredParamsText(const std::string & subblock_path,
+                                   const std::string & subblock_type,
+                                   const std::set<std::string> & existing_params,
+                                   const std::string & indent_spaces)
+{
+  // gather global, action, and object parameters in request object context
+  InputParameters valid_params = emptyInputParameters();
+  std::set<std::string> obj_act_tasks;
+  getAllValidParameters(valid_params, subblock_path, subblock_type, obj_act_tasks);
+
+  // walk over collection of all parameters and build text of ones required
+  std::string required_param_text;
+  for (const auto & valid_params_iter : valid_params)
+  {
+    // skip parameter if deprecated, private, defaulted, optional, existing
+    const std::string & param_name = valid_params_iter.first;
+    if (!valid_params.isParamDeprecated(param_name) && !valid_params.isPrivate(param_name) &&
+        !valid_params.isParamValid(param_name) && valid_params.isParamRequired(param_name) &&
+        !existing_params.count(param_name))
+      required_param_text += "\n" + indent_spaces + param_name + " = ";
+  }
+
+  return required_param_text;
 }
 
 bool
