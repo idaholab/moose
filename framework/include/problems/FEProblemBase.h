@@ -884,6 +884,8 @@ public:
 
   void projectSolution();
 
+  int getGlobalCurrentState();
+
   /**
    * Project initial conditions for custom \p elem_range and \p bnd_node_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
@@ -2747,6 +2749,9 @@ protected:
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property
   bool _using_ad_mat_props;
+
+  // Used for setting previous states
+  int _global_current_state;
 
 private:
   /**

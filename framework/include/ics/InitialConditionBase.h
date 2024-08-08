@@ -91,12 +91,17 @@ public:
 
   virtual const std::set<std::string> & getSuppliedItems() override;
 
+  int & getMyState();
+
 protected:
   /// The system object
   SystemBase & _sys;
 
   /// If set, UOs retrieved by this IC will not be executed before this IC
   const bool _ignore_uo_dependency;
+
+  // variable used when applying initial conditions to previous states
+  int _my_state;
 
 private:
   void addUserObjectDependencyHelper(const UserObject & uo) const override final;

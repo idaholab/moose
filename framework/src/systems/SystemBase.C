@@ -1246,9 +1246,15 @@ SystemBase::copyOldSolutions()
   {
     const auto states = _solution_states[iteration_index].size();
     if (states > 1)
-      for (unsigned int i = states - 1; i > 0; --i)
+    {
+      unsigned int i = states - 1;
+      while (i > 0)
+      {
         solutionState(i, Moose::SolutionIterationType(iteration_index)) =
             solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
+        --i;
+      }
+    }
   }
 
   if (solutionUDotOld())
