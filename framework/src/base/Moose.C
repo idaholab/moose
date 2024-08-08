@@ -170,6 +170,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_mesh_division",            MeshDivision,              false);
   registerMooseObjectTask("add_user_object",              UserObject,                false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
+  registerMooseObjectTask("add_mesh_modifier",            UserObject,                false);
 
   registerMooseObjectTask("add_postprocessor",            Postprocessor,             false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,       false);
@@ -232,6 +233,8 @@ addActionTypes(Syntax & syntax)
   registerTask("check_integrity_early", true);
   registerTask("check_integrity_early_physics", false);
   registerTask("setup_quadrature", true);
+
+  registerTask("mesh_modifiers", false);
 
   /// Additional Actions
   registerTask("no_action", false); // Used for Empty Action placeholders
@@ -325,7 +328,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_periodic_bc)"
-                           "(add_user_object)"
+                           "(add_user_object, add_mesh_modifier)"
                            "(add_distribution)"
                            "(add_sampler)"
                            "(setup_function_complete)"
@@ -576,6 +579,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddControlAction", "Controls/*");
   registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
+  // MeshModifiers
+  registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
+  syntax.registerSyntaxType("MeshModifiers/*", "MeshModifiersName");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
 
