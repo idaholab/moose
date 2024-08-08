@@ -11,7 +11,7 @@
 
 #include "GeneralUserObject.h"
 #include "BlockRestrictable.h"
-#include "INSFVPressureVariable.h"
+#include "moose/modules/navier_stokes/include/variables/INSFVPressureVariable.h"
 #include "NonADFunctorInterface.h"
 
 class MooseMesh;
