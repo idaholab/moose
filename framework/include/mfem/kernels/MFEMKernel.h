@@ -20,8 +20,16 @@ public:
     return params;
   };
 
-  MFEMKernel(const InputParameters & parameters) : MFEMGeneralUserObject(parameters) {}
+  MFEMKernel(const InputParameters & parameters)
+    : MFEMGeneralUserObject(parameters), _test_var_name(getParam<std::string>("variable"))
+  {
+  }
   virtual ~MFEMKernel() = default;
 
+  // Create a new MFEM integrator to apply to the weak form. Ownership managed by the caller.
   virtual T * createIntegrator() = 0;
+
+protected:
+  // Name of the (test) variable associated with the weak form kernel is applied to.
+  std::string _test_var_name;
 };
