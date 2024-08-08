@@ -17,8 +17,8 @@ class EquationSystem : public mfem::Operator
 public:
   using MFEMBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
   using MFEMLinearFormKernel = MFEMKernel<mfem::LinearFormIntegrator>;
-  using ParNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
-  using ParMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
+  using MFEMNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
+  using MFEMMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
 
   EquationSystem() = default;
   ~EquationSystem() override;
@@ -53,16 +53,13 @@ public:
                  std::shared_ptr<MFEMLinearFormKernel> lf_kernel);
 
   void AddKernel(const std::string & test_var_name,
-                 std::shared_ptr<ParNonlinearFormKernel> nlf_kernel);
+                 std::shared_ptr<MFEMNonlinearFormKernel> nlf_kernel);
 
   void AddKernel(const std::string & trial_var_name,
                  const std::string & test_var_name,
-                 std::shared_ptr<ParMixedBilinearFormKernel> mblf_kernel);
+                 std::shared_ptr<MFEMMixedBilinearFormKernel> mblf_kernel);
 
   virtual void ApplyBoundaryConditions(platypus::BCMap & bc_map);
-
-  // override to add kernels
-  virtual void AddKernels() {}
 
   // Build forms
   virtual void Init(platypus::GridFunctions & gridfunctions,
@@ -107,13 +104,12 @@ protected:
   // according to test variable
   platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
 
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel<mfem::LinearFormIntegrator>>>>
-      _lf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMLinearFormKernel>>> _lf_kernels_map;
 
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParNonlinearFormKernel>>> _nlf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>> _nlf_kernels_map;
 
   platypus::NamedFieldsMap<
-      platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>
+      platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>
       _mblf_kernels_map_map;
 
   mutable mfem::OperatorHandle _jacobian;
