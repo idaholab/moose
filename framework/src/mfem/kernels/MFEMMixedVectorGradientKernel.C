@@ -1,5 +1,7 @@
 #include "MFEMMixedVectorGradientKernel.h"
 
+registerMooseObject("PlatypusApp", MFEMMixedVectorGradientKernel);
+
 InputParameters
 MFEMMixedVectorGradientKernel::validParams()
 {
