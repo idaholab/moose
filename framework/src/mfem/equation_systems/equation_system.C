@@ -53,13 +53,13 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<ParLinearFormKernel> lf_kernel)
+                          std::shared_ptr<MFEMLinearFormKernel> lf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_lf_kernels_map.Has(test_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParLinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMLinearFormKernel>>>();
 
     _lf_kernels_map.Register(test_var_name, std::move(kernels));
   }
@@ -245,24 +245,6 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
     _xs.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
-
-  // Initialise bilinear forms
-
-  for (const auto & [test_var_name, blf_kernels] : _blf_kernels_map)
-  {
-    // for (auto & blf_kernel : *blf_kernels)
-    // {
-    //   i->Init(gridfunctions, fespaces, bc_map, coefficients);
-    // }
-  }
-  // Initialise linear form kernels
-  for (const auto & [test_var_name, lf_kernels] : _lf_kernels_map)
-  {
-    for (auto & i : *lf_kernels)
-    {
-      i->Init(gridfunctions, fespaces, bc_map, coefficients);
-    }
-  }
   // Initialise nonlinear form kernels
   for (const auto & [test_var_name, nlf_kernels] : _nlf_kernels_map)
   {
@@ -301,18 +283,16 @@ EquationSystem::BuildLinearForms(platypus::BCMap & bc_map)
   {
     // Apply kernels
     auto lf = _lfs.Get(test_var_name);
-    // Assemble. Must be done before applying kernels that add to lf.
-    lf->Assemble();
-
     if (_lf_kernels_map.Has(test_var_name))
     {
       auto lf_kernels = _lf_kernels_map.GetRef(test_var_name);
 
       for (auto & lf_kernel : lf_kernels)
       {
-        lf_kernel->Apply(lf);
+        lf->AddDomainIntegrator(lf_kernel->createIntegrator());
       }
     }
+    lf->Assemble();
   }
 }
 
