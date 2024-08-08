@@ -4,12 +4,10 @@
 #include "gridfunctions.h"
 
 /*
-Class to construct an MFEM integrator to apply to the
-equation system.
+Class to construct an MFEM integrator to apply to the equation system.
 
 TODO: Support for marker arrays specifying the block each kernel is applied on.
 */
-
 template <typename T>
 class MFEMKernel : public MFEMGeneralUserObject
 {
