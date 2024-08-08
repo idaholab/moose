@@ -10,7 +10,7 @@
 #include "MFEMScalarDirichletBC.h"
 #include "MFEMConstantCoefficient.h"
 #include "MFEMBoundaryCondition.h"
-#include "MFEMLinearFormKernel.h"
+#include "MFEMKernel.h"
 #include "MFEMFormulation.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
@@ -149,7 +149,8 @@ protected:
     }
   }
 
-  void addKernel(std::string var_name, std::shared_ptr<MFEMBilinearFormKernel> kernel)
+  void addKernel(std::string var_name,
+                 std::shared_ptr<MFEMKernel<mfem::BilinearFormIntegrator>> kernel)
   {
     using namespace platypus;
 
@@ -167,7 +168,8 @@ protected:
     }
   }
 
-  void addKernel(std::string var_name, std::shared_ptr<MFEMLinearFormKernel> kernel)
+  void addKernel(std::string var_name,
+                 std::shared_ptr<MFEMKernel<mfem::LinearFormIntegrator>> kernel)
   {
     using namespace platypus;
 

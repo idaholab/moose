@@ -1,11 +1,11 @@
 #pragma once
-#include "MFEMLinearFormKernel.h"
+#include "MFEMKernel.h"
 #include "kernels.h"
 
 /*
 (\\vec f, \\vec u')
 */
-class MFEMVectorFEDomainLFKernel : public MFEMLinearFormKernel
+class MFEMVectorFEDomainLFKernel : public MFEMKernel<mfem::LinearFormIntegrator>
 {
 public:
   static InputParameters validParams();
