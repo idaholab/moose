@@ -23,6 +23,8 @@ NEML2ObjectStubHeader(ExecuteNEML2Model, ElementUserObject);
 #include "NEML2ModelInterface.h"
 #include <map>
 
+#include "BatchPropertyDerivative.h"
+
 class MOOSEToNEML2;
 
 /**
@@ -45,6 +47,8 @@ public:
   virtual void execute() override;
   virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
+  virtual void preCompute();
+  virtual void postCompute();
 
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
@@ -55,6 +59,10 @@ public:
   /// Get a reference(!) to the requested output derivative view
   const neml2::Tensor & getOutputDerivativeView(const neml2::VariableName & output_name,
                                                 const neml2::VariableName & input_name) const;
+
+  /// Get a reference(!) to the requested output parameter derivative view
+  const neml2::Tensor & getOutputParameterDerivativeView(const neml2::VariableName & output_name,
+                                                         const std::string & parameter_name) const;
 
   /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
@@ -120,6 +128,9 @@ protected:
   /// model output derivatives (see above))
   std::map<std::pair<neml2::VariableName, std::string>, neml2::Tensor> _doutputs;
 
+  /// model output derivatives wrt parameters (see above)
+  std::map<std::pair<neml2::VariableName, std::string>, neml2::Tensor> _doutputs_dparams;
+
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
 
@@ -129,6 +140,10 @@ protected:
   /// set of derivatives that were retrieved
   mutable std::set<std::tuple<neml2::VariableName, neml2::VariableName, neml2::Tensor *>>
       _retrieved_derivatives;
+
+  /// set of parameter derivatives that were retrieved
+  mutable std::set<std::tuple<neml2::VariableName, std::string, neml2::Tensor *>>
+      _retrieved_parameter_derivatives;
 };
 
 #endif

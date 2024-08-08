@@ -73,6 +73,10 @@ ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
     // reserve Batch tensors for each output derivative
     for (const auto & uo_name : gather_uo_names)
       _doutputs[std::make_pair(output, uo_name)] = neml2::Tensor();
+
+    // reserve Batch tensors for each model parameter
+    for (const auto & param : model().named_parameters())
+      _doutputs_dparams[std::make_pair(output, param.first)] = neml2::Tensor();
   }
 
   for (const auto & var_name : getParam<std::vector<std::string>>("skip_variables"))
@@ -222,7 +226,7 @@ ExecuteNEML2Model::finalize()
     }
 
     // Steps before stress update
-    // preCompute();
+    preCompute();
 
     updateForces();
 
@@ -241,7 +245,7 @@ ExecuteNEML2Model::finalize()
         *batch_tensor_ptr = _dout_din.base_index({out, in});
 
       // Additional calculations after stress update
-      // postCompute();
+      postCompute();
       _output_ready = true;
     }
   }
@@ -258,6 +262,45 @@ ExecuteNEML2Model::finalize()
                    "\nIt is possible that this error is related to NEML2.",
                    NEML2Utils::NEML2_help_message);
   }
+}
+
+void
+ExecuteNEML2Model::preCompute()
+{
+  // loop through all retrieved parameter, request ad; check parameter's batch size equal
+  // to the model's batch size
+
+  // // Set the parameter value using batch material from MOOSE
+  // for (auto && [name, prop] : _props)
+  // {
+  //   if (!model().named_parameters().has_key(name))
+  //     mooseError("Trying to set scalar-valued material property named ",
+  //                name,
+  //                ". But there is not such parameter in the NEML2 material model.");
+
+  //   auto input = NEML2Utils::homogenizeBatchedTuple(prop->getInputData());
+  //   auto pval = NEML2Utils::toNEML2Batched(std::get<0>(input));
+  //   pval.requires_grad_(true);
+  //   model().set_parameter(name, pval);
+  // }
+}
+
+void
+ExecuteNEML2Model::postCompute()
+{
+  // for (auto && [name, prop] : _props)
+  // {
+  //   // Extract the parameter derivative from NEML2
+  //   auto param = neml2::Tensor(model().get_parameter(name));
+  //   auto dstress_dparam = neml2::math::jacrev(_out, param); // how to retrieve stress from
+  //   output?
+
+  //   // Fill the NEML2 parameter derivative into MOOSE UO
+  //   auto & dstress_dprop = prop->setOutputData();
+  //   for (const neml2::Size i : index_range(dstress_dprop))
+  //     dstress_dprop[i] =
+  //         NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(dstress_dparam.batch_index({i}));
+  // }
 }
 
 void
@@ -397,6 +440,36 @@ ExecuteNEML2Model::getOutputDerivativeView(const neml2::VariableName & output_na
              "` not found in ExecuteNEML2Model object `",
              name(),
              "`.");
+}
+
+const neml2::Tensor &
+ExecuteNEML2Model::getOutputParameterDerivativeView(const neml2::VariableName & output_name,
+                                                    const std::string & parameter_name) const
+{
+  checkExecutionStage();
+
+  if (!model().named_parameters().has_key(parameter_name))
+    mooseError("Trying to get derivative of ",
+               output_name,
+               " with respect to material property named ",
+               parameter_name,
+               ". But there is not such parameter in the NEML2 material model.");
+
+  const auto it = _doutputs_dparams.find(std::make_pair(output_name, parameter_name));
+  if (it == _doutputs_dparams.end())
+    mooseError("Requested derivative of `",
+               output_name,
+               "` with respect to `",
+               parameter_name,
+               "` not found in any ExecuteNEML2Model object.");
+
+  // save derivative as retrieved (we carefully cast constness away, which is ok, as the items
+  // stored in _retrieved_derivatives will be used only in this object)
+  _retrieved_derivatives.emplace(
+      output_name, parameter_name, const_cast<neml2::Tensor *>(&it->second));
+
+  // return reference to derivative tensor view
+  return it->second;
 }
 
 #endif
