@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "DirectCentralDifference.h"
+#include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseVariableFieldBase.h"
 #include "NonlinearSystem.h"
@@ -88,6 +89,9 @@ DirectCentralDifference::solve()
   _fe_problem.time() = _fe_problem.timeOld();
   _nonlinear_implicit_system->update();
 
+  // Calculating the lumped mass matrix for use in residual calculation
+  mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+
   // Compute the residual
   _explicit_residual.zero();
   _fe_problem.computeResidual(
@@ -122,10 +126,8 @@ DirectCentralDifference::postResidual(NumericVector<Number> & residual)
 }
 
 bool
-DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
+DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> &)
 {
-  mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
-
   bool converged = false;
 
   // "Invert" the diagonal mass matrix

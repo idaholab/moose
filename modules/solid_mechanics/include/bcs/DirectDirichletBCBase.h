@@ -38,4 +38,7 @@ protected:
   virtual Real computeQpValue() = 0;
 
   SparseMatrix<Number> * _mass_matrix;
+
+  const VariableValue & _u_old;
+  const VariableValue & _u_dot_old;
 };
