@@ -9,11 +9,20 @@
 
 #pragma once
 
+// MOOSE includes
 #include "MooseObjectAction.h"
 
+/**
+ * Action for creating MeshModifier, a UserObject that modifies
+ * the connectivity of a MooseMesh
+ */
 class AddMeshModifiersAction : public MooseObjectAction
 {
 public:
+  /**
+   * Class constructor
+   * @param params Parameters for this Action
+   */
   static InputParameters validParams();
 
   AddMeshModifiersAction(const InputParameters & params);

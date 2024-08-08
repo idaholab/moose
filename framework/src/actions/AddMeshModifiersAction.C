@@ -16,7 +16,7 @@ InputParameters
 AddMeshModifiersAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a MeshModifiers object to the simulation.");
+  params.addClassDescription("Add a MeshModifier object to the simulation.");
   return params;
 }
 
@@ -28,5 +28,6 @@ AddMeshModifiersAction::AddMeshModifiersAction(const InputParameters & params)
 void
 AddMeshModifiersAction::act()
 {
+  // MeshModifiers are user objects in the backend
   _problem->addUserObject(_type, _name, _moose_object_pars);
 }

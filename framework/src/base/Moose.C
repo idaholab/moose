@@ -172,6 +172,7 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
   appendDeprecatedMooseObjectTask("add_user_object",      Corrector);
   registerMooseObjectTask("add_corrector",                Corrector,                 false);
+  registerMooseObjectTask("add_mesh_modifier",            UserObject,                false);
 
   registerMooseObjectTask("add_postprocessor",            Postprocessor,             false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,       false);
@@ -189,8 +190,6 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_control",                  Control,                   false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,          false);
-
-  registerMooseObjectTask("add_mesh_modifier",            UserObject,             false);
 
   // clang-format on
 
@@ -582,8 +581,14 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddControlAction", "Controls/*");
   registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
+<<<<<<< HEAD
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
+=======
+  // MeshModifiers
+  registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
+  syntax.registerSyntaxType("MeshModifiers/*", "MeshModifiersName");
+>>>>>>> 3776c02983 (Making changes Guillaume requested - Issue #2767)
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
 
@@ -618,10 +623,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // Application Block System
   registerSyntax("CreateApplicationBlockAction", "Application");
-
-  // MeshModifiers
-  registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
-  syntax.registerSyntaxType("MeshModifiers/*", "MeshModifiersName");
 
   addActionTypes(syntax);
 }
