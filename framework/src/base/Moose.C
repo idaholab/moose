@@ -325,7 +325,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_periodic_bc)"
-                           "(add_user_object)"
+                           "(add_user_object, add_corrector)"
                            "(add_distribution)"
                            "(add_sampler)"
                            "(setup_function_complete)"
@@ -576,6 +576,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddControlAction", "Controls/*");
   registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
+  registerSyntax("AddCorrectorAction", "Correctors/*");
+  syntax.registerSyntaxType("Correctors/*", "UserObjectName");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
 
