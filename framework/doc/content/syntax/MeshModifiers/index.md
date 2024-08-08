@@ -8,6 +8,9 @@ The `MeshModifiers` system is designed to be able to modify the connectivity of 
 - [TimedElementSubdomainModifier](TimedElementSubdomainModifier.md)
 - [TimedSubdomainModifier](TimedSubdomainModifier.md)
 - [VariableValueElementSubdomainModifier](VariableValueElementSubdomainModifier.md)
+- [ActivateElementsUserObjectBase](ActivateElementsUserObjectBase.md)
+- [ActivateElementsCoupled](ActivateElementsCoupled.md)
+- [ActivateElementsByPath](ActivateElementsByPath.md)
 
 This feature is a work in progress.
 
