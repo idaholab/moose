@@ -1,12 +1,3 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #pragma once
 
 #include "gtest/gtest.h"
@@ -17,19 +8,17 @@
 #include "MooseMain.h"
 
 /**
- * Base class for building basic unit tests for MOOSE objects that can live alone (like user
- * objects, etc.)
+ * Base class for building basic unit tests for MFEM objects that can live alone (like user
+ * objects, etc.). Based on MOOSEObjectUnitTest.h from the MOOSE framework.
  *
  * This class builds the basic objects that are needed in order to test a MOOSE object. Those are a
- * mesh and an FEProblem.  To build a unit test, inherit from this class and build your test using
- * the following template:
+ * MFEMMesh and an MFEMProblem.  To build a unit test, inherit from this class and build your test
+ * using the following template:
  *
- * In your .h file:
- *
- * class MyUnitTest : public MooseObjectUnitTest
+ * class MyUnitTest : public MFEMObjectUnitTest
  * {
  * public:
- *   MyUnitTest() : MooseObjectUnitTest("MyAppUnitApp")
+ *   MyUnitTest() : MFEMObjectUnitTest("MyAppUnitApp")
  *   {
  *     // if you are using the old registration system, you want to register your objects using this
  *     // call. Otherwise, you do not need it.
@@ -49,8 +38,8 @@
  *   {
  *     // build your object like so
  *     InputParameters pars = _factory.getValidParams("MyObjectThatIAmTesting");
- *     _fe_problem->addUserObject("MyObjectThatIAmTesting", "fp", uo_pars);
- *     _obj = &_fe_problem->getUserObject<MyObjectThatIAmTesting>("fp");
+ *     _mfem_problem->addUserObject("MyObjectThatIAmTesting", "fp", uo_pars);
+ *     _obj = &_mfem_problem->getUserObject<MyObjectThatIAmTesting>("fp");
  *   }
  *
  *   // member variable used later in the actual tests
@@ -63,8 +52,6 @@
  * {
  *   EXPECT_EQ("testing", _obj->method(par1, par2));
  * }
- *
- * NOTE: Testing mesh-bound objects like Kernels, BCs, etc. is not possible with this class.
  */
 class MFEMObjectUnitTest : public ::testing::Test
 {
