@@ -1,5 +1,7 @@
 #include "MFEMVectorFEWeakDivergenceKernel.h"
 
+registerMooseObject("PlatypusApp", MFEMVectorFEWeakDivergenceKernel);
+
 InputParameters
 MFEMVectorFEWeakDivergenceKernel::validParams()
 {
