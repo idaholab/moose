@@ -2,6 +2,9 @@
 #include "MFEMLinearFormKernel.h"
 #include "kernels.h"
 
+/*
+(\\vec f, \\vec u')
+*/
 class MFEMVectorFEDomainLFKernel : public MFEMLinearFormKernel
 {
 public:
@@ -10,9 +13,9 @@ public:
   MFEMVectorFEDomainLFKernel(const InputParameters & parameters);
   ~MFEMVectorFEDomainLFKernel() override {}
 
-  std::shared_ptr<platypus::Kernel<mfem::ParLinearForm>> getKernel() override { return _kernel; }
+  virtual mfem::LinearFormIntegrator * createIntegrator() override;
 
 protected:
-  platypus::InputParameters _kernel_params;
-  std::shared_ptr<platypus::VectorFEDomainLFKernel> _kernel{nullptr};
+  std::string _vec_coef_name;
+  mfem::VectorCoefficient * _vec_coef{nullptr};
 };

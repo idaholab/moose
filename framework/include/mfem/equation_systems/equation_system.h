@@ -4,6 +4,7 @@
 #include "kernel_base.h"
 #include "named_fields_map.h"
 #include "MFEMBilinearFormKernel.h"
+#include "MFEMLinearFormKernel.h"
 
 namespace platypus
 {
@@ -15,7 +16,6 @@ mixed and nonlinear forms) and build methods
 class EquationSystem : public mfem::Operator
 {
 public:
-  using ParLinearFormKernel = platypus::Kernel<mfem::ParLinearForm>;
   using ParNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
   using ParMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
 
@@ -48,7 +48,8 @@ public:
   void AddKernel(const std::string & test_var_name,
                  std::shared_ptr<MFEMBilinearFormKernel> blf_kernel);
 
-  void AddKernel(const std::string & test_var_name, std::shared_ptr<ParLinearFormKernel> lf_kernel);
+  void AddKernel(const std::string & test_var_name,
+                 std::shared_ptr<MFEMLinearFormKernel> lf_kernel);
 
   void AddKernel(const std::string & test_var_name,
                  std::shared_ptr<ParNonlinearFormKernel> nlf_kernel);
@@ -105,7 +106,7 @@ protected:
   // according to test variable
   platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
 
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParLinearFormKernel>>> _lf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMLinearFormKernel>>> _lf_kernels_map;
 
   platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParNonlinearFormKernel>>> _nlf_kernels_map;
 
