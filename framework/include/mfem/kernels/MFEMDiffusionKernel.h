@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMKernel.h"
-#include "kernels.h"
 
 /*
 (σ ∇ q, ∇ q')
@@ -11,7 +10,6 @@ public:
   static InputParameters validParams();
 
   MFEMDiffusionKernel(const InputParameters & parameters);
-  ~MFEMDiffusionKernel() override {}
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 

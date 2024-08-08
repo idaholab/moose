@@ -241,25 +241,6 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
     _xs.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
-  // Initialise nonlinear form kernels
-  for (const auto & [test_var_name, nlf_kernels] : _nlf_kernels_map)
-  {
-    for (auto & i : *nlf_kernels)
-    {
-      i->Init(gridfunctions, fespaces, bc_map, coefficients);
-    }
-  }
-  // Initialise mixed bilinear form kernels
-  for (const auto & [test_var_name, mblf_kernels_map] : _mblf_kernels_map_map)
-  {
-    for (const auto & [trial_var_name, mblf_kernels] : *mblf_kernels_map)
-    {
-      for (auto & i : *mblf_kernels)
-      {
-        i->Init(gridfunctions, fespaces, bc_map, coefficients);
-      }
-    }
-  }
 }
 
 void
@@ -320,7 +301,7 @@ EquationSystem::BuildBilinearForms()
 void
 EquationSystem::BuildMixedBilinearForms()
 {
-  // Register mixed linear forms. Note that not all combinations may
+  // Register mixed bilinear forms. Note that not all combinations may
   // have a kernel
 
   // Create mblf for each test/trial pair
@@ -343,7 +324,7 @@ EquationSystem::BuildMixedBilinearForms()
         // Apply all mixed kernels with this test/trial pair
         for (auto & mblf_kernel : mblf_kernels)
         {
-          mblf_kernel->Apply(mblf.get());
+          mblf->AddDomainIntegrator(mblf_kernel->createIntegrator());
         }
         // Assemble mixed bilinear forms
         mblf->Assemble();
