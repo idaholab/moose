@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMVectorFEDomainLFKernel);
 InputParameters
 MFEMVectorFEDomainLFKernel::validParams()
 {
-  InputParameters params = MFEMLinearFormKernel::validParams();
+  InputParameters params = MFEMKernel::validParams();
   params.addClassDescription("A volumetric function ($f$), with the weak "
                              "form of $ (f, u_h), to be added to an MFEM problem");
 
@@ -15,7 +15,7 @@ MFEMVectorFEDomainLFKernel::validParams()
 }
 
 MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & parameters)
-  : MFEMLinearFormKernel(parameters),
+  : MFEMKernel(parameters),
     _vec_coef_name(getParam<std::string>("vector_coefficient")),
     _vec_coef(getMFEMProblem()._coefficients._vectors.Get(_vec_coef_name))
 {

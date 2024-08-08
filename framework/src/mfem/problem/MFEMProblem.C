@@ -269,17 +269,18 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   FEProblemBase::addUserObject(kernel_name, name, parameters);
   const UserObject * kernel = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMLinearFormKernel *>(kernel) != nullptr)
+  if (dynamic_cast<const MFEMKernel<mfem::LinearFormIntegrator> *>(kernel) != nullptr)
   {
-    auto object_ptr = getUserObject<MFEMLinearFormKernel>(name).getSharedPtr();
-    auto lf_kernel = std::dynamic_pointer_cast<MFEMLinearFormKernel>(object_ptr);
+    auto object_ptr = getUserObject<MFEMKernel<mfem::LinearFormIntegrator>>(name).getSharedPtr();
+    auto lf_kernel = std::dynamic_pointer_cast<MFEMKernel<mfem::LinearFormIntegrator>>(object_ptr);
 
     addKernel(parameters.get<std::string>("variable"), lf_kernel);
   }
-  else if (dynamic_cast<const MFEMBilinearFormKernel *>(kernel) != nullptr)
+  else if (dynamic_cast<const MFEMKernel<mfem::BilinearFormIntegrator> *>(kernel) != nullptr)
   {
-    auto object_ptr = getUserObject<MFEMBilinearFormKernel>(name).getSharedPtr();
-    auto blf_kernel = std::dynamic_pointer_cast<MFEMBilinearFormKernel>(object_ptr);
+    auto object_ptr = getUserObject<MFEMKernel<mfem::BilinearFormIntegrator>>(name).getSharedPtr();
+    auto blf_kernel =
+        std::dynamic_pointer_cast<MFEMKernel<mfem::BilinearFormIntegrator>>(object_ptr);
     addKernel(parameters.get<std::string>("variable"), blf_kernel);
   }
   else

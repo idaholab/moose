@@ -1,11 +1,11 @@
 #pragma once
-#include "MFEMBilinearFormKernel.h"
+#include "MFEMKernel.h"
 #include "kernels.h"
 
 /*
 (σ ∇ q, ∇ q')
 */
-class MFEMDiffusionKernel : public MFEMBilinearFormKernel
+class MFEMDiffusionKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:
   static InputParameters validParams();
