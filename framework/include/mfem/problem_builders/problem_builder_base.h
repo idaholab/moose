@@ -175,13 +175,8 @@ public:
     GetEquationSystem()->AddKernel(var_name, std::move(kernel));
   }
 
-  void AddKernel(std::string var_name, std::shared_ptr<MFEMBilinearFormKernel> kernel)
-  {
-    GetEquationSystem()->AddTrialVariableNameIfMissing(var_name);
-    GetEquationSystem()->AddKernel(var_name, std::move(kernel));
-  }
-
-  void AddKernel(std::string var_name, std::shared_ptr<MFEMLinearFormKernel> kernel)
+  template <class T>
+  void AddKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
   {
     GetEquationSystem()->AddTrialVariableNameIfMissing(var_name);
     GetEquationSystem()->AddKernel(var_name, std::move(kernel));

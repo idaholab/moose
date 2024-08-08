@@ -53,13 +53,14 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<MFEMLinearFormKernel> lf_kernel)
+                          std::shared_ptr<MFEMKernel<mfem::LinearFormIntegrator>> lf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_lf_kernels_map.Has(test_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMLinearFormKernel>>>();
+    auto kernels =
+        std::make_shared<std::vector<std::shared_ptr<MFEMKernel<mfem::LinearFormIntegrator>>>>();
 
     _lf_kernels_map.Register(test_var_name, std::move(kernels));
   }

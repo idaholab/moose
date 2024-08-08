@@ -3,8 +3,7 @@
 #include "inputs.h"
 #include "kernel_base.h"
 #include "named_fields_map.h"
-#include "MFEMBilinearFormKernel.h"
-#include "MFEMLinearFormKernel.h"
+#include "MFEMKernel.h"
 
 namespace platypus
 {
@@ -16,6 +15,8 @@ mixed and nonlinear forms) and build methods
 class EquationSystem : public mfem::Operator
 {
 public:
+  using MFEMBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
+  using MFEMLinearFormKernel = MFEMKernel<mfem::LinearFormIntegrator>;
   using ParNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
   using ParMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
 
@@ -106,7 +107,8 @@ protected:
   // according to test variable
   platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
 
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMLinearFormKernel>>> _lf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel<mfem::LinearFormIntegrator>>>>
+      _lf_kernels_map;
 
   platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParNonlinearFormKernel>>> _nlf_kernels_map;
 
