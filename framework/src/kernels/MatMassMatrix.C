@@ -18,7 +18,8 @@ InputParameters
 MatMassMatrix::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addClassDescription("Computes a finite element mass matrix");
+  params.addClassDescription(
+      "Computes a finite element mass matrix give density as a material property");
   params.addRequiredParam<MaterialPropertyName>("density",
                                                 "The material property defining the density");
   params.set<MultiMooseEnum>("vector_tags") = "";
