@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMKernel.h"
-#include "kernels.h"
 
 /*
 (βu, u')

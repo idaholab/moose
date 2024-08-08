@@ -1,7 +1,6 @@
 #pragma once
 #include "../common/pfem_extras.hpp"
 #include "inputs.h"
-#include "kernel_base.h"
 #include "named_fields_map.h"
 #include "MFEMKernel.h"
 
@@ -17,8 +16,8 @@ class EquationSystem : public mfem::Operator
 public:
   using MFEMBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
   using MFEMLinearFormKernel = MFEMKernel<mfem::LinearFormIntegrator>;
-  using MFEMNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
-  using MFEMMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
+  using MFEMNonlinearFormKernel = MFEMKernel<mfem::NonlinearFormIntegrator>;
+  using MFEMMixedBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
 
   EquationSystem() = default;
   ~EquationSystem() override;
