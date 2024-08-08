@@ -19,7 +19,7 @@
   [add_subdomain_names]
     type = Exodiff
     input = add_subdomain_names.i
-    exodiff = 'add_subdomain_names_out.e add_subdomain_names_out.e-s004 add_subdomain_names_out.e-s006'
+    exodiff = 'add_subdomain_names_out.e add_subdomain_names_out.e-s002 add_subdomain_names_out.e-s003'
     exodiff_opts = '-pedantic'
     issues = '#27474'
     design = MooseMesh.md
