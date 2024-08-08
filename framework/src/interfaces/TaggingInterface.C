@@ -377,6 +377,17 @@ TaggingInterface::assignTaggedLocalResidual()
 }
 
 void
+TaggingInterface::maskTaggedLocalResidual(const DenseVector<Number> & mask)
+{
+  for (auto & re : _re_blocks)
+    for (const auto i : index_range(mask))
+      (*re)(i) *= mask(i);
+  for (auto & absre : _absre_blocks)
+    for (const auto i : index_range(mask))
+      (*absre)(i) *= mask(i);
+}
+
+void
 TaggingInterface::accumulateTaggedLocalMatrix()
 {
   for (auto & ke : _ke_blocks)
@@ -431,6 +442,15 @@ TaggingInterface::assignTaggedLocalMatrix()
 {
   for (auto & ke : _ke_blocks)
     *ke = _local_ke;
+}
+
+void
+TaggingInterface::maskTaggedLocalMatrix(const DenseMatrix<Number> & mask)
+{
+  for (auto & ke : _ke_blocks)
+    for (unsigned int i = 0; i < ke->m(); i++)
+      for (unsigned int j = 0; j < ke->n(); j++)
+        (*ke)(i, j) *= mask(i, j);
 }
 
 TaggingInterface::~TaggingInterface() {}
