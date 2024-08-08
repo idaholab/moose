@@ -267,40 +267,28 @@ ExecuteNEML2Model::finalize()
 void
 ExecuteNEML2Model::preCompute()
 {
-  // loop through all retrieved parameter, request ad; check parameter's batch size equal
-  // to the model's batch size
-
-  // // Set the parameter value using batch material from MOOSE
-  // for (auto && [name, prop] : _props)
-  // {
-  //   if (!model().named_parameters().has_key(name))
-  //     mooseError("Trying to set scalar-valued material property named ",
-  //                name,
-  //                ". But there is not such parameter in the NEML2 material model.");
-
-  //   auto input = NEML2Utils::homogenizeBatchedTuple(prop->getInputData());
-  //   auto pval = NEML2Utils::toNEML2Batched(std::get<0>(input));
-  //   pval.requires_grad_(true);
-  //   model().set_parameter(name, pval);
-  // }
+  for (auto & [out, name, batch_tensor_ptr] : _retrieved_parameter_derivatives)
+  {
+    auto param = neml2::Tensor(model().get_parameter(name));
+    // check batch size of the paremeter and the model
+    if (param.batch_sizes() != model().batch_sizes())
+      mooseError("The batch size size of the parameter ",
+                 name,
+                 " does not match with that of NEML2 material model.");
+    param.requires_grad_(true);
+    model().set_parameter(name, param);
+  }
 }
 
 void
 ExecuteNEML2Model::postCompute()
 {
-  // for (auto && [name, prop] : _props)
-  // {
-  //   // Extract the parameter derivative from NEML2
-  //   auto param = neml2::Tensor(model().get_parameter(name));
-  //   auto dstress_dparam = neml2::math::jacrev(_out, param); // how to retrieve stress from
-  //   output?
-
-  //   // Fill the NEML2 parameter derivative into MOOSE UO
-  //   auto & dstress_dprop = prop->setOutputData();
-  //   for (const neml2::Size i : index_range(dstress_dprop))
-  //     dstress_dprop[i] =
-  //         NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(dstress_dparam.batch_index({i}));
-  // }
+  // output retrieved output variable derivatives wrt parameters
+  for (auto & [out, pname, batch_tensor_ptr] : _retrieved_parameter_derivatives)
+  {
+    auto param = neml2::Tensor(model().get_parameter(pname));
+    *batch_tensor_ptr = neml2::math::jacrev(_out.base_index(out), param);
+  }
 }
 
 void
