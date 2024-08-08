@@ -15,6 +15,7 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_communication.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/sparse_matrix.h"
 
 registerMooseObject("MooseApp", FileMeshGenerator);
 
@@ -37,9 +38,9 @@ FileMeshGenerator::validParams()
                         "because the mesh was pre-split for example.");
   params.addParam<bool>("allow_renumbering",
                         true,
-                        "Whether to allow the mesh to renumber nodes and elements. Note that this "
-                        "parameter is only relevant for non-exodus files, e.g. if reading from "
-                        "checkpoint for example. For exodus we always disallow renumbering.");
+                        "Whether to allow the mesh to renumber nodes and elements, if not "
+                        "overridden by a global parameter or by a requirement (e.g. an exodus "
+                        "restart or a constraint matrix) that disables renumbering.");
   params.addParam<bool>("clear_spline_nodes",
                         false,
                         "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
@@ -53,13 +54,19 @@ FileMeshGenerator::validParams()
                         "their extraction operators.  This may be less efficient than the "
                         "default C^0 extracted mesh, but may be necessary if the extracted "
                         "mesh is non-conforming.");
+  params.addParam<MatrixFileName>(
+      "constraint_matrix", "", "The name of a constraint matrix file to apply to the mesh");
   params.addClassDescription("Read a mesh from a file.");
+  params.addParamNamesToGroup(
+      "clear_spline_nodes discontinuous_spline_extraction constraint_matrix",
+      "IsoGeometric Analysis (IGA) and other mesh constraint options");
   return params;
 }
 
 FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _file_name(getParam<MeshFileName>("file")),
+    _matrix_file_name(getParam<MatrixFileName>("constraint_matrix")),
     _skip_partitioning(getParam<bool>("skip_partitioning")),
     _allow_renumbering(getParam<bool>("allow_renumbering"))
 {
@@ -69,6 +76,14 @@ std::unique_ptr<MeshBase>
 FileMeshGenerator::generate()
 {
   auto mesh = buildMeshBaseObject();
+
+  // Maybe we'll reallow renumbering after constraints are applied?
+  bool eventually_allow_renumbering = _allow_renumbering && mesh->allow_renumbering();
+
+  // If we have a constraint matrix, we need its numbering to match
+  // the numbering in the mesh file
+  if (!_matrix_file_name.empty())
+    mesh->allow_renumbering(false);
 
   // Figure out if we are reading an Exodus file, but not Tetgen (*.ele)
   bool exodus = (_file_name.rfind(".exd") < _file_name.size() ||
@@ -89,6 +104,7 @@ FileMeshGenerator::generate()
     {
       _app.setExReaderForRestart(std::move(exreader));
       exreader->read(_file_name);
+      eventually_allow_renumbering = false;
       mesh->allow_renumbering(false);
     }
     else
@@ -128,6 +144,25 @@ FileMeshGenerator::generate()
     // Load the meta data if it is available
     _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, (std::string)file_name);
   }
+
+  if (!_matrix_file_name.empty())
+  {
+    auto matrix = SparseMatrix<Number>::build(mesh->comm());
+    matrix->read_matlab(_matrix_file_name);
+
+    // In the future we might deduce matrix orientation via matrix
+    // size; for now we simply hardcode that the Flex IGA standard for
+    // projection operator matrices is the transpose of our standard
+    // for constraint equations.
+    matrix->get_transpose(*matrix);
+    mesh->copy_constraint_rows(*matrix);
+
+    // libMesh should probably update this in copy_constraint_rows();
+    // once it does this will be a redundant sweep we can remove.
+    mesh->cache_elem_data();
+  }
+
+  mesh->allow_renumbering(eventually_allow_renumbering);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

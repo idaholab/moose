@@ -171,7 +171,7 @@ MultiAppConservativeTransfer::initialSetup()
       auto & execute_on = parent_problem.getUserObjectBase(pp).getExecuteOnEnum();
       const auto & type = parent_problem.getUserObjectBase(pp).type();
       // Check if parent app has transfer execute_on
-      if (!execute_on.contains(EXEC_TRANSFER))
+      if (!execute_on.isValueSet(EXEC_TRANSFER))
         mooseError(
             "execute_on='transfer' is required in the conservative transfer for " + type + " '",
             pp,
@@ -197,7 +197,7 @@ MultiAppConservativeTransfer::initialSetup()
         auto & execute_on = sub_problem.getUserObjectBase(sub_pp).getExecuteOnEnum();
         const auto & type = sub_problem.getUserObjectBase(sub_pp).type();
         // Check if sub pp has transfer execute_on
-        if (!execute_on.contains(EXEC_TRANSFER))
+        if (!execute_on.isValueSet(EXEC_TRANSFER))
           mooseError(
               "execute_on='transfer' is required in the conservative transfer for " + type + " '",
               sub_pp,

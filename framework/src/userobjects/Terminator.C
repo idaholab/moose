@@ -29,11 +29,11 @@ Terminator::validParams()
       "FunctionExpression",
       "FParser expression to process Postprocessor values into a boolean value. "
       "Termination of the simulation occurs when this returns true.");
-  MooseEnum failModeOption("HARD SOFT", "HARD");
+  MooseEnum failModeOption("HARD SOFT NONE", "HARD");
   params.addParam<MooseEnum>(
       "fail_mode",
       failModeOption,
-      "Abort entire simulation (HARD) or just the current time step (SOFT).");
+      "Abort entire simulation (HARD), just the current time step (SOFT), or not at all (NONE).");
   params.addParam<std::string>("message",
                                "An optional message to be output instead of the default message "
                                "when the termination condition is triggered");
@@ -55,20 +55,24 @@ Terminator::validParams()
 Terminator::Terminator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _fail_mode(getParam<MooseEnum>("fail_mode").getEnum<FailMode>()),
-    _error_level(getParam<MooseEnum>("error_level").getEnum<ErrorLevel>()),
+    _msg_type(getParam<MooseEnum>("error_level").getEnum<MessageType>()),
     _pp_names(),
     _pp_values(),
     _expression(getParam<std::string>("expression")),
     _fp()
 {
   // sanity check the parameters
-  if (_error_level == ErrorLevel::ERROR && _fail_mode == FailMode::SOFT)
+  if (_msg_type == MessageType::ERROR && _fail_mode != FailMode::HARD)
     paramError("error_level",
                "Setting the error level to ERROR always causes a hard failure, which is "
-               "incompatible with `fail_mode=SOFT`.");
-  if (_error_level == ErrorLevel::NONE && isParamValid("message"))
+               "incompatible with `fail_mode=SOFT or NONE`.");
+  if (_msg_type == MessageType::NONE && isParamValid("message"))
     paramError("error_level",
                "Cannot specify `error_level=NONE` together with the `message` parameter.");
+  if (_msg_type == MessageType::NONE && _fail_mode == FailMode::NONE)
+    paramWarning("error_level",
+                 "With the current error level and fail mode settings, the terminator will not "
+                 "error or output.");
 
   // build the expression object
   if (_fp.ParseAndDeduceVariables(_expression, _pp_names) >= 0)
@@ -89,13 +93,13 @@ void
 Terminator::initialSetup()
 {
   // Check execution schedule of the postprocessors
-  if (_fail_mode == FailMode::SOFT)
+  if (_fail_mode == FailMode::SOFT || _fail_mode == FailMode::NONE)
     for (const auto i : make_range(_pp_num))
     // Make sure the postprocessor is executed at least as often
     {
       const auto & pp_exec = _fe_problem.getUserObjectBase(_pp_names[i], _tid).getExecuteOnEnum();
       for (const auto & flag : getExecuteOnEnum())
-        if (!pp_exec.contains(flag) && flag != EXEC_FINAL)
+        if (!pp_exec.isValueSet(flag) && flag != EXEC_FINAL)
           paramWarning("expression",
                        "Postprocessor '" + _pp_names[i] + "' is not executed on " + flag.name() +
                            ", which it really should be to serve in the criterion "
@@ -109,26 +113,28 @@ Terminator::handleMessage()
   std::string message;
   if (!isParamValid("message"))
   {
-    message = "Terminator '" + name() + "' is causing ";
+    message = "Terminator '" + name() + "' is ";
     if (_fail_mode == FailMode::HARD)
-      message += "the execution to terminate.\n";
+      message += "causing the execution to terminate.\n";
+    else if (_fail_mode == FailMode::SOFT)
+      message += "causing a time step cutback by marking the current step as failed.\n";
     else
-      message += "a time step cutback by marking the current step as failed.\n";
+      message += "outputting a message due to the criterion being met";
   }
   else
     message = getParam<std::string>("message");
 
-  switch (_error_level)
+  switch (_msg_type)
   {
-    case ErrorLevel::INFO:
+    case MessageType::INFO:
       mooseInfoRepeated(message);
       break;
 
-    case ErrorLevel::WARNING:
+    case MessageType::WARNING:
       mooseWarning(message);
       break;
 
-    case ErrorLevel::ERROR:
+    case MessageType::ERROR:
       mooseError(message);
       break;
 
@@ -150,7 +156,7 @@ Terminator::execute()
     handleMessage();
     if (_fail_mode == FailMode::HARD)
       _fe_problem.terminateSolve();
-    else
+    else if (_fail_mode == FailMode::SOFT)
     {
       // Within a nonlinear solve, trigger a solve fail
       if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_LINEAR ||

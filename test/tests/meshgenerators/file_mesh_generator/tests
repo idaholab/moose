@@ -157,6 +157,38 @@
     issues = '#18768'
   []
 
+  [iga_constraint_matrix]
+    type = Exodiff
+    input = 'iga_constraint_matrix.i'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+    exodiff = 'iga_constraint_matrix_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to apply externally defined constraint matrices to 3D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+  [iga_constraint_matrix_1d]
+    type = Exodiff
+    input = 'iga_constraint_matrix_1d.i'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+    exodiff = 'iga_constraint_matrix_1d_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to apply externally defined constraint matrices to 1D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
   [./exodus_discontinuous_iga_2d_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff

@@ -54,9 +54,9 @@ XMLOutput::outputVectorPostprocessors()
   // is not required.
   vec_node.append_attribute("time") = _problem_ptr->time();
   vec_node.append_attribute("timestep") = _problem_ptr->timeStep();
-  if (_execute_enum.contains(EXEC_LINEAR) && !_on_nonlinear_residual)
+  if (_execute_enum.isValueSet(EXEC_LINEAR) && !_on_nonlinear_residual)
     vec_node.append_attribute("linear_iteration") = _linear_iter;
-  if (_execute_enum.contains(EXEC_NONLINEAR))
+  if (_execute_enum.isValueSet(EXEC_NONLINEAR))
     vec_node.append_attribute("nonlinear_iteration") = _nonlinear_iter;
 
   // The VPP objects to be output

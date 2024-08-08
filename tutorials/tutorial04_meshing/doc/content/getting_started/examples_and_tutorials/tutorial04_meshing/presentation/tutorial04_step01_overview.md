@@ -16,7 +16,7 @@ How it works, in a nutshell
 
 - The [Reactor Module](modules/reactor/index.md) contains mesh generation objects which a user calls from the `[Mesh]` block of a MOOSE input file
 - User constructs sequences of mesh generation objects to build custom Cartesian and hexagonal-based pins, assemblies, and cores
-- Meshes may be created in memory or pre-generated/output as Exodus II files for later use
+- Meshes may be created in memory or pre-generated/output as Exodus files for later use
 
 !---
 

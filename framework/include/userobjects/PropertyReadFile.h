@@ -32,6 +32,9 @@ public:
   PropertyReadFile(const InputParameters & parameters);
   virtual ~PropertyReadFile() {}
 
+  /// Retrieve the property file names from the parameters
+  std::vector<FileName> getFileNames();
+
   virtual void initialize();
   virtual void execute() {}
   virtual void finalize() {}
@@ -119,7 +122,7 @@ public:
 
 protected:
   /// Name of file containing property values
-  const std::vector<FileName> _prop_file_names;
+  std::vector<FileName> _prop_file_names;
   /// Index of the file we last read
   unsigned int & _current_file_index;
   /// Use DelimitedFileReader to read and store data from file

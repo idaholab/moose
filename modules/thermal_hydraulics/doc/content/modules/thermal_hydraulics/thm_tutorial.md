@@ -22,6 +22,6 @@ See [command line usage](/command_line_usage.md) for more information.
 # Output
 
 Output can be in a number of different formats (see [/Outputs/index.md]), but
-the most common is the Exodus II format. This can be viewed by a number of
+the most common is the Exodus format. This can be viewed by a number of
 different applications, including VisIt and Paraview. A basics tutorial for
 Paraview can found [here](paraview_basics.md).

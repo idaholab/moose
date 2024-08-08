@@ -186,15 +186,15 @@ PetscOutput::PetscOutput(const InputParameters & parameters)
 {
   // Output toggle support
   if (getParam<bool>("output_linear"))
-    _execute_on.push_back("linear");
+    _execute_on.setAdditionalValue("linear");
   if (getParam<bool>("output_nonlinear"))
-    _execute_on.push_back("nonlinear");
+    _execute_on.setAdditionalValue("nonlinear");
 
   // Nonlinear residual start-time supplied by user
   if (isParamValid("nonlinear_residual_start_time"))
   {
     _nonlinear_start_time = getParam<Real>("nonlinear_residual_start_time");
-    _execute_on.push_back("nonlinear");
+    _execute_on.setAdditionalValue("nonlinear");
   }
 
   // Nonlinear residual end-time supplied by user
@@ -205,7 +205,7 @@ PetscOutput::PetscOutput(const InputParameters & parameters)
   if (isParamValid("linear_residual_start_time"))
   {
     _linear_start_time = getParam<Real>("linear_residual_start_time");
-    _execute_on.push_back("linear");
+    _execute_on.setAdditionalValue("linear");
   }
 
   // Linear residual end-time supplied by user

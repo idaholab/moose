@@ -5,11 +5,13 @@
 ## Description
 
 This computes the average value of specified nodal variables at nodes located within cross-sectional planes
-at user-specified locations along the axis of a mesh.  For example, this is designed to work on bodies whose mesh discretization
+at locations along the axis of a mesh.  Those locations can either be defined by the user (through the `positions` parameter),
+or automatically determined by the axial positions of the nodes in the mesh if `positions` is not defined.
+For example, this is designed to work on bodies whose mesh discretization
 is created by extrusion, so that sets of nodes that make up the mesh lie within planes regularly.
 
 The location of the nodes is given by a direction and an
-associated set of lengths. This postprocessor is particularly indicated for structural components that deform in
+associated set of positions. This postprocessor is particularly indicated for structural components that deform in
 a way analogous to beams, thereby freeing the user from performing additional postprocessing tasks on a
 different software. One use case of this postprocessor is the definition of cross sections in ducts that
 bend or bow (see [disp_cross]).

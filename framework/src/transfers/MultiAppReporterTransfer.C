@@ -69,7 +69,7 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
       paramError(
           "subapp_index",
           "The supplied sub-application index is greater than the number of sub-applications.");
-    else if (_directions.contains(FROM_MULTIAPP) &&
+    else if (_directions.isValueSet(FROM_MULTIAPP) &&
              _subapp_index == std::numeric_limits<unsigned int>::max() &&
              multi_app->numGlobalApps() > 1 && !_distribute_reporter_vector)
       paramError("from_multi_app",
@@ -95,7 +95,7 @@ MultiAppReporterTransfer::initialSetup()
   // that we consume a replicated version.
   // Find proper FEProblem
   FEProblemBase * problem_ptr = nullptr;
-  if (_directions.contains(TO_MULTIAPP))
+  if (_directions.isValueSet(TO_MULTIAPP))
     problem_ptr = &getToMultiApp()->problemBase();
   else if (_subapp_index == std::numeric_limits<unsigned int>::max() &&
            getFromMultiApp()->hasLocalApp(0))

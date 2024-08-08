@@ -129,11 +129,11 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   if (!isParamValid("direction"))
   {
     if (_from_multi_app && (!_to_multi_app || _from_multi_app == _to_multi_app))
-      _directions.push_back("from_multiapp");
+      _directions.setAdditionalValue("from_multiapp");
     if (_to_multi_app && (!_from_multi_app || _from_multi_app == _to_multi_app))
-      _directions.push_back("to_multiapp");
+      _directions.setAdditionalValue("to_multiapp");
     if (_from_multi_app && _to_multi_app && _from_multi_app != _to_multi_app)
-      _directions.push_back("between_multiapp");
+      _directions.setAdditionalValue("between_multiapp");
 
     // So it's available in the next constructors
     _direction = _directions[0];

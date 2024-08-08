@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#28190'
+  design = 'PropertyReadFile.md'
+  # See test/tests/functions/piecewise_constant_from_csv for additional tests
+  [csv_read]
+    requirement = 'The system shall include a file reader for data stored in a CSV format'
+    [multiple_files]
+      type = 'Exodiff'
+      input = 'piecewise_constant_elem_multiple.i'
+      exodiff = 'piecewise_constant_elem_multiple_out.e'
+      detail = "with the name of each CSV data file to read stored in a separate "
+                  "CSV file. At each user object execution, the next data file is read"
+    []
+  []
+  [errors]
+    requirement = "The system shall error if"
+    [too_many_data_sources]
+      type = RunException
+      input = 'piecewise_constant_elem_multiple.i'
+      cli_args = "UserObjects/reader_element/prop_file_name='data_element.csv'"
+      expect_err = "Providing both or none is not supported"
+      detail = "the user provides two parameters for the property file names,"
+    []
+    [no_files]
+      type = RunException
+      input = 'piecewise_constant_elem_multiple.i'
+      cli_args = "UserObjects/reader_element/prop_file_names_csv='data_empty.csv'"
+      expect_err = "A property file should have been specified"
+      detail = "the user supplied an empty vector for the property file names,"
+    []
+  []
+[]

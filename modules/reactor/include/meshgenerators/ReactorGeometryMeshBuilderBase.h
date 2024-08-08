@@ -31,6 +31,8 @@ static const std::string pin_region_ids = "pin_region_ids";
 static const std::string pin_block_names = "pin_block_names";
 static const std::string pin_region_id_map = "pin_region_id_map";
 static const std::string pin_block_name_map = "pin_block_name_map";
+static const std::string flexible_assembly_stitching = "flexible_assembly_stitching";
+static const std::string num_sectors_flexible_stitching = "num_sectors_flexible_stitching";
 
 // Geometrical quantities
 static const std::string pitch = "pitch";
@@ -57,6 +59,13 @@ static const std::string region_id_as_block_name = "region_id_as_block_name";
 // Name of a boolean metadata that indicates whether or not we skipped mesh generation in favor of
 // only generating the mesh metadata
 static const std::string bypass_meshgen = "bypass_meshgen";
+
+// Default values for setting block IDs of RGMB regions
+const subdomain_id_type PIN_BLOCK_ID_START = 10000;
+const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;
+const subdomain_id_type PIN_BLOCK_ID_TRI_FLEXIBLE = 9998;
+const subdomain_id_type ASSEMBLY_BLOCK_ID_START = 20000;
+const subdomain_id_type ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE = 19999;
 }
 
 /**

@@ -55,7 +55,7 @@ Exodus::validParams()
   params.set<unsigned int>("padding") = 3;
 
   // Add description for the Exodus class
-  params.addClassDescription("Object for output data in the Exodus II format");
+  params.addClassDescription("Object for output data in the Exodus format");
 
   // Flag for overwriting at each timestep
   params.addParam<bool>("overwrite",

@@ -706,7 +706,7 @@ Simulation::setupCoordinateSystem()
       {
         blocks.push_back(subdomains[i]);
         // coord_types.push_back("XYZ");
-        coord_types.push_back(coord_sys[i] == Moose::COORD_RZ ? "RZ" : "XYZ");
+        coord_types.setAdditionalValue(coord_sys[i] == Moose::COORD_RZ ? "RZ" : "XYZ");
       }
     }
   }

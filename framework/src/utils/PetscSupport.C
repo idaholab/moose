@@ -650,8 +650,8 @@ processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
     }
 
     // Update the stored items, but do not create duplicates
-    if (!po.flags.contains(option))
-      po.flags.push_back(option);
+    if (!po.flags.isValueSet(option))
+      po.flags.setAdditionalValue(option);
   }
 }
 
@@ -667,7 +667,7 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
        std::make_pair(false, "-ksp_converged_reason")}};
 
   for (auto & reason_flag : reason_flags)
-    if (po.flags.contains(reason_flag.second))
+    if (po.flags.isValueSet(reason_flag.second))
       // We register the reason option as already existing
       reason_flag.first = true;
 
@@ -1043,7 +1043,7 @@ disableNonlinearConvergedReason(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
 
-  petsc_options.flags.erase("-snes_converged_reason");
+  petsc_options.flags.eraseSetValue("-snes_converged_reason");
 
   auto & pairs = petsc_options.pairs;
   auto it = MooseUtils::findPair(pairs, "-snes_converged_reason", MooseUtils::Any);
@@ -1056,7 +1056,7 @@ disableLinearConvergedReason(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
 
-  petsc_options.flags.erase("-ksp_converged_reason");
+  petsc_options.flags.eraseSetValue("-ksp_converged_reason");
 
   auto & pairs = petsc_options.pairs;
   auto it = MooseUtils::findPair(pairs, "-ksp_converged_reason", MooseUtils::Any);

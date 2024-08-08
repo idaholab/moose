@@ -32,5 +32,5 @@ GeneralReporter::shouldStore() const
 {
   // Either we always store, or we store if the current execution flag matches
   // a flag that is within this GeneralReporter's 'execute_on'
-  return _always_store || getExecuteOnEnum().contains(_fe_problem.getCurrentExecuteOnFlag());
+  return _always_store || getExecuteOnEnum().isValueSet(_fe_problem.getCurrentExecuteOnFlag());
 }

@@ -408,7 +408,7 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
     {
       if (!_advanced_execute_on.contains(execute_data_name) ||
           (_advanced_execute_on[execute_data_name].isValid() &&
-           _advanced_execute_on[execute_data_name].contains("none")))
+           _advanced_execute_on[execute_data_name].isValueSet("none")))
       {
         const bool is_pp_type = (execute_data_name == "postprocessors");
         const std::string pp_type_str = is_pp_type ? "post-processor" : "vector post-processor";

@@ -22,7 +22,7 @@ PINSFVRhieChowInterpolator::validParams()
   params.addClassDescription("Performs interpolations and reconstructions of porosity and computes "
                              "the Rhie-Chow face velocities.");
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", /*quiet=*/true);
-  exec_enum.push_back(EXEC_INITIAL);
+  exec_enum.setAdditionalValue(EXEC_INITIAL);
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addParam<unsigned short>(
       "smoothing_layers",

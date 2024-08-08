@@ -29,7 +29,7 @@ ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag)
                flag,
                "' is not an available enum item for the "
                "MultiMooseEnum object, thus it cannot be removed.");
-  else if (contains(flag))
+  else if (isValueSet(flag))
     mooseError("The supplied item '", flag, "' is a selected item, thus it can not be removed.");
 
   _items.erase(flag);
@@ -48,7 +48,7 @@ ExecFlagEnum::getDocString() const
 ExecFlagEnum &
 ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 {
-  clear();
+  clearSetValues();
   *this += flags;
   return *this;
 }
@@ -56,7 +56,7 @@ ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 ExecFlagEnum &
 ExecFlagEnum::operator=(const ExecFlagType & flag)
 {
-  clear();
+  clearSetValues();
   *this += flag;
   return *this;
 }
@@ -86,5 +86,5 @@ ExecFlagEnum::appendCurrent(const ExecFlagType & item)
                item,
                "' is not an available item for the "
                "ExecFlagEnum object, thus it cannot be set as current.");
-  _current.push_back(item);
+  _current_values.push_back(item);
 }

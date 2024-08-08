@@ -156,7 +156,7 @@ Eigenvalue::init()
   {
     const auto & normpp = getParam<PostprocessorName>("normalization");
     const auto & exec = _eigen_problem.getUserObject<UserObject>(normpp).getExecuteOnEnum();
-    if (!exec.contains(EXEC_LINEAR))
+    if (!exec.isValueSet(EXEC_LINEAR))
       mooseError("Normalization postprocessor ", normpp, " requires execute_on = 'linear'");
   }
 
