@@ -67,16 +67,34 @@ function configure_petsc()
     unset IFS
   fi
 
+  if [ -n "$BASH_VERSION" ]; then
+      PATCH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+  elif [ -n "$ZSH_VERSION" ]; then
+      PATCH_DIR="${0:A:h}"
+  else
+      echo "Not using Bash or Zsh. Script may not work as expected."
+      exit 1
+  fi
+
   # If HDF5 is not found locally, download it via PETSc and patch if on Apple Silicon
   if [ -z "$HDF5_STR" ]; then
     HDF5_STR='--download-hdf5=1 --with-hdf5-fortran-bindings=0 --download-hdf5-configure-arguments="--with-zlib"'
     echo 'INFO: HDF5 library not detected, opting to download via PETSc...'
     if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
       echo 'INFO: Patching PETSc to support HDF5 download and installation on Apple Silicon...'
-      PATCH_DIR=$PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
-      git apply $PATCH_DIR 2>/dev/null || (git apply $PATCH_DIR -R --check && echo 'INFO: Apple Silicon HDF5 patch already applied.')
+      PATCH=$PATCH_DIR/apple-silicon-hdf5-autogen.patch
+      git apply $PATCH 2>/dev/null || (git apply $PATCH -R --check && echo 'INFO: Apple Silicon HDF5 patch already applied.')
     fi
   fi
+
+  # Patch for PETSc-TAO in order to make TaoSolve more thread-safe. This should be removed when the
+  # patch contents have been added to a PETSc release.
+  # See: https://gitlab.com/petsc/petsc/-/merge_requests/7047
+  if [[ $PETSC_ARCH == 'arch-moose' ]]; then
+    echo 'INFO: Patching PETSc to improve thread safety for TAO...'
+    PATCH=$PATCH_DIR/tao_restore_viewer.patch
+    git apply $PATCH 2>/dev/null || (git apply $PATCH -R --check && echo 'INFO: PETSc-TAO patch already applied.')
+    fi
 
   # When manually building PETSc on Apple Silicon, set FFLAGS to the proper arch, otherwise MUMPS
   # will fail to find MPI libraries
@@ -92,9 +110,11 @@ function configure_petsc()
       --with-fortran-bindings=0 \
       --with-mpi=1 \
       --with-openmp=1 \
+      --with-strict-petscerrorcode=1 \
       --with-shared-libraries=1 \
       --with-sowing=0 \
       --download-fblaslapack=1 \
+      --download-hpddm=1 \
       --download-hypre=1 \
       --download-metis=1 \
       --download-mumps=1 \

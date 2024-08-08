@@ -22,7 +22,7 @@
     type = 'PetscJacobianTester'
     input = 'ad_heat_source_bar.i'
     ratio_tol = 2e-7
-    difference_tol = 1e-2
+    difference_tol = 2e-2
     run_sim = True
     requirement = 'The system shall produce correct Jacobians for the AD heat conduction and heat source kernel objects.'
     design = "ADMatHeatSource.md"

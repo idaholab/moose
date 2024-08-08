@@ -31,6 +31,7 @@
     type = 'Exodiff'
     input = 'GrandPotentialStrictMassConservation.i'
     exodiff = 'GrandPotentialStrictMassConservation_out.e'
+    custom_cmp = GrandPotentialStrictMassConservation.cmp
     issues = '#23329'
     design = '/GrandPotentialKernelAction.md'
     requirement = 'The system shall provide classes to implement a Grand Potential phase field '
