@@ -48,9 +48,6 @@ protected:
    */
   virtual void showStatusMessage(unsigned int i) const;
 
-  /// Whether or not to skip restoring
-  const bool _no_restore;
-
 private:
   /// Switch to tell executioner to keep going despite app solve not converging
   const bool _ignore_diverge;
