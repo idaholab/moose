@@ -20,9 +20,9 @@ PowerLawCreepTestTempl<is_ad>::validParams()
 {
   InputParameters params = PowerLawCreepStressUpdateTempl<is_ad>::validParams();
   params.addClassDescription(
-      "This class duplicates the PowerLawCreepStressUpdate, except at a specificed time step and "
+      "This class duplicates the PowerLawCreepStressUpdate, except at a specificed time step on "
       "the 1st iteration, at which time a high residual is computed, forcing an exception. "
-      "Optionally, a high or low initial guess can be used to test the check_rage limits, which "
+      "Optionally, a high or low initial guess can be used to test the check_range limits, which "
       "will also force an exception.");
   params.addParam<int>("failure_step", 2, "Time step for which to inject a high residual.");
   params.addParam<Real>("initial_guess", 0.0, "Initial guess for inner Newton solve.");

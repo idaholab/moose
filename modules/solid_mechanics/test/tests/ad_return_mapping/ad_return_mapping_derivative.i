@@ -83,7 +83,7 @@
     # options for using substepping
     use_substepping = INCREMENT_BASED
     substep_strain_tolerance = 0.1
-    max_inelastic_increment = 0.01
+    max_inelastic_increment=0.007
     automatic_differentiation_return_mapping = true
   []
 []
