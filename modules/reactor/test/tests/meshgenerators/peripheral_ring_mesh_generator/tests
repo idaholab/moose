@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PeripheralRingMeshGenerator.md'
-  issues = '#19978 #20637 #22138'
+  issues = '#19978 #20637 #22138 #28169'
   [core_peripheral_ring_nonpreserved]
     type = 'Exodiff'
     input = 'core_ring.i'
@@ -75,6 +75,23 @@
                 --mesh-only core_ring_boundary_layers_in.e'
     requirement ='The system shall be able to add a peripheral ring with boundary layers to the input mesh and preserve volumes even with polygonization.'
     recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [peripheral_ring_boundary_layers_quadratic]
+    type = 'Exodiff'
+    input = 'ring_quadratic.i'
+    exodiff = 'ring_boundary_layers_quadratic_in.e'
+    cli_args = '--mesh-only ring_boundary_layers_quadratic_in.e'
+    requirement ='The system shall be able to add a peripheral ring consisting of quadratic elements with boundary layers to the input mesh and preserve volumes despite polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [err_mixed_edge_types]
+    type = 'RunException'
+    input = 'err_mix_type.i'
+    cli_args = '--mesh-only err.e'
+    expect_err = 'Input contains mixed element types on the external boundary.'
+    requirement ='The system shall throw an error if the external sideset of input mesh contains mixed types of side elements.'
     mesh_mode = 'REPLICATED'
   []
   [err_overlapped_boundary_layers]

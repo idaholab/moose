@@ -65,7 +65,7 @@ changeBoundaryId(MeshBase & mesh,
   for (auto & elem : as_range(mesh.level_elements_begin(0), mesh.level_elements_end(0)))
   {
     unsigned int n_sides = elem->n_sides();
-    for (unsigned int s = 0; s != n_sides; ++s)
+    for (const auto s : make_range(n_sides))
     {
       boundary_info.boundary_ids(elem, s, old_ids);
       if (std::find(old_ids.begin(), old_ids.end(), old_id) != old_ids.end())
@@ -134,7 +134,7 @@ getBoundaryIDs(const MeshBase & mesh,
       max_boundary_id > max_boundary_local_id ? max_boundary_id : max_boundary_local_id;
 
   std::vector<BoundaryID> ids(boundary_name.size());
-  for (unsigned int i = 0; i < boundary_name.size(); i++)
+  for (const auto i : index_range(boundary_name))
   {
     if (boundary_name[i] == "ANY_BOUNDARY_ID")
     {
@@ -188,7 +188,7 @@ getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdom
 {
   std::vector<SubdomainID> ids(subdomain_name.size());
 
-  for (unsigned int i = 0; i < subdomain_name.size(); i++)
+  for (const auto i : index_range(subdomain_name))
     ids[i] = MooseMeshUtils::getSubdomainID(subdomain_name[i], mesh);
 
   return ids;
@@ -356,7 +356,7 @@ isCoPlanar(const std::vector<Point> vec_pts)
   // Assuming that overlapped Points are allowed, the Points that are overlapped with vec_pts[0] are
   // removed before further calculation.
   std::vector<Point> vec_pts_nonzero{vec_pts[0]};
-  for (unsigned int i = 1; i < vec_pts.size(); i++)
+  for (const auto i : index_range(vec_pts))
     if (!MooseUtils::absoluteFuzzyEqual((vec_pts[i] - vec_pts[0]).norm(), 0.0))
       vec_pts_nonzero.push_back(vec_pts[i]);
   // 3 or fewer points are always coplanar
@@ -364,7 +364,7 @@ isCoPlanar(const std::vector<Point> vec_pts)
     return true;
   else
   {
-    for (unsigned int i = 1; i < vec_pts_nonzero.size() - 1; i++)
+    for (const auto i : make_range(vec_pts_nonzero.size() - 1))
     {
       const Point tmp_pt = (vec_pts_nonzero[i] - vec_pts_nonzero[0])
                                .cross(vec_pts_nonzero[i + 1] - vec_pts_nonzero[0]);
@@ -451,6 +451,7 @@ hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name)
 void
 makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
                     std::vector<dof_id_type> & elem_id_list,
+                    std::vector<dof_id_type> & midpoint_node_list,
                     std::vector<dof_id_type> & ordered_node_list,
                     std::vector<dof_id_type> & ordered_elem_id_list)
 {
@@ -459,10 +460,13 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
   // Start from the first element, try to find a chain of nodes
   mooseAssert(node_assm.size(), "Node list must not be empty");
   ordered_node_list.push_back(node_assm.front().first);
+  if (midpoint_node_list.front() != DofObject::invalid_id)
+    ordered_node_list.push_back(midpoint_node_list.front());
   ordered_node_list.push_back(node_assm.front().second);
   ordered_elem_id_list.push_back(elem_id_list.front());
   // Remove the element that has just been added to ordered_node_list
   node_assm.erase(node_assm.begin());
+  midpoint_node_list.erase(midpoint_node_list.begin());
   elem_id_list.erase(elem_id_list.begin());
   const unsigned int node_assm_size_0 = node_assm.size();
   for (unsigned int i = 0; i < node_assm_size_0; i++)
@@ -487,9 +491,12 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
     // If found, add the node to boundary_ordered_node_list
     if (result != node_assm.end())
     {
+      const auto elem_index = std::distance(node_assm.begin(), result);
+      if (midpoint_node_list[elem_index] != DofObject::invalid_id)
+        ordered_node_list.push_back(midpoint_node_list[elem_index]);
       ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
       node_assm.erase(result);
-      const auto elem_index = std::distance(node_assm.begin(), result);
+      midpoint_node_list.erase(midpoint_node_list.begin() + elem_index);
       ordered_elem_id_list.push_back(elem_id_list[elem_index]);
       elem_id_list.erase(elem_id_list.begin() + elem_index);
     }
@@ -506,11 +513,23 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
       // mark the first flip event.
       is_flipped = true;
       std::reverse(ordered_node_list.begin(), ordered_node_list.end());
+      std::reverse(midpoint_node_list.begin(), midpoint_node_list.end());
       std::reverse(ordered_elem_id_list.begin(), ordered_elem_id_list.end());
       // As this iteration is wasted, set the iterator backward
       i--;
     }
   }
+}
+
+void
+makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+                    std::vector<dof_id_type> & elem_id_list,
+                    std::vector<dof_id_type> & ordered_node_list,
+                    std::vector<dof_id_type> & ordered_elem_id_list)
+{
+  std::vector<dof_id_type> dummy_midpoint_node_list(node_assm.size(), DofObject::invalid_id);
+  makeOrderedNodeList(
+      node_assm, elem_id_list, dummy_midpoint_node_list, ordered_node_list, ordered_elem_id_list);
 }
 
 void
