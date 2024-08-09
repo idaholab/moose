@@ -33,11 +33,16 @@ MultiAppGeneralFieldNearestLocationTransfer::validParams()
   params.addClassDescription(
       "Transfers field data at the MultiApp position by finding the value at the nearest "
       "neighbor(s) in the origin application.");
-  params.addParam<unsigned int>("num_nearest_points",
+  params.addParam<long unsigned int>("num_nearest_points",
                                 1,
                                 "Number of nearest source (from) points will be chosen to "
                                 "construct a value for the target point. All points will be "
                                 "selected from the same origin mesh!");
+  params.addParam<bool>("distance_weighted_average",
+                        false,
+                        "Set to true when we want to compute average value "
+                        "of neighbouring points based on distance "
+                        "(rather than simply the mean of all nearby points)");
 
   // Nearest node is historically more an extrapolation transfer
   params.set<Real>("extrapolation_constant") = GeneralFieldTransfer::BetterOutOfMeshValue;
@@ -67,8 +72,9 @@ MultiAppGeneralFieldNearestLocationTransfer::MultiAppGeneralFieldNearestLocation
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters),
     SolutionInvalidInterface(this),
-    _num_nearest_points(getParam<unsigned int>("num_nearest_points")),
-    _group_subapps(getParam<bool>("group_subapps"))
+    _num_nearest_points(getParam<long unsigned int>("num_nearest_points")),
+    _group_subapps(getParam<bool>("group_subapps")),
+    _distance_weighted_average(getParam<bool>("distance_weighted_average"))
 {
   if (_source_app_must_contain_point && _nearest_positions_obj)
     paramError("use_nearest_position",
@@ -382,9 +388,14 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
       if (!checkRestrictionsForSource(pt, mesh_div, i_from))
         continue;
 
+      // To prevent possible segfault, check number of nearest points is not greater than
+      // num_candidates
+      const auto num_candidates = _local_kdtrees[i_from]->numberCandidatePoints();
+      const auto num_search_points_robust = std::min(_num_nearest_points, num_candidates);
+
       // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
-      std::vector<std::size_t> return_index(_num_nearest_points);
-      std::vector<Real> return_dist_sqr(_num_nearest_points);
+      std::vector<std::size_t> return_index(num_search_points_robust);
+      std::vector<Real> return_dist_sqr(num_search_points_robust);
 
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
       if (_local_kdtrees[i_from]->numberCandidatePoints())
@@ -393,18 +404,56 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
         // Note that we do not need to use the transformed_pt (in the source app frame)
         // because the KDTree has been created in the reference frame
         _local_kdtrees[i_from]->neighborSearch(
-            pt, _num_nearest_points, return_index, return_dist_sqr);
+            pt, num_search_points_robust, return_index, return_dist_sqr);
+        
         Real val_sum = 0, dist_sum = 0;
+        Real val_sum_dist_weighted = 0.0, inv_dist_sum = 0.0;
+        bool exact_dist_found = false;
+        Real exact_dist_found_val = 0.0;
+        Real exact_dist_found_dist = 0.0;
         for (const auto index : return_index)
         {
+          Real node_dist = (_local_points[i_from][index] - pt).norm();
+          // if distance is zero, inverse distance will give infinity
+          if (node_dist == 0.0)
+          {
+            exact_dist_found = true;
+            exact_dist_found_dist = node_dist;
+            exact_dist_found_val = _local_values[i_from][index];
+          }
+          else
+          {
+            val_sum_dist_weighted += _local_values[i_from][index]/node_dist;
+            inv_dist_sum += 1.0/node_dist;
+          }
           val_sum += _local_values[i_from][index];
-          dist_sum += (_local_points[i_from][index] - pt).norm();
+          dist_sum += node_dist;
         }
 
-        // If the new value found is closer than for other sources, use it
-        const auto new_distance = dist_sum / return_dist_sqr.size();
-        if (new_distance < outgoing_vals[i_pt].second)
-          outgoing_vals[i_pt] = {val_sum / return_index.size(), new_distance};
+        // avoid division by zero, if we find exact match, just keep that point
+        if (exact_dist_found)
+        {
+          const auto new_distance = exact_dist_found_dist;
+          // If the new value found is closer than for other sources, use it
+          if (new_distance < outgoing_vals[i_pt].second)
+            outgoing_vals[i_pt] = {exact_dist_found_val, new_distance};
+        }
+        else
+        {
+          const auto new_distance = dist_sum / return_dist_sqr.size();
+          if (_distance_weighted_average)
+          {
+            // If the new value found is closer than for other sources, use it
+            if (new_distance < outgoing_vals[i_pt].second)
+              outgoing_vals[i_pt] = {val_sum_dist_weighted / inv_dist_sum, new_distance};
+          }
+          else
+          {
+            // If the new value found is closer than for other sources, use it
+            if (new_distance < outgoing_vals[i_pt].second)
+              outgoing_vals[i_pt] = {val_sum / return_index.size(), new_distance};
+          }
+        }
       }
     }
 
@@ -426,13 +475,17 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
         if (!checkRestrictionsForSource(pt, mesh_div, i_from))
           continue;
 
+        // To prevent possible segfault, check number of nearest points is not greater than
+        // num_candidates
+        const auto num_candidates = _local_kdtrees[i_from]->numberCandidatePoints();
+        const auto num_search = std::min(_num_nearest_points+1, num_candidates);
+
         // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
-        std::vector<std::size_t> return_index(_num_nearest_points + 1);
-        std::vector<Real> return_dist_sqr(_num_nearest_points + 1);
+        std::vector<std::size_t> return_index(num_search);
+        std::vector<Real> return_dist_sqr(num_search);
 
         // NOTE: app_index is not valid if _group_subapps = true
         const auto app_index = i_from / getNumDivisions();
-        const auto num_search = _num_nearest_points + 1;
 
         if (_local_kdtrees[i_from]->numberCandidatePoints())
         {
