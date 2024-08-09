@@ -17,6 +17,10 @@ Function::validParams()
   InputParameters params = MooseObject::validParams();
   params += SetupInterface::validParams();
 
+  // So far, only setting used, for setting up the tabular interpolations
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
+  params.suppressParameter<ExecFlagEnum>("execute_on");
+
   params.registerBase("Function");
 
   return params;
