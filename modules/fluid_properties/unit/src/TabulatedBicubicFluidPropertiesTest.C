@@ -688,13 +688,41 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_pT_from_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), tol);
+
+  // These calls are always forwarded to the 'fp' parameter fluid properties because the
+  // tabulations are not implemented
   ABS_TEST(_tab_pT_from_fp->henryCoefficients()[0], _co2_fp->henryCoefficients()[0], tol);
   ABS_TEST(_tab_pT_from_fp->henryCoefficients()[1], _co2_fp->henryCoefficients()[1], tol);
   ABS_TEST(_tab_pT_from_fp->henryCoefficients()[2], _co2_fp->henryCoefficients()[2], tol);
+  ABS_TEST(_tab_pT_from_fp->triplePointPressure(), _co2_fp->triplePointPressure(), tol);
+  ABS_TEST(_tab_pT_from_fp->triplePointTemperature(), _co2_fp->triplePointTemperature(), tol);
+  ABS_TEST(_tab_pT_from_fp->criticalPressure(), _co2_fp->criticalPressure(), tol);
+  ABS_TEST(_tab_pT_from_fp->criticalTemperature(), _co2_fp->criticalTemperature(), tol);
+  ABS_TEST(_tab_pT_from_fp->criticalDensity(), _co2_fp->criticalDensity(), tol);
+
+  // Currently not tabulated with AD, forwarding to _fp
+  ABS_TEST(_tab_pT_from_fp->T_from_p_h(p, T), _co2_fp->T_from_p_h(p, T), tol);
+  ABS_TEST(_tab_pT_from_fp->T_from_p_h(ADReal(p), ADReal(T)),
+           _co2_fp->T_from_p_h(ADReal(p), ADReal(T)),
+           tol);
 
   // Use a temperature less than the critical point
   T = 300.0;
   ABS_TEST(_tab_pT_from_fp->vaporPressure(T), _co2_fp->vaporPressure(T), tol);
+  Real psat1, dpsat_dT1, psat2, dpsat_dT2;
+  _tab_pT_from_fp->vaporPressure(T, psat1, dpsat_dT1);
+  _co2_fp->vaporPressure(T, psat2, dpsat_dT2);
+  ABS_TEST(psat1, psat2, tol);
+  ABS_TEST(dpsat_dT1, dpsat_dT2, tol);
+
+  // Use a pressure less than the critical point
+  p = 1.5e5;
+  ABS_TEST(_tab_pT_from_fp->vaporTemperature(T), _co2_fp->vaporTemperature(T), tol);
+  Real Tsat1, dTsat_dp1, Tsat2, dTsat_dp2;
+  _tab_pT_from_fp->vaporTemperature(T, Tsat1, dTsat_dp1);
+  _co2_fp->vaporTemperature(T, Tsat2, dTsat_dp2);
+  ABS_TEST(Tsat1, Tsat2, tol);
+  ABS_TEST(dTsat_dp1, dTsat_dp2, tol);
 }
 
 /**
