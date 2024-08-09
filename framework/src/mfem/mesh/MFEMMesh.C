@@ -15,7 +15,17 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
+  params.addParam<int>(
+      "serial_ref",
+      0,
+      "Number of serial refinements to perform on the mesh.");
+  params.addParam<int>(
+      "parallel_ref",
+      0,
+      "Number of parallel refinements to perform on the mesh.");
+
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
+
   return params;
 }
 
@@ -35,12 +45,12 @@ MFEMMesh::buildMesh()
   mfem::Mesh mfem_ser_mesh(getFileName());
 
   // Perform serial refinements
-  uniformRefinement(&mfem_ser_mesh, getParam<int>("serial_refinements"));
+  uniformRefinement(mfem_ser_mesh, getParam<int>("serial_ref"));
 
   _mfem_par_mesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mfem_ser_mesh);
 
   // Perform parallel refinements
-  uniformRefinement(mfem_par_mesh.get(), getParam<int>("parallel_refinements"));
+  uniformRefinement(*_mfem_par_mesh, getParam<int>("parallel_ref"));
 }
 
 void
@@ -66,11 +76,11 @@ MFEMMesh::buildDummyMooseMesh()
 }
 
 void
-MFEMMesh::uniformRefinement(mfem::ParMesh * mesh, int nref)
+MFEMMesh::uniformRefinement(mfem::Mesh & mesh, int nref)
 {
-
+  std::cout << "Got into UniformRefinement! Will be doing " << nref << " refinements." << std::endl;
   for (int i = 0; i < nref; ++i)
-    mesh->UniformRefinement();
+    mesh.UniformRefinement();
 }
 
 std::unique_ptr<MooseMesh>
