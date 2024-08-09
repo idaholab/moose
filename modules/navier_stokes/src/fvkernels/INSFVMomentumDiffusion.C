@@ -42,6 +42,8 @@ INSFVMomentumDiffusion::validParams()
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addParam<bool>(
       "limit_interpolation", false, "Flag to limit interpolation to positive values.");
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
 }
 
@@ -56,7 +58,8 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _w_var(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _complete_expansion(getParam<bool>("complete_expansion")),
     _limit_interpolation(getParam<bool>("limit_interpolation")),
-    _dim(_subproblem.mesh().dimension())
+    _dim(_subproblem.mesh().dimension()),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))

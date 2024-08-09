@@ -426,6 +426,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _const_jacobian(false),
     _has_jacobian(false),
     _needs_old_newton_iter(false),
+    _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(
@@ -621,7 +622,7 @@ FEProblemBase::createTagSolutions()
     _aux->addVector(tag, false, GHOSTED);
   }
 
-  if (getParam<bool>("previous_nl_solution_required"))
+  if (_previous_nl_solution_required)
   {
     // We'll populate the zeroth state of the nonlinear iterations with the current solution for
     // ease of use in doing things like copying solutions backwards. We're just storing pointers in

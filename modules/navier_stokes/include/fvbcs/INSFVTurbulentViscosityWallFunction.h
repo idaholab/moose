@@ -52,6 +52,9 @@ private:
   /// Method used for wall treatment
   NS::WallTreatmentEnum _wall_treatment;
 
+  /// For Newton solves we want to add extra zero-valued terms regardless of y-plus to avoid sparsity pattern changes as y-plus changes near the walls
+  const bool _newton_solve;
+
   // Mu_t evaluated at y+=30 for blending purposes
   const Real _mut_30 =
       (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);

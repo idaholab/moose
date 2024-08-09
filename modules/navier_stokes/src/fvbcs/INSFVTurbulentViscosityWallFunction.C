@@ -24,14 +24,15 @@ INSFVTurbulentViscosityWallFunction::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "The turbulent viscosity.");
-  params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
+  params.addParam<MooseFunctorName>("k", "The turbulent kinetic energy.");
+  params.deprecateParam("k", NS::TKE, "01/01/2025");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
-  params.addParam<MooseEnum>("wall_treatment",
-                             wall_treatment,
-                             "The method used for computing the wall functions "
-                             "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
+  params.addParam<MooseEnum>(
+      "wall_treatment", wall_treatment, "The method used for computing the wall functions");
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
 }
 
@@ -47,7 +48,8 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _k(getFunctor<ADReal>(NS::TKE)),
     _C_mu(getParam<Real>("C_mu")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>())
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
 }
 
@@ -89,7 +91,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
     // Incremental solve on y_plus to get the near-wall quantities
-    y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
+    y_plus = NS::findyPlus(mu, rho, parallel_speed, wall_dist);
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
     mut_log = mu_wall - mu;
@@ -120,18 +122,24 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     mooseAssert(false,
                 "For `INSFVTurbulentViscosityWallFunction` , wall treatment should not reach here");
 
+  ADReal residual = 0;
+  // To keep the same sparsity pattern
+  if (_newton_solve)
+    residual = 0 * mut_log * y_plus;
+
   if (y_plus <= 5.0)
     // sub-laminar layer
-    return 0.0;
+    residual += 0.0;
   else if (y_plus >= 30.0)
     // log-layer
-    return std::max(mut_log, NS::mu_t_low_limit);
+    residual += std::max(mut_log, NS::mu_t_low_limit);
   else
   {
     // buffer layer
     const auto blending_function = (y_plus - 5.0) / 25.0;
     // the blending depends on the mut_log at y+=30
     const auto mut_log = mu * _mut_30;
-    return blending_function * std::max(mut_log, NS::mu_t_low_limit);
+    residual += std::max(blending_function * mut_log, NS::mu_t_low_limit);
   }
+  return residual;
 }

@@ -22,7 +22,8 @@ RANSYPlusAux::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addParam<MooseFunctorName>(NS::TKE, "Turbulent kinetic energy functor.");
+  params.addParam<MooseFunctorName>("k", "Turbulent kinetic energy functor.");
+  params.deprecateParam("k", NS::TKE, "01/01/2025");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Fluid density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<std::vector<BoundaryName>>(

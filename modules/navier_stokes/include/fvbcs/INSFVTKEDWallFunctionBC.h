@@ -49,4 +49,7 @@ private:
 
   /// C_mu turbulent coefficient
   const Moose::Functor<ADReal> & _C_mu;
+
+  /// Whether we are using a newton solve
+  const bool _newton_solve;
 };

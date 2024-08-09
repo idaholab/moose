@@ -1209,6 +1209,22 @@ isDigits(const std::string & str)
 {
   return std::all_of(str.begin(), str.end(), [](unsigned char c) { return std::isdigit(c); });
 }
+
+/**
+ * Courtesy https://stackoverflow.com/a/57163016 and
+ * https://stackoverflow.com/questions/447206/c-isfloat-function
+ * @return Whether the string is convertible to a float
+ */
+inline bool
+isFloat(const std::string & str)
+{
+  if (str.empty())
+    return false;
+
+  char * ptr;
+  strtof(str.c_str(), &ptr);
+  return (*ptr) == '\0';
+}
 } // MooseUtils namespace
 
 namespace Moose

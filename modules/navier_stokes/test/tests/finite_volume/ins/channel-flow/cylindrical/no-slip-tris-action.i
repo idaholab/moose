@@ -9,9 +9,6 @@ rho = 1
   ymax = 4.1
   elem_type = TRI3
   dim = 2
-[]
-
-[Problem]
   coord_type = 'RZ'
 []
 

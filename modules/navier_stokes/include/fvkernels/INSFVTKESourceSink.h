@@ -66,6 +66,9 @@ protected:
   // Production Limiter Constant
   const Real _C_pl;
 
+  /// For Newton solves we want to add extra zero-valued terms regardless of y-plus to avoid sparsity pattern changes as y-plus changes near the walls
+  const bool _newton_solve;
+
   ///@{
   /// Maps for wall treatement
   std::map<const Elem *, bool> _wall_bounded;

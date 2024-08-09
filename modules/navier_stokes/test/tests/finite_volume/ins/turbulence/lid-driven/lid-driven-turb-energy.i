@@ -2,14 +2,14 @@
 # Lid-driven cavity test
 # Reynolds: 5,000
 # Author: Dr. Mauricio Tano
-# Last Update: Novomber, 2023
+# Last Update: November, 2023
 # Turbulent model using:
 # k-epsilon model with energy transport
 # Standard wall functions without temperature wall functions
 # SIMPLE Solve
 ##########################################################
 
-### Thermophsyical Properties ###
+### Thermophysical Properties ###
 mu = 2e-5
 rho = 1.0
 k = 0.01
@@ -25,7 +25,7 @@ intensity = 0.01
 k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
@@ -331,9 +331,9 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
     cp = ${cp}

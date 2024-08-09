@@ -208,7 +208,7 @@ NSFVBase::commonFluidEnergyEquationParams()
       std::vector<MooseFunctorName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
-  MultiMooseEnum en_wall_types("fixed-temperature heatflux");
+  MultiMooseEnum en_wall_types("fixed-temperature heatflux wallfunction");
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 
