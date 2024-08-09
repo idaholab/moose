@@ -51,6 +51,11 @@ private:
   void buildDummyMooseMesh();
 
   /**
+   * Performs a uniform refinement on the chosen mesh @nref times.
+   */
+  void uniformRefinement(mfem::ParMesh * mesh, int nref);
+
+  /**
    * Smart pointers to mfem::ParMesh object. Do not access directly.
    * Use the accessors instead.
    */
