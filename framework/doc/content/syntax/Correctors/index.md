@@ -1,7 +1,7 @@
 # Correctors
 
 The `Correctors` system is designed to modify the values of nonlinear variable solutions.
-This could be as part of a predictor-corrector time integration scheme for example.
+This can be as part of a predictor-corrector time integration scheme for example.
 
 !alert note
 Please let us know on [GitHub Discussions](https://github.com/idaholab/moose/discussions)

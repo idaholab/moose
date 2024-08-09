@@ -170,6 +170,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_mesh_division",            MeshDivision,              false);
   registerMooseObjectTask("add_user_object",              UserObject,                false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
+  appendDeprecatedMooseObjectTask("add_user_object",      Corrector);
+  registerMooseObjectTask("add_corrector",                Corrector,                 false);
 
   registerMooseObjectTask("add_postprocessor",            Postprocessor,             false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,       false);

@@ -8,7 +8,7 @@ The `NSPressurePin` can pin the pressure in two modes:
 
 - by offsetting the pressure variable to make it have an average equal to the [!param](/Correctors/NSPressurePin/phi0) parameter value
 - by offsetting the pressure variable to make its value equal to the [!param](/Correctors/NSPressurePin/phi0) parameter value in the element
-  containing the point specified by the [!param](/Corectors/NSPressurePin/point) parameter.
+  containing the point specified by the [!param](/Correctors/NSPressurePin/point) parameter.
 
 
 !alert note

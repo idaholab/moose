@@ -48,6 +48,7 @@ NSPressurePin::validParams()
       "pressure_average", "A postprocessor that computes the average of the pressure variable");
 
   params.addClassDescription("Pins the pressure after a solve");
+  params.registerBase("Corrector");
 
   return params;
 }
