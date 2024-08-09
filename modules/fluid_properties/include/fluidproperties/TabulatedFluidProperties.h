@@ -106,6 +106,10 @@ public:
 
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
 
+  /**
+   * The following routines are simply forwarded to the 'fp' companion FluidProperties
+   * as they are not included in the tabulations presently
+   */
   virtual std::vector<Real> henryCoefficients() const override;
 
   virtual Real vaporPressure(Real temperature) const override;
