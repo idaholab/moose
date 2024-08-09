@@ -15,14 +15,8 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
-  params.addParam<int>(
-      "serial_ref",
-      0,
-      "Number of serial refinements to perform on the mesh.");
-  params.addParam<int>(
-      "parallel_ref",
-      0,
-      "Number of parallel refinements to perform on the mesh.");
+  params.addParam<int>("serial_ref", 0, "Number of serial refinements to perform on the mesh.");
+  params.addParam<int>("parallel_ref", 0, "Number of parallel refinements to perform on the mesh.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
