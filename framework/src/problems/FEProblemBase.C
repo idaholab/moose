@@ -5924,7 +5924,14 @@ FEProblemBase::init()
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     for (const auto i : index_range(_nl))
+    {
+      mooseAssert(
+          _cm[i],
+          "Coupling matrix not set for system "
+              << i
+              << ". This should only happen if a preconditioner was not setup for this system");
       _assembly[tid][i]->init(_cm[i].get());
+    }
 
   if (_displaced_problem)
     _displaced_problem->init();

@@ -43,4 +43,21 @@
     input = test.i
     requirement = 'The system shall be able to perform a segregated solve using objects with hand-coded Jacobians and show perfect Jacobians for those objects.'
   []
+  [different_num_vars_per_system]
+    requirement = 'The software shall allow having a different number of variables in nonlinear systems within the same problem when the action of the Jacobian is provided by'
+    [newton]
+      type = Exodiff
+      input = different-vars-per-system.i
+      exodiff = different-vars-per-system_out.e
+      detail = 'an assembled matrix, or'
+    []
+    [pjfnk]
+      type = Exodiff
+      input = different-vars-per-system.i
+      exodiff = different-vars-per-system_out.e
+      detail = 'a matrix-free approximation.'
+      prereq = 'different_num_vars_per_system/newton'
+      cli_args = 'Executioner/solve_type=PJFNK'
+    []
+  []
 []
