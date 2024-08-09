@@ -53,7 +53,7 @@ private:
   /**
    * Performs a uniform refinement on the chosen mesh @nref times.
    */
-  void uniformRefinement(mfem::ParMesh * mesh, int nref);
+  void uniformRefinement(mfem::Mesh & mesh, int nref);
 
   /**
    * Smart pointers to mfem::ParMesh object. Do not access directly.
