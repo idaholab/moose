@@ -24,12 +24,12 @@ public:
   virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
 
   /**
-   * Retreive the parameters of the object to be created by this action
+   * Retrieve the parameters of the object to be created by this action
    */
   InputParameters & getObjectParams() { return _moose_object_pars; }
 
   /**
-   * Constant version of retreiving the parameters of the object to be created by this action
+   * Constant version of retrieving the parameters of the object to be created by this action
    */
   const InputParameters & getObjectParams() const { return _moose_object_pars; }
 

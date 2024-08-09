@@ -42,6 +42,9 @@ AddRelationshipManager::act()
   if (_current_task == "add_geometric_rm" || _current_task == "add_algebraic_rm" ||
       _current_task == "add_coupling_rm")
   {
+    // Exit if there is no mesh, it's too early
+    if (!_awh.getMesh().get())
+      return;
     const auto & all_action_ptrs = _awh.allActionBlocks();
     for (const auto & action_ptr : all_action_ptrs)
       action_ptr->addRelationshipManagers(rm_type);

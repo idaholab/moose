@@ -246,8 +246,10 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
     // Note: if performance becomes an issue, this is overkill for just getting the max node id
     std::set<subdomain_id_type> source_ids;
     std::set<subdomain_id_type> dest_ids;
-    source.subdomain_ids(source_ids, false);
-    destination.subdomain_ids(dest_ids, false);
+    source.subdomain_ids(source_ids, true);
+    destination.subdomain_ids(dest_ids, true);
+    mooseAssert(source_ids.size(), "Should have a subdomain");
+    mooseAssert(dest_ids.size(), "Should have a subdomain");
     unsigned int max_dest_bid = *dest_ids.rbegin();
     unsigned int min_source_bid = *source_ids.begin();
     _communicator.max(max_dest_bid);
@@ -275,8 +277,10 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
   unsigned int bid_offset = 0;
   if (_avoid_merging_boundaries)
   {
-    unsigned int max_dest_bid = *boundary.get_boundary_ids().rbegin();
-    unsigned int min_source_bid = *other_boundary.get_boundary_ids().begin();
+    const auto boundary_ids = boundary.get_boundary_ids();
+    const auto other_boundary_ids = other_boundary.get_boundary_ids();
+    unsigned int max_dest_bid = boundary_ids.size() ? *boundary_ids.rbegin() : 0;
+    unsigned int min_source_bid = other_boundary_ids.size() ? *other_boundary_ids.begin() : 0;
     _communicator.max(max_dest_bid);
     _communicator.min(min_source_bid);
     bid_offset = 1 + max_dest_bid - min_source_bid;

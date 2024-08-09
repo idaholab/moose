@@ -26,5 +26,6 @@ private:
   virtual void addNonlinearVariables() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
+  virtual void initializePhysicsAdditional() override;
   virtual InputParameters getAdditionalRMParams() const override;
 };

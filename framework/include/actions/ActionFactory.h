@@ -89,6 +89,7 @@ public:
   iterator end();
   const_iterator end() const;
 
+  /// Returns begin and end iterators in a multimap from tasks to actions names
   std::pair<std::multimap<std::string, std::string>::const_iterator,
             std::multimap<std::string, std::string>::const_iterator>
   getActionsByTask(const std::string & task) const;

@@ -15,6 +15,7 @@
 #include "Action.h"
 #include "Factory.h"
 #include "MooseObjectAction.h"
+#include "AddActionComponentAction.h"
 #include "ActionWarehouse.h"
 #include "EmptyAction.h"
 #include "FEProblem.h"
@@ -35,6 +36,7 @@
 #include "MooseUtils.h"
 #include "Conversion.h"
 #include "Units.h"
+#include "ActionComponent.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
@@ -285,6 +287,17 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
         object_params.setHitNode(*n, {});
         extractParams(curr_identifier, object_params);
         object_params.set<std::vector<std::string>>("control_tags")
+            .push_back(MooseUtils::baseName(curr_identifier));
+      }
+      // extract the Component params if necessary
+      std::shared_ptr<AddActionComponentAction> component_action =
+          std::dynamic_pointer_cast<AddActionComponentAction>(action_obj);
+      if (component_action)
+      {
+        auto & component_params = component_action->getComponentParams();
+        component_params.setHitNode(*n, {});
+        extractParams(curr_identifier, component_params);
+        component_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
       }
     }
@@ -568,6 +581,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
   for (const auto & iter : _syntax.getAssociatedTypes())
     root.addSyntaxType(iter.first, iter.second);
 
+  // Build a list of all the actions appearing in the syntax
   for (const auto & iter : _syntax.getAssociatedActions())
   {
     Syntax::ActionInfo act_info = iter.second;
@@ -582,20 +596,21 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     all_names.push_back(std::make_pair(iter.first, act_info));
   }
 
+  // Add all the actions to the JSON tree, except for ActionComponents (below)
   for (const auto & act_names : all_names)
   {
     const auto & act_info = act_names.second;
     const std::string & action = act_info._action;
     const std::string & task = act_info._task;
-    const std::string act_name = act_names.first;
+    const std::string syntax = act_names.first;
     InputParameters action_obj_params = _action_factory.getValidParams(action);
     bool params_added = root.addParameters("",
-                                           act_name,
+                                           syntax,
                                            false,
                                            action,
                                            true,
                                            &action_obj_params,
-                                           _syntax.getLineInfo(act_name, action, ""),
+                                           _syntax.getLineInfo(syntax, action, ""),
                                            "");
 
     if (params_added)
@@ -604,7 +619,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
       for (auto & t : tasks)
       {
         auto info = _action_factory.getLineInfo(action, t);
-        root.addActionTask(act_name, action, t, info);
+        root.addActionTask(syntax, action, t, info);
       }
     }
 
@@ -638,28 +653,28 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
           size_t pos = 0;
           bool is_action_params = false;
           bool is_type = false;
-          if (act_name[act_name.size() - 1] == '*')
+          if (syntax[syntax.size() - 1] == '*')
           {
-            pos = act_name.size();
+            pos = syntax.size();
 
             if (!action_obj_params.collapseSyntaxNesting())
-              name = act_name.substr(0, pos - 1) + moose_obj_name;
+              name = syntax.substr(0, pos - 1) + moose_obj_name;
             else
             {
-              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj_name;
+              name = syntax.substr(0, pos - 1) + "/<type>/" + moose_obj_name;
               is_action_params = true;
             }
           }
           else
           {
-            name = act_name + "/<type>/" + moose_obj_name;
+            name = syntax + "/<type>/" + moose_obj_name;
             is_type = true;
           }
           moose_obj_params.set<std::string>("type") = moose_obj_name;
 
           auto lineinfo = _factory.getLineInfo(moose_obj_name);
           std::string classname = _factory.associatedClassName(moose_obj_name);
-          root.addParameters(act_name,
+          root.addParameters(syntax,
                              name,
                              is_type,
                              moose_obj_name,
@@ -667,6 +682,50 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                              &moose_obj_params,
                              lineinfo,
                              classname);
+        }
+      }
+
+      // Same thing for ActionComponents, which, while they are not MooseObjects, should behave
+      // similarly syntax-wise
+      if (syntax != "ActionComponents/*")
+        continue;
+
+      auto iters = _action_factory.getActionsByTask("list_component");
+
+      for (auto it = iters.first; it != iters.second; ++it)
+      {
+        // Get the name and parameters
+        const auto component_name = it->second;
+        auto component_params = _action_factory.getValidParams(component_name);
+
+        // We currently do not have build-type restrictions on this action that adds
+        // action-components
+
+        // See if the current Moose Object syntax belongs under this Action's block
+        if (action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
+        )
+        {
+          // The logic for Components is a little simpler here for now because syntax like
+          // Executioner/TimeIntegrator/type= do not exist for components
+          std::string name;
+          if (syntax[syntax.size() - 1] == '*')
+          {
+            size_t pos = syntax.size();
+            name = syntax.substr(0, pos - 1) + component_name;
+          }
+          component_params.set<std::string>("type") = component_name;
+
+          auto lineinfo = _action_factory.getLineInfo(component_name, "list_component");
+          // We add the parameters as for an object, because we want to fit them to be
+          // added to json["AddActionComponentAction"]["subblock_types"]
+          root.addParameters(syntax,
+                             /*syntax_path*/ name,
+                             /*is_type*/ false,
+                             "AddActionComponentAction",
+                             /*is_action=*/false,
+                             &component_params,
+                             lineinfo,
+                             component_name);
         }
       }
     }
@@ -1068,6 +1127,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(FileNameNoExtension, string);
         setscalar(RelativeFileName, string);
         setscalar(DataFileName, string);
+        setscalar(ComponentName, string);
         setscalar(PhysicsName, string);
         setscalar(OutFileBase, string);
         setscalar(VariableName, string);
@@ -1170,6 +1230,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ExtraElementIDName, string);
         setvector(ReporterName, string);
         setvector(CLIArgString, string);
+        setvector(ComponentName, string);
         setvector(PhysicsName, string);
         setvector(PositionsName, string);
         setvector(TimesName, string);

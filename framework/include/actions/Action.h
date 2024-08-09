@@ -131,7 +131,7 @@ protected:
    * parameters from this action.
    *
    * An example here is when you want to associate the creation of an action with
-   * an arugment from the aplication.
+   * an argument from the application.
    */
   void associateWithParameter(const InputParameters & from_params,
                               const std::string & param_name,
