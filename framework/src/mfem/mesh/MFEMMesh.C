@@ -33,7 +33,14 @@ MFEMMesh::buildMesh()
 
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
+
+  // Perform serial refinements
+  uniformRefinement(&mfem_ser_mesh, getParam<int>("serial_refinements"));
+
   _mfem_par_mesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mfem_ser_mesh);
+
+  // Perform parallel refinements
+  uniformRefinement(mfem_par_mesh.get(), getParam<int>("parallel_refinements"));
 }
 
 void
@@ -56,6 +63,14 @@ MFEMMesh::buildDummyMooseMesh()
   element->set_node(3) = getMesh().add_point(pt4);
 
   getMesh().prepare_for_use();
+}
+
+void
+MFEMMesh::uniformRefinement(mfem::ParMesh * mesh, int nref)
+{
+
+  for (int i = 0; i < nref; ++i)
+    mesh->UniformRefinement();
 }
 
 std::unique_ptr<MooseMesh>
