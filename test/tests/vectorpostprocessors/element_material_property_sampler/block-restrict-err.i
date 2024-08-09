@@ -44,7 +44,7 @@
 
 [VectorPostprocessors]
   [./vpp]
-    type = MaterialVectorPostprocessor
+    type = ElementMaterialPropertySampler
     material = 'mat'
     elem_ids = '2112'
   [../]
