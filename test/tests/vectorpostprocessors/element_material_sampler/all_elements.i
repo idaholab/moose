@@ -1,18 +1,10 @@
 # test that all scalar material properties are properly recorded for all elements.
 [Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 3
   allow_renumbering = false
-  [gen]
-    type = GeneratedMeshGenerator
-    dim = 2
-    nx = 2
-    ny = 3
-  []
-  [./subdomains]
-    type = ParsedSubdomainMeshGenerator
-    input = gen
-    combinatorial_geometry = 'x < 0.5'
-    block_id = 1
-  []
 []
 
 [Variables]
@@ -52,9 +44,8 @@
 
 [VectorPostprocessors]
   [vpp]
-    type = MaterialVectorPostprocessor
+    type = ElementMaterialSampler
     material = 'mat'
-    block = '1'
   []
 []
 

@@ -16,12 +16,12 @@
 /// material object on specified elements at the indicated execution points
 /// (e.g. initial, timestep_begin, etc.).  Non-scalar properties are ignored
 /// with a warning.
-class MaterialVectorPostprocessor : public ElementVectorPostprocessor
+class ElementMaterialSampler : public ElementVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  MaterialVectorPostprocessor(const InputParameters & parameters);
+  ElementMaterialSampler(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
