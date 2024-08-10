@@ -1154,7 +1154,7 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
     std::string blank = child.line() > prev_line + 1 ? "\n" : "";
 
     // format include directive with indentation and collapse extra spacing
-    if (wasp::is_nested_file(child))
+    if (child.type() == wasp::FILE)
       format_string += blank + newline_indent + MooseUtils::trim(collapse_spaces(child.data()));
 
     // format normal comment with indentation and inline comment with space

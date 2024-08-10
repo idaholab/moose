@@ -1563,6 +1563,7 @@ xy_data = " 0 0.0
           100 22.30
          1000 42.210"
 [../]
+  !include    missing_file.i
 [./multi_line_indent_decrease_01]
             type = PiecewiseConstant
             xy_data = "100 1.0
@@ -1658,7 +1659,7 @@ expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 
   // expected textedits with zero-based lines and columns
 
   std::string textedits_expect = R"INPUT(
-textedit_position: [2.0]-[58.11]
+textedit_position: [2.0]-[59.11]
 textedit_new_text:
 num_dim = 2
 
@@ -1684,6 +1685,7 @@ num_dim = 2
                   100 22.30
                  1000 42.210"
     []
+    !include missing_file.i
     [multi_line_indent_decrease_01]
         type = PiecewiseConstant
         xy_data = "100 1.0
