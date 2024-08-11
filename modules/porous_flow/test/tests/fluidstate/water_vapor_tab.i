@@ -185,7 +185,7 @@
     type = TabulatedBicubicFluidProperties
     fp = water_true
     allow_fp_and_tabulation = true
-    fluid_property_file = fluid_properties.csv
+    fluid_property_file = fluid_properties_extended.csv
   []
 []
 
