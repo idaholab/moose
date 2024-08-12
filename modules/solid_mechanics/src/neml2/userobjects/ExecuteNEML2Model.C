@@ -272,11 +272,15 @@ ExecuteNEML2Model::preCompute()
     auto param = neml2::Tensor(model().get_parameter(name));
     // check batch size of the paremeter and the model
     if (param.batch_sizes() != model().batch_sizes())
-      mooseError("The batch size size of the parameter ",
-                 name,
-                 " does not match with that of NEML2 material model.");
-    param.requires_grad_(true);
-    model().set_parameter(name, param);
+    {
+      // when the batch size of the parameter size not match with the batch size of the model, we
+      // expand the batch size of the parameter
+      auto pval = param.batch_expand(model().batch_sizes());
+      pval.requires_grad_(true);
+      model().set_parameter(name, pval);
+    }
+    else
+      param.requires_grad_(true);
   }
 }
 
