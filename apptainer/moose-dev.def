@@ -71,11 +71,12 @@ From: {{ APPTAINER_FROM }}
     # Eventually, this will go in the base container as far down as
     # we can. But we don't want to do a full rebuild at the moment,
     # so this is good for now.
-    mv ${ROOT_BUILD_DIR}/set_prompt.bash  ${SINGULARITY_ROOTFS}{{ SET_PROMPT_SCRIPT }}
+    mv ${ROOT_BUILD_DIR}/set_prompt.bash ${SINGULARITY_ROOTFS}{{ SET_PROMPT_SCRIPT }}
     cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
 source {{ SET_PROMPT_SCRIPT }}
 set_prompt
 EOF
+    chmod 755 ${SINGULARITY_ROOTFS}{{ SET_PROMPT_SCRIPT }}
 
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
