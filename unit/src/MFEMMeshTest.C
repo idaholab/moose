@@ -6,7 +6,7 @@ class MFEMMeshTest : public ::testing::Test
 {
 protected:
   void SetUp() override;
-  void buildMFEMMesh(MeshFileName filename);
+  void buildMFEMMesh(MeshFileName filename, int serial_ref = 0, int parallel_ref = 0);
 
   std::shared_ptr<MooseApp> _app;
   Factory * _factory;
@@ -30,10 +30,12 @@ MFEMMeshTest::SetUp()
  * Helper method to set up and build mesh given mesh filename.
  */
 void
-MFEMMeshTest::buildMFEMMesh(MeshFileName filename)
+MFEMMeshTest::buildMFEMMesh(MeshFileName filename, int serial_ref, int parallel_ref)
 {
   InputParameters params = _factory->getValidParams(_mesh_type);
   params.set<MeshFileName>("file") = filename;
+  params.set<int>("serial_refine") = serial_ref;
+  params.set<int>("parallel_refine") = parallel_ref;
   _mfem_mesh_ptr = _factory->create<MFEMMesh>(_mesh_type, "moose_mesh", params);
   _app->actionWarehouse().mesh() = _mfem_mesh_ptr;
   _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
@@ -120,3 +122,28 @@ TEST_F(MFEMMeshTest, MFEMHighOrderMeshFormatReader)
   // Test MFEMMesh can be cloned
   ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
 }
+
+TEST_F(MFEMMeshTest, Refinement)
+{
+  buildMFEMMesh("data/mug.e", 1, 2);
+  mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
+
+  // Check expected number of vertices have been read
+  EXPECT_EQ(pmesh.GetNV(), 1349545);
+  // Check expected number of elements have been read
+  EXPECT_EQ(pmesh.GetNE(), 1267712);
+  // Check expected number of boundary elements have been read
+  EXPECT_EQ(pmesh.GetNBE(), 35456);
+  // Check expected number of edges have been read
+  EXPECT_EQ(pmesh.GetNEdges(), 3966632);
+  // Check expected number of faces have been read
+  EXPECT_EQ(pmesh.GetNFaces(), 3884800);
+  // Check expected number of boundary attributes (sidesets) have been read
+  EXPECT_EQ(pmesh.bdr_attributes.Size(), 2);
+  // Check expected number of element attributes (blocks) have been read
+  EXPECT_EQ(pmesh.attributes.Size(), 1);
+
+  // Test MFEMMesh can be cloned
+  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
+}
+
