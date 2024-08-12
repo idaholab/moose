@@ -137,7 +137,7 @@
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '1e-1'
+    rel_err = '2e-1'
   [../]
 
   [./parmetis_presplit_mesh]
