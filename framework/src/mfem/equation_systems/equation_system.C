@@ -35,14 +35,14 @@ EquationSystem::AddTestVariableNameIfMissing(const std::string & test_var_name)
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<ParBilinearFormKernel> blf_kernel)
+                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_blf_kernels_map.Has(test_var_name))
   {
     // 1. Create kernels vector.
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParBilinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>();
 
     // 2. Register with map to prevent leaks.
     _blf_kernels_map.Register(test_var_name, std::move(kernels));
@@ -53,13 +53,13 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<ParLinearFormKernel> lf_kernel)
+                          std::shared_ptr<MFEMLinearFormKernel> lf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_lf_kernels_map.Has(test_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParLinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMLinearFormKernel>>>();
 
     _lf_kernels_map.Register(test_var_name, std::move(kernels));
   }
@@ -69,13 +69,13 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 
 void
 EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<ParNonlinearFormKernel> nlf_kernel)
+                          std::shared_ptr<MFEMNonlinearFormKernel> nlf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
   if (!_nlf_kernels_map.Has(test_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParNonlinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>>();
 
     _nlf_kernels_map.Register(test_var_name, std::move(kernels));
   }
@@ -86,7 +86,7 @@ EquationSystem::AddKernel(const std::string & test_var_name,
 void
 EquationSystem::AddKernel(const std::string & trial_var_name,
                           const std::string & test_var_name,
-                          std::shared_ptr<ParMixedBilinearFormKernel> mblf_kernel)
+                          std::shared_ptr<MFEMMixedBilinearFormKernel> mblf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
 
@@ -94,7 +94,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
   if (!_mblf_kernels_map_map.Has(test_var_name))
   {
     auto kernel_field_map = std::make_shared<
-        platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>();
+        platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>();
 
     _mblf_kernels_map_map.Register(test_var_name, std::move(kernel_field_map));
   }
@@ -103,7 +103,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
   // pair
   if (!_mblf_kernels_map_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>();
 
     _mblf_kernels_map_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
   }
@@ -227,10 +227,6 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
                      platypus::BCMap & bc_map,
                      platypus::Coefficients & coefficients)
 {
-
-  // Add optional kernels to the EquationSystem
-  AddKernels();
-
   for (auto & test_var_name : _test_var_names)
   {
     if (!gridfunctions.Has(test_var_name))
@@ -244,43 +240,6 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
     // Create auxiliary gridfunctions for applying Dirichlet conditions
     _xs.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-  }
-
-  // Initialise bilinear forms
-
-  for (const auto & [test_var_name, blf_kernels] : _blf_kernels_map)
-  {
-    for (auto & i : *blf_kernels)
-    {
-      i->Init(gridfunctions, fespaces, bc_map, coefficients);
-    }
-  }
-  // Initialise linear form kernels
-  for (const auto & [test_var_name, lf_kernels] : _lf_kernels_map)
-  {
-    for (auto & i : *lf_kernels)
-    {
-      i->Init(gridfunctions, fespaces, bc_map, coefficients);
-    }
-  }
-  // Initialise nonlinear form kernels
-  for (const auto & [test_var_name, nlf_kernels] : _nlf_kernels_map)
-  {
-    for (auto & i : *nlf_kernels)
-    {
-      i->Init(gridfunctions, fespaces, bc_map, coefficients);
-    }
-  }
-  // Initialise mixed bilinear form kernels
-  for (const auto & [test_var_name, mblf_kernels_map] : _mblf_kernels_map_map)
-  {
-    for (const auto & [trial_var_name, mblf_kernels] : *mblf_kernels_map)
-    {
-      for (auto & i : *mblf_kernels)
-      {
-        i->Init(gridfunctions, fespaces, bc_map, coefficients);
-      }
-    }
   }
 }
 
@@ -301,18 +260,16 @@ EquationSystem::BuildLinearForms(platypus::BCMap & bc_map)
   {
     // Apply kernels
     auto lf = _lfs.Get(test_var_name);
-    // Assemble. Must be done before applying kernels that add to lf.
-    lf->Assemble();
-
     if (_lf_kernels_map.Has(test_var_name))
     {
       auto lf_kernels = _lf_kernels_map.GetRef(test_var_name);
 
       for (auto & lf_kernel : lf_kernels)
       {
-        lf_kernel->Apply(lf);
+        lf->AddDomainIntegrator(lf_kernel->createIntegrator());
       }
     }
+    lf->Assemble();
   }
 }
 
@@ -333,7 +290,7 @@ EquationSystem::BuildBilinearForms()
 
       for (auto & blf_kernel : blf_kernels)
       {
-        blf_kernel->Apply(blf);
+        blf->AddDomainIntegrator(blf_kernel->createIntegrator());
       }
     }
     // Assemble
@@ -344,7 +301,7 @@ EquationSystem::BuildBilinearForms()
 void
 EquationSystem::BuildMixedBilinearForms()
 {
-  // Register mixed linear forms. Note that not all combinations may
+  // Register mixed bilinear forms. Note that not all combinations may
   // have a kernel
 
   // Create mblf for each test/trial pair
@@ -367,7 +324,7 @@ EquationSystem::BuildMixedBilinearForms()
         // Apply all mixed kernels with this test/trial pair
         for (auto & mblf_kernel : mblf_kernels)
         {
-          mblf_kernel->Apply(mblf.get());
+          mblf->AddDomainIntegrator(mblf_kernel->createIntegrator());
         }
         // Assemble mixed bilinear forms
         mblf->Assemble();

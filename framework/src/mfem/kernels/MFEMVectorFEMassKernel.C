@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMVectorFEMassKernel);
 InputParameters
 MFEMVectorFEMassKernel::validParams()
 {
-  InputParameters params = MFEMBilinearFormKernel::validParams();
+  InputParameters params = MFEMKernel::validParams();
   params.addClassDescription("The mass operator ($k u$), with the weak "
                              "form of $ (k \\phi_i, \\times u_h), to be added to an MFEM problem");
 
@@ -16,9 +16,14 @@ MFEMVectorFEMassKernel::validParams()
 }
 
 MFEMVectorFEMassKernel::MFEMVectorFEMassKernel(const InputParameters & parameters)
-  : MFEMBilinearFormKernel(parameters),
-    _kernel_params{{{"VariableName", getParam<std::string>("variable")},
-                    {"CoefficientName", getParam<std::string>("coefficient")}}},
-    _kernel{std::make_shared<platypus::VectorFEMassKernel>(_kernel_params)}
+  : MFEMKernel(parameters),
+    _coef_name(getParam<std::string>("coefficient")),
+    _coef(getMFEMProblem()._coefficients._scalars.Get(_coef_name))
 {
+}
+
+mfem::BilinearFormIntegrator *
+MFEMVectorFEMassKernel::createIntegrator()
+{
+  return new mfem::VectorFEMassIntegrator(*_coef);
 }

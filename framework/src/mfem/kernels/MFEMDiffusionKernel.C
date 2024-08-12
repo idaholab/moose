@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMDiffusionKernel);
 InputParameters
 MFEMDiffusionKernel::validParams()
 {
-  InputParameters params = MFEMBilinearFormKernel::validParams();
+  InputParameters params = MFEMKernel::validParams();
   params.addClassDescription(
       "The Laplacian operator ($-k\\nabla \\cdot \\nabla u$), with the weak "
       "form of $ (k\\nabla \\phi_i, \\nabla u_h), to be added to an MFEM problem");
@@ -17,9 +17,14 @@ MFEMDiffusionKernel::validParams()
 }
 
 MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
-  : MFEMBilinearFormKernel(parameters),
-    _kernel_params{{{"VariableName", getParam<std::string>("variable")},
-                    {"CoefficientName", getParam<std::string>("coefficient")}}},
-    _kernel{std::make_shared<platypus::DiffusionKernel>(_kernel_params)}
+  : MFEMKernel(parameters),
+    _coef_name(getParam<std::string>("coefficient")),
+    _coef(getMFEMProblem()._coefficients._scalars.Get(_coef_name))
 {
+}
+
+mfem::BilinearFormIntegrator *
+MFEMDiffusionKernel::createIntegrator()
+{
+  return new mfem::DiffusionIntegrator(*_coef);
 }
