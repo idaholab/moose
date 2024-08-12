@@ -18,7 +18,7 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
 
-registerMooseObject("HeatTransferApp", GhostBoundary);
+registerMooseObject("MooseApp", GhostBoundary);
 
 using namespace libMesh;
 
@@ -98,9 +98,19 @@ GhostBoundary::operator()(const MeshBase::const_element_iterator & /*range_begin
 bool
 GhostBoundary::operator>=(const RelationshipManager & other) const
 {
-  if (auto asoi = dynamic_cast<const GhostBoundary *>(&other))
-    if (_boundary_name == asoi->_boundary_name && baseGreaterEqual(*asoi))
+  if (auto asoi = dynamic_cast<const GhostBoundary *>(&other); asoi && baseGreaterEqual(*asoi))
+  {
+    std::set<BoundaryName> our_set(_boundary_name.begin(), _boundary_name.end());
+    std::set<BoundaryName> their_set(asoi->_boundary_name.begin(), asoi->_boundary_name.end());
+    std::set<BoundaryName> difference;
+    std::set_difference(their_set.begin(),
+                        their_set.end(),
+                        our_set.begin(),
+                        our_set.end(),
+                        std::inserter(difference, difference.end()));
+    if (difference.empty())
       return true;
+  }
   return false;
 }
 
