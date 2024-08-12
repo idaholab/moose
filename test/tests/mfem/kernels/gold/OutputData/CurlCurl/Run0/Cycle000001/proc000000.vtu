@@ -5394,7 +5394,7 @@
 </DataArray>
 </CellData>
 <PointData >
-<DataArray type="Float64" Name="e_field" NumberOfComponents="3" format="ascii" >
+<DataArray type="Float64" Name="e_field" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
 -8.97931843e-11 -8.97931843e-11 0 
 -8.97931843e-11 -8.97931843e-11 0.707106781 
 -0.707106781 -8.97931843e-11 0 
