@@ -114,6 +114,16 @@
     neml2_stress_output = state/S
     neml2_strain_input = forces/E
   []
+
+  [output_dS_dE]
+    type = NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
+    execute_neml2_model_uo = model
+    moose_material_property = neml2_ds_dE
+    # dstress/dE
+    neml2_variable = state/S
+    neml2_parameter_derivative = 'E'
+    outputs = exodus
+  []
 []
 
 [Functions]

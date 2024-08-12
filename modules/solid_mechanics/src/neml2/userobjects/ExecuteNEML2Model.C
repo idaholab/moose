@@ -452,8 +452,8 @@ ExecuteNEML2Model::getOutputParameterDerivativeView(const neml2::VariableName & 
                "` not found in any ExecuteNEML2Model object.");
 
   // save derivative as retrieved (we carefully cast constness away, which is ok, as the items
-  // stored in _retrieved_derivatives will be used only in this object)
-  _retrieved_derivatives.emplace(
+  // stored in _retrieved_parameter_derivatives will be used only in this object)
+  _retrieved_parameter_derivatives.emplace(
       output_name, parameter_name, const_cast<neml2::Tensor *>(&it->second));
 
   // return reference to derivative tensor view
