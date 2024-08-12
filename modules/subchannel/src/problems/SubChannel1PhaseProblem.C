@@ -117,13 +117,11 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _g_grav(9.81),
     _kij(_subchannel_mesh.getKij()),
     _one(1.0),
-    _TR(isTransient() ? 1. : 0.),
     _compute_density(getParam<bool>("compute_density")),
     _compute_viscosity(getParam<bool>("compute_viscosity")),
     _compute_power(getParam<bool>("compute_power")),
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
-    _dt(isTransient() ? dt() : _one),
     _P_out(getPostprocessorValue("P_out")),
     _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
@@ -2764,6 +2762,8 @@ void
 SubChannel1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
+  _dt = (isTransient() ? dt() : _one);
+  _TR = isTransient();
   initializeSolution();
   if (_verbose_subchannel)
     _console << "Solution initialized" << std::endl;
