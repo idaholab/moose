@@ -8,7 +8,7 @@ MFEMMixedVectorGradientKernel::validParams()
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription(
       "The scaled gradient operator for the mixed form "
-      "form of $ (k\\nabla q, u') with u a vector FE type, to be added to an MFEM problem");
+      "$(k\\nabla q, \\vec u')$ with $\\vec u$ a vector FE type, to be added to an MFEM problem");
 
   params.addParam<std::string>("coefficient", "Name of MFEM coefficient k to use.");
 
