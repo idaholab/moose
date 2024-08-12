@@ -7,7 +7,7 @@ MFEMVectorFEWeakDivergenceKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription("The weak divergence operator for the mixed form "
-                             "form of (σ u, ∇ V') $ (k\\vec u, \\nabla q') with u a vector FE "
+                             "$(k\\vec u, \\nabla q')$ with $\\vec u$ a vector FE "
                              "type, to be added to an MFEM problem");
 
   params.addParam<std::string>("coefficient", "Name of MFEM coefficient k to use.");
