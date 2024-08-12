@@ -12,19 +12,15 @@
 #include "Kernel.h"
 
 /**
- *  Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.
+ *  Base class for mass matrix calculation
  */
-class MatMassMatrix : public MassMatrixBase
+class MassMatrixBase : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MatMassMatrix(const InputParameters & parameters);
+  MassMatrixBase(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-
-  /// The density of the material
-  const MaterialProperty<Real> & _density;
 };
