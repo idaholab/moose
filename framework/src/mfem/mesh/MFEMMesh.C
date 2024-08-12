@@ -46,14 +46,14 @@ MFEMMesh::buildMesh()
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
 
-  // Perform serial refinements
-  mooseAssert(!(getParam<int>("serial_refine") && getParam<int>("uniform_refine")),
-              "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
-              "are the same variable). Please choose one.\n");
+  if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
+    paramError(
+        "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
+        "are the same variable). Please choose one.\n");
 
   uniformRefinement(mfem_ser_mesh,
-                    (bool)getParam<int>("serial_refine") ? getParam<int>("serial_refine")
-                                                         : getParam<int>("uniform_refine"));
+                    isParamSetByUser("serial_refine") ? getParam<int>("serial_refine")
+                                                      : getParam<int>("uniform_refine"));
 
   _mfem_par_mesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mfem_ser_mesh);
 
