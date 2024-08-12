@@ -233,8 +233,7 @@ protected:
   void missingVEInterpolationError(const std::string & function_name) const;
 
   // Utility to forward errors related to fluid properties methods not implemented
-  [[noreturn]] void FluidPropertiesForwardError(const std::string & desired_routine,
-                                                bool is_ad) const;
+  [[noreturn]] void FluidPropertiesForwardError(const std::string & desired_routine) const;
 
   /// File name of input tabulated data file
   FileName _file_name_in;

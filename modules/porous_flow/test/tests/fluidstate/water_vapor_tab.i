@@ -145,17 +145,6 @@
   []
 []
 
-[Kernels]
-  [mass]
-    type = PorousFlowMassTimeDerivative
-    variable = pliq
-  []
-  [heat]
-    type = PorousFlowEnergyTimeDerivative
-    variable = h
-  []
-[]
-
 [UserObjects]
   [dictator]
     type = PorousFlowDictator
@@ -223,11 +212,12 @@
   []
 []
 
+[Problem]
+  solve = false
+[]
+
 [Executioner]
-  type = Transient
-  solve_type = NEWTON
-  end_time = 1
-  nl_abs_tol = 1e-12
+  type = Steady
 []
 
 [Preconditioning]
@@ -288,11 +278,11 @@
     variable = pressure_gas
     execute_on = 'initial timestep_end'
   []
-  # [temperature]
-  #   type = ElementAverageValue
-  #   variable = temperature
-  #   execute_on = 'initial timestep_end'
-  # []
+  [temperature]
+    type = ElementAverageValue
+    variable = temperature
+    execute_on = 'initial timestep_end'
+  []
   [enthalpy]
     type = ElementAverageValue
     variable = h
@@ -313,4 +303,5 @@
 [Outputs]
   file_base = water_vapor_twophase_tab
   csv = true
+  execute_on = INITIAL
 []

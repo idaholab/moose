@@ -354,7 +354,7 @@ TabulatedFluidProperties::molarMass() const
   if (_fp)
     return _fp->molarMass();
   else
-    FluidPropertiesForwardError("molarMass", false);
+    FluidPropertiesForwardError("molarMass");
 }
 
 Real
@@ -619,7 +619,7 @@ TabulatedFluidProperties::h_from_p_T(const ADReal & pressure, const ADReal & tem
   if (_fp) // Assuming _fp can handle ADReal types
     return _fp->h_from_p_T(pressure, temperature);
   else
-    FluidPropertiesForwardError("h_from_p_T", true);
+    FluidPropertiesForwardError("h_from_p_T");
 }
 
 void
@@ -931,7 +931,7 @@ TabulatedFluidProperties::henryCoefficients() const
   if (_fp)
     return _fp->henryCoefficients();
   else
-    FluidPropertiesForwardError("henryCoefficients", false);
+    FluidPropertiesForwardError("henryCoefficients");
 }
 
 Real
@@ -940,7 +940,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature) const
   if (_fp)
     return _fp->vaporPressure(temperature);
   else
-    FluidPropertiesForwardError("vaporPressure", false);
+    FluidPropertiesForwardError("vaporPressure");
 }
 
 void
@@ -949,7 +949,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
   if (_fp)
     _fp->vaporPressure(temperature, psat, dpsat_dT);
   else
-    FluidPropertiesForwardError("vaporPressure", false);
+    FluidPropertiesForwardError("vaporPressure");
 }
 
 Real
@@ -958,7 +958,7 @@ TabulatedFluidProperties::vaporTemperature(Real pressure) const
   if (_fp)
     return _fp->vaporTemperature(pressure);
   else
-    FluidPropertiesForwardError("vaporTemperature", false);
+    FluidPropertiesForwardError("vaporTemperature");
 }
 
 void
@@ -968,7 +968,7 @@ TabulatedFluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dT
   if (_fp)
     _fp->vaporTemperature(pressure, Tsat, dTsat_dp);
   else
-    FluidPropertiesForwardError("vaporTemperature", false);
+    FluidPropertiesForwardError("vaporTemperature");
 }
 
 Real
@@ -978,7 +978,7 @@ TabulatedFluidProperties::triplePointPressure() const
   if (_fp)
     return _fp->triplePointPressure();
   else
-    FluidPropertiesForwardError("triplePointPressure", false);
+    FluidPropertiesForwardError("triplePointPressure");
 }
 
 Real
@@ -988,7 +988,7 @@ TabulatedFluidProperties::triplePointTemperature() const
   if (_fp)
     return _fp->triplePointTemperature();
   else
-    FluidPropertiesForwardError("triplePointTemperature", false);
+    FluidPropertiesForwardError("triplePointTemperature");
 }
 
 Real
@@ -998,7 +998,7 @@ TabulatedFluidProperties::criticalPressure() const
   if (_fp)
     return _fp->criticalPressure();
   else
-    FluidPropertiesForwardError("criticalPointPressure", false);
+    FluidPropertiesForwardError("criticalPressure");
 }
 
 Real
@@ -1008,7 +1008,7 @@ TabulatedFluidProperties::criticalTemperature() const
   if (_fp)
     return _fp->criticalTemperature();
   else
-    FluidPropertiesForwardError("criticalPointTemperature", false);
+    FluidPropertiesForwardError("criticalTemperature");
 }
 
 Real
@@ -1017,7 +1017,7 @@ TabulatedFluidProperties::criticalDensity() const
   if (_fp)
     return _fp->criticalDensity();
   else
-    FluidPropertiesForwardError("criticalPointDensity", false);
+    FluidPropertiesForwardError("criticalDensity");
 }
 
 Real
@@ -1026,7 +1026,7 @@ TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
   if (_fp)
     return _fp->T_from_p_h(pressure, enthalpy);
   else
-    FluidPropertiesForwardError("T_from_p_h", false);
+    FluidPropertiesForwardError("T_from_p_h");
 }
 
 ADReal
@@ -1035,7 +1035,7 @@ TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & ent
   if (_fp)
     return _fp->T_from_p_h(pressure, enthalpy);
   else
-    FluidPropertiesForwardError("T_from_p_h", false);
+    FluidPropertiesForwardError("T_from_p_h");
 }
 
 Real
@@ -1457,14 +1457,12 @@ TabulatedFluidProperties::s_from_h_p(
 }
 
 [[noreturn]] void
-TabulatedFluidProperties::FluidPropertiesForwardError(const std::string & desired_routine,
-                                                      bool is_ad) const
+TabulatedFluidProperties::FluidPropertiesForwardError(const std::string & desired_routine) const
 {
-  mooseError(
-      "FluidPropertiesForwardError: TabulatedFluidProperties does not contain the function '" +
-      desired_routine +
-      "'. Provide another fluid property class using the 'fp' parameter that has " +
-      (is_ad ? "an AD" : "a") + " version of " + desired_routine + " implemented.");
+  mooseError("TabulatedFluidProperties can only call the function '" + desired_routine +
+             "' when the 'fp' parameter is provided. It is currently not implemented using "
+             "tabulations, and this property is simply forwarded to the FluidProperties specified "
+             "in the 'fp' parameter");
 }
 
 void
