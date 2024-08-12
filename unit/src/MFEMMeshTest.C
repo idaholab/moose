@@ -146,4 +146,3 @@ TEST_F(MFEMMeshTest, Refinement)
   // Test MFEMMesh can be cloned
   ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
 }
-
