@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "MassMatrixBase.h"
 
 /**
- *  Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.
+ * Calculates a mass matrix using a material property for density.
  */
 class MatMassMatrix : public MassMatrixBase
 {
@@ -22,7 +22,6 @@ public:
   MatMassMatrix(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
   /// The density of the material

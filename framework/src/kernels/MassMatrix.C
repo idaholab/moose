@@ -14,21 +14,20 @@ registerMooseObject("MooseApp", MassMatrix);
 InputParameters
 MassMatrix::validParams()
 {
-  InputParameters params = Reaction::validParams();
-  params.addClassDescription("Computes a finite element mass matrix meant for use in "
-                             "preconditioning schemes which require one");
-  params.renameParam("rate", "density", "Optional density for scaling the computed mass.");
-  params.set<MultiMooseEnum>("vector_tags") = "";
-  params.set<MultiMooseEnum>("matrix_tags") = "";
-  params.suppressParameter<MultiMooseEnum>("vector_tags");
-  params.suppressParameter<std::vector<TagName>>("extra_vector_tags");
-  params.suppressParameter<std::vector<TagName>>("absolute_value_vector_tags");
-  params.set<bool>("matrix_only") = true;
+  InputParameters params = MassMatrixBase::validParams();
+  params.addClassDescription(
+      "Computes a finite element mass matrix using a scalar for the density");
+  params.addParam<Real>("density", 1.0, "Optional density for scaling the computed mass.");
   return params;
 }
 
-MassMatrix::MassMatrix(const InputParameters & parameters) : Reaction(parameters)
+MassMatrix::MassMatrix(const InputParameters & parameters)
+  : MassMatrixBase(parameters), _density(getParam<Real>("density"))
 {
-  if (!isParamValid("matrix_tags") && !isParamValid("extra_matrix_tags"))
-    mooseError("One of 'matrix_tags' or 'extra_matrix_tags' must be provided");
+}
+
+Real
+MassMatrix::computeQpJacobian()
+{
+  return _test[_i][_qp] * _density * _phi[_j][_qp];
 }
