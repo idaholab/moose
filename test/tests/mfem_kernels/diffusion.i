@@ -2,8 +2,8 @@
   type = MFEMMesh
   file = gold/mug.e
   dim = 3
-  serial_ref = 0
-  parallel_ref = 0
+  serial_refine = 0
+  parallel_refine = 0
 []
 
 [Problem]
