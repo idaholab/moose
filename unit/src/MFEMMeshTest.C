@@ -125,21 +125,21 @@ TEST_F(MFEMMeshTest, MFEMHighOrderMeshFormatReader)
 
 TEST_F(MFEMMeshTest, Refinement)
 {
-  buildMFEMMesh("data/mug.e", 1, 2);
+  buildMFEMMesh("data/fichera-q3.mesh", 1, 2);
   mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
 
   // Check expected number of vertices have been read
-  EXPECT_EQ(pmesh.GetNV(), 1349545);
+  EXPECT_EQ(pmesh.GetNV(), 4401);
   // Check expected number of elements have been read
-  EXPECT_EQ(pmesh.GetNE(), 1267712);
+  EXPECT_EQ(pmesh.GetNE(), 3584);
   // Check expected number of boundary elements have been read
-  EXPECT_EQ(pmesh.GetNBE(), 35456);
+  EXPECT_EQ(pmesh.GetNBE(), 1536);
   // Check expected number of edges have been read
-  EXPECT_EQ(pmesh.GetNEdges(), 3966632);
+  EXPECT_EQ(pmesh.GetNEdges(), 12336);
   // Check expected number of faces have been read
-  EXPECT_EQ(pmesh.GetNFaces(), 3884800);
+  EXPECT_EQ(pmesh.GetNFaces(), 11520);
   // Check expected number of boundary attributes (sidesets) have been read
-  EXPECT_EQ(pmesh.bdr_attributes.Size(), 2);
+  EXPECT_EQ(pmesh.bdr_attributes.Size(), 24);
   // Check expected number of element attributes (blocks) have been read
   EXPECT_EQ(pmesh.attributes.Size(), 1);
 
