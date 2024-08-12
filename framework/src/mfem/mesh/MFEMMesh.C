@@ -15,8 +15,16 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
-  params.addParam<int>("serial_ref", 0, "Number of serial refinements to perform on the mesh.");
-  params.addParam<int>("parallel_ref", 0, "Number of parallel refinements to perform on the mesh.");
+  params.addParam<int>(
+      "serial_refine",
+      0,
+      "Number of serial refinements to perform on the mesh. Equivalent to uniform_refine.");
+  params.addParam<int>(
+      "uniform_refine",
+      0,
+      "Number of serial refinements to perform on the mesh. Equivalent to serial_refine");
+  params.addParam<int>(
+      "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -39,12 +47,18 @@ MFEMMesh::buildMesh()
   mfem::Mesh mfem_ser_mesh(getFileName());
 
   // Perform serial refinements
-  uniformRefinement(mfem_ser_mesh, getParam<int>("serial_ref"));
+  mooseAssert(!(getParam<int>("serial_refine") && getParam<int>("uniform_refine")),
+              "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
+              "are the same variable). Please choose one.\n");
+
+  uniformRefinement(mfem_ser_mesh,
+                    (bool)getParam<int>("serial_refine") ? getParam<int>("serial_refine")
+                                                         : getParam<int>("uniform_refine"));
 
   _mfem_par_mesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mfem_ser_mesh);
 
   // Perform parallel refinements
-  uniformRefinement(*_mfem_par_mesh, getParam<int>("parallel_ref"));
+  uniformRefinement(*_mfem_par_mesh, getParam<int>("parallel_refine"));
 }
 
 void
@@ -72,7 +86,7 @@ MFEMMesh::buildDummyMooseMesh()
 void
 MFEMMesh::uniformRefinement(mfem::Mesh & mesh, int nref)
 {
-  std::cout << "Got into UniformRefinement! Will be doing " << nref << " refinements." << std::endl;
+
   for (int i = 0; i < nref; ++i)
     mesh.UniformRefinement();
 }
