@@ -1,8 +1,10 @@
 #pragma once
-#include "MFEMBilinearFormKernel.h"
-#include "kernels.h"
+#include "MFEMKernel.h"
 
-class MFEMVectorFEMassKernel : public MFEMBilinearFormKernel
+/*
+(βu, u')
+*/
+class MFEMVectorFEMassKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:
   static InputParameters validParams();
@@ -10,9 +12,9 @@ public:
   MFEMVectorFEMassKernel(const InputParameters & parameters);
   ~MFEMVectorFEMassKernel() override {}
 
-  std::shared_ptr<platypus::Kernel<mfem::ParBilinearForm>> getKernel() override { return _kernel; }
+  virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 
 protected:
-  platypus::InputParameters _kernel_params;
-  std::shared_ptr<platypus::VectorFEMassKernel> _kernel{nullptr};
+  std::string _coef_name;
+  mfem::Coefficient * _coef{nullptr};
 };

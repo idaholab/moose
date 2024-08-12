@@ -2,15 +2,15 @@
 #include "MFEMKernel.h"
 
 /*
-(α∇×u, ∇×u')
+(σ u, ∇ V')
 */
-class MFEMCurlCurlKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:
   static InputParameters validParams();
 
-  MFEMCurlCurlKernel(const InputParameters & parameters);
-  ~MFEMCurlCurlKernel() override {}
+  MFEMVectorFEWeakDivergenceKernel(const InputParameters & parameters);
+  ~MFEMVectorFEWeakDivergenceKernel() override = default;
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 
