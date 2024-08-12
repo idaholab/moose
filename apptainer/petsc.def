@@ -84,6 +84,7 @@ From: {{ APPTAINER_FROM }}
         export OMPI_ALLOW_RUN_AS_ROOT=1
         export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
     fi
+    export PMIX_MCA_pcompress_base_silence_warning=1
 {%- endif %}
 
     # Test PETSc
