@@ -44,8 +44,10 @@ From: {{ APPTAINER_FROM }}
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
     source /opt/mpi/use-mpich
+    rm -rf /opt/openmpi /opt/mpi/use-openmpi
 {%- elif MPI_FLAVOUR == "openmpi" %}
     source /opt/mpi/use-openmpi
+    rm -rf /opt/mpich /opt/mpi/use-mpich
 {%- endif %}
 
     # Load jinja vars
