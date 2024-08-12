@@ -1,8 +1,8 @@
 #pragma once
 #include "../common/pfem_extras.hpp"
 #include "inputs.h"
-#include "kernel_base.h"
 #include "named_fields_map.h"
+#include "MFEMKernel.h"
 
 namespace platypus
 {
@@ -14,10 +14,10 @@ mixed and nonlinear forms) and build methods
 class EquationSystem : public mfem::Operator
 {
 public:
-  using ParBilinearFormKernel = platypus::Kernel<mfem::ParBilinearForm>;
-  using ParLinearFormKernel = platypus::Kernel<mfem::ParLinearForm>;
-  using ParNonlinearFormKernel = platypus::Kernel<mfem::ParNonlinearForm>;
-  using ParMixedBilinearFormKernel = platypus::Kernel<mfem::ParMixedBilinearForm>;
+  using MFEMBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
+  using MFEMLinearFormKernel = MFEMKernel<mfem::LinearFormIntegrator>;
+  using MFEMNonlinearFormKernel = MFEMKernel<mfem::NonlinearFormIntegrator>;
+  using MFEMMixedBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
 
   EquationSystem() = default;
   ~EquationSystem() override;
@@ -46,21 +46,19 @@ public:
 
   // Add kernels.
   void AddKernel(const std::string & test_var_name,
-                 std::shared_ptr<ParBilinearFormKernel> blf_kernel);
-
-  void AddKernel(const std::string & test_var_name, std::shared_ptr<ParLinearFormKernel> lf_kernel);
+                 std::shared_ptr<MFEMBilinearFormKernel> blf_kernel);
 
   void AddKernel(const std::string & test_var_name,
-                 std::shared_ptr<ParNonlinearFormKernel> nlf_kernel);
+                 std::shared_ptr<MFEMLinearFormKernel> lf_kernel);
+
+  void AddKernel(const std::string & test_var_name,
+                 std::shared_ptr<MFEMNonlinearFormKernel> nlf_kernel);
 
   void AddKernel(const std::string & trial_var_name,
                  const std::string & test_var_name,
-                 std::shared_ptr<ParMixedBilinearFormKernel> mblf_kernel);
+                 std::shared_ptr<MFEMMixedBilinearFormKernel> mblf_kernel);
 
   virtual void ApplyBoundaryConditions(platypus::BCMap & bc_map);
-
-  // override to add kernels
-  virtual void AddKernels() {}
 
   // Build forms
   virtual void Init(platypus::GridFunctions & gridfunctions,
@@ -103,14 +101,14 @@ protected:
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParBilinearFormKernel>>> _blf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
 
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParLinearFormKernel>>> _lf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMLinearFormKernel>>> _lf_kernels_map;
 
-  platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParNonlinearFormKernel>>> _nlf_kernels_map;
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>> _nlf_kernels_map;
 
   platypus::NamedFieldsMap<
-      platypus::NamedFieldsMap<std::vector<std::shared_ptr<ParMixedBilinearFormKernel>>>>
+      platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>
       _mblf_kernels_map_map;
 
   mutable mfem::OperatorHandle _jacobian;

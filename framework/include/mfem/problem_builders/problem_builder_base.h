@@ -167,9 +167,8 @@ public:
   EquationSystemProblemBuilderInterface() = default;
   virtual ~EquationSystemProblemBuilderInterface() = default;
 
-  /// Add a kernel to the problem's equation system.
   template <class T>
-  void AddKernel(std::string var_name, std::shared_ptr<platypus::Kernel<T>> kernel)
+  void AddKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
   {
     GetEquationSystem()->AddTrialVariableNameIfMissing(var_name);
     GetEquationSystem()->AddKernel(var_name, std::move(kernel));
