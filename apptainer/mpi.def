@@ -20,7 +20,7 @@
 
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
 Bootstrap: docker
-From: rockylinux:8.8.20230518
+From: rockylinux:8.9.20231119
 {%- else %}
 BootStrap: oras
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
