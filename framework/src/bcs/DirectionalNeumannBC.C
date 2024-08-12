@@ -7,12 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorNeumannBC.h"
+#include "DirectionalNeumannBC.h"
 
-registerMooseObject("MooseApp", VectorNeumannBC);
+registerMooseObject("MooseApp", DirectionalNeumannBC);
+registerMooseObjectRenamed("MooseApp", VectorNeumannBC, "01/01/2025 00:01", DirectionalNeumannBC);
 
 InputParameters
-VectorNeumannBC::validParams()
+DirectionalNeumannBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addParam<RealVectorValue>(
@@ -23,13 +24,13 @@ VectorNeumannBC::validParams()
   return params;
 }
 
-VectorNeumannBC::VectorNeumannBC(const InputParameters & parameters)
+DirectionalNeumannBC::DirectionalNeumannBC(const InputParameters & parameters)
   : IntegratedBC(parameters), _value(getParam<RealVectorValue>("vector_value"))
 {
 }
 
 Real
-VectorNeumannBC::computeQpResidual()
+DirectionalNeumannBC::computeQpResidual()
 {
   return -_test[_i][_qp] * (_value * _normals[_qp]);
 }

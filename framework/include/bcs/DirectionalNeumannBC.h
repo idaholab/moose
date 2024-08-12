@@ -18,12 +18,12 @@
  * vector V is specifed by the user. This differs from NeumannBC,
  * where the user instead specifies the _scalar_ value g = grad(u).n.
  */
-class VectorNeumannBC : public IntegratedBC
+class DirectionalNeumannBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  VectorNeumannBC(const InputParameters & parameters);
+  DirectionalNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
