@@ -1,18 +1,19 @@
 #pragma once
-#include "MFEMBilinearFormKernel.h"
-#include "kernels.h"
+#include "MFEMKernel.h"
 
-class MFEMDiffusionKernel : public MFEMBilinearFormKernel
+/*
+(σ ∇ q, ∇ q')
+*/
+class MFEMDiffusionKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:
   static InputParameters validParams();
 
   MFEMDiffusionKernel(const InputParameters & parameters);
-  ~MFEMDiffusionKernel() override {}
 
-  std::shared_ptr<platypus::Kernel<mfem::ParBilinearForm>> getKernel() override { return _kernel; }
+  virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 
 protected:
-  platypus::InputParameters _kernel_params;
-  std::shared_ptr<platypus::DiffusionKernel> _kernel{nullptr};
+  std::string _coef_name;
+  mfem::Coefficient * _coef{nullptr};
 };
