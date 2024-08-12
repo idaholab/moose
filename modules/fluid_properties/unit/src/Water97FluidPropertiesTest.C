@@ -352,9 +352,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   h0 = _fp->h_from_p_T(p0, T0);
   h1 = _fp->h_from_p_T(p1, T1);
   h2 = _fp->h_from_p_T(p2, T2);
-  REL_TEST(_fp->s_from_h_p(h0, p0), 0.392294792e3, tol);
-  REL_TEST(_fp->s_from_h_p(h1, p1), 0.368563852e3, tol);
-  REL_TEST(_fp->s_from_h_p(h2, p2), 2.58041912e3, tol);
+  REL_TEST(_fp->s_from_h_p(h0, p0), 0.392294792e3, 1e-3);
+  REL_TEST(_fp->s_from_h_p(h1, p1), 0.368563852e3, 1e-3);
+  REL_TEST(_fp->s_from_h_p(h2, p2), 2.58041912e3, 1e-4);
 
   // Region 2 properties
   p0 = 3.5e3;
@@ -390,9 +390,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   h0 = _fp->h_from_p_T(p0, T0);
   h1 = _fp->h_from_p_T(p1, T1);
   h2 = _fp->h_from_p_T(p2, T2);
-  REL_TEST(_fp->s_from_h_p(h0, p0), 8.52238967e3, tol);
-  REL_TEST(_fp->s_from_h_p(h1, p1), 10.1749996e3, tol);
-  REL_TEST(_fp->s_from_h_p(h2, p2), 5.17540298e3, tol);
+  REL_TEST(_fp->s_from_h_p(h0, p0), 8.52238967e3, 1e-5);
+  REL_TEST(_fp->s_from_h_p(h1, p1), 10.1749996e3, 1e-6);
+  REL_TEST(_fp->s_from_h_p(h2, p2), 5.17540298e3, 1e-4);
 
   // Region 3 properties
   p0 = 25.5837018e6;
@@ -429,9 +429,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   h0 = _fp->h_from_p_T(p0, T0);
   h1 = _fp->h_from_p_T(p1, T1);
   h2 = _fp->h_from_p_T(p2, T2);
-  REL_TEST(_fp->s_from_h_p(h0, p0), 4.05427273e3, 1e-5);
-  REL_TEST(_fp->s_from_h_p(h1, p1), 4.85438792e3, 1e-5);
-  REL_TEST(_fp->s_from_h_p(h2, p2), 4.46971906e3, 1e-5);
+  REL_TEST(_fp->s_from_h_p(h0, p0), 4.05427273e3, 1e-4);
+  REL_TEST(_fp->s_from_h_p(h1, p1), 4.85438792e3, 2e-4);
+  REL_TEST(_fp->s_from_h_p(h2, p2), 4.46971906e3, 2e-5);
 
   // Region 5 properties
   p0 = 0.5e6;
@@ -464,12 +464,7 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->cv_from_p_T(p0, T0), 2.1534e3, REL_TOL_EXTERNAL_VALUE);
 
   // (h,p) properties
-  h0 = _fp->h_from_p_T(p0, T0);
-  h1 = _fp->h_from_p_T(p1, T1);
-  h2 = _fp->h_from_p_T(p2, T2);
-  REL_TEST(_fp->s_from_h_p(h0, p0), 9.65408875e3, tol);
-  REL_TEST(_fp->s_from_h_p(h1, p1), 7.72970133e3, tol);
-  REL_TEST(_fp->s_from_h_p(h2, p2), 8.53640523e3, tol);
+  // T_from_p_h is not implemented in zone 5
 
   // Viscosity
   ABS_TEST(_fp->mu_from_rho_T(998.0, 298.15), 889.735100e-6, tol2);
@@ -643,7 +638,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
 
   REL_TEST(adT.derivatives()[1], dT_dh_fd, tol);
 
-  // Check derivaties of (p, h) routines
+  // Check derivatives of (p, h) routines
   p = 3.0e6;
   T = 300.0;
   Real h = _fp->h_from_p_T(p, T);

@@ -473,8 +473,8 @@ Water97FluidProperties::s_from_h_p(
   ADReal T = T_from_p_h_ad(p, h);
   ADReal entropy = s_from_p_T_template(p, T);
 
-  ds_dh = entropy.derivatives()[0];
-  ds_dp = entropy.derivatives()[1];
+  ds_dh = entropy.derivatives()[1];
+  ds_dp = entropy.derivatives()[0];
   s = entropy.value();
 }
 

@@ -679,7 +679,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
   const Real tol = REL_TOL_SAVED_VALUE;
 
   // As the flags for interpolation in TabulatedBicubicFluidProperties default to false,
-  // properties will be passed through to the given userobject
+  // properties will be passed through to the given fluid properties object
   ABS_TEST(_tab_pT_from_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->h_from_p_T(p, T), _co2_fp->h_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), tol);
@@ -700,29 +700,14 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_pT_from_fp->criticalTemperature(), _co2_fp->criticalTemperature(), tol);
   ABS_TEST(_tab_pT_from_fp->criticalDensity(), _co2_fp->criticalDensity(), tol);
 
-  // Currently not tabulated with AD, forwarding to _fp
-  ABS_TEST(_tab_pT_from_fp->T_from_p_h(p, T), _co2_fp->T_from_p_h(p, T), tol);
-  ABS_TEST(_tab_pT_from_fp->T_from_p_h(ADReal(p), ADReal(T)),
-           _co2_fp->T_from_p_h(ADReal(p), ADReal(T)),
-           tol);
-
   // Use a temperature less than the critical point
   T = 300.0;
   ABS_TEST(_tab_pT_from_fp->vaporPressure(T), _co2_fp->vaporPressure(T), tol);
-  Real psat1, dpsat_dT1, psat2, dpsat_dT2;
-  _tab_pT_from_fp->vaporPressure(T, psat1, dpsat_dT1);
-  _co2_fp->vaporPressure(T, psat2, dpsat_dT2);
-  ABS_TEST(psat1, psat2, tol);
-  ABS_TEST(dpsat_dT1, dpsat_dT2, tol);
 
-  // Use a pressure less than the critical point
-  p = 1.5e5;
-  ABS_TEST(_tab_pT_from_fp->vaporTemperature(T), _co2_fp->vaporTemperature(T), tol);
-  Real Tsat1, dTsat_dp1, Tsat2, dTsat_dp2;
-  _tab_pT_from_fp->vaporTemperature(T, Tsat1, dTsat_dp1);
-  _co2_fp->vaporTemperature(T, Tsat2, dTsat_dp2);
-  ABS_TEST(Tsat1, Tsat2, tol);
-  ABS_TEST(dTsat_dp1, dTsat_dp2, tol);
+  // TODO: these properties are not implemented in CO2 fp so we cannot test the pass through
+  // T_from_p_h
+  // vaporPressure with saturation pressure
+  // vaporTemperature
 }
 
 /**
