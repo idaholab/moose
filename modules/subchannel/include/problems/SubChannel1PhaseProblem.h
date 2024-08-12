@@ -153,7 +153,7 @@ protected:
   /// Variable that informs whether we exited external solve with a converged solution or not
   bool _converged;
   /// Time step
-  const Real & _dt;
+  Real _dt;
   /// Outlet Pressure
   const PostprocessorValue & _P_out;
   /// Turbulent modeling parameter used in axial momentum equation
