@@ -247,6 +247,7 @@ ComputeGBMisorientationType::getMisorientationAngles()
   for (const auto i : make_range(grain_num))
   {
     auto grain_id = _ebsd_reader.getFeatureID(i);
+    mooseAssert(grain_id < grain_num, "Feature ids cannot exceed max grain number");
     _euler_angle[grain_id] = _ebsd_reader.getEulerAngles(i);
     _quat_angle[grain_id] = _euler_angle[grain_id].toQuaternion();
   }
