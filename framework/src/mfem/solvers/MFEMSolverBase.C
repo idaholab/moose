@@ -1,7 +1,5 @@
 #include "MFEMSolverBase.h"
 
-registerMooseObject("PlatypusApp", MFEMSolverBase);
-
 InputParameters
 MFEMSolverBase::validParams()
 {
