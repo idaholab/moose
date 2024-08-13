@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InertialForce.h"
-#include "MooseTypes.h"
 #include "SubProblem.h"
 #include "TimeIntegrator.h"
 #include "NonlinearSystemBase.h"
