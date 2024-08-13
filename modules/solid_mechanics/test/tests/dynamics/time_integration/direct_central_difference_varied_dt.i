@@ -50,13 +50,13 @@
         displacements = 'disp_x disp_y'
     []
     [massmatrix]
-        type = MatMassMatrix
+        type = MassMatrix
         density = density
         matrix_tags = 'system'
         variable = disp_x
     []
     [massmatrix_y]
-        type = MatMassMatrix
+        type = MassMatrix
         density = density
         matrix_tags = 'system'
         variable = disp_y
