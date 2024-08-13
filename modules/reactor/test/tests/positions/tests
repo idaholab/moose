@@ -45,4 +45,22 @@
       detail = 'a three-dimensional cartesian grid with some positions excluded.'
     []
   []
+
+  [errors]
+    requirement = "The system shall error"
+    [1ring_too_big]
+      type = RunException
+      input = 'hexagonal_grid_positions.i'
+      cli_args = "Positions/hex_grid/nr=1 Positions/hex_grid/lattice_flat_to_flat=0.49"
+      expect_err = "For one ring, the lattice flat to flat must be at least the pin pitch"
+      detail = 'if the hexagonal lattice flat-to-flat specified is too small for a single pin to fit,'
+    []
+    [more_rings_too_big]
+      type = RunException
+      input = 'hexagonal_grid_positions.i'
+      cli_args = "Positions/hex_grid/lattice_flat_to_flat=1.43"
+      expect_err = "Lattice flat to flat distance is less than the minimum"
+      detail = 'and if the hexagonal lattice flat-to-flat specified is too small for the rings of pins to fit.'
+    []
+  []
 []

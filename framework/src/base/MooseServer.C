@@ -1090,10 +1090,14 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
                                                int tab_size,
                                                bool /* insert_spaces */)
 {
+  // strip scheme prefix from document uri if it exists for parse file path
+  std::string parse_file_path = document_path;
+  pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
+
   // input check expanded any brace expressions in cached tree so reprocess
   std::stringstream input_errors, input_stream(document_text);
   wasp::DefaultHITInterpreter interpreter(input_errors);
-  interpreter.parse(input_stream);
+  interpreter.parseStream(input_stream, parse_file_path);
 
   // return without adding any formatting text edits if parser root is null
   if (interpreter.root().is_null())

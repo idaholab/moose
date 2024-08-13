@@ -11,6 +11,7 @@
 
 #include "AddVariableAction.h"
 #include "FEProblem.h"
+#include "GapHeatTransfer.h"
 #include "libmesh/string_to_enum.h"
 #include "GapConductance.h"
 #include "GapConductanceConstant.h"
@@ -392,4 +393,23 @@ ThermalContactAction::addSecondaryFluxVector()
   // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3 or older.
   if (!_problem->isSNESMFReuseBaseSetbyUser())
     _problem->setSNESMFReuseBase(false, false);
+}
+
+void
+ThermalContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  if (!_quadrature)
+    return;
+
+  for (const auto & contact_pair : _boundary_pairs)
+  {
+    const auto & object_name = getParam<std::string>("type");
+    auto params = _factory.getValidParams(object_name);
+    params.applyParameters(parameters());
+
+    params.set<BoundaryName>("paired_boundary") = contact_pair.first;
+    params.set<bool>("use_displaced_mesh") = true;
+    params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
+    addRelationshipManagers(input_rm_type, params);
+  }
 }
