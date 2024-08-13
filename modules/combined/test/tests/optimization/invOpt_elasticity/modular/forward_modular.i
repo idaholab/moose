@@ -18,43 +18,6 @@
 [AuxVariables]
   [T]
   []
-
-  [dsde_00]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [dsde_11]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [dsde_01]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [aux_dsde_00]
-    type = MaterialRankTwoTensorAux
-    property = cauchy_stress
-    variable = dsde_00
-    i = 0
-    j = 0
-  []
-  [aux_dsde_11]
-    type = MaterialRankTwoTensorAux
-    property = cauchy_stress
-    variable = dsde_11
-    i = 1
-    j = 1
-  []
-  [aux_dsde_01]
-    type = MaterialRankTwoTensorAux
-    property = cauchy_stress
-    variable = dsde_01
-    i = 0
-    j = 1
-  []
 []
 
 [Physics]
@@ -115,6 +78,12 @@
     neml2_strain_input = forces/E
   []
 
+  [E_material]
+    type = GenericFunctionMaterial
+    prop_names = 'E_material'
+    prop_values = E
+  []
+
   [output_dS_dE]
     type = NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
     execute_neml2_model_uo = model
@@ -122,7 +91,7 @@
     # dstress/dE
     neml2_variable = state/S
     neml2_parameter_derivative = 'E'
-    outputs = exodus
+    # outputs = exodus
   []
 []
 
@@ -227,24 +196,11 @@
     variable = ux
     execute_on = TIMESTEP_END
   []
-
-  [avg_dsde_00]
-    type = ElementAverageValue
-    variable = dsde_00
-  []
-  [avg_dsde_11]
-    type = ElementAverageValue
-    variable = dsde_11
-  []
-  [avg_dsde_01]
-    type = ElementAverageValue
-    variable = dsde_01
-  []
 []
 
 [Outputs]
-  file_base = 'forward_modular'
-  console = true
-  exodus = true
-  csv = true
+  file_base = 'forward'
+  console = false
+  # exodus = true
+  # csv = true
 []

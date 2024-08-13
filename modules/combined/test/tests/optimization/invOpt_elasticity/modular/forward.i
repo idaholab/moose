@@ -18,43 +18,6 @@
 [AuxVariables]
   [T]
   []
-
-  [dsde_00]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [dsde_11]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [dsde_01]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [aux_dsde_00]
-    type = MaterialRankTwoTensorAux
-    property = cauchy_stress
-    variable = dsde_00
-    i = 0
-    j = 0
-  []
-  [aux_dsde_11]
-    type = MaterialRankTwoTensorAux
-    property = cauchy_stress
-    variable = dsde_11
-    i = 1
-    j = 1
-  []
-  [aux_dsde_01]
-    type = MaterialRankTwoTensorAux
-    property = cauchy_stress
-    variable = dsde_01
-    i = 0
-    j = 1
-  []
 []
 
 [Physics]
@@ -102,6 +65,7 @@
 [NEML2]
   input = 'elasticity.i'
   model = 'forward_elasticity_model'
+  temperature = 'T'
   verbose = true
   mode = PARSE_ONLY
   device = 'cpu'
@@ -219,24 +183,9 @@
     variable = ux
     execute_on = TIMESTEP_END
   []
-
-  [avg_dsde_00]
-    type = ElementAverageValue
-    variable = dsde_00
-  []
-  [avg_dsde_11]
-    type = ElementAverageValue
-    variable = dsde_11
-  []
-  [avg_dsde_01]
-    type = ElementAverageValue
-    variable = dsde_01
-  []
 []
 
 [Outputs]
   file_base = 'forward'
-  console = true
-  exodus = true
-  csv = true
+  console = false
 []
