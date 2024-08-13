@@ -6,6 +6,10 @@ export PETSC_ARCH=arch-conda-c-opt
 # Remove std=C++17 from CXXFLAGS as we specify the C++ dialect for PETSc as C++17 in configure_petsc.
 # Specifying both causes an error as of PETSc 3.17.
 CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
+# This linker argument leads to segmentation faults when testing MUMPS during PETSc make check. We
+# are not the only ones who have had problems with this option. See
+# https://gitlab.c3s.unito.it/enocera/nnpdf/-/issues/307
+LDFLAGS=${LDFLAGS//-Wl,-dead_strip_dylibs}
 
 ## TODO: the following is a partial requirement for the day we introduce pytorch
 # Handle switches created by Conda variants
@@ -54,9 +58,7 @@ function build_petsc() {
   make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH install
   # set forth by MPI conda-forge package
   # shellcheck disable=SC2154
-  if [[ "${mpi}" == 'mpich' ]]; then
-      make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH check
-  fi
+  make SLEPC_DIR="$PREFIX"/petsc PETSC_DIR="$PREFIX"/petsc PETSC_ARCH="" check
 }
 
 function no_exit_failure(){
