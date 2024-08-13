@@ -29,7 +29,7 @@ public:
 
   virtual void initialSetup() override{};
 
-  virtual MooseConvergenceStatus checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) = 0;
+  virtual MooseConvergenceStatus checkConvergence() = 0;
 
 protected:
   PerfID _perf_check_convergence;

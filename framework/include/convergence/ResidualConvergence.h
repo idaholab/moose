@@ -15,7 +15,6 @@
 // PETSc includes
 #include <petsc.h>
 #include <petscmat.h>
-
 class ResidualConvergence : public Convergence
 {
 public:
@@ -25,8 +24,7 @@ public:
 
   ResidualConvergence(const InputParameters & parameters);
 
-  Convergence::MooseConvergenceStatus
-  checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
+  Convergence::MooseConvergenceStatus checkConvergence() override;
 
 protected:
   /**
@@ -84,4 +82,10 @@ protected:
   /// maximum number of ping-pong iterations
   unsigned int _n_nl_pingpong = 0;
   unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
+
+  PetscErrorCode ierr;
+  PetscInt it_petsc;
+  PetscReal xnorm_petsc;
+  PetscReal fnorm_petsc;
+  PetscReal snorm_petsc;
 };

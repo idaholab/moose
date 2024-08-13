@@ -55,13 +55,10 @@ AugmentedLagrangianContactConvergence<T>::AugmentedLagrangianContactConvergence(
 
 template <class T>
 Convergence::MooseConvergenceStatus
-AugmentedLagrangianContactConvergence<T>::checkConvergence(int it,
-                                                           Real xnorm,
-                                                           Real snorm,
-                                                           Real fnorm)
+AugmentedLagrangianContactConvergence<T>::checkConvergence()
 {
 
-  Convergence::MooseConvergenceStatus reason = T::checkConvergence(it, xnorm, snorm, fnorm);
+  Convergence::MooseConvergenceStatus reason = T::checkConvergence();
 
   auto aug_contact = dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem);
   _lagrangian_iteration_number = aug_contact->getLagrangianIterationNumber();

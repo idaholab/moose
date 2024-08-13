@@ -29,8 +29,7 @@ public:
 
   AugmentedLagrangianContactConvergence(const InputParameters & params);
 
-  virtual Convergence::MooseConvergenceStatus
-  checkConvergence(int it, Real xnorm, Real snorm, Real fnorm) override;
+  virtual Convergence::MooseConvergenceStatus checkConvergence() override;
 
 protected:
   FEProblemBase & _fe_problem;

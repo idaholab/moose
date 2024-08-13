@@ -285,10 +285,10 @@ petscSetupOutput(CommandLine * cmd_line)
 
 PetscErrorCode
 petscAlgebraicTest(SNES snes,
-                   PetscInt it,
-                   PetscReal xnorm,
-                   PetscReal snorm,
-                   PetscReal fnorm,
+                   PetscInt /*it*/,
+                   PetscReal /*xnorm*/,
+                   PetscReal /*snorm*/,
+                   PetscReal /*fnorm*/,
                    SNESConvergedReason * reason,
                    void * ctx)
 {
@@ -299,8 +299,8 @@ petscAlgebraicTest(SNES snes,
   std::string msg;
 
   auto & convergence = problem.getConvergence(problem.getNonlinearConvergenceName());
-  Convergence::MooseConvergenceStatus mreason =
-      convergence.checkConvergence(it, xnorm, snorm, fnorm);
+
+  Convergence::MooseConvergenceStatus mreason = convergence.checkConvergence();
 
   // if (msg.length() > 0)
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
