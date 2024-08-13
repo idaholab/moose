@@ -1,0 +1,10 @@
+[Tests]
+  design = 'RelationshipManager.md'
+  issues = '#28330'
+  [test]
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+    requirement = 'The system shall not add a relationship manager ghosting boundaries that are a subset of the boundaries ghosted by another relationship manager.'
+  []
+[]
