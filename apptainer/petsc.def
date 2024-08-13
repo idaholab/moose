@@ -20,12 +20,6 @@
 {%- set MPI_FLAVOUR = 'mpich' -%}
 {%- endif %}
 
-{%- if PETSC_ALT is defined %}
-{%- set PETSC_BUILD_SCRIPT = 'update_and_rebuild_petsc_alt.sh' -%}
-{%- else -%}
-{%- set PETSC_BUILD_SCRIPT = 'update_and_rebuild_petsc.sh' -%}
-{%- endif %}
-
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
 
@@ -75,7 +69,7 @@ From: {{ APPTAINER_FROM }}
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${PETSC_BUILD_SCRIPT} ${PETSC_OPTIONS}
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS}
 
 {%- if MPI_FLAVOUR == "openmpi" %}
     # If we're using openmpi, we need to allow running as root
