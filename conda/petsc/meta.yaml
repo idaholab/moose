@@ -7,8 +7,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
-{% set version = "3.20.3" %}
+{% set build = 0 %}
+{% set version = "3.21.4" %}
 
 package:
   name: moose-petsc
@@ -19,6 +19,7 @@ source:
   - path: ../../scripts/configure_petsc.sh
   - patches:
       - no-cppflags-in-pkgconfig-cflags.patch
+      - ../../scripts/tao_restore_viewer.patch
 
 build:
   number: {{ build }}

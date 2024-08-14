@@ -123,6 +123,8 @@ SteadySolve2::execute()
         break;
       }
     }
+    _problem.onTimestepEnd();
+    _problem.execute(EXEC_TIMESTEP_END);
 
     _problem.computeIndicators();
     _problem.computeMarkers();

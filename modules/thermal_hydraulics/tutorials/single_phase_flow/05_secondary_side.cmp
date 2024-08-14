@@ -1,0 +1,4 @@
+TIME STEPS relative 5.5e-06 floor 1e-10
+
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-10
+    core_delta_p relative 3e-05

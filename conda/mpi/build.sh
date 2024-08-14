@@ -15,9 +15,23 @@ ACTIVATION_CXXFLAGS=${TEMP_CXXFLAGS%%-fdebug-prefix-map*}-std=c++17
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77 C_INCLUDE_PATH=${PREFIX}/include \
- MOOSE_NO_CODESIGN=true MPIHOME=${PREFIX} CXXFLAGS="$ACTIVATION_CXXFLAGS" HDF5_DIR=${PREFIX} \
- FI_PROVIDER=tcp
+ MOOSE_NO_CODESIGN=true MPIHOME=${PREFIX} CXXFLAGS="$ACTIVATION_CXXFLAGS" HDF5_DIR=${PREFIX}
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
-unset CC CXX FC F90 F77 C_INCLUDE_PATH MOOSE_NO_CODESIGN MPIHOME CXXFLAGS HDF5_DIR FI_PROVIDER
+unset CC CXX FC F90 F77 C_INCLUDE_PATH MOOSE_NO_CODESIGN MPIHOME CXXFLAGS HDF5_DIR
 EOF
+if [[ "${mpi}" == 'mpich' ]]; then
+    cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
+export FI_PROVIDER=tcp
+EOF
+    cat <<EOF >> "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
+unset FI_PROVIDER
+EOF
+elif [[ "${mpi}" == 'openmpi' ]]; then
+    cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
+export OMPI_MCA_mca_base_component_show_load_errors=0
+EOF
+    cat <<EOF >> "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
+unset OMPI_MCA_mca_base_component_show_load_errors
+EOF
+fi
