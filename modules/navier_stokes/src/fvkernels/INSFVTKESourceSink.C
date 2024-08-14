@@ -189,7 +189,7 @@ INSFVTKESourceSink::computeQpResidual()
       const ADReal wall_mu = _mu(facearg, state);
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
-      if (_epsilon) // wall functions for epsilon-based formulation
+      if (_epsilon || _omega) // wall functions for epsilon-based formulation
       {
         const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
         const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
@@ -214,15 +214,29 @@ INSFVTKESourceSink::computeQpResidual()
         const auto omegaVis =
             6.0 * _mu(facearg, state) / (_beta_i_1 * Utility::pow<2>(distance_vec[i]));
 
-        const auto omegaLog = std::sqrt(_var(elem_arg, old_state)) * rho /
+        const auto omegaLog = rho * std::pow(_var(elem_arg, old_state), 0.5) /
                               (std::pow(_C_mu, 0.25) * NS::von_karman_constant * distance_vec[i]);
 
         // Using blending wall functions for omega
         const auto Re_d = std::sqrt(_var(elem_arg, old_state)) * distance_vec[i] * rho / wall_mu;
         const auto gamma = std::exp(-Re_d / 11.0);
         // destruction += (gamma * omegaVis + (1.0 - gamma) * omegaLog) * _beta_infty / tot_weight;
+        ADReal beta_star;
+        if (_bool_low_Re_modification)
+        {
+          const auto omega_capped = std::max((*_omega)(elem_arg, old_state), 1e-10);
+          const auto Re_shear = rho * _var(elem_arg, old_state) / (mu * omega_capped);
+          const auto Re_ratio_4 = Utility::pow<4>(Re_shear / _Re_beta);
+          const auto beta_i_1_star = _beta_i_2 * ((4.0 / 15.0 + Re_ratio_4) / (1.0 + Re_ratio_4));
+          beta_star =
+              (*_F1)(elem_arg, state) * beta_i_1_star + (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
+        }
+        else
+          beta_star =
+              (*_F1)(elem_arg, state) * _beta_i_1 + (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
+
         destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog)) *
-                       _beta_infty / tot_weight;
+                       beta_star / tot_weight;
 
         const auto tau_w_blended =
             (wall_mu * gamma + wall_mut * (1.0 - gamma)) * velocity_grad_norm_vec[i];
