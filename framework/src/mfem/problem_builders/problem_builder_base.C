@@ -290,8 +290,6 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
   InitializeKernels();
   SetOperatorGridFunctions();
 
-  ConstructJacobianPreconditioner();
-  ConstructJacobianSolver();
   ConstructNonlinearSolver();
 
   ConstructState();

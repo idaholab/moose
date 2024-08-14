@@ -1,4 +1,5 @@
 #pragma once
+#include "MFEMHypreBoomerAMG.h"
 #include "MFEMSolverBase.h"
 #include "mfem.hpp"
 #include <memory>
@@ -20,5 +21,6 @@ protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
+  const MFEMPreconditionerBase & _preconditioner;
   std::shared_ptr<mfem::HypreGMRES> _solver{nullptr};
 };
