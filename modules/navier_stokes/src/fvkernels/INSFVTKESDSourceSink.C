@@ -272,12 +272,17 @@ INSFVTKESDSourceSink::computeQpResidual()
       gamma = F1 * _gamma_infty_1 + (1.0 - F1) * _gamma_infty_2;
 
     // TKSD production
-    production = rho * gamma * symmetric_strain_tensor_sq_norm;
+    auto production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+
     // Limiting production
-    production = std::min(production,
-                          _c_pl / _a_1 * _beta_infty * _var(elem_arg, old_state) *
-                              std::max(_a_1 * _var(elem_arg, old_state),
-                                       F1 * std::sqrt(symmetric_strain_tensor_sq_norm)));
+    production_k =
+        std::min(production_k, _c_pl * rho * _beta_infty * _var(elem_arg, old_state) * TKE);
+
+    production = (rho * gamma / _mu_t(elem_arg, state)) * production_k;
+    // production = std::min(production,
+    //                       _c_pl / _a_1 * _beta_infty * _var(elem_arg, old_state) *
+    //                           std::max(_a_1 * _var(elem_arg, old_state),
+    //                                    F1 * std::sqrt(symmetric_strain_tensor_sq_norm)));
 
     // Vortex stretching modification to TKSE destruction
     ADReal f_beta(1.0);

@@ -30,4 +30,6 @@ protected:
   /// C-mu closure coefficient
   static constexpr Real _sigma_k_1 = 0.85;
   static constexpr Real _sigma_k_2 = 1.00;
+  static constexpr Real _beta_i_1_star = 0.09;
+  static constexpr Real _beta_i_2_star = 0.09;
 };
