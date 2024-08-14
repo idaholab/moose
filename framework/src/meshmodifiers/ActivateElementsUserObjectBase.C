@@ -31,6 +31,7 @@ ActivateElementsUserObjectBase::validParams()
       "The inactivate subdomain ID, i.e., the subdomain that you want to keep the same.");
   params.addRequiredParam<std::vector<BoundaryName>>("expand_boundary_name",
                                                      "The expanded boundary name.");
+  params.registerBase("MeshModifier");
   return params;
 }
 

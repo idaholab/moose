@@ -172,7 +172,8 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
   appendDeprecatedMooseObjectTask("add_user_object",      Corrector);
   registerMooseObjectTask("add_corrector",                Corrector,                 false);
-  registerMooseObjectTask("add_mesh_modifier",            UserObject,                false);
+  appendDeprecatedMooseObjectTask("add_user_object",      MeshModifier);
+  registerMooseObjectTask("add_mesh_modifier",            MeshModifier,              false);
 
   registerMooseObjectTask("add_postprocessor",            Postprocessor,             false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,       false);
@@ -576,19 +577,17 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddConstraintAction", "Constraints/*");
 
-  registerSyntax("AddUserObjectAction", "UserObjects/*");
-  syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   registerSyntax("AddControlAction", "Controls/*");
   registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
-<<<<<<< HEAD
+
+  // UserObject and some derived classes
+  registerSyntax("AddUserObjectAction", "UserObjects/*");
+  syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
-=======
-  // MeshModifiers
   registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
-  syntax.registerSyntaxType("MeshModifiers/*", "MeshModifiersName");
->>>>>>> 3776c02983 (Making changes Guillaume requested - Issue #2767)
+  syntax.registerSyntaxType("MeshModifiers/*", "UserObjectName");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
 

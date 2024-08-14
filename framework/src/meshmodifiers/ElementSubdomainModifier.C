@@ -36,6 +36,7 @@ ElementSubdomainModifier::validParams()
                                 "created if not already exists on the mesh.");
   params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
+  params.registerBase("MeshModifier");
   return params;
 }
 

@@ -130,6 +130,7 @@ Extensions:
             mesh: syntax/Mesh/index.md
             meshdivisions: syntax/MeshDivisions/index.md
             meshgenerators: syntax/Mesh/index.md
+            meshmodifiers: syntax/MeshModifiers/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md
             optimizationreporters: syntax/OptimizationReporter/index.md

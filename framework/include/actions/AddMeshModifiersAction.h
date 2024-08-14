@@ -19,10 +19,6 @@
 class AddMeshModifiersAction : public MooseObjectAction
 {
 public:
-  /**
-   * Class constructor
-   * @param params Parameters for this Action
-   */
   static InputParameters validParams();
 
   AddMeshModifiersAction(const InputParameters & params);
