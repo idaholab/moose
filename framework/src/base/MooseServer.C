@@ -1097,7 +1097,10 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
   // input check expanded any brace expressions in cached tree so reprocess
   std::stringstream input_errors, input_stream(document_text);
   wasp::DefaultHITInterpreter interpreter(input_errors);
-  interpreter.parseStream(input_stream, parse_file_path);
+
+  // return without adding any formatting text edits if input parsing fails
+  if (!interpreter.parseStream(input_stream, parse_file_path))
+    return true;
 
   // return without adding any formatting text edits if parser root is null
   if (interpreter.root().is_null())
