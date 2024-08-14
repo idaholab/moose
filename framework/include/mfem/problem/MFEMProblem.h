@@ -15,7 +15,6 @@
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
-#include "MFEMPreconditionerBase.h"
 #include "Function.h"
 #include "MooseEnum.h"
 #include "SystemBase.h"

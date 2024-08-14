@@ -150,9 +150,9 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
                                    InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  const MFEMPreconditionerBase & mfem_preconditioner = getUserObject<MFEMPreconditionerBase>(name);
+  const MFEMSolverBase & mfem_preconditioner = getUserObject<MFEMSolverBase>(name);
 
-  mfem_problem->_jacobian_preconditioner = mfem_preconditioner.getPreconditioner();
+  mfem_problem->_jacobian_preconditioner = mfem_preconditioner.getSolver();
 }
 
 void

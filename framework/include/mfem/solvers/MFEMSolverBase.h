@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMGeneralUserObject.h"
-#include "MFEMPreconditionerBase.h"
 #include "mfem.hpp"
 #include <memory>
 
