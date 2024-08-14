@@ -1,11 +1,11 @@
 #pragma once
-#include "MFEMPreconditionerBase.h"
+#include "MFEMSolverBase.h"
 #include "MFEMFESpace.h"
 
 /**
- * Wrapper for mfem::HypreGMRES solver.
+ * Wrapper for mfem::HypreAMS solver.
  */
-class MFEMHypreAMS : public MFEMPreconditionerBase
+class MFEMHypreAMS : public MFEMSolverBase
 {
 public:
   static InputParameters validParams();
@@ -13,10 +13,10 @@ public:
   MFEMHypreAMS(const InputParameters &);
 
   /// Returns a shared pointer to the instance of the Solver derived-class.
-  std::shared_ptr<mfem::Solver> getPreconditioner() const override { return _preconditioner; }
+  std::shared_ptr<mfem::Solver> getSolver() const override { return _preconditioner; }
 
 protected:
-  void constructPreconditioner(const InputParameters & parameters) override;
+  void constructSolver(const InputParameters & parameters) override;
 
 private:
   const MFEMFESpace & _mfem_fespace;

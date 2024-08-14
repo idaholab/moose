@@ -91,7 +91,7 @@
 []
 
 [Solver]
-  type = MFEMHypreGMRESSolver
+  type = MFEMHypreGMRES
   preconditioner = boomeramg
 []
 

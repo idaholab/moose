@@ -6,20 +6,19 @@
 /**
  * Wrapper for mfem::HypreGMRES solver.
  */
-class MFEMHypreGMRESSolver : public MFEMSolverBase
+class MFEMHypreBoomerAMG : public MFEMSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMHypreGMRESSolver(const InputParameters &);
+  MFEMHypreBoomerAMG(const InputParameters &);
 
   /// Returns a shared pointer to the instance of the Solver derived-class.
-  std::shared_ptr<mfem::Solver> getSolver() const override { return _solver; }
+  std::shared_ptr<mfem::Solver> getSolver() const override { return _preconditioner; }
 
 protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
-  const MFEMPreconditionerBase & _preconditioner;
-  std::shared_ptr<mfem::HypreGMRES> _solver{nullptr};
+  std::shared_ptr<mfem::HypreBoomerAMG> _preconditioner{nullptr};
 };

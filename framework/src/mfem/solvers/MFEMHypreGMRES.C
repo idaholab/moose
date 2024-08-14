@@ -1,11 +1,11 @@
 #pragma once
-#include "MFEMHypreGMRESSolver.h"
+#include "MFEMHypreGMRES.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMHypreGMRESSolver);
+registerMooseObject("PlatypusApp", MFEMHypreGMRES);
 
 InputParameters
-MFEMHypreGMRESSolver::validParams()
+MFEMHypreGMRES::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
 
@@ -19,18 +19,17 @@ MFEMHypreGMRESSolver::validParams()
   return params;
 }
 
-MFEMHypreGMRESSolver::MFEMHypreGMRESSolver(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
-    _preconditioner(getUserObject<MFEMPreconditionerBase>("preconditioner"))
+MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
+  : MFEMSolverBase(parameters), _preconditioner(getUserObject<MFEMSolverBase>("preconditioner"))
 {
   constructSolver(parameters);
 }
 
 void
-MFEMHypreGMRESSolver::constructSolver(const InputParameters & parameters)
+MFEMHypreGMRES::constructSolver(const InputParameters & parameters)
 {
   auto hypre_preconditioner =
-      std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner.getPreconditioner());
+      std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner.getSolver());
 
   _solver = std::make_shared<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   _solver->SetTol(getParam<double>("l_tol"));

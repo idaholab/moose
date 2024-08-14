@@ -56,10 +56,6 @@ public:
   virtual ~ProblemBuilder() = default;
 
   void SetMesh(std::shared_ptr<mfem::ParMesh> pmesh);
-  void SetFESpaces(platypus::FESpaces & fespaces);
-  void SetGridFunctions(platypus::GridFunctions & gridfunctions);
-  void SetBoundaryConditions(platypus::BCMap & bc_map);
-  void SetOutputs(platypus::Outputs & outputs);
   void SetCoefficients(platypus::Coefficients & coefficients);
   void SetDevice(const std::string & dev);
 

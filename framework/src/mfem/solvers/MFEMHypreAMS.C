@@ -6,7 +6,7 @@ registerMooseObject("PlatypusApp", MFEMHypreAMS);
 InputParameters
 MFEMHypreAMS::validParams()
 {
-  InputParameters params = MFEMPreconditionerBase::validParams();
+  InputParameters params = MFEMSolverBase::validParams();
   params.addParam<UserObjectName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
   params.addParam<bool>("singular",
                         false,
@@ -17,13 +17,13 @@ MFEMHypreAMS::validParams()
 }
 
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
-  : MFEMPreconditionerBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
+  : MFEMSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
 {
-  constructPreconditioner(parameters);
+  constructSolver(parameters);
 }
 
 void
-MFEMHypreAMS::constructPreconditioner(const InputParameters & parameters)
+MFEMHypreAMS::constructSolver(const InputParameters & parameters)
 {
   _preconditioner = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))

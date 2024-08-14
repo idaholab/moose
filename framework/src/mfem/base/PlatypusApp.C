@@ -56,7 +56,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("add_kernel", "add_mfem_fespaces");
 
   // add preconditioning.
-  registerMooseObjectTask("add_mfem_preconditioner", MFEMPreconditionerBase, false);
+  registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   addTaskDependency("add_mfem_preconditioner", "add_mfem_formulation");
   addTaskDependency("add_mfem_preconditioner", "add_variable");

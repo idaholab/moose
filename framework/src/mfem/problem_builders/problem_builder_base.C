@@ -20,30 +20,6 @@ ProblemBuilder::SetMesh(std::shared_ptr<mfem::ParMesh> pmesh)
 }
 
 void
-ProblemBuilder::SetFESpaces(platypus::FESpaces & fespaces)
-{
-  GetProblem()->_fespaces = fespaces;
-}
-
-void
-ProblemBuilder::SetGridFunctions(platypus::GridFunctions & gridfunctions)
-{
-  GetProblem()->_gridfunctions = gridfunctions;
-}
-
-void
-ProblemBuilder::SetBoundaryConditions(platypus::BCMap & bc_map)
-{
-  GetProblem()->_bc_map = bc_map;
-}
-
-void
-ProblemBuilder::SetOutputs(platypus::Outputs & outputs)
-{
-  GetProblem()->_outputs = outputs;
-}
-
-void
 ProblemBuilder::SetCoefficients(platypus::Coefficients & coefficients)
 {
   GetProblem()->_coefficients = coefficients;
