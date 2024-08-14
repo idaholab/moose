@@ -518,8 +518,17 @@ petscSetDefaults(FEProblemBase & problem)
   {
     // dig out PETSc solver
     NonlinearSystemBase & nl = problem.getNonlinearSystemBase(nl_index);
-    PetscNonlinearSolver<Number> * petsc_solver =
-        dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+    auto * const petsc_solver = cast_ptr<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+    auto * const sys_matrix = petsc_solver->system().request_matrix("System Matrix");
+    if (sys_matrix && problem.solverParams()._type != Moose::ST_JFNK)
+    {
+      auto * const petsc_sys_matrix = cast_ptr<PetscMatrix<Number> *>(sys_matrix);
+      LibmeshPetscCall2(
+          nl.comm(),
+          MatSetOptionsPrefix(petsc_sys_matrix->mat(),
+                              (problem.getNonlinearSystemNames()[nl_index] + "_").c_str()));
+      LibmeshPetscCall2(nl.comm(), MatSetFromOptions(petsc_sys_matrix->mat()));
+    }
     SNES snes = petsc_solver->snes();
     KSP ksp;
     auto ierr = SNESGetKSP(snes, &ksp);
