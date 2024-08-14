@@ -29,4 +29,11 @@
     valgrind = NONE
     recover = false
   []
+  [test_monolithic_csv]
+    type = CSVDiff
+    input = 'test19_monolithic.i'
+    csvdiff = 'test19_monolithic_out.csv'
+    recover = False
+    rel_err = 3e-4
+  []
 []

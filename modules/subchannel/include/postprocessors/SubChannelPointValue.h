@@ -23,6 +23,7 @@
 class SubChannelPointValue : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
   SubChannelPointValue(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
@@ -37,7 +38,4 @@ protected:
   const unsigned int _var_number;
   const System & _system;
   Real _value;
-
-public:
-  static InputParameters validParams();
 };

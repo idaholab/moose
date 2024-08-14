@@ -23,6 +23,7 @@
 class PlanarMean : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
   PlanarMean(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
@@ -34,7 +35,4 @@ protected:
   AuxVariableName const & _variable;
   const Real & _height;
   Real _mean_value;
-
-public:
-  static InputParameters validParams();
 };
