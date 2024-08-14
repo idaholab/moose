@@ -44,24 +44,6 @@ ProblemBuilder::SetOutputs(platypus::Outputs & outputs)
 }
 
 void
-ProblemBuilder::SetSolverOptions(platypus::InputParameters & solver_options)
-{
-  GetProblem()->_solver_options = solver_options;
-}
-
-void
-ProblemBuilder::SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner)
-{
-  GetProblem()->_jacobian_preconditioner = preconditioner;
-}
-
-void
-ProblemBuilder::SetJacobianSolver(std::shared_ptr<mfem::Solver> jacobian_solver)
-{
-  GetProblem()->_jacobian_solver = jacobian_solver;
-}
-
-void
 ProblemBuilder::SetCoefficients(platypus::Coefficients & coefficients)
 {
   GetProblem()->_coefficients = coefficients;
@@ -142,21 +124,6 @@ ProblemBuilder::AddBoundaryCondition(std::string bc_name,
     mfem::mfem_error(error_message.c_str());
   }
   GetProblem()->_bc_map.Register(bc_name, std::move(bc));
-}
-
-void
-ProblemBuilder::ConstructJacobianPreconditioner()
-{
-  auto precond = std::make_shared<mfem::HypreBoomerAMG>();
-  precond->SetPrintLevel(2); // GetGlobalPrintLevel());
-
-  GetProblem()->_jacobian_preconditioner = precond;
-}
-
-void
-ProblemBuilder::ConstructJacobianSolver()
-{
-  ConstructJacobianSolverWithOptions(SolverType::HYPRE_GMRES);
 }
 
 void

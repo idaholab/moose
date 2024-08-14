@@ -8,6 +8,7 @@ InputParameters
 MFEMHypreBoomerAMG::validParams()
 {
   InputParameters params = MFEMPreconditionerBase::validParams();
+  params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   return params;
 }
 
@@ -21,5 +22,5 @@ void
 MFEMHypreBoomerAMG::constructPreconditioner(const InputParameters & parameters)
 {
   _preconditioner = std::make_shared<mfem::HypreBoomerAMG>();
-  _preconditioner->SetPrintLevel(2);
+  _preconditioner->SetPrintLevel(getParam<int>("print_level"));
 }

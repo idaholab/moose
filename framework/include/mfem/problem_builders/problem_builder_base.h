@@ -60,9 +60,6 @@ public:
   void SetGridFunctions(platypus::GridFunctions & gridfunctions);
   void SetBoundaryConditions(platypus::BCMap & bc_map);
   void SetOutputs(platypus::Outputs & outputs);
-  void SetSolverOptions(platypus::InputParameters & solver_options);
-  void SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner);
-  void SetJacobianSolver(std::shared_ptr<mfem::Solver> solver);
   void SetCoefficients(platypus::Coefficients & coefficients);
   void SetDevice(const std::string & dev);
 
@@ -79,8 +76,6 @@ public:
   virtual void RegisterCoefficients() = 0;
 
   virtual void SetOperatorGridFunctions() = 0;
-  virtual void ConstructJacobianPreconditioner();
-  virtual void ConstructJacobianSolver();
   virtual void ConstructNonlinearSolver();
   virtual void ConstructOperator() = 0;
   virtual void ConstructState() = 0;
