@@ -106,7 +106,7 @@
 []
 
 [Solver]
-  type = MFEMHypreGMRESSolver
+  type = MFEMHypreGMRES
   preconditioner = ams
   l_tol = 1e-6  
 []
