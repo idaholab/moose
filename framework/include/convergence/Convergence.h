@@ -13,6 +13,12 @@
 #include "SetupInterface.h"
 #include "PerfGraphInterface.h"
 
+/**
+ * The Convergence class is designed to provide an interface for convergence related queries. It
+ * defines basic routines for checking convergence, setting performance timers in the
+ * computationally heavy sections of the code, and setting up the initial conditions for the
+ * convergence check.
+ */
 class Convergence : public MooseObject, public SetupInterface, public PerfGraphInterface
 {
 public:

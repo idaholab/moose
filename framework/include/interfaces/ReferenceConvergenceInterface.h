@@ -15,6 +15,11 @@
 class InputParameters;
 class MooseObject;
 
+/**
+ * The ReferenceConvergenceInterface class is designed to provide an interface for
+ * the ReferenceConvergence class, and allow access to parameters shared by other classes.
+ */
+
 InputParameters validParams();
 
 class ReferenceConvergenceInterface

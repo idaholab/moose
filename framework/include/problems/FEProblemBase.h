@@ -97,7 +97,8 @@ class NonlinearImplicitSystem;
 class LinearImplicitSystem;
 } // namespace libMesh
 
-/// Enumeration for nonlinear convergence reasons
+/// The below enums are replaced by the ones in the Convergence class,
+// Preserving them only if applications use any of them, to be removed if Civet passes
 enum class MooseNonlinearConvergenceReason
 {
   ITERATING = 0,
@@ -111,12 +112,6 @@ enum class MooseNonlinearConvergenceReason
   DIVERGED_NL_RESIDUAL_PINGPONG = -10
 };
 
-// The idea with these enums is to abstract the reasons for
-// convergence/divergence, i.e. they could be used with linear algebra
-// packages other than PETSc.  They were directly inspired by PETSc,
-// though.  This enum could also be combined with the
-// MooseNonlinearConvergenceReason enum but there might be some
-// confusion (?)
 enum class MooseLinearConvergenceReason
 {
   ITERATING = 0,

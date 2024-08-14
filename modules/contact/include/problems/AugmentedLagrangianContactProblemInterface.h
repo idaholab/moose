@@ -14,6 +14,10 @@
 #include "MechanicalContactConstraint.h"
 #include "Convergence.h"
 
+/**
+ *  Class to provide an interface for parameters and routines required to check
+ *  convergence for the augmented Lagrangian contact problem.
+ */
 class AugmentedLagrangianContactProblemInterface
 {
 public:

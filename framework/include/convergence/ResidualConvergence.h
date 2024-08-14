@@ -15,6 +15,15 @@
 // PETSc includes
 #include <petsc.h>
 #include <petscmat.h>
+
+/**
+ * The ResidualConvergence is designed to provide a more flexible convergence
+ * criteria and user access to each iteration computation. It allows for the user to
+ * specify the relative and absolute tolerance for the residual, as well as
+ * the maximum number of iterations and function evaluations. The ResidualConvergence
+ * class also allows for the user to specify the convergence tolerance for the
+ * linear solver.
+ */
 class ResidualConvergence : public Convergence
 {
 public:

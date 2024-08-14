@@ -20,6 +20,13 @@
 
 #include "libmesh/enum_norm_type.h"
 
+/**
+ * The ReferenceResidualConvergence is designed to query the solver based on user specified
+ * convergence criteria, an assess current solver iterations with respect to a reference solution.
+ * The ReferenceResidualConvergence class also allows for the user to specify the convergence
+ * tolerance for the linear solver.
+ */
+
 class ReferenceResidualConvergence : public ResidualConvergence,
                                      public ReferenceConvergenceInterface
 {
