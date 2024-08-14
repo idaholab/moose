@@ -65,6 +65,21 @@ protected:
   /// Characteristic speed
   const Real _cs;
 
+  // Attributes to compute the momentum limiters based on the momentum absolute value
+  // This is desirable to make the solution independent of the orientation of the mesh
+  /// Problem dimension
+  const unsigned int _dim;
+  /// Velocity X-component
+  const Moose::Functor<ADReal> & _u;
+  /// Velocity Y-component
+  const Moose::Functor<ADReal> & _v;
+  /// Velocity Z-component
+  const Moose::Functor<ADReal> & _w;
+  /// Whether to use a vector limiter
+  const bool _absolute_momentum_limiter;
+  /// Momentum norm
+  std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADReal>> _mom_abs;
+
   /// Our local momentum functor
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADReal>> _rho_u;
 

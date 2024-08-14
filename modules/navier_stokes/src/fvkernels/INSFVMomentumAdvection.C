@@ -10,6 +10,7 @@
 #include "INSFVMomentumAdvection.h"
 #include "NS.h"
 #include "FVUtils.h"
+#include "NavierStokesMethods.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "SystemBase.h"
 #include "NSFVUtils.h"
@@ -41,6 +42,15 @@ INSFVMomentumAdvection::validParams()
   params += INSFVMomentumAdvection::uniqueParams();
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
   params.addClassDescription("Object for advecting momentum, e.g. rho*u");
+
+  params.addParam<bool>("momentum_norm_limiter",
+                        false,
+                        "Whether to use the norm of the momentum vector for momentum interpolation "
+                        "limiter computations");
+  params.addParam<MooseFunctorName>(NS::velocity_x, 0, "Velocity X-component (superficial)");
+  params.addParam<MooseFunctorName>(NS::velocity_y, 0, "Velocity Y-component (superficial)");
+  params.addParam<MooseFunctorName>(NS::velocity_z, 0, "Velocity Z-component (superficial)");
+
   return params;
 }
 
@@ -49,8 +59,27 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     INSFVMomentumResidualObject(*this),
     _rho(getFunctor<ADReal>(NS::density)),
     _approximate_as(isParamValid("characteristic_speed")),
-    _cs(_approximate_as ? getParam<Real>("characteristic_speed") : 0)
+    _cs(_approximate_as ? getParam<Real>("characteristic_speed") : 0),
+    _dim(_subproblem.mesh().dimension()),
+    _u(getFunctor<ADReal>(NS::velocity_x)),
+    _v(getFunctor<ADReal>(NS::velocity_y)),
+    _w(getFunctor<ADReal>(NS::velocity_z)),
+    _absolute_momentum_limiter(getParam<bool>("momentum_norm_limiter"))
 {
+  if (_absolute_momentum_limiter)
+  {
+    if (!isParamSetByUser(NS::velocity_x))
+      paramError(NS::velocity_x,
+                 "The u velocity must be defined when using the absolute value momentum limiter.");
+    if (_dim >= 2 && !isParamSetByUser(NS::velocity_y))
+      paramError(NS::velocity_y,
+                 "The v velocity must be defined when using the absolute value momentum limiter"
+                 "and problem dimension is larger or equal to 2.");
+    if (_dim >= 3 && !isParamSetByUser(NS::velocity_z))
+      paramError(NS::velocity_z,
+                 "The w velocity must be defined when using the absolute value momentum limiter"
+                 "and problem dimension is larger or equal to three.");
+  }
 }
 
 void
@@ -65,6 +94,18 @@ INSFVMomentumAdvection::initialSetup()
       std::set<ExecFlagType>({EXEC_ALWAYS}),
       _mesh,
       this->blockIDs());
+
+  if (_absolute_momentum_limiter)
+    _mom_abs = std::make_unique<PiecewiseByBlockLambdaFunctor<ADReal>>(
+        "rho_vel",
+        [this](const auto & r, const auto & t) -> ADReal
+        {
+          return _rho(r, t) * NS::computeSpeed(ADRealVectorValue(_u(r, t), _v(r, t), _w(r, t))) /
+                 epsilon()(r, t);
+        },
+        std::set<ExecFlagType>({EXEC_ALWAYS}),
+        _mesh,
+        this->blockIDs());
 }
 
 ADReal
@@ -167,11 +208,17 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     }
     else
     {
-      const auto [interp_coeffs, advected] =
-          interpCoeffsAndAdvected(*_rho_u, advected_face_arg, state);
+      auto [interp_coeffs, advected] = interpCoeffsAndAdvected(
+          _absolute_momentum_limiter ? *_mom_abs : *_rho_u, advected_face_arg, state);
 
       const auto elem_arg = elemArg();
       const auto neighbor_arg = neighborArg();
+
+      // Use the interpolation coefficients for the absolute value of the momentum to re-create the
+      // advected momentum
+      if (_absolute_momentum_limiter)
+        advected = std::make_pair<ADReal, ADReal>((*_rho_u)(elem_arg, state),
+                                                  (*_rho_u)(neighbor_arg, state));
 
       const auto rho_elem = _rho(elem_arg, state), rho_neighbor = _rho(neighbor_arg, state);
       const auto eps_elem = epsilon()(elem_arg, state),
