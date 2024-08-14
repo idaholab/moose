@@ -77,8 +77,15 @@
   []
 []
 
+[Preconditioner]
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+  []
+[]
+
 [Solver]
   type = MFEMHypreGMRESSolver
+  preconditioner = boomeramg
 []
 
 [Executioner]

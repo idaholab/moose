@@ -84,6 +84,17 @@
   []
 []
 
+[Preconditioner]
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+  []
+[]
+
+[Solver]
+  type = MFEMHypreGMRESSolver
+  preconditioner = boomeramg
+[]
+
 [Executioner]
   type = Transient
   dt = 1.0

@@ -98,6 +98,17 @@
   []    
 []
 
+[Preconditioner]
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+  []
+[]
+
+[Solver]
+  type = MFEMHypreGMRESSolver
+  preconditioner = boomeramg
+[]
+
 [Executioner]
   type = Steady
   l_tol = 1e-6
