@@ -172,6 +172,7 @@ static const std::string convex = "convex";
 static const std::string x_curvature_axis = "x_curvature_axis";
 static const std::string y_curvature_axis = "y_curvature_axis";
 static const std::string z_curvature_axis = "z_curvature_axis";
+static const std::string alpha_curv = "alpha_curv";
 
 /**
  * Wall treatment options

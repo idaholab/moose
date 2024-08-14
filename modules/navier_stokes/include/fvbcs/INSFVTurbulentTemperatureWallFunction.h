@@ -52,4 +52,18 @@ protected:
   const Real _C_mu;
   /// Method used for wall treatment
   const MooseEnum _wall_treatment;
+
+    /// Equivalent sand height wall roughness
+  const Real _rough_ks;
+
+  /// Curvature radius
+  const Moose::Functor<ADReal> * _curv_R;
+
+  /// Wall convexity parameter
+  const bool _convex;
+
+  /// Curvature axis
+  const Moose::Functor<ADReal> * _x_curvature_axis;
+  const Moose::Functor<ADReal> * _y_curvature_axis;
+  const Moose::Functor<ADReal> * _z_curvature_axis;
 };

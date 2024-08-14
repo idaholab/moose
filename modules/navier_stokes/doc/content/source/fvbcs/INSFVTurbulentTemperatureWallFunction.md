@@ -55,6 +55,21 @@ where:
 
 - $Pr$ is the Prandtl number
 
+If roughness is taken into account, $w_s$ and $J_k$ are modified as follows :
+
+\begin{equation}
+  w_s = \frac{1}{\kappa} \operatorname{ln}(\frac{E y^+}{1+C_{rough}k_s^+}) + J_k \,,
+\end{equation}
+
+\begin{equation}
+  J_k^{rough} = 3.15 Pr^{0.695} \left(\frac{C_{rough}k_s^+}{E}\right)^{0.359}+ \left(\frac{1}{1+C_{rough}k_s^+}\right)^{0.6}J_k^{smooth}\,,
+\end{equation}
+
+where:
+
+- $C_{rough} = 0.366$ is a closure parameter
+- $k_s$ is the equivalent sand height for roughness
+
 For the buffer layer, i.e., in $y^+ \in (5, 30)$, the thermal diffusivity
 is defined via a linear blending function as follows:
 

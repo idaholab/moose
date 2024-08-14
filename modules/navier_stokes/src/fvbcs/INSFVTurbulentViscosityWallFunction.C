@@ -45,9 +45,11 @@ INSFVTurbulentViscosityWallFunction::validParams()
       "y_curvature_axis", 0, "y coordinate of the axis along which the curvature is");
   params.addParam<MooseFunctorName>(
       "z_curvature_axis", 0, "z coordinate of the axis along which the curvature is");
+  params.addParam<MooseFunctorName>(
+      "alpha_curv", 0, "Coefficient to change the viscosity in the case of curvature");
   params.addParamNamesToGroup(
-      "rough_ks NS::curv_R convex x_curvature_axis y_curvature_axis z_curvature_axis",
-      "Wall function correction parameters.");
+      "rough_ks convex x_curvature_axis y_curvature_axis z_curvature_axis",
+      "Wall function correction parameters");
   return params;
 }
 
@@ -74,10 +76,12 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
                           ? &getFunctor<ADReal>("y_curvature_axis")
                           : nullptr),
     _z_curvature_axis(
-        params.isParamValid("z_curvature_axis") ? &getFunctor<ADReal>("z_curvature_axis") : nullptr)
+        params.isParamValid("z_curvature_axis") ? &getFunctor<ADReal>("z_curvature_axis") : nullptr),
+    _alpha_curv(
+        params.isParamValid("alpha_curv") ? &getFunctor<ADReal>("alpha_curv") : nullptr)
 {
-  if (params.isParamValid(NS::curv_R) && _dim < 3)
-    paramError(NS::curv_R, "Curvature corrections are only available for 3D domains.");
+  //if (params.isParamValid(NS::curv_R) && _dim < 3)
+    //paramError(NS::curv_R, "Curvature corrections are only available for 3D domains.");
 
   if (!(params.isParamValid(NS::curv_R)) && params.isParamValid("x_curvature_axis"))
     paramError("x_curvature_axis",
@@ -170,9 +174,9 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
             mu.value(), rho.value(), speed_w, wall_dist, curv_R, _convex);
 
       // Get effecitve non-dimmensional wall distance
+      const auto alpha_curv = (*_alpha_curv)(makeElemArg(&_current_elem), old_state);
       y_plus = wall_dist * std::sqrt(Utility::pow<2>(u_tau) + Utility::pow<2>(w_tau)) * rho / mu;
-      mu_wall =
-          rho * wall_dist * (Utility::pow<2>(u_tau) + Utility::pow<2>(w_tau)) / parallel_speed;
+      mu_wall =rho * wall_dist * (Utility::pow<2>(u_tau) + Utility::pow<2>(w_tau) + alpha_curv*u_tau*w_tau) / parallel_speed;
     }
     else
     {

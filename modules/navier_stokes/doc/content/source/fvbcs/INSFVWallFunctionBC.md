@@ -1,7 +1,7 @@
 # INSFVWallFunctionBC
 
 This object imposes a wall shear stress to the momentum equation according to
-the standard wall functions. Besides imposing the corresponding shear stress,
+the standard wall functions, that can be modified with roughness or curvature corrections if needed. Besides imposing the corresponding shear stress,
 it ensures zero advective flux at the wall (non-penetrability).
 
 !syntax parameters /FVBCs/INSFVWallFunctionBC

@@ -83,6 +83,21 @@ where:
 - $E = 9.793$ is a closure parameter
 - $\kappa = 0.4187$ is the von Kármán constant
 
+If roughness is taken into account, the law of the wall rewrites as follows :
+
+\begin{equation}
+  \frac{u_p}{u_{\tau}} = \frac{1}{\kappa} \operatorname{ln}(\frac{E y^+}{1+C_{rough}k_s^+}) \,,
+\end{equation}
+
+\begin{equation}
+  k_s^+ = \frac{\rho u_{\tau} k_s}{\mu} \,,
+\end{equation}
+
+where:
+
+- $k_s$ is the equivalent sand roughness
+- $C_{rough} = 0.366$ is a closure parameter
+
 In this method, we iterate on the wall function and $y^+$ to find
 $u_{\tau}$ via a Newton solve. Once $u_{\tau}$ is defined, $y^+$ is
 computed followed by the determination of the boundary turbulent viscosity.
@@ -92,6 +107,30 @@ computed followed by the determination of the boundary turbulent viscosity.
 may diverge for more complicated flows. Also, the code will run if the center
 of the near wall cells are in the buffer layer. However, using a mesh that
 contains nodes in the buffer layer is not recommended.
+
+A correction for swirling flows in a transverse curvature situataion is available if the first cell is situated in the log layer. 
+When activated, it decomposes the flow in its swirling an non swirling part, then 
+calculates $u_{\tau}$ for the non swirling part of the flow using the methods mentioned above.
+It also calculates $w_{\tau}$, the equivalent of $u_{\tau}$ for the swirling part, with the following formula : 
+
+\begin{equation}
+  \frac{w_p}{w_{\tau}} = \frac{1}{\kappa} \left(1 \pm \frac{y}{R}\right) \operatorname{ln}(\frac{E y w_{\tau}}{\nu \left(1 \pm \frac{y}{R}\right)}) \,,
+\end{equation}
+
+where:
+
+- R is the radius of curvature
+- The + sign is used for convex surfaces
+
+Finally, the value of $\mu_t$ is obtained by the following equation :
+
+\begin{equation}
+    \mu_t =\frac{\rho (u_{\tau}^2+w_{\tau}^2+\alpha w_{\tau} u_{\tau}) y_p}{\sqrt{(u_p^2+w_p^2)}} - \mu
+\end{equation}
+
+where:
+
+- \alpha is a constant depending on he radius of curvature, not precisely determined for the moment
 
 
 ## Equilibrium wall functions using a fixed-point solve

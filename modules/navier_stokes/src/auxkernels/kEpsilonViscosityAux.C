@@ -11,6 +11,7 @@
 #include "NavierStokesMethods.h"
 #include "NonlinearSystemBase.h"
 #include "libmesh/nonlinear_solver.h"
+#include "CurvatureCorrec.h"
 
 registerMooseObject("NavierStokesApp", kEpsilonViscosityAux);
 
@@ -43,6 +44,20 @@ kEpsilonViscosityAux::validParams()
                              scale_limiter,
                              "The method used to limit the k-epsilon time scale."
                              "'none', 'standard'");
+
+  // Wall function correction parameters
+  params.addParam<Real>("rough_ks", 0, "equivalent sand roughness height");
+  params.addParam<MooseFunctorName>(NS::curv_R, 0, "curvature ");
+  params.addParam<bool>("convex", false, "is the mesh convex ?");
+  params.addParam<MooseFunctorName>(
+      "x_curvature_axis", 0, "x coordinate of the axis along which the curvature is");
+  params.addParam<MooseFunctorName>(
+      "y_curvature_axis", 0, "y coordinate of the axis along which the curvature is");
+  params.addParam<MooseFunctorName>(
+      "z_curvature_axis", 0, "z coordinate of the axis along which the curvature is");
+  params.addParamNamesToGroup(
+      "rough_ks convex x_curvature_axis y_curvature_axis z_curvature_axis",
+      "Wall function correction parameters");
   return params;
 }
 
@@ -61,8 +76,45 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
-    _scale_limiter(getParam<MooseEnum>("scale_limiter"))
+    _scale_limiter(getParam<MooseEnum>("scale_limiter")),
+    _rough_ks(getParam<Real>("rough_ks")),
+    _curv_R(params.isParamValid(NS::curv_R) ? &getFunctor<ADReal>(NS::curv_R) : nullptr),
+    _convex(getParam<bool>("convex")),
+    _x_curvature_axis(params.isParamValid("x_curvature_axis")
+                          ? &getFunctor<ADReal>("x_curvature_axis")
+                          : nullptr),
+    _y_curvature_axis(params.isParamValid("y_curvature_axis")
+                          ? &getFunctor<ADReal>("y_curvature_axis")
+                          : nullptr),
+    _z_curvature_axis(
+        params.isParamValid("z_curvature_axis") ? &getFunctor<ADReal>("z_curvature_axis") : nullptr)
 {
+  if (!(params.isParamValid(NS::curv_R)) && params.isParamValid("x_curvature_axis"))
+    paramError("x_curvature_axis",
+               "Curvature in the `x` direction provided but wall curvature corrections are not "
+               "active since ",
+               NS::curv_R,
+               " has not been provided");
+
+  if (!(params.isParamValid(NS::curv_R)) && params.isParamValid("y_curvature_axis"))
+    paramError("y_curvature_axis",
+               "Curvature in the `y` direction provided but wall curvature corrections are not "
+               "active since ",
+               NS::curv_R,
+               " has not been provided");
+
+  if (!(params.isParamValid(NS::curv_R)) && params.isParamValid("z_curvature_axis"))
+    paramError("z_curvature_axis",
+               "Curvature in the `z` direction provided but wall curvature corrections are not "
+               "active since ",
+               NS::curv_R,
+               " has not been provided");
+
+  if (params.isParamValid(NS::curv_R) &&
+      !(params.isParamValid("x_curvature_axis") && params.isParamValid("y_curvature_axis") &&
+        params.isParamValid("z_curvature_axis")))
+    mooseError("When curvature correction is active, all `x_curvature_axis`, `y_curvature_axis`, "
+               "`z_curvature_axis` curvature axis need to be provided");
 }
 
 void
@@ -124,10 +176,51 @@ kEpsilonViscosityAux::computeValue()
 
     if (_wall_treatment == NS::WallTreatmentEnum::EQ_NEWTON)
     {
-      // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-      const auto u_tau = NS::findUStar(mu, rho, parallel_speed, min_wall_dist);
-      y_plus = min_wall_dist * u_tau * rho / mu;
-      mu_wall = rho * Utility::pow<2>(u_tau) * min_wall_dist / parallel_speed;
+      if (_curv_R)
+      {
+        ADReal speed_u = parallel_speed; // streamwise speed
+        ADReal speed_w = 0;              // swirling speed
+
+        // Getting curvature corrections
+        if (_x_curvature_axis || _y_curvature_axis || _z_curvature_axis) 
+        {
+          const auto x_curvature_axis = (*_x_curvature_axis)(makeElemArg(&elem), state);
+          const auto y_curvature_axis = (*_y_curvature_axis)(makeElemArg(&elem), state);
+          const auto z_curvature_axis = (*_z_curvature_axis)(makeElemArg(&elem), state);
+          if (x_curvature_axis > 1e-12 || y_curvature_axis > 1e-12 || y_curvature_axis > 1e-12)
+          {
+            ADRealVectorValue curv_axis(x_curvature_axis, y_curvature_axis, z_curvature_axis);
+            ADRealVectorValue w_vector =
+                loc_normal.cross(curv_axis) / loc_normal.cross(curv_axis).norm();
+            speed_u =
+                (velocity - velocity * loc_normal * loc_normal - velocity * w_vector * w_vector)
+                  .norm();
+            speed_w = (velocity * w_vector * w_vector).norm();
+          }
+        }
+
+        // Get new stemwise friction velocity with swirling corrections
+        const auto u_tau = NS::findUStar(mu, rho, speed_u, min_wall_dist, _rough_ks);
+
+        // Get swirling friction velocity
+        ADReal w_tau = 0.0;
+        const auto curv_R = (*_curv_R)(current_argument, state);
+        if (curv_R > 1e-12)
+          w_tau = CurvatureCorrec::findWStar(
+            mu.value(), rho.value(), speed_w, min_wall_dist, curv_R, _convex);
+
+        // Get effecitve non-dimmensional wall distance
+        y_plus = min_wall_dist * std::sqrt(Utility::pow<2>(u_tau) + Utility::pow<2>(w_tau)) * rho / mu;
+        mu_wall =
+          rho * min_wall_dist * (Utility::pow<2>(u_tau) + Utility::pow<2>(w_tau)) / parallel_speed;
+      }
+      else
+      {
+        // Full Newton-Raphson solve to find the wall quantities from the law of the wall
+        const auto u_tau = NS::findUStar(mu, rho, parallel_speed, min_wall_dist, _rough_ks);
+        y_plus = min_wall_dist * u_tau * rho / mu;
+        mu_wall = rho * Utility::pow<2>(u_tau) * min_wall_dist / parallel_speed;
+      }
       mut_log = mu_wall - mu;
     }
     else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)

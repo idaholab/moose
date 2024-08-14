@@ -69,4 +69,7 @@ private:
   const Moose::Functor<ADReal> * _x_curvature_axis;
   const Moose::Functor<ADReal> * _y_curvature_axis;
   const Moose::Functor<ADReal> * _z_curvature_axis;
+
+  /// Curvature correction factor for tau_w
+  const Moose::Functor<ADReal> * _alpha_curv;
 };
