@@ -55,16 +55,9 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  EquationSystems & es = FEProblemBase::es();
-  _solver_options.SetParam("Tolerance", float(es.parameters.get<Real>("linear solver tolerance")));
-  _solver_options.SetParam("AbsTolerance",
-                           float(es.parameters.get<Real>("linear solver absolute tolerance")));
-  _solver_options.SetParam("MaxIter",
-                           es.parameters.get<unsigned int>("linear solver maximum iterations"));
   _coefficients.AddGlobalCoefficientsFromSubdomains();
 
   mfem_problem_builder->SetCoefficients(_coefficients);
-  mfem_problem_builder->SetSolverOptions(_solver_options);
 
   // NB: set to false to avoid reconstructing problem operator.
   mfem_problem_builder->FinalizeProblem(false);
@@ -159,7 +152,7 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMPreconditionerBase & mfem_preconditioner = getUserObject<MFEMPreconditionerBase>(name);
 
-  mfem_problem_builder->SetJacobianPreconditioner(mfem_preconditioner.getPreconditioner());
+  mfem_problem->_jacobian_preconditioner = mfem_preconditioner.getPreconditioner();
 }
 
 void
@@ -170,7 +163,7 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMSolverBase & mfem_solver = getUserObject<MFEMSolverBase>(name);
 
-  mfem_problem_builder->SetJacobianSolver(mfem_solver.getSolver());
+  mfem_problem->_jacobian_solver = mfem_solver.getSolver();
 }
 
 void
