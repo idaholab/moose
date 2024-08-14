@@ -1,6 +1,5 @@
 #pragma once
 #include "../common/pfem_extras.hpp"
-#include "hephaestus_solvers.h"
 #include "problem_builder_base.h"
 #include "problem_operator_interface.h"
 
