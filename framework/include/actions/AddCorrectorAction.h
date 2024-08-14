@@ -14,15 +14,11 @@
 
 /**
  * Action for creating Corrector, a UserObject
- * designed for nonlinear variable solutions without constraints.
+ * designed for modifying nonlinear variable solutions, for example outside of the nonlinear solve
  */
 class AddCorrectorAction : public MooseObjectAction
 {
 public:
-  /**
-   * Class constructor
-   * @param params Parameters for this Action
-   */
   static InputParameters validParams();
 
   AddCorrectorAction(const InputParameters & params);
