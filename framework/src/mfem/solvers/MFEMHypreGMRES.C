@@ -20,7 +20,10 @@ MFEMHypreGMRES::validParams()
 }
 
 MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
-  : MFEMSolverBase(parameters), _preconditioner(getUserObject<MFEMSolverBase>("preconditioner"))
+  : MFEMSolverBase(parameters),
+    _preconditioner(isParamSetByUser("preconditioner")
+                        ? getUserObject<MFEMSolverBase>("preconditioner").getSolver()
+                        : nullptr)
 {
   constructSolver(parameters);
 }
@@ -28,8 +31,7 @@ MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
 void
 MFEMHypreGMRES::constructSolver(const InputParameters & parameters)
 {
-  auto hypre_preconditioner =
-      std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner.getSolver());
+  auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner);
 
   _solver = std::make_shared<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   _solver->SetTol(getParam<double>("l_tol"));
