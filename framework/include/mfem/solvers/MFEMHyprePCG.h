@@ -1,18 +1,17 @@
 #pragma once
 #include "MFEMSolverBase.h"
-#include "MFEMHypreBoomerAMG.h"
 #include "mfem.hpp"
 #include <memory>
 
 /**
- * Wrapper for mfem::HypreGMRES solver.
+ * Wrapper for mfem::HyprePCG solver.
  */
-class MFEMHypreGMRES : public MFEMSolverBase
+class MFEMHyprePCG : public MFEMSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMHypreGMRES(const InputParameters &);
+  MFEMHyprePCG(const InputParameters & parameters);
 
   /// Returns a shared pointer to the instance of the Solver derived-class.
   std::shared_ptr<mfem::Solver> getSolver() const override { return _solver; }
@@ -22,5 +21,5 @@ protected:
 
 private:
   std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
-  std::shared_ptr<mfem::HypreGMRES> _solver{nullptr};
+  std::shared_ptr<mfem::HyprePCG> _solver{nullptr};
 };
