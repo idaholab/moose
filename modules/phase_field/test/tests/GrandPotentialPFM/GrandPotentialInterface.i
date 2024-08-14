@@ -4,21 +4,21 @@
 []
 
 [Materials]
-  [./iface]
+  [iface]
     # reproduce the parameters from GrandPotentialMultiphase.i
     type = GrandPotentialInterface
     gamma_names = 'gbb gab'
-    sigma       = '0.4714  0.6161' # Ratio of 1:1.307 to obtain dihedral angle of 135deg
-    width       = 2.8284
-  [../]
+    sigma = '0.4714  0.6161' # Ratio of 1:1.307 to obtain dihedral angle of 135deg
+    width = 2.8284
+  []
 []
 
 [VectorPostprocessors]
-  [./mat]
-    type = MaterialVectorPostprocessor
+  [mat]
+    type = ElementMaterialSampler
     material = iface
     elem_ids = 0
-  [../]
+  []
 []
 
 [Executioner]

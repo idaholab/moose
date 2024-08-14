@@ -1,57 +1,59 @@
-# check that the simulation terminates with an error when you try to use this
-# on an element that isn't available/computed on a particular block.
+# test that all scalar material properties are properly recorded in basic usage.
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
   ny = 10
+  allow_renumbering = false
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
-    type = GenericConstantMaterial
+  [mat]
+    type = GenericFunctionMaterial
     prop_names = 'prop1 prop2 prop3'
-    prop_values = '1 2 42'
-  [../]
+    prop_values = '1 2 t'
+  []
 []
 
 [VectorPostprocessors]
-  [./vpp]
-    type = MaterialVectorPostprocessor
+  [vpp]
+    type = ElementMaterialSampler
     material = 'mat'
-    elem_ids = '2112'
-  [../]
+    elem_ids = '3 4 7 42 88'
+  []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 2
+  nl_abs_tol = 1e-12
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'

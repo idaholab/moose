@@ -1,10 +1,10 @@
-# VectorNeumannBC
+# DirectionalNeumannBC
 
-!syntax description /BCs/VectorNeumannBC
+!syntax description /BCs/DirectionalNeumannBC
 
 ## Description
 
-`VectorNeumannBC` is an `IntegratedBC` which weakly imposes the flux boundary condition
+`DirectionalNeumannBC` is an `IntegratedBC` which weakly imposes the flux boundary condition
 $\frac{\partial u}{\partial n} = \vec{V}\cdot\hat{n}$, where the user specifies the vector $\vec{V}$
 and the unit normal vector $\hat{n}$ is determined by the geometry of the domain $\Omega$. This class
 is appropriate to use in systems of partial differential equations (PDEs) of the form
@@ -30,8 +30,8 @@ outward normals as necessary.
 
 !listing test/tests/bcs/misc_bcs/vector_neumann_bc_test.i start=[./top] end=[../] include-end=true
 
-!syntax parameters /BCs/VectorNeumannBC
+!syntax parameters /BCs/DirectionalNeumannBC
 
-!syntax inputs /BCs/VectorNeumannBC
+!syntax inputs /BCs/DirectionalNeumannBC
 
-!syntax children /BCs/VectorNeumannBC
+!syntax children /BCs/DirectionalNeumannBC
