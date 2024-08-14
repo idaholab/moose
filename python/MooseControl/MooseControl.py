@@ -56,6 +56,7 @@ class MooseControl:
             moose_command (list[str]): The command to use to start the moose process
             moose_port (int): The webserver port to connect to
             moose_control_name (str): The name of the input control object
+            inherit_environment (bool): Whether or not the MOOSE command will inherit the current shell environment
         """
         # Setup a basic logger
         logging.basicConfig(level=logging.INFO,
