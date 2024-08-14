@@ -86,6 +86,8 @@
 [Solver]
   type = MFEMHypreGMRESSolver
   preconditioner = boomeramg
+  l_tol = 1e-16
+  l_max_its = 1000  
 []
 
 [Executioner]
@@ -93,9 +95,6 @@
   dt = 1.0
   start_time = 0.0
   end_time = 1.0
-
-  l_tol = 1e-16
-  l_max_its = 1000
 []
 
 [Outputs]
