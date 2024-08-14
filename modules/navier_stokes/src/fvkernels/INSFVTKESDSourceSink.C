@@ -313,8 +313,8 @@ INSFVTKESDSourceSink::computeQpResidual()
     }
 
     // Destruction
-    const auto beta_star = F1 * _beta_i_1 + (1.0 - F1) * _beta_i_2;
-    destruction = rho * beta_star * f_beta * _var(elem_arg, old_state) * _var(elem_arg, state);
+    const auto beta = F1 * _beta_i_1 + (1.0 - F1) * _beta_i_2;
+    destruction = rho * beta * f_beta * _var(elem_arg, old_state) * _var(elem_arg, state);
 
     // Cross diffusion term
     const auto & grad_k = _k.gradient(elem_arg, old_state);

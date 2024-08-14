@@ -189,7 +189,7 @@ INSFVTKESourceSink::computeQpResidual()
       const ADReal wall_mu = _mu(facearg, state);
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
-      if (_epsilon || _omega) // wall functions for epsilon-based formulation
+      if (_epsilon) // wall functions for epsilon-based formulation
       {
         const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
         const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
@@ -232,16 +232,15 @@ INSFVTKESourceSink::computeQpResidual()
               (*_F1)(elem_arg, state) * beta_i_1_star + (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
         }
         else
-          beta_star =
-              (*_F1)(elem_arg, state) * _beta_i_1 + (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
+          beta_star = (*_F1)(elem_arg, state) * _beta_i_1_star +
+                      (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2_star;
 
         destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog)) *
                        beta_star / tot_weight;
 
-        const auto tau_w_blended =
-            (wall_mu * gamma + wall_mut * (1.0 - gamma)) * velocity_grad_norm_vec[i];
-        production += tau_w_blended * std::pow(_C_mu, 0.25) /
-                      std::sqrt(_var(elem_arg, old_state) + 1e-10) /
+        // const auto tau_w_blended =
+        //     (wall_mu * gamma + wall_mut * (1.0 - gamma)) * velocity_grad_norm_vec[i];
+        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(_var(elem_arg, old_state) + 1e-10) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
 
         // if (y_plus < 11.25)
