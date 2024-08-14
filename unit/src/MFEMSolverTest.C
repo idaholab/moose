@@ -4,6 +4,7 @@
 #include "MFEMHyprePCG.h"
 #include "MFEMHypreBoomerAMG.h"
 #include "MFEMHypreAMS.h"
+#include "MFEMSuperLU.h"
 
 class MFEMSolverTest : public MFEMObjectUnitTest
 {
@@ -100,5 +101,21 @@ TEST_F(MFEMSolverTest, MFEMHypreAMS)
 
   // Test MFEMSolver returns an solver of the expected type
   auto solver_downcast = std::dynamic_pointer_cast<mfem::HypreAMS>(solver.getSolver());
+  ASSERT_NE(solver_downcast.get(), nullptr);
+}
+
+/**
+ * Test MFEMSuperLU creates an platypus::SuperLUSolver successfully.
+ */
+TEST_F(MFEMSolverTest, MFEMSuperLU)
+{
+  // Build required kernel inputs
+  InputParameters solver_params = _factory.getValidParams("MFEMSuperLU");
+
+  // Construct kernel
+  MFEMSuperLU & solver = addObject<MFEMSuperLU>("MFEMSuperLU", "solver1", solver_params);
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto solver_downcast = std::dynamic_pointer_cast<platypus::SuperLUSolver>(solver.getSolver());
   ASSERT_NE(solver_downcast.get(), nullptr);
 }

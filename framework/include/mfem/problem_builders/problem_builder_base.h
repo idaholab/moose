@@ -119,16 +119,6 @@ protected:
     int _k_dim;
   };
 
-  /// Called in @a ConstructJacobianSolver. This will create a solver of the chosen type and use the user's input
-  /// parameters if they have been provided.
-  void ConstructJacobianSolverWithOptions(SolverType type,
-                                          SolverParams default_params = {
-                                              ._tolerance = 1e-16,
-                                              ._abs_tolerance = 1e-16,
-                                              ._max_iteration = 1000,
-                                              ._print_level = 2, // GetGlobalPrintLevel(),
-                                              ._k_dim = 10});
-
   /// Overridden in derived classes.
   [[nodiscard]] virtual platypus::Problem * GetProblem() const = 0;
 
