@@ -23,6 +23,7 @@
 class PinSurfaceTemperature : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
   PinSurfaceTemperature(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
@@ -34,7 +35,4 @@ protected:
   const Real & _height;
   const int & _i_pin;
   Real _value;
-
-public:
-  static InputParameters validParams();
 };

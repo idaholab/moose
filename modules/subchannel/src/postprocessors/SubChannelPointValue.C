@@ -36,7 +36,7 @@ SubChannelPointValue::validParams()
 
 SubChannelPointValue::SubChannelPointValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
+    _mesh(libMesh::cast_ref<SubChannelMesh &>(_fe_problem.mesh())),
     _height(getParam<Real>("height")),
     _i_ch(getParam<int>("index")),
     _var_number(_subproblem

@@ -23,6 +23,7 @@
 class SubChannelDelta : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
   SubChannelDelta(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
@@ -33,7 +34,4 @@ protected:
   SubChannelMesh & _mesh;
   AuxVariableName const & _variable;
   Real _value;
-
-public:
-  static InputParameters validParams();
 };

@@ -33,6 +33,13 @@
     rel_err = 2e-2
     max_threads = 1
   []
+  [psbt_implicit_csv]
+    type = CSVDiff
+    input = 'psbt_implicit.i'
+    csvdiff = 'psbt_implicit_out.csv'
+    recover = False
+    rel_err = 3e-4
+  []
   [psbt_monolithic]
     type = Exodiff
     input = psbt_monolithic.i

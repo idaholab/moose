@@ -36,7 +36,7 @@ PlanarMean::validParams()
 
 PlanarMean::PlanarMean(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
+    _mesh(libMesh::cast_ref<SubChannelMesh &>(_fe_problem.mesh())),
     _variable(getParam<AuxVariableName>("variable")),
     _height(getParam<Real>("height")),
     _mean_value(0)

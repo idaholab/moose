@@ -35,7 +35,7 @@ SubChannelDelta::validParams()
 
 SubChannelDelta::SubChannelDelta(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
+    _mesh(libMesh::cast_ref<SubChannelMesh &>(_fe_problem.mesh())),
     _variable(getParam<AuxVariableName>("variable")),
     _value(0)
 {
