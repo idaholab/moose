@@ -1,5 +1,4 @@
 #pragma once
-#include "MFEMHypreBoomerAMG.h"
 #include "MFEMSolverBase.h"
 #include "mfem.hpp"
 #include <memory>

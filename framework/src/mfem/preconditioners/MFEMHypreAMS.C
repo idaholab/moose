@@ -8,6 +8,11 @@ MFEMHypreAMS::validParams()
 {
   InputParameters params = MFEMPreconditionerBase::validParams();
   params.addParam<UserObjectName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
+  params.addParam<bool>("singular",
+                        false,
+                        "Declare that the system is singular; use when solving curl-curl problem "
+                        "if mass term is zero");
+  params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   return params;
 }
 
@@ -21,5 +26,9 @@ void
 MFEMHypreAMS::constructPreconditioner(const InputParameters & parameters)
 {
   _preconditioner = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
-  _preconditioner->SetPrintLevel(2);
+  if (getParam<bool>("singular"))
+  {
+    _preconditioner->SetSingularProblem();
+  }
+  _preconditioner->SetPrintLevel(getParam<int>("print_level"));
 }
