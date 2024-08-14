@@ -56,10 +56,6 @@ ExplicitDynamicsContactAction::validParams()
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("penalty", 1e8, "Penalty factor for normal contact.");
-  params.addParam<bool>("overwrite_current_solution",
-                        false,
-                        "Whether to overwrite the position of contact boundaries with the velocity "
-                        "computed with the contact algorithm.");
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement in "
                              "explicit dynamics simulations.");
   params.addParam<std::vector<TagName>>(
@@ -361,7 +357,6 @@ ExplicitDynamicsContactAction::addNodeFaceContact()
 
   params.set<std::vector<VariableName>>("displacements") = displacements;
   params.set<bool>("use_displaced_mesh") = true;
-  params.set<bool>("overwrite_current_solution") = getParam<bool>("overwrite_current_solution");
   params.set<Real>("penalty") = getParam<Real>("penalty");
 
   params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
