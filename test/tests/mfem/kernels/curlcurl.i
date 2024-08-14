@@ -99,14 +99,15 @@
 []
 
 [Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
+  [ams]
+    type = MFEMHypreAMS
+    fespace = HCurlFESpace
   []
 []
 
 [Solver]
   type = MFEMHypreGMRESSolver
-  preconditioner = boomeramg
+  preconditioner = ams
 []
 
 [Executioner]
