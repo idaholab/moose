@@ -21,6 +21,6 @@ protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
-  std::shared_ptr<mfem::Solver> _preconditioner;
+  std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
   std::shared_ptr<mfem::HypreGMRES> _solver{nullptr};
 };

@@ -6,12 +6,12 @@
 /**
  * Wrapper for mfem::HypreFGMRES solver.
  */
-class MFEMHypreFGMRESSolver : public MFEMSolverBase
+class MFEMHypreFGMRES : public MFEMSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMHypreFGMRESSolver(const InputParameters & parameters);
+  MFEMHypreFGMRES(const InputParameters & parameters);
 
   std::shared_ptr<mfem::Solver> getSolver() const override { return _solver; }
 
@@ -19,5 +19,6 @@ protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
+  std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
   std::shared_ptr<mfem::HypreFGMRES> _solver{nullptr};
 };
