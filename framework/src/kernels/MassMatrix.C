@@ -7,17 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "Kernel.h"
 #include "MassMatrix.h"
+#include "MaterialProperty.h"
+#include "MooseError.h"
+#include "Registry.h"
 
 registerMooseObject("MooseApp", MassMatrix);
 
 InputParameters
 MassMatrix::validParams()
 {
-  InputParameters params = Reaction::validParams();
-  params.addClassDescription("Computes a finite element mass matrix meant for use in "
-                             "preconditioning schemes which require one");
-  params.renameParam("rate", "density", "Optional density for scaling the computed mass.");
+  InputParameters params = Kernel::validParams();
+  params.addClassDescription("Computes a finite element mass matrix");
+  params.addParam<MaterialPropertyName>("density", 1, "The material property defining the density");
   params.set<MultiMooseEnum>("vector_tags") = "";
   params.set<MultiMooseEnum>("matrix_tags") = "";
   params.suppressParameter<MultiMooseEnum>("vector_tags");
@@ -27,8 +30,21 @@ MassMatrix::validParams()
   return params;
 }
 
-MassMatrix::MassMatrix(const InputParameters & parameters) : Reaction(parameters)
+MassMatrix::MassMatrix(const InputParameters & parameters)
+  : Kernel(parameters), _density(getMaterialProperty<Real>("density"))
 {
   if (!isParamValid("matrix_tags") && !isParamValid("extra_matrix_tags"))
     mooseError("One of 'matrix_tags' or 'extra_matrix_tags' must be provided");
+}
+
+Real
+MassMatrix::computeQpResidual()
+{
+  mooseError("Residual should not be calculated for the MassMatrix kernel");
+}
+
+Real
+MassMatrix::computeQpJacobian()
+{
+  return _test[_i][_qp] * _density[_qp] * _phi[_j][_qp];
 }
