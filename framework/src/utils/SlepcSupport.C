@@ -495,15 +495,15 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
 void
 slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
 {
-  Moose::PetscSupport::petscSetOptions(eigen_problem.getPetscOptions(),
-                                       eigen_problem.solverParams());
+  Moose::PetscSupport::petscSetOptions(
+      eigen_problem.getPetscOptions(), eigen_problem.solverParams(), &eigen_problem);
   // Call "SolverTolerances" first, so some solver specific tolerance such as "eps_max_it"
   // can be overriden
   setSlepcEigenSolverTolerances(eigen_problem, params);
   setEigenSolverOptions(eigen_problem.solverParams(), params);
   // when Bx norm postprocessor is provided, we switch off the sign normalization
   if (eigen_problem.bxNormProvided())
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_sign_normalization", "0");
+    Moose::PetscSupport::setSinglePetscOption("-eps_power_sign_normalization", "0", &eigen_problem);
   setEigenProblemOptions(eigen_problem.solverParams());
   setWhichEigenPairsOptions(eigen_problem.solverParams());
   Moose::PetscSupport::addPetscOptionsFromCommandline();

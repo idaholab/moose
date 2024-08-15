@@ -53,7 +53,9 @@ public:
 /**
  * A function for setting the PETSc options in PETSc from the options supplied to MOOSE
  */
-void petscSetOptions(const PetscOptions & po, const SolverParams & solver_params);
+void petscSetOptions(const PetscOptions & po,
+                     const SolverParams & solver_params,
+                     FEProblemBase * const problem = nullptr);
 
 /**
  * Set the default options for a KSP
@@ -146,7 +148,9 @@ bool isSNESVI(FEProblemBase & fe_problem);
  * MOOSE code, it is instead intended to be called by stuff in
  * MOOSE::PetscSupport.
  */
-void setSinglePetscOption(const std::string & name, const std::string & value = "");
+void setSinglePetscOption(const std::string & name,
+                          const std::string & value = "",
+                          FEProblemBase * const problem = nullptr);
 
 void addPetscOptionsFromCommandline();
 
