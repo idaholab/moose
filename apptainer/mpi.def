@@ -1,5 +1,5 @@
 {#- Required jinja arguments                                                                  -#}
-{#- ARCH: The machine arch                                                                    -#}
+{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
 
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- Optional jinja arguments                                                                  -#}
@@ -7,6 +7,12 @@
 
 {#- The minimum version of LLVM/Clang                                                         -#}
 {%- set MIN_CLANG_VERSION = '10.0.1' -%}
+
+{#- The within-container build directory to use                                               -#}
+{%- set ROOT_BUILD_DIR = '/root/build' -%}
+
+{#- The location for the bash prompt script in the container                                  -#}
+{%- set SET_PROMPT_SCRIPT = '/.singularity.d/set_prompt.bash' -%}
 
 {#- The system GCC version based on ALTERNATE_FROM clang or clang_min                         -#}
 {#- Note: harmless if not set                                                                 -#}
@@ -20,10 +26,10 @@
 
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
 Bootstrap: docker
-From: rockylinux:8.8.20230518
+From: rockylinux:8.9.20231119
 {%- else %}
 BootStrap: oras
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.9-0
 {%- endif %}
 
 %environment
@@ -40,7 +46,32 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
     export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 
+    # Load a custom environment if it exists
+    if [ -e /init_env ]; then
+        source /init_env
+    fi
+
 %post
+    umask 022
+
+    # Load jinja vars
+    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
+
+    # Setup the build directory
+    mkdir ${ROOT_BUILD_DIR}
+
+    # Setup the custom prompt. The apptainer generator script will append
+    # extra variables to the %environment step that identify what container
+    # is currently being used
+    # Eventually, this will go in the base container as far down as
+    # we can. But we don't want to do a full rebuild at the moment,
+    # so this is good for now.
+    cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
+source {{ SET_PROMPT_SCRIPT }}
+set_prompt
+EOF
+    chmod 755 ${SINGULARITY_ROOTFS}{{ SET_PROMPT_SCRIPT }}
+
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
     # Install prefix for mpich
@@ -58,10 +89,6 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
     # Version of clang to install
     export MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
 {%- endif %}
-
-    # Prepare a temp directory
-    TEMP_LOC=/root/build
-    mkdir ${TEMP_LOC}
 
     # Enable power tools
     dnf install -y dnf-plugins-core
@@ -107,46 +134,9 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
     alternatives --set python /usr/bin/python3.9
     alternatives --set python3 /usr/bin/python3.9
 
-    # Allow a custom initialization routine if the following files exist at /
-    touch ${SINGULARITY_ROOTFS}/none
-    cat <<'EOF' >> ${SINGULARITY_ROOTFS}/.singularity.d/env/90-environment.sh
-# If discovered, use these files as initialization routines
-if [ -f /init_env ]; then
-  file="/init_env"
-else
-  file="/none"
-fi
-action="${0##*/}"
-case "${action}" in
-shell)
-    if [ "${SINGULARITY_SHELL:-}" = "/bin/bash" ]; then
-        set -- --noprofile --rcfile $file
-    elif test -z "${SINGULARITY_SHELL:-}"; then
-        export SINGULARITY_SHELL=/bin/bash
-        set -- --noprofile --rcfile $file
-    fi
-    ;;
-exec)
-    export BASH_ENV="$file"
-    set -- /bin/bash --noprofile --rcfile $file -c "$*"
-    ;;
-run)
-    set -- /bin/bash --noprofile --rcfile $file
-esac
-EOF
-
-    # Create a pretty prompt (ensure last item sourced)
-    cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
-if [ -n "${CUSTOM_PROMPT}" ]; then
-    PS1=${CUSTOM_PROMPT}
-else
-    PS1="\[\033[1;34m\][`basename ${APPTAINER_NAME:-$SINGULARITY_NAME} .sif`]\[\033[1;32m\][\w]\[\033[0m\]> "
-fi
-EOF
-
     # We need git lfs
-    mkdir ${TEMP_LOC}/gitlfs
-    cd ${TEMP_LOC}/gitlfs
+    mkdir ${ROOT_BUILD_DIR}/gitlfs
+    cd ${ROOT_BUILD_DIR}/gitlfs
     curl -L -O https://github.com/git-lfs/git-lfs/releases/download/v3.2.0/git-lfs-linux-amd64-v3.2.0.tar.gz
     tar -xf git-lfs-linux-amd64-v3.2.0.tar.gz
     cd git-lfs-3.2.0
@@ -154,7 +144,7 @@ EOF
 
 {%- if ALTERNATE_FROM == "clang_min" %}
     # Build minimum Clang {{ MIN_CLANG_VERSION }} from source
-    cd ${TEMP_LOC}
+    cd ${ROOT_BUILD_DIR}
     git clone --depth 1 --branch llvmorg-${MIN_CLANG_VERSION} https://github.com/llvm/llvm-project
     cd llvm-project
     mkdir llvm-build
@@ -180,8 +170,8 @@ EOF
 
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     # Build and install MPICH
-    mkdir ${TEMP_LOC}/mpich
-    cd ${TEMP_LOC}/mpich
+    mkdir ${ROOT_BUILD_DIR}/mpich
+    cd ${ROOT_BUILD_DIR}/mpich
     curl -L -O http://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
     tar -xf mpich-4.1.2.tar.gz
     mkdir mpich-4.1.2/build
@@ -232,5 +222,8 @@ EOF
 {%- endif %}
 
     # Clean Up
-    rm -rf ${TEMP_LOC}
+    rm -rf ${ROOT_BUILD_DIR}
     dnf clean all
+
+%files
+    {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}

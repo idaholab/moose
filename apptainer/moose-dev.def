@@ -2,7 +2,6 @@
 {#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
 {#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
 {#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
-{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
 {#- WASP_GIT_SHA: The git SHA to use for WASP                                                 -#}
 {#- WASP_GIT_REMOTE: The git remote to use to get WASP                                        -#}
 
@@ -33,8 +32,6 @@
 
 {#- The script used to install wasp                                                           -#}
 {%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
-
-{%- set SET_PROMPT_SCRIPT = '/.singularity.d/set_prompt.bash' -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
@@ -67,15 +64,6 @@ From: {{ APPTAINER_FROM }}
     WASP_GIT_SHA={{ WASP_GIT_SHA }}
     WASP_GIT_REMOTE={{ WASP_GIT_REMOTE }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
-
-    # Eventually, this will go in the base container as far down as
-    # we can. But we don't want to do a full rebuild at the moment,
-    # so this is good for now.
-    mv ${ROOT_BUILD_DIR}/set_prompt.bash  ${SINGULARITY_ROOTFS}{{ SET_PROMPT_SCRIPT }}
-    cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
-source {{ SET_PROMPT_SCRIPT }}
-set_prompt
-EOF
 
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
@@ -154,7 +142,6 @@ EOF
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
-    {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ ROOT_BUILD_DIR }}/set_prompt.bash
     {{ MOOSE_DIR }}/scripts/{{ WASP_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ WASP_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_wasp.sh {{ ROOT_BUILD_DIR }}/configure_wasp.sh
 {%- if WITH_LIBTORCH %}

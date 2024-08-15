@@ -3,7 +3,7 @@ mpi:
   - openmpi
 
 moose_mpi:
-  - moose-mpi 2024.08.05
+  - moose-mpi 2024.08.12
 
 # Pesky packages that break internal CI
 # Note: Modifying/Updating this will require changes to conda/mpich!
