@@ -559,6 +559,7 @@ class MooseControl:
                         'text': True,
                         'universal_newlines': True,
                         'bufsize': 1,
-                        'env': os.environ if inherit_environment else None}
+                        'env': os.environ if inherit_environment else None,
+                        'preexec_fn': os.setsid}
 
         return subprocess.Popen(cmd, **popen_kwargs)
