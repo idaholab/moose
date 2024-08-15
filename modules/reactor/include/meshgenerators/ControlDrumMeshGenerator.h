@@ -25,8 +25,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  // Define metadata associated with ControlDrumMeshGenerator
+  ///Define metadata associated with ControlDrumMeshGenerator
   void generateMetadata();
+
+  ///Get drum index from radial index of mesh element, drum index is used to retrieve region ID and block names for each element
+  unsigned int getDrumIdxFromRadialIdx(const unsigned int radial_idx, const Real elem_x, const Real elem_y);
 
   ///The type of geometry that is being described (Square or Hex, declared in the ReactorMeshParams object)
   std::string _geom_type;
