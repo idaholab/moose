@@ -410,55 +410,73 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     {
       if (assembly != _empty_key)
       {
-        std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> pin_region_id_map =
-            getMeshProperty<
-                std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
-                RGMB::pin_region_id_map, assembly);
-        for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
-          if (_pin_region_id_map.find(pin->first) == _pin_region_id_map.end())
-            _pin_region_id_map.insert(
-                std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-                    pin->first, pin->second));
-
-        std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
-            getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
-                RGMB::pin_block_name_map, assembly);
-        for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
-          if (_pin_block_name_map.find(pin->first) == _pin_block_name_map.end())
-            _pin_block_name_map.insert(
-                std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(pin->first,
-                                                                                    pin->second));
-
-        // Define background and duct region ID map from constituent assemblies
         subdomain_id_type assembly_type =
             getMeshProperty<subdomain_id_type>(RGMB::assembly_type, assembly);
-        if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
+        if (!getMeshProperty<bool>(RGMB::is_control_drum, assembly))
         {
-          // Store region ids and block names associated with duct and background regions for each
-          // assembly, in case block names need to be recovered from region ids after
-          // multiple assemblies have been stitched together into a core
-          std::vector<subdomain_id_type> background_region_ids =
-              getMeshProperty<std::vector<subdomain_id_type>>(RGMB::background_region_id, assembly);
-          std::vector<std::vector<subdomain_id_type>> duct_region_ids =
-              getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::duct_region_ids,
-                                                                           assembly);
-          _background_region_id_map.insert(
-              std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
-                                                                           background_region_ids));
-          _duct_region_id_map.insert(
-              std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-                  assembly_type, duct_region_ids));
+          // For assembly structures, store region ID and block names of assembly regions and constituent pins
+          std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> pin_region_id_map =
+              getMeshProperty<
+                  std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
+                  RGMB::pin_region_id_map, assembly);
+          for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
+            if (_pin_region_id_map.find(pin->first) == _pin_region_id_map.end())
+              _pin_region_id_map.insert(
+                  std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+                      pin->first, pin->second));
 
-          std::vector<std::string> background_block_names =
-              getMeshProperty<std::vector<std::string>>(RGMB::background_block_name, assembly);
-          std::vector<std::vector<std::string>> duct_block_names =
-              getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::duct_block_names,
-                                                                     assembly);
-          _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
-              assembly_type, background_block_names));
-          _duct_block_name_map.insert(
+          std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
+              getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
+                  RGMB::pin_block_name_map, assembly);
+          for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
+            if (_pin_block_name_map.find(pin->first) == _pin_block_name_map.end())
+              _pin_block_name_map.insert(
+                  std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(pin->first,
+                                                                                      pin->second));
+
+          // Define background and duct region ID map from constituent assemblies
+          if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
+          {
+            // Store region ids and block names associated with duct and background regions for each
+            // assembly, in case block names need to be recovered from region ids after
+            // multiple assemblies have been stitched together into a core
+            std::vector<subdomain_id_type> background_region_ids =
+                getMeshProperty<std::vector<subdomain_id_type>>(RGMB::background_region_id, assembly);
+            std::vector<std::vector<subdomain_id_type>> duct_region_ids =
+                getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::duct_region_ids,
+                                                                             assembly);
+            _background_region_id_map.insert(
+                std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
+                                                                             background_region_ids));
+            _duct_region_id_map.insert(
+                std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+                    assembly_type, duct_region_ids));
+
+            std::vector<std::string> background_block_names =
+                getMeshProperty<std::vector<std::string>>(RGMB::background_block_name, assembly);
+            std::vector<std::vector<std::string>> duct_block_names =
+                getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::duct_block_names,
+                                                                       assembly);
+            _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
+                assembly_type, background_block_names));
+            _duct_block_name_map.insert(
+                std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
+                    assembly_type, duct_block_names));
+          }
+        }
+        else
+        {
+          // For control drum structures, store region ID and block name information of drum regions
+          std::vector<std::vector<subdomain_id_type>> drum_region_ids =
+              getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::drum_region_ids, assembly);
+          _drum_region_id_map.insert(
+              std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+                  assembly_type, drum_region_ids));
+          std::vector<std::vector<std::string>> drum_block_names =
+              getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::drum_block_names, assembly);
+          _drum_block_name_map.insert(
               std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
-                  assembly_type, duct_block_names));
+                  assembly_type, drum_block_names));
         }
       }
     }
@@ -585,7 +603,7 @@ CoreMeshGenerator::generateMetadata()
     if (input_assembly_name != _empty_key)
     {
       input_assembly_names.push_back(input_assembly_name);
-      if (!getMeshProperty<bool>(RGMB::is_single_pin, input_assembly_name))
+      if (!getMeshProperty<bool>(RGMB::is_control_drum, input_assembly_name) && !getMeshProperty<bool>(RGMB::is_single_pin, input_assembly_name))
       {
         const auto pin_names =
             getMeshProperty<std::vector<std::string>>(RGMB::pin_names, input_assembly_name);
@@ -794,41 +812,68 @@ CoreMeshGenerator::generate()
     }
     else
     {
-      // element is in an assembly duct or background region since it doesn't
-      // have a pin type id that matches one in the map. Infer peripheral index
-      // from pin_type and region id from assembly_type_id, z_id, and peripheral_index
       dof_id_type assembly_type_id = elem->get_extra_integer(assembly_type_id_int);
+      // Infer peripheral index of assembly background, assembly duct, or control drum regions from pin_type
       unsigned int peripheral_idx = ((UINT16_MAX / 2) - 1) - pin_type_id;
-      bool is_background_region = peripheral_idx == 0;
-      const auto elem_rid =
-          (is_background_region ? _background_region_id_map[assembly_type_id][z_id]
-                                : _duct_region_id_map[assembly_type_id][z_id][peripheral_idx - 1]);
-      elem->set_extra_integer(region_id_int, elem_rid);
 
-      // Set element block name and block id
-      auto elem_block_name = default_block_name;
-      if (getReactorParam<bool>(RGMB::region_id_as_block_name))
-        elem_block_name += "_REG" + std::to_string(elem_rid);
-      else
+      // check if element is part of drum region
+      if (_drum_region_id_map.find(assembly_type_id) != _drum_region_id_map.end())
       {
-        if (is_background_region)
-        {
-          bool has_background_block_name = !_background_block_name_map[assembly_type_id].empty();
-          if (has_background_block_name)
-            elem_block_name += "_" + _background_block_name_map[assembly_type_id][z_id];
-        }
+        // Element is in a control drum region. Infer region id from assembly_type_id, z_id, and peripheral_index
+        const auto elem_rid = _drum_region_id_map[assembly_type_id][z_id][peripheral_idx];
+        elem->set_extra_integer(region_id_int, elem_rid);
+
+        // Set element block name and block id
+        auto elem_block_name = default_block_name;
+        if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+          elem_block_name += "_REG" + std::to_string(elem_rid);
         else
         {
-          bool has_duct_block_names = !_duct_block_name_map[assembly_type_id].empty();
-          if (has_duct_block_names)
-            elem_block_name +=
-                "_" + _duct_block_name_map[assembly_type_id][z_id][peripheral_idx - 1];
+          bool has_drum_block_name = !_drum_block_name_map[assembly_type_id].empty();
+          if (has_drum_block_name)
+            elem_block_name += "_" + _drum_block_name_map[assembly_type_id][z_id][peripheral_idx];
         }
+        if (elem->type() == TRI3 || elem->type() == PRISM6)
+          elem_block_name += "_TRI";
+        updateElementBlockNameId(
+            *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
       }
-      if (elem->type() == TRI3 || elem->type() == PRISM6)
-        elem_block_name += "_TRI";
-      updateElementBlockNameId(
-          *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
+      else
+      {
+        // Element is in an assembly duct or background region since it doesn't
+        // have an assembly type id in the drum region map. Infer region id from
+        // assembly_type_id, z_id, and peripheral_index
+        bool is_background_region = peripheral_idx == 0;
+        const auto elem_rid =
+            (is_background_region ? _background_region_id_map[assembly_type_id][z_id]
+                                  : _duct_region_id_map[assembly_type_id][z_id][peripheral_idx - 1]);
+        elem->set_extra_integer(region_id_int, elem_rid);
+
+        // Set element block name and block id
+        auto elem_block_name = default_block_name;
+        if (getReactorParam<bool>(RGMB::region_id_as_block_name))
+          elem_block_name += "_REG" + std::to_string(elem_rid);
+        else
+        {
+          if (is_background_region)
+          {
+            bool has_background_block_name = !_background_block_name_map[assembly_type_id].empty();
+            if (has_background_block_name)
+              elem_block_name += "_" + _background_block_name_map[assembly_type_id][z_id];
+          }
+          else
+          {
+            bool has_duct_block_names = !_duct_block_name_map[assembly_type_id].empty();
+            if (has_duct_block_names)
+              elem_block_name +=
+                  "_" + _duct_block_name_map[assembly_type_id][z_id][peripheral_idx - 1];
+          }
+        }
+        if (elem->type() == TRI3 || elem->type() == PRISM6)
+          elem_block_name += "_TRI";
+        updateElementBlockNameId(
+            *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
+      }
     }
   }
 
