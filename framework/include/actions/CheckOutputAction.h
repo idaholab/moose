@@ -18,10 +18,6 @@
 class CheckOutputAction : public Action
 {
 public:
-  /**
-   * Class constructor
-   * @param params Input parameters for this object
-   */
   static InputParameters validParams();
 
   CheckOutputAction(const InputParameters & params);

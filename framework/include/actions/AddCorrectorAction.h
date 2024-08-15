@@ -13,14 +13,15 @@
 #include "MooseObjectAction.h"
 
 /**
- * Action for creating output objects
+ * Action for creating Corrector, a UserObject
+ * designed for modifying nonlinear variable solutions, for example outside of the nonlinear solve
  */
-class AddOutputAction : public MooseObjectAction
+class AddCorrectorAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddOutputAction(const InputParameters & params);
+  AddCorrectorAction(const InputParameters & params);
 
   virtual void act() override;
 };

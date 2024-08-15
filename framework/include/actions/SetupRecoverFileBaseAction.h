@@ -18,10 +18,6 @@
 class SetupRecoverFileBaseAction : public Action
 {
 public:
-  /**
-   * Class constructor
-   * @param params Input parameters for this action
-   */
   static InputParameters validParams();
 
   SetupRecoverFileBaseAction(const InputParameters & params);
