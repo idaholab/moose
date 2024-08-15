@@ -15,7 +15,7 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", MeshExtruderGenerator);
+registerMooseObjectDeprecated("MooseApp", MeshExtruderGenerator, "12/31/2025 24:00");
 
 InputParameters
 MeshExtruderGenerator::validParams()

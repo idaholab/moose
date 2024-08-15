@@ -14,20 +14,24 @@ The number of elements in the radial direction and the angular direction may be 
 
 Sidesets are also created:
 
-* Sideset 0 is called "rmin" and is the set of sides at the minimum radius (which is zero for the disc).
-* Sideset 1 is called "rmax" and is the set of sides at the maximum radius.
-* Sideset 2 is called "dmin" and is the set of sides at the minimum angle, which is created only in the case of a sector of an annulus (or disc)
-* Sideset 3 is called "dmax" and is the set of sides at the maximum angle, which is created only in the case of a sector of an annulus (or disc)
+- Sideset 0 is called "rmin" and is the set of sides at the minimum radius (which is zero for the disc).
+- Sideset 1 is called "rmax" and is the set of sides at the maximum radius.
+- Sideset 2 is called "dmin" and is the set of sides at the minimum angle, which is created only in the case of a sector of an annulus (or disc)
+- Sideset 3 is called "dmax" and is the set of sides at the maximum angle, which is created only in the case of a sector of an annulus (or disc)
+
 
 ## Example Syntax
 
 A full annulus with minimum radius 1 and maximum radius 5, with smaller elements near the inside of the annulus.  (A disc would be created by setting rmin to zero.)
+
 !listing test/tests/mesh/mesh_generation/annulus.i block=Mesh
 
 A sector of an annulus, sitting between 45 and 135 degrees.  (A sector of a disc would be created by setting rmin to zero.)
+
 !listing test/tests/mesh/mesh_generation/annulus_sector.i block=Mesh
 
 An example of using sidesets
+
 !listing test/tests/mesh/mesh_generation/annulus_sector.i block=BCs
 
 !syntax parameters /Mesh/AnnularMesh

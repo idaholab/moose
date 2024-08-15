@@ -299,7 +299,7 @@ public:
    */
   virtual Real vaporPressure(Real T) const;
   virtual void vaporPressure(Real T, Real & psat, Real & dpsat_dT) const;
-  ADReal vaporPressure(const ADReal & T) const;
+  virtual ADReal vaporPressure(const ADReal & T) const;
 
   /**
    * Vapor temperature. Used to delineate liquid and gas phases.
@@ -312,7 +312,7 @@ public:
    */
   virtual Real vaporTemperature(Real p) const;
   virtual void vaporTemperature(Real p, Real & Tsat, Real & dTsat_dp) const;
-  ADReal vaporTemperature(const ADReal & p) const;
+  virtual ADReal vaporTemperature(const ADReal & p) const;
 
   /**
    * Henry's law coefficients for dissolution in water

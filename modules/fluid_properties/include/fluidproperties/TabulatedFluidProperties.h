@@ -72,6 +72,8 @@ public:
 
   virtual Real h_from_p_T(Real p, Real T) const override;
 
+  virtual ADReal h_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+
   virtual void
   h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
@@ -104,11 +106,27 @@ public:
 
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
 
+  /**
+   * The following routines are simply forwarded to the 'fp' companion FluidProperties
+   * as they are not included in the tabulations presently
+   */
   virtual std::vector<Real> henryCoefficients() const override;
 
   virtual Real vaporPressure(Real temperature) const override;
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
+
+  virtual Real vaporTemperature(Real pressure) const override;
+  virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
+
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+  virtual ADReal T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const override;
+
+  virtual Real triplePointPressure() const override;
+  virtual Real triplePointTemperature() const override;
+  virtual Real criticalPressure() const override;
+  virtual Real criticalTemperature() const override;
+  virtual Real criticalDensity() const override;
 
   /**
    * Derivatives like dc_dv & dc_de are computed using the chain rule
@@ -138,6 +156,8 @@ public:
   virtual Real T_from_h_p(Real h, Real pressure) const override;
   virtual Real s_from_v_e(Real v, Real e) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
+  virtual void
+  s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
 
   /// AD implementations needed
   using SinglePhaseFluidProperties::c_from_v_e;
@@ -211,6 +231,9 @@ protected:
 
   /// Standardized error message for missing interpolation
   void missingVEInterpolationError(const std::string & function_name) const;
+
+  // Utility to forward errors related to fluid properties methods not implemented
+  [[noreturn]] void FluidPropertiesForwardError(const std::string & desired_routine) const;
 
   /// File name of input tabulated data file
   FileName _file_name_in;

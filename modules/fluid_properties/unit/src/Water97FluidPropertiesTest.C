@@ -347,6 +347,15 @@ TEST_F(Water97FluidPropertiesTest, properties)
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 4.1207e3, REL_TOL_EXTERNAL_VALUE);
 
+  // (h,p) properties
+  Real h0, h1, h2;
+  h0 = _fp->h_from_p_T(p0, T0);
+  h1 = _fp->h_from_p_T(p1, T1);
+  h2 = _fp->h_from_p_T(p2, T2);
+  REL_TEST(_fp->s_from_h_p(h0, p0), 0.392294792e3, 1e-3);
+  REL_TEST(_fp->s_from_h_p(h1, p1), 0.368563852e3, 1e-3);
+  REL_TEST(_fp->s_from_h_p(h2, p2), 2.58041912e3, 1e-4);
+
   // Region 2 properties
   p0 = 3.5e3;
   p1 = 3.5e3;
@@ -376,6 +385,14 @@ TEST_F(Water97FluidPropertiesTest, properties)
 
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 1.4415e3, REL_TOL_EXTERNAL_VALUE);
+
+  // (h,p) properties
+  h0 = _fp->h_from_p_T(p0, T0);
+  h1 = _fp->h_from_p_T(p1, T1);
+  h2 = _fp->h_from_p_T(p2, T2);
+  REL_TEST(_fp->s_from_h_p(h0, p0), 8.52238967e3, 1e-5);
+  REL_TEST(_fp->s_from_h_p(h1, p1), 10.1749996e3, 1e-6);
+  REL_TEST(_fp->s_from_h_p(h2, p2), 5.17540298e3, 1e-4);
 
   // Region 3 properties
   p0 = 25.5837018e6;
@@ -408,6 +425,14 @@ TEST_F(Water97FluidPropertiesTest, properties)
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 3.1910e3, REL_TOL_EXTERNAL_VALUE);
 
+  // (h,p) properties
+  h0 = _fp->h_from_p_T(p0, T0);
+  h1 = _fp->h_from_p_T(p1, T1);
+  h2 = _fp->h_from_p_T(p2, T2);
+  REL_TEST(_fp->s_from_h_p(h0, p0), 4.05427273e3, 1e-4);
+  REL_TEST(_fp->s_from_h_p(h1, p1), 4.85438792e3, 2e-4);
+  REL_TEST(_fp->s_from_h_p(h2, p2), 4.46971906e3, 2e-5);
+
   // Region 5 properties
   p0 = 0.5e6;
   p1 = 30.0e6;
@@ -437,6 +462,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
 
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 2.1534e3, REL_TOL_EXTERNAL_VALUE);
+
+  // (h,p) properties
+  // T_from_p_h is not implemented in zone 5
 
   // Viscosity
   ABS_TEST(_fp->mu_from_rho_T(998.0, 298.15), 889.735100e-6, tol2);
@@ -475,6 +503,7 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->T_from_p_h(3.0e6, 500.0e3), 0.391798509e3, tol);
   REL_TEST(_fp->T_from_p_h(80.0e6, 500.0e3), 0.378108626e3, tol);
   REL_TEST(_fp->T_from_p_h(80.0e6, 1500.0e3), 0.611041229e3, tol);
+  REL_TEST(_fp->T_from_p_h((ADReal)80.0e6, (ADReal)1500.0e3).value(), 0.611041229e3, tol);
 
   // Region 2 (subregion a)
   REL_TEST(_fp->T_from_p_h(1.0e3, 3000.0e3), 0.534433241e3, tol);
@@ -516,6 +545,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
 
   // Region 2
   p = 3.5e3;
@@ -523,6 +553,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
 
   // Region 3
   p = 26.0e6;
@@ -530,6 +561,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->rho_from_p_T, p, T, 1.0e-2);
   DERIV_TEST(_fp->e_from_p_T, p, T, 1.0e-2);
   DERIV_TEST(_fp->h_from_p_T, p, T, 1.0e-2);
+  DERIV_TEST(_fp->s_from_p_T, p, T, 1.0e-2);
 
   // Region 4 (saturation curve)
   T = 300.0;
@@ -547,6 +579,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
 
   // Viscosity
   Real rho = 998.0, drho_dp = 0.0, drho_dT = 0.0;
@@ -604,6 +637,12 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
                   (2.0 * dh);
 
   REL_TEST(adT.derivatives()[1], dT_dh_fd, tol);
+
+  // Check derivatives of (p, h) routines
+  p = 3.0e6;
+  T = 300.0;
+  Real h = _fp->h_from_p_T(p, T);
+  DERIV_TEST(_fp->s_from_h_p, h, p, tol);
 }
 
 /**

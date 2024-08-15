@@ -181,6 +181,15 @@
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
   []
+  [water_vapor_tabulated]
+    type = 'CSVDiff'
+    input = 'water_vapor_tab.i'
+    csvdiff = 'water_vapor_twophase_tab.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall be able to use tabulated fluid properties in conjunction with another fluid properties object to provide non-tabulated properties.'
+    design = 'PorousFlowWaterVapor.md'
+    issues = '#27457'
+  []
   [geothermal_1d]
     type = 'CSVDiff'
     input = 'coldwater_injection.i'

@@ -354,7 +354,7 @@ TabulatedFluidProperties::molarMass() const
   if (_fp)
     return _fp->molarMass();
   else
-    mooseError("Molar mass can currently only be computed by providing a 'fp' object.");
+    FluidPropertiesForwardError("molarMass");
 }
 
 Real
@@ -611,6 +611,15 @@ TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
     else
       paramError("fp", "No fluid properties or csv data provided for enthalpy.");
   }
+}
+
+ADReal
+TabulatedFluidProperties::h_from_p_T(const ADReal & pressure, const ADReal & temperature) const
+{
+  if (_fp) // Assuming _fp can handle ADReal types
+    return _fp->h_from_p_T(pressure, temperature);
+  else
+    FluidPropertiesForwardError("h_from_p_T");
 }
 
 void
@@ -922,7 +931,7 @@ TabulatedFluidProperties::henryCoefficients() const
   if (_fp)
     return _fp->henryCoefficients();
   else
-    mooseError("Henry coefficients can currently only be computed by providing a 'fp' object.");
+    FluidPropertiesForwardError("henryCoefficients");
 }
 
 Real
@@ -931,7 +940,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature) const
   if (_fp)
     return _fp->vaporPressure(temperature);
   else
-    mooseError("Vapor pressure can currently only be computed by providing a 'fp' object.");
+    FluidPropertiesForwardError("vaporPressure");
 }
 
 void
@@ -940,7 +949,93 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
   if (_fp)
     _fp->vaporPressure(temperature, psat, dpsat_dT);
   else
-    mooseError("Vapor pressure can currently only be computed by providing a 'fp' object.");
+    FluidPropertiesForwardError("vaporPressure");
+}
+
+Real
+TabulatedFluidProperties::vaporTemperature(Real pressure) const
+{
+  if (_fp)
+    return _fp->vaporTemperature(pressure);
+  else
+    FluidPropertiesForwardError("vaporTemperature");
+}
+
+void
+TabulatedFluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const
+{
+
+  if (_fp)
+    _fp->vaporTemperature(pressure, Tsat, dTsat_dp);
+  else
+    FluidPropertiesForwardError("vaporTemperature");
+}
+
+Real
+TabulatedFluidProperties::triplePointPressure() const
+{
+
+  if (_fp)
+    return _fp->triplePointPressure();
+  else
+    FluidPropertiesForwardError("triplePointPressure");
+}
+
+Real
+TabulatedFluidProperties::triplePointTemperature() const
+{
+
+  if (_fp)
+    return _fp->triplePointTemperature();
+  else
+    FluidPropertiesForwardError("triplePointTemperature");
+}
+
+Real
+TabulatedFluidProperties::criticalPressure() const
+{
+
+  if (_fp)
+    return _fp->criticalPressure();
+  else
+    FluidPropertiesForwardError("criticalPressure");
+}
+
+Real
+TabulatedFluidProperties::criticalTemperature() const
+{
+
+  if (_fp)
+    return _fp->criticalTemperature();
+  else
+    FluidPropertiesForwardError("criticalTemperature");
+}
+
+Real
+TabulatedFluidProperties::criticalDensity() const
+{
+  if (_fp)
+    return _fp->criticalDensity();
+  else
+    FluidPropertiesForwardError("criticalDensity");
+}
+
+Real
+TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
+{
+  if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+    FluidPropertiesForwardError("T_from_p_h");
+}
+
+ADReal
+TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const
+{
+  if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+    FluidPropertiesForwardError("T_from_p_h");
 }
 
 Real
@@ -1351,6 +1446,26 @@ TabulatedFluidProperties::s_from_h_p(Real h, Real pressure) const
 }
 
 void
+TabulatedFluidProperties::s_from_h_p(
+    Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const
+{
+
+  if (_fp)
+    _fp->s_from_h_p(h, pressure, s, ds_dh, ds_dp);
+  else
+    mooseError("fp", "s_from_h_p derivatives not implemented.");
+}
+
+[[noreturn]] void
+TabulatedFluidProperties::FluidPropertiesForwardError(const std::string & desired_routine) const
+{
+  mooseError("TabulatedFluidProperties can only call the function '" + desired_routine +
+             "' when the 'fp' parameter is provided. It is currently not implemented using "
+             "tabulations, and this property is simply forwarded to the FluidProperties specified "
+             "in the 'fp' parameter");
+}
+
+void
 TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 {
   file_name = file_name.empty() ? "fluid_properties_" + name() + "_out.csv" : file_name;
@@ -1635,6 +1750,7 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
                            " is outside the range of tabulated pressure (" +
                            Moose::stringify(_pressure_min) + ", " +
                            Moose::stringify(_pressure_max) + ").");
+
     else
     {
       pressure = std::max(_pressure_min, std::min(pressure, _pressure_max));

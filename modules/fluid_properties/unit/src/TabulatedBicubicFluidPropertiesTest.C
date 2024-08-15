@@ -679,7 +679,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
   const Real tol = REL_TOL_SAVED_VALUE;
 
   // As the flags for interpolation in TabulatedBicubicFluidProperties default to false,
-  // properties will be passed through to the given userobject
+  // properties will be passed through to the given fluid properties object
   ABS_TEST(_tab_pT_from_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->h_from_p_T(p, T), _co2_fp->h_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), tol);
@@ -688,13 +688,26 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_pT_from_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), tol);
+
+  // These calls are always forwarded to the 'fp' parameter fluid properties because the
+  // tabulations are not implemented
   ABS_TEST(_tab_pT_from_fp->henryCoefficients()[0], _co2_fp->henryCoefficients()[0], tol);
   ABS_TEST(_tab_pT_from_fp->henryCoefficients()[1], _co2_fp->henryCoefficients()[1], tol);
   ABS_TEST(_tab_pT_from_fp->henryCoefficients()[2], _co2_fp->henryCoefficients()[2], tol);
+  ABS_TEST(_tab_pT_from_fp->triplePointPressure(), _co2_fp->triplePointPressure(), tol);
+  ABS_TEST(_tab_pT_from_fp->triplePointTemperature(), _co2_fp->triplePointTemperature(), tol);
+  ABS_TEST(_tab_pT_from_fp->criticalPressure(), _co2_fp->criticalPressure(), tol);
+  ABS_TEST(_tab_pT_from_fp->criticalTemperature(), _co2_fp->criticalTemperature(), tol);
+  ABS_TEST(_tab_pT_from_fp->criticalDensity(), _co2_fp->criticalDensity(), tol);
 
   // Use a temperature less than the critical point
   T = 300.0;
   ABS_TEST(_tab_pT_from_fp->vaporPressure(T), _co2_fp->vaporPressure(T), tol);
+
+  // TODO: these properties are not implemented in CO2 fp so we cannot test the pass through
+  // T_from_p_h
+  // vaporPressure with saturation pressure
+  // vaporTemperature
 }
 
 /**

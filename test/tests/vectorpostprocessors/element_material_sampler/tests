@@ -1,6 +1,6 @@
 [Tests]
   issues = '#8436'
-  design = 'MaterialVectorPostprocessor.md'
+  design = 'ElementMaterialSampler.md'
 
   [basic]
     type = 'CSVDiff'

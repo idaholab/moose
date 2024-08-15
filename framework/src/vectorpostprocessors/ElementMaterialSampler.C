@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MaterialVectorPostprocessor.h"
+#include "ElementMaterialSampler.h"
 #include "Material.h"
 #include "IndirectSort.h"
 #include "MooseMesh.h"
@@ -16,14 +16,18 @@
 
 #include <numeric>
 
-registerMooseObject("MooseApp", MaterialVectorPostprocessor);
+registerMooseObject("MooseApp", ElementMaterialSampler);
+registerMooseObjectRenamed("MooseApp",
+                           MaterialVectorPostprocessor,
+                           "06/30/2025 24:00",
+                           ElementMaterialSampler);
 
 InputParameters
-MaterialVectorPostprocessor::validParams()
+ElementMaterialSampler::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
-  params.addClassDescription("Records all scalar material properties of a material object on "
-                             "elements at the indicated execution points.");
+  params.addClassDescription("Records all Real-valued material properties of a material object on "
+                             "quadrature points on elements at the indicated execution points.");
   params.addRequiredParam<MaterialName>("material",
                                         "Material for which all properties will be recorded.");
   params.addParam<std::vector<dof_id_type>>(
@@ -32,7 +36,7 @@ MaterialVectorPostprocessor::validParams()
   return params;
 }
 
-MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters & parameters)
+ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _elem_ids(declareVector("elem_id")),
     _qp_ids(declareVector("qp_id")),
@@ -80,7 +84,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
     else
     {
       mooseWarning("property " + prop +
-                   " is of unsupported type and skipped by MaterialVectorPostprocessor");
+                   " is of unsupported type and skipped by ElementMaterialSampler");
       continue;
     }
     _prop_vecs.push_back(&declareVector(prop));
@@ -89,7 +93,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
 }
 
 void
-MaterialVectorPostprocessor::initialize()
+ElementMaterialSampler::initialize()
 {
   if (!containsCompleteHistory())
   {
@@ -104,7 +108,7 @@ MaterialVectorPostprocessor::initialize()
 }
 
 void
-MaterialVectorPostprocessor::execute()
+ElementMaterialSampler::execute()
 {
   // skip execution if element not in filter, assuming filter was used
   const auto elem_id = _current_elem->id();
@@ -148,7 +152,7 @@ MaterialVectorPostprocessor::execute()
 }
 
 void
-MaterialVectorPostprocessor::finalize()
+ElementMaterialSampler::finalize()
 {
   // collect all processor data
   comm().gather(0, _elem_ids);
@@ -162,9 +166,9 @@ MaterialVectorPostprocessor::finalize()
 }
 
 void
-MaterialVectorPostprocessor::threadJoin(const UserObject & y)
+ElementMaterialSampler::threadJoin(const UserObject & y)
 {
-  const auto & vpp = static_cast<const MaterialVectorPostprocessor &>(y);
+  const auto & vpp = static_cast<const ElementMaterialSampler &>(y);
   _elem_ids.insert(_elem_ids.end(), vpp._elem_ids.begin(), vpp._elem_ids.end());
   _qp_ids.insert(_qp_ids.end(), vpp._qp_ids.begin(), vpp._qp_ids.end());
   _x_coords.insert(_x_coords.end(), vpp._x_coords.begin(), vpp._x_coords.end());
@@ -181,7 +185,7 @@ MaterialVectorPostprocessor::threadJoin(const UserObject & y)
 }
 
 void
-MaterialVectorPostprocessor::sortVecs()
+ElementMaterialSampler::sortVecs()
 {
   std::vector<size_t> ind;
   ind.resize(_elem_ids.size());
