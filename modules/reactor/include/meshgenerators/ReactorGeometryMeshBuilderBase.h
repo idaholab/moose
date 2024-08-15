@@ -33,6 +33,9 @@ static const std::string pin_region_id_map = "pin_region_id_map";
 static const std::string pin_block_name_map = "pin_block_name_map";
 static const std::string flexible_assembly_stitching = "flexible_assembly_stitching";
 static const std::string num_sectors_flexible_stitching = "num_sectors_flexible_stitching";
+static const std::string is_control_drum = "is_control_drum";
+static const std::string drum_region_ids = "drum_region_ids";
+static const std::string drum_block_names = "drum_block_names";
 
 // Geometrical quantities
 static const std::string pitch = "pitch";
@@ -42,6 +45,8 @@ static const std::string duct_halfpitches = "duct_halfpitches";
 static const std::string peripheral_ring_radius = "peripheral_ring_radius";
 static const std::string pin_lattice = "pin_lattice";
 static const std::string assembly_lattice = "assembly_lattice";
+static const std::string drum_pad_angles = "drum_pad_angles";
+static const std::string drum_radii = "drum_radii";
 
 // Quantities related to region ids, type ids, and block names
 static const std::string pin_type = "pin_type";

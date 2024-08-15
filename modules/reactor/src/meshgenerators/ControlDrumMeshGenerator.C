@@ -70,6 +70,8 @@ ControlDrumMeshGenerator::validParams()
 ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & parameters)
   : ReactorGeometryMeshBuilderBase(parameters),
     _assembly_type(getParam<subdomain_id_type>("assembly_type")),
+    _drum_inner_radius(getParam<Real>("drum_inner_radius")),
+    _drum_outer_radius(getParam<Real>("drum_outer_radius")),
     _extrude(getParam<bool>("extrude")),
     _region_ids(isParamValid("region_ids")
                     ? getParam<std::vector<std::vector<subdomain_id_type>>>("region_ids")
@@ -85,17 +87,15 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
   _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
 
-  const auto drum_inner_radius = getParam<Real>("drum_inner_radius");
-  const auto drum_outer_radius = getParam<Real>("drum_outer_radius");
   const auto drum_inner_intervals = getParam<unsigned int>("drum_inner_intervals");
   const auto drum_intervals = getParam<unsigned int>("drum_intervals");
   const auto num_sectors = getParam<unsigned int>("num_azimuthal_sectors");
   const auto assembly_pitch = getReactorParam<Real>(RGMB::assembly_pitch);
 
   // Check drum radius parameters
-  if (drum_inner_radius >= drum_outer_radius)
+  if (_drum_inner_radius >= _drum_outer_radius)
     paramError("drum_outer_radius", "Drum outer radius must be larger than the inner radius");
-  if (drum_outer_radius >= assembly_pitch / 2.)
+  if (_drum_outer_radius >= assembly_pitch / 2.)
     paramError("drum_outer_radius", "Outer radius of drum region must be smaller than half the assembly pitch as defined by 'ReactorMeshParams/assembly_pitch'");
 
   // Check drum pad parameters
@@ -198,7 +198,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       auto params = _app.getFactory().getValidParams("AdvancedConcentricCircleGenerator");
 
       params.set<std::vector<Real>>("customized_azimuthal_angles") = azimuthal_angles;
-      params.set<std::vector<double>>("ring_radii") = {drum_inner_radius, drum_outer_radius};
+      params.set<std::vector<double>>("ring_radii") = {_drum_inner_radius, _drum_outer_radius};
       params.set<std::vector<unsigned int>>("ring_intervals") = {drum_inner_intervals, drum_intervals};
       if (drum_inner_intervals > 1)
       {
@@ -229,11 +229,15 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       params.set<Real>("boundary_size") = assembly_pitch;
       params.set<boundary_id_type>("external_boundary_id") = 20000 + _assembly_type;
       params.set<BoundaryName>("external_boundary_name") =
-          "outer_drum_" + std::to_string(_assembly_type);
+          "outer_assembly_" + std::to_string(_assembly_type);
       params.set<SubdomainName>("background_subdomain_name") = block_name_prefix + "_R2_TRI";
       params.set<unsigned short>("background_subdomain_id") = RGMB::CONTROL_DRUM_BLOCK_ID_OUTER;
 
       addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);
+
+      // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
+      copyMeshProperty<bool>("is_control_drum_meta", name() + "_fpg");
+      copyMeshProperty<Real>("pattern_pitch_meta", name() + "_fpg");
     }
     std::string build_mesh_name = name() + "_delbds";
     {
@@ -300,22 +304,25 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
     _build_mesh = &getMeshByName(build_mesh_name);
   }
 
-  /*
   generateMetadata();
-  */
 }
 
 void
 ControlDrumMeshGenerator::generateMetadata()
 {
-  /* TODO update, add block_names, region_ids, drum_inner_radius, drum_outer_radius, start_angle, end_angle, is_control_drum?
   // Declare metadata for use in downstream mesh generators
   declareMeshProperty(RGMB::assembly_type, _assembly_type);
   declareMeshProperty(RGMB::pitch, getReactorParam<Real>(RGMB::assembly_pitch));
+  declareMeshProperty(RGMB::extruded, _extrude && _mesh_dimensions == 3);
+  declareMeshProperty(RGMB::is_control_drum, true);
+  declareMeshProperty(RGMB::drum_region_ids, _region_ids);
+  declareMeshProperty(RGMB::drum_block_names, _block_names);
+  std::vector<Real> drum_pad_angles = _has_pad_region ? std::vector<Real>({_pad_start_angle, _pad_end_angle}) : std::vector<Real>();
+  declareMeshProperty(RGMB::drum_pad_angles, drum_pad_angles);
+  std::vector<Real> drum_radii = std::vector<Real>({_drum_inner_radius, _drum_outer_radius});
+  declareMeshProperty(RGMB::drum_radii, drum_radii);
   declareMeshProperty(RGMB::is_homogenized, false);
   declareMeshProperty(RGMB::is_single_pin, false);
-  declareMeshProperty(RGMB::extruded, _extrude && _mesh_dimensions == 3);
-  */
 }
 
 std::unique_ptr<MeshBase>
@@ -332,17 +339,6 @@ ControlDrumMeshGenerator::generate()
     auto null_mesh = nullptr;
     return null_mesh;
   }
-
-  /* TODO is this needed?
-  // Update metadata at this point since values for these metadata only get set by PCCMG
-  // at generate() stage
-  if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
-  {
-    const auto pattern_pitch_meta =
-        getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
-    setMeshProperty("pattern_pitch_meta", pattern_pitch_meta);
-  }
-  */
 
   // This generate() method will be called once the subgenerators that we depend on are
   // called. This is where we reassign subdomain ids/name in case they were merged when
@@ -409,13 +405,11 @@ ControlDrumMeshGenerator::generate()
         *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
   }
 
-  /* TODO update
   if (getParam<bool>("generate_depletion_id"))
   {
     const MooseEnum option = getParam<MooseEnum>("depletion_id_type");
     addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Assembly, _extrude);
   }
-  */
 
   (*_build_mesh)->find_neighbors();
 

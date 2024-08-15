@@ -40,6 +40,12 @@ protected:
   ///The id number for the type of the assembly
   const subdomain_id_type _assembly_type;
 
+  ///The inner radius of drum region
+  const Real _drum_inner_radius;
+
+  ///The outer radius of drum region
+  const Real _drum_outer_radius;
+
   ///Whether this mesh should be extruded to 3-D, making it the final structure in the reactor mesh
   const bool _extrude;
 
