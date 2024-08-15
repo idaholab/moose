@@ -9,17 +9,23 @@
 
 #pragma once
 
-#include "Reaction.h"
+#include "Kernel.h"
 
 /**
- * Computes a finite element mass matrix meant for use in preconditioning schemes which require one
+ *  Computes a finite element mass matrix
  */
-class MassMatrix : public Reaction
+class MassMatrix : public Kernel
 {
 public:
   static InputParameters validParams();
 
   MassMatrix(const InputParameters & parameters);
 
-  virtual void computeResidual() override {}
+protected:
+  virtual Real computeQpResidual() override;
+
+  virtual Real computeQpJacobian() override;
+
+  /// The density of the material
+  const MaterialProperty<Real> & _density;
 };
