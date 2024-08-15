@@ -51,7 +51,7 @@ MOOSEToNEML2Parameter::MOOSEToNEML2Parameter(const InputParameters & params)
     _model(neml2::get_model(params.get<std::string>("model"), params.get<bool>("enable_AD"))),
     _neml2_parameter(getParam<std::string>("neml2_parameter"))
 {
-  if (_model.named_parameters().has_key(_neml2_parameter))
+  if (!_model.named_parameters().has_key(_neml2_parameter))
     mooseError("Trying to set scalar-valued material property named ",
                _neml2_parameter,
                ". But there is not such parameter in the NEML2 material model.");
@@ -60,7 +60,15 @@ MOOSEToNEML2Parameter::MOOSEToNEML2Parameter(const InputParameters & params)
 void
 MOOSEToNEML2Parameter::insertIntoParameter() const
 {
-  _model.set_parameter(_neml2_parameter, neml2::Tensor(torch::stack(_buffer, 0), 1));
+  auto param = neml2::Tensor(torch::stack(_buffer, 0), 1);
+  // check batch size of the paremeter and the model
+  if (param.batch_sizes() != _model.batch_sizes())
+  {
+    mooseError("Batch size does not match while trying to set NEML2 parameter ",
+               _neml2_parameter,
+               " from MOOSE.");
+  }
+  _model.set_parameter(_neml2_parameter, param);
 }
 
 void

@@ -15,6 +15,7 @@ registerMooseObject("SolidMechanicsApp", ExecuteNEML2Model);
 #ifndef NEML2_ENABLED
 NEML2ObjectStubImplementationOpen(ExecuteNEML2Model, ElementUserObject);
 NEML2ObjectStubParam(std::vector<UserObjectName>, "gather_uos");
+NEML2ObjectStubParam(std::vector<UserObjectName>, "gather_param_uos");
 NEML2ObjectStubImplementationClose(ExecuteNEML2Model, ElementUserObject);
 #else
 
@@ -31,6 +32,9 @@ ExecuteNEML2Model::validParams()
   // we need the user to explicitly list the UOs so we can set up a construction order independent
   // dependency chain
   params.addParam<std::vector<UserObjectName>>("gather_uos", "List of MOOSE*ToNEML2 user objects");
+
+  params.addParam<std::vector<UserObjectName>>("gather_param_uos",
+                                               "List of MOOSE*ToNEML2Parameter user objects");
 
   // time input
   params.addParam<std::string>("neml2_time", "forces/t", "(optional) NEML2 variable name for time");
@@ -61,8 +65,13 @@ ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
 {
   const auto gather_uo_names = getParam<std::vector<UserObjectName>>("gather_uos");
 
+  const auto gather_param_uo_names = getParam<std::vector<UserObjectName>>("gather_param_uos");
+
   // add user object dependencies by name (the UOs do not need to exist yet for this)
   for (const auto & uo_name : gather_uo_names)
+    _depend_uo.insert(uo_name);
+
+  for (const auto & uo_name : gather_param_uo_names)
     _depend_uo.insert(uo_name);
 
   for (const auto & output : model().output_axis().variable_names())
@@ -115,6 +124,16 @@ ExecuteNEML2Model::initialSetup()
     _gather_uos.push_back(&uo);
 
     addUOVariable(uo_name, uo.getNEML2Variable());
+  }
+
+  // deal with user object provided inputs
+  for (const auto & uo_name : getParam<std::vector<UserObjectName>>("gather_param_uos"))
+  {
+    // gather coupled user objects late to ensure they are constructed. Do not add them as
+    // dependencies (that's already done in the constructor).
+    const auto & uo =
+        getUserObjectByName<MOOSEToNEML2Parameter>(uo_name, /*is_dependency = */ false);
+    _gather_param_uos.push_back(&uo);
   }
 
   std::set<neml2::VariableName> required_inputs = model().input_axis().variable_names();
@@ -267,20 +286,18 @@ ExecuteNEML2Model::finalize()
 void
 ExecuteNEML2Model::preCompute()
 {
+  // Set model parameters from the parameter UOs
+  for (const auto & uo : _gather_param_uos)
+  {
+    mooseAssert(!model().named_parameters().has_key(uo->getNEML2Parameter()),
+                "Parameter gathered by the UO does not connect to a NEML2 parameter");
+    uo->insertIntoParameter();
+  }
+  // Request gradient for the properties that we request AD for
   for (auto & [out, name, batch_tensor_ptr] : _retrieved_parameter_derivatives)
   {
     auto param = neml2::Tensor(model().get_parameter(name));
-    // check batch size of the paremeter and the model
-    if (param.batch_sizes() != model().batch_sizes())
-    {
-      // when the batch size of the parameter size not match with the batch size of the model, we
-      // expand the batch size of the parameter
-      auto pval = param.batch_expand(model().batch_sizes());
-      pval.requires_grad_(true);
-      model().set_parameter(name, pval);
-    }
-    else
-      param.requires_grad_(true);
+    param.requires_grad_(true);
   }
 }
 
