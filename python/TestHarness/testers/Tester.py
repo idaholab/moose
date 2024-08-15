@@ -400,10 +400,15 @@ class Tester(MooseObject):
             else:
                 popen_kwargs['preexec_fn'] = os.setsid
 
-            # Set this for OpenMPI so that we don't clobber state
+            # Special logic for openmpi runs
             if self.hasOpenMPI():
                 popen_env = os.environ.copy()
+
+                # Don't clobber state
                 popen_env['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
+                # Allow oversubscription for hosts that don't have a hostfile
+                popen_env['PRTE_MCA_rmaps_default_mapping_policy'] = ':oversubscribe'
+
                 popen_kwargs['env'] = popen_env
 
             process = subprocess.Popen(*popen_args, **popen_kwargs)
