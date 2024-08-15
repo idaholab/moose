@@ -51,12 +51,11 @@ ControlDrumMeshGenerator::validParams()
       "Block names for each radial and axial zone. "
       "Inner indexing is radial zones (drum inner/drum/drum outer), outer indexing is axial");
 
-  /* TODO update
-  params.addParamNamesToGroup("background_region_id duct_region_ids assembly_type", "ID assigment");
-  params.addParamNamesToGroup("background_intervals background_region_id",
-                              "Background specifications");
-  params.addParamNamesToGroup("duct_intervals duct_region_ids duct_halfpitch",
-                              "Duct specifications");
+  params.addParamNamesToGroup("region_ids assembly_type", "ID assigment");
+  params.addParamNamesToGroup("drum_inner_radius drum_outer_radius drum_inner_intervals drum_intervals num_azimuthal_sectors",
+                              "Drum specifications");
+  params.addParamNamesToGroup("pad_start_angle pad_end_angle",
+                              "Control pad specifications");
 
   params.addClassDescription("This ControlDrumMeshGenerator object is designed to generate "
                              "drum-like structures, with IDs, from a reactor geometry. "
@@ -64,7 +63,6 @@ ControlDrumMeshGenerator::validParams()
                              "control drums into a core lattice alongside AssemblyMeshGenerator structures");
   // depletion id generation params are added
   addDepletionIDParams(params);
-  */
 
   return params;
 }
@@ -172,11 +170,34 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
     const std::string block_name_prefix = "RGMB_DRUM" + std::to_string(_assembly_type);
+
+    // Define azimuthal angles explicitly based on num_azimuthal_sectors and manually add pad start angle and end angle if they
+    // are not contained within these angle intervals
+    std::vector<Real> azimuthal_angles;
+    const auto custom_start_angle = _pad_start_angle;
+    const auto custom_end_angle = (_pad_end_angle > 360) ? _pad_end_angle - 360. : _pad_end_angle;
+    for (unsigned int i = 0; i < num_sectors; ++i)
+    {
+      Real current_azim_angle = (Real)i * 360. / (Real)num_sectors;
+      Real next_azim_angle = (Real)(i + 1) * 360. / (Real)num_sectors;
+      azimuthal_angles.push_back(current_azim_angle);
+
+      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_start_angle) && !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_start_angle) && (custom_start_angle > current_azim_angle) && (custom_start_angle < next_azim_angle))
+      {
+        mooseWarning("pad_start_angle not contained within drum azimuthal discretization so additional azimuthal nodes are created to align mesh with this angle");
+        azimuthal_angles.push_back(custom_start_angle);
+      }
+      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_end_angle) && !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_end_angle) && (custom_end_angle > current_azim_angle) && (custom_end_angle < next_azim_angle))
+      {
+        mooseWarning("pad_end_angle not contained within drum azimuthal discretization so additional azimuthal nodes are created to align mesh with this angle");
+        azimuthal_angles.push_back(custom_end_angle);
+      }
+    }
     {
       // Invoke AdvancedConcentricCircleGenerator to define drum mesh without background region
       auto params = _app.getFactory().getValidParams("AdvancedConcentricCircleGenerator");
 
-      params.set<unsigned int>("num_sectors") = num_sectors;
+      params.set<std::vector<Real>>("customized_azimuthal_angles") = azimuthal_angles;
       params.set<std::vector<double>>("ring_radii") = {drum_inner_radius, drum_outer_radius};
       params.set<std::vector<unsigned int>>("ring_intervals") = {drum_inner_intervals, drum_intervals};
       if (drum_inner_intervals > 1)
@@ -214,6 +235,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
 
       addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);
     }
+    std::string build_mesh_name = name() + "_delbds";
     {
       // Invoke BoundaryDeletionGenerator to delete extra sidesets created by AdvancedConcentricCircleGenerator
       auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
@@ -221,11 +243,61 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       params.set<MeshGeneratorName>("input") = name() + "_fpg";
       params.set<std::vector<BoundaryName>>("boundary_names") = {"0", "2"};
 
-      // Store final mesh subgenerator
-      std::string build_mesh_name = name() + "_del_bds";
       addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
-      _build_mesh = &getMeshByName(build_mesh_name);
     }
+    if (_extrude && _mesh_dimensions == 3)
+    {
+      std::vector<Real> axial_boundaries =
+          getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+      const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
+      const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
+      {
+        auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
+
+        params.set<MeshGeneratorName>("input") = build_mesh_name;
+        params.set<Point>("direction") = Point(0, 0, 1);
+        params.set<std::vector<unsigned int>>("num_layers") =
+            getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
+        params.set<std::vector<Real>>("heights") = axial_boundaries;
+        params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
+        params.set<boundary_id_type>("top_boundary") = top_boundary;
+
+        addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
+      }
+
+      {
+        auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
+
+        params.set<MeshGeneratorName>("input") = name() + "_extruded";
+        params.set<std::vector<BoundaryName>>("old_boundary") = {
+            std::to_string(top_boundary),
+            std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
+        params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
+
+        addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
+      }
+
+      {
+        auto params = _app.getFactory().getValidParams("PlaneIDMeshGenerator");
+
+        params.set<MeshGeneratorName>("input") = name() + "_change_plane_name";
+
+        std::vector<Real> plane_heights{0};
+        for (Real z : axial_boundaries)
+          plane_heights.push_back(z + plane_heights.back());
+
+        params.set<std::vector<Real>>("plane_coordinates") = plane_heights;
+
+        std::string plane_id_name = "plane_id";
+        params.set<std::string>("id_name") = "plane_id";
+
+        build_mesh_name = name() + "_extrudedIDs";
+        addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
+      }
+    }
+
+    // Store final mesh subgenerator
+    _build_mesh = &getMeshByName(build_mesh_name);
   }
 
   /*
@@ -313,35 +385,12 @@ ControlDrumMeshGenerator::generate()
     std::string prefix = "RGMB_DRUM" + std::to_string(_assembly_type) + "_R";
     if (!(base_block_name.find(prefix, 0) == 0))
       continue;
+
     // Radial index is integer value of substring after prefix
     const unsigned int radial_idx = std::stoi(base_block_name.substr(prefix.length()));
 
-    // TODO convert radial_idx to drum_idx
-    unsigned int drum_idx = radial_idx;
-    if (_has_pad_region)
-    {
-      if (radial_idx == 1)
-      {
-        Real drum_angle = std::atan2(elem->true_centroid()(1), elem->true_centroid()(0)) * 360. / (2. * M_PI);
-        if (drum_angle < 0)
-          drum_angle += 360;
-
-        // If _pad_end_angle does not exceed 360 degrees, check if drum angle lies within _pad_start_angle and _pad_end_angle
-        if (_pad_end_angle <= 360)
-        {
-          if ((drum_angle < _pad_start_angle) || (drum_angle > _pad_end_angle))
-            ++drum_idx;
-        }
-        else
-        {
-          // If _pad_end_angle exceeds 360 degrees, check two intervals - _pad_start_angle to 360, and 0 to _pad_end_angle - 360
-          if ((drum_angle < _pad_start_angle) && (drum_angle > _pad_end_angle - 360.))
-            ++drum_idx;
-        }
-      }
-      else if (radial_idx == 2)
-        ++drum_idx;
-    }
+    // Drum index distinguishes between elements in pad and ex-pad regions that have the same radial index
+    const unsigned int drum_idx = getDrumIdxFromRadialIdx(radial_idx, elem->true_centroid()(0), elem->true_centroid()(1));
     subdomain_id_type pin_type = (UINT16_MAX / 2) - 1 - drum_idx;
     elem->set_extra_integer(pin_type_id_int, pin_type);
 
@@ -371,4 +420,44 @@ ControlDrumMeshGenerator::generate()
   (*_build_mesh)->find_neighbors();
 
   return std::move(*_build_mesh);
+}
+
+unsigned int
+ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx, const Real elem_x, const Real elem_y)
+{
+  // By default, drum index will match radial index unless a pad region is defined
+  unsigned int drum_idx = radial_idx;
+  if (_has_pad_region)
+  {
+    if (radial_idx == 1)
+    {
+      // This is an element in the drum region, use drum angle to determine whether it belongs to pad or ex-pad region
+      // Note: drum angle of 0 degrees starts in positive y-direction and increments in clockwise direction, which is consistent
+      //       with how AdvancedConcentricCircleMeshGenerator defines azimuthal angles
+      Real drum_angle = std::atan2(elem_x, elem_y) * 360. / (2. * M_PI);
+      if (drum_angle < 0)
+        drum_angle += 360;
+
+      // If _pad_end_angle does not exceed 360 degrees, check if drum angle lies within _pad_start_angle and _pad_end_angle.
+      // Drum index needs to be incremented if element in ex-core region
+      if (_pad_end_angle <= 360)
+      {
+        if ((drum_angle < _pad_start_angle) || (drum_angle > _pad_end_angle))
+          ++drum_idx;
+      }
+      else
+      {
+        // If _pad_end_angle exceeds 360 degrees, check two intervals - _pad_start_angle to 360, and 0 to _pad_end_angle - 360
+        // Drum index needs to be incremented if element in ex-core region
+        if ((drum_angle < _pad_start_angle) && (drum_angle > _pad_end_angle - 360.))
+          ++drum_idx;
+      }
+    }
+    else if (radial_idx == 2)
+    {
+      // Element is in outer drum region, drum index needs to be incremented to account for presence of ex-pad region
+      ++drum_idx;
+    }
+  }
+  return drum_idx;
 }
