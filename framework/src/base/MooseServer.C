@@ -1110,7 +1110,10 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
   // input check expanded any brace expressions in cached tree so reprocess
   std::stringstream input_errors, input_stream(document_text);
   wasp::DefaultHITInterpreter interpreter(input_errors);
-  interpreter.parseStream(input_stream, parse_file_path);
+
+  // return without adding any formatting text edits if input parsing fails
+  if (!interpreter.parseStream(input_stream, parse_file_path))
+    return true;
 
   // return without adding any formatting text edits if parser root is null
   if (interpreter.root().is_null())
@@ -1167,7 +1170,7 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
     std::string blank = child.line() > prev_line + 1 ? "\n" : "";
 
     // format include directive with indentation and collapse extra spacing
-    if (wasp::is_nested_file(child))
+    if (child.type() == wasp::FILE)
       format_string += blank + newline_indent + MooseUtils::trim(collapse_spaces(child.data()));
 
     // format normal comment with indentation and inline comment with space
