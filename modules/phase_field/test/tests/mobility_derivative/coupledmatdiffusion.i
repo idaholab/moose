@@ -44,7 +44,7 @@
     type = MatReaction
     variable = c
     v = u
-    mob_name = 1
+    reaction_rate = 1
   [../]
   [./urxn]
     type = Reaction
@@ -66,7 +66,7 @@
     type = MatReaction
     variable = d
     v = w
-    mob_name = 1
+    reaction_rate = 1
   [../]
   [./wrxn]
     type = Reaction

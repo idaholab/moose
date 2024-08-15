@@ -267,7 +267,7 @@
     type = MatReaction
     variable = eta1
     v = lambda
-    mob_name = L
+    reaction_rate = L
   [../]
 
   # Kernels for Allen-Cahn equation for eta2
@@ -303,14 +303,14 @@
     type = MatReaction
     variable = eta2
     v = lambda
-    mob_name = L
+    reaction_rate = L
   [../]
 
   # Kernels for the Lagrange multiplier equation
   [./mult_lambda]
     type = MatReaction
     variable = lambda
-    mob_name = 3
+    reaction_rate = 3
   [../]
   [./mult_ACBulkF_1]
     type = KKSMultiACBulkF
@@ -402,19 +402,19 @@
   [./eta3reaction]
     type = MatReaction
     variable = eta3
-    mob_name = 1
+    reaction_rate = 1
   [../]
   [./eta1reaction]
     type = MatReaction
     variable = eta3
     v = eta1
-    mob_name = 1
+    reaction_rate = 1
   [../]
   [./eta2reaction]
     type = MatReaction
     variable = eta3
     v = eta2
-    mob_name = 1
+    reaction_rate = 1
   [../]
   [./one]
     type = BodyForce
