@@ -88,6 +88,7 @@
   temperature = 'T'
   mode = PARSE_ONLY
   device = 'cpu'
+  enable_AD = true
 []
 
 [Materials]
@@ -145,6 +146,7 @@
     model = 'forward_elasticity_model'
     scalar_material_property_names = 'E'
     scalar_material_property_values = 'forward_E_batch_material'
+    enable_AD = true
     # use forward strain calculated from state_x and state_y
     mechanical_strain = 'forward_mechanical_strain'
   []
