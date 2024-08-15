@@ -61,11 +61,17 @@ static const std::string region_id_as_block_name = "region_id_as_block_name";
 static const std::string bypass_meshgen = "bypass_meshgen";
 
 // Default values for setting block IDs of RGMB regions
-const subdomain_id_type PIN_BLOCK_ID_START = 10000;
-const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;
 const subdomain_id_type PIN_BLOCK_ID_TRI_FLEXIBLE = 9998;
-const subdomain_id_type ASSEMBLY_BLOCK_ID_START = 20000;
+const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;
+const subdomain_id_type PIN_BLOCK_ID_START = 10000;
+
+const subdomain_id_type CONTROL_DRUM_BLOCK_ID_INNER_TRI = 19995;
+const subdomain_id_type CONTROL_DRUM_BLOCK_ID_INNER = 19996;
+const subdomain_id_type CONTROL_DRUM_BLOCK_ID_PAD = 19997;
+const subdomain_id_type CONTROL_DRUM_BLOCK_ID_OUTER = 19998;
+
 const subdomain_id_type ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE = 19999;
+const subdomain_id_type ASSEMBLY_BLOCK_ID_START = 20000;
 }
 
 /**
