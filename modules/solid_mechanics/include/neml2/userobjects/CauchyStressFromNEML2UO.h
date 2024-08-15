@@ -53,6 +53,7 @@ public:
   virtual void postCompute() {}
 #else
 
+  virtual void initialSetup() override;
   virtual void batchCompute() override;
   virtual void preCompute();
   virtual void timestepSetup() override;

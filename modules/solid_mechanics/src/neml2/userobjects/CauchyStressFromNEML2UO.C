@@ -86,6 +86,15 @@ CauchyStressFromNEML2UO::CauchyStressFromNEML2UO(const InputParameters & params)
 }
 
 void
+CauchyStressFromNEML2UO::initialSetup()
+{
+  // Initialize the model with a dummy batch shape of 1
+  initModel(1);
+  _in = neml2::LabeledVector::zeros(1, {&model().input_axis()});
+  _out = neml2::LabeledVector::zeros(1, {&model().output_axis()});
+}
+
+void
 CauchyStressFromNEML2UO::preCompute()
 {
   // Set the parameter value using batch material from MOOSE
@@ -99,7 +108,7 @@ CauchyStressFromNEML2UO::preCompute()
     auto input = NEML2Utils::homogenizeBatchedTuple(prop->getInputData());
     auto pval = NEML2Utils::toNEML2Batched(std::get<0>(input));
     pval.requires_grad_(true);
-    model().named_parameters()[name].set(pval);
+    model().set_parameter(name, pval);
   }
 }
 
@@ -129,13 +138,14 @@ CauchyStressFromNEML2UO::batchCompute()
 
   try
   {
-    initModel(_input_data.size());
+    auto batch_shape = neml2::TensorShape{neml2::Size(_input_data.size())};
 
-    // Allocate the input and output
-    if (_t_step == 0)
+    // Reallocate the variable storage only when the batch shape has changed
+    if (neml2::TensorShapeRef(batch_shape) != model().batch_sizes())
     {
-      _in = neml2::LabeledVector::zeros(_input_data.size(), {&model().input_axis()});
-      _out = neml2::LabeledVector::zeros(_input_data.size(), {&model().output_axis()});
+      initModel(batch_shape);
+      _in = neml2::LabeledVector::zeros(batch_shape, {&model().input_axis()});
+      _out = neml2::LabeledVector::zeros(batch_shape, {&model().output_axis()});
     }
 
     // Steps before stress update
@@ -150,12 +160,12 @@ CauchyStressFromNEML2UO::batchCompute()
       solve();
 
       // Fill the NEML2 output back into the MOOSE output data
-      for (const neml2::TorchSize i : index_range(_output_data))
+      for (const neml2::Size i : index_range(_output_data))
       {
         std::get<0>(_output_data[i]) =
-            NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(_out(stress()).batch_index({i}));
+            NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(_out.base_index(stress()).batch_index({i}));
         std::get<1>(_output_data[i]) = RankFourTensor(NEML2Utils::toMOOSE<SymmetricRankFourTensor>(
-            _dout_din(stress(), strain()).batch_index({i})));
+            _dout_din.base_index({stress(), strain()}).batch_index({i})));
       }
 
       // Additional calculations after stress update
@@ -183,12 +193,12 @@ CauchyStressFromNEML2UO::postCompute()
   for (auto && [name, prop] : _props)
   {
     // Extract the parameter derivative from NEML2
-    auto param = neml2::BatchTensor(model().named_parameters()[name]);
-    auto dstress_dparam = neml2::math::jacrev(_out(stress()), param);
+    auto param = neml2::Tensor(model().get_parameter(name));
+    auto dstress_dparam = neml2::math::jacrev(_out.base_index(stress()), param);
 
     // Fill the NEML2 parameter derivative into MOOSE UO
     auto & dstress_dprop = prop->setOutputData();
-    for (const neml2::TorchSize i : index_range(dstress_dprop))
+    for (const neml2::Size i : index_range(dstress_dprop))
       dstress_dprop[i] =
           NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(dstress_dparam.batch_index({i}));
   }

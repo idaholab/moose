@@ -50,11 +50,11 @@ public:
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
   /// Get a reference(!) to the requested output view
-  const neml2::BatchTensor & getOutputView(const neml2::VariableName & output_name) const;
+  const neml2::Tensor & getOutputView(const neml2::VariableName & output_name) const;
 
   /// Get a reference(!) to the requested output derivative view
-  const neml2::BatchTensor & getOutputDerivativeView(const neml2::VariableName & output_name,
-                                                     const neml2::VariableName & input_name) const;
+  const neml2::Tensor & getOutputDerivativeView(const neml2::VariableName & output_name,
+                                                const neml2::VariableName & input_name) const;
 
   /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
@@ -115,10 +115,10 @@ protected:
   std::map<neml2::VariableName, std::string> _var_to_uo;
 
   /// model outputs (the map is an unstable container and we're doling out references to the items. we must not change it after construction!)
-  std::map<neml2::VariableName, neml2::BatchTensor> _outputs;
+  std::map<neml2::VariableName, neml2::Tensor> _outputs;
 
   /// model output derivatives (see above))
-  std::map<std::pair<neml2::VariableName, std::string>, neml2::BatchTensor> _doutputs;
+  std::map<std::pair<neml2::VariableName, std::string>, neml2::Tensor> _doutputs;
 
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
@@ -127,7 +127,7 @@ protected:
   mutable std::set<neml2::VariableName> _retrieved_outputs;
 
   /// set of derivatives that were retrieved
-  mutable std::set<std::tuple<neml2::VariableName, neml2::VariableName, neml2::BatchTensor *>>
+  mutable std::set<std::tuple<neml2::VariableName, neml2::VariableName, neml2::Tensor *>>
       _retrieved_derivatives;
 };
 
