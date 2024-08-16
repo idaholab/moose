@@ -33,7 +33,7 @@ public:
   std::size_t size() const { return _buffer.size(); }
 
   // inserts the gathered data into the model parameter
-  void insertIntoParameter() const;
+  void insertIntoParameter(neml2::Model & model) const;
 
 protected:
   virtual void initialize() override;
@@ -41,14 +41,8 @@ protected:
   virtual void finalize() override {}
   virtual void threadJoin(const UserObject &) override;
 
-  /// Get the NEML2 model in order to access the parameter
-  neml2::Model & model() const { return _model; }
-
   /// Convert the underlying MOOSE data to a torch::Tensor
   virtual torch::Tensor convertQpMOOSEData() const = 0;
-
-  /// The NEML2 material model
-  neml2::Model & _model;
 
   /// NEML2 input parameter to transfer data to
   const std::string _neml2_parameter;

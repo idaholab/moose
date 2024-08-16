@@ -20,6 +20,7 @@ NEML2ObjectStubImplementationClose(ExecuteNEML2Model, ElementUserObject);
 #else
 
 #include "MOOSEToNEML2.h"
+#include "MOOSEToNEML2Parameter.h"
 #include "neml2/misc/math.h"
 #include <set>
 
@@ -33,8 +34,8 @@ ExecuteNEML2Model::validParams()
   // dependency chain
   params.addParam<std::vector<UserObjectName>>("gather_uos", "List of MOOSE*ToNEML2 user objects");
 
-  params.addParam<std::vector<UserObjectName>>("gather_param_uos",
-                                               "List of MOOSE*ToNEML2Parameter user objects");
+  params.addParam<std::vector<UserObjectName>>(
+      "gather_param_uos", {}, "List of MOOSE*ToNEML2Parameter user objects");
 
   // time input
   params.addParam<std::string>("neml2_time", "forces/t", "(optional) NEML2 variable name for time");
@@ -64,7 +65,6 @@ ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
     _output_ready(false)
 {
   const auto gather_uo_names = getParam<std::vector<UserObjectName>>("gather_uos");
-
   const auto gather_param_uo_names = getParam<std::vector<UserObjectName>>("gather_param_uos");
 
   // add user object dependencies by name (the UOs do not need to exist yet for this)
@@ -134,6 +134,14 @@ ExecuteNEML2Model::initialSetup()
     const auto & uo =
         getUserObjectByName<MOOSEToNEML2Parameter>(uo_name, /*is_dependency = */ false);
     _gather_param_uos.push_back(&uo);
+
+    // check if requested parameter exist in the model
+    if (!model().named_parameters().has_key(uo.getNEML2Parameter()))
+      mooseError("Trying to set scalar-valued material property named '",
+                 uo.getNEML2Parameter(),
+                 "' in the UserObject '",
+                 uo_name,
+                 "'. But there is not such parameter in the NEML2 material model.");
   }
 
   std::set<neml2::VariableName> required_inputs = model().input_axis().variable_names();
@@ -289,9 +297,13 @@ ExecuteNEML2Model::preCompute()
   // Set model parameters from the parameter UOs
   for (const auto & uo : _gather_param_uos)
   {
-    mooseAssert(!model().named_parameters().has_key(uo->getNEML2Parameter()),
-                "Parameter gathered by the UO does not connect to a NEML2 parameter");
-    uo->insertIntoParameter();
+    auto batch_shape = neml2::TensorShape{neml2::Size(uo->size())};
+    if (neml2::TensorShapeRef(batch_shape) != model().batch_sizes())
+      mooseError("parameter batch shape ",
+                 batch_shape,
+                 " is inconsistent with model batch shape ",
+                 model().batch_sizes());
+    uo->insertIntoParameter(model());
   }
   // Request gradient for the properties that we request AD for
   for (auto & [out, name, batch_tensor_ptr] : _retrieved_parameter_derivatives)

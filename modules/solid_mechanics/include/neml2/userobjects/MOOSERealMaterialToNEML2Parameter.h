@@ -12,7 +12,7 @@
 #include "MOOSEToNEML2Parameter.h"
 
 #ifndef NEML2_ENABLED
-NEML2ObjectStubHeader(MOOSERealMaterialToNEML2Parameter, MOOSEToNEML2);
+NEML2ObjectStubHeader(MOOSERealMaterialToNEML2Parameter, MOOSEToNEML2Parameter);
 #else
 
 /**

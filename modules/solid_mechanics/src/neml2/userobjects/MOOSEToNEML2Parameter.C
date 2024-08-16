@@ -25,17 +25,6 @@ MOOSEToNEML2Parameter::validParams()
   params.addRequiredParam<std::string>("neml2_parameter",
                                        "Name of the NEML2 parameter to write to");
 
-  params.addRequiredParam<std::string>(
-      "model",
-      "Name of the NEML2 model, i.e., the string inside the brackets [] in the NEML2 input file "
-      "that corresponds to the model you want to use.");
-
-  params.addParam<bool>("enable_AD",
-                        false,
-                        "Set to true to enable PyTorch AD. When set to false (default), no "
-                        "function graph or gradient is computed, which speeds up model "
-                        "evaluation.");
-
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
   // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
@@ -47,28 +36,14 @@ MOOSEToNEML2Parameter::validParams()
 }
 
 MOOSEToNEML2Parameter::MOOSEToNEML2Parameter(const InputParameters & params)
-  : ElementUserObject(params),
-    _model(neml2::get_model(params.get<std::string>("model"), params.get<bool>("enable_AD"))),
-    _neml2_parameter(getParam<std::string>("neml2_parameter"))
+  : ElementUserObject(params), _neml2_parameter(getParam<std::string>("neml2_parameter"))
 {
-  if (!_model.named_parameters().has_key(_neml2_parameter))
-    mooseError("Trying to set scalar-valued material property named ",
-               _neml2_parameter,
-               ". But there is not such parameter in the NEML2 material model.");
 }
 
 void
-MOOSEToNEML2Parameter::insertIntoParameter() const
+MOOSEToNEML2Parameter::insertIntoParameter(neml2::Model & model) const
 {
-  auto param = neml2::Tensor(torch::stack(_buffer, 0), 1);
-  // check batch size of the paremeter and the model
-  if (param.batch_sizes() != _model.batch_sizes())
-  {
-    mooseError("Batch size does not match while trying to set NEML2 parameter ",
-               _neml2_parameter,
-               " from MOOSE.");
-  }
-  _model.set_parameter(_neml2_parameter, param);
+  model.set_parameter(_neml2_parameter, neml2::Tensor(torch::stack(_buffer, 0), 1));
 }
 
 void

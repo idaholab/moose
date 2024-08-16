@@ -26,6 +26,7 @@ NEML2ObjectStubHeader(ExecuteNEML2Model, ElementUserObject);
 #include "BatchPropertyDerivative.h"
 
 class MOOSEToNEML2;
+class MOOSEToNEML2Parameter;
 
 /**
  * ExecuteNEML2Model executes a NEML2 model. The NEML2 input variables are gathered by UserObjects
@@ -47,8 +48,6 @@ public:
   virtual void execute() override;
   virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
-  virtual void preCompute();
-  virtual void postCompute();
 
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
@@ -74,6 +73,12 @@ protected:
   /// Prevent output and derivative retrieval after construction
   virtual void checkExecutionStage() const final;
 
+  /// Set parameters from parameter UO and/or enable AD
+  virtual void preCompute();
+
+  /// Obtain derivative of output with respect to parameters
+  virtual void postCompute();
+
   /// Determine whether the material model should be called
   virtual bool shouldCompute();
 
@@ -93,7 +98,8 @@ protected:
   std::set<neml2::VariableName> _provided_inputs;
 
   /// MOOSE data gathering user objects
-  std::vector<const MOOSEToNEML2 *> _gather_uos;
+  std::vector<const MOOSEToNEML2 *> _gather_uos;                // for input
+  std::vector<const MOOSEToNEML2Parameter *> _gather_param_uos; // for parameters
 
   /// (optional) NEML2 time input
   const neml2::VariableName _neml2_time;
