@@ -24,9 +24,6 @@
 class CommonOutputAction : public Action
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   CommonOutputAction(const InputParameters & params);

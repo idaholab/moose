@@ -23,6 +23,7 @@ registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_material");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_user_object");
+registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_corrector");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_postprocessor");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "get_turbulence_physics");
 
@@ -1149,7 +1150,11 @@ WCNSFVFlowPhysics::addUserObjects()
 {
   // Rhie Chow user object for interpolation velocities
   addRhieChowUserObjects();
+}
 
+void
+WCNSFVFlowPhysics::addCorrectors()
+{
   if (!_has_flow_equations)
     return;
 

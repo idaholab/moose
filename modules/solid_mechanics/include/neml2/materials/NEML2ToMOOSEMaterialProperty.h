@@ -19,7 +19,7 @@ NEML2ObjectStubHeader(NEML2ToSymmetricRankTwoTensorMOOSEMaterialProperty, Materi
 NEML2ObjectStubHeader(NEML2ToSymmetricRankFourTensorMOOSEMaterialProperty, Material);
 #else
 
-#include "neml2/tensors/BatchTensorBase.h"
+#include "neml2/tensors/TensorBase.h"
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
 
@@ -48,7 +48,7 @@ protected:
   const MaterialProperty<T> * _prop0;
 
   /// labled view to the requested output
-  const neml2::BatchTensor & _output_view;
+  const neml2::Tensor & _output_view;
 };
 
 typedef NEML2ToMOOSEMaterialProperty<Real> NEML2ToRealMOOSEMaterialProperty;

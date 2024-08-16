@@ -21,10 +21,6 @@
 class AddControlAction : public MooseObjectAction
 {
 public:
-  /**
-   * Class constructor
-   * @param params Parameters for this Action
-   */
   static InputParameters validParams();
 
   AddControlAction(const InputParameters & parameters);

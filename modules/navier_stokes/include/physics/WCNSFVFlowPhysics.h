@@ -77,6 +77,7 @@ private:
   void addFVBCs() override;
   void addMaterials() override;
   void addUserObjects() override;
+  void addCorrectors() override;
   void addPostprocessors() override;
 
   /// Function adding kernels for the incompressible continuity equation

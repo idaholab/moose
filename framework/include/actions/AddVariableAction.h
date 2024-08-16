@@ -19,9 +19,6 @@
 class AddVariableAction : public MooseObjectAction
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   AddVariableAction(const InputParameters & params);

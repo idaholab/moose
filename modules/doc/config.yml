@@ -101,6 +101,7 @@ Extensions:
             constraints: syntax/Constraints/index.md
             controllogic: syntax/ControlLogic/index.md
             controls: syntax/Controls/index.md
+            correctors: syntax/Correctors/index.md
             dampers: syntax/Dampers/index.md
             dgkernels: syntax/DGKernels/index.md
             dirackernels: syntax/DiracKernels/index.md

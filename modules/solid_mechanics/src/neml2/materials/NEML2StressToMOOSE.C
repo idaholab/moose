@@ -56,9 +56,9 @@ void
 NEML2StressToMOOSE::computeQpSmallStress()
 {
   _small_stress[_qp] = NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(
-      _output_stress.batch_index({neml2::TorchSize(_batch_index + _qp)}));
+      _output_stress.batch_index({neml2::Size(_batch_index + _qp)}));
   _small_jacobian[_qp] = RankFourTensor(NEML2Utils::toMOOSE<SymmetricRankFourTensor>(
-      _output_jacobian.batch_index({neml2::TorchSize(_batch_index + _qp)})));
+      _output_jacobian.batch_index({neml2::Size(_batch_index + _qp)})));
 }
 
 #endif

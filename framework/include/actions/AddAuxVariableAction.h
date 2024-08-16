@@ -18,9 +18,6 @@
 class AddAuxVariableAction : public AddVariableAction
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   AddAuxVariableAction(const InputParameters & params);

@@ -105,6 +105,8 @@ PhysicsBase::act()
     addFunctions();
   else if (_current_task == "add_user_object")
     addUserObjects();
+  else if (_current_task == "add_corrector")
+    addCorrectors();
 
   else if (_current_task == "add_aux_variable")
     addAuxiliaryVariables();

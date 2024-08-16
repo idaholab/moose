@@ -69,6 +69,7 @@
   verbose = true
   mode = PARSE_ONLY
   device = 'cpu'
+  enable_AD = true
 []
 
 [Materials]
@@ -116,6 +117,7 @@
     model = 'forward_elasticity_model'
     scalar_material_property_names = 'E'
     scalar_material_property_values = 'E_batch_material'
+    enable_AD = true
   []
 []
 

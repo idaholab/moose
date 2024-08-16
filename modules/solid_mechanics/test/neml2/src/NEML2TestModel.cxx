@@ -19,11 +19,12 @@ NEML2TestModel::expected_options()
   using vecstr = std::vector<std::string>;
   auto options = Model::expected_options();
   options.set<VariableName>("A") = VariableName("forces", "A");
-  options.set<VariableName>("B") = vecstr{"forces", std::string("B")};
-  options.set<VariableName>("sum") = vecstr{"state", "internal", "sum"};
-  options.set<VariableName>("product") = vecstr{"state", "internal", "product"};
-  options.set<bool>("use_AD_first_derivative") = true;
-  options.set<bool>("use_AD_second_derivative") = true;
+  options.set<VariableName>("B") = VariableName("forces", "B");
+  options.set<VariableName>("sum") = VariableName("state", "internal", "sum");
+  options.set<VariableName>("product") = VariableName("state", "internal", "product");
+  // Use AD
+  options.set<bool>("_use_AD_first_derivative") = true;
+  options.set<bool>("_use_AD_second_derivative") = true;
   return options;
 }
 
@@ -47,10 +48,6 @@ NEML2TestModel::set_value(bool out, bool dout_din, bool d2out_din2)
 
   if (!out)
     return;
-
-  // Grab the inputs
-  const auto & A = _input_a;
-  const auto & B = _input_b;
 
   // Compute outputs
   _sum = _input_a + _input_b;
