@@ -11,6 +11,7 @@
 
 #include "BatchPropertyDerivative.h"
 #include "ElementOptimizationFunctionInnerProduct.h"
+#include "SymmetricRankTwoTensor.h"
 
 /**
  * This is a "glue" material that retrieves the batched stress derivative output vector
@@ -29,7 +30,7 @@ protected:
   const std::string _base_name;
 
   /// Holds stress derivative at current quadrature points
-  const MaterialProperty<RankTwoTensor> & _stress_derivative;
+  const MaterialProperty<SymmetricRankTwoTensor> & _stress_derivative;
 
   /// Holds adjoint strain at current quadrature points
   const MaterialProperty<RankTwoTensor> & _adjoint_strain;

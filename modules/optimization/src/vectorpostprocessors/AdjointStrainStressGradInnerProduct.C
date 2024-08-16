@@ -31,7 +31,7 @@ AdjointStrainStressGradInnerProduct::AdjointStrainStressGradInnerProduct(
     const InputParameters & parameters)
   : ElementOptimizationFunctionInnerProduct(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _stress_derivative(getMaterialPropertyByName<RankTwoTensor>(
+    _stress_derivative(getMaterialPropertyByName<SymmetricRankTwoTensor>(
         getParam<MaterialPropertyName>("stress_derivative_name"))),
     _adjoint_strain(getMaterialPropertyByName<RankTwoTensor>(
         getParam<MaterialPropertyName>("adjoint_strain_name")))
@@ -41,5 +41,6 @@ AdjointStrainStressGradInnerProduct::AdjointStrainStressGradInnerProduct(
 Real
 AdjointStrainStressGradInnerProduct::computeQpInnerProduct()
 {
-  return -_adjoint_strain[_qp].doubleContraction(_stress_derivative[_qp]);
+  auto derivative = RankTwoTensor(_stress_derivative[_qp]);
+  return -_adjoint_strain[_qp].doubleContraction(derivative);
 }
