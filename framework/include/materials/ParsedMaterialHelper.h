@@ -59,16 +59,63 @@ public:
 
   static InputParameters validParams();
 
+  /**
+   * This method sets up and parses the function string given by the user.
+   * @param function_expression Functional expression to parse.
+   * Arguments not exposed by this method overload (e.g. post-processors, functors, etc.) are
+   * assigned as an empty vector.
+   */
   void functionParse(const std::string & function_expression);
+
+  /**
+   * This method sets up all variables (e.g. constants)
+   * to be used in the function and parses the function string given by the user.
+   * Arguments not exposed by this method overload (e.g. post-processors, functors, tolerances) are
+   * assigned as an empty vector.
+   * @param function_expression Functional expression to parse.
+   * @param constant_names Vector of constant names to use.
+   * @param constant_expressions Vector of values for the constants in \p constant_names (can be an
+   * FParser expression).
+   */
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions);
+
+  /**
+   * This method sets up all variables (e.g. constants, material properties)
+   * to be used in the function and parses the function string given by the user.
+   * Arguments not exposed by this method overload (e.g. post-processors, functors) are assigned as
+   * an empty vector.
+   * @param function_expression Functional expression to parse.
+   * @param constant_names Vector of constant names to use.
+   * @param constant_expressions Vector of values for the constants in \p constant_names (can be an
+   * FParser expression).
+   * @param mat_prop_names Vector of material properties used in the parsed function.
+   * @param tol_names Vector of variable names to be protected from being 0 or 1 within a tolerance
+   * (needed for log(c) and log(1-c) terms).
+   * @param tol_values Vector of tolerance values for the variables in \p tol_names .
+   */
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions,
                      const std::vector<std::string> & mat_prop_names,
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
+
+  /**
+   * This method sets up all variables (e.g. constants, material properties, post-processors)
+   * to be used in the function and parses the function string given by the user.
+   * Arguments not exposed by this method overload (e.g. functors) are assigned as an empty vector.
+   * @param function_expression Functional expression to parse.
+   * @param constant_names Vector of constant names to use.
+   * @param constant_expressions Vector of values for the constants in \p constant_names (can be an
+   * FParser expression).
+   * @param mat_prop_names Vector of material properties used in the parsed function.
+   * @param postprocessor_names Vector of postprocessor names used in the parsed function.
+   * @param tol_names Vector of variable names to be protected from being 0 or 1 within a tolerance
+   * (needed for log(c) and log(1-c) terms).
+   * @param tol_values Vector of tolerance values for the variables in \p tol_names .
+   */
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions,
@@ -77,6 +124,32 @@ public:
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
 
+  /**
+   * This method sets up all variables (e.g. constants, material properties, post-processors,
+   * functors) to be used in the function and parses the function string given by the user.
+   * @param function_expression Functional expression to parse.
+   * @param constant_names Vector of constant names to use.
+   * @param constant_expressions Vector of values for the constants in \p constant_names (can be an
+   * FParser expression).
+   * @param mat_prop_names Vector of material properties used in the parsed function.
+   * @param postprocessor_names Vector of postprocessor names used in the parsed function.
+   * @param tol_names Vector of variable names to be protected from being 0 or 1 within a tolerance
+   * (needed for log(c) and log(1-c) terms).
+   * @param tol_values Vector of tolerance values for the variables in \p tol_names .
+   * @param functor_names vector of constant names to use.
+   * @param functor_symbols vector of constant names to use. If this vector is empty, \p
+   * functor_names are used as symbol names.
+   */
+  void functionParse(const std::string & function_expression,
+                     const std::vector<std::string> & constant_names,
+                     const std::vector<std::string> & constant_expressions,
+                     const std::vector<std::string> & mat_prop_names,
+                     const std::vector<PostprocessorName> & postprocessor_names,
+                     const std::vector<std::string> & tol_names,
+                     const std::vector<Real> & tol_values,
+                     const std::vector<MooseFunctorName> & functor_names,
+                     const std::vector<std::string> & functor_symbols);
+
 protected:
   usingFunctionMaterialBaseMembers(is_ad);
   usingFunctionParserUtilsMembers(is_ad);
@@ -84,6 +157,11 @@ protected:
   void initQpStatefulProperties() override;
   void computeQpProperties() override;
   virtual void initialSetup() override final;
+
+  /**
+   * Populates the given set with names not to be used as user-defined symbol (e.g. for a functor)
+   */
+  void insertReservedNames(std::set<std::string> & reserved_names);
 
   // tasks to perform after parsing the primary function
   virtual void functionsPostParse();
@@ -100,6 +178,9 @@ protected:
 
   /// Extra symbols
   const std::vector<ExtraSymbols> _extra_symbols;
+
+  /// Vector of pointers to functors
+  std::vector<const Moose::Functor<Real> *> _functors;
 
   /// convenience typedef for the material property descriptors
   typedef std::vector<FunctionMaterialPropertyDescriptor<is_ad>> MatPropDescriptorList;
