@@ -215,6 +215,13 @@ EOF
 %test
     set -x
 
+    # If we're using openmpi, we need to allow running as root
+    # if we're in a fakeroot environment
+    if [ $(whoami) == root ] && which ompi_info &> /dev/null; then
+        export OMPI_ALLOW_RUN_AS_ROOT=1
+        export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+    fi
+
     # Load jinja vars
     export BINARY_NAME={{ BINARY_NAME }}
     export METHOD={{ METHOD }}

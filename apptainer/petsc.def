@@ -5,7 +5,6 @@
 {#- PETSC_GIT_REMOTE: The git remote to use to get PETSc                                      -#}
 
 {#- Optional jinja arguments                                                                  -#}
-{#- PETSC_ALT: Set to anything to use the alternate version of PETSc                          -#}
 {#- PETSC_OPTIONS: Options to pass to the PETSc build script                                  -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the PETSc build script                              -#}
 {#- MPI_FLAVOUR: The flavour of MPI to use (options: mpich, openmpi; default: mpich)          -#}
@@ -18,12 +17,6 @@
 
 {%- if MPI_FLAVOUR is not defined %}
 {%- set MPI_FLAVOUR = 'mpich' -%}
-{%- endif %}
-
-{%- if PETSC_ALT is defined %}
-{%- set PETSC_BUILD_SCRIPT = 'update_and_rebuild_petsc_alt.sh' -%}
-{%- else -%}
-{%- set PETSC_BUILD_SCRIPT = 'update_and_rebuild_petsc.sh' -%}
 {%- endif %}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
@@ -41,11 +34,15 @@ From: {{ APPTAINER_FROM }}
     export PETSC_DIR={{ PETSC_DIR }}
 
 %post
+    umask 022
+
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
     source /opt/mpi/use-mpich
+    rm -rf /opt/openmpi /opt/mpi/use-openmpi
 {%- elif MPI_FLAVOUR == "openmpi" %}
     source /opt/mpi/use-openmpi
+    rm -rf /opt/mpich /opt/mpi/use-mpich
 {%- endif %}
 
     # Load jinja vars
@@ -61,28 +58,23 @@ From: {{ APPTAINER_FROM }}
     cd ${PETSC_SRC_DIR}
     git checkout ${PETSC_GIT_SHA}
 
-    PETSC_OPTIONS+=" --skip-submodule-update"
-{%- if PETSC_ALT is defined %}
-    PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc_alt.sh
-{%- else %}
-    # Need a newer cmake for current petsc
-    PETSC_OPTIONS+=" --download-cmake"
-    PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh
-{%- endif %}
-
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${PETSC_BUILD_SCRIPT} ${PETSC_OPTIONS}
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh --skip-submodule-update${PETSC_OPTIONS}
 
-{%- if MPI_FLAVOUR != "openmpi" %}
+{%- if MPI_FLAVOUR == "openmpi" %}
+    # If we're using openmpi, we need to allow running as root
+    # if we're in a fakeroot environment
+    if [ $(whoami) == root ]; then
+        export OMPI_ALLOW_RUN_AS_ROOT=1
+        export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+    fi
+{%- endif %}
+
     # Test PETSc
     cd petsc
     make SLEPC_DIR=${PETSC_DIR} PETSC_DIR=${PETSC_DIR} PETSC_ARCH= check
-{%- endif %}
-
-    # Fix possibly bad permissions
-    chmod -R o=u-w,g=u-w ${PETSC_DIR}
 
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
@@ -91,6 +83,3 @@ From: {{ APPTAINER_FROM }}
     {{ MOOSE_DIR }}/scripts/configure_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/configure_petsc.sh
     {{ MOOSE_DIR }}/scripts/update_and_rebuild_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/update_and_rebuild_petsc.sh
     {{ MOOSE_DIR }}/scripts/tao_restore_viewer.patch {{ ROOT_BUILD_DIR }}/scripts/tao_restore_viewer.patch
-{%- if PETSC_ALT is defined %}
-    {{ MOOSE_DIR }}/scripts/update_and_rebuild_petsc_alt.sh {{ ROOT_BUILD_DIR }}/scripts/update_and_rebuild_petsc_alt.sh
-{%- endif %}

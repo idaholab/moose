@@ -481,13 +481,13 @@ class ApptainerGenerator:
                    f'export MOOSE_APPTAINER_GENERATOR_NAME_SUMMARY="{name_summary}"',
                    f'export MOOSE_APPTAINER_GENERATOR_TAG="{self.tag}"',
                    f'export MOOSE_APPTAINER_GENERATOR_VERSION="{self.version}"']
-        content = '\n    ' + '\n    '.join(content) + '\n'
+        content = '\n    ' + '\n    '.join(content) + '\n\n'
 
-        env_header = '%environment'
+        env_header = '\n%environment\n'
         if env_header in definition:
             definition = definition.replace(env_header, env_header + content)
         else:
-            definition += '\n' + env_header + content
+            definition += env_header + content
 
         return definition
 
