@@ -52,6 +52,7 @@
 []
 
 [Materials]
+  active = "output_stress_jacobian nu_material"
   [output_stress_jacobian]
     type = NEML2StressToMOOSE
     execute_neml2_model_uo = model
@@ -64,6 +65,15 @@
     prop_names = 'nu_material'
     prop_values = '0.3+0.1*(y+t)'
     outputs = exodus
+  []
+
+  [dstress_dE]
+    type = NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
+    execute_neml2_model_uo = model
+    moose_material_property = 'dstress_dE'
+    neml2_variable = state/S
+    neml2_parameter_derivative = E # young's modulus
+    outputs = 'exodus'
   []
 []
 

@@ -179,45 +179,32 @@
       recover = false
       valgrind = heavy
     []
-    # [moose_to_neml2_parameter]
-    #   type = Exodiff
-    #   input = 'moose_to_neml2_parameters.i'
-    #   exodiff = 'moose_to_neml2_parameters_out.e'
-    #   requirement = 'The system shall provide for a modular way to transfer NEML2 results to material properties..'
-    #   required_submodule = 'contrib/neml2'
-    #   libtorch = true
-    #   recover = false
-    # []
-    # [moose_to_neml2_parameter_error]
-    #   type = RunException
-    #   input = 'moose_to_neml2_parameters.i'
-    #   cli_args = 'UserObjects/gather_E/neml2_parameter=p'
-    #   requirement = 'The system shall error out while trying to set a parameter that does not exist.'
-    #   expect_err = 'there is not such parameter in the NEML2 material model.'
-    #   collections = 'SYSTEM'
-    #   required_submodule = 'contrib/neml2'
-    #   libtorch = true
-    #   recover = false
-    # []
-
     [moose_to_neml2_parameter]
       type = Exodiff
-      input = 'neml2_to_moose.i'
+      input = 'moose_to_neml2_parameters.i'
       exodiff = 'moose_to_neml2_parameters_out.e'
-      cli_args = "UserObjects/model/gather_param_uos='gather_p gather_q' Outputs/file_base='moose_to_neml2_parameters_out'"
-      requirement = 'The system shall provide for a modular way to transfer NEML2 results to material properties..'
+      requirement = 'The system shall provide a modular way to transfer NEML2 results to material properties.'
       required_submodule = 'contrib/neml2'
       libtorch = true
       recover = false
     []
-
     [moose_to_neml2_parameter_error]
       type = RunException
-      input = 'neml2_to_moose.i'
-      cli_args = "UserObjects/model/gather_param_uos='gather_p gather_q' UserObjects/gather_p/neml2_parameter=Z"
+      input = 'moose_to_neml2_parameters.i'
+      cli_args = 'UserObjects/gather_E/neml2_parameter=p'
       requirement = 'The system shall error out while trying to set a parameter that does not exist.'
       expect_err = 'there is not such parameter in the NEML2 material model.'
       collections = 'SYSTEM'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      recover = false
+    []
+    [neml2_parameter_derivative]
+      type = Exodiff
+      input = 'moose_to_neml2_parameters.i'
+      exodiff = 'neml2_parameter_derivative_out.e'
+      cli_args = "Materials/active='output_stress_jacobian nu_material dstress_dE' Outputs/file_base='neml2_parameter_derivative_out'"
+      requirement = 'The system shall provide for a modular way to compute NEML2 output with respect to specific model parameters and save that it as a MOOSE material property.'
       required_submodule = 'contrib/neml2'
       libtorch = true
       recover = false
