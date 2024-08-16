@@ -10,6 +10,9 @@
 [AuxVariables]
   [a]
   []
+  [p_var]
+    outputs = none
+  []
 []
 
 [ICs]
@@ -17,6 +20,12 @@
     type = FunctionIC
     variable = a
     function = 'x'
+  []
+
+  [p]
+    type = FunctionIC
+    variable = p_var
+    function = 'x*x'
   []
 []
 
@@ -26,6 +35,13 @@
     prop_names = 'b'
     prop_values = 'y+t'
     outputs = exodus
+  []
+
+  [q_property]
+    type = GenericFunctionMaterial
+    prop_names = 'q_property'
+    prop_values = 'x+y+t'
+    outputs = none
   []
 
   [neml2_sum]
@@ -83,6 +99,19 @@
     type = MOOSERealMaterialPropertyToNEML2
     moose_material_property = b
     neml2_variable = forces/B
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
+
+  [gather_p] # used in tests
+    type = MOOSEVariableToNEML2Parameter
+    moose_variable = p_var
+    neml2_parameter = P
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
+  [gather_q] # used in tests
+    type = MOOSERealMaterialToNEML2Parameter
+    moose_material_property = q_property
+    neml2_parameter = Q
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []

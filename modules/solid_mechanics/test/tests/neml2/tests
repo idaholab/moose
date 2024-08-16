@@ -179,19 +179,42 @@
       recover = false
       valgrind = heavy
     []
+    # [moose_to_neml2_parameter]
+    #   type = Exodiff
+    #   input = 'moose_to_neml2_parameters.i'
+    #   exodiff = 'moose_to_neml2_parameters_out.e'
+    #   requirement = 'The system shall provide for a modular way to transfer NEML2 results to material properties..'
+    #   required_submodule = 'contrib/neml2'
+    #   libtorch = true
+    #   recover = false
+    # []
+    # [moose_to_neml2_parameter_error]
+    #   type = RunException
+    #   input = 'moose_to_neml2_parameters.i'
+    #   cli_args = 'UserObjects/gather_E/neml2_parameter=p'
+    #   requirement = 'The system shall error out while trying to set a parameter that does not exist.'
+    #   expect_err = 'there is not such parameter in the NEML2 material model.'
+    #   collections = 'SYSTEM'
+    #   required_submodule = 'contrib/neml2'
+    #   libtorch = true
+    #   recover = false
+    # []
+
     [moose_to_neml2_parameter]
       type = Exodiff
-      input = 'moose_to_neml2_parameters.i'
+      input = 'neml2_to_moose.i'
       exodiff = 'moose_to_neml2_parameters_out.e'
+      cli_args = "UserObjects/model/gather_param_uos='gather_p gather_q' Outputs/file_base='moose_to_neml2_parameters_out'"
       requirement = 'The system shall provide for a modular way to transfer NEML2 results to material properties..'
       required_submodule = 'contrib/neml2'
       libtorch = true
       recover = false
     []
+
     [moose_to_neml2_parameter_error]
       type = RunException
-      input = 'moose_to_neml2_parameters.i'
-      cli_args = 'UserObjects/gather_E/neml2_parameter=p'
+      input = 'neml2_to_moose.i'
+      cli_args = "UserObjects/model/gather_param_uos='gather_p gather_q' UserObjects/gather_p/neml2_parameter=Z"
       requirement = 'The system shall error out while trying to set a parameter that does not exist.'
       expect_err = 'there is not such parameter in the NEML2 material model.'
       collections = 'SYSTEM'
@@ -202,8 +225,9 @@
   []
   [neml2_to_moose_material]
     type = Exodiff
-    input = 'neml2_to_moose_material.i'
+    input ='neml2_to_moose.i'
     exodiff = 'neml2_to_moose_material_out.e'
+    cli_args="Outputs/file_base='neml2_to_moose_material_out'"
     requirement = 'The system shall provide for a modular way to transfer NEML2 results to material properties..'
     required_submodule = 'contrib/neml2'
     libtorch = true

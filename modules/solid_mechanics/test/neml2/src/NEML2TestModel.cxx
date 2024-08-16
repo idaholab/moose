@@ -22,6 +22,10 @@ NEML2TestModel::expected_options()
   options.set<VariableName>("B") = VariableName("forces", "B");
   options.set<VariableName>("sum") = VariableName("state", "internal", "sum");
   options.set<VariableName>("product") = VariableName("state", "internal", "product");
+  options.set_parameter<CrossRef<Scalar>>("P");
+  options.set("P").doc() = "P";
+  options.set_parameter<CrossRef<Scalar>>("Q");
+  options.set("Q").doc() = "Q";
   // Use AD
   options.set<bool>("_use_AD_first_derivative") = true;
   options.set<bool>("_use_AD_second_derivative") = true;
@@ -35,7 +39,10 @@ NEML2TestModel::NEML2TestModel(const OptionSet & options)
     _input_b(declare_input_variable<Scalar>("B")),
     // outputs
     _sum(declare_output_variable<Scalar>("sum")),
-    _product(declare_output_variable<Scalar>("product"))
+    _product(declare_output_variable<Scalar>("product")),
+    // parameters
+    _P(declare_parameter<Scalar>("P", "P", /*allow_nonlinear=*/true)),
+    _Q(declare_parameter<Scalar>("Q", "Q", /*allow_nonlinear=*/true))
 {
 }
 
@@ -50,8 +57,8 @@ NEML2TestModel::set_value(bool out, bool dout_din, bool d2out_din2)
     return;
 
   // Compute outputs
-  _sum = _input_a + _input_b;
-  _product = _input_a * _input_b;
+  _sum = _P * _input_a + _Q * _input_b;
+  _product = _P * _Q * _input_a * _input_b;
 }
 
 } // namespace neml2
