@@ -11,6 +11,12 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * Action for creating Convergence objects
+ *
+ * Convergence objects are MooseObjects, thus just
+ * use the MooseObjectAction
+ */
 class AddConvergenceAction : public MooseObjectAction
 {
 public:
