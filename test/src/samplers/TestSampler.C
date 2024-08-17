@@ -31,35 +31,35 @@ TestSampler::validParams()
 TestSampler::TestSampler(const InputParameters & parameters)
   : Sampler(parameters),
     _use_rand(getParam<bool>("use_rand")),
-    _error_test(getParam<MooseEnum>("error_test"))
+    _error_test(isParamValid("error_test") ? &getParam<MooseEnum>("error_test") : nullptr)
 {
   setNumberOfRows(getParam<dof_id_type>("num_rows"));
   setNumberOfCols(getParam<dof_id_type>("num_cols"));
-  if (_error_test == "set_number_of_seeds_to_zero")
+  if (_error_test && *_error_test == "set_number_of_seeds_to_zero")
     setNumberOfRandomSeeds(0);
 }
 
 void
 TestSampler::executeSetUp()
 {
-  if (_error_test.isValid())
+  if (_error_test)
   {
     setNumberOfRows(getNumberOfRows() + 1);
-    if (_error_test == "reinit_getGlobalSamples")
+    if (*_error_test == "reinit_getGlobalSamples")
       getGlobalSamples();
-    else if (_error_test == "reinit_getLocalSamples")
+    else if (*_error_test == "reinit_getLocalSamples")
       getLocalSamples();
-    else if (_error_test == "reinit_getNextLocalRow")
+    else if (*_error_test == "reinit_getNextLocalRow")
       getNextLocalRow();
-    else if (_error_test == "reinit_getNumberOfRows")
+    else if (*_error_test == "reinit_getNumberOfRows")
       getNumberOfRows();
-    else if (_error_test == "reinit_getNumberOfLocalRows")
+    else if (*_error_test == "reinit_getNumberOfLocalRows")
       getNumberOfLocalRows();
-    else if (_error_test == "reinit_getNumberOfCols")
+    else if (*_error_test == "reinit_getNumberOfCols")
       getNumberOfCols();
-    else if (_error_test == "reinit_getLocalRowBegin")
+    else if (*_error_test == "reinit_getLocalRowBegin")
       getLocalRowBegin();
-    else if (_error_test == "reinit_getLocalRowEnd")
+    else if (*_error_test == "reinit_getLocalRowEnd")
       getLocalRowEnd();
   }
 }
@@ -67,12 +67,15 @@ TestSampler::executeSetUp()
 Real
 TestSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  if (_error_test == "call_set_number_of_rows")
-    setNumberOfRows(1980);
-  else if (_error_test == "call_set_number_of_cols")
-    setNumberOfCols(1980);
-  else if (_error_test == "call_set_number_of_seeds")
-    setNumberOfRandomSeeds(1980);
+  if (_error_test)
+  {
+    if (*_error_test == "call_set_number_of_rows")
+      setNumberOfRows(1980);
+    else if (*_error_test == "call_set_number_of_cols")
+      setNumberOfCols(1980);
+    else if (*_error_test == "call_set_number_of_seeds")
+      setNumberOfRandomSeeds(1980);
+  }
 
   if (_use_rand)
     return getRand();

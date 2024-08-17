@@ -45,5 +45,5 @@ protected:
   PostprocessorName _to_pp_name;
 
   /// Reduction operation to perform when transferring from multiple child apps to the parent app
-  MooseEnum _reduction_type;
+  const MooseEnum * const _reduction_type;
 };

@@ -39,7 +39,7 @@ public:
 
 private:
   /// The type of test that this object is to perform
-  MooseEnum _test_type;
+  const MooseEnum * const _test_type;
 
   /// A value to report (used for addAttributeReporter test)
   PostprocessorValue * _some_value_that_needs_to_be_reported;

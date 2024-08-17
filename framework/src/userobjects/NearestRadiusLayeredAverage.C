@@ -24,7 +24,11 @@ NearestRadiusLayeredAverage::validParams()
   params.suppressParameter<MooseEnum>("dist_norm");
 
   // 'direction' in this case corresponds to 'axis' so the user shouldn't input it
-  params.set<MooseEnum>("axis") = params.get<MooseEnum>("direction");
+  if (params.isParamValid("direction"))
+  {
+    const std::string direction = params.get<MooseEnum>("direction");
+    params.set<MooseEnum>("axis").assign(direction);
+  }
   params.suppressParameter<MooseEnum>("axis");
 
   params.addClassDescription(

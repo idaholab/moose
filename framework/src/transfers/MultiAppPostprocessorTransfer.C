@@ -45,18 +45,18 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
   : MultiAppTransfer(parameters),
     _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
     _to_pp_name(getParam<PostprocessorName>("to_postprocessor")),
-    _reduction_type(getParam<MooseEnum>("reduction_type"))
+    _reduction_type(isParamValid("reduction_type") ? &getParam<MooseEnum>("reduction_type")
+                                                   : nullptr)
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
 
   if (_current_direction == FROM_MULTIAPP)
-    if (!_reduction_type.isValid())
+    if (!_reduction_type)
       mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = "
                  "from_multiapp");
 
-  if (isParamValid("to_multi_app") && isParamValid("from_multi_app") &&
-      isParamValid("reduction_type"))
+  if (isParamValid("to_multi_app") && isParamValid("from_multi_app") && _reduction_type)
     mooseError("Reductions are not supported for multiapp sibling transfers");
 }
 
@@ -114,10 +114,12 @@ MultiAppPostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
+      mooseAssert(_reduction_type, "Not set");
+
       FEProblemBase & to_problem = getFromMultiApp()->problemBase();
 
       Real reduced_pp_value;
-      switch (_reduction_type)
+      switch (*_reduction_type)
       {
         case AVERAGE:
         case SUM:
@@ -142,7 +144,7 @@ MultiAppPostprocessorTransfer::execute()
         {
           const Real & curr_pp_value =
               multi_app->appProblemBase(i).getPostprocessorValueByName(_from_pp_name);
-          switch (_reduction_type)
+          switch (*_reduction_type)
           {
             case AVERAGE:
             case SUM:
@@ -161,7 +163,7 @@ MultiAppPostprocessorTransfer::execute()
         }
       }
 
-      switch (_reduction_type)
+      switch (*_reduction_type)
       {
         case AVERAGE:
           _communicator.sum(reduced_pp_value);
