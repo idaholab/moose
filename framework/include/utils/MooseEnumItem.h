@@ -31,9 +31,21 @@ public:
   /**
    * Return the numeric, name, or raw name.
    */
-  const int & id() const { return _id; }
-  const std::string & name() const { return _name; }
-  const std::string & rawName() const { return _raw_name; }
+  const int & id() const
+  {
+    checkValue();
+    return _id;
+  }
+  const std::string & name() const
+  {
+    checkValue();
+    return _name;
+  }
+  const std::string & rawName() const
+  {
+    checkValue();
+    return _raw_name;
+  }
   ///@}
 
   ///@{
@@ -87,6 +99,16 @@ public:
    * ID is assigned when ExecFlagEnum::addAvailableFlags is called.
    */
   void setID(const int & id);
+
+  /**
+   * @returns Whether or not a value is set
+   */
+  bool hasValue() const { return _id != INVALID_ID; }
+
+  /**
+   * Throws an error if a value is being retrieved without it being set.
+   */
+  void checkValue() const;
 
 private:
   /// The name as provided in constructor

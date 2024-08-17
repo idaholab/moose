@@ -82,13 +82,20 @@ operator<<(std::ostream & out, const MooseEnumItem & item)
 void
 MooseEnumItem::setID(const int & id)
 {
-  if (_id != INVALID_ID)
+  if (hasValue())
     mooseError("The ID of a MooseEnumItem can not be changed if it is valid, the item ",
                _name,
                " has a valid id of ",
                _id,
                ".");
   _id = id;
+}
+
+void
+MooseEnumItem::checkValue() const
+{
+  if (!hasValue())
+    mooseError("A MooseEnumItem value is being retrieved without being set.");
 }
 
 const int MooseEnumItem::INVALID_ID = std::numeric_limits<int>::min();

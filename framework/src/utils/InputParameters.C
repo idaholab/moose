@@ -1325,7 +1325,15 @@ const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name_in) const
 {
   const auto name = checkForRename(name_in);
-  return get<MooseEnum>(name);
+  const auto & value = get<MooseEnum>(name);
+  if (!value.isValid())
+    mooseError("The MooseEnum parameter \"",
+               name,
+               "\" is being retrieved but does not have a value set.\n\n",
+               "To resolve this, you should:\n",
+               " - Set a default value for this MooseEnum parameter\n",
+               " - Make this parameter required");
+  return value;
 }
 
 template <>
