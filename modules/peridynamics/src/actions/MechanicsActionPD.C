@@ -67,7 +67,7 @@ MechanicsActionPD::MechanicsActionPD(const InputParameters & params)
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _formulation(getParam<MooseEnum>("formulation")),
-    _stabilization(getParam<MooseEnum>("stabilization")),
+    _stabilization(isParamValid("stabilization") ? &getParam<MooseEnum>("stabilization") : nullptr),
     _strain(getParam<MooseEnum>("strain")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_ids(),
@@ -75,7 +75,7 @@ MechanicsActionPD::MechanicsActionPD(const InputParameters & params)
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in"))
 {
   // Consistency check
-  if (_formulation == "NONORDINARY_STATE" && !isParamValid("stabilization"))
+  if (_formulation == "NONORDINARY_STATE" && !_stabilization)
     mooseError("'stabilization' is a required parameter for non-ordinary state-based models only.");
 
   if (_save_in.size() != 0 && _save_in.size() != _ndisp)
@@ -197,18 +197,18 @@ MechanicsActionPD::getKernelName()
   }
   else if (_formulation == "NONORDINARY_STATE")
   {
-    if (_stabilization == "FORCE")
+    if (_stabilization && *_stabilization == "FORCE")
     {
       name = "ForceStabilizedSmallStrainMechanicsNOSPD";
     }
-    else if (_stabilization == "BOND_HORIZON_I")
+    else if (_stabilization && *_stabilization == "BOND_HORIZON_I")
     {
       if (_strain == "SMALL")
         name = "HorizonStabilizedFormISmallStrainMechanicsNOSPD";
       else
         name = "HorizonStabilizedFormIFiniteStrainMechanicsNOSPD";
     }
-    else if (_stabilization == "BOND_HORIZON_II")
+    else if (_stabilization && *_stabilization == "BOND_HORIZON_II")
     {
       if (_strain == "SMALL")
         name = "HorizonStabilizedFormIISmallStrainMechanicsNOSPD";

@@ -102,13 +102,13 @@ protected:
    * these will be provided for any one series.
    */
   /// Stores the name of the single function series to use in the x direction
-  const MooseEnum & _x;
+  const MooseEnum * const _x;
   /// Stores the name of the single function series to use in the y direction
-  const MooseEnum & _y;
+  const MooseEnum * const _y;
   /// Stores the name of the single function series to use in the z direction
-  const MooseEnum & _z;
+  const MooseEnum * const _z;
   /// Stores the name of the single function series to use for a unit disc
-  const MooseEnum & _disc;
+  const MooseEnum * const _disc;
   /// The normalization type for expansion
   const MooseEnum & _expansion_type;
   /// The normalization type for generation

@@ -61,7 +61,7 @@ protected:
    * MooseEnum to determine which stainless steel region needs to be enabled in
    * the three block analytic solution.
    */
-  const MooseEnum & _side;
+  const MooseEnum * const _side;
 
 private:
   /**

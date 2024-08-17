@@ -76,10 +76,10 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
     _orders(convertOrders(getParam<std::vector<unsigned int>>("orders"))),
     _physical_bounds(getParam<std::vector<Real>>("physical_bounds")),
     _series_type_name(getParam<MooseEnum>("series_type")),
-    _x(getParam<MooseEnum>("x")),
-    _y(getParam<MooseEnum>("y")),
-    _z(getParam<MooseEnum>("z")),
-    _disc(getParam<MooseEnum>("disc")),
+    _x(isParamValid("x") ? &getParam<MooseEnum>("x") : nullptr),
+    _y(isParamValid("y") ? &getParam<MooseEnum>("y") : nullptr),
+    _z(isParamValid("z") ? &getParam<MooseEnum>("z") : nullptr),
+    _disc(isParamValid("disc") ? &getParam<MooseEnum>("disc") : nullptr),
     _expansion_type(getParam<MooseEnum>("expansion_type")),
     _generation_type(getParam<MooseEnum>("generation_type"))
 {
@@ -95,20 +95,20 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
      * they appear in the input file). Hence, the 'orders' and 'physical_bounds' vectors must always
      * be specified in x, y, z order.
      */
-    if (isParamValid("x"))
+    if (_x)
     {
       domains.push_back(FunctionalBasisInterface::_domain_options = "x");
-      types.push_back(_x);
+      types.push_back(*_x);
     }
-    if (isParamValid("y"))
+    if (_y)
     {
       domains.push_back(FunctionalBasisInterface::_domain_options = "y");
-      types.push_back(_y);
+      types.push_back(*_y);
     }
-    if (isParamValid("z"))
+    if (_z)
     {
       domains.push_back(FunctionalBasisInterface::_domain_options = "z");
-      types.push_back(_z);
+      types.push_back(*_z);
     }
     if (types.size() == 0)
       mooseError("Must specify one of 'x', 'y', or 'z' for 'Cartesian' series!");
@@ -126,26 +126,26 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
      * order. The first entry in _domains is interpreted as the axial direction, and the following
      * two as the planar.
      */
-    if (isParamValid("x"))
+    if (_x)
     {
       domains = {FunctionalBasisInterface::_domain_options = "x",
                  FunctionalBasisInterface::_domain_options = "y",
                  FunctionalBasisInterface::_domain_options = "z"};
-      types.push_back(_x);
+      types.push_back(*_x);
     }
-    if (isParamValid("y"))
+    if (_y)
     {
       domains = {FunctionalBasisInterface::_domain_options = "y",
                  FunctionalBasisInterface::_domain_options = "x",
                  FunctionalBasisInterface::_domain_options = "z"};
-      types.push_back(_y);
+      types.push_back(*_y);
     }
-    if (isParamValid("z"))
+    if (_z)
     {
       domains = {FunctionalBasisInterface::_domain_options = "z",
                  FunctionalBasisInterface::_domain_options = "x",
                  FunctionalBasisInterface::_domain_options = "y"};
-      types.push_back(_z);
+      types.push_back(*_z);
     }
 
     if (types.size() == 0)
@@ -154,7 +154,8 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
     if (types.size() > 1)
       mooseError("Cannot specify more than one of 'x', 'y', or 'z' for 'CylindricalDuo' series!");
 
-    types.push_back(_disc);
+    mooseAssert(_disc, "Not set");
+    types.push_back(*_disc);
     _series_type = std::make_unique<CylindricalDuo>(
         domains, _orders, types, name(), _expansion_type, _generation_type);
   }

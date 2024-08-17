@@ -68,7 +68,7 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
     _temp_ref(getParam<Real>("stress_free_temperature")),
     _rank_two_tensor(getParam<std::string>("rank_two_tensor")),
     _output_type(getParam<std::string>("output_type")),
-    _scalar_type(getParam<MooseEnum>("scalar_type")),
+    _scalar_type(isParamValid("scalar_type") ? &getParam<MooseEnum>("scalar_type") : nullptr),
     _point1(parameters.get<Point>("point1")),
     _point2(parameters.get<Point>("point2"))
 {
@@ -117,7 +117,7 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
     }
   }
 
-  if (_output_type == "scalar" && !isParamValid("scalar_type"))
+  if (_output_type == "scalar" && !_scalar_type)
     mooseError("The output_type is 'scalar', but no 'scalar_type' is provided!");
 }
 
@@ -144,7 +144,11 @@ NodalRankTwoPD::computeValue()
   if (_output_type == "component")
     val = RankTwoScalarTools::component(tensor, _i, _j);
   else if (_output_type == "scalar")
-    val = RankTwoScalarTools::getQuantity(tensor, _scalar_type, _point1, _point2, _q_point[_qp], p);
+  {
+    mooseAssert(_scalar_type, "Not set");
+    val =
+        RankTwoScalarTools::getQuantity(tensor, *_scalar_type, _point1, _point2, _q_point[_qp], p);
+  }
   else
     mooseError("NodalRankTwoPD Error: Pass valid output type - component or scalar");
 

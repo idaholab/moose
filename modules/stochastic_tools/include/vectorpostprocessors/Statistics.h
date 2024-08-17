@@ -36,7 +36,7 @@ protected:
   const MultiMooseEnum & _compute_stats;
 
   /// Bootstrap Confidence Level method
-  const MooseEnum & _ci_method;
+  const MooseEnum * const _ci_method;
 
   /// Confidence levels to compute (see computeLevels)
   const std::vector<Real> _ci_levels;

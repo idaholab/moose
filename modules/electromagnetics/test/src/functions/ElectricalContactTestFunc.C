@@ -62,7 +62,7 @@ ElectricalContactTestFunc::ElectricalContactTestFunc(const InputParameters & par
     _electrical_contact_conductance(getParam<Real>("contact_conductance")),
     _domain(getParam<MooseEnum>("domain")),
     _is_three_block(getParam<bool>("three_block")),
-    _side(getParam<MooseEnum>("three_block_side"))
+    _side(isParamValid("three_block_side") ? &getParam<MooseEnum>("three_block_side") : nullptr)
 {
 }
 
@@ -146,11 +146,12 @@ ElectricalContactTestFunc::threeBlockFunction(Real /*t*/, const Point & p) const
     RIGHT
   };
 
-  if (_domain == STAINLESS_STEEL && _side == LEFT)
+  mooseAssert(_side, "Not set");
+  if (_domain == STAINLESS_STEEL && *_side == LEFT)
   {
     return stainless_steel_func_left;
   }
-  else if (_domain == STAINLESS_STEEL && _side == RIGHT)
+  else if (_domain == STAINLESS_STEEL && *_side == RIGHT)
   {
     return stainless_steel_func_right;
   }

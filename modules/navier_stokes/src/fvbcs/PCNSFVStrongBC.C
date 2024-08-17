@@ -86,7 +86,7 @@ PCNSFVStrongBC::PCNSFVStrongBC(const InputParameters & params)
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
     _eqn(getParam<MooseEnum>("eqn")),
-    _index(getParam<MooseEnum>("momentum_component")),
+    _index(isParamValid("momentum_component") ? getParam<MooseEnum>("momentum_component") : -1),
     _sup_vel_provided(isParamValid(NS::superficial_velocity)),
     _pressure_provided(isParamValid(NS::pressure)),
     _T_fluid_provided(isParamValid(NS::T_fluid)),

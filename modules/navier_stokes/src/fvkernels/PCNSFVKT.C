@@ -73,7 +73,7 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
     _eqn(getParam<MooseEnum>("eqn")),
-    _index(getParam<MooseEnum>("momentum_component")),
+    _index(isParamValid("momentum_component") ? getParam<MooseEnum>("momentum_component") : -1),
     _scalar_elem(_u_elem),
     _scalar_neighbor(_u_neighbor),
     _grad_scalar_elem((_eqn == "scalar") ? &_var.adGradSln() : nullptr),

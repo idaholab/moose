@@ -64,9 +64,9 @@ Statistics::validParams()
 Statistics::Statistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _compute_stats(getParam<MultiMooseEnum>("compute")),
-    _ci_method(getParam<MooseEnum>("ci_method")),
-    _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
-                                    : std::vector<Real>()),
+    _ci_method(isParamValid("ci_method") ? &getParam<MooseEnum>("ci_method") : nullptr),
+    _ci_levels(_ci_method ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
+                          : std::vector<Real>()),
     _replicates(getParam<unsigned int>("ci_replicates")),
     _seed(getParam<unsigned int>("ci_seed")),
     _stat_type_vector(declareVector("stat_type"))
@@ -131,10 +131,10 @@ Statistics::execute()
             StochasticTools::makeCalculator(item, *this);
         _stat_vectors[i]->emplace_back(calc_ptr->compute(data, is_distributed));
 
-        if (_ci_method.isValid())
+        if (_ci_method)
         {
           auto ci_calc_ptr = StochasticTools::makeBootstrapCalculator<std::vector<Real>, Real>(
-              _ci_method, *this, _ci_levels, _replicates, _seed, *calc_ptr);
+              *_ci_method, *this, _ci_levels, _replicates, _seed, *calc_ptr);
           std::vector<Real> ci = ci_calc_ptr->compute(data, is_distributed);
           _stat_vectors[i]->insert(_stat_vectors[i]->end(), ci.begin(), ci.end());
         }

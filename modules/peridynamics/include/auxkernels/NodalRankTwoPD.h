@@ -67,7 +67,7 @@ protected:
   std::string _output_type;
 
   /// specific scalar type to be output
-  MooseEnum _scalar_type;
+  const MooseEnum * const _scalar_type;
 
   ///@{ component index
   unsigned int _i;

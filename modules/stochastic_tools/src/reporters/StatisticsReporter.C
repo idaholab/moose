@@ -63,14 +63,14 @@ StatisticsReporter::validParams()
 StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _compute_stats(getParam<MultiMooseEnum>("compute")),
-    _ci_method(getParam<MooseEnum>("ci_method")),
+    _ci_method(isParamValid("ci_method") ? &getParam<MooseEnum>("ci_method") : nullptr),
     _ci_levels(getParam<std::vector<Real>>("ci_levels")),
     _ci_replicates(getParam<unsigned int>("ci_replicates")),
     _ci_seed(getParam<unsigned int>("ci_seed")),
     _initialized(false)
 {
   // CI levels error checking
-  if (_ci_method.isValid())
+  if (_ci_method)
   {
     if (_ci_levels.empty())
       paramError("ci_levels",
@@ -145,8 +145,8 @@ void
 StatisticsReporter::store(nlohmann::json & json) const
 {
   Reporter::store(json);
-  if (_ci_method.isValid())
-    json["confidence_intervals"] = {{"method", _ci_method},
+  if (_ci_method)
+    json["confidence_intervals"] = {{"method", *_ci_method},
                                     {"levels", _ci_levels},
                                     {"replicates", _ci_replicates},
                                     {"seed", _ci_seed}};
@@ -162,14 +162,14 @@ StatisticsReporter::declareValueHelper(const ReporterName & r_name)
   {
     const std::string s_name =
         r_name.getObjectName() + "_" + r_name.getValueName() + "_" + item.name();
-    if (_ci_method.isValid())
+    if (_ci_method)
       declareValueByName<std::pair<OutType, std::vector<OutType>>,
                          ReporterStatisticsContext<InType, OutType>>(s_name,
                                                                      REPORTER_MODE_ROOT,
                                                                      data,
                                                                      mode,
                                                                      item,
-                                                                     _ci_method,
+                                                                     *_ci_method,
                                                                      _ci_levels,
                                                                      _ci_replicates,
                                                                      _ci_seed);

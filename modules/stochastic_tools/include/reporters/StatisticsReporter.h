@@ -145,7 +145,7 @@ private:
   const MultiMooseEnum & _compute_stats;
 
   // CI Method to be computed (optional)
-  const MooseEnum & _ci_method;
+  const MooseEnum * const _ci_method;
 
   // CI levels to be computed
   const std::vector<Real> & _ci_levels;
