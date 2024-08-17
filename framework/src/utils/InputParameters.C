@@ -381,10 +381,8 @@ InputParameters::isParamValid(const std::string & name_in) const
     return get<MooseEnum>(name).isValid();
   else if (have_parameter<std::vector<MooseEnum>>(name))
   {
-    for (auto it = get<std::vector<MooseEnum>>(name).begin();
-         it != get<std::vector<MooseEnum>>(name).end();
-         ++it)
-      if (!it->isValid())
+    for (const auto & entry : get<std::vector<MooseEnum>>(name))
+      if (entry.isValid())
         return false;
     return true;
   }
