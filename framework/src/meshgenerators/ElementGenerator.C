@@ -22,8 +22,6 @@ ElementGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum elem_types(LIST_GEOM_ELEM); // no default
-
   params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
 
   params.addRequiredParam<std::vector<Point>>("nodal_positions",
@@ -32,8 +30,8 @@ ElementGenerator::validParams()
   params.addRequiredParam<std::vector<dof_id_type>>("element_connectivity",
                                                     "List of nodes to use for each element");
 
-  params.addParam<MooseEnum>(
-      "elem_type", elem_types, "The type of element from libMesh to generate");
+  params.addRequiredParam<MooseEnum>(
+      "elem_type", MooseMesh::elem_type_enum, "The type of element from libMesh to generate");
 
   params.addClassDescription("Generates individual elements given a list of nodal positions.");
 
@@ -49,12 +47,6 @@ ElementGenerator::ElementGenerator(const InputParameters & parameters)
 {
 }
 
-Elem *
-ElementGenerator::getElemType(const std::string & type)
-{
-  return Elem::build(Utility::string_to_enum<ElemType>(type)).release();
-}
-
 std::unique_ptr<MeshBase>
 ElementGenerator::generate()
 {
@@ -64,8 +56,8 @@ ElementGenerator::generate()
   if (!mesh)
     mesh = buildMeshBaseObject();
 
-  MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
-  auto elem = getElemType(elem_type_enum);
+  const auto elem_type = getParam<MooseEnum>("elem_type");
+  auto elem = Elem::build(Utility::string_to_enum<ElemType>(elem_type)).release();
 
   mesh->set_mesh_dimension(std::max((unsigned int)elem->dim(), mesh->mesh_dimension()));
 

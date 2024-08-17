@@ -108,6 +108,11 @@ public:
     DISTRIBUTED
   };
 
+  /// The list of supported geometrical elements
+  static const std::string list_geom_elem;
+  /// MooseEnum of the supported geometrical elements; useful for "elem_type" params
+  static const MooseEnum elem_type_enum;
+
   /**
    * Clone method.  Allocates memory you are responsible to clean up.
    */
@@ -1364,6 +1369,18 @@ public:
    * block faces
    */
   bool hasLowerD() const { return _has_lower_d; }
+
+  /**
+   * Helper for determining the ElemType to use given a MooseMesh::elem_type_enum parameter.
+   *
+   * @param params The InputParameters to pull from
+   * @param elem_type_param_name The name of the MooseEnum parameter set to
+   * MooseMesh::elem_type_enum
+   * @param dim The dimension
+   */
+  static ElemType determineElemType(const InputParameters & params,
+                                    const std::string & elem_type_param_name,
+                                    const unsigned int dim);
 
 protected:
   /// Deprecated (DO NOT USE)

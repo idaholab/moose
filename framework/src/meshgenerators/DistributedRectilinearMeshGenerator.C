@@ -82,9 +82,8 @@ DistributedRectilinearMeshGenerator::validParams()
   params.addParam<MooseEnum>(
       "partition", partition, "Which method (graph linear square) use to partition mesh");
 
-  MooseEnum elem_types(LIST_GEOM_ELEM); // no default
   params.addParam<MooseEnum>("elem_type",
-                             elem_types,
+                             MooseMesh::elem_type_enum,
                              "The type of element from libMesh to "
                              "generate (default: linear element for "
                              "requested dimension)");
@@ -1279,26 +1278,7 @@ DistributedRectilinearMeshGenerator::generate()
   // DistributedRectilinearMeshGenerator always generates a distributed mesh
   auto mesh = buildDistributedMesh();
 
-  MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
-
-  if (!isParamValid("elem_type"))
-  {
-    // Switching on MooseEnum
-    switch (_dim)
-    {
-      case 1:
-        elem_type_enum = "EDGE2";
-        break;
-      case 2:
-        elem_type_enum = "QUAD4";
-        break;
-      case 3:
-        elem_type_enum = "HEX8";
-        break;
-    }
-  }
-
-  _elem_type = Utility::string_to_enum<ElemType>(elem_type_enum);
+  _elem_type = MooseMesh::determineElemType(_pars, "elem_type", _dim);
 
   mesh->set_mesh_dimension(_dim);
   mesh->set_spatial_dimension(_dim);

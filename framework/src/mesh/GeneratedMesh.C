@@ -29,8 +29,6 @@ GeneratedMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
 
-  MooseEnum elem_types(LIST_GEOM_ELEM); // no default
-
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>(
       "dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
@@ -45,7 +43,7 @@ GeneratedMesh::validParams()
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
   params.addParam<MooseEnum>("elem_type",
-                             elem_types,
+                             MooseMesh::elem_type_enum,
                              "The type of element from libMesh to "
                              "generate (default: linear element for "
                              "requested dimension)");
@@ -158,26 +156,7 @@ GeneratedMesh::safeClone() const
 void
 GeneratedMesh::buildMesh()
 {
-  MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
-
-  if (!isParamValid("elem_type"))
-  {
-    // Switching on MooseEnum
-    switch (_dim)
-    {
-      case 1:
-        elem_type_enum = "EDGE2";
-        break;
-      case 2:
-        elem_type_enum = "QUAD4";
-        break;
-      case 3:
-        elem_type_enum = "HEX8";
-        break;
-    }
-  }
-
-  ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_enum);
+  const auto elem_type = determineElemType(_pars, "elem_type", _dim);
 
   // Switching on MooseEnum
   switch (_dim)

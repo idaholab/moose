@@ -64,6 +64,15 @@
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
 
+const std::string MooseMesh::list_geom_elem = "EDGE EDGE2 EDGE3 EDGE4 "
+                                              "QUAD QUAD4 QUAD8 QUAD9 "
+                                              "TRI TRI3 TRI6 TRI7 "
+                                              "HEX HEX8 HEX20 HEX27 "
+                                              "TET TET4 TET10 TET14 "
+                                              "PRISM PRISM6 PRISM15 PRISM18 "
+                                              "PYRAMID PYRAMID5 PYRAMID13 PYRAMID14";
+const MooseEnum MooseMesh::elem_type_enum = MooseMesh::list_geom_elem;
+
 // Make newer nanoflann API compatible with older nanoflann versions
 #if NANOFLANN_VERSION < 0x150
 namespace nanoflann
@@ -2314,6 +2323,38 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
       face_ref_points_fine.swap(face_ref_points_coarse);
     }
   }
+}
+
+ElemType
+MooseMesh::determineElemType(const InputParameters & params,
+                             const std::string & elem_type_param_name,
+                             const unsigned int dim)
+{
+  mooseAssert(dim > 0 && dim < 4, "Invalid dimension");
+  mooseAssert(params.have_parameter<MooseEnum>(elem_type_param_name), "Missing parameter");
+
+  MooseEnum elem_type_enum = MooseMesh::elem_type_enum;
+  // Set by the user
+  if (params.isParamValid(elem_type_param_name))
+    elem_type_enum = params.getParamHelper<MooseEnum>(elem_type_param_name);
+  // Not set by the user, determine based on dimension
+  else
+  {
+    switch (dim)
+    {
+      case 1:
+        elem_type_enum = "EDGE2";
+        break;
+      case 2:
+        elem_type_enum = "QUAD4";
+        break;
+      case 3:
+        elem_type_enum = "HEX8";
+        break;
+    }
+  }
+
+  return Utility::string_to_enum<ElemType>(elem_type_enum);
 }
 
 void
