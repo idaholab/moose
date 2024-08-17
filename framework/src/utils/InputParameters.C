@@ -382,7 +382,7 @@ InputParameters::isParamValid(const std::string & name_in) const
   else if (have_parameter<std::vector<MooseEnum>>(name))
   {
     for (const auto & entry : get<std::vector<MooseEnum>>(name))
-      if (entry.isValid())
+      if (!entry.isValid())
         return false;
     return true;
   }

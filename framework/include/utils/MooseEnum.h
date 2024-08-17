@@ -113,7 +113,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const override { return _current.id() > MooseEnumItem::INVALID_ID; }
+  virtual bool isValid() const override { return _current.hasValue(); }
 
   // InputParameters is allowed to create an empty enum but is responsible for
   // filling it in after the fact
