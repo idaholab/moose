@@ -183,10 +183,12 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
   else
     mooseError("Have to specify a valid eigen problem type");
 
-  const std::string & which_eigen_pairs = params.get<MooseEnum>("which_eigen_pairs");
-  if (!which_eigen_pairs.empty())
+  if (params.isParamValid("which_eigen_pairs"))
+  {
+    const std::string & which_eigen_pairs = params.get<MooseEnum>("which_eigen_pairs");
     eigen_problem.solverParams()._which_eigen_pairs =
         Moose::stringToEnum<Moose::WhichEigenPairs>(which_eigen_pairs);
+  }
 
   // Set necessary parametrs used in EigenSystem::solve(),
   // i.e. the number of requested eigenpairs nev and the number
