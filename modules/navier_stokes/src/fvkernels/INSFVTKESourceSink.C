@@ -352,21 +352,23 @@ INSFVTKESourceSink::computeQpResidual()
         const auto Re_ratio_4 = Utility::pow<4>(Re_shear / _Re_beta);
         const auto beta_i_1_star =
             _beta_i_2_star * ((4.0 / 15.0 + Re_ratio_4) / (1.0 + Re_ratio_4));
-        beta_star = (*_F1)(elem_arg, state) * beta_i_1_star +
-                    (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2_star;
       }
-      else
-        beta_star = (*_F1)(elem_arg, state) * _beta_i_1_star +
-                    (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2_star;
+
+      beta_star = (*_F1)(elem_arg, state) * _beta_i_1_star +
+                  (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2_star;
+      // }
+      // else
+      //   beta_star = (*_F1)(elem_arg, state) * _beta_i_1 +
+      //               (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
 
       // Destruction
       destruction =
           rho * f_beta_star * beta_star * _var(elem_arg, state) * (*_omega)(elem_arg, old_state);
 
       // Limited production
-      production = std::min(production,
-                            _c_pl * rho * beta_star * _var(elem_arg, old_state) *
-                                (*_omega)(elem_arg, old_state));
+      // production = std::min(production,
+      //                      _c_pl * rho * beta_star * _var(elem_arg, old_state) *
+      //                          (*_omega)(elem_arg, old_state));
     }
     // *************************************** //
 

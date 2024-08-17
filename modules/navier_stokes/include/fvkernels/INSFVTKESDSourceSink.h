@@ -97,10 +97,10 @@ protected:
   static constexpr Real _beta_i_2 = 0.0828;
   static constexpr Real _beta_infty = 0.09;
   static constexpr Real _alpha_0 = 1.0 / 9.0;
-  static constexpr Real _sigma_omega_1 = 2.000;
-  static constexpr Real _sigma_omega_2 = 1.168;
-  static constexpr Real _gamma_infty_1 = _beta_i_1 / _beta_infty - 0.1681 / (_sigma_omega_1 * 0.3);
-  static constexpr Real _gamma_infty_2 = _beta_i_2 / _beta_infty - 0.1681 / (_sigma_omega_2 * 0.3);
+  static constexpr Real _sigma_omega_1 = 0.5;   // 2.000;
+  static constexpr Real _sigma_omega_2 = 0.856; // 1.168;
+  static constexpr Real _gamma_infty_1 = _beta_i_1 / _beta_infty - 0.1681 * _sigma_omega_1 / (0.3);
+  static constexpr Real _gamma_infty_2 = _beta_i_2 / _beta_infty - 0.1681 * _sigma_omega_2 / (0.3);
   // Limiting
   static constexpr Real _c_pl = 10.0;
   static constexpr Real _a_1 = 0.31;

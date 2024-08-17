@@ -250,7 +250,7 @@ INSFVTKESDSourceSink::computeQpResidual()
     // *************************************** //
 
     // Low Reynolds number modifications to production
-    const auto F1 = _F1(elem_arg, old_state);
+    const auto F1 = _F1(elem_arg, state);
     ADReal gamma;
     if (_bool_low_Re_modification)
     {
@@ -275,8 +275,8 @@ INSFVTKESDSourceSink::computeQpResidual()
     auto production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
     // Limiting production
-    production_k =
-        std::min(production_k, _c_pl * rho * _beta_infty * _var(elem_arg, old_state) * TKE);
+    // production_k =
+    //    std::min(production_k, _c_pl * rho * _beta_infty * _var(elem_arg, old_state) * TKE);
 
     production = (rho * gamma / _mu_t(elem_arg, state)) * production_k;
     // production = std::min(production,
@@ -330,7 +330,7 @@ INSFVTKESDSourceSink::computeQpResidual()
     if (_dim > 2)
       cross_diffusion += grad_k(2) * grad_omega(2);
     cross_diffusion *=
-        2.0 * (1.0 - F1) * rho / _sigma_omega_2 / std::max(_var(elem_arg, old_state), 1e-12);
+        2.0 * (1.0 - F1) * rho * _sigma_omega_2 / std::max(_var(elem_arg, old_state), 1e-12);
 
     // Free shear modification to cross diffusion
     if (_bool_free_shear_modficiation)

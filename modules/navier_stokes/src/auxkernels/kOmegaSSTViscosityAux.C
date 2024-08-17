@@ -85,9 +85,12 @@ kOmegaSSTViscosityAux::computeValue()
 {
   // Convenient Arguments
   const Elem & elem = *_current_elem;
+  const auto state = determineState();
   const auto current_argument = makeElemArg(_current_elem);
-  const Moose::StateArg state =
-      Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear); // determineState();
+  const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
+  // const auto current_argument = makeElemArg(_current_elem);
+  // const Moose::StateArg state =
+  //     Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear); // determineState();
   const auto rho = _rho(makeElemArg(_current_elem), state);
   const auto mu = _mu(makeElemArg(_current_elem), state);
   const auto nu = mu / rho;
@@ -188,13 +191,13 @@ kOmegaSSTViscosityAux::computeValue()
 
     // Useful variables
     const auto rho = _rho(current_argument, state);
-    const auto TKE = _k(current_argument, state);
-    const auto omega_capped = std::max(_omega(current_argument, state), 1e-10);
+    const auto TKE = _k(current_argument, old_state);
+    const auto omega_capped = std::max(_omega(current_argument, old_state), 1e-10);
 
     // ***** Computing shear strain rate ***** //
     // *************************************** //
     // Computing wall scaling
-    const auto & grad_u = _u_var.gradient(current_argument, state);
+    const auto & grad_u = _u_var.gradient(current_argument, old_state);
     const auto Sij_xx = 2.0 * grad_u(0);
     ADReal Sij_xy = 0.0;
     ADReal Sij_xz = 0.0;
@@ -216,7 +219,7 @@ kOmegaSSTViscosityAux::computeValue()
 
     if (_dim >= 2)
     {
-      const auto & grad_v = (*_v_var).gradient(current_argument, state);
+      const auto & grad_v = (*_v_var).gradient(current_argument, old_state);
       Sij_xy = grad_u(1) + grad_v(0);
       Sij_yy = 2.0 * grad_v(1);
 
@@ -228,7 +231,7 @@ kOmegaSSTViscosityAux::computeValue()
 
       if (_dim >= 3)
       {
-        const auto & grad_w = (*_w_var).gradient(current_argument, state);
+        const auto & grad_w = (*_w_var).gradient(current_argument, old_state);
 
         Sij_xz = grad_u(2) + grad_w(0);
         Sij_yz = grad_v(2) + grad_w(1);
