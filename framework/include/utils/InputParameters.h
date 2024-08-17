@@ -47,6 +47,7 @@ class MooseObject;
 class MooseBase;
 class MultiMooseEnum;
 class Problem;
+class MooseBase;
 namespace hit
 {
 class Node;
@@ -115,6 +116,17 @@ public:
     FRIEND_TEST(InputParametersTest, fileNames);
     SetParamHitNodeKey() {}
     SetParamHitNodeKey(const SetParamHitNodeKey &) {}
+  };
+
+  /**
+   * Class that is used as a parameter to setMooseBase() that allows only
+   * MooseBase to set the moose base
+   */
+  class SetMooseBaseKey
+  {
+    friend class MooseBase;
+    SetMooseBaseKey() {}
+    SetMooseBaseKey(const SetMooseBaseKey &) {}
   };
 
   /**
@@ -876,10 +888,7 @@ public:
    * when returning most scalar and vector types.
    */
   template <typename T>
-  static const T & getParamHelper(const std::string & name,
-                                  const InputParameters & pars,
-                                  const T * the_type,
-                                  const MooseBase * moose_base = nullptr);
+  const T & getParamHelper(const std::string & name) const;
   ///@}
 
   using Parameters::get;
@@ -1096,6 +1105,17 @@ public:
    */
   bool isFinalized() const { return _finalized; }
 
+  /**
+   * Sets the MooseBase object that owns these InputParameters, if any. This enables
+   * using the error context from the owning object instead.
+   *
+   * Is protected to be called only by MooseBase via the SetMooseBaseKey.
+   */
+  void setMooseBase(const MooseBase & moose_base, const SetMooseBaseKey) const
+  {
+    _moose_base = &moose_base;
+  }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1124,8 +1144,6 @@ private:
                                 const std::string & new_name,
                                 const std::string & docstring,
                                 const std::string & removal_date);
-
-  static void callMooseErrorHelper(const MooseBase & moose_base, const std::string & error);
 
   struct Metadata
   {
@@ -1218,11 +1236,22 @@ private:
   template <typename T>
   void addCommandLineParamHelper(const std::string & name, const std::string & syntax);
 
-  /// original location of input block (i.e. filename,linenum) - used for nice error messages.
-  std::string _block_location;
+  /**
+   * Helper for calling mooseError on the _moose_base object instead if it exists
+   */
+  [[noreturn]] void mooseErrorInternal(const std::string & error) const;
 
-  /// full HIT path of the block from the input file - used for nice error messages.
-  std::string _block_fullpath;
+  /**
+   * Forwarder for mooseError with multiple arguments, which will call to
+   * MooseBase::callMooseError() if it exists, providing more context
+   */
+  template <typename... Args>
+  [[noreturn]] void mooseError(Args &&... args) const
+  {
+    std::ostringstream oss;
+    moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+    mooseErrorInternal(oss.str());
+  }
 
   /// The actual parameter data. Each Metadata object contains attributes for the corresponding
   /// parameter.
@@ -1280,6 +1309,10 @@ private:
 
   /// Whether or not we've called finalize() on these parameters yet
   bool _finalized;
+
+  /// The MooseBase object using these InputParameters, if any; needs to be mutable because
+  /// the MooseBase object only owns a const reference to these parameters
+  mutable const MooseBase * _moose_base;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
@@ -1913,45 +1946,27 @@ void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & 
                                                             MooseFunctorName & l_value,
                                                             const int & r_value);
 
-// TODO: pass MooseBase here instead and use it in objects
 template <typename T>
 const T &
-InputParameters::getParamHelper(const std::string & name_in,
-                                const InputParameters & pars,
-                                const T *,
-                                const MooseBase * moose_base /* = nullptr */)
+InputParameters::getParamHelper(const std::string & name_in) const
 {
-  const auto name = pars.checkForRename(name_in);
+  const auto name = checkForRename(name_in);
 
-  if (!pars.isParamValid(name))
-  {
-    std::stringstream err;
-    err << "The parameter \"" << name << "\" is being retrieved before being set.";
-    if (moose_base)
-      callMooseErrorHelper(*moose_base, err.str());
-    else
-      mooseError(err.str());
-  }
+  if (!isParamValid(name))
+    mooseError("The parameter \"", name, "\" is being retrieved before being set.");
 
-  return pars.get<T>(name);
+  return get<T>(name);
 }
 
 // Declare specializations so we don't fall back on the generic
 // implementation, but the definition will be in InputParameters.C so
 // we won't need to bring in *MooseEnum header files here.
 template <>
-const MooseEnum &
-InputParameters::getParamHelper<MooseEnum>(const std::string & name,
-                                           const InputParameters & pars,
-                                           const MooseEnum *,
-                                           const MooseBase * moose_base /* = nullptr */);
+const MooseEnum & InputParameters::getParamHelper<MooseEnum>(const std::string & name) const;
 
 template <>
 const MultiMooseEnum &
-InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum *,
-                                                const MooseBase * moose_base /* = nullptr */);
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name) const;
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>
