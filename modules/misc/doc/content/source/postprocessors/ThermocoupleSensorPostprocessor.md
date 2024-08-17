@@ -16,7 +16,7 @@ v(t) = \mu(t) + \eta(t) \left\{ K_p \tilde{u}(t-\tau(t)) + K_i \int_{0}^{t} \til
 \end{equation}
 
 For a thermocouple,
-\end{equation}
+\begin{equation}
 R(t, t') = \frac{e^{-(t-t')/\tau}}{\tau} ,
 \end{equation}
 
