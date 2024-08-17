@@ -1493,14 +1493,14 @@ template <typename T>
 const T &
 MooseApp::getParam(const std::string & name)
 {
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+  return _pars.getParamHelper<T>(name);
 }
 
 template <typename T>
 const T &
 MooseApp::getParam(const std::string & name) const
 {
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), this);
+  return _pars.getParamHelper<T>(name);
 }
 
 template <typename T>
@@ -1510,13 +1510,13 @@ MooseApp::getRenamedParam(const std::string & old_name, const std::string & new_
   // this enables having a default on the new parameter but bypassing it with the old one
   // Most important: accept new parameter
   if (isParamSetByUser(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
+    return _pars.getParamHelper<T>(new_name);
   // Second most: accept old parameter
   else if (isParamValid(old_name) && !isParamSetByUser(new_name))
-    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0), this);
+    return _pars.getParamHelper<T>(old_name);
   // Third most: accept default for new parameter
   else if (isParamValid(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
+    return _pars.getParamHelper<T>(new_name);
   // Refuse: no default, no value passed
   else if (!isParamValid(old_name) && !isParamValid(new_name))
     mooseError(_pars.blockFullpath() + ": parameter '" + new_name +

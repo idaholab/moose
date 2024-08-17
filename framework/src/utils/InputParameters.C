@@ -40,7 +40,8 @@ InputParameters::InputParameters()
     _show_deprecated_message(true),
     _allow_copy(true),
     _hit_node(nullptr),
-    _finalized(false)
+    _finalized(false),
+    _moose_base(nullptr)
 {
 }
 
@@ -70,12 +71,11 @@ InputParameters::clear()
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
   _allow_copy = true;
-  _block_fullpath = "";
-  _block_location = "";
   _old_to_new_name_and_dep.clear();
   _new_to_old_names.clear();
   _hit_node = nullptr;
   _finalized = false;
+  _moose_base = nullptr;
 }
 
 void
@@ -170,12 +170,13 @@ InputParameters::operator=(const InputParameters & rhs)
   _coupled_vars = rhs._coupled_vars;
   _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
   _allow_copy = rhs._allow_copy;
-  _block_fullpath = rhs._block_fullpath;
-  _block_location = rhs._block_location;
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
   _finalized = rhs._finalized;
+
+  // Let the new object set this if it wants to
+  _moose_base = nullptr;
 
   return *this;
 }
@@ -1323,24 +1324,18 @@ InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & /*nam
 
 template <>
 const MooseEnum &
-InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
-                                           const InputParameters & pars,
-                                           const MooseEnum *,
-                                           const MooseBase * /* = nullptr */)
+InputParameters::getParamHelper<MooseEnum>(const std::string & name_in) const
 {
-  const auto name = pars.checkForRename(name_in);
-  return pars.get<MooseEnum>(name);
+  const auto name = checkForRename(name_in);
+  return get<MooseEnum>(name);
 }
 
 template <>
 const MultiMooseEnum &
-InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum *,
-                                                const MooseBase * /* = nullptr */)
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in) const
 {
-  const auto name = pars.checkForRename(name_in);
-  return pars.get<MultiMooseEnum>(name);
+  const auto name = checkForRename(name_in);
+  return get<MultiMooseEnum>(name);
 }
 
 void
@@ -1423,6 +1418,18 @@ InputParameters::getCommandLineMetadata(const std::string & name) const
   if (!cl_data)
     mooseError("The parameter '", name, "' is not a command line parameter.");
   return *cl_data;
+}
+
+void
+InputParameters::mooseErrorInternal(const std::string & error) const
+{
+  // Allow errors with context of the MooseBase object that uses these
+  // parameters if they're available
+  if (_moose_base)
+    _moose_base->callMooseError(error, true);
+  // If not, revert to the contextless error
+  else
+    ::mooseError(error);
 }
 
 bool
@@ -1616,10 +1623,4 @@ InputParameters::paramAliases(const std::string & param_name) const
     aliases.push_back(pr.second);
 
   return aliases;
-}
-
-void
-InputParameters::callMooseErrorHelper(const MooseBase & moose_base, const std::string & error)
-{
-  moose_base.callMooseError(error, true);
 }
