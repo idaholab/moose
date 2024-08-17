@@ -32,6 +32,7 @@
     cli_args = '--yaml'
     # suppress error checking, the word 'ERROR' shows up in the yaml dump
     errors = 'zzzzzzzzzz'
+    valgrind = HEAVY
     issues = '#920'
     design = 'YAMLFormatter.md'
     requirement = 'The system shall be able to dump YAML data.'
