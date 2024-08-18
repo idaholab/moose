@@ -262,14 +262,14 @@ BoundaryID getNextFreeBoundaryID(MeshBase & input_mesh);
  * @param input mesh over which to determine subdomain IDs
  * @param subdomain ID
  */
-bool hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id);
+bool hasSubdomainID(const MeshBase & input_mesh, const SubdomainID & id);
 
 /**
  * Whether a particular subdomain name exists in the mesh
  * @param input mesh over which to determine subdomain names
  * @param subdomain name
  */
-bool hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name);
+bool hasSubdomainName(const MeshBase & input_mesh, const SubdomainName & name);
 
 /**
  * Whether a particular boundary ID exists in the mesh

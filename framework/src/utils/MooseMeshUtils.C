@@ -407,7 +407,7 @@ getNextFreeBoundaryID(MeshBase & input_mesh)
 }
 
 bool
-hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id)
+hasSubdomainID(const MeshBase & input_mesh, const SubdomainID & id)
 {
   std::set<SubdomainID> mesh_blocks;
   input_mesh.subdomain_ids(mesh_blocks);
@@ -421,7 +421,7 @@ hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id)
 }
 
 bool
-hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name)
+hasSubdomainName(const MeshBase & input_mesh, const SubdomainName & name)
 {
   const auto id = getSubdomainID(name, input_mesh);
   return hasSubdomainID(input_mesh, id);
