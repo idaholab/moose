@@ -1128,7 +1128,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
 // but presumably uint64_t is the "most standard" way to get a
 // 64-bit unsigned type, so we'll stick with that here.
 #if LIBMESH_DOF_ID_BYTES == 8
-        setvector(uint64_t, int);
+        setvector(uint64_t, int64_t);
 #endif
 
         setvector(SubdomainID, int);

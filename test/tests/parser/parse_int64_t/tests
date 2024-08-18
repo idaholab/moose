@@ -1,0 +1,12 @@
+[Tests]
+  [parse_int64_t]
+    design = 'Parser.md'
+    issues = '#28419'
+    type = 'Exodiff'
+    input = 'parse_int64_t.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parse_int64_t_in.e'
+    recover = false
+    requirement = 'The system shall support reading in eight-bites integers from an input file.'
+  []
+[]
