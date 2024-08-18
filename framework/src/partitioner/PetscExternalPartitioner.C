@@ -93,7 +93,8 @@ PetscExternalPartitioner::partition(MeshBase & mesh, const unsigned int n_parts)
   if (mesh.is_replicated() && n_parts > 1)
     preLinearPartition(mesh);
 
-  if ((mesh.n_elem() / n_parts < 28) && _part_package == "parmetis")
+  if (!isParamSetByUser("part_package") && (mesh.n_elem() / n_parts < 28) &&
+      _part_package == "parmetis")
   {
     Moose::out
         << "Average number of elements per partition (" << mesh.n_elem() / n_parts
