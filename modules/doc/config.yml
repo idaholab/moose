@@ -102,6 +102,7 @@ Extensions:
             controllogic: syntax/ControlLogic/index.md
             controls: syntax/Controls/index.md
             correctors: syntax/Correctors/index.md
+            covariances: syntax/Covariance/index.md
             dampers: syntax/Dampers/index.md
             dgkernels: syntax/DGKernels/index.md
             dirackernels: syntax/DiracKernels/index.md
@@ -131,6 +132,7 @@ Extensions:
             meshdivisions: syntax/MeshDivisions/index.md
             meshgenerators: syntax/Mesh/index.md
             multiapps: syntax/MultiApps/index.md
+            neml2: syntax/NEML2/index.md
             nodalkernels: syntax/NodalKernels/index.md
             optimizationreporters: syntax/OptimizationReporter/index.md
             outputs: syntax/Outputs/index.md
@@ -144,6 +146,7 @@ Extensions:
             problems: syntax/Problem/index.md
             raybcs: syntax/RayBCs/index.md
             raykernels: syntax/RayKernels/index.md
+            raytracing: modules/ray_tracing/index.md
             relationshipmanagers: source/relationshipmanagers/RelationshipManager.md
             reporters: syntax/Reporters/index.md
             restart: application_usage/restart_recover.md
