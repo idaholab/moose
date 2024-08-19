@@ -73,7 +73,7 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   const Real a_c = 1 / NS::von_karman_constant;
   const ADReal b_c =
       1.0 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
-  const ADReal c_c = u;
+  const ADReal & c_c = u;
 
   /// This is important to reduce the number of nonlinear iterations
   ADReal u_star = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
@@ -113,17 +113,18 @@ findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   constexpr int MAX_ITERS{10};
   constexpr Real REL_TOLERANCE{1e-2};
 
-  ADReal yPlusLast = 0.0;
+  Real yPlusLast = 0.0;
   ADReal yPlus = dist * u * rho / mu; // Assign intitial value to laminar
-  const ADReal rev_yPlusLam = 1.0 / yPlus;
+  const Real rev_yPlusLam = 1.0 / yPlus.value();
   const ADReal kappa_time_Re = NS::von_karman_constant * u * dist / (mu / rho);
   unsigned int iters = 0;
 
   do
   {
-    yPlusLast = yPlus;
+    yPlusLast = yPlus.value();
     yPlus = (kappa_time_Re + yPlus) / (1.0 + std::log(NS::E_turb_constant * yPlus));
-  } while (std::abs(rev_yPlusLam * (yPlus - yPlusLast)) > REL_TOLERANCE && ++iters < MAX_ITERS);
+  } while (std::abs(rev_yPlusLam * (yPlus.value() - yPlusLast)) > REL_TOLERANCE &&
+           ++iters < MAX_ITERS);
 
   return std::max(0.0, yPlus);
 }
