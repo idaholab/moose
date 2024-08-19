@@ -18,7 +18,10 @@ DirectDirichletBCBase::validParams()
 }
 
 DirectDirichletBCBase::DirectDirichletBCBase(const InputParameters & parameters)
-  : NodalBC(parameters), _u_old(_var.nodalValueOld()), _u_dot_old(_var.nodalValueDotOld())
+  : NodalBC(parameters),
+    _mass_diag(_sys.getVector("mass_matrix_diag")),
+    _u_old(_var.nodalValueOld()),
+    _u_dot_old(_var.nodalValueDotOld())
 {
 }
 
@@ -28,15 +31,11 @@ DirectDirichletBCBase::computeQpResidual()
   // Get dof for current var
   const auto dofnum = _variable->nodalDofIndex();
 
-  // // Get lumped component of mass matrix
-  auto & diag = _sys.getVector("mass_matrix_diag");
-  Real mass_q = diag(dofnum);
-
   // Compute residual to enforce BC
   // This is the force required to enforce the BC in a central difference scheme
   Real avg_dt = (_dt + _dt_old) / 2;
   Real resid = (computeQpValue() - _u_old) / (avg_dt * _dt) - (_u_dot_old) / avg_dt;
-  resid *= -mass_q;
+  resid *= -_mass_diag(dofnum);
 
   return resid;
 }
