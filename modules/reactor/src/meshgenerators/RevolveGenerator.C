@@ -511,8 +511,8 @@ RevolveGenerator::generate()
           const unique_id_type uid =
               (current_node_layer == 0)
                   ? node->unique_id()
-                  : orig_unique_ids + (current_node_layer - 1) * (orig_nodes + orig_elem * 2) +
-                        node->id();
+                  : (orig_unique_ids + (current_node_layer - 1) * (orig_nodes + orig_elem * 2) +
+                     node->id());
           new_node->set_unique_id(uid);
 #endif
 
@@ -982,11 +982,11 @@ RevolveGenerator::generate()
         // Let's give the base elements of the revolved mesh the same
         // unique_ids as the source mesh, in case anyone finds that
         // a useful map to preserve.
-        const unique_id_type uid = (current_layer == 0)
-                                       ? elem->unique_id()
-                                       : orig_unique_ids +
-                                             (current_layer - 1) * (orig_nodes + orig_elem * 2) +
-                                             orig_nodes + elem->id();
+        const unique_id_type uid =
+            (current_layer == 0)
+                ? elem->unique_id()
+                : (orig_unique_ids + (current_layer - 1) * (orig_nodes + orig_elem * 2) +
+                   orig_nodes + elem->id());
 
         new_elem->set_unique_id(uid);
 
@@ -994,10 +994,10 @@ RevolveGenerator::generate()
         if (new_elem_1)
         {
           const unique_id_type uid_1 =
-              ((current_layer == 0)
-                   ? (elem->unique_id() + orig_elem)
-                   : orig_unique_ids + (current_layer - 1) * (orig_nodes + orig_elem * 2) +
-                         orig_nodes + orig_elem + elem->id());
+              (current_layer == 0)
+                  ? (elem->id() + orig_unique_ids - orig_elem)
+                  : (orig_unique_ids + (current_layer - 1) * (orig_nodes + orig_elem * 2) +
+                     orig_nodes + orig_elem + elem->id());
 
           new_elem_1->set_unique_id(uid_1);
         }
