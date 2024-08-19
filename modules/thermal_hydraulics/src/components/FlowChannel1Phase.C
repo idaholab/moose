@@ -56,7 +56,12 @@ void
 FlowChannel1Phase::init()
 {
   FlowChannelBase::init();
+  checkFluidProperties();
+}
 
+void
+FlowChannel1Phase::checkFluidProperties() const
+{
   const UserObject & fp = getTHMProblem().getUserObject<UserObject>(_fp_name);
   if (dynamic_cast<const SinglePhaseFluidProperties *>(&fp) == nullptr)
     logError("Supplied fluid properties must be for 1-phase fluids.");
@@ -65,7 +70,7 @@ FlowChannel1Phase::init()
 std::shared_ptr<FlowModel>
 FlowChannel1Phase::buildFlowModel()
 {
-  const std::string class_name = "FlowModelSinglePhase";
+  const std::string class_name = flowModelClassName();
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<THMProblem *>("_thm_problem") = &getTHMProblem();
   pars.set<FlowChannelBase *>("_flow_channel") = this;
@@ -73,6 +78,12 @@ FlowChannel1Phase::buildFlowModel()
   pars.set<bool>("output_vector_velocity") = getTHMProblem().getVectorValuedVelocity();
   pars.applyParameters(parameters());
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
+}
+
+std::string
+FlowChannel1Phase::flowModelClassName() const
+{
+  return "FlowModelSinglePhase";
 }
 
 void
@@ -90,21 +101,27 @@ FlowChannel1Phase::check() const
                "component instead.");
   }
 
-  bool ics_set =
-      getTHMProblem().hasInitialConditionsFromFile() ||
-      (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel"));
+  bool ics_set = true;
+  for (const auto & ic_param : ICParameters())
+    ics_set = ics_set && isParamValid(ic_param);
+  ics_set = ics_set || getTHMProblem().hasInitialConditionsFromFile();
 
   if (!ics_set && !_app.isRestarting())
   {
     // create a list of the missing IC parameters
-    const std::vector<std::string> ic_params{"initial_p", "initial_T", "initial_vel"};
     std::ostringstream oss;
-    for (const auto & ic_param : ic_params)
+    for (const auto & ic_param : ICParameters())
       if (!isParamValid(ic_param))
         oss << " " << ic_param;
 
     logError("The following initial condition parameters are missing:", oss.str());
   }
+}
+
+std::vector<std::string>
+FlowChannel1Phase::ICParameters() const
+{
+  return {"initial_p", "initial_T", "initial_vel"};
 }
 
 void

@@ -25,6 +25,18 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  /// Returns the solution variable names for the flow model
+  virtual std::vector<VariableName> solutionVariableNames() const;
+  /// Adds the density IC
+  virtual void addDensityIC();
+  /// Adds the rho*E*A IC
+  virtual void addRhoEAIC();
+  /// Adds materials to compute fluid properties
+  virtual void addFluidPropertiesMaterials();
+  /// Adds pressure aux kernel
+  virtual void addPressureAux();
+  /// Adds temperature aux kernel
+  virtual void addTemperatureAux();
   virtual void addNumericalFluxUserObject();
   virtual void addRDGAdvectionDGKernels();
   virtual void addRDGMooseObjects();

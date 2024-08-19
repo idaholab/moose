@@ -42,6 +42,9 @@ public:
    */
   const MooseEnum & getSlopeReconstruction() const { return _rdg_slope_reconstruction; }
 
+  /// Returns the names of the IC parameters
+  virtual std::vector<std::string> ICParameters() const;
+
 protected:
   virtual void init() override;
   virtual std::shared_ptr<FlowModel> buildFlowModel() override;
@@ -56,6 +59,12 @@ protected:
    * Populates heat connection variable names lists
    */
   virtual void getHeatTransferVariableNames() override;
+
+  /// Logs an error if the fluid properties is not valid
+  virtual void checkFluidProperties() const;
+
+  /// Returns the flow model class name
+  virtual std::string flowModelClassName() const;
 
   /// 1-phase wall heat transfer coefficient names for connected heat transfers
   std::vector<MaterialPropertyName> _Hw_1phase_names;
