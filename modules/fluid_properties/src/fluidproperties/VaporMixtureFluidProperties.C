@@ -40,7 +40,7 @@ VaporMixtureFluidProperties::mixtureMolarMass(const std::vector<Real> & molar_fr
   mooseAssert(molar_fractions.size() == molar_masses.size(), "Must have same size");
 
   Real molar_mass_mix = 0;
-  for (unsigned int i = 0; i < molar_fractions.size(); i++)
+  for (const auto i : index_range(molar_fractions))
     molar_mass_mix += molar_fractions[i] * molar_masses[i];
   return molar_mass_mix;
 }
@@ -54,7 +54,7 @@ VaporMixtureFluidProperties::massFractionsFromMolarFractions(
   const auto molar_mass_mix = mixtureMolarMass(molar_fractions, molar_masses);
 
   std::vector<Real> mass_fractions(molar_fractions.size(), 0.0);
-  for (unsigned int i = 0; i < molar_fractions.size(); i++)
+  for (const auto i : index_range(molar_fractions))
     mass_fractions[i] = molar_masses[i] / molar_mass_mix * molar_fractions[i];
   return mass_fractions;
 }

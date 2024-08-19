@@ -54,7 +54,7 @@ TwoPhaseNCGPartialPressureFunction::TwoPhaseNCGPartialPressureFunction(
                  n_expected_args,
                  " argument parameter(s) to be provided, but the provided number of arguments was ",
                  n_provided_args,
-                 ".");
+                 " (counting arg1 then arg2).");
   }
   else
     mooseError("Property call in MooseEnum but not _n_expected_args.");
