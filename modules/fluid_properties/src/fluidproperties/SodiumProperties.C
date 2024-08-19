@@ -16,6 +16,7 @@ SodiumProperties::validParams()
 {
   InputParameters params = FluidProperties::validParams();
   params.addClassDescription("Fluid properties for sodium");
+  params.set<std::string>("fp_type") = "sodium-specific-fp";
   params.addParam<Real>(
       "thermal_conductivity",
       "Optional value for thermal conductivity that overrides interal calculations");
