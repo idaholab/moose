@@ -261,7 +261,7 @@ elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   for (const auto i : make_range(num_layers))
-    for (const auto j : make_range(uint(1), node_number))
+    for (unsigned int j = 1; j < node_number; j++)
     {
       Elem * elem = mesh.add_elem(new Quad4);
       bool is_elem_flip = buildQuadElement(elem,
@@ -444,7 +444,7 @@ surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
   // First element is trivial
   weighted_surrogate_index.push_back(0.0);
   unweighted_surrogate_index.push_back(0.0);
-  for (const auto j : make_range(uint(1), node_number_vec[i]))
+  for (unsigned int j = 1; j < node_number_vec[i]; j++)
   {
     // uniform interval for unweighted index
     unweighted_surrogate_index.push_back((Real)j / ((Real)node_number_vec[i] - 1.0));
@@ -467,7 +467,7 @@ surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
       weighted_surrogate_index[j] += (*it_0 - unweighted_surrogate_index[j - 1]) * wt[it_start - 1];
       weighted_surrogate_index[j] +=
           (unweighted_surrogate_index[j] - *(it_1 - 1)) * wt[it_start + it_dist - 1];
-      for (const auto k : make_range(long(1), it_dist))
+      for (unsigned int k = 1; k < it_dist; k++)
         weighted_surrogate_index[j] += wt[it_start + k - 1] / ((Real)boundary_node_num - 1.0);
     }
   }

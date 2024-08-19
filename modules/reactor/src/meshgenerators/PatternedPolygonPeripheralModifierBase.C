@@ -241,14 +241,18 @@ PatternedPolygonPeripheralModifierBase::generate()
     // (1) remove the midpoints from the inner point vector
     // (2) generate linear mesh using fillBetweenPointVectorsGenerator
     // (3) convert the linear mesh to quadratic mesh
-    // Generally, in the input mesh, the midpoint and the two vertices might not be colinear.
-    // In that case, the midpoint needs to be moved to match the input mesh
-    // However, in the case of PatternedHex/CartesianMeshGenerator, the midpoints of the inner
-    // boundary are always colinear with the vertices.
+    // Generally, in the input mesh, the midpoint might not be located in the middle of the two
+    // vertices. (4) In that case, the midpoint needs to be moved to match the input mesh In the
+    // case of PatternedHex/CartesianMeshGenerator, the midpoints of the inner boundary shoule be
+    // the average of the vertices unless the non-circular regions are deformed. So this step still
+    // needs to be done.
 
     // Use fillBetweenPointVectorsGenerator to generate the transition layer
 
     // Remove the midpoints from the inner point vector
+    // But record the midpoints for later use
+    // In the meantime, calculate the average of the two vertices
+    std::vector<std::pair<Point, Point>> inner_midpts_pairs;
     if (quad_type > 4)
     {
       auto inner_pts_tmp(inner_pts);
@@ -256,6 +260,14 @@ PatternedPolygonPeripheralModifierBase::generate()
       for (const auto i : index_range(inner_pts_tmp))
         if (i % 2 == 0)
           inner_pts.push_back(inner_pts_tmp[i]);
+        else
+        {
+          // We check if the midpoint is located in the middle of the two vertices
+          // If not, we record the them for later use
+          const Point avgpt = 0.5 * (inner_pts_tmp[i - 1] + inner_pts_tmp[i + 1]);
+          if (!MooseUtils::absoluteFuzzyEqual((avgpt - inner_pts_tmp[i]).norm(), 0.0))
+            inner_midpts_pairs.push_back(std::make_pair(avgpt, inner_pts_tmp[i]));
+        }
       inner_pts_tmp.clear();
     }
 
@@ -274,6 +286,30 @@ PatternedPolygonPeripheralModifierBase::generate()
       mesh->all_second_order();
     else if (quad_type == 9)
       mesh->all_complete_order();
+
+    // Move the midpoints to match the input mesh if applicable
+    if (inner_midpts_pairs.size())
+    {
+      mesh->get_boundary_info().build_node_list_from_side_list();
+      auto tl_node_list = mesh->get_boundary_info().build_node_list();
+      std::vector<dof_id_type> bdry_node_ids;
+      std::vector<Point> bdry_node_pts;
+      for (const auto & tl_node_tuple : tl_node_list)
+      {
+        if (std::get<1>(tl_node_tuple) == OUTER_SIDESET_ID)
+        {
+          bdry_node_ids.push_back(std::get<0>(tl_node_tuple));
+          bdry_node_pts.push_back(*(mesh->node_ptr(std::get<0>(tl_node_tuple))));
+        }
+      }
+      KDTree ref_kd_tree(bdry_node_pts, 4);
+      for (const auto & midpt_pair : inner_midpts_pairs)
+      {
+        std::vector<std::size_t> nn_id;
+        ref_kd_tree.neighborSearch(midpt_pair.first, 1, nn_id);
+        *(mesh->node_ptr(bdry_node_ids[nn_id.front()])) = midpt_pair.second;
+      }
+    }
 
     MeshTools::Modification::rotate(*mesh, (Real)i_side * 360.0 / (Real)_num_sides, 0, 0);
     // Assign extra element id based on the nearest deleted element
