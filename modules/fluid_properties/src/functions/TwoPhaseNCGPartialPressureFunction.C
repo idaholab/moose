@@ -9,6 +9,7 @@
 
 #include "TwoPhaseNCGPartialPressureFunction.h"
 #include "TwoPhaseNCGPartialPressureFluidProperties.h"
+#include "MooseUtils.h"
 
 registerMooseObject("FluidPropertiesApp", TwoPhaseNCGPartialPressureFunction);
 
@@ -42,19 +43,43 @@ TwoPhaseNCGPartialPressureFunction::TwoPhaseNCGPartialPressureFunction(
     _arg1_fn(getFunction("arg1")),
     _arg2_fn(getFunction("arg2"))
 {
-  // Check that the number of provided arguments matches the expected number
-  const auto n_provided_args = getNumberOfProvidedArguments();
+  // Check that the provided arguments matches the expected number
   if (_n_expected_args.find(_property_call) != _n_expected_args.end())
   {
+    bool args_are_valid = true;
+    const unsigned int n_arg_params = 2;
     const auto n_expected_args = _n_expected_args.at(_property_call);
-    if (n_provided_args != n_expected_args)
+    std::vector<std::string> expected_args, provided_args;
+    for (unsigned int i = 0; i < n_arg_params; i++)
+    {
+      const std::string arg_param = "arg" + std::to_string(i + 1);
+      const std::string arg_str = "'" + arg_param + "'";
+
+      const bool arg_is_expected = i + 1 <= n_expected_args;
+      if (arg_is_expected)
+        expected_args.push_back(arg_str);
+
+      if (isParamSetByUser(arg_param))
+      {
+        provided_args.push_back(arg_str);
+        if (!arg_is_expected)
+          args_are_valid = false;
+      }
+      else
+      {
+        if (arg_is_expected)
+          args_are_valid = false;
+      }
+    }
+
+    if (!args_are_valid)
       mooseError("The property call '",
                  _property_call,
-                 "' expects ",
-                 n_expected_args,
-                 " argument parameter(s) to be provided, but the provided number of arguments was ",
-                 n_provided_args,
-                 " (counting arg1 then arg2).");
+                 "' expects the parameter(s) {",
+                 MooseUtils::join(expected_args, ", "),
+                 "} to be provided, but the provided argument(s) were {",
+                 MooseUtils::join(provided_args, ", "),
+                 "}.");
   }
   else
     mooseError("Property call in MooseEnum but not _n_expected_args.");
@@ -64,20 +89,6 @@ void
 TwoPhaseNCGPartialPressureFunction::initialSetup()
 {
   _fp = &getUserObject<TwoPhaseNCGPartialPressureFluidProperties>("fluid_properties");
-}
-
-unsigned int
-TwoPhaseNCGPartialPressureFunction::getNumberOfProvidedArguments() const
-{
-  if (isParamSetByUser("arg1"))
-  {
-    if (isParamSetByUser("arg2"))
-      return 2;
-    else
-      return 1;
-  }
-  else
-    return 0;
 }
 
 Real

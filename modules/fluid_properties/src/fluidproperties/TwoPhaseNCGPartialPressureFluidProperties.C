@@ -9,6 +9,7 @@
 
 #include "TwoPhaseNCGPartialPressureFluidProperties.h"
 #include "IdealRealGasMixtureFluidProperties.h"
+#include "SinglePhaseFluidProperties.h"
 
 registerMooseObject("FluidPropertiesApp", TwoPhaseNCGPartialPressureFluidProperties);
 

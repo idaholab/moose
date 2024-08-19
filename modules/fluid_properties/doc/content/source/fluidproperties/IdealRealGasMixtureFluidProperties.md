@@ -4,7 +4,8 @@ This class computes fluid properties for gaseous mixtures with a condensable
 (primary) component and one or more non-condensable (secondary) components.
 This model (which corresponds to "Model A" in [!citep](hansel2018ncgs))
 assumes that each gas in the mixture occupies the entire mixture
-volume at a common temperature and each has a partial pressure.
+volume at a common temperature and each has a partial pressure and is considered
+an ideal gas mixture approximation applied to real gases.
 
 ## Formulation
 

@@ -28,14 +28,10 @@ public:
   TwoPhaseNCGPartialPressureFunction(const InputParameters & parameters);
 
   virtual void initialSetup() override;
+  using Function::value;
   virtual Real value(Real t, const Point & p) const override;
 
 protected:
-  /**
-   * Gets the number of provided argument parameters
-   */
-  unsigned int getNumberOfProvidedArguments() const;
-
   /// Fluid properties object
   const TwoPhaseNCGPartialPressureFluidProperties * _fp;
   /// Property call
