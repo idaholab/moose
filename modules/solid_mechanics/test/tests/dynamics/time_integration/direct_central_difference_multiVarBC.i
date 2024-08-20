@@ -63,12 +63,13 @@
     []
 
     [strain_block]
-        type = ComputeFiniteStrain # ComputeIncrementalSmallStrain
+        type = ComputeFiniteStrain
         displacements = 'disp_x disp_y'
         implicit = false
     []
     [stress_block]
         type = ComputeFiniteStrainElasticStress
+        implicit = false
     []
     [density]
         type = GenericConstantMaterial
@@ -90,7 +91,7 @@
         boundary = 'left'
         value = 0
     []
-    [right]
+    [right_x]
         type = DirectFunctionDirichletBC
         variable = disp_x
         boundary = 'right'
