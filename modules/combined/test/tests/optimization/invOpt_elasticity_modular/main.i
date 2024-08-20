@@ -45,12 +45,12 @@
 [MultiApps]
   [forward]
     type = FullSolveMultiApp
-    input_files = forward_modular.i
+    input_files = forward.i
     execute_on = FORWARD
   []
   [adjoint]
     type = FullSolveMultiApp
-    input_files = grad_modular.i
+    input_files = grad.i
     execute_on = ADJOINT
   []
 []

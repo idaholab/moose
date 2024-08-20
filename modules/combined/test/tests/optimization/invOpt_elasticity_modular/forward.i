@@ -65,7 +65,6 @@
 [NEML2]
   input = 'elasticity.i'
   model = 'forward_elasticity_model'
-  temperature = 'T'
   verbose = true
   mode = PARSE_ONLY
   device = 'cpu'
@@ -73,14 +72,27 @@
 []
 
 [Materials]
-  [stress]
-    type = CauchyStressFromNEML2Receiver
-    neml2_uo = neml2_stress_UO
+  [output_stress_jacobian]
+    type = NEML2StressToMOOSE
+    execute_neml2_model_uo = model
+    neml2_stress_output = state/S
+    neml2_strain_input = forces/E
   []
+
   [E_material]
     type = GenericFunctionMaterial
     prop_names = 'E_material'
     prop_values = E
+  []
+
+  [output_dS_dE]
+    type = NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
+    execute_neml2_model_uo = model
+    moose_material_property = neml2_ds_dE
+    # dstress/dE
+    neml2_variable = state/S
+    neml2_parameter_derivative = 'E'
+    # outputs = exodus
   []
 []
 
@@ -107,17 +119,25 @@
 []
 
 [UserObjects]
-  [E_batch_material]
-    type = BatchPropertyDerivativeRankTwoTensorReal
-    material_property = 'E_material'
+  [input_strain]
+    type = MOOSERankTwoTensorMaterialPropertyToNEML2
+    moose_material_property = mechanical_strain
+    neml2_variable = forces/E
   []
-  [neml2_stress_UO]
-    type = CauchyStressFromNEML2UO
-    temperature = 'T'
-    model = 'forward_elasticity_model'
-    scalar_material_property_names = 'E'
-    scalar_material_property_values = 'E_batch_material'
-    enable_AD = true
+
+  [E_material]
+    type = MOOSERealMaterialToNEML2Parameter
+    moose_material_property = E_material
+    neml2_parameter = E
+  []
+
+  [model]
+    type = ExecuteNEML2Model
+    model = forward_elasticity_model
+    # add other gatherers here if needed
+    gather_uos = 'input_strain'
+    gather_param_uos = 'E_material'
+    # enable_AD = true # AD is not necessary for the forward app
   []
 []
 
@@ -190,4 +210,6 @@
 [Outputs]
   file_base = 'forward'
   console = false
+  # exodus = true
+  # csv = true
 []

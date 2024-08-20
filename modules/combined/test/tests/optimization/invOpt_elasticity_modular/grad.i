@@ -91,16 +91,64 @@
   enable_AD = true
 []
 
+[UserObjects]
+  [gather_E]
+    type = MOOSERealMaterialToNEML2Parameter
+    moose_material_property = E_material
+    neml2_parameter = E
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
+
+  # forward model
+  [forward_input_strain]
+    type = MOOSERankTwoTensorMaterialPropertyToNEML2
+    moose_material_property = forward_mechanical_strain
+    neml2_variable = forces/E
+  []
+  [forward_model]
+    type = ExecuteNEML2Model
+    model = 'forward_elasticity_model'
+    # add other gatherers here if needed
+    enable_AD = true
+    gather_uos = 'forward_input_strain'
+    gather_param_uos = 'gather_E'
+  []
+
+  # adjoint model
+  [adjoint_input_strain]
+    type = MOOSERankTwoTensorMaterialPropertyToNEML2
+    moose_material_property = adjoint_mechanical_strain
+    neml2_variable = forces/E
+  []
+  [adjoint_model]
+    type = ExecuteNEML2Model
+    model = 'adjoint_elasticity_model'
+    # add other gatherers here if needed
+    enable_AD = true
+    gather_uos = 'adjoint_input_strain'
+    gather_param_uos = 'gather_E'
+  []
+[]
+
 [Materials]
   [adjoint_stress]
-    type = CauchyStressFromNEML2Receiver
-    neml2_uo = adjoint_neml2_stress_UO
+    type = NEML2StressToMOOSE
+    execute_neml2_model_uo = adjoint_model
+    neml2_stress_output = state/S
+    neml2_strain_input = forces/E
     base_name = 'adjoint'
   []
   [forward_strain]
     type = ComputeSmallStrain
     displacements = 'state_x state_y'
     base_name = 'forward'
+  []
+  [forward_dstress_dE]
+    type = NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
+    execute_neml2_model_uo = forward_model
+    moose_material_property = forward_dstress_dE
+    neml2_variable = state/S
+    neml2_parameter_derivative = E # young's modulus
   []
   # adjoint and forward use the same young's modulus value
   [E_material]
@@ -134,42 +182,10 @@
   []
 []
 
-[UserObjects]
-  # forward stress derivative,to be used in gradient calculation
-  [forward_E_batch_material]
-    type = BatchPropertyDerivativeRankTwoTensorReal
-    material_property = 'E_material'
-  []
-  [forward_neml2_stress_UO]
-    type = CauchyStressFromNEML2UO
-    temperature = 'T'
-    model = 'forward_elasticity_model'
-    scalar_material_property_names = 'E'
-    scalar_material_property_values = 'forward_E_batch_material'
-    enable_AD = true
-    # use forward strain calculated from state_x and state_y
-    mechanical_strain = 'forward_mechanical_strain'
-  []
-  # adjoint stress derivative, not used
-  [adjoint_E_batch_material]
-    type = BatchPropertyDerivativeRankTwoTensorReal
-    material_property = 'E_material'
-  []
-  [adjoint_neml2_stress_UO]
-    type = CauchyStressFromNEML2UO
-    temperature = 'T'
-    model = 'adjoint_elasticity_model'
-    scalar_material_property_names = 'E'
-    scalar_material_property_values = 'adjoint_E_batch_material'
-    # use adjoint strain calculated tensor mechanics module
-    mechanical_strain = 'adjoint_mechanical_strain'
-  []
-[]
-
 [VectorPostprocessors]
   [grad_youngs_modulus]
-    type = AdjointStrainBatchStressGradInnerProduct
-    stress_derivative = 'forward_E_batch_material'
+    type = AdjointStrainStressGradInnerProduct
+    stress_derivative_name = 'forward_dstress_dE'
     adjoint_strain_name = 'adjoint_mechanical_strain'
     variable = dummy
     function = E
