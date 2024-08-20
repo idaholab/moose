@@ -22,9 +22,9 @@
 
 [Materials]
   [prop1] # dummy stress deriv
-    type = GenericConstantRankTwoTensor
+    type = GenericConstantSymmetricRankTwoTensor
     tensor_name = tensor
-    tensor_values = '1 2 3 4 5 6 7 8 9'
+    tensor_values = '1 2 3 4 5 6'
   []
   [prop2]
     type = GenericConstantRankTwoTensor
@@ -64,7 +64,7 @@
 [Executioner]
   type = Transient
   dt = 0.1
-  end_time = 1
+  end_time = 0.1
 []
 
 [Outputs]

@@ -38,7 +38,7 @@
   [prop1]
     type = GenericConstantRankTwoTensor
     tensor_name = tensor
-    tensor_values = '1 2 3 4 5 6 7 8 9'
+    tensor_values = '1 6 5 6 2 4 5 4 3'
   []
   [prop2]
     type = GenericFunctionMaterial
@@ -83,7 +83,7 @@
 [Executioner]
   type = Transient
   dt = 0.1
-  end_time = 1
+  end_time = 0.1
 []
 
 [Outputs]

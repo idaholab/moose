@@ -3,7 +3,7 @@
   [inner_product_batch]
     type = CSVDiff
     input = strain_stress_grad_inner_product.i
-    csvdiff = strain_stress_grad_inner_product_out_inner_product_0011.csv
+    csvdiff = strain_stress_grad_inner_product_out_inner_product_0002.csv
     allow_test_objects = true
     recover = false # Can't do recover since there is no mesh
     issues = '#26920'
@@ -12,7 +12,7 @@
   [inner_product_material]
     type = CSVDiff
     input = strain_stress_grad_inner_product_material.i
-    csvdiff = strain_stress_grad_inner_product_material_out_inner_product_0011.csv
+    csvdiff = strain_stress_grad_inner_product_material_out_inner_product_0002.csv
     allow_test_objects = true
     recover = false # Can't do recover since there is no mesh
     issues = '#26920'
