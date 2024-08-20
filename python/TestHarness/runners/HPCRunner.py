@@ -130,6 +130,22 @@ class HPCRunner(Runner):
             waited_time += self.file_completion_poll_time
             time.sleep(self.file_completion_poll_time)
 
+        # Handle openmpi appending a null character at the end of jobs
+        # that return a nonzero exit code. We don't know how to fix this
+        # in openmpi yet, so this is the cleanest way to take care of it.
+        # We're looking for \n\0##########', which is at the end of the
+        # apptainer execution within hpc_template. This allows the null
+        # character check that happens in Runner.finalize() to still
+        # be valid.
+        if self.exit_code != 0 and self.job.getTester().hasOpenMPI() and self.output:
+            prefix = '\n'
+            null = '\0'
+            suffix = '##########'
+            all = f'{prefix}{null}{suffix}'
+            no_null = f'{prefix}{suffix}'
+            if all in self.output:
+                self.output = self.output.replace(all, no_null)
+
     def kill(self):
         if self.hpc_job:
             self.run_hpc.killHPCJob(self.hpc_job)
