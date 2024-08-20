@@ -4,11 +4,8 @@
 # direct calculation of acceleration.
 #
 # Testing that the first and second time derivatives
-# are calculated correctly using the Direct Central Difference
+# are calculated correctly using the Central Difference Direct
 # method
-
-# Testing the accuracy of the timestep averaging method within
-# the Direct Central Difference method
 ###########################################################
 
 [GlobalParams]
@@ -22,8 +19,8 @@
     xmax = 1
     ymin = -1
     ymax = 1
-    nx = 1
-    ny = 1
+    nx = 4
+    ny = 4
 []
 
 [Variables]
@@ -34,14 +31,9 @@
 []
 
 [Functions]
-    #Mid-step velocities
-    #0 0.00625 0.015 0.0075 0.25 0
-    #Accelerations
-    #0.025 0.01944 -0.01 0.48 -2.17
     [forcing_fn]
-        type = PiecewiseLinear
-        x = '0.0 0.1 0.5    1.0  2.0   2.01 2.23'
-        y = '0.0 0.0 0.0025 0.01 0.0175 0.02 0.02'
+        type = ParsedFunction
+        expression = 't'
     []
 []
 
@@ -67,7 +59,7 @@
     [elasticity_tensor_block_one]
         type = ComputeIsotropicElasticityTensor
         youngs_modulus = 1e1
-        poissons_ratio = 0.0
+        poissons_ratio = 0.33
     []
 
     [strain_block]
@@ -82,16 +74,22 @@
     [density]
         type = GenericConstantMaterial
         prop_names = 'density'
-        prop_values = 5
+        prop_values = 1
     []
 []
 
 [BCs]
     [left_x]
-        type = DirectFunctionDirichletBC
+        type = DirectDirichletBC
         variable = disp_x
         boundary = 'left'
-        function = forcing_fn
+        value = 0
+    []
+    [left_y]
+        type = DirectDirichletBC
+        variable = disp_y
+        boundary = 'left'
+        value = 0
     []
     [right_x]
         type = DirectFunctionDirichletBC
@@ -108,27 +106,21 @@
         type = DirectCentralDifference
         mass_matrix_tag = 'system'
     []
-    [TimeStepper]
-        type = TimeSequenceStepper
-        time_sequence = '0.0 0.1 0.5 1.0 2.0 2.01 2.23'
-    []
     start_time = 0.0
     num_steps = 6
     dt = 0.1
 []
 
 [Postprocessors]
-    [udot]
-        type = ElementAverageTimeDerivative
+    [left_x]
+        type = AverageNodalVariableValue
         variable = disp_x
+        boundary = left
     []
-    [udotdot]
-        type = ElementAverageSecondTimeDerivative
+    [right_y]
+        type = AverageNodalVariableValue
         variable = disp_x
-    []
-    [u]
-        type = ElementAverageValue
-        variable = disp_x
+        boundary = left
     []
 []
 
