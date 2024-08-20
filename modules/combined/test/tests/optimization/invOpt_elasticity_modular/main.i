@@ -32,14 +32,14 @@
 [Executioner]
   type = Optimize
   tao_solver = taobqnls #taobncg #taoblmvm
-  # petsc_options_iname = '-tao_gatol -tao_ls_type -tao_max_it'
-  # petsc_options_value = '1e-10 unit 1000'
+  petsc_options_iname = '-tao_gatol -tao_ls_type -tao_max_it'
+  petsc_options_value = '1e-10 unit 1000'
 
   # THESE OPTIONS ARE FOR TESTING THE ADJOINT GRADIENT
-  petsc_options_iname = '-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-  petsc_options_value = '1 true true false 1e-8 0.1'
-  petsc_options = '-tao_test_gradient_view'
-  verbose = true
+  # petsc_options_iname = '-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
+  # petsc_options_value = '1 true true false 1e-8 0.1'
+  # petsc_options = '-tao_test_gradient_view'
+  # verbose = true
 []
 
 [MultiApps]
