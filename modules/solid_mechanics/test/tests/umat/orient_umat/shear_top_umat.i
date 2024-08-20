@@ -1,5 +1,6 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+  decomposition_method = HughesWinget
 []
 
 [Mesh]
