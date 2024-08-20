@@ -197,7 +197,13 @@ class RunApp(Tester):
         # all other TestHarness supplied options.
         if specs['no_additional_cli_args']:
             # TODO: Do error checking for TestHarness options that will be silently ignored
-            return os.path.join(specs['test_dir'], specs['executable']) + ' ' + ' '.join(specs['cli_args'])
+            cmd = os.path.join(specs['test_dir'], specs['executable']) + ' ' + ' '.join(specs['cli_args'])
+
+            # Need to run mpiexec with containerized openmpi
+            if options.hpc and self.hasOpenMPI():
+                cmd = f'mpiexec -n 1 {cmd}'
+
+            return cmd
 
         # Create the additional command line arguments list
         cli_args = list(specs['cli_args'])
@@ -254,8 +260,8 @@ class RunApp(Tester):
         elif nthreads > 1:
             command = command + ' --n-threads=' + str(nthreads)
 
-        # Force mpi, more than 1 core, or openmpi (openmpi requires mpiexec even in serial)
-        if self.force_mpi or ncpus > 1 or self.hasOpenMPI():
+        # Force mpi, more than 1 core, or containerized openmpi (requires mpiexec serial)
+        if self.force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
             command = f'{self.mpi_command} -n {ncpus} {command}'
 
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
