@@ -36,12 +36,6 @@ set -e
 {{ SOURCE_CONTENTS }}
 {%- endif %}
 
-{%- if NUM_THREADS != 1 %}
-# Set mvapich options for threading
-export MV2_USE_ALIGNED_ALLOC=1
-export MV2_THREADS_PER_PROCESS={{ NUM_THREADS }}
-{%- endif %}
-
 # Add MOOSE's python path for python scripts
 export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
 

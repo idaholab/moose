@@ -1,3 +1,2 @@
 export MOOSE_DEV_CONTAINER_MINIMAL_BINDPATH=1
-module load use.moose moose-dev-container
-export MV2_ENABLE_AFFINITY=0
+module load use.moose moose-dev-container-openmpi

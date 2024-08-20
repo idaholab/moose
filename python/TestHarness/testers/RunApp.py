@@ -254,7 +254,8 @@ class RunApp(Tester):
         elif nthreads > 1:
             command = command + ' --n-threads=' + str(nthreads)
 
-        if self.force_mpi or ncpus > 1:
+        # Force mpi, more than 1 core, or openmpi (openmpi requires mpiexec even in serial)
+        if self.force_mpi or ncpus > 1 or self.hasOpenMPI():
             command = f'{self.mpi_command} -n {ncpus} {command}'
 
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
