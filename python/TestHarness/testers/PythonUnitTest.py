@@ -49,10 +49,11 @@ class PythonUnitTest(RunApp):
         return cmd + ' '.join(self.specs['cli_args'])
 
     def checkRunnable(self, options):
-        # Can't run within apptainer in parallel because mpiexec needs to be
-        # executed outside of the apptainer call
-        if os.environ.get('APPTAINER_CONTAINER') and self.getProcs(options) > 1:
-            self.addCaveats('PARALLEL APPTAINER')
+        # Don't run unit tests on HPC. These tests commonly involve running
+        # an appliacation within a black box script, which we cannot control
+        # very well within the HPC environment
+        if options.hpc:
+            self.addCaveats('hpc unsupported')
             self.setStatus(self.skip)
             return False
 
