@@ -19,7 +19,8 @@ MatReaction::validParams()
                        "Set this to make v a coupled variable, otherwise it will use the "
                        "kernel's nonlinear variable for v");
   params.addClassDescription("Kernel to add -L*v, where L=reaction rate, v=variable");
-  params.addParam<MaterialPropertyName>("mob_name", "L", "The reaction rate used with the kernel");
+  params.addRequiredParam<MaterialPropertyName>("mob_name",
+                                                "The reaction rate used with the kernel");
   params.deprecateParam("mob_name", "reaction_rate", "01/01/2025");
   params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
   return params;
