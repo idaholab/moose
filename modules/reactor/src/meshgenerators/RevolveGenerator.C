@@ -407,7 +407,7 @@ RevolveGenerator::generate()
   }
   if (_preserve_volumes)
   {
-    _radius_correction_factor = radiusCorrectionFactor(azi_array, _full_circle_revolving);
+    _radius_correction_factor = radiusCorrectionFactor(azi_array, _full_circle_revolving, order);
 
     // In the meanwhile, modify the input mesh for radius correction if applicable
     for (const auto & node : input->node_ptr_range())

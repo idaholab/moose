@@ -14,6 +14,7 @@
 #include "MooseError.h"
 
 // libMesh includes
+#include "libmesh/int_range.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh_serializer.h"
@@ -141,7 +142,7 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
   // Node counter
   unsigned int node_counter = 0;
 
-  for (unsigned int i = 0; i < num_layers + 1; i++)
+  for (const auto i : make_range(num_layers + 1))
   {
     // calculate number of nodes in each sublayer
     node_number_vec.push_back(
@@ -173,7 +174,7 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
                        vec_2_node_num,
                        i);
 
-    for (unsigned int j = 0; j < node_number_vec[i]; j++)
+    for (const auto j : make_range(node_number_vec[i]))
     {
       // Create surrogate Points on side #1 for Point #j on the sublayer
       Point surrogate_pos_1 = Point(linear_vec_1_x->sample(weighted_surrogate_index_1[j]),
@@ -259,7 +260,7 @@ elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
   const unsigned int node_number = node_number_vec.front();
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  for (unsigned int i = 0; i < num_layers; i++)
+  for (const auto i : make_range(num_layers))
     for (unsigned int j = 1; j < node_number; j++)
     {
       Elem * elem = mesh.add_elem(new Quad4);
@@ -293,7 +294,7 @@ elementsCreationFromNodesVectors(MeshBase & mesh,
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  for (unsigned int i = 0; i < num_layers; i++)
+  for (const auto i : make_range(num_layers))
   {
     unsigned int nodes_up_it = 0;
     unsigned int nodes_down_it = 0;
@@ -383,7 +384,7 @@ weightedInterpolator(const unsigned int vec_node_num,
   std::vector<Real> dist_vec;
   std::vector<Real> pos_l;
 
-  for (unsigned int i = 0; i < vec_node_num; i++)
+  for (const auto i : make_range(vec_node_num))
   {
     // Unweighted, the index interval is just uniform
     // Normalized range 0~1
@@ -410,12 +411,12 @@ weightedInterpolator(const unsigned int vec_node_num,
                  index.begin(),
                  [dist_vec_total](Real & c) { return c / dist_vec_total; });
   // Use Gaussian blurring to smoothen local density
-  for (unsigned int i = 0; i < vec_node_num; i++)
+  for (const auto i : make_range(vec_node_num))
   {
     Real gaussian_factor(0.0);
     Real sum_tmp(0.0);
     // Use interval as parameter now, consider distance in the future
-    for (unsigned int j = 0; j < vec_node_num - 1; j++)
+    for (const auto j : make_range(vec_node_num - 1))
     {
       // dis_vec and index are off by 0.5
       const Real tmp_factor =
@@ -509,17 +510,22 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list_tmp = boundary_info.build_side_list();
   std::vector<std::pair<dof_id_type, dof_id_type>> boundary_node_assm;
-  for (unsigned int i = 0; i < side_list_tmp.size(); i++)
+  std::vector<dof_id_type> boundary_midpoint_node_list;
+  for (const auto i : index_range(side_list_tmp))
   {
     if (std::get<2>(side_list_tmp[i]) == bid)
     {
       // store two nodes of each side
-      boundary_node_assm.push_back(std::make_pair(mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
-                                                      ->side_ptr(std::get<1>(side_list_tmp[i]))
-                                                      ->node_id(0),
-                                                  mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
-                                                      ->side_ptr(std::get<1>(side_list_tmp[i]))
-                                                      ->node_id(1)));
+      const auto elem = mesh.elem_ptr(std::get<0>(side_list_tmp[i]));
+      const auto side = elem->side_ptr(std::get<1>(side_list_tmp[i]));
+      boundary_node_assm.push_back(std::make_pair(side->node_id(0), side->node_id(1)));
+      // see if there is a midpoint
+      const auto & side_type = elem->side_type(std::get<1>(side_list_tmp[i]));
+      if (side_type == EDGE3)
+        boundary_midpoint_node_list.push_back(
+            elem->node_id(elem->n_vertices() + std::get<1>(side_list_tmp[i])));
+      else
+        boundary_midpoint_node_list.push_back(DofObject::invalid_id);
     }
   }
   bool is_closed_loop;
@@ -527,6 +533,7 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
                max_node_radius,
                boundary_ordered_node_list,
                boundary_node_assm,
+               boundary_midpoint_node_list,
                origin_pt,
                "external boundary",
                is_closed_loop);
@@ -586,7 +593,7 @@ isExternalBoundary(MeshBase & mesh, const boundary_id_type bid)
     mesh.find_neighbors();
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list = boundary_info.build_side_list();
-  for (unsigned int i = 0; i < side_list.size(); i++)
+  for (const auto i : index_range(side_list))
   {
     if (std::get<2>(side_list[i]) == bid)
       if (mesh.elem_ptr(std::get<0>(side_list[i]))->neighbor_ptr(std::get<1>(side_list[i])) !=
@@ -658,6 +665,7 @@ isClosedLoop(MeshBase & mesh,
              Real & max_node_radius,
              std::vector<dof_id_type> & ordered_node_list,
              std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+             std::vector<dof_id_type> & midpoint_node_list,
              const Point origin_pt,
              const std::string input_type,
              bool & is_closed_loop,
@@ -671,7 +679,7 @@ isClosedLoop(MeshBase & mesh,
   std::vector<dof_id_type> ordered_dummy_elem_list;
   is_closed_loop = false;
   MooseMeshUtils::makeOrderedNodeList(
-      node_assm, dummy_elem_list, ordered_node_list, ordered_dummy_elem_list);
+      node_assm, dummy_elem_list, midpoint_node_list, ordered_node_list, ordered_dummy_elem_list);
   // If the code ever gets here, node_assm is empty.
   // If the ordered_node_list front and back are not the same, the boundary is not a loop.
   // This is not done inside the loop just for some potential applications in the future.
@@ -690,7 +698,7 @@ isClosedLoop(MeshBase & mesh,
     // If azimuthal angles change monotonically,
     // the z components of the cross products are always negative or positive.
     std::vector<Real> ordered_node_azi_list;
-    for (unsigned int i = 0; i < ordered_node_list.size() - 1; i++)
+    for (const auto i : make_range(ordered_node_list.size() - 1))
     {
       ordered_node_azi_list.push_back(
           (*mesh.node_ptr(ordered_node_list[i]) - origin_pt)
@@ -712,6 +720,28 @@ isClosedLoop(MeshBase & mesh,
     else
       is_closed_loop = true;
   }
+}
+
+void
+isClosedLoop(MeshBase & mesh,
+             Real & max_node_radius,
+             std::vector<dof_id_type> & ordered_node_list,
+             std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+             const Point origin_pt,
+             const std::string input_type,
+             bool & is_closed_loop,
+             const bool suppress_exception)
+{
+  std::vector<dof_id_type> dummy_midpoint_node_list(node_assm.size(), DofObject::invalid_id);
+  isClosedLoop(mesh,
+               max_node_radius,
+               ordered_node_list,
+               node_assm,
+               dummy_midpoint_node_list,
+               origin_pt,
+               input_type,
+               is_closed_loop,
+               suppress_exception);
 }
 
 bool
