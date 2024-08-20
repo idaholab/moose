@@ -136,6 +136,14 @@ From: {{ APPTAINER_FROM }}
     # Install node.js
     dnf install -y nodejs npm
 
+    # This needs to take place very early on
+    cat <<'EOF' >> ${SINGULARITY_ROOTFS}/.singularity.d/env/01-base.sh
+action="${0##*/}"
+if [[ "${action}" == 'exec' ]]; then
+    set -- /bin/bash --noprofile -c "$*"
+fi
+EOF
+
     # Clean up
     conda clean -ya
     dnf clean all
