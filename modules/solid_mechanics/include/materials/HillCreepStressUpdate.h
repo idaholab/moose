@@ -162,6 +162,9 @@ protected:
 
   /// Materials's elasticity tensor is anisotropic or not
   bool _anisotropic_elasticity;
+
+  /// Prefactor for scaling creep
+  const Function * const _prefactor_function;
 };
 
 typedef HillCreepStressUpdateTempl<false> HillCreepStressUpdate;
