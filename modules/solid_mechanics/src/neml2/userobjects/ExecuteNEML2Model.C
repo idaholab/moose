@@ -214,17 +214,21 @@ ExecuteNEML2Model::shouldCompute()
 void
 ExecuteNEML2Model::initialize()
 {
+  if (!shouldCompute())
+    return;
+
   _elem_to_batch_index.clear();
   _elem_to_batch_index_cache = {libMesh::invalid_uint, 0};
   _batch_index = 0;
-
-  if (shouldCompute())
-    _output_ready = false;
+  _output_ready = false;
 }
 
 void
 ExecuteNEML2Model::execute()
 {
+  if (!shouldCompute())
+    return;
+
   _elem_to_batch_index[_current_elem->id()] = _batch_index;
   _batch_index += _qrule->n_points();
 }
