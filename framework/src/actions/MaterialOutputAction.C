@@ -266,6 +266,13 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
                          material,
                          get_names_only);
 
+  else if (hasADProperty<RankFourTensor>(property_name))
+    names = outputHelper({"ADMaterialRankFourTensorAux", "012", {"i", "j", "k", "l"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
   else if (hasProperty<SymmetricRankTwoTensor>(property_name))
     names = outputHelper({"MaterialSymmetricRankTwoTensorAux", "012345", {"component"}},
                          property_name,
@@ -273,8 +280,22 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
                          material,
                          get_names_only);
 
+  else if (hasADProperty<SymmetricRankTwoTensor>(property_name))
+    names = outputHelper({"ADMaterialSymmetricRankTwoTensorAux", "012345", {"component"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
   else if (hasProperty<SymmetricRankFourTensor>(property_name))
     names = outputHelper({"MaterialSymmetricRankFourTensorAux", "012345", {"i", "j"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
+  else if (hasADProperty<SymmetricRankFourTensor>(property_name))
+    names = outputHelper({"ADMaterialSymmetricRankFourTensorAux", "012345", {"i", "j"}},
                          property_name,
                          property_name + "_",
                          material,
