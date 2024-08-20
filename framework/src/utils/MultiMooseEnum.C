@@ -146,36 +146,15 @@ MultiMooseEnum::eraseSetValue(const std::string & names)
 }
 
 void
-MultiMooseEnum::erase(const std::string & names)
-{
-  mooseDeprecated("MultiMooseEnum::erase is deprecated, use MultiMooseEnum::eraseSetValue");
-  MultiMooseEnum::eraseSetValue(names);
-}
-
-void
 MultiMooseEnum::eraseSetValue(const std::vector<std::string> & names)
 {
   removeSetValues(names.begin(), names.end());
 }
 
 void
-MultiMooseEnum::erase(const std::vector<std::string> & names)
-{
-  mooseDeprecated("MultiMooseEnum::erase is deprecated, use MultiMooseEnum::eraseSetValue");
-  MultiMooseEnum::eraseSetValue(names);
-}
-
-void
 MultiMooseEnum::eraseSetValue(const std::set<std::string> & names)
 {
   removeSetValues(names.begin(), names.end());
-}
-
-void
-MultiMooseEnum::erase(const std::set<std::string> & names)
-{
-  mooseDeprecated("MultiMooseEnum::erase is deprecated, use MultiMooseEnum::eraseSetValue");
-  MultiMooseEnum::eraseSetValue(names);
 }
 
 void
@@ -187,25 +166,9 @@ MultiMooseEnum::setAdditionalValue(const std::string & names)
 }
 
 void
-MultiMooseEnum::push_back(const std::string & names)
-{
-  mooseDeprecated(
-      "MultiMooseEnum::push_back is deprecated, use MultiMooseEnum::setAdditionalValue");
-  MultiMooseEnum::setAdditionalValue(names);
-}
-
-void
 MultiMooseEnum::setAdditionalValue(const std::vector<std::string> & names)
 {
   assignValues(names.begin(), names.end(), true);
-}
-
-void
-MultiMooseEnum::push_back(const std::vector<std::string> & names)
-{
-  mooseDeprecated(
-      "MultiMooseEnum::push_back is deprecated, use MultiMooseEnum::setAdditionalValue");
-  MultiMooseEnum::setAdditionalValue(names);
 }
 
 void
@@ -215,25 +178,9 @@ MultiMooseEnum::setAdditionalValue(const std::set<std::string> & names)
 }
 
 void
-MultiMooseEnum::push_back(const std::set<std::string> & names)
-{
-  mooseDeprecated(
-      "MultiMooseEnum::push_back is deprecated, use MultiMooseEnum::setAdditionalValue");
-  MultiMooseEnum::setAdditionalValue(names);
-}
-
-void
 MultiMooseEnum::setAdditionalValue(const MultiMooseEnum & other_enum)
 {
   assignValues(other_enum.begin(), other_enum.end(), true);
-}
-
-void
-MultiMooseEnum::push_back(const MultiMooseEnum & other_enum)
-{
-  mooseDeprecated(
-      "MultiMooseEnum::push_back is deprecated, use MultiMooseEnum::setAdditionalValue");
-  MultiMooseEnum::setAdditionalValue(other_enum);
 }
 
 const std::string &
@@ -310,13 +257,6 @@ MultiMooseEnum::clearSetValues()
   _current_values.clear();
 }
 
-void
-MultiMooseEnum::clear()
-{
-  mooseDeprecated("MultiMooseEnum::clear is deprecated, use MultiMooseEnum::clearSetValues");
-  clearSetValues();
-}
-
 unsigned int
 MultiMooseEnum::size() const
 {
@@ -344,23 +284,9 @@ MultiMooseEnum::addValidName(const std::string & name)
   checkDeprecated();
 }
 
-MooseEnumBase &
-MultiMooseEnum::operator+=(const std::string & name)
-{
-  mooseDeprecated("MultiMooseEnum::operator+= is deprecated, use MultiMooseEnum::addValidName");
-  return MooseEnumBase::operator+=(name);
-}
-
 void
 MultiMooseEnum::addValidName(const std::initializer_list<std::string> & names)
 {
   for (const auto & name : names)
     addValidName(name);
-}
-
-MooseEnumBase &
-MultiMooseEnum::operator+=(const std::initializer_list<std::string> & names)
-{
-  mooseDeprecated("MultiMooseEnum::operator+= is deprecated, use MultiMooseEnum::addValidName");
-  return MooseEnumBase::operator+=(names);
 }

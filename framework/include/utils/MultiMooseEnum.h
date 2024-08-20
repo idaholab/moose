@@ -130,16 +130,6 @@ public:
   MultiMooseEnum & operator=(const std::set<std::string> & names);
   ///@}
 
-  ///@{
-  /**
-   * Un-assign, or unset a value. Deprecated, use eraseSetValue instead.
-   * @param names - a string, set, or vector giving the name to erase from the enumeration values
-   */
-  void erase(const std::string & names);
-  void erase(const std::vector<std::string> & names);
-  void erase(const std::set<std::string> & names);
-  ///@}
-
   // The following replaces erase with a more descriptive name
   ///@{
   /**
@@ -149,19 +139,6 @@ public:
   void eraseSetValue(const std::string & names);
   void eraseSetValue(const std::vector<std::string> & names);
   void eraseSetValue(const std::set<std::string> & names);
-  ///@}
-
-  ///@{
-  /**
-   * Insert operators
-   * Operator to insert (push_back) values into the enum. Existing values are preserved and
-   * duplicates are stored. Deprecated, use setAdditionalValue instead.
-   * @param names - a string, set, or vector representing the enumeration values to set.
-   */
-  void push_back(const std::string & names);
-  void push_back(const std::vector<std::string> & names);
-  void push_back(const std::set<std::string> & names);
-  void push_back(const MultiMooseEnum & other_enum);
   ///@}
 
   // The following replaces push_back with a more descriptive name
@@ -218,7 +195,6 @@ public:
    * Clear the MultiMooseEnum
    */
   void clearSetValues();
-  void clear();
   ///@}
 
   /**
@@ -238,15 +214,6 @@ public:
 
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MultiMooseEnum & obj);
-
-  // The following functions would add possible values
-  // (to _items) that an enumerated variable can take. However "+=" is not a
-  // descriptive enough funtion name for this and should not be used in case
-  // users get confused that the operator actually changes the set values of the
-  // variable (_current_values). We have re-implemented this logic under a method
-  // with a more descirptive name to force users to be informed. These are deprecated.
-  MooseEnumBase & operator+=(const std::string & name);
-  MooseEnumBase & operator+=(const std::initializer_list<std::string> & names);
 
   // The following replaces operator+= with a more descriptive name
   /// Extends the range of possible values the variable can be set to
