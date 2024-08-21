@@ -9,6 +9,7 @@
 
 #include "HillCreepStressUpdate.h"
 #include "ElasticityTensorTools.h"
+#include "Function.h"
 
 registerMooseObject("SolidMechanicsApp", ADHillCreepStressUpdate);
 registerMooseObject("SolidMechanicsApp", HillCreepStressUpdate);
@@ -33,6 +34,8 @@ HillCreepStressUpdateTempl<is_ad>::validParams()
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
   params.addParam<bool>("anisotropic_elasticity", false, "Enable using anisotropic elasticity");
+  params.addParam<FunctionName>(
+      "creep_prefactor", "Optional function to use as a scalar prefactor on the creep strain.");
   return params;
 }
 
@@ -59,7 +62,9 @@ HillCreepStressUpdateTempl<is_ad>::HillCreepStressUpdateTempl(const InputParamet
     _elasticity_tensor_name(this->_base_name + "elasticity_tensor"),
     _elasticity_tensor(
         this->template getGenericMaterialProperty<RankFourTensor, is_ad>(_elasticity_tensor_name)),
-    _anisotropic_elasticity(this->template getParam<bool>("anisotropic_elasticity"))
+    _anisotropic_elasticity(this->template getParam<bool>("anisotropic_elasticity")),
+    _prefactor_function(
+        this->isParamValid("creep_prefactor") ? &this->getFunction("creep_prefactor") : nullptr)
 {
   if (_start_time < this->_app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
     this->template paramError(
@@ -104,8 +109,11 @@ HillCreepStressUpdateTempl<is_ad>::computeResidual(
   // delta_gamma (scalar plastic strain) will change the stress (and qsigma as well)
   computeQsigmaChanged(qsigma_changed, stress_new, delta_gamma, stress_changed);
 
-  const GenericReal<is_ad> creep_rate =
+  GenericReal<is_ad> creep_rate =
       _coefficient * std::pow(qsigma_changed, _n_exponent) * _exponential * _exp_time;
+
+  if (_prefactor_function)
+    creep_rate *= _prefactor_function->value(_t, _q_point[_qp]);
 
   this->_inelastic_strain_rate[_qp] = MetaPhysicL::raw_value(creep_rate);
   // Return iteration difference between creep strain and inelastic strain multiplier
@@ -197,9 +205,13 @@ HillCreepStressUpdateTempl<is_ad>::computeDerivative(
   GenericReal<is_ad> d_qsigma_d_deltaGamma =
       d_qsigma_d_inelasticStrainIncrement.dot(d_qsigma_d_sigma);
 
-  const GenericReal<is_ad> creep_rate_derivative =
-      _coefficient * d_qsigma_d_deltaGamma * _n_exponent *
-      std::pow(qsigma_changed, _n_exponent - 1.0) * _exponential * _exp_time;
+  GenericReal<is_ad> creep_rate_derivative = _coefficient * d_qsigma_d_deltaGamma * _n_exponent *
+                                             std::pow(qsigma_changed, _n_exponent - 1.0) *
+                                             _exponential * _exp_time;
+
+  if (_prefactor_function)
+    creep_rate_derivative *= _prefactor_function->value(_t, _q_point[_qp]);
+
   return (creep_rate_derivative * _dt - 1.0);
 }
 

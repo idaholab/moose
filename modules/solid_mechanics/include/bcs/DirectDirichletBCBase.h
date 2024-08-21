@@ -10,6 +10,7 @@
 #pragma once
 
 #include "NodalBC.h"
+#include "libmesh/numeric_vector.h"
 
 // libMesh forward declarations
 namespace libMesh
@@ -27,8 +28,6 @@ public:
 
   DirectDirichletBCBase(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-
 protected:
   virtual Real computeQpResidual() override;
 
@@ -37,8 +36,9 @@ protected:
    */
   virtual Real computeQpValue() = 0;
 
-  SparseMatrix<Number> * _mass_matrix;
+  /// The diagonal of the mass matrix
+  const NumericVector<Number> & _mass_diag;
 
-  const VariableValue & _u_old;
-  const VariableValue & _u_dot_old;
+  const Real & _u_old;
+  const Real & _u_dot_old;
 };
