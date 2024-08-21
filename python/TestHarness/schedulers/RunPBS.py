@@ -37,6 +37,8 @@ class RunPBS(RunHPC):
             # This job's result from the qstat command
             job_result = job_results[hpc_job.id]
             exit_code = job_result.get('Exit_status')
+            if exit_code is not None:
+                exit_code = int(exit_code)
             state = job_result.get('job_state')
             obittime = job_result.get('obittime')
 
@@ -44,13 +46,10 @@ class RunPBS(RunHPC):
                 job = hpc_job.job
 
                 # Helper for parsing timings
-                def parse_time(name, graceful=False):
+                def parse_time(name):
                     time_format = '%a %b %d %H:%M:%S %Y'
                     entry = job_result.get(name)
                     if not entry:
-                        if not graceful:
-                            self.setHPCJobError(hpc_job, 'FAILED TO GET TIMING',
-                                                f'Failed to get time entry "{name}"')
                         return None
 
                     try:
@@ -62,7 +61,7 @@ class RunPBS(RunHPC):
 
                 # Job is queued and it has switched to running
                 if hpc_job.state == hpc_job.State.queued:
-                    start_time = parse_time('stime', True)
+                    start_time = parse_time('stime')
                     if start_time:
                         self.setHPCJobRunning(hpc_job, start_time)
 
@@ -70,6 +69,7 @@ class RunPBS(RunHPC):
                 # will also try to cancel it so that it doesn't hang around
                 if state == 'H' and (job_result.get('Hold_Types') != 'u' or self.options.hpc_no_hold):
                     self.setHPCJobError(hpc_job, 'PBS JOB HELD', 'was held; killed job')
+                    exit_code = 1
                     try:
                         self.killHPCJob(hpc_job, lock=False) # no lock; we're already in one
                     except:
@@ -78,14 +78,10 @@ class RunPBS(RunHPC):
                 # Job finished before it started, so something killed it
                 if state == 'F' and exit_code is None:
                     self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed')
+                    exit_code = 1
 
                 # If we have a finished time or an error, we're done
-                if obittime or job.getStatus() == job.error:
-                    if exit_code is not None:
-                        exit_code = int(exit_code)
-                    else:
-                        exit_code = 1
-
+                if exit_code is not None:
                     if exit_code < 0:
                         name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
                         # Job timed out; give this a special timeout status because
@@ -104,12 +100,33 @@ class RunPBS(RunHPC):
                     elif exit_code >= 128:
                         self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed by a signal')
 
-                    # Parse end time if possible
-                    end_time = None
-                    if obittime:
-                        end_time = parse_time('obittime')
+                    # Parse walltime if possible
+                    walltime_sec = None
+                    resources_used = job_result.get('resources_used')
+                    if resources_used:
+                        walltime = resources_used.get('walltime')
+                        if walltime:
+                            search = re.search(f'^(\d{2}):(\d{2}):(\d{2})$', walltime)
+                            if search:
+                                walltime_sec = datetime.timedelta(hours=int(search.group(1)),
+                                                                  minutes=int(search.group(2)),
+                                                                  seconds=int(search.group(3))).total_seconds()
+                            else:
+                                self.setHPCJobError(hpc_job, 'WALLTIME PARSE ERROR',
+                                                    f'Failed to parse walltime from {walltime}')
 
-                    # Parse the queued time
+
+                    # Set end time if possible. PBS has an 'obittime' entry that can be used,
+                    # but it includes a ton of cleanup time that isn't representative of the
+                    # actual time. Here, we'll cheat and just append to the start time the
+                    # walltime to determine the end time, if possible. If not possible, it'll
+                    # just use the time for now which is fine.
+                    end_time = None
+                    if walltime_sec:
+                        start_time = parse_time('stime')
+                        if start_time:
+                            end_time = start_time + walltime_sec
+
                     self.setHPCJobDone(hpc_job, exit_code, end_time)
 
         # Success
