@@ -23,8 +23,6 @@ NEML2ObjectStubHeader(ExecuteNEML2Model, ElementUserObject);
 #include "NEML2ModelInterface.h"
 #include <map>
 
-#include "BatchPropertyDerivative.h"
-
 class MOOSEToNEML2;
 class MOOSEToNEML2Parameter;
 
@@ -74,10 +72,10 @@ protected:
   virtual void checkExecutionStage() const final;
 
   /// Set parameters from parameter UO and/or enable AD
-  virtual void preCompute();
+  virtual void setParameter();
 
   /// Obtain derivative of output with respect to parameters
-  virtual void postCompute();
+  virtual void getParameterDerivative();
 
   /// Determine whether the material model should be called
   virtual bool shouldCompute();

@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "BatchPropertyDerivative.h"
 #include "ElementOptimizationFunctionInnerProduct.h"
 #include "SymmetricRankTwoTensor.h"
 
 /**
- * This is a "glue" material that retrieves the batched stress derivative output vector
- * and uses the output variables to perform the objective stress integration.
+ * This object calculates the double contraction between the stress derivative and the adjoint
+ * strain material properties. The resulting product is integrated to determine the gradient of the
+ * objective function, which is essential for solving an inverse optimization problem.
  */
 class AdjointStrainStressGradInnerProduct : public ElementOptimizationFunctionInnerProduct
 {

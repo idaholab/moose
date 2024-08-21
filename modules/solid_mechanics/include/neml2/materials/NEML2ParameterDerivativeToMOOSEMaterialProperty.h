@@ -38,7 +38,7 @@ public:
   virtual void computeProperties() override;
 
 protected:
-  virtual void initQpStatefulProperties() override;
+  virtual void initQpStatefulProperties() override {};
 
   /// User object managing the execution of the NEML2 model
   const ExecuteNEML2Model & _execute_neml2_model;
@@ -46,10 +46,7 @@ protected:
   /// Emitted material property
   MaterialProperty<T> & _prop;
 
-  /// Initial condition
-  const MaterialProperty<T> * _prop0;
-
-  /// labled view to the requested output
+  /// the requested parameter derivative
   const neml2::Tensor & _output_view;
 };
 

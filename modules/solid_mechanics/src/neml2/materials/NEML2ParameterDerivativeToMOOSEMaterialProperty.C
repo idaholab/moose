@@ -70,21 +70,10 @@ NEML2ParameterDerivativeToMOOSEMaterialProperty<T>::NEML2ParameterDerivativeToMO
   : Material(params),
     _execute_neml2_model(getUserObject<ExecuteNEML2Model>("execute_neml2_model_uo")),
     _prop(declareProperty<T>(getParam<MaterialPropertyName>("moose_material_property"))),
-    _prop0(isParamValid("moose_material_property_init")
-               ? &getMaterialProperty<T>("moose_material_property_init")
-               : nullptr),
     _output_view(_execute_neml2_model.getOutputParameterDerivativeView(
         neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_variable")),
         getParam<std::string>("neml2_parameter_derivative")))
 {
-}
-
-template <typename T>
-void
-NEML2ParameterDerivativeToMOOSEMaterialProperty<T>::initQpStatefulProperties()
-{
-  if (_prop0)
-    _prop[_qp] = (*_prop0)[_qp];
 }
 
 template <typename T>

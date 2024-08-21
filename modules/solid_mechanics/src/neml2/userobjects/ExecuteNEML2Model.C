@@ -83,7 +83,7 @@ ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
     for (const auto & uo_name : gather_uo_names)
       _doutputs[std::make_pair(output, uo_name)] = neml2::Tensor();
 
-    // reserve Batch tensors for each model parameter
+    // reserve Batch tensors for each model parameter derivative
     for (const auto & param : model().named_parameters())
       _doutputs_dparams[std::make_pair(output, param.first)] = neml2::Tensor();
   }
@@ -126,7 +126,7 @@ ExecuteNEML2Model::initialSetup()
     addUOVariable(uo_name, uo.getNEML2Variable());
   }
 
-  // deal with user object provided inputs
+  // deal with user object provided parameters
   for (const auto & uo_name : getParam<std::vector<UserObjectName>>("gather_param_uos"))
   {
     // gather coupled user objects late to ensure they are constructed. Do not add them as
@@ -256,8 +256,7 @@ ExecuteNEML2Model::finalize()
       _in = neml2::LabeledVector::zeros(batch_shape, {&model().input_axis()});
     }
 
-    // Steps before stress update
-    preCompute();
+    setParameter();
 
     updateForces();
 
@@ -271,12 +270,8 @@ ExecuteNEML2Model::finalize()
       for (auto & pair : _outputs)
         pair.second = _out.base_index(pair.first);
 
-      // output retrieved derivatives
-      for (auto & [out, in, batch_tensor_ptr] : _retrieved_derivatives)
-        *batch_tensor_ptr = _dout_din.base_index({out, in});
+      getParameterDerivative();
 
-      // Additional calculations after stress update
-      postCompute();
       _output_ready = true;
     }
   }
@@ -296,7 +291,7 @@ ExecuteNEML2Model::finalize()
 }
 
 void
-ExecuteNEML2Model::preCompute()
+ExecuteNEML2Model::setParameter()
 {
   // Set model parameters from the parameter UOs
   for (const auto & uo : _gather_param_uos)
@@ -318,8 +313,12 @@ ExecuteNEML2Model::preCompute()
 }
 
 void
-ExecuteNEML2Model::postCompute()
+ExecuteNEML2Model::getParameterDerivative()
 {
+  // output retrieved derivatives
+  for (auto & [out, in, batch_tensor_ptr] : _retrieved_derivatives)
+    *batch_tensor_ptr = _dout_din.base_index({out, in});
+
   // output retrieved output variable derivatives wrt parameters
   for (auto & [out, pname, batch_tensor_ptr] : _retrieved_parameter_derivatives)
   {
