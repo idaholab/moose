@@ -30,10 +30,6 @@ protected:
   Variable<Scalar> & _sum;
   Variable<Scalar> & _product;
 
-  // parameters
-  const Scalar & _P;
-  const Scalar & _Q;
-
   /// Compute
   virtual void set_value(bool out, bool dout_din, bool d2out_din2) override;
 };

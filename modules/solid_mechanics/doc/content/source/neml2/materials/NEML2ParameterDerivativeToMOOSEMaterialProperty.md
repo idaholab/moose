@@ -24,8 +24,8 @@ Only `Scaler` NEML2 parameters are supported in this case, which keeps the type 
 
 !listing modules/solid_mechanics/test/tests/neml2/moose_to_neml2_parameters.i block=Materials/dstress_dE
 
-!syntax parameters /Materials/NEML2ParameterDerivativeToMOOSEMaterialProperty
+!syntax parameters /Materials/NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
 
-!syntax inputs /Materials/NEML2ParameterDerivativeToMOOSEMaterialProperty
+!syntax inputs /Materials/NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
 
-!syntax children /Materials/NEML2ParameterDerivativeToMOOSEMaterialProperty
+!syntax children /Materials/NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty

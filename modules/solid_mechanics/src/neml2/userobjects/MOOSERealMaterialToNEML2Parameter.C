@@ -18,7 +18,6 @@ registerMooseObject("SolidMechanicsApp", MOOSERealMaterialToNEML2Parameter);
   NEML2ObjectStubParam(MaterialPropertyName, "moose_material_property");                           \
   NEML2ObjectStubParam(std::string, "neml2_parameter");                                            \
   NEML2ObjectStubImplementationClose(name, MOOSEToNEML2Parameter)
-MOOSERealMaterialToNEML2ParameterStub(MOOSERealMaterialToNEML2Parameter);
 #else
 
 InputParameters
