@@ -14,34 +14,101 @@ from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
 from tempfile import TemporaryDirectory
+from collections import namedtuple
 import traceback
+
+def time_now():
+    return time.time_ns() / (10 ** 9)
 
 class Timer(object):
     """
     A helper class for testers to track the time it takes to run.
-
-    Every call to the start method must be followed by a call to stop.
     """
     def __init__(self):
-        self.starts = []
-        self.ends = []
-    def start(self):
-        """ starts the timer clock """
-        self.starts.append(clock())
-    def stop(self):
-        """ stop/pauses the timer clock """
-        self.ends.append(clock())
-    def cumulativeDur(self):
-        """ returns the total/cumulative time taken by the timer """
-        diffs = [end - start for start, end in zip(self.starts, self.ends)]
-        return sum(diffs)
-    def averageDur(self):
-        return self.cumulativeDur() / len(self.starts)
-    def nRuns(self):
-        return len(self.starts)
-    def reset(self):
-        self.starts = []
-        self.ends = []
+        # Dict of time name -> (start,) or (start,end)
+        self.times = {}
+        # Threading lock for setting timers
+        self.lock = threading.Lock()
+
+    @staticmethod
+    def time_now() -> float:
+        """ Helper for getting a precise now time """
+        return float(time.time_ns() / (10 ** 9))
+
+    def start(self, name: str, at_time=None):
+        """ Start the given timer """
+        if not at_time:
+            at_time = self.time_now()
+        with self.lock:
+            self.times[name] = [at_time]
+
+    def stop(self, name: str, at_time=None):
+        """ End the given timer """
+        if not at_time:
+            at_time = self.time_now()
+        with self.lock:
+            entry = self.times.get(name)
+            if not entry:
+                raise Exception(f'Missing time entry {name}')
+
+            if len(entry) > 1:
+                raise Exception(f'Time entry {name} already stopped')
+            entry.append(at_time)
+
+    def startMain(self):
+        """ Get the start time for the main timer """
+        self.start('main')
+
+    def stopMain(self):
+        """ Get the end time for the main timer """
+        self.stop('main')
+
+    def hasTime(self, name: str):
+        """ Whether or not the given timer exists """
+        with self.lock:
+            return name in self.times
+
+    def hasTotalTime(self, name: str):
+        """ Whether or not the given total time exists """
+        with self.lock:
+            entry = self.times.get(name)
+            if not entry:
+                return False
+            return len(entry) > 1
+
+    def totalTime(self, name='main'):
+        """ Get the total time for the given timer """
+        with self.lock:
+            entry = self.times.get(name)
+            if not entry:
+                if name == 'main':
+                    return 0
+                raise Exception(f'Missing time entry {name}')
+
+            if len(entry) > 1:
+                return entry[1] - entry[0]
+            return time_now() - entry[0]
+
+    def totalTimes(self):
+        """ Get the total times """
+        times = {}
+        for name, entry in self.times.items():
+            times[name] = self.totalTime(name)
+        return times
+
+    class TimeManager:
+        """ Context manager for timing a section """
+        def __init__(self, timer, name: str):
+            self.timer = timer
+            self.name = name
+        def __enter__(self):
+            self.timer.start(self.name)
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self.timer.stop(self.name)
+
+    def time(self, name: str):
+        """ Time a section using a context manager """
+        return self.TimeManager(self, name)
 
 class Job(object):
     """
@@ -59,8 +126,6 @@ class Job(object):
         self.specs = tester.specs
         self.__job_dag = job_dag
         self.timer = Timer()
-        self.__start_time = clock()
-        self.__end_time = None
         self.__previous_time = None
         self.__joined_out = ''
         self.report_timer = None
@@ -279,87 +344,102 @@ class Job(object):
         """
         tester = self.__tester
 
-        # Helper for trying and catching
-        def try_catch(do, exception_name):
-            try:
-                do()
-            except Exception:
+        # Start the main timer for running
+        self.timer.startMain()
+
+        # Helper for exiting
+        def cleanup():
+            with self.timer.time('job_cleanup'):
                 self.cleanup()
-                self.setStatus(self.error, f'{exception_name} EXCEPTION')
-                self.output += util.outputHeader('Python exception encountered')
-                self.output += traceback.format_exc()
-                return False
-            return True
+            self.timer.stopMain()
+
+        # Helper for trying and catching
+        def try_catch(do, exception_name, timer_name):
+            with self.timer.time(timer_name):
+                failed = False
+                try:
+                    do()
+                except:
+                    trace = traceback.format_exc()
+                    self.setStatus(self.error, f'{exception_name} EXCEPTION')
+                    self.output += util.outputHeader('Python exception encountered')
+                    self.output += trace
+                    failed = True
+
+            if failed:
+                cleanup()
+            return not failed
 
         # Do not execute app, but still run the tester
         # This is truly awful and I really hate that it got put in here,
         # please remove it if you can.
         if not tester.shouldExecute():
             run_tester = lambda: tester.run(self.options, 0, '')
-            try_catch(run_tester, 'TESTER RUN')
+            try_catch(run_tester, 'TESTER RUN', 'tester_run')
             return
 
         if self.options.pedantic_checks and self.canParallel():
             # Before the job does anything, get the times files below it were last modified
-            self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
-            self.addCaveats('pedantic check')
-            time.sleep(1)
+            with self.timer.time('pedantic_init'):
+                self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
+                self.addCaveats('pedantic check')
+                time.sleep(1)
 
-        tester.prepare(self.options)
+        with self.timer.time('tester_prepare'):
+            tester.prepare(self.options)
 
         # Verify that the working directory is available right before we execute
         if not os.path.exists(tester.getTestDir()):
             self.setStatus(self.error, 'WORKING DIRECTORY NOT FOUND')
+            cleanup()
             return
         # Getting the command can also cause a failure, so try that
         tester.getCommand(self.options)
         if tester.isError():
+            cleanup()
             return
-
-        self.timer.reset()
-
-        self.__start_time = clock()
 
         # Spawn the process
         spawn = lambda: self._runner.spawn(self.timer)
-        if not try_catch(spawn, 'RUNNER SPAWN'):
+        if not try_catch(spawn, 'RUNNER SPAWN', 'runner_spawn'):
             return
 
         # Entry point for testers to do other things
         post_spawn = lambda: tester.postSpawn(self._runner)
-        if not try_catch(post_spawn, 'TESTER POST SPAWN'):
+        if not try_catch(post_spawn, 'TESTER POST SPAWN', 'tester_post_spawn'):
             return
 
         # And wait for it to complete
         wait = lambda: self._runner.wait(self.timer)
-        if not try_catch(wait, 'RUNNER WAIT'):
+        if not try_catch(wait, 'RUNNER WAIT', 'runner_wait'):
             return
-
-        self.__start_time = self.timer.starts[0]
-        self.__end_time = self.timer.ends[-1]
 
         # Job error occurred, which means the Runner didn't complete
         # so don't process anything else
         if self.isError():
-            self.cleanup()
+            cleanup()
             return
 
         # And do finalize (really just cleans up output)
-        self._runner.finalize()
+        runner_finalize = lambda: self._runner.finalize()
+        if not try_catch(runner_finalize, 'RUNNER FINALIZE', 'runner_finalize'):
+            return
 
+        # Check if the files we checked on earlier were modified.
         if self.options.pedantic_checks and self.canParallel():
-            # Check if the files we checked on earlier were modified.
-            self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
-            self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(), self.fileChecker.getNewTimes())
+            with self.timer.time('pedantic_check'):
+                self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
+                self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(),
+                                                                    self.fileChecker.getNewTimes())
 
         # Allow derived proccessResults to process the output and set a failing status (if it failed)
         runner_output = self._runner.getOutput()
         exit_code = self._runner.getExitCode()
         run_tester = lambda: tester.run(self.options, exit_code, runner_output)
-        try_catch(run_tester, 'TESTER RUN')
+        try_catch(run_tester, 'TESTER RUN', 'tester_run')
 
         # Run cleanup now that we're done
-        self.cleanup()
+        cleanup()
 
     def killProcess(self):
         """ Kill remaining process that may be running """
@@ -369,14 +449,6 @@ class Job(object):
             except:
                 pass
         self.cleanup()
-
-    def getStartTime(self):
-        """ Return the time the process started """
-        return self.__start_time
-
-    def getEndTime(self):
-        """ Return the time the process exited """
-        return self.__end_time
 
     def getOutput(self):
         """ Return the combined contents of output """
@@ -421,18 +493,6 @@ class Job(object):
     def appendOutput(self, output):
         self.output += output
 
-    def getActiveTime(self):
-        """ Return active time """
-        m = re.search(r"Active time=(\S+)", self.getOutput())
-        if m != None:
-            return float(m.group(1))
-
-    def getSolveTime(self):
-        """ Return solve time """
-        m = re.search(r"solve().*", self.getOutput())
-        if m != None:
-            return m.group().split()[5]
-
     def setPreviousTime(self, t):
         """
         Allow an arbitrary time to be set. This is used by the QueueManager
@@ -442,17 +502,16 @@ class Job(object):
 
     def getTiming(self):
         """ Return active time if available, if not return a comparison of start and end time """
-        if self.getActiveTime():
-            return self.getActiveTime()
-        elif self.getEndTime() and self.getStartTime():
-            return self.timer.cumulativeDur()
-        elif self.getStartTime() and self.isRunning():
-            # If the test is still running, return current run time instead
-            return max(0.0, clock() - self.getStartTime())
-        elif self.__previous_time:
+        # Actual execution time
+        if self.timer.hasTime('runner_run'):
+            return self.timer.totalTime('runner_run')
+        # Job has started
+        if self.timer.hasTime('main'):
+            return self.timer.totalTime()
+        # Previous time is set
+        if self.__previous_time:
             return self.__previous_time
-        else:
-            return 0.0
+        return 0.0
 
     def getStatus(self):
         return self.job_status.getStatus()

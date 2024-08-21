@@ -14,6 +14,7 @@ from enum import Enum
 import paramiko
 import jinja2
 import copy
+import statistics
 from multiprocessing.pool import ThreadPool
 from TestHarness import util
 
@@ -437,6 +438,10 @@ class RunHPC(RunParallel):
             # Do the submission; this is thread safe
             exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.submit, cmd)
 
+            # Start the queued timer if needed
+            if not hold:
+                job.timer.start('hpc_queued')
+
             # Set what we've ran for this job so that we can
             # potentially get the context in an error
             tester.setCommandRan(full_cmd)
@@ -503,6 +508,9 @@ class RunHPC(RunParallel):
                     except:
                         pass
                     raise self.CallHPCException(self, f'{cmd} failed', full_cmd, result)
+
+                # Start the timer now that we've queued it
+                hpc_job.job.timer.start('hpc_queued')
 
                 self.setHPCJobQueued(hpc_job)
 
@@ -589,7 +597,7 @@ class RunHPC(RunParallel):
         """
         raise Exception('Unimplemented updateHPCJobs()')
 
-    def setHPCJobRunning(self, hpc_job):
+    def setHPCJobRunning(self, hpc_job, start_time):
         """
         Sets the given HPC job as running.
 
@@ -598,10 +606,19 @@ class RunHPC(RunParallel):
         This should be called within the overridden updateHPCJobs() to
         set a HPCJob as running.
         """
+        job = hpc_job.job
+
         # This is currently thread safe because we only ever change
         # it within updateJobs(), which is only ever executed serially
         # within the thread the calls _updateHPCJobs()
         hpc_job.state = hpc_job.State.running
+
+        # The job is no longer queued as of when it started
+        if job.timer.hasTime('hpc_queued'):
+            job.timer.stop('hpc_queued', start_time)
+        # The runner job (actual walltime for the exec) as of when it started
+        job.timer.start('runner_run', start_time)
+
         # Print out that the job is now running
         self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.running, caveats=True)
 
@@ -623,19 +640,24 @@ class RunHPC(RunParallel):
         # Print out that the job is queued again
         self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.queued, caveats=True)
 
-    def setHPCJobDone(self, hpc_job, exit_code):
+    def setHPCJobDone(self, hpc_job, exit_code, end_time):
         """
         Sets the given HPC job as done.
 
         This should be called within the overridden updateHPCJobs(),
         within a thread lock for that HPCJob.
         """
+        job = hpc_job.job
+
         hpc_job.state = hpc_job.State.done
         hpc_job.exit_code = exit_code
 
+        # The runner job (actual walltime for the exec) ends when it stopped
+        if job.timer.hasTime('runner_run'):
+            job.timer.stop('runner_run', end_time)
+
         # We've actually ran something now that didn't fail, so update
         # the command to what was ran there
-        job = hpc_job.job
         if not job.isError():
             job.getTester().setCommandRan(hpc_job.command)
 
@@ -816,3 +838,22 @@ class RunHPC(RunParallel):
         # dependency above them
         functor = lambda hpc_job: hpc_job.state == hpc_job.State.held
         self.killHPCJobs(functor)
+
+    def additionalResultSummary(self):
+        timer_keys = ['hpc_queued', 'hpc_wait_output']
+        times = {}
+        for key in timer_keys:
+            times[key] = []
+
+        for hpc_job in self.hpc_jobs.values():
+            timer = hpc_job.job.timer
+            for key in timer_keys:
+                if timer.hasTotalTime(key):
+                    times[key].append(timer.totalTime(key))
+
+        avg_queued = statistics.mean(times['hpc_queued'])
+        avg_wait_output = statistics.mean(times['hpc_wait_output'])
+
+        result = f'Average queued time {avg_queued:.1f} seconds, '
+        result += f'average output wait time {avg_wait_output:.1f} seconds.'
+        return result

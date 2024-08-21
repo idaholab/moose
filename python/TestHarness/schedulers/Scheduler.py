@@ -548,3 +548,7 @@ class Scheduler(MooseObject):
 
         except KeyboardInterrupt:
             self.killRemaining(keyboard=True)
+
+    def additionalResultSummary(self):
+        """ Entrypoint to add additional results to the final summary """
+        return None

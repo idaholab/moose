@@ -70,12 +70,12 @@ class SubprocessRunner(Runner):
         except Exception as e:
             raise Exception('Error in launching a new task') from e
 
-        timer.start()
+        timer.start('runner_run')
 
     def wait(self, timer):
         self.process.wait()
 
-        timer.stop()
+        timer.stop('runner_run')
 
         self.exit_code = self.process.poll()
 
