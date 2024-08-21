@@ -191,7 +191,7 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
 }
 
 void
-NonlinearEigenSystem::condenseOutConstraints()
+NonlinearEigenSystem::initializeCondensedMatrices()
 {
   if (!dofMap().n_constrained_dofs())
     return;

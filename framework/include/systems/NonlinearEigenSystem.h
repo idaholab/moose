@@ -174,10 +174,10 @@ public:
   void residualAndJacobianTogether() override;
 
   /**
-   * Condense constraint dofs out of the condensed matrices. This is a no-op if there are no
+   * Initialize the condensed matrices. This is a no-op if there are no
    * constraints in the DofMap
    */
-  void condenseOutConstraints();
+  void initializeCondensedMatrices();
 
 protected:
   virtual void postAddResidualObject(ResidualObject & object) override;
