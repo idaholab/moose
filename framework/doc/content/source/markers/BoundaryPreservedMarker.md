@@ -12,7 +12,7 @@ These elements might be coarsened later if the boundary moves to a different loc
 
 ## Example Input File Syntax
 
-!listing test/tests/userobjects/element_subdomain_modifier/adaptivity_moving_boundary.i
+!listing test/tests/meshmodifiers/element_subdomain_modifier/adaptivity_moving_boundary.i
            block=Adaptivity
            link=False
 

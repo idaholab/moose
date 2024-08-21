@@ -31,6 +31,7 @@ SidesetAroundSubdomainUpdater::validParams()
   params.addRequiredParam<BoundaryName>("update_sideset_name",
                                         "The name of the sideset to be updated. If the boundary "
                                         "does not exist it will be added to the system.");
+  params.registerBase("MeshModifier");
   return params;
 }
 

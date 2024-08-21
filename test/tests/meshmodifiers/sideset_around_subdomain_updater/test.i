@@ -31,7 +31,7 @@
   []
 []
 
-[UserObjects]
+[MeshModifiers]
   [subdomain_updater]
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = c

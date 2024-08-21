@@ -48,7 +48,7 @@ TimedSubdomainModifier::validParams()
 
   params.addClassDescription(
       "Modify element subdomain ID of entire subdomains for given points "
-      "in time. This userobject only runs on the undisplaced mesh, and it will "
+      "in time. This mesh modifier only runs on the undisplaced mesh, and it will "
       "modify both the undisplaced and the displaced mesh.");
 
   return params;

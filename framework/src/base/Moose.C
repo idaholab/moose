@@ -172,6 +172,8 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
   appendDeprecatedMooseObjectTask("add_user_object",      Corrector);
   registerMooseObjectTask("add_corrector",                Corrector,                 false);
+  appendDeprecatedMooseObjectTask("add_user_object",      MeshModifier);
+  registerMooseObjectTask("add_mesh_modifier",            MeshModifier,              false);
 
   registerMooseObjectTask("add_postprocessor",            Postprocessor,             false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,       false);
@@ -234,6 +236,8 @@ addActionTypes(Syntax & syntax)
   registerTask("check_integrity_early", true);
   registerTask("check_integrity_early_physics", false);
   registerTask("setup_quadrature", true);
+
+  registerTask("mesh_modifiers", false);
 
   /// Additional Actions
   registerTask("no_action", false); // Used for Empty Action placeholders
@@ -327,7 +331,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_periodic_bc)"
-                           "(add_user_object, add_corrector)"
+                           "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"
                            "(add_sampler)"
                            "(setup_function_complete)"
@@ -573,13 +577,17 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddConstraintAction", "Constraints/*");
 
-  registerSyntax("AddUserObjectAction", "UserObjects/*");
-  syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   registerSyntax("AddControlAction", "Controls/*");
   registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
+
+  // UserObject and some derived classes
+  registerSyntax("AddUserObjectAction", "UserObjects/*");
+  syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
+  registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
+  syntax.registerSyntaxType("MeshModifiers/*", "UserObjectName");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
 
