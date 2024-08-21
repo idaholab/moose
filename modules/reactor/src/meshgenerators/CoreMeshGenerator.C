@@ -640,9 +640,6 @@ CoreMeshGenerator::generateMetadata()
   declareMeshProperty(RGMB::assembly_names, input_assembly_names);
   declareMeshProperty(RGMB::assembly_lattice, assembly_name_lattice);
   declareMeshProperty(RGMB::extruded, _extrude && _mesh_dimensions == 3);
-
-  if (getParam<bool>("show_rgmb_metadata"))
-    printReactorMetadata("core", name());
 }
 
 bool

@@ -613,12 +613,6 @@ PinMeshGenerator::generateMetadata()
   declareMeshProperty(RGMB::ring_region_ids, ring_region_ids);
   declareMeshProperty(RGMB::background_region_id, background_region_ids);
   declareMeshProperty(RGMB::duct_region_ids, duct_region_ids);
-
-  if (getParam<bool>("show_rgmb_metadata"))
-  {
-    std::string mg_struct = _is_assembly ? "assembly" : "pin";
-    printReactorMetadata(mg_struct, name());
-  }
 }
 
 std::unique_ptr<MeshBase>

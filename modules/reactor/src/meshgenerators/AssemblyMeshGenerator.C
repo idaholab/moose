@@ -490,9 +490,6 @@ AssemblyMeshGenerator::generateMetadata()
   }
   declareMeshProperty(RGMB::pin_names, input_pin_names);
   declareMeshProperty(RGMB::pin_lattice, pin_name_lattice);
-
-  if (getParam<bool>("show_rgmb_metadata"))
-    printReactorMetadata("assembly", name());
 }
 
 void
