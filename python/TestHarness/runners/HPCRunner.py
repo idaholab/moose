@@ -37,8 +37,6 @@ class HPCRunner(Runner):
         # Rely on the RunHPC object to queue the job
         self.hpc_job = self.run_hpc.queueJob(self.job)
 
-        timer.start()
-
     def wait(self, timer):
         # The states that we should wait on. Anything else should
         # be an invalid state for waiting
@@ -55,8 +53,6 @@ class HPCRunner(Runner):
                 if self.hpc_job.state not in wait_states:
                     self.exit_code = self.hpc_job.exit_code
                     break
-
-        timer.stop()
 
         # The PBS output (stdout+stderr)
         output_file = self.run_hpc.getHPCJobOutputPath(self.job)
@@ -91,6 +87,7 @@ class HPCRunner(Runner):
         incomplete_files = set()
 
         # Wait for all of the files to be available
+        timer.start('hpc_wait_output')
         waited_time = 0
         while wait_files or incomplete_files:
             # Don't bother if we've been killed
@@ -129,6 +126,7 @@ class HPCRunner(Runner):
 
             waited_time += self.file_completion_poll_time
             time.sleep(self.file_completion_poll_time)
+        timer.stop('hpc_wait_output')
 
         # Handle openmpi appending a null character at the end of jobs
         # that return a nonzero exit code. We don't know how to fix this

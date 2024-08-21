@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re, json
+from datetime import datetime
 from RunHPC import RunHPC
 from PBScodes import PBS_User_EXITCODES
 from TestHarness import util
@@ -36,22 +37,39 @@ class RunPBS(RunHPC):
             # This job's result from the qstat command
             job_result = job_results[hpc_job.id]
             exit_code = job_result.get('Exit_status')
-            if exit_code is not None:
-                exit_code = int(exit_code)
             state = job_result.get('job_state')
+            obittime = job_result.get('obittime')
 
             with hpc_job.getLock():
                 job = hpc_job.job
 
-                # The job has switched to running
-                if state == 'R' and hpc_job.state != hpc_job.State.running:
-                    self.setHPCJobRunning(hpc_job)
+                # Helper for parsing timings
+                def parse_time(name, graceful=False):
+                    time_format = '%a %b %d %H:%M:%S %Y'
+                    entry = job_result.get(name)
+                    if not entry:
+                        if not graceful:
+                            self.setHPCJobError(hpc_job, 'FAILED TO GET TIMING',
+                                                f'Failed to get time entry "{name}"')
+                        return None
+
+                    try:
+                        return datetime.strptime(entry, '%a %b %d %H:%M:%S %Y').timestamp()
+                    except:
+                        self.setHPCJobError(hpc_job, 'FAILED TO PARSE TIMING',
+                                            f'Failed to parse time "{time}" from entry "{name}"')
+                        return None
+
+                # Job is queued and it has switched to running
+                if hpc_job.state == hpc_job.State.queued:
+                    start_time = parse_time('stime', True)
+                    if start_time:
+                        self.setHPCJobRunning(hpc_job, start_time)
 
                 # The job is held, so we're going to consider it a failure and
                 # will also try to cancel it so that it doesn't hang around
                 if state == 'H' and (job_result.get('Hold_Types') != 'u' or self.options.hpc_no_hold):
                     self.setHPCJobError(hpc_job, 'PBS JOB HELD', 'was held; killed job')
-                    exit_code = 1
                     try:
                         self.killHPCJob(hpc_job, lock=False) # no lock; we're already in one
                     except:
@@ -60,10 +78,14 @@ class RunPBS(RunHPC):
                 # Job finished before it started, so something killed it
                 if state == 'F' and exit_code is None:
                     self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed')
-                    exit_code = 1
 
-                # If we were running but now we're done, we're not running anymore
-                if exit_code is not None:
+                # If we have a finished time or an error, we're done
+                if obittime or job.getStatus() == job.error:
+                    if exit_code is not None:
+                        exit_code = int(exit_code)
+                    else:
+                        exit_code = 1
+
                     if exit_code < 0:
                         name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
                         # Job timed out; give this a special timeout status because
@@ -82,7 +104,13 @@ class RunPBS(RunHPC):
                     elif exit_code >= 128:
                         self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed by a signal')
 
-                    self.setHPCJobDone(hpc_job, exit_code)
+                    # Parse end time if possible
+                    end_time = None
+                    if obittime:
+                        end_time = parse_time('obittime')
+
+                    # Parse the queued time
+                    self.setHPCJobDone(hpc_job, exit_code, end_time)
 
         # Success
         return True

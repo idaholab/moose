@@ -704,6 +704,11 @@ class TestHarness:
                 timing_avg = 0
             print(('Ran %d tests in %.1f seconds. Average test time %.1f seconds, maximum test time %.1f seconds.' % (self.num_passed+self.num_failed, time, timing_avg, timing_max)))
 
+            # Get additional results from the scheduler
+            scheduler_summary = self.scheduler.additionalResultSummary()
+            if scheduler_summary:
+                print(scheduler_summary)
+
             if self.num_passed:
                 summary = '<g>%d passed</g>'
             else:
