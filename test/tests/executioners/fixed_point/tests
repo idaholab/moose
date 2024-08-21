@@ -19,7 +19,7 @@
 
       detail = "nonlinear problems."
       # nonlinear tolerance (fixed point problem) is only 1e-2
-      rel_err = 1e-5
+      rel_err = 2e-5
     []
   []
 

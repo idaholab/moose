@@ -198,7 +198,8 @@ AdvancedConcentricCircleGenerator::generate()
     mod_azimuthal_angles.push_back((_azimuthal_angles.back() + _azimuthal_angles.front() + 360.0) /
                                    2.0);
 
-  const Real corr_factor = _preserve_volumes ? radiusCorrectionFactor(mod_azimuthal_angles) : 1.0;
+  const Real corr_factor =
+      _preserve_volumes ? radiusCorrectionFactor(mod_azimuthal_angles, true, _order) : 1.0;
 
   for (const auto & ring_radius : _ring_radii)
     ring_radii_corr.push_back(ring_radius * corr_factor);

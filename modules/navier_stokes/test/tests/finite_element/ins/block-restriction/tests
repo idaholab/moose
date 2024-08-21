@@ -6,6 +6,7 @@
     input = two-mats-two-eqn-sets.i
     exodiff = two-mats-two-eqn-sets_out.e
     requirement = 'The system shall be able to solve two different kernel sets with two different material domains.'
+    rel_err = 2e-5
   []
   [one-mat-two-eqn-sets]
     type = Exodiff

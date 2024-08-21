@@ -16,6 +16,7 @@
     cli_args = 'Mesh/hex/quad_element_type=QUAD8
                 Mesh/hex/tri_element_type=TRI6
                 Mesh/pattern/boundary_region_element_type=QUAD8
+                Mesh/pattern/hexagon_size=15
                 --mesh-only single_hex_quadratic_in.e'
     requirement ='The system shall generate a hexagonal assembly mesh of quadratic QUAD8 elements then modify the peripheral region with TRI6 elements to facilitate further stitching.'
     recover = false
