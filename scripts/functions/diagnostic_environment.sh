@@ -179,6 +179,7 @@ function _python_modules()
 
 function conda_test()
 {
+    # Check library stack compatibility against user's moose repository
     # First run our python_modules test. We need yaml in order to run conda_test.
     _python_modules
     modules_test=$?
@@ -216,8 +217,9 @@ function conda_test()
             fi
         done
         if [[ "${package}" == 'none' ]]; then
-            printf "\nConda MOOSE packages not applicative.
-User is required to manually build PETSc, libMesh, and WASP\n\n"
+            printf "\nConda MOOSE dependencies not avilable (moose-petsc, moose-libmesh,
+moose-wasp, etc). User is required to manually build PETSc, libMesh,
+and WASP\n\n"
             return 0
         fi
         printf '%s\t%s == %s' "${package}" \
