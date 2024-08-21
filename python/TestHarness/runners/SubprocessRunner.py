@@ -79,11 +79,24 @@ class SubprocessRunner(Runner):
 
         self.exit_code = self.process.poll()
 
+        # Header for the combined output
         self.output = util.outputHeader('Begin combined stdout+stderr output')
+
+        # Load combined output
         for file in [self.outfile, self.errfile]:
             file.flush()
             self.output += self.readOutput(file)
             file.close()
+
+            # For some reason openmpi will append a null character at the end
+            # when the exit code is nonzero. Not sure why this is... but remove
+            # it until we figure out what's broken
+            if file == self.errfile and self.exit_code != 0 \
+                and self.job.getTester().hasOpenMPI() and len(self.output) > 2 \
+                and self.output[-3:] == '\n\0\n':
+                self.output = self.output[0:-2]
+
+        # Footer for the combined output
         self.output += util.outputHeader('End combined stderr+stdout output')
 
     def kill(self):
