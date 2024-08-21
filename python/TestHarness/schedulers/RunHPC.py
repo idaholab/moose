@@ -857,9 +857,10 @@ class RunHPC(RunParallel):
                 if timer.hasTotalTime(key):
                     times[key].append(timer.totalTime(key))
 
-        avg_queued = statistics.mean(times['hpc_queued'])
-        avg_wait_output = statistics.mean(times['hpc_wait_output'])
+        averages = {}
+        for key, values in times.items():
+            averages[key] = statistics.mean(values) if values else 0
 
-        result = f'Average queued time {avg_queued:.1f} seconds, '
-        result += f'average output wait time {avg_wait_output:.1f} seconds.'
+        result = f'Average queued time {averages["hpc_queued"]:.1f} seconds, '
+        result += f'average output wait time {averages["hpc_wait_output"]:.1f} seconds.'
         return result
