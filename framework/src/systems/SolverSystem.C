@@ -125,8 +125,8 @@ SolverSystem::checkInvalidSolution()
                      "Use Problem/show_invalid_solution_console=true to show solution counts");
     else
       // output the occurrence of solution invalid in a summary table
-       if (_fe_problem.showInvalidSolutionConsole())
-      _app.solutionInvalidity().print(_console);
+      if (_fe_problem.showInvalidSolutionConsole())
+        _app.solutionInvalidity().print(_console);
   }
 }
 
