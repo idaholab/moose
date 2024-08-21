@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re, json
-from datetime import datetime
+import datetime
 from RunHPC import RunHPC
 from PBScodes import PBS_User_EXITCODES
 from TestHarness import util
@@ -53,7 +53,7 @@ class RunPBS(RunHPC):
                         return None
 
                     try:
-                        return datetime.strptime(entry, '%a %b %d %H:%M:%S %Y').timestamp()
+                        return datetime.datetime.strptime(entry, '%a %b %d %H:%M:%S %Y').timestamp()
                     except:
                         self.setHPCJobError(hpc_job, 'FAILED TO PARSE TIMING',
                                             f'Failed to parse time "{time}" from entry "{name}"')
@@ -106,14 +106,14 @@ class RunPBS(RunHPC):
                     if resources_used:
                         walltime = resources_used.get('walltime')
                         if walltime:
-                            search = re.search(f'^(\d{2}):(\d{2}):(\d{2})$', walltime)
+                            search = re.search(r'^(\d+):(\d{2}):(\d{2})$', walltime)
                             if search:
                                 walltime_sec = datetime.timedelta(hours=int(search.group(1)),
                                                                   minutes=int(search.group(2)),
                                                                   seconds=int(search.group(3))).total_seconds()
                             else:
                                 self.setHPCJobError(hpc_job, 'WALLTIME PARSE ERROR',
-                                                    f'Failed to parse walltime from {walltime}')
+                                                    f'Failed to parse walltime from "{walltime}"')
 
 
                     # Set end time if possible. PBS has an 'obittime' entry that can be used,

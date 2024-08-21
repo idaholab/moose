@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
+from datetime import datetime
 from RunHPC import RunHPC
 
 ## This Class is responsible for maintaining an interface to the slurm scheduling syntax
@@ -26,7 +27,7 @@ class RunSlurm(RunHPC):
         # Poll for all of the jobs within a single call
         active_job_ids = ','.join([x.id for x in hpc_jobs])
         cmd = ['sacct', '-j', active_job_ids, '--parsable2', '--noheader',
-               '-o', 'jobid,exitcode,state,reason']
+               '-o', 'jobid,exitcode,state,reason,start,end']
         exit_code, result, _ = self.callHPC(self.CallHPCPoolType.status, ' '.join(cmd))
         if exit_code != 0:
             return False
@@ -44,10 +45,18 @@ class RunSlurm(RunHPC):
             # exit code of the process, the second is a slurm internal code
             statuses[id] = {'exitcode': int(status_split[1].split(':')[0]),
                             'state': status_split[2],
-                            'reason': status_split[3]}
+                            'reason': status_split[3],
+                            'start': status_split[4],
+                            'end': status_split[5]}
 
         # Update the jobs that we can
         for hpc_job in hpc_jobs:
+            # Helper for parsing a time
+            def parse_time(time):
+                if time:
+                    return datetime.strptime(time, '%Y-%m-%dT%H:%M:%S').timestamp()
+                return None
+
             # Slurm jobs are sometimes not immediately available
             status = statuses.get(hpc_job.id)
             if status is None:
@@ -60,7 +69,8 @@ class RunSlurm(RunHPC):
                 # Job wasn't running and it's no longer pending, so it
                 # is running or has at least ran
                 if state != 'PENDING' and hpc_job.state != hpc_job.State.running:
-                    self.setHPCJobRunning(hpc_job)
+                    start_time = parse_time(status['start'])
+                    self.setHPCJobRunning(hpc_job, start_time)
 
                 # Job was running and isn't running anymore, so it's done
                 if hpc_job.state == hpc_job.State.running and state not in ['RUNNING', 'COMPLETING']:
@@ -80,7 +90,8 @@ class RunSlurm(RunHPC):
                     elif state not in ['FAILED', 'COMPLETED']:
                         self.setHPCJobError(hpc_job, f'SLURM ERROR: {state}', f'has state "{state}"')
 
-                    self.setHPCJobDone(hpc_job, exit_code)
+                    end_time = parse_time(status['end'])
+                    self.setHPCJobDone(hpc_job, exit_code, end_time)
 
         # Success
         return True
