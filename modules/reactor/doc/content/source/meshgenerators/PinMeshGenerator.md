@@ -37,9 +37,7 @@ If the pin is extruded to three dimensions the top-most boundary ID must be assi
 
 ## Metadata Information
 
-Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. In order to see the values of these metadata entries as console output, [!param](/Mesh/PinMeshGenerator/show_rgmb_metadata) can be set to true.
-
-At the pin level, the following metadata is defined on the pin mesh:
+Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. At the pin level, the following metadata is defined on the pin mesh:
 
 - `pin_type`: pin_type id associated with pin mesh, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/pin_type)
 - `pitch`: Pitch of outermost boundary polygon, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/pitch)

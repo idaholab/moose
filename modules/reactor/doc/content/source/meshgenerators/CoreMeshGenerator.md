@@ -53,9 +53,7 @@ By default, `CoreMeshGenerator` will stitch assemblies created by [`AssemblyMesh
 
 ## Metadata Information
 
-Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/CoreMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output.
-
-At the core level, the following metadata is defined on the output mesh:
+Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. At the core level, the following metadata is defined on the output mesh:
 
 - `assembly_names`: Mesh generator names of input assemblies in lattice, similar to input parameter (/Mesh/CoreMeshGenerator/inputs) but with the dummy assembly name excluded
 - `lattice`: 2-D lattice of assemblies in core, where each location represents the 0-based index of the assembly in the list of names under the `assembly_names` metadata entry. A -1 entry represents a dummy assembly.

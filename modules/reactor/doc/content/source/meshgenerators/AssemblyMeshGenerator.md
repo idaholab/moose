@@ -43,7 +43,7 @@ If the assembly is extruded to three dimensions the top-most boundary ID must be
 
 ## Metadata Information
 
-Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output. The following metadata is defined on the assembly mesh:
+Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. The following metadata is defined on the assembly mesh:
 
 - `assembly_type`: Value of type_id associated with assembly, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/assembly_type)
 - `pitch`: Assembly pitch, equivalent to the input parameter [!param](/Mesh/ReactorMeshParams/assembly_pitch)
