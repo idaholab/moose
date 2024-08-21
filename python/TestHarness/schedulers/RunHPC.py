@@ -607,6 +607,7 @@ class RunHPC(RunParallel):
         set a HPCJob as running.
         """
         job = hpc_job.job
+        timer = job.timer
 
         # This is currently thread safe because we only ever change
         # it within updateJobs(), which is only ever executed serially
@@ -614,10 +615,15 @@ class RunHPC(RunParallel):
         hpc_job.state = hpc_job.State.running
 
         # The job is no longer queued as of when it started
-        if job.timer.hasTime('hpc_queued'):
-            job.timer.stop('hpc_queued', start_time)
+        if timer.hasTime('hpc_queued'):
+            queued_start_time = timer.startTime('hpc_queued')
+            # This can happen on slurm in < 1s, which could give us negatives
+            if start_time < queued_start_time:
+                timer.stop('hpc_queued', queued_start_time)
+            else:
+                timer.stop('hpc_queued', start_time)
         # The runner job (actual walltime for the exec) as of when it started
-        job.timer.start('runner_run', start_time)
+        timer.start('runner_run', start_time)
 
         # Print out that the job is now running
         self.setAndOutputJobStatus(hpc_job.job, hpc_job.job.running, caveats=True)
