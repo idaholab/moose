@@ -96,6 +96,14 @@ class Timer(object):
             times[name] = self.totalTime(name)
         return times
 
+    def startTime(self, name):
+        """ Get the start time """
+        with self.lock:
+            entry = self.times.get(name)
+            if not entry:
+                raise Exception(f'Missing time entry {name}')
+            return entry[0]
+
     class TimeManager:
         """ Context manager for timing a section """
         def __init__(self, timer, name: str):
