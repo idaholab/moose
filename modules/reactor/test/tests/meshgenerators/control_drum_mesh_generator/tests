@@ -1,0 +1,54 @@
+[Tests]
+  design = 'meshgenerators/ControlDrumMeshGenerator.md'
+  issues = '#TODO'
+  # TODO: hex_no_pad, hex_with_pad, cart_no_pad, cart_with_pad
+  [hex_with_pad]
+    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+    type = 'CSVDiff'
+    input = 'drum_pad.i'
+    cli_args = 'Outputs/file_base=drum_hex_pad_out'
+    csvdiff = 'drum_hex_pad_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [cart_with_pad]
+    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+    type = 'CSVDiff'
+    input = 'drum_pad.i'
+    cli_args = 'Mesh/rmp/geom=Square
+                Outputs/file_base=drum_cart_pad_out'
+    csvdiff = 'drum_cart_pad_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [hex_no_pad]
+    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+    type = 'CSVDiff'
+    input = 'drum_nopad.i'
+    cli_args = 'Outputs/file_base=drum_hex_nopad_out'
+    csvdiff = 'drum_hex_nopad_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [cart_no_pad]
+    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+    type = 'CSVDiff'
+    input = 'drum_nopad.i'
+    cli_args = 'Mesh/rmp/geom=Square
+                Outputs/file_base=drum_cart_nopad_out'
+    csvdiff = 'drum_cart_nopad_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [pad_azimuthal_sector_mismatch]
+    requirement = 'The system shall generate additional azimuthal nodes for a control drum assembly mesh when the azimuthal discretization does not line up with the drum start and end angles'
+    type = 'CSVDiff'
+    input = 'drum_pad.i'
+    csvdiff = 'drum_hex_pad_out.csv'
+    cli_args = 'Mesh/drum/num_azimuthal_sectors=102
+                Outputs/file_base=drum_hex_pad_out'
+    allow_warnings = true
+    recover = false
+    mesh_mode = REPLICATED
+  []
+[]
