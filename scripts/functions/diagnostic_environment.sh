@@ -217,9 +217,9 @@ function conda_test()
             fi
         done
         if [[ "${package}" == 'none' ]]; then
-            printf "\nConda MOOSE dependencies not avilable (moose-petsc, moose-libmesh,
+            printf "\nConda MOOSE dependencies not available (moose-petsc, moose-libmesh,
 moose-wasp, etc). User is required to manually build PETSc, libMesh,
-and WASP\n\n"
+and WASP  (see moose/scripts folder)\n\n"
             return 0
         fi
         printf '%s\t%s == %s' "${package}" \
