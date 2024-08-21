@@ -18,18 +18,16 @@ Denote the normal to the layers by $z$, and the tangential directions
 by $x$ and $y$.  It is convenient to introduce two new stress variables in
 terms of the stress tensor $\sigma$:
 
-\begin{equation}
-p = \sigma_{zz} \ \ \ \mbox{and}\ \ \ q = \sqrt{\sigma_{xz}^{2} +
+!equation id=eqn.defn.p.q
+p = \sigma_{zz} \ \ \ \text{and}\ \ \ q = \sqrt{\sigma_{xz}^{2} +
   \sigma_{yz}^{2}} \ .
-\label{eqn.defn.p.q}
-\end{equation}
 
 In standard elasticity, the stress tensor is symmetric, so an
 equivalent definition of $q$ is
-$q=\sqrt{\mbox{$\frac{1}{2}$}(\sigma_{xz}+\sigma_{zx})^{2} +
-  \mbox{$\frac{1}{2}$}(\sigma_{yz}+\sigma_{zy})^{2}}$, however the
+$q=\sqrt{\text{$\frac{1}{2}$}(\sigma_{xz}+\sigma_{zx})^{2} +
+  \text{$\frac{1}{2}$}(\sigma_{yz}+\sigma_{zy})^{2}}$, however the
 symmetrization is deliberately not written in
-Eqn~(\ref{eqn.defn.p.q}) and below so that the equations also hold for
+Eqn~[eqn.defn.p.q] and below so that the equations also hold for
 the Cosserat case (see [CappedWeakPlaneCosseratStressUpdate.md]).
 
 The joint slipping is assumed to be governed by a
@@ -67,10 +65,8 @@ The yield functions $f_{1}$ and $f_{2}$ place ``caps'' on the shear
 yield function $f_{0}$.
 The combined yield function is simply
 
-\begin{equation}
+!equation id=one.yf.eqn
 f = \max(f_{0}, f_{1}, f_{2}) \ ,
-\label{one.yf.eqn}
-\end{equation}
 
 which defines the admissible domain where all yield functions are
 non-positive, and the inadmissible domain where at least one yield
@@ -113,9 +109,9 @@ The overall flow potential is
 \begin{equation}
 g = \left\{
 \begin{array}{ll}
-g_{0} & \mbox{ if } f = f_{0} \\
-g_{1} & \mbox{ if } f = f_{1} \\
-g_{2} & \mbox{ if } f = f_{2}\ .
+g_{0} & \text{ if } f = f_{0} \\
+g_{1} & \text{ if } f = f_{1} \\
+g_{2} & \text{ if } f = f_{2}\ .
 \end{array}
 \label{one.g.eqn}
 \right.
@@ -130,13 +126,15 @@ This plasticity model contains two internal parameters, denote by
 $i_{0}$ and $i_{1}$.   It is assumed
 that
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 C & = & C(i_{0}) \ , \\
 \phi & = & \phi(i_{0}) \ , \\
 \psi & = & \psi(i_{0}) \ , \\
 S_{T} & = & S_{T}(i_{1}) \ , \\
 S_{C} & = & S_{C}(i_{1}) \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 That is, $i_{0}$ can be thought of as the ``shear'' internal parameter,
 while $i_{1}$ is the ``tensile'' internal parameter.
@@ -147,11 +145,14 @@ The return-map process involves being provided with a trial stress
 $\sigma^{\mathrm{trial}}$ and an existing value of the internal
 parameters $i^{\mathrm{old}}$, and finding a ``returned'' stress,
 $\sigma$, and internal parameters, $i$, that satisfy
-\begin{eqnarray}
+
+\begin{equation}
+\begin{split}
 0 & = & f(\sigma, i) \ . \\\label{f.zero.return}
 \sigma & = & \sigma^{\mathrm{trial}} - E\gamma \frac{\partial
   g}{\partial\sigma} \ ,
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 where $E$ is the elasticity tensor, and $\gamma$ is a ``plastic
 multiplier'', that must be positive.  The former expresses that the
@@ -164,21 +165,17 @@ the ``normal direction'').
 Let us express the normality condition in $(p, q)$ space.  The $zz$
 component is easy:
 
-\begin{equation}
+!equation id=p.norm.eqn
 p = \sigma_{zz} = \sigma_{zz}^{\mathrm{trial}} - E_{zzij}\gamma
 \frac{\partial g}{\partial \sigma_{ij}} = \sigma_{zz}^{\mathrm{trial}} - E_{zzzz}\gamma
 \frac{\partial g}{\partial p}  \ ,
-\label{p.norm.eqn}
-\end{equation}
 
 where the last equality holds by assumption (see full list of
 assumptions below).  The $xz$ and $yz$ components are similar:
 
-\begin{equation}
+!equation id=eqn.xz.flow
 \sigma_{xz} = \sigma_{xz}^{\mathrm{trial}} - E_{xzxz}\gamma
 \frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{xz}}
-\ . \label{eqn.xz.flow}
-\end{equation}
 
 Another assumption has been made about $E$.  The final term is
 
@@ -186,7 +183,7 @@ Another assumption has been made about $E$.  The final term is
 \frac{\partial q}{\partial\sigma_{xz}} = \frac{\sigma_{xz}}{q} \ .
 \end{equation}
 
-This means that Eqn~(\ref{eqn.xz.flow}) can be re-written
+This means that Eqn~[eqn.xz.flow] can be re-written
 
 \begin{equation}
 \sigma_{xz}^{2} \left( 1 + E_{xzxz}\gamma \frac{\partial g}{\partial
@@ -197,26 +194,25 @@ This means that Eqn~(\ref{eqn.xz.flow}) can be re-written
 A similar equation holds for the $yz$ component, and these can be
 summed and rearranged to yield
 
-\begin{equation}
+!equation id=q.norm.eqn
 q = q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial q}
-\ . \label{q.norm.eqn}
-\end{equation}
 
-Equations~(\ref{f.zero.return}), (\ref{p.norm.eqn})
-and~(\ref{q.norm.eqn}) are the three conditions that need to be
+Equations~[f.zero.return], [p.norm.eqn]
+and~[q.norm.eqn] are the three conditions that need to be
 satisfied, and the three variables to be found are $p$, $q$ and
 $\gamma$.
 
-Consider the case of returning to the shear yield surface, as shown in
-Figure~\ref{shear.return.fig}.  Since $\partial g/\partial p =
+Consider the case of returning to the shear yield surface.  Since $\partial g/\partial p =
 \tan\psi$ and $\partial g/\partial q = 1$ for this flow, the
 return-map process must solve the following system of equations
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 0 & = & q + p\tan\phi - C \ , \\
 p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma\tan\psi \ , \\
 q & = & q^{\mathrm{trial}} - E_{xzxz}\gamma \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 The solution satisfied $p^{\mathrm{trial}} - p =
 E_{zzzz}\gamma\tan\psi$ and $q^{\mathrm{trial}} - q = E_{xzxz}\gamma$.
@@ -224,30 +220,34 @@ E_{zzzz}\gamma\tan\psi$ and $q^{\mathrm{trial}} - q = E_{xzxz}\gamma$.
 Now consider the case of returning to the tensile yield surface.  The
 equations are
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 0 & = & p - S_{T} \ , \\
 p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma \ , \\
 q & = & q^{\mathrm{trial}} \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 Comparing these two types of return, it is obvious that
 $q^{\mathrm{trial}} - q$ quantifies the amount of shear failure.
 Therefore, the following definitions are used in this plasticity model
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} -
   q}{E_{xzxz}} \ , \\
 i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} -
   p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 The final term ensures that $i_{1}$ does not increase during pure
 shear failure.  The scaling by $E$ ensures that these internal
 parameters are dimensionless.
 
 In summary, this plasticity model is defined by the yield function of
-Equation~(\ref{one.yf.eqn}), the flow potential of
-Equation~(\ref{one.g.eqn}), and the following return-map problem.
+Equation~[one.yf.eqn], the flow potential of
+Equation~[one.g.eqn], and the following return-map problem.
 
 ### Return-map problem id=rmap
 
@@ -267,7 +267,8 @@ $i_{1}^{\mathrm{old}}$ are such that $f(p^{\mathrm{trial}}, q^{\mathrm{trial}},
 i^{\mathrm{old}}) > 0$, the return-map problem is: find $p$, $q$,
 $\gamma$, $i_{0}$ and $i_{1}$ such that
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 0 & = & f(p, q, i) \ , \nonumber \\
 p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma \frac{\partial g}{\partial
   p} \ , \nonumber \\
@@ -278,7 +279,8 @@ i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} -
 i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} -
   p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ .
 \label{rmp.eqn}
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 The latter two equations are assumed to hold in the smoothed situation
 (discussed below) too, and note that $\psi = \psi(i_{0})$, so the
@@ -287,7 +289,8 @@ these two equations are not completely trivial.
 After the return-map problem has been solved, the stress components
 are $\sigma_{ij} = \sigma_{ij}^{\mathrm{trial}}$, except for the following
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 \sigma_{xx} & = & \sigma_{xx}^{\mathrm{trial}} -
 E_{zzxx}\gamma\frac{\partial g}{\partial p} \ , \\
 \sigma_{yy} & = & \sigma_{yy}^{\mathrm{trial}} -
@@ -301,23 +304,24 @@ E_{zzyy}\gamma\frac{\partial g}{\partial p} \ , \\
 \ ,  \label{szy.return.eqn} \\
 \sigma_{yz} & = & \sigma_{yz}^{\mathrm{trial}} q / q^{\mathrm{trial}}
 \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 The plastic strain is
 
 \begin{equation}
-\ep_{ij}^{\mathrm{plastic}} = \ep_{ij}^{\mathrm{plastic, old}} +
+\epsilon_{ij}^{\mathrm{plastic}} = \epsilon_{ij}^{\mathrm{plastic, old}} +
 \delta\epsilon_{ij} + E_{ijkl}^{-1}(\sigma_{kl}^{\mathrm{old}} -
-\sigma_{kl}) = \ep_{ij}^{\mathrm{plastic, old}} + E_{ijkl}\gamma
+\sigma_{kl}) = \epsilon_{ij}^{\mathrm{plastic, old}} + E_{ijkl}\gamma
 \frac{\partial g}{\partial \sigma_{kl}}\ .
 \end{equation}
 
 The elastic strain is
 
 \begin{equation}
-\ep_{ij}^{\mathrm{elastic}} = \ep_{ij}^{\mathrm{elastic, old}} +
-\delta\epsilon_{ij} - \ep_{ij}^{\mathrm{plastic}} +
-\ep_{ij}^{\mathrm{plastic, old}} \ .
+\epsilon_{ij}^{\mathrm{elastic}} = \epsilon_{ij}^{\mathrm{elastic, old}} +
+\delta\epsilon_{ij} - \epsilon_{ij}^{\mathrm{plastic}} +
+\epsilon_{ij}^{\mathrm{plastic, old}} \ .
 \end{equation}
 
 
@@ -360,7 +364,7 @@ Then the single, smoothed yield function is defined to be
 \begin{equation}
 f = \left\{
 \begin{array}{ll}
-A & \ \ \ \mbox{if}\ \ A\geq B+s \\
+A & \ \ \ \text{if}\ \ A\geq B+s \\
 \frac{A+B+s}{2} -
 \frac{s}{\pi}\cos\left(\frac{(B-A)\pi}{2s}\right) \ .
 \end{array}
@@ -407,15 +411,13 @@ poor convergence of the return-map process will occur.
 
 It is assumed that the elasticity tensor has the following symmetries:
 
-\begin{equation}
+!equation id=eqn.elas.symms
 E_{ijkl} = E_{jikl} = E_{ijlk} = E_{klij} \ ,
-\label{eqn.elas.symms}
-\end{equation}
 
 and that
 
 \begin{equation}
-0 = E_{zzij} \ \ \ \mbox{if}\ \ \ i\neq j \ ,
+0 = E_{zzij} \ \ \ \text{if}\ \ \ i\neq j \ ,
 \end{equation}
 
 and that
@@ -426,11 +428,9 @@ E_{xzxz} = E_{yzyz} \ ,
 
 and that
 
-\begin{equation}
-0 = E_{xzij} \ \ \mbox{ unless } (i, j) = (z, x) \ \ \mbox{ or } (i,
+!equation id=eqn.elas.xz.con
+0 = E_{xzij} \ \ \text{ unless } (i, j) = (z, x) \ \ \text{ or } (i,
 j) = (x, z) \ .
-\label{eqn.elas.xz.con}
-\end{equation}
 
 These are quite standard conditions that hold for all non-Cosserat
 materials to our knowledge.
@@ -439,10 +439,10 @@ materials to our knowledge.
 
 ### Unknowns and the convergence criterion
 
-The return-map problem Eqn~(\ref{rmp.eqn}) is solved as a $3\times 3$
+The return-map problem Eqn~[rmp.eqn] is solved as a $3\times 3$
 system consisting of the first 3 equations, and substituting the fourth and
 fifth equations wherever needed.  The three unknowns are $p$, $q$ and
-$\ga_{E}=\gamma E_{zzzz}$, which all have the same units.  Convergence
+$\gamma_{E}=\gamma E_{zzzz}$, which all have the same units.  Convergence
 is deemed to be achieved when the sum of squares of the residuals of
 these 3 equations is less than a user-defined tolerance.
 
@@ -507,7 +507,8 @@ The return-map algorithm provides
 Since $\sigma^{\mathrm{trial}} = E\epsilon$, the consistent tangent
 operator is
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 H_{ijkl} & = & E_{ijkl} -
 E_{ijmn}E_{pqkl}\frac{\partial}{\partial\sigma_{pq}^{\mathrm{trial}}}
 \gamma \frac{\partial g}{\partial\sigma_{mn}} \ . \nonumber \\
@@ -524,7 +525,8 @@ E_{ijmn}E_{pqkl}\frac{\partial}{\partial\sigma_{pq}^{\mathrm{trial}}}
 +
 \frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{mn}}
 \right)
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 However, note that
 
@@ -550,7 +552,8 @@ terms that involve derivatives of $\partial p/\partial \sigma_{mn}$
 
 The consistent tangent operator may therefore be written as
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 H_{ijkl} & = & E_{ijkl} - E_{ijmn}E_{pqkl} \left\{
 \frac{\partial
   p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
@@ -581,7 +584,8 @@ H_{ijkl} & = & E_{ijkl} - E_{ijmn}E_{pqkl} \left\{
 \frac{\partial g}{\partial q}\frac{\partial^{2}
   q}{\partial\sigma_{mn}\partial\sigma_{ab}}
 \right) \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 All terms but the final line have already been computed during the
 return-map process.  The final line may be brought to the right-hand
@@ -594,7 +598,7 @@ weak-plane case.
 
 ### Specialization to the weak-plane case
 
-The return-map equations Eqn \ref{rmp.eqn} are obtaining $(p, q)$
+The return-map equations Eqn [rmp.eqn] are obtaining $(p, q)$
 given the trial variables.  Finding $H$ is really just re-solving
 these equations for a slightly changed trial variable.  Denote
 
@@ -608,7 +612,8 @@ these equations for a slightly changed trial variable.  Denote
 
 Then
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 \frac{\partial R_{0}}{\partial p^{\mathrm{trial}}} & = & -\frac{\partial
   f}{\partial i_{1}} \frac{\partial i_{i}}{\partial
   p^{\mathrm{trial}}}  \ , \\
@@ -619,7 +624,8 @@ E_{zzzz}\gamma \frac{\partial^{2}g}{\partial p\partial i_{i}}\frac{\partial i_{i
 \frac{\partial R_{2}}{\partial p^{\mathrm{trial}}} & = &
 -E_{xzxz}\gamma \frac{\partial^{2}g}{\partial q\partial i_{i}}\frac{\partial i_{i}}{\partial
   p^{\mathrm{trial}}}
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 In these equations
 
@@ -628,7 +634,7 @@ In these equations
 \frac{1}{E_{zzzz}} \ ,
 \end{equation}
 
-which comes from Eqn \ref{rmp.eqn}.  The derivatives with respect to
+which comes from Eqn [rmp.eqn].  The derivatives with respect to
 $q^{\mathrm{trial}}$ are similar but more lengthy due to both $i_{0}$
 and $i_{1}$ being dependent on $q^{\mathrm{trial}}$.  The system to
 solve is
@@ -674,7 +680,8 @@ H_{zzii} = \frac{\delta p}{\delta p^{\mathrm{trial}}} E_{zzii} \ ,
 
 and other more complicated expressions appear for other components, such as
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 H_{xxii} & = & E_{xxii} - E_{zzxx} E_{zzii}\left( \frac{\delta \gamma}{\delta
   p^{\mathrm{trial}}} \frac{\partial g}{\partial p}
 + \gamma \frac{\partial^{2} g}{\partial p^{2}} \frac{\delta
@@ -693,7 +700,8 @@ H_{xxii} & = & E_{xxii} - E_{zzxx} E_{zzii}\left( \frac{\delta \gamma}{\delta
 \frac{\partial i_{1}}{\partial q} \frac{\delta q}{\delta
   p^{\mathrm{trial}}}
 \right) \right) \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 ### The consistent tangent operator and sub-stepping strain increments
 
@@ -730,7 +738,8 @@ stress at step $n$ is
 
 This means that
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
 \frac{\partial p_{n}}{\partial p^{\mathrm{trial}}} & = &
 \frac{\partial p_{n}}{\partial p_{n}^{\mathrm{trial}}}
 \frac{\partial p_{n}^{\mathrm{trial}}}{\partial p^{\mathrm{trial}}}
@@ -741,7 +750,8 @@ This means that
 \right)
 + \frac{\partial p_{n}}{\partial q_{n}^{\mathrm{trial}}}
 \frac{\partial q_{n-1}}{\partial p^{\mathrm{trial}}} \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 Similar inductive equations hold for the other derivatives, and note
 that $\partial p_{0}/\partial p^{\mathrm{trial}} = \partial

@@ -26,16 +26,18 @@ $T$ the corresponding admissible configuration is that both of them
 are equal to $T$.  While one yield function is sufficient, it is
 convenient to use three yield functions in total:
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
   f_{0} & = & \sigma_{III} - T \ , \nonumber \\
   f_{1} & = & \sigma_{II} - T \ , \nonumber \\
   f_{2} & = & \sigma_{I} - T \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 
 The return-map algorithm first rotates $\sigma$ from the physical
 frame to the
-principal-stress frame (where $\sigma = \mbox{diag}(\sigma_{I}, \sigma_{II},
+principal-stress frame (where $\sigma = \text{diag}(\sigma_{I}, \sigma_{II},
 \sigma_{III})$).  The rotation matrices used are assumed not to change
 during the return-map process: only $\sigma_{I}$, $\sigma_{II}$ and
 $\sigma_{III}$ change.  Therefore, at the end of the

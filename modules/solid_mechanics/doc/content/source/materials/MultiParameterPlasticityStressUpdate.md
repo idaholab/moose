@@ -1,6 +1,6 @@
 # MultiParameterPlasticityStressUpdate
 
-`MultiParameterPlasticityStressUpdate` is a base to class to the following stress update materials:
+`MultiParameterPlasticityStressUpdate` is a base class to the following stress update materials:
 
 !syntax children /Materials/TensileStressUpdate
 
@@ -52,18 +52,16 @@ lines.
 This plasticity is associative: the flow potential is
 
 \begin{equation}
-  g = f = max(f_{0}, f_{1}, f_{2}) + \mbox{smoothing} \ .
+  g = f = max(f_{0}, f_{1}, f_{2}) + \text{smoothing} \ .
 \end{equation}
 
 Here `smoothing` indicates the smoothing mentioned in the previous section.
 
 The flow rules are
 
-\begin{equation}
+!equation id=eqn.flow.rules
   s_{a} = s_{a}^{\mathrm{trial}} - \ga E_{ab} \frac{\partial
     g}{\partial s_{a}} \ ,
-  \label{eqn.flow.rules}
-\end{equation}
 
 where $s_{a}=\{\sigma_{I}, \sigma_{II}, \sigma_{III}\}$ and
 
@@ -114,7 +112,7 @@ this single internal parameter
 ### Unknowns and the convergence criterion
 
 The return-map problem involves solving the four equations: $f=0$ (smoothed yield function
-should be zero) and the flow equations~(\ref{eqn.flow.rules}).  The
+should be zero) and the flow equations~([eqn.flow.rules]).  The
 unknowns are the 3 stress parameters $s_{a}=\{\sigma_{I}, \sigma_{II},
 \sigma_{III}\}$ and the plasticity multiplier $\ga$.  Actually, to
 make the units consistent the algorithm uses $\ga E_{22}$ instead of
@@ -184,13 +182,15 @@ The three eigenvectors remain unchanged during the return-map
 process.  However, of course they change under a change in
 $\sigma^{\mathrm{trial}}$.  The relevant formulae are
 
-\begin{eqnarray}
+\begin{equation}
+\begin{split}
   \frac{\delta s_{a}^{\mathrm{trial}}}{\delta
     \sigma_{kl}^{\mathrm{trial}}} & = & v^{a}_{i}v^{a}_{j} \ , \\
   \frac{\delta v^{a}_{i}}{\delta \sigma_{kl}^{\mathrm{trial}}} & = &
   \sum_{b\neq a}\frac{v_{i}^{b}(v_{k}^{b}v_{l}^{a} +
     v_{l}^{b}v_{k}^{a})}{2(s_{a}-s_{b})} \ .
-\end{eqnarray}
+\end{split}
+\end{equation}
 
 On the RHS of these equations there is no sum over $a$.
 

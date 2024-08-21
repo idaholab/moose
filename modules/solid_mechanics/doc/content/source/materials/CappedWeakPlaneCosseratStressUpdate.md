@@ -27,7 +27,7 @@ case, and the Cosserat case are only:
   $E_{ijkl}=E_{klij}$.
 
 
-See the theory manual  (at [solid_mechanics/doc/theory/capped_weak_plane.pdf](https://github.com/idaholab/moose/modules/solid_mechanics/doc/theory/capped_weak_plane.pdf))
+See the theory manual  (at [solid_mechanics/doc/theory/capped_weak_plane.pdf](https://github.com/idaholab/moose/tree/next/modules/solid_mechanics/doc/theory/capped_weak_plane.pdf))
 for more explanation.
 
 !syntax parameters /Materials/CappedWeakPlaneCosseratStressUpdate
