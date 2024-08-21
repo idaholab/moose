@@ -6,7 +6,5 @@
     B = forces/B
     sum = state/internal/sum
     product = state/internal/product
-    P = 1
-    Q = 1
   []
 []

@@ -38,7 +38,7 @@ public:
   virtual void computeProperties() override;
 
 protected:
-  virtual void initQpStatefulProperties() override {};
+  virtual void initQpStatefulProperties() override{};
 
   /// User object managing the execution of the NEML2 model
   const ExecuteNEML2Model & _execute_neml2_model;

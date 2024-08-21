@@ -24,9 +24,8 @@ InputParameters
 MOOSERealMaterialToNEML2Parameter::validParams()
 {
   auto params = MOOSEToNEML2Parameter::validParams();
-  params.addClassDescription(
-      "Gather a MOOSE variable for insertion into the specified parameter of a "
-      "NEML2 model.");
+  params.addClassDescription("This object gathers a real material property from MOOSE and use it "
+                             "as a NEML2 model parameter.");
 
   params.addRequiredParam<MaterialPropertyName>("moose_material_property",
                                                 "MOOSE material property to read from");

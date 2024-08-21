@@ -4,4 +4,10 @@ This component is designed to compute the gradient of the objective function con
 
 ## Example Input Syntax
 
+!listing test/tests/vectorpostprocessors/adjoint_strain_batch_stress_grad_inner_product/strain_stress_grad_inner_product_material.i block=VectorPostprocessors/inner_product
+
 !syntax parameters /VectorPostprocessors/AdjointStrainStressGradInnerProduct
+
+!syntax inputs /VectorPostprocessors/AdjointStrainStressGradInnerProduct
+
+!syntax children /VectorPostprocessors/AdjointStrainStressGradInnerProduct

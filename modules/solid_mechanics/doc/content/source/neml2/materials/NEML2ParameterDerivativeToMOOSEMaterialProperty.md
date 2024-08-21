@@ -1,10 +1,6 @@
 # NEML2ParameterDerivativeToMOOSEMaterialProperty
 
-!syntax description /Materials/NEML2ParameterDerivativeToMOOSEMaterialProperty
-
-## Description
-
-This object requests the computation of the derivative of a NEML2 output variable [!param](/Materials/NEML2ParameterDerivativeToMOOSEMaterialProperty/neml2_variable) with respect to a NEML2 parameter [!param](/Materials/NEML2ParameterDerivativeToMOOSEMaterialProperty/neml2_parameter_derivative) and saves the derivative as a MOOSE MaterialProperty. The derivative is computed in [ExecuteNEML2Model](ExecuteNEML2Model.md).
+This object requests the computation of the derivative of a NEML2 output variable with respect to a NEML2 parameter and saves the derivative as a MOOSE MaterialProperty. The derivative is computed in [ExecuteNEML2Model](ExecuteNEML2Model.md).
 
 This object utilizes the automatic differentiation (AD) feature in NEML2. To ensure proper functionality, make sure that `enable_AD = true` is set in the `ExecuteNEML2Model` block when using this object.
 

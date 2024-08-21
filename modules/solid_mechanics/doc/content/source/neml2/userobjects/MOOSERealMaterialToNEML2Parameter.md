@@ -4,12 +4,12 @@
 
 ## Description
 
-This family of objects collects a given [!param](/UserObjects/MOOSERealMaterialToNEML2Parameter/moose_material_property) for use as parameter [!param](/UserObjects/MOOSERealMaterialToNEML2Parameter/neml2_parameter) in a NEML2 model executed by a [ExecuteNEML2Model](ExecuteNEML2Model.md) user object.
+This object collects a given [!param](/UserObjects/MOOSERealMaterialToNEML2Parameter/moose_material_property) for use as a parameter [!param](/UserObjects/MOOSERealMaterialToNEML2Parameter/neml2_parameter) in a NEML2 model executed by a [ExecuteNEML2Model](ExecuteNEML2Model.md) user object.
 
 !alert note title=Note
-Only Real material type is supported in this case.
+Only Real material type is supported in this object.
 
-To use a MOOSE +variable+ as parameter in a NEML2 object see [MOOSEVariableToNEML2](MOOSEVariableToNEML2Parameter.md).
+To use a MOOSE +variable+ as parameter in a NEML2 object see [MOOSEVariableToNEML2Parameter](MOOSEVariableToNEML2Parameter.md).
 
 ## Example Input Syntax
 

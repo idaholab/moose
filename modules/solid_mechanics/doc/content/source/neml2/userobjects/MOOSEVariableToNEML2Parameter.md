@@ -6,7 +6,7 @@
 
 This family of objects collects a given [!param](/UserObjects/MOOSEVariableToNEML2Parameter/moose_variable) for use as parameter [!param](/UserObjects/MOOSEVariableToNEML2Parameter/neml2_parameter) in a NEML2 model executed by a [ExecuteNEML2Model](ExecuteNEML2Model.md) user object.
 
-To use a MOOSE +variable+ as parameter in a NEML2 object see [MOOSEVariableToNEML2](MOOSEVariableToNEML2Parameter.md).
+To use a MOOSE +material+ as parameter in a NEML2 object see [MOOSERealMaterialToNEML2Parameter](MOOSERealMaterialToNEML2Parameter.md).
 
 ## Example Input Syntax
 

@@ -45,8 +45,8 @@ NEML2ParameterDerivativeToMOOSEMaterialProperty<T>::validParams()
 {
   auto params = Material::validParams();
   params.addClassDescription(
-      "Provide an output from a NEML2 model as a MOOSE material property of type " +
-      demangle(typeid(T).name()) + ".");
+      "This object requests the computation of the derivative of a NEML2 output variable with "
+      "respect to a NEML2 model parameter and saves the derivative as a MOOSE material property");
 
   params.addRequiredParam<UserObjectName>("execute_neml2_model_uo",
                                           "User object managing the execution of the NEML2 model.");

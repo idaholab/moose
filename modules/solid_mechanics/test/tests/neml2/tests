@@ -183,7 +183,7 @@
       type = Exodiff
       input = 'moose_to_neml2_parameters.i'
       exodiff = 'moose_to_neml2_parameters_out.e'
-      requirement = 'The system shall provide a modular way to transfer NEML2 results to material properties.'
+      requirement = 'The system shall provide a modular way to transfer variables and/or real material property to NEML2 for use as model parameters.'
       required_submodule = 'contrib/neml2'
       libtorch = true
       recover = false
@@ -212,9 +212,8 @@
   []
   [neml2_to_moose_material]
     type = Exodiff
-    input ='neml2_to_moose.i'
+    input ='neml2_to_moose_material.i'
     exodiff = 'neml2_to_moose_material_out.e'
-    cli_args="Outputs/file_base='neml2_to_moose_material_out'"
     requirement = 'The system shall provide for a modular way to transfer NEML2 results to material properties..'
     required_submodule = 'contrib/neml2'
     libtorch = true
