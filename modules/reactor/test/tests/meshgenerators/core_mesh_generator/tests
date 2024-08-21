@@ -321,4 +321,43 @@
     recover = false
     mesh_mode = REPLICATED
   []
+  [core_stitching_drum_cart]
+    requirement = 'The system shall generate a 3D Cartesian core mesh with heterogeneous and homogeneous assemblies stitched alongside drum structures'
+    type = 'CSVDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_cart.i'
+    csvdiff = 'core_flexible_assembly_stitching_with_drum_cart_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [core_stitching_drum_hex]
+    requirement = 'The system shall generate a 3D hexagonal core mesh with heterogeneous and homogeneous assemblies stitched alongside drum structures'
+    type = 'CSVDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_hex.i'
+    csvdiff = 'core_flexible_assembly_stitching_with_drum_hex_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [core_drum_metadata_jsondiff]
+    requirement = 'The system shall output reactor-related metadata for a full 3D hexagonal core mesh with a drum assembly in mesh generation mode'
+    type = 'JSONDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_hex.i'
+    jsondiff = 'core_flexible_assembly_stitching_with_drum_hex_out.json'
+    # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
+    recover = false
+    allow_test_objects = true
+  []
+  [core_drum_bypass_meshgen]
+    requirement = 'The system shall output reactor-related metadata for a full 3D hexagonal core mesh with a drum assembly in data driven mode'
+    type = 'JSONDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_hex.i'
+    cli_args = "Mesh/test_rgmb/type=TestReactorGeometryMeshBuilderMeshGenerator
+                Mesh/test_rgmb/input=core
+                Mesh/data_driven_generator=test_rgmb
+                Postprocessors/inactive='area_reg1 area_reg2 area_reg3 area_reg4 area_reg5
+                                         area_reg6 area_reg7 area_reg8 area_reg9'"
+    jsondiff = 'core_flexible_assembly_stitching_with_drum_hex_out.json'
+    allow_test_objects = true
+    recover = false
+  []
 []
