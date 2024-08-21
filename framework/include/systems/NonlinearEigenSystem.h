@@ -179,6 +179,9 @@ public:
    */
   void initializeCondensedMatrices();
 
+  virtual void postInit() override;
+  virtual void reinit() override;
+
 protected:
   virtual void postAddResidualObject(ResidualObject & object) override;
 
@@ -200,6 +203,10 @@ protected:
   bool _precond_matrix_includes_eigen;
   // Libmesh preconditioner
   Preconditioner<Number> * _preconditioner;
+
+  /// The number of degrees of freedom constrained at the libMesh level, e.g. via hanging node or
+  /// periodic boundary constraints
+  dof_id_type _num_constrained_dofs;
 };
 
 #else

@@ -70,7 +70,7 @@ public:
   NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
   virtual ~NonlinearSystemBase();
 
-  virtual void init() override;
+  virtual void preInit() override;
 
   bool computedScalingJacobian() const { return _computed_scaling; }
 

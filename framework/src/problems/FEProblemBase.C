@@ -5894,8 +5894,8 @@ FEProblemBase::init()
       nl->turnOffJacobian();
 
   for (auto & sys : _solver_systems)
-    sys->init();
-  _aux->init();
+    sys->preInit();
+  _aux->preInit();
 
   // Build the mortar segment meshes, if they haven't been already, for a couple reasons:
   // 1) Get the ghosting correct for both static and dynamic meshes
@@ -5912,6 +5912,10 @@ FEProblemBase::init()
     TIME_SECTION("EquationSystems::Init", 2, "Initializing Equation Systems");
     es().init();
   }
+
+  for (auto & sys : _solver_systems)
+    sys->postInit();
+  _aux->postInit();
 
   // Now that the equation system and the dof distribution is done, we can generate the
   // finite volume-related parts if needed.
@@ -7670,7 +7674,14 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   if (intermediate_change)
     es().reinit_solutions();
   else
+  {
     es().reinit();
+    // Since the mesh has changed, we need to make sure that we update any of our
+    // MOOSE-system specific data.
+    for (auto & sys : _solver_systems)
+      sys->reinit();
+    _aux->reinit();
+  }
 
   // Updating MooseMesh first breaks other adaptivity code, unless we
   // then *again* update the MooseMesh caches.  E.g. the definition of
@@ -7768,12 +7779,6 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   _has_jacobian = false; // we have to recompute jacobian when mesh changed
-
-  // Since the mesh has changed, we need to make sure that we update any of our
-  // MOOSE-system specific data. libmesh system data has already been updated
-  for (auto & sys : _solver_systems)
-    sys->update(/*update_libmesh_system=*/false);
-  _aux->update(/*update_libmesh_system=*/false);
 }
 
 void

@@ -113,7 +113,8 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     _work_rhs_vector_AX(addVector("work_rhs_vector_Ax", false, PARALLEL)),
     _work_rhs_vector_BX(addVector("work_rhs_vector_Bx", false, PARALLEL)),
     _precond_matrix_includes_eigen(false),
-    _preconditioner(nullptr)
+    _preconditioner(nullptr),
+    _num_constrained_dofs(0)
 {
   SlepcEigenSolver<Number> * solver =
       cast_ptr<SlepcEigenSolver<Number> *>(_eigen_sys.eigen_solver.get());
@@ -193,7 +194,7 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
 void
 NonlinearEigenSystem::initializeCondensedMatrices()
 {
-  if (!dofMap().n_constrained_dofs())
+  if (!(_num_constrained_dofs = dofMap().n_constrained_dofs()))
     return;
 
   _eigen_sys.initialize_condensed_dofs();
@@ -219,6 +220,20 @@ NonlinearEigenSystem::initializeCondensedMatrices()
 }
 
 void
+NonlinearEigenSystem::postInit()
+{
+  NonlinearSystemBase::postInit();
+  initializeCondensedMatrices();
+}
+
+void
+NonlinearEigenSystem::reinit()
+{
+  NonlinearSystemBase::reinit();
+  initializeCondensedMatrices();
+}
+
+void
 NonlinearEigenSystem::solve()
 {
   const bool presolve_succeeded = preSolve();
@@ -230,7 +245,7 @@ NonlinearEigenSystem::solve()
   // We apply initial guess for only nonlinear solver
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
-    if (dofMap().n_constrained_dofs())
+    if (_num_constrained_dofs)
     {
       subvec = solution().get_subvector(_eigen_sys.local_non_condensed_dofs_vector);
       _eigen_sys.set_initial_space(*subvec);
@@ -265,17 +280,17 @@ NonlinearEigenSystem::solve()
   if (n_converged_eigenvalues)
     getConvergedEigenpair(_eigen_problem.activeEigenvalueIndex());
 
-  if (_eigen_problem.isNonlinearEigenvalueSolver() && dofMap().n_constrained_dofs())
+  if (_eigen_problem.isNonlinearEigenvalueSolver() && _num_constrained_dofs)
     solution().restore_subvector(std::move(subvec), _eigen_sys.local_non_condensed_dofs_vector);
 }
 
 void
 NonlinearEigenSystem::attachSLEPcCallbacks()
 {
-  // Tell libmesh not close matrices before solve
+  // Tell libmesh not to close matrices before solve
   _eigen_sys.get_eigen_solver().set_close_matrix_before_solve(false);
 
-  if (dofMap().n_constrained_dofs())
+  if (_num_constrained_dofs)
   {
     // Condensed Matrix A
     if (_eigen_sys.has_condensed_matrix_A())
