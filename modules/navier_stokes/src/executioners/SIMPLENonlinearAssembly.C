@@ -575,17 +575,30 @@ SIMPLENonlinearAssembly::execute()
 
       // If we have an turbulence equations, we solve it here. We solve it inside the
       // momentum-pressure loop because it affects the turbulent viscosity
-      if (_has_turbulence_systems)
+      if (_has_turbulence_systems && (iteration_counter > 0))
       {
         Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
 
         for (auto system_i : index_range(_turbulence_systems))
         {
           residual_index += 1;
+
+          // Compute effective relaxation factors
+          // const auto eq_relax = _turbulence_equation_relaxation[system_i] *
+          //                       (1.0 - std::exp(-(iteration_counter + 1.0) / 200.0));
+          // const auto field_relax = _turbulence_field_relaxation[system_i] *
+          //                          (1.0 - std::exp(-(iteration_counter + 1.0) / 200.0));
+
+          // _console << "eq_relax: " << eq_relax << std::endl;
+          // _console << "field_relax: " << field_relax << std::endl;
+
+          const auto eq_relax = _turbulence_equation_relaxation[system_i];
+          const auto field_relax = _turbulence_field_relaxation[system_i];
+
           ns_its_residuals[residual_index] =
               solveAdvectedSystem(_turbulence_system_numbers[system_i],
                                   *_turbulence_systems[system_i],
-                                  _turbulence_equation_relaxation[system_i],
+                                  eq_relax,
                                   _turbulence_linear_control,
                                   _turbulence_l_abs_tol);
 
@@ -597,8 +610,7 @@ SIMPLENonlinearAssembly::execute()
           auto & old_solution = *(_turbulence_systems[system_i]->solutionPreviousNewton());
 
           // Relax the pressure update for the next momentum predictor
-          relaxSolutionUpdate(
-              current_solution, old_solution, _turbulence_equation_relaxation[system_i]);
+          relaxSolutionUpdate(current_solution, old_solution, field_relax);
 
           // Overwrite old solution
           old_solution = current_solution;
@@ -636,7 +648,7 @@ SIMPLENonlinearAssembly::execute()
         }
       }
 
-      if (_has_turbulence_systems)
+      if (_has_turbulence_systems && (iteration_counter > 0))
       {
         _console << "Turbulence Iteration " << std::endl;
         for (auto system_i : index_range(_turbulence_systems))

@@ -235,8 +235,9 @@ INSFVTKESourceSink::computeQpResidual()
           beta_star = (*_F1)(elem_arg, state) * _beta_i_1_star +
                       (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2_star;
 
-        destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog)) *
-                       beta_star / tot_weight;
+        // destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog)) *
+        //                beta_star / tot_weight;
+        destruction += omegaLog * beta_star / tot_weight;
 
         // const auto tau_w_blended =
         //     (wall_mu * gamma + wall_mut * (1.0 - gamma)) * velocity_grad_norm_vec[i];
@@ -362,13 +363,20 @@ INSFVTKESourceSink::computeQpResidual()
       //               (1.0 - (*_F1)(elem_arg, state)) * _beta_i_2;
 
       // Destruction
+      // destruction =
+      //     rho * f_beta_star * beta_star * _var(elem_arg, state) * (*_omega)(elem_arg, old_state);
+
       destruction =
-          rho * f_beta_star * beta_star * _var(elem_arg, state) * (*_omega)(elem_arg, old_state);
+          rho * f_beta_star * beta_star * (*_omega)(elem_arg, old_state) * _var(elem_arg, state);
 
       // Limited production
       // production = std::min(production,
-      //                      _c_pl * rho * beta_star * _var(elem_arg, old_state) *
-      //                          (*_omega)(elem_arg, old_state));
+      //                       _c_pl * rho * beta_star * _var(elem_arg, old_state) *
+      //                           (*_omega)(elem_arg, old_state));
+
+      production = std::min(production,
+                            rho * (_c_pl * beta_star) * _var(elem_arg, old_state) *
+                                (*_omega)(elem_arg, old_state));
     }
     // *************************************** //
 

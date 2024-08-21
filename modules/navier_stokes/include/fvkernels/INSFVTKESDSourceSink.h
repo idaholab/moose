@@ -61,8 +61,9 @@ protected:
   /// Method used for wall treatment
   const MooseEnum _wall_treatment;
 
-  /// F1 blending function
+  /// Blending functions
   const Moose::Functor<ADReal> & _F1;
+  const Moose::Functor<ADReal> & _F2;
 
   /// Stored strain rate
   std::map<const Elem *, Real> _symmetric_strain_tensor_norm_old;

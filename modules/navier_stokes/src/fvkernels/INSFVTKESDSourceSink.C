@@ -40,6 +40,7 @@ INSFVTKESDSourceSink::validParams()
                              "The method used for computing the wall functions "
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
   params.addRequiredParam<MooseFunctorName>("F1", "The F1 blending function.");
+  params.addRequiredParam<MooseFunctorName>("F2", "The F2 blending function.");
   params.addParam<bool>("free_shear_modification",
                         false,
                         "Activate free shear modification for the turbulent kinetic energy.");
@@ -69,6 +70,7 @@ INSFVTKESDSourceSink::INSFVTKESDSourceSink(const InputParameters & params)
     _linearized_model(getParam<bool>("linearized_model")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment")),
     _F1(getFunctor<ADReal>("F1")),
+    _F2(getFunctor<ADReal>("F2")),
     _bool_free_shear_modficiation(getParam<bool>("free_shear_modification")),
     _wall_normal_unit_vectors(params.isParamValid("wall_normal_unit_vectors")
                                   ? &(getFunctor<ADRealVectorValue>("wall_normal_unit_vectors"))
@@ -105,6 +107,7 @@ INSFVTKESDSourceSink::computeQpResidual()
   ADReal residual = 0.0;
   ADReal production = 0.0;
   ADReal destruction = 0.0;
+  ADReal cross_diffusion = 0.0;
 
   // Convenient variables
   const auto elem_arg = makeElemArg(_current_elem);
@@ -176,7 +179,7 @@ INSFVTKESDSourceSink::computeQpResidual()
       //     std::sqrt(_k(elem_arg, old_state)) * distance_vec[i] * rho / _mu(facearg, state);
       // const auto gamma = std::exp(-Re_d / 11.0);
       // // destruction += gamma * omegaVis + (1.0 - gamma) * omegaLog;
-      destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
+      destruction += omegaLog; // std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
 
       // if (y_plus < 11.25)
       //   destruction += omegaVis / tot_weight;
@@ -271,14 +274,23 @@ INSFVTKESDSourceSink::computeQpResidual()
     else
       gamma = F1 * _gamma_infty_1 + (1.0 - F1) * _gamma_infty_2;
 
-    // TKSD production
-    auto production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+    // // TKSD production
+    // auto production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    // Limiting production
+    // // Limiting production
     // production_k =
-    //    std::min(production_k, _c_pl * rho * _beta_infty * _var(elem_arg, old_state) * TKE);
+    //     std::min(production_k, _c_pl * rho * _beta_infty * _var(elem_arg, old_state) * TKE);
 
-    production = (rho * gamma / _mu_t(elem_arg, state)) * production_k;
+    // production = (rho * gamma / _mu_t(elem_arg, state)) * production_k;
+
+    production = rho * gamma * symmetric_strain_tensor_sq_norm;
+
+    production =
+        std::min(production,
+                 (_c_pl / _a_1) * _beta_infty * _var(elem_arg, old_state) *
+                     std::max(_a_1 * _var(elem_arg, old_state),
+                              _F2(elem_arg, state) * std::sqrt(symmetric_strain_tensor_sq_norm)));
+
     // production = std::min(production,
     //                       _c_pl / _a_1 * _beta_infty * _var(elem_arg, old_state) *
     //                           std::max(_a_1 * _var(elem_arg, old_state),
@@ -319,18 +331,19 @@ INSFVTKESDSourceSink::computeQpResidual()
 
     // Destruction
     const auto beta = F1 * _beta_i_1 + (1.0 - F1) * _beta_i_2;
+    // destruction = rho * beta * f_beta * _var(elem_arg, old_state) * _var(elem_arg, state);
     destruction = rho * beta * f_beta * _var(elem_arg, old_state) * _var(elem_arg, state);
 
     // Cross diffusion term
     const auto & grad_k = _k.gradient(elem_arg, old_state);
     const auto & grad_omega = _var.gradient(elem_arg, old_state);
-    auto cross_diffusion = grad_k(0) * grad_omega(0);
-    if (_dim > 1)
-      cross_diffusion += grad_k(1) * grad_omega(1);
-    if (_dim > 2)
-      cross_diffusion += grad_k(2) * grad_omega(2);
-    cross_diffusion *=
-        2.0 * (1.0 - F1) * rho * _sigma_omega_2 / std::max(_var(elem_arg, old_state), 1e-12);
+    auto cross_diffusion_grad = grad_k(0) * grad_omega(0);
+    if (_dim >= 2)
+      cross_diffusion_grad += grad_k(1) * grad_omega(1);
+    if (_dim >= 3)
+      cross_diffusion_grad += grad_k(2) * grad_omega(2);
+    cross_diffusion = (1.0 - F1) * rho * 2.0 * _sigma_omega_2 * cross_diffusion_grad /
+                      Utility::pow<2>(_var(elem_arg, old_state)) * _var(elem_arg, state);
 
     // Free shear modification to cross diffusion
     if (_bool_free_shear_modficiation)

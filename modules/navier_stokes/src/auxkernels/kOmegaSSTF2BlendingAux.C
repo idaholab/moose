@@ -62,7 +62,7 @@ kOmegaSSTF2BlendingAux::computeValue()
       Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto k = _k(elem_arg, previous_state);
   const auto omega = _omega(elem_arg, previous_state);
-  const auto omega_capped = std::max(omega.value(), 1e-12);
+  //const auto omega_capped = std::max(omega.value(), 1e-12);
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
 
@@ -72,8 +72,8 @@ kOmegaSSTF2BlendingAux::computeValue()
   const auto y = std::max(elem_distances, 1e-10);
 
   // Computing phi_2
-  const auto T1 = 2.0 * std::sqrt(k) / (0.09 * omega_capped * y);
-  const auto T2 = 500.0 * mu / (rho * Utility::pow<2>(y) * omega_capped);
+  const auto T1 = 2.0 * std::sqrt(k) / (0.09 * omega * y);
+  const auto T2 = 500.0 * mu / (rho * Utility::pow<2>(y) * omega);
   const auto phi_2 = std::max(T1, T2);
 
   return std::tanh(Utility::pow<2>(phi_2)).value();
