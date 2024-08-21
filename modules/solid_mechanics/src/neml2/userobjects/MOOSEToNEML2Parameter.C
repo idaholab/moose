@@ -11,7 +11,11 @@
 #include "NEML2Utils.h"
 
 #ifndef NEML2_ENABLED
-NEML2ObjectStubImplementation(MOOSEToNEML2Parameter, ElementUserObject);
+#define MOOSEToNEML2ParameterStub(name)                                                            \
+  NEML2ObjectStubImplementationOpen(name, ElementUserObject);                                      \
+  NEML2ObjectStubParam(std::string, "neml2_parameter");                                            \
+  NEML2ObjectStubImplementationClose(name, ElementUserObject)
+MOOSEToNEML2ParameterStub(MOOSEToNEML2Parameter);
 #else
 
 #include "neml2/misc/math.h"

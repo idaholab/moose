@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2ParameterDerivativeToMOOSEMaterialProperty.h"
-#include "ExecuteNEML2Model.h"
+#include "NEML2Utils.h"
 
 registerMooseObject("SolidMechanicsApp", NEML2ParameterDerivativeToRealMOOSEMaterialProperty);
 registerMooseObject("SolidMechanicsApp",
@@ -19,14 +19,25 @@ registerMooseObject("SolidMechanicsApp",
                     NEML2ParameterDerivativeToSymmetricRankFourTensorMOOSEMaterialProperty);
 
 #ifndef NEML2_ENABLED
-NEML2ObjectStubImplementation(NEML2ParameterDerivativeToRealMOOSEMaterialProperty, Material);
-NEML2ObjectStubImplementation(NEML2ParameterDerivativeToStdVectorRealMOOSEMaterialProperty,
-                              Material);
-NEML2ObjectStubImplementation(NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty,
-                              Material);
-NEML2ObjectStubImplementation(
-    NEML2ParameterDerivativeToSymmetricRankFourTensorMOOSEMaterialProperty, Material);
+#define NEML2ParameterDerivativeToMOOSEMaterialPropertyStub(name)                                  \
+  NEML2ObjectStubImplementationOpen(name, Material);                                               \
+  NEML2ObjectStubParam(UserObjectName, "execute_neml2_model_uo");                                  \
+  NEML2ObjectStubParam(MaterialPropertyName, "moose_material_property");                           \
+  NEML2ObjectStubParam(std::string, "neml2_variable");                                             \
+  NEML2ObjectStubParam(std::string, "neml2_parameter_derivative");                                 \
+  NEML2ObjectStubImplementationClose(name, Material)
+
+NEML2ParameterDerivativeToMOOSEMaterialPropertyStub(
+    NEML2ParameterDerivativeToRealMOOSEMaterialProperty);
+NEML2ParameterDerivativeToMOOSEMaterialPropertyStub(
+    NEML2ParameterDerivativeToStdVectorRealMOOSEMaterialProperty);
+NEML2ParameterDerivativeToMOOSEMaterialPropertyStub(
+    NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty);
+NEML2ParameterDerivativeToMOOSEMaterialPropertyStub(
+    NEML2ParameterDerivativeToSymmetricRankFourTensorMOOSEMaterialProperty);
 #else
+
+#include "ExecuteNEML2Model.h"
 
 template <typename T>
 InputParameters

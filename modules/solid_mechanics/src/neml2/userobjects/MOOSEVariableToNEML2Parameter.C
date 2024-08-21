@@ -15,9 +15,9 @@ registerMooseObject("SolidMechanicsApp", MOOSEVariableToNEML2Parameter);
 #ifndef NEML2_ENABLED
 #define MOOSEMVariableToNEML2ParameterStub(name)                                                   \
   NEML2ObjectStubImplementationOpen(name, MOOSEToNEML2Parameter);                                  \
-  NEML2ObjectStubParam(std::vector<VariableName>, "moose_variable");                               \
-  NEML2ObjectStubParam(std::string, "neml2_parameter");                                            \
+  NEML2ObjectStubVariable("moose_variable");                                                       \
   NEML2ObjectStubImplementationClose(name, MOOSEToNEML2Parameter)
+MOOSEMVariableToNEML2ParameterStub(MOOSEVariableToNEML2Parameter)
 #else
 
 InputParameters
