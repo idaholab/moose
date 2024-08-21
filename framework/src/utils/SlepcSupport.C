@@ -626,7 +626,7 @@ evaluateResidual(EigenProblem & eigen_problem, Vec x, Vec r, TagID tag)
 
 void
 moosePetscSNESFormMatrixTag(
-    SNES /*snes*/, Vec x, Mat mat, SparseMatrix<Number> & libmesh_mat, void * ctx, TagID tag)
+    SNES /*snes*/, Vec x, Mat eigen_mat, SparseMatrix<Number> & all_dofs_mat, void * ctx, TagID tag)
 {
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   auto & nl = eigen_problem->getCurrentNonlinearEigenSystem();
@@ -634,31 +634,32 @@ moosePetscSNESFormMatrixTag(
   auto & dof_map = sys.get_dof_map();
 
 #ifndef NDEBUG
-  auto & petsc_mat = cast_ref<PetscMatrix<Number> &>(libmesh_mat);
-  mooseAssert(!dof_map.n_constrained_dofs() == (mat == petsc_mat.mat()),
-              "If we do not have constrained dofs, then mat and libmesh_mat should be the same. "
-              "Conversely, if we do have constrained dofs, they must be different");
+  auto & petsc_all_dofs_mat = cast_ref<PetscMatrix<Number> &>(all_dofs_mat);
+  mooseAssert(
+      !dof_map.n_constrained_dofs() == (eigen_mat == petsc_all_dofs_mat.mat()),
+      "If we do not have constrained dofs, then eigen_mat and all_dofs_mat should be the same. "
+      "Conversely, if we do have constrained dofs, they must be different");
 #endif
 
   updateCurrentLocalSolution(sys, x);
 
   if (!eigen_problem->constJacobian())
-    libmesh_mat.zero();
+    all_dofs_mat.zero();
 
-  eigen_problem->computeJacobianTag(*sys.current_local_solution.get(), libmesh_mat, tag);
+  eigen_problem->computeJacobianTag(*sys.current_local_solution.get(), all_dofs_mat, tag);
 
   if (dof_map.n_constrained_dofs())
   {
-    PetscMatrix<Number> sub(mat, sys.comm());
-    sys.copy_super_to_sub(libmesh_mat, sub);
+    PetscMatrix<Number> wrapped_eigen_mat(eigen_mat, sys.comm());
+    sys.copy_super_to_sub(all_dofs_mat, wrapped_eigen_mat);
   }
 }
 
 void
 moosePetscSNESFormMatricesTags(SNES /*snes*/,
                                Vec x,
-                               std::vector<Mat> & mats,
-                               std::vector<SparseMatrix<Number> *> & libmesh_mats,
+                               std::vector<Mat> & eigen_mats,
+                               std::vector<SparseMatrix<Number> *> & all_dofs_mats,
                                void * ctx,
                                const std::set<TagID> & tags)
 {
@@ -668,26 +669,26 @@ moosePetscSNESFormMatricesTags(SNES /*snes*/,
   auto & dof_map = sys.get_dof_map();
 
 #ifndef NDEBUG
-  for (const auto i : index_range(mats))
+  for (const auto i : index_range(eigen_mats))
     mooseAssert(!dof_map.n_constrained_dofs() ==
-                    (mats[i] == cast_ptr<PetscMatrix<Number> *>(libmesh_mats[i])->mat()),
+                    (eigen_mats[i] == cast_ptr<PetscMatrix<Number> *>(all_dofs_mats[i])->mat()),
                 "If we do not have constrained dofs, then mat and libmesh_mat should be the same. "
                 "Conversely, if we do have constrained dofs, they must be different");
 #endif
 
   updateCurrentLocalSolution(sys, x);
 
-  for (auto * const lm_mat : libmesh_mats)
+  for (auto * const all_dofs_mat : all_dofs_mats)
     if (!eigen_problem->constJacobian())
-      lm_mat->zero();
+      all_dofs_mat->zero();
 
-  eigen_problem->computeMatricesTags(*sys.current_local_solution.get(), libmesh_mats, tags);
+  eigen_problem->computeMatricesTags(*sys.current_local_solution.get(), all_dofs_mats, tags);
 
   if (dof_map.n_constrained_dofs())
-    for (const auto i : index_range(mats))
+    for (const auto i : index_range(eigen_mats))
     {
-      PetscMatrix<Number> sub(mats[i], sys.comm());
-      sys.copy_super_to_sub(*libmesh_mats[i], sub);
+      PetscMatrix<Number> wrapped_eigen_mat(eigen_mats[i], sys.comm());
+      sys.copy_super_to_sub(*all_dofs_mats[i], wrapped_eigen_mat);
     }
 }
 
