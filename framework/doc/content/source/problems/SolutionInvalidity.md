@@ -8,7 +8,7 @@ To declare a solution as "invalid", use the macro in the following code to mark 
 
 !listing /test/src/materials/NonsafeMaterial.C  re=\s+if \(_fe_problem.dt\(\) < 1 && _test_invalid_recover\)(?:.|\n)*\}
 
-The `flagInvalidSolution` macro will mark solution as not converged when invalid solution is detected while the `flagSolutionWarning` marco doesn't affect solution convergence but still count invalid solution occurrences.
+The `flagInvalidSolution` macro will mark the solution as not converged when triggered. The `flagSolutionWarning` will not do so but simply report on the number of warnings encountered.
 
 !alert tip
 It is recommended to have a unique message for each invalidity, especially when you want to mark multiple types of invalid solutions within one object.

@@ -1842,34 +1842,34 @@ public:
   }
 
   /**
-   * Whether or not has solution warning flagged
+   * Whether or not an solution warning has been flagged
    */
   bool hasSolutionWarning() { return _has_solution_warning; }
 
   bool hasSolutionWarning(bool state) { return _has_solution_warning = state; }
 
   /**
-   * Whether or not has invalid solution flagged
+   * Whether or not an invalid solution has been flagged
    */
   bool hasInvalidSolution() { return _has_invalid_solution; }
 
   bool hasInvalidSolution(bool state) { return _has_invalid_solution = state; }
 
   /**
-   * Whether or not to allow convergence of the solution
+   * Whether or not to accept the solution
    */
-  bool allowInvalidSolutionWithConvergence()
+  bool acceptInvalidSolution()
   {
     return (hasSolutionWarning() && !hasInvalidSolution()) || allowInvalidSolution();
   }
 
   /**
-   * Allow use to decide whether to allow invalid solution or not
+   * Whether to accept / allow an invalid solution
    */
   bool allowInvalidSolution() const { return _allow_invalid_solution; }
 
   /**
-   * Whether or not allow print out invalid solutions summary table in console
+   * Whether or not to print out the invalid solutions summary table in console
    */
   bool showInvalidSolutionConsole() const { return _show_invalid_solution_console; }
 

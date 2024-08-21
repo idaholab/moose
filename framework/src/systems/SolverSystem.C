@@ -117,7 +117,7 @@ SolverSystem::checkInvalidSolution()
     // sync all solution invalid counts to rank 0 process
     _app.solutionInvalidity().sync();
 
-    if (_fe_problem.allowInvalidSolutionWithConvergence())
+    if (_fe_problem.acceptInvalidSolution())
       if (_fe_problem.showInvalidSolutionConsole())
         _app.solutionInvalidity().print(_console);
       else
@@ -125,6 +125,7 @@ SolverSystem::checkInvalidSolution()
                      "Use Problem/show_invalid_solution_console=true to show solution counts");
     else
       // output the occurrence of solution invalid in a summary table
+       if (_fe_problem.showInvalidSolutionConsole())
       _app.solutionInvalidity().print(_console);
   }
 }
