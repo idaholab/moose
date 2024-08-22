@@ -25,7 +25,6 @@
 []
 [Outputs]
   csv = true
-  # console = false
 []
 [MultiApps]
   [model_grad_sampler]

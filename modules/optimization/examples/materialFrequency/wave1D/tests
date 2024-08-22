@@ -8,8 +8,6 @@
     abs_zero = 1e-5
     recover = False
     requirement = 'The system shall be able to perform frequency domain material inversion for a bimaterial problem with multiple sets of experimental data.'
-    method = '!dbg'
-    valgrind = heavy
     max_threads = 1 # Optimize executioner does not support multiple threads
   []
 []

@@ -41,7 +41,6 @@ omega = 1
     type = FunctionValuePostprocessor
     function = obj_func
     execute_on = 'INITIAL TIMESTEP_END'
-    # outputs = console
   []
   [df_dx]
     type = FunctionValuePostprocessor
@@ -52,7 +51,7 @@ omega = 1
     function = df_dy
   []
   [omega]
-    type=ConstantPostprocessor
+    type = ConstantPostprocessor
     value = ${omega}
   []
 []

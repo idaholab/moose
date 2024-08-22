@@ -78,5 +78,4 @@
   csv = false
   json = false
   console = false
-  # file_base = sampler/sample
 []
