@@ -100,10 +100,15 @@ class RunPBS(RunHPC):
                     elif exit_code >= 128:
                         self.setHPCJobError(hpc_job, 'PBS JOB KILLED', 'was killed by a signal')
 
-                    # Parse walltime if possible
-                    walltime_sec = None
+                    # Parse end time if possible. PBS is all over the place on this one. Sometimes
+                    # walltime is available, sometimes it isn't. We also have obittime, but that
+                    # time seems to be longer than the actual run.
+                    end_time = None
+                    # First try to get it from the walltime (sometimes this is 0...). We'll fake
+                    # this a bit and just add the walltime to the start time
+                    stime = parse_time('stime')
                     resources_used = job_result.get('resources_used')
-                    if resources_used:
+                    if stime and resources_used:
                         walltime = resources_used.get('walltime')
                         if walltime:
                             search = re.search(r'^(\d+):(\d{2}):(\d{2})$', walltime)
@@ -111,21 +116,16 @@ class RunPBS(RunHPC):
                                 walltime_sec = datetime.timedelta(hours=int(search.group(1)),
                                                                   minutes=int(search.group(2)),
                                                                   seconds=int(search.group(3))).total_seconds()
+                                if walltime_sec != 0:
+                                    end_time = stime + walltime_sec
                             else:
                                 self.setHPCJobError(hpc_job, 'WALLTIME PARSE ERROR',
                                                     f'Failed to parse walltime from "{walltime}"')
-
-
-                    # Set end time if possible. PBS has an 'obittime' entry that can be used,
-                    # but it includes a ton of cleanup time that isn't representative of the
-                    # actual time. Here, we'll cheat and just append to the start time the
-                    # walltime to determine the end time, if possible. If not possible, it'll
-                    # just use the time for now which is fine.
-                    end_time = None
-                    if walltime_sec:
-                        start_time = parse_time('stime')
-                        if start_time:
-                            end_time = start_time + walltime_sec
+                    # If we don't have it yet, use the obit time
+                    if not end_time:
+                        obittime = parse_time('obittime')
+                        if obittime:
+                            end_time = obittime
 
                     self.setHPCJobDone(hpc_job, exit_code, end_time)
 
