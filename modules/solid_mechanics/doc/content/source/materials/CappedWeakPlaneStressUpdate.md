@@ -18,9 +18,11 @@ Denote the normal to the layers by $z$, and the tangential directions
 by $x$ and $y$.  It is convenient to introduce two new stress variables in
 terms of the stress tensor $\sigma$:
 
-!equation id=eqn.defn.p.q
+\begin{equation}
 p = \sigma_{zz} \ \ \ \text{and}\ \ \ q = \sqrt{\sigma_{xz}^{2} +
   \sigma_{yz}^{2}} \ .
+\label{eqn.defn.p.q}
+\end{equation}
 
 In standard elasticity, the stress tensor is symmetric, so an
 equivalent definition of $q$ is
@@ -65,8 +67,10 @@ The yield functions $f_{1}$ and $f_{2}$ place ``caps'' on the shear
 yield function $f_{0}$.
 The combined yield function is simply
 
-!equation id=one.yf.eqn
+\begin{equation}
 f = \max(f_{0}, f_{1}, f_{2}) \ ,
+\label{one.yf.eqn}
+\end{equation}
 
 which defines the admissible domain where all yield functions are
 non-positive, and the inadmissible domain where at least one yield
@@ -145,7 +149,6 @@ The return-map process involves being provided with a trial stress
 $\sigma^{\mathrm{trial}}$ and an existing value of the internal
 parameters $i^{\mathrm{old}}$, and finding a ``returned'' stress,
 $\sigma$, and internal parameters, $i$, that satisfy
-
 \begin{equation}
 \begin{split}
 0 & = & f(\sigma, i) \ . \\\label{f.zero.return}
@@ -165,17 +168,21 @@ the ``normal direction'').
 Let us express the normality condition in $(p, q)$ space.  The $zz$
 component is easy:
 
-!equation id=p.norm.eqn
+\begin{equation}
 p = \sigma_{zz} = \sigma_{zz}^{\mathrm{trial}} - E_{zzij}\gamma
 \frac{\partial g}{\partial \sigma_{ij}} = \sigma_{zz}^{\mathrm{trial}} - E_{zzzz}\gamma
 \frac{\partial g}{\partial p}  \ ,
+\label{p.norm.eqn}
+\end{equation}
 
 where the last equality holds by assumption (see full list of
 assumptions below).  The $xz$ and $yz$ components are similar:
 
-!equation id=eqn.xz.flow
+\begin{equation}
 \sigma_{xz} = \sigma_{xz}^{\mathrm{trial}} - E_{xzxz}\gamma
 \frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{xz}}
+\ . \label{eqn.xz.flow}
+\end{equation}
 
 Another assumption has been made about $E$.  The final term is
 
@@ -194,15 +201,18 @@ This means that Eqn~[eqn.xz.flow] can be re-written
 A similar equation holds for the $yz$ component, and these can be
 summed and rearranged to yield
 
-!equation id=q.norm.eqn
+\begin{equation}
 q = q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial q}
+\ . \label{q.norm.eqn}
+\end{equation}
 
 Equations~[f.zero.return], [p.norm.eqn]
 and~[q.norm.eqn] are the three conditions that need to be
 satisfied, and the three variables to be found are $p$, $q$ and
 $\gamma$.
 
-Consider the case of returning to the shear yield surface.  Since $\partial g/\partial p =
+Consider the case of returning to the shear yield surface.
+Since $\partial g/\partial p =
 \tan\psi$ and $\partial g/\partial q = 1$ for this flow, the
 return-map process must solve the following system of equations
 
@@ -411,8 +421,10 @@ poor convergence of the return-map process will occur.
 
 It is assumed that the elasticity tensor has the following symmetries:
 
-!equation id=eqn.elas.symms
+\begin{equation}
 E_{ijkl} = E_{jikl} = E_{ijlk} = E_{klij} \ ,
+\label{eqn.elas.symms}
+\end{equation}
 
 and that
 
@@ -428,9 +440,11 @@ E_{xzxz} = E_{yzyz} \ ,
 
 and that
 
-!equation id=eqn.elas.xz.con
+\begin{equation}
 0 = E_{xzij} \ \ \text{ unless } (i, j) = (z, x) \ \ \text{ or } (i,
 j) = (x, z) \ .
+\label{eqn.elas.xz.con}
+\end{equation}
 
 These are quite standard conditions that hold for all non-Cosserat
 materials to our knowledge.

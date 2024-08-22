@@ -59,9 +59,11 @@ Here `smoothing` indicates the smoothing mentioned in the previous section.
 
 The flow rules are
 
-!equation id=eqn.flow.rules
+\begin{equation}
   s_{a} = s_{a}^{\mathrm{trial}} - \ga E_{ab} \frac{\partial
     g}{\partial s_{a}} \ ,
+  \label{eqn.flow.rules}
+\end{equation}
 
 where $s_{a}=\{\sigma_{I}, \sigma_{II}, \sigma_{III}\}$ and
 
