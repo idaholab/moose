@@ -22,7 +22,7 @@ CoreMeshGenerator::validParams()
   auto params = ReactorGeometryMeshBuilderBase::validParams();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
-      "inputs", "The AssemblyMeshGenerators that form the components of the assembly.");
+      "inputs", "The AssemblyMeshGenerator and ControlDrumMeshGenerator objects that form the components of the assembly.");
 
   params.addParam<std::string>(
       "dummy_assembly_name",
@@ -85,7 +85,7 @@ CoreMeshGenerator::validParams()
   params.addClassDescription("This CoreMeshGenerator object is designed to generate a core-like "
                              "structure, with IDs, from a reactor geometry. "
                              "The core-like structure consists of a pattern of assembly-like "
-                             "structures generated with AssemblyMeshGenerator "
+                             "structures generated with AssemblyMeshGenerator and/or ControlDrumMeshGenerator "
                              "and is permitted to have \"empty\" locations. The size and spacing "
                              "of the assembly-like structures is defined, and "
                              "enforced by declaration in the ReactorMeshParams.");
