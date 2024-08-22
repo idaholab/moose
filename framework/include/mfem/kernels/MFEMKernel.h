@@ -16,9 +16,10 @@ public:
   {
     InputParameters params = MFEMGeneralUserObject::validParams();
     params.registerBase("Kernel");
-    params.addParam<std::string>("variable", "Variable on which to apply the kernel");
+    params.addParam<std::string>("variable",
+                                 "Variable labelling the weak form this kernel is added to");
     return params;
-  };
+  }
 
   MFEMKernel(const InputParameters & parameters)
     : MFEMGeneralUserObject(parameters), _test_var_name(getParam<std::string>("variable"))
@@ -29,7 +30,14 @@ public:
   // Create a new MFEM integrator to apply to the weak form. Ownership managed by the caller.
   virtual T * createIntegrator() = 0;
 
+  // Get name of the test variable labelling the weak form this kernel is added to
+  const std::string & getTestVariableName() const { return _test_var_name; }
+
+  // Get name of the trial variable (gridfunction) the kernel acts on.
+  // Defaults to the name of the test variable labelling the weak form.
+  virtual const std::string & getTrialVariableName() const { return _test_var_name; }
+
 protected:
-  // Name of the (test) variable associated with the weak form kernel is applied to.
+  // Name of (the test variable associated with) the weak form that the kernel is applied to.
   std::string _test_var_name;
 };
