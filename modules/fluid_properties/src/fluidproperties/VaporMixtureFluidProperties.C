@@ -33,4 +33,30 @@ VaporMixtureFluidProperties::primaryMassFraction(const std::vector<Real> & x) co
   return 1 - std::accumulate(x.begin(), x.end(), 0.0);
 }
 
+Real
+VaporMixtureFluidProperties::mixtureMolarMass(const std::vector<Real> & molar_fractions,
+                                              const std::vector<Real> & molar_masses) const
+{
+  mooseAssert(molar_fractions.size() == molar_masses.size(), "Must have same size");
+
+  Real molar_mass_mix = 0;
+  for (const auto i : index_range(molar_fractions))
+    molar_mass_mix += molar_fractions[i] * molar_masses[i];
+  return molar_mass_mix;
+}
+
+std::vector<Real>
+VaporMixtureFluidProperties::massFractionsFromMolarFractions(
+    const std::vector<Real> & molar_fractions, const std::vector<Real> & molar_masses) const
+{
+  mooseAssert(molar_fractions.size() == molar_masses.size(), "Must have same size");
+
+  const auto molar_mass_mix = mixtureMolarMass(molar_fractions, molar_masses);
+
+  std::vector<Real> mass_fractions(molar_fractions.size(), 0.0);
+  for (const auto i : index_range(molar_fractions))
+    mass_fractions[i] = molar_masses[i] / molar_mass_mix * molar_fractions[i];
+  return mass_fractions;
+}
+
 #pragma GCC diagnostic pop

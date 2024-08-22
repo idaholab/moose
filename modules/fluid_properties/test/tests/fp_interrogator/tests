@@ -289,6 +289,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
   [./2ph_ncg_p_T]
     type = 'RunApp'
     input = '2ph_ncg_p_T.i'
+    cli_args = 'FluidPropertiesInterrogator/x_ncg=0.1'
     allow_test_objects = true
     allow_warnings = true
     method = 'OPT'
@@ -321,6 +322,7 @@ Volumetric expansion coefficient:        0.002682720575  1/K
 
 Vapor mixture STATIC properties:
 --------------------------------------------------------------------------------
+Mass fraction 0:                                    0.1  -
 Pressure:                              1.0000000000e\+05  Pa
 Temperature:                                372.7559289  K
 Density:                                   0.8972309616  kg/m\^3
@@ -335,15 +337,33 @@ Specific heat at constant volume:                2772.5  J/\(kg-K\)
 Thermal conductivity:                           0.02568  W/\(m-K\)'
 
     requirement = "The fluid properties interrogator shall output two-phase and static-state, "
-      "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object."
+      "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object when the NCG mass fraction is provided."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
+  [2ph_ncg_p_T_sat]
+    type = RunApp
+    input = '2ph_ncg_p_T.i'
+    cli_args = "
+      FluidPropertiesInterrogator/fp=fp_2phase_ncg_partial_pressure
+      FluidPropertiesInterrogator/p=40e3
+      FluidPropertiesInterrogator/T=300"
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = 'Mass fraction 0:\s+0.8463343673'
+    requirement = "The fluid properties interrogator shall output two-phase and static-state, "
+      "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object when the NCG mass fraction is not provided."
+    issues = '#28335'
+    design = 'FluidPropertiesInterrogator.md'
+  []
+
   [./2ph_ncg_p_T.json]
     type = 'RunApp'
     input = '2ph_ncg_p_T.i'
-    cli_args = 'FluidPropertiesInterrogator/json=true'
+    cli_args = 'FluidPropertiesInterrogator/x_ncg=0.1 FluidPropertiesInterrogator/json=true'
     allow_test_objects = true
     allow_warnings = true
     method = 'OPT'
@@ -372,6 +392,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     threading = '!pthreads'
     expect_out = 'Vapor mixture STATIC properties:
 --------------------------------------------------------------------------------
+Mass fraction 0:                                    0.1  -
 Pressure:                              9.0404345635e\+05  Pa
 Temperature:                                2547.214296  K
 Density:                                    1.187005237  kg/m\^3

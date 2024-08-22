@@ -46,6 +46,7 @@
     design = '/GrandPotentialInterface.md'
     requirement = 'The system shall provide a material to automatically compute grand potential '
                   'model interface parameters based on provided interfacial free energies and widths'
+    valgrind = 'heavy'
   []
   [GrandPotentialAnisotropyAntitrap]
     type = 'Exodiff'

@@ -147,6 +147,24 @@ public:
    */
   Real primaryMassFraction(const std::vector<Real> & x) const;
 
+  /**
+   * Computes the mixture molar mass for given molar fractions and molar masses
+   *
+   * @param[in] molar_fractions  Molar fractions for all vapors
+   * @param[in] molar_masses  Molar masses for all vapors
+   */
+  Real mixtureMolarMass(const std::vector<Real> & molar_fractions,
+                        const std::vector<Real> & molar_masses) const;
+
+  /**
+   * Computes the mass fractions for given molar fractions and molar masses
+   *
+   * @param[in] molar_fractions  Molar fractions for all vapors
+   * @param[in] molar_masses  Molar masses for all vapors
+   */
+  std::vector<Real> massFractionsFromMolarFractions(const std::vector<Real> & molar_fractions,
+                                                    const std::vector<Real> & molar_masses) const;
+
 private:
   template <typename... Args>
   void fluidPropError(Args... args) const

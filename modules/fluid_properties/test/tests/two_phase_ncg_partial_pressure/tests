@@ -1,0 +1,20 @@
+[Tests]
+  design = 'TwoPhaseNCGPartialPressureFunction.md'
+  issues = '#28335'
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall be able to compute properties from a two-phase with non-condensable gas user object.'
+  []
+  [error_wrong_number_of_args]
+    type = RunException
+    input = 'test.i'
+    cli_args = "Functions/p_sat_fn/arg2=40000"
+    expect_err = "The property call 'p_sat' expects the parameter\(s\) {'arg1'} to be provided, but the provided argument\(s\) were {'arg1', 'arg2'}"
+    allow_test_objects = true
+    threading = '!pthreads'
+    requirement = 'The system shall report an error if an incorrect number of arguments are provided when computing properties from a two-phase with non-condensable gas user object.'
+  []
+[]
