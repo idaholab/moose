@@ -38,8 +38,6 @@ public:
 
   virtual void finishStep(bool recurse_through_multiapp_levels = false) override;
 
-  virtual bool needsRestoration() override;
-
   virtual void resetApp(unsigned int global_app, Real time) override;
 
   /**
