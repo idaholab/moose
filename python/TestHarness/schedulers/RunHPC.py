@@ -312,8 +312,8 @@ class RunHPC(RunParallel):
             output_file = self.getHPCJobOutputPath(job)
             result_file = self.getHPCJobResultPath(job)
 
-            # Clean these two files
-            for file in [submission_script, output_file]:
+            # Remove these files if they exist
+            for file in [submission_script, output_file, result_file]:
                 if os.path.exists(file):
                     os.remove(file)
 
