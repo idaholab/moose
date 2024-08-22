@@ -114,10 +114,6 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   bool bypass_meshgen = (data_driven_generator != "") && isDataOnly();
   this->declareMeshProperty(RGMB::bypass_meshgen, bypass_meshgen);
 
-  // Declare name id map only if RGMB is outputting a mesh
-  if (!bypass_meshgen)
-    this->declareMeshProperty("name_id_map", _name_id_map);
-
   if (isParamValid("top_boundary_id"))
   {
     _top_boundary = getParam<boundary_id_type>("top_boundary_id");
