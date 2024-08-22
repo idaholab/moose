@@ -25,7 +25,7 @@ ElementExtremeFunctorValueTempl<is_ad>::validParams()
       "the functor value should be taken; if not provided, this defaults "
       "to the 'functor' parameter.");
   params.addClassDescription(
-      "Finds either the min or max elemental value of a variable over the domain.");
+      "Finds either the min or max elemental value of a functor over the domain.");
   return params;
 }
 
