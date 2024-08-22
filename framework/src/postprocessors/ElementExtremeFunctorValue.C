@@ -37,8 +37,6 @@ ElementExtremeFunctorValueTempl<is_ad>::ElementExtremeFunctorValueTempl(
     _proxy_functor(isParamValid("proxy_functor") ? getFunctor<GenericReal<is_ad>>("proxy_functor")
                                                  : getFunctor<GenericReal<is_ad>>("functor"))
 {
-  if (this->isNodal())
-    this->paramError("variable", "This AuxKernel only supports Elemental fields");
   _use_proxy = isParamValid("proxy_functor");
 }
 
