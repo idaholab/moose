@@ -29,9 +29,10 @@ NonsafeMaterial::validParams()
   params.addParam<Real>("invalid_after_time",
                         -std::numeric_limits<Real>::max(),
                         "Only set invalid solutions after this time");
-  params.addParam<bool>("flag_solution_warning",
-                        false,
-                        "True to test invalid solution warning while converging the solution.");
+  params.addParam<bool>(
+      "flag_solution_warning",
+      false,
+      "True to test an invalid solution warning, which do not cause the solution to be invalid.");
 
   return params;
 }
