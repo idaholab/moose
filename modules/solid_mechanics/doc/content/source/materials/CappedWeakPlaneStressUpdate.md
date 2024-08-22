@@ -26,10 +26,8 @@ p = \sigma_{zz} \ \ \ \text{and}\ \ \ q = \sqrt{\sigma_{xz}^{2} +
 
 In standard elasticity, the stress tensor is symmetric, so an
 equivalent definition of $q$ is
-$q=\sqrt{\text{$\frac{1}{2}$}(\sigma_{xz}+\sigma_{zx})^{2} +
-  \text{$\frac{1}{2}$}(\sigma_{yz}+\sigma_{zy})^{2}}$, however the
-symmetrization is deliberately not written in
-Eqn~[eqn.defn.p.q] and below so that the equations also hold for
+$q=\sqrt{$\frac{1}{2}$(\sigma_{xz}+\sigma_{zx})^{2} + $\frac{1}{2}$(\sigma_{yz}+\sigma_{zy})^{2}}$, however the symmetrization is deliberately not written in
+[eqn.defn.p.q] and below so that the equations also hold for
 the Cosserat case (see [CappedWeakPlaneCosseratStressUpdate.md]).
 
 The joint slipping is assumed to be governed by a
@@ -149,6 +147,7 @@ The return-map process involves being provided with a trial stress
 $\sigma^{\mathrm{trial}}$ and an existing value of the internal
 parameters $i^{\mathrm{old}}$, and finding a ``returned'' stress,
 $\sigma$, and internal parameters, $i$, that satisfy
+
 \begin{equation}
 \begin{split}
 0 & = & f(\sigma, i) \ . \\\label{f.zero.return}
@@ -189,7 +188,7 @@ Another assumption has been made about $E$.  The final term is
 \frac{\partial q}{\partial\sigma_{xz}} = \frac{\sigma_{xz}}{q} \ .
 \end{equation}
 
-This means that Eqn~[eqn.xz.flow] can be re-written
+This means that [eqn.xz.flow] can be re-written
 
 \begin{equation}
 \sigma_{xz}^{2} \left( 1 + E_{xzxz}\gamma \frac{\partial g}{\partial
@@ -205,7 +204,7 @@ q = q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial q}
 \ . \label{q.norm.eqn}
 \end{equation}
 
-Equations~[f.zero.return], [p.norm.eqn]
+[f.zero.return], [p.norm.eqn]
 and~[q.norm.eqn] are the three conditions that need to be
 satisfied, and the three variables to be found are $p$, $q$ and
 $\gamma$.
@@ -253,8 +252,8 @@ shear failure.  The scaling by $E$ ensures that these internal
 parameters are dimensionless.
 
 In summary, this plasticity model is defined by the yield function of
-Equation~[one.yf.eqn], the flow potential of
-Equation~[one.g.eqn], and the following return-map problem.
+[one.yf.eqn], the flow potential of
+[one.g.eqn], and the following return-map problem.
 
 ### Return-map problem id=rmap
 
@@ -440,7 +439,7 @@ materials to our knowledge.
 
 ### Unknowns and the convergence criterion
 
-The return-map problem Eqn~[rmp.eqn] is solved as a $3\times 3$
+The return-map problem [rmp.eqn] is solved as a $3\times 3$
 system consisting of the first 3 equations, and substituting the fourth and
 fifth equations wherever needed.  The three unknowns are $p$, $q$ and
 $\gamma_{E}=\gamma E_{zzzz}$, which all have the same units.  Convergence
@@ -560,7 +559,7 @@ weak-plane case.
 
 ### Specialization to the weak-plane case
 
-The return-map equations Eqn [rmp.eqn] are obtaining $(p, q)$
+The return-map equations [rmp.eqn] are obtaining $(p, q)$
 given the trial variables.  Finding $H$ is really just re-solving
 these equations for a slightly changed trial variable.  Denote
 
@@ -589,7 +588,7 @@ In these equations
 \frac{1}{E_{zzzz}} \ ,
 \end{equation}
 
-which comes from Eqn [rmp.eqn].  The derivatives with respect to
+which comes from [rmp.eqn].  The derivatives with respect to
 $q^{\mathrm{trial}}$ are similar but more lengthy due to both $i_{0}$
 and $i_{1}$ being dependent on $q^{\mathrm{trial}}$.  The system to
 solve is

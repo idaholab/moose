@@ -9,8 +9,8 @@
 The three yield functions shown in [TensileStressUpdate.md] are smoothed in the
 `MultiParameterPlasticityStressUpdate` class.
 
-An example is shown Figures [tensile_3D]
-and [tensile_oct].  Figure [tensile_oct] shows slices
+An example is shown [tensile_3D]
+and [tensile_oct]. [tensile_oct] shows slices
 of the yield surface at three values of the mean stress, and the
 triangular-pyramid nature of the yield surface is evident.  The slices
 are taken near the tip region only, to highlight: (1) the smoothing;
@@ -19,10 +19,10 @@ are taken near the tip region only, to highlight: (1) the smoothing;
 The unsymmetric nature of the
 yield surface only occurs near the tip region where the smoothing
 mixes the three yield surfaces.  For instance, the black line in
-Figure [tensile_oct] is symmetric, while the blue and red
+[tensile_oct] is symmetric, while the blue and red
 lines are unsymmetric.  The amount of asymmetry is small, but it is
 evident that the red curve is not concentric with the remainder of the
-curves shown in Figure [tensile_oct].  The order of the yield
+curves shown in [tensile_oct].  The order of the yield
 functions has been chosen so that the curves
 intersect the $\sigma_{III}=\sigma_{II}$ line at $90^{\circ}$, but not
 on the $\sigma_{II}=\sigma_{I}$ line near the pyramid's tip.  The
@@ -76,12 +76,14 @@ In this equation $E_{ijkl}$ is the elasticity tensor.
 
 An assumption that is made is that
 $E_{ab}$ is independent of the stress parameters, $s_{a}$ and the
-internal variables.  In this case\footnote{Special precautions are
-  taken when the eigenvalues are equal, as described in {\tt RankTwoTensor}.}
+internal variables.  In this case,
 
 \begin{equation}
   \frac{\partial s_{a}}{\partial \sigma_{ij}} = v_{i}^{a}v_{j}^{a} \ ,
 \end{equation}
+
+!alert note
+Special precautions are taken when the eigenvalues are equal, as described in the documentation for `RankTwoTensor`.
 
 where $v^{a}$ is the eigenvector corresponding to the eigenvalue
 $s^{a}$ (of the stress tensor) and there is no sum over $a$ on the
@@ -114,7 +116,7 @@ this single internal parameter
 ### Unknowns and the convergence criterion
 
 The return-map problem involves solving the four equations: $f=0$ (smoothed yield function
-should be zero) and the flow equations~([eqn.flow.rules]).  The
+should be zero) and the flow [eqn.flow.rules].  The
 unknowns are the 3 stress parameters $s_{a}=\{\sigma_{I}, \sigma_{II},
 \sigma_{III}\}$ and the plasticity multiplier $\ga$.  Actually, to
 make the units consistent the algorithm uses $\ga E_{22}$ instead of
@@ -186,11 +188,8 @@ $\sigma^{\mathrm{trial}}$.  The relevant formulae are
 
 \begin{equation}
 \begin{split}
-  \frac{\delta s_{a}^{\mathrm{trial}}}{\delta
-    \sigma_{kl}^{\mathrm{trial}}} & = & v^{a}_{i}v^{a}_{j} \ , \\
-  \frac{\delta v^{a}_{i}}{\delta \sigma_{kl}^{\mathrm{trial}}} & = &
-  \sum_{b\neq a}\frac{v_{i}^{b}(v_{k}^{b}v_{l}^{a} +
-    v_{l}^{b}v_{k}^{a})}{2(s_{a}-s_{b})} \ .
+  \frac{\delta s_{a}^{\mathrm{trial}}}{\delta \sigma_{kl}^{\mathrm{trial}}} & = & v^{a}_{i}v^{a}_{j} \ , \\
+  \frac{\delta v^{a}_{i}}{\delta \sigma_{kl}^{\mathrm{trial}}} & = & \sum_{b\neq a}\frac{v_{i}^{b}(v_{k}^{b}v_{l}^{a} + v_{l}^{b}v_{k}^{a})}{2(s_{a}-s_{b})} \ . \\
 \end{split}
 \end{equation}
 
