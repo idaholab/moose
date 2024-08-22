@@ -164,21 +164,20 @@ DisplacedProblem::init()
   for (auto & nl : _displaced_solver_systems)
   {
     nl->dofMap().attach_extra_send_list_function(&extraSendList, nl.get());
-    nl->init();
+    nl->preInit();
   }
 
   _displaced_aux->dofMap().attach_extra_send_list_function(&extraSendList, _displaced_aux.get());
-  _displaced_aux->init();
+  _displaced_aux->preInit();
 
   {
     TIME_SECTION("eq::init", 2, "Initializing Displaced Equation System");
     _eq.init();
   }
 
-  /// Get face types properly set for variables
   for (auto & nl : _displaced_solver_systems)
-    nl->update(/*update_libmesh_system=*/false);
-  _displaced_aux->update(/*update_libmesh_system=*/false);
+    nl->postInit();
+  _displaced_aux->postInit();
 
   _mesh.meshChanged();
 
@@ -291,10 +290,6 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   // The mesh has changed. Face information normals, areas, etc. must be re-calculated
   if (haveFV())
     _mesh.setupFiniteVolumeMeshData();
-
-  for (auto & disp_nl : _displaced_solver_systems)
-    disp_nl->update(false);
-  _displaced_aux->update(false);
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
@@ -1104,6 +1099,11 @@ DisplacedProblem::meshChanged()
   // EquationSystems::reinit only prolongs/restricts the solution vectors, which is something that
   // needs to happen for every step of mesh adaptivity.
   _eq.reinit();
+  // Since the mesh has changed, we need to make sure that we update any of our
+  // MOOSE-system specific data.
+  for (auto & nl : _displaced_solver_systems)
+    nl->reinit();
+  _displaced_aux->reinit();
 
   // We've performed some mesh adaptivity. We need to
   // clear any quadrature nodes such that when we build the boundary node lists in
@@ -1116,12 +1116,6 @@ DisplacedProblem::meshChanged()
   // then reinitialize GeometricSearchData such that we have all the correct geometric information
   // for the changed mesh
   updateMesh(/*mesh_changing=*/true);
-
-  // Since the mesh has changed, we need to make sure that we update any of our
-  // MOOSE-system specific data. libmesh system data has already been updated
-  for (auto & nl : _displaced_solver_systems)
-    nl->update(/*update_libmesh_system=*/false);
-  _displaced_aux->update(/*update_libmesh_system=*/false);
 }
 
 void

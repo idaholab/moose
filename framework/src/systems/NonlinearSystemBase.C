@@ -179,9 +179,9 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
 NonlinearSystemBase::~NonlinearSystemBase() = default;
 
 void
-NonlinearSystemBase::init()
+NonlinearSystemBase::preInit()
 {
-  SolverSystem::init();
+  SolverSystem::preInit();
 
   if (_fe_problem.hasDampers())
     setupDampers();

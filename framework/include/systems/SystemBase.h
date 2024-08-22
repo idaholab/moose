@@ -151,19 +151,32 @@ public:
   virtual const System & system() const = 0;
 
   /**
-   * Initialize the system
+   * This is called prior to the libMesh system has been init'd. MOOSE system wrappers can use this
+   * method to add vectors and matrices to the libMesh system
    */
-  virtual void init(){};
+  virtual void preInit() {}
+
+  /*
+   * This is called after the libMesh system has been init'd. This can be used to initialize MOOSE
+   * system data that relies on the libMesh system data already being initialized
+   */
+  virtual void postInit() {}
+
+  /**
+   * Reinitialize the system when the degrees of freedom in this system have changed. This is called
+   * after the libMesh system has been reinit'd
+   */
+  virtual void reinit() {}
 
   /**
    * Called only once, just before the solve begins so objects can do some precalculations
    */
-  virtual void initializeObjects(){};
+  virtual void initializeObjects() {}
 
   /**
    * Update the system (doing libMesh magic)
    */
-  virtual void update(bool update_libmesh_system = true);
+  void update();
 
   /**
    * Solve the system (using libMesh magic)

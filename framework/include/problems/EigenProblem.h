@@ -128,7 +128,7 @@ public:
    * Form several matrices simultaneously
    */
   void computeMatricesTags(const NumericVector<Number> & soln,
-                           const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
+                           const std::vector<SparseMatrix<Number> *> & jacobians,
                            const std::set<TagID> & tags);
 
   /**

@@ -28,7 +28,7 @@ public:
                Moose::VarKindType var_kind);
   virtual ~SolverSystem();
 
-  virtual void init() override;
+  virtual void preInit() override;
   virtual void restoreSolutions() override final;
 
   void serializeSolution();
