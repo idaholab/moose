@@ -295,7 +295,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         params.set<unsigned int>("background_intervals") = _background_intervals;
         // Initial block id used to define peripheral regions of assembly
 
-        const auto background_block_name = RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R0";
+        const auto background_block_name =
+            RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R0";
         const auto background_block_id = RGMB::ASSEMBLY_BLOCK_ID_START;
         params.set<subdomain_id_type>("background_block_id") = background_block_id;
         params.set<SubdomainName>("background_block_name") = background_block_name;
@@ -307,8 +308,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         std::vector<SubdomainName> duct_block_names;
         for (const auto duct_it : index_range(_duct_region_ids[0]))
         {
-          const auto duct_block_name =
-              RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
+          const auto duct_block_name = RGMB::ASSEMBLY_BLOCK_NAME_PREFIX +
+                                       std::to_string(_assembly_type) + "_R" +
+                                       std::to_string(duct_it + 1);
           const auto duct_block_id = RGMB::ASSEMBLY_BLOCK_ID_START + duct_it + 1;
           duct_block_ids.push_back(duct_block_id);
           duct_block_names.push_back(duct_block_name);
@@ -347,7 +349,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         {
           const auto pin_name = _inputs[pattern_idx];
           const auto pin_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pin_name);
-          const BoundaryName boundary_name = RGMB::PIN_BOUNDARY_NAME_PREFIX + std::to_string(pin_id);
+          const BoundaryName boundary_name =
+              RGMB::PIN_BOUNDARY_NAME_PREFIX + std::to_string(pin_id);
           if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
             boundaries_to_delete.push_back(boundary_name);
         }
@@ -502,8 +505,8 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     mooseError("Attempting to use flexible stitching on assembly " + name() +
                " that does not have a background region. This is not yet supported.");
   const auto radial_index = _duct_region_ids.size() == 0 ? 0 : _duct_region_ids[0].size();
-  block_to_delete =
-      RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R" + std::to_string(radial_index);
+  block_to_delete = RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R" +
+                    std::to_string(radial_index);
 
   {
     // Invoke BlockDeletionGenerator to delete outermost mesh interval of assembly
@@ -528,7 +531,8 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<Real>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
     params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
     params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
-    params.set<SubdomainName>("background_subdomain_name") = block_to_delete + RGMB::TRI_BLOCK_NAME_SUFFIX;
+    params.set<SubdomainName>("background_subdomain_name") =
+        block_to_delete + RGMB::TRI_BLOCK_NAME_SUFFIX;
     params.set<bool>("verify_holes") = false;
     params.set<unsigned short>("background_subdomain_id") = RGMB::ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE;
 
@@ -580,7 +584,8 @@ AssemblyMeshGenerator::generate()
   std::string pin_type_id_name = "pin_type_id";
   std::string assembly_type_id_name = "assembly_type_id";
   std::string radial_id_name = "radial_id";
-  const std::string default_block_name = RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
+  const std::string default_block_name =
+      RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
 
   auto pin_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), pin_type_id_name, true);
   auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name, true);

@@ -247,8 +247,8 @@
     type = 'JSONDiff'
     input = 'core_hex_extra_assemblies.i'
     jsondiff = core_hex_extra_assemblies_out.json
+    ignored_regex_items = '.*/.*/.*_meta|name_id_map'
     recover = false
-    allow_test_objects = true
   []
   [ptmg_periphery]
     requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a triangular mesh.'
@@ -359,5 +359,24 @@
     jsondiff = 'core_flexible_assembly_stitching_with_drum_hex_out.json'
     allow_test_objects = true
     recover = false
+  []
+  [drum_depletion_id_pin]
+    requirement = 'The system shall generate pin-wise depletion IDs for a 3D hexagonal core mesh with a control drum'
+    type = 'CSVDiff'
+    input = 'core_with_drum_depletion_id.i'
+    cli_args = "Outputs/file_base=core_with_drum_depletion_id_pin_out"
+    csvdiff = 'core_with_drum_depletion_id_pin_out_region_volumes_0002.csv'
+    recover = false
+    #mesh_mode = REPLICATED
+  []
+  [drum_depletion_id_pin_type]
+    requirement = 'The system shall generate pin type-wise depletion IDs for a 3D hexagonal core mesh with a control drum'
+    type = 'CSVDiff'
+    input = 'core_with_drum_depletion_id.i'
+    cli_args = "Mesh/core/depletion_id_type=pin_type
+                Outputs/file_base=core_with_drum_depletion_id_pin_type_out"
+    csvdiff = 'core_with_drum_depletion_id_pin_type_out_region_volumes_0002.csv'
+    recover = false
+    #mesh_mode = REPLICATED
   []
 []

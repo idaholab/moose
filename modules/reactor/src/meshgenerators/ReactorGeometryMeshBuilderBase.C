@@ -16,8 +16,10 @@ ReactorGeometryMeshBuilderBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addDeprecatedParam<bool>(
-      "show_rgmb_metadata", "Print out RGMB-related metadata to console output", "This parameter is deprecated. Please use MeshMetaDataReporter system to print out mesh metadata to JSON output file instead");
+  params.addDeprecatedParam<bool>("show_rgmb_metadata",
+                                  "Print out RGMB-related metadata to console output",
+                                  "This parameter is deprecated. Please use MeshMetaDataReporter "
+                                  "system to print out mesh metadata to JSON output file instead");
   params.addClassDescription("A base class that contains common members and methods for Reactor "
                              "Geometry Mesh Builder mesh generators.");
 
@@ -138,8 +140,17 @@ ReactorGeometryMeshBuilderBase::addDepletionId(MeshBase & input_mesh,
       id_names.push_back("pin_type_id");
     else
       paramError("depletion_id_type",
-                 "'assembly_id' or 'assembly_type_id' is not allowd in depletion ID generation at "
+                 "'assembly_id' or 'assembly_type_id' is not allowed in depletion ID generation at "
                  "assembly level");
+  }
+  else if (generation_level == DepletionIDGenerationLevel::Drum)
+  {
+    if (option == "pin_type")
+      id_names.push_back("pin_type_id");
+    else
+      paramError("depletion_id_type",
+                 "Only 'pin_type' is allowed in depletion ID generation at "
+                 "drum level");
   }
   else if (generation_level == DepletionIDGenerationLevel::Pin)
     mooseError("Depletion ID generation is not supported at pin level yet in RGMB");

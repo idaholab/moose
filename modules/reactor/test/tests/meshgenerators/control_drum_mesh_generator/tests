@@ -1,7 +1,6 @@
 [Tests]
   design = 'meshgenerators/ControlDrumMeshGenerator.md'
-  issues = '#TODO'
-  # TODO: hex_no_pad, hex_with_pad, cart_no_pad, cart_with_pad
+  issues = '#28457'
   [hex_with_pad]
     requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
     type = 'CSVDiff'
@@ -48,6 +47,14 @@
     cli_args = 'Mesh/drum/num_azimuthal_sectors=102
                 Outputs/file_base=drum_hex_pad_out'
     allow_warnings = true
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [drum_depletion_id]
+    requirement = 'The system shall generate depletion IDs for each region in a 2D control drum mesh'
+    type = 'CSVDiff'
+    input = 'drum_depletion_id.i'
+    csvdiff = 'drum_depletion_id_out_region_volumes_0002.csv'
     recover = false
     mesh_mode = REPLICATED
   []

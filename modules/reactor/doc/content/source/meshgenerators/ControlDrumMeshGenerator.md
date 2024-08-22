@@ -32,12 +32,9 @@ The `ControlDrumMeshGenerator` object also automatically tags all elements in th
 
 ## Depletion ID Information
 
-The `ControlDrumMeshGenerator` object can optionally assign a depletion ID, with the extra integer name "depletion_id", only if they are the final mesh generator.
+The `ControlDrumMeshGenerator` object can optionally assign a depletion ID, with the extra integer name "depletion_id", only if is the final mesh generator.
 The depletion ID generation option can be enabled by setting the  [!param](/Mesh/ControlDrumMeshGenerator/generate_depletion_id) to true.
-The level of detail needed for depletion zones is specified in the input parameter [!param](/Mesh/ControlDrumMeshGenerator/depletion_id_type).
-[!param](/Mesh/ControlDrumMeshGenerator/depletion_id_type) can be either `pin` and `pin_type`.
-All pins in the assembly have separate depletion ID values by setting [!param](/Mesh/ControlDrumMeshGenerator/depletion_id_type) to `pin`.
-By setting that option to `pin_type`, unique ID values are assigned to individual pin types in assemblies.
+The level of detail needed for depletion zones is specified in the input parameter [!param](/Mesh/ControlDrumMeshGenerator/depletion_id_type) and must be set to `pin_type`, which will assign a unique depletion ID for each radial and axial zone of the drum.
 
 ## Exterior Boundary ID Information
 
