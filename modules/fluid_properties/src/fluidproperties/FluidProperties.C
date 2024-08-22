@@ -20,6 +20,7 @@ FluidProperties::validParams()
       false,
       "true to allow unimplemented property derivative terms to be set to zero for the AD API");
   params.addCustomTypeParam<std::string>("fp_type", "FPType", "Type of the fluid property object");
+  params.set<std::string>("fp_type") = "unspecified-type";
   params.addParamNamesToGroup("fp_type allow_imperfect_jacobians", "Advanced");
   params.registerBase("FluidProperties");
   return params;

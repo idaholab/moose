@@ -51,13 +51,13 @@
   [./W]
     type = MatReaction
     variable = w
-    mob_name = -1
+    reaction_rate = -1
   [../]
   [./CoupledBulk]
     type = MatReaction
     variable = eta
     v = w
-    mob_name = L
+    reaction_rate = L
   [../]
   [./ACInterface]
     type = ACInterface

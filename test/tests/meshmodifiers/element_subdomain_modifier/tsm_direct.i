@@ -6,18 +6,19 @@
   material_coverage_check = false
 []
 
-Box2_inactive_id = '3'
+Box2_inactive_id = '4'
+Box3_inactive_id = '5'
 Box2_inactive_name = 'Box2_inactive'
-inactive_domain_block_ids = ${Box2_inactive_id}
-inactive_domain_block_names = ${Box2_inactive_name}
+Box3_inactive_name = 'Box3_inactive'
+inactive_domain_block_ids = '${Box2_inactive_id} ${Box3_inactive_id}'
+inactive_domain_block_names = '${Box2_inactive_name} ${Box3_inactive_name}'
 
 [Mesh]
-
   [BaseMesh]
     type = GeneratedMeshGenerator
     elem_type = TET4
     dim = 3
-    nx = 5
+    nx = 4
     ny = 3
     nz = 2
     xmin = -10
@@ -42,13 +43,21 @@ inactive_domain_block_names = ${Box2_inactive_name}
     input = "Box1"
     block_id = 2
     location = "INSIDE"
-    bottom_left = "-2 -2 +2"
-    top_right = "+2 +2 0"
+    bottom_left = "-4 -3 +3"
+    top_right = "0 +3 0"
+  []
+
+  [Box3]
+    type = SubdomainBoundingBoxGenerator
+    input = "Box2"
+    block_id = 3
+    location = "INSIDE"
+    bottom_left = "0 -3 +2"
+    top_right = "+4 +3 0"
   []
 
   add_subdomain_ids = ${inactive_domain_block_ids}
   add_subdomain_names = ${inactive_domain_block_names}
-
 []
 
 [AuxVariables]
@@ -58,12 +67,12 @@ inactive_domain_block_names = ${Box2_inactive_name}
 []
 
 # move elements between subdomains back and forth
-[UserObjects]
+[MeshModifiers]
   [GlobalSubdomainModifier]
     type = TimedSubdomainModifier
-    header = ON
-    data_file = 'tsm.csv'
-    comment = '#'
+    times = '      0.4            0.6  0.4'
+    blocks_from = '2              4    3'
+    blocks_to = '  Box2_inactive  2    Box3_inactive' # Subdomain names are permitted ('Box2_inactive' = 4, etc)
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
