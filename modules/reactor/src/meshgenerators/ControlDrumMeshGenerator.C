@@ -169,7 +169,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   // No subgenerators will be called if option to bypass mesh generators is enabled
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
-    const std::string block_name_prefix = "RGMB_DRUM" + std::to_string(_assembly_type);
+    const std::string block_name_prefix = RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
 
     // Define azimuthal angles explicitly based on num_azimuthal_sectors and manually add pad start angle and end angle if they
     // are not contained within these angle intervals
@@ -208,7 +208,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       else
       {
         params.set<std::vector<unsigned short>>("ring_block_ids") = {RGMB::CONTROL_DRUM_BLOCK_ID_INNER, RGMB::CONTROL_DRUM_BLOCK_ID_PAD};
-        params.set<std::vector<SubdomainName>>("ring_block_names") = {"RGMB_DRUM_R0", "RGMB_DRUM_R1"};
+        params.set<std::vector<SubdomainName>>("ring_block_names") = {block_name_prefix + "_R0", block_name_prefix + "_R1"};
       }
       params.set<bool>("create_outward_interface_boundaries") = false;
 
@@ -229,7 +229,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       params.set<Real>("boundary_size") = assembly_pitch;
       params.set<boundary_id_type>("external_boundary_id") = 20000 + _assembly_type;
       params.set<BoundaryName>("external_boundary_name") =
-          "outer_assembly_" + std::to_string(_assembly_type);
+          RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX + std::to_string(_assembly_type);
       params.set<SubdomainName>("background_subdomain_name") = block_name_prefix + "_R2_TRI";
       params.set<unsigned short>("background_subdomain_id") = RGMB::CONTROL_DRUM_BLOCK_ID_OUTER;
 
@@ -350,7 +350,7 @@ ControlDrumMeshGenerator::generate()
   std::string region_id_name = "region_id";
   std::string pin_type_id_name = "pin_type_id";
   std::string assembly_type_id_name = "assembly_type_id";
-  const std::string default_block_name = "RGMB_DRUM" + std::to_string(_assembly_type);
+  const std::string default_block_name = RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
 
   auto pin_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), pin_type_id_name);
   auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name);
@@ -372,13 +372,13 @@ ControlDrumMeshGenerator::generate()
     const dof_id_type z_id = _extrude ? elem->get_extra_integer(plane_id_int) : 0;
 
     // Assembly peripheral element (background / duct), set subdomains according
-    // to user preferences and set pin type id to (UINT16_MAX/2) - 1 - peripheral index
+    // to user preferences and set pin type id to RGMB::MAX_PIN_TYPE_ID - peripheral index
     // Region id is inferred from z_id and peripheral_idx
     const auto base_block_id = elem->subdomain_id();
     const auto base_block_name = (*_build_mesh)->subdomain_name(base_block_id);
 
     // Check if block name has correct prefix
-    std::string prefix = "RGMB_DRUM" + std::to_string(_assembly_type) + "_R";
+    std::string prefix = RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R";
     if (!(base_block_name.find(prefix, 0) == 0))
       continue;
 
@@ -387,7 +387,7 @@ ControlDrumMeshGenerator::generate()
 
     // Drum index distinguishes between elements in pad and ex-pad regions that have the same radial index
     const unsigned int drum_idx = getDrumIdxFromRadialIdx(radial_idx, elem->true_centroid()(0), elem->true_centroid()(1));
-    subdomain_id_type pin_type = (UINT16_MAX / 2) - 1 - drum_idx;
+    subdomain_id_type pin_type = RGMB::MAX_PIN_TYPE_ID - drum_idx;
     elem->set_extra_integer(pin_type_id_int, pin_type);
 
     const auto elem_rid = _region_ids[z_id][drum_idx];
@@ -400,7 +400,7 @@ ControlDrumMeshGenerator::generate()
     else if (_has_block_names)
       elem_block_name += "_" + _block_names[z_id][drum_idx];
     if (elem->type() == TRI3 || elem->type() == PRISM6)
-      elem_block_name += "_TRI";
+      elem_block_name += RGMB::TRI_BLOCK_NAME_SUFFIX;
     updateElementBlockNameId(
         *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
   }

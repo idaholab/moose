@@ -65,7 +65,7 @@ static const std::string region_id_as_block_name = "region_id_as_block_name";
 // only generating the mesh metadata
 static const std::string bypass_meshgen = "bypass_meshgen";
 
-// Default values for setting block IDs of RGMB regions
+// Default values for setting block IDs and region IDs of RGMB regions
 const subdomain_id_type PIN_BLOCK_ID_TRI_FLEXIBLE = 9998;
 const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;
 const subdomain_id_type PIN_BLOCK_ID_START = 10000;
@@ -77,6 +77,29 @@ const subdomain_id_type CONTROL_DRUM_BLOCK_ID_OUTER = 19998;
 
 const subdomain_id_type ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE = 19999;
 const subdomain_id_type ASSEMBLY_BLOCK_ID_START = 20000;
+
+const subdomain_id_type DUMMY_ASSEMBLY_BLOCK_ID = (UINT16_MAX/2) - 1;
+const subdomain_id_type PERIPHERAL_RING_BLOCK_ID = 25000;
+
+const subdomain_id_type MAX_PIN_TYPE_ID = (UINT16_MAX/2) - 1;
+
+// Default values for setting block names of RGMB regions
+const SubdomainName PIN_BLOCK_NAME_PREFIX = "RGMB_PIN";
+const SubdomainName ASSEMBLY_BLOCK_NAME_PREFIX = "RGMB_ASSEMBLY";
+const SubdomainName DRUM_BLOCK_NAME_PREFIX = "RGMB_DRUM";
+const SubdomainName CORE_BLOCK_NAME_PREFIX = "RGMB_CORE";
+const SubdomainName TRI_BLOCK_NAME_SUFFIX = "_TRI";
+const SubdomainName PERIPHERAL_RING_BLOCK_NAME = "PERIPHERY_GENERATED";
+
+// Default values for setting boundary ids of RGMB regions
+const boundary_id_type PIN_BOUNDARY_ID_START = 20000;
+const boundary_id_type ASSEMBLY_BOUNDARY_ID_START = 2000;
+
+// Default values for setting boundary names of RGMB regions
+const BoundaryName PIN_BOUNDARY_NAME_PREFIX = "outer_pin_";
+const BoundaryName ASSEMBLY_BOUNDARY_NAME_PREFIX = "outer_assembly_";
+const BoundaryName CORE_BOUNDARY_NAME = "outer_core";
+
 }
 
 /**
