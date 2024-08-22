@@ -1409,10 +1409,6 @@
                         "type": "std::string",
                         "value": "Hex"
                     },
-                    "MeshMetaData/rmp/name_id_map": {
-                        "type": "std::map<std::string, std::pair<unsigned short, unsigned long long>, std::less<std::string>, std::allocator<std::pair<std::stringconst, std::pair<unsigned short, unsigned long long>>>>",
-                        "value": {}
-                    },
                     "MeshMetaData/rmp/radial_boundary_id": {
                         "type": "short",
                         "value": 200

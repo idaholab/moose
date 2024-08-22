@@ -11,7 +11,7 @@
     mesh_mode = REPLICATED
   []
   [cart_with_pad]
-    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+    requirement = 'The system shall generate a 2D Cartesian control drum assembly mesh with an explicit drum pad region'
     type = 'CSVDiff'
     input = 'drum_pad.i'
     cli_args = 'Mesh/rmp/geom=Square
@@ -21,7 +21,7 @@
     mesh_mode = REPLICATED
   []
   [hex_no_pad]
-    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh without an explicit drum pad region'
     type = 'CSVDiff'
     input = 'drum_nopad.i'
     cli_args = 'Outputs/file_base=drum_hex_nopad_out'
@@ -30,7 +30,7 @@
     mesh_mode = REPLICATED
   []
   [cart_no_pad]
-    requirement = 'The system shall generate a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+    requirement = 'The system shall generate a 2D Cartesian control drum assembly mesh without an explicit drum pad region'
     type = 'CSVDiff'
     input = 'drum_nopad.i'
     cli_args = 'Mesh/rmp/geom=Square
