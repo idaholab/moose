@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, time, os, subprocess
+import re, time, os, subprocess, yaml
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
 
@@ -56,6 +56,8 @@ class HPCRunner(Runner):
 
         # The PBS output (stdout+stderr)
         output_file = self.run_hpc.getHPCJobOutputPath(self.job)
+        # The result file (exit code + walltime)
+        result_file = self.run_hpc.getHPCJobResultPath(self.job)
 
         # If the Job is already finished, something happened in the
         # HPC scheduler so we have an invalid state for processing
@@ -78,7 +80,7 @@ class HPCRunner(Runner):
         tester = self.job.getTester()
 
         # Determine the output files that we need to wait for to be complete
-        wait_files = set([output_file])
+        wait_files = set([output_file, result_file])
         # Output files needed by the Tester, only if it says we should
         if tester.mustOutputExist(self.exit_code):
             for file in tester.getOutputFiles(self.options):
@@ -89,6 +91,7 @@ class HPCRunner(Runner):
         # Wait for all of the files to be available
         timer.start('hpc_wait_output')
         waited_time = 0
+        walltime = None
         while wait_files or incomplete_files:
             # Don't bother if we've been killed
             if self.hpc_job.isKilled():
@@ -108,6 +111,19 @@ class HPCRunner(Runner):
                         # It's now required because its complete
                         if not self.trySetOutput(required=True):
                             break
+                    # Store the result
+                    elif file == result_file:
+                        with open(file, 'r') as f:
+                            result = yaml.safe_load(f)
+                        self.exit_code = result['exit_code']
+                        walltime = result['walltime']
+
+                        # Delete this, we don't really need it to hang around
+                        try:
+                            os.remove(file)
+                        except OSError:
+                            pass
+
                     # Done with this file
                     incomplete_files.discard(file)
 
@@ -127,6 +143,16 @@ class HPCRunner(Runner):
             waited_time += self.file_completion_poll_time
             time.sleep(self.file_completion_poll_time)
         timer.stop('hpc_wait_output')
+
+        # If we have a walltime from output, use it instead as it'll be
+        # more accurate for the real runtime
+        if walltime:
+            timer = self.job.timer
+            start_time = timer.startTime('runner_run')
+            end_time = start_time + walltime
+            timer.reset('runner_run')
+            timer.start('runner_run', start_time)
+            timer.stop('runner_run', end_time)
 
         # Handle openmpi appending a null character at the end of jobs
         # that return a nonzero exit code. We don't know how to fix this

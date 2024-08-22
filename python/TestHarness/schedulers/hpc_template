@@ -47,6 +47,7 @@ echo 'Directory: {{ CWD }}'
 echo 'Submitted hostname: {{ SUBMITTED_HOSTNAME }}'
 echo 'Submission script: {{ SUBMISSION_SCRIPT }}'
 echo 'Output: {{ OUTPUT }}'
+echo 'Result: {{ RESULT }}'
 module list
 
 echo "################################################################################"
@@ -55,14 +56,16 @@ echo "Beginning TestHarness {{ SCHEDULER_NAME }} test execution"
 # Move into the test directory
 cd {{ CWD }}
 
+# Make a temp file to store the time
+time_output=$(mktemp)
+
 # Don't exit on failure: need to capture the actual run's return code
 set +e
-
-# Run the command
-{{ COMMAND }}
+# Run the command, wrapped in time so that we can capture the real runtime
+# We use which here to make sure we don't get the bash function 'time'
+$(which time) -f %e -o ${time_output} {{ COMMAND }}
 # ...and capture the return code cause we're not done yet
 return_code=$?
-
 # Exit on failure
 set -e
 
@@ -80,7 +83,17 @@ if ((return_code > 128)); then
     return_code=$new_return_code
 fi
 {%- endif %}
-echo "Completed TestHarness {{ SCHEDULER_NAME }} test execution; exit code = $return_code"
+# Load the execution time; we use a tail here because the process will
+# include a comment about a non-zero status first if the exit code is nonzero
+walltime=$(tail -1 ${time_output})
+rm ${time_output}
+# Print the exit footer
+echo "Completed TestHarness {{ SCHEDULER_NAME }} test execution; exit code = $return_code, walltime = $walltime sec"
+
+# Build the result file
+touch {{ RESULT }}
+echo "exit_code: $return_code" >> {{ RESULT }}
+echo "walltime: $walltime" >> {{ RESULT }}
 
 # Append a terminator to all of the output files for file syncing across NFS
 ADDITIONAL_OUTPUT_FILES=({{ ADDITIONAL_OUTPUT_FILES }})

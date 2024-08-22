@@ -330,5 +330,7 @@ share/
 # test harness hpc output
 pbs_*.qsub
 pbs_*.out
+pbs_*.result
 slurm_*.sbatch
 slurm_*.out
+slurm_*.result
