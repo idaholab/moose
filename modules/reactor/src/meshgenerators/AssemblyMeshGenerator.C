@@ -76,7 +76,7 @@ AssemblyMeshGenerator::validParams()
   params.addClassDescription("This AssemblyMeshGenerator object is designed to generate "
                              "assembly-like structures, with IDs, from a reactor geometry. "
                              "The assembly-like structures must consist of a full pattern of equal "
-                             "sized pins from PinMeshGenerator"
+                             "sized pins from PinMeshGenerator. "
                              "A hexagonal assembly will be placed inside of a bounding hexagon "
                              "consisting of a background region and, optionally,"
                              " duct regions.");
