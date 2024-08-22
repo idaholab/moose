@@ -618,7 +618,7 @@ FEProblemBase::createTagVectors()
     for (auto & vector : vectors[nl_sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, PARALLEL);
+      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
     }
 
   auto & not_zeroed_vectors = getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors");
@@ -626,7 +626,7 @@ FEProblemBase::createTagVectors()
     for (auto & vector : not_zeroed_vectors[nl_sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, PARALLEL);
+      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
       addNotZeroedVectorTag(tag);
     }
 
