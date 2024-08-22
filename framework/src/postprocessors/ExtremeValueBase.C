@@ -41,18 +41,12 @@ template <class T>
 void
 ExtremeValueBase<T>::initialize()
 {
-  switch (_type)
-  {
-    case ExtremeType::MAX:
-      _proxy_value =
-          std::make_pair(-std::numeric_limits<Real>::max(), -std::numeric_limits<Real>::max());
-      break;
-
-    case ExtremeType::MIN:
-      _proxy_value =
-          std::make_pair(std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max());
-      break;
-  }
+  if (_type == ExtremeType::MAX)
+    _proxy_value =
+        std::make_pair(-std::numeric_limits<Real>::max(), -std::numeric_limits<Real>::max());
+  else if (_type == ExtremeType::MIN)
+    _proxy_value =
+        std::make_pair(std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max());
 }
 
 template <class T>
@@ -60,18 +54,10 @@ void
 ExtremeValueBase<T>::computeExtremeValue()
 {
   const auto pv = getProxyValuePair();
-  switch (_type)
-  {
-    case ExtremeType::MAX:
-      if (pv > _proxy_value)
-        _proxy_value = pv;
-      break;
 
-    case ExtremeType::MIN:
-      if (pv < _proxy_value)
-        _proxy_value = pv;
-      break;
-  }
+  if ((_type == ExtremeType::MAX && pv > _proxy_value) ||
+      (_type == ExtremeType::MIN && pv < _proxy_value))
+    _proxy_value = pv;
 }
 
 template <class T>
@@ -85,26 +71,19 @@ template <class T>
 void
 ExtremeValueBase<T>::finalize()
 {
-  switch (_type)
+  if (_type == ExtremeType::MAX)
   {
-    case ExtremeType::MAX:
-      if (_use_proxy)
-        this->gatherProxyValueMax(_proxy_value.first, _proxy_value.second);
-      else
-      {
-        this->gatherMax(_proxy_value.first);
-        _proxy_value.second = _proxy_value.first;
-      }
-      break;
-    case ExtremeType::MIN:
-      if (_use_proxy)
-        this->gatherProxyValueMin(_proxy_value.first, _proxy_value.second);
-      else
-      {
-        this->gatherMin(_proxy_value.first);
-        _proxy_value.second = _proxy_value.first;
-      }
-      break;
+    if (_use_proxy)
+      this->gatherProxyValueMax(_proxy_value.first, _proxy_value.second);
+    else
+      this->gatherMax(_proxy_value.second);
+  }
+  else if (_type == ExtremeType::MIN)
+  {
+    if (_use_proxy)
+      this->gatherProxyValueMin(_proxy_value.first, _proxy_value.second);
+    else
+      this->gatherMin(_proxy_value.second);
   }
 }
 
@@ -114,17 +93,9 @@ ExtremeValueBase<T>::threadJoin(const UserObject & y)
 {
   const auto & pps = static_cast<const ExtremeValueBase<T> &>(y);
 
-  switch (_type)
-  {
-    case ExtremeType::MAX:
-      if (pps._proxy_value > _proxy_value)
-        _proxy_value = pps._proxy_value;
-      break;
-    case ExtremeType::MIN:
-      if (pps._proxy_value < _proxy_value)
-        _proxy_value = pps._proxy_value;
-      break;
-  }
+  if ((_type == ExtremeType::MAX && pps._proxy_value > _proxy_value) ||
+      (_type == ExtremeType::MIN && pps._proxy_value < _proxy_value))
+    _proxy_value = pps._proxy_value;
 }
 
 template class ExtremeValueBase<ElementPostprocessor>;
