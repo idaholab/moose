@@ -53,7 +53,7 @@
 
 [VectorPostprocessors]
   [inner_product]
-    type = AdjointStrainStressGradInnerProduct
+    type = AdjointStrainSymmetricStressGradInnerProduct
     adjoint_strain_name = dummy_strain
     stress_derivative_name = tensor
     function = fcn

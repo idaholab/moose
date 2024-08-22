@@ -184,7 +184,7 @@
 
 [VectorPostprocessors]
   [grad_youngs_modulus]
-    type = AdjointStrainStressGradInnerProduct
+    type = AdjointStrainSymmetricStressGradInnerProduct
     stress_derivative_name = 'forward_dstress_dE'
     adjoint_strain_name = 'adjoint_mechanical_strain'
     variable = dummy

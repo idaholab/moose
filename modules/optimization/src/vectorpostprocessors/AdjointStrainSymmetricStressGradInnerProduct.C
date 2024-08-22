@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AdjointStrainStressGradInnerProduct.h"
+#include "AdjointStrainSymmetricStressGradInnerProduct.h"
 
-registerMooseObject("OptimizationApp", AdjointStrainStressGradInnerProduct);
+registerMooseObject("OptimizationApp", AdjointStrainSymmetricStressGradInnerProduct);
 
 InputParameters
-AdjointStrainStressGradInnerProduct::validParams()
+AdjointStrainSymmetricStressGradInnerProduct::validParams()
 {
   InputParameters params = ElementOptimizationFunctionInnerProduct::validParams();
   params.addClassDescription(
@@ -27,7 +27,7 @@ AdjointStrainStressGradInnerProduct::validParams()
   return params;
 }
 
-AdjointStrainStressGradInnerProduct::AdjointStrainStressGradInnerProduct(
+AdjointStrainSymmetricStressGradInnerProduct::AdjointStrainSymmetricStressGradInnerProduct(
     const InputParameters & parameters)
   : ElementOptimizationFunctionInnerProduct(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
@@ -39,7 +39,7 @@ AdjointStrainStressGradInnerProduct::AdjointStrainStressGradInnerProduct(
 }
 
 Real
-AdjointStrainStressGradInnerProduct::computeQpInnerProduct()
+AdjointStrainSymmetricStressGradInnerProduct::computeQpInnerProduct()
 {
   auto derivative = RankTwoTensor(_stress_derivative[_qp]);
   return -_adjoint_strain[_qp].doubleContraction(derivative);

@@ -17,11 +17,11 @@
  * strain material properties. The resulting product is integrated to determine the gradient of the
  * objective function, which is essential for solving an inverse optimization problem.
  */
-class AdjointStrainStressGradInnerProduct : public ElementOptimizationFunctionInnerProduct
+class AdjointStrainSymmetricStressGradInnerProduct : public ElementOptimizationFunctionInnerProduct
 {
 public:
   static InputParameters validParams();
-  AdjointStrainStressGradInnerProduct(const InputParameters & parameters);
+  AdjointStrainSymmetricStressGradInnerProduct(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpInnerProduct() override;
