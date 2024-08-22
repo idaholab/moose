@@ -136,7 +136,7 @@ C & = & C(i_{0}) \ , \\
 \phi & = & \phi(i_{0}) \ , \\
 \psi & = & \psi(i_{0}) \ , \\
 S_{T} & = & S_{T}(i_{1}) \ , \\
-S_{C} & = & S_{C}(i_{1}) \ .
+S_{C} & = & S_{C}(i_{1}) \ . \\
 \end{split}
 \end{equation}
 
@@ -152,8 +152,7 @@ $\sigma$, and internal parameters, $i$, that satisfy
 \begin{equation}
 \begin{split}
 0 & = & f(\sigma, i) \ . \\\label{f.zero.return}
-\sigma & = & \sigma^{\mathrm{trial}} - E\gamma \frac{\partial
-  g}{\partial\sigma} \ ,
+\sigma & = & \sigma^{\mathrm{trial}} - E\gamma \frac{\partial g}{\partial\sigma} \ , \\
 \end{split}
 \end{equation}
 
@@ -220,7 +219,7 @@ return-map process must solve the following system of equations
 \begin{split}
 0 & = & q + p\tan\phi - C \ , \\
 p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma\tan\psi \ , \\
-q & = & q^{\mathrm{trial}} - E_{xzxz}\gamma \ .
+q & = & q^{\mathrm{trial}} - E_{xzxz}\gamma \ . \\
 \end{split}
 \end{equation}
 
@@ -234,7 +233,7 @@ equations are
 \begin{split}
 0 & = & p - S_{T} \ , \\
 p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma \ , \\
-q & = & q^{\mathrm{trial}} \ .
+q & = & q^{\mathrm{trial}} \ . \\
 \end{split}
 \end{equation}
 
@@ -244,10 +243,8 @@ Therefore, the following definitions are used in this plasticity model
 
 \begin{equation}
 \begin{split}
-i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} -
-  q}{E_{xzxz}} \ , \\
-i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} -
-  p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ .
+i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} - q}{E_{xzxz}} \ , \\
+i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} - p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ . \\
 \end{split}
 \end{equation}
 
@@ -280,14 +277,10 @@ $\gamma$, $i_{0}$ and $i_{1}$ such that
 \begin{equation}
 \begin{split}
 0 & = & f(p, q, i) \ , \nonumber \\
-p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma \frac{\partial g}{\partial
-  p} \ , \nonumber \\
-q & = & q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial
-  q} \ , \nonumber \\
-i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} -
-  q}{E_{xzxz}} \ , \nonumber \\
-i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} -
-  p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ .
+p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma \frac{\partial g}{\partial p} \ , \nonumber \\
+q & = & q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial q} \ , \nonumber \\
+i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} - q}{E_{xzxz}} \ , \nonumber \\
+i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} - p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ . \\
 \label{rmp.eqn}
 \end{split}
 \end{equation}
@@ -301,19 +294,13 @@ are $\sigma_{ij} = \sigma_{ij}^{\mathrm{trial}}$, except for the following
 
 \begin{equation}
 \begin{split}
-\sigma_{xx} & = & \sigma_{xx}^{\mathrm{trial}} -
-E_{zzxx}\gamma\frac{\partial g}{\partial p} \ , \\
-\sigma_{yy} & = & \sigma_{yy}^{\mathrm{trial}} -
-E_{zzyy}\gamma\frac{\partial g}{\partial p} \ , \\
+\sigma_{xx} & = & \sigma_{xx}^{\mathrm{trial}} - E_{zzxx}\gamma\frac{\partial g}{\partial p} \ , \\
+\sigma_{yy} & = & \sigma_{yy}^{\mathrm{trial}} - E_{zzyy}\gamma\frac{\partial g}{\partial p} \ , \\
 \sigma_{zz} & = & p \ , \\
-\sigma_{zx} & = & \sigma_{zx}^{\mathrm{trial}} q / q^{\mathrm{trial}}
-\ , \label{szx.return.eqn} \\
-\sigma_{xz} & = & \sigma_{xz}^{\mathrm{trial}} q / q^{\mathrm{trial}}
-\ , \\
-\sigma_{zy} & = & \sigma_{zy}^{\mathrm{trial}} q / q^{\mathrm{trial}}
-\ ,  \label{szy.return.eqn} \\
-\sigma_{yz} & = & \sigma_{yz}^{\mathrm{trial}} q / q^{\mathrm{trial}}
-\ .
+\sigma_{zx} & = & \sigma_{zx}^{\mathrm{trial}} q / q^{\mathrm{trial}} \ , \label{szx.return.eqn} \\
+\sigma_{xz} & = & \sigma_{xz}^{\mathrm{trial}} q / q^{\mathrm{trial}} \ , \\
+\sigma_{zy} & = & \sigma_{zy}^{\mathrm{trial}} q / q^{\mathrm{trial}} \ ,  \label{szy.return.eqn} \\
+\sigma_{yz} & = & \sigma_{yz}^{\mathrm{trial}} q / q^{\mathrm{trial}} \ . \\
 \end{split}
 \end{equation}
 
@@ -524,21 +511,9 @@ operator is
 \begin{equation}
 \begin{split}
 H_{ijkl} & = & E_{ijkl} -
-E_{ijmn}E_{pqkl}\frac{\partial}{\partial\sigma_{pq}^{\mathrm{trial}}}
-\gamma \frac{\partial g}{\partial\sigma_{mn}} \ . \nonumber \\
-& = & E_{ijkl} - E_{ijmn}E_{pqkl} \left(
-\frac{\partial
-  p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
-\frac{\partial}{\partial p^{\mathrm{trial}}}
-+ \frac{\partial
-  q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
-\frac{\partial}{\partial q^{\mathrm{trial}}} \right)
-\gamma
-\left(
-\frac{\partial g}{\partial p}\frac{\partial p}{\partial \sigma_{mn}}
-+
-\frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{mn}}
-\right)
+E_{ijmn}E_{pqkl}\frac{\partial}{\partial\sigma_{pq}^{\mathrm{trial}}} \gamma \frac{\partial g}{\partial\sigma_{mn}} \ . \nonumber \\
+& = & E_{ijkl} - E_{ijmn}E_{pqkl} \left( \frac{\partial p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}} \frac{\partial}{\partial p^{\mathrm{trial}}} + \frac{\partial q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}} \\
+& \frac{\partial}{\partial q^{\mathrm{trial}}} \right) \gamma \left( \frac{\partial g}{\partial p}\frac{\partial p}{\partial \sigma_{mn}} + \frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{mn}} \right) \\
 \end{split}
 \end{equation}
 
@@ -568,36 +543,9 @@ The consistent tangent operator may therefore be written as
 
 \begin{equation}
 \begin{split}
-H_{ijkl} & = & E_{ijkl} - E_{ijmn}E_{pqkl} \left\{
-\frac{\partial
-  p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
-\frac{1}{E_{pp}}\left(1 - \frac{\partial p}{\partial
-  p^{\mathrm{trial}}} \right) \frac{\partial p}{\partial\sigma_{mn}}
-\right. \nonumber \\
-&& \left.
-\frac{\partial
-  q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
-\frac{1}{E_{pp}}\left( - \frac{\partial p}{\partial
-  q^{\mathrm{trial}}} \right) \frac{\partial p}{\partial\sigma_{mn}}
-+
-\frac{\partial
-  p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
-\frac{1}{E_{qq}}\left(- \frac{\partial q}{\partial
-  p^{\mathrm{trial}}} \right) \frac{\partial q}{\partial\sigma_{mn}}
-+
-\frac{\partial
-  q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
-\frac{1}{E_{qq}}\left(1 - \frac{\partial q}{\partial
-  q^{\mathrm{trial}}} \right) \frac{\partial q}{\partial\sigma_{mn}}
-\right\} \nonumber \\
-&& \frac{\partial \sigma_{ab}}{\partial\epsilon_{kl}} E_{ijmn} \gamma
-\left(
-\frac{\partial g}{\partial p}\frac{\partial^{2}
-  p}{\partial\sigma_{mn}\partial\sigma_{ab}}
-+
-\frac{\partial g}{\partial q}\frac{\partial^{2}
-  q}{\partial\sigma_{mn}\partial\sigma_{ab}}
-\right) \ .
+H_{ijkl} & = & E_{ijkl} - E_{ijmn}E_{pqkl} \left\{ \frac{\partial p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}} \frac{1}{E_{pp}}\left(1 - \frac{\partial p}{\partial p^{\mathrm{trial}}} \right) \frac{\partial p}{\partial\sigma_{mn}} \right. \nonumber \\
+&& \left. \frac{\partial q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}} \frac{1}{E_{pp}}\left( - \frac{\partial p}{\partial q^{\mathrm{trial}}} \right) \frac{\partial p}{\partial\sigma_{mn}} + \frac{\partial p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}\ \frac{1}{E_{qq}}\left(- \frac{\partial q}{\partial p^{\mathrm{trial}}} \right) \frac{\partial q}{\partial\sigma_{mn}} + \frac{\partial q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}} \frac{1}{E_{qq}}\left(1 - \frac{\partial q}{\partial q^{\mathrm{trial}}} \right) \frac{\partial q}{\partial\sigma_{mn}} \right\} \nonumber \\
+&& \frac{\partial \sigma_{ab}}{\partial\epsilon_{kl}} E_{ijmn} \gamma \left( \frac{\partial g}{\partial p}\frac{\partial^{2} p}{\partial\sigma_{mn}\partial\sigma_{ab}} + \frac{\partial g}{\partial q}\frac{\partial^{2} q}{\partial\sigma_{mn}\partial\sigma_{ab}} \right) \ . \\
 \end{split}
 \end{equation}
 
@@ -628,16 +576,9 @@ Then
 
 \begin{equation}
 \begin{split}
-\frac{\partial R_{0}}{\partial p^{\mathrm{trial}}} & = & -\frac{\partial
-  f}{\partial i_{1}} \frac{\partial i_{i}}{\partial
-  p^{\mathrm{trial}}}  \ , \\
-\frac{\partial R_{1}}{\partial p^{\mathrm{trial}}} & = & 1 -
-E_{zzzz}\gamma \frac{\partial^{2}g}{\partial p\partial i_{i}}\frac{\partial i_{i}}{\partial
-  p^{\mathrm{trial}}}
-\ , \\
-\frac{\partial R_{2}}{\partial p^{\mathrm{trial}}} & = &
--E_{xzxz}\gamma \frac{\partial^{2}g}{\partial q\partial i_{i}}\frac{\partial i_{i}}{\partial
-  p^{\mathrm{trial}}}
+\frac{\partial R_{0}}{\partial p^{\mathrm{trial}}} & = & -\frac{\partial f}{\partial i_{1}} \frac{\partial i_{i}}{\partial p^{\mathrm{trial}}}  \ , \\
+\frac{\partial R_{1}}{\partial p^{\mathrm{trial}}} & = & 1 - E_{zzzz}\gamma \frac{\partial^{2}g}{\partial p\partial i_{i}}\frac{\partial i_{i}}{\partial p^{\mathrm{trial}}} \ , \\
+\frac{\partial R_{2}}{\partial p^{\mathrm{trial}}} & = & -E_{xzxz}\gamma \frac{\partial^{2}g}{\partial q\partial i_{i}}\frac{\partial i_{i}}{\partial p^{\mathrm{trial}}} \\
 \end{split}
 \end{equation}
 
@@ -696,24 +637,8 @@ and other more complicated expressions appear for other components, such as
 
 \begin{equation}
 \begin{split}
-H_{xxii} & = & E_{xxii} - E_{zzxx} E_{zzii}\left( \frac{\delta \gamma}{\delta
-  p^{\mathrm{trial}}} \frac{\partial g}{\partial p}
-+ \gamma \frac{\partial^{2} g}{\partial p^{2}} \frac{\delta
-  p}{\delta p^{\mathrm{trial}}}
-+ \gamma \frac{\partial^{2} g}{\partial p\partial i_{1}} \frac{\delta
-  q}{\delta p^{\mathrm{trial}}}
-+ \gamma \frac{\partial^{2} g}{\partial p\partial i_{0}}
-\frac{\partial i_{0}}{\partial q} \frac{\delta
-  q}{\delta p^{\mathrm{trial}}} \right.
-\nonumber \\
-&& \ \ \ \
-+ \left.
-\gamma \frac{\partial^{2} g}{\partial p\partial i_{1}} \left(
-\frac{\delta i_{1}}{\delta p^{\mathrm{trial}}} +
-\frac{\partial i_{1}}{\partial p} \frac{\delta p}{\delta p^{\mathrm{trial}}}
-\frac{\partial i_{1}}{\partial q} \frac{\delta q}{\delta
-  p^{\mathrm{trial}}}
-\right) \right) \ .
+H_{xxii} & = & E_{xxii} - E_{zzxx} E_{zzii}\left( \frac{\delta \gamma}{\delta p^{\mathrm{trial}}} \frac{\partial g}{\partial p} + \gamma \frac{\partial^{2} g}{\partial p^{2}} \frac{\delta p}{\delta p^{\mathrm{trial}}} + \gamma \frac{\partial^{2} g}{\partial p\partial i_{1}} \frac{\delta q}{\delta p^{\mathrm{trial}}} + \gamma \frac{\partial^{2} g}{\partial p\partial i_{0}} \frac{\partial i_{0}}{\partial q} \frac{\delta q}{\delta p^{\mathrm{trial}}} \right. \nonumber \\
+&& \ \ \ \ + \left. \gamma \frac{\partial^{2} g}{\partial p\partial i_{1}} \left( \frac{\delta i_{1}}{\delta p^{\mathrm{trial}}} + \frac{\partial i_{1}}{\partial p} \frac{\delta p}{\delta p^{\mathrm{trial}}} \frac{\partial i_{1}}{\partial q} \frac{\delta q}{\delta p^{\mathrm{trial}}} \right) \right) \ . \\
 \end{split}
 \end{equation}
 
@@ -754,16 +679,8 @@ This means that
 
 \begin{equation}
 \begin{split}
-\frac{\partial p_{n}}{\partial p^{\mathrm{trial}}} & = &
-\frac{\partial p_{n}}{\partial p_{n}^{\mathrm{trial}}}
-\frac{\partial p_{n}^{\mathrm{trial}}}{\partial p^{\mathrm{trial}}}
-+ \frac{\partial p_{n}}{\partial q_{n}^{\mathrm{trial}}}
-\frac{\partial q_{n}^{\mathrm{trial}}}{\partial p^{\mathrm{trial}}} \\
-& = & \frac{\partial p_{n}}{\partial p_{n}^{\mathrm{trial}}}
-\left(\lambda_{n} + \frac{\partial p_{n-1}}{\partial p^{\mathrm{trial}}}
-\right)
-+ \frac{\partial p_{n}}{\partial q_{n}^{\mathrm{trial}}}
-\frac{\partial q_{n-1}}{\partial p^{\mathrm{trial}}} \ .
+\frac{\partial p_{n}}{\partial p^{\mathrm{trial}}} & = & \frac{\partial p_{n}}{\partial p_{n}^{\mathrm{trial}}} \frac{\partial p_{n}^{\mathrm{trial}}}{\partial p^{\mathrm{trial}}} + \frac{\partial p_{n}}{\partial q_{n}^{\mathrm{trial}}} \frac{\partial q_{n}^{\mathrm{trial}}}{\partial p^{\mathrm{trial}}} \\
+& = & \frac{\partial p_{n}}{\partial p_{n}^{\mathrm{trial}}} \left(\lambda_{n} + \frac{\partial p_{n-1}}{\partial p^{\mathrm{trial}}} \right) + \frac{\partial p_{n}}{\partial q_{n}^{\mathrm{trial}}} \frac{\partial q_{n-1}}{\partial p^{\mathrm{trial}}} \ . \\
 \end{split}
 \end{equation}
 
