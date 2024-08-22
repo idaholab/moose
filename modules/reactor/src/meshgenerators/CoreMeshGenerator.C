@@ -22,7 +22,9 @@ CoreMeshGenerator::validParams()
   auto params = ReactorGeometryMeshBuilderBase::validParams();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
-      "inputs", "The AssemblyMeshGenerator and ControlDrumMeshGenerator objects that form the components of the assembly.");
+      "inputs",
+      "The AssemblyMeshGenerator and ControlDrumMeshGenerator objects that form the components of "
+      "the assembly.");
 
   params.addParam<std::string>(
       "dummy_assembly_name",
@@ -82,13 +84,14 @@ CoreMeshGenerator::validParams()
                         " and extrudes the 2D geometry to 3D. If this is true then this mesh "
                         "cannot be used in further mesh building in the Reactor workflow");
 
-  params.addClassDescription("This CoreMeshGenerator object is designed to generate a core-like "
-                             "structure, with IDs, from a reactor geometry. "
-                             "The core-like structure consists of a pattern of assembly-like "
-                             "structures generated with AssemblyMeshGenerator and/or ControlDrumMeshGenerator "
-                             "and is permitted to have \"empty\" locations. The size and spacing "
-                             "of the assembly-like structures is defined, and "
-                             "enforced by declaration in the ReactorMeshParams.");
+  params.addClassDescription(
+      "This CoreMeshGenerator object is designed to generate a core-like "
+      "structure, with IDs, from a reactor geometry. "
+      "The core-like structure consists of a pattern of assembly-like "
+      "structures generated with AssemblyMeshGenerator and/or ControlDrumMeshGenerator "
+      "and is permitted to have \"empty\" locations. The size and spacing "
+      "of the assembly-like structures is defined, and "
+      "enforced by declaration in the ReactorMeshParams.");
   // depletion id generation params are added
   addDepletionIDParams(params);
 
@@ -303,7 +306,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
             params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
-            params.set<std::vector<subdomain_id_type>>("block_id") = {RGMB::DUMMY_ASSEMBLY_BLOCK_ID};
+            params.set<std::vector<subdomain_id_type>>("block_id") = {
+                RGMB::DUMMY_ASSEMBLY_BLOCK_ID};
 
             addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
           }
@@ -368,7 +372,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     {
       auto params = _app.getFactory().getValidParams("BlockDeletionGenerator");
 
-      params.set<std::vector<SubdomainName>>("block") = {std::to_string(RGMB::DUMMY_ASSEMBLY_BLOCK_ID)};
+      params.set<std::vector<SubdomainName>>("block") = {
+          std::to_string(RGMB::DUMMY_ASSEMBLY_BLOCK_ID)};
       params.set<MeshGeneratorName>("input") = name() + "_pattern";
       params.set<BoundaryName>("new_boundary") = RGMB::CORE_BOUNDARY_NAME;
 
@@ -391,7 +396,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             continue;
           const auto assembly_id =
               getMeshProperty<subdomain_id_type>(RGMB::assembly_type, assembly_name);
-          const BoundaryName boundary_name = RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX + std::to_string(assembly_id);
+          const BoundaryName boundary_name =
+              RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX + std::to_string(assembly_id);
           if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
             boundaries_to_delete.push_back(boundary_name);
         }
@@ -414,9 +420,10 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             getMeshProperty<subdomain_id_type>(RGMB::assembly_type, assembly);
         if (!getMeshProperty<bool>(RGMB::is_control_drum, assembly))
         {
-          // For assembly structures, store region ID and block names of assembly regions and constituent pins
-          std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> pin_region_id_map =
-              getMeshProperty<
+          // For assembly structures, store region ID and block names of assembly regions and
+          // constituent pins
+          std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>
+              pin_region_id_map = getMeshProperty<
                   std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
                   RGMB::pin_region_id_map, assembly);
           for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
@@ -441,13 +448,14 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             // assembly, in case block names need to be recovered from region ids after
             // multiple assemblies have been stitched together into a core
             std::vector<subdomain_id_type> background_region_ids =
-                getMeshProperty<std::vector<subdomain_id_type>>(RGMB::background_region_id, assembly);
+                getMeshProperty<std::vector<subdomain_id_type>>(RGMB::background_region_id,
+                                                                assembly);
             std::vector<std::vector<subdomain_id_type>> duct_region_ids =
                 getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::duct_region_ids,
                                                                              assembly);
             _background_region_id_map.insert(
-                std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
-                                                                             background_region_ids));
+                std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(
+                    assembly_type, background_region_ids));
             _duct_region_id_map.insert(
                 std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
                     assembly_type, duct_region_ids));
@@ -457,8 +465,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             std::vector<std::vector<std::string>> duct_block_names =
                 getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::duct_block_names,
                                                                        assembly);
-            _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
-                assembly_type, background_block_names));
+            _background_block_name_map.insert(
+                std::pair<subdomain_id_type, std::vector<std::string>>(assembly_type,
+                                                                       background_block_names));
             _duct_block_name_map.insert(
                 std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
                     assembly_type, duct_block_names));
@@ -468,12 +477,14 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         {
           // For control drum structures, store region ID and block name information of drum regions
           std::vector<std::vector<subdomain_id_type>> drum_region_ids =
-              getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::drum_region_ids, assembly);
+              getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::drum_region_ids,
+                                                                           assembly);
           _drum_region_id_map.insert(
               std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
                   assembly_type, drum_region_ids));
           std::vector<std::vector<std::string>> drum_block_names =
-              getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::drum_block_names, assembly);
+              getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::drum_block_names,
+                                                                     assembly);
           _drum_block_name_map.insert(
               std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
                   assembly_type, drum_block_names));
@@ -603,7 +614,8 @@ CoreMeshGenerator::generateMetadata()
     if (input_assembly_name != _empty_key)
     {
       input_assembly_names.push_back(input_assembly_name);
-      if (!getMeshProperty<bool>(RGMB::is_control_drum, input_assembly_name) && !getMeshProperty<bool>(RGMB::is_single_pin, input_assembly_name))
+      if (!getMeshProperty<bool>(RGMB::is_control_drum, input_assembly_name) &&
+          !getMeshProperty<bool>(RGMB::is_single_pin, input_assembly_name))
       {
         const auto pin_names =
             getMeshProperty<std::vector<std::string>>(RGMB::pin_names, input_assembly_name);
@@ -793,7 +805,8 @@ CoreMeshGenerator::generate()
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
-    else if ((*_build_mesh)->subdomain_name(elem->subdomain_id()) == RGMB::PERIPHERAL_RING_BLOCK_NAME)
+    else if ((*_build_mesh)->subdomain_name(elem->subdomain_id()) ==
+             RGMB::PERIPHERAL_RING_BLOCK_NAME)
     // periphery type element
     {
       // set region ID of core periphery element
@@ -810,13 +823,15 @@ CoreMeshGenerator::generate()
     else
     {
       dof_id_type assembly_type_id = elem->get_extra_integer(assembly_type_id_int);
-      // Infer peripheral index of assembly background, assembly duct, or control drum regions from pin_type_id
+      // Infer peripheral index of assembly background, assembly duct, or control drum regions from
+      // pin_type_id
       unsigned int peripheral_idx = RGMB::MAX_PIN_TYPE_ID - pin_type_id;
 
       // check if element is part of drum region
       if (_drum_region_id_map.find(assembly_type_id) != _drum_region_id_map.end())
       {
-        // Element is in a control drum region. Infer region id from assembly_type_id, z_id, and peripheral_index
+        // Element is in a control drum region. Infer region id from assembly_type_id, z_id, and
+        // peripheral_index
         const auto elem_rid = _drum_region_id_map[assembly_type_id][z_id][peripheral_idx];
         elem->set_extra_integer(region_id_int, elem_rid);
 
@@ -842,8 +857,9 @@ CoreMeshGenerator::generate()
         // assembly_type_id, z_id, and peripheral_index
         bool is_background_region = peripheral_idx == 0;
         const auto elem_rid =
-            (is_background_region ? _background_region_id_map[assembly_type_id][z_id]
-                                  : _duct_region_id_map[assembly_type_id][z_id][peripheral_idx - 1]);
+            (is_background_region
+                 ? _background_region_id_map[assembly_type_id][z_id]
+                 : _duct_region_id_map[assembly_type_id][z_id][peripheral_idx - 1]);
         elem->set_extra_integer(region_id_int, elem_rid);
 
         // Set element block name and block id

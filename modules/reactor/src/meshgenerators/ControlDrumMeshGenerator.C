@@ -25,22 +25,36 @@ ControlDrumMeshGenerator::validParams()
   params.addRequiredParam<MeshGeneratorName>(
       "reactor_params",
       "The ReactorMeshParams MeshGenerator that is the basis for this component mesh.");
-  params.addRequiredParam<subdomain_id_type>("assembly_type",
-                                             "The assembly type integer ID to use for this control drum definition. "
-                                             "This parameter should be uniquely defined for each ControlDrumMeshGenerator "
-                                             "and AssemblyMeshGenerator structure in the RGMB workflow.");
+  params.addRequiredParam<subdomain_id_type>(
+      "assembly_type",
+      "The assembly type integer ID to use for this control drum definition. "
+      "This parameter should be uniquely defined for each ControlDrumMeshGenerator "
+      "and AssemblyMeshGenerator structure in the RGMB workflow.");
   params.addParam<bool>("extrude",
                         false,
                         "Determines if this is the final step in the geometry construction"
                         " and extrudes the 2D geometry to 3D. If this is true then this mesh "
                         "cannot be used in further mesh building in the Reactor workflow");
-  params.addRequiredRangeCheckedParam<Real>("drum_inner_radius", "drum_inner_radius>0", "Inner radius of drum region");
-  params.addRequiredRangeCheckedParam<Real>("drum_outer_radius", "drum_outer_radius>0", "Outer radius of drum region");
-  params.addRangeCheckedParam<unsigned int>("drum_inner_intervals", 1, "drum_inner_intervals>0", "Number of mesh intervals in region up to inner drum radius");
-  params.addRangeCheckedParam<unsigned int>("drum_intervals", 1, "drum_intervals>0", "Number of mesh intervals in drum region");
-  params.addRangeCheckedParam<Real>("pad_start_angle", "pad_start_angle>=0 & pad_start_angle < 360", "Starting angle of drum pad region");
-  params.addRangeCheckedParam<Real>("pad_end_angle", "pad_end_angle>0 & pad_end_angle < 720", "Ending angle of drum pad region");
-  params.addRequiredRangeCheckedParam<unsigned int>("num_azimuthal_sectors", "num_azimuthal_sectors>2", "Number of azimuthal sectors to sub-divide the drum region into");
+  params.addRequiredRangeCheckedParam<Real>(
+      "drum_inner_radius", "drum_inner_radius>0", "Inner radius of drum region");
+  params.addRequiredRangeCheckedParam<Real>(
+      "drum_outer_radius", "drum_outer_radius>0", "Outer radius of drum region");
+  params.addRangeCheckedParam<unsigned int>(
+      "drum_inner_intervals",
+      1,
+      "drum_inner_intervals>0",
+      "Number of mesh intervals in region up to inner drum radius");
+  params.addRangeCheckedParam<unsigned int>(
+      "drum_intervals", 1, "drum_intervals>0", "Number of mesh intervals in drum region");
+  params.addRangeCheckedParam<Real>("pad_start_angle",
+                                    "pad_start_angle>=0 & pad_start_angle < 360",
+                                    "Starting angle of drum pad region");
+  params.addRangeCheckedParam<Real>(
+      "pad_end_angle", "pad_end_angle>0 & pad_end_angle < 720", "Ending angle of drum pad region");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "num_azimuthal_sectors",
+      "num_azimuthal_sectors>2",
+      "Number of azimuthal sectors to sub-divide the drum region into");
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "region_ids",
       "IDs for each radial and axial zone for assignment of region_id extra element "
@@ -52,15 +66,16 @@ ControlDrumMeshGenerator::validParams()
       "Inner indexing is radial zones (drum inner/drum/drum outer), outer indexing is axial");
 
   params.addParamNamesToGroup("region_ids assembly_type", "ID assigment");
-  params.addParamNamesToGroup("drum_inner_radius drum_outer_radius drum_inner_intervals drum_intervals num_azimuthal_sectors",
+  params.addParamNamesToGroup("drum_inner_radius drum_outer_radius drum_inner_intervals "
+                              "drum_intervals num_azimuthal_sectors",
                               "Drum specifications");
-  params.addParamNamesToGroup("pad_start_angle pad_end_angle",
-                              "Control pad specifications");
+  params.addParamNamesToGroup("pad_start_angle pad_end_angle", "Control pad specifications");
 
-  params.addClassDescription("This ControlDrumMeshGenerator object is designed to generate "
-                             "drum-like structures, with IDs, from a reactor geometry. "
-                             "These structures can be used directly within CoreMeshGenerator to stitch"
-                             "control drums into a core lattice alongside AssemblyMeshGenerator structures");
+  params.addClassDescription(
+      "This ControlDrumMeshGenerator object is designed to generate "
+      "drum-like structures, with IDs, from a reactor geometry. "
+      "These structures can be used directly within CoreMeshGenerator to stitch"
+      "control drums into a core lattice alongside AssemblyMeshGenerator structures");
   // depletion id generation params are added
   addDepletionIDParams(params);
 
@@ -82,7 +97,8 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
 
   // Flexible stitching needs to be invoked in order to create control drum mesh
   if (!getReactorParam<bool>(RGMB::flexible_assembly_stitching))
-    mooseError("'flexible_assembly_stitching' needs to be set to true in ReactorMeshParams in order to use ControlDrumMeshGenerator");
+    mooseError("'flexible_assembly_stitching' needs to be set to true in ReactorMeshParams in "
+               "order to use ControlDrumMeshGenerator");
 
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
   _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
@@ -96,24 +112,30 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   if (_drum_inner_radius >= _drum_outer_radius)
     paramError("drum_outer_radius", "Drum outer radius must be larger than the inner radius");
   if (_drum_outer_radius >= assembly_pitch / 2.)
-    paramError("drum_outer_radius", "Outer radius of drum region must be smaller than half the assembly pitch as defined by 'ReactorMeshParams/assembly_pitch'");
+    paramError("drum_outer_radius",
+               "Outer radius of drum region must be smaller than half the assembly pitch as "
+               "defined by 'ReactorMeshParams/assembly_pitch'");
 
   // Check drum pad parameters
   if (isParamSetByUser("pad_start_angle"))
   {
     _pad_start_angle = getParam<Real>("pad_start_angle");
     if (!isParamSetByUser("pad_end_angle"))
-      paramError("pad_start_angle", "If 'pad_start_angle' is set, 'pad_end_angle' needs to also be set.");
+      paramError("pad_start_angle",
+                 "If 'pad_start_angle' is set, 'pad_end_angle' needs to also be set.");
     _pad_end_angle = getParam<Real>("pad_end_angle");
 
-    if ((_pad_end_angle  - _pad_start_angle >= 360) || (_pad_end_angle - _pad_start_angle <= 0))
-      paramError("pad_start_angle", "The difference between 'pad_end_angle' and 'pad_start_angle' must be between 0 and 360 exclusive.");
+    if ((_pad_end_angle - _pad_start_angle >= 360) || (_pad_end_angle - _pad_start_angle <= 0))
+      paramError("pad_start_angle",
+                 "The difference between 'pad_end_angle' and 'pad_start_angle' must be between 0 "
+                 "and 360 exclusive.");
     _has_pad_region = true;
   }
   else
   {
     if (isParamSetByUser("pad_end_angle"))
-      paramError("pad_end_angle", "If 'pad_end_angle' is set, 'pad_start_angle' needs to also be set.");
+      paramError("pad_end_angle",
+                 "If 'pad_end_angle' is set, 'pad_start_angle' needs to also be set.");
     _has_pad_region = false;
   }
 
@@ -130,13 +152,19 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
                  "the ReactorMeshParams object");
     if (_region_ids[0].size() != n_radial_regions)
     {
-      std::string err_msg = "'region_ids' parameter does not have the correct number of elements per axial zone. ";
-      err_msg += _has_pad_region ? "For control drums with a pad region, 4 radial IDs need to be provided per axial zone (drum inner, drum pad, drum ex-pad, and drum outer)" : "For control drums with no pad region, 3 radial IDs need to be provided per axial zone (drum inner, drum, and drum outer)";
+      std::string err_msg =
+          "'region_ids' parameter does not have the correct number of elements per axial zone. ";
+      err_msg += _has_pad_region
+                     ? "For control drums with a pad region, 4 radial IDs need to be provided per "
+                       "axial zone (drum inner, drum pad, drum ex-pad, and drum outer)"
+                     : "For control drums with no pad region, 3 radial IDs need to be provided per "
+                       "axial zone (drum inner, drum, and drum outer)";
       paramError("region_ids", err_msg);
     }
   }
   else
-    mooseError("Region IDs must be assigned for ControlDrumMeshGenerator using parameter 'region_ids'");
+    mooseError(
+        "Region IDs must be assigned for ControlDrumMeshGenerator using parameter 'region_ids'");
 
   // Check block names have the correct size
   if (isParamValid("block_names"))
@@ -155,7 +183,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   }
   else
     _has_block_names = false;
-  
+
   // Check extrusion parameters
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
@@ -169,10 +197,11 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   // No subgenerators will be called if option to bypass mesh generators is enabled
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
-    const std::string block_name_prefix = RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
+    const std::string block_name_prefix =
+        RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
 
-    // Define azimuthal angles explicitly based on num_azimuthal_sectors and manually add pad start angle and end angle if they
-    // are not contained within these angle intervals
+    // Define azimuthal angles explicitly based on num_azimuthal_sectors and manually add pad start
+    // angle and end angle if they are not contained within these angle intervals
     std::vector<Real> azimuthal_angles;
     const auto custom_start_angle = _pad_start_angle;
     const auto custom_end_angle = (_pad_end_angle > 360) ? _pad_end_angle - 360. : _pad_end_angle;
@@ -182,14 +211,20 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       Real next_azim_angle = (Real)(i + 1) * 360. / (Real)num_sectors;
       azimuthal_angles.push_back(current_azim_angle);
 
-      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_start_angle) && !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_start_angle) && (custom_start_angle > current_azim_angle) && (custom_start_angle < next_azim_angle))
+      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_start_angle) &&
+          !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_start_angle) &&
+          (custom_start_angle > current_azim_angle) && (custom_start_angle < next_azim_angle))
       {
-        mooseWarning("pad_start_angle not contained within drum azimuthal discretization so additional azimuthal nodes are created to align mesh with this angle");
+        mooseWarning("pad_start_angle not contained within drum azimuthal discretization so "
+                     "additional azimuthal nodes are created to align mesh with this angle");
         azimuthal_angles.push_back(custom_start_angle);
       }
-      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_end_angle) && !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_end_angle) && (custom_end_angle > current_azim_angle) && (custom_end_angle < next_azim_angle))
+      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_end_angle) &&
+          !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_end_angle) &&
+          (custom_end_angle > current_azim_angle) && (custom_end_angle < next_azim_angle))
       {
-        mooseWarning("pad_end_angle not contained within drum azimuthal discretization so additional azimuthal nodes are created to align mesh with this angle");
+        mooseWarning("pad_end_angle not contained within drum azimuthal discretization so "
+                     "additional azimuthal nodes are created to align mesh with this angle");
         azimuthal_angles.push_back(custom_end_angle);
       }
     }
@@ -199,16 +234,23 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
 
       params.set<std::vector<Real>>("customized_azimuthal_angles") = azimuthal_angles;
       params.set<std::vector<double>>("ring_radii") = {_drum_inner_radius, _drum_outer_radius};
-      params.set<std::vector<unsigned int>>("ring_intervals") = {drum_inner_intervals, drum_intervals};
+      params.set<std::vector<unsigned int>>("ring_intervals") = {drum_inner_intervals,
+                                                                 drum_intervals};
       if (drum_inner_intervals > 1)
       {
-        params.set<std::vector<unsigned short>>("ring_block_ids") = {RGMB::CONTROL_DRUM_BLOCK_ID_INNER_TRI, RGMB::CONTROL_DRUM_BLOCK_ID_INNER, RGMB::CONTROL_DRUM_BLOCK_ID_PAD};
-        params.set<std::vector<SubdomainName>>("ring_block_names") = {block_name_prefix + "_R0_TRI", block_name_prefix + "_R0", block_name_prefix + "_R1"};
+        params.set<std::vector<unsigned short>>("ring_block_ids") = {
+            RGMB::CONTROL_DRUM_BLOCK_ID_INNER_TRI,
+            RGMB::CONTROL_DRUM_BLOCK_ID_INNER,
+            RGMB::CONTROL_DRUM_BLOCK_ID_PAD};
+        params.set<std::vector<SubdomainName>>("ring_block_names") = {
+            block_name_prefix + "_R0_TRI", block_name_prefix + "_R0", block_name_prefix + "_R1"};
       }
       else
       {
-        params.set<std::vector<unsigned short>>("ring_block_ids") = {RGMB::CONTROL_DRUM_BLOCK_ID_INNER, RGMB::CONTROL_DRUM_BLOCK_ID_PAD};
-        params.set<std::vector<SubdomainName>>("ring_block_names") = {block_name_prefix + "_R0", block_name_prefix + "_R1"};
+        params.set<std::vector<unsigned short>>("ring_block_ids") = {
+            RGMB::CONTROL_DRUM_BLOCK_ID_INNER, RGMB::CONTROL_DRUM_BLOCK_ID_PAD};
+        params.set<std::vector<SubdomainName>>("ring_block_names") = {block_name_prefix + "_R0",
+                                                                      block_name_prefix + "_R1"};
       }
       params.set<bool>("create_outward_interface_boundaries") = false;
 
@@ -241,7 +283,8 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
     }
     std::string build_mesh_name = name() + "_delbds";
     {
-      // Invoke BoundaryDeletionGenerator to delete extra sidesets created by AdvancedConcentricCircleGenerator
+      // Invoke BoundaryDeletionGenerator to delete extra sidesets created by
+      // AdvancedConcentricCircleGenerator
       auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
 
       params.set<MeshGeneratorName>("input") = name() + "_fpg";
@@ -317,7 +360,8 @@ ControlDrumMeshGenerator::generateMetadata()
   declareMeshProperty(RGMB::is_control_drum, true);
   declareMeshProperty(RGMB::drum_region_ids, _region_ids);
   declareMeshProperty(RGMB::drum_block_names, _block_names);
-  std::vector<Real> drum_pad_angles = _has_pad_region ? std::vector<Real>({_pad_start_angle, _pad_end_angle}) : std::vector<Real>();
+  std::vector<Real> drum_pad_angles =
+      _has_pad_region ? std::vector<Real>({_pad_start_angle, _pad_end_angle}) : std::vector<Real>();
   declareMeshProperty(RGMB::drum_pad_angles, drum_pad_angles);
   std::vector<Real> drum_radii = std::vector<Real>({_drum_inner_radius, _drum_outer_radius});
   declareMeshProperty(RGMB::drum_radii, drum_radii);
@@ -350,7 +394,8 @@ ControlDrumMeshGenerator::generate()
   std::string region_id_name = "region_id";
   std::string pin_type_id_name = "pin_type_id";
   std::string assembly_type_id_name = "assembly_type_id";
-  const std::string default_block_name = RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
+  const std::string default_block_name =
+      RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
 
   auto pin_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), pin_type_id_name);
   auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name);
@@ -385,8 +430,10 @@ ControlDrumMeshGenerator::generate()
     // Radial index is integer value of substring after prefix
     const unsigned int radial_idx = std::stoi(base_block_name.substr(prefix.length()));
 
-    // Drum index distinguishes between elements in pad and ex-pad regions that have the same radial index
-    const unsigned int drum_idx = getDrumIdxFromRadialIdx(radial_idx, elem->true_centroid()(0), elem->true_centroid()(1));
+    // Drum index distinguishes between elements in pad and ex-pad regions that have the same radial
+    // index
+    const unsigned int drum_idx =
+        getDrumIdxFromRadialIdx(radial_idx, elem->true_centroid()(0), elem->true_centroid()(1));
     subdomain_id_type pin_type = RGMB::MAX_PIN_TYPE_ID - drum_idx;
     elem->set_extra_integer(pin_type_id_int, pin_type);
 
@@ -408,7 +455,7 @@ ControlDrumMeshGenerator::generate()
   if (getParam<bool>("generate_depletion_id"))
   {
     const MooseEnum option = getParam<MooseEnum>("depletion_id_type");
-    addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Assembly, _extrude);
+    addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Drum, _extrude);
   }
 
   (*_build_mesh)->find_neighbors();
@@ -417,7 +464,9 @@ ControlDrumMeshGenerator::generate()
 }
 
 unsigned int
-ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx, const Real elem_x, const Real elem_y)
+ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx,
+                                                  const Real elem_x,
+                                                  const Real elem_y)
 {
   // By default, drum index will match radial index unless a pad region is defined
   unsigned int drum_idx = radial_idx;
@@ -425,15 +474,17 @@ ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx,
   {
     if (radial_idx == 1)
     {
-      // This is an element in the drum region, use drum angle to determine whether it belongs to pad or ex-pad region
-      // Note: drum angle of 0 degrees starts in positive y-direction and increments in clockwise direction, which is consistent
+      // This is an element in the drum region, use drum angle to determine whether it belongs to
+      // pad or ex-pad region Note: drum angle of 0 degrees starts in positive y-direction and
+      // increments in clockwise direction, which is consistent
       //       with how AdvancedConcentricCircleMeshGenerator defines azimuthal angles
       Real drum_angle = std::atan2(elem_x, elem_y) * 360. / (2. * M_PI);
       if (drum_angle < 0)
         drum_angle += 360;
 
-      // If _pad_end_angle does not exceed 360 degrees, check if drum angle lies within _pad_start_angle and _pad_end_angle.
-      // Drum index needs to be incremented if element in ex-core region
+      // If _pad_end_angle does not exceed 360 degrees, check if drum angle lies within
+      // _pad_start_angle and _pad_end_angle. Drum index needs to be incremented if element in
+      // ex-core region
       if (_pad_end_angle <= 360)
       {
         if ((drum_angle < _pad_start_angle) || (drum_angle > _pad_end_angle))
@@ -441,15 +492,16 @@ ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx,
       }
       else
       {
-        // If _pad_end_angle exceeds 360 degrees, check two intervals - _pad_start_angle to 360, and 0 to _pad_end_angle - 360
-        // Drum index needs to be incremented if element in ex-core region
+        // If _pad_end_angle exceeds 360 degrees, check two intervals - _pad_start_angle to 360, and
+        // 0 to _pad_end_angle - 360 Drum index needs to be incremented if element in ex-core region
         if ((drum_angle < _pad_start_angle) && (drum_angle > _pad_end_angle - 360.))
           ++drum_idx;
       }
     }
     else if (radial_idx == 2)
     {
-      // Element is in outer drum region, drum index needs to be incremented to account for presence of ex-pad region
+      // Element is in outer drum region, drum index needs to be incremented to account for presence
+      // of ex-pad region
       ++drum_idx;
     }
   }

@@ -12,8 +12,8 @@
 #include "ReactorGeometryMeshBuilderBase.h"
 
 /**
- * Mesh generator for defining a reactor control drum that can be used in a Cartesian or hexagonal lattice with the
- * option to be 2-D or 3-D.
+ * Mesh generator for defining a reactor control drum that can be used in a Cartesian or hexagonal
+ * lattice with the option to be 2-D or 3-D.
  */
 class ControlDrumMeshGenerator : public ReactorGeometryMeshBuilderBase
 {
@@ -29,7 +29,8 @@ protected:
   void generateMetadata();
 
   ///Get drum index from radial index of mesh element, drum index is used to retrieve region ID and block names for each element
-  unsigned int getDrumIdxFromRadialIdx(const unsigned int radial_idx, const Real elem_x, const Real elem_y);
+  unsigned int
+  getDrumIdxFromRadialIdx(const unsigned int radial_idx, const Real elem_x, const Real elem_y);
 
   ///The type of geometry that is being described (Square or Hex, declared in the ReactorMeshParams object)
   std::string _geom_type;

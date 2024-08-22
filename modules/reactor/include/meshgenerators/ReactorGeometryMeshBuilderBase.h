@@ -78,10 +78,10 @@ const subdomain_id_type CONTROL_DRUM_BLOCK_ID_OUTER = 19998;
 const subdomain_id_type ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE = 19999;
 const subdomain_id_type ASSEMBLY_BLOCK_ID_START = 20000;
 
-const subdomain_id_type DUMMY_ASSEMBLY_BLOCK_ID = (UINT16_MAX/2) - 1;
+const subdomain_id_type DUMMY_ASSEMBLY_BLOCK_ID = (UINT16_MAX / 2) - 1;
 const subdomain_id_type PERIPHERAL_RING_BLOCK_ID = 25000;
 
-const subdomain_id_type MAX_PIN_TYPE_ID = (UINT16_MAX/2) - 1;
+const subdomain_id_type MAX_PIN_TYPE_ID = (UINT16_MAX / 2) - 1;
 
 // Default values for setting block names of RGMB regions
 const SubdomainName PIN_BLOCK_NAME_PREFIX = "RGMB_PIN";
@@ -99,7 +99,6 @@ const boundary_id_type ASSEMBLY_BOUNDARY_ID_START = 2000;
 const BoundaryName PIN_BOUNDARY_NAME_PREFIX = "outer_pin_";
 const BoundaryName ASSEMBLY_BOUNDARY_NAME_PREFIX = "outer_assembly_";
 const BoundaryName CORE_BOUNDARY_NAME = "outer_core";
-
 }
 
 /**
@@ -243,6 +242,7 @@ protected:
   {
     Pin,
     Assembly,
+    Drum,
     Core
   };
 

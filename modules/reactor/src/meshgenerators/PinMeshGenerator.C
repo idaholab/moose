@@ -206,8 +206,11 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
       params.set<Real>("hexagon_size") = _pitch / 2.0;
-      params.set<boundary_id_type>("external_boundary_id") = RGMB::PIN_BOUNDARY_ID_START + _pin_type;
-      const auto boundary_name = (_is_assembly ? RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX : RGMB::PIN_BOUNDARY_NAME_PREFIX) + std::to_string(_pin_type);
+      params.set<boundary_id_type>("external_boundary_id") =
+          RGMB::PIN_BOUNDARY_ID_START + _pin_type;
+      const auto boundary_name =
+          (_is_assembly ? RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX : RGMB::PIN_BOUNDARY_NAME_PREFIX) +
+          std::to_string(_pin_type);
       params.set<std::string>("external_boundary_name") = boundary_name;
       params.set<std::vector<subdomain_id_type>>("block_id") = {
           _quad_center ? RGMB::PIN_BLOCK_ID_START : RGMB::PIN_BLOCK_ID_TRI};
@@ -238,7 +241,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
       for (const auto i : index_range(_intervals))
       {
-        const auto block_name = RGMB::PIN_BLOCK_NAME_PREFIX + std::to_string(_pin_type) + "_R" + std::to_string(i);
+        const auto block_name =
+            RGMB::PIN_BLOCK_NAME_PREFIX + std::to_string(_pin_type) + "_R" + std::to_string(i);
         const auto block_id = RGMB::PIN_BLOCK_ID_START + i;
 
         if (i < _ring_radii.size())
@@ -333,8 +337,11 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
           params.set<bool>("quad_center_elements") = _quad_center;
           params.set<MooseEnum>("polygon_size_style") = "apothem";
           params.set<Real>("polygon_size") = _pitch / 2.0;
-          params.set<boundary_id_type>("external_boundary_id") = RGMB::PIN_BOUNDARY_ID_START + _pin_type;
-          const auto boundary_name = (_is_assembly ? RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX : RGMB::PIN_BOUNDARY_NAME_PREFIX) + std::to_string(_pin_type);
+          params.set<boundary_id_type>("external_boundary_id") =
+              RGMB::PIN_BOUNDARY_ID_START + _pin_type;
+          const auto boundary_name = (_is_assembly ? RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX
+                                                   : RGMB::PIN_BOUNDARY_NAME_PREFIX) +
+                                     std::to_string(_pin_type);
           params.set<std::string>("external_boundary_name") = boundary_name;
           bool flat_side_up = (_mesh_geometry == "Square");
           params.set<bool>("flat_side_up") = flat_side_up;
@@ -484,8 +491,8 @@ PinMeshGenerator::generateFlexibleAssemblyBoundaries()
   }
   else
   {
-    outermost_block_name =
-        RGMB::PIN_BLOCK_NAME_PREFIX + std::to_string(_pin_type) + "_R" + std::to_string(_intervals.size() - 1);
+    outermost_block_name = RGMB::PIN_BLOCK_NAME_PREFIX + std::to_string(_pin_type) + "_R" +
+                           std::to_string(_intervals.size() - 1);
     has_single_mesh_interval = false;
 
     // Invoke BlockDeletionGenerator to delete outermost mesh interval of assembly
@@ -518,7 +525,8 @@ PinMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<boundary_id_type>("external_boundary_id") = RGMB::PIN_BOUNDARY_ID_START + _pin_type;
     params.set<BoundaryName>("external_boundary_name") =
         RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX + std::to_string(_pin_type);
-    params.set<SubdomainName>("background_subdomain_name") = outermost_block_name + RGMB::TRI_BLOCK_NAME_SUFFIX;
+    params.set<SubdomainName>("background_subdomain_name") =
+        outermost_block_name + RGMB::TRI_BLOCK_NAME_SUFFIX;
     params.set<unsigned short>("background_subdomain_id") = RGMB::PIN_BLOCK_ID_TRI_FLEXIBLE;
 
     addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);
