@@ -50,7 +50,6 @@ class Timer(object):
             entry = self.times.get(name)
             if not entry:
                 raise Exception(f'Missing time entry {name}')
-
             if len(entry) > 1:
                 raise Exception(f'Time entry {name} already stopped')
             entry.append(at_time)
@@ -103,6 +102,13 @@ class Timer(object):
             if not entry:
                 raise Exception(f'Missing time entry {name}')
             return entry[0]
+
+    def reset(self, name: str):
+        """ Resets a given timer """
+        with self.lock:
+            if name not in self.times:
+                raise Exception(f'Missing time entry {name}')
+            del self.times[name]
 
     class TimeManager:
         """ Context manager for timing a section """

@@ -310,6 +310,7 @@ class RunHPC(RunParallel):
 
             submission_script = self.getHPCJobSubmissionPath(job)
             output_file = self.getHPCJobOutputPath(job)
+            result_file = self.getHPCJobResultPath(job)
 
             # Clean these two files
             for file in [submission_script, output_file]:
@@ -324,6 +325,7 @@ class RunHPC(RunParallel):
                               'NAME': self.getHPCJobName(job),
                               'CWD': tester.getTestDir(),
                               'OUTPUT': output_file,
+                              'RESULT': result_file,
                               'SUBMISSION_SCRIPT': submission_script,
                               'WALLTIME': str(datetime.timedelta(seconds=tester.getMaxTime())),
                               'PROJECT': self.options.hpc_project,
@@ -402,7 +404,7 @@ class RunHPC(RunParallel):
             # The output files that we're expected to generate so that the
             # HPC job can add a terminator for them so that we can verify
             # they are complete on the executing host
-            additional_output = []
+            additional_output = [result_file]
             for file in tester.getOutputFiles(options):
                 additional_output.append(f'"{os.path.join(tester.getTestDir(), file)}"')
             submission_env['ADDITIONAL_OUTPUT_FILES'] = ' '.join(additional_output)
@@ -800,6 +802,10 @@ class RunHPC(RunParallel):
     def getHPCJobOutputPath(self, job):
         """Gets the absolute path for stdout/stderr for a HPC job"""
         return self.getHPCJobOutputPathPrefix(job) + '.out'
+
+    def getHPCJobResultPath(self, job):
+        """Gets the absolute path for the result (exit code, walltime) for a HPC job"""
+        return self.getHPCJobOutputPathPrefix(job) + '.result'
 
     def getHPCJobSubmissionPath(self, job):
         """Gets the aboslute path for the qsub script for a HPC job"""
