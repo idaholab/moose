@@ -54,7 +54,7 @@ CoreMeshGenerator::validParams()
       "periphery_num_layers>0",
       "Number of layers to subdivide the periphery boundary.");
   params.addParam<std::string>(
-      "periphery_block_name", "RGMB_CORE", "Block name for periphery zone.");
+      "periphery_block_name", RGMB::CORE_BLOCK_NAME_PREFIX, "Block name for periphery zone.");
   params.addParam<subdomain_id_type>(
       "periphery_region_id",
       -1,
@@ -303,7 +303,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
             params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
-            params.set<std::vector<subdomain_id_type>>("block_id") = {(UINT16_MAX / 2) - 1};
+            params.set<std::vector<subdomain_id_type>>("block_id") = {RGMB::DUMMY_ASSEMBLY_BLOCK_ID};
 
             addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
           }
@@ -331,7 +331,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             params.set<std::vector<MeshGeneratorName>>("meshes_to_adapt_to") =
                 std::vector<MeshGeneratorName>{first_nondummy_assembly};
             params.set<std::vector<subdomain_id_type>>("background_block_ids") =
-                std::vector<subdomain_id_type>{(UINT16_MAX / 2) - 1};
+                std::vector<subdomain_id_type>{RGMB::DUMMY_ASSEMBLY_BLOCK_ID};
 
             addMeshSubgenerator(adaptive_mg_name, std::string(_empty_key), params);
           }
@@ -358,7 +358,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
         const auto radial_boundary = getReactorParam<boundary_id_type>(RGMB::radial_boundary_id);
         params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
-        params.set<std::string>("external_boundary_name") = "outer_core";
+        params.set<std::string>("external_boundary_name") = RGMB::CORE_BOUNDARY_NAME;
         params.set<double>("rotate_angle") = 0.0;
 
         addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
@@ -368,9 +368,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     {
       auto params = _app.getFactory().getValidParams("BlockDeletionGenerator");
 
-      params.set<std::vector<SubdomainName>>("block") = {std::to_string((UINT16_MAX / 2) - 1)};
+      params.set<std::vector<SubdomainName>>("block") = {std::to_string(RGMB::DUMMY_ASSEMBLY_BLOCK_ID)};
       params.set<MeshGeneratorName>("input") = name() + "_pattern";
-      params.set<BoundaryName>("new_boundary") = "outer_core";
+      params.set<BoundaryName>("new_boundary") = RGMB::CORE_BOUNDARY_NAME;
 
       addMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
     }
@@ -391,7 +391,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             continue;
           const auto assembly_id =
               getMeshProperty<subdomain_id_type>(RGMB::assembly_type, assembly_name);
-          const BoundaryName boundary_name = "outer_assembly_" + std::to_string(assembly_id);
+          const BoundaryName boundary_name = RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX + std::to_string(assembly_id);
           if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
             boundaries_to_delete.push_back(boundary_name);
         }
@@ -493,7 +493,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<MeshGeneratorName>("input") = name() + "_delbds";
       params.set<Real>("peripheral_ring_radius") = _outer_circle_radius;
       params.set<std::string>("external_boundary_name") = "outside_periphery";
-      params.set<SubdomainName>("peripheral_ring_block_name") = "RGMB_PERIPHERY_GENERATED";
+      params.set<SubdomainName>("peripheral_ring_block_name") = RGMB::PERIPHERAL_RING_BLOCK_NAME;
 
       // unique MG options
       if (_periphery_meshgenerator == "triangle")
@@ -504,8 +504,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       }
       else if (_periphery_meshgenerator == "quad_ring")
       {
-        params.set<subdomain_id_type>("peripheral_ring_block_id") = 25000;
-        params.set<BoundaryName>("input_mesh_external_boundary") = (BoundaryName) "outer_core";
+        params.set<subdomain_id_type>("peripheral_ring_block_id") = RGMB::PERIPHERAL_RING_BLOCK_ID;
+        params.set<BoundaryName>("input_mesh_external_boundary") = RGMB::CORE_BOUNDARY_NAME;
         params.set<unsigned int>("peripheral_layer_num") = _periphery_num_layers;
       }
 
@@ -753,7 +753,7 @@ CoreMeshGenerator::generate()
   std::string plane_id_name = "plane_id";
   std::string region_id_name = "region_id";
   std::string radial_id_name = "radial_id";
-  const std::string default_block_name = "RGMB_CORE";
+  const std::string default_block_name = RGMB::CORE_BLOCK_NAME_PREFIX;
 
   auto pin_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), pin_type_id_name, true);
   auto assembly_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), assembly_type_id_name, true);
@@ -789,11 +789,11 @@ CoreMeshGenerator::generate()
       else if (getReactorParam<bool>(RGMB::region_id_as_block_name))
         elem_block_name += "_REG" + std::to_string(elem_rid);
       if (elem->type() == TRI3 || elem->type() == PRISM6)
-        elem_block_name += "_TRI";
+        elem_block_name += RGMB::TRI_BLOCK_NAME_SUFFIX;
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
-    else if ((*_build_mesh)->subdomain_name(elem->subdomain_id()) == "RGMB_PERIPHERY_GENERATED")
+    else if ((*_build_mesh)->subdomain_name(elem->subdomain_id()) == RGMB::PERIPHERAL_RING_BLOCK_NAME)
     // periphery type element
     {
       // set region ID of core periphery element
@@ -803,15 +803,15 @@ CoreMeshGenerator::generate()
       if (getReactorParam<bool>(RGMB::region_id_as_block_name))
         elem_block_name += "_REG" + std::to_string(_periphery_region_id);
       if (elem->type() == TRI3 || elem->type() == PRISM6)
-        elem_block_name += "_TRI";
+        elem_block_name += RGMB::TRI_BLOCK_NAME_SUFFIX;
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
     else
     {
       dof_id_type assembly_type_id = elem->get_extra_integer(assembly_type_id_int);
-      // Infer peripheral index of assembly background, assembly duct, or control drum regions from pin_type
-      unsigned int peripheral_idx = ((UINT16_MAX / 2) - 1) - pin_type_id;
+      // Infer peripheral index of assembly background, assembly duct, or control drum regions from pin_type_id
+      unsigned int peripheral_idx = RGMB::MAX_PIN_TYPE_ID - pin_type_id;
 
       // check if element is part of drum region
       if (_drum_region_id_map.find(assembly_type_id) != _drum_region_id_map.end())
@@ -831,7 +831,7 @@ CoreMeshGenerator::generate()
             elem_block_name += "_" + _drum_block_name_map[assembly_type_id][z_id][peripheral_idx];
         }
         if (elem->type() == TRI3 || elem->type() == PRISM6)
-          elem_block_name += "_TRI";
+          elem_block_name += RGMB::TRI_BLOCK_NAME_SUFFIX;
         updateElementBlockNameId(
             *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
       }
@@ -867,7 +867,7 @@ CoreMeshGenerator::generate()
           }
         }
         if (elem->type() == TRI3 || elem->type() == PRISM6)
-          elem_block_name += "_TRI";
+          elem_block_name += RGMB::TRI_BLOCK_NAME_SUFFIX;
         updateElementBlockNameId(
             *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
       }
@@ -876,10 +876,10 @@ CoreMeshGenerator::generate()
 
   // Sideset 10000 does not get stitched properly when BlockDeletionGenerator
   // is used for deleting dummy assemblies. This block copies missing sides
-  // into sideset 10000 from sideset "outer_core"
+  // into sideset 10000 from sideset RGMB::CORE_BOUNDARY_NAME
   BoundaryInfo & boundary_info = (*_build_mesh)->get_boundary_info();
   boundary_id_type source_id =
-      MooseMeshUtils::getBoundaryIDs(**_build_mesh, {"outer_core"}, true)[0];
+      MooseMeshUtils::getBoundaryIDs(**_build_mesh, {RGMB::CORE_BOUNDARY_NAME}, true)[0];
   boundary_id_type target_id = 10000;
   const auto sideset_map = boundary_info.get_sideset_map();
 
@@ -888,7 +888,7 @@ CoreMeshGenerator::generate()
     const auto side_id = id_pair.first;
     const auto sideset_id = id_pair.second;
 
-    // Filter all sides that belong to "outer_core" sideset
+    // Filter all sides that belong to RGMB::CORE_BOUNDARY_NAME sideset
     if (sideset_id == source_id)
     {
       auto mm_it = sideset_map.equal_range(elem);
