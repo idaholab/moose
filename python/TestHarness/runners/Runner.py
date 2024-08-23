@@ -27,6 +27,15 @@ class Runner(OutputInterface):
         self.options = options
         # The job's exit code, should be set after wait()
         self.exit_code = None
+        # The output for the actual run of the job. We keep this
+        # separate from self.output in this Runner because HPC
+        # jobs always have a file output, so we want to store
+        # their output separately
+        self.run_output = OutputInterface()
+
+    def getRunOutput(self):
+        """ Get the OutputInterface object for the actual run """
+        return self.run_output
 
     def spawn(self, timer):
         """

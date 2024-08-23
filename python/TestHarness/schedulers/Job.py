@@ -495,6 +495,7 @@ class Job(OutputInterface):
         """
         objects = {}
         if self.getRunner():
+            objects['runner_run'] = self.getRunner().getRunOutput()
             objects['runner'] = self.getRunner()
         objects['tester'] = self.getTester()
         objects['job'] = self
@@ -540,7 +541,7 @@ class Job(OutputInterface):
                 else:
                     output[name] = wrapped_object_output
             elif not concatenate:
-                output[name] = ''
+                output[name] = None
 
         return output
 

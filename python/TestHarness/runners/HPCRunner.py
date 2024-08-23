@@ -30,10 +30,14 @@ class HPCRunner(Runner):
         # Interval in seconds for polling for file completion
         self.file_completion_poll_time = 0.1
 
-        # Whether or not the primary output has been loaded fully
-        self.output_completed = False
-
     def spawn(self, timer):
+        # The runner_run output, which is the output from what we're
+        # actually running, already exists as a file. So just load
+        # it from that file instead and don't bother loading it
+        # into memory
+        hpc_job_output_path = self.run_hpc.getHPCJobOutputPath(self.job)
+        self.runner_output.setSeparateOutputPath(hpc_job_output_path)
+
         # Rely on the RunHPC object to queue the job
         self.hpc_job = self.run_hpc.queueJob(self.job)
 
@@ -61,20 +65,7 @@ class HPCRunner(Runner):
 
         # If the Job is already finished, something happened in the
         # HPC scheduler so we have an invalid state for processing
-        # in the Tester
         if self.job.isFinished():
-            # Don't bother if we've been killed
-            if self.hpc_job.isKilled():
-                return
-
-            # If we have _some_ output, at least try to load it. However, don't wait
-            # a while for this one.
-            for i in range(int(60 / self.file_completion_poll_time)):
-                if self.trySetOutput():
-                    break
-                time.sleep(self.file_completion_poll_time)
-
-            # Don't bother looking for the rest of the output
             return
 
         tester = self.job.getTester()
@@ -105,13 +96,8 @@ class HPCRunner(Runner):
             # Check for file completeness
             for file in incomplete_files.copy():
                 if self.fileIsReady(file):
-                    # Store the output
-                    if file == output_file:
-                        # It's now required because its complete
-                        if not self.trySetOutput(required=True):
-                            break
                     # Store the result
-                    elif file == result_file:
+                    if file == result_file:
                         with open(file, 'r') as f:
                             result = yaml.safe_load(f)
                         self.exit_code = result['exit_code']
@@ -129,11 +115,9 @@ class HPCRunner(Runner):
             # We've waited for files for too long
             if (wait_files or incomplete_files) and waited_time >= self.options.hpc_file_timeout:
                 self.job.setStatus(self.job.timeout, 'FILE TIMEOUT')
-                if not self.output_completed:
-                    self.trySetOutput()
                 def print_files(files, type):
                     if files:
-                        self.appendOutput(util.outputHeader(f'{type} output file(s):', ending=False))
+                        self.appendOutput(f'{type} output file(s)\n')
                         self.appendOutput('\n'.join(files) + '\n')
                 print_files(wait_files, 'Unavailable')
                 print_files(incomplete_files, 'Incomplete')
@@ -161,7 +145,7 @@ class HPCRunner(Runner):
         # character check that happens in Runner.finalize() to still
         # be valid.
         if self.exit_code != 0 and self.job.getTester().hasOpenMPI():
-            output = self.getOutput()
+            output = self.getRunOutput().getOutput()
             if output:
                 prefix = '\n'
                 null = '\0'
@@ -169,52 +153,11 @@ class HPCRunner(Runner):
                 all = f'{prefix}{null}{suffix}'
                 no_null = f'{prefix}{suffix}'
                 if all in output:
-                    self.setOutput(output.replace(all, no_null))
-
-        # Report queue time and output wait time
-        stats = f'Queue time = {timer.totalTime("hpc_queued"):.2f} s, '
-        stats += f'output wait time = {timer.totalTime("hpc_wait_output"):.2f} s\n'
-        self.appendOutput(stats)
+                    self.getRunOutput().setOutput(output.replace(all, no_null))
 
     def kill(self):
         if self.hpc_job:
             self.run_hpc.killHPCJob(self.hpc_job)
-
-    def trySetOutput(self, required=False):
-        """
-        Tries to set the output if it exists.
-
-        If required is set, this will fail the job.
-
-        Returns whether or not the output was set.
-        """
-        # Whether or not we actually set it
-        did_set = False
-
-        output_file = self.run_hpc.getHPCJobOutputPath(self.job)
-        if os.path.exists(output_file) and os.path.isfile(output_file):
-            try:
-                header = f'{self.run_hpc.getHPCSchedulerName()} job {self.hpc_job.id} output'
-                # If we're trying to parse output, we can't truncate it
-                # because it might appear in the truncated portion
-                if self.job.getTester().needFullOutput(self.options) or self.job.hasSeperateOutput():
-                    self.setOutput(open(output_file, 'r').read())
-                # Not parsing the output, so just read it truncated
-                else:
-                    self.setOutput(self.readTruncated(output_file))
-
-                did_set = True
-            except:
-                pass
-
-        if did_set:
-            self.output_completed = True
-        else:
-            self.setOutput(f'Failed to load output file {output_file}\n')
-            if required:
-                self.job.setStatus(self.job.error, 'FAILED OUTPUT READ')
-
-        return did_set
 
     def fileIsReady(self, file):
         """

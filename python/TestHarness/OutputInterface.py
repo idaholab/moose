@@ -26,17 +26,17 @@ class OutputInterface:
             self.setOutput(self.output)
             self.output = ''
 
-    def getSeparateOutputFilePath(self):
+    def getSeparateOutputFilePath(self) -> str:
         """ Gets the path that this output is writing to, if any """
         return self.separate_output_path
 
-    def hasOutput(self):
+    def hasOutput(self) -> bool:
         """ Whether or not this object has any content written """
         if self.separate_output_path:
             return os.path.isfile(self.separate_output_path)
-        return len(self.output)
+        return len(self.output) > 0
 
-    def getOutput(self):
+    def getOutput(self) -> str:
         """ Gets the underlying output, either from file or memory """
         if self.separate_output_path:
             try:
@@ -47,15 +47,19 @@ class OutputInterface:
             return self.output
         return ''
 
-    def setOutput(self, output):
+    def setOutput(self, output: str):
         """ Sets the output given some output string """
+        if not output:
+            return
         if self.separate_output_path:
             open(self.separate_output_path, 'w').write(output)
         else:
             self.output = output
 
-    def appendOutput(self, output):
+    def appendOutput(self, output: str):
         """ Appends to the output """
+        if not output:
+            return
         if self.separate_output_path:
             open(self.separate_output_path, 'a').write(output)
         else:
@@ -64,6 +68,7 @@ class OutputInterface:
     def clearOutput(self):
         """ Clears the output """
         if self.separate_output_path:
-            open(self.separate_output_path, 'w').close()
+            if os.path.exists(self.separate_output_path):
+                os.remove(self.separate_output_path)
         else:
             self.output = ''

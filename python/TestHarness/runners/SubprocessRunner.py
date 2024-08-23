@@ -43,10 +43,10 @@ class SubprocessRunner(Runner):
 
         process_args = [cmd]
         process_kwargs = {'stdout': self.outfile,
-                            'stderr': self.errfile,
-                            'close_fds': False,
-                            'shell': use_shell,
-                            'cwd': tester.getTestDir()}
+                          'stderr': self.errfile,
+                          'close_fds': False,
+                          'shell': use_shell,
+                          'cwd': tester.getTestDir()}
         # On Windows, there is an issue with path translation when the command is passed in
         # as a list.
         if platform.system() == "Windows":
@@ -79,23 +79,26 @@ class SubprocessRunner(Runner):
 
         self.exit_code = self.process.poll()
 
-        self.clearOutput()
+        # This should have been cleared before the job started
+        if self.getRunOutput().hasOutput():
+            raise Exception('Runner run output was not cleared')
 
         # Load combined output
         for file in [self.outfile, self.errfile]:
             file.flush()
-            file_output = self.readOutput(file)
+            output = self.readOutput(file)
             file.close()
 
             # For some reason openmpi will append a null character at the end
             # when the exit code is nonzero. Not sure why this is... but remove
             # it until we figure out what's broken
             if file == self.errfile and self.exit_code != 0 \
-                and self.job.getTester().hasOpenMPI() and len(file_output) > 2 \
-                and file_output == '\n\0\n':
-                file_output = file_output
+                and self.job.getTester().hasOpenMPI() and len(output) > 2 \
+                and output[-3] == '\n\0\n':
+                output = output[:-3]
 
-            self.appendOutput(file_output)
+            if output:
+                self.getRunOutput().appendOutput(output)
 
     def kill(self):
         if self.process is not None:
