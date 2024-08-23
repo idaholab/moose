@@ -16,6 +16,8 @@ InputParameters
 FeatureVolumeFraction::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Computes the total feature volume fraction from a "
+                             "vectorpostprocessor computing the feature volume");
   MooseEnum value_type("VOLUME_FRACTION AVRAMI", "VOLUME_FRACTION");
   params.addParam<MooseEnum>(
       "value_type", value_type, "The value to output (VOLUME_FRACTION or AVRAMI value)");

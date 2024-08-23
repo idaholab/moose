@@ -20,6 +20,8 @@ InputParameters
 MaterialVectorGradAuxKernelAction::validParams()
 {
   InputParameters params = MaterialVectorAuxKernelAction::validParams();
+  params.addClassDescription("Outputs all components of the gradient of the real standard "
+                             "vector-valued properties specified");
   return params;
 }
 

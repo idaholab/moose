@@ -18,6 +18,8 @@ InputParameters
 PFCElementEnergyIntegral::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
+  params.addClassDescription("Computes the integral of the energy from the temperature. Note that "
+                             "the kb factor is missing.");
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable that this object operates on");
   params.addParam<Real>("temp", 1833.0, "Temperature of simulation");
@@ -37,6 +39,7 @@ PFCElementEnergyIntegral::PFCElementEnergyIntegral(const InputParameters & param
     _u_dot(_var.uDot()),
     _temp(getParam<Real>("temp")) // K
 {
+  // TODO: error on unused parameters
   addMooseVariableDependency(&mooseVariableField());
 }
 

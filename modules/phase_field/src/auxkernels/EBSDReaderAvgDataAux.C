@@ -17,6 +17,8 @@ InputParameters
 EBSDReaderAvgDataAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Outputs the requested EBSD reader average data, for a given phase if "
+                             "specified, for the grain at the local node/element.");
   params.addParam<unsigned int>("phase", "The phase to use for all queries.");
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
   params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject");

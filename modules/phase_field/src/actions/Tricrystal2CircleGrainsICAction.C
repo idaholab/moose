@@ -31,6 +31,8 @@ InputParameters
 Tricrystal2CircleGrainsICAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Sets initial conditions for the order parameters representing the "
+                             "tri-crystal grain structure");
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<std::vector<SubdomainName>>(

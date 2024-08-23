@@ -16,6 +16,7 @@ InputParameters
 DeformedGrainMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Computes scaled grain material properties");
   params.addRequiredCoupledVarWithAutoBuild(
       "v", "var_name_base", "op_num", "Array of coupled variables");
   params.addRequiredParam<unsigned int>("deformed_grain_num",
