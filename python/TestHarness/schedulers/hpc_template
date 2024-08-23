@@ -99,24 +99,20 @@ echo "walltime: $walltime" >> {{ RESULT }}
 ADDITIONAL_OUTPUT_FILES=({{ ADDITIONAL_OUTPUT_FILES }})
 for file in ${ADDITIONAL_OUTPUT_FILES[@]}; do
     if [ ! -e "$file" ]; then
-        echo "Failed to finalize output $file"
+        echo "Failed to find output $file"
         continue
     fi
 
-    # No newline for binaries
-    if [[ $(file --mime-encoding ${file}) = *binary ]]; then
-        printf "{{ ENDING_COMMENT }}" >> $file;
-    # Newline for plain text
-    else
-        printf "\n{{ ENDING_COMMENT }}" >> $file;
+    printf "{{ ENDING_COMMENT }}" >> $file;
+    if [ $? != 0 ]; then
+        echo "Failed to finalize output $file"
     fi
-    echo "Finalized output $file"
 done
 
 # Append a recognizable string at the end of the output. We look
 # for this string when parsing the output so that we can be sure
 # that we have obtained all of the output
-printf "\n{{ ENDING_COMMENT }}"
+printf "{{ ENDING_COMMENT }}"
 
 # Exit with the real return code from the job that we ran
 exit $return_code

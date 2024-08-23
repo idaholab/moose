@@ -545,7 +545,7 @@ class Job(OutputInterface):
                     if wrapped_object_output[-1] != '\n':
                         wrapped_object_output += '\n'
                     # Add a footer after the output ends
-                    wrapped_object_output += util.outputHeader(f'End {name} output', ending=False)
+                    wrapped_object_output += '\n' + util.outputHeader(f'End {name} output', ending=False)
 
                     output += wrapped_object_output
                 else:

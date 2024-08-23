@@ -171,6 +171,11 @@ class HPCRunner(Runner):
                 if all in output:
                     self.setOutput(output.replace(all, no_null))
 
+        # Report queue time and output wait time
+        stats = f'Queue time = {timer.totalTime("hpc_queued"):.2f} s, '
+        stats += f'output wait time = {timer.totalTime("hpc_wait_output"):.2f} s\n'
+        self.appendOutput(stats)
+
     def kill(self):
         if self.hpc_job:
             self.run_hpc.killHPCJob(self.hpc_job)

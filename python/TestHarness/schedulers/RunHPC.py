@@ -813,7 +813,7 @@ class RunHPC(RunParallel):
         that are read in order to verify that the files are fully
         synced when reading during postprocessing.
         """
-        return f'TESTHARNESS RUNHPC FILE TERMINATOR FOR {job_id}\n'
+        return f'TESTHARNESS RUNHPC FILE TERMINATOR FOR {job_id}'
 
     @staticmethod
     def parseMPICommand(command) -> str:
