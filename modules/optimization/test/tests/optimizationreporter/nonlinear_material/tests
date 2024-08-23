@@ -9,7 +9,5 @@
     max_threads = 1 # Optimize executioner does not support multiple threads
     recover = False
     requirement = 'The system shall be able perform inverse source optimization on a problem with nonlinear material properties using automatically computed adjoint.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 []
