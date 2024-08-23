@@ -124,9 +124,9 @@ class RunApp(Tester):
             self.setStatus(self.skip)
             return False
 
-        # We have non-deterministic issues when running with the HPC python wrapper
-        # and using --redirected-output. If the user explicitly requested more
-        # parallel procs, we can't run this
+        # Finalizing output using the current method in the submission script from the rank 0 process isn't
+        # really a good idea when output might exist on a different node. We could make that finalization
+        # more complex, but there isn't a need at the moment.
         if options.hpc and self.specs['redirect_output'] == True and int(self.specs['min_parallel']) > 1:
             self.addCaveats('hpc min_cpus=1')
             self.setStatus(self.skip)
@@ -168,9 +168,9 @@ class RunApp(Tester):
         # Lower the ceiling
         ncpus = min(ncpus, int(self.specs['max_parallel']))
 
-        # We have non-deterministic issues when running with the HPC python wrapper
-        # and using --redirected-output. Here, if the user didn't explicitly request
-        # to use more parallel procs, we'll limit it to 1
+        # Finalizing output using the current method in the submission script from the rank 0 process isn't
+        # really a good idea when output might exist on a different node. We could make that finalization
+        # more complex, but there isn't a need at the moment.
         if options.hpc and self.specs['redirect_output'] == True and min_parallel == 1 and ncpus > 1:
             self.addCaveats('hpc min_cpus=1')
             return 1
