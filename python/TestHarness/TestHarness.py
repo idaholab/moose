@@ -799,10 +799,8 @@ class TestHarness:
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
-        # Record that we are using --sep-files* options
-        self.options.results_storage['SEP_FILES'] = (self.options.ok_files
-                                                     or self.options.fail_files
-                                                     or self.options.sep_files)
+        # Record that we are using --sep-files
+        self.options.results_storage['SEP_FILES'] = self.options.sep_files
 
         # Record the Scheduler Plugin used
         self.options.results_storage['SCHEDULER'] = self.scheduler.__class__.__name__
@@ -812,30 +810,34 @@ class TestHarness:
             for job in job_group:
                 status, message, message_color, status_code, sort_value = job.getJointStatus()
 
+                if status == 'SILENT':
+                    continue
+
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
 
-                # If output has been stored in separate files, don't make additional copies by
-                # storing that data in this json results file (--sep-files, etc options).
-                output = '' if job.getOutputFile() else job.getOutput()
+                # Output that isn't in a file (no --sep-files)
+                output = job.getCombinedOutput() if not self.options.sep_files else None
+                # Output that is in a file (--sep-files)
+                output_files = job.getCombinedSeparateOutputPaths() if self.options.sep_files else None
 
-                self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
-                                                                                     'LONG_NAME'      : job.getTestName(),
-                                                                                     'TIMING'         : job.getTiming(),
-                                                                                     'STATUS'         : status,
-                                                                                     'STATUS_MESSAGE' : message,
-                                                                                     'FAIL'           : job.isFail(),
-                                                                                     'COLOR'          : message_color,
-                                                                                     'CAVEATS'        : list(job.getCaveats()),
-                                                                                     'OUTPUT'         : output,
-                                                                                     'COMMAND'        : job.getCommand(),
-                                                                                     'META_DATA'      : job.getMetaData()}
+                self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'                 : job.getTestNameShort(),
+                                                                                     'LONG_NAME'            : job.getTestName(),
+                                                                                     'TIMING'               : job.timer.totalTimes(),
+                                                                                     'STATUS'               : status,
+                                                                                     'STATUS_MESSAGE'       : message,
+                                                                                     'FAIL'                 : job.isFail(),
+                                                                                     'COLOR'                : message_color,
+                                                                                     'CAVEATS'              : list(job.getCaveats()),
+                                                                                     'OUTPUT'               : output,
+                                                                                     'OUTPUT_FILES'         : output_files,
+                                                                                     'TESTER_OUTPUT_FILES'  : job.getOutputFiles(self.options),
+                                                                                     'INPUT_FILE'           : job.getInputFile(),
+                                                                                     'COMMAND'              : job.getCommand(),
+                                                                                     'META_DATA'            : job.getMetaData()}
 
                 # Additional data to store (overwrites any previous matching keys)
                 self.options.results_storage[job.getTestDir()].update(job.getMetaData())
-
-        if self.options.output_dir:
-            self.options.results_file = os.path.join(self.options.output_dir, self.options.results_file)
 
         if self.options.results_storage and self.options.results_file:
             try:
@@ -856,7 +858,7 @@ class TestHarness:
         try:
             # Write one file, with verbose information (--file)
             if self.options.file:
-                with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
+                with open(self.options.file, 'w') as f:
                     for job_group in all_jobs:
                         for job in job_group:
                             # Do not write information about silent tests
@@ -865,33 +867,6 @@ class TestHarness:
 
                             formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
                             f.write(formated_results + '\n')
-
-            # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
-            if ((self.options.ok_files and self.num_passed)
-                or (self.options.fail_files and self.num_failed)):
-                for job_group in all_jobs:
-                    for job in job_group:
-                        status, message, message_color, status_code, sort_value = job.getJointStatus()
-
-                        if self.options.output_dir:
-                            output_dir = self.options.output_dir
-                        else:
-                            output_dir = job.getTestDir()
-
-                        output = ''
-                        # Append input file contents to output
-                        if self.options.include_input:
-                            # This is a file i/o operation. We only want to do this once, and only if necessary
-                            input_file = job.getInputFileContents()
-                            if input_file:
-                                output += "\n\nINPUT FILE:\n" + str(input_file)
-
-                        output += "\n\nTEST OUTPUT:" + job.getOutput()
-                        output_file = job.getOutputFile()
-                        formated_results = util.formatResult(job, self.options, result=output, color=False)
-                        if output_file:
-                            with open(output_file, 'w') as f:
-                                f.write(formated_results)
 
         except IOError:
             print('Permission error while writing results to disc')
@@ -952,17 +927,6 @@ class TestHarness:
             # it's (hopefully) in an installed location
             mydir = os.path.dirname(os.path.realpath(__file__))
             self.executable = os.path.join(mydir, '../../../..', 'bin', self.executable)
-
-        # Save the output dir since the current working directory changes during tests
-        self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)
-
-        # Create the output dir if they ask for it. It is easier to ask for forgiveness than permission
-        if self.options.output_dir:
-            try:
-                os.makedirs(self.output_dir)
-            except OSError as ex:
-                if ex.errno == errno.EEXIST: pass
-                else: raise
 
         # Use a previous results file, or declare the variable
         self.options.results_storage = {}
@@ -1056,11 +1020,8 @@ class TestHarness:
         outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
         outputgroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='do not report skipped tests')
         outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
-        outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
         outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
-        outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
-        outputgroup.add_argument('--sep-files-ok', action='store_true', dest='ok_files', help='Write the output of each passed test to a separate file')
-        outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
+        outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal.')
         outputgroup.add_argument('--include-input-file', action='store_true', dest='include_input', help='Include the contents of the input file when writing the results of a test to a file')
         outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
         outputgroup.add_argument("--json", action="store_true", dest="json", help="Dump the parameters for the testers in JSON Format")
@@ -1132,8 +1093,6 @@ class TestHarness:
     # Exit if options don't make any sense, print warnings if they are merely weird
     def checkAndUpdateCLArgs(self):
         opts = self.options
-        if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
-            print('WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option')
         if opts.group == opts.not_group:
             print('ERROR: The group and not_group options cannot specify the same group')
             sys.exit(1)
@@ -1172,12 +1131,6 @@ class TestHarness:
 
         # User wants to write all output, so unify the options involved
         if opts.sep_files:
-            opts.ok_files = True
-            opts.fail_files = True
-            opts.quiet = True
-
-        # User wants only failed files, so unify the options involved
-        elif opts.fail_files:
             opts.quiet = True
 
     def postRun(self, specs, timing):

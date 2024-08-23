@@ -83,8 +83,7 @@ class HPCRunner(Runner):
         wait_files = set([output_file, result_file])
         # Output files needed by the Tester, only if it says we should
         if tester.mustOutputExist(self.exit_code):
-            for file in tester.getOutputFiles(self.options):
-                wait_files.add(os.path.join(tester.getTestDir(), file))
+            wait_files.update(self.job.getOutputFiles(self.options))
         # The files that we can read, but are incomplete (no terminator)
         incomplete_files = set()
 
@@ -134,8 +133,8 @@ class HPCRunner(Runner):
                     self.trySetOutput()
                 def print_files(files, type):
                     if files:
-                        self.output += util.outputHeader(f'{type} output file(s):', ending=False)
-                        self.output += '\n'.join(files) + '\n'
+                        self.appendOutput(util.outputHeader(f'{type} output file(s):', ending=False))
+                        self.appendOutput('\n'.join(files) + '\n')
                 print_files(wait_files, 'Unavailable')
                 print_files(incomplete_files, 'Incomplete')
                 break
@@ -161,14 +160,16 @@ class HPCRunner(Runner):
         # apptainer execution within hpc_template. This allows the null
         # character check that happens in Runner.finalize() to still
         # be valid.
-        if self.exit_code != 0 and self.job.getTester().hasOpenMPI() and self.output:
-            prefix = '\n'
-            null = '\0'
-            suffix = '##########'
-            all = f'{prefix}{null}{suffix}'
-            no_null = f'{prefix}{suffix}'
-            if all in self.output:
-                self.output = self.output.replace(all, no_null)
+        if self.exit_code != 0 and self.job.getTester().hasOpenMPI():
+            output = self.getOutput()
+            if output:
+                prefix = '\n'
+                null = '\0'
+                suffix = '##########'
+                all = f'{prefix}{null}{suffix}'
+                no_null = f'{prefix}{suffix}'
+                if all in output:
+                    self.setOutput(output.replace(all, no_null))
 
     def kill(self):
         if self.hpc_job:
@@ -189,15 +190,13 @@ class HPCRunner(Runner):
         if os.path.exists(output_file) and os.path.isfile(output_file):
             try:
                 header = f'{self.run_hpc.getHPCSchedulerName()} job {self.hpc_job.id} output'
-                self.output = util.outputHeader(f'Begin {header}')
                 # If we're trying to parse output, we can't truncate it
                 # because it might appear in the truncated portion
-                if self.job.getTester().needFullOutput(self.options):
-                    self.output += open(output_file, 'r').read()
+                if self.job.getTester().needFullOutput(self.options) or self.job.hasSeperateOutput():
+                    self.setOutput(open(output_file, 'r').read())
                 # Not parsing the output, so just read it truncated
                 else:
-                    self.output += self.readTruncated(output_file)
-                self.output += util.outputHeader(f'End {header}')
+                    self.setOutput(self.readTruncated(output_file))
 
                 did_set = True
             except:
@@ -206,7 +205,7 @@ class HPCRunner(Runner):
         if did_set:
             self.output_completed = True
         else:
-            self.output = f'Failed to load output file {output_file}\n'
+            self.setOutput(f'Failed to load output file {output_file}\n')
             if required:
                 self.job.setStatus(self.job.error, 'FAILED OUTPUT READ')
 

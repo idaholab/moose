@@ -871,7 +871,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
 
 # Trimming routines for job output
 def trimOutput(job, options):
-    output = job.getOutput()
+    output = job.getCombinedOutput(concatenate=True)
     if ((job.isFail() and options.no_trimmed_output_on_error)
         or (job.specs.isValid('max_buffer_size') and job.specs['max_buffer_size'] == -1)
         or options.no_trimmed_output):

@@ -12,7 +12,7 @@ from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
-from TestHarness import util
+from TestHarness import OutputInterface, util
 from tempfile import TemporaryDirectory
 from collections import namedtuple
 import traceback
@@ -103,12 +103,15 @@ class Timer(object):
                 raise Exception(f'Missing time entry {name}')
             return entry[0]
 
-    def reset(self, name: str):
-        """ Resets a given timer """
+    def reset(self, name = None):
+        """ Resets a given timer or all timers """
         with self.lock:
-            if name not in self.times:
-                raise Exception(f'Missing time entry {name}')
-            del self.times[name]
+            if name:
+                if name not in self.times:
+                    raise Exception(f'Missing time entry {name}')
+                del self.times[name]
+            else:
+                self.times.clear()
 
     class TimeManager:
         """ Context manager for timing a section """
@@ -124,7 +127,7 @@ class Timer(object):
         """ Time a section using a context manager """
         return self.TimeManager(self, name)
 
-class Job(object):
+class Job(OutputInterface):
     """
     The Job class is a simple container for the tester and its associated output file object, the DAG,
     the process object, the exit codes, and the start and end times.
@@ -133,6 +136,8 @@ class Job(object):
     id_iter = itertools.count()
 
     def __init__(self, tester, job_dag, options):
+        OutputInterface.__init__(self)
+
         self.id = next(self.id_iter)
         self.options = options
         self.__j_lock = threading.Lock()
@@ -140,7 +145,6 @@ class Job(object):
         self.specs = tester.specs
         self.__job_dag = job_dag
         self.timer = Timer()
-        self.__previous_time = None
         self.__joined_out = ''
         self.report_timer = None
         self.__slots = None
@@ -188,11 +192,6 @@ class Job(object):
 
         # The object that'll actually do the run
         self._runner = None
-
-        # Any additional output produced by the Job (not from the Tester or Runner)
-        self.output = ''
-
-        self.cached_output = None
 
         # A temp directory for this Job, if requested
         self.tmp_dir = None
@@ -300,8 +299,11 @@ class Job(object):
         return self.__tester.getRunnable(self.options)
 
     def getOutputFiles(self, options):
-        """ Wrapper method to return getOutputFiles """
-        return self.__tester.getOutputFiles(options)
+        """ Wrapper method to return getOutputFiles (absolute path) """
+        files = []
+        for file in self.__tester.getOutputFiles(options):
+            files.append(os.path.join(self.__tester.getTestDir(), file))
+        return files
 
     def getMaxTime(self):
         """ Wrapper method to return getMaxTime """
@@ -309,7 +311,10 @@ class Job(object):
 
     def getInputFile(self):
         """ Wrapper method to return input filename """
-        return self.__tester.getInputFile()
+        input_file = self.__tester.getInputFile()
+        if input_file:
+            return os.path.join(self.getTestDir(), input_file)
+        return None
 
     def getInputFileContents(self):
         """ Wrapper method to return input file contents """
@@ -358,11 +363,18 @@ class Job(object):
         """
         tester = self.__tester
 
+        # Set the output path if its separate and initialize the output
+        if self.hasSeperateOutput():
+            for name, object in self.getOutputObjects().items():
+                output_path = self.getOutputPathPrefix() + f'.{name}_out.txt'
+                object.setSeparateOutputPath(output_path)
+                object.clearOutput()
+
         # Start the main timer for running
         self.timer.startMain()
 
         # Helper for exiting
-        def cleanup():
+        def finalize():
             with self.timer.time('job_cleanup'):
                 self.cleanup()
             self.timer.stopMain()
@@ -376,12 +388,11 @@ class Job(object):
                 except:
                     trace = traceback.format_exc()
                     self.setStatus(self.error, f'{exception_name} EXCEPTION')
-                    self.output += util.outputHeader('Python exception encountered')
-                    self.output += trace
+                    self.appendOutput(util.outputHeader('Python exception encountered') + trace)
                     failed = True
 
             if failed:
-                cleanup()
+                finalize()
             return not failed
 
         # Do not execute app, but still run the tester
@@ -405,12 +416,12 @@ class Job(object):
         # Verify that the working directory is available right before we execute
         if not os.path.exists(tester.getTestDir()):
             self.setStatus(self.error, 'WORKING DIRECTORY NOT FOUND')
-            cleanup()
+            finalize()
             return
         # Getting the command can also cause a failure, so try that
         tester.getCommand(self.options)
         if tester.isError():
-            cleanup()
+            finalize()
             return
 
         # Spawn the process
@@ -431,7 +442,7 @@ class Job(object):
         # Job error occurred, which means the Runner didn't complete
         # so don't process anything else
         if self.isError():
-            cleanup()
+            finalize()
             return
 
         # And do finalize (really just cleans up output)
@@ -452,8 +463,8 @@ class Job(object):
         run_tester = lambda: tester.run(self.options, exit_code, runner_output)
         try_catch(run_tester, 'TESTER RUN', 'tester_run')
 
-        # Run cleanup now that we're done
-        cleanup()
+        # Run finalize now that we're done
+        finalize()
 
     def killProcess(self):
         """ Kill remaining process that may be running """
@@ -464,55 +475,104 @@ class Job(object):
                 pass
         self.cleanup()
 
-    def getOutput(self):
-        """ Return the combined contents of output """
-        # Cached output is used when reading from a results file,
-        # when we don't run anything and just populate results
-        if self.cached_output:
-            return self.cached_output
+    def getOutputObjects(self) -> dict:
+        """
+        Get a dict of all of the objects that contribute to output
 
-        # Concatenate output in order of Runner, Tester, Job
-        output = ''
-        object_outputs = [self.getRunner().getOutput() if self.getRunner() else '',
-                          self.getTester().getOutput() if self.getTester() else '',
-                          self.output]
-        for object_output in object_outputs:
+        The key is a name which is a human readable name of the object
+        """
+        objects = {}
+        if self.getRunner():
+            objects['runner'] = self.getRunner()
+        objects['tester'] = self.getTester()
+        objects['job'] = self
+        return objects
+
+    def getCombinedSeparateOutputPaths(self):
+        """
+        Gets a dict of all of the --sep-files file paths that were produced
+
+        The key is a name which is a human readable name of the object
+        """
+        paths = {}
+        for name, object in self.getOutputObjects().items():
+            paths[name] = object.getSeparateOutputFilePath() if object.hasOutput() else None
+        return paths
+
+    def getCombinedOutput(self, concatenate=False):
+        """ Return individual output from each object """
+        output = '' if concatenate else {}
+        for name, object in self.getOutputObjects().items():
+            object_output = object.getOutput()
             if object_output:
-                # Append an extra line if we're missing one
-                if output and output[-1] != '\n':
-                    output += '\n'
-                output += object_output
+                wrapped_object_output = ''
+
+                if concatenate:
+                    # Add a complete line break between objects
+                    if output:
+                        wrapped_object_output += '\n'
+                    # Add a header before the output starts
+                    wrapped_object_output += util.outputHeader(f'Begin {name} output', ending=False) + '\n'
+
+                # Add the actual output
+                wrapped_object_output += object_output
+
+                if concatenate:
+                    # Add a newline if one is missing
+                    if wrapped_object_output[-1] != '\n':
+                        wrapped_object_output += '\n'
+                    # Add a footer after the output ends
+                    wrapped_object_output += util.outputHeader(f'End {name} output', ending=False)
+
+                    output += wrapped_object_output
+                else:
+                    output[name] = wrapped_object_output
+            elif not concatenate:
+                output[name] = ''
 
         return output
+
+    def setPreviousOutputs(self, outputs):
+        """ Sets outputs from a previous run of this Job """
+        for name, object in self.getOutputObjects().items():
+            object.setOutput(outputs[name])
+
+    def setPreviousSeparateOutputs(self, output_paths):
+        """ Sets --sep-files outputs from a previous run of this Job """
+        for name, object in self.getOutputObjects().items():
+            object.setSeparateOutputPath(output_paths[name])
 
     def getRunner(self):
         """ Gets the Runner that actually runs the command """
         return self._runner
 
-    def getOutputFile(self):
-        """ Return the output file path """
-        if ((self.options.ok_files
-             or self.options.fail_files
-             or self.options.sep_files)
-             and (self.isPass() or self.isFail())):
-            (status, message, color, exit_code, sort_value) = self.getJointStatus()
-            output_dir = self.options.output_dir if self.options.output_dir else self.getTestDir()
-            output_file = os.path.join(output_dir,
-                                       '.'.join([os.path.basename(self.getTestDir()),
-                                                 self.getTestNameShort().replace(os.sep, '.'),
-                                                 status,
-                                                 'txt']))
-            return os.path.join(output_dir, output_file)
-
-    def appendOutput(self, output):
-        self.output += output
-
-    def setPreviousTime(self, t):
+    def getOutputPathPrefix(self):
         """
-        Allow an arbitrary time to be set. This is used by the QueueManager
+        Returns a file prefix that is unique to this job
+
+        Should be used for all TestHarness produced files for this job
+        """
+        return os.path.join(self.getTestDir(), self.getTestNameShort().replace(os.sep, '.'))
+
+    def hasSeperateOutput(self):
+        """
+        Whether or not this job has separate output.
+
+        That is, whether or not we should pipe output to a file
+        """
+        return self.options.sep_files
+
+
+    def setPreviousTimer(self, timer_dict):
+        """
+        Allow arbitrary timer times to be set. This is used by the QueueManager
         to set the time as recorded by a previous TestHarness instance.
         """
-        self.__previous_time = t
+        self.timer.reset()
+        time_now = Timer.time_now()
+        for name, total_time in timer_dict.items():
+            self.timer.start(name, time_now)
+            self.timer.stop(name, time_now + total_time)
 
     def getTiming(self):
         """ Return active time if available, if not return a comparison of start and end time """
@@ -522,9 +582,6 @@ class Job(object):
         # Job has started
         if self.timer.hasTime('main'):
             return self.timer.totalTime()
-        # Previous time is set
-        if self.__previous_time:
-            return self.__previous_time
         return 0.0
 
     def getStatus(self):

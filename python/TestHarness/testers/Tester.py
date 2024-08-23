@@ -9,12 +9,12 @@
 
 import re, os, sys, shutil
 import mooseutils
-from TestHarness import util
+from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
 from pathlib import Path
 
-class Tester(MooseObject):
+class Tester(MooseObject, OutputInterface):
     """
     Base class from which all tester objects are instanced.
     """
@@ -122,6 +122,8 @@ class Tester(MooseObject):
 
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
+        OutputInterface.__init__(self)
+
         self.specs = params
         self.joined_out = ''
         self.process = None
@@ -163,13 +165,6 @@ class Tester(MooseObject):
         # The command that we actually ended up running; this may change
         # depending on the runner which might inject something
         self.command_ran = None
-
-        # The tester output
-        self.output = ''
-
-    def getOutput(self) -> str:
-        """Return the Tester output"""
-        return self.output
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -705,9 +700,7 @@ class Tester(MooseObject):
                 self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
 
         # We can't offer the option of reading output files outside of initial TestDir
-        if self.specs['working_directory'] and (options.ok_files
-                                                or options.fail_files
-                                                or options.sep_files):
+        if self.specs['working_directory'] and options.sep_files:
             reasons['working_directory'] = '--sep-files* enabled'
 
         # Explicitly skip HPC tests
@@ -767,13 +760,15 @@ class Tester(MooseObject):
         return False
 
     def run(self, options, exit_code, runner_output):
-        self.output = self.processResults(self.getMooseDir(), options, exit_code, runner_output)
+        output = self.processResults(self.getMooseDir(), options, exit_code, runner_output)
 
         # If the tester requested to be skipped at the last minute, report that.
         if self.isSkip():
-            self.output += '\n' + "#"*80 + '\nTester skipped, reason: ' + self.getStatusMessage() + '\n'
+            output += f'\nTester skipped, reason: {self.getStatusMessage()}\n'
         elif self.isFail():
-            self.output += '\n' + "#"*80 + '\nTester failed, reason: ' + self.getStatusMessage() + '\n'
+            output += f'\nTester failed, reason: {self.getStatusMessage()}\n'
+
+        self.setOutput(output)
 
     def getHPCPlace(self, options):
         """

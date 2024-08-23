@@ -8,9 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, json
-from TestHarness import util
+from TestHarness import OutputInterface
 
-class Runner:
+class Runner(OutputInterface):
     """
     Base class for running a process via a command.
 
@@ -19,14 +19,14 @@ class Runner:
     or externally (i.e., PBS, slurm, etc on HPC)
     """
     def __init__(self, job, options):
+        OutputInterface.__init__(self)
+
         # The job that this runner is for
         self.job = job
         # The test harness options
         self.options = options
         # The job's exit code, should be set after wait()
         self.exit_code = None
-        # The output the job produced; to be filled in wait()
-        self.output = ''
 
     def spawn(self, timer):
         """
@@ -60,36 +60,32 @@ class Runner:
         """
         # Load the redirected output files, if any
         for file_path in self.job.getTester().getRedirectedOutputFiles(self.options):
-            self.output += util.outputHeader(f'Begin redirected output {file_path}')
+            self.appendOutput(util.outputHeader(f'Begin redirected output {file_path}'))
             if os.access(file_path, os.R_OK):
                 with open(file_path, 'r+b') as f:
-                    self.output += self.readOutput(f)
+                    self.appendOutput(self.readOutput(f))
             else:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
-                self.output += 'FILE UNAVAILABLE\n'
-            self.output += util.outputHeader(f'End redirected output {file_path}')
+                self.appendOutput('FILE UNAVAILABLE\n')
+            self.appendOutput(util.outputHeader(f'End redirected output {file_path}'))
 
         # Check for invalid unicode in output
+        output = self.getOutput()
         try:
-            json.dumps(self.output)
+            json.dumps(output)
         except UnicodeDecodeError:
             # Convert invalid output to something json can handle
-            self.output = self.output.decode('utf-8','replace').encode('ascii', 'replace')
+            self.setOutput(output.decode('utf-8','replace').encode('ascii', 'replace'))
             # Alert the user that output has invalid characters
             self.job.addCaveats('invalid characters in output')
 
         # Remove NULL output and fail if it exists
+        output = self.getOutput()
         null_chars = ['\0', '\x00']
         for null_char in null_chars:
-            if null_char in self.output:
-                self.output = self.output.replace(null_char, 'NULL')
+            if null_char in output:
+                self.setOutput(output.replace(null_char, 'NULL'))
                 self.job.setStatus(self.job.error, 'NULL characters in output')
-
-    def getOutput(self):
-        """
-        Gets the combined output of the process.
-        """
-        return self.output
 
     def getExitCode(self):
         """
