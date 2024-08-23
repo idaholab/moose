@@ -17,8 +17,8 @@ Two combination types are possible: `Maximum` (default) and `Product`:
 
 \begin{equation}
 \begin{split}
-    \mathrm{Maximum:} & d = & \mathrm{max}(d_1 ... d_N) \\
-    \mathrm{Product:} & d = & 1 - \Prod\limits_{i=1}^{N} (1 - d_i)
+    \mathrm{Maximum:} & d = \mathrm{max}(d_1 ... d_N) \\
+    \mathrm{Product:} & d = 1 - \Prod\limits_{i=1}^{N} (1 - d_i)
 \end{split}
 \end{equation}
 

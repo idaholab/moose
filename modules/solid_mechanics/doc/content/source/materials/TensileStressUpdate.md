@@ -28,9 +28,9 @@ convenient to use three yield functions in total:
 
 \begin{equation}
 \begin{split}
-  f_{0} & = & \sigma_{III} - T \ , \nonumber \\
-  f_{1} & = & \sigma_{II} - T \ , \nonumber \\
-  f_{2} & = & \sigma_{I} - T \ .
+  f_{0} & = \sigma_{III} - T \\
+  f_{1} & = \sigma_{II} - T  \\
+  f_{2} & = \sigma_{I} - T   \\
 \end{split}
 \end{equation}
 
