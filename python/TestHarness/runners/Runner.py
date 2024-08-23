@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, json
-from TestHarness import OutputInterface
+from TestHarness import OutputInterface, util
 
 class Runner(OutputInterface):
     """
@@ -68,15 +68,16 @@ class Runner(OutputInterface):
         Finalizes the output, which should be called at the end of wait()
         """
         # Load the redirected output files, if any
+        run_output = self.getRunOutput()
         for file_path in self.job.getTester().getRedirectedOutputFiles(self.options):
-            self.appendOutput(util.outputHeader(f'Begin redirected output {file_path}'))
+            self.run_output.appendOutput(util.outputHeader(f'Begin redirected output {file_path}'))
             if os.access(file_path, os.R_OK):
                 with open(file_path, 'r+b') as f:
-                    self.appendOutput(self.readOutput(f))
+                    self.run_output.appendOutput(self.readOutput(f))
             else:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
-                self.appendOutput('FILE UNAVAILABLE\n')
-            self.appendOutput(util.outputHeader(f'End redirected output {file_path}'))
+                self.appendOutput(f'File {file_path} unavailable')
+            self.run_output.appendOutput(util.outputHeader(f'End redirected output {file_path}'))
 
         # Check for invalid unicode in output
         output = self.getOutput()
