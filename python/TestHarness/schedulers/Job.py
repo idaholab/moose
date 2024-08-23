@@ -377,26 +377,15 @@ class Job(OutputInterface):
 
         # Set the output path if its separate and initialize the output
         if self.hasSeperateOutput():
-            # Create the directory for output if it's separate
-            if self.options.output_dir:
-                # To prevent jobs clobbering when making the directory
-                with Job.mkdir_lock:
-                    job_output_dir = self.getOutputDirectory()
-                    if not os.path.isdir(job_output_dir):
-                        try:
-                            os.makedirs(job_output_dir)
-                        except OSError as ex:
-                            if ex.errno == errno.EEXIST:
-                                pass
-                            else:
-                                self.setStatus(self.error, f'DIRECTORY CREATION FAILURE')
-                                self.appendOutput(f'Failed to create directory {job_output_dir}')
+            # Need to potentially create the output directory
+            self.createOutputDirectory()
 
             # Failed to create the directory
             if self.isError():
                 finalize()
                 return
 
+            # Set the output path for each object
             for name, object in self.getOutputObjects().items():
                 output_path = self.getOutputPathPrefix() + f'.{name}_out.txt'
                 object.setSeparateOutputPath(output_path)
@@ -574,6 +563,22 @@ class Job(OutputInterface):
         if not self.options.output_dir:
             return self.getTestDir()
         return os.path.join(self.options.output_dir, self.getTestName()[:-len(self.getTestNameShort())-1])
+
+    def createOutputDirectory(self):
+        """ Create the output directory for this job, if needed """
+        if not self.options.output_dir:
+            return
+        output_dir = self.getOutputDirectory()
+        with Job.mkdir_lock:
+            if not os.path.isdir(output_dir):
+                try:
+                    os.makedirs(output_dir)
+                except OSError as ex:
+                    if ex.errno == errno.EEXIST:
+                        pass
+                    else:
+                        self.setStatus(self.error, f'DIRECTORY CREATION FAILURE')
+                        self.appendOutput(f'Failed to create Job directory {output_dir}')
 
     def getOutputPathPrefix(self):
         """
