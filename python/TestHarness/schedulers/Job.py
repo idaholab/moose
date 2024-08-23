@@ -470,7 +470,7 @@ class Job(OutputInterface):
                                                                     self.fileChecker.getNewTimes())
 
         # Allow derived proccessResults to process the output and set a failing status (if it failed)
-        runner_output = self._runner.getOutput()
+        runner_output = self._runner.getRunOutput().getOutput()
         exit_code = self._runner.getExitCode()
         run_tester = lambda: tester.run(self.options, exit_code, runner_output)
         try_catch(run_tester, 'TESTER RUN', 'tester_run')
