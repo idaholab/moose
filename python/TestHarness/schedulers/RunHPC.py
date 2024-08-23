@@ -411,8 +411,12 @@ class RunHPC(RunParallel):
             # they are complete on the executing host
             additional_output = [result_file]
             for file in tester.getOutputFiles(options):
-                additional_output.append(f'"{os.path.join(tester.getTestDir(), file)}"')
-            submission_env['ADDITIONAL_OUTPUT_FILES'] = ' '.join(additional_output)
+                additional_output.append(os.path.join(tester.getTestDir(), file))
+            # This is a bash array, need to wrap each entry in double quotes
+            additional_output_wrapped = []
+            for entry in additional_output:
+                additional_output_wrapped.append(f'"{entry}"')
+            submission_env['ADDITIONAL_OUTPUT_FILES'] = ' '.join(additional_output_wrapped)
 
             # Let the derived scheduler add additional variables
             self.augmentJobSubmission(submission_env)
