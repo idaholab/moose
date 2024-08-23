@@ -605,7 +605,7 @@ class TestHarness:
         """ Method to print a testers output to the screen """
         output = ''
         # Print what ever status the tester has at the time
-        if self.options.verbose or (job.isFail() and not self.options.quiet):
+        if self.options.verbose or (job.isFail() and not self.options.quiet) or job.isError():
             if job.getCommandRan():
                 command = job.getCommandRan()
             else:
