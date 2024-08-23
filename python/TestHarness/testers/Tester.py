@@ -774,3 +774,13 @@ class Tester(MooseObject):
             self.output += '\n' + "#"*80 + '\nTester skipped, reason: ' + self.getStatusMessage() + '\n'
         elif self.isFail():
             self.output += '\n' + "#"*80 + '\nTester failed, reason: ' + self.getStatusMessage() + '\n'
+
+    def getHPCPlace(self, options):
+        """
+        Return the placement to use for HPC jobs
+        """
+        if options.hpc_scatter_procs:
+            procs = self.getProcs(options)
+            if procs > 1 and procs <= options.hpc_scatter_procs:
+                return 'scatter'
+        return 'free'

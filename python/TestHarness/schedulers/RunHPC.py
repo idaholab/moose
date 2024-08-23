@@ -337,7 +337,7 @@ class RunHPC(RunParallel):
                               'NUM_THREADS': int(tester.getThreads(options)),
                               'ENDING_COMMENT': self.getOutputEndingComment(f'${self.getHPCJobIDVariable()}'),
                               'JOB_ID_VARIABLE': self.getHPCJobIDVariable(),
-                              'PLACE': self.options.hpc_place}
+                              'PLACE': tester.getHPCPlace(options)}
             if hold:
                 submission_env['HOLD'] = 1
             if self.options.hpc_pre_source:
