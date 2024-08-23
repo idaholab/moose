@@ -97,8 +97,7 @@ class SubprocessRunner(Runner):
                 and output[-3] == '\n\0\n':
                 output = output[:-3]
 
-            if output:
-                self.getRunOutput().appendOutput(output)
+            self.getRunOutput().appendOutput(output)
 
     def kill(self):
         if self.process is not None:

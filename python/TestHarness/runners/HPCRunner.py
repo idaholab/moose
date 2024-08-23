@@ -36,7 +36,7 @@ class HPCRunner(Runner):
         # it from that file instead and don't bother loading it
         # into memory
         hpc_job_output_path = self.run_hpc.getHPCJobOutputPath(self.job)
-        self.runner_output.setSeparateOutputPath(hpc_job_output_path)
+        self.getRunOutput().setSeparateOutputPath(hpc_job_output_path)
 
         # Rely on the RunHPC object to queue the job
         self.hpc_job = self.run_hpc.queueJob(self.job)
