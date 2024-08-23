@@ -25,7 +25,7 @@ ElementExtremeFunctorValueTempl<is_ad>::validParams()
       "the functor value should be taken; if not provided, this defaults "
       "to the 'functor' parameter.");
   params.addClassDescription(
-      "Finds either the min or max elemental value of a variable over the domain.");
+      "Finds either the min or max elemental value of a functor over the domain.");
   return params;
 }
 
@@ -37,8 +37,6 @@ ElementExtremeFunctorValueTempl<is_ad>::ElementExtremeFunctorValueTempl(
     _proxy_functor(isParamValid("proxy_functor") ? getFunctor<GenericReal<is_ad>>("proxy_functor")
                                                  : getFunctor<GenericReal<is_ad>>("functor"))
 {
-  if (this->isNodal())
-    this->paramError("variable", "This AuxKernel only supports Elemental fields");
   _use_proxy = isParamValid("proxy_functor");
 }
 

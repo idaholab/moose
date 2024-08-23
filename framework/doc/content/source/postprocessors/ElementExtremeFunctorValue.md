@@ -8,8 +8,11 @@ find the element at which the proxy functor reaches the max/min value,
 and then return the value of the specified functor at that element.
 
 !alert note
-Unlike the [ElementExtremeValue.md] postprocessor, this postprocessor does not examine the quadrature
-point values, but instead passes the element argument to the functor.
+Like the [ElementExtremeValue.md] postprocessor, this postprocessor can also
+operate on both elemental and nodal variables.
+However, unlike the [ElementExtremeValue.md] postprocessor, this postprocessor
+does not examine the quadrature point values, but instead passes the element
+argument to the functor.
 
 ## Example Input File Syntax
 
