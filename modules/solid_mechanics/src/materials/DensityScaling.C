@@ -17,6 +17,8 @@ InputParameters
 DensityScaling::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Creates an additional density scaling term to allow for larger time "
+                             "steps for specific time integration schemes");
   params.addRequiredParam<MaterialPropertyName>(
       "density",
       "Name of Material Property or a constant real number defining the density of the material.");
