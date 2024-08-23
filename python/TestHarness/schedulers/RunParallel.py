@@ -62,8 +62,8 @@ class RunParallel(Scheduler):
             if not tester.isSkip() and not job.isFail():
                 self.setSuccessfulMessage(tester)
         except:
-            job.appendOutput(util.outputHeader('Python exception encountered in Job'))
-            job.appendOutput(traceback.format_exc())
+            trace = traceback.format_exc()
+            job.appendOutput(util.outputHeader('Python exception encountered in Job') + trace)
             job.setStatus(job.error, 'JOB EXCEPTION')
 
         if job.hasSeperateOutput():

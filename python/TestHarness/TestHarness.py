@@ -839,6 +839,10 @@ class TestHarness:
                 # Additional data to store (overwrites any previous matching keys)
                 self.options.results_storage[job.getTestDir()].update(job.getMetaData())
 
+        if self.options.output_dir:
+            self.options.output_dir = os.path.abspath(self.options.output_dir)
+            self.options.results_file = os.path.join(self.options.output_dir, self.options.results_file)
+
         if self.options.results_storage and self.options.results_file:
             try:
                 with open(self.options.results_file, 'w') as data_file:
@@ -858,7 +862,7 @@ class TestHarness:
         try:
             # Write one file, with verbose information (--file)
             if self.options.file:
-                with open(self.options.file, 'w') as f:
+                with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
                     for job_group in all_jobs:
                         for job in job_group:
                             # Do not write information about silent tests
@@ -927,6 +931,14 @@ class TestHarness:
             # it's (hopefully) in an installed location
             mydir = os.path.dirname(os.path.realpath(__file__))
             self.executable = os.path.join(mydir, '../../../..', 'bin', self.executable)
+
+        # Create the output dir if they ask for it. It is easier to ask for forgiveness than permission
+        if self.options.output_dir:
+            try:
+                os.makedirs(self.options.output_dir)
+            except OSError as ex:
+                if ex.errno == errno.EEXIST: pass
+                else: raise
 
         # Use a previous results file, or declare the variable
         self.options.results_storage = {}
@@ -1020,6 +1032,7 @@ class TestHarness:
         outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
         outputgroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='do not report skipped tests')
         outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
+        outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
         outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
         outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal.')
         outputgroup.add_argument('--include-input-file', action='store_true', dest='include_input', help='Include the contents of the input file when writing the results of a test to a file')

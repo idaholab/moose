@@ -135,6 +135,9 @@ class Job(OutputInterface):
     # Iterator for producing a unique Job ID
     id_iter = itertools.count()
 
+    # Thread lock for creating output directories
+    mkdir_lock = threading.Lock()
+
     def __init__(self, tester, job_dag, options):
         OutputInterface.__init__(self)
 
@@ -363,13 +366,6 @@ class Job(OutputInterface):
         """
         tester = self.__tester
 
-        # Set the output path if its separate and initialize the output
-        if self.hasSeperateOutput():
-            for name, object in self.getOutputObjects().items():
-                output_path = self.getOutputPathPrefix() + f'.{name}_out.txt'
-                object.setSeparateOutputPath(output_path)
-                object.clearOutput()
-
         # Start the main timer for running
         self.timer.startMain()
 
@@ -378,6 +374,33 @@ class Job(OutputInterface):
             with self.timer.time('job_cleanup'):
                 self.cleanup()
             self.timer.stopMain()
+
+        # Set the output path if its separate and initialize the output
+        if self.hasSeperateOutput():
+            # Create the directory for output if it's separate
+            if self.options.output_dir:
+                # To prevent jobs clobbering when making the directory
+                with Job.mkdir_lock:
+                    job_output_dir = self.getOutputDirectory()
+                    if not os.path.isdir(job_output_dir):
+                        try:
+                            os.makedirs(job_output_dir)
+                        except OSError as ex:
+                            if ex.errno == errno.EEXIST:
+                                pass
+                            else:
+                                self.setStatus(self.error, f'DIRECTORY CREATION FAILURE')
+                                self.appendOutput(f'Failed to create directory {job_output_dir}')
+
+            # Failed to create the directory
+            if self.isError():
+                finalize()
+                return
+
+            for name, object in self.getOutputObjects().items():
+                output_path = self.getOutputPathPrefix() + f'.{name}_out.txt'
+                object.setSeparateOutputPath(output_path)
+                object.clearOutput()
 
         # Helper for trying and catching
         def try_catch(do, exception_name, timer_name):
@@ -546,13 +569,19 @@ class Job(OutputInterface):
         """ Gets the Runner that actually runs the command """
         return self._runner
 
+    def getOutputDirectory(self):
+        """ Get the directory for output for this job """
+        if not self.options.output_dir:
+            return self.getTestDir()
+        return os.path.join(self.options.output_dir, self.getTestName()[:-len(self.getTestNameShort())-1])
+
     def getOutputPathPrefix(self):
         """
         Returns a file prefix that is unique to this job
 
         Should be used for all TestHarness produced files for this job
         """
-        return os.path.join(self.getTestDir(), self.getTestNameShort().replace(os.sep, '.'))
+        return os.path.join(self.getOutputDirectory(), self.getTestNameShort().replace(os.sep, '.'))
 
     def hasSeperateOutput(self):
         """
