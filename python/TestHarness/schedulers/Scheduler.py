@@ -423,8 +423,6 @@ class Scheduler(MooseObject):
                     if clock() - self.last_reported_time >= self.min_report_time:
                         # prevent 'finished' caveat with options expecting to take lengthy amounts of time
                         if (not self.options.sep_files
-                           and not self.options.ok_files
-                           and not self.options.fail_files
                            and not self.options.hpc
                            and not self.options.heavy_tests
                            and not self.options.valgrind_mode):

@@ -16,7 +16,7 @@ import jinja2
 import copy
 import statistics
 from multiprocessing.pool import ThreadPool
-from TestHarness import util
+from TestHarness import OutputInterface, util
 
 class HPCJob:
     # The valid job states for a HPC job
@@ -794,22 +794,17 @@ class RunHPC(RunParallel):
         """
         return job.getTestName().replace(':', '.').replace('/', '.')
 
-    def getHPCJobOutputPathPrefix(self, job):
-        """Gets the absolute path prefix for a HPC job"""
-        scheduler_name = self.getHPCSchedulerName()
-        return os.path.join(job.getTestDir(), f"{scheduler_name}_" + job.getTestNameShort().replace('/', '.'))
-
     def getHPCJobOutputPath(self, job):
         """Gets the absolute path for stdout/stderr for a HPC job"""
-        return self.getHPCJobOutputPathPrefix(job) + '.out'
+        return job.getOutputPathPrefix() + '.hpc_out.txt'
 
     def getHPCJobResultPath(self, job):
         """Gets the absolute path for the result (exit code, walltime) for a HPC job"""
-        return self.getHPCJobOutputPathPrefix(job) + '.result'
+        return job.getOutputPathPrefix() + '.hpc_result'
 
     def getHPCJobSubmissionPath(self, job):
         """Gets the aboslute path for the qsub script for a HPC job"""
-        return self.getHPCJobOutputPathPrefix(job) + f'.{self.getHPCSubmissionCommand()}'
+        return job.getOutputPathPrefix() + '.hpc_submit'
 
     @staticmethod
     def getOutputEndingComment(job_id) -> str:

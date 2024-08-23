@@ -45,8 +45,11 @@ class RunParallel(Scheduler):
             tester.setStatus(status, message)
             if caveats:
                 tester.addCaveats(caveats)
-            job.setPreviousTime(job_results['TIMING'])
-            job.cached_output = job_results['OUTPUT']
+            job.setPreviousTimer(job_results['TIMING'])
+            if self.options.results_storage['SEP_FILES']:
+                job.setPreviousSeparateOutputs(job_results['OUTPUT_FILES'])
+            else:
+                job.setPreviousOutputs(job_results['OUTPUT'])
             return
 
         # Anything that throws while running or processing a job should be caught
@@ -63,8 +66,12 @@ class RunParallel(Scheduler):
             job.appendOutput(traceback.format_exc())
             job.setStatus(job.error, 'JOB EXCEPTION')
 
-        if job.getOutputFile():
-            job.addMetaData(DIRTY_FILES=[job.getOutputFile()])
+        if job.hasSeperateOutput():
+            dirty_files = []
+            for object in job.getOutputObjects().values():
+                if object.hasOutput():
+                    dirty_files.append(object.getSeparateOutputFilePath())
+            job.addMetaData(DIRTY_FILES=dirty_files)
 
     def buildRunner(self, job, options) -> Runner:
         """Builds the runner for a given tester
