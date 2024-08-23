@@ -308,6 +308,11 @@ class RunHPC(RunParallel):
             tester = job.getTester()
             options = self.options
 
+            # If we have a separate output directory, we might need to create this
+            # for the files that follow. This won't do anything if it exists and
+            # it is thread safe
+            job.createOutputDirectory()
+
             submission_script = self.getHPCJobSubmissionPath(job)
             output_file = self.getHPCJobOutputPath(job)
             result_file = self.getHPCJobResultPath(job)
