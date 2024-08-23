@@ -123,9 +123,9 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
 NonlinearSystem::~NonlinearSystem() {}
 
 void
-NonlinearSystem::init()
+NonlinearSystem::preInit()
 {
-  NonlinearSystemBase::init();
+  NonlinearSystemBase::preInit();
 
   if (_automatic_scaling && _resid_vs_jac_scaling_param < 1. - TOLERANCE)
     // Add diagonal matrix that will be used for computing scaling factors

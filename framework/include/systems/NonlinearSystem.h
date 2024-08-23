@@ -32,7 +32,7 @@ public:
 
   virtual void solve() override;
 
-  void init() override;
+  virtual void preInit() override;
 
   /**
    * Quit the current solve as soon as possible.

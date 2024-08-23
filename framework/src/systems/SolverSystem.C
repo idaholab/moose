@@ -27,9 +27,9 @@ SolverSystem::SolverSystem(SubProblem & subproblem,
 SolverSystem::~SolverSystem() = default;
 
 void
-SolverSystem::init()
+SolverSystem::preInit()
 {
-  SystemBase::init();
+  SystemBase::preInit();
 
   _current_solution = system().current_local_solution.get();
 

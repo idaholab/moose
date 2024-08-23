@@ -1211,10 +1211,9 @@ SystemBase::copyVars(ExodusII_IO & io)
 }
 
 void
-SystemBase::update(const bool update_libmesh_system)
+SystemBase::update()
 {
-  if (update_libmesh_system)
-    system().update();
+  system().update();
 }
 
 void
