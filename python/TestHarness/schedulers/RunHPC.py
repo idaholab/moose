@@ -855,7 +855,7 @@ class RunHPC(RunParallel):
         functor = lambda hpc_job: hpc_job.state == hpc_job.State.held
         self.killHPCJobs(functor)
 
-    def additionalResultSummary(self):
+    def appendResultFooter(self):
         timer_keys = ['hpc_queued', 'hpc_wait_output']
         times = {}
         for key in timer_keys:
@@ -874,3 +874,8 @@ class RunHPC(RunParallel):
         result = f'Average queue time {averages["hpc_queued"]:.1f} seconds, '
         result += f'average output wait time {averages["hpc_wait_output"]:.1f} seconds.'
         return result
+
+    def appendResultFileHeader(self):
+        hpc_entry = {'scheduler': self.options.hpc,
+                     'hosts': self.options.hpc_host if isinstance(self.options.hpc_host, list) else [self.options.hpc_host]}
+        return {'HPC': hpc_entry}

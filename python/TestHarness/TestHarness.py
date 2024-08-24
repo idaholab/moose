@@ -15,6 +15,8 @@ import shlex
 from . import RaceChecker
 import subprocess
 import shutil
+import socket
+import datetime
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -364,7 +366,7 @@ class TestHarness:
     def findAndRunTests(self, find_only=False):
         self.error_code = 0x0
         self.preRun()
-        self.start_time = clock()
+        self.start_time = datetime.datetime.now()
         launched_tests = []
         if self.options.input_file_name != '':
             self._infiles = self.options.input_file_name.split(',')
@@ -675,7 +677,7 @@ class TestHarness:
             for (job, sort_value, timing) in sorted(self.test_table, key=lambda x: x[1]):
                 print((util.formatResult(job, self.options, caveats=True)))
 
-        time = clock() - self.start_time
+        time = datetime.datetime.now() - self.start_time
 
         print(('-' * (self.options.term_cols)))
 
@@ -702,10 +704,13 @@ class TestHarness:
             else:
                 timing_max = 0
                 timing_avg = 0
-            print(('Ran %d tests in %.1f seconds. Average test time %.1f seconds, maximum test time %.1f seconds.' % (self.num_passed+self.num_failed, time, timing_avg, timing_max)))
+            summary = f'Ran {self.num_passed + self.num_failed} tests in {time.total_seconds():.1f} seconds.'
+            summary += f' Average test time {timing_avg:.1f} seconds,'
+            summary += f' maximum test time {timing_max:.1f} seconds.'
+            print(summary)
 
             # Get additional results from the scheduler
-            scheduler_summary = self.scheduler.additionalResultSummary()
+            scheduler_summary = self.scheduler.appendResultFooter()
             if scheduler_summary:
                 print(scheduler_summary)
 
@@ -804,6 +809,14 @@ class TestHarness:
 
         # Record the Scheduler Plugin used
         self.options.results_storage['SCHEDULER'] = self.scheduler.__class__.__name__
+
+        # Record information on the host we can ran on
+        self.options.results_storage['HOSTNAME'] = socket.gethostname()
+        self.options.results_storage['USER'] = os.getlogin()
+        self.options.results_storage['TIME'] = self.start_time.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Record any additional data from the cheduler
+        self.options.results_storage.update(self.scheduler.appendResultFileHeader())
 
         # Write some useful data to our results_storage
         for job_group in all_jobs:
