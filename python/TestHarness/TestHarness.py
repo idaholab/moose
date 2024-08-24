@@ -893,6 +893,9 @@ class TestHarness:
         # Record information on the host we can ran on
         storage['HOSTNAME'] = socket.gethostname()
         storage['USER'] = os.getlogin()
+        storage['TESTHARNESS_PATH'] = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+        storage['TESTHARNESS_ARGS'] = sys.argv[1:]
+        storage['MOOSE_DIR'] = self.moose_dir
 
         # Record when the run began
         storage['TIME'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
