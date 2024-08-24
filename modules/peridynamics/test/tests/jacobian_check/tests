@@ -4,7 +4,7 @@
     input = '2D_heat_conduction_BPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'HeatConductionBPD shall provide the accurate residual and
+    requirement = 'The system shall be able to provide the accurate residual and
                    jacobian for bond-based peridynamic heat conduction model.'
     design = 'HeatConductionBPD.md'
     issues = '#11561'
@@ -16,7 +16,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'HeatConductionBPD shall provide the accurate residual and
+    requirement = 'The system shall be able to provide the accurate residual and
                    jacobian for bond-based peridynamic heat conduction model with arbitrarily broken bonds.'
     design = 'HeatConductionBPD.md'
     issues = '#15393'
@@ -26,7 +26,7 @@
     input = '2D_mechanics_BPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'MechanicsBPD shall provide the accurate residual and jacobian
+    requirement = 'The system shall be able to provide the accurate residual and jacobian
                    for bond-based peridynamic mechanics model.'
     design = 'MechanicsBPD.md'
     issues = '#11561'
@@ -38,7 +38,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'MechanicsBPD shall provide the accurate residual and jacobian
+    requirement = 'The system shall be able to provide the accurate residual and jacobian
                    for bond-based peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'MechanicsBPD.md'
     issues = '#15393'
@@ -48,7 +48,7 @@
     input = '2D_thermomechanics_BPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'MechanicsBPD and HeatConductionBPD shall provide the accurate
+    requirement = 'The system shall be able to provide the accurate
                    residual and jacobian for bond-based peridynamic thermomechanics model.'
     design = 'MechanicsBPD.md'
     issues = '#11561'
@@ -60,7 +60,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'MechanicsBPD and HeatConductionBPD shall provide the accurate
+    requirement = 'The system shall be able to provide the accurate
                    residual and jacobian for bond-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'MechanicsBPD.md'
     issues = '#15393'
@@ -70,7 +70,7 @@
     input = '2D_mechanics_OSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'MechanicsOSPD shall provide the accurate residual and jacobian
+    requirement = 'The system shall be able to provide the accurate residual and jacobian
                    for ordinary state-based peridynamic mechanics model.'
     design = 'MechanicsOSPD.md'
     issues = '#11561'
@@ -82,7 +82,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'MechanicsOSPD shall provide the accurate residual and jacobian
+    requirement = 'The system shall be able to provide the accurate residual and jacobian
                    for ordinary state-based peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'MechanicsOSPD.md'
     issues = '#15393'
@@ -92,7 +92,7 @@
     input = '2D_thermomechanics_OSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'MechanicsOSPD and HeatConductionBPD shall provide the accurate
+    requirement = 'The system shall be able to provide the accurate
                    residual and jacobian for ordinary state-based peridynamic thermomechanics model.'
     design = 'MechanicsOSPD.md'
     issues = '#11561'
@@ -104,7 +104,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'MechanicsOSPD and HeatConductionBPD shall provide the accurate
+    requirement = 'The system shall be able to provide the accurate
                    residual and jacobian for ordinary state-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'MechanicsOSPD.md'
     issues = '#15393'
@@ -114,7 +114,7 @@
     input = '2D_mechanics_FNOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'ForceStabilizedSmallStrainMechanicsNOSPD shall provide the
+    requirement = 'The system shall be able to provide the
                    accurate residual and jacobian for force stabilized peridynamic
                    correspondence model under small strain assumptions.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
@@ -127,7 +127,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'ForceStabilizedSmallStrainMechanicsNOSPD shall provide the
+    requirement = 'The system shall be able to provide the
                    accurate residual and jacobian for force-stabilized small-strain
                    non-ordinary state-based peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
@@ -138,8 +138,7 @@
     input = '2D_thermomechanics_FNOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'ForceStabilizedSmallStrainMechanicsNOSPD and HeatConductionBPD
-                   shall provide the accurate residual and jacobian for thermomechanics problems
+    requirement = 'The system shall be able to provide the accurate residual and jacobian for thermomechanics problems
                    based on force stabilized correspondence model and bond-based heat conduction model
                    under small strain assumptions.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
@@ -152,8 +151,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'ForceStabilizedSmallStrainMechanicsNOSPD and HeatConductionBPD
-                   shall provide the accurate residual and jacobian for force-stabilized
+    requirement = 'The system shall be able to provide the accurate residual and jacobian for force-stabilized
                    small-strain non-ordinary state-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'ForceStabilizedSmallStrainMechanicsNOSPD.md'
     issues = '#15393'
@@ -163,7 +161,7 @@
     input = '2D_mechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD shall provide the accurate residual
+    requirement = 'The system shall be able to provide the accurate residual
                    and jacobian for Form I of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions in 2D.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
@@ -176,7 +174,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD shall provide the accurate residual
+    requirement = 'The system shall be able to provide the accurate residual
                    and jacobian for horizon-stabilized small-strain non-ordinary state-based
                    peridynamic mechanics model with arbitrarily broken bonds.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
@@ -187,7 +185,7 @@
     input = '2D_mechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD shall provide the accurate residual
+    requirement = 'The system shall be able to provide the accurate residual
                    and jacobian for Form II of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions.'
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
@@ -200,7 +198,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD and HeatConductionBPD shall provide
+    requirement = 'The system shall be able to provide
                    the accurate residual and jacobian for horizon-stabilized small-strain
                    non-ordinary state-based peridynamic thermomechanics model with arbitrarily broken bonds.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
@@ -211,7 +209,7 @@
     input = '2D_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD and HeatConductionBPD shall provide
+    requirement = 'The system shall be able to provide
                    the accurate residual and jacobian for thermomechanics problems based on Form I
                    of the horizon stabilized peridynamic correspondence model and the bond-based heat conduction model
                    under small strain assumptions.'
@@ -223,7 +221,7 @@
     input = '2D_thermomechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD and HeatConductionBPD shall provide
+    requirement = 'The system shall be able to provide
                    the accurate residual and jacobian for thermomechanics problems based on Form II
                    of the horizon stabilized peridynamic correspondence model and the bond-based heat conduction model
                    under small strain assumptions.'
@@ -235,7 +233,7 @@
     input = '3D_mechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD shall provide the accurate residual
+    requirement = 'The system shall be able to provide the accurate residual
                    and jacobian for Form I of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions in 3D.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
@@ -246,7 +244,7 @@
     input = '3D_mechanics_smallstrain_H2NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD shall provide the accurate residual
+    requirement = 'The system shall be able to provide the accurate residual
                    and jacobian for Form II of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions in 3D.'
     design = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
@@ -260,7 +258,7 @@
     difference_tol = 1E10
     allow_test_objects = true
     max_parallel = 1
-    requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD shall provide the accurate residual
+    requirement = 'The system shall be able to provide the accurate residual
                    and jacobian for horizon-stabilized small-strain non-ordinary
                    state-based peridynamic mechanics model with arbitrarily broken bonds in 3D.'
     design = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
@@ -271,7 +269,7 @@
     input = 'generalized_planestrain_OSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'GeneralizedPlaneStrainOffDiagOSPD shall provide the off-diagonal
+    requirement = 'The system shall be able to provide the off-diagonal
                    jacobian for coupling between scalar variable and displacement variables
                    for the ordinary state-based peridynamic generalized plane strain model.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
@@ -284,7 +282,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'GeneralizedPlaneStrainOffDiagOSPD shall provide the off-diagonal
+    requirement = 'The system shall be able to provide the off-diagonal
                    jacobian for coupling between scalar variable and displacement variables
                    for ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
@@ -295,7 +293,7 @@
     input = 'generalized_planestrain_thermomechanics_OSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'GeneralizedPlaneStrainOffDiagOSPD shall provide the off-diagonal
+    requirement = 'The system shall be able to provide the off-diagonal
                    jacobian for coupling between scalar variable and field variables (disp and temp)
                    for the ordinary state-based peridynamic generalized plane strain model.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
@@ -308,7 +306,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'GeneralizedPlaneStrainOffDiagOSPD shall provide the off-diagonal
+    requirement = 'The system shall be able to provide the off-diagonal
                    jacobian for coupling between scalar variable and field variables (disp and temp)
                    for ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
     design = 'GeneralizedPlaneStrainOffDiagOSPD.md'
@@ -319,7 +317,7 @@
     input = 'generalized_planestrain_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'GeneralizedPlaneStrainOffDiagNOSPD shall provide the off-diagonal
+    requirement = 'The system shall be able to provide the off-diagonal
                    jacobian for coupling between scalar variable and displacement variables
                    for Form I of the horizon stabilized peridynamic correspondence model based
                    generalized plane strain model.'
@@ -333,10 +331,10 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'GeneralizedPlaneStrainOffDiagHNOSPD shall provide the off-diagonal
+    requirement = 'The system shall be able to provide the off-diagonal
                    jacobian for coupling between scalar variable and displacement variables
                    for non-ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
-    design = 'GeneralizedPlaneStrainOffDiagHNOSPD.md'
+    design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#15393'
   [../]
   [./gps_thermomechanics_smallstrain_H1NOSPD]
@@ -344,7 +342,7 @@
     input = 'generalized_planestrain_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'GeneralizedPlaneStrainOffDiagNOSPD shall provide the off-diagonal
+    requirement = 'The system shall be able to provide the off-diagonal
                    jacobian for coupling between scalar variable and field variables (disp and temp)
                    for Form I of the horizon stabilized peridynamic correspondence model based
                    generalized plane strain model.'
@@ -358,10 +356,10 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'GeneralizedPlaneStrainOffDiagHNOSPD shall provide the off-diagonal
-                   jacobian for coupling between scalar variable and field variables (disp and temp)
+    requirement = 'The system shall be able to provide the off-diagonal
+                   jacobian for coupling between scalar variable and field variables (displacement and temperature)
                    for ordinary state-based peridynamic generalized plane strain model with arbitrarily broken bonds.'
-    design = 'GeneralizedPlaneStrainOffDiagHNOSPD.md'
+    design = 'GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#15393'
   [../]
   [./weak_planestress_thermomechanics_smallstrain_H1NOSPD]
@@ -369,7 +367,7 @@
     input = 'weak_planestress_thermomechanics_smallstrain_H1NOSPD.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'WeakPlaneStressNOSPD shall provide the accurate residual and
+    requirement = 'The system shall be able to provide the accurate residual and
                    jacobian for the coupled peridynamic weak plane stress model.'
     design = 'WeakPlaneStressNOSPD.md'
     issues = '#11561'
@@ -381,9 +379,9 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
-    requirement = 'WeakPlaneStressHNOSPD shall provide the accurate residual and
+    requirement = 'The system shall be able to provide the accurate residual and
                    jacobian for coupled peridynamic weak plane stress model with arbitrarily broken bonds.'
-    design = 'WeakPlaneStressHNOSPD.md'
+    design = 'WeakPlaneStressNOSPD.md'
     issues = '#15393'
   [../]
 []
