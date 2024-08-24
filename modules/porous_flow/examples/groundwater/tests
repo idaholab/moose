@@ -5,7 +5,7 @@
     cli_args = 'DiracKernels/sink/point_file=ex01.bh_aquitard Outputs/csv/file_base=ex01_aquitard_extraction'
     csvdiff = 'ex01_aquitard_extraction_drawdown_0004.csv'
     issues = '#15921'
-    design = 'groundwater.md'
+    design = 'groundwater_models.md'
     requirement = 'PorousFlow shall be able to simulate groundwater extraction via a borehole'
   [../]
   [./ex02_steady_state]
@@ -15,7 +15,7 @@
     cli_args = 'Executioner/end_time=1'
     csvdiff = 'ex02_steady_state_csv.csv'
     issues = '#15921'
-    design = 'groundwater.md'
+    design = 'groundwater_models.md'
     requirement = 'PorousFlow shall be able to simulate rainfall recharge, evapotranspiration and baseflow, and converge to a usable steadystate solution in such instances'
   [../]
   [./ex02_abstraction]
@@ -25,7 +25,7 @@
     cli_args = 'Executioner/end_time=100'
     csvdiff = 'ex02_abstraction_csv.csv'
     issues = '#15921'
-    design = 'groundwater.md'
+    design = 'groundwater_models.md'
     requirement = 'PorousFlow shall be able to simulate rainfall recharge, evapotranspiration and baseflow in transient simulations'
   [../]
 []
