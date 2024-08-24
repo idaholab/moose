@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885 #26530'
-  design = 'ParsedVectorReporter.md ParsedScalarReporter.md MultiAppReporterTransfer.md'
+  design = 'ParsedVectorRealReductionReporter.md ParsedVectorVectorRealReductionReporter.md'
   [sampler_opt]
     requirement = "The system shall be able to find an optimal value to a linear combination of parallel forward problems run using the sampler system."
     type = CSVDiff

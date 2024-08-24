@@ -5,7 +5,7 @@
     csvdiff = water_60degC_out.csv
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals, for water at equilibrium at a constant 60C temperature."
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
   [./water_60_to_220degC]
     type = CSVDiff
@@ -13,7 +13,7 @@
     csvdiff = water_60_to_220degC_out.csv
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals, for water in a reservoir."
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
   [./kinetic]
     type = CSVDiff
@@ -21,7 +21,7 @@
     csvdiff = kinetic_out.csv
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with kinetic minerals"
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
   [./water_3]
     type = CSVDiff
@@ -29,7 +29,7 @@
     csvdiff = water_3_out.csv
     requirement = "The system shall be able to solve aqueous geochemical systems with varying temperatures and varying pH"
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
   [./natural_reservoir]
     type = CSVDiff
@@ -38,7 +38,7 @@
     cli_args = 'Executioner/end_time=4E2'
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals, for water enclosed in a natural reservoir."
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
   [./reservoir_and_water_3]
     type = CSVDiff
@@ -47,7 +47,7 @@
     cli_args = 'Executioner/end_time=4E6'
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals to examine water injection in a natural reservoir."
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
   [./porous_flow]
     type = CSVDiff
@@ -56,7 +56,7 @@
     cli_args = "MultiApps/active='' Transfers/active='' Mesh/gen/nx=9 Mesh/gen/ny=8 Executioner/end_time=500 FluidProperties/the_simple_fluid/thermal_expansion=0"
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals to examine water injection in a natural reservoir without geochemistry"
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
   [./aquifer_geochemistry_alone]
     type = CSVDiff
@@ -65,6 +65,6 @@
     cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=2 Executioner/TimeStepper/function=1E2 Executioner/end_time=4E2'
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals to examine water injection in a natural reservoir with reactive transport / geochemistry."
     issues = '#15693'
-    design = 'geotes_forge.md'
+    design = 'forge.md'
   [../]
 []
