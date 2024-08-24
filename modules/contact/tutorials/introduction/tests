@@ -1,17 +1,24 @@
 [Tests]
+  issues = '#18791'
   [step01]
     type = RunApp
     input = step01.i
     absent_out = 'Solve Did NOT Converge'
+    requirement = 'The system shall be able to model contact between two cantilevers using a penalty formulation.'
+    design = 'modules/contact/tutorials/introduction/step01.md'
   []
   [step02]
     type = RunApp
     input = step02.i
     absent_out = 'Solve Did NOT Converge'
+    requirement = 'The system shall be able to model contact between two cantilevers using a mortar formulation.'
+    design = 'modules/contact/tutorials/introduction/step02.md'
   []
   [plot02]
     type = RunApp
     command = plot02.py
     display_required = true
+    requirement = 'The system shall be able to plot contact pressure and distance in the contact tutorial.'
+    design = 'modules/contact/tutorials/introduction/step02.md'
   []
 []
