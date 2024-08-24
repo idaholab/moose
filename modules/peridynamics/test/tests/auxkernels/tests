@@ -6,7 +6,7 @@
     map = false
     requirement = 'NodalRankTwoPD shall calculate the stress/strain tensors at
                    a material point for elastic material.'
-    design = 'modules/peridynamics/NodalRankTwoPD.md'
+    design = 'NodalRankTwoPD.md'
     issues = '#11561'
   [../]
   [./stretch_H1NOSPD]
@@ -15,7 +15,7 @@
     exodiff = 'planestrain_thermomechanics_stretch_H1NOSPD.e'
     map = false
     requirement = 'ComputeStrainBaseNOSPD shall calculate the stretches of a bond.'
-    design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
+    design = 'ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   [../]
   [./offset_and_area_2D]
@@ -25,7 +25,7 @@
     map = false
     requirement = 'BoundaryOffsetPD and NodalVolumePD shall retrieve the offset of boundary nodes
                    and nodal area from mesh for 2D geometries.'
-    design = 'modules/peridynamics/BoundaryOffsetPD.md; modules/peridynamics/NodalVolumePD.md'
+    design = 'BoundaryOffsetPD.md; NodalVolumePD.md'
     issues = '#11561'
   [../]
   [./offset_and_volume_3D]
@@ -35,7 +35,7 @@
     map = false
     requirement = 'BoundaryOffsetPD and NodalVolumePD shall retrieve the offset of boundary nodes
                    and nodal volume from mesh for 3D geometries.'
-    design = 'modules/peridynamics/BoundaryOffsetPD.md; modules/peridynamics/NodalVolumePD.md'
+    design = 'BoundaryOffsetPD.md; NodalVolumePD.md'
     issues = '#11561'
   [../]
 []

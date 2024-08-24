@@ -1,6 +1,6 @@
 [Tests]
   issues = '#11561'
-  design = 'modules/peridynamics/PeridynamicsMesh.md'
+  design = 'PeridynamicsMesh.md'
   [./initial_run]
     type = 'Exodiff'
     input = '2D_mesh_restartable_H1NOSPD.i'

@@ -8,7 +8,7 @@
     requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual
                    and diagonal jacobian entry for the ordinary state-based formulation
                    of generalized plane strain problem.'
-    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
+    design = 'GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
   [../]
 
@@ -19,8 +19,8 @@
     map = false
     requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual
                    and diagonal jacobian entry for the ordinary state-based formulation
-                   of generalized plane strain problem.'
-    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
+                   of generalized plane strain problem with a problem geometry with multiple disjoint regions.'
+    design = 'GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
   [../]
 
@@ -31,7 +31,7 @@
     map = false
     requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall consider the out-of-plane
                    pressure for the ordinary state-based formulation of generalized plane strain problem.'
-    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
+    design = 'GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
   [../]
 
@@ -43,7 +43,7 @@
     requirement = 'ComputeSmallStrainConstantHorizonMaterialOSPD shall incorporate
                    prescribed out-of-plane strain for the ordinary state-based formulation
                    of generalized plane strain problem.'
-    design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialOSPD.md'
+    design = 'ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
 
@@ -56,7 +56,7 @@
     requirement = 'GeneralizedPlaneStrainUserObjectNOSPD shall provide the residual
                    and diagonal jacobian entry for formulation based on Form I of
                    the horizon stabilized correspondence model.'
-    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectNOSPD.md'
+    design = 'GeneralizedPlaneStrainUserObjectNOSPD.md'
     issues = '#11561'
   [../]
 []

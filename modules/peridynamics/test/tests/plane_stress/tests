@@ -6,7 +6,7 @@
     map = false
     requirement = 'ComputeSmallStrainConstantHorizonMaterialOSPD shall model
                    plane stress problems by providing related material constants.'
-    design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialOSPD.md'
+    design = 'ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
   [./conventional_planestress_H1NOSPD]
@@ -16,7 +16,7 @@
     map = false
     requirement = 'ComputePlaneStressIsotropicElasticityTensor shall provide elasticity
                    tensor for plane stress model based on Form I of the horizon stabilized correspondence model.'
-    design = 'modules/peridynamics/ComputePlaneStressIsotropicElasticityTensor.md'
+    design = 'ComputePlaneStressIsotropicElasticityTensor.md'
     issues = '#11561'
     allow_test_objects = true
   [../]
@@ -27,7 +27,7 @@
     map = false
     requirement = 'WeakPlaneStressNOSPD shall model plane stress problem using
                    weak formulation based on Form I of the horizon stabilized correspondence model.'
-    design = 'modules/peridynamics/WeakPlaneStressNOSPD.md'
+    design = 'WeakPlaneStressNOSPD.md'
     issues = '#11561'
   [../]
 []

@@ -6,7 +6,7 @@
     map = false
     requirement = 'HeatConductionBPD shall model heat conduction using bond-based
                    peridynamics model.'
-    design = 'modules/peridynamics/HeatConductionBPD.md'
+    design = 'HeatConductionBPD.md'
     issues = '#11561'
   [../]
 []

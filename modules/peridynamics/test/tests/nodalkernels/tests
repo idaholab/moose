@@ -7,7 +7,7 @@
 
     requirement = "PenaltyDirichletOldValuePD shall support enforcement of
                    Dirichlet boundary condition of old value by penalty method for nodesets."
-    design = 'modules/peridynamics/nodalkernels/PenaltyDirichletOldValuePD.md'
+    design = 'nodalkernels/PenaltyDirichletOldValuePD.md'
     issues = '#11561'
   [../]
 []
