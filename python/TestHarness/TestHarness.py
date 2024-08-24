@@ -810,9 +810,6 @@ class TestHarness:
             for job in job_group:
                 status, message, message_color, status_code, sort_value = job.getJointStatus()
 
-                if status == 'SILENT':
-                    continue
-
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
 
