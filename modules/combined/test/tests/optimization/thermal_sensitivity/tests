@@ -1,11 +1,13 @@
 [Tests]
   issues = '#25602'
   design = 'ThermalCompliance.md ThermalSensitivity.md'
-  requirement = 'The system shall be able to minimize the thermal compliance for a '
-  [2d_root]
-    type = 'CSVDiff'
-    input = '2d_root.i'
-    csvdiff = '2d_root_out.csv'
-    detail = ' single material 2D topology optimization problem.'
+  [thermal_compliance]
+    requirement = 'The system shall be able to minimize the thermal compliance for a '
+    [2d_root]
+      type = 'CSVDiff'
+      input = '2d_root.i'
+      csvdiff = '2d_root_out.csv'
+      detail = ' single material 2D topology optimization problem.'
+    []
   []
 []

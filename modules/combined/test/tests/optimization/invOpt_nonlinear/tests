@@ -1,33 +1,35 @@
 [Tests]
   issues = '#22208'
   design = 'Optimize.md OptimizationReporter/index.md'
-  requirement = "The system shall solve for the value of a constant heat source with a temperature dependent "
-                "thermal conductivity, to match a target temperature profile, using a"
-  [BFGS]
-    detail = " limited memory BFGS algorithm"
-    type = CSVDiff
-    rel_err = 0.1
-    abs_zero = 0.5
-    input = main.i
-    csvdiff = main_out_OptimizationReporter_0001.csv
-    cli_args = "Executioner/tao_solver=taolmvm"
-    max_threads = 1
-    valgrind = none
-    recover = false
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
-  []
-  [Newton]
-    detail = " matrix free hessian and Newton algorithm"
-    type = CSVDiff
-    rel_err = 0.1
-    abs_zero = 0.5
-    input = main.i
-    csvdiff = main_out_OptimizationReporter_0001.csv
-    cli_args = "Executioner/tao_solver=taonls"
-    max_threads = 1
-    recover = false
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+  [inverse_opt]
+    requirement = "The system shall solve for the value of a constant heat source with a temperature dependent "
+                  "thermal conductivity, to match a target temperature profile, using a"
+    [BFGS]
+      detail = " limited memory BFGS algorithm"
+      type = CSVDiff
+      rel_err = 0.1
+      abs_zero = 0.5
+      input = main.i
+      csvdiff = main_out_OptimizationReporter_0001.csv
+      cli_args = "Executioner/tao_solver=taolmvm"
+      max_threads = 1
+      valgrind = none
+      recover = false
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
+      installation_type = in_tree
+    []
+    [Newton]
+      detail = " matrix free hessian and Newton algorithm"
+      type = CSVDiff
+      rel_err = 0.1
+      abs_zero = 0.5
+      input = main.i
+      csvdiff = main_out_OptimizationReporter_0001.csv
+      cli_args = "Executioner/tao_solver=taonls"
+      max_threads = 1
+      recover = false
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
+      installation_type = in_tree
+    []
   []
 []

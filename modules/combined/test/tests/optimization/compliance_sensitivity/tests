@@ -1,35 +1,37 @@
 [Tests]
   issues = '#25602'
   design = 'DensityUpdate.md DensityUpdateTwoConstraints.md'
-  requirement = 'The system shall be able to compute the compliance sensitivty correctly for a '
-  [2d_mbb]
-    type = 'CSVDiff'
-    input = '2d_mbb.i'
-    csvdiff = '2d_mbb_out.csv'
-    detail = '2D topology optimization problem.'
-    heavy = true
-  []
-  [3d_mbb]
-    type = 'CSVDiff'
-    input = '3d_mbb.i'
-    csvdiff = '3d_mbb_out.csv'
-    detail = '3D topology optimization problem.'
-    valgrind = 'none'
-    method = opt
-  []
-  [2d_mbb_pde]
-    type = 'CSVDiff'
-    input = '2d_mbb_pde.i'
-    csvdiff = '2d_mbb_pde_out.csv'
-    detail = '2D topology optimization problem with a PDE filter.'
-    heavy = true
-  []
-  [2d_mbb_pde_amr]
-    type = 'CSVDiff'
-    input = '2d_mbb_pde_amr.i'
-    csvdiff = '2d_mbb_pde_amr_out.csv'
-    detail = '2D topology optimization problem with AMR.'
-    heavy = true
+  [compliance_sensitivity]
+    requirement = 'The system shall be able to compute the compliance sensitivty correctly for a '
+    [2d_mbb]
+      type = 'CSVDiff'
+      input = '2d_mbb.i'
+      csvdiff = '2d_mbb_out.csv'
+      detail = '2D topology optimization problem.'
+      heavy = true
+    []
+    [3d_mbb]
+      type = 'CSVDiff'
+      input = '3d_mbb.i'
+      csvdiff = '3d_mbb_out.csv'
+      detail = '3D topology optimization problem.'
+      valgrind = 'none'
+      method = opt
+    []
+    [2d_mbb_pde]
+      type = 'CSVDiff'
+      input = '2d_mbb_pde.i'
+      csvdiff = '2d_mbb_pde_out.csv'
+      detail = '2D topology optimization problem with a PDE filter.'
+      heavy = true
+    []
+    [2d_mbb_pde_amr]
+      type = 'CSVDiff'
+      input = '2d_mbb_pde_amr.i'
+      csvdiff = '2d_mbb_pde_amr_out.csv'
+      detail = '2D topology optimization problem with AMR.'
+      heavy = true
+    []
   []
   [2d_mmb_2material_cost_initial]
     type = 'CSVDiff'
