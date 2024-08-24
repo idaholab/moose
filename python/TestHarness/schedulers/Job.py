@@ -335,7 +335,8 @@ class Job(OutputInterface):
             unique_prereqs.append(os.path.join(self.getTestDir(), prereq))
         return unique_prereqs
 
-    def addDirtyFiles(self, files):
+    def addDirtyFiles(self, files: list):
+        """ Adds the given files as dirty for this job """
         dirty_files = self.getMetaData().get('DIRTY_FILES', [])
         for file in files:
             if file not in dirty_files:
@@ -552,16 +553,6 @@ class Job(OutputInterface):
 
         return output
 
-    def setPreviousOutputs(self, outputs):
-        """ Sets outputs from a previous run of this Job """
-        for name, object in self.getOutputObjects().items():
-            object.setOutput(outputs[name])
-
-    def setPreviousSeparateOutputs(self, output_paths):
-        """ Sets --sep-files outputs from a previous run of this Job """
-        for name, object in self.getOutputObjects().items():
-            object.setSeparateOutputPath(output_paths[name])
-
     def getRunner(self):
         """ Gets the Runner that actually runs the command """
         return self._runner
@@ -603,18 +594,6 @@ class Job(OutputInterface):
         That is, whether or not we should pipe output to a file
         """
         return self.options.sep_files
-
-
-    def setPreviousTimer(self, timer_dict):
-        """
-        Allow arbitrary timer times to be set. This is used by the QueueManager
-        to set the time as recorded by a previous TestHarness instance.
-        """
-        self.timer.reset()
-        time_now = Timer.time_now()
-        for name, total_time in timer_dict.items():
-            self.timer.start(name, time_now)
-            self.timer.stop(name, time_now + total_time)
 
     def getTiming(self):
         """ Return active time if available, if not return a comparison of start and end time """
@@ -709,3 +688,61 @@ class Job(OutputInterface):
                     self.__tester.getStatus().color,
                     self.__tester.getStatus().code,
                     self.__tester.getStatus().sort_value)
+
+    def getResults(self):
+        """ Gets the results for this job for the results storage """
+        status, message, message_color, _, _ = self.getJointStatus()
+
+        # Output that isn't in a file (no --sep-files)
+        output = self.getCombinedOutput() if not self.hasSeperateOutput() else None
+        # Output that is in a file (--sep-files)
+        output_files = self.getCombinedSeparateOutputPaths() if self.hasSeperateOutput() else None
+
+        job_data = {'NAME'                 : self.getTestNameShort(),
+                    'LONG_NAME'            : self.getTestName(),
+                    'TIMING'               : self.timer.totalTimes(),
+                    'STATUS'               : status,
+                    'STATUS_MESSAGE'       : message,
+                    'FAIL'                 : self.isFail(),
+                    'COLOR'                : message_color,
+                    'CAVEATS'              : list(self.getCaveats()),
+                    'OUTPUT'               : output,
+                    'OUTPUT_FILES'         : output_files,
+                    'TESTER_OUTPUT_FILES'  : self.getOutputFiles(self.options),
+                    'INPUT_FILE'           : self.getInputFile(),
+                    'COMMAND'              : self.getCommand(),
+                    'META_DATA'            : self.getMetaData()}
+        return job_data
+
+    def loadPreviousResults(self):
+        """ Loads the previous results for this job for the results storage """
+        try:
+            test_results = self.options.results_storage[self.getTestDir()][self.getTestName()]
+        except KeyError:
+            print(f'ERROR: {self.getTestName()} is missing in {self.options.results_file}')
+            sys.exit(1)
+
+        # Set the tester status
+        tester = self.getTester()
+        status, message, caveats = self.previousTesterStatus(self.options, self.options.results_storage)
+        tester.setStatus(status, message)
+        if caveats:
+            tester.addCaveats(caveats)
+
+        # Set the previous times
+        self.timer.reset()
+        time_now = Timer.time_now()
+        for name, total_time in test_results['TIMING'].items():
+            self.timer.start(name, time_now)
+            self.timer.stop(name, time_now + total_time)
+
+        # Set the previous --sep-files outputs, if any
+        if self.options.results_storage['SEP_FILES']:
+            output_paths = test_results['OUTPUT_FILES']
+            for name, object in self.getOutputObjects().items():
+                object.setSeparateOutputPath(output_paths[name])
+        # Otherwise, set the previous actual outputs
+        else:
+            outputs = test_results['OUTPUT']
+            for name, object in self.getOutputObjects().items():
+                object.setOutput(outputs[name])

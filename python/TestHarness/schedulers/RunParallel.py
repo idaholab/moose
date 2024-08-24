@@ -39,17 +39,9 @@ class RunParallel(Scheduler):
         if self.options.dry_run:
             self.setSuccessfulMessage(tester)
             return
+        # Load results from a previous run
         elif self.options.show_last_run:
-            job_results = self.options.results_storage[job.getTestDir()][job.getTestName()]
-            status, message, caveats = job.previousTesterStatus(self.options, self.options.results_storage)
-            tester.setStatus(status, message)
-            if caveats:
-                tester.addCaveats(caveats)
-            job.setPreviousTimer(job_results['TIMING'])
-            if self.options.results_storage['SEP_FILES']:
-                job.setPreviousSeparateOutputs(job_results['OUTPUT_FILES'])
-            else:
-                job.setPreviousOutputs(job_results['OUTPUT'])
+            job.loadPreviousResults()
             return
 
         # Anything that throws while running or processing a job should be caught
