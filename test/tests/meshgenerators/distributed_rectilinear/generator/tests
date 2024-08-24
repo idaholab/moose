@@ -33,6 +33,8 @@
     cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d Outputs/hide="pid npid" '
     requirement = 'The system shall be able to generate 3D HEX8 mesh in parallel.'
     valgrind = 'NONE'
+    # Enables running the limited HPC tests on CIVET on all events
+    group = 'hpc'
   [../]
 
   [./3D_ptscotch]
