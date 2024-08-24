@@ -335,6 +335,13 @@ class Job(OutputInterface):
             unique_prereqs.append(os.path.join(self.getTestDir(), prereq))
         return unique_prereqs
 
+    def addDirtyFiles(self, files):
+        dirty_files = self.getMetaData().get('DIRTY_FILES', [])
+        for file in files:
+            if file not in dirty_files:
+                dirty_files.append(file)
+        self.addMetaData(DIRTY_FILES=dirty_files)
+
     def addMetaData(self, **kwargs):
         """ Allow derived methods to store additional data which ends up in the data storage file """
         for key, value in kwargs.items():

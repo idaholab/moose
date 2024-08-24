@@ -825,29 +825,37 @@ class TestHarness:
 
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
+                test_dir_entry = self.options.results_storage[job.getTestDir()]
 
                 # Output that isn't in a file (no --sep-files)
                 output = job.getCombinedOutput() if not self.options.sep_files else None
                 # Output that is in a file (--sep-files)
                 output_files = job.getCombinedSeparateOutputPaths() if self.options.sep_files else None
 
-                self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'                 : job.getTestNameShort(),
-                                                                                     'LONG_NAME'            : job.getTestName(),
-                                                                                     'TIMING'               : job.timer.totalTimes(),
-                                                                                     'STATUS'               : status,
-                                                                                     'STATUS_MESSAGE'       : message,
-                                                                                     'FAIL'                 : job.isFail(),
-                                                                                     'COLOR'                : message_color,
-                                                                                     'CAVEATS'              : list(job.getCaveats()),
-                                                                                     'OUTPUT'               : output,
-                                                                                     'OUTPUT_FILES'         : output_files,
-                                                                                     'TESTER_OUTPUT_FILES'  : job.getOutputFiles(self.options),
-                                                                                     'INPUT_FILE'           : job.getInputFile(),
-                                                                                     'COMMAND'              : job.getCommand(),
-                                                                                     'META_DATA'            : job.getMetaData()}
+                # Initialize entry for this job
+                test_dir_entry[job.getTestName()] = {}
+                job_entry = test_dir_entry[job.getTestName()]
+                job_data = {'NAME'                 : job.getTestNameShort(),
+                            'LONG_NAME'            : job.getTestName(),
+                            'TIMING'               : job.timer.totalTimes(),
+                            'STATUS'               : status,
+                            'STATUS_MESSAGE'       : message,
+                            'FAIL'                 : job.isFail(),
+                            'COLOR'                : message_color,
+                            'CAVEATS'              : list(job.getCaveats()),
+                            'OUTPUT'               : output,
+                            'OUTPUT_FILES'         : output_files,
+                            'TESTER_OUTPUT_FILES'  : job.getOutputFiles(self.options),
+                            'INPUT_FILE'           : job.getInputFile(),
+                            'COMMAND'              : job.getCommand(),
+                            'META_DATA'            : job.getMetaData()}
+                job_entry.update(job_data)
+
+                # Additional data from the scheduler for this job
+                job_entry.update(self.scheduler.appendResultFileJob(job))
 
                 # Additional data to store (overwrites any previous matching keys)
-                self.options.results_storage[job.getTestDir()].update(job.getMetaData())
+                test_dir_entry.update(job.getMetaData())
 
         if self.options.output_dir:
             self.options.output_dir = os.path.abspath(self.options.output_dir)
