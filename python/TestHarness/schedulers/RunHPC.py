@@ -707,7 +707,7 @@ class RunHPC(RunParallel):
                 # a chance to get to this in the pool, when it finally
                 # executes in the pool, it will do nothing because the
                 # HPCJob will already exist.
-                if not self.options.hpc_no_hold:
+                if not self.options.hpc_no_hold and not self.options.dry_run:
                     self.submit_job_pool.apply_async(self.submitJob, (job, True,))
 
     def killHPCJob(self, hpc_job, lock=True):
