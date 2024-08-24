@@ -619,8 +619,8 @@ class Job(OutputInterface):
     def createStatus(self):
         return self.job_status.createStatus()
 
-    def previousTesterStatus(self, options, previous_storage=None):
-        return self.__tester.previousTesterStatus(options, previous_storage)
+    def previousTesterStatus(self):
+        return self.__tester.previousTesterStatus(self.options)
 
     def getStatusMessage(self):
         return self.__job_message
@@ -689,15 +689,11 @@ class Job(OutputInterface):
                     self.__tester.getStatus().code,
                     self.__tester.getStatus().sort_value)
 
-    def getResults(self):
-        """ Gets the results for this job for the results storage """
+    def storeResults(self, scheduler):
+        """ Store the results for this Job into the results storage """
         status, message, message_color, _, _ = self.getJointStatus()
 
-        # Output that isn't in a file (no --sep-files)
-        output = self.getCombinedOutput() if not self.hasSeperateOutput() else None
-        # Output that is in a file (--sep-files)
-        output_files = self.getCombinedSeparateOutputPaths() if self.hasSeperateOutput() else None
-
+        # Base job data
         job_data = {'NAME'                 : self.getTestNameShort(),
                     'LONG_NAME'            : self.getTestName(),
                     'TIMING'               : self.timer.totalTimes(),
@@ -706,25 +702,34 @@ class Job(OutputInterface):
                     'FAIL'                 : self.isFail(),
                     'COLOR'                : message_color,
                     'CAVEATS'              : list(self.getCaveats()),
-                    'OUTPUT'               : output,
-                    'OUTPUT_FILES'         : output_files,
                     'TESTER_OUTPUT_FILES'  : self.getOutputFiles(self.options),
                     'INPUT_FILE'           : self.getInputFile(),
                     'COMMAND'              : self.getCommand(),
                     'META_DATA'            : self.getMetaData()}
-        return job_data
+        if self.hasSeperateOutput():
+            job_data['OUTPUT_FILES'] = self.getCombinedSeparateOutputPaths()
+        else:
+            job_data['OUTPUT'] = self.getCombinedOutput()
+
+        # Extend with data from the scheduler, if any
+        job_data.update(scheduler.appendResultFileJob(self))
+
+        # Get the entry we're loading into
+        test_dir_entry, test_entry = self.getTester().getResultsEntry(self.options, True)
+
+        # Add the job data
+        test_entry.update(job_data)
+        # Additional data to store (overwrites any previous matching keys)
+        test_dir_entry.update(self.getMetaData())
 
     def loadPreviousResults(self):
         """ Loads the previous results for this job for the results storage """
-        try:
-            test_results = self.options.results_storage[self.getTestDir()][self.getTestName()]
-        except KeyError:
-            print(f'ERROR: {self.getTestName()} is missing in {self.options.results_file}')
-            sys.exit(1)
+        # False here means don't create it
+        test_dir_entry, test_entry = self.getTester().getResultsEntry(self.options, False)
 
         # Set the tester status
         tester = self.getTester()
-        status, message, caveats = self.previousTesterStatus(self.options, self.options.results_storage)
+        status, message, caveats = self.previousTesterStatus()
         tester.setStatus(status, message)
         if caveats:
             tester.addCaveats(caveats)
@@ -732,17 +737,21 @@ class Job(OutputInterface):
         # Set the previous times
         self.timer.reset()
         time_now = Timer.time_now()
-        for name, total_time in test_results['TIMING'].items():
+        for name, total_time in test_entry['TIMING'].items():
             self.timer.start(name, time_now)
             self.timer.stop(name, time_now + total_time)
 
-        # Set the previous --sep-files outputs, if any
-        if self.options.results_storage['SEP_FILES']:
-            output_paths = test_results['OUTPUT_FILES']
+        # Load the output
+        output_files = test_entry.get('OUTPUT_FILES')
+        output = test_entry.get('OUTPUT')
+        # --sep-files
+        if output_files:
             for name, object in self.getOutputObjects().items():
-                object.setSeparateOutputPath(output_paths[name])
-        # Otherwise, set the previous actual outputs
+                object.setSeparateOutputPath(output_files[name])
+        # Output stored in the result
+        elif output:
+            for name, object in self.getOutputObjects().items():
+                object.setOutput(output[name])
+        # No output?!
         else:
-            outputs = test_results['OUTPUT']
-            for name, object in self.getOutputObjects().items():
-                object.setOutput(outputs[name])
+            raise Exception(f'Test {self.getTestName()} missing output')

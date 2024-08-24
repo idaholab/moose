@@ -151,7 +151,7 @@ class JobDAG(object):
     def _hasDownStreamsWithFailures(self, job):
         """ Return True if any dependents of job has previous failures """
         for d_job in self.__job_dag.all_downstreams(job):
-            status, message, caveats = d_job.previousTesterStatus(self.options)
+            status, message, caveats = d_job.previousTesterStatus()
             if status in d_job.job_status.getFailingStatuses():
                 return True
 
@@ -160,7 +160,7 @@ class JobDAG(object):
         Set up statuses for jobs contained within the DAG for use with failed-tests option
         """
         tester = job.getTester()
-        status, message, caveats = job.previousTesterStatus(self.options)
+        status, message, caveats = job.previousTesterStatus()
 
         # This job passed, but one of its dependents has not
         if status == tester.success and self._hasDownStreamsWithFailures(job):

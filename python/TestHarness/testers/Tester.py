@@ -176,18 +176,39 @@ class Tester(MooseObject, OutputInterface):
     def createStatus(self):
         return self.test_status.createStatus()
 
-    # Return a tuple (status, message, caveats) for this tester as found
-    # in the .previous_test_results.json file (or supplied json object)
-    def previousTesterStatus(self, options, previous_storage=None):
-        if not previous_storage:
-            previous_storage = options.results_storage
+    def getResultsEntry(self, options, create, graceful=False):
+        """ Get the entry in the results storage for this tester """
+        tests = options.results_storage['TESTS']
 
-        status_exists = previous_storage.get(self.getTestDir(), {}).get(self.getTestName(), None)
+        test_dir = self.getTestDir()
+        test_dir_entry = tests.get(test_dir)
+        if not test_dir_entry:
+            if not create:
+                if graceful:
+                    return None, None
+                raise Exception(f'Test folder {test_dir} not in results')
+            tests[test_dir] = {}
+            test_dir_entry = tests[test_dir]
+
+        test_name = self.getTestName()
+        test_name_entry = test_dir_entry.get(test_name)
+        if not test_name_entry:
+            if not create:
+                if graceful:
+                    return test_dir_entry, None
+                raise Exception(f'Test {test_dir}/{test_name} not in results')
+            test_dir_entry[test_name] = {}
+        return test_dir_entry, test_dir_entry.get(test_name)
+
+    # Return a tuple (status, message, caveats) for this tester as found
+    # in the previous results
+    def previousTesterStatus(self, options):
+        test_dir_entry, test_entry = self.getResultsEntry(options, False, True)
         status = (self.test_status.createStatus(), '', '')
-        if status_exists:
-            status = (self.test_status.createStatus(str(status_exists['STATUS'])),
-                      str(status_exists['STATUS_MESSAGE']),
-                      status_exists['CAVEATS'])
+        if test_entry:
+            status = (self.test_status.createStatus(str(test_entry['STATUS'])),
+                      str(test_entry['STATUS_MESSAGE']),
+                      test_entry['CAVEATS'])
         return (status)
 
     def getStatusMessage(self):

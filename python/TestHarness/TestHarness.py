@@ -802,7 +802,7 @@ class TestHarness:
                 # Store the results from each job
                 for job_group in all_jobs:
                     for job in job_group:
-                        self.storeJobResults(job)
+                        job.storeResults(self.scheduler)
 
                 # And write the results
                 self.writeResults(complete=True)
@@ -903,6 +903,9 @@ class TestHarness:
         # Record whether or not the storage is incomplete
         storage['INCOMPLETE'] = True
 
+        # Empty storage for the tests
+        storage['TESTS'] = {}
+
         # Write the headers
         self.writeResults()
 
@@ -942,26 +945,6 @@ class TestHarness:
         except:
             print(f'\nERROR: Failed to move in progress results {file_in_progress} to {file}')
             raise
-
-    def storeJobResults(self, job):
-        """ Stores the results from a job to the results storage """
-        # Nothing to store
-        if self.useExistingStorage():
-            raise Exception('Should not store job results')
-
-        # Get the job's result out of the thread lock
-        job_results = job.getResults()
-
-        # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
-        self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
-        test_dir_entry = self.options.results_storage[job.getTestDir()]
-
-        # Initialize entry for this job
-        test_dir_entry[job.getTestName()] = job_results
-        test_dir_entry[job.getTestName()].update(self.scheduler.appendResultFileJob(job))
-
-        # Additional data to store (overwrites any previous matching keys)
-        test_dir_entry.update(job.getMetaData())
 
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
