@@ -555,3 +555,7 @@ class Scheduler(MooseObject):
     def appendResultFileHeader(self) -> dict:
         """ Entrypoint to add entries to the result file header """
         return {}
+
+    def appendResultFileJob(self, job) -> dict:
+        """ Entrypoint to add entries to the result file for a job """
+        return {}

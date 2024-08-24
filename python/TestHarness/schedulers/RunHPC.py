@@ -431,6 +431,9 @@ class RunHPC(RunParallel):
             # Write the script
             open(submission_script, 'w').write(script)
 
+            # Add our output to dirty files
+            job.addDirtyFiles([submission_script, output_file, result_file])
+
             # Submission command. Here we have a simple bash loop
             # that will try to wait for the file if it doesn't exist yet
             submission_command = self.getHPCSubmissionCommand()
@@ -876,6 +879,16 @@ class RunHPC(RunParallel):
         return result
 
     def appendResultFileHeader(self):
-        hpc_entry = {'scheduler': self.options.hpc,
-                     'hosts': self.options.hpc_host if isinstance(self.options.hpc_host, list) else [self.options.hpc_host]}
-        return {'HPC': hpc_entry}
+        entry = {'scheduler': self.options.hpc,
+                 'pre_source_file': self.options.hpc_pre_source,
+                 'pre_source': self.source_contents,
+                 'hosts': self.options.hpc_host if isinstance(self.options.hpc_host, list) else [self.options.hpc_host]}
+        return {'HPC': entry}
+
+    def appendResultFileJob(self, job):
+        hpc_job = self.hpc_jobs.get(job.getID())
+        if not hpc_job:
+            return {}
+        entry = {'id': hpc_job.id,
+                 'submission_script': self.getHPCJobSubmissionPath(job)}
+        return {'HPC': entry}
