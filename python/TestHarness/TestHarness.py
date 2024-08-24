@@ -244,7 +244,6 @@ class TestHarness:
         self.code = b'2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
         self.keyboard_talk = True
-        self.results_file = '.previous_test_results.json'
         # Assume libmesh is a peer directory to MOOSE if not defined
         if "LIBMESH_DIR" in os.environ:
             self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -257,6 +256,13 @@ class TestHarness:
 
         # Parse arguments
         self.parseCLArgs(argv)
+
+        # Setup absolute paths and output paths
+        if self.options.output_dir:
+            self.options.output_dir = os.path.abspath(self.options.output_dir)
+            self.options.results_file = os.path.join(self.options.output_dir, self.options.results_file)
+        else:
+            self.options.results_file = os.path.abspath(self.options.results_file)
 
         checks = {}
         checks['platform'] = util.getPlatforms()
@@ -780,102 +786,26 @@ class TestHarness:
                         print(str(group[0]).ljust((self.options.term_cols - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
                     print('\n')
 
-            # Perform any write-to-disc operations
-            self.writeResults()
+            all_jobs = self.scheduler.retrieveJobs()
 
-    def writeResults(self):
-        """ Don't update the results file when using the --failed-tests argument """
-        if self.options.failed_tests or self.options.show_last_run:
-            return
+            # Gather and print the jobs with race conditions after the jobs are finished
+            # and only run when running --pedantic-checks.
+            if self.options.pedantic_checks:
+                checker = RaceChecker.RaceChecker(all_jobs)
+                if checker.findRacePartners():
+                    # Print the unique racer conditions and adjust our error code.
+                    self.error_code = checker.printUniqueRacerSets()
+                else:
+                    print("There are no race conditions.")
 
-        """ write test results to disc in some fashion the user has requested """
-        all_jobs = self.scheduler.retrieveJobs()
+            if not self.useExistingStorage():
+                # Store the results from each job
+                for job_group in all_jobs:
+                    for job in job_group:
+                        self.storeJobResults(job)
 
-        # Gather and print the jobs with race conditions after the jobs are finished
-        # and only run when running --diag.
-        if self.options.pedantic_checks:
-            checker = RaceChecker.RaceChecker(all_jobs)
-            if checker.findRacePartners():
-                # Print the unique racer conditions and adjust our error code.
-                self.error_code = checker.printUniqueRacerSets()
-            else:
-                print("There are no race conditions.")
-
-        # Record the input file name that was used
-        self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
-
-        # Record that we are using --sep-files
-        self.options.results_storage['SEP_FILES'] = self.options.sep_files
-
-        # Record the Scheduler Plugin used
-        self.options.results_storage['SCHEDULER'] = self.scheduler.__class__.__name__
-
-        # Record information on the host we can ran on
-        self.options.results_storage['HOSTNAME'] = socket.gethostname()
-        self.options.results_storage['USER'] = os.getlogin()
-        self.options.results_storage['TIME'] = self.start_time.strftime('%Y-%m-%d %H:%M:%S')
-
-        # Record any additional data from the cheduler
-        self.options.results_storage.update(self.scheduler.appendResultFileHeader())
-
-        # Write some useful data to our results_storage
-        for job_group in all_jobs:
-            for job in job_group:
-                status, message, message_color, status_code, sort_value = job.getJointStatus()
-
-                # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
-                self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
-                test_dir_entry = self.options.results_storage[job.getTestDir()]
-
-                # Output that isn't in a file (no --sep-files)
-                output = job.getCombinedOutput() if not self.options.sep_files else None
-                # Output that is in a file (--sep-files)
-                output_files = job.getCombinedSeparateOutputPaths() if self.options.sep_files else None
-
-                # Initialize entry for this job
-                test_dir_entry[job.getTestName()] = {}
-                job_entry = test_dir_entry[job.getTestName()]
-                job_data = {'NAME'                 : job.getTestNameShort(),
-                            'LONG_NAME'            : job.getTestName(),
-                            'TIMING'               : job.timer.totalTimes(),
-                            'STATUS'               : status,
-                            'STATUS_MESSAGE'       : message,
-                            'FAIL'                 : job.isFail(),
-                            'COLOR'                : message_color,
-                            'CAVEATS'              : list(job.getCaveats()),
-                            'OUTPUT'               : output,
-                            'OUTPUT_FILES'         : output_files,
-                            'TESTER_OUTPUT_FILES'  : job.getOutputFiles(self.options),
-                            'INPUT_FILE'           : job.getInputFile(),
-                            'COMMAND'              : job.getCommand(),
-                            'META_DATA'            : job.getMetaData()}
-                job_entry.update(job_data)
-
-                # Additional data from the scheduler for this job
-                job_entry.update(self.scheduler.appendResultFileJob(job))
-
-                # Additional data to store (overwrites any previous matching keys)
-                test_dir_entry.update(job.getMetaData())
-
-        if self.options.output_dir:
-            self.options.output_dir = os.path.abspath(self.options.output_dir)
-            self.options.results_file = os.path.join(self.options.output_dir, self.options.results_file)
-
-        if self.options.results_storage and self.options.results_file:
-            try:
-                with open(self.options.results_file, 'w') as data_file:
-                    json.dump(self.options.results_storage, data_file, indent=2)
-            except UnicodeDecodeError:
-                print('\nERROR: Unable to write results due to unicode decode/encode error')
-
-                # write to a plain file to aid in reproducing error
-                with open(self.options.results_file + '.unicode_error' , 'w') as f:
-                    f.write(self.options.results_storage)
-
-                sys.exit(1)
-            except IOError:
-                print('\nERROR: Unable to write results due to permissions')
-                sys.exit(1)
+                # And write the results
+                self.writeResults(complete=True)
 
         try:
             # Write one file, with verbose information (--file)
@@ -909,6 +839,130 @@ class TestHarness:
         # The default scheduler plugin
         return 'RunParallel'
 
+    def initializeResults(self):
+        """ Initializes the results storage
+
+        If using existing storage, this will load the previous storage.
+
+        If not using existing storage, this will:
+        - Delete the previous storage, if any
+        - Setup the header for the storage
+        - Write the incomplete storage to file
+        """
+        if self.useExistingStorage():
+            if not os.path.exists(self.options.results_file):
+                print(f'The previous run {self.options.results_file} does not exist')
+                sys.exit(1)
+            try:
+                with open(self.options.results_file, 'r') as f:
+                    self.options.results_storage = json.load(f)
+            except:
+                print(f'ERROR: Failed to load result {self.options.results_file}')
+                raise
+
+            if self.options.results_storage['INCOMPLETE']:
+                print(f'ERROR: The previous result {self.options.results_file} is incomplete!')
+                sys.exit(1)
+
+            # Adhere to previous input file syntax, or set the default
+            _input_file_name = 'tests'
+            if self.options.input_file_name:
+                _input_file_name = self.options.input_file_name
+            self.options.input_file_name = self.options.results_storage.get('INPUT_FILE_NAME', _input_file_name)
+
+            # Done working with existing storage
+            return
+
+        # Remove the old one if it exists
+        if os.path.exists(self.options.results_file):
+            os.remove(self.options.results_file)
+
+        # Not using previous or previous failed, initialize a new one
+        self.options.results_storage = {}
+        storage = self.options.results_storage
+
+        # Record the input file name that was used
+        storage['INPUT_FILE_NAME'] = self.options.input_file_name
+
+        # Record that we are using --sep-files
+        storage['SEP_FILES'] = self.options.sep_files
+
+        # Record the Scheduler Plugin used
+        storage['SCHEDULER'] = self.scheduler.__class__.__name__
+
+        # Record information on the host we can ran on
+        storage['HOSTNAME'] = socket.gethostname()
+        storage['USER'] = os.getlogin()
+
+        # Record when the run began
+        storage['TIME'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Record any additional data from the scheduler
+        storage.update(self.scheduler.appendResultFileHeader())
+
+        # Record whether or not the storage is incomplete
+        storage['INCOMPLETE'] = True
+
+        # Write the headers
+        self.writeResults()
+
+    def writeResults(self, complete=False):
+        """ Forcefully write the current results to file
+
+        Will not do anything if using existing storage.
+        """
+        # Not writing results
+        if self.useExistingStorage():
+            raise Exception('Should not write results')
+
+        # Make it as complete (run is done)
+        self.options.results_storage['INCOMPLETE'] = not complete
+
+        # Store to a temporary file so that we always have a working file
+        file = self.options.results_file
+        file_in_progress = self.options.results_file + '.inprogress'
+        try:
+            with open(file_in_progress, 'w') as data_file:
+                json.dump(self.options.results_storage, data_file, indent=2)
+        except UnicodeDecodeError:
+            print(f'\nERROR: Unable to write results {file_in_progress} due to unicode decode/encode error')
+
+            # write to a plain file to aid in reproducing error
+            with open(file + '.unicode_error' , 'w') as f:
+                f.write(self.options.results_storage)
+
+            raise
+        except IOError:
+            print(f'\nERROR: Unable to write results {file_in_progress} due to permissions')
+            raise
+
+        # Replace the file now that it's complete
+        try:
+            os.replace(file_in_progress, file)
+        except:
+            print(f'\nERROR: Failed to move in progress results {file_in_progress} to {file}')
+            raise
+
+    def storeJobResults(self, job):
+        """ Stores the results from a job to the results storage """
+        # Nothing to store
+        if self.useExistingStorage():
+            raise Exception('Should not store job results')
+
+        # Get the job's result out of the thread lock
+        job_results = job.getResults()
+
+        # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
+        self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
+        test_dir_entry = self.options.results_storage[job.getTestDir()]
+
+        # Initialize entry for this job
+        test_dir_entry[job.getTestName()] = job_results
+        test_dir_entry[job.getTestName()].update(self.scheduler.appendResultFileJob(job))
+
+        # Additional data to store (overwrites any previous matching keys)
+        test_dir_entry.update(job.getMetaData())
+
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
         plugin_paths = [os.path.join(self.moose_dir, 'python', 'TestHarness'), os.path.join(self.moose_dir, 'share', 'moose', 'python', 'TestHarness')]
@@ -926,6 +980,7 @@ class TestHarness:
         # Create the scheduler
         self.scheduler = self.factory.create(scheduler_plugin, self, plugin_params)
 
+        # Now that the scheduler is setup, initialize the results storage
         # Save executable-under-test name to self.executable
         exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
         self.executable = app_name + '-' + self.options.method + exec_suffix
@@ -958,36 +1013,12 @@ class TestHarness:
                 if ex.errno == errno.EEXIST: pass
                 else: raise
 
-        # Use a previous results file, or declare the variable
-        self.options.results_storage = {}
-        if self.useExistingStorage():
-            with open(self.options.results_file, 'r') as f:
-                try:
-                    self.options.results_storage = json.load(f)
-
-                    # Adhere to previous input file syntax, or set the default
-                    _input_file_name = 'tests'
-                    if self.options.input_file_name:
-                        _input_file_name = self.options.input_file_name
-                    self.options.input_file_name = self.options.results_storage.get('INPUT_FILE_NAME', _input_file_name)
-
-                except ValueError:
-                    # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
-                    # and exit. Perhaps a warning instead, and create a new file? Down the road, when
-                    # we use this file for PBS etc, this should probably result in an exception.
-                    print(('INFO: Previous %s file is damaged. Creating a new one...' % (self.results_storage)))
+        # Initialize the results storage or load the previous results
+        self.initializeResults()
 
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
-        if (os.path.exists(self.options.results_file)
-            and (self.options.failed_tests or self.options.show_last_run)):
-            return True
-        elif ((self.options.failed_tests or self.options.show_last_run)
-            and not os.path.exists(self.options.results_file)):
-            print('A previous run does not exist')
-            sys.exit(1)
-        elif os.path.exists(self.options.results_file):
-            os.remove(self.options.results_file)
+        return self.options.failed_tests or self.options.show_last_run
 
     ## Parse command line options and assign them to self.options
     def parseCLArgs(self, argv):
@@ -1060,7 +1091,7 @@ class TestHarness:
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
         outputgroup.add_argument("--no-trimmed-output-on-error", action="store_true", dest="no_trimmed_output_on_error", help="Do not trim output for tests which cause an error")
-        outputgroup.add_argument("--results-file", nargs=1, default=self.results_file, help="Save run_tests results to an alternative json file (default: %(default)s)")
+        outputgroup.add_argument("--results-file", nargs=1, default='.previous_test_results.json', help="Save run_tests results to an alternative json file (default: %(default)s)")
         outputgroup.add_argument("--show-last-run", action="store_true", dest="show_last_run", help="Display previous results without executing tests again")
 
         # Options for HPC execution

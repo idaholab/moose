@@ -141,11 +141,12 @@ class RunHPC(RunParallel):
                 except:
                     pass
 
-        # Make sure that we can call commands up front
-        for val in self.CallHPCPoolType:
-            if self.options.hpc_no_hold and val == self.CallHPCPoolType.queue:
-                continue
-            self.callHPC(val, 'hostname')
+        # Make sure that we can call commands up front, only if we're not re-running
+        if not self.options.show_last_run:
+            for val in self.CallHPCPoolType:
+                if self.options.hpc_no_hold and val == self.CallHPCPoolType.queue:
+                    continue
+                self.callHPC(val, 'hostname')
 
         # Pool for submitJob(), so that we can submit jobs to be
         # held in the background without blocking
@@ -739,10 +740,14 @@ class RunHPC(RunParallel):
         if job_ids:
             self.callHPC(self.CallHPCPoolType.kill, f'{self.getHPCCancelCommand()} {" ".join(job_ids)}')
 
+        return len(job_ids)
+
     def killRemaining(self, keyboard=False):
         """Kills all currently running HPC jobs"""
         functor = lambda hpc_job: hpc_job.state not in [hpc_job.State.killed, hpc_job.State.done]
-        self.killHPCJobs(functor)
+        killed_jobs = self.killHPCJobs(functor)
+        if keyboard and killed_jobs:
+            print(f'\nAttempted to kill remaining {killed_jobs} HPC jobs...')
         super().killRemaining(keyboard)
 
     def getHPCSchedulerName(self):
@@ -888,7 +893,7 @@ class RunHPC(RunParallel):
     def appendResultFileJob(self, job):
         hpc_job = self.hpc_jobs.get(job.getID())
         if not hpc_job:
-            return {}
+            return {'HPC': None}
         entry = {'id': hpc_job.id,
                  'submission_script': self.getHPCJobSubmissionPath(job)}
         return {'HPC': entry}
