@@ -7,7 +7,7 @@
     exodiff = 'elastic_thermal_patch_out.e'
     abs_zero = 1e-08
     use_old_floor = True
-    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature'
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature with an irregular patch mesh.'
   [../]
 
   [./elastic_thermal_patch_rz]
