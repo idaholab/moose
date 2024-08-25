@@ -328,6 +328,7 @@ share/
 /tutorials/darcy_thermo_mech/*/darcy_thermo_mech.yaml
 
 # test harness --sep-files output
+*.runner_run_out.txt
 *.runner_out.txt
 *.tester_out.txt
 *.job_out.txt
