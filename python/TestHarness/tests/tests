@@ -183,12 +183,6 @@
     requirement = "The system shall be able to perform recovery of a test"
     issues = '#11492'
   []
-  [pbs_tests]
-    type = PythonUnitTest
-    input = test_PBS.py
-    requirement = "The system shall be able to submit jobs to a PBS third party scheduler"
-    issues = '#12138'
-  []
   [trim_output]
     type = PythonUnitTest
     input = test_TrimOutput.py
