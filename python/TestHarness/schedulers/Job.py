@@ -529,7 +529,7 @@ class Job(OutputInterface):
         output = {}
         for name, object in self.getOutputObjects().items():
             output[name] = object.getOutput()
-            object_output = object.getOutput()
+        return output
 
     def getOutputForScreen(self):
         """ Gets the output for printing on screen """
