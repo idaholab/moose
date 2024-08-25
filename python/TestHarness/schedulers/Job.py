@@ -155,7 +155,6 @@ class Job(OutputInterface):
         self.__joined_out = ''
         self.report_timer = None
         self.__slots = None
-        self.__meta_data = {}
 
         # Create a fileChecker object to be able to call filecheck methods
         self.fileChecker = FileChecker(self.options.input_file_name)
@@ -338,23 +337,6 @@ class Job(OutputInterface):
         for prereq in prereqs:
             unique_prereqs.append(os.path.join(self.getTestDir(), prereq))
         return unique_prereqs
-
-    def addDirtyFiles(self, files: list):
-        """ Adds the given files as dirty for this job """
-        dirty_files = self.getMetaData().get('DIRTY_FILES', [])
-        for file in files:
-            if file not in dirty_files:
-                dirty_files.append(file)
-        self.addMetaData(DIRTY_FILES=dirty_files)
-
-    def addMetaData(self, **kwargs):
-        """ Allow derived methods to store additional data which ends up in the data storage file """
-        for key, value in kwargs.items():
-            self.__meta_data[key] = value
-
-    def getMetaData(self):
-        """ return data stored by addMetaData """
-        return self.__meta_data
 
     def getSlots(self):
         """ Return the number of slots this job consumes """
@@ -761,8 +743,7 @@ class Job(OutputInterface):
                     'CAVEATS'              : list(self.getCaveats()),
                     'TESTER_OUTPUT_FILES'  : self.getOutputFiles(self.options),
                     'INPUT_FILE'           : self.getInputFile(),
-                    'COMMAND'              : self.getCommand(),
-                    'META_DATA'            : self.getMetaData()}
+                    'COMMAND'              : self.getCommand()}
         if self.hasSeperateOutput():
             job_data['OUTPUT_FILES'] = self.getCombinedSeparateOutputPaths()
         else:
@@ -776,8 +757,6 @@ class Job(OutputInterface):
 
         # Add the job data
         test_entry.update(job_data)
-        # Additional data to store (overwrites any previous matching keys)
-        test_dir_entry.update(self.getMetaData())
 
     def loadPreviousResults(self):
         """ Loads the previous results for this job for the results storage """
