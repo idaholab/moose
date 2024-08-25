@@ -15,4 +15,4 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'unknown_param')
 
         self.assertIn('unknown_param:5: unused parameter "not_a_parameter"',
-                      cm.exception.output.decode('utf-8'))
+                      cm.exception.output)

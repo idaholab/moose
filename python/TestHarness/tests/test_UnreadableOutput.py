@@ -19,4 +19,4 @@ class TestHarnessTester(TestHarnessTestCase):
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('-i', 'non_unicode')
         e = cm.exception
-        self.assertIn('non-unicode characters in output', e.output.decode('utf-8'))
+        self.assertIn('non-unicode characters in output', e.output)

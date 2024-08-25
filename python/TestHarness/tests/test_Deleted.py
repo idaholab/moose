@@ -19,7 +19,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'deleted', '-e')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')
+        self.assertRegex(e.output, r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')
 
         # Verify return code is DELETED related (0x83)
         self.assertIs(0x83, e.returncode)
@@ -28,5 +28,5 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test that deleted tests do not run without -e (extra) option
         """
-        output = self.runTests('--no-color', '-i', 'deleted').decode('utf-8')
+        output = self.runTests('--no-color', '-i', 'deleted')
         self.assertNotIn('tests/test_harness.deleted', output)

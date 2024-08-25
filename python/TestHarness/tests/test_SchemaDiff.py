@@ -13,7 +13,7 @@ from TestHarnessTestCase import TestHarnessTestCase
 class TestHarnessTester(TestHarnessTestCase):
     def testSchemaDiff(self):
         output = self.runExceptionTests('-i', 'schemadiff')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_jsondiff.*?FAILED \(SCHEMADIFF\)')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_xmldiff.*?FAILED \(SCHEMADIFF\)')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_json.*?FAILED \(LOAD FAILED\)')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_xml.*?FAILED \(LOAD FAILED\)')
+        self.assertRegex(output, r'test_harness\.schema_jsondiff.*?FAILED \(SCHEMADIFF\)')
+        self.assertRegex(output, r'test_harness\.schema_xmldiff.*?FAILED \(SCHEMADIFF\)')
+        self.assertRegex(output, r'test_harness\.schema_invalid_json.*?FAILED \(LOAD FAILED\)')
+        self.assertRegex(output, r'test_harness\.schema_invalid_xml.*?FAILED \(LOAD FAILED\)')
