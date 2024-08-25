@@ -17,6 +17,7 @@ import subprocess
 import shutil
 import socket
 import datetime
+import getpass
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -892,7 +893,7 @@ class TestHarness:
 
         # Record information on the host we can ran on
         storage['HOSTNAME'] = socket.gethostname()
-        storage['USER'] = os.getlogin()
+        storage['USER'] = getpass.getuser()
         storage['TESTHARNESS_PATH'] = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
         storage['TESTHARNESS_ARGS'] = sys.argv[1:]
         storage['MOOSE_DIR'] = self.moose_dir
