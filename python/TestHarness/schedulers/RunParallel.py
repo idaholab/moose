@@ -58,15 +58,6 @@ class RunParallel(Scheduler):
             job.appendOutput(util.outputHeader('Python exception encountered in Job') + trace)
             job.setStatus(job.error, 'JOB EXCEPTION')
 
-        # Add the separate output as dirty if we have any
-        dirty_files = []
-        for object in job.getOutputObjects().values():
-            if object.hasOutput():
-                output_file = object.getSeparateOutputFilePath()
-                if output_file:
-                    dirty_files.append(output_file)
-        job.addDirtyFiles(dirty_files)
-
     def buildRunner(self, job, options) -> Runner:
         """Builds the runner for a given tester
 

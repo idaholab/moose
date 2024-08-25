@@ -432,9 +432,6 @@ class RunHPC(RunParallel):
             # Write the script
             open(submission_script, 'w').write(script)
 
-            # Add our output to dirty files
-            job.addDirtyFiles([submission_script, output_file, result_file])
-
             # Submission command. Here we have a simple bash loop
             # that will try to wait for the file if it doesn't exist yet
             submission_command = self.getHPCSubmissionCommand()
