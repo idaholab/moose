@@ -19,13 +19,13 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'expect')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.no_expect_err_pattern.*?FAILED \(EXPECTED ERROR MISSING\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.no_expect_out_pattern.*?FAILED \(EXPECTED OUTPUT MISSING\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.absent_out_pattern.*?FAILED \(OUTPUT NOT ABSENT\)')
+        self.assertRegex(e.output, r'test_harness\.no_expect_err_pattern.*?FAILED \(EXPECTED ERROR MISSING\)')
+        self.assertRegex(e.output, r'test_harness\.no_expect_out_pattern.*?FAILED \(EXPECTED OUTPUT MISSING\)')
+        self.assertRegex(e.output, r'test_harness\.absent_out_pattern.*?FAILED \(OUTPUT NOT ABSENT\)')
 
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.no_expect_err_literal.*?FAILED \(EXPECTED ERROR MISSING\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.no_expect_out_literal.*?FAILED \(EXPECTED OUTPUT MISSING\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.absent_out_literal.*?FAILED \(OUTPUT NOT ABSENT\)')
+        self.assertRegex(e.output, r'test_harness\.no_expect_err_literal.*?FAILED \(EXPECTED ERROR MISSING\)')
+        self.assertRegex(e.output, r'test_harness\.no_expect_out_literal.*?FAILED \(EXPECTED OUTPUT MISSING\)')
+        self.assertRegex(e.output, r'test_harness\.absent_out_literal.*?FAILED \(OUTPUT NOT ABSENT\)')
 
     def testExpectMissing(self):
         """
@@ -35,4 +35,4 @@ class TestHarnessTester(TestHarnessTestCase):
              self.runTests('-i', 'expect_missing_params')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'Either "expect_err" or "expect_assert" must be supplied')
+        self.assertRegex(e.output, r'Either "expect_err" or "expect_assert" must be supplied')

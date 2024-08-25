@@ -18,7 +18,7 @@ class TestHarnessTester(TestHarnessTestCase):
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('-i', 'duplicate_outputs')
 
-        output = cm.exception.output.decode('utf-8')
+        output = cm.exception.output
         self.assertIn('Tests: d, c', output)
         self.assertIn('File(s): good_out.e', output)
 
@@ -26,7 +26,7 @@ class TestHarnessTester(TestHarnessTestCase):
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('-i', 'duplicate_outputs_analyzejacobian')
 
-        output = cm.exception.output.decode('utf-8')
+        output = cm.exception.output
         self.assertIn('Tests: b, a', output)
         self.assertIn('File(s): good.i', output)
 
@@ -39,8 +39,8 @@ class TestHarnessTester(TestHarnessTestCase):
         output += self.runTests('-i', 'duplicate_outputs_ok', '--heavy')
 
         # skip case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'skipped_out.e')
+        self.assertNotRegexpMatches(output, 'skipped_out.e')
         # heavy case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'heavy_out.e')
+        self.assertNotRegexpMatches(output, 'heavy_out.e')
         # all
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'FATAL TEST HARNESS ERROR')
+        self.assertNotRegexpMatches(output, 'FATAL TEST HARNESS ERROR')

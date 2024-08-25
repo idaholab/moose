@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import subprocess
+import tempfile
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -17,21 +18,24 @@ class TestHarnessTester(TestHarnessTestCase):
         to create a json file containing previous results, and again to only run
         the test which that has failed.
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('--no-color', '-i', 'always_bad', '--results-file', 'failed-unittest')
+        with tempfile.TemporaryDirectory() as output_dir:
+            args = ['--no-color', '--results-file', 'failed-unittest', '-o', output_dir]
+            kwargs = {'tmp_output': False}
+            with self.assertRaises(subprocess.CalledProcessError) as cm:
+                self.runTests(*args, '-i', 'always_bad', **kwargs)
 
-        e = cm.exception
+            e = cm.exception
 
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.always_ok.*?OK')
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.always_bad.*?FAILED \(CODE 1\)')
+            self.assertRegex(e.output, r'tests/test_harness.always_ok.*?OK')
+            self.assertRegex(e.output, r'tests/test_harness.always_bad.*?FAILED \(CODE 1\)')
 
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('--no-color', '--failed-tests', '--results-file', 'failed-unittest')
+            with self.assertRaises(subprocess.CalledProcessError) as cm:
+                self.runTests(*args, '--failed-tests', **kwargs)
 
-        e = cm.exception
+            e = cm.exception
 
-        # Verify the passing test is not present
-        self.assertNotRegex(e.output.decode('utf-8'), r'tests/test_harness.always_ok.*?OK')
+            # Verify the passing test is not present
+            self.assertNotRegex(e.output, r'tests/test_harness.always_ok.*?OK')
 
-        # Verify the caveat represents a previous result
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.always_bad.*?\[PREVIOUS RESULTS: CODE 1\] FAILED \(CODE 1\)')
+            # Verify the caveat represents a previous result
+            self.assertRegex(e.output, r'tests/test_harness.always_bad.*?\[PREVIOUS RESULTS: CODE 1\] FAILED \(CODE 1\)')

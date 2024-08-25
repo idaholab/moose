@@ -17,13 +17,13 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         output = self.runTests('-i', 'diffs', '--dry-run')
 
-        self.assertRegex(output.decode('utf-8'), 'test_harness\.exodiff.*?DRY RUN')
-        self.assertRegex(output.decode('utf-8'), 'test_harness\.csvdiff.*?DRY RUN')
+        self.assertRegex(output, 'test_harness\.exodiff.*?DRY RUN')
+        self.assertRegex(output, 'test_harness\.csvdiff.*?DRY RUN')
 
         # Skipped caveat test which returns skipped instead of 'DRY RUN'
         output = self.runTests('--no-color', '-i', 'depend_skip_tests', '--dry-run')
-        self.assertRegex(output.decode('utf-8'), r'tests/test_harness.always_skipped.*? \[ALWAYS SKIPPED\] SKIP')
-        self.assertRegex(output.decode('utf-8'), r'tests/test_harness.needs_always_skipped.*? \[SKIPPED DEPENDENCY\] SKIP')
+        self.assertRegex(output, r'tests/test_harness.always_skipped.*? \[ALWAYS SKIPPED\] SKIP')
+        self.assertRegex(output, r'tests/test_harness.needs_always_skipped.*? \[SKIPPED DEPENDENCY\] SKIP')
 
         # Deleted caveat test which returns a deleted failing tests while
         # performing a dry run
@@ -31,4 +31,4 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'deleted', '-e', '--dry-run')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')
+        self.assertRegex(e.output, r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')

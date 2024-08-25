@@ -15,7 +15,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test that --recover returns two passing statuses (part1 and the OK)
         """
-        output = self.runTests('-i', 'always_ok', '--recover').decode('utf-8')
+        output = self.runTests('-i', 'always_ok', '--recover')
 
         self.assertIn('PART1', output)
         self.assertIn('RECOVER', output)
@@ -30,8 +30,8 @@ class TestHarnessTester(TestHarnessTestCase):
         Test that --recover still checks status on Part1 tests
         """
         with self.assertRaises(subprocess.CalledProcessError) as cm:
-             self.runTests('-i', 'exception_transient', '--recover').decode('utf-8')
+             self.runTests('-i', 'exception_transient', '--recover')
 
         e = cm.exception
-        output = e.output.decode('utf-8')
+        output = e.output
         self.assertRegex(output, r'test_harness.*?part1.*?FAILED \(CRASH\)')
