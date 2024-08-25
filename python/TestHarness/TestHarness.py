@@ -258,13 +258,6 @@ class TestHarness:
         # Parse arguments
         self.parseCLArgs(argv)
 
-        # Setup absolute paths and output paths
-        if self.options.output_dir:
-            self.options.output_dir = os.path.abspath(self.options.output_dir)
-            self.options.results_file = os.path.join(self.options.output_dir, self.options.results_file)
-        else:
-            self.options.results_file = os.path.abspath(self.options.results_file)
-
         checks = {}
         checks['platform'] = util.getPlatforms()
         checks['machine'] = util.getMachine()
@@ -1139,11 +1132,19 @@ class TestHarness:
         if opts.spec_file and not os.path.exists(opts.spec_file):
             print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
-        if opts.failed_tests and not os.path.exists(opts.results_file):
-            print('ERROR: --failed-tests could not detect a previous run')
-            sys.exit(1)
         if opts.verbose and opts.quiet:
             print('Do not be an oxymoron with --verbose and --quiet')
+            sys.exit(1)
+
+        # Setup absolute paths and output paths
+        if opts.output_dir:
+            opts.output_dir = os.path.abspath(opts.output_dir)
+            opts.results_file = os.path.join(opts.output_dir, opts.results_file)
+        else:
+            opts.results_file = os.path.abspath(opts.results_file)
+
+        if opts.failed_tests and not os.path.exists(opts.results_file):
+            print('ERROR: --failed-tests could not detect a previous run')
             sys.exit(1)
 
         # Update any keys from the environment as necessary
