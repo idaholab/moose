@@ -260,7 +260,7 @@ def formatStatusMessage(job, status, message, options):
 def formatResult(job, options, result='', color=True, **kwargs):
     # Support only one instance of a format identifier, but obey the order
     terminal_format = list(OrderedDict.fromkeys(list(options.term_format)))
-    status, message, message_color, exit_code, sort_value = job.getJointStatus()
+    joint_status = job.getJointStatus()
 
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
@@ -282,18 +282,18 @@ def formatResult(job, options, result='', color=True, **kwargs):
             justification_index = terminal_format[i]
 
         if str(f_key).lower() == 'p':
-            pre_result = ' '*(8-len(status)) + status
-            formatCase(f_key, (pre_result, message_color), formatted_results)
+            pre_result = ' '*(8-len(joint_status.status)) + joint_status.status
+            formatCase(f_key, (pre_result, joint_status.color), formatted_results)
 
         if str(f_key).lower() == 's':
             if not result:
-                result = formatStatusMessage(job, status, message, options)
+                result = formatStatusMessage(job, joint_status.status, joint_status.message, options)
 
             # refrain from printing a duplicate pre_result if it will match result
-            if 'p' in [x.lower() for x in terminal_format] and result == status:
+            if 'p' in [x.lower() for x in terminal_format] and result == joint_status.status:
                 formatCase(f_key, None, formatted_results)
             else:
-                formatCase(f_key, (result, message_color), formatted_results)
+                formatCase(f_key, (result, joint_status.color), formatted_results)
 
         if str(f_key).lower() == 'n':
             formatCase(f_key, (job.getTestName(), None), formatted_results)
@@ -310,7 +310,7 @@ def formatResult(job, options, result='', color=True, **kwargs):
     # Decorate Caveats
     if job.getCaveats() and caveat_index is not None and 'caveats' in kwargs and kwargs['caveats']:
         caveats = ','.join(job.getCaveats())
-        caveat_color = message_color
+        caveat_color = joint_status.color
         if not job.isFail():
             caveat_color = 'CYAN'
 
@@ -869,27 +869,19 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                     # TL;DR; Just pass...
                     pass
 
-# Trimming routines for job output
-def trimOutput(job, options):
-    output = job.getCombinedOutput(concatenate=True)
-    if ((job.isFail() and options.no_trimmed_output_on_error)
-        or (job.specs.isValid('max_buffer_size') and job.specs['max_buffer_size'] == -1)
-        or options.no_trimmed_output):
-        return output
-    elif job.specs.isValid('max_buffer_size'):
-        max_size = int(job.specs['max_buffer_size'])
-    else:
-        max_size = 100000
-
-    if len(output) <= max_size:
+def trimOutput(output, max_size=None):
+    """ Trims the output given some max size """
+    if not max_size or len(output) < max_size or not output:
         return output
 
     first_part = int(max_size*(2.0/3.0))
     second_part = int(max_size*(1.0/3.0))
-    return "%s\n%s\n\nOutput trimmed\n\n%s\n%s" % (output[:first_part],
-                                                   "#"*80,
-                                                   "#"*80,
-                                                   output[-second_part:])
+    trimmed = f'{output[:first_part]}'
+    if trimmed[-1] != '\n':
+        trimmed += '\n'
+    sep = "#" * 80
+    trimmed += f'\n{sep}\nOutput trimmed\n{sep}\n{output[-second_part:]}'
+    return trimmed
 
 def outputHeader(header, ending=True):
     """
