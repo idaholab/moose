@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools, re, os, time, threading
+import itertools, re, os, time, threading, traceback
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
@@ -15,7 +15,8 @@ from TestHarness.runners.Runner import Runner
 from TestHarness import OutputInterface, util
 from tempfile import TemporaryDirectory
 from collections import namedtuple
-import traceback
+
+from TestHarness import util
 
 def time_now():
     return time.time_ns() / (10 ** 9)
@@ -137,6 +138,9 @@ class Job(OutputInterface):
 
     # Thread lock for creating output directories
     mkdir_lock = threading.Lock()
+
+    # Tuple for getJointStatus()
+    JointStatus = namedtuple('JointStatus', ['status', 'message', 'color', 'status_code', 'sort_value'])
 
     def __init__(self, tester, job_dag, options):
         OutputInterface.__init__(self)
@@ -520,36 +524,90 @@ class Job(OutputInterface):
             paths[name] = object.getSeparateOutputFilePath() if object.hasOutput() else None
         return paths
 
-    def getCombinedOutput(self, concatenate=False):
-        """ Return individual output from each object """
-        output = '' if concatenate else {}
+    def getAllOutput(self) -> dict:
+        """ Get all output in a dict from each object to the text output """
+        output = {}
+        for name, object in self.getOutputObjects().items():
+            output[name] = object.getOutput()
+            object_output = object.getOutput()
+
+    def getOutputForScreen(self):
+        """ Gets the output for printing on screen """
+        show_output = self.options.verbose or (self.isFail() and not self.options.quiet) or self.isError()
+        if not show_output:
+            return None
+
+        if self.getCommandRan():
+            command = self.getCommandRan()
+        else:
+            command = self.getCommand()
+
+        output = 'Working Directory: ' + self.getTestDir() + '\nRunning command: ' + command + '\n'
+
+        # Whether or not to skip the runner_run output, which is the output from the
+        # actual run (the process that the harness runs)
+        skip_runner_run = None
+        if self.options.sep_files and not self.options.verbose:
+            skip_runner_run = '--sep-files'
+
+        options = self.options
+        specs = self.specs
+
         for name, object in self.getOutputObjects().items():
             object_output = object.getOutput()
-            if object_output:
-                wrapped_object_output = ''
 
-                if concatenate:
-                    # Add a complete line break between objects
-                    if output:
-                        wrapped_object_output += '\n'
-                    # Add a header before the output starts
-                    wrapped_object_output += util.outputHeader(f'Begin {name} output', ending=False) + '\n'
+            # Nothing to output
+            if not object_output:
+                continue
 
-                # Add the actual output
-                wrapped_object_output += object_output
+            # Max size of this output for trimming
+            # Currently only used for the runner_run output
+            max_size = None
 
-                if concatenate:
-                    # Add a newline if one is missing
-                    if wrapped_object_output[-1] != '\n':
-                        wrapped_object_output += '\n'
-                    # Add a footer after the output ends
-                    wrapped_object_output += '\n' + util.outputHeader(f'End {name} output', ending=False)
+            # Possibly trim or skip the runner_run output (actual process output)
+            if name == 'runner_run':
+                # Don't output the runner run
+                if skip_runner_run:
+                    output += f'\nSkipping runner_run output due to {skip_runner_run}\n'
+                    continue
 
-                    output += wrapped_object_output
-                else:
-                    output[name] = wrapped_object_output
-            elif not concatenate:
-                output[name] = None
+                # Default trimmed output size
+                max_size = 1000
+                # max_buffer_size is set
+                if specs.isValid('max_buffer_size'):
+                    # ...to the max
+                    if specs['max_buffer_size'] == -1:
+                        max_size = None
+                    # ... or to a value
+                    else:
+                        max_size = int(specs['max_buffer_size'])
+                # Disable trimmed output
+                if options.no_trimmed_output:
+                    max_size = None
+                # Don't trim output on error, and we errored
+                if options.no_trimmed_output_on_error and self.isFail():
+                    max_size = None
+
+            # Add a complete line break between objects
+            if output:
+                output += '\n'
+            # Add a header before the output starts
+            output += util.outputHeader(f'Begin {name} output', ending=False) + '\n'
+            # Add the output, trimming if needed
+            output += util.trimOutput(object_output, max_size=max_size)
+            # Add a newline if one is missing
+            if output[-1] != '\n':
+                output += '\n'
+            # Add a footer after the output ends
+            output += '\n' + util.outputHeader(f'End {name} output', ending=False)
+
+        # Add the text name prefix
+        if output:
+            lines = output.split('\n')
+            joint_status = self.getJointStatus()
+            prefix = util.colorText(self.getTestName() + ': ', joint_status.color,
+                                    colored=self.options.colored, code=self.options.code)
+            output = prefix + ('\n' + prefix).join(lines)
 
         return output
 
@@ -675,32 +733,31 @@ class Job(OutputInterface):
         """
         # Job has failed, or tester has no status
         if self.isError() or self.isNoStatus():
-            return (self.getStatus().status,
-                    self.getStatusMessage(),
-                    self.getStatus().color,
-                    self.getStatus().code,
-                    self.getStatus().sort_value)
+            return Job.JointStatus(status=self.getStatus().status,
+                                   message=self.getStatusMessage(),
+                                   color=self.getStatus().color,
+                                   status_code=self.getStatus().code,
+                                   sort_value=self.getStatus().sort_value)
 
         # Tester has a finished status of some sort
-        else:
-            return (self.__tester.getStatus().status,
-                    self.__tester.getStatusMessage(),
-                    self.__tester.getStatus().color,
-                    self.__tester.getStatus().code,
-                    self.__tester.getStatus().sort_value)
+        return Job.JointStatus(status=self.__tester.getStatus().status,
+                               message=self.__tester.getStatusMessage(),
+                               color=self.__tester.getStatus().color,
+                               status_code=self.__tester.getStatus().code,
+                               sort_value=self.__tester.getStatus().sort_value)
 
     def storeResults(self, scheduler):
         """ Store the results for this Job into the results storage """
-        status, message, message_color, _, _ = self.getJointStatus()
+        joint_status = self.getJointStatus()
 
         # Base job data
         job_data = {'NAME'                 : self.getTestNameShort(),
                     'LONG_NAME'            : self.getTestName(),
                     'TIMING'               : self.timer.totalTimes(),
-                    'STATUS'               : status,
-                    'STATUS_MESSAGE'       : message,
+                    'STATUS'               : joint_status.status,
+                    'STATUS_MESSAGE'       : joint_status.message,
                     'FAIL'                 : self.isFail(),
-                    'COLOR'                : message_color,
+                    'COLOR'                : joint_status.color,
                     'CAVEATS'              : list(self.getCaveats()),
                     'TESTER_OUTPUT_FILES'  : self.getOutputFiles(self.options),
                     'INPUT_FILE'           : self.getInputFile(),
@@ -709,7 +766,7 @@ class Job(OutputInterface):
         if self.hasSeperateOutput():
             job_data['OUTPUT_FILES'] = self.getCombinedSeparateOutputPaths()
         else:
-            job_data['OUTPUT'] = self.getCombinedOutput()
+            job_data['OUTPUT'] = self.getAllOutput()
 
         # Extend with data from the scheduler, if any
         job_data.update(scheduler.appendResultFileJob(self))

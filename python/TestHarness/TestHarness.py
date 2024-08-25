@@ -610,26 +610,6 @@ class TestHarness:
         else:
             return True
 
-    def printOutput(self, job, color):
-        """ Method to print a testers output to the screen """
-        output = ''
-        # Print what ever status the tester has at the time
-        if self.options.verbose or (job.isFail() and not self.options.quiet) or job.isError():
-            if job.getCommandRan():
-                command = job.getCommandRan()
-            else:
-                command = job.getCommand()
-            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + command + '\n'
-            output += util.trimOutput(job, self.options)
-            output = output.replace('\r', '\n')  # replace the carriage returns with newlines
-            lines = output.split('\n')
-
-            if output != '':
-                test_name = util.colorText(job.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
-                output = test_name + ("\n" + test_name).join(lines)
-                print(output)
-        return output
-
     def handleJobStatus(self, job, caveats=None):
         """
         The Scheduler is calling back the TestHarness to inform us of a status change.
@@ -640,11 +620,13 @@ class TestHarness:
         elif not job.isSilent():
             # Print results and perform any desired post job processing
             if job.isFinished():
-                status, message, color, status_code, sort_value = job.getJointStatus()
-                self.error_code = self.error_code | status_code
+                joint_status = job.getJointStatus()
+                self.error_code = self.error_code | joint_status.status_code
 
                 # perform printing of application output if so desired
-                self.printOutput(job, color)
+                output = job.getOutputForScreen()
+                if output:
+                    print(output)
 
                 # Print status with caveats (if caveats not overridden)
                 caveats = True if caveats is None else caveats
@@ -653,7 +635,7 @@ class TestHarness:
                 timing = job.getTiming()
 
                 # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, sort_value, timing) )
+                self.test_table.append( (job, joint_status.sort_value, timing) )
                 self.postRun(job.specs, timing)
 
                 if job.isSkip():
@@ -1177,10 +1159,6 @@ class TestHarness:
         # Update libmesh_dir to reflect arguments
         if opts.libmesh_dir:
             self.libmesh_dir = opts.libmesh_dir
-
-        # User wants to write all output, so unify the options involved
-        if opts.sep_files:
-            opts.quiet = True
 
     def postRun(self, specs, timing):
         return
