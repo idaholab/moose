@@ -572,7 +572,7 @@ class Job(OutputInterface):
                     continue
 
                 # Default trimmed output size
-                max_size = 1000
+                max_size = 100000
                 # max_buffer_size is set
                 if specs.isValid('max_buffer_size'):
                     # ...to the max
