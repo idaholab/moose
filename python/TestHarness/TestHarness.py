@@ -666,7 +666,7 @@ class TestHarness:
             for (job, sort_value, timing) in sorted(self.test_table, key=lambda x: x[1]):
                 print((util.formatResult(job, self.options, caveats=True)))
 
-        time = datetime.datetime.now() - self.start_time
+        time = (datetime.datetime.now() - self.start_time).total_seconds()
 
         print(('-' * (self.options.term_cols)))
 
@@ -693,7 +693,7 @@ class TestHarness:
             else:
                 timing_max = 0
                 timing_avg = 0
-            summary = f'Ran {self.num_passed + self.num_failed} tests in {time.total_seconds():.1f} seconds.'
+            summary = f'Ran {self.num_passed + self.num_failed} tests in {time:.1f} seconds.'
             summary += f' Average test time {timing_avg:.1f} seconds,'
             summary += f' maximum test time {timing_max:.1f} seconds.'
             print(summary)
