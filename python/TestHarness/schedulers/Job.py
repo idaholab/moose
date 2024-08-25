@@ -801,14 +801,10 @@ class Job(OutputInterface):
         # Load the output
         output_files = test_entry.get('OUTPUT_FILES')
         output = test_entry.get('OUTPUT')
-        # --sep-files
-        if output_files:
-            for name, object in self.getOutputObjects().items():
+        for name, object in self.getOutputObjects().items():
+            if output_files: # --sep-files
                 object.setSeparateOutputPath(output_files[name])
-        # Output stored in the result
-        elif output:
-            for name, object in self.getOutputObjects().items():
+            elif output: # stored in result
                 object.setOutput(output[name])
-        # No output?!
-        else:
-            raise Exception(f'Test {self.getTestName()} missing output')
+            else:
+                raise Exception(f'Test {self.getTestName()} missing output')
