@@ -1712,6 +1712,7 @@ MooseApp::runInputs() const
       return_value = system(cmd.c_str());
     _communicator.broadcast(return_value);
 
+    // TODO: return the actual return value here
     if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
       mooseError("Run failed");
     return true;
