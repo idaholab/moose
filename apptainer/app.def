@@ -296,6 +296,12 @@ EOF
             return_code=$?
         fi
 
+        # Clean the copied tests directory if it exists
+        binary_test_dir=${TEMP_TEST_LOC}/${BINARY_NAME}
+        if [ -e ${binary_test_dir} ]; then
+            rm -rf ${binary_test_dir}
+        fi
+
         results_summary+=" - ${TEST_DIR}: exit ${return_code}\n"
         rm -rf ${TEMP_TEST_LOC}
         return $return_code
