@@ -70,7 +70,7 @@
       type = CheckFiles
       input = checkpoint.i
       cli_args = 'Outputs/checkpoint=true --test-checkpoint-half-transient'
-      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 3600.000000 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 3600 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       recover = false
 
       check_files = "checkpoint_out_cp/0004-restart-0.rd/data "
@@ -124,7 +124,7 @@
       input = checkpoint.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --output-wall-time-interval 0.02'
-      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.020000 s\s+ User Checkpoint:\s+ Disabled\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.02 s\s+ User Checkpoint:\s+ Disabled\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       detail = " at specified wall time intervals and"
     []
     [wall_time_interval_recover]
@@ -195,7 +195,7 @@
       type = CheckFiles
       input = checkpoint_parent.i
       cli_args = '--output-wall-time-interval 1e-50'
-      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.000000 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 1e-50 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       recover = false
 
       check_files = "checkpoint_parent_out_cp/0010-restart-0.rd/data "
@@ -292,7 +292,7 @@
       input = checkpoint_block.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --output-wall-time-interval 0.02'
-      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.020000 s\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.02 s\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       detail = "at specified wall time intervals"
     []
     [wall_time_interval_recover]

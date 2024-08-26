@@ -264,7 +264,8 @@ Checkpoint::checkpointInfo() const
 
   std::string interval_info;
   if (getParam<bool>("wall_time_checkpoint"))
-    interval_info = "Every " + std::to_string(_wall_time_interval) + " s";
+    interval_info =
+        (std::stringstream() << "Every " << std::defaultfloat << _wall_time_interval << " s").str();
   else
     interval_info = "Disabled";
 
