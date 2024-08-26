@@ -46,7 +46,7 @@ MooseServer::MooseServer(MooseApp & moose_app)
   server_capabilities[wasp::lsp::m_doc_symbol_provider] = true;
   server_capabilities[wasp::lsp::m_doc_format_provider] = true;
   server_capabilities[wasp::lsp::m_definition_provider] = true;
-  server_capabilities[wasp::lsp::m_references_provider] = false;
+  server_capabilities[wasp::lsp::m_references_provider] = true;
   server_capabilities[wasp::lsp::m_hover_provider] = true;
 }
 
@@ -977,20 +977,20 @@ MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
 }
 
 bool
-MooseServer::addLocationNodesToList(wasp::DataArray & definitionLocations,
+MooseServer::addLocationNodesToList(wasp::DataArray & defsOrRefsLocations,
                                     const SortedLocationNodes & location_nodes)
 {
   bool pass = true;
 
-  // walk over set of nodes with locations to add and build definition list
+  // walk over set of sorted nodes provided to add and build locations list
   for (const auto & location_nodes_iter : location_nodes)
   {
-    // add file scheme prefix to front of file path to build definition uri
+    // add file scheme prefix onto front of file path to build location uri
     auto location_uri = wasp::lsp::m_uri_prefix + location_nodes_iter.node_pool()->stream_name();
 
-    // add file uri and zero based line and column range to definition list
-    definitionLocations.push_back(wasp::DataObject());
-    wasp::DataObject * location = definitionLocations.back().to_object();
+    // add file uri with zero based line and column range to locations list
+    defsOrRefsLocations.push_back(wasp::DataObject());
+    wasp::DataObject * location = defsOrRefsLocations.back().to_object();
     pass &= wasp::lsp::buildLocationObject(*location,
                                            errors,
                                            location_uri,
@@ -1086,16 +1086,120 @@ MooseServer::getHoverDisplayText(std::string & display_text, int line, int chara
 }
 
 bool
-MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & /* referencesLocations */,
-                                               int /* line */,
-                                               int /* character */,
-                                               bool /* include_declaration */)
+MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & referencesLocations,
+                                               int line,
+                                               int character,
+                                               bool include_declaration)
 {
-  bool pass = true;
+  Syntax & syntax = getCheckApp()->syntax();
 
-  // TODO - hook up this capability by adding server specific logic here
+  // return without adding any reference locations when parser root is null
+  if (!rootIsValid())
+    return true;
 
-  return pass;
+  // find hit node for zero based request line and column number from input
+  wasp::HITNodeView view_root = getRoot().getNodeView();
+  wasp::HITNodeView request_context =
+      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // return without adding any references when request not block declarator
+  if ((request_context.type() != wasp::DECL && request_context.type() != wasp::DOT_SLASH &&
+       request_context.type() != wasp::LBRACKET && request_context.type() != wasp::RBRACKET) ||
+      !request_context.has_parent() || request_context.parent().type() != wasp::OBJECT)
+    return true;
+
+  // get input path and block name of declarator located at request context
+  const std::string & block_path = request_context.parent().path();
+  const std::string & block_name = request_context.parent().name();
+
+  // build map from input lookup paths to parameter types and save to reuse
+  if (_input_path_to_types.empty())
+    for (const auto & associated_types_iter : syntax.getAssociatedTypes())
+    {
+      const std::string & path = associated_types_iter.first;
+      const std::string & type = associated_types_iter.second;
+      _input_path_to_types[path].insert(type);
+    }
+
+  // get registered syntax from block path with map of input paths to types
+  bool is_parent;
+  std::string registered_syntax = syntax.isAssociated(block_path, &is_parent, _input_path_to_types);
+
+  // return without adding any references if syntax has no types associated
+  if (is_parent || !_input_path_to_types.count(registered_syntax))
+    return true;
+
+  // get set of parameter types which are associated with registered syntax
+  const std::set<std::string> & target_types = _input_path_to_types.at(registered_syntax);
+
+  // set used to gather nodes collected by value custom sorted by locations
+  SortedLocationNodes match_nodes(
+      [](const wasp::HITNodeView & l, const wasp::HITNodeView & r)
+      {
+        const std::string & l_file = l.node_pool()->stream_name();
+        const std::string & r_file = r.node_pool()->stream_name();
+        return (l_file < r_file || (l_file == r_file && l.line() < r.line()) ||
+                (l_file == r_file && l.line() == r.line() && l.column() < r.column()));
+      });
+
+  // walk input recursively and gather all nodes that match value and types
+  getNodesByValueAndTypes(match_nodes, view_root, block_name, target_types);
+
+  // return without adding any references if no nodes match value and types
+  if (match_nodes.empty())
+    return true;
+
+  // add request context node to set if declaration inclusion was specified
+  if (include_declaration && request_context.parent().child_count_by_name("decl"))
+    match_nodes.insert(request_context.parent().first_child_by_name("decl"));
+
+  // add locations to references list with nodes that match value and types
+  return addLocationNodesToList(referencesLocations, match_nodes);
+}
+
+void
+MooseServer::getNodesByValueAndTypes(SortedLocationNodes & match_nodes,
+                                     wasp::HITNodeView view_parent,
+                                     const std::string & target_value,
+                                     const std::set<std::string> & target_types)
+{
+  // walk over children of context to gather nodes matching value and types
+  for (const auto & view_child : view_parent)
+  {
+    // check for parameter type match if node is value matching target data
+    if (view_child.type() == wasp::VALUE && view_child.to_string() == target_value)
+    {
+      // get object context path and object type value of node if it exists
+      wasp::HITNodeView object_context = view_child;
+      while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+        object_context = object_context.parent();
+      const std::string object_path = object_context.path();
+      wasp::HITNodeView type_node = object_context.first_child_by_name("type");
+      const std::string object_type =
+          type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
+
+      // gather global, action, and object parameters for context of object
+      InputParameters valid_params = emptyInputParameters();
+      std::set<std::string> obj_act_tasks;
+      getAllValidParameters(valid_params, object_path, object_type, obj_act_tasks);
+
+      // get name from parent of current value node which is parameter node
+      std::string param_name = view_child.has_parent() ? view_child.parent().name() : "";
+
+      // get type of parameter and prepare string to check target set match
+      std::string dirty_type = valid_params.type(param_name);
+      std::string clean_type = MooseUtils::prettyCppType(dirty_type);
+      pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+      // add input node to collection if its type is also in set of targets
+      if (target_types.count(clean_type))
+        match_nodes.insert(view_child);
+    }
+
+    // recurse deeper into input to search for matches if node has children
+    if (!view_child.is_leaf())
+      getNodesByValueAndTypes(match_nodes, view_child, target_value, target_types);
+  }
 }
 
 bool
