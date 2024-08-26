@@ -404,17 +404,30 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       local_rotation_mat(2, 1) = e3(1);
       local_rotation_mat(2, 2) = e3(2);
 
-      ADRankTwoTensor gmninv = local_rotation_mat.transpose() * gmninv_temp * local_rotation_mat;
+      // Calculate the contravariant base vectors g^0, g^1, g^2
+      // The base vectors for the strain tensor in the convected coordinate
+      // are g_0, g_1, g_2 (g_i=dx/dr_i)
+      // The following contravariant base vectors have the property:
+      // g^i*g_j= 1 if {i=j} otherwise g^i*g_j= 0
 
-      (*_ge[j])[i](0, 0) = (gmninv * (*_dxyz_dxi[j])[i]) * e1;
-      (*_ge[j])[i](0, 1) = (gmninv * (*_dxyz_dxi[j])[i]) * e2;
-      (*_ge[j])[i](0, 2) = (gmninv * (*_dxyz_dxi[j])[i]) * e3;
-      (*_ge[j])[i](1, 0) = (gmninv * (*_dxyz_deta[j])[i]) * e1;
-      (*_ge[j])[i](1, 1) = (gmninv * (*_dxyz_deta[j])[i]) * e2;
-      (*_ge[j])[i](1, 2) = (gmninv * (*_dxyz_deta[j])[i]) * e3;
-      (*_ge[j])[i](2, 0) = (gmninv * (*_dxyz_dzeta[j])[i]) * e1;
-      (*_ge[j])[i](2, 1) = (gmninv * (*_dxyz_dzeta[j])[i]) * e2;
-      (*_ge[j])[i](2, 2) = (gmninv * (*_dxyz_dzeta[j])[i]) * e3;
+      ADReal denom = ((*_dxyz_dxi[j])[i] * ((*_dxyz_deta[j])[i].cross((*_dxyz_dzeta[j])[i])));
+      ADRealVectorValue gi0 = ((*_dxyz_deta[j])[i].cross((*_dxyz_dzeta[j])[i])) / denom;
+      ADRealVectorValue gi1 = ((*_dxyz_dzeta[j])[i].cross((*_dxyz_dxi[j])[i])) / denom;
+      ADRealVectorValue gi2 = ((*_dxyz_dxi[j])[i].cross((*_dxyz_deta[j])[i])) / denom;
+
+      // Calculate the rotation matrix for the elasticity tensor that maps
+      //  the strain tensor (with g_1, g2_, g_3 base vectors) to
+      //  the stress tensor (with base vectors e1, e2, e3)
+
+      (*_ge[j])[i](0, 0) = gi0 * e1;
+      (*_ge[j])[i](0, 1) = gi0 * e2;
+      (*_ge[j])[i](0, 2) = gi0 * e3;
+      (*_ge[j])[i](1, 0) = gi1 * e1;
+      (*_ge[j])[i](1, 1) = gi1 * e2;
+      (*_ge[j])[i](1, 2) = gi1 * e3;
+      (*_ge[j])[i](2, 0) = gi2 * e1;
+      (*_ge[j])[i](2, 1) = gi2 * e2;
+      (*_ge[j])[i](2, 2) = gi2 * e3;
     }
   }
 }

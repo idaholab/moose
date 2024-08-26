@@ -1,6 +1,6 @@
 [Tests]
   design = "ShellElements.md"
-  issues = "#14280 #21384"
+  issues = "#14280 #21384 #28471"
   [./beam_bending]
     type = 'Exodiff'
     input = 'beam_bending_moment_AD.i'
@@ -101,4 +101,12 @@
 
     requirement = "The system shall generate an error if the shell strain material is evaluated when the number of quadrature points does not equal 4."
   [../]
+  [./pinched_cylinder_symm_unstructured]
+    type = 'Exodiff'
+    input = pinched_cylinder_symm_unstructured.i
+    exodiff = 'pinched_cylinder_symm_unstructured_out.e'
+  
+    requirement = "Shell elements should have compatible stresses even for unstructured meshes."
+  [../]
+  
 []
