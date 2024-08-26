@@ -29,7 +29,7 @@
     type = MultiAppReporterTransfer
     to_multi_app = forward_sampler
     from_reporters = 'OptimizationReporter/vals'
-    to_reporters = 'controllable_params/vals'
+    to_reporters = 'parameters/vals'
   []
 
   [fromForward]
