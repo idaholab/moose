@@ -353,6 +353,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
         gmn(0, 2) += (*_dxyz_dxi[j])[i](component) * (*_dxyz_dzeta[j])[i](component);
         gmn(1, 2) += (*_dxyz_deta[j])[i](component) * (*_dxyz_dzeta[j])[i](component);
 
+        // why are we dropping derivatives here?!
         J(0, component) = MetaPhysicL::raw_value((*_dxyz_dxi[j])[i](component));
         J(1, component) = MetaPhysicL::raw_value((*_dxyz_deta[j])[i](component));
         J(2, component) = MetaPhysicL::raw_value((*_dxyz_dzeta[j])[i](component));
@@ -384,6 +385,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       J(2, 1) /= normz;
       J(2, 2) /= normz;
 
+      // _transformation_matrix is an AD property, but we're not setting the derivatives!
       (*_transformation_matrix)[i] = J;
 
       // calculate ge
@@ -393,27 +395,16 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       ADRealVectorValue e2 = e3.cross(e1);
       e2 /= e2.norm();
 
-      ADRankTwoTensor local_rotation_mat;
-      local_rotation_mat(0, 0) = e1(0);
-      local_rotation_mat(0, 1) = e1(1);
-      local_rotation_mat(0, 2) = e1(2);
-      local_rotation_mat(1, 0) = e2(0);
-      local_rotation_mat(1, 1) = e2(1);
-      local_rotation_mat(1, 2) = e2(2);
-      local_rotation_mat(2, 0) = e3(0);
-      local_rotation_mat(2, 1) = e3(1);
-      local_rotation_mat(2, 2) = e3(2);
-
       // Calculate the contravariant base vectors g^0, g^1, g^2
       // The base vectors for the strain tensor in the convected coordinate
       // are g_0, g_1, g_2 (g_i=dx/dr_i)
       // The following contravariant base vectors have the property:
       // g^i*g_j= 1 if {i=j} otherwise g^i*g_j= 0
 
-      ADReal denom = ((*_dxyz_dxi[j])[i] * ((*_dxyz_deta[j])[i].cross((*_dxyz_dzeta[j])[i])));
-      ADRealVectorValue gi0 = ((*_dxyz_deta[j])[i].cross((*_dxyz_dzeta[j])[i])) / denom;
-      ADRealVectorValue gi1 = ((*_dxyz_dzeta[j])[i].cross((*_dxyz_dxi[j])[i])) / denom;
-      ADRealVectorValue gi2 = ((*_dxyz_dxi[j])[i].cross((*_dxyz_deta[j])[i])) / denom;
+      const auto denom = (*_dxyz_dxi[j])[i] * (*_dxyz_deta[j])[i].cross((*_dxyz_dzeta[j])[i]);
+      const auto gi0 = (*_dxyz_deta[j])[i].cross((*_dxyz_dzeta[j])[i]) / denom;
+      const auto gi1 = (*_dxyz_dzeta[j])[i].cross((*_dxyz_dxi[j])[i]) / denom;
+      const auto gi2 = (*_dxyz_dxi[j])[i].cross((*_dxyz_deta[j])[i]) / denom;
 
       // Calculate the rotation matrix for the elasticity tensor that maps
       //  the strain tensor (with g_1, g2_, g_3 base vectors) to
