@@ -100,10 +100,9 @@ function python_test()
                 "${my_version}"
                 (( error_cnt+=1 ))
             elif [[ -z "${my_python}" ]] && [[ ${which_python} == 'python' ]]; then
-                print_orange "WARNING: "
-                print_bold "${which_python};"
-                printf ' does not exist. The further back in time we go, the more important this'
-                printf ' becomes.\n'
+                printf '%s: %s does not exist\n' \
+                "$(print_orange 'WARNING')" \
+                "$(print_bold "${which_python};")"
             else
                 print_bold "${my_python} --version"
                 printf '; == %s\n' "${my_version}"
@@ -185,76 +184,124 @@ function conda_test()
     modules_test=$?
     if [[ -z "${CONDA_PREFIX}" ]]; then printf "\n"; return 0; fi
     print_sep
-    printf "CONDA MOOSE Package Checks\n\n"
+    printf "MOOSE Repository/Conda Version Checks\n\n"
     if [[ $modules_test -ge 1 ]]; then
         print_orange "WARNING: "
         printf "Unable to run Conda tests due to missing Python modules\n\n"
         return 1
     fi
     if [[ -n "${CONDA_EXE}" ]] && [[ -n "${MOOSE_NO_CODESIGN}" ]]; then
+        local moose_packages needs_version comparison_version \
+        conda_list iter_cnt str_length ver_length
         # right to left dependency. `none` is used as a control label
-        moose_packages=(dev wasp libmesh petsc none)
+        moose_packages=(dev libmesh petsc wasp mpi none)
+        needs_version=()
+        comparison_version=()
+        str_length=0
         conda_list=$(${CONDA_EXE} list ^moose)
-
-        # iterate over and break on the top-most level we find installed
+        # capture required versions
         for package in "${moose_packages[@]}"; do
+            if [[ "${package}" == 'dev' ]]; then package='moose-dev'; fi
+            while IFS='' read -r line; do needs_version+=("$line"); done < <(./versioner.py \
+                "${package}" --yaml 2>/dev/null | \
+                grep 'install:' | \
+                awk 'BEGIN { FS = "=" }; {print $2}')
+         done
+        # capture installed versions
+        for package in "${moose_packages[@]}"; do
+            if [[ $str_length -lt ${#package} ]]; then str_length=${#package}; fi
             my_version=$(echo -e "${conda_list}" | grep "^moose-${package} " | awk '{print $2}')
+            if [[ $ver_length -lt ${#my_version} ]]; then ver_length=${#my_version}; fi
             if [ -n "$my_version" ]; then
-                # hack naming conventions
-                if [[ ${package} == 'dev' ]]; then package='moose-dev'; fi
-
-                local needs_version
-                needs_version=()
-                while IFS='' read -r line; do needs_version+=("$line"); done < <(./versioner.py \
-                 "${package}" --yaml 2>/dev/null | \
-                 grep 'install:' | \
-                 awk 'BEGIN { FS = "=" }; {print $2}')
-
-                if [[ ${package} != 'moose-dev' ]]; then
-                    reminder='Top-level moose-dev package not in use'
-                fi
-                break
+                comparison_version+=("${package} ${my_version} ${needs_version[$iter_cnt]}")
+            else
+                comparison_version+=("${package} none ${needs_version[$iter_cnt]}")
             fi
+            (( iter_cnt+=1 ))
         done
-        if [[ "${package}" == 'none' ]]; then
+
+        # handle comparisons if there are comparisons to be made
+        local once mismatch conda_install_packages
+        if [[ -n "${comparison_version[*]}" ]]; then
+            for package in "${comparison_version[@]}"; do
+                (( once+=1 ))
+                if [[ $once -eq 1 ]]; then
+                    printf '%*sInstalled%*sRequired\n' "$((str_length+7))" "" "5" ""
+                fi
+                if [[ $package =~ ([a-zA-Z]+)[[:space:]]([.0-9]+)[[:space:]]([.0-9]+) ]]; then
+                    library="${BASH_REMATCH[1]}"
+                    installed_version="${BASH_REMATCH[2]}"
+                    required_version="${BASH_REMATCH[3]}"
+                    # Version mis-match detected
+                    if [[ "$installed_version" != "$required_version" ]]; then
+                        (( mismatch+=1 ))
+                        conda_install_packages+=("moose-${library}=${required_version}")
+                        printf '%s %*s' \
+                        "$(print_bold "moose-$library")" \
+                        "$((str_length-${#library}))" ""
+                        printf '%s %*s!= ' \
+                        "$(print_red "$installed_version")" \
+                        "$((ver_length-${#installed_version}))" ""
+                        printf '%s\n' \
+                        "$(print_green "$required_version")"
+                    # Version match
+                    else
+                        printf '%s %*s' \
+                        "$(print_bold "moose-$library")" \
+                        "$((str_length-${#library}))" ""
+                        printf '%s %*s== ' \
+                        "$(print_green "$installed_version")" \
+                        "$((ver_length-${#installed_version}))" ""
+                        printf '%s\n' \
+                        "$(print_green "$required_version")"
+                    fi
+                # Package not installed, but list the required version (helps us Discussioners)
+                elif [[ $package =~ ([a-zA-Z]+)[[:space:]]none[[:space:]]([.0-9]+) ]]; then
+                    library="${BASH_REMATCH[1]}"
+                    required_version="${BASH_REMATCH[2]}"
+                    printf '%s %*s' \
+                        "moose-${library}" \
+                        "$(( (str_length-${#library}) + ver_length + 4 ))" ""
+                    printf '%s\n' "$required_version"
+                fi
+            done
+        else
             printf "\nConda MOOSE dependencies not available (moose-petsc, moose-libmesh,
 moose-wasp, etc). User is required to manually build PETSc, libMesh,
 and WASP  (see moose/scripts folder)\n\n"
             return 0
         fi
-        printf '%s\t%s == %s' "${package}" \
-         "$(print_bold "${my_version}")" \
-         "$(print_bold "${needs_version[0]}")"
+        if [[ -n "${mismatch}" ]]; then
+            printf "\n%s: Repository/Conda version mismatch.\n\n" \
+             "$(print_red "FAIL")"
 
-        if [ -n "${reminder}" ]; then printf '\n%s: %s' \
-         "$(print_bold 'NOTE')" \
-         "${reminder}"
-        fi
-        if [[ -n "${my_version}" ]] && [[ "${my_version}" != "${needs_version[0]}" ]]; then
-            printf "\n%s: %s/repository version mismatch.\n\n" \
-             "$(print_red "FAIL")" \
-             "${package}"
+            printf "Your MOOSE repository requires different MOOSE Conda packages
+than what you have installed.
 
-            printf "Your MOOSE repository requires %s:\t%s
-while your Conda environment has %s:\t%s
+There are one of two ways to resolve this:
 
-There are two ways to fix this:
+1.  Install the required Conda packages:
 
-1.  To install the required Conda package version:
+"
+            printf '\t%s' "$(print_bold "conda install")"
+            for conda_package in "${conda_install_packages[@]}"; do
+                if [[ -n "${conda_package}" ]]; then
+                    printf ' %s' "$(print_bold "${conda_package}")"
+                    # break on moose-dev. Mixing other dependency packages is an impossibility
+                    if [[ $conda_package =~ (moose-dev) ]]; then
+                        break
+                    fi
+                fi
+            done
+            printf '\n\n2.  Adjust your repository to be in sync with Conda packages.
 
-\t%s
+Whatever choice you make, be sure to perform a clean before
+rebuilding:
 
-2.  Or adjust your repository to be in sync with %s Conda package.\n\n" \
- "${package}" \
- "$(print_green "${needs_version[0]}")" \
- "${package}" \
- "$(print_red "${my_version}")" \
- "$(print_bold "conda install ${package}=${needs_version[0]}")" \
- "${package}"
-
+\t%s\n' "$(print_bold "make clobberall; make")"
             return 1
-        elif [[ -n "${my_version}" ]]; then
-            print_green "\n\nOK\n"
+        else
+            print_green "\nOK\n"
         fi
     else
         print_orange "WARNING: "
