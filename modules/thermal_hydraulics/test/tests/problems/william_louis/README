@@ -1,0 +1,26 @@
+This directory contains files modeling the junction experiments described
+in the following reference:
+
+M.J.P. William-Louis et al. On the calculation of unsteady compressible flow through
+an N-branch junction. Proc. Instn. Mech. Engrs. 212 (1998) 49-56.
+
+Experimental data was extracted from plot images in this reference using a plot digitizer.
+
+Three cases were considered in the experiments. For now, we consider only two of
+the cases, given the following names here:
+- 3pipes_open: 3 pipes, with pipes 2 and 3 open
+- 4pipes_closed: 4 pipes, with pipes 2, 3, and 4 closed
+
+The following files are in this directory:
+- 3pipes_open.i: input file for the "3pipes_open" case
+- 4pipes_closed.i: input file for the "4pipes_closed" case
+- data/3pipes_open_pipe1_048.csv: "3pipes_open" experimental data for pipe 1, 0.48 m from junction
+- data/3pipes_open_pipe2_052.csv: "3pipes_open" experimental data for pipe 2, 0.52 m from junction
+- data/3pipes_open_pipe3_048.csv: "3pipes_open" experimental data for pipe 3, 0.48 m from junction
+- data/4pipes_closed_pipe1_048.csv: "4pipes_closed" experimental data for pipe 1, 0.48 m from junction
+- plot.py: plot script
+
+The experimental data files have the following columns:
+- dp: Pressure difference [kPa], relative to low pressure state (100 kPa)
+- time: Time [s]
+
