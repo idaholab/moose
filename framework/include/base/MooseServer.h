@@ -223,12 +223,12 @@ private:
                                      const std::string & val_string);
 
   /**
-   * Add locations of lookups or parameter declarator to definition list.
-   * @param definitionLocations - data array of locations objects to fill
+   * Add set of nodes sorted by location to definition or reference list.
+   * @param defsOrRefsLocations - data array of locations objects to fill
    * @param location_nodes - set of nodes that have locations to be added
    * @return - true if filling of location objects completed successfully
    */
-  bool addLocationNodesToList(wasp::DataArray & definitionLocations,
+  bool addLocationNodesToList(wasp::DataArray & defsOrRefsLocations,
                               const SortedLocationNodes & location_nodes);
 
   /**
@@ -252,6 +252,18 @@ private:
                                          int line,
                                          int character,
                                          bool include_declaration);
+
+  /**
+   * Recursively walk input to gather all nodes matching value and types.
+   * @param match_nodes - set to fill with nodes matching value and types
+   * @param view_parent - nodeview used to start recursive tree traversal
+   * @param target_value -
+   * @param target_types -
+   */
+  void getNodesByValueAndTypes(SortedLocationNodes & match_nodes,
+                               wasp::HITNodeView view_parent,
+                               const std::string & target_value,
+                               const std::set<std::string> & target_types);
 
   /**
    * Gather formatting text edits - specific to this server implemention.
@@ -377,6 +389,11 @@ private:
    * @brief _type_to_input_paths - map of parameter types to lookup paths
    */
   std::map<std::string, std::set<std::string>> _type_to_input_paths;
+
+  /**
+   * @brief _type_to_input_paths - map of lookup paths to parameter types
+   */
+  std::map<std::string, std::set<std::string>> _input_path_to_types;
 
   /**
    * @brief _formatting_tab_size - number of indent spaces for formatting

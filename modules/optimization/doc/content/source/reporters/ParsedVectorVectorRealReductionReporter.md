@@ -17,7 +17,7 @@ In this case, a `ParsedVectorVectorRealReductionReporter` is needed to sum each 
 This set-up allows us to optimize parameters that combine multiple forward problems created and run in parallel using the sampler system.
 The scalar reporter computed by `ParsedVectorVectorRealReductionReporter` is then be transferred as the objective value into [GeneralOptimization.md].
 
-!listing modules/combined/test/tests/optimization/invOpt_multiExperiment/sampler_subapp.i id=sampler block=Transfers Reporters
+!listing test/tests/reporters/multiExperiment/sampler_subapp.i id=sampler block=Transfers Reporters
 
 !syntax parameters /Reporters/ParsedVectorVectorRealReductionReporter
 
