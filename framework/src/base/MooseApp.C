@@ -1667,6 +1667,9 @@ MooseApp::runInputs() const
 {
   if (isParamValid("run"))
   {
+    // These options will show as unused by petsc; ignore them all
+    Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
+
     // Here we are going to pass everything after --run on the cli to the TestHarness. That means
     // cannot validate these CLIs.
     auto it = _command_line->find("run");
@@ -1709,6 +1712,7 @@ MooseApp::runInputs() const
       return_value = system(cmd.c_str());
     _communicator.broadcast(return_value);
 
+    // TODO: return the actual return value here
     if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
       mooseError("Run failed");
     return true;
