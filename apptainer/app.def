@@ -213,8 +213,6 @@ EOF
     rm -rf $TEMP_LOC
 
 %test
-    set -x
-
     # If we're using openmpi, we need to allow running as root
     # if we're in a fakeroot environment
     if [ $(whoami) == root ] && which ompi_info &> /dev/null; then
@@ -234,18 +232,76 @@ EOF
     {{ SECTION_TEST_BEGIN }}
 {%- endif %}
 
+    # Print out a summary of what we're going to run before running it
+    echo "Running tests for the following directories:"
+    for TEST_DIR in ${TEST_DIRS}; do
+        echo " - ${TEST_DIR}"
+    done
+    echo ""
+
+    # So that we can keep a summary at the end
+    results_summary="Test result summary:\n"
+
+    # Helper function for running tests
     function run_tests()
     {
         local BINARY_NAME=$1
         local TEST_DIR=$2
         local TEMP_TEST_LOC=${TEMP_LOC}/${TEST_DIR}
-        mkdir $TEMP_TEST_LOC &&                                 \
-          cd $TEMP_TEST_LOC &&                                  \
-          ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR &&   \
-          cd ${BINARY_NAME}/${TEST_DIR} &&                      \
-          ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-        return_code=$?
-        rm -rf $TEMP_TEST_LOC
+
+        echo "Running tests for ${TEST_DIR} in ${TEMP_TEST_LOC}"
+
+        should_break=
+
+        # Make the directory where we should copy the inputs and run
+        mkdir ${TEMP_TEST_LOC} || should_break=1
+
+        # Move into said directory
+        if [ -z "$should_break" ]; then
+            cd ${TEMP_TEST_LOC} || should_break=1
+        fi
+        # Copy the inputs
+        if [ -z "$should_break" ]; then
+            copy_cmd="${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR"
+            echo "> ${copy_cmd}"
+            copy_result="$(${copy_cmd} 2>&1)"
+            if [ $? != 0 ]; then
+                should_break=1
+                echo "${copy_result}"
+            fi
+        fi
+        # Move into the copied input directory
+        if [ -z "$should_break" ]; then
+            cd_cmd="cd ${BINARY_NAME}/${TEST_DIR}"
+            echo "> ${cd_cmd}"
+            ${cd_cmd} || should_break=1
+        fi
+        # And run the tests
+        if [ -z "$should_break" ]; then
+            run_cmd="${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t"
+            echo "> ${run_cmd}"
+            ${run_cmd}
+            return_code=$?
+        fi
+
+        # Broke before running the tests, nothing to do
+        if [ -n "$should_break" ]; then
+            return_code=1
+        # Ran the tests, but we had a timeout; try again
+        elif [ $return_code -gt 0 ] && [ $return_code -lt 128 ] && [ -f ".previous_test_results.json" ]; then
+            echo "Possible intermittent failure; retrying failed tests"
+            run_cmd+=" --failed-tests --ignore prereq"
+            echo "> ${run_cmd}"
+            ${run_cmd}
+            return_code=$?
+        fi
+
+        results_summary+=" - ${TEST_DIR}: exit ${return_code}\n"
+        rm -rf ${TEMP_TEST_LOC}
+
+        # Add a line break now that we're done
+        echo ""
+
         return $return_code
     }
 
@@ -259,6 +315,9 @@ EOF
     for TEST_DIR in ${TEST_DIRS}; do
         run_tests ${BINARY_NAME} ${TEST_DIR} || return_flag=$?
     done
+
+    # Show the summary at the end
+    printf "$results_summary"
 
     rm -rf $TEMP_LOC
 
