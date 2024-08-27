@@ -14,7 +14,5 @@
 int
 main(int argc, char * argv[])
 {
-  Moose::main<GeochemistryTestApp>(argc, argv);
-
-  return 0;
+  return Moose::main<GeochemistryTestApp>(argc, argv);
 }

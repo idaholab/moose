@@ -403,6 +403,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _factory(*this),
     _error_overridden(false),
     _ready_to_exit(false),
+    _exit_code(0),
     _initial_from_file(false),
     _distributed_mesh_on_command_line(false),
     _recover(false),
@@ -1669,7 +1670,7 @@ MooseApp::copyInputs() const
 }
 
 bool
-MooseApp::runInputs() const
+MooseApp::runInputs()
 {
   if (isParamValid("run"))
   {
@@ -1717,10 +1718,7 @@ MooseApp::runInputs() const
     if (processor_id() == 0)
       return_value = system(cmd.c_str());
     _communicator.broadcast(return_value);
-
-    // TODO: return the actual return value here
-    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
-      mooseError("Run failed");
+    _exit_code = return_value;
     return true;
   }
 
