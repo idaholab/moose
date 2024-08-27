@@ -291,6 +291,7 @@ There are one of two ways to resolve this:
                     # break on anything not moose-wasp (all other packages have dependencies
                     # therefore we can safely end the loop now)
                     if ! [[ $conda_package =~ (moose-wasp) ]]; then
+                        printf ' %s' "$(print_bold "$(get_value 'default_mpi')")"
                         break
                     fi
                 fi
