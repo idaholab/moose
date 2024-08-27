@@ -232,7 +232,7 @@ function conda_test()
                     library="${BASH_REMATCH[1]}"
                     installed_version="${BASH_REMATCH[2]}"
                     required_version="${BASH_REMATCH[3]}"
-                    # Version mis-match detected
+                    # Version mismatch detected
                     if [[ "$installed_version" != "$required_version" ]]; then
                         (( mismatch+=1 ))
                         conda_install_packages+=("moose-${library}=${required_version}")
@@ -255,7 +255,7 @@ function conda_test()
                         printf '%s\n' \
                         "$(print_green "$required_version")"
                     fi
-                # Package not installed, but list the required version (helps us Discussioners)
+                # Package not installed, but list the version required (helps us Discussioners)
                 elif [[ $package =~ ([a-zA-Z]+)[[:space:]]none[[:space:]]([.0-9]+) ]]; then
                     library="${BASH_REMATCH[1]}"
                     required_version="${BASH_REMATCH[2]}"
@@ -287,8 +287,9 @@ There are one of two ways to resolve this:
             for conda_package in "${conda_install_packages[@]}"; do
                 if [[ -n "${conda_package}" ]]; then
                     printf ' %s' "$(print_bold "${conda_package}")"
-                    # break on moose-dev. Mixing other dependency packages is an impossibility
-                    if [[ $conda_package =~ (moose-dev) ]]; then
+                    # break on anything not moose-wasp (all other packages have dependencies
+                    # and we can safely end the loop then)
+                    if ! [[ $conda_package =~ (moose-wasp) ]]; then
                         break
                     fi
                 fi
