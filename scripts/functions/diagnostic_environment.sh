@@ -221,7 +221,7 @@ function conda_test()
         done
 
         # handle comparisons if there are comparisons to be made
-        local once mismatch conda_install_packages
+        local once mismatch conda_install_packages not_installed
         if [[ -n "${comparison_version[*]}" ]]; then
             for package in "${comparison_version[@]}"; do
                 (( once+=1 ))
@@ -259,6 +259,7 @@ function conda_test()
                 elif [[ $package =~ ([a-zA-Z]+)[[:space:]]none[[:space:]]([.0-9]+) ]]; then
                     library="${BASH_REMATCH[1]}"
                     required_version="${BASH_REMATCH[2]}"
+                    not_installed+=("${library}")
                     printf '%s %*s' \
                         "moose-${library}" \
                         "$(( (str_length-${#library}) + ver_length + 4 ))" ""
@@ -280,7 +281,7 @@ than what you have installed.
 
 There are one of two ways to resolve this:
 
-1.  Install the required Conda packages:
+1.  Install the required Conda packages (preferred):
 
 "
             printf '\t%s' "$(print_bold "conda install")"
@@ -288,18 +289,35 @@ There are one of two ways to resolve this:
                 if [[ -n "${conda_package}" ]]; then
                     printf ' %s' "$(print_bold "${conda_package}")"
                     # break on anything not moose-wasp (all other packages have dependencies
-                    # and we can safely end the loop then)
+                    # therefore we can safely end the loop now)
                     if ! [[ $conda_package =~ (moose-wasp) ]]; then
                         break
                     fi
                 fi
             done
-            printf '\n\n2.  Adjust your repository to be in sync with Conda packages.
+            printf '\n\t%s\n' \
+            "$(print_bold "conda deactivate; conda activate ${CONDA_DEFAULT_ENV}")"
+            printf '\n2.  Adjust your repository to be in sync with Conda packages.
 
-Whatever choice you make, be sure to perform a clean before
-rebuilding:
 
-\t%s\n' "$(print_bold "make clobberall; make")"
+Whatever your choice, you will then need to clean any previous
+build attempts and start over:\n\n'
+            printf '\t%s\n' "$(print_bold "git -C $SCRIPT_DIR/../ clean -Xfd")"
+            for conda_package in "${not_installed[@]}"; do
+                if [[ -z "${conda_package}" ]] || [[ "${conda_package}" =~ dev ]]; then continue; fi
+                if [[ "${conda_package}" =~ petsc ]]; then
+                    printf '\t%s\n' "$(print_bold "$SCRIPT_DIR/update_and_rebuild_petsc.sh")"
+                fi
+                if [[ "${conda_package}" =~ libmesh ]]; then
+                    printf '\t%s\n' "$(print_bold "$SCRIPT_DIR/update_and_rebuild_libmesh.sh")"
+                fi
+                if [[ "${conda_package}" =~ wasp ]]; then
+                    printf '\t%s\n' "$(print_bold "$SCRIPT_DIR/update_and_rebuild_wasp.sh")"
+                fi
+            done
+            printf '\t%s\n\t%s\n' \
+            "$(print_bold "cd $SCRIPT_DIR/../test")" \
+            "$(print_bold "make -j ${MOOSE_JOBS:-6}")"
             return 1
         else
             print_green "\nOK\n"
