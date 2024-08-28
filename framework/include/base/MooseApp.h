@@ -1413,7 +1413,7 @@ private:
    * read/writable location for the user.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool copyInputs() const;
+  bool copyInputs();
 
   /**
    * Handles the run input parameter logic: Checks to see whether a directory exists in user space

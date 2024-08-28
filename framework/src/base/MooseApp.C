@@ -1606,10 +1606,13 @@ MooseApp::getInstallableInputs() const
 }
 
 bool
-MooseApp::copyInputs() const
+MooseApp::copyInputs()
 {
   if (isParamValid("copy_inputs"))
   {
+    if (comm().size() > 1)
+      mooseError("The --copy-inputs option should not be ran in parallel");
+
     // Get command line argument following --copy-inputs on command line
     auto dir_to_copy = getParam<std::string>("copy_inputs");
 
@@ -1655,15 +1658,13 @@ MooseApp::copyInputs() const
 
     TIME_SECTION("copy_inputs", 2, "Copying Inputs");
 
-    // Only perform the copy on the root processor
-    int return_value = 0;
-    if (processor_id() == 0)
-      return_value = system(cmd.c_str());
-    _communicator.broadcast(return_value);
-
-    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
-      mooseError("Failed to copy the requested directory.");
-    Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
+    mooseAssert(comm().size() == 1, "Should be run in serial");
+    const auto return_value = system(cmd.c_str());
+    if (!WIFEXITED(return_value))
+      mooseError("Process exited unexpectedly");
+    _exit_code = WEXITSTATUS(return_value);
+    if (_exit_code == 0)
+      Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
     return true;
   }
   return false;
@@ -1676,6 +1677,9 @@ MooseApp::runInputs()
   {
     // These options will show as unused by petsc; ignore them all
     Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
+
+    if (comm().size() > 1)
+      mooseError("The --run option should not be ran in parallel");
 
     // Here we are going to pass everything after --run on the cli to the TestHarness. That means
     // cannot validate these CLIs.
@@ -1712,13 +1716,12 @@ MooseApp::runInputs()
           " --run <dir>\" again.");
     }
 
-    // Only launch the tests on the root processor
     Moose::out << "Working Directory: " << working_dir << "\nRunning Command: " << cmd << std::endl;
-    int return_value = 0;
-    if (processor_id() == 0)
-      return_value = system(cmd.c_str());
-    _communicator.broadcast(return_value);
-    _exit_code = return_value;
+    mooseAssert(comm().size() == 1, "Should be run in serial");
+    const auto return_value = system(cmd.c_str());
+    if (!WIFEXITED(return_value))
+      mooseError("Process exited unexpectedly");
+    _exit_code = WEXITSTATUS(return_value);
     return true;
   }
 
