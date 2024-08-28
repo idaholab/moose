@@ -15,6 +15,7 @@
       cli_args = 'Outputs/json/file_base=control_reporter_bool
                   Reporters/test/bool_value=true'
       command_proxy = 'control_reporter.py bool_value'
+      required_python_packages = requests
       recover = false
       detail = 'boolean'
     []
@@ -26,6 +27,7 @@
       cli_args = 'Outputs/json/file_base=control_reporter_real
                   Reporters/test/real_value=1234'
       command_proxy = 'control_reporter.py real_value'
+      required_python_packages = requests
       recover = false
       detail = 'double precision number'
     []
@@ -37,6 +39,7 @@
       cli_args = 'Outputs/json/file_base=control_reporter_int
                   Reporters/test/int_value=-1234'
       command_proxy = 'control_reporter.py int_value'
+      required_python_packages = requests
       recover = false
       detail = 'integer'
     []
@@ -48,6 +51,7 @@
       cli_args = 'Outputs/json/file_base=control_reporter_string
                   Reporters/test/string_value=abcd'
       command_proxy = 'control_reporter.py string_value'
+      required_python_packages = requests
       recover = false
       detail = 'string'
     []
@@ -59,6 +63,7 @@
       cli_args = 'Outputs/json/file_base=control_reporter_vec_real
                   Reporters/test/vec_real_value="999 0 100"'
       command_proxy = 'control_reporter.py vec_real_value'
+      required_python_packages = requests
       recover = false
       detail = 'vector of double precision numbers'
     []
@@ -70,6 +75,7 @@
       cli_args = 'Outputs/json/file_base=control_reporter_vec_int
                   Reporters/test/vec_int_value="0 -100 12345"'
       command_proxy = 'control_reporter.py vec_int_value'
+      required_python_packages = requests
       recover = false
       detail = 'vector of integers'
     []
@@ -81,6 +87,7 @@
       cli_args = 'Outputs/json/file_base=control_reporter_vec_string
                   Reporters/test/vec_string_value="m o o s e"'
       command_proxy = 'control_reporter.py vec_string_value'
+      required_python_packages = requests
       recover = false
       detail = 'vector of strings'
     []
@@ -91,6 +98,7 @@
     input = get_postprocessor.i
     csvdiff = get_postprocessor_out.csv
     command_proxy = get_postprocessor.py
+    required_python_packages = requests
     recover = false
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
   []
@@ -99,6 +107,7 @@
     type = RunApp
     input = wait_initial.i
     command_proxy = use_port.py
+    required_python_packages = requests
     recover = False
     requirement = 'The system shall support connecting to a REST API via a port'
   []
@@ -110,6 +119,7 @@
     cli_args = 'Outputs/json/file_base=parallel_consistent
                 Reporters/test/bool_value=true'
     command_proxy = 'control_reporter.py bool_value'
+    required_python_packages = requests
     recover = false
     requirement = 'The system shall support changing controllable parameters via a REST API in a manner that is parallel consistent'
     min_parallel = 2
@@ -124,6 +134,7 @@
       type = RunException
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_no_exist'
+      required_python_packages = requests
       expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
       detail = 'setting a controllable parameter that does not exist'
       valgrind = none
@@ -132,6 +143,7 @@
       type = RunException
       input = 'wait_initial.i'
       command_proxy = 'errors.py postprocessor_no_exist'
+      required_python_packages = requests
       expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
       detail = 'getting a postprocessor that does not exist'
       valgrind = none
@@ -140,6 +152,7 @@
       type = RunException
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_unregistered_type'
+      required_python_packages = requests
       expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
       detail = 'setting a controllable parameter whose type is not supported'
       valgrind = none
@@ -148,6 +161,7 @@
       type = RunException
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_bad_convert'
+      required_python_packages = requests
       cli_args = 'Outputs/json/type=JSON'
       expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
       detail = 'setting a controllable parameter with an incompatible JSON type'
@@ -157,6 +171,7 @@
       type = RunException
       input = 'control_reporter.i'
       command_proxy = 'errors.py set_controllable_vector_non_array'
+      required_python_packages = requests
       cli_args = 'Reporters/test/type=WebServerControlTestReporter
                   Reporters/test/vec_real_value=0'
       expect_err = 'The value \'1234\' of type number is not an array'
