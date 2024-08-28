@@ -97,7 +97,7 @@ NEML2Action::act()
 
     if (_verbose)
     {
-      auto & model = neml2::get_model(_mname, _enable_AD);
+      auto & model = NEML2Utils::get_model_moose(_mname, this, _enable_AD);
 
       _console << COLOR_YELLOW << "*** BEGIN NEML2 INFO ***" << std::endl;
       _console << model << std::endl;
