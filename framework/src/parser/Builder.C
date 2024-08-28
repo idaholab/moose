@@ -882,6 +882,14 @@ void Builder::setVectorParameter<MooseEnum, MooseEnum>(
     GlobalParamsAction * global_block);
 
 template <>
+void Builder::setVectorParameter<MultiMooseEnum, MultiMooseEnum>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<MultiMooseEnum>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
+template <>
 void Builder::setVectorParameter<VariableName, VariableName>(
     const std::string & full_name,
     const std::string & short_name,
@@ -1136,6 +1144,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(RealVectorValue, RealVectorValue);
         setvector(Point, Point);
         setvector(MooseEnum, MooseEnum);
+        setvector(MultiMooseEnum, MultiMooseEnum);
 
         setvector(string, string);
         setvector(FileName, string);
@@ -2159,6 +2168,40 @@ Builder::setVectorParameter<MooseEnum, MooseEnum>(
     global_block->setVectorParam<MooseEnum>(short_name).resize(vec.size(), enum_values[0]);
     for (unsigned int i = 0; i < vec.size(); ++i)
       global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];
+  }
+}
+
+template <>
+void
+Builder::setVectorParameter<MultiMooseEnum, MultiMooseEnum>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<MultiMooseEnum>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  const std::vector<MultiMooseEnum> & enum_values = param->get();
+
+  // Get the full string assigned to the variable full_name
+  std::string buffer = root()->param<std::string>(full_name);
+
+  std::vector<std::string> first_tokenized_vector;
+  MooseUtils::tokenize<std::string>(buffer, first_tokenized_vector, 1, ";");
+  param->set().resize(first_tokenized_vector.size(), enum_values[0]);
+
+  std::vector<std::vector<std::string>> vecvec(first_tokenized_vector.size());
+  for (const auto i : index_range(vecvec))
+  {
+    MooseUtils::tokenize<std::string>(first_tokenized_vector[i], vecvec[i], 1, " ");
+    param->set()[i] = vecvec[i];
+  }
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setVectorParam<MultiMooseEnum>(short_name).resize(vecvec.size(), enum_values[0]);
+    for (unsigned int i = 0; i < vecvec.size(); ++i)
+      global_block->setVectorParam<MultiMooseEnum>(short_name)[i] = vecvec[i];
   }
 }
 

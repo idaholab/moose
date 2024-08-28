@@ -1145,6 +1145,20 @@ InputParameters::addRequiredParam<std::vector<MooseEnum>>(
 
 template <>
 void
+InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(
+    const std::string & name,
+    const std::vector<MultiMooseEnum> & moose_enums,
+    const std::string & doc_string)
+{
+  InputParameters::set<std::vector<MultiMooseEnum>>(name) =
+      moose_enums; // valid parameter is set by set_attributes
+  auto & metadata = _params[name];
+  metadata._required = true;
+  metadata._doc_string = doc_string;
+}
+
+template <>
+void
 InputParameters::addParam<MooseEnum>(const std::string & /*name*/,
                                      const std::string & /*doc_string*/)
 {
@@ -1168,6 +1182,24 @@ InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
 {
   mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the "
              "parameter is not required!");
+}
+
+template <>
+void
+InputParameters::addParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                       const std::string & /*doc_string*/)
+{
+  mooseError(
+      "You must supply a vector of MultiMooseEnum object(s) when using addParam, even if the "
+      "parameter is not required!");
+}
+
+template <>
+void
+InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                               const std::string & /*doc_string*/)
+{
+  mooseError("You must supply a vector of MultiMooseEnum object(s) when using addRequiredParam!");
 }
 
 template <>

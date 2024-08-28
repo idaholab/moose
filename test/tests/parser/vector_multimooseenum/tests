@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#28487'
+  design = 'InputParameters.md'
+
+  [vmme]
+    type = 'RunApp'
+    input = 'vmme.i'
+    requirement = 'The system shall support vectors of MultiMooseEnums as input parameters.'
+    expect_out = 'Solve Skipped!'
+  []
+[]
