@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // C POSIX includes
+#include <sstream>
 #include <sys/stat.h>
 
 #include <system_error>
@@ -264,7 +265,11 @@ Checkpoint::checkpointInfo() const
 
   std::string interval_info;
   if (getParam<bool>("wall_time_checkpoint"))
-    interval_info = "Every " + std::to_string(_wall_time_interval) + " s";
+  {
+    std::stringstream interval_info_ss;
+    interval_info_ss << "Every " << std::defaultfloat << _wall_time_interval << " s";
+    interval_info = interval_info_ss.str();
+  }
   else
     interval_info = "Disabled";
 
