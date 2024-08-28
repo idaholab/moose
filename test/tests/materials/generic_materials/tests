@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#8437'
+  issues = '#8437 #26920'
   design = 'syntax/Materials/index.md'
   [./real]
     requirement = 'The system shall be able to produce a valid Real material object on the fly for use in calculations requiring material properties'

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'AdjointStrainBatchStressGradInnerProduct.md'
+  design = 'AdjointStrainBatchStressGradInnerProduct.md AdjointStrainSymmetricStressGradInnerProduct.md'
   [inner_product_batch]
     type = CSVDiff
     input = strain_stress_grad_inner_product.i
