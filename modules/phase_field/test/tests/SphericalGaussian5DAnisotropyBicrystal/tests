@@ -1,5 +1,6 @@
 [Tests]
   [BicrystalEpsAndMAndLAnisoGaussOut]
+    method = '!DBG'
     type = 'CSVDiff'
     input = 'BicrystalEpsAndMAndLAnisoGauss.i'
     csvdiff = 'BicrystalEpsAndMAndLAnisoGauss_out.csv'
@@ -8,6 +9,7 @@
     issues = '#27774'
   []
   [BicrystalEpsAndMAnisoGaussOut]
+    method = '!DBG'
     type = 'CSVDiff'
     input = 'BicrystalEpsAndMAnisoGauss.i'
     csvdiff = 'BicrystalEpsAndMAnisoGauss_out.csv'
@@ -17,6 +19,7 @@
   []
 
   [BicrystalGammaAndLAnisoGaussOut]
+    method = '!DBG'
     type = 'CSVDiff'
     input = 'BicrystalGammaAndLAnisoGauss.i'
     csvdiff = 'BicrystalGammaAndLAnisoGauss_out.csv'
@@ -25,6 +28,7 @@
     issues = '#27774'
   []
   [BicrystalGammaAnisoGaussOut]
+    method = '!DBG'
     type = 'CSVDiff'
     input = 'BicrystalGammaAnisoGauss.i'
     csvdiff = 'BicrystalGammaAnisoGauss_out.csv'
