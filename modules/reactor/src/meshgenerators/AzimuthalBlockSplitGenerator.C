@@ -77,6 +77,34 @@ AzimuthalBlockSplitGenerator::generate()
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
+  // Check the order of the input mesh's elements
+  // Meanwhile, record the vertex average of each element for future comparison
+  unsigned short order = 0;
+  std::map<dof_id_type, Point> vertex_avgs;
+  for (const auto & elem : mesh.element_ptr_range())
+  {
+    switch (elem->type())
+    {
+      case TRI3:
+      case QUAD4:
+        if (order == 2)
+          paramError("input", "This mesh contains elements of different orders.");
+        order = 1;
+        break;
+      case TRI6:
+      case TRI7:
+      case QUAD8:
+      case QUAD9:
+        if (order == 1)
+          paramError("input", "This mesh contains elements of different orders.");
+        order = 2;
+        break;
+      default:
+        paramError("input", "This mesh contains elements of unsupported type.");
+    }
+    vertex_avgs[elem->id()] = elem->vertex_average();
+  }
+
   _old_block_ids =
       MooseMeshUtils::getSubdomainIDs(mesh, getParam<std::vector<SubdomainName>>("old_blocks"));
   if (_old_block_ids.size() != _new_block_ids.size())
@@ -102,13 +130,25 @@ AzimuthalBlockSplitGenerator::generate()
 
   MeshTools::Modification::rotate(mesh, 90.0, 0.0, 0.0);
   _azimuthal_angle_meta = azimuthalAnglesCollector(mesh, -180.0, 180.0, ANGLE_DEGREE);
+  std::vector<Real> azimuthal_angles_vtx;
+  const bool is_first_value_vertex =
+      order == 1 ? true : MooseUtils::absoluteFuzzyEqual(_azimuthal_angle_meta[0], -180.0);
+  if (order == 1)
+    azimuthal_angles_vtx = _azimuthal_angle_meta;
+  else
+    for (const auto & i : make_range(_azimuthal_angle_meta.size()))
+      if (i % 2 != is_first_value_vertex)
+        azimuthal_angles_vtx.push_back(_azimuthal_angle_meta[i]);
+
   // So that this class works for both derived classes of PolygonMeshGeneratorBase
   auto pattern_pitch_meta = std::max(getMeshProperty<Real>("pitch_meta", _input_name),
                                      getMeshProperty<Real>("pattern_pitch_meta", _input_name));
   setMeshProperty("pattern_pitch_meta", pattern_pitch_meta);
 
   Real radiusCorrectionFactor_original =
-      _preserve_volumes ? radiusCorrectionFactor(_azimuthal_angle_meta) : 1.0;
+      _preserve_volumes
+          ? radiusCorrectionFactor(_azimuthal_angle_meta, true, order, is_first_value_vertex)
+          : 1.0;
 
   const Real azi_tol = 1.0E-6;
   const Real rad_tol = 1.0e-6;
@@ -130,7 +170,8 @@ AzimuthalBlockSplitGenerator::generate()
                   original_start_down,
                   original_start_down_it,
                   original_start_up,
-                  original_start_up_it);
+                  original_start_up_it,
+                  azimuthal_angles_vtx);
 
   Real original_end_down;
   std::vector<Real>::iterator original_end_down_it;
@@ -139,8 +180,12 @@ AzimuthalBlockSplitGenerator::generate()
 
   // Identify the mesh azimuthal angles of the elements that need to be modified for the ending
   // edge of the absorber region.
-  angleIdentifier(
-      _end_angle, original_end_down, original_end_down_it, original_end_up, original_end_up_it);
+  angleIdentifier(_end_angle,
+                  original_end_down,
+                  original_end_down_it,
+                  original_end_up,
+                  original_end_up_it,
+                  azimuthal_angles_vtx);
 
   Real azi_to_mod_start;
   Real azi_to_keep_start;
@@ -177,9 +222,6 @@ AzimuthalBlockSplitGenerator::generate()
   if (azi_to_mod_end == azi_to_mod_start)
     paramError("angle_range",
                "The azimuthal intervals of the input mesh are too coarse for this parameter.");
-
-  Real radiusCorrectionFactor_mod =
-      _preserve_volumes ? radiusCorrectionFactor(_azimuthal_angle_meta) : 1.0;
 
   const auto & side_list = mesh.get_boundary_info().build_side_list();
 
@@ -270,6 +312,67 @@ AzimuthalBlockSplitGenerator::generate()
   const Real min_non_circular_radius =
       *std::min_element(non_circular_rad_list.begin(), non_circular_rad_list.end());
 
+  // Before re-correcting the radii, correct the mid-point of the elements that are altered
+  if (order == 2)
+    for (const auto & elem : mesh.element_ptr_range())
+    {
+      const Point & original_vertex_avg = vertex_avgs[elem->id()];
+      const Point & new_vertex_avg = elem->vertex_average();
+      if (MooseUtils::absoluteFuzzyGreaterThan((original_vertex_avg - new_vertex_avg).norm(), 0.0))
+      {
+        if (elem->type() == TRI6 || elem->type() == TRI7)
+        {
+          *elem->node_ptr(3) = midPointCorrector(
+              *elem->node_ptr(0), *elem->node_ptr(1), max_circular_radius, rad_tol);
+          *elem->node_ptr(4) = midPointCorrector(
+              *elem->node_ptr(1), *elem->node_ptr(2), max_circular_radius, rad_tol);
+          *elem->node_ptr(5) = midPointCorrector(
+              *elem->node_ptr(2), *elem->node_ptr(0), max_circular_radius, rad_tol);
+          if (elem->type() == TRI7)
+            *elem->node_ptr(6) = (*elem->node_ptr(0) + *elem->node_ptr(1) + *elem->node_ptr(2) +
+                                  *elem->node_ptr(3) + *elem->node_ptr(4) + *elem->node_ptr(5)) /
+                                 6.0;
+        }
+        else if (elem->type() == QUAD8 || elem->type() == QUAD9)
+        {
+          *elem->node_ptr(4) = midPointCorrector(
+              *elem->node_ptr(0), *elem->node_ptr(1), max_circular_radius, rad_tol);
+          *elem->node_ptr(5) = midPointCorrector(
+              *elem->node_ptr(1), *elem->node_ptr(2), max_circular_radius, rad_tol);
+          *elem->node_ptr(6) = midPointCorrector(
+              *elem->node_ptr(2), *elem->node_ptr(3), max_circular_radius, rad_tol);
+          *elem->node_ptr(7) = midPointCorrector(
+              *elem->node_ptr(3), *elem->node_ptr(0), max_circular_radius, rad_tol);
+          if (elem->type() == QUAD9)
+            *elem->node_ptr(8) = (*elem->node_ptr(0) + *elem->node_ptr(1) + *elem->node_ptr(2) +
+                                  *elem->node_ptr(3) + *elem->node_ptr(4) + *elem->node_ptr(5) +
+                                  *elem->node_ptr(6) + *elem->node_ptr(7)) /
+                                 8.0;
+        }
+      }
+    }
+
+  std::vector<Real> new_azimuthal_angle;
+  for (const auto & node_ptr : as_range(mesh.nodes_begin(), mesh.nodes_end()))
+  {
+    const Node & node = *node_ptr;
+    if (MooseUtils::absoluteFuzzyEqual(
+            std::sqrt(node(0) * node(0) + node(1) * node(1)), max_circular_radius, rad_tol))
+    {
+      Real node_azi = atan2(node(1), node(0)) * 180.0 / M_PI;
+      new_azimuthal_angle.push_back(node_azi);
+    }
+  }
+  std::sort(new_azimuthal_angle.begin(), new_azimuthal_angle.end());
+  _azimuthal_angle_meta = new_azimuthal_angle;
+  const bool is_first_value_vertex_mod =
+      order == 1 ? true : MooseUtils::absoluteFuzzyEqual(_azimuthal_angle_meta[0], -180.0);
+
+  Real radiusCorrectionFactor_mod =
+      _preserve_volumes
+          ? radiusCorrectionFactor(_azimuthal_angle_meta, true, order, is_first_value_vertex_mod)
+          : 1.0;
+
   // Re-correct Radii
   if (_preserve_volumes)
   {
@@ -325,24 +428,25 @@ AzimuthalBlockSplitGenerator::angleIdentifier(const Real & terminal_angle,
                                               Real & original_down,
                                               std::vector<Real>::iterator & original_down_it,
                                               Real & original_up,
-                                              std::vector<Real>::iterator & original_up_it)
+                                              std::vector<Real>::iterator & original_up_it,
+                                              std::vector<Real> & azimuthal_angles_vtx)
 {
 
   auto term_up =
-      std::lower_bound(_azimuthal_angle_meta.begin(), _azimuthal_angle_meta.end(), terminal_angle);
-  if (term_up == _azimuthal_angle_meta.begin())
+      std::lower_bound(azimuthal_angles_vtx.begin(), azimuthal_angles_vtx.end(), terminal_angle);
+  if (term_up == azimuthal_angles_vtx.begin())
   {
     original_up = *term_up;
     original_up_it = term_up;
     original_down = -180.0;
-    original_down_it = _azimuthal_angle_meta.end() - 1;
+    original_down_it = azimuthal_angles_vtx.end() - 1;
   }
-  else if (term_up == _azimuthal_angle_meta.end())
+  else if (term_up == azimuthal_angles_vtx.end())
   {
-    original_down = _azimuthal_angle_meta.back();
-    original_down_it = _azimuthal_angle_meta.end() - 1;
+    original_down = azimuthal_angles_vtx.back();
+    original_down_it = azimuthal_angles_vtx.end() - 1;
     original_up = 180.0;
-    original_up_it = _azimuthal_angle_meta.begin();
+    original_up_it = azimuthal_angles_vtx.begin();
   }
   else
   {
@@ -453,4 +557,22 @@ AzimuthalBlockSplitGenerator::nodeModifier(
       }
     }
   }
+}
+
+Point
+AzimuthalBlockSplitGenerator::midPointCorrector(const Point vertex_0,
+                                                const Point vertex_1,
+                                                const Real max_radius,
+                                                const Real rad_tol)
+{
+  // Check if two vertices have the same radius
+  const Real r_vertex_0 = std::sqrt(vertex_0(0) * vertex_0(0) + vertex_0(1) * vertex_0(1));
+  const Real r_vertex_1 = std::sqrt(vertex_1(0) * vertex_1(0) + vertex_1(1) * vertex_1(1));
+  // If both vertices have the same radius and they are located in the circular region,
+  // their midpoint should have the same radius and has the average azimuthal angle of the two
+  // vertices.
+  if (std::abs(r_vertex_0 - r_vertex_1) < rad_tol && r_vertex_0 < max_radius + rad_tol)
+    return (vertex_0 + vertex_1).unit() * r_vertex_0;
+  else
+    return (vertex_0 + vertex_1) / 2.0;
 }
