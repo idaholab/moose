@@ -153,13 +153,15 @@ ExtraNodesetGenerator::generate()
         }
       }
 
-      // get proc id with the global closest node
+      // get proc id with the global closest node and then communicate that procs closest node_id
       processor_id_type dmin_proc_id;
       this->comm().minloc(dmin, dmin_proc_id);
-      // To make this work for distributed, only add on the proc_id containing the closest node
-      if (mesh->processor_id() == dmin_proc_id)
+      this->comm().broadcast(dmin_id, dmin_proc_id);
+
+      const Node * node = mesh->query_node_ptr(dmin_id);
+      if (node)
         for (const auto & boundary_id : boundary_ids)
-          boundary_info.add_node(mesh->node_ptr(dmin_id), boundary_id);
+          boundary_info.add_node(node, boundary_id);
     }
 
     if (!found_elem)
