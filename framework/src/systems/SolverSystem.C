@@ -117,12 +117,16 @@ SolverSystem::checkInvalidSolution()
     // sync all solution invalid counts to rank 0 process
     _app.solutionInvalidity().sync();
 
-    if (_fe_problem.allowInvalidSolution())
-      mooseWarning("The Solution Invalidity warnings are detected but silenced! "
-                   "Use Problem/allow_invalid_solution=false to activate ");
+    if (_fe_problem.acceptInvalidSolution())
+      if (_fe_problem.showInvalidSolutionConsole())
+        _app.solutionInvalidity().print(_console);
+      else
+        mooseWarning("The Solution Invalidity warnings are detected but silenced! "
+                     "Use Problem/show_invalid_solution_console=true to show solution counts");
     else
       // output the occurrence of solution invalid in a summary table
-      _app.solutionInvalidity().print(_console);
+      if (_fe_problem.showInvalidSolutionConsole())
+        _app.solutionInvalidity().print(_console);
   }
 }
 

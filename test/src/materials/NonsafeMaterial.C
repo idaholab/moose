@@ -29,6 +29,10 @@ NonsafeMaterial::validParams()
   params.addParam<Real>("invalid_after_time",
                         -std::numeric_limits<Real>::max(),
                         "Only set invalid solutions after this time");
+  params.addParam<bool>(
+      "flag_solution_warning",
+      false,
+      "True to test an invalid solution warning, which do not cause the solution to be invalid.");
 
   return params;
 }
@@ -40,7 +44,8 @@ NonsafeMaterial::NonsafeMaterial(const InputParameters & parameters)
     _diffusivity(declareProperty<Real>("diffusivity")),
     _test_different_procs(getParam<bool>("test_different_procs")),
     _test_invalid_recover(getParam<bool>("test_invalid_recover")),
-    _invalid_after_time(getParam<Real>("invalid_after_time"))
+    _invalid_after_time(getParam<Real>("invalid_after_time")),
+    _flag_solution_warning(getParam<bool>("flag_solution_warning"))
 {
 }
 
@@ -53,10 +58,15 @@ NonsafeMaterial::computeQpProperties()
     _test_diffusivity /= 2;
   if (_test_diffusivity > _threshold && _fe_problem.time() > _invalid_after_time)
   {
-    if (!_test_different_procs || processor_id() == 0)
-      flagInvalidSolution("The diffusivity is greater than the threshold value!");
-    if (!_test_different_procs || comm().size() == 1 || processor_id() == 1)
-      flagInvalidSolution("Extra invalid thing!");
+    if (_flag_solution_warning)
+      flagSolutionWarning("Solution invalid warning!");
+    else
+    {
+      if (!_test_different_procs || processor_id() == 0)
+        flagInvalidSolution("The diffusivity is greater than the threshold value!");
+      if (!_test_different_procs || comm().size() == 1 || processor_id() == 1)
+        flagInvalidSolution("Extra invalid thing!");
+    }
   }
   _diffusivity[_qp] = _test_diffusivity;
 }

@@ -1872,9 +1872,36 @@ public:
   }
 
   /**
-   * Whether or not the invalid solutions are allowed
+   * Whether or not an solution warning has been flagged
+   */
+  bool hasSolutionWarning() { return _has_solution_warning; }
+
+  bool hasSolutionWarning(bool state) { return _has_solution_warning = state; }
+
+  /**
+   * Whether or not an invalid solution has been flagged
+   */
+  bool hasInvalidSolution() { return _has_invalid_solution; }
+
+  bool hasInvalidSolution(bool state) { return _has_invalid_solution = state; }
+
+  /**
+   * Whether or not to accept the solution
+   */
+  bool acceptInvalidSolution()
+  {
+    return (hasSolutionWarning() && !hasInvalidSolution()) || allowInvalidSolution();
+  }
+
+  /**
+   * Whether to accept / allow an invalid solution
    */
   bool allowInvalidSolution() const { return _allow_invalid_solution; }
+
+  /**
+   * Whether or not to print out the invalid solutions summary table in console
+   */
+  bool showInvalidSolutionConsole() const { return _show_invalid_solution_console; }
 
   /**
    * Whether or not the solution invalid warnings are printed out immediately
@@ -2822,8 +2849,11 @@ private:
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
-  const bool & _allow_invalid_solution;
+  bool _allow_invalid_solution;
+  bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
+  bool _has_solution_warning;
+  bool _has_invalid_solution;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;
