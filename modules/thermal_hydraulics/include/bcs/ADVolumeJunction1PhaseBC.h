@@ -30,12 +30,6 @@ protected:
    */
   std::map<unsigned int, unsigned int> getFlowChannelIndexMapping() const;
 
-  /**
-   * Creates the mapping of coupled variable index to local equation system
-   * index for junction variables
-   */
-  std::map<unsigned int, unsigned int> getJunctionIndexMapping() const;
-
   /// Index of the connected flow channel
   const unsigned int _connection_index;
 
@@ -54,21 +48,8 @@ protected:
   /// Flow channel rho*E*A coupled variable index
   const unsigned int _rhoEA_jvar;
 
-  /// Junction rho*V coupled variable index
-  const unsigned int _rhoV_jvar;
-  /// Junction rho*u*V coupled variable index
-  const unsigned int _rhouV_jvar;
-  /// Junction rho*v*V coupled variable index
-  const unsigned int _rhovV_jvar;
-  /// Junction rho*w*V coupled variable index
-  const unsigned int _rhowV_jvar;
-  /// Junction rho*E*V coupled variable index
-  const unsigned int _rhoEV_jvar;
-
   /// Map of coupled variable index to local equation system index for flow channel variables
   const std::map<unsigned int, unsigned int> _flow_channel_jvar_map;
-  /// Map of coupled variable index to local equation system index for junction variables
-  const std::map<unsigned int, unsigned int> _junction_jvar_map;
   /// Index within local system of the equation upon which this object acts
   const unsigned int _equation_index;
 
