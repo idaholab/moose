@@ -209,6 +209,39 @@ Component::addRelationshipManager(
     unique_object_id++;
 }
 
+Node *
+Component::addNode(const Point & pt)
+{
+  auto node = mesh().addNode(pt);
+  _node_ids.push_back(node->id());
+  return node;
+}
+
+Elem *
+Component::addNodeElement(dof_id_type node)
+{
+  auto elem = mesh().addNodeElement(node);
+  _elem_ids.push_back(elem->id());
+  return elem;
+}
+
+void
+Component::setSubdomainInfo(SubdomainID subdomain_id,
+                            const std::string & subdomain_name,
+                            const Moose::CoordinateSystemType & coord_system)
+{
+  _subdomain_ids.push_back(subdomain_id);
+  _subdomain_names.push_back(subdomain_name);
+  _coord_sys.push_back(coord_system);
+  if (_parent)
+  {
+    _parent->_subdomain_ids.push_back(subdomain_id);
+    _parent->_subdomain_names.push_back(subdomain_name);
+    _parent->_coord_sys.push_back(coord_system);
+  }
+  mesh().setSubdomainName(subdomain_id, subdomain_name);
+}
+
 void
 Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & params,
                                             bool need_one_specified) const
@@ -252,4 +285,36 @@ Component::stringify(EComponentSetupStatus status) const
     default:
       mooseError("Should not reach here");
   }
+}
+
+const std::vector<dof_id_type> &
+Component::getNodeIDs() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _node_ids;
+}
+
+const std::vector<dof_id_type> &
+Component::getElementIDs() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _elem_ids;
+}
+
+const std::vector<SubdomainName> &
+Component::getSubdomainNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _subdomain_names;
+}
+
+const std::vector<Moose::CoordinateSystemType> &
+Component::getCoordSysTypes() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _coord_sys;
 }

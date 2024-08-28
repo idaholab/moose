@@ -772,11 +772,10 @@ Simulation::setupCoordinateSystem()
 
   for (auto && comp : _components)
   {
-    GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(comp.get());
-    if (gc != NULL && gc->parent() == nullptr)
+    if (comp->parent() == nullptr)
     {
-      const std::vector<SubdomainName> & subdomains = gc->getSubdomainNames();
-      const std::vector<Moose::CoordinateSystemType> & coord_sys = gc->getCoordSysTypes();
+      const auto & subdomains = comp->getSubdomainNames();
+      const auto & coord_sys = comp->getCoordSysTypes();
 
       for (unsigned int i = 0; i < subdomains.size(); i++)
       {

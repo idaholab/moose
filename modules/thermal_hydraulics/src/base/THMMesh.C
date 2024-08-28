@@ -9,6 +9,7 @@
 
 #include "THMMesh.h"
 #include "libmesh/node.h"
+#include "libmesh/node_elem.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
 #include "libmesh/face_quad4.h"
@@ -104,6 +105,18 @@ THMMesh::addElement(libMesh::ElemType elem_type, const std::vector<dof_id_type> 
   _mesh->add_elem(elem);
   for (std::size_t i = 0; i < node_ids.size(); i++)
     elem->set_node(i) = _mesh->node_ptr(node_ids[i]);
+  return elem;
+}
+
+Elem *
+THMMesh::addNodeElement(dof_id_type node)
+{
+  dof_id_type elem_id = getNextElementId();
+
+  Elem * elem = new NodeElem;
+  elem->set_id(elem_id);
+  _mesh->add_elem(elem);
+  elem->set_node(0) = _mesh->node_ptr(node);
   return elem;
 }
 
