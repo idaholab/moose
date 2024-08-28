@@ -6,7 +6,7 @@
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = duct_alt.e
+    file = one_duct.e
   []
 []
 

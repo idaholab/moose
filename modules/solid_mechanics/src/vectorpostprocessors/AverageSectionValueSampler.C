@@ -40,12 +40,19 @@ AverageSectionValueSampler::validParams()
   params.addDeprecatedParam<std::vector<Real>>(
       "lengths",
       {},
-      "Positions along axis of from reference_point at which to compute average values.",
+      "Positions along axis from reference_point at which to compute average values.",
       "Use the 'positions' parameter instead");
   params.addParam<std::vector<Real>>(
       "positions",
       {},
-      "Positions along axis of from reference_point at which to compute average values.");
+      "Positions along axis from reference_point at which to compute average values.");
+  params.addParam<RealVectorValue>(
+      "symmetry_plane",
+      RealVectorValue(0, 0, 0),
+      "Vector normal to a symmetry plane, used if the section has a symmetry plane through it. "
+      "Causes the variables to be treated as components of a vector and zeros out the compomnent "
+      "in the direction normal to symmetry_plane. Three variables must be defined in 'variables' "
+      "to use this option.");
   params.addParam<Real>("tolerance",
                         1.0e-6,
                         "Maximum axial distance of nodes from the specified axial lengths to "
@@ -65,6 +72,8 @@ AverageSectionValueSampler::AverageSectionValueSampler(const InputParameters & p
     _reference_point(getParam<Point>("reference_point")),
     _positions(isParamSetByUser("lengths") ? getParam<std::vector<Real>>("lengths")
                                            : getParam<std::vector<Real>>("positions")),
+    _have_symmetry_plane(isParamSetByUser("symmetry_plane")),
+    _symmetry_plane(getParam<RealVectorValue>("symmetry_plane")),
     _automatically_locate_positions(_positions.size() == 0),
     _tolerance(getParam<Real>("tolerance")),
     _number_of_nodes(_positions.size()),
@@ -88,11 +97,12 @@ AverageSectionValueSampler::AverageSectionValueSampler(const InputParameters & p
   if (!MooseUtils::absoluteFuzzyEqual(_direction.norm_sq(), 1.0))
     paramError("axis_direction", "Axis direction must be a unit vector.");
 
-  _output_vector.resize(_variables.size() + 1);
+  _output_vector.resize(_variables.size() + 2);
   for (const auto j : make_range(_variables.size()))
     _output_vector[j] = &declareVector(_variables[j]);
   const auto pos_idx = _variables.size();
   _output_vector[pos_idx] = &declareVector("axial_position");
+  _output_vector[pos_idx + 1] = &declareVector("node_count");
 
   for (const auto j : make_range(_variables.size()))
   {
@@ -101,6 +111,23 @@ AverageSectionValueSampler::AverageSectionValueSampler(const InputParameters & p
       paramError(
           "variables",
           "The variables provided to this vector postprocessor must be defined at the nodes.");
+    _var_numbers.push_back(variable.number());
+  }
+
+  if (_have_symmetry_plane)
+  {
+    const auto symm_plane_norm = _symmetry_plane.norm();
+    if (MooseUtils::absoluteFuzzyEqual(symm_plane_norm, 0.0))
+      mooseError("Vector defined in 'symmetry_plane' cannot have a size of zero");
+    _symmetry_plane /= _symmetry_plane.norm();
+    if (_variables.size() != 3)
+      paramError("variables",
+                 "If 'symmetry_plane' is prescribed, three variables must be provided (for the x, "
+                 "y, z vector components, in that order)");
+    mooseInfo("In AverageSectionValueSampler " + name() +
+              ": \nTreating the variables as vector components (" + _variables[0] + ", " +
+              _variables[1] + ", " + _variables[2] +
+              ") and zeroing out the component normal to the prescribed 'symmetry_plane'\n");
   }
 }
 
@@ -126,7 +153,7 @@ AverageSectionValueSampler::initialize()
     _need_mesh_initializations = false;
   }
 
-  for (const auto j : make_range(_variables.size() + 1))
+  for (const auto j : make_range(_variables.size() + 2))
   {
     _output_vector[j]->clear();
     _output_vector[j]->resize(_positions.size());
@@ -151,13 +178,24 @@ AverageSectionValueSampler::finalize()
     for (const auto j : make_range(_variables.size()))
       (*_output_vector[j])[li] /= _number_of_nodes[li];
 
+  const auto pos_idx = _variables.size();
+  (*_output_vector[pos_idx]) = _positions;
+  std::vector<Real> num_nodes_real(_number_of_nodes.begin(), _number_of_nodes.end());
+  (*_output_vector[pos_idx + 1]) = num_nodes_real;
+
   if (_require_equal_node_counts)
   {
     for (const auto li : index_range(_number_of_nodes))
       if (_number_of_nodes[li] != _number_of_nodes[0])
+      {
+        std::ostringstream pos_out;
+        for (const auto li2 : index_range(_number_of_nodes))
+          pos_out << _positions[li2] << " " << _number_of_nodes[li2] << "\n";
         mooseError("Node counts do not match for all axial positions. If this behavior "
                    "is desired to accommodate nonuniform meshes, set "
-                   "'require_equal_node_counts=false'");
+                   "'require_equal_node_counts=false'\nPosition Count\n\n" +
+                   pos_out.str());
+      }
   }
 }
 
@@ -190,12 +228,22 @@ AverageSectionValueSampler::execute()
             continue;
 
           // Retrieve nodal variables
-          for (const auto j : make_range(_variables.size()))
+          std::vector<Real> this_node_vars(_var_numbers.size());
+          for (const auto j : make_range(_var_numbers.size()))
+            this_node_vars[j] = _sol(node->dof_number(_sys.number(), _var_numbers[j], 0));
+
+          if (_have_symmetry_plane)
           {
-            const MooseVariable & variable = _sys.getFieldVariable<Real>(_tid, _variables[j]);
-            const auto var_num = variable.number();
-            output_vector_partial[j][li] += _sol(node->dof_number(_sys.number(), var_num, 0));
+            RealVectorValue this_node_vec_var(
+                this_node_vars[0], this_node_vars[1], this_node_vars[2]);
+            this_node_vec_var -= _symmetry_plane * this_node_vec_var * _symmetry_plane;
+            this_node_vars[0] = this_node_vec_var(0);
+            this_node_vars[1] = this_node_vec_var(1);
+            this_node_vars[2] = this_node_vec_var(2);
           }
+
+          for (const auto j : make_range(_var_numbers.size()))
+            output_vector_partial[j][li] += this_node_vars[j];
 
           _number_of_nodes[li]++;
           break;
@@ -206,8 +254,6 @@ AverageSectionValueSampler::execute()
 
   for (const auto j : make_range(_variables.size()))
     *_output_vector[j] = output_vector_partial[j];
-  const auto pos_idx = _variables.size();
-  (*_output_vector[pos_idx]) = _positions;
 }
 
 Real
