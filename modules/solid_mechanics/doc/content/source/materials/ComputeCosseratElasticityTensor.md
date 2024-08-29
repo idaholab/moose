@@ -12,7 +12,7 @@ Note that the elasticity tensor can still be made to vary in space and time usin
 [Function](Functions/index.md) parameter. The elasticity rigidity tensor is constant.
 
 !alert note
-This object is part of the Cosserat mechanics model. See the theory manual  (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/modules/solid_mechanics/doc/theory/cosserat.pdf))
+This object is part of the Cosserat mechanics model. See the theory manual  (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/tree/next/modules/solid_mechanics/doc/theory/cosserat.pdf))
 for more explanation.
 
 !syntax parameters /Materials/ComputeCosseratElasticityTensor
