@@ -13,6 +13,9 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 
+/**
+ * Base class for mesh modifiers modifying element subdomains
+ */
 class ElementSubdomainModifierBase : public ElementUserObject
 {
 public:
@@ -88,11 +91,13 @@ private:
                                ConstElemRange & elem_range,
                                ConstBndNodeRange & bnd_node_range);
 
-  /// Determine if a node is newly activated
+  /// Determine if a node is newly reinitialized
   bool nodeIsNewlyReinitialized(dof_id_type node_id) const;
 
+  /// Reinitialize variables on range of elements and nodes to be reinitialized
   void applyIC(bool displaced);
 
+  /// Reinitialize stateful material properties on range of elements and nodes to be reinitialized
   void initElementStatefulProps(bool displaced);
 
   /// Range of reinitialized elements

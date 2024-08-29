@@ -29,11 +29,13 @@ ElementSubdomainModifierBase::validParams()
   params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
 
-  params.addParam<BoundaryName>(
+  params.addDeprecatedParam<BoundaryName>(
       "moving_boundary_name",
+      "Name of the moving boundary",
       "This has been replaced by 'moving_boundaries' and 'moving_boundary_subdomain_pairs'.");
-  params.addParam<BoundaryName>(
+  params.addDeprecatedParam<BoundaryName>(
       "complement_moving_boundary_name",
+      "Name of the moving boundary on the complement subdomain(s)",
       "This has been replaced by 'moving_boundaries' and 'moving_boundary_subdomain_pairs'.");
   params.addDeprecatedParam<bool>(
       "apply_initial_conditions",
@@ -177,6 +179,14 @@ void
 ElementSubdomainModifierBase::modify(
     const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems)
 {
+
+  // If nothing need to change, just return.
+  // This will skip all mesh changes, and so no adaptivity mesh files will be written.
+  auto n_moved_elem = moved_elems.size();
+  gatherSum(n_moved_elem);
+  if (n_moved_elem == 0)
+    return;
+
   // Create moving boundaries on the undisplaced and displaced meshes
   //
   // Note: We do this _everytime_ because previous execution might have removed the sidesets and
@@ -185,13 +195,6 @@ ElementSubdomainModifierBase::modify(
   createMovingBoundaries(_mesh);
   if (_displaced_mesh)
     createMovingBoundaries(*_displaced_mesh);
-
-  // If nothing need to change, just return.
-  // This will skip all mesh changes, and so no adaptivity mesh files will be written.
-  auto n_moved_elem = moved_elems.size();
-  gatherSum(n_moved_elem);
-  if (n_moved_elem == 0)
-    return;
 
   // This has to be done _before_ subdomain changes are applied
   findReinitializedElemsAndNodes(moved_elems);
@@ -531,6 +534,8 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
   _fe_problem.projectInitialConditionOnCustomRange(reinitializedElemRange(displaced),
                                                    reinitializedBndNodeRange(displaced));
 
+  mooseAssert(_fe_problem.numSolverSystems() < 2,
+              "This code was written for a single nonlinear system");
   // Set old and older solutions on the reinitialized dofs to the reinitialized values
   setOldAndOlderSolutions(_fe_problem.getNonlinearSystemBase(_sys.number()),
                           reinitializedElemRange(displaced),
