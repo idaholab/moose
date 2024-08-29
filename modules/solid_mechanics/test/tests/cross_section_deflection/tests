@@ -59,4 +59,22 @@
                   'section defined by the user via two nodal vector and two reference points for two '
                   'respective ducts.'
   []
+  [test_therm_exp]
+    type = 'CSVDiff'
+    input = 'test_therm_exp.i'
+    csvdiff = 'test_therm_exp_out_section_output_0001.csv'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross '
+                  'section with mechanically and thermally induced deformation.'
+  []
+  [test_therm_exp_symm]
+    type = 'CSVDiff'
+    input = 'test_therm_exp_symm.i'
+    csvdiff = 'test_therm_exp_symm_out_section_output_0001.csv'
+    ignore_columns = 'node_count'
+    rel_err = 5e-3
+    requirement = 'The system shall compute the average of the nodal displacements of a cross '
+                  'section with mechanically and thermally induced deformation with a symmetry '
+                  'plane not aligned with a Cartesian coordinate, and match a reference '
+                  'solution without the symmetry plane.'
+  []
 []
