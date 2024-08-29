@@ -27,6 +27,24 @@ This postprocessor should only be used for regularly meshed geometries as it rel
 same weights on the cross section. There is no check within the code for this condition, so the user must
 ensure that the mesh is reasonably uniform.
 
+Because this VectorPostprocessor is intended to be applied to geometries with extruded meshes, with layers
+of nodes that all occupy the same axial position, it will generate an error if the numbers of nodes located
+at the various axial positions vary. However, there are valid scenarios when this is not the case. For example,
+if part of the extruded mesh is refined, the number of nodes per layer will differ along the axis of the
+extrueded section. The `require_equal_node_counts` parameter can be set to `false` in such situations to skip
+that check. The number of nodes per position is reported in the ouputs as the `node_count` vector to allow the
+user to ensure that each layer contains all expected nodes.
+
+The optional `symmetry_plane` parameter is intended to be used when there is a symmetry plane passing through
+the extruded section being evaluated. If there is volumetric expansion in the section and this is used to 
+compute displacements, the results will be skewed because only the expansion on one side of the symmetry plane
+is considered, when it should be balanced out by an expansion in the opposite direction on the other side of
+that symmetry plane. To account for this, if `symmetry_plane` is specified, the set of variables is treated
+as a size-three vector, and the component of that vector in the direction of `symmetry_plane` is removed. The
+`symmetry_plane` parameter defines the normal to the symmetry plane, and when this option is used, a set of
+three variables must be provided in `variables`. These are assumed to be the x, y, and z components of a
+vector, in that order.
+
 ## Example Syntax
 
 See below an input file excerpt which locates the cross section along the $Z$ direction at distances of 10 and 18.
