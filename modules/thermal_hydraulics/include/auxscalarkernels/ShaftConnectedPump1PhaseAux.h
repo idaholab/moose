@@ -14,18 +14,29 @@
 class ADShaftConnectedPump1PhaseUserObject;
 
 /**
- * Moment of inertia computed in the 1-phase shaft-connected pump
+ * Computes various quantities for a ShaftConnectedPump1Phase.
  */
-class PumpInertiaAux : public AuxScalarKernel
+class ShaftConnectedPump1PhaseAux : public AuxScalarKernel
 {
 public:
-  PumpInertiaAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
+  ShaftConnectedPump1PhaseAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
+
+  /// Quantity type
+  enum class Quantity
+  {
+    PUMP_HEAD,
+    HYDRAULIC_TORQUE,
+    FRICTION_TORQUE,
+    MOMENT_OF_INERTIA
+  };
+  /// Which quantity to compute
+  const Quantity _quantity;
+
   /// 1-phase shaft-connected pump user object
   const ADShaftConnectedPump1PhaseUserObject & _pump_uo;
-
-public:
-  static InputParameters validParams();
 };
