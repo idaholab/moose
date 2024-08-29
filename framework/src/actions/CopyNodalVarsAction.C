@@ -63,6 +63,7 @@ CopyNodalVarsAction::act()
       {
         // This iterates through each nonlinear system and finds which one the current variable
         // needs to be copied to
+        system = &_problem->getNonlinearSystemBase(/*nl_sys=*/0);
         for (unsigned int i = 0; i < (*_problem).numNonlinearSystems(); i++)
         {
           tempSys = &_problem->getNonlinearSystemBase(i);
