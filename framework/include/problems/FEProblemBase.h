@@ -355,12 +355,6 @@ public:
   unsigned int getMaxQps() const;
 
   /**
-   * @return The number of nonlinear systems
-   */
-
-  unsigned int getNonLinearSize() const { return _nl.size(); }
-
-  /**
    * @return The maximum order for all scalar variables in this problem's systems.
    */
   Order getMaxScalarOrder() const;
