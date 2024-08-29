@@ -5,7 +5,7 @@
     input = 'BicrystalEpsAndMAndLAnisoGauss.i'
     csvdiff = 'BicrystalEpsAndMAndLAnisoGauss_out.csv'
     requirement = "Material EpsAndMAndLAnisoGauss shall compute the accurate anisotropic grain boundary energy and mobility"
-    design = 'EpsAndMAndLAnisoGauss.md EpsilonModelKernel1stGauss.md EpsilonModelKernel1stV2Gauss.md EpsilonModelKernel2ndGauss.md EPSILONmodelKERNEL2ndV2GAUSS.md EpsilonModelKernel2ndV2Gauss.md'
+    design = 'EpsAndMAndLAnisoGauss.md EpsilonModelKernel1stGauss.md EpsilonModelKernel1stV2Gauss.md EpsilonModelKernel2ndGauss.md EpsilonModelKernel2ndV2Gauss.md EpsilonModelKernelAction.md'
     issues = '#27774'
   []
   [BicrystalEpsAndMAnisoGaussOut]
@@ -14,7 +14,7 @@
     input = 'BicrystalEpsAndMAnisoGauss.i'
     csvdiff = 'BicrystalEpsAndMAnisoGauss_out.csv'
     requirement = "Material EpsAndMAnisoGauss shall compute the accurate anisotropic grain boundary energy and mobility"
-    design = 'EpsAndMAnisoGauss.md EpsilonModelKernel1stGauss.md EpsilonModelKernel1stV2Gauss.md EpsilonModelKernel2ndGauss.md EPSILONmodelKERNEL2ndV2GAUSS.md EpsilonModelKernel2ndV2Gauss.md'
+    design = 'EpsAndMAnisoGauss.md EpsilonModelKernel1stGauss.md EpsilonModelKernel1stV2Gauss.md EpsilonModelKernel2ndGauss.md EpsilonModelKernel2ndV2Gauss.md EpsilonModelKernelAction.md'
     issues = '#27774'
   []
 
