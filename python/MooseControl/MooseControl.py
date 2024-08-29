@@ -114,10 +114,8 @@ class MooseControl:
     def kill(self):
         """Kills the underlying moose process if one is running"""
         if self.isProcessRunning():
-            try:
-                self._moose_process.kill()
-            except:
-                pass
+            self._moose_process.kill()
+            self._moose_process.wait()
         self.possiblyRemoveSocket()
 
     class ControlException(Exception):
