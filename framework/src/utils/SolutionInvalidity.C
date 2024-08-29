@@ -31,13 +31,17 @@ SolutionInvalidity::SolutionInvalidity(MooseApp & app)
 }
 
 void
-SolutionInvalidity::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id)
+SolutionInvalidity::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id,
+                                                const bool warning)
 {
   std::lock_guard<std::mutex> lock_id(_invalid_mutex);
   if (_counts.size() <= _invalid_solution_id)
     _counts.resize(_invalid_solution_id + 1);
 
-  ++_counts[_invalid_solution_id].counts;
+  auto & count_entry = _counts[_invalid_solution_id];
+  ++count_entry.counts;
+  if (warning)
+    count_entry.warning = true;
 }
 
 bool
@@ -59,11 +63,54 @@ SolutionInvalidity::solutionInvalid() const
   return is_invalid > 0;
 }
 
+bool
+SolutionInvalidity::hasSolutionWarning() const
+{
+
+  libmesh_parallel_only(comm());
+
+  bool has_warning = false;
+  for (auto & entry : _counts)
+  {
+    if (entry.warning)
+    {
+      has_warning = true;
+      break;
+    }
+  }
+
+  comm().max(has_warning);
+  return has_warning > 0;
+}
+
+bool
+SolutionInvalidity::hasInvalidSolution() const
+{
+
+  libmesh_parallel_only(comm());
+
+  bool has_invalid = false;
+  for (auto & entry : _counts)
+  {
+    if (!entry.warning)
+    {
+      has_invalid = true;
+      break;
+    }
+  }
+
+  comm().max(has_invalid);
+  return has_invalid > 0;
+}
+
 void
 SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 {
   for (auto & entry : _counts)
+  {
+    entry.warning = false;
     entry.counts = 0;
+  }
 }
 
 void

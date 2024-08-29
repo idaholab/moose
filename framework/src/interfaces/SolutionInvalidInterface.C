@@ -28,16 +28,14 @@ SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID invalid_
   auto & solution_invalidity = _si_moose_object.getMooseApp().solutionInvalidity();
   if (_si_problem.immediatelyPrintInvalidSolution())
     solution_invalidity.printDebug(invalid_solution_id);
-  _si_problem.hasInvalidSolution(true);
-  return solution_invalidity.flagInvalidSolutionInternal(invalid_solution_id);
+  return solution_invalidity.flagInvalidSolutionInternal(invalid_solution_id, false);
 }
 
 void
 SolutionInvalidInterface::flagSolutionWarningInternal(InvalidSolutionID invalid_solution_id) const
 {
   auto & solution_invalidity = _si_moose_object.getMooseApp().solutionInvalidity();
-  _si_problem.hasSolutionWarning(true);
-  return solution_invalidity.flagInvalidSolutionInternal(invalid_solution_id);
+  return solution_invalidity.flagInvalidSolutionInternal(invalid_solution_id, true);
 }
 
 InvalidSolutionID

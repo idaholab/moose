@@ -29,10 +29,16 @@
       detail = 'unless the user specifies to silence them,'
     []
     [console_output]
-      type = 'JSONDiff'
+      type = 'RunApp'
       input = 'solution_invalid.i'
       cli_args = "Materials/filter/flag_solution_warning=true Outputs/file_base='solution_invalid_warning'"
-      jsondiff = 'solution_invalid_warning.json'
+      expect_out = "Solution Invalid Warnings:
+------------------------------------------------------------------------------
+|     Object      | Converged | Timestep | Total |          Message          |
+------------------------------------------------------------------------------
+| NonsafeMaterial |        16 |       48 |    48 | Solution invalid warning! |
+------------------------------------------------------------------------------
+"
       detail = 'and otherwise both in the console window and a json file.'
     []
   []

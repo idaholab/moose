@@ -45,7 +45,13 @@ public:
   SolutionInvalidity(MooseApp & app);
 
   /// Increments solution invalid occurrences for each solution id
-  void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
+  void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id, const bool warning);
+
+  /// Loop over all the tracked objects and determine whether any solution warning check is registered by users
+  bool hasSolutionWarning() const;
+
+  /// Loop over all the tracked objects and determine whether any invalid solution check is registered by users
+  bool hasInvalidSolution() const;
 
   /// Loop over all the tracked objects and determine whether solution invalid is detected
   bool solutionInvalid() const;
@@ -65,6 +71,7 @@ public:
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
   {
+    bool warning = false;
     unsigned int counts;
     unsigned int timestep_counts;
     unsigned int total_counts;
