@@ -34,8 +34,9 @@
   # Note that we choose the parameters of the mesh generator to match the
   # 'two_same_components.i' output
   [cylinder_2]
-    type = SavedMeshComponent
+    type = MeshGeneratorComponent
     mesh_generator = 'cmg'
+    mesh_generator_type = 'saved_mesh'
     saved_mesh_name = 'saved_mesh_0'
   []
 []

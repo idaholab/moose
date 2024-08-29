@@ -16,7 +16,7 @@
 /**
  * Component whose mesh is generated in the [Mesh] block on which one can define a Physics.
  */
-class SavedMeshComponent : public virtual ActionComponent, public PhysicsComponentHelper
+class MeshGeneratorComponent : public virtual ActionComponent, public PhysicsComponentHelper
 {
 public:
   /**
@@ -24,9 +24,13 @@ public:
    */
   static InputParameters validParams();
 
-  SavedMeshComponent(const InputParameters & params);
+  MeshGeneratorComponent(const InputParameters & params);
 
 protected:
   virtual void addMeshGenerators() override;
   virtual void setupComponent() override;
+
+private:
+  /// Whether the component uses a saved mesh or the final mesh
+  const MooseEnum _mesh_generator_type;
 };

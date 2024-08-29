@@ -218,7 +218,7 @@ PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_typ
 }
 
 const ActionComponent &
-PhysicsBase::getComponent(const ComponentName & comp_name)
+PhysicsBase::getActionComponent(const ComponentName & comp_name)
 {
   return _awh.getAction<ActionComponent>(comp_name);
 }

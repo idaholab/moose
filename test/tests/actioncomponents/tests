@@ -14,11 +14,23 @@
     design = 'CombineComponentsMeshes.md'
     requirement = 'The system shall be able to combine two (action)components in a single simulation.'
   []
-  [saved_mesh_component]
-    type = Exodiff
-    input = 'saved_mesh_component.i'
-    exodiff = 'saved_mesh_component_out.e'
-    design = 'SavedMeshComponent.md'
-    requirement = 'The system shall be able to use a mesh produced by a mesh generator for an (action)component.'
+  [mesh_generator_component]
+    requirement = 'The system shall be able to use a mesh produced by a mesh generator for an (action)component'
+    design = 'MeshGeneratorComponent.md'
+    [saved]
+      type = Exodiff
+      input = 'mesh_generator_component.i'
+      exodiff = 'mesh_generator_component_out.e'
+      detail = 'using the saved mesh options,'
+    []
+    [final]
+      type = Exodiff
+      input = 'mesh_generator_component.i'
+      cli_args = "ActionComponents/cylinder_2/mesh_generator='move_down'
+                  ActionComponents/cylinder_2/mesh_generator_type='final_generator'
+                  Outputs/file_base='final_mg_out'"
+      exodiff = 'final_mg_out.e'
+      detail = 'and using the mesh from the final mesh generator.'
+    []
   []
 []
