@@ -1150,6 +1150,13 @@ InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(
     const std::vector<MultiMooseEnum> & moose_enums,
     const std::string & doc_string)
 {
+  mooseAssert(
+      moose_enums.size() == 1,
+      "Only 1 MultiMooseEnum is supported in addRequiredParam<std::vector<MultiMooseEnum>> for " +
+          name);
+  mooseAssert(!moose_enums[0].items().empty(),
+              "The MultiMooseEnum in addRequiredParam<std::vector<MultiMooseEnum>> is empty for " +
+                  name);
   InputParameters::set<std::vector<MultiMooseEnum>>(name) =
       moose_enums; // valid parameter is set by set_attributes
   auto & metadata = _params[name];
