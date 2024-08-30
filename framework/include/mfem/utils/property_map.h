@@ -52,6 +52,7 @@ public:
                            "' already present for all blocks in PropertyMap");
     }
     auto & [pw_coeff, coeff_map] = *data;
+    this->checkPWData(coeff, pw_coeff, name);
 
     for (const auto & block : blocks)
     {
@@ -78,13 +79,25 @@ public:
     }
   }
 
-  bool hasCoefficient(const std::string & name) { return this->_properties.count(name) > 0; }
+  bool hasCoefficient(const std::string & name) const { return this->_properties.count(name) > 0; }
+
+  bool coefficientDefinedOnBlock(const std::string & name, const std::string & block) const
+  {
+    if (!this->hasCoefficient(name))
+      return false;
+    auto & coeff = this->_properties.at(name);
+    if (std::holds_alternative<std::unique_ptr<T>>(coeff))
+      return true;
+    auto block_map = std::get<1>(std::get<PWData>(coeff));
+    return block_map.count(block) > 0;
+  }
 
 private:
   using PWData = std::tuple<Tpw, std::map<const std::string, std::shared_ptr<T>>>;
   std::map<const std::string, std::variant<std::unique_ptr<T>, PWData>> _properties;
 
   PWData emptyPWData(std::shared_ptr<T> coeff) { return PWData(); }
+  void checkPWData(std::shared_ptr<T> coeff, Tpw & existing_pw, const std::string & name) {}
 };
 
 using ScalarMap = PropertyMap<mfem::Coefficient, mfem::PWCoefficient>;
@@ -92,18 +105,18 @@ using VectorMap = PropertyMap<mfem::VectorCoefficient, mfem::PWVectorCoefficient
 using MatrixMap = PropertyMap<mfem::MatrixCoefficient, mfem::PWMatrixCoefficient>;
 
 template <>
-VectorMap::PWData
-VectorMap::emptyPWData(std::shared_ptr<mfem::VectorCoefficient> coeff)
-{
-  return std::make_tuple(mfem::PWVectorCoefficient(coeff->GetVDim()),
-                         std::map<const std::string, std::shared_ptr<mfem::VectorCoefficient>>());
-}
+VectorMap::PWData VectorMap::emptyPWData(std::shared_ptr<mfem::VectorCoefficient> coeff);
 
 template <>
-MatrixMap::PWData
-MatrixMap::emptyPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff)
-{
-  return std::make_tuple(mfem::PWMatrixCoefficient(coeff->GetHeight(), coeff->GetWidth()),
-                         std::map<const std::string, std::shared_ptr<mfem::MatrixCoefficient>>());
-}
+MatrixMap::PWData MatrixMap::emptyPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff);
+
+template <>
+void VectorMap::checkPWData(std::shared_ptr<mfem::VectorCoefficient> coeff,
+                            mfem::PWVectorCoefficient & existing_pw,
+                            const std::string & name);
+
+template <>
+void MatrixMap::checkPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff,
+                            mfem::PWMatrixCoefficient & existing_pw,
+                            const std::string & name);
 } // namespace platypus

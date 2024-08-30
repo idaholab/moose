@@ -30,7 +30,7 @@ public:
                      std::function<mfem::real_t(const mfem::Vector &)> func,
                      const std::vector<std::string> & blocks = {});
   void declareScalar(const std::string & name,
-                     mfem::Coefficient && coef,
+                     std::unique_ptr<mfem::Coefficient> && coef,
                      const std::vector<std::string> & blocks = {});
 
   void declareVector(const std::string & name,
@@ -41,24 +41,26 @@ public:
                      std::function<void(const mfem::Vector &, mfem::Vector &)> func,
                      const std::vector<std::string> & blocks = {});
   void declareVector(const std::string & name,
-                     mfem::VectorCoefficient && coef,
+                     std::unique_ptr<mfem::VectorCoefficient> && coef,
                      const std::vector<std::string> & blocks = {});
 
   void declareMatrix(const std::string & name,
-                     const mfem::Matrix & value,
+                     const mfem::DenseMatrix & value,
                      const std::vector<std::string> & blocks = {});
   void declareMatrix(const std::string & name,
                      int dim,
                      std::function<void(const mfem::Vector &, mfem::DenseMatrix &)> func,
                      const std::vector<std::string> & blocks = {});
   void declareMatrix(const std::string & name,
-                     mfem::MatrixCoefficient && coef,
+                     std::unique_ptr<mfem::MatrixCoefficient> && coef,
                      const std::vector<std::string> & blocks = {});
 
   mfem::Coefficient & getScalarProperty(const std::string name);
   mfem::VectorCoefficient & getVectorProperty(const std::string name);
   mfem::MatrixCoefficient & getMatrixProperty(const std::string name);
-  bool propertyIsDefined(const std::string & name, const std::string & block);
+  bool scalarIsDefined(const std::string & name, const std::string & block) const;
+  bool vectorIsDefined(const std::string & name, const std::string & block) const;
+  bool matrixIsDefined(const std::string & name, const std::string & block) const;
 
 private:
   ScalarMap _scalar_coeffs;

@@ -99,16 +99,16 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWScalar)
   EXPECT_EQ(c->Eval(fe_transform, point2), 2.5);
   fe_transform.Attribute = 10;
   EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
-  EXPECT_EQ(c->Eval(fe_transform, point2), 0.5);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 0.0);
 }
 
 TEST_F(CheckPropertyManager, DeclareCoefficientScalar)
 {
   platypus::PropertyManager manager;
-  manager.declareScalar("resistivity", mfem::ConstantCoefficient(2.));
+  manager.declareScalar("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("resistivity"));
-  EXPECT_NE(c, nullptr);
+  ASSERT_NE(c, nullptr);
   EXPECT_EQ(c->Eval(fe_transform, point1), 2.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 2.0);
 }
@@ -116,10 +116,10 @@ TEST_F(CheckPropertyManager, DeclareCoefficientScalar)
 TEST_F(CheckPropertyManager, DeclareCoefficientPWScalar)
 {
   platypus::PropertyManager manager;
-  manager.declareScalar("test", mfem::ConstantCoefficient(2.), {"1", "2"});
-  manager.declareScalar("test", mfem::ConstantCoefficient(1.), {"3"});
+  manager.declareScalar("test", std::make_unique<mfem::ConstantCoefficient>(2.), {"1", "2"});
+  manager.declareScalar("test", std::make_unique<mfem::ConstantCoefficient>(1.), {"3"});
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
-  EXPECT_NE(c, nullptr);
+  ASSERT_NE(c, nullptr);
   fe_transform.Attribute = 1;
   EXPECT_EQ(c->Eval(fe_transform, point1), 2.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 2.0);
@@ -136,19 +136,26 @@ TEST_F(CheckPropertyManager, ScalarIsDefined)
   platypus::PropertyManager manager;
   manager.declareScalar("a", 2.);
   manager.declareScalar("b", scalar_func);
-  manager.declareScalar("c", mfem::ConstantCoefficient(2.));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "10"));
-  EXPECT_FALSE(manager.propertyIsDefined("A", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "-57"));
-  EXPECT_FALSE(manager.propertyIsDefined("B", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "0"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "20"));
-  EXPECT_FALSE(manager.propertyIsDefined("C", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "2"));
+  manager.declareScalar("c", std::make_unique<mfem::ConstantCoefficient>(2.));
+  EXPECT_TRUE(manager.scalarIsDefined("a", "1"));
+  EXPECT_TRUE(manager.scalarIsDefined("a", "10"));
+  EXPECT_FALSE(manager.scalarIsDefined("A", "1"));
+  EXPECT_TRUE(manager.scalarIsDefined("b", "1"));
+  EXPECT_TRUE(manager.scalarIsDefined("b", "-57"));
+  EXPECT_FALSE(manager.scalarIsDefined("B", "1"));
+  EXPECT_TRUE(manager.scalarIsDefined("c", "0"));
+  EXPECT_TRUE(manager.scalarIsDefined("c", "20"));
+  EXPECT_FALSE(manager.scalarIsDefined("C", "0"));
+  EXPECT_FALSE(manager.scalarIsDefined("d", "0"));
+  EXPECT_FALSE(manager.scalarIsDefined("d", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("d", "2"));
+
+  EXPECT_FALSE(manager.vectorIsDefined("a", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("a", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("b", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("b", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("c", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("c", "1"));
 }
 
 TEST_F(CheckPropertyManager, ScalarPWIsDefined)
@@ -156,23 +163,30 @@ TEST_F(CheckPropertyManager, ScalarPWIsDefined)
   platypus::PropertyManager manager;
   manager.declareScalar("a", 2., {"1", "2"});
   manager.declareScalar("b", scalar_func, {"-1", "0"});
-  manager.declareScalar("c", mfem::ConstantCoefficient(2.), {"42", "45"});
-  EXPECT_TRUE(manager.propertyIsDefined("a", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "2"));
-  EXPECT_FALSE(manager.propertyIsDefined("a", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("A", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "-1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("b", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("B", "0"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "42"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "45"));
-  EXPECT_FALSE(manager.propertyIsDefined("c", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("C", "42"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "-1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "2"));
+  manager.declareScalar("c", std::make_unique<mfem::ConstantCoefficient>(2.), {"42", "45"});
+  EXPECT_TRUE(manager.scalarIsDefined("a", "1"));
+  EXPECT_TRUE(manager.scalarIsDefined("a", "2"));
+  EXPECT_FALSE(manager.scalarIsDefined("a", "0"));
+  EXPECT_FALSE(manager.scalarIsDefined("A", "1"));
+  EXPECT_TRUE(manager.scalarIsDefined("b", "-1"));
+  EXPECT_TRUE(manager.scalarIsDefined("b", "0"));
+  EXPECT_FALSE(manager.scalarIsDefined("b", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("B", "0"));
+  EXPECT_TRUE(manager.scalarIsDefined("c", "42"));
+  EXPECT_TRUE(manager.scalarIsDefined("c", "45"));
+  EXPECT_FALSE(manager.scalarIsDefined("c", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("C", "42"));
+  EXPECT_FALSE(manager.scalarIsDefined("d", "-1"));
+  EXPECT_FALSE(manager.scalarIsDefined("d", "0"));
+  EXPECT_FALSE(manager.scalarIsDefined("d", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("d", "2"));
+
+  EXPECT_FALSE(manager.vectorIsDefined("a", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("a", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("b", "-1"));
+  EXPECT_FALSE(manager.matrixIsDefined("b", "-1"));
+  EXPECT_FALSE(manager.vectorIsDefined("c", "42"));
+  EXPECT_FALSE(manager.matrixIsDefined("c", "42"));
 }
 
 TEST_F(CheckPropertyManager, DeclareUniformVector)
@@ -203,22 +217,22 @@ TEST_F(CheckPropertyManager, DeclarePWVector)
   fe_transform.Attribute = 1;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 1.0);
-  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 2.0);
   c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 1.0);
-  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 2.0);
   fe_transform.Attribute = 2;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 1.0);
-  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 2.0);
   fe_transform.Attribute = 3;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 3.0);
-  EXPECT_EQ(vec[0], 4.0);
+  EXPECT_EQ(vec[1], 4.0);
   fe_transform.Attribute = 10;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 0.);
-  EXPECT_EQ(vec[0], 0.);
+  EXPECT_EQ(vec[1], 0.);
 }
 
 TEST_F(CheckPropertyManager, DeclareFunctionVector)
@@ -230,7 +244,7 @@ TEST_F(CheckPropertyManager, DeclareFunctionVector)
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 0.);
   EXPECT_EQ(vec[1], 1.);
-  c->Eval(vec, fe_transform, point1);
+  c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 1.);
   EXPECT_EQ(vec[1], 2.);
 }
@@ -254,52 +268,55 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWVector)
   fe_transform.Attribute = 1;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 0.0);
-  EXPECT_EQ(vec[0], 1.0);
+  EXPECT_EQ(vec[1], 1.0);
   c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 1.);
-  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 2.0);
   fe_transform.Attribute = 2;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 0.0);
-  EXPECT_EQ(vec[0], 1.0);
+  EXPECT_EQ(vec[1], 1.0);
   fe_transform.Attribute = 3;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 0.0);
-  EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 0.0);
   c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 1.5);
-  EXPECT_EQ(vec[0], 3.0);
+  EXPECT_EQ(vec[1], 3.0);
   fe_transform.Attribute = 10;
   c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 0.);
-  EXPECT_EQ(vec[0], 0.);
+  EXPECT_EQ(vec[1], 0.);
 }
 
 TEST_F(CheckPropertyManager, DeclareCoefficientVector)
 {
   platypus::PropertyManager manager;
-  manager.declareVector("resistivity", mfem::VectorConstantCoefficient(mfem::Vector({1., 2.})));
+  manager.declareVector("resistivity",
+                        std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({1., 2.})));
   mfem::VectorConstantCoefficient * c =
       dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorProperty("resistivity"));
-  EXPECT_NE(c, nullptr);
+  ASSERT_NE(c, nullptr);
   mfem::Vector vec;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 1.0);
-  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 2.0);
   c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 1.);
-  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 2.0);
 }
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWVector)
 {
   platypus::PropertyManager manager;
+  manager.declareVector("test",
+                        std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})),
+                        {"1", "2"});
   manager.declareVector(
-      "test", mfem::VectorConstantCoefficient(mfem::Vector({2., 1.})), {"1", "2"});
-  manager.declareVector("test", mfem::VectorConstantCoefficient(mfem::Vector({-1., -7.})), {"3"});
+      "test", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({-1., -7.})), {"3"});
   mfem::PWVectorCoefficient * c =
       dynamic_cast<mfem::PWVectorCoefficient *>(&manager.getVectorProperty("test"));
-  EXPECT_NE(c, nullptr);
+  ASSERT_NE(c, nullptr);
   mfem::Vector vec;
   fe_transform.Attribute = 1;
   c->Eval(vec, fe_transform, point1);
@@ -317,6 +334,7 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWVector)
   EXPECT_EQ(vec[0], -1.0);
   EXPECT_EQ(vec[1], -7.0);
   fe_transform.Attribute = 10;
+  c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 0.0);
   EXPECT_EQ(vec[1], 0.0);
 }
@@ -326,19 +344,27 @@ TEST_F(CheckPropertyManager, VectorIsDefined)
   platypus::PropertyManager manager;
   manager.declareVector("a", mfem::Vector({2., 1.}));
   manager.declareVector("b", 2, vector_func);
-  manager.declareVector("c", mfem::VectorConstantCoefficient(mfem::Vector({3., 4.})));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "10"));
-  EXPECT_FALSE(manager.propertyIsDefined("A", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "-57"));
-  EXPECT_FALSE(manager.propertyIsDefined("B", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "0"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "20"));
-  EXPECT_FALSE(manager.propertyIsDefined("C", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "2"));
+  manager.declareVector("c",
+                        std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})));
+  EXPECT_TRUE(manager.vectorIsDefined("a", "1"));
+  EXPECT_TRUE(manager.vectorIsDefined("a", "10"));
+  EXPECT_FALSE(manager.vectorIsDefined("A", "1"));
+  EXPECT_TRUE(manager.vectorIsDefined("b", "1"));
+  EXPECT_TRUE(manager.vectorIsDefined("b", "-57"));
+  EXPECT_FALSE(manager.vectorIsDefined("B", "1"));
+  EXPECT_TRUE(manager.vectorIsDefined("c", "0"));
+  EXPECT_TRUE(manager.vectorIsDefined("c", "20"));
+  EXPECT_FALSE(manager.vectorIsDefined("C", "0"));
+  EXPECT_FALSE(manager.vectorIsDefined("d", "0"));
+  EXPECT_FALSE(manager.vectorIsDefined("d", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("d", "2"));
+
+  EXPECT_FALSE(manager.scalarIsDefined("a", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("a", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("b", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("b", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("c", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("c", "1"));
 }
 
 TEST_F(CheckPropertyManager, VectorPWIsDefined)
@@ -346,23 +372,31 @@ TEST_F(CheckPropertyManager, VectorPWIsDefined)
   platypus::PropertyManager manager;
   manager.declareVector("a", mfem::Vector({2., 1.}), {"1", "2"});
   manager.declareVector("b", 2, vector_func, {"-1", "0"});
-  manager.declareVector("c", mfem::VectorConstantCoefficient(mfem::Vector({3., 4.})), {"42", "45"});
-  EXPECT_TRUE(manager.propertyIsDefined("a", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "2"));
-  EXPECT_FALSE(manager.propertyIsDefined("a", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("A", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "-1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("b", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("B", "0"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "42"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "45"));
-  EXPECT_FALSE(manager.propertyIsDefined("c", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("C", "42"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "-1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "2"));
+  manager.declareVector(
+      "c", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})), {"42", "45"});
+  EXPECT_TRUE(manager.vectorIsDefined("a", "1"));
+  EXPECT_TRUE(manager.vectorIsDefined("a", "2"));
+  EXPECT_FALSE(manager.vectorIsDefined("a", "0"));
+  EXPECT_FALSE(manager.vectorIsDefined("A", "1"));
+  EXPECT_TRUE(manager.vectorIsDefined("b", "-1"));
+  EXPECT_TRUE(manager.vectorIsDefined("b", "0"));
+  EXPECT_FALSE(manager.vectorIsDefined("b", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("B", "0"));
+  EXPECT_TRUE(manager.vectorIsDefined("c", "42"));
+  EXPECT_TRUE(manager.vectorIsDefined("c", "45"));
+  EXPECT_FALSE(manager.vectorIsDefined("c", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("C", "42"));
+  EXPECT_FALSE(manager.vectorIsDefined("d", "-1"));
+  EXPECT_FALSE(manager.vectorIsDefined("d", "0"));
+  EXPECT_FALSE(manager.vectorIsDefined("d", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("d", "2"));
+
+  EXPECT_FALSE(manager.scalarIsDefined("a", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("a", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("b", "-1"));
+  EXPECT_FALSE(manager.matrixIsDefined("b", "-1"));
+  EXPECT_FALSE(manager.scalarIsDefined("c", "42"));
+  EXPECT_FALSE(manager.matrixIsDefined("c", "42"));
 }
 
 TEST_F(CheckPropertyManager, DeclareUniformMatrix)
@@ -498,11 +532,12 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWMatrix)
 TEST_F(CheckPropertyManager, DeclareCoefficientMatrix)
 {
   platypus::PropertyManager manager;
-  manager.declareMatrix("resistivity",
-                        mfem::MatrixConstantCoefficient(mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
+  manager.declareMatrix(
+      "resistivity",
+      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
   mfem::MatrixConstantCoefficient * c =
       dynamic_cast<mfem::MatrixConstantCoefficient *>(&manager.getMatrixProperty("resistivity"));
-  EXPECT_NE(c, nullptr);
+  ASSERT_NE(c, nullptr);
   mfem::DenseMatrix mat;
   c->Eval(mat, fe_transform, point1);
   EXPECT_EQ(mat.Elem(0, 0), 1.0);
@@ -520,9 +555,13 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWMatrix)
 {
   platypus::PropertyManager manager;
   manager.declareMatrix(
-      "test", mfem::MatrixConstantCoefficient(mfem::DenseMatrix({{1., 2.}, {3., 4.}})), {"1", "2"});
-  manager.declareMatrix(
-      "test", mfem::MatrixConstantCoefficient(mfem::DenseMatrix({{-1., 4.}, {-10., -2.}})), {"3"});
+      "test",
+      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
+      {"1", "2"});
+  manager.declareMatrix("test",
+                        std::make_unique<mfem::MatrixConstantCoefficient>(
+                            mfem::DenseMatrix({{-1., 4.}, {-10., -2.}})),
+                        {"3"});
   mfem::PWMatrixCoefficient * c =
       dynamic_cast<mfem::PWMatrixCoefficient *>(&manager.getMatrixProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -563,20 +602,28 @@ TEST_F(CheckPropertyManager, MatrixIsDefined)
   platypus::PropertyManager manager;
   manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 0.}}));
   manager.declareMatrix("b", 2, matrix_func);
-  manager.declareMatrix("c",
-                        mfem::MatrixConstantCoefficient(mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "10"));
-  EXPECT_FALSE(manager.propertyIsDefined("A", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "-57"));
-  EXPECT_FALSE(manager.propertyIsDefined("B", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "0"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "20"));
-  EXPECT_FALSE(manager.propertyIsDefined("C", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "2"));
+  manager.declareMatrix(
+      "c",
+      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
+  EXPECT_TRUE(manager.matrixIsDefined("a", "1"));
+  EXPECT_TRUE(manager.matrixIsDefined("a", "10"));
+  EXPECT_FALSE(manager.matrixIsDefined("A", "1"));
+  EXPECT_TRUE(manager.matrixIsDefined("b", "1"));
+  EXPECT_TRUE(manager.matrixIsDefined("b", "-57"));
+  EXPECT_FALSE(manager.matrixIsDefined("B", "1"));
+  EXPECT_TRUE(manager.matrixIsDefined("c", "0"));
+  EXPECT_TRUE(manager.matrixIsDefined("c", "20"));
+  EXPECT_FALSE(manager.matrixIsDefined("C", "0"));
+  EXPECT_FALSE(manager.matrixIsDefined("d", "0"));
+  EXPECT_FALSE(manager.matrixIsDefined("d", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("d", "2"));
+
+  EXPECT_FALSE(manager.scalarIsDefined("a", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("a", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("b", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("b", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("c", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("c", "1"));
 }
 
 TEST_F(CheckPropertyManager, MatrixPWIsDefined)
@@ -585,23 +632,32 @@ TEST_F(CheckPropertyManager, MatrixPWIsDefined)
   manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 1.}}), {"1", "2"});
   manager.declareMatrix("b", 2, matrix_func, {"-1", "0"});
   manager.declareMatrix(
-      "c", mfem::MatrixConstantCoefficient(mfem::DenseMatrix({{1., 2.}, {3., 4.}})), {"42", "45"});
-  EXPECT_TRUE(manager.propertyIsDefined("a", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("a", "2"));
-  EXPECT_FALSE(manager.propertyIsDefined("a", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("A", "1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "-1"));
-  EXPECT_TRUE(manager.propertyIsDefined("b", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("b", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("B", "0"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "42"));
-  EXPECT_TRUE(manager.propertyIsDefined("c", "45"));
-  EXPECT_FALSE(manager.propertyIsDefined("c", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("C", "42"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "-1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "0"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "1"));
-  EXPECT_FALSE(manager.propertyIsDefined("d", "2"));
+      "c",
+      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
+      {"42", "45"});
+  EXPECT_TRUE(manager.matrixIsDefined("a", "1"));
+  EXPECT_TRUE(manager.matrixIsDefined("a", "2"));
+  EXPECT_FALSE(manager.matrixIsDefined("a", "0"));
+  EXPECT_FALSE(manager.matrixIsDefined("A", "1"));
+  EXPECT_TRUE(manager.matrixIsDefined("b", "-1"));
+  EXPECT_TRUE(manager.matrixIsDefined("b", "0"));
+  EXPECT_FALSE(manager.matrixIsDefined("b", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("B", "0"));
+  EXPECT_TRUE(manager.matrixIsDefined("c", "42"));
+  EXPECT_TRUE(manager.matrixIsDefined("c", "45"));
+  EXPECT_FALSE(manager.matrixIsDefined("c", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("C", "42"));
+  EXPECT_FALSE(manager.matrixIsDefined("d", "-1"));
+  EXPECT_FALSE(manager.matrixIsDefined("d", "0"));
+  EXPECT_FALSE(manager.matrixIsDefined("d", "1"));
+  EXPECT_FALSE(manager.matrixIsDefined("d", "2"));
+
+  EXPECT_FALSE(manager.scalarIsDefined("a", "1"));
+  EXPECT_FALSE(manager.vectorIsDefined("a", "1"));
+  EXPECT_FALSE(manager.scalarIsDefined("b", "-1"));
+  EXPECT_FALSE(manager.vectorIsDefined("b", "-1"));
+  EXPECT_FALSE(manager.scalarIsDefined("c", "42"));
+  EXPECT_FALSE(manager.vectorIsDefined("c", "42"));
 }
 
 TEST_F(CheckPropertyManager, CheckRepeatedNames)
