@@ -99,6 +99,7 @@ EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
     // Set default value of gridfunction used in essential BC. Values
     // overwritten in applyEssentialBCs
     *(_xs.at(i)) = 0.0;
+    *(_dxdts.at(i)) = 0.0;
     bc_map.ApplyEssentialBCs(
         test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), _test_pfespaces.at(i)->GetParMesh());
     bc_map.ApplyIntegratedBCs(
@@ -189,11 +190,11 @@ void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
                                    platypus::GridFunctions & gridfunctions)
 {
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (int i = 0; i < _trial_var_names.size(); i++)
   {
-    auto & test_var_name = _test_var_names.at(i);
+    auto & trial_var_name = _trial_var_names.at(i);
     trueX.GetBlock(i).SyncAliasMemory(trueX);
-    gridfunctions.Get(test_var_name)->Distribute(&(trueX.GetBlock(i)));
+    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }
 
@@ -215,6 +216,9 @@ EquationSystem::Init(platypus::GridFunctions & gridfunctions,
     // Create auxiliary gridfunctions for applying Dirichlet conditions
     _xs.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+    _dxdts.emplace_back(
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+    _trial_variables.Register(test_var_name, gridfunctions.GetShared(test_var_name));
   }
 }
 
@@ -327,12 +331,13 @@ TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
 void
 TimeDependentEquationSystem::AddTrialVariableNameIfMissing(const std::string & var_name)
 {
-  EquationSystem::AddTrialVariableNameIfMissing(var_name);
+  // The TimeDependentEquationSystem operator expects to act on a vector of variable time
+  // derivatives
   std::string var_time_derivative_name = GetTimeDerivativeName(var_name);
-  if (std::find(_trial_var_time_derivative_names.begin(),
-                _trial_var_time_derivative_names.end(),
-                var_time_derivative_name) == _trial_var_time_derivative_names.end())
+
+  if (!VectorContainsName(_trial_var_names, var_time_derivative_name))
   {
+    _trial_var_names.push_back(var_time_derivative_name);
     _trial_var_time_derivative_names.push_back(var_time_derivative_name);
   }
 }
@@ -348,8 +353,95 @@ TimeDependentEquationSystem::SetTimeStep(double dt)
       auto blf = _blfs.Get(test_var_name);
       blf->Update();
       blf->Assemble();
+      blf->Finalize();
     }
   }
+}
+
+void
+TimeDependentEquationSystem::AddKernel(const std::string & test_var_name,
+                                       std::shared_ptr<MFEMBilinearFormKernel> blf_kernel)
+{
+  if (blf_kernel->getTrialVariableName() == GetTimeDerivativeName(test_var_name))
+  {
+    AddTestVariableNameIfMissing(test_var_name);
+    AddTrialVariableNameIfMissing(test_var_name);
+    addKernelToMap<MFEMBilinearFormKernel>(blf_kernel, _td_blf_kernels_map);
+  }
+  else
+  {
+    EquationSystem::AddKernel(test_var_name, blf_kernel);
+  }
+}
+
+void
+TimeDependentEquationSystem::BuildBilinearForms()
+{
+  EquationSystem::BuildBilinearForms();
+
+  // Register bilinear forms
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto test_var_name = _test_var_names.at(i);
+    _td_blfs.Register(test_var_name,
+                      std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
+
+    // Apply kernels
+    auto td_blf = _td_blfs.Get(test_var_name);
+    if (_td_blf_kernels_map.Has(test_var_name))
+    {
+      auto td_blf_kernels = _td_blf_kernels_map.GetRef(test_var_name);
+
+      for (auto & td_blf_kernel : td_blf_kernels)
+      {
+        td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator());
+      }
+    }
+    // Assemble
+    td_blf->Assemble();
+    // if implicit:
+    auto blf = _blfs.Get(test_var_name);
+    td_blf->SpMat().Add(-_dt_coef.constant, blf->SpMat());
+  }
+}
+
+void
+TimeDependentEquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
+                                              mfem::BlockVector & truedXdt,
+                                              mfem::BlockVector & trueRHS)
+{
+
+  // Allocate block operator
+  _h_blocks.DeleteAll();
+  _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
+  // Form diagonal blocks.
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto td_blf = _td_blfs.Get(test_var_name);
+    auto blf = _blfs.Get(test_var_name);
+    auto lf = _lfs.Get(test_var_name);
+    blf->AddMult(*_trial_variables.Get(test_var_name), *lf, 1.0);
+    mfem::Vector aux_x, aux_rhs;
+    mfem::Vector bc_x = *(_xs.at(i).get());
+    bc_x -= *_trial_variables.Get(test_var_name);
+    bc_x /= _dt_coef.constant;
+
+    _h_blocks(i, i) = new mfem::HypreParMatrix;
+    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *_h_blocks(i, i), aux_x, aux_rhs);
+    truedXdt.GetBlock(i) = aux_x;
+    trueRHS.GetBlock(i) = aux_rhs;
+  }
+
+  // Sync memory
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    truedXdt.GetBlock(i).SyncAliasMemory(truedXdt);
+    trueRHS.GetBlock(i).SyncAliasMemory(trueRHS);
+  }
+
+  // Create monolithic matrix
+  op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
 void
