@@ -83,7 +83,10 @@ ExtraNodesetGenerator::generate()
 
   const auto tolerance = getParam<Real>("tolerance");
   const bool use_closest_node = getParam<bool>("use_closest_node");
-  for (const auto & c : getParam<std::vector<std::vector<Real>>>("coord"))
+  const auto coords = getParam<std::vector<std::vector<Real>>>("coord");
+  if (use_closest_node && coords.empty())
+    paramError("coord", "A coordinate should be specified to use 'use_closest_node'");
+  for (const auto & c : coords)
   {
     Point p;
     if (c.size() < dim)
