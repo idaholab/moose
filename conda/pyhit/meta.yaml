@@ -1,11 +1,23 @@
-{% set version = "2024.05.08" %}
+{% set version = "2024.08.30" %}
 
 package:
   name: moose-pyhit
   version: {{ version }}
 
 source:
-  git_url: https://github.com/milljm/moose-pyhit.git
+  - path: ../pyhit
+  - path: ../../python/moosetree
+    folder: pyhit/moosetree
+  - path: ../../python/mooseutils/message.py
+    folder: pyhit/mooseutils/message.py
+  - path: ../../python/mooseutils/mooseutils.py
+    folder: pyhit/mooseutils/mooseutils.py
+  - path: ../../framework/contrib/hit
+    folder: src
+  - path: ../../python/pyhit/pyhit.py
+    folder: pyhit
+  - patches:
+      - pyhit.patch
 
 build:
   number: 0

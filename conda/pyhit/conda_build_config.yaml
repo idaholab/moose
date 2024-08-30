@@ -1,5 +1,5 @@
 moose_wasp:
-  moose-wasp 2024.05.08
+  moose-wasp 2024.08.30
 
 moose_python:
   - python 3.10
