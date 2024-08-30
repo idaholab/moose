@@ -66,18 +66,13 @@ SolutionInvalidity::solutionInvalid() const
 bool
 SolutionInvalidity::hasSolutionWarning() const
 {
-
   libmesh_parallel_only(comm());
 
   bool has_warning = false;
   for (auto & entry : _counts)
-  {
     if (entry.warning)
-    {
       has_warning = true;
       break;
-    }
-  }
 
   comm().max(has_warning);
   return has_warning > 0;
@@ -86,18 +81,13 @@ SolutionInvalidity::hasSolutionWarning() const
 bool
 SolutionInvalidity::hasInvalidSolution() const
 {
-
   libmesh_parallel_only(comm());
 
   bool has_invalid = false;
   for (auto & entry : _counts)
-  {
     if (!entry.warning)
-    {
       has_invalid = true;
       break;
-    }
-  }
 
   comm().max(has_invalid);
   return has_invalid > 0;
