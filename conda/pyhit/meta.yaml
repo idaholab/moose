@@ -23,7 +23,6 @@ build:
   number: 0
   string: build_0
   skip: true           # [win]
-  pin_depends: record
 
 requirements:
   build:
@@ -34,14 +33,10 @@ requirements:
     - setuptools
 
   host:
-    - {{ compiler('cxx') }}
     - {{ moose_python }}
-    - make
-    - cython
 
   run:
     - {{ moose_wasp }}
-    - setuptools
     - python
 
 test:
