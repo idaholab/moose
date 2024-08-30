@@ -32,6 +32,7 @@ See [this paper](https://joss.theoj.org/papers/10.21105/joss.06146) for an overv
 - [Examples](modules/thermal_hydraulics/examples/index.md)
 - [Test problems](modules/thermal_hydraulics/test_problems/index.md)
 - [Syntax index](modules/thermal_hydraulics/syntax.md)
+- [Utilities](modules/thermal_hydraulics/utilities.md)
 
 !col-end!
 

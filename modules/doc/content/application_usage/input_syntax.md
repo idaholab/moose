@@ -129,43 +129,116 @@ Other input files may be included using the following syntax:
 !include path/to/input.i
 ```
 
-This can be used in any arbitrary nested context in an input file and included files
-can include other included files. The only requirement is that the included files
+This can be used in any arbitrary nested context in an input file, and included files
+can include other files. The only requirement is that the included files
 must contain a set of syntactically complete blocks or parameters.
+
+Functionally, including a file is equivalent to inserting the
+text of the file at the `!include` location. Therefore,
+for example, if the included file uses a value `${somevar}` defined in the parent file
+via `somevar = somval`, then the `!include` statement must occur *after* the
+`somevar` definition.
+
+!alert! warning title=Beware merge-related include ordering issues
+When an included file contains the same block as the parent file, the blocks get
+*merged*. The merge moves the second instance of the block into the first, not
+the first into the second. For example,
+
+`file1.i`:
+
+```
+[BlockA]
+  param1 = 4
+[]
+
+!include file2.i
+```
+
+`file2.i`:
+
+```
+val3 = 8
+
+[BlockA]
+  param2 = ${val3}
+[]
+```
+
+This effectively produces the input
+
+```
+[BlockA]
+  param1 = 4
+[]
+
+val3 = 8
+
+[BlockA]
+  param2 = ${val3}
+[]
+```
+
+and after the merge operation,
+
+```
+[BlockA]
+  param1 = 4
+  param2 = ${val3}
+[]
+
+val3 = 8
+```
+
+This results in an error, since `${val3}` is now used before it is defined.
+Therefore, files must be partitioned with this behavior in mind.
+!alert-end!
+
+!alert warning title=Included input parameters cannot be overridden by default
+Note that parameters from the parent or included files do not override each other by default,
+as this is just interpreted as providing the input parameter twice, resulting in a parsing error.
+To override parameters, you must either use command-line arguments or the explicit
+override syntax defined below.
 
 ## Parameter override syntax
 
-It may be useful to include a file containing common parameter defaults and just override specific values.
-
-This can be done by using the `param := value` override syntax on the parameter taking precedence.
-
-For example, suppose a file named `default_settings.i` is set up defining these parameter defaults:
+Ordinarily, redefining a parameter results in an input error:
 
 ```
-[section]
-  field_01 = field_01_default
-  field_02 = field_02_default
-  field_03 = field_03_default
+param1 = 3
+param1 = 4   # error due to duplicate parameter
+```
+
+However, there is a syntax for explicitly specifying that you would like to
+allow overriding a previously defined value, using either `:=` or `:override=`
+instead of `=`:
+
+```
+param1 = 3
+param1 := 4           # not an error; now param1 is 4 instead of 3
+param1 :override= 5   # now param1 is 5
+```
+
+Note that `:=` and `:override=` are exactly the same; the latter is provided for
+those wanting to make the syntax more visible to a reader of the input file.
+
+As noted with the `!include` syntax above, redefining a parameter with the
+`=` assignment operator results in an duplicate parameter error; the explicit
+override syntax can be used to fix this:
+
+`myinput.i`:
+
+```
+!include base.i
+
+[BlockA]
+  param1 := new_value   # using "=" would result in an error
 []
 ```
 
-A problem specific input may then use those default settings and override just one parameter value with:
+`base.i`:
 
 ```
-!include default_settings.i
-[section]
-  field_02 := field_02_problem_specific
+[BlockA]
+  param1 = original_value
 []
 ```
-
-This would result in the following specification which uses the default settings and overridden parameter:
-
-```
-[section]
-  field_01 = field_01_default
-  field_02 = field_02_problem_specific
-  field_03 = field_03_default
-[]
-```
-
-The `param := value` syntax and verbose `param :override= value` syntax are interchangeable.

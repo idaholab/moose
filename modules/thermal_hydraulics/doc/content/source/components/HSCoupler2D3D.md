@@ -176,7 +176,7 @@ of the 3D surface. This component uses [automatic differentiation](automatic_dif
 to compute the Jacobian matrix contributions used in Newton's method for solving
 the nonlinear system. For performance flexibility, MOOSE has a maximum AD container size,
 which currently by default is set to 53, which means that if a term like the
-2D boundary heat flux $q_z$ depends on more that 53 degrees of freedom, then
+2D boundary heat flux $q_z$ depends on more than 53 degrees of freedom, then
 an error occurs. This maximum AD container size can be increased by configuring
 MOOSE and recompiling your application. See [automatic_differentiation/index.md#max_container_size]
 for more information.
