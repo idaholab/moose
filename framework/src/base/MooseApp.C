@@ -824,12 +824,12 @@ MooseApp::setupOptions()
     if ((tree.getRoot()).is_object())
     {
       // Turn off live printing so that it doesn't mess with the dump
-    _perf_graph.disableLivePrint();
+      _perf_graph.disableLivePrint();
 
-    JsonInputFileFormatter formatter;
-    Moose::out << "\n### START DUMP DATA ###\n"
-               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
-    _ready_to_exit = true;
+      JsonInputFileFormatter formatter;
+      Moose::out << "\n### START DUMP DATA ###\n"
+                 << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
+      _ready_to_exit = true;
     }
     else
       mooseError("Invalid search parameter ", param_search);
