@@ -5,6 +5,7 @@ namespace platypus
 void
 ProblemOperatorInterface::SetGridFunctions()
 {
+  _test_variables = _problem._gridfunctions.Get(_test_var_names);
   _trial_variables = _problem._gridfunctions.Get(_trial_var_names);
 
   // Set operator size and block structure
@@ -31,12 +32,9 @@ ProblemOperatorInterface::SetGridFunctions()
 void
 ProblemOperatorInterface::Init(mfem::Vector & X)
 {
-  for (size_t i = 0; i < _trial_variables.size(); ++i)
+  for (size_t i = 0; i < _test_variables.size(); ++i)
   {
-    mfem::ParGridFunction * trial_var = _trial_variables.at(i);
-
-    trial_var->MakeRef(trial_var->ParFESpace(), const_cast<mfem::Vector &>(X), _true_offsets[i]);
-    *trial_var = 0.0;
+    _test_variables.at(i)->MakeRef(_test_variables.at(i)->ParFESpace(), X, _true_offsets[i]);
   }
 }
 

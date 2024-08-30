@@ -20,11 +20,6 @@ EquationSystemProblemOperator::Init(mfem::Vector & X)
 void
 EquationSystemProblemOperator::Solve(mfem::Vector & X)
 {
-  for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
-  {
-    _trial_variables.at(ind)->MakeRef(
-        _trial_variables.at(ind)->ParFESpace(), const_cast<mfem::Vector &>(X), _true_offsets[ind]);
-  }
   GetEquationSystem()->BuildEquationSystem(_problem._bc_map);
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
