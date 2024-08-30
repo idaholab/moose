@@ -29,6 +29,7 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ moose_python }}
     - {{ moose_wasp }}
+    - make
     - cython
     - setuptools
 
