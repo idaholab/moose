@@ -72,9 +72,9 @@ public:
   struct InvalidCounts
   {
     bool warning = false;
-    unsigned int counts;
-    unsigned int timestep_counts;
-    unsigned int total_counts;
+    unsigned int counts = 0;
+    unsigned int timestep_counts = 0;
+    unsigned int total_counts = 0;
   };
 
   /// Access the private solution invalidity counts
