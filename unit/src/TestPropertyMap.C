@@ -5,9 +5,6 @@
 
 #include "mfem.hpp"
 
-mfem::ConstantCoefficient coeff1(1.), coeff2(2.);
-mfem::Linear2DFiniteElement elem;
-
 class CheckPropertyMap : public testing::Test
 {
 protected:
@@ -211,5 +208,32 @@ TEST_F(CheckPropertyMap, OverwriteBlocks)
       "resistivity", std::make_shared<mfem::ConstantCoefficient>(2.), {"2", "3"});
   EXPECT_THROW(prop_map.addPiecewiseBlocks(
                    "resistivity", std::make_shared<mfem::ConstantCoefficient>(1.), {"1", "2"}),
+               MooseException);
+}
+
+TEST_F(CheckPropertyMap, DifferentVecSize)
+{
+  platypus::VectorMap prop_map;
+  prop_map.addPiecewiseBlocks(
+      "test",
+      std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
+      {"1", "2"});
+  EXPECT_THROW(
+      prop_map.addPiecewiseBlocks(
+          "test", std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({1., 0.})), {"3"}),
+      MooseException);
+}
+
+TEST_F(CheckPropertyMap, DifferentMatSize)
+{
+  platypus::MatrixMap prop_map;
+  prop_map.addPiecewiseBlocks(
+      "test",
+      std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})),
+      {"1", "2"});
+  EXPECT_THROW(prop_map.addPiecewiseBlocks("test",
+                                           std::make_shared<mfem::MatrixConstantCoefficient>(
+                                               mfem::DenseMatrix({{11., 0., 42.}, {0., -1., 10.}})),
+                                           {"3"}),
                MooseException);
 }
