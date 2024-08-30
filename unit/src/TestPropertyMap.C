@@ -184,6 +184,23 @@ TEST_F(CheckPropertyMap, GetPWMatCoefficient)
   EXPECT_EQ(mat(1, 1), 0.);
 }
 
+TEST_F(CheckPropertyMap, CoefficientDefinedOnBlock)
+{
+  platypus::ScalarMap prop_map;
+  prop_map.addPiecewiseBlocks("a", std::make_shared<mfem::ConstantCoefficient>(2.), {"1", "2"});
+  prop_map.addProperty("b", std::make_unique<mfem::ConstantCoefficient>(5.));
+  EXPECT_TRUE(prop_map.coefficientDefinedOnBlock("a", "1"));
+  EXPECT_TRUE(prop_map.coefficientDefinedOnBlock("a", "2"));
+  EXPECT_FALSE(prop_map.coefficientDefinedOnBlock("a", "3"));
+  EXPECT_FALSE(prop_map.coefficientDefinedOnBlock("a", "0"));
+  EXPECT_TRUE(prop_map.coefficientDefinedOnBlock("b", "0"));
+  EXPECT_TRUE(prop_map.coefficientDefinedOnBlock("b", "1"));
+  EXPECT_TRUE(prop_map.coefficientDefinedOnBlock("b", "2"));
+  EXPECT_FALSE(prop_map.coefficientDefinedOnBlock("c", "1"));
+  EXPECT_FALSE(prop_map.coefficientDefinedOnBlock("A", "1"));
+  EXPECT_FALSE(prop_map.coefficientDefinedOnBlock("B", "1"));
+}
+
 TEST_F(CheckPropertyMap, OverwriteProperty)
 {
   platypus::ScalarMap prop_map;
