@@ -108,25 +108,23 @@ SolverSystem::setMooseKSPNormType(MooseEnum kspnorm)
 void
 SolverSystem::checkInvalidSolution()
 {
-  // determine whether solution invalid occurs in the converged solution
-  _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
+  auto & solution_invalidity = _app.solutionInvalidity();
 
-  // output the solution invalid summary
-  if (_solution_is_invalid)
+  // sync all solution invalid counts to rank 0 process
+  solution_invalidity.sync();
+
+  if (solution_invalidity.hasInvalidSolution())
   {
-    // sync all solution invalid counts to rank 0 process
-    _app.solutionInvalidity().sync();
-
     if (_fe_problem.acceptInvalidSolution())
       if (_fe_problem.showInvalidSolutionConsole())
-        _app.solutionInvalidity().print(_console);
+        solution_invalidity.print(_console);
       else
         mooseWarning("The Solution Invalidity warnings are detected but silenced! "
                      "Use Problem/show_invalid_solution_console=true to show solution counts");
     else
       // output the occurrence of solution invalid in a summary table
       if (_fe_problem.showInvalidSolutionConsole())
-        _app.solutionInvalidity().print(_console);
+        solution_invalidity.print(_console);
   }
 }
 

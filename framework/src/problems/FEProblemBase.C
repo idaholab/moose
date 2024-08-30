@@ -3497,6 +3497,13 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
 }
 
+bool
+FEProblemBase::acceptInvalidSolution() const
+{
+  return allowInvalidSolution() || // invalid solutions are always allowed
+         !_app.solutionInvalidity().hasInvalidSolutionError(); // if not allowed, check for errors
+}
+
 void
 FEProblemBase::addFunctorMaterial(const std::string & functor_material_name,
                                   const std::string & name,

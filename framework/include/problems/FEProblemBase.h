@@ -1874,23 +1874,12 @@ public:
   }
 
   /**
-   * Whether or not an solution warning has been flagged
+   * Whether or not to accept the solution based on its invalidity.
+   *
+   * If this returns false, it means that an invalid solution was encountered
+   * (an error) that was not allowed.
    */
-  bool hasSolutionWarning() { return _app.solutionInvalidity().hasSolutionWarning(); }
-
-  /**
-   * Whether or not an invalid solution has been flagged
-   */
-  bool hasInvalidSolution() { return _app.solutionInvalidity().hasInvalidSolution(); }
-
-  /**
-   * Whether or not to accept the solution
-   */
-  bool acceptInvalidSolution()
-  {
-    return (hasSolutionWarning() && !hasInvalidSolution()) || allowInvalidSolution();
-  }
-
+  bool acceptInvalidSolution() const;
   /**
    * Whether to accept / allow an invalid solution
    */
