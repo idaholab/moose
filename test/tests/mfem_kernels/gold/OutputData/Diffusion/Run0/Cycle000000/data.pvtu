@@ -10,8 +10,7 @@
 	<PDataArray type="UInt8"  Name="types"        NumberOfComponents="1" format="ascii"/>
 </PCells>
 <PPointData>
-<PDataArray type="Float64" Name="ddiffused_dt" NumberOfComponents="1" format="ascii" />
-<PDataArray type="Float64" Name="diffused" NumberOfComponents="1" format="ascii" />
+<PDataArray type="Float64" Name="diffused" NumberOfComponents="1"  format="ascii" />
 </PPointData>
 <PCellData>
 	<PDataArray type="Int32" Name="attribute" NumberOfComponents="1" format="ascii"/>
