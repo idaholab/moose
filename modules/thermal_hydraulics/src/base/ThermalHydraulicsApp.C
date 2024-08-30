@@ -121,6 +121,10 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Simulation::setComponentVariableOrder("rhovV", 5);
   Simulation::setComponentVariableOrder("rhowV", 6);
   Simulation::setComponentVariableOrder("rhoEV", 7);
+
+  // Physics
+  auto & syntax = s;
+  registerSyntax("THMVACESinglePhaseFlowPhysics", "Physics/ThermalHydraulics/VACESinglePhase/*");
 }
 
 const std::string &
