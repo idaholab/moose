@@ -17,7 +17,9 @@ ThermalHydraulicsFlowPhysics::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params.addPrivateParam<THMProblem *>("_thm_problem");
-  params.addPrivateParam<FlowChannelBase *>("_flow_channel");
+  // Note: suppress this parameter in Physics which should only be added from components
+  params.addParam<std::vector<std::string>>(
+      "flow_channels", {}, "Flow channels on which this Physics is active.");
   params.addRequiredParam<UserObjectName>(
       "fp", "The name of the user object that defines fluid properties");
   params.addRequiredParam<bool>("output_vector_velocity",
@@ -37,15 +39,31 @@ const std::string ThermalHydraulicsFlowPhysics::DIRECTION = "direction";
 ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters & params)
   : PhysicsBase(params),
     _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
-    _flow_channels({params.getCheckedPointerParam<FlowChannelBase *>("_flow_channel")}),
     _fp_name(params.get<UserObjectName>("fp")),
     _component_names({name()}),
-    _gravity_vector(_flow_channels[0]->getParam<RealVectorValue>("gravity_vector")),
-    _gravity_magnitude(_gravity_vector.norm()),
     _fe_type(_sim.getFlowFEType()),
-    _lump_mass_matrix(_flow_channels[0]->getParam<bool>("lump_mass_matrix")),
     _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
+  for (const auto & channel_name : getParam<std::vector<std::string>>("flow_channels"))
+  {
+    if (_sim.hasComponentOfType<FlowChannelBase>(channel_name))
+      _flow_channels.push_back(&_sim.getComponentByName<FlowChannelBase>(channel_name));
+    else
+      paramError("flow_channels", "Flow channel '" + channel_name + "' is not of expected type");
+  }
+
+}
+
+void
+ThermalHydraulicsFlowPhysics::initializePhysicsAdditional()
+{
+  if (_flow_channels.empty())
+    paramError("flow_channels",
+               "Flow channels should be specified as a parameter or the Physics should be added "
+               "from the flow channels");
+  _lump_mass_matrix = _flow_channels[0]->getParam<bool>("lump_mass_matrix");
+  _gravity_vector = _flow_channels[0]->getParam<RealVectorValue>("gravity_vector");
+  _gravity_magnitude = _gravity_vector.norm();
 }
 
 const FunctionName &

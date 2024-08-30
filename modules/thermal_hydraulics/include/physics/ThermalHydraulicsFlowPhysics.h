@@ -43,33 +43,9 @@ public:
   std::vector<VariableName> getSolutionVariables() const { return nonlinearVariableNames(); }
 
 protected:
-  /// The THM problem
-  THMProblem & _sim;
+  virtual void initializePhysicsAdditional() override;
 
-  /// The flow channel component that built this class
-  std::vector<FlowChannelBase *> _flow_channels;
-
-  /// The name of the user object that defines fluid properties
-  const UserObjectName _fp_name;
-
-  /// The name of the components
-  const std::vector<std::string> _component_names;
-
-  /// Gravitational acceleration vector
-  const RealVectorValue & _gravity_vector;
-  /// Gravitational acceleration magnitude
-  const Real _gravity_magnitude;
-
-  /// The type of FE used for flow
-  const FEType & _fe_type;
-  /// Lump the mass matrix
-  const bool _lump_mass_matrix;
-
-  // Names of variables for which derivative material properties need to be created
-  std::vector<VariableName> _derivative_vars;
-  /// True if we output velocity as a vector-value field, false for outputting velocity as a scalar
-  const bool & _output_vector_velocity;
-
+  /// Get the name of a function for a given parameter of the FlowModelPhysics
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
   /**
@@ -88,6 +64,32 @@ protected:
    */
   virtual void addCommonMaterials();
 
+  /// The THM problem
+  THMProblem & _sim;
+
+  /// The flow channel component that built this class
+  std::vector<const FlowChannelBase *> _flow_channels;
+
+  /// The name of the user object that defines fluid properties
+  const UserObjectName _fp_name;
+
+  /// The name of the components
+  const std::vector<std::string> _component_names;
+
+  /// Gravitational acceleration vector
+  RealVectorValue _gravity_vector;
+  /// Gravitational acceleration magnitude
+  Real _gravity_magnitude;
+
+  /// The type of FE used for flow
+  const FEType & _fe_type;
+  /// Lump the mass matrix
+  bool _lump_mass_matrix;
+
+  // Names of variables for which derivative material properties need to be created
+  std::vector<VariableName> _derivative_vars;
+  /// True if we output velocity as a vector-value field, false for outputting velocity as a scalar
+  const bool & _output_vector_velocity;
 public:
   static const std::string AREA;
   static const std::string AREA_LINEAR;
