@@ -10,7 +10,7 @@
 []
 
 [Formulation]
-  type = TransientCustomFormulation
+  type = SteadyStateCustomFormulation
 []
 
 [FESpaces]
@@ -95,10 +95,7 @@
 []
 
 [Executioner]
-  type = Transient
-  dt = 1.0
-  start_time = 0.0
-  end_time = 1.0
+  type = Steady
 []
 
 [Outputs]
