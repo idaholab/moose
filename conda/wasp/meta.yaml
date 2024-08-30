@@ -67,6 +67,7 @@ outputs:
         - {{ compiler('cxx') }}
         - {{ moose_python }}
         - {{ pin_subpackage("moose-wasp-base", exact=True) }}
+        - make
         - cython
         - setuptools
       host:
