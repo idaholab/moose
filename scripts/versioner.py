@@ -31,7 +31,7 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
 
 ### Tracking Libraries
 # note: Order is important only for historical lookups; git_ancestor(commit) == True
-TRACKING_LIBRARIES = ['mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
+TRACKING_LIBRARIES = ['mpi', 'petsc', 'libmesh', 'wasp', 'pyhit', 'moose-dev', 'app']
 
 ### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
 # pylint: disable=unused-argument

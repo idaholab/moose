@@ -83,7 +83,6 @@ outputs:
       build: []
       run:
         - {{ pin_subpackage('moose-wasp-base', exact=True)}}
-        - {{ pin_subpackage('moose-pyhit', exact=True)}}
 
 about:
   home: https://code.ornl.gov/neams-workbench/wasp

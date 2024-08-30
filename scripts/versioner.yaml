@@ -62,6 +62,11 @@ packages:
       - conda/wasp/conda_build_config.yaml
       - conda/wasp/build_wasp.sh
       - conda/wasp/build_pyhit.sh
+  pyhit:
+    dependencies:
+      - wasp
+    influential:
+      - framework/contrib/hit
   moose-dev:
     dependencies:
       - libmesh
