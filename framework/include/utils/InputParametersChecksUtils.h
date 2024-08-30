@@ -363,7 +363,7 @@ InputParametersChecksUtils<C>::checkVectorParamsNoOverlap(
         copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
         forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
                           "' is also present in one or more of the parameters '" +
-                          Moose::stringify(param_vec) + "'. This is disallowed.");
+                          Moose::stringify(param_vec) + "', which is not allowed.");
       }
   }
 }
@@ -374,7 +374,7 @@ void
 InputParametersChecksUtils<C>::checkTwoDVectorParamsNoRespectiveOverlap(
     const std::vector<std::string> & param_vec) const
 {
-  // Outer loop, each parameter is a vector of vector
+  // Outer loop, each param is the name of a parameter for a vector of vectors
   for (const auto & param : param_vec)
   {
     assertParamDefined<std::vector<std::vector<T>>>(param);
@@ -392,7 +392,7 @@ InputParametersChecksUtils<C>::checkTwoDVectorParamsNoRespectiveOverlap(
           forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
                             "' is also present in one or more of the two-D vector parameters '" +
                             Moose::stringify(copy_params) +
-                            "' in the inner vector of the same index. This is disallowed.");
+                            "' in the inner vector of the same index, which is not allowed.");
         }
     }
   }

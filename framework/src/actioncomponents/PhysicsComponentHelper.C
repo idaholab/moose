@@ -24,6 +24,8 @@ PhysicsComponentHelper::PhysicsComponentHelper(const InputParameters & params)
   // Should be done later?
   for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
     _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
+
+  addRequiredTask("init_component_physics");
 }
 
 void

@@ -13,7 +13,7 @@
 
 registerActionComponent("MooseApp", MeshGeneratorComponent);
 registerMooseAction("MooseApp", MeshGeneratorComponent, "add_mesh_generator");
-registerMooseAction("MooseApp", MeshGeneratorComponent, "init_physics");
+registerMooseAction("MooseApp", MeshGeneratorComponent, "init_component_physics");
 
 InputParameters
 MeshGeneratorComponent::validParams()
@@ -41,6 +41,8 @@ MeshGeneratorComponent::MeshGeneratorComponent(const InputParameters & params)
     paramError("saved_mesh_name",
                "The name of the saved mesh must be provided if using a mesh generator that saves "
                "the mesh for the component to use");
+
+  addRequiredTask("add_mesh_generator");
 }
 
 void
@@ -53,11 +55,11 @@ MeshGeneratorComponent::addMeshGenerators()
 void
 MeshGeneratorComponent::setupComponent()
 {
-  const auto component_mesh = (_mesh_generator_type == "saved_mesh")
-                                  ? _app.getMeshGeneratorSystem()
-                                        .getSavedMesh(getParam<std::string>("saved_mesh_name"))
-                                        .get()
-                                  : _mesh->getMeshPtr();
+  const auto saved_mesh =
+      (_mesh_generator_type == "saved_mesh")
+          ? _app.getMeshGeneratorSystem().getSavedMesh(getParam<std::string>("saved_mesh_name"))
+          : nullptr;
+  const auto component_mesh = saved_mesh ? saved_mesh.get() : _mesh->getMeshPtr();
   mooseAssert(component_mesh, "Should have a mesh");
 
   // Get list of blocks from the saved mesh

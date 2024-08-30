@@ -18,9 +18,6 @@
 class AddActionComponentAction : public Action
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   AddActionComponentAction(const InputParameters & params);
@@ -37,7 +34,7 @@ public:
 
 private:
   /// The Component type that is being created
-  std::string _type;
+  std::string _component_type;
 
   /// The parameters for the component to be created
   InputParameters _component_params;

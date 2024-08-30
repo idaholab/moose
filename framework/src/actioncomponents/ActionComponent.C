@@ -9,12 +9,13 @@
 
 // MOOSE includes
 #include "ActionComponent.h"
+#include "ActionFactory.h"
 
 InputParameters
 ActionComponent::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Base class for components that are defined using action.");
+  params.addClassDescription("Base class for components that are defined using actions.");
   params.addParam<bool>("verbose", false, "Whether the component setup should be verbose");
   return params;
 }
@@ -29,6 +30,7 @@ ActionComponent::act()
 {
   // This is inspired by the PhysicsBase definition of act(). We register components to the
   // task they use, and the base class calls the appropriate virtual member functions
+  mooseDoOnce(checkRequiredTasks());
 
   // These tasks are conceptually what we image a mostly-geometrical component should do
   if (_current_task == "add_mesh_generator")
@@ -50,4 +52,21 @@ ActionComponent::act()
   else
     // For a new task that isn't registered to ActionComponent in the framework
     actOnAdditionalTasks();
+}
+
+void
+ActionComponent::checkRequiredTasks() const
+{
+  const auto registered_tasks = _action_factory.getTasksByAction(type());
+
+  // Check for missing tasks
+  for (const auto & required_task : _required_tasks)
+    if (!registered_tasks.count(required_task))
+      mooseWarning(
+          "Task '" + required_task +
+          "' has been declared as required by a Component parent class of derived class '" +
+          type() +
+          "' but this task is not registered to the derived class. Registered tasks for "
+          "this Component are: " +
+          Moose::stringify(registered_tasks));
 }

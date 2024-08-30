@@ -30,8 +30,8 @@ AddActionComponentAction::validParams()
 
 AddActionComponentAction::AddActionComponentAction(const InputParameters & params)
   : Action(params),
-    _type(getParam<std::string>("type")),
-    _component_params(_action_factory.getValidParams(_type))
+    _component_type(getParam<std::string>("type")),
+    _component_params(_action_factory.getValidParams(_component_type))
 {
   _component_params.blockFullpath() = params.blockFullpath();
 
@@ -54,13 +54,14 @@ AddActionComponentAction::act()
 
     // Create and add the action to the warehouse
     auto action_component = MooseSharedNamespace::static_pointer_cast<Action>(
-        _action_factory.create(_type, name(), _component_params));
+        _action_factory.create(_component_type, name(), _component_params));
     _awh.addActionBlock(action_component);
   }
 }
 
 void
-AddActionComponentAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+AddActionComponentAction::addRelationshipManagers(
+    Moose::RelationshipManagerType input_rm_component_type)
 {
-  addRelationshipManagers(input_rm_type, _component_params);
+  addRelationshipManagers(input_rm_component_type, _component_params);
 }

@@ -281,8 +281,7 @@ template <typename T>
 void
 PhysicsBase::checkComponentType(const ActionComponent & component) const
 {
-  // TODO figure out why dynamic_cast is not enough
-  if (!dynamic_cast<const T *>(&component) && MooseUtils::prettyCppType<T>() != component.type())
+  if (!dynamic_cast<const T *>(&component))
     mooseError("Component '" + component.name() + "' must be of type '" +
                MooseUtils::prettyCppType<T>() + "'.\nIt is currently of type '" + component.type() +
                "'");

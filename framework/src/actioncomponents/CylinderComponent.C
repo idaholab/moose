@@ -27,13 +27,13 @@ CylinderComponent::validParams()
                                      "Dimension of the cylinder. 1 for an (axial) 1D line, 2 for a "
                                      "2D-RZ cylinder, and 3 for a 3D cylinder");
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
-  params.addRequiredRangeCheckedParam<Real>("height", "height>0", "Height of the cylinder");
+  params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
   params.addRequiredParam<Point>("position", "Positional offset of the cylinder");
   params.addRequiredParam<Point>("direction", "Direction of the cylinder");
 
-  params.addParam<unsigned int>("n_axial", 1, "Axial mesh of the cylinder");
-  params.addParam<unsigned int>("n_radial", 1, "Radial mesh of the cylinder");
-  params.addParam<unsigned int>("n_azimuthal", 1, "Azimuthal mesh of the cylinder");
+  params.addRequiredParam<unsigned int>("n_axial", "Number of axial elements of the cylinder");
+  params.addParam<unsigned int>("n_radial", "Number of radial elements of the cylinder");
+  params.addParam<unsigned int>("n_azimuthal", "Number of azimuthal elements of the cylinder");
 
   params.addParam<std::vector<SubdomainName>>("block", "Block for the cylinder");
 
@@ -44,9 +44,10 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
   : ActionComponent(params),
     PhysicsComponentHelper(params),
     _radius(getParam<Real>("radius")),
-    _height(getParam<Real>("height"))
+    _height(getParam<Real>("length"))
 {
   _dimension = getParam<MooseEnum>("dimension");
+  addRequiredTask("add_mesh_generator");
 }
 
 void
@@ -56,12 +57,14 @@ CylinderComponent::addMeshGenerators()
   {
     InputParameters params = _factory.getValidParams("GeneratedMeshGenerator");
     params.set<MooseEnum>("dim") = _dimension;
-    params.set<Real>("xmax") = {getParam<Real>("height")};
+    params.set<Real>("xmax") = {getParam<Real>("length")};
     params.set<unsigned int>("nx") = {getParam<unsigned int>("n_axial")};
     params.set<std::string>("boundary_name_prefix") = name();
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
+      if (!isParamValid("n_radial"))
+        paramError("n_radial", "Should be provided in 2D");
       params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial")};
     }
     if (isParamValid("block"))
@@ -79,6 +82,8 @@ CylinderComponent::addMeshGenerators()
   else
   {
     mooseError("3D is currently unsupported");
+    if (!isParamValid("n_azimuthal"))
+      paramError("n_azimuthal", "Should be provided in 3D");
   }
 
   // Place it in position

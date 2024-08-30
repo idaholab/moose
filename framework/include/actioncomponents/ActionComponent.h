@@ -63,10 +63,19 @@ protected:
   // These routines can help define a component that also defines a Physics
   virtual void addNonlinearVariables() {}
 
+  /// Used to add one or more Physics to be active on the component.
+  /// We recommend using the PhysicsComponentInterface instead of overriding this directly
+  virtual void addPhysics() {}
+
   /// Use this if registering a new task to the derived ActionComponent
   virtual void actOnAdditionalTasks() {}
 
-  virtual void addPhysics() {}
+  /// Add a new required task for all physics deriving from this class
+  /// NOTE: This does not register the task, you still need to call registerMooseAction
+  void addRequiredTask(const std::string & task) { _required_tasks.insert(task); }
+
+  /// Checks that tasks marked required by parent classes are indeed registered to derived classes
+  void checkRequiredTasks() const;
 
   /// Get problem from action warehouse
   FEProblem & getProblem()
@@ -89,4 +98,7 @@ protected:
 
   /// Whether the component setup should be verbose
   const bool _verbose;
+
+  /// Manually keeps track of the tasks required by each component as tasks cannot be inherited
+  std::set<std::string> _required_tasks;
 };

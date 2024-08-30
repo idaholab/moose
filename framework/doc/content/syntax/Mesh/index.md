@@ -53,14 +53,14 @@ defensive action that at worst will incur an unnecessary `prepare_for_use`,
 which may slow down the simulation setup, and at best may save follow-on mesh
 generators or simulation execution from undesirable behavior.
 
-### DAG and final mesh selection
+### DAG and final mesh selection id=final
 
 When chaining together several MeshGenerators, you are implicitly creating a DAG (directed acyclic graph).
 MOOSE evaluates and generates the individual objects to build up your final mesh. If your input file has
 multiple end points, (e.g. B->A and C->A) then MOOSE will issue an error and terminate. Generally, it doesn't
 make sense to have multiple end points since the output of one would simply be discarded anyway. It is possible
-to force the selection of a particular end point by using the "final_generator" parameter in the Mesh block.
-This parameter can be used on any generator whether there is ambiguity or not in the generator dependencies.
+to force the selection of a particular end point by using the [!param](/Mesh/MeshGeneratorMesh/final_generator)
+parameter in the Mesh block. This parameter can be used on any generator whether there is ambiguity or not in the generator dependencies.
 
 
 ## Outputting The Mesh
