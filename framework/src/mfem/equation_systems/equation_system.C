@@ -38,17 +38,8 @@ EquationSystem::AddKernel(const std::string & test_var_name,
                           std::shared_ptr<MFEMBilinearFormKernel> blf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
-
-  if (!_blf_kernels_map.Has(test_var_name))
-  {
-    // 1. Create kernels vector.
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>();
-
-    // 2. Register with map to prevent leaks.
-    _blf_kernels_map.Register(test_var_name, std::move(kernels));
-  }
-
-  _blf_kernels_map.GetRef(test_var_name).push_back(std::move(blf_kernel));
+  AddTrialVariableNameIfMissing(test_var_name);
+  addKernelToMap<MFEMBilinearFormKernel>(blf_kernel, _blf_kernels_map);
 }
 
 void
@@ -56,15 +47,7 @@ EquationSystem::AddKernel(const std::string & test_var_name,
                           std::shared_ptr<MFEMLinearFormKernel> lf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
-
-  if (!_lf_kernels_map.Has(test_var_name))
-  {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMLinearFormKernel>>>();
-
-    _lf_kernels_map.Register(test_var_name, std::move(kernels));
-  }
-
-  _lf_kernels_map.GetRef(test_var_name).push_back(std::move(lf_kernel));
+  addKernelToMap<MFEMLinearFormKernel>(lf_kernel, _lf_kernels_map);
 }
 
 void
@@ -72,15 +55,8 @@ EquationSystem::AddKernel(const std::string & test_var_name,
                           std::shared_ptr<MFEMNonlinearFormKernel> nlf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
-
-  if (!_nlf_kernels_map.Has(test_var_name))
-  {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>>();
-
-    _nlf_kernels_map.Register(test_var_name, std::move(kernels));
-  }
-
-  _nlf_kernels_map.GetRef(test_var_name).push_back(std::move(nlf_kernel));
+  AddTrialVariableNameIfMissing(nlf_kernel->getTrialVariableName());
+  addKernelToMap<MFEMNonlinearFormKernel>(nlf_kernel, _nlf_kernels_map);
 }
 
 void
@@ -89,7 +65,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
                           std::shared_ptr<MFEMMixedBilinearFormKernel> mblf_kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
-
+  AddTrialVariableNameIfMissing(trial_var_name);
   // Register new mblf kernels map if not present for this test variable
   if (!_mblf_kernels_map_map.Has(test_var_name))
   {

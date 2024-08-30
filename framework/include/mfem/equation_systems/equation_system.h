@@ -89,6 +89,24 @@ public:
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
+  /**
+   * Template method for storing kernels.
+   */
+  template <class T>
+  void addKernelToMap(std::shared_ptr<T> kernel,
+                      platypus::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & kernels_map)
+  {
+    auto test_var_name = kernel->getTestVariableName();
+    if (!kernels_map.Has(test_var_name))
+    {
+      // 1. Create kernels vector.
+      auto kernels = std::make_shared<std::vector<std::shared_ptr<T>>>();
+      // 2. Register with map to prevent leaks.
+      kernels_map.Register(test_var_name, std::move(kernels));
+    }
+    kernels_map.GetRef(test_var_name).push_back(std::move(kernel));
+  }
+
 protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
