@@ -23,7 +23,8 @@ class FlowChannelBase;
 
 #define registerTHMFlowModelPhysicsBaseTasks(app_name, derived_name)                               \
   registerMooseAction(app_name, derived_name, "add_ic");                                           \
-  registerMooseAction(app_name, derived_name, "add_variable")
+  registerMooseAction(app_name, derived_name, "add_variable");                                     \
+  registerMooseAction(app_name, derived_name, "add_material");
 
 /**
  * Provides functions to setup the flow model.  Should be used by components that has flow in them
@@ -41,33 +42,12 @@ public:
    */
   std::vector<VariableName> getSolutionVariables() const { return nonlinearVariableNames(); }
 
-  /**
-   * Initialize the model
-   */
-  virtual void init() = 0;
-
-  /**
-   * Add variables the model uses
-   *
-   */
-  virtual void addVariables() = 0;
-
-  /**
-   * Add initial conditions
-   */
-  virtual void addInitialConditions() = 0;
-
-  /**
-   * Add MOOSE objects this model uses
-   */
-  // virtual void addMooseObjects() = 0;
-
 protected:
   /// The THM problem
   THMProblem & _sim;
 
   /// The flow channel component that built this class
-  FlowChannelBase & _flow_channel;
+  std::vector<FlowChannelBase *> _flow_channels;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;
@@ -93,20 +73,20 @@ protected:
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
   /**
-   * Adds variables common to any flow model (A, P_hf, ...)
+   * Adds variables common to any flow model physics (A, P_hf, ...)
    * Note: we could move these to flow components since they pertain to the geometry
    */
   virtual void addCommonVariables();
 
   /**
-   * Adds initial conditions common to any flow model
+   * Adds initial conditions common to any flow model physics
    */
   virtual void addCommonInitialConditions();
 
   /**
-   * Adds common MOOSE objects
+   * Adds common materials useful for any flow model physics
    */
-  // virtual void addCommonMooseObjects();
+  virtual void addCommonMaterials();
 
 public:
   static const std::string AREA;

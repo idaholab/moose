@@ -35,15 +35,15 @@ const std::string ThermalHydraulicsFlowPhysics::UNITY = "unity";
 const std::string ThermalHydraulicsFlowPhysics::DIRECTION = "direction";
 
 ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters & params)
-  : MooseObject(params),
+  : PhysicsBase(params),
     _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
-    _flow_channel(*params.getCheckedPointerParam<FlowChannelBase *>("_flow_channel")),
+    _flow_channels({params.getCheckedPointerParam<FlowChannelBase *>("_flow_channel")}),
     _fp_name(params.get<UserObjectName>("fp")),
-    _comp_names({name()}),
-    _gravity_vector(_flow_channel.getParam<RealVectorValue>("gravity_vector")),
+    _component_names({name()}),
+    _gravity_vector(_flow_channels[0]->getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
     _fe_type(_sim.getFlowFEType()),
-    _lump_mass_matrix(_flow_channel.getParam<bool>("lump_mass_matrix")),
+    _lump_mass_matrix(_flow_channels[0]->getParam<bool>("lump_mass_matrix")),
     _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
 }
@@ -51,11 +51,12 @@ ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters
 const FunctionName &
 ThermalHydraulicsFlowPhysics::getVariableFn(const FunctionName & fn_param_name)
 {
-  const FunctionName & fn_name = _flow_channel.getParam<FunctionName>(fn_param_name);
+  // TODO request index
+  const FunctionName & fn_name = _flow_channels[0]->getParam<FunctionName>(fn_param_name);
   const Function & fn = _sim.getFunction(fn_name);
 
   if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
-    _flow_channel.connectObject(fn.parameters(), fn_name, fn_param_name, "value");
+    _flow_channels[0]->connectObject(fn.parameters(), fn_name, fn_param_name, "value");
 
   return fn_name;
 }
@@ -63,56 +64,70 @@ ThermalHydraulicsFlowPhysics::getVariableFn(const FunctionName & fn_param_name)
 void
 ThermalHydraulicsFlowPhysics::addCommonVariables()
 {
-  const std::vector<SubdomainName> & subdomains = _flow_channel.getSubdomainNames();
+  for (const auto i : index_range(_flow_channels))
+  {
+    const auto flow_channel = _flow_channels[i];
+    const std::vector<SubdomainName> & subdomains = flow_channel->getSubdomainNames();
 
-  _sim.addSimVariable(false, AREA, _fe_type, subdomains);
-  _sim.addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomains);
-  _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
+    _sim.addSimVariable(false, AREA, _fe_type, subdomains);
+    _sim.addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomains);
+    _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
+  }
 }
 
 void
 ThermalHydraulicsFlowPhysics::addCommonInitialConditions()
 {
-  if (_flow_channel.isParamValid("A") && !_app.isRestarting())
+  for (const auto i : index_range(_flow_channels))
   {
-    const std::vector<SubdomainName> & block = _flow_channel.getSubdomainNames();
-    const FunctionName & area_function = _flow_channel.getAreaFunctionName();
-
-    if (!_sim.hasFunction(area_function))
+    const auto flow_channel = _flow_channels[i];
+    const auto comp_name = _component_names[i];
+    if (flow_channel->isParamValid("A") && !_app.isRestarting())
     {
-      const Function & fn = _sim.getFunction(area_function);
-      _sim.addConstantIC(AREA, fn.value(0, Point()), block);
-      _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
+      const std::vector<SubdomainName> & block = flow_channel->getSubdomainNames();
+      const FunctionName & area_function = flow_channel->getAreaFunctionName();
 
-      _flow_channel.makeFunctionControllableIfConstant(area_function, "Area", "value");
-    }
-    else
-    {
-      _sim.addFunctionIC(AREA_LINEAR, area_function, block);
-
+      if (!_sim.hasFunction(area_function))
       {
-        const std::string class_name = "FunctionNodalAverageIC";
-        InputParameters params = getFactory().getValidParams(class_name);
-        params.set<VariableName>("variable") = AREA;
-        params.set<std::vector<SubdomainName>>("block") = block;
-        params.set<FunctionName>("function") = area_function;
-        _sim.addSimInitialCondition(class_name, genName(_comp_name, AREA, "ic"), params);
+        const Function & fn = _sim.getFunction(area_function);
+        _sim.addConstantIC(AREA, fn.value(0, Point()), block);
+        _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
+
+        flow_channel->makeFunctionControllableIfConstant(area_function, "Area", "value");
+      }
+      else
+      {
+        _sim.addFunctionIC(AREA_LINEAR, area_function, block);
+
+        {
+          const std::string class_name = "FunctionNodalAverageIC";
+          InputParameters params = getFactory().getValidParams(class_name);
+          params.set<VariableName>("variable") = AREA;
+          params.set<std::vector<SubdomainName>>("block") = block;
+          params.set<FunctionName>("function") = area_function;
+          _sim.addSimInitialCondition(class_name, genName(comp_name, AREA, "ic"), params);
+        }
       }
     }
   }
 }
 
 void
-ThermalHydraulicsFlowPhysics::addCommonMooseObjects()
+ThermalHydraulicsFlowPhysics::addCommonMaterials()
 {
-  // add material property equal to one, useful for dummy multiplier values
+  for (const auto i : index_range(_flow_channels))
   {
-    const std::string class_name = "ConstantMaterial";
-    InputParameters params = getFactory().getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::string>("property_name") = ThermalHydraulicsFlowPhysics::UNITY;
-    params.set<Real>("value") = 1.0;
-    params.set<std::vector<VariableName>>("derivative_vars") = _derivative_vars;
-    _sim.addMaterial(class_name, genName(_comp_name, ThermalHydraulicsFlowPhysics::UNITY), params);
+    const auto flow_channel = _flow_channels[i];
+    const auto comp_name = _component_names[i];
+    // add material property equal to one, useful for dummy multiplier values
+    {
+      const std::string class_name = "ConstantMaterial";
+      InputParameters params = getFactory().getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
+      params.set<std::string>("property_name") = ThermalHydraulicsFlowPhysics::UNITY;
+      params.set<Real>("value") = 1.0;
+      params.set<std::vector<VariableName>>("derivative_vars") = _derivative_vars;
+      _sim.addMaterial(class_name, genName(comp_name, ThermalHydraulicsFlowPhysics::UNITY), params);
+    }
   }
 }
