@@ -353,7 +353,6 @@ TimeDependentEquationSystem::SetTimeStep(double dt)
       auto blf = _blfs.Get(test_var_name);
       blf->Update();
       blf->Assemble();
-      blf->Finalize();
     }
   }
 }
