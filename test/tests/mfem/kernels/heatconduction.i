@@ -9,10 +9,6 @@
   device = "cpu"
 []
 
-[Formulation]
-  type = TransientCustomFormulation
-[]
-
 [FESpaces]
   [H1FESpace]
     type = MFEMFESpace
