@@ -9,10 +9,6 @@
   device = "cpu"
 []
 
-[Formulation]
-  type = SteadyStateCustomFormulation
-[]
-
 [FESpaces]
   [H1FESpace]
     type = MFEMFESpace
