@@ -378,7 +378,7 @@ TimeDependentEquationSystem::BuildBilinearForms()
 {
   EquationSystem::BuildBilinearForms();
 
-  // Register bilinear forms
+  // Build and assemble bilinear forms acting on time derivatives
   for (int i = 0; i < _test_var_names.size(); i++)
   {
     auto test_var_name = _test_var_names.at(i);
@@ -396,11 +396,12 @@ TimeDependentEquationSystem::BuildBilinearForms()
         td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator());
       }
     }
-    // Assemble
+    // Assemble bilinear form acting on only time derivatives
     td_blf->Assemble();
-    // if implicit:
+    // if implicit, add contribution from bilinear form acting on u: {
     auto blf = _blfs.Get(test_var_name);
     td_blf->SpMat().Add(-_dt_coef.constant, blf->SpMat());
+    // }
   }
 }
 
@@ -420,12 +421,17 @@ TimeDependentEquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
     auto td_blf = _td_blfs.Get(test_var_name);
     auto blf = _blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
+    // if implicit, add contribution to linear form from terms involving state
+    // variable at previous timestep: {
     blf->AddMult(*_trial_variables.Get(test_var_name), *lf, 1.0);
+    // }
     mfem::Vector aux_x, aux_rhs;
+    // Update solution values on Dirichlet values to be in terms of du/dt instead of u
     mfem::Vector bc_x = *(_xs.at(i).get());
     bc_x -= *_trial_variables.Get(test_var_name);
     bc_x /= _dt_coef.constant;
 
+    // Form linear system for operator acting on vector of du/dt
     _h_blocks(i, i) = new mfem::HypreParMatrix;
     td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *_h_blocks(i, i), aux_x, aux_rhs);
     truedXdt.GetBlock(i) = aux_x;
