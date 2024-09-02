@@ -11,15 +11,17 @@
 
 #include "ThermalHydraulicsFlowPhysics.h"
 
+class PhysicsFlowBoundary;
+
 /**
  * Sets up the single-phase Euler flow equations with a RDG discretization
  */
 class THMVACESinglePhaseFlowPhysics : public ThermalHydraulicsFlowPhysics
 {
 public:
-  THMVACESinglePhaseFlowPhysics(const InputParameters & params);
-
   static InputParameters validParams();
+
+  THMVACESinglePhaseFlowPhysics(const InputParameters & params);
 
 protected:
   /// Slope reconstruction type for rDG
@@ -43,6 +45,10 @@ private:
 
   virtual void addInletBoundaries() override;
   virtual void addOutletBoundaries() override;
+
+  /// Adds the boundary flux boundary condition, which uses the boundary flux user object
+  void addBoundaryFluxBC(const PhysicsFlowBoundary & comp,
+                         const UserObjectName & boundary_numerical_flux_name);
 
 public:
   static const std::string DENSITY;

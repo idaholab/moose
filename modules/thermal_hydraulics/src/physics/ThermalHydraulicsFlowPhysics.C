@@ -11,6 +11,7 @@
 #include "Component.h"
 #include "FlowChannelBase.h"
 #include "ConstantFunction.h"
+#include "ThermalHydraulicsFlowPhysics.h"
 
 InputParameters
 ThermalHydraulicsFlowPhysics::validParams()
@@ -159,6 +160,14 @@ ThermalHydraulicsFlowPhysics::setInlet(const std::string & boundary_component,
 {
   _inlet_components.push_back(boundary_component);
   _inlet_types.push_back(inlet_type);
+}
+
+void
+ThermalHydraulicsFlowPhysics::setOutlet(const std::string & boundary_component,
+                                        const OutletTypeEnum & outlet_type)
+{
+  _outlet_components.push_back(boundary_component);
+  _outlet_types.push_back(outlet_type);
 }
 
 void

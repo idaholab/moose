@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "THMVACESinglePhaseFlowPhysics.h"
+#include "THMProblem.h"
 #include "FlowChannelBase.h"
 #include "SlopeReconstruction1DInterface.h"
 #include "PhysicsFlowBoundary.h"
@@ -57,8 +58,6 @@ THMVACESinglePhaseFlowPhysics::validParams()
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
   return params;
 }
-
-registerMooseObject("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics);
 
 THMVACESinglePhaseFlowPhysics::THMVACESinglePhaseFlowPhysics(const InputParameters & params)
   : ThermalHydraulicsFlowPhysics(params),
@@ -560,7 +559,7 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
   {
     // Get component, which has reference to the controllable parameters
     const auto & comp_name = _inlet_components[i];
-    const auto comp = _sim->getComponentByName<PhysicsFlowBoundary>("comp_name");
+    const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
     UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _inlet_types[i];
 
@@ -588,28 +587,63 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
     }
 
     // Boundary flux BC
-    {
-      const std::string class_name = "ADBoundaryFlux3EqnBC";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<BoundaryName>>("boundary") = comp.getBoundaryNames();
-      params.set<Real>("normal") = comp.getNormal();
-      params.set<UserObjectName>("boundary_flux") = boundary_numerical_flux_name;
-      params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
-      params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-      params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
-      params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-      params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
-
-      for (const auto & var : nonlinearVariableNames())
-      {
-        params.set<NonlinearVariableName>("variable") = var;
-        _sim->addBoundaryCondition(class_name, genName(comp_name, var, "bnd_flux_3eqn_bc"), params);
-      }
-    }
+    addBoundaryFluxBC(comp, boundary_numerical_flux_name);
   }
 }
 
 void
 THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
 {
+  for (const auto i : index_range(_outlet_components))
+  {
+    // Get component, which has reference to the controllable parameters
+    const auto & comp_name = _outlet_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
+    UserObjectName boundary_numerical_flux_name = "invalid";
+    const auto & boundary_type = _outlet_types[i];
+
+    // Boundary fluxes should be updated as often as possible
+    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
+    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+    // boundary flux user object
+    // we add them in addBCs for convenience
+    if (boundary_type == OutletTypeEnum::FixedPressure)
+    {
+      const std::string class_name = "ADBoundaryFlux3EqnGhostPressure";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<Real>("p") = comp.getParam<Real>("p");
+      params.set<Real>("normal") = comp.getNormal();
+      params.set<UserObjectName>("fluid_properties") = _fp_name;
+      params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim->addUserObject(class_name, boundary_numerical_flux_name, params);
+      comp.connectObject(params, boundary_numerical_flux_name, "p");
+    }
+
+    // Boundary flux BC
+    addBoundaryFluxBC(comp, boundary_numerical_flux_name);
+  }
+}
+
+void
+THMVACESinglePhaseFlowPhysics::addBoundaryFluxBC(
+    const PhysicsFlowBoundary & comp, const UserObjectName & boundary_numerical_flux_name)
+{
+  const std::string class_name = "ADBoundaryFlux3EqnBC";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<BoundaryName>>("boundary") = comp.getBoundaryNames();
+  params.set<Real>("normal") = comp.getNormal();
+  params.set<UserObjectName>("boundary_flux") = boundary_numerical_flux_name;
+  params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
+  params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+  params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+  params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+  params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
+
+  for (const auto & var : nonlinearVariableNames())
+  {
+    params.set<NonlinearVariableName>("variable") = var;
+    _sim->addBoundaryCondition(class_name, genName(comp.name(), var, "bnd_flux_3eqn_bc"), params);
+  }
 }

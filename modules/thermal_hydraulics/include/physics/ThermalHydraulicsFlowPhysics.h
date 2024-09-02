@@ -22,7 +22,7 @@ class FluidProperties;
 class FlowChannelBase;
 
 #define registerTHMFlowModelPhysicsBaseTasks(app_name, derived_name)                               \
-  registerMooseAction(app_name, derived_name, "init_physics");                                     \
+  registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_ic");                                           \
   registerMooseAction(app_name, derived_name, "add_variable");                                     \
   registerMooseAction(app_name, derived_name, "add_bc");                                           \
@@ -46,10 +46,24 @@ public:
 
   /**
    * Add an inlet boundary
-   * @param boundary_component the name of the component
+   * @param boundary_component the name of the flow boundary component
    * @param inlet_type the type of inlet
    */
   void setInlet(const std::string & boundary_component, const InletTypeEnum & inlet_type);
+
+  // TODO: add here and implement all types needed
+  enum OutletTypeEnum
+  {
+    FixedPressure
+  };
+
+  /**
+   * Add an outlet boundary
+   * @param boundary_component the name of the flow boundary component
+   * @param outlet_type the type of outlet
+   */
+  void setOutlet(const std::string & boundary_component, const OutletTypeEnum & outlet_type);
+
 
 protected:
   virtual void initializePhysicsAdditional() override;
@@ -82,12 +96,16 @@ protected:
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;
 
-  /// The name of the components
-  const std::vector<std::string> _component_names;
+  /// The name of the flow components
+  std::vector<std::string> _component_names;
   /// The name of the inlet components
   std::vector<std::string> _inlet_components;
   /// The types of the inlets
   std::vector<InletTypeEnum> _inlet_types;
+  /// The name of the outlet components
+  std::vector<std::string> _outlet_components;
+  /// The types of the outlets
+  std::vector<OutletTypeEnum> _outlet_types;
 
   /// Gravitational acceleration vector
   RealVectorValue _gravity_vector;
