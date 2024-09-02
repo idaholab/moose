@@ -162,14 +162,12 @@ FlowChannelBase::init()
 
   _flow_model = buildFlowModel();
   if (_flow_model)
-  {
     _flow_model->init();
 
-    if (getTHMProblem().hasClosures(_closures_name))
-      _closures = getTHMProblem().getClosures(_closures_name);
-    else
-      _closures = buildClosures();
-  }
+  if (getTHMProblem().hasClosures(_closures_name))
+    _closures = getTHMProblem().getClosures(_closures_name);
+  else
+    _closures = buildClosures();
 }
 
 std::shared_ptr<ClosuresBase>
@@ -230,7 +228,8 @@ FlowChannelBase::addVariables()
   // generated in initSecondary() of heat transfer components
   getHeatTransferVariableNames();
 
-  _flow_model->addVariables();
+  if (_flow_model)
+    _flow_model->addVariables();
 
   // total heat flux perimeter
   if (_n_heat_transfer_connections > 1 && !_app.isRestarting())
@@ -243,7 +242,8 @@ FlowChannelBase::addVariables()
     getTHMProblem().addSimInitialCondition(class_name, genName(name(), "P_hf_ic"), params);
   }
 
-  _flow_model->addInitialConditions();
+  if (_flow_model)
+    _flow_model->addInitialConditions();
 }
 
 void
@@ -333,7 +333,8 @@ FlowChannelBase::addMooseObjects()
     }
   }
 
-  _flow_model->addMooseObjects();
+  if (_flow_model)
+    _flow_model->addMooseObjects();
   _closures->addMooseObjectsFlowChannel(*this);
 }
 
