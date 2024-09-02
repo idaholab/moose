@@ -41,6 +41,9 @@ private:
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
 
+  virtual void addInletBoundaries() override;
+  virtual void addOutletBoundaries() override;
+
 public:
   static const std::string DENSITY;
   static const std::string FRICTION_FACTOR_DARCY;
