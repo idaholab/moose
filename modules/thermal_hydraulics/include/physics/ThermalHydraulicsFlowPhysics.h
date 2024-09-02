@@ -22,9 +22,11 @@ class FluidProperties;
 class FlowChannelBase;
 
 #define registerTHMFlowModelPhysicsBaseTasks(app_name, derived_name)                               \
+  registerMooseAction(app_name, derived_name, "init_physics");                                     \
   registerMooseAction(app_name, derived_name, "add_ic");                                           \
   registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_material");
+  registerMooseAction(app_name, derived_name, "add_bc");                                           \
+  registerMooseAction(app_name, derived_name, "add_material")
 
 /**
  * Provides functions to setup the flow model.  Should be used by components that has flow in them
@@ -36,11 +38,18 @@ public:
 
   static InputParameters validParams();
 
+  // TODO: add here and implement all types needed
+  enum InletTypeEnum
+  {
+    MdotTemperature
+  };
+
   /**
-   * Gets a vector of the solution variables
-   * // TODO: remove
+   * Add an inlet boundary
+   * @param boundary_component the name of the component
+   * @param inlet_type the type of inlet
    */
-  std::vector<VariableName> getSolutionVariables() const { return nonlinearVariableNames(); }
+  void setInlet(const std::string & boundary_component, const InletTypeEnum & inlet_type);
 
 protected:
   virtual void initializePhysicsAdditional() override;
@@ -65,7 +74,7 @@ protected:
   virtual void addCommonMaterials();
 
   /// The THM problem
-  THMProblem & _sim;
+  THMProblem * _sim;
 
   /// The flow channel component that built this class
   std::vector<const FlowChannelBase *> _flow_channels;
@@ -75,6 +84,10 @@ protected:
 
   /// The name of the components
   const std::vector<std::string> _component_names;
+  /// The name of the inlet components
+  std::vector<std::string> _inlet_components;
+  /// The types of the inlets
+  std::vector<InletTypeEnum> _inlet_types;
 
   /// Gravitational acceleration vector
   RealVectorValue _gravity_vector;
@@ -82,7 +95,7 @@ protected:
   Real _gravity_magnitude;
 
   /// The type of FE used for flow
-  const FEType & _fe_type;
+  FEType _fe_type;
   /// Lump the mass matrix
   bool _lump_mass_matrix;
 
@@ -90,6 +103,15 @@ protected:
   std::vector<VariableName> _derivative_vars;
   /// True if we output velocity as a vector-value field, false for outputting velocity as a scalar
   const bool & _output_vector_velocity;
+
+private:
+  virtual void addFEBCs() override;
+
+  /// Create the objects for the inlet boundary conditions
+  virtual void addInletBoundaries() = 0;
+  /// Create the objects for the outlet boundary conditions
+  virtual void addOutletBoundaries() = 0;
+
 public:
   static const std::string AREA;
   static const std::string AREA_LINEAR;

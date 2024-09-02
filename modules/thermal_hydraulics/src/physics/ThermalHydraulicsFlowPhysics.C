@@ -15,8 +15,8 @@
 InputParameters
 ThermalHydraulicsFlowPhysics::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  params.addPrivateParam<THMProblem *>("_thm_problem");
+  InputParameters params = PhysicsBase::validParams();
+
   // Note: suppress this parameter in Physics which should only be added from components
   params.addParam<std::vector<std::string>>(
       "flow_channels", {}, "Flow channels on which this Physics is active.");
@@ -38,25 +38,27 @@ const std::string ThermalHydraulicsFlowPhysics::DIRECTION = "direction";
 
 ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters & params)
   : PhysicsBase(params),
-    _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _fp_name(params.get<UserObjectName>("fp")),
     _component_names({name()}),
-    _fe_type(_sim.getFlowFEType()),
     _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
-  for (const auto & channel_name : getParam<std::vector<std::string>>("flow_channels"))
-  {
-    if (_sim.hasComponentOfType<FlowChannelBase>(channel_name))
-      _flow_channels.push_back(&_sim.getComponentByName<FlowChannelBase>(channel_name));
-    else
-      paramError("flow_channels", "Flow channel '" + channel_name + "' is not of expected type");
-  }
-
 }
 
 void
 ThermalHydraulicsFlowPhysics::initializePhysicsAdditional()
 {
+  // Retrieve the problem
+  _sim = dynamic_cast<THMProblem *>(&getProblem());
+
+  _fe_type = _sim->getFlowFEType();
+  for (const auto & channel_name : getParam<std::vector<std::string>>("flow_channels"))
+  {
+    if (_sim->hasComponentOfType<FlowChannelBase>(channel_name))
+      _flow_channels.push_back(&_sim->getComponentByName<FlowChannelBase>(channel_name));
+    else
+      paramError("flow_channels", "Flow channel '" + channel_name + "' is not of expected type");
+  }
+
   if (_flow_channels.empty())
     paramError("flow_channels",
                "Flow channels should be specified as a parameter or the Physics should be added "
@@ -71,7 +73,7 @@ ThermalHydraulicsFlowPhysics::getVariableFn(const FunctionName & fn_param_name)
 {
   // TODO request index
   const FunctionName & fn_name = _flow_channels[0]->getParam<FunctionName>(fn_param_name);
-  const Function & fn = _sim.getFunction(fn_name);
+  const Function & fn = _sim->getFunction(fn_name);
 
   if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
     _flow_channels[0]->connectObject(fn.parameters(), fn_name, fn_param_name, "value");
@@ -87,9 +89,9 @@ ThermalHydraulicsFlowPhysics::addCommonVariables()
     const auto flow_channel = _flow_channels[i];
     const std::vector<SubdomainName> & subdomains = flow_channel->getSubdomainNames();
 
-    _sim.addSimVariable(false, AREA, _fe_type, subdomains);
-    _sim.addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomains);
-    _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
+    _sim->addSimVariable(false, AREA, _fe_type, subdomains);
+    _sim->addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomains);
+    _sim->addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
   }
 }
 
@@ -105,17 +107,17 @@ ThermalHydraulicsFlowPhysics::addCommonInitialConditions()
       const std::vector<SubdomainName> & block = flow_channel->getSubdomainNames();
       const FunctionName & area_function = flow_channel->getAreaFunctionName();
 
-      if (!_sim.hasFunction(area_function))
+      if (!_sim->hasFunction(area_function))
       {
-        const Function & fn = _sim.getFunction(area_function);
-        _sim.addConstantIC(AREA, fn.value(0, Point()), block);
-        _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
+        const Function & fn = _sim->getFunction(area_function);
+        _sim->addConstantIC(AREA, fn.value(0, Point()), block);
+        _sim->addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
 
         flow_channel->makeFunctionControllableIfConstant(area_function, "Area", "value");
       }
       else
       {
-        _sim.addFunctionIC(AREA_LINEAR, area_function, block);
+        _sim->addFunctionIC(AREA_LINEAR, area_function, block);
 
         {
           const std::string class_name = "FunctionNodalAverageIC";
@@ -123,7 +125,7 @@ ThermalHydraulicsFlowPhysics::addCommonInitialConditions()
           params.set<VariableName>("variable") = AREA;
           params.set<std::vector<SubdomainName>>("block") = block;
           params.set<FunctionName>("function") = area_function;
-          _sim.addSimInitialCondition(class_name, genName(comp_name, AREA, "ic"), params);
+          _sim->addSimInitialCondition(class_name, genName(comp_name, AREA, "ic"), params);
         }
       }
     }
@@ -145,7 +147,24 @@ ThermalHydraulicsFlowPhysics::addCommonMaterials()
       params.set<std::string>("property_name") = ThermalHydraulicsFlowPhysics::UNITY;
       params.set<Real>("value") = 1.0;
       params.set<std::vector<VariableName>>("derivative_vars") = _derivative_vars;
-      _sim.addMaterial(class_name, genName(comp_name, ThermalHydraulicsFlowPhysics::UNITY), params);
+      _sim->addMaterial(
+          class_name, genName(comp_name, ThermalHydraulicsFlowPhysics::UNITY), params);
     }
   }
+}
+
+void
+ThermalHydraulicsFlowPhysics::setInlet(const std::string & boundary_component,
+                                       const InletTypeEnum & inlet_type)
+{
+  _inlet_components.push_back(boundary_component);
+  _inlet_types.push_back(inlet_type);
+}
+
+void
+ThermalHydraulicsFlowPhysics::addFEBCs()
+{
+  // NOTE: This routine will likely move to the derived class if we implement finite volume
+  addInletBoundaries();
+  addOutletBoundaries();
 }
