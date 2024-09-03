@@ -43,6 +43,11 @@ ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters
     _component_names({name()}),
     _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
+  // A derived physics must act on those tasks
+  addRequiredPhysicsTask("THMPhysics:add_ic");
+  addRequiredPhysicsTask("add_variable");
+  addRequiredPhysicsTask("add_bc");
+  addRequiredPhysicsTask("add_material");
 }
 
 void

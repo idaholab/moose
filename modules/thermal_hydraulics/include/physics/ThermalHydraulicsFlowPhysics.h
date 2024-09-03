@@ -23,7 +23,7 @@ class FlowChannelBase;
 
 #define registerTHMFlowModelPhysicsBaseTasks(app_name, derived_name)                               \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
-  registerMooseAction(app_name, derived_name, "add_ic");                                           \
+  registerMooseAction(app_name, derived_name, "THMPhysics:add_ic");                                \
   registerMooseAction(app_name, derived_name, "add_variable");                                     \
   registerMooseAction(app_name, derived_name, "add_bc");                                           \
   registerMooseAction(app_name, derived_name, "add_material")
@@ -63,7 +63,6 @@ public:
    * @param outlet_type the type of outlet
    */
   void setOutlet(const std::string & boundary_component, const OutletTypeEnum & outlet_type);
-
 
 protected:
   virtual void initializePhysicsAdditional() override;

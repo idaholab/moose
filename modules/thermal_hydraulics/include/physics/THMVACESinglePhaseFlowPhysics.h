@@ -34,9 +34,11 @@ protected:
   const std::vector<Real> _scaling_factors;
 
 private:
+  virtual void actOnAdditionalTasks() override;
+
   virtual void addNonlinearVariables() override;
   virtual void addAuxiliaryVariables() override;
-  virtual void addInitialConditions() override;
+  virtual void addTHMInitialConditions();
   virtual void addFEKernels() override;
   virtual void addDGKernels() override;
   virtual void addAuxiliaryKernels() override;

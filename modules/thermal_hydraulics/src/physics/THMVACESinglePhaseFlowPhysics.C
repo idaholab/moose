@@ -39,6 +39,8 @@ const std::string VACE1P::VELOCITY_Z = "vel_z";
 const std::string VACE1P::REYNOLDS_NUMBER = "Re";
 
 registerTHMFlowModelPhysicsBaseTasks("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics);
+registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_aux_variable");
+registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "THMPhysics:add_ic");
 registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_dg_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_aux_kernel");
@@ -65,6 +67,14 @@ THMVACESinglePhaseFlowPhysics::THMVACESinglePhaseFlowPhysics(const InputParamete
     _numerical_flux_name(prefix() + "VACE_uo"),
     _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase"))
 {
+}
+
+void
+THMVACESinglePhaseFlowPhysics::actOnAdditionalTasks()
+{
+  // The THMProblem adds ICs on THM:add_variables, which happens before add_ic
+  if (_current_task == "THMPhysics:add_ic")
+    addTHMInitialConditions();
 }
 
 void
@@ -111,7 +121,7 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryVariables()
 }
 
 void
-THMVACESinglePhaseFlowPhysics::addInitialConditions()
+THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
 {
   ThermalHydraulicsFlowPhysics::addCommonInitialConditions();
 
@@ -493,6 +503,8 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
       params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("A") = {AREA};
+      // Less frequent than in FlowModelSinglePhase
+      params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       _sim->addAuxKernel(class_name, genName(comp_name, "v_aux"), params);
     }
     {
