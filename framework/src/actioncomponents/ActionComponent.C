@@ -32,7 +32,7 @@ ActionComponent::act()
   // task they use, and the base class calls the appropriate virtual member functions
   mooseDoOnce(checkRequiredTasks());
 
-  // These tasks are conceptually what we image a mostly-geometrical component should do
+  // These tasks are conceptually what we imagine a mostly-geometrical component should do
   if (_current_task == "add_mesh_generator")
     addMeshGenerators();
   else if (_current_task == "add_positions")

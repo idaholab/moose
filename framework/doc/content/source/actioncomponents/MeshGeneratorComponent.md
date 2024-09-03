@@ -19,7 +19,7 @@ When using the 'saved_mesh' option for the [!param](/ActionComponents/MeshGenera
 ## Using the final mesh generator
 
 When using the 'final_generator' option for the [!param](/ActionComponents/MeshGeneratorComponent/mesh_generator_type) parameter,
-the mesh will not be duplicated, the final mesh from the [Mesh](syntax/Mesh/index.md) block will be used.
+the mesh will not be duplicated; the final mesh from the [Mesh](syntax/Mesh/index.md) block will be used.
 
 !syntax parameters /ActionComponents/MeshGeneratorComponent
 

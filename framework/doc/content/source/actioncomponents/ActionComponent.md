@@ -8,7 +8,7 @@ on describing the geometry of the system, with [Physics](Physics/index.md) takin
 
 It provides several public APIs to interact with other systems such as:
 
-- `blocks()` to return the subdomains the component comprises of
+- `blocks()` to return the subdomains the component comprises
 - `meshGeneratorName()` to return the name of the last mesh generator (if any) creating the mesh for this component
 
 Some of these APIs are not implemented by default. They must be implemented by derived classes in order to

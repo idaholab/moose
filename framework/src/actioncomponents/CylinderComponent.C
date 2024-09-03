@@ -24,8 +24,9 @@ CylinderComponent::validParams()
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
                                      dims,
-                                     "Dimension of the cylinder. 1 for an (axial) 1D line, 2 for a "
-                                     "2D-RZ cylinder, and 3 for a 3D cylinder");
+                                     "Dimension of the cylinder. 0 for a point (not implemented), "
+                                     "1 for an (axial) 1D line, 2 for a 2D-RZ cylinder, and 3 for "
+                                     "a 3D cylinder (not implemented)");
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
   params.addRequiredParam<Point>("position", "Positional offset of the cylinder");
@@ -53,7 +54,9 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
 void
 CylinderComponent::addMeshGenerators()
 {
-  if (_dimension == 1 || _dimension == 2)
+  if (_dimension == 0)
+    paramError("dimension", "0D cylinder not implemented");
+  else if (_dimension == 1 || _dimension == 2)
   {
     InputParameters params = _factory.getValidParams("GeneratedMeshGenerator");
     params.set<MooseEnum>("dim") = _dimension;
@@ -64,9 +67,11 @@ CylinderComponent::addMeshGenerators()
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
       if (!isParamValid("n_radial"))
-        paramError("n_radial", "Should be provided in 2D");
+        paramError("n_radial", "Should be provided for a 2D cylinder");
       params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial")};
     }
+    else if (isParamValid("n_radial"))
+      paramError("n_radial", "Should not be provided for a 1D cylinder");
     if (isParamValid("block"))
     {
       const auto block_names = getParam<std::vector<SubdomainName>>("block");
@@ -81,7 +86,9 @@ CylinderComponent::addMeshGenerators()
   }
   else
   {
-    mooseError("3D is currently unsupported");
+    paramError("dimension", "3D cylinder is not implemented");
+    if (!isParamValid("n_radial"))
+      paramError("n_radial", "Should be provided for a 3D cylinder");
     if (!isParamValid("n_azimuthal"))
       paramError("n_azimuthal", "Should be provided in 3D");
   }
