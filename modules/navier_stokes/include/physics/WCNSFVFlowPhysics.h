@@ -40,6 +40,8 @@ protected:
   void initializePhysicsAdditional() override;
   void actOnAdditionalTasks() override;
 
+  // Used by derived THMWCNSFVFlowPhysics
+  // TODO: make sure list is minimal
   void addNonlinearVariables() override;
   void addInitialConditions() override;
   void addMaterials() override;

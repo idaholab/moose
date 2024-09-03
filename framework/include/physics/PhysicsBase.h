@@ -56,6 +56,12 @@ public:
   void addBlocks(const std::vector<SubdomainName> & blocks);
   void addBlocksById(const std::vector<SubdomainID> & block_ids);
 
+  /**
+   * Remove blocks from the Physics' block restriction
+   * @param blocks list of blocks to remove
+   */
+  void removeBlocks(const std::vector<SubdomainName> & blocks);
+
   /// Return the blocks this physics is defined on
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
 

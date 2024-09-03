@@ -41,12 +41,14 @@ const std::string WCNSFV::REYNOLDS_NUMBER = "Re";
 registerTHMFlowModelPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVFlowPhysics);
 registerNavierStokesPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVFlowPhysics);
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "THMPhysics:add_ic");
+
+// From WCNSFVFlowPhysics
+// TODO: make sure list is minimal
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_fv_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_fv_bc");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_material");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_corrector");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_postprocessor");
-registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "get_turbulence_physics");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_aux_variable");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_aux_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_user_object");
@@ -69,7 +71,7 @@ THMWCNSFVFlowPhysics::validParams()
   params.suppressParameter<std::vector<MooseEnum>>("momentum_wall_types");
   // params.suppressParameter<std::vector<MooseFunctorName>>("momentum_wall_functors");
 
-  // Suppress misc parameters we do not expect we will need
+  // Suppress misc parameters we do not expect we will need for now
   params.suppressParameter<bool>("add_flow_equations");
   params.suppressParameter<PhysicsName>("coupled_turbulence_physics");
 
@@ -86,6 +88,11 @@ THMWCNSFVFlowPhysics::initializePhysicsAdditional()
 {
   ThermalHydraulicsFlowPhysics::initializePhysicsAdditional();
   WCNSFVFlowPhysics::initializePhysicsAdditional();
+
+  // Move block information from flow_channels to _blocks as WCNSFV routines rely on blocks
+  for (const auto flow_channel : _flow_channels)
+    addBlocks(flow_channel->getSubdomainNames());
+  // TODO: consider other Physics-components
 }
 
 void
@@ -113,9 +120,48 @@ THMWCNSFVFlowPhysics::addAuxiliaryVariables()
 void
 THMWCNSFVFlowPhysics::addTHMInitialConditions()
 {
+  // We are going to assume these are not restarted properly
   ThermalHydraulicsFlowPhysics::addCommonInitialConditions();
-  // TODO: check that they are valid
+
+  // Restarting, avoid ICs
+  if (_app.isRestarting() || getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+
+  // Use Physics initial conditions only on components on which the initial conditions were not
+  // specified
+  const auto copy_blocks = blocks();
+  for (const auto flow_channel : _flow_channels)
+  {
+    if (flow_channel->isParamValid("initial_vel") && flow_channel->isParamValid("initial_p"))
+    {
+      // Velocity initial condition
+      InputParameters params = getFactory().getValidParams("FunctionIC");
+      assignBlocks(params, flow_channel->getSubdomainNames());
+      auto vvalue = flow_channel->getParam<FunctionName>("initial_vel");
+      params.set<VariableName>("variable") = getVelocityNames()[0];
+      params.set<FunctionName>("function") = vvalue;
+      getProblem().addInitialCondition(
+          "FunctionIC", prefix() + getVelocityNames()[0] + "_ic", params);
+
+      // Pressure initial condition
+      params.set<VariableName>("variable") = getPressureName();
+      params.set<FunctionName>("function") = flow_channel->getParam<FunctionName>("initial_p");
+      getProblem().addInitialCondition("FunctionIC", prefix() + getPressureName() + "_ic", params);
+
+      // NOTE: this could be a little slow for very many channels. If we specified initial
+      // conditions on every single channel, we could skip this
+      removeBlocks(flow_channel->getSubdomainNames());
+    }
+    else if (flow_channel->isParamValid("initial_vel") || flow_channel->isParamValid("initial_p"))
+      mooseError(
+          "Both or none of 'initial_vel' and 'initial_p' should be specified on flow channel '",
+          flow_channel->name() + "'");
+  }
+
+  // Add WCNSFV initial conditions with modified block restriction
   WCNSFVFlowPhysics::addInitialConditions();
+  // Restore initial block restriction
+  _blocks = copy_blocks;
 }
 
 void

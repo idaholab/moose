@@ -207,6 +207,16 @@ PhysicsBase::addBlocksById(const std::vector<SubdomainID> & block_ids)
   {
     for (const auto bid : block_ids)
       _blocks.push_back(_mesh->getSubdomainName(bid));
+  }
+}
+
+void
+PhysicsBase::removeBlocks(const std::vector<SubdomainName> & blocks)
+{
+  if (blocks.size())
+  {
+    for (const auto & block : blocks)
+      _blocks.erase(std::remove(_blocks.begin(), _blocks.end(), block), _blocks.end());
     _dim = _mesh->getBlocksMaxDimension(_blocks);
   }
 }
