@@ -16,12 +16,13 @@
 #include "SymmetricRankTwoTensorForward.h"
 #include "SymmetricRankFourTensorForward.h"
 
-class OutputTestMaterial : public Material
+template <bool is_ad>
+class OutputTestMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  OutputTestMaterial(const InputParameters & parameters);
+  OutputTestMaterialTempl(const InputParameters & parameters);
 
   // Used for testing if hidden compiler warning shows up
   virtual void computeProperties() { Material::computeProperties(); }
@@ -29,19 +30,22 @@ public:
   /**
    * Class destructor
    */
-  virtual ~OutputTestMaterial();
+  virtual ~OutputTestMaterialTempl();
 
 protected:
   virtual void computeQpProperties();
 
-  MaterialProperty<Real> & _real_property;
-  MaterialProperty<RealVectorValue> & _vector_property;
-  MaterialProperty<RealTensorValue> & _tensor_property;
-  MaterialProperty<RankTwoTensor> & _ranktwotensor_property;
-  MaterialProperty<RankFourTensor> & _rankfourtensor_property;
-  MaterialProperty<SymmetricRankTwoTensor> & _symmetricranktwotensor_property;
-  MaterialProperty<SymmetricRankFourTensor> & _symmetricrankfourtensor_property;
-  MaterialProperty<std::vector<Real>> * _stdvector_property;
-  Real _factor;
-  const VariableValue & _variable;
+  GenericMaterialProperty<Real, is_ad> & _real_property;
+  GenericMaterialProperty<RealVectorValue, is_ad> & _vector_property;
+  GenericMaterialProperty<RealTensorValue, is_ad> & _tensor_property;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _ranktwotensor_property;
+  GenericMaterialProperty<RankFourTensor, is_ad> & _rankfourtensor_property;
+  GenericMaterialProperty<SymmetricRankTwoTensor, is_ad> & _symmetricranktwotensor_property;
+  GenericMaterialProperty<SymmetricRankFourTensor, is_ad> & _symmetricrankfourtensor_property;
+  GenericMaterialProperty<std::vector<Real>, is_ad> * _stdvector_property;
+  GenericReal<is_ad> _factor;
+  const GenericVariableValue<is_ad> & _variable;
 };
+
+typedef OutputTestMaterialTempl<false> OutputTestMaterial;
+typedef OutputTestMaterialTempl<true> ADOutputTestMaterial;
