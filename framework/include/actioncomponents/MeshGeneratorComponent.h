@@ -11,12 +11,12 @@
 
 // MOOSE includes
 #include "ActionComponent.h"
-#include "PhysicsComponentHelper.h"
+#include "PhysicsComponentBase.h"
 
 /**
  * Component whose mesh is generated in the [Mesh] block on which one can define a Physics.
  */
-class MeshGeneratorComponent : public virtual ActionComponent, public PhysicsComponentHelper
+class MeshGeneratorComponent : public virtual ActionComponent, public PhysicsComponentBase
 {
 public:
   /**

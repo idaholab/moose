@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhysicsComponentHelper.h"
+#include "PhysicsComponentBase.h"
 
 InputParameters
-PhysicsComponentHelper::validParams()
+PhysicsComponentBase::validParams()
 {
   auto params = emptyInputParameters();
   params.addParam<std::vector<PhysicsName>>(
@@ -18,7 +18,7 @@ PhysicsComponentHelper::validParams()
   return params;
 }
 
-PhysicsComponentHelper::PhysicsComponentHelper(const InputParameters & params)
+PhysicsComponentBase::PhysicsComponentBase(const InputParameters & params)
   : ActionComponent(params), _physics_names(getParam<std::vector<PhysicsName>>("physics"))
 {
   // Should be done later?
@@ -29,7 +29,7 @@ PhysicsComponentHelper::PhysicsComponentHelper(const InputParameters & params)
 }
 
 void
-PhysicsComponentHelper::initComponentPhysics()
+PhysicsComponentBase::initComponentPhysics()
 {
   for (auto physics : _physics)
   {

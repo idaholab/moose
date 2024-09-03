@@ -19,12 +19,12 @@
  * TODO: Should this be an Interface rather than a Helper?
  * Note: Trying out virtual inheritance
  */
-class PhysicsComponentHelper : public virtual ActionComponent
+class PhysicsComponentBase : public virtual ActionComponent
 {
 public:
   static InputParameters validParams();
 
-  PhysicsComponentHelper(const InputParameters & params);
+  PhysicsComponentBase(const InputParameters & params);
 
   /// Get the Physics from the Component
   std::vector<PhysicsBase *> getPhysics() const { return _physics; }
@@ -45,7 +45,7 @@ protected:
 
 template <typename T>
 bool
-PhysicsComponentHelper::physicsExists(const PhysicsName & name)
+PhysicsComponentBase::physicsExists(const PhysicsName & name)
 {
   const auto physics = _awh.getPhysics<T>();
   for (const auto phys : physics)
