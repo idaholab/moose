@@ -17,6 +17,9 @@ WCNSFVFluxBCBase::validParams()
   params += INSFVFlowBC::validParams();
   params.addParam<Real>("scaling_factor", 1, "To scale the mass flux");
 
+  params.addParam<unsigned int>("dimension",
+                                "Dimension of the velocity vector for this boundary condition. "
+                                "Defaults to the mesh dimension");
   params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
   params.addParam<Point>(
       "direction",
@@ -56,9 +59,9 @@ WCNSFVFluxBCBase::WCNSFVFluxBCBase(const InputParameters & params)
   if (_mdot_pp && _velocity_pp)
     mooseWarning("If setting the mass flow rate directly, no need for inlet velocity");
 
-  if (_subproblem.mesh().dimension() >= 2 && !_vel_y)
+  if (!isParamValid("dimension") && _subproblem.mesh().dimension() >= 2 && !_vel_y)
     mooseError("In two or more dimensions, the y-component of the velocity must be supplied.");
-  if (_subproblem.mesh().dimension() == 3 && !_vel_z)
+  if (!isParamValid("dimension") && _subproblem.mesh().dimension() == 3 && !_vel_z)
     mooseError("In three dimensions, the z-component of the velocity must be supplied.");
 }
 

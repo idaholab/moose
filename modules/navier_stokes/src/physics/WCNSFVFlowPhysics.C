@@ -934,6 +934,7 @@ WCNSFVFlowPhysics::addINSInletBC()
         else
           params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
+        params.set<unsigned int>("dimension") = dimension();
         for (const auto d : make_range(dimension()))
           params.set<MooseFunctorName>(NS::velocity_vector[d]) = _velocity_names[d];
 
@@ -963,6 +964,7 @@ WCNSFVFlowPhysics::addINSInletBC()
         else
           params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
+        params.set<unsigned int>("dimension") = dimension();
         for (const auto d : make_range(dimension()))
           params.set<MooseFunctorName>(NS::velocity_vector[d]) = _velocity_names[d];
 
