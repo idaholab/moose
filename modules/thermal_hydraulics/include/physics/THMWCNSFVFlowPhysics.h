@@ -31,11 +31,8 @@ private:
   virtual void addNonlinearVariables() override;
   virtual void addAuxiliaryVariables() override;
   virtual void addTHMInitialConditions();
-  // virtual void addFEKernels() override;
-  // virtual void addDGKernels() override;
   virtual void addAuxiliaryKernels() override;
   virtual void addMaterials() override;
-  virtual void addUserObjects() override;
 
   virtual void addInletBoundaries() override;
   virtual void addOutletBoundaries() override;

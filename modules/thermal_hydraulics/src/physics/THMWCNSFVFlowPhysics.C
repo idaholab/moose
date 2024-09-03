@@ -174,12 +174,7 @@ THMWCNSFVFlowPhysics::addMaterials()
 void
 THMWCNSFVFlowPhysics::addAuxiliaryKernels()
 {
-}
-
-void
-THMWCNSFVFlowPhysics::addUserObjects()
-{
-  WCNSFVFlowPhysics::addUserObjects();
+  // TODO: add aux-variables used by the closures
 }
 
 void
