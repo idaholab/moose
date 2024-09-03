@@ -1,5 +1,5 @@
 #pragma once
-#include "inputs.h"
+#include "MFEMGeneralUserObject.h"
 
 namespace platypus
 {
@@ -8,7 +8,7 @@ class Executioner
 {
 public:
   Executioner() = default;
-  explicit Executioner(const platypus::InputParameters & params) {}
+  explicit Executioner(const InputParameters & params) {}
 
   virtual ~Executioner() = default;
 

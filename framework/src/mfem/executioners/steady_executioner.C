@@ -3,8 +3,8 @@
 namespace platypus
 {
 
-SteadyExecutioner::SteadyExecutioner(const platypus::InputParameters & params)
-  : Executioner(params), _problem(params.GetParam<platypus::SteadyStateProblem *>("Problem"))
+SteadyExecutioner::SteadyExecutioner(const InputParameters & params)
+  : Executioner(params), _problem(params.get<platypus::SteadyStateProblem *>("Problem"))
 {
 }
 

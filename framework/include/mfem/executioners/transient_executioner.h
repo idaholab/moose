@@ -11,7 +11,7 @@ public:
   mutable double _t_step; // Time step
 
   TransientExecutioner() = default;
-  explicit TransientExecutioner(const platypus::InputParameters & params);
+  explicit TransientExecutioner(const InputParameters & params);
 
   ~TransientExecutioner() override = default;
 

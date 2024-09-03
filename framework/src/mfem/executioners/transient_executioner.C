@@ -3,16 +3,16 @@
 namespace platypus
 {
 
-TransientExecutioner::TransientExecutioner(const platypus::InputParameters & params)
+TransientExecutioner::TransientExecutioner(const InputParameters & params)
   : Executioner(params),
-    _t_step(params.GetParam<float>("TimeStep")),
-    _t_initial(params.GetParam<float>("StartTime")),
-    _t_final(params.GetParam<float>("EndTime")),
+    _t_step(params.get<float>("TimeStep")),
+    _t_initial(params.get<float>("StartTime")),
+    _t_final(params.get<float>("EndTime")),
     _t(_t_initial),
     _it(0),
-    _vis_steps(params.GetOptionalParam<int>("VisualisationSteps", 1)),
+    _vis_steps(params.get<int>("VisualisationSteps")),
     _last_step(false),
-    _problem(params.GetParam<platypus::TimeDomainProblem *>("Problem"))
+    _problem(params.getCheckedPointerParam<platypus::TimeDomainProblem *>("Problem"))
 {
 }
 

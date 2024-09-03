@@ -9,7 +9,7 @@ class SteadyExecutioner : public Executioner
 {
 public:
   SteadyExecutioner() = default;
-  explicit SteadyExecutioner(const platypus::InputParameters & params);
+  explicit SteadyExecutioner(const InputParameters & params);
 
   void Solve() const override;
 
