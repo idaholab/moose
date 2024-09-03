@@ -846,8 +846,8 @@ WCNSFVFlowPhysics::addINSInletBC()
 {
   // Check the size of the BC parameters
   unsigned int num_velocity_functor_inlets = 0;
-  for (const auto & [bdy, momentum_outlet_type] : _momentum_inlet_types)
-    if (momentum_outlet_type == "fixed-velocity" || momentum_outlet_type == "fixed-pressure")
+  for (const auto & [bdy, momentum_inlet_type] : _momentum_inlet_types)
+    if (momentum_inlet_type == "fixed-velocity" || momentum_inlet_type == "fixed-pressure")
       num_velocity_functor_inlets++;
 
   if (num_velocity_functor_inlets != _momentum_inlet_functors.size())
@@ -1057,7 +1057,12 @@ WCNSFVFlowPhysics::addInletBoundary(const BoundaryName & boundary_name,
 {
   _inlet_boundaries.push_back(boundary_name);
   _momentum_inlet_types.insert(std::make_pair(boundary_name, inlet_type));
-  _momentum_inlet_functors[boundary_name] = std::vector<MooseFunctorName>({inlet_functor, 0, 0});
+  if (inlet_type == "fixed-velocity" || inlet_type == "fixed-pressure")
+    _momentum_inlet_functors[boundary_name] =
+        std::vector<MooseFunctorName>({inlet_functor, "0", "0"});
+  else
+    // if inlet_functor is not a postprocessor, this will be caught when creating the BC
+    _flux_inlet_pps.push_back(inlet_functor);
 }
 
 void
@@ -1344,9 +1349,6 @@ WCNSFVFlowPhysics::addRhieChowUserObjects()
 {
   mooseAssert(dimension(), "0-dimension not supported");
 
-  // This means we are solving for velocity. We dont need external RC coefficients
-  bool has_flow_equations = nonlinearVariableExists(_velocity_names[0], false);
-
   // First make sure that we only add this object once
   // Potential cases:
   // - there is a flow physics, and an advection one (UO should be added by one)
@@ -1395,7 +1397,7 @@ WCNSFVFlowPhysics::addRhieChowUserObjects()
     params.set<unsigned short>("smoothing_layers") = smoothing_layers;
   }
 
-  if (!has_flow_equations)
+  if (!_has_flow_equations)
   {
     checkRhieChowFunctorsDefined();
     params.set<MooseFunctorName>("a_u") = "ax";
@@ -1404,6 +1406,7 @@ WCNSFVFlowPhysics::addRhieChowUserObjects()
   }
 
   params.applySpecificParameters(parameters(), INSFVRhieChowInterpolator::listOfCommonParams());
+  params.set<unsigned int>("dimension") = dimension();
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }
 

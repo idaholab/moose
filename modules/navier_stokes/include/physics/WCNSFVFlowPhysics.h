@@ -67,15 +67,17 @@ public:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
 protected:
-  void initializePhysicsAdditional() override;
-  void actOnAdditionalTasks() override;
+  virtual void initializePhysicsAdditional() override;
+  virtual void actOnAdditionalTasks() override;
 
   // Used by derived THMWCNSFVFlowPhysics
   // TODO: make sure list is minimal
-  void addNonlinearVariables() override;
-  void addInitialConditions() override;
-  void addMaterials() override;
-  void addUserObjects() override;
+  virtual void addNonlinearVariables() override;
+  virtual void addInitialConditions() override;
+  virtual void addFVKernels() override;
+  virtual void addFVBCs() override;
+  virtual void addMaterials() override;
+  virtual void addUserObjects() override;
 
   /*
    * Add an inlet
@@ -98,8 +100,6 @@ protected:
                          const MooseFunctorName & outlet_functor);
 
 private:
-  void addFVKernels() override;
-  void addFVBCs() override;
   void addCorrectors() override;
   void addPostprocessors() override;
 
