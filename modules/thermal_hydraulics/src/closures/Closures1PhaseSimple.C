@@ -49,8 +49,7 @@ Closures1PhaseSimple::checkHeatTransfer(const HeatTransferBase & heat_transfer,
 void
 Closures1PhaseSimple::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
 {
-  const FlowChannel1Phase & flow_channel_1phase =
-      dynamic_cast<const FlowChannel1Phase &>(flow_channel);
+  const FlowChannelBase & flow_channel_1phase = dynamic_cast<const FlowChannelBase &>(flow_channel);
 
   // wall friction material
   addWallFrictionFunctionMaterial(flow_channel_1phase);
@@ -61,7 +60,7 @@ Closures1PhaseSimple::addMooseObjectsFlowChannel(const FlowChannelBase & flow_ch
     // wall heat transfer coefficient material
     if (n_ht_connections > 1)
       addWeightedAverageMaterial(flow_channel_1phase,
-                                 flow_channel_1phase.getWallHTCNames1Phase(),
+                                 flow_channel_1phase.getWallHeatTransferCoefficientNames(),
                                  flow_channel_1phase.getHeatedPerimeterNames(),
                                  FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL);
 
@@ -105,7 +104,7 @@ Closures1PhaseSimple::addMooseObjectsHeatTransfer(const HeatTransferBase & heat_
 
 void
 Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(
-    const FlowChannel1Phase & flow_channel) const
+    const FlowChannelBase & flow_channel) const
 {
   const std::string class_name = "ADTemperatureWall3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);

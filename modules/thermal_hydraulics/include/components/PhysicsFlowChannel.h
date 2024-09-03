@@ -27,11 +27,13 @@ public:
 
   virtual void addMooseObjects() override;
 
-  /**
-   * Gets 1-phase wall heat transfer coefficient names for connected heat transfers
-   */
-  std::vector<MaterialPropertyName> getWallHTCNames1Phase() const { return _Hw_1phase_names; }
+  /// Get the wall heat transfer coefficient
+  virtual const std::vector<MaterialPropertyName> & getWallHeatTransferCoefficientNames() const override
+  {
+    return _Hw_names;
+  }
 
+  // TODO Update
   virtual const THM::FlowModelID & getFlowModelID() const override { return THM::FM_SINGLE_PHASE; }
 
   /**
@@ -59,8 +61,8 @@ protected:
    */
   virtual void getHeatTransferVariableNames() override;
 
-  /// 1-phase wall heat transfer coefficient names for connected heat transfers
-  std::vector<MaterialPropertyName> _Hw_1phase_names;
+  /// Wall heat transfer coefficient names for connected heat transfers
+  std::vector<MaterialPropertyName> _Hw_names;
 
   /// Numerical flux user object name
   const UserObjectName _numerical_flux_name;

@@ -280,6 +280,7 @@ FlowChannelBase::addCommonObjects()
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<std::vector<VariableName>>("v") = {FlowModel::AREA_LINEAR};
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
+      params.set<bool>("warn_projection_loss") = false;
       const std::string aux_kernel_name = genName(name(), "area_aux");
       getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
       makeFunctionControllableIfConstant(_area_function, "Area");
