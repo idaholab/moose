@@ -82,14 +82,24 @@
   []  
 []
 
+[Preconditioner]
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+  []
+[]
+
+[Solver]
+  type = MFEMHypreGMRES
+  preconditioner = boomeramg
+  l_tol = 1e-16
+  l_max_its = 1000  
+[]
+
 [Executioner]
   type = Transient
   dt = 0.25
   start_time = 0.0
   end_time = 1.0
-
-  l_tol = 1e-16
-  l_max_its = 1000
 []
 
 [Outputs]
