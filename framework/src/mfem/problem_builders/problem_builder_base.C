@@ -20,48 +20,6 @@ ProblemBuilder::SetMesh(std::shared_ptr<mfem::ParMesh> pmesh)
 }
 
 void
-ProblemBuilder::SetFESpaces(platypus::FESpaces & fespaces)
-{
-  GetProblem()->_fespaces = fespaces;
-}
-
-void
-ProblemBuilder::SetGridFunctions(platypus::GridFunctions & gridfunctions)
-{
-  GetProblem()->_gridfunctions = gridfunctions;
-}
-
-void
-ProblemBuilder::SetBoundaryConditions(platypus::BCMap & bc_map)
-{
-  GetProblem()->_bc_map = bc_map;
-}
-
-void
-ProblemBuilder::SetOutputs(platypus::Outputs & outputs)
-{
-  GetProblem()->_outputs = outputs;
-}
-
-void
-ProblemBuilder::SetSolverOptions(platypus::InputParameters & solver_options)
-{
-  GetProblem()->_solver_options = solver_options;
-}
-
-void
-ProblemBuilder::SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner)
-{
-  GetProblem()->_jacobian_preconditioner = preconditioner;
-}
-
-void
-ProblemBuilder::SetJacobianSolver(std::shared_ptr<mfem::Solver> jacobian_solver)
-{
-  GetProblem()->_jacobian_solver = jacobian_solver;
-}
-
-void
 ProblemBuilder::SetCoefficients(platypus::Coefficients & coefficients)
 {
   GetProblem()->_coefficients = coefficients;
@@ -145,113 +103,6 @@ ProblemBuilder::AddBoundaryCondition(std::string bc_name,
 }
 
 void
-ProblemBuilder::ConstructJacobianPreconditioner()
-{
-  auto precond = std::make_shared<mfem::HypreBoomerAMG>();
-  precond->SetPrintLevel(2); // GetGlobalPrintLevel());
-
-  GetProblem()->_jacobian_preconditioner = precond;
-}
-
-void
-ProblemBuilder::ConstructJacobianSolver()
-{
-  ConstructJacobianSolverWithOptions(SolverType::HYPRE_GMRES);
-}
-
-void
-ProblemBuilder::ConstructJacobianSolverWithOptions(SolverType type, SolverParams default_params)
-{
-  const auto & solver_options = GetProblem()->_solver_options;
-
-  const auto tolerance =
-      solver_options.GetOptionalParam<float>("Tolerance", default_params._tolerance);
-  const auto abs_tolerance =
-      solver_options.GetOptionalParam<float>("AbsTolerance", default_params._abs_tolerance);
-  const auto max_iter =
-      solver_options.GetOptionalParam<unsigned int>("MaxIter", default_params._max_iteration);
-  const auto print_level =
-      solver_options.GetOptionalParam<int>("PrintLevel", default_params._print_level);
-  const auto k_dim = solver_options.GetOptionalParam<unsigned int>("KDim", default_params._k_dim);
-
-  auto preconditioner =
-      std::dynamic_pointer_cast<mfem::HypreSolver>(GetProblem()->_jacobian_preconditioner);
-
-  switch (type)
-  {
-    case SolverType::HYPRE_PCG:
-    {
-      auto solver = std::make_shared<mfem::HyprePCG>(GetProblem()->_comm);
-
-      solver->SetTol(tolerance);
-      solver->SetAbsTol(abs_tolerance);
-      solver->SetMaxIter(max_iter);
-      solver->SetPrintLevel(print_level);
-
-      if (preconditioner)
-        solver->SetPreconditioner(*preconditioner);
-
-      GetProblem()->_jacobian_solver = solver;
-      break;
-    }
-    case SolverType::HYPRE_GMRES:
-    {
-      auto solver = std::make_shared<mfem::HypreGMRES>(GetProblem()->_comm);
-
-      solver->SetTol(tolerance);
-      solver->SetAbsTol(abs_tolerance);
-      solver->SetMaxIter(max_iter);
-      solver->SetKDim(k_dim);
-      solver->SetPrintLevel(print_level);
-
-      if (preconditioner)
-        solver->SetPreconditioner(*preconditioner);
-
-      GetProblem()->_jacobian_solver = solver;
-      break;
-    }
-    case SolverType::HYPRE_FGMRES:
-    {
-      auto solver = std::make_shared<mfem::HypreFGMRES>(GetProblem()->_comm);
-
-      solver->SetTol(tolerance);
-      solver->SetMaxIter(max_iter);
-      solver->SetKDim(k_dim);
-      solver->SetPrintLevel(print_level);
-
-      if (preconditioner)
-        solver->SetPreconditioner(*preconditioner);
-
-      GetProblem()->_jacobian_solver = solver;
-      break;
-    }
-    case SolverType::HYPRE_AMG:
-    {
-      auto solver = std::make_shared<mfem::HypreBoomerAMG>();
-
-      solver->SetTol(tolerance);
-      solver->SetMaxIter(max_iter);
-      solver->SetPrintLevel(print_level);
-
-      GetProblem()->_jacobian_solver = solver;
-      break;
-    }
-    case SolverType::SUPER_LU:
-    {
-      auto solver = std::make_shared<platypus::SuperLUSolver>(GetProblem()->_comm);
-
-      GetProblem()->_jacobian_solver = solver;
-      break;
-    }
-    default:
-    {
-      MFEM_ABORT("Unsupported solver type specified.");
-      break;
-    }
-  }
-}
-
-void
 ProblemBuilder::ConstructNonlinearSolver()
 {
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(GetProblem()->_comm);
@@ -290,8 +141,6 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
   InitializeKernels();
   SetOperatorGridFunctions();
 
-  ConstructJacobianPreconditioner();
-  ConstructJacobianSolver();
   ConstructNonlinearSolver();
 
   ConstructState();

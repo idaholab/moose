@@ -14,6 +14,7 @@
 #include "MFEMFormulation.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
+#include "MFEMSolverBase.h"
 #include "Function.h"
 #include "MooseEnum.h"
 #include "SystemBase.h"
@@ -111,6 +112,20 @@ public:
   void addKernel(const std::string & kernel_name,
                  const std::string & name,
                  InputParameters & parameters) override;
+
+  /**
+   * Method called in AddMFEMPreconditionerAction which will create the solver.
+   */
+  void addMFEMPreconditioner(const std::string & user_object_name,
+                             const std::string & name,
+                             InputParameters & parameters);
+
+  /**
+   * Method called in AddMFEMSolverAction which will create the solver.
+   */
+  void addMFEMSolver(const std::string & user_object_name,
+                     const std::string & name,
+                     InputParameters & parameters);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.

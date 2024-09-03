@@ -56,13 +56,6 @@ public:
   virtual ~ProblemBuilder() = default;
 
   void SetMesh(std::shared_ptr<mfem::ParMesh> pmesh);
-  void SetFESpaces(platypus::FESpaces & fespaces);
-  void SetGridFunctions(platypus::GridFunctions & gridfunctions);
-  void SetBoundaryConditions(platypus::BCMap & bc_map);
-  void SetOutputs(platypus::Outputs & outputs);
-  void SetSolverOptions(platypus::InputParameters & solver_options);
-  void SetJacobianPreconditioner(std::shared_ptr<mfem::Solver> preconditioner);
-  void SetJacobianSolver(std::shared_ptr<mfem::Solver> solver);
   void SetCoefficients(platypus::Coefficients & coefficients);
   void SetDevice(const std::string & dev);
 
@@ -79,8 +72,6 @@ public:
   virtual void RegisterCoefficients() = 0;
 
   virtual void SetOperatorGridFunctions() = 0;
-  virtual void ConstructJacobianPreconditioner();
-  virtual void ConstructJacobianSolver();
   virtual void ConstructNonlinearSolver();
   virtual void ConstructOperator() = 0;
   virtual void ConstructState() = 0;
@@ -127,16 +118,6 @@ protected:
     int _print_level;
     int _k_dim;
   };
-
-  /// Called in @a ConstructJacobianSolver. This will create a solver of the chosen type and use the user's input
-  /// parameters if they have been provided.
-  void ConstructJacobianSolverWithOptions(SolverType type,
-                                          SolverParams default_params = {
-                                              ._tolerance = 1e-16,
-                                              ._abs_tolerance = 1e-16,
-                                              ._max_iteration = 1000,
-                                              ._print_level = 2, // GetGlobalPrintLevel(),
-                                              ._k_dim = 10});
 
   /// Overridden in derived classes.
   [[nodiscard]] virtual platypus::Problem * GetProblem() const = 0;
