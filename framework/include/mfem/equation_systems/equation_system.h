@@ -1,7 +1,7 @@
 #pragma once
 #include "../common/pfem_extras.hpp"
 #include "inputs.h"
-#include "named_fields_map.h"
+#include "MFEMContainers.h"
 #include "MFEMKernel.h"
 
 namespace platypus
