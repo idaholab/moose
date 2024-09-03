@@ -170,10 +170,7 @@ protected:
   mfem::Device _device;
 
   platypus::PropertyManager _properties;
-  platypus::InputParameters _solver_options;
   platypus::Outputs _outputs;
-  platypus::InputParameters _exec_params;
-
   std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
 
   std::shared_ptr<platypus::Problem> mfem_problem{nullptr};
