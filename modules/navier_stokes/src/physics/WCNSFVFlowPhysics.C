@@ -886,6 +886,26 @@ WCNSFVFlowPhysics::addINSOutletBC()
 }
 
 void
+WCNSFVFlowPhysics::addInletBoundary(const BoundaryName & boundary_name,
+                                    const MooseEnum & inlet_type,
+                                    const MooseFunctorName & inlet_functor)
+{
+  _inlet_boundaries.push_back(boundary_name);
+  _momentum_inlet_types.insert(std::make_pair(boundary_name, inlet_type));
+  _momentum_inlet_functors[boundary_name] = std::vector<MooseFunctorName>({inlet_functor, 0, 0});
+}
+
+void
+WCNSFVFlowPhysics::addOutletBoundary(const BoundaryName & boundary_name,
+                                     const MooseEnum & outlet_type,
+                                     const MooseFunctorName & outlet_functor)
+{
+  _outlet_boundaries.push_back(boundary_name);
+  _momentum_outlet_types.insert(std::make_pair(boundary_name, outlet_type));
+  _pressure_functors[boundary_name] = outlet_functor;
+}
+
+void
 WCNSFVFlowPhysics::addINSWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};

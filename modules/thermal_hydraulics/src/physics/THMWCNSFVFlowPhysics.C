@@ -180,6 +180,7 @@ THMWCNSFVFlowPhysics::addAuxiliaryKernels()
 void
 THMWCNSFVFlowPhysics::addInletBoundaries()
 {
+  // Fill in the data structures used by WCNSFVFlowPhysics to represent the boundary conditions
   for (const auto i : index_range(_inlet_components))
   {
     // Get component, which has reference to the controllable parameters
@@ -187,20 +188,18 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
     UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _inlet_types[i];
-
-    // Boundary fluxes should be updated as often as possible
-    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+    MooseEnum flux_mass("flux-mass", "flux-mass");
 
     if (boundary_type == InletTypeEnum::MdotTemperature)
-    {
-    }
+      for (const auto & boundary_name : comp.getBoundaryNames())
+        addInletBoundary(boundary_name, flux_mass, std::to_string(comp.getParam<Real>("mdot")));
   }
 }
 
 void
 THMWCNSFVFlowPhysics::addOutletBoundaries()
 {
+  // Fill in the data structures used by WCNSFVFlowPhysics to represent the boundary conditions
   for (const auto i : index_range(_outlet_components))
   {
     // Get component, which has reference to the controllable parameters
@@ -208,13 +207,12 @@ THMWCNSFVFlowPhysics::addOutletBoundaries()
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
     UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _outlet_types[i];
-
-    // Boundary fluxes should be updated as often as possible
-    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+    MooseEnum fixed_pressure("fixed-pressure", "fixed-pressure");
 
     if (boundary_type == OutletTypeEnum::FixedPressure)
     {
+      for (const auto & boundary_name : comp.getBoundaryNames())
+        addOutletBoundary(boundary_name, fixed_pressure, std::to_string(comp.getParam<Real>("p")));
     }
   }
 }
