@@ -832,7 +832,7 @@ MooseApp::setupOptions()
       _ready_to_exit = true;
     }
     else
-      mooseError("Invalid search parameter ", param_search);
+      mooseError("Search parameter '", param_search, "' was not found in the registered syntax.");
   }
   else if (isParamValid("registry"))
   {
