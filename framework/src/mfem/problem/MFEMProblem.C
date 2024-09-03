@@ -21,8 +21,7 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
   : ExternalProblem(params),
     _input_mesh(_mesh.parameters().get<MeshFileName>("file")),
     _coefficients(),
-    _outputs(),
-    _exec_params()
+    _outputs()
 {
 }
 
@@ -62,7 +61,7 @@ MFEMProblem::initialSetup()
   // NB: set to false to avoid reconstructing problem operator.
   mfem_problem_builder->FinalizeProblem(false);
 
-  platypus::InputParameters exec_params;
+  InputParameters exec_params = MooseApp::validParams();
 
   Transient * _moose_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
   if (_moose_executioner != nullptr)
@@ -74,11 +73,12 @@ MFEMProblem::initialSetup()
       mooseError("Specified formulation does not support Transient executioners");
     }
 
-    exec_params.SetParam("StartTime", float(_moose_executioner->getStartTime()));
-    exec_params.SetParam("TimeStep", float(dt()));
-    exec_params.SetParam("EndTime", float(_moose_executioner->endTime()));
-    exec_params.SetParam("VisualisationSteps", getParam<int>("vis_steps"));
-    exec_params.SetParam("Problem", static_cast<platypus::TimeDomainProblem *>(mfem_problem.get()));
+    exec_params.set<float>("StartTime") = float(_moose_executioner->getStartTime());
+    exec_params.set<float>("TimeStep") = float(dt());
+    exec_params.set<float>("EndTime") = float(_moose_executioner->endTime());
+    exec_params.set<int>("VisualisationSteps") = getParam<int>("vis_steps");
+    exec_params.set<platypus::TimeDomainProblem *>("Problem") =
+        static_cast<platypus::TimeDomainProblem *>(mfem_problem.get());
 
     executioner = std::make_unique<platypus::TransientExecutioner>(exec_params);
   }
@@ -91,8 +91,8 @@ MFEMProblem::initialSetup()
       mooseError("Specified formulation does not support Steady executioners");
     }
 
-    exec_params.SetParam("Problem",
-                         static_cast<platypus::SteadyStateProblem *>(mfem_problem.get()));
+    exec_params.set<platypus::SteadyStateProblem *>("Problem") =
+        static_cast<platypus::SteadyStateProblem *>(mfem_problem.get());
 
     executioner = std::make_unique<platypus::SteadyExecutioner>(exec_params);
   }
