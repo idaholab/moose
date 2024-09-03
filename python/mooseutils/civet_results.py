@@ -69,7 +69,10 @@ def _get_remote_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=
     info = list()
     for sha1 in hashes:
         url = '{}/sha_events/{}/{}'.format(site, repo, sha1)
-        pid = urllib.request.urlopen(url)
+        try:
+            pid = urllib.request.urlopen(url)
+        except urllib.error.HTTPError as e:
+            raise Exception(f'Failed to request {url}: {e}')
 
         page = pid.read().decode('utf8')
         for match in JOB_RE.finditer(page):
