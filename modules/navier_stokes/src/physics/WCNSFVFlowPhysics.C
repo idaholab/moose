@@ -87,10 +87,8 @@ WCNSFVFlowPhysics::validParams()
 }
 
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
-  : WCNSFVFlowPhysicsBase(parameters),
-    _porosity_smoothing_layers(isParamValid("porosity_smoothing_layers")
-                                   ? getParam<unsigned short>("porosity_smoothing_layers")
-                                   : 0),
+  : PhysicsBase(parameters),
+    WCNSFVFlowPhysicsBase(parameters),
     _friction_blocks(getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")),
     _friction_types(getParam<std::vector<std::vector<std::string>>>("friction_types")),
     _friction_coeffs(getParam<std::vector<std::vector<std::string>>>("friction_coeffs"))

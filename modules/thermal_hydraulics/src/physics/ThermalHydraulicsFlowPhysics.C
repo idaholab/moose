@@ -53,10 +53,18 @@ ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters
 void
 ThermalHydraulicsFlowPhysics::initializePhysicsAdditional()
 {
+  // Force a 1D dimension. THM implementations are only 1D
+  if (dimension() > 1)
+    mooseInfo("Lowering Physics dimension from '" + std::to_string(dimension()) +
+              "' to 1, as the thermal hydraulics flow physics only support 1-dimensional problems");
+  setDimension(1);
+
   // Retrieve the problem
   _sim = dynamic_cast<THMProblem *>(&getProblem());
-
   _fe_type = _sim->getFlowFEType();
+
+  // Check the user input channel
+  // TODO: add the channels to the Physics from the channels
   for (const auto & channel_name : getParam<std::vector<std::string>>("flow_channels"))
   {
     if (_sim->hasComponentOfType<FlowChannelBase>(channel_name))

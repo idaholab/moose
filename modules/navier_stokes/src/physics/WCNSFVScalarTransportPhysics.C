@@ -27,7 +27,9 @@ WCNSFVScalarTransportPhysics::validParams()
 }
 
 WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters & parameters)
-  : WCNSFVScalarTransportPhysicsBase(parameters)
+  : PhysicsBase(parameters),
+    WCNSFVScalarTransportPhysicsBase(parameters)
+    WCNSFVCoupledAdvectionPhysicsHelper(this)
 {
 }
 

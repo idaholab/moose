@@ -31,7 +31,7 @@ class FlowChannelBase;
 /**
  * Provides functions to setup the flow model.  Should be used by components that has flow in them
  */
-class ThermalHydraulicsFlowPhysics : public PhysicsBase, public NamingInterface
+class ThermalHydraulicsFlowPhysics : public virtual PhysicsBase, public NamingInterface
 {
 public:
   ThermalHydraulicsFlowPhysics(const InputParameters & params);

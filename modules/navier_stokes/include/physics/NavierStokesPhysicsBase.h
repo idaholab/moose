@@ -20,7 +20,7 @@
  * Navier Stokes-based equations (WCNSFV)
  * Includes incompressible flow (INSFV).
  */
-class NavierStokesPhysicsBase : public PhysicsBase
+class NavierStokesPhysicsBase : public virtual PhysicsBase
 {
 public:
   static InputParameters validParams();

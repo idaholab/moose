@@ -62,7 +62,8 @@ THMVACESinglePhaseFlowPhysics::validParams()
 }
 
 THMVACESinglePhaseFlowPhysics::THMVACESinglePhaseFlowPhysics(const InputParameters & params)
-  : ThermalHydraulicsFlowPhysics(params),
+  : PhysicsBase(params),
+    ThermalHydraulicsFlowPhysics(params),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
     _numerical_flux_name(prefix() + "VACE_uo"),
     _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase"))

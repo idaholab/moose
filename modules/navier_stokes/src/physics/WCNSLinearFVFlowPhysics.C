@@ -53,7 +53,8 @@ WCNSLinearFVFlowPhysics::validParams()
 }
 
 WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & parameters)
-  : WCNSFVFlowPhysicsBase(parameters),
+  : PhysicsBase(parameters),
+    WCNSFVFlowPhysicsBase(parameters),
     _non_orthogonal_correction(getParam<bool>("orthogonality_correction"))
 {
   if (_porous_medium_treatment)

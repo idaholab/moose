@@ -29,11 +29,28 @@ public:
   /// Return the number of algebraic ghosting layers needed
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
+<<<<<<< HEAD
 private:
   virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
   virtual void addUserObjects() override;
   virtual void addCorrectors() override;
+=======
+protected:
+  void initializePhysicsAdditional() override;
+  void actOnAdditionalTasks() override;
+
+  void addNonlinearVariables() override;
+  void addInitialConditions() override;
+  void addMaterials() override;
+  void addUserObjects() override;
+
+private:
+  void addFVKernels() override;
+  void addFVBCs() override;
+  void addCorrectors() override;
+  void addPostprocessors() override;
+>>>>>>> c0ac93e76f (Switch to virtual inheritance for physics to allow a physics to derive both from THM & NS physics)
 
   /// Function adding kernels for the incompressible continuity equation
   void addINSMassKernels();
