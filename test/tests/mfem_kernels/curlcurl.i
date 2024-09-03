@@ -98,9 +98,21 @@
   []    
 []
 
+[Preconditioner]
+  [ams]
+    type = MFEMHypreAMS
+    fespace = HCurlFESpace
+  []
+[]
+
+[Solver]
+  type = MFEMHypreGMRES
+  preconditioner = ams
+  l_tol = 1e-6  
+[]
+
 [Executioner]
   type = Steady
-  l_tol = 1e-6
 []
 
 [Outputs]
