@@ -364,6 +364,7 @@ THMVACESinglePhaseFlowPhysics::addFEKernels()
       params.set<MaterialPropertyName>("f_D") = FRICTION_FACTOR_DARCY;
       _sim->addKernel(class_name, genName(comp_name, "rhou_friction"), params);
     }
+    if (_gravity_vector.norm() > 0)
     {
       std::string class_name = "ADOneD3EqnMomentumGravity";
       InputParameters params = _factory.getValidParams(class_name);
