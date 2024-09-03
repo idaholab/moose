@@ -683,8 +683,8 @@ WCNSFVFlowPhysics::addINSInletBC()
 {
   // Check the size of the BC parameters
   unsigned int num_velocity_functor_inlets = 0;
-  for (const auto & [bdy, momentum_outlet_type] : _momentum_inlet_types)
-    if (momentum_outlet_type == "fixed-velocity" || momentum_outlet_type == "fixed-pressure")
+  for (const auto & [bdy, momentum_inlet_type] : _momentum_inlet_types)
+    if (momentum_inlet_type == "fixed-velocity" || momentum_inlet_type == "fixed-pressure")
       num_velocity_functor_inlets++;
 
   if (num_velocity_functor_inlets != _momentum_inlet_functors.size())
@@ -894,7 +894,12 @@ WCNSFVFlowPhysics::addInletBoundary(const BoundaryName & boundary_name,
 {
   _inlet_boundaries.push_back(boundary_name);
   _momentum_inlet_types.insert(std::make_pair(boundary_name, inlet_type));
-  _momentum_inlet_functors[boundary_name] = std::vector<MooseFunctorName>({inlet_functor, 0, 0});
+  if (inlet_type == "fixed-velocity" || inlet_type == "fixed-pressure")
+    _momentum_inlet_functors[boundary_name] =
+        std::vector<MooseFunctorName>({inlet_functor, "0", "0"});
+  else
+    // if inlet_functor is not a postprocessor, this will be caught when creating the BC
+    _flux_inlet_pps.push_back(inlet_functor);
 }
 
 void
@@ -1162,6 +1167,7 @@ WCNSFVFlowPhysics::addRhieChowUserObjects()
   }
 
   params.applySpecificParameters(parameters(), INSFVRhieChowInterpolator::listOfCommonParams());
+  params.set<unsigned int>("dimension") = dimension();
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }
 
