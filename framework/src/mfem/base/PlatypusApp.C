@@ -57,14 +57,14 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // add preconditioning.
   registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
-  addTaskDependency("add_mfem_preconditioner", "add_mfem_formulation");
+  addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_builder");
   addTaskDependency("add_mfem_preconditioner", "add_variable");
 
   // add solver.
   registerMooseObjectTask("add_mfem_solver", MFEMSolverBase, true);
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
   addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
-  addTaskDependency("add_mfem_solver", "add_mfem_formulation");
+  addTaskDependency("add_mfem_solver", "add_mfem_problem_builder");
 }
 
 void
