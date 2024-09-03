@@ -10,7 +10,6 @@ MFEMHypreFGMRES::validParams()
   InputParameters params = MFEMSolverBase::validParams();
 
   params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
-  params.addParam<double>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("kdim", 10, "Set the k-dimension.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
