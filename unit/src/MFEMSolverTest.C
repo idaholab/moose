@@ -14,56 +14,22 @@ public:
   static double uexact(const mfem::Vector & x)
   {
     double u;
-    switch (x.Size())
-    {
-      case 1:
-        u = 3.0 + 2.0 * x(0) - 0.5 * x(0) * x(0);
-        break;
-      case 2:
-        u = 1.0 + 0.2 * x(0) - 0.9 * x(0) * x(1) + x(1) * x(1) * x(0);
-        break;
-      default:
-        u = x(2) * x(2) * x(2) - 5.0 * x(0) * x(0) * x(1) * x(2);
-        break;
-    }
+    u = x(2) * x(2) * x(2) - 5.0 * x(0) * x(0) * x(1) * x(2);
     return u;
   }
 
   static void gradexact(const mfem::Vector & x, mfem::Vector & grad)
   {
     grad.SetSize(x.Size());
-    switch (x.Size())
-    {
-      case 1:
-        grad[0] = 2.0 - x(0);
-        break;
-      case 2:
-        grad[0] = 0.2 - 0.9 * x(1) + x(1) * x(1);
-        grad[1] = -0.9 * x(0) + 2.0 * x(0) * x(1);
-        break;
-      default:
-        grad[0] = -10.0 * x(0) * x(1) * x(2);
-        grad[1] = -5.0 * x(0) * x(0) * x(2);
-        grad[2] = 3.0 * x(2) * x(2) - 5.0 * x(0) * x(0) * x(1);
-        break;
-    }
+    grad[0] = -10.0 * x(0) * x(1) * x(2);
+    grad[1] = -5.0 * x(0) * x(0) * x(2);
+    grad[2] = 3.0 * x(2) * x(2) - 5.0 * x(0) * x(0) * x(1);
   }
 
   static double d2uexact(const mfem::Vector & x) // returns \Delta u
   {
     double d2u;
-    switch (x.Size())
-    {
-      case 1:
-        d2u = -1.0;
-        break;
-      case 2:
-        d2u = 2.0 * x(0);
-        break;
-      default:
-        d2u = -10.0 * x(1) * x(2) + 6.0 * x(2);
-        break;
-    }
+    d2u = -10.0 * x(1) * x(2) + 6.0 * x(2);
     return d2u;
   }
 
