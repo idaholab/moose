@@ -1,0 +1,15 @@
+[Tests]
+  design = 'PhysicsFlowChannel.md'
+  issues = '#'
+
+  [physics]
+    requirement = 'The system shall simulate a single-phase flow channel'
+
+    [single_channel]
+      type = Exodiff
+      input = 'vace_single_channel.i'
+      exodiff = 'vace_single_channel_out.e'
+      detail = 'using the Physics syntax for the variable area compressible Euler equation for a single channel problem.'
+    []
+  []
+[]
