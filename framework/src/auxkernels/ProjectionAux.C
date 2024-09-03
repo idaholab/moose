@@ -31,6 +31,14 @@ ProjectionAux::validParams()
   // Technically possible to project from nodal to elemental and back
   params.set<bool>("_allow_nodal_to_elemental_coupling") = true;
 
+  // To silence the warning in the THM use case
+  params.addParam<bool>(
+      "warn_projection_loss",
+      true,
+      "Whether to warn the user about the clear projection error from lowering "
+      "the polynomial order. Projection error can occur even with matching orders.");
+  params.addParamNamesToGroup("warn_projection_loss", "Advanced");
+
   // We need some ghosting for all elemental to nodal projections
   params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
   params.addRelationshipManager("ElementPointNeighborLayers",
@@ -52,14 +60,16 @@ ProjectionAux::ProjectionAux(const InputParameters & parameters)
     _source_sys(_c_fe_problem.getSystem(coupledName("v"))),
     _use_block_restriction_for_source(getParam<bool>("use_block_restriction_for_source"))
 {
-  // Output some messages to user
-  if (_source_variable.order() > _var.order())
-    mooseInfo("Projection lowers order, please expect a loss of accuracy");
   // Check the dimension of the block restriction
   for (const auto & sub_id : blockIDs())
     if (_mesh.isLowerD(sub_id))
       paramError("block",
                  "ProjectionAux's block restriction must not include lower dimensional blocks");
+  // Warn user, unless set not to
+  if (_source_variable.order() > _var.order() && getParam<bool>("warn_projection_loss"))
+    mooseInfo("Projection of variable '" + _source_variable.name() + "' onto variable '" +
+              _var.name() +
+              "' lowers polynomial order of variable , please expect a loss of accuracy");
 }
 
 Real
