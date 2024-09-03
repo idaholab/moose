@@ -9,6 +9,7 @@
 
 #include "THMProblem.h"
 #include "AddPostprocessorAction.h"
+#include "libmesh/string_to_enum.h"
 
 registerMooseObject("ThermalHydraulicsApp", THMProblem);
 
@@ -72,4 +73,20 @@ THMProblem::hasPostprocessor(const std::string & name) const
       return true;
 
   return false;
+}
+
+void
+THMProblem::addVariable(const std::string & var_type,
+                        const std::string & var_name,
+                        InputParameters & params)
+{
+  // the libmesh and MooseEnum better stay in sync
+  FEType fe_type;
+  fe_type.family = Utility::string_to_enum<FEFamily>(std::string(params.get<MooseEnum>("family")));
+  fe_type.order = int(params.get<MooseEnum>("order"));
+  addSimVariable(true,
+                 var_name,
+                 fe_type,
+                 params.get<std::vector<SubdomainName>>("blocks"),
+                 params.get<Real>("scaling"));
 }
