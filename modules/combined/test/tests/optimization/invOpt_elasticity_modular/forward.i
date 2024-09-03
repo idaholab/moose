@@ -114,7 +114,7 @@
   [parametrization]
     type = ConstantReporter
     real_vector_names = 'coordx coordy youngs_modulus'
-    real_vector_values = '0 1 2; 0 1 2; 7.5 7.5 7.5'
+    real_vector_values = '0 0 0; ${fparse 8/3} 0 ${fparse -8/3}; 5 5 5'
   []
 []
 
