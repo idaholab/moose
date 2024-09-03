@@ -1,4 +1,5 @@
 #include "MFEMMaterial.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMMaterial);
 
@@ -14,6 +15,20 @@ MFEMMaterial::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of blocks (ids or names) that this object will be applied");
   return params;
+}
+
+std::vector<std::string>
+MFEMMaterial::subdomainsToStrings(std::vector<SubdomainName> blocks)
+{
+  std::vector<std::string> result(blocks.size());
+  // FIXME: Is there really no better way to do this conversion? It doesn't seem like it should be
+  // necessary to do the various copies etc. for this.
+  std::transform(blocks.begin(),
+                 blocks.end(),
+                 result.begin(),
+                 // FIXME: How do I pass the string constructor directly?
+                 [](const SubdomainName & x) -> std::string { return std::string(x); });
+  return result;
 }
 
 MFEMMaterial::MFEMMaterial(const InputParameters & parameters)
