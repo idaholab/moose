@@ -18,7 +18,6 @@ public:
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
   platypus::BCMap _bc_map;
-  platypus::PropertyManager & _properties;
   platypus::Coefficients _coefficients;
   platypus::Outputs _outputs;
   platypus::InputParameters _solver_options;
