@@ -1,4 +1,5 @@
 #include "MFEMDiffusionKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMDiffusionKernel);
 

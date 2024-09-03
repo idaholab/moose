@@ -183,14 +183,6 @@ MFEMProblem::addMaterial(const std::string & kernel_name,
 {
   FEProblemBase::addUserObject(kernel_name, name, parameters);
   MFEMMaterial & mfem_material(getUserObject<MFEMMaterial>(name));
-
-  for (unsigned int bid = 0; bid < mfem_material.blocks.size(); ++bid)
-  {
-    int block = std::stoi(mfem_material.blocks[bid]);
-    platypus::Subdomain mfem_subdomain(name, block);
-    mfem_material.storeCoefficients(mfem_subdomain);
-    _coefficients._subdomains.push_back(mfem_subdomain);
-  }
 }
 
 void
