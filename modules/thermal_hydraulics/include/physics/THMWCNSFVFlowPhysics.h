@@ -17,7 +17,7 @@ class PhysicsFlowBoundary;
 /**
  * Sets up the single-phase flow equations using Euler's equations and a RDG discretization
  */
-class THMWCNSFVFlowPhysics : public virtual ThermalHydraulicsFlowPhysics, public virtual WCNSFVFlowPhysics
+class THMWCNSFVFlowPhysics : public ThermalHydraulicsFlowPhysics, public WCNSFVFlowPhysics
 {
 public:
   static InputParameters validParams();
@@ -25,6 +25,7 @@ public:
   THMWCNSFVFlowPhysics(const InputParameters & params);
 
 private:
+  virtual void initializePhysicsAdditional() override;
   virtual void actOnAdditionalTasks() override;
 
   virtual void addNonlinearVariables() override;

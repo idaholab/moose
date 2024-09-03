@@ -57,13 +57,35 @@ THMWCNSFVFlowPhysics::validParams()
   InputParameters params = ThermalHydraulicsFlowPhysics::validParams();
   params += WCNSFVFlowPhysics::validParams();
 
+  // Suppress direct setting of boundary parameters from the physics, since these will be set by
+  // flow boundary components
+  params.suppressParameter<std::vector<BoundaryName>>("inlet_boundaries");
+  params.suppressParameter<std::vector<MooseEnum>>("momentum_inlet_types");
+  params.suppressParameter<std::vector<MooseFunctorName>>("momentum_inlet_functors");
+  params.suppressParameter<std::vector<BoundaryName>>("outlet_boundaries");
+  params.suppressParameter<std::vector<MooseEnum>>("momentum_outlet_types");
+  params.suppressParameter<std::vector<MooseFunctorName>>("pressure_functors");
+  params.suppressParameter<std::vector<BoundaryName>>("wall_boundaries");
+  params.suppressParameter<std::vector<MooseEnum>>("momentum_wall_types");
+  // params.suppressParameter<std::vector<MooseFunctorName>>("momentum_wall_functors");
+
+  // Suppress misc parameters we do not expect we will need
+  params.suppressParameter<bool>("add_flow_equations");
+  params.suppressParameter<PhysicsName>("coupled_turbulence_physics");
+
   return params;
 }
 
 THMWCNSFVFlowPhysics::THMWCNSFVFlowPhysics(const InputParameters & params)
-  : ThermalHydraulicsFlowPhysics(params),
-    WCNSFVFlowPhysics(params)
+  : PhysicsBase(params), ThermalHydraulicsFlowPhysics(params), WCNSFVFlowPhysics(params)
 {
+}
+
+void
+THMWCNSFVFlowPhysics::initializePhysicsAdditional()
+{
+  ThermalHydraulicsFlowPhysics::initializePhysicsAdditional();
+  WCNSFVFlowPhysics::initializePhysicsAdditional();
 }
 
 void
@@ -78,6 +100,8 @@ void
 THMWCNSFVFlowPhysics::addNonlinearVariables()
 {
   ThermalHydraulicsFlowPhysics::addCommonVariables();
+
+  // TODO: can we use this? it does not use the THM problem does it?
   WCNSFVFlowPhysics::addNonlinearVariables();
 }
 
@@ -129,7 +153,6 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
 
     if (boundary_type == InletTypeEnum::MdotTemperature)
     {
-
     }
   }
 }
@@ -151,8 +174,6 @@ THMWCNSFVFlowPhysics::addOutletBoundaries()
 
     if (boundary_type == OutletTypeEnum::FixedPressure)
     {
-
     }
-
   }
 }

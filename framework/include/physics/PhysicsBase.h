@@ -81,6 +81,8 @@ public:
   template <typename T>
   const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
 
+  /// Manually set the dimension of the Physics
+  void setDimension(unsigned int dim) { _dim = dim; }
   /// Return the maximum dimension of the blocks the Physics is active on
   unsigned int dimension() const;
 

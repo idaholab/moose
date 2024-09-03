@@ -125,6 +125,7 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   // Physics
   auto & syntax = s;
   registerSyntax("THMVACESinglePhaseFlowPhysics", "Physics/ThermalHydraulics/VACESinglePhase/*");
+  registerSyntax("THMWCNSFVFlowPhysics", "Physics/ThermalHydraulics/WCNSFV/*");
 }
 
 const std::string &
