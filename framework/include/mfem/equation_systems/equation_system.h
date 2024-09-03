@@ -143,11 +143,6 @@ public:
   TimeDependentEquationSystem();
   ~TimeDependentEquationSystem() override = default;
 
-  static std::string GetTimeDerivativeName(std::string name)
-  {
-    return std::string("d") + name + std::string("_dt");
-  }
-
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 
   virtual void SetTimeStep(double dt);
