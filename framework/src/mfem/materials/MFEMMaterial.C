@@ -17,7 +17,9 @@ MFEMMaterial::validParams()
 }
 
 MFEMMaterial::MFEMMaterial(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters), blocks(getParam<std::vector<SubdomainName>>("block"))
+  : MFEMGeneralUserObject(parameters),
+    _block_ids(getParam<std::vector<SubdomainName>>("block")),
+    _properties(getMFEMProblem().getProperties())
 {
 }
 

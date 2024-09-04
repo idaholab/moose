@@ -15,6 +15,7 @@
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
+#include "PropertyManager.h"
 #include "Function.h"
 #include "MooseEnum.h"
 #include "SystemBase.h"
@@ -134,6 +135,13 @@ public:
    */
   InputParameters addMFEMFESpaceFromMOOSEVariable(InputParameters & moosevar_params);
 
+  /**
+   * Method to get the PropertyManager object for storing material
+   * properties and converting them to MFEM coefficients. This is used
+   * by Material and Kernel classes (among others).
+   */
+  platypus::PropertyManager & getProperties() { return _properties; }
+
   std::string _input_mesh;
   std::string _formulation_name;
   int _order;
@@ -164,6 +172,9 @@ protected:
     }
   }
 
+  mfem::Device _device;
+
+  platypus::PropertyManager _properties;
   platypus::InputParameters _solver_options;
   platypus::Outputs _outputs;
   platypus::InputParameters _exec_params;
