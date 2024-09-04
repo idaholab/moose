@@ -17,14 +17,8 @@ InputParameters
 ThermalHydraulicsFlowPhysics::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
-
-  // Note: suppress this parameter in Physics which should only be added from components
-  params.addParam<std::vector<std::string>>(
-      "flow_channels", {}, "Flow channels on which this Physics is active.");
   params.addRequiredParam<UserObjectName>(
       "fp", "The name of the user object that defines fluid properties");
-  params.addRequiredParam<bool>("output_vector_velocity",
-                                "True if velocity is put out as a vector field.");
   return params;
 }
 
@@ -38,10 +32,7 @@ const std::string ThermalHydraulicsFlowPhysics::UNITY = "unity";
 const std::string ThermalHydraulicsFlowPhysics::DIRECTION = "direction";
 
 ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters & params)
-  : PhysicsBase(params),
-    _fp_name(params.get<UserObjectName>("fp")),
-    _component_names({name()}),
-    _output_vector_velocity(params.get<bool>("output_vector_velocity"))
+  : PhysicsBase(params), _fp_name(params.get<UserObjectName>("fp")), _component_names({})
 {
   // A derived physics must act on those tasks
   addRequiredPhysicsTask("THMPhysics:add_ic");
@@ -62,20 +53,8 @@ ThermalHydraulicsFlowPhysics::initializePhysicsAdditional()
   _sim = dynamic_cast<THMProblem *>(&getProblem());
   _fe_type = _sim->getFlowFEType();
 
-  // Check the user input channel
-  // TODO: add the channels to the Physics from the channels
-  for (const auto & channel_name : getParam<std::vector<std::string>>("flow_channels"))
-  {
-    if (_sim->hasComponentOfType<FlowChannelBase>(channel_name))
-      _flow_channels.push_back(&_sim->getComponentByName<FlowChannelBase>(channel_name));
-    else
-      paramError("flow_channels", "Flow channel '" + channel_name + "' is not of expected type");
-  }
-
   if (_flow_channels.empty())
-    paramError("flow_channels",
-               "Flow channels should be specified as a parameter or the Physics should be added "
-               "from the flow channels");
+    mooseError("The Physics should be added from at least one flow channel");
   _lump_mass_matrix = _flow_channels[0]->getParam<bool>("lump_mass_matrix");
   _gravity_vector = _flow_channels[0]->getParam<RealVectorValue>("gravity_vector");
   _gravity_magnitude = _gravity_vector.norm();
@@ -114,7 +93,7 @@ ThermalHydraulicsFlowPhysics::addCommonInitialConditions()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto comp_name = _component_names[i];
+    const auto & comp_name = _component_names[i];
     if (flow_channel->isParamValid("A") && !_app.isRestarting())
     {
       const std::vector<SubdomainName> & block = flow_channel->getSubdomainNames();
@@ -151,7 +130,7 @@ ThermalHydraulicsFlowPhysics::addCommonMaterials()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto comp_name = _component_names[i];
+    const auto & comp_name = _component_names[i];
     // add material property equal to one, useful for dummy multiplier values
     {
       const std::string class_name = "ConstantMaterial";
@@ -164,6 +143,13 @@ ThermalHydraulicsFlowPhysics::addCommonMaterials()
           class_name, genName(comp_name, ThermalHydraulicsFlowPhysics::UNITY), params);
     }
   }
+}
+
+void
+ThermalHydraulicsFlowPhysics::addFlowChannel(const FlowChannelBase * c_ptr)
+{
+  _flow_channels.push_back(c_ptr);
+  _component_names.push_back(c_ptr->name());
 }
 
 void
