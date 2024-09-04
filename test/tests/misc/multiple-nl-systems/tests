@@ -70,4 +70,14 @@
     issues = '#28331'
     requirement = 'The system shall be able to output postprocessor data after solving multiple solver systems.'
   []
+  [restart]
+    requirement = 'The system shall be able to restart from an exodus file containing multiple nonlinear variables and multiple nonlinear systems'
+    issues = '#26580'
+    [restart_problem]
+      type = Exodiff
+      input = restart_problem.i
+      exodiff = restart_problem_out.e
+      detail = 'using problem_out.e as a starting point, slightly modify the BCs and rerun' 
+    []
+  []
 []
