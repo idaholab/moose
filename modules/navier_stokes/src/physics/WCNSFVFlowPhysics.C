@@ -1010,6 +1010,7 @@ WCNSFVFlowPhysics::addINSOutletBC()
         params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
+        params.set<unsigned int>("dimension") = dimension();
         for (unsigned int i = 0; i < dimension(); ++i)
           params.set<MooseFunctorName>(u_names[i]) = _velocity_names[i];
 
@@ -1042,6 +1043,7 @@ WCNSFVFlowPhysics::addINSOutletBC()
       params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
 
+      params.set<unsigned int>("dimension") = dimension();
       for (const auto d : make_range(dimension()))
         params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
 
@@ -1072,7 +1074,8 @@ WCNSFVFlowPhysics::addOutletBoundary(const BoundaryName & boundary_name,
 {
   _outlet_boundaries.push_back(boundary_name);
   _momentum_outlet_types.insert(std::make_pair(boundary_name, outlet_type));
-  _pressure_functors[boundary_name] = outlet_functor;
+  if (outlet_type == "fixed-pressure" || outlet_type == "fixed-pressure-zero-gradient")
+    _pressure_functors[boundary_name] = outlet_functor;
 }
 
 void
