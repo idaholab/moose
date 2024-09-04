@@ -469,8 +469,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _show_invalid_solution_console(getParam<bool>("show_invalid_solution_console")),
     _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
-    _has_solution_warning(false),
-    _has_invalid_solution(false),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
     _u_dot_requested(false),
@@ -3497,6 +3495,13 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid
   }
 
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
+}
+
+bool
+FEProblemBase::acceptInvalidSolution() const
+{
+  return allowInvalidSolution() || // invalid solutions are always allowed
+         !_app.solutionInvalidity().hasInvalidSolutionError(); // if not allowed, check for errors
 }
 
 void

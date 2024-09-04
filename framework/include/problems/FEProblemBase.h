@@ -35,6 +35,7 @@
 #include "MooseObjectWarehouse.h"
 #include "MaterialPropertyRegistry.h"
 #include "RestartableEquationSystems.h"
+#include "SolutionInvalidity.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -88,6 +89,7 @@ class VectorPostprocessor;
 class Function;
 class MooseAppCoordTransform;
 class MortarUserObject;
+class SolutionInvalidity;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1872,27 +1874,12 @@ public:
   }
 
   /**
-   * Whether or not an solution warning has been flagged
+   * Whether or not to accept the solution based on its invalidity.
+   *
+   * If this returns false, it means that an invalid solution was encountered
+   * (an error) that was not allowed.
    */
-  bool hasSolutionWarning() { return _has_solution_warning; }
-
-  bool hasSolutionWarning(bool state) { return _has_solution_warning = state; }
-
-  /**
-   * Whether or not an invalid solution has been flagged
-   */
-  bool hasInvalidSolution() { return _has_invalid_solution; }
-
-  bool hasInvalidSolution(bool state) { return _has_invalid_solution = state; }
-
-  /**
-   * Whether or not to accept the solution
-   */
-  bool acceptInvalidSolution()
-  {
-    return (hasSolutionWarning() && !hasInvalidSolution()) || allowInvalidSolution();
-  }
-
+  bool acceptInvalidSolution() const;
   /**
    * Whether to accept / allow an invalid solution
    */
@@ -2849,11 +2836,9 @@ private:
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
-  bool _allow_invalid_solution;
-  bool _show_invalid_solution_console;
+  const bool _allow_invalid_solution;
+  const bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
-  bool _has_solution_warning;
-  bool _has_invalid_solution;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;

@@ -148,7 +148,10 @@ public:
   /**
    * Get the SolutionInvalidity for this app
    */
+  ///@{
   SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
+  const SolutionInvalidity & solutionInvalidity() const { return _solution_invalidity; }
+  ///@}
 
   ///@{
   /**
