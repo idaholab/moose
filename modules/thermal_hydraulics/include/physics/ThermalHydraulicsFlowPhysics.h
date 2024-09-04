@@ -56,7 +56,8 @@ public:
   // TODO: add here and implement all types needed
   enum OutletTypeEnum
   {
-    FixedPressure
+    FixedPressure,
+    FreeBoundary
   };
 
   /**
