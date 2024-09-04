@@ -42,6 +42,7 @@ private:
   virtual void addFEKernels() override;
   virtual void addDGKernels() override;
   virtual void addAuxiliaryKernels() override;
+  virtual void addFEBCs() override;
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
 

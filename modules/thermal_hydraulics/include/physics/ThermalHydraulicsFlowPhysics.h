@@ -25,7 +25,6 @@ class FlowChannelBase;
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "THMPhysics:add_ic");                                \
   registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_bc");                                           \
   registerMooseAction(app_name, derived_name, "add_material")
 
 /**
@@ -122,8 +121,6 @@ protected:
   const bool & _output_vector_velocity;
 
 private:
-  virtual void addFEBCs() override;
-
   /// Create the objects for the inlet boundary conditions
   virtual void addInletBoundaries() = 0;
   /// Create the objects for the outlet boundary conditions
