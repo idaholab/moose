@@ -46,7 +46,6 @@ ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters
   // A derived physics must act on those tasks
   addRequiredPhysicsTask("THMPhysics:add_ic");
   addRequiredPhysicsTask("add_variable");
-  addRequiredPhysicsTask("add_bc");
   addRequiredPhysicsTask("add_material");
 }
 
@@ -181,12 +180,4 @@ ThermalHydraulicsFlowPhysics::setOutlet(const std::string & boundary_component,
 {
   _outlet_components.push_back(boundary_component);
   _outlet_types.push_back(outlet_type);
-}
-
-void
-ThermalHydraulicsFlowPhysics::addFEBCs()
-{
-  // NOTE: This routine will likely move to the derived class if we implement finite volume
-  addInletBoundaries();
-  addOutletBoundaries();
 }

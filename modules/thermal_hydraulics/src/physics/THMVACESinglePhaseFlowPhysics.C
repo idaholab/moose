@@ -44,7 +44,9 @@ registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "THMP
 registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_dg_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_aux_kernel");
+registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_bc");
 registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_user_object");
+registerMooseAction("ThermalHydraulicsApp", THMVACESinglePhaseFlowPhysics, "add_postprocessor");
 
 InputParameters
 THMVACESinglePhaseFlowPhysics::validParams()
@@ -564,6 +566,14 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
   params.set<MooseEnum>("emit_on_nan") = "none";
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
   _sim->addUserObject(class_name, _numerical_flux_name, params);
+}
+
+void
+THMVACESinglePhaseFlowPhysics::addFEBCs()
+{
+  // NOTE: This routine will likely move to the derived class if we implement finite volume
+  addInletBoundaries();
+  addOutletBoundaries();
 }
 
 void
