@@ -4,19 +4,19 @@
 namespace platypus
 {
 
-class Executioner
-{
-public:
-  Executioner() = default;
-  explicit Executioner(const InputParameters & params) {}
+// class Executioner
+// {
+// public:
+//   Executioner() = default;
+//   explicit Executioner(const InputParameters & params) {}
 
-  virtual ~Executioner() = default;
+//   virtual ~Executioner() = default;
 
-  // Solve the current system of equations
-  virtual void Solve() const = 0;
+//   // Solve the current system of equations
+//   virtual void Solve() const = 0;
 
-  // Execute solution strategy including any timestepping
-  virtual void Execute() const = 0;
-};
+//   // Execute solution strategy including any timestepping
+//   virtual void Execute() const = 0;
+// };
 
 } // namespace platypus

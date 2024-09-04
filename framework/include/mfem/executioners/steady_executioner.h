@@ -5,18 +5,18 @@
 namespace platypus
 {
 
-class SteadyExecutioner : public Executioner
-{
-public:
-  SteadyExecutioner() = default;
-  explicit SteadyExecutioner(const InputParameters & params);
+// class SteadyExecutioner : public Executioner
+// {
+// public:
+//   SteadyExecutioner() = default;
+//   explicit SteadyExecutioner(const InputParameters & params);
 
-  void Solve() const override;
+//   void Solve() const override;
 
-  void Execute() const override;
+//   void Execute() const override;
 
-private:
-  platypus::SteadyStateProblem * _problem{nullptr};
-};
+// private:
+//   platypus::SteadyStateProblem * _problem{nullptr};
+// };
 
 } // namespace platypus
