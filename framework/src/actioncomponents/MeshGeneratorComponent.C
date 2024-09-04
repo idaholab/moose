@@ -65,7 +65,6 @@ MeshGeneratorComponent::setupComponent()
   // Get list of blocks from the saved mesh
   std::set<subdomain_id_type> blocks;
   component_mesh->subdomain_ids(blocks);
-  std::vector<SubdomainName> blocks_vec;
   for (const auto bid : blocks)
-    blocks_vec.push_back(component_mesh->subdomain_name(bid));
+    _blocks.push_back(component_mesh->subdomain_name(bid));
 }

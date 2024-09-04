@@ -12,7 +12,7 @@
 InputParameters
 PhysicsComponentBase::validParams()
 {
-  auto params = emptyInputParameters();
+  auto params = ActionComponent::validParams();
   params.addParam<std::vector<PhysicsName>>(
       "physics", {}, "Physics object(s) active on the Component");
   return params;

@@ -67,8 +67,8 @@ CombineComponentsMeshes::act()
               all_components_mgs.end())
         mgs_to_combine.push_back(final_mg);
       if (final_mg == "" && !all_mgs_from_components)
-        mooseError(
-            "Final mesh generator should be set for[Mesh] and [ActionComponents] to work together");
+        mooseError("Final mesh generator should be set for [Mesh] and [ActionComponents] to work "
+                   "together");
     }
 
     // Combine everyone into a combiner

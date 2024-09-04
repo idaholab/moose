@@ -36,7 +36,7 @@ CylinderComponent::validParams()
   params.addParam<unsigned int>("n_radial", "Number of radial elements of the cylinder");
   params.addParam<unsigned int>("n_azimuthal", "Number of azimuthal elements of the cylinder");
 
-  params.addParam<std::vector<SubdomainName>>("block", "Block for the cylinder");
+  params.addParam<SubdomainName>("block", "Block name for the cylinder");
 
   return params;
 }
@@ -54,6 +54,7 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
 void
 CylinderComponent::addMeshGenerators()
 {
+  // Create the base mesh for the component using a mesh generator
   if (_dimension == 0)
     paramError("dimension", "0D cylinder not implemented");
   else if (_dimension == 1 || _dimension == 2)
@@ -74,11 +75,9 @@ CylinderComponent::addMeshGenerators()
       paramError("n_radial", "Should not be provided for a 1D cylinder");
     if (isParamValid("block"))
     {
-      const auto block_names = getParam<std::vector<SubdomainName>>("block");
-      if (block_names.size() > 1)
-        paramError("block", "Currently only implemented for a single block.");
-      params.set<SubdomainName>("subdomain_name") = block_names[0];
-      _blocks.push_back(block_names[0]);
+      const auto block_name = getParam<SubdomainName>("block");
+      params.set<SubdomainName>("subdomain_name") = block_name;
+      _blocks.push_back(block_name);
     }
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "GeneratedMeshGenerator", name() + "_base", params);
@@ -93,8 +92,7 @@ CylinderComponent::addMeshGenerators()
       paramError("n_azimuthal", "Should be provided in 3D");
   }
 
-  // Place it in position
-  if (isParamValid("position"))
+  // Place mesh into position
   {
     InputParameters params = _factory.getValidParams("TransformGenerator");
     params.set<MeshGeneratorName>("input") = _mg_names.back();
@@ -104,8 +102,7 @@ CylinderComponent::addMeshGenerators()
         "TransformGenerator", name() + "_translated", params);
     _mg_names.push_back(name() + "_translated");
   }
-  // Rotate it as desired
-  if (isParamValid("direction"))
+  // Rotate the mesh as desired
   {
     InputParameters params = _factory.getValidParams("TransformGenerator");
     params.set<MeshGeneratorName>("input") = _mg_names.back();
