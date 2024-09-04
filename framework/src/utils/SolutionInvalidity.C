@@ -27,7 +27,7 @@ SolutionInvalidity::SolutionInvalidity(MooseApp & app)
   : ConsoleStreamInterface(app),
     ParallelObject(app.comm()),
     _solution_invalidity_registry(moose::internal::getSolutionInvalidityRegistry()),
-    _has_synced(false),
+    _has_synced(true),
     _has_solution_warning(false),
     _has_solution_error(false)
 {
@@ -66,8 +66,6 @@ SolutionInvalidity::hasInvalidSolution() const
 void
 SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 {
-  // Reset that we have synced because we're on a new iteration
-  _has_synced = false;
   // Zero current counts
   for (auto & entry : _counts)
     entry.counts = 0;
@@ -76,6 +74,8 @@ SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 void
 SolutionInvalidity::resetSolutionInvalidTimeStep()
 {
+  // Reset that we have synced because we're on a new iteration
+  _has_synced = false;
   for (auto & entry : _counts)
     entry.timestep_counts = 0;
 }
@@ -225,7 +225,7 @@ SolutionInvalidity::summaryTable() const
 void
 dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context)
 {
-  mooseAssert(solution_invalidity._has_synced, "Has not synced");
+  solution_invalidity.sync();
 
   if (solution_invalidity.processor_id() != 0)
     return;
