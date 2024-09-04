@@ -245,6 +245,13 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
                          material,
                          get_names_only);
 
+  else if (hasADProperty<RealTensorValue>(property_name))
+    names = outputHelper({"ADMaterialRealTensorValueAux", "012", {"row", "column"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
   else if (hasProperty<RankTwoTensor>(property_name))
     names = outputHelper({"MaterialRankTwoTensorAux", "012", {"i", "j"}},
                          property_name,
