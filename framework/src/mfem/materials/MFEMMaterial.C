@@ -13,7 +13,10 @@ MFEMMaterial::validParams()
   params.addPrivateParam<bool>("_interface", false);
 
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of blocks (ids or names) that this object will be applied");
+      "block",
+      {},
+      "The list of blocks (ids or names) that this object will be applied to. Leave empty to apply "
+      "to all blocks.");
   return params;
 }
 

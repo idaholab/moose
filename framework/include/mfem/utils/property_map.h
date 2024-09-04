@@ -68,14 +68,21 @@ public:
 
   T & getCoefficient(const std::string & name)
   {
-    auto & coeff = this->_properties.at(name);
     try
     {
-      return *std::get<std::unique_ptr<T>>(coeff);
+      auto & coeff = this->_properties.at(name);
+      try
+      {
+        return *std::get<std::unique_ptr<T>>(coeff);
+      }
+      catch (std::bad_variant_access)
+      {
+        return std::get<0>(std::get<PWData>(coeff));
+      }
     }
-    catch (std::bad_variant_access)
+    catch (std::out_of_range)
     {
-      return std::get<0>(std::get<PWData>(coeff));
+      throw MooseException("Property with name '" + name + "' has not been declared.");
     }
   }
 
