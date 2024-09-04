@@ -78,13 +78,11 @@ THMProblem::addVariable(const std::string & var_type,
                         const std::string & var_name,
                         InputParameters & params)
 {
-  // the libmesh and MooseEnum better stay in sync
-  FEType fe_type;
-  fe_type.family = Utility::string_to_enum<FEFamily>(std::string(params.get<MooseEnum>("family")));
-  fe_type.order = int(params.get<MooseEnum>("order"));
-  addSimVariable(true,
-                 var_name,
-                 fe_type,
-                 params.get<std::vector<SubdomainName>>("blocks"),
-                 params.get<Real>("scaling"));
+  // Add the variable through the simulation the first time
+  if (_vars.find(var_name) == _vars.end())
+    addSimVariable(true, var_type, var_name, params);
+  // The simulation will call this routine again, in this case we want to perform
+  // the addition of the variable through the FEProblem
+  else
+    FEProblem::addVariable(var_type, var_name, params);
 }

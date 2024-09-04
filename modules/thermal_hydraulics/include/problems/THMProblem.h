@@ -32,7 +32,7 @@ public:
   virtual bool hasPostprocessor(const std::string & name) const;
 
   /// Add a variable through the simulation
-  virtual void addVariable(const std::string & /* var_type */,
+  virtual void addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & params) override;
 
