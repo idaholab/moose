@@ -10,23 +10,32 @@
   []
 []
 
+[FunctorMaterials]
+  [functor_fluid_props]
+    type = GeneralFunctorFluidProps
+    fp = fp
+    T_fluid = 500
+    pressure = 'pressure'
+    characteristic_length = 1
+    porosity = 1
+    speed = 1 # Re unused
+  []
+[]
+
 [Closures]
   [simple_closures]
     type = Closures1PhaseSimple
   []
 []
 
+
 [Physics]
   [ThermalHydraulics]
-    [VACESinglePhase]
+    [WCNSFV]
       [all]
-        # Specified here for now
-        flow_channels = pipe
-
+        # needed to avoid ANY_BLOCK_ID
+        block = 'pipe'
         fp = fp
-
-        scaling_factor_1phase = "1 1 1"
-        output_vector_velocity = false
       []
     []
   []
@@ -36,7 +45,6 @@
   [inlet]
     type = PhysicsInletMassFlowRateTemperature
     input = 'pipe:in'
-    physics = 'all'
     m_dot = 2
     T = 500
   []
@@ -54,17 +62,15 @@
     initial_p = 1e5
     initial_vel = 1
 
+    physics = 'all'
     f = 10.0
     closures = simple_closures
     fp = fp
-
-    scaling_factor_1phase = '1 1 1e-5'
   []
 
   [outlet]
     type = PhysicsOutlet
     input = 'pipe:out'
-    physics = 'all'
     p = 2e5
   []
 []
@@ -77,7 +83,9 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+
+  num_steps = 3
 
   solve_type = NEWTON
   nl_rel_tol = 1e-7

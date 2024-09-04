@@ -20,12 +20,9 @@
   [ThermalHydraulics]
     [VACESinglePhase]
       [all]
-        # Specified here for now
-        flow_channels = pipe
-
         fp = fp
 
-        scaling_factor_1phase = "1 1 1"
+        scaling_factor_1phase = '1 1 1e-5'
         output_vector_velocity = false
       []
     []
@@ -36,7 +33,6 @@
   [inlet]
     type = PhysicsInletMassFlowRateTemperature
     input = 'pipe:in'
-    physics = 'all'
     m_dot = 2
     T = 500
   []
@@ -54,17 +50,15 @@
     initial_p = 1e5
     initial_vel = 1
 
+    physics = 'all'
     f = 10.0
     closures = simple_closures
     fp = fp
-
-    scaling_factor_1phase = '1 1 1e-5'
   []
 
   [outlet]
     type = PhysicsOutlet
     input = 'pipe:out'
-    physics = 'all'
     p = 2e5
   []
 []
