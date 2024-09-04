@@ -42,6 +42,7 @@ private:
 
   virtual void addInletBoundaries() override;
   virtual void addOutletBoundaries() override;
+  virtual void addFlowJunctions() override;
 
   // /// Adds the boundary flux boundary condition, which uses the boundary flux user object
   // void addBoundaryFluxBC(const PhysicsFlowBoundary & comp,

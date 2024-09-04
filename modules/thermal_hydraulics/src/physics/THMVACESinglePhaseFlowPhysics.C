@@ -12,6 +12,7 @@
 #include "FlowChannelBase.h"
 #include "SlopeReconstruction1DInterface.h"
 #include "PhysicsFlowBoundary.h"
+#include "PhysicsFlowJunction.h"
 
 // TODO: consolidate those at the THMPhysics parent class level
 typedef THMVACESinglePhaseFlowPhysics VACE1P;
@@ -578,6 +579,7 @@ THMVACESinglePhaseFlowPhysics::addFEBCs()
   // NOTE: This routine will likely move to the derived class if we implement finite volume
   addInletBoundaries();
   addOutletBoundaries();
+  addFlowJunctions();
 }
 
 void
@@ -639,6 +641,7 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
     if (boundary_type == OutletTypeEnum::FixedPressure)
     {
       const std::string class_name = "ADBoundaryFlux3EqnGhostPressure";
+      boundary_numerical_flux_name = comp_name + "_fixedpressure";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<Real>("p") = comp.getParam<Real>("p");
       params.set<Real>("normal") = comp.getNormal();
@@ -683,5 +686,68 @@ THMVACESinglePhaseFlowPhysics::addBoundaryFluxBC(
   {
     params.set<NonlinearVariableName>("variable") = var;
     _sim->addBoundaryCondition(class_name, genName(comp.name(), var, "bnd_flux_3eqn_bc"), params);
+  }
+}
+
+void
+THMVACESinglePhaseFlowPhysics::addFlowJunctions()
+{
+  for (const auto i : index_range(_junction_components))
+  {
+    // Get component, which has reference to the controllable parameters
+    const auto & comp_name = _junction_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
+    const auto & junction_type = _junction_types[i];
+    const auto & boundary_names = comp.getBoundaryNames();
+    const auto & normals = comp.getBoundaryNormals();
+
+    // Junction fluxes should be updated as often as possible
+    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
+    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+    // Add user object for computing and storing the fluxes
+    if (junction_type == OneToOne)
+    {
+      {
+        const std::string class_name = "ADPhysicsJunctionOneToOneUserObject";
+        InputParameters params = _factory.getValidParams(class_name);
+        params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+        params.set<std::vector<Real>>("normals") = normals;
+        params.set<std::vector<processor_id_type>>("processor_ids") = comp.getProcIds();
+        params.set<UserObjectName>("fluid_properties") = _fp_name;
+        // It is assumed that each channel should have the same numerical flux, so
+        // just use the first one.
+        params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+        params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
+        params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
+        params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};
+        params.set<std::vector<VariableName>>("rhouA") = {VACE1P::RHOUA};
+        params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
+        params.set<std::string>("junction_name") = comp_name;
+        params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
+        params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+        _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
+      }
+
+      // Add BC to each of the connected flow channels
+      const auto var_names = nonlinearVariableNames();
+      for (std::size_t i = 0; i < boundary_names.size(); i++)
+        for (std::size_t j = 0; j < var_names.size(); j++)
+        {
+          const std::string class_name = "ADPhysicsJunctionOneToOneBC";
+          InputParameters params = _factory.getValidParams(class_name);
+          params.set<std::vector<BoundaryName>>("boundary") = {boundary_names[i]};
+          params.set<Real>("normal") = normals[i];
+          params.set<NonlinearVariableName>("variable") = var_names[j];
+          params.set<UserObjectName>("junction_uo") = comp.getJunctionUOName();
+          params.set<unsigned int>("connection_index") = i;
+          params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};
+          params.set<std::vector<VariableName>>("rhouA") = {VACE1P::RHOUA};
+          params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
+          params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
+          _sim->addBoundaryCondition(
+              class_name, genName(name(), i, var_names[j] + ":" + class_name), params);
+        }
+    }
   }
 }
