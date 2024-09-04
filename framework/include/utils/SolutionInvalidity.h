@@ -45,10 +45,28 @@ public:
   SolutionInvalidity(MooseApp & app);
 
   /// Increments solution invalid occurrences for each solution id
-  void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
+  void flagInvalidSolutionInternal(const InvalidSolutionID _invalid_solution_id);
 
-  /// Loop over all the tracked objects and determine whether solution invalid is detected
-  bool solutionInvalid() const;
+  /**
+   * Whether or not an invalid solution was encountered that was a warning.
+   *
+   * This must be called after a sync.
+   */
+  bool hasInvalidSolutionWarning() const;
+
+  /**
+   * Whether or not an invalid solution was encountered that was an error.
+   *
+   * This must be called after a sync.
+   */
+  bool hasInvalidSolutionError() const;
+
+  /**
+   * Whether or not any invalid solution was encountered (error or warning).
+   *
+   * This must be called after a sync.
+   */
+  bool hasInvalidSolution() const;
 
   /// Reset the number of solution invalid occurrences back to zero for the current time step
   void resetSolutionInvalidTimeStep();
@@ -65,9 +83,9 @@ public:
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
   {
-    unsigned int counts;
-    unsigned int timestep_counts;
-    unsigned int total_counts;
+    unsigned int counts = 0;
+    unsigned int timestep_counts = 0;
+    unsigned int total_counts = 0;
   };
 
   /// Access the private solution invalidity counts
@@ -109,6 +127,13 @@ private:
 
   /// Store the solution invalidity counts
   std::vector<InvalidCounts> _counts;
+
+  /// Whether or not we've synced (can check counts/existance of warnings or errors)
+  bool _has_synced;
+  /// Whether or not we have a warning (only after a sync)
+  bool _has_solution_warning;
+  /// Whether or not we have an invalid solution (only after a sync)
+  bool _has_solution_error;
 };
 
 // datastore and dataload for recover

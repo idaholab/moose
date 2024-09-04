@@ -1,11 +1,4 @@
 {
-    "app_name": "main",
-    "current_time": "Sun Feb 12 20:33:35 2023",
-    "executable": "/Users/lim2/Research/MOOSE/mengnan/moose/test/tests/materials/solution_invalid/../../../moose_test-devel",
-    "executable_time": "Sun Feb 12 20:33:19 2023",
-    "libmesh_version": "",
-    "moose_version": "git commit 51996e2753 on 2023-02-09",
-    "petsc_version": "3.16.6",
     "reporters": {
         "solution_invalidity": {
             "type": "SolutionInvalidityReporter",
@@ -16,7 +9,6 @@
             }
         }
     },
-    "slepc_version": "3.16.2",
     "time_steps": [
         {
             "solution_invalidity": {

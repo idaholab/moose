@@ -73,13 +73,16 @@ class SolutionInvalidityInfo : public SolutionInvalidityName
 public:
   SolutionInvalidityInfo(const std::string & object_type,
                          const std::string & message,
-                         const InvalidSolutionID id)
-    : SolutionInvalidityName(object_type, message), id(id)
+                         const InvalidSolutionID id,
+                         const bool warning)
+    : SolutionInvalidityName(object_type, message), id(id), warning(warning)
   {
   }
 
   /// The solution ID
   InvalidSolutionID id;
+  /// Whether or not this is a warning
+  bool warning;
 };
 
 /**
@@ -95,10 +98,12 @@ public:
    *
    * @param object_type The type of the object doing the registration
    * @param message The description of the solution invalid warning
+   * @param warning Whether or not it is a warning
    * @return The registered ID
    */
   InvalidSolutionID registerInvalidity(const std::string & object_type,
-                                       const std::string & message);
+                                       const std::string & message,
+                                       const bool warning);
 
 private:
   SolutionInvalidityRegistry();

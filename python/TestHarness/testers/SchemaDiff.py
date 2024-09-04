@@ -30,6 +30,8 @@ class SchemaDiff(RunApp):
             self.specs['required_python_packages'] = 'deepdiff>=6.1.0'
         elif 'deepdiff' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' deepdiff>=6.1.0'
+        if 'packaging' not in self.specs['required_python_packages']:
+            self.specs['required_python_packages'] += ' packaging'
 
         # So that derived classes can internally pass skip regex paths
         self.exclude_regex_paths = []
@@ -96,6 +98,8 @@ class SchemaDiff(RunApp):
     def do_deepdiff(self,orig, comp, rel_err, abs_zero, exclude_values:list=None):
         import deepdiff
         from deepdiff.operator import BaseOperator
+        from packaging.version import Version
+
         class testcompare(BaseOperator):
             def __init__(self, rel_err,abs_zero,types,regex_paths=None):
                 self.rel_err = rel_err
@@ -156,11 +160,26 @@ class SchemaDiff(RunApp):
                         exclude_paths.append(path)
 
         custom_operators = [testcompare(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]
-        return deepdiff.DeepDiff(orig,
-                                 comp,
-                                 exclude_paths=exclude_paths,
-                                 exclude_regex_paths=self.exclude_regex_paths,
-                                 custom_operators=custom_operators).pretty()
+        args = [orig, comp]
+        kwargs = {'exclude_paths': exclude_paths,
+                  'exclude_regex_paths': self.exclude_regex_paths,
+                  'custom_operators': custom_operators}
+
+        # 8.0.0 introduces and sets threshold_to_diff_deeper=0.33; this reverts
+        # to the previous behavior. If a dict is different enough, it'll report
+        # the whole thing as different instead of listing a large amount of keys
+        # that are different. We would prefer to see all of the individual
+        # keys that are different. It also seems like the "significant difference"
+        # measure is done before things are excluded, which doesn't work with
+        # how much we exclude from the system information by default. This might
+        # be a bug, but I'm not sure. Even if it is a bug, we still want to see
+        # each key individually as being different instead of the whole thing
+        # being different.
+        deepdiff_version = Version(deepdiff.__version__)
+        if deepdiff_version >= Version('8.0.0'):
+            kwargs['threshold_to_diff_deeper'] = 0
+
+        return deepdiff.DeepDiff(*args, **kwargs).pretty()
 
     #this is how we call the load_file in the derived classes, and also check for exceptions in the load
     #all python functions are virtual, so there is no templating, but some self shenanigans required

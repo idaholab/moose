@@ -35,6 +35,7 @@
 #include "MooseObjectWarehouse.h"
 #include "MaterialPropertyRegistry.h"
 #include "RestartableEquationSystems.h"
+#include "SolutionInvalidity.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -88,6 +89,7 @@ class VectorPostprocessor;
 class Function;
 class MooseAppCoordTransform;
 class MortarUserObject;
+class SolutionInvalidity;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1872,9 +1874,21 @@ public:
   }
 
   /**
-   * Whether or not the invalid solutions are allowed
+   * Whether or not to accept the solution based on its invalidity.
+   *
+   * If this returns false, it means that an invalid solution was encountered
+   * (an error) that was not allowed.
+   */
+  bool acceptInvalidSolution() const;
+  /**
+   * Whether to accept / allow an invalid solution
    */
   bool allowInvalidSolution() const { return _allow_invalid_solution; }
+
+  /**
+   * Whether or not to print out the invalid solutions summary table in console
+   */
+  bool showInvalidSolutionConsole() const { return _show_invalid_solution_console; }
 
   /**
    * Whether or not the solution invalid warnings are printed out immediately
@@ -2822,7 +2836,8 @@ private:
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
-  const bool & _allow_invalid_solution;
+  const bool _allow_invalid_solution;
+  const bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
 
   /// At or beyond initialSteup stage

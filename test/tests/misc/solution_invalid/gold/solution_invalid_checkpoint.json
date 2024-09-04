@@ -1,11 +1,4 @@
 {
-    "app_name": "main",
-    "current_time": "Thu Nov 30 18:45:23 2023",
-    "executable": "moose/test/moose_test-opt",
-    "executable_time": "Thu Nov 30 18:41:11 2023",
-    "libmesh_version": "",
-    "moose_version": "git commit 3572f02d92 on 2023-11-30",
-    "petsc_version": "3.20.0",
     "reporters": {
         "solution_invalidity": {
             "type": "SolutionInvalidityReporter",
@@ -16,7 +9,6 @@
             }
         }
     },
-    "slepc_version": "3.19.2",
     "time_steps": [
         {
             "solution_invalidity": {
