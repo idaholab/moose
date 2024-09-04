@@ -22,23 +22,6 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 }
 
 void
-MFEMSteady::Solve() const
-{
-  // Advance time step.
-  _problem->GetOperator()->Solve(*(_problem->_f));
-
-  // Output data
-  // Output timestep summary to console
-  _problem->_outputs.Write();
-}
-
-void
-MFEMSteady::Execute() const
-{
-  Solve();
-}
-
-void
 MFEMSteady::init()
 {
   _problem = dynamic_cast<platypus::SteadyStateProblem *>(_mfem_problem.mfem_problem.get());
@@ -68,7 +51,11 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  Solve();
+  // Solve equation system.
+  _problem->GetOperator()->Solve(*(_problem->_f));
+  // Output data
+  _problem->_outputs.Write();
+
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();
 
