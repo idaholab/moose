@@ -11,8 +11,7 @@
 #include "MFEMConstantCoefficient.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
-#include "MFEMSteady.h"
-#include "MFEMTransient.h"
+#include "MFEMExecutioner.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
@@ -36,7 +35,7 @@ public:
 
   virtual void init() override;
   virtual void initialSetup() override;
-  virtual void externalSolve() override;
+  virtual void externalSolve() override{};
   virtual void outputStep(ExecFlagType type) override;
 
   virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };

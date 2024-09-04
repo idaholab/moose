@@ -61,34 +61,10 @@ MFEMProblem::initialSetup()
   // NB: set to false to avoid reconstructing problem operator.
   mfem_problem_builder->FinalizeProblem(false);
 
-  InputParameters exec_params = MooseApp::validParams();
-
-  MFEMTransient * _moose_executioner = dynamic_cast<MFEMTransient *>(_app.getExecutioner());
-  if (_moose_executioner != nullptr)
-  {
-    auto mfem_transient_problem_builder =
-        std::dynamic_pointer_cast<platypus::TimeDomainProblemBuilder>(mfem_problem_builder);
-    if (mfem_transient_problem_builder == nullptr)
-    {
-      mooseError("Specified formulation does not support Transient executioners");
-    }
-    executioner = dynamic_cast<MFEMTransient *>(_app.getExecutioner());
-  }
-  else if (dynamic_cast<MFEMSteady *>(_app.getExecutioner()))
-  {
-    auto mfem_steady_problem_builder =
-        std::dynamic_pointer_cast<platypus::SteadyStateProblemBuilder>(mfem_problem_builder);
-    if (mfem_steady_problem_builder == nullptr)
-    {
-      mooseError("Specified formulation does not support Steady executioners");
-    }
-    executioner = dynamic_cast<MFEMSteady *>(_app.getExecutioner());
-  }
-  else
+  if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
   {
     mooseError("Executioner used that is not currently supported by MFEMProblem");
   }
-
   mfem_problem->_outputs.EnableGLVis(getParam<bool>("use_glvis"));
 }
 
@@ -96,22 +72,6 @@ void
 MFEMProblem::init()
 {
   FEProblemBase::init();
-}
-
-void
-MFEMProblem::externalSolve()
-{
-  if (!_solve)
-  {
-    return;
-  }
-
-  auto * transient_mfem_exec = dynamic_cast<MFEMTransient *>(executioner);
-  if (transient_mfem_exec != nullptr)
-  {
-    transient_mfem_exec->_t_step = dt();
-  }
-  // executioner->Solve();
 }
 
 void
