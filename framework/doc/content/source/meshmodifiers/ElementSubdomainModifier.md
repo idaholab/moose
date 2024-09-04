@@ -25,7 +25,7 @@ Consider a unit square domain decomposed by a vertical line $x=0.25$. The elemen
 !alert note
 If the moving boundary is defined completely around a subdomain, or between subdomains, then [SidesetAroundSubdomainUpdater.md] may be more useful to use in conjunction with the `ElementSubdomainModifier`, rather than using the `moving_boundaries` and `moving_boundary_subdomain_pairs` parameters in `ElementSubdomainModifier`.
 
-The change of element subdomains will alter the definitions of certain sidesets and nodesets. The parameters [!param](/MeshModifiers/ElementSubdomainModifier/moving_boundaries) and [!param](/MeshModifiers/ElementSubdomainModifier/moving_boundary_subdomain_pairs) can optionally be used to modify the corresponding sidesets/nodesets over the elements that change subdomain. The names of the boundaries are specified in `moving_boundaries`, and the pair of subdomains that each boundary in `moving_boundaries` lies between must be specified in the corresponding `moving_boundary_subdomain_pairs`. The element side from the first subdomain of the pair is added to the boundary.
+The change of element subdomains will alter the definitions of certain sidesets and nodesets. The parameters `moving_boundaries` and `moving_boundary_subdomain_pairs` can optionally be used to modify the corresponding sidesets/nodesets over the elements that change subdomain. The names of the boundaries are specified in `moving_boundaries`, and the pair of subdomains that each boundary in `moving_boundaries` lies between must be specified in the corresponding `moving_boundary_subdomain_pairs`. The element side from the first subdomain of the pair is added to the boundary.
 
 If the boundaries provided through `moving_boundaries` already exist, the modifier will attempt to modify the provided sidesets/nodesets whenever an element changes subdomain ID. If the boundaries do not exist, the modifier will create sidesets and nodesets with the provided names.
 
@@ -80,7 +80,7 @@ An auxiliary variable $u$ is defined over the domain, with initial values of 1, 
 
 !media large_media/mesh_modifiers/element_subdomain_modifier/orig.png style=float:center;width:100%; caption=The default behaviour of the modifier is to reinitializate all elements that change subdomain ID.
 
-However, if a list of subdomains (IDs or names) is provided through the parameter [!param](/MeshModifiers/ElementSubdomainModifier/reinitialize_subdomains), the reinitialization only occurs if the element's new subdomain ID is in the provided list:
+However, if a list of subdomains (IDs or names) is provided through the parameter `reinitialize_subdomains`, the reinitialization only occurs if the element's new subdomain ID is in the provided list:
 
 !listing test/tests/meshmodifiers/element_subdomain_modifier/reinitialization_into.i start=[MeshModifiers] end=[AuxVariables]
 
@@ -92,7 +92,7 @@ If an empty list is given in `reinitialize_subdomains`, then there is no reiniti
 
 !media large_media/mesh_modifiers/element_subdomain_modifier/none.png style=float:center;width:100%; caption=No reinitialization of any elements that change subdomain ID.
 
-Reinitialization can be further restricted by setting the parameter [!param](/MeshModifiers/ElementSubdomainModifier/old_subdomain_reinitialized) to `false`. The modifier will then additionally check the element's old subdomain ID. Reinitialization then only occurs if the old subdomain ID was not in the list provided in the parameter `reinitialize_subdomains`.
+Reinitialization can be further restricted by setting the parameter `old_subdomain_reinitialized` to `false`. The modifier will then additionally check the element's old subdomain ID. Reinitialization then only occurs if the old subdomain ID was not in the list provided in the parameter `reinitialize_subdomains`.
 
 !listing test/tests/meshmodifiers/element_subdomain_modifier/reinitialization_from_into.i start=[MeshModifiers] end=[AuxVariables]
 
