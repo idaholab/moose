@@ -648,6 +648,16 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
       _sim->addUserObject(class_name, boundary_numerical_flux_name, params);
       comp.connectObject(params, boundary_numerical_flux_name, "p");
     }
+    else if (boundary_type == OutletTypeEnum::FreeBoundary)
+    {
+      const std::string class_name = "ADBoundaryFlux3EqnFreeOutflow";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<UserObjectName>("fluid_properties") = _fp_name;
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim->addUserObject(class_name, boundary_numerical_flux_name, params);
+    }
+    else
+      mooseError("Unimplemented boundary type", boundary_type);
 
     // Boundary flux BC
     addBoundaryFluxBC(comp, boundary_numerical_flux_name);
