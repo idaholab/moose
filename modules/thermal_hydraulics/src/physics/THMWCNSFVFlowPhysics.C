@@ -211,6 +211,7 @@ THMWCNSFVFlowPhysics::addFVBCs()
   // NOTE: This routine will likely move to the derived class if we implement finite volume
   addInletBoundaries();
   addOutletBoundaries();
+  addFlowJunctions();
 
   WCNSFVFlowPhysics::addFVBCs();
 }
@@ -258,6 +259,11 @@ THMWCNSFVFlowPhysics::addOutletBoundaries()
         addOutletBoundary(boundary_name, fixed_pressure, std::to_string(comp.getParam<Real>("p")));
     }
   }
+}
+
+void
+THMWCNSFVFlowPhysics::addFlowJunctions()
+{
 }
 
 void

@@ -67,6 +67,18 @@ public:
    */
   void setOutlet(const std::string & boundary_component, const OutletTypeEnum & outlet_type);
 
+  enum JunctionTypeEnum
+  {
+    OneToOne
+  };
+
+  /**
+   * Add a junction
+   * @param boundary_component the name of the flow junction component
+   * @param junction_type the type of junction
+   */
+  void setJunction(const std::string & junction_component, const JunctionTypeEnum & junction_type);
+
 protected:
   virtual void initializePhysicsAdditional() override;
 
@@ -108,6 +120,10 @@ protected:
   std::vector<std::string> _outlet_components;
   /// The types of the outlets
   std::vector<OutletTypeEnum> _outlet_types;
+  /// The name of the junction components
+  std::vector<std::string> _junction_components;
+  /// The types of the junctions
+  std::vector<JunctionTypeEnum> _junction_types;
 
   /// Gravitational acceleration vector
   RealVectorValue _gravity_vector;
@@ -127,6 +143,8 @@ private:
   virtual void addInletBoundaries() = 0;
   /// Create the objects for the outlet boundary conditions
   virtual void addOutletBoundaries() = 0;
+  /// Create the objects for the flow junctions
+  virtual void addFlowJunctions() = 0;
 
 public:
   static const std::string AREA;

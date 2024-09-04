@@ -167,3 +167,11 @@ ThermalHydraulicsFlowPhysics::setOutlet(const std::string & boundary_component,
   _outlet_components.push_back(boundary_component);
   _outlet_types.push_back(outlet_type);
 }
+
+void
+ThermalHydraulicsFlowPhysics::setJunction(const std::string & boundary_component,
+                                          const JunctionTypeEnum & junction_type)
+{
+  _junction_components.push_back(boundary_component);
+  _junction_types.push_back(junction_type);
+}
