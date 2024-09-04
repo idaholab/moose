@@ -21,6 +21,8 @@ INSFVMomentumAdvectionOutflowBC::validParams()
 {
   InputParameters params = INSFVFluxBC::validParams();
   params += INSFVFullyDevelopedFlowBC::validParams();
+  params.addParam<unsigned int>("dimension",
+                                "Dimension of the velocity vector. Defaults to the mesh dimension");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -36,7 +38,8 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w(isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
-    _dim(_subproblem.mesh().dimension()),
+    _dim(isParamValid("dimension") ? getParam<unsigned int>("dimension")
+                                   : _subproblem.mesh().dimension()),
     _rho(getFunctor<ADReal>(NS::density))
 {
   if (_dim >= 2 && !_v)

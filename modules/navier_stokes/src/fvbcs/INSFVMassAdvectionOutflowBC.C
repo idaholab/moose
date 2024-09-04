@@ -23,6 +23,8 @@ INSFVMassAdvectionOutflowBC::validParams()
   params.addClassDescription("Outflow boundary condition for advecting mass.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The functor for the density");
   params.declareControllable("rho");
+  params.addParam<unsigned int>("dimension",
+                                "Dimension of the velocity vector. Defaults to the mesh dimension");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -36,7 +38,8 @@ INSFVMassAdvectionOutflowBC::INSFVMassAdvectionOutflowBC(const InputParameters &
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w(isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
-    _dim(_subproblem.mesh().dimension())
+    _dim(isParamValid("dimension") ? getParam<unsigned int>("dimension")
+                                   : _subproblem.mesh().dimension())
 {
   if (_dim >= 2 && !_v)
     mooseError(
