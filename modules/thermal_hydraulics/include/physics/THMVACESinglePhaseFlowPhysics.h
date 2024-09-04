@@ -33,6 +33,9 @@ protected:
   /// Scaling factors for each solution variable (rhoA, rhouA, rhoEA)
   const std::vector<Real> _scaling_factors;
 
+  /// True if we output velocity as a vector-value field, false for outputting velocity as a scalar
+  const bool & _output_vector_velocity;
+
 private:
   virtual void actOnAdditionalTasks() override;
 

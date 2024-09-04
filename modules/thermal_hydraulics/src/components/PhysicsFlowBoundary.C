@@ -16,8 +16,6 @@ InputParameters
 PhysicsFlowBoundary::validParams()
 {
   InputParameters params = FlowBoundary::validParams();
-  params.addRequiredParam<std::vector<PhysicsName>>("physics",
-                                                    "Physics active on the flow boundary");
   return params;
 }
 
@@ -33,19 +31,12 @@ PhysicsFlowBoundary::init()
 
   if (hasComponentByName<PhysicsFlowChannel>(_connected_component_name))
   {
-    // This will likely be necessary
-    // const PhysicsFlowChannel & comp =
-    //    getTHMProblem().getComponentByName<PhysicsFlowChannel>(_connected_component_name);
-    // for (const auto physics : comp.getPhysics())
-    //   _connected_physics.push_back(physics);
+    // Get Physics from the connected components
+    const PhysicsFlowChannel & comp =
+        getTHMProblem().getComponentByName<PhysicsFlowChannel>(_connected_component_name);
+    for (const auto physics : comp.getPhysics())
+      _th_physics.insert(physics);
   }
-
-  if (isParamSetByUser("physics"))
-    for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
-      _th_physics.push_back(
-          _app.actionWarehouse().getPhysics<ThermalHydraulicsFlowPhysics>(physics_name));
-  // NOTE: we currently expect to error on non thermal-hydraulics physics.
-  // This may be removed in the future
 }
 
 void

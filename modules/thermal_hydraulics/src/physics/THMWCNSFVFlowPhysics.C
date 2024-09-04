@@ -192,7 +192,9 @@ THMWCNSFVFlowPhysics::addMaterials()
 void
 THMWCNSFVFlowPhysics::addFVKernels()
 {
-  // TODO: process friction factor, gravity
+  // Process gravity input
+
+  // Process friction factor input
 
   WCNSFVFlowPhysics::addFVKernels();
 }

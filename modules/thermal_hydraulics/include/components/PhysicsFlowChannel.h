@@ -28,23 +28,16 @@ public:
   virtual void addMooseObjects() override;
 
   /// Get the wall heat transfer coefficient
-  virtual const std::vector<MaterialPropertyName> & getWallHeatTransferCoefficientNames() const override
+  virtual const std::vector<MaterialPropertyName> &
+  getWallHeatTransferCoefficientNames() const override
   {
     return _Hw_names;
   }
 
-  // TODO Update
-  virtual const THM::FlowModelID & getFlowModelID() const override { return THM::FM_SINGLE_PHASE; }
+  virtual const THM::FlowModelID & getFlowModelID() const override { return THM::FM_PHYSICS_BASED; }
 
-  /**
-   * Gets the numerical flux user object name
-   */
-  const UserObjectName & getNumericalFluxUserObjectName() const { return _numerical_flux_name; }
-
-  /**
-   * Gets the slope reconstruction option used
-   */
-  const MooseEnum & getSlopeReconstruction() const { return _rdg_slope_reconstruction; }
+  /// Return the Physics active on this flow channel
+  const std::set<ThermalHydraulicsFlowPhysics *> & getPhysics() const { return _th_physics; }
 
 protected:
   virtual void init() override;
@@ -64,9 +57,6 @@ protected:
   /// Wall heat transfer coefficient names for connected heat transfers
   std::vector<MaterialPropertyName> _Hw_names;
 
-  /// Numerical flux user object name
-  const UserObjectName _numerical_flux_name;
-
-  /// Slope reconstruction type for rDG
-  const MooseEnum _rdg_slope_reconstruction;
+  /// Thermal hydraulics Physics active on this flow boundary
+  std::set<ThermalHydraulicsFlowPhysics *> _th_physics;
 };

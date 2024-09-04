@@ -60,6 +60,9 @@ THMVACESinglePhaseFlowPhysics::validParams()
   params.addRequiredParam<std::vector<Real>>(
       "scaling_factor_1phase",
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
+
+  params.addRequiredParam<bool>("output_vector_velocity",
+                                "True if velocity is output as a vector field.");
   return params;
 }
 
@@ -68,7 +71,8 @@ THMVACESinglePhaseFlowPhysics::THMVACESinglePhaseFlowPhysics(const InputParamete
     ThermalHydraulicsFlowPhysics(params),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
     _numerical_flux_name(prefix() + "VACE_uo"),
-    _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase"))
+    _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase")),
+    _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
 }
 

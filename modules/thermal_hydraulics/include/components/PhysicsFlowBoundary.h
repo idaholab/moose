@@ -38,5 +38,5 @@ protected:
   /// Name of boundary user object name
   const UserObjectName _boundary_uo_name;
   /// Thermal hydraulics Physics active on this flow boundary
-  std::vector<ThermalHydraulicsFlowPhysics *> _th_physics;
+  std::set<ThermalHydraulicsFlowPhysics *> _th_physics;
 };
