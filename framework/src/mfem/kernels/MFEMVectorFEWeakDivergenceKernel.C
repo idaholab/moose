@@ -10,7 +10,7 @@ MFEMVectorFEWeakDivergenceKernel::validParams()
                              "$(k\\vec u, \\nabla q')$ with $\\vec u$ a vector FE "
                              "type, to be added to an MFEM problem");
 
-  params.addParam<std::string>("coefficient", "Name of MFEM coefficient k to use.");
+  params.addParam<std::string>("coefficient", "Name of property k to use.");
 
   return params;
 }
@@ -19,7 +19,7 @@ MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
     const InputParameters & parameters)
   : MFEMKernel(parameters),
     _coef_name(getParam<std::string>("coefficient")),
-    _coef(getMFEMProblem()._coefficients._scalars.Get(_coef_name))
+    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
 {
 }
 

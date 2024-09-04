@@ -224,8 +224,7 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 void
 EquationSystem::Init(platypus::GridFunctions & gridfunctions,
                      const platypus::FESpaces & fespaces,
-                     platypus::BCMap & bc_map,
-                     platypus::Coefficients & coefficients)
+                     platypus::BCMap & bc_map)
 {
   for (auto & test_var_name : _test_var_names)
   {

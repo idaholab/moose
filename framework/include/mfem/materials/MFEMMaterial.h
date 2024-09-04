@@ -2,6 +2,7 @@
 
 #include "MFEMGeneralUserObject.h"
 #include "MFEMCoefficient.h"
+#include "PropertyManager.h"
 #include "coefficients.h"
 
 class MFEMMaterial : public MFEMGeneralUserObject
@@ -12,7 +13,7 @@ public:
   MFEMMaterial(const InputParameters & parameters);
   virtual ~MFEMMaterial();
 
-  virtual void storeCoefficients(platypus::Subdomain & subdomain) {}
-
-  std::vector<SubdomainName> blocks;
+protected:
+  std::vector<SubdomainName> _block_ids;
+  platypus::PropertyManager & _properties;
 };

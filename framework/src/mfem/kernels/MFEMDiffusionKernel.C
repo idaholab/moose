@@ -11,7 +11,8 @@ MFEMDiffusionKernel::validParams()
       "form of $ (k\\nabla \\phi_i, \\nabla u_h), to be added to an MFEM problem");
 
   params.addParam<std::string>("coefficient",
-                               "Name of MFEM coefficient k to multiply the Laplacian by");
+                               "Name of property for diffusion coefficient k to multiply "
+                               "the Laplacian by");
 
   return params;
 }
@@ -19,12 +20,14 @@ MFEMDiffusionKernel::validParams()
 MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _coef_name(getParam<std::string>("coefficient")),
-    _coef(getMFEMProblem()._coefficients._scalars.Get(_coef_name))
+    // FIXME: The MFEM bilinear form can also handle vector and matrix
+    // coefficients, so ideally we'd handle all three too.
+    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMDiffusionKernel::createIntegrator()
 {
-  return new mfem::DiffusionIntegrator(*_coef);
+  return new mfem::DiffusionIntegrator(_coef);
 }
