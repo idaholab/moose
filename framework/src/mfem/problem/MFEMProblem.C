@@ -63,7 +63,7 @@ MFEMProblem::initialSetup()
 
   InputParameters exec_params = MooseApp::validParams();
 
-  Transient * _moose_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
+  MFEMTransient * _moose_executioner = dynamic_cast<MFEMTransient *>(_app.getExecutioner());
   if (_moose_executioner != nullptr)
   {
     auto mfem_transient_problem_builder =
@@ -72,17 +72,9 @@ MFEMProblem::initialSetup()
     {
       mooseError("Specified formulation does not support Transient executioners");
     }
-
-    exec_params.set<float>("StartTime") = float(_moose_executioner->getStartTime());
-    exec_params.set<float>("TimeStep") = float(dt());
-    exec_params.set<float>("EndTime") = float(_moose_executioner->endTime());
-    exec_params.set<int>("VisualisationSteps") = getParam<int>("vis_steps");
-    exec_params.set<platypus::TimeDomainProblem *>("Problem") =
-        static_cast<platypus::TimeDomainProblem *>(mfem_problem.get());
-
-    executioner = std::make_unique<platypus::TransientExecutioner>(exec_params);
+    executioner = dynamic_cast<MFEMTransient *>(_app.getExecutioner());
   }
-  else if (dynamic_cast<Steady *>(_app.getExecutioner()))
+  else if (dynamic_cast<MFEMSteady *>(_app.getExecutioner()))
   {
     auto mfem_steady_problem_builder =
         std::dynamic_pointer_cast<platypus::SteadyStateProblemBuilder>(mfem_problem_builder);
@@ -90,11 +82,7 @@ MFEMProblem::initialSetup()
     {
       mooseError("Specified formulation does not support Steady executioners");
     }
-
-    exec_params.set<platypus::SteadyStateProblem *>("Problem") =
-        static_cast<platypus::SteadyStateProblem *>(mfem_problem.get());
-
-    executioner = std::make_unique<platypus::SteadyExecutioner>(exec_params);
+    executioner = dynamic_cast<MFEMSteady *>(_app.getExecutioner());
   }
   else
   {
@@ -118,12 +106,12 @@ MFEMProblem::externalSolve()
     return;
   }
 
-  auto * transient_mfem_exec = dynamic_cast<platypus::TransientExecutioner *>(executioner.get());
+  auto * transient_mfem_exec = dynamic_cast<MFEMTransient *>(executioner);
   if (transient_mfem_exec != nullptr)
   {
     transient_mfem_exec->_t_step = dt();
   }
-  executioner->Solve();
+  // executioner->Solve();
 }
 
 void

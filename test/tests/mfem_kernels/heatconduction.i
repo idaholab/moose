@@ -96,7 +96,7 @@
 []
 
 [Executioner]
-  type = Transient
+  type = MFEMTransient
   dt = 0.25
   start_time = 0.0
   end_time = 1.0

@@ -11,6 +11,8 @@
 #include "MFEMConstantCoefficient.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
+#include "MFEMSteady.h"
+#include "MFEMTransient.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
@@ -142,6 +144,7 @@ public:
   int _order;
 
   platypus::Coefficients _coefficients;
+  std::shared_ptr<platypus::Problem> mfem_problem{nullptr};
 
 protected:
   /**
@@ -172,7 +175,5 @@ protected:
   platypus::PropertyManager _properties;
   platypus::Outputs _outputs;
   std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
-
-  std::shared_ptr<platypus::Problem> mfem_problem{nullptr};
-  std::unique_ptr<platypus::Executioner> executioner{nullptr};
+  MFEMExecutioner * executioner{nullptr};
 };

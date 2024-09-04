@@ -91,7 +91,7 @@
 []
 
 [Executioner]
-  type = Steady
+  type = MFEMSteady
 []
 
 [Outputs]
