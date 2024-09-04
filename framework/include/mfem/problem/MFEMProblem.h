@@ -31,15 +31,13 @@ public:
   static InputParameters validParams();
 
   MFEMProblem(const InputParameters & params);
-  virtual ~MFEMProblem();
+  virtual ~MFEMProblem(){};
 
   virtual void init() override;
   virtual void initialSetup() override;
   virtual void externalSolve() override{};
   virtual void outputStep(ExecFlagType type) override;
-
   virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };
-
   virtual void syncSolutions(Direction direction) override{};
 
   /**
@@ -139,9 +137,6 @@ public:
    */
   platypus::PropertyManager & getProperties() { return _properties; }
 
-  std::string _input_mesh;
-  int _order;
-
   platypus::Coefficients _coefficients;
   std::shared_ptr<platypus::Problem> mfem_problem{nullptr};
 
@@ -172,7 +167,5 @@ protected:
   mfem::Device _device;
 
   platypus::PropertyManager _properties;
-  platypus::Outputs _outputs;
   std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
-  MFEMExecutioner * executioner{nullptr};
 };

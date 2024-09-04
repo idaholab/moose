@@ -52,26 +52,6 @@ MFEMTransient::Step(double dt, int it) const
 }
 
 void
-MFEMTransient::Solve() const
-{
-  _it++;
-  Step(_t_step, _it);
-}
-
-void
-MFEMTransient::Execute() const
-{
-  // Initialise time gridfunctions
-  _t = _t_initial;
-  _last_step = false;
-  _it = 0;
-  while (_last_step != true)
-  {
-    Solve();
-  }
-}
-
-void
 MFEMTransient::init()
 {
   _problem = dynamic_cast<platypus::TimeDomainProblem *>(_mfem_problem.mfem_problem.get());
@@ -84,7 +64,8 @@ MFEMTransient::execute()
 {
   _mfem_problem.outputStep(EXEC_INITIAL);
   preExecute();
-  Solve();
+  _it++;
+  Step(_t_step, _it);
 
   _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,
                                    /*recurse_through_multiapp_levels=*/true);

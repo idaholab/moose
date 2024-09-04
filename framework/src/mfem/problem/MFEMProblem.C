@@ -6,26 +6,13 @@ InputParameters
 MFEMProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
-  params.addParam<int>(
-      "vis_steps",
-      1,
-      "Number of timesteps between successive write outs of data collections to file.");
-  params.addParam<bool>(
-      "use_glvis", false, "Attempt to open GLVis ports to display variables during simulation");
   params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
-
   return params;
 }
 
-MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params),
-    _input_mesh(_mesh.parameters().get<MeshFileName>("file")),
-    _coefficients(),
-    _outputs()
+MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params), _coefficients()
 {
 }
-
-MFEMProblem::~MFEMProblem() {}
 
 void
 MFEMProblem::outputStep(ExecFlagType type)
@@ -57,7 +44,6 @@ MFEMProblem::initialSetup()
   _coefficients.AddGlobalCoefficientsFromSubdomains();
 
   mfem_problem_builder->SetCoefficients(_coefficients);
-
   // NB: set to false to avoid reconstructing problem operator.
   mfem_problem_builder->FinalizeProblem(false);
 
@@ -65,7 +51,6 @@ MFEMProblem::initialSetup()
   {
     mooseError("Executioner used that is not currently supported by MFEMProblem");
   }
-  mfem_problem->_outputs.EnableGLVis(getParam<bool>("use_glvis"));
 }
 
 void
