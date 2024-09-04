@@ -54,11 +54,12 @@
   []
 []
 
+[Materials]
+  prop_names = diffusivity
+  prop_values = 1.0
+[]
+
 [Coefficients]
-  [one]
-    type = MFEMConstantCoefficient
-    value = 1.0
-  []
   [TopValue]
     type = MFEMFunctionCoefficient
     function = value_top
@@ -73,7 +74,7 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = diffused
-    coefficient = one
+    coefficient = diffusivity
   []
 []
 
