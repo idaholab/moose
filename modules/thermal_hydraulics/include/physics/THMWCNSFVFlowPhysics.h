@@ -31,8 +31,14 @@ private:
   virtual void addNonlinearVariables() override;
   virtual void addAuxiliaryVariables() override;
   virtual void addTHMInitialConditions();
+  // For nonlinear variables, we use the traditional method of adding initial conditions instead of
+  // what is done in Simulation.C, adding ICs with variables
+  virtual void addInitialConditions() override;
+  virtual void addFVKernels() override;
   virtual void addAuxiliaryKernels() override;
+  virtual void addFVBCs() override;
   virtual void addMaterials() override;
+  virtual void addPostprocessors() override;
 
   virtual void addInletBoundaries() override;
   virtual void addOutletBoundaries() override;

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "THMWCNSFVFlowPhysics.h"
+#include "NSFVBase.h"
 #include "THMProblem.h"
 #include "FlowChannelBase.h"
 #include "SlopeReconstruction1DInterface.h"
@@ -41,6 +42,7 @@ const std::string WCNSFV::REYNOLDS_NUMBER = "Re";
 registerTHMFlowModelPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVFlowPhysics);
 registerNavierStokesPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVFlowPhysics);
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "THMPhysics:add_ic");
+registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_ic");
 
 // From WCNSFVFlowPhysics
 // TODO: make sure list is minimal
@@ -59,16 +61,20 @@ THMWCNSFVFlowPhysics::validParams()
   InputParameters params = ThermalHydraulicsFlowPhysics::validParams();
   params += WCNSFVFlowPhysics::validParams();
 
+  params.addParam<bool>("output_inlet_areas",
+                        false,
+                        "Whether to output the postprocessors measuring the inlet areas");
+
   // Suppress direct setting of boundary parameters from the physics, since these will be set by
   // flow boundary components
   params.suppressParameter<std::vector<BoundaryName>>("inlet_boundaries");
-  params.suppressParameter<std::vector<MooseEnum>>("momentum_inlet_types");
-  params.suppressParameter<std::vector<MooseFunctorName>>("momentum_inlet_functors");
+  params.suppressParameter<MultiMooseEnum>("momentum_inlet_types");
+  params.suppressParameter<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors");
   params.suppressParameter<std::vector<BoundaryName>>("outlet_boundaries");
-  params.suppressParameter<std::vector<MooseEnum>>("momentum_outlet_types");
+  params.suppressParameter<MultiMooseEnum>("momentum_outlet_types");
   params.suppressParameter<std::vector<MooseFunctorName>>("pressure_functors");
   params.suppressParameter<std::vector<BoundaryName>>("wall_boundaries");
-  params.suppressParameter<std::vector<MooseEnum>>("momentum_wall_types");
+  params.suppressParameter<MultiMooseEnum>("momentum_wall_types");
   // params.suppressParameter<std::vector<MooseFunctorName>>("momentum_wall_functors");
 
   // Suppress misc parameters we do not expect we will need for now
@@ -122,7 +128,11 @@ THMWCNSFVFlowPhysics::addTHMInitialConditions()
 {
   // We are going to assume these are not restarted properly
   ThermalHydraulicsFlowPhysics::addCommonInitialConditions();
+}
 
+void
+THMWCNSFVFlowPhysics::addInitialConditions()
+{
   // Restarting, avoid ICs
   if (_app.isRestarting() || getParam<bool>("initialize_variables_from_mesh_file"))
     return;
@@ -134,19 +144,26 @@ THMWCNSFVFlowPhysics::addTHMInitialConditions()
   {
     if (flow_channel->isParamValid("initial_vel") && flow_channel->isParamValid("initial_p"))
     {
+      const auto & blocks = flow_channel->getSubdomainNames();
+
       // Velocity initial condition
       InputParameters params = getFactory().getValidParams("FunctionIC");
-      assignBlocks(params, flow_channel->getSubdomainNames());
+      assignBlocks(params, blocks);
       auto vvalue = flow_channel->getParam<FunctionName>("initial_vel");
       params.set<VariableName>("variable") = getVelocityNames()[0];
       params.set<FunctionName>("function") = vvalue;
-      getProblem().addInitialCondition(
-          "FunctionIC", prefix() + getVelocityNames()[0] + "_ic", params);
+      getProblem().addInitialCondition("FunctionIC",
+                                       prefix() + getVelocityNames()[0] + "_" +
+                                           Moose::stringify(blocks) + "_ic",
+                                       params);
 
       // Pressure initial condition
       params.set<VariableName>("variable") = getPressureName();
       params.set<FunctionName>("function") = flow_channel->getParam<FunctionName>("initial_p");
-      getProblem().addInitialCondition("FunctionIC", prefix() + getPressureName() + "_ic", params);
+      getProblem().addInitialCondition("FunctionIC",
+                                       prefix() + getPressureName() + "_" +
+                                           Moose::stringify(blocks) + "_ic",
+                                       params);
 
       // NOTE: this could be a little slow for very many channels. If we specified initial
       // conditions on every single channel, we could skip this
@@ -158,8 +175,9 @@ THMWCNSFVFlowPhysics::addTHMInitialConditions()
           flow_channel->name() + "'");
   }
 
-  // Add WCNSFV initial conditions with modified block restriction
-  WCNSFVFlowPhysics::addInitialConditions();
+  // Add WCNSFV initial conditions on the remaining blocks
+  if (_blocks.size())
+    WCNSFVFlowPhysics::addInitialConditions();
   // Restore initial block restriction
   _blocks = copy_blocks;
 }
@@ -172,9 +190,27 @@ THMWCNSFVFlowPhysics::addMaterials()
 }
 
 void
+THMWCNSFVFlowPhysics::addFVKernels()
+{
+  // TODO: process friction factor, gravity
+
+  WCNSFVFlowPhysics::addFVKernels();
+}
+
+void
 THMWCNSFVFlowPhysics::addAuxiliaryKernels()
 {
   // TODO: add aux-variables used by the closures
+}
+
+void
+THMWCNSFVFlowPhysics::addFVBCs()
+{
+  // NOTE: This routine will likely move to the derived class if we implement finite volume
+  addInletBoundaries();
+  addOutletBoundaries();
+
+  WCNSFVFlowPhysics::addFVBCs();
 }
 
 void
@@ -188,11 +224,16 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
     UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _inlet_types[i];
-    MooseEnum flux_mass("flux-mass", "flux-mass");
 
     if (boundary_type == InletTypeEnum::MdotTemperature)
+    {
+      MooseEnum flux_mass(NSFVBase::getValidMomentumInletTypes(), "flux-mass");
+      MooseFunctorName mdot = std::to_string(comp.getParam<Real>("m_dot"));
       for (const auto & boundary_name : comp.getBoundaryNames())
-        addInletBoundary(boundary_name, flux_mass, std::to_string(comp.getParam<Real>("mdot")));
+      {
+        addInletBoundary(boundary_name, flux_mass, mdot);
+      }
+    }
   }
 }
 
@@ -207,12 +248,39 @@ THMWCNSFVFlowPhysics::addOutletBoundaries()
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
     UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _outlet_types[i];
-    MooseEnum fixed_pressure("fixed-pressure", "fixed-pressure");
+    MooseEnum fixed_pressure(NSFVBase::getValidMomentumOutletTypes(), "fixed-pressure");
 
     if (boundary_type == OutletTypeEnum::FixedPressure)
     {
       for (const auto & boundary_name : comp.getBoundaryNames())
         addOutletBoundary(boundary_name, fixed_pressure, std::to_string(comp.getParam<Real>("p")));
+    }
+  }
+}
+
+void
+THMWCNSFVFlowPhysics::addPostprocessors()
+{
+  const std::string pp_type = "AverageNodalVariableValue";
+  InputParameters params = getFactory().getValidParams(pp_type);
+  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
+  params.set<std::vector<VariableName>>("variable") = {AREA_LINEAR};
+  if (!getParam<bool>("output_inlet_areas"))
+    params.set<std::vector<OutputName>>("outputs") = {"none"};
+
+  for (const auto i : index_range(_inlet_components))
+  {
+    const auto & comp_name = _inlet_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
+    const auto & boundary_type = _inlet_types[i];
+
+    for (const auto & bdy_name : comp.getBoundaryNames())
+    {
+      params.set<std::vector<BoundaryName>>("boundary") = {bdy_name};
+
+      const auto name_pp = "area_pp_" + bdy_name;
+      if (!getProblem().hasUserObject(name_pp))
+        getProblem().addPostprocessor(pp_type, name_pp, params);
     }
   }
 }
