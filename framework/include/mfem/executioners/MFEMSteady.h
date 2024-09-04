@@ -11,10 +11,6 @@ public:
   explicit MFEMSteady(const InputParameters & params);
   ~MFEMSteady() override = default;
 
-  void Solve() const override;
-
-  void Execute() const override;
-
   virtual void init() override;
 
   virtual void execute() override;

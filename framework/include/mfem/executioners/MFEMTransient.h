@@ -13,10 +13,6 @@ public:
 
   void Step(double dt, int it) const;
 
-  void Solve() const override;
-
-  void Execute() const override;
-
   virtual void init() override;
 
   virtual void execute() override;
