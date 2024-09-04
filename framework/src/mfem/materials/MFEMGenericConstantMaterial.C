@@ -1,5 +1,7 @@
 #include "MFEMGenericConstantMaterial.h"
 
+registerMooseObject("PlatypusApp", MFEMGenericConstantMaterial);
+
 InputParameters
 MFEMGenericConstantMaterial::validParams()
 {
@@ -11,7 +13,6 @@ MFEMGenericConstantMaterial::validParams()
   params.addRequiredParam<std::vector<Real>>("prop_values",
                                              "The values associated with the named properties");
 
-  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   params.declareControllable("prop_values");
   return params;
 }

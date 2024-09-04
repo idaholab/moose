@@ -55,8 +55,11 @@
 []
 
 [Materials]
-  prop_names = diffusivity
-  prop_values = 1.0
+  [Substance]
+    type = MFEMGenericConstantMaterial
+    prop_names = diffusivity
+    prop_values = 1.0
+  []
 []
 
 [Coefficients]

@@ -209,6 +209,12 @@ TEST_F(CheckPropertyMap, OverwriteProperty)
                MooseException);
 }
 
+TEST_F(CheckPropertyMap, PropertyNotDeclared)
+{
+  platypus::ScalarMap prop_map;
+  EXPECT_THROW(prop_map.getCoefficient("NotDeclared"), MooseException);
+}
+
 TEST_F(CheckPropertyMap, AddBlocksForUniformProperty)
 {
   platypus::ScalarMap prop_map;
