@@ -87,6 +87,13 @@ public:
    */
   const std::vector<BoundaryName> & getBoundaryNames() const;
 
+  /**
+   * Gets the boundary normals for this component
+   *
+   * @return boundary normal for this component
+   */
+  const std::vector<Real> & getBoundaryNormals() const;
+
 protected:
   virtual void setupMesh() override;
   virtual void init() override;

@@ -26,6 +26,9 @@ public:
    */
   const UserObjectName & getFluidPropertiesName() const;
 
+  /// Get the name of the junction user object
+  const std::string & getJunctionUOName() const { return _junction_uo_name; }
+
 protected:
   virtual void init() override;
   virtual void check() const override;

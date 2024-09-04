@@ -154,3 +154,11 @@ Component1DConnection::getBoundaryNames() const
 
   return _boundary_names;
 }
+
+const std::vector<Real> &
+Component1DConnection::getBoundaryNormals() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _normals;
+}
