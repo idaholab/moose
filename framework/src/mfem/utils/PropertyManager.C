@@ -38,6 +38,15 @@ PropertyManager::declareScalar(const std::string & name,
 }
 
 void
+PropertyManager::declareScalar(
+    const std::string & name,
+    std::function<mfem::real_t(const mfem::Vector &, mfem::real_t t)> func,
+    const std::vector<std::string> & blocks)
+{
+  this->declareScalar(name, std::make_unique<mfem::FunctionCoefficient>(func), blocks);
+}
+
+void
 PropertyManager::declareScalar(const std::string & name,
                                std::unique_ptr<mfem::Coefficient> && coef,
                                const std::vector<std::string> & blocks)
@@ -63,6 +72,16 @@ PropertyManager::declareVector(const std::string & name,
 }
 
 void
+PropertyManager::declareVector(
+    const std::string & name,
+    int dim,
+    std::function<void(const mfem::Vector &, mfem::real_t t, mfem::Vector &)> func,
+    const std::vector<std::string> & blocks)
+{
+  this->declareVector(name, std::make_unique<mfem::VectorFunctionCoefficient>(dim, func), blocks);
+}
+
+void
 PropertyManager::declareVector(const std::string & name,
                                std::unique_ptr<mfem::VectorCoefficient> && coef,
                                const std::vector<std::string> & blocks)
@@ -83,6 +102,16 @@ PropertyManager::declareMatrix(const std::string & name,
                                int dim,
                                std::function<void(const mfem::Vector &, mfem::DenseMatrix &)> func,
                                const std::vector<std::string> & blocks)
+{
+  this->declareMatrix(name, std::make_unique<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
+}
+
+void
+PropertyManager::declareMatrix(
+    const std::string & name,
+    int dim,
+    std::function<void(const mfem::Vector &, mfem::real_t, mfem::DenseMatrix &)> func,
+    const std::vector<std::string> & blocks)
 {
   this->declareMatrix(name, std::make_unique<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
 }
