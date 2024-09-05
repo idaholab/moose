@@ -24,6 +24,11 @@
 {%- set CLANG_GCC_VERSION = '' -%}
 {%- endif %}
 
+{#- The system GCC version for GCC min                                                        -#}
+{%- if ALTERNATE_FROM == "gcc_min" %}
+{%- set GCC_MIN_VERSION = '9' -%}
+{%- endif %}
+
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
 {#- Whether or not to enable openmpi                                                          -#}
@@ -45,6 +50,10 @@ Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
     # Fix locale warnings
     export LC_ALL=C
 
+{%- if ALTERNATE_FROM == "gcc_min" %}
+    # Alternate GCC used for Clang compile
+    source /opt/rh/gcc-toolset-{{ GCC_MIN_VERSION }}/enable
+{%- endif %}
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     # Alternate GCC used for Clang compile
     source /opt/rh/gcc-toolset-{{ CLANG_GCC_VERSION }}/enable
@@ -104,11 +113,6 @@ EOF
     dnf config-manager --set-enabled powertools
     dnf install -y redhat-lsb-core.x86_64
 
-{%- if ALTERNATE_FROM == "gcc_min" %}
-    # Install gcc
-    dnf install -y gcc gcc-gfortran gcc-c++ gdb
-{%- endif %}
-
     # Additional installs
     dnf install -y tmux emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
         perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
@@ -134,6 +138,12 @@ EOF
     dnf install -y gcc-toolset-${CLANG_GCC_VERSION}
     # Set alternative gcc-toolchain paths required by Clang
     source /opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/enable
+{%- endif %}
+{%- if ALTERNATE_FROM == "gcc_min" %}
+    # Install gcc min
+    GCC_MIN_VERSION={{ GCC_MIN_VERSION }}
+    dnf install -y gcc-toolset-${GCC_MIN_VERSION}
+    source /opt/rh/gcc-toolset-${GCC_MIN_VERSION}/enable
 {%- endif %}
 
 {%- if ALTERNATE_FROM == "clang_min" %}
