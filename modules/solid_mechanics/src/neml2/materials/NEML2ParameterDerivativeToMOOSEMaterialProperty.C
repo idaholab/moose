@@ -56,11 +56,6 @@ NEML2ParameterDerivativeToMOOSEMaterialProperty<T>::validParams()
   params.addRequiredParam<std::string>(
       "neml2_parameter_derivative", "Return the derivative of neml2_variable with respect to this");
 
-  // provide an optional initialization of the moose property (because we don't really know if it is
-  // going to become stateful or not)
-  params.addParam<MaterialPropertyName>("moose_material_property_init",
-                                        "Optional material property as the initial condition");
-
   return params;
 }
 
