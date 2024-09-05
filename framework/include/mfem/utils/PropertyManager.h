@@ -30,6 +30,9 @@ public:
                      std::function<mfem::real_t(const mfem::Vector &)> func,
                      const std::vector<std::string> & blocks = {});
   void declareScalar(const std::string & name,
+                     std::function<mfem::real_t(const mfem::Vector &, mfem::real_t)> func,
+                     const std::vector<std::string> & blocks = {});
+  void declareScalar(const std::string & name,
                      std::unique_ptr<mfem::Coefficient> && coef,
                      const std::vector<std::string> & blocks = {});
 
@@ -39,6 +42,10 @@ public:
   void declareVector(const std::string & name,
                      int dim,
                      std::function<void(const mfem::Vector &, mfem::Vector &)> func,
+                     const std::vector<std::string> & blocks = {});
+  void declareVector(const std::string & name,
+                     int dim,
+                     std::function<void(const mfem::Vector &, double t, mfem::Vector &)> func,
                      const std::vector<std::string> & blocks = {});
   void declareVector(const std::string & name,
                      std::unique_ptr<mfem::VectorCoefficient> && coef,
@@ -51,6 +58,11 @@ public:
                      int dim,
                      std::function<void(const mfem::Vector &, mfem::DenseMatrix &)> func,
                      const std::vector<std::string> & blocks = {});
+  void
+  declareMatrix(const std::string & name,
+                int dim,
+                std::function<void(const mfem::Vector &, mfem::real_t, mfem::DenseMatrix &)> func,
+                const std::vector<std::string> & blocks = {});
   void declareMatrix(const std::string & name,
                      std::unique_ptr<mfem::MatrixCoefficient> && coef,
                      const std::vector<std::string> & blocks = {});
