@@ -33,7 +33,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     source /opt/mpi/use-openmpi
 {%- endif %}
 
-    # From moose-petsc
     export PETSC_DIR={{ PETSC_DIR }}
 
 %post
@@ -60,19 +59,21 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${PETSC_SRC_DIR}
     git checkout ${PETSC_GIT_SHA}
 
+    # Load PETSc options, split by word so that globbing works correctly
+    IFS=' ' read -r -a PETSC_OPTIONS <<< "{{ PETSC_OPTIONS }}"
+    # Additional options with cuda
+    if [ -n "$CUDA_DIR" ]; then
+        PETSC_OPTIONS+=("--download-kokkos" "--download-kokkos-kernels" "--with-cuda" "--with-cuda-arch=70" "--download-slate")
+    fi
+{%- if PROFILING is defined %}
+    # Flags needed for profiling
+    PETSC_OPTIONS+=("--CFLAGS=-fno-omit-frame-pointer" "--CXX_CXXFLAGS=-fno-omit-frame-pointer" "--FFLAGS=-fno-omit-frame-pointer")
+{%- endif %}
+
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh \
-{%- if PROFILING is defined %}
-        --CFLAGS=-fno-omit-frame-pointer \
-        --CXX_CXXFLAGS=-fno-omit-frame-pointer \
-        --FFLAGS=-fno-omit-frame-pointer \
-{%- endif %}
-{%- if PETSC_OPTIONS is defined %}
-        {{ PETSC_OPTIONS }} \
-{%- endif %}
-        ;
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh "${PETSC_OPTIONS[@]}"
 
 {%- if MPI_FLAVOUR == "openmpi" %}
     # If we're using openmpi, we need to allow running as root
@@ -83,9 +84,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     fi
 {%- endif %}
 
-    # Test PETSc
-    cd petsc
-    make SLEPC_DIR=${PETSC_DIR} PETSC_DIR=${PETSC_DIR} PETSC_ARCH= check
+    # Test PETSc, only if not using cuda (so that we don't need a GPU to build)
+    if [ -z "$CUDA_DIR" ]; then
+        cd petsc
+        make SLEPC_DIR=${PETSC_DIR} PETSC_DIR=${PETSC_DIR} PETSC_ARCH= check
+    fi
 
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
