@@ -30,8 +30,10 @@
     type = ParsedGenerateSideset
     input = sideset
     combinatorial_geometry = 'z > 0.6'
-    included_boundaries = 'interior'
-    new_sideset_name = interior_smaller
+    excluded_boundaries = 'interior'
+    # note we specify the normal here to prevent the "other side" of the face to be added
+    normal = '1 0 0'
+    new_sideset_name = 'none_from_interior'
   []
 []
 

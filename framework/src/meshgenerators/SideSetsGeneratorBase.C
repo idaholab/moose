@@ -165,7 +165,6 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
             "A boundary cannot be both the new boundary and be excluded in the list of excluded "
             "boundaries.");
     _excluded_boundary_ids = MooseMeshUtils::getBoundaryIDs(mesh, excluded_boundaries, false);
-    std::cout << "Excluding " << Moose::stringify(_excluded_boundary_ids) << std::endl;
 
     // Check that the excluded boundary ids/names exist in the mesh
     for (const auto & i : index_range(_excluded_boundary_ids))
@@ -309,10 +308,7 @@ SideSetsGeneratorBase::elementSideInExcludedBoundaries(const Elem * const elem,
 {
   for (const auto bid : _excluded_boundary_ids)
     if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
-    {
-      std::cout << "excludid side " << elem->true_centroid() << std::endl;
       return true;
-    }
   return false;
 }
 

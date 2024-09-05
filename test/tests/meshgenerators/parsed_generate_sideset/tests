@@ -61,7 +61,7 @@
     issues = '#25082'
   []
 
-  [errors]
+  [missing_errors]
     requirement = 'The system shall report an error'
     design = 'meshgenerators/ParsedGenerateSideset.md'
     issues = '#22117'
@@ -78,7 +78,7 @@
       input = parsed_generate_sideset.i
       cli_args = 'Mesh/sideset/included_neighbors="missing"'
       expect_err = "The block 'missing' was not found in the mesh"
-      requirement = 'if one of the included neighbors does not exist in the mesh,'
+      detail = 'if one of the included neighbors does not exist in the mesh,'
       mesh_mode = 'REPLICATED'
     []
     [invalid_included_boundary]
@@ -86,17 +86,26 @@
       input = parsed_generate_sideset.i
       cli_args = 'Mesh/sideset/included_boundaries="missing"'
       expect_err = "The boundary 'missing' was not found in the mesh"
-      requirement = 'if one of the included sidesets does not exist in the mesh,'
+      detail = 'if one of the included sidesets does not exist in the mesh,'
       mesh_mode = 'REPLICATED'
-      design = 'meshgenerators/ParsedGenerateSideset.md'
     []
     [invalid_excluded_boundary]
       type = RunException
       input = parsed_generate_sideset.i
       cli_args = 'Mesh/sideset/excluded_boundaries="missing"'
       expect_err = "The boundary 'missing' was not found in the mesh"
-      requirement = 'if one of the excluded sidesets does not exist in the mesh,'
+      detail = 'if one of the excluded sidesets does not exist in the mesh,'
       mesh_mode = 'REPLICATED'
     []
+  []
+  [overlap_included_excluded_boundary]
+    type = RunException
+    input = parsed_generate_sideset.i
+    cli_args = 'Mesh/sideset/included_boundaries="top" Mesh/sideset/excluded_boundaries="top"'
+    expect_err = "'included_boundaries' and 'excluded_boundaries' lists should not overlap"
+    requirement = 'The system shall report an error if a sideset appears in both the list of sidesets to include and to exclude.'
+    mesh_mode = 'REPLICATED'
+    issues = '#28551'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
   []
 []
