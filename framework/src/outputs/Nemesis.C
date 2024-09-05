@@ -38,22 +38,18 @@ Nemesis::validParams()
 Nemesis::Nemesis(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _nemesis_io_ptr(nullptr),
-    _file_num(0),
-    _nemesis_num(0),
-    _nemesis_initialized(false)
+    _file_num(declareRestartableData<unsigned int>("nemesis_file_num", 0)),
+    _nemesis_num(declareRestartableData<unsigned int>("nemesis_num", 0)),
+    _nemesis_initialized(false),
+    _recovering(_app.isRecovering()),
+    _nemesis_mesh_changed(declareRestartableData<bool>("nemesis_mesh_changed", true))
 {
 }
-
-Nemesis::~Nemesis() {}
 
 void
 Nemesis::initialSetup()
 {
-
   AdvancedOutput::initialSetup();
-
-  // Make certain that a Nemesis_IO object exists
-  meshChanged();
 }
 
 void
@@ -64,15 +60,46 @@ Nemesis::meshChanged()
   if (_nemesis_io_ptr != nullptr && !_nemesis_initialized)
     return;
 
-  // Increment the file number
-  _file_num++;
+  // Indicate to the Nemesis object that the mesh has changed
+  _nemesis_mesh_changed = true;
+}
 
-  // Reset the number of outputs for this file
-  _nemesis_num = 1;
+void
+Nemesis::outputSetup()
+{
+  if (_nemesis_io_ptr)
+  {
+    // Do nothing if the Nemesis_IO objects exists, but has not been initialized
+    if (!_nemesis_initialized)
+      return;
+
+    // Do nothing if the mesh has not changed
+    if (!_nemesis_mesh_changed)
+      return;
+  }
 
   // Create the new NemesisIO object
   _nemesis_io_ptr = std::make_unique<Nemesis_IO>(_problem_ptr->mesh().getMesh());
   _nemesis_initialized = false;
+
+  if (_recovering && !_nemesis_mesh_changed && _nemesis_num > 0)
+  {
+    // Set the recovering flag to false so that this special case is not triggered again
+    _recovering = false;
+
+    // Set the append flag to true b/c on recover the file is being appended
+    _nemesis_io_ptr->append(true);
+  }
+  else
+  {
+    // Increment file counter
+    if (_nemesis_mesh_changed)
+      _file_num++;
+
+    // Disable file appending and reset nemesis file number count
+    _nemesis_io_ptr->append(false);
+    _nemesis_num = 1;
+  }
 }
 
 void
@@ -142,6 +169,8 @@ Nemesis::outputScalarVariables()
 void
 Nemesis::output()
 {
+  outputSetup();
+
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();
@@ -170,6 +199,9 @@ Nemesis::output()
   // Write the global variables (populated by the output methods)
   if (!_global_values.empty())
     _nemesis_io_ptr->write_global_data(_global_values, _global_names);
+
+  // Reset the mesh changed flag
+  _nemesis_mesh_changed = false;
 }
 
 std::string
