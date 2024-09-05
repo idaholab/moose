@@ -85,7 +85,7 @@
       type = RunException
       input = parsed_generate_sideset.i
       cli_args = 'Mesh/sideset/included_boundaries="missing"'
-      expect_err = "The boundary 'missing' was not found in the mesh"
+      expect_err = "The boundary 'missing' was not found within the mesh"
       detail = 'if one of the included sidesets does not exist in the mesh,'
       mesh_mode = 'REPLICATED'
     []
@@ -93,7 +93,7 @@
       type = RunException
       input = parsed_generate_sideset.i
       cli_args = 'Mesh/sideset/excluded_boundaries="missing"'
-      expect_err = "The boundary 'missing' was not found in the mesh"
+      expect_err = "The boundary 'missing' was not found within the mesh"
       detail = 'if one of the excluded sidesets does not exist in the mesh,'
       mesh_mode = 'REPLICATED'
     []
