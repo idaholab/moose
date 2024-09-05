@@ -820,13 +820,19 @@ MooseApp::setupOptions()
       _builder.buildJsonSyntaxTree(tree);
     }
 
-    // Turn off live printing so that it doesn't mess with the dump
-    _perf_graph.disableLivePrint();
+    // Check if second arg is valid or not
+    if ((tree.getRoot()).is_object())
+    {
+      // Turn off live printing so that it doesn't mess with the dump
+      _perf_graph.disableLivePrint();
 
-    JsonInputFileFormatter formatter;
-    Moose::out << "\n### START DUMP DATA ###\n"
-               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
-    _ready_to_exit = true;
+      JsonInputFileFormatter formatter;
+      Moose::out << "\n### START DUMP DATA ###\n"
+                 << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
+      _ready_to_exit = true;
+    }
+    else
+      mooseError("Search parameter '", param_search, "' was not found in the registered syntax.");
   }
   else if (isParamValid("registry"))
   {
