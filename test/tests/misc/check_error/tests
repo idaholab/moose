@@ -1169,4 +1169,13 @@
     design = 'MooseUtils.md'
     issues = '#17407'
   []
+  [dump_error_with_unrecogized_param]
+    type = 'RunException'
+    input = ''
+    cli_args = '--dump bad_parameter'
+    expect_err = "Search parameter 'bad_parameter' was not found in the registered syntax."
+
+    requirement = 'The system shall report a helpful error when the dump parameter does not match any valid parameters'
+    issues = '#26714'
+  []
 []
