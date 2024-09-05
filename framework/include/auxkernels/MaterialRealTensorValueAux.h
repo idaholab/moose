@@ -15,7 +15,8 @@
 /**
  * AuxKernel for outputting a RealTensorValue material property component to an AuxVariable
  */
-class MaterialRealTensorValueAux : public MaterialAuxBase<RealTensorValue>
+template <bool is_ad>
+class MaterialRealTensorValueAuxTempl : public MaterialAuxBaseTempl<RealTensorValue, is_ad>
 {
 public:
   static InputParameters validParams();
@@ -24,7 +25,7 @@ public:
    * Class constructor
    * @param parameters The input parameters for this AuxKernel
    */
-  MaterialRealTensorValueAux(const InputParameters & parameters);
+  MaterialRealTensorValueAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real getRealValue() override;
@@ -35,3 +36,6 @@ protected:
   /// The column index to output
   unsigned int _col;
 };
+
+typedef MaterialRealTensorValueAuxTempl<false> MaterialRealTensorValueAux;
+typedef MaterialRealTensorValueAuxTempl<true> ADMaterialRealTensorValueAux;

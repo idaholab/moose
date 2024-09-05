@@ -14,9 +14,11 @@
 #include "SymmetricRankFourTensor.h"
 
 registerMooseObject("MooseTestApp", OutputTestMaterial);
+registerMooseObject("MooseTestApp", ADOutputTestMaterial);
 
+template <bool is_ad>
 InputParameters
-OutputTestMaterial::validParams()
+OutputTestMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addParam<std::string>(
@@ -49,47 +51,55 @@ OutputTestMaterial::validParams()
   return params;
 }
 
-OutputTestMaterial::OutputTestMaterial(const InputParameters & parameters)
+template <bool is_ad>
+OutputTestMaterialTempl<is_ad>::OutputTestMaterialTempl(const InputParameters & parameters)
   : Material(parameters),
-    _real_property(declareProperty<Real>(getParam<std::string>("real_property_name"))),
-    _vector_property(
-        declareProperty<RealVectorValue>(getParam<std::string>("vector_property_name"))),
-    _tensor_property(
-        declareProperty<RealTensorValue>(getParam<std::string>("tensor_property_name"))),
-    _ranktwotensor_property(
-        declareProperty<RankTwoTensor>(getParam<std::string>("ranktwotensor_property_name"))),
-    _rankfourtensor_property(
-        declareProperty<RankFourTensor>(getParam<std::string>("rankfourtensor_property_name"))),
-    _symmetricranktwotensor_property(declareProperty<SymmetricRankTwoTensor>(
-        getParam<std::string>("symmetricranktwotensor_property_name"))),
-    _symmetricrankfourtensor_property(declareProperty<SymmetricRankFourTensor>(
-        getParam<std::string>("symmetricrankfourtensor_property_name"))),
+    _real_property(this->template declareGenericPropertyByName<Real, is_ad>(
+        getParam<std::string>("real_property_name"))),
+    _vector_property(this->template declareGenericPropertyByName<RealVectorValue, is_ad>(
+        getParam<std::string>("vector_property_name"))),
+    _tensor_property(this->template declareGenericPropertyByName<RealTensorValue, is_ad>(
+        getParam<std::string>("tensor_property_name"))),
+    _ranktwotensor_property(this->template declareGenericPropertyByName<RankTwoTensor, is_ad>(
+        getParam<std::string>("ranktwotensor_property_name"))),
+    _rankfourtensor_property(this->template declareGenericPropertyByName<RankFourTensor, is_ad>(
+        getParam<std::string>("rankfourtensor_property_name"))),
+    _symmetricranktwotensor_property(
+        this->template declareGenericPropertyByName<SymmetricRankTwoTensor, is_ad>(
+            getParam<std::string>("symmetricranktwotensor_property_name"))),
+    _symmetricrankfourtensor_property(
+        this->template declareGenericPropertyByName<SymmetricRankFourTensor, is_ad>(
+            getParam<std::string>("symmetricrankfourtensor_property_name"))),
     _factor(getParam<Real>("real_factor")),
-    _variable(coupledValue("variable"))
+    _variable(coupledGenericValue<is_ad>("variable"))
 {
   if (isParamValid("stdvector_property_name"))
-    _stdvector_property =
-        &declareProperty<std::vector<Real>>(getParam<std::string>("stdvector_property_name"));
+    _stdvector_property = &(this->template declareGenericPropertyByName<std::vector<Real>, is_ad>(
+        getParam<std::string>("stdvector_property_name")));
   else
     _stdvector_property = nullptr;
 }
 
-OutputTestMaterial::~OutputTestMaterial() {}
+template <bool is_ad>
+OutputTestMaterialTempl<is_ad>::~OutputTestMaterialTempl()
+{
+}
 
+template <bool is_ad>
 void
-OutputTestMaterial::computeQpProperties()
+OutputTestMaterialTempl<is_ad>::computeQpProperties()
 {
   Point p = _q_point[_qp];
-  Real v = std::floor(_variable[_qp] + 0.5);
-  Real x = std::ceil(p(0));
-  Real y = std::ceil(p(1));
+  GenericReal<is_ad> v = std::floor(_variable[_qp] + 0.5);
+  GenericReal<is_ad> x = std::ceil(p(0));
+  GenericReal<is_ad> y = std::ceil(p(1));
 
   _real_property[_qp] = v + y + x + _factor;
 
-  RealVectorValue vec(v + x, v + y);
+  GenericRealVectorValue<is_ad> vec(v + x, v + y);
   _vector_property[_qp] = vec;
 
-  RealTensorValue tensor(v, x * y, 0, -x * y, y * y);
+  GenericRealTensorValue<is_ad> tensor(v, x * y, 0, -x * y, y * y);
   _tensor_property[_qp] = tensor;
 
   _ranktwotensor_property[_qp] = tensor;
@@ -115,3 +125,6 @@ OutputTestMaterial::computeQpProperties()
     (*_stdvector_property)[_qp][1] = vec(1);
   }
 }
+
+template class OutputTestMaterialTempl<false>;
+template class OutputTestMaterialTempl<true>;

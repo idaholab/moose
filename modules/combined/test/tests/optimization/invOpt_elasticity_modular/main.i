@@ -23,9 +23,7 @@
                            1.0 -1.0 0.0
                            1.0  0.0 0.0
                            1.0  1.0 0.0'
-    measurement_values = '2.270471e+00 3.448233e+00 4.766029e+00
-    2.205754e+00 3.374848e+00 4.691352e+00
-    2.172435e+00 3.326780e+00 4.642104e+00'
+    measurement_values = '3.276017e+00 4.763281e+00 6.380137e+00 3.171603e+00 4.660766e+00 6.289842e+00 3.127077e+00 4.608134e+00 6.228638e+00'
   []
 []
 
@@ -39,7 +37,7 @@
   # petsc_options_iname = '-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
   # petsc_options_value = '1 true true false 1e-8 0.1'
   # petsc_options = '-tao_test_gradient_view'
-  verbose = true
+  # verbose = true
 []
 
 [MultiApps]

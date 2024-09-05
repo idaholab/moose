@@ -13,5 +13,6 @@
     recover = false
     libtorch = true
     required_submodule = '../solid_mechanics/contrib/neml2'
+    issues = '#26920'
   []
 []

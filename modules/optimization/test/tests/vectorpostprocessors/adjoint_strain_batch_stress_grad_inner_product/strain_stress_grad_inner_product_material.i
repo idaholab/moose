@@ -20,32 +20,13 @@
   []
 []
 
-[UserObjects]
-  [batch_deriv]
-    type = BatchPropertyDerivativeRankTwoTensorReal
-    material_property = number
-  []
-  # assign value using the following object
-  [batch]
-    type = OptimizationBatchPropertyDerivativeTest
-    batch_deriv_uo = batch_deriv
-    prop = tensor
-    execute_on = 'LINEAR'
-  []
-[]
-
 [Materials]
-  [prop1]
-    type = GenericConstantRankTwoTensor
+  [prop1] # dummy stress deriv
+    type = GenericConstantSymmetricRankTwoTensor
     tensor_name = tensor
-    tensor_values = '1 6 5 6 2 4 5 4 3'
+    tensor_values = '1 2 3 4 5 6'
   []
   [prop2]
-    type = GenericFunctionMaterial
-    prop_names = number
-    prop_values = '1.0'
-  []
-  [prop3]
     type = GenericConstantRankTwoTensor
     tensor_name = dummy_strain
     tensor_values = '10 11 12 13 14 15 16 17 18'
@@ -72,9 +53,9 @@
 
 [VectorPostprocessors]
   [inner_product]
-    type = AdjointStrainBatchStressGradInnerProduct
+    type = AdjointStrainSymmetricStressGradInnerProduct
     adjoint_strain_name = dummy_strain
-    stress_derivative = batch_deriv
+    stress_derivative_name = tensor
     function = fcn
     variable = v
   []
