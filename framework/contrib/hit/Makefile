@@ -1,6 +1,10 @@
 hit_CXX := $(libmesh_CXX)
 
 ifeq ($(hit_CXX),)
+  hit_CXX := $(CXX)
+endif
+
+ifeq ($(hit_CXX),)
   hit_CXX := g++
 endif
 
