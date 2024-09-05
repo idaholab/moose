@@ -2,6 +2,7 @@
   design = 'meshgenerators/LowerDBlockFromSidesetGenerator.md'
   [mesh]
     requirement = 'The system shall be able to create different subdomains (with first order elements)'
+    issues = '#11640'
     [ids]
       type = 'Exodiff'
       input = 'ids.i'
