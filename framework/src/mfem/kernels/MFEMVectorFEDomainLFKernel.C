@@ -17,12 +17,13 @@ MFEMVectorFEDomainLFKernel::validParams()
 MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _vec_coef_name(getParam<std::string>("vector_coefficient")),
-    _vec_coef(getMFEMProblem().getProperties().getVectorProperty(_vec_coef_name))
+    _vec_coef(getMFEMProblem().getProperties().getVectorProperty(_vec_coef_name)),
+    _vec_coef2(getMFEMProblem()._coefficients._vectors.Get("VolumetricSourceCoefficient"))
 {
 }
 
 mfem::LinearFormIntegrator *
 MFEMVectorFEDomainLFKernel::createIntegrator()
 {
-  return new mfem::VectorFEDomainLFIntegrator(_vec_coef);
+  return new mfem::VectorFEDomainLFIntegrator(*_vec_coef2);
 }
