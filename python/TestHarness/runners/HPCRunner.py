@@ -140,20 +140,20 @@ class HPCRunner(Runner):
         # Handle openmpi appending a null character at the end of jobs
         # that return a nonzero exit code. We don't know how to fix this
         # in openmpi yet, so this is the cleanest way to take care of it.
-        # We're looking for \n\0##########', which is at the end of the
+        # We're looking for \n[\0,\x00]##########', which is at the end of the
         # apptainer execution within hpc_template. This allows the null
         # character check that happens in Runner.finalize() to still
         # be valid.
         if self.exit_code != 0 and self.job.getTester().hasOpenMPI():
             output = self.getRunOutput().getOutput(sanitize=False)
             if output:
-                prefix = '\n'
-                null = '\0'
-                suffix = '##########'
-                all = f'{prefix}{null}{suffix}'
-                no_null = f'{prefix}{suffix}'
-                if all in output:
-                    self.getRunOutput().setOutput(output.replace(all, no_null))
+                for null in ['\0', '\x00']:
+                    prefix = '\n'
+                    suffix = '##########'
+                    all = f'{prefix}{null}{suffix}'
+                    no_null = f'{prefix}{suffix}'
+                    if all in output:
+                        self.getRunOutput().setOutput(output.replace(all, no_null))
 
     def kill(self):
         if self.hpc_job:
