@@ -10,6 +10,7 @@ class MFEMMaterial : public MFEMGeneralUserObject
 public:
   static InputParameters validParams();
   static std::vector<std::string> subdomainsToStrings(std::vector<SubdomainName> blocks);
+  static libMesh::Point pointFromMFEMVector(const mfem::Vector & vec);
 
   MFEMMaterial(const InputParameters & parameters);
   virtual ~MFEMMaterial();
