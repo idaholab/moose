@@ -1,12 +1,12 @@
-#include "MFEMGenericFunctionVectorMaterial.h"
+#include "MFEMGenericFunctionMaterial.h"
 
-registerMooseObject("PlatypusApp", MFEMGenericFunctionVectorMaterial);
+registerMooseObject("PlatypusApp", MFEMGenericFunctionMaterial);
 
 InputParameters
-MFEMGenericFunctionVectorMaterial::validParams()
+MFEMGenericFunctionMaterial::validParams()
 {
   InputParameters params = MFEMMaterial::validParams();
-  params.addClassDescription("Declares material vector properties based on names and functions "
+  params.addClassDescription("Declares material scalar properties based on names and functions "
                              "prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
       "prop_names", "The names of the properties this material will have");
@@ -16,8 +16,7 @@ MFEMGenericFunctionVectorMaterial::validParams()
   return params;
 }
 
-MFEMGenericFunctionVectorMaterial::MFEMGenericFunctionVectorMaterial(
-    const InputParameters & parameters)
+MFEMGenericFunctionMaterial::MFEMGenericFunctionMaterial(const InputParameters & parameters)
   : MFEMMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<FunctionName>>("prop_values"))
@@ -33,19 +32,13 @@ MFEMGenericFunctionVectorMaterial::MFEMGenericFunctionVectorMaterial(
   for (unsigned int i = 0; i < _num_props; i++)
   {
     // FIXME: Ideally this would support arbitrary dimensions
-    _properties.declareVector(
+    _properties.declareScalar(
         _prop_names[i],
-        3,
-        [&func =
-             getFunctionByName(_prop_values[i])](const mfem::Vector & p, double t, mfem::Vector & u)
-        {
-          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-          u[0] = vector_value(0);
-          u[1] = vector_value(1);
-          u[2] = vector_value(2);
-        },
+        [&func = getFunctionByName(_prop_values[i])](const mfem::Vector & p,
+                                                     double t) -> mfem::real_t
+        { return func.value(t, pointFromMFEMVector(p)); },
         subdomainsToStrings(_block_ids));
   }
 }
 
-MFEMGenericFunctionVectorMaterial::~MFEMGenericFunctionVectorMaterial() {}
+MFEMGenericFunctionMaterial::~MFEMGenericFunctionMaterial() {}

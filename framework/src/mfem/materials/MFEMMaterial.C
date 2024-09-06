@@ -34,6 +34,12 @@ MFEMMaterial::subdomainsToStrings(std::vector<SubdomainName> blocks)
   return result;
 }
 
+libMesh::Point
+MFEMMaterial::pointFromMFEMVector(const mfem::Vector & vec)
+{
+  return libMesh::Point(vec.Elem(0), vec.Elem(1), vec.Elem(2));
+}
+
 MFEMMaterial::MFEMMaterial(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _block_ids(getParam<std::vector<SubdomainName>>("block")),
