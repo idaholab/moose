@@ -70,32 +70,14 @@ class Runner(OutputInterface):
         # Load the redirected output files, if any
         run_output = self.getRunOutput()
         for file_path in self.job.getTester().getRedirectedOutputFiles(self.options):
-            self.run_output.appendOutput(util.outputHeader(f'Begin redirected output {file_path}'))
+            run_output.appendOutput(util.outputHeader(f'Begin redirected output {file_path}'))
             if os.access(file_path, os.R_OK):
                 with open(file_path, 'r+b') as f:
-                    self.run_output.appendOutput(self.readOutput(f))
+                    run_output.appendOutput(self.readOutput(f))
             else:
                 self.job.setStatus(self.job.error, 'FILE TIMEOUT')
                 self.appendOutput(f'File {file_path} unavailable')
-            self.run_output.appendOutput(util.outputHeader(f'End redirected output {file_path}'))
-
-        # Check for invalid unicode in output
-        output = self.getOutput()
-        try:
-            json.dumps(output)
-        except UnicodeDecodeError:
-            # Convert invalid output to something json can handle
-            self.setOutput(output.decode('utf-8','replace').encode('ascii', 'replace'))
-            # Alert the user that output has invalid characters
-            self.job.addCaveats('invalid characters in output')
-
-        # Remove NULL output and fail if it exists
-        output = self.getOutput()
-        null_chars = ['\0', '\x00']
-        for null_char in null_chars:
-            if null_char in output:
-                self.setOutput(output.replace(null_char, 'NULL'))
-                self.job.setStatus(self.job.error, 'NULL characters in output')
+            run_output.appendOutput(util.outputHeader(f'End redirected output {file_path}'))
 
     def getExitCode(self):
         """

@@ -365,8 +365,12 @@ class Job(OutputInterface):
 
         # Helper for exiting
         def finalize():
+            # Run cleanup
             with self.timer.time('job_cleanup'):
                 self.cleanup()
+            # Sanitize the output from all objects
+            self.sanitizeAllOutput()
+            # Stop timing
             self.timer.stopMain()
 
         # Set the output path if its separate and initialize the output
@@ -454,6 +458,13 @@ class Job(OutputInterface):
         # And do finalize (really just cleans up output)
         runner_finalize = lambda: self._runner.finalize()
         if not try_catch(runner_finalize, 'RUNNER FINALIZE', 'runner_finalize'):
+            finalize()
+            return
+
+        # Exit if we have bad output in the runner before running the tester
+        self.sanitizeAllOutput()
+        if self.isError():
+            finalize()
             return
 
         # Check if the files we checked on earlier were modified.
@@ -512,6 +523,21 @@ class Job(OutputInterface):
         for name, object in self.getOutputObjects().items():
             output[name] = object.getOutput()
         return output
+
+    def sanitizeAllOutput(self):
+        """ Sanitizes the output from all output objects
+
+        If output is retreived from these objects via getOutput() and
+        it contains bad output, it will throw an error. Instead of
+        throwing an error, we will sanitize it before hand and then
+        set a Job error so that we can still continue in a failed state.
+        """
+        all_failures = []
+        for name, object in self.getOutputObjects().items():
+            failures = object.sanitizeOutput()
+            all_failures.extend([s + f' in {name}' for s in failures])
+        if all_failures:
+            self.setStatus(self.error, ', '.join(all_failures))
 
     def getOutputForScreen(self):
         """ Gets the output for printing on screen """
