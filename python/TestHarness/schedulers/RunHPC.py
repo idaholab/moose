@@ -255,10 +255,15 @@ class RunHPC(RunParallel):
         full_command = f"ssh {host} '{command}'"
         return exit_code, result.rstrip(), full_command
 
-    def callHPC(self, pool_type, command):
+    def callHPC(self, pool_type, command: str, num_retries: int = 0, retry_time: float = 5):
         """
         Wrapper for calling a HPC command (qsub, qstat, etc) that supports
         SSH-ing to another host as needed when calling from within apptainer
+
+        Set num_retires to retry the command this many times, waiting
+        retry_time sec between each retry. The command will only be retried
+        if self.callHPCShouldRetry() is True for that command. This lets
+        us retry commands given known failures.
 
         Requires the "pool" to specify which command pool to use, of the
         RunHPC.CallHPCPoolType types.
@@ -266,7 +271,20 @@ class RunHPC(RunParallel):
         if not self.ssh_hosts:
             raise Exception('HPC not currently supported outside of a container')
 
-        return self.call_hpc_pool[pool_type].apply(self._callSSH, (command,))
+        exit_code = None
+        result = None
+        full_cmd = None
+
+        for i in range(num_retries + 1):
+            exit_code, result, full_cmd = self.call_hpc_pool[pool_type].apply(self._callSSH, (command,))
+            if exit_code == 0:
+                break
+            if self.callHPCShouldRetry(pool_type, result):
+                time.sleep(retry_time)
+            else:
+                break
+
+        return exit_code, result, full_cmd
 
     def getJobSlots(self, job):
         # Jobs only use one slot because they are ran externally
@@ -448,7 +466,7 @@ class RunHPC(RunParallel):
             cmd = '; '.join(cmd)
 
             # Do the submission; this is thread safe
-            exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.submit, cmd)
+            exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.submit, cmd, num_retries=5)
 
             # Start the queued timer if needed
             if not hold:
@@ -513,7 +531,7 @@ class RunHPC(RunParallel):
                     raise Exception('Job should not be held with holding disabled')
 
                 cmd = f'{self.getHPCQueueCommand()} {hpc_job.id}'
-                exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.queue, cmd)
+                exit_code, result, full_cmd = self.callHPC(self.CallHPCPoolType.queue, cmd, num_retries=5)
                 if exit_code != 0:
                     try:
                         self.killHPCJob(hpc_job, lock=False) # already locked
@@ -894,3 +912,10 @@ class RunHPC(RunParallel):
         entry = {'id': hpc_job.id,
                  'submission_script': self.getHPCJobSubmissionPath(job)}
         return {'HPC': entry}
+
+    def callHPCShouldRetry(self, pool_type, result: str):
+        """
+        Entry point for a derived scheduler class to tell us if we can
+        retry a command given a failure with a certain result.
+        """
+        return False

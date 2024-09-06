@@ -152,3 +152,12 @@ class RunPBS(RunHPC):
         if not search:
             raise Exception(f'qsub has unexpected ID {result}')
         return result
+
+    def callHPCShouldRetry(self, pool_type, result: str):
+        # If we're submitting/releasing/getting a status and cannot connect
+        # to the scheduler, we can retry
+        if pool_type in [self.CallHPCPoolType.submit,
+                         self.CallHPCPoolType.queue,
+                         self.CallHPCPoolType.status]:
+            return 'pbs_iff: cannot connect to host' in result
+        return False
