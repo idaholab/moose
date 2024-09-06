@@ -1,7 +1,3 @@
-[GlobalParams]
-  displacements = 'ux uy'
-[]
-
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -13,6 +9,14 @@
     ymin = -4
     ymax = 4
   []
+  displacements = 'disp_x disp_y'
+[]
+
+[Variables]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
@@ -23,76 +27,86 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
+      displacements = 'disp_x disp_y'
       [all]
         strain = SMALL
         new_system = true
-        add_variables = true
         formulation = TOTAL
         incremental = true
         volumetric_locking_correction = false
+        displacements = 'disp_x disp_y'
       []
     []
+  []
+[]
+
+[NEML2]
+  input = 'elasticity.i'
+  verbose = true
+  device = 'cpu'
+  [all]
+    model = 'forward_elasticity_model'
+
+    moose_input_types = 'MATERIAL'
+    moose_inputs = 'neml2_strain'
+    neml2_inputs = 'forces/E'
+
+    moose_parameter_types = 'MATERIAL'
+    moose_parameters = 'E_material'
+    neml2_parameters = 'E'
+
+    moose_output_types = 'MATERIAL'
+    moose_outputs = 'neml2_stress'
+    neml2_outputs = 'state/S'
+
+    moose_derivative_types = 'MATERIAL'
+    moose_derivatives = 'neml2_jacobian'
+    neml2_derivatives = 'state/S forces/E'
   []
 []
 
 [BCs]
   [bottom_x]
     type = DirichletBC
-    variable = ux
+    variable = disp_x
     boundary = bottom
     value = 0.0
   []
   [bottom_y]
     type = DirichletBC
-    variable = uy
+    variable = disp_y
     boundary = bottom
     value = 0.0
   []
   [top_x]
     type = NeumannBC
-    variable = ux
+    variable = disp_x
     boundary = top
     value = 1.0
   []
   [top_y]
     type = NeumannBC
-    variable = uy
+    variable = disp_y
     boundary = top
     value = 1.0
   []
 []
 
-[NEML2]
-  input = 'elasticity.i'
-  model = 'forward_elasticity_model'
-  verbose = true
-  mode = PARSE_ONLY
-  device = 'cpu'
-  enable_AD = true
-[]
-
 [Materials]
-  [output_stress_jacobian]
-    type = NEML2StressToMOOSE
-    execute_neml2_model_uo = model
-    neml2_stress_output = state/S
-    neml2_strain_input = forces/E
+  [convert_strain]
+    type = RankTwoTensorToSymmetricRankTwoTensor
+    from = 'mechanical_strain'
+    to = 'neml2_strain'
   []
-
+  [stress]
+    type = ComputeLagrangianObjectiveCustomSymmetricStress
+    custom_small_stress = 'neml2_stress'
+    custom_small_jacobian = 'neml2_jacobian'
+  []
   [E_material]
     type = GenericFunctionMaterial
     prop_names = 'E_material'
-    prop_values = E
-  []
-
-  [output_dS_dE]
-    type = NEML2ParameterDerivativeToSymmetricRankTwoTensorMOOSEMaterialProperty
-    execute_neml2_model_uo = model
-    moose_material_property = neml2_ds_dE
-    # dstress/dE
-    neml2_variable = state/S
-    neml2_parameter_derivative = 'E'
-    # outputs = exodus
+    prop_values = 'E'
   []
 []
 
@@ -108,36 +122,13 @@
 [Reporters]
   [measure_data]
     type = OptimizationData
-    variable = ux
+    variable = disp_x
     objective_name = objective_value
   []
   [parametrization]
     type = ConstantReporter
     real_vector_names = 'coordx coordy youngs_modulus'
     real_vector_values = '0 0 0; ${fparse 8/3} 0 ${fparse -8/3}; 5 5 5'
-  []
-[]
-
-[UserObjects]
-  [input_strain]
-    type = MOOSERankTwoTensorMaterialPropertyToNEML2
-    moose_material_property = mechanical_strain
-    neml2_variable = forces/E
-  []
-
-  [E_material]
-    type = MOOSERealMaterialToNEML2Parameter
-    moose_material_property = E_material
-    neml2_parameter = E
-  []
-
-  [model]
-    type = ExecuteNEML2Model
-    model = forward_elasticity_model
-    # add other gatherers here if needed
-    gather_uos = 'input_strain'
-    gather_param_uos = 'E_material'
-    # enable_AD = true # AD is not necessary for the forward app
   []
 []
 
@@ -148,61 +139,63 @@
   petsc_options_value = 'lu'
   # better efficiency if we compute them together
   residual_and_jacobian_together = true
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-14
 []
 
 [Postprocessors]
   [point1]
     type = PointValue
     point = '-1.0 -1.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point2]
     type = PointValue
     point = '-1.0 0.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point3]
     type = PointValue
     point = '-1.0 1.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point4]
     type = PointValue
     point = '0.0 -1.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point5]
     type = PointValue
     point = '0.0  0.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point6]
     type = PointValue
     point = '0.0  1.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point7]
     type = PointValue
     point = '1.0 -1.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point8]
     type = PointValue
     point = '1.0  0.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
   [point9]
     type = PointValue
     point = '1.0  1.0 0.0'
-    variable = ux
+    variable = disp_x
     execute_on = TIMESTEP_END
   []
 []
@@ -210,6 +203,4 @@
 [Outputs]
   file_base = 'forward'
   console = false
-  # exodus = true
-  # csv = true
 []

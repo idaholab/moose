@@ -810,7 +810,7 @@ public:
    *
    * In order to apply common parameter 4 statements must be satisfied
    *   (1) A local parameter must exist with the same name as common parameter
-   *   (2) Common parameter must valid
+   *   (2) Common parameter must be valid
    *   (3) Local parameter must be invalid OR not have been set from its default
    *   (4) Both cannot be private (unless \p allow_private = true)
    *
