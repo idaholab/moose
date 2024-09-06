@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FactorizedRankTwoTensor.h"
+#include "RankTwoTensorImplementation.h"
+#include "SymmetricRankTwoTensorImplementation.h"
 
 template <typename T>
 void
