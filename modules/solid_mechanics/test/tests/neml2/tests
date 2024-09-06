@@ -1,6 +1,6 @@
 [Tests]
   # The original issue is idaholab/blackbear#333
-  issues = '#26450'
+  issues = '#26450 #26920'
   design = 'CauchyStressFromNEML2.md CauchyStressFromNEML2UO.md CauchyStressFromNEML2Receiver.md'
   [neml2_error]
     type = RunException
@@ -179,6 +179,35 @@
       recover = false
       valgrind = heavy
     []
+  []
+  [moose_to_neml2_parameter]
+    type = Exodiff
+    input = 'moose_to_neml2_parameters.i'
+    exodiff = 'moose_to_neml2_parameters_out.e'
+    requirement = 'The system shall provide a modular way to transfer variables and/or real material property to NEML2 for use as model parameters.'
+    required_submodule = 'contrib/neml2'
+    libtorch = true
+    recover = false
+  []
+  [moose_to_neml2_parameter_error]
+    type = RunException
+    input = 'moose_to_neml2_parameters.i'
+    cli_args = 'UserObjects/gather_E/neml2_parameter=p'
+    requirement = 'The system shall error out while trying to set a parameter that does not exist.'
+    expect_err = 'there is not such parameter in the NEML2 material model.'
+    required_submodule = 'contrib/neml2'
+    libtorch = true
+    recover = false
+  []
+  [neml2_parameter_derivative]
+    type = Exodiff
+    input = 'moose_to_neml2_parameters.i'
+    exodiff = 'neml2_parameter_derivative_out.e'
+    cli_args = "Materials/active='output_stress_jacobian nu_material dstress_dE' Outputs/file_base='neml2_parameter_derivative_out'"
+    requirement = 'The system shall provide for a modular way to compute NEML2 output with respect to specific model parameters and save that it as a MOOSE material property.'
+    required_submodule = 'contrib/neml2'
+    libtorch = true
+    recover = false
   []
   [neml2_to_moose_material]
     type = Exodiff

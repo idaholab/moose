@@ -10,11 +10,13 @@
 #include "MaterialRealTensorValueAux.h"
 
 registerMooseObject("MooseApp", MaterialRealTensorValueAux);
+registerMooseObject("MooseApp", ADMaterialRealTensorValueAux);
 
+template <bool is_ad>
 InputParameters
-MaterialRealTensorValueAux::validParams()
+MaterialRealTensorValueAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBase<>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<RealTensorValue, is_ad>::validParams();
   params.addClassDescription("Object for extracting a component of a rank two tensor material "
                              "property to populate an auxiliary variable.");
   params.addParam<unsigned int>("row", 0, "The row component to consider for this kernel");
@@ -22,10 +24,12 @@ MaterialRealTensorValueAux::validParams()
   return params;
 }
 
-MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & parameters)
-  : MaterialAuxBase<RealTensorValue>(parameters),
-    _row(getParam<unsigned int>("row")),
-    _col(getParam<unsigned int>("column"))
+template <bool is_ad>
+MaterialRealTensorValueAuxTempl<is_ad>::MaterialRealTensorValueAuxTempl(
+    const InputParameters & parameters)
+  : MaterialAuxBaseTempl<RealTensorValue, is_ad>(parameters),
+    _row(this->template getParam<unsigned int>("row")),
+    _col(this->template getParam<unsigned int>("column"))
 {
   if (_row > LIBMESH_DIM)
     mooseError(
@@ -38,8 +42,9 @@ MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & p
                " dimensional problems");
 }
 
+template <bool is_ad>
 Real
-MaterialRealTensorValueAux::getRealValue()
+MaterialRealTensorValueAuxTempl<is_ad>::getRealValue()
 {
-  return _full_value(_row, _col);
+  return MetaPhysicL::raw_value(this->_full_value(_row, _col));
 }
