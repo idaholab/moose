@@ -45,7 +45,7 @@ The epsilon equation is created with:
 - a [INSFVTKEDSourceSink.md] for the turbulent kinetic energy dissipation rate source and removal (sink) terms
 
 
-The boundary conditions are not set this in this object for the `TKE` and `TKED` variables, as they
+The boundary conditions are not set in this object for the `TKE` and `TKED` variables, as they
 are computed by the wall-functions in the relevant kernels. A boundary condition is set for the turbulent
 viscosity when using an auxiliary variable, with a [INSFVTurbulentViscosityWallFunction.md].
 
