@@ -28,6 +28,18 @@ WallDistanceMixingLengthAux::validParams()
       1e9,
       ""); // Tunable parameter related to the thickness of the boundary layer.
            // When it is not specified, Prandtl's original mixing length model is retrieved.
+
+  // Ghost boundaries for distributed meshes
+  params.addRelationshipManager("GhostBoundary",
+                                Moose::RelationshipManagerType::GEOMETRIC,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  rm_params.set<std::vector<BoundaryName>>("boundary") =
+                                      obj_params.get<std::vector<BoundaryName>>("walls");
+                                  rm_params.set<bool>("use_displaced_mesh") =
+                                      obj_params.get<bool>("use_displaced_mesh");
+                                });
+
   return params;
 }
 
@@ -38,9 +50,6 @@ WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters &
     _von_karman_const_0(getFunctor<Real>("von_karman_const_0")),
     _delta(getFunctor<Real>("delta"))
 {
-  const MeshBase & mesh = _subproblem.mesh().getMesh();
-  if (!mesh.is_replicated())
-    mooseError("WallDistanceMixingLengthAux only supports replicated meshes");
   if (!dynamic_cast<MooseVariableFV<Real> *>(&_var))
     paramError("variable",
                "'",
