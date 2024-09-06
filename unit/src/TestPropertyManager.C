@@ -42,6 +42,28 @@ matrix_func(const mfem::Vector & x, mfem::DenseMatrix & mat)
   mat(1, 1) = x[0] + x[1];
 }
 
+mfem::real_t
+scalar_func_t(const mfem::Vector & x, mfem::real_t t)
+{
+  return x[0] + x[1] + t;
+}
+
+void
+vector_func_t(const mfem::Vector & x, mfem::real_t t, mfem::Vector & vec)
+{
+  vec[0] = 2 * x[0] + t;
+  vec[1] = x[1] + 1;
+}
+
+void
+matrix_func_t(const mfem::Vector & x, mfem::real_t t, mfem::DenseMatrix & mat)
+{
+  mat(0, 0) = 2 * x[0] + t;
+  mat(0, 1) = x[1] + 1;
+  mat(1, 0) = t;
+  mat(1, 1) = x[0] + x[1];
+}
+
 TEST_F(CheckPropertyManager, DeclareUniformScalar)
 {
   platypus::PropertyManager manager;
@@ -80,6 +102,19 @@ TEST_F(CheckPropertyManager, DeclareFunctionScalar)
   EXPECT_EQ(c->Eval(fe_transform, point2), 1.5);
 }
 
+TEST_F(CheckPropertyManager, DeclareFunctionTScalar)
+{
+  platypus::PropertyManager manager;
+  manager.declareScalar("resistivity", scalar_func_t);
+  auto c = &manager.getScalarProperty("resistivity");
+  c->SetTime(0.);
+  EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 1.5);
+  c->SetTime(1.);
+  EXPECT_EQ(c->Eval(fe_transform, point1), 1.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 2.5);
+}
+
 TEST_F(CheckPropertyManager, DeclareFunctionPWScalar)
 {
   platypus::PropertyManager manager;
@@ -94,6 +129,42 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWScalar)
   fe_transform.Attribute = 2;
   EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 1.5);
+  fe_transform.Attribute = 3;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 1.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 2.5);
+  fe_transform.Attribute = 10;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 0.0);
+}
+
+TEST_F(CheckPropertyManager, DeclareFunctionTPWScalar)
+{
+  platypus::PropertyManager manager;
+  manager.declareScalar("test", scalar_func_t, {"1", "2"});
+  manager.declareScalar(
+      "test", [](const mfem::Vector & x) -> mfem::real_t { return scalar_func(x) + 1.; }, {"3"});
+  mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
+  ASSERT_NE(c, nullptr);
+  c->SetTime(0.);
+  fe_transform.Attribute = 1;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 1.5);
+  fe_transform.Attribute = 2;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 1.5);
+  fe_transform.Attribute = 3;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 1.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 2.5);
+  fe_transform.Attribute = 10;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 0.0);
+  c->SetTime(2.);
+  fe_transform.Attribute = 1;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 2.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 3.5);
+  fe_transform.Attribute = 2;
+  EXPECT_EQ(c->Eval(fe_transform, point1), 2.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 3.5);
   fe_transform.Attribute = 3;
   EXPECT_EQ(c->Eval(fe_transform, point1), 1.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 2.5);
@@ -249,6 +320,28 @@ TEST_F(CheckPropertyManager, DeclareFunctionVector)
   EXPECT_EQ(vec[1], 2.);
 }
 
+TEST_F(CheckPropertyManager, DeclareFunctionTVector)
+{
+  platypus::PropertyManager manager;
+  manager.declareVector("resistivity", 2, vector_func_t);
+  auto c = &manager.getVectorProperty("resistivity");
+  mfem::Vector vec;
+  c->SetTime(0.);
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 0.);
+  EXPECT_EQ(vec[1], 1.);
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 1.);
+  EXPECT_EQ(vec[1], 2.);
+  c->SetTime(1.);
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 1.);
+  EXPECT_EQ(vec[1], 1.);
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 2.);
+  EXPECT_EQ(vec[1], 2.);
+}
+
 TEST_F(CheckPropertyManager, DeclareFunctionPWVector)
 {
   platypus::PropertyManager manager;
@@ -275,6 +368,69 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWVector)
   fe_transform.Attribute = 2;
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 1.0);
+  fe_transform.Attribute = 3;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 0.0);
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 1.5);
+  EXPECT_EQ(vec[1], 3.0);
+  fe_transform.Attribute = 10;
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 0.);
+  EXPECT_EQ(vec[1], 0.);
+}
+TEST_F(CheckPropertyManager, DeclareFunctionTPWVector)
+{
+  platypus::PropertyManager manager;
+  manager.declareVector("test", 2, vector_func_t, {"1", "2"});
+  manager.declareVector("test",
+                        2,
+                        [](const mfem::Vector & x, mfem::Vector & vec)
+                        {
+                          vector_func(x, vec);
+                          vec *= scalar_func(x);
+                        },
+                        {"3"});
+  mfem::PWVectorCoefficient * c =
+      dynamic_cast<mfem::PWVectorCoefficient *>(&manager.getVectorProperty("test"));
+  ASSERT_NE(c, nullptr);
+  mfem::Vector vec;
+  c->SetTime(0.);
+  fe_transform.Attribute = 1;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 1.0);
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 1.);
+  EXPECT_EQ(vec[1], 2.0);
+  fe_transform.Attribute = 2;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 1.0);
+  fe_transform.Attribute = 3;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 0.0);
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 1.5);
+  EXPECT_EQ(vec[1], 3.0);
+  fe_transform.Attribute = 10;
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 0.);
+  EXPECT_EQ(vec[1], 0.);
+  c->SetTime(1.);
+  fe_transform.Attribute = 1;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 1.0);
+  EXPECT_EQ(vec[1], 1.0);
+  c->Eval(vec, fe_transform, point2);
+  EXPECT_EQ(vec[0], 2.);
+  EXPECT_EQ(vec[1], 2.0);
+  fe_transform.Attribute = 2;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 1.0);
   EXPECT_EQ(vec[1], 1.0);
   fe_transform.Attribute = 3;
   c->Eval(vec, fe_transform, point1);
@@ -477,6 +633,36 @@ TEST_F(CheckPropertyManager, DeclareFunctionMatrix)
   EXPECT_EQ(mat.Elem(1, 1), 1.5);
 }
 
+TEST_F(CheckPropertyManager, DeclareFunctionTMatrix)
+{
+  platypus::PropertyManager manager;
+  manager.declareMatrix("resistivity", 2, matrix_func_t);
+  auto c = &manager.getMatrixProperty("resistivity");
+  mfem::DenseMatrix mat;
+  c->SetTime(0.0);
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 0.);
+  EXPECT_EQ(mat.Elem(0, 1), 1.);
+  EXPECT_EQ(mat.Elem(1, 0), 0.);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 1.0);
+  EXPECT_EQ(mat.Elem(0, 1), 2.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 1.5);
+  c->SetTime(5.0);
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 5.);
+  EXPECT_EQ(mat.Elem(0, 1), 1.);
+  EXPECT_EQ(mat.Elem(1, 0), 5.);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 6.0);
+  EXPECT_EQ(mat.Elem(0, 1), 2.0);
+  EXPECT_EQ(mat.Elem(1, 0), 5.0);
+  EXPECT_EQ(mat.Elem(1, 1), 1.5);
+}
+
 TEST_F(CheckPropertyManager, DeclareFunctionPWMatrix)
 {
   platypus::PropertyManager manager;
@@ -509,6 +695,94 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWMatrix)
   EXPECT_EQ(mat.Elem(0, 0), 0.);
   EXPECT_EQ(mat.Elem(0, 1), 1.);
   EXPECT_EQ(mat.Elem(1, 0), 0.);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  fe_transform.Attribute = 3;
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 0.0);
+  EXPECT_EQ(mat.Elem(0, 1), 0.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 1.5);
+  EXPECT_EQ(mat.Elem(0, 1), 3.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 2.25);
+  fe_transform.Attribute = 10;
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 0.0);
+  EXPECT_EQ(mat.Elem(0, 1), 0.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+}
+
+TEST_F(CheckPropertyManager, DeclareFunctionTPWMatrix)
+{
+  platypus::PropertyManager manager;
+  manager.declareMatrix("test", 2, matrix_func_t, {"1", "2"});
+  manager.declareMatrix("test",
+                        2,
+                        [](const mfem::Vector & x, mfem::DenseMatrix & mat)
+                        {
+                          matrix_func(x, mat);
+                          mat *= scalar_func(x);
+                        },
+                        {"3"});
+  mfem::PWMatrixCoefficient * c =
+      dynamic_cast<mfem::PWMatrixCoefficient *>(&manager.getMatrixProperty("test"));
+  ASSERT_NE(c, nullptr);
+  mfem::DenseMatrix mat;
+  c->SetTime(0.);
+  fe_transform.Attribute = 1;
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 0.);
+  EXPECT_EQ(mat.Elem(0, 1), 1.);
+  EXPECT_EQ(mat.Elem(1, 0), 0.);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 1.0);
+  EXPECT_EQ(mat.Elem(0, 1), 2.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 1.5);
+  fe_transform.Attribute = 2;
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 0.);
+  EXPECT_EQ(mat.Elem(0, 1), 1.);
+  EXPECT_EQ(mat.Elem(1, 0), 0.);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  fe_transform.Attribute = 3;
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 0.0);
+  EXPECT_EQ(mat.Elem(0, 1), 0.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 1.5);
+  EXPECT_EQ(mat.Elem(0, 1), 3.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 2.25);
+  fe_transform.Attribute = 10;
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 0.0);
+  EXPECT_EQ(mat.Elem(0, 1), 0.0);
+  EXPECT_EQ(mat.Elem(1, 0), 0.0);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  c->SetTime(-1.);
+  fe_transform.Attribute = 1;
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), -1.);
+  EXPECT_EQ(mat.Elem(0, 1), 1.);
+  EXPECT_EQ(mat.Elem(1, 0), -1.);
+  EXPECT_EQ(mat.Elem(1, 1), 0.0);
+  c->Eval(mat, fe_transform, point2);
+  EXPECT_EQ(mat.Elem(0, 0), 0.0);
+  EXPECT_EQ(mat.Elem(0, 1), 2.0);
+  EXPECT_EQ(mat.Elem(1, 0), -1.0);
+  EXPECT_EQ(mat.Elem(1, 1), 1.5);
+  fe_transform.Attribute = 2;
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), -1.);
+  EXPECT_EQ(mat.Elem(0, 1), 1.);
+  EXPECT_EQ(mat.Elem(1, 0), -1.);
   EXPECT_EQ(mat.Elem(1, 1), 0.0);
   fe_transform.Attribute = 3;
   c->Eval(mat, fe_transform, point1);
