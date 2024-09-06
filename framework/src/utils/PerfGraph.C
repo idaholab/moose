@@ -13,6 +13,7 @@
 #include "PerfGuard.h"
 #include "MooseError.h"
 #include "PerfGraphLivePrint.h"
+#include "PerfGraphRegistry.h"
 #include "MooseApp.h"
 
 // Note: do everything we can to make sure this only gets #included
