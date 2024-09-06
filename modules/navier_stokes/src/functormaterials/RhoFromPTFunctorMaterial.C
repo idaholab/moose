@@ -28,7 +28,10 @@ RhoFromPTFunctorMaterial::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::pressure, "pressure functor");
   params.addParam<MooseFunctorName>(
       "density_name", NS::density, "name to use to declare the density functor");
-
+  params.addParam<bool>("neglect_derivatives_of_density_time_derivative",
+                        false,
+                        "Whether to neglect the derivatives with regards to nonlinear variables "
+                        "of the density time derivatives");
   return params;
 }
 
@@ -42,12 +45,23 @@ RhoFromPTFunctorMaterial::RhoFromPTFunctorMaterial(const InputParameters & param
   addFunctorProperty<ADReal>(_density_name,
                              [this](const auto & r, const auto & t) -> ADReal
                              { return _fluid.rho_from_p_T(_pressure(r, t), _temperature(r, t)); });
-  addFunctorProperty<ADReal>(
-      NS::time_deriv(_density_name),
-      [this](const auto & r, const auto & t) -> ADReal
-      {
-        ADReal rho, drho_dp, drho_dT;
-        _fluid.rho_from_p_T(_pressure(r, t), _temperature(r, t), rho, drho_dp, drho_dT);
-        return drho_dp * _pressure.dot(r, t) + drho_dT * _temperature.dot(r, t);
-      });
+  if (getParam<bool>("neglect_derivatives_of_density_time_derivative"))
+    addFunctorProperty<ADReal>(
+        NS::time_deriv(_density_name),
+        [this](const auto & r, const auto & t) -> ADReal
+        {
+          Real rho, drho_dp, drho_dT;
+          _fluid.rho_from_p_T(
+              _pressure(r, t).value(), _temperature(r, t).value(), rho, drho_dp, drho_dT);
+          return drho_dp * _pressure.dot(r, t) + drho_dT * _temperature.dot(r, t);
+        });
+  else
+    addFunctorProperty<ADReal>(
+        NS::time_deriv(_density_name),
+        [this](const auto & r, const auto & t) -> ADReal
+        {
+          ADReal rho, drho_dp, drho_dT;
+          _fluid.rho_from_p_T(_pressure(r, t), _temperature(r, t), rho, drho_dp, drho_dT);
+          return drho_dp * _pressure.dot(r, t) + drho_dT * _temperature.dot(r, t);
+        });
 }
