@@ -26,7 +26,7 @@ MFEMGenericConstantVectorMaterial::MFEMGenericConstantVectorMaterial(
   unsigned int num_names = _prop_names.size();
   unsigned int num_values = _prop_values.size();
 
-  if (num_names != num_values * LIBMESH_DIM)
+  if (num_names * LIBMESH_DIM != num_values)
     mooseError("Number of prop_values must be equal to dim * number of prop_values for a "
                "GenericConstantMaterial!");
 
