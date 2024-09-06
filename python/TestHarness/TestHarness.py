@@ -623,7 +623,7 @@ class TestHarness:
 
                 # Print status with caveats (if caveats not overridden)
                 caveats = True if caveats is None else caveats
-                print((util.formatResult(job, self.options, caveats=caveats)))
+                print(util.formatResult(job, self.options, caveats=caveats), flush=True)
 
                 timing = job.getTiming()
 
@@ -643,7 +643,7 @@ class TestHarness:
             # Just print current status without saving results
             else:
                 caveats = False if caveats is None else caveats
-                print((util.formatResult(job, self.options, result=job.getStatus().status, caveats=caveats)))
+                print(util.formatResult(job, self.options, result=job.getStatus().status, caveats=caveats), flush=True)
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
