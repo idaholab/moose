@@ -129,8 +129,17 @@
     input = 'mass14.i'
     expect_err = 'A strain base_name incorrect_base_name_ does not exist'
     threading = '!pthreads'
-    requirement = 'If the user enters a base_name strain that does not exist, the system should produce an error.'
+    requirement = 'If the user enters a base_name strain that does not exist when using FV variables, the system should produce an error.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md FVPorousFlowFluidMass.md'
+    issues = '#25673'
+  []
+  [mass15]
+    type = 'RunException'
+    input = 'mass15.i'
+    expect_err = 'A strain base_name incorrect_base_name_ does not exist'
+    threading = '!pthreads'
+    requirement = 'If the user enters a base_name strain that does not exist when using FE variables, the system should produce an error.'
+    design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#25673'
   []
 []
