@@ -10,7 +10,7 @@
   []
   [cg_ad]
     type = CSVDiff
-    input = 'diffusion_cg.i'
+    input = 'diffusion_multi_cg.i'
     csvdiff = 'diffusion_multi_cg_out_sample_0010.csv'
     requirement = 'The system shall be able to solve a diffusion equation for multiple species with a continuous Galerkin discretization with automatic differentiation with a shorthand syntax.'
     design = 'MultiSpeciesDiffusionCG.md'

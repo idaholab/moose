@@ -11,10 +11,10 @@
 #include "MooseVariableBase.h"
 
 // Register the actions for the objects actually used
-registerMooseAction("MooseApp", MultiSpeciesDiffusionCG, "add_kernel");
-registerMooseAction("MooseApp", MultiSpeciesDiffusionCG, "add_bc");
-registerMooseAction("MooseApp", MultiSpeciesDiffusionCG, "add_variable");
-registerMultiSpeciesDiffusionPhysicsBaseTasks("MooseApp", MultiSpeciesDiffusionCG);
+registerMooseAction("ScalarTransportApp", MultiSpeciesDiffusionCG, "add_kernel");
+registerMooseAction("ScalarTransportApp", MultiSpeciesDiffusionCG, "add_bc");
+registerMooseAction("ScalarTransportApp", MultiSpeciesDiffusionCG, "add_variable");
+registerMultiSpeciesDiffusionPhysicsBaseTasks("ScalarTransportApp", MultiSpeciesDiffusionCG);
 
 InputParameters
 MultiSpeciesDiffusionCG::validParams()
