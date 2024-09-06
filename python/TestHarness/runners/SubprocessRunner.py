@@ -94,7 +94,7 @@ class SubprocessRunner(Runner):
             # it until we figure out what's broken
             if file == self.errfile and self.exit_code != 0 \
                 and self.job.getTester().hasOpenMPI() and len(output) > 2 \
-                and output[-3] == '\n\0\n':
+                and output[-3:] in ['\n\0\n', '\n\x00\n']:
                 output = output[:-3]
 
             self.getRunOutput().appendOutput(output)
