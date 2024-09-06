@@ -145,7 +145,7 @@ class HPCRunner(Runner):
         # character check that happens in Runner.finalize() to still
         # be valid.
         if self.exit_code != 0 and self.job.getTester().hasOpenMPI():
-            output = self.getRunOutput().getOutput()
+            output = self.getRunOutput().getOutput(sanitize=False)
             if output:
                 prefix = '\n'
                 null = '\0'
