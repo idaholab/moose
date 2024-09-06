@@ -7,22 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MOOSEToNEML2.h"
-#include "NEML2Utils.h"
-
-#ifndef NEML2_ENABLED
-NEML2ObjectStubImplementation(MOOSEToNEML2, ElementUserObject);
-#else
-
-#include "neml2/misc/math.h"
-#include "MooseUtils.h"
+#include "MOOSEToNEML2Batched.h"
 
 InputParameters
-MOOSEToNEML2::validParams()
+MOOSEToNEML2Batched::validParams()
 {
-  auto params = ElementUserObject::validParams();
-
-  params.addRequiredParam<std::string>("neml2_variable", "Name of the NEML2 variable to write to");
+  auto params = MOOSEToNEML2::validParams();
+  params += ElementUserObject::validParams();
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -34,38 +25,36 @@ MOOSEToNEML2::validParams()
   return params;
 }
 
-MOOSEToNEML2::MOOSEToNEML2(const InputParameters & params)
-  : ElementUserObject(params),
-    _neml2_variable(
-        neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_variable")))
+MOOSEToNEML2Batched::MOOSEToNEML2Batched(const InputParameters & params)
+  : MOOSEToNEML2(params), ElementUserObject(params)
 {
 }
 
+#ifdef NEML2_ENABLED
 void
-MOOSEToNEML2::insertIntoInput(neml2::LabeledVector & input) const
-{
-  input.base_index_put_(_neml2_variable, neml2::Tensor(torch::stack(_buffer, 0), 1));
-}
-
-void
-MOOSEToNEML2::initialize()
+MOOSEToNEML2Batched::initialize()
 {
   _buffer.clear();
 }
 
 void
-MOOSEToNEML2::execute()
+MOOSEToNEML2Batched::execute()
 {
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     _buffer.push_back(convertQpMOOSEData());
 }
 
 void
-MOOSEToNEML2::threadJoin(const UserObject & uo)
+MOOSEToNEML2Batched::threadJoin(const UserObject & uo)
 {
   // append vectors
-  const auto & m2n = static_cast<const MOOSEToNEML2 &>(uo);
+  const auto & m2n = static_cast<const MOOSEToNEML2Batched &>(uo);
   _buffer.insert(_buffer.end(), m2n._buffer.begin(), m2n._buffer.end());
 }
 
+neml2::Tensor
+MOOSEToNEML2Batched::gatheredData() const
+{
+  return neml2::Tensor(torch::stack(_buffer, 0), 1);
+}
 #endif

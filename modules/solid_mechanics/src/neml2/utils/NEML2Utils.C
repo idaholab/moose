@@ -53,29 +53,39 @@ namespace NEML2Utils
 {
 
 #ifdef NEML2_ENABLED
-
-neml2::VariableName
-getOldName(const neml2::VariableName & var)
+void
+assertVariable(const neml2::VariableName & v)
 {
-  if (var.start_with("forces"))
-    return var.slice(1).prepend("old_forces");
+  if (v.empty())
+    mooseError("Empty NEML2 variable");
 
-  if (var.start_with("state"))
-    return var.slice(1).prepend("old_state");
+  if (!v.start_with("forces") && !v.start_with("state"))
+    mooseError("The NEML2 variable '",
+               v,
+               "' should be defined on the forces or the state sub-axis, got ",
+               v.slice(0, 1),
+               " instead");
+}
 
-  mooseError("An error occurred when trying to map a stateful NEML2 variable name '",
-             var,
-             "' onto its old counterpart. The leading sub-axis of the variable should either be "
-             "'state' or 'forces'. However, we got '",
-             var.slice(0, 1),
-             "'");
+void
+assertOldVariable(const neml2::VariableName & v)
+{
+  if (v.empty())
+    mooseError("Empty NEML2 variable");
+
+  if (!v.start_with("old_forces") && !v.start_with("old_state"))
+    mooseError("The NEML2 variable '",
+               v,
+               "' should be defined on the old_forces or the old_state sub-axis, got ",
+               v.slice(0, 1),
+               " instead");
 }
 
 template <>
 neml2::Tensor
 toNEML2(const Real & v)
 {
-  return neml2::Scalar(v, neml2::default_tensor_options());
+  return neml2::Scalar::full(v);
 }
 
 // FIXME: This is an unfortunately specialization because the models I included for testing use
@@ -145,35 +155,25 @@ toMOOSE(const neml2::Tensor & t)
 
 #endif // NEML2_ENABLED
 
-static const std::string message_all =
+static const std::string missing_neml2 =
     "To use this object, you need to have the `NEML2` library installed. Refer to the "
     "documentation for guidance on how to enable it.";
-#ifdef LIBTORCH_ENABLED
-static const std::string message = message_all;
-#else
-static const std::string message =
-    message_all + " To build this library MOOSE must be configured with `LIBTORCH` support!";
-#endif
 
-void
-addClassDescription(InputParameters & params, const std::string & desc)
+std::string
+docstring(const std::string & desc)
 {
-#ifdef NEML2_ENABLED
-  params.addClassDescription(desc);
+#ifndef NEML2_ENABLED
+  return message + " (Original description: " + desc + ")";
 #else
-  params.addClassDescription(message + " (Original description: " + desc + ")");
+  return desc;
 #endif
 }
 
 void
-libraryNotEnabledError(const InputParameters & params)
+assertNEML2Enabled()
 {
 #ifndef NEML2_ENABLED
-  mooseError(params.blockLocation() + ": " + message);
-#else
-  libmesh_ignore(params);
-  static_assert(
-      "Only place libraryNotEnabledError() in a branch that is compiled if NEML2 is not enabled!");
+  mooseError(message);
 #endif
 }
 

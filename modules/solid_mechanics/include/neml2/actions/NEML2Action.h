@@ -16,36 +16,79 @@
 #include "Action.h"
 
 /**
- * Action to parse and set up NEML2 objects.
+ * Action to set up NEML2 objects.
  */
 class NEML2Action : public Action
 {
 public:
   static InputParameters validParams();
 
-  NEML2Action(const InputParameters & params);
+  NEML2Action(const InputParameters &);
 
   virtual void act() override;
 
+protected:
 #ifdef NEML2_ENABLED
 
-protected:
-  /// Name of the NEML2 input file
-  FileName _fname;
+  enum class MOOSEIOType
+  {
+    MATERIAL,
+    VARIABLE,
+    SCALAR,
+    POSTPROCESSOR,
+    CUSTOM
+  };
 
-  /// Name of the NEML2 material model to import from the NEML2 input file
-  std::string _mname;
+  struct MOOSEIO
+  {
+    const std::string name;
+    const MOOSEIOType type;
+  };
 
-  /// Whether to print additional information about the NEML2 material model
+  struct NEML2IO
+  {
+    const neml2::VariableName name;
+    const neml2::TensorType type;
+  };
+
+  struct VariableMapping
+  {
+    const MOOSEIO moose;
+    const NEML2IO neml2;
+  };
+
+  struct DerivativeMapping
+  {
+    const MOOSEIO moose;
+    const struct NEML2Derivative
+    {
+      const NEML2IO y;
+      const NEML2IO x;
+    } neml2;
+  };
+
+  /// Set up MOOSE-NEML2 input variable mappings
+  void setupInputMappings(const neml2::Model &);
+
+  /// Set up MOOSE-NEML2 output variable mappings
+  void setupOutputMappings(const neml2::Model &);
+
+  /// Set up MOOSE-NEML2 derivative mappings
+  void setupDerivativeMappings(const neml2::Model &);
+
+  /// MOOSE-NEML2 input variable mappings
+  std::vector<VariableMapping> _inputs;
+
+  /// MOOSE-NEML2 output variable mappings
+  std::vector<VariableMapping> _outputs;
+
+  /// MOOSE-NEML2 derivative mappings
+  std::vector<DerivativeMapping> _derivs;
+
+#endif
+  /// Whether to print additional information about the model
   const bool _verbose;
 
-  /// The operation mode
-  const MooseEnum _mode;
-
-  /// The device on which to evaluate the NEML2 model
-  const torch::Device _device;
-
-  /// Whether AD is enabled
-  const bool _enable_AD;
-#endif
+  /// Name of the ExecuteNEML2Model user object
+  const UserObjectName _executor_name;
 };
