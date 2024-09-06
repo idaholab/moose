@@ -20,7 +20,7 @@ class OutputInterface:
 
     class BadOutputException(Exception):
         """ Exception that is thrown when bad output is detected """
-        def __init__(self, errors: list[str]):
+        def __init__(self, errors):
             self.errors = errors
             message = 'Bad output detected: ' + ', '.join(errors)
             super().__init__(message)
