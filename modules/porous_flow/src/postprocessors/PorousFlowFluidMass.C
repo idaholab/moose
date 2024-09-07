@@ -143,6 +143,10 @@ PorousFlowFluidMassTempl<is_ad>::PorousFlowFluidMassTempl(const InputParameters 
   if (_phase_index.empty())
     for (unsigned int i = 0; i < num_phases; ++i)
       _phase_index.push_back(i);
+
+  // Error if a strain base_name is provided but doesn't exist
+  if (parameters.isParamSetByUser("base_name") && !_has_total_strain)
+    paramError("base_name", "A strain base_name ", _base_name, " does not exist");
 }
 
 template <bool is_ad>

@@ -141,7 +141,7 @@ class SQAExtension(command.CommandExtension):
                     path = os.path.join(MooseDocs.ROOT_DIR, d)
                 if not os.path.isdir(path):
                     msg = "Input directory does not exist: %s"
-                    LOG.error(msg, path)
+                    LOG.warning(msg, path)
                     continue
                 directories.append(path)
 

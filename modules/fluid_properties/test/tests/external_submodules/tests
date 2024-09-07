@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#27097'
+  # The design files are in the respective subdmoules in fluid_properties/contrib/<name_of_submodule>
+  design = 'ExternalFluidPropertiesSubmodules.md'
+
+  [fps]
+    requirement = 'fluid properties from an external submodule for'
+    [air_pT]
+      type = CSVDiff
+      input = 'air.i'
+      csvdiff = 'air_out.csv'
+      threading = '!pthreads'
+      detail = 'spline-based table-lookup air fluid properties,'
+      required_submodule = 'contrib/air'
+    []
+    [CO2_pT]
+      type = CSVDiff
+      input = 'co2.i'
+      csvdiff = 'co2_out.csv'
+      threading = '!pthreads'
+      detail = 'vapor carbon dioxide fluid properties,'
+      required_submodule = 'contrib/carbon_dioxide'
+    []
+    [helium_pT]
+      type = CSVDiff
+      input = 'helium.i'
+      csvdiff = 'helium_out.csv'
+      threading = '!pthreads'
+      detail = 'spline-based table-lookup Helium fluid properties,'
+      required_submodule = 'contrib/helium'
+    []
+    [nitrogen_pT]
+      type = CSVDiff
+      input = 'nitrogen.i'
+      csvdiff = 'nitrogen_out.csv'
+      threading = '!pthreads'
+      detail = 'spline-based table-lookup Nitrogen fluid properties,'
+      required_submodule = 'contrib/nitrogen'
+    []
+    [potassium_pT]
+      type = CSVDiff
+      input = 'potassium.i'
+      csvdiff = 'potassium_out.csv'
+      threading = '!pthreads'
+      detail = 'liquid Potassium fluid properties,'
+      required_submodule = 'contrib/potassium'
+    []
+    [sodium_pT]
+      type = CSVDiff
+      input = 'sodium.i'
+      csvdiff = 'sodium_out.csv'
+      threading = '!pthreads'
+      detail = 'liquid Sodium fluid properties.'
+      required_submodule = 'contrib/sodium'
+    []
+  []
+[]
