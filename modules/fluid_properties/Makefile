@@ -12,6 +12,7 @@ MODULE_DIR         ?= $(shell dirname `pwd`)
 MOOSE_DIR          ?= $(shell dirname $(MODULE_DIR))
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 ADDITIONAL_CPPFLAGS += -Wall -Wextra
+
 ###############################################################################
 
 # framework

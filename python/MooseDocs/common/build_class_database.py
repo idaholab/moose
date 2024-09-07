@@ -10,6 +10,7 @@
 """Tools for extracting C++ class information."""
 import os
 import re
+import logging
 
 import mooseutils
 
@@ -27,7 +28,7 @@ DEFINITION_RE = re.compile(r'register(|AD)MooseObject(|Aliased)\(\"\w+App\"(,\s+
 #: Locates class inheritance
 # <key> is captured as the first word after the 'public' word at the beginning of the expression
 # with a space before and with some text (or not) after
-CHILD_RE = re.compile(r'\bpublic\s+(?P<key>\w+)\b')
+CHILD_RE = re.compile(r'\b(public|protected|private)\s+(?P<key>\w+)\b')
 
 #: Locates class use in input files
 # expression starts with type, spaces or not, an equal, spaces or not
@@ -72,9 +73,22 @@ def build_class_database(source_dirs=None, include_dirs=None, input_dirs=None):
         input_dirs = [MooseDocs.ROOT_DIR]
 
     # Locate filenames
-    sources = _locate_filenames(source_dirs, '.C')
-    headers = _locate_filenames(include_dirs, '.h')
-    inputs = _locate_filenames(input_dirs, '.i')
+    LOG = logging.getLogger('MooseDocs.common.build_class_database')
+    try:
+        sources = _locate_filenames(source_dirs, '.C')
+    except FileNotFoundError as err:
+        LOG.warning(err)
+        sources = []
+    try:
+        headers = _locate_filenames(include_dirs, '.h')
+    except FileNotFoundError as err:
+        headers = []
+        LOG.warning(err)
+    try:
+        inputs = _locate_filenames(input_dirs, '.i')
+    except FileNotFoundError as err:
+        inputs = []
+        LOG.warning(err)
 
     # Create the database
     objects = dict()
