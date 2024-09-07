@@ -22,8 +22,8 @@ PorousFlow1PhasePTempl<is_ad>::validParams()
                                "Variable that represents the porepressure of the single phase");
   params.addRequiredParam<UserObjectName>("capillary_pressure",
                                           "Name of the UserObject defining the capillary pressure");
-  params.addClassDescription("This Material is used for the fully saturated single-phase situation "
-                             "where porepressure is the primary variable");
+  params.addClassDescription("This Material is used for the partially saturated single-phase "
+                             "situation where porepressure is the primary variable");
   return params;
 }
 
