@@ -105,10 +105,14 @@ function configure_petsc()
 
   cd $PETSC_DIR
   python3 ./configure \
-      CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77 \
-      COPTFLAGS="-g -O" \
-      CXXOPTFLAGS="-g -O" \
-      FOPTFLAGS="-g -O" \
+      CC=${CC:=mpicc} \
+      CXX=${CXX:=mpicxx} \
+      FC=${FC:=mpif90} \
+      F90=${F90:=mpif90} \
+      F77=${F77:=mpif77} \
+      COPTFLAGS=${COPTFLAGS:="-g -O"} \
+      CXXOPTFLAGS=${CXXOPTFLAGS:="-g -O"} \
+      FOPTFLAGS=${FOPTFLAGS:="-g -O"} \
       --with-64-bit-indices \
       --with-cxx-dialect=C++17 \
       --with-debugging=no \
