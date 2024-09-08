@@ -44,6 +44,7 @@ private:
   virtual void addOutletBoundaries() override;
   virtual void addFlowJunctions() override;
 
+  void addJunctionFunctorMaterials();
   // /// Adds the boundary flux boundary condition, which uses the boundary flux user object
   // void addBoundaryFluxBC(const PhysicsFlowBoundary & comp,
   //                        const UserObjectName & boundary_numerical_flux_name);

@@ -187,6 +187,46 @@ THMWCNSFVFlowPhysics::addMaterials()
 {
   ThermalHydraulicsFlowPhysics::addCommonMaterials();
   WCNSFVFlowPhysics::addMaterials();
+
+  addJunctionFunctorMaterials();
+}
+
+void
+THMWCNSFVFlowPhysics::addJunctionFunctorMaterials()
+{
+  if (_verbose)
+    _console << "Adding junction functor materials for junctions: "
+             << Moose::stringify(_junction_components) << std::endl;
+  for (const auto i : index_range(_junction_components))
+  {
+    // Get component, which has reference to the controllable parameters
+    const auto & comp_name = _junction_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
+    const auto & junction_type = _junction_types[i];
+    const auto & boundary_names = comp.getBoundaryNames();
+
+    // Add functor materials to compute the boundary values
+    if (junction_type == JunctionTypeEnum::OneToOne)
+    {
+      std::string class_name = "ADFixedNodeValueFunctorMaterial";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+      // Get velocity at outlet of the first connected component
+      params.set<MooseFunctorName>("functor_in") = getVelocityNames()[0];
+      params.set<MooseFunctorName>("functor_name") = "face_value_v_" + boundary_names[0];
+      params.set<BoundaryName>("nodeset") = boundary_names[0];
+      params.set<SubdomainName>("subdomain_for_node") = comp.getConnectedComponentNames()[0];
+      _sim->addFunctorMaterial(class_name, "compute_face_value_v_" + boundary_names[0], params);
+
+      // Get pressure on inlet of second connected component
+      params.set<MooseFunctorName>("functor_in") = getPressureName();
+      params.set<BoundaryName>("nodeset") = boundary_names[1];
+      params.set<SubdomainName>("subdomain_for_node") = comp.getConnectedComponentNames()[1];
+      params.set<MooseFunctorName>("functor_name") = "face_value_p_" + boundary_names[1];
+      _sim->addFunctorMaterial(class_name, "compute_face_value_p_" + boundary_names[1], params);
+    }
+  }
 }
 
 void
@@ -219,6 +259,9 @@ THMWCNSFVFlowPhysics::addFVBCs()
 void
 THMWCNSFVFlowPhysics::addInletBoundaries()
 {
+  if (_verbose)
+    _console << "Adding boundary conditions for inlets: " << Moose::stringify(_inlet_components)
+             << std::endl;
   // Fill in the data structures used by WCNSFVFlowPhysics to represent the boundary conditions
   for (const auto i : index_range(_inlet_components))
   {
@@ -237,33 +280,77 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
         addInletBoundary(boundary_name, flux_mass, mdot);
       }
     }
+    else
+      mooseError("Unsupported inlet boundary type ", boundary_type);
   }
 }
 
 void
 THMWCNSFVFlowPhysics::addOutletBoundaries()
 {
+  if (_verbose)
+    _console << "Adding boundary conditions for outlets: " << Moose::stringify(_outlet_components)
+             << std::endl;
   // Fill in the data structures used by WCNSFVFlowPhysics to represent the boundary conditions
   for (const auto i : index_range(_outlet_components))
   {
     // Get component, which has reference to the controllable parameters
     const auto & comp_name = _outlet_components[i];
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
-    UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _outlet_types[i];
-    MooseEnum fixed_pressure(NSFVBase::getValidMomentumOutletTypes(), "fixed-pressure");
 
     if (boundary_type == OutletTypeEnum::FixedPressure)
     {
+      MooseEnum fixed_pressure(NSFVBase::getValidMomentumOutletTypes(), "fixed-pressure");
       for (const auto & boundary_name : comp.getBoundaryNames())
         addOutletBoundary(boundary_name, fixed_pressure, std::to_string(comp.getParam<Real>("p")));
     }
+    else if (boundary_type == OutletTypeEnum::FreeBoundary)
+    {
+      MooseEnum free_boundary(NSFVBase::getValidMomentumOutletTypes(), "zero-gradient");
+      for (const auto & boundary_name : comp.getBoundaryNames())
+        addOutletBoundary(boundary_name, free_boundary, "");
+    }
+    else
+      mooseError("Unsupported outlet boundary type ", boundary_type);
   }
 }
 
 void
 THMWCNSFVFlowPhysics::addFlowJunctions()
 {
+  if (_verbose)
+    _console << "Adding junction objects for junctions: " << Moose::stringify(_junction_components)
+             << std::endl;
+  // Fill in the data structures used by WCNSFVFlowPhysics to represent the boundary conditions
+  for (const auto i : index_range(_junction_components))
+  {
+    // Get component, which has reference to the controllable parameters
+    const auto & comp_name = _junction_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
+    const auto & junction_type = _junction_types[i];
+    const auto & boundary_names = comp.getBoundaryNames();
+
+    if (junction_type == JunctionTypeEnum::OneToOne)
+    {
+      // The ideal junction would be to merge the nodes
+      // However, the two pipes might not be at the same location.
+      // We make the pressure & velocity functors match using dirichlet BCs
+      for (const auto bi : index_range(boundary_names))
+      {
+        // The first boundary is skipped
+        if (bi == 0)
+          continue;
+
+        MooseEnum fixed_velocity(NSFVBase::getValidMomentumInletTypes(), "fixed-velocity");
+        MooseEnum fixed_pressure(NSFVBase::getValidMomentumOutletTypes(), "fixed-pressure");
+        addInletBoundary(boundary_names[1], fixed_velocity, "face_value_v_" + boundary_names[0]);
+        addOutletBoundary(boundary_names[0], fixed_pressure, "face_value_p_" + boundary_names[1]);
+      }
+    }
+    else
+      mooseError("Unsupported junction type ", junction_type);
+  }
 }
 
 void
@@ -280,7 +367,6 @@ THMWCNSFVFlowPhysics::addPostprocessors()
   {
     const auto & comp_name = _inlet_components[i];
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
-    const auto & boundary_type = _inlet_types[i];
 
     for (const auto & bdy_name : comp.getBoundaryNames())
     {
