@@ -24,14 +24,10 @@ registerMooseObject("MooseApp", Nemesis);
 InputParameters
 Nemesis::validParams()
 {
-  // Get the base class parameters
   InputParameters params = AdvancedOutput::validParams();
   params += AdvancedOutput::enableOutputTypes("scalar postprocessor input");
-
-  // Add description for the Nemesis class
+  params.addParam<bool>("write_hdf5", false, "Enables HDF5 output format for Nemesis files.");
   params.addClassDescription("Object for output data in the Nemesis (parallel ExodusII) format.");
-
-  // Return the InputParameters
   return params;
 }
 
@@ -42,7 +38,8 @@ Nemesis::Nemesis(const InputParameters & parameters)
     _nemesis_num(declareRestartableData<unsigned int>("nemesis_num", 0)),
     _nemesis_initialized(false),
     _recovering(_app.isRecovering()),
-    _nemesis_mesh_changed(declareRestartableData<bool>("nemesis_mesh_changed", true))
+    _nemesis_mesh_changed(declareRestartableData<bool>("nemesis_mesh_changed", true)),
+    _write_hdf5(getParam<bool>("write_hdf5"))
 {
 }
 
@@ -81,6 +78,20 @@ Nemesis::outputSetup()
   // Create the new NemesisIO object
   _nemesis_io_ptr = std::make_unique<Nemesis_IO>(_problem_ptr->mesh().getMesh());
   _nemesis_initialized = false;
+
+  if (_write_hdf5)
+  {
+#ifndef LIBMESH_HAVE_HDF5
+    mooseError("Moose input requested HDF Nemesis output, but libMesh was built without HDF5.");
+#endif
+
+    // This is redundant unless the libMesh default changes
+    _nemesis_io_ptr->set_hdf5_writing(true);
+  }
+  else
+  {
+    _nemesis_io_ptr->set_hdf5_writing(false);
+  }
 
   if (_recovering && !_nemesis_mesh_changed && _nemesis_num > 0)
   {

@@ -99,4 +99,10 @@ private:
 
   /// A flag indicating to the Nemesis object that the mesh has changed
   bool & _nemesis_mesh_changed;
+
+  /// Flag to output HDF5 format (when available) in Nemesis. libMesh wants to do
+  ///  so by default (for backwards compatibility with libMesh HDF5 users), but we
+  /// want to avoid this by default (for backwards compatibility with most Moose users
+  /// and to avoid generating regression test gold files that non-HDF5 Moose builds can't read)
+  bool _write_hdf5;
 };
