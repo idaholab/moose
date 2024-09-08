@@ -663,13 +663,13 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
 
 void
 THMVACESinglePhaseFlowPhysics::addBoundaryFluxBC(
-    const PhysicsFlowBoundary & comp, const UserObjectName & boundary_numerical_flux_name)
+    const PhysicsFlowBoundary & comp, const UserObjectName & boundary_flux_uo_name)
 {
   const std::string class_name = "ADBoundaryFlux3EqnBC";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<BoundaryName>>("boundary") = comp.getBoundaryNames();
   params.set<Real>("normal") = comp.getNormal();
-  params.set<UserObjectName>("boundary_flux") = boundary_numerical_flux_name;
+  params.set<UserObjectName>("boundary_flux") = boundary_flux_uo_name;
   params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
   params.set<std::vector<VariableName>>("rhoA") = {RHOA};
   params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
