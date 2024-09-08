@@ -512,8 +512,6 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
       params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("A") = {AREA};
-      // Less frequent than in FlowModelSinglePhase
-      params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       _sim->addAuxKernel(class_name, genName(comp_name, "v_aux"), params);
     }
     {
@@ -590,7 +588,6 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
     // Get component, which has reference to the controllable parameters
     const auto & comp_name = _inlet_components[i];
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
-    UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _inlet_types[i];
 
     // Boundary fluxes should be updated as often as possible
@@ -602,7 +599,6 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
     if (boundary_type == InletTypeEnum::MdotTemperature)
     {
       const std::string class_name = "ADBoundaryFlux3EqnGhostMassFlowRateTemperature";
-      boundary_numerical_flux_name = comp_name + "_MdotTemperature";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<Real>("mass_flow_rate") = comp.getParam<Real>("m_dot");
       params.set<Real>("T") = comp.getParam<Real>("T");
@@ -611,13 +607,13 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
       params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
       params.set<UserObjectName>("fluid_properties") = _fp_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-      _sim->addUserObject(class_name, boundary_numerical_flux_name, params);
-      comp.connectObject(params, boundary_numerical_flux_name, "m_dot", "mass_flow_rate");
-      comp.connectObject(params, boundary_numerical_flux_name, "T");
+      _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
+      comp.connectObject(params, comp.getBoundaryUOName(), "m_dot", "mass_flow_rate");
+      comp.connectObject(params, comp.getBoundaryUOName(), "T");
     }
 
     // Boundary flux BC
-    addBoundaryFluxBC(comp, boundary_numerical_flux_name);
+    addBoundaryFluxBC(comp, comp.getBoundaryUOName());
   }
 }
 
@@ -629,7 +625,6 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
     // Get component, which has reference to the controllable parameters
     const auto & comp_name = _outlet_components[i];
     const auto & comp = _sim->getComponentByName<PhysicsFlowBoundary>(comp_name);
-    UserObjectName boundary_numerical_flux_name = "invalid";
     const auto & boundary_type = _outlet_types[i];
 
     // Boundary fluxes should be updated as often as possible
@@ -641,15 +636,14 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
     if (boundary_type == OutletTypeEnum::FixedPressure)
     {
       const std::string class_name = "ADBoundaryFlux3EqnGhostPressure";
-      boundary_numerical_flux_name = comp_name + "_fixedpressure";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<Real>("p") = comp.getParam<Real>("p");
       params.set<Real>("normal") = comp.getNormal();
       params.set<UserObjectName>("fluid_properties") = _fp_name;
       params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-      _sim->addUserObject(class_name, boundary_numerical_flux_name, params);
-      comp.connectObject(params, boundary_numerical_flux_name, "p");
+      _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
+      comp.connectObject(params, comp.getBoundaryUOName(), "p");
     }
     else if (boundary_type == OutletTypeEnum::FreeBoundary)
     {
@@ -657,13 +651,13 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("fluid_properties") = _fp_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-      _sim->addUserObject(class_name, boundary_numerical_flux_name, params);
+      _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
     }
     else
       mooseError("Unimplemented boundary type", boundary_type);
 
     // Boundary flux BC
-    addBoundaryFluxBC(comp, boundary_numerical_flux_name);
+    addBoundaryFluxBC(comp, comp.getBoundaryUOName());
   }
 }
 
@@ -709,7 +703,7 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
     if (junction_type == OneToOne)
     {
       {
-        const std::string class_name = "ADPhysicsJunctionOneToOneUserObject";
+        const std::string class_name = "ADJunctionOneToOne1PhaseUserObject";
         InputParameters params = _factory.getValidParams(class_name);
         params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
         params.set<std::vector<Real>>("normals") = normals;
@@ -734,7 +728,7 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
       for (std::size_t i = 0; i < boundary_names.size(); i++)
         for (std::size_t j = 0; j < var_names.size(); j++)
         {
-          const std::string class_name = "ADPhysicsJunctionOneToOneBC";
+          const std::string class_name = "ADJunctionOneToOne1PhaseBC";
           InputParameters params = _factory.getValidParams(class_name);
           params.set<std::vector<BoundaryName>>("boundary") = {boundary_names[i]};
           params.set<Real>("normal") = normals[i];
