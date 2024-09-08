@@ -60,12 +60,14 @@ protected:
    * intercepted by terminal_angle
    * @param original_up_it reference to iterator of the azimuthal angle vector pointing the
    * azimuthal angle of the upper side of the element intercepted by terminal_angle
+   * @param azimuthal_angles_vtx vector of azimuthal angles of the vertices of the elements
    */
   void angleIdentifier(const Real & terminal_angle,
                        Real & original_down,
                        std::vector<Real>::iterator & original_down_it,
                        Real & original_up,
-                       std::vector<Real>::iterator & original_up_it);
+                       std::vector<Real>::iterator & original_up_it,
+                       std::vector<Real> & azimuthal_angles_vtx);
 
   /**
    * Modifies the azimuthal angle to perform move the edge of the control drum during rotation
@@ -120,4 +122,17 @@ protected:
                     const Real & term_angle,
                     const bool & external_block_change,
                     const Real & rad_tol);
+
+  /**
+   * Calculate the corrected midpoint position of the element with vertices moved
+   * @param vertex_0 the position of the first vertex
+   * @param vertex_1 the position of the second vertex
+   * @param max_radius the maximum radius of the circular region
+   * @param rad_tol tolerance of the radii of nodes
+   * @return the corrected midpoint position between the given vertices
+   */
+  Point midPointCorrector(const Point vertex_0,
+                          const Point vertex_1,
+                          const Real max_radius,
+                          const Real rad_tol);
 };

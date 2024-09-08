@@ -11,6 +11,16 @@
       recover = false
       detail = '(without the external block) based on the given angle range.'
     []
+    [block_id_in_quadratic]
+      type = 'Exodiff'
+      input = 'azi_block_id_mod.i'
+      exodiff = 'azi_block_id_mod_id_in_quadratic.e'
+      cli_args = 'Mesh/cd/tri_element_type=TRI6
+                  Mesh/cd/quad_element_type=QUAD9
+                  --mesh-only "azi_block_id_mod_id_in_quadratic.e"'
+      recover = false
+      detail = '(without the external block) that consists of quadratic elements based on the given angle range.'
+    []
     [block_id_in_quad]
       type = 'Exodiff'
       input = 'azi_block_id_mod.i'
@@ -47,6 +57,22 @@
   []
   [errors]
     requirement = 'The system shall throw an error '
+    [err_mixed_element_order]
+      type = 'RunException'
+      input = 'err_mixed_order.i'
+      cli_args = '--mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'This mesh contains elements of different orders.'
+      detail = "if the input mesh contains elements of mixed orders."
+    []
+    [err_unsupported_element_type]
+      type = 'RunException'
+      input = 'err_mixed_order.i'
+      cli_args = 'Mesh/gmg1/elem_type="HEX8"
+                  Mesh/gmg1/dim=3
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'This mesh contains elements of unsupported type.'
+      detail = "if the input mesh contains elements of an unsupported type."
+    []
     [err_diff_block_size_id]
       type = 'RunException'
       input = 'azi_block_id_mod.i'
