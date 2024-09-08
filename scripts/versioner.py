@@ -31,7 +31,7 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
 
 ### Tracking Libraries
 # note: Order is important only for historical lookups; git_ancestor(commit) == True
-TRACKING_LIBRARIES = ['mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
+TRACKING_LIBRARIES = ['tools', 'mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
 
 ### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
 # pylint: disable=unused-argument
@@ -367,10 +367,15 @@ class Versioner:
         contents = Versioner.git_file(influential, commit)
         name, version, build_string, build_number, meta = Versioner.conda_meta_jinja(contents)
 
+        version_and_build = version
+        if build_string is not None:
+            version_and_build += f'={build_string}'
+
         return {'name': name,
                 'version': version,
-                'build': int(build_number),
-                'install': f'{name}={version}={build_string}',
+                'build': int(build_number) if build_number is not None else None,
+                'version_and_build': version_and_build,
+                'install': f'{name}={version_and_build}',
                 'meta': meta}
 
     @staticmethod

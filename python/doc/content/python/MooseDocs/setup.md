@@ -40,9 +40,9 @@ or your package is old, then we suggest that a new `moose-tools` package be inst
 needed dependencies, which can be done using conda. This command assumes that you have created and
 activated a conda environment for your MOOSE development:
 
-!package! code
-conda install moose-tools=__MOOSE_TOOLS__
-!package-end!
+!versioner! code
+conda install moose-tools=__VERSIONER_CONDA_VERSION_TOOLS__
+!versioner-end!
 
 ## Build a Live Website
 
