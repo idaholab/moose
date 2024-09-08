@@ -47,17 +47,6 @@ dnf install mpich    # CentOS, Rocky, RHEL
 zypper install mpich # OpenSUSE
 ```
 
-If you choose this method, more likely than not you will still need to export variables to enable
-your MPI wrapper:
-
-```bash
-export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
-```
-
-Note that PETSc ignores such environment variables unless explicitly passed its corresponding
-configure arguments. libMesh honors them. Exporting variables is only temporary in the session you
-execute them in.
-
 !include installation/start_up_profile.md
 
 !alert-end!

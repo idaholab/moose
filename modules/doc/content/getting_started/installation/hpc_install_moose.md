@@ -27,20 +27,17 @@ This *usually* involves `module load` commands. Please note again, that Intel co
 supported.
 !style-end!
 
-Sometimes after loading a proper MPI environment, it is still necessary to set some variables.
-Check to see if the following variables are set:
-
+After loading a proper MPI environment, check to see if the following variables are set:
 ```bash
 echo $CC $CXX $FC $F90 $F77
 ```
 
-If nothing returns, or what does return does *not* include MPI naming conventions (`$CC` is `gcc`
-and not `mpicc` like we need), you need to set them manually each and every time you load said
-environment:
-
+If nothing returns, the following default values are used:
 ```bash
-export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 ```
+If the returned variable values do *not* include MPI naming conventions (`$CC` is `gcc`
+and not `mpicc` like we need), you need to set the values manually.
 
 !include installation/start_up_profile.md
 
