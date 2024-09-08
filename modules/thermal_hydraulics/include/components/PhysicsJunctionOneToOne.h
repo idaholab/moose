@@ -28,7 +28,7 @@ public:
 
   virtual void init() override;
   virtual void check() const override;
-  virtual void addMooseObjects() override;
+  virtual void addMooseObjects() override {};
 
 protected:
   virtual void setupMesh() override;

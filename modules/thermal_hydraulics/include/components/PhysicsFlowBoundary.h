@@ -29,6 +29,9 @@ public:
     mooseError("isReversible not implemented for this flow boundary");
   }
 
+  /// The name of the boundary user object
+  const UserObjectName & getBoundaryUOName() const { return _boundary_uo_name; }
+
 protected:
   virtual void init() override;
   virtual void check() const override;

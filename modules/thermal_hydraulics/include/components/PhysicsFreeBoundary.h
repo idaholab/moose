@@ -22,5 +22,5 @@ public:
 
   PhysicsFreeBoundary(const InputParameters & parameters);
 
-  virtual void addMooseObjects() override;
+  virtual void init() override;
 };

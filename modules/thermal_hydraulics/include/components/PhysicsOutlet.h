@@ -21,8 +21,7 @@ public:
 
   PhysicsOutlet(const InputParameters & params);
 
-  virtual void addMooseObjects() override;
-
 protected:
   virtual void check() const override;
+  virtual void init() override;
 };

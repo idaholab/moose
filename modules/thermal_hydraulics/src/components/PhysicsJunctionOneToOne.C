@@ -42,6 +42,10 @@ void
 PhysicsJunctionOneToOne::init()
 {
   PhysicsFlowJunction::init();
+
+  // For now, we do this here. We could consider doing it elsewhere
+  for (auto th_phys : _th_physics)
+    th_phys->setJunction(name(), ThermalHydraulicsFlowPhysics::OneToOne);
 }
 
 void
@@ -51,12 +55,4 @@ PhysicsJunctionOneToOne::check() const
 
   // Check that there are exactly 2 connections
   checkNumberOfConnections(2);
-}
-
-void
-PhysicsJunctionOneToOne::addMooseObjects()
-{
-  // For now, we do this here. We could consider doing it elsewhere
-  for (auto th_phys : _th_physics)
-    th_phys->setJunction(name(), ThermalHydraulicsFlowPhysics::OneToOne);
 }
