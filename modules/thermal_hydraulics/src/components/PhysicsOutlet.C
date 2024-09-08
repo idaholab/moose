@@ -32,8 +32,10 @@ PhysicsOutlet::check() const
 }
 
 void
-PhysicsOutlet::addMooseObjects()
+PhysicsOutlet::init()
 {
+  PhysicsFlowBoundary::init();
+
   // For now, we do this here. We could consider doing it elsewhere
   for (auto th_phys : _th_physics)
     th_phys->setOutlet(name(), ThermalHydraulicsFlowPhysics::FixedPressure);

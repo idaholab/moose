@@ -22,12 +22,11 @@ public:
 
   PhysicsInletMassFlowRateTemperature(const InputParameters & params);
 
-  virtual void addMooseObjects() override;
-
   virtual bool isReversible() const override { return _reversible; }
 
 protected:
   virtual void check() const override;
+  virtual void init() override;
 
   /// True to allow the flow to reverse, otherwise false
   bool _reversible;

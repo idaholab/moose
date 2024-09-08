@@ -15,7 +15,7 @@ registerMooseObject("ThermalHydraulicsApp", PhysicsFreeBoundary);
 InputParameters
 PhysicsFreeBoundary::validParams()
 {
-  InputParameters params = FlowBoundary1Phase::validParams();
+  InputParameters params = PhysicsFlowBoundary::validParams();
   params.addClassDescription(
       "Component to create a free flow boundary for flow using thermal hydraulic Physics.");
   return params;
@@ -27,8 +27,9 @@ PhysicsFreeBoundary::PhysicsFreeBoundary(const InputParameters & parameters)
 }
 
 void
-PhysicsFreeBoundary::addMooseObjects()
+PhysicsFreeBoundary::init()
 {
+  PhysicsFlowBoundary::init();
   // We set this as an outlet as NSFV supports these as outlets
   for (auto th_phys : _th_physics)
     th_phys->setOutlet(name(), ThermalHydraulicsFlowPhysics::FreeBoundary);

@@ -38,8 +38,9 @@ PhysicsInletMassFlowRateTemperature::check() const
 }
 
 void
-PhysicsInletMassFlowRateTemperature::addMooseObjects()
+PhysicsInletMassFlowRateTemperature::init()
 {
+  PhysicsFlowBoundary::init();
   // For now, we do this here. We could consider doing it elsewhere
   for (auto th_phys : _th_physics)
     th_phys->setInlet(name(), ThermalHydraulicsFlowPhysics::MdotTemperature);
