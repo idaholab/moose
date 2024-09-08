@@ -2588,7 +2588,10 @@ protected:
   void meshChangedHelper(bool intermediate_change = false);
 
   /// Helper to check for duplicate variable names across systems or within a single system
-  bool duplicateVariableCheck(const std::string & var_name, const FEType & type, bool is_aux);
+  bool duplicateVariableCheck(const std::string & var_name,
+                              const FEType & type,
+                              bool is_aux,
+                              const std::set<SubdomainID> * const active_subdomains);
 
   void computeUserObjectsInternal(const ExecFlagType & type,
                                   const Moose::AuxGroup & group,
@@ -2704,6 +2707,9 @@ protected:
   /// Determines whether and which subdomains are to be checked to ensure that they have an active material
   CoverageCheckMode _material_coverage_check;
   std::vector<SubdomainName> _material_coverage_blocks;
+
+  /// Flags used for deduplication checks of variables.
+  MultiMooseEnum _variables_deduplication_flags;
 
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
   bool _fv_bcs_integrity_check;
