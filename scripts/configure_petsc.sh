@@ -104,7 +104,12 @@ function configure_petsc()
   fi
 
   cd $PETSC_DIR
-  python3 ./configure --with-64-bit-indices \
+  python3 ./configure \
+      CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77 \
+      COPTFLAGS="-g -O" \
+      CXXOPTFLAGS="-g -O" \
+      FOPTFLAGS="-g -O" \
+      --with-64-bit-indices \
       --with-cxx-dialect=C++17 \
       --with-debugging=no \
       --with-fortran-bindings=0 \
