@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess, os, re, sys, traceback
+import subprocess, os, platform, re, sys, traceback
 from versioner import Versioner
 from datetime import date
 
@@ -206,12 +206,19 @@ class PreMake:
             message += f'and the required version is {required_version}.\n'
             message += f'Before updating the container, make sure that your version '
             message += f'of MOOSE is up to date.\n\n'
-            message += 'You can obtain the correct container at '
-            if name_base == 'moose-dev':
-                harbor = 'harbor.hpc.inl.gov'
+
+            # Using a loaded module on INL HPC
+            CONTAINER_MODULE_NAME = os.environ.get('CONTAINER_MODULE_NAME')
+            if CONTAINER_MODULE_NAME == name.replace(f'-{platform.machine()}', ''):
+                message += 'You can obtain the correct container via the module '
+                message += f'{CONTAINER_MODULE_NAME}/{required_version}.'
             else:
-                harbor = 'mooseharbor.hpc.inl.gov'
-            message += f'oras://{harbor}/{name_base}/{name}:{required_version}.'
+                message += 'You can obtain the correct container at '
+                if name_base == 'moose-dev':
+                    harbor = 'harbor.hpc.inl.gov'
+                else:
+                    harbor = 'mooseharbor.hpc.inl.gov'
+                message += f'oras://{harbor}/{name_base}/{name}:{required_version}.'
             raise self.ApptainerVersionMismatch(message)
 
     def _check(self):
