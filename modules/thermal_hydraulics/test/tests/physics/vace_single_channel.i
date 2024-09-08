@@ -23,7 +23,7 @@
         fp = fp
 
         scaling_factor_1phase = '1 1 1e-5'
-        output_vector_velocity = false
+        output_vector_velocity = true
       []
     []
   []
