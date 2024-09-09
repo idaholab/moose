@@ -252,10 +252,16 @@ VolumeJunction1Phase::addMooseObjects()
     }
   }
 
+  const std::vector<std::pair<std::string, VariableName>> quantities = {
+      {"pressure", _pressure_var_name},
+      {"temperature", _temperature_var_name},
+      {"speed", _velocity_var_name}};
+  for (const auto & quantity_and_name : quantities)
   {
-    const std::string class_name = "VolumeJunction1PhasePressureAux";
+    const std::string class_name = "VolumeJunction1PhaseAux";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _pressure_var_name;
+    params.set<AuxVariableName>("variable") = quantity_and_name.second;
+    params.set<MooseEnum>("quantity") = quantity_and_name.first;
     params.set<Real>("volume") = _volume;
     params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
     params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
@@ -263,29 +269,7 @@ VolumeJunction1Phase::addMooseObjects()
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
     params.set<UserObjectName>("fp") = _fp_name;
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "pressure_aux"), params);
-  }
-  {
-    const std::string class_name = "VolumeJunction1PhaseTemperatureAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _temperature_var_name;
-    params.set<Real>("volume") = _volume;
-    params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
-    params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
-    params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
-    params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
-    params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
-    params.set<UserObjectName>("fp") = _fp_name;
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "temperature_aux"), params);
-  }
-  {
-    const std::string class_name = "VolumeJunction1PhaseVelocityMagnitudeAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _velocity_var_name;
-    params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
-    params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
-    params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
-    params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "velmag_aux"), params);
+    getTHMProblem().addAuxScalarKernel(
+        class_name, genName(name(), quantity_and_name.first + "_aux"), params);
   }
 }
