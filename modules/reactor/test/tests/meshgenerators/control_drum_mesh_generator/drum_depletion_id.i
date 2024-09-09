@@ -1,7 +1,6 @@
 [Mesh]
   [rmp]
     type = ReactorMeshParams
-    dim = 2
     geom = "Hex"
     assembly_pitch = 20
     flexible_assembly_stitching = true
@@ -16,7 +15,6 @@
     drum_outer_radius = 9.1
     num_azimuthal_sectors = 180
     drum_inner_intervals = 10
-    drum_intervals = 1
 
     pad_start_angle = 90
     pad_end_angle = 180
@@ -40,14 +38,7 @@
   [volume]
     family = MONOMIAL
     order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [volume]
-    type = ConstantAux
-    variable = volume
-    value = 1.0
+    initial_condition = 1.0
   []
 []
 

@@ -89,14 +89,7 @@
   [volume]
     family = MONOMIAL
     order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [volume]
-    type = ConstantAux
-    variable = volume
-    value = 1.0
+    initial_condition = 1.0
   []
 []
 
