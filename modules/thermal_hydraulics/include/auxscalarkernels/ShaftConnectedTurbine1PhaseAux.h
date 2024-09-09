@@ -14,18 +14,31 @@
 class ADShaftConnectedTurbine1PhaseUserObject;
 
 /**
- * Power extracted from flow computed in the 1-phase shaft-connected turbine
+ * Computes various quantities for a ShaftConnectedTurbine1Phase.
  */
-class Turbine1PhasePowerAux : public AuxScalarKernel
+class ShaftConnectedTurbine1PhaseAux : public AuxScalarKernel
 {
 public:
-  Turbine1PhasePowerAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
+  ShaftConnectedTurbine1PhaseAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
+
+  /// Quantity type
+  enum class Quantity
+  {
+    DELTA_P,
+    FLOW_COEFFICIENT,
+    DRIVING_TORQUE,
+    FRICTION_TORQUE,
+    MOMENT_OF_INERTIA,
+    POWER
+  };
+  /// Which quantity to compute
+  const Quantity _quantity;
+
   /// 1-phase shaft-connected turbine user object
   const ADShaftConnectedTurbine1PhaseUserObject & _turbine_uo;
-
-public:
-  static InputParameters validParams();
 };

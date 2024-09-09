@@ -14,15 +14,27 @@
 class SinglePhaseFluidProperties;
 
 /**
- * Computes pressure from the 1-phase volume junction variables
+ * Computes various quantities for a VolumeJunction1Phase.
  */
-class VolumeJunction1PhasePressureAux : public AuxScalarKernel
+class VolumeJunction1PhaseAux : public AuxScalarKernel
 {
 public:
-  VolumeJunction1PhasePressureAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
+  VolumeJunction1PhaseAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
+
+  /// Quantity type
+  enum class Quantity
+  {
+    PRESSURE,
+    TEMPERATURE,
+    SPEED
+  };
+  /// Which quantity to compute
+  const Quantity _quantity;
 
   /// Volume of the junction
   const Real & _volume;
@@ -36,9 +48,7 @@ protected:
   const VariableValue & _rhowV;
   /// rho*E*V of the junction
   const VariableValue & _rhoEV;
+
   /// Single-phase fluid properties user object
   const SinglePhaseFluidProperties & _fp;
-
-public:
-  static InputParameters validParams();
 };

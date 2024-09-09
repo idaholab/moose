@@ -188,84 +188,32 @@ ShaftConnectedCompressor1Phase::addMooseObjects()
 {
   VolumeJunction1Phase::addMooseObjects();
 
+  const std::vector<std::pair<std::string, VariableName>> quantities_aux = {
+      {"delta_p", _delta_p_var_name},
+      {"isentropic_torque", _isentropic_torque_var_name},
+      {"dissipation_torque", _dissipation_torque_var_name},
+      {"friction_torque", _friction_torque_var_name},
+      {"moment_of_inertia", _moment_of_inertia_var_name}};
+  for (const auto & quantity_and_name : quantities_aux)
   {
-    std::string class_name = "Compressor1PhaseDeltaPAux";
+    const std::string class_name = "ShaftConnectedCompressor1PhaseAux";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _delta_p_var_name;
+    params.set<AuxVariableName>("variable") = quantity_and_name.second;
+    params.set<MooseEnum>("quantity") = quantity_and_name.first;
     params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-
     getTHMProblem().addAuxScalarKernel(
-        class_name, Component::genName(name(), "delta_p_aux"), params);
+        class_name, genName(name(), quantity_and_name.first + "_aux"), params);
   }
-  {
-    std::string class_name = "Compressor1PhaseIsentropicTorqueAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _isentropic_torque_var_name;
-    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
 
-    getTHMProblem().addAuxScalarKernel(
-        class_name, Component::genName(name(), "isentropic_torque_aux"), params);
-  }
-  {
-    std::string class_name = "Compressor1PhaseDissipationTorqueAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _dissipation_torque_var_name;
-    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(
-        class_name, Component::genName(name(), "dissipation_torque_aux"), params);
-  }
-  {
-    std::string class_name = "Compressor1PhaseFrictionAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _friction_torque_var_name;
-    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(
-        class_name, Component::genName(name(), "friction_torque_aux"), params);
-  }
-  {
-    std::string class_name = "Compressor1PhaseInertiaAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _moment_of_inertia_var_name;
-    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(
-        class_name, Component::genName(name(), "inertia_aux"), params);
-  }
+  const std::vector<std::string> quantities_pp = {
+      "pressure_ratio", "efficiency", "rel_corrected_flow", "rel_corrected_speed"};
+  for (const auto & quantity : quantities_pp)
   {
     const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<MooseEnum>("quantity") = "pressure_ratio";
+    params.set<MooseEnum>("quantity") = quantity;
     params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    getTHMProblem().addPostprocessor(
-        class_name, Component::genName(name(), "pressure_ratio"), params);
-  }
-  {
-    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<MooseEnum>("quantity") = "efficiency";
-    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    getTHMProblem().addPostprocessor(class_name, Component::genName(name(), "efficiency"), params);
-  }
-  {
-    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<MooseEnum>("quantity") = "rel_corrected_flow";
-    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    getTHMProblem().addPostprocessor(
-        class_name, Component::genName(name(), "rel_corrected_flow"), params);
-  }
-  {
-    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<MooseEnum>("quantity") = "rel_corrected_speed";
-    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    getTHMProblem().addPostprocessor(
-        class_name, Component::genName(name(), "rel_corrected_speed"), params);
+    getTHMProblem().addPostprocessor(class_name, Component::genName(name(), quantity), params);
   }
 }

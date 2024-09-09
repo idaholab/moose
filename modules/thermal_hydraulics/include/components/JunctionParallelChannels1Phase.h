@@ -19,9 +19,6 @@ class JunctionParallelChannels1Phase : public VolumeJunction1Phase
 public:
   JunctionParallelChannels1Phase(const InputParameters & params);
 
-  virtual void addVariables() override;
-  virtual void addMooseObjects() override;
-
 protected:
   /**
    * Builds user object for computing and storing the fluxes

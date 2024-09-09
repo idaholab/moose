@@ -7,16 +7,21 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VolumeJunction1PhaseTemperatureAux.h"
+#include "VolumeJunction1PhaseAux.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
-registerMooseObject("ThermalHydraulicsApp", VolumeJunction1PhaseTemperatureAux);
+registerMooseObject("ThermalHydraulicsApp", VolumeJunction1PhaseAux);
 
 InputParameters
-VolumeJunction1PhaseTemperatureAux::validParams()
+VolumeJunction1PhaseAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
+
+  params.addClassDescription("Computes various quantities for a VolumeJunction1Phase.");
+
+  MooseEnum quantity("pressure temperature speed");
+  params.addRequiredParam<MooseEnum>("quantity", quantity, "Which quantity to compute");
   params.addRequiredParam<Real>("volume", "Volume of the junction");
   params.addRequiredCoupledVar("rhoV", "rho*V of the junction");
   params.addRequiredCoupledVar("rhouV", "rho*u*V of the junction");
@@ -24,13 +29,13 @@ VolumeJunction1PhaseTemperatureAux::validParams()
   params.addRequiredCoupledVar("rhowV", "rho*w*V of the junction");
   params.addRequiredCoupledVar("rhoEV", "rho*E*V of the junction");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
-  params.addClassDescription("Computes temperature from the 1-phase volume junction variables.");
+
   return params;
 }
 
-VolumeJunction1PhaseTemperatureAux::VolumeJunction1PhaseTemperatureAux(
-    const InputParameters & parameters)
+VolumeJunction1PhaseAux::VolumeJunction1PhaseAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
+    _quantity(getParam<MooseEnum>("quantity").getEnum<Quantity>()),
     _volume(getParam<Real>("volume")),
     _rhoV(coupledScalarValue("rhoV")),
     _rhouV(coupledScalarValue("rhouV")),
@@ -42,14 +47,26 @@ VolumeJunction1PhaseTemperatureAux::VolumeJunction1PhaseTemperatureAux(
 }
 
 Real
-VolumeJunction1PhaseTemperatureAux::computeValue()
+VolumeJunction1PhaseAux::computeValue()
 {
   Real vJ, dvJ_drhoV;
   THM::v_from_rhoA_A(_rhoV[0], _volume, vJ, dvJ_drhoV);
 
-  const RealVectorValue rhouV_vec(_rhouV[0], _rhovV[0], _rhowV[0]);
-  const Real rhouV2 = rhouV_vec * rhouV_vec;
-  const Real eJ = _rhoEV[0] / _rhoV[0] - 0.5 * rhouV2 / (_rhoV[0] * _rhoV[0]);
+  const RealVectorValue vel(_rhouV[0] / _rhoV[0], _rhovV[0] / _rhoV[0], _rhowV[0] / _rhoV[0]);
+  const Real eJ = _rhoEV[0] / _rhoV[0] - 0.5 * vel * vel;
 
-  return _fp.T_from_v_e(vJ, eJ);
+  switch (_quantity)
+  {
+    case Quantity::PRESSURE:
+      return _fp.p_from_v_e(vJ, eJ);
+      break;
+    case Quantity::TEMPERATURE:
+      return _fp.T_from_v_e(vJ, eJ);
+      break;
+    case Quantity::SPEED:
+      return vel.norm();
+      break;
+    default:
+      mooseError("Invalid 'quantity' parameter.");
+  }
 }
