@@ -99,6 +99,10 @@ THMWCNSFVFlowPhysics::initializePhysicsAdditional()
   for (const auto flow_channel : _flow_channels)
     addBlocks(flow_channel->getSubdomainNames());
   // TODO: consider other Physics-components
+
+  // Delete ANY_BLOCK_ID from the Physics block restriction
+  // TODO: never add it in the first place?
+  _blocks.erase(std::remove(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID"), _blocks.end());
 }
 
 void
@@ -176,8 +180,9 @@ THMWCNSFVFlowPhysics::addInitialConditions()
   }
 
   // Add WCNSFV initial conditions on the remaining blocks
-  if (_blocks.size())
+  if (_blocks.size() && std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") == _blocks.end())
     WCNSFVFlowPhysics::addInitialConditions();
+
   // Restore initial block restriction
   _blocks = copy_blocks;
 }
@@ -186,6 +191,7 @@ void
 THMWCNSFVFlowPhysics::addMaterials()
 {
   ThermalHydraulicsFlowPhysics::addCommonMaterials();
+  addChannelFrictionRegions();
   WCNSFVFlowPhysics::addMaterials();
 
   addJunctionFunctorMaterials();
@@ -230,13 +236,60 @@ THMWCNSFVFlowPhysics::addJunctionFunctorMaterials()
 }
 
 void
+THMWCNSFVFlowPhysics::addChannelFrictionRegions()
+{
+  // Process friction factor input
+  for (const auto flow_channel : _flow_channels)
+  {
+    const auto & blocks = flow_channel->getSubdomainNames();
+    if (flow_channel->isParamValid("f"))
+    {
+      const std::string f_name = flow_channel->getParam<FunctionName>("f");
+      // we ll only support isotropic friction in 1D for now
+      addFrictionRegion(blocks, {"Darcy"}, {f_name});
+      // TODO Remove this code and use the closure instead
+    }
+  }
+}
+
+void
 THMWCNSFVFlowPhysics::addFVKernels()
 {
-  // Process gravity input
+  // Process channel orientation and gravity vector input
+  for (const auto flow_channel : _flow_channels)
+  {
+    const auto & blocks = flow_channel->getSubdomainNames();
+    const auto & physics_gravity = getParam<RealVectorValue>("gravity");
+    if (flow_channel->isParamValid("gravity_vector"))
+    {
+      const auto & local_gravity = flow_channel->getParam<RealVectorValue>("gravity_vector");
+      for (const auto & block : blocks)
+        _gravity_vector_map[block] = local_gravity;
+    }
+    else
+      for (const auto & block : blocks)
+        _gravity_vector_map[block] = physics_gravity;
 
-  // Process friction factor input
+    if (flow_channel->isParamValid("orientation"))
+    {
+      const auto & local_orientation = flow_channel->getParam<RealVectorValue>("orientation");
+      for (const auto & block : blocks)
+        _flow_channel_orientation_map[block] = local_orientation;
+    }
+  }
 
   WCNSFVFlowPhysics::addFVKernels();
+}
+
+RealVectorValue
+THMWCNSFVFlowPhysics::getLocalGravityVector(const SubdomainName & block) const
+{
+  // Gravity kernel will access the first component of gravity vector, since we use vel_x for the
+  // variable
+  return RealVectorValue({libmesh_map_find(_flow_channel_orientation_map, block) *
+                              libmesh_map_find(_gravity_vector_map, block),
+                          0,
+                          0});
 }
 
 void
