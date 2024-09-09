@@ -131,6 +131,12 @@ docsDir(const std::string & app_name)
 }
 
 std::string
+mooseDocsURL(const std::string & path)
+{
+  return "https://mooseframework.inl.gov/" + path;
+}
+
+std::string
 replaceAll(std::string str, const std::string & from, const std::string & to)
 {
   size_t start_pos = 0;
