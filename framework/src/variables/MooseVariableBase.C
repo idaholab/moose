@@ -148,12 +148,12 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
 #ifdef DEBUG
     for (auto it = ++blk_ids.begin(); it != blk_ids.end(); ++it)
       if (_is_lower_d != _mesh.isLowerD(*it))
-        mooseError("A user should not specify a mix of lower-dimensional and higher-dimensional "
-                   "blocks for variable '" +
-                   _var_name + "'. This variable is " + (_is_lower_d ? "" : "not ") +
-                   "recognised as lower-dimensional, but is also defined for the " +
-                   (_is_lower_d ? "higher" : "lower") + "-dimensional block '" +
-                   _mesh.getSubdomainName(*it) + "' (block-id " + std::to_string(*it) + ").");
+        mooseWarning("A user should not specify a mix of lower-dimensional and higher-dimensional "
+                     "blocks for variable '" +
+                     _var_name + "'. This variable is " + (_is_lower_d ? "" : "not ") +
+                     "recognised as lower-dimensional, but is also defined for the " +
+                     (_is_lower_d ? "higher" : "lower") + "-dimensional block '" +
+                     _mesh.getSubdomainName(*it) + "' (block-id " + std::to_string(*it) + ").");
 #endif
   }
 }
