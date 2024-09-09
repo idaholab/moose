@@ -55,7 +55,7 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
   if (*_reactor_params_mesh)
     mooseError("The reactor_params mesh is not of the correct type");
 
-  if (!hasMeshProperty<int>("mesh_dimensions", _reactor_params) ||
+  if (!hasMeshProperty<unsigned int>("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty<std::string>("mesh_geometry", _reactor_params))
     mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n Please "
                "check that a valid definition and name of ReactorMeshParams has been provided.");

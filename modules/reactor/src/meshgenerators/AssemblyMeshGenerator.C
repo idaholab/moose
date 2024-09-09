@@ -118,7 +118,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   initializeReactorMeshParams(reactor_params);
 
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
-  _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
+  _mesh_dimensions = getReactorParam<unsigned int>(RGMB::mesh_dimensions);
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",

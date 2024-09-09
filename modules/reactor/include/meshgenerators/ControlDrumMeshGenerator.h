@@ -36,7 +36,7 @@ protected:
   std::string _geom_type;
 
   ///The number of dimensions the mesh is ultimately going to have (2 or 3, declared in the ReactorMeshParams object)
-  int _mesh_dimensions;
+  unsigned int _mesh_dimensions;
 
   ///The id number for the type of the assembly
   const subdomain_id_type _assembly_type;

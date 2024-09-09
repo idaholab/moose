@@ -220,7 +220,7 @@
                         "value": false
                     },
                     "MeshMetaData/rmp/mesh_dimensions": {
-                        "type": "int",
+                        "type": "unsigned int",
                         "value": 2
                     },
                     "MeshMetaData/rmp/mesh_geometry": {
