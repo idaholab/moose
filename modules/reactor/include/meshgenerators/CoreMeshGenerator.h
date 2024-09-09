@@ -71,7 +71,7 @@ protected:
   std::string _desired_area_func;
 
   ///The number of dimensions the mesh is ultimately going to have (2 or 3, declared in the ReactorMeshParams object)
-  int _mesh_dimensions;
+  unsigned int _mesh_dimensions;
 
   ///A mapping from pin-type IDs to region IDs used when assigning region IDs during the assembly stitching stage
   std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> _pin_region_id_map;

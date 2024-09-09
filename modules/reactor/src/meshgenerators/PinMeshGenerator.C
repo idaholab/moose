@@ -114,7 +114,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   // Initialize ReactorMeshParams object
   initializeReactorMeshParams(getParam<MeshGeneratorName>("reactor_params"));
 
-  _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
+  _mesh_dimensions = getReactorParam<unsigned int>(RGMB::mesh_dimensions);
   _mesh_geometry = getReactorParam<std::string>(RGMB::mesh_geometry);
 
   if (_is_assembly)

@@ -349,7 +349,7 @@
                         "value": true
                     },
                     "MeshMetaData/rmp/mesh_dimensions": {
-                        "type": "int",
+                        "type": "unsigned int",
                         "value": 3
                     },
                     "MeshMetaData/rmp/mesh_geometry": {

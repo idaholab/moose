@@ -101,7 +101,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
                "order to use ControlDrumMeshGenerator");
 
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
-  _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
+  _mesh_dimensions = getReactorParam<unsigned int>(RGMB::mesh_dimensions);
 
   const auto drum_inner_intervals = getParam<unsigned int>("drum_inner_intervals");
   const auto drum_intervals = getParam<unsigned int>("drum_intervals");
