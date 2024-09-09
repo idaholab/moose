@@ -188,7 +188,7 @@
       expect_err = "Both top_boundary_id and bottom_boundary_id must be provided"
     []
     [depletion_id_incorrect_level]
-      detail = 'if a 3-D mesh is extruded but is missing top and bottom boundary id data'
+      detail = 'if a depletion id type other than pin type is used for a control drum mesh'
       type = 'RunException'
       input = 'drum_depletion_id.i'
       cli_args = 'Mesh/drum/depletion_id_type=assembly_type'

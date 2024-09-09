@@ -45,7 +45,7 @@ SimpleHexagonGenerator::validParams()
                                                 "external_boundary_id>=0",
                                                 "Optional customized external boundary id.");
   params.addParam<BoundaryName>("external_boundary_name",
-                               "Optional customized external boundary name.");
+                                "Optional customized external boundary name.");
   params.addParamNamesToGroup("block_id block_name external_boundary_id external_boundary_name",
                               "Customized Subdomain/Boundary");
   params.addClassDescription(

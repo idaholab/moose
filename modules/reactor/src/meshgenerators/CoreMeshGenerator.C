@@ -524,60 +524,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     }
 
     if (_extrude && _mesh_dimensions == 3)
-    {
-      std::vector<Real> axial_boundaries =
-          getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
-      const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
-      const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
-      {
-        auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
-
-        if (_mesh_periphery)
-          params.set<MeshGeneratorName>("input") = name() + "_periphery";
-        else
-          params.set<MeshGeneratorName>("input") = name() + "_delbds";
-
-        params.set<Point>("direction") = Point(0, 0, 1);
-        params.set<std::vector<unsigned int>>("num_layers") =
-            getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
-        params.set<std::vector<Real>>("heights") = axial_boundaries;
-        params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
-        params.set<boundary_id_type>("top_boundary") = top_boundary;
-
-        addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
-      }
-
-      {
-        auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
-
-        params.set<MeshGeneratorName>("input") = name() + "_extruded";
-        params.set<std::vector<BoundaryName>>("old_boundary") = {
-            std::to_string(top_boundary),
-            std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
-        params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
-
-        addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
-      }
-
-      {
-        auto params = _app.getFactory().getValidParams("PlaneIDMeshGenerator");
-
-        params.set<MeshGeneratorName>("input") = name() + "_change_plane_name";
-
-        std::vector<Real> plane_heights{0};
-        for (Real z : axial_boundaries)
-        {
-          plane_heights.push_back(z + plane_heights.back());
-        }
-        params.set<std::vector<Real>>("plane_coordinates") = plane_heights;
-
-        std::string plane_id_name = "plane_id";
-        params.set<std::string>("id_name") = "plane_id";
-
-        build_mesh_name = name() + "_extrudedIDs";
-        addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
-      }
-    }
+      build_mesh_name = callExtrusionMeshSubgenerators(build_mesh_name);
 
     // Store final mesh subgenerator
     _build_mesh = &getMeshByName(build_mesh_name);
@@ -925,6 +872,7 @@ CoreMeshGenerator::generate()
     addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Core, _extrude);
   }
 
+  // Mark mesh as not prepared, as block ID's were re-assigned in this method
   (*_build_mesh)->set_isnt_prepared();
 
   return std::move(*_build_mesh);
