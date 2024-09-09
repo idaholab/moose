@@ -139,7 +139,7 @@ class PreMake:
 
             if msg:
                 full_message += f'\n{msg}'
-            super().__init__(self, full_message)
+            super().__init__(full_message)
 
         @staticmethod
         def parseVersionDate(version: str):
@@ -154,7 +154,36 @@ class PreMake:
                         int(version_date_re.group(3)))
 
     class ApptainerVersionMismatch(VersionMismatch):
-        pass
+        """
+        Exception that denotes the mismatch of an apptainer
+        container version
+        """
+        def __init__(self, name, name_base, current_version, required_version):
+            self.name = name
+            self.name_base = name_base
+            self.current_version = current_version
+            self.required_version = required_version
+
+            message = f'Container {name} is currently at version {current_version} '
+            message += f'and the required version is {required_version}.\n'
+            message += f'Before updating the container, make sure that your version '
+            message += f'of MOOSE is up to date.\n\n'
+
+            # Using a loaded module on INL HPC
+            CONTAINER_MODULE_NAME = os.environ.get('CONTAINER_MODULE_NAME')
+            if CONTAINER_MODULE_NAME == name.replace(f'-{platform.machine()}', ''):
+                message += 'You can obtain the correct container via the module '
+                message += f'{CONTAINER_MODULE_NAME}/{required_version}.'
+            # Not using a loaded module on INL HPC
+            else:
+                message += 'You can obtain the correct container at '
+                if name_base == 'moose-dev':
+                    harbor = 'harbor.hpc.inl.gov'
+                else:
+                    harbor = 'mooseharbor.hpc.inl.gov'
+                message += f'oras://{harbor}/{name_base}/{name}:{required_version}.'
+
+            super().__init__(message)
 
     def check(self):
         """
@@ -202,24 +231,7 @@ class PreMake:
         if required_version != current_version:
             name = self.apptainer_env['NAME']
             name_base = apptainer_meta['name_base']
-            message = f'Container {name} is currently at version {current_version} '
-            message += f'and the required version is {required_version}.\n'
-            message += f'Before updating the container, make sure that your version '
-            message += f'of MOOSE is up to date.\n\n'
-
-            # Using a loaded module on INL HPC
-            CONTAINER_MODULE_NAME = os.environ.get('CONTAINER_MODULE_NAME')
-            if CONTAINER_MODULE_NAME == name.replace(f'-{platform.machine()}', ''):
-                message += 'You can obtain the correct container via the module '
-                message += f'{CONTAINER_MODULE_NAME}/{required_version}.'
-            else:
-                message += 'You can obtain the correct container at '
-                if name_base == 'moose-dev':
-                    harbor = 'harbor.hpc.inl.gov'
-                else:
-                    harbor = 'mooseharbor.hpc.inl.gov'
-                message += f'oras://{harbor}/{name_base}/{name}:{required_version}.'
-            raise self.ApptainerVersionMismatch(message)
+            raise self.ApptainerVersionMismatch(name, name_base, current_version, required_version)
 
     def _check(self):
         """
