@@ -106,11 +106,15 @@ gold_conda_list = [{
 
 # Have a gold for the apptainer environment so that we can
 # test it without being in apptainer
-gold_apptainer_env = {'TAG': '561161b',
-                      'VERSION': '561161b',
-                      'LIBRARY': 'moose-dev',
-                      'NAME': 'moose-dev-openmpi-x86_64',
-                      'SUMMARY': 'moose-dev-openmpi-x86_64:561161b'}
+gold_apptainer_tag = '561161b'
+gold_apptainer_library = 'moose-dev'
+gold_apptainer_suffix = '-openmpi'
+gold_apptainer_arch = 'x86_64'
+gold_apptainer_env = {'TAG': gold_apptainer_tag,
+                      'VERSION': gold_apptainer_tag,
+                      'LIBRARY': gold_apptainer_library,
+                      'NAME': f'{gold_apptainer_library}{gold_apptainer_suffix}-{gold_apptainer_arch}',
+                      'NAME_SUMMARY': f'{gold_apptainer_library}{gold_apptainer_suffix}-{gold_apptainer_arch}:{gold_apptainer_tag}'}
 
 class Test(unittest.TestCase):
     def testCondaList(self):
@@ -214,8 +218,8 @@ class Test(unittest.TestCase):
 
     def testGetApptainerEnv(self):
         prefix = 'MOOSE_APPTAINER_GENERATOR_'
-        keys = ['TAG', 'VERSION', 'LIBRARY', 'NAME', 'NAME_SUMMARY']
         apptainer_env = {}
+        keys = list(gold_apptainer_env.keys())
         for key in keys:
             entry = os.environ.get(f'{prefix}{key}')
             if entry:
@@ -237,7 +241,7 @@ class Test(unittest.TestCase):
     def testCheckApptainer(self, mock_get_apptainer_env):
         # So that we can still test this on systems outside of apptainer
         mock_get_apptainer_env.return_value = gold_apptainer_env
-        library = 'moose-dev'
+        library = gold_apptainer_library
 
         # The current apptainer info for moose-dev
         pre_make = PreMake()
