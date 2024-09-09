@@ -66,6 +66,7 @@ registerActions(Syntax & syntax)
 
   // New tasks required to get correct Physics setup order
   registerTask("THMPhysics:add_ic", false);
+  registerTask("THMPhysics:change_1D_mesh_info", false);
 
   try
   {
@@ -112,6 +113,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:output_vector_velocity", "THM:add_relationship_managers");
     syntax.addDependency("THM:add_variables", "THM:integrity_check");
     syntax.addDependency("THM:add_variables", "THMPhysics:add_ic");
+    syntax.addDependency("THMPhysics:change_1D_mesh_info", "init_problem");
   }
   catch (CyclicDependencyException<std::string> & e)
   {
