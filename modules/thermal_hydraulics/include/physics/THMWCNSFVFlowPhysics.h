@@ -12,8 +12,6 @@
 #include "ThermalHydraulicsFlowPhysics.h"
 #include "WCNSFVFlowPhysics.h"
 
-class PhysicsFlowBoundary;
-
 /**
  * Sets up the single-phase flow equations using Euler's equations and a RDG discretization
  */
@@ -44,10 +42,17 @@ private:
   virtual void addOutletBoundaries() override;
   virtual void addFlowJunctions() override;
 
+  /// Add functor materials that compute the fluxes / pressures on the sides connected to the junction
   void addJunctionFunctorMaterials();
-  // /// Adds the boundary flux boundary condition, which uses the boundary flux user object
-  // void addBoundaryFluxBC(const PhysicsFlowBoundary & comp,
-  //                        const UserObjectName & boundary_numerical_flux_name);
+  /// Add to data structures in WCNSFVFlowPhysics for each flow channel
+  void addChannelFrictionRegions();
+
+  virtual RealVectorValue getLocalGravityVector(const SubdomainName & block) const override;
+
+  /// Keeps track of the orientation of the gravity vector
+  std::map<SubdomainName, RealVectorValue> _gravity_vector_map;
+  /// Keeps track of the orientation of the flow channels
+  std::map<SubdomainName, RealVectorValue> _flow_channel_orientation_map;
 
 public:
   static const std::string DENSITY;
