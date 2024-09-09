@@ -14,6 +14,8 @@
 #include "SlopeReconstruction1DInterface.h"
 #include "PhysicsFlowBoundary.h"
 
+#include "Function.h"
+
 // TODO: consolidate those at the THMPhysics parent class level
 typedef THMWCNSFVFlowPhysics WCNSFV;
 const std::string WCNSFV::DENSITY = "rho";
@@ -54,6 +56,7 @@ registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_postproce
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_aux_variable");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_aux_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_user_object");
+registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "THMPhysics:change_1D_mesh_info");
 
 InputParameters
 THMWCNSFVFlowPhysics::validParams()
@@ -111,6 +114,8 @@ THMWCNSFVFlowPhysics::actOnAdditionalTasks()
   // The THMProblem adds ICs on THM:add_variables, which happens before add_ic
   if (_current_task == "THMPhysics:add_ic")
     addTHMInitialConditions();
+  else if (_current_task == "THMPhysics:change_1D_mesh_info")
+    changeMeshFaceAndElemInfo();
 }
 
 void
@@ -428,6 +433,43 @@ THMWCNSFVFlowPhysics::addPostprocessors()
       const auto name_pp = "area_pp_" + bdy_name;
       if (!getProblem().hasUserObject(name_pp))
         getProblem().addPostprocessor(pp_type, name_pp, params);
+    }
+  }
+}
+
+void
+THMWCNSFVFlowPhysics::changeMeshFaceAndElemInfo()
+{
+  // NOTE: an alternative to messing with the mesh like this would be to use
+  // custom porosity functors. This works so I will keep it around. It would
+  // also be helpful when debugging the porosity functors
+
+  // Loop on flow channels
+  for (const auto flow_channel : _flow_channels)
+  {
+    const auto & blocks = flow_channel->getSubdomainNames();
+    const auto & channel_area =
+        getProblem().getFunction(flow_channel->getParam<FunctionName>("A"), 0);
+
+    for (const auto & block : blocks)
+    {
+      const auto block_id = _mesh->getSubdomainID(block);
+
+      // Loop on elements in the flow channel
+      for (const auto & elem : _mesh->getMesh().active_local_subdomain_elements_ptr_range(block_id))
+      {
+        const auto centroid = elem->true_centroid();
+        // Fix element info
+        ElemInfo & elem_info = const_cast<ElemInfo &>(_mesh->elemInfo(elem->id()));
+        elem_info.volumeRef() = channel_area.value(0, centroid) * elem->hmax();
+
+        // Fix face infos attached to the element
+        for (const auto & side : elem->side_index_range())
+        {
+          FaceInfo * fi = const_cast<FaceInfo *>(_mesh->faceInfo(elem, side));
+          fi->faceArea() = channel_area.value(0, centroid);
+        }
+      }
     }
   }
 }

@@ -47,6 +47,9 @@ private:
   /// Add to data structures in WCNSFVFlowPhysics for each flow channel
   void addChannelFrictionRegions();
 
+  /// Change the element and face info to the have the expected component areas / volumes
+  void changeMeshFaceAndElemInfo();
+
   virtual RealVectorValue getLocalGravityVector(const SubdomainName & block) const override;
 
   /// Keeps track of the orientation of the gravity vector
