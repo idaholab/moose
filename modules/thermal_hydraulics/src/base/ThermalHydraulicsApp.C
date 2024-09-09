@@ -18,7 +18,9 @@
 #include "MiscApp.h"
 
 #include "AppFactory.h"
+#include "Simulation.h"
 
+#include "FlowModelSinglePhase.h"
 #include "SinglePhaseFluidProperties.h"
 #include "TwoPhaseFluidProperties.h"
 #include "TwoPhaseNCGFluidProperties.h"
@@ -105,6 +107,15 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
+
+  // Component variable ordering:
+  // Note that this particular order ({rhoA, rhoEA, rhouA}) corresponds to the
+  // the alphabetic ordering, which was the ordering used before this ordering
+  // feature was implemented. We preserve this order for ease of transition,
+  // but an order such as {rhoA, rhouA, rhoEA} may work as well.
+  Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOA, 0);
+  Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOEA, 1);
+  Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOUA, 2);
 }
 
 const std::string &
