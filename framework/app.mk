@@ -82,11 +82,12 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # of unrelated stuff.
 non_unity_dirs := %.libs %/src $(app_non_unity_dirs)
 
-# Find all of the top-level subdirectories in our src folder(s)
+# Find all of the subdirectories in our src folder(s) up to $(app_unity_depth)
+app_unity_depth ?= 1
 # We will create a Unity file for each individual subdirectory
 # The idea is that files grouped withing a subdirectory are closely related
 # and will benefit from a Unity build
-srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth 1 -type d -not -path '*/.libs*')
+srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth $(app_unity_depth) -type d -not -path '*/.libs*')
 allsrcsubdirs := $(shell find $(APPLICATION_DIR)/src -type d -not -path '*/.libs*')
 
 # Filter out the paths we don't want to Unity build
