@@ -61,7 +61,7 @@ PeripheralTriangleMeshGenerator::validParams()
 
   params.addParam<SubdomainName>("peripheral_ring_block_name",
                                  "The block name assigned to the created peripheral layer.");
-  params.addParam<std::string>("external_boundary_name",
+  params.addParam<BoundaryName>("external_boundary_name",
                                "Optional customized external boundary name.");
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>(
@@ -87,8 +87,8 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
                                     ? getParam<SubdomainName>("peripheral_ring_block_name")
                                     : (SubdomainName) ""),
     _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string())
+                                ? getParam<BoundaryName>("external_boundary_name")
+                                : BoundaryName())
 {
   // Calculate outer boundary points
 

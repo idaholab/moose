@@ -238,7 +238,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
                                                                  drum_intervals};
       if (drum_inner_intervals > 1)
       {
-        params.set<std::vector<unsigned short>>("ring_block_ids") = {
+        params.set<std::vector<subdomain_id_type>>("ring_block_ids") = {
             RGMB::CONTROL_DRUM_BLOCK_ID_INNER_TRI,
             RGMB::CONTROL_DRUM_BLOCK_ID_INNER,
             RGMB::CONTROL_DRUM_BLOCK_ID_PAD};
@@ -247,7 +247,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       }
       else
       {
-        params.set<std::vector<unsigned short>>("ring_block_ids") = {
+        params.set<std::vector<subdomain_id_type>>("ring_block_ids") = {
             RGMB::CONTROL_DRUM_BLOCK_ID_INNER, RGMB::CONTROL_DRUM_BLOCK_ID_PAD};
         params.set<std::vector<SubdomainName>>("ring_block_names") = {block_name_prefix + "_R0",
                                                                       block_name_prefix + "_R1"};
@@ -264,6 +264,8 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       params.set<std::vector<libMesh::Point>>("extra_positions") = {libMesh::Point(0, 0, 0)};
       params.set<std::vector<unsigned int>>("extra_positions_mg_indices") = {0};
       params.set<bool>("use_auto_area_func") = true;
+      // `verify_holes` is set to false to prevent false positive instances of points outside of
+      // defined holes, which can create test failures on certain dev environments
       params.set<bool>("verify_holes") = false;
       params.set<MooseEnum>("boundary_type") = (_geom_type == "Hex") ? "HEXAGON" : "CARTESIAN";
       params.set<unsigned int>("boundary_sectors") =
@@ -273,7 +275,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
       params.set<BoundaryName>("external_boundary_name") =
           RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX + std::to_string(_assembly_type);
       params.set<SubdomainName>("background_subdomain_name") = block_name_prefix + "_R2_TRI";
-      params.set<unsigned short>("background_subdomain_id") = RGMB::CONTROL_DRUM_BLOCK_ID_OUTER;
+      params.set<subdomain_id_type>("background_subdomain_id") = RGMB::CONTROL_DRUM_BLOCK_ID_OUTER;
 
       addMeshSubgenerator("FlexiblePatternGenerator", name() + "_fpg", params);
 
@@ -330,7 +332,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
         params.set<MeshGeneratorName>("input") = name() + "_change_plane_name";
 
         std::vector<Real> plane_heights{0};
-        for (Real z : axial_boundaries)
+        for (const auto & z : axial_boundaries)
           plane_heights.push_back(z + plane_heights.back());
 
         params.set<std::vector<Real>>("plane_coordinates") = plane_heights;
@@ -478,7 +480,7 @@ ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx,
       // pad or ex-pad region Note: drum angle of 0 degrees starts in positive y-direction and
       // increments in clockwise direction, which is consistent
       //       with how AdvancedConcentricCircleMeshGenerator defines azimuthal angles
-      Real drum_angle = std::atan2(elem_x, elem_y) * 360. / (2. * M_PI);
+      Real drum_angle = std::atan2(elem_x, elem_y) * 180. / M_PI;
       if (drum_angle < 0)
         drum_angle += 360;
 

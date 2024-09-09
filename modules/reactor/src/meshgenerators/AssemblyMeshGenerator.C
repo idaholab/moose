@@ -323,7 +323,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       }
 
       params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
-      params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
+      params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
 
       addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
 

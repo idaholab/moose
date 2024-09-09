@@ -211,7 +211,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       const auto boundary_name =
           (_is_assembly ? RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX : RGMB::PIN_BOUNDARY_NAME_PREFIX) +
           std::to_string(_pin_type);
-      params.set<std::string>("external_boundary_name") = boundary_name;
+      params.set<BoundaryName>("external_boundary_name") = boundary_name;
       params.set<std::vector<subdomain_id_type>>("block_id") = {
           _quad_center ? RGMB::PIN_BLOCK_ID_START : RGMB::PIN_BLOCK_ID_TRI};
       params.set<MooseEnum>("element_type") = _quad_center ? "QUAD" : "TRI";
@@ -342,7 +342,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
           const auto boundary_name = (_is_assembly ? RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX
                                                    : RGMB::PIN_BOUNDARY_NAME_PREFIX) +
                                      std::to_string(_pin_type);
-          params.set<std::string>("external_boundary_name") = boundary_name;
+          params.set<BoundaryName>("external_boundary_name") = boundary_name;
           bool flat_side_up = (_mesh_geometry == "Square");
           params.set<bool>("flat_side_up") = flat_side_up;
           params.set<bool>("create_outward_interface_boundaries") = false;
