@@ -576,18 +576,17 @@ std::vector<VariableName>
 Simulation::sortAddedComponentVariables() const
 {
   // Check that no index in order map is used more than once.
-  // Also, convert the map to a vector pairs to be sorted.
-  std::vector<int> indices;
+  // Also, convert the map to a vector of pairs to be sorted.
+  std::set<int> indices;
   std::vector<std::pair<VariableName, int>> registered_var_index_pairs;
   for (const auto & var_and_index : _component_variable_order_map)
   {
     registered_var_index_pairs.push_back(var_and_index);
 
     const auto ind = var_and_index.second;
-    if (std::find(indices.begin(), indices.end(), ind) != indices.end())
+    auto insert_return = indices.insert(ind);
+    if (!insert_return.second)
       mooseError("The index ", ind, " was used for multiple component variables.");
-    else
-      indices.push_back(ind);
   }
 
   // Collect all of the added variable names into an unsorted vector.
@@ -655,7 +654,7 @@ Simulation::addVariables()
   const auto var_names = sortAddedComponentVariables();
 
   // Report the ordering if the executioner is verbose
-  if (_thm_app.getExecutioner()->getParam<bool>("verbose"))
+  if (_fe_problem.getParam<MooseEnum>("verbose_setup") != "false")
   {
     std::stringstream ss;
     ss << "The system ordering of variables added by Components is as follows:\n";
