@@ -158,7 +158,7 @@ public:
    * @returns false if the tag is not within the set of vectors that are
    *          intended to not be zero or if the set is empty. returns true otherwise
    */
-  bool vectorTagNotZeroed(const TagID tag);
+  bool vectorTagNotZeroed(const TagID tag) const;
 
   /**
    * Get a VectorTag from a TagID.
