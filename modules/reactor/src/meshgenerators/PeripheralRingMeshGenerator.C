@@ -88,7 +88,7 @@ PeripheralRingMeshGenerator::validParams()
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
   params.addParam<BoundaryName>("external_boundary_name",
-                               "Optional customized external boundary name.");
+                                "Optional customized external boundary name.");
   params.addParamNamesToGroup(
       "peripheral_radial_bias peripheral_inner_boundary_layer_width "
       "peripheral_inner_boundary_layer_intervals peripheral_inner_boundary_layer_bias "

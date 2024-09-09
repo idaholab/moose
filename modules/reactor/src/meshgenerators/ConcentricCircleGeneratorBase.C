@@ -69,7 +69,7 @@ ConcentricCircleGeneratorBase::validParams()
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
   params.addParam<BoundaryName>("external_boundary_name",
-                               "Optional customized external boundary name.");
+                                "Optional customized external boundary name.");
 
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7", "TRI3");
   params.addParam<MooseEnum>(

@@ -235,6 +235,14 @@ protected:
                                 std::string elem_block_name,
                                 SubdomainID & next_free_id);
 
+  /**
+   * Calls mesh subgenerators related to extrusion, renaming of top / bottom boundaries, and
+   * defining plane IDs
+   * @param input_mesh_name name of input 2D mesh generator to extrude
+   * @return name of final output 3D mesh generator
+   */
+  MeshGeneratorName callExtrusionMeshSubgenerators(const MeshGeneratorName input_mesh_name);
+
   ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
   MeshGeneratorName _reactor_params;
   /// specify the depletion id is generated at which reactor generation level

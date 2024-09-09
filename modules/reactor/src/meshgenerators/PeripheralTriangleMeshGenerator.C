@@ -62,7 +62,7 @@ PeripheralTriangleMeshGenerator::validParams()
   params.addParam<SubdomainName>("peripheral_ring_block_name",
                                  "The block name assigned to the created peripheral layer.");
   params.addParam<BoundaryName>("external_boundary_name",
-                               "Optional customized external boundary name.");
+                                "Optional customized external boundary name.");
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>(
       "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
