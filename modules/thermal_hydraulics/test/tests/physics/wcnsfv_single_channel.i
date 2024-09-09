@@ -33,8 +33,6 @@
   [ThermalHydraulics]
     [WCNSFV]
       [all]
-        # needed to avoid ANY_BLOCK_ID
-        block = 'pipe'
         fp = fp
       []
     []
@@ -52,8 +50,8 @@
   [pipe]
     type = PhysicsFlowChannel
     position = '0 0 0'
-    orientation = '1 0 0'
-    gravity_vector = '0 0 0'
+    orientation = '0 1 0'
+    gravity_vector = '-9000 0 0'
     length = 1.0
     n_elems = 50
     A = 1.0
@@ -63,7 +61,7 @@
     initial_vel = 1
 
     physics = 'all'
-    f = 10.0
+    f = 1e10
     closures = simple_closures
     fp = fp
   []
@@ -106,4 +104,28 @@
 
 [Outputs]
   exodus = true
+[]
+
+
+[Postprocessors]
+  [pressure_left]
+    type = SideAverageValue
+    variable = pressure
+    boundary = pipe:out
+    execute_on = 'initial timestep_end'
+  []
+  [pressure_right]
+    type = SideAverageValue
+    variable = pressure
+    boundary = pipe:in
+    execute_on = 'initial timestep_end'
+  []
+  [mass_right]
+    type = VolumetricFlowRate
+    boundary = pipe:out
+    vel_x = vel_x
+    advected_quantity = 'rho'
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    execute_on = 'initial timestep_end'
+  []
 []
