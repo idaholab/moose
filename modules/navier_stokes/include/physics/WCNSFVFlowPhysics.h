@@ -99,6 +99,18 @@ protected:
                          const MooseEnum & outlet_type,
                          const MooseFunctorName & outlet_functor);
 
+  /*
+   * Add a friction zone
+   * @param block_name the name of the block to add a friction term in
+   * @param friction_type the friction model (Darcy or Forchheimer)
+   * @param friction_functors the friction coefficient(s)
+   */
+  void addFrictionRegion(const std::vector<SubdomainName> & block_names,
+                         const std::vector<std::string> & friction_types,
+                         const std::vector<std::string> & friction_functors);
+
+  void addFrictionFunctorMaterials();
+
 private:
   void addCorrectors() override;
   void addPostprocessors() override;
@@ -157,6 +169,10 @@ private:
     else
       return false;
   }
+
+  /// Return the oriented gravity vector for the given component
+  /// This is useful if the flow region is rotated and we are solving in its local frame of reference
+  virtual RealVectorValue getLocalGravityVector(const SubdomainName & block) const;
 
   /// Find the turbulence physics
   const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;

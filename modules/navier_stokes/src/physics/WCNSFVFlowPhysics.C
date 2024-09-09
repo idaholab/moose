@@ -680,18 +680,23 @@ WCNSFVFlowPhysics::addINSMomentumGravityKernels()
     assignBlocks(params, _blocks);
     params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
     params.set<MooseFunctorName>(NS::density) = _density_gravity_name;
-    params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
     if (_porous_medium_treatment)
       params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
     for (const auto d : make_range(dimension()))
     {
-      if (getParam<RealVectorValue>("gravity")(d) != 0)
-      {
-        params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      params.set<NonlinearVariableName>("variable") = _velocity_names[d];
 
-        getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+      for (const auto & block : _blocks)
+      {
+        const auto & gravity = getLocalGravityVector(block);
+        if (gravity(d) != 0)
+        {
+          params.set<RealVectorValue>("gravity") = gravity;
+          getProblem().addFVKernel(
+              kernel_type, kernel_name + block + "_" + NS::directions[d], params);
+        }
       }
     }
   }
@@ -1230,6 +1235,7 @@ WCNSFVFlowPhysics::addCorrectors()
 void
 WCNSFVFlowPhysics::addMaterials()
 {
+  addFrictionFunctorMaterials();
   if (hasForchheimerFriction() || _porous_medium_treatment)
     addPorousMediumSpeedMaterial();
   else
@@ -1244,6 +1250,47 @@ WCNSFVFlowPhysics::hasForchheimerFriction() const
       if (MooseUtils::toUpper(_friction_types[block_i][type_i]) == "FORCHHEIMER")
         return true;
   return false;
+}
+
+void
+WCNSFVFlowPhysics::addFrictionRegion(const std::vector<SubdomainName> & block_names,
+                                     const std::vector<std::string> & friction_types,
+                                     const std::vector<std::string> & friction_functors)
+{
+  _friction_blocks.push_back(block_names);
+  _friction_types.push_back(friction_types);
+  _friction_coeffs.push_back(friction_functors);
+}
+
+void
+WCNSFVFlowPhysics::addFrictionFunctorMaterials()
+{
+  // Add functor materials for the constants
+  for (const auto i : index_range(_friction_blocks))
+  {
+    const auto class_name = "GenericVectorFunctorMaterial";
+    InputParameters params = getFactory().getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _friction_blocks[i];
+
+    for (const auto j : index_range(_friction_types[i]))
+    {
+      const auto fric_coef = _friction_coeffs[i][j];
+      if (MooseUtils::parsesToReal(fric_coef))
+      {
+        // Modify friction coef name
+        _friction_coeffs[i][j] =
+            "constant_friction_coef_" + std::to_string(i) + "_" + _friction_types[i][j];
+        params.set<std::vector<std::string>>("prop_names") = {_friction_coeffs[i][j]};
+        params.set<std::vector<MooseFunctorName>>("prop_values") = {
+            fric_coef, fric_coef, fric_coef};
+
+        getProblem().addFunctorMaterial(class_name,
+                                        prefix() + "ins_friction_coefs_" + std::to_string(i) + "_" +
+                                            _friction_types[i][j],
+                                        params);
+      }
+    }
+  }
 }
 
 void
@@ -1541,4 +1588,10 @@ WCNSFVFlowPhysics::getCoupledTurbulencePhysics() const
   }
   // Did not find one
   return nullptr;
+}
+
+RealVectorValue
+WCNSFVFlowPhysics::getLocalGravityVector(const SubdomainName & /*block*/) const
+{
+  return getParam<RealVectorValue>("gravity");
 }

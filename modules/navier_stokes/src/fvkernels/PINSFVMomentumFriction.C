@@ -147,7 +147,7 @@ PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_
     }
   }
 
-  /// Fluid properies
+  /// Fluid properties
   if (_use_Darcy_friction_model && _standard_friction_formulation)
   {
     mu = (*_mu)(elem_arg, state);
@@ -175,7 +175,6 @@ PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_
     if (_use_Forchheimer_friction_model)
       coefficient += (*_F)(elem_arg, state)(_index)*speed;
   }
-
   return coefficient;
 }
 
