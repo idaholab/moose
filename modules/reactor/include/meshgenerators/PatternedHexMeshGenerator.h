@@ -63,7 +63,7 @@ protected:
   /// Boundary ID of mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
-  const std::string _external_boundary_name;
+  const BoundaryName _external_boundary_name;
   /// Whether inward interface boundaries are created
   const bool _create_inward_interface_boundaries;
   /// Whether outward interface boundaries are created

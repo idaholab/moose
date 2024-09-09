@@ -362,7 +362,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
         const auto radial_boundary = getReactorParam<boundary_id_type>(RGMB::radial_boundary_id);
         params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
-        params.set<std::string>("external_boundary_name") = RGMB::CORE_BOUNDARY_NAME;
+        params.set<BoundaryName>("external_boundary_name") = RGMB::CORE_BOUNDARY_NAME;
         params.set<double>("rotate_angle") = 0.0;
 
         addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
@@ -427,19 +427,17 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
                   std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
                   RGMB::pin_region_id_map, assembly);
           for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
-            if (_pin_region_id_map.find(pin->first) == _pin_region_id_map.end())
-              _pin_region_id_map.insert(
-                  std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-                      pin->first, pin->second));
+            _pin_region_id_map.insert(
+                std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+                    pin->first, pin->second));
 
           std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
               getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
                   RGMB::pin_block_name_map, assembly);
           for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
-            if (_pin_block_name_map.find(pin->first) == _pin_block_name_map.end())
-              _pin_block_name_map.insert(
-                  std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(pin->first,
-                                                                                      pin->second));
+            _pin_block_name_map.insert(
+                std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(pin->first,
+                                                                                    pin->second));
 
           // Define background and duct region ID map from constituent assemblies
           if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
@@ -503,7 +501,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       auto params = _app.getFactory().getValidParams(periphery_mg_name);
       params.set<MeshGeneratorName>("input") = name() + "_delbds";
       params.set<Real>("peripheral_ring_radius") = _outer_circle_radius;
-      params.set<std::string>("external_boundary_name") = "outside_periphery";
+      params.set<BoundaryName>("external_boundary_name") = "outside_periphery";
       params.set<SubdomainName>("peripheral_ring_block_name") = RGMB::PERIPHERAL_RING_BLOCK_NAME;
 
       // unique MG options
