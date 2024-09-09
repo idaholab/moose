@@ -36,9 +36,9 @@ def hasMooseApp(ext, app):
     """Module function for searching for the existence of a registered application name."""
     return ext.hasRegistredApp(app)
 
-def hasSubmodule(ext, name):
+def hasSubmodule(ext, name, recursive=True):
     """Module function for testing if an application has a submodule ending with the given name."""
-    return ext.hasSubmodule(name)
+    return ext.hasSubmodule(name, recursive)
 
 def hasLibtorch(ext):
     """Module function for testing if an application was compiled with libtorch."""
@@ -97,9 +97,12 @@ class IfElseExtension(command.CommandExtension):
 
         return name in self._registerd_apps
 
-    def hasSubmodule(self, name):
+    def hasSubmodule(self, name, recursive):
         """Helper for the 'hasSubmodule' function."""
-        status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
+        if recursive:
+            status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
+        else:
+            status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR)
         return any([repo.endswith(name) for repo in status.keys()])
 
     def hasConfigOption(self, option, value):
