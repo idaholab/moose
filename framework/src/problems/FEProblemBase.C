@@ -250,11 +250,6 @@ FEProblemBase::validParams()
       "the parameter 'material_coverage_check' (whether this is the list of subdomains to be "
       "checked, not to be checked or not taken into account).");
 
-  MultiMooseEnum variable_deduplication_checks("ALLOW_MISMATCHING_BLOCK_RESTRICTIONS", "");
-  params.addParam<MultiMooseEnum>("variable_deduplication_check",
-                                  variable_deduplication_checks,
-                                  "Flags used for deduplication checks of variables.");
-
   params.addParam<bool>("fv_bcs_integrity_check",
                         true,
                         "Set to false to disable checking of overlapping Dirichlet and Flux BCs "
@@ -350,7 +345,7 @@ FEProblemBase::validParams()
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
       "boundary_restricted_elem_integrity_check material_coverage_check "
-      "material_coverage_block_list variable_deduplication_check fv_bcs_integrity_check "
+      "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
@@ -448,7 +443,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _material_coverage_check(
         getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
     _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
-    _variables_deduplication_flags(getParam<MultiMooseEnum>("variable_deduplication_check")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
@@ -2618,10 +2612,7 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                                   stringifySubdomains(varSubdomainIDs) + "} and {" +
                                   stringifySubdomains(subdomainIDs) + "}";
 
-          if (_variables_deduplication_flags.isValueSet("ALLOW_MISMATCHING_BLOCK_RESTRICTIONS"))
-            mooseWarning(msg);
-          else
-            mooseError(msg);
+          mooseError(msg);
         }
       }
 

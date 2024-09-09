@@ -2708,9 +2708,6 @@ protected:
   CoverageCheckMode _material_coverage_check;
   std::vector<SubdomainName> _material_coverage_blocks;
 
-  /// Flags used for deduplication checks of variables.
-  MultiMooseEnum _variables_deduplication_flags;
-
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
   bool _fv_bcs_integrity_check;
 

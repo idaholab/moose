@@ -59,17 +59,6 @@
     issues = '#28568'
   []
 
-  [add_aux_variable_multiple_subdomain_test_warn]
-    type = 'RunApp'
-    input = 'add_aux_variable_multiple_subdomain_test.i'
-    cli_args = 'Problem/variable_deduplication_check=ALLOW_MISMATCHING_BLOCK_RESTRICTIONS'
-    expect_out = "Mismatching block-restrictions are specified for auxvariable with name 'q': \{0, 2\} and \{2\}"
-    allow_warnings = true
-
-    requirement = 'The system shall report an warning when multiple AuxVariables are added to the system with conflicting block-restriction if variable_deduplication_check is set to ALLOW_MISMATCHING_BLOCK_RESTRICTIONS.'
-    issues = '#28568'
-  []
-
   [bad_bc_test]
     type = 'RunException'
     input = 'bad_bc_test.i'
