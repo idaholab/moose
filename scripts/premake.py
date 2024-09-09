@@ -9,13 +9,21 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import subprocess, os, platform, re, sys, traceback
-from versioner import Versioner
 from datetime import date
 
 class PreMake:
     def __init__(self):
         self.conda_env = self.getCondaEnv()
         self.apptainer_env = self.getApptainerEnv()
+
+        try:
+            from versioner import Versioner
+        except Exception as e:
+            warning = 'Failed to initialize PreMake for version checking; '
+            warning += 'this may be ignored but may suggest an environment issue.'
+            warning += f'\n\n{traceback.format_exc()}'
+            self.warn(warning)
+
         self.versioner_meta = Versioner().version_meta()
 
     @staticmethod
