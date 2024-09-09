@@ -5,7 +5,6 @@
     assembly_pitch = 20
     flexible_assembly_stitching = true
     radial_boundary_id = 200
-    region_id_as_block_name = true
   []
   [drum]
     type = ControlDrumMeshGenerator
@@ -15,8 +14,6 @@
     drum_outer_radius = 9.1
     num_azimuthal_sectors = 180
     drum_inner_intervals = 10
-
-    region_ids = '1 2 3'
   []
 []
 
