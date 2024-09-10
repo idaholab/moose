@@ -148,10 +148,13 @@ WCNSFVFlowPhysics::addSolverVariables()
   if (!_has_flow_equations)
     return;
 
+<<<<<<< HEAD
   for (const auto d : make_range(dimension()))
     saveSolverVariableName(_velocity_names[d]);
   saveSolverVariableName(_pressure_name);
 
+=======
+>>>>>>> f874b38114 (WIP: typo fixes + try a direction variable)
   // Check number of variables
   if (_velocity_names.size() != dimension() && _velocity_names.size() != 3)
     paramError("velocity_variable",
@@ -166,6 +169,9 @@ WCNSFVFlowPhysics::addSolverVariables()
     if (variableExists(_velocity_names[d], true))
       checkBlockRestrictionIdentical(_velocity_names[d],
                                      getProblem().getVariable(0, _velocity_names[d]).blocks());
+    else if (getProblem().hasFunctor(_velocity_names[d], /*thread_id=*/0))
+    {
+    }
     else if (_define_variables)
     {
       std::string variable_type = "INSFVVelocityVariable";
@@ -498,6 +504,8 @@ WCNSFVFlowPhysics::addINSMomentumPressureKernels()
       getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected";
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+  if (dimension() == 1)
+    params.set<MooseFunctorName>("direction") = "direction_vec";
 
   for (const auto d : make_range(dimension()))
   {
@@ -1281,32 +1289,9 @@ WCNSFVFlowPhysics::getLinearFrictionCoefName() const
   }
   mooseError("Should not get here");
 }
-<<<<<<< HEAD
-=======
-
-const WCNSFVTurbulencePhysics *
-WCNSFVFlowPhysics::getCoupledTurbulencePhysics() const
-{
-  // User passed it, just use that
-  if (isParamValid("coupled_turbulence_physics"))
-    return getCoupledPhysics<WCNSFVTurbulencePhysics>(
-        getParam<PhysicsName>("coupled_flow_physics"));
-  // Look for any physics of the right type, and check the block restriction
-  else
-  {
-    const auto all_turbulence_physics = getCoupledPhysics<const WCNSFVTurbulencePhysics>(true);
-    for (const auto physics : all_turbulence_physics)
-      if (checkBlockRestrictionIdentical(
-              physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
-        return physics;
-  }
-  // Did not find one
-  return nullptr;
-}
 
 RealVectorValue
 WCNSFVFlowPhysics::getLocalGravityVector(const SubdomainName & /*block*/) const
 {
   return getParam<RealVectorValue>("gravity");
 }
->>>>>>> 2a3222feeb (Add support for setting gravity and friction terms from outside the physics)

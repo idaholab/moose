@@ -31,6 +31,9 @@ protected:
   /// index x|y|z
   const unsigned int _index;
 
+  /// Pointer to a functor giving the direction of the channel (if used)
+  const Moose::Functor<RealVectorValue> * _direction;
+
   /// Whether to correct for mesh skewness in face calculations
   const bool _correct_skewness;
 };

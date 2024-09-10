@@ -25,6 +25,9 @@ INSFVMomentumPressure::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
+  params.addParam<MooseFunctorName>("direction",
+                                    "Vector functor giving the direction of the gradient to "
+                                    "consider. Only for 1D flow-channel applications");
   params.addParam<bool>(
       "correct_skewness", false, "Whether to correct for mesh skewness in face calculations.");
   return params;
@@ -35,6 +38,7 @@ INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
     INSFVMomentumResidualObject(*this),
     _p(getFunctor<ADReal>(NS::pressure)),
     _index(getParam<MooseEnum>("momentum_component")),
+    _direction(isParamValid("direction") ? &getFunctor<RealVectorValue>("direction") : nullptr),
     _correct_skewness(getParam<bool>("correct_skewness"))
 {
 }
@@ -42,5 +46,16 @@ INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
 ADReal
 INSFVMomentumPressure::computeQpResidual()
 {
+  // if (!_direction)
   return _p.gradient(Moose::ElemArg{_current_elem, _correct_skewness}, determineState())(_index);
+  // else
+  // {
+  //   const auto elem = Moose::ElemArg{_current_elem, _correct_skewness};
+  //   const auto & state = determineState();
+  //   _console << _p.gradient(elem, state)(0).value() << "  " << _p.gradient(elem,
+  //   state)(1).value()
+  //            << " " << _p.gradient(elem, state)(2).value() << " : " << (*_direction)(elem, state)
+  //            << std::endl;
+  //   return _p.gradient(elem, state) * (*_direction)(elem, state);
+  // }
 }
