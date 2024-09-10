@@ -90,10 +90,12 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
 TEST_F(MFEMKernelTest, MFEMVectorFEDomainLFKernel)
 {
   // Build required kernel inputs
-  InputParameters vec_coef_params = _factory.getValidParams("MFEMGenericConstantVectorMaterial");
-  vec_coef_params.set<std::vector<std::string>>("prop_names") = {"vec_coef1"};
-  vec_coef_params.set<std::vector<double>>("prop_values") = {1.0, 2.0, 3.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantVectorMaterial", "material1", vec_coef_params);
+  InputParameters vec_coef_params = _factory.getValidParams("MFEMVectorConstantCoefficient");
+  vec_coef_params.set<double>("value_x") = 1.0;
+  vec_coef_params.set<double>("value_y") = 2.0;
+  vec_coef_params.set<double>("value_z") = 3.0;
+  _mfem_problem->addVectorCoefficient(
+      "MFEMVectorConstantCoefficient", "vec_coef1", vec_coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEDomainLFKernel");
