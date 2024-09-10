@@ -1,0 +1,17 @@
+diff --git a/pyhit/pyhit.py b/pyhit/pyhit.py
+index c484b9e6a6..4fc6c1ff95 100644
+--- a/pyhit/pyhit.py
++++ b/pyhit/pyhit.py
+@@ -10,9 +10,9 @@
+ """Wrapper for hit parser."""
+ import os
+ import subprocess
+-import moosetree
+-import hit
+-from mooseutils import message
++from . import moosetree
++from . import hit
++from .mooseutils import message
+
+ class Node(moosetree.Node):
+     """
