@@ -56,6 +56,7 @@ public:
   dof_id_type id() const { return _id; }
 
   /// Returns the face area of face id
+  Real & faceArea() { return _face_area; }
   Real faceArea() const { return _face_area; }
 
   /// Sets/gets the coordinate transformation factor (for e.g. rz, spherical
@@ -64,6 +65,7 @@ public:
   Real faceCoord() const { return _face_coord; }
 
   /// Returns the unit normal vector for the face oriented outward from the face's elem element.
+  Point & normal() { return _normal; }
   const Point & normal() const { return _normal; }
 
   /// Returns the coordinates of the face centroid.
