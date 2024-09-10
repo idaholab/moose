@@ -36,7 +36,7 @@
   type = Steady
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -vec_type -nl0_mat_type'
-  petsc_options_value = 'hypre    cuda      aijcusparse'
+  petsc_options_value = 'hypre    standard  aij'
 []
 
 [Postprocessors]
