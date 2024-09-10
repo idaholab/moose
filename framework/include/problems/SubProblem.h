@@ -861,6 +861,9 @@ public:
    */
   void clearAllDofIndices();
 
+  /// Whether a variable is from the auxiliary system or not
+  bool isAuxiliaryVariable(const std::string & name) const;
+
   /**
    * @tparam T The type that the functor will return when evaluated, e.g. \p
                ADReal or \p Real
