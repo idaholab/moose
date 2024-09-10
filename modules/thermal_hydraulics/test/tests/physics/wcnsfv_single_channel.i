@@ -34,6 +34,9 @@
     [WCNSFV]
       [all]
         fp = fp
+        velocity_interpolation = 'average'
+
+        dynamic_viscosity = 0
       []
     []
   []
@@ -53,7 +56,7 @@
     orientation = '0 1 0'
     gravity_vector = '-9000 0 0'
     length = 1.0
-    n_elems = 50
+    n_elems = 5
     A = 1.0
 
     initial_T = 300
@@ -127,5 +130,16 @@
     advected_quantity = 'rho'
     rhie_chow_user_object = 'ins_rhie_chow_interpolator'
     execute_on = 'initial timestep_end'
+  []
+  [vel_right]
+    type = SideAverageValue
+    variable = 'vel_x'
+    boundary = 'pipe:in'
+  []
+  # wont match because of pressure difference
+  [vel_left]
+    type = SideAverageValue
+    variable = 'vel_x'
+    boundary = 'pipe:out'
   []
 []
