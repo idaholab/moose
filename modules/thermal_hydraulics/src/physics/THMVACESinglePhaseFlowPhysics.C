@@ -78,6 +78,18 @@ THMVACESinglePhaseFlowPhysics::THMVACESinglePhaseFlowPhysics(const InputParamete
 }
 
 void
+THMVACESinglePhaseFlowPhysics::initializePhysicsAdditional()
+{
+  // Force a 1D dimension. THM VACE implementations are only 1D
+  if (dimension() > 1)
+    mooseInfo("Lowering Physics dimension from '" + std::to_string(dimension()) +
+              "' to 1, as the thermal hydraulics flow physics only support 1-dimensional problems");
+  setDimension(1);
+
+  ThermalHydraulicsFlowPhysics::initializePhysicsAdditional();
+}
+
+void
 THMVACESinglePhaseFlowPhysics::actOnAdditionalTasks()
 {
   // The THMProblem adds ICs on THM:add_variables, which happens before add_ic
@@ -662,8 +674,8 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
 }
 
 void
-THMVACESinglePhaseFlowPhysics::addBoundaryFluxBC(
-    const PhysicsFlowBoundary & comp, const UserObjectName & boundary_flux_uo_name)
+THMVACESinglePhaseFlowPhysics::addBoundaryFluxBC(const PhysicsFlowBoundary & comp,
+                                                 const UserObjectName & boundary_flux_uo_name)
 {
   const std::string class_name = "ADBoundaryFlux3EqnBC";
   InputParameters params = _factory.getValidParams(class_name);

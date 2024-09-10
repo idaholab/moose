@@ -37,6 +37,7 @@ protected:
   const bool & _output_vector_velocity;
 
 private:
+  virtual void initializePhysicsAdditional() override;
   virtual void actOnAdditionalTasks() override;
 
   virtual void addNonlinearVariables() override;
