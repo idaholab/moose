@@ -35,8 +35,10 @@ of the shape function at that node.
 
 In the elemental case the `computeValue` method will be executed on each quadrature point of an
 +element+ of the finite element mesh. The values computed at the quadrature points are used to
-perform the correct finite element interpolation automatically and set the values for the degrees
-of freedom. Typically, in the elemental case the order of the monomial finite element is set to
+perform the correct finite element projection automatically and set the values for the degrees
+of freedom. This is achieved by assembling and solving a *local* finite element projection
+problem for each and every element in the domain (or blocks) of interest.
+Typically, in the elemental case the order of the monomial finite element is set to
 constant so there is a single DOF per element, but higher monomials are also supported.
 
 As is evident by the functionality detailed, the distinction between the two arises from the nature

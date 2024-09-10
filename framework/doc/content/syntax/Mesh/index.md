@@ -5,14 +5,14 @@
 There are two primary ways of creating a mesh for use in a MOOSE simulation: "offline generation" through
 a tool like [CUBIT](https://cubit.sandia.gov/) from [Sandia National Laboratories](http://www.sandia.gov/), and
 "online generation" through programmatic interfaces. CUBIT is useful for creating complex geometries, and can be
-licensed from CSimSoft for a fee depending on the type of organization and work
+licensed from Coreform for a fee depending on the type of organization and work
 being performed. Other mesh generators can work as long as they output a file format that is
 supported by the [FileMesh](/FileMesh.md) object.
 
 ## Example Syntax and Mesh Objects
 
-Mesh settings are applied with the `[Mesh]` of the input files, for example the basic input file
-syntax for reading a file from a mesh is shown below. For additional information on the other types
+Mesh settings are applied with the `[Mesh]` section in input files, for example the basic input file
+syntax for generating a simple square mesh is shown below. For additional information on the other types
 of Mesh objects refer to the individual object pages listed below.
 
 !listing test/tests/auxkernels/solution_aux/build.i block=Mesh
