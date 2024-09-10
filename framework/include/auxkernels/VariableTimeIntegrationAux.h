@@ -28,12 +28,10 @@ protected:
   Real getIntegralValue();
 
   std::vector<const VariableValue *> _coupled_vars;
-  Real _coef;
+  const Function & _func;
   unsigned int _order;
   std::vector<Real> _integration_coef;
 
-  /// The old variable value (zero if order == 3)
-  const VariableValue & _u_old;
-  /// The older variable value (zero if order != 3)
-  const VariableValue & _u_older;
+  /// The previous variable value
+  const VariableValue & _u_prev;
 };
