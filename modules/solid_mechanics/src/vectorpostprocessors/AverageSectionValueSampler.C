@@ -118,7 +118,7 @@ AverageSectionValueSampler::AverageSectionValueSampler(const InputParameters & p
   {
     const auto symm_plane_norm = _symmetry_plane.norm();
     if (MooseUtils::absoluteFuzzyEqual(symm_plane_norm, 0.0))
-      mooseError("Vector defined in 'symmetry_plane' cannot have a size of zero");
+      mooseError("Vector defined in 'symmetry_plane' cannot have a norm of zero");
     _symmetry_plane /= _symmetry_plane.norm();
     if (_variables.size() != 3)
       paramError("variables",

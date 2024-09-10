@@ -32,6 +32,7 @@ protected:
   /// Variables to output
   std::vector<VariableName> _variables;
 
+  /// Indicies of the variables in their systems
   std::vector<unsigned int> _var_numbers;
 
   /// Vector of outputs, where each entry is the vector of average values for single variable at the selected points along the axis
