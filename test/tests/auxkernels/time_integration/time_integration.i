@@ -57,10 +57,12 @@
 [AuxVariables]
   [./v_midpoint]
   [../]
-  [./v_trapazoid]
+  [./v_trapezoid]
   [../]
   [./v_simpson]
   [../]
+  [v_partial]
+  []
 []
 
 [AuxKernels]
@@ -70,10 +72,10 @@
     variable = v_midpoint
     order = 1
   [../]
-  [./TrapazoidalTimeIntegrator]
+  [./TrapezoidalTimeIntegrator]
     type = VariableTimeIntegrationAux
     variable_to_integrate = u
-    variable = v_trapazoid
+    variable = v_trapezoid
     order = 2
   [../]
   [./SimpsonsTimeIntegrator]
@@ -82,6 +84,13 @@
     variable = v_simpson
     order = 3
   [../]
+  [PartialTimeIntegrator]
+    type = VariableTimeIntegrationAux
+    variable_to_integrate = u
+    variable = v_partial
+    order = 2
+    coefficient = 't > 0.05'
+  []
 []
 
 [BCs]
