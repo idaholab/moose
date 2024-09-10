@@ -826,6 +826,9 @@ public:
    */
   void clearAllDofIndices();
 
+  /// Whether a variable is from the auxiliary system or not
+  bool isAuxiliaryVariable(const std::string & name) const;
+
   /**
    * @tparam T The type that the functor will return when evaluated, e.g. \p
                ADReal or \p Real
@@ -1218,8 +1221,9 @@ SubProblem::getFunctor(const std::string & name,
         mooseError("We already have the functor; it should not be unset");
 
       // Check for whether this is a valid request
+      // Careful that auxiliary variables are AD functors, but not really AD, so we can allow them
       if (!requested_functor_is_ad && requestor_is_ad &&
-          true_functor_is == SubProblem::TrueFunctorIs::AD)
+          true_functor_is == SubProblem::TrueFunctorIs::AD && !isAuxiliaryVariable(name))
         mooseError("The AD object '",
                    requestor_name,
                    "' is requesting the functor '",
