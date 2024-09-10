@@ -42,6 +42,8 @@ private:
   virtual void addOutletBoundaries() override;
   virtual void addFlowJunctions() override;
 
+  /// Adds a vector functor for the direction of the channels, that will help for computing the pressure gradient contribution to the momentum equation notably
+  void addDirectionFunctorMaterial();
   /// Add functor materials that compute the fluxes / pressures on the sides connected to the junction
   void addJunctionFunctorMaterials();
   /// Add to data structures in WCNSFVFlowPhysics for each flow channel
