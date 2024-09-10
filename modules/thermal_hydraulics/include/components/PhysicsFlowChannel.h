@@ -49,6 +49,9 @@ protected:
    */
   virtual void addHydraulicDiameterMaterial();
 
+  /// Adds functor materials to get the direction of the channel
+  void addDirectionVariables();
+
   /**
    * Populates heat connection variable names lists
    */
