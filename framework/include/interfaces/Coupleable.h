@@ -1655,7 +1655,7 @@ public:
    * Helper method to return (and insert if necessary) the default value for Automatic
    * Differentiation for an uncoupled variable.
    * @param var_name the name of the variable for which to retrieve a default value
-   * @return VariableValue * a pointer to the associated VarirableValue.
+   * @return VariableValue * a pointer to the associated VariableValue.
    */
   const ADVariableValue * getADDefaultValue(const std::string & var_name) const;
 
@@ -1663,7 +1663,7 @@ public:
    * Helper method to return (and insert if necessary) the default vector value for Automatic
    * Differentiation for an uncoupled variable.
    * @param var_name the name of the vector variable for which to retrieve a default value
-   * @return VariableVectorValue * a pointer to the associated VarirableVectorValue.
+   * @return VectorVariableValue * a pointer to the associated VectorVariableValue.
    */
   const ADVectorVariableValue * getADDefaultVectorValue(const std::string & var_name) const;
 
