@@ -80,11 +80,6 @@
     prop_names = one
     prop_values = 1.0
   []
-  [Forcing]
-    type = MFEMGenericFunctionVectorMaterial
-    prop_names = VolumetricSourceCoefficient
-    prop_values = forcing_field
-  []
 []
 
 [Kernels]
