@@ -96,6 +96,18 @@ public:
   virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
 
   /**
+   * Dynamic viscosity from pressure and temperature
+   *
+   * @param[in] p       pressure (Pa)
+   * @param[in] T       temperature (K)
+   * @param[out] mu     dynamic viscosity (Pa.s)
+   * @param[out] dmu_dp derivative of dynamic viscosity w.r.t. pressure (s)
+   * @param[out] dmu_dT derivative of dynamic viscosity w.r.t. temperature (Pa.s/K)
+   */
+  virtual void mu_from_p_T(
+      Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+
+  /**
    * Thermal conductivity from pressure and temperature
    *
    * @param p   pressure (Pa)
@@ -103,6 +115,18 @@ public:
    * @return thermal conductivity  (W/m.K)
    */
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
+
+  /**
+   * Thermal conductivity from pressure and temperature
+   *
+   * @param[in] p       pressure (Pa)
+   * @param[in] T       temperature (K)
+   * @param[out] k      thermal conductivity (Pa.s)
+   * @param[out] dk_dp  derivative of thermal conductivity w.r.t. pressure (s)
+   * @param[out] dk_dT  derivative of thermal conductivity w.r.t. temperature (Pa.s/K)
+   */
+  virtual void
+  k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   /**
    * Specific enthalpy from pressure and temperature
@@ -125,6 +149,26 @@ public:
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   /**
+   * Specific energy from pressure and temperature
+   *
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return specific energy (J/kg)
+   */
+  virtual Real e_from_p_T(Real p, Real T) const override;
+
+  /**
+   * Specific energy and its derivatives from pressure and temperature
+   *
+   * @param[in] p        pressure (Pa)
+   * @param[in] T        temperature (K)
+   * @param[out] e       specific energy (J/kg)
+   * @param[out] de_dp   derivative of specific energy w.r.t. pressure
+   * @param[out] de_dT   derivative of specific energy w.r.t. temperature
+   */
+  virtual void e_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
+
+  /**
    * Temperature from pressure and specific enthalpy
    *
    * @param[in] p       pressure (Pa)
@@ -136,6 +180,8 @@ public:
 #endif
 
 protected:
+  /// The relative finite differencing step size
+  const Real _fd_size;
 #ifdef SALINE_ENABLED
   /// Saline DataStore object
   saline::Default_Data_Store _d;

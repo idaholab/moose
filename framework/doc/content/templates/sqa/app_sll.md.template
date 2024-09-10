@@ -15,7 +15,7 @@ the [!ac](SLL) for {{app}} is dependent upon the following documents.
 !sqa dependencies suffix=sll category={{category}}
 !template-end!
 
-!if! function=hasSubmodule('moose')
+!if! function=hasSubmodule('moose', False)
 ## MOOSE
 
 {{app}} is a MOOSE-based application, [mooseframework.org](https://mooseframework), which is

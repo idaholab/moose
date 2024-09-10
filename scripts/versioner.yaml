@@ -4,6 +4,10 @@
 # If adding a new control key, a change to versioner.py:influential_list will be required
 # (add that control key to 'not_libraries').
 packages:
+  tools:
+    influential:
+      - conda/tools/meta.yaml
+      - conda/tools/conda_build_config.yaml
   mpi:
     influential:
       - apptainer/mpi.def
