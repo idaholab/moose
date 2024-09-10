@@ -33,11 +33,14 @@
 {#- The script used to install wasp                                                           -#}
 {%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
 
+{#- The files directory for this definition                                                   -#}
+{%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
+
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
 
 %environment
-    export PATH={{ MOOSE_MINIFORGE }}/bin:$PATH
+    export PATH={{ MOOSE_MINIFORGE }}/bin:/opt/code-server/bin:$PATH
     source activate {{ MOOSE_MINIFORGE }}/envs/{{ MOOSE_CONDA_ENV_NAME }}
 
     export WASP_DIR={{ WASP_DIR }}
@@ -68,7 +71,7 @@ From: {{ APPTAINER_FROM }}
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
     PYTHON_VERSION=3.10
-    CODE_SERVER_VERSION=4.91.1
+    CODE_SERVER_VERSION=4.92.2
 
     # Install code-server
     CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
@@ -77,7 +80,22 @@ From: {{ APPTAINER_FROM }}
     rpm -i ${CODE_SERVER_FILE}
     rm ${CODE_SERVER_FILE}
 
+    # Setup directory for code-server extensions. The extensions folder can be
+    # filled by other applications as they wish to have extensions auto installed
+    # by the "setup-code-server-extensions" script (in PATH)
+    mkdir /opt/code-server/extensions
+    # Download extensions for code-server, currently just moose language support
+    MOOSE_LANGUAGE_SUPPORT_VERSION=1.1.2
+    cd /opt/code-server/extensions
+    curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/DanielSchwen.moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
+
+    # Setup permissions for the code server extras
+    find /opt/code-server -type d -exec chmod 755 {} +
+    chmod 755 /opt/code-server/bin/*
+    chmod 644 /opt/code-server/extensions/*
+
     # Clone WASP
+    cd ${ROOT_BUILD_DIR}
     WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
     git clone ${WASP_GIT_REMOTE} ${WASP_SRC_DIR}
     cd ${WASP_SRC_DIR}
@@ -111,6 +129,7 @@ From: {{ APPTAINER_FROM }}
     bash ${MINIFORGE_SCRIPT} -b -p ${MOOSE_MINIFORGE}
     rm ${MINIFORGE_SCRIPT}
     PATH=${MOOSE_MINIFORGE}/bin:$PATH
+    conda update -yq --all
 
     # Add moose channels
     conda config --env --add channels https://conda.software.inl.gov/public
@@ -142,6 +161,8 @@ From: {{ APPTAINER_FROM }}
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
+    {{ FILES_DIR }}/opt/code-server/bin/code-server-setup-extensions /opt/code-server/bin/code-server-setup-extensions
+    {{ FILES_DIR }}/opt/code-server/bin/code-server-start /opt/code-server/bin/code-server-start
     {{ MOOSE_DIR }}/scripts/{{ WASP_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ WASP_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_wasp.sh {{ ROOT_BUILD_DIR }}/configure_wasp.sh
 {%- if WITH_LIBTORCH %}
