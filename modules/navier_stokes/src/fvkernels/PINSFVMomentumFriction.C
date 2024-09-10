@@ -75,21 +75,21 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
     {
       if (!_u_var)
         mooseError("The velocity variable 'u' should be defined if no speed functor material is "
-                   "defined for this kernel when using the Forchheimer fromulation.");
+                   "defined for this kernel when using the Forchheimer formulation.");
     }
     if (_dim >= 2)
     {
       if (!_v_var)
         mooseError(
             "The velocity variable 'v' should be defined if no speed functor material is "
-            "defined for this kernel and dimensions >= 2 when using the Forchheimer fromulation.");
+            "defined for this kernel and dimensions >= 2 when using the Forchheimer formulation.");
     }
     if (_dim >= 3)
     {
       if (!_w_var)
         mooseError(
             "The velocity variable 'w' should be defined if no speed functor material is "
-            "defined for this kernel and dimensions >= 3 when using the Forchheimer fromulation.");
+            "defined for this kernel and dimensions >= 3 when using the Forchheimer formulation.");
     }
   }
 }
@@ -119,7 +119,7 @@ ADReal
 PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_arg,
                                                     const Moose::StateArg & state)
 {
-  // Forward declaration of the coeffcients to be used and returned by the model
+  // Forward declaration of the coefficients to be used and returned by the model
   ADReal coefficient = 0.0;
   ADReal speed = 0.0;
   ADReal rho = 0.0;

@@ -316,10 +316,6 @@ WCNSFVFlowPhysics::addNonlinearVariables()
   if (!_has_flow_equations)
     return;
 
-  for (const auto d : make_range(dimension()))
-    saveNonlinearVariableName(_velocity_names[d]);
-  saveNonlinearVariableName(_pressure_name);
-
   // Check number of variables
   if (_velocity_names.size() != dimension() && _velocity_names.size() != 3)
     paramError("velocity_variable",
@@ -334,6 +330,9 @@ WCNSFVFlowPhysics::addNonlinearVariables()
     if (nonlinearVariableExists(_velocity_names[d], true))
       checkBlockRestrictionIdentical(_velocity_names[d],
                                      getProblem().getVariable(0, _velocity_names[d]).blocks());
+    else if (getProblem().hasFunctor(_velocity_names[d], /*thread_id=*/0))
+    {
+    }
     else if (_define_variables)
     {
       std::string variable_type = "INSFVVelocityVariable";
@@ -407,6 +406,12 @@ WCNSFVFlowPhysics::addNonlinearVariables()
     if (type == "point-value" || type == "average")
       getProblem().addVariable("MooseVariableScalar", "lambda", lm_params);
   }
+
+  // Save the names of the nonlinear variables, to automate Exodus restart for example
+  for (const auto d : make_range(dimension()))
+    if (nonlinearVariableExists(_velocity_names[d], false))
+      saveNonlinearVariableName(_velocity_names[d]);
+  saveNonlinearVariableName(_pressure_name);
 }
 
 void
@@ -653,6 +658,8 @@ WCNSFVFlowPhysics::addINSMomentumPressureKernels()
       getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected";
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+  if (dimension() == 1)
+    params.set<MooseFunctorName>("direction") = "direction_vec";
 
   for (const auto d : make_range(dimension()))
   {
