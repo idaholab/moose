@@ -68,6 +68,10 @@ THMWCNSFVFlowPhysics::validParams()
                         false,
                         "Whether to output the postprocessors measuring the inlet areas");
 
+  // Prepare to forward velocity components to the main velocity variable
+  // params.set<std::vector<std::string>>("velocity_variable") = {
+  //     "vel_x_channel", "vel_y_channel", "vel_z_channel"};
+
   // Suppress direct setting of boundary parameters from the physics, since these will be set by
   // flow boundary components
   params.suppressParameter<std::vector<BoundaryName>>("inlet_boundaries");
@@ -123,7 +127,39 @@ THMWCNSFVFlowPhysics::addNonlinearVariables()
 {
   ThermalHydraulicsFlowPhysics::addCommonVariables();
 
-  // TODO: can we use this? it does not use the THM problem does it?
+  // Add the channel velocity variable
+  // {
+  //   const auto variable_type = "INSFVVelocityVariable";
+  //   auto params = getFactory().getValidParams(variable_type);
+  //   assignBlocks(params, _blocks);
+  //   params.set<std::vector<Real>>("scaling") = {getParam<Real>("momentum_scaling")};
+  //   params.set<MooseEnum>("face_interp_method") =
+  //       getParam<MooseEnum>("momentum_face_interpolation");
+  //   params.set<bool>("two_term_boundary_expansion") =
+  //       getParam<bool>("momentum_two_term_bc_expansion");
+  //   getProblem().addVariable(variable_type, "vel_1d", params);
+  //   saveNonlinearVariableName("vel_1d");
+  // }
+
+  // Add functors that forward to the nonlinear variables
+  // {
+  //   std::vector<std::string> velocity_name = {"vel_x_channel", "vel_y_channel", "vel_z_channel"};
+  //   std::vector<std::string> channel_direction = {"direction_x", "direction_y", "direction_z"};
+
+  //   std::string class_name = "ADParsedFunctorMaterial";
+  //   InputParameters params = _factory.getValidParams(class_name);
+  //   assignBlocks(params, _blocks);
+  //   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+  //   for (const auto d : make_range(dimension()))
+  //   {
+  //     params.set<std::string>("property_name") = velocity_name[d];
+  //     params.set<std::vector<std::string>>("functor_names") = {"vel_1d ", channel_direction[d]};
+  //     params.set<std::string>("expression") = "vel_1d * " + channel_direction[d];
+  //     _sim->addFunctorMaterial(class_name, "compute_" + velocity_name[d], params);
+  //   }
+  // }
+
+  // Use this for pressure only. Since we are using functors for the velocity variables
   WCNSFVFlowPhysics::addNonlinearVariables();
 }
 
@@ -199,7 +235,23 @@ THMWCNSFVFlowPhysics::addMaterials()
   addChannelFrictionRegions();
   WCNSFVFlowPhysics::addMaterials();
 
+  addDirectionFunctorMaterial();
   addJunctionFunctorMaterials();
+}
+
+void
+THMWCNSFVFlowPhysics::addDirectionFunctorMaterial()
+{
+  std::string class_name = "GenericVectorFunctorMaterial";
+  InputParameters params = _factory.getValidParams(class_name);
+  assignBlocks(params, _blocks);
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+  // Get velocity at outlet of the first connected component
+  params.set<std::vector<std::string>>("prop_names") = {"direction_vec"};
+  params.set<std::vector<MooseFunctorName>>("prop_values") = {
+      "direction_x", "direction_y", "direction_z"};
+  _sim->addFunctorMaterial(class_name, prefix() + "channel_direction_vector", params);
 }
 
 void
@@ -467,7 +519,10 @@ THMWCNSFVFlowPhysics::changeMeshFaceAndElemInfo()
         for (const auto & side : elem->side_index_range())
         {
           FaceInfo * fi = const_cast<FaceInfo *>(_mesh->faceInfo(elem, side));
+          // Channel area for all faces along the channel
           fi->faceArea() = channel_area.value(0, centroid);
+          // Channel is always aligned with vel_x as vel_x follows the channel
+          fi->normal() = {1, 0, 0};
         }
       }
     }
