@@ -53,6 +53,9 @@ PhysicsFlowChannel::init()
 
   for (auto th_phys : _th_physics)
     th_phys->addFlowChannel(this);
+
+  // This has to be early
+  addDirectionVariables();
 }
 
 void
@@ -122,6 +125,38 @@ PhysicsFlowChannel::addHydraulicDiameterMaterial()
     params.set<MaterialPropertyName>("D_h_name") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     getTHMProblem().addMaterial(class_name, mat_name, params);
+  }
+}
+
+void
+PhysicsFlowChannel::addDirectionVariables()
+{
+  std::vector<std::string> channel_direction = {"direction_x", "direction_y", "direction_z"};
+  const auto dimension = 3;
+
+  // Add a variable (done in every flow channel)
+  {
+    const auto variable_type = "MooseVariableFVReal";
+    auto params = _factory.getValidParams(variable_type);
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+
+    for (const auto d : make_range(dimension))
+      getTHMProblem().addSimVariable(false, variable_type, channel_direction[d], params);
+  }
+
+  // Add an IC
+  {
+    const auto ic_type = "ConstantIC";
+    auto params = _factory.getValidParams(ic_type);
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+
+    for (const auto d : make_range(dimension))
+    {
+      params.set<VariableName>("variable") = channel_direction[d];
+      params.set<Real>("value") = getParam<RealVectorValue>("orientation")(d);
+      getTHMProblem().addSimInitialCondition(
+          ic_type, genName(name(), channel_direction[d]), params);
+    }
   }
 }
 
