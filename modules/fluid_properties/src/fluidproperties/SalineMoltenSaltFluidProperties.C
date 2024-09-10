@@ -36,7 +36,7 @@ SalineMoltenSaltFluidProperties::validParams()
 }
 
 SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters)
+  : SinglePhaseFluidProperties(parameters), _fd_size(1e-6)
 {
 #ifdef SALINE_ENABLED
   const auto & propDef = getParam<std::string>("prop_def_file");
@@ -116,7 +116,24 @@ SalineMoltenSaltFluidProperties::h_from_p_T(
   enthalpy = h_from_p_T(0.0, temperature);
   dh_dp = 0.0;
   // finite difference approximation
-  dh_dT = (h_from_p_T(0.0, temperature * (1 + 1e-6)) - enthalpy) / (temperature * 1e-6);
+  dh_dT = (h_from_p_T(0.0, temperature * (1 + _fd_size)) - enthalpy) / (temperature * _fd_size);
+}
+
+Real
+SalineMoltenSaltFluidProperties::e_from_p_T(Real pressure, Real temperature) const
+{
+  return _tp.h_t_kg(temperature) - pressure / rho_from_p_T(pressure, temperature);
+}
+
+void
+SalineMoltenSaltFluidProperties::e_from_p_T(
+    Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
+{
+  const Real rho = rho_from_p_T(pressure, temperature);
+  e = _tp.h_t_kg(temperature) - pressure / rho;
+  de_dp = -1 / rho;
+  // finite difference approximation
+  de_dT = (e_from_p_T(pressure, temperature * (1 + _fd_size)) - e) / (temperature * _fd_size);
 }
 
 Real
@@ -131,10 +148,32 @@ SalineMoltenSaltFluidProperties::mu_from_p_T(Real pressure, Real temperature) co
   return _tp.mu(temperature, pressure * Pa_to_kPa) * mN_to_N; // Ns/m^2
 }
 
+void
+SalineMoltenSaltFluidProperties::mu_from_p_T(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  mu = _tp.mu(temperature, pressure * Pa_to_kPa) * mN_to_N;
+  Real mu_p1 = _tp.mu(temperature, pressure * (1 + _fd_size) * Pa_to_kPa) * mN_to_N; // Ns/m^2
+  Real mu_T1 = _tp.mu(temperature * (1 + _fd_size), pressure * Pa_to_kPa) * mN_to_N; // Ns/m^2
+  dmu_dp = (mu_p1 - mu) / (_fd_size * pressure * Pa_to_kPa);
+  dmu_dT = (mu_T1 - mu) / (_fd_size * temperature);
+}
+
 Real
 SalineMoltenSaltFluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
   return _tp.k(temperature, pressure * Pa_to_kPa); // W/m/K
+}
+
+void
+SalineMoltenSaltFluidProperties::k_from_p_T(
+    Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
+{
+  k = _tp.k(temperature, pressure * Pa_to_kPa);
+  Real k_p1 = _tp.k(temperature, pressure * (1 + _fd_size) * Pa_to_kPa);
+  Real k_T1 = _tp.k(temperature * (1 + _fd_size), pressure * Pa_to_kPa);
+  dk_dp = (k_p1 - k) / (_fd_size * pressure * Pa_to_kPa);
+  dk_dT = (k_T1 - k) / (_fd_size * temperature);
 }
 
 #endif
