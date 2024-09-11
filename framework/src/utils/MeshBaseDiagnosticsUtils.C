@@ -67,4 +67,99 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
   }
   pl->unset_close_to_point_tol();
 }
+
+bool
+checkEdgeOverlap(const std::unique_ptr<Elem> & edge1, 
+                 const std::unique_ptr<Elem> & edge2,
+                 double tol)
+{
+  //get node array from two edges
+  const auto & node_list1 = edge1->get_nodes();
+  const auto & node_list2 = edge2->get_nodes();
+
+  //make sure two edges are not the same and don't share any nodes edge before checking for overlap
+  auto & n1 = (*node_list1)[0];
+  auto & n2 = (*node_list1)[-1];
+  auto & n3 = (*node_list2)[0];
+  auto & n4 = (*node_list2)[-1];
+  //auto num_nodes = node_list1->size();
+  //const Point *p1, *p2, *p3, *p4;
+  //const Point * const p1 = n1;
+  //const Point * const p2 = n2;
+  //const Point * const p3 = n3;
+  //const Point * const p4 = n4;
+
+  auto n1x = n1.operator()(0);
+  auto n1y = n1.operator()(1);
+  auto n1z = n1.operator()(2);
+  auto n2x = n2.operator()(0);
+  auto n2y = n2.operator()(1);
+  auto n2z = n2.operator()(2);
+  auto n3x = n3.operator()(0);
+  auto n3y = n3.operator()(1);
+  auto n3z = n3.operator()(2);
+  auto n4x = n4.operator()(0);
+  auto n4y = n4.operator()(1);
+  auto n4z = n4.operator()(2);
+
+  if(std::abs(n1x-n3x)<tol && std::abs(n1y-n3y)<tol && std::abs(n1z-n3z)<tol) 
+    return false;
+  if(std::abs(n2x-n4x)<tol && std::abs(n2y-n4y)<tol && std::abs(n2z-n4z)<tol)
+    return false;
+  if(std::abs(n1x-n4x)<tol && std::abs(n1y-n4y)<tol && std::abs(n1z-n4z)<tol) 
+    return false;
+  if(std::abs(n2x-n3x)<tol && std::abs(n2y-n3y)<tol && std::abs(n2z-n3z)<tol)
+    return false;
+
+  /*
+  if((n1x == n4x && n1y == n4y && n1z == n4z) && (n2x == n3x && n2y == n3y && n1z == n3z))
+  {
+    //Then these are the same edge so this test doen't apply
+    return false;
+  }
+  */
+
+  //There's a chance that they overlap. Find shortest line that connects two edges and if its length is close enough to 0 return true
+  double n13x, n13y, n13z, n21x, n21y, n21z, n43x, n43y, n43z;
+  double d1343, d4321, d1321, d4343, d2121, numerator, denominator, mua, mub;
+
+  n13x = n1x - n3x;
+  n13y = n1y - n3y;
+  n13z = n1z - n3z;
+  n21x = n2x - n1x;
+  n21y = n2y - n1y;
+  n21z = n2z - n1z;
+  n43x = n4x - n3x;
+  n43y = n4y - n3y;
+  n43z = n4z - n3z;
+
+  d1343 = n13x * n43x + n13y * n43y + n13z * n43z;
+  d4321 = n43x * n21x + n43y * n21y + n43z * n21z;
+  d1321 = n13x * n21x + n13y * n21y + n13z * n21z;
+  d4343 = n43x * n43x + n43y * n43y + n43z * n43z;
+  d2121 = n21x * n21x + n21y * n21y + n21z * n21z;
+
+  denominator = d2121 * d4343 - d4321 * d4321;
+  numerator = d1343 * d4321 - d1321 * d4343;
+
+  mua = numerator/denominator;
+  mub = (d1343 + (mua * d4321)) / d4343;
+
+  //Use these values to solve for the two poits that define the shortest line segment
+  double nax, nay, naz, nbx, nby, nbz;
+  nax = n1x + mua * n21x;
+  nay = n1y + mua * n21y;
+  naz = n1z + mua * n21z;
+
+  nbx = n3x + mub * n43x;
+  nby = n3y + mub * n43y;
+  nbz = n3z + mub * n43z;
+
+  //Calculate distance between these two nodes
+  double distance = std::sqrt(std::pow(nax - nbx, 2) + std::pow(nay - nby, 2) + std::pow(naz - nbz, 2));
+  if (distance < tol)
+    return true;
+  else
+    return false;
+}
 }

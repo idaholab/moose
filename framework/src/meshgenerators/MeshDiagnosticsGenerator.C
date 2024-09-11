@@ -64,6 +64,9 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<MooseEnum>("examine_non_conformality",
                              chk_option,
                              "whether to examine the conformality of elements in the mesh");
+  params.addParam<MooseEnum>("examine_non_matching_edges",
+                              chk_option,
+                              "Whether to check if there are any intersecting edges");
   params.addParam<Real>("nonconformal_tol", TOLERANCE, "tolerance for element non-conformality");
   params.addParam<MooseEnum>(
       "search_for_adaptivity_nonconformality",
@@ -93,6 +96,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
+    _check_non_matching_edges(getParam<MooseEnum>("examine_non_matching_edges")),
     _check_adaptivity_non_conformality(
         getParam<MooseEnum>("search_for_adaptivity_nonconformality")),
     _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
@@ -108,10 +112,18 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
   if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
+<<<<<<< HEAD
       _check_watertight_nodesets == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
       _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
+=======
+      _check_watertight_nodesets == "NO_CHECK" && _check_element_volumes == "NO_CHECK" && 
+      _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" && 
+      _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" && 
+      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" && 
+      _check_non_matching_edges == "NO_CHECK")
+>>>>>>> a759b2e1ae (Basic outline for checkNonMatchingEdges)
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -157,6 +169,9 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_local_jacobian != "NO_CHECK")
     checkLocalJacobians(mesh);
+
+  if (_check_non_matching_edges != "NO_CHECK")
+    checkNonMatchingEdges(mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -1386,6 +1401,76 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
                      Moose::stringify(num_negative_side_qp_jacobians),
                  _check_local_jacobian,
                  num_negative_side_qp_jacobians);
+}
+
+void
+MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> & mesh) const
+{
+  /*Algorithm Overview
+    1)Prechecks
+      a)This algorithn only works for 3D so check for that first
+      b)Optional->In theory this should only be needed for tetrahedral meshes so checking to ensure the mesh has tet cells could be usefull
+    2)Loop
+      a)Loop through every node
+      b)For each node get the edges associated with it
+      c)For each edge check overlap with any edges nearby
+      d)Have check to make sure the same pair of edges are not being tested twice for overlap
+      e)Have check to see if the edges are close to eachother before testing for overlap
+    3)Overlap check
+      a)Use algorithm from Paul Bourke
+      b)Finds shortest line that connects two line segments
+      c)If length of line is below some threshold, print out info about which two edges are intersecting
+  */
+  unsigned int num_intersecting_edges = 0;
+  //unsigned int num_elem_check = 0;
+  for (auto & elem : mesh->active_element_ptr_range())
+  {
+    std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
+    //num_elem_check++;
+    for (auto i : elem->edge_index_range())
+      elem_edges[i] = elem->build_edge_ptr(i);
+    for (auto & other_elem : mesh->active_element_ptr_range())
+    {
+      std::vector<std::unique_ptr<Elem>> other_edges(other_elem->n_edges());
+      //num_elem_check++;
+      for (auto j : other_elem->edge_index_range())
+        other_edges[j] = other_elem->build_edge_ptr(j);
+      for (auto & edge : elem_edges)
+      {
+        for (auto & other_edge : other_edges)
+        {
+          // Now compare edge with other_edge
+          double tol = 0.000001;
+          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(edge, other_edge, tol);
+          if (overlap)
+          {
+            num_intersecting_edges++;
+            const auto & n = edge->get_nodes()[0];
+            //const Point * const p = n;
+  	        const Real x = n->operator()(0);
+	          const Real y = n->operator()(1);
+	          const Real z = n->operator()(2);
+            
+            std::string x_coord = std::to_string(x);
+            std::string y_coord = std::to_string(y);
+            std::string z_coord = std::to_string(z);
+
+            std::string message = "Non-matching edges found near (" + x_coord + ", " + y_coord + ", " + z_coord + ")";
+            _console << message << std::endl;
+          }
+        }
+        /*for (const auto other_i : other_elem->edge_index_range())
+        {
+          const auto other_edge = other_elem->build_edge_ptr();
+          // you now have edge, and other_edge
+        }
+        */
+      }
+    }
+  }
+  std::string string_message = "Number of intersecting edges: " + std::to_string(num_intersecting_edges);
+  _console << string_message << std::endl;
+  diagnosticsLog("Number of intesecting edges: ", _check_non_matching_edges, num_intersecting_edges);
 }
 
 void
