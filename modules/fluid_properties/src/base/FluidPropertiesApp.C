@@ -80,22 +80,22 @@ void
 FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
 #ifdef AIR_FP_ENABLED
-  mooseDoOnce(AirApp::registerAll(f, af, s));
+  AirApp::registerAll(f, af, s);
 #endif
 #ifdef CARBON_DIOXIDE_FP_ENABLED
-  mooseDoOnce(CarbonDioxideApp::registerAll(f, af, s));
+  CarbonDioxideApp::registerAll(f, af, s);
 #endif
 #ifdef HELIUM_FP_ENABLED
-  mooseDoOnce(HeliumApp::registerAll(f, af, s));
+  HeliumApp::registerAll(f, af, s);
 #endif
 #ifdef NITROGEN_FP_ENABLED
-  mooseDoOnce(NitrogenApp::registerAll(f, af, s));
+  NitrogenApp::registerAll(f, af, s);
 #endif
 #ifdef POTASSIUM_FP_ENABLED
-  mooseDoOnce(PotassiumApp::registerAll(f, af, s));
+  PotassiumApp::registerAll(f, af, s);
 #endif
 #ifdef SODIUM_FP_ENABLED
-  mooseDoOnce(SodiumApp::registerAll(f, af, s));
+  SodiumApp::registerAll(f, af, s);
 #endif
 
   Registry::registerObjectsTo(f, {"FluidPropertiesApp"});
