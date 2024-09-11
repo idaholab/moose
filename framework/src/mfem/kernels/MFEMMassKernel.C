@@ -18,12 +18,12 @@ MFEMMassKernel::validParams()
 MFEMMassKernel::MFEMMassKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _coef_name(getParam<std::string>("coefficient")),
-    _coef(getMFEMProblem()._coefficients._scalars.Get(_coef_name))
+    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMMassKernel::createIntegrator()
 {
-  return new mfem::MassIntegrator(*_coef);
+  return new mfem::MassIntegrator(_coef);
 }
