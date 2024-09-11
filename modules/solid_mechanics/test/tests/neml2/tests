@@ -3,9 +3,9 @@
   issues = '#26450 #26920'
   design = 'CauchyStressFromNEML2.md CauchyStressFromNEML2UO.md CauchyStressFromNEML2Receiver.md'
   [neml2_error]
+    requirement = 'The system shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
     type = RunException
     input = 'error.i'
-    requirement = 'The system shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
     expect_err = 'To debug NEML2 related issues'
     collections = 'SYSTEM'
     required_submodule = 'contrib/neml2'
@@ -13,12 +13,57 @@
     valgrind = none
   []
   [no_neml2]
+    requirement = 'The system shall throw an error upon instantiation of NEML2 interface objects if NEML2 is not available.'
     type = RunException
     input = 'elasticity.i'
-    requirement = 'The system shall throw an error upon instantiation of NEML2 interface objects if NEML2 is not available.'
     expect_err = 'To use this object, you need to have the `NEML2` library installed'
     collections = 'SYSTEM'
     libtorch = false
+  []
+  [model_parameter]
+    requirement = 'The system shall be capable of using MOOSE data as NEML2 model parameters.'
+    type = Exodiff
+    input = 'parameter.i'
+    exodiff = 'parameter_out.e'
+    required_submodule = 'contrib/neml2'
+    libtorch = true
+    recover = false
+    valgrind = heavy
+  []
+  [custom_model]
+    requirement = 'The system shall be capable of running custom NEML2 model implemented in MOOSE (optionally with automatic differentiation).'
+    type = Exodiff
+    input = 'custom_model.i'
+    exodiff = 'custom_model_out.e'
+    required_submodule = 'contrib/neml2'
+    libtorch = true
+    recover = false
+    valgrind = heavy
+  []
+  [block_restriction]
+    issues = '#27493'
+    collections = 'SYSTEM'
+    requirement = 'The system shall be capable of defining, for multiple subdomains, '
+    [same_model]
+      detail = 'the same NEML2 model running on the same device.'
+      type = Exodiff
+      input = 'blocks_same_model.i'
+      exodiff = 'blocks_same_model_out.e'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      recover = false
+      valgrind = heavy
+    []
+    [different_model]
+      detail = 'different NEML2 models running on the same device.'
+      type = Exodiff
+      input = 'blocks_different_model.i'
+      exodiff = 'blocks_different_model_out.e'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      recover = false
+      valgrind = heavy
+    []
   []
   [neml2_modular]
     issues = '#27493'

@@ -26,16 +26,31 @@ NEML2ActionCommon::commonParams()
 
   // Inputs
   params.addParam<MultiMooseEnum>(
-      "moose_input_types", moose_types, NEML2Utils::docstring("Type of each MOOSE input"));
+      "moose_input_types",
+      moose_types,
+      NEML2Utils::docstring("Type of each MOOSE data to be used as NEML2 input variable"));
   params.addParam<std::vector<std::string>>(
       "moose_inputs",
       {},
-      NEML2Utils::docstring("List of MOOSE variables/material properties to be used as inputs for "
-                            "the material model."));
+      NEML2Utils::docstring("List of MOOSE data to be used as inputs of the material model."));
   params.addParam<std::vector<std::string>>(
       "neml2_inputs",
       {},
-      NEML2Utils::docstring("List of NEML2 input variables corresponding to each MOOSE input."));
+      NEML2Utils::docstring("List of NEML2 input variables corresponding to each MOOSE data."));
+
+  // Model parameters
+  params.addParam<MultiMooseEnum>(
+      "moose_parameter_types",
+      moose_types,
+      NEML2Utils::docstring("Type of each MOOSE data to be used as NEML2 model parameter"));
+  params.addParam<std::vector<std::string>>(
+      "moose_parameters",
+      {},
+      NEML2Utils::docstring("List of MOOSE data to be used as parameters of the material model."));
+  params.addParam<std::vector<std::string>>(
+      "neml2_parameters",
+      {},
+      NEML2Utils::docstring("List of NEML2 model parameters corresponding to each MOOSE data."));
 
   // Outputs
   params.addParam<MultiMooseEnum>(
@@ -45,12 +60,11 @@ NEML2ActionCommon::commonParams()
   params.addParam<std::vector<std::string>>(
       "moose_outputs",
       {},
-      NEML2Utils::docstring("List of MOOSE variables/material properties used to hold the output "
-                            "of the material model."));
+      NEML2Utils::docstring("List of MOOSE data used to hold the output of the material model."));
   params.addParam<std::vector<std::string>>(
       "neml2_outputs",
       {},
-      NEML2Utils::docstring("List of NEML2 output variables corresponding to each MOOSE output."));
+      NEML2Utils::docstring("List of NEML2 output variables corresponding to each MOOSE data."));
 
   // Derivatives
   params.addParam<MultiMooseEnum>(
@@ -60,15 +74,15 @@ NEML2ActionCommon::commonParams()
   params.addParam<std::vector<std::string>>(
       "moose_derivatives",
       {},
-      NEML2Utils::docstring("List of MOOSE variables/material properties used to hold the "
-                            "derivative of the material model."));
+      NEML2Utils::docstring(
+          "List of MOOSE data used to hold the derivative of the material model."));
   params.addParam<std::vector<std::vector<std::string>>>(
       "neml2_derivatives",
       {},
       NEML2Utils::docstring("List of pairs of NEML2 variables to take derivatives (i.e., first in "
                             "the pair w.r.t. the second in the pair)."));
 
-  // Error checking and logging
+  // Error checking, logging, etc
   params.addParam<std::vector<std::string>>(
       "skip_variables",
       {},
@@ -80,6 +94,17 @@ NEML2ActionCommon::commonParams()
                         true,
                         NEML2Utils::docstring("Whether to print additional information about the "
                                               "NEML2 model at the beginning of the simulation"));
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "export_outputs",
+      {},
+      "List of MOOSE material properties to export which correspond to NEML2 output variables or "
+      "output derivatives. Each material property's export targets can be specified by "
+      "export_output_targets. The default export target is 'none'.");
+  params.addParam<std::vector<std::vector<OutputName>>>(
+      "export_output_targets",
+      {},
+      "The export targets corresponding to each MOOSE material property specified in "
+      "export_outputs.");
   return params;
 }
 

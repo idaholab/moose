@@ -51,10 +51,22 @@ protected:
     const neml2::TensorType type;
   };
 
+  struct NEML2Param
+  {
+    const std::string name;
+    const neml2::TensorType type;
+  };
+
   struct VariableMapping
   {
     const MOOSEIO moose;
     const NEML2IO neml2;
+  };
+
+  struct ParameterMapping
+  {
+    const MOOSEIO moose;
+    const NEML2Param neml2;
   };
 
   struct DerivativeMapping
@@ -70,6 +82,9 @@ protected:
   /// Set up MOOSE-NEML2 input variable mappings
   void setupInputMappings(const neml2::Model &);
 
+  /// Set up MOOSE-NEML2 model parameter mappings
+  void setupParameterMappings(const neml2::Model &);
+
   /// Set up MOOSE-NEML2 output variable mappings
   void setupOutputMappings(const neml2::Model &);
 
@@ -79,6 +94,9 @@ protected:
   /// MOOSE-NEML2 input variable mappings
   std::vector<VariableMapping> _inputs;
 
+  /// MOOSE-NEML2 model parameter mappings
+  std::vector<ParameterMapping> _params;
+
   /// MOOSE-NEML2 output variable mappings
   std::vector<VariableMapping> _outputs;
 
@@ -87,8 +105,14 @@ protected:
 
 #endif
   /// Whether to print additional information about the model
-  const bool _verbose;
+  bool _verbose;
 
   /// Name of the ExecuteNEML2Model user object
   const UserObjectName _executor_name;
+
+  /// Blocks this sub-block action applies to
+  const std::vector<SubdomainName> _block;
+
+  /// Material property additional outputs
+  std::map<MaterialPropertyName, std::vector<OutputName>> _export_output_targets;
 };

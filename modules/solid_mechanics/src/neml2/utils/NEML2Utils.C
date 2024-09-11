@@ -19,28 +19,22 @@ namespace neml2
 std::ostream &
 operator<<(std::ostream & os, const Model & model)
 {
-  auto print_axis = [](std::ostream & os, const LabeledAxis & axis)
-  {
-    VariadicTable<std::string, Size> table({"Variable", "Storage size"});
-    for (const auto & var : axis.variable_names())
-      table.addRow(utils::stringify(var), axis.storage_size(var));
-    table.print(os);
-  };
+  VariadicTable<std::string, std::string, std::string, Size> table(
+      {"Type", "Name", "Tensor type", "Storage size"});
 
-  os << "Input:" << std::endl;
-  print_axis(os, model.input_axis());
+  for (const auto && [name, var] : model.input_variables())
+    table.addRow("input", utils::stringify(name), utils::stringify(var.type()), var.base_storage());
 
-  os << std::endl;
+  for (const auto && [name, var] : model.output_variables())
+    table.addRow(
+        "output", utils::stringify(name), utils::stringify(var.type()), var.base_storage());
 
-  os << "Output:" << std::endl;
-  print_axis(os, model.output_axis());
-
-  os << std::endl;
-
-  os << "Parameters: " << std::endl;
-  VariadicTable<std::string, std::string> table({"Parameter", "Requires grad"});
   for (auto && [name, param] : model.named_parameters())
-    table.addRow(name, Tensor(param).requires_grad() ? "True" : "False");
+    table.addRow("parameter", name, utils::stringify(param.type()), Tensor(param).base_storage());
+
+  for (auto && [name, buffer] : model.named_buffers())
+    table.addRow("buffer", name, utils::stringify(buffer.type()), Tensor(buffer).base_storage());
+
   table.print(os);
 
   return os;

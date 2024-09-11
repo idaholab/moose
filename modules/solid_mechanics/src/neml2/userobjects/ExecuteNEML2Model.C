@@ -40,7 +40,15 @@ ExecuteNEML2Model::validParams()
   // we need the user to explicitly list the UOs so we can set up a construction order independent
   // dependency chain
   params.addParam<std::vector<UserObjectName>>(
-      "gatherers", {}, NEML2Utils::docstring("List of MOOSE*ToNEML2 user objects"));
+      "gatherers",
+      {},
+      NEML2Utils::docstring(
+          "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 input variables"));
+  params.addParam<std::vector<UserObjectName>>(
+      "param_gatherers",
+      {},
+      NEML2Utils::docstring(
+          "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 model parameters"));
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -63,10 +71,10 @@ ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
 #endif
 {
 #ifdef NEML2_ENABLED
-  const auto gatherer_names = getParam<std::vector<UserObjectName>>("gatherers");
-
   // add user object dependencies by name (the UOs do not need to exist yet for this)
-  for (const auto & gatherer_name : gatherer_names)
+  for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("gatherers"))
+    _depend_uo.insert(gatherer_name);
+  for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("param_gatherers"))
     _depend_uo.insert(gatherer_name);
 
   for (const auto & var_name : getParam<std::vector<std::string>>("skip_inputs"))
@@ -97,21 +105,37 @@ ExecuteNEML2Model::initialSetup()
       else
         uo.setMode(MOOSEToNEML2::Mode::VARIABLE);
       addGatheredVariable(gatherer_name, uo.NEML2VariableName());
-      std::cout << "Setting " << gatherer_name << " to Mode::VARIABLE\n";
-    }
-    else if (model().named_parameters().has_key(uo.NEML2Name()))
-    {
-      uo.setMode(MOOSEToNEML2::Mode::PARAMETER);
-      addGatheredParameter(gatherer_name, uo.NEML2ParameterName());
-      std::cout << "Setting " << gatherer_name << " to Mode::PARAMETER\n";
     }
     else
       mooseError("The MOOSEToNEML2 gatherer named '",
                  gatherer_name,
-                 "' is gathering MOOSE data for a NEML2 quantity named '",
+                 "' is gathering MOOSE data for a non-existent NEML2 input variable named '",
                  uo.NEML2Name(),
-                 "' which is neither a NEML2 input variable nor a NEML2 model parameter. The list "
-                 "of NEML2 variables and parameters can be printed by setting verbose=true.");
+                 "'.");
+
+    _gatherers.push_back(&uo);
+  }
+
+  // deal with user object provided model parameters
+  for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("param_gatherers"))
+  {
+    // gather coupled user objects late to ensure they are constructed. Do not add them as
+    // dependencies (that's already done in the constructor).
+    const auto & uo = getUserObjectByName<MOOSEToNEML2>(gatherer_name, /*is_dependency = */ false);
+
+    // introspect the NEML2 model to figure out if the gatherer UO is gathering for a NEML2 input
+    // variable or for a NEML2 model parameter
+    if (model().named_parameters().has_key(uo.NEML2Name()))
+    {
+      uo.setMode(MOOSEToNEML2::Mode::PARAMETER);
+      addGatheredParameter(gatherer_name, uo.NEML2ParameterName());
+    }
+    else
+      mooseError("The MOOSEToNEML2 gatherer named '",
+                 gatherer_name,
+                 "' is gathering MOOSE data for a non-existent NEML2 model parameter named '",
+                 uo.NEML2Name(),
+                 "'.");
 
     _gatherers.push_back(&uo);
   }
