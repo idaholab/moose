@@ -106,11 +106,13 @@ AverageSectionValueSampler::AverageSectionValueSampler(const InputParameters & p
 
   for (const auto j : make_range(_variables.size()))
   {
+    if (!_sys.hasVariable(_variables[j]))
+      paramError("variables",
+                 "One or more of the specified variables do not exist in this system.");
     const MooseVariable & variable = _sys.getFieldVariable<Real>(_tid, _variables[j]);
     if (!variable.isNodal())
-      paramError(
-          "variables",
-          "The variables provided to this vector postprocessor must be defined at the nodes.");
+      paramError("variables",
+                 "One or more of the specified variables are not defined at the nodes.");
     _var_numbers.push_back(variable.number());
   }
 
@@ -186,16 +188,20 @@ AverageSectionValueSampler::finalize()
   if (_require_equal_node_counts)
   {
     for (const auto li : index_range(_number_of_nodes))
+    {
       if (_number_of_nodes[li] != _number_of_nodes[0])
       {
         std::ostringstream pos_out;
         for (const auto li2 : index_range(_number_of_nodes))
-          pos_out << _positions[li2] << " " << _number_of_nodes[li2] << "\n";
-        mooseError("Node counts do not match for all axial positions. If this behavior "
-                   "is desired to accommodate nonuniform meshes, set "
-                   "'require_equal_node_counts=false'\nPosition Count\n\n" +
-                   pos_out.str());
+          pos_out << std::setw(10) << _positions[li2] << std::setw(10) << _number_of_nodes[li2]
+                  << "\n";
+        mooseError(
+            "Node counts do not match for all axial positions. If this behavior "
+            "is desired to accommodate nonuniform meshes, set "
+            "'require_equal_node_counts=false'\n     Axial      Node\n  Position     Count\n" +
+            pos_out.str());
       }
+    }
   }
 }
 

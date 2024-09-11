@@ -40,6 +40,14 @@
     requirement = 'The system shall generate an error if the user defines '
                   'an empty set of positions in AverageSectionValueSampler.' 
   []
+  [test_one_step_nonexistent_variable]
+    type = 'RunException'
+    input = 'test_one_step.i'
+    cli_args = "VectorPostprocessors/section_output/variables='dummy' Outputs/file_base=err_var_out"
+    expect_err = "One or more of the specified variables do not exist in this system."
+    requirement = 'The system shall generate an error if the user specifies '
+                  'a nonexistent variable in AverageSectionValueSampler.' 
+  []
   [test_one_step_heavy]
     type = 'CSVDiff'
     input = 'test_one_step.i'

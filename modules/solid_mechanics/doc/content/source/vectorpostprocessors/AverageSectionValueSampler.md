@@ -31,8 +31,8 @@ Because this VectorPostprocessor is intended to be applied to geometries with ex
 of nodes that all occupy the same axial position, it will generate an error if the numbers of nodes located
 at the various axial positions vary. However, there are valid scenarios when this is not the case. For example,
 if part of the extruded mesh is refined, the number of nodes per layer will differ along the axis of the
-extrueded section. The [!param](/VectorPostprocessors/AverageSectionValueSampler/require_equal_node_counts) parameter can be set to `false` in such situations to skip
-that check. The number of nodes per position is reported in the ouputs as the `node_count` vector to allow the
+extruded section. The [!param](/VectorPostprocessors/AverageSectionValueSampler/require_equal_node_counts) parameter can be set to `false` in such situations to skip
+that check. The number of nodes per axial position is reported in the ouputs as the `node_count` vector to allow the
 user to ensure that each layer contains all expected nodes.
 
 The optional [!param](/VectorPostprocessors/AverageSectionValueSampler/symmetry_plane) parameter is intended to be used when there is a symmetry plane passing through
