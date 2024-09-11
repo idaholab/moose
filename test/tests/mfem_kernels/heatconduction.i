@@ -50,15 +50,15 @@
   []
 []
 
-[Coefficients]
-  [one]
-    type = MFEMConstantCoefficient
-    value = 1.0
+[Materials]
+  [Substance]
+    type = MFEMGenericConstantMaterial
+    prop_names = 'negative_thermal_conductivity volumetric_heat_capacity'
+    prop_values = '-1.0 1.0'
   []
-  [neg_one]
-    type = MFEMConstantCoefficient
-    value = -1.0
-  []  
+[]
+
+[Coefficients]
   [TopValue]
     type = MFEMFunctionCoefficient
     function = value_top
@@ -73,12 +73,12 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = temperature
-    coefficient = neg_one
+    coefficient = negative_thermal_conductivity
   []
   [dT_dt]
     type = MFEMTimeDerivativeMassKernel
     variable = temperature
-    coefficient = one
+    coefficient = volumetric_heat_capacity
   []  
 []
 
