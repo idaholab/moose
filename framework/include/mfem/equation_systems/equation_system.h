@@ -63,8 +63,7 @@ public:
   // Build forms
   virtual void Init(platypus::GridFunctions & gridfunctions,
                     const platypus::FESpaces & fespaces,
-                    platypus::BCMap & bc_map,
-                    platypus::Coefficients & coefficients);
+                    platypus::BCMap & bc_map);
   virtual void BuildLinearForms(platypus::BCMap & bc_map);
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();

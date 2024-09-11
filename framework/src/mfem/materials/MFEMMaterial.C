@@ -1,4 +1,5 @@
 #include "MFEMMaterial.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMMaterial);
 
@@ -12,12 +13,37 @@ MFEMMaterial::validParams()
   params.addPrivateParam<bool>("_interface", false);
 
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of blocks (ids or names) that this object will be applied");
+      "block",
+      {},
+      "The list of blocks (ids or names) that this object will be applied to. Leave empty to apply "
+      "to all blocks.");
   return params;
 }
 
+std::vector<std::string>
+MFEMMaterial::subdomainsToStrings(std::vector<SubdomainName> blocks)
+{
+  std::vector<std::string> result(blocks.size());
+  // FIXME: Is there really no better way to do this conversion? It doesn't seem like it should be
+  // necessary to do the various copies etc. for this.
+  std::transform(blocks.begin(),
+                 blocks.end(),
+                 result.begin(),
+                 // FIXME: How do I pass the string constructor directly?
+                 [](const SubdomainName & x) -> std::string { return std::string(x); });
+  return result;
+}
+
+libMesh::Point
+MFEMMaterial::pointFromMFEMVector(const mfem::Vector & vec)
+{
+  return libMesh::Point(vec.Elem(0), vec.Elem(1), vec.Elem(2));
+}
+
 MFEMMaterial::MFEMMaterial(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters), blocks(getParam<std::vector<SubdomainName>>("block"))
+  : MFEMGeneralUserObject(parameters),
+    _block_ids(getParam<std::vector<SubdomainName>>("block")),
+    _properties(getMFEMProblem().getProperties())
 {
 }
 

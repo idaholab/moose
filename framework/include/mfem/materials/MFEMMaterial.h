@@ -2,17 +2,22 @@
 
 #include "MFEMGeneralUserObject.h"
 #include "MFEMCoefficient.h"
+#include "PropertyManager.h"
 #include "coefficients.h"
 
 class MFEMMaterial : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
+  static std::vector<std::string> subdomainsToStrings(std::vector<SubdomainName> blocks);
+  static libMesh::Point pointFromMFEMVector(const mfem::Vector & vec);
 
   MFEMMaterial(const InputParameters & parameters);
   virtual ~MFEMMaterial();
 
-  virtual void storeCoefficients(platypus::Subdomain & subdomain) {}
+  const std::vector<SubdomainName> & getBlocks() const { return _block_ids; }
 
-  std::vector<SubdomainName> blocks;
+protected:
+  std::vector<SubdomainName> _block_ids;
+  platypus::PropertyManager & _properties;
 };

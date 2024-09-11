@@ -73,10 +73,12 @@
   []
 []
 
-[Coefficients]
-  [one]
-    type = MFEMConstantCoefficient
-    value = 1.0
+
+[Materials]
+  [Substance]
+    type = MFEMGenericConstantMaterial
+    prop_names = one
+    prop_values = 1.0
   []
 []
 
