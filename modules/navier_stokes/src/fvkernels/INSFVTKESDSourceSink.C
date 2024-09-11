@@ -178,8 +178,8 @@ INSFVTKESDSourceSink::computeQpResidual()
       // const auto Re_d =
       //     std::sqrt(_k(elem_arg, old_state)) * distance_vec[i] * rho / _mu(facearg, state);
       // const auto gamma = std::exp(-Re_d / 11.0);
-      // // destruction += gamma * omegaVis + (1.0 - gamma) * omegaLog;
-      destruction += omegaLog; // std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
+      // destruction += gamma * omegaVis + (1.0 - gamma) * omegaLog;
+      destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
 
       // if (y_plus < 11.25)
       //   destruction += omegaVis / tot_weight;
@@ -275,21 +275,24 @@ INSFVTKESDSourceSink::computeQpResidual()
       gamma = F1 * _gamma_infty_1 + (1.0 - F1) * _gamma_infty_2;
 
     // // TKSD production
-    // auto production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
     // // Limiting production
-    // production_k =
-    //     std::min(production_k, _c_pl * rho * _beta_infty * _var(elem_arg, old_state) * TKE);
 
-    // production = (rho * gamma / _mu_t(elem_arg, state)) * production_k;
+    ADReal production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    production = rho * gamma * symmetric_strain_tensor_sq_norm;
+    production_k =
+        std::min(production_k, _c_pl * rho * _beta_infty * _var(elem_arg, old_state) * TKE);
 
-    production =
-        std::min(production,
-                 (_c_pl / _a_1) * _beta_infty * _var(elem_arg, old_state) *
-                     std::max(_a_1 * _var(elem_arg, old_state),
-                              _F2(elem_arg, state) * std::sqrt(symmetric_strain_tensor_sq_norm)));
+    production = (rho * gamma / _mu_t(elem_arg, state)) * production_k;
+
+    // production = rho * gamma * symmetric_strain_tensor_sq_norm;
+
+    // production =
+    //     std::min(production,
+    //              (_c_pl / _a_1) * _beta_infty * _var(elem_arg, old_state) *
+    //                  std::max(_a_1 * _var(elem_arg, old_state),
+    //                           _F2(elem_arg, state) *
+    //                           std::sqrt(symmetric_strain_tensor_sq_norm)));
 
     // production = std::min(production,
     //                       _c_pl / _a_1 * _beta_infty * _var(elem_arg, old_state) *
@@ -342,8 +345,8 @@ INSFVTKESDSourceSink::computeQpResidual()
       cross_diffusion_grad += grad_k(1) * grad_omega(1);
     if (_dim >= 3)
       cross_diffusion_grad += grad_k(2) * grad_omega(2);
-    cross_diffusion = (1.0 - F1) * rho * 2.0 * _sigma_omega_2 * cross_diffusion_grad /
-                      Utility::pow<2>(_var(elem_arg, old_state)) * _var(elem_arg, state);
+    cross_diffusion = (1.0 - F1) * rho * 2.0 * _sigma_omega_2 * cross_diffusion_grad / _var(elem_arg, old_state);
+                      //Utility::pow<2>(_var(elem_arg, old_state)) * _var(elem_arg, state);
 
     // Free shear modification to cross diffusion
     if (_bool_free_shear_modficiation)

@@ -116,11 +116,11 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   else if (_wall_treatment == "neq")
   {
     // Assign non-equilibrium wall function value
-    y_plus = wall_dist * std::sqrt(std::sqrt(_C_mu) * _k(current_argument, old_state)) * rho / mu;
-    u_tau = parallel_speed / (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) /
-                              NS::von_karman_constant);
+    u_tau = std::sqrt(std::sqrt(_C_mu) * _k(current_argument, old_state));
+    y_plus = wall_dist * u_tau * rho / mu;
+    // u_tau = parallel_speed / (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) /
+    //                           NS::von_karman_constant);
   }
-
   ADReal alpha;
   if (y_plus <= 5.0) // sub-laminar layer
   {
@@ -135,6 +135,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     const auto wall_scaling =
         1.0 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus) + jayatilleke_P;
     alpha = u_tau * wall_dist / (_Pr_t(current_argument, state) * wall_scaling);
+    // alpha = u_tau / (_Pr_t(current_argument, state) * wall_scaling);
   }
   else // buffer layer
   {
@@ -145,8 +146,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     const auto jayatilleke_P =
         9.24 * (std::pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * std::exp(-0.007 * Pr_ratio));
     const auto wall_scaling =
-        1.0 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus) + jayatilleke_P;
-    const auto alpha_turb = u_tau * wall_dist / (Pr_t * wall_scaling);
+        1.0 / NS::von_karman_constant * std::log(NS::E_turb_constant * 30.0) + jayatilleke_P;
+    const auto alpha_turb = u_tau * wall_dist / (_Pr_t(current_argument, state) * wall_scaling);
     const auto blending_function = (y_plus - 5.0) / 25.0;
     alpha = blending_function * alpha_turb + (1.0 - blending_function) * alpha_lam;
   }

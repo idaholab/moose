@@ -220,18 +220,18 @@ kOmegaSSTViscosityAux::computeValue()
 
       // ADReal y_plus;
       // ADReal mu_wall;
-      // ADReal u_tau;
+      // ADReal u_tau_2;
 
       // // Add an if for neq or eq in the future.
       // y_plus = std::pow(_C_mu, 0.25) * min_wall_dist * std::sqrt(TKE) * rho / mu;
 
       // mu_wall = mu * (NS::von_karman_constant * y_plus /
       //                 std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
-      // u_tau = std::pow(_C_mu, 0.5) * TKE;
-      // const auto S = mu_wall / mu * parallel_speed / min_wall_dist; //(rho * std::pow(u_tau, 2))
-      // /
-      //                //mu; //  // mu_wall / (rho * std::pow(u_tau, 2)); // modify in the future
-      // symmetric_strain_tensor_norm = std::sqrt(Utility::pow<2>(S));
+      // u_tau_2 = std::pow(_C_mu, 0.5) * TKE;
+      // const auto S = mu / mu_wall * parallel_speed / min_wall_dist; //(rho * u_tau)
+      // // /
+      // //                //mu; //  // mu_wall / (rho * std::pow(u_tau, 2)); // modify in the future
+      // symmetric_strain_tensor_norm = S;
     }
     else
     {

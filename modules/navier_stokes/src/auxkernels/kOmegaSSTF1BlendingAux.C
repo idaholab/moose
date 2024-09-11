@@ -63,7 +63,7 @@ kOmegaSSTF1BlendingAux::computeValue()
       Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto k = _k(elem_arg, previous_state);
   const auto omega = _omega(elem_arg, previous_state);
-  //const auto omega_capped = std::max(_omega(elem_arg, previous_state).value(), 1e-12);
+  // const auto omega_capped = std::max(_omega(elem_arg, previous_state).value(), 1e-12);
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
 
@@ -81,7 +81,7 @@ kOmegaSSTF1BlendingAux::computeValue()
   if (_dim > 2)
     cross_diffusion += grad_k(2) * grad_omega(2);
   cross_diffusion *= 1 / omega;
-  const auto cross_diffusion_plus = std::max(cross_diffusion.value(), 1e-20);
+  const auto cross_diffusion_plus = std::max(cross_diffusion.value(), 1e-10);
 
   // Computing phi_1
   const auto T1 = std::sqrt(k) / (0.09 * omega * y);
