@@ -49,6 +49,8 @@ private:
   void checkNonConformalMeshFromAdaptivity(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check whether the Jacobians (elem and side) are not negative
   void checkLocalJacobians(const std::unique_ptr<MeshBase> & mesh) const;
+  //// Routing to check for non matching edges
+  void checkNonMatchingEdges(const std::unique_ptr<MeshBase> & mesh) const;
 
   /**
    * Utility routine to output the final diagnostics level in the desired mode
@@ -82,6 +84,8 @@ private:
   const MooseEnum _check_non_conformal_mesh;
   /// tolerance for detecting when meshes are not conformal
   const Real _non_conformality_tol;
+  //// whether to check for intersecting edges
+  const MooseEnum _check_non_matching_edges;
   /// whether to check for the adaptivity of non-conformal meshes
   const MooseEnum _check_adaptivity_non_conformality;
   /// whether to check for negative jacobians in the domain
