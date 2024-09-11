@@ -42,12 +42,25 @@
       mesh_mode = REPLICATED
     []
     [pad_azimuthal_sector_mismatch]
-      detail = 'additional azimuthal nodes for a control drum assembly mesh when the azimuthal discretization does not line up with the drum start and end angles'
+      detail = 'additional azimuthal nodes for a control drum assembly mesh when the azimuthal discretization does not line up with the pad start and end angles'
       type = 'CSVDiff'
       input = 'drum_pad.i'
       csvdiff = 'drum_hex_pad_out.csv'
       cli_args = 'Mesh/drum/num_azimuthal_sectors=102
                   Outputs/file_base=drum_hex_pad_out'
+      allow_warnings = true
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [pad_azimuthal_sector_shift]
+      detail = 'shift azimuthal nodes for a control drum assembly mesh to match the drum pad locations when the azimuthal angles line up to within tolerance'
+      type = 'CSVDiff'
+      input = 'drum_pad.i'
+      csvdiff = 'drum_hex_pad_shift_nodes_out.csv'
+      cli_args = 'Mesh/drum/pad_start_angle=90.1
+                  Mesh/drum/pad_end_angle=179.9
+                  Mesh/drum/azimuthal_node_tolerance=0.2
+                  Outputs/file_base=drum_hex_pad_shift_nodes_out'
       allow_warnings = true
       recover = false
       mesh_mode = REPLICATED
@@ -81,8 +94,9 @@
       detail = 'if the outer radius of the control drum exceeds the radius of the inscribed circle of the assembly boundary'
       type = 'RunException'
       input = 'drum_nopad.i'
-      cli_args = 'Mesh/drum/drum_outer_radius=10.1'
-      expect_err = "Outer radius of drum region must be smaller"
+      cli_args = 'Mesh/drum/drum_outer_radius=9.9
+                  Mesh/drum/num_azimuthal_sectors=6'
+      expect_err = "Volume-corrected outer radius of drum region must be smaller"
     []
     [missing_pad_end_angle]
       detail = 'if the user sets the start angle of the drum pad but not the end angle'
@@ -113,6 +127,23 @@
       cli_args = 'Mesh/drum/pad_start_angle=0
                   Mesh/drum/pad_end_angle=360'
       expect_err = "The difference between 'pad_end_angle' and 'pad_start_angle' must be between"
+    []
+    [node_tolerance_interval_size]
+      detail = 'if the azimuthal node tolerance is larger than half the azimuthal interval size'
+      type = 'RunException'
+      input = 'drum_pad.i'
+      cli_args = 'Mesh/drum/azimuthal_node_tolerance=1'
+      expect_err = "Azimuthal node tolerance should be smaller than half the azimuthal interval size"
+    []
+    [node_tolerance_pad_angle_range]
+      detail = 'if the azimuthal node tolerance is larger than half the difference of the pad angle range'
+      type = 'RunException'
+      input = 'drum_pad.i'
+      cli_args = 'Mesh/drum/azimuthal_node_tolerance=1
+                  Mesh/drum/num_azimuthal_sectors=36
+                  Mesh/drum/pad_start_angle=90
+                  Mesh/drum/pad_end_angle=92'
+      expect_err = "Azimuthal node tolerance should be smaller than half the difference of the pad angle range"
     []
     [no_region_ids]
       detail = 'if region IDs are not provided for the control drum mesh'

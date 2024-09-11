@@ -1142,7 +1142,7 @@ Real
 PolygonMeshGeneratorBase::radiusCorrectionFactor(const std::vector<Real> & azimuthal_list,
                                                  const bool full_circle,
                                                  const unsigned int order,
-                                                 const bool is_first_value_vertex) const
+                                                 const bool is_first_value_vertex)
 {
   Real tmp_acc = 0.0;
   Real tmp_acc_azi = 0.0;
@@ -1197,7 +1197,7 @@ PolygonMeshGeneratorBase::radiusCorrectionFactor(const std::vector<Real> & azimu
 }
 
 Real
-PolygonMeshGeneratorBase::dummyTRI6VolCalculator(const std::pair<Real, Real> & azi_pair) const
+PolygonMeshGeneratorBase::dummyTRI6VolCalculator(const std::pair<Real, Real> & azi_pair)
 {
   // The algorithm is copied from libMesh's face_tri6.C
   // Original license is LGPL so it can be used here.

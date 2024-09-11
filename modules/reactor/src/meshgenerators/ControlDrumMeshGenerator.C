@@ -14,6 +14,7 @@
 #include "Factory.h"
 #include "libmesh/elem.h"
 #include "MooseMeshUtils.h"
+#include "PolygonMeshGeneratorBase.h"
 
 registerMooseObject("ReactorApp", ControlDrumMeshGenerator);
 
@@ -64,12 +65,17 @@ ControlDrumMeshGenerator::validParams()
       "block_names",
       "Block names for each radial and axial zone. "
       "Inner indexing is radial zones (drum inner/drum/drum outer), outer indexing is axial");
+  params.addParam<Real>("azimuthal_node_tolerance",
+                        0.1,
+                        "(in degrees) The absolute tolerance for which to shift an azimuthal node "
+                        "to match the pad start/end angles");
 
   params.addParamNamesToGroup("region_ids assembly_type", "ID assigment");
   params.addParamNamesToGroup("drum_inner_radius drum_outer_radius drum_inner_intervals "
                               "drum_intervals num_azimuthal_sectors",
                               "Drum specifications");
-  params.addParamNamesToGroup("pad_start_angle pad_end_angle", "Control pad specifications");
+  params.addParamNamesToGroup("pad_start_angle pad_end_angle azimuthal_node_tolerance",
+                              "Control pad specifications");
 
   params.addClassDescription(
       "This ControlDrumMeshGenerator object is designed to generate "
@@ -108,14 +114,6 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   const auto num_sectors = getParam<unsigned int>("num_azimuthal_sectors");
   const auto assembly_pitch = getReactorParam<Real>(RGMB::assembly_pitch);
 
-  // Check drum radius parameters
-  if (_drum_inner_radius >= _drum_outer_radius)
-    paramError("drum_outer_radius", "Drum outer radius must be larger than the inner radius");
-  if (_drum_outer_radius >= assembly_pitch / 2.)
-    paramError("drum_outer_radius",
-               "Outer radius of drum region must be smaller than half the assembly pitch as "
-               "defined by 'ReactorMeshParams/assembly_pitch'");
-
   // Check drum pad parameters
   if (isParamSetByUser("pad_start_angle"))
   {
@@ -138,6 +136,22 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
                  "If 'pad_end_angle' is set, 'pad_start_angle' needs to also be set.");
     _has_pad_region = false;
   }
+
+  // Error checking for azimuthal node tolerance
+  const auto azimuthal_node_tolerance = getParam<Real>("azimuthal_node_tolerance");
+  if (!_has_pad_region && isParamSetByUser("azimuthal_node_tolerance"))
+    paramWarning("azimuthal_node_tolerance",
+                 "This parameter is relevant only when pad start and end angles are defined");
+  if (_has_pad_region && MooseUtils::absoluteFuzzyGreaterEqual(2. * azimuthal_node_tolerance,
+                                                               360. / (Real)num_sectors))
+    paramError("azimuthal_node_tolerance",
+               "Azimuthal node tolerance should be smaller than half the azimuthal interval size "
+               "as defined by 'num_azimuthal_sectors'");
+  if (_has_pad_region && MooseUtils::absoluteFuzzyGreaterEqual(2. * azimuthal_node_tolerance,
+                                                               _pad_end_angle - _pad_start_angle))
+    paramError("azimuthal_node_tolerance",
+               "Azimuthal node tolerance should be smaller than half the difference of the pad "
+               "angle range");
 
   // Check region IDs have correct size
   const unsigned int n_radial_regions = _has_pad_region ? 4 : 3;
@@ -194,40 +208,78 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
+  // Define azimuthal angles explicitly based on num_azimuthal_sectors and manually add pad start
+  // angle and end angle if they are not contained within these angle intervals
+  std::vector<Real> azimuthal_angles;
+  const auto custom_start_angle = _pad_start_angle;
+  const auto custom_end_angle = (_pad_end_angle > 360) ? _pad_end_angle - 360. : _pad_end_angle;
+  for (unsigned int i = 0; i < num_sectors; ++i)
+  {
+    Real current_azim_angle = (Real)i * 360. / (Real)num_sectors;
+    Real next_azim_angle = (Real)(i + 1) * 360. / (Real)num_sectors;
+    if (!_has_pad_region)
+      azimuthal_angles.push_back(current_azim_angle);
+    else
+    {
+      // When pad regions are involved, check if the current azimuthal node angle coincides with
+      // pad start/end angle to within tolerance. If it does, then shift the azimuthal node location
+      // to match the pad angle location. If it does not and the pad angle falls within the
+      // azimuthal sector, then create an additional node for the pad location
+      if (MooseUtils::absoluteFuzzyLessEqual(std::abs(current_azim_angle - custom_start_angle),
+                                             azimuthal_node_tolerance))
+      {
+        azimuthal_angles.push_back(custom_start_angle);
+      }
+      else if (MooseUtils::absoluteFuzzyLessEqual(std::abs(current_azim_angle - custom_end_angle),
+                                                  azimuthal_node_tolerance))
+      {
+        azimuthal_angles.push_back(custom_end_angle);
+      }
+      else if (MooseUtils::absoluteFuzzyGreaterThan(custom_start_angle - current_azim_angle,
+                                                    azimuthal_node_tolerance) &&
+               MooseUtils::absoluteFuzzyGreaterThan(next_azim_angle - custom_start_angle,
+                                                    azimuthal_node_tolerance))
+      {
+        mooseWarning("pad_start_angle not contained within drum azimuthal discretization so "
+                     "additional azimuthal nodes are created to align mesh with this angle");
+        azimuthal_angles.push_back(current_azim_angle);
+        azimuthal_angles.push_back(custom_start_angle);
+      }
+      else if (MooseUtils::absoluteFuzzyGreaterThan(custom_end_angle - current_azim_angle,
+                                                    azimuthal_node_tolerance) &&
+               MooseUtils::absoluteFuzzyGreaterThan(next_azim_angle - custom_end_angle,
+                                                    azimuthal_node_tolerance))
+      {
+        mooseWarning("pad_end_angle not contained within drum azimuthal discretization so "
+                     "additional azimuthal nodes are created to align mesh with this angle");
+        azimuthal_angles.push_back(current_azim_angle);
+        azimuthal_angles.push_back(custom_end_angle);
+      }
+      else
+        azimuthal_angles.push_back(current_azim_angle);
+    }
+  }
+
+  // Check drum radius parameters
+  if (_drum_inner_radius >= _drum_outer_radius)
+    paramError("drum_outer_radius", "Drum outer radius must be larger than the inner radius");
+  // Check if volume preserved radius of outer radius exceeds assembly halfpitch. In data driven
+  // mode, radius is assumed not to need volume preservation
+  auto radius_corrfac = getReactorParam<bool>(RGMB::bypass_meshgen)
+                            ? 1.0
+                            : PolygonMeshGeneratorBase::radiusCorrectionFactor(azimuthal_angles);
+  if (_drum_outer_radius * radius_corrfac >= assembly_pitch / 2.)
+    paramError("drum_outer_radius",
+               "Volume-corrected outer radius of drum region must be smaller than half the "
+               "assembly pitch as "
+               "defined by 'ReactorMeshParams/assembly_pitch'");
+
   // No subgenerators will be called if option to bypass mesh generators is enabled
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
     const std::string block_name_prefix =
         RGMB::DRUM_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
 
-    // Define azimuthal angles explicitly based on num_azimuthal_sectors and manually add pad start
-    // angle and end angle if they are not contained within these angle intervals
-    std::vector<Real> azimuthal_angles;
-    const auto custom_start_angle = _pad_start_angle;
-    const auto custom_end_angle = (_pad_end_angle > 360) ? _pad_end_angle - 360. : _pad_end_angle;
-    for (unsigned int i = 0; i < num_sectors; ++i)
-    {
-      Real current_azim_angle = (Real)i * 360. / (Real)num_sectors;
-      Real next_azim_angle = (Real)(i + 1) * 360. / (Real)num_sectors;
-      azimuthal_angles.push_back(current_azim_angle);
-
-      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_start_angle) &&
-          !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_start_angle) &&
-          (custom_start_angle > current_azim_angle) && (custom_start_angle < next_azim_angle))
-      {
-        mooseWarning("pad_start_angle not contained within drum azimuthal discretization so "
-                     "additional azimuthal nodes are created to align mesh with this angle");
-        azimuthal_angles.push_back(custom_start_angle);
-      }
-      if (!MooseUtils::absoluteFuzzyEqual(current_azim_angle, custom_end_angle) &&
-          !MooseUtils::absoluteFuzzyEqual(next_azim_angle, custom_end_angle) &&
-          (custom_end_angle > current_azim_angle) && (custom_end_angle < next_azim_angle))
-      {
-        mooseWarning("pad_end_angle not contained within drum azimuthal discretization so "
-                     "additional azimuthal nodes are created to align mesh with this angle");
-        azimuthal_angles.push_back(custom_end_angle);
-      }
-    }
     {
       // Invoke AdvancedConcentricCircleGenerator to define drum mesh without background region
       auto params = _app.getFactory().getValidParams("AdvancedConcentricCircleGenerator");
