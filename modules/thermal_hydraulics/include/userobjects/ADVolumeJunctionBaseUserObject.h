@@ -61,6 +61,11 @@ protected:
    */
   virtual void computeFluxesAndResiduals(const unsigned int & c) = 0;
 
+  /**
+   * Gets the junction variables
+   */
+  virtual std::vector<const MooseVariableBase *> getJunctionVariables() const;
+
   /// Volume of the junction
   const Real & _volume;
 
