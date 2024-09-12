@@ -34,9 +34,7 @@ protected:
   {
     MATERIAL,
     VARIABLE,
-    SCALAR,
-    POSTPROCESSOR,
-    CUSTOM
+    POSTPROCESSOR
   };
 
   struct MOOSEIO
