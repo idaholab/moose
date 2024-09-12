@@ -27,6 +27,7 @@ ifneq ($(BUILDING_FP_APP), yes)
 	APPLICATION_NAME   := air
 	libmesh_CXXFLAGS   += -DAIR_FP_ENABLED -DSKIP_MODULE_LOAD
 	GEN_REVISION       := yes
+	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
 	include            $(AIR_FP_DIR)/libSBTL_Air.mk
 endif
@@ -40,6 +41,7 @@ ifneq ($(BUILDING_FP_APP), yes)
 	APPLICATION_NAME   := carbon_dioxide
 	libmesh_CXXFLAGS   += -DCARBON_DIOXIDE_FP_ENABLED -DSKIP_MODULE_LOAD
 	GEN_REVISION       := yes
+	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
 	include            $(CARBON_DIOXIDE_FP_DIR)/libSBTL_CarbonDioxide.mk
 endif
@@ -53,6 +55,7 @@ ifneq ($(BUILDING_FP_APP), yes)
 	APPLICATION_NAME   := nitrogen
 	libmesh_CXXFLAGS   += -DNITROGEN_FP_ENABLED -DSKIP_MODULE_LOAD
 	GEN_REVISION       := yes
+	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
 	include            $(NITROGEN_FP_DIR)/libSBTL_Nitrogen.mk
 endif
@@ -66,6 +69,7 @@ ifneq ($(BUILDING_FP_APP), yes)
 	APPLICATION_NAME   := helium
 	libmesh_CXXFLAGS   += -DHELIUM_FP_ENABLED -DSKIP_MODULE_LOAD
 	GEN_REVISION       := yes
+	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
 	include            $(HELIUM_FP_DIR)/libSBTL_Helium.mk
 endif
@@ -79,6 +83,7 @@ ifneq ($(BUILDING_FP_APP), yes)
 	APPLICATION_NAME   := potassium
 	libmesh_CXXFLAGS   += -DPOTASSIUM_FP_ENABLED -DSKIP_MODULE_LOAD
 	GEN_REVISION       := yes
+	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
 	include            $(POTASSIUM_FP_DIR)/libPotassiumProperties.mk
 endif
@@ -92,6 +97,7 @@ ifneq ($(BUILDING_FP_APP), yes)
 	APPLICATION_NAME   := sodium
 	libmesh_CXXFLAGS   += -DSODIUM_FP_ENABLED -DSKIP_MODULE_LOAD
 	GEN_REVISION       := yes
+	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
 	include            $(SODIUM_FP_DIR)/libSodiumProperties.mk
 endif
