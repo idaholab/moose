@@ -13,6 +13,8 @@
 #include "Positions.h"
 #include "BlockRestrictable.h"
 
+class MooseMesh;
+
 /**
  * Positions of all the quadrature points
  */
@@ -21,9 +23,14 @@ class QuadraturePointsPositions : public Positions, BlockRestrictable
 public:
   static InputParameters validParams();
   QuadraturePointsPositions(const InputParameters & parameters);
-  virtual ~QuadraturePointsPositions() = default;
 
   virtual void initialize() override;
 
+  /// Reference to the mesh
   MooseMesh & _mesh;
+
+  /// Type of the quadrature
+  QuadratureType _q_type;
+  /// Order of the quadrature
+  Order _q_order;
 };
