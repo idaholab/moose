@@ -96,6 +96,8 @@ and test it as normal:
 make -j 4
 ./run_tests -j 4
 ```
+make -j 6
+./run_tests -j 6
 
 ## Running id=running
 
