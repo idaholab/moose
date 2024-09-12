@@ -611,6 +611,10 @@ WCNSFVFlowPhysics::addINSMomentumAdvectionKernels()
 void
 WCNSFVFlowPhysics::addINSMomentumViscousDissipationKernels()
 {
+  // No need for this kernel for Eulerian flow
+  if (_dynamic_viscosity_name == "0")
+    return;
+
   std::string kernel_type = "INSFVMomentumDiffusion";
   std::string kernel_name = prefix() + "ins_momentum_diffusion_";
 
