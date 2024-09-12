@@ -17,6 +17,8 @@ InputParameters
 CoupledVarThresholdElementSubdomainModifier::validParams()
 {
   InputParameters params = ThresholdElementSubdomainModifier::validParams();
+  params.addClassDescription("Modify the element subdomain ID if a coupled variable satisfies the "
+                             "criterion for the threshold (above, equal, or below)");
   params.addRequiredCoupledVar("coupled_var",
                                "Coupled variable whose value is used in the criterion");
   return params;

@@ -65,7 +65,7 @@
   []
 []
 
-[UserObjects]
+[MeshModifiers]
   [assign_block_id]
     type = VariableValueElementSubdomainModifier
     coupled_var = 'block_id'

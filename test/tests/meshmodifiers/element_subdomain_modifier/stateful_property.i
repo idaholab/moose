@@ -13,6 +13,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'gen'
     block_id = 1
+    block_name = 'left'
     bottom_left = '0 0 0'
     top_right = '0.25 1 1'
   []
@@ -20,6 +21,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'left'
     block_id = 2
+    block_name = 'right'
     bottom_left = '0.25 0 0'
     top_right = '1 1 1'
   []
@@ -29,33 +31,21 @@
   [moving_circle]
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
-    block = 2
-    criterion_type = BELOW
+    criterion_type = 'BELOW'
     threshold = 0
     subdomain_id = 1
-    moving_boundary_name = moving_boundary
     execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-[]
-
-[Functions]
-  [moving_circle]
-    type = ParsedFunction
-    expression = '(x-t)^2+(y)^2-0.5^2'
   []
 []
 
 [AuxVariables]
   [phi]
-  []
-[]
-
-[AuxKernels]
-  [phi]
-    type = FunctionAux
-    variable = phi
-    function = moving_circle
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    [AuxKernel]
+      type = ParsedAux
+      expression = '(x-t)^2+(y)^2-0.5^2'
+      use_xyzt = true
+      execute_on = 'INITIAL TIMESTEP_BEGIN'
+    []
   []
 []
 
@@ -64,15 +54,15 @@
     type = StatefulMaterial
     initial_diffusivity = 0.5
     multiplier = 2
-    block = 1
-    outputs = exodus
+    block = 'left'
+    outputs = 'exodus'
   []
   [non_stateful]
     type = GenericConstantMaterial
     prop_names = 'diffusivity'
-    prop_values = '0.5'
-    block = 2
-    outputs = exodus
+    prop_values = '-1'
+    block = 'right'
+    outputs = 'exodus'
   []
 []
 
