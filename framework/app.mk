@@ -82,22 +82,31 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # of unrelated stuff.
 non_unity_dirs := %.libs %/src $(app_non_unity_dirs)
 
-# Find all of the top-level subdirectories in our src folder(s)
+# Find all of the subdirectories in our src folder(s) up to $(app_unity_depth)
+app_unity_depth ?= 1
+ifeq ($(shell expr $(app_unity_depth) \< 1), 1)
+	$(error "app_unity_depth cannot be less than 1, got $(app_unity_depth)")
+endif
 # We will create a Unity file for each individual subdirectory
 # The idea is that files grouped withing a subdirectory are closely related
 # and will benefit from a Unity build
-srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth 1 -type d -not -path '*/.libs*')
+srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth $(app_unity_depth) -type d -not -path '*/.libs*')
+srcsubdirs_nonmaxdepth := $(shell find $(APPLICATION_DIR)/src -maxdepth $(shell expr $(app_unity_depth) - 1) -type d -not -path '*/.libs*')
+srcsubdirs_maxdepth := $(filter-out $(srcsubdirs_nonmaxdepth), $(srcsubdirs))
 allsrcsubdirs := $(shell find $(APPLICATION_DIR)/src -type d -not -path '*/.libs*')
 
 # Filter out the paths we don't want to Unity build
 unity_srcsubdirs := $(filter-out $(non_unity_dirs), $(srcsubdirs))
+unity_srcsubdirs_nonmaxdepth := $(filter-out $(non_unity_dirs), $(srcsubdirs_nonmaxdepth))
+unity_srcsubdirs_maxdepth := $(filter-out $(non_unity_dirs), $(srcsubdirs_maxdepth))
 non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(allsrcsubdirs))
 
 # This is a biggie
 # Loop over the subdirectories, creating a rule to create the Unity source file
 # for each subdirectory.  To do that we need to create a unique name using the
 # full hierarchy of the path underneath src
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs_nonmaxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs_maxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
 app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
