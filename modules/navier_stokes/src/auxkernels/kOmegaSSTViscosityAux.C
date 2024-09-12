@@ -185,116 +185,105 @@ kOmegaSSTViscosityAux::computeValue()
   }
   else
   {
-
     // Useful variables
     const auto rho = _rho(current_argument, state);
     const auto TKE = _k(current_argument, old_state);
     // const auto omega_capped = std::max(_omega(current_argument, old_state), 1e-10);
 
-    // ***** Computing shear strain rate ***** //
-    // *************************************** //
     ADReal symmetric_strain_tensor_norm;
 
-    // Future work:
+    // ***** Computing shear strain rate ***** //
+    // *************************************** //
+    // Computing wall scaling
+    const auto & grad_u = _u_var.gradient(current_argument, state);
+    const auto Sij_xx = 2.0 * grad_u(0);
+    ADReal Sij_xy = 0.0;
+    ADReal Sij_xz = 0.0;
+    ADReal Sij_yy = 0.0;
+    ADReal Sij_yz = 0.0;
+    ADReal Sij_zz = 0.0;
+
+    const auto grad_xx = grad_u(0);
+    ADReal grad_xy = 0.0;
+    ADReal grad_xz = 0.0;
+    ADReal grad_yx = 0.0;
+    ADReal grad_yy = 0.0;
+    ADReal grad_yz = 0.0;
+    ADReal grad_zx = 0.0;
+    ADReal grad_zy = 0.0;
+    ADReal grad_zz = 0.0;
+
+    auto trace = Sij_xx / 3.0;
+
+    if (_dim >= 2)
+    {
+      const auto & grad_v = (*_v_var).gradient(current_argument, state);
+      Sij_xy = grad_u(1) + grad_v(0);
+      Sij_yy = 2.0 * grad_v(1);
+
+      grad_xy = grad_u(1);
+      grad_yx = grad_v(0);
+      grad_yy = grad_v(1);
+
+      trace += Sij_yy / 3.0;
+
+      if (_dim >= 3)
+      {
+        const auto & grad_w = (*_w_var).gradient(current_argument, state);
+
+        Sij_xz = grad_u(2) + grad_w(0);
+        Sij_yz = grad_v(2) + grad_w(1);
+        Sij_zz = 2.0 * grad_w(2);
+
+        grad_xz = grad_u(2);
+        grad_yz = grad_v(2);
+        grad_zx = grad_w(0);
+        grad_zy = grad_w(1);
+        grad_zz = grad_w(2);
+
+        trace += Sij_zz / 3.0;
+      }
+    }
+
+    symmetric_strain_tensor_norm =
+        std::sqrt((Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz +
+                  Sij_xy * grad_yx + (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz +
+                  Sij_xz * grad_zx + Sij_yz * grad_zy + (Sij_zz - trace) * grad_zz);
+
+        // Future work:
     if (wall_bounded)
     {
-      // FUTURE WORK : Computation of S in the near wall region.
-      // Below are potential useful lines of code.
 
-      // const auto & elem_distances = _dist[&elem];
-      // const auto min_wall_distance_iterator =
-      //     (std::min_element(elem_distances.begin(), elem_distances.end()));
-      // const auto min_wall_dist = *min_wall_distance_iterator;
+      const auto & elem_distances = _dist[&elem];
+      const auto min_wall_distance_iterator =
+          (std::min_element(elem_distances.begin(), elem_distances.end()));
+      const auto min_wall_dist = *min_wall_distance_iterator;
       // const size_t minIndex = std::distance(elem_distances.begin(), min_wall_distance_iterator);
       // const auto loc_normal = _face_infos[&elem][minIndex]->normal();
 
-      // // Getting y_plus
-      // ADRealVectorValue velocity(_u_var(current_argument, state));
-      // if (_v_var)
-      //   velocity(1) = (*_v_var)(current_argument, state);
-      // if (_w_var)
-      //   velocity(2) = (*_w_var)(current_argument, state);
+      ADReal y_plus;
+      y_plus = std::pow(_C_mu, 0.25) * min_wall_dist * std::sqrt(TKE) * rho / mu;
 
-      // // Compute the velocity and direction of the velocity component that is parallel to the wall
-      // const ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
-
-      // ADReal y_plus;
-      // ADReal mu_wall;
-      // ADReal u_tau_2;
-
-      // // Add an if for neq or eq in the future.
-      // y_plus = std::pow(_C_mu, 0.25) * min_wall_dist * std::sqrt(TKE) * rho / mu;
-
-      // mu_wall = mu * (NS::von_karman_constant * y_plus /
-      //                 std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
-      // u_tau_2 = std::pow(_C_mu, 0.5) * TKE;
-      // const auto S = mu / mu_wall * parallel_speed / min_wall_dist; //(rho * u_tau)
-      // // /
-      // //                //mu; //  // mu_wall / (rho * std::pow(u_tau, 2)); // modify in the future
-      // symmetric_strain_tensor_norm = S;
-    }
-    else
-    {
-      // ***** Computing shear strain rate ***** //
-      // *************************************** //
-      // Computing wall scaling
-      const auto & grad_u = _u_var.gradient(current_argument, state);
-      const auto Sij_xx = 2.0 * grad_u(0);
-      ADReal Sij_xy = 0.0;
-      ADReal Sij_xz = 0.0;
-      ADReal Sij_yy = 0.0;
-      ADReal Sij_yz = 0.0;
-      ADReal Sij_zz = 0.0;
-
-      const auto grad_xx = grad_u(0);
-      ADReal grad_xy = 0.0;
-      ADReal grad_xz = 0.0;
-      ADReal grad_yx = 0.0;
-      ADReal grad_yy = 0.0;
-      ADReal grad_yz = 0.0;
-      ADReal grad_zx = 0.0;
-      ADReal grad_zy = 0.0;
-      ADReal grad_zz = 0.0;
-
-      auto trace = Sij_xx / 3.0;
-
-      if (_dim >= 2)
+      ADReal S;
+      if (y_plus >= 11.225)
       {
-        const auto & grad_v = (*_v_var).gradient(current_argument, state);
-        Sij_xy = grad_u(1) + grad_v(0);
-        Sij_yy = 2.0 * grad_v(1);
 
-        grad_xy = grad_u(1);
-        grad_yx = grad_v(0);
-        grad_yy = grad_v(1);
+        ADReal u_tau;
+        u_tau = std::sqrt(std::sqrt(_C_mu) * TKE);
+        S = u_tau / (NS::von_karman_constant * min_wall_dist); //(rho * u_tau)
+        symmetric_strain_tensor_norm = S;
+        // // // Getting y_plus
+        // ADRealVectorValue velocity(_u_var(current_argument, state));
+        // if (_v_var)
+        //   velocity(1) = (*_v_var)(current_argument, state);
+        // if (_w_var)
+        //   velocity(2) = (*_w_var)(current_argument, state);
 
-        trace += Sij_yy / 3.0;
-
-        if (_dim >= 3)
-        {
-          const auto & grad_w = (*_w_var).gradient(current_argument, state);
-
-          Sij_xz = grad_u(2) + grad_w(0);
-          Sij_yz = grad_v(2) + grad_w(1);
-          Sij_zz = 2.0 * grad_w(2);
-
-          grad_xz = grad_u(2);
-          grad_yz = grad_v(2);
-          grad_zx = grad_w(0);
-          grad_zy = grad_w(1);
-          grad_zz = grad_w(2);
-
-          trace += Sij_zz / 3.0;
-        }
+        // // // Compute the velocity and direction of the velocity component that is parallel to the wall
+        // const ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
+        // S = parallel_speed / min_wall_dist;
       }
-
-      symmetric_strain_tensor_norm =
-          std::sqrt((Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz +
-                    Sij_xy * grad_yx + (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz +
-                    Sij_xz * grad_zx + Sij_yz * grad_zy + (Sij_zz - trace) * grad_zz);
     }
-    // Future work ends here.
-    // *************************************** //
 
     // Low-Re modification
     ADReal alpha_star(1.0);
@@ -310,11 +299,11 @@ kOmegaSSTViscosityAux::computeValue()
 
     // Limited time scale
     ADReal T;
-    if (wall_bounded)
-      T = alpha_star / _omega(current_argument, old_state);
-    else
-      T = std::min(alpha_star / _omega(current_argument, old_state),
-                   _a_1 / symmetric_strain_tensor_norm / _F2(current_argument, state));
+    // if (wall_bounded)
+    //   T = alpha_star / _omega(current_argument, old_state);
+    // else
+    T = std::min(alpha_star / _omega(current_argument, old_state),
+                  _a_1 / symmetric_strain_tensor_norm / _F2(current_argument, state));
 
     // Dynamic turbulent viscosity
     mu_t = std::max((rho * TKE * T).value(), NS::mu_t_low_limit);
