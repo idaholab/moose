@@ -13,6 +13,7 @@
 #include "FlowChannelBase.h"
 #include "SlopeReconstruction1DInterface.h"
 #include "PhysicsFlowBoundary.h"
+#include "THMMesh.h"
 
 #include "Function.h"
 
@@ -56,7 +57,7 @@ registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_postproce
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_aux_variable");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_aux_kernel");
 registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "add_user_object");
-registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "THMPhysics:change_1D_mesh_info");
+registerMooseAction("ThermalHydraulicsApp", THMWCNSFVFlowPhysics, "THMPhysics:change_1D_mesh_info");
 
 InputParameters
 THMWCNSFVFlowPhysics::validParams()
@@ -496,33 +497,61 @@ THMWCNSFVFlowPhysics::changeMeshFaceAndElemInfo()
   // custom porosity functors. This works so I will keep it around. It would
   // also be helpful when debugging the porosity functors
 
+  // Note: we change here
+  // - the flux size on every face for FVFluxBC / Kernels (by changing the area)
+  // - the gradient orientations! grad_P is now always aligned with 'x'
+  // - the velocity * normal product on outer boundaries for outflow BCs. Always aligned.
+
+  // Need to work on THM mesh (do I?)
+  auto & thm_mesh = static_cast<THMMesh &>(_sim->mesh());
+
   // Loop on flow channels
   for (const auto flow_channel : _flow_channels)
   {
     const auto & blocks = flow_channel->getSubdomainNames();
     const auto & channel_area =
         getProblem().getFunction(flow_channel->getParam<FunctionName>("A"), 0);
+    const auto & channel_orientation = flow_channel->getParam<RealVectorValue>("orientation");
 
     for (const auto & block : blocks)
     {
-      const auto block_id = _mesh->getSubdomainID(block);
+      const auto block_id = thm_mesh.getSubdomainID(block);
 
       // Loop on elements in the flow channel
-      for (const auto & elem : _mesh->getMesh().active_local_subdomain_elements_ptr_range(block_id))
+      for (const auto elem : thm_mesh.getMesh().active_local_subdomain_elements_ptr_range(block_id))
       {
         const auto centroid = elem->true_centroid();
         // Fix element info
-        ElemInfo & elem_info = const_cast<ElemInfo &>(_mesh->elemInfo(elem->id()));
+        ElemInfo & elem_info = const_cast<ElemInfo &>(thm_mesh.elemInfo(elem->id()));
         elem_info.volumeRef() = channel_area.value(0, centroid) * elem->hmax();
 
+        // Fix centroid
+        elem_info.centroid() = elem_info.centroid().norm() * RealVectorValue(1, 0, 0);
+
         // Fix face infos attached to the element
-        for (const auto & side : elem->side_index_range())
+        for (const auto side : elem->side_index_range())
         {
-          FaceInfo * fi = const_cast<FaceInfo *>(_mesh->faceInfo(elem, side));
+          FaceInfo * fi = const_cast<FaceInfo *>(thm_mesh.faceInfo(elem, side));
+
+          if (!fi)
+            continue;
+
           // Channel area for all faces along the channel
           fi->faceArea() = channel_area.value(0, centroid);
           // Channel is always aligned with vel_x as vel_x follows the channel
-          fi->normal() = {1, 0, 0};
+          // Distinguish between faces aligned with the orientation and not
+          if (fi->normal() * channel_orientation > 0)
+            fi->normal() = {1, 0, 0};
+          else
+            fi->normal() = {-1, 0, 0};
+
+          // Change all other quantities (more hacking)
+          fi->dCN() = fi->dCN().norm() * fi->normal();
+          fi->eCN() = fi->normal();
+
+          // Note:
+          // we did not change any of the centroids, neither element nor face.
+          fi->faceCentroid() = fi->faceCentroid().norm() * RealVectorValue(1, 0, 0);
         }
       }
     }
