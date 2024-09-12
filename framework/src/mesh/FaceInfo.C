@@ -38,6 +38,12 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_t
 
   _face_area = face->volume();
   _face_centroid = face->vertex_average();
+
+  if (dim == 1)
+  {
+    const auto dir = _face_centroid - _elem_info->elem()->true_centroid();
+    _normal = dir / dir.norm();
+  }
 }
 
 void

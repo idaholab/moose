@@ -34,6 +34,7 @@ public:
   const Elem * elem() const { return _elem; }
   Real volume() const { return _volume; }
   Real & volumeRef() { return _volume; }
+  Point & centroid() { return _centroid; }
   const Point & centroid() const { return _centroid; }
   Real coordFactor() const { return _coord_transform_factor; }
   Real & coordFactor() { return _coord_transform_factor; }

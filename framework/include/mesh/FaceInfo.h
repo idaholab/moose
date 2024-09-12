@@ -69,6 +69,7 @@ public:
   const Point & normal() const { return _normal; }
 
   /// Returns the coordinates of the face centroid.
+  Point & faceCentroid() { return _face_centroid; }
   const Point & faceCentroid() const { return _face_centroid; }
 
   /// Returns the skewness-correction vector (vector between the approximate and real face
@@ -136,6 +137,7 @@ public:
    * @return the distance vector drawn from centroid C to N, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
    */
+  Point & dCN() { return _d_cn; }
   const Point & dCN() const { return _d_cn; }
 
   /**
@@ -149,6 +151,7 @@ public:
    * MOOSE implementation, the normalized (e.g. unit) distance vector obtained from subtracting the
    * element centroid from the neighbor centroid
    */
+  Point & eCN() { return _e_cn; }
   const Point & eCN() const { return _e_cn; }
 
   /**
