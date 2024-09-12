@@ -35,8 +35,6 @@
       [all]
         fp = fp
         velocity_interpolation = 'average'
-
-        dynamic_viscosity = 0
       []
     []
   []
