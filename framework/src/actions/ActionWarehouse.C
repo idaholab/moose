@@ -344,6 +344,7 @@ ActionWarehouse::executeAllActions()
   for (const auto & task : _ordered_names)
   {
     executeActionsWithAction(task);
+    std::scoped_lock lock(_completed_tasks_mutex);
     _completed_tasks.insert(task);
     if (_final_task != "" && task == _final_task)
       break;
@@ -468,5 +469,6 @@ ActionWarehouse::isTaskComplete(const std::string & task) const
 {
   if (!hasTask(task))
     mooseError("\"", task, "\" is not a registered task.");
+  std::scoped_lock lock(_completed_tasks_mutex);
   return _completed_tasks.count(task);
 }

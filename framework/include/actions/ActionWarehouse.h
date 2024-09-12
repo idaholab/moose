@@ -367,4 +367,7 @@ private:
   std::string _final_task;
 
   const std::list<Action *> _empty_action_list;
+
+  /// Mutex for preventing read/write races for _completed_tasks
+  mutable std::mutex _completed_tasks_mutex;
 };
