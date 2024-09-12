@@ -859,3 +859,49 @@ MooseVariableFE<OutputType>::setActiveTags(const std::set<TagID> & vtags)
   _neighbor_data->setActiveTags(vtags);
   _lower_data->setActiveTags(vtags);
 }
+
+// Declare all the specializations, as the template specialization declarations below must know
+template <>
+InputParameters MooseVariableFE<Real>::validParams();
+template <>
+InputParameters MooseVariableFE<RealVectorValue>::validParams();
+template <>
+InputParameters MooseVariableFE<RealEigenVector>::validParams();
+template <>
+RealEigenVector
+MooseVariableFE<RealEigenVector>::getValue(const Elem * elem,
+                                           const std::vector<std::vector<Real>> & phi) const;
+template <>
+RealVectorArrayValue MooseVariableFE<RealEigenVector>::getGradient(
+    const Elem * elem, const std::vector<std::vector<RealVectorValue>> & grad_phi) const;
+template <>
+void MooseVariableFE<RealEigenVector>::evaluateOnElement(const ElemQpArg &,
+                                                         const StateArg &,
+                                                         bool) const;
+template <>
+void MooseVariableFE<RealEigenVector>::evaluateOnElementSide(const ElemSideQpArg &,
+                                                             const StateArg &,
+                                                             bool) const;
+template <>
+typename MooseVariableFE<RealEigenVector>::ValueType
+MooseVariableFE<RealEigenVector>::evaluate(const ElemQpArg &, const StateArg &) const;
+template <>
+typename MooseVariableFE<RealEigenVector>::ValueType
+MooseVariableFE<RealEigenVector>::evaluate(const ElemSideQpArg &, const StateArg &) const;
+template <>
+typename MooseVariableFE<RealEigenVector>::GradientType
+MooseVariableFE<RealEigenVector>::evaluateGradient(const ElemQpArg &, const StateArg &) const;
+template <>
+typename MooseVariableFE<RealEigenVector>::GradientType
+MooseVariableFE<RealEigenVector>::evaluateGradient(const ElemSideQpArg &, const StateArg &) const;
+template <>
+typename MooseVariableFE<RealEigenVector>::DotType
+MooseVariableFE<RealEigenVector>::evaluateDot(const ElemQpArg &, const StateArg &) const;
+template <>
+typename MooseVariableFE<RealEigenVector>::DotType
+MooseVariableFE<RealEigenVector>::evaluateDot(const ElemSideQpArg &, const StateArg &) const;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MooseVariableFE<Real>;
+extern template class MooseVariableFE<RealVectorValue>;
+extern template class MooseVariableFE<RealEigenVector>;

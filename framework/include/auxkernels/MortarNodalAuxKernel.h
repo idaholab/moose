@@ -84,3 +84,7 @@ private:
 
 typedef MortarNodalAuxKernelTempl<Real> MortarNodalAuxKernel;
 typedef MortarNodalAuxKernelTempl<RealVectorValue> VectorMortarNodalAuxKernel;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MortarNodalAuxKernelTempl<Real>;
+extern template class MortarNodalAuxKernelTempl<RealVectorValue>;

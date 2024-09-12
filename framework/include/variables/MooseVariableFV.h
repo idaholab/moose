@@ -841,5 +841,13 @@ MooseVariableFV<OutputType>::lowerDError() const
   mooseError("Lower dimensional element support not implemented for finite volume variables");
 }
 
+// Declare all the specializations, as the template specialization declaration below must know
 template <>
 ADReal MooseVariableFV<Real>::evaluateDot(const ElemArg & elem, const StateArg & state) const;
+template <>
+ADReal MooseVariableFV<Real>::evaluateDot(const FaceArg & elem_arg, const StateArg & state) const;
+template <>
+ADReal MooseVariableFV<Real>::evaluateDot(const ElemQpArg & elem_arg, const StateArg & state) const;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MooseVariableFV<Real>;
