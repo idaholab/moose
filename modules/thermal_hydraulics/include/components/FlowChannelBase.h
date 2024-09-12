@@ -184,6 +184,12 @@ public:
    */
   std::shared_ptr<ClosuresBase> getClosures() const { return _closures; }
 
+  /// Get the name of the heat transfer coefficient
+  virtual const std::vector<MaterialPropertyName> & getWallHeatTransferCoefficientNames() const
+  {
+    mooseError("Unimplemented");
+  };
+
 protected:
   virtual std::shared_ptr<FlowModel> buildFlowModel() = 0;
   virtual void init() override;

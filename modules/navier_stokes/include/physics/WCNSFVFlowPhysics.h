@@ -15,7 +15,7 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes mass and momentum equations
  */
-class WCNSFVFlowPhysics final : public NavierStokesPhysicsBase
+class WCNSFVFlowPhysics : public NavierStokesPhysicsBase
 {
 public:
   static InputParameters validParams();
@@ -67,16 +67,51 @@ public:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
 protected:
-  void initializePhysicsAdditional() override;
-  void actOnAdditionalTasks() override;
+  virtual void initializePhysicsAdditional() override;
+  virtual void actOnAdditionalTasks() override;
+
+  // Used by derived THMWCNSFVFlowPhysics
+  // TODO: make sure list is minimal
+  virtual void addNonlinearVariables() override;
+  virtual void addInitialConditions() override;
+  virtual void addFVKernels() override;
+  virtual void addFVBCs() override;
+  virtual void addMaterials() override;
+  virtual void addUserObjects() override;
+
+  /*
+   * Add an inlet
+   * @param boundary_name inlet boundary to add
+   * @param inlet_type type of the inlet boundary condition
+   * @param inlet_functor functor providing the flux values for the boundary conditions
+   */
+  void addInletBoundary(const BoundaryName & boundary_name,
+                        const MooseEnum & inlet_type,
+                        const MooseFunctorName & inlet_functor);
+
+  /*
+   * Add an outlet
+   * @param boundary_name outlet boundary to add
+   * @param outlet_type type of the outlet boundary condition
+   * @param outlet_functor functor providing the flux values for the boundary conditions
+   */
+  void addOutletBoundary(const BoundaryName & boundary_name,
+                         const MooseEnum & outlet_type,
+                         const MooseFunctorName & outlet_functor);
+
+  /*
+   * Add a friction zone
+   * @param block_name the name of the block to add a friction term in
+   * @param friction_type the friction model (Darcy or Forchheimer)
+   * @param friction_functors the friction coefficient(s)
+   */
+  void addFrictionRegion(const std::vector<SubdomainName> & block_names,
+                         const std::vector<std::string> & friction_types,
+                         const std::vector<std::string> & friction_functors);
+
+  void addFrictionFunctorMaterials();
 
 private:
-  void addNonlinearVariables() override;
-  void addInitialConditions() override;
-  void addFVKernels() override;
-  void addFVBCs() override;
-  void addMaterials() override;
-  void addUserObjects() override;
   void addCorrectors() override;
   void addPostprocessors() override;
 
@@ -135,6 +170,10 @@ private:
       return false;
   }
 
+  /// Return the oriented gravity vector for the given component
+  /// This is useful if the flow region is rotated and we are solving in its local frame of reference
+  virtual RealVectorValue getLocalGravityVector(const SubdomainName & block) const;
+
   /// Find the turbulence physics
   const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
 
@@ -176,9 +215,9 @@ private:
   const WCNSFVTurbulencePhysics * _turbulence_physics;
 
   /// Boundaries with a flow inlet specified on them
-  const std::vector<BoundaryName> _inlet_boundaries;
+  std::vector<BoundaryName> _inlet_boundaries;
   /// Boundaries with a flow outlet specified on them
-  const std::vector<BoundaryName> _outlet_boundaries;
+  std::vector<BoundaryName> _outlet_boundaries;
   /// Boundaries which define a wall (slip/noslip/etc.)
   const std::vector<BoundaryName> _wall_boundaries;
 

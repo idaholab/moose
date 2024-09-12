@@ -25,4 +25,13 @@ public:
   static InputParameters commonFluidEnergyEquationParams();
   static InputParameters commonScalarFieldAdvectionParams();
   static InputParameters commonTurbulenceParams();
+
+  static std::string getValidMomentumInletTypes()
+  {
+    return "fixed-velocity flux-velocity flux-mass fixed-pressure";
+  }
+  static std::string getValidMomentumOutletTypes()
+  {
+    return "fixed-pressure zero-gradient fixed-pressure-zero-gradient";
+  }
 };

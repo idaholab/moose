@@ -48,6 +48,7 @@ RhieChowInterpolatorBase::validParams()
   // Avoid uninitialized residual objects
   params.suppressParameter<bool>("force_preic");
 
+  params.addParam<unsigned int>("dimension", "Dimension of the flow problem");
   params.addRequiredParam<VariableName>(NS::pressure, "The pressure variable.");
   params.addRequiredParam<VariableName>("u", "The x-component of velocity");
   params.addParam<VariableName>("v", "The y-component of velocity");
@@ -70,7 +71,8 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     ADFunctorInterface(this),
     _moose_mesh(UserObject::_subproblem.mesh()),
     _mesh(_moose_mesh.getMesh()),
-    _dim(blocksMaxDimension()),
+    _dim(isParamSetByUser("dimension") ? getParam<unsigned int>("dimension")
+                                       : blocksMaxDimension()),
     _p(dynamic_cast<INSFVPressureVariable *>(
         &UserObject::_subproblem.getVariable(0, getParam<VariableName>(NS::pressure)))),
     _u(dynamic_cast<INSFVVelocityVariable *>(

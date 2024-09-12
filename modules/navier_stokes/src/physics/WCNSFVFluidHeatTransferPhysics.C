@@ -64,7 +64,8 @@ WCNSFVFluidHeatTransferPhysics::validParams()
 }
 
 WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters)
-  : NavierStokesPhysicsBase(parameters),
+  : PhysicsBase(parameters),
+    NavierStokesPhysicsBase(parameters),
     WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
     _has_energy_equation(
         isParamValid("add_energy_equation")

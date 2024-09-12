@@ -19,6 +19,9 @@ class Component1DJunction : public Component1DConnection
 public:
   Component1DJunction(const InputParameters & params);
 
+  /// Get the processor ids owning the connected flow channels
+  const std::vector<processor_id_type> & getProcIds() const { return _proc_ids; }
+
 protected:
   virtual void setupMesh() override;
   virtual void initSecondary() override;

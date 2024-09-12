@@ -9,7 +9,7 @@
 
 #include "Closures1PhaseBase.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel1Phase.h"
+#include "FlowChannelBase.h"
 
 InputParameters
 Closures1PhaseBase::validParams()
@@ -21,7 +21,7 @@ Closures1PhaseBase::validParams()
 Closures1PhaseBase::Closures1PhaseBase(const InputParameters & params) : ClosuresBase(params) {}
 
 void
-Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel1Phase & flow_channel) const
+Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannelBase & flow_channel) const
 {
   const FunctionName & f_D_fn_name = flow_channel.getParam<FunctionName>("f");
   flow_channel.makeFunctionControllableIfConstant(f_D_fn_name, "f");
@@ -35,14 +35,14 @@ Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel1Phase & fl
 }
 
 void
-Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannel1Phase & flow_channel) const
+Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannelBase & flow_channel) const
 {
   const std::string class_name = "ADAverageWallTemperature3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
   params.set<std::vector<VariableName>>("T_wall_sources") = flow_channel.getWallTemperatureNames();
   params.set<std::vector<MaterialPropertyName>>("Hw_sources") =
-      flow_channel.getWallHTCNames1Phase();
+      flow_channel.getWallHeatTransferCoefficientNames();
   params.set<std::vector<VariableName>>("P_hf_sources") = flow_channel.getHeatedPerimeterNames();
   params.set<std::vector<VariableName>>("P_hf_total") = {FlowModel::HEAT_FLUX_PERIMETER};
   params.set<MaterialPropertyName>("Hw_average") =

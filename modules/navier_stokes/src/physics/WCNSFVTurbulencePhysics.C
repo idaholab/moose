@@ -71,7 +71,8 @@ WCNSFVTurbulencePhysics::validParams()
 }
 
 WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & parameters)
-  : NavierStokesPhysicsBase(parameters),
+  : PhysicsBase(parameters),
+    NavierStokesPhysicsBase(parameters),
     WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
     _turbulence_model(getParam<MooseEnum>("turbulence_handling")),
     _mixing_length_name(getParam<AuxVariableName>("mixing_length_name")),

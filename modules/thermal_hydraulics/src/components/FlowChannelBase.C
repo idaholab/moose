@@ -162,14 +162,12 @@ FlowChannelBase::init()
 
   _flow_model = buildFlowModel();
   if (_flow_model)
-  {
     _flow_model->init();
 
-    if (getTHMProblem().hasClosures(_closures_name))
-      _closures = getTHMProblem().getClosures(_closures_name);
-    else
-      _closures = buildClosures();
-  }
+  if (getTHMProblem().hasClosures(_closures_name))
+    _closures = getTHMProblem().getClosures(_closures_name);
+  else
+    _closures = buildClosures();
 }
 
 std::shared_ptr<ClosuresBase>
@@ -230,7 +228,8 @@ FlowChannelBase::addVariables()
   // generated in initSecondary() of heat transfer components
   getHeatTransferVariableNames();
 
-  _flow_model->addVariables();
+  if (_flow_model)
+    _flow_model->addVariables();
 
   // total heat flux perimeter
   if (_n_heat_transfer_connections > 1 && !_app.isRestarting())
@@ -243,7 +242,8 @@ FlowChannelBase::addVariables()
     getTHMProblem().addSimInitialCondition(class_name, genName(name(), "P_hf_ic"), params);
   }
 
-  _flow_model->addInitialConditions();
+  if (_flow_model)
+    _flow_model->addInitialConditions();
 }
 
 void
@@ -280,6 +280,7 @@ FlowChannelBase::addCommonObjects()
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<std::vector<VariableName>>("v") = {FlowModel::AREA_LINEAR};
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
+      params.set<bool>("warn_projection_loss") = false;
       const std::string aux_kernel_name = genName(name(), "area_aux");
       getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
       makeFunctionControllableIfConstant(_area_function, "Area");
@@ -333,7 +334,8 @@ FlowChannelBase::addMooseObjects()
     }
   }
 
-  _flow_model->addMooseObjects();
+  if (_flow_model)
+    _flow_model->addMooseObjects();
   _closures->addMooseObjectsFlowChannel(*this);
 }
 

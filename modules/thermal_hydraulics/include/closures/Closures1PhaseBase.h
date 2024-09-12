@@ -11,7 +11,7 @@
 
 #include "ClosuresBase.h"
 
-class FlowChannel1Phase;
+class FlowChannelBase;
 
 /**
  * Base class for 1-phase closures
@@ -30,14 +30,14 @@ protected:
    *
    * @param[in] flow_channel   Flow channel component
    */
-  void addWallFrictionFunctionMaterial(const FlowChannel1Phase & flow_channel) const;
+  void addWallFrictionFunctionMaterial(const FlowChannelBase & flow_channel) const;
 
   /**
    * Adds average wall temperature material
    *
    * @param[in] flow_channel   Flow channel component
    */
-  void addAverageWallTemperatureMaterial(const FlowChannel1Phase & flow_channel) const;
+  void addAverageWallTemperatureMaterial(const FlowChannelBase & flow_channel) const;
 
 public:
   static InputParameters validParams();

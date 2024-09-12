@@ -192,6 +192,18 @@ PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
 }
 
 void
+PhysicsBase::removeBlocks(const std::vector<SubdomainName> & blocks)
+{
+  if (blocks.size())
+  {
+    for (const auto & block : blocks)
+      _blocks.erase(std::remove(_blocks.begin(), _blocks.end(), block), _blocks.end());
+    _dim = _mesh->getBlocksMaxDimension(_blocks);
+  }
+}
+
+
+void
 PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   InputParameters params = getAdditionalRMParams();

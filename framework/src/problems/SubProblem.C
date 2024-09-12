@@ -1229,6 +1229,12 @@ SubProblem::hasFunctor(const std::string & name, const THREAD_ID tid) const
   return (functors.find("wraps_" + name) != functors.end());
 }
 
+bool
+SubProblem::isAuxiliaryVariable(const std::string & name) const
+{
+  return systemBaseAuxiliary().hasVariable(name);
+}
+
 Moose::CoordinateSystemType
 SubProblem::getCoordSystem(SubdomainID sid) const
 {

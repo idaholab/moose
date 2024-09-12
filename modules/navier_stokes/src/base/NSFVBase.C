@@ -131,12 +131,12 @@ InputParameters
 NSFVBase::commonMomentumBoundaryTypesParams()
 {
   InputParameters params = emptyInputParameters();
-  MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass fixed-pressure");
+  MultiMooseEnum mom_inlet_types(getValidMomentumInletTypes());
   params.addParam<MultiMooseEnum>("momentum_inlet_types",
                                   mom_inlet_types,
                                   "Types of inlet boundaries for the momentum equation.");
 
-  MultiMooseEnum mom_outlet_types("fixed-pressure zero-gradient fixed-pressure-zero-gradient");
+  MultiMooseEnum mom_outlet_types(getValidMomentumOutletTypes());
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
                                   mom_outlet_types,
                                   "Types of outlet boundaries for the momentum equation");

@@ -19,6 +19,9 @@ class Component1DBoundary : public Component1DConnection
 public:
   Component1DBoundary(const InputParameters & params);
 
+  /// Get the normal to the component
+  Real getNormal() const { return _normal; }
+
 protected:
   virtual void setupMesh() override;
   virtual void check() const override;
