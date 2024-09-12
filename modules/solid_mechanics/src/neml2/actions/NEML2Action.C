@@ -126,6 +126,7 @@ NEML2Action::act()
     setupParameterMappings(model);
     setupOutputMappings(model);
     setupDerivativeMappings(model);
+    setupParameterDerivativeMappings(model);
 
     // MOOSEToNEML2 input gatherers
     std::vector<UserObjectName> gatherers;
@@ -257,6 +258,10 @@ NEML2Action::act()
               _export_output_targets[output.moose.name];
         _problem->addMaterial(obj_type, obj_name, obj_params);
       }
+      else
+        paramError("moose_output_types",
+                   "Unsupported type corresponding to the moose output ",
+                   output.moose.name);
     }
 
     // NEML2ToMOOSE derivative retrievers
@@ -283,6 +288,40 @@ NEML2Action::act()
               _export_output_targets[deriv.moose.name];
         _problem->addMaterial(obj_type, obj_name, obj_params);
       }
+      else
+        paramError("moose_derivative_types",
+                   "Unsupported type corresponding to the moose derivative ",
+                   deriv.moose.name);
+    }
+
+    // NEML2ToMOOSE parameter derivative retrievers
+    for (const auto & param_deriv : _param_derivs)
+    {
+      if (param_deriv.moose.type == MOOSEIOType::MATERIAL)
+      {
+        auto obj_name = "__neml2(d(" + neml2::utils::stringify(param_deriv.neml2.y.name) + ")/d(" +
+                        param_deriv.neml2.x.name + "))->moose(" + param_deriv.moose.name + ")_" +
+                        name() + "__";
+        auto obj_type = "NEML2To" +
+                        tensor_type_map.at(deriv_type_map.at(
+                            {param_deriv.neml2.y.type, param_deriv.neml2.x.type})) +
+                        "MOOSEMaterialProperty";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<UserObjectName>("execute_neml2_model_uo") = _executor_name;
+        obj_params.set<MaterialPropertyName>("moose_material_property") = param_deriv.moose.name;
+        obj_params.set<std::string>("neml2_variable") =
+            neml2::utils::stringify(param_deriv.neml2.y.name);
+        obj_params.set<std::string>("neml2_parameter_derivative") = param_deriv.neml2.x.name;
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        if (_export_output_targets.count(param_deriv.moose.name))
+          obj_params.set<std::vector<OutputName>>("outputs") =
+              _export_output_targets[param_deriv.moose.name];
+        _problem->addMaterial(obj_type, obj_name, obj_params);
+      }
+      else
+        paramError("moose_parameter_derivative_types",
+                   "Unsupported type corresponding to the moose parameter derivative ",
+                   param_deriv.moose.name);
     }
   }
 }
@@ -362,9 +401,11 @@ NEML2Action::setupDerivativeMappings(const neml2::Model & model)
   const auto neml2_derivs = getParam<std::vector<std::vector<std::string>>>("neml2_derivatives");
 
   if (moose_derivs.size() != moose_deriv_types.size())
-    paramError("moose_derivs", "moose_derivs must have the same length as moose_deriv_types");
+    paramError("moose_derivatives",
+               "moose_derivatives must have the same length as moose_derivative_types");
   if (moose_derivs.size() != neml2_derivs.size())
-    paramError("moose_derivs", "moose_derivs must have the same length as neml2_derivs");
+    paramError("moose_derivatives",
+               "moose_derivatives must have the same length as neml2_derivatives");
 
   for (auto i : index_range(moose_derivs))
   {
@@ -376,6 +417,39 @@ NEML2Action::setupDerivativeMappings(const neml2::Model & model)
     _derivs.push_back({
         {moose_derivs[i], moose_deriv_types[i]},
         {{neml2_y, model.output_type(neml2_y)}, {neml2_x, model.input_type(neml2_x)}},
+    });
+  }
+}
+
+void
+NEML2Action::setupParameterDerivativeMappings(const neml2::Model & model)
+{
+  const auto moose_param_deriv_types =
+      getParam<MultiMooseEnum>("moose_parameter_derivative_types").getSetValueIDs<MOOSEIOType>();
+  const auto moose_param_derivs = getParam<std::vector<std::string>>("moose_parameter_derivatives");
+  const auto neml2_param_derivs =
+      getParam<std::vector<std::vector<std::string>>>("neml2_parameter_derivatives");
+
+  if (moose_param_derivs.size() != moose_param_deriv_types.size())
+    paramError("moose_parameter_derivatives",
+               "moose_parameter_derivatives must have the same length as "
+               "moose_parameter_derivative_types");
+  if (moose_param_derivs.size() != neml2_param_derivs.size())
+    paramError(
+        "moose_parameter_derivatives",
+        "moose_parameter_derivatives must have the same length as neml2_parameter_derivatives");
+
+  for (auto i : index_range(moose_param_derivs))
+  {
+    if (neml2_param_derivs[i].size() != 2)
+      paramError("neml2_parameter_derivatives",
+                 "The length of each pair in neml2_parameter_derivatives must be 2.");
+
+    auto neml2_y = neml2::utils::parse<neml2::VariableName>(neml2_param_derivs[i][0]);
+    auto neml2_x = neml2_param_derivs[i][1];
+    _param_derivs.push_back({
+        {moose_param_derivs[i], moose_param_deriv_types[i]},
+        {{neml2_y, model.output_type(neml2_y)}, {neml2_x, model.get_parameter(neml2_x).type()}},
     });
   }
 }

@@ -82,6 +82,22 @@ NEML2ActionCommon::commonParams()
       NEML2Utils::docstring("List of pairs of NEML2 variables to take derivatives (i.e., first in "
                             "the pair w.r.t. the second in the pair)."));
 
+  // Parameter derivatives
+  params.addParam<MultiMooseEnum>(
+      "moose_parameter_derivative_types",
+      moose_types,
+      NEML2Utils::docstring("MOOSE types used to hold the NEML2 parameter derivatives"));
+  params.addParam<std::vector<std::string>>(
+      "moose_parameter_derivatives",
+      {},
+      NEML2Utils::docstring("List of MOOSE data used to hold the derivative of the material model "
+                            "w.r.t. model parameters."));
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "neml2_parameter_derivatives",
+      {},
+      NEML2Utils::docstring("List of pairs of NEML2 variables to take derivatives (i.e., first in "
+                            "the pair w.r.t. the second in the pair)."));
+
   // Error checking, logging, etc
   params.addParam<std::vector<std::string>>(
       "skip_variables",

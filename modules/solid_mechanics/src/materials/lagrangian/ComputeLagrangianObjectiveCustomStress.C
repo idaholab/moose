@@ -28,10 +28,8 @@ template <bool symmetric>
 ComputeLagrangianObjectiveCustomStressTmpl<symmetric>::ComputeLagrangianObjectiveCustomStressTmpl(
     const InputParameters & parameters)
   : ComputeLagrangianObjectiveStress(parameters),
-    _custom_stress(getMaterialProperty<StressType>(
-        _base_name + getParam<MaterialPropertyName>("custom_small_stress"))),
-    _custom_jacobian(getMaterialProperty<JacobianType>(
-        _base_name + getParam<MaterialPropertyName>("custom_small_jacobian")))
+    _custom_stress(getMaterialProperty<StressType>("custom_small_stress")),
+    _custom_jacobian(getMaterialProperty<JacobianType>("custom_small_jacobian"))
 {
 }
 

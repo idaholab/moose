@@ -79,6 +79,16 @@ protected:
     } neml2;
   };
 
+  struct ParameterDerivativeMapping
+  {
+    const MOOSEIO moose;
+    const struct NEML2Derivative
+    {
+      const NEML2IO y;
+      const NEML2Param x;
+    } neml2;
+  };
+
   /// Set up MOOSE-NEML2 input variable mappings
   void setupInputMappings(const neml2::Model &);
 
@@ -91,6 +101,9 @@ protected:
   /// Set up MOOSE-NEML2 derivative mappings
   void setupDerivativeMappings(const neml2::Model &);
 
+  /// Set up MOOSE-NEML2 parameter derivative mappings
+  void setupParameterDerivativeMappings(const neml2::Model &);
+
   /// MOOSE-NEML2 input variable mappings
   std::vector<VariableMapping> _inputs;
 
@@ -102,6 +115,9 @@ protected:
 
   /// MOOSE-NEML2 derivative mappings
   std::vector<DerivativeMapping> _derivs;
+
+  /// MOOSE-NEML2 parameter derivative mappings
+  std::vector<ParameterDerivativeMapping> _param_derivs;
 
 #endif
   /// Whether to print additional information about the model

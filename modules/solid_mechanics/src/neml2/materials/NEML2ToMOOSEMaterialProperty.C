@@ -39,6 +39,9 @@ NEML2ToMOOSEMaterialProperty<T>::validParams()
   params.addParam<std::string>(
       "neml2_input_derivative",
       "If supplied return the derivative of neml2_variable with respect to this");
+  params.addParam<std::string>(
+      "neml2_parameter_derivative",
+      "If supplied return the derivative of neml2_variable with respect to this");
 
   // provide an optional initialization of the moose property (because we don't really know if it is
   // going to become stateful or not)
@@ -58,8 +61,13 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
                : nullptr),
     _output_view(
         !isParamValid("neml2_input_derivative")
-            ? _execute_neml2_model.getOutputView(
-                  neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_variable")))
+            ? (!isParamValid("neml2_parameter_derivative")
+                   ? _execute_neml2_model.getOutputView(neml2::utils::parse<neml2::VariableName>(
+                         getParam<std::string>("neml2_variable")))
+                   : _execute_neml2_model.getOutputParameterDerivativeView(
+                         neml2::utils::parse<neml2::VariableName>(
+                             getParam<std::string>("neml2_variable")),
+                         getParam<std::string>("neml2_parameter_derivative")))
             : _execute_neml2_model.getOutputDerivativeView(
                   neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_variable")),
                   neml2::utils::parse<neml2::VariableName>(
