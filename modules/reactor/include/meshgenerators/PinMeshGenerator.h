@@ -63,7 +63,7 @@ protected:
   std::string _mesh_geometry;
 
   ///The number of dimensions the mesh is ultimately going to have (2 or 3, declared in the ReactorMeshParams object)
-  int _mesh_dimensions;
+  unsigned int _mesh_dimensions;
 
   ///Whether this mesh should be extruded to 3-D, making it the final structure in the reactor mesh
   const bool _extrude;

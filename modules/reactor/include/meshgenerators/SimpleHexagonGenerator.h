@@ -43,5 +43,5 @@ protected:
   /// Boundary ID of the external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the external boundary
-  const std::string _external_boundary_name;
+  const BoundaryName _external_boundary_name;
 };

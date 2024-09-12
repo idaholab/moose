@@ -16,8 +16,10 @@ ReactorGeometryMeshBuilderBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addParam<bool>(
-      "show_rgmb_metadata", false, "Print out RGMB-related metadata to console output");
+  params.addDeprecatedParam<bool>("show_rgmb_metadata",
+                                  "Print out RGMB-related metadata to console output",
+                                  "This parameter is deprecated. Please use MeshMetaDataReporter "
+                                  "system to print out mesh metadata to JSON output file instead");
   params.addClassDescription("A base class that contains common members and methods for Reactor "
                              "Geometry Mesh Builder mesh generators.");
 
@@ -53,7 +55,7 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
   if (*_reactor_params_mesh)
     mooseError("The reactor_params mesh is not of the correct type");
 
-  if (!hasMeshProperty<int>("mesh_dimensions", _reactor_params) ||
+  if (!hasMeshProperty<unsigned int>("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty<std::string>("mesh_geometry", _reactor_params))
     mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n Please "
                "check that a valid definition and name of ReactorMeshParams has been provided.");
@@ -110,168 +112,6 @@ ReactorGeometryMeshBuilderBase::updateElementBlockNameId(
 }
 
 void
-ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string geometry_type,
-                                                     const std::string mg_name,
-                                                     bool first_function_call)
-{
-  if (first_function_call)
-  {
-    _console << "Global metadata defined using Reactor Geometry Mesh Builder:" << std::endl;
-    printGlobalReactorMetadata();
-  }
-  if (geometry_type == "core")
-  {
-    _console << "Core-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
-             << ":" << std::endl;
-    printCoreMetadata(mg_name, first_function_call);
-  }
-  else if (geometry_type == "assembly")
-  {
-    _console << "Assembly-level metadata defined using Reactor Geometry Mesh Builder for "
-             << mg_name << ":" << std::endl;
-    printAssemblyMetadata(mg_name, first_function_call);
-  }
-  else if (geometry_type == "pin")
-  {
-    _console << "Pin-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
-             << ":" << std::endl;
-    printPinMetadata(mg_name);
-  }
-  if (first_function_call)
-    _console << std::endl;
-}
-
-void
-ReactorGeometryMeshBuilderBase::printCoreMetadata(const std::string mg_name,
-                                                  bool first_function_call)
-{
-  bool has_mesh_periphery = hasMeshProperty<Real>(RGMB::peripheral_ring_radius, mg_name);
-  if (has_mesh_periphery)
-  {
-    printMetadataToConsole<Real>(RGMB::peripheral_ring_radius, mg_name);
-    printMetadataToConsole<subdomain_id_type>(RGMB::peripheral_ring_region_id, mg_name);
-  }
-
-  printMetadataToConsole<std::vector<std::string>>(RGMB::assembly_names, mg_name);
-  print2dMetadataToConsole<int>(RGMB::assembly_lattice, mg_name);
-
-  if (first_function_call)
-  {
-    const auto core_assembly_names =
-        getMeshProperty<std::vector<std::string>>(RGMB::assembly_names, mg_name);
-    for (const auto & assembly_name : core_assembly_names)
-      printReactorMetadata("assembly", assembly_name, false);
-
-    const auto core_pin_names = getMeshProperty<std::vector<std::string>>(RGMB::pin_names, mg_name);
-    for (const auto & pin_name : core_pin_names)
-      printReactorMetadata("pin", pin_name, false);
-  }
-}
-
-void
-ReactorGeometryMeshBuilderBase::printAssemblyMetadata(const std::string mg_name,
-                                                      bool first_function_call)
-{
-  printMetadataToConsole<subdomain_id_type>(RGMB::assembly_type, mg_name);
-  printMetadataToConsole<Real>(RGMB::pitch, mg_name);
-  printMetadataToConsole<bool>(RGMB::is_homogenized, mg_name);
-  printMetadataToConsole<bool>(RGMB::is_single_pin, mg_name);
-  printMetadataToConsole<std::vector<subdomain_id_type>>(RGMB::background_region_id, mg_name);
-
-  const auto duct_halfpitch = getMeshProperty<std::vector<Real>>(RGMB::duct_halfpitches, mg_name);
-  if (duct_halfpitch.size() > 0)
-  {
-    printMetadataToConsole<std::vector<Real>>(RGMB::duct_halfpitches, mg_name);
-    print2dMetadataToConsole<subdomain_id_type>(RGMB::duct_region_ids, mg_name);
-  }
-
-  const auto is_single_pin = getMeshProperty<bool>(RGMB::is_single_pin, mg_name);
-  const auto is_homogenized = getMeshProperty<bool>(RGMB::is_homogenized, mg_name);
-
-  // Print metadata specific to assemblies defined as a lattice of pins
-  if (!is_single_pin)
-  {
-    printMetadataToConsole<std::vector<std::string>>(RGMB::pin_names, mg_name);
-    print2dMetadataToConsole<int>(RGMB::pin_lattice, mg_name);
-
-    // Print information about constituent pins if this is the first function call
-    if (first_function_call)
-    {
-      const auto assembly_pin_names =
-          getMeshProperty<std::vector<std::string>>(RGMB::pin_names, mg_name);
-      for (const auto & pin_name : assembly_pin_names)
-        printReactorMetadata("pin", pin_name, false);
-    }
-  }
-  // Print metadata specific to assemblies defined as a single pin
-  else if (!is_homogenized)
-  {
-    const auto ring_radii = getMeshProperty<std::vector<Real>>(RGMB::ring_radii, mg_name);
-    if (ring_radii.size() > 0)
-    {
-      printMetadataToConsole<std::vector<Real>>(RGMB::ring_radii, mg_name);
-      print2dMetadataToConsole<subdomain_id_type>(RGMB::ring_region_ids, mg_name);
-    }
-  }
-}
-
-void
-ReactorGeometryMeshBuilderBase::printPinMetadata(const std::string mg_name)
-{
-  printMetadataToConsole<subdomain_id_type>(RGMB::pin_type, mg_name);
-  printMetadataToConsole<Real>(RGMB::pitch, mg_name);
-
-  const auto ring_radii = getMeshProperty<std::vector<Real>>(RGMB::ring_radii, mg_name);
-  if (ring_radii.size() > 0)
-  {
-    printMetadataToConsole<std::vector<Real>>(RGMB::ring_radii, mg_name);
-    print2dMetadataToConsole<subdomain_id_type>(RGMB::ring_region_ids, mg_name);
-  }
-
-  printMetadataToConsole<std::vector<subdomain_id_type>>(RGMB::background_region_id, mg_name);
-
-  const auto duct_halfpitch = getMeshProperty<std::vector<Real>>(RGMB::duct_halfpitches, mg_name);
-  if (duct_halfpitch.size() > 0)
-  {
-    printMetadataToConsole<std::vector<Real>>(RGMB::duct_halfpitches, mg_name);
-    print2dMetadataToConsole<subdomain_id_type>(RGMB::duct_region_ids, mg_name);
-  }
-}
-
-void
-ReactorGeometryMeshBuilderBase::printGlobalReactorMetadata()
-{
-  printMetadataToConsole<int>(RGMB::mesh_dimensions, _reactor_params);
-  printMetadataToConsole<std::string>(RGMB::mesh_geometry, _reactor_params);
-  const auto mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
-  if (mesh_dimensions == 3)
-  {
-    printMetadataToConsole<std::vector<Real>>(RGMB::axial_mesh_sizes, _reactor_params);
-    printMetadataToConsole<std::vector<unsigned int>>(RGMB::axial_mesh_intervals, _reactor_params);
-  }
-}
-
-template <typename T>
-void
-ReactorGeometryMeshBuilderBase::printMetadataToConsole(const std::string metadata_name,
-                                                       const std::string mg_name)
-{
-  _console << "  " << metadata_name << ": "
-           << Moose::stringify(getMeshProperty<T>(metadata_name, mg_name)) << std::endl;
-}
-
-template <typename T>
-void
-ReactorGeometryMeshBuilderBase::print2dMetadataToConsole(const std::string metadata_name,
-                                                         const std::string mg_name)
-{
-  const auto metadata_value = getMeshProperty<std::vector<std::vector<T>>>(metadata_name, mg_name);
-  _console << "  " << metadata_name << ":" << std::endl;
-  for (const auto & row : metadata_value)
-    _console << "    " << Moose::stringify(row) << std::endl;
-}
-
-void
 ReactorGeometryMeshBuilderBase::addDepletionId(MeshBase & input_mesh,
                                                const MooseEnum & option,
                                                const DepletionIDGenerationLevel generation_level,
@@ -300,8 +140,17 @@ ReactorGeometryMeshBuilderBase::addDepletionId(MeshBase & input_mesh,
       id_names.push_back("pin_type_id");
     else
       paramError("depletion_id_type",
-                 "'assembly_id' or 'assembly_type_id' is not allowd in depletion ID generation at "
+                 "'assembly_id' or 'assembly_type_id' is not allowed in depletion ID generation at "
                  "assembly level");
+  }
+  else if (generation_level == DepletionIDGenerationLevel::Drum)
+  {
+    if (option == "pin_type")
+      id_names.push_back("pin_type_id");
+    else
+      paramError("depletion_id_type",
+                 "Only 'pin_type' is allowed in depletion ID generation at "
+                 "drum level");
   }
   else if (generation_level == DepletionIDGenerationLevel::Pin)
     mooseError("Depletion ID generation is not supported at pin level yet in RGMB");
@@ -317,4 +166,57 @@ ReactorGeometryMeshBuilderBase::addDepletionId(MeshBase & input_mesh,
   const auto depl_id_index = input_mesh.add_elem_integer("depletion_id");
   for (Elem * const elem : input_mesh.active_element_ptr_range())
     elem->set_extra_integer(depl_id_index, depl_ids.at(elem->id()));
+}
+
+MeshGeneratorName
+ReactorGeometryMeshBuilderBase::callExtrusionMeshSubgenerators(
+    const MeshGeneratorName input_mesh_name)
+{
+  std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+  const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
+  const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
+
+  {
+    auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
+
+    params.set<MeshGeneratorName>("input") = input_mesh_name;
+    params.set<Point>("direction") = Point(0, 0, 1);
+    params.set<std::vector<unsigned int>>("num_layers") =
+        getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
+    params.set<std::vector<Real>>("heights") = axial_boundaries;
+    params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
+    params.set<boundary_id_type>("top_boundary") = top_boundary;
+    addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
+  }
+
+  {
+    auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
+
+    params.set<MeshGeneratorName>("input") = name() + "_extruded";
+    params.set<std::vector<BoundaryName>>("old_boundary") = {
+        std::to_string(top_boundary),
+        std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
+    params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
+    addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
+  }
+
+  const MeshGeneratorName output_mesh_name = name() + "_extrudedIDs";
+  {
+    auto params = _app.getFactory().getValidParams("PlaneIDMeshGenerator");
+
+    params.set<MeshGeneratorName>("input") = name() + "_change_plane_name";
+
+    std::vector<Real> plane_heights{0};
+    for (Real z : axial_boundaries)
+      plane_heights.push_back(z + plane_heights.back());
+
+    params.set<std::vector<Real>>("plane_coordinates") = plane_heights;
+
+    std::string plane_id_name = "plane_id";
+    params.set<std::string>("id_name") = "plane_id";
+
+    addMeshSubgenerator("PlaneIDMeshGenerator", output_mesh_name, params);
+  }
+
+  return output_mesh_name;
 }

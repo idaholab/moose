@@ -18,13 +18,6 @@
     exodiff = 'core_rid_as_block_name.e'
     recover = false
   []
-  [square_metadata]
-    requirement = 'The system shall print out reactor-related metadata to console output for a full 3D square core mesh with 3 pin types and 2 assembly types'
-    type = 'RunApp'
-    input = 'core_square.i'
-    cli_args = "Mesh/cmg/show_rgmb_metadata=true"
-    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Square.+axial_mesh_sizes: 1.+axial_mesh_intervals: 1.+Core-level metadata.+cmg.+assembly_names: amg2, amg1.+assembly_lattice:.+1, 0.+0, 1.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin3, pin1, pin2.+pin_lattice:.+0, 1.+1, 2.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 4.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 2'
-  []
   [square_metadata_jsondiff]
     requirement = 'The system shall output reactor-related metadata for a full 3D square core mesh in mesh generation mode'
     type = 'JSONDiff'
@@ -36,7 +29,7 @@
                 Outputs/json_out/file_base=core_square_datadriven_out'
     jsondiff = 'core_square_datadriven_out.json'
     # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
     recover = false
     allow_test_objects = true
   []
@@ -136,14 +129,6 @@
     exodiff = 'core_hex_in.e'
     recover = false
   []
-  [hex_metadata]
-    requirement = 'The system shall print out reactor-related metadata to console output for a 3D hexagonal core mesh with empty lattice positions and explicit block name specification'
-    type = 'RunApp'
-    input = 'core_hex.i'
-    cli_args = "Mesh/cmg/show_rgmb_metadata=true
-                Outputs/file_base=core_hex_in"
-    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Hex.+axial_mesh_sizes: 1, 1.+axial_mesh_intervals: 1, 1.+Core-level metadata.+cmg.+assembly_names: amg1, amg2.+assembly_lattice:.+-1, 1.+1, 0, -1.+-1, 1.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin1, pin3.+pin_lattice:.+0, 0.+0, 1, 0.+0, 0.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 21, 121.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 12, 112.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 32, 132'
-  []
   [hex_metadata_jsondiff]
     requirement = 'The system shall output reactor-related metadata for a full 3D hexagonal core mesh in mesh generation mode'
     type = 'JSONDiff'
@@ -155,7 +140,7 @@
                 Outputs/json_out/file_base=core_hex_datadriven_out'
     jsondiff = 'core_hex_datadriven_out.json'
     # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
     recover = false
     allow_test_objects = true
   []
@@ -234,13 +219,6 @@
     exodiff = 'core_metadata_transfer.e'
     recover = false
   []
-  [hex_metadata_2d]
-    requirement = 'The system shall print out reactor-related metadata to console output for a 2D hexagonal core mesh'
-    type = 'RunApp'
-    input = 'core_hex_2d.i'
-    cli_args = "Mesh/cmg/show_rgmb_metadata=true"
-    expect_out = 'Global metadata.+mesh_dimensions: 2.+mesh_geometry: Hex.+Core-level metadata.+cmg.+peripheral_ring_radius: 7.+peripheral_ring_region_id: 5.+assembly_names: amg1.+assembly_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin1.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2'
-  []
   [hex_metadata_2d_jsondiff]
     requirement = 'The system shall output reactor-related metadata for a 2D hexagonal core mesh in mesh generation mode'
     type = 'JSONDiff'
@@ -252,7 +230,7 @@
                 Outputs/json_out/file_base=core_hex_2d_datadriven_out'
     jsondiff = 'core_hex_2d_datadriven_out.json'
     # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
-    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|name_id_map|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
     recover = false
     allow_test_objects = true
   []
@@ -265,10 +243,12 @@
     recover = false
   []
   [hex_metadata_extra_assemblies]
-    requirement = 'The system shall print out reactor-related metadata to console output for a 3D hexagonal core mesh with extra assemblies not part of core lattice'
-    type = 'RunApp'
+    requirement = 'The system shall output reactor-related metadata for a 3D hexagonal core mesh with extra assemblies not part of core lattice'
+    type = 'JSONDiff'
     input = 'core_hex_extra_assemblies.i'
-    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Hex.+axial_mesh_sizes: 1, 1.+axial_mesh_intervals: 1, 1.+Core-level metadata.+cmg.+assembly_names: amg1, amg2, amg3.+assembly_lattice:.+-1, 1.+1, 0, -1.+-1, 1.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin1, pin3.+pin_lattice:.+0, 0.+0, 1, 0.+0, 0.+Assembly-level metadata.+amg3.+assembly_type: 3.+pin_names: pin1, pin3.+pin_lattice:.+0, 0.+0, 1, 0.+0, 0.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 21, 121.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 12, 112.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 32, 132'
+    jsondiff = core_hex_extra_assemblies_out.json
+    ignored_regex_items = '.*/.*/.*_meta'
+    recover = false
   []
   [ptmg_periphery]
     requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a triangular mesh.'
@@ -338,6 +318,65 @@
     input = 'core_flexible_assembly_stitching_hex.i'
     cli_args = "Mesh/rmp/num_sectors_at_flexible_boundary=3"
     csvdiff = 'core_flexible_assembly_stitching_hex_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [core_stitching_drum_cart]
+    requirement = 'The system shall generate a 3D Cartesian core mesh with heterogeneous and homogeneous assemblies stitched alongside drum structures'
+    type = 'CSVDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_cart.i'
+    csvdiff = 'core_flexible_assembly_stitching_with_drum_cart_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [core_stitching_drum_hex]
+    requirement = 'The system shall generate a 3D hexagonal core mesh with heterogeneous and homogeneous assemblies stitched alongside drum structures'
+    type = 'CSVDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_hex.i'
+    csvdiff = 'core_flexible_assembly_stitching_with_drum_hex_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [core_drum_metadata_jsondiff]
+    requirement = 'The system shall output reactor-related metadata for a full 3D hexagonal core mesh with a drum assembly in mesh generation mode'
+    type = 'JSONDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_hex.i'
+    jsondiff = 'core_flexible_assembly_stitching_with_drum_hex_out.json'
+    # Ignoring data that is only generated when the mesh is actually constructed, to compare with data-driven
+    ignored_regex_items = '.*/.*/.*_meta|flat_side_up|control_drum_angles|control_drum_positions|quad_center_block_id|pin_block_name_map|pin_region_id_map|position_file_name|peripheral_modifier_compatible|pattern_size|.*_trimmability|bypass_meshgen|interface_boundary_ids|interface_boundaries|flexible_assembly_stitching'
+    recover = false
+    allow_test_objects = true
+    mesh_mode = REPLICATED
+  []
+  [core_drum_bypass_meshgen]
+    requirement = 'The system shall output reactor-related metadata for a full 3D hexagonal core mesh with a drum assembly in data driven mode'
+    type = 'JSONDiff'
+    input = 'core_flexible_assembly_stitching_with_drum_hex.i'
+    cli_args = "Mesh/test_rgmb/type=TestReactorGeometryMeshBuilderMeshGenerator
+                Mesh/test_rgmb/input=core
+                Mesh/data_driven_generator=test_rgmb
+                Postprocessors/inactive='area_reg1 area_reg2 area_reg3 area_reg4 area_reg5
+                                         area_reg6 area_reg7 area_reg8 area_reg9'"
+    jsondiff = 'core_flexible_assembly_stitching_with_drum_hex_out.json'
+    allow_test_objects = true
+    recover = false
+  []
+  [drum_depletion_id_pin]
+    requirement = 'The system shall generate pin-wise depletion IDs for a 3D hexagonal core mesh with a control drum'
+    type = 'CSVDiff'
+    input = 'core_with_drum_depletion_id.i'
+    cli_args = "Outputs/file_base=core_with_drum_depletion_id_pin_out"
+    csvdiff = 'core_with_drum_depletion_id_pin_out_region_volumes_0002.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+  [drum_depletion_id_pin_type]
+    requirement = 'The system shall generate pin type-wise depletion IDs for a 3D hexagonal core mesh with a control drum'
+    type = 'CSVDiff'
+    input = 'core_with_drum_depletion_id.i'
+    cli_args = "Mesh/core/depletion_id_type=pin_type
+                Outputs/file_base=core_with_drum_depletion_id_pin_type_out"
+    csvdiff = 'core_with_drum_depletion_id_pin_type_out_region_volumes_0002.csv'
     recover = false
     mesh_mode = REPLICATED
   []

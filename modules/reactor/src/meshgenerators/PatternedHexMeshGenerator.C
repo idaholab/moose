@@ -101,8 +101,8 @@ PatternedHexMeshGenerator::validParams()
   params.addParam<bool>("create_outward_interface_boundaries",
                         true,
                         "Whether the outward interface boundary sidesets are created.");
-  params.addParam<std::string>(
-      "external_boundary_name", std::string(), "Optional customized external boundary name.");
+  params.addParam<BoundaryName>(
+      "external_boundary_name", BoundaryName(), "Optional customized external boundary name.");
   params.addParam<bool>("deform_non_circular_region",
                         true,
                         "Whether the non-circular region (outside the rings) can be deformed.");
@@ -169,7 +169,7 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
-    _external_boundary_name(getParam<std::string>("external_boundary_name")),
+    _external_boundary_name(getParam<BoundaryName>("external_boundary_name")),
     _create_inward_interface_boundaries(getParam<bool>("create_inward_interface_boundaries")),
     _create_outward_interface_boundaries(getParam<bool>("create_outward_interface_boundaries")),
     _hexagon_size_style(

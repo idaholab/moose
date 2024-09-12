@@ -102,15 +102,7 @@
     pattern = '2 1;
               1 0 2;
                2 1'
-    show_rgmb_metadata = true
     extrude = true
-  []
-
-  [rotate90]
-    type = TransformGenerator
-    input = cmg
-    transform = ROTATE
-    vector_value = '0 0 90'
   []
 []
 
@@ -122,12 +114,17 @@
   type = Steady
 []
 
-[Outputs]
-  [out]
-    type = Exodus
-    execute_on = timestep_end
-    output_extra_element_ids = true
-    extra_element_ids_to_output = 'assembly_id assembly_type_id plane_id pin_id pin_type_id region_id'
+[Reporters]
+  [metadata]
+    type = MeshMetaDataReporter
   []
-  file_base = core_in
+[]
+
+[Outputs]
+  file_base = core_hex_extra_assemblies_out
+  [json_out]
+    type = JSON
+    execute_on = FINAL
+    execute_system_information_on = none
+  []
 []
