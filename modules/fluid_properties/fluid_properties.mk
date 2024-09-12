@@ -19,6 +19,11 @@ POTASSIUM_FP_CONTENT      := $(shell ls $(POTASSIUM_FP_DIR) 2> /dev/null)
 SODIUM_FP_DIR             ?= ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium
 SODIUM_FP_CONTENT         := $(shell ls $(SODIUM_FP_DIR) 2> /dev/null)
 
+# Cache revision information
+CAMEL_CASE_NAME_save := ${CAMEL_CASE_NAME}
+app_BASE_DIR_save := ${app_BASE_DIR}
+app_HEADER_save := ${app_HEADER}
+
 # AIR
 ifneq ($(AIR_FP_CONTENT),)
 ifneq ($(BUILDING_FP_APP), yes)
@@ -101,4 +106,12 @@ ifneq ($(BUILDING_FP_APP), yes)
 	include            $(FRAMEWORK_DIR)/app.mk
 	include            $(SODIUM_FP_DIR)/libSodiumProperties.mk
 endif
+endif
+
+# If building any fluid property submodule, we need to clear those before app.mk gets included
+# for any other module, as those modules do not generate a revision
+ifneq ($(AIR_FP_CONTENT)$(CARBON_DIOXIDE_FP_CONTENT)$(HELIUM_FP_CONTENT)$(NITROGEN_FP_CONTENT)$(POTASSIUM_FP_CONTENT)$(SODIUM_FP_CONTENT),)
+  CAMEL_CASE_NAME := ${CAMEL_CASE_NAME_save}
+	app_BASE_DIR := ${app_BASE_DIR_save}
+	app_HEADER := ${app_HEADER_save}
 endif
