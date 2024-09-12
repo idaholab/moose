@@ -4,7 +4,6 @@
 []
 
 [Mesh]
-  use_displaced_mesh = false
   [file]
     type = FileMeshGenerator
     file = one_duct.e
@@ -15,16 +14,32 @@
   [pressure]
     type = PiecewiseLinear
     x = '0 10'
-    y = '0 0.005'
+    y = '0 0.05'
     scale_factor = 1
+  []
+[]
+
+[Variables]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+[]
+
+[AuxVariables]
+  [temp]
+    initial_condition = 300
   []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
-    strain = SMALL
+    strain = FINITE
     block = '1'
+    eigenstrain_names = 'thermal_expansion'
   []
 []
 
@@ -32,7 +47,7 @@
   [fix_y]
     type = DirichletBC
     variable = 'disp_y'
-    boundary = '1001'
+    boundary = '16'
     value = 0.0
   []
   [fix_x]
@@ -63,23 +78,6 @@
     block = '1'
     variables = 'disp_x disp_y disp_z'
     reference_point = '0 0 0'
-    require_equal_node_counts = false
-  []
-[]
-
-[Adaptivity]
-  steps = 1
-  marker = box
-  max_h_level = 2
-  interval = 1
-  [Markers]
-    [box]
-      type = BoxMarker
-      bottom_left = '-2 -2 17.5'
-      top_right = '2 2 21'
-      inside = refine
-      outside = do_nothing
-    []
   []
 []
 
@@ -91,8 +89,15 @@
     poissons_ratio = 0.0
   []
   [hex_stress]
-    type = ComputeLinearElasticStress
+    type = ComputeFiniteStrainElasticStress
     block = '1'
+  []
+  [thermal_expansion]
+    type = ComputeThermalExpansionEigenstrain
+    temperature = temp
+    thermal_expansion_coeff = 1e-5
+    stress_free_temperature = 0
+    eigenstrain_name = 'thermal_expansion'
   []
 []
 
@@ -118,7 +123,7 @@
 
   l_max_its = 20
   dt = 0.5
-  end_time = 1.0
+  end_time = 0.5
 []
 
 [Outputs]
