@@ -33,8 +33,6 @@
 {%- if TEST_DIRS is not defined %}
 {%- set TEST_DIRS = 'tests' -%}
 {%- endif %}
-{#- Set app code server prefix based on binary name                                           -#}
-{%- set APP_CODE_SERVER_PREFIX = '/opt/code-server-' + BINARY_NAME -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
@@ -99,7 +97,6 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
     # Load jinja vars
     APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
-    APP_CODE_SERVER_PREFIX={{ APP_CODE_SERVER_PREFIX }}
     BINARY_NAME={{ BINARY_NAME }}
     export METHOD={{ METHOD }}
     MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
@@ -129,44 +126,6 @@ From: {{ APPTAINER_FROM }}
     done
 
     umask 022
-
-    # Setup the directory server for the code-server app wrapper
-    mkdir ${APP_CODE_SERVER_PREFIX}
-    mkdir ${APP_CODE_SERVER_PREFIX}/bin
-    mkdir ${APP_CODE_SERVER_PREFIX}/extensions
-
-    # Download the language server extension; others can be put here
-    # and they'll also be installed
-    MOOSE_LANGUAGE_SUPPORT_VERSION=1.1.2
-    cd ${APP_CODE_SERVER_PREFIX}/extensions
-    curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/DanielSchwen.moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
-
-    # Setup the code-server wrapper
-    CODE_SERVER_BINARY=${APP_CODE_SERVER_PREFIX}/bin/code-server-${BINARY_NAME}
-    cat <<'EOF' > ${CODE_SERVER_BINARY}
-#!/bin/sh
-set -e
-# The port to run on, auto set to 8080
-PORT=${PORT:-8080}
-# The password to connect; randomly generated
-export PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 24)
-# Install the extensions
-for extension in {{ APP_CODE_SERVER_PREFIX }}/extensions/*; do
-    code-server --force --install-extension=${extension}
-done
-# Expose the password to the user in color
-GREEN='\033[0;32m'
-NC='\033[0m'
-printf "${GREEN}Connect to the instance at http://localhost:${PORT} with password ${PASSWORD}${NC}\n"
-# Run the server
-code-server --auth="password" \
-            --bind-addr=0.0.0.0:${PORT} \
-            --disable-telemetry \
-            --disable-getting-started-override \
-            --disable-update-check \
-            "$@"
-EOF
-    chmod +x ${CODE_SERVER_BINARY}
 
     # Install the application
     MOOSE_PREFIX=/opt/${BINARY_NAME}

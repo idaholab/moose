@@ -10,6 +10,8 @@ packages:
       - conda/tools/conda_build_config.yaml
   mpi:
     influential:
+      # need to remember to add apptainer/set_prompt.bash
+      # the next time we update this
       - apptainer/mpi.def
       - conda/mpi/meta.yaml
       - conda/mpi/conda_build_config.yaml
@@ -74,7 +76,7 @@ packages:
     influential:
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def
-      - apptainer/set_prompt.bash
+      - apptainer/files/moose-dev
       - conda/peacock/meta.yaml
       - conda/peacock/conda_build_config.yaml
       - conda/tools/meta.yaml
