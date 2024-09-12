@@ -76,7 +76,7 @@ protected:
   /// Velocity Z-component
   const Moose::Functor<ADReal> & _w;
   /// Whether to use a vector limiter
-  const bool _absolute_momentum_limiter;
+  const bool _use_norm_for_momentum_limiter;
   /// Momentum norm
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADReal>> _mom_abs;
 

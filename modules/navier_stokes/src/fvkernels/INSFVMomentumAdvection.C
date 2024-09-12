@@ -43,7 +43,7 @@ INSFVMomentumAdvection::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
   params.addClassDescription("Object for advecting momentum, e.g. rho*u");
 
-  params.addParam<bool>("momentum_norm_limiter",
+  params.addParam<bool>("use_norm_for_momentum_limiter",
                         false,
                         "Whether to use the norm of the momentum vector for momentum interpolation "
                         "limiter computations");
@@ -64,9 +64,9 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     _u(getFunctor<ADReal>(NS::velocity_x)),
     _v(getFunctor<ADReal>(NS::velocity_y)),
     _w(getFunctor<ADReal>(NS::velocity_z)),
-    _absolute_momentum_limiter(getParam<bool>("momentum_norm_limiter"))
+    _use_norm_for_momentum_limiter(getParam<bool>("use_norm_for_momentum_limiter"))
 {
-  if (_absolute_momentum_limiter)
+  if (_use_norm_for_momentum_limiter)
   {
     if (!isParamSetByUser(NS::velocity_x))
       paramError(NS::velocity_x,
@@ -95,7 +95,7 @@ INSFVMomentumAdvection::initialSetup()
       _mesh,
       this->blockIDs());
 
-  if (_absolute_momentum_limiter)
+  if (_use_norm_for_momentum_limiter)
     _mom_abs = std::make_unique<PiecewiseByBlockLambdaFunctor<ADReal>>(
         "rho_vel",
         [this](const auto & r, const auto & t) -> ADReal
@@ -209,14 +209,14 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     else
     {
       auto [interp_coeffs, advected] = interpCoeffsAndAdvected(
-          _absolute_momentum_limiter ? *_mom_abs : *_rho_u, advected_face_arg, state);
+          _use_norm_for_momentum_limiter ? *_mom_abs : *_rho_u, advected_face_arg, state);
 
       const auto elem_arg = elemArg();
       const auto neighbor_arg = neighborArg();
 
       // Use the interpolation coefficients for the absolute value of the momentum to re-create the
       // advected momentum
-      if (_absolute_momentum_limiter)
+      if (_use_norm_for_momentum_limiter)
         advected = std::make_pair<ADReal, ADReal>((*_rho_u)(elem_arg, state),
                                                   (*_rho_u)(neighbor_arg, state));
 
