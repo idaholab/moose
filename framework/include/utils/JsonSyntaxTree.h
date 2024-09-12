@@ -31,9 +31,10 @@ public:
    * @param path The path of the action
    * @param is_type Whether this belongs to a "<type>" or not
    * @param action Name of the action
-   * @param is_action Wheter it is an action
+   * @param is_action Whether we are adding the parameter for an action (except Components)
    * @param params The InputParameters to add to the tree
    * @param lineinfo The FileLineInfo where the action/path was registered
+   * @param classname the name of the class being added
    * @return Whether the parameters were added to the tree (ie if it matched the search string).
    */
   bool addParameters(const std::string & parent_path,

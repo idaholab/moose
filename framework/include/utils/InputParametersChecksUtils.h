@@ -70,6 +70,11 @@ protected:
   /// @param param_vecs vector of parameters that should not overlap with each other
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
+  /// Check that there is no overlap between the respective items in each vector of the two-D parameters
+  /// Each vector of the two-D vector parameter should also have unique items
+  /// @param param_vecs vector of parameters that should not overlap with each other
+  template <typename T>
+  void checkTwoDVectorParamsNoRespectiveOverlap(const std::vector<std::string> & param_vecs) const;
   /// Check that each inner vector of a two-D vector parameter are the same size as another one-D vector parameter
   /// @param param1 two-D vector parameter to check the dimensions of
   /// @param param2 one-D vector parameter to set the desired size
@@ -355,9 +360,43 @@ InputParametersChecksUtils<C>::checkVectorParamsNoOverlap(
 
     for (const auto & value : forwardGetParam<std::vector<T>>(param))
       if (!unique_params.insert(value).second)
+      {
+        auto copy_params = param_vec;
+        copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
         forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
                           "' is also present in one or more of the parameters '" +
-                          Moose::stringify(param_vec) + "'. This is disallowed.");
+                          Moose::stringify(copy_params) + "', which is not allowed.");
+      }
+  }
+}
+
+template <typename C>
+template <typename T>
+void
+InputParametersChecksUtils<C>::checkTwoDVectorParamsNoRespectiveOverlap(
+    const std::vector<std::string> & param_vec) const
+{
+  // Outer loop, each param is the name of a parameter for a vector of vectors
+  for (const auto & param : param_vec)
+  {
+    assertParamDefined<std::vector<std::vector<T>>>(param);
+    const auto & twoD_vec = forwardGetParam<std::vector<std::vector<T>>>(param);
+    std::vector<std::set<T>> unique_params(twoD_vec.size());
+
+    // Loop over each outer vector and compare the inner vectors respectively to other parameters
+    for (const auto i : index_range(twoD_vec))
+    {
+      for (const auto & value : twoD_vec[i])
+        if (!unique_params[i].insert(value).second)
+        {
+          auto copy_params = param_vec;
+          copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
+          forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
+                            "' is also present in one or more of the two-D vector parameters '" +
+                            Moose::stringify(copy_params) +
+                            "' in the inner vector of the same index, which is not allowed.");
+        }
+    }
   }
 }
 

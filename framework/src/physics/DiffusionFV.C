@@ -32,12 +32,19 @@ DiffusionFV::validParams()
 DiffusionFV::DiffusionFV(const InputParameters & parameters) : DiffusionPhysicsBase(parameters) {}
 
 void
+DiffusionFV::initializePhysicsAdditional()
+{
+  getProblem().needFV();
+}
+
+void
 DiffusionFV::addFVKernels()
 {
   // Diffusion term
   {
     const std::string kernel_type = "FVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _var_name;
     params.set<MooseFunctorName>("coeff") = isParamValid("diffusivity_functor")
                                                 ? getParam<MooseFunctorName>("diffusivity_functor")
@@ -64,6 +71,7 @@ DiffusionFV::addFVKernels()
 
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
 
     // Transfer the source and coefficient parameter from the Physics to the kernel
     const auto coef = getParam<Real>("source_coef");
@@ -93,6 +101,7 @@ DiffusionFV::addFVKernels()
     const std::string kernel_type = "FVTimeKernel";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
     getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_time", params);
   }
 }
@@ -173,7 +182,10 @@ DiffusionFV::addNonlinearVariables()
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
+  assignBlocks(params, _blocks);
 
+  // TODO: Do we need to use a different variable name maybe?
+  // Or add API to extend block definition of a boundary
   getProblem().addVariable(variable_type, _var_name, params);
 }
 

@@ -154,7 +154,9 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
                "order of your MeshGenerators.\n\nThe most likely case is a sub generator whose "
                "input(s) are not declared as a sub dependency in the generator creating them.";
     else
-      error << "was not found.";
+      error << "was not found.\nMesh generators that can be found: "
+            << Moose::stringify(mg_sys.getMeshGeneratorNames());
+
     if (param_name.size())
       paramError(param_name, error.str());
     else

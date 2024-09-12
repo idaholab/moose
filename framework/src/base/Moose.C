@@ -98,7 +98,14 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_executioner",            Executioner,               false);
   registerMooseObjectTask("read_executor",                Executor,                  false);
   registerTask("add_executor", true);
+
+  // TODO Organize these somewhere
   registerTask("init_physics", false);
+  registerTask("init_component_physics", false);
+  registerTask("meta_action_component", false);
+  registerTask("setup_component", false);
+  // 'list_component' is used to retrieve ActionComponents for the syntax JSON
+  registerTask("list_component", false);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
@@ -286,6 +293,7 @@ addActionTypes(Syntax & syntax)
 
   // clang-format off
   syntax.addDependencySets("(meta_action)"
+                           "(meta_action_component)"
                            "(dynamic_object_registration)"
                            "(common_output)"
                            "(set_global_params)"
@@ -315,11 +323,13 @@ addActionTypes(Syntax & syntax)
                            "(init_displaced_problem)" // Problem must be init-ed before we start adding functors
                            "(add_function)"  // Functions can depend on scalar variables & PPs, but this dependence can be
                                              // added on initialSetup() rather than construction
-                           "(init_physics)"  // Components add their blocks to Physics, and components need functions at initialization
+                           "(init_component_physics)" // components must add their blocks to physics before init_physics
+                           "(init_physics)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
                            "(setup_executioner_complete)"
+                           "(setup_component)"  // no particular reason for that placement
                            "(read_executor)"
                            "(add_executor)"
                            "(check_integrity_early)"
@@ -443,6 +453,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("DiffusionCG", "Physics/Diffusion/ContinuousGalerkin/*");
   registerSyntax("DiffusionFV", "Physics/Diffusion/FiniteVolume/*");
 
+  registerSyntax("AddActionComponentAction", "ActionComponents/*");
+  registerSyntax("CombineComponentsMeshes", "ActionComponents");
+
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
@@ -467,6 +480,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("SetupMeshAction", "Mesh");
   registerSyntax("SetupMeshCompleteAction", "Mesh");
+  // Components should be able create a Mesh without a Mesh block
+  registerSyntax("CreateMeshSetupActionsForComponents", "ActionComponents");
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");
   registerSyntax("AddMeshGeneratorAction", "Mesh/*");
