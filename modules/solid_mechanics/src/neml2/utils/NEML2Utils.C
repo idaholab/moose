@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2Utils.h"
+#include "SubProblem.h"
 
 #ifdef NEML2_ENABLED
 
@@ -152,6 +153,24 @@ toMOOSE(const neml2::Tensor & t)
 static const std::string missing_neml2 =
     "To use this object, you need to have the `NEML2` library installed. Refer to the "
     "documentation for guidance on how to enable it.";
+
+bool
+shouldCompute(const SubProblem & problem)
+{
+  // NEML2 computes residual and Jacobian together at EXEC_LINEAR
+  // There is no work to be done at EXEC_NONLINEAR **UNLESS** we are computing the Jacobian for
+  // automatic scaling.
+  if (problem.computingScalingJacobian())
+    return true;
+
+  if (problem.currentlyComputingResidualAndJacobian())
+    return true;
+
+  if (problem.currentlyComputingJacobian())
+    return false;
+
+  return true;
+}
 
 std::string
 docstring(const std::string & desc)

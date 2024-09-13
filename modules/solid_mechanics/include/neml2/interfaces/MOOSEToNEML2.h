@@ -45,7 +45,7 @@ public:
   /**
    * Change the mode of operation
    *
-   * The ExecuteNEML2Model user object performs run-time introspection of the NEML2 model to
+   * The NEML2ModelExecutor user object performs run-time introspection of the NEML2 model to
    * determine if the supplied name is for a NEML2 variable or for a NEML2 model parameter.
    * It then uses this method to change the mode of operation of the MOOSEToNEML2 gatherer.
    */

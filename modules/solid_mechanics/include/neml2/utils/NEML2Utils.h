@@ -25,6 +25,7 @@
 
 class MooseObject;
 class Action;
+class SubProblem;
 
 #ifdef NEML2_ENABLED
 namespace neml2
@@ -202,6 +203,9 @@ setBatched(neml2::LabeledVector & v,
 }
 
 #endif // NEML2_ENABLED
+
+/// Determine whether the NEML2 material model should be evaluated
+bool shouldCompute(const SubProblem &);
 
 /**
  * Augment docstring if NEML2 is not enabled

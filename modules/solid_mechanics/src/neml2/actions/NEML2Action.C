@@ -50,9 +50,9 @@ NEML2Action::validParams()
   params.addClassDescription(NEML2Utils::docstring("Set up the NEML2 material model"));
   params.addParam<std::string>(
       "executor_name",
-      NEML2Utils::docstring(
-          "Name of the ExecuteNEML2Model user object. The default name is "
-          "'neml2_<block-name>' where <block-name> is this action sub-block's name."));
+      NEML2Utils::docstring("Name of the NEML2ModelExecutor user object. The default name is "
+                            "'neml2_<model-name>_<block-name>' where <model-name> is the NEML2 "
+                            "model's name, and <block-name> is this action sub-block's name."));
   params.addParam<std::vector<SubdomainName>>(
       "block",
       {},
@@ -62,8 +62,9 @@ NEML2Action::validParams()
 
 NEML2Action::NEML2Action(const InputParameters & params)
   : Action(params),
-    _executor_name(isParamValid("executor_name") ? getParam<std::string>("executor_name")
-                                                 : "neml2_" + name()),
+    _executor_name(isParamValid("executor_name")
+                       ? getParam<std::string>("executor_name")
+                       : "neml2_" + getParam<std::string>("model") + "_" + name()),
     _block(getParam<std::vector<SubdomainName>>("block"))
 {
   NEML2Utils::assertNEML2Enabled();
@@ -230,7 +231,7 @@ NEML2Action::act()
     }
 
     // The Executor UO
-    auto type = "ExecuteNEML2Model";
+    auto type = "NEML2ModelExecutor";
     auto params = _factory.getValidParams(type);
     params.applyParameters(parameters());
     params.set<std::vector<UserObjectName>>("gatherers") = gatherers;

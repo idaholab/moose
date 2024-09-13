@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ExecuteNEML2Model.h"
+#include "NEML2ModelExecutor.h"
 #include "MOOSEToNEML2.h"
 #include <set>
 
@@ -15,12 +15,12 @@
 #include "neml2/misc/math.h"
 #endif
 
-registerMooseObject("SolidMechanicsApp", ExecuteNEML2Model);
+registerMooseObject("SolidMechanicsApp", NEML2ModelExecutor);
 
 InputParameters
-ExecuteNEML2Model::actionParams()
+NEML2ModelExecutor::actionParams()
 {
-  auto params = NEML2ModelInterface<ElementUserObject>::validParams();
+  auto params = NEML2ModelInterface<GeneralUserObject>::validParams();
   // allow user to explicit skip required input variables
   params.addParam<std::vector<std::string>>(
       "skip_inputs",
@@ -32,13 +32,14 @@ ExecuteNEML2Model::actionParams()
 }
 
 InputParameters
-ExecuteNEML2Model::validParams()
+NEML2ModelExecutor::validParams()
 {
-  auto params = ExecuteNEML2Model::actionParams();
+  auto params = NEML2ModelExecutor::actionParams();
   params.addClassDescription(NEML2Utils::docstring("Execute the specified NEML2 model"));
 
-  // we need the user to explicitly list the UOs so we can set up a construction order independent
-  // dependency chain
+  params.addRequiredParam<UserObjectName>(
+      "batch_index_generator",
+      "The NEML2BatchIndexGenerator used to generate the element-to-batch-index map.");
   params.addParam<std::vector<UserObjectName>>(
       "gatherers",
       {},
@@ -60,10 +61,11 @@ ExecuteNEML2Model::validParams()
   return params;
 }
 
-ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
-  : NEML2ModelInterface<ElementUserObject>(params)
+NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
+  : NEML2ModelInterface<GeneralUserObject>(params)
 #ifdef NEML2_ENABLED
     ,
+    _batch_index_generator(getUserObject<NEML2BatchIndexGenerator>("batch_index_generator")),
     _output_ready(false),
     _in(model().input_storage()),
     _out(model().output_storage()),
@@ -86,7 +88,7 @@ ExecuteNEML2Model::ExecuteNEML2Model(const InputParameters & params)
 
 #ifdef NEML2_ENABLED
 void
-ExecuteNEML2Model::initialSetup()
+NEML2ModelExecutor::initialSetup()
 {
   // deal with user object provided inputs
   for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("gatherers"))
@@ -167,8 +169,8 @@ ExecuteNEML2Model::initialSetup()
 }
 
 void
-ExecuteNEML2Model::addGatheredVariable(const UserObjectName & gatherer_name,
-                                       const neml2::VariableName & var)
+NEML2ModelExecutor::addGatheredVariable(const UserObjectName & gatherer_name,
+                                        const neml2::VariableName & var)
 {
   if (_gathered_variable_names.count(var))
     paramError("gatherers",
@@ -181,8 +183,8 @@ ExecuteNEML2Model::addGatheredVariable(const UserObjectName & gatherer_name,
 }
 
 void
-ExecuteNEML2Model::addGatheredParameter(const UserObjectName & gatherer_name,
-                                        const std::string & param)
+NEML2ModelExecutor::addGatheredParameter(const UserObjectName & gatherer_name,
+                                         const std::string & param)
 {
   if (_gathered_parameter_names.count(param))
     paramError("gatherers",
@@ -195,7 +197,7 @@ ExecuteNEML2Model::addGatheredParameter(const UserObjectName & gatherer_name,
 }
 
 bool
-ExecuteNEML2Model::shouldCompute()
+NEML2ModelExecutor::shouldCompute()
 {
   // NEML2 computes residual and Jacobian together at EXEC_LINEAR
   // There is no work to be done at EXEC_NONLINEAR **UNLESS** we are computing the Jacobian for
@@ -213,7 +215,7 @@ ExecuteNEML2Model::shouldCompute()
 }
 
 void
-ExecuteNEML2Model::initialize()
+NEML2ModelExecutor::initialize()
 {
   if (!shouldCompute())
     return;
@@ -225,7 +227,7 @@ ExecuteNEML2Model::initialize()
 }
 
 void
-ExecuteNEML2Model::execute()
+NEML2ModelExecutor::execute()
 {
   if (!shouldCompute())
     return;
@@ -235,7 +237,7 @@ ExecuteNEML2Model::execute()
 }
 
 void
-ExecuteNEML2Model::finalize()
+NEML2ModelExecutor::finalize()
 {
   if (!shouldCompute())
     return;
@@ -275,7 +277,7 @@ ExecuteNEML2Model::finalize()
 }
 
 void
-ExecuteNEML2Model::fillInputs()
+NEML2ModelExecutor::fillInputs()
 {
   for (const auto & uo : _gatherers)
     uo->insertInto(model());
@@ -286,7 +288,7 @@ ExecuteNEML2Model::fillInputs()
 }
 
 void
-ExecuteNEML2Model::applyPredictor()
+NEML2ModelExecutor::applyPredictor()
 {
   // Set trial state variables (i.e., initial guesses).
   // Right now we hard-code to use the old state as the trial state.
@@ -296,14 +298,14 @@ ExecuteNEML2Model::applyPredictor()
 }
 
 void
-ExecuteNEML2Model::solve()
+NEML2ModelExecutor::solve()
 {
   // Evaluate the NEML2 material model
   model().value_and_dvalue(_in);
 }
 
 void
-ExecuteNEML2Model::extractOutputs()
+NEML2ModelExecutor::extractOutputs()
 {
   // retrieve outputs
   for (auto & [y, tensor] : _retrieved_outputs)
@@ -325,9 +327,9 @@ ExecuteNEML2Model::extractOutputs()
 }
 
 void
-ExecuteNEML2Model::threadJoin(const UserObject & uo)
+NEML2ModelExecutor::threadJoin(const UserObject & uo)
 {
-  const auto & m2n = static_cast<const ExecuteNEML2Model &>(uo);
+  const auto & m2n = static_cast<const NEML2ModelExecutor &>(uo);
 
   // append and renumber maps
   for (const auto & [elem_id, batch_index] : m2n._elem_to_batch_index)
@@ -337,7 +339,7 @@ ExecuteNEML2Model::threadJoin(const UserObject & uo)
 }
 
 std::size_t
-ExecuteNEML2Model::getBatchIndex(dof_id_type elem_id) const
+NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
 {
   // return cached map lookup if applicable
   if (_elem_to_batch_index_cache.first == elem_id)
@@ -352,7 +354,7 @@ ExecuteNEML2Model::getBatchIndex(dof_id_type elem_id) const
 }
 
 void
-ExecuteNEML2Model::checkExecutionStage() const
+NEML2ModelExecutor::checkExecutionStage() const
 {
   if (_fe_problem.startedInitialSetup())
     mooseError("NEML2 output variables and derivatives must be retrieved during object "
@@ -360,7 +362,7 @@ ExecuteNEML2Model::checkExecutionStage() const
 }
 
 const neml2::Tensor &
-ExecuteNEML2Model::getOutputView(const neml2::VariableName & output_name) const
+NEML2ModelExecutor::getOutputView(const neml2::VariableName & output_name) const
 {
   checkExecutionStage();
 
@@ -371,8 +373,8 @@ ExecuteNEML2Model::getOutputView(const neml2::VariableName & output_name) const
 }
 
 const neml2::Tensor &
-ExecuteNEML2Model::getOutputDerivativeView(const neml2::VariableName & output_name,
-                                           const neml2::VariableName & input_name) const
+NEML2ModelExecutor::getOutputDerivativeView(const neml2::VariableName & output_name,
+                                            const neml2::VariableName & input_name) const
 {
   checkExecutionStage();
 
@@ -394,8 +396,8 @@ ExecuteNEML2Model::getOutputDerivativeView(const neml2::VariableName & output_na
 }
 
 const neml2::Tensor &
-ExecuteNEML2Model::getOutputParameterDerivativeView(const neml2::VariableName & output_name,
-                                                    const std::string & parameter_name) const
+NEML2ModelExecutor::getOutputParameterDerivativeView(const neml2::VariableName & output_name,
+                                                     const std::string & parameter_name) const
 {
   checkExecutionStage();
 

@@ -10,9 +10,8 @@
 #pragma once
 
 #include "NEML2ModelInterface.h"
-#include "ElementUserObject.h"
-
-#include <map>
+#include "GeneralUserObject.h"
+#include "NEML2BatchIndexGenerator.h"
 
 #ifdef NEML2_ENABLED
 #include "neml2/tensors/LabeledVector.h"
@@ -23,13 +22,11 @@
 class MOOSEToNEML2;
 
 /**
- * ExecuteNEML2Model executes a NEML2 model. The NEML2 input variables and model parameters are
- * gathered by UserObjects derived from MOOSEToNEML2. The execution of the NEML2 model happens in
- * finalize(). This class is derived from ElementUserObject and iterates over the mesh along with
- * the MOOSEToNEML2Batched objects. While iterating it generates a map from element ID to batch
- * index which is later used when retrieving the NEML2 model outputs.
+ * NEML2ModelExecutor executes a NEML2 model. The NEML2 input variables and model parameters are
+ * gathered by UserObjects derived from MOOSEToNEML2. This class is derived from GeneralUserObject
+ * and is not threaded. It relies on a NEML2BatchIndexGenerator to generate batch indices.
  */
-class ExecuteNEML2Model : public NEML2ModelInterface<ElementUserObject>
+class NEML2ModelExecutor : public NEML2ModelInterface<GeneralUserObject>
 {
 public:
   /// Parameters that can be specified under the NEML2Action common area
@@ -37,18 +34,16 @@ public:
 
   static InputParameters validParams();
 
-  ExecuteNEML2Model(const InputParameters & params);
+  NEML2ModelExecutor(const InputParameters & params);
 
 #ifndef NEML2_ENABLED
   void initialize() override {}
   void execute() override {}
-  void threadJoin(const UserObject &) override {}
   void finalize() override {}
 #else
   void initialize() override;
   void execute() override;
-  void threadJoin(const UserObject &) override;
-  void finalize() override;
+  void finalize() override {}
 
   void initialSetup() override;
 
@@ -94,6 +89,9 @@ protected:
   /// Extract output derivatives with respect to input variables and model parameters
   virtual void extractOutputs();
 
+  /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
+  const NEML2BatchIndexGenerator & _batch_index_generator;
+
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
 
@@ -117,15 +115,6 @@ protected:
 
   /// MOOSE data gathering user objects
   std::vector<const MOOSEToNEML2 *> _gatherers;
-
-  /// Highest current batch index
-  std::size_t _batch_index;
-
-  /// Map from element IDs to batch indices
-  std::map<dof_id_type, std::size_t> _elem_to_batch_index;
-
-  /// cache the index for the current element
-  mutable std::pair<dof_id_type, std::size_t> _elem_to_batch_index_cache;
 
   /// set of output variables that were retrieved (by other objects)
   mutable std::map<neml2::VariableName, neml2::Tensor> _retrieved_outputs;

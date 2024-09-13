@@ -121,7 +121,7 @@ protected:
   /// Whether to print additional information about the model
   bool _verbose;
 
-  /// Name of the ExecuteNEML2Model user object
+  /// Name of the NEML2Executor user object
   const UserObjectName _executor_name;
 
   /// Blocks this sub-block action applies to

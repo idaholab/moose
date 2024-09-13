@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2ToMOOSEMaterialProperty.h"
-#include "ExecuteNEML2Model.h"
+#include "NEML2ModelExecutor.h"
 
 #define RegisterNEML2ToMOOSEMaterialProperty(alias)                                                \
   registerMooseObject("SolidMechanicsApp", NEML2ToMOOSE##alias##MaterialProperty)
@@ -60,7 +60,7 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
   : Material(params)
 #ifdef NEML2_ENABLED
     ,
-    _execute_neml2_model(getUserObject<ExecuteNEML2Model>("neml2_executor")),
+    _execute_neml2_model(getUserObject<NEML2ModelExecutor>("neml2_executor")),
     _prop(declareProperty<T>(getParam<MaterialPropertyName>("to_moose"))),
     _prop0(isParamValid("moose_material_property_init")
                ? &getMaterialProperty<T>("moose_material_property_init")

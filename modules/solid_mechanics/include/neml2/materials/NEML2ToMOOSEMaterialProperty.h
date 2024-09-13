@@ -18,7 +18,7 @@
 #include "neml2/tensors/TensorBase.h"
 #endif
 
-class ExecuteNEML2Model;
+class NEML2ModelExecutor;
 
 template <typename T>
 class NEML2ToMOOSEMaterialProperty : public Material
@@ -35,7 +35,7 @@ protected:
   void initQpStatefulProperties() override;
 
   /// User object managing the execution of the NEML2 model
-  const ExecuteNEML2Model & _execute_neml2_model;
+  const NEML2ModelExecutor & _execute_neml2_model;
 
   /// Emitted material property
   MaterialProperty<T> & _prop;
