@@ -211,10 +211,10 @@ THMWCNSFVFluidHeatTransferPhysics::addInletBoundaries()
 
     if (boundary_type == InletTypeEnum::MdotTemperature)
     {
-      MooseEnum fixed_temp(NSFVBase::getValidEnergyInletTypes(), "fixed-temperature");
+      MooseEnum inlet_type(NSFVBase::getValidEnergyInletTypes(), "flux-mass");
       MooseFunctorName inlet_T = std::to_string(comp.getParam<Real>("T"));
       for (const auto & boundary_name : comp.getBoundaryNames())
-        addInletBoundary(boundary_name, fixed_temp, inlet_T);
+        addInletBoundary(boundary_name, inlet_type, inlet_T);
     }
     else
       mooseError("Unsupported inlet boundary type ", boundary_type);

@@ -372,8 +372,12 @@ WCNSFVFluidHeatTransferPhysics::addInletBoundary(const BoundaryName & boundary_n
                                                  const MooseEnum & inlet_type,
                                                  const MooseFunctorName & inlet_functor)
 {
+  // Note: the boundary is added in the flow Physics addInletBoundary
+  //       the flux PPs are added similarly
   _energy_inlet_types.insert(std::make_pair(boundary_name, inlet_type));
   if (inlet_type == "fixed-temperature")
+    _energy_inlet_functors[boundary_name] = inlet_functor;
+  else if (inlet_type == "flux-mass")
     _energy_inlet_functors[boundary_name] = inlet_functor;
   else
     mooseError("Inlet boundary type not implemented.");
@@ -442,6 +446,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyInletBC()
       params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
       params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
 
+      params.set<unsigned int>("dimension") = dimension();
       for (const auto d : make_range(dimension()))
         params.set<MooseFunctorName>(NS::velocity_vector[d]) = _velocity_names[d];
 
