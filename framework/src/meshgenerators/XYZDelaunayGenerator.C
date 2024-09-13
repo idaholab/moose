@@ -375,13 +375,16 @@ XYZDelaunayGenerator::generate()
       const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
-      mesh->stitch_meshes(hole_mesh,
-                          inner_bcid,
-                          new_hole_bcid,
-                          TOLERANCE,
-                          /*clear_stitched_bcids*/ true,
-                          _verbose_stitching,
-                          use_binary_search);
+      std::size_t n_nodes_stitched = mesh->stitch_meshes(hole_mesh,
+                                                         inner_bcid,
+                                                         new_hole_bcid,
+                                                         TOLERANCE,
+                                                         /*clear_stitched_bcids*/ true,
+                                                         _verbose_stitching,
+                                                         use_binary_search);
+
+      if (!n_nodes_stitched)
+        mooseError("Failed to stitch hole mesh ", hole_i, " to new tetrahedralization.");
     }
   }
   // Check if one SubdomainName is shared by more than one subdomain ids
