@@ -873,6 +873,18 @@ class TestHarness:
         storage['testharness_args'] = sys.argv[1:]
         storage['moose_dir'] = self.moose_dir
 
+        # Record information from apptainer, if any
+        apptainer_container = os.environ.get('APPTAINER_CONTAINER')
+        if apptainer_container:
+            apptainer = {'path': apptainer_container}
+            # Information from ApptainerGenerator generated containers
+            var_prefix = 'MOOSE_APPTAINER_GENERATOR'
+            generator_name = os.environ.get(f'{var_prefix}_NAME')
+            if generator_name:
+                for suffix in ['LIBRARY', 'NAME', 'TAG', 'VERSION']:
+                    apptainer[f'generator_{suffix.lower()}'] = os.environ.get(f'{var_prefix}_{suffix}')
+            storage['apptainer'] = apptainer
+
         # Record when the run began
         storage['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
