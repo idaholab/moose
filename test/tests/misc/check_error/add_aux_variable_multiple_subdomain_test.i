@@ -34,6 +34,7 @@
   [q]
     family = MONOMIAL
     order = third
+    block = 2
   []
 []
 
@@ -69,10 +70,12 @@
   file_base = out
 []
 
+# Request AuxVariable "q" again. This time without block restriction.
+# This would widen the scope of "q" by means of block-restriction. This is not allowed.
+# Note: If this block were above [AuxVariables/q], no error would occour.
 [MoreAuxVariables]
   [q]
     family = MONOMIAL
     order = third
-    block = 2
   []
 []

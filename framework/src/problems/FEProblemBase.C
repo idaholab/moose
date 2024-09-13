@@ -2584,9 +2584,15 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
         else
           varSubdomainIDs.insert(varActiveSubdomains.begin(), varActiveSubdomains.end());
 
-        if (varSubdomainIDs != subdomainIDs)
-        {
+        // Is subdomainIDs a subset of varSubdomainIDs? With this we allow the case that the newly
+        // requested block restriction is only a subset of the existing one.
+        const auto isSubset = std::includes(varSubdomainIDs.begin(),
+                                            varSubdomainIDs.end(),
+                                            subdomainIDs.begin(),
+                                            subdomainIDs.end());
 
+        if (!isSubset)
+        {
           // helper function: make a string from a set of subdomain ids
           const auto stringifySubdomains = [this](std::set<SubdomainID> subdomainIDs)
           {

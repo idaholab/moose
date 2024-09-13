@@ -53,7 +53,7 @@
   [add_aux_variable_multiple_subdomain_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_subdomain_test.i'
-    expect_err = "Mismatching block-restrictions are specified for auxvariable with name 'q': \{0, 2\} and \{2\}"
+    expect_err = "Mismatching block-restrictions are specified for auxvariable with name 'q': \{2\} and \{0, 2\}"
 
     requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting block-restriction.'
     issues = '#28568'
