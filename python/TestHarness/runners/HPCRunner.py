@@ -138,22 +138,40 @@ class HPCRunner(Runner):
             timer.stop('runner_run', end_time)
 
         # Handle openmpi appending a null character at the end of jobs
-        # that return a nonzero exit code. We don't know how to fix this
-        # in openmpi yet, so this is the cleanest way to take care of it.
-        # We're looking for \n[\0,\x00]##########', which is at the end of the
-        # apptainer execution within hpc_template. This allows the null
-        # character check that happens in Runner.finalize() to still
-        # be valid.
+        # that return a nonzero exit code. An example of this is:
+        #
+        # --------------------------------------------------------------------------
+        # MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+        #   Proc: [[PID,1],0]
+        #   Errorcode: 1
+        #
+        # NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+        # You may or may not see output from other processes, depending on
+        # exactly when Open MPI kills them.
+        # --------------------------------------------------------------------------
+        # <NULL>--------------------------------------------------------------------------
+        # prterun has exited due to process rank 0 with PID 0 on node HOSTNAME calling
+        # "abort". This may have caused other processes in the application to be
+        # terminated by signals sent by prterun (as reported here).
+        # --------------------------------------------------------------------------
+        # <NULL>
+        #
+        # Where <NULL> is there the null character ends up. Thus, in cases
+        # where we have a nonzero exit code and a MPI_ABORT, we'll try to remove these.
         if self.exit_code != 0 and self.job.getTester().hasOpenMPI():
             output = self.getRunOutput().getOutput(sanitize=False)
-            if output:
-                for null in ['\0', '\x00']:
-                    prefix = '\n'
-                    suffix = '##########'
-                    all = f'{prefix}{null}{suffix}'
-                    no_null = f'{prefix}{suffix}'
-                    if all in output:
-                        self.getRunOutput().setOutput(output.replace(all, no_null))
+            if 'MPI_ABORT' in output:
+                output_changed = False
+                if output:
+                    for null in ['\0', '\x00']:
+                        prefix = '-'*74 + '\n'
+                        prefix_with_null = prefix + null
+                        if prefix_with_null in output:
+                            output = output.replace(prefix_with_null, prefix, 1)
+                            output_changed = True
+                if output_changed:
+                    self.getRunOutput().setOutput(output)
+
 
     def kill(self):
         if self.hpc_job:
