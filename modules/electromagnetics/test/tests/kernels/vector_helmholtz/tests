@@ -15,4 +15,29 @@
     design = 'VectorCurrentSource.md'
     issues = '#21080'
   []
+
+  [vector_ADmaterial_wave_equation]
+    type = 'Exodiff'
+    input = 'vector_ADmaterial_wave_equation.i'
+    exodiff = 'vector_ADmaterial_wave_equation_out.e'
+    #requirement = ''
+    #design = ''
+    #issues = ''
+  []
+  [vector_conductive_current]
+    type = 'Exodiff'
+    input = 'vector_conductive_current.i'
+    exodiff = 'vector_conductive_current_out.e'
+    #requirement = ''
+    #design = ''
+    #issues = ''
+  []
+  [microwave_heating]
+    type = 'Exodiff'
+    input = 'microwave_heating.i'
+    exodiff = 'microwave_heating_out.e'
+    #requirement = ''
+    #design = ''
+    #issues = ''
+  []
 []
