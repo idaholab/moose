@@ -22,7 +22,7 @@ InputParameters
 NEML2ActionCommon::commonParams()
 {
   auto params = NEML2ModelInterface<Action>::validParams();
-  MultiMooseEnum moose_types("MATERIAL VARIABLE SCALAR POSTPROCESSOR CUSTOM");
+  MultiMooseEnum moose_types("MATERIAL VARIABLE POSTPROCESSOR");
 
   // Inputs
   params.addParam<MultiMooseEnum>(

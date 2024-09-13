@@ -247,11 +247,11 @@ NEML2Action::act()
       {
         auto obj_name = "__neml2(" + neml2::utils::stringify(output.neml2.name) + ")->moose(" +
                         output.moose.name + ")_" + name() + "__";
-        auto obj_type = "NEML2To" + tensor_type_map.at(output.neml2.type) + "MOOSEMaterialProperty";
+        auto obj_type = "NEML2ToMOOSE" + tensor_type_map.at(output.neml2.type) + "MaterialProperty";
         auto obj_params = _factory.getValidParams(obj_type);
-        obj_params.set<UserObjectName>("execute_neml2_model_uo") = _executor_name;
-        obj_params.set<MaterialPropertyName>("moose_material_property") = output.moose.name;
-        obj_params.set<std::string>("neml2_variable") = neml2::utils::stringify(output.neml2.name);
+        obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
+        obj_params.set<MaterialPropertyName>("to_moose") = output.moose.name;
+        obj_params.set<std::string>("from_neml2") = neml2::utils::stringify(output.neml2.name);
         obj_params.set<std::vector<SubdomainName>>("block") = _block;
         if (_export_output_targets.count(output.moose.name))
           obj_params.set<std::vector<OutputName>>("outputs") =
@@ -273,13 +273,13 @@ NEML2Action::act()
                         neml2::utils::stringify(deriv.neml2.x.name) + "))->moose(" +
                         deriv.moose.name + ")_" + name() + "__";
         auto obj_type =
-            "NEML2To" +
+            "NEML2ToMOOSE" +
             tensor_type_map.at(deriv_type_map.at({deriv.neml2.y.type, deriv.neml2.x.type})) +
-            "MOOSEMaterialProperty";
+            "MaterialProperty";
         auto obj_params = _factory.getValidParams(obj_type);
-        obj_params.set<UserObjectName>("execute_neml2_model_uo") = _executor_name;
-        obj_params.set<MaterialPropertyName>("moose_material_property") = deriv.moose.name;
-        obj_params.set<std::string>("neml2_variable") = neml2::utils::stringify(deriv.neml2.y.name);
+        obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
+        obj_params.set<MaterialPropertyName>("to_moose") = deriv.moose.name;
+        obj_params.set<std::string>("from_neml2") = neml2::utils::stringify(deriv.neml2.y.name);
         obj_params.set<std::string>("neml2_input_derivative") =
             neml2::utils::stringify(deriv.neml2.x.name);
         obj_params.set<std::vector<SubdomainName>>("block") = _block;
@@ -302,14 +302,14 @@ NEML2Action::act()
         auto obj_name = "__neml2(d(" + neml2::utils::stringify(param_deriv.neml2.y.name) + ")/d(" +
                         param_deriv.neml2.x.name + "))->moose(" + param_deriv.moose.name + ")_" +
                         name() + "__";
-        auto obj_type = "NEML2To" +
+        auto obj_type = "NEML2ToMOOSE" +
                         tensor_type_map.at(deriv_type_map.at(
                             {param_deriv.neml2.y.type, param_deriv.neml2.x.type})) +
-                        "MOOSEMaterialProperty";
+                        "MaterialProperty";
         auto obj_params = _factory.getValidParams(obj_type);
-        obj_params.set<UserObjectName>("execute_neml2_model_uo") = _executor_name;
-        obj_params.set<MaterialPropertyName>("moose_material_property") = param_deriv.moose.name;
-        obj_params.set<std::string>("neml2_variable") =
+        obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
+        obj_params.set<MaterialPropertyName>("to_moose") = param_deriv.moose.name;
+        obj_params.set<std::string>("from_neml2") =
             neml2::utils::stringify(param_deriv.neml2.y.name);
         obj_params.set<std::string>("neml2_parameter_derivative") = param_deriv.neml2.x.name;
         obj_params.set<std::vector<SubdomainName>>("block") = _block;
