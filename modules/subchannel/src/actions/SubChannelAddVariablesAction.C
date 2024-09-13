@@ -16,6 +16,7 @@
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
 #include "AddVariableAction.h"
+#include "AddAuxVariableAction.h"
 #include "SubChannelApp.h"
 
 registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "meta_action");
@@ -56,6 +57,9 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::VISCOSITY,
                                         SubChannelApp::DISPLACEMENT};
 
+  // Get a list of the already existing AddAuxVariableAction
+  const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();
+
   for (auto & vn : var_names)
   {
     const std::string class_name = "AddAuxVariableAction";
@@ -66,6 +70,13 @@ SubChannelAddVariablesAction::act()
     std::shared_ptr<Action> action =
         std::static_pointer_cast<Action>(_action_factory.create(class_name, vn, params));
 
-    _awh.addActionBlock(action);
+    //  Avoid trying (and failing) to override the user variable selection
+    bool add_action = true;
+    for (const auto aux_action : aux_actions)
+      if (aux_action->name() == vn)
+        add_action = false;
+
+    if (add_action)
+      _awh.addActionBlock(action);
   }
 }
