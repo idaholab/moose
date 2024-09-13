@@ -22,18 +22,13 @@ MultiSpeciesDiffusionCG::validParams()
   InputParameters params = MultiSpeciesDiffusionPhysicsBase::validParams();
   params.addClassDescription("Discretizes diffusion equations for several species with the "
                              "continuous Galerkin finite element method");
-  params.addParam<bool>(
-      "use_automatic_differentiation",
-      true,
-      "Whether to use automatic differentiation for all the terms in the equation");
   params.transferParam<MooseEnum>(MooseVariableBase::validParams(), "order", "variable_order");
 
   return params;
 }
 
 MultiSpeciesDiffusionCG::MultiSpeciesDiffusionCG(const InputParameters & parameters)
-  : MultiSpeciesDiffusionPhysicsBase(parameters),
-    _use_ad(getParam<bool>("use_automatic_differentiation"))
+  : MultiSpeciesDiffusionPhysicsBase(parameters)
 {
 }
 

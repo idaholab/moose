@@ -61,6 +61,11 @@ MultiSpeciesDiffusionPhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "preconditioning", pc_options, "Which preconditioning to use for this Physics");
 
+  params.addParam<bool>(
+      "use_automatic_differentiation",
+      true,
+      "Whether to use automatic differentiation for all the terms in the equation");
+
   return params;
 }
 
@@ -70,7 +75,8 @@ MultiSpeciesDiffusionPhysicsBase::MultiSpeciesDiffusionPhysicsBase(
     _species_names(getParam<std::vector<VariableName>>("species")),
     _num_species(_species_names.size()),
     _neumann_boundaries(getParam<std::vector<std::vector<BoundaryName>>>("neumann_boundaries")),
-    _dirichlet_boundaries(getParam<std::vector<std::vector<BoundaryName>>>("dirichlet_boundaries"))
+    _dirichlet_boundaries(getParam<std::vector<std::vector<BoundaryName>>>("dirichlet_boundaries")),
+    _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
   // Keep track of variables
   for (const auto & var_name : _species_names)
@@ -117,7 +123,8 @@ MultiSpeciesDiffusionPhysicsBase::addPostprocessors()
          getParam<std::vector<BoundaryName>>("compute_diffusive_fluxes_on"))
     {
       // Create the boundary integration of the flux
-      const std::string pp_type = "SideDiffusiveFluxIntegral";
+      const std::string pp_type =
+          _use_ad ? "ADSideDiffusiveFluxIntegral" : "SideDiffusiveFluxIntegral";
       auto params = _factory.getValidParams(pp_type);
       params.set<std::vector<VariableName>>("variable") = {var_name};
       // FE variables require matprops for this postprocessor at the moment
@@ -134,7 +141,8 @@ MultiSpeciesDiffusionPhysicsBase::addPostprocessors()
       // Default to maximum computation
       params.set<ExecFlagEnum>("execute_on") = {
           EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR, EXEC_LINEAR};
-      getProblem().addPostprocessor(pp_type, prefix() + "diffusive_flux_" + boundary_name, params);
+      getProblem().addPostprocessor(
+          pp_type, prefix() + "diffusive_flux_" + var_name + "_" + boundary_name, params);
     }
   }
 }

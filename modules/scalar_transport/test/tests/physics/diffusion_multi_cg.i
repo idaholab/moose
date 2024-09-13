@@ -43,6 +43,9 @@
         boundary_values = '2 value_pp;
                            2 value_pp value_function value_variable;
                            2 value_pp'
+
+        # Add some postprocessing
+        compute_diffusive_fluxes_on = 'right left top'
       []
     []
   []
@@ -50,7 +53,7 @@
 
 [Materials]
   [diff_coeffs]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'da db'
     prop_values = '1 2'
   []

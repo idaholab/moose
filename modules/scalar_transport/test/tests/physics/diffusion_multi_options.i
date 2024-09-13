@@ -23,7 +23,7 @@
         # A and C have the same equation, on purpose
         species = 'A B C'
 
-        diffusivity_functor = 'da db 1'
+        diffusivity_functors = 'da db 1'
 
         source_functors = 'heat_pp heat_var heat_function'
         source_coefs = '1 2 1'
@@ -43,9 +43,6 @@
         boundary_values = '2 value_pp;
                            2 value_pp value_function value_variable;
                            2 value_pp'
-
-        # Add some postprocessing
-        compute_diffusive_fluxes_on = true
       []
     []
   []
