@@ -49,9 +49,9 @@ To access all MOOSE related modules, you must first load the `use.moose` module.
 container modules are then located within the `moose-dev-MPI` modules, where `MPI` denotes the variant
 of MPI is used. The version of these `moose-dev-MPI` modules used are the versions described by
 the versioner script explained in the [#versioning] section. Currently, the only deployed variant is
-`openmpi`, i.e. the development container modulethat should be used is `moose-dev-openmpi`.
+`openmpi`, i.e. the development container module that should be used is `moose-dev-openmpi`.
 
-With this, the containeried development environment is loaded with the following:
+With this, the containerized development environment is loaded with the following:
 
 !versioner! code
 module load use.moose moose-dev-openmpi/__VERSIONER_VERSION_MOOSE_DEV__
@@ -115,10 +115,10 @@ moose-dev-shell
 mpiexec -n 2 /path/to/your/application-opt -i ...
 !versioner-end!
 
-When you are running on multiple hosts (i.e., in a HPC job) you must use the "execute"
+When you are running on multiple hosts (i.e., in an HPC job) you must use the "execute"
 method to run your application as described above. This is done by appending the command
-`moose-dev-exec` before the path to the binary of your application. That is, within a HPC
-job submission script or within a HPC job interactive session, you will run your application
+`moose-dev-exec` before the path to the binary of your application. That is, within an HPC
+job submission script or within an HPC job interactive session, you will run your application
 with:
 
 !versioner! code
