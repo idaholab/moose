@@ -28,7 +28,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # Load the previous results
         with open(os.path.join(output_dir, '.previous_test_results.json')) as f:
             results = json.load(f)
-        test_results = results['TESTS']
+        test_results = results['tests']
         # We should only have one test spec
         self.assertEqual(1, len(test_results))
         # The test spec should be in the results
@@ -43,7 +43,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.assertIn(test_name_short, test_spec_results)
             test_results = test_spec_results[test_name_short]
             # Get the output files from the test spec
-            result_output_files = test_results['OUTPUT_FILES']
+            result_output_files = test_results['output_files']
             # Make sure each output file exists and is set in the results file
             for name in output_object_names:
                 output_path = f'{output_base_path}/{test}.{name}_out.txt'
