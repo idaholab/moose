@@ -71,7 +71,7 @@
     requirement = 'The system shall be able to output postprocessor data after solving multiple solver systems.'
   []
   [restart]
-    requirement = 'The system shall be able to restart from an exodus file containing multiple nonlinear variables and multiple nonlinear systems'
+    requirement = 'The system shall be able to restart multiple nonlinear variables from different nonlinear systems from an exodus file'
     issues = '#26580'
     [restart_problem]
       type = Exodiff
