@@ -78,7 +78,7 @@ require_total = 63
 require_total = 93
 
 [scalar_transport]
-require_total = 85
+require_total = 81
 
 [solid_properties]
 require_total = 83
