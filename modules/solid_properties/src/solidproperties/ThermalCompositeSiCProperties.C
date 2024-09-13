@@ -46,7 +46,7 @@ ThermalCompositeSiCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_d
 }
 
 Real
-ThermalCompositeSiCProperties::e_from_T(const Real & T) const
+ThermalCompositeSiCProperties::cp_integral(const Real & T) const
 {
   return _c1 * T + 0.5 * _c2 * Utility::pow<2>(T) - _c3 / 3.0 * Utility::pow<3>(T) + _c4 / T;
 }

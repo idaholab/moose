@@ -70,7 +70,7 @@ ThermalGraphiteProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) c
 }
 
 Real
-ThermalGraphiteProperties::e_from_T(const Real & T) const
+ThermalGraphiteProperties::cp_integral(const Real & T) const
 {
   switch (_grade)
   {

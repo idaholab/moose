@@ -51,7 +51,7 @@ TEST_F(ThermalCompositeSiCPropertiesTest, cp)
 TEST_F(ThermalCompositeSiCPropertiesTest, e)
 {
   const Real T = 800.0;
-  REL_TEST(_sp1->e_from_T(T), 887629.6306666667, REL_TOL_SAVED_VALUE);
+  REL_TEST(_sp1->e_from_T(T), 504301.09074042423, REL_TOL_SAVED_VALUE);
   SPECIFIC_INTERNAL_ENERGY_DERIVATIVE_CONSISTENCY_TEST(_sp1, T, 1e-6, 1e-6);
 }
 

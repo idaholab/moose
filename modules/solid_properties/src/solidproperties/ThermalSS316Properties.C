@@ -39,7 +39,7 @@ ThermalSS316Properties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) cons
 }
 
 Real
-ThermalSS316Properties::e_from_T(const Real & T) const
+ThermalSS316Properties::cp_integral(const Real & T) const
 {
   return 0.5 * _c1 * T * T + _c2 * T;
 }

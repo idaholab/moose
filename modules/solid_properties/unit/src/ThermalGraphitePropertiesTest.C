@@ -51,7 +51,7 @@ TEST_F(ThermalGraphitePropertiesTest, cp)
 TEST_F(ThermalGraphitePropertiesTest, e)
 {
   const Real T = 800.0;
-  REL_TEST(_sp1->e_from_T(T), -534364.0304404178, REL_TOL_SAVED_VALUE);
+  REL_TEST(_sp1->e_from_T(T), 648167.7112224712, REL_TOL_SAVED_VALUE);
   SPECIFIC_INTERNAL_ENERGY_DERIVATIVE_CONSISTENCY_TEST(_sp1, T, 1e-6, 1e-6);
 }
 

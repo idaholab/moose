@@ -33,23 +33,37 @@ provides the value $y(T)$ and its derivative $y'(T)$ using an `ADReal` input val
 
 Thus both AD and non-AD interfaces are available. Derived classes are only responsible
 for overriding the non-AD interfaces for each property. The AD interfaces are
-implemented by default by combining the two non-AD interfaces. Also note that
-the `void e_from_T(const Real & T, Real & e, Real & de_dT) const` interface is
-not virtual and has a definition already, obtained by taking advantage of the
-definition of isobaric specific heat capacity,
+implemented by default by combining the two non-AD interfaces.
+
+Note that the `e_from_T` interfaces should not be overridden because they have
+generic implementations, and the non-AD interfaces are not even virtual.
+Instead, derived classes must override the following:
+
+```
+Real cp_integral(const Real & T) const
+```
+
+which corresponds to the indefinite integral $C(T)$ of $c_p(T)$, minus the
+constant of integration:
 
 !equation
-c_p \equiv \left.\frac{\partial e}{\partial T}\right|_v \,.
+C(T) = \int c_p(T) dT \,.
 
-Therefore this interface should not and cannot be overridden in child classes.
-Note that the above definition for $c_p$ can also give a definition for $e(T)$:
+Due to the definition of the isobaric specific heat capacity,
 
 !equation
-e(T) - e(T_0) = \int\limits_{T_0}^T c_p(T') dT' \,.
+c_p \equiv \left.\frac{\partial e}{\partial T}\right|_v \,,
 
-Note that this requires a decision for a reference temperature $T_0$, which may
-be taken to be 0 K (absolute zero), or it may be any other value. This is
-important to note when comparing to external property tables, which each may use
-a particular reference value.
+the specific internal energy can be expressed as
+
+!equation
+e(T) - e(T_0) = \int\limits_{T_0}^T c_p(T') dT' = C(T) - C(T_0) \,,
+
+where $T_0$ is the temperature at which the specific internal energy is assumed
+to be zero. This is a convention supplied by the user using the parameter
+[!param](/SolidProperties/ThermalSS316Properties/T_zero_e). By default, this
+is taken to be at standard temperature, 273.15 K. Note that this is important
+for comparing specific internal energy values to external sources, which may
+be based on different reference temperatures.
 
 !bibtex bibliography

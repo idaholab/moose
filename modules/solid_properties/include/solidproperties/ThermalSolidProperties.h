@@ -93,9 +93,21 @@ public:
   propfunc(cp)
   propfunc(rho)
 
-  propfuncNonADValueOnly(e)
-  // Note that this interface does not need to be virtual; its default definition
-  // should not need to be overridden
+  /**
+   * Computes the integral of isobaric specific heat capacity w.r.t. temperature,
+   * from the zero-e reference temperature, provided by a user parameter.
+   *
+   * Note that the constant of integration is not included. This function is
+   * called in the \c e_from_T(T) method.
+   */
+  virtual Real cp_integral(const Real & /*T*/) const
+  {
+    mooseError(__PRETTY_FUNCTION__, " not implemented.");
+  }
+
+  // Specific internal energy methods; these designed to not be virtual; only
+  // cp_integral(T) needs to be implemented.
+  Real e_from_T(const Real & T) const;
   void e_from_T(const Real & T, Real & val, Real & dedT) const;
   propfuncAD(e)
   ///@}
@@ -115,6 +127,10 @@ public:
     else
       mooseError(std::forward<Args>(args)...);
   }
+
+protected:
+  /// Temperature at which the specific internal energy is assumed to be zero
+  const Real _T_zero_e;
 };
 
 #pragma GCC diagnostic pop

@@ -26,8 +26,8 @@ public:
   virtual Real cp_from_T(const Real & T) const override;
   virtual void cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const override;
 
-  using ThermalSolidProperties::e_from_T;
-  virtual Real e_from_T(const Real & T) const override;
+  using ThermalSolidProperties::cp_integral;
+  virtual Real cp_integral(const Real & T) const override;
 
   using ThermalSolidProperties::rho_from_T;
   virtual Real rho_from_T(const Real & T) const override;

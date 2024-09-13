@@ -51,7 +51,7 @@ ThermalMonolithicSiCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_
 }
 
 Real
-ThermalMonolithicSiCProperties::e_from_T(const Real & T) const
+ThermalMonolithicSiCProperties::cp_integral(const Real & T) const
 {
   return _c1 * T + 0.5 * _c2 * Utility::pow<2>(T) - _c3 / 3.0 * Utility::pow<3>(T) + _c4 / T;
 }
