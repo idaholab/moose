@@ -178,7 +178,7 @@ class Tester(MooseObject, OutputInterface):
 
     def getResultsEntry(self, options, create, graceful=False):
         """ Get the entry in the results storage for this tester """
-        tests = options.results_storage['TESTS']
+        tests = options.results_storage['tests']
 
         test_dir = self.getTestDir()
         test_dir_entry = tests.get(test_dir)
@@ -206,9 +206,9 @@ class Tester(MooseObject, OutputInterface):
         test_dir_entry, test_entry = self.getResultsEntry(options, False, True)
         status = (self.test_status.createStatus(), '', '')
         if test_entry:
-            status = (self.test_status.createStatus(str(test_entry['STATUS'])),
-                      str(test_entry['STATUS_MESSAGE']),
-                      test_entry['CAVEATS'])
+            status = (self.test_status.createStatus(str(test_entry['status'])),
+                      str(test_entry['status_message']),
+                      test_entry['caveats'])
         return (status)
 
     def getStatusMessage(self):

@@ -759,21 +759,21 @@ class Job(OutputInterface):
         joint_status = self.getJointStatus()
 
         # Base job data
-        job_data = {'NAME'                 : self.getTestNameShort(),
-                    'LONG_NAME'            : self.getTestName(),
-                    'TIMING'               : self.timer.totalTimes(),
-                    'STATUS'               : joint_status.status,
-                    'STATUS_MESSAGE'       : joint_status.message,
-                    'FAIL'                 : self.isFail(),
-                    'COLOR'                : joint_status.color,
-                    'CAVEATS'              : list(self.getCaveats()),
-                    'TESTER_OUTPUT_FILES'  : self.getOutputFiles(self.options),
-                    'INPUT_FILE'           : self.getInputFile(),
-                    'COMMAND'              : self.getCommand()}
+        job_data = {'name'                 : self.getTestNameShort(),
+                    'long_name'            : self.getTestName(),
+                    'timing'               : self.timer.totalTimes(),
+                    'status'               : joint_status.status,
+                    'status_message'       : joint_status.message,
+                    'fail'                 : self.isFail(),
+                    'color'                : joint_status.color,
+                    'caveats'              : list(self.getCaveats()),
+                    'tester_output_files'  : self.getOutputFiles(self.options),
+                    'input_file'           : self.getInputFile(),
+                    'command'              : self.getCommand()}
         if self.hasSeperateOutput():
-            job_data['OUTPUT_FILES'] = self.getCombinedSeparateOutputPaths()
+            job_data['output_files'] = self.getCombinedSeparateOutputPaths()
         else:
-            job_data['OUTPUT'] = self.getAllOutput()
+            job_data['output'] = self.getAllOutput()
 
         # Extend with data from the scheduler, if any
         job_data.update(scheduler.appendResultFileJob(self))
@@ -799,13 +799,13 @@ class Job(OutputInterface):
         # Set the previous times
         self.timer.reset()
         time_now = Timer.time_now()
-        for name, total_time in test_entry['TIMING'].items():
+        for name, total_time in test_entry['timing'].items():
             self.timer.start(name, time_now)
             self.timer.stop(name, time_now + total_time)
 
         # Load the output
-        output_files = test_entry.get('OUTPUT_FILES')
-        output = test_entry.get('OUTPUT')
+        output_files = test_entry.get('output_files')
+        output = test_entry.get('output')
         for name, object in self.getOutputObjects().items():
             if output_files: # --sep-files
                 object.setSeparateOutputPath(output_files[name])

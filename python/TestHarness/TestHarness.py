@@ -836,7 +836,7 @@ class TestHarness:
                 print(f'ERROR: Failed to load result {self.options.results_file}')
                 raise
 
-            if self.options.results_storage['INCOMPLETE']:
+            if self.options.results_storage['incomplete']:
                 print(f'ERROR: The previous result {self.options.results_file} is incomplete!')
                 sys.exit(1)
 
@@ -844,7 +844,7 @@ class TestHarness:
             _input_file_name = 'tests'
             if self.options.input_file_name:
                 _input_file_name = self.options.input_file_name
-            self.options.input_file_name = self.options.results_storage.get('INPUT_FILE_NAME', _input_file_name)
+            self.options.input_file_name = self.options.results_storage.get('input_file_name', _input_file_name)
 
             # Done working with existing storage
             return
@@ -858,32 +858,32 @@ class TestHarness:
         storage = self.options.results_storage
 
         # Record the input file name that was used
-        storage['INPUT_FILE_NAME'] = self.options.input_file_name
+        storage['input_file_name'] = self.options.input_file_name
 
         # Record that we are using --sep-files
-        storage['SEP_FILES'] = self.options.sep_files
+        storage['sep_files'] = self.options.sep_files
 
         # Record the Scheduler Plugin used
-        storage['SCHEDULER'] = self.scheduler.__class__.__name__
+        storage['scheduler'] = self.scheduler.__class__.__name__
 
         # Record information on the host we can ran on
-        storage['HOSTNAME'] = socket.gethostname()
-        storage['USER'] = getpass.getuser()
-        storage['TESTHARNESS_PATH'] = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-        storage['TESTHARNESS_ARGS'] = sys.argv[1:]
-        storage['MOOSE_DIR'] = self.moose_dir
+        storage['hostname'] = socket.gethostname()
+        storage['user'] = getpass.getuser()
+        storage['testharness_path'] = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+        storage['testharness_args'] = sys.argv[1:]
+        storage['moose_dir'] = self.moose_dir
 
         # Record when the run began
-        storage['TIME'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        storage['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # Record any additional data from the scheduler
         storage.update(self.scheduler.appendResultFileHeader())
 
         # Record whether or not the storage is incomplete
-        storage['INCOMPLETE'] = True
+        storage['incomplete'] = True
 
         # Empty storage for the tests
-        storage['TESTS'] = {}
+        storage['tests'] = {}
 
         # Write the headers
         self.writeResults()
@@ -898,7 +898,7 @@ class TestHarness:
             raise Exception('Should not write results')
 
         # Make it as complete (run is done)
-        self.options.results_storage['INCOMPLETE'] = not complete
+        self.options.results_storage['incomplete'] = not complete
 
         # Store to a temporary file so that we always have a working file
         file = self.options.results_file
