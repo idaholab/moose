@@ -110,7 +110,9 @@ MultiSpeciesDiffusionPhysicsBase::addPreconditioning()
 void
 MultiSpeciesDiffusionPhysicsBase::addPostprocessors()
 {
-  for (const auto & var_name : _species_names)
+  for (const auto i : index_range(_species_names))
+  {
+    const auto & var_name = _species_names[i];
     for (const auto & boundary_name :
          getParam<std::vector<BoundaryName>>("compute_diffusive_fluxes_on"))
     {
@@ -118,12 +120,14 @@ MultiSpeciesDiffusionPhysicsBase::addPostprocessors()
       const std::string pp_type = "SideDiffusiveFluxIntegral";
       auto params = _factory.getValidParams(pp_type);
       params.set<std::vector<VariableName>>("variable") = {var_name};
-      if (isParamValid("diffusivity_matprop"))
+      // FE variables require matprops for this postprocessor at the moment
+      if (isParamValid("diffusivity_matprops"))
         params.set<MaterialPropertyName>("diffusivity") =
-            getParam<MaterialPropertyName>("diffusivity_matprop");
-      else if (isParamValid("diffusivity_functor"))
+            getParam<std::vector<MaterialPropertyName>>("diffusivity_matprops")[i];
+      // FV variables require functors
+      else if (isParamValid("diffusivity_functors"))
         params.set<MooseFunctorName>("functor_diffusivity") =
-            getParam<MooseFunctorName>("diffusivity_functor");
+            getParam<std::vector<MooseFunctorName>>("diffusivity_functors")[i];
       else
         params.set<MooseFunctorName>("functor_diffusivity") = "1";
       params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
@@ -132,6 +136,7 @@ MultiSpeciesDiffusionPhysicsBase::addPostprocessors()
           EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR, EXEC_LINEAR};
       getProblem().addPostprocessor(pp_type, prefix() + "diffusive_flux_" + boundary_name, params);
     }
+  }
 }
 
 void
