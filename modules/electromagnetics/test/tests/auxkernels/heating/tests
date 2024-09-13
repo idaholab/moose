@@ -1,0 +1,16 @@
+[Tests]
+  [aux_microwave_heating]
+    type = Exodiff
+    input = aux_microwave_heating.i
+    exodiff = aux_microwave_heating_out.e
+    # cli_args = ''
+    # requirement = ''
+  []
+  [aux_current_heating]
+    type = Exodiff
+    input = aux_current_source_heating.i
+    exodiff = aux_current_source_heating_out.e
+    # cli_args = ''
+    # requirement = ''
+  []
+[]

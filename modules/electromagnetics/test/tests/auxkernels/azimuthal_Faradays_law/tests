@@ -1,0 +1,16 @@
+[Tests]
+  [scalar_azim_magnetic_time_deriv]
+    type = Exodiff
+    input = scalar_azim_magnetic_time_deriv.i
+    exodiff = scalar_azim_magnetic_time_deriv_out.e
+    # cli_args = ''
+    # requirement = ''
+  []
+  [vector_azim_magnetic_time_deriv]
+    type = Exodiff
+    input = vector_azim_magnetic_time_deriv.i
+    exodiff = vector_azim_magnetic_time_deriv_out.e
+    # cli_args = ''
+    # requirement = ''
+  []
+[]

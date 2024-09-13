@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from sympy import * # use star so all functions are available to supplied strings
-from sympy.vector import divergence, gradient, Vector, CoordSys3D
+from sympy.vector import divergence, curl, gradient, Vector, CoordSys3D
 from mms.fparser import print_fparser
 from mms.moosefunction import print_moose
 
@@ -122,6 +122,7 @@ def evaluate(pde, soln, variable='u',
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
     pde = pde.replace('div', 'divergence')
+    pde = pde.replace('curl', 'curl')
     _func_ = eval(pde)
     if negative:
         _func_ = -1 * _func_
