@@ -23,6 +23,7 @@ SODIUM_FP_CONTENT         := $(shell ls $(SODIUM_FP_DIR) 2> /dev/null)
 CAMEL_CASE_NAME_save := ${CAMEL_CASE_NAME}
 app_BASE_DIR_save := ${app_BASE_DIR}
 app_HEADER_save := ${app_HEADER}
+GEN_REVISION_save := ${GEN_REVISION}
 
 # AIR
 ifneq ($(AIR_FP_CONTENT),)
@@ -114,4 +115,5 @@ ifneq ($(AIR_FP_CONTENT)$(CARBON_DIOXIDE_FP_CONTENT)$(HELIUM_FP_CONTENT)$(NITROG
   CAMEL_CASE_NAME := ${CAMEL_CASE_NAME_save}
 	app_BASE_DIR := ${app_BASE_DIR_save}
 	app_HEADER := ${app_HEADER_save}
+	GEN_REVISION := ${GEN_REVISION_save}
 endif
