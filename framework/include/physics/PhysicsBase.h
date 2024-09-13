@@ -128,6 +128,9 @@ protected:
     return *_problem;
   }
 
+  /// Additional initialization work that should happen very early, as soon as the problem is created
+  virtual void initializePhysicsAdditional() {}
+
   /// Tell the app if we want to use Exodus restart
   void prepareCopyVariablesFromMesh() const;
   /**
@@ -199,8 +202,6 @@ private:
 
   /// Process some parameters that require the problem to be created. Executed on init_physics
   void initializePhysics();
-  /// Additional initialization work that should happen very early, as soon as the problem is created
-  virtual void initializePhysicsAdditional() {}
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
 
