@@ -2,21 +2,54 @@
 
 This is the base class for providing thermal solid properties
 as a function of temperature.
-This class defines functions to compute the following thermal properties
-as a function of temperature:
+This class defines functions to compute the following thermal properties,
+which are all assumed to be functions of temperature only:
 
-- compute isobaric specific heat - `Real cp_from_T(const Real & T)`
-- compute thermal conductivity - `Real k_from_T(const Real & T)`
-- compute density - `Real rho_from_T(const Real & T)`
+- `cp`: isobaric specific heat, $c_p$
+- `e`: specific internal energy, $e$
+- `k`: thermal conductivity, $k$
+- `rho`: density, $\rho$
 
-Functions to compute derivatives of these properties as a function of temperature
-are also available:
+For each of these, the following methods are available, where `y` should be
+replaced by the respective property name given in the list above:
 
-- compute isobaric specific heat and its temperature derivative - `void cp_from_T(const Real & T, Real & cp, Real & dcp_dT)`
-- compute thermal conductivity and its temperature derivative - `void k_from_T(const Real & T, Real & k, Real & dk_dT)`
-- compute density and its temperature derivative - `void rho_from_T(const Real & T, Real & rho, Real & drho_dT)`
+```
+Real y_from_T(const Real & T) const
+```
 
-To create a new userobject providing thermal properties, derive from this
-userobject and specify implementations of the above functions.
+provides the value $y(T)$ using a `Real` input value for $T$.
+
+```
+void y_from_T(const Real & T, Real & y, Real & dy_dT) const
+```
+
+provides the value $y(T)$ and its derivative $y'(T)$ using a `Real` input value for $T$.
+
+```
+ADReal y_from_T(const ADReal & T) const
+```
+
+provides the value $y(T)$ and its derivative $y'(T)$ using an `ADReal` input value for $T$.
+
+Thus both AD and non-AD interfaces are available. Derived classes are only responsible
+for overriding the non-AD interfaces for each property. The AD interfaces are
+implemented by default by combining the two non-AD interfaces. Also note that
+the `void e_from_T(const Real & T, Real & e, Real & de_dT) const` interface is
+not virtual and has a definition already, obtained by taking advantage of the
+definition of isobaric specific heat capacity,
+
+!equation
+c_p \equiv \left.\frac{\partial e}{\partial T}\right|_v \,.
+
+Therefore this interface should not and cannot be overridden in child classes.
+Note that the above definition for $c_p$ can also give a definition for $e(T)$:
+
+!equation
+e(T) - e(T_0) = \int\limits_{T_0}^T c_p(T') dT' \,.
+
+Note that this requires a decision for a reference temperature $T_0$, which may
+be taken to be 0 K (absolute zero), or it may be any other value. This is
+important to note when comparing to external property tables, which each may use
+a particular reference value.
 
 !bibtex bibliography

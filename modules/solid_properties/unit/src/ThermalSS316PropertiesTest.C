@@ -45,6 +45,17 @@ TEST_F(ThermalSS316PropertiesTest, cp)
 }
 
 /**
+ * Test that the specific internal energy and its derivatives are
+ * correctly computed.
+ */
+TEST_F(ThermalSS316PropertiesTest, e)
+{
+  const Real T = 800.0;
+  REL_TEST(_sp->e_from_T(T), 400880.0, REL_TOL_SAVED_VALUE);
+  SPECIFIC_INTERNAL_ENERGY_DERIVATIVE_CONSISTENCY_TEST(_sp, T, 1e-6, 1e-6);
+}
+
+/**
  * Test that the density and its derivatives are
  * correctly computed.
  */

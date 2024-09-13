@@ -20,3 +20,10 @@ ThermalSolidProperties::ThermalSolidProperties(const InputParameters & parameter
   : SolidProperties(parameters)
 {
 }
+
+void
+ThermalSolidProperties::e_from_T(const Real & T, Real & e, Real & de_dT) const
+{
+  e = e_from_T(T);
+  de_dT = cp_from_T(T);
+}

@@ -45,6 +45,17 @@ TEST_F(ThermalGraphitePropertiesTest, cp)
 }
 
 /**
+ * Test that the specific internal energy and its derivatives are
+ * correctly computed.
+ */
+TEST_F(ThermalGraphitePropertiesTest, e)
+{
+  const Real T = 800.0;
+  REL_TEST(_sp1->e_from_T(T), -534364.0304404178, REL_TOL_SAVED_VALUE);
+  SPECIFIC_INTERNAL_ENERGY_DERIVATIVE_CONSISTENCY_TEST(_sp1, T, 1e-6, 1e-6);
+}
+
+/**
  * Test that the density and its derivatives are
  * correctly computed.
  */

@@ -55,3 +55,11 @@
   {                                                                                                \
     DERIV_TEST_CUSTOM_PERTURBATION(f, a, tol, REL_PERTURBATION);                                   \
   }
+
+// Macro for testing that the definition of the derivative of specific internal energy is
+// consistent with the definition of the isobaric specific heat capacity
+#define SPECIFIC_INTERNAL_ENERGY_DERIVATIVE_CONSISTENCY_TEST(sp, T, dT, rel_tol)                   \
+  {                                                                                                \
+    const Real de_dT_fd = (sp->e_from_T(T + dT) - sp->e_from_T(T - dT)) / (2 * dT);                \
+    REL_TEST(sp->cp_from_T(T), de_dT_fd, rel_tol);                                                 \
+  }
