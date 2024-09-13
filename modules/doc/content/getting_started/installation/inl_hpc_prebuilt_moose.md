@@ -21,20 +21,17 @@ Load the following modules:
 !style-end!
 
 ```bash
-module load use.moose moose-apps moose
+module load use.moose moose-openmpi
 ```
 
 !alert warning
 If you receive an error about modules not being known, please make sure you are logged into either
 Sawtooth or Lemhi.
 
-!alert tip
-In generally, Sawtooth may have a more up-to-date version.
-
 Once loaded, `moose` becomes available. You need now only provide input files to run simulations.
 Example input files are also available while this module is loaded.
 
-!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$MOOSE_DIR/moose/share/moose TUTORIAL=heat_conduction
+!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$MOOSE_DIR/moose/share/moose TUTORIAL=heat_transfer
 
 ## View Results
 
