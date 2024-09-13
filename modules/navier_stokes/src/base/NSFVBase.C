@@ -202,7 +202,7 @@ NSFVBase::commonFluidEnergyEquationParams()
 
   params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
-  MultiMooseEnum en_inlet_types("fixed-temperature flux-mass flux-velocity heatflux");
+  MultiMooseEnum en_inlet_types(getValidEnergyInletTypes());
   params.addParam<MultiMooseEnum>("energy_inlet_types",
                                   en_inlet_types,
                                   "Types for the inlet boundaries for the energy equation.");
@@ -212,7 +212,7 @@ NSFVBase::commonFluidEnergyEquationParams()
       std::vector<MooseFunctorName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
-  MultiMooseEnum en_wall_types("fixed-temperature heatflux wallfunction");
+  MultiMooseEnum en_wall_types(getValidEnergyWallTypes());
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 

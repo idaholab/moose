@@ -34,4 +34,10 @@ public:
   {
     return "fixed-pressure zero-gradient fixed-pressure-zero-gradient";
   }
+  static std::string getValidEnergyInletTypes()
+  {
+    return "fixed-temperature flux-mass flux-velocity heatflux";
+  }
+
+  static std::string getValidEnergyWallTypes() { return "fixed-temperature heatflux"; }
 };
