@@ -2,21 +2,36 @@
 
 !syntax description /UserObjects/ExecuteNEML2Model
 
+!alert note
+Users are +NOT+ expected to directly use this object in an input file. Instead, it is always recommended to use the [NEML2 action](syntax/NEML2/index.md).
+
 ## Description
 
-This object uses the specified NEML2 material model to perform mesh-wise (or subdomain-wise) batched
-material update.
+This object uses the specified NEML2 material model to perform mesh-wise (or subdomain-wise) batched material update.
 
-Each NEML2 model +input+ is gathered by a [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) or [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md) user object given in [!param](/UserObjects/ExecuteNEML2Model/gather_uos).
+Each NEML2 model +input variable+ is gathered from MOOSE by a `MOOSEToNEML2` user object given in [!param](/UserObjects/ExecuteNEML2Model/gatherers). Optionally, NEML2 model +parameters+ can also be gathered from MOOSE by `MOOSEToNEML2` user objects given in [!param](/UserObjects/ExecuteNEML2Model/param_gatherers).
 
-Each model +output+ can be retireved by a [NEML2ToMOOSEMaterialProperty](NEML2ToMOOSEMaterialProperty.md) material object.
+Currently, three types of `MOOSEToNEML2` user objects (gatherers) are available:
 
-## Example Input Syntax
+- [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) gathers material property stored at each quadrature point.
+- [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md) gathers (auxiliary) variables interpolated at quadrature points.
+- [MOOSEPostprocessorToNEML2](MOOSEPostprocessorToNEML2.md) gathers postprocessor value broadcast to all quadrature points.
 
-!listing modules/solid_mechanics/test/tests/neml2/neml2_to_moose_material.i block=UserObjects/model
+Each model +output+ and its +derivatives+ with respect to input variables and model parameters can be retireved by a [NEML2ToMOOSEMaterialProperty](NEML2ToMOOSEMaterialProperty.md) material object.
+
+## NEML2 model execution
+
+The actual execution of the NEML2 model takes place in the `finalize()` method. The model execution involves five steps:
+
+1. Re-allocate the model, if necessary
+2. Fill out model input variables and parameters
+3. Apply the predictor
+4. Solve, i.e., perform the material update
+5. Extract model output variables and their derivatives
+
+Note that the model is only re-allocated when the gathered batch size and the model's batch size do not match, which could happen
+
+- Before the very first material update;
+- After a mesh-change event which results in a change in the number of quadrature points in the operating subdomain.
 
 !syntax parameters /UserObjects/ExecuteNEML2Model
-
-!syntax inputs /UserObjects/ExecuteNEML2Model
-
-!syntax children /UserObjects/ExecuteNEML2Model

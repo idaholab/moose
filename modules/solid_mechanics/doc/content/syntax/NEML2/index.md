@@ -2,9 +2,11 @@
 
 The `[NEML2]` block in the MOOSE input file is the entry point for defining NEML2 material model(s). All parameters are listed at [the bottom of the page](syntax/NEML2/index.md#syntax-list).
 
+!alert note
 This page is user-facing, i.e., the [Input file syntax](syntax/NEML2/index.md#input-syntax) section explains how to write the MOOSE input file in order to connect MOOSE to NEML2 for material modeling.
 
-For developers, please refer to the [NEML2Action](NEML2Action.md) and [NEML2ActionCommon](NEML2ActionCommon.md) pages regarding what objects are constructed by underlying Action.
+!alert note
+For developers, please refer to the [NEML2Action](NEML2Action.md) and [NEML2ActionCommon](NEML2ActionCommon.md) pages regarding what objects are constructed by the underlying Action.
 
 ## Input File Syntax id=input-syntax
 
@@ -37,7 +39,7 @@ In each sub-block, there are a total of 6 groups of parameters that can be speci
 
 The configuration of model is controlled by parameters such as [!param](/NEML2/model), [!param](/NEML2/verbose), [!param](/NEML2/device), etc., each of which is explained in the syntax documentation at the bottom of the page.
 
-The other 5 groups of parameters are all related to data transfer between MOOSE and NEML2. The 2nd and the 3rd groups of parameters correspond to the transfer of data **from MOOSE to NEML2**. The 4th, 5th and the 6th groups of parameters correspond to the transfer of data **from NEML2 to MOOSE**.
+The other 5 groups of parameters are all related to data transfer between MOOSE and NEML2. The 2nd and the 3rd groups of parameters correspond to the transfer of data +from MOOSE to NEML2+. The 4th, 5th and the 6th groups of parameters correspond to the transfer of data +from NEML2 to MOOSE+.
 
 Each group has three parameters in the following form:
 
