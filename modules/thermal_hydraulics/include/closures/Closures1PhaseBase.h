@@ -19,6 +19,8 @@ class FlowChannelBase;
 class Closures1PhaseBase : public ClosuresBase
 {
 public:
+  static InputParameters validParams();
+
   Closures1PhaseBase(const InputParameters & params);
 
 protected:
@@ -38,7 +40,4 @@ protected:
    * @param[in] flow_channel   Flow channel component
    */
   void addAverageWallTemperatureMaterial(const FlowChannelBase & flow_channel) const;
-
-public:
-  static InputParameters validParams();
 };

@@ -9,6 +9,7 @@
 
 #include "Closures1PhaseSimple.h"
 #include "FlowModelSinglePhase.h"
+#include "THMWCNSFVFlowPhysics.h"
 #include "FlowChannel1Phase.h"
 #include "HeatTransfer1PhaseBase.h"
 
@@ -84,33 +85,52 @@ void
 Closures1PhaseSimple::addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
                                                   const FlowChannelBase & flow_channel)
 {
-  const HeatTransfer1PhaseBase & heat_transfer_1phase =
-      dynamic_cast<const HeatTransfer1PhaseBase &>(heat_transfer);
-  const FunctionName & Hw_fn_name = heat_transfer.getParam<FunctionName>("Hw");
-
+  if (_add_regular_materials)
   {
-    const std::string class_name = "ADGenericFunctionMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-    params.set<std::vector<std::string>>("prop_names") = {
-        heat_transfer_1phase.getWallHeatTransferCoefficient1PhaseName()};
-    params.set<std::vector<FunctionName>>("prop_values") = {Hw_fn_name};
-    _sim.addMaterial(
-        class_name, genName(heat_transfer.name(), "Hw_material", flow_channel.name()), params);
-  }
+    const HeatTransfer1PhaseBase & heat_transfer_1phase =
+        dynamic_cast<const HeatTransfer1PhaseBase &>(heat_transfer);
+    const FunctionName & Hw_fn_name = heat_transfer.getParam<FunctionName>("Hw");
 
-  heat_transfer.makeFunctionControllableIfConstant(Hw_fn_name, "Hw");
+    {
+      const std::string class_name = "ADGenericFunctionMaterial";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+      params.set<std::vector<std::string>>("prop_names") = {
+          heat_transfer_1phase.getWallHeatTransferCoefficient1PhaseName()};
+      params.set<std::vector<FunctionName>>("prop_values") = {Hw_fn_name};
+      _sim.addMaterial(
+          class_name, genName(heat_transfer.name(), "Hw_material", flow_channel.name()), params);
+    }
+
+    heat_transfer.makeFunctionControllableIfConstant(Hw_fn_name, "Hw");
+  }
+  // Nothing to do for functor materials, Hw is a function and can be used a functor directly
 }
 
 void
 Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(
     const FlowChannelBase & flow_channel) const
 {
-  const std::string class_name = "ADTemperatureWall3EqnMaterial";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-  params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
-  params.set<MaterialPropertyName>("q_wall") = FlowModel::HEAT_FLUX_WALL;
-  params.set<MaterialPropertyName>("Hw") = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-  _sim.addMaterial(class_name, genName(flow_channel.name(), "T_wall_mat"), params);
+  if (_add_regular_materials)
+  {
+    const std::string class_name = "ADTemperatureWall3EqnMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+    params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
+    params.set<MaterialPropertyName>("q_wall") = FlowModel::HEAT_FLUX_WALL;
+    params.set<MaterialPropertyName>("Hw") = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
+    _sim.addMaterial(class_name, genName(flow_channel.name(), "T_wall_mat"), params);
+  }
+
+  if (_add_functor_materials)
+  {
+    const std::string class_name = "ADParsedFunctorMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+    params.set<std::string>("property_name") = "T_wall";
+    params.set<std::string>("expression") = "q_wall / Hw + T_fluid";
+    params.set<std::vector<std::string>>("functor_names") = {"q_wall", "Hw", "T_fluid"};
+
+    _sim.addMaterial(class_name, genName(flow_channel.name(), "T_wall_mat"), params);
+  }
 }

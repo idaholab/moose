@@ -100,6 +100,11 @@ protected:
   /// Factory associated with the MooseApp
   Factory & _factory;
 
+  /// Whether to add regular materials for every material used in the closure
+  bool _add_regular_materials;
+  /// Whether to add functor materials for every material used in the closure
+  bool _add_functor_materials;
+
 public:
   static InputParameters validParams();
 };
