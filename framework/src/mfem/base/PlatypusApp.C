@@ -24,13 +24,12 @@ static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   // add base formulation
-  registerMooseObjectTask("add_mfem_formulation", MFEMFormulation, true);
-  registerSyntaxTask("AddFormulationAction", "Formulation", "add_mfem_formulation");
-  addTaskDependency("add_mfem_formulation", "init_mesh");
-  addTaskDependency("add_variable", "add_mfem_formulation");
-  addTaskDependency("add_aux_variable", "add_mfem_formulation");
-  addTaskDependency("add_elemental_field_variable", "add_mfem_formulation");
-  addTaskDependency("add_kernel", "add_mfem_formulation");
+  registerTask("add_mfem_problem_builder", true);
+  addTaskDependency("add_mfem_problem_builder", "init_mesh");
+  addTaskDependency("add_variable", "add_mfem_problem_builder");
+  addTaskDependency("add_aux_variable", "add_mfem_problem_builder");
+  addTaskDependency("add_elemental_field_variable", "add_mfem_problem_builder");
+  addTaskDependency("add_kernel", "add_mfem_problem_builder");
 
   // add coefficients
   registerMooseObjectTask("add_mfem_coefficients", MFEMCoefficient, false);
@@ -58,14 +57,14 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // add preconditioning.
   registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
-  addTaskDependency("add_mfem_preconditioner", "add_mfem_formulation");
+  addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_builder");
   addTaskDependency("add_mfem_preconditioner", "add_variable");
 
   // add solver.
   registerMooseObjectTask("add_mfem_solver", MFEMSolverBase, true);
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
   addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
-  addTaskDependency("add_mfem_solver", "add_mfem_formulation");
+  addTaskDependency("add_mfem_solver", "add_mfem_problem_builder");
 }
 
 void

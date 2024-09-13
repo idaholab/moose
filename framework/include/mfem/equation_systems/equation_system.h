@@ -28,6 +28,8 @@ public:
   // Names of all variables corresponding to gridfunctions. This may differ
   // from test_var_names when time derivatives are present.
   std::vector<std::string> _trial_var_names;
+  // Pointers to trial variables.
+  platypus::GridFunctions _trial_variables;
   // Names of all test variables corresponding to linear forms in this equation
   // system
   std::vector<std::string> _test_var_names;
@@ -45,8 +47,8 @@ public:
   virtual void AddTrialVariableNameIfMissing(const std::string & trial_var_name);
 
   // Add kernels.
-  void AddKernel(const std::string & test_var_name,
-                 std::shared_ptr<MFEMBilinearFormKernel> blf_kernel);
+  virtual void AddKernel(const std::string & test_var_name,
+                         std::shared_ptr<MFEMBilinearFormKernel> blf_kernel);
 
   void AddKernel(const std::string & test_var_name,
                  std::shared_ptr<MFEMLinearFormKernel> lf_kernel);
@@ -89,12 +91,31 @@ public:
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
+  /**
+   * Template method for storing kernels.
+   */
+  template <class T>
+  void addKernelToMap(std::shared_ptr<T> kernel,
+                      platypus::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & kernels_map)
+  {
+    auto test_var_name = kernel->getTestVariableName();
+    if (!kernels_map.Has(test_var_name))
+    {
+      // 1. Create kernels vector.
+      auto kernels = std::make_shared<std::vector<std::shared_ptr<T>>>();
+      // 2. Register with map to prevent leaks.
+      kernels_map.Register(test_var_name, std::move(kernels));
+    }
+    kernels_map.GetRef(test_var_name).push_back(std::move(kernel));
+  }
+
 protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
   // gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
+  std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
 
   mfem::Array2D<mfem::HypreParMatrix *> _h_blocks;
 
@@ -122,17 +143,24 @@ public:
   TimeDependentEquationSystem();
   ~TimeDependentEquationSystem() override = default;
 
-  static std::string GetTimeDerivativeName(std::string name)
-  {
-    return std::string("d") + name + std::string("_dt");
-  }
-
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 
   virtual void SetTimeStep(double dt);
   virtual void UpdateEquationSystem(platypus::BCMap & bc_map);
   mfem::ConstantCoefficient _dt_coef; // Coefficient for timestep scaling
   std::vector<std::string> _trial_var_time_derivative_names;
+
+  platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>
+      _td_blf_kernels_map;
+  // Container to store contributions to weak form of the form (F du/dt, v)
+  platypus::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+
+  virtual void AddKernel(const std::string & test_var_name,
+                         std::shared_ptr<MFEMBilinearFormKernel> blf_kernel) override;
+  virtual void BuildBilinearForms() override;
+  virtual void FormLinearSystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & truedXdt,
+                                mfem::BlockVector & trueRHS) override;
 };
 
 } // namespace platypus

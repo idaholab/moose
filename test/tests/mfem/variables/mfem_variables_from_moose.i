@@ -9,10 +9,6 @@
   device = "cpu"
 []
 
-[Formulation]
-  type = TransientCustomFormulation
-[]
-
 [Variables]
   [scalar_var]
     family = LAGRANGE
