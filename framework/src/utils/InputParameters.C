@@ -389,6 +389,15 @@ InputParameters::isParamValid(const std::string & name_in) const
   }
   else if (have_parameter<MultiMooseEnum>(name))
     return get<MultiMooseEnum>(name).isValid();
+  else if (have_parameter<std::vector<MultiMooseEnum>>(name))
+  {
+    for (auto it = get<std::vector<MultiMooseEnum>>(name).begin();
+         it != get<std::vector<MultiMooseEnum>>(name).end();
+         ++it)
+      if (!it->isValid())
+        return false;
+    return true;
+  }
   else if (have_parameter<ExecFlagEnum>(name))
     return get<ExecFlagEnum>(name).isValid();
   else
