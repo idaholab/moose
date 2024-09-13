@@ -2,13 +2,6 @@
 
 namespace platypus
 {
-
-std::string
-GetTimeDerivativeName(const std::string & name)
-{
-  return std::string("d") + name + std::string("_dt");
-}
-
 std::vector<std::string>
 GetTimeDerivativeNames(std::vector<std::string> gridfunction_names)
 {

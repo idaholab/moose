@@ -18,7 +18,7 @@
 []
 
 [Variables]
-  [diffused]
+  [temperature]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -38,13 +38,13 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = temperature
     boundary = '1'
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = temperature
     boundary = '2'
     coefficient = TopValue
   []
@@ -53,8 +53,8 @@
 [Materials]
   [Substance]
     type = MFEMGenericConstantMaterial
-    prop_names = diffusivity
-    prop_values = 1.0
+    prop_names = 'negative_thermal_conductivity volumetric_heat_capacity'
+    prop_values = '-1.0 1.0'
   []
 []
 
@@ -72,9 +72,14 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = diffused
-    coefficient = diffusivity
+    variable = temperature
+    coefficient = negative_thermal_conductivity
   []
+  [dT_dt]
+    type = MFEMTimeDerivativeMassKernel
+    variable = temperature
+    coefficient = volumetric_heat_capacity
+  []  
 []
 
 [Preconditioner]
@@ -91,13 +96,16 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  dt = 0.25
+  start_time = 0.0
+  end_time = 1.0
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/HeatConduction
     vtk_format = ASCII
   []
 []
