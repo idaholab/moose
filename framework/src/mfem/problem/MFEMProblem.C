@@ -127,16 +127,17 @@ MFEMProblem::externalSolve()
 }
 
 void
-MFEMProblem::setFormulation(const std::string & user_object_name,
-                            const std::string & name,
-                            InputParameters & parameters)
+MFEMProblem::setProblemBuilder()
 {
   mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
-  FEProblemBase::addUserObject(user_object_name, name, parameters);
-  MFEMFormulation * mfem_formulation(&getUserObject<MFEMFormulation>(name));
-
-  mfem_problem_builder = mfem_formulation->getProblemBuilder();
-
+  if (isTransient())
+  {
+    mfem_problem_builder = std::make_shared<platypus::TimeDomainEquationSystemProblemBuilder>();
+  }
+  else
+  {
+    mfem_problem_builder = std::make_shared<platypus::SteadyStateEquationSystemProblemBuilder>();
+  }
   mfem_problem_builder->SetDevice(getParam<std::string>("device"));
   mfem_problem_builder->SetMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
   mfem_problem_builder->ConstructOperator();

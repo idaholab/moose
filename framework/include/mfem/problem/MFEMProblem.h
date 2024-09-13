@@ -11,7 +11,6 @@
 #include "MFEMConstantCoefficient.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
-#include "MFEMFormulation.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
@@ -82,12 +81,9 @@ public:
                   const std::string & name,
                   InputParameters & parameters);
   /**
-   * Override of ExternalProblem::addUserObject. Uses ExternalProblem::addUserObject to set the
-   * Moose user objects, and contains additional code to create MFEM specific user objects.
+   * Set the required ProblemBuilder to build a transient or steady state problem.
    */
-  void setFormulation(const std::string & user_object_name,
-                      const std::string & name,
-                      InputParameters & parameters);
+  void setProblemBuilder();
 
   /**
    * Override of ExternalProblem::addVariable. Sets a
@@ -143,7 +139,6 @@ public:
   platypus::PropertyManager & getProperties() { return _properties; }
 
   std::string _input_mesh;
-  std::string _formulation_name;
   int _order;
 
   platypus::Coefficients _coefficients;
