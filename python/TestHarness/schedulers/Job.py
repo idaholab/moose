@@ -317,10 +317,7 @@ class Job(OutputInterface):
 
     def getInputFile(self):
         """ Wrapper method to return input filename """
-        input_file = self.__tester.getInputFile()
-        if input_file:
-            return os.path.join(self.getTestDir(), input_file)
-        return None
+        return self.__tester.getInputFile()
 
     def getInputFileContents(self):
         """ Wrapper method to return input file contents """
@@ -767,9 +764,7 @@ class Job(OutputInterface):
                     'fail'                 : self.isFail(),
                     'color'                : joint_status.color,
                     'caveats'              : list(self.getCaveats()),
-                    'tester_output_files'  : self.getOutputFiles(self.options),
-                    'input_file'           : self.getInputFile(),
-                    'command'              : self.getCommand()}
+                    'tester'               : self.getTester().getResults(self.options)}
         if self.hasSeperateOutput():
             job_data['output_files'] = self.getCombinedSeparateOutputPaths()
         else:

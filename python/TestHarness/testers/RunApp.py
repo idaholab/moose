@@ -79,7 +79,7 @@ class RunApp(Tester):
 
     def getInputFile(self):
         if self.specs.isValid('input'):
-            return self.specs['input'].strip()
+            return os.path.join(self.getTestDir(), self.specs['input'].strip())
         else:
             return None # Not all testers that inherit from RunApp have an input file
 

@@ -211,6 +211,16 @@ class Tester(MooseObject, OutputInterface):
                       test_entry['caveats'])
         return (status)
 
+    def getResults(self, options) -> dict:
+        """Get the results dict for this Tester"""
+        output_files = []
+        for file in self.getOutputFiles(options):
+            output_files.append(os.path.join(self.getTestDir(), file))
+        return {'name': self.__class__.__name__,
+                'command': self.getCommand(options),
+                'input_file': self.getInputFile(),
+                'output_files': output_files}
+
     def getStatusMessage(self):
         return self.__tester_message
 
