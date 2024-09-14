@@ -54,17 +54,7 @@ public:
   // Virtual destructor required to prevent leaks.
   virtual ~ProblemBuilder() = default;
 
-  void SetMesh(std::shared_ptr<mfem::ParMesh> pmesh);
   void SetCoefficients(platypus::Coefficients & coefficients);
-  void SetDevice(const std::string & dev);
-
-  void AddFESpace(std::string fespace_name,
-                  std::string fec_name,
-                  int vdim = 1,
-                  int ordering = mfem::Ordering::byNODES);
-  void AddGridFunction(std::string gridfunction_name, std::string fespace_name);
-
-  void AddBoundaryCondition(std::string bc_name, std::shared_ptr<platypus::BoundaryCondition> bc);
 
   virtual void RegisterFESpaces() = 0;
   virtual void RegisterGridFunctions() = 0;

@@ -80,6 +80,16 @@ public:
                   const std::string & name,
                   InputParameters & parameters);
   /**
+   * Set the device to use to solve the FE problem.
+   */
+  void setDevice();
+
+  /**
+   * Set the mesh used by MFEM.
+   */
+  void setMesh(std::shared_ptr<mfem::ParMesh> pmesh);
+
+  /**
    * Set the required ProblemBuilder to build a transient or steady state problem.
    */
   void setProblemBuilder();
@@ -163,8 +173,6 @@ protected:
                  "' because there is no equation system.");
     }
   }
-
-  mfem::Device _device;
 
   platypus::PropertyManager _properties;
   std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
