@@ -573,7 +573,8 @@ class Job(OutputInterface):
             if name == 'runner_run':
                 # Don't output the runner run
                 if skip_runner_run:
-                    output += f'\nSkipping runner_run output due to {skip_runner_run}\n'
+                    output += f'\nSkipping runner_run output due to {skip_runner_run}; output located at:\n'
+                    output += object.getSeparateOutputFilePath() + '\n'
                     continue
 
                 # Default trimmed output size
