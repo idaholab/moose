@@ -903,15 +903,15 @@ class RunHPC(RunParallel):
                  'pre_source_file': self.options.hpc_pre_source,
                  'pre_source': self.source_contents,
                  'hosts': self.options.hpc_host if isinstance(self.options.hpc_host, list) else [self.options.hpc_host]}
-        return {'HPC': entry}
+        return {'hpc': entry}
 
     def appendResultFileJob(self, job):
         hpc_job = self.hpc_jobs.get(job.getID())
         if not hpc_job:
-            return {'HPC': None}
+            return {'hpc': None}
         entry = {'id': hpc_job.id,
                  'submission_script': self.getHPCJobSubmissionPath(job)}
-        return {'HPC': entry}
+        return {'hpc': entry}
 
     def callHPCShouldRetry(self, pool_type, result: str):
         """
