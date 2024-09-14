@@ -64,8 +64,12 @@ MFEMTransient::execute()
 {
   _mfem_problem.outputStep(EXEC_INITIAL);
   preExecute();
-  _it++;
-  Step(_t_step, _it);
+
+  while (_last_step != true)
+  {
+    _it++;
+    Step(_t_step, _it);
+  }
 
   _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,
                                    /*recurse_through_multiapp_levels=*/true);
