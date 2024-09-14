@@ -60,6 +60,22 @@ MFEMProblem::init()
 }
 
 void
+MFEMProblem::setDevice()
+{
+  mfem_problem->_device.Configure(getParam<std::string>("device"));
+  mfem_problem->_device.Print(std::cout);
+}
+
+void
+MFEMProblem::setMesh(std::shared_ptr<mfem::ParMesh> pmesh)
+{
+  mfem_problem->_pmesh = pmesh;
+  mfem_problem->_comm = pmesh->GetComm();
+  MPI_Comm_size(pmesh->GetComm(), &(mfem_problem->_num_procs));
+  MPI_Comm_rank(pmesh->GetComm(), &(mfem_problem->_myid));
+}
+
+void
 MFEMProblem::setProblemBuilder()
 {
   mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
@@ -71,11 +87,11 @@ MFEMProblem::setProblemBuilder()
   {
     mfem_problem_builder = std::make_shared<platypus::SteadyStateEquationSystemProblemBuilder>();
   }
-  mfem_problem_builder->SetDevice(getParam<std::string>("device"));
-  mfem_problem_builder->SetMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
-  mfem_problem_builder->ConstructOperator();
-
   mfem_problem = mfem_problem_builder->ReturnProblem();
+
+  setDevice();
+  setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
+  mfem_problem_builder->ConstructOperator();
 }
 
 void
@@ -107,7 +123,14 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
   MFEMBoundaryCondition * mfem_bc(&getUserObject<MFEMBoundaryCondition>(name));
-  mfem_problem_builder->AddBoundaryCondition(name, mfem_bc->getBC());
+
+  if (mfem_problem->_bc_map.Has(name))
+  {
+    const std::string error_message = "A boundary condition with the name " + name +
+                                      " has already been added to the problem boundary conditions.";
+    mfem::mfem_error(error_message.c_str());
+  }
+  mfem_problem->_bc_map.Register(name, std::move(mfem_bc->getBC()));
 }
 
 void
