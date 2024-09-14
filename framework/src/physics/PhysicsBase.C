@@ -14,6 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
+#include "ActionComponent.h"
 
 InputParameters
 PhysicsBase::validParams()
@@ -192,10 +193,34 @@ PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
 }
 
 void
+PhysicsBase::addBlocksById(const std::vector<SubdomainID> & block_ids)
+{
+  if (block_ids.size())
+  {
+    for (const auto bid : block_ids)
+      _blocks.push_back(_mesh->getSubdomainName(bid));
+    _dim = _mesh->getBlocksMaxDimension(_blocks);
+  }
+}
+
+void
+PhysicsBase::addComponent(const ActionComponent & component)
+{
+  for (const auto & block : component.blocks())
+    _blocks.push_back(block);
+}
+
+void
 PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   InputParameters params = getAdditionalRMParams();
   Action::addRelationshipManagers(input_rm_type, params);
+}
+
+const ActionComponent &
+PhysicsBase::getActionComponent(const ComponentName & comp_name)
+{
+  return _awh.getAction<ActionComponent>(comp_name);
 }
 
 void
@@ -242,8 +267,8 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
   {
     SystemBase & system = are_nonlinear ? getProblem().getNonlinearSystemBase(_sys_number)
                                         : getProblem().systemBaseAuxiliary();
-    _console << "Adding Exodus restart for " << variables_to_copy.size()
-             << " variables: " << Moose::stringify(variables_to_copy) << std::endl;
+    mooseInfoRepeated("Adding Exodus restart for " + std::to_string(variables_to_copy.size()) +
+                      " variables: " + Moose::stringify(variables_to_copy));
     // TODO Check that the variable types and orders are actually supported for exodus restart
     for (const auto & var_name : variables_to_copy)
       system.addVariableToCopy(
@@ -291,8 +316,8 @@ PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainN
   if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     params.set<std::vector<SubdomainName>>("block") = blocks;
   if (blocks.empty())
-    _console << "Empty block restriction assigned to an object created by " << name()
-             << " did you mean to do this?" << std::endl;
+    mooseInfoRepeated("Empty block restriction assigned to an object created by Physics '" +
+                      name() + "'.\n Did you mean to do this?");
 }
 
 bool

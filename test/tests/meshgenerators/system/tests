@@ -59,14 +59,14 @@
       input = 'mesh_generator_test.i'
       detail = 'requesting an input mesh generator by parameter that does not exist'
       cli_args = 'Mesh/test/input=foo Mesh/test/request_input=true'
-      expect_err = "\(Mesh/test/input\) The requested MeshGenerator with name 'foo' was not found"
+      expect_err = "The requested MeshGenerator with name 'foo' was not found"
     []
     [get_meshes_not_found]
       type = RunException
       input = 'mesh_generator_test.i'
       detail = 'requesting input mesh generators by parameter that do not exist'
       cli_args = 'Mesh/test/inputs=bar Mesh/test/request_inputs=true'
-      expect_err = "\(Mesh/test/inputs\) The requested MeshGenerator with name 'bar' was not found"
+      expect_err = "The requested MeshGenerator with name 'bar' was not found"
     []
     [get_mesh_by_name_not_found]
       type = RunException
@@ -96,7 +96,8 @@
       input = 'mesh_generator_test.i'
       detail = 'declaring a property on the mesh multiple times'
       cli_args = 'Mesh/test/mesh_prop_double_declare=true'
-      expect_err = "While declaring mesh property 'foo' with type 'bool',\nsaid property has already been declared with type 'bool'"
+      expect_err = "While declaring mesh property 'foo' with type 'bool',\nsaid property has already "
+                   "been declared with type 'bool'"
     []
     [unused_sub_input]
       type = RunException
@@ -105,7 +106,8 @@
       cli_args = 'Mesh/active="gmg test"
                   Mesh/test/input=gmg
                   Mesh/test/request_sub_input=true'
-      expect_err = "The sub generator dependency declared from MeshGenerator 'gmg' from the parameter 'input' was not used."
+      expect_err = "The sub generator dependency declared from MeshGenerator 'gmg' from the "
+                   "parameter 'input' was not used."
     []
     [sub_no_declare_input]
       type = RunException
@@ -114,14 +116,17 @@
       cli_args = 'Mesh/active="gmg test"
                   Mesh/test/input=gmg
                   Mesh/test/sub_no_declare_input=true'
-      expect_err = "The MeshGenerator 'gmg' was referenced in the parameter 'input' and used in the sub generator RenameBlockGenerator 'test_rbg', but was not declared as a sub dependency."
+      expect_err = "The MeshGenerator 'gmg' was referenced in the parameter 'input' and used in the "
+                   "sub generator RenameBlockGenerator 'test_rbg', but was not declared as a sub "
+                   "dependency."
     []
     [unused_param_input]
       type = RunException
       input = 'mesh_generator_test.i'
       detail = 'coupling an input mesh generator in a parameter but not using said mesh generator'
       cli_args = 'Mesh/test/input=foo'
-      expect_err = "You failed to request the generated mesh\(es\) for the parameter 'input'.\n\nIn specific, the mesh from MeshGenerator 'foo' was not requested"
+      expect_err = "You failed to request the generated mesh\(es\) for the parameter 'input'.\n\nIn "
+                   "specific, the mesh from MeshGenerator 'foo' was not requested"
     []
     [missing_get]
       type = RunException
@@ -143,7 +148,8 @@
       detail = 'an input mesh is not found because its dependencies are not properly declared'
       cli_args = 'Mesh/active="gmg test"
                   Mesh/test/add_sub_input=gmg'
-      expect_err = "The requested MeshGenerator with name 'gmg' was found, but has not been constructed yet"
+      expect_err = "The requested MeshGenerator with name 'gmg' was found, but has not been "
+                   "constructed yet"
     []
     [generated_nullptr]
       type = RunException

@@ -1,77 +1,77 @@
 [Tests]
   design = "ShellElements.md"
-  issues = "#14280 #21384"
-  [./beam_bending]
+  issues = "#14280 #21384 #28471"
+  [beam_bending]
     type = 'Exodiff'
     input = 'beam_bending_moment_AD.i'
     exodiff = 'beam_bending_moment_AD_out.e'
 
     requirement = "The mechanics system shall accurately compute the deflection of a cantilever beam when it is modeled using shell elements."
-  [../]
-  [./rotated_beam_bending]
+  []
+  [rotated_beam_bending]
     type = 'Exodiff'
     input = 'beam_bending_moment_AD_2.i'
     exodiff = 'beam_bending_moment_AD_2_out.e'
 
     requirement = "The mechanics system shall accurately compute the deflection of a rotated cantilever beam when it is modeled using shell elements."
-  [../]
-  [./large_beam_bending]
+  []
+  [large_beam_bending]
     type = 'Exodiff'
     input = 'large_strain_m_40_AD.i'
     exodiff = 'large_strain_m_40_AD_out.e'
     petsc_version = '>=3.9.0'
     requirement = "The mechanics system shall accurately compute the deflection of a cantilever beam when it is modeled using shell elements under large strain and rotations are included."
-  [../]
-  [./beam_bending_jacobian]
+  []
+  [beam_bending_jacobian]
     type = 'PetscJacobianTester'
     input = 'beam_bending_moment_AD.i'
 
     requirement = "The mechanics system shall accurately compute the Jacobian for a small strain quasi-static shell element."
-  [../]
-  [./large_beam_bending_jacobian]
+  []
+  [large_beam_bending_jacobian]
     type = 'PetscJacobianTester'
     input = 'large_strain_m_40_AD.i'
     cli_args = 'Executioner/num_steps=1'
     petsc_version = '>=3.9.0'
     requirement = "The mechanics system shall accurately compute the Jacobian for a large strain quasi-static shell element."
-  [../]
-  [./plate_bending]
+  []
+  [plate_bending]
     type = 'Exodiff'
     input = 'plate_bending.i'
     exodiff = 'plate_bending_out.e'
     heavy = true
 
     requirement = "The mechanics system shall accurately model the deflection of a simply supported under uniform loading."
-  [../]
-  [./plate_bending2]
+  []
+  [plate_bending2]
     type = 'Exodiff'
     input = plate_bending2.i
     exodiff = 'plate_bending2_out.e'
 
     requirement = "The mechanics system shall accurately model deflection of a plate with multiple force and moment boundary conditions."
-  [../]
-  [./pinched_cylinder]
+  []
+  [pinched_cylinder]
     type = 'Exodiff'
     input = pinched_cylinder_symm.i
     exodiff = 'pinched_cylinder_symm_out.e'
 
     requirement = "The mechanics system shall accurately model the deflection of a pinched cylinder modeled when it is modeled using shell elements."
-  [../]
-  [./inclined_plane]
+  []
+  [inclined_plane]
     type = 'Exodiff'
     input = inclined_straintest.i
     exodiff = 'inclined_straintest_out.e'
 
     requirement = "The mechanics system shall accurately model the deflection of a inclined shell elements."
-  [../]
-  [./straintest_axial]
+  []
+  [straintest_axial]
     type = 'Exodiff'
     input = straintest.i
     exodiff = 'straintest_out.e'
 
     requirement = "The mechanics system shall accurately compute the axial stress and strain of the shell elements."
-  [../]
-  [./finite_straintest_axial]
+  []
+  [finite_straintest_axial]
     type = 'Exodiff'
     input = finite_straintest.i
     exodiff = 'finite_straintest_out.e'
@@ -79,26 +79,33 @@
     issues = '#25266'
 
     requirement = "The mechanics system shall accurately compute the axial stress and strain of the shell elements using the finite strain formulation."
-  [../]
-  [./straintest_shear]
+  []
+  [straintest_shear]
     type = 'Exodiff'
     input = straintest_shear.i
     exodiff = 'straintest_shear_out.e'
 
     requirement = "The mechanics system shall accurately compute the stress and strain of the shell elements subjected to shear deformation."
-  [../]
-  [./tapered]
+  []
+  [tapered]
     type = 'Exodiff'
     input = tapered.i
     exodiff = 'tapered_out.e'
 
     requirement = "The mechanics system shall accurately compute the stress and strain of the tapered shell elements."
-  [../]
-  [./qp_error]
+  []
+  [qp_error]
     type = 'RunException'
     input = pressure_error.i
     expect_err = 'Shell element needs to have exactly four quadrature points.'
 
     requirement = "The system shall generate an error if the shell strain material is evaluated when the number of quadrature points does not equal 4."
-  [../]
+  []
+  [pinched_cylinder_symm_unstructured]
+    type = 'Exodiff'
+    input = pinched_cylinder_symm_unstructured.i
+    exodiff = 'pinched_cylinder_symm_unstructured_out.e'
+
+    requirement = "Shell elements should have compatible stresses even for unstructured meshes."
+  []
 []
