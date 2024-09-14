@@ -26,7 +26,10 @@ if __name__ == '__main__':
     command = shlex.split(urllib.parse.unquote(encoded_command))
 
     # Try to only print this on rank 0
-    if os.environ.get('PMI_RANK', '0') == '0':
+    rank = os.environ.get('PMI_RANK') # mpich
+    if rank is None:
+        rank = os.environ.get('OMPI_COMM_WORLD_RANK') # openmpi
+    if rank == '0' or rank is None:
         print('Running decoded command:', ' '.join(command), flush=True)
 
     # Run the thing; close_fds=False needed for MPI
