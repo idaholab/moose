@@ -43,6 +43,12 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params.deprecateParam("energy_inlet_function", "energy_inlet_functors", "01/01/2025");
   params.deprecateParam("energy_wall_function", "energy_wall_functors", "01/01/2025");
 
+  // Support for multiple heat sources
+  params.addParam<std::vector<SubdomainName>>(
+      "external_heat_sources_blocks", {}, "Subdomains on which to add the heat sources");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "external_heat_sources_functors", {}, "Functors defining the heat sources");
+
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_advection_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
@@ -94,6 +100,11 @@ WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParame
   // This should probably be done for all the coupled physics, tbd
   if (!isParamSetByUser("block"))
     _blocks = _flow_equations_physics->blocks();
+
+  // Set volumetric source term maps
+  _external_heat_sources_functors = Moose::createMapFromVectors<SubdomainName, MooseFunctorName>(
+      getParam<std::vector<SubdomainName>>("external_heat_sources_blocks"),
+      getParam<std::vector<MooseFunctorName>>("external_heat_sources_functors"));
 
   // Set boundary condition maps
   _energy_inlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
@@ -173,7 +184,7 @@ WCNSFVFluidHeatTransferPhysics::addFVKernels()
   addINSEnergyHeatConductionKernels();
   if (getParam<std::vector<MooseFunctorName>>("ambient_temperature").size())
     addINSEnergyAmbientConvection();
-  if (isParamValid("external_heat_source"))
+  if (isParamValid("external_heat_source") || _external_heat_sources_functors.size())
     addINSEnergyExternalHeatSource();
 }
 
@@ -347,14 +358,35 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyAmbientConvection()
 }
 
 void
+WCNSFVFluidHeatTransferPhysics::addExternalHeatSource(const SubdomainName & subdomain,
+                                                      const MooseFunctorName & source,
+                                                      const MooseFunctorName & coef)
+{
+  _external_heat_sources_functors[subdomain] = source;
+  _external_heat_sources_coefs[subdomain] = coef;
+}
+
+void
+WCNSFVFluidHeatTransferPhysics::addAmbientHeatSource(const std::vector<SubdomainName> & subdomains,
+                                                     const MooseFunctorName & alpha,
+                                                     const MooseFunctorName & temperature)
+{
+  _ambient_convection_blocks.push_back(subdomains);
+  _ambient_convection_alpha.push_back(alpha);
+  _ambient_temperature.push_back(temperature);
+}
+
+void
 WCNSFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
 {
-  const std::string kernel_type = "FVCoupledForce";
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-  assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>("v") = getParam<MooseFunctorName>("external_heat_source");
-  params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
+  if (isParamValid("external_heat_source"))
+  {
+    const std::string kernel_type = "FVCoupledForce";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+    assignBlocks(params, _blocks);
+    params.set<MooseFunctorName>("v") = getParam<MooseFunctorName>("external_heat_source");
+    params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
     getProblem().addFVKernel(kernel_type, prefix() + "external_heat_source", params);
   }

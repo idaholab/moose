@@ -59,6 +59,12 @@ private:
   void addWallBoundary(const BoundaryName & boundary_name,
                        const MooseEnum & wall_type,
                        const MooseFunctorName & wall_functor);
+  void addExternalHeatSource(const SubdomainName & subdomain,
+                             const MooseFunctorName & source,
+                             const MooseFunctorName & coef);
+  void addAmbientHeatSource(const std::vector<SubdomainName> & subdomains,
+                            const MooseFunctorName & alpha,
+                            const MooseFunctorName & temperature);
   void addInitialConditions() override;
   void addFVKernels() override;
   void addFVBCs() override;
@@ -105,6 +111,11 @@ private:
   std::vector<MooseFunctorName> _ambient_convection_alpha;
   /// Name of the solid domain temperature for each block-group
   std::vector<MooseFunctorName> _ambient_temperature;
+
+  /// Functors describing the external heat sources
+  std::map<SubdomainName, MooseFunctorName> _external_heat_sources_functors;
+  /// Coefficients multiplying the external heat sources
+  std::map<SubdomainName, MooseFunctorName> _external_heat_sources_coefs;
 
   /// Energy inlet boundary types
   std::map<BoundaryName, MooseEnum> _energy_inlet_types;
