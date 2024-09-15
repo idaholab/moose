@@ -56,6 +56,9 @@ private:
   void addInletBoundary(const BoundaryName & boundary_name,
                         const MooseEnum & inlet_type,
                         const MooseFunctorName & inlet_functor);
+  void addWallBoundary(const BoundaryName & boundary_name,
+                       const MooseEnum & wall_type,
+                       const MooseFunctorName & wall_functor);
   void addInitialConditions() override;
   void addFVKernels() override;
   void addFVBCs() override;
@@ -108,7 +111,7 @@ private:
   /// Functors describing the inlet boundary values. See energy_inlet_types for what the functors actually represent
   std::map<BoundaryName, MooseFunctorName> _energy_inlet_functors;
   /// Energy wall boundary types
-  MultiMooseEnum _energy_wall_types;
+  std::map<BoundaryName, MooseEnum> _energy_wall_types;
   /// Functors describing the wall boundary values. See energy_wall_types for what the functors actually represent
-  std::vector<MooseFunctorName> _energy_wall_functors;
+  std::map<BoundaryName, MooseFunctorName> _energy_wall_functors;
 };
