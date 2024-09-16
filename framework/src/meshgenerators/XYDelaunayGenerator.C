@@ -547,6 +547,6 @@ XYDelaunayGenerator::generate()
   if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
     paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
 
-  mesh->prepare_for_use();
+  mesh->set_isnt_prepared();
   return mesh;
 }

@@ -399,7 +399,7 @@ XYZDelaunayGenerator::generate()
   for (auto & hole_ptr : _hole_ptrs)
     hole_ptr->reset();
 
-  mesh->prepare_for_use();
+  mesh->set_isnt_prepared();
   return mesh;
 #else
   mooseError("Cannot use XYZDelaunayGenerator without NetGen-enabled libMesh.");
