@@ -185,10 +185,6 @@ XYZDelaunayGenerator::generate()
       }
     }
 
-  // Assign new subdomain name, if provided
-  if (isParamValid("output_subdomain_name"))
-    mesh->subdomain_name(_output_subdomain_id) = getParam<SubdomainName>("output_subdomain_name");
-
   const bool use_binary_search = (_algorithm == "BINARY");
 
   // The hole meshes are specified by the user, so they could have any
