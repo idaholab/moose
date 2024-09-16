@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GaussianProcess.h"
+#include "TwoLayerGaussianProcess.h"
 #include "FEProblemBase.h"
 
 #include <petsctao.h>
@@ -21,6 +21,7 @@
 #include "MooseRandom.h"
 #include "Shuffle.h"
 
+#include "Normal.h"
 #include "Uniform.h"
 #include "Gamma.h"
 
@@ -28,7 +29,7 @@
 namespace StochasticTools
 {
 
-GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nth_iteration,
+TwoLayerGaussianProcess::TGPOptimizerOptions::TGPOptimizerOptions(const bool show_every_nth_iteration,
                                                         const unsigned int num_iter,
                                                         const unsigned int batch_size,
                                                         const Real learning_rate,
@@ -47,10 +48,10 @@ GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nt
 {
 }
 
-GaussianProcess::GaussianProcess() {}
+TwoLayerGaussianProcess::TwoLayerGaussianProcess() {}
 
 void
-GaussianProcess::initialize(CovarianceFunctionBase * covariance_function,
+TwoLayerGaussianProcess::initialize(CovarianceFunctionBase * covariance_function,
                             const std::vector<std::string> & params_to_tune,
                             const std::vector<Real> & min,
                             const std::vector<Real> & max)
@@ -60,7 +61,7 @@ GaussianProcess::initialize(CovarianceFunctionBase * covariance_function,
 }
 
 void
-GaussianProcess::linkCovarianceFunction(CovarianceFunctionBase * covariance_function)
+TwoLayerGaussianProcess::linkCovarianceFunction(CovarianceFunctionBase * covariance_function)
 {
   _covariance_function = covariance_function;
   _covar_type = _covariance_function->type();
@@ -71,17 +72,17 @@ GaussianProcess::linkCovarianceFunction(CovarianceFunctionBase * covariance_func
 }
 
 void
-GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
+TwoLayerGaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
                                        const RealEigenMatrix & training_data,
-                                       const GPOptimizerOptions & opts)
+                                       const TGPOptimizerOptions & opts)
 {
   const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= training_params.rows());
   _batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
   if (_tuning_data.size())
-    tuneHyperParamsAdam(training_params, training_data, opts);
-    // tuneHyperParamsMcmc(training_params, training_data);
+    // tuneHyperParamsAdam(training_params, training_data, opts);
+    tuneHyperParamsMcmc(training_params, training_data);
 
   _K.resize(training_params.rows() * training_data.cols(),
             training_params.rows() * training_data.cols());
@@ -97,14 +98,14 @@ GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
 }
 
 void
-GaussianProcess::setupStoredMatrices(const RealEigenMatrix & input)
+TwoLayerGaussianProcess::setupStoredMatrices(const RealEigenMatrix & input)
 {
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(input);
 }
 
 void
-GaussianProcess::generateTuningMap(const std::vector<std::string> & params_to_tune,
+TwoLayerGaussianProcess::generateTuningMap(const std::vector<std::string> & params_to_tune,
                                    const std::vector<Real> & min_vector,
                                    const std::vector<Real> & max_vector)
 {
@@ -138,7 +139,7 @@ GaussianProcess::generateTuningMap(const std::vector<std::string> & params_to_tu
 }
 
 void
-GaussianProcess::standardizeParameters(RealEigenMatrix & data, bool keep_moments)
+TwoLayerGaussianProcess::standardizeParameters(RealEigenMatrix & data, bool keep_moments)
 {
   if (!keep_moments)
     _param_standardizer.computeSet(data);
@@ -146,15 +147,16 @@ GaussianProcess::standardizeParameters(RealEigenMatrix & data, bool keep_moments
 }
 
 void
-GaussianProcess::standardizeData(RealEigenMatrix & data, bool keep_moments)
+TwoLayerGaussianProcess::standardizeData(RealEigenMatrix & data, bool keep_moments)
 {
   if (!keep_moments)
     _data_standardizer.computeSet(data);
   _data_standardizer.getStandardized(data);
 }
+
                                     
 void
-GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta, 
+TwoLayerGaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta, 
           LogLResult & result, bool outer, bool tau2) {
   int n = out_vec.rows();
   RealEigenMatrix K(x1.rows(), x2.rows());
@@ -194,7 +196,7 @@ GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x
 }
 
 void
-GaussianProcess::sample_g(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g_t, const RealEigenMatrix theta, 
+TwoLayerGaussianProcess::sample_g(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g_t, const RealEigenMatrix theta, 
               Real alpha, Real beta, Real l, Real u, Real ll_prev, SampleGResult & result) {
 
   Real ru1 = MooseRandom::rand();
@@ -225,62 +227,204 @@ GaussianProcess::sample_g(const RealEigenMatrix & out_vec, const RealEigenMatrix
   }
 }
 
-void
-GaussianProcess::sample_theta(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_t,
+void 
+TwoLayerGaussianProcess::sample_theta(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_t,
               unsigned int i, Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev) {
+  RealEigenMatrix theta_star = theta_t;
+  Real ru1 = MooseRandom::rand();
+  Real ru = MooseRandom::rand();
+  theta_star(0, i) = Uniform::quantile(ru1, l * theta_t(0,i) / u, u * theta_t(0,i) / l);
 
-    RealEigenMatrix theta_star = theta_t;
-    Real ru1 = MooseRandom::rand();
-    Real ru = MooseRandom::rand();
-    theta_star(0, i) = Uniform::quantile(ru1, l * theta_t(0,i) / u, u * theta_t(0,i) / l);
-
-    if (std::isnan(ll_prev)) {
-      LogLResult ll_result;
-      logl(out_vec, x1, x2, g, theta_t, ll_result, true, true);
-      ll_prev = ll_result.logl;
-    }
-              
-    Real lpost_threshold = ll_prev + std::log(Gamma::pdf(theta_t(0,i), alpha, beta)) + 
-                             std::log(ru) - std::log(theta_t(0,i)) + std::log(theta_star(0,i));
-
-    Real ll_new;
-    Real tau2_new;
+  if (std::isnan(ll_prev)) {
     LogLResult ll_result;
-    logl(out_vec, x1, x2, g, theta_star, ll_result, true, true);
-    ll_new = ll_result.logl;
-    tau2_new = ll_result.tau2;
-      
-    Real new_val = ll_new + std::log(Gamma::pdf(theta_star(0,i), alpha, beta));
-    if (new_val > lpost_threshold) {
-      result.theta = theta_star(0,i);
-      result.ll = ll_new;
-      result.tau2 = tau2_new;
-    } else {
-      result.theta = theta_t(0,i);
-      result.ll = ll_prev;
-      result.tau2 = NAN;
+    logl(out_vec, x1, x2, g, theta_t, ll_result, true, true);
+    ll_prev = ll_result.logl;
+  }
+            
+  Real lpost_threshold = ll_prev + std::log(Gamma::pdf(theta_t(0,i), alpha, beta)) + 
+                            std::log(ru) - std::log(theta_t(0,i)) + std::log(theta_star(0,i));
+
+  Real ll_new;
+  Real tau2_new;
+  LogLResult ll_result;
+  logl(out_vec, x1, x2, g, theta_star, ll_result, true, true);
+  ll_new = ll_result.logl;
+  tau2_new = ll_result.tau2;
+    
+  Real new_val = ll_new + std::log(Gamma::pdf(theta_star(0,i), alpha, beta));
+  if (new_val > lpost_threshold) {
+    result.theta = theta_star(0,i);
+    result.ll = ll_new;
+    result.tau2 = tau2_new;
+  } else {
+    result.theta = theta_t(0,i);
+    result.ll = ll_prev;
+    result.tau2 = NAN;
+  }
+}
+
+void
+TwoLayerGaussianProcess::multiVariateNormalSampling(const RealEigenMatrix & mean,const RealEigenMatrix & cov, unsigned int n_dim, unsigned int n_draw, RealEigenMatrix & final_sample_matrix)
+{
+  Eigen::LLT<RealEigenMatrix> cho_decomp = cov.llt();
+  RealEigenMatrix L = cho_decomp.matrixL();
+  RealEigenMatrix standard_sample_matrix(n_dim, n_draw);
+  Real ru;
+  Real standard_sample;
+  for (unsigned int i = 0; i < n_dim; i++) {
+    for (unsigned int j = 0; j < n_draw; j++) {
+      ru = MooseRandom::rand();
+      standard_sample = Normal::quantile(ru, 0, 1);
+      standard_sample_matrix(i,j) = standard_sample;
     }
+  }
+  final_sample_matrix  = mean + L * standard_sample_matrix;
+}
+
+void TwoLayerGaussianProcess::sample_w(const RealEigenMatrix & out_vec, RealEigenMatrix & w_t, const RealEigenMatrix & w1, const RealEigenMatrix & w2, 
+              const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_y, const RealEigenMatrix & theta_w,
+              SampleWResult & result, Real ll_prev, const RealEigenMatrix & prior_mean) {
+// sample_w(y, w[j-1], initial.w, initial.w, x, x, g.row(j), theta_y.row(j), theta_w.row(j), sample_w_result, ll, prior_mean);
+  unsigned int D = x1.cols();
+  if (std::isnan(ll_prev)) {
+    LogLResult ll_result;
+    logl(out_vec, w1, w2, g, theta_y, ll_result, true, true);
+    ll_prev = ll_result.logl;
+  }
+  RealEigenMatrix w_prior(x1.rows(),1);
+  Real ru1 = MooseRandom::rand();
+  Real ru2 = MooseRandom::rand();
+  Real ru3 = MooseRandom::rand();
+  Real ru;
+  RealEigenMatrix K(x1.rows(), x2.rows());
+  Real a;
+  Real amin;
+  Real amax;
+  Real ll_threshold;
+  bool accept;
+  unsigned int count = 0;
+  RealEigenMatrix w_prev;
+  LogLResult ll_result;
+  Real new_logl;
+
+  for (unsigned int i=0; i< x1.cols(); i++){
+//   for (unsigned int i=0; i< 1; i++){
+    std::vector<Real> theta1(_num_tunable, 0.0);
+    theta1[0] = 1;
+    theta1[1] = theta_w(0,0);
+    theta1[2] = theta_w(0,1);
+    vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
+    _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+    _covariance_function->computeCovarianceMatrix(K, x1, x2, true);
+    multiVariateNormalSampling(prior_mean.col(i), K, prior_mean.col(i).rows(), 1, w_prior);
+
+    a = Uniform::quantile(ru1, 0, 2 * M_PI);
+    amax = a;
+    ru = Uniform::quantile(ru2, 0, 1);
+    ll_threshold = ll_prev + std::log(ru);
+    w_prev = w_t.col(i);
+    while (!accept) {
+      count += 1;
+      w_t.col(i) = w_prev * std::cos(a) + w_prior * std::sin(a);
+      logl(out_vec, w_t, w_t, g, theta_y, ll_result, true, false);
+      new_logl = ll_result.logl;
+
+      if (new_logl > ll_threshold) {
+        ll_prev = new_logl;
+        accept = true;
+      } else {
+        if (a < 0) {
+          amin = a;
+        } else {
+          amax = a;
+        }
+        a = Uniform::quantile(ru3, amin, amax);
+        if (count > 100) {
+            std::cout << "error! reached maximum iterations of ESS" << std::endl;
+            break;
+        }
+      }
+    }
+  }
+  result.w = w_t;
+  result.ll = ll_prev;
 }
 
 
 void 
-GaussianProcess::check_settings(Settings &settings) {
+TwoLayerGaussianProcess::squared_exponential_covariance(const RealEigenMatrix &x1, 
+                  const RealEigenMatrix &x2, 
+                  Real tau2, 
+                  const RealEigenMatrix &theta, 
+                  Real g, 
+                  RealEigenMatrix &k)
+{
+  int n1 = x1.rows();
+  int n2 = x2.rows();
+  
+  for (int i = 0; i < n1; ++i) {
+    for (int j = 0; j < n2; ++j) {
+      // Compute the scaled distance r_l(x1, x2)
+      Eigen::RowVectorXd diff = (x1.row(i) - x2.row(j)).array() / theta.row(0).array();
+      Real r_l = std::sqrt(diff.squaredNorm());
+      Real cov_val = tau2 * std::exp(-0.5 * r_l * r_l);
+      if (i == j) {
+          cov_val += g;
+      }
+      k(i, j) = cov_val;
+    }
+  }
+}
+
+void
+TwoLayerGaussianProcess::krig(const RealEigenMatrix & y, const RealEigenMatrix & x, const RealEigenMatrix & x_new,
+                                   const RealEigenMatrix & theta, Real g, Real tau2, bool cal_sigma,
+                                   const RealEigenMatrix & prior_mean, const RealEigenMatrix & prior_mean_new,
+                                   RealEigenMatrix & krig_mean, RealEigenMatrix & krig_sigma)
+{
+  RealEigenMatrix C;
+  RealEigenMatrix C_cross;
+  RealEigenMatrix C_new;
+  squared_exponential_covariance(x, x, tau2, theta, g, C);
+  squared_exponential_covariance(x, x_new, tau2, theta, g, C_cross);
+
+  Eigen::LLT<RealEigenMatrix> llt(C);
+  RealEigenMatrix C_inv = llt.solve(RealEigenMatrix::Identity(C.rows(), C.cols()));
+
+  krig_mean =  C_cross * C_inv * (y - prior_mean);
+
+  if (cal_sigma) {
+    RealEigenMatrix quad_term = C_cross * C_inv * C_cross.transpose();
+    squared_exponential_covariance(x_new, x_new, tau2, theta, g, C_new);
+    krig_sigma = tau2 * (C_new - quad_term);
+  }
+
+}
+
+
+
+
+void 
+TwoLayerGaussianProcess::check_settings(Settings &settings) {
   settings.l = 1;
   settings.u = 2;
 
   settings.alpha.g = 1.5;
   settings.beta.g = 3.9;
 
-  settings.alpha.theta = 1.5;
-  settings.beta.theta = 3.9 / 1.5;
+  settings.alpha.theta_w = 1.5;
+  settings.alpha.theta_y = 1.5;
+  settings.beta.theta_w = 3.9 / 4;
+  settings.beta.theta_y = 3.9 / 6;
 }
 
 
 void
-GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
+TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
                                      const RealEigenMatrix & training_data)
+
 { 
-  std::cout << "enter onelayer mcmc" << std::endl;
+  std::cout << "enter twolayer mcmc" << std::endl;
   std::vector<Real> theta1(_num_tunable, 0.0);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
@@ -291,41 +435,49 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
   
   MooseRandom generator;
   generator.seed(0, 1980);
-  unsigned int nmcmc = 10000;
+  unsigned int nmcmc = 100;
+
+  Real g_0 = 0.01;
+  RealEigenMatrix theta_0(1,x.cols());
+  RealEigenMatrix theta_y_0 = RealEigenMatrix::Constant(1, x.cols(), 0.5);
+  RealEigenMatrix theta_w_0 = RealEigenMatrix::Constant(1, x.cols(), 1);
+  RealEigenMatrix w_0 = training_params;
+  Real tau_0 = 1;
 
   Settings settings;
   check_settings(settings);
 
-  Real g_0 = 0.01;
-  RealEigenMatrix theta_0(1,x.cols());
-  theta_0 << 0.5,0.5;
-  Real tau_0 = 1;
-
-  Initial initial = {theta_0, g_0, tau_0};
-
+  Initial initial = {w_0, theta_y_0, theta_w_0, g_0, tau_0};
 
   RealEigenMatrix g(nmcmc, 1);
   g(0,0) = initial.g;
-  RealEigenMatrix theta(nmcmc, x.cols());
-  theta.row(0) = initial.theta;
+  RealEigenMatrix theta_y(nmcmc, x.cols());
+  theta_y.row(0) = initial.theta_y;
+  RealEigenMatrix theta_w(nmcmc, x.cols());
+  theta_w.row(0) = initial.theta_w;
+  std::vector<RealEigenMatrix> w(nmcmc);
+  w[0] = initial.w;
   RealEigenMatrix tau2(nmcmc, 1);
   tau2(0,0) = initial.tau2;
   RealEigenMatrix ll_store(nmcmc, x.cols());
-  ll_store.row(0) << NAN, NAN;
+  for (unsigned int j = 0; j < theta_0.cols(); j++) {
+    theta_0(0, j) = NAN;
+  }
   Real ll = NAN;
-  
-  for (unsigned int j = 1; j < nmcmc; ++j) {
-    SampleGResult sample_g_result;
-    sample_g(y, x, x, g(j-1,0), theta.row(j-1), settings.alpha.g, settings.beta.g, settings.l, settings.u, ll, sample_g_result);
 
+  for (unsigned int j = 1; j < nmcmc; ++j) {
+    if (j % 500 == 0){
+      std::cout << "each 500" << j << std::endl;
+    }
+    SampleGResult sample_g_result;
+    sample_g(y, w[j-1], w[j-1], g(j-1,0), theta_y.row(j-1), settings.alpha.g, settings.beta.g, settings.l, settings.u, ll, sample_g_result);
     g(j,0) = sample_g_result.g;
     ll = sample_g_result.ll;
-
     for (unsigned int i=0; i<x.cols(); i++){
       SampleThetaResult sample_theta_result;
-      sample_theta(y, x, x, g(j,0), theta.row(j-1), i, settings.alpha.theta, settings.beta.theta, settings.l,
-                  settings.u, sample_theta_result, ll);
-      theta(j,i) = sample_theta_result.theta;
+      sample_theta(y, w[j-1], w[j-1], g(j,0), theta_y.row(j-1), i, settings.alpha.theta_y, settings.beta.theta_y, settings.l,
+                    settings.u, sample_theta_result, ll);
+      theta_y(j,i) = sample_theta_result.theta;
       ll = sample_theta_result.ll;
       ll_store(j,i) = ll;
       if (std::isnan(sample_theta_result.tau2)) {
@@ -335,32 +487,43 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
         tau2(j,0) = sample_theta_result.tau2;
       }
     }
-    
-    Real sum_tau2 = 0;
-    Real sum_theta0 = 0;
-    Real sum_theta1 = 0;
-
-    for (unsigned int k = 0; k < j+1; ++k) {
-        sum_tau2 += tau2(k,0);
-        sum_theta0 += theta(k,0);
-        sum_theta1 += theta(k,1);
+    for (unsigned int i=0; i<x.cols(); i++){
+      Real g = 1.5e-8;
+      SampleThetaResult sample_theta_w_result;
+      sample_theta(w[j-1].col(i), x, x, g, theta_w.row(j-1), i, settings.alpha.theta_w, settings.beta.theta_w, settings.l,
+                    settings.u, sample_theta_w_result, ll);
+      theta_w(j,i) = sample_theta_w_result.theta;
     }
+    
 
-    theta1[0] = sum_tau2 / j;
-    theta1[1] = sum_theta0 / j;
-    theta1[2] = sum_theta1 / j;
+    RealEigenMatrix prior_mean = RealEigenMatrix::Zero(x.rows(), x.cols());
 
-    vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
-    _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+
+    SampleWResult sample_w_result;
+    sample_w(y, w[j-1], w[j-1], w[j-1], x, x, g(j,0), theta_y.row(j), theta_w.row(j), sample_w_result, ll, prior_mean);
+    w[j] = sample_w_result.w;
+    ll = sample_w_result.ll;
+    for (unsigned int i=0; i<x.cols(); i++){
+     ll_store(j,i) = ll;
+    }
   }
+
+  _g = g;
+  _theta_y = theta_y;
+  _theta_w = theta_w;
+  _tau2 = tau2;
+  _w = w;
+  _nmcmc = nmcmc;
+  _x = x;
+  _y = y;
+
 }
 
 void
-GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
+TwoLayerGaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                                      const RealEigenMatrix & training_data,
-                                     const GPOptimizerOptions & opts)
+                                     const TGPOptimizerOptions & opts)
 {
-  std::cout << "enter onelayer adam" << std::endl;
   std::vector<Real> theta(_num_tunable, 0.0);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
@@ -386,7 +549,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
   RealEigenMatrix inputs(_batch_size, training_params.cols());
   RealEigenMatrix outputs(_batch_size, training_data.cols());
   if (opts.show_every_nth_iteration)
-    Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
+    Moose::out << "OPTIMIZING TGP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
   {
     // Shuffle data
@@ -432,14 +595,14 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
   }
   if (opts.show_every_nth_iteration)
   {
-    Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
+    Moose::out << "OPTIMIZED TGP HYPER-PARAMETERS:" << std::endl;
     Moose::out << Moose::stringify(theta) << std::endl;
     Moose::out << "FINAL LOSS: " << store_loss << std::endl;
   }
 }
 
 Real
-GaussianProcess::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
+TwoLayerGaussianProcess::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
 
@@ -456,7 +619,7 @@ GaussianProcess::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 }
 
 std::vector<Real>
-GaussianProcess::getGradient(RealEigenMatrix & inputs) const
+TwoLayerGaussianProcess::getGradient(RealEigenMatrix & inputs) const
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
@@ -479,7 +642,7 @@ GaussianProcess::getGradient(RealEigenMatrix & inputs) const
 }
 
 void
-GaussianProcess::mapToVec(
+TwoLayerGaussianProcess::mapToVec(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
     const std::unordered_map<std::string, Real> & scalar_map,
@@ -503,7 +666,7 @@ GaussianProcess::mapToVec(
 }
 
 void
-GaussianProcess::vecToMap(
+TwoLayerGaussianProcess::vecToMap(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
     std::unordered_map<std::string, Real> & scalar_map,
@@ -523,57 +686,57 @@ GaussianProcess::vecToMap(
 
 } // StochasticTools namespace
 
+// template <>
+// void
+// dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+// {
+//   // Store the L matrix as opposed to the full matrix to avoid compounding
+//   // roundoff error and decomposition error
+//   RealEigenMatrix L(decomp.matrixL());
+//   dataStore(stream, L, context);
+// }
+
+// template <>
+// void
+// dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+// {
+//   RealEigenMatrix L;
+//   dataLoad(stream, L, context);
+//   decomp.compute(L * L.transpose());
+// }
+
 template <>
 void
-dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+dataStore(std::ostream & stream, StochasticTools::TwoLayerGaussianProcess & tgp_utils, void * context)
 {
-  // Store the L matrix as opposed to the full matrix to avoid compounding
-  // roundoff error and decomposition error
-  RealEigenMatrix L(decomp.matrixL());
-  dataStore(stream, L, context);
+  dataStore(stream, tgp_utils.hyperparamMap(), context);
+  dataStore(stream, tgp_utils.hyperparamVectorMap(), context);
+  dataStore(stream, tgp_utils.covarType(), context);
+  dataStore(stream, tgp_utils.covarName(), context);
+  dataStore(stream, tgp_utils.covarNumOutputs(), context);
+  dataStore(stream, tgp_utils.dependentCovarNames(), context);
+  dataStore(stream, tgp_utils.dependentCovarTypes(), context);
+  dataStore(stream, tgp_utils.K(), context);
+  dataStore(stream, tgp_utils.KResultsSolve(), context);
+  dataStore(stream, tgp_utils.KCholeskyDecomp(), context);
+  dataStore(stream, tgp_utils.paramStandardizer(), context);
+  dataStore(stream, tgp_utils.dataStandardizer(), context);
 }
 
 template <>
 void
-dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+dataLoad(std::istream & stream, StochasticTools::TwoLayerGaussianProcess & tgp_utils, void * context)
 {
-  RealEigenMatrix L;
-  dataLoad(stream, L, context);
-  decomp.compute(L * L.transpose());
-}
-
-template <>
-void
-dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context)
-{
-  dataStore(stream, gp_utils.hyperparamMap(), context);
-  dataStore(stream, gp_utils.hyperparamVectorMap(), context);
-  dataStore(stream, gp_utils.covarType(), context);
-  dataStore(stream, gp_utils.covarName(), context);
-  dataStore(stream, gp_utils.covarNumOutputs(), context);
-  dataStore(stream, gp_utils.dependentCovarNames(), context);
-  dataStore(stream, gp_utils.dependentCovarTypes(), context);
-  dataStore(stream, gp_utils.K(), context);
-  dataStore(stream, gp_utils.KResultsSolve(), context);
-  dataStore(stream, gp_utils.KCholeskyDecomp(), context);
-  dataStore(stream, gp_utils.paramStandardizer(), context);
-  dataStore(stream, gp_utils.dataStandardizer(), context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context)
-{
-  dataLoad(stream, gp_utils.hyperparamMap(), context);
-  dataLoad(stream, gp_utils.hyperparamVectorMap(), context);
-  dataLoad(stream, gp_utils.covarType(), context);
-  dataLoad(stream, gp_utils.covarName(), context);
-  dataLoad(stream, gp_utils.covarNumOutputs(), context);
-  dataLoad(stream, gp_utils.dependentCovarNames(), context);
-  dataLoad(stream, gp_utils.dependentCovarTypes(), context);
-  dataLoad(stream, gp_utils.K(), context);
-  dataLoad(stream, gp_utils.KResultsSolve(), context);
-  dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
-  dataLoad(stream, gp_utils.paramStandardizer(), context);
-  dataLoad(stream, gp_utils.dataStandardizer(), context);
+  dataLoad(stream, tgp_utils.hyperparamMap(), context);
+  dataLoad(stream, tgp_utils.hyperparamVectorMap(), context);
+  dataLoad(stream, tgp_utils.covarType(), context);
+  dataLoad(stream, tgp_utils.covarName(), context);
+  dataLoad(stream, tgp_utils.covarNumOutputs(), context);
+  dataLoad(stream, tgp_utils.dependentCovarNames(), context);
+  dataLoad(stream, tgp_utils.dependentCovarTypes(), context);
+  dataLoad(stream, tgp_utils.K(), context);
+  dataLoad(stream, tgp_utils.KResultsSolve(), context);
+  dataLoad(stream, tgp_utils.KCholeskyDecomp(), context);
+  dataLoad(stream, tgp_utils.paramStandardizer(), context);
+  dataLoad(stream, tgp_utils.dataStandardizer(), context);
 }
