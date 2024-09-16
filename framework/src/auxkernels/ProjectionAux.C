@@ -49,6 +49,11 @@ ProjectionAux::ProjectionAux(const InputParameters & parameters)
   // Output some messages to user
   if (_source_variable.order() > _var.order())
     mooseInfo("Projection lowers order, please expect a loss of accuracy");
+  // Check the dimension of the block restriction
+  for (const auto & sub_id : blockIDs())
+    if (_mesh.isLowerD(sub_id))
+      paramError("block",
+                 "ProjectionAux's block restriction must not include lower dimensional blocks");
 }
 
 Real
@@ -60,8 +65,10 @@ ProjectionAux::computeValue()
   // AND nodal low order -> nodal higher order
   else if (isNodal() && _source_variable.getContinuity() != DISCONTINUOUS &&
            _source_variable.getContinuity() != SIDE_DISCONTINUOUS)
+  {
     return _source_sys.point_value(
         _source_variable.number(), *_current_node, elemOnNodeVariableIsDefinedOn());
+  }
   // Handle discontinuous elemental variable projection into a nodal variable
   else
   {
@@ -78,7 +85,9 @@ ProjectionAux::computeValue()
     for (auto & id : elem_ids->second)
     {
       const auto & elem = _mesh.elemPtr(id);
-      if (_source_variable.hasBlocks(elem->subdomain_id()))
+      const auto block_id = elem->subdomain_id();
+      // Only use higher D elements
+      if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) && hasBlocks(block_id))
       {
         const auto elem_volume = elem->volume();
         sum_weighted_values +=
@@ -86,6 +95,7 @@ ProjectionAux::computeValue()
         sum_volumes += elem_volume;
       }
     }
+    mooseAssert(sum_volumes != 0, "Should have found a valid source variable value");
     return sum_weighted_values / sum_volumes;
   }
 }
@@ -94,7 +104,8 @@ const Elem *
 ProjectionAux::elemOnNodeVariableIsDefinedOn() const
 {
   for (const auto & elem_id : _mesh.nodeToElemMap().find(_current_node->id())->second)
-    if (_source_variable.hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
+    if (_source_variable.hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()) &&
+        !_mesh.isLowerD(block_id) && hasBlocks(block_id))
       return _mesh.elemPtr(elem_id);
   mooseError("Source variable is not defined everywhere the target variable is");
 }
