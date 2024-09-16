@@ -40,3 +40,9 @@ to a given uniform element volume specified as
 [!param](/Mesh/XYZDelaunayGenerator/desired_volume).
 This refinement is currently controlled by the third-party Netgen
 code.
+
+!syntax parameters /Mesh/XYZDelaunayGenerator
+
+!syntax inputs /Mesh/XYZDelaunayGenerator
+
+

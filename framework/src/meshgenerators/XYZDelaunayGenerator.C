@@ -81,7 +81,7 @@ XYZDelaunayGenerator::validParams()
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
   params.addParam<bool>(
-      "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
+      "verbose_stitching", false, "Whether mesh hole stitching should have verbose output.");
 
   params.addClassDescription(
       "Creates tetrahedral 3D meshes within boundaries defined by input meshes.");
