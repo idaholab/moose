@@ -52,7 +52,7 @@ TEST_F(ThermalSS316PropertiesTest, e)
 {
   const Real T = 800.0;
   REL_TEST(_sp->e_from_T(T), 277071.479237, REL_TOL_SAVED_VALUE);
-  SPECIFIC_INTERNAL_ENERGY_DERIVATIVE_CONSISTENCY_TEST(_sp, T, 1e-6, 1e-6);
+  SPECIFIC_INTERNAL_ENERGY_TESTS(_sp, T, 1e-6, 1e-6);
 }
 
 /**
