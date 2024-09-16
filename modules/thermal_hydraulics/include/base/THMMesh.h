@@ -31,6 +31,7 @@ public:
 
   /// Add a new element into the mesh
   Elem * addElement(libMesh::ElemType elem_type, const std::vector<dof_id_type> & node_ids);
+  Elem * addNodeElement(dof_id_type node);
   Elem * addElementEdge2(dof_id_type node0, dof_id_type node1);
   Elem * addElementEdge3(dof_id_type node0, dof_id_type node1, dof_id_type node2);
   Elem *

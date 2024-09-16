@@ -34,8 +34,9 @@ GateValve1Phase::setupMesh()
 {
   FlowJunction1Phase::setupMesh();
 
-  if (_connected_elems.size() == 2)
-    getTHMProblem().augmentSparsity(_connected_elems[0], _connected_elems[1]);
+  const auto & connected_elems = getConnectedElementIDs();
+  if (connected_elems.size() == 2)
+    getTHMProblem().augmentSparsity(connected_elems[0], connected_elems[1]);
 }
 
 void
@@ -75,7 +76,7 @@ GateValve1Phase::addMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
-    params.set<std::vector<processor_id_type>>("processor_ids") = _proc_ids;
+    params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();
     // It is assumed that each channel should have the same numerical flux, so
     // just use the first one.
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_names[0];

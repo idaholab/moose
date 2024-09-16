@@ -140,3 +140,12 @@ ADVolumeJunctionBaseUserObject::getFlux(const unsigned int & connection_index) c
   checkValidConnectionIndex(connection_index);
   return _flux[connection_index];
 }
+
+std::vector<const MooseVariableBase *>
+ADVolumeJunctionBaseUserObject::getJunctionVariables() const
+{
+  std::vector<const MooseVariableBase *> vars(_scalar_variable_names.size());
+  for (unsigned int i = 0; i < _scalar_variable_names.size(); i++)
+    vars[i] = getScalarVar(_scalar_variable_names[i], 0);
+  return vars;
+}
