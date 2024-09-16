@@ -69,6 +69,7 @@
   []
   [errors]
     requirement = 'The system shall error'
+    issues = '#23844 #22117'
     [err_non_2d_mesh]
       type = 'RunException'
       input = 'simple_cut.i'

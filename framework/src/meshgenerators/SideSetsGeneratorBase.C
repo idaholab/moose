@@ -44,12 +44,12 @@ SideSetsGeneratorBase::validParams()
       "is only added if it also belongs to one of these boundaries.");
   params.addParam<std::vector<BoundaryName>>(
       "excluded_boundaries",
-      "A set of boundary names or ids whose sides will be included in the new sidesets.  A side "
+      "A set of boundary names or ids whose sides will be excluded from the new sidesets.  A side "
       "is only added if does not belong to any of these boundaries.");
   params.addParam<std::vector<SubdomainName>>(
       "included_subdomains",
       "A set of subdomain names or ids whose sides will be included in the new sidesets. A side "
-      "is only added if subdomain id of the element is in this set.");
+      "is only added if the subdomain id of the corresponding element is in this set.");
   params.addParam<std::vector<SubdomainName>>("included_neighbors",
                                               "A set of neighboring subdomain names or ids. A face "
                                               "is only added if the subdomain id of the "
@@ -74,9 +74,10 @@ SideSetsGeneratorBase::validParams()
   params.deprecateParam("variance", "normal_tol", "4/01/2025");
 
   // Sideset restriction param group
-  params.addParamNamesToGroup("included_boundaries included_subdomains included_neighbors "
-                              "include_only_external_sides normal normal_tol",
-                              "Sideset restrictions");
+  params.addParamNamesToGroup(
+      "included_boundaries excluded_boundaries included_subdomains included_neighbors "
+      "include_only_external_sides normal normal_tol",
+      "Sideset restrictions");
 
   return params;
 }
@@ -146,7 +147,7 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
     _included_boundary_ids = MooseMeshUtils::getBoundaryIDs(mesh, included_boundaries, false);
 
     // Check that the included boundary ids/names exist in the mesh
-    for (const auto & i : index_range(_included_boundary_ids))
+    for (const auto i : index_range(_included_boundary_ids))
       if (_included_boundary_ids[i] == Moose::INVALID_BOUNDARY_ID)
         paramError("included_boundaries",
                    "The boundary '",
@@ -167,7 +168,7 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
     _excluded_boundary_ids = MooseMeshUtils::getBoundaryIDs(mesh, excluded_boundaries, false);
 
     // Check that the excluded boundary ids/names exist in the mesh
-    for (const auto & i : index_range(_excluded_boundary_ids))
+    for (const auto i : index_range(_excluded_boundary_ids))
       if (_excluded_boundary_ids[i] == Moose::INVALID_BOUNDARY_ID)
         paramError("excluded_boundaries",
                    "The boundary '",
@@ -180,11 +181,6 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
       for (const auto & boundary_id : _included_boundary_ids)
         if (std::find(_excluded_boundary_ids.begin(), _excluded_boundary_ids.end(), boundary_id) !=
             _excluded_boundary_ids.end())
-          paramError("excluded_boundaries",
-                     "'included_boundaries' and 'excluded_boundaries' lists should not overlap");
-      for (const auto & boundary_id : _excluded_boundary_ids)
-        if (std::find(_included_boundary_ids.begin(), _included_boundary_ids.end(), boundary_id) !=
-            _included_boundary_ids.end())
           paramError("excluded_boundaries",
                      "'included_boundaries' and 'excluded_boundaries' lists should not overlap");
     }
@@ -295,7 +291,7 @@ SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * const elem,
                                                        const unsigned int side,
                                                        const MeshBase & mesh) const
 {
-  for (const auto bid : _included_boundary_ids)
+  for (const auto & bid : _included_boundary_ids)
     if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
       return true;
   return false;

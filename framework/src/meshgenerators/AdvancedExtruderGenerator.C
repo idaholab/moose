@@ -250,13 +250,13 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     paramError("biases", "Size of this parameter, if provided, must be the same as heights.");
 
   if (_upward_boundary_source_blocks.size() != _upward_boundary_ids.size() ||
-      _upward_boundary_ids.size() != _heights.size())
+      _upward_boundary_ids.size() != num_elevations)
     paramError("upward_boundary_ids",
                "This parameter must have the same length (" +
                    std::to_string(_upward_boundary_ids.size()) +
                    ") as upward_boundary_source_blocks (" +
                    std::to_string(_upward_boundary_source_blocks.size()) + ") and heights (" +
-                   std::to_string(_heights.size()) + ")");
+                   std::to_string(num_elevations) + ")");
   for (unsigned int i = 0; i < _upward_boundary_source_blocks.size(); i++)
     if (_upward_boundary_source_blocks[i].size() != _upward_boundary_ids[i].size())
       paramError("upward_boundary_ids",
@@ -264,13 +264,13 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                  "element of upward_boundary_source_blocks.");
 
   if (_downward_boundary_source_blocks.size() != _downward_boundary_ids.size() ||
-      _downward_boundary_ids.size() != _heights.size())
+      _downward_boundary_ids.size() != num_elevations)
     paramError("downward_boundary_ids",
                "This parameter must have the same length (" +
                    std::to_string(_downward_boundary_ids.size()) +
                    ") as downward_boundary_source_blocks (" +
                    std::to_string(_downward_boundary_source_blocks.size()) + ") and heights (" +
-                   std::to_string(_heights.size()) + ")");
+                   std::to_string(num_elevations) + ")");
   for (unsigned int i = 0; i < _downward_boundary_source_blocks.size(); i++)
     if (_downward_boundary_source_blocks[i].size() != _downward_boundary_ids[i].size())
       paramError("downward_boundary_ids",

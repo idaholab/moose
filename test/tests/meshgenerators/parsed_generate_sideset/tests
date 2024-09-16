@@ -108,4 +108,24 @@
     issues = '#28551'
     design = 'meshgenerators/ParsedGenerateSideset.md'
   []
+  [overlap_included_target_boundary]
+    type = RunException
+    input = parsed_generate_sideset.i
+    cli_args = 'Mesh/sideset/included_boundaries="interior"'
+    expect_err = "boundary cannot be both the new boundary and be included in the list of included boundaries"
+    requirement = 'The system shall report an error if the sideset to create appears in the list of sidesets to include.'
+    mesh_mode = 'REPLICATED'
+    issues = '#24354'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+  []
+  [overlap_excluded_target_boundary]
+    type = RunException
+    input = parsed_generate_sideset.i
+    cli_args = 'Mesh/sideset/excluded_boundaries="interior"'
+    expect_err = "boundary cannot be both the new boundary and be excluded in the list of excluded boundaries"
+    requirement = 'The system shall report an error if the sideset to create appears in the list of sidesets to exclude.'
+    mesh_mode = 'REPLICATED'
+    issues = '#28551'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+  []
 []
