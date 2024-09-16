@@ -85,7 +85,7 @@ From: {{ APPTAINER_FROM }}
     # by the "setup-code-server-extensions" script (in PATH)
     mkdir /opt/code-server/extensions
     # Download extensions for code-server, currently just moose language support
-    MOOSE_LANGUAGE_SUPPORT_VERSION=1.1.2
+    MOOSE_LANGUAGE_SUPPORT_VERSION=1.2.0
     cd /opt/code-server/extensions
     curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/DanielSchwen.moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
 
