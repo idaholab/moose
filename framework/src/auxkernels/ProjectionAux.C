@@ -23,6 +23,11 @@ ProjectionAux::validParams()
       "variable. If they are the same type, this amounts to a simple copy.");
   params.addRequiredCoupledVar("v", "Variable to take the value of.");
 
+  params.addParam<bool>("use_block_restriction_for_source",
+                        false,
+                        "Whether to use the auxkernel block restriction to also restrict the "
+                        "locations selected for source variable values");
+
   // Technically possible to project from nodal to elemental and back
   params.set<bool>("_allow_nodal_to_elemental_coupling") = true;
 
@@ -44,7 +49,8 @@ ProjectionAux::ProjectionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _v(coupledValue("v")),
     _source_variable(*getFieldVar("v", 0)),
-    _source_sys(_c_fe_problem.getSystem(coupledName("v")))
+    _source_sys(_c_fe_problem.getSystem(coupledName("v"))),
+    _use_block_restriction_for_source(getParam<bool>("use_block_restriction_for_source"))
 {
   // Output some messages to user
   if (_source_variable.order() > _var.order())
@@ -87,7 +93,8 @@ ProjectionAux::computeValue()
       const auto & elem = _mesh.elemPtr(id);
       const auto block_id = elem->subdomain_id();
       // Only use higher D elements
-      if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) && hasBlocks(block_id))
+      if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) &&
+          (!_use_block_restriction_for_source || hasBlocks(block_id)))
       {
         const auto elem_volume = elem->volume();
         sum_weighted_values +=
@@ -104,8 +111,12 @@ const Elem *
 ProjectionAux::elemOnNodeVariableIsDefinedOn() const
 {
   for (const auto & elem_id : _mesh.nodeToElemMap().find(_current_node->id())->second)
-    if (_source_variable.hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()) &&
-        !_mesh.isLowerD(block_id) && hasBlocks(block_id))
-      return _mesh.elemPtr(elem_id);
+  {
+    const auto & elem = _mesh.elemPtr(elem_id);
+    const auto block_id = elem->subdomain_id();
+    if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) &&
+        (!_use_block_restriction_for_source || hasBlocks(block_id)))
+      return elem;
+  }
   mooseError("Source variable is not defined everywhere the target variable is");
 }
