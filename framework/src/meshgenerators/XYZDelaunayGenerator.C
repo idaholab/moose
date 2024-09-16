@@ -102,6 +102,13 @@ XYZDelaunayGenerator::XYZDelaunayGenerator(const InputParameters & parameters)
 {
   if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
     paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
+
+  if (isParamValid("hole_boundaries"))
+  {
+    auto & hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
+    if (hole_boundaries.size() != _hole_ptrs.size())
+      paramError("hole_boundaries", "Need one hole_boundaries entry per hole, if specified.");
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -231,9 +238,6 @@ XYZDelaunayGenerator::generate()
   {
     auto hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
     auto hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, hole_boundaries, true);
-
-    if (hole_boundary_ids.size() != _hole_ptrs.size())
-      paramError("hole_boundary_ids", "Need one hole_boundary_ids entry per hole, if specified.");
 
     for (auto h : index_range(_hole_ptrs))
       libMesh::MeshTools::Modification::change_boundary_id(
