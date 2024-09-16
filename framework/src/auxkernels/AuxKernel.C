@@ -486,7 +486,7 @@ AuxKernelTempl<ComputeValueType>::isMortar()
   return dynamic_cast<MortarNodalAuxKernelTempl<ComputeValueType> *>(this) != nullptr;
 }
 
-// Explicitly instantiates the two versions of the AuxKernelTempl class
+// Explicitly instantiates the three versions of the AuxKernelTempl class
 template class AuxKernelTempl<Real>;
 template class AuxKernelTempl<RealVectorValue>;
 template class AuxKernelTempl<RealEigenVector>;
