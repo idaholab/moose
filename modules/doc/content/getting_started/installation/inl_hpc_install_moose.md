@@ -93,8 +93,8 @@ available and are in the directory that contains that application. Build your ap
 and test it as normal:
 
 ```
-make -j 6
-./run_tests -j 6
+make -j 4
+./run_tests -j 4
 ```
 
 ## Running id=running
