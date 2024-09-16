@@ -1662,8 +1662,8 @@ MooseApp::copyInputs()
     const auto return_value = system(cmd.c_str());
     if (!WIFEXITED(return_value))
       mooseError("Process exited unexpectedly");
-    _exit_code = WEXITSTATUS(return_value);
-    if (_exit_code == 0)
+    setExitCode(WEXITSTATUS(return_value));
+    if (exitCode() == 0)
       Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
     return true;
   }
@@ -1721,7 +1721,7 @@ MooseApp::runInputs()
     const auto return_value = system(cmd.c_str());
     if (!WIFEXITED(return_value))
       mooseError("Process exited unexpectedly");
-    _exit_code = WEXITSTATUS(return_value);
+    setExitCode(WEXITSTATUS(return_value));
     return true;
   }
 

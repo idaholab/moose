@@ -135,6 +135,11 @@ public:
   int exitCode() const { return _exit_code; }
 
   /**
+   * Sets the exit code that the application will exit with.
+   */
+  void setExitCode(const int exit_code) { _exit_code = exit_code; }
+
+  /**
    * Get the parameters of the object
    * @return The parameters of the object
    */
