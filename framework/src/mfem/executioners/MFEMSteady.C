@@ -24,7 +24,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 void
 MFEMSteady::init()
 {
-  _problem = dynamic_cast<platypus::SteadyStateProblem *>(_mfem_problem.mfem_problem.get());
+  _problem = dynamic_cast<platypus::SteadyStateProblem *>(&_mfem_problem.getProblemData());
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 }
