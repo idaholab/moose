@@ -2185,8 +2185,11 @@ Builder::setVectorParameter<MultiMooseEnum, MultiMooseEnum>(
   // Get the full string assigned to the variable full_name
   std::string buffer = root()->param<std::string>(full_name);
 
-  std::vector<std::string> first_tokenized_vector;
-  MooseUtils::tokenize<std::string>(buffer, first_tokenized_vector, 1, ";");
+  std::vector<std::string> first_tokenized_vector = MooseUtils::split(buffer, ";");
+  for (const auto & i : first_tokenized_vector)
+    if (MooseUtils::trim(i) == "")
+      mooseError("In " + full_name + ", one entry in the vector is empty.  This is not allowed.");
+
   param->set().resize(first_tokenized_vector.size(), enum_values[0]);
 
   std::vector<std::vector<std::string>> vecvec(first_tokenized_vector.size());
@@ -2273,15 +2276,14 @@ Builder::setVectorParameter<VariableName, VariableName>(
     for (unsigned int i = 0; i < vec.size(); ++i)
       if (var_names[i] == "")
       {
-        _errmsg +=
-            hit::errormsg(
-                root()->find(full_name),
-                "invalid value for ",
-                full_name,
-                ":\n"
-                "    MOOSE does not currently support a coupled vector where some parameters are ",
-                "reals and others are variables") +
-            "\n";
+        _errmsg += hit::errormsg(root()->find(full_name),
+                                 "invalid value for ",
+                                 full_name,
+                                 ":\n"
+                                 "    MOOSE does not currently support a coupled vector where "
+                                 "some parameters are ",
+                                 "reals and others are variables") +
+                   "\n";
         return;
       }
       else

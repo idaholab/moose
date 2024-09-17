@@ -23,6 +23,11 @@ VecMultiMooseEnumMaterial::validParams()
 VecMultiMooseEnumMaterial::VecMultiMooseEnumMaterial(const InputParameters & parameters)
   : Material(parameters)
 {
+  const std::vector<MultiMooseEnum> & vmme = getParam<std::vector<MultiMooseEnum>>("mme");
+  Moose::out << "mme: ";
+  for (const auto & i : vmme)
+    Moose::out << i << "; ";
+  Moose::out << std::endl;
 }
 
 void
