@@ -21,7 +21,7 @@ MFEMProblem::outputStep(ExecFlagType type)
   // directories with iterated names
   if (type == EXEC_INITIAL)
   {
-    mfem_problem->_outputs.Init(mfem_problem->_gridfunctions);
+    getProblemData()._outputs.Init(getProblemData()._gridfunctions);
     std::vector<OutputName> mfem_data_collections =
         _app.getOutputWarehouse().getOutputNames<MFEMDataCollection>();
     for (const auto & name : mfem_data_collections)
@@ -30,8 +30,8 @@ MFEMProblem::outputStep(ExecFlagType type)
       int filenum(dc->getFileNumber());
       std::string filename("/Run" + std::to_string(filenum));
 
-      mfem_problem->_outputs.Register(name, dc->createDataCollection(filename));
-      mfem_problem->_outputs.Reset();
+      getProblemData()._outputs.Register(name, dc->createDataCollection(filename));
+      getProblemData()._outputs.Reset();
       dc->setFileNumber(filenum + 1);
     }
   }
@@ -62,17 +62,17 @@ MFEMProblem::init()
 void
 MFEMProblem::setDevice()
 {
-  mfem_problem->_device.Configure(getParam<std::string>("device"));
-  mfem_problem->_device.Print(std::cout);
+  getProblemData()._device.Configure(getParam<std::string>("device"));
+  getProblemData()._device.Print(std::cout);
 }
 
 void
 MFEMProblem::setMesh(std::shared_ptr<mfem::ParMesh> pmesh)
 {
-  mfem_problem->_pmesh = pmesh;
-  mfem_problem->_comm = pmesh->GetComm();
-  MPI_Comm_size(pmesh->GetComm(), &(mfem_problem->_num_procs));
-  MPI_Comm_rank(pmesh->GetComm(), &(mfem_problem->_myid));
+  getProblemData()._pmesh = pmesh;
+  getProblemData()._comm = pmesh->GetComm();
+  MPI_Comm_size(pmesh->GetComm(), &(getProblemData()._num_procs));
+  MPI_Comm_rank(pmesh->GetComm(), &(getProblemData()._myid));
 }
 
 void
@@ -87,11 +87,11 @@ MFEMProblem::setProblemBuilder()
   {
     mfem_problem_builder = std::make_shared<platypus::SteadyStateEquationSystemProblemBuilder>();
   }
-  mfem_problem = mfem_problem_builder->ReturnProblem();
+  _problem_data = mfem_problem_builder->ReturnProblem();
 
   setDevice();
   setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
-  mfem_problem->ConstructOperator();
+  getProblemData().ConstructOperator();
 }
 
 void
@@ -102,7 +102,7 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMSolverBase & mfem_preconditioner = getUserObject<MFEMSolverBase>(name);
 
-  mfem_problem->_jacobian_preconditioner = mfem_preconditioner.getSolver();
+  getProblemData()._jacobian_preconditioner = mfem_preconditioner.getSolver();
 }
 
 void
@@ -113,7 +113,7 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMSolverBase & mfem_solver = getUserObject<MFEMSolverBase>(name);
 
-  mfem_problem->_jacobian_solver = mfem_solver.getSolver();
+  getProblemData()._jacobian_solver = mfem_solver.getSolver();
 }
 
 void
@@ -124,13 +124,13 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   FEProblemBase::addUserObject(bc_name, name, parameters);
   MFEMBoundaryCondition * mfem_bc(&getUserObject<MFEMBoundaryCondition>(name));
 
-  if (mfem_problem->_bc_map.Has(name))
+  if (getProblemData()._bc_map.Has(name))
   {
     const std::string error_message = "A boundary condition with the name " + name +
                                       " has already been added to the problem boundary conditions.";
     mfem::mfem_error(error_message.c_str());
   }
-  mfem_problem->_bc_map.Register(name, std::move(mfem_bc->getBC()));
+  getProblemData()._bc_map.Register(name, std::move(mfem_bc->getBC()));
 }
 
 void
@@ -171,8 +171,8 @@ MFEMProblem::addFESpace(const std::string & user_object_name,
   MFEMFESpace & mfem_fespace(getUserObject<MFEMFESpace>(name));
 
   // Register fespace and associated fe collection.
-  mfem_problem->_fecs.Register(name, mfem_fespace.getFEC());
-  mfem_problem->_fespaces.Register(name, mfem_fespace.getFESpace());
+  getProblemData()._fecs.Register(name, mfem_fespace.getFEC());
+  getProblemData()._fespaces.Register(name, mfem_fespace.getFESpace());
 }
 
 void
@@ -197,7 +197,7 @@ MFEMProblem::addVariable(const std::string & var_type,
 
   // Register gridfunction.
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  mfem_problem->_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  getProblemData()._gridfunctions.Register(var_name, mfem_variable.getGridFunction());
 }
 
 void
@@ -222,7 +222,7 @@ MFEMProblem::addAuxVariable(const std::string & var_type,
 
   // Register gridfunction.
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  mfem_problem->_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  getProblemData()._gridfunctions.Register(var_name, mfem_variable.getGridFunction());
 }
 
 void
