@@ -35,6 +35,12 @@
   []
   [physics_single_heated_channel]
     requirement = 'The system shall simulate a single-phase heated flow channel'
+    [VACE]
+      type = Exodiff
+      input = 'vace_single_heated_channel.i'
+      exodiff = 'vace_single_heated_channel_out.e'
+      detail = 'using the Physics syntax for the variable area compressible Euler equation.'
+    []
     [WCNSFV]
       type = Exodiff
       input = 'wcnsfv_single_heated_channel.i'
