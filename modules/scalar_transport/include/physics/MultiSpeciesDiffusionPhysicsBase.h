@@ -41,6 +41,9 @@ protected:
   /// Boundaries on which a Dirichlet boundary condition is applied. Outer indexing is variables
   const std::vector<std::vector<BoundaryName>> & _dirichlet_boundaries;
 
+  /// Whether to use automatic differentiation or not
+  const bool _use_ad;
+
 private:
   /// Add default preconditioning options
   virtual void addPreconditioning() override;

@@ -23,9 +23,9 @@
         # A and C have the same equation, on purpose
         species = 'A B C'
 
-        diffusivity_matprops = 'da db 1'
+        diffusivity_functors = 'da db 1'
 
-        source_functors = '0 2 0'
+        source_functors = 'heat_pp heat_var heat_function'
         source_coefs = '1 2 1'
 
         # Test all the ways of setting the boundary conditions (from variable, pp, etc)
@@ -43,19 +43,38 @@
         boundary_values = '2 value_pp;
                            2 value_pp value_function value_variable;
                            2 value_pp'
-
-        # Add some postprocessing
-        compute_diffusive_fluxes_on = 'right left top'
       []
     []
   []
 []
 
-[Materials]
-  [diff_coeffs]
-    type = ADGenericConstantMaterial
-    prop_names = 'da db'
-    prop_values = '1 2'
+[Functions]
+  [da]
+    type = ConstantFunction
+    value = 1
+  []
+  [db]
+    type = ConstantFunction
+    value = 2
+  []
+  [heat_function]
+    type = ConstantFunction
+    value = 0
+  []
+[]
+
+[AuxVariables]
+  [heat_var]
+    family = MONOMIAL
+    order = CONSTANT
+    initial_condition = 2
+  []
+[]
+
+[Postprocessors]
+  [heat_pp]
+    type = Receiver
+    default = 0
   []
 []
 
