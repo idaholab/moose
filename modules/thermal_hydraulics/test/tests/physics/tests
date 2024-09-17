@@ -33,4 +33,13 @@
       detail = 'using the Physics syntax for the weakly compressible finite volume discretization of the Navier Stokes equations.'
     []
   []
+  [physics_single_heated_channel]
+    requirement = 'The system shall simulate a single-phase heated flow channel'
+    [WCNSFV]
+      type = Exodiff
+      input = 'wcnsfv_single_heated_channel.i'
+      exodiff = 'wcnsfv_single_heated_channel_out.e'
+      detail = 'using the Physics syntax for the weakly compressible finite volume discretization of the Navier Stokes equations.'
+    []
+  []
 []
