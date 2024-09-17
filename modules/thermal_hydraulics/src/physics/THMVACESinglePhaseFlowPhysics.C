@@ -9,10 +9,13 @@
 
 #include "THMVACESinglePhaseFlowPhysics.h"
 #include "THMProblem.h"
-#include "FlowChannelBase.h"
 #include "SlopeReconstruction1DInterface.h"
+
+// For implementing component-specific behavior
+#include "FlowChannelBase.h"
 #include "PhysicsFlowBoundary.h"
 #include "PhysicsFlowJunction.h"
+#include "PhysicsHeatTransferBase.h"
 
 // TODO: consolidate those at the THMPhysics parent class level
 typedef THMVACESinglePhaseFlowPhysics VACE1P;
@@ -422,6 +425,8 @@ THMVACESinglePhaseFlowPhysics::addFEKernels()
       _sim->addKernel(class_name, genName(comp_name, "rhoE_gravity"), params);
     }
   }
+
+  addHeatTransferKernels();
 }
 
 void
@@ -760,19 +765,41 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
 
 void
 THMVACESinglePhaseFlowPhysics::addWallHeatFlux(const std::string & heat_transfer_component,
-                                               const HeatFluxWallEnum & heat_flux_type,
-                                               const MooseFunctorName & functor_name)
+                                               const HeatFluxWallEnum & heat_flux_type)
 {
+  _heat_transfer_types[heat_transfer_component] = heat_flux_type;
+}
 
-    // {
-  //   const std::string class_name = "ADOneDEnergyWallHeating";
-  //   InputParameters params = _factory.getValidParams(class_name);
-  //   params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
-  //   params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
-  //   params.set<std::vector<VariableName>>("T_wall") = {_T_wall_name};
-  //   params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
-  //   params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
-  //   params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
-  //   getTHMProblem().addKernel(class_name, genName(name(), "wall_heat_transfer"), params);
-  // }
+void
+THMVACESinglePhaseFlowPhysics::addHeatTransferKernels()
+{
+  for (const auto & [comp_name, heat_flux_type] : _heat_transfer_types)
+  {
+    const auto & comp = _sim->getComponentByName<PhysicsHeatTransferBase>(comp_name);
+
+    if (heat_flux_type == ThermalHydraulicsFlowPhysics::FixedWallTemperature)
+    {
+      const std::string class_name = "ADOneDEnergyWallHeating";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<NonlinearVariableName>("variable") = VACE1P::RHOEA;
+      params.set<std::vector<SubdomainName>>("block") = comp.getFlowChannelSubdomains();
+      params.set<std::vector<VariableName>>("T_wall") = {comp.getWallTemperatureName()};
+      params.set<MaterialPropertyName>("Hw") = comp.getWallHeatTransferCoefficientName();
+      params.set<std::vector<VariableName>>("P_hf") = {comp.getHeatedPerimeterName()};
+      params.set<MaterialPropertyName>("T") = VACE1P::TEMPERATURE;
+      _sim->addKernel(class_name, genName(comp_name, "wall_heat_transfer"), params);
+    }
+    else if (heat_flux_type == ThermalHydraulicsFlowPhysics::FixedHeatFlux)
+    {
+      const std::string class_name = "ADOneDEnergyWallHeatFlux";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<NonlinearVariableName>("variable") = VACE1P::RHOEA;
+      params.set<std::vector<SubdomainName>>("block") = comp.getFlowChannelSubdomains();
+      params.set<MaterialPropertyName>("q_wall") = comp.getWallHeatFluxName();
+      params.set<std::vector<VariableName>>("P_hf") = {comp.getHeatedPerimeterName()};
+      _sim->addKernel(class_name, genName(comp_name, "wall_heat"), params);
+    }
+    else
+      mooseAssert(false, "Heat flux type not implemented");
+  }
 }

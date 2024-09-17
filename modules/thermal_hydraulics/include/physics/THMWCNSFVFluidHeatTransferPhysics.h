@@ -43,8 +43,7 @@ private:
   virtual void addFlowJunctions() override;
 
   virtual void addWallHeatFlux(const std::string & heat_transfer_component,
-                               const HeatFluxWallEnum & heat_flux_type,
-                               const MooseFunctorName & functor_name) override;
+                               const HeatFluxWallEnum & heat_flux_type) override;
 
   /// Add functor materials that compute the fluxes / pressures on the sides connected to the junction
   void addJunctionFunctorMaterials();

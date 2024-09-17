@@ -41,6 +41,10 @@ private:
   virtual void addInletBoundaries() override;
   virtual void addOutletBoundaries() override;
   virtual void addFlowJunctions() override;
+  virtual void addWallHeatFlux(const std::string & /*heat_transfer_component*/,
+                               const HeatFluxWallEnum & /*heat_flux_type*/) override
+  {
+  }
 
   /// Adds a vector functor for the direction of the channels, that will help for computing the pressure gradient contribution to the momentum equation notably
   void addDirectionFunctorMaterial();

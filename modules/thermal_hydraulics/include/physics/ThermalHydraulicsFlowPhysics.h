@@ -92,8 +92,7 @@ public:
    * @param functor_name functor describing the heat flux
    */
   virtual void addWallHeatFlux(const std::string & /*heat_transfer_component*/,
-                               const HeatFluxWallEnum & /*heat_flux_type*/,
-                               const MooseFunctorName & /*functor_name*/)
+                               const HeatFluxWallEnum & /*heat_flux_type*/)
   {
     mooseError("Not implemented");
   };

@@ -57,6 +57,11 @@ private:
   /// Adds the boundary flux boundary condition, which uses the boundary flux user object
   void addBoundaryFluxBC(const PhysicsFlowBoundary & comp,
                          const UserObjectName & boundary_numerical_flux_name);
+  /// Adds the kernels to represent a heat transfer term
+  void addHeatTransferKernels();
+
+  virtual void addWallHeatFlux(const std::string & heat_transfer_component,
+                               const HeatFluxWallEnum & heat_flux_type) override;
 
 public:
   static const std::string DENSITY;
