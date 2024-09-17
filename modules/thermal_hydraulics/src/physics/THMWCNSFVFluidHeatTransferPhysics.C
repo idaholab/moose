@@ -10,12 +10,11 @@
 #include "THMWCNSFVFluidHeatTransferPhysics.h"
 #include "NSFVBase.h"
 #include "THMProblem.h"
-#include "FlowChannelBase.h"
-#include "SlopeReconstruction1DInterface.h"
-#include "PhysicsFlowBoundary.h"
-#include "THMMesh.h"
 
-#include "Function.h"
+// To implement component-specific behavior
+#include "PhysicsFlowChannel.h"
+#include "PhysicsFlowBoundary.h"
+#include "PhysicsHeatTransferBase.h"
 
 registerTHMFlowModelPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVFluidHeatTransferPhysics);
 registerNavierStokesPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVFluidHeatTransferPhysics);
@@ -137,6 +136,7 @@ THMWCNSFVFluidHeatTransferPhysics::addMaterials()
 {
   WCNSFVFluidHeatTransferPhysics::addMaterials();
   addJunctionFunctorMaterials();
+  addHeatTransferFunctorMaterials();
 }
 
 void
@@ -171,8 +171,41 @@ THMWCNSFVFluidHeatTransferPhysics::addJunctionFunctorMaterials()
 }
 
 void
+THMWCNSFVFluidHeatTransferPhysics::addHeatTransferFunctorMaterials()
+{
+  for (const auto & [comp_name, heat_transfer_type] : _heat_transfer_types)
+  {
+    const auto & comp = _sim->getComponentByName<PhysicsHeatTransferBase>(comp_name);
+    // Factor to convert a surface term to a volumetric term
+    {
+      const std::string class_name = "VolumeToAreaFunctorMaterial";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = comp.getFlowChannelSubdomains();
+      params.set<MooseFunctorName>("functor_name") = "vol_surf_factor_" + comp_name;
+      params.set<MooseFunctorName>("area") = "A";
+      _sim->addFunctorMaterial(class_name, genName(comp.name(), "conversion_area_volume"), params);
+    }
+
+    // Convert wall temperature to a heat flux
+    if (heat_transfer_type == FixedWallTemperature)
+    {
+      const std::string class_name = "ADParsedFunctorMaterial";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = comp.getFlowChannelSubdomains();
+      params.set<std::string>("property_name") = comp_name + "_q_wall";
+      // How to set T_wall is decided by the HeatTransfer object, Hw is set by a correlation
+      params.set<std::string>("expression") = "(T_wall - T_fluid) * Hw";
+      params.set<std::vector<std::string>>("functor_names") = {"T_wall", "Hw", "T_fluid"};
+
+      _sim->addFunctorMaterial(class_name, genName(comp.name(), "q_wall"), params);
+    }
+  }
+}
+
+void
 THMWCNSFVFluidHeatTransferPhysics::addFVKernels()
 {
+  addHeatTransferKernels();
   WCNSFVFluidHeatTransferPhysics::addFVKernels();
 }
 
@@ -260,6 +293,40 @@ THMWCNSFVFluidHeatTransferPhysics::addFlowJunctions()
     }
     else
       mooseError("Unsupported junction type ", junction_type);
+  }
+}
+
+void
+THMWCNSFVFluidHeatTransferPhysics::addWallHeatFlux(const std::string & heat_transfer_component,
+                                                   const HeatFluxWallEnum & heat_flux_type,
+                                                   const MooseFunctorName & functor_name)
+{
+  _heat_transfer_types[heat_transfer_component] = heat_flux_type;
+}
+
+void
+THMWCNSFVFluidHeatTransferPhysics::addHeatTransferKernels()
+{
+  for (const auto & [heat_transfer_component, heat_flux_type] : _heat_transfer_types)
+  {
+    mooseAssert(_sim, "Should have a problem");
+    const auto & component = _sim->getComponentByName<HeatTransferBase>(heat_transfer_component);
+    const auto volume_surface_adjustment = "vol_surf_factor_" + heat_transfer_component;
+
+    if (heat_flux_type == ThermalHydraulicsFlowPhysics::FixedWallTemperature)
+    {
+      // Wall temperature has to be converted to a heat flux functor
+      for (const auto & block : component.getFlowChannelSubdomains())
+        addExternalHeatSource(
+            block, heat_transfer_component + "_q_wall", volume_surface_adjustment);
+    }
+    else if (heat_flux_type == THMWCNSFVFluidHeatTransferPhysics::FixedHeatFlux)
+    {
+      for (const auto & block : component.getFlowChannelSubdomains())
+        addExternalHeatSource(block, component.getWallHeatFluxName(), volume_surface_adjustment);
+    }
+    else
+      mooseAssert(false, "Heat flux type not implemented");
   }
 }
 

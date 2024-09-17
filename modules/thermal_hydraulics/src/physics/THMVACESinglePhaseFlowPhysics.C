@@ -757,3 +757,22 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
     }
   }
 }
+
+void
+THMVACESinglePhaseFlowPhysics::addWallHeatFlux(const std::string & heat_transfer_component,
+                                               const HeatFluxWallEnum & heat_flux_type,
+                                               const MooseFunctorName & functor_name)
+{
+
+    // {
+  //   const std::string class_name = "ADOneDEnergyWallHeating";
+  //   InputParameters params = _factory.getValidParams(class_name);
+  //   params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
+  //   params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
+  //   params.set<std::vector<VariableName>>("T_wall") = {_T_wall_name};
+  //   params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
+  //   params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
+  //   params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
+  //   getTHMProblem().addKernel(class_name, genName(name(), "wall_heat_transfer"), params);
+  // }
+}

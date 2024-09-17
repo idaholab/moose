@@ -79,6 +79,25 @@ public:
    */
   void setJunction(const std::string & junction_component, const JunctionTypeEnum & junction_type);
 
+  enum HeatFluxWallEnum
+  {
+    FixedWallTemperature,
+    FixedHeatFlux
+  };
+
+  /**
+   * Add a heat transfer term
+   * @param heat_transfer_component the name of the heat transfer component
+   * @param heat_flux_type how the heat flux is imposed
+   * @param functor_name functor describing the heat flux
+   */
+  virtual void addWallHeatFlux(const std::string & /*heat_transfer_component*/,
+                               const HeatFluxWallEnum & /*heat_flux_type*/,
+                               const MooseFunctorName & /*functor_name*/)
+  {
+    mooseError("Not implemented");
+  };
+
 protected:
   virtual void initializePhysicsAdditional() override;
 
@@ -124,6 +143,8 @@ protected:
   std::vector<std::string> _junction_components;
   /// The types of the junctions
   std::vector<JunctionTypeEnum> _junction_types;
+  /// The types of the heat transfer components
+  std::map<std::string, HeatFluxWallEnum> _heat_transfer_types;
 
   /// Gravitational acceleration vector
   RealVectorValue _gravity_vector;

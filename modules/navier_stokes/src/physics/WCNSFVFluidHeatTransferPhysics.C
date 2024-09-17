@@ -356,7 +356,23 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
   params.set<MooseFunctorName>("v") = getParam<MooseFunctorName>("external_heat_source");
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
-  getProblem().addFVKernel(kernel_type, prefix() + "external_heat_source", params);
+    getProblem().addFVKernel(kernel_type, prefix() + "external_heat_source", params);
+  }
+  if (_external_heat_sources_functors.size())
+  {
+    for (const auto & [block, functor] : _external_heat_sources_functors)
+    {
+      const std::string kernel_type = "FVCoupledForce";
+      InputParameters params = getFactory().getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      assignBlocks(params, {block});
+      params.set<MooseFunctorName>("v") = functor;
+      params.set<MooseFunctorName>("functor_coef") = _external_heat_sources_coefs[block];
+
+      getProblem().addFVKernel(
+          kernel_type, prefix() + "external_heat_source_" + block + "_" + functor, params);
+    }
+  }
 }
 
 void

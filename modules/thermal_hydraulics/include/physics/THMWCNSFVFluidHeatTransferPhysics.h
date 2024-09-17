@@ -42,8 +42,18 @@ private:
   virtual void addOutletBoundaries() override;
   virtual void addFlowJunctions() override;
 
+  virtual void addWallHeatFlux(const std::string & heat_transfer_component,
+                               const HeatFluxWallEnum & heat_flux_type,
+                               const MooseFunctorName & functor_name) override;
+
   /// Add functor materials that compute the fluxes / pressures on the sides connected to the junction
   void addJunctionFunctorMaterials();
+
+  ///  Add functor materials to perform the necessary calculations for heat fluxes
+  void addSurfaceToVolumeConversionFunctor();
+  void addHeatTransferFunctorMaterials();
+  void addWallHeatFluxFunctor();
+  void addHeatTransferKernels();
 
 public:
   static const std::string DENSITY;
