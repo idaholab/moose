@@ -17,7 +17,7 @@ MFEMTransient::validParams()
 
 MFEMTransient::MFEMTransient(const InputParameters & params)
   : MFEMExecutioner(params),
-    _problem(dynamic_cast<platypus::TimeDomainProblem *>(_mfem_problem.mfem_problem.get())),
+    _problem(dynamic_cast<platypus::TimeDomainProblem *>(&_mfem_problem.getProblemData())),
     _t_step(getParam<Real>("dt")),
     _t_initial(getParam<Real>("start_time")),
     _t_final(getParam<Real>("end_time")),
@@ -54,7 +54,7 @@ MFEMTransient::Step(double dt, int it) const
 void
 MFEMTransient::init()
 {
-  _problem = dynamic_cast<platypus::TimeDomainProblem *>(_mfem_problem.mfem_problem.get());
+  _problem = dynamic_cast<platypus::TimeDomainProblem *>(&_mfem_problem.getProblemData());
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 
