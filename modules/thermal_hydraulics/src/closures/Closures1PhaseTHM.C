@@ -95,6 +95,7 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
         params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
         params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
         params.set<Real>("roughness") = flow_channel.getParam<Real>("roughness");
+        params.applyParameter(parameters(), "outputs");
         const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
         _sim.addMaterial(class_name, obj_name, params);
         flow_channel.connectObject(params, obj_name, "roughness");
@@ -110,6 +111,7 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
         params.set<MooseFunctorName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
         params.set<MooseFunctorName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
         params.set<Real>("roughness") = flow_channel.getParam<Real>("roughness");
+        params.applyParameter(parameters(), "outputs");
         const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
         _sim.addFunctorMaterial(class_name, obj_name, params);
         flow_channel.connectObject(params, obj_name, "roughness");
@@ -161,6 +163,7 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
         {
           params.set<MooseEnum>("subchannel_type") = "CORNER";
         }
+        params.applyParameter(parameters(), "outputs");
         const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
         _sim.addMaterial(class_name, obj_name, params);
       }
@@ -207,6 +210,7 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
         {
           params.set<MooseEnum>("subchannel_type") = "CORNER";
         }
+        params.applyParameter(parameters(), "outputs");
         const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
         _sim.addFunctorMaterial(class_name, obj_name, params);
       }
@@ -240,6 +244,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
             FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE;
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -257,6 +262,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         params.set<MooseFunctorName>("cp") = FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE;
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -270,6 +276,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -279,6 +286,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -318,6 +326,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         {
           params.set<MooseEnum>("bundle_array") = "TRIANGULAR";
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -353,6 +362,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         {
           params.set<MooseEnum>("bundle_array") = "TRIANGULAR";
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -366,6 +376,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -375,6 +386,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -396,6 +408,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
               "FlowChannel1Phase component"));
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -413,6 +426,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
               "FlowChannel1Phase component"));
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -434,6 +448,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
               "FlowChannel1Phase component"));
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -451,6 +466,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
               "FlowChannel1Phase component"));
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -472,6 +488,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
               "FlowChannel1Phase component"));
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -489,6 +506,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
               "FlowChannel1Phase component"));
         }
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -502,6 +520,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       if (_add_functor_materials)
@@ -511,6 +530,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+        params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
       }
       break;
@@ -535,5 +555,6 @@ Closures1PhaseTHM::addTemperatureWallFromHeatFluxMaterial(const FlowChannel1Phas
   params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
   params.set<MaterialPropertyName>("cp") = FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE;
   params.set<MaterialPropertyName>("q_wall") = flow_channel.getWallHeatFluxNames()[i];
+  params.applyParameter(parameters(), "outputs");
   _sim.addMaterial(class_name, genName(flow_channel.name(), "T_from_q_wall_mat", i), params);
 }

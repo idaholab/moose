@@ -10,8 +10,10 @@
 #include "Closures1PhaseSimple.h"
 #include "FlowModelSinglePhase.h"
 #include "THMWCNSFVFlowPhysics.h"
+
 #include "FlowChannel1Phase.h"
 #include "HeatTransfer1PhaseBase.h"
+#include "PhysicsHeatTransferBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", Closures1PhaseSimple);
 
@@ -85,12 +87,14 @@ void
 Closures1PhaseSimple::addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
                                                   const FlowChannelBase & flow_channel)
 {
+  const FunctionName & Hw_fn_name = heat_transfer.getParam<FunctionName>("Hw");
+
   if (_add_regular_materials)
   {
+    if (!dynamic_cast<const HeatTransfer1PhaseBase *>(&heat_transfer))
+      mooseError("Component " + heat_transfer.name() + " is not of the expected type");
     const HeatTransfer1PhaseBase & heat_transfer_1phase =
         dynamic_cast<const HeatTransfer1PhaseBase &>(heat_transfer);
-    const FunctionName & Hw_fn_name = heat_transfer.getParam<FunctionName>("Hw");
-
     {
       const std::string class_name = "ADGenericFunctionMaterial";
       InputParameters params = _factory.getValidParams(class_name);
@@ -98,13 +102,34 @@ Closures1PhaseSimple::addMooseObjectsHeatTransfer(const HeatTransferBase & heat_
       params.set<std::vector<std::string>>("prop_names") = {
           heat_transfer_1phase.getWallHeatTransferCoefficient1PhaseName()};
       params.set<std::vector<FunctionName>>("prop_values") = {Hw_fn_name};
+      params.applyParameter(parameters(), "outputs");
       _sim.addMaterial(
           class_name, genName(heat_transfer.name(), "Hw_material", flow_channel.name()), params);
     }
 
     heat_transfer.makeFunctionControllableIfConstant(Hw_fn_name, "Hw");
   }
-  // Nothing to do for functor materials, Hw is a function and can be used a functor directly
+  if (_add_functor_materials)
+  {
+    if (!dynamic_cast<const PhysicsHeatTransferBase *>(&heat_transfer))
+      mooseError("Component " + heat_transfer.name() + " is not of the expected type");
+    const PhysicsHeatTransferBase & phys_heat_transfer =
+        dynamic_cast<const PhysicsHeatTransferBase &>(heat_transfer);
+    if (MooseUtils::parsesToReal(Hw_fn_name))
+    {
+      const std::string class_name = "ADGenericFunctorMaterial";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+      params.set<std::vector<std::string>>("prop_names") = {
+          phys_heat_transfer.getWallHeatTransferCoefficientName()};
+      params.set<std::vector<MooseFunctorName>>("prop_values") = {Hw_fn_name};
+      params.applyParameter(parameters(), "outputs");
+      _sim.addFunctorMaterial(
+          class_name, genName(heat_transfer.name(), "Hw_material", flow_channel.name()), params);
+    }
+
+    heat_transfer.makeFunctionControllableIfConstant(Hw_fn_name, "Hw");
+  }
 }
 
 void
@@ -119,6 +144,7 @@ Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
     params.set<MaterialPropertyName>("q_wall") = FlowModel::HEAT_FLUX_WALL;
     params.set<MaterialPropertyName>("Hw") = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
+    params.applyParameter(parameters(), "outputs");
     _sim.addMaterial(class_name, genName(flow_channel.name(), "T_wall_mat"), params);
   }
 
@@ -130,7 +156,7 @@ Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(
     params.set<std::string>("property_name") = "T_wall";
     params.set<std::string>("expression") = "q_wall / Hw + T_fluid";
     params.set<std::vector<std::string>>("functor_names") = {"q_wall", "Hw", "T_fluid"};
-
-    _sim.addMaterial(class_name, genName(flow_channel.name(), "T_wall_mat"), params);
+    params.applyParameter(parameters(), "outputs");
+    _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "T_wall_mat"), params);
   }
 }

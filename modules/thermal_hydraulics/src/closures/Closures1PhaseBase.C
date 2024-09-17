@@ -33,6 +33,7 @@ Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannelBase & flow
     params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
     params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
     params.set<FunctionName>("function") = f_D_fn_name;
+    params.applyParameter(parameters(), "outputs");
     _sim.addMaterial(class_name, genName(flow_channel.name(), "f_wall_fn_mat"), params);
   }
   // Nothing to do for functor materials, f is a function and can be used a functor directly
@@ -55,6 +56,7 @@ Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannelBase & fl
     params.set<MaterialPropertyName>("Hw_average") =
         FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
     params.set<std::vector<VariableName>>("T_fluid") = {FlowModelSinglePhase::TEMPERATURE};
+    params.applyParameter(parameters(), "outputs");
     _sim.addMaterial(class_name, genName(flow_channel.name(), "avg_T_wall_3eqn_mat"), params);
   }
   if (_add_functor_materials)

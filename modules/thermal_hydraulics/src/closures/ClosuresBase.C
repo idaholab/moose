@@ -23,6 +23,8 @@ ClosuresBase::validParams()
       "Whether to create the regular material properties version of the closure properties");
   params.addParam<bool>(
       "add_functor_materials", false, "Whether to create the corresponding functor materials");
+  params.addParam<std::vector<OutputName>>(
+      "outputs", {"none"}, "Output for the material properties");
 
   params.registerBase("Closures");
 
