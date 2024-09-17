@@ -9,7 +9,7 @@
 {% set version = "2024.09.12" %}
 
 # HDF5 Version
-{% set hdf5_version = "1.14.2" %}
+{% set hdf5_version = "1.14.3" %}
 
 package:
   name: moose-mpi
