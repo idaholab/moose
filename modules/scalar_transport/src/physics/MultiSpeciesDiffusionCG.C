@@ -22,18 +22,13 @@ MultiSpeciesDiffusionCG::validParams()
   InputParameters params = MultiSpeciesDiffusionPhysicsBase::validParams();
   params.addClassDescription("Discretizes diffusion equations for several species with the "
                              "continuous Galerkin finite element method");
-  params.addParam<bool>(
-      "use_automatic_differentiation",
-      true,
-      "Whether to use automatic differentiation for all the terms in the equation");
   params.transferParam<MooseEnum>(MooseVariableBase::validParams(), "order", "variable_order");
 
   return params;
 }
 
 MultiSpeciesDiffusionCG::MultiSpeciesDiffusionCG(const InputParameters & parameters)
-  : MultiSpeciesDiffusionPhysicsBase(parameters),
-    _use_ad(getParam<bool>("use_automatic_differentiation"))
+  : MultiSpeciesDiffusionPhysicsBase(parameters)
 {
 }
 
@@ -47,16 +42,16 @@ MultiSpeciesDiffusionCG::addFEKernels()
     {
       // Select the kernel type based on the user parameters
       std::string kernel_type;
-      if (isParamValid("diffusivity_matprop"))
+      if (isParamValid("diffusivity_matprops"))
         kernel_type = _use_ad ? "ADMatDiffusion" : "MatDiffusion";
-      else if (isParamValid("diffusivity_functor"))
+      else if (isParamValid("diffusivity_functors"))
       {
-        const auto & d = getParam<MooseFunctorName>("diffusivity_functor");
+        const auto & d = getParam<std::vector<MooseFunctorName>>("diffusivity_functors")[s];
         if (getProblem().hasFunction(d))
           kernel_type = "FunctionDiffusion";
         else
           paramError(
-              "diffusivity_functor", "No diffusion kernel implemented for the source type of", d);
+              "diffusivity_functors", "No diffusion kernel implemented for the source type of", d);
       }
       else
         kernel_type = _use_ad ? "ADDiffusion" : "Diffusion";
@@ -65,12 +60,12 @@ MultiSpeciesDiffusionCG::addFEKernels()
       assignBlocks(params, _blocks);
 
       // Transfer the diffusivity parameter from the Physics to the kernel
-      if (isParamValid("diffusivity_matprop"))
+      if (isParamValid("diffusivity_matprops"))
         params.set<MaterialPropertyName>("diffusivity") =
-            getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop")[s];
-      else if (isParamValid("diffusivity_functor"))
-        params.set<MaterialPropertyName>("diffusivity") =
-            getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop")[s];
+            getParam<std::vector<MaterialPropertyName>>("diffusivity_matprops")[s];
+      else if (isParamValid("diffusivity_functors"))
+        params.set<FunctionName>("function") =
+            getParam<std::vector<MooseFunctorName>>("diffusivity_functors")[s];
 
       getProblem().addKernel(kernel_type, prefix() + var_name + "_diffusion", params);
     }
