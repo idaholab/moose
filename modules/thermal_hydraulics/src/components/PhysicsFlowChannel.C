@@ -9,7 +9,7 @@
 
 #include "PhysicsFlowChannel.h"
 #include "SinglePhaseFluidProperties.h"
-#include "HeatTransfer1PhaseBase.h"
+#include "PhysicsHeatTransferBase.h"
 #include "ThermalHydraulicsApp.h"
 
 registerMooseObject("ThermalHydraulicsApp", PhysicsFlowChannel);
@@ -66,10 +66,10 @@ PhysicsFlowChannel::check() const
   // only 1-phase flow compatible heat transfers are allowed
   for (unsigned int i = 0; i < _heat_transfer_names.size(); i++)
   {
-    if (!hasComponentByName<HeatTransfer1PhaseBase>(_heat_transfer_names[i]))
+    if (!hasComponentByName<PhysicsHeatTransferBase>(_heat_transfer_names[i]))
       logError("Coupled heat source '",
                _heat_transfer_names[i],
-               "' is not compatible with single phase flow channel. Use single phase heat transfer "
+               "' is not compatible with Physics flow channel. Use a Physics heat transfer "
                "component instead.");
   }
 
@@ -167,9 +167,9 @@ PhysicsFlowChannel::getHeatTransferVariableNames()
 
   for (unsigned int i = 0; i < _n_heat_transfer_connections; i++)
   {
-    const HeatTransfer1PhaseBase & heat_transfer =
-        getComponentByName<HeatTransfer1PhaseBase>(_heat_transfer_names[i]);
+    const PhysicsHeatTransferBase & heat_transfer =
+        getComponentByName<PhysicsHeatTransferBase>(_heat_transfer_names[i]);
 
-    _Hw_1phase_names.push_back(heat_transfer.getWallHeatTransferCoefficient1PhaseName());
+    _Hw_names.push_back(heat_transfer.getWallHeatTransferCoefficientName());
   }
 }

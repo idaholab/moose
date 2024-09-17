@@ -298,8 +298,7 @@ THMWCNSFVFluidHeatTransferPhysics::addFlowJunctions()
 
 void
 THMWCNSFVFluidHeatTransferPhysics::addWallHeatFlux(const std::string & heat_transfer_component,
-                                                   const HeatFluxWallEnum & heat_flux_type,
-                                                   const MooseFunctorName & functor_name)
+                                                   const HeatFluxWallEnum & heat_flux_type)
 {
   _heat_transfer_types[heat_transfer_component] = heat_flux_type;
 }
