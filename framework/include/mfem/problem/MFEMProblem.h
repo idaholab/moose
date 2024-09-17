@@ -147,6 +147,8 @@ public:
    */
   platypus::PropertyManager & getProperties() { return _properties; }
 
+  platypus::Problem & getProblemData() { return *mfem_problem; }
+
   platypus::Coefficients _coefficients;
   std::shared_ptr<platypus::Problem> mfem_problem{nullptr};
 

@@ -7,7 +7,8 @@
 #include "../common/pfem_extras.hpp"
 #include "MFEMContainers.h"
 #include "mesh_extras.hpp"
-#include "MFEMContainers.h"
+
+class MFEMProblem;
 
 namespace platypus
 {
@@ -15,6 +16,7 @@ namespace platypus
 class Outputs : public platypus::NamedFieldsMap<mfem::DataCollection>
 {
   friend class ProblemBuilder;
+  friend class ::MFEMProblem;
 
 public:
   Outputs();

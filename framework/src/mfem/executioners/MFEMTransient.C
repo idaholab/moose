@@ -57,6 +57,13 @@ MFEMTransient::init()
   _problem = dynamic_cast<platypus::TimeDomainProblem *>(_mfem_problem.mfem_problem.get());
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
+
+  // RegisterGridFunctions();
+  // SetOperatorGridFunctions();
+  // ConstructNonlinearSolver();
+  // ConstructState();
+  // ConstructTimestepper();
+  // InitializeOutputs();
 }
 
 void

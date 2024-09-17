@@ -59,7 +59,7 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
 
   ConstructState();
   ConstructTimestepper();
-  InitializeOutputs();
+  // InitializeOutputs();
 }
 
 } // namespace platypus
