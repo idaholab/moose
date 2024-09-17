@@ -23,14 +23,6 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
 {
 }
 
-Node *
-GeometricalComponent::addNode(const Point & pt)
-{
-  auto node = mesh().addNode(pt);
-  _node_ids.push_back(node->id());
-  return node;
-}
-
 Elem *
 GeometricalComponent::addElement(libMesh::ElemType elem_type,
                                  const std::vector<dof_id_type> & node_ids)
@@ -83,22 +75,6 @@ GeometricalComponent::addElementQuad9(dof_id_type node0,
   return elem;
 }
 
-const std::vector<SubdomainName> &
-GeometricalComponent::getSubdomainNames() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _subdomain_names;
-}
-
-const std::vector<Moose::CoordinateSystemType> &
-GeometricalComponent::getCoordSysTypes() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _coord_sys;
-}
-
 const FunctionName &
 GeometricalComponent::getVariableFn(const FunctionName & fn_param_name)
 {
@@ -111,38 +87,4 @@ GeometricalComponent::getVariableFn(const FunctionName & fn_param_name)
   }
 
   return fn_name;
-}
-
-void
-GeometricalComponent::setSubdomainInfo(SubdomainID subdomain_id,
-                                       const std::string & subdomain_name,
-                                       const Moose::CoordinateSystemType & coord_system)
-{
-  _subdomain_ids.push_back(subdomain_id);
-  _subdomain_names.push_back(subdomain_name);
-  _coord_sys.push_back(coord_system);
-  if (_parent)
-  {
-    GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(_parent);
-    gc->_subdomain_ids.push_back(subdomain_id);
-    gc->_subdomain_names.push_back(subdomain_name);
-    gc->_coord_sys.push_back(coord_system);
-  }
-  mesh().setSubdomainName(subdomain_id, subdomain_name);
-}
-
-const std::vector<dof_id_type> &
-GeometricalComponent::getNodeIDs() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _node_ids;
-}
-
-const std::vector<dof_id_type> &
-GeometricalComponent::getElementIDs() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _elem_ids;
 }

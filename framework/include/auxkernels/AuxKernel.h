@@ -333,3 +333,16 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & n
 
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
 }
+
+// Declare all the specializations, as the template specialization declaration below must know
+template <>
+void AuxKernelTempl<Real>::setDofValueHelper(const Real & value);
+template <>
+void AuxKernelTempl<RealVectorValue>::setDofValueHelper(const RealVectorValue &);
+template <>
+void AuxKernelTempl<RealEigenVector>::compute();
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class AuxKernelTempl<Real>;
+extern template class AuxKernelTempl<RealVectorValue>;
+extern template class AuxKernelTempl<RealEigenVector>;

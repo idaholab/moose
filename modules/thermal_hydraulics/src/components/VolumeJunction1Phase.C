@@ -216,11 +216,6 @@ VolumeJunction1Phase::addMooseObjects()
       params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-      params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
-      params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
-      params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
-      params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
-      params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
       params.set<bool>("implicit") = getTHMProblem().getImplicitTimeIntegrationFlag();
       getTHMProblem().addBoundaryCondition(
           class_name, genName(name(), i, var_names[j] + ":" + class_name), params);

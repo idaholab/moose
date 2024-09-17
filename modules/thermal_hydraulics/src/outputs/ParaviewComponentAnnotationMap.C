@@ -13,7 +13,7 @@
 #include "LockFile.h"
 #include "JsonIO.h"
 #include "THMProblem.h"
-#include "GeometricalComponent.h"
+#include "Component.h"
 #include <fstream>
 
 registerMooseObject("ThermalHydraulicsApp", ParaviewComponentAnnotationMap);
@@ -55,25 +55,21 @@ ParaviewComponentAnnotationMap::output()
     unsigned int clr_idx = 0;
 
     std::vector<std::string> anns;
-    for (auto & c : comps)
+    for (auto & comp : comps)
     {
-      auto gc = dynamic_cast<GeometricalComponent *>(c.get());
-      if (gc != nullptr)
+      const auto & subdomains = comp->getSubdomainNames();
+      for (auto & sn : subdomains)
       {
-        const std::vector<SubdomainName> & subdomains = gc->getSubdomainNames();
-        for (auto & sn : subdomains)
-        {
-          SubdomainID sid = _mesh_ptr->getSubdomainID(sn);
+        SubdomainID sid = _mesh_ptr->getSubdomainID(sn);
 
-          anns.push_back(Moose::stringify(sid));
-          anns.push_back(sn);
+        anns.push_back(Moose::stringify(sid));
+        anns.push_back(sn);
 
-          clrs.push_back(kaams_colors[clr_idx++]);
-          clrs.push_back(kaams_colors[clr_idx++]);
-          clrs.push_back(kaams_colors[clr_idx++]);
-          // 12 colors with RGB values
-          clr_idx = clr_idx % (12 * 3);
-        }
+        clrs.push_back(kaams_colors[clr_idx++]);
+        clrs.push_back(kaams_colors[clr_idx++]);
+        clrs.push_back(kaams_colors[clr_idx++]);
+        // 12 colors with RGB values
+        clr_idx = clr_idx % (12 * 3);
       }
     }
 

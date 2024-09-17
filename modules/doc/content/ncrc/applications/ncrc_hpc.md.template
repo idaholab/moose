@@ -9,7 +9,7 @@ Sawtooth and Lemhi.
 Logged into either Sawtooth or Lemhi, load the {{ApplicationName}} environment:
 
 ```bash
-module load use.moose moose-apps {{ApplicationLower}}
+module load use.moose {{ApplicationLower}}-openmpi
 ```
 
 At this point you should be able to run {{binary}}. For this example, {{ApplicationName}}'s
@@ -78,7 +78,7 @@ qsub: job 141541.sawtoothpbs ready
 When running on an interactive node, you will need to load the application environment once more:
 
 ```bash
-module load use.moose moose-apps {{ApplicationLower}}
+module load use.moose {{ApplicationLower}}-openmpi
 ```
 
 ### (2) Run the simulation
@@ -165,9 +165,9 @@ command line in the interactive job above.
 
 cd $PBS_O_WORKDIR
 source /etc/profile.d/modules.sh
-module load use.moose moose-apps {{ApplicationLower}}
+module load use.moose {{ApplicationLower}}-openmpi
 
-mpirun {{binary}} -i input.i Mesh/uniform_refine=7
+mpirun -n 48 {{binary}} -i input.i Mesh/uniform_refine=7
 ```
 
 It is recommend that this script exists in the same location where the input file resides. This

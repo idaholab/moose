@@ -197,3 +197,24 @@ InitialConditionTempl<T>::validParams()
 typedef InitialConditionTempl<Real> InitialCondition;
 typedef InitialConditionTempl<RealVectorValue> VectorInitialCondition;
 typedef InitialConditionTempl<RealEigenVector> ArrayInitialCondition;
+
+// Declare all the specializations, as the template specialization declaration below must know
+template <>
+void InitialConditionTempl<RealVectorValue>::setCZeroVertices();
+template <>
+RealVectorValue InitialConditionTempl<RealVectorValue>::gradientComponent(GradientType grad,
+                                                                          unsigned int i);
+template <>
+RealEigenVector InitialConditionTempl<RealEigenVector>::gradientComponent(GradientType grad,
+                                                                          unsigned int i);
+template <>
+void InitialConditionTempl<RealVectorValue>::setHermiteVertices();
+template <>
+void InitialConditionTempl<RealVectorValue>::setOtherCOneVertices();
+template <>
+void InitialConditionTempl<RealEigenVector>::choleskySolve(bool is_volume);
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class InitialConditionTempl<Real>;
+extern template class InitialConditionTempl<RealVectorValue>;
+extern template class InitialConditionTempl<RealEigenVector>;

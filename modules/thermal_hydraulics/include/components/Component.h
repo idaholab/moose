@@ -251,6 +251,30 @@ public:
    */
   bool problemIsTransient() const { return getTHMProblem().isTransient(); }
 
+  /**
+   * Gets the node IDs corresponding to this component
+   */
+  const std::vector<dof_id_type> & getNodeIDs() const;
+
+  /**
+   * Gets the element IDs corresponding to this component
+   */
+  const std::vector<dof_id_type> & getElementIDs() const;
+
+  /**
+   * Gets the subdomain names for this component
+   *
+   * @return vector of subdomain names for this component
+   */
+  virtual const std::vector<SubdomainName> & getSubdomainNames() const;
+
+  /**
+   * Gets the coordinate system types for this component
+   *
+   * @return vector of coordinate system types for this component
+   */
+  virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
+
 protected:
   /**
    * Initializes the component
@@ -291,6 +315,21 @@ protected:
    * @param moose_object_pars The MooseObject to inspect for RelationshipManagers to add
    */
   void addRelationshipManagersFromParameters(const InputParameters & moose_object_pars);
+
+  Node * addNode(const Point & pt);
+  Elem * addNodeElement(dof_id_type node);
+
+  /**
+   * Sets the next subdomain ID, name, and coordinate system
+   *
+   * @param[in] subdomain_id  subdomain index
+   * @param[in] subdomain_name  name of the new subdomain
+   * @param[in] coord_system  type of coordinate system
+   */
+  virtual void
+  setSubdomainInfo(SubdomainID subdomain_id,
+                   const std::string & subdomain_name,
+                   const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
   /**
    * Runtime check to make sure that a parameter of specified type exists in the component's input
@@ -411,6 +450,18 @@ protected:
   /// The THM mesh
   /// TODO: make _mesh private (applications need to switch to getters to avoid breaking)
   THMMesh & _mesh;
+
+  /// Node IDs of this component
+  std::vector<dof_id_type> _node_ids;
+  /// Element IDs of this component
+  std::vector<dof_id_type> _elem_ids;
+
+  /// List of subdomain IDs this components owns
+  std::vector<SubdomainID> _subdomain_ids;
+  /// List of subdomain names this components owns
+  std::vector<SubdomainName> _subdomain_names;
+  /// List of coordinate system for each subdomain
+  std::vector<Moose::CoordinateSystemType> _coord_sys;
 
 private:
   /**

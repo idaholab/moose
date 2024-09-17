@@ -73,3 +73,6 @@ FVInitialConditionTempl<T>::validParams()
 }
 
 typedef FVInitialConditionTempl<Real> FVInitialCondition;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class FVInitialConditionTempl<Real>;
