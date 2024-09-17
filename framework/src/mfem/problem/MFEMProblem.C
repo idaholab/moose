@@ -21,6 +21,7 @@ MFEMProblem::outputStep(ExecFlagType type)
   // directories with iterated names
   if (type == EXEC_INITIAL)
   {
+    mfem_problem->_outputs.Init(mfem_problem->_gridfunctions);
     std::vector<OutputName> mfem_data_collections =
         _app.getOutputWarehouse().getOutputNames<MFEMDataCollection>();
     for (const auto & name : mfem_data_collections)
@@ -43,8 +44,7 @@ MFEMProblem::initialSetup()
   FEProblemBase::initialSetup();
   _coefficients.AddGlobalCoefficientsFromSubdomains();
 
-  mfem_problem_builder->SetCoefficients(_coefficients);
-  // NB: set to false to avoid reconstructing problem operator.
+  getProblemData()._coefficients = _coefficients;
   mfem_problem_builder->FinalizeProblem(false);
 
   if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
@@ -91,7 +91,7 @@ MFEMProblem::setProblemBuilder()
 
   setDevice();
   setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
-  mfem_problem_builder->ConstructOperator();
+  mfem_problem->ConstructOperator();
 }
 
 void
