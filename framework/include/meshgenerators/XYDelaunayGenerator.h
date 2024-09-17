@@ -83,4 +83,7 @@ protected:
 
   /// Whether mesh stitching should have verbose output
   const bool _verbose_stitching;
+
+  /// Desired interior node locations
+  std::vector<Point> _interior_points;
 };

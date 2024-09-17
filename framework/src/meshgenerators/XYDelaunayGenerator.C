@@ -21,6 +21,7 @@
 #include "libmesh/parsed_function.h"
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
+#include "DelimitedFileReader.h"
 
 registerMooseObject("MooseApp", XYDelaunayGenerator);
 
@@ -112,12 +113,20 @@ XYDelaunayGenerator::validParams()
       "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
-
+  params.addParam<std::vector<Point>>("interior_points",
+                                      {},
+                                      "Interior node locations, if no smoothing is used. Any point "
+                                      "outside the surface will not be meshed.");
+  params.addParam<std::vector<FileName>>(
+      "interior_point_files", {}, "Text file(s) with the interior points, one per line");
   params.addClassDescription("Triangulates meshes within boundaries defined by input meshes.");
 
   params.addParamNamesToGroup(
       "use_auto_area_func auto_area_func_default_size auto_area_func_default_size_dist",
       "Automatic triangle meshing area control");
+  params.addParamNamesToGroup(
+      "interior_points interior_point_files",
+      "Explicitly specify the interior points to be included in the mesh generation process.");
 
   return params;
 }
@@ -142,7 +151,8 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _auto_area_function_power(getParam<Real>("auto_area_function_power")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _tri_elem_type(parameters.get<MooseEnum>("tri_element_type")),
-    _verbose_stitching(parameters.get<bool>("verbose_stitching"))
+    _verbose_stitching(parameters.get<bool>("verbose_stitching")),
+    _interior_points(getParam<std::vector<Point>>("interior_points"))
 {
   if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
       (_desired_area > 0.0 && _use_auto_area_func) ||
@@ -167,6 +177,22 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
   for (auto hole_i : index_range(_stitch_holes))
     if (_stitch_holes[hole_i] && (hole_i >= _refine_holes.size() || _refine_holes[hole_i]))
       paramError("refine_holes", "Disable auto refine of any hole boundary to be stitched.");
+
+  // Copied from MultiApp.C
+  const auto & positions_files = getParam<std::vector<FileName>>("interior_point_files");
+  for (const auto p_file_it : index_range(positions_files))
+  {
+    const std::string positions_file = positions_files[p_file_it];
+    MooseUtils::DelimitedFileReader file(positions_file, &_communicator);
+    file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
+    file.read();
+
+    const std::vector<Point> & data = file.getDataAsPoints();
+    for (const auto & d : data)
+    {
+      _interior_points.push_back(d);
+    }
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -284,6 +310,10 @@ XYDelaunayGenerator::generate()
     poly2tri.elem_type() = libMesh::ElemType::TRI6;
   else if (_tri_elem_type == "TRI7")
     poly2tri.elem_type() = libMesh::ElemType::TRI7;
+  // Add interior points before triangulating. Only points inside the boundaries
+  // will be meshed.
+  for (auto & point : _interior_points)
+    mesh->add_point(point);
 
   poly2tri.triangulate();
 
