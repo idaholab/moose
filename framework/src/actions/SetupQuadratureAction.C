@@ -17,27 +17,20 @@ registerMooseAction("MooseApp", SetupQuadratureAction, "setup_quadrature");
 InputParameters
 SetupQuadratureAction::validParams()
 {
-  MooseEnum types("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP GAUSS_LOBATTO", "GAUSS");
-  MooseEnum order("AUTO CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH "
-                  "ELEVENTH TWELFTH THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH "
-                  "EIGHTTEENTH NINTEENTH TWENTIETH",
-                  "AUTO");
-  MultiMooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH "
-                        "ELEVENTH TWELFTH THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH "
-                        "EIGHTTEENTH NINTEENTH TWENTIETH");
-
   InputParameters params = Action::validParams();
   params.addClassDescription("Sets the quadrature type for the simulation.");
-  params.addParam<MooseEnum>("type", types, "Type of the quadrature rule");
-  params.addParam<MooseEnum>("order", order, "Order of the quadrature");
-  params.addParam<MooseEnum>("element_order", order, "Order of the quadrature for elements");
-  params.addParam<MooseEnum>("side_order", order, "Order of the quadrature for sides");
+  params.addParam<MooseEnum>("type", getQuadratureTypesEnum(), "Type of the quadrature rule");
+  params.addParam<MooseEnum>("order", getQuadratureOrderEnum(), "Order of the quadrature");
+  params.addParam<MooseEnum>(
+      "element_order", getQuadratureOrderEnum(), "Order of the quadrature for elements");
+  params.addParam<MooseEnum>(
+      "side_order", getQuadratureOrderEnum(), "Order of the quadrature for sides");
   params.addParam<std::vector<SubdomainID>>("custom_blocks",
                                             std::vector<SubdomainID>{},
                                             "list of blocks to specify custom quadrature order");
   params.addParam<MultiMooseEnum>(
       "custom_orders",
-      orders,
+      getQuadratureOrdersMultiEnum(),
       "list of quadrature orders for the blocks specified in `custom_blocks`");
   params.addParam<bool>(
       "allow_negative_qweights", true, "Whether or not allow negative quadrature weights");
