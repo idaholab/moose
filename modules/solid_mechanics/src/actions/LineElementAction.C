@@ -477,7 +477,8 @@ LineElementAction::actAddVariables()
     for (const auto & disp : _displacements)
     {
       // Create displacement variables
-      _problem->addVariable("MooseVariable", disp, params);
+      if (!_problem->hasVariable(disp))
+        _problem->addVariable("MooseVariable", disp, params);
     }
 
     // Add rotation variables if line element is a beam.
@@ -486,7 +487,8 @@ LineElementAction::actAddVariables()
       for (const auto & rot : _rotations)
       {
         // Create rotation variables
-        _problem->addVariable("MooseVariable", rot, params);
+        if (!_problem->hasVariable(rot))
+          _problem->addVariable("MooseVariable", rot, params);
       }
     }
   }
