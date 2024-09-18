@@ -24,7 +24,7 @@
         Components/junction/initial_vel_y=1
         Components/pipe2/position="0 1.04 0"
         Components/pipe2/orientation="0 1 0"
-        Postprocessors/junction_rhou/variable=junction:rhovV'
+        Postprocessors/junction_rhou/variable=rhovV'
       csvdiff = 'equal_area_with_junction_out.csv'
       prereq = 'test_phy/equal_area_x_direction'
       detail = '2 pipes of equal area not in the x direction,'

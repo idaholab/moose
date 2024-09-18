@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "AuxKernel.h"
 #include "AuxScalarKernel.h"
 
 class SinglePhaseFluidProperties;
@@ -16,12 +17,13 @@ class SinglePhaseFluidProperties;
 /**
  * Computes various quantities for a VolumeJunction1Phase.
  */
-class VolumeJunction1PhaseAux : public AuxScalarKernel
+template <typename T>
+class VolumeJunction1PhaseAuxTempl : public T
 {
 public:
   static InputParameters validParams();
 
-  VolumeJunction1PhaseAux(const InputParameters & parameters);
+  VolumeJunction1PhaseAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -52,3 +54,6 @@ protected:
   /// Single-phase fluid properties user object
   const SinglePhaseFluidProperties & _fp;
 };
+
+typedef VolumeJunction1PhaseAuxTempl<AuxKernel> VolumeJunction1PhaseAux;
+typedef VolumeJunction1PhaseAuxTempl<AuxScalarKernel> VolumeJunction1PhaseScalarAux;

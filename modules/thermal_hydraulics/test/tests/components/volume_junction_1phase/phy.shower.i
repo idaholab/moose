@@ -82,6 +82,7 @@
     connections = 'pipe_cold:out pipe_hot:out pipe_warm:in'
     position = '1 0.5 0'
     volume = 1e-8
+    use_scalar_variables = false
   []
 []
 

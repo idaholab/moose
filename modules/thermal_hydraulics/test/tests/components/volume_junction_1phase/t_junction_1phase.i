@@ -84,6 +84,8 @@ A_small = 0.5
     initial_vel_x = 0
     initial_vel_y = 0
     initial_vel_z = 0
+
+    use_scalar_variables = false
   []
 
   [pipe1_wall]
@@ -142,8 +144,9 @@ A_small = 0.5
     execute_on = 'initial timestep_end'
   []
   [mass_junction]
-    type = ScalarVariable
-    variable = junction:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
   [mass_tot]
@@ -167,8 +170,9 @@ A_small = 0.5
     execute_on = 'initial timestep_end'
   []
   [E_junction]
-    type = ScalarVariable
-    variable = junction:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
   [E_tot]

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "AuxKernel.h"
 #include "AuxScalarKernel.h"
 
 class ADShaftConnectedPump1PhaseUserObject;
@@ -16,12 +17,13 @@ class ADShaftConnectedPump1PhaseUserObject;
 /**
  * Computes various quantities for a ShaftConnectedPump1Phase.
  */
-class ShaftConnectedPump1PhaseAux : public AuxScalarKernel
+template <typename T>
+class ShaftConnectedPump1PhaseAuxTempl : public T
 {
 public:
   static InputParameters validParams();
 
-  ShaftConnectedPump1PhaseAux(const InputParameters & parameters);
+  ShaftConnectedPump1PhaseAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -40,3 +42,6 @@ protected:
   /// 1-phase shaft-connected pump user object
   const ADShaftConnectedPump1PhaseUserObject & _pump_uo;
 };
+
+typedef ShaftConnectedPump1PhaseAuxTempl<AuxKernel> ShaftConnectedPump1PhaseAux;
+typedef ShaftConnectedPump1PhaseAuxTempl<AuxScalarKernel> ShaftConnectedPump1PhaseScalarAux;

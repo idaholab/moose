@@ -215,6 +215,8 @@ p_ambient = 1e5
     speed_cr_fr = 0
     tau_fr_const = 0
     tau_fr_coeff = '0 0 0 0'
+
+    use_scalar_variables = false
   []
   [pipe2]
     type = FlowChannel1Phase
@@ -274,6 +276,8 @@ p_ambient = 1e5
     speed_cr_fr = 0
     tau_fr_const = 0
     tau_fr_coeff = '0 0 0 0'
+
+    use_scalar_variables = false
   []
   [pipe5]
     type = FlowChannel1Phase

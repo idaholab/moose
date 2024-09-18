@@ -58,6 +58,7 @@
     volume = 1
     on = false
     power = 1
+    use_scalar_variables = false
   []
 
   [fch2]

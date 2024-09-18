@@ -55,6 +55,7 @@
     initial_vel_x = 1
     initial_vel_y = 0
     initial_vel_z = 0
+    use_scalar_variables = false
   []
 
   [fch2]

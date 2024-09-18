@@ -12,11 +12,13 @@
 #include "Numerics.h"
 
 registerMooseObject("ThermalHydraulicsApp", VolumeJunction1PhaseAux);
+registerMooseObject("ThermalHydraulicsApp", VolumeJunction1PhaseScalarAux);
 
+template <typename T>
 InputParameters
-VolumeJunction1PhaseAux::validParams()
+VolumeJunction1PhaseAuxTempl<T>::validParams()
 {
-  InputParameters params = AuxScalarKernel::validParams();
+  InputParameters params = T::validParams();
 
   params.addClassDescription("Computes various quantities for a VolumeJunction1Phase.");
 
@@ -33,7 +35,24 @@ VolumeJunction1PhaseAux::validParams()
   return params;
 }
 
-VolumeJunction1PhaseAux::VolumeJunction1PhaseAux(const InputParameters & parameters)
+template <>
+VolumeJunction1PhaseAuxTempl<AuxKernel>::VolumeJunction1PhaseAuxTempl(
+    const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _quantity(getParam<MooseEnum>("quantity").getEnum<Quantity>()),
+    _volume(getParam<Real>("volume")),
+    _rhoV(coupledValue("rhoV")),
+    _rhouV(coupledValue("rhouV")),
+    _rhovV(coupledValue("rhovV")),
+    _rhowV(coupledValue("rhowV")),
+    _rhoEV(coupledValue("rhoEV")),
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
+{
+}
+
+template <>
+VolumeJunction1PhaseAuxTempl<AuxScalarKernel>::VolumeJunction1PhaseAuxTempl(
+    const InputParameters & parameters)
   : AuxScalarKernel(parameters),
     _quantity(getParam<MooseEnum>("quantity").getEnum<Quantity>()),
     _volume(getParam<Real>("volume")),
@@ -46,8 +65,9 @@ VolumeJunction1PhaseAux::VolumeJunction1PhaseAux(const InputParameters & paramet
 {
 }
 
+template <typename T>
 Real
-VolumeJunction1PhaseAux::computeValue()
+VolumeJunction1PhaseAuxTempl<T>::computeValue()
 {
   Real vJ, dvJ_drhoV;
   THM::v_from_rhoA_A(_rhoV[0], _volume, vJ, dvJ_drhoV);
@@ -70,3 +90,6 @@ VolumeJunction1PhaseAux::computeValue()
       mooseError("Invalid 'quantity' parameter.");
   }
 }
+
+template class VolumeJunction1PhaseAuxTempl<AuxKernel>;
+template class VolumeJunction1PhaseAuxTempl<AuxScalarKernel>;

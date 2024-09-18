@@ -69,6 +69,7 @@
     K = 0
     on = true
     power = 0
+    use_scalar_variables = false
   []
 
   [pipe2]
@@ -124,15 +125,16 @@
 []
 
 [Postprocessors]
-  [W_dot]
-    type = ScalarVariable
-    variable = turbine:W_dot
+  [turbine_power]
+    type = ElementAverageValue
+    variable = W_dot
+    block = 'turbine'
   []
 []
 
 [Outputs]
   [csv]
     type = CSV
-    show = 'W_dot'
+    show = 'turbine_power'
   []
 []

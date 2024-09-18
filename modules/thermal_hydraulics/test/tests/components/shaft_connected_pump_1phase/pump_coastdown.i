@@ -53,6 +53,7 @@ dt = 0.005
     head = head_fcn
     torque_hydraulic = torque_fcn
     density_rated = 124.2046
+    use_scalar_variables = false
   []
 
   [pipe]
@@ -87,7 +88,7 @@ dt = 0.005
     type = ParsedFunction
     expression = '-tau_hyd * omega'
     symbol_names = 'tau_hyd  omega'
-    symbol_values = 'pump:hydraulic_torque shaft:omega'
+    symbol_values = 'hydraulic_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction
@@ -106,8 +107,9 @@ dt = 0.005
     execute_on = 'initial timestep_end'
   []
   [mass_pump]
-    type = ScalarVariable
-    variable = pump:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'pump'
     execute_on = 'initial timestep_end'
   []
   [mass_tot]
@@ -131,8 +133,9 @@ dt = 0.005
     execute_on = 'initial timestep_end'
   []
   [E_pump]
-    type = ScalarVariable
-    variable = pump:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'pump'
     execute_on = 'initial timestep_end'
   []
   [E_tot]
@@ -144,6 +147,7 @@ dt = 0.005
   [S_energy]
     type = FunctionValuePostprocessor
     function = S_energy_fcn
+    indirect_dependencies = 'hydraulic_torque'
     execute_on = 'initial timestep_end'
   []
   [E_change]
@@ -158,6 +162,13 @@ dt = 0.005
     type = FunctionValuePostprocessor
     function = energy_conservation_fcn
     execute_on = 'timestep_end'
+  []
+
+  [hydraulic_torque]
+    type = ElementAverageValue
+    variable = hydraulic_torque
+    block = 'pump'
+    execute_on = 'initial timestep_end'
   []
 []
 

@@ -116,6 +116,11 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOA, 0);
   Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOEA, 1);
   Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOUA, 2);
+  Simulation::setComponentVariableOrder("rhoV", 3);
+  Simulation::setComponentVariableOrder("rhouV", 4);
+  Simulation::setComponentVariableOrder("rhovV", 5);
+  Simulation::setComponentVariableOrder("rhowV", 6);
+  Simulation::setComponentVariableOrder("rhoEV", 7);
 }
 
 const std::string &
