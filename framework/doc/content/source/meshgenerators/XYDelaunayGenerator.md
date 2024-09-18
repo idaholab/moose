@@ -9,7 +9,7 @@ vertices.  Additional interior vertices can be automatically generated
 by specifying a desired triangle area (either as a constant or as a
 function of triangle center location that can be specified or
 automatically generated).  Additional interior boundary "holes" can
-be meshed by the mesh generators specified in the [!param](/Mesh/XYDelaunayGenerator/holes) vector parameter.
+be specified by the mesh generators specified in the [!param](/Mesh/XYDelaunayGenerator/holes) vector parameter.
 
 Each input mesh, as specified in the
 [!param](/Mesh/XYDelaunayGenerator/boundary) parameter and optionally
