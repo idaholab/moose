@@ -284,6 +284,15 @@ JsonSyntaxTree::buildOptions(const std::iterator_traits<InputParameters::iterato
       docs = enum_type->get()[0].getItemDocumentation();
     }
   }
+  {
+    auto * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MultiMooseEnum>> *>(val);
+    if (enum_type)
+    {
+      out_of_range_allowed = (enum_type->get())[0].isOutOfRangeAllowed();
+      options = (enum_type->get())[0].getRawNames();
+      docs = enum_type->get()[0].getItemDocumentation();
+    }
+  }
   return options;
 }
 

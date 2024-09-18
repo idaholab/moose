@@ -1839,6 +1839,12 @@ void InputParameters::addRequiredParam<std::vector<MooseEnum>>(
     const std::string & doc_string);
 
 template <>
+void InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(
+    const std::string & name,
+    const std::vector<MultiMooseEnum> & moose_enums,
+    const std::string & doc_string);
+
+template <>
 void InputParameters::addParam<MooseEnum>(const std::string & /*name*/,
                                           const std::string & /*doc_string*/);
 
@@ -1849,6 +1855,15 @@ void InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/,
 template <>
 void InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
                                                        const std::string & /*doc_string*/);
+
+template <>
+void InputParameters::addParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                            const std::string & /*doc_string*/);
+
+template <>
+void
+InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                               const std::string & /*doc_string*/);
 
 template <>
 void InputParameters::addPrivateParam<MooseEnum>(const std::string & /*name*/);
