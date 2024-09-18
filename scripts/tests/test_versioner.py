@@ -105,6 +105,11 @@ class Test(unittest.TestCase):
             Versioner.git_file('foo', 'HEAD')
         self.assertIn('Failed to load', str(e.exception))
 
+        out_of_repo_path = os.path.join(MOOSE_DIR, '..', 'out_of_repo')
+        with self.assertRaises(Exception) as e:
+            Versioner.git_file(out_of_repo_path, 'HEAD')
+        self.assertEqual(f'Supplied path {out_of_repo_path} is not in {MOOSE_DIR}', str(e.exception))
+
     def testGetApp(self):
         app_name, git_root, git_hash = Versioner.get_app()
         self.assertEqual('moose', app_name)
