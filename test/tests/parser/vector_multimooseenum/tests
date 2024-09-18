@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#28487'
+  design = 'InputParameters.md'
+
+  [vmme]
+    type = 'RunApp'
+    input = 'vmme.i'
+    requirement = 'The system shall support vectors of MultiMooseEnums as input parameters.'
+    expect_out = 'mme: b; c a; a b c d e; e;'
+  []
+  [vmme_empty]
+    type = RunException
+    input = 'vmme.i'
+    cli_args = "Materials/vmme/mme='b;; a b c d e; e'"
+    requirement = 'The system shall return a usage message when the vector of MultiMooseEnums includes an empty entry.'
+    expect_err = "In Materials/vmme/mme, one entry in the vector is empty.  This is not allowed."
+  []
+  [vmme_invalid]
+    type = RunException
+    input = 'vmme.i'
+    cli_args = "Materials/vmme/mme='a; b; c; d; e; a b f'"
+    requirement = 'The system shall return an error message when an invalid entry is supplied in a vector of MultiMooseEnums.'
+    expect_err = 'Invalid option "f" in MultiMooseEnum.'
+  []
+[]
