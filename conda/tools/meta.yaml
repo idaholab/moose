@@ -2,8 +2,11 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   moose-dev/*
 #
+#   And documentation:
+#   framework/doc/packages_config.yml
+#
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.09.10" %}
+{% set version = "2024.07.19" %}
 
 package:
   name: moose-tools
