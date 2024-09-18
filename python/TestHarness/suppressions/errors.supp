@@ -250,3 +250,10 @@
    fun:*torch*autograd*
    ...
 }
+{
+   netgen_singleton_taskmanager_leak
+   Memcheck:Leak
+   ...
+   fun:*TaskManager*
+   ...
+}
