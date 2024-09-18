@@ -39,6 +39,9 @@ protected:
   /// The system owning the source variable
   const System & _source_sys;
 
+  /// Whether to use the auxkernel block restriction to limit the values for the source variables
+  bool _use_block_restriction_for_source;
+
 private:
   /// For a node, finds an element we can use to evaluate the (continuous) source variable
   const Elem * elemOnNodeVariableIsDefinedOn() const;

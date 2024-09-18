@@ -23,6 +23,11 @@ ProjectionAux::validParams()
       "variable. If they are the same type, this amounts to a simple copy.");
   params.addRequiredCoupledVar("v", "Variable to take the value of.");
 
+  params.addParam<bool>("use_block_restriction_for_source",
+                        false,
+                        "Whether to use the auxkernel block restriction to also restrict the "
+                        "locations selected for source variable values");
+
   // Technically possible to project from nodal to elemental and back
   params.set<bool>("_allow_nodal_to_elemental_coupling") = true;
 
@@ -44,11 +49,17 @@ ProjectionAux::ProjectionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _v(coupledValue("v")),
     _source_variable(*getFieldVar("v", 0)),
-    _source_sys(_c_fe_problem.getSystem(coupledName("v")))
+    _source_sys(_c_fe_problem.getSystem(coupledName("v"))),
+    _use_block_restriction_for_source(getParam<bool>("use_block_restriction_for_source"))
 {
   // Output some messages to user
   if (_source_variable.order() > _var.order())
     mooseInfo("Projection lowers order, please expect a loss of accuracy");
+  // Check the dimension of the block restriction
+  for (const auto & sub_id : blockIDs())
+    if (_mesh.isLowerD(sub_id))
+      paramError("block",
+                 "ProjectionAux's block restriction must not include lower dimensional blocks");
 }
 
 Real
@@ -60,8 +71,10 @@ ProjectionAux::computeValue()
   // AND nodal low order -> nodal higher order
   else if (isNodal() && _source_variable.getContinuity() != DISCONTINUOUS &&
            _source_variable.getContinuity() != SIDE_DISCONTINUOUS)
+  {
     return _source_sys.point_value(
         _source_variable.number(), *_current_node, elemOnNodeVariableIsDefinedOn());
+  }
   // Handle discontinuous elemental variable projection into a nodal variable
   else
   {
@@ -78,7 +91,10 @@ ProjectionAux::computeValue()
     for (auto & id : elem_ids->second)
     {
       const auto & elem = _mesh.elemPtr(id);
-      if (_source_variable.hasBlocks(elem->subdomain_id()))
+      const auto block_id = elem->subdomain_id();
+      // Only use higher D elements
+      if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) &&
+          (!_use_block_restriction_for_source || hasBlocks(block_id)))
       {
         const auto elem_volume = elem->volume();
         sum_weighted_values +=
@@ -86,6 +102,7 @@ ProjectionAux::computeValue()
         sum_volumes += elem_volume;
       }
     }
+    mooseAssert(sum_volumes != 0, "Should have found a valid source variable value");
     return sum_weighted_values / sum_volumes;
   }
 }
@@ -94,7 +111,12 @@ const Elem *
 ProjectionAux::elemOnNodeVariableIsDefinedOn() const
 {
   for (const auto & elem_id : _mesh.nodeToElemMap().find(_current_node->id())->second)
-    if (_source_variable.hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
-      return _mesh.elemPtr(elem_id);
+  {
+    const auto & elem = _mesh.elemPtr(elem_id);
+    const auto block_id = elem->subdomain_id();
+    if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) &&
+        (!_use_block_restriction_for_source || hasBlocks(block_id)))
+      return elem;
+  }
   mooseError("Source variable is not defined everywhere the target variable is");
 }

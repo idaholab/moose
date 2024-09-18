@@ -112,5 +112,18 @@
       detail = "a cubic variation to all variable families supported in 2d at various orders on a "
                "triangle mesh,"
     []
+    [2d_and_lower_d]
+      type = 'Exodiff'
+      input = '2d_and_lower_d.i'
+      exodiff = '2d_and_lower_d_out.e'
+      detail = "between variables on regular elements, in the presence of lower D elements,"
+    []
+    [excluding_some_source_blocks]
+      type = 'Exodiff'
+      input = '2d_and_lower_d.i'
+      exodiff = '2d_restrict_source.e'
+      cli_args = 'Outputs/file_base=2d_restrict_source AuxKernels/node_to_node_higher_order/use_block_restriction_for_source=true AuxKernels/elem_to_nodal/use_block_restriction_for_source=true'
+      detail = "between variables defined on multiple blocks, ignoring the source variable values on the subdomains that the auxkernel is not defined on."
+    []
   []
 []
