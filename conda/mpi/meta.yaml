@@ -45,6 +45,7 @@ outputs:
         - {{ moose_libzlib }}
         - {{ moose_clangcc }}                     # [osx]
         - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_libcxx }}                      # [arm64]
         - {{ moose_gcc_impl }}                    # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
         - {{ moose_gcc }}                         # [linux]
@@ -60,6 +61,7 @@ outputs:
         - {{ moose_libzlib }}
         - {{ moose_clangcc }}                     # [osx]
         - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_libcxx }}                      # [arm64]
         - {{ moose_gcc }}                         # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
         - gxx                                     # [linux]

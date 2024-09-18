@@ -50,6 +50,9 @@ moose_clangxx:                                              # [osx]
   - clangxx 16.0.6 default_h7151d67_6                       # [not arm64 and osx]
   - clangxx 16.0.6 default_h4cf2255_6                       # [arm64]
 
+moose_libcxx:                                               # [arm64]
+  - libcxx 17.0.6 h0812c0d_3                                # [arm64]
+
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
   - /opt/MacOSX11.3.sdk                                     # [osx]
