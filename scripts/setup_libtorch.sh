@@ -40,12 +40,15 @@ done
 
 # Show how to use the script
 if [[ -n "$HELP" ]]; then
-  echo "Usage: $0 [-h | --help | -k | --version=VERSION_NUMBER | --cleanup ]"
+  echo "Usage: $0 [-h | --help | -k | --version=VERSION_NUMBER | --libtorch-dest=DESTINATION | "
+  echo " --libtorch-distribution=DISTRIBUTION | --cleanup ]"
   echo
-  echo "-h | --help              Display this message and list of available setup options"
-  echo "-k                       Ignore certifications while downloading packages with curl"
-  echo "--cleanup                Remove the downloaded tarball after the install"
-  echo "--version=VERSION_NUMBER Specify the version number of libtorch"
+  echo "-h | --help                          Display this message and list of available setup options"
+  echo "-k                                   Ignore certifications while downloading packages with curl"
+  echo "--cleanup                            Remove the downloaded tarball after the install"
+  echo "--version=VERSION_NUMBER             Specify the version number of libtorch"
+  echo "--libtorch-dest=DESTINATION          Specify where the packages are to be copied"
+  echo "--libtorch-distribution=DISTRIBUTION Specify the distribution (cpu/cuda)"
   echo "*************************************************************************************"
   echo ""
   exit 0
@@ -89,17 +92,13 @@ version_check() {
   fi
 }
 
-if version_check ${VERSION} 1.4.0 -g; then
-  echo "yes"
-else
-  echo "no"
-fi
-
+# We check if somebody requested a very old version that we don't support
 if version_check ${VERSION} 1.4.0 -l; then
   echo "ERROR! The current implementation does not support libtorch versions below 1.4!"
   exit 1
 fi
 
+# We clean up before we get a new version
 if [ -d $TORCH_DIR ]; then
   echo "Cleaning up previous libtorch installation"
   rm -rf $TORCH_DIR
@@ -116,9 +115,9 @@ esac
 # We do some sanity checking on the version number. They started distributing
 # precompiled libraries for ARM machines afer version 2.2. Before that, it was x86 without the
 # tag
-if (( $OP_SYS == mac )); then
+if [[ $OP_SYS == mac ]]; then
   if version_check ${VERSION} 2.2.0 -l; then
-    if (( UNAME_ARCH == "-arm64" )); then
+    if [[ $UNAME_ARCH == "-arm64" ]]; then
       echo "ERROR! Precompiled libraries below version 2.2 are not available for ARM architecture!"
       exit 1
     else
