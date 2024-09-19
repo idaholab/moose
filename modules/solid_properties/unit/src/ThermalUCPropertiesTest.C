@@ -45,6 +45,17 @@ TEST_F(ThermalUCPropertiesTest, cp)
 }
 
 /**
+ * Test that the specific internal energy and its derivatives are
+ * correctly computed.
+ */
+TEST_F(ThermalUCPropertiesTest, e)
+{
+  const Real T = 800.0;
+  REL_TEST(_sp1->e_from_T(T), 119328.29374852851, REL_TOL_SAVED_VALUE);
+  SPECIFIC_INTERNAL_ENERGY_TESTS(_sp1, T, 1e-6, 1e-6);
+}
+
+/**
  * Test that the density and its derivatives are
  * correctly computed.
  */

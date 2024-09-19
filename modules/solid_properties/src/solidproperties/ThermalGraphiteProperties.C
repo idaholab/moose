@@ -27,7 +27,14 @@ ThermalGraphiteProperties::validParams()
 ThermalGraphiteProperties::ThermalGraphiteProperties(const InputParameters & parameters)
   : ThermalSolidProperties(parameters),
     _grade(getParam<MooseEnum>("grade").getEnum<GraphiteGrade>()),
-    _rho_const(getParam<Real>("density"))
+    _rho_const(getParam<Real>("density")),
+    _c1(4184.0),
+    _c2(0.54212),
+    _c3(2.42667e-6),
+    _c4(90.2725),
+    _c5(43449.3),
+    _c6(1.59309e7),
+    _c7(1.43688e9)
 {
 }
 
@@ -37,8 +44,8 @@ ThermalGraphiteProperties::cp_from_T(const Real & T) const
   switch (_grade)
   {
     case GraphiteGrade::H_451:
-      return 4184.0 * (0.54212 - 2.42667e-6 * T - 90.2725 / T - 43449.3 / Utility::pow<2>(T) +
-                       1.59309e7 / Utility::pow<3>(T) - 1.43688e9 / Utility::pow<4>(T));
+      return _c1 * (_c2 - _c3 * T - _c4 / T - _c5 / Utility::pow<2>(T) + _c6 / Utility::pow<3>(T) -
+                    _c7 / Utility::pow<4>(T));
     default:
       mooseError("Unhandled GraphiteGrade enum!");
   }
@@ -53,9 +60,24 @@ ThermalGraphiteProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) c
   {
     case GraphiteGrade::H_451:
     {
-      dcp_dT = 4184.0 * (-2.42667e-6 + 90.2725 / Utility::pow<2>(T) + 86898.6 / Utility::pow<3>(T) -
-                         4.77927e7 / Utility::pow<4>(T) + 5.74752e9 / Utility::pow<5>(T));
+      dcp_dT = _c1 * (-_c3 + _c4 / Utility::pow<2>(T) + 2.0 * _c5 / Utility::pow<3>(T) -
+                      3.0 * _c6 / Utility::pow<4>(T) + 4.0 * _c7 / Utility::pow<5>(T));
       break;
+    }
+    default:
+      mooseError("Unhandled GraphiteGrade enum!");
+  }
+}
+
+Real
+ThermalGraphiteProperties::cp_integral(const Real & T) const
+{
+  switch (_grade)
+  {
+    case GraphiteGrade::H_451:
+    {
+      return _c1 * (_c2 * T - 0.5 * _c3 * Utility::pow<2>(T) - _c4 * std::log(T) + _c5 / T -
+                    0.5 * _c6 / Utility::pow<2>(T) + _c7 / (3.0 * Utility::pow<3>(T)));
     }
     default:
       mooseError("Unhandled GraphiteGrade enum!");
