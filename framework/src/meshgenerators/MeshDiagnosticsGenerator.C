@@ -1422,14 +1422,15 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       c)If length of line is below some threshold, print out info about which two edges are intersecting
   */
   unsigned int num_intersecting_edges = 0;
+  std::vector<Node> checked_edges;
   //unsigned int num_elem_check = 0;
-  for (auto & elem : mesh->active_element_ptr_range())
+  for (auto elem : mesh->active_element_ptr_range())
   {
     std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
     //num_elem_check++;
     for (auto i : elem->edge_index_range())
       elem_edges[i] = elem->build_edge_ptr(i);
-    for (auto & other_elem : mesh->active_element_ptr_range())
+    for (auto other_elem : mesh->active_element_ptr_range())
     {
       std::vector<std::unique_ptr<Elem>> other_edges(other_elem->n_edges());
       //num_elem_check++;
@@ -1444,16 +1445,35 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
           bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(edge, other_edge, tol);
           if (overlap)
           {
-            num_intersecting_edges++;
-            const auto & n = edge->get_nodes()[0];
+            const auto node_list1 = edge->get_nodes();
+            const auto node_list2 = other_edge->get_nodes();
+            auto n1 = *node_list1[0];
+            auto n2 = *node_list1[1];
+            auto n3 = *node_list2[0];
+            auto n4 = *node_list2[1];
+            if(std::find(checked_edges.begin(), checked_edges.end(), n1) !=checked_edges.end() &&
+              std::find(checked_edges.begin(), checked_edges.end(), n2) !=checked_edges.end() &&
+              std::find(checked_edges.begin(), checked_edges.end(), n3) !=checked_edges.end() &&
+              std::find(checked_edges.begin(), checked_edges.end(), n4) !=checked_edges.end())
+            {
+              continue;
+            }
+            checked_edges.push_back(n1);
+            checked_edges.push_back(n2);
+            checked_edges.push_back(n3);
+            checked_edges.push_back(n4);
+            num_intersecting_edges+=2;
             //const Point * const p = n;
-  	        const Real x = n->operator()(0);
-	          const Real y = n->operator()(1);
-	          const Real z = n->operator()(2);
+  	        auto x1 = n1.operator()(0);
+	          auto y1 = n1.operator()(1);
+	          auto z1 = n1.operator()(2);
+            auto x2 = n2.operator()(0);
+	          auto y2 = n2.operator()(1);
+	          auto z2 = n2.operator()(2);
             
-            std::string x_coord = std::to_string(x);
-            std::string y_coord = std::to_string(y);
-            std::string z_coord = std::to_string(z);
+            std::string x_coord = std::to_string((x1+x2)/2);
+            std::string y_coord = std::to_string((y1+y2)/2);
+            std::string z_coord = std::to_string((z1+z2)/2);
 
             std::string message = "Non-matching edges found near (" + x_coord + ", " + y_coord + ", " + z_coord + ")";
             _console << message << std::endl;
@@ -1468,9 +1488,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       }
     }
   }
-  std::string string_message = "Number of intersecting edges: " + std::to_string(num_intersecting_edges);
-  _console << string_message << std::endl;
-  diagnosticsLog("Number of intesecting edges: ", _check_non_matching_edges, num_intersecting_edges);
+  diagnosticsLog("Number of intesecting edges: " + Moose::stringify(num_intersecting_edges), _check_non_matching_edges, num_intersecting_edges);
 }
 
 void
