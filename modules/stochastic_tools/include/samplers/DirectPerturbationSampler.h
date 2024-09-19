@@ -30,8 +30,11 @@ private:
   const std::vector<Real> _nominal_values;
 
   /// The relative intervals that should be used for the perturbation of each parameter
-  const std::vector<Real> _relative_perturbation_intervals;
+  const std::vector<Real> _relative_intervals;
 
   /// The method which is used for the perturbation (one-sided/two-sided)
   const MooseEnum _perturbation_method;
+
+  /// The data matrix created using the parameters
+  std::vector<std::vector<Real>> _parameter_vectors;
 };

@@ -21,7 +21,8 @@ DirectPerturbationSampler::validParams()
       "nominal_parameter_values",
       "The nominal values of the parameters around which we shall perturb them.");
   params.addParam<std::vector<Real>>(
-      "relative_perturbation_intervals", {0.1},
+      "relative_perturbation_intervals",
+      {0.01},
       "The numbers by which the nominal values are multiplied to get a perturbed value.");
   MooseEnum perturbation_type("central_difference forward_difference", "central_difference");
   params.addParam<MooseEnum>(
@@ -35,24 +36,32 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
   : Sampler(parameters),
     _nominal_values(getParam<std::vector<Real>>("nominal_parameter_values")),
     _relative_intervals(getParam<std::vector<Real>>("relative_perturbation_intervals")),
-    _perturbation_method(getParam<MooseEnum>("perturbation_method"))
+    _perturbation_method(getParam<MooseEnum>("perturbation_method")),
 {
   dof_id_type num_samples = 0;
-  switch (_perturbation_method)
-  {
-    case "central_difference":
-      num_samples = 2 * _nominal_values.size();
-      break;
-    case "forward_difference":
-      num_samples = _nominal_values.size() + 1;
-      break;
-  }
+  if (_perturbation_method == "central_difference")
+    num_samples = 2 * _nominal_values.size();
+  else
+    num_samples = _nominal_values.size() + 1;
+
   setNumberOfRows(_nominal_values.size());
   setNumberOfCols(num_samples);
+
+  _parameter_vectors = std::vector < std::vector<Real>(num_samples, _nominal_values);
+
+  if (_perturbation_method == "central_difference")
+    for (const auto & i : index_range(_nominal_values))
+    {
+      _parameter_vectors[i][i] = _parameter_vectors[i][i] * (1 + _relative_intervals[i]);
+      _parameter_vectors[i + 1][i] = _parameter_vectors[i + 1][i] * (1 - _relative_intervals[i]);
+    }
+  else
+    for (const auto & i : index_range(_nominal_values))
+      _parameter_vectors[i + 1][i] = _parameter_vectors[i + 1][i] * (1 + _relative_intervals[i]);
 }
 
 Real
 DirectPerturbationSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  return 0.0; // entering samples into the matrix
+  return _parameter_vectors[row_index][col_index];
 }
