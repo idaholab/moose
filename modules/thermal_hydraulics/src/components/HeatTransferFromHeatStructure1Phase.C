@@ -23,6 +23,8 @@ HeatTransferFromHeatStructure1Phase::validParams()
   InputParameters params = HeatTransferFromTemperature1Phase::validParams();
   params += HSBoundaryInterface::validParams();
 
+  params.addParam<MooseFunctorName>("scale", 1.0, "Functor by which to scale the heat flux");
+
   params.addClassDescription("Connects a 1-phase flow channel and a heat structure");
 
   return params;
@@ -143,6 +145,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
+    params.set<MooseFunctorName>("scale") = getParam<MooseFunctorName>("scale");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, heat_flux_uo_name, params);
   }
