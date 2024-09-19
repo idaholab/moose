@@ -61,11 +61,42 @@ REVISION=$(echo $VERSION | cut -d. -f3)
 
 if [[ -z "${REVISION}" ]]; then
   REVISION="0"
-  VERSION=$VERSION.0
+  VERSION=$VERSION.$REVISION
 fi
 
-if (( $MAINVERSION < 1  || ( $MAINVERSION == 1  &&  $SUBVERSION < 4 ) )); then
-  echo "The current implementation does not support libtorch versions below 1.4!"
+# Little helper routine to check if a version number is lower
+# or higher than a given number
+version_check() {
+  local loc_1=$1
+  local loc_2=$2
+
+  case $3 in
+    -g);;
+    -l)
+      loc_1=$2
+      loc_2=$1
+      ;;
+    *)
+      echo "'version_check' function does only supports '-g' and '-l' for comparison!"
+      exit 0
+      ;;
+  esac
+
+  if { echo "$loc_1"; echo "$loc_2"; } | sort --version-sort --check=quiet; then
+    false
+  else
+    true
+  fi
+}
+
+if version_check ${VERSION} 1.4.0 -g; then
+  echo "yes"
+else
+  echo "no"
+fi
+
+if version_check ${VERSION} 1.4.0 -l; then
+  echo "ERROR! The current implementation does not support libtorch versions below 1.4!"
   exit 1
 fi
 
@@ -86,9 +117,9 @@ esac
 # precompiled libraries for ARM machines afer version 2.2. Before that, it was x86 without the
 # tag
 if (( $OP_SYS == mac )); then
-  if (( $MAINVERSION < 2  || ( $MAINVERSION == 2 && $SUBVERSION < 2 ) )); then
+  if version_check ${VERSION} 2.2.0 -l; then
     if (( UNAME_ARCH == "-arm64" )); then
-      echo "Precompiled libraries below version 2.2 are not available for ARM architecture!"
+      echo "ERROR! Precompiled libraries below version 2.2 are not available for ARM architecture!"
       exit 1
     else
       UNAME_ARCH=""
@@ -98,32 +129,31 @@ else
   UNAME_ARCH="" # We don't need this for linux machines
 fi
 
-# Checking if the available GLIBC version is sufficient for proper linkig. Only
-# causes issues on linux distributions. Considering that most Macs use the
-# moose compiler stack.
-function version_greater {
-  if { echo "$1"; echo "$2"; } | sort --version-sort --check=quiet; then
-    false
-  else
-    true
-  fi
-}
+# Helper routine for the glibc error message.
 function error_message {
   echo "ERROR! The current version of GLIBC is not sufficient for proper linking!"
   echo "Upgrade it to at least $1! Current version: $2"
 }
 
+# We check if the available compiler stack is suitable for compiling moose with the
+# precompiled versions of libtorch
 if [[ $OP_SYS == linux ]]; then
   GLIBC_VERSION=`ldd --version | awk '/ldd/{print $NF}'`
-  if not version_greater $VERSION 1.8 && (( $(echo "$GLIBC_VERSION < 2.23" | bc -l) )); then
-    error_message 2.23 $GLIBC_VERSION
-    exit 1
-  elif not version_greater $VERSION 2.1 && (( $(echo "$GLIBC_VERSION < 2.27" | bc -l) )); then
-    error_message 2.27 $GLIBC_VERSION
-    exit 1
-  elif version_greater $VERSION 2.1 && (( $(echo "$GLIBC_VERSION < 2.29" | bc -l) )); then
-    error_message 2.29 $GLIBC_VERSION
-    exit 1
+  if !( version_check ${VERSION} 1.8.0 -g ); then
+    if (( $(echo "$GLIBC_VERSION < 2.23" | bc -l) )); then
+      error_message 2.23 $GLIBC_VERSION
+      exit 1
+    fi
+  elif !( version_check ${VERSION} 2.1.0 -g ); then
+    if (( $(echo "$GLIBC_VERSION < 2.27" | bc -l) )); then
+      error_message 2.27 $GLIBC_VERSION
+      exit 1
+    fi
+  else
+    if (( $(echo "$GLIBC_VERSION < 2.29" | bc -l) )); then
+      error_message 2.29 $GLIBC_VERSION
+      exit 1
+    fi
   fi
 fi
 
