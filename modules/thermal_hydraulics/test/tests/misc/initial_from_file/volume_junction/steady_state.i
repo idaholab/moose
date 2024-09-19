@@ -15,7 +15,7 @@
 []
 
 [Executioner]
-  num_steps = 100
+  num_steps = 5
 []
 
 [Outputs]

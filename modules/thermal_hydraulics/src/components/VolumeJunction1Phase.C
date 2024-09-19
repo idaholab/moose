@@ -134,6 +134,14 @@ VolumeJunction1Phase::check() const
 
     logError("The following initial condition parameters are missing:", oss.str());
   }
+
+  // https://github.com/idaholab/moose/issues/28670
+  if (getTHMProblem().hasInitialConditionsFromFile() && libMesh::n_threads() > 1 &&
+      _app.n_processors() > 1)
+    mooseDocumentedError("moose",
+                         28670,
+                         "Using initial conditions from a file for VolumeJunction1Phase is "
+                         "currently not tested for parallel threading.");
 }
 
 void

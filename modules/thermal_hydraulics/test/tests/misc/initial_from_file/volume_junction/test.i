@@ -7,7 +7,7 @@
 []
 
 [Executioner]
-  num_steps = 1
+  num_steps = 0
 []
 
 [Outputs]
