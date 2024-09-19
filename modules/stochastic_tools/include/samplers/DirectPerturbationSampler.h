@@ -26,6 +26,12 @@ protected:
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
 private:
-  /// The nomial values of the parameters
-  std::vector<Real> _nominal_values;
+  /// The nominal values of the parameters
+  const std::vector<Real> _nominal_values;
+
+  /// The relative intervals that should be used for the perturbation of each parameter
+  const std::vector<Real> _relative_perturbation_intervals;
+
+  /// The method which is used for the perturbation (one-sided/two-sided)
+  const MooseEnum _perturbation_method;
 };
