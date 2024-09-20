@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'variable.i'
     exodiff = 'variable_out.e'
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     issues = '#5194'
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The ComputeVariableEigenstrain material shall correctly compute an eigenstrain that is a function of a variable."
@@ -12,7 +12,7 @@
     type = 'Exodiff'
     input = 'variable_finite.i'
     exodiff = 'variable_finite_out.e'
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     issues = '#5194'
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The ComputeVariableEigenstrain material shall correctly compute an eigenstrain that is a function of a variable in a finite strain calculation."
@@ -21,7 +21,7 @@
     type = 'Exodiff'
     input = 'variable_cahnhilliard.i'
     exodiff = 'variable_cahnhilliard_out.e'
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     issues = '#6066'
     design = 'ComputeVariableEigenstrain.md'
     requirement = "The ComputeVariableEigenstrain material shall correctly compute the derivative of an eigenstrain that is a function of a variable with respect to that variable."
@@ -38,7 +38,7 @@
     type = 'Exodiff'
     input = 'inclusion.i'
     exodiff = 'inclusion_out.e'
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     abs_zero = 1e-8
     issues = '#7452'
     design = 'ComputeVariableEigenstrain.md InclusionProperties.md'

@@ -10,7 +10,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     deleted = '#6924'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
@@ -24,7 +24,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     deleted = 'Ticket #7073'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
@@ -38,7 +38,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
@@ -51,7 +51,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
@@ -64,7 +64,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch
     test with matched nodes)."
@@ -78,7 +78,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch
     test with matched nodes)."
@@ -91,7 +91,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch
     test with matched nodes)."

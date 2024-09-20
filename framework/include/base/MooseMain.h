@@ -33,7 +33,7 @@ void addMainCommandLineParams(InputParameters & params);
  * Initialize, create and run a MooseApp
  */
 template <typename DefaultAppType>
-void
+int
 main(int argc, char * argv[])
 {
   MooseInit init(argc, argv);
@@ -45,5 +45,7 @@ main(int argc, char * argv[])
   auto app = createMooseApp(default_app_name, argc, argv);
 
   app->run();
+
+  return app->exitCode();
 }
 }
