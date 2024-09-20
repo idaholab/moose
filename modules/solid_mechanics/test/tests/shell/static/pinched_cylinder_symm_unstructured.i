@@ -1,17 +1,5 @@
 # Test for displacement of pinched cylinder (similar to pinch_cyl_symm.i)
-# The Test is run with an unstructured mesh
-# The 40x40 mesh is included as a test for better visualization of
-# stress distribution
-
-# Mesh of 1/8 cylinder |  FEM/analytical (Moose) | FEM/analytical (Dvorkin)
-#                      |ratio of normalized disp.| ratio of normalized disp.
-#----------------------|-------------------------|-------------------------
-#     10 x 10          |          0.806          |        0.83
-#     20 x 20          |          0.95           |        0.96
-#     40 x 40          |          0.975          |         -
-
-# The results from FEM analysis matches well with the series solution and with
-# the solution presented by Dvorkin and Bathe (1984).
+# This variant of the test is run with an unstructured mesh
 
 [Mesh]
   [mesh]
@@ -86,7 +74,6 @@
     order = CONSTANT
     family = MONOMIAL
   []
-
 []
 
 [AuxKernels]
@@ -106,7 +93,6 @@
     index_j = 0
     execute_on = TIMESTEP_END
   []
-
 []
 
 [BCs]
