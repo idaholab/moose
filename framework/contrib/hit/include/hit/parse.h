@@ -212,6 +212,7 @@ public:
   virtual std::vector<double> vecFloatVal();
   virtual std::vector<bool> vecBoolVal();
   virtual std::vector<int> vecIntVal();
+  virtual std::vector<int64_t> vecInt64Val();
   virtual std::vector<std::string> vecStrVal();
 
   /// addChild adds a node to the ordered set of this node's children.  This node assumes/takes
@@ -377,6 +378,12 @@ Node::paramInner(Node * n)
   return vec;
 }
 template <>
+inline std::vector<int64_t>
+Node::paramInner(Node * n)
+{
+  return n->vecInt64Val();
+}
+template <>
 inline std::vector<double>
 Node::paramInner(Node * n)
 {
@@ -502,6 +509,7 @@ public:
   virtual std::vector<double> vecFloatVal() override;
   virtual std::vector<bool> vecBoolVal() override;
   virtual std::vector<int> vecIntVal() override;
+  virtual std::vector<int64_t> vecInt64Val() override;
   virtual std::vector<std::string> vecStrVal() override;
   virtual bool boolVal() override;
   virtual int64_t intVal() override;

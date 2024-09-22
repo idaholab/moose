@@ -82,6 +82,8 @@ GeneratedMeshGenerator::validParams()
 
   params.addParam<std::vector<ExtraElementIDName>>("extra_element_integers",
                                                    "Names of extra element integers");
+  params.addParam<std::vector<std::vector<dof_id_type>>>("extra_element_integer_ids",
+                                                         "IDs of extra element integers");
 
   params.addClassDescription(
       "Create a line, square, or cube mesh with uniformly spaced or biased elements.");
@@ -205,6 +207,41 @@ GeneratedMeshGenerator::generate()
         elem->subdomain_id() = bids[0];
       else
         elem->subdomain_id() = bids[i];
+    }
+  }
+
+  if (isParamValid("extra_element_integer_ids"))
+  {
+    if (!"extra_element_integers")
+      paramError("extra_element_integer_ids",
+                 "Depending 'extra_element_integers' which is missing");
+    const auto & id_names = getParam<std::vector<ExtraElementIDName>>("extra_element_integers");
+    const auto & ids = getParam<std::vector<std::vector<dof_id_type>>>("extra_element_integer_ids");
+    if (ids.size() != id_names.size())
+      paramError("extra_element_integer_ids",
+                 "Leading size must be equal to the size of 'extra_element_integers'.");
+
+    const unsigned int nelems = _nx * _ny * _nz;
+    for (const auto i : index_range(id_names))
+    {
+      const auto extra_elem_id = mesh->get_elem_integer_index(id_names[i]);
+      if (ids[i].size() != nelems)
+        paramError("extra_element_integer_ids",
+                   "Size of the ",
+                   i,
+                   "-th element integer (",
+                   id_names[i],
+                   ") is not equal to the product of number of elements in all "
+                   "directions.");
+      for (auto & elem : mesh->element_ptr_range())
+      {
+        const Point p = elem->vertex_average();
+        unsigned int ix = std::floor((p(0) - _xmin) / (_xmax - _xmin) * _nx);
+        unsigned int iy = std::floor((p(1) - _ymin) / (_ymax - _ymin) * _ny);
+        unsigned int iz = std::floor((p(2) - _zmin) / (_zmax - _zmin) * _nz);
+        unsigned int ip = iz * _nx * _ny + iy * _nx + ix;
+        elem->set_extra_integer(extra_elem_id, ids[i][ip]);
+      }
     }
   }
 
