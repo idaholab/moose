@@ -3,6 +3,11 @@
     type = FileMeshGenerator
     file = 'mesh/cube.e'
   []
+  [remove_low_low_D]
+    type = BlockDeletionGenerator
+    input = cube
+    block = 2
+  []
   second_order = true
   allow_renumbering = false
 []
@@ -15,7 +20,6 @@
     []
     family = MONOMIAL
     order = CONSTANT
-    block = 0
   []
   [u_nodal]
     [InitialCondition]
@@ -27,6 +31,7 @@
     order = SECOND
   []
   [v_low]
+    block = 0
   []
 []
 

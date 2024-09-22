@@ -93,7 +93,8 @@ ProjectionAux::computeValue()
       const auto & elem = _mesh.elemPtr(id);
       const auto block_id = elem->subdomain_id();
       // Only use higher D elements
-      if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) &&
+      if (_source_variable.hasBlocks(block_id) &&
+          (!_mesh.isLowerD(block_id) && elem->dim() == _mesh.dimension()) &&
           (!_use_block_restriction_for_source || hasBlocks(block_id)))
       {
         const auto elem_volume = elem->volume();
@@ -114,7 +115,8 @@ ProjectionAux::elemOnNodeVariableIsDefinedOn() const
   {
     const auto & elem = _mesh.elemPtr(elem_id);
     const auto block_id = elem->subdomain_id();
-    if (_source_variable.hasBlocks(block_id) && !_mesh.isLowerD(block_id) &&
+    if (_source_variable.hasBlocks(block_id) &&
+        (!_mesh.isLowerD(block_id) && elem->dim() == _mesh.dimension()) &&
         (!_use_block_restriction_for_source || hasBlocks(block_id)))
       return elem;
   }
