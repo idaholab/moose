@@ -18,6 +18,7 @@ ADHeatFluxFromHeatStructure3EqnUserObject::validParams()
   params.addRequiredParam<MaterialPropertyName>("T_wall", "Wall temperature");
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Convective heat transfer coefficient");
+  params.addParam<MooseFunctorName>("scale", 1.0, "Functor by which to scale the heat flux");
   params.addClassDescription(
       "Cache the heat flux between a single phase flow channel and a heat structure");
   return params;
@@ -28,12 +29,14 @@ ADHeatFluxFromHeatStructure3EqnUserObject::ADHeatFluxFromHeatStructure3EqnUserOb
   : ADHeatFluxFromHeatStructureBaseUserObject(parameters),
     _T_wall(getADMaterialProperty<Real>("T_wall")),
     _Hw(getADMaterialProperty<Real>("Hw")),
-    _T(getADMaterialProperty<Real>("T"))
+    _T(getADMaterialProperty<Real>("T")),
+    _scale(getFunctor<ADReal>("scale"))
 {
 }
 
 ADReal
 ADHeatFluxFromHeatStructure3EqnUserObject::computeQpHeatFlux()
 {
-  return _Hw[_qp] * (_T_wall[_qp] - _T[_qp]);
+  const Moose::ElemQpArg space_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
+  return _Hw[_qp] * (_T_wall[_qp] - _T[_qp]) * _scale(space_arg, Moose::currentState());
 }
