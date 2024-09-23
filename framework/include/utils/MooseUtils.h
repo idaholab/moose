@@ -1220,7 +1220,6 @@ isFloat(const std::string & str)
 {
   if (str.empty())
     return false;
-
   char * ptr;
   strtof(str.c_str(), &ptr);
   return (*ptr) == '\0';

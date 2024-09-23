@@ -95,11 +95,13 @@ INSFVTKESourceSink::computeQpResidual()
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
   // To prevent negative values & preserve sparsity pattern
-  auto TKE = std::max(_var(elem_arg, old_state), ADReal(0) * _var(elem_arg, old_state));
+  auto TKE = _newton_solve
+                 ? std::max(_var(elem_arg, old_state), ADReal(0) * _var(elem_arg, old_state))
+                 : _var(elem_arg, old_state);
   // Prevent computation of sqrt(0) with undefined automatic derivatives
   // This is not needed for segregated solves, as TKE has minimum bound in the solver
   if (_newton_solve)
-    TKE += 1e-10;
+    TKE = std::max(TKE, 1e-10);
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
@@ -188,6 +190,7 @@ INSFVTKESourceSink::computeQpResidual()
     }
 
     residual = (destruction - production) * _var(elem_arg, state);
+    // Additional 0-value term to make sure new derivative entries are not added during the solve
     if (_newton_solve)
       residual += 0 * _epsilon(elem_arg, old_state);
   }
@@ -250,25 +253,26 @@ INSFVTKESourceSink::computeQpResidual()
 
     production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    const auto time_scale_eps = raw_value(TKE);
-    const auto epsilon = _epsilon(elem_arg, old_state);
+    const auto tke_old_raw = raw_value(TKE);
+    const auto epsilon_old = _epsilon(elem_arg, old_state);
 
-    if (MooseUtils::absoluteFuzzyEqual(time_scale_eps, 0))
-      destruction = rho * _var(elem_arg, state);
+    if (MooseUtils::absoluteFuzzyEqual(tke_old_raw, 0))
+      destruction = rho * epsilon_old;
     else
-      destruction = rho * _var(elem_arg, state) / time_scale_eps * raw_value(epsilon);
+      destruction = rho * _var(elem_arg, state) / tke_old_raw * raw_value(epsilon_old);
 
     // k-Production limiter (needed for flows with stagnation zones)
-    const ADReal production_limit = _C_pl * rho * std::max(epsilon, ADReal(0));
+    const ADReal production_limit =
+        _C_pl * rho * (_newton_solve ? std::max(epsilon_old, ADReal(0)) : epsilon_old);
 
     // Apply production limiter
     production = std::min(production, production_limit);
 
     residual = destruction - production;
 
-    // Sparsity pattern preservation
+    // Additional 0-value terms to make sure new derivative entries are not added during the solve
     if (_newton_solve)
-      residual += 0 * epsilon;
+      residual += 0 * _epsilon(elem_arg, state);
   }
 
   return residual;

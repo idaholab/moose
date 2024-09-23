@@ -44,6 +44,8 @@ INSFVTKEDSourceSink::validParams()
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>("C_pl", 10.0, "Production limiter constant multiplier.");
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
 }
 
@@ -63,7 +65,8 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _C1_eps(getParam<Real>("C1_eps")),
     _C2_eps(getParam<Real>("C2_eps")),
     _C_mu(getParam<Real>("C_mu")),
-    _C_pl(getParam<Real>("C_pl"))
+    _C_pl(getParam<Real>("C_pl")),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -93,7 +96,8 @@ INSFVTKEDSourceSink::computeQpResidual()
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto mu = _mu(elem_arg, state);
   const auto rho = _rho(elem_arg, state);
-  const auto TKE_old = _k(elem_arg, old_state);
+  const auto TKE_old =
+      _newton_solve ? std::max(_k(elem_arg, old_state), 1e-10) : _k(elem_arg, old_state);
   ADReal y_plus;
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
@@ -150,7 +154,7 @@ INSFVTKEDSourceSink::computeQpResidual()
                        Utility::pow<2>(distance_vec[i]) / tot_weight;
       }
       else
-        destruction += std::pow(_C_mu, 0.75) * std::pow(std::max(ADReal(0), TKE_old), 1.5) /
+        destruction += std::pow(_C_mu, 0.75) * std::pow(TKE_old, 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
     }
 
@@ -215,24 +219,17 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     ADReal production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
     // Compute production limiter (needed for flows with stagnation zones)
-    const auto eps_old = _var(elem_arg, old_state);
+    const auto eps_old =
+        _newton_solve ? std::max(_var(elem_arg, old_state), 1e-10) : _var(elem_arg, old_state);
     const ADReal production_limit = _C_pl * rho * eps_old;
     // Apply production limiter
     production_k = std::min(production_k, production_limit);
 
-    const auto raw_k = raw_value(TKE_old);
-    const auto raw_eps = raw_value(eps_old);
-
-    production = _C1_eps * production_k;
-    destruction = _C2_eps * rho * _var(elem_arg, state);
+    const auto time_scale = raw_value(TKE_old) / raw_value(eps_old);
+    production = _C1_eps * production_k / time_scale;
+    destruction = _C2_eps * rho * _var(elem_arg, state) / time_scale;
 
     residual = destruction - production;
-    // Multiply by time scale
-    if (!MooseUtils::absoluteFuzzyEqual(raw_k, 0))
-    {
-      residual /= raw_k;
-      residual *= raw_eps;
-    }
   }
 
   return residual;

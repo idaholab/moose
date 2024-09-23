@@ -83,9 +83,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     velocity(2) = (*_w_var)(current_argument, state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  const VectorValue offset = {1e-42, 1e-42, 1e-42};
   const ADReal parallel_speed =
-      NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()) + offset);
+      NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Computing friction velocity and y+
   ADReal u_tau, y_plus;

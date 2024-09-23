@@ -675,6 +675,8 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     params.set<Real>("C1_eps") = getParam<Real>("C1_eps");
     params.set<Real>("C2_eps") = getParam<Real>("C2_eps");
+    // Currently only Newton method for WCNSFVTurbulencePhysics
+    params.set<bool>("newton_solve") = true;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
     getProblem().addFVKernel(kernel_type, prefix() + "tked_source_sink", params);
