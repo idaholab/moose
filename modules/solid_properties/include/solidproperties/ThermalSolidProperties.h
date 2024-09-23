@@ -12,9 +12,30 @@
 #include "SolidProperties.h"
 
 /**
+ * Adds default error implementation for non-AD value, which should be overridden in child classes
+ */
+#define propfuncNonADValueOnly(want)                                                               \
+  virtual Real want##_from_T(const Real &) const                                                   \
+  {                                                                                                \
+    mooseError(__PRETTY_FUNCTION__, " not implemented.");                                          \
+  }
+
+/**
+ * Adds default error implementation for non-AD value and derivatives, which should be overridden
+ * in child classes
+ */
+#define propfuncNonADDerivatives(want)                                                             \
+  virtual void want##_from_T(const Real & T, Real & val, Real & d##want##dT) const                 \
+  {                                                                                                \
+    solidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");                          \
+    d##want##dT = 0;                                                                               \
+    val = want##_from_T(T);                                                                        \
+  }
+
+/**
  * Adds AD versions of each solid property. These functions use the Real versions of these methods
  * to compute the AD variables complete with derivatives. Typically, these do not need to be
- * overriden in derived classes.
+ * overridden in derived classes.
  */
 #define propfuncAD(want)                                                                           \
   virtual ADReal want##_from_T(const ADReal & T) const                                             \
@@ -27,26 +48,13 @@
     ADReal result = x;                                                                             \
     result.derivatives() = T.derivatives() * dxdT;                                                 \
     return result;                                                                                 \
-  }                                                                                                \
-                                                                                                   \
-/**                                                                                                \
- * Adds function definitions with not implemented error. These functions should be overriden in    \
- * derived classes where required. AD versions are constructed automatically using propfuncAD.     \
+  }
+
+/**
+ * Adds function definitions with not implemented error. These functions should be overridden in
+ * derived classes where required. AD versions are constructed automatically using propfuncAD.
  */
-#define propfunc(want)                                                                             \
-  virtual Real want##_from_T(const Real &) const                                                   \
-  {                                                                                                \
-    mooseError(__PRETTY_FUNCTION__, " not implemented.");                                          \
-  }                                                                                                \
-                                                                                                   \
-  virtual void want##_from_T(const Real & T, Real & val, Real & d##want##dT) const                 \
-  {                                                                                                \
-    solidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");                          \
-    d##want##dT = 0;                                                                               \
-    val = want##_from_T(T);                                                                        \
-  }                                                                                                \
-                                                                                                   \
-  propfuncAD(want)
+#define propfunc(want) propfuncNonADValueOnly(want) propfuncNonADDerivatives(want) propfuncAD(want)
 
 /**
  * Common class for solid properties that are a function of temperature
@@ -84,6 +92,24 @@ public:
   propfunc(k)
   propfunc(cp)
   propfunc(rho)
+
+  /**
+   * Computes the integral of isobaric specific heat capacity w.r.t. temperature,
+   * from the zero-e reference temperature, provided by a user parameter.
+   *
+   * Note that the constant of integration is not included. This function is
+   * called in the \c e_from_T(T) method.
+   */
+  virtual Real cp_integral(const Real & /*T*/) const
+  {
+    mooseError(__PRETTY_FUNCTION__, " not implemented.");
+  }
+
+  // Specific internal energy methods; these designed to not be virtual; only
+  // cp_integral(T) needs to be implemented.
+  Real e_from_T(const Real & T) const;
+  void e_from_T(const Real & T, Real & val, Real & dedT) const;
+  propfuncAD(e)
   ///@}
 
   // clang-format on
@@ -101,6 +127,10 @@ public:
     else
       mooseError(std::forward<Args>(args)...);
   }
+
+protected:
+  /// Temperature at which the specific internal energy is assumed to be zero
+  const Real _T_zero_e;
 };
 
 #pragma GCC diagnostic pop

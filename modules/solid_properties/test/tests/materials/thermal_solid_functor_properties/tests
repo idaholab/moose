@@ -1,11 +1,31 @@
 [Tests]
+  design = 'ThermalSolidPropertiesFunctorMaterial.md'
+  issues = '#21978'
   [test]
-    type = CSVDiff
-    input = 'test.i'
-    csvdiff = 'test_out.csv'
-    requirement = "The system shall provide the ability to use functors for solid material "
-                  "properties."
-    design = 'ThermalSolidPropertiesFunctorMaterial.md'
-    issues = '#21978'
+    requirement = "The system shall provide the ability to use functors for solid material properties"
+    [variable_density]
+      type = CSVDiff
+      input = 'variable_density.i'
+      csvdiff = 'variable_density.csv'
+      detail = "with a temperature-dependent density."
+    []
+    [constant_density]
+      type = CSVDiff
+      input = 'constant_density.i'
+      csvdiff = 'constant_density.csv'
+      detail = "with a constant density."
+    []
+    [error_no_T_ref]
+      type = RunException
+      input = 'error_no_T_ref.i'
+      expect_err = "The parameter 'T_ref' is required if 'use_constant_density' is set to 'true'"
+      detail = "and report an error if no reference temperature is supplied for a constant density."
+    []
+    [error_provided_T_ref]
+      type = RunException
+      input = 'error_provided_T_ref.i'
+      expect_err = "The parameter 'T_ref' may not be specified if 'use_constant_density' is set to 'false'"
+      detail = "and report an error if a reference temperature is supplied for a variable density."
+    []
   []
 []

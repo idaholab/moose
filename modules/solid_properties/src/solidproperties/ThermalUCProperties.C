@@ -24,7 +24,12 @@ ThermalUCProperties::validParams()
 }
 
 ThermalUCProperties::ThermalUCProperties(const InputParameters & parameters)
-  : ThermalSolidProperties(parameters), _rho_const(getParam<Real>("density"))
+  : ThermalSolidProperties(parameters),
+    _rho_const(getParam<Real>("density")),
+    _c1(239.7),
+    _c2(5.068e-3),
+    _c3(1.7604e-5),
+    _c4(3488100)
 {
 }
 
@@ -34,7 +39,7 @@ ThermalUCProperties::cp_from_T(const Real & T) const
   if ((T < 298) || (T > 2838))
     flagInvalidSolution(
         "UC specific heat evaluated outside of UC cp temperature range [298, 2838] K");
-  return 239.7 - 5.068e-3 * T + 1.7604e-5 * Utility::pow<2>(T) - 3488100 / Utility::pow<2>(T);
+  return _c1 - _c2 * T + _c3 * Utility::pow<2>(T) - _c4 / Utility::pow<2>(T);
 }
 
 void
@@ -46,7 +51,13 @@ ThermalUCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const
         "UC specific heat evaluated outside of UC cp temperature range [298, 2838] K");
 
   cp = cp_from_T(T);
-  dcp_dT = -5.068e-3 + 3.5208e-5 * T + 6976200 / Utility::pow<3>(T);
+  dcp_dT = -_c2 + 2 * _c3 * T + 2 * _c4 / Utility::pow<3>(T);
+}
+
+Real
+ThermalUCProperties::cp_integral(const Real & T) const
+{
+  return _c1 * T - 0.5 * _c2 * Utility::pow<2>(T) + _c3 / 3.0 * Utility::pow<3>(T) + _c4 / T;
 }
 
 Real

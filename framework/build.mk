@@ -187,7 +187,7 @@ pcre%.$(obj-suffix) : pcre%.c | prebuild
 #
 
 %.$(obj-suffix) : %.f
-	@echo "Compiling Fortan (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortran (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F77) $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< -o $@
 
@@ -322,10 +322,10 @@ PLUGIN_FLAGS := -shared -fPIC -Wl,-undefined,dynamic_lookup
 	@echo "Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
-	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortran Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
-	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortran Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F90) -ffree-line-length-none $(libmesh_FFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 
 # Define the "test" target, we'll use a variable name so that we can override it without warnings if needed

@@ -18,7 +18,7 @@ T_initial = 300
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [sp_mat]
     type = ThermalSolidPropertiesFunctorMaterial
     temperature = T
@@ -26,6 +26,7 @@ T_initial = 300
     specific_heat = cp
     density = rho
     thermal_conductivity = k
+    specific_internal_energy = e
   []
 []
 
@@ -46,16 +47,20 @@ T_initial = 300
 
 [Postprocessors]
   [cp]
-    type = ElementIntegralFunctorPostprocessor
+    type = ElementExtremeFunctorValue
     functor = 'cp'
   []
   [k]
-    type = ElementIntegralFunctorPostprocessor
+    type = ElementExtremeFunctorValue
     functor = 'k'
   []
   [density]
-    type = ElementIntegralFunctorPostprocessor
+    type = ElementExtremeFunctorValue
     functor = 'rho'
+  []
+  [e]
+    type = ElementExtremeFunctorValue
+    functor = 'e'
   []
 []
 

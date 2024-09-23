@@ -167,6 +167,13 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
   for (auto hole_i : index_range(_stitch_holes))
     if (_stitch_holes[hole_i] && (hole_i >= _refine_holes.size() || _refine_holes[hole_i]))
       paramError("refine_holes", "Disable auto refine of any hole boundary to be stitched.");
+
+  if (isParamValid("hole_boundaries"))
+  {
+    auto & hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
+    if (hole_boundaries.size() != _hole_ptrs.size())
+      paramError("hole_boundaries", "Need one hole_boundaries entry per hole, if specified.");
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -340,10 +347,6 @@ XYDelaunayGenerator::generate()
       }
     }
 
-  // Assign new subdomain name, if provided
-  if (isParamValid("output_subdomain_name"))
-    mesh->subdomain_name(_output_subdomain_id) = getParam<SubdomainName>("output_subdomain_name");
-
   const bool use_binary_search = (_algorithm == "BINARY");
 
   // The hole meshes are specified by the user, so they could have any
@@ -390,9 +393,6 @@ XYDelaunayGenerator::generate()
   {
     auto hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
     auto hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, hole_boundaries, true);
-
-    if (hole_boundary_ids.size() != hole_ptrs.size())
-      paramError("hole_boundary_ids", "Need one hole_boundary_ids entry per hole, if specified.");
 
     for (auto h : index_range(hole_ptrs))
       libMesh::MeshTools::Modification::change_boundary_id(
@@ -547,6 +547,6 @@ XYDelaunayGenerator::generate()
   if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
     paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
 
-  mesh->prepare_for_use();
+  mesh->set_isnt_prepared();
   return mesh;
 }

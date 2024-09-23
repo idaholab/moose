@@ -26,6 +26,9 @@ public:
   virtual Real cp_from_T(const Real & T) const override;
   virtual void cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const override;
 
+  using ThermalSolidProperties::cp_integral;
+  virtual Real cp_integral(const Real & T) const override;
+
   using ThermalSolidProperties::rho_from_T;
   virtual Real rho_from_T(const Real & T) const override;
   virtual void rho_from_T(const Real & T, Real & rho, Real & drho_dT) const override;
@@ -33,4 +36,10 @@ public:
 protected:
   /// (constant) density
   const Real & _rho_const;
+
+  // Constants used in specific heat relation
+  const Real _c1;
+  const Real _c2;
+  const Real _c3;
+  const Real _c4;
 };
