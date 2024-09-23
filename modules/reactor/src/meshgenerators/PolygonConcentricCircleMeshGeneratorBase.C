@@ -342,25 +342,55 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     if (!_ring_block_ids.empty() &&
         _ring_block_ids.size() !=
             (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
-      paramError("ring_block_ids",
-                 "This parameter must have the appropriate size if it is provided. The size should "
-                 "be the same as the size of 'ring_intervals' if the innermost ring interval "
-                 "(including boundary layers) is unity; otherwise the size should be greater than "
-                 "the size of 'ring_intervals' by one. If 'quad_center_elements' is true, it is "
-                 "optional to only provide this parameter with the same size as 'ring_intervals'");
+    {
+      _console << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
+               << std::endl;
+      _console << "ring_block_ids size is : " << _ring_block_ids.size() << std::endl;
+      _console << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
+      _console << "first element of ring_intervals is : " << num_innermost_ring_layers << std::endl;
+      if (!_quad_center_elements)
+        paramError("ring_block_ids",
+                   "This parameter must have the appropriate size if it is provided: "
+                   "If the first element of 'ring_intervals' is more than one, "
+                   "the size of 'ring_block_ids' must be "
+                   "equal to the size of 'ring_intervals' + 1. Else, equal to the size of "
+                   "'ring_intervals'");
+      else
+        paramError("ring_block_ids",
+                   "This parameter must have the appropriate size if it is provided: "
+                   "If the first element of 'ring_intervals' is more than one, "
+                   "the size of 'ring_block_ids' must be "
+                   "equal to the size of 'ring_intervals' or 'ring_intervals' + 1. Else, equal to "
+                   "the size of ring_intervals' ",
+                   _quad_center_elements);
+    }
     if (!_ring_block_names.empty() && _quad_center_elements && num_innermost_ring_layers > 1 &&
         _ring_block_names.size() == _ring_intervals.size())
       _ring_block_names.insert(_ring_block_names.begin(), _ring_block_names.front());
     if (!_ring_block_names.empty() &&
         _ring_block_names.size() !=
             (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
-      paramError(
-          "ring_block_names",
-          "This parameter must have the appropriate size if it is set. The size should be the "
-          "same as the size of 'ring_intervals' if the innermost ring interval (including "
-          "boundary layers) is unity; otherwise the size should be greater than the size of "
-          "'ring_intervals' by one. If 'quad_center_elements' is true, it is optional to only "
-          "provide this parameter with the same size as 'ring_intervals'");
+    {
+      _console << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
+               << std::endl;
+      _console << "ring_block_names size is : " << _ring_block_names.size() << std::endl;
+      _console << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
+      _console << "first element of ring_intervals is : " << num_innermost_ring_layers << std::endl;
+      if (!_quad_center_elements)
+        paramError("ring_block_names",
+                   "This parameter must have the appropriate size if it is provided: "
+                   "If the first element of 'ring_intervals' is more than one, "
+                   "the size of 'ring_block_names' must be "
+                   "equal to the size of 'ring_intervals' + 1. Else, equal to the size of "
+                   "'ring_intervals'");
+      else
+        paramError("ring_block_names",
+                   "This parameter must have the appropriate size if it is provided: "
+                   "If the first element of 'ring_intervals' is more than one, "
+                   "the size of 'ring_block_names' must be "
+                   "equal to the size of 'ring_intervals' or 'ring_intervals' + 1. Else, equal to "
+                   "the size of 'ring_intervals'");
+    }
     for (unsigned int i = 0; i < _ring_radii.size(); i++)
     {
       const Real layer_width = _ring_radii[i] - (i == 0 ? 0.0 : _ring_radii[i - 1]);
