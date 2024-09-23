@@ -190,9 +190,6 @@ time = 0.1
   []
 []
 
-[BCs]
-[]
-
 [Preconditioning]
   [basic]
     type = SMP
@@ -239,5 +236,4 @@ time = 0.1
 
 [Outputs]
   csv = true
-  exodus = true
 []
