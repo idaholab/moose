@@ -163,6 +163,12 @@ protected:
    */
   bool converged(const GenericReal<is_ad> & residual, const Real reference);
 
+  /// Return nonlinear iterations
+  unsigned int getIterations() { return _iteration; }
+
+  /// Return final converged residual
+  Real getResidual() { return MetaPhysicL::raw_value(_residual); }
+
 private:
   /// Helper function to compute and set the _residual and _derivative
   void computeResidualAndDerivativeHelper(const GenericReal<is_ad> & effective_trial_stress,

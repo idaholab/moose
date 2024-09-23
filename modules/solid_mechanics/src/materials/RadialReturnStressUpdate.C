@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
 #include "RankTwoScalarTools.h"
+#include "MooseTypes.h"
 
 template <bool is_ad>
 InputParameters
@@ -70,6 +71,12 @@ RadialReturnStressUpdateTempl<is_ad>::validParams()
                                     0.0,
                                     "scale_strain_predictor <= 1 & scale_strain_predictor >= 0",
                                     "Scaling factor for the inelastic strain increment predictor.");
+  params.addParam<bool>(
+      "debug_newton_solve_materials",
+      false,
+      "If true, create materials for material nonlinear iterations "
+      "called nl_iterations and material residual "
+      "called nl_residual.  These are the values at the end of a system level nonlinear solved.");
   return params;
 }
 
@@ -90,6 +97,12 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _effective_inelastic_strain_rate_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name + this->template getParam<std::string>("effective_inelastic_strain_name") +
         "_rate")),
+    _nl_iterations(this->template getParam<bool>("debug_newton_solve_materials")
+                       ? &(this->template declareProperty<Real>)(this->_base_name + "nl_iterations")
+                       : nullptr),
+    _nl_residual(this->template getParam<bool>("debug_newton_solve_materials")
+                     ? &(this->template declareProperty<Real>)(this->_base_name + "nl_residual")
+                     : nullptr),
     _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
     _substep_tolerance(this->template getParam<Real>("substep_strain_tolerance")),
     _identity_two(RankTwoTensor::initIdentity),
@@ -306,7 +319,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
     strain_increment -= inelastic_strain_increment;
     updateEffectiveInelasticStrain(_effective_inelastic_strain_increment);
     // ternary checking for _dt=0 on first timestep.
-    // The effective strain rate updated here making.
+    // The effective strain rate updated here.
     // For substepping, this will make it the rate over a single substep.
     _effective_inelastic_strain_rate[_qp] =
         (_dt == 0) ? 0 : MetaPhysicL::raw_value(_effective_inelastic_strain_increment) / _dt;
@@ -320,6 +333,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   computeStressFinalize(inelastic_strain_increment);
 
   if constexpr (!is_ad)
+
   {
     if (compute_full_tangent_operator)
       computeTangentOperator(effective_trial_stress, stress_new, tangent_operator);
@@ -328,6 +342,12 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   {
     libmesh_ignore(compute_full_tangent_operator);
     libmesh_ignore(tangent_operator);
+  }
+
+  if (_nl_iterations)
+  {
+    (*_nl_iterations)[_qp] = static_cast<Real>(this->getIterations());
+    (*_nl_residual)[_qp] = this->getResidual();
   }
 }
 

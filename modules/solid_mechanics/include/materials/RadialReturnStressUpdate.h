@@ -224,6 +224,13 @@ protected:
   MaterialProperty<Real> & _effective_inelastic_strain_rate;
   const MaterialProperty<Real> & _effective_inelastic_strain_rate_old;
 
+  /// For outputting material nonlinear iterations
+  /// this is Real instead of unsigned int to allow for output with materialRealAux
+  MaterialProperty<Real> * _nl_iterations;
+
+  /// For outputting material nonlinear residual
+  MaterialProperty<Real> * _nl_residual;
+
   /// Stores the scalar effective inelastic strain increment from Newton iteration
   GenericReal<is_ad> _effective_inelastic_strain_increment;
 
