@@ -71,7 +71,7 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
 bool
 checkEdgeOverlap(const std::unique_ptr<Elem> & edge1, 
                  const std::unique_ptr<Elem> & edge2,
-                 double tol)
+                 const ConsoleStream & console)
 {
   //get node array from two edges
   const auto node_list1 = edge1->get_nodes();
@@ -82,68 +82,40 @@ checkEdgeOverlap(const std::unique_ptr<Elem> & edge1,
   auto n2 = *node_list1[1];
   auto n3 = *node_list2[0];
   auto n4 = *node_list2[1];
-  //auto size1 = sizeof(*node_list1);
-  //auto size2 = std::size(*node_list1);
-  //if(size1 < 3){
-    //return false;
-  //}
-  //auto num_nodes = node_list1->size();
-  //const Point *p1, *p2, *p3, *p4;
-  //const Point * const p1 = n1;
-  //const Point * const p2 = n2;
-  //const Point * const p3 = n3;
-  //const Point * const p4 = n4;
 
-  double n1x = 1.0*(n1.operator()(0));
-  double n1y = 1.0*(n1.operator()(1));
-  double n1z = 1.0*(n1.operator()(2));
-  double n2x = 1.0*(n2.operator()(0));
-  double n2y = 1.0*(n2.operator()(1));
-  double n2z = 1.0*(n2.operator()(2));
-  double n3x = 1.0*(n3.operator()(0));
-  double n3y = 1.0*(n3.operator()(1));
-  double n3z = 1.0*(n3.operator()(2));
-  double n4x = 1.0*(n4.operator()(0));
-  double n4y = 1.0*(n4.operator()(1));
-  double n4z = 1.0*(n4.operator()(2));
+  auto n1x = 1.0*(n1.operator()(0));
+  auto n1y = 1.0*(n1.operator()(1));
+  auto n1z = 1.0*(n1.operator()(2));
+  auto n2x = 1.0*(n2.operator()(0));
+  auto n2y = 1.0*(n2.operator()(1));
+  auto n2z = 1.0*(n2.operator()(2));
+  auto n3x = 1.0*(n3.operator()(0));
+  auto n3y = 1.0*(n3.operator()(1));
+  auto n3z = 1.0*(n3.operator()(2));
+  auto n4x = 1.0*(n4.operator()(0));
+  auto n4y = 1.0*(n4.operator()(1));
+  auto n4z = 1.0*(n4.operator()(2));
 
+  //Tolerance should be based on edge length. Here it is arbitrarily set to 1/1000th of the average of the two edge lengths
+  auto edge1Length = std::sqrt(std::pow(n1x - n2x, 2) + std::pow(n1y - n2y, 2) + std::pow(n1z - n2z, 2));
+  auto edge2Length = std::sqrt(std::pow(n3x - n4x, 2) + std::pow(n3y - n4y, 2) + std::pow(n3z - n4z, 2));
+  auto tol = ((edge1Length + edge2Length)/2)/1000;
   //double n13x, n13y, n13z, n21x, n21y, n21z, n43x, n43y, n43z;
-  double n13x = n1x - n3x;
-  double n13y = n1y - n3y;
-  double n13z = n1z - n3z;
-  double n21x = n2x - n1x;
-  double n21y = n2y - n1y;
-  double n21z = n2z - n1z;
-  double n43x = n4x - n3x;
-  double n43y = n4y - n3y;
-  double n43z = n4z - n3z;
+  auto n13x = n1x - n3x;
+  auto n13y = n1y - n3y;
+  auto n13z = n1z - n3z;
+  auto n21x = n2x - n1x;
+  auto n21y = n2y - n1y;
+  auto n21z = n2z - n1z;
+  auto n43x = n4x - n3x;
+  auto n43y = n4y - n3y;
+  auto n43z = n4z - n3z;
 
-  //double n13xfabs = std::fabs(n13x);
-  //double n13xabs = std::abs(n13x);
-  if((std::fabs(n1x - n3x)<tol) && (std::fabs(n1y - n3y)<tol) && (std::fabs(n1z - n3z)<tol))
-  { 
+  if(((std::fabs(n1x - n3x)<tol) && (std::fabs(n1y - n3y)<tol) && (std::fabs(n1z - n3z)<tol)) ||
+    ((std::fabs(n2x-n4x)<tol) && (std::fabs(n2y-n4y)<tol) && (std::fabs(n2z-n4z)<tol)) ||
+    ((std::fabs(n1x-n4x)<tol) && (std::fabs(n1y-n4y)<tol) && (std::fabs(n1z-n4z)<tol)) ||
+    ((std::fabs(n2x-n3x)<tol) && (std::fabs(n2y-n3y)<tol) && (std::fabs(n2z-n3z)<tol)))
     return false;
-  }
-  else if((std::fabs(n2x-n4x)<tol) && (std::fabs(n2y-n4y)<tol) && (std::fabs(n2z-n4z)<tol))
-  { 
-    return false;
-  }
-  else if((std::fabs(n1x-n4x)<tol) && (std::fabs(n1y-n4y)<tol) && (std::fabs(n1z-n4z)<tol)) 
-  {
-    return false;
-  }
-  else if((std::fabs(n2x-n3x)<tol) && (std::fabs(n2y-n3y)<tol) && (std::fabs(n2z-n3z)<tol))
-  {
-    return false;
-  }
-
-  /*
-  if((n1x == n4x && n1y == n4y && n1z == n4z) && (n2x == n3x && n2y == n3y && n1z == n3z))
-  {
-    //Then these are the same edge so this test doen't apply
-    return false;
-  }
-  */
 
   //There's a chance that they overlap. Find shortest line that connects two edges and if its length is close enough to 0 return true
   double d1343, d4321, d1321, d4343, d2121, numerator, denominator, mua, mub;
@@ -193,7 +165,14 @@ checkEdgeOverlap(const std::unique_ptr<Elem> & edge1,
   //Calculate distance between these two nodes
   double distance = std::sqrt(std::pow(nax - nbx, 2) + std::pow(nay - nby, 2) + std::pow(naz - nbz, 2));
   if (distance < tol)
+  {
+    std::string x_coord = std::to_string(nax);
+    std::string y_coord = std::to_string(nay);
+    std::string z_coord = std::to_string(naz);
+    std::string message = "Non-matching edges found near (" + x_coord + ", " + y_coord + ", " + z_coord + ")";
+    console << message << std::endl;
     return true;
+  }
   else
     return false;
 }

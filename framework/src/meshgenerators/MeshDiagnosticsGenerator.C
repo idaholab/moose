@@ -1423,68 +1423,58 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
   */
   unsigned int num_intersecting_edges = 0;
   std::vector<Node> checked_edges;
-  //unsigned int num_elem_check = 0;
   for (auto elem : mesh->active_element_ptr_range())
   {
     std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
-    //num_elem_check++;
     for (auto i : elem->edge_index_range())
       elem_edges[i] = elem->build_edge_ptr(i);
     for (auto other_elem : mesh->active_element_ptr_range())
     {
+      //If they're the same element then there's no need to check for overlap
+      if (elem == other_elem)
+      {
+        continue;
+      }
+      //Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges will either
+      auto boundingBox1 = elem->loose_bounding_box();
+      auto boundingBox2 = other_elem->loose_bounding_box();
+      if(!(boundingBox1.intersects(boundingBox2)))
+      {
+        continue;
+      }
       std::vector<std::unique_ptr<Elem>> other_edges(other_elem->n_edges());
-      //num_elem_check++;
       for (auto j : other_elem->edge_index_range())
         other_edges[j] = other_elem->build_edge_ptr(j);
       for (auto & edge : elem_edges)
       {
         for (auto & other_edge : other_edges)
         {
+          const auto node_list1 = edge->get_nodes();
+          const auto node_list2 = other_edge->get_nodes();
+          auto n1 = *node_list1[0];
+          auto n2 = *node_list1[1];
+          auto n3 = *node_list2[0];
+          auto n4 = *node_list2[1];
+          //Check if the edges have already been added to our check_edges list
+          if (std::find(checked_edges.begin(), checked_edges.end(), n1) !=checked_edges.end() &&
+            std::find(checked_edges.begin(), checked_edges.end(), n2) !=checked_edges.end() &&
+            std::find(checked_edges.begin(), checked_edges.end(), n3) !=checked_edges.end() &&
+            std::find(checked_edges.begin(), checked_edges.end(), n4) !=checked_edges.end())
+          {
+            continue;
+          }
           // Now compare edge with other_edge
-          double tol = 0.000001;
-          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(edge, other_edge, tol);
+          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(edge, other_edge, _console);
           if (overlap)
           {
-            const auto node_list1 = edge->get_nodes();
-            const auto node_list2 = other_edge->get_nodes();
-            auto n1 = *node_list1[0];
-            auto n2 = *node_list1[1];
-            auto n3 = *node_list2[0];
-            auto n4 = *node_list2[1];
-            if(std::find(checked_edges.begin(), checked_edges.end(), n1) !=checked_edges.end() &&
-              std::find(checked_edges.begin(), checked_edges.end(), n2) !=checked_edges.end() &&
-              std::find(checked_edges.begin(), checked_edges.end(), n3) !=checked_edges.end() &&
-              std::find(checked_edges.begin(), checked_edges.end(), n4) !=checked_edges.end())
-            {
-              continue;
-            }
+            // Add the nodes that make up the 2 edges to the vector checked_edges
             checked_edges.push_back(n1);
             checked_edges.push_back(n2);
             checked_edges.push_back(n3);
             checked_edges.push_back(n4);
             num_intersecting_edges+=2;
-            //const Point * const p = n;
-  	        auto x1 = n1.operator()(0);
-	          auto y1 = n1.operator()(1);
-	          auto z1 = n1.operator()(2);
-            auto x2 = n2.operator()(0);
-	          auto y2 = n2.operator()(1);
-	          auto z2 = n2.operator()(2);
-            
-            std::string x_coord = std::to_string((x1+x2)/2);
-            std::string y_coord = std::to_string((y1+y2)/2);
-            std::string z_coord = std::to_string((z1+z2)/2);
-
-            std::string message = "Non-matching edges found near (" + x_coord + ", " + y_coord + ", " + z_coord + ")";
-            _console << message << std::endl;
           }
         }
-        /*for (const auto other_i : other_elem->edge_index_range())
-        {
-          const auto other_edge = other_elem->build_edge_ptr();
-          // you now have edge, and other_edge
-        }
-        */
       }
     }
   }
