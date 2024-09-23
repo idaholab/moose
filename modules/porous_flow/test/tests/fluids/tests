@@ -77,6 +77,8 @@
     cli_args = 'AuxVariables/xnacl/family=MONOMIAL AuxVariables/xnacl/order=CONSTANT'
     requirement = "The system shall be able to use high-precision equations of state for brine for "
                   "FV case "
+    issues = "#11716 #13882 #24381"
+    design = 'PorousFlowBrine.md'
   []
   [brine1_MPA]
     type = 'CSVDiff'
@@ -88,6 +90,8 @@
     cli_args = 'AuxVariables/xnacl/family=MONOMIAL AuxVariables/xnacl/order=CONSTANT'
     requirement = "The system shall be able to use high-precision equations of state for brine for "
                   "MPa unit pressure "
+    issues = "#11716 #13882 #24381"
+    design = 'PorousFlowBrine.md'
   []
   [co2]
     type = 'CSVDiff'

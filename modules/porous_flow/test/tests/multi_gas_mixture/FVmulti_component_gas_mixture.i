@@ -198,9 +198,6 @@ time = 0.1
   []
 []
 
-[BCs]
-[]
-
 [Preconditioning]
   [basic]
     type = SMP
@@ -246,7 +243,6 @@ time = 0.1
 []
 
 [Outputs]
-  file_base = "multi_component_gas_mixture_out"
+  file_base = "multi_component_gas_mixture_fv_out"
   csv = true
-  exodus = true
 []
