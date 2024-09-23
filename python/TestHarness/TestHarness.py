@@ -372,10 +372,19 @@ class TestHarness:
         try:
             testroot_params = {}
             for dirpath, dirnames, filenames in os.walk(search_dir, followlinks=True):
-                # Prune submdule paths when searching for tests
+                # Prune submodule paths when searching for tests, allowing exception
+                # for a git submodule contained within the test/tests or tests folder
 
                 dir_name = os.path.basename(dirpath)
                 if (search_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git'))) or dir_name in [".git", ".svn"]:
+                    cdir = os.path.join(search_dir, 'test/tests/')
+                    if (os.path.commonprefix([dirpath, cdir]) == cdir):
+                        continue
+
+                    cdir = os.path.join(search_dir, 'tests/')
+                    if (os.path.commonprefix([dirpath, cdir]) == cdir):
+                        continue
+
                     dirnames[:] = []
                     filenames[:] = []
 
