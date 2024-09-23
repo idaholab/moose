@@ -498,6 +498,26 @@
       expect_err = 'This parameter must have the appropriate size if it is provided.'
       detail = "ring_block_names size is not consistent with number of rings in the mesh."
     []
+    [err_ring_block_ids_quad]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_block_ids="20"
+                  Mesh/gen/quad_center_elements="true"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must have the appropriate size if it is provided.'
+      detail = "ring_block_ids size is not consistent with number of rings in the mesh."
+    []
+    [err_ring_block_names_quad]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_block_names="ring1"
+                  Mesh/gen/quad_center_elements="true"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must have the appropriate size if it is provided.'
+      detail = "ring_block_names size is not consistent with number of rings in the mesh."
+    []
     [err_descend_ring_radii]
       type = 'RunException'
       input = 'poly_2d.i'
