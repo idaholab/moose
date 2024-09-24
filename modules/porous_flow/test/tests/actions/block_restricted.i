@@ -11,7 +11,6 @@ PorousFlowDictatorName = 'dictator'
   material_coverage_check = false
 []
 
-
 [Mesh]
   active_block_names = 'BaseMesh Box1'
   [BaseMesh]
@@ -50,14 +49,30 @@ PorousFlowDictatorName = 'dictator'
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      [./all]
+      [all]
         strain = SMALL
         incremental = true
-        add_variables = true
         block = ${Mesh/active_block_names}
-        generate_output = 'stress_xx stress_yy stress_zz'
       []
     []
+  []
+[]
+
+[AuxVariables]
+  [stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 'BaseMesh'
+  []
+  [stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 'BaseMesh'
+  []
+  [stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 'BaseMesh'
   []
 []
 
@@ -74,6 +89,12 @@ PorousFlowDictatorName = 'dictator'
 []
 
 [Variables]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
   [porepressure]
     order = SECOND
     family = LAGRANGE
@@ -137,7 +158,7 @@ PorousFlowDictatorName = 'dictator'
 []
 
 [FluidProperties]
-  [./simple_fluid]
+  [simple_fluid]
     type = SimpleFluidProperties
     bulk_modulus = 2E3
     density0 = 1000
@@ -190,7 +211,7 @@ PorousFlowDictatorName = 'dictator'
     poissons_ratio = 0.15
   []
 
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = ''
     perform_finite_strain_rotations = false

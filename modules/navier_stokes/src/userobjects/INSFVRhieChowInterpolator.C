@@ -310,16 +310,18 @@ INSFVRhieChowInterpolator::initialSetup()
   if (_bool_correct_vf && _volume_force_correction_method == "force-consistent")
   {
     _baseline_volume_force = 1e10;
-    for (const auto & loc_elem : _mesh.element_ptr_range())
+    for (const auto & loc_elem : *_elem_range)
     {
       Real elem_value = 0.0;
       for (const auto i : make_range(_volumetric_force.size()))
         elem_value += (*_volumetric_force[i])(makeElemArg(loc_elem), determineState());
+
       if (std::abs(elem_value) < _baseline_volume_force)
         _baseline_volume_force = std::abs(elem_value);
       if (_baseline_volume_force == 0)
         break;
     }
+    _communicator.min(_baseline_volume_force);
   }
 }
 
