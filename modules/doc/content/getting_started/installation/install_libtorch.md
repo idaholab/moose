@@ -31,7 +31,7 @@ to the Metal Performance Shader (MPS) capabilities (GPU acceleration).
 1. Create and activate a new MOOSE environment with pytorch included:
 
    ```bash
-   conda create -n moose-torch moose-dev pytorch
+   conda create -n moose-torch moose-dev pytorch=2.1 -c pytorch
    conda activate moose-torch
    ```
 
