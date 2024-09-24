@@ -1,8 +1,8 @@
 [Tests]
   design = 'meshgenerators/LowerDBlockFromSidesetGenerator.md'
-  issues = '#11640'
   [mesh]
     requirement = 'The system shall be able to create different subdomains (with first order elements)'
+    issues = '#11640'
     [ids]
       type = 'Exodiff'
       input = 'ids.i'
@@ -32,12 +32,22 @@
     cli_args = 'Mesh/second_order=true Outputs/file_base=lower_d_second_order_out '
                  'GlobalParams/order=SECOND Mesh/gmg/nx=5 Mesh/gmg/ny=5'
   []
-  [dont_refine_before]
-    requirement = 'The system shall report an error if refinement generators are executed before lower dimensional elements are added.'
-    issues = '#24638'
-    type = 'RunException'
-    cli_args = '--mesh-only'
-    expect_err = 'Make sure that LowerDBlockFromSidesetGenerators are run before any refinement generators'
-    input = 'refine-error.i'
+  [error]
+    requirement = 'The system shall report an error'
+    issues = '#24638 #22117'
+    [dont_refine_before]
+      type = 'RunException'
+      input = 'refine-error.i'
+      cli_args = '--mesh-only'
+      detail = 'if refinement generators are executed before lower dimensional elements are added,'
+      expect_err = 'Make sure that LowerDBlockFromSidesetGenerators are run before any refinement generators'
+    []
+    [invalid_sideset]
+      type = 'RunException'
+      input = 'names.i'
+      cli_args = 'Mesh/lower_d_block/sidesets=invalid --mesh-only'
+      detail = 'if a non-existing sideset is specified as the sideset to create a lower-dimensional block from.'
+      expect_err = 'The sideset \'invalid\' was not found within the mesh'
+    []
   []
 []

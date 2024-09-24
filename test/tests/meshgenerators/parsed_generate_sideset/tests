@@ -37,6 +37,18 @@
     issues = '#24354'
   []
 
+  [exclude_bids]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset_boundary_excluded.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_boundary_excluded_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions, excluding sides that are also part of another sideset.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#28551'
+  []
+
   [limit_to_external_sides]
     type = 'Exodiff'
     input = 'parsed_generate_sideset.i parsed_generate_sideset_exterior_limited.i'
@@ -49,25 +61,71 @@
     issues = '#25082'
   []
 
-  [invalid_included_subdomains]
-    type = RunException
-    input = parsed_generate_sideset.i
-    cli_args = 'Mesh/sideset/included_subdomains="missing"'
-    expect_err = "The block 'missing' was not found in the mesh"
-    requirement = 'The system shall report an error if one of the included subdomains does not exist in the mesh.'
-    mesh_mode = 'REPLICATED'
+  [missing_errors]
+    requirement = 'The system shall report an error'
     design = 'meshgenerators/ParsedGenerateSideset.md'
     issues = '#22117'
+    [invalid_included_subdomains]
+      type = RunException
+      input = parsed_generate_sideset.i
+      cli_args = 'Mesh/sideset/included_subdomains="missing"'
+      expect_err = "The block 'missing' was not found in the mesh"
+      detail = 'if one of the included subdomains does not exist in the mesh,'
+      mesh_mode = 'REPLICATED'
+    []
+    [invalid_included_neighbors]
+      type = RunException
+      input = parsed_generate_sideset.i
+      cli_args = 'Mesh/sideset/included_neighbors="missing"'
+      expect_err = "The block 'missing' was not found in the mesh"
+      detail = 'if one of the included neighbors does not exist in the mesh,'
+      mesh_mode = 'REPLICATED'
+    []
+    [invalid_included_boundary]
+      type = RunException
+      input = parsed_generate_sideset.i
+      cli_args = 'Mesh/sideset/included_boundaries="missing"'
+      expect_err = "The boundary 'missing' was not found within the mesh"
+      detail = 'if one of the included sidesets does not exist in the mesh,'
+      mesh_mode = 'REPLICATED'
+    []
+    [invalid_excluded_boundary]
+      type = RunException
+      input = parsed_generate_sideset.i
+      cli_args = 'Mesh/sideset/excluded_boundaries="missing"'
+      expect_err = "The boundary 'missing' was not found within the mesh"
+      detail = 'if one of the excluded sidesets does not exist in the mesh,'
+      mesh_mode = 'REPLICATED'
+    []
   []
-
-  [invalid_included_neighbors]
+  [overlap_included_excluded_boundary]
     type = RunException
     input = parsed_generate_sideset.i
-    cli_args = 'Mesh/sideset/included_neighbors="missing"'
-    expect_err = "The block 'missing' was not found in the mesh"
-    requirement = 'The system shall report an error if one of the included neighbors does not exist in the mesh.'
+    cli_args = 'Mesh/sideset/included_boundaries="top" Mesh/sideset/excluded_boundaries="top"'
+    expect_err = "'included_boundaries' and 'excluded_boundaries' lists should not overlap"
+    requirement = 'The system shall report an error if a sideset appears in both the list of sidesets to include and to exclude.'
     mesh_mode = 'REPLICATED'
+    issues = '#28551'
     design = 'meshgenerators/ParsedGenerateSideset.md'
-    issues = '#22117'
+  []
+  [overlap_included_target_boundary]
+    type = RunException
+    input = parsed_generate_sideset.i
+    cli_args = 'Mesh/sideset/included_boundaries="interior"'
+    expect_err = "boundary cannot be both the new boundary and be included in the list of included boundaries"
+    requirement = 'The system shall report an error if the sideset to create appears in the list of sidesets to include.'
+    mesh_mode = 'REPLICATED'
+    issues = '#24354'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+  []
+  [overlap_excluded_target_boundary]
+    type = RunException
+    input = parsed_generate_sideset.i
+    cli_args = 'Mesh/sideset/excluded_boundaries="interior"'
+    expect_err = "boundary cannot be both the new boundary and be excluded in the list of excluded boundaries"
+    requirement = 'The system shall report an error if the sideset to create appears in the list of sidesets to exclude.'
+    mesh_mode = 'REPLICATED'
+    issues = '#28551'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
   []
 []

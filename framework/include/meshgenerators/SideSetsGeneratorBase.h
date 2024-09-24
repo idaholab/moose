@@ -75,6 +75,14 @@ protected:
                                        const MeshBase & mesh) const;
 
   /**
+   * Determines whether the given side of an element belongs to any boundaries in the
+   * excluded_boundaries parameter.
+   */
+  bool elementSideInExcludedBoundaries(const Elem * const elem,
+                                       const unsigned int side,
+                                       const MeshBase & mesh) const;
+
+  /**
    * Determines whether the given element's side satisfies the following parameters:
    * include_only_external_sides, included_boundaries, included_neighbor_subdomains and normal
    */
@@ -96,8 +104,11 @@ protected:
   /// Whether or not to remove the old sidesets (all of them, if any) when adding sidesets
   const bool _replace;
 
-  /// whether to check boundary ids when adding sides or not
-  const bool _check_boundaries;
+  /// whether to check boundary ids against the included boundary list when adding sides or not
+  const bool _check_included_boundaries;
+
+  /// whether to check boundary ids against the excluded boundary list when adding sides or not
+  const bool _check_excluded_boundaries;
 
   /// whether to check subdomain ids of the element in the (element, side, boundary id) tuple when adding sides
   const bool _check_subdomains;
@@ -105,8 +116,11 @@ protected:
   /// whether to check the subdomain ids of the neighbor element (on the other 'side' of the side) when adding sides
   const bool _check_neighbor_subdomains;
 
-  /// A list of included boundary ids that the side has to be part of, extracted from the included_boundaries parameter
-  std::vector<boundary_id_type> _restricted_boundary_ids;
+  /// A list of boundary ids that the side has to be part of, extracted from the included_boundaries parameter
+  std::vector<boundary_id_type> _included_boundary_ids;
+
+  /// A list of boundary ids that the side must not be a part of, extracted from the excluded_boundaries parameter
+  std::vector<boundary_id_type> _excluded_boundary_ids;
 
   /// A list of included subdomain ids that the side has to be part of, extracted from the included_subdomains parameter
   std::vector<subdomain_id_type> _included_subdomain_ids;

@@ -177,7 +177,9 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
 
   if (_subdomain_swaps.size() && (_subdomain_swaps.size() != num_elevations))
     paramError("subdomain_swaps",
-               "If specified, 'subdomain_swaps' must be the same length as 'heights' in ",
+               "If specified, 'subdomain_swaps' (" + std::to_string(_subdomain_swaps.size()) +
+                   ") must be the same length as 'heights' (" + std::to_string(num_elevations) +
+                   ") in ",
                name());
 
   try
@@ -192,7 +194,9 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
 
   if (_boundary_swaps.size() && (_boundary_swaps.size() != num_elevations))
     paramError("boundary_swaps",
-               "If specified, 'boundary_swaps' must be the same length as 'heights' in ",
+               "If specified, 'boundary_swaps' (" + std::to_string(_boundary_swaps.size()) +
+                   ") must be the same length as 'heights' (" + std::to_string(num_elevations) +
+                   ") in ",
                name());
 
   try
@@ -246,25 +250,31 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     paramError("biases", "Size of this parameter, if provided, must be the same as heights.");
 
   if (_upward_boundary_source_blocks.size() != _upward_boundary_ids.size() ||
-      _upward_boundary_ids.size() != _heights.size())
-    paramError(
-        "upward_boundary_ids",
-        "This parameter must have the same length as upward_boundary_source_blocks and heights.");
+      _upward_boundary_ids.size() != num_elevations)
+    paramError("upward_boundary_ids",
+               "This parameter must have the same length (" +
+                   std::to_string(_upward_boundary_ids.size()) +
+                   ") as upward_boundary_source_blocks (" +
+                   std::to_string(_upward_boundary_source_blocks.size()) + ") and heights (" +
+                   std::to_string(num_elevations) + ")");
   for (unsigned int i = 0; i < _upward_boundary_source_blocks.size(); i++)
     if (_upward_boundary_source_blocks[i].size() != _upward_boundary_ids[i].size())
       paramError("upward_boundary_ids",
-                 "Every element of this parameter must have the same length as the corrresponding "
+                 "Every element of this parameter must have the same length as the corresponding "
                  "element of upward_boundary_source_blocks.");
 
   if (_downward_boundary_source_blocks.size() != _downward_boundary_ids.size() ||
-      _downward_boundary_ids.size() != _heights.size())
-    paramError(
-        "downward_boundary_ids",
-        "This parameter must have the same length as downward_boundary_source_blocks and heights.");
+      _downward_boundary_ids.size() != num_elevations)
+    paramError("downward_boundary_ids",
+               "This parameter must have the same length (" +
+                   std::to_string(_downward_boundary_ids.size()) +
+                   ") as downward_boundary_source_blocks (" +
+                   std::to_string(_downward_boundary_source_blocks.size()) + ") and heights (" +
+                   std::to_string(num_elevations) + ")");
   for (unsigned int i = 0; i < _downward_boundary_source_blocks.size(); i++)
     if (_downward_boundary_source_blocks[i].size() != _downward_boundary_ids[i].size())
       paramError("downward_boundary_ids",
-                 "Every element of this parameter must have the same length as the corrresponding "
+                 "Every element of this parameter must have the same length as the corresponding "
                  "element of downward_boundary_source_blocks.");
 }
 
@@ -305,6 +315,32 @@ AdvancedExtruderGenerator::generate()
   const auto & input_subdomain_map = _input->get_subdomain_name_map();
   const auto & input_sideset_map = _input->get_boundary_info().get_sideset_name_map();
   const auto & input_nodeset_map = _input->get_boundary_info().get_nodeset_name_map();
+
+  // Check that the swaps source blocks are present in the mesh
+  for (const auto & swap : _subdomain_swaps)
+    for (const auto i : index_range(swap))
+      if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainID(*_input, swap[i]))
+        paramError("subdomain_swaps", "The block '", swap[i], "' was not found within the mesh");
+
+  // Check that the swaps source boundaries are present in the mesh
+  for (const auto & swap : _boundary_swaps)
+    for (const auto i : index_range(swap))
+      if (i % 2 == 0 && !MooseMeshUtils::hasBoundaryID(*_input, swap[i]))
+        paramError("boundary_swaps", "The boundary '", swap[i], "' was not found within the mesh");
+
+  // Check that the source blocks for layer top/bottom boundaries exist in the mesh
+  for (const auto & layer_vec : _upward_boundary_source_blocks)
+    for (const auto bid : layer_vec)
+      if (!MooseMeshUtils::hasSubdomainID(*_input, bid))
+        paramError(
+            "upward_boundary_source_blocks", "The block '", bid, "' was not found within the mesh");
+  for (const auto & layer_vec : _downward_boundary_source_blocks)
+    for (const auto bid : layer_vec)
+      if (!MooseMeshUtils::hasSubdomainID(*_input, bid))
+        paramError("downward_boundary_source_blocks",
+                   "The block '",
+                   bid,
+                   "' was not found within the mesh");
 
   std::unique_ptr<MeshBase> input = std::move(_input);
 
@@ -921,6 +957,7 @@ AdvancedExtruderGenerator::generate()
                   new_elem.get(), is_flipped ? top_id : 0, _downward_boundary_ids[e][i]);
         }
 
+        // perform subdomain swaps
         if (_subdomain_swap_pairs.size())
         {
           auto & elevation_swap_pairs = _subdomain_swap_pairs[e];
