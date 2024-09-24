@@ -31,6 +31,24 @@
   reference_vector = 'ref'
 []
 
+[Variables]
+  [disp_x]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [disp_y]
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[Physics/SolidMechanics/QuasiStatic/all]
+  strain = FINITE
+  extra_vector_tags = 'ref'
+  block = '1 2 3 4 5 6 7'
+  generate_output = 'stress_xx stress_yy stress_xy'
+[]
+
 [AuxVariables]
   [penalty_normal_pressure]
   []
@@ -59,14 +77,6 @@
     x = '0. 1. 3.5'
     y = '0. 0.0 0.015'
   []
-[]
-
-[Modules/TensorMechanics/Master/all]
-  strain = FINITE
-  add_variables = true
-  extra_vector_tags = 'ref'
-  block = '1 2 3 4 5 6 7'
-  generate_output = 'stress_xx stress_yy stress_xy'
 []
 
 [AuxKernels]
