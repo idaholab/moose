@@ -1,0 +1,29 @@
+[Tests]
+  [test]
+    requirement = 'The system shall be able to solve a diffusion problem with penalty boundary conditions using a second order Lagrange basis'
+    [regular]
+      type = Exodiff
+      exodiff = test_out.e
+      input = test.i
+      cli_args = '-ksp_norm_type preconditioned'
+      detail = 'using an iterative preconditioner applied to all the degrees of freedom, and'
+    []
+    [sc]
+      type = Exodiff
+      exodiff = test_out.e
+      input = test.i
+      cli_args = '--nl0-static-condensation -nl0_condensed_ksp_norm_type preconditioned'
+      prereq = 'test/regular'
+    []
+  []
+  [mms]
+    requirement = 'The system shall show the expected cubic rate of convergence in the L2 norm for a quadratic Lagrange basis when using static condensation preconditioning.'
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestStaticCondensation
+    method = "!dbg"
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    valgrind = 'none'
+  []
+[]
