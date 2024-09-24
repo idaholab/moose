@@ -316,6 +316,8 @@ unity_srcfiles += $(app_unity_srcfiles)
 
 ifneq ($(non_unity_srcsubdirs),)
 	app_nonunity_srcfiles = $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
+else
+  app_nonunity_srcfiles = $(shell find . -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
 endif
 moose_srcfiles    := $(app_unity_srcfiles) $(app_nonunity_srcfiles)
 
