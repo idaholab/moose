@@ -14,6 +14,9 @@
 
 #include "nlohmann/json.h"
 
+// Forward declaration
+class DirectPerturbationSampler;
+
 class DirectPerturbationReporter : public GeneralReporter
 {
 public:
@@ -26,6 +29,39 @@ public:
   virtual void finalize() override final {}
 
 private:
-  /// Direct perturbation sampler (don't need any specific functions, but should be this type)
-  Sampler & _sampler;
+  /**
+   * Helper for adding direct perturbation-based reporter values
+   */
+  template <typename DataType>
+  void declareValueHelper(const ReporterName & r_name);
+
+  /// Direct perturbation sampler
+  DirectPerturbationSampler & _sampler;
+
+  /// Whether or not initialize() has been called for reporter value declaration
+  bool _initialized;
+};
+
+template <typename DataType>
+class DirectPerturbationReporterContext : public ReporterGeneralContext<std::vector<DataType>>
+{
+public:
+  DirectPerturbationReporterContext(const libMesh::ParallelObject & other,
+                                    const MooseObject & producer,
+                                    ReporterState<std::vector<DataType>> & state,
+                                    DirectPerturbationSampler & sampler,
+                                    const std::vector<DataType> & data);
+
+  virtual void finalize() override;
+  virtual std::string type() const override
+  {
+    return "DirectPerturbationSensitivity<" + MooseUtils::prettyCppType<DataType>() + ">";
+  }
+
+private:
+  /// Reference to the direct perturbation sampler
+  DirectPerturbationSampler & _sampler;
+
+  /// Data used for the statistic calculation
+  const std::vector<DataType> & _data;
 };
