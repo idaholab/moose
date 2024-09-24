@@ -36,7 +36,7 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
   : Sampler(parameters),
     _nominal_values(getParam<std::vector<Real>>("nominal_parameter_values")),
     _relative_intervals(getParam<std::vector<Real>>("relative_perturbation_intervals")),
-    _perturbation_method(getParam<MooseEnum>("perturbation_method")),
+    _perturbation_method(getParam<MooseEnum>("perturbation_method"))
 {
   dof_id_type num_samples = 0;
   if (_perturbation_method == "central_difference")
@@ -47,7 +47,7 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
   setNumberOfRows(_nominal_values.size());
   setNumberOfCols(num_samples);
 
-  _parameter_vectors = std::vector < std::vector<Real>(num_samples, _nominal_values);
+  _parameter_vectors = std::vector<std::vector<Real>>(num_samples, _nominal_values);
 
   if (_perturbation_method == "central_difference")
     for (const auto & i : index_range(_nominal_values))
