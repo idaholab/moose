@@ -71,7 +71,8 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
 bool
 checkEdgeOverlap(const std::unique_ptr<Elem> & edge1, 
                  const std::unique_ptr<Elem> & edge2,
-                 const ConsoleStream & console)
+                 const ConsoleStream & console,
+                 const Real intersection_tol)
 {
   //get node array from two edges
   const auto node_list1 = edge1->get_nodes();
@@ -83,69 +84,56 @@ checkEdgeOverlap(const std::unique_ptr<Elem> & edge1,
   auto n3 = *node_list2[0];
   auto n4 = *node_list2[1];
 
-  auto n1x = 1.0*(n1.operator()(0));
-  auto n1y = 1.0*(n1.operator()(1));
-  auto n1z = 1.0*(n1.operator()(2));
-  auto n2x = 1.0*(n2.operator()(0));
-  auto n2y = 1.0*(n2.operator()(1));
-  auto n2z = 1.0*(n2.operator()(2));
-  auto n3x = 1.0*(n3.operator()(0));
-  auto n3y = 1.0*(n3.operator()(1));
-  auto n3z = 1.0*(n3.operator()(2));
-  auto n4x = 1.0*(n4.operator()(0));
-  auto n4y = 1.0*(n4.operator()(1));
-  auto n4z = 1.0*(n4.operator()(2));
+  //get x,y,z coordinates for each point
+  auto n1x = n1.operator()(0);
+  auto n1y = n1.operator()(1);
+  auto n1z = n1.operator()(2);
+  auto n2x = n2.operator()(0);
+  auto n2y = n2.operator()(1);
+  auto n2z = n2.operator()(2);
+  auto n3x = n3.operator()(0);
+  auto n3y = n3.operator()(1);
+  auto n3z = n3.operator()(2);
+  auto n4x = n4.operator()(0);
+  auto n4y = n4.operator()(1);
+  auto n4z = n4.operator()(2);
 
-  //Tolerance should be based on edge length. Here it is arbitrarily set to 1/1000th of the average of the two edge lengths
-  auto edge1Length = std::sqrt(std::pow(n1x - n2x, 2) + std::pow(n1y - n2y, 2) + std::pow(n1z - n2z, 2));
-  auto edge2Length = std::sqrt(std::pow(n3x - n4x, 2) + std::pow(n3y - n4y, 2) + std::pow(n3z - n4z, 2));
-  auto tol = ((edge1Length + edge2Length)/2)/1000;
-  //double n13x, n13y, n13z, n21x, n21y, n21z, n43x, n43y, n43z;
-  auto n13x = n1x - n3x;
-  auto n13y = n1y - n3y;
-  auto n13z = n1z - n3z;
-  auto n21x = n2x - n1x;
-  auto n21y = n2y - n1y;
-  auto n21z = n2z - n1z;
-  auto n43x = n4x - n3x;
-  auto n43y = n4y - n3y;
-  auto n43z = n4z - n3z;
-
-  if(((std::fabs(n1x - n3x)<tol) && (std::fabs(n1y - n3y)<tol) && (std::fabs(n1z - n3z)<tol)) ||
-    ((std::fabs(n2x-n4x)<tol) && (std::fabs(n2y-n4y)<tol) && (std::fabs(n2z-n4z)<tol)) ||
-    ((std::fabs(n1x-n4x)<tol) && (std::fabs(n1y-n4y)<tol) && (std::fabs(n1z-n4z)<tol)) ||
-    ((std::fabs(n2x-n3x)<tol) && (std::fabs(n2y-n3y)<tol) && (std::fabs(n2z-n3z)<tol)))
+  //Check that none of these points are the same
+  if(((std::fabs(n1x - n3x)<intersection_tol) && (std::fabs(n1y - n3y)<intersection_tol) && (std::fabs(n1z - n3z)<intersection_tol)) ||
+    ((std::fabs(n2x-n4x)<intersection_tol) && (std::fabs(n2y-n4y)<intersection_tol) && (std::fabs(n2z-n4z)<intersection_tol)) ||
+    ((std::fabs(n1x-n4x)<intersection_tol) && (std::fabs(n1y-n4y)<intersection_tol) && (std::fabs(n1z-n4z)<intersection_tol)) ||
+    ((std::fabs(n2x-n3x)<intersection_tol) && (std::fabs(n2y-n3y)<intersection_tol) && (std::fabs(n2z-n3z)<intersection_tol)))
     return false;
 
-  //There's a chance that they overlap. Find shortest line that connects two edges and if its length is close enough to 0 return true
-  double d1343, d4321, d1321, d4343, d2121, numerator, denominator, mua, mub;
+  /*
+    There's a chance that they overlap. Find shortest line that connects two edges and if its length is close enough to 0 return true
+    The shortest line between the two edges will be perpendicular to both.
+  */
+  auto d1343 = (n1x - n3x) * (n4x - n3x) + (n1y - n3y) * (n4y - n3y) + (n1z - n3z) * (n4z - n3z);
+  auto d4321 = (n4x - n3x) * (n2x - n1x) + (n4y - n3y) * (n2y - n1y) + (n4z - n3z) * (n2z - n1z);
+  auto d1321 = (n1x - n3x) * (n2x - n1x) + (n1y - n3y) * (n2y - n1y) + (n1z - n3z) * (n2z - n1z);
+  auto d4343 = (n4x - n3x) * (n4x - n3x) + (n4y - n3y) * (n4y - n3y) + (n4z - n3z) * (n4z - n3z);
+  auto d2121 = (n2x - n1x) * (n2x - n1x) + (n2y - n1y) * (n2y - n1y) + (n2z - n1z) * (n2z - n1z);
 
-  d1343 = n13x * n43x + n13y * n43y + n13z * n43z;
-  d4321 = n43x * n21x + n43y * n21y + n43z * n21z;
-  d1321 = n13x * n21x + n13y * n21y + n13z * n21z;
-  d4343 = n43x * n43x + n43y * n43y + n43z * n43z;
-  d2121 = n21x * n21x + n21y * n21y + n21z * n21z;
+  auto denominator = d2121 * d4343 - d4321 * d4321;
+  auto numerator = d1343 * d4321 - d1321 * d4343;
 
-  denominator = d2121 * d4343 - d4321 * d4321;
-  numerator = d1343 * d4321 - d1321 * d4343;
-
-  if(std::fabs(denominator) < tol)
+  if(std::fabs(denominator) < intersection_tol)
   {
     //This indicates that the intersecting line is vertical so they don't intersect
     return false;
   }
-  mua = numerator/denominator;
-  mub = (d1343 + (mua * d4321)) / d4343;
+  auto mua = numerator/denominator;
+  auto mub = (d1343 + (mua * d4321)) / d4343;
 
   //Use these values to solve for the two poits that define the shortest line segment
-  double nax, nay, naz, nbx, nby, nbz;
-  nax = n1x + mua * n21x;
-  nay = n1y + mua * n21y;
-  naz = n1z + mua * n21z;
+  auto nax = n1x + mua * (n2x - n1x);
+  auto nay = n1y + mua * (n2y - n1y);
+  auto naz = n1z + mua * (n2z - n1z);
 
-  nbx = n3x + mub * n43x;
-  nby = n3y + mub * n43y;
-  nbz = n3z + mub * n43z;
+  auto nbx = n3x + mub * (n4x - n3x);
+  auto nby = n3y + mub * (n4y - n3y);
+  auto nbz = n3z + mub * (n4z - n3z);
 
   //This method assume the two lines are infinite. This check to make sure na and nb are part of their respective line segments
   if((nax < std::min(n1x, n2x)) || (nax > std::max(n1x, n2x)) ||
@@ -164,7 +152,7 @@ checkEdgeOverlap(const std::unique_ptr<Elem> & edge1,
 
   //Calculate distance between these two nodes
   double distance = std::sqrt(std::pow(nax - nbx, 2) + std::pow(nay - nby, 2) + std::pow(naz - nbz, 2));
-  if (distance < tol)
+  if (distance < intersection_tol)
   {
     std::string x_coord = std::to_string(nax);
     std::string y_coord = std::to_string(nay);

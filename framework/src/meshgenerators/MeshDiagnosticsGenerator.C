@@ -67,6 +67,7 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<MooseEnum>("examine_non_matching_edges",
                               chk_option,
                               "Whether to check if there are any intersecting edges");
+  params.addParam<Real>("intersection_tol", TOLERANCE, "tolerence for intersecting edges");
   params.addParam<Real>("nonconformal_tol", TOLERANCE, "tolerance for element non-conformality");
   params.addParam<MooseEnum>(
       "search_for_adaptivity_nonconformality",
@@ -97,6 +98,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
     _check_non_matching_edges(getParam<MooseEnum>("examine_non_matching_edges")),
+    _non_matching_edge_tol(getParam<Real>("intersection_tol")),
     _check_adaptivity_non_conformality(
         getParam<MooseEnum>("search_for_adaptivity_nonconformality")),
     _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
@@ -1409,18 +1411,19 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
   /*Algorithm Overview
     1)Prechecks
       a)This algorithn only works for 3D so check for that first
-      b)Optional->In theory this should only be needed for tetrahedral meshes so checking to ensure the mesh has tet cells could be usefull
     2)Loop
-      a)Loop through every node
-      b)For each node get the edges associated with it
-      c)For each edge check overlap with any edges nearby
+      a)Loop through every element
+      b)For each element get the edges associated with it
+      c)For each edge check overlap with any edges of nearby elements
       d)Have check to make sure the same pair of edges are not being tested twice for overlap
-      e)Have check to see if the edges are close to eachother before testing for overlap
     3)Overlap check
-      a)Use algorithm from Paul Bourke
-      b)Finds shortest line that connects two line segments
-      c)If length of line is below some threshold, print out info about which two edges are intersecting
+      a)Shortest line that connects both lines is perpendicular to both lines
+      b)A good overview of the math for finding intersecting lines can be found here->paulbourke.net/geometry/pointlineplane/
   */
+  if(mesh->mesh_dimension() != 3)
+    mooseError("The edge intersection algorithm only works with 3D meshes");
+  if (!mesh->is_serial())
+    mooseError("Only serialized/replicated meshes are supported");
   unsigned int num_intersecting_edges = 0;
   std::vector<Node> checked_edges;
   for (auto elem : mesh->active_element_ptr_range())
@@ -1464,7 +1467,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
             continue;
           }
           // Now compare edge with other_edge
-          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(edge, other_edge, _console);
+          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(edge, other_edge, _console, _non_matching_edge_tol);
           if (overlap)
           {
             // Add the nodes that make up the 2 edges to the vector checked_edges
@@ -1478,7 +1481,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       }
     }
   }
-  diagnosticsLog("Number of intesecting edges: " + Moose::stringify(num_intersecting_edges), _check_non_matching_edges, num_intersecting_edges);
+  diagnosticsLog("Number of intersecting edges: " + Moose::stringify(num_intersecting_edges), _check_non_matching_edges, num_intersecting_edges);
 }
 
 void

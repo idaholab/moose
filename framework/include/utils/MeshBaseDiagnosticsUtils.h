@@ -27,5 +27,6 @@ void checkNonConformalMesh(const std::unique_ptr<libMesh::MeshBase> & mesh,
 
 bool checkEdgeOverlap(const std::unique_ptr<Elem> & edge1, 
                       const std::unique_ptr<Elem> & edge2,
-                      const ConsoleStream & console);
+                      const ConsoleStream & console,
+                      const Real insersection_tol);
 }

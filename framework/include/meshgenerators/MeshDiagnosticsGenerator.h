@@ -86,6 +86,8 @@ private:
   const Real _non_conformality_tol;
   //// whether to check for intersecting edges
   const MooseEnum _check_non_matching_edges;
+  //// tolerance for detecting when edges intersect
+  const Real _non_matching_edge_tol;
   /// whether to check for the adaptivity of non-conformal meshes
   const MooseEnum _check_adaptivity_non_conformality;
   /// whether to check for negative jacobians in the domain
