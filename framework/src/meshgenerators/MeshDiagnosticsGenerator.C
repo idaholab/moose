@@ -65,8 +65,8 @@ MeshDiagnosticsGenerator::validParams()
                              chk_option,
                              "whether to examine the conformality of elements in the mesh");
   params.addParam<MooseEnum>("examine_non_matching_edges",
-                              chk_option,
-                              "Whether to check if there are any intersecting edges");
+                             chk_option,
+                             "Whether to check if there are any intersecting edges");
   params.addParam<Real>("intersection_tol", TOLERANCE, "tolerence for intersecting edges");
   params.addParam<Real>("nonconformal_tol", TOLERANCE, "tolerance for element non-conformality");
   params.addParam<MooseEnum>(
@@ -1418,9 +1418,10 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       d)Have check to make sure the same pair of edges are not being tested twice for overlap
     3)Overlap check
       a)Shortest line that connects both lines is perpendicular to both lines
-      b)A good overview of the math for finding intersecting lines can be found here->paulbourke.net/geometry/pointlineplane/
+      b)A good overview of the math for finding intersecting lines can be found
+    here->paulbourke.net/geometry/pointlineplane/
   */
-  if(mesh->mesh_dimension() != 3)
+  if (mesh->mesh_dimension() != 3)
     mooseError("The edge intersection algorithm only works with 3D meshes");
   if (!mesh->is_serial())
     mooseError("Only serialized/replicated meshes are supported");
@@ -1433,15 +1434,16 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       elem_edges[i] = elem->build_edge_ptr(i);
     for (auto other_elem : mesh->active_element_ptr_range())
     {
-      //If they're the same element then there's no need to check for overlap
+      // If they're the same element then there's no need to check for overlap
       if (elem == other_elem)
       {
         continue;
       }
-      //Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges will either
+      // Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges
+      // will either
       auto boundingBox1 = elem->loose_bounding_box();
       auto boundingBox2 = other_elem->loose_bounding_box();
-      if(!(boundingBox1.intersects(boundingBox2)))
+      if (!(boundingBox1.intersects(boundingBox2)))
       {
         continue;
       }
@@ -1458,16 +1460,17 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
           auto n2 = *node_list1[1];
           auto n3 = *node_list2[0];
           auto n4 = *node_list2[1];
-          //Check if the edges have already been added to our check_edges list
-          if (std::find(checked_edges.begin(), checked_edges.end(), n1) !=checked_edges.end() &&
-            std::find(checked_edges.begin(), checked_edges.end(), n2) !=checked_edges.end() &&
-            std::find(checked_edges.begin(), checked_edges.end(), n3) !=checked_edges.end() &&
-            std::find(checked_edges.begin(), checked_edges.end(), n4) !=checked_edges.end())
+          // Check if the edges have already been added to our check_edges list
+          if (std::find(checked_edges.begin(), checked_edges.end(), n1) != checked_edges.end() &&
+              std::find(checked_edges.begin(), checked_edges.end(), n2) != checked_edges.end() &&
+              std::find(checked_edges.begin(), checked_edges.end(), n3) != checked_edges.end() &&
+              std::find(checked_edges.begin(), checked_edges.end(), n4) != checked_edges.end())
           {
             continue;
           }
           // Now compare edge with other_edge
-          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(edge, other_edge, _console, _non_matching_edge_tol);
+          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(
+              edge, other_edge, _console, _non_matching_edge_tol);
           if (overlap)
           {
             // Add the nodes that make up the 2 edges to the vector checked_edges
@@ -1475,13 +1478,15 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
             checked_edges.push_back(n2);
             checked_edges.push_back(n3);
             checked_edges.push_back(n4);
-            num_intersecting_edges+=2;
+            num_intersecting_edges += 2;
           }
         }
       }
     }
   }
-  diagnosticsLog("Number of intersecting edges: " + Moose::stringify(num_intersecting_edges), _check_non_matching_edges, num_intersecting_edges);
+  diagnosticsLog("Number of intersecting edges: " + Moose::stringify(num_intersecting_edges),
+                 _check_non_matching_edges,
+                 num_intersecting_edges);
 }
 
 void
