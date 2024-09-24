@@ -178,6 +178,14 @@ fi
 echo "Extracting $PACKAGE."
 unzip -q -o $PACKAGE -d $TORCH_DEST
 
+echo "******************************************************************************************
+A precompiled libtorch (version: $VERSION distribution: $TORCH_DISTRIBUTION) has been
+downloaded to $TORCH_DEST.
+Next, you need to configure MOOSE to use the downloaded libtorch, i.e use the following
+command in the root directory of moose:
+  ./configure --with-libtorch
+******************************************************************************************"
+
 # Clean it up after if requested
 if [[ $CLEANUP == 1 ]]; then
   echo "Removing $PACKAGE."
