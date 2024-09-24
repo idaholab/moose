@@ -31,3 +31,6 @@ TotalLagrangianStressDivergenceBaseS<GradientOperatorCentrosymmetricSpherical>::
 
 typedef TotalLagrangianStressDivergenceBaseS<GradientOperatorCentrosymmetricSpherical>
     TotalLagrangianStressDivergenceCentrosymmetricSphericalS;
+
+extern template class TotalLagrangianStressDivergenceBaseS<
+    GradientOperatorCentrosymmetricSpherical>;

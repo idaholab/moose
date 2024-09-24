@@ -31,3 +31,5 @@ TotalLagrangianStressDivergenceBase<GradientOperatorAxisymmetricCylindrical>::in
 
 typedef TotalLagrangianStressDivergenceBase<GradientOperatorAxisymmetricCylindrical>
     TotalLagrangianStressDivergenceAxisymmetricCylindrical;
+
+extern template class TotalLagrangianStressDivergenceBase<GradientOperatorAxisymmetricCylindrical>;
