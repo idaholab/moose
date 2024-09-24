@@ -21,6 +21,10 @@ public:
 
   DirectPerturbationSampler(const InputParameters & parameters);
 
+  const MooseEnum & perturbationMethod() { return _perturbation_method; }
+
+  Real getInterval(const Real param_index) const;
+
 protected:
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
@@ -37,4 +41,7 @@ private:
 
   /// The data matrix created using the parameters
   std::vector<std::vector<Real>> _parameter_vectors;
+
+  /// The intervals for the perturbations
+  std::vector<Real> _absolute_intervals;
 };
