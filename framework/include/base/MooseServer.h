@@ -366,6 +366,11 @@ private:
   std::shared_ptr<MooseApp> getCheckApp() const;
 
   /**
+   * @return up to date text string associated with current document path
+   */
+  const std::string & getDocumentText() const;
+
+  /**
    * @brief _moose_app - reference to parent application that owns this server
    */
   MooseApp & _moose_app;
@@ -374,6 +379,11 @@ private:
    * @brief _check_apps - map from document paths to input check applications
    */
   std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
+
+  /**
+   * @brief _path_to_text - map of document paths to current text strings
+   */
+  std::map<std::string, std::string> _path_to_text;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream
