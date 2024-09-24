@@ -46,7 +46,7 @@ CrankNicolson::computeTimeDerivatives()
     _solution_old.create_subvector(*_solution_old_sub, _local_indices, false);
     *u_dot_sub = *_solution_sub;
     computeTimeDerivativeHelper(*u_dot_sub, *_solution_old_sub);
-    u_dot.restore_subvector(std::move(*u_dot_sub), _local_indices);
+    u_dot.restore_subvector(std::move(u_dot_sub), _local_indices);
     // Scatter info needed for ghosts
     u_dot.close();
   }
@@ -129,10 +129,10 @@ CrankNicolson::postResidual(NumericVector<Number> & residual)
     *residual_sub += *re_time_sub;
     *residual_sub += *re_non_time_sub;
     *residual_sub += *residual_old_sub;
-    residual.restore_subvector(std::move(*residual_sub), _local_indices);
-    _Re_time.restore_subvector(std::move(*re_time_sub), _local_indices);
-    _Re_non_time.restore_subvector(std::move(*re_non_time_sub), _local_indices);
-    _residual_old.restore_subvector(std::move(*residual_old_sub), _local_indices);
+    residual.restore_subvector(std::move(residual_sub), _local_indices);
+    _Re_time.restore_subvector(std::move(re_time_sub), _local_indices);
+    _Re_non_time.restore_subvector(std::move(re_non_time_sub), _local_indices);
+    _residual_old.restore_subvector(std::move(residual_old_sub), _local_indices);
   }
 }
 

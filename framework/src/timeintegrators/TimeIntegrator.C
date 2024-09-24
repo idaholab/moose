@@ -132,8 +132,8 @@ TimeIntegrator::copyVector(NumericVector<Number> & from, NumericVector<Number> &
     auto to_sub = to.get_subvector(_local_indices);
     auto from_sub = from.get_subvector(_local_indices);
     *to_sub = *from_sub;
-    to.restore_subvector(std::move(*to_sub), _local_indices);
-    from.restore_subvector(std::move(*from_sub), _local_indices);
+    to.restore_subvector(std::move(to_sub), _local_indices);
+    from.restore_subvector(std::move(from_sub), _local_indices);
   }
 }
 

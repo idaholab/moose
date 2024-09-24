@@ -44,7 +44,7 @@ ImplicitEuler::computeTimeDerivatives()
     _solution_old.create_subvector(*_solution_old_sub, _local_indices, false);
     *u_dot_sub = *_solution_sub;
     computeTimeDerivativeHelper(*u_dot_sub, *_solution_old_sub);
-    u_dot.restore_subvector(std::move(*u_dot_sub), _local_indices);
+    u_dot.restore_subvector(std::move(u_dot_sub), _local_indices);
     // Scatter info needed for ghosts
     u_dot.close();
   }
@@ -78,8 +78,8 @@ ImplicitEuler::postResidual(NumericVector<Number> & residual)
     auto re_non_time_sub = _Re_non_time.get_subvector(_local_indices);
     *residual_sub += *re_time_sub;
     *residual_sub += *re_non_time_sub;
-    residual.restore_subvector(std::move(*residual_sub), _local_indices);
-    _Re_time.restore_subvector(std::move(*re_time_sub), _local_indices);
-    _Re_non_time.restore_subvector(std::move(*re_non_time_sub), _local_indices);
+    residual.restore_subvector(std::move(residual_sub), _local_indices);
+    _Re_time.restore_subvector(std::move(re_time_sub), _local_indices);
+    _Re_non_time.restore_subvector(std::move(re_non_time_sub), _local_indices);
   }
 }
