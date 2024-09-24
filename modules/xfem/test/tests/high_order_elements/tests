@@ -85,7 +85,7 @@
     type = Exodiff
     input = square_branch_2d.i
     exodiff = 'square_branch_quad8_2d_out.e square_branch_quad8_2d_out.e-s002 square_branch_quad8_2d_out.e-s003'
-    cli_args = 'Modules/TensorMechanics/Master/all/planar_formulation=PLANE_STRAIN Mesh/elem_type=QUAD8 Outputs/file_base=square_branch_quad8_2d_out'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/all/planar_formulation=PLANE_STRAIN Mesh/elem_type=QUAD8 Outputs/file_base=square_branch_quad8_2d_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting second-order elements in 2D using QUAD8 elements.'

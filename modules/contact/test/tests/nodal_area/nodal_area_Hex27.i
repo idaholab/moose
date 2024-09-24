@@ -33,7 +33,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     incremental = true
     save_in = 'react_x react_y react_z'

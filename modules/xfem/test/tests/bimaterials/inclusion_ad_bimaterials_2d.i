@@ -81,7 +81,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
     use_automatic_differentiation = true

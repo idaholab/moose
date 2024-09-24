@@ -20,9 +20,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [./SolidMechanics]
+    [./QuasiStatic]
       [./mech]
         add_variables = true
         strain = SMALL

@@ -40,7 +40,7 @@ offset = -0.045
   []
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Physics/SolidMechanics/Dynamic]
   [all]
     hht_alpha = 0.0
     newmark_beta = 0.25

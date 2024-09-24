@@ -28,7 +28,7 @@ offset = 1e-2
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = false
     use_automatic_differentiation = true

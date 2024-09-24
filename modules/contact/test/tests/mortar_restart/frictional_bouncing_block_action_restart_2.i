@@ -43,7 +43,7 @@ offset = 1e-2
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     generate_output = 'stress_xx stress_yy'

@@ -38,7 +38,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   # FINITE strain when strain is large, i.e., visible movement.
   # SMALL strain when things are stressed, but may not move.
   [./fuel]

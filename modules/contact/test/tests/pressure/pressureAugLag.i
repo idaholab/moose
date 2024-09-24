@@ -12,7 +12,7 @@
   maximum_lagrangian_update_iterations = 200
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     add_variables = true
     strain = FINITE
