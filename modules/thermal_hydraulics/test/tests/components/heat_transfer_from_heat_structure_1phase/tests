@@ -108,6 +108,13 @@
     requirement = "The system shall conserve energy after reaching steady-state when a flow channel is coupled to a heat structure."
     issues = '#19754'
   []
+  [fin_enhancement]
+    type = CSVDiff
+    input = 'fin_enhancement.i'
+    csvdiff = 'fin_enhancement_out.csv'
+    requirement = 'The system shall be able to enhance heat transfer between a flow channel and heat structure using fins.'
+    issues = '#25275'
+  []
 
   # Error checking
   [err:not_a_pipe]

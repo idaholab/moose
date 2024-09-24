@@ -21,6 +21,11 @@ side of the connected heat structure that is coupled to the flow channel.
 The flow channel axis must be parallel to the heat structure axis and have
 the same discretization along their axes.
 
+The parameter [!param](/Components/HeatTransferFromHeatStructure1Phase/scale) specifies
+the name of a [functor](Functors/index.md) $f$ that can scale the heat flux, for
+example, a functor material property created with [FinEnhancementFactorFunctorMaterial.md]
+for heat transfer enhancement due to fins.
+
 !syntax parameters /Components/HeatTransferFromHeatStructure1Phase
 
 ## Formulation
@@ -30,15 +35,15 @@ and heat structure, with the flow channel receiving the following wall heat
 flux:
 
 !equation
-q_\text{wall} = \mathcal{H}(T_s - T) \eqc
+q_\text{wall} = f \mathcal{H}(T_s - T) \eqc
 
 where $\mathcal{H}$ is the heat transfer coefficient, $T_s$ is the heat
-structure surface temperature, and $T$ is the fluid temperature. On the heat
+structure surface temperature, $T$ is the fluid temperature, and $f$ is an optional scaling factor. On the heat
 structure side, the incoming boundary flux is the opposite of that going into
 the flow channel:
 
 !equation
-q_b = -q_\text{wall} = \mathcal{H}(T - T_s) \eqp
+q_b = -q_\text{wall} = f \mathcal{H}(T - T_s) \eqp
 
 !syntax inputs /Components/HeatTransferFromHeatStructure1Phase
 
