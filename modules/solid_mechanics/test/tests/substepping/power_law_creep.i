@@ -18,13 +18,17 @@
   []
 []
 
-[Physics/SolidMechanics/QuasiStatic]
-  [all]
-    strain = FINITE
-    incremental = true
-    add_variables = true
-    generate_output = 'stress_zz elastic_strain_zz creep_strain_zz'
-    use_automatic_differentiation = false
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
+      [all]
+        strain = FINITE
+        incremental = true
+        add_variables = true
+        generate_output = 'stress_zz elastic_strain_zz creep_strain_zz'
+        use_automatic_differentiation = false
+      []
+    []
   []
 []
 
@@ -83,6 +87,40 @@
     # options for using substepping
     substep_strain_tolerance = 0.1
     max_inelastic_increment = 0.01
+    # output radial return materials
+    debug_newton_solve_materials = true
+    scale_strain_predictor = 0.9
+  []
+[]
+
+[Postprocessors]
+  [nl_residual]
+    type = ElementExtremeMaterialProperty
+    mat_prop = nl_residual
+    value_type = max
+    execute_on = 'NONLINEAR'
+    outputs = csv_out
+  []
+  [nl_iterations]
+    type = ElementExtremeMaterialProperty
+    mat_prop = nl_iterations
+    value_type = max
+    execute_on = 'NONLINEAR'
+    outputs = csv_out
+  []
+  [effective_creep_strain]
+    type = ElementExtremeMaterialProperty
+    mat_prop = effective_creep_strain
+    value_type = max
+    execute_on = 'NONLINEAR'
+    outputs = csv_out
+  []
+  [effective_creep_strain_rate]
+    type = ElementExtremeMaterialProperty
+    mat_prop = effective_creep_strain_rate
+    value_type = max
+    execute_on = 'NONLINEAR'
+    outputs = csv_out
   []
 []
 
@@ -102,8 +140,17 @@
 
   end_time = 0.1
   dt = 0.1
+
+  [Predictor]
+    type = SimplePredictor
+    scale = 1
+  []
 []
 
 [Outputs]
   exodus = true
+  [csv_out]
+    type = CSV
+    execute_on = 'NONLINEAR'
+  []
 []

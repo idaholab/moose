@@ -55,48 +55,6 @@
     expect_err = 'Adaptive substepping failed. Maximum number of substeps exceeded.'
     requirement = "The system shall report an error when the maximum number of substeps are exceeded for error based substepping "
   []
-  [ad_power_law_substepping_goodPredict]
-    issues = '#27429'
-    type = 'RunApp'
-    input = 'ad_power_law_creep.i'
-    cli_args = "Mesh/gen/nx=1 Mesh/gen/ny=1 Mesh/gen/nz=1 Materials/power_law_creep/use_substepping=INCREMENT_BASED "
-               "Materials/power_law_creep/max_inelastic_increment=0.1 "
-               "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
-               "Materials/power_law_creep/internal_solve_full_iteration_history=true "
-               "Materials/power_law_creep/internal_solve_output_on=always "
-               "Materials/power_law_creep/scale_strain_predictor=0.9"
-    expect_out = "iteration=0 .*scalar=0.0089"
-    valgrind = HEAVY
-    requirement = 'The system will use substepping with a properly sized strain increment predictor that is used to intialize iteration 0 '
-  []
-  [ad_power_law_substepping_badPredict]
-    issues = '#27429'
-    type = 'RunApp'
-    input = 'ad_power_law_creep.i'
-    cli_args = "Mesh/gen/nx=1 Mesh/gen/ny=1 Mesh/gen/nz=1 Materials/power_law_creep/use_substepping=INCREMENT_BASED "
-               "Materials/power_law_creep/max_inelastic_increment=0.1 "
-               "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
-               "Materials/power_law_creep/internal_solve_full_iteration_history=true "
-               "Materials/power_law_creep/internal_solve_output_on=always "
-               "Materials/power_law_creep/scale_strain_predictor=1.0"
-    expect_out = "iteration=0 .*scalar=0.0023"
-    valgrind = HEAVY
-    requirement = 'The system will use substepping with too large of a strain increment predictor which results in no strain predictor being used '
-  []
-  [ad_power_law_substepping_noPredict]
-    issues = '#27429'
-    type = 'RunApp'
-    input = 'ad_power_law_creep.i'
-    cli_args = "Mesh/gen/nx=1 Mesh/gen/ny=1 Mesh/gen/nz=1 Materials/power_law_creep/use_substepping=INCREMENT_BASED "
-               "Materials/power_law_creep/max_inelastic_increment=0.1 "
-               "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
-               "Materials/power_law_creep/internal_solve_full_iteration_history=true "
-               "Materials/power_law_creep/internal_solve_output_on=always "
-               "Materials/power_law_creep/scale_strain_predictor=0.0"
-    expect_out = "iteration=0 .*scalar=0.0023"
-    valgrind = HEAVY
-    requirement = 'The system will use substepping with no strain increment predictor '
-  []
 
   [power_law]
     type = 'RunException'
@@ -123,5 +81,51 @@
                "Executioner/nl_rel_tol=1e-8"
     expect_out = "iteration=0 trial_stress="
     requirement = 'The system shall output verbose information about radial return iterations.'
+  []
+  [power_law_substepping_goodPredict]
+    issues = '#27429'
+    type = 'CSVDiff'
+    abs_zero = 1.0E-7
+    rel_err = 1.0E-4
+    input = 'power_law_creep.i'
+    csvdiff = power_law_creep_predictor.csv
+    cli_args = "Executioner/dtmin=0.1 Executioner/end_time=0.2 "
+               "Materials/power_law_creep/absolute_tolerance=1e-6 "
+               "Outputs/csv_out/file_base=power_law_creep_predictor "
+               "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/max_inelastic_increment=0.1 "
+               "Materials/power_law_creep/maximum_number_substeps=500 "
+               "Materials/power_law_creep/scale_strain_predictor=0.9"
+    requirement = 'The system will use substepping with a properly sized strain increment predictor that reduces the number nonlinear material iterations.'
+  []
+  [power_law_substepping_badPredict]
+    issues = '#27429'
+    type = 'CSVDiff'
+    abs_zero = 1.0E-7
+    rel_err = 1.0E-4
+    input = 'power_law_creep.i'
+    csvdiff = power_law_creep_csv_out.csv
+    cli_args = "Executioner/dtmin=0.1 Executioner/end_time=0.2 "
+               "Materials/power_law_creep/absolute_tolerance=1e-6 "
+               "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/max_inelastic_increment=0.1 "
+               "Materials/power_law_creep/maximum_number_substeps=500 "
+               "Materials/power_law_creep/scale_strain_predictor=1.0"
+    requirement = 'The system will use substepping with too large of a strain increment predictor which results in no strain predictor being used.'
+  []
+  [power_law_substepping_noPredict]
+    issues = '#27429'
+    type = 'CSVDiff'
+    abs_zero = 1.0E-7
+    rel_err = 1.0E-4
+    input = 'power_law_creep.i'
+    csvdiff = power_law_creep_csv_out.csv
+    cli_args = "Executioner/dtmin=0.1 Executioner/end_time=0.2 "
+               "Materials/power_law_creep/absolute_tolerance=1e-6 "
+               "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/max_inelastic_increment=0.1 "
+               "Materials/power_law_creep/maximum_number_substeps=500 "
+               "Materials/power_law_creep/scale_strain_predictor=0.0"
+    requirement = 'The system will use substepping with no strain increment predictor.'
   []
 []
