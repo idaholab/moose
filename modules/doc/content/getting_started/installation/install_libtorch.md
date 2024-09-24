@@ -119,7 +119,6 @@ to the Metal Performance Shader (MPS) capabilities (GPU acceleration).
 
 For linux, due to the official conda distribution of pytorch is using pre-CXX11 ABI, while the
 conda compiler stack of MOOSE relies on this ABI, we don't support conda-based installations yet.
-If the user requires CPU-only support the
 
 !alert! note title=Main limitation on Linux machines
 
@@ -188,7 +187,8 @@ acceleration is tested.
 The following packages need to be also installed to enable this feature:
 
 - [A sutiable Nvidia driver](https://www.nvidia.com/en-us/drivers/)
-- [Cuda toolkit](https://developer.nvidia.com/cuda-toolkit)
+- [Cuda toolkit](https://developer.nvidia.com/cuda-toolkit) - only strictly required if
+   building libtorch from source.
 
 The supported versions can be determined using the [compatibility matrix](https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix).
 Once the dependencies of MOOSE are installed, we can use the setup script to fetch
