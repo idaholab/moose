@@ -249,6 +249,7 @@ FEProblemBase::validParams()
       "List of subdomains for material coverage check. The meaning of this list is controlled by "
       "the parameter 'material_coverage_check' (whether this is the list of subdomains to be "
       "checked, not to be checked or not taken into account).");
+
   params.addParam<bool>("fv_bcs_integrity_check",
                         true,
                         "Set to false to disable checking of overlapping Dirichlet and Flux BCs "
@@ -2519,8 +2520,19 @@ FEProblemBase::getSampler(const std::string & name, const THREAD_ID tid)
 bool
 FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                                       const FEType & type,
-                                      bool is_aux)
+                                      bool is_aux,
+                                      const std::set<SubdomainID> * const active_subdomains)
 {
+
+  std::set<SubdomainID> subdomainIDs;
+  if (active_subdomains->size() == 0)
+  {
+    const auto subdomains = _mesh.meshSubdomains();
+    subdomainIDs.insert(subdomains.begin(), subdomains.end());
+  }
+  else
+    subdomainIDs.insert(active_subdomains->begin(), active_subdomains->end());
+
   for (auto & sys : _solver_systems)
   {
     SystemBase * curr_sys_ptr = sys.get();
@@ -2530,7 +2542,7 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
     {
       curr_sys_ptr = _aux.get();
       other_sys_ptr = sys.get();
-      error_prefix = "Aux";
+      error_prefix = "aux";
     }
 
     if (other_sys_ptr->hasVariable(var_name))
@@ -2541,11 +2553,74 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
     {
       const Variable & var =
           curr_sys_ptr->system().variable(curr_sys_ptr->system().variable_number(var_name));
+
+      // variable type
       if (var.type() != type)
-        mooseError(error_prefix,
-                   "Variable with name '",
+      {
+        const auto stringifyType = [](FEType t)
+        { return Moose::stringify(t.family) + " of order " + Moose::stringify(t.order); };
+
+        mooseError("Mismatching types are specified for ",
+                   error_prefix,
+                   "variable with name '",
                    var_name,
-                   "' already exists but is of a differing type!");
+                   "': '",
+                   stringifyType(var.type()),
+                   "' and '",
+                   stringifyType(type),
+                   "'");
+      }
+
+      // block-restriction
+      if (!(active_subdomains->size() == 0 && var.active_subdomains().size() == 0))
+      {
+        const auto varActiveSubdomains = var.active_subdomains();
+        std::set<SubdomainID> varSubdomainIDs;
+        if (varActiveSubdomains.size() == 0)
+        {
+          const auto subdomains = _mesh.meshSubdomains();
+          varSubdomainIDs.insert(subdomains.begin(), subdomains.end());
+        }
+        else
+          varSubdomainIDs.insert(varActiveSubdomains.begin(), varActiveSubdomains.end());
+
+        // Is subdomainIDs a subset of varSubdomainIDs? With this we allow the case that the newly
+        // requested block restriction is only a subset of the existing one.
+        const auto isSubset = std::includes(varSubdomainIDs.begin(),
+                                            varSubdomainIDs.end(),
+                                            subdomainIDs.begin(),
+                                            subdomainIDs.end());
+
+        if (!isSubset)
+        {
+          // helper function: make a string from a set of subdomain ids
+          const auto stringifySubdomains = [this](std::set<SubdomainID> subdomainIDs)
+          {
+            std::stringstream s;
+            for (auto const i : subdomainIDs)
+            {
+              // do we need to insert a comma?
+              if (s.tellp() != 0)
+                s << ", ";
+
+              // insert subdomain name and id -or- only the id (if no name is given)
+              const auto subdomainName = _mesh.getSubdomainName(i);
+              if (subdomainName.empty())
+                s << i;
+              else
+                s << subdomainName << " (" << i << ")";
+            }
+            return s.str();
+          };
+
+          const std::string msg = "Mismatching block-restrictions are specified for " +
+                                  error_prefix + "variable with name '" + var_name + "': {" +
+                                  stringifySubdomains(varSubdomainIDs) + "} and {" +
+                                  stringifySubdomains(subdomainIDs) + "}";
+
+          mooseError(msg);
+        }
+      }
 
       return true;
     }
@@ -2564,7 +2639,12 @@ FEProblemBase::addVariable(const std::string & var_type,
   auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
 
-  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
+  const auto active_subdomains_vector =
+      _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
+  const std::set<SubdomainID> active_subdomains(active_subdomains_vector.begin(),
+                                                active_subdomains_vector.end());
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false, &active_subdomains))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -2840,7 +2920,12 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
 
-  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true))
+  const auto active_subdomains_vector =
+      _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
+  const std::set<SubdomainID> active_subdomains(active_subdomains_vector.begin(),
+                                                active_subdomains_vector.end());
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true, &active_subdomains))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -2862,7 +2947,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
 
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true, active_subdomains))
     return;
 
   std::string var_type;
@@ -2901,7 +2986,7 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
 
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true, active_subdomains))
     return;
 
   InputParameters params = _factory.getValidParams("ArrayMooseVariable");
@@ -2935,7 +3020,7 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
     _max_scalar_order = order;
 
   FEType type(order, SCALAR);
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true, active_subdomains))
     return;
 
   InputParameters params = _factory.getValidParams("MooseVariableScalar");

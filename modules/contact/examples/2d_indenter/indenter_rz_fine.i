@@ -55,7 +55,6 @@
 
 [Modules/TensorMechanics/Master]
   [all]
-    add_variables = true
     strain = FINITE
     block = '1 2'
     use_automatic_differentiation = false
