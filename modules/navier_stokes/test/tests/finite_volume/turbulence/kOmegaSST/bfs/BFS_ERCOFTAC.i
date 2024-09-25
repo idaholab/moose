@@ -231,20 +231,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     scaling_coef = 'sigma_omega'
     walls = ${walls}
   []
-  # [TKESD_source_sink]
-  #   type = INSFVTKESDSourceSink
-  #   variable = TKESD
-  #   u = vel_x
-  #   v = vel_y
-  #   k = TKE
-  #   rho = ${rho}
-  #   mu = ${mu}
-  #   mu_t = 'mu_t'
-  #   C1_eps = ${C1_eps}
-  #   C2_eps = ${C2_eps}
-  #   walls = ${walls}
-  #   wall_treatment = ${wall_treatment}
-  # []
   [TKESD_source_sink]
     type = INSFVTKESDSourceSink
     variable = TKESD
@@ -257,6 +243,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     F1 = F1
+    F2 = F2
   []
 []
 
@@ -327,15 +314,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [AuxVariables]
-  # [mu_t]
-  #   type = MooseVariableFVReal
-  #   initial_condition = '${fparse rho * C_mu * ${k_init}^2 / omega_init}'
-  #   two_term_boundary_expansion = false
-  # []
-  # [yplus]
-  #   type = MooseVariableFVReal
-  #   two_term_boundary_expansion = false
-  # []
   [wall_distance]
     type = MooseVariableFVReal
     initial_condition = 1.0
@@ -364,33 +342,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [AuxKernels]
-  # [compute_mu_t]
-  #   type = kEpsilonViscosityAux
-  #   variable = mu_t
-  #   C_mu = ${C_mu}
-  #   k = TKE
-  #   epsilon = TKESD
-  #   mu = ${mu}
-  #   rho = ${rho}
-  #   u = vel_x
-  #   v = vel_y
-  #   bulk_wall_treatment = ${bulk_wall_treatment}
-  #   walls = ${walls}
-  #   wall_treatment = ${wall_treatment}
-  #   execute_on = 'NONLINEAR'
-  # []
-  # [compute_y_plus]
-  #   type = RANSYPlusAux
-  #   variable = yplus
-  #   k = TKE
-  #   mu = ${mu}
-  #   rho = ${rho}
-  #   u = vel_x
-  #   v = vel_y
-  #   walls = ${walls}
-  #   wall_treatment = ${wall_treatment}
-  #   execute_on = 'NONLINEAR'
-  # []
   [compute_wall_distance]
     type = WallDistanceAux
     variable = wall_distance
@@ -404,7 +355,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
-    wall_distance = wall_distance
     execute_on = 'NONLINEAR'
   []
   [compute_F2]
@@ -414,7 +364,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
-    wall_distance = wall_distance
     execute_on = 'NONLINEAR'
   []
   [compute_sigma_k]

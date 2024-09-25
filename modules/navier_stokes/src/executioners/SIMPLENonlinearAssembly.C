@@ -583,17 +583,11 @@ SIMPLENonlinearAssembly::execute()
         {
           residual_index += 1;
 
-          // Compute effective relaxation factors
-          // const auto eq_relax = _turbulence_equation_relaxation[system_i] *
-          //                       (1.0 - std::exp(-(iteration_counter + 1.0) / 200.0));
-          // const auto field_relax = _turbulence_field_relaxation[system_i] *
-          //                          (1.0 - std::exp(-(iteration_counter + 1.0) / 200.0));
-
-          // _console << "eq_relax: " << eq_relax << std::endl;
-          // _console << "field_relax: " << field_relax << std::endl;
-
+          // Note: we are using the same relaxation factor for the turbulence equations and fields
+          // Practice showed that this is quite optimal.
+          // We can change it in future versions if this is not the case.
           const auto eq_relax = _turbulence_equation_relaxation[system_i];
-          const auto field_relax = _turbulence_field_relaxation[system_i];
+          const auto field_relax = _turbulence_equation_relaxation[system_i];
 
           ns_its_residuals[residual_index] =
               solveAdvectedSystem(_turbulence_system_numbers[system_i],

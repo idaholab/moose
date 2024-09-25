@@ -123,8 +123,7 @@ INSFVTKESourceSink::computeQpResidual()
   if (_newton_solve)
     TKE = std::max(TKE, 1e-10);
 
-  // Near-wal formulation
-  if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
+  if (_wall_bounded.find(_current_elem) != _wall_bounded.end()) // Near-wal formulation
   {
     std::vector<ADReal> y_plus_vec, velocity_grad_norm_vec;
 
@@ -217,10 +216,6 @@ INSFVTKESourceSink::computeQpResidual()
         const auto omegaLog = rho * std::pow(_var(elem_arg, old_state), 0.5) /
                               (std::pow(_C_mu, 0.25) * NS::von_karman_constant * distance_vec[i]);
 
-        // Using blending wall functions for omega
-        const auto Re_d = std::sqrt(_var(elem_arg, old_state)) * distance_vec[i] * rho / wall_mu;
-        const auto gamma = std::exp(-Re_d / 11.0);
-        // destruction += (gamma * omegaVis + (1.0 - gamma) * omegaLog) * _beta_infty / tot_weight;
         ADReal beta_star;
         if (_bool_low_Re_modification)
         {
@@ -238,31 +233,16 @@ INSFVTKESourceSink::computeQpResidual()
         destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog)) *
                        beta_star / tot_weight;
 
-        // destruction += omegaLog * beta_star / tot_weight;
-
-        // const auto tau_w_blended =
-        //     (wall_mu * gamma + wall_mut * (1.0 - gamma)) * velocity_grad_norm_vec[i];
         production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(_var(elem_arg, old_state) + 1e-10) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
-
-        // if (y_plus < 11.25)
-        //   destruction += omegaVis * _beta_infty / tot_weight;
-        // else
-        // {
-        //   destruction += omegaLog * _beta_infty / tot_weight;
-        //   production += tau_w * std::pow(_C_mu, 0.25) /
-        //                 std::sqrt(_var(elem_arg, old_state) + 1e-10) /
-        //                 (NS::von_karman_constant * distance_vec[i]) / tot_weight;
-        // }
       }
     }
 
     residual = (destruction - production) * _var(elem_arg, state);
   }
-  // Bulk formulation
-  else
+  else // Bulk formulation
   {
-
+    // *************************************** //
     // ***** Computing shear strain rate ***** //
     // *************************************** //
     const auto & grad_u = _u_var.gradient(elem_arg, state);
@@ -298,14 +278,15 @@ INSFVTKESourceSink::computeQpResidual()
         (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
         (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
         (Sij_zz - trace) * grad_zz;
-    // *************************************** //
 
+    // *************************************** //
     // ************ TKE production *********** //
     // *************************************** //
     production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
     // *************************************** //
 
-    // ***** TKE destriction and production modifiers ***** //
+    // *************************************** //
+    // ***** TKE destruction and production modifiers ***** //
     // *************************************** //
     if (_epsilon) // epsilon-based formulation
     {
@@ -313,7 +294,7 @@ INSFVTKESourceSink::computeQpResidual()
       const auto time_scale =
           raw_value(_var(elem_arg, old_state) / (*_epsilon)(elem_arg, old_state));
 
-      // Computing desctruction
+      // Computing destruction
       destruction = rho * _var(elem_arg, state) / time_scale;
 
       // k-Production limiter (needed for flows with stagnation zones)
@@ -324,7 +305,6 @@ INSFVTKESourceSink::computeQpResidual()
     }
     else if (_omega) // omega-based formulation
     {
-
       // Modifications due to free-shear corrections
       ADReal f_beta_star(1.0);
       if (_bool_free_shear_modficiation)
@@ -364,7 +344,6 @@ INSFVTKESourceSink::computeQpResidual()
           rho * f_beta_star * beta_star * (*_omega)(elem_arg, old_state) * _var(elem_arg, state);
 
       // Limited production
-
       production = std::min(production,
                             rho * (_c_pl * beta_star) * _var(elem_arg, old_state) *
                                 (*_omega)(elem_arg, old_state));

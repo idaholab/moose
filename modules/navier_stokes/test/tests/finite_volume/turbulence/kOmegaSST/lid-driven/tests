@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INSFVMixingLengthTKESDBC.md kOmegaSSTF1BlendingAux.md kOmegaSSTF2BlendingAux.md kOmegaSSTSigmaKAux.md kOmegaSSTSigmaOmegaAux.md kOmegaSSTViscosityAux.md WallNormalUnitVectorAux.md WallDistanceAux.md INSFVTKESDSourceSink.md INSFVTKESourceSink'
+  design = 'INSFVMixingLengthTKESDBC.md kOmegaSSTF1BlendingAux.md kOmegaSSTF2BlendingAux.md kOmegaSSTSigmaKAux.md kOmegaSSTSigmaOmegaAux.md kOmegaSSTViscosityAux.md WallNormalUnitVectorAux.md WallDistanceAux.md INSFVTKESDSourceSink.md INSFVTKESourceSink.md'
   issues = '#28130'
   [lid_driven_turb_std_wall]
     requirement = 'The system shall be able to run fluid flow with k-omega-SST turbulence model in enclosures with standard wall functions, '

@@ -69,16 +69,12 @@ SegregatedSolverBase::validParams()
                                      "The relaxation which should be used for the passive scalar "
                                      "equations. (=1 for no relaxation, "
                                      "diagonal dominance will still be enforced)");
-  params.addParam<std::vector<Real>>("turbulence_equation_relaxation",
-                                     std::vector<Real>(),
-                                     "The relaxation which should be used for the turbulence "
-                                     "equations. (=1 for no relaxation, "
-                                     "diagonal dominance will still be enforced)");
-
   params.addParam<std::vector<Real>>(
-      "turbulence_field_relaxation",
+      "turbulence_equation_relaxation",
       std::vector<Real>(),
-      "The relaxation which should be used for the turbulence fields. (=1 for no relaxation)");
+      "The relaxation which should be used for the turbulence equations "
+      "equations. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
 
   params.addParam<std::vector<Real>>(
       "turbulence_field_min_limit",
@@ -88,7 +84,7 @@ SegregatedSolverBase::validParams()
 
   params.addParamNamesToGroup("pressure_variable_relaxation momentum_equation_relaxation "
                               "energy_equation_relaxation passive_scalar_equation_relaxation "
-                              "turbulence_equation_relaxation turbulence_field_relaxation",
+                              "turbulence_equation_relaxation",
                               "Relaxation");
 
   /*
@@ -374,7 +370,6 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
         getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
     _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
     _turbulence_field_min_limit(getParam<std::vector<Real>>("turbulence_field_min_limit")),
-    _turbulence_field_relaxation(getParam<std::vector<Real>>("turbulence_field_relaxation")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
@@ -419,10 +414,6 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
     if (_turbulence_system_names.size() != _turbulence_equation_relaxation.size())
       paramError("turbulence_equation_relaxation",
                  "The number of equation relaxation parameters does not match the number of "
-                 "turbulence scalar equations!");
-    if (_turbulence_system_names.size() != _turbulence_field_relaxation.size())
-      paramError("turbulence_field_relaxation",
-                 "The number of field relaxation parameters does not match the number of "
                  "turbulence scalar equations!");
     if (_turbulence_system_names.size() != _turbulence_absolute_tolerance.size())
       paramError("turbulence_absolute_tolerance",
@@ -576,7 +567,6 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
                                   "turbulence_l_abs_tol",
                                   "turbulence_l_max_its",
                                   "turbulence_equation_relaxation",
-                                  "turbulence_field_relaxation",
                                   "turbulence_absolute_tolerance"},
                                  false);
 

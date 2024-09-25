@@ -298,6 +298,7 @@ pressure_tag = "pressure_grad"
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     F1 = F1
+    F2 = F2
     free_shear_modification = ${free_shear_modification}
     wall_normal_unit_vectors = 'wall_cell_face_normals'
     vortex_stretching_modficiation = ${vortex_stretching_modficiation}
@@ -389,7 +390,6 @@ pressure_tag = "pressure_grad"
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
-    wall_distance = wall_distance
     execute_on = 'NONLINEAR'
   []
   [compute_F2]
@@ -399,7 +399,6 @@ pressure_tag = "pressure_grad"
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
-    wall_distance = wall_distance
     execute_on = 'NONLINEAR'
   []
   [compute_sigma_k]
@@ -409,7 +408,7 @@ pressure_tag = "pressure_grad"
     execute_on = 'NONLINEAR'
   []
   [compute_sigma_omega]
-    type = kOmegaSSTSigmaKAux
+    type = kOmegaSSTSigmaOmegaAux
     variable = sigma_omega
     F1 = F1
     execute_on = 'NONLINEAR'
