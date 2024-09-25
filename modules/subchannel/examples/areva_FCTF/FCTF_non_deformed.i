@@ -712,83 +712,83 @@ unheated_length_exit = 0.855 #m
   # ####### Area, wetted-perim, at midpoint of heated section, displacement
   # ###### Mid plane is 3P above start of heated section
   # ###### Mid plane: z = 7P = 1.995 [m]
-  # [Area_1]
-  #   type = SubChannelPointValue
-  #   variable = S
-  #   index = 104
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [Area_2]
-  #   type = SubChannelPointValue
-  #   variable = S
-  #   index = 105
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [Area_3]
-  #   type = SubChannelPointValue
-  #   variable = S
-  #   index = 107
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [WP_1]
-  #   type = SubChannelPointValue
-  #   variable = w_perim
-  #   index = 104
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [WP_2]
-  #   type = SubChannelPointValue
-  #   variable = w_perim
-  #   index = 105
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [WP_3]
-  #   type = SubChannelPointValue
-  #   variable = w_perim
-  #   index = 107
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [Disp_1]
-  #   type = SubChannelPointValue
-  #   variable = displacement
-  #   index = 104
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [Disp_2]
-  #   type = SubChannelPointValue
-  #   variable = displacement
-  #   index = 105
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [Disp_3]
-  #   type = SubChannelPointValue
-  #   variable = displacement
-  #   index = 107
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [PB]
-  #   type = SubChannelPointValue
-  #   variable = P
-  #   index = 108
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
-  # [PA]
-  #   type = SubChannelPointValue
-  #   variable = P
-  #   index = 80
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 1.995
-  # []
+  [Area_1]
+    type = SubChannelPointValue
+    variable = S
+    index = 104
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [Area_2]
+    type = SubChannelPointValue
+    variable = S
+    index = 105
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [Area_3]
+    type = SubChannelPointValue
+    variable = S
+    index = 107
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [WP_1]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 104
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [WP_2]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 105
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [WP_3]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 107
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [Disp_1]
+    type = SubChannelPointValue
+    variable = displacement
+    index = 104
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [Disp_2]
+    type = SubChannelPointValue
+    variable = displacement
+    index = 105
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [Disp_3]
+    type = SubChannelPointValue
+    variable = displacement
+    index = 107
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [PB]
+    type = SubChannelPointValue
+    variable = P
+    index = 108
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
+  [PA]
+    type = SubChannelPointValue
+    variable = P
+    index = 80
+    execute_on = 'TIMESTEP_END'
+    height = 1.995
+  []
 []
 
 [Executioner]

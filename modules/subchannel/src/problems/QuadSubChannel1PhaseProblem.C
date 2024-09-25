@@ -186,6 +186,7 @@ QuadSubChannel1PhaseProblem::initializeSolution()
           _subchannel_mesh._gij_map[iz][i_gap] =
               pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0;
         }
+        // if pins come in contact, the gap is zero
         if (_subchannel_mesh._gij_map[iz][i_gap] <= 0.0)
           _subchannel_mesh._gij_map[iz][i_gap] = 0.0;
       }
