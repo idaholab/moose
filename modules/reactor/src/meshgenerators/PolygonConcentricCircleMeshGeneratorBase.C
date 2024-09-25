@@ -359,7 +359,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       {
         paramError("ring_block_ids",
                    "This parameter must have the appropriate size if it is provided: "
-                   "If the first element of 'ring_intervals' is more than one, "
+                   "If the number of the innermost ring layers is more than one, "
                    "the size of 'ring_block_ids' must be "
                    "equal to the size of 'ring_intervals' + 1. Else, equal to the size of "
                    "'ring_intervals'\n",
@@ -369,7 +369,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       {
         paramError("ring_block_ids",
                    "This parameter must have the appropriate size if it is provided: "
-                   "If the first element of 'ring_intervals' is more than one, "
+                   "If the number of the innermost ring layers is more than one, "
                    "the size of 'ring_block_ids' must be "
                    "equal to the size of 'ring_intervals' or 'ring_intervals' + 1. Else, equal to "
                    "the size of 'ring_intervals'\n",
@@ -399,8 +399,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       {
         paramError("ring_block_names",
                    "This parameter must have the appropriate size if it is provided: "
-                   "If the first element of 'ring_intervals' is more than one, "
-                   "the size of 'ring_block_names' must be "
+                   "If the number of the innermost ring layers is more than one, "
+                   "and we have non-quad elements, the size of 'ring_block_names' must be "
                    "equal to the size of 'ring_intervals' + 1. Else, equal to the size of "
                    "'ring_intervals'\n",
                    debug_info.str());
@@ -409,8 +409,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       {
         paramError("ring_block_names",
                    "This parameter must have the appropriate size if it is provided: "
-                   "If the first element of 'ring_intervals' is more than one, "
-                   "the size of 'ring_block_names' must be "
+                   "If the number of the innermost ring layers is more than one, "
+                   "and we have quad elements, the size of 'ring_block_names' must be "
                    "equal to the size of 'ring_intervals' or 'ring_intervals' + 1. Else, equal to "
                    "the size of 'ring_intervals'\n",
                    debug_info.str());
