@@ -51,13 +51,14 @@
     transform = 'rotate'
     vector_value = '180 0 0'
   []
-  [cmbn]
-    type = CombinerGenerator
+  [stitch]
+    type = StitchedMeshGenerator
     inputs = 'convert1 rotate'
+    stitch_boundaries_pairs = 'front back'
   []
   [diag]
     type = MeshDiagnosticsGenerator
-    input = cmbn
+    input = stitch
     examine_non_matching_edges = INFO
   []
 []
