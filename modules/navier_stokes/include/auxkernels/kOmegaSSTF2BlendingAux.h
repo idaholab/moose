@@ -24,7 +24,7 @@ public:
   kOmegaSSTF2BlendingAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+ virtual Real computeValue() override;
 
   /// The dimension of the domain
   const unsigned int _dim;
