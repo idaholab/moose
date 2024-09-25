@@ -238,11 +238,12 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
   for (unsigned int k = 0; k < _nodes.size(); ++k)
   {
     _v1[k] = _x2.cross(_node_normal[k]);
-    _v1[k] /= _x2.norm() * _node_normal[k].norm();
 
     // If x2 is parallel to node normal, set V1 to x3
     if (MooseUtils::absoluteFuzzyEqual(_v1[k].norm(), 0.0, 1e-6))
       _v1[k] = _x3;
+
+    _v1[k] /= _v1[k].norm();
 
     _v2[k] = _node_normal[k].cross(_v1[k]);
   }

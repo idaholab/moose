@@ -51,11 +51,17 @@
     requirement = "The mechanics system shall accurately model deflection of a plate with multiple force and moment boundary conditions."
   []
   [pinched_cylinder]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = pinched_cylinder_symm.i
-    exodiff = 'pinched_cylinder_symm_out.e'
-
-    requirement = "The mechanics system shall accurately model the deflection of a pinched cylinder modeled when it is modeled using shell elements."
+    csvdiff = 'pinched_cylinder_symm_out.csv'
+    requirement = "The mechanics system shall converge to the analytic displacement of a cylinder modeled with shell elements, with point loading applied in the x direction."
+  []
+  [pinched_cylinder_y]
+    type = 'CSVDiff'
+    input = pinched_cylinder_symm.i
+    cli_args = "DiracKernels/point/variable=disp_y DiracKernels/point/point='0 1 1' Outputs/file_base=pinched_cylinder_symm_y_out"
+    csvdiff = 'pinched_cylinder_symm_y_out.csv'
+    requirement = "The mechanics system shall converge to the analytic displacement of a cylinder modeled with shell elements, with point loading applied in the y direction."
   []
   [inclined_plane]
     type = 'Exodiff'
