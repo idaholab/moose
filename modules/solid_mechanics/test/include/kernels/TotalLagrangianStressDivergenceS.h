@@ -31,3 +31,5 @@ TotalLagrangianStressDivergenceBaseS<GradientOperatorCartesian>::initialSetup()
 
 typedef TotalLagrangianStressDivergenceBaseS<GradientOperatorCartesian>
     TotalLagrangianStressDivergenceS;
+
+extern template class TotalLagrangianStressDivergenceBaseS<GradientOperatorCartesian>;

@@ -109,3 +109,5 @@ private:
    */
   void computeResidual();
 };
+
+extern template class RayKernelTempl<Real>;
