@@ -21,12 +21,9 @@
     valgrind = none
   []
   [mixture_rayleigh_bernard_two_phase]
-    type = 'CSVDiff'
+    type = 'RunApp'
     input = 'rayleigh-bernard-two-phase.i'
-    csvdiff = 'rayleigh-bernard-two-phase_CSV.csv'
-    requirement = 'The system shall be able solve two phase Rayleigh Bernard convection with the mixture model.'
-    rel_err = 5.0E-3
-    abs_zero = 1e-8
+    requirement = 'The system shall be able solve two phase Rayleigh Bernard convection with the mixture model. The problem has multiple solutions so RunApp is used for testing.'
     recover = false
     method = '!dbg'
     valgrind = none
