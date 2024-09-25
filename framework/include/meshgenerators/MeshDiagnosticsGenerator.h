@@ -49,7 +49,7 @@ private:
   void checkNonConformalMeshFromAdaptivity(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check whether the Jacobians (elem and side) are not negative
   void checkLocalJacobians(const std::unique_ptr<MeshBase> & mesh) const;
-  //// Routing to check for non matching edges
+  //// Routine to check for non matching edges
   void checkNonMatchingEdges(const std::unique_ptr<MeshBase> & mesh) const;
 
   /**
