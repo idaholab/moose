@@ -16,7 +16,8 @@ InputParameters
 DirectPerturbationSampler::validParams()
 {
   InputParameters params = Sampler::validParams();
-  params.addClassDescription("Sampler that reads samples from CSV file.");
+  params.addClassDescription(
+      "Sampler that creates samples for a direct perturbation-based sensitivity study.");
   params.addRequiredParam<std::vector<Real>>(
       "nominal_parameter_values",
       "The nominal values of the parameters around which we shall perturb them.");
