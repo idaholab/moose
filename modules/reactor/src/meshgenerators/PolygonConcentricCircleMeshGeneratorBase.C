@@ -336,60 +336,85 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     const unsigned int num_innermost_ring_layers =
         _ring_inner_boundary_layer_params.intervals.front() + _ring_intervals.front() +
         _ring_outer_boundary_layer_params.intervals.front();
+    // If conditions are met, duplicate the first element of _ring_block_ids at the start.
     if (!_ring_block_ids.empty() && _quad_center_elements && num_innermost_ring_layers > 1 &&
         _ring_block_ids.size() == _ring_intervals.size())
       _ring_block_ids.insert(_ring_block_ids.begin(), _ring_block_ids.front());
+    // check if the number of ring block ids is appropiate
     if (!_ring_block_ids.empty() &&
         _ring_block_ids.size() !=
             (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
     {
-      _console << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
-               << std::endl;
-      _console << "ring_block_ids size is : " << _ring_block_ids.size() << std::endl;
-      _console << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
-      _console << "first element of ring_intervals is : " << num_innermost_ring_layers << std::endl;
+      // Create an ostringstream for the debug information
+      std::ostringstream debug_info;
+      debug_info << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
+                 << std::endl;
+      debug_info << "ring_block_ids size is : " << _ring_block_ids.size() << std::endl;
+      debug_info << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
+      debug_info << "first element of ring_intervals is : " << num_innermost_ring_layers
+                 << std::endl;
+
+      // error message
       if (!_quad_center_elements)
+      {
         paramError("ring_block_ids",
                    "This parameter must have the appropriate size if it is provided: "
                    "If the first element of 'ring_intervals' is more than one, "
                    "the size of 'ring_block_ids' must be "
                    "equal to the size of 'ring_intervals' + 1. Else, equal to the size of "
-                   "'ring_intervals'");
+                   "'ring_intervals'\n",
+                   debug_info.str());
+      }
       else
+      {
         paramError("ring_block_ids",
                    "This parameter must have the appropriate size if it is provided: "
                    "If the first element of 'ring_intervals' is more than one, "
                    "the size of 'ring_block_ids' must be "
                    "equal to the size of 'ring_intervals' or 'ring_intervals' + 1. Else, equal to "
-                   "the size of ring_intervals' ",
-                   _quad_center_elements);
+                   "the size of 'ring_intervals'\n",
+                   debug_info.str());
+      }
     }
+    // If conditions are met, duplicate the first element of _ring_block_names at the start.
     if (!_ring_block_names.empty() && _quad_center_elements && num_innermost_ring_layers > 1 &&
         _ring_block_names.size() == _ring_intervals.size())
       _ring_block_names.insert(_ring_block_names.begin(), _ring_block_names.front());
+    // check if the number of ring block names is appropiate
     if (!_ring_block_names.empty() &&
         _ring_block_names.size() !=
             (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
     {
-      _console << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
-               << std::endl;
-      _console << "ring_block_names size is : " << _ring_block_names.size() << std::endl;
-      _console << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
-      _console << "first element of ring_intervals is : " << num_innermost_ring_layers << std::endl;
+      // Create an ostringstream for the debug information
+      std::ostringstream debug_info;
+      debug_info << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
+                 << std::endl;
+      debug_info << "ring_block_names size is : " << _ring_block_names.size() << std::endl;
+      debug_info << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
+      debug_info << "first element of ring_intervals is : " << num_innermost_ring_layers
+                 << std::endl;
+
+      // error message
       if (!_quad_center_elements)
+      {
         paramError("ring_block_names",
                    "This parameter must have the appropriate size if it is provided: "
                    "If the first element of 'ring_intervals' is more than one, "
                    "the size of 'ring_block_names' must be "
                    "equal to the size of 'ring_intervals' + 1. Else, equal to the size of "
-                   "'ring_intervals'");
+                   "'ring_intervals'\n",
+                   debug_info.str());
+      }
       else
+      {
         paramError("ring_block_names",
                    "This parameter must have the appropriate size if it is provided: "
                    "If the first element of 'ring_intervals' is more than one, "
                    "the size of 'ring_block_names' must be "
                    "equal to the size of 'ring_intervals' or 'ring_intervals' + 1. Else, equal to "
-                   "the size of 'ring_intervals'");
+                   "the size of 'ring_intervals'\n",
+                   debug_info.str());
+      }
     }
     for (unsigned int i = 0; i < _ring_radii.size(); i++)
     {
