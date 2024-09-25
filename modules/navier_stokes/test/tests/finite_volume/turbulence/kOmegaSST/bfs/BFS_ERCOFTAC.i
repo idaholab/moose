@@ -373,7 +373,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     execute_on = 'NONLINEAR'
   []
   [compute_sigma_omega]
-    type = kOmegaSSTSigmaKAux
+    type = kOmegaSSTSigmaOmegaAux
     variable = sigma_omega
     F1 = F1
     execute_on = 'NONLINEAR'

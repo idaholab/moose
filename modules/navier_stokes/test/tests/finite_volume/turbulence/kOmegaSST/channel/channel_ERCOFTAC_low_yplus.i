@@ -413,7 +413,7 @@ vortex_stretching_modficiation = false
     execute_on = 'NONLINEAR'
   []
   [compute_sigma_omega]
-    type = kOmegaSSTSigmaKAux
+    type = kOmegaSSTSigmaOmegaAux
     variable = sigma_omega
     F1 = F1
     execute_on = 'NONLINEAR'
