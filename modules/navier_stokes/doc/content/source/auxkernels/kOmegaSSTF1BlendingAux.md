@@ -11,7 +11,7 @@ where:
 
 - $k$ is the turbulent kinetic energy,
 - $\omega$ is the turbulent kinetic energy specific dissipation rate,
-- d$ is the distance to the nearest wall provided in the [!param](/AuxKernels/kOmegaSSTF1BlendingAux/wall_distance) functor,
+- d$ is the distance to the nearest wall,
 - $\mu$ is the dynamic viscosity,
 - $\rho$ is the density,
 - ${CD}_{k \omega} = \operatorname{max} \left( \frac{\nabla k \cdot \nabla \omega}{\omega}, 10^{-20} \right)$ is the positive part of the cross diffusion term,

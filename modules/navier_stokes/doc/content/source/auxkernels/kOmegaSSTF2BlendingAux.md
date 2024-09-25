@@ -11,7 +11,7 @@ where:
 
 - $k$ is the turbulent kinetic energy,
 - $\omega$ is the turbulent kinetic energy specific dissipation rate,
-- d$ is the distance to the nearest wall provided in the [!param](/AuxKernels/kOmegaSSTF2BlendingAux/wall_distance) functor,
+- d$ is the distance to the nearest wall,
 - $\mu$ is the dynamic viscosity,
 - $\rho$ is the density,
 - $\beta^* = 0.09$ is a closure parameter.
