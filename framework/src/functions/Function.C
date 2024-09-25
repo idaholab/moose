@@ -17,6 +17,8 @@ Function::validParams()
   InputParameters params = MooseObject::validParams();
   params += SetupInterface::validParams();
 
+  // Functions should be executed on the fly
+  params.suppressParameter<ExecFlagEnum>("execute_on");
   params.registerBase("Function");
 
   return params;
