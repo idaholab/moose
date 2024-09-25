@@ -139,7 +139,6 @@ void getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                      const std::set<SubdomainID> & block_ids,
                      std::map<const Elem *, std::vector<Real>> & dist_map);
 
-
 /**
  * Get distance for all active elements to the nearest active boundary
  */

@@ -62,7 +62,7 @@ kOmegaSSTF2BlendingAux::computeValue()
       Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto k = _k(elem_arg, previous_state);
   const auto omega = _omega(elem_arg, previous_state);
-  //const auto omega_capped = std::max(omega.value(), 1e-12);
+  // const auto omega_capped = std::max(omega.value(), 1e-12);
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
 
