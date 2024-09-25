@@ -83,7 +83,7 @@ name = 'finite_rr'
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [block]
     use_automatic_differentiation = true
     strain = FINITE

@@ -126,16 +126,10 @@ PR=2
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
-        add_variables = true
-        strain = SMALL
-        eigenstrain_names = eigenstrain
-      [../]
-    [../]
-  [../]
+[Physics/SolidMechanics/QuasiStatic/all]
+  add_variables = true
+  strain = SMALL
+  eigenstrain_names = eigenstrain
 []
 
 [Kernels]

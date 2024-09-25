@@ -118,7 +118,7 @@ offset = 0.00
   allow_renumbering = false
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     strain = FINITE

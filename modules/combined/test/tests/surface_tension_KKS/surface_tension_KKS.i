@@ -112,7 +112,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     add_variables = true
     generate_output = 'hydrostatic_stress stress_xx stress_yy stress_zz'

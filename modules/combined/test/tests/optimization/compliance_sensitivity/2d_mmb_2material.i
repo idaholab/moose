@@ -67,7 +67,7 @@ rho2 = 1.0
     min = '${fparse vol_frac-0.15}'
   []
 []
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true

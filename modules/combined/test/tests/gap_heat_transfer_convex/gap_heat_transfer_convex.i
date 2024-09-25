@@ -44,7 +44,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   volumetric_locking_correction = true
   strain = FINITE
   eigenstrain_names = eigenstrain

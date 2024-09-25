@@ -71,7 +71,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     volumetric_locking_correction = false
     decomposition_method = EigenSolution

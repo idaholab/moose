@@ -144,7 +144,7 @@ refine = 3
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     incremental = true
