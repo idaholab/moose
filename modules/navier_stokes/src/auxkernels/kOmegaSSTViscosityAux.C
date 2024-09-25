@@ -250,7 +250,6 @@ kOmegaSSTViscosityAux::computeValue()
                   Sij_xy * grad_yx + (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz +
                   Sij_xz * grad_zx + Sij_yz * grad_zy + (Sij_zz - trace) * grad_zz);
 
-        // Future work:
     if (wall_bounded)
     {
 
@@ -272,16 +271,6 @@ kOmegaSSTViscosityAux::computeValue()
         u_tau = std::sqrt(std::sqrt(_C_mu) * TKE);
         S = u_tau / (NS::von_karman_constant * min_wall_dist); //(rho * u_tau)
         symmetric_strain_tensor_norm = S;
-        // // // Getting y_plus
-        // ADRealVectorValue velocity(_u_var(current_argument, state));
-        // if (_v_var)
-        //   velocity(1) = (*_v_var)(current_argument, state);
-        // if (_w_var)
-        //   velocity(2) = (*_w_var)(current_argument, state);
-
-        // // // Compute the velocity and direction of the velocity component that is parallel to the wall
-        // const ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
-        // S = parallel_speed / min_wall_dist;
       }
     }
 
@@ -299,11 +288,8 @@ kOmegaSSTViscosityAux::computeValue()
 
     // Limited time scale
     ADReal T;
-    // if (wall_bounded)
-    //   T = alpha_star / _omega(current_argument, old_state);
-    // else
     T = std::min(alpha_star / _omega(current_argument, old_state),
-                  _a_1 / symmetric_strain_tensor_norm / _F2(current_argument, state));
+                 _a_1 / symmetric_strain_tensor_norm / _F2(current_argument, state));
 
     // Dynamic turbulent viscosity
     mu_t = std::max((rho * TKE * T).value(), NS::mu_t_low_limit);

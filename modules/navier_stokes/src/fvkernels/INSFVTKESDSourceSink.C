@@ -175,18 +175,7 @@ INSFVTKESDSourceSink::computeQpResidual()
       const auto omegaLog =
           std::sqrt(TKE) / (std::pow(_C_mu, 0.25) * NS::von_karman_constant * distance_vec[i]);
 
-      // const auto Re_d =
-      //     std::sqrt(_k(elem_arg, old_state)) * distance_vec[i] * rho / _mu(facearg, state);
-      // const auto gamma = std::exp(-Re_d / 11.0);
-      // destruction += gamma * omegaVis + (1.0 - gamma) * omegaLog;
       destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
-
-      // if (y_plus < 11.25)
-      //   destruction += omegaVis / tot_weight;
-      // else
-      // {
-      //   destruction += omegaLog / tot_weight;
-      // }
     }
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;
@@ -285,20 +274,6 @@ INSFVTKESDSourceSink::computeQpResidual()
 
     production = (rho * gamma / _mu_t(elem_arg, state)) * production_k;
 
-    // production = rho * gamma * symmetric_strain_tensor_sq_norm;
-
-    // production =
-    //     std::min(production,
-    //              (_c_pl / _a_1) * _beta_infty * _var(elem_arg, old_state) *
-    //                  std::max(_a_1 * _var(elem_arg, old_state),
-    //                           _F2(elem_arg, state) *
-    //                           std::sqrt(symmetric_strain_tensor_sq_norm)));
-
-    // production = std::min(production,
-    //                       _c_pl / _a_1 * _beta_infty * _var(elem_arg, old_state) *
-    //                           std::max(_a_1 * _var(elem_arg, old_state),
-    //                                    F1 * std::sqrt(symmetric_strain_tensor_sq_norm)));
-
     // Vortex stretching modification to TKSE destruction
     ADReal f_beta(1.0);
     if (_bool_vortex_stretching_modficiation)
@@ -345,8 +320,8 @@ INSFVTKESDSourceSink::computeQpResidual()
       cross_diffusion_grad += grad_k(1) * grad_omega(1);
     if (_dim >= 3)
       cross_diffusion_grad += grad_k(2) * grad_omega(2);
-    cross_diffusion = (1.0 - F1) * rho * 2.0 * _sigma_omega_2 * cross_diffusion_grad / _var(elem_arg, old_state);
-                      //Utility::pow<2>(_var(elem_arg, old_state)) * _var(elem_arg, state);
+    cross_diffusion =
+        (1.0 - F1) * rho * 2.0 * _sigma_omega_2 * cross_diffusion_grad / _var(elem_arg, old_state);
 
     // Free shear modification to cross diffusion
     if (_bool_free_shear_modficiation)
