@@ -160,7 +160,6 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;
   }
-
   else
   {
     const auto & grad_u = _u_var.gradient(elem_arg, state);
