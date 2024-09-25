@@ -44,8 +44,8 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
   else
     num_samples = _nominal_values.size() + 1;
 
-  setNumberOfRows(_nominal_values.size());
-  setNumberOfCols(num_samples);
+  setNumberOfRows(num_samples);
+  setNumberOfCols(_nominal_values.size());
 
   _absolute_intervals = std::vector<Real>(num_samples, 0);
   _parameter_vectors = std::vector<std::vector<Real>>(num_samples, _nominal_values);
@@ -53,15 +53,15 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
   if (_perturbation_method == "central_difference")
     for (const auto i : index_range(_nominal_values))
     {
-      _absolute_intervals[i] = _parameter_vectors[i][i] * _relative_intervals[i];
-      _parameter_vectors[i][i] = _parameter_vectors[i][i] + _absolute_intervals[i] / 2;
-      _parameter_vectors[i + 1][i] = _parameter_vectors[i + 1][i] - _absolute_intervals[i] / 2;
+      _absolute_intervals[i] = _nominal_values[i] * _relative_intervals[i];
+      _parameter_vectors[2 * i][i] += _absolute_intervals[i] / 2;
+      _parameter_vectors[2 * i + 1][i] -= _absolute_intervals[i] / 2;
     }
   else
     for (const auto i : index_range(_nominal_values))
     {
-      _absolute_intervals[i] = _parameter_vectors[i][i] * _relative_intervals[i];
-      _parameter_vectors[i + 1][i] = _parameter_vectors[i + 1][i] + _absolute_intervals[i];
+      _absolute_intervals[i] = _nominal_values[i] * _relative_intervals[i];
+      _parameter_vectors[i + 1][i] += _absolute_intervals[i];
     }
 }
 

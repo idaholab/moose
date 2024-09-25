@@ -126,12 +126,18 @@ DirectPerturbationReporterContext<DataType>::finalize()
   {
     const auto & interval = _sampler.getInterval(param_i);
 
-    const auto left_i = param_i;
+    dof_id_type left_i;
     dof_id_type right_i;
     if (_sampler.perturbationMethod() == "central_difference")
-      right_i = param_i + 1;
+    {
+      left_i = 2 * param_i;
+      right_i = 2 * param_i + 1;
+    }
     else
-      right_i = num_columns - 1;
+    {
+      left_i = param_i + 1;
+      right_i = 0;
+    }
 
     DataType sensitivity = initializeSensitivity(_data[left_i - offset]);
 
