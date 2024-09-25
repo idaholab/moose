@@ -26,9 +26,9 @@ DirectPerturbationSampler::validParams()
       {0.01},
       "The numbers by which the nominal values are multiplied to get a perturbed value.");
   MooseEnum perturbation_type("central_difference forward_difference", "central_difference");
-  params.addParam<MooseEnum>(
-      "perturbation_method", perturbation_type,
-      "The perturbation method to use for creating samples.");
+  params.addParam<MooseEnum>("perturbation_method",
+                             perturbation_type,
+                             "The perturbation method to use for creating samples.");
 
   return params;
 }

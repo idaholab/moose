@@ -3,7 +3,7 @@
   issues = '#28671'
 
   [central_difference]
-    requirement = 'The system shall support the ability to compute direct perturbation-based sensitivity values '
+    requirement = 'The system shall support the ability to compute direct perturbation-based sensitivity values with central differencing '
     [distributed]
       type = JSONDiff
       input = dp_main.i
@@ -23,7 +23,7 @@
     []
   []
   [forward_difference]
-    requirement = 'The system shall support the ability to compute direct perturbation-based sensitivity values '
+    requirement = 'The system shall support the ability to compute direct perturbation-based sensitivity values with forward differencing '
     [distributed]
       type = JSONDiff
       input = dp_main.i
