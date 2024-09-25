@@ -73,6 +73,9 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   _check_apps[document_path] = AppFactory::instance().createShared(
       _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
+  // add updated document text to map associated with current document path
+  _path_to_text[document_path] = document_text;
+
   // enable exceptions to be thrown for errors and cache initial setting
   bool cached_throw_on_error = Moose::_throw_on_error;
   Moose::_throw_on_error = true;
@@ -1212,7 +1215,7 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
   pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
 
   // input check expanded any brace expressions in cached tree so reprocess
-  std::stringstream input_errors, input_stream(document_text);
+  std::stringstream input_errors, input_stream(getDocumentText());
   wasp::DefaultHITInterpreter interpreter(input_errors);
 
   // return without adding any formatting text edits if input parsing fails
@@ -1527,4 +1530,11 @@ MooseServer::getCheckApp() const
 {
   mooseAssert(_check_apps.count(document_path), "No check app for path");
   return _check_apps.at(document_path);
+}
+
+const std::string &
+MooseServer::getDocumentText() const
+{
+  mooseAssert(_path_to_text.count(document_path), "No text for path");
+  return _path_to_text.at(document_path);
 }

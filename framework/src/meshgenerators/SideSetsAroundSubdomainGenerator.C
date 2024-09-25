@@ -28,7 +28,9 @@ SideSetsAroundSubdomainGenerator::validParams()
   params.renameParam("included_subdomains", "block", "The blocks around which to create sidesets");
   params.makeParamRequired<std::vector<SubdomainName>>("block");
 
+  // Not implemented, but could be implemented
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
+  params.suppressParameter<std::vector<BoundaryName>>("excluded_boundaries");
   params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
 
   params.addClassDescription(

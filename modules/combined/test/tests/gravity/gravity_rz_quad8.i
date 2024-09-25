@@ -50,7 +50,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   strain = FINITE
   add_variables = true
   generate_output = 'stress_xx stress_yy stress_xy'

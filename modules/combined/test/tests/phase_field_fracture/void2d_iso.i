@@ -7,9 +7,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [./SolidMechanics]
+    [./QuasiStatic]
       [./All]
         add_variables = true
         strain = SMALL
@@ -17,6 +17,8 @@
       [../]
     [../]
   [../]
+[]
+[Modules]
   [./PhaseField]
     [./Nonconserved]
       [./c]

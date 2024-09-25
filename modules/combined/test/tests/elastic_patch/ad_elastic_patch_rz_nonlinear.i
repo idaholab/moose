@@ -40,7 +40,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   strain = FINITE
   decomposition_method = EigenSolution
   add_variables = true

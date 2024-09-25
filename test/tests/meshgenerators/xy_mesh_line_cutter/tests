@@ -20,7 +20,7 @@
     requirement = 'The system shall be able to cut a simple one-subdomain mesh using the node moving method.'
     allow_warnings = true
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
-                Mesh/mlc/input_mesh_external_boundary_id=100 
+                Mesh/mlc/input_mesh_external_boundary_id=100
                 --mesh-only simple_cut_node.e'
   []
   [multi_block_cut_elem]
@@ -52,7 +52,7 @@
     recover = false
     requirement = 'The system shall be able to cut a multi-subdomain mesh using the node moving method.'
     allow_warnings = true
-    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE 
+    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
                 --mesh-only multi_block_cut_node.e'
   []
   [multi_block_cut_node_other_boundaries]
@@ -63,73 +63,93 @@
     recover = false
     requirement = 'The system shall be able to cut a multi-subdomain mesh using the node moving method with interface boundaries that need to conform.'
     allow_warnings = true
-    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE 
+    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
                 Mesh/mlc/other_boundaries_to_conform="12 23 34 45"
                 --mesh-only multi_block_cut_node_other_boundaries.e'
   []
-  [err_non_2d_mesh]
-    type = 'RunException'
-    input = 'simple_cut.i'
-    mesh_mode = 'REPLICATED'
-    expect_err = 'Only 2D meshes are supported'
-    requirement = 'The system shall throw an error if the input mesh is not 2D.'
-    cli_args = 'Mesh/gmg/dim=3
-                --mesh-only simple_cut_err.e'
+  [errors]
+    requirement = 'The system shall error'
+    issues = '#23844 #22117'
+    [err_non_2d_mesh]
+      type = 'RunException'
+      input = 'simple_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'Only 2D meshes are supported'
+      detail = 'if the input mesh is not 2D,'
+      cli_args = 'Mesh/gmg/dim=3
+                  --mesh-only simple_cut_err.e'
+    []
+    [err_pre_exist_block_name_elem]
+      type = 'RunException'
+      input = 'err_multi_block_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'The new subdomain name already exists in the mesh'
+      detail = 'if the given name of the triangle element block, created during mesh line cutting, already exists in the input mesh, in the element cutting mode,'
+      allow_warnings = true
+      cli_args = '--mesh-only err_multi_block_cut.e'
+    []
+    [err_pre_exist_block_name_node]
+      type = 'RunException'
+      input = 'err_multi_block_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'The new subdomain name already exists in the mesh'
+      detail = 'if the given name of the triangular element block, created during mesh line cutting, already exists in the input mesh in the node moving mode,'
+      allow_warnings = true
+      cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
+                  --mesh-only err_multi_block_cut.e'
+    []
+    [err_missing_external_bdy]
+      type = 'RunException'
+      input = 'simple_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'Boundary must exist in input mesh'
+      detail = 'if the input mesh does not contain the user-specified external boundary,'
+      cli_args = 'Mesh/mlc/input_mesh_external_boundary_id=123 --mesh-only'
+    []
+    [err_missing_bdy_to_conform]
+      type = 'RunException'
+      input = 'simple_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'Boundary \'123\' must exist in input mesh'
+      detail = 'if the input mesh does not contain the user-specified boundary to conform,'
+      cli_args = 'Mesh/mlc/other_boundaries_to_conform=123 --mesh-only'
+    []
+    [err_wrong_line_params_size]
+      type = 'RunException'
+      input = 'simple_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'this parameter must have three elements.'
+      detail = 'if the size of the cut line parameters is not three,'
+      cli_args = 'Mesh/mlc/cut_line_params="1 1 1 1"
+                  --mesh-only simple_cut_err.e'
+    []
+    [err_wrong_line_params_value]
+      type = 'RunException'
+      input = 'simple_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'At lease one of the first two elements must be non-zero.'
+      detail = 'if the cut line parameters is not valid to define a line,'
+      cli_args = 'Mesh/mlc/cut_line_params="0 0 1"
+                  --mesh-only simple_cut_err.e'
+    []
+    [err_no_external_boundary_id]
+      type = 'RunException'
+      input = 'simple_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'This parameter must be provided if'
+      detail = 'if the external boundary id is not provided when the node moving method is used,'
+      cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
+                  --mesh-only simple_cut_err.e'
+    []
+    [err_tri_improve_for_node_moving]
+      type = 'RunException'
+      input = 'simple_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'This parameter is not supported when'
+      detail = 'if the triangle element improvement is enabled under the node moving mode.'
+      cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
+                  Mesh/mlc/improve_tri_elements=true
+                  --mesh-only simple_cut_err.e'
+    []
   []
-  [err_pre_exist_block_name_elem]
-    type = 'RunException'
-    input = 'err_multi_block_cut.i'
-    mesh_mode = 'REPLICATED'
-    expect_err = 'The new subdomain name already exists in the mesh'
-    requirement = 'The system shall throw an error if the given name of the triangle element block, created during mesh line cutting, already exists in the input mesh, in the element cutting mode.'
-    allow_warnings = true
-    cli_args = '--mesh-only err_multi_block_cut.e'
-  []
-  [err_pre_exist_block_name_node]
-    type = 'RunException'
-    input = 'err_multi_block_cut.i'
-    mesh_mode = 'REPLICATED'
-    expect_err = 'The new subdomain name already exists in the mesh'
-    requirement = 'The system shall throw an error if the given name of the triangular element block, created during mesh line cutting, already exists in the input mesh in the node moving mode.'
-    allow_warnings = true
-    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
-                --mesh-only err_multi_block_cut.e'
-  []
-  [err_wrong_line_params_size]
-    type = 'RunException'
-    input = 'simple_cut.i'
-    mesh_mode = 'REPLICATED'
-    expect_err = 'this parameter must have three elements.'
-    requirement = 'The system shall throw an error if the size of the cut line parameters is not three.'
-    cli_args = 'Mesh/mlc/cut_line_params="1 1 1 1"
-                --mesh-only simple_cut_err.e'
-  []
-  [err_wrong_line_params_value]
-    type = 'RunException'
-    input = 'simple_cut.i'
-    mesh_mode = 'REPLICATED'
-    expect_err = 'At lease one of the first two elements must be non-zero.'
-    requirement = 'The system shall throw an error if the cut line parameters is not valid to define a line.'
-    cli_args = 'Mesh/mlc/cut_line_params="0 0 1"
-                --mesh-only simple_cut_err.e'
-  []
-  [err_no_external_boundary_id]
-    type = 'RunException'
-    input = 'simple_cut.i'
-    mesh_mode = 'REPLICATED'
-    expect_err = 'This parameter must be provided if'
-    requirement = 'The system shall throw an error if the external boundary id is not provided when the node moving method is used.'
-    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
-                --mesh-only simple_cut_err.e'
-  []
-  [err_tri_improve_for_node_moving]
-    type = 'RunException'
-    input = 'simple_cut.i'
-    mesh_mode = 'REPLICATED'
-    expect_err = 'This parameter is not supported when'
-    requirement = 'The system shall throw an error if the triangle element improvement is enabled under the node moving mode.'
-    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
-                Mesh/mlc/improve_tri_elements=true
-                --mesh-only simple_cut_err.e'
-  []  
-[] 
+[]

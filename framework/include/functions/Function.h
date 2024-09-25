@@ -143,9 +143,10 @@ public:
   virtual Real average() const;
 
   void timestepSetup() override;
-  void residualSetup() override;
-  void jacobianSetup() override;
-  void customSetup(const ExecFlagType & exec_type) override;
+  // We will only allow initialSetup() and timestepSetup() to be overriden
+  void residualSetup() override final;
+  void jacobianSetup() override final;
+  void customSetup(const ExecFlagType & exec_type) override final;
 
   bool hasBlocks(SubdomainID) const override { return true; }
 

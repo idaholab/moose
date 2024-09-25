@@ -65,7 +65,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/all]
+[Physics/SolidMechanics/QuasiStatic/all]
   strain = FINITE
   add_variables = true
   save_in = 'saved_x saved_y'

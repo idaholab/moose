@@ -29,7 +29,7 @@ ElementsToTetrahedronsConverter::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>(
-      "input", "The input mesh that needs to be converted to tetrahedrals.");
+      "input", "The input mesh that needs to be converted to tetrahedral elements.");
 
   params.addClassDescription(
       "This ElementsToTetrahedronsConverter object is designed to convert all the elements in a 3D "

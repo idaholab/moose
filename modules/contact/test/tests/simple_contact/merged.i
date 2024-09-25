@@ -7,7 +7,7 @@
   file = merged.e
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     add_variables = true
     incremental = true

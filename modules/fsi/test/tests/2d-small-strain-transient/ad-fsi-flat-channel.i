@@ -172,7 +172,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [solid_domain]
     strain = SMALL
     incremental = false

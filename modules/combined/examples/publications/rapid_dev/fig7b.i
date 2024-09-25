@@ -89,7 +89,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/all]
+[Physics/SolidMechanics/QuasiStatic/all]
   add_variables = true
   eigenstrain_names = eigenstrain
 []
