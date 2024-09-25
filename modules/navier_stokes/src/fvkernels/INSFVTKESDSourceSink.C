@@ -175,7 +175,7 @@ INSFVTKESDSourceSink::computeQpResidual()
       const auto omegaLog =
           std::sqrt(TKE) / (std::pow(_C_mu, 0.25) * NS::von_karman_constant * distance_vec[i]);
 
-      destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog));
+      destruction += std::sqrt(Utility::pow<2>(omegaVis) + Utility::pow<2>(omegaLog)) / tot_weight;
     }
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;
