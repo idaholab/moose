@@ -66,6 +66,13 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
 }
 
 Real
+DirectPerturbationSampler::getInterval(const Real param_index) const
+{
+  mooseAssert(param_index < _absolute_intervals.size(), "We don't have the required interval!");
+  return _absolute_intervals[param_index];
+}
+
+Real
 DirectPerturbationSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   return _parameter_vectors[row_index][col_index];

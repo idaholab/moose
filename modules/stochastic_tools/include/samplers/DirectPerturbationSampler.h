@@ -21,7 +21,7 @@ public:
 
   DirectPerturbationSampler(const InputParameters & parameters);
 
-  const MooseEnum & perturbationMethod() { return _perturbation_method; }
+  const MooseEnum & perturbationMethod() const { return _perturbation_method; }
 
   Real getInterval(const Real param_index) const;
 

@@ -122,8 +122,6 @@ DirectPerturbationReporterContext<DataType>::finalize()
 
   const dof_id_type num_columns = _sampler.getNumberOfCols();
 
-  DataType value(_sampler.getNumberOfCols());
-
   for (const auto param_i : make_range(num_columns))
   {
     const auto & interval = _sampler.getInterval(param_i);
@@ -135,15 +133,112 @@ DirectPerturbationReporterContext<DataType>::finalize()
     else
       right_i = num_columns - 1;
 
-    if (_sampler.getLocalRowBegin() <= left_i && left_i < _sampler.getLocalRowEnd())
-      value[param_i] += _data[left_i];
+    DataType sensitivity = initializeSensitivity(_data[left_i - offset]);
 
     if (_sampler.getLocalRowBegin() <= left_i && left_i < _sampler.getLocalRowEnd())
-      value[param_i] -= _data[right_i];
+      addSensitivityConstribution(sensitivity, _data[left_i - offset], interval);
 
-    value[param_i] = value[param_i] / interval;
+    if (_sampler.getLocalRowBegin() <= right_i && right_i < _sampler.getLocalRowEnd())
+      addSensitivityConstribution(sensitivity, _data[right_i - offset], -interval);
+
+    this->_state.value()[param_i] = sensitivity;
   }
+}
 
-  this->comm().sum(value);
-  this->_state.value() = value;
+template <typename DataType>
+void
+DirectPerturbationReporterContext<DataType>::addSensitivityConstribution(DataType & add_to,
+                                                                         const DataType & to_add,
+                                                                         const Real interval) const
+{
+  // DataType is a numeric type that we can sum (excluding bool)
+  if constexpr (std::is_arithmetic<DataType>::value && !std::is_same<DataType, bool>::value)
+  {
+    add_to += to_add / interval;
+    return;
+  }
+  // DataType is a vector type
+  else if constexpr (is_std_vector<DataType>::value)
+  {
+    // It can still be anything in the vector elements, so we will check this later
+    using VectorValueType = typename DataType::value_type;
+
+    mooseAssert(add_to.size() == to_add.size(), "The vectors for summation have different sizes!");
+
+    // Check if the vector elements are of a numeric type
+    if constexpr (std::is_arithmetic<VectorValueType>::value &&
+                  !std::is_same<VectorValueType, bool>::value)
+    {
+      for (const auto index : index_range(add_to))
+        add_to[index] += to_add[index] / interval;
+      return;
+    }
+    // Check if the vector elements are also vectors
+    else if constexpr (is_std_vector<VectorValueType>::value)
+    {
+      // This is as deep as we will go for now
+      using InnerValueType = typename VectorValueType::value_type;
+
+      // Check if the inner vector elements are of a numeric type
+      if constexpr (std::is_arithmetic<InnerValueType>::value &&
+                    !std::is_same<InnerValueType, bool>::value)
+      {
+        // Iterate over each inner vector in the outer vector
+        for (auto & inner_index : index_range(add_to))
+        {
+          mooseAssert(add_to[inner_index].size() == to_add[inner_index].size(),
+                      "The vectors for summation have different sizes!");
+          for (const auto index : index_range(add_to[inner_index]))
+            add_to[inner_index][index] += to_add[inner_index][index] / interval;
+        }
+        return;
+      }
+    }
+  }
+  else
+    static_assert(Moose::always_false<DataType>,
+                  "Sensitivity coefficient computation is not implemented for the given type!");
+}
+
+template <typename DataType>
+DataType
+DirectPerturbationReporterContext<DataType>::initializeSensitivity(
+    const DataType & example_output) const
+{
+  // DataType is a numeric type that we can sum (excluding bool)
+  if constexpr (std::is_arithmetic<DataType>::value && !std::is_same<DataType, bool>::value)
+  {
+    return 0.0;
+  }
+  // DataType is a vector type
+  else if constexpr (is_std_vector<DataType>::value)
+  {
+    // It can still be anything in the vector elements, so we will check this later
+    using VectorValueType = typename DataType::value_type;
+
+    // Check if the vector elements are of a numeric type
+    if constexpr (std::is_arithmetic<VectorValueType>::value &&
+                  !std::is_same<VectorValueType, bool>::value)
+      return std::vector<VectorValueType>(example_output.size(), 0);
+    // Check if the vector elements are also vectors
+    else if constexpr (is_std_vector<VectorValueType>::value)
+    {
+      // This is as deep as we will go for now
+      using InnerValueType = typename VectorValueType::value_type;
+
+      // Check if the inner vector elements are of a numeric type
+      if constexpr (std::is_arithmetic<InnerValueType>::value &&
+                    !std::is_same<InnerValueType, bool>::value)
+      {
+        auto return_vector = std::vector<VectorValueType>(example_output.size());
+        // Iterate over each inner vector in the outer vector
+        for (auto & inner_index : index_range(example_output))
+          return_vector[inner_index].resize(example_output.size(), 0.0);
+        return return_vector;
+      }
+    }
+  }
+  else
+    static_assert(Moose::always_false<DataType>,
+                  "Sensitivity coefficient initialization is not implemented for the given type!");
 }

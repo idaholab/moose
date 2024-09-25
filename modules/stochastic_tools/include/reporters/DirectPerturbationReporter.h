@@ -59,6 +59,16 @@ public:
   }
 
 private:
+  /// Compute direct perturbation index, split into a separate function due to
+  /// the different operators on vectors and scalars
+  void addSensitivityConstribution(DataType & add_to,
+                                   const DataType & to_add,
+                                   const Real interval) const;
+
+  /// Compute direct perturbation index, split into a separate function due to
+  /// the different operators on vectors and scalars
+  DataType initializeSensitivity(const DataType & example_output) const;
+
   /// Reference to the direct perturbation sampler
   DirectPerturbationSampler & _sampler;
 
