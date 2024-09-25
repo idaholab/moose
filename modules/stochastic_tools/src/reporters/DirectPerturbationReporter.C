@@ -106,20 +106,7 @@ template <typename DataType>
 void
 DirectPerturbationReporterContext<DataType>::finalize()
 {
-  dof_id_type offset;
-  if (_data.size() == _sampler.getNumberOfRows())
-    offset = _sampler.getLocalRowBegin();
-  else if (_data.size() == _sampler.getNumberOfLocalRows())
-    offset = 0;
-  else
-    mooseError("Data size inconsistency. Expected data vector to have ",
-               _sampler.getNumberOfLocalRows(),
-               " (local) or ",
-               _sampler.getNumberOfRows(),
-               " (global) elements, but actually has ",
-               _data.size(),
-               " elements. Are you using the same sampler?");
-
+  const dof_id_type offset = _sampler.getLocalRowBegin();
   const dof_id_type num_columns = _sampler.getNumberOfCols();
 
   for (const auto param_i : make_range(num_columns))
@@ -139,16 +126,26 @@ DirectPerturbationReporterContext<DataType>::finalize()
       right_i = 0;
     }
 
-    DataType sensitivity = initializeSensitivity(_data[left_i - offset]);
+    const bool left_i_in_owned_range =
+        _sampler.getLocalRowBegin() <= left_i && left_i < _sampler.getLocalRowEnd();
+    const bool right_i_in_owned_range =
+        _sampler.getLocalRowBegin() <= right_i && right_i < _sampler.getLocalRowEnd();
 
-    if (_sampler.getLocalRowBegin() <= left_i && left_i < _sampler.getLocalRowEnd())
-      addSensitivityConstribution(sensitivity, _data[left_i - offset], interval);
+    if (left_i_in_owned_range || right_i_in_owned_range)
+    {
+      const dof_id_type copy_i = left_i_in_owned_range ? left_i - offset : right_i - offset;
+      this->_state.value()[param_i] = initializeSensitivity(_data[copy_i]);
+    }
 
-    if (_sampler.getLocalRowBegin() <= right_i && right_i < _sampler.getLocalRowEnd())
-      addSensitivityConstribution(sensitivity, _data[right_i - offset], -interval);
+    if (left_i_in_owned_range)
+      addSensitivityConstribution(this->_state.value()[param_i], _data[left_i - offset], interval);
 
-    this->_state.value()[param_i] = sensitivity;
+    if (right_i_in_owned_range)
+      addSensitivityConstribution(
+          this->_state.value()[param_i], _data[right_i - offset], -interval);
   }
+
+  this->vectorSum();
 }
 
 template <typename DataType>
