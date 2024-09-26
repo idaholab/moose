@@ -109,23 +109,22 @@ EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
 
 void
 EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
-                           mfem::BlockVector & trueX,
-                           mfem::BlockVector & trueRHS)
+                                 mfem::BlockVector & trueX,
+                                 mfem::BlockVector & trueRHS)
 {
 
-  if(_assembly_level == mfem::AssemblyLevel::LEGACY)
+  if (_assembly_level == mfem::AssemblyLevel::LEGACY)
   {
     FormLegacySystem(op, trueX, trueRHS);
   }
   else
   {
-    MFEM_VERIFY(_test_var_names.size() == 1, "Non-legacy assembly is only supported for single-variable systems");
+    MFEM_VERIFY(_test_var_names.size() == 1,
+                "Non-legacy assembly is only supported for single-variable systems");
     MFEM_VERIFY(_mblfs.size() != 0, "Non-legacy assembly is only supported for square systems");
     FormSystem(op, trueX, trueRHS);
   }
-      
 }
-
 
 void
 EquationSystem::FormSystem(mfem::OperatorHandle & op,
@@ -137,17 +136,15 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
   auto lf = _lfs.Get(test_var_name);
   mfem::BlockVector aux_x, aux_rhs;
   mfem::OperatorPtr * aux_a = new mfem::OperatorPtr;
-  
-  blf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *(_xs.at(0)), *lf, *aux_a, aux_x, aux_rhs);
-  
+
+  blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_xs.at(0)), *lf, *aux_a, aux_x, aux_rhs);
+
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
 
   op.Reset(aux_a->Ptr());
-
 }
 
 void
@@ -167,8 +164,7 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto lf = _lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix aux_a;
-    blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_xs.at(i)), *lf, aux_a, aux_x, aux_rhs);
+    blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_xs.at(i)), *lf, aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = new const mfem::HypreParMatrix(aux_a);
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -500,8 +496,8 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
 
 void
 TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
-                                              mfem::BlockVector & truedXdt,
-                                              mfem::BlockVector & trueRHS)
+                                        mfem::BlockVector & truedXdt,
+                                        mfem::BlockVector & trueRHS)
 {
   MFEM_VERIFY(0, "Non-legacy assembly not yet implemented for time-dependent systems");
 }
