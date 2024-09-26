@@ -1,6 +1,6 @@
 # ADTotalFreeEnergy
 
-AD version of [TotalFreeEnergy.md] that uses AD material properties
+AD version of TotalFreeEnergy that uses AD material properties
 
 ## Overview
 
