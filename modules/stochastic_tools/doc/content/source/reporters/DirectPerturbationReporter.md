@@ -23,7 +23,7 @@ The following example computes the local sensitivity coefficients of three linea
 \end{equation}
 
 \begin{equation}
-  f_2(\mu_1,\mu_2,\mu_2)=7\mu_1+8\mu_2+9\mu_3
+  f_3(\mu_1,\mu_2,\mu_2)=7\mu_1+8\mu_2+9\mu_3
 \end{equation}
 
 !listing reporters/directperturbation/dp_main.i block=Samplers

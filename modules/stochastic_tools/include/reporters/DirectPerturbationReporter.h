@@ -17,6 +17,11 @@
 // Forward declaration
 class DirectPerturbationSampler;
 
+/**
+ * Reporter class for computing and displaying local sensitivity
+ * coefficients around a nominal value using a direct perturbation
+ * method.
+ */
 class DirectPerturbationReporter : public GeneralReporter
 {
 public:

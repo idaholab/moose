@@ -9,9 +9,9 @@ computing local sensitivity coefficients using the finite
 difference approximation of the derivatives at a certain
 point in the parameter domain. The coordinates of the reference
 location can be supplied through the [!param](/Samplers/DirectPerturbationSampler/nominal_parameter_values) parameter.
-The parameter vector holding the paraemters can be denoted by:
+The parameter vector holding the parameters can be denoted by:
 $\vec{\mu}=\left[\mu_1,\mu_2,\mu_3,...,\mu_{N_p}\right]^T$, where
-$N_p$ is the number of paraemters. The direct perturbation-based
+$N_p$ is the number of parameters. The direct perturbation-based
 sensitivity coefficients can then be computed using the
 following two methods:
 
@@ -65,7 +65,7 @@ parallel.
 ## Example Input Syntax
 
 the following input generates perturbed samples for a
-3-dimesnionsal parameter space around a nominal value
+3-dimensional parameter space around a nominal value
 using the central difference approach.
 
 !listing samplers/directperturbation/directperturbation.i block=Samplers

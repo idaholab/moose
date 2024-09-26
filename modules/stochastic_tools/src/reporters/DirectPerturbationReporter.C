@@ -19,12 +19,13 @@ DirectPerturbationReporter::validParams()
   params.addClassDescription("Compute local sensitivities using the direct perturbation method.");
 
   params.addRequiredParam<SamplerName>("sampler",
-                                       "Direct PErturbation sampler used to generate samples.");
+                                       "Direct Perturbation sampler used to generate samples.");
   params.addParam<std::vector<VectorPostprocessorName>>(
       "vectorpostprocessors",
-      "List of VectorPostprocessor(s) to utilized for sensitivity computations.");
+      {},
+      "List of VectorPostprocessor(s) to utilize for sensitivity computations.");
   params.addParam<std::vector<ReporterName>>(
-      "reporters", {}, "List of Reporter values to utilized for sensitivity computations.");
+      "reporters", {}, "List of Reporter values to utilize for sensitivity computations.");
 
   return params;
 }
@@ -34,9 +35,8 @@ DirectPerturbationReporter::DirectPerturbationReporter(const InputParameters & p
     _sampler(getSampler<DirectPerturbationSampler>("sampler")),
     _initialized(false)
 {
-  if ((!isParamValid("reporters") && !isParamValid("vectorpostprocessors")) ||
-      (getParam<std::vector<ReporterName>>("reporters").empty() &&
-       getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors").empty()))
+  if (getParam<std::vector<ReporterName>>("reporters").empty() &&
+      getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors").empty())
     mooseError(
         "The 'vectorpostprocessors' and/or 'reporters' parameters must be defined and non-empty.");
 }
@@ -49,33 +49,29 @@ DirectPerturbationReporter::initialize()
     return;
 
   // Sensitivities from Reporters
-  if (isParamValid("reporters"))
+  std::vector<std::string> unsupported_types;
+  for (const auto & r_name : getParam<std::vector<ReporterName>>("reporters"))
   {
-    std::vector<std::string> unsupported_types;
-    for (const auto & r_name : getParam<std::vector<ReporterName>>("reporters"))
-    {
-      if (hasReporterValueByName<std::vector<Real>>(r_name))
-        declareValueHelper<Real>(r_name);
-      else if (hasReporterValueByName<std::vector<std::vector<Real>>>(r_name))
-        declareValueHelper<std::vector<Real>>(r_name);
-      else
-        unsupported_types.push_back(r_name.getCombinedName());
-    }
-
-    if (!unsupported_types.empty())
-      paramError("reporters",
-                 "The following reporter value(s) do not have a type supported by the "
-                 "DirectPerturbationReporter:\n",
-                 MooseUtils::join(unsupported_types, ", "));
+    if (hasReporterValueByName<std::vector<Real>>(r_name))
+      declareValueHelper<Real>(r_name);
+    else if (hasReporterValueByName<std::vector<std::vector<Real>>>(r_name))
+      declareValueHelper<std::vector<Real>>(r_name);
+    else
+      unsupported_types.push_back(r_name.getCombinedName());
   }
 
-  // Sensitivities from VPP
-  if (isParamValid("vectorpostprocessors"))
-    for (const auto & vpp_name :
-         getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors"))
-      for (const auto & vec_name :
-           _fe_problem.getVectorPostprocessorObjectByName(vpp_name).getVectorNames())
-        declareValueHelper<Real>(ReporterName(vpp_name, vec_name));
+  if (!unsupported_types.empty())
+    paramError("reporters",
+               "The following reporter value(s) do not have a type supported by the "
+               "DirectPerturbationReporter:\n",
+               MooseUtils::join(unsupported_types, ", "));
+
+  // Sensitivities from VPPs
+  for (const auto & vpp_name :
+       getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors"))
+    for (const auto & vec_name :
+         _fe_problem.getVectorPostprocessorObjectByName(vpp_name).getVectorNames())
+      declareValueHelper<Real>(ReporterName(vpp_name, vec_name));
   _initialized = true;
 }
 
@@ -202,6 +198,9 @@ DirectPerturbationReporterContext<DataType>::addSensitivityConstribution(DataTyp
         }
         return;
       }
+      else
+        static_assert(Moose::always_false<DataType>,
+                      "Sensitivity coefficient computation is not implemented for the given type!");
     }
   }
   else
@@ -244,6 +243,9 @@ DirectPerturbationReporterContext<DataType>::initializeSensitivity(
         return return_vector;
       }
     }
+    else
+      static_assert(Moose::always_false<DataType>,
+                    "Sensitivity coefficient computation is not implemented for the given type!");
   }
   else
     static_assert(Moose::always_false<DataType>,
