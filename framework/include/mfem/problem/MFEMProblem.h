@@ -170,13 +170,12 @@ protected:
   void addKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
   {
     using namespace platypus;
-
-    EquationSystemProblemBuilderInterface * eqn_system_problem_builder{nullptr};
-
-    if ((eqn_system_problem_builder =
-             dynamic_cast<EquationSystemProblemBuilderInterface *>(mfem_problem_builder.get())))
+    EquationSystemInterface * eqn_system{nullptr};
+    eqn_system = dynamic_cast<platypus::EquationSystemInterface *>(&getProblemData());
+    if (eqn_system)
     {
-      eqn_system_problem_builder->AddKernel(std::move(var_name), std::move(kernel));
+      eqn_system->GetEquationSystem()->AddTrialVariableNameIfMissing(var_name);
+      eqn_system->GetEquationSystem()->AddKernel(var_name, std::move(kernel));
     }
     else
     {
@@ -187,5 +186,4 @@ protected:
 
   platypus::PropertyManager _properties;
   std::shared_ptr<platypus::Problem> _problem_data{nullptr};
-  std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
 };
