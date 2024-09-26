@@ -67,6 +67,12 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   constexpr int MAX_ITERS{50};
   constexpr Real REL_TOLERANCE{1e-6};
 
+  // Check inputs
+  mooseAssert(mu > 0, "Need a strictly positive viscosity");
+  mooseAssert(rho > 0, "Need a strictly positive density");
+  mooseAssert(u > 0, "Need a strictly positive velocity");
+  mooseAssert(dist > 0, "Need a strictly positive wall distance");
+
   const ADReal nu = mu / rho;
 
   // Wall-function linearized guess
@@ -76,7 +82,8 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   const ADReal & c_c = u;
 
   /// This is important to reduce the number of nonlinear iterations
-  ADReal u_star = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
+  ADReal u_star =
+      std::max(1e-20, (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c));
 
   // Newton-Raphson method to solve for u_star (friction velocity).
   for (int i = 0; i < MAX_ITERS; ++i)
@@ -113,8 +120,14 @@ findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   constexpr int MAX_ITERS{10};
   constexpr Real REL_TOLERANCE{1e-2};
 
+  // Check inputs
+  mooseAssert(mu > 0, "Need a strictly positive viscosity");
+  mooseAssert(u > 0, "Need a strictly positive velocity");
+  mooseAssert(rho > 0, "Need a strictly positive density");
+  mooseAssert(dist > 0, "Need a strictly positive wall distance");
+
   Real yPlusLast = 0.0;
-  ADReal yPlus = dist * u * rho / mu; // Assign intitial value to laminar
+  ADReal yPlus = dist * u * rho / mu; // Assign initial value to laminar
   const Real rev_yPlusLam = 1.0 / yPlus.value();
   const ADReal kappa_time_Re = NS::von_karman_constant * u * dist / (mu / rho);
   unsigned int iters = 0;
@@ -122,11 +135,13 @@ findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   do
   {
     yPlusLast = yPlus.value();
+    // Negative y plus does not make sense
+    yPlus = std::max(NS::min_y_plus, yPlus);
     yPlus = (kappa_time_Re + yPlus) / (1.0 + std::log(NS::E_turb_constant * yPlus));
   } while (std::abs(rev_yPlusLam * (yPlus.value() - yPlusLast)) > REL_TOLERANCE &&
            ++iters < MAX_ITERS);
 
-  return std::max(0.0, yPlus);
+  return std::max(NS::min_y_plus, yPlus);
 }
 
 ADReal
@@ -139,7 +154,7 @@ computeSpeed(const ADRealVectorValue & velocity)
   return isZero(velocity) ? 1e-42 : velocity.norm();
 }
 
-/// Bounded element maps for wall treatement
+/// Bounded element maps for wall treatment
 void
 getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
                        const FEProblemBase & fe_problem,
@@ -167,7 +182,7 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
   }
 }
 
-/// Bounded element face distances for wall treatement
+/// Bounded element face distances for wall treatment
 void
 getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                 const FEProblemBase & fe_problem,
@@ -197,7 +212,7 @@ getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
       }
 }
 
-/// Face arguments to wall-bounded faces for wall tretement
+/// Face arguments to wall-bounded faces for wall treatment
 void
 getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
                    const FEProblemBase & fe_problem,

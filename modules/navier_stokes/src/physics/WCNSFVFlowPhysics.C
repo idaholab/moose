@@ -66,6 +66,15 @@ WCNSFVFlowPhysics::validParams()
 
   // Momentum boundary conditions are important for advection problems as well
   params += NSFVBase::commonMomentumBoundaryTypesParams();
+  params.addParam<bool>(
+      "include_deviatoric_stress",
+      false,
+      "Whether to include the full expansion (the transposed term as well) of the stress tensor");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "momentum_wall_functors",
+      {},
+      "Functors for each component of the velocity value on walls. This is only necessary for the "
+      "fixed-velocity momentum wall types.");
 
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
@@ -120,7 +129,8 @@ WCNSFVFlowPhysics::validParams()
                               "Inlet boundary conditions");
   params.addParamNamesToGroup("outlet_boundaries momentum_outlet_types pressure_functors",
                               "Outlet boundary conditions");
-  params.addParamNamesToGroup("wall_boundaries momentum_wall_types", "Wall boundary conditions");
+  params.addParamNamesToGroup("wall_boundaries momentum_wall_types momentum_wall_functors",
+                              "Wall boundary conditions");
   params.addParamNamesToGroup("coupled_turbulence_physics", "Coupled Physics");
   params.addParamNamesToGroup(
       "porosity_interface_pressure_treatment pressure_allow_expansion_on_bernoulli_faces "
@@ -174,6 +184,7 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
     _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
+    _momentum_wall_functors(getParam<std::vector<MooseFunctorName>>("momentum_wall_functors")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions")),
     _friction_blocks(getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")),
@@ -619,10 +630,18 @@ WCNSFVFlowPhysics::addINSMomentumViscousDissipationKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
   params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
+  if (getParam<bool>("include_deviatoric_stress"))
+  {
+    params.set<bool>("complete_expansion") = true;
+    const std::string u_names[3] = {"u", "v", "w"};
+    for (unsigned int i = 0; i < dimension(); ++i)
+      params.set<MooseFunctorName>(u_names[i]) = _velocity_names[i];
+  }
 
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
-
+  // Currently only Newton method for WCNSFVFlowPhysics
+  params.set<bool>("newton_solve") = true;
   for (const auto d : make_range(dimension()))
   {
     params.set<NonlinearVariableName>("variable") = _velocity_names[d];
@@ -1052,6 +1071,21 @@ WCNSFVFlowPhysics::addINSWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
 
+  // Count the number of fixed velocity wall boundaries (moving walls)
+  unsigned int num_functor_walls = 0;
+  for (const auto bc_ind : index_range(_momentum_wall_types))
+    if (_momentum_wall_types[bc_ind] == "noslip")
+      num_functor_walls++;
+  if (_momentum_wall_functors.size() &&
+      num_functor_walls * dimension() != _momentum_wall_functors.size())
+    paramError("momentum_wall_functors",
+               "If any wall functors are specified, the number of boundaries requiring a momentum "
+               "functor (times the dimension, " +
+                   std::to_string(num_functor_walls * dimension()) +
+                   ") and the number of functors specified (" +
+                   std::to_string(_momentum_wall_functors.size()) + ") must match");
+
+  unsigned int i_wall_functors = 0;
   for (unsigned int bc_ind = 0; bc_ind < _momentum_wall_types.size(); ++bc_ind)
   {
     if (_momentum_wall_types[bc_ind] == "noslip")
@@ -1063,7 +1097,10 @@ WCNSFVFlowPhysics::addINSWallsBC()
       for (const auto d : make_range(dimension()))
       {
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-        params.set<FunctionName>("function") = "0";
+        if (_momentum_wall_functors.empty())
+          params.set<FunctionName>("function") = "0";
+        else
+          params.set<FunctionName>("function") = _momentum_wall_functors[i_wall_functors++];
 
         getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
       }
@@ -1500,7 +1537,7 @@ WCNSFVFlowPhysics::getCoupledTurbulencePhysics() const
   // User passed it, just use that
   if (isParamValid("coupled_turbulence_physics"))
     return getCoupledPhysics<WCNSFVTurbulencePhysics>(
-        getParam<PhysicsName>("coupled_flow_physics"));
+        getParam<PhysicsName>("coupled_turbulence_physics"));
   // Look for any physics of the right type, and check the block restriction
   else
   {

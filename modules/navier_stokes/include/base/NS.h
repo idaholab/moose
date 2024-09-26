@@ -113,20 +113,25 @@ static const std::string drhos_dTs = "drhos_dTs";
 static const std::string dks_dTs = "dks_dTs";
 static const std::string kappa = "kappa";
 static const std::string kappa_s = "kappa_s";
-static const std::string mu_eff = "mu_eff";
 static const std::string rho_s = "rho_s";
 static const std::string cp_s = "cp_s";
 static const std::string k_s = "k_s";
 static const std::string cp = "cp";
 static const std::string cv = "cv";
 static const std::string mu = "mu";
+// Turbulent viscosity
 static const std::string mu_t = "mu_t";
+// Effective viscosity = sum of viscosities
+static const std::string mu_eff = "mu_eff";
 static const std::string k = "k";
+// Turbulence 'conductivity'
+static const std::string k_t = "k_t";
 static const std::string thermal_diffusivity = "thermal_diffusivity";
 static const std::string alpha = "alpha";
 static const std::string alpha_wall = "alpha_wall";
 static const std::string solid = "solid";
 static const std::string Prandtl = "Pr";
+static const std::string turbulent_Prandtl = "Pr_t";
 static const std::string Reynolds = "Re";
 static const std::string Reynolds_hydraulic = "Re_h";
 static const std::string Reynolds_interstitial = "Re_i";
@@ -161,10 +166,10 @@ static const std::string Z = "Z";
 static const std::string K = "K";
 static const std::string mass_flux = "mass_flux";
 
-// Turbuelnce
+// Turbulence
 
 // Turbulence variables
-static const std::string TKE = "k";
+static const std::string TKE = "tke";
 static const std::string TKED = "epsilon";
 
 /**
@@ -183,6 +188,8 @@ static constexpr Real von_karman_constant = 0.4187;
 static constexpr Real E_turb_constant = 9.793;
 // Lower limit for mu_t
 static constexpr Real mu_t_low_limit = 1.0e-8;
+// Lower limit for y_plus
+static constexpr Real min_y_plus = 1e-10;
 }
 
 namespace NS_DEFAULT_VALUES
