@@ -1432,7 +1432,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
     std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
     for (auto i : elem->edge_index_range())
       elem_edges[i] = elem->build_edge_ptr(i);
-    for (auto other_elem : mesh->active_element_ptr_range())
+    for (const auto other_elem : mesh->active_element_ptr_range())
     {
       // If they're the same element then there's no need to check for overlap
       if (elem == other_elem)
@@ -1440,8 +1440,8 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
 
       // Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges
       // will either
-      auto boundingBox1 = elem->loose_bounding_box();
-      auto boundingBox2 = other_elem->loose_bounding_box();
+      const auto boundingBox1 = elem->loose_bounding_box();
+      const auto boundingBox2 = other_elem->loose_bounding_box();
       if (!(boundingBox1.intersects(boundingBox2)))
         continue;
 
@@ -1467,7 +1467,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
 
           // Now compare edge with other_edge
           std::vector<double> intersection_coords(3);
-          bool overlap = MeshBaseDiagnosticsUtils::checkEdgeOverlap(
+          bool overlap = MeshBaseDiagnosticsUtils::checkFirstOrderEdgeOverlap(
               edge, other_edge, intersection_coords, _non_matching_edge_tol);
           if (overlap)
           {
@@ -1493,7 +1493,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       }
     }
   }
-  diagnosticsLog("Number of intersecting edges: " + Moose::stringify(num_intersecting_edges),
+  diagnosticsLog("Number of intersecting element edges: " + Moose::stringify(num_intersecting_edges),
                  _check_non_matching_edges,
                  num_intersecting_edges);
 }
