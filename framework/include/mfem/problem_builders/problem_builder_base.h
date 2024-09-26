@@ -55,7 +55,6 @@ public:
   virtual ~ProblemBuilder() = default;
 
   virtual void RegisterGridFunctions() = 0;
-  virtual void SetOperatorGridFunctions() = 0;
   virtual void ConstructOperator() = 0;
 
   virtual void InitializeKernels(){};

@@ -46,8 +46,6 @@ public:
 
   void RegisterGridFunctions() override {}
 
-  void SetOperatorGridFunctions() override;
-
   void ConstructOperator() override;
 
 protected:

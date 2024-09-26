@@ -33,12 +33,6 @@ TimeDomainProblemBuilder::RegisterGridFunctions()
 }
 
 void
-TimeDomainProblemBuilder::SetOperatorGridFunctions()
-{
-  GetProblem()->GetOperator()->SetGridFunctions();
-}
-
-void
 TimeDomainProblemBuilder::ConstructOperator()
 {
   GetProblem()->ConstructOperator();
