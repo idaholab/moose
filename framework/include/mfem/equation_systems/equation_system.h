@@ -66,7 +66,8 @@ public:
   // Build forms
   virtual void Init(platypus::GridFunctions & gridfunctions,
                     const platypus::FESpaces & fespaces,
-                    platypus::BCMap & bc_map);
+                    platypus::BCMap & bc_map,
+                    mfem::AssemblyLevel assembly_level);
   virtual void BuildLinearForms(platypus::BCMap & bc_map);
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
@@ -76,6 +77,14 @@ public:
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+
+  virtual void FormSystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & trueX,
+                                mfem::BlockVector & trueRHS);
+  virtual void FormLegacySystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & trueX,
+                                mfem::BlockVector & trueRHS);
+
 
   // Build linear system, with essential boundary conditions accounted for
   virtual void BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
@@ -133,6 +142,8 @@ protected:
       _mblf_kernels_map_map;
 
   mutable mfem::OperatorHandle _jacobian;
+
+  mfem::AssemblyLevel _assembly_level;
 };
 
 /*
@@ -159,7 +170,7 @@ public:
   virtual void AddKernel(const std::string & test_var_name,
                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel) override;
   virtual void BuildBilinearForms() override;
-  virtual void FormLinearSystem(mfem::OperatorHandle & op,
+  virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
 };
