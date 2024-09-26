@@ -22,7 +22,7 @@ public:
 
   MultiSpeciesDiffusionCG(const InputParameters & parameters);
 
-private:
+protected:
   virtual void addNonlinearVariables() override;
   virtual void addFEKernels() override;
   virtual void addFEBCs() override;

@@ -94,6 +94,11 @@ public:
   /// restriction of the Physics. More complex behavior should be implemented by overriding
   virtual void addComponent(const ActionComponent & component);
 
+  /// Return the list of nonlinear variables in this physics
+  const std::vector<VariableName> & nonlinearVariableNames() const { return _nl_var_names; };
+  /// Return the list of aux variables in this physics
+  const std::vector<VariableName> & auxVariableNames() const { return _aux_var_names; };
+
 protected:
   /// Return whether the Physics is solved using a transient
   bool isTransient() const;
@@ -128,11 +133,6 @@ protected:
 
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
-
-  /// Return the list of nonlinear variables in this physics
-  const std::vector<VariableName> & nonlinearVariableNames() const { return _nl_var_names; };
-  /// Return the list of aux variables in this physics
-  const std::vector<VariableName> & auxVariableNames() const { return _aux_var_names; };
 
   /// Keep track of the name of a nonlinear variable defined in the Physics
   void saveNonlinearVariableName(const VariableName & var_name)
