@@ -7,6 +7,7 @@
 [Problem]
   type = MFEMProblem
   device = cpu
+  assembly_level = partial
 []
 
 [FESpaces]
@@ -78,21 +79,22 @@
 []
 
 [Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
+  [cg]
+    type = MFEMCGSolver
+    print_level = 2
   []
 []
 
 [Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
+  type = MFEMCGSolver
+  preconditioner = cg
   l_tol = 1e-16
-  l_max_its = 1000  
+  l_max_its = 1000
+  print_level = 2
 []
 
 [Executioner]
-  type = MFEMSteady
-  device = cpu
+  type = Steady
 []
 
 [Outputs]

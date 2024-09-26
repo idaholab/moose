@@ -112,6 +112,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
                            mfem::BlockVector & trueX,
                            mfem::BlockVector & trueRHS)
 {
+
   if(_assembly_level == mfem::AssemblyLevel::LEGACY)
   {
     FormLegacySystem(op, trueX, trueRHS);
@@ -131,21 +132,18 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
                            mfem::BlockVector & trueRHS)
 {
 
-  mfem::OperatorPtr aux_a;
-  // Form diagonal blocks.
-  for (int i = 0; i < _test_var_names.size(); i++)
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
-    mfem::Vector aux_x, aux_rhs;
-    blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_xs.at(i)), *lf, aux_a, aux_x, aux_rhs);
-    trueX.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-  }
+  auto & test_var_name = _test_var_names.at(0);
+  auto blf = _blfs.Get(test_var_name);
+  auto lf = _lfs.Get(test_var_name);
+  mfem::Vector aux_x, aux_rhs;
+  
+  blf->FormLinearSystem(
+      _ess_tdof_lists.at(0), *(_xs.at(0)), *lf, aux_a, aux_x, aux_rhs);
+  trueX.GetBlock(0) = aux_x;
+  trueRHS.GetBlock(0) = aux_rhs;
 
-  op.Reset(aux_a.Ptr());
+  //op.Reset(aux_a.Ptr(), false);
+  op = aux_a;
 
 }
 
@@ -317,6 +315,7 @@ EquationSystem::BuildBilinearForms()
 
       for (auto & blf_kernel : blf_kernels)
       {
+        blf->SetAssemblyLevel(_assembly_level);
         blf->AddDomainIntegrator(blf_kernel->createIntegrator());
       }
     }

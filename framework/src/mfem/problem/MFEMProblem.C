@@ -6,8 +6,6 @@ InputParameters
 MFEMProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
-<<<<<<< HEAD
-=======
   params.addParam<int>(
       "vis_steps",
       1,
@@ -19,7 +17,6 @@ MFEMProblem::validParams()
       "assembly_level", "legacy", "Matrix assembly level. Options: Legacy, Full, Partial, Element");
 
 
->>>>>>> ca24d72 (Created a FormSystem that takes inn assembly type)
   return params;
 }
 
@@ -53,8 +50,55 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  getProblemData()._coefficients.AddGlobalCoefficientsFromSubdomains();
-  addMFEMNonlinearSolver();
+  _coefficients.AddGlobalCoefficientsFromSubdomains();
+
+  setAssemblyLevel();
+
+  mfem_problem_builder->SetCoefficients(_coefficients);
+
+  // NB: set to false to avoid reconstructing problem operator.
+  mfem_problem_builder->FinalizeProblem(false);
+
+  platypus::InputParameters exec_params;
+
+  Transient * _moose_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
+  if (_moose_executioner != nullptr)
+  {
+    auto mfem_transient_problem_builder =
+        std::dynamic_pointer_cast<platypus::TimeDomainProblemBuilder>(mfem_problem_builder);
+    if (mfem_transient_problem_builder == nullptr)
+    {
+      mooseError("Specified formulation does not support Transient executioners");
+    }
+
+    exec_params.SetParam("StartTime", float(_moose_executioner->getStartTime()));
+    exec_params.SetParam("TimeStep", float(dt()));
+    exec_params.SetParam("EndTime", float(_moose_executioner->endTime()));
+    exec_params.SetParam("VisualisationSteps", getParam<int>("vis_steps"));
+    exec_params.SetParam("Problem", static_cast<platypus::TimeDomainProblem *>(mfem_problem.get()));
+
+    executioner = std::make_unique<platypus::TransientExecutioner>(exec_params);
+  }
+  else if (dynamic_cast<Steady *>(_app.getExecutioner()))
+  {
+    auto mfem_steady_problem_builder =
+        std::dynamic_pointer_cast<platypus::SteadyStateProblemBuilder>(mfem_problem_builder);
+    if (mfem_steady_problem_builder == nullptr)
+    {
+      mooseError("Specified formulation does not support Steady executioners");
+    }
+
+    exec_params.SetParam("Problem",
+                         static_cast<platypus::SteadyStateProblem *>(mfem_problem.get()));
+
+    executioner = std::make_unique<platypus::SteadyExecutioner>(exec_params);
+  }
+  else
+  {
+    mooseError("Executioner used that is not currently supported by MFEMProblem");
+  }
+
+  mfem_problem->_outputs.EnableGLVis(getParam<bool>("use_glvis"));
 }
 
 void
@@ -64,9 +108,6 @@ MFEMProblem::init()
 }
 
 void
-<<<<<<< HEAD
-MFEMProblem::setMesh()
-=======
 MFEMProblem::setAssemblyLevel()
 {
   // Convert to lowercase string
@@ -88,7 +129,6 @@ MFEMProblem::setAssemblyLevel()
 
 void
 MFEMProblem::externalSolve()
->>>>>>> ca24d72 (Created a FormSystem that takes inn assembly type)
 {
   auto pmesh = std::make_shared<mfem::ParMesh>(mesh().getMFEMParMesh());
   getProblemData()._pmesh = pmesh;
