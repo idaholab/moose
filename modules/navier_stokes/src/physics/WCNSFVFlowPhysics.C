@@ -889,14 +889,18 @@ WCNSFVFlowPhysics::addINSWallsBC()
   for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
     if (momentum_wall_type == "noslip")
       num_functor_walls++;
-  if (_momentum_wall_functors.size() &&
-      num_functor_walls * dimension() != _momentum_wall_functors.size())
+  if (_momentum_wall_functors.size() && num_functor_walls != _momentum_wall_functors.size())
     paramError("momentum_wall_functors",
                "If any wall functors are specified, the number of boundaries requiring a momentum "
-               "functor (times the dimension, " +
-                   std::to_string(num_functor_walls * dimension()) +
-                   ") and the number of functors specified (" +
+               "functor (" +
+                   std::to_string(num_functor_walls) + ") and the number of functors specified (" +
                    std::to_string(_momentum_wall_functors.size()) + ") must match");
+  for (const auto & wall_functors : _momentum_wall_functors)
+    if (wall_functors.second.size() != dimension())
+      paramError("momentum_wall_functors",
+                 "Number of wall functors (" + std::to_string(wall_functors.second.size()) +
+                     ") must match dimension (" + std::to_string(dimension()) +
+                     ").\nFunctors currently specified:" + Moose::stringify(wall_functors.second));
 
   for (const auto & [boundary_name, wall_type] : _momentum_wall_types)
   {

@@ -47,7 +47,7 @@ WCNSFVFlowPhysicsBase::validParams()
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
   params += NSFVBase::commonMomentumBoundaryFluxesParams();
-  params.addParam<std::vector<MooseFunctorName>>(
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "momentum_wall_functors",
       {},
       "Functors for each component of the velocity value on walls. This is only necessary for the "
@@ -217,9 +217,10 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
     if (wall_boundaries_with_functors.size() != momentum_wall_functors.size())
       paramError("momentum_wall_functors",
                  "Size (" + std::to_string(momentum_wall_functors.size()) +
-                     ") is not the same as the number of momentum_wall wall boundaries in "
-                     "'fixed-momentum_wall/fixed-momentum_wall-zero-gradient' (size " +
+                     ") is not the same as the number of momentum_wall wall boundaries with "
+                     "no-slip boundary conditions ' (size " +
                      std::to_string(wall_boundaries_with_functors.size()) + ")");
+
     _momentum_wall_functors =
         Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
             wall_boundaries_with_functors, momentum_wall_functors);
@@ -311,8 +312,7 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
       getParam<std::vector<FunctionName>>("initial_velocity").size() != 0)
     // TODO: Rework and remove this last statement once the NSFV action is removed
     paramError("initial_velocity",
-               "The number of velocity components in the WCNSFVFlowPhysicsBase initial condition "
-               "is not " +
+               "The number of velocity components in the " + type() + " initial condition is not " +
                    std::to_string(dimension()) + " or 3!");
 
   // do not set initial conditions if we load from file

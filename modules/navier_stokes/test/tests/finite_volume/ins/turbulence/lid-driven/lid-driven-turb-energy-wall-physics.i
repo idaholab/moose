@@ -74,7 +74,7 @@ wall_treatment_tem = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_li
 
         wall_boundaries = 'left right bottom top'
         momentum_wall_types = 'noslip noslip noslip noslip'
-        momentum_wall_functors = '0 0 0 0 0 0 ${lid_velocity} 0'
+        momentum_wall_functors = '0 0; 0 0; 0 0; ${lid_velocity} 0'
 
         pin_pressure = true
         pinned_pressure_type = point-value
