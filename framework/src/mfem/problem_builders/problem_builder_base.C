@@ -11,12 +11,6 @@ Problem::~Problem()
 }
 
 void
-ProblemBuilder::SetCoefficients(platypus::Coefficients & coefficients)
-{
-  GetProblem()->_coefficients = coefficients;
-}
-
-void
 ProblemBuilder::ConstructNonlinearSolver()
 {
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(GetProblem()->_comm);
@@ -35,23 +29,9 @@ ProblemBuilder::InitializeKernels()
 }
 
 void
-ProblemBuilder::InitializeOutputs()
-{
-  GetProblem()->_outputs.Init(GetProblem()->_gridfunctions);
-}
-
-void
 ProblemBuilder::FinalizeProblem(bool build_operator)
 {
-  RegisterFESpaces();
   RegisterGridFunctions();
-  RegisterCoefficients();
-
-  if (build_operator)
-  {
-    ConstructOperator();
-  }
-
   InitializeKernels();
   SetOperatorGridFunctions();
 
@@ -59,7 +39,6 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
 
   ConstructState();
   ConstructTimestepper();
-  // InitializeOutputs();
 }
 
 } // namespace platypus

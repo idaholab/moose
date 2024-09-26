@@ -54,12 +54,7 @@ public:
   // Virtual destructor required to prevent leaks.
   virtual ~ProblemBuilder() = default;
 
-  void SetCoefficients(platypus::Coefficients & coefficients);
-
-  virtual void RegisterFESpaces() = 0;
   virtual void RegisterGridFunctions() = 0;
-  virtual void RegisterCoefficients() = 0;
-
   virtual void SetOperatorGridFunctions() = 0;
   virtual void ConstructNonlinearSolver();
   virtual void ConstructOperator() = 0;
@@ -67,8 +62,6 @@ public:
   virtual void ConstructTimestepper() = 0;
 
   virtual void InitializeKernels();
-
-  void InitializeOutputs();
 
   /// @brief Call @a FinalizeProblem to setup a problem.
   /// @param build_operator Skips @a ConstructOperator step if false. Set this to false if the problem

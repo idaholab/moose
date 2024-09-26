@@ -47,11 +47,7 @@ public:
   RegisterTimeDerivatives(std::vector<std::string> gridfunction_names,
                           platypus::GridFunctions & gridfunctions);
 
-  void RegisterFESpaces() override {}
-
   void RegisterGridFunctions() override;
-
-  void RegisterCoefficients() override {}
 
   void SetOperatorGridFunctions() override;
 

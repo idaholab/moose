@@ -44,11 +44,7 @@ public:
 
   ~SteadyStateProblemBuilder() override = default;
 
-  void RegisterFESpaces() override {}
-
   void RegisterGridFunctions() override {}
-
-  void RegisterCoefficients() override {}
 
   void SetOperatorGridFunctions() override;
 
