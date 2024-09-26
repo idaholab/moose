@@ -463,7 +463,8 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem, const StateAr
   // while the libMesh solution is frozen in the non-perturbed state
   const auto & global_soln = (state.state == 0)
                                  ? *this->_sys.currentSolution()
-                                 : this->_sys.solutionState(state.state, state.iteration_type);
+                                 : static_cast<const SystemBase &>(this->_sys)
+                                       .solutionState(state.state, state.iteration_type);
 
   ADReal value = global_soln(index);
 
