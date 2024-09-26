@@ -47,12 +47,12 @@ MFEMProblem::initialSetup()
   getProblemData()._coefficients = _coefficients;
   mfem_problem_builder->RegisterGridFunctions();
   mfem_problem_builder->InitializeKernels();
-  mfem_problem_builder->SetOperatorGridFunctions();
   addMFEMNonlinearSolver();
 
   // Set up initial conditions
   auto problem_operator =
       dynamic_cast<platypus::ProblemOperatorInterface *>(getProblemData().GetOperator());
+  problem_operator->SetGridFunctions();
   problem_operator->Init(getProblemData()._f);
 
   if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
