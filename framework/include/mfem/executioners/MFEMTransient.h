@@ -12,10 +12,9 @@ public:
   ~MFEMTransient() override = default;
 
   void Step(double dt, int it) const;
-
   virtual void init() override;
-
   virtual void execute() override;
+  virtual void registerTimeDerivatives();
 
   platypus::TimeDomainProblem * _problem{nullptr};
   mutable double _t_step; // Time step
