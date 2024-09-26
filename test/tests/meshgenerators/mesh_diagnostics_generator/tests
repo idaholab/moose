@@ -19,6 +19,7 @@
       cli_args = '--mesh-only'
       mesh_mode = replicated
       expect_out = 'Number of intersecting edges: 4'
+      detail = 'edges intersecting'
     []
     [inconsistent_sidesets]
       type = RunApp
