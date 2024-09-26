@@ -79,7 +79,6 @@ private:
   const MaterialPropertyName _m_name;
   const MaterialPropertyName _mob_L_name;
   const MaterialPropertyName _gamma_name;
-  const MaterialPropertyName _sigmaORIUNIT_name;
   ///@}
 
   ///@{ Material properties
@@ -87,7 +86,6 @@ private:
   ADMaterialProperty<Real> & _m;
   ADMaterialProperty<Real> & _mob_L;
   ADMaterialProperty<Real> & _gamma;
-  ADMaterialProperty<Real> & _sigmaORIUNIT;
   ///@}
 
   ///@{ Derivatives of material properties

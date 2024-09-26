@@ -39,8 +39,6 @@ SphericalGaussianMaterial::validParams()
   params.addParam<MaterialPropertyName>("m_name", "mu", "The name of the anisotropic m");
   params.addParam<MaterialPropertyName>("mob_L_name", "mob_L", "The name of the anisotropic L");
   params.addParam<MaterialPropertyName>("gamma_name", "gamma_asymm", "The name of isotropic gamma");
-  params.addParam<MaterialPropertyName>(
-      "sigmaORIUNIT_name", "sigmaORIUNIT", "Grain boundary energy (J//m^2)");
   params.addParam<Real>(
       "gamma_value",
       1.5,
@@ -127,7 +125,6 @@ SphericalGaussianMaterial::SphericalGaussianMaterial(const InputParameters & par
     _m(declareADProperty<Real>(getParam<MaterialPropertyName>("m_name"))),
     _mob_L(declareADProperty<Real>(getParam<MaterialPropertyName>("mob_L_name"))),
     _gamma(declareADProperty<Real>(getParam<MaterialPropertyName>("gamma_name"))),
-    _sigmaORIUNIT(declareADProperty<Real>(getParam<MaterialPropertyName>("sigmaORIUNIT_name"))),
     _depsilon_plus(declareADProperty<RealGradient>("depsilon_plus")),
     _depsilon_minus(declareADProperty<RealGradient>("depsilon_minus")),
     _dm_plus(declareADProperty<RealGradient>("dm_plus")),
@@ -576,10 +573,6 @@ SphericalGaussianMaterial::computeQpProperties()
 
     // Compute isotropic gamma
     _gamma[_qp] = _gamma_value;
-
-    const ADReal value = _epsilon[_qp] * _m[_qp];
-    const ADReal sigma_value = _g_gamma_value * std::sqrt(value);
-    _sigmaORIUNIT[_qp] = sigma_value / (_energy_scale * _length_scale * _length_scale);
   }
   else if (_model_type == ModelType::GAMMA) // If model_type is "GAMMA"
   {
@@ -631,10 +624,6 @@ SphericalGaussianMaterial::computeQpProperties()
     // Compute isotropic epsilon and m
     _epsilon[_qp] = epsilon_value;
     _m[_qp] = m_value;
-
-    const ADReal value = _epsilon[_qp] * _m[_qp];
-    const ADReal sigma_value = g_gamma * std::sqrt(value);
-    _sigmaORIUNIT[_qp] = sigma_value / (_energy_scale * _length_scale * _length_scale);
   }
   else
   {
