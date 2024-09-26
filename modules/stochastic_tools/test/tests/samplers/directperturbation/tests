@@ -1,0 +1,44 @@
+[Tests]
+  design = 'DirectPerturbationSampler.md'
+  issues = '#28671'
+
+  [central_difference]
+    requirement = 'The system shall be able to generate samples for a direct perturbation method with a central difference scheme:'
+
+    [serial]
+      type = CSVDiff
+      input = directperturbation.i
+      csvdiff = 'directperturbation_out_data_0001.csv'
+      detail = "with replicated output;"
+    []
+    [parallel]
+      type = CSVDiff
+      input = directperturbation.i
+      cli_args = 'VectorPostprocessors/data/parallel_type=DISTRIBUTED Outputs/file_base=dp_cd_3'
+      min_parallel = 3
+      max_parallel = 3
+      csvdiff = 'dp_cd_3_data_0001.csv.0 dp_cd_3_data_0001.csv.1 dp_cd_3_data_0001.csv.2'
+      detail = "with parallel output;"
+    []
+  []
+  [forward_difference]
+    requirement = 'The system shall be able to generate samples for a direct perturbation method with a forward difference scheme:'
+
+    [serial]
+      type = CSVDiff
+      input = directperturbation.i
+      csvdiff = 'dp_fd_data_0001.csv'
+      detail = "with replicated output;"
+      cli_args = 'Outputs/file_base=dp_fd Samplers/directperturbation/perturbation_method=forward_difference'
+    []
+    [parallel]
+      type = CSVDiff
+      input = directperturbation.i
+      cli_args = 'Samplers/directperturbation/perturbation_method=forward_difference VectorPostprocessors/data/parallel_type=DISTRIBUTED Outputs/file_base=dp_fd_3'
+      min_parallel = 3
+      max_parallel = 3
+      csvdiff = 'dp_fd_3_data_0001.csv.0 dp_fd_3_data_0001.csv.1 dp_fd_3_data_0001.csv.2'
+      detail = "with parallel output;"
+    []
+  []
+[]
