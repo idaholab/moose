@@ -6,7 +6,7 @@
 
 [Problem]
   type = MFEMProblem
-  device = cuda
+  device = cpu
   assembly_level = partial
 []
 
