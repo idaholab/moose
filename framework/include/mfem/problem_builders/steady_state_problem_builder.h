@@ -37,25 +37,4 @@ private:
   std::unique_ptr<platypus::ProblemOperator> _problem_operator{nullptr};
 };
 
-class SteadyStateProblemBuilder : public ProblemBuilder
-{
-public:
-  SteadyStateProblemBuilder() : ProblemBuilder(new platypus::SteadyStateProblem) {}
-
-  ~SteadyStateProblemBuilder() override = default;
-
-  void RegisterGridFunctions() override {}
-
-  void ConstructOperator() override;
-
-protected:
-  // NB: constructor for derived classes.
-  SteadyStateProblemBuilder(platypus::SteadyStateProblem * problem) : ProblemBuilder(problem) {}
-
-  [[nodiscard]] platypus::SteadyStateProblem * GetProblem() const override
-  {
-    return ProblemBuilder::GetProblem<platypus::SteadyStateProblem>();
-  }
-};
-
 } // namespace platypus

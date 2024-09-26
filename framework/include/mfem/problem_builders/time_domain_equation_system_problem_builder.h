@@ -40,32 +40,4 @@ public:
   }
 };
 
-// Problem-builder for TimeDomainEquationSystemProblem.
-class TimeDomainEquationSystemProblemBuilder : public TimeDomainProblemBuilder,
-                                               public EquationSystemProblemBuilderInterface
-{
-public:
-  /// NB: set "_problem" member variable in parent class.
-  TimeDomainEquationSystemProblemBuilder()
-    : TimeDomainProblemBuilder(new platypus::TimeDomainEquationSystemProblem)
-  {
-  }
-
-  ~TimeDomainEquationSystemProblemBuilder() override = default;
-
-  /// NB: - note use of final. Ensure that the equation system is initialized.
-  void InitializeKernels() final;
-
-protected:
-  [[nodiscard]] platypus::TimeDomainEquationSystemProblem * GetProblem() const override
-  {
-    return ProblemBuilder::GetProblem<platypus::TimeDomainEquationSystemProblem>();
-  }
-
-  [[nodiscard]] platypus::TimeDependentEquationSystem * GetEquationSystem() const override
-  {
-    return GetProblem()->GetEquationSystem();
-  }
-};
-
 } // namespace platypus

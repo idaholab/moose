@@ -35,30 +35,4 @@ private:
   std::unique_ptr<platypus::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 
-/// Problem-builder for TimeDomainProblem.
-class TimeDomainProblemBuilder : public ProblemBuilder
-{
-public:
-  TimeDomainProblemBuilder() : ProblemBuilder(new platypus::TimeDomainProblem) {}
-
-  ~TimeDomainProblemBuilder() override = default;
-
-  static std::vector<mfem::ParGridFunction *>
-  RegisterTimeDerivatives(std::vector<std::string> gridfunction_names,
-                          platypus::GridFunctions & gridfunctions);
-
-  void RegisterGridFunctions() override;
-
-  void ConstructOperator() override;
-
-protected:
-  /// NB: constructor called in derived classes.
-  TimeDomainProblemBuilder(platypus::TimeDomainProblem * problem) : ProblemBuilder(problem) {}
-
-  [[nodiscard]] platypus::TimeDomainProblem * GetProblem() const override
-  {
-    return ProblemBuilder::GetProblem<platypus::TimeDomainProblem>();
-  };
-};
-
 } // namespace platypus

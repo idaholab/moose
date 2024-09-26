@@ -39,33 +39,4 @@ public:
   }
 };
 
-/// Problem-builder for SteadyStateEquationSystemProblem.
-class SteadyStateEquationSystemProblemBuilder : public SteadyStateProblemBuilder,
-                                                public EquationSystemProblemBuilderInterface
-{
-public:
-  /// NB: set "_problem" member variable in parent class.
-  SteadyStateEquationSystemProblemBuilder()
-    : SteadyStateProblemBuilder(new SteadyStateEquationSystemProblem)
-  {
-  }
-
-  ~SteadyStateEquationSystemProblemBuilder() override = default;
-
-  /// NB: use of final! This calls ProblemBuilder::InitializeKernels and also ensures that the
-  /// equation system is initialized.
-  void InitializeKernels() final;
-
-protected:
-  [[nodiscard]] platypus::SteadyStateEquationSystemProblem * GetProblem() const override
-  {
-    return ProblemBuilder::GetProblem<platypus::SteadyStateEquationSystemProblem>();
-  }
-
-  [[nodiscard]] platypus::EquationSystem * GetEquationSystem() const override
-  {
-    return GetProblem()->GetEquationSystem();
-  }
-};
-
 } // namespace platypus
