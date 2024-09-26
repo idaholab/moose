@@ -49,9 +49,9 @@ GammaModelGammaGradientKernel::computeQpResidual()
   const auto & grad_test = _grad_test[_i][_qp];
 
   // Evaluate the expression based on _grains_set
-  if (_grains_set == SetsType::FIRST)  // If grains_set is "FIRST"
+  if (_grains_set == SetsType::FIRST) // If grains_set is "FIRST"
     return _L[_qp] * _mu[_qp] * sum_eta_j * _u[_qp] * _u[_qp] * _dgamma_plus[_qp] * grad_test;
-  else if (_grains_set == SetsType::SECOND)  // If grains_set is "SECOND"
+  else if (_grains_set == SetsType::SECOND) // If grains_set is "SECOND"
     return _L[_qp] * _mu[_qp] * sum_eta_j * _u[_qp] * _u[_qp] * _dgamma_minus[_qp] * grad_test;
   else
     mooseError("Invalid grains_set value"); // Handle unexpected values of _grains_set

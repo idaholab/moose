@@ -17,7 +17,8 @@
 
 /**
  * 5D-gaussian-anisotropy material object for anisotropic grain growth
- * This material adds anisotropy to epsilon - also called kappa, m - also called mu, and L for epsilon model or adds anisotropy to gamma and L for gamma model
+ * This material adds anisotropy to epsilon - also called kappa, m - also called mu, and L for
+ * epsilon model or adds anisotropy to gamma and L for gamma model
  */
 
 class SphericalGaussianMaterial : public ADMaterial

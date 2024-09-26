@@ -19,7 +19,8 @@ SphericalGaussianKernelAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Set up ADGrainGrowth, ADACInterface, ADTimeDerivative, "
-                             "EpsilonModelEpsilonGradientKernel, EpsilonModelMGradientKernel, GammaModelGammaGradientKernel kernels based on the selected model");
+                             "EpsilonModelEpsilonGradientKernel, EpsilonModelMGradientKernel, "
+                             "GammaModelGammaGradientKernel kernels based on the selected model");
   MooseEnum models("EPSILON GAMMA");
   params.addRequiredParam<MooseEnum>("model_type", models, "Epsilon or Gamma model?");
   params.addRequiredParam<unsigned int>(
@@ -70,74 +71,83 @@ SphericalGaussianKernelAction::act()
     params.applyParameters(parameters());
     _problem->addKernel("ADTimeDerivative", "ADTimeDerivative_" + var_name, params);
 
-    if (_model_type == ModelType::EPSILON)  // If model_type is "EPSILON"
+    if (_model_type == ModelType::EPSILON) // If model_type is "EPSILON"
     {
-        // Set up EpsilonModelEpsilonGradientKernel and EpsilonModelMGradientKernel kernels for the first set of grains
-        if (op < _op_num - 1)
-        {
-          std::string var_name_plus = _var_name_base + Moose::stringify(op);
-          params = _factory.getValidParams("EpsilonModelEpsilonGradientKernel");
-          params.set<NonlinearVariableName>("variable") = var_name_plus;
-          params.set<std::vector<VariableName>>("v") = v;
-          params.set<MooseEnum>("grains_set") = "FIRST";
-          params.applyParameters(parameters());
-          _problem->addKernel(
-              "EpsilonModelEpsilonGradientKernel", "EpsilonModelEpsilonGradientKernel_plus" + var_name_plus, params);
+      // Set up EpsilonModelEpsilonGradientKernel and EpsilonModelMGradientKernel kernels for the
+      // first set of grains
+      if (op < _op_num - 1)
+      {
+        std::string var_name_plus = _var_name_base + Moose::stringify(op);
+        params = _factory.getValidParams("EpsilonModelEpsilonGradientKernel");
+        params.set<NonlinearVariableName>("variable") = var_name_plus;
+        params.set<std::vector<VariableName>>("v") = v;
+        params.set<MooseEnum>("grains_set") = "FIRST";
+        params.applyParameters(parameters());
+        _problem->addKernel("EpsilonModelEpsilonGradientKernel",
+                            "EpsilonModelEpsilonGradientKernel_plus" + var_name_plus,
+                            params);
 
-          params = _factory.getValidParams("EpsilonModelMGradientKernel");
-          params.set<NonlinearVariableName>("variable") = var_name_plus;
-          params.set<MooseEnum>("grains_set") = "FIRST";
-          params.applyParameters(parameters());
-          _problem->addKernel(
-              "EpsilonModelMGradientKernel", "EpsilonModelMGradientKernel_plus" + var_name_plus, params);
-        }
+        params = _factory.getValidParams("EpsilonModelMGradientKernel");
+        params.set<NonlinearVariableName>("variable") = var_name_plus;
+        params.set<MooseEnum>("grains_set") = "FIRST";
+        params.applyParameters(parameters());
+        _problem->addKernel("EpsilonModelMGradientKernel",
+                            "EpsilonModelMGradientKernel_plus" + var_name_plus,
+                            params);
+      }
 
-        // Set up EpsilonModelEpsilonGradientKernel and EpsilonModelMGradientKernel kernels for the second set of grains
-        if (op > 0)
-        {
-          std::string var_name_minus = _var_name_base + Moose::stringify(op);
-          params = _factory.getValidParams("EpsilonModelEpsilonGradientKernel");
-          params.set<NonlinearVariableName>("variable") = var_name_minus;
-          params.set<std::vector<VariableName>>("v") = v;
-          params.set<MooseEnum>("grains_set") = "SECOND";
-          params.applyParameters(parameters());
-          _problem->addKernel(
-              "EpsilonModelEpsilonGradientKernel", "EpsilonModelEpsilonGradientKernel_minus" + var_name_minus, params);
+      // Set up EpsilonModelEpsilonGradientKernel and EpsilonModelMGradientKernel kernels for the
+      // second set of grains
+      if (op > 0)
+      {
+        std::string var_name_minus = _var_name_base + Moose::stringify(op);
+        params = _factory.getValidParams("EpsilonModelEpsilonGradientKernel");
+        params.set<NonlinearVariableName>("variable") = var_name_minus;
+        params.set<std::vector<VariableName>>("v") = v;
+        params.set<MooseEnum>("grains_set") = "SECOND";
+        params.applyParameters(parameters());
+        _problem->addKernel("EpsilonModelEpsilonGradientKernel",
+                            "EpsilonModelEpsilonGradientKernel_minus" + var_name_minus,
+                            params);
 
-          params = _factory.getValidParams("EpsilonModelMGradientKernel");
-          params.set<NonlinearVariableName>("variable") = var_name_minus;
-          params.set<MooseEnum>("grains_set") = "SECOND";
-          params.applyParameters(parameters());
-          _problem->addKernel(
-              "EpsilonModelMGradientKernel", "EpsilonModelMGradientKernel_minus" + var_name_minus, params);
-        }
+        params = _factory.getValidParams("EpsilonModelMGradientKernel");
+        params.set<NonlinearVariableName>("variable") = var_name_minus;
+        params.set<MooseEnum>("grains_set") = "SECOND";
+        params.applyParameters(parameters());
+        _problem->addKernel("EpsilonModelMGradientKernel",
+                            "EpsilonModelMGradientKernel_minus" + var_name_minus,
+                            params);
+      }
     }
-    else if (_model_type == ModelType::GAMMA)  // If model_type is "GAMMA"
+    else if (_model_type == ModelType::GAMMA) // If model_type is "GAMMA"
     {
-        // Set up GammaModelGammaGradientKernel kernel for the first set of grains
-        if (op < _op_num - 1)
-        {
-          std::string var_name_plus = _var_name_base + Moose::stringify(op);
-          params = _factory.getValidParams("GammaModelGammaGradientKernel");
-          params.set<NonlinearVariableName>("variable") = var_name_plus;
-          params.set<std::vector<VariableName>>("v") = v;
-          params.set<MooseEnum>("grains_set") = "FIRST";
-          params.applyParameters(parameters());
-          _problem->addKernel("GammaModelGammaGradientKernel", "GammaModelGammaGradientKernel_plus" + var_name_plus, params);
-        }
+      // Set up GammaModelGammaGradientKernel kernel for the first set of grains
+      if (op < _op_num - 1)
+      {
+        std::string var_name_plus = _var_name_base + Moose::stringify(op);
+        params = _factory.getValidParams("GammaModelGammaGradientKernel");
+        params.set<NonlinearVariableName>("variable") = var_name_plus;
+        params.set<std::vector<VariableName>>("v") = v;
+        params.set<MooseEnum>("grains_set") = "FIRST";
+        params.applyParameters(parameters());
+        _problem->addKernel("GammaModelGammaGradientKernel",
+                            "GammaModelGammaGradientKernel_plus" + var_name_plus,
+                            params);
+      }
 
-        // Set up GammaModelGammaGradientKernel kernel for the second set of grains
-        if (op > 0)
-        {
-          std::string var_name_minus = _var_name_base + Moose::stringify(op);
-          params = _factory.getValidParams("GammaModelGammaGradientKernel");
-          params.set<NonlinearVariableName>("variable") = var_name_minus;
-          params.set<std::vector<VariableName>>("v") = v;
-          params.set<MooseEnum>("grains_set") = "SECOND";
-          params.applyParameters(parameters());
-          _problem->addKernel(
-              "GammaModelGammaGradientKernel", "GammaModelGammaGradientKernel_minus" + var_name_minus, params);
-        }
+      // Set up GammaModelGammaGradientKernel kernel for the second set of grains
+      if (op > 0)
+      {
+        std::string var_name_minus = _var_name_base + Moose::stringify(op);
+        params = _factory.getValidParams("GammaModelGammaGradientKernel");
+        params.set<NonlinearVariableName>("variable") = var_name_minus;
+        params.set<std::vector<VariableName>>("v") = v;
+        params.set<MooseEnum>("grains_set") = "SECOND";
+        params.applyParameters(parameters());
+        _problem->addKernel("GammaModelGammaGradientKernel",
+                            "GammaModelGammaGradientKernel_minus" + var_name_minus,
+                            params);
+      }
     }
     else
     {

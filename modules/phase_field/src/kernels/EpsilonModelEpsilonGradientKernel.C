@@ -16,7 +16,8 @@ EpsilonModelEpsilonGradientKernel::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription(
-      "Implements the epsilon-gradient term: -L \\nabla \\cdot \\left( \\frac{1}{2} \\frac{\\partial "
+      "Implements the epsilon-gradient term: -L \\nabla \\cdot \\left( \\frac{1}{2} "
+      "\\frac{\\partial "
       "\\epsilon(\\theta, v)}{\\partial \\nabla \\eta_i} \\sum_{i=1}^p (\\eta_i^2) \\right)");
   params.addRequiredCoupledVar("v",
                                "Array of coupled order parameter names for other order parameters");
@@ -25,7 +26,8 @@ EpsilonModelEpsilonGradientKernel::validParams()
   return params;
 }
 
-EpsilonModelEpsilonGradientKernel::EpsilonModelEpsilonGradientKernel(const InputParameters & parameters)
+EpsilonModelEpsilonGradientKernel::EpsilonModelEpsilonGradientKernel(
+    const InputParameters & parameters)
   : ADKernel(parameters),
     _grains_set(getParam<MooseEnum>("grains_set").getEnum<SetsType>()),
     _depsilon_plus(getADMaterialProperty<RealGradient>("depsilon_plus")),
@@ -51,9 +53,9 @@ EpsilonModelEpsilonGradientKernel::computeQpResidual()
   const auto & grad_test = _grad_test[_i][_qp];
 
   // Evaluate the expression based on _grains_set
-  if (_grains_set == SetsType::FIRST)  // If grains_set is "FIRST"
+  if (_grains_set == SetsType::FIRST) // If grains_set is "FIRST"
     return 0.5 * _L[_qp] * (SqrGrad + SumSqrGradEtaj) * _depsilon_plus[_qp] * grad_test;
-  else if (_grains_set == SetsType::SECOND)  // If grains_set is "SECOND"
+  else if (_grains_set == SetsType::SECOND) // If grains_set is "SECOND"
     return 0.5 * _L[_qp] * (SqrGrad + SumSqrGradEtaj) * _depsilon_minus[_qp] * grad_test;
   else
     mooseError("Invalid grains_set value"); // Handle unexpected values of _grains_set
