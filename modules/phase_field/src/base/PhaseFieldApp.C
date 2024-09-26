@@ -60,10 +60,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("PolycrystalElasticDrivingForceAction", "Kernels/PolycrystalElasticDrivingForce");
   registerSyntax("NonconservedAction", "Modules/PhaseField/Nonconserved/*");
   registerSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
-
-  registerSyntax("EpsilonModelKernelAction", "Kernels/EpsilonModelKernel");
-  registerSyntax("GammaModelKernelAction", "Kernels/GammaModelKernel");
-
+  registerSyntax("SphericalGaussianKernelAction", "Kernels/SphericalGaussianKernel");
   registerSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
   registerSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
   registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
