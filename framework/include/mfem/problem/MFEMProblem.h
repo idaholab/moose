@@ -134,6 +134,12 @@ public:
                      InputParameters & parameters);
 
   /**
+   * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
+   * similar to the linear solvers.
+   */
+  void addMFEMNonlinearSolver();
+
+  /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
    * This method is used in addAuxVariable to help create the MFEM grid function that corresponds to
    * a given MOOSE aux-variable.
