@@ -6,6 +6,20 @@ InputParameters
 MFEMProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+<<<<<<< HEAD
+=======
+  params.addParam<int>(
+      "vis_steps",
+      1,
+      "Number of timesteps between successive write outs of data collections to file.");
+  params.addParam<bool>(
+      "use_glvis", false, "Attempt to open GLVis ports to display variables during simulation");
+  params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
+  params.addParam<std::string>(
+      "assembly_level", "legacy", "Matrix assembly level. Options: Legacy, Full, Partial, Element");
+
+
+>>>>>>> ca24d72 (Created a FormSystem that takes inn assembly type)
   return params;
 }
 
@@ -50,7 +64,31 @@ MFEMProblem::init()
 }
 
 void
+<<<<<<< HEAD
 MFEMProblem::setMesh()
+=======
+MFEMProblem::setAssemblyLevel()
+{
+  // Convert to lowercase string
+  std::string assembly = "";
+  for (auto c : getParam<std::string>("assembly_level"))
+    assembly += tolower(c);
+
+  if (assembly == "legacy")
+    mfem_problem->_assembly_level = mfem::AssemblyLevel::LEGACY;
+  else if (assembly == "full")
+    mfem_problem->_assembly_level = mfem::AssemblyLevel::FULL;
+  else if (assembly == "partial")
+    mfem_problem->_assembly_level = mfem::AssemblyLevel::PARTIAL;
+  else if (assembly == "element")
+    mfem_problem->_assembly_level = mfem::AssemblyLevel::ELEMENT;
+  else
+    MFEM_ABORT("Assembly level not recognised.");
+}
+
+void
+MFEMProblem::externalSolve()
+>>>>>>> ca24d72 (Created a FormSystem that takes inn assembly type)
 {
   auto pmesh = std::make_shared<mfem::ParMesh>(mesh().getMFEMParMesh());
   getProblemData()._pmesh = pmesh;
