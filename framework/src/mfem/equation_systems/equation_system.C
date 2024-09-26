@@ -131,19 +131,21 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
                            mfem::BlockVector & trueX,
                            mfem::BlockVector & trueRHS)
 {
-
   auto & test_var_name = _test_var_names.at(0);
   auto blf = _blfs.Get(test_var_name);
   auto lf = _lfs.Get(test_var_name);
-  mfem::Vector aux_x, aux_rhs;
+  mfem::BlockVector aux_x, aux_rhs;
+  mfem::OperatorPtr * aux_a = new mfem::OperatorPtr;
   
   blf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *(_xs.at(0)), *lf, aux_a, aux_x, aux_rhs);
+      _ess_tdof_lists.at(0), *(_xs.at(0)), *lf, *aux_a, aux_x, aux_rhs);
+  
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
+  trueX.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
 
-  //op.Reset(aux_a.Ptr(), false);
-  op = aux_a;
+  op.Reset(aux_a->Ptr());
 
 }
 
@@ -221,6 +223,8 @@ void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
   _jacobian->Mult(x, residual);
+  x.HostRead();
+  residual.HostRead();
 }
 
 mfem::Operator &
@@ -486,15 +490,19 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     trueRHS.GetBlock(i) = aux_rhs;
   }
 
-  // Sync memory
-  for (int i = 0; i < _test_var_names.size(); i++)
-  {
-    truedXdt.GetBlock(i).SyncAliasMemory(truedXdt);
-    trueRHS.GetBlock(i).SyncAliasMemory(trueRHS);
-  }
+  truedXdt.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
 
   // Create monolithic matrix
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
+}
+
+void
+TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
+                                              mfem::BlockVector & truedXdt,
+                                              mfem::BlockVector & trueRHS)
+{
+  MFEM_VERIFY(0, "Non-legacy assembly not yet implemented for time-dependent systems");
 }
 
 void
