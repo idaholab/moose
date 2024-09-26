@@ -120,6 +120,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   else
   {
     MFEM_VERIFY(_test_var_names.size() == 1, "Non-legacy assembly is only supported for single-variable systems");
+    MFEM_VERIFY(_mblfs.size() != 0, "Non-legacy assembly is only supported for square systems");
     FormSystem(op, trueX, trueRHS);
   }
       
