@@ -31,18 +31,22 @@ advected_interp_method = 'average'
       density = ${rho}
       dynamic_viscosity = ${mu}
 
+      # we use an inlet to mimick the original input
+      # we could use a wall noslip boundary
       inlet_boundaries = 'left'
       momentum_inlet_types = 'fixed-velocity'
       momentum_inlet_functors = '1.1 0'
 
       wall_boundaries = 'top bottom'
       momentum_wall_types = 'noslip noslip'
+      momentum_wall_functors = '0 0; 0 0'
 
       outlet_boundaries = 'right'
       momentum_outlet_types = 'fixed-pressure-zero-gradient'
       pressure_functors = '1.4'
 
       orthogonality_correction = false
+      pressure_two_term_bc_expansion = false
       momentum_advection_interpolation = ${advected_interp_method}
     []
   []

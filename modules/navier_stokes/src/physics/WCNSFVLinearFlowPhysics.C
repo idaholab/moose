@@ -58,10 +58,10 @@ void
 WCNSFVLinearFlowPhysics::initializePhysicsAdditional()
 {
   WCNSFVFlowPhysicsBase::initializePhysicsAdditional();
-  // TODO Check that the Problem has the right systems
-  // at least until we make the Physics creates the problem
-  // TODO Uncomment once k-eps Physics is merged
-  // getProblem().setSavePreviousNLSolution(true);
+  // TODO Add support for multi-system by either:
+  // - creating the problem in the Physics or,
+  // - checking that the right systems are being created
+  getProblem().setSavePreviousNLSolution(true);
   // TODO Ban all other nonlinear Physics for now
 }
 
@@ -172,7 +172,7 @@ WCNSFVLinearFlowPhysics::addINSPressureCorrectionKernels()
   }
   {
     std::string kernel_type = "LinearFVDivergence";
-    std::string kernel_name = prefix() + "p_divergence";
+    std::string kernel_name = prefix() + "HbyA_divergence";
 
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
@@ -396,7 +396,10 @@ WCNSFVLinearFlowPhysics::addINSWallsBC()
       for (const auto d : make_range(dimension()))
       {
         params.set<LinearVariableName>("variable") = _velocity_names[d];
-        params.set<MooseFunctorName>("functor") = "0";
+        if (_momentum_wall_functors.count(boundary_name) == 0)
+          params.set<MooseFunctorName>("functor") = "0";
+        else
+          params.set<MooseFunctorName>("functor") = _momentum_wall_functors[boundary_name][d];
 
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }

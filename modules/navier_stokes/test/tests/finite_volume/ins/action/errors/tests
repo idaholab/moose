@@ -131,7 +131,7 @@
     requirement = 'The system shall throw an error if the number of components for the initial velocity is not equal to the dimension or 3.'
     cli_args = "Modules/NavierStokesFV/initial_velocity='0'"
     expect_err = "(The number of velocity components in the NSFVAction initial condition is not "
-                 "3!|The number of velocity components in the WCNSFVFlowPhysics initial condition is "
+                 "3!|The number of velocity components in the WCNSFVFlowPhysics(Base|) initial condition is "
                  "not 2 or 3!)"
   []
   [porosity-correction-error]
@@ -239,7 +239,7 @@
     cli_args = "Modules/NavierStokesFV/velocity_variable='velx vel_y' Variables/inactive='pressure "
                "vel_x T_fluid scalar' Modules/NavierStokesFV/define_variables=false"
     expect_err = "(Variable \(velx\) supplied to the NavierStokesFV action does not exist!|Variable "
-                 "\(velx\) supplied to the WCNSFVFlowPhysics does not exist!)"
+                 "\(velx\) supplied to the WCNSFVFlowPhysics(Base|) does not exist!)"
   []
   [velocity-component-error]
     type = 'RunException'
@@ -337,7 +337,7 @@
       cli_args = "Variables/inactive='scalar' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
                  "Modules/NavierStokesFV/define_variables=false"
       expect_err = "(Velocity is defined externally of NavierStokesFV, so should the inital "
-                   "conditions|Velocity is defined externally of WCNSFVFlowPhysics, so should the "
+                   "conditions|Velocity is defined externally of WCNSFVFlowPhysics(Base|), so should the "
                    "inital conditions)"
     []
     [pressure]
@@ -348,7 +348,7 @@
                  "Modules/NavierStokesFV/define_variables=false Modules/velocity_variable='vel_x "
                  "vel_y'"
       expect_err = "(Pressure is defined externally of NavierStokesFV, so should the inital "
-                   "condition|Pressure is defined externally of WCNSFVFlowPhysics, so should the "
+                   "condition|Pressure is defined externally of WCNSFVFlowPhysics(Base|), so should the "
                    "inital condition)"
     []
     [temperature]
