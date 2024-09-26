@@ -385,36 +385,35 @@ WCNSFVLinearFlowPhysics::addINSWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
 
-  for (unsigned int bc_ind = 0; bc_ind < _momentum_wall_types.size(); ++bc_ind)
+  for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
   {
-    if (_momentum_wall_types[bc_ind] == "noslip")
+    if (momentum_wall_type == "noslip")
     {
       const std::string bc_type = "LinearFVAdvectionDiffusionFunctorDirichletBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+      params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
 
       for (const auto d : make_range(dimension()))
       {
         params.set<LinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseFunctorName>("functor") = "0";
 
-        getProblem().addLinearFVBC(
-            bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
+        getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }
     }
-    else if (_momentum_wall_types[bc_ind] == "wallfunction")
+    else if (momentum_wall_type == "wallfunction")
     {
       // Placeholder
-      mooseError("Unsupported boundary condition type: " + _momentum_wall_types[bc_ind]);
+      mooseError("Unsupported boundary condition type: " + std::string(momentum_wall_type));
     }
-    else if (_momentum_wall_types[bc_ind] == "slip")
+    else if (momentum_wall_type == "slip")
     {
       // Do nothing
     }
-    else if (_momentum_wall_types[bc_ind] == "symmetry")
+    else if (momentum_wall_type == "symmetry")
     {
       // Placeholder
-      mooseError("Unsupported boundary condition type: " + _momentum_wall_types[bc_ind]);
+      mooseError("Unsupported boundary condition type: " + std::string(momentum_wall_type));
     }
   }
 

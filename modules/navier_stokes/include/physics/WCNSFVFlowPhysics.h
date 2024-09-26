@@ -30,9 +30,10 @@ public:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
 private:
-  void addNonlinearVariables() override;
-  void addFVKernels() override;
-  void addUserObjects() override;
+  virtual void addNonlinearVariables() override;
+  virtual void addFVKernels() override;
+  virtual void addUserObjects() override;
+  virtual void addCorrectors() override;
 
   /// Function adding kernels for the incompressible continuity equation
   void addINSMassKernels();

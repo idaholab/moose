@@ -36,6 +36,10 @@ WCNSFVFlowPhysicsBase::validParams()
   // We mostly pull the boundary parameters from NSFV Action
 
   params += NSFVBase::commonNavierStokesFlowParams();
+  params.addParam<bool>(
+      "include_deviatoric_stress",
+      false,
+      "Whether to include the full expansion (the transposed term as well) of the stress tensor");
 
   // Momentum boundary conditions are important for advection problems as well
   params += NSFVBase::commonMomentumBoundaryTypesParams();
@@ -43,6 +47,11 @@ WCNSFVFlowPhysicsBase::validParams()
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
   params += NSFVBase::commonMomentumBoundaryFluxesParams();
+  params.addParam<std::vector<MooseFunctorName>>(
+      "momentum_wall_functors",
+      {},
+      "Functors for each component of the velocity value on walls. This is only necessary for the "
+      "fixed-velocity momentum wall types.");
 
   // Most downstream physics implementations are valid for porous media too
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
@@ -77,7 +86,8 @@ WCNSFVFlowPhysicsBase::validParams()
                               "Inlet boundary conditions");
   params.addParamNamesToGroup("outlet_boundaries momentum_outlet_types pressure_functors",
                               "Outlet boundary conditions");
-  params.addParamNamesToGroup("wall_boundaries momentum_wall_types", "Wall boundary conditions");
+  params.addParamNamesToGroup("wall_boundaries momentum_wall_types momentum_wall_functors",
+                              "Wall boundary conditions");
   params.addParamNamesToGroup(
       "velocity_interpolation momentum_advection_interpolation pressure_two_term_bc_expansion",
       "Numerical scheme");
@@ -118,7 +128,6 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
-    _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions"))
 {
@@ -162,6 +171,8 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
       _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"));
   _momentum_outlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
       _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"));
+  _momentum_wall_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+      _wall_boundaries, getParam<MultiMooseEnum>("momentum_wall_types"));
   if (isParamSetByUser("momentum_inlet_functors"))
   {
     // Not all inlet boundary types require the specification of an inlet functor
@@ -177,7 +188,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
   }
   if (isParamSetByUser("pressure_functors"))
   {
-    // Not all inlet boundary types require the specification of an inlet functor
+    // Not all outlet boundary types require the specification of an inlet functor
     std::vector<BoundaryName> outlet_boundaries_with_functors;
     for (const auto & boundary : _outlet_boundaries)
       if (libmesh_map_find(_momentum_outlet_types, boundary) == "fixed-pressure-zero-gradient" ||
@@ -192,6 +203,26 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                      std::to_string(outlet_boundaries_with_functors.size()) + ")");
     _pressure_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
         outlet_boundaries_with_functors, pressure_functors);
+  }
+
+  if (isParamSetByUser("momentum_wall_functors"))
+  {
+    // Not all wall boundary types require the specification of an inlet functor
+    std::vector<BoundaryName> wall_boundaries_with_functors;
+    for (const auto & boundary : _wall_boundaries)
+      if (libmesh_map_find(_momentum_wall_types, boundary) == "noslip")
+        wall_boundaries_with_functors.push_back(boundary);
+    const auto & momentum_wall_functors =
+        getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_wall_functors");
+    if (wall_boundaries_with_functors.size() != momentum_wall_functors.size())
+      paramError("momentum_wall_functors",
+                 "Size (" + std::to_string(momentum_wall_functors.size()) +
+                     ") is not the same as the number of momentum_wall wall boundaries in "
+                     "'fixed-momentum_wall/fixed-momentum_wall-zero-gradient' (size " +
+                     std::to_string(wall_boundaries_with_functors.size()) + ")");
+    _momentum_wall_functors =
+        Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
+            wall_boundaries_with_functors, momentum_wall_functors);
   }
 }
 

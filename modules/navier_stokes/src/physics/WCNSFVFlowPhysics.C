@@ -886,8 +886,8 @@ WCNSFVFlowPhysics::addINSWallsBC()
 
   // Count the number of fixed velocity wall boundaries (moving walls)
   unsigned int num_functor_walls = 0;
-  for (const auto bc_ind : index_range(_momentum_wall_types))
-    if (_momentum_wall_types[bc_ind] == "noslip")
+  for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
+    if (momentum_wall_type == "noslip")
       num_functor_walls++;
   if (_momentum_wall_functors.size() &&
       num_functor_walls * dimension() != _momentum_wall_functors.size())
@@ -898,33 +898,32 @@ WCNSFVFlowPhysics::addINSWallsBC()
                    ") and the number of functors specified (" +
                    std::to_string(_momentum_wall_functors.size()) + ") must match");
 
-  unsigned int i_wall_functors = 0;
-  for (unsigned int bc_ind = 0; bc_ind < _momentum_wall_types.size(); ++bc_ind)
+  for (const auto & [boundary_name, wall_type] : _momentum_wall_types)
   {
-    if (_momentum_wall_types[bc_ind] == "noslip")
+    if (wall_type == "noslip")
     {
       const std::string bc_type = "INSFVNoSlipWallBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+      params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
 
       for (const auto d : make_range(dimension()))
       {
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-        if (_momentum_wall_functors.empty())
+        if (_momentum_wall_functors.count(boundary_name) == 0)
           params.set<FunctionName>("function") = "0";
         else
-          params.set<FunctionName>("function") = _momentum_wall_functors[i_wall_functors++];
+          params.set<FunctionName>("function") = _momentum_wall_functors[boundary_name][d];
 
-        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }
     }
-    else if (_momentum_wall_types[bc_ind] == "wallfunction")
+    else if (wall_type == "wallfunction")
     {
       const std::string bc_type = "INSFVWallFunctionBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
       params.set<MooseFunctorName>(NS::density) = _density_name;
-      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+      params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
       params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
 
       for (const auto d : make_range(dimension()))
@@ -935,14 +934,14 @@ WCNSFVFlowPhysics::addINSWallsBC()
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }
     }
-    else if (_momentum_wall_types[bc_ind] == "slip")
+    else if (wall_type == "slip")
     {
       const std::string bc_type = "INSFVNaturalFreeSlipBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+      params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
       params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
 
       for (const auto d : make_range(dimension()))
@@ -950,10 +949,10 @@ WCNSFVFlowPhysics::addINSWallsBC()
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }
     }
-    else if (_momentum_wall_types[bc_ind] == "symmetry")
+    else if (wall_type == "symmetry")
     {
       {
         std::string bc_type;
@@ -963,7 +962,7 @@ WCNSFVFlowPhysics::addINSWallsBC()
           bc_type = "INSFVSymmetryVelocityBC";
 
         InputParameters params = getFactory().getValidParams(bc_type);
-        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
 
         MooseFunctorName viscosity_name = _dynamic_viscosity_name;
         if (hasTurbulencePhysics())
@@ -979,17 +978,16 @@ WCNSFVFlowPhysics::addINSWallsBC()
           params.set<NonlinearVariableName>("variable") = _velocity_names[d];
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-          getProblem().addFVBC(
-              bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
+          getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
         }
       }
       {
         const std::string bc_type = "INSFVSymmetryPressureBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _pressure_name;
-        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
 
-        getProblem().addFVBC(bc_type, _pressure_name + "_" + _wall_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _pressure_name + "_" + boundary_name, params);
       }
     }
   }

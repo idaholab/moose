@@ -20,6 +20,7 @@
   registerMooseAction(app_name, derived_name, "add_material");                                     \
   registerMooseAction(app_name, derived_name, "add_user_object");                                  \
   registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
+  registerMooseAction(app_name, derived_name, "add_corrector");                                    \
   registerMooseAction(app_name, derived_name, "get_turbulence_physics");
 
 /**
@@ -176,16 +177,17 @@ protected:
   /// Momentum outlet boundary types
   std::map<BoundaryName, MooseEnum> _momentum_outlet_types;
   /// Momentum wall boundary types
-  MultiMooseEnum _momentum_wall_types;
+  std::map<BoundaryName, MooseEnum> _momentum_wall_types;
 
   /// Postprocessors describing the momentum inlet for each boundary. Indexing based on the number of flux boundaries
   std::vector<PostprocessorName> _flux_inlet_pps;
   /// Direction of each flux inlet. Indexing based on the number of flux boundaries
   std::vector<Point> _flux_inlet_directions;
 
-  /// Functors describing the momentum inlet for each boundary. See matching index momentum_inlet_types
-  /// for the function actually computes
+  /// Functors describing the momentum inlet for each boundary
   std::map<BoundaryName, std::vector<MooseFunctorName>> _momentum_inlet_functors;
   /// Functors describing the outlet pressure on each boundary
   std::map<BoundaryName, MooseFunctorName> _pressure_functors;
+  /// Functors describing the momentum for each wall boundary
+  std::map<BoundaryName, std::vector<MooseFunctorName>> _momentum_wall_functors;
 };
