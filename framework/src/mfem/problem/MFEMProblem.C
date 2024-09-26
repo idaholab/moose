@@ -43,13 +43,15 @@ MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
   _coefficients.AddGlobalCoefficientsFromSubdomains();
-
   getProblemData()._coefficients = _coefficients;
-  mfem_problem_builder->RegisterGridFunctions();
-  mfem_problem_builder->InitializeKernels();
   addMFEMNonlinearSolver();
+  mfem_problem_builder->RegisterGridFunctions();
 
   // Set up initial conditions
+  auto equation_system = dynamic_cast<platypus::EquationSystemInterface *>(&getProblemData());
+  equation_system->GetEquationSystem()->Init(
+      getProblemData()._gridfunctions, getProblemData()._fespaces, getProblemData()._bc_map);
+
   auto problem_operator =
       dynamic_cast<platypus::ProblemOperatorInterface *>(getProblemData().GetOperator());
   problem_operator->SetGridFunctions();
