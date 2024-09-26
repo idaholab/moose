@@ -52,7 +52,7 @@ MFEMSteady::execute()
   _mfem_problem.timestepSetup();
 
   // Solve equation system.
-  _problem->GetOperator()->Solve(*(_problem->_f));
+  _problem->GetOperator()->Solve(_problem->_f);
   // Output data
   _problem->_outputs.Write();
 

@@ -44,16 +44,4 @@ TimeDomainProblemBuilder::ConstructOperator()
   GetProblem()->ConstructOperator();
 }
 
-void
-TimeDomainProblemBuilder::ConstructState()
-{
-  auto problem_operator = GetProblem()->GetOperator();
-
-  // Vector of dofs.
-  GetProblem()->_f = std::make_unique<mfem::BlockVector>(problem_operator->_true_offsets);
-  *(GetProblem()->_f) = 0.0;                   // give initial value
-  problem_operator->Init(*(GetProblem()->_f)); // Set up initial conditions
-  problem_operator->SetTime(0.0);
-}
-
 } // namespace platypus

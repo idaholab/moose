@@ -22,7 +22,7 @@ public:
   platypus::Outputs _outputs;
 
   std::unique_ptr<mfem::ODESolver> _ode_solver{nullptr};
-  std::unique_ptr<mfem::BlockVector> _f{nullptr};
+  mfem::BlockVector _f;
 
   std::shared_ptr<mfem::Solver> _jacobian_preconditioner{nullptr};
   std::shared_ptr<mfem::Solver> _jacobian_solver{nullptr};
@@ -58,14 +58,8 @@ public:
   virtual void SetOperatorGridFunctions() = 0;
   virtual void ConstructNonlinearSolver();
   virtual void ConstructOperator() = 0;
-  virtual void ConstructState() = 0;
 
   virtual void InitializeKernels();
-
-  /// @brief Call @a FinalizeProblem to setup a problem.
-  /// @param build_operator Skips @a ConstructOperator step if false. Set this to false if the problem
-  /// operator has already been constructed earlier to avoid rebuilding it.
-  void FinalizeProblem(bool build_operator = true);
 
   /// Returns a shared pointer to the problem.
   std::shared_ptr<platypus::Problem> ReturnProblem() { return _problem; }

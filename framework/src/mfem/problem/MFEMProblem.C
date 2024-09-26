@@ -45,7 +45,15 @@ MFEMProblem::initialSetup()
   _coefficients.AddGlobalCoefficientsFromSubdomains();
 
   getProblemData()._coefficients = _coefficients;
-  mfem_problem_builder->FinalizeProblem(false);
+  mfem_problem_builder->RegisterGridFunctions();
+  mfem_problem_builder->InitializeKernels();
+  mfem_problem_builder->SetOperatorGridFunctions();
+  mfem_problem_builder->ConstructNonlinearSolver();
+
+  // Set up initial conditions
+  auto problem_operator =
+      dynamic_cast<platypus::ProblemOperatorInterface *>(getProblemData().GetOperator());
+  problem_operator->Init(getProblemData()._f);
 
   if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
   {

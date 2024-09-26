@@ -50,8 +50,6 @@ public:
 
   void ConstructOperator() override;
 
-  void ConstructState() override;
-
 protected:
   // NB: constructor for derived classes.
   SteadyStateProblemBuilder(platypus::SteadyStateProblem * problem) : ProblemBuilder(problem) {}

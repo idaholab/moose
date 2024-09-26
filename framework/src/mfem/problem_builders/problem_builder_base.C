@@ -6,7 +6,6 @@ namespace platypus
 Problem::~Problem()
 {
   // Ensure that all owned memory is properly freed!
-  _f.reset();
   _ode_solver.reset();
 }
 
@@ -26,19 +25,6 @@ ProblemBuilder::ConstructNonlinearSolver()
 void
 ProblemBuilder::InitializeKernels()
 {
-}
-
-void
-ProblemBuilder::FinalizeProblem(bool build_operator)
-{
-  RegisterGridFunctions();
-  InitializeKernels();
-  SetOperatorGridFunctions();
-
-  ConstructNonlinearSolver();
-
-  ConstructState();
-  // ConstructTimestepper();
 }
 
 } // namespace platypus

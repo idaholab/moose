@@ -53,8 +53,6 @@ public:
 
   void ConstructOperator() override;
 
-  void ConstructState() override;
-
 protected:
   /// NB: constructor called in derived classes.
   TimeDomainProblemBuilder(platypus::TimeDomainProblem * problem) : ProblemBuilder(problem) {}
