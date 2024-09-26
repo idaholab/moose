@@ -1,0 +1,20 @@
+[Tests]
+  [Epsilon_model_out]
+    method = '!DBG'
+    type = 'CSVDiff'
+    input = 'epsilon_model_bicrystal.i'
+    csvdiff = 'epsilon_model_bicrystal_out.csv'
+    requirement = "The system shall be able to compute the accurate anisotropic grain boundary energy and mobility for the epsilon model"
+    design = 'SphericalGaussianKernelAction.md EpsilonModelEpsilonGradientKernel.md EpsilonModelMGradientKernel.md SphericalGaussianMaterial.md'
+    issues = '#27774'
+  []
+  [Gamma_model_out]
+    method = '!DBG'
+    type = 'CSVDiff'
+    input = 'gamma_model_bicrystal.i'
+    csvdiff = 'gamma_model_bicrystal_out.csv'
+    requirement = "The system shall be able to compute the accurate anisotropic grain boundary energy and mobility for the gamma model"
+    design = 'SphericalGaussianKernelAction.md GammaModelGammaGradientKernel.md SphericalGaussianMaterial.md'
+    issues = '#27774'
+  []
+[]
