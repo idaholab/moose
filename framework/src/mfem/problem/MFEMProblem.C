@@ -45,7 +45,6 @@ MFEMProblem::initialSetup()
   _coefficients.AddGlobalCoefficientsFromSubdomains();
   getProblemData()._coefficients = _coefficients;
   addMFEMNonlinearSolver();
-  mfem_problem_builder->RegisterGridFunctions();
 
   // Set up initial conditions
   auto equation_system = dynamic_cast<platypus::EquationSystemInterface *>(&getProblemData());
