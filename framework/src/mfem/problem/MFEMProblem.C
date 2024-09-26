@@ -48,7 +48,7 @@ MFEMProblem::initialSetup()
   mfem_problem_builder->RegisterGridFunctions();
   mfem_problem_builder->InitializeKernels();
   mfem_problem_builder->SetOperatorGridFunctions();
-  mfem_problem_builder->ConstructNonlinearSolver();
+  addMFEMNonlinearSolver();
 
   // Set up initial conditions
   auto problem_operator =
@@ -122,6 +122,19 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
   const MFEMSolverBase & mfem_solver = getUserObject<MFEMSolverBase>(name);
 
   getProblemData()._jacobian_solver = mfem_solver.getSolver();
+}
+
+void
+MFEMProblem::addMFEMNonlinearSolver()
+{
+  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getProblemData()._comm);
+
+  // Defaults to one iteration, without further nonlinear iterations
+  nl_solver->SetRelTol(0.0);
+  nl_solver->SetAbsTol(0.0);
+  nl_solver->SetMaxIter(1);
+
+  getProblemData()._nonlinear_solver = nl_solver;
 }
 
 void

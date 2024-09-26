@@ -14,7 +14,7 @@ class Problem
 {
 public:
   Problem() = default;
-  virtual ~Problem();
+  virtual ~Problem() { _ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
   platypus::BCMap _bc_map;
@@ -56,10 +56,9 @@ public:
 
   virtual void RegisterGridFunctions() = 0;
   virtual void SetOperatorGridFunctions() = 0;
-  virtual void ConstructNonlinearSolver();
   virtual void ConstructOperator() = 0;
 
-  virtual void InitializeKernels();
+  virtual void InitializeKernels(){};
 
   /// Returns a shared pointer to the problem.
   std::shared_ptr<platypus::Problem> ReturnProblem() { return _problem; }
@@ -70,29 +69,6 @@ protected:
     : _problem(std::shared_ptr<platypus::Problem>(problem))
   {
   }
-
-  /// Supported Jacobian solver types.
-  enum class SolverType
-  {
-    HYPRE_PCG,
-    HYPRE_GMRES,
-    HYPRE_FGMRES,
-    HYPRE_AMG,
-    SUPER_LU
-  };
-
-  /// Structure containing default parameters which can be passed to @a ConstructJacobianSolverWithOptions.
-  /// These will be used if the user has not supplied their own values.
-  struct SolverParams
-  {
-    double _tolerance;
-    double _abs_tolerance;
-
-    unsigned int _max_iteration;
-
-    int _print_level;
-    int _k_dim;
-  };
 
   /// Overridden in derived classes.
   [[nodiscard]] virtual platypus::Problem * GetProblem() const = 0;
