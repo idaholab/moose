@@ -56,11 +56,4 @@ TimeDomainProblemBuilder::ConstructState()
   problem_operator->SetTime(0.0);
 }
 
-void
-TimeDomainProblemBuilder::ConstructTimestepper()
-{
-  GetProblem()->_ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
-  GetProblem()->_ode_solver->Init(*(GetProblem()->GetOperator()));
-}
-
 } // namespace platypus

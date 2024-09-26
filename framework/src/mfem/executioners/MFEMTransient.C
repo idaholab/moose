@@ -62,8 +62,10 @@ MFEMTransient::init()
   // SetOperatorGridFunctions();
   // ConstructNonlinearSolver();
   // ConstructState();
-  // ConstructTimestepper();
-  // InitializeOutputs();
+
+  // Set timestepper
+  _problem->_ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
+  _problem->_ode_solver->Init(*(_problem->GetOperator()));
 }
 
 void

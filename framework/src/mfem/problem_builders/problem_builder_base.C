@@ -38,7 +38,7 @@ ProblemBuilder::FinalizeProblem(bool build_operator)
   ConstructNonlinearSolver();
 
   ConstructState();
-  ConstructTimestepper();
+  // ConstructTimestepper();
 }
 
 } // namespace platypus
