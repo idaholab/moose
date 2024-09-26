@@ -39,10 +39,10 @@ MFEMTransient::Step(double dt, int it) const
   }
 
   // Advance time step.
-  _problem->_ode_solver->Step(*(_problem->_f), _t, dt);
+  _problem->_ode_solver->Step(_problem->_f, _t, dt);
 
   // Sync Host/Device
-  _problem->_f->HostRead();
+  _problem->_f.HostRead();
 
   // Output data
   if (_last_step || (it % _vis_steps) == 0)
@@ -66,6 +66,7 @@ MFEMTransient::init()
   // Set timestepper
   _problem->_ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
   _problem->_ode_solver->Init(*(_problem->GetOperator()));
+  _problem->GetOperator()->SetTime(0.0);
 }
 
 void

@@ -21,7 +21,7 @@ public:
   }
 
   void SetGridFunctions() override;
-  void Init(mfem::Vector & X) override;
+  void Init(mfem::BlockVector & X) override;
 
   void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override;
 
