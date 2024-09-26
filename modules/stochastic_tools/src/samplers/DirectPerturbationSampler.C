@@ -45,12 +45,14 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
   else
     num_samples = _nominal_values.size() + 1;
 
+  // Adjusting the sample matrix
   setNumberOfRows(num_samples);
   setNumberOfCols(_nominal_values.size());
 
   _absolute_intervals = std::vector<Real>(num_samples, 0);
   _parameter_vectors = std::vector<std::vector<Real>>(num_samples, _nominal_values);
 
+  // Depending on what kind of perturbation we selected, the parameter values will change
   if (_perturbation_method == "central_difference")
     for (const auto i : index_range(_nominal_values))
     {

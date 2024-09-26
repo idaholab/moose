@@ -22,9 +22,9 @@ DirectPerturbationReporter::validParams()
                                        "Direct PErturbation sampler used to generate samples.");
   params.addParam<std::vector<VectorPostprocessorName>>(
       "vectorpostprocessors",
-      "List of VectorPostprocessor(s) to utilized for statistic computations.");
+      "List of VectorPostprocessor(s) to utilized for sensitivity computations.");
   params.addParam<std::vector<ReporterName>>(
-      "reporters", {}, "List of Reporter values to utilized for statistic computations.");
+      "reporters", {}, "List of Reporter values to utilized for sensitivity computations.");
 
   return params;
 }
@@ -44,10 +44,11 @@ DirectPerturbationReporter::DirectPerturbationReporter(const InputParameters & p
 void
 DirectPerturbationReporter::initialize()
 {
+  // It is enough to do this once
   if (_initialized)
     return;
 
-  // Stats for Reporters
+  // Sensitivities from Reporters
   if (isParamValid("reporters"))
   {
     std::vector<std::string> unsupported_types;
@@ -68,7 +69,7 @@ DirectPerturbationReporter::initialize()
                  MooseUtils::join(unsupported_types, ", "));
   }
 
-  // Stats for VPP
+  // Sensitivities from VPP
   if (isParamValid("vectorpostprocessors"))
     for (const auto & vpp_name :
          getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors"))
@@ -82,6 +83,7 @@ template <typename DataType>
 void
 DirectPerturbationReporter::declareValueHelper(const ReporterName & r_name)
 {
+  // We create a reporter value for the sensitivities based on the input
   const auto & data = getReporterValueByName<std::vector<DataType>>(r_name);
   const std::string s_name = r_name.getObjectName() + "_" + r_name.getValueName();
   declareValueByName<std::vector<DataType>, DirectPerturbationReporterContext<DataType>>(
@@ -115,6 +117,7 @@ DirectPerturbationReporterContext<DataType>::finalize()
 
     dof_id_type left_i;
     dof_id_type right_i;
+    // Depending on which method we use, the indices will change
     if (_sampler.perturbationMethod() == "central_difference")
     {
       left_i = 2 * param_i;
@@ -137,14 +140,17 @@ DirectPerturbationReporterContext<DataType>::finalize()
       this->_state.value()[param_i] = initializeSensitivity(_data[copy_i]);
     }
 
+    // We add the contribution from one side
     if (left_i_in_owned_range)
       addSensitivityConstribution(this->_state.value()[param_i], _data[left_i - offset], interval);
 
+    // We add the contribution from the other side
     if (right_i_in_owned_range)
       addSensitivityConstribution(
           this->_state.value()[param_i], _data[right_i - offset], -interval);
   }
 
+  // We gather the contributions across all processors
   this->vectorSum();
 }
 
@@ -208,11 +214,9 @@ DataType
 DirectPerturbationReporterContext<DataType>::initializeSensitivity(
     const DataType & example_output) const
 {
-  // DataType is a numeric type that we can sum (excluding bool)
+  // DataType is a numeric type so we just return 0
   if constexpr (std::is_arithmetic<DataType>::value && !std::is_same<DataType, bool>::value)
-  {
     return 0.0;
-  }
   // DataType is a vector type
   else if constexpr (is_std_vector<DataType>::value)
   {

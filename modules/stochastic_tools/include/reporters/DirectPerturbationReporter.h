@@ -42,10 +42,22 @@ private:
   bool _initialized;
 };
 
+/**
+ * Reporter context for computing direct perturbation-based sensitivity
+ * coefficients
+ */
 template <typename DataType>
 class DirectPerturbationReporterContext : public ReporterGeneralContext<std::vector<DataType>>
 {
 public:
+  /**
+   * Constructor
+   * @param other A parallel object, usually the MooseApp
+   * @param producer The producer object for the reporter
+   * @param state A reporter state (a vector of some types in this case)
+   * @param sampler The sampler holding information on the direct perturbation paraemters
+   * @param data The data coming back from the executed models
+   */
   DirectPerturbationReporterContext(const libMesh::ParallelObject & other,
                                     const MooseObject & producer,
                                     ReporterState<std::vector<DataType>> & state,
@@ -59,14 +71,18 @@ public:
   }
 
 private:
-  /// Compute direct perturbation index, split into a separate function due to
+  /// Compute direct perturbation sensitivity, split into a separate function due to
   /// the different operators on vectors and scalars
+  /// @param add_to The data structure which will be extended
+  /// @param to_add The data structure which will be added to the other one
+  /// @param interval The interval scaling coefficient
   void addSensitivityConstribution(DataType & add_to,
                                    const DataType & to_add,
                                    const Real interval) const;
 
-  /// Compute direct perturbation index, split into a separate function due to
-  /// the different operators on vectors and scalars
+  /// Initialize the sensitivity container, split into a separate function due to
+  /// the different constructors for scalars and vectors
+  /// @param example_output A structure which supplies the dimensions for the allocation
   DataType initializeSensitivity(const DataType & example_output) const;
 
   /// Reference to the direct perturbation sampler
