@@ -52,16 +52,29 @@ MFEMTransient::Step(double dt, int it) const
 }
 
 void
+MFEMTransient::registerTimeDerivatives()
+{
+  std::vector<std::string> gridfunction_names;
+  platypus::GridFunctions & gridfunctions = _mfem_problem.getProblemData()._gridfunctions;
+  for (auto const & [name, gf] : gridfunctions)
+  {
+    gridfunction_names.push_back(name);
+  }
+  for (auto & gridfunction_name : gridfunction_names)
+  {
+    gridfunctions.Register(platypus::GetTimeDerivativeName(gridfunction_name),
+                           std::make_shared<mfem::ParGridFunction>(
+                               gridfunctions.Get(gridfunction_name)->ParFESpace()));
+  }
+}
+
+void
 MFEMTransient::init()
 {
   _problem = dynamic_cast<platypus::TimeDomainProblem *>(&_mfem_problem.getProblemData());
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
+  registerTimeDerivatives();
   _mfem_problem.initialSetup();
-
-  // RegisterGridFunctions();
-  // SetOperatorGridFunctions();
-  // ConstructNonlinearSolver();
-  // ConstructState();
 
   // Set timestepper
   _problem->_ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
