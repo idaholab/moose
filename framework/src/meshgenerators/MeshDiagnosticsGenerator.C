@@ -1493,7 +1493,8 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       }
     }
   }
-  diagnosticsLog("Number of intersecting element edges: " + Moose::stringify(num_intersecting_edges),
+  diagnosticsLog("Number of intersecting element edges: " +
+                     Moose::stringify(num_intersecting_edges),
                  _check_non_matching_edges,
                  num_intersecting_edges);
 }

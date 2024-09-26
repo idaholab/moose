@@ -70,14 +70,14 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
 
 bool
 checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
-                 const std::unique_ptr<Elem> & edge2,
-                 std::vector<double> & intersection_coords,
-                 const Real intersection_tol)
+                           const std::unique_ptr<Elem> & edge2,
+                           std::vector<double> & intersection_coords,
+                           const Real intersection_tol)
 {
-  //check that the two elements are of type EDGE2
-  mooseAssert(edge1->side_type(*(edge1->side_index_range()).end())==0,
+  // check that the two elements are of type EDGE2
+  mooseAssert(edge1->side_type(*(edge1->side_index_range()).end()) == 0,
               "Elements must be of type EDGE2");
-  mooseAssert(edge2->side_type(*(edge2->side_index_range()).end())==0,
+  mooseAssert(edge2->side_type(*(edge2->side_index_range()).end()) == 0,
               "Elements must be of type EDGE2");
   // Get nodes from the two edges
   const Node * const n1 = edge1->get_nodes()[0];
@@ -108,11 +108,16 @@ checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
     is close enough to 0 return true The shortest line between the two edges will be perpendicular
     to both.
   */
-  const auto d1343 = (n1x - n3x) * (n4x - n3x) + (n1y - n3y) * (n4y - n3y) + (n1z - n3z) * (n4z - n3z);
-  const auto d4321 = (n4x - n3x) * (n2x - n1x) + (n4y - n3y) * (n2y - n1y) + (n4z - n3z) * (n2z - n1z);
-  const auto d1321 = (n1x - n3x) * (n2x - n1x) + (n1y - n3y) * (n2y - n1y) + (n1z - n3z) * (n2z - n1z);
-  const auto d4343 = (n4x - n3x) * (n4x - n3x) + (n4y - n3y) * (n4y - n3y) + (n4z - n3z) * (n4z - n3z);
-  const auto d2121 = (n2x - n1x) * (n2x - n1x) + (n2y - n1y) * (n2y - n1y) + (n2z - n1z) * (n2z - n1z);
+  const auto d1343 =
+      (n1x - n3x) * (n4x - n3x) + (n1y - n3y) * (n4y - n3y) + (n1z - n3z) * (n4z - n3z);
+  const auto d4321 =
+      (n4x - n3x) * (n2x - n1x) + (n4y - n3y) * (n2y - n1y) + (n4z - n3z) * (n2z - n1z);
+  const auto d1321 =
+      (n1x - n3x) * (n2x - n1x) + (n1y - n3y) * (n2y - n1y) + (n1z - n3z) * (n2z - n1z);
+  const auto d4343 =
+      (n4x - n3x) * (n4x - n3x) + (n4y - n3y) * (n4y - n3y) + (n4z - n3z) * (n4z - n3z);
+  const auto d2121 =
+      (n2x - n1x) * (n2x - n1x) + (n2y - n1y) * (n2y - n1y) + (n2z - n1z) * (n2z - n1z);
 
   const auto denominator = d2121 * d4343 - d4321 * d4321;
   const auto numerator = d1343 * d4321 - d1321 * d4343;
@@ -141,8 +146,8 @@ checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
     return false;
 
   // Calculate distance between these two nodes
-  const auto distance =
-      std::sqrt(Utility::pow<2>(nax - nbx) + Utility::pow<2>(nay - nby) + Utility::pow<2>(naz - nbz));
+  const auto distance = std::sqrt(Utility::pow<2>(nax - nbx) + Utility::pow<2>(nay - nby) +
+                                  Utility::pow<2>(naz - nbz));
   if (distance < intersection_tol)
   {
     intersection_coords[0] = nax;
