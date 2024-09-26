@@ -128,6 +128,9 @@ protected:
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
+  
+  // Auxiliary operator for non-legacy assembly 
+  mfem::OperatorPtr aux_a;
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
