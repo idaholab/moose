@@ -165,9 +165,10 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto blf = _blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
-    _h_blocks(i, i) = new mfem::HypreParMatrix;
+    mfem::HypreParMatrix aux_a;
     blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_xs.at(i)), *lf, *_h_blocks(i, i), aux_x, aux_rhs);
+        _ess_tdof_lists.at(i), *(_xs.at(i)), *lf, aux_a, aux_x, aux_rhs);
+    _h_blocks(i, i) = new const mfem::HypreParMatrix(aux_a);
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
   }
@@ -186,14 +187,15 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
-        _h_blocks(i, j) = new mfem::HypreParMatrix;
+        mfem::HypreParMatrix aux_a;
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *(_xs.at(j)),
                                           aux_lf,
-                                          *_h_blocks(i, j),
+                                          aux_a,
                                           aux_x,
                                           aux_rhs);
+        _h_blocks(i, j) = new const mfem::HypreParMatrix(aux_a);
         trueRHS.GetBlock(i) += aux_rhs;
       }
     }
@@ -478,8 +480,9 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     bc_x /= _dt_coef.constant;
 
     // Form linear system for operator acting on vector of du/dt
-    _h_blocks(i, i) = new mfem::HypreParMatrix;
-    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *_h_blocks(i, i), aux_x, aux_rhs);
+    mfem::HypreParMatrix aux_a;
+    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, aux_a, aux_x, aux_rhs);
+    _h_blocks(i, i) = new const mfem::HypreParMatrix(aux_a);
     truedXdt.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
   }

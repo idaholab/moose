@@ -127,7 +127,7 @@ protected:
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
 
-  mfem::Array2D<mfem::HypreParMatrix *> _h_blocks;
+  mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
