@@ -11,8 +11,6 @@
 
 #include "TotalFreeEnergyBase.h"
 
-// Forward Declarations
-
 /**
  * AD version that uses AD material properties
  * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined

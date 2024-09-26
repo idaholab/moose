@@ -251,28 +251,28 @@ SphericalGaussianMaterial::computeQpProperties()
 
   // Initialize values
   ADReal aniso_epsilon = 0.0;
-  ADRealVectorValue anisoplus_epsilon(0.0, 0.0, 0.0);
-  ADRealVectorValue anisominus_epsilon(0.0, 0.0, 0.0);
+  ADRealVectorValue anisoplus_epsilon;
+  ADRealVectorValue anisominus_epsilon;
   ADReal sum_epsilon = 0.0;
-  ADRealVectorValue sum_epsilon_plus(0.0, 0.0, 0.0);
-  ADRealVectorValue sum_epsilon_minus(0.0, 0.0, 0.0);
-  ADRealVectorValue finalgaussianplus_epsilon(0.0, 0.0, 0.0);
-  ADRealVectorValue finalgaussianminus_epsilon(0.0, 0.0, 0.0);
+  ADRealVectorValue sum_epsilon_plus;
+  ADRealVectorValue sum_epsilon_minus;
+  ADRealVectorValue finalgaussianplus_epsilon;
+  ADRealVectorValue finalgaussianminus_epsilon;
   // Compute base value of epsilon from base value of energy
   const ADReal epsilon_base = 3.0 / 4.0 * _base_energy * _energy_scale * _length_scale *
                               _length_scale * _grain_boundary_width;
 
   ADReal aniso_g_gamma = 0.0;
-  ADRealVectorValue anisoplus_g_gamma(0.0, 0.0, 0.0);
-  ADRealVectorValue anisominus_g_gamma(0.0, 0.0, 0.0);
+  ADRealVectorValue anisoplus_g_gamma;
+  ADRealVectorValue anisominus_g_gamma;
   ADReal sum_g_gamma = 0.0;
-  ADRealVectorValue sum_g_gamma_plus(0.0, 0.0, 0.0);
-  ADRealVectorValue sum_g_gamma_minus(0.0, 0.0, 0.0);
-  ADRealVectorValue finalgaussianplus_g_gamma(0.0, 0.0, 0.0);
-  ADRealVectorValue finalgaussianminus_g_gamma(0.0, 0.0, 0.0);
+  ADRealVectorValue sum_g_gamma_plus;
+  ADRealVectorValue sum_g_gamma_minus;
+  ADRealVectorValue finalgaussianplus_g_gamma;
+  ADRealVectorValue finalgaussianminus_g_gamma;
   ADReal g_gamma = 0.0;
-  ADRealVectorValue dg_gamma_plus(0.0, 0.0, 0.0);
-  ADRealVectorValue dg_gamma_minus(0.0, 0.0, 0.0);
+  ADRealVectorValue dg_gamma_plus;
+  ADRealVectorValue dg_gamma_minus;
 
   // Compute isotropic values of epsilon and m
   const ADReal converted_base_energy = _base_energy * _energy_scale * _length_scale * _length_scale;
@@ -285,26 +285,26 @@ SphericalGaussianMaterial::computeQpProperties()
   ADReal aniso_L = 0.0;
   ADReal sum_L = 0.0;
 
-  ADRealVectorValue gaussianplus(0.0, 0.0, 0.0);
-  ADRealVectorValue gaussianminus(0.0, 0.0, 0.0);
+  ADRealVectorValue gaussianplus;
+  ADRealVectorValue gaussianminus;
   ADReal continuity_term = 0.0;
   ADReal parts_continuity_term = 0.0;
   ADReal sum_continuity_term = 0.0;
 
   // Term used to combine all the individually computed anisotropic properties between each pair of
   // grains into single continuous functions
-  for (std::size_t m : make_range(std::size_t(0), _op_num - 1))
-    for (std::size_t n : make_range(m + 1, _op_num))
+  for (const auto m : make_range(std::size_t(0), _op_num - 1))
+    for (const auto n : make_range(m + 1, _op_num))
     {
       parts_continuity_term = (100000.0 * ((*_vals[m])[_qp]) * ((*_vals[m])[_qp]) + 0.01) *
                               (100000.0 * ((*_vals[n])[_qp]) * ((*_vals[n])[_qp]) + 0.01);
       sum_continuity_term += parts_continuity_term;
     }
 
-  for (std::size_t b : make_range(std::size_t(0), _grain_num - 1))
-    for (std::size_t m : make_range(std::size_t(0), _op_num - 1))
-      for (std::size_t a : make_range(b + 1, _grain_num))
-        for (std::size_t n : make_range(m + 1, _op_num))
+  for (const auto b : make_range(std::size_t(0), _grain_num - 1))
+    for (const auto m : make_range(std::size_t(0), _op_num - 1))
+      for (const auto a : make_range(b + 1, _grain_num))
+        for (const auto n : make_range(m + 1, _op_num))
           // Compute individual anisotropic properties between each pairs of grains
           if (b == op_to_grains[m])
             if (a == op_to_grains[n])
@@ -360,7 +360,7 @@ SphericalGaussianMaterial::computeQpProperties()
 
               // Loop through the stored minima library data to compute gaussian for each minima
               // library misorientation
-              for (std::size_t l : make_range(std::size_t(0), _library_misorientations_number))
+              for (const auto l : make_range(std::size_t(0), _library_misorientations_number))
               {
                 // Compute the gaussian switch by comparing the axis angle components of the minima
                 // library misorientation to the simulation misorientation
@@ -395,7 +395,7 @@ SphericalGaussianMaterial::computeQpProperties()
                 _library_gaussian_direction[l] = _library_gaussian_direction[l].unit();
                 // Determine whether the library gaussian direction needs to be rotated into the
                 // simulation reference frame using quaternion orientations or left as such
-                ADRealVectorValue final_gaussian_direction(0.0, 0.0, 0.0);
+                ADRealVectorValue final_gaussian_direction;
                 if (_compute_final_gaussian_direction)
                 {
                   const ADReal miuo0 = (_q0[a] * 0.0) -
