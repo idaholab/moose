@@ -24,6 +24,9 @@
 {%- set CLANG_GCC_VERSION = '' -%}
 {%- endif %}
 
+{#- The files directory for this definition                                                   -#}
+{%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
+
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
 Bootstrap: docker
 From: rockylinux:8.9.20231119
@@ -227,3 +230,4 @@ EOF
 
 %files
     {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}
+    {{ FILES_DIR }}/.singularity.d/env/01-fix-exec.sh /.singularity.d/env/01-fix-exec.sh
