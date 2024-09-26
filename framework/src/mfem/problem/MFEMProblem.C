@@ -16,7 +16,6 @@ MFEMProblem::validParams()
   params.addParam<std::string>(
       "assembly_level", "legacy", "Matrix assembly level. Options: Legacy, Full, Partial, Element");
 
-
   return params;
 }
 
