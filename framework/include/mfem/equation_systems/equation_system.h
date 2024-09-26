@@ -129,9 +129,6 @@ protected:
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
   
-  // Auxiliary operator for non-legacy assembly 
-  mfem::OperatorPtr aux_a;
-
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
   platypus::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
@@ -176,6 +173,10 @@ public:
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
+  virtual void FormSystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & truedXdt,
+                                mfem::BlockVector & trueRHS) override;
+
 };
 
 } // namespace platypus
