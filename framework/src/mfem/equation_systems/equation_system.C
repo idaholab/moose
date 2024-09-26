@@ -106,8 +106,51 @@ EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
         test_var_name, _lfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
   }
 }
+
 void
 EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
+                           mfem::BlockVector & trueX,
+                           mfem::BlockVector & trueRHS)
+{
+  if(_assembly_level == mfem::AssemblyLevel::LEGACY)
+  {
+    FormLegacySystem(op, trueX, trueRHS);
+  }
+  else
+  {
+    MFEM_VERIFY(_test_var_names.size() == 1, "Non-legacy assembly is only supported for single-variable systems");
+    FormSystem(op, trueX, trueRHS);
+  }
+      
+}
+
+
+void
+EquationSystem::FormSystem(mfem::OperatorHandle & op,
+                           mfem::BlockVector & trueX,
+                           mfem::BlockVector & trueRHS)
+{
+
+  mfem::OperatorPtr aux_a;
+  // Form diagonal blocks.
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto blf = _blfs.Get(test_var_name);
+    auto lf = _lfs.Get(test_var_name);
+    mfem::Vector aux_x, aux_rhs;
+    blf->FormLinearSystem(
+        _ess_tdof_lists.at(i), *(_xs.at(i)), *lf, aux_a, aux_x, aux_rhs);
+    trueX.GetBlock(i) = aux_x;
+    trueRHS.GetBlock(i) = aux_rhs;
+  }
+
+  op.Reset(aux_a.Ptr());
+
+}
+
+void
+EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueX,
                                  mfem::BlockVector & trueRHS)
 {
@@ -201,8 +244,11 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 void
 EquationSystem::Init(platypus::GridFunctions & gridfunctions,
                      const platypus::FESpaces & fespaces,
-                     platypus::BCMap & bc_map)
+                     platypus::BCMap & bc_map,
+                     mfem::AssemblyLevel assembly_level)
 {
+  _assembly_level = assembly_level;
+
   for (auto & test_var_name : _test_var_names)
   {
     if (!gridfunctions.Has(test_var_name))
@@ -406,7 +452,7 @@ TimeDependentEquationSystem::BuildBilinearForms()
 }
 
 void
-TimeDependentEquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
+TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                               mfem::BlockVector & truedXdt,
                                               mfem::BlockVector & trueRHS)
 {
