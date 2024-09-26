@@ -71,7 +71,7 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
 bool
 checkEdgeOverlap(const std::unique_ptr<Elem> & edge1,
                  const std::unique_ptr<Elem> & edge2,
-                 std::vector<double> &intersection_coords,
+                 std::vector<double> & intersection_coords,
                  const Real intersection_tol)
 {
   // Get nodes from the two edges
@@ -95,8 +95,7 @@ checkEdgeOverlap(const std::unique_ptr<Elem> & edge1,
   auto n4z = n4->operator()(2);
 
   // Check that none of these points are the same
-  if (n1->id() == n3->id() || n1->id() == n4->id() ||
-      n2->id() == n3->id() || n2->id() == n4->id())
+  if (n1->id() == n3->id() || n1->id() == n4->id() || n2->id() == n3->id() || n2->id() == n4->id())
     return false;
 
   /*
@@ -135,7 +134,7 @@ checkEdgeOverlap(const std::unique_ptr<Elem> & edge1,
     return false;
   if (mub < 0 || mub > 1)
     return false;
-  
+
   // Calculate distance between these two nodes
   double distance =
       std::sqrt(std::pow(nax - nbx, 2) + std::pow(nay - nby, 2) + std::pow(naz - nbz, 2));

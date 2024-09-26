@@ -1437,7 +1437,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       // If they're the same element then there's no need to check for overlap
       if (elem == other_elem)
         continue;
-      
+
       // Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges
       // will either
       auto boundingBox1 = elem->loose_bounding_box();
@@ -1459,10 +1459,8 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
           const Node * n4 = other_edge->get_nodes()[1];
 
           // Check if the edges have already been added to our check_edges list
-          if (checked_edges_nodes.count(*n1) &&
-              checked_edges_nodes.count(*n2) &&
-              checked_edges_nodes.count(*n3) &&
-              checked_edges_nodes.count(*n4))
+          if (checked_edges_nodes.count(*n1) && checked_edges_nodes.count(*n2) &&
+              checked_edges_nodes.count(*n3) && checked_edges_nodes.count(*n4))
           {
             continue;
           }
@@ -1486,7 +1484,9 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
             std::string x_coord = std::to_string(intersection_coords[0]);
             std::string y_coord = std::to_string(intersection_coords[1]);
             std::string z_coord = std::to_string(intersection_coords[2]);
-            std::string message = "Intersecting edges found between elements " + elem_id + " and " + other_elem_id + " near point (" + x_coord + ", " + y_coord + ", " + z_coord + ")";
+            std::string message = "Intersecting edges found between elements " + elem_id + " and " +
+                                  other_elem_id + " near point (" + x_coord + ", " + y_coord +
+                                  ", " + z_coord + ")";
             _console << message << std::endl;
           }
         }
