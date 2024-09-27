@@ -1465,6 +1465,24 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
             continue;
           }
 
+          //Check element/edge type 
+          if (edge->type() != 0)
+          {
+            std::string element_message = "Edge of type " + Utility::enum_to_string(edge->type()) + " was found in cell " + std::to_string(elem->id()) + 
+                                          " which is of type " + Utility::enum_to_string(elem->type()) + '\n' + 
+                                          "The edge intersection check only works for EDGE2 elements";
+            _console << element_message << std::endl;
+            continue;
+          }
+          if (other_edge->type() != 0)
+          {
+            std::string element_message = "Edge of type " + Utility::enum_to_string(other_edge->type()) + " was found in cell " + std::to_string(other_elem->id()) + 
+                                          " which is of type " + Utility::enum_to_string(other_elem->type()) + '\n' + 
+                                          "The edge intersection check only works for EDGE2 elements";
+            _console << element_message << std::endl;
+            continue;
+          }
+
           // Now compare edge with other_edge
           std::vector<double> intersection_coords(3);
           bool overlap = MeshBaseDiagnosticsUtils::checkFirstOrderEdgeOverlap(

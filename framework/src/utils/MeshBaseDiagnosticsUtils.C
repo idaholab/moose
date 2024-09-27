@@ -75,10 +75,8 @@ checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
                            const Real intersection_tol)
 {
   // check that the two elements are of type EDGE2
-  mooseAssert(edge1->type() == 0,
-              "Elements must be of type EDGE2");
-  mooseAssert(edge2->type() == 0,
-              "Elements must be of type EDGE2");
+  mooseAssert(edge1->type() == 0, "Elements must be of type EDGE2");
+  mooseAssert(edge2->type() == 0, "Elements must be of type EDGE2");
   // Get nodes from the two edges
   const Node * const n1 = edge1->get_nodes()[0];
   const Node * const n2 = edge1->get_nodes()[1];
