@@ -42,6 +42,7 @@
     type = 'RunApp'
     input = ''
     absent_out = '/Executioner/\<type\>/Transient.*/Executioner/\<type\>/Transient'
+    valgrind = HEAVY
     # suppress error checking, the word 'ERROR' shows up in the yaml dump
     errors = 'zzzzz zzzzz'
     cli_args = '--yaml /Executioner'
