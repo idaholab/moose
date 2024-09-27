@@ -6,15 +6,12 @@
 #include <iostream>
 #include <memory>
 
-namespace platypus
-{
-
-/// Base problem data class.
-class ProblemData
+/// Base problem data struct.
+struct MFEMProblemData
 {
 public:
-  ProblemData() = default;
-  virtual ~ProblemData() { _ode_solver.reset(); };
+  MFEMProblemData() = default;
+  virtual ~MFEMProblemData() { _ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
   platypus::BCMap _bc_map;
@@ -38,5 +35,3 @@ public:
   int _myid;
   int _num_procs;
 };
-
-} // namespace platypus
