@@ -6,7 +6,7 @@ namespace platypus
 {
 
 /// Time-dependent problems with no equation system.
-class TimeDomainProblem : public Problem
+class TimeDomainProblemData : public ProblemData
 {
 public:
   [[nodiscard]] platypus::TimeDomainProblemOperator * GetOperator() const override

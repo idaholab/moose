@@ -9,12 +9,12 @@
 namespace platypus
 {
 
-/// Base problem class.
-class Problem
+/// Base problem data class.
+class ProblemData
 {
 public:
-  Problem() = default;
-  virtual ~Problem() { _ode_solver.reset(); };
+  ProblemData() = default;
+  virtual ~ProblemData() { _ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
   platypus::BCMap _bc_map;

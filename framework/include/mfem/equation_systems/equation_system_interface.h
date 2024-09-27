@@ -5,8 +5,8 @@ namespace platypus
 {
 /**
  * Interface required for:
- * - SteadyStateEquationSystemProblem
- * - TimeDomainEquationSystemProblem
+ * - SteadyStateEquationSystemProblemData
+ * - TimeDomainEquationSystemProblemData
  * - EquationSystemProblemOperator
  * - TimeDomainEquationSystemProblemOperator
  */

@@ -5,11 +5,11 @@ namespace platypus
 {
 
 /// Class for steady-state problems with no equation system.
-class SteadyStateProblem : public Problem
+class SteadyStateProblemData : public ProblemData
 {
 public:
-  SteadyStateProblem() = default;
-  ~SteadyStateProblem() override = default;
+  SteadyStateProblemData() = default;
+  ~SteadyStateProblemData() override = default;
 
   [[nodiscard]] platypus::ProblemOperator * GetOperator() const override
   {

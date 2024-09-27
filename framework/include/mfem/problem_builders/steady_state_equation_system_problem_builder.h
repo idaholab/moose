@@ -8,20 +8,21 @@ namespace platypus
 {
 
 /// Steady-state problems with an equation system.
-class SteadyStateEquationSystemProblem : public SteadyStateProblem, public EquationSystemInterface
+class SteadyStateEquationSystemProblemData : public SteadyStateProblemData,
+                                             public EquationSystemInterface
 {
 public:
-  SteadyStateEquationSystemProblem() = default;
-  ~SteadyStateEquationSystemProblem() override = default;
+  SteadyStateEquationSystemProblemData() = default;
+  ~SteadyStateEquationSystemProblemData() override = default;
 
   [[nodiscard]] EquationSystemProblemOperator * GetOperator() const override
   {
-    return static_cast<EquationSystemProblemOperator *>(SteadyStateProblem::GetOperator());
+    return static_cast<EquationSystemProblemOperator *>(SteadyStateProblemData::GetOperator());
   }
 
   void SetOperator(std::unique_ptr<EquationSystemProblemOperator> problem_operator)
   {
-    SteadyStateProblem::SetOperator(std::move(problem_operator));
+    SteadyStateProblemData::SetOperator(std::move(problem_operator));
   }
 
   void ConstructOperator() override

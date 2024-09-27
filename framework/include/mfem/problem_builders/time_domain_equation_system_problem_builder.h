@@ -7,22 +7,23 @@
 namespace platypus
 {
 /// Time-depent problems with an equation system.
-class TimeDomainEquationSystemProblem : public TimeDomainProblem, public EquationSystemInterface
+class TimeDomainEquationSystemProblemData : public TimeDomainProblemData,
+                                            public EquationSystemInterface
 {
 public:
-  TimeDomainEquationSystemProblem() = default;
-  ~TimeDomainEquationSystemProblem() override = default;
+  TimeDomainEquationSystemProblemData() = default;
+  ~TimeDomainEquationSystemProblemData() override = default;
 
   [[nodiscard]] platypus::TimeDomainEquationSystemProblemOperator * GetOperator() const override
   {
     return static_cast<platypus::TimeDomainEquationSystemProblemOperator *>(
-        TimeDomainProblem::GetOperator());
+        TimeDomainProblemData::GetOperator());
   }
 
   void
   SetOperator(std::unique_ptr<platypus::TimeDomainEquationSystemProblemOperator> problem_operator)
   {
-    TimeDomainProblem::SetOperator(std::move(problem_operator));
+    TimeDomainProblemData::SetOperator(std::move(problem_operator));
   }
 
   void ConstructOperator() override

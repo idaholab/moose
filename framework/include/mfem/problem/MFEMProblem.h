@@ -154,10 +154,10 @@ public:
   platypus::PropertyManager & getProperties() { return _properties; }
 
   /**
-   * Method to get the current platypus::Problem object storing the
+   * Method to get the current platypus::ProblemData object storing the
    * current data specifying the FE problem.
    */
-  platypus::Problem & getProblemData() { return *_problem_data; }
+  platypus::ProblemData & getProblemData() { return *_problem_data; }
 
   platypus::Coefficients _coefficients;
 
@@ -185,5 +185,5 @@ protected:
   }
 
   platypus::PropertyManager _properties;
-  std::shared_ptr<platypus::Problem> _problem_data{nullptr};
+  std::shared_ptr<platypus::ProblemData> _problem_data{nullptr};
 };
