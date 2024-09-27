@@ -1,6 +1,6 @@
 # Navier Stokes Linear Finite Volume Flow Physics
 
-This syntax was created for the [WCNSFVLinearFlowPhysics.md] Physics.
+This syntax was created for the [WCNSLinearFVFlowPhysics.md] Physics.
 The nesting is intended to allow the definition of multiple instances of this Physics,
 with different block restrictions.
 

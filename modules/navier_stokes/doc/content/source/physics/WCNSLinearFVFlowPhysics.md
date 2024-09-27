@@ -1,18 +1,18 @@
-# Navier Stokes Flow / WCNSFVLinearFlowPhysics
+# Navier Stokes Flow / WCNSLinearFVFlowPhysics
 
-!syntax description /Physics/NavierStokes/FlowLinear/WCNSFVLinearFlowPhysics
+!syntax description /Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics
 
 ## Equations
 
-This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the pressure
-correction equation and momentum Navier Stokes equations for the flow.
+This [Physics](Physics/index.md) object creates the kernels and boundary conditions to solve the Navier Stokes equations for the flow
+using the [SIMPLE.md] algorithm.
 For regular flow in a non-porous medium:
 
 !equation
 \nabla \cdot \rho \vec{v} = 0
 
 !equation
-\nabla \cdot (\rho \mathbf{v} \otimes \mathbf{v}) = \nabla \cdot (\mu \nabla \mathbf{v}) - \nabla p + \mathbf{F}_g
+\nabla \cdot (\rho \mathbf{v} \otimes \mathbf{v}) = \nabla \cdot \left(\mu \left[\nabla \mathbf{v}+\nabla \mathbf{v}^T\right]\right) - \nabla p + \mathbf{F}_g
 
 where:
 
@@ -20,7 +20,7 @@ where:
 - $\mu$ is the dynamic viscosity
 - $\mathbf{v}$ is the velocity (non-porous flow)
 - $p$ is the pressure
-- $\mathbf{F}_g$ is the gravity term
+- $\mathbf{F}_g$ is the gravitational force
 
 The kernels created for the momentum equation for free flow:
 
@@ -32,12 +32,12 @@ The kernels created for the momentum equation for free flow:
 The kernels created for free flow for the pressure correction equation:
 
 - [LinearFVAnisotropicDiffusion.md] for the pressure diffusion term
-- [LinearFVDivergencen.md] for the pressure divergence term
+- [LinearFVDivergencen.md] for the divergence of $A^{-1}H$. For more information, see [SIMPLE.md].
 
 
 ## Automatically defined variables
 
-The `WCNSFVLinearFlowPhysics` automatically sets up the variables which are
+The `WCNSLinearFVFlowPhysics` automatically sets up the variables which are
 necessary for the solution of a given problem. These variables can then be used
 to couple fluid flow simulations with other physics. The list of variable names
 commonly used in the action syntax is presented below:
@@ -55,11 +55,11 @@ For the default names of other variables used in this action, visit [this site](
 
 ## Coupling with other Physics
 
-Coupling with other Physics has not been implemented for `WCNSFVLinearFlowPhysics`.
+Coupling with other Physics has not been implemented for `WCNSLinearFVFlowPhysics`.
 Coupling can only be performed at the moment by leveraging [MultiApps](syntax/MultiApps/index.md).
 
-!syntax parameters /Physics/NavierStokes/FlowLinear/WCNSFVLinearFlowPhysics
+!syntax parameters /Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics
 
-!syntax inputs /Physics/NavierStokes/FlowLinear/WCNSFVLinearFlowPhysics
+!syntax inputs /Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics
 
-!syntax children /Physics/NavierStokes/FlowLinear/WCNSFVLinearFlowPhysics
+!syntax children /Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WCNSFVLinearFlowPhysics.h"
+#include "WCNSLinearFVFlowPhysics.h"
 #include "WCNSFVTurbulencePhysics.h"
 #include "NSFVBase.h"
 #include "INSFVMomentumAdvection.h"
@@ -16,12 +16,12 @@
 #include "MapConversionUtils.h"
 #include "NS.h"
 
-registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp", WCNSFVLinearFlowPhysics);
-registerMooseAction("NavierStokesApp", WCNSFVLinearFlowPhysics, "add_linear_fv_kernel");
-registerMooseAction("NavierStokesApp", WCNSFVLinearFlowPhysics, "add_linear_fv_bc");
+registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFlowPhysics);
+registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_bc");
 
 InputParameters
-WCNSFVLinearFlowPhysics::validParams()
+WCNSLinearFVFlowPhysics::validParams()
 {
   InputParameters params = WCNSFVFlowPhysicsBase::validParams();
   params.addClassDescription(
@@ -32,10 +32,13 @@ WCNSFVLinearFlowPhysics::validParams()
       "orthogonality_correction", false, "Whether to use orthogonality correction");
 
   // Not supported
+  params.suppressParameter<bool>("add_flow_equations");
   params.set<bool>("porous_medium_treatment") = false;
   params.suppressParameter<bool>("porous_medium_treatment");
   params.set<MooseFunctorName>("porosity") = "1";
   params.suppressParameter<MooseFunctorName>("porosity");
+  params.suppressParameter<MooseEnum>("mu_interp_method");
+  params.suppressParameter<MooseFunctorName>("thermal_expansion");
 
   // No other options so far
   params.set<MooseEnum>("velocity_interpolation") = "rc";
@@ -44,7 +47,7 @@ WCNSFVLinearFlowPhysics::validParams()
   return params;
 }
 
-WCNSFVLinearFlowPhysics::WCNSFVLinearFlowPhysics(const InputParameters & parameters)
+WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVFlowPhysicsBase(parameters),
     _non_orthogonal_correction(getParam<bool>("orthogonality_correction"))
 {
@@ -55,7 +58,7 @@ WCNSFVLinearFlowPhysics::WCNSFVLinearFlowPhysics(const InputParameters & paramet
 }
 
 void
-WCNSFVLinearFlowPhysics::initializePhysicsAdditional()
+WCNSLinearFVFlowPhysics::initializePhysicsAdditional()
 {
   WCNSFVFlowPhysicsBase::initializePhysicsAdditional();
   // TODO Add support for multi-system by either:
@@ -66,7 +69,7 @@ WCNSFVLinearFlowPhysics::initializePhysicsAdditional()
 }
 
 void
-WCNSFVLinearFlowPhysics::addNonlinearVariables()
+WCNSLinearFVFlowPhysics::addNonlinearVariables()
 {
   if (!_has_flow_equations)
     return;
@@ -105,7 +108,7 @@ WCNSFVLinearFlowPhysics::addNonlinearVariables()
     else
       paramError("velocity_variable",
                  "Variable (" + _velocity_names[d] +
-                     ") supplied to the WCNSFVLinearFlowPhysics does not exist!");
+                     ") supplied to the WCNSLinearFVFlowPhysics does not exist!");
   }
 
   // Pressure
@@ -125,11 +128,11 @@ WCNSFVLinearFlowPhysics::addNonlinearVariables()
   else
     paramError("pressure_variable",
                "Variable (" + _pressure_name +
-                   ") supplied to the WCNSFVLinearFlowPhysics does not exist!");
+                   ") supplied to the WCNSLinearFVFlowPhysics does not exist!");
 }
 
 void
-WCNSFVLinearFlowPhysics::addFVKernels()
+WCNSLinearFVFlowPhysics::addFVKernels()
 {
   if (!_has_flow_equations)
     return;
@@ -156,7 +159,7 @@ WCNSFVLinearFlowPhysics::addFVKernels()
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSPressureCorrectionKernels()
+WCNSLinearFVFlowPhysics::addINSPressureCorrectionKernels()
 {
   {
     std::string kernel_type = "LinearFVAnisotropicDiffusion";
@@ -185,7 +188,7 @@ WCNSFVLinearFlowPhysics::addINSPressureCorrectionKernels()
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSMomentumFluxKernels()
+WCNSLinearFVFlowPhysics::addINSMomentumFluxKernels()
 {
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";
@@ -197,6 +200,7 @@ WCNSFVLinearFlowPhysics::addINSMomentumFluxKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
+  params.set<bool>("use_deviatoric_terms") = getParam<bool>("include_deviatoric_stress");
 
   for (unsigned int i = 0; i < dimension(); ++i)
     params.set<SolverVariableName>(u_names[i]) = _velocity_names[i];
@@ -211,7 +215,7 @@ WCNSFVLinearFlowPhysics::addINSMomentumFluxKernels()
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSMomentumPressureKernels()
+WCNSLinearFVFlowPhysics::addINSMomentumPressureKernels()
 {
   std::string kernel_type = "LinearFVMomentumPressure";
   std::string kernel_name = prefix() + "ins_momentum_pressure_";
@@ -229,7 +233,7 @@ WCNSFVLinearFlowPhysics::addINSMomentumPressureKernels()
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSMomentumGravityKernels()
+WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
 {
   if (parameters().isParamValid("gravity"))
   {
@@ -241,7 +245,6 @@ WCNSFVLinearFlowPhysics::addINSMomentumGravityKernels()
     const auto gravity_vector = getParam<RealVectorValue>("gravity");
 
     for (const auto d : make_range(dimension()))
-    {
       if (gravity_vector(d) != 0)
       {
         params.set<MooseFunctorName>("source_density") = std::to_string(gravity_vector(d));
@@ -249,18 +252,17 @@ WCNSFVLinearFlowPhysics::addINSMomentumGravityKernels()
 
         getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
       }
-    }
   }
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSMomentumBoussinesqKernels()
+WCNSLinearFVFlowPhysics::addINSMomentumBoussinesqKernels()
 {
   paramError("boussinesq_approximation", "Currently not implemented.");
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSInletBC()
+WCNSLinearFVFlowPhysics::addINSInletBC()
 {
   // Check the size of the BC parameters
   unsigned int num_velocity_functor_inlets = 0;
@@ -329,7 +331,7 @@ WCNSFVLinearFlowPhysics::addINSInletBC()
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSOutletBC()
+WCNSLinearFVFlowPhysics::addINSOutletBC()
 {
   // Check the BCs size
   unsigned int num_pressure_outlets = 0;
@@ -381,7 +383,7 @@ WCNSFVLinearFlowPhysics::addINSOutletBC()
 }
 
 void
-WCNSFVLinearFlowPhysics::addINSWallsBC()
+WCNSLinearFVFlowPhysics::addINSWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
 
@@ -404,20 +406,8 @@ WCNSFVLinearFlowPhysics::addINSWallsBC()
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }
     }
-    else if (momentum_wall_type == "wallfunction")
-    {
-      // Placeholder
-      mooseError("Unsupported boundary condition type: " + std::string(momentum_wall_type));
-    }
-    else if (momentum_wall_type == "slip")
-    {
-      // Do nothing
-    }
-    else if (momentum_wall_type == "symmetry")
-    {
-      // Placeholder
-      mooseError("Unsupported boundary condition type: " + std::string(momentum_wall_type));
-    }
+    else
+      mooseError("Unsupported wall boundary condition type: " + std::string(momentum_wall_type));
   }
 
   if (getParam<bool>("pressure_two_term_bc_expansion"))
@@ -433,14 +423,14 @@ WCNSFVLinearFlowPhysics::addINSWallsBC()
 }
 
 void
-WCNSFVLinearFlowPhysics::addUserObjects()
+WCNSLinearFVFlowPhysics::addUserObjects()
 {
   // Rhie Chow user object for interpolation velocities
   addRhieChowUserObjects();
 }
 
 void
-WCNSFVLinearFlowPhysics::addRhieChowUserObjects()
+WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
 {
   mooseAssert(dimension(), "0-dimension not supported");
 
@@ -488,7 +478,7 @@ WCNSFVLinearFlowPhysics::addRhieChowUserObjects()
 }
 
 UserObjectName
-WCNSFVLinearFlowPhysics::rhieChowUOName() const
+WCNSLinearFVFlowPhysics::rhieChowUOName() const
 {
   mooseAssert(!_porous_medium_treatment, "Not implemented");
   return "ins_rhie_chow_interpolator";

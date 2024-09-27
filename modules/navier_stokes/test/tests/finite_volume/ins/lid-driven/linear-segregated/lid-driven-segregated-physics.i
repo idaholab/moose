@@ -22,7 +22,7 @@ advected_interp_method = 'average'
 
 [Physics]
   [NavierStokes]
-    [FlowLinear/flow]
+    [FlowSegregated/flow]
       velocity_variable = 'vel_x vel_y'
       pressure_variable = 'pressure'
 

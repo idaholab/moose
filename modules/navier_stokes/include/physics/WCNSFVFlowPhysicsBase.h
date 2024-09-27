@@ -40,7 +40,7 @@ public:
   const std::vector<std::string> & getVelocityNames() const { return _velocity_names; }
   const NonlinearVariableName & getPressureName() const { return _pressure_name; }
   const NonlinearVariableName & getFluidTemperatureName() const { return _fluid_temperature_name; }
-  MooseFunctorName getPorosityFunctorName(bool smoothed) const;
+  MooseFunctorName getPorosityFunctorName(const bool smoothed) const;
 
   // Getters to interact with other WCNSFVPhysics classes
   /// Return the compressibility of the flow equations selected

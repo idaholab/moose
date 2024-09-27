@@ -27,9 +27,14 @@ WCNSFVFlowPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible mass and momentum equations");
 
-  // Time derivative term correction
-  params.transferParam<bool>(INSFVTimeKernel::validParams(), "contribute_to_rc");
-  params.addParamNamesToGroup("contribute_to_rc", "Advanced");
+  // Rhie Chow interpolation parameters
+  params.transferParam<Real>(INSFVMomentumAdvection::validParams(), "characteristic_speed");
+  params.addParam<bool>(
+      "time_derivative_contributes_to_RC_coefficients",
+      "Whether the time derivative term should contribute to the Rhie Chow coefficients. This adds "
+      "stabilization, but makes the solution dependent on the time step size");
+  params.addParamNamesToGroup("time_derivative_contributes_to_RC_coefficients",
+                              "characteristic_speed Numerical scheme");
 
   // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
   params.addParam<MooseFunctorName>(
@@ -55,15 +60,9 @@ WCNSFVFlowPhysics::validParams()
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "pressure_face_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_face_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "mass_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_advection_interpolation");
   params.transferParam<bool>(NSFVBase::validParams(),
                              "pressure_allow_expansion_on_bernoulli_faces");
   params.transferParam<bool>(NSFVBase::validParams(), "momentum_two_term_bc_expansion");
-  params.transferParam<Real>(INSFVMomentumAdvection::validParams(), "characteristic_speed");
-  MooseEnum coeff_interp_method("average harmonic", "harmonic");
-  params.addParam<MooseEnum>("mu_interp_method",
-                             coeff_interp_method,
-                             "Switch that can select face interpolation method for the viscosity.");
 
   // Nonlinear solver parameters
   params.transferParam<Real>(NSFVBase::validParams(), "mass_scaling");
@@ -75,10 +74,13 @@ WCNSFVFlowPhysics::validParams()
       "porosity_interface_pressure_treatment pressure_allow_expansion_on_bernoulli_faces "
       "porosity_smoothing_layers use_friction_correction consistent_scaling",
       "Flow medium discontinuity treatment");
-  params.addParamNamesToGroup("pressure_face_interpolation momentum_face_interpolation "
-                              "mass_advection_interpolation momentum_advection_interpolation "
-                              "momentum_two_term_bc_expansion mass_scaling momentum_scaling",
-                              "Numerical scheme");
+  params.addParamNamesToGroup(
+      "pressure_face_interpolation momentum_face_interpolation "
+      "mass_advection_interpolation momentum_advection_interpolation "
+      "momentum_two_term_bc_expansion mass_scaling momentum_scaling characteristic_speed",
+      "Numerical scheme");
+
+  // TODO Add default preconditioning and move scaling parameters to a preconditioning group
 
   return params;
 }

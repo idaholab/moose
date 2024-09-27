@@ -16,12 +16,11 @@ advected_interp_method = 'average'
 [Problem]
   #TODO: remove both
   linear_sys_names = 'u_system v_system pressure_system'
-  previous_nl_solution_required = true
 []
 
 [Physics]
   [NavierStokes]
-    [FlowLinear/flow]
+    [FlowSegregated/flow]
       velocity_variable = 'vel_x vel_y'
       pressure_variable = 'pressure'
 

@@ -13,19 +13,20 @@
 #include "WCNSFVTurbulencePhysics.h"
 
 /**
- * Creates all the objects needed to solve the Navier-Stokes mass and momentum equations
+ * Creates all the objects needed to solve the Navier-Stokes with the SIMPLE algorithm
  * using the linear finite volume discretization
  * Currently does not implement:
  * - friction
  * - other momentum sources and sinks
  * - porous media
+ * - transients
  */
-class WCNSFVLinearFlowPhysics final : public WCNSFVFlowPhysicsBase
+class WCNSLinearFVFlowPhysics final : public WCNSFVFlowPhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVLinearFlowPhysics(const InputParameters & parameters);
+  WCNSLinearFVFlowPhysics(const InputParameters & parameters);
 
 protected:
   virtual void initializePhysicsAdditional() override;
@@ -57,9 +58,6 @@ private:
   virtual void addRhieChowUserObjects() override;
 
   UserObjectName rhieChowUOName() const override;
-
-  /// Name of the vector to hold pressure momentum equation contributions
-  const TagName _pressure_tag = "p_tag";
 
   /// Whether to use the correction term for non-orthogonality
   const bool _non_orthogonal_correction;
