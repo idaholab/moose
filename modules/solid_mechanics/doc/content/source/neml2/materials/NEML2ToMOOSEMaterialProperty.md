@@ -5,7 +5,7 @@ Users are +NOT+ expected to directly use this object in an input file. Instead, 
 
 ## Description
 
-This family of objects assign a NEML2 output variable given by [!param](/Materials/NEML2ToMOOSERealMaterialProperty/neml2_variable) back to the quadrature points.
+This family of objects assign a NEML2 output variable given by [!param](/Materials/NEML2ToMOOSERealMaterialProperty/from_neml2) back to the quadrature points. The data is stored as a MOOSE material property with name given by [!param](/Materials/NEML2ToMOOSERealMaterialProperty/to_moose).
 
 Note that if the [!param](/Materials/NEML2ToMOOSERealMaterialProperty/neml2_input_derivative) parameter is specified, the derivative of the NEML2 output variable with respect to the input variable is retrieved instead. If the [!param](/Materials/NEML2ToMOOSERealMaterialProperty/neml2_parameter_derivative) parameter is specified, the derivative of the NEML2 output variable with respect to the model parameter is retrieved instead.
 

@@ -8,11 +8,13 @@ Users are +NOT+ expected to directly use this object in an input file. Instead, 
 ## Description
 
 This element user object generates the map from element ID to the offset of batch index. The intervals between the batch index offsets associated with each element are determined by the number of quadrature points on each element. For example, if this element user object operates on a subdomain with 3 QUAD4 elements with the default quadrature (i.e., 4 quadrature points per element), the generated map will have three entries:
+
 ```
 0 -> 0
 1 -> 4
 2 -> 8
 ```
+
 assuming the element IDs are 0, 1, and 2.
 
 The batch index associated with each quadrature point can then be calculated as
