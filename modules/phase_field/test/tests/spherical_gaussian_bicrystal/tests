@@ -1,6 +1,5 @@
 [Tests]
   [Epsilon_model_out]
-    method = '!DBG'
     type = 'CSVDiff'
     input = 'epsilon_model_bicrystal.i'
     csvdiff = 'epsilon_model_bicrystal_out.csv'
@@ -9,7 +8,6 @@
     issues = '#27774'
   []
   [Gamma_model_out]
-    method = '!DBG'
     type = 'CSVDiff'
     input = 'gamma_model_bicrystal.i'
     csvdiff = 'gamma_model_bicrystal_out.csv'
