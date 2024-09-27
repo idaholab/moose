@@ -46,15 +46,15 @@ MFEMProblem::initialSetup()
   getProblemData()._coefficients = _coefficients;
   addMFEMNonlinearSolver();
 
-  // Set up initial conditions
-  auto equation_system = dynamic_cast<platypus::EquationSystemInterface *>(&getProblemData());
-  equation_system->GetEquationSystem()->Init(
-      getProblemData()._gridfunctions, getProblemData()._fespaces, getProblemData()._bc_map);
+  // // Set up initial conditions
+  // auto equation_system = dynamic_cast<platypus::EquationSystemInterface *>(&getProblemData());
+  // equation_system->GetEquationSystem()->Init(
+  //     getProblemData()._gridfunctions, getProblemData()._fespaces, getProblemData()._bc_map);
 
-  auto problem_operator =
-      dynamic_cast<platypus::ProblemOperatorInterface *>(getProblemData().GetOperator());
-  problem_operator->SetGridFunctions();
-  problem_operator->Init(getProblemData()._f);
+  // auto problem_operator =
+  //     dynamic_cast<platypus::ProblemOperatorInterface *>(getProblemData().GetOperator());
+  // problem_operator->SetGridFunctions();
+  // problem_operator->Init(getProblemData()._f);
 
   if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
   {
@@ -88,18 +88,10 @@ void
 MFEMProblem::setProblemBuilder()
 {
   mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
-  if (isTransient())
-  {
-    _problem_data = std::make_shared<platypus::TimeDomainEquationSystemProblemData>();
-  }
-  else
-  {
-    _problem_data = std::make_shared<platypus::SteadyStateEquationSystemProblemData>();
-  }
-
+  _problem_data = std::make_shared<platypus::ProblemData>();
   setDevice();
   setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
-  getProblemData().ConstructOperator();
+  dynamic_cast<MFEMExecutioner *>(_app.getExecutioner())->ConstructOperator();
 }
 
 void

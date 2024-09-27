@@ -12,7 +12,7 @@ public:
   EquationSystemProblemOperator(platypus::ProblemData &) = delete;
 
   EquationSystemProblemOperator(platypus::ProblemData & problem,
-                                std::unique_ptr<platypus::EquationSystem> equation_system)
+                                std::shared_ptr<platypus::EquationSystem> equation_system)
     : ProblemOperator(problem), _equation_system(std::move(equation_system))
   {
   }
@@ -34,7 +34,7 @@ public:
   }
 
 private:
-  std::unique_ptr<platypus::EquationSystem> _equation_system{nullptr};
+  std::shared_ptr<platypus::EquationSystem> _equation_system{nullptr};
 };
 
 } // namespace platypus

@@ -24,9 +24,16 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 void
 MFEMSteady::init()
 {
-  _problem = dynamic_cast<platypus::SteadyStateProblemData *>(&_mfem_problem.getProblemData());
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
+
+  // Set up initial conditions
+  _mfem_problem.getProblemData()._eqn_system->Init(_mfem_problem.getProblemData()._gridfunctions,
+                                                   _mfem_problem.getProblemData()._fespaces,
+                                                   _mfem_problem.getProblemData()._bc_map);
+
+  _problem_operator->SetGridFunctions();
+  _problem_operator->Init(_mfem_problem.getProblemData()._f);
 }
 
 void
@@ -52,7 +59,7 @@ MFEMSteady::execute()
   _mfem_problem.timestepSetup();
 
   // Solve equation system.
-  _problem->GetOperator()->Solve(_problem->_f);
+  _problem_operator->Solve(_problem->_f);
   // Output data
   _problem->_outputs.Write();
 
