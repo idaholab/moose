@@ -150,9 +150,8 @@ toMOOSE(const neml2::Tensor & t)
 
 #endif // NEML2_ENABLED
 
-static const std::string missing_neml2 =
-    "To use this object, you need to have the `NEML2` library installed. Refer to the "
-    "documentation for guidance on how to enable it.";
+static const std::string missing_neml2 = "The `NEML2` library is required but not enabled. Refer "
+                                         "to the documentation for guidance on how to enable it.";
 
 bool
 shouldCompute(const SubProblem & problem)
@@ -176,7 +175,7 @@ std::string
 docstring(const std::string & desc)
 {
 #ifndef NEML2_ENABLED
-  return message + " (Original description: " + desc + ")";
+  return missing_neml2 + " (Original description: " + desc + ")";
 #else
   return desc;
 #endif
@@ -186,7 +185,7 @@ void
 assertNEML2Enabled()
 {
 #ifndef NEML2_ENABLED
-  mooseError(message);
+  mooseError(missing_neml2);
 #endif
 }
 

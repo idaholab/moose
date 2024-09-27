@@ -11,6 +11,9 @@
 
 #include "MOOSEToNEML2Batched.h"
 
+#include "RankTwoTensor.h"
+#include "SymmetricRankTwoTensor.h"
+
 /**
  * Gather a MOOSE material property for insertion into the NEML2 model.
  */

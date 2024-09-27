@@ -101,7 +101,6 @@ template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...)
 {
-  NEML2Utils::libraryNotEnabledError(params);
 }
 
 #else

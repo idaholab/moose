@@ -18,15 +18,18 @@ MOOSEToNEML2::validParams()
   return params;
 }
 
+#ifndef NEML2_ENABLED
+
+MOOSEToNEML2::MOOSEToNEML2(const InputParameters & /*params*/) {}
+
+#else
+
 MOOSEToNEML2::MOOSEToNEML2(const InputParameters & params)
-#ifdef NEML2_ENABLED
   : _mode(Mode::UNDEFINED), _raw_name(params.get<std::string>("to_neml2"))
-#endif
 {
   NEML2Utils::assertNEML2Enabled();
 }
 
-#ifdef NEML2_ENABLED
 void
 MOOSEToNEML2::setMode(MOOSEToNEML2::Mode m) const
 {

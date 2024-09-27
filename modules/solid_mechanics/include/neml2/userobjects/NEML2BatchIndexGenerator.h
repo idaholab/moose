@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "NEML2ModelInterface.h"
 #include "ElementUserObject.h"
 
 #include <map>
