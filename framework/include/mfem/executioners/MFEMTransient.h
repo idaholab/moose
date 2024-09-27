@@ -16,7 +16,7 @@ public:
   virtual void execute() override;
   virtual void registerTimeDerivatives();
 
-  platypus::TimeDomainProblem * _problem{nullptr};
+  platypus::TimeDomainProblemData * _problem{nullptr};
   mutable double _t_step; // Time step
 
 private:

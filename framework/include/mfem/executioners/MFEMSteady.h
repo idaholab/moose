@@ -15,7 +15,7 @@ public:
 
   virtual void execute() override;
 
-  platypus::SteadyStateProblem * _problem{nullptr};
+  platypus::SteadyStateProblemData * _problem{nullptr};
 
 protected:
   Real _system_time;

@@ -9,7 +9,7 @@ namespace platypus
 class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
 {
 public:
-  ProblemOperator(platypus::Problem & problem) : ProblemOperatorInterface(problem) {}
+  ProblemOperator(platypus::ProblemData & problem) : ProblemOperatorInterface(problem) {}
   ~ProblemOperator() override = default;
 
   void SetGridFunctions() override;

@@ -90,11 +90,11 @@ MFEMProblem::setProblemBuilder()
   mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
   if (isTransient())
   {
-    _problem_data = std::make_shared<platypus::TimeDomainEquationSystemProblem>();
+    _problem_data = std::make_shared<platypus::TimeDomainEquationSystemProblemData>();
   }
   else
   {
-    _problem_data = std::make_shared<platypus::SteadyStateEquationSystemProblem>();
+    _problem_data = std::make_shared<platypus::SteadyStateEquationSystemProblemData>();
   }
 
   setDevice();
