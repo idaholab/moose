@@ -12,9 +12,9 @@ class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator
                                                 public EquationSystemInterface
 {
 public:
-  TimeDomainEquationSystemProblemOperator(platypus::Problem &) = delete;
+  TimeDomainEquationSystemProblemOperator(platypus::ProblemData &) = delete;
   TimeDomainEquationSystemProblemOperator(
-      platypus::Problem & problem,
+      platypus::ProblemData & problem,
       std::unique_ptr<platypus::TimeDependentEquationSystem> equation_system)
     : TimeDomainProblemOperator(problem), _equation_system{std::move(equation_system)}
   {
