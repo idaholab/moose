@@ -16,6 +16,7 @@ InputParameters
 FVInitialConditionBase::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += InitialConditionInterface::validParams();
   params += BlockRestrictable::validParams();
 
   params.addRequiredParam<VariableName>("variable",
@@ -28,6 +29,7 @@ FVInitialConditionBase::validParams()
 
 FVInitialConditionBase::FVInitialConditionBase(const InputParameters & parameters)
   : MooseObject(parameters),
+    InitialConditionInterface(parameters),
     BlockRestrictable(this),
     FunctionInterface(this),
     Restartable(this, "FVInitialConditionBases"),
