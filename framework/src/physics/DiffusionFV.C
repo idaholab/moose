@@ -177,7 +177,7 @@ DiffusionFV::addFVBCs()
 void
 DiffusionFV::addNonlinearVariables()
 {
-  if (nonlinearVariableExists(_var_name, true))
+  if (variableExists(_var_name, true))
     return;
 
   const std::string variable_type = "MooseVariableFVReal";

@@ -14,7 +14,6 @@ advected_interp_method = 'average'
 []
 
 [Problem]
-  #TODO: remove both
   linear_sys_names = 'u_system v_system pressure_system'
 []
 

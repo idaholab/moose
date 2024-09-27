@@ -10,9 +10,6 @@
 #include "WCNSFVFlowPhysicsBase.h"
 #include "WCNSFVTurbulencePhysics.h"
 #include "NSFVBase.h"
-#include "INSFVMomentumAdvection.h"
-#include "RhieChowMassFlux.h"
-#include "INSFVTimeKernel.h"
 #include "MapConversionUtils.h"
 #include "NS.h"
 

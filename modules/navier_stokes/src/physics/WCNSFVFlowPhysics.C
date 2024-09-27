@@ -31,6 +31,7 @@ WCNSFVFlowPhysics::validParams()
   params.transferParam<Real>(INSFVMomentumAdvection::validParams(), "characteristic_speed");
   params.addParam<bool>(
       "time_derivative_contributes_to_RC_coefficients",
+      true,
       "Whether the time derivative term should contribute to the Rhie Chow coefficients. This adds "
       "stabilization, but makes the solution dependent on the time step size");
   params.addParamNamesToGroup("time_derivative_contributes_to_RC_coefficients",
@@ -150,8 +151,8 @@ WCNSFVFlowPhysics::addNonlinearVariables()
     return;
 
   for (const auto d : make_range(dimension()))
-    saveNonlinearVariableName(_velocity_names[d]);
-  saveNonlinearVariableName(_pressure_name);
+    saveSolverVariableName(_velocity_names[d]);
+  saveSolverVariableName(_pressure_name);
 
   // Check number of variables
   if (_velocity_names.size() != dimension() && _velocity_names.size() != 3)
@@ -164,7 +165,7 @@ WCNSFVFlowPhysics::addNonlinearVariables()
   // Velocities
   for (const auto d : make_range(dimension()))
   {
-    if (nonlinearVariableExists(_velocity_names[d], true))
+    if (variableExists(_velocity_names[d], true))
       checkBlockRestrictionIdentical(_velocity_names[d],
                                      getProblem().getVariable(0, _velocity_names[d]).blocks());
     else if (_define_variables)
@@ -191,7 +192,7 @@ WCNSFVFlowPhysics::addNonlinearVariables()
   }
 
   // Pressure
-  if (nonlinearVariableExists(_pressure_name, true))
+  if (variableExists(_pressure_name, true))
     checkBlockRestrictionIdentical(_pressure_name,
                                    getProblem().getVariable(0, _pressure_name).blocks());
   else if (_define_variables)
@@ -369,7 +370,8 @@ WCNSFVFlowPhysics::addINSMomentumTimeKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
+  params.set<bool>("contribute_to_rc") =
+      getParam<bool>("time_derivative_contributes_to_RC_coefficients");
 
   for (const auto d : make_range(dimension()))
   {
@@ -388,7 +390,8 @@ WCNSFVFlowPhysics::addWCNSMomentumTimeKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-  params.set<bool>("contribute_to_rc") = getParam<bool>("contribute_to_rc");
+  params.set<bool>("contribute_to_rc") =
+      getParam<bool>("time_derivative_contributes_to_RC_coefficients");
 
   for (const auto d : make_range(dimension()))
   {
@@ -1079,9 +1082,6 @@ WCNSFVFlowPhysics::addRhieChowUserObjects()
 {
   mooseAssert(dimension(), "0-dimension not supported");
 
-  // This means we are solving for velocity. We dont need external RC coefficients
-  bool has_flow_equations = nonlinearVariableExists(_velocity_names[0], false);
-
   // First make sure that we only add this object once
   // Potential cases:
   // - there is a flow physics, and an advection one (UO should be added by one)
@@ -1130,7 +1130,7 @@ WCNSFVFlowPhysics::addRhieChowUserObjects()
     params.set<unsigned short>("smoothing_layers") = smoothing_layers;
   }
 
-  if (!has_flow_equations)
+  if (!_has_flow_equations)
   {
     checkRhieChowFunctorsDefined();
     params.set<MooseFunctorName>("a_u") = "ax";

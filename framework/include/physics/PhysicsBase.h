@@ -135,17 +135,12 @@ protected:
   std::string prefix() const { return name() + "_"; }
 
   /// Keep track of the name of a nonlinear variable defined in the Physics
-  void saveNonlinearVariableName(const VariableName & var_name)
-  {
-    _nl_var_names.push_back(var_name);
-  }
+  void saveSolverVariableName(const VariableName & var_name) { _nl_var_names.push_back(var_name); }
   /// Keep track of the name of an aux variable defined in the Physics
   void saveAuxVariableName(const VariableName & var_name) { _aux_var_names.push_back(var_name); }
 
-  /// Check whether a linear variable already exists
-  bool linearVariableExists(const VariableName & var_name, bool error_if_aux) const;
-  /// Check whether a nonlinear variable already exists
-  bool nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
+  /// Check whether a variable already exists
+  bool variableExists(const VariableName & var_name, bool error_if_aux) const;
 
   /// Add a new required task for all physics deriving from this class
   /// NOTE: This does not register the task, you still need to call registerMooseAction

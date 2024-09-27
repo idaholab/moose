@@ -59,6 +59,8 @@ private:
 
   UserObjectName rhieChowUOName() const override;
 
+  unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
+
   /// Whether to use the correction term for non-orthogonality
   const bool _non_orthogonal_correction;
 };

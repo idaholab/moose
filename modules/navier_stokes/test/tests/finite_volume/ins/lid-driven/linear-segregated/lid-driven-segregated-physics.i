@@ -32,8 +32,8 @@ advected_interp_method = 'average'
       density = ${rho}
       dynamic_viscosity = ${mu}
 
-      # use inlet for moving wall for now
-      # see k-eps PR for momentum_wall_functors
+      # use inlet for moving wall to match the reference input
+      # we could also use a noslip BC with a velocity wall functor
       inlet_boundaries = 'top'
       momentum_inlet_types = 'fixed-velocity'
       momentum_inlet_functors = '1 0'

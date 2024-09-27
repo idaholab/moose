@@ -25,11 +25,12 @@ WCNSLinearFVFlowPhysics::validParams()
 {
   InputParameters params = WCNSFVFlowPhysicsBase::validParams();
   params.addClassDescription(
-      "Define the Navier Stokes weakly-compressible mass and momentum equations with the linear "
+      "Define the Navier Stokes weakly-compressible equations with the linear "
       "solver implementation of the SIMPLE scheme");
 
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
+  params.set<unsigned short>("ghost_layers") = 1;
 
   // Not supported
   params.suppressParameter<bool>("add_flow_equations");
@@ -64,7 +65,7 @@ WCNSLinearFVFlowPhysics::initializePhysicsAdditional()
   // TODO Add support for multi-system by either:
   // - creating the problem in the Physics or,
   // - checking that the right systems are being created
-  getProblem().setSavePreviousNLSolution(true);
+  getProblem().needSolutionState(2, Moose::SolutionIterationType::Nonlinear);
   // TODO Ban all other nonlinear Physics for now
 }
 
@@ -76,8 +77,8 @@ WCNSLinearFVFlowPhysics::addNonlinearVariables()
 
   // TODO Rename to system variable
   for (const auto d : make_range(dimension()))
-    saveNonlinearVariableName(_velocity_names[d]);
-  saveNonlinearVariableName(_pressure_name);
+    saveSolverVariableName(_velocity_names[d]);
+  saveSolverVariableName(_pressure_name);
 
   const std::vector<std::string> v_short = {"u", "v", "w"};
 
@@ -92,7 +93,7 @@ WCNSLinearFVFlowPhysics::addNonlinearVariables()
   // Velocities
   for (const auto d : make_range(dimension()))
   {
-    if (linearVariableExists(_velocity_names[d], true))
+    if (variableExists(_velocity_names[d], true))
       checkBlockRestrictionIdentical(_velocity_names[d],
                                      getProblem().getVariable(0, _velocity_names[d]).blocks());
     else if (_define_variables)
@@ -112,7 +113,7 @@ WCNSLinearFVFlowPhysics::addNonlinearVariables()
   }
 
   // Pressure
-  if (linearVariableExists(_pressure_name, true))
+  if (variableExists(_pressure_name, true))
     checkBlockRestrictionIdentical(_pressure_name,
                                    getProblem().getVariable(0, _pressure_name).blocks());
   else if (_define_variables)
@@ -482,4 +483,10 @@ WCNSLinearFVFlowPhysics::rhieChowUOName() const
 {
   mooseAssert(!_porous_medium_treatment, "Not implemented");
   return "ins_rhie_chow_interpolator";
+}
+
+unsigned short
+WCNSLinearFVFlowPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+{
+  return 1;
 }

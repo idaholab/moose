@@ -216,7 +216,7 @@ void
 DiffusionCG::addNonlinearVariables()
 {
   // If the variable was added outside the Physics
-  if (nonlinearVariableExists(_var_name, /*error_if_aux*/ true))
+  if (variableExists(_var_name, /*error_if_aux*/ true))
   {
     if (isParamValid("variable_order"))
       paramError("variable_order",

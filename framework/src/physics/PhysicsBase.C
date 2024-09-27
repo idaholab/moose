@@ -277,31 +277,16 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
 }
 
 bool
-PhysicsBase::linearVariableExists(const VariableName & var_name, bool error_if_aux) const
+PhysicsBase::variableExists(const VariableName & var_name, bool error_if_aux) const
 {
-  if (_problem->hasVariable(var_name))
-    return true;
-  else if (error_if_aux && _problem->getAuxiliarySystem().hasVariable(var_name))
+  if (error_if_aux && _problem->getAuxiliarySystem().hasVariable(var_name))
     mooseError("Variable '",
                var_name,
                "' is supposed to be nonlinear for physics '",
                name(),
                "' but it is already defined as auxiliary");
-  else
-    return false;
-}
-
-bool
-PhysicsBase::nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const
-{
-  if (_problem->getNonlinearSystemBase(_sys_number).hasVariable(var_name))
+  else if (_problem->hasVariable(var_name))
     return true;
-  else if (error_if_aux && _problem->getAuxiliarySystem().hasVariable(var_name))
-    mooseError("Variable '",
-               var_name,
-               "' is supposed to be nonlinear for physics '",
-               name(),
-               "' but it's already defined as auxiliary");
   else
     return false;
 }
