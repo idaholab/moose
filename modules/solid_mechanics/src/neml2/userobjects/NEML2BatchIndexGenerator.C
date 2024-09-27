@@ -15,10 +15,9 @@ registerMooseObject("SolidMechanicsApp", NEML2BatchIndexGenerator);
 InputParameters
 NEML2BatchIndexGenerator::validParams()
 {
-  auto params = NEML2BatchIndexGenerator::actionParams();
-  params.addClassDescription(
-      NEML2Utils::docstring("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
-                            "NEML2ToMOOSE retrievers, and the NEML2 executor"));
+  auto params = ElementUserObject::validParams();
+  params.addClassDescription("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
+                             "NEML2ToMOOSE retrievers, and the NEML2 executor");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -31,14 +30,23 @@ NEML2BatchIndexGenerator::validParams()
 }
 
 NEML2BatchIndexGenerator::NEML2BatchIndexGenerator(const InputParameters & params)
-  : ElementUserObject(params)
+  : ElementUserObject(params), _outdated(true)
 {
+}
+
+void
+NEML2BatchIndexGenerator::meshChanged()
+{
+  _outdated = true;
 }
 
 void
 NEML2BatchIndexGenerator::initialize()
 {
   if (!NEML2Utils::shouldCompute(_fe_problem))
+    return;
+
+  if (!_outdated)
     return;
 
   _elem_to_batch_index.clear();
@@ -52,6 +60,9 @@ NEML2BatchIndexGenerator::execute()
   if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
 
+  if (!_outdated)
+    return;
+
   _elem_to_batch_index[_current_elem->id()] = _batch_index;
   _batch_index += _qrule->n_points();
 }
@@ -59,6 +70,12 @@ NEML2BatchIndexGenerator::execute()
 void
 NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
 {
+  if (!NEML2Utils::shouldCompute(_fe_problem))
+    return;
+
+  if (!_outdated)
+    return;
+
   const auto & m2n = static_cast<const NEML2BatchIndexGenerator &>(uo);
 
   // append and renumber maps
@@ -66,6 +83,12 @@ NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
     _elem_to_batch_index[elem_id] = _batch_index + batch_index;
 
   _batch_index += m2n._batch_index;
+}
+
+void
+NEML2BatchIndexGenerator::finalize()
+{
+  _outdated = false;
 }
 
 std::size_t

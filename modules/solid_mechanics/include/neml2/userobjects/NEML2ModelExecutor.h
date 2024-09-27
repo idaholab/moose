@@ -74,9 +74,6 @@ protected:
   /// Prevent output and derivative retrieval after construction
   virtual void checkExecutionStage() const final;
 
-  /// Determine whether the material model should be called
-  virtual bool shouldCompute();
-
   /// Fill input variables and model parameters using the gatherers
   virtual void fillInputs();
 

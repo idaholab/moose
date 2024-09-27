@@ -28,12 +28,20 @@ public:
   void initialize() override;
   void execute() override;
   void threadJoin(const UserObject &) override;
-  void finalize() override {}
+  void finalize() override;
+
+  void meshChanged() override;
+
+  /// Get the current batch index (in almost all cases this is the total batch size)
+  std::size_t getBatchIndex() const { return _batch_index; }
 
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
 protected:
+  /// Whether the batch index map is outdated
+  bool _outdated;
+
   /// Highest current batch index
   std::size_t _batch_index;
 

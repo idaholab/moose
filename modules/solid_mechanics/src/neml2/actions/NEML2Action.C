@@ -53,6 +53,12 @@ NEML2Action::validParams()
       NEML2Utils::docstring("Name of the NEML2ModelExecutor user object. The default name is "
                             "'neml2_<model-name>_<block-name>' where <model-name> is the NEML2 "
                             "model's name, and <block-name> is this action sub-block's name."));
+  params.addParam<std::string>(
+      "batch_index_generator_name",
+      NEML2Utils::docstring(
+          "Name of the NEML2BatchIndexGenerator user object. The default name is "
+          "'neml2_index_<model-name>_<block-name>' where <model-name> is the NEML2 model's name, "
+          "and <block-name> is this action sub-block's name."));
   params.addParam<std::vector<SubdomainName>>(
       "block",
       {},
@@ -65,6 +71,9 @@ NEML2Action::NEML2Action(const InputParameters & params)
     _executor_name(isParamValid("executor_name")
                        ? getParam<std::string>("executor_name")
                        : "neml2_" + getParam<std::string>("model") + "_" + name()),
+    _idx_generator_name(isParamValid("batch_index_generator_name")
+                            ? getParam<std::string>("batch_index_generator_name")
+                            : "neml2_index_" + getParam<std::string>("model") + "_" + name()),
     _block(getParam<std::vector<SubdomainName>>("block"))
 {
   NEML2Utils::assertNEML2Enabled();
@@ -230,13 +239,24 @@ NEML2Action::act()
                    param.moose.name);
     }
 
+    // The index generator UO
+    {
+      auto type = "NEML2BatchIndexGenerator";
+      auto params = _factory.getValidParams(type);
+      params.applyParameters(parameters());
+      _problem->addUserObject(type, _idx_generator_name, params);
+    }
+
     // The Executor UO
-    auto type = "NEML2ModelExecutor";
-    auto params = _factory.getValidParams(type);
-    params.applyParameters(parameters());
-    params.set<std::vector<UserObjectName>>("gatherers") = gatherers;
-    params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers;
-    _problem->addUserObject(type, _executor_name, params);
+    {
+      auto type = "NEML2ModelExecutor";
+      auto params = _factory.getValidParams(type);
+      params.applyParameters(parameters());
+      params.set<UserObjectName>("batch_index_generator") = _idx_generator_name;
+      params.set<std::vector<UserObjectName>>("gatherers") = gatherers;
+      params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers;
+      _problem->addUserObject(type, _executor_name, params);
+    }
   }
 
   if (_current_task == "add_material")

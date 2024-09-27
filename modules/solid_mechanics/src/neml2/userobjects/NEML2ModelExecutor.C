@@ -168,6 +168,12 @@ NEML2ModelExecutor::initialSetup()
           "those called `NEML2To*MOOSEMaterialProperty`.");
 }
 
+std::size_t
+NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
+{
+  return _batch_index_generator.getBatchIndex(elem_id);
+}
+
 void
 NEML2ModelExecutor::addGatheredVariable(const UserObjectName & gatherer_name,
                                         const neml2::VariableName & var)
@@ -196,55 +202,24 @@ NEML2ModelExecutor::addGatheredParameter(const UserObjectName & gatherer_name,
   _gathered_parameter_names.insert(param);
 }
 
-bool
-NEML2ModelExecutor::shouldCompute()
-{
-  // NEML2 computes residual and Jacobian together at EXEC_LINEAR
-  // There is no work to be done at EXEC_NONLINEAR **UNLESS** we are computing the Jacobian for
-  // automatic scaling.
-  if (_fe_problem.computingScalingJacobian())
-    return true;
-
-  if (_fe_problem.currentlyComputingResidualAndJacobian())
-    return true;
-
-  if (_fe_problem.currentlyComputingJacobian())
-    return false;
-
-  return true;
-}
-
 void
 NEML2ModelExecutor::initialize()
 {
-  if (!shouldCompute())
+  if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
 
-  _elem_to_batch_index.clear();
-  _elem_to_batch_index_cache = {libMesh::invalid_uint, 0};
-  _batch_index = 0;
   _output_ready = false;
 }
 
 void
 NEML2ModelExecutor::execute()
 {
-  if (!shouldCompute())
-    return;
-
-  _elem_to_batch_index[_current_elem->id()] = _batch_index;
-  _batch_index += _qrule->n_points();
-}
-
-void
-NEML2ModelExecutor::finalize()
-{
-  if (!shouldCompute())
+  if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
 
   try
   {
-    auto batch_shape = neml2::TensorShape{neml2::Size(_batch_index)};
+    auto batch_shape = neml2::TensorShape{neml2::Size(_batch_index_generator.getBatchIndex())};
 
     // Reallocate the variable storage only when the batch shape has changed
     if (neml2::TensorShapeRef(batch_shape) != model().batch_sizes())
@@ -324,33 +299,6 @@ NEML2ModelExecutor::extractOutputs()
     auto & [y, p] = deriv;
     tensor = neml2::math::jacrev(_out.base_index(y), model().get_parameter(p)).to(torch::kCPU);
   }
-}
-
-void
-NEML2ModelExecutor::threadJoin(const UserObject & uo)
-{
-  const auto & m2n = static_cast<const NEML2ModelExecutor &>(uo);
-
-  // append and renumber maps
-  for (const auto & [elem_id, batch_index] : m2n._elem_to_batch_index)
-    _elem_to_batch_index[elem_id] = _batch_index + batch_index;
-
-  _batch_index += m2n._batch_index;
-}
-
-std::size_t
-NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
-{
-  // return cached map lookup if applicable
-  if (_elem_to_batch_index_cache.first == elem_id)
-    return _elem_to_batch_index_cache.second;
-
-  // else, search the map
-  const auto it = _elem_to_batch_index.find(elem_id);
-  if (it == _elem_to_batch_index.end())
-    mooseError("No batch index found for element id ", elem_id);
-  _elem_to_batch_index_cache = *it;
-  return it->second;
 }
 
 void

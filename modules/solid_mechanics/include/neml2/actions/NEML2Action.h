@@ -124,6 +124,9 @@ protected:
   /// Name of the NEML2Executor user object
   const UserObjectName _executor_name;
 
+  /// Name of the NEML2BatchIndexGenerator user object
+  const UserObjectName _idx_generator_name;
+
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
 
