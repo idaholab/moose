@@ -14,7 +14,5 @@
 int
 main(int argc, char * argv[])
 {
-  Moose::main<MeshingTutorialTestApp>(argc, argv);
-
-  return 0;
+  return Moose::main<MeshingTutorialTestApp>(argc, argv);
 }

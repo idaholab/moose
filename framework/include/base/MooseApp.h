@@ -129,6 +129,17 @@ public:
   }
 
   /**
+   * Get the shell exit code for the application
+   * @return The shell exit code
+   */
+  int exitCode() const { return _exit_code; }
+
+  /**
+   * Sets the exit code that the application will exit with.
+   */
+  void setExitCode(const int exit_code) { _exit_code = exit_code; }
+
+  /**
    * Get the parameters of the object
    * @return The parameters of the object
    */
@@ -1234,6 +1245,8 @@ protected:
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
   bool _ready_to_exit;
+  /// The exit code
+  int _exit_code;
 
   /// This variable indicates when a request has been made to restart from an Exodus file
   bool _initial_from_file;
@@ -1405,14 +1418,14 @@ private:
    * read/writable location for the user.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool copyInputs() const;
+  bool copyInputs();
 
   /**
    * Handles the run input parameter logic: Checks to see whether a directory exists in user space
    * and launches the TestHarness to process the given directory.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool runInputs() const;
+  bool runInputs();
 
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>

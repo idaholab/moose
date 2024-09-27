@@ -14,7 +14,5 @@
 int
 main(int argc, char * argv[])
 {
-  Moose::main<StochasticToolsTestApp>(argc, argv);
-
-  return 0;
+  return Moose::main<StochasticToolsTestApp>(argc, argv);
 }
