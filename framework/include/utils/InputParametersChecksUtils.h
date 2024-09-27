@@ -132,6 +132,13 @@ protected:
   void errorDependentParameter(const std::string & param1,
                                const std::string & value_not_set,
                                const std::vector<std::string> & dependent_params) const;
+  /// Error messages for parameters that should depend on another parameter but with a different error message
+  /// @param param1 the parameter has not been set to the desired value (for logging purposes)
+  /// @param value_set the value it has been set to and which is not appropriate (for logging purposes)
+  /// @param dependent_params all the parameters that should not have been since 'param1' was not set to 'value_not_set'
+  void errorInconsistentDependentParameter(const std::string & param1,
+                                           const std::string & value_set,
+                                           const std::vector<std::string> & dependent_params) const;
 
 private:
   // Convenience routines so that defining new checks feels very similar to coding checks in
@@ -552,6 +559,21 @@ InputParametersChecksUtils<C>::errorDependentParameter(
                         "Parameter '" + dependent_param +
                             "' should not be set by the user if parameter '" + param1 +
                             "' has not been set to '" + value_not_set + "'");
+}
+
+template <typename C>
+void
+InputParametersChecksUtils<C>::errorInconsistentDependentParameter(
+    const std::string & param1,
+    const std::string & value_set,
+    const std::vector<std::string> & dependent_params) const
+{
+  for (const auto & dependent_param : dependent_params)
+    if (forwardIsParamSetByUser(dependent_param))
+      forwardParamError(dependent_param,
+                        "Parameter '" + dependent_param +
+                            "' should not be set by the user if parameter '" + param1 +
+                            "' has been set to '" + value_set + "'");
 }
 
 template <typename C>

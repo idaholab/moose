@@ -312,11 +312,14 @@ $(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call uni
 
 app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
 
-#$(info $(app_unity_srcfiles))
-
 unity_srcfiles += $(app_unity_srcfiles)
 
-moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
+ifneq ($(non_unity_srcsubdirs),)
+	app_nonunity_srcfiles = $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
+else
+  app_nonunity_srcfiles = $(shell find . -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
+endif
+moose_srcfiles    := $(app_unity_srcfiles) $(app_nonunity_srcfiles)
 
 else # Non-Unity
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -regex "[^\#~]*\.C")

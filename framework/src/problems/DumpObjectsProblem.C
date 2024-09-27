@@ -23,8 +23,8 @@ DumpObjectsProblem::validParams()
   params.addClassDescription("Single purpose problem object that does not run the given input but "
                              "allows deconstructing actions into their series of underlying Moose "
                              "objects and variables.");
-  params.addRequiredParam<std::string>(
-      "dump_path", "Syntax path of the action of which to dump the generated syntax");
+  params.addParam<std::string>(
+      "dump_path", "all", "Syntax path of the action of which to dump the generated syntax");
   params.addParam<bool>(
       "include_all_user_specified_params",
       true,
@@ -144,7 +144,11 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 void
 DumpObjectsProblem::solve(unsigned int)
 {
-  dumpGeneratedSyntax(getParam<std::string>("dump_path"));
+  const auto path = getParam<std::string>("dump_path");
+  if (path != "all")
+    dumpGeneratedSyntax(path);
+  else
+    dumpAllGeneratedSyntax();
 }
 
 void
@@ -157,6 +161,17 @@ DumpObjectsProblem::dumpGeneratedSyntax(const std::string path)
   Moose::out << "**START DUMP DATA**\n";
   for (const auto & system_pair : pathit->second)
     Moose::out << '[' << system_pair.first << "]\n" << system_pair.second << "[]\n\n";
+  Moose::out << "**END DUMP DATA**\n";
+  Moose::out << std::flush;
+}
+
+void
+DumpObjectsProblem::dumpAllGeneratedSyntax() const
+{
+  Moose::out << "**START DUMP DATA**\n";
+  for (const auto & path : _generated_syntax)
+    for (const auto & system_pair : path.second)
+      Moose::out << '[' << system_pair.first << "]\n" << system_pair.second << "[]\n\n";
   Moose::out << "**END DUMP DATA**\n";
   Moose::out << std::flush;
 }

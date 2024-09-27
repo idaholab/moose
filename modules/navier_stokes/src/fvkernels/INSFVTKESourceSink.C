@@ -42,6 +42,8 @@ INSFVTKESourceSink::validParams()
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>("C_pl", 10.0, "Production Limiter Constant Multiplier.");
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
 
   return params;
 }
@@ -60,7 +62,8 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _linearized_model(getParam<bool>("linearized_model")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
-    _C_pl(getParam<Real>("C_pl"))
+    _C_pl(getParam<Real>("C_pl")),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -91,6 +94,14 @@ INSFVTKESourceSink::computeQpResidual()
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
+  // To prevent negative values & preserve sparsity pattern
+  auto TKE = _newton_solve
+                 ? std::max(_var(elem_arg, old_state), ADReal(0) * _var(elem_arg, old_state))
+                 : _var(elem_arg, old_state);
+  // Prevent computation of sqrt(0) with undefined automatic derivatives
+  // This is not needed for segregated solves, as TKE has minimum bound in the solver
+  if (_newton_solve)
+    TKE = std::max(TKE, 1e-10);
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
@@ -115,7 +126,7 @@ INSFVTKESourceSink::computeQpResidual()
 
       ADReal y_plus;
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
-        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * _var(elem_arg, old_state)) * rho / mu;
+        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
       else // Equilibrium / Iterative
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
@@ -157,26 +168,34 @@ INSFVTKESourceSink::computeQpResidual()
       const ADReal wall_mu = _mu(facearg, state);
 
       const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
-      const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
-                                   std::pow(_var(elem_arg, old_state), 0.5) /
+      const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 0.5) /
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
 
+      // Additional 0-value terms to make sure new derivative entries are not added during the solve
       if (y_plus < 11.25)
+      {
         destruction += destruction_visc;
+        if (_newton_solve)
+          destruction += 0 * destruction_log + 0 * tau_w;
+      }
       else
       {
         destruction += destruction_log;
-        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(_var(elem_arg, old_state) + 1e-10) /
+        if (_newton_solve)
+          destruction += 0 * destruction_visc;
+        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(TKE) /
                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
       }
     }
 
     residual = (destruction - production) * _var(elem_arg, state);
+    // Additional 0-value term to make sure new derivative entries are not added during the solve
+    if (_newton_solve)
+      residual += 0 * _epsilon(elem_arg, old_state);
   }
   else
   {
-
     const auto & grad_u = _u_var.gradient(elem_arg, state);
     const auto Sij_xx = 2.0 * grad_u(0);
     ADReal Sij_xy = 0.0;
@@ -234,17 +253,26 @@ INSFVTKESourceSink::computeQpResidual()
 
     production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
-    const auto time_scale = raw_value(_var(elem_arg, old_state) / _epsilon(elem_arg, old_state));
+    const auto tke_old_raw = raw_value(TKE);
+    const auto epsilon_old = _epsilon(elem_arg, old_state);
 
-    destruction = rho * _var(elem_arg, state) / time_scale;
+    if (MooseUtils::absoluteFuzzyEqual(tke_old_raw, 0))
+      destruction = rho * epsilon_old;
+    else
+      destruction = rho * _var(elem_arg, state) / tke_old_raw * raw_value(epsilon_old);
 
     // k-Production limiter (needed for flows with stagnation zones)
-    const ADReal production_limit = _C_pl * rho * _epsilon(elem_arg, old_state);
+    const ADReal production_limit =
+        _C_pl * rho * (_newton_solve ? std::max(epsilon_old, ADReal(0)) : epsilon_old);
 
     // Apply production limiter
     production = std::min(production, production_limit);
 
     residual = destruction - production;
+
+    // Additional 0-value terms to make sure new derivative entries are not added during the solve
+    if (_newton_solve)
+      residual += 0 * _epsilon(elem_arg, state);
   }
 
   return residual;

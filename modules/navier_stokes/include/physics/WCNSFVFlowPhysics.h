@@ -188,6 +188,8 @@ private:
   std::map<BoundaryName, MooseEnum> _momentum_outlet_types;
   /// Momentum wall boundary types
   MultiMooseEnum _momentum_wall_types;
+  /// Momentum wall functors
+  std::vector<MooseFunctorName> _momentum_wall_functors;
 
   /// Postprocessors describing the momentum inlet for each boundary. Indexing based on the number of flux boundaries
   std::vector<PostprocessorName> _flux_inlet_pps;

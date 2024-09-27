@@ -113,14 +113,16 @@
   type = Transient
   solve_type = NEWTON
   automatic_scaling = true
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
 
   line_search = 'none'
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-10
   nl_abs_tol = 1e-14
 
   dt = 0.1
   dtmin = 0.1
-  end_time = 3.0
+  end_time = 1.0
 []
 
 [Kernels]

@@ -88,4 +88,7 @@ protected:
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}
+
+  /// Whether a nonlinear Newton-like solver is being used (as opposed to a linearized solver)
+  const bool _newton_solve;
 };
