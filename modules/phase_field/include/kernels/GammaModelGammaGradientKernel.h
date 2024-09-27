@@ -14,7 +14,6 @@
 /**
  * Gamma-gradient kernel for the first and second set of grains
  */
-
 class GammaModelGammaGradientKernel : public ADKernel
 {
 public:

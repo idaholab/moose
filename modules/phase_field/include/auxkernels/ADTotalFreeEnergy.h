@@ -16,7 +16,6 @@
  * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined
  * in a material and called f_name
  */
-
 class ADTotalFreeEnergy : public TotalFreeEnergyBase
 {
 public:

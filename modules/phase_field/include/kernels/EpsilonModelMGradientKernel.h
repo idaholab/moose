@@ -14,7 +14,6 @@
 /**
  * M-gradient kernel for the first and second set of grains
  */
-
 class EpsilonModelMGradientKernel : public ADKernel
 {
 public:

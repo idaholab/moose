@@ -14,7 +14,6 @@
 /**
  * Sets up all the necessary kernels for the anisotropic grain growth epsilon and gamma models
  */
-
 class SphericalGaussianKernelAction : public Action
 {
 public:
