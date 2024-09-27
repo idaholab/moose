@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2BatchIndexGenerator.h"
-#include <set>
+#include "NEML2Utils.h"
 
 registerMooseObject("SolidMechanicsApp", NEML2BatchIndexGenerator);
 
