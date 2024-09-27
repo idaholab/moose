@@ -71,15 +71,22 @@ MFEMTransient::registerTimeDerivatives()
 void
 MFEMTransient::init()
 {
-  _problem = dynamic_cast<platypus::TimeDomainProblemData *>(&_mfem_problem.getProblemData());
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   registerTimeDerivatives();
   _mfem_problem.initialSetup();
 
+  // Set up initial conditions
+  _mfem_problem.getProblemData()._eqn_system->Init(_mfem_problem.getProblemData()._gridfunctions,
+                                                   _mfem_problem.getProblemData()._fespaces,
+                                                   _mfem_problem.getProblemData()._bc_map);
+
+  _problem_operator->SetGridFunctions();
+  _problem_operator->Init(_mfem_problem.getProblemData()._f);
+
   // Set timestepper
   _problem->_ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
-  _problem->_ode_solver->Init(*(_problem->GetOperator()));
-  _problem->GetOperator()->SetTime(0.0);
+  _problem->_ode_solver->Init(*(_problem_operator));
+  _problem_operator->SetTime(0.0);
 }
 
 void
