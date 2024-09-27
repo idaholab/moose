@@ -1466,7 +1466,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
           }
 
           //Check element/edge type 
-          if (edge->type() != 0)
+          if (edge->type() != EDGE2)
           {
             std::string element_message = "Edge of type " + Utility::enum_to_string(edge->type()) + " was found in cell " + std::to_string(elem->id()) + 
                                           " which is of type " + Utility::enum_to_string(elem->type()) + '\n' + 
@@ -1474,7 +1474,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
             _console << element_message << std::endl;
             continue;
           }
-          if (other_edge->type() != 0)
+          if (other_edge->type() != EDGE2)
           {
             std::string element_message = "Edge of type " + Utility::enum_to_string(other_edge->type()) + " was found in cell " + std::to_string(other_elem->id()) + 
                                           " which is of type " + Utility::enum_to_string(other_elem->type()) + '\n' + 
