@@ -80,7 +80,7 @@
 
 [Preconditioner]
   [cg]
-    type = MFEMCGSolver
+    type = MFEMGMRESSolver
     print_level = 2
   []
 []
