@@ -1,6 +1,6 @@
-# ExecuteNEML2Model
+# NEML2ModelExecutor
 
-!syntax description /UserObjects/ExecuteNEML2Model
+!syntax description /UserObjects/NEML2ModelExecutor
 
 !alert note
 Users are +NOT+ expected to directly use this object in an input file. Instead, it is always recommended to use the [NEML2 action](syntax/NEML2/index.md).
@@ -9,9 +9,9 @@ Users are +NOT+ expected to directly use this object in an input file. Instead, 
 
 This object uses the specified NEML2 material model to perform mesh-wise (or subdomain-wise) batched material update.
 
-Each NEML2 model +input variable+ is gathered from MOOSE by a `MOOSEToNEML2` user object given in [!param](/UserObjects/ExecuteNEML2Model/gatherers). Optionally, NEML2 model +parameters+ can also be gathered from MOOSE by `MOOSEToNEML2` user objects given in [!param](/UserObjects/ExecuteNEML2Model/param_gatherers).
+Each NEML2 model +input variable+ is gathered from MOOSE by a `MOOSEToNEML2` user object (gatherer) given in [!param](/UserObjects/NEML2ModelExecutor/gatherers). Optionally, NEML2 model +parameters+ can also be gathered from MOOSE by gatherers given in [!param](/UserObjects/NEML2ModelExecutor/param_gatherers).
 
-Currently, three types of `MOOSEToNEML2` user objects (gatherers) are available:
+Currently, three types of gatherers are available:
 
 - [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) gathers material property stored at each quadrature point.
 - [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md) gathers (auxiliary) variables interpolated at quadrature points.
@@ -21,7 +21,7 @@ Each model +output+ and its +derivatives+ with respect to input variables and mo
 
 ## NEML2 model execution
 
-The actual execution of the NEML2 model takes place in the `finalize()` method. The model execution involves five steps:
+The actual execution of the NEML2 model takes place in the `execute()` method. The model execution involves five steps:
 
 1. Re-allocate the model, if necessary
 2. Fill out model input variables and parameters
@@ -34,4 +34,4 @@ Note that the model is only re-allocated when the gathered batch size and the mo
 - Before the very first material update;
 - After a mesh-change event which results in a change in the number of quadrature points in the operating subdomain.
 
-!syntax parameters /UserObjects/ExecuteNEML2Model
+!syntax parameters /UserObjects/NEML2ModelExecutor

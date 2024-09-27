@@ -9,23 +9,25 @@ This page is developer-facing. Users please refer to the [NEML2 syntax](syntax/N
 
 This is the primary action responsible for constructing objects for transferring data back and forth between MOOSE and NEML2, as well as for executing the NEML2 model.
 
-Three types of objects are constructed by this action:
+Four types of objects are constructed by this action:
 
 - +Gatherer+: Object responsible for gathering MOOSE data.
 - +Retriever+: Object responsible for retrieving NEML2 data and assigning it back to MOOSE data structures.
+- +Index generator+: Object responsible for generating the element-to-batch-index map.
 - +Executor+: Object responsible for sending data gathered by gatherers to NEML2, execute the NEML2 model, and have the outputs ready for retrieval by retrievers.
 
 Currently supported objects are summarized below.
 
-| Type      | MOOSE object(s)                                                 |
-| :-------- | :-------------------------------------------------------------- |
-| Gatherer  | [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) |
-|           | [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md)                 |
-|           | [MOOSPostprocessorToNEML2](MOOSEPostprocessorToNEML2.md)        |
-| Retriever | [NEML2ToMOOSEMaterialProperty](NEML2ToMOOSEMaterialProperty.md) |
-| Executor  | [ExecuteNEML2Model](ExecuteNEML2Model.md)                       |
+| Type            | MOOSE object(s)                                                 |
+| :-------------- | :-------------------------------------------------------------- |
+| Gatherer        | [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) |
+|                 | [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md)                 |
+|                 | [MOOSPostprocessorToNEML2](MOOSEPostprocessorToNEML2.md)        |
+| Retriever       | [NEML2ToMOOSEMaterialProperty](NEML2ToMOOSEMaterialProperty.md) |
+| Index generator | [NEML2BatchIndexGenerator](NEML2BatchIndexGenerator.md)         |
+| Executor        | [NEML2ModelExecutor](NEML2ModelExecutor.md)                     |
 
-Multiple gatherers and retrievers may be created by this action, but each instance of the action creates one and only one executor.  Each step performed by this action is explained in one of the following sections, in the order of execution.
+Multiple gatherers and retrievers may be created by this action, but each instance of the action creates one and only one index generator and executor.  Each step performed by this action is explained in one of the following sections, in the order of execution.
 
 ## Applying common parameters
 
@@ -55,9 +57,9 @@ This step involves the creation of `MOOSEToNEML2` gatherers for NEML2 input vari
 
 Note that the correct type of object is selected/created relying on NEML2 model introspection. For example, if a NEML2 input variable is of type `SR2`, we can infer that the corresponding MOOSE data structure should be `SymmetricRankTwoTensor`. According to the user-specified [!param](/NEML2/moose_input_types), we can deduce where the MOOSE data comes from. (Though in this case `MATERIAL` is the only viable option, as a `SymmetricRankTwoTensor` cannot come from a MOOSE variable nor a MOOSE postprocessor).
 
-## Creating the NEML2 model executor
+## Creating the NEML2 index generator and model executor
 
-Next, an [ExecuteNEML2Model](ExecuteNEML2Model.md) excutor is created. The list of [!param](/UserObjects/ExecuteNEML2Model/gatherers) and [!param](/UserObjects/ExecuteNEML2Model/param_gatherers) are automatically filled out by this action.
+Next, a [NEML2BatchIndexGenerator](NEML2BatchIndexGenerator.md) and a [NEML2ModelExecutor](NEML2ModelExecutor.md) excutor are created. The list of [!param](/UserObjects/NEML2ModelExecutor/gatherers) and [!param](/UserObjects/NEML2ModelExecutor/param_gatherers) are automatically filled out by this action.
 
 ## Creating NEML2ToMOOSE retrievers
 
