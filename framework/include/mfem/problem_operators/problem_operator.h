@@ -1,6 +1,6 @@
 #pragma once
 #include "../common/pfem_extras.hpp"
-#include "problem_builder_base.h"
+#include "MFEMProblemData.h"
 #include "problem_operator_interface.h"
 
 namespace platypus
@@ -9,7 +9,7 @@ namespace platypus
 class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
 {
 public:
-  ProblemOperator(platypus::ProblemData & problem) : ProblemOperatorInterface(problem) {}
+  ProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
   ~ProblemOperator() override = default;
 
   void SetGridFunctions() override;
