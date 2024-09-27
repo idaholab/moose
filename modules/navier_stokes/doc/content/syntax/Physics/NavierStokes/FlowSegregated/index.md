@@ -1,6 +1,6 @@
-# Navier Stokes Solid Heat Transfer Physics
+# Navier Stokes Flow Segregated Physics
 
-This syntax was created for the [WCNSFVSolidHeatTransferPhysics.md] `Physics`.
+This syntax was created for the [WCNSLinearFVFlowPhysics.md] `Physics`.
 The additional nesting is intended to allow the definition of multiple instances of this `Physics`,
 with different block restrictions.
 
