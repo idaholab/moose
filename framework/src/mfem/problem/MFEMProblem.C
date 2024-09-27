@@ -88,7 +88,7 @@ void
 MFEMProblem::setProblemBuilder()
 {
   mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
-  _problem_data = std::make_shared<platypus::ProblemData>();
+  _problem_data = std::make_shared<MFEMProblemData>();
   setDevice();
   setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
   dynamic_cast<MFEMExecutioner *>(_app.getExecutioner())->ConstructOperator();

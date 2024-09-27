@@ -15,7 +15,7 @@ public:
 
   virtual void execute() override;
 
-  platypus::ProblemData * _problem{nullptr};
+  MFEMProblemData * _problem{nullptr};
 
   [[nodiscard]] platypus::EquationSystemProblemOperator * GetOperator() const override
   {

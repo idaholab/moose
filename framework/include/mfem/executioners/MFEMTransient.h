@@ -45,7 +45,7 @@ public:
     return GetOperator()->GetEquationSystem();
   }
 
-  platypus::ProblemData * _problem{nullptr};
+  MFEMProblemData * _problem{nullptr};
   mutable double _t_step; // Time step
 
 private:
