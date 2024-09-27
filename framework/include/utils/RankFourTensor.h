@@ -246,24 +246,24 @@ public:
 
   /// C_ijkl + a_ijkl
   template <typename T2>
-  auto
-  operator+(const RankFourTensorTempl<T2> & a) const -> RankFourTensorTempl<decltype(T() + T2())>;
+  auto operator+(const RankFourTensorTempl<T2> & a) const
+      -> RankFourTensorTempl<decltype(T() + T2())>;
 
   /// C_ijkl -= a_ijkl
   RankFourTensorTempl<T> & operator-=(const RankFourTensorTempl<T> & a);
 
   /// C_ijkl - a_ijkl
   template <typename T2>
-  auto
-  operator-(const RankFourTensorTempl<T2> & a) const -> RankFourTensorTempl<decltype(T() - T2())>;
+  auto operator-(const RankFourTensorTempl<T2> & a) const
+      -> RankFourTensorTempl<decltype(T() - T2())>;
 
   /// -C_ijkl
   RankFourTensorTempl<T> operator-() const;
 
   /// C_ijpq*a_pqkl
   template <typename T2>
-  auto
-  operator*(const RankFourTensorTempl<T2> & a) const -> RankFourTensorTempl<decltype(T() * T2())>;
+  auto operator*(const RankFourTensorTempl<T2> & a) const
+      -> RankFourTensorTempl<decltype(T() * T2())>;
 
   /// sqrt(C_ijkl*C_ijkl)
   T L2norm() const;
