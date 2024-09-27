@@ -246,7 +246,7 @@
   l_tol = 1e-4
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-12
-  num_steps = 3
+  num_steps = 1
   dt = 3 # (ns)
 []
 
