@@ -15,7 +15,7 @@ public:
   TimeDomainEquationSystemProblemOperator(platypus::ProblemData &) = delete;
   TimeDomainEquationSystemProblemOperator(
       platypus::ProblemData & problem,
-      std::unique_ptr<platypus::TimeDependentEquationSystem> equation_system)
+      std::shared_ptr<platypus::TimeDependentEquationSystem> equation_system)
     : TimeDomainProblemOperator(problem), _equation_system{std::move(equation_system)}
   {
   }
@@ -40,7 +40,7 @@ protected:
 
 private:
   std::vector<mfem::ParGridFunction *> _trial_variable_time_derivatives;
-  std::unique_ptr<platypus::TimeDependentEquationSystem> _equation_system{nullptr};
+  std::shared_ptr<platypus::TimeDependentEquationSystem> _equation_system{nullptr};
 };
 
 } // namespace platypus

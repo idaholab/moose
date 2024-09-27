@@ -170,12 +170,10 @@ protected:
   void addKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
   {
     using namespace platypus;
-    EquationSystemInterface * eqn_system{nullptr};
-    eqn_system = dynamic_cast<platypus::EquationSystemInterface *>(&getProblemData());
-    if (eqn_system)
+    if (getProblemData()._eqn_system)
     {
-      eqn_system->GetEquationSystem()->AddTrialVariableNameIfMissing(var_name);
-      eqn_system->GetEquationSystem()->AddKernel(var_name, std::move(kernel));
+      getProblemData()._eqn_system->AddTrialVariableNameIfMissing(var_name);
+      getProblemData()._eqn_system->AddKernel(var_name, std::move(kernel));
     }
     else
     {
