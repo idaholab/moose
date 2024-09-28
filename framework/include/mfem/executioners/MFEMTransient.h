@@ -31,11 +31,11 @@ public:
 
   void ConstructOperator() override
   {
-    _problem = &_mfem_problem.getProblemData();
-    _problem->_eqn_system = std::make_shared<platypus::TimeDependentEquationSystem>();
+    _problem_data._eqn_system = std::make_shared<platypus::TimeDependentEquationSystem>();
     auto problem_operator = std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(
-        *_problem,
-        std::dynamic_pointer_cast<platypus::TimeDependentEquationSystem>(_problem->_eqn_system));
+        _problem_data,
+        std::dynamic_pointer_cast<platypus::TimeDependentEquationSystem>(
+            _problem_data._eqn_system));
 
     SetOperator(std::move(problem_operator));
   }
@@ -45,7 +45,6 @@ public:
     return GetOperator()->GetEquationSystem();
   }
 
-  MFEMProblemData * _problem{nullptr};
   mutable double _t_step; // Time step
 
 private:

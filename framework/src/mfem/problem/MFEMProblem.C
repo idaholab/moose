@@ -10,7 +10,8 @@ MFEMProblem::validParams()
   return params;
 }
 
-MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params), _coefficients()
+MFEMProblem::MFEMProblem(const InputParameters & params)
+  : ExternalProblem(params), _coefficients(), _problem_data(std::make_shared<MFEMProblemData>())
 {
 }
 
@@ -46,16 +47,6 @@ MFEMProblem::initialSetup()
   getProblemData()._coefficients = _coefficients;
   addMFEMNonlinearSolver();
 
-  // // Set up initial conditions
-  // auto equation_system = dynamic_cast<platypus::EquationSystemInterface *>(&getProblemData());
-  // equation_system->GetEquationSystem()->Init(
-  //     getProblemData()._gridfunctions, getProblemData()._fespaces, getProblemData()._bc_map);
-
-  // auto problem_operator =
-  //     dynamic_cast<platypus::ProblemOperatorInterface *>(getProblemData().GetOperator());
-  // problem_operator->SetGridFunctions();
-  // problem_operator->Init(getProblemData()._f);
-
   if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
   {
     mooseError("Executioner used that is not currently supported by MFEMProblem");
@@ -88,7 +79,6 @@ void
 MFEMProblem::setProblemBuilder()
 {
   mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
-  _problem_data = std::make_shared<MFEMProblemData>();
   setDevice();
   setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
   dynamic_cast<MFEMExecutioner *>(_app.getExecutioner())->ConstructOperator();

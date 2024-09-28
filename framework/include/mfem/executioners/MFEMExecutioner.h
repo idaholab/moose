@@ -1,7 +1,6 @@
 #pragma once
 #include "Executioner.h"
-#include "mfem.hpp"
-#include "equation_system.h"
+#include "MFEMProblemData.h"
 
 class MFEMProblem;
 
@@ -25,4 +24,5 @@ public:
 
 protected:
   MFEMProblem & _mfem_problem;
+  MFEMProblemData & _problem_data;
 };
