@@ -58,9 +58,17 @@ UpdateErrorVectorsThread::onElement(const Elem * elem)
     unsigned int var_num = it.first;
     ErrorVector & ev = *(it.second);
 
-    dof_id_type dof_number = elem->dof_number(_system_number, var_num, 0);
-    Real value = _solution(dof_number);
-    ev[elem->id()] = value;
+    // Must obey the block restriction of the indicator (error vector is global)
+    // we have to check here because the loop is over all indicators, and other indicators
+    // might have larger block restrictions.
+    if (_aux_sys.getVariable(_tid, var_num).hasBlocks(elem->subdomain_id()))
+    {
+      dof_id_type dof_number = elem->dof_number(_system_number, var_num, 0);
+      Real value = _solution(dof_number);
+      ev[elem->id()] = value;
+    }
+    else
+      ev[elem->id()] = 0;
   }
 }
 
