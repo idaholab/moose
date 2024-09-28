@@ -28,12 +28,11 @@ MFEMSteady::init()
   _mfem_problem.initialSetup();
 
   // Set up initial conditions
-  _mfem_problem.getProblemData()._eqn_system->Init(_mfem_problem.getProblemData()._gridfunctions,
-                                                   _mfem_problem.getProblemData()._fespaces,
-                                                   _mfem_problem.getProblemData()._bc_map);
+  _problem_data._eqn_system->Init(
+      _problem_data._gridfunctions, _problem_data._fespaces, _problem_data._bc_map);
 
   _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_mfem_problem.getProblemData()._f);
+  _problem_operator->Init(_problem_data._f);
 }
 
 void
@@ -59,9 +58,9 @@ MFEMSteady::execute()
   _mfem_problem.timestepSetup();
 
   // Solve equation system.
-  _problem_operator->Solve(_problem->_f);
+  _problem_operator->Solve(_problem_data._f);
   // Output data
-  _problem->_outputs.Write();
+  _problem_data._outputs.Write();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();
