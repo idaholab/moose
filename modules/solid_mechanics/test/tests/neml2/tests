@@ -16,7 +16,7 @@
     requirement = 'The system shall throw an error upon instantiation of NEML2 interface objects if NEML2 is not available.'
     type = RunException
     input = 'elasticity.i'
-    expect_err = 'To use this object, you need to have the `NEML2` library installed'
+    expect_err = 'The `NEML2` library is required but not enabled'
     collections = 'SYSTEM'
     libtorch = false
   []
