@@ -42,11 +42,6 @@ MFEMProblem::initialSetup()
   FEProblemBase::initialSetup();
   getProblemData()._coefficients.AddGlobalCoefficientsFromSubdomains();
   addMFEMNonlinearSolver();
-
-  if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
-  {
-    mooseError("Executioner used that is not currently supported by MFEMProblem");
-  }
 }
 
 void
@@ -63,8 +58,9 @@ MFEMProblem::setDevice()
 }
 
 void
-MFEMProblem::setMesh(std::shared_ptr<mfem::ParMesh> pmesh)
+MFEMProblem::setMesh()
 {
+  auto pmesh = std::make_shared<mfem::ParMesh>(mesh().getMFEMParMesh());
   getProblemData()._pmesh = pmesh;
   getProblemData()._comm = pmesh->GetComm();
   MPI_Comm_size(pmesh->GetComm(), &(getProblemData()._num_procs));
@@ -72,11 +68,10 @@ MFEMProblem::setMesh(std::shared_ptr<mfem::ParMesh> pmesh)
 }
 
 void
-MFEMProblem::setProblemBuilder()
+MFEMProblem::setProblemOperator()
 {
-  mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
   setDevice();
-  setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
+  setMesh();
   auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
   if (mfem_exec_ptr != nullptr)
   {
