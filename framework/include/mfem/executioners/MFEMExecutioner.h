@@ -20,8 +20,6 @@ public:
   /// Virtual method to construct the operator. Call for default problems.
   virtual void ConstructOperator() = 0;
 
-  [[nodiscard]] virtual platypus::EquationSystem * GetEquationSystem() const = 0;
-
 protected:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _problem_data;

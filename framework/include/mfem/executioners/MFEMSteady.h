@@ -20,11 +20,6 @@ public:
     return static_cast<platypus::EquationSystemProblemOperator *>(_problem_operator.get());
   }
 
-  [[nodiscard]] platypus::EquationSystem * GetEquationSystem() const override
-  {
-    return GetOperator()->GetEquationSystem();
-  }
-
   void SetOperator(std::unique_ptr<platypus::EquationSystemProblemOperator> problem_operator)
   {
     _problem_operator.reset();

@@ -40,11 +40,6 @@ public:
     SetOperator(std::move(problem_operator));
   }
 
-  [[nodiscard]] platypus::TimeDependentEquationSystem * GetEquationSystem() const override
-  {
-    return GetOperator()->GetEquationSystem();
-  }
-
   mutable double _t_step; // Time step
 
 private:
