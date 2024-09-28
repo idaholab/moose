@@ -10,10 +10,7 @@ MFEMProblem::validParams()
   return params;
 }
 
-MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params), _coefficients(), _problem_data(std::make_shared<MFEMProblemData>())
-{
-}
+MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params) {}
 
 void
 MFEMProblem::outputStep(ExecFlagType type)
