@@ -17,7 +17,6 @@ MFEMTransient::validParams()
 
 MFEMTransient::MFEMTransient(const InputParameters & params)
   : MFEMExecutioner(params),
-    _problem(&_mfem_problem.getProblemData()),
     _t_step(getParam<Real>("dt")),
     _t_initial(getParam<Real>("start_time")),
     _t_final(getParam<Real>("end_time")),
@@ -39,15 +38,15 @@ MFEMTransient::Step(double dt, int it) const
   }
 
   // Advance time step.
-  _problem->_ode_solver->Step(_problem->_f, _t, dt);
+  _problem_data._ode_solver->Step(_problem_data._f, _t, dt);
 
   // Sync Host/Device
-  _problem->_f.HostRead();
+  _problem_data._f.HostRead();
 
   // Output data
   if (_last_step || (it % _vis_steps) == 0)
   {
-    _problem->_outputs.Write(_t);
+    _problem_data._outputs.Write(_t);
   }
 }
 
@@ -55,7 +54,7 @@ void
 MFEMTransient::registerTimeDerivatives()
 {
   std::vector<std::string> gridfunction_names;
-  platypus::GridFunctions & gridfunctions = _mfem_problem.getProblemData()._gridfunctions;
+  platypus::GridFunctions & gridfunctions = _problem_data._gridfunctions;
   for (auto const & [name, gf] : gridfunctions)
   {
     gridfunction_names.push_back(name);
@@ -76,16 +75,15 @@ MFEMTransient::init()
   _mfem_problem.initialSetup();
 
   // Set up initial conditions
-  _mfem_problem.getProblemData()._eqn_system->Init(_mfem_problem.getProblemData()._gridfunctions,
-                                                   _mfem_problem.getProblemData()._fespaces,
-                                                   _mfem_problem.getProblemData()._bc_map);
+  _problem_data._eqn_system->Init(
+      _problem_data._gridfunctions, _problem_data._fespaces, _problem_data._bc_map);
 
   _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_mfem_problem.getProblemData()._f);
+  _problem_operator->Init(_problem_data._f);
 
   // Set timestepper
-  _problem->_ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
-  _problem->_ode_solver->Init(*(_problem_operator));
+  _problem_data._ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
+  _problem_data._ode_solver->Init(*(_problem_operator));
   _problem_operator->SetTime(0.0);
 }
 
