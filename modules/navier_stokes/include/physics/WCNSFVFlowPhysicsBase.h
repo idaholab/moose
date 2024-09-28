@@ -21,7 +21,7 @@
   registerMooseAction(app_name, derived_name, "add_user_object");                                  \
   registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
   registerMooseAction(app_name, derived_name, "add_corrector");                                    \
-  registerMooseAction(app_name, derived_name, "get_turbulence_physics");
+  registerMooseAction(app_name, derived_name, "get_turbulence_physics")
 
 /**
  * Base class for Physics which create the Navier Stokes flow equations

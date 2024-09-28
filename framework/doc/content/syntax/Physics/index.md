@@ -11,7 +11,7 @@ The interaction with Components is one of the main goals of the Physics system. 
 ## Generating a traditional input from a Physics input
 
 By substituting the traditional [Problem](syntax/Problem/index.md) in your simulation for the [DumpObjectsProblem.md],
-you can generate the equivalent input using the traditional Kernel/BCs/etc syntax to an input using [Physics.md].
+you can generate the equivalent input using the traditional Kernel/BCs/etc syntax to an input using `Physics`.
 This is useful for debugging purposes.
 
 !alert note
@@ -65,7 +65,7 @@ If you already have an `Action` defined for your equations, converting it to a `
 Please add as much parameter checking as you can. The `PhysicsBase` class inherits the `InputParameterCheckUtils` that implements
 routines like the ones below that let you check that the user inputs to your physics are correct.
 
-!listing file=InputParameterCheckUtils.h start=InputParametersChecksUtils<C>::checkVectorParamsSameLength end=} include-end=true
+!listing file=InputParametersChecksUtils.h start=InputParametersChecksUtils<C>::checkVectorParamsSameLength end=} include-end=true
 
 Using this utility, consider checking that:
 
