@@ -30,6 +30,7 @@ include $(MODULE_DIR)/modules.mk
 APPLICATION_DIR    := $(MODULE_DIR)/combined
 APPLICATION_NAME   := combined
 BUILD_EXEC         := yes
+GEN_REVISION       := yes
 # Sets INSTALLABLE_DIRS
 include            $(MOOSE_DIR)/modules/combined/combined_installable_dirs.mk
 include            $(FRAMEWORK_DIR)/app.mk
