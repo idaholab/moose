@@ -159,8 +159,6 @@ public:
    */
   MFEMProblemData & getProblemData() { return _problem_data; }
 
-  platypus::Coefficients _coefficients;
-
 protected:
   /**
    * Template method for adding kernels. We can only add kernels using equation system problem
