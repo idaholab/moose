@@ -87,12 +87,12 @@ public:
   /**
    * Set the mesh used by MFEM.
    */
-  void setMesh(std::shared_ptr<mfem::ParMesh> pmesh);
+  void setMesh();
 
   /**
-   * Set the required ProblemBuilder to build a transient or steady state problem.
+   * Set the required ProblemOperator used in the Executioner to solve the problem.
    */
-  void setProblemBuilder();
+  void setProblemOperator();
 
   /**
    * Override of ExternalProblem::addVariable. Sets a
