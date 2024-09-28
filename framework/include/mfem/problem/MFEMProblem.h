@@ -157,7 +157,7 @@ public:
    * Method to get the current MFEMProblemData object storing the
    * current data specifying the FE problem.
    */
-  MFEMProblemData & getProblemData() { return *_problem_data; }
+  MFEMProblemData & getProblemData() { return _problem_data; }
 
   platypus::Coefficients _coefficients;
 
@@ -183,5 +183,5 @@ protected:
   }
 
   platypus::PropertyManager _properties;
-  std::shared_ptr<MFEMProblemData> _problem_data{nullptr};
+  MFEMProblemData _problem_data;
 };
