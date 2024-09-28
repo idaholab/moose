@@ -148,7 +148,8 @@ wall_treatment_tem = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_li
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 5e-8
+  nl_max_its = 100
 
   # Necessary for these cases
   snesmf_reuse_base = false
