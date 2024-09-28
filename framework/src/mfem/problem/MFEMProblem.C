@@ -40,8 +40,7 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  _coefficients.AddGlobalCoefficientsFromSubdomains();
-  getProblemData()._coefficients = _coefficients;
+  getProblemData()._coefficients.AddGlobalCoefficientsFromSubdomains();
   addMFEMNonlinearSolver();
 
   if (dynamic_cast<MFEMExecutioner *>(_app.getExecutioner()) == nullptr)
@@ -78,7 +77,15 @@ MFEMProblem::setProblemBuilder()
   mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
   setDevice();
   setMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
-  dynamic_cast<MFEMExecutioner *>(_app.getExecutioner())->ConstructOperator();
+  auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+  if (mfem_exec_ptr != nullptr)
+  {
+    mfem_exec_ptr->ConstructOperator();
+  }
+  else
+  {
+    mooseError("Executioner used that is not currently supported by MFEMProblem");
+  }
 }
 
 void
@@ -149,7 +156,7 @@ MFEMProblem::addCoefficient(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   MFEMCoefficient * mfem_coef(&getUserObject<MFEMCoefficient>(name));
-  _coefficients._scalars.Register(name, mfem_coef->getCoefficient());
+  getProblemData()._coefficients._scalars.Register(name, mfem_coef->getCoefficient());
 }
 
 void
@@ -159,7 +166,7 @@ MFEMProblem::addVectorCoefficient(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   MFEMVectorCoefficient * mfem_vec_coef(&getUserObject<MFEMVectorCoefficient>(name));
-  _coefficients._vectors.Register(name, mfem_vec_coef->getVectorCoefficient());
+  getProblemData()._coefficients._vectors.Register(name, mfem_vec_coef->getVectorCoefficient());
 }
 
 void
