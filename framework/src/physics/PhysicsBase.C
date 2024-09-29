@@ -190,6 +190,15 @@ PhysicsBase::dimension() const
   return _dim;
 }
 
+bool
+PhysicsBase::hasBlocks(const std::vector<SubdomainName> & blocks)
+{
+  for (const auto & block : blocks)
+    if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+      return false;
+  return true;
+}
+
 void
 PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
 {

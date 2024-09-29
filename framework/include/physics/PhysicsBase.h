@@ -50,6 +50,12 @@ public:
 
   // Block restriction //
   /**
+   * @brief Checks if the Physics' block restriction includes these blocks
+   * @param blocks list of blocks to check
+   */
+  bool hasBlocks(const std::vector<SubdomainName> & blocks);
+
+  /**
    * @brief Add new blocks to the Physics
    * @param blocks list of blocks to add to the physics
    */
