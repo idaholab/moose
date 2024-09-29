@@ -154,6 +154,7 @@ TwoLayerGaussianProcess::standardizeData(RealEigenMatrix & data, bool keep_momen
   _data_standardizer.getStandardized(data);
 }
 
+<<<<<<< HEAD
 // void 
 // TwoLayerGaussianProcess::sq_dist(const RealEigenMatrix &X1_in, RealEigenMatrix &D_out, const RealEigenMatrix &X2_in) {
 //   if (X2_in.size() == 0) {
@@ -185,6 +186,8 @@ TwoLayerGaussianProcess::standardizeData(RealEigenMatrix & data, bool keep_momen
 //     }
 //   }
 // }
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
                                     
 void
 TwoLayerGaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta, 
@@ -338,8 +341,13 @@ void TwoLayerGaussianProcess::sample_w(const RealEigenMatrix & out_vec, RealEige
   LogLResult ll_result;
   Real new_logl;
 
+<<<<<<< HEAD
   // for (unsigned int i=0; i< x1.cols(); i++){
   for (unsigned int i=0; i< 1; i++){
+=======
+  for (unsigned int i=0; i< x1.cols(); i++){
+//   for (unsigned int i=0; i< 1; i++){
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
     std::vector<Real> theta1(_num_tunable, 0.0);
     theta1[0] = 1;
     theta1[1] = theta_w(0,0);
@@ -347,19 +355,27 @@ void TwoLayerGaussianProcess::sample_w(const RealEigenMatrix & out_vec, RealEige
     vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
     _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
     _covariance_function->computeCovarianceMatrix(K, x1, x2, true);
+<<<<<<< HEAD
     // std::cout << "w prior" << prior_mean.col(i).rows()<< "," << K.rows() << "," << K.cols() << std::endl;
     multiVariateNormalSampling(prior_mean.col(i), K, prior_mean.col(i).rows(), 1, w_prior);
 
     // w_prior = Normal::quantile(ru1, prior_mean.col(i), K);
     // Real h1 = Normal::quantile(ru1, 0, 1);
 
+=======
+    multiVariateNormalSampling(prior_mean.col(i), K, prior_mean.col(i).rows(), 1, w_prior);
+
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
     a = Uniform::quantile(ru1, 0, 2 * M_PI);
     amax = a;
     ru = Uniform::quantile(ru2, 0, 1);
     ll_threshold = ll_prev + std::log(ru);
     w_prev = w_t.col(i);
+<<<<<<< HEAD
     // std::cout << "w1" << w_prev.rows()<< "," << w_prev.cols() << "," << w_prior.rows()<< "," << w_prior.cols() << "," << w_t.col(i).rows()<< "," << w_t.col(i).cols() << std::endl;
     // std::cout << "w2" << w_prev << "," << w_prior << "," << w_t.col(i) << std::endl;
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
     while (!accept) {
       count += 1;
       w_t.col(i) = w_prev * std::cos(a) + w_prior * std::sin(a);
@@ -398,9 +414,12 @@ TwoLayerGaussianProcess::squared_exponential_covariance(const RealEigenMatrix &x
 {
   int n1 = x1.rows();
   int n2 = x2.rows();
+<<<<<<< HEAD
   // k.resize(n1, n2);
   // std::cout << "x1 rows is " << x1.rows() << std::endl;
   // std::cout << "x1 cols is " << x1.cols() << std::endl;
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
   
   for (int i = 0; i < n1; ++i) {
     for (int j = 0; j < n2; ++j) {
@@ -414,7 +433,10 @@ TwoLayerGaussianProcess::squared_exponential_covariance(const RealEigenMatrix &x
       k(i, j) = cov_val;
     }
   }
+<<<<<<< HEAD
   // std::cout << "k is " << k << std::endl;
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
 }
 
 void
@@ -432,6 +454,7 @@ TwoLayerGaussianProcess::krig(const RealEigenMatrix & y, const RealEigenMatrix &
   Eigen::LLT<RealEigenMatrix> llt(C);
   RealEigenMatrix C_inv = llt.solve(RealEigenMatrix::Identity(C.rows(), C.cols()));
 
+<<<<<<< HEAD
   // RealEigenMatrix L = llt.matrixL();
   // Real ldet = 2 * L.diagonal().array().log().sum();
   // result.Mi = Mi;
@@ -440,6 +463,9 @@ TwoLayerGaussianProcess::krig(const RealEigenMatrix & y, const RealEigenMatrix &
   // RealEigenMatrix mean = prior_mean_new + C_cross * C_inv * (y - prior_mean);
   krig_mean =  C_cross * C_inv * (y - prior_mean);
   // RealEigenMatrix sigma;
+=======
+  krig_mean =  C_cross * C_inv * (y - prior_mean);
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
 
   if (cal_sigma) {
     RealEigenMatrix quad_term = C_cross * C_inv * C_cross.transpose();
@@ -450,6 +476,7 @@ TwoLayerGaussianProcess::krig(const RealEigenMatrix & y, const RealEigenMatrix &
 }
 
 
+<<<<<<< HEAD
 // void
 // TwoLayerGaussianProcess::sample_theta_w(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, Real theta_w,
 //               Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev) {
@@ -487,6 +514,8 @@ TwoLayerGaussianProcess::krig(const RealEigenMatrix & y, const RealEigenMatrix &
 //     result.tau2 = NAN;
 //   }
 // }
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
 
 
 void 
@@ -525,7 +554,10 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
   Real g_0 = 0.01;
   RealEigenMatrix theta_0(1,x.cols());
   RealEigenMatrix theta_y_0 = RealEigenMatrix::Constant(1, x.cols(), 0.5);
+<<<<<<< HEAD
   // std::cout << "theta_y_0" << theta_y_0 << std::endl;
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
   RealEigenMatrix theta_w_0 = RealEigenMatrix::Constant(1, x.cols(), 1);
   RealEigenMatrix w_0 = training_params;
   Real tau_0 = 1;
@@ -535,10 +567,13 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
 
   Initial initial = {w_0, theta_y_0, theta_w_0, g_0, tau_0};
 
+<<<<<<< HEAD
   // RealEigenMatrix dx;
   // sq_dist(x, dx);
   // RealEigenMatrix dw;
   // sq_dist(w, dw); 
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
   RealEigenMatrix g(nmcmc, 1);
   g(0,0) = initial.g;
   RealEigenMatrix theta_y(nmcmc, x.cols());
@@ -584,14 +619,18 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
                     settings.u, sample_theta_w_result, ll);
       theta_w(j,i) = sample_theta_w_result.theta;
     }
+<<<<<<< HEAD
     // std::cout << "theta_w shape is" << theta_w.rows() << "," << theta_w.cols() << std::endl;
     // std::cout << "theta_w shape is" << theta_w.row(0).rows() << "," << theta_w.row(0).cols() << std::endl;
     // std::cout << "theta_w shape is" << theta_w.row(0).col(0).rows() << "," << theta_w.row(0).col(0).cols() << std::endl;
     // std::cout << "theta_w shape is" << theta_w(0,0).rows() << "," << theta_w(0,0).cols() << std::endl;
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
     
 
     RealEigenMatrix prior_mean = RealEigenMatrix::Zero(x.rows(), x.cols());
 
+<<<<<<< HEAD
 //  code block for debug
     // std::vector<Real> theta1(_num_tunable, 0.0);
     // RealEigenMatrix K(x.rows(), x.rows());
@@ -608,6 +647,8 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
     // std::cout << "w1" << w_prev.rows()<< "," << w_prev.cols() << "," << w_prior.rows()<< "," << w_prior.cols() << "," << w[j-1].rows()<< "," << w[j-1].cols() << std::endl;
     // w[j-1].col(0) = w_prev * std::cos(1/2) + w_prev * std::sin(1/2);
 //  code block for debug
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
 
     SampleWResult sample_w_result;
     sample_w(y, w[j-1], w[j-1], w[j-1], x, x, g(j,0), theta_y.row(j), theta_w.row(j), sample_w_result, ll, prior_mean);
@@ -616,6 +657,7 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
     for (unsigned int i=0; i<x.cols(); i++){
      ll_store(j,i) = ll;
     }
+<<<<<<< HEAD
     // RealEigenMatrix g(2,2);
     // g << 0.11, 0.21,
     //          0.31, 0.41;
@@ -634,6 +676,8 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
 
     // vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
     // _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
   }
 
   _g = g;

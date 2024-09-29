@@ -39,6 +39,7 @@ public:
   StochasticTools::TwoLayerGaussianProcess & tgp() { return _tgp; }
   const StochasticTools::TwoLayerGaussianProcess & getTGP() const { return _tgp; }
 
+<<<<<<< HEAD
   // struct KrigResult {
   //   RealEigenMatrix mean;
   //   RealEigenMatrix sigma;
@@ -56,6 +57,8 @@ public:
   //                                  const RealEigenMatrix & prior_mean, const RealEigenMatrix & prior_mean_new, KrigResult & result);
 
   // void predict(const RealEigenMatrix & x_new);
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
 
 private:
   StochasticTools::TwoLayerGaussianProcess & _tgp;

@@ -64,6 +64,7 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x, std::vec
   this->evaluate(x, y, std_dummy);
 }
 
+<<<<<<< HEAD
 // void 
 // TwoLayerGaussianProcessSurrogate::squared_exponential_covariance(const RealEigenMatrix &x1, 
 //                   const RealEigenMatrix &x2, 
@@ -165,6 +166,8 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x, std::vec
 //   // RealEigenMatrix Sigma = (sigma_sum / _tgp.getNmcmc()) + covariance;
 
 // }
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
 
 void
 TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
@@ -187,6 +190,7 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
     test_points(0, ii) = x[ii];
 
   _tgp.getParamStandardizer().getStandardized(test_points);
+<<<<<<< HEAD
   // std::cout << "test points: " << test_points << "," << _tgp.getW()[0] << "," << _tgp.getG() << "," << _tgp.getThetaY() << "," << _tgp.getThetaW() << "," << _tgp.getTau2() << std::endl;
   // std::cout << "test points: " << "," << _training_params << "," << _tgp.getX() << "," << _tgp.getY() << std::endl;
   // predict(test_points);
@@ -231,6 +235,37 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
 
 
 
+=======
+
+  RealEigenMatrix x_old = _training_params;
+  RealEigenMatrix prior_mean_new = RealEigenMatrix::Zero(1, 1);;
+  RealEigenMatrix prior_mean = RealEigenMatrix::Zero(_training_params.rows(), 1);
+  Real prior_tau2 = 1;
+  RealEigenMatrix mu_t = RealEigenMatrix::Zero(1, _tgp.getNmcmc());
+  RealEigenMatrix sigma_sum(1, 1);
+  RealEigenMatrix w_t;
+  RealEigenMatrix w_new(1, _training_params.cols());
+  RealEigenMatrix theta_w(1, _training_params.cols());
+  RealEigenMatrix krig_mean;
+  RealEigenMatrix krig_sigma;
+
+  for (unsigned int t = 0; t < _tgp.getNmcmc(); t++){
+    w_t = _tgp.getW()[t];
+    w_new = RealEigenMatrix::Zero(1, _training_params.cols());
+    for (unsigned int i = 0; t < _training_params.cols(); i++){
+      theta_w = RealEigenMatrix::Constant(1, _training_params.cols(), _tgp.getThetaW()(t,i));
+      _tgp.krig(w_t.col(i), x_old, test_points, theta_w, 1e-10, prior_tau2, false, prior_mean, prior_mean_new, krig_mean, krig_sigma);
+      w_new.col(i) = krig_mean;
+    }
+    _tgp.krig(_tgp.getY(), _tgp.getW()[t], w_new, _tgp.getThetaY().row(t), _tgp.getG()(t,0), _tgp.getTau2()(t,0), true, prior_mean, prior_mean_new, krig_mean, krig_sigma);
+    mu_t.col(t) = krig_mean;
+    sigma_sum += krig_sigma;
+  }
+  RealEigenMatrix mean = mu_t.rowwise().mean();
+  RealEigenMatrix mu_t_centered = mu_t.rowwise() - mean.transpose();
+  RealEigenMatrix covariance = (mu_t_centered.adjoint() * mu_t_centered) / (_tgp.getNmcmc() - 1);
+  RealEigenMatrix Sigma = (sigma_sum / _tgp.getNmcmc()) + covariance;
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
 
   RealEigenMatrix K_train_test(_training_params.rows() * n_outputs, n_outputs);
 
@@ -242,13 +277,19 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   // Compute the predicted mean value (centered)
   RealEigenMatrix pred_value = (K_train_test.transpose() * _tgp.getKResultsSolve()).transpose();
   // De-center/scale the value and store for return
+<<<<<<< HEAD
   // std::cout << "pred_value: " << pred_value << std::endl;
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
   _tgp.getDataStandardizer().getDestandardized(pred_value);
 
   RealEigenMatrix pred_var =
       K_test - (K_train_test.transpose() * _tgp.getKCholeskyDecomp().solve(K_train_test));
 
+<<<<<<< HEAD
   // std::cout << "enter twolayer prediction" << std::endl;
+=======
+>>>>>>> 3916813fc047f20cb781ea492725fdd8038d8614
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
   RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
   _tgp.getDataStandardizer().getDescaled(std_dev_mat);
