@@ -49,7 +49,7 @@ protected:
 };
 
 #define DefineNEML2ToMOOSEMaterialPropertyAlias(T, alias)                                          \
-  using NEML2ToMOOSE##alias##MaterialProperty = NEML2ToMOOSEMaterialProperty<T>;
+  using NEML2ToMOOSE##alias##MaterialProperty = NEML2ToMOOSEMaterialProperty<T>
 
 DefineNEML2ToMOOSEMaterialPropertyAlias(Real, Real);
 DefineNEML2ToMOOSEMaterialPropertyAlias(SymmetricRankTwoTensor, SymmetricRankTwoTensor);
