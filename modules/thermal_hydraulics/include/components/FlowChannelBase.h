@@ -164,6 +164,17 @@ public:
   void addHeatTransferName(const std::string & ht_name) const;
 
   /**
+   * Adds the name of a scalar transfer component to the flow channel's list.
+   *
+   * This function is called from a scalar transfer component to add its name to
+   * the flow channel's list, so that the flow channel can communicate with it, such as for
+   * determining variable names used in averages of heat transfer variables.
+   *
+   * @param[in] st_name  name of the scalar transfer component
+   */
+  void addScalarTransferName(const std::string & st_name) const;
+
+  /**
    * Gets suffix to add to heat-transfer-related names in a heat transfer component
    *
    * This function is called from a heat transfer component to determine how to
@@ -176,6 +187,21 @@ public:
    * @return suffix to add to heat transfer variable names
    */
   std::string getHeatTransferNamesSuffix(const std::string & ht_name) const;
+
+  // TODO: consider removing
+  /**
+   * Gets suffix to add to scalar-transfer-related names in a scalar transfer component
+   *
+   * This function is called from a scalar transfer component to determine how to
+   * name its variables. If the flow channel has only one scalar transfer coefficient, for
+   * example, then no suffix is returned. This function must be called after all
+   * of the scalar transfer component names have been added to the flow channel's list
+   * (via \c addHeatTransferName()).
+   *
+   * @param[in] st_name  name of the scalar transfer component
+   * @return suffix to add to scalar transfer variable names
+   */
+  std::string getScalarTransferNamesSuffix(const std::string & st_name) const;
 
   /**
    * Get the used closures object
@@ -246,6 +272,9 @@ protected:
   mutable std::vector<std::string> _heat_transfer_names;
   /// Number of connected heat transfer components
   mutable unsigned int _n_heat_transfer_connections;
+
+  /// Names of scalar transfer components connected to this component
+  mutable std::vector<std::string> _scalar_transfer_names;
 
   /// 1-phase wall heat transfer coefficient names for connected heat transfers
   std::vector<MaterialPropertyName> _Hw_1phase_names;

@@ -347,6 +347,12 @@ FlowChannelBase::addHeatTransferName(const std::string & name) const
 }
 
 void
+FlowChannelBase::addScalarTransferName(const std::string & name) const
+{
+  _scalar_transfer_names.push_back(name);
+}
+
+void
 FlowChannelBase::getHeatTransferVariableNames()
 {
   for (unsigned int i = 0; i < _n_heat_transfer_connections; i++)
@@ -386,6 +392,33 @@ FlowChannelBase::getHeatTransferNamesSuffix(const std::string & ht_name) const
     else
       mooseError(
           "Heat transfer component '", ht_name, "' was not added to flow channel '", name(), "'");
+  }
+  // else, don't add a suffix; there is no need
+  else
+    return "";
+}
+
+std::string
+FlowChannelBase::getScalarTransferNamesSuffix(const std::string & st_name) const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  // if there is more than one connected scalar transfer component, then number them
+  if (_scalar_transfer_names.size() > 1)
+  {
+    // determine index of scalar transfer name based on when it was added
+    auto it = std::find(_scalar_transfer_names.begin(), _scalar_transfer_names.end(), st_name);
+    if (it != _scalar_transfer_names.end())
+    {
+      const unsigned int index = std::distance(_scalar_transfer_names.begin(), it);
+
+      std::string suffix = ":" + _scalar_transfer_names[index];
+
+      return suffix;
+    }
+    else
+      mooseError(
+          "Scalar transfer component '", st_name, "' was not added to flow channel '", name(), "'");
   }
   // else, don't add a suffix; there is no need
   else
