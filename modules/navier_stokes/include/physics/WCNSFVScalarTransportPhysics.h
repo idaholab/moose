@@ -28,6 +28,15 @@ public:
 
   WCNSFVScalarTransportPhysics(const InputParameters & parameters);
 
+  void addInletBoundary(const BoundaryName & boundary,
+                        const MooseEnum & inlet_type,
+                        const MooseFunctorName & inlet_functor,
+                        const unsigned int scalar_index);
+
+  void addExternalScalarSources(std::vector<SubdomainName> blocks,
+                                std::vector<MooseFunctorName> scalar_sources,
+                                std::vector<MooseFunctorName> scalar_sources_coefs);
+
 private:
   virtual void addSolverVariables() override;
 

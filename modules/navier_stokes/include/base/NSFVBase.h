@@ -38,6 +38,7 @@ public:
   {
     return "fixed-temperature flux-mass flux-velocity heatflux";
   }
+  static std::string getValidScalarInletTypes() { return "fixed-value flux-mass flux-velocity"; }
 
   static std::string getValidEnergyWallTypes() { return "fixed-temperature heatflux"; }
 };

@@ -170,11 +170,11 @@ protected:
   const WCNSFVTurbulencePhysics * _turbulence_physics;
 
   /// Boundaries with a flow inlet specified on them
-  const std::vector<BoundaryName> _inlet_boundaries;
+  std::vector<BoundaryName> _inlet_boundaries;
   /// Boundaries with a flow outlet specified on them
-  const std::vector<BoundaryName> _outlet_boundaries;
+  std::vector<BoundaryName> _outlet_boundaries;
   /// Boundaries which define a wall (slip/noslip/etc.)
-  const std::vector<BoundaryName> _wall_boundaries;
+  std::vector<BoundaryName> _wall_boundaries;
 
   /// Momentum inlet boundary types
   std::map<BoundaryName, MooseEnum> _momentum_inlet_types;

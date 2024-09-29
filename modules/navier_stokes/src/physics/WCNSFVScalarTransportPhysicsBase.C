@@ -112,6 +112,45 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
   if (_porous_medium_treatment)
     _flow_equations_physics->paramError("porous_medium_treatment",
                                         "Porous media scalar advection is currently unimplemented");
+
+
+  // Create maps for boundary-restricted parameters
+  _passive_scalar_inlet_types.resize(_passive_scalar_names.size());
+  _passive_scalar_inlet_functors.resize(_passive_scalar_names.size());
+  const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
+  // Re-organize data from (inlet, scalar) indexing to (scalar, inlet) indexing
+  if (isParamValid("passive_scalar_inlet_types"))
+  {
+    const auto & all_inlet_types = getParam<MultiMooseEnum>("passive_scalar_inlet_types");
+    const auto num_scalars = _passive_scalar_names.size();
+    const auto num_inlets = inlet_boundaries.size();
+    if (num_scalars * num_inlets != all_inlet_types.size())
+      paramError("passive_scalar_inlet_types",
+                 "The number of scalar inlet types (" + std::to_string(all_inlet_types.size()) +
+                     ") is not equal to the number of inlet boundaries (" +
+                     std::to_string(num_inlets) + ") times the number of passive scalars (" +
+                     std::to_string(num_scalars) + ")");
+
+    for (const auto scalar_i : index_range(_passive_scalar_names))
+    {
+      auto inlet_types = std::vector<MooseEnum>();
+      for (const auto i : index_range(inlet_boundaries))
+        inlet_types.push_back(all_inlet_types[i * num_scalars + scalar_i]);
+      _passive_scalar_inlet_types[scalar_i] =
+          Moose::createMapFromVectors<BoundaryName, MooseEnum>(inlet_boundaries, inlet_types);
+      if (isParamSetByUser("passive_scalar_inlet_functors"))
+      {
+        const auto & all_inlet_functors =
+            getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors");
+        auto inlet_functors = std::vector<MooseFunctorName>();
+        for (const auto i : index_range(inlet_boundaries))
+          inlet_functors.push_back(all_inlet_functors[i][scalar_i]);
+        _passive_scalar_inlet_functors[scalar_i] =
+            Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(inlet_boundaries,
+                                                                        inlet_functors);
+      }
+    }
+  }
 }
 
 void

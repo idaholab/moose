@@ -51,8 +51,11 @@ protected:
 
   /// Passive scalar inlet boundary types
   MultiMooseEnum _passive_scalar_inlet_types;
+
+  /// Passive scalar inlet boundary types
+  std::vector<std::map<BoundaryName, MooseEnum>> _passive_scalar_inlet_types;
   /// Functors describing the inlet boundary values. See passive_scalar_inlet_types for what the functors actually represent
-  std::vector<std::vector<MooseFunctorName>> _passive_scalar_inlet_functors;
+  std::vector<std::map<BoundaryName, MooseFunctorName>> _passive_scalar_inlet_functors;
 
   /// Functors for the passive scalar sources. Indexing is scalar variable index
   std::vector<MooseFunctorName> _passive_scalar_sources;

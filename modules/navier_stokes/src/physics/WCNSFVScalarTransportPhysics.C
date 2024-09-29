@@ -11,6 +11,7 @@
 #include "WCNSFVFlowPhysicsBase.h"
 #include "NSFVBase.h"
 #include "NS.h"
+#include "MapConversionUtils.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
@@ -191,22 +192,20 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
                      std::to_string(_passive_scalar_inlet_functors[name_i].size()) + ")");
 
     unsigned int flux_bc_counter = 0;
-    unsigned int num_inlets = inlet_boundaries.size();
-    for (unsigned int bc_ind = 0; bc_ind < num_inlets; ++bc_ind)
+    for (const auto & boundary : inlet_boundaries)
     {
-      if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "fixed-value")
+      if (libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "fixed-value")
       {
         const std::string bc_type = "FVFunctionDirichletBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-        params.set<FunctionName>("function") = _passive_scalar_inlet_functors[name_i][bc_ind];
-        params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
+        params.set<FunctionName>("function") = _passive_scalar_inlet_functors[name_i][boundary];
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary};
 
-        getProblem().addFVBC(
-            bc_type, _passive_scalar_names[name_i] + "_" + inlet_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _passive_scalar_names[name_i] + "_" + boundary, params);
       }
-      else if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass" ||
-               _passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-velocity")
+      else if (libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "flux-mass" ||
+               libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "flux-velocity")
       {
         const auto flux_inlet_directions = _flow_equations_physics->getFluxInletDirections();
         const auto flux_inlet_pps = _flow_equations_physics->getFluxInletPPs();
@@ -217,29 +216,28 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
         params.set<MooseFunctorName>("passive_scalar") = _passive_scalar_names[name_i];
         if (flux_inlet_directions.size())
           params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
-        if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass")
+        if (libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
-          params.set<PostprocessorName>("area_pp") = "area_pp_" + inlet_boundaries[bc_ind];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + boundary;
         }
         else
           params.set<PostprocessorName>("velocity_pp") = flux_inlet_pps[flux_bc_counter];
 
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<PostprocessorName>("scalar_value_pp") =
-            _passive_scalar_inlet_functors[name_i][bc_ind];
-        params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
+            _passive_scalar_inlet_functors[name_i][boundary];
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary};
 
+        params.set<unsigned int>("dimension") = dimension();
         params.set<MooseFunctorName>(NS::velocity_x) = _velocity_names[0];
         if (dimension() > 1)
           params.set<MooseFunctorName>(NS::velocity_y) = _velocity_names[1];
         if (dimension() > 2)
           params.set<MooseFunctorName>(NS::velocity_z) = _velocity_names[2];
 
-        getProblem().addFVBC(bc_type,
-                             prefix() + _passive_scalar_names[name_i] + "_" +
-                                 inlet_boundaries[bc_ind],
-                             params);
+        getProblem().addFVBC(
+            bc_type, prefix() + _passive_scalar_names[name_i] + "_" + boundary, params);
         flux_bc_counter += 1;
       }
     }
@@ -247,7 +245,59 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
 }
 
 void
+<<<<<<< HEAD
 WCNSFVScalarTransportPhysics::addScalarOutletBC()
+=======
+WCNSFVScalarTransportPhysics::addInletBoundary(const BoundaryName & boundary,
+                                               const MooseEnum & inlet_type,
+                                               const MooseFunctorName & inlet_functor,
+                                               const unsigned int scalar_index)
+{
+  _passive_scalar_inlet_types[scalar_index].insert(std::make_pair(boundary, inlet_type));
+  if (inlet_type == "fixed-value" || inlet_type == "flux-mass" || inlet_type == "flux-velocity")
+    _passive_scalar_inlet_functors[scalar_index][boundary] = inlet_functor;
+  else
+    mooseError("Unsupported inlet type on boundary " + boundary +
+               (inlet_functor.empty() ? "" : ("\nInlet functor: " + inlet_functor)));
+}
+
+void
+WCNSFVScalarTransportPhysics::addInitialConditions()
+{
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_scalar_equation)
+    return;
+  if (!_define_variables && parameters().isParamSetByUser("initial_scalar_variables"))
+    paramError("initial_scalar_variables",
+               "Scalar variables are defined externally of NavierStokesFV, so should their inital "
+               "conditions");
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+  // do not set initial conditions if we are not defining variables
+  if (!_define_variables)
+    return;
+
+  InputParameters params = getFactory().getValidParams("FunctionIC");
+  assignBlocks(params, _blocks);
+
+  // We want to set ICs only if the user specified them
+  if (parameters().isParamSetByUser("initial_scalar_variables"))
+  {
+    for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+    {
+      params.set<VariableName>("variable") = _passive_scalar_names[name_i];
+      params.set<FunctionName>("function") =
+          getParam<std::vector<FunctionName>>("initial_scalar_variables")[name_i];
+
+      getProblem().addInitialCondition("FunctionIC", _passive_scalar_names[name_i] + "_ic", params);
+    }
+  }
+}
+
+unsigned short
+WCNSFVScalarTransportPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+>>>>>>> 49a4b58532 (Rework NSFV scalar transport physics to use a map for the inlet boundaries)
 {
   // Advection outlet is naturally handled by the advection flux kernel
   return;
