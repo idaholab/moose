@@ -41,9 +41,13 @@ public:
   void addFlowChannel(const FlowChannelBase * c_ptr);
 
   // TODO: add here and implement all types needed
+  // Note that we could adopt a more general approach with SpecifiedFlux/SpecifiedValues options
+  // but then we would need to keep track of boundary conditions on a variable basis as well
+  // (for example MdotTemperature: mdot=flux, temperature=value)
   enum InletTypeEnum
   {
-    MdotTemperature
+    MdotTemperature,
+    GeneralBoundary
   };
 
   /**
@@ -97,6 +101,22 @@ public:
     mooseError("Not implemented");
   };
 
+  enum ScalarFluxWallEnum
+  {
+    FixedScalarFlux
+  };
+
+  /**
+   * Add a scalar flux term
+   * @param scalar_transfer_component the name of the scalar transfer component
+   * @param scalar_flux_type how the scalar flux is imposed
+   */
+  virtual void addWallScalarFlux(const std::string & /*heat_transfer_component*/,
+                                 const ScalarFluxWallEnum & /*scalar_flux_type*/)
+  {
+    mooseError("Not implemented");
+  };
+
 protected:
   virtual void initializePhysicsAdditional() override;
 
@@ -144,6 +164,8 @@ protected:
   std::vector<JunctionTypeEnum> _junction_types;
   /// The types of the heat transfer components
   std::map<std::string, HeatFluxWallEnum> _heat_transfer_types;
+  /// The types of the scalar transfer components
+  std::map<std::string, ScalarFluxWallEnum> _scalar_transfer_types;
 
   /// Gravitational acceleration vector
   RealVectorValue _gravity_vector;
