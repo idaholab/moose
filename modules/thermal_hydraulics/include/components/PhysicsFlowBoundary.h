@@ -32,6 +32,27 @@ public:
   /// The name of the boundary user object
   const UserObjectName & getBoundaryUOName() const { return _boundary_uo_name; }
 
+  /// Whether the flow boundary is a flux boundary for the equation with this variable
+  virtual bool isFluxBoundary(const VariableName & /*var_name*/) const
+  {
+    mooseError("Not implemented");
+  }
+  /// Whether the flow boundary is a Dirichlet boundary for this variable
+  virtual bool isValueBoundary(const VariableName & /*var_name*/) const
+  {
+    mooseError("Not implemented");
+  }
+  /// Returns the boundary value for this variable
+  virtual MooseFunctorName getBoundaryValue(const VariableName & /*var_name*/) const
+  {
+    mooseError("Not implemented");
+  }
+  /// Returns the boundary flux for the equation associated with this variable
+  virtual MooseFunctorName getBoundaryFlux(const VariableName & /*var_name*/) const
+  {
+    mooseError("Not implemented");
+  }
+
 protected:
   virtual void init() override;
   virtual void check() const override;
