@@ -15,6 +15,7 @@
 
 class FlowChannelBase;
 class HeatTransferBase;
+class ScalarTransferBase;
 class THMProblem;
 class Factory;
 
@@ -47,6 +48,17 @@ public:
                                  const FlowChannelBase & flow_channel) const = 0;
 
   /**
+   * Checks for errors associated with a scalar transfer component
+   *
+   * @param[in] scalar_transfer  Scalar transfer component
+   * @param[in] flow_channel     Flow channel component
+   */
+  virtual void checkScalarTransfer(const ScalarTransferBase & /*scalar_transfer*/,
+                                   const FlowChannelBase & /*flow_channel*/) const
+  {
+  }
+
+  /**
    * Adds MOOSE objects associated with a flow channel component
    *
    * @param[in] flow_channel   Flow channel component
@@ -61,6 +73,17 @@ public:
    */
   virtual void addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
                                            const FlowChannelBase & flow_channel) = 0;
+
+  /**
+   * Adds MOOSE objects associated with a scalar transfer component
+   *
+   * @param[in] scalar_transfer  Scalar transfer component
+   * @param[in] flow_channel     Flow channel component
+   */
+  virtual void addMooseObjectsScalarTransfer(const ScalarTransferBase & /*scalar_transfer*/,
+                                             const FlowChannelBase & /*flow_channel*/)
+  {
+  }
 
 protected:
   /**
