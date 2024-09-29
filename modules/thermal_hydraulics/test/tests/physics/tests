@@ -17,7 +17,6 @@
       detail = 'using the Physics syntax for the weakly compressible finite volume discretization of the Navier Stokes equations.'
     []
   []
-  #TODO: add testing for different area, friction factors, using closures
   [physics_junction]
     requirement = 'The system shall simulate two flow channels connected by a junction'
     [VACE]
