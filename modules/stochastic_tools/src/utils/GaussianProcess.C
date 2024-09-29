@@ -80,8 +80,8 @@ GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
   if (_tuning_data.size())
-    // tuneHyperParamsAdam(training_params, training_data, opts);
-    tuneHyperParamsMcmc(training_params, training_data);
+    tuneHyperParamsAdam(training_params, training_data, opts);
+    // tuneHyperParamsMcmc(training_params, training_data);
 
   _K.resize(training_params.rows() * training_data.cols(),
             training_params.rows() * training_data.cols());
@@ -280,6 +280,7 @@ void
 GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
                                      const RealEigenMatrix & training_data)
 { 
+  std::cout << "enter onelayer mcmc" << std::endl;
   std::vector<Real> theta1(_num_tunable, 0.0);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
@@ -302,12 +303,7 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
 
   Initial initial = {theta_0, g_0, tau_0};
 
-  Output out;
-  out.x = x;
-  out.y = y;
-  out.nmcmc = nmcmc;
-  out.initial = initial;
-  out.settings = settings;
+
   RealEigenMatrix g(nmcmc, 1);
   g(0,0) = initial.g;
   RealEigenMatrix theta(nmcmc, x.cols());
@@ -364,6 +360,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                                      const RealEigenMatrix & training_data,
                                      const GPOptimizerOptions & opts)
 {
+  std::cout << "enter onelayer adam" << std::endl;
   std::vector<Real> theta(_num_tunable, 0.0);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
