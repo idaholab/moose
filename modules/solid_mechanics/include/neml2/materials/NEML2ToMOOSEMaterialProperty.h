@@ -11,19 +11,14 @@
 
 #include "NEML2Utils.h"
 #include "Material.h"
-
-#ifndef NEML2_ENABLED
-NEML2ObjectStubHeader(NEML2ToRealMOOSEMaterialProperty, Material);
-NEML2ObjectStubHeader(NEML2ToStdVectorRealMOOSEMaterialProperty, Material);
-NEML2ObjectStubHeader(NEML2ToSymmetricRankTwoTensorMOOSEMaterialProperty, Material);
-NEML2ObjectStubHeader(NEML2ToSymmetricRankFourTensorMOOSEMaterialProperty, Material);
-#else
-
-#include "neml2/tensors/TensorBase.h"
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
 
-class ExecuteNEML2Model;
+#ifdef NEML2_ENABLED
+#include "neml2/tensors/TensorBase.h"
+#endif
+
+class NEML2ModelExecutor;
 
 template <typename T>
 class NEML2ToMOOSEMaterialProperty : public Material
@@ -33,13 +28,14 @@ public:
 
   NEML2ToMOOSEMaterialProperty(const InputParameters & params);
 
-  virtual void computeProperties() override;
+#ifdef NEML2_ENABLED
+  void computeProperties() override;
 
 protected:
-  virtual void initQpStatefulProperties() override;
+  void initQpStatefulProperties() override;
 
   /// User object managing the execution of the NEML2 model
-  const ExecuteNEML2Model & _execute_neml2_model;
+  const NEML2ModelExecutor & _execute_neml2_model;
 
   /// Emitted material property
   MaterialProperty<T> & _prop;
@@ -47,15 +43,15 @@ protected:
   /// Initial condition
   const MaterialProperty<T> * _prop0;
 
-  /// labled view to the requested output
+  /// labled view to the requested output (or its derivative)
   const neml2::Tensor & _output_view;
+#endif
 };
 
-typedef NEML2ToMOOSEMaterialProperty<Real> NEML2ToRealMOOSEMaterialProperty;
-typedef NEML2ToMOOSEMaterialProperty<std::vector<Real>> NEML2ToStdVectorRealMOOSEMaterialProperty;
-typedef NEML2ToMOOSEMaterialProperty<SymmetricRankTwoTensor>
-    NEML2ToSymmetricRankTwoTensorMOOSEMaterialProperty;
-typedef NEML2ToMOOSEMaterialProperty<SymmetricRankFourTensor>
-    NEML2ToSymmetricRankFourTensorMOOSEMaterialProperty;
+#define DefineNEML2ToMOOSEMaterialPropertyAlias(T, alias)                                          \
+  using NEML2ToMOOSE##alias##MaterialProperty = NEML2ToMOOSEMaterialProperty<T>
 
-#endif
+DefineNEML2ToMOOSEMaterialPropertyAlias(Real, Real);
+DefineNEML2ToMOOSEMaterialPropertyAlias(SymmetricRankTwoTensor, SymmetricRankTwoTensor);
+DefineNEML2ToMOOSEMaterialPropertyAlias(SymmetricRankFourTensor, SymmetricRankFourTensor);
+DefineNEML2ToMOOSEMaterialPropertyAlias(std::vector<Real>, StdVector);

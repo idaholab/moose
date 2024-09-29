@@ -1,24 +1,21 @@
 # NEML2ToMOOSEMaterialProperty
 
-!syntax description /Materials/NEML2ToRealMOOSEMaterialProperty
+!alert note
+Users are +NOT+ expected to directly use this object in an input file. Instead, it is always recommended to use the [NEML2 action](syntax/NEML2/index.md).
 
 ## Description
 
-Objects in this family assign a selected NEML2 model output computed through [ExecuteNEML2Model](ExecuteNEML2Model.md) to a MOOSE MaterialProperty. The following flavors exist:
+This family of objects assign a NEML2 output variable given by [!param](/Materials/NEML2ToMOOSERealMaterialProperty/from_neml2) back to the quadrature points. The data is stored as a MOOSE material property with name given by [!param](/Materials/NEML2ToMOOSERealMaterialProperty/to_moose).
 
-!table caption=`NEML2ToMOOSEMaterialProperty` objects
-| Object name | MOOSE material property type |
-| - | - |
-| `NEML2ToRealMOOSEMaterialProperty`  | `Real` |
-| `NEML2ToStdVectorRealMOOSEMaterialProperty` | `std::vector<Real>` |
-| `NEML2ToSymmetricRankTwoTensorMOOSEMaterialProperty` | `SymmetricRankTwoTensor` |
-| `NEML2ToSymmetricRankFourTensorMOOSEMaterialProperty`  |`SymmetricRankFourTensor` |
+Note that if the [!param](/Materials/NEML2ToMOOSERealMaterialProperty/neml2_input_derivative) parameter is specified, the derivative of the NEML2 output variable with respect to the input variable is retrieved instead. If the [!param](/Materials/NEML2ToMOOSERealMaterialProperty/neml2_parameter_derivative) parameter is specified, the derivative of the NEML2 output variable with respect to the model parameter is retrieved instead.
 
-## Example Input Syntax
+The following flavors exist:
 
+| Class                                                 | MOOSE MaterialProperty type |
+| :---------------------------------------------------- | :-------------------------- |
+| `NEML2ToMOOSERealMaterialProperty`                    | `Real`                      |
+| `NEML2ToMOOSESymmetricRankTwoTensorMaterialProperty`  | `SymmetricRankTwoTensor`    |
+| `NEML2ToMOOSESymmetricRankFourTensorMaterialProperty` | `SymmetricRankFourTensor`   |
+| `NEML2ToMOOSEStdVectorMaterialProperty`               | `std::vector<Real>`         |
 
-!syntax parameters /Materials/NEML2ToRealMOOSEMaterialProperty
-
-!syntax inputs /Materials/NEML2ToRealMOOSEMaterialProperty
-
-!syntax children /Materials/NEML2ToRealMOOSEMaterialProperty
+!syntax parameters /Materials/NEML2ToMOOSERealMaterialProperty

@@ -78,26 +78,33 @@ SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl(const InitMethod i
 }
 
 template <typename T>
+SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl(const RankFourTensorTempl<T> & t)
+{
+  for (const auto a : make_range(N))
+    for (const auto b : make_range(N))
+    {
+      const auto & idx = full_index[a][b];
+      auto i = idx[0];
+      auto j = idx[1];
+      auto k = idx[2];
+      auto l = idx[3];
+      (*this)(a, b) =
+          (t(i, j, k, l) + t(j, i, l, k) + t(j, i, k, l) + t(i, j, l, k)) / 4 * mandelFactor(a, b);
+    }
+}
+
+template <typename T>
 SymmetricRankFourTensorTempl<T>::operator RankFourTensorTempl<T>()
 {
-  // Full tensor indices in the Mandel/Voigt representation
-  static constexpr unsigned int g[6][6][4] = {
-      {{1, 1, 1, 1}, {1, 1, 2, 2}, {1, 1, 3, 3}, {1, 1, 2, 3}, {1, 1, 1, 3}, {1, 1, 1, 2}},
-      {{2, 2, 1, 1}, {2, 2, 2, 2}, {2, 2, 3, 3}, {2, 2, 2, 3}, {2, 2, 1, 3}, {2, 2, 1, 2}},
-      {{3, 3, 1, 1}, {3, 3, 2, 2}, {3, 3, 3, 3}, {3, 3, 2, 3}, {3, 3, 1, 3}, {3, 3, 1, 2}},
-      {{2, 3, 1, 1}, {2, 3, 2, 2}, {2, 3, 3, 3}, {2, 3, 2, 3}, {2, 3, 1, 3}, {2, 3, 1, 2}},
-      {{1, 3, 1, 1}, {1, 3, 2, 2}, {1, 3, 3, 3}, {1, 3, 2, 3}, {1, 3, 1, 3}, {1, 3, 1, 2}},
-      {{1, 2, 1, 1}, {1, 2, 2, 2}, {1, 2, 3, 3}, {1, 2, 2, 3}, {1, 2, 1, 3}, {1, 2, 1, 2}}};
-
   auto & q = *this;
   RankFourTensorTempl<T> r;
   for (const auto a : make_range(N))
     for (const auto b : make_range(N))
     {
-      const auto i = g[a][b][0] - 1;
-      const auto j = g[a][b][1] - 1;
-      const auto k = g[a][b][2] - 1;
-      const auto l = g[a][b][3] - 1;
+      const auto i = full_index[a][b][0];
+      const auto j = full_index[a][b][1];
+      const auto k = full_index[a][b][2];
+      const auto l = full_index[a][b][3];
 
       // Rijkl = Rjikl = Rijlk = Rjilk
       r(i, j, k, l) = q(a, b) / mandelFactor(a, b);

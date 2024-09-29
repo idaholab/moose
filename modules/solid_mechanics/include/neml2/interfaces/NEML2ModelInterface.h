@@ -73,8 +73,9 @@ InputParameters
 NEML2ModelInterface<T>::validParams()
 {
   InputParameters params = T::validParams();
-  params.addRequiredParam<std::string>(
+  params.addParam<std::string>(
       "model",
+      "",
       "Name of the NEML2 model, i.e., the string inside the brackets [] in the NEML2 input file "
       "that corresponds to the model you want to use.");
   params.addParam<std::string>(
@@ -100,7 +101,6 @@ template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...)
 {
-  NEML2Utils::libraryNotEnabledError(params);
 }
 
 #else

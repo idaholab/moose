@@ -23,7 +23,15 @@
                            1.0 -1.0 0.0
                            1.0  0.0 0.0
                            1.0  1.0 0.0'
-    measurement_values = '3.276017e+00 4.763281e+00 6.380137e+00 3.171603e+00 4.660766e+00 6.289842e+00 3.127077e+00 4.608134e+00 6.228638e+00'
+    measurement_values = '3.276017e+00
+                          4.763281e+00
+                          6.380137e+00
+                          3.171603e+00
+                          4.660766e+00
+                          6.289842e+00
+                          3.127077e+00
+                          4.608134e+00
+                          6.228638e+00'
   []
 []
 
@@ -80,8 +88,8 @@
     type = MultiAppCopyTransfer
     from_multi_app = forward
     to_multi_app = adjoint
-    source_variable = 'ux uy'
-    variable = 'state_x state_y'
+    source_variable = 'disp_x disp_y'
+    variable = 'disp_x disp_y'
   []
   [setup_adjoint_run]
     type = MultiAppReporterTransfer
