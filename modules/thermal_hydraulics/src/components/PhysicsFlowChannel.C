@@ -22,13 +22,16 @@ PhysicsFlowChannel::validParams()
   params.addParam<FunctionName>("initial_p", "Initial pressure in the flow channel [Pa]");
   params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel [m/s]");
   params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel [K]");
+  params.addParam<std::vector<FunctionName>>("initial_scalars",
+                                             "Initial scalar concentration for each species [m-3]");
   params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
 
   params.addRequiredParam<std::vector<PhysicsName>>("physics",
                                                     "Physics active on the flow channel");
 
   params.declareControllable("initial_p initial_T initial_vel D_h");
-  params.addParamNamesToGroup("initial_p initial_T initial_vel", "Variable initialization");
+  params.addParamNamesToGroup("initial_p initial_T initial_vel initial_scalars",
+                              "Variable initialization");
   params.addClassDescription("1D flow channel using Physics to define the equations");
 
   return params;
