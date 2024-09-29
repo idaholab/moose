@@ -177,6 +177,7 @@ THMWCNSFVFluidHeatTransferPhysics::addHeatTransferFunctorMaterials()
   {
     const auto & comp = _sim->getComponentByName<PhysicsHeatTransferBase>(comp_name);
     // Factor to convert a surface term to a volumetric term
+    if (!_sim->hasFunctor("vol_surf_factor_" + comp_name, 0))
     {
       const std::string class_name = "VolumeToAreaFunctorMaterial";
       InputParameters params = _factory.getValidParams(class_name);
@@ -194,8 +195,9 @@ THMWCNSFVFluidHeatTransferPhysics::addHeatTransferFunctorMaterials()
       params.set<std::vector<SubdomainName>>("block") = comp.getFlowChannelSubdomains();
       params.set<std::string>("property_name") = comp_name + "_q_wall";
       // How to set T_wall is decided by the HeatTransfer object, Hw is set by a correlation
-      params.set<std::string>("expression") = "(T_wall - T_fluid) * Hw";
-      params.set<std::vector<std::string>>("functor_names") = {"T_wall", "Hw", "T_fluid"};
+      params.set<std::string>("expression") = "(T_wall - " + getFluidTemperatureName() + ") * Hw";
+      params.set<std::vector<std::string>>("functor_names") = {
+          "T_wall", "Hw", getFluidTemperatureName()};
 
       _sim->addFunctorMaterial(class_name, genName(comp.name(), "q_wall"), params);
     }
@@ -248,6 +250,23 @@ THMWCNSFVFluidHeatTransferPhysics::addInletBoundaries()
       MooseFunctorName inlet_T = std::to_string(comp.getParam<Real>("T"));
       for (const auto & boundary_name : comp.getBoundaryNames())
         addInletBoundary(boundary_name, inlet_type, inlet_T);
+    }
+    else if (boundary_type == InletTypeEnum::GeneralBoundary)
+    {
+      if (comp.isFluxBoundary(getFluidTemperatureName()))
+      {
+        MooseEnum inlet_type(NSFVBase::getValidEnergyInletTypes(), "heatflux");
+        MooseFunctorName flux = comp.getBoundaryFlux(getFluidTemperatureName());
+        for (const auto & boundary_name : comp.getBoundaryNames())
+          addInletBoundary(boundary_name, inlet_type, flux);
+      }
+      else
+      {
+        MooseEnum inlet_type(NSFVBase::getValidEnergyInletTypes(), "fixed-temperature");
+        MooseFunctorName inlet_T = comp.getBoundaryValue(getFluidTemperatureName());
+        for (const auto & boundary_name : comp.getBoundaryNames())
+          addInletBoundary(boundary_name, inlet_type, inlet_T);
+      }
     }
     else
       mooseError("Unsupported inlet boundary type ", boundary_type);

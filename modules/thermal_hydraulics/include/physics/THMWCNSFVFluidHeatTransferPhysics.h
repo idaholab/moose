@@ -13,7 +13,7 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 
 /**
- * Sets up the single-phase fluid energy equations using Euler's equations and a RDG discretization
+ * Sets up the single-phase fluid energy equations
  */
 class THMWCNSFVFluidHeatTransferPhysics : public ThermalHydraulicsFlowPhysics,
                                           public WCNSFVFluidHeatTransferPhysics

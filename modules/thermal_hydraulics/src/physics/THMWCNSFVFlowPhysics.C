@@ -373,6 +373,9 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
   if (_verbose)
     _console << "Adding boundary conditions for inlets: " << Moose::stringify(_inlet_components)
              << std::endl;
+
+  // TODO: Handle reversible boundaries (specified in components, to be obeyed)
+
   // Fill in the data structures used by WCNSFVFlowPhysics to represent the boundary conditions
   for (const auto i : index_range(_inlet_components))
   {
@@ -387,9 +390,52 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
       MooseEnum flux_mass(NSFVBase::getValidMomentumInletTypes(), "flux-mass");
       MooseFunctorName mdot = std::to_string(comp.getParam<Real>("m_dot"));
       for (const auto & boundary_name : comp.getBoundaryNames())
-      {
         addInletBoundary(boundary_name, flux_mass, mdot);
+    }
+    else if (boundary_type == InletTypeEnum::GeneralBoundary)
+    {
+      // Boundary condition set for pressure equation: mass
+      bool has_mass_bc = true;
+      if (comp.isFluxBoundary(getPressureName()))
+      {
+        MooseEnum inlet_type(NSFVBase::getValidMomentumInletTypes(), "flux-mass");
+        MooseFunctorName mdot = comp.getBoundaryFlux(getPressureName());
+        for (const auto & boundary_name : comp.getBoundaryNames())
+          addInletBoundary(boundary_name, inlet_type, mdot);
       }
+      else if (comp.isValueBoundary(getPressureName()))
+      {
+        MooseEnum inlet_type(NSFVBase::getValidEnergyInletTypes(), "fixed-pressure");
+        MooseFunctorName inlet_p = comp.getBoundaryValue(getPressureName());
+        for (const auto & boundary_name : comp.getBoundaryNames())
+          addInletBoundary(boundary_name, inlet_type, inlet_p);
+      }
+      else
+        has_mass_bc = false;
+
+      // Boundary condition set for momentum equation
+      bool has_momentum_bc = true;
+      if (comp.isFluxBoundary(getVelocityNames()[0]))
+      {
+        MooseEnum inlet_type(NSFVBase::getValidMomentumInletTypes(), "flux-mass");
+        MooseFunctorName mdot = comp.getBoundaryFlux(getVelocityNames()[0]);
+        for (const auto & boundary_name : comp.getBoundaryNames())
+          addInletBoundary(boundary_name, inlet_type, mdot);
+      }
+      else if (comp.isValueBoundary(getVelocityNames()[0]))
+      {
+        MooseEnum inlet_type(NSFVBase::getValidEnergyInletTypes(), "fixed-velocity");
+        MooseFunctorName inlet_v = comp.getBoundaryValue(getVelocityNames()[0]);
+        for (const auto & boundary_name : comp.getBoundaryNames())
+          addInletBoundary(boundary_name, inlet_type, inlet_v);
+      }
+      else
+        has_momentum_bc = false;
+
+      if (!has_mass_bc && !has_momentum_bc)
+        mooseError("Inlet boundary component '",
+                   comp.name(),
+                   "' does not set boundary conditions for the mass and momentum equations");
     }
     else
       mooseError("Unsupported inlet boundary type ", boundary_type);
