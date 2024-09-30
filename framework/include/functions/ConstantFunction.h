@@ -28,6 +28,8 @@ public:
   virtual Real timeDerivative(Real t, const Point & p) const override;
   virtual RealVectorValue gradient(Real t, const Point & p) const override;
 
+  virtual Real timeIntegral(Real t1, Real t2, const Point & p) const override;
+
 protected:
   const Real & _value;
 };
