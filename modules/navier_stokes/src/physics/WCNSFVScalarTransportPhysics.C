@@ -131,6 +131,20 @@ WCNSFVScalarTransportPhysics::addScalarSourceKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
 
+  // Check the size of the scalar sources inputs
+  for (const auto scalar_i : index_range(_passive_scalar_names))
+  {
+    if (_passive_scalar_coupled_sources_blocks.size() != _passive_scalar_coupled_sources[scalar_i].size())
+      paramError("passive_scalar_coupled_source",
+                 "Number of coupled sources does not match the number of groups of blocks "
+                 "specified for the coupled sources");
+    if (_passive_scalar_coupled_sources_coefs[scalar_i].size() !=
+        _passive_scalar_coupled_sources[scalar_i].size())
+      paramError(
+          "passive_scalar_coupled_source_coeff",
+          "Number of coupled sources does not match the number of coupled sources coefficients");
+  }
+
   for (const auto scalar_i : index_range(_passive_scalar_names))
   {
     params.set<NonlinearVariableName>("variable") = _passive_scalar_names[scalar_i];
@@ -147,8 +161,12 @@ WCNSFVScalarTransportPhysics::addScalarSourceKernels()
       for (const auto i : index_range(_passive_scalar_coupled_sources[scalar_i]))
       {
         params.set<MooseFunctorName>("v") = _passive_scalar_coupled_sources[scalar_i][i];
-        if (_passive_scalar_sources_coef.size())
-          params.set<Real>("coef") = _passive_scalar_sources_coef[scalar_i][i];
+        if (_passive_scalar_coupled_sources_coefs.size())
+          params.set<MooseFunctorName>("functor_coef") =
+              _passive_scalar_coupled_sources_coefs[scalar_i][i];
+        if (_passive_scalar_coupled_sources_blocks.size())
+          params.set<std::vector<SubdomainName>>("block") =
+              _passive_scalar_coupled_sources_blocks[i];
 
         getProblem().addFVKernel(kernel_type,
                                  prefix() + "ins_" + _passive_scalar_names[scalar_i] +
@@ -245,9 +263,6 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
 }
 
 void
-<<<<<<< HEAD
-WCNSFVScalarTransportPhysics::addScalarOutletBC()
-=======
 WCNSFVScalarTransportPhysics::addInletBoundary(const BoundaryName & boundary,
                                                const MooseEnum & inlet_type,
                                                const MooseFunctorName & inlet_functor,
@@ -262,42 +277,18 @@ WCNSFVScalarTransportPhysics::addInletBoundary(const BoundaryName & boundary,
 }
 
 void
-WCNSFVScalarTransportPhysics::addInitialConditions()
+WCNSFVScalarTransportPhysics::addExternalScalarSources(
+    std::vector<SubdomainName> blocks,
+    std::vector<MooseFunctorName> scalar_sources,
+    std::vector<MooseFunctorName> scalar_sources_coefs)
 {
-  // For compatibility with Modules/NavierStokesFV syntax
-  if (!_has_scalar_equation)
-    return;
-  if (!_define_variables && parameters().isParamSetByUser("initial_scalar_variables"))
-    paramError("initial_scalar_variables",
-               "Scalar variables are defined externally of NavierStokesFV, so should their inital "
-               "conditions");
-  // do not set initial conditions if we load from file
-  if (getParam<bool>("initialize_variables_from_mesh_file"))
-    return;
-  // do not set initial conditions if we are not defining variables
-  if (!_define_variables)
-    return;
-
-  InputParameters params = getFactory().getValidParams("FunctionIC");
-  assignBlocks(params, _blocks);
-
-  // We want to set ICs only if the user specified them
-  if (parameters().isParamSetByUser("initial_scalar_variables"))
-  {
-    for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
-    {
-      params.set<VariableName>("variable") = _passive_scalar_names[name_i];
-      params.set<FunctionName>("function") =
-          getParam<std::vector<FunctionName>>("initial_scalar_variables")[name_i];
-
-      getProblem().addInitialCondition("FunctionIC", _passive_scalar_names[name_i] + "_ic", params);
-    }
-  }
+  _passive_scalar_coupled_sources_blocks.push_back(blocks);
+  _passive_scalar_coupled_sources.push_back(scalar_sources);
+  _passive_scalar_coupled_sources_coefs.push_back(scalar_sources_coefs);
 }
 
-unsigned short
-WCNSFVScalarTransportPhysics::getNumberAlgebraicGhostingLayersNeeded() const
->>>>>>> 49a4b58532 (Rework NSFV scalar transport physics to use a map for the inlet boundaries)
+void
+WCNSFVScalarTransportPhysics::addScalarOutletBC()
 {
   // Advection outlet is naturally handled by the advection flux kernel
   return;

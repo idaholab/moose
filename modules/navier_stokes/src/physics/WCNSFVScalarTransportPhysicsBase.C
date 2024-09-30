@@ -105,10 +105,12 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
     checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
         "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
 
-  if (_passive_scalar_sources_coef.size())
-    checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
-                                                            "passive_scalar_coupled_source_coeff");
+  if (_passive_scalar_coupled_sources_coefs.size())
+    checkTwoDVectorParamsSameLength<MooseFunctorName, MooseFunctorName>(
+        "passive_scalar_coupled_source", "passive_scalar_coupled_source_coeff");
 
+  if (!_flow_equations_physics)
+    mooseError("Flow physics should be set");
   if (_porous_medium_treatment)
     _flow_equations_physics->paramError("porous_medium_treatment",
                                         "Porous media scalar advection is currently unimplemented");

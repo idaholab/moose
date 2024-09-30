@@ -148,13 +148,10 @@ WCNSFVFlowPhysics::addSolverVariables()
   if (!_has_flow_equations)
     return;
 
-<<<<<<< HEAD
   for (const auto d : make_range(dimension()))
     saveSolverVariableName(_velocity_names[d]);
   saveSolverVariableName(_pressure_name);
 
-=======
->>>>>>> f874b38114 (WIP: typo fixes + try a direction variable)
   // Check number of variables
   if (_velocity_names.size() != dimension() && _velocity_names.size() != 3)
     paramError("velocity_variable",

@@ -38,6 +38,26 @@ public:
   /// Whether the physics is actually creating the scalar advection equations
   bool hasScalarEquations() const { return _has_scalar_equation; }
 
+  /**
+   * Add a boundary condition on the specified boundary
+   * @param boundary_name the name of the boundary
+   * @param inlet_type the type of the inlet
+   * @param inlet_functor the functor setting the boundary condition
+   */
+  void addInletBoundary(const BoundaryName & boundary_name,
+                        const MooseEnum & inlet_type,
+                        const MooseFunctorName & inlet_functor,
+                        const unsigned int scalar_index);
+
+  /** Add scalar sources on the specified blocks for all the scalars at once
+   * @param blocks subdomains to add the sources on
+   * @param scalar_sources vector of the sources, for each passive scalar
+   * @param scalar_sources_coefs vector of the functor coefficients multiplying each source
+   */
+  void addExternalScalarSources(std::vector<SubdomainName> blocks,
+                                std::vector<MooseFunctorName> scalar_sources,
+                                std::vector<MooseFunctorName> scalar_sources_coefs);
+
 protected:
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
@@ -50,19 +70,18 @@ protected:
   const bool _has_scalar_equation;
 
   /// Passive scalar inlet boundary types
-  MultiMooseEnum _passive_scalar_inlet_types;
-
-  /// Passive scalar inlet boundary types
   std::vector<std::map<BoundaryName, MooseEnum>> _passive_scalar_inlet_types;
   /// Functors describing the inlet boundary values. See passive_scalar_inlet_types for what the functors actually represent
   std::vector<std::map<BoundaryName, MooseFunctorName>> _passive_scalar_inlet_functors;
 
   /// Functors for the passive scalar sources. Indexing is scalar variable index
   std::vector<MooseFunctorName> _passive_scalar_sources;
+  /// Subdomains for the passive scalar coupled sources
+  std::vector<std::vector<SubdomainName>> _passive_scalar_coupled_sources_blocks;
   /// Functors for the passive scalar (coupled) sources. Inner indexing is scalar variable index
   std::vector<std::vector<MooseFunctorName>> _passive_scalar_coupled_sources;
   /// Coefficients multiplying for the passive scalar sources. Inner indexing is scalar variable index
-  std::vector<std::vector<Real>> _passive_scalar_sources_coef;
+  std::vector<std::vector<MooseFunctorName>> _passive_scalar_coupled_sources_coefs;
 
 private:
   virtual void addInitialConditions() override;

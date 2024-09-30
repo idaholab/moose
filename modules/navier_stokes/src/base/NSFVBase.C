@@ -259,32 +259,30 @@ NSFVBase::commonScalarFieldAdvectionParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<NonlinearVariableName>>(
-      "passive_scalar_names",
-      std::vector<NonlinearVariableName>(),
-      "Vector containing the names of the advected scalar variables.");
+      "passive_scalar_names", {}, "Vector containing the names of the advected scalar variables.");
 
   params.addParam<std::vector<FunctionName>>("initial_scalar_variables",
                                              "Initial values of the passive scalar variables.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_diffusivity",
-      std::vector<MooseFunctorName>(),
+      {},
       "Functor names for the diffusivities used for the passive scalar fields.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_source",
-      std::vector<MooseFunctorName>(),
+      {},
       "Functor names for the sources used for the passive scalar fields.");
 
   params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source",
-      std::vector<std::vector<MooseFunctorName>>(),
+      {},
       "Coupled variable names for the sources used for the passive scalar fields. If multiple "
       "sources for each equation are specified, major (outer) ordering by equation.");
 
-  params.addParam<std::vector<std::vector<Real>>>(
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source_coeff",
-      std::vector<std::vector<Real>>(),
+      {},
       "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
       " sources for each equation are specified, major (outer) ordering by equation.");
 
