@@ -19,7 +19,7 @@
       ratio_tol = 1E-7
       difference_tol = 1E10
       cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false "
-                 "Kernels/sdx/use_displaced_mesh=falseKernels/sdy/use_displaced_mesh=false "
+                 "Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false "
                  "Kernels/sdz/use_displaced_mesh=false"
       detail = 'for small displacements, without stabilization, and Neumann BCs,'
     []
