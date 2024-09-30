@@ -28,10 +28,21 @@ TEST_F(ThermalFunctionSolidPropertiesTest, k)
  */
 TEST_F(ThermalFunctionSolidPropertiesTest, cp)
 {
-  Real T = 10.0;
+  Real T = 800.0;
 
   REL_TEST(_sp->cp_from_T(T), 1200.0, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp->cp_from_T, T, REL_TOL_DERIVATIVE);
+}
+
+/**
+ * Test that the specific internal energy and its derivatives are
+ * correctly computed.
+ */
+TEST_F(ThermalFunctionSolidPropertiesTest, e)
+{
+  const Real T = 800.0;
+  REL_TEST(_sp->e_from_T(T), 536850.0, REL_TOL_SAVED_VALUE);
+  SPECIFIC_INTERNAL_ENERGY_TESTS(_sp, T, 1e-6, 1e-6);
 }
 
 /**

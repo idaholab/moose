@@ -37,6 +37,8 @@ public:
 
   virtual void cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const override;
 
+  virtual Real cp_integral(const Real & T) const override;
+
   virtual Real rho_from_T(const Real & T) const override;
 
   virtual void rho_from_T(const Real & T, Real & rho, Real & drho_dT) const override;
