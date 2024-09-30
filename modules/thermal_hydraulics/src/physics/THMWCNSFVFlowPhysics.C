@@ -103,10 +103,7 @@ THMWCNSFVFlowPhysics::initializePhysicsAdditional()
   ThermalHydraulicsFlowPhysics::initializePhysicsAdditional();
   WCNSFVFlowPhysics::initializePhysicsAdditional();
 
-  // Move block information from flow_channels to _blocks as WCNSFV routines rely on blocks
-  for (const auto flow_channel : _flow_channels)
-    addBlocks(flow_channel->getSubdomainNames());
-  // TODO: consider other Physics-components
+  setDimension(1);
 
   // Delete ANY_BLOCK_ID from the Physics block restriction
   // TODO: never add it in the first place?

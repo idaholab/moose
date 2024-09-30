@@ -51,10 +51,7 @@ THMWCNSFVScalarTransportPhysics::initializePhysicsAdditional()
   ThermalHydraulicsFlowPhysics::initializePhysicsAdditional();
   WCNSFVScalarTransportPhysics::initializePhysicsAdditional();
 
-  // Move block information from flow_channels to _blocks as WCNSFV routines rely on blocks
-  for (const auto flow_channel : _flow_channels)
-    addBlocks(flow_channel->getSubdomainNames());
-  // TODO: consider other Physics-components
+  setDimension(1);
 
   // Delete ANY_BLOCK_ID from the Physics block restriction
   // TODO: never add it in the first place?
@@ -183,7 +180,8 @@ THMWCNSFVScalarTransportPhysics::addScalarTransferFunctorMaterials()
       _sim->addFunctorMaterial(class_name, genName(comp.name(), "conversion_area_volume"), params);
       params.set<MooseFunctorName>("functor_name") = "minus_vol_surf_factor_" + comp_name;
       params.set<MooseFunctorName>("coef") = "-1";
-      _sim->addFunctorMaterial(class_name, genName(comp.name(), "minus_conversion_area_volume"), params);
+      _sim->addFunctorMaterial(
+          class_name, genName(comp.name(), "minus_conversion_area_volume"), params);
     }
   }
 }

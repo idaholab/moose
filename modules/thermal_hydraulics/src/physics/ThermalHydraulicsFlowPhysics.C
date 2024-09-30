@@ -144,6 +144,8 @@ ThermalHydraulicsFlowPhysics::addFlowChannel(const FlowChannelBase * c_ptr)
 {
   _flow_channels.push_back(c_ptr);
   _component_names.push_back(c_ptr->name());
+  addBlocks(c_ptr->getSubdomainNames());
+  setDimension(1);
 }
 
 void
