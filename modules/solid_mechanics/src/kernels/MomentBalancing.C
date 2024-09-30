@@ -23,6 +23,8 @@ InputParameters
 MomentBalancing::validParams()
 {
   InputParameters params = Kernel::validParams();
+  params.addClassDescription("Balance of momentum for three-dimensional Cosserat media, notably in "
+                             "a Cosserat layered elasticity model.");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component<3",

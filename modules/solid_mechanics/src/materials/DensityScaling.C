@@ -17,6 +17,8 @@ InputParameters
 DensityScaling::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Automatically scale the material density to achieve the desired time "
+                             "step size to satisfy CFL conditions.");
   params.addRequiredParam<MaterialPropertyName>(
       "density",
       "Name of Material Property or a constant real number defining the density of the material.");
