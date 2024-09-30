@@ -15,6 +15,7 @@
 #include "PhysicsFlowChannel.h"
 #include "PhysicsFlowBoundary.h"
 #include "PhysicsHeatTransferBase.h"
+#include "ScalarTransferBase.h"
 
 registerTHMFlowModelPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVScalarTransportPhysics);
 registerNavierStokesPhysicsBaseTasks("ThermalHydraulicsApp", THMWCNSFVScalarTransportPhysics);
@@ -170,7 +171,7 @@ THMWCNSFVScalarTransportPhysics::addScalarTransferFunctorMaterials()
 {
   for (const auto & [comp_name, heat_transfer_type] : _scalar_transfer_types)
   {
-    const auto & comp = _sim->getComponentByName<PhysicsHeatTransferBase>(comp_name);
+    const auto & comp = _sim->getComponentByName<ScalarTransferBase>(comp_name);
     // Factor to convert a surface term to a volumetric term
     if (!_sim->hasFunctor("vol_surf_factor_" + comp_name, 0))
     {
@@ -180,6 +181,9 @@ THMWCNSFVScalarTransportPhysics::addScalarTransferFunctorMaterials()
       params.set<MooseFunctorName>("functor_name") = "vol_surf_factor_" + comp_name;
       params.set<MooseFunctorName>("area") = "A";
       _sim->addFunctorMaterial(class_name, genName(comp.name(), "conversion_area_volume"), params);
+      params.set<MooseFunctorName>("functor_name") = "minus_vol_surf_factor_" + comp_name;
+      params.set<MooseFunctorName>("coef") = "-1";
+      _sim->addFunctorMaterial(class_name, genName(comp.name(), "minus_conversion_area_volume"), params);
     }
   }
 }
@@ -302,20 +306,34 @@ THMWCNSFVScalarTransportPhysics::addScalarTransferKernels()
   for (const auto & [scalar_transfer_component, scalar_flux_type] : _scalar_transfer_types)
   {
     mooseAssert(_sim, "Should have a problem");
-    libmesh_ignore(scalar_transfer_component);
-    libmesh_ignore(scalar_flux_type);
-    // TODO: switch to using the right flux component
-    // const auto & component =
-    //     _sim->getComponentByName<PhysicsConnectorBase>(scalar_transfer_component);
-    // const auto volume_surface_adjustment = "vol_surf_factor_" + scalar_transfer_component;
 
-    // if [scalar_flux_type == THMWCNSFVScalarTransportPhysics::FixedScalarFlux)
-    // {
-    //     for (const auto & scalar_name : _passive_scalar_names)
-    //       for (const auto & block : component.getFlowChannelSubdomains())
-    //         addExternalScalarSource(
-    //             block, component.getWallFluxName(scalar_name), volume_surface_adjustment);
-    // }
-    // else mooseAssert(false, "Flux type not implemented");
+    const auto & component =
+        _sim->getComponentByName<ScalarTransferBase>(scalar_transfer_component);
+    const auto volume_surface_adjustment = "vol_surf_factor_" + scalar_transfer_component;
+
+    if (scalar_flux_type == THMWCNSFVScalarTransportPhysics::FixedScalarValue)
+    {
+      addExternalScalarSources(
+          component.getFlowChannelSubdomains(),
+          component.getWallScalarValuesNames(),
+          std::vector<MooseFunctorName>(_passive_scalar_names.size(), volume_surface_adjustment));
+      // This is inefficient, but for 1D Physics we should be fine
+      std::vector<MooseFunctorName> _passive_scalar_names_functors;
+      for (const auto & scalar_name : _passive_scalar_names)
+        _passive_scalar_names_functors.push_back(scalar_name);
+      addExternalScalarSources(component.getFlowChannelSubdomains(),
+                               _passive_scalar_names_functors,
+                               std::vector<MooseFunctorName>(_passive_scalar_names.size(),
+                                                             "minus_" + volume_surface_adjustment));
+    }
+    else if (scalar_flux_type == THMWCNSFVScalarTransportPhysics::FixedScalarFlux)
+    {
+      addExternalScalarSources(
+          component.getFlowChannelSubdomains(),
+          component.getWallScalarFluxNames(),
+          std::vector<MooseFunctorName>(_passive_scalar_names.size(), volume_surface_adjustment));
+    }
+    else
+      mooseAssert(false, "Flux type not implemented");
   }
 }
