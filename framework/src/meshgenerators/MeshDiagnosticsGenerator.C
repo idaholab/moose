@@ -1426,7 +1426,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
   if (!mesh->is_serial())
     mooseError("Only serialized/replicated meshes are supported");
   unsigned int num_intersecting_edges = 0;
-  std::set<Node> checked_edges_nodes;
+  std::set<Node> overlapping_edges_nodes;
   for (const auto elem : mesh->active_element_ptr_range())
   {
     std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
@@ -1459,8 +1459,8 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
           const Node * n4 = other_edge->get_nodes()[1];
 
           // Check if the edges have already been added to our check_edges list
-          if (checked_edges_nodes.count(*n1) && checked_edges_nodes.count(*n2) &&
-              checked_edges_nodes.count(*n3) && checked_edges_nodes.count(*n4))
+          if (overlapping_edges_nodes.count(*n1) && overlapping_edges_nodes.count(*n2) &&
+              overlapping_edges_nodes.count(*n3) && overlapping_edges_nodes.count(*n4))
           {
             continue;
           }
@@ -1486,11 +1486,11 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
               edge, other_edge, intersection_coords, _non_matching_edge_tol);
           if (overlap)
           {
-            // Add the nodes that make up the 2 edges to the vector checked_edges_nodes
-            checked_edges_nodes.insert(*n1);
-            checked_edges_nodes.insert(*n2);
-            checked_edges_nodes.insert(*n3);
-            checked_edges_nodes.insert(*n4);
+            // Add the nodes that make up the 2 edges to the vector overlapping_edges_nodes
+            overlapping_edges_nodes.insert(*n1);
+            overlapping_edges_nodes.insert(*n2);
+            overlapping_edges_nodes.insert(*n3);
+            overlapping_edges_nodes.insert(*n4);
             num_intersecting_edges += 2;
 
             // Print error message
