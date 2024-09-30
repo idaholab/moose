@@ -17,8 +17,11 @@ InputParameters
 StepUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription("Maps the time steps and the load step simulation times. It can be "
-                             "used in either direction depending on the simulation setup");
+  params.addClassDescription(
+      "Maps the time steps and the load step simulation times. It can be "
+      "used in either direction depending on the simulation setup. It "
+      "generates steps to be used in StepPeriod to control the enabled/disabled state of objects "
+      "with user-provided simulation steps.");
   params.addParam<std::vector<Real>>(
       "step_start_times",
       "The beginning of step times. The number of steps is inferred from the number of times. One "

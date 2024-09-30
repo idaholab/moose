@@ -1,16 +1,18 @@
 [Tests]
   issues = '#17472'
   design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
-  [./cook_small_updated]
+  [cook_small_updated]
     type = CSVDiff
     input = 'cook_small.i'
     csvdiff = 'cook_small_out.csv'
-    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements."
-  [../]
-  [./cook_large_updated]
+    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements with small "
+                  "deformations."
+  []
+  [cook_large_updated]
     type = CSVDiff
     input = 'cook_large.i'
     csvdiff = 'cook_large_out.csv'
-    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements."
-  [../]
+    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements with large "
+                  "deformations."
+  []
 []

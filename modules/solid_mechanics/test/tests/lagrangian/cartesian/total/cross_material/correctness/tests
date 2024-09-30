@@ -1,10 +1,11 @@
 [Tests]
   issues = '#17472'
   design = 'source/materials/lagrangian/ComputeLagrangianWrappedStress.md'
-  [./flow_curve]
+  [flow_curve]
     type = CSVDiff
     input = 'plastic_j2.i'
     csvdiff = 'plastic_j2_out.csv'
-    requirement = "Resulting flow curve matches analytic calculation"
-  [../]
+    requirement = "Resulting flow curve matches analytic calculation with the total Lagrangian "
+                  "formulation"
+  []
 []

@@ -26,7 +26,8 @@ InputParameters
 HomogenizationConstraint::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addClassDescription("Computes a volumetric homogenization constraint");
+  params.addClassDescription("Calculate element contribution to the homogenization constraint "
+                             "depending on the homogenization constraint type.");
   params.addRequiredParam<MultiMooseEnum>(
       "constraint_types",
       Homogenization::constraintType,
