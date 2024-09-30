@@ -24,18 +24,23 @@ public:
   ScalarTransferBase(const InputParameters & parameters);
 
   /**
-   * Returns wall scalar flux name
-   *
+   * Returns wall scalar flux names for scalar of index i
+   * @param scalar_i the index of the scalar flux
    * @return The name of wall scalar flux functor
    */
   const MooseFunctorName & getWallScalarFluxName(unsigned int scalar_i) const;
 
-  /**
-   * Returns whether this heat transfer is specified by temperature, rather than heat flux
-   *
-   * @return true if the heat transfer is specified by temperature, false otherwise
-   */
-  virtual bool isTemperatureType() const = 0;
+  /// Get the names of all the scalar fluxes
+  const std::vector<MooseFunctorName> & getWallScalarFluxNames() const
+  {
+    return _wall_scalar_flux_names;
+  }
+
+  /// Get the names of all the scalar wall values
+  virtual const std::vector<MooseFunctorName> & getWallScalarValuesNames() const
+  {
+    mooseError("Not implemented");
+  }
 
   /**
    * Get the list of the subdomain names associated with the flow channel
