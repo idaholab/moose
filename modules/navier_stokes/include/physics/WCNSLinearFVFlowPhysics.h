@@ -13,7 +13,7 @@
 #include "WCNSFVTurbulencePhysics.h"
 
 /**
- * Creates all the objects needed to solve the Navier-Stokes with the SIMPLE algorithm
+ * Creates all the objects needed to solve the Navier-Stokes equations with the SIMPLE algorithm
  * using the linear finite volume discretization
  * Currently does not implement:
  * - friction

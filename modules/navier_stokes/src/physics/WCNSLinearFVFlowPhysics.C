@@ -355,16 +355,14 @@ WCNSLinearFVFlowPhysics::addINSOutletBC()
     if (momentum_outlet_type == "zero-gradient" || momentum_outlet_type == "fixed-pressure" ||
         momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
-      {
-        const std::string bc_type = "LinearFVAdvectionDiffusionOutflowBC";
-        InputParameters params = getFactory().getValidParams(bc_type);
-        params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
+      const std::string bc_type = "LinearFVAdvectionDiffusionOutflowBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
 
-        for (const auto d : make_range(dimension()))
-        {
-          params.set<LinearVariableName>("variable") = _velocity_names[d];
-          getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + outlet_bdy, params);
-        }
+      for (const auto d : make_range(dimension()))
+      {
+        params.set<LinearVariableName>("variable") = _velocity_names[d];
+        getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + outlet_bdy, params);
       }
     }
 

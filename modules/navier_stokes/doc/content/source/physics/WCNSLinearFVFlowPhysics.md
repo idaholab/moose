@@ -32,7 +32,7 @@ The kernels created for the momentum equation for free flow:
 The kernels created for free flow for the pressure correction equation:
 
 - [LinearFVAnisotropicDiffusion.md] for the pressure diffusion term
-- [LinearFVDivergencen.md] for the divergence of $A^{-1}H$. For more information, see [SIMPLE.md].
+- [LinearFVDivergence.md] for the divergence of $A^{-1}H$. For more information, see [SIMPLE.md].
 
 
 ## Automatically defined variables

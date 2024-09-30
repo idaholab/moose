@@ -65,7 +65,7 @@ If you already have an `Action` defined for your equations, converting it to a `
 Please add as much parameter checking as you can. The `PhysicsBase` class inherits the `InputParameterCheckUtils` that implements
 routines like the ones below that let you check that the user inputs to your physics are correct.
 
-!listing file=InputParametersChecksUtils.h start=InputParametersChecksUtils<C>::checkVectorParamsSameLength end=} include-end=true
+!listing InputParametersChecksUtils.h start=InputParametersChecksUtils<C>::checkVectorParamsSameLength end=} include-end=true
 
 Using this utility, consider checking that:
 
