@@ -96,14 +96,12 @@ public:
    * @param functor_name functor describing the heat flux
    */
   virtual void addWallHeatFlux(const std::string & /*heat_transfer_component*/,
-                               const HeatFluxWallEnum & /*heat_flux_type*/)
-  {
-    mooseError("Not implemented");
-  };
+                               const HeatFluxWallEnum & /*heat_flux_type*/){};
 
   enum ScalarFluxWallEnum
   {
-    FixedScalarFlux
+    FixedScalarFlux,
+    FixedScalarValue
   };
 
   /**
@@ -112,10 +110,7 @@ public:
    * @param scalar_flux_type how the scalar flux is imposed
    */
   virtual void addWallScalarFlux(const std::string & /*heat_transfer_component*/,
-                                 const ScalarFluxWallEnum & /*scalar_flux_type*/)
-  {
-    mooseError("Not implemented");
-  };
+                                 const ScalarFluxWallEnum & /*scalar_flux_type*/){};
 
 protected:
   virtual void initializePhysicsAdditional() override;
