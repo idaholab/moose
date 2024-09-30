@@ -375,7 +375,8 @@ WCNSFVScalarTransportPhysics::addInitialConditions()
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
 
-  // We want to set ICs only if the user specified them
+  // There are no default initial conditions for passive scalar variables, we however
+  // must obey the user-defined initial conditions, even if we are restarting
   if (parameters().isParamSetByUser("initial_scalar_variables"))
   {
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
