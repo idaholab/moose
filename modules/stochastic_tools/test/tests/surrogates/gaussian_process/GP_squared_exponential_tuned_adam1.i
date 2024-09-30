@@ -17,7 +17,7 @@
 [Samplers]
   [train_sample]
     type = MonteCarlo
-    num_rows = 30
+    num_rows = 20
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
     seed = 100
@@ -27,14 +27,14 @@
     num_rows = 100
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
-    seed = 101
+    seed = 100
   []
 []
 
 [MultiApps]
   [sub]
     type = SamplerFullSolveMultiApp
-    input_files = sub.i     Navier_Stokes.i
+    input_files = sub.i
     sampler = train_sample
   []
 []

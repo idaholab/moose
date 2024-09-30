@@ -1,7 +1,6 @@
 [StochasticTools]
 []
-
-[Distributions] change dist
+[Distributions]
   [a_dist]
     type = TruncatedNormal
     mean = -0.287682
@@ -43,7 +42,6 @@
     upper_bound = -2.9957
   []
 []
-
 [Samplers]
   [train_sample]
     type = MonteCarlo
@@ -60,7 +58,6 @@
     seed = 101
   []
 []
-
 [MultiApps]
   [sub]
     type = SamplerFullSolveMultiApp
@@ -68,7 +65,6 @@
     sampler = train_sample
   []
 []
-
 [Controls]
   [cmdline]
     type = MultiAppSamplerControl
@@ -77,17 +73,15 @@
     param_names = 'param1 param2 param3 param4 rho1 mu1'
   []
 []
-
 [Transfers]
   [data]
     type = SamplerReporterTransfer
     from_multi_app = sub
     sampler = train_sample
     stochastic_reporter = results
-    from_reporter = 'avg/value'
+    from_reporter = 'resultant_velocity/value'
   []
 []
-
 [Reporters]
   [results]
     type = StochasticReporter
@@ -100,6 +94,7 @@
     evaluate_std = 'true'
     parallel_type = ROOT
     execute_on = final
+    outputs = out
   []
   [train_avg]
     type = EvaluateSurrogate
@@ -110,7 +105,6 @@
     execute_on = final
   []
 []
-
 [VectorPostprocessors]
   [hyperparams]
     type = TwoLayerGaussianProcessData
@@ -123,7 +117,6 @@
     execute_on = 'initial timestep_end'
   []
 []
-
 [Trainers]
   [TGP_avg_trainer]
     type = TwoLayerGaussianProcessTrainer
@@ -132,34 +125,32 @@
     standardize_params = 'true' #Center and scale the training params
     standardize_data = 'true' #Center and scale the training data
     sampler = train_sample
-    response = results/data:avg:value
+    response = results/data:resultant_velocity:value
     tune_parameters = 'covar:signal_variance covar:length_factor'
-    num_iters = 1000
-    batch_size = 20
+    num_iters = 5000
+    batch_size = 30
     learning_rate = 0.005
+    show_every_nth_iteration = 1
   []
 []
-
 [Surrogates]
   [TGP_avg]
     type = TwoLayerGaussianProcessSurrogate
     trainer = TGP_avg_trainer
   []
 []
-
 [Covariance]
   [covar]
     type = SquaredExponentialCovariance
     signal_variance = 1.0 #Use a signal variance of 1 in the kernel
     noise_variance = 1e-6 #A small amount of noise can help with numerical stability
-    length_factor = '1.0 1.0' #Select a length factor for each parameter (k and q)
+    length_factor = '1.0 1.0 1.0 1.0 1.0 1.0' #Select a length factor for each parameter (k and q)
   []
 []
-
 [Outputs]
   [out]
     type = CSV
     execute_on = FINAL
-    file_base = 'dgp'
+    file_base = 'tgp'
   []
 []
