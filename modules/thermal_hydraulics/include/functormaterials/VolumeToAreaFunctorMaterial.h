@@ -24,4 +24,6 @@ public:
 protected:
   /// Area functor
   const Moose::Functor<ADReal> & _area;
+  /// Coefficient multiplying the conversion factor
+  const Moose::Functor<ADReal> & _coef;
 };

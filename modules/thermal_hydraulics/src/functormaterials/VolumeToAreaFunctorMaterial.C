@@ -23,12 +23,15 @@ VolumeToAreaFunctorMaterial::validParams()
                                             "Name of the conversion factor functor");
   params.addRequiredParam<MooseFunctorName>("area",
                                             "Name of the functor providing the target area");
+  params.addParam<MooseFunctorName>("coef", "1", "Coefficient multiplying the conversion factor");
 
   return params;
 }
 
 VolumeToAreaFunctorMaterial::VolumeToAreaFunctorMaterial(const InputParameters & parameters)
-  : FunctorMaterial(parameters), _area(getFunctor<ADReal>("area"))
+  : FunctorMaterial(parameters),
+    _area(getFunctor<ADReal>("area")),
+    _coef(getFunctor<ADReal>("coef"))
 {
   addFunctorProperty<ADReal>(
       getParam<MooseFunctorName>("functor_name"),
@@ -48,6 +51,6 @@ VolumeToAreaFunctorMaterial::VolumeToAreaFunctorMaterial(const InputParameters &
                      MooseUtils::prettyCppType(&r),
                      ". Please contact a MOOSE developer or implement it yourself.");
 
-        return _area(r, t) / volume;
+        return _coef(r, t) * _area(r, t) / volume;
       });
 }
