@@ -19,8 +19,6 @@ public:
   mfem::Array<int> _markers;
 
   virtual void ApplyBC(mfem::LinearForm & b) {}
-  virtual void ApplyBC(mfem::ComplexLinearForm & b) {}
-  virtual void ApplyBC(mfem::ParComplexLinearForm & b) {}
 };
 
 } // namespace platypus

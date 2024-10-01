@@ -10,13 +10,11 @@ public:
   ScalarDirichletBC(const std::string & name_, mfem::Array<int> bdr_attributes_);
   ScalarDirichletBC(const std::string & name_,
                     mfem::Array<int> bdr_attributes_,
-                    mfem::Coefficient * coeff_,
-                    mfem::Coefficient * coeff_im_ = nullptr);
+                    mfem::Coefficient * coeff_);
 
   void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_) override;
 
   mfem::Coefficient * _coeff{nullptr};
-  mfem::Coefficient * _coeff_im{nullptr};
 };
 
 } // namespace platypus
