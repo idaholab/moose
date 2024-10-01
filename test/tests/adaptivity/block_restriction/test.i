@@ -55,6 +55,7 @@
       type = GradientJumpIndicator
       variable = u
       block = '0'
+      scale_by_flux_faces = true
     []
   []
   [Markers]
@@ -69,17 +70,10 @@
 
 [Executioner]
   type = Transient
+  solve_type = 'NEWTON'
 
   end_time = 200
   dt = 100
-
-  solve_type = 'PJFNK'
-
-  nl_abs_tol = 1E-5
-  nl_max_its = 400
-
-  l_tol = 1E-8
-  l_max_its = 200
 []
 
 [Outputs]

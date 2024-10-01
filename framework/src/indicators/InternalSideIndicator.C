@@ -94,6 +94,7 @@ InternalSideIndicator::computeIndicator()
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
+    // We use the nodal dof index but these are constant monomial variables
     _solution.add(_field_var.nodalDofIndex(), sum * _current_elem->hmax());
     _solution.add(_field_var.nodalDofIndexNeighbor(), sum * _neighbor_elem->hmax());
   }
@@ -118,11 +119,12 @@ InternalSideIndicator::finalize()
   else
     n_flux_faces = 1;
 
-  // The 0 is because CONSTANT MONOMIALS only have one coefficient per element...
+  // The 0 is because CONSTANT MONOMIALS only have one coefficient per element
   Real value = _field_var.dofValues()[0];
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    // We use the nodal dof index but these are constant monomial variables
     _solution.set(_field_var.nodalDofIndex(), std::sqrt(value) / static_cast<Real>(n_flux_faces));
   }
 }
