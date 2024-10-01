@@ -63,13 +63,13 @@ g^2=\dfrac{g_3 \times g_1}{g_1 \cdot (g_2 \times g_3)}
 \begin{equation}
 g^3=\dfrac{g_1 \times g_2}{g_1 \cdot (g_2 \times g_3)}
 \end{equation}
-These contravariant base vectors satisfy the orthogonality condition: $g^i \cdot g_j =\delta_{ij}$, where $\delta_{ij}$ is Kronecker delta. The $\hat{e}_i$ vectors are the local cartesian coordinate system computed using the covariant base vectors, i.e.,
+These contravariant base vectors satisfy the orthogonality condition: $g^i \cdot g_j =\delta_{ij}$, where $\delta_{ij}$ is Kronecker delta. The $\hat{e}_i$ vectors are the local cartesian coordinate system computed using the following rule:
 
 \begin{equation}
-\hat{e}_3 = \frac{g_3}{|g_3|}; \hat{e}_1 = \frac{g_2 \times \hat{e}^3}{|g_2 \times \hat{e}^3|}; \hat{e}_2 = \hat{e}_3 \times \hat{e}_1
+\hat{e}_3 = V_n; \hat{e}_1 = \frac{X_2 \times \hat{e}^3}{|X_2 \times \hat{e}^3|}; \hat{e}_2 = \hat{e}_3 \times \hat{e}_1
 \end{equation}
 
-The elasticity tensor at each quadrature point (qp) is computed in [ADComputeIsotropicElasticityTensorShell](/ADComputeIsotropicElasticityTensorShell.md).
+In this equation, $V_n$ represents the element's normal vector, and $X_2$ is the unit vector in the global y-direction, given by $X_2={0, 1, 0}$. Users also have the option to define the local coordinate system by introducing the parameter "first_local_vector_ref" in the input file. When this option is selected, the first local vector $e_1$ of each shell element is calculated by projecting the user_defined vector onto the element, ensuring it lies "in plane" and is perpendicular to the element's normal. The second local vector $e_2$ is then determined using right-hand-rule, via the cross product of $e_3$ and $e_1$. The elasticity tensor at each quadrature point (qp) is computed in [ADComputeIsotropicElasticityTensorShell](/ADComputeIsotropicElasticityTensorShell.md).
 
 ## Stress calculation
 
