@@ -51,27 +51,6 @@ BCMap::ApplyEssentialBCs(const std::string & name_,
 }
 
 void
-BCMap::ApplyEssentialBCs(const std::string & name_,
-                         mfem::Array<int> & ess_tdof_list,
-                         mfem::ParComplexGridFunction & gridfunc,
-                         mfem::Mesh * mesh_)
-{
-  for (auto const & [name, bc_] : *this)
-  {
-    if (bc_->_name == name_)
-    {
-      auto bc = std::dynamic_pointer_cast<platypus::EssentialBC>(bc_);
-      if (bc != nullptr)
-      {
-        bc->ApplyBC(gridfunc, mesh_);
-      }
-    }
-  }
-  mfem::Array<int> ess_bdr = GetEssentialBdrMarkers(name_, mesh_);
-  gridfunc.FESpace()->GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
-};
-
-void
 BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::LinearForm & lf, mfem::Mesh * mesh_)
 {
 
@@ -84,45 +63,6 @@ BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::LinearForm & lf, mfem
       {
         bc->GetMarkers(*mesh_);
         bc->ApplyBC(lf);
-      }
-    }
-  }
-};
-
-void
-BCMap::ApplyIntegratedBCs(const std::string & name_,
-                          mfem::ParComplexLinearForm & clf,
-                          mfem::Mesh * mesh_)
-{
-
-  for (auto const & [name, bc_] : *this)
-  {
-    if (bc_->_name == name_)
-    {
-      auto bc = std::dynamic_pointer_cast<platypus::IntegratedBC>(bc_);
-      if (bc != nullptr)
-      {
-        bc->GetMarkers(*mesh_);
-        bc->ApplyBC(clf);
-      }
-    }
-  }
-};
-
-void
-BCMap::ApplyIntegratedBCs(const std::string & name_,
-                          mfem::ParSesquilinearForm & slf,
-                          mfem::Mesh * mesh_)
-{
-  for (auto const & [name, bc_] : *this)
-  {
-    if (bc_->_name == name_)
-    {
-      auto bc = std::dynamic_pointer_cast<platypus::RobinBC>(bc_);
-      if (bc != nullptr)
-      {
-        bc->GetMarkers(*mesh_);
-        bc->ApplyBC(slf);
       }
     }
   }
