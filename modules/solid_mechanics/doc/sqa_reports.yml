@@ -8,7 +8,7 @@ Applications:
             - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
-        log_stub_files: NONE
+        log_stub_files: WARNING
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -34,4 +34,4 @@ Requirements:
     solid_mechanics:
         directories:
             - ${MOOSE_DIR}/modules/solid_mechanics
-        log_missing: NONE
+        log_missing: WARNING
