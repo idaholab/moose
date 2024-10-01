@@ -79,15 +79,14 @@
 []
 
 [Preconditioner]
-  [cg]
-    type = MFEMGMRESSolver
-    print_level = 2
+  [jacobi]
+    type = MFEMOperatorJacobiSmoother
   []
 []
 
 [Solver]
   type = MFEMCGSolver
-  preconditioner = cg
+  preconditioner = jacobi
   l_tol = 1e-16
   l_max_its = 1000
   print_level = 2
