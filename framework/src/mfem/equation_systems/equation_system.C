@@ -102,8 +102,10 @@ EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
     *(_dxdts.at(i)) = 0.0;
     bc_map.ApplyEssentialBCs(
         test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), _test_pfespaces.at(i)->GetParMesh());
-    bc_map.ApplyIntegratedBCs(
-        test_var_name, _lfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
+    bc_map.ApplyIntegratedBCs(test_var_name,
+                              _lfs.GetRef(test_var_name),
+                              _blfs.GetRef(test_var_name),
+                              _test_pfespaces.at(i)->GetParMesh());
   }
 }
 
@@ -372,9 +374,9 @@ EquationSystem::BuildMixedBilinearForms()
 void
 EquationSystem::BuildEquationSystem(platypus::BCMap & bc_map)
 {
-  BuildLinearForms(bc_map);
   BuildBilinearForms();
   BuildMixedBilinearForms();
+  BuildLinearForms(bc_map);
 }
 
 TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
@@ -509,9 +511,9 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 void
 TimeDependentEquationSystem::UpdateEquationSystem(platypus::BCMap & bc_map)
 {
-  BuildLinearForms(bc_map);
   BuildBilinearForms();
   BuildMixedBilinearForms();
+  BuildLinearForms(bc_map);
 }
 
 } // namespace platypus
