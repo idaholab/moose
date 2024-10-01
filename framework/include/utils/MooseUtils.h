@@ -85,6 +85,15 @@ std::string installedInputsDir(const std::string & app_name,
 /// Returns the directory of any installed docs/site.
 std::string docsDir(const std::string & app_name);
 
+/**
+ * Returns the URL of a page located on the MOOSE documentation site.
+ *
+ * @param[in] path   URL path following the domain name. For example, in the
+ *                   URL "www.example.com/folder1/folder2/file.html", this
+ *                   would be "folder1/folder2/file.html".
+ */
+std::string mooseDocsURL(const std::string & path);
+
 /// Replaces all occurrences of from in str with to and returns the result.
 std::string replaceAll(std::string str, const std::string & from, const std::string & to);
 

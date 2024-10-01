@@ -59,6 +59,7 @@
     connections = 'pipe1:out pipe2:in'
     position = '1 0 0'
     volume = 1e-8
+    use_scalar_variables = false
   []
 
   [pipe2]

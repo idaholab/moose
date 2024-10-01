@@ -67,6 +67,7 @@ p_out = 1e6
     D_wheel = 0.4
     head_coefficient = head
     power_coefficient = power
+    use_scalar_variables = false
   []
   [ch_out]
     type = FlowChannel1Phase
@@ -156,18 +157,21 @@ p_out = 1e6
     execute_on = 'initial timestep_end'
   []
   [flow_coefficient]
-    type = ScalarVariable
-    variable = turbine:flow_coeff
+    type = ElementAverageValue
+    variable = flow_coeff
+    block = 'turbine'
     execute_on = 'initial timestep_end'
   []
   [delta_p]
-    type = ScalarVariable
-    variable = turbine:delta_p
+    type = ElementAverageValue
+    variable = delta_p
+    block = 'turbine'
     execute_on = 'initial timestep_end'
   []
   [power]
-    type = ScalarVariable
-    variable = turbine:power
+    type = ElementAverageValue
+    variable = power
+    block = 'turbine'
     execute_on = 'initial timestep_end'
   []
 []

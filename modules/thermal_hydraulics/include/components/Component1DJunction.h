@@ -36,6 +36,9 @@ protected:
   /// Processor IDs of connected 1D components
   std::vector<processor_id_type> _proc_ids;
 
+  /// Junction subdomain ID
+  subdomain_id_type _junction_subdomain_id;
+
 public:
   static InputParameters validParams();
 };

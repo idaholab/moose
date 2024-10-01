@@ -67,6 +67,7 @@
     speeds = '-1.0 0.0 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.5'
     Rp_functions = 'Rp00 Rp00 Rp04 Rp05 Rp06 Rp07 Rp08 Rp09 Rp10 Rp11 Rp11'
     eff_functions = 'eff00 eff00 eff04 eff05 eff06 eff07 eff08 eff09 eff10 eff11 eff11'
+    use_scalar_variables = false
   []
 
   [fch2]

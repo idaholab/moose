@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "AuxKernel.h"
 #include "AuxScalarKernel.h"
 
 class ADShaftConnectedCompressor1PhaseUserObject;
@@ -16,12 +17,13 @@ class ADShaftConnectedCompressor1PhaseUserObject;
 /**
  * Computes various quantities for a ShaftConnectedCompressor1Phase.
  */
-class ShaftConnectedCompressor1PhaseAux : public AuxScalarKernel
+template <typename T>
+class ShaftConnectedCompressor1PhaseAuxTempl : public T
 {
 public:
   static InputParameters validParams();
 
-  ShaftConnectedCompressor1PhaseAux(const InputParameters & parameters);
+  ShaftConnectedCompressor1PhaseAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -41,3 +43,7 @@ protected:
   /// 1-phase shaft-connected compressor user object
   const ADShaftConnectedCompressor1PhaseUserObject & _compressor_uo;
 };
+
+typedef ShaftConnectedCompressor1PhaseAuxTempl<AuxKernel> ShaftConnectedCompressor1PhaseAux;
+typedef ShaftConnectedCompressor1PhaseAuxTempl<AuxScalarKernel>
+    ShaftConnectedCompressor1PhaseScalarAux;
