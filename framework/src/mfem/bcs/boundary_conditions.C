@@ -13,9 +13,9 @@ BCMap::GetEssentialBdrMarkers(const std::string & name_, mfem::Mesh * mesh_)
 
   for (auto const & [name, bc_] : *this)
   {
-    if (bc_->_name == name_)
+    if (bc_->getTestVariableName() == name_)
     {
-      auto bc = std::dynamic_pointer_cast<platypus::EssentialBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc_);
       if (bc != nullptr)
       {
         ess_bdrs = bc->GetMarkers(*mesh_);
@@ -37,9 +37,9 @@ BCMap::ApplyEssentialBCs(const std::string & name_,
 {
   for (auto const & [name, bc_] : *this)
   {
-    if (bc_->_name == name_)
+    if (bc_->getTestVariableName() == name_)
     {
-      auto bc = std::dynamic_pointer_cast<platypus::EssentialBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc_);
       if (bc != nullptr)
       {
         bc->ApplyBC(gridfunc, mesh_);
@@ -51,18 +51,21 @@ BCMap::ApplyEssentialBCs(const std::string & name_,
 }
 
 void
-BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::LinearForm & lf, mfem::Mesh * mesh_)
+BCMap::ApplyIntegratedBCs(const std::string & name_,
+                          mfem::LinearForm & lf,
+                          mfem::BilinearForm & blf,
+                          mfem::Mesh * mesh_)
 {
-
   for (auto const & [name, bc_] : *this)
   {
-    if (bc_->_name == name_)
+    if (bc_->getTestVariableName() == name_)
     {
-      auto bc = std::dynamic_pointer_cast<platypus::IntegratedBC>(bc_);
+      auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_);
       if (bc != nullptr)
       {
         bc->GetMarkers(*mesh_);
-        bc->ApplyBC(lf);
+        lf.AddBoundaryIntegrator(bc->createLinearFormIntegrator(), bc->_bdr_markers);
+        blf.AddBoundaryIntegrator(bc->createBilinearFormIntegrator(), bc->_bdr_markers);
       }
     }
   }
