@@ -69,7 +69,7 @@ public:
                     platypus::BCMap & bc_map,
                     mfem::AssemblyLevel assembly_level);
   virtual void BuildLinearForms(platypus::BCMap & bc_map);
-  virtual void BuildBilinearForms();
+  virtual void BuildBilinearForms(platypus::BCMap & bc_map);
   virtual void BuildMixedBilinearForms();
   virtual void BuildEquationSystem(platypus::BCMap & bc_map);
 
@@ -167,7 +167,7 @@ public:
 
   virtual void AddKernel(const std::string & test_var_name,
                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel) override;
-  virtual void BuildBilinearForms() override;
+  virtual void BuildBilinearForms(platypus::BCMap & bc_map) override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;

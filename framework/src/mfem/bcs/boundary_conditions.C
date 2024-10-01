@@ -51,10 +51,7 @@ BCMap::ApplyEssentialBCs(const std::string & name_,
 }
 
 void
-BCMap::ApplyIntegratedBCs(const std::string & name_,
-                          mfem::LinearForm & lf,
-                          mfem::BilinearForm & blf,
-                          mfem::Mesh * mesh_)
+BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::LinearForm & lf, mfem::Mesh * mesh_)
 {
   for (auto const & [name, bc_] : *this)
   {
@@ -65,6 +62,22 @@ BCMap::ApplyIntegratedBCs(const std::string & name_,
       {
         bc->GetMarkers(*mesh_);
         lf.AddBoundaryIntegrator(bc->createLinearFormIntegrator(), bc->_bdr_markers);
+      }
+    }
+  }
+};
+
+void
+BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::BilinearForm & blf, mfem::Mesh * mesh_)
+{
+  for (auto const & [name, bc_] : *this)
+  {
+    if (bc_->getTestVariableName() == name_)
+    {
+      auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_);
+      if (bc != nullptr)
+      {
+        bc->GetMarkers(*mesh_);
         blf.AddBoundaryIntegrator(bc->createBilinearFormIntegrator(), bc->_bdr_markers);
       }
     }

@@ -28,5 +28,12 @@
                 OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu
                 OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem set up from MOOSE and produce the same result as a native run.'
-  []  
+  []
+  [./MFEMHeatTransfer]
+    type = XMLDiff
+    input = heattransfer.i
+    xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
+                OutputData/HeatTransfer/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'Platypus shall have the ability to solve a steady state heat conduction problem with a heat transfer coefficient on one boundary set up from MOOSE.'
+  []    
 []
