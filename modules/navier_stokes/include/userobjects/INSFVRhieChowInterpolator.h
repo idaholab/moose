@@ -101,8 +101,17 @@ public:
   /**
    * Whether central differencing face interpolations of velocity should include a skewness
    * correction
+   * Also used for the face interpolation of the D coefficient
+   * and the face interpolation of volumetric forces for for the volume correction method
+   * and the face interpolation of porosity
    */
   bool velocitySkewCorrection(THREAD_ID tid) const;
+
+  /**
+   * Whether central differencing face interpolations of pressure should include a skewness
+   * correction
+   */
+  bool pressureSkewCorrection(THREAD_ID tid) const;
 
 protected:
   /**
@@ -232,4 +241,11 @@ INSFVRhieChowInterpolator::velocitySkewCorrection(const THREAD_ID tid) const
 {
   const auto * const u = _us[tid];
   return (u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+}
+
+inline bool
+INSFVRhieChowInterpolator::pressureSkewCorrection(const THREAD_ID tid) const
+{
+  const auto * const p = _ps[tid];
+  return (p->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 }
