@@ -9,5 +9,7 @@
     method = "!dbg"
     valgrind = 'none'
     installation_type = 'in_tree' # uses JIT
+    # Raised for the lagrange multiplier diffing right above the default tolerance
+    abs_zero = 2e-10
   []
 []

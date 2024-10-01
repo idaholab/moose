@@ -80,7 +80,7 @@ MultiSpeciesDiffusionPhysicsBase::MultiSpeciesDiffusionPhysicsBase(
 {
   // Keep track of variables
   for (const auto & var_name : _species_names)
-    saveNonlinearVariableName(var_name);
+    saveSolverVariableName(var_name);
 
   // Parameter checking
   checkTwoDVectorParamsSameLength<BoundaryName, MooseFunctorName>("neumann_boundaries",

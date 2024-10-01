@@ -63,7 +63,7 @@ DiffusionPhysicsBase::DiffusionPhysicsBase(const InputParameters & parameters)
     _dirichlet_boundaries(getParam<std::vector<BoundaryName>>("dirichlet_boundaries"))
 {
   // Keep track of variables
-  saveNonlinearVariableName(_var_name);
+  saveSolverVariableName(_var_name);
 
   // Parameter checking
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("neumann_boundaries",

@@ -224,7 +224,7 @@ void
 WCNSFVTurbulencePhysics::initializePhysicsAdditional()
 {
   if (_turbulence_model == "k-epsilon")
-    getProblem().setSavePreviousNLSolution(true);
+    getProblem().needSolutionState(2, Moose::SolutionIterationType::Nonlinear);
 }
 
 void
@@ -316,8 +316,8 @@ WCNSFVTurbulencePhysics::addNonlinearVariables()
   {
     // Dont add if the user already defined the variable
     // Add turbulent kinetic energy variable
-    if (nonlinearVariableExists(_tke_name,
-                                /*error_if_aux=*/true))
+    if (variableExists(_tke_name,
+                       /*error_if_aux=*/true))
       checkBlockRestrictionIdentical(_tke_name, getProblem().getVariable(0, _tke_name).blocks());
     else if (_define_variables)
     {
@@ -334,8 +334,8 @@ WCNSFVTurbulencePhysics::addNonlinearVariables()
                      ") supplied to the WCNSFVTurbulencePhysics does not exist!");
 
     // Add turbulent kinetic energy dissipation variable
-    if (nonlinearVariableExists(_tked_name,
-                                /*error_if_aux=*/true))
+    if (variableExists(_tked_name,
+                       /*error_if_aux=*/true))
       checkBlockRestrictionIdentical(_tked_name, getProblem().getVariable(0, _tked_name).blocks());
     else if (_define_variables)
     {

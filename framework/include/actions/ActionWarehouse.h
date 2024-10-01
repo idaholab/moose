@@ -139,7 +139,7 @@ public:
   T * getPhysics(const std::string & name)
   {
     auto physics = const_cast<T *>(&getAction<T>(name));
-    if (!dynamic_cast<PhysicsBase *>(physics))
+    if (!dynamic_cast<const PhysicsBase *>(physics))
       mooseError("The Physics requested of type '",
                  MooseUtils::prettyCppType<T>(),
                  "' and name '",
@@ -178,7 +178,7 @@ public:
   {
     const auto physics_vector = getActions<T>();
     for (const auto phys_ptr : physics_vector)
-      if (!dynamic_cast<PhysicsBase *>(phys_ptr))
+      if (!dynamic_cast<const PhysicsBase *>(phys_ptr))
         mooseError("The Physics requested of type '",
                    MooseUtils::prettyCppType<T>(),
                    "' and name '",

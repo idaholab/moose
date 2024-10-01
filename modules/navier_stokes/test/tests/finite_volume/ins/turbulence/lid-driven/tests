@@ -244,6 +244,8 @@
       abs_zero = 1e-6
       cli_args = 'Outputs/file_base=lid-driven-turb-energy-wall-physics_out'
       custom_cmp = 'lid-driven-low-turb.cmp'
+      # >300s in debug mode
+      method = 'opt'
     []
   []
   [lid_driven_turb_energy_wall_linear]

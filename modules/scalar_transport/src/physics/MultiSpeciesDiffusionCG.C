@@ -233,7 +233,7 @@ MultiSpeciesDiffusionCG::addNonlinearVariables()
   for (const auto & var_name : _species_names)
   {
     // If the variable was added outside the Physics
-    if (nonlinearVariableExists(var_name, /*error_if_aux*/ true))
+    if (variableExists(var_name, /*error_if_aux*/ true))
     {
       if (isParamValid("variable_order"))
         paramError("variable_order",

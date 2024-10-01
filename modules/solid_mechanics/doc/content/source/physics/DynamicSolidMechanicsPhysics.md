@@ -1,4 +1,4 @@
-# DynamicSolidMechanics
+# SolidMechanics Dynamic Physics
 
 !syntax description /Kernels/DynamicSolidMechanics/LegacyDynamicTensorMechanicsAction
 
