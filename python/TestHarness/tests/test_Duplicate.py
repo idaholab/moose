@@ -18,18 +18,17 @@ class TestHarnessTester(TestHarnessTestCase):
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('-i', 'duplicate_outputs')
 
-        e = cm.exception
+        output = cm.exception.output
+        self.assertIn('Tests: d, c', output)
+        self.assertIn('File(s): good_out.e', output)
 
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
-
-        # Use a different spec file, which makes use of the AnalyzeJacobian tester. The is because
-        # a race condition, when caught, will invalidate the rest of the tests with out testing them.
+        # Use a different spec file, which makes use of the AnalyzeJacobian tester
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('-i', 'duplicate_outputs_analyzejacobian')
 
-        e = cm.exception
-
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
+        output = cm.exception.output
+        self.assertIn('Tests: b, a', output)
+        self.assertIn('File(s): good.i', output)
 
     def testDuplicateOutputsOK(self):
         """
@@ -40,33 +39,8 @@ class TestHarnessTester(TestHarnessTestCase):
         output += self.runTests('-i', 'duplicate_outputs_ok', '--heavy')
 
         # skip case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'skipped_out.e')
+        self.assertNotRegexpMatches(output, 'skipped_out.e')
         # heavy case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'heavy_out.e')
+        self.assertNotRegexpMatches(output, 'heavy_out.e')
         # all
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'FATAL TEST HARNESS ERROR')
-
-    def testDelayedDuplicateOutputs(self):
-        """
-        Test a more complex, delayed, race condition by running three tests. Two which launch
-        immediately, and a third, waiting on one job to finish. When it does, this third test
-        will write to the same output file, that one of the other tests which is still running
-        is writing to. Thus, causing a delayed race condition.
-        """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'duplicate_outputs_prereqs')
-
-        e = cm.exception
-
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
-
-    def testMultipleDuplicateOutputs(self):
-        """
-        Test for multiple duplicate outputs created by one test
-        """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'multiple_duplicate_outputs')
-
-        e = cm.exception
-
-        self.assertRegex(e.output.decode('utf-8'), r'FAILED \(DUPLICATE OUTFILES\)')
+        self.assertNotRegexpMatches(output, 'FATAL TEST HARNESS ERROR')

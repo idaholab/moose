@@ -20,10 +20,10 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'csv_validation_tester', '--no-color').decode('utf-8')
+            self.runTests('-i', 'csv_validation_tester', '--no-color')
 
         e = cm.exception
-        output = e.output.decode('utf-8')
+        output = e.output
         self.assertRegexpMatches(output, r'test_harness\.csv_validation_tester_01.*?OK')
         self.assertRegexpMatches(output, r'test_harness\.csv_validation_tester_02.*?FAILED \(DIFF\)')
 
@@ -34,9 +34,9 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'csv_validation_tester', '--verbose', '--no-color').decode('utf-8')
+            self.runTests('-i', 'csv_validation_tester', '--verbose', '--no-color')
 
         e = cm.exception
-        output = e.output.decode('utf-8')
+        output = e.output
         self.assertRegexpMatches(output, 'csv_validation_tester_01.csv                        | 0.00 \xb1 0.01          | 0.01 \xb1 0.01')
         self.assertRegexpMatches(output, 'csv_validation_tester_02.csv                        | 0.00 \xb1 0.01          | 0.01 \xb1 0.00')

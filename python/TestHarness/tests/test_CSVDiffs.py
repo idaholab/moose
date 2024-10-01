@@ -19,9 +19,9 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'csvdiffs')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_csvdiff.*?FAILED \(Override inputs not the same length\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_badfile.*?FAILED \(MISSING GOLD FILE\)')
-        self.checkStatus(e.output.decode('utf-8'), failed=2)
+        self.assertRegex(e.output, r'test_harness\.test_csvdiff.*?FAILED \(Override inputs not the same length\)')
+        self.assertRegex(e.output, r'test_harness\.test_badfile.*?FAILED \(MISSING GOLD FILE\)')
+        self.checkStatus(e.output, failed=2)
 
     def testMissingComparison(self):
         """
@@ -31,8 +31,8 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'csvdiff_missing_comparison_file')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_csvdiff_comparison_file_missing.*?FAILED \(MISSING COMPARISON FILE\)')
-        self.checkStatus(e.output.decode('utf-8'), failed=1)
+        self.assertRegex(e.output, r'test_harness\.test_csvdiff_comparison_file_missing.*?FAILED \(MISSING COMPARISON FILE\)')
+        self.checkStatus(e.output, failed=1)
 
     def testCSVDiffScript(self):
         """

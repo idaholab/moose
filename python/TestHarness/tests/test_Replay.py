@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import shutil
+import tempfile
 
 from TestHarnessTestCase import TestHarnessTestCase
 
@@ -40,30 +41,40 @@ class TestHarnessTester(TestHarnessTestCase):
 
     def testReplay(self):
         """ Test ability to replay back previous run results """
-        output_a = self.runTests('--verbose', '--timing', '-i', 'always_ok', '--results-file', 'unittest_Replay')
-        output_b = self.runTests('--verbose', '--timing', '--show-last-run', '--results-file', 'unittest_Replay')
-        compile = self.reCompile()
-        formated_a = compile.findall(str(output_a))
-        formated_b = compile.findall(str(output_b))
+        with tempfile.TemporaryDirectory() as output_dir:
+            base_args = ['--verbose', '-c', '--timing', '--results-file', 'unittest_Replay', '-o', output_dir]
+            base_kwargs = {'tmp_output': False}
+            output_a = self.runTests(*base_args, '-i', 'always_ok', **base_kwargs)
+            output_b = self.runTests(*base_args, '--show-last-run', **base_kwargs)
 
-        if formated_a != formated_b:
-            self.fail(f'--show-last-run did not match last run\n\n{formated_a}\n\n{formated_b}')
+        # The only difference should be the total run time, so replace the run time
+        # from the first with the run time from the second
+        def parseSummary(output):
+            search = re.search(r'Ran (\d+) tests in (\d+.\d+) seconds', output)
+            self.assertTrue(search is not None)
+            return int(search.group(1)), float(search.group(2))
+        num_tests, total_time = parseSummary(output_a)
+        other_num_tests, other_total_time = parseSummary(output_b)
+        self.assertEqual(num_tests, other_num_tests)
+        output_b = output_b.replace(f'Ran {num_tests} tests in {other_total_time} seconds',
+                                    f'Ran {num_tests} tests in {total_time} seconds')
+        self.assertEqual(output_a, output_b)
 
     def testDiffReplay(self):
         """ Verify that the feature fails when asked to capture new output """
-        output_a = self.runTests('--verbose', '--timing', '-i', 'always_ok', '--results-file', 'unittest_Replay')
-        # --re=doesenotexist will produce no output (or rather different output than the above)
-        output_b = self.runTests('--verbose', '--timing', '--show-last-run', '--results-file', 'unittest_Replay', '--re=doesnotexist')
-        compile = self.reCompile()
-        formated_a = compile.findall(str(output_a))
-        formated_b = compile.findall(str(output_b))
-
-        if formated_a == formated_b:
-            self.fail(f'--show-last-run matched when it should not have')
+        with tempfile.TemporaryDirectory() as output_dir:
+            base_args = ['--verbose', '--timing', '--results-file', 'unittest_Replay', '-o', output_dir]
+            base_kwargs = {'tmp_output': False}
+            output_a = self.runTests(*base_args, '-i', 'always_ok', **base_kwargs)
+            # --re=doesenotexist will produce no output (or rather different output than the above)
+            output_b = self.runTests(*base_args, '--show-last-run', '--re=doesnotexist', **base_kwargs)
+        self.assertIn('Ran 1 tests in', output_a)
+        self.assertIn('Ran 0 tests in', output_b)
 
     def testNoResultsFile(self):
         """ Verify the TestHarness errors correctly when there is no results file to work with """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('--show-last-run', '--results-file', 'non_existent')
-        e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'A previous run does not exist')
+        with tempfile.TemporaryDirectory() as output_dir:
+            with self.assertRaises(subprocess.CalledProcessError) as cm:
+                self.runTests('--show-last-run', '--results-file', 'non_existent', '-o', output_dir, tmp_output=False)
+            e = cm.exception
+            self.assertIn(f'The previous run {output_dir}/non_existent does not exist', e.output)

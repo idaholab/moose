@@ -79,7 +79,7 @@ class RunApp(Tester):
 
     def getInputFile(self):
         if self.specs.isValid('input'):
-            return self.specs['input'].strip()
+            return os.path.join(self.getTestDir(), self.specs['input'].strip())
         else:
             return None # Not all testers that inherit from RunApp have an input file
 
@@ -119,9 +119,26 @@ class RunApp(Tester):
                 self.setStatus(self.skip)
                 return False
 
+        if options.hpc and self.specs.isValid('command_proxy') and os.environ.get('APPTAINER_CONTAINER') is not None:
+            self.addCaveats('hpc unsupported')
+            self.setStatus(self.skip)
+            return False
+
+        # Finalizing output using the current method in the submission script from the rank 0 process isn't
+        # really a good idea when output might exist on a different node. We could make that finalization
+        # more complex, but there isn't a need at the moment.
+        if options.hpc and self.specs['redirect_output'] == True and int(self.specs['min_parallel']) > 1:
+            self.addCaveats('hpc min_cpus=1')
+            self.setStatus(self.skip)
+            return False
+
         return True
 
     def getThreads(self, options):
+        # This disables additional arguments
+        if self.specs['no_additional_cli_args']:
+            return 1
+
         #Set number of threads to be used lower bound
         nthreads = max(options.nthreads, int(self.specs['min_threads']))
         #Set number of threads to be used upper bound
@@ -135,15 +152,28 @@ class RunApp(Tester):
         return nthreads
 
     def getProcs(self, options):
+        # This disables additional arguments
+        if self.specs['no_additional_cli_args']:
+            return 1
+
         if options.parallel == None:
             default_ncpus = 1
         else:
             default_ncpus = options.parallel
 
+        min_parallel = int(self.specs['min_parallel'])
+
         # Raise the floor
-        ncpus = max(default_ncpus, int(self.specs['min_parallel']))
+        ncpus = max(default_ncpus, min_parallel)
         # Lower the ceiling
         ncpus = min(ncpus, int(self.specs['max_parallel']))
+
+        # Finalizing output using the current method in the submission script from the rank 0 process isn't
+        # really a good idea when output might exist on a different node. We could make that finalization
+        # more complex, but there isn't a need at the moment.
+        if options.hpc and self.specs['redirect_output'] == True and min_parallel == 1 and ncpus > 1:
+            self.addCaveats('hpc min_cpus=1')
+            return 1
 
         if ncpus > default_ncpus:
             self.addCaveats('min_cpus=' + str(ncpus))
@@ -161,14 +191,19 @@ class RunApp(Tester):
 
         # Check for built application
         if shutil.which(specs['executable']) is None:
-            self.setStatus(self.fail, 'Application not found')
-            return ''
+            self.setStatus(self.error, 'APPLICATION NOT FOUND')
 
         # If no_additional_cli_args is set to True, return early with a simplified command line ignoring
         # all other TestHarness supplied options.
         if specs['no_additional_cli_args']:
             # TODO: Do error checking for TestHarness options that will be silently ignored
-            return os.path.join(specs['test_dir'], specs['executable']) + ' ' + ' '.join(specs['cli_args'])
+            cmd = os.path.join(specs['test_dir'], specs['executable']) + ' ' + ' '.join(specs['cli_args'])
+
+            # Need to run mpiexec with containerized openmpi
+            if options.hpc and self.hasOpenMPI():
+                cmd = f'mpiexec -n 1 {cmd}'
+
+            return cmd
 
         # Create the additional command line arguments list
         cli_args = list(specs['cli_args'])
@@ -225,7 +260,8 @@ class RunApp(Tester):
         elif nthreads > 1:
             command = command + ' --n-threads=' + str(nthreads)
 
-        if self.force_mpi or options.parallel or ncpus > 1:
+        # Force mpi, more than 1 core, or containerized openmpi (requires mpiexec serial)
+        if self.force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
             command = f'{self.mpi_command} -n {ncpus} {command}'
 
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
@@ -235,7 +271,7 @@ class RunApp(Tester):
 
         return command
 
-    def testFileOutput(self, moose_dir, options, output):
+    def testFileOutput(self, moose_dir, options, runner_output):
         """ Set a failure status for expressions found in output """
         reason = ''
         errors = ''
@@ -251,15 +287,12 @@ class RunApp(Tester):
             custom_module = importlib.util.module_from_spec(custom_mod_spec)
             sys.modules['custom_module'] = custom_module
             custom_mod_spec.loader.exec_module(custom_module)
-            if custom_module.custom_evaluation(output):
+            if custom_module.custom_evaluation(runner_output):
                 return errors
             else:
                 errors += "#"*80 + "\n\n" + "Custom evaluation failed.\n"
                 self.setStatus(self.fail, "CUSTOM EVAL FAILED")
                 return errors
-
-
-
 
         params_and_msgs = {'expect_err':
                               {'error_missing': True,
@@ -287,10 +320,10 @@ class RunApp(Tester):
             if specs.isValid(param) and (options.method in attr['modes'] or attr['modes'] == ['ALL']):
                 match_type = ""
                 if specs['match_literal']:
-                    have_expected_out = util.checkOutputForLiteral(output, specs[param])
+                    have_expected_out = util.checkOutputForLiteral(runner_output, specs[param])
                     match_type = 'literal'
                 else:
-                    have_expected_out = util.checkOutputForPattern(output, specs[param])
+                    have_expected_out = util.checkOutputForPattern(runner_output, specs[param])
                     match_type = 'pattern'
 
                 # Exclusive OR test
@@ -304,7 +337,7 @@ class RunApp(Tester):
 
         return errors
 
-    def testExitCodes(self, moose_dir, options, output):
+    def testExitCodes(self, moose_dir, options, exit_code, runner_output):
         # Don't do anything if we already have a status set
         reason = ''
         if self.isNoStatus():
@@ -312,25 +345,25 @@ class RunApp(Tester):
             # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
             # since a message to standard error might actually be a real error.  This case should be handled
             # in the derived class.
-            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in output, specs['errors'] )] ) > 0:
+            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
                 reason = 'ERRMSG'
-            elif self.exit_code == 0 and specs['should_crash'] == True:
+            elif exit_code == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
-            elif self.exit_code != 0 and specs['should_crash'] == False:
+            elif exit_code != 0 and specs['should_crash'] == False and self.shouldExecute():
                 # Let's look at the error code to see if we can perhaps further split this out later with a post exam
                 reason = 'CRASH'
             # Valgrind runs
-            elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+            elif exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in runner_output:
                 reason = 'MEMORY ERROR'
 
             if reason != '':
                 self.setStatus(self.fail, str(reason))
-                return "\n\nExit Code: " + str(self.exit_code)
+                return "\n\nExit Code: " + str(exit_code)
 
         # Return anything extra here that we want to tack onto the Output for when it gets printed later
         return ''
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
         """
         Wrapper method for testFileOutput.
 
@@ -344,7 +377,21 @@ class RunApp(Tester):
         # TODO: because RunParallel is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
-        output += self.testFileOutput(moose_dir, options, output)
-        output += self.testExitCodes(moose_dir, options, output)
+        output = ''
+        output += self.testFileOutput(moose_dir, options, runner_output)
+        output += self.testExitCodes(moose_dir, options, exit_code, runner_output)
 
         return output
+
+    def mustOutputExist(self, exit_code):
+        if self.specs['should_crash']:
+            return exit_code != 0
+        return exit_code == 0
+
+    def needFullOutput(self, options):
+        # We need the full output when we're trying to read from said output
+        params = ['expect_err', 'expect_assert', 'expect_out', 'absent_out']
+        for param in params:
+            if self.specs.isValid(param):
+                return True
+        return super().needFullOutput(options)

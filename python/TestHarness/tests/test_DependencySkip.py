@@ -13,6 +13,6 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test skipping a test if its prereq is also skipped
         """
-        output = self.runTests('--no-color', '-i', 'depend_skip_tests').decode('utf-8')
+        output = self.runTests('--no-color', '-i', 'depend_skip_tests')
         self.assertIn('[ALWAYS SKIPPED] SKIP', output)
         self.assertIn('[SKIPPED DEPENDENCY] SKIP', output)
