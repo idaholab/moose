@@ -32,7 +32,7 @@ protected:
   std::vector<MooseFunctorName> _prop_values;
 
   /// Number of properties to define
-  unsigned int _num_props;
+  const unsigned int _num_props;
 
   /// Vector of the functors
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _functors;

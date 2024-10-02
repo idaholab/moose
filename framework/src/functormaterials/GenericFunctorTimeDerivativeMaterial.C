@@ -37,25 +37,24 @@ GenericFunctorTimeDerivativeMaterialTempl<is_ad>::GenericFunctorTimeDerivativeMa
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
-    _prop_values(getParam<std::vector<MooseFunctorName>>("prop_values"))
+    _prop_values(getParam<std::vector<MooseFunctorName>>("prop_values")),
+    _num_props(_prop_names.size())
 {
-  unsigned int num_names = _prop_names.size();
   unsigned int num_values = _prop_values.size();
 
-  if (num_names != num_values)
+  if (_num_props != num_values)
     mooseError("Number of prop_names must match the number of prop_values for a "
                "GenericFunctorTimeDerivativeMaterial!");
 
   // Check that there is no name conflict, a common mistake with this object
-  for (const auto i : make_range(num_names))
+  for (const auto i : make_range(_num_props))
     for (const auto j : make_range(num_values))
       if (_prop_names[i] == _prop_values[j])
         paramError("prop_names",
                    "prop_names should not be the same as any of the prop_values. They"
                    " can both be functors, and functors may not have the same name.");
 
-  _num_props = num_names;
-  _functors.resize(num_names);
+  _functors.resize(_num_props);
 
   for (const auto i : make_range(_num_props))
   {
