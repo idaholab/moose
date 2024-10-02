@@ -31,11 +31,13 @@ public:
   void join(const UpdateErrorVectorsThread & /*y*/);
 
 protected:
+  /// Map from indicators to error vectors (markers solution vector)
   const std::map<std::string, std::unique_ptr<ErrorVector>> & _indicator_field_to_error_vector;
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;
   NumericVector<Number> & _solution;
 
+  /// Map from indicator variable number to error vectors (markers solution vector)
   std::map<unsigned int, ErrorVector *> _indicator_field_number_to_error_vector;
 };

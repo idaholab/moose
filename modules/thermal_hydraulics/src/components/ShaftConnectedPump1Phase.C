@@ -71,10 +71,10 @@ ShaftConnectedPump1Phase::ShaftConnectedPump1Phase(const InputParameters & param
     _inertia_coeff(getParam<std::vector<Real>>("inertia_coeff")),
     _head(getParam<FunctionName>("head")),
     _torque_hydraulic(getParam<FunctionName>("torque_hydraulic")),
-    _head_var_name(genName(name(), "head")),
-    _hydraulic_torque_var_name(genName(name(), "hydraulic_torque")),
-    _friction_torque_var_name(genName(name(), "friction_torque")),
-    _moi_var_name(genName(name(), "moment_of_inertia")),
+    _head_var_name(junctionVariableName("head")),
+    _hydraulic_torque_var_name(junctionVariableName("hydraulic_torque")),
+    _friction_torque_var_name(junctionVariableName("friction_torque")),
+    _moi_var_name(junctionVariableName("moment_of_inertia")),
     _transition_width(getParam<Real>("transition_width"))
 {
   // this determines connection ordering
@@ -105,6 +105,9 @@ ShaftConnectedPump1Phase::buildVolumeJunctionUserObject()
   {
     const std::string class_name = "ADShaftConnectedPump1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
+    params.set<bool>("use_scalar_variables") = _use_scalar_variables;
+    if (!_use_scalar_variables)
+      params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
     params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();
@@ -152,17 +155,17 @@ ShaftConnectedPump1Phase::addVariables()
 {
   VolumeJunction1Phase::addVariables();
 
-  getTHMProblem().addSimVariable(false, _head_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _hydraulic_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _friction_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _moment_of_inertia_var_name, FEType(FIRST, SCALAR));
+  addJunctionVariable(false, _head_var_name);
+  addJunctionVariable(false, _hydraulic_torque_var_name);
+  addJunctionVariable(false, _friction_torque_var_name);
+  addJunctionVariable(false, _moment_of_inertia_var_name);
 
   if (!_app.isRestarting())
   {
-    getTHMProblem().addConstantScalarIC(_head_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_hydraulic_torque_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+    addJunctionIC(_head_var_name, 0);
+    addJunctionIC(_hydraulic_torque_var_name, 0);
+    addJunctionIC(_friction_torque_var_name, 0);
+    addJunctionIC(_moment_of_inertia_var_name, _inertia_const);
   }
 }
 
@@ -178,12 +181,19 @@ ShaftConnectedPump1Phase::addMooseObjects()
       {"moment_of_inertia", _moment_of_inertia_var_name}};
   for (const auto & quantity_and_name : quantities)
   {
-    const std::string class_name = "ShaftConnectedPump1PhaseAux";
+    const std::string class_name =
+        _use_scalar_variables ? "ShaftConnectedPump1PhaseScalarAux" : "ShaftConnectedPump1PhaseAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = quantity_and_name.second;
     params.set<MooseEnum>("quantity") = quantity_and_name.first;
     params.set<UserObjectName>("pump_uo") = getShaftConnectedUserObjectName();
-    getTHMProblem().addAuxScalarKernel(
-        class_name, genName(name(), quantity_and_name.first + "_aux"), params);
+    const std::string obj_name = genName(name(), quantity_and_name.first + "_aux");
+    if (_use_scalar_variables)
+      getTHMProblem().addAuxScalarKernel(class_name, obj_name, params);
+    else
+    {
+      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+      getTHMProblem().addAuxKernel(class_name, obj_name, params);
+    }
   }
 }

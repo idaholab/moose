@@ -1,4 +1,6 @@
 [Tests]
+  design = 'flow_junction.md'
+
   [steady_state]
     type = 'Exodiff'
     input = 'steady_state.i'
@@ -6,7 +8,6 @@
     recover = false
 
     requirement = 'The system shall be able to produce an exodus file for setting initial conditions in volume junctions'
-    design = 'flow_junction.md'
     issues = '#20553'
   []
 
@@ -16,9 +17,21 @@
     exodiff = 'test_out.e'
     prereq = steady_state
     recover = false
+    max_threads = 1 # https://github.com/idaholab/moose/issues/28670
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in volume junctions'
-    design = 'flow_junction.md ScalarSolutionIC.md'
     issues = '#20553'
+  []
+
+  [parallel_threading_error]
+    type = RunException
+    input = 'test.i'
+    prereq = 'steady_state test'
+    expect_err = "Using initial conditions from a file for VolumeJunction1Phase is currently not tested for parallel threading"
+    min_parallel = 2
+    min_threads = 2
+
+    requirement = 'The system shall report an error if one tries to use an exodus file for setting initial conditions in a volume junction, with parallel threads.'
+    issues = '#28670'
   []
 []

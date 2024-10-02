@@ -11,4 +11,16 @@
     method = '!dbg'
     max_threads = 1 # see libmesh issue #3808
   []
+  [momentum-pressure-physics]
+    type = 'Exodiff'
+    input = 'lid-driven-segregated-physics.i'
+    exodiff = 'lid-driven-segregated-physics_out.e'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm, the linear finite volume system and the shorthand Physics syntax.'
+    recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
+    method = '!dbg'
+    max_threads = 1 # see libmesh issue #3808
+    # Until k-eps is merged, cannot do wall BC for moving wall
+    rel_err = 0.53
+  []
 []

@@ -135,7 +135,7 @@ PNSFVSolidHeatTransferPhysics::PNSFVSolidHeatTransferPhysics(const InputParamete
     _ambient_convection_alpha(getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha")),
     _ambient_temperature(getParam<std::vector<MooseFunctorName>>("ambient_convection_temperature"))
 {
-  saveNonlinearVariableName(_solid_temperature_name);
+  saveSolverVariableName(_solid_temperature_name);
 
   // Parameter checks
   if (getParam<std::vector<MooseFunctorName>>("ambient_convection_temperature").size() != 1)
@@ -152,8 +152,8 @@ void
 PNSFVSolidHeatTransferPhysics::addNonlinearVariables()
 {
   // Dont add if the user already defined the variable
-  if (nonlinearVariableExists(_solid_temperature_name,
-                              /*error_if_aux=*/true))
+  if (variableExists(_solid_temperature_name,
+                     /*error_if_aux=*/true))
     checkBlockRestrictionIdentical(_solid_temperature_name,
                                    getProblem().getVariable(0, _solid_temperature_name).blocks());
   else

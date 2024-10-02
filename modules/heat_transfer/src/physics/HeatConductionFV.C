@@ -156,7 +156,7 @@ HeatConductionFV::addFVBCs()
 void
 HeatConductionFV::addNonlinearVariables()
 {
-  if (nonlinearVariableExists(_temperature_name, /*error_if_aux=*/true))
+  if (variableExists(_temperature_name, /*error_if_aux=*/true))
     return;
 
   const std::string variable_type = "MooseVariableFVReal";

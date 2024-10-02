@@ -1,15 +1,15 @@
-# SimpleTurbinePowerAux
+# SimpleTurbinePowerScalarAux
 
-!syntax description /AuxScalarKernels/SimpleTurbinePowerAux
+!syntax description /AuxScalarKernels/SimpleTurbinePowerScalarAux
 
-If the [!param](/AuxScalarKernels/SimpleTurbinePowerAux/on) parameter is true, the power is
-equal to [!param](/AuxScalarKernels/SimpleTurbinePowerAux/value), else it is 0.
+If the [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) parameter is true, the power is
+equal to [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/value), else it is 0.
 
-The [!param](/AuxScalarKernels/SimpleTurbinePowerAux/on) parameter is controllable,
+The [!param](/AuxScalarKernels/SimpleTurbinePowerScalarAux/on) parameter is controllable,
 meaning that its value can be changed dynamically during a simulation using the [Controls system](syntax/Controls/index.md).
 
-!syntax parameters /AuxScalarKernels/SimpleTurbinePowerAux
+!syntax parameters /AuxScalarKernels/SimpleTurbinePowerScalarAux
 
-!syntax inputs /AuxScalarKernels/SimpleTurbinePowerAux
+!syntax inputs /AuxScalarKernels/SimpleTurbinePowerScalarAux
 
-!syntax children /AuxScalarKernels/SimpleTurbinePowerAux
+!syntax children /AuxScalarKernels/SimpleTurbinePowerScalarAux

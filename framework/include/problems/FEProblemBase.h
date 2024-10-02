@@ -606,13 +606,17 @@ public:
    */
   virtual void saveOldSolutions();
 
-  /// Set whether you want the non linear solution to be saved
-  void setSavePreviousNLSolution(bool set) { _previous_nl_solution_required = set; }
-
   /**
    * Restore old solutions from the backup vectors and deallocate them.
    */
   virtual void restoreOldSolutions();
+
+  /**
+   * Declare that we need up to old (1) or older (2) solution states for a given type of iteration
+   * @param oldest_needed oldest solution state needed
+   * @param iteration_type the type of iteration for which old/older states are needed
+   */
+  void needSolutionState(unsigned int oldest_needed, Moose::SolutionIterationType iteration_type);
 
   /**
    * Output the current step.

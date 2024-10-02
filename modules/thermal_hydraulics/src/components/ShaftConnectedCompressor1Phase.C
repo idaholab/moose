@@ -85,11 +85,11 @@ ShaftConnectedCompressor1Phase::ShaftConnectedCompressor1Phase(const InputParame
     _speeds(getParam<std::vector<Real>>("speeds")),
     _Rp_functions(getParam<std::vector<FunctionName>>("Rp_functions")),
     _eff_functions(getParam<std::vector<FunctionName>>("eff_functions")),
-    _delta_p_var_name(genName(name(), "delta_p")),
-    _isentropic_torque_var_name(genName(name(), "isentropic_torque")),
-    _dissipation_torque_var_name(genName(name(), "dissipation_torque")),
-    _friction_torque_var_name(genName(name(), "friction_torque")),
-    _moi_var_name(genName(name(), "moment_of_inertia"))
+    _delta_p_var_name(junctionVariableName("delta_p")),
+    _isentropic_torque_var_name(junctionVariableName("isentropic_torque")),
+    _dissipation_torque_var_name(junctionVariableName("dissipation_torque")),
+    _friction_torque_var_name(junctionVariableName("friction_torque")),
+    _moi_var_name(junctionVariableName("moment_of_inertia"))
 {
   // this determines connection ordering
   addConnection(_inlet);
@@ -119,6 +119,9 @@ ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
   {
     const std::string class_name = "ADShaftConnectedCompressor1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
+    params.set<bool>("use_scalar_variables") = _use_scalar_variables;
+    if (!_use_scalar_variables)
+      params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
     params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();
@@ -167,19 +170,19 @@ ShaftConnectedCompressor1Phase::addVariables()
 {
   VolumeJunction1Phase::addVariables();
 
-  getTHMProblem().addSimVariable(false, _delta_p_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _isentropic_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _dissipation_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _friction_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _moment_of_inertia_var_name, FEType(FIRST, SCALAR));
+  addJunctionVariable(false, _delta_p_var_name);
+  addJunctionVariable(false, _isentropic_torque_var_name);
+  addJunctionVariable(false, _dissipation_torque_var_name);
+  addJunctionVariable(false, _friction_torque_var_name);
+  addJunctionVariable(false, _moment_of_inertia_var_name);
 
   if (!_app.isRestarting())
   {
-    getTHMProblem().addConstantScalarIC(_delta_p_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_isentropic_torque_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_dissipation_torque_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+    addJunctionIC(_delta_p_var_name, 0);
+    addJunctionIC(_isentropic_torque_var_name, 0);
+    addJunctionIC(_dissipation_torque_var_name, 0);
+    addJunctionIC(_friction_torque_var_name, 0);
+    addJunctionIC(_moment_of_inertia_var_name, _inertia_const);
   }
 }
 
@@ -196,13 +199,20 @@ ShaftConnectedCompressor1Phase::addMooseObjects()
       {"moment_of_inertia", _moment_of_inertia_var_name}};
   for (const auto & quantity_and_name : quantities_aux)
   {
-    const std::string class_name = "ShaftConnectedCompressor1PhaseAux";
+    const std::string class_name = _use_scalar_variables ? "ShaftConnectedCompressor1PhaseScalarAux"
+                                                         : "ShaftConnectedCompressor1PhaseAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = quantity_and_name.second;
     params.set<MooseEnum>("quantity") = quantity_and_name.first;
     params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
-    getTHMProblem().addAuxScalarKernel(
-        class_name, genName(name(), quantity_and_name.first + "_aux"), params);
+    const std::string obj_name = genName(name(), quantity_and_name.first + "_aux");
+    if (_use_scalar_variables)
+      getTHMProblem().addAuxScalarKernel(class_name, obj_name, params);
+    else
+    {
+      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+      getTHMProblem().addAuxKernel(class_name, obj_name, params);
+    }
   }
 
   const std::vector<std::string> quantities_pp = {

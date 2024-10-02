@@ -44,6 +44,9 @@ Pump1Phase::buildVolumeJunctionUserObject()
   {
     const std::string class_name = "ADPump1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
+    params.set<bool>("use_scalar_variables") = _use_scalar_variables;
+    if (!_use_scalar_variables)
+      params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
     params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();

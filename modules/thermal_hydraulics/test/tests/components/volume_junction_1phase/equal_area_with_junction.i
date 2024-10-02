@@ -86,6 +86,8 @@
     scaling_factor_rhovV = 1
     scaling_factor_rhowV = 1
     scaling_factor_rhoEV = 1e-5
+
+    use_scalar_variables = false
   []
 
   [pipe2]
@@ -132,6 +134,9 @@
   l_tol = 1e-3
   l_max_its = 10
 
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
   [Quadrature]
     type = GAUSS
     order = SECOND
@@ -140,18 +145,21 @@
 
 [Postprocessors]
   [junction_rho]
-    type = ScalarVariable
-    variable = junction:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
   [junction_rhou]
-    type = ScalarVariable
-    variable = junction:rhouV
+    type = ElementAverageValue
+    variable = rhouV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
   [junction_rhoE]
-    type = ScalarVariable
-    variable = junction:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
 []

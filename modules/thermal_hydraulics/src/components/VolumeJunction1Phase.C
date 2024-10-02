@@ -22,6 +22,9 @@ VolumeJunction1Phase::validParams()
 {
   InputParameters params = FlowJunction1Phase::validParams();
 
+  params.addParam<bool>(
+      "use_scalar_variables", true, "True if the junction variables are scalar variables");
+
   params.addRequiredParam<Real>("volume", "Volume of the junction [m^3]");
   params.addRequiredParam<Point>("position", "Spatial position of the center of the junction [m]");
 
@@ -49,6 +52,8 @@ VolumeJunction1Phase::validParams()
 VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
   : FlowJunction1Phase(params),
 
+    _use_scalar_variables(getParam<bool>("use_scalar_variables")),
+
     _volume(getParam<Real>("volume")),
     _position(getParam<Point>("position")),
 
@@ -58,14 +63,14 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _scaling_factor_rhowV(getParam<Real>("scaling_factor_rhowV")),
     _scaling_factor_rhoEV(getParam<Real>("scaling_factor_rhoEV")),
 
-    _rhoV_var_name(genName(name(), "rhoV")),
-    _rhouV_var_name(genName(name(), "rhouV")),
-    _rhovV_var_name(genName(name(), "rhovV")),
-    _rhowV_var_name(genName(name(), "rhowV")),
-    _rhoEV_var_name(genName(name(), "rhoEV")),
-    _pressure_var_name(genName(name(), "p")),
-    _temperature_var_name(genName(name(), "T")),
-    _velocity_var_name(genName(name(), "vel")),
+    _rhoV_var_name(junctionVariableName("rhoV")),
+    _rhouV_var_name(junctionVariableName("rhouV")),
+    _rhovV_var_name(junctionVariableName("rhovV")),
+    _rhowV_var_name(junctionVariableName("rhowV")),
+    _rhoEV_var_name(junctionVariableName("rhoEV")),
+    _pressure_var_name(junctionVariableName("p")),
+    _temperature_var_name(junctionVariableName("T")),
+    _velocity_var_name(junctionVariableName("vel")),
 
     _K(getParam<Real>("K")),
     _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : _zero)
@@ -75,6 +80,36 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
       !params.isParamSetByUser("K"))
     logWarning("Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will "
                "behave as if there were no form loss.");
+
+  if (_use_scalar_variables)
+    mooseDeprecated(
+        "Volume junction-based components now have the parameter 'use_scalar_variables', which is "
+        "set to 'true' by default. Please set this parameter to 'false' and update input file "
+        "accordingly. See ",
+        MooseUtils::mooseDocsURL(
+            "modules/thermal_hydraulics/deprecations/volume_junction_scalar_variables.html"),
+        " for more information.");
+}
+
+void
+VolumeJunction1Phase::setupMesh()
+{
+  FlowJunction1Phase::setupMesh();
+
+  if (!_use_scalar_variables)
+  {
+    // Add a NodeElem to the mesh
+    auto * node = addNode(_position);
+    auto * elem = addNodeElement(node->id());
+    _junction_subdomain_id = mesh().getNextSubdomainId();
+    elem->subdomain_id() = _junction_subdomain_id;
+    setSubdomainInfo(_junction_subdomain_id, name());
+
+    // Add coupling between the flow channel end elements and the NodeElem
+    const auto & elem_ids = getConnectedElementIDs();
+    for (unsigned int i = 0; i < elem_ids.size(); i++)
+      getTHMProblem().augmentSparsity(elem_ids[i], elem->id());
+  }
 }
 
 void
@@ -99,23 +134,28 @@ VolumeJunction1Phase::check() const
 
     logError("The following initial condition parameters are missing:", oss.str());
   }
+
+  // https://github.com/idaholab/moose/issues/28670
+  if (getTHMProblem().hasInitialConditionsFromFile() && libMesh::n_threads() > 1 &&
+      _app.n_processors() > 1)
+    mooseDocumentedError("moose",
+                         28670,
+                         "Using initial conditions from a file for VolumeJunction1Phase is "
+                         "currently not tested for parallel threading.");
 }
 
 void
 VolumeJunction1Phase::addVariables()
 {
-  getTHMProblem().addSimVariable(true, _rhoV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhoV);
-  getTHMProblem().addSimVariable(
-      true, _rhouV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhouV);
-  getTHMProblem().addSimVariable(
-      true, _rhovV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhovV);
-  getTHMProblem().addSimVariable(
-      true, _rhowV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhowV);
-  getTHMProblem().addSimVariable(
-      true, _rhoEV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhoEV);
-  getTHMProblem().addSimVariable(false, _pressure_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _temperature_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _velocity_var_name, FEType(FIRST, SCALAR));
+  addJunctionVariable(true, _rhoV_var_name, _scaling_factor_rhoV);
+  addJunctionVariable(true, _rhouV_var_name, _scaling_factor_rhouV);
+  addJunctionVariable(true, _rhovV_var_name, _scaling_factor_rhovV);
+  addJunctionVariable(true, _rhowV_var_name, _scaling_factor_rhowV);
+  addJunctionVariable(true, _rhoEV_var_name, _scaling_factor_rhoEV);
+
+  addJunctionVariable(false, _pressure_var_name);
+  addJunctionVariable(false, _temperature_var_name);
+  addJunctionVariable(false, _velocity_var_name);
 
   if (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel_x") &&
       isParamValid("initial_vel_y") && isParamValid("initial_vel_z"))
@@ -148,15 +188,15 @@ VolumeJunction1Phase::addVariables()
     const RealVectorValue vel(initial_vel_x, initial_vel_y, initial_vel_z);
     const Real initial_E = fp.e_from_p_rho(initial_p, initial_rho) + 0.5 * vel * vel;
 
-    getTHMProblem().addConstantScalarIC(_rhoV_var_name, initial_rho * _volume);
-    getTHMProblem().addConstantScalarIC(_rhouV_var_name, initial_rho * initial_vel_x * _volume);
-    getTHMProblem().addConstantScalarIC(_rhovV_var_name, initial_rho * initial_vel_y * _volume);
-    getTHMProblem().addConstantScalarIC(_rhowV_var_name, initial_rho * initial_vel_z * _volume);
-    getTHMProblem().addConstantScalarIC(_rhoEV_var_name, initial_rho * initial_E * _volume);
+    addJunctionIC(_rhoV_var_name, initial_rho * _volume);
+    addJunctionIC(_rhouV_var_name, initial_rho * initial_vel_x * _volume);
+    addJunctionIC(_rhovV_var_name, initial_rho * initial_vel_y * _volume);
+    addJunctionIC(_rhowV_var_name, initial_rho * initial_vel_z * _volume);
+    addJunctionIC(_rhoEV_var_name, initial_rho * initial_E * _volume);
 
-    getTHMProblem().addConstantScalarIC(_pressure_var_name, initial_p);
-    getTHMProblem().addConstantScalarIC(_temperature_var_name, initial_T);
-    getTHMProblem().addConstantScalarIC(_velocity_var_name, vel.norm());
+    addJunctionIC(_pressure_var_name, initial_p);
+    addJunctionIC(_temperature_var_name, initial_T);
+    addJunctionIC(_velocity_var_name, vel.norm());
   }
 }
 
@@ -169,9 +209,12 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
   {
     const std::string class_name = "ADVolumeJunction1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
+    params.set<bool>("use_scalar_variables") = _use_scalar_variables;
+    if (!_use_scalar_variables)
+      params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
-    params.set<std::vector<processor_id_type>>("processor_ids") = _proc_ids;
+    params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();
     params.set<std::vector<UserObjectName>>("numerical_flux_names") = _numerical_flux_names;
     params.set<Real>("volume") = _volume;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
@@ -232,18 +275,34 @@ VolumeJunction1Phase::addMooseObjects()
   for (std::size_t i = 0; i < N_EQ; i++)
   {
     {
-      const std::string class_name = "ADScalarTimeDerivative";
+      const std::string class_name =
+          _use_scalar_variables ? "ADScalarTimeDerivative" : "ADTimeDerivative";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<NonlinearVariableName>("variable") = var_names[i];
-      getTHMProblem().addScalarKernel(class_name, genName(name(), var_names[i], "td"), params);
+      const std::string obj_name = genName(name(), var_names[i], "td");
+      if (_use_scalar_variables)
+        getTHMProblem().addScalarKernel(class_name, obj_name, params);
+      else
+      {
+        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+        getTHMProblem().addKernel(class_name, obj_name, params);
+      }
     }
     {
-      const std::string class_name = "ADVolumeJunctionAdvectionScalarKernel";
+      const std::string class_name = _use_scalar_variables ? "ADVolumeJunctionAdvectionScalarKernel"
+                                                           : "ADVolumeJunctionAdvectionKernel";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<NonlinearVariableName>("variable") = var_names[i];
       params.set<UserObjectName>("volume_junction_uo") = _junction_uo_name;
       params.set<unsigned int>("equation_index") = i;
-      getTHMProblem().addScalarKernel(class_name, genName(name(), var_names[i], "vja_sk"), params);
+      const std::string obj_name = genName(name(), var_names[i], "vja_sk");
+      if (_use_scalar_variables)
+        getTHMProblem().addScalarKernel(class_name, obj_name, params);
+      else
+      {
+        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+        getTHMProblem().addKernel(class_name, obj_name, params);
+      }
     }
   }
 
@@ -253,7 +312,8 @@ VolumeJunction1Phase::addMooseObjects()
       {"speed", _velocity_var_name}};
   for (const auto & quantity_and_name : quantities)
   {
-    const std::string class_name = "VolumeJunction1PhaseAux";
+    const std::string class_name =
+        _use_scalar_variables ? "VolumeJunction1PhaseScalarAux" : "VolumeJunction1PhaseAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = quantity_and_name.second;
     params.set<MooseEnum>("quantity") = quantity_and_name.first;
@@ -264,7 +324,69 @@ VolumeJunction1Phase::addMooseObjects()
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
     params.set<UserObjectName>("fp") = _fp_name;
-    getTHMProblem().addAuxScalarKernel(
-        class_name, genName(name(), quantity_and_name.first + "_aux"), params);
+    const std::string obj_name = genName(name(), quantity_and_name.first + "_aux");
+    if (_use_scalar_variables)
+      getTHMProblem().addAuxScalarKernel(class_name, obj_name, params);
+    else
+    {
+      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+      getTHMProblem().addAuxKernel(class_name, obj_name, params);
+    }
   }
+
+  // An error message results if there is any block without a material, so
+  // until this restriction is removed, we must add a dummy material that
+  // computes no material properties.
+  if (!_use_scalar_variables)
+  {
+    const std::string class_name = "GenericConstantMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+    params.set<std::vector<std::string>>("prop_names") = {};
+    params.set<std::vector<Real>>("prop_values") = {};
+    getTHMProblem().addMaterial(class_name, genName(name(), "dummy_mat"), params);
+  }
+}
+
+std::string
+VolumeJunction1Phase::junctionVariableName(const std::string & var_base) const
+{
+  return _use_scalar_variables ? genName(name(), var_base) : var_base;
+}
+
+void
+VolumeJunction1Phase::addJunctionVariable(bool is_nonlinear,
+                                          const VariableName & var,
+                                          Real scaling_factor)
+{
+  auto & problem = getTHMProblem();
+
+  if (_use_scalar_variables)
+  {
+    const FEType fe_type(FIRST, SCALAR);
+
+    if (is_nonlinear)
+      problem.addSimVariable(is_nonlinear, var, fe_type, scaling_factor);
+    else
+      problem.addSimVariable(is_nonlinear, var, fe_type);
+  }
+  else
+  {
+    const FEType fe_type(CONSTANT, MONOMIAL);
+    const auto & subdomains = getSubdomainNames();
+
+    if (is_nonlinear)
+      problem.addSimVariable(is_nonlinear, var, fe_type, subdomains, scaling_factor);
+    else
+      problem.addSimVariable(is_nonlinear, var, fe_type, subdomains);
+  }
+}
+
+void
+VolumeJunction1Phase::addJunctionIC(const VariableName & var, Real value)
+{
+  if (_use_scalar_variables)
+    getTHMProblem().addConstantScalarIC(var, value);
+  else
+    getTHMProblem().addConstantIC(var, value, getSubdomainNames());
 }

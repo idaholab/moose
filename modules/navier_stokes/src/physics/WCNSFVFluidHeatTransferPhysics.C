@@ -91,7 +91,7 @@ WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParame
   if (!_has_energy_equation)
     return;
 
-  saveNonlinearVariableName(_fluid_temperature_name);
+  saveSolverVariableName(_fluid_temperature_name);
 
   // set block restrictions if not set by user
   // This should probably be done for all the coupled physics, tbd
@@ -122,8 +122,8 @@ WCNSFVFluidHeatTransferPhysics::addNonlinearVariables()
     return;
 
   // Dont add if the user already defined the variable
-  if (nonlinearVariableExists(_fluid_temperature_name,
-                              /*error_if_aux=*/true))
+  if (variableExists(_fluid_temperature_name,
+                     /*error_if_aux=*/true))
     checkBlockRestrictionIdentical(_fluid_temperature_name,
                                    getProblem().getVariable(0, _fluid_temperature_name).blocks());
   else if (_define_variables)

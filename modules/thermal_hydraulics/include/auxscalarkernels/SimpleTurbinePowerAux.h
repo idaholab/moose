@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "ConstantAux.h"
 #include "ConstantScalarAux.h"
 
 class SinglePhaseFluidProperties;
@@ -16,13 +17,14 @@ class SinglePhaseFluidProperties;
 /**
  * Computes turbine power for 1-phase flow
  */
-class SimpleTurbinePowerAux : public ConstantScalarAux
+template <typename T>
+class SimpleTurbinePowerAuxTempl : public T
 {
 public:
-  SimpleTurbinePowerAux(const InputParameters & parameters);
+  SimpleTurbinePowerAuxTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// Flag indicating if turbine is operating or not
   const bool & _on;
@@ -30,3 +32,6 @@ protected:
 public:
   static InputParameters validParams();
 };
+
+typedef SimpleTurbinePowerAuxTempl<ConstantAux> SimpleTurbinePowerFieldAux;
+typedef SimpleTurbinePowerAuxTempl<ConstantScalarAux> SimpleTurbinePowerScalarAux;
