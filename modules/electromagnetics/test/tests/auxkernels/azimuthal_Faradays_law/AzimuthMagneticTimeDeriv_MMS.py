@@ -3,7 +3,7 @@
 # NOTE: For Cartesian to Cylindrical:
 # For MOOSE's 2D Cylindrical, it transforms (x,y) -> (r,z),
 # But MOOSE's mms.evaluate uses sympy, which assumes 3D and transforms (x,y,z) -> (r,theta,z).
-# For this reason, the 'z' coordinate in this file are inputted as the 'y' coordinate 
+# For this reason, the 'z' coordinate in this file are inputted as the 'y' coordinate
 # for the 2D cylindrical test file...
 
 import mms
@@ -29,7 +29,7 @@ mms.print_hit(fd, 'dB_dt')
 f_i = expand(f[0])
 
 f_i = str(f_i)
-f_i = f_i.replace('R.','') 
+f_i = f_i.replace('R.','')
 f_i = eval(f_i)
 
 f_i_re = re(f_i)
@@ -47,7 +47,7 @@ f_i_im = f_i_im.replace('z','y')
 f_j = expand(f[2])
 
 f_j = str(f_j)
-f_j = f_j.replace('R.','') 
+f_j = f_j.replace('R.','')
 f_j = eval(f_j)
 
 f_j_re = re(f_j)

@@ -33,7 +33,7 @@ mms.print_hit(fd, 'force_n')
 f_i = expand(f[0])
 
 f_i = str(f_i)
-f_i = f_i.replace('R.','') 
+f_i = f_i.replace('R.','')
 f_i = eval(f_i)
 
 f_i_re = re(f_i)
@@ -48,7 +48,7 @@ f_i_im = f_i_im.replace('**','^')
 f_j = expand(f[1])
 
 f_j = str(f_j)
-f_j = f_j.replace('R.','') 
+f_j = f_j.replace('R.','')
 f_j = eval(f_j)
 
 f_j_re = re(f_j)
