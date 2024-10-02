@@ -312,11 +312,11 @@ EquationSystem::BuildBilinearForms()
     auto blf = _blfs.Get(test_var_name);
     if (_blf_kernels_map.Has(test_var_name))
     {
+      blf->SetAssemblyLevel(_assembly_level);
       auto blf_kernels = _blf_kernels_map.GetRef(test_var_name);
 
       for (auto & blf_kernel : blf_kernels)
       {
-        blf->SetAssemblyLevel(_assembly_level);
         blf->AddDomainIntegrator(blf_kernel->createIntegrator());
       }
     }
@@ -499,7 +499,7 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
                                         mfem::BlockVector & truedXdt,
                                         mfem::BlockVector & trueRHS)
 {
-  MFEM_VERIFY(0, "Non-legacy assembly not yet implemented for time-dependent systems");
+  mooseError("Non-legacy assembly not yet implemented for time-dependent systems");
 }
 
 void
