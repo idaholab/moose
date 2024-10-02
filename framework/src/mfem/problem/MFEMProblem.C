@@ -13,8 +13,10 @@ MFEMProblem::validParams()
   params.addParam<bool>(
       "use_glvis", false, "Attempt to open GLVis ports to display variables during simulation");
   params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
-  params.addParam<std::string>(
-      "assembly_level", "legacy", "Matrix assembly level. Options: Legacy, Full, Partial, Element");
+
+  MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
+  params.addParam<MooseEnum>(
+      "assembly_level", assembly_levels, "Matrix assembly level. Options: legacy, full, element, partial, none.");
 
   return params;
 }
@@ -109,23 +111,28 @@ MFEMProblem::init()
 void
 MFEMProblem::setAssemblyLevel()
 {
-  // Convert to lowercase string
-  std::string assembly = "";
-  for (auto c : getParam<std::string>("assembly_level"))
-    assembly += tolower(c);
 
-  if (assembly == "legacy")
-    mfem_problem->_assembly_level = mfem::AssemblyLevel::LEGACY;
-  else if (assembly == "full")
-    mfem_problem->_assembly_level = mfem::AssemblyLevel::FULL;
-  else if (assembly == "element")
-    mfem_problem->_assembly_level = mfem::AssemblyLevel::ELEMENT;
-  else if (assembly == "partial")
-    mfem_problem->_assembly_level = mfem::AssemblyLevel::PARTIAL;
-  else if (assembly == "none")
-    mfem_problem->_assembly_level = mfem::AssemblyLevel::NONE;
-  else
-    MFEM_ABORT("Assembly level not recognised.");
+  switch(getParam<MooseEnum>("assembly_level"))
+  {
+    case 0:
+      mfem_problem->_assembly_level = mfem::AssemblyLevel::LEGACY;
+      break;
+    case 1:
+      mfem_problem->_assembly_level = mfem::AssemblyLevel::FULL;
+      break;
+    case 2:
+      mfem_problem->_assembly_level = mfem::AssemblyLevel::ELEMENT;
+      break;
+    case 3:
+      mfem_problem->_assembly_level = mfem::AssemblyLevel::PARTIAL;
+      break;
+    case 4:
+      mfem_problem->_assembly_level = mfem::AssemblyLevel::NONE;
+      break;
+    default:
+      mooseError("Assembly level not recognised");
+  }
+  
 }
 
 void
