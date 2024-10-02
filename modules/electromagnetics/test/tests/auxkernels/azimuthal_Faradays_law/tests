@@ -3,14 +3,16 @@
     type = Exodiff
     input = scalar_azim_magnetic_time_deriv.i
     exodiff = scalar_azim_magnetic_time_deriv_out.e
-    # cli_args = ''
-    # requirement = ''
+    requirement = 'The system shall calculate the time derivative of the azimuthal component of the magnetic field based on a supplied electric field scalar components.'
+    design = 'AzimuthMagneticTimeDerivScalar.md'
+    issues = '#28758'
   []
   [vector_azim_magnetic_time_deriv]
     type = Exodiff
     input = vector_azim_magnetic_time_deriv.i
     exodiff = vector_azim_magnetic_time_deriv_out.e
-    # cli_args = ''
-    # requirement = ''
+    requirement = 'The system shall calculate the time derivative of the azimuthal component of the magnetic field based on a supplied electric field vector.'
+    design = 'AzimuthMagneticTimeDerivVector.md'
+    issues = '#28758'
   []
 []
