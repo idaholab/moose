@@ -113,27 +113,8 @@ MFEMProblem::init()
 void
 MFEMProblem::setAssemblyLevel()
 {
-
-  switch (getParam<MooseEnum>("assembly_level"))
-  {
-    case 0:
-      mfem_problem->_assembly_level = mfem::AssemblyLevel::LEGACY;
-      break;
-    case 1:
-      mfem_problem->_assembly_level = mfem::AssemblyLevel::FULL;
-      break;
-    case 2:
-      mfem_problem->_assembly_level = mfem::AssemblyLevel::ELEMENT;
-      break;
-    case 3:
-      mfem_problem->_assembly_level = mfem::AssemblyLevel::PARTIAL;
-      break;
-    case 4:
-      mfem_problem->_assembly_level = mfem::AssemblyLevel::NONE;
-      break;
-    default:
-      mooseError("Assembly level not recognised");
-  }
+  mfem_problem->_assembly_level =
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>();
 }
 
 void
