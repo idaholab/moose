@@ -21,6 +21,5 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 void
 MFEMOperatorJacobiSmoother::constructSolver(const InputParameters & parameters)
 {
-  _preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>(
-      getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  _preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>();
 }
