@@ -173,4 +173,15 @@
     requirement ='The system shall throw an error if the given external boundary is actually an internal boundary of the input mesh.'
     mesh_mode = 'REPLICATED'
   []
+  [err_non_existing_boundary]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/fmg/file=input_mesh_err.e
+                Mesh/pr/input_mesh_external_boundary=12345
+                Mesh/inactive=tg
+                --mesh-only'
+    expect_err = 'External boundary does not exist in the input mesh'
+    requirement ='The system shall throw an error if the given external boundary does not exist in the input mesh.'
+    mesh_mode = 'REPLICATED'
+  []
 []

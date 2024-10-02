@@ -85,6 +85,9 @@ PatternedPolygonPeripheralModifierBase::generate()
   // Load boundary information
   _input_mesh_external_bid =
       MooseMeshUtils::getBoundaryID(_input_mesh_external_boundary, *input_mesh);
+  if (_input_mesh_external_bid == Moose::INVALID_BOUNDARY_ID)
+    paramError("input_mesh_external_boundary",
+               "External boundary does not exist in the input mesh");
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
       input_mesh->get_boundary_info().build_side_list();
   input_mesh->get_boundary_info().build_node_list_from_side_list();

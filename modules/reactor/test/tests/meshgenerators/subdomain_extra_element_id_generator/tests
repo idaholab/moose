@@ -26,6 +26,13 @@
       expect_err = 'Cannot have subdomain with ID 1 listed more than once!'
       detail = 'a subdomain is listed more than once when assigning extra element IDs'
     []
+    [non_existing_subdomain]
+      type = RunException
+      input = 'subdomain_elem_ids_test.i'
+      cli_args = "Mesh/subdomain_ids/subdomains='1234 sub1 2 sub3'"
+      expect_err = 'Subdomain 1234 does not exist in the mesh'
+      detail = 'a subdomain listed by the user does not exist in the mesh'
+    []
     [diff_size1]
       type = RunException
       input = 'subdomain_elem_ids_test.i'

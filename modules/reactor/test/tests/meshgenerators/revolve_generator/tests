@@ -70,10 +70,10 @@
     [simple_tri_270]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_tri_270.e 
-                  Mesh/rg/revolving_angles=270.0 
-                  Mesh/rg/start_boundary=123 
-                  Mesh/rg/end_boundary=456 
+      cli_args = '--mesh-only simple_revolve_tri_270.e
+                  Mesh/rg/revolving_angles=270.0
+                  Mesh/rg/start_boundary=123
+                  Mesh/rg/end_boundary=456
                   Mesh/rg/preserve_volumes=true'
       exodiff = 'simple_revolve_tri_270.e'
       recover = false
@@ -82,8 +82,8 @@
     [simple_tri_-270]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_tri_-270.e 
-                  Mesh/rg/revolving_angles=270.0 
+      cli_args = '--mesh-only simple_revolve_tri_-270.e
+                  Mesh/rg/revolving_angles=270.0
                   Mesh/rg/clockwise=false'
       exodiff = 'simple_revolve_tri_-270.e'
       recover = false
@@ -92,7 +92,7 @@
     [simple_tri_vol_preserve]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_tri_vp.e 
+      cli_args = '--mesh-only simple_revolve_tri_vp.e
                   Mesh/rg/preserve_volumes=true'
       exodiff = 'simple_revolve_tri_vp.e'
       recover = false
@@ -101,8 +101,8 @@
     [simple_tri_on_axis_1]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_tri_oa.e 
-                  Mesh/rg/axis_point="0.0 1.15470053838 0.0" 
+      cli_args = '--mesh-only simple_revolve_tri_oa.e
+                  Mesh/rg/axis_point="0.0 1.15470053838 0.0"
                   Mesh/rg/axis_direction="1.0 0.0 0.0"'
       exodiff = 'simple_revolve_tri_oa.e'
       recover = false
@@ -111,8 +111,8 @@
     [simple_tri_on_axis_2]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_tri_oa_2.e 
-                  Mesh/rg/axis_point="-1.0 0.0 0.0" 
+      cli_args = '--mesh-only simple_revolve_tri_oa_2.e
+                  Mesh/rg/axis_point="-1.0 0.0 0.0"
                   Mesh/rg/axis_direction="0.0 1.0 0.0"'
       exodiff = 'simple_revolve_tri_oa_2.e'
       recover = false
@@ -121,7 +121,7 @@
     [simple_quad]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_quad.e 
+      cli_args = '--mesh-only simple_revolve_quad.e
                   Mesh/shg/element_type=QUAD'
       exodiff = 'simple_revolve_quad.e'
       recover = false
@@ -130,9 +130,9 @@
     [simple_quad_on_axis_1]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_quad_oa.e 
-                  Mesh/rg/axis_point="0.0 1.15470053838 0.0" 
-                  Mesh/rg/axis_direction="1.0 0.0 0.0" 
+      cli_args = '--mesh-only simple_revolve_quad_oa.e
+                  Mesh/rg/axis_point="0.0 1.15470053838 0.0"
+                  Mesh/rg/axis_direction="1.0 0.0 0.0"
                   Mesh/shg/element_type=QUAD'
       exodiff = 'simple_revolve_quad_oa.e'
       recover = false
@@ -141,9 +141,9 @@
     [simple_quad_on_axis_2]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_quad_oa_2.e 
-                  Mesh/rg/axis_point="-1.0 0.0 0.0" 
-                  Mesh/rg/axis_direction="0.0 1.0 0.0" 
+      cli_args = '--mesh-only simple_revolve_quad_oa_2.e
+                  Mesh/rg/axis_point="-1.0 0.0 0.0"
+                  Mesh/rg/axis_direction="0.0 1.0 0.0"
                   Mesh/shg/element_type=QUAD'
       exodiff = 'simple_revolve_quad_oa_2.e'
       recover = false
@@ -152,10 +152,10 @@
     [simple_hybrid]
       type = 'Exodiff'
       input = 'simple_revolve.i'
-      cli_args = '--mesh-only simple_revolve_hybrid.e 
-                  Mesh/shg/element_type=HYBRID 
-                  Mesh/shg/block_id="100 200" 
-                  Mesh/shg/block_name="block_tri block_quad" 
+      cli_args = '--mesh-only simple_revolve_hybrid.e
+                  Mesh/shg/element_type=HYBRID
+                  Mesh/shg/block_id="100 200"
+                  Mesh/shg/block_name="block_tri block_quad"
                   Mesh/shg/radial_intervals=2'
       exodiff = 'simple_revolve_hybrid.e'
       recover = false
@@ -172,7 +172,7 @@
     [multi_tri_partial]
       type = 'Exodiff'
       input = 'multi_revolve.i'
-      cli_args = '--mesh-only multi_revolve_tri_partial.e 
+      cli_args = '--mesh-only multi_revolve_tri_partial.e
                   Mesh/rg/revolving_angles="120 180"'
       exodiff = 'multi_revolve_tri_partial.e'
       recover = false
@@ -196,7 +196,7 @@
     [revolve_1d_single]
       type = 'Exodiff'
       input = 'revolve_1d.i'
-      cli_args = '--mesh-only revolve_1d_s_in.e 
+      cli_args = '--mesh-only revolve_1d_s_in.e
                   Mesh/gmg/nx=1'
       exodiff = 'revolve_1d_s_in.e'
       recover = false
@@ -231,7 +231,7 @@
     [err_3d_input]
       type = 'RunException'
       input = 'revolve_2d.i'
-      cli_args = '--mesh-only err_revolve_2d.e 
+      cli_args = '--mesh-only err_revolve_2d.e
                   Mesh/gmg/dim=3'
       expect_err = 'This mesh generator only works for 1D and 2D input meshes.'
       detail = "if input mesh has an inappropriate dimension."
@@ -239,7 +239,7 @@
     [err_1d_nonverticle]
       type = 'RunException'
       input = 'revolve_1d.i'
-      cli_args = '--mesh-only err_revolve_1d.e 
+      cli_args = '--mesh-only err_revolve_1d.e
                   Mesh/rg/axis_direction="-1.0 1.0 0.0"'
       expect_err = 'The 1D input mesh is not perpendicular to the rotation axis'
       detail = "if input 1D mesh is not perpendicular to the rotation axis."
@@ -247,7 +247,7 @@
     [err_input_centroid_on_axis]
       type = 'RunException'
       input = 'revolve_1d.i'
-      cli_args = '--mesh-only err_revolve_1d.e 
+      cli_args = '--mesh-only err_revolve_1d.e
                   Mesh/rg/axis_point="0.5 0.0 0.0"'
       expect_err = 'The input mesh is either across the axis or overlapped with the axis'
       detail = "if the input 1D mesh has its centroid overlapped with the rotation axis."
@@ -255,7 +255,7 @@
     [err_1d_input_across_axis]
       type = 'RunException'
       input = 'revolve_1d.i'
-      cli_args = '--mesh-only err_revolve_1d.e 
+      cli_args = '--mesh-only err_revolve_1d.e
                   Mesh/rg/axis_point="0.3 0.0 0.0"'
       expect_err = 'The input mesh is across the axis'
       detail = "if the input 1D mesh is across the rotation axis."
@@ -263,7 +263,7 @@
     [err_2d_input_across_axis]
       type = 'RunException'
       input = 'revolve_2d.i'
-      cli_args = '--mesh-only err_revolve_2d.e 
+      cli_args = '--mesh-only err_revolve_2d.e
                   Mesh/rg/axis_point="0.3 0.0 0.0"'
       expect_err = 'The input mesh is across the axis'
       detail = "if the input 2D mesh is across the rotation axis."
@@ -271,10 +271,18 @@
     [err_input_off_plane]
       type = 'RunException'
       input = 'revolve_1d.i'
-      cli_args = '--mesh-only err_revolve_1d.e 
+      cli_args = '--mesh-only err_revolve_1d.e
                   Mesh/rg/axis_point="0.0 0.0 1.0"'
       expect_err = 'The input mesh is not in the same plane with the rotation axis'
       detail = "the input 1D mesh is not coplanar to the rotation axis."
     []
-  []  
+    [err_bad_block_swap]
+      type = 'RunException'
+      input = 'multi_revolve.i'
+      cli_args = "--mesh-only bad_swap.e
+                  Mesh/rg/subdomain_swaps=' ;13021 300 13021 400'"
+      expect_err = 'Source subdomain 13021 was not found in the mesh'
+      detail = "the source subdomain for a subdomain swap does not exist in the mesh."
+    []
+  []
 []
