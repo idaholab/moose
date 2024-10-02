@@ -3,14 +3,16 @@
     type = Exodiff
     input = aux_microwave_heating.i
     exodiff = aux_microwave_heating_out.e
-    # cli_args = ''
-    # requirement = ''
+    requirement = 'The system shall calculate the power deposition based on the material conductivity and electric field.'
+    design = 'AuxComplexHeating.md'
+    issues = '#28758'
   []
   [aux_current_heating]
     type = Exodiff
     input = aux_current_source_heating.i
     exodiff = aux_current_source_heating_out.e
-    # cli_args = ''
-    # requirement = ''
+    requirement = 'The system shall calculate the power deposition based on the electric field and a supplied current density source.'
+    design = 'SourceCurrentHeating.md'
+    issues = '#28758'
   []
 []

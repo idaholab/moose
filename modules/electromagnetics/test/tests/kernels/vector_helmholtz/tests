@@ -20,24 +20,24 @@
     type = 'Exodiff'
     input = 'vector_ADmaterial_wave_equation.i'
     exodiff = 'vector_ADmaterial_wave_equation_out.e'
-    #requirement = ''
-    #design = ''
-    #issues = ''
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
+    design = 'ADMatWaveEquation.md'
+    issues = '#28758'
   []
   [vector_conductive_current]
     type = 'Exodiff'
     input = 'vector_conductive_current.i'
     exodiff = 'vector_conductive_current_out.e'
-    #requirement = ''
-    #design = ''
-    #issues = ''
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
+    design = 'ADConductiveCurrent.md'
+    issues = '#28758'
   []
   [microwave_heating]
     type = 'Exodiff'
     input = 'microwave_heating.i'
     exodiff = 'microwave_heating_out.e'
-    #requirement = ''
-    #design = ''
-    #issues = ''
+    requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions.'
+    design = 'ComplexHeating.md'
+    issues = '#28758'
   []
 []
