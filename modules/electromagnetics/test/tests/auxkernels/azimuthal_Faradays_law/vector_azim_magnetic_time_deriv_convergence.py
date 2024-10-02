@@ -38,7 +38,7 @@ for i in range(0, runs):
     cli_args = ['-i'] + input_files
     a = copy.copy(cli_args)
 
-    out = mooseutils.run_executable('/Users/dechcs/projects-EM-update/moose/modules/electromagnetics/electromagnetics-opt', *a, mpi=mpi, suppress_output=not console)
+    out = mooseutils.run_executable('../../../../electromagnetics-opt', *a, mpi=mpi, suppress_output=not console)
 
     fcsv = input_files[-1].replace('.i', '_out.csv')
     current = pandas.read_csv(fcsv)

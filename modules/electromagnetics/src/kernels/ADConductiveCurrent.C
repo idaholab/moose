@@ -25,23 +25,15 @@ ADConductiveCurrent::validParams()
   params.addRequiredCoupledVar("E_imag", "The imaginary component of the E-field.");
 
   params.addParam<MaterialPropertyName>(
-      "conductivity_real",
-      1.0,
-      "The real component of the material conductivity.");
+      "conductivity_real", 1.0, "The real component of the material conductivity.");
   params.addParam<MaterialPropertyName>(
-      "conductivity_imag",
-      0.0,
-      "The imaginary component of the material conductivity.");
+      "conductivity_imag", 0.0, "The imaginary component of the material conductivity.");
 
-  params.addParam<MaterialPropertyName>(
-      "ang_freq_real", "ang_freq", "The drive frequency.");
-  params.addParam<MaterialPropertyName>(
-      "ang_freq_imag", 0.0, "The drive frequency.");
+  params.addParam<MaterialPropertyName>("ang_freq_real", "ang_freq", "The drive frequency.");
+  params.addParam<MaterialPropertyName>("ang_freq_imag", 0.0, "The drive frequency.");
 
-  params.addParam<MaterialPropertyName>(
-      "permeability_real", "mu_vacuum", "The permeability.");
-      params.addParam<MaterialPropertyName>(
-      "permeability_imag", 0.0, "The permeability.");
+  params.addParam<MaterialPropertyName>("permeability_real", "mu_vacuum", "The permeability.");
+  params.addParam<MaterialPropertyName>("permeability_imag", 0.0, "The permeability.");
 
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Component of field (real or imaginary).");
@@ -78,12 +70,10 @@ ADConductiveCurrent::computeQpResidual()
 
   if (_component == EM::REAL)
   {
-    return _test[_i][_qp] * -1.0 *
-           (mu_omega_imag * sigma_E_real + mu_omega_real * sigma_E_imag);
+    return _test[_i][_qp] * -1.0 * (mu_omega_imag * sigma_E_real + mu_omega_real * sigma_E_imag);
   }
   else
   {
-    return _test[_i][_qp] *
-           (mu_omega_real * sigma_E_real - mu_omega_imag * sigma_E_imag);
+    return _test[_i][_qp] * (mu_omega_real * sigma_E_real - mu_omega_imag * sigma_E_imag);
   }
 }
