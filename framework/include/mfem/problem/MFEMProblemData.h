@@ -30,7 +30,6 @@ public:
   platypus::FESpaces _fespaces;
   platypus::GridFunctions _gridfunctions;
 
-  mfem::Device _device;
   MPI_Comm _comm;
   int _myid;
   int _num_procs;
