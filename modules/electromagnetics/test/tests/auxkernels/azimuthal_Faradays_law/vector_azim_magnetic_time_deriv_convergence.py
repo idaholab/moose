@@ -59,7 +59,7 @@ for i in range(0, runs):
 mesh["nx"] = 10
 mesh["ny"] = 10
 pyhit.write("vector_azim_magnetic_time_deriv.i", root)
-    
+
 
 fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
 fig.plot(data, label=['E_Real', 'E_Imag.','dB_dt_vector'], marker='o', markersize=8)
