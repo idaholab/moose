@@ -4,7 +4,7 @@
 InputParameters
 MFEMExecutioner::validParams()
 {
-  InputParameters params = Executioner::validParams();  
+  InputParameters params = Executioner::validParams();
   params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
   return params;
 }
