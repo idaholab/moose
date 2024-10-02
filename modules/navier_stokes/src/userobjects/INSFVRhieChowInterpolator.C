@@ -610,11 +610,12 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell
   // centroid values on either side of the face
-  const auto & grad_p = p.adGradSln(fi, time);
+  const auto correct_skewness_p = pressureSkewCorrection(tid);
+  const auto & grad_p = p.adGradSln(fi, time, correct_skewness_p);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
-  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
+  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time, correct_skewness_p);
 
   // Volumetric Correction Method #1: pressure-based correction
   // Function that allows us to mark the face for which the Rhie-Chow interpolation is
