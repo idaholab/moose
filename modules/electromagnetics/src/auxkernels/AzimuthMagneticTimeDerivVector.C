@@ -15,17 +15,16 @@ InputParameters
 AzimuthMagneticTimeDerivVector::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Computes the time derivative of the azimuthal component "
-    "of the magnetic field assuming cylindrical electric field. The electric field is "
-    "is supplied as a vector.");
-  params.addRequiredCoupledVar("Efield",
-                               "The electric field vector");
+  params.addClassDescription(
+      "Computes the time derivative of the azimuthal component "
+      "of the magnetic field assuming cylindrical electric field. The electric field is "
+      "is supplied as a vector.");
+  params.addRequiredCoupledVar("Efield", "The electric field vector");
   return params;
 }
 
 AzimuthMagneticTimeDerivVector::AzimuthMagneticTimeDerivVector(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _efield_curl(coupledCurl("Efield"))
+  : AuxKernel(parameters), _efield_curl(coupledCurl("Efield"))
 {
 }
 

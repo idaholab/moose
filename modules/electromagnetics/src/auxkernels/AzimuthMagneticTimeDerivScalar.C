@@ -15,9 +15,10 @@ InputParameters
 AzimuthMagneticTimeDerivScalar::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Computes the time derivative of the azimuthal component "
-    "of the magnetic field assuming cylindrical electric field. The electric field is "
-    "is supplied as scalar components.");
+  params.addClassDescription(
+      "Computes the time derivative of the azimuthal component "
+      "of the magnetic field assuming cylindrical electric field. The electric field is "
+      "is supplied as scalar components.");
   params.addRequiredCoupledVar("Efield_X", "The x-component of the E-field");
   params.addRequiredCoupledVar("Efield_Y", "The y-component of the E-field");
   return params;
