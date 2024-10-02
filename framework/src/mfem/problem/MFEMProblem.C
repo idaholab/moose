@@ -118,10 +118,12 @@ MFEMProblem::setAssemblyLevel()
     mfem_problem->_assembly_level = mfem::AssemblyLevel::LEGACY;
   else if (assembly == "full")
     mfem_problem->_assembly_level = mfem::AssemblyLevel::FULL;
-  else if (assembly == "partial")
-    mfem_problem->_assembly_level = mfem::AssemblyLevel::PARTIAL;
   else if (assembly == "element")
     mfem_problem->_assembly_level = mfem::AssemblyLevel::ELEMENT;
+  else if (assembly == "partial")
+    mfem_problem->_assembly_level = mfem::AssemblyLevel::PARTIAL;
+  else if (assembly == "none")
+    mfem_problem->_assembly_level = mfem::AssemblyLevel::NONE;
   else
     MFEM_ABORT("Assembly level not recognised.");
 }
