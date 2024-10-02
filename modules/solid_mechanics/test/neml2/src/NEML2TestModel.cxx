@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2TestModel.h"
+using neml2::print_helper;
+
+#include "MooseApp.h"
 
 namespace neml2
 {
@@ -25,6 +28,7 @@ NEML2TestModel::expected_options()
   // Use AD
   options.set<bool>("_use_AD_first_derivative") = true;
   options.set<bool>("_use_AD_second_derivative") = true;
+  options.set<MooseApp *>("_moose_app") = nullptr;
   return options;
 }
 
@@ -37,6 +41,10 @@ NEML2TestModel::NEML2TestModel(const OptionSet & options)
     _sum(declare_output_variable<Scalar>("sum")),
     _product(declare_output_variable<Scalar>("product"))
 {
+  const auto moose_app = options.get<MooseApp *>("_moose_app");
+  neml_assert(moose_app,
+              "The _moose_app option was not set. The model should be built using the "
+              "NEML2Utils::get_model_moose method!");
 }
 
 void

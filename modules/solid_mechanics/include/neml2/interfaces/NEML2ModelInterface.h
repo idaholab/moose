@@ -109,7 +109,8 @@ template <class T>
 template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...),
-    _model(neml2::get_model(params.get<std::string>("model"), params.get<bool>("enable_AD"))),
+    _model(NEML2Utils::get_model_moose(
+        params.get<std::string>("model"), this, params.get<bool>("enable_AD"))),
     _device(params.get<std::string>("device"))
 {
 }

@@ -12,6 +12,7 @@
 #ifdef NEML2_ENABLED
 
 #include "VariadicTable.h"
+#include "MooseBase.h"
 
 namespace neml2
 {
@@ -53,6 +54,21 @@ namespace NEML2Utils
 {
 
 #ifdef NEML2_ENABLED
+
+neml2::Model &
+get_model_moose(const std::string & mname,
+                MooseBase * moose_base,
+                bool enable_ad,
+                bool force_create)
+{
+  neml2::OptionSet extra_opts;
+  extra_opts.set<MooseApp *>("_moose_app") = &moose_base->getMooseApp();
+  extra_opts.set<bool>("_enable_AD") = enable_ad;
+  auto & model =
+      neml2::Factory::get_object<neml2::Model>("Models", mname, extra_opts, force_create);
+  model.reinit();
+  return model;
+}
 
 neml2::VariableName
 getOldName(const neml2::VariableName & var)

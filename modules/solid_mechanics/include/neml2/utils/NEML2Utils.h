@@ -23,7 +23,7 @@
 
 #include "InputParameters.h"
 
-class MooseObject;
+class MooseBase;
 class Action;
 
 #ifdef NEML2_ENABLED
@@ -42,6 +42,12 @@ namespace NEML2Utils
 {
 
 #ifdef NEML2_ENABLED
+
+/// special version of get_model that adds a MooseApp parameter
+neml2::Model & get_model_moose(const std::string & mname,
+                               MooseBase * moose_base,
+                               bool enable_ad = true,
+                               bool force_create = true);
 
 /// Map a variable name onto the old_xxx sub-axis
 neml2::VariableName getOldName(const neml2::VariableName & var);
