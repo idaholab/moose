@@ -16,7 +16,7 @@ public:
   TimeDomainEquationSystemProblemOperator(
       MFEMProblemData & problem,
       std::shared_ptr<platypus::TimeDependentEquationSystem> equation_system)
-    : TimeDomainProblemOperator(problem), _equation_system{std::move(equation_system)}
+    : TimeDomainProblemOperator(problem), _equation_system{equation_system}
   {
   }
 
