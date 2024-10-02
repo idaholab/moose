@@ -6,7 +6,6 @@
 
 [Problem]
   type = MFEMProblem
-  device = "cpu"
 []
 
 [Variables]
@@ -99,6 +98,7 @@
 
 [Executioner]
   type = MFEMTransient
+  device = cpu
   dt = 1.0
   start_time = 0.0
   end_time = 1.0

@@ -20,7 +20,13 @@ public:
   /// Virtual method to construct the operator. Call for default problems.
   virtual void ConstructOperator() = 0;
 
+  /**
+   * Set the device to use to solve the FE problem.
+   */
+  void setDevice();
+  
 protected:
   MFEMProblem & _mfem_problem;
-  MFEMProblemData & _problem_data;
+  MFEMProblemData & _problem_data;  
+  mfem::Device _device;
 };

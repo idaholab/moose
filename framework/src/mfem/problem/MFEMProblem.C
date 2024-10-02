@@ -6,7 +6,6 @@ InputParameters
 MFEMProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
-  params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
   return params;
 }
 
@@ -51,13 +50,6 @@ MFEMProblem::init()
 }
 
 void
-MFEMProblem::setDevice()
-{
-  getProblemData()._device.Configure(getParam<std::string>("device"));
-  getProblemData()._device.Print(std::cout);
-}
-
-void
 MFEMProblem::setMesh()
 {
   auto pmesh = std::make_shared<mfem::ParMesh>(mesh().getMFEMParMesh());
@@ -70,7 +62,6 @@ MFEMProblem::setMesh()
 void
 MFEMProblem::setProblemOperator()
 {
-  setDevice();
   setMesh();
   auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
   if (mfem_exec_ptr != nullptr)
