@@ -16,7 +16,9 @@ MFEMProblem::validParams()
 
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
   params.addParam<MooseEnum>(
-      "assembly_level", assembly_levels, "Matrix assembly level. Options: legacy, full, element, partial, none.");
+      "assembly_level",
+      assembly_levels,
+      "Matrix assembly level. Options: legacy, full, element, partial, none.");
 
   return params;
 }
@@ -112,7 +114,7 @@ void
 MFEMProblem::setAssemblyLevel()
 {
 
-  switch(getParam<MooseEnum>("assembly_level"))
+  switch (getParam<MooseEnum>("assembly_level"))
   {
     case 0:
       mfem_problem->_assembly_level = mfem::AssemblyLevel::LEGACY;
@@ -132,7 +134,6 @@ MFEMProblem::setAssemblyLevel()
     default:
       mooseError("Assembly level not recognised");
   }
-  
 }
 
 void
