@@ -13,7 +13,7 @@ public:
 
   EquationSystemProblemOperator(MFEMProblemData & problem,
                                 std::shared_ptr<platypus::EquationSystem> equation_system)
-    : ProblemOperator(problem), _equation_system(std::move(equation_system))
+    : ProblemOperator(problem), _equation_system(equation_system)
   {
   }
 
