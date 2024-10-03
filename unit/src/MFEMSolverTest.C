@@ -161,7 +161,8 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolver)
   solver_params.set<double>("l_abs_tol") = 1e-5;
 
   // Construct kernel
-  MFEMGMRESSolver & solver = addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
+  MFEMGMRESSolver & solver =
+      addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto solver_downcast = std::dynamic_pointer_cast<mfem::GMRESSolver>(solver.getSolver());
