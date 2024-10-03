@@ -207,7 +207,7 @@ class TestParam(AppSyntaxTestCase):
         self.assertHTMLTag(res(1, 0, 1), 'p', size=2, class_='moose-parameter-description-cpptype')
         self.assertEqual(u"NonlinearVariableName", res(1, 0, 1, 1)['content'])
         self.assertHTMLTag(res(1, 0, 2), 'p', size=2, class_='moose-parameter-description-doc-unit')
-        self.assertEqual(u"(no unit assumed for this parameter)", res(1, 0, 2, 1)['content'])
+        self.assertEqual(u"(no unit assumed)", res(1, 0, 2, 1)['content'])
         self.assertHTMLTag(res(1, 0, 3), 'p', size=2, class_='moose-parameter-description-controllable')
         self.assertHTMLString(res(1, 0, 3, 1), 'No')
         self.assertHTMLTag(res(1, 0, 4), 'p', size=2, class_='moose-parameter-description')
