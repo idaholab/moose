@@ -44,6 +44,7 @@ SideFVFluxBCIntegral::initialSetup()
                         .condition<AttribSystem>("FVFluxBC")
                         .condition<AttribThread>(_tid);
 
+  // Fetch the mentioned boundary conditions
   _bc_objects.clear();
   for (const auto & name : _bc_names)
   {
@@ -54,6 +55,15 @@ SideFVFluxBCIntegral::initialSetup()
 
     _bc_objects.push_back(flux_bcs[0]);
   }
+
+  // Check if the boundary restriction of the objects is the same.
+  for (const auto bc_ptr : _bc_objects)
+    // Comparing ordered sets
+    if (this->boundaryIDs() != bc_ptr->boundaryIDs())
+      paramError("fvbcs",
+                 "The given boundary condition with name ",
+                 bc_ptr->name(),
+                 " does not have the same boundary restriction as this postprocessor!");
 }
 
 Real
