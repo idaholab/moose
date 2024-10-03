@@ -60,13 +60,13 @@ MFEMProblem::setMesh()
 }
 
 void
-MFEMProblem::setProblemOperator()
+MFEMProblem::initProblemOperator()
 {
   setMesh();
   auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
   if (mfem_exec_ptr != nullptr)
   {
-    mfem_exec_ptr->ConstructOperator();
+    mfem_exec_ptr->constructProblemOperator();
   }
   else
   {

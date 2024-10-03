@@ -11,24 +11,9 @@ public:
   explicit MFEMSteady(const InputParameters & params);
   ~MFEMSteady() override = default;
 
+  void constructProblemOperator() override;
   virtual void init() override;
-
   virtual void execute() override;
-
-  [[nodiscard]] platypus::EquationSystemProblemOperator * GetOperator() const override
-  {
-    return static_cast<platypus::EquationSystemProblemOperator *>(_problem_operator.get());
-  }
-
-  void ConstructOperator() override
-  {
-    _problem_data._eqn_system = std::make_shared<platypus::EquationSystem>();
-    auto problem_operator = std::make_unique<platypus::EquationSystemProblemOperator>(
-        _problem_data, _problem_data._eqn_system);
-
-    _problem_operator.reset();
-    _problem_operator = std::move(problem_operator);
-  }
 
 protected:
   Real _system_time;
