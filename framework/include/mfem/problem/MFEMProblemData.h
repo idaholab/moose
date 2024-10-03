@@ -1,6 +1,7 @@
 #pragma once
 #include "equation_system.h"
 #include "MFEMContainers.h"
+#include "PropertyManager.h"
 #include "outputs.h"
 #include <fstream>
 #include <iostream>
@@ -14,6 +15,7 @@ public:
   virtual ~MFEMProblemData() { _ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
+  platypus::PropertyManager _properties;
   platypus::BCMap _bc_map;
   platypus::Coefficients _coefficients;
   platypus::Outputs _outputs;
