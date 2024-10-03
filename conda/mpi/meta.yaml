@@ -6,10 +6,10 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.08.12" %}
+{% set version = "2024.10.01" %}
 
 # HDF5 Version
-{% set hdf5_version = "1.14.3" %}
+{% set hdf5_version = "1.14.2" %}
 
 package:
   name: moose-mpi
@@ -21,60 +21,114 @@ source:
 build:
   number: 0
   string: {{ mpi }}
-  pin_depends: strict
-  ignore_exports:
-    - openssl
-  script_env:
-    - REQUESTS_CA_BUNDLE
-    - SSL_CERT_FILE
-    - CURL_CA_BUNDLE
 
-requirements:
-  build:
-    - {{ mpi }} {{ mpi_version }}
-    - {{ mpi }}-mpicc
-    - {{ mpi }}-mpicxx
-    - {{ mpi }}-mpifort
-    - {{ moose_libgfortran5 }}
-    - {{ moose_libzlib }}
-    - {{ moose_clangcc }}                     # [osx]
-    - {{ moose_clangxx }}                     # [osx]
-    - {{ moose_gcc_impl }}                    # [linux]
-    - {{ moose_gfortran_impl }}               # [linux]
-    - {{ moose_gcc }}                         # [linux]
-    - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
-    - libcxx <18
-    - gfortran
-  run:
-    - {{ mpi }} {{ mpi_version }}
-    - {{ mpi }}-mpicc
-    - {{ mpi }}-mpicxx
-    - {{ mpi }}-mpifort
-    - {{ moose_libgfortran5 }}
-    - {{ moose_libzlib }}
-    - {{ moose_clangcc }}                     # [osx]
-    - {{ moose_clangxx }}                     # [osx]
-    - {{ moose_gcc }}                         # [linux]
-    - {{ moose_gfortran_impl }}               # [linux]
-    - gxx                                     # [linux]
-    - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
-    - libcxx <18
-    - automake 1.16.5
-    - libexpat 2.5.0
-    - bison 3.4
-    - zfp 0.5.5
-    - gfortran
-    - autoconf
-    - libtool
-    - cmake
-    - make
-    - m4
-  run_constrained:
-    - python <{{3.12}}
+outputs:
+  - name: moose-mpi-base
+    build:
+      number: 0
+      string: {{ mpi }}
+      pin_depends: strict
+      ignore_exports:
+        - openssl
+      script: ${RECIPE_DIR}/base_build.sh
+      script_env:
+        - REQUESTS_CA_BUNDLE
+        - SSL_CERT_FILE
+        - CURL_CA_BUNDLE
+    requirements:
+      build:
+        - {{ mpi }} {{ mpi_version }}
+        - {{ mpi }}-mpicc
+        - {{ mpi }}-mpicxx
+        - {{ mpi }}-mpifort
+        - {{ moose_libgfortran5 }}
+        - {{ moose_gfortran }}
+        - {{ moose_libzlib }}
+        - {{ moose_libcxx }}
+        - {{ moose_clangcc }}                     # [osx]
+        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_clang_osx }}                   # [osx]
+        - {{ moose_compiler_rt }}                 # [osx]
+        - {{ moose_libclang }}                    # [osx]
+        - {{ moose_cctools }}                     # [osx]
+        - {{ moose_llvm_tools }}                  # [osx]
+        - {{ moose_llvm_openmp }}                 # [osx]
+        - {{ moose_gcc_impl }}                    # [linux]
+        - {{ moose_gfortran_impl }}               # [linux]
+        - {{ moose_gcc }}                         # [linux]
+        - {{ moose_gxx }}                         # [linux]
+        - {{ moose_libstdcxx }}                   # [linux]
+        - {{ moose_libstdcxx_devel }}             # [linux]
+        - {{ moose_icu }}
+        - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+      run:
+        - {{ mpi }} {{ mpi_version }}
+        - {{ mpi }}-mpicc
+        - {{ mpi }}-mpicxx
+        - {{ mpi }}-mpifort
+        - {{ moose_libgfortran5 }}
+        - {{ moose_gfortran }}
+        - {{ moose_libzlib }}
+        - {{ moose_libcxx }}
+        - {{ moose_clangcc }}                     # [osx]
+        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_clang_osx }}                   # [osx]
+        - {{ moose_compiler_rt }}                 # [osx]
+        - {{ moose_libclang }}                    # [osx]
+        - {{ moose_cctools }}                     # [osx]
+        - {{ moose_llvm_tools }}                  # [osx]
+        - {{ moose_llvm_openmp }}                 # [osx]
+        - {{ moose_gcc_impl }}                    # [linux]
+        - {{ moose_gfortran_impl }}               # [linux]
+        - {{ moose_gcc }}                         # [linux]
+        - {{ moose_gxx }}                         # [linux]
+        - {{ moose_libstdcxx }}                   # [linux]
+        - {{ moose_libstdcxx_devel }}             # [linux]
+        - {{ moose_icu }}
+        - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+        - automake 1.16.5
+        - libexpat 2.5.0
+        - bison 3.4
+        - zfp 0.5.5
+        - autoconf
+        - libtool
+        - cmake
+        - make
+        - zlib
+        - m4
+      run_constrained:
+        - python >=3.8,<3.12
+    test:
+      commands:
+        - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
+        - test -f $PREFIX/etc/conda/deactivate.d/deactivate_zzz_moose-mpi-base.sh
 
-test:
-  commands:
-    - test -f $PREFIX/etc/conda/activate.d/activate_moose-mpi.sh
+  # Default Python packages installed, with constrained Python versioning. These
+  # packages are what is required to build and pass moose/tests
+  - name: moose-python
+    requirements:
+      run:
+        - {{ pin_subpackage("moose-mpi-base", exact=True) }}
+        - python >=3.8,<3.12
+        - packaging
+        - requests
+        - jinja2
+        - pyaml
+
+  # tie it all together (note the exact=True pinning)
+  # The secrete sauce I was not understanding in all the available documentation: I
+  # failed to realize the package name here can match the global package name.
+  - name: moose-mpi
+    build:
+      number: 0
+      string: {{ mpi }}
+      run_exports:
+        - {{ pin_subpackage('moose-mpi', max_pin='x.x.x') }}
+    requirements:
+      build: []
+      run:
+        - {{ pin_subpackage("moose-mpi-base", exact=True) }}
+        - {{ pin_subpackage("moose-python", exact=True) }}
 
 about:
   home: https://mooseframework.org/

@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.08.12" %}
+{% set version = "2024.10.01" %}
 
 package:
   name: moose-peacock

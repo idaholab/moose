@@ -111,7 +111,7 @@ if [ -z "$go_fast" ]; then
   rm -rf ${PETSC_SRC_DIR}/$PETSC_ARCH
 
   source $SCRIPT_DIR/configure_petsc.sh
-  configure_petsc "$PFX_STR" $*
+  configure_petsc "$PFX_STR" "$@"
 
   exitIfExitCode $?
 fi

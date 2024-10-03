@@ -10,7 +10,7 @@ maximum_python: 3.11
 mpich: 4.2.1
 openmpi: 4.1.6
 petsc_alt: 3.11.4
-petsc: 3.21.4
+petsc: 3.21.5
 apptainer_rockylinux: 8.8.20230518
 apptainer_mpich: 3.4.3
 apptainer_gcc: 12.2.1

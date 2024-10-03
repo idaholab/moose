@@ -7,8 +7,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
-{% set version = "3.21.4" %}
+{% set build = 0 %}
+{% set version = "3.21.5" %}
 
 package:
   name: moose-petsc

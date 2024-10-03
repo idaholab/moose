@@ -129,5 +129,11 @@ function configure_petsc()
       $MAKE_NP_STR \
       "$@"
 
-  return $?
+  RETURN_CODE=$?
+  if [ $RETURN_CODE != 0 ] && [ -f configure.log ]; then
+    echo "Configure failed; displaying contents of configure.log:"
+    cat configure.log
+  fi
+
+  return $RETURN_CODE
 }
