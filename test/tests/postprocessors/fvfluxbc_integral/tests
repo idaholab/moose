@@ -1,0 +1,10 @@
+[Tests]
+  [diffusive_flux]
+    design = 'SideFVFluxBCIntegral.md'
+    issues = '#28767'
+    requirement = 'The system shall be able to integrate the contributions from finite volume flux boundary conditions on sidesets.'
+    type = 'CSVDiff'
+    input = 'fvfluxbc_integral.i'
+    csvdiff = 'fvfluxbc_integral_out.csv'
+  []
+[]
