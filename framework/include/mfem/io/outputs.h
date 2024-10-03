@@ -15,13 +15,10 @@ namespace platypus
 
 class Outputs : public platypus::NamedFieldsMap<mfem::DataCollection>
 {
-  friend class ProblemBuilder;
-  friend class ::MFEMProblem;
 
 public:
   Outputs();
   Outputs(platypus::GridFunctions & gridfunctions);
-
   ~Outputs();
 
   // Set output fields to write out. If output_field_names is empty, all
@@ -31,12 +28,9 @@ public:
     _output_field_names = output_field_names;
   }
 
-  // Enable GLVis streams for visualisation
-  void EnableGLVis(const bool & use_glvis)
+  void SetGridFunctions(platypus::GridFunctions & gridfunctions)
   {
-    _use_glvis = use_glvis;
-    if (_use_glvis)
-      InitializeGLVis(_my_rank);
+    _gridfunctions = &gridfunctions;
   }
 
   // Reset Outputs and re-register output fields from GridFunctions
@@ -48,13 +42,6 @@ public:
     RegisterOutputFields();
     // Write initial fields to disk
     WriteOutputFields(0.0);
-
-    // Initialize GLVis _use_glvis and send the initial condition
-    // by socket to a GLVis server.
-    if (_use_glvis)
-    {
-      DisplayToGLVis();
-    }
   }
 
   // Write outputs out to requested streams
@@ -64,12 +51,6 @@ public:
     MPI_Barrier(_my_comm);
     // Update cycle counter
     _cycle++;
-    // Output timestep summary to console
-    WriteConsoleSummary(_my_rank, t);
-    if (_use_glvis)
-    {
-      DisplayToGLVis();
-    }
     // Save output fields at timestep to DataCollections
     WriteOutputFields(t);
   }
@@ -79,21 +60,8 @@ private:
   platypus::GridFunctions * _gridfunctions;
   std::vector<std::string> _output_field_names{};
   int _cycle{0};
-  bool _use_glvis{false};
   MPI_Comm _my_comm{MPI_COMM_WORLD};
   int _n_ranks, _my_rank;
-
-  // Initialize Outputs with Gridfunctions; used in ProblemBuilder
-  void Init(platypus::GridFunctions & gridfunctions)
-  {
-    SetGridFunctions(gridfunctions);
-    Reset();
-  }
-
-  void SetGridFunctions(platypus::GridFunctions & gridfunctions)
-  {
-    _gridfunctions = &gridfunctions;
-  }
 
   // Register fields (gridfunctions) to write to DataCollections
   void RegisterOutputFields()
@@ -132,44 +100,6 @@ private:
       dc->SetCycle(_cycle);
       dc->SetTime(t);
       dc->Save();
-    }
-  }
-
-  // Write out summary of last timestep to console
-  void WriteConsoleSummary(int _my_rank, double t) {}
-
-  // Initialize GLVis sockets and fields
-  void InitializeGLVis(int _my_rank)
-  {
-    for (auto & gridfunction : *_gridfunctions)
-    {
-      _socks[gridfunction.first] = new mfem::socketstream;
-      _socks[gridfunction.first]->precision(8);
-    }
-  }
-
-  // Update GLVis display of output fields (gridfunctions)
-  void DisplayToGLVis()
-  {
-    char vishost[] = "localhost";
-    int visport = 19916;
-
-    int wx = 0, wy = 0;                 // window position
-    int ww = 350, wh = 350;             // window size
-    int offx = ww + 10, offy = wh + 45; // window offsets
-
-    for (auto & gridfunction : *_gridfunctions)
-    {
-      mfem::common::VisualizeField(*_socks[gridfunction.first],
-                                   vishost,
-                                   visport,
-                                   *(gridfunction.second),
-                                   (gridfunction.first).c_str(),
-                                   wx,
-                                   wy,
-                                   ww,
-                                   wh);
-      wx += offx;
     }
   }
 };
