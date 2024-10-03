@@ -173,7 +173,7 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWScalar)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientScalar)
 {
-  manager.declareScalar("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
+  manager.declareScalar("resistivity", _scalar_manager.make<mfem::ConstantCoefficient>(2.));
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -183,8 +183,8 @@ TEST_F(CheckPropertyManager, DeclareCoefficientScalar)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWScalar)
 {
-  manager.declareScalar("test", std::make_unique<mfem::ConstantCoefficient>(2.), {"1", "2"});
-  manager.declareScalar("test", std::make_unique<mfem::ConstantCoefficient>(1.), {"3"});
+  manager.declareScalar("test", _scalar_manager.make<mfem::ConstantCoefficient>(2.), {"1", "2"});
+  manager.declareScalar("test", _scalar_manager.make<mfem::ConstantCoefficient>(1.), {"3"});
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
   ASSERT_NE(c, nullptr);
   fe_transform.Attribute = 1;
@@ -202,7 +202,7 @@ TEST_F(CheckPropertyManager, ScalarIsDefined)
 {
   manager.declareScalar("a", 2.);
   manager.declareScalar("b", scalar_func);
-  manager.declareScalar("c", std::make_unique<mfem::ConstantCoefficient>(2.));
+  manager.declareScalar("c", _scalar_manager.make<mfem::ConstantCoefficient>(2.));
   EXPECT_TRUE(manager.scalarIsDefined("a", "1"));
   EXPECT_TRUE(manager.scalarIsDefined("a", "10"));
   EXPECT_FALSE(manager.scalarIsDefined("A", "1"));
@@ -228,7 +228,7 @@ TEST_F(CheckPropertyManager, ScalarPWIsDefined)
 {
   manager.declareScalar("a", 2., {"1", "2"});
   manager.declareScalar("b", scalar_func, {"-1", "0"});
-  manager.declareScalar("c", std::make_unique<mfem::ConstantCoefficient>(2.), {"42", "45"});
+  manager.declareScalar("c", _scalar_manager.make<mfem::ConstantCoefficient>(2.), {"42", "45"});
   EXPECT_TRUE(manager.scalarIsDefined("a", "1"));
   EXPECT_TRUE(manager.scalarIsDefined("a", "2"));
   EXPECT_FALSE(manager.scalarIsDefined("a", "0"));
@@ -435,8 +435,8 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWVector)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientVector)
 {
-  manager.declareVector("resistivity",
-                        std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({1., 2.})));
+  manager.declareVector(
+      "resistivity", _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({1., 2.})));
   mfem::VectorConstantCoefficient * c =
       dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -451,11 +451,14 @@ TEST_F(CheckPropertyManager, DeclareCoefficientVector)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWVector)
 {
-  manager.declareVector("test",
-                        std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})),
-                        {"1", "2"});
   manager.declareVector(
-      "test", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({-1., -7.})), {"3"});
+      "test",
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})),
+      {"1", "2"});
+  manager.declareVector(
+      "test",
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({-1., -7.})),
+      {"3"});
   mfem::PWVectorCoefficient * c =
       dynamic_cast<mfem::PWVectorCoefficient *>(&manager.getVectorProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -485,8 +488,8 @@ TEST_F(CheckPropertyManager, VectorIsDefined)
 {
   manager.declareVector("a", mfem::Vector({2., 1.}));
   manager.declareVector("b", 2, vector_func);
-  manager.declareVector("c",
-                        std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})));
+  manager.declareVector(
+      "c", _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})));
   EXPECT_TRUE(manager.vectorIsDefined("a", "1"));
   EXPECT_TRUE(manager.vectorIsDefined("a", "10"));
   EXPECT_FALSE(manager.vectorIsDefined("A", "1"));
@@ -513,7 +516,9 @@ TEST_F(CheckPropertyManager, VectorPWIsDefined)
   manager.declareVector("a", mfem::Vector({2., 1.}), {"1", "2"});
   manager.declareVector("b", 2, vector_func, {"-1", "0"});
   manager.declareVector(
-      "c", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})), {"42", "45"});
+      "c",
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})),
+      {"42", "45"});
   EXPECT_TRUE(manager.vectorIsDefined("a", "1"));
   EXPECT_TRUE(manager.vectorIsDefined("a", "2"));
   EXPECT_FALSE(manager.vectorIsDefined("a", "0"));
@@ -783,9 +788,9 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWMatrix)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientMatrix)
 {
-  manager.declareMatrix(
-      "resistivity",
-      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
+  manager.declareMatrix("resistivity",
+                        _matrix_manager.make<mfem::MatrixConstantCoefficient>(
+                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
   mfem::MatrixConstantCoefficient * c =
       dynamic_cast<mfem::MatrixConstantCoefficient *>(&manager.getMatrixProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -804,12 +809,12 @@ TEST_F(CheckPropertyManager, DeclareCoefficientMatrix)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWMatrix)
 {
-  manager.declareMatrix(
-      "test",
-      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
-      {"1", "2"});
   manager.declareMatrix("test",
-                        std::make_unique<mfem::MatrixConstantCoefficient>(
+                        _matrix_manager.make<mfem::MatrixConstantCoefficient>(
+                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
+                        {"1", "2"});
+  manager.declareMatrix("test",
+                        _matrix_manager.make<mfem::MatrixConstantCoefficient>(
                             mfem::DenseMatrix({{-1., 4.}, {-10., -2.}})),
                         {"3"});
   mfem::PWMatrixCoefficient * c =
@@ -851,9 +856,9 @@ TEST_F(CheckPropertyManager, MatrixIsDefined)
 {
   manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 0.}}));
   manager.declareMatrix("b", 2, matrix_func);
-  manager.declareMatrix(
-      "c",
-      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
+  manager.declareMatrix("c",
+                        _matrix_manager.make<mfem::MatrixConstantCoefficient>(
+                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
   EXPECT_TRUE(manager.matrixIsDefined("a", "1"));
   EXPECT_TRUE(manager.matrixIsDefined("a", "10"));
   EXPECT_FALSE(manager.matrixIsDefined("A", "1"));
@@ -879,10 +884,10 @@ TEST_F(CheckPropertyManager, MatrixPWIsDefined)
 {
   manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 1.}}), {"1", "2"});
   manager.declareMatrix("b", 2, matrix_func, {"-1", "0"});
-  manager.declareMatrix(
-      "c",
-      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
-      {"42", "45"});
+  manager.declareMatrix("c",
+                        _matrix_manager.make<mfem::MatrixConstantCoefficient>(
+                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
+                        {"42", "45"});
   EXPECT_TRUE(manager.matrixIsDefined("a", "1"));
   EXPECT_TRUE(manager.matrixIsDefined("a", "2"));
   EXPECT_FALSE(manager.matrixIsDefined("a", "0"));
