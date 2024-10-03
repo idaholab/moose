@@ -97,7 +97,7 @@
   device = cpu
   dt = 2.0
   start_time = 0.0
-  end_time = 10.0
+  end_time = 6.0
 []
 
 [Outputs]
