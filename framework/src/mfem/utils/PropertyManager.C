@@ -1,4 +1,6 @@
 #include "PropertyManager.h"
+#include "MooseError.h"
+#include <algorithm>
 
 namespace platypus
 {
@@ -9,8 +11,11 @@ inline void
 declareCoefficient(PropertyMap<T, Tpw> & map,
                    const std::string & name,
                    std::shared_ptr<T> coef,
-                   const std::vector<std::string> & blocks)
+                   const std::vector<std::string> & blocks,
+                   const ObjectManager<T> & manager)
 {
+  mooseAssert(std::find(manager.cbegin(), manager.cend(), coef) != manager.cend(),
+              "Coefficient object was not created by the appropriate coefficient manager.");
   if (blocks.empty())
   {
     map.addProperty(name, coef);
@@ -51,7 +56,7 @@ PropertyManager::declareScalar(const std::string & name,
                                std::shared_ptr<mfem::Coefficient> coef,
                                const std::vector<std::string> & blocks)
 {
-  declareCoefficient(this->_scalar_coeffs, name, coef, blocks);
+  declareCoefficient(this->_scalar_coeffs, name, coef, blocks, this->_scalar_manager);
 }
 
 void
@@ -89,7 +94,7 @@ PropertyManager::declareVector(const std::string & name,
                                std::shared_ptr<mfem::VectorCoefficient> coef,
                                const std::vector<std::string> & blocks)
 {
-  declareCoefficient(this->_vector_coeffs, name, coef, blocks);
+  declareCoefficient(this->_vector_coeffs, name, coef, blocks, this->_vector_manager);
 }
 
 void
@@ -127,7 +132,7 @@ PropertyManager::declareMatrix(const std::string & name,
                                std::shared_ptr<mfem::MatrixCoefficient> coef,
                                const std::vector<std::string> & blocks)
 {
-  declareCoefficient(this->_matrix_coeffs, name, coef, blocks);
+  declareCoefficient(this->_matrix_coeffs, name, coef, blocks, this->_matrix_manager);
 }
 
 mfem::Coefficient &
