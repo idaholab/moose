@@ -5,6 +5,7 @@
 #include "MFEMHypreBoomerAMG.h"
 #include "MFEMHypreAMS.h"
 #include "MFEMSuperLU.h"
+#include "MFEMGMRESSolver.h"
 
 class MFEMSolverTest : public MFEMObjectUnitTest
 {
@@ -130,7 +131,7 @@ TEST_F(MFEMSolverTest, MFEMHypreFGMRES)
 }
 
 /**
- * Test MFEMHyprePCG creates an mfem::HyperPCG solver successfully.
+ * Test MFEMHyprePCG creates an mfem::HyprePCG solver successfully.
  */
 TEST_F(MFEMSolverTest, MFEMHyprePCG)
 {
@@ -144,6 +145,26 @@ TEST_F(MFEMSolverTest, MFEMHyprePCG)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto solver_downcast = std::dynamic_pointer_cast<mfem::HyprePCG>(solver.getSolver());
+  ASSERT_NE(solver_downcast.get(), nullptr);
+  testDiffusionSolve(*solver_downcast.get(), 1e-5);
+}
+
+/**
+ * Test MFEMGMRES creates an mfem::GMRESSolver solver successfully.
+ */
+
+TEST_F(MFEMSolverTest, MFEMGMRESSolver)
+{
+  // Build required kernel inputs
+  InputParameters solver_params = _factory.getValidParams("MFEMGMRESSolver");
+  solver_params.set<double>("l_tol") = 0.0;
+  solver_params.set<double>("l_abs_tol") = 1e-5;
+
+  // Construct kernel
+  MFEMGMRESSolver & solver = addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto solver_downcast = std::dynamic_pointer_cast<mfem::GMRESSolver>(solver.getSolver());
   ASSERT_NE(solver_downcast.get(), nullptr);
   testDiffusionSolve(*solver_downcast.get(), 1e-5);
 }
