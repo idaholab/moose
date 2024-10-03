@@ -163,9 +163,10 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto blf = _blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
-    mfem::HypreParMatrix aux_a;
-    blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_xs.at(i)), *lf, aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = new const mfem::HypreParMatrix(aux_a);
+    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+    // Ownership of aux_a goes to the blf
+    blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_xs.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+    _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
   }
@@ -184,15 +185,16 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
-        mfem::HypreParMatrix aux_a;
+        mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+        // Ownership of aux_a goes to the blf
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *(_xs.at(j)),
                                           aux_lf,
-                                          aux_a,
+                                          *aux_a,
                                           aux_x,
                                           aux_rhs);
-        _h_blocks(i, j) = new const mfem::HypreParMatrix(aux_a);
+        _h_blocks(i, j) = aux_a;
         trueRHS.GetBlock(i) += aux_rhs;
       }
     }
@@ -480,9 +482,10 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     bc_x /= _dt_coef.constant;
 
     // Form linear system for operator acting on vector of du/dt
-    mfem::HypreParMatrix aux_a;
-    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = new const mfem::HypreParMatrix(aux_a);
+    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+    // Ownership of aux_a goes to the blf
+    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *aux_a, aux_x, aux_rhs);
+    _h_blocks(i, i) = aux_a;
     truedXdt.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
   }
