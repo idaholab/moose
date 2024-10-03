@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
-#include "gridfunctions.h"
+#include "MFEMContainers.h"
 
 /*
 Class to construct an MFEM integrator to apply to the equation system.

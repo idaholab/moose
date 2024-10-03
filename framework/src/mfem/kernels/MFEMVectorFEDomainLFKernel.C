@@ -17,7 +17,7 @@ MFEMVectorFEDomainLFKernel::validParams()
 MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _vec_coef_name(getParam<std::string>("vector_coefficient")),
-    _vec_coef(getMFEMProblem()._coefficients._vectors.Get(_vec_coef_name))
+    _vec_coef(getMFEMProblem().getProblemData()._coefficients._vectors.Get(_vec_coef_name))
 {
 }
 

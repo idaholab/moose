@@ -1,6 +1,6 @@
 #pragma once
 #include "../common/pfem_extras.hpp"
-#include "problem_builder_base.h"
+#include "MFEMProblemData.h"
 #include "problem_operator_interface.h"
 
 namespace platypus
@@ -13,7 +13,7 @@ class TimeDomainProblemOperator : public mfem::TimeDependentOperator,
                                   public ProblemOperatorInterface
 {
 public:
-  TimeDomainProblemOperator(platypus::Problem & problem) : ProblemOperatorInterface(problem) {}
+  TimeDomainProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
   ~TimeDomainProblemOperator() override = default;
 
   void SetGridFunctions() override;

@@ -1,5 +1,5 @@
 #pragma once
-#include "problem_builder_base.h"
+#include "MFEMProblemData.h"
 
 namespace platypus
 {
@@ -7,11 +7,11 @@ namespace platypus
 class ProblemOperatorInterface
 {
 public:
-  ProblemOperatorInterface(platypus::Problem & problem) : _problem(problem) {}
+  ProblemOperatorInterface(MFEMProblemData & problem) : _problem(problem) {}
   virtual ~ProblemOperatorInterface() = default;
 
   virtual void SetGridFunctions();
-  virtual void Init(mfem::Vector & X);
+  virtual void Init(mfem::BlockVector & X);
 
   mfem::Array<int> _true_offsets, _block_true_offsets;
 
@@ -20,7 +20,7 @@ public:
 
 protected:
   // Reference to the current problem.
-  platypus::Problem & _problem;
+  MFEMProblemData & _problem;
 
   // Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   // vector during solve.

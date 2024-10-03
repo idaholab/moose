@@ -15,7 +15,7 @@ public:
     point1.Set3(0., 0., 0.);
     point2.Init(3);
     point2.Set3(0.5, 1., 0.);
-    fe_transform.SetIdentityTransformation(mfem::Geometry::SQUARE);
+    fe_transform.SetIdentityTransformation(mfem::Geometry::CUBE);
   }
 };
 
