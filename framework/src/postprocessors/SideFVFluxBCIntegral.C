@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SideFVFluxBCIntegral.h"
+#include "FVFluxBC.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -18,7 +19,8 @@ InputParameters
 SideFVFluxBCIntegral::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
-  params.addRequiredParam<std::vector<std::string>>("fvbcs");
+  params.addRequiredParam<std::vector<std::string>>(
+      "fvbcs", "List of boundary conditions whose contribution we want to integrate.");
   params.addClassDescription(
       "Computes the side integral of different finite volume flux boundary conditions.");
   return params;
@@ -48,7 +50,7 @@ SideFVFluxBCIntegral::initialSetup()
   _bc_objects.clear();
   for (const auto & name : _bc_names)
   {
-    std::vector<const FVFluxBC *> flux_bcs;
+    std::vector<FVFluxBC *> flux_bcs;
     base_query.condition<AttribName>(name).queryInto(flux_bcs);
     mooseAssert(flux_bcs.size() == 1,
                 "There should be only one boundary condition from this search.");
@@ -69,11 +71,17 @@ SideFVFluxBCIntegral::initialSetup()
 Real
 SideFVFluxBCIntegral::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
-  return 0.0;
+  Real flux_value = 0.0;
+  for (auto bc_ptr : _bc_objects)
+  {
+    bc_ptr->updateCurrentFace(*fi);
+    flux_value += MetaPhysicL::raw_value(bc_ptr->computeQpResidual());
+  }
+  return flux_value;
 }
 
 Real
 SideFVFluxBCIntegral::computeQpIntegral()
 {
-  return 0.0;
+  mooseError("We should never call this function!");
 }

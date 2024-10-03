@@ -11,7 +11,9 @@
 
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
-#include "FVFluxBC.h"
+
+// Forward declaration
+class FVFluxBC;
 
 /**
  * This postprocessor computes the side integral of different
@@ -30,5 +32,5 @@ protected:
   Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   const std::vector<std::string> _bc_names;
-  std::vector<const FVFluxBC *> _bc_objects;
+  std::vector<FVFluxBC *> _bc_objects;
 };
