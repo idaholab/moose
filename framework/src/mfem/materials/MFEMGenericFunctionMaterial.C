@@ -1,4 +1,5 @@
 #include "MFEMGenericFunctionMaterial.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMGenericFunctionMaterial);
 
@@ -31,13 +32,9 @@ MFEMGenericFunctionMaterial::MFEMGenericFunctionMaterial(const InputParameters &
   _num_props = num_names;
   for (unsigned int i = 0; i < _num_props; i++)
   {
-    // FIXME: Ideally this would support arbitrary dimensions
-    _properties.declareScalar(
-        _prop_names[i],
-        [&func = getFunctionByName(_prop_values[i])](const mfem::Vector & p,
-                                                     double t) -> mfem::real_t
-        { return func.value(t, pointFromMFEMVector(p)); },
-        subdomainsToStrings(_block_ids));
+    _properties.declareScalar(_prop_names[i],
+                              getMFEMProblem().getScalarFunctionCoefficient(_prop_values[i]),
+                              subdomainsToStrings(_block_ids));
   }
 }
 
