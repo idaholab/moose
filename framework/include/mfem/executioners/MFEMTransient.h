@@ -22,13 +22,6 @@ public:
         _problem_operator.get());
   }
 
-  void
-  SetOperator(std::unique_ptr<platypus::TimeDomainEquationSystemProblemOperator> problem_operator)
-  {
-    _problem_operator.reset();
-    _problem_operator = std::move(problem_operator);
-  }
-
   void ConstructOperator() override
   {
     _problem_data._eqn_system = std::make_shared<platypus::TimeDependentEquationSystem>();
@@ -37,7 +30,8 @@ public:
         std::dynamic_pointer_cast<platypus::TimeDependentEquationSystem>(
             _problem_data._eqn_system));
 
-    SetOperator(std::move(problem_operator));
+    _problem_operator.reset();
+    _problem_operator = std::move(problem_operator);
   }
 
   mutable double _t_step; // Time step
