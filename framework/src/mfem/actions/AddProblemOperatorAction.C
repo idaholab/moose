@@ -21,5 +21,5 @@ AddProblemOperatorAction::act()
 {
   MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
   if (mfem_problem)
-    mfem_problem->setProblemOperator();
+    mfem_problem->initProblemOperator();
 }

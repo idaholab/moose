@@ -22,6 +22,16 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 }
 
 void
+MFEMSteady::constructProblemOperator()
+{
+  _problem_data._eqn_system = std::make_shared<platypus::EquationSystem>();
+  auto problem_operator = std::make_unique<platypus::EquationSystemProblemOperator>(_problem_data);
+
+  _problem_operator.reset();
+  _problem_operator = std::move(problem_operator);
+}
+
+void
 MFEMSteady::init()
 {
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);

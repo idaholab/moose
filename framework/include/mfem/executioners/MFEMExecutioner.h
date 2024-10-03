@@ -14,11 +14,8 @@ public:
 
   virtual bool lastSolveConverged() const override { return true; };
 
-  /// Returns a pointer to the operator. See derived classes.
-  [[nodiscard]] virtual mfem::Operator * GetOperator() const = 0;
-
-  /// Virtual method to construct the operator. Call for default problems.
-  virtual void ConstructOperator() = 0;
+  /// Virtual method to construct the ProblemOperator. Call for default problems.
+  virtual void constructProblemOperator() = 0;
 
   /**
    * Set the device to use to solve the FE problem.

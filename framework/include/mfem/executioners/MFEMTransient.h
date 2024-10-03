@@ -11,28 +11,11 @@ public:
   explicit MFEMTransient(const InputParameters & params);
   ~MFEMTransient() override = default;
 
-  void Step(double dt, int it) const;
+  void constructProblemOperator() override;
+  virtual void registerTimeDerivatives();
+  void step(double dt, int it) const;
   virtual void init() override;
   virtual void execute() override;
-  virtual void registerTimeDerivatives();
-
-  [[nodiscard]] platypus::TimeDomainEquationSystemProblemOperator * GetOperator() const override
-  {
-    return static_cast<platypus::TimeDomainEquationSystemProblemOperator *>(
-        _problem_operator.get());
-  }
-
-  void ConstructOperator() override
-  {
-    _problem_data._eqn_system = std::make_shared<platypus::TimeDependentEquationSystem>();
-    auto problem_operator = std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(
-        _problem_data,
-        std::dynamic_pointer_cast<platypus::TimeDependentEquationSystem>(
-            _problem_data._eqn_system));
-
-    _problem_operator.reset();
-    _problem_operator = std::move(problem_operator);
-  }
 
   mutable double _t_step; // Time step
 
