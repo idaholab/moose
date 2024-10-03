@@ -1,4 +1,5 @@
 #include "MFEMGenericFunctionVectorMaterial.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMGenericFunctionVectorMaterial);
 
@@ -33,18 +34,9 @@ MFEMGenericFunctionVectorMaterial::MFEMGenericFunctionVectorMaterial(
   for (unsigned int i = 0; i < _num_props; i++)
   {
     // FIXME: Ideally this would support arbitrary dimensions
-    _properties.declareVector(
-        _prop_names[i],
-        3,
-        [&func =
-             getFunctionByName(_prop_values[i])](const mfem::Vector & p, double t, mfem::Vector & u)
-        {
-          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-          u[0] = vector_value(0);
-          u[1] = vector_value(1);
-          u[2] = vector_value(2);
-        },
-        subdomainsToStrings(_block_ids));
+    _properties.declareVector(_prop_names[i],
+                              getMFEMProblem().getVectorFunctionCoefficient(_prop_values[i]),
+                              subdomainsToStrings(_block_ids));
   }
 }
 
