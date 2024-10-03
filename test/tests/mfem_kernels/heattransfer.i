@@ -6,7 +6,6 @@
 
 [Problem]
   type = MFEMProblem
-  device = "cpu"
 []
 
 [FESpaces]
@@ -89,7 +88,8 @@
 []
 
 [Executioner]
-  type = Steady
+  type = MFEMSteady
+  device = cpu  
 []
 
 [Outputs]
