@@ -1,7 +1,7 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
 {% set build = "0" %}
-{% set seacas_version = "2024.03.11" %}
-{% set seacas_git_rev = "v2024-03-11" %}
+{% set seacas_version = "2024.08.15" %}
+{% set seacas_git_rev = "v2024-08-15" %}
 {% set strbuild = "build_" + build|string %}
 
 package:
@@ -11,8 +11,6 @@ package:
 source:
   git_url: https://github.com/sandialabs/seacas
   git_rev: {{ seacas_git_rev }}
-  patches:
-    - arm-kern-return.patch
 
 build:
   number: {{ build }}
