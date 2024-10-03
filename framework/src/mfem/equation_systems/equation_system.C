@@ -438,6 +438,9 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
     _td_blfs.Register(test_var_name,
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
 
+    bc_map.ApplyIntegratedBCs(
+        test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
+
     // Apply kernels
     auto td_blf = _td_blfs.Get(test_var_name);
     if (_td_blf_kernels_map.Has(test_var_name))
@@ -453,7 +456,7 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
     td_blf->Assemble();
     // if implicit, add contribution from bilinear form acting on u: {
     auto blf = _blfs.Get(test_var_name);
-    td_blf->SpMat().Add(-_dt_coef.constant, blf->SpMat());
+    td_blf->SpMat().Add(_dt_coef.constant, blf->SpMat());
     // }
   }
 }
@@ -476,7 +479,7 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto lf = _lfs.Get(test_var_name);
     // if implicit, add contribution to linear form from terms involving state
     // variable at previous timestep: {
-    blf->AddMult(*_trial_variables.Get(test_var_name), *lf, 1.0);
+    blf->AddMult(*_trial_variables.Get(test_var_name), *lf, -1.0);
     // }
     mfem::Vector aux_x, aux_rhs;
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u

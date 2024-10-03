@@ -43,6 +43,11 @@
     variable = temperature
     coefficient = thermal_conductivity
   []  
+  [dT_dt]
+    type = MFEMTimeDerivativeMassKernel
+    variable = temperature
+    coefficient = volumetric_heat_capacity
+  []    
 []
 
 [BCs]
@@ -70,7 +75,7 @@
   [Boundary]
     type = MFEMGenericConstantMaterial
     prop_names = 'heat_transfer_coefficient reservoir_far_temperature'
-    prop_values = '0.1 0.5'
+    prop_values = '5.0 0.5'
   []
 []
 
@@ -88,8 +93,11 @@
 []
 
 [Executioner]
-  type = MFEMSteady
-  device = cpu  
+  type = MFEMTransient
+  device = cpu
+  dt = 2.0
+  start_time = 0.0
+  end_time = 10.0
 []
 
 [Outputs]
