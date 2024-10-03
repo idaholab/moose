@@ -16,6 +16,8 @@ public:
   virtual void execute() override;
 
 protected:
+  // Time variables used for consistency with MOOSE, needed for outputs.
+  // Important for future synchronisation of solves in MultiApps
   Real _system_time;
   int & _time_step;
   Real & _time;
