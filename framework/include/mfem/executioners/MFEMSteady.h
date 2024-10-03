@@ -20,19 +20,14 @@ public:
     return static_cast<platypus::EquationSystemProblemOperator *>(_problem_operator.get());
   }
 
-  void SetOperator(std::unique_ptr<platypus::EquationSystemProblemOperator> problem_operator)
-  {
-    _problem_operator.reset();
-    _problem_operator = std::move(problem_operator);
-  }
-
   void ConstructOperator() override
   {
     _problem_data._eqn_system = std::make_shared<platypus::EquationSystem>();
     auto problem_operator = std::make_unique<platypus::EquationSystemProblemOperator>(
         _problem_data, _problem_data._eqn_system);
 
-    SetOperator(std::move(problem_operator));
+    _problem_operator.reset();
+    _problem_operator = std::move(problem_operator);
   }
 
 protected:
