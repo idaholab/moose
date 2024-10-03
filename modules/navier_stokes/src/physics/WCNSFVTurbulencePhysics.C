@@ -102,7 +102,8 @@ WCNSFVTurbulencePhysics::validParams()
                              adv_interpol_types,
                              "The numerical scheme to interpolate the TKE to the "
                              "face when in the advection kernel.");
-  params.addParam<bool>("linearize_sink_sources", true, "Whether to linearize the source term");
+  // Better Jacobian if not linearizing sink and sources
+  params.addParam<bool>("linearize_sink_sources", false, "Whether to linearize the source term");
   params.addParam<bool>(
       "tke_two_term_bc_expansion",
       true,
