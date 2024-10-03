@@ -121,7 +121,7 @@ public:
    * MFEMGeneralUserObject representing the function in MOOSE, and creates a corresponding
    * MFEM Coefficient or VectorCoefficient object.
    */
-  void addFunction(const std::string & function_name,
+  void addFunction(const std::string & type,
                    const std::string & name,
                    InputParameters & parameters) override;
 
