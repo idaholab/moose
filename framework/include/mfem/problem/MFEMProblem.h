@@ -1,29 +1,20 @@
 #pragma once
-#include "AuxiliarySystem.h"
-#include "DisplacedProblem.h"
+#include "../common/pfem_extras.hpp"
 #include "ExternalProblem.h"
+#include "MFEMProblemData.h"
 #include "MFEMMesh.h"
 #include "MFEMCoefficient.h"
 #include "MFEMVectorCoefficient.h"
 #include "MFEMMaterial.h"
 #include "MFEMVariable.h"
-#include "MFEMScalarDirichletBC.h"
-#include "MFEMConstantCoefficient.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
 #include "MFEMExecutioner.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
-#include "PropertyManager.h"
-#include "Function.h"
 #include "MooseEnum.h"
-#include "SystemBase.h"
-#include "Transient.h"
-#include "Steady.h"
-#include "platypus.h"
 #include "libmesh/string_to_enum.h"
-#include "libmesh/point.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -151,7 +142,7 @@ public:
    * properties and converting them to MFEM coefficients. This is used
    * by Material and Kernel classes (among others).
    */
-  platypus::PropertyManager & getProperties() { return _properties; }
+  platypus::PropertyManager & getProperties() { return _problem_data._properties; }
 
   /**
    * Method to get the current MFEMProblemData object storing the
@@ -180,6 +171,5 @@ protected:
     }
   }
 
-  platypus::PropertyManager _properties;
   MFEMProblemData _problem_data;
 };
