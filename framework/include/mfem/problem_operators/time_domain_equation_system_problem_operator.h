@@ -12,11 +12,10 @@ class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator
                                                 public EquationSystemInterface
 {
 public:
-  TimeDomainEquationSystemProblemOperator(MFEMProblemData &) = delete;
-  TimeDomainEquationSystemProblemOperator(
-      MFEMProblemData & problem,
-      std::shared_ptr<platypus::TimeDependentEquationSystem> equation_system)
-    : TimeDomainProblemOperator(problem), _equation_system{equation_system}
+  TimeDomainEquationSystemProblemOperator(MFEMProblemData & problem)
+    : TimeDomainProblemOperator(problem),
+      _equation_system(
+          std::dynamic_pointer_cast<platypus::TimeDependentEquationSystem>(problem._eqn_system))
   {
   }
 

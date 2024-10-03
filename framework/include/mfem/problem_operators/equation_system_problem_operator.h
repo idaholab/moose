@@ -9,11 +9,8 @@ namespace platypus
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
-  EquationSystemProblemOperator(MFEMProblemData &) = delete;
-
-  EquationSystemProblemOperator(MFEMProblemData & problem,
-                                std::shared_ptr<platypus::EquationSystem> equation_system)
-    : ProblemOperator(problem), _equation_system(equation_system)
+  EquationSystemProblemOperator(MFEMProblemData & problem)
+    : ProblemOperator(problem), _equation_system(problem._eqn_system)
   {
   }
 

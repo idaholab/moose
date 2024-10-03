@@ -90,9 +90,9 @@ public:
   void setMesh();
 
   /**
-   * Set the required ProblemOperator used in the Executioner to solve the problem.
+   * Initialise the required ProblemOperator used in the Executioner to solve the problem.
    */
-  void setProblemOperator();
+  void initProblemOperator();
 
   /**
    * Override of ExternalProblem::addVariable. Sets a

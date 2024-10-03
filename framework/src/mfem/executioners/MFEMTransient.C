@@ -29,7 +29,34 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
 }
 
 void
-MFEMTransient::Step(double dt, int it) const
+MFEMTransient::constructProblemOperator()
+{
+  _problem_data._eqn_system = std::make_shared<platypus::TimeDependentEquationSystem>();
+  auto problem_operator =
+      std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(_problem_data);
+  _problem_operator.reset();
+  _problem_operator = std::move(problem_operator);
+}
+
+void
+MFEMTransient::registerTimeDerivatives()
+{
+  std::vector<std::string> gridfunction_names;
+  platypus::GridFunctions & gridfunctions = _problem_data._gridfunctions;
+  for (auto const & [name, gf] : gridfunctions)
+  {
+    gridfunction_names.push_back(name);
+  }
+  for (auto & gridfunction_name : gridfunction_names)
+  {
+    gridfunctions.Register(platypus::GetTimeDerivativeName(gridfunction_name),
+                           std::make_shared<mfem::ParGridFunction>(
+                               gridfunctions.Get(gridfunction_name)->ParFESpace()));
+  }
+}
+
+void
+MFEMTransient::step(double dt, int it) const
 {
   // Check if current time step is final
   if (_t + dt >= _t_final - dt / 2)
@@ -47,23 +74,6 @@ MFEMTransient::Step(double dt, int it) const
   if (_last_step || (it % _vis_steps) == 0)
   {
     _problem_data._outputs.Write(_t);
-  }
-}
-
-void
-MFEMTransient::registerTimeDerivatives()
-{
-  std::vector<std::string> gridfunction_names;
-  platypus::GridFunctions & gridfunctions = _problem_data._gridfunctions;
-  for (auto const & [name, gf] : gridfunctions)
-  {
-    gridfunction_names.push_back(name);
-  }
-  for (auto & gridfunction_name : gridfunction_names)
-  {
-    gridfunctions.Register(platypus::GetTimeDerivativeName(gridfunction_name),
-                           std::make_shared<mfem::ParGridFunction>(
-                               gridfunctions.Get(gridfunction_name)->ParFESpace()));
   }
 }
 
@@ -96,7 +106,7 @@ MFEMTransient::execute()
   while (_last_step != true)
   {
     _it++;
-    Step(_t_step, _it);
+    step(_t_step, _it);
   }
 
   _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,
