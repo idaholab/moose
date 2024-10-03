@@ -27,5 +27,5 @@ else
       echo "Adding newline at EOF: $fname"
       sed -i -e '$a\' "$fname"
     fi
-  done < <( find "$REPO_DIR" -path "*/contrib" -prune -o -path "*/libmesh" -prune -o \( -name "*.[Chi]" -o -name "*.py" -o -name "*.tex" \) -type f -print0)
+  done < <( find "$REPO_DIR" -path "*/contrib" -prune -o -path "*/libmesh" -prune -o \( -name "*.[Chi]" -o -name "*.py" \) -type f -print0)
 fi

@@ -250,6 +250,18 @@ RevolveGenerator::generate()
   if (!input->is_serial())
     mesh->delete_remote_elements();
 
+  // check that subdomain swap sources exist in the mesh
+  std::set<subdomain_id_type> blocks;
+  input->subdomain_ids(blocks, true);
+  for (const auto & swap_map : _subdomain_swap_pairs)
+    for (const auto & [bid, tbid] : swap_map)
+    {
+      libmesh_ignore(tbid);
+      if (blocks.count(bid) == 0)
+        paramError("subdomain_swaps",
+                   "Source subdomain " + std::to_string(bid) + " was not found in the mesh");
+    }
+
   // Subdomain IDs for on-axis elements must be new
   std::set<subdomain_id_type> subdomain_ids_set;
   input->subdomain_ids(subdomain_ids_set);
@@ -270,9 +282,7 @@ RevolveGenerator::generate()
   const Point axis_centroid_cross = (input_centroid - _axis_point).cross(_axis_direction);
 
   if (MooseUtils::absoluteFuzzyEqual(axis_centroid_cross.norm(), 0.0))
-  {
     mooseError("The input mesh is either across the axis or overlapped with the axis!");
-  }
 
   Real inner_product_1d(0.0);
   bool inner_product_1d_initialized(false);
@@ -285,20 +295,14 @@ RevolveGenerator::generate()
     if (!MooseUtils::absoluteFuzzyEqual(axis_node_cross.norm(), 0.0))
     {
       if (MooseUtils::absoluteFuzzyLessThan(axis_node_cross * axis_centroid_cross, 0.0))
-      {
         mooseError("The input mesh is across the axis.");
-      }
       else if (MooseUtils::absoluteFuzzyLessThan(axis_node_cross * axis_centroid_cross,
                                                  axis_centroid_cross.norm() *
                                                      axis_node_cross.norm()))
-      {
         mooseError("The input mesh is not in the same plane with the rotation axis.");
-      }
     }
     else
-    {
       node_ids_on_axis.push_back(node->id());
-    }
 
     // Only for 1D input mesh, we need to check if the axis is perpendicular to the input mesh
     if (input->mesh_dimension() == 1)
@@ -307,9 +311,7 @@ RevolveGenerator::generate()
       if (inner_product_1d_initialized)
       {
         if (!MooseUtils::absoluteFuzzyEqual(temp_inner_product, inner_product_1d))
-        {
           mooseError("The 1D input mesh is not perpendicular to the rotation axis.");
-        }
       }
       else
       {

@@ -27,7 +27,7 @@ DepletionIDGenerator::validParams()
   params.addParam<std::vector<ExtraElementIDName>>(
       "exclude_id_name", "Extra ID names that need to be excluded in the depletion ID generation");
   params.addParam<std::vector<std::vector<dof_id_type>>>(
-      "exclude_id_value", "Extra ID values correponding to names defined in `exclude_id_name`");
+      "exclude_id_value", "Extra ID values corresponding to names defined in `exclude_id_name`");
   params.addClassDescription("This DepletionIDGenerator source code is to assign depletion IDs for "
                              "elements on a mesh based on material and other extra element IDs.");
   return params;

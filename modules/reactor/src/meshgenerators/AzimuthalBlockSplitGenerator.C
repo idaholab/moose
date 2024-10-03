@@ -117,7 +117,9 @@ AzimuthalBlockSplitGenerator::generate()
   for (unsigned int i = 0; i < _old_block_ids.size(); i++)
     if (_old_block_ids[i] == Moose::INVALID_BLOCK_ID || !mesh_blocks.count(_old_block_ids[i]))
       paramError("old_blocks",
-                 "This parameter contains blocks that do not exist in the input mesh.");
+                 "This parameter contains blocks that do not exist in the input mesh. Error "
+                 "triggered by block: " +
+                     getParam<std::vector<SubdomainName>>("old_blocks")[i]);
 
   if (std::find(_old_block_ids.begin(),
                 _old_block_ids.end(),
