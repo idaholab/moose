@@ -18,7 +18,7 @@ MFEMProblem::outputStep(ExecFlagType type)
   // directories with iterated names
   if (type == EXEC_INITIAL)
   {
-    getProblemData()._outputs.Init(getProblemData()._gridfunctions);
+    getProblemData()._outputs.SetGridFunctions(getProblemData()._gridfunctions);
     std::vector<OutputName> mfem_data_collections =
         _app.getOutputWarehouse().getOutputNames<MFEMDataCollection>();
     for (const auto & name : mfem_data_collections)
