@@ -119,8 +119,10 @@ static const std::string k_s = "k_s";
 static const std::string cp = "cp";
 static const std::string cv = "cv";
 static const std::string mu = "mu";
-// Turbulent viscosity
+// Turbulent dynamic viscosity
 static const std::string mu_t = "mu_t";
+// Turbulent dynamic scalar viscosity
+static const std::string mu_t_passive_scalar = "mu_t_passive_scalar";
 // Effective viscosity = sum of viscosities
 static const std::string mu_eff = "mu_eff";
 static const std::string k = "k";

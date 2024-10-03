@@ -18,7 +18,8 @@ INSFVTurbulentDiffusion::validParams()
   InputParameters params = FVDiffusion::validParams();
   params.addClassDescription(
       "Computes residual for the turbulent scaled diffusion operator for finite volume method.");
-  params.addParam<MooseFunctorName>("scaling_coef", 1.0, "diffusion coefficient");
+  params.addParam<MooseFunctorName>(
+      "scaling_coef", 1.0, "Scaling factor to divide the diffusion coefficient with");
   params.set<unsigned short>("ghost_layers") = 2;
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
@@ -54,6 +55,11 @@ INSFVTurbulentDiffusion::computeQpResidual()
   // If we are on internal faces, we interpolate the diffusivity as usual
   if (_var.isInternalFace(*_face_info))
   {
+    // If the diffusion coefficients are zero, then we can early return 0 (and avoid warnings if we
+    // have a harmonic interpolation)
+    if (!coeff_elem.value() && !coeff_neighbor.value())
+      return 0;
+
     interpolate(_coeff_interp_method,
                 coeff,
                 _coeff(elemArg(), state),

@@ -163,7 +163,7 @@ WCNSFVTurbulencePhysics::validParams()
   params.addParamNamesToGroup("mixing_length_name mixing_length_two_term_bc_expansion",
                               "Mixing length model");
   params.addParamNamesToGroup("fluid_heat_transfer_physics turbulent_prandtl "
-                              "scalar_transport_physics passive_scalar_schmidt_number",
+                              "scalar_transport_physics Sc_t",
                               "Coupled Physics");
   params.addParamNamesToGroup("initial_tke initial_tked C1_eps C2_eps sigma_k sigma_eps",
                               "K-Epsilon model");
@@ -199,8 +199,8 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
     saveAuxVariableName(_mixing_length_name);
   else if (_turbulence_model == "k-epsilon")
   {
-    saveNonlinearVariableName(_tke_name);
-    saveNonlinearVariableName(_tked_name);
+    saveSolverVariableName(_tke_name);
+    saveSolverVariableName(_tked_name);
     if (getParam<bool>("mu_t_as_aux_variable"))
       saveAuxVariableName(_turbulent_viscosity_name);
     if (getParam<bool>("k_t_as_aux_variable"))
@@ -219,6 +219,7 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
                              "von_karman_const_0",
                              "mixing_length_two_term_bc_expansion"});
   if (_turbulence_model != "k-epsilon")
+  {
     errorDependentParameter("turbulence_handling",
                             "k-epsilon",
                             {"C_mu",
@@ -232,6 +233,8 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
                              "tked_face_interpolation",
                              "tked_two_term_bc_expansion",
                              "turbulent_viscosity_two_term_bc_expansion"});
+    checkSecondParamSetOnlyIfFirstOneTrue("mu_t_as_aux_variable", "initial_mu_t");
+  }
 }
 
 void
@@ -531,13 +534,13 @@ void
 WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
 {
   const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
-  const auto & passive_scalar_schmidt_number =
-      getParam<std::vector<Real>>("passive_scalar_schmidt_number");
+  const auto & passive_scalar_schmidt_number = getParam<std::vector<Real>>("Sc_t");
   if (passive_scalar_schmidt_number.size() != passive_scalar_names.size() &&
       passive_scalar_schmidt_number.size() != 1)
-    paramError("passive_scalar_schmidt_number",
-               "The number of Schmidt numbers defined is not equal to the number of passive "
-               "scalar fields!");
+    paramError(
+        "Sc_t",
+        "The number of turbulent Schmidt numbers defined is not equal to the number of passive "
+        "scalar fields!");
 
   if (_turbulence_model == "mixing-length")
   {
@@ -572,6 +575,7 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     for (const auto & name_i : index_range(passive_scalar_names))
     {
       params.set<NonlinearVariableName>("variable") = passive_scalar_names[name_i];
+      params.set<MooseFunctorName>("coeff") = NS::mu_t_passive_scalar;
       getProblem().addFVKernel(
           kernel_type, prefix() + passive_scalar_names[name_i] + "_turbulent_diffusion", params);
     }
@@ -621,6 +625,7 @@ WCNSFVTurbulencePhysics::addKEpsilonDiffusion()
     const std::string kernel_type = "INSFVTurbulentDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
+    params.set<bool>("newton_solve") = true;
 
     params.set<NonlinearVariableName>("variable") = _tke_name;
     params.set<MooseFunctorName>("coeff") = _flow_equations_physics->dynamicViscosityName();
@@ -930,6 +935,33 @@ WCNSFVTurbulencePhysics::addMaterials()
       getProblem().addMaterial(
           "ADParsedFunctorMaterial", prefix() + "turbulent_heat_eff_conductivity", params);
     }
+
+    if (_has_scalar_equations && !getProblem().hasFunctor(NS::mu_t_passive_scalar, /*thread_id=*/0))
+    {
+      InputParameters params = getFactory().getValidParams("ADParsedFunctorMaterial");
+      assignBlocks(params, _blocks);
+      const auto & rho_name = _flow_equations_physics->densityName();
+
+      // Avoid defining floats as functors in the parsed expression
+      if (!MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(rho_name))
+        params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name,
+                                                                 rho_name};
+      else if (MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(rho_name))
+        params.set<std::vector<std::string>>("functor_names") = {rho_name};
+      else if (!MooseUtils::isFloat(_turbulent_viscosity_name) && MooseUtils::isFloat(rho_name))
+        params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name};
+
+      const auto turbulent_schmidt_number = getParam<std::vector<Real>>("Sc_t");
+      if (turbulent_schmidt_number.size() != 1)
+        paramError(
+            "passive_scalar_schmidt_number",
+            "Only one passive scalar turbulent Schmidt number can be specified with k-epsilon");
+      params.set<std::string>("expression") = _turbulent_viscosity_name + "/" + rho_name + " / " +
+                                              std::to_string(turbulent_schmidt_number[0]);
+      params.set<std::string>("property_name") = NS::mu_t_passive_scalar;
+      getProblem().addMaterial(
+          "ADParsedFunctorMaterial", prefix() + "scalar_turbulent_diffusivity", params);
+    }
   }
 }
 
@@ -937,6 +969,7 @@ unsigned short
 WCNSFVTurbulencePhysics::getNumberAlgebraicGhostingLayersNeeded() const
 {
   unsigned short ghost_layers = _flow_equations_physics->getNumberAlgebraicGhostingLayersNeeded();
+  // due to the computation of the eddy-diffusivity from the strain tensor
   if (_turbulence_model == "mixing-length")
     ghost_layers = std::max(ghost_layers, (unsigned short)3);
   return ghost_layers;

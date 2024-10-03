@@ -203,19 +203,22 @@ WCNSFVScalarTransportPhysics::addScalarAdvectionKernels()
 void
 WCNSFVScalarTransportPhysics::addScalarDiffusionKernels()
 {
+  // Direct specification of diffusion term
   const auto passive_scalar_diffusivities =
       getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity");
-  if (passive_scalar_diffusivities.empty())
-    return;
-  const std::string kernel_type = "FVDiffusion";
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  for (const auto name_i : index_range(_passive_scalar_names))
+
+  if (passive_scalar_diffusivities.size())
   {
-    params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-    params.set<MooseFunctorName>("coeff") = passive_scalar_diffusivities[name_i];
-    getProblem().addFVKernel(
-        kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
+    const std::string kernel_type = "FVDiffusion";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    for (const auto name_i : index_range(_passive_scalar_names))
+    {
+      params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+      params.set<MooseFunctorName>("coeff") = passive_scalar_diffusivities[name_i];
+      getProblem().addFVKernel(
+          kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
+    }
   }
 }
 
