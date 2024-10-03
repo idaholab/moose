@@ -18,8 +18,7 @@ class Outputs : public platypus::NamedFieldsMap<mfem::DataCollection>
 
 public:
   Outputs();
-  Outputs(platypus::GridFunctions & gridfunctions);
-  ~Outputs();
+  ~Outputs(){};
 
   // Set output fields to write out. If output_field_names is empty, all
   // gridfunctions will be written by default.
@@ -56,7 +55,6 @@ public:
   }
 
 private:
-  std::map<std::string, mfem::socketstream *> _socks;
   platypus::GridFunctions * _gridfunctions;
   std::vector<std::string> _output_field_names{};
   int _cycle{0};
