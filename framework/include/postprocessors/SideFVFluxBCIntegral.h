@@ -21,6 +21,7 @@ class SideFVFluxBCIntegral : public SideIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
+  virtual void initialSetup() override;
 
   SideFVFluxBCIntegral(const InputParameters & parameters);
 
@@ -29,5 +30,5 @@ protected:
   Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   const std::vector<std::string> _bc_names;
-  std::vector<const FVFluxBC *> _bc_names;
+  std::vector<const FVFluxBC *> _bc_objects;
 };
