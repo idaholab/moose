@@ -6,27 +6,10 @@ InputParameters
 MFEMProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
-  params.addParam<int>(
-      "vis_steps",
-      1,
-      "Number of timesteps between successive write outs of data collections to file.");
-  params.addParam<bool>(
-      "use_glvis", false, "Attempt to open GLVis ports to display variables during simulation");
-  params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
-
   return params;
 }
 
-MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params),
-    _input_mesh(_mesh.parameters().get<MeshFileName>("file")),
-    _coefficients(),
-    _outputs(),
-    _exec_params()
-{
-}
-
-MFEMProblem::~MFEMProblem() {}
+MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params) {}
 
 void
 MFEMProblem::outputStep(ExecFlagType type)
@@ -35,6 +18,7 @@ MFEMProblem::outputStep(ExecFlagType type)
   // directories with iterated names
   if (type == EXEC_INITIAL)
   {
+    getProblemData()._outputs.SetGridFunctions(getProblemData()._gridfunctions);
     std::vector<OutputName> mfem_data_collections =
         _app.getOutputWarehouse().getOutputNames<MFEMDataCollection>();
     for (const auto & name : mfem_data_collections)
@@ -43,8 +27,8 @@ MFEMProblem::outputStep(ExecFlagType type)
       int filenum(dc->getFileNumber());
       std::string filename("/Run" + std::to_string(filenum));
 
-      mfem_problem->_outputs.Register(name, dc->createDataCollection(filename));
-      mfem_problem->_outputs.Reset();
+      getProblemData()._outputs.Register(name, dc->createDataCollection(filename));
+      getProblemData()._outputs.Reset();
       dc->setFileNumber(filenum + 1);
     }
   }
@@ -55,53 +39,8 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  _coefficients.AddGlobalCoefficientsFromSubdomains();
-
-  mfem_problem_builder->SetCoefficients(_coefficients);
-
-  // NB: set to false to avoid reconstructing problem operator.
-  mfem_problem_builder->FinalizeProblem(false);
-
-  platypus::InputParameters exec_params;
-
-  Transient * _moose_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
-  if (_moose_executioner != nullptr)
-  {
-    auto mfem_transient_problem_builder =
-        std::dynamic_pointer_cast<platypus::TimeDomainProblemBuilder>(mfem_problem_builder);
-    if (mfem_transient_problem_builder == nullptr)
-    {
-      mooseError("Specified formulation does not support Transient executioners");
-    }
-
-    exec_params.SetParam("StartTime", float(_moose_executioner->getStartTime()));
-    exec_params.SetParam("TimeStep", float(dt()));
-    exec_params.SetParam("EndTime", float(_moose_executioner->endTime()));
-    exec_params.SetParam("VisualisationSteps", getParam<int>("vis_steps"));
-    exec_params.SetParam("Problem", static_cast<platypus::TimeDomainProblem *>(mfem_problem.get()));
-
-    executioner = std::make_unique<platypus::TransientExecutioner>(exec_params);
-  }
-  else if (dynamic_cast<Steady *>(_app.getExecutioner()))
-  {
-    auto mfem_steady_problem_builder =
-        std::dynamic_pointer_cast<platypus::SteadyStateProblemBuilder>(mfem_problem_builder);
-    if (mfem_steady_problem_builder == nullptr)
-    {
-      mooseError("Specified formulation does not support Steady executioners");
-    }
-
-    exec_params.SetParam("Problem",
-                         static_cast<platypus::SteadyStateProblem *>(mfem_problem.get()));
-
-    executioner = std::make_unique<platypus::SteadyExecutioner>(exec_params);
-  }
-  else
-  {
-    mooseError("Executioner used that is not currently supported by MFEMProblem");
-  }
-
-  mfem_problem->_outputs.EnableGLVis(getParam<bool>("use_glvis"));
+  getProblemData()._coefficients.AddGlobalCoefficientsFromSubdomains();
+  addMFEMNonlinearSolver();
 }
 
 void
@@ -111,38 +50,28 @@ MFEMProblem::init()
 }
 
 void
-MFEMProblem::externalSolve()
+MFEMProblem::setMesh()
 {
-  if (!_solve)
-  {
-    return;
-  }
-
-  auto * transient_mfem_exec = dynamic_cast<platypus::TransientExecutioner *>(executioner.get());
-  if (transient_mfem_exec != nullptr)
-  {
-    transient_mfem_exec->_t_step = dt();
-  }
-  executioner->Solve();
+  auto pmesh = std::make_shared<mfem::ParMesh>(mesh().getMFEMParMesh());
+  getProblemData()._pmesh = pmesh;
+  getProblemData()._comm = pmesh->GetComm();
+  MPI_Comm_size(pmesh->GetComm(), &(getProblemData()._num_procs));
+  MPI_Comm_rank(pmesh->GetComm(), &(getProblemData()._myid));
 }
 
 void
-MFEMProblem::setProblemBuilder()
+MFEMProblem::initProblemOperator()
 {
-  mfem::ParMesh & mfem_par_mesh = mesh().getMFEMParMesh();
-  if (isTransient())
+  setMesh();
+  auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+  if (mfem_exec_ptr != nullptr)
   {
-    mfem_problem_builder = std::make_shared<platypus::TimeDomainEquationSystemProblemBuilder>();
+    mfem_exec_ptr->constructProblemOperator();
   }
   else
   {
-    mfem_problem_builder = std::make_shared<platypus::SteadyStateEquationSystemProblemBuilder>();
+    mooseError("Executioner used that is not currently supported by MFEMProblem");
   }
-  mfem_problem_builder->SetDevice(getParam<std::string>("device"));
-  mfem_problem_builder->SetMesh(std::make_shared<mfem::ParMesh>(mfem_par_mesh));
-  mfem_problem_builder->ConstructOperator();
-
-  mfem_problem = mfem_problem_builder->ReturnProblem();
 }
 
 void
@@ -153,7 +82,7 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMSolverBase & mfem_preconditioner = getUserObject<MFEMSolverBase>(name);
 
-  mfem_problem->_jacobian_preconditioner = mfem_preconditioner.getSolver();
+  getProblemData()._jacobian_preconditioner = mfem_preconditioner.getSolver();
 }
 
 void
@@ -164,7 +93,20 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMSolverBase & mfem_solver = getUserObject<MFEMSolverBase>(name);
 
-  mfem_problem->_jacobian_solver = mfem_solver.getSolver();
+  getProblemData()._jacobian_solver = mfem_solver.getSolver();
+}
+
+void
+MFEMProblem::addMFEMNonlinearSolver()
+{
+  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getProblemData()._comm);
+
+  // Defaults to one iteration, without further nonlinear iterations
+  nl_solver->SetRelTol(0.0);
+  nl_solver->SetAbsTol(0.0);
+  nl_solver->SetMaxIter(1);
+
+  getProblemData()._nonlinear_solver = nl_solver;
 }
 
 void
@@ -174,7 +116,14 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
   MFEMBoundaryCondition * mfem_bc(&getUserObject<MFEMBoundaryCondition>(name));
-  mfem_problem_builder->AddBoundaryCondition(name, mfem_bc->getBC());
+
+  if (getProblemData()._bc_map.Has(name))
+  {
+    const std::string error_message = "A boundary condition with the name " + name +
+                                      " has already been added to the problem boundary conditions.";
+    mfem::mfem_error(error_message.c_str());
+  }
+  getProblemData()._bc_map.Register(name, std::move(mfem_bc->getBC()));
 }
 
 void
@@ -193,7 +142,7 @@ MFEMProblem::addCoefficient(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   MFEMCoefficient * mfem_coef(&getUserObject<MFEMCoefficient>(name));
-  _coefficients._scalars.Register(name, mfem_coef->getCoefficient());
+  getProblemData()._coefficients._scalars.Register(name, mfem_coef->getCoefficient());
 }
 
 void
@@ -203,7 +152,7 @@ MFEMProblem::addVectorCoefficient(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   MFEMVectorCoefficient * mfem_vec_coef(&getUserObject<MFEMVectorCoefficient>(name));
-  _coefficients._vectors.Register(name, mfem_vec_coef->getVectorCoefficient());
+  getProblemData()._coefficients._vectors.Register(name, mfem_vec_coef->getVectorCoefficient());
 }
 
 void
@@ -215,8 +164,8 @@ MFEMProblem::addFESpace(const std::string & user_object_name,
   MFEMFESpace & mfem_fespace(getUserObject<MFEMFESpace>(name));
 
   // Register fespace and associated fe collection.
-  mfem_problem->_fecs.Register(name, mfem_fespace.getFEC());
-  mfem_problem->_fespaces.Register(name, mfem_fespace.getFESpace());
+  getProblemData()._fecs.Register(name, mfem_fespace.getFEC());
+  getProblemData()._fespaces.Register(name, mfem_fespace.getFESpace());
 }
 
 void
@@ -241,7 +190,7 @@ MFEMProblem::addVariable(const std::string & var_type,
 
   // Register gridfunction.
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  mfem_problem->_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  getProblemData()._gridfunctions.Register(var_name, mfem_variable.getGridFunction());
 }
 
 void
@@ -266,7 +215,7 @@ MFEMProblem::addAuxVariable(const std::string & var_type,
 
   // Register gridfunction.
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  mfem_problem->_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  getProblemData()._gridfunctions.Register(var_name, mfem_variable.getGridFunction());
 }
 
 void
