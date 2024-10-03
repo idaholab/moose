@@ -29,4 +29,5 @@ protected:
   Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   const std::vector<std::string> _bc_names;
+  std::vector<const FVFluxBC *> _bc_names;
 };
