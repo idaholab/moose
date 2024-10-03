@@ -10,7 +10,7 @@ EquationSystemProblemOperator::SetGridFunctions()
 }
 
 void
-EquationSystemProblemOperator::Init(mfem::Vector & X)
+EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
   ProblemOperator::Init(X);
 

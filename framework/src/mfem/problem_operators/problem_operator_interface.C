@@ -30,8 +30,9 @@ ProblemOperatorInterface::SetGridFunctions()
 }
 
 void
-ProblemOperatorInterface::Init(mfem::Vector & X)
+ProblemOperatorInterface::Init(mfem::BlockVector & X)
 {
+  X.Update(_true_offsets);
   for (size_t i = 0; i < _test_variables.size(); ++i)
   {
     _test_variables.at(i)->MakeRef(_test_variables.at(i)->ParFESpace(), X, _true_offsets[i]);

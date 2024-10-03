@@ -178,4 +178,8 @@ GetTimeDerivativeName(std::string name)
 {
   return std::string("d") + name + std::string("_dt");
 }
+
+using FECollections = platypus::NamedFieldsMap<mfem::FiniteElementCollection>;
+using FESpaces = platypus::NamedFieldsMap<mfem::ParFiniteElementSpace>;
+using GridFunctions = platypus::NamedFieldsMap<mfem::ParGridFunction>;
 } // namespace platypus

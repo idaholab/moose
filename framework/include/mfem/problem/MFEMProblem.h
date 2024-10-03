@@ -1,28 +1,20 @@
 #pragma once
-#include "AuxiliarySystem.h"
-#include "DisplacedProblem.h"
+#include "../common/pfem_extras.hpp"
 #include "ExternalProblem.h"
+#include "MFEMProblemData.h"
 #include "MFEMMesh.h"
 #include "MFEMCoefficient.h"
 #include "MFEMVectorCoefficient.h"
 #include "MFEMMaterial.h"
 #include "MFEMVariable.h"
-#include "MFEMScalarDirichletBC.h"
-#include "MFEMConstantCoefficient.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
+#include "MFEMExecutioner.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
-#include "PropertyManager.h"
-#include "Function.h"
 #include "MooseEnum.h"
-#include "SystemBase.h"
-#include "Transient.h"
-#include "Steady.h"
-#include "platypus.h"
 #include "libmesh/string_to_enum.h"
-#include "libmesh/point.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -30,15 +22,13 @@ public:
   static InputParameters validParams();
 
   MFEMProblem(const InputParameters & params);
-  virtual ~MFEMProblem();
+  virtual ~MFEMProblem(){};
 
   virtual void init() override;
   virtual void initialSetup() override;
-  virtual void externalSolve() override;
+  virtual void externalSolve() override{};
   virtual void outputStep(ExecFlagType type) override;
-
   virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };
-
   virtual void syncSolutions(Direction direction) override{};
 
   /**
@@ -81,9 +71,19 @@ public:
                   const std::string & name,
                   InputParameters & parameters);
   /**
-   * Set the required ProblemBuilder to build a transient or steady state problem.
+   * Set the device to use to solve the FE problem.
    */
-  void setProblemBuilder();
+  void setDevice();
+
+  /**
+   * Set the mesh used by MFEM.
+   */
+  void setMesh();
+
+  /**
+   * Initialise the required ProblemOperator used in the Executioner to solve the problem.
+   */
+  void initProblemOperator();
 
   /**
    * Override of ExternalProblem::addVariable. Sets a
@@ -125,6 +125,12 @@ public:
                      InputParameters & parameters);
 
   /**
+   * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
+   * similar to the linear solvers.
+   */
+  void addMFEMNonlinearSolver();
+
+  /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
    * This method is used in addAuxVariable to help create the MFEM grid function that corresponds to
    * a given MOOSE aux-variable.
@@ -136,12 +142,13 @@ public:
    * properties and converting them to MFEM coefficients. This is used
    * by Material and Kernel classes (among others).
    */
-  platypus::PropertyManager & getProperties() { return _properties; }
+  platypus::PropertyManager & getProperties() { return _problem_data._properties; }
 
-  std::string _input_mesh;
-  int _order;
-
-  platypus::Coefficients _coefficients;
+  /**
+   * Method to get the current MFEMProblemData object storing the
+   * current data specifying the FE problem.
+   */
+  MFEMProblemData & getProblemData() { return _problem_data; }
 
 protected:
   /**
@@ -152,13 +159,10 @@ protected:
   void addKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
   {
     using namespace platypus;
-
-    EquationSystemProblemBuilderInterface * eqn_system_problem_builder{nullptr};
-
-    if ((eqn_system_problem_builder =
-             dynamic_cast<EquationSystemProblemBuilderInterface *>(mfem_problem_builder.get())))
+    if (getProblemData()._eqn_system)
     {
-      eqn_system_problem_builder->AddKernel(std::move(var_name), std::move(kernel));
+      getProblemData()._eqn_system->AddTrialVariableNameIfMissing(var_name);
+      getProblemData()._eqn_system->AddKernel(var_name, std::move(kernel));
     }
     else
     {
@@ -167,15 +171,5 @@ protected:
     }
   }
 
-  mfem::Device _device;
-
-  platypus::PropertyManager _properties;
-  platypus::InputParameters _solver_options;
-  platypus::Outputs _outputs;
-  platypus::InputParameters _exec_params;
-
-  std::shared_ptr<platypus::ProblemBuilder> mfem_problem_builder{nullptr};
-
-  std::shared_ptr<platypus::Problem> mfem_problem{nullptr};
-  std::unique_ptr<platypus::Executioner> executioner{nullptr};
+  MFEMProblemData _problem_data;
 };

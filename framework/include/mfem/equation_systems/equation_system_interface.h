@@ -1,12 +1,10 @@
 #pragma once
-#include "problem_builder_base.h"
+#include "MFEMProblemData.h"
 
 namespace platypus
 {
 /**
  * Interface required for:
- * - SteadyStateEquationSystemProblem
- * - TimeDomainEquationSystemProblem
  * - EquationSystemProblemOperator
  * - TimeDomainEquationSystemProblemOperator
  */

@@ -12,16 +12,15 @@ class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator
                                                 public EquationSystemInterface
 {
 public:
-  TimeDomainEquationSystemProblemOperator(platypus::Problem &) = delete;
-  TimeDomainEquationSystemProblemOperator(
-      platypus::Problem & problem,
-      std::unique_ptr<platypus::TimeDependentEquationSystem> equation_system)
-    : TimeDomainProblemOperator(problem), _equation_system{std::move(equation_system)}
+  TimeDomainEquationSystemProblemOperator(MFEMProblemData & problem)
+    : TimeDomainProblemOperator(problem),
+      _equation_system(
+          std::dynamic_pointer_cast<platypus::TimeDependentEquationSystem>(problem._eqn_system))
   {
   }
 
   void SetGridFunctions() override;
-  void Init(mfem::Vector & X) override;
+  void Init(mfem::BlockVector & X) override;
 
   void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override;
 
@@ -40,7 +39,7 @@ protected:
 
 private:
   std::vector<mfem::ParGridFunction *> _trial_variable_time_derivatives;
-  std::unique_ptr<platypus::TimeDependentEquationSystem> _equation_system{nullptr};
+  std::shared_ptr<platypus::TimeDependentEquationSystem> _equation_system{nullptr};
 };
 
 } // namespace platypus
