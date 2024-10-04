@@ -6,7 +6,6 @@
 
 [Problem]
   type = MFEMProblem
-  device = cpu
 []
 
 [FESpaces]
