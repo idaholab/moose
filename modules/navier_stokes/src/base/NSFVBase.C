@@ -332,8 +332,7 @@ NSFVBase::commonTurbulenceParams()
       "passive_scalar_schmidt_number",
       std::vector<Real>(),
       "Turbulent Schmidt numbers used for the passive scalar fields.");
-  params.deprecateParam(
-      "passive_scalar_schmidt_number", "passive_scalar_turbulent_schmidt_number", "01/01/2025");
+  params.deprecateParam("passive_scalar_schmidt_number", "Sc_t", "01/01/2025");
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
                               "von_karman_const_0 mixing_length_delta",
                               "Mixing length model");
