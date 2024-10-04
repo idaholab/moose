@@ -40,11 +40,17 @@ HeatConductionPhysicsBase::validParams()
       {},
       "Functors to compute the heat flux on each boundary in 'fixed_temperature_boundaries'");
   params.addParam<std::vector<BoundaryName>>(
-      "fixed_convection_boundaries", {}, "Boundaries on which to apply convection with an infinite medium");
+      "fixed_convection_boundaries",
+      {},
+      "Boundaries on which to apply convection with a neighboring fluid");
   params.addParam<std::vector<MooseFunctorName>>(
-      "fixed_convection_T_infinity", {}, "Temperature at an infinite distance from the convective boundary conditions");
+      "fixed_convection_T_fluid",
+      {},
+      "Temperature of the convecting fluid. The user should note that numerous heat transfer "
+      "coefficient correlation will require this fluid temperature to be the bulk fluid "
+      "temperature / fluid temperature at an infinite distance.");
   params.addParam<std::vector<MooseFunctorName>>(
-      "fixed_convection_htc", {}, "Heat transfer coefficient for convection with infinite medium");
+      "fixed_convection_htc", {}, "Heat transfer coefficient for convection with a fluid");
   params.addParamNamesToGroup(
       "heat_flux_boundaries insulated_boundaries fixed_temperature_boundaries boundary_heat_fluxes "
       "boundary_temperatures",
@@ -66,8 +72,10 @@ HeatConductionPhysicsBase::HeatConductionPhysicsBase(const InputParameters & par
                                                               "boundary_heat_fluxes");
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("fixed_temperature_boundaries",
                                                               "boundary_temperatures");
-  checkVectorParamsNoOverlap<BoundaryName>(
-      {"heat_flux_boundaries", "insulated_boundaries", "fixed_temperature_boundaries", "fixed_convection_boundaries"});
+  checkVectorParamsNoOverlap<BoundaryName>({"heat_flux_boundaries",
+                                            "insulated_boundaries",
+                                            "fixed_temperature_boundaries",
+                                            "fixed_convection_boundaries"});
 
   addRequiredPhysicsTask("add_preconditioning");
 }
