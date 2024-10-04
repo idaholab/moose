@@ -20,7 +20,7 @@ registerMooseAction("HeatTransferApp", HeatConductionFV, "add_preconditioning");
 InputParameters
 HeatConductionFV::validParams()
 {
-  InputParameters params = HeatConductionPhysics::validParams();
+  InputParameters params = HeatConductionPhysicsBase::validParams();
   params.addClassDescription(
       "Creates the heat conduction equation discretized with nonlinear finite volume");
 
@@ -41,7 +41,7 @@ HeatConductionFV::validParams()
 }
 
 HeatConductionFV::HeatConductionFV(const InputParameters & parameters)
-  : HeatConductionPhysics(parameters)
+  : HeatConductionPhysicsBase(parameters)
 {
 }
 

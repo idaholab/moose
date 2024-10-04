@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HeatConductionPhysics.h"
+#include "HeatConductionPhysicsBase.h"
 
 InputParameters
-HeatConductionPhysics::validParams()
+HeatConductionPhysicsBase::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
   params.addClassDescription("Add the heat conduction physics");
@@ -58,7 +58,7 @@ HeatConductionPhysics::validParams()
   return params;
 }
 
-HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
+HeatConductionPhysicsBase::HeatConductionPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters), _temperature_name(getParam<VariableName>("temperature_name"))
 {
   // Parameter checking
@@ -73,7 +73,7 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
 }
 
 void
-HeatConductionPhysics::addInitialConditions()
+HeatConductionPhysicsBase::addInitialConditions()
 {
   // Always obey the user, but dont set a hidden default when restarting
   if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
@@ -86,7 +86,7 @@ HeatConductionPhysics::addInitialConditions()
 }
 
 void
-HeatConductionPhysics::addPreconditioning()
+HeatConductionPhysicsBase::addPreconditioning()
 {
   // Use a multigrid method, known to work for elliptic problems such as diffusion
   if (_preconditioning == "default")

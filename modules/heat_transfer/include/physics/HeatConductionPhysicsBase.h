@@ -15,12 +15,12 @@
  * Base class to host common parameters and attributes to all Physics solving the heat conduction
  * equation
  */
-class HeatConductionPhysics : public PhysicsBase
+class HeatConductionPhysicsBase : public PhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  HeatConductionPhysics(const InputParameters & parameters);
+  HeatConductionPhysicsBase(const InputParameters & parameters);
 
 protected:
   /// Name of the temperature variable

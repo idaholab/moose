@@ -22,7 +22,7 @@ registerMooseAction("HeatTransferApp", HeatConductionCG, "add_preconditioning");
 InputParameters
 HeatConductionCG::validParams()
 {
-  InputParameters params = HeatConductionPhysics::validParams();
+  InputParameters params = HeatConductionPhysicsBase::validParams();
   params.addClassDescription("Creates the heat conduction equation discretized with CG");
 
   // Material properties
@@ -37,7 +37,7 @@ HeatConductionCG::validParams()
 }
 
 HeatConductionCG::HeatConductionCG(const InputParameters & parameters)
-  : HeatConductionPhysics(parameters)
+  : HeatConductionPhysicsBase(parameters)
 {
 }
 
@@ -75,7 +75,7 @@ HeatConductionCG::addFEKernels()
     else if (getProblem().hasPostprocessorValueByName(functor_name))
       params.set<PostprocessorName>("postprocessor") = functor_name;
     else
-      paramError("heat_source_functor", "Unsupported functor type. Consider using 'heat_source_var'.");
+      paramError("heat_source_functor", "Unsupported functor type.");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
   }
   if (isTransient())
@@ -168,13 +168,11 @@ HeatConductionCG::addFEBCs()
         getParam<std::vector<BoundaryName>>("fixed_convection_boundaries");
     const auto & boundary_T_infinity =
         getParam<std::vector<MooseFunctorName>>("fixed_convection_T_infinity");
-    const auto & boundary_htc =
-        getParam<std::vector<MooseFunctorName>>("fixed_convection_htc");
+    const auto & boundary_htc = getParam<std::vector<MooseFunctorName>>("fixed_convection_htc");
     // Optimization if all the same
-    if (std::set<MooseFunctorName>(boundary_T_infinity.begin(), boundary_T_infinity.end())
-                .size() == 1 &&
-        std::set<MooseFunctorName>(boundary_htc.begin(), boundary_htc.end())
-                .size() == 1 &&
+    if (std::set<MooseFunctorName>(boundary_T_infinity.begin(), boundary_T_infinity.end()).size() ==
+            1 &&
+        std::set<MooseFunctorName>(boundary_htc.begin(), boundary_htc.end()).size() == 1 &&
         convective_boundaries.size() > 1)
     {
       params.set<std::vector<BoundaryName>>("boundary") = convective_boundaries;
