@@ -113,16 +113,16 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueRHS)
 {
 
-  if (_assembly_level == mfem::AssemblyLevel::LEGACY)
+  switch (_assembly_level)
   {
-    FormLegacySystem(op, trueX, trueRHS);
-  }
-  else
-  {
-    MFEM_VERIFY(_test_var_names.size() == 1,
-                "Non-legacy assembly is only supported for single-variable systems");
-    MFEM_VERIFY(_mblfs.size() != 0, "Non-legacy assembly is only supported for square systems");
-    FormSystem(op, trueX, trueRHS);
+    case mfem::AssemblyLevel::LEGACY:
+      FormLegacySystem(op, trueX, trueRHS);
+      break;
+    default:
+      MFEM_VERIFY(_test_var_names.size() == 1,
+                  "Non-legacy assembly is only supported for single-variable systems");
+      MFEM_VERIFY(_mblfs.size() != 0, "Non-legacy assembly is only supported for square systems");
+      FormSystem(op, trueX, trueRHS);
   }
 }
 
