@@ -10,6 +10,7 @@
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- WITH_LIBTORCH: The libtorch distribution to use (cpu, cu121, etc); default: cpu           -#}
+{#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
 
 {#- Set WITH_LIBTORCH default if not set                                                      -#}
 {%- if WITH_LIBTORCH is not defined %}
@@ -27,6 +28,10 @@
 
 {#- The installation location for wasp                                                        -#}
 {%- set WASP_DIR = '/opt/wasp' -%}
+{#- The installation location for gperftools                                                  -#}
+{%- set GPERF_DIR = '/opt/gperftools' -%}
+{#- The installation location for pprof                                                       -#}
+{%- set PPROF_DIR = '/opt/pprof' -%}
 {#- The installation location for libtorch                                                    -#}
 {%- set LIBTORCH_DEST = '/opt' -%}
 
@@ -47,10 +52,17 @@ From: {{ APPTAINER_FROM }}
     export PATH=${WASP_DIR}/bin:$PATH
 
 {%- if WITH_LIBTORCH %}
+    # Make libtorch visible to moose
     export LIBTORCH_DIR={{ LIBTORCH_DEST }}/libtorch
-
     # Adding this to not get GPU initialization errors from MPICH
     export MPIR_CVAR_ENABLE_GPU=0
+{%- endif %}
+
+{% if PROFILING is defined %}
+    # For profiling
+    export GPERF_DIR={{ GPERF_DIR }}
+    export PATH={{ PPROF_DIR }}/bin:$PATH
+    export METHOD=oprof
 {%- endif %}
 
 %post
@@ -70,7 +82,7 @@ From: {{ APPTAINER_FROM }}
 
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
-    PYTHON_VERSION=3.10
+    PYTHON_VERSION=3.11
     CODE_SERVER_VERSION=4.92.2
 
     # Install code-server
@@ -152,8 +164,41 @@ From: {{ APPTAINER_FROM }}
     # This is redundant; hopefully we can use the one from conda in the future
     WASP_SRC_DIR=${WASP_SRC_DIR} ${WASP_BUILD_SCRIPT} -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR}
 
-    # Install node.js
+    # Install node.js. Requested by dschwen for bison
     dnf install -y nodejs npm
+
+{% if PROFILING is defined %}
+    # Install gperftools
+    GPERFTOOLS_VERSION=gperftools-2.15
+    cd ${ROOT_BUILD_DIR}
+    git clone -b ${GPERFTOOLS_VERSION} --single-branch https://github.com/gperftools/gperftools.git
+    GPERFTOOLS_SRC=${ROOT_BUILD_DIR}/gperftools
+    cd ${GPERFTOOLS_SRC}
+    ./autogen.sh
+    ./configure --prefix={{ GPERF_DIR }} --enable-frame-pointers
+    make -j ${MOOSE_JOBS}
+    make install
+    cd ~
+    rm -rf ${GPERFTOOLS_SRC}
+
+    # Install go for building pprof; to be removed
+    GO_VERSION=1.23.1
+    GO_TAR=${ROOT_BUILD_DIR}/go.tar.gz
+    curl -L https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o ${GO_TAR}
+    tar -C ${ROOT_BUILD_DIR} -xf ${GO_TAR}
+    rm -rf ${GO_TAR}
+    export PATH=${ROOT_BUILD_DIR}/go/bin:${PATH}
+    export GOPATH=${ROOT_BUILD_DIR}/gopath
+    mkdir ${GOPATH}
+
+    # Install pprof
+    PPROF_VERSION=a0b0bb1d4134f37be44de6c328680339b0fc13ad
+    GOBIN={{ PPROF_DIR }}/bin go install github.com/google/pprof@${PPROF_VERSION}
+
+    # Remove go now that pprof is installed
+    go clean -cache -modcache
+    rm -rf ${GOPATH} ${ROOT_BUILD_DIR}/go
+{%- endif %}
 
     # Clean up
     conda clean -ya

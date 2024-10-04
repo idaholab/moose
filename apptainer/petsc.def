@@ -8,6 +8,7 @@
 {#- PETSC_OPTIONS: Options to pass to the PETSc build script                                  -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the PETSc build script                              -#}
 {#- MPI_FLAVOUR: The flavour of MPI to use (options: mpich, openmpi; default: mpich)          -#}
+{#- PROFILING: Set to anything to build for profiling (set petsc flags)                       -#}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
@@ -50,7 +51,6 @@ From: {{ APPTAINER_FROM }}
     PETSC_DIR={{ PETSC_DIR }}
     PETSC_GIT_SHA={{ PETSC_GIT_SHA }}
     PETSC_GIT_REMOTE={{ PETSC_GIT_REMOTE }}
-    PETSC_OPTIONS="{{ PETSC_OPTIONS }}"
 
     # Clone PETSc
     PETSC_SRC_DIR=${ROOT_BUILD_DIR}/petsc
@@ -61,7 +61,16 @@ From: {{ APPTAINER_FROM }}
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh --skip-submodule-update${PETSC_OPTIONS}
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh \
+{%- if PROFILING is defined %}
+        --CFLAGS=-fno-omit-frame-pointer \
+        --CXX_CXXFLAGS=-fno-omit-frame-pointer \
+        --FFLAGS=-fno-omit-frame-pointer \
+{%- endif %}
+{%- if PETSC_OPTIONS is defined %}
+        {{ PETSC_OPTIONS }} \
+{%- endif %}
+        ;
 
 {%- if MPI_FLAVOUR == "openmpi" %}
     # If we're using openmpi, we need to allow running as root
