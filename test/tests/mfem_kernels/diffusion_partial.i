@@ -6,8 +6,6 @@
 
 [Problem]
   type = MFEMProblem
-  device = cpu
-  assembly_level = partial
 []
 
 [FESpaces]
@@ -93,7 +91,8 @@
 []
 
 [Executioner]
-  type = Steady
+  type = MFEMSteady
+  assembly_level = partial
 []
 
 [Outputs]

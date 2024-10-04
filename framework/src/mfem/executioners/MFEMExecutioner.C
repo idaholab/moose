@@ -6,6 +6,12 @@ MFEMExecutioner::validParams()
 {
   InputParameters params = Executioner::validParams();
   params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
+  MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
+  params.addParam<MooseEnum>(
+      "assembly_level",
+      assembly_levels,
+      "Matrix assembly level. Options: legacy, full, element, partial, none.");
+
   return params;
 }
 
