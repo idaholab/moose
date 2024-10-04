@@ -11,6 +11,8 @@
 
 #include "mfem.hpp"
 
+#include "ObjectManager.h"
+
 namespace platypus
 {
 
@@ -23,7 +25,9 @@ template <class T, class Tpw>
 class PropertyMap
 {
 public:
-  void addProperty(const std::string & name, std::unique_ptr<T> && coeff)
+  PropertyMap(ObjectManager<T> & manager) : _manager(manager) {}
+
+  void addProperty(const std::string & name, std::shared_ptr<T> coeff)
   {
     const auto [_, inserted] = this->_properties.emplace(name, std::move(coeff));
     if (!inserted)
@@ -62,7 +66,7 @@ public:
                              block + " in PropertyMap object");
       }
       coeff_map[block] = coeff;
-      pw_coeff.UpdateCoefficient(std::stoi(block), *coeff);
+      pw_coeff->UpdateCoefficient(std::stoi(block), *coeff);
     }
   }
 
@@ -73,11 +77,11 @@ public:
       auto & coeff = this->_properties.at(name);
       try
       {
-        return *std::get<std::unique_ptr<T>>(coeff);
+        return *std::get<std::shared_ptr<T>>(coeff);
       }
       catch (std::bad_variant_access)
       {
-        return std::get<0>(std::get<PWData>(coeff));
+        return *std::get<0>(std::get<PWData>(coeff));
       }
     }
     catch (std::out_of_range)
@@ -93,18 +97,26 @@ public:
     if (!this->hasCoefficient(name))
       return false;
     auto & coeff = this->_properties.at(name);
-    if (std::holds_alternative<std::unique_ptr<T>>(coeff))
+    if (std::holds_alternative<std::shared_ptr<T>>(coeff))
       return true;
     auto block_map = std::get<1>(std::get<PWData>(coeff));
     return block_map.count(block) > 0;
   }
 
 private:
-  using PWData = std::tuple<Tpw, std::map<const std::string, std::shared_ptr<T>>>;
-  std::map<const std::string, std::variant<std::unique_ptr<T>, PWData>> _properties;
+  using PWData = std::tuple<std::shared_ptr<Tpw>, std::map<const std::string, std::shared_ptr<T>>>;
+  std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _properties;
+  ObjectManager<T> & _manager;
 
-  PWData emptyPWData(std::shared_ptr<T> coeff) { return PWData(); }
-  void checkPWData(std::shared_ptr<T> coeff, Tpw & existing_pw, const std::string & name) {}
+  PWData emptyPWData(std::shared_ptr<T> coeff)
+  {
+    return std::make_tuple(this->_manager.template make<Tpw>(),
+                           std::map<const std::string, std::shared_ptr<T>>());
+  }
+  void
+  checkPWData(std::shared_ptr<T> coeff, std::shared_ptr<Tpw> existing_pw, const std::string & name)
+  {
+  }
 };
 
 using ScalarMap = PropertyMap<mfem::Coefficient, mfem::PWCoefficient>;
@@ -119,11 +131,11 @@ MatrixMap::PWData MatrixMap::emptyPWData(std::shared_ptr<mfem::MatrixCoefficient
 
 template <>
 void VectorMap::checkPWData(std::shared_ptr<mfem::VectorCoefficient> coeff,
-                            mfem::PWVectorCoefficient & existing_pw,
+                            std::shared_ptr<mfem::PWVectorCoefficient> existing_pw,
                             const std::string & name);
 
 template <>
 void MatrixMap::checkPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff,
-                            mfem::PWMatrixCoefficient & existing_pw,
+                            std::shared_ptr<mfem::PWMatrixCoefficient> existing_pw,
                             const std::string & name);
 } // namespace platypus

@@ -14,7 +14,10 @@ public:
   virtual ~MFEMProblemData() { _ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
-  platypus::PropertyManager _properties;
+  platypus::ScalarCoefficientManager _scalar_manager;
+  platypus::VectorCoefficientManager _vector_manager;
+  platypus::MatrixCoefficientManager _matrix_manager;
+  platypus::PropertyManager _properties{_scalar_manager, _vector_manager, _matrix_manager};
   platypus::BCMap _bc_map;
   platypus::Coefficients _coefficients;
 

@@ -10,7 +10,11 @@ class CheckPropertyManager : public testing::Test
 protected:
   mfem::IsoparametricTransformation fe_transform;
   mfem::IntegrationPoint point1, point2;
-  CheckPropertyManager()
+  platypus::ScalarCoefficientManager _scalar_manager;
+  platypus::VectorCoefficientManager _vector_manager;
+  platypus::MatrixCoefficientManager _matrix_manager;
+  platypus::PropertyManager manager;
+  CheckPropertyManager() : manager(_scalar_manager, _vector_manager, _matrix_manager)
   {
     point1.Init(2);
     point1.Set2(0., 0.);
@@ -66,7 +70,6 @@ matrix_func_t(const mfem::Vector & x, mfem::real_t t, mfem::DenseMatrix & mat)
 
 TEST_F(CheckPropertyManager, DeclareUniformScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("resistivity", 2.);
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("resistivity"));
@@ -77,7 +80,6 @@ TEST_F(CheckPropertyManager, DeclareUniformScalar)
 
 TEST_F(CheckPropertyManager, DeclarePWScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("test", 2., {"1", "2"});
   manager.declareScalar("test", 1., {"3"});
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
@@ -95,7 +97,6 @@ TEST_F(CheckPropertyManager, DeclarePWScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("resistivity", scalar_func);
   auto c = &manager.getScalarProperty("resistivity");
   EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
@@ -104,7 +105,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("resistivity", scalar_func_t);
   auto c = &manager.getScalarProperty("resistivity");
   c->SetTime(0.);
@@ -117,7 +117,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionTScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionPWScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("test", scalar_func, {"1", "2"});
   manager.declareScalar(
       "test", [](const mfem::Vector & x) -> mfem::real_t { return scalar_func(x) + 1.; }, {"3"});
@@ -139,7 +138,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTPWScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("test", scalar_func_t, {"1", "2"});
   manager.declareScalar(
       "test", [](const mfem::Vector & x) -> mfem::real_t { return scalar_func(x) + 1.; }, {"3"});
@@ -175,7 +173,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWScalar)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("resistivity"));
@@ -186,7 +183,6 @@ TEST_F(CheckPropertyManager, DeclareCoefficientScalar)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWScalar)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("test", std::make_unique<mfem::ConstantCoefficient>(2.), {"1", "2"});
   manager.declareScalar("test", std::make_unique<mfem::ConstantCoefficient>(1.), {"3"});
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
@@ -204,7 +200,6 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWScalar)
 
 TEST_F(CheckPropertyManager, ScalarIsDefined)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("a", 2.);
   manager.declareScalar("b", scalar_func);
   manager.declareScalar("c", std::make_unique<mfem::ConstantCoefficient>(2.));
@@ -231,7 +226,6 @@ TEST_F(CheckPropertyManager, ScalarIsDefined)
 
 TEST_F(CheckPropertyManager, ScalarPWIsDefined)
 {
-  platypus::PropertyManager manager;
   manager.declareScalar("a", 2., {"1", "2"});
   manager.declareScalar("b", scalar_func, {"-1", "0"});
   manager.declareScalar("c", std::make_unique<mfem::ConstantCoefficient>(2.), {"42", "45"});
@@ -262,7 +256,6 @@ TEST_F(CheckPropertyManager, ScalarPWIsDefined)
 
 TEST_F(CheckPropertyManager, DeclareUniformVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("resistivity", mfem::Vector({1., 2.}));
   mfem::VectorConstantCoefficient * c =
       dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorProperty("resistivity"));
@@ -278,7 +271,6 @@ TEST_F(CheckPropertyManager, DeclareUniformVector)
 
 TEST_F(CheckPropertyManager, DeclarePWVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("test", mfem::Vector({1., 2.}), {"1", "2"});
   manager.declareVector("test", mfem::Vector({3., 4.}), {"3"});
   mfem::PWVectorCoefficient * c =
@@ -308,7 +300,6 @@ TEST_F(CheckPropertyManager, DeclarePWVector)
 
 TEST_F(CheckPropertyManager, DeclareFunctionVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("resistivity", 2, vector_func);
   auto c = &manager.getVectorProperty("resistivity");
   mfem::Vector vec;
@@ -322,7 +313,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionVector)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("resistivity", 2, vector_func_t);
   auto c = &manager.getVectorProperty("resistivity");
   mfem::Vector vec;
@@ -344,7 +334,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionTVector)
 
 TEST_F(CheckPropertyManager, DeclareFunctionPWVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("test", 2, vector_func, {"1", "2"});
   manager.declareVector("test",
                         2,
@@ -383,7 +372,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWVector)
 }
 TEST_F(CheckPropertyManager, DeclareFunctionTPWVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("test", 2, vector_func_t, {"1", "2"});
   manager.declareVector("test",
                         2,
@@ -447,7 +435,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWVector)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("resistivity",
                         std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({1., 2.})));
   mfem::VectorConstantCoefficient * c =
@@ -464,7 +451,6 @@ TEST_F(CheckPropertyManager, DeclareCoefficientVector)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWVector)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("test",
                         std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})),
                         {"1", "2"});
@@ -497,7 +483,6 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWVector)
 
 TEST_F(CheckPropertyManager, VectorIsDefined)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("a", mfem::Vector({2., 1.}));
   manager.declareVector("b", 2, vector_func);
   manager.declareVector("c",
@@ -525,7 +510,6 @@ TEST_F(CheckPropertyManager, VectorIsDefined)
 
 TEST_F(CheckPropertyManager, VectorPWIsDefined)
 {
-  platypus::PropertyManager manager;
   manager.declareVector("a", mfem::Vector({2., 1.}), {"1", "2"});
   manager.declareVector("b", 2, vector_func, {"-1", "0"});
   manager.declareVector(
@@ -557,7 +541,6 @@ TEST_F(CheckPropertyManager, VectorPWIsDefined)
 
 TEST_F(CheckPropertyManager, DeclareUniformMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("resistivity", mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
   mfem::MatrixConstantCoefficient * c =
       dynamic_cast<mfem::MatrixConstantCoefficient *>(&manager.getMatrixProperty("resistivity"));
@@ -577,7 +560,6 @@ TEST_F(CheckPropertyManager, DeclareUniformMatrix)
 
 TEST_F(CheckPropertyManager, DeclarePWMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("test", mfem::DenseMatrix({{1., 2.}, {3., 4.}}), {"1", "2"});
   manager.declareMatrix("test", mfem::DenseMatrix({{-1., 4.}, {-10., -2.}}), {"3"});
   mfem::PWMatrixCoefficient * c =
@@ -617,7 +599,6 @@ TEST_F(CheckPropertyManager, DeclarePWMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("resistivity", 2, matrix_func);
   auto c = &manager.getMatrixProperty("resistivity");
   mfem::DenseMatrix mat;
@@ -635,7 +616,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("resistivity", 2, matrix_func_t);
   auto c = &manager.getMatrixProperty("resistivity");
   mfem::DenseMatrix mat;
@@ -665,7 +645,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionTMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionPWMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("test", 2, matrix_func, {"1", "2"});
   manager.declareMatrix("test",
                         2,
@@ -717,7 +696,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTPWMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("test", 2, matrix_func_t, {"1", "2"});
   manager.declareMatrix("test",
                         2,
@@ -805,7 +783,6 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWMatrix)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix(
       "resistivity",
       std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
@@ -827,7 +804,6 @@ TEST_F(CheckPropertyManager, DeclareCoefficientMatrix)
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWMatrix)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix(
       "test",
       std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
@@ -873,7 +849,6 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWMatrix)
 
 TEST_F(CheckPropertyManager, MatrixIsDefined)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 0.}}));
   manager.declareMatrix("b", 2, matrix_func);
   manager.declareMatrix(
@@ -902,7 +877,6 @@ TEST_F(CheckPropertyManager, MatrixIsDefined)
 
 TEST_F(CheckPropertyManager, MatrixPWIsDefined)
 {
-  platypus::PropertyManager manager;
   manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 1.}}), {"1", "2"});
   manager.declareMatrix("b", 2, matrix_func, {"-1", "0"});
   manager.declareMatrix(
@@ -936,7 +910,6 @@ TEST_F(CheckPropertyManager, MatrixPWIsDefined)
 
 TEST_F(CheckPropertyManager, CheckRepeatedNames)
 {
-  platypus::PropertyManager manager;
   // Check there can be scalar, vector, and matrix coefficients defined with the same name
   manager.declareScalar("a", 2.);
   manager.declareVector("a", mfem::Vector({2., 1.}));

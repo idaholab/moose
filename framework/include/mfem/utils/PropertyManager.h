@@ -23,6 +23,18 @@ namespace platypus
 class PropertyManager
 {
 public:
+  PropertyManager(ScalarCoefficientManager & scalar_manager,
+                  VectorCoefficientManager & vector_manager,
+                  MatrixCoefficientManager & matrix_manager)
+    : _scalar_manager(scalar_manager),
+      _vector_manager(vector_manager),
+      _matrix_manager(matrix_manager),
+      _scalar_coeffs(scalar_manager),
+      _vector_coeffs(vector_manager),
+      _matrix_coeffs(matrix_manager)
+  {
+  }
+
   void declareScalar(const std::string & name,
                      mfem::real_t value,
                      const std::vector<std::string> & blocks = {});
@@ -33,7 +45,7 @@ public:
                      std::function<mfem::real_t(const mfem::Vector &, mfem::real_t)> func,
                      const std::vector<std::string> & blocks = {});
   void declareScalar(const std::string & name,
-                     std::unique_ptr<mfem::Coefficient> && coef,
+                     std::shared_ptr<mfem::Coefficient> coef,
                      const std::vector<std::string> & blocks = {});
 
   void declareVector(const std::string & name,
@@ -48,7 +60,7 @@ public:
                      std::function<void(const mfem::Vector &, double t, mfem::Vector &)> func,
                      const std::vector<std::string> & blocks = {});
   void declareVector(const std::string & name,
-                     std::unique_ptr<mfem::VectorCoefficient> && coef,
+                     std::shared_ptr<mfem::VectorCoefficient> coef,
                      const std::vector<std::string> & blocks = {});
 
   void declareMatrix(const std::string & name,
@@ -64,7 +76,7 @@ public:
                 std::function<void(const mfem::Vector &, mfem::real_t, mfem::DenseMatrix &)> func,
                 const std::vector<std::string> & blocks = {});
   void declareMatrix(const std::string & name,
-                     std::unique_ptr<mfem::MatrixCoefficient> && coef,
+                     std::shared_ptr<mfem::MatrixCoefficient> coef,
                      const std::vector<std::string> & blocks = {});
 
   mfem::Coefficient & getScalarProperty(const std::string name);
@@ -75,6 +87,9 @@ public:
   bool matrixIsDefined(const std::string & name, const std::string & block) const;
 
 private:
+  ScalarCoefficientManager & _scalar_manager;
+  VectorCoefficientManager & _vector_manager;
+  MatrixCoefficientManager & _matrix_manager;
   ScalarMap _scalar_coeffs;
   VectorMap _vector_coeffs;
   MatrixMap _matrix_coeffs;
