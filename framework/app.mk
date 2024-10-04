@@ -469,19 +469,23 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 
 ###### install stuff #############
 docs_dir := $(APPLICATION_DIR)/doc
-bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
+installed_app_binary = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(share_install_dir)/$(notdir $(app_EXEC))
 # Strip the trailing slashes (if provided) and transform into a suitable Makefile targets
 copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAME)_$(patsubst %/,%,$(dir)))
 
 ifeq ($(want_exec),yes)
-  install_bin: $(bindst)
-  lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
+  install_bin: $(installed_app_binary)
+# Install targets for library archives, which will also install the associated .so/.dylib library
+  lib_archive_install_targets = $(foreach lib,$(filter %.la, $(applibs)),$(dir $(lib))install_lib_from_archive_$(notdir $(lib)))
+# Install targets for libraries that do not have archives (.so/.dylib)
+	lib_install_targets = $(foreach lib,$(filter %.$(lib_suffix), $(applibs)),$(dir $(lib))install_lib_$(notdir $(lib)))
 else
   install_bin:
 endif
 
-install_libs:: $(lib_install_targets)
+# Top level install target for all libraries (.so/.dylib, .la)
+install_all_libs: $(lib_archive_install_targets) $(lib_install_targets)
 
 ifneq ($(wildcard $(APPLICATION_DIR)/data/.),)
 install_data_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/data
@@ -518,27 +522,44 @@ $(copy_input_targets):
 		echo "app_name = $(APPLICATION_NAME)" > $(share_install_dir)/$(dest_dir)/testroot; \
 	fi; \
 
-
-install_lib_%: %
+# Install target for a single .la library archive and the associated .so/.dylib library
+install_lib_from_archive_%: %
 	@mkdir -p $(lib_install_dir)
-	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))  # full installed path (includes library name)
-	@$(eval source_dir := $(dir $<))
-	@$(eval la_installed = $(lib_install_dir)/$(notdir $<))
-	@echo "Installing library $(libdst)"
-	@cp $< $(la_installed)                   # Copy the library archive file
-	@cp $(source_dir)/$(libname) $(libdst)   # Copy the library file
-	@$(call patch_la,$(la_installed),$(lib_install_dir))
-ifneq (,$(findstring darwin,$(libmesh_HOST)))
-	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
-endif
-	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
-	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
+	@$(eval lib_archive_installed = $(lib_install_dir)/$(notdir $<))
+	@$(eval lib_file = $(call lib_from_archive,$<))
+	@$(eval lib_installed := $(lib_install_dir)/$(lib_file))
+	@$(eval lib_build := $(dir $<)/$(lib_file))
+
+# Install the .so/.dylib library
+	@echo "Installing library $(lib_installed)"
+	@cp $(lib_build) $(lib_installed)
+# Patch to add additional installed rpaths to the application libs
+# for dependencies-of-dependencies installed in a different folder
+	@if [ "$(notdir $<)" == "$(notdir $(app_LIB))" ] || [ "$(notdir $<)" == "$(notdir $(app_test_LIB))" ]; then \
+	for lib_dir in $(ADDITIONAL_APP_INSTALL_RPATHS); do $(call patch_rpath,$(lib_installed),$(abspath $(lib_install_dir)/../$$lib_dir)); done \
+	fi
+# Patch to add libraries in the installed folder
+	@$(call patch_rpath,$(lib_installed),$(lib_install_dir))
+
+# Install the .la library, which on mac requires the library above to be installed first
+	@echo "Installing library archive $(lib_archive_installed)"
+	@cp $< $(lib_archive_installed)
+	@$(call patch_la,$(lib_archive_installed),$(lib_install_dir))
+	@$(call patch_relink,$(lib_installed),$(libpath_pcre),$(libname_pcre))
+	@$(call patch_relink,$(lib_installed),$(libpath_framework),$(libname_framework))
 # These lines are critical in that they are a catch-all for nested applications. (e.g. These will properly remap MOOSE and the modules
 # in an application library to the installed locations) - DO NOT REMOVE! Yes, this can probably be done better
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
+	@$(eval libnames := $(foreach lib,$(filter %.la, $(applibs)),$(call lib_from_archive,$(lib))))
+	@$(eval libpaths := $(foreach lib,$(filter %.la, $(applibs)),$(dir $(lib))$(call lib_from_archive,$(lib))))
+	@for lib in $(libpaths); do $(call patch_relink,$(lib_installed),$$lib,$$(basename $$lib)); done
+
+# Install target for a single .so/.dylib library that is not associated with a .la library archive
+install_lib_%: %
+	@mkdir -p $(lib_install_dir)
+	@$(eval lib_installed = $(lib_install_dir)/$(notdir $<))
+	@echo "Installing library $(lib_installed)"
+	@cp $< $(lib_installed)
+	@$(call patch_rpath,$(lib_installed),$(lib_install_dir))
 
 $(binlink): $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
@@ -552,17 +573,17 @@ else
 	@echo "Skipping docs installation."
 endif
 
-$(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs install_$(APPLICATION_NAME)_resource $(binlink)
+$(installed_app_binary): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs install_$(APPLICATION_NAME)_resource $(binlink)
 	@echo "Installing binary $@"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@
-	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@$(call patch_rpath,$@,$(lib_install_dir))
+	@$(eval libnames := $(foreach lib,$(applibs),$(call lib_from_archive,$(lib))))
+	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(call lib_from_archive,$(lib))))
 	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
 
 ifeq ($(want_exec),yes)
-install_bin: $(bindst)
+install_bin: $(installed_app_binary)
 else
 install_bin:
 endif

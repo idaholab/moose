@@ -484,7 +484,7 @@ moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
 
-install: all install_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data
+install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data
 
 install_data::
 	@mkdir -p $(moose_share_dir)
@@ -526,16 +526,20 @@ lib_install_dir = $(PREFIX)/$(lib_install_suffix)
 
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
   patch_relink = install_name_tool -change $(2) @rpath/$(3) $(1)
-  patch_rpath = install_name_tool -add_rpath @executable_path/$(2) $(1)
+	patch_rpath = install_name_tool -add_rpath $(2) $(1)
+	patch_remove = :
 else
   patch_relink = :
-  patch_rpath = patchelf --set-rpath '$$ORIGIN'/$(2):$$(patchelf --print-rpath $(1)) $(1)
+	patch_rpath = patchelf --set-rpath $(2):$$(patchelf --print-rpath $(1)) $(1)
+	patch_remove = patchelf --remove-needed $(2) $(1)
 endif
 patch_la = $(FRAMEWORK_DIR)/scripts/patch_la.py $(1) $(2)
+# Gets the associated library from a library archive (first argument)
+lib_from_archive = `grep "dlname='.*'" $(1) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g"`
 
-libname_framework = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/libmoose-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libname_framework = $(call lib_from_archive,$(MOOSE_DIR)/framework/libmoose-$(METHOD).la)
 libpath_framework = $(MOOSE_DIR)/framework/$(libname_framework)
-libname_pcre = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/pcre/libpcre-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libname_pcre = $(call lib_from_archive,$(MOOSE_DIR)/framework/contrib/pcre/libpcre-$(METHOD).la)
 libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 
 #
