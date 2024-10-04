@@ -108,7 +108,7 @@ public:
    * @param name The action name.
    */
   template <class T>
-  const T & getAction(const std::string & name)
+  const T & getAction(const std::string & name) const
   {
     typename std::shared_ptr<T> p;
     for (auto act_ptr : _all_ptrs)
@@ -136,7 +136,7 @@ public:
     return *p;
   }
   template <class T>
-  T * getPhysics(const std::string & name)
+  T * getPhysics(const std::string & name) const
   {
     auto physics = const_cast<T *>(&getAction<T>(name));
     if (!dynamic_cast<const PhysicsBase *>(physics))
