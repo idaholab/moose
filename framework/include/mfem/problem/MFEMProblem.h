@@ -13,6 +13,7 @@
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
+#include "Function.h"
 #include "MooseEnum.h"
 #include "libmesh/string_to_enum.h"
 
@@ -116,6 +117,15 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Override of ExternalProblem::addFunction. Uses ExternalProblem::addFunction to create a
+   * MFEMGeneralUserObject representing the function in MOOSE, and creates a corresponding
+   * MFEM Coefficient or VectorCoefficient object.
+   */
+  void addFunction(const std::string & function_name,
+                   const std::string & name,
+                   InputParameters & parameters) override;
+
+  /**
    * Method called in AddMFEMPreconditionerAction which will create the solver.
    */
   void addMFEMPreconditioner(const std::string & user_object_name,
@@ -154,6 +164,18 @@ public:
    * current data specifying the FE problem.
    */
   MFEMProblemData & getProblemData() { return _problem_data; }
+
+  /**
+   * Method to get the MFEM scalar coefficient object corresponding to the named function.
+   */
+  virtual std::shared_ptr<mfem::FunctionCoefficient>
+  getScalarFunctionCoefficient(const std::string & name);
+
+  /**
+   * Method to get the MFEM vector coefficient object corresponding to the named function.
+   */
+  virtual std::shared_ptr<mfem::VectorFunctionCoefficient>
+  getVectorFunctionCoefficient(const std::string & name);
 
 protected:
   /**

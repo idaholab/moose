@@ -5,19 +5,19 @@ namespace platypus
 ;
 
 template <class T, class Tpw>
-void
+inline void
 declareCoefficient(PropertyMap<T, Tpw> & map,
                    const std::string & name,
-                   std::unique_ptr<T> && coef,
+                   std::shared_ptr<T> coef,
                    const std::vector<std::string> & blocks)
 {
   if (blocks.empty())
   {
-    map.addProperty(name, std::move(coef));
+    map.addProperty(name, coef);
   }
   else
   {
-    map.addPiecewiseBlocks(name, std::shared_ptr<T>(std::move(coef)), blocks);
+    map.addPiecewiseBlocks(name, coef, blocks);
   }
 }
 
@@ -26,7 +26,7 @@ PropertyManager::declareScalar(const std::string & name,
                                mfem::real_t value,
                                const std::vector<std::string> & blocks)
 {
-  this->declareScalar(name, std::make_unique<mfem::ConstantCoefficient>(value), blocks);
+  this->declareScalar(name, this->_scalar_manager.make<mfem::ConstantCoefficient>(value), blocks);
 }
 
 void
@@ -34,7 +34,7 @@ PropertyManager::declareScalar(const std::string & name,
                                std::function<mfem::real_t(const mfem::Vector &)> func,
                                const std::vector<std::string> & blocks)
 {
-  this->declareScalar(name, std::make_unique<mfem::FunctionCoefficient>(func), blocks);
+  this->declareScalar(name, _scalar_manager.make<mfem::FunctionCoefficient>(func), blocks);
 }
 
 void
@@ -43,15 +43,15 @@ PropertyManager::declareScalar(
     std::function<mfem::real_t(const mfem::Vector &, mfem::real_t t)> func,
     const std::vector<std::string> & blocks)
 {
-  this->declareScalar(name, std::make_unique<mfem::FunctionCoefficient>(func), blocks);
+  this->declareScalar(name, this->_scalar_manager.make<mfem::FunctionCoefficient>(func), blocks);
 }
 
 void
 PropertyManager::declareScalar(const std::string & name,
-                               std::unique_ptr<mfem::Coefficient> && coef,
+                               std::shared_ptr<mfem::Coefficient> coef,
                                const std::vector<std::string> & blocks)
 {
-  declareCoefficient(this->_scalar_coeffs, name, std::move(coef), blocks);
+  declareCoefficient(this->_scalar_coeffs, name, coef, blocks);
 }
 
 void
@@ -59,7 +59,8 @@ PropertyManager::declareVector(const std::string & name,
                                const mfem::Vector & value,
                                const std::vector<std::string> & blocks)
 {
-  this->declareVector(name, std::make_unique<mfem::VectorConstantCoefficient>(value), blocks);
+  this->declareVector(
+      name, this->_vector_manager.make<mfem::VectorConstantCoefficient>(value), blocks);
 }
 
 void
@@ -68,7 +69,8 @@ PropertyManager::declareVector(const std::string & name,
                                std::function<void(const mfem::Vector &, mfem::Vector &)> func,
                                const std::vector<std::string> & blocks)
 {
-  this->declareVector(name, std::make_unique<mfem::VectorFunctionCoefficient>(dim, func), blocks);
+  this->declareVector(
+      name, this->_vector_manager.make<mfem::VectorFunctionCoefficient>(dim, func), blocks);
 }
 
 void
@@ -78,15 +80,16 @@ PropertyManager::declareVector(
     std::function<void(const mfem::Vector &, mfem::real_t t, mfem::Vector &)> func,
     const std::vector<std::string> & blocks)
 {
-  this->declareVector(name, std::make_unique<mfem::VectorFunctionCoefficient>(dim, func), blocks);
+  this->declareVector(
+      name, this->_vector_manager.make<mfem::VectorFunctionCoefficient>(dim, func), blocks);
 }
 
 void
 PropertyManager::declareVector(const std::string & name,
-                               std::unique_ptr<mfem::VectorCoefficient> && coef,
+                               std::shared_ptr<mfem::VectorCoefficient> coef,
                                const std::vector<std::string> & blocks)
 {
-  declareCoefficient(this->_vector_coeffs, name, std::move(coef), blocks);
+  declareCoefficient(this->_vector_coeffs, name, coef, blocks);
 }
 
 void
@@ -94,7 +97,8 @@ PropertyManager::declareMatrix(const std::string & name,
                                const mfem::DenseMatrix & value,
                                const std::vector<std::string> & blocks)
 {
-  this->declareMatrix(name, std::make_unique<mfem::MatrixConstantCoefficient>(value), blocks);
+  this->declareMatrix(
+      name, this->_matrix_manager.make<mfem::MatrixConstantCoefficient>(value), blocks);
 }
 
 void
@@ -103,7 +107,8 @@ PropertyManager::declareMatrix(const std::string & name,
                                std::function<void(const mfem::Vector &, mfem::DenseMatrix &)> func,
                                const std::vector<std::string> & blocks)
 {
-  this->declareMatrix(name, std::make_unique<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
+  this->declareMatrix(
+      name, this->_matrix_manager.make<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
 }
 
 void
@@ -113,15 +118,16 @@ PropertyManager::declareMatrix(
     std::function<void(const mfem::Vector &, mfem::real_t, mfem::DenseMatrix &)> func,
     const std::vector<std::string> & blocks)
 {
-  this->declareMatrix(name, std::make_unique<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
+  this->declareMatrix(
+      name, this->_matrix_manager.make<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
 }
 
 void
 PropertyManager::declareMatrix(const std::string & name,
-                               std::unique_ptr<mfem::MatrixCoefficient> && coef,
+                               std::shared_ptr<mfem::MatrixCoefficient> coef,
                                const std::vector<std::string> & blocks)
 {
-  declareCoefficient(this->_matrix_coeffs, name, std::move(coef), blocks);
+  declareCoefficient(this->_matrix_coeffs, name, coef, blocks);
 }
 
 mfem::Coefficient &
