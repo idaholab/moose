@@ -1,10 +1,12 @@
 ### Thermophysical Properties ###
-mu = 1
 rho = 1
-k = 1e-3
-diff = 1e-3
 cp = 1
 Pr_t = 0.9
+
+# large diffusion coefficients to converge without initial conditions (test uses Problem/solve=false)
+mu = 100
+k = 10
+diff_scalar = 10
 
 ### Simulation parameters
 inlet_velocity = 1
@@ -29,6 +31,7 @@ wall_treatment_eps = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linear
 wall_treatment_tem = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
+  active = 'gen'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -38,6 +41,11 @@ wall_treatment_tem = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linear
     ymax = ${side_length}
     nx = 100
     ny = 20
+  []
+  [fmg_restart]
+    type = FileMeshGenerator
+    file = user_ics.e
+    use_for_exodus_restart = true
   []
 []
 
@@ -83,9 +91,9 @@ wall_treatment_tem = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linear
       [all_scalar]
         passive_scalar_names = 'scalar1 scalar2'
 
-        passive_scalar_diffusivity = '${diff} ${diff}'
+        passive_scalar_diffusivity = '${diff_scalar} ${diff_scalar}'
         passive_scalar_source = '0.1 0'
-        passive_scalar_coupled_source = 'U; 0'
+        passive_scalar_coupled_source = '1; 0'
         passive_scalar_coupled_source_coeff = '0.1; 0'
 
         passive_scalar_inlet_types = 'fixed-value fixed-value'
@@ -103,13 +111,9 @@ wall_treatment_tem = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linear
         tke_name = TKE
         tked_name = TKED
 
-        # Initialization
-        initial_tke = ${k_init}
-        initial_tked = ${eps_init}
-        initial_mu_t = ${mu_t_init}
-
         # Fluid properties
         Pr_t = ${Pr_t}
+        Sc_t = '0.7'
 
         # Model parameters
         C1_eps = ${C1_eps}
@@ -132,32 +136,143 @@ wall_treatment_tem = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linear
   []
 []
 
-[AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
-[]
-
-[AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
-  []
-[]
-
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
-  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-3
+
+  line_search = 'none'
+[]
+
+[Problem]
+  solve = false
+  # Currently necessary when using Newton's method, somewhere in the K-epsilon equations we do not preserve
+  # the sparsity pattern when no initial conditions for velocity are used
+  error_on_jacobian_nonzero_reallocation = false
 []
 
 [Outputs]
-  exodus = true
+  # Used to set up a restart from checkpoint
+  checkpoint = true
+  # Used to set up a restart from exodus file
+  [exodus]
+    type = Exodus
+    execute_on = TIMESTEP_END
+  []
+  # Used to check results
   csv = true
+  execute_on = INITIAL
+[]
+
+[Postprocessors]
+  [min_vel_x]
+    type = ElementExtremeValue
+    variable = 'vel_x'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_vel_x]
+    type = ElementExtremeValue
+    variable = 'vel_x'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_vel_y]
+    type = ElementExtremeValue
+    variable = 'vel_y'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_vel_y]
+    type = ElementExtremeValue
+    variable = 'vel_y'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_pressure]
+    type = ElementExtremeValue
+    variable = 'pressure'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_pressure]
+    type = ElementExtremeValue
+    variable = 'pressure'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_T_fluid]
+    type = ElementExtremeValue
+    variable = 'T_fluid'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_T_fluid]
+    type = ElementExtremeValue
+    variable = 'T_fluid'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_scalar1]
+    type = ElementExtremeValue
+    variable = 'scalar1'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_scalar1]
+    type = ElementExtremeValue
+    variable = 'scalar1'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_scalar2]
+    type = ElementExtremeValue
+    variable = 'scalar2'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_scalar2]
+    type = ElementExtremeValue
+    variable = 'scalar2'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_mu_t]
+    type = ElementExtremeFunctorValue
+    functor = 'mu_t'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_mu_t]
+    type = ElementExtremeFunctorValue
+    functor = 'mu_t'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_tke]
+    type = ElementExtremeValue
+    variable = 'TKE'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_tke]
+    type = ElementExtremeValue
+    variable = 'TKE'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
+  [min_tked]
+    type = ElementExtremeValue
+    variable = 'TKED'
+    value_type = 'min'
+    execute_on = 'INITIAL'
+  []
+  [max_tked]
+    type = ElementExtremeValue
+    variable = 'TKED'
+    value_type = 'max'
+    execute_on = 'INITIAL'
+  []
 []
