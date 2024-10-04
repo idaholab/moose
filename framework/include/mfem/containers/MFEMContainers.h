@@ -102,6 +102,9 @@ public:
   // NOLINTNEXTLINE(readability-identifier-naming)
   [[nodiscard]] inline const_iterator end() const { return _field_map.end(); }
 
+  // Returns the number of elements in the map
+  int size() { return _field_map.size(); }
+
 protected:
   /// Returns a const iterator to the field.
   [[nodiscard]] inline const_iterator FindField(const std::string & field_name) const

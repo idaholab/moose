@@ -106,8 +106,50 @@ EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
         test_var_name, _lfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
   }
 }
+
 void
 EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
+                                 mfem::BlockVector & trueX,
+                                 mfem::BlockVector & trueRHS)
+{
+
+  switch (_assembly_level)
+  {
+    case mfem::AssemblyLevel::LEGACY:
+      FormLegacySystem(op, trueX, trueRHS);
+      break;
+    default:
+      MFEM_VERIFY(_test_var_names.size() == 1,
+                  "Non-legacy assembly is only supported for single-variable systems");
+      MFEM_VERIFY(!_mblf_kernels_map_map.size(),
+                  "Non-legacy assembly is only supported for square systems");
+      FormSystem(op, trueX, trueRHS);
+  }
+}
+
+void
+EquationSystem::FormSystem(mfem::OperatorHandle & op,
+                           mfem::BlockVector & trueX,
+                           mfem::BlockVector & trueRHS)
+{
+  auto & test_var_name = _test_var_names.at(0);
+  auto blf = _blfs.Get(test_var_name);
+  auto lf = _lfs.Get(test_var_name);
+  mfem::BlockVector aux_x, aux_rhs;
+  mfem::OperatorPtr * aux_a = new mfem::OperatorPtr;
+
+  blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_xs.at(0)), *lf, *aux_a, aux_x, aux_rhs);
+
+  trueX.GetBlock(0) = aux_x;
+  trueRHS.GetBlock(0) = aux_rhs;
+  trueX.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
+
+  op.Reset(aux_a->Ptr());
+}
+
+void
+EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueX,
                                  mfem::BlockVector & trueRHS)
 {
@@ -122,9 +164,10 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
     auto blf = _blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
-    _h_blocks(i, i) = new mfem::HypreParMatrix;
-    blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_xs.at(i)), *lf, *_h_blocks(i, i), aux_x, aux_rhs);
+    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+    // Ownership of aux_a goes to the blf
+    blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_xs.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+    _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
   }
@@ -143,14 +186,16 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
-        _h_blocks(i, j) = new mfem::HypreParMatrix;
+        mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+        // Ownership of aux_a goes to the blf
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *(_xs.at(j)),
                                           aux_lf,
-                                          *_h_blocks(i, j),
+                                          *aux_a,
                                           aux_x,
                                           aux_rhs);
+        _h_blocks(i, j) = aux_a;
         trueRHS.GetBlock(i) += aux_rhs;
       }
     }
@@ -178,6 +223,8 @@ void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
   _jacobian->Mult(x, residual);
+  x.HostRead();
+  residual.HostRead();
 }
 
 mfem::Operator &
@@ -201,8 +248,11 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 void
 EquationSystem::Init(platypus::GridFunctions & gridfunctions,
                      const platypus::FESpaces & fespaces,
-                     platypus::BCMap & bc_map)
+                     platypus::BCMap & bc_map,
+                     mfem::AssemblyLevel assembly_level)
 {
+  _assembly_level = assembly_level;
+
   for (auto & test_var_name : _test_var_names)
   {
     if (!gridfunctions.Has(test_var_name))
@@ -265,6 +315,7 @@ EquationSystem::BuildBilinearForms()
     auto blf = _blfs.Get(test_var_name);
     if (_blf_kernels_map.Has(test_var_name))
     {
+      blf->SetAssemblyLevel(_assembly_level);
       auto blf_kernels = _blf_kernels_map.GetRef(test_var_name);
 
       for (auto & blf_kernel : blf_kernels)
@@ -406,7 +457,7 @@ TimeDependentEquationSystem::BuildBilinearForms()
 }
 
 void
-TimeDependentEquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
+TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                               mfem::BlockVector & truedXdt,
                                               mfem::BlockVector & trueRHS)
 {
@@ -432,21 +483,27 @@ TimeDependentEquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
     bc_x /= _dt_coef.constant;
 
     // Form linear system for operator acting on vector of du/dt
-    _h_blocks(i, i) = new mfem::HypreParMatrix;
-    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *_h_blocks(i, i), aux_x, aux_rhs);
+    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+    // Ownership of aux_a goes to the blf
+    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *aux_a, aux_x, aux_rhs);
+    _h_blocks(i, i) = aux_a;
     truedXdt.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
   }
 
-  // Sync memory
-  for (int i = 0; i < _test_var_names.size(); i++)
-  {
-    truedXdt.GetBlock(i).SyncAliasMemory(truedXdt);
-    trueRHS.GetBlock(i).SyncAliasMemory(trueRHS);
-  }
+  truedXdt.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
 
   // Create monolithic matrix
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
+}
+
+void
+TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
+                                        mfem::BlockVector & truedXdt,
+                                        mfem::BlockVector & trueRHS)
+{
+  mooseError("Non-legacy assembly not yet implemented for time-dependent systems");
 }
 
 void

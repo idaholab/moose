@@ -66,7 +66,8 @@ public:
   // Build forms
   virtual void Init(platypus::GridFunctions & gridfunctions,
                     const platypus::FESpaces & fespaces,
-                    platypus::BCMap & bc_map);
+                    platypus::BCMap & bc_map,
+                    mfem::AssemblyLevel assembly_level);
   virtual void BuildLinearForms(platypus::BCMap & bc_map);
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
@@ -74,6 +75,12 @@ public:
 
   // Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & trueX,
+                                mfem::BlockVector & trueRHS);
+
+  virtual void
+  FormSystem(mfem::OperatorHandle & op, mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
+  virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
 
@@ -118,7 +125,7 @@ protected:
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
 
-  mfem::Array2D<mfem::HypreParMatrix *> _h_blocks;
+  mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
@@ -133,6 +140,8 @@ protected:
       _mblf_kernels_map_map;
 
   mutable mfem::OperatorHandle _jacobian;
+
+  mfem::AssemblyLevel _assembly_level;
 };
 
 /*
@@ -159,9 +168,12 @@ public:
   virtual void AddKernel(const std::string & test_var_name,
                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel) override;
   virtual void BuildBilinearForms() override;
-  virtual void FormLinearSystem(mfem::OperatorHandle & op,
+  virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
+  virtual void FormSystem(mfem::OperatorHandle & op,
+                          mfem::BlockVector & truedXdt,
+                          mfem::BlockVector & trueRHS) override;
 };
 
 } // namespace platypus
