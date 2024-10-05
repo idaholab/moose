@@ -123,7 +123,7 @@ MultiAppGeneralFieldTransfer::validParams()
       "use_nearest_position",
       "Name of the the Positions object (in main app) such that transfers to/from a child "
       "application will work by finding the nearest position to a target and query only the "
-      "app / points closer to this position than any other position for the value to transfer.");
+      "app / points closer to this position than to any other position for the value to transfer.");
   params.addParam<bool>(
       "from_app_must_contain_point",
       false,
@@ -437,6 +437,8 @@ MultiAppGeneralFieldTransfer::getAppInfo()
 void
 MultiAppGeneralFieldTransfer::execute()
 {
+  TIME_SECTION(
+      "MultiAppGeneralFieldTransfer::execute()_" + name(), 5, "Transfer execution " + name());
   getAppInfo();
 
   // Set up bounding boxes, etc
@@ -560,20 +562,43 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
   bool found = false;
 
   // Additional process-restriction techniques we could use (TODOs):
-  // - nearest_positions/_app could use its own heuristic
+  // - create a heuristic for using nearest-positions
   // - from_mesh_divisions could be polled for which divisions they possess on each
   //   process, depending on the behavior chosen. This could limit potential senders.
   //   This should be done ahead of this function call, for all points at once
 
-  // Select the method for determining the apps receiving points/sending values
-  if (_use_bounding_boxes)
+  // Determine the apps which will be receiving points (then sending values) using various
+  // heuristics
+  if (_use_nearest_app)
   {
-    // We examine all bounding boxes and find the maximum distance within a bounding box
-    // from the point. This creates a sphere around the point of interest. Any app with a bounding
-    // box that intersects this sphere (with a bboxMinDistance < nearest_max_distance) will be
-    // considered a potential source.
+    // Find the nearest position for the point
+    const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+    // The apps form the nearest positions here, this is the index of the nearest app
+    const auto nearest_index = _nearest_positions_obj->getNearestPositionIndex(point, initial);
+
+    // Find the apps that are nearest to the same position
+    // Global search over all applications
+    unsigned int from0 = 0;
+    for (processor_id_type i_proc = 0; i_proc < n_processors();
+         from0 += _froms_per_proc[i_proc], ++i_proc)
+      for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
+      {
+        if (_greedy_search || i_from == nearest_index)
+        {
+          processors.insert(i_proc);
+          found = true;
+        }
+      }
+    mooseAssert(processors.size() == 1 || _greedy_search, "Should only be one nearest app");
+  }
+  else if (_use_bounding_boxes)
+  {
+    // We examine all (global) bounding boxes and find the minimum of the maximum distances within a
+    // bounding box from the point. This creates a sphere around the point of interest. Any app
+    // with a bounding box that intersects this sphere (with a bboxMinDistance <
+    // nearest_max_distance) will be considered a potential source
     // NOTE: This is a heuristic. We could try others
-    // NOTE: from_bboxes are in the reference space, as is the point
+    // NOTE: from_bboxes are in the reference space, as is the point.
     Real nearest_max_distance = std::numeric_limits<Real>::max();
     for (const auto & bbox : _from_bboxes)
     {
@@ -640,7 +665,12 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
 
   // Error out if we could not find this point when ask us to do so
   if (!found && _error_on_miss)
-    mooseError("Cannot locate point ", point, " \n ", "mismatched meshes are used");
+    mooseError(
+        "Cannot find a source application to provide a value at point: ",
+        point,
+        " \n ",
+        "It must be that mismatched matches are used.\nIf you are using bounding boxes, "
+        "nearest-app or mesh-divisions, please consider using the greedy_search to confirm.");
 }
 
 void
@@ -677,7 +707,7 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
     outgoing_points[pid].push_back(std::pair<Point, unsigned int>(point, required_source_division));
 
     // Store point information locally for processing received data
-    // We can use these information when insert values to solution vector
+    // We can use these information when inserting values into the solution vector
     PointInfo pointinfo;
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
@@ -891,7 +921,9 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
           MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))
         registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
 
-      if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(val) || _use_nearest_app) &&
+      // if we use the nearest app, even if the value is bad we want to save the distance because
+      // it's the distance to the app, if that's the closest app then so be it with the bad value
+      if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(val)) &&
           MooseUtils::absoluteFuzzyGreaterThan(distance_cache[p], incoming_vals[val_offset].second))
       {
         // NOTE: We store the distance as well as the value. We really only need the
@@ -962,7 +994,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         }
 
         // We adopt values that are, in order of priority
-        // - valid
+        // - valid (or from nearest app)
         // - closest distance
         // - the smallest rank with the same distance
         if (!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) &&
@@ -1692,8 +1724,7 @@ MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Po
   if (!_skip_coordinate_collapsing)
     paramError("skip_coordinate_collapsing", "Coordinate collapsing not implemented");
   bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
-  return _nearest_positions_obj->getPosition(pos_index, initial) ==
-         _nearest_positions_obj->getNearestPosition(pt, initial);
+  return pos_index == _nearest_positions_obj->getNearestPositionIndex(pt, initial);
 }
 
 Real
