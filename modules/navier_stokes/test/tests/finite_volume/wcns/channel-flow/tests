@@ -39,7 +39,6 @@
     cli_args = "FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
     method = "!dbg"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model.'
-    mesh_mode = REPLICATED
     abs_zero = 1e-9
     recover = false # see #19126
     valgrind = HEAVY
@@ -66,7 +65,6 @@
                "Outputs/file_base='2d-turbulent-action'"
     method = "!dbg"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model using the NSFV action syntax.'
-    mesh_mode = REPLICATED
     abs_zero = 1e-9
     recover = false # see #19126
     valgrind = HEAVY
@@ -97,7 +95,6 @@
     cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1 FVKernels/inactive='' "
                "AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model and show a perfect Jacobian.'
-    mesh_mode = REPLICATED
     min_ad_size = 53 # You can draw out the stencil. For Rhie-Chow we interpolate element 'a' coefficients
     # to a face. Each element 'a' coefficient will be dependent on face computations of rho
     # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
