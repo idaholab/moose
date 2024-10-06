@@ -97,10 +97,11 @@ class ApptainerGenerator:
         action_parser = parser.add_subparsers(dest='action', help='Action to perform')
         action_parser.required = True
 
-        def add_default_args(parser, write=True, remote=False, remote_fetch=False):
+        def add_default_args(parser, write=True, remote=False, remote_fetch=False, repo=True):
             parser.add_argument('library', choices=entities,
                     help='The library to act on')
-            parser.add_argument('--suffix', type=str, help='Suffix to add to the name')
+            if repo:
+                parser.add_argument('--suffix', type=str, help='Suffix to add to the name')
             parser.add_argument('--tag', type=str, help='Alternate tag')
             parser.add_argument('--tag-prefix', type=str, help='Prefix to add to the tag')
             if write:
@@ -176,6 +177,10 @@ class ApptainerGenerator:
         add_default_args(uri_parser, write=False, remote=True, remote_fetch=True)
         uri_parser.add_argument('--check', action='store_true',
                                 help='Check whether or not the container exists')
+
+        tag_parser = action_parser.add_parser('tag', parents=[parent],
+                                              help='Get the tag for a container')
+        add_default_args(tag_parser, write=False, repo=False)
 
         return parser.parse_args()
 
@@ -818,6 +823,12 @@ class ApptainerGenerator:
         if self.args.check and not self.oras_exists(uri):
             self.error(f'Container {uri} does not exist')
         print(uri)
+
+    def _action_tag(self):
+        """
+        Performs the "tag" action
+        """
+        print(self.tag)
 
     def main(self):
         """
