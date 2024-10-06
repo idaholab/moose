@@ -673,7 +673,7 @@ class ApptainerGenerator:
             self.error(f'Container {uri} does not exist')
 
         args = [] if self.args.pull_args is None else self.args.pull_args.split(' ')
-        self.apptainer_pull(self.project, self.name, self.tag, args, project_suffix=self.args.project_suffix)
+        self.apptainer_pull(self.project, self.name, self.tag, project_suffix=self.args.project_suffix, args=args)
 
     def _action_def(self):
         """
