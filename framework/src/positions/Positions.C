@@ -52,10 +52,7 @@ Positions::Positions(const InputParameters & parameters)
 {
 
   if (_initial_positions)
-  {
-    auto initial_positions_copy = *_initial_positions;
-    _initial_positions_kd_tree = std::make_unique<KDTree>(initial_positions_copy, 1);
-  }
+    _initial_positions_kd_tree = std::make_unique<KDTree>(*_initial_positions, 1);
 }
 
 const Point &
