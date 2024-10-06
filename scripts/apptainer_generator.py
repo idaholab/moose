@@ -97,10 +97,11 @@ class ApptainerGenerator:
         action_parser = parser.add_subparsers(dest='action', help='Action to perform')
         action_parser.required = True
 
-        def add_default_args(parser, write=True, remote=False):
+        def add_default_args(parser, write=True, remote=False, remote_fetch=False, repo=True):
             parser.add_argument('library', choices=entities,
                     help='The library to act on')
-            parser.add_argument('--suffix', type=str, help='Suffix to add to the name')
+            if repo:
+                parser.add_argument('--suffix', type=str, help='Suffix to add to the name')
             parser.add_argument('--tag', type=str, help='Alternate tag')
             parser.add_argument('--tag-prefix', type=str, help='Prefix to add to the tag')
             if write:
@@ -113,16 +114,19 @@ class ApptainerGenerator:
                                         f'defaults to {oras_url_default}')
                 parser.add_argument('--disable-cache', action='store_true',
                                     help='Disable the apptainer cache')
+            if remote_fetch:
+                parser.add_argument('--project-suffix', type=str,
+                                    help='Suffix to add to the project')
 
         exists_parser = action_parser.add_parser('exists', parents=[parent],
                                                  help='Checks if a container exists'
                                                  + ' on a remote')
-        add_default_args(exists_parser, write=False, remote=True)
+        add_default_args(exists_parser, write=False, remote=True, remote_fetch=True)
 
         def_parser = action_parser.add_parser('def', parents=[parent],
                                               help='Generates a definition')
         def add_def_args(parser):
-            add_default_args(parser, remote=True)
+            add_default_args(parser, remote=True, remote_fetch=True)
             parser.add_argument('--local', action='store_true',
                                 help='Use a local dependency container')
             parser.add_argument('--dep', type=str,
@@ -138,7 +142,7 @@ class ApptainerGenerator:
 
         pull_parser = action_parser.add_parser('pull', parents=[parent],
                                                help='Pull a container')
-        add_default_args(pull_parser, remote=True)
+        add_default_args(pull_parser, remote=True, remote_fetch=True)
         pull_parser.add_argument('--pull-args', type=str,
                                  help="Arguments to pass to apptainer pull")
 
@@ -170,9 +174,13 @@ class ApptainerGenerator:
 
         uri_parser = action_parser.add_parser('uri', parents=[parent],
                                               help='Get the URI to a container')
-        add_default_args(uri_parser, write=False, remote=True)
+        add_default_args(uri_parser, write=False, remote=True, remote_fetch=True)
         uri_parser.add_argument('--check', action='store_true',
                                 help='Check whether or not the container exists')
+
+        tag_parser = action_parser.add_parser('tag', parents=[parent],
+                                              help='Get the tag for a container')
+        add_default_args(tag_parser, write=False, repo=False)
 
         return parser.parse_args()
 
@@ -262,7 +270,7 @@ class ApptainerGenerator:
         ext = 'sif' if image else 'def'
         return os.path.join(self.dir, f'{name}_{tag}.{ext}')
 
-    def oras_uri(self, project: str, name: str, tag: str, project_suffix = None):
+    def oras_uri(self, project: str, name: str, tag: str, project_suffix=None):
         """
         Gets the ORAS URI for the given image
         """
@@ -270,11 +278,11 @@ class ApptainerGenerator:
             project = f'{project}-{project_suffix}'
         return f'oras://{self.args.oras_url}/{project}/{name}:{tag}'
 
-    def apptainer_pull(self, project: str, name: str, tag: str, args=None):
+    def apptainer_pull(self, project: str, name: str, tag: str, project_suffix=None, args=None):
         """
         Pulls the given image via apptainer
         """
-        oras_uri = self.oras_uri(project, name, tag)
+        oras_uri = self.oras_uri(project, name, tag, project_suffix=project_suffix)
         file = self.container_path(name, tag)
         self.print(f'Pulling {oras_uri}')
 
@@ -382,7 +390,7 @@ class ApptainerGenerator:
             return 'localimage', container_path
 
         # First, try the production tag
-        uri = self.oras_uri(project, name, tag)
+        uri = self.oras_uri(project, name, tag, project_suffix=self.args.project_suffix)
         prod_exists = self.oras_exists(uri)
         # Failed to find a production tag
         if not self.oras_exists(uri):
@@ -398,7 +406,7 @@ class ApptainerGenerator:
                 tag = self.args.alt_dep_tag
             if self.args.alt_dep_tag_prefix is not None:
                 tag = f'{self.args.alt_dep_tag_prefix}-{tag}'
-            uri = self.oras_uri(project, name, tag)
+            uri = self.oras_uri(project, name, tag, project_suffix=self.args.project_suffix)
             alt_exists = self.oras_exists(uri)
 
             # No luck, we're still screwed
@@ -642,7 +650,7 @@ class ApptainerGenerator:
         """
         Performs the "exists" action
         """
-        uri = self.oras_uri(self.project, self.name, self.tag)
+        uri = self.oras_uri(self.project, self.name, self.tag, project_suffix=self.args.project_suffix)
         if self.oras_exists(uri):
             self.print(f'Container {uri} exists')
         else:
@@ -660,12 +668,12 @@ class ApptainerGenerator:
             else:
                 self.error(f'Container already exists in {container_path}')
 
-        uri = self.oras_uri(self.project, self.name, self.tag)
+        uri = self.oras_uri(self.project, self.name, self.tag, project_suffix=self.args.project_suffix)
         if not self.oras_exists(uri):
             self.error(f'Container {uri} does not exist')
 
         args = [] if self.args.pull_args is None else self.args.pull_args.split(' ')
-        self.apptainer_pull(self.project, self.name, self.tag, args)
+        self.apptainer_pull(self.project, self.name, self.tag, project_suffix=self.args.project_suffix, args=args)
 
     def _action_def(self):
         """
@@ -811,10 +819,16 @@ class ApptainerGenerator:
         """
         Performs the "uri" action
         """
-        uri = self.oras_uri(self.project, self.name, self.tag)
+        uri = self.oras_uri(self.project, self.name, self.tag, project_suffix=self.args.project_suffix)
         if self.args.check and not self.oras_exists(uri):
             self.error(f'Container {uri} does not exist')
         print(uri)
+
+    def _action_tag(self):
+        """
+        Performs the "tag" action
+        """
+        print(self.tag)
 
     def main(self):
         """
