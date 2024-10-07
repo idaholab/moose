@@ -47,6 +47,18 @@ public:
   void declareScalar(const std::string & name,
                      std::shared_ptr<mfem::Coefficient> coef,
                      const std::vector<std::string> & blocks = {});
+  // New factory methods?
+  template <class P, class... Args>
+  void
+  declareScalar(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
+  {
+    this->declareScalar(name, _scalar_manager.make<P>(args...), blocks);
+  }
+  template <class P, class... Args>
+  void declareGlobalScalar(const std::string & name, Args &&... args)
+  {
+    this->declareScalar<P>(name, {}, args...);
+  }
 
   void declareVector(const std::string & name,
                      const mfem::Vector & value,
