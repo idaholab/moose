@@ -7,6 +7,20 @@
     design = 'AzimuthMagneticTimeDerivScalar.md'
     issues = '#28758'
   []
+  [scalar_azim_magnetic_time_deriv_csv]
+    type = CSVDiff
+    command = 'scalar_azim_magnetic_time_deriv_convergence.py'
+    csvdiff = 'scalar_azim_magnetic_time_deriv_convergence.csv'
+    requirement = 'The system shall include a tool for writing spatial convergence data for the time derivative of the azimuthal component of the magnetic field based on a supplied electric field scalar components.'
+    design = 'AzimuthMagneticTimeDerivScalar.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy'
+  []
+
   [vector_azim_magnetic_time_deriv]
     type = Exodiff
     input = vector_azim_magnetic_time_deriv.i
@@ -14,5 +28,18 @@
     requirement = 'The system shall calculate the time derivative of the azimuthal component of the magnetic field based on a supplied electric field vector.'
     design = 'AzimuthMagneticTimeDerivVector.md'
     issues = '#28758'
+  []
+  [vector_azim_magnetic_time_deriv_csv]
+    type = CSVDiff
+    command = 'vector_azim_magnetic_time_deriv_convergence.py'
+    csvdiff = 'vector_azim_magnetic_time_deriv_convergence.csv'
+    requirement = 'The system shall include a tool for writing spatial convergence data for the time derivative of the azimuthal component of the magnetic field based on a supplied electric field vector.'
+    design = 'AzimuthMagneticTimeDerivVector.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy'
   []
 []

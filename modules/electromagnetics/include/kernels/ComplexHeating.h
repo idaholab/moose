@@ -12,8 +12,8 @@
 #include "ADKernel.h"
 
 /**
- * This kernel implements the Laplacian operator:
- * $\nabla u \cdot \nabla \phi_i$
+ *  Supplies the heating due to the electic field in the form of 
+ *  0.5 Re( conductivity * E * E^* )
  */
 class ComplexHeating : public ADKernel
 {
@@ -25,8 +25,15 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// Vector variable of the real component of the E-field
   const ADVectorVariableValue & _E_real;
+
+  /// Vector variable of the imaginary component of the E-field
   const ADVectorVariableValue & _E_imag;
+
+  /// Real component of the material conductivity (in S/m)
   const ADMaterialProperty<Real> & _cond;
+
+  /// Coefficient to multiply by heating term
   const Real & _scale;
 };

@@ -1,4 +1,5 @@
-# Script to run spatial convergence study on microwave_heating.i
+#!/usr/bin/env python3
+# Script to run spatial convergence study on vector_azim_magnetic_time_deriv.i
 
 import mms
 import sympy
@@ -6,6 +7,7 @@ import sympy
 import mooseutils
 import copy
 import pandas
+import os
 
 import pyhit
 import moosetree
@@ -18,6 +20,11 @@ y = [ [] for _ in range(len(y_pp)) ]
 
 
 runs = 6
+
+if os.path.isfile('../../../../electromagnetics-opt'):
+    executable = '../../../../electromagnetics-opt'
+else:
+    executable = '../../../../../combined/combined-opt'
 
 for i in range(0, runs):
     mpi = None
@@ -38,7 +45,7 @@ for i in range(0, runs):
     cli_args = ['-i'] + input_files
     a = copy.copy(cli_args)
 
-    out = mooseutils.run_executable('../../../../electromagnetics-opt', *a, mpi=mpi, suppress_output=not console)
+    out = mooseutils.run_executable(executable, *a, mpi=mpi, suppress_output=not console)
 
     fcsv = input_files[-1].replace('.i', '_out.csv')
     current = pandas.read_csv(fcsv)
@@ -63,4 +70,5 @@ pyhit.write("vector_azim_magnetic_time_deriv.i", root)
 
 fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
 fig.plot(data, label=['E_Real', 'E_Imag.','dB_dt_vector'], marker='o', markersize=8)
-fig.save('vector_azim_magnetic_time_deriv.png')
+fig.save('vector_azim_magnetic_time_deriv_convergence.png')
+data.to_csv('vector_azim_magnetic_time_deriv_convergence.csv')

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Script to run spatial convergence study on vector_ADmaterial_wave_equation.i
 
 import mms
@@ -9,3 +10,4 @@ df1 = mms.run_spatial('vector_ADmaterial_wave_equation.i', 6, console=False, x_p
 fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
 fig.plot(df1, label=['E_Real', 'E_Imag.'], marker='o', markersize=8)
 fig.save('vector_ADmaterial_wave_equation_convergence.png')
+df1.to_csv('vector_ADmaterial_wave_equation_convergence.csv')
