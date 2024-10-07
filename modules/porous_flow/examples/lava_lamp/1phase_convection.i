@@ -19,6 +19,10 @@
   max_h_level = 2
   marker = marker
   initial_marker = initial
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   initial_steps = 2
   [Indicators]
     [indicator]
