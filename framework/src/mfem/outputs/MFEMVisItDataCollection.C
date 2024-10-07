@@ -17,8 +17,10 @@ MFEMVisItDataCollection::validParams()
 
 MFEMVisItDataCollection::MFEMVisItDataCollection(const InputParameters & parameters)
   : MFEMDataCollection(parameters),
-    _visit_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str()),
+    _visit_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str(),
+              _problem_data._pmesh.get()),
     _refinements(getParam<unsigned int>("refinements"))
 {
   _visit_dc.SetLevelsOfDetail(_refinements + 1);
+  registerFields();
 }
