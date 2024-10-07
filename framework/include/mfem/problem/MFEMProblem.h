@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include "../common/pfem_extras.hpp"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
@@ -199,4 +200,6 @@ protected:
   }
 
   MFEMProblemData _problem_data;
+  std::map<std::string, std::shared_ptr<mfem::FunctionCoefficient>> _scalar_functions;
+  std::map<std::string, std::shared_ptr<mfem::VectorFunctionCoefficient>> _vector_functions;
 };
