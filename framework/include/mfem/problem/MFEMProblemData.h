@@ -2,7 +2,6 @@
 #include "equation_system.h"
 #include "MFEMContainers.h"
 #include "PropertyManager.h"
-#include "outputs.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
