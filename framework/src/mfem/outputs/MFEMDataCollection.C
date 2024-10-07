@@ -1,7 +1,5 @@
 #include "MFEMDataCollection.h"
 
-registerMooseObject("PlatypusApp", MFEMDataCollection);
-
 InputParameters
 MFEMDataCollection::validParams()
 {
@@ -10,12 +8,8 @@ MFEMDataCollection::validParams()
   return params;
 }
 
-MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters) : FileOutput(parameters)
+MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
+  : FileOutput(parameters),
+    _problem_data(static_cast<MFEMProblem *>(_problem_ptr)->getProblemData())
 {
-}
-
-std::shared_ptr<mfem::DataCollection>
-MFEMDataCollection::createDataCollection(const std::string & collection_name) const
-{
-  return std::make_shared<mfem::DataCollection>(collection_name);
 }
