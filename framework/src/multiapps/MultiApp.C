@@ -107,6 +107,10 @@ MultiApp::validParams()
       "run_in_position",
       false,
       "If true this will cause the mesh from the MultiApp to be 'moved' by its position vector");
+  params.addParam<bool>("reorder_positions",
+                        true,
+                        "Whether to re-order positions so that the subapps are placed closer to "
+                        "the parent app partitioning");
 
   params.addRequiredParam<std::vector<FileName>>(
       "input_files",
@@ -262,6 +266,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
+    _reorder_positions(getParam<bool>("reorder_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
     _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
     _total_num_apps(0),
@@ -361,6 +366,7 @@ MultiApp::setupPositions()
   if (_use_positions)
   {
     fillPositions();
+    reorderPositions();
     init(_positions.size());
     createApps();
   }
@@ -634,6 +640,131 @@ MultiApp::fillPositions()
 
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(),
               "Number of positions and input files are not the same!");
+}
+
+void
+MultiApp::reorderPositions()
+{
+  if (!_reorder_positions)
+    return;
+  if (_positions.size() < _communicator.size())
+    return;
+  // Because the subapps are created for all positions, with no concern for which input they use, we
+  // have to re-order every single position all together, then adapt the other attributes that are
+  // ordered by position index.
+  // This must be done the same way for each domain.
+  // Note for improvement:
+  // - If we used a mesh division, we would have that information in parallel on every rank without
+  // the need for a reduction
+  // - We could use a nearest-location heuristic for the positions that are not located on the mesh
+
+  // Step 1: use the partitioner on the positions through the elements
+  std::vector<unsigned int> position_in_partition(_positions.size(),
+                                                  std::numeric_limits<unsigned int>::max());
+
+  auto pl = _fe_problem.mesh().getPointLocator();
+  // positions will likely be outside of most of the domains
+  pl->enable_out_of_mesh_mode();
+  // positions are often inside empty channels
+  // TODO find another solution
+  pl->set_close_to_point_tol(0.04);
+  pl->set_contains_point_tol(0.04);
+
+  for (const auto i : index_range(_positions))
+  {
+    // Put position inside the mesh
+    // TODO think of something
+    const auto save_z = _positions[i](2);
+    _positions[i](2) = 1;
+    const auto elem = (*pl)(_positions[i]);
+    _positions[i](2) = save_z;
+    if (elem)
+      position_in_partition[i] = elem->processor_id();
+  }
+  // Reduction over all ranks (min rank is chosen if position was near multiple elements on
+  // different processes)
+  _communicator.min(position_in_partition);
+
+  // Count positions found and not found
+  unsigned int num_not_found = 0;
+  for (const auto i : index_range(_positions))
+    if (position_in_partition[i] == std::numeric_limits<unsigned int>::max())
+      num_not_found++;
+  if (num_not_found && _fe_problem.verboseMultiApps())
+    _console << "Found " << _positions.size() - num_not_found
+             << " positions within mesh partitions " << std::endl;
+
+  // Step 2: try to do with an even split with what the partitioner found
+  std::map<unsigned int, unsigned int> reordering_map;
+  std::vector<std::vector<unsigned int>> index_position_per_proc(_communicator.size());
+  const auto subapps_per_rank = ceil(float(_positions.size()) / _communicator.size());
+  for (const auto i : index_range(_positions))
+  {
+    // if the position was found in a partition and we still have room for a subapp in that rank
+    if (position_in_partition[i] != std::numeric_limits<unsigned int>::max() &&
+        index_position_per_proc[position_in_partition[i]].size() < subapps_per_rank)
+    {
+      // Order positions on each rank
+      reordering_map[i] = position_in_partition[i] * subapps_per_rank +
+                          index_position_per_proc[position_in_partition[i]].size();
+      index_position_per_proc[position_in_partition[i]].push_back(i);
+    }
+    else
+      reordering_map[i] = std::numeric_limits<unsigned int>::max();
+  }
+
+  // Step 3: assign the leftovers (outside the partitioning or rank already at capacity) to ranks
+  // with less subapps
+  for (const auto i : index_range(_positions))
+  {
+    if (reordering_map[i] == std::numeric_limits<unsigned int>::max())
+    {
+      // Assign to the first rank we find that has room
+      for (const auto j : index_range(index_position_per_proc))
+        if (index_position_per_proc[j].size() < subapps_per_rank)
+        {
+          // Order positions on each rank
+          reordering_map[i] = j * subapps_per_rank + index_position_per_proc[j].size();
+          index_position_per_proc[j].push_back(i);
+          break;
+        }
+    }
+  }
+
+  // Sanity check on data structures used
+  if (reordering_map.size() != _positions.size() && processor_id() == 0)
+    paramError("reorder_positions", "System was unable to reorder positions.");
+  unsigned int num_pos = 0;
+  for (const auto & index_pos : index_position_per_proc)
+    num_pos += index_pos.size();
+  if (num_pos != _positions.size() && processor_id() == 0)
+    paramError("reorder_positions", "System was unable to reorder positions");
+
+  // Re-order cli_args, input_files, every array that is index by positions
+  std::vector<Point> positions_temp(_positions.size());
+  std::vector<unsigned int> reset_apps_temp(_reset_apps.size());
+  std::vector<unsigned int> move_apps_temp(_move_apps.size());
+  std::vector<std::string> cli_args_from_file_temp(_cli_args_from_file.size());
+  std::vector<FileName> input_files_temp(_input_files.size());
+  for (const auto i : index_range(_positions))
+    positions_temp[reordering_map[i]] = _positions[i];
+  for (const auto i : index_range(_reset_apps))
+    reset_apps_temp[i] = reordering_map[i];
+  for (const auto i : index_range(_move_apps))
+    move_apps_temp[i] = reordering_map[i];
+  if (cli_args_from_file_temp.size() > 1)
+    for (const auto i : index_range(_cli_args_from_file))
+      cli_args_from_file_temp[i] = _cli_args_from_file[reordering_map[i]];
+  if (input_files_temp.size() > 1)
+    for (const auto i : index_range(_input_files))
+      input_files_temp[i] = _input_files[reordering_map[i]];
+
+  // Replace with re-ordered version
+  _positions = positions_temp;
+  _reset_apps = reset_apps_temp;
+  _move_apps = move_apps_temp;
+  _cli_args_from_file = cli_args_from_file_temp;
+  _input_files = input_files_temp;
 }
 
 void
@@ -1208,8 +1339,14 @@ MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
   else if (_cli_args_from_file.size() == 1)
     return _cli_args_from_file[0];
   else if (cla.size())
+  {
+    if (_use_positions && _reorder_positions)
+      paramError(
+          "reorder_positions",
+          "Specifying multiple CLI args is not currently supported with sub-app re-ordering");
     // Unique set of "cli_args" to be applied to each sub apps
     return cla[local_app + _first_local_app];
+  }
   else
     return _cli_args_from_file[local_app + _first_local_app];
 }

@@ -395,6 +395,11 @@ protected:
   virtual void fillPositions();
 
   /**
+   * Re-orders positions so they fit better with the partitioning
+   */
+  void reorderPositions();
+
+  /**
    * Fill command line arguments for sub apps
    */
   void readCommandLineArguments();
@@ -491,6 +496,8 @@ protected:
   /// Toggle use of "positions". Subapps are created at each different position.
   /// List of positions can be created using the Positions system
   const bool _use_positions;
+  /// Toggle use of positions re-order. The positions and app-dependent parameters are re-ordered to better fit onto the main application domain
+  const bool _reorder_positions;
 
   /// The input file for each app's simulation
   std::vector<FileName> _input_files;

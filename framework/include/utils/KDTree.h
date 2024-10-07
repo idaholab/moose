@@ -28,7 +28,7 @@ using ResultItem = std::pair<T, U>;
 class KDTree
 {
 public:
-  KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size);
+  KDTree(const std::vector<Point> & master_points, unsigned int max_leaf_size);
 
   virtual ~KDTree() = default;
 
