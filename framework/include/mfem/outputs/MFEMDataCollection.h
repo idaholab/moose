@@ -1,5 +1,6 @@
 #pragma once
 #include "FileOutput.h"
+#include "MFEMProblem.h"
 #include "mfem.hpp"
 
 /**
@@ -12,9 +13,17 @@ public:
 
   MFEMDataCollection(const InputParameters & parameters);
 
-  virtual std::shared_ptr<mfem::DataCollection>
-  createDataCollection(const std::string & collection_name) const;
+  virtual mfem::DataCollection & getDataCollection() = 0;
 
 protected:
-  void output() override {}
+  MFEMProblemData & _problem_data;
+  void output() override
+  {
+    mfem::DataCollection & dc(getDataCollection());
+    // Write fields to disk
+    dc.SetCycle(getFileNumber());
+    dc.SetTime(time());
+    dc.Save();
+    _file_num++;
+  }
 };

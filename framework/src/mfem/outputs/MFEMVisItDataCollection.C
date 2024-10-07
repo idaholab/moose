@@ -16,15 +16,9 @@ MFEMVisItDataCollection::validParams()
 }
 
 MFEMVisItDataCollection::MFEMVisItDataCollection(const InputParameters & parameters)
-  : MFEMDataCollection(parameters), _refinements(getParam<unsigned int>("refinements"))
+  : MFEMDataCollection(parameters),
+    _visit_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str()),
+    _refinements(getParam<unsigned int>("refinements"))
 {
-}
-
-std::shared_ptr<mfem::DataCollection>
-MFEMVisItDataCollection::createDataCollection(const std::string & collection_name) const
-{
-  auto visit_dc = std::make_shared<mfem::VisItDataCollection>(_file_base.c_str() + collection_name);
-  visit_dc->SetLevelsOfDetail(_refinements + 1);
-
-  return visit_dc;
+  _visit_dc.SetLevelsOfDetail(_refinements + 1);
 }
