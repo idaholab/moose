@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMDataCollection.h"
-#include "mfem.hpp"
 
 /**
  * Class for output information saved in MFEM VisItDataCollections

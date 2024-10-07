@@ -1,7 +1,6 @@
 #pragma once
 #include "FileOutput.h"
 #include "MFEMProblem.h"
-#include "mfem.hpp"
 
 /**
  * Class for output information saved in MFEM DataCollections

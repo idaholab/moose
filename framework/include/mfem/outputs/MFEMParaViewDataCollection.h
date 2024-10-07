@@ -1,7 +1,5 @@
 #pragma once
 #include "MFEMDataCollection.h"
-#include "MFEMMesh.h"
-#include "mfem.hpp"
 
 /**
  * Class for output information saved in MFEM ParaViewDataCollections
