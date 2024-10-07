@@ -42,6 +42,10 @@ MeshDiagnosticsGenerator::validParams()
       "whether to check that sidesets are consistently oriented using neighbor subdomains. If a "
       "sideset is inconsistently oriented within a subdomain, this will not be detected");
   params.addParam<MooseEnum>(
+      "check_for_watertight_sidesets",
+      chk_option,
+      "whether to check for sides that are not assigned to any sidesets");
+  params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
   params.addParam<Real>("maximum_element_volumes", 1e16, "Maximum size for element volume");
@@ -75,6 +79,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _check_sidesets_orientation(getParam<MooseEnum>("examine_sidesets_orientation")),
+    _check_watertight_sidesets(getParam<MooseEnum>("check_for_watertight_sidesets")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -97,7 +102,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   if (isParamSetByUser("nonconformal_tol") && _check_non_conformal_mesh == "NO_CHECK")
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
-  if (_check_sidesets_orientation == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
+  if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
+      _check_element_volumes == "NO_CHECK" &&
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
       _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
@@ -119,6 +125,9 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_sidesets_orientation != "NO_CHECK")
     checkSidesetsOrientation(mesh);
+
+  if (_check_watertight_sidesets != "NO_CHECK")
+    checkWaterTightSidesets(mesh);
 
   if (_check_element_volumes != "NO_CHECK")
     checkElementVolumes(mesh);
@@ -149,7 +158,11 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 {
   auto & boundary_info = mesh->get_boundary_info();
   auto side_tuples = boundary_info.build_side_list();
-
+  auto sideset_map = boundary_info.get_sideset_map();
+  auto side_set = boundary_info.get_side_boundary_ids();
+  boundary_info.build_node_list_from_side_list();
+  auto nodeset_map = boundary_info.get_nodeset_map();
+  //auto & num_sides = mesh->n_sides();
   for (const auto bid : boundary_info.get_boundary_ids())
   {
     // This check only looks at subdomains on both sides of the sideset
@@ -264,6 +277,58 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 
     diagnosticsLog(message, _check_sidesets_orientation, num_normals_flipping);
   }
+}
+
+void
+MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase> & mesh) const
+{
+  /*
+  Algorithm Overview:
+  1) Loop through all elements
+  2) For each element loop through it's edges
+  3) If !neighbors it's external
+  4) If external check if it's part of a sideset
+  */
+
+  auto & boundary_info = mesh->get_boundary_info();
+  boundary_info.build_side_list();
+  const auto sideset_map = boundary_info.get_sideset_map();
+  unsigned int num_faces_without_sideset = 0;
+
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    std::vector<std::unique_ptr<Elem>> elem_sides(elem->n_sides());
+    for (auto i : elem->side_index_range())
+    {
+      // build sides
+      elem_sides[i] = elem->build_side_ptr(i, false);
+    }
+    for (const auto & side : elem_sides)
+    {
+      // Need a different check to see if it's external or not. Try checking all nodes
+      bool external = true;
+      for (unsigned int node_num = 0; node_num < elem->n_nodes(); node_num++)
+      {
+        if (side->is_internal(node_num))
+          external = false;
+      }
+      if(external)
+      {
+        //unsigned int side_id = elem->which_side_am_i(*side);
+        // check for side_id in sideset_map
+        auto sideset_count = sideset_map.count(side);
+        if (sideset_count == 0)
+        {
+          // This side does not have a sideset!!!
+          std::string message = "Side " + std::to_string(side_id) + " is has not been assigned to any sidesets";
+          _console << message << std::endl;
+          num_faces_without_sideset++;
+        }
+      }
+    }  
+  }
+  std::string message = "Number of element sides that have not been assigned to a sideset: " + std::to_string(num_faces_without_sideset);
+  diagnosticsLog(message, _check_watertight_sidesets, num_faces_without_sideset);
 }
 
 void
