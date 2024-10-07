@@ -14,7 +14,6 @@
 
 registerMooseObject("MooseApp", SideFVFluxBCIntegral);
 
-
 InputParameters
 SideFVFluxBCIntegral::validParams()
 {
@@ -26,10 +25,8 @@ SideFVFluxBCIntegral::validParams()
   return params;
 }
 
-SideFVFluxBCIntegral::SideFVFluxBCIntegral(
-    const InputParameters & parameters)
-  : SideIntegralPostprocessor(parameters),
-  _bc_names(getParam<std::vector<std::string>>("fvbcs"))
+SideFVFluxBCIntegral::SideFVFluxBCIntegral(const InputParameters & parameters)
+  : SideIntegralPostprocessor(parameters), _bc_names(getParam<std::vector<std::string>>("fvbcs"))
 {
   _qp_integration = false;
 }
@@ -52,8 +49,12 @@ SideFVFluxBCIntegral::initialSetup()
   {
     std::vector<FVFluxBC *> flux_bcs;
     base_query.condition<AttribName>(name).queryInto(flux_bcs);
-    mooseAssert(flux_bcs.size() == 1,
-                "There should be only one boundary condition from this search.");
+    if (flux_bcs.size() == 0)
+      paramError("fvbcs",
+                 "The given FVFluxBC with name '",
+                 name,
+                 "' was not found! This can be due to the boundary condition not existing in the "
+                 "'FVBCs' block or the boundary condition not inheriting from FVFluxBC.");
 
     _bc_objects.push_back(flux_bcs[0]);
   }
