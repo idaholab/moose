@@ -1,4 +1,5 @@
-# Script to generate source term for microwave_heating.i
+# Script to generate source term for scalar_azim_magnetic_time_deriv.i
+# and vector_azim_magnetic_time_deriv.i
 
 # NOTE: For Cartesian to Cylindrical:
 # For MOOSE's 2D Cylindrical, it transforms (x,y) -> (r,z),

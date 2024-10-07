@@ -11,6 +11,11 @@
 
 #include "AuxKernel.h"
 
+/**
+ *  Computes the time derivative of the azimuthal component 
+ *  of the magnetic field assuming cylindrical electric field. The electric field is 
+ *  is supplied as a vector.
+ */
 class AzimuthMagneticTimeDerivVector : public AuxKernel
 {
 public:
@@ -22,5 +27,7 @@ protected:
   virtual Real computeValue() override;
 
 private:
+
+  /// Curl of the electric field vector
   const VectorVariableCurl & _efield_curl;
 };

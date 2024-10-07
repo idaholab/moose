@@ -7,6 +7,20 @@
     design = 'AuxComplexHeating.md'
     issues = '#28758'
   []
+  [aux_microwave_heating_csv]
+    type = CSVDiff
+    command = 'aux_microwave_heating_convergence.py'
+    csvdiff = 'aux_microwave_heating_convergence.csv'
+    requirement = 'The system shall include a tool for writing spatial convergence data for the power deposition based on the material conductivity and electric field.'
+    design = 'AuxComplexHeating.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy'
+  []
+
   [aux_current_heating]
     type = Exodiff
     input = aux_current_source_heating.i
@@ -14,5 +28,18 @@
     requirement = 'The system shall calculate the power deposition based on the electric field and a supplied current density source.'
     design = 'SourceCurrentHeating.md'
     issues = '#28758'
+  []
+  [aux_current_heating_csv]
+    type = CSVDiff
+    command = 'aux_current_source_heating_convergence.py'
+    csvdiff = 'aux_current_source_heating_convergence.csv'
+    requirement = 'The system shall include a tool for writing spatial convergence data for the power deposition based on the electric field and a supplied current density source.'
+    design = 'SourceCurrentHeating.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy'
   []
 []

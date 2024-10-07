@@ -11,6 +11,10 @@
 
 #include "AuxKernel.h"
 
+/**
+ *  Computes the heating due to the electic field in the form of 
+ *  0.5 Re( J * E^* )
+ */
 class SourceCurrentHeating : public AuxKernel
 {
 public:
@@ -22,8 +26,16 @@ protected:
   virtual Real computeValue() override;
 
 private:
+
+  /// Vector variable of the real component of the E-field
   const VectorVariableValue & _E_real;
+
+  /// Vector variable of the imaginary component of the E-field
   const VectorVariableValue & _E_imag;
+
+  /// Real component of the current source
   const Function & _source_real;
+
+  /// Imaginary component of the current source
   const Function & _source_imag;
 };

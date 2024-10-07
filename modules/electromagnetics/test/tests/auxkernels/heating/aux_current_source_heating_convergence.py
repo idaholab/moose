@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Script to run spatial convergence study on aux_current_source_heating.i
 
 import mms
@@ -9,3 +10,4 @@ df1 = mms.run_spatial('aux_current_source_heating.i', 6, console=False, x_pp='h'
 fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
 fig.plot(df1, label=['E_Real', 'E_Imag.','Aux Heating Term'], marker='o', markersize=8)
 fig.save('aux_current_source_heating_convergence.png')
+df1.to_csv('aux_current_source_heating_convergence.csv')
