@@ -12,7 +12,7 @@
 #include "ADVectorKernel.h"
 
 /**
- *  Calculates the current source term in the Helmholtz wave equation using 
+ *  Calculates the current source term in the Helmholtz wave equation using
  *  the conduction formulation of the current.
  */
 class ADConductiveCurrent : public ADVectorKernel
@@ -26,7 +26,6 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-
   /// Vector variable of the real component of the E-field
   const ADVectorVariableValue & _E_real;
 
