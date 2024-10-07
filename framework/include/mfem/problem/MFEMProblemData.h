@@ -18,7 +18,6 @@ public:
   platypus::PropertyManager _properties;
   platypus::BCMap _bc_map;
   platypus::Coefficients _coefficients;
-  platypus::Outputs _outputs;
 
   std::unique_ptr<mfem::ODESolver> _ode_solver{nullptr};
   mfem::BlockVector _f;
