@@ -1,6 +1,7 @@
 ## Flow Equations
 
-The governing flow equations for the VACE model are as follows:
+The governing flow equations for the variable-area formulation of the compressible
+Euler equations are as follows:
 
 !equation
 \pd{\rho A}{t} + \pd{\rho u A}{x} = 0 \,,

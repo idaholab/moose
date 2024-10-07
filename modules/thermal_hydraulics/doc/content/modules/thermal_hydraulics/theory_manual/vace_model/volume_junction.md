@@ -238,4 +238,4 @@ $u_{\text{J},i,n} \equiv \mathbf{u}_\text{J} \cdot \mathbf{n}_{\text{J},i}$ and
 \mathcal{G}_i = \frac{1}{2} \left(1 - \text{sgn}(u_{i,n})\right)
 \min\left(\frac{\left|u_{i,n} - u_{\text{J},i,n}\right|}{c_{\text{J},i}}, 1\right) \eqc
 
-with $c_{\text{J},i} \equiv \max(c_i, c_\text{J})$.
+with $c_{\text{J},i} \equiv \max(c_i, c_\text{J})$, where $c$ is sound speed.

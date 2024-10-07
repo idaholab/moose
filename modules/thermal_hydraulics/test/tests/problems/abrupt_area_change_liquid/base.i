@@ -47,7 +47,6 @@
     p_inf = ${p_inf}
     q = ${q}
     cv = ${cv}
-    # type = IAPWS95LiquidFluidProperties
   []
 []
 
