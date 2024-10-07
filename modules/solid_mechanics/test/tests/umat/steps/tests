@@ -7,10 +7,7 @@
     exodiff = 'elastic_temperature_steps_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for finite strain elastic material models and '
-                  'temperature dependence with the ability to switch boundary conditions according '
-                  'to the controls system.'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -20,10 +17,7 @@
     exodiff = 'elastic_temperature_steps_uo_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for finite strain elastic material models and '
-                  'temperature dependence with the ability to switch boundary conditions according '
-                  'to the controls system using loading steps from a general user object.'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -34,11 +28,7 @@
     exodiff = 'elastic_temperature_steps_uo_durations_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for finite strain elastic material models and '
-                  'temperature dependence with the ability to switch boundary conditions according '
-                  'to the controls system using loading steps from a general user object, to which '
-                  'the user only provides the step durations.'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system using loading steps from a general user object, to which the user only provides the step durations.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -49,11 +39,7 @@
     exodiff = 'elastic_temperature_steps_uo_intervals_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for finite strain elastic material models and '
-                  'temperature dependence with the ability to switch boundary conditions according '
-                  'to the controls system using loading steps from a general user object, to which '
-                  'the user only provides the number of steps and the total time interval.'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system using loading steps from a general user object, to which the user only provides the number of steps and the total time interval.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -64,11 +50,8 @@
     exodiff = 'elastic_temperature_steps_uo_sync_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    cli_args = 'Outputs/file_base=elastic_temperature_steps_uo_sync_out '
-               'Functions/top_pull_step2/expression="(t-4.5)/20" '
-               'UserObjects/step_uo/step_start_times="0 4.5"'
-    requirement = 'The system shall ensure that solution synchronization times are enforced by '
-                  'default when employing a user object to determine the steps of the simulation.'
+    cli_args = 'Outputs/file_base=elastic_temperature_steps_uo_sync_out Functions/top_pull_step2/expression="(t-4.5)/20" UserObjects/step_uo/step_start_times="0 4.5"'
+    requirement = 'The system shall ensure that solution synchronization times are enforced by default when employing a user object to determine the steps of the simulation.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -76,14 +59,10 @@
     type = 'Exodiff'
     input = 'elastic_temperature_steps_uo.i'
     exodiff = 'elastic_temperature_steps_uo_input_out.e'
-    cli_args = 'Materials/umat/step_user_object=step_uo '
-               'Outputs/file_base=elastic_temperature_steps_uo_input_out'
+    cli_args = 'Materials/umat/step_user_object=step_uo Outputs/file_base=elastic_temperature_steps_uo_input_out'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for finite strain elastic material models and '
-                  'temperature dependence with the ability to switch boundary conditions according '
-                  'to the controls system using loading steps from a general user object.'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system using loading steps from a general user object.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []

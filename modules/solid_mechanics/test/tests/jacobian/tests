@@ -1,691 +1,792 @@
 [Tests]
-  [cosserat01]
-    type = 'PetscJacobianTester'
-    input = 'cosserat01.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cosserat02]
-    type = 'PetscJacobianTester'
-    input = 'cosserat02.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cosserat03]
-    type = 'PetscJacobianTester'
-    input = 'cosserat03.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cosserat04]
-    type = 'PetscJacobianTester'
-    input = 'cosserat04.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cosserat05]
-    type = 'PetscJacobianTester'
-    input = 'cosserat05.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cosserat06]
-    type = 'PetscJacobianTester'
-    input = 'cosserat06.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [inertial_torque]
-    type = 'PetscJacobianTester'
-    input = 'inertial_torque.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  # The --no-trap-fpe is necessary because when performing a singular value decomposition PETSc/LAPACK/BLAS checks 0/0, 1/0, etc, and Libmesh would trap these checks
-  [cto01]
-    type = 'PetscJacobianTester'
-    input = 'cto01.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto02]
-    type = 'PetscJacobianTester'
-    input = 'cto02.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto03]
-    type = 'PetscJacobianTester'
-    input = 'cto03.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto04]
-    type = 'PetscJacobianTester'
-    input = 'cto04.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto05]
-    type = 'PetscJacobianTester'
-    input = 'cto05.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto06]
-    type = 'PetscJacobianTester'
-    input = 'cto06.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto07]
-    type = 'PetscJacobianTester'
-    input = 'cto07.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto08]
-    type = 'PetscJacobianTester'
-    input = 'cto08.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto09]
-    type = 'PetscJacobianTester'
-    input = 'cto09.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto10]
-    type = 'PetscJacobianTester'
-    input = 'cto10.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto11]
-    type = 'PetscJacobianTester'
-    input = 'cto11.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto12]
-    type = 'PetscJacobianTester'
-    input = 'cto12.i'
-    ratio_tol = 1E-6 # this is a very nonlinear test
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto13]
-    type = 'PetscJacobianTester'
-    input = 'cto13.i'
-    ratio_tol = 1E-5 # this is a very nonlinear test
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto14]
-    type = 'PetscJacobianTester'
-    input = 'cto14.i'
-    ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto15]
-    type = 'PetscJacobianTester'
-    input = 'cto15.i'
-    ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto16]
-    type = 'PetscJacobianTester'
-    input = 'cto16.i'
-    ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around a tip where some derivatives are not defined
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto17]
-    type = 'PetscJacobianTester'
-    input = 'cto17.i'
-    ratio_tol = 1E-6 # this is a very nonlinear test
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto18]
-    type = 'PetscJacobianTester'
-    input = 'cto18.i'
-    ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
+  issues = '#5677 #7028 #8200 #10134 #11219 #19570 #19627 #20879'
+  design = 'syntax/Physics/SolidMechanics/QuasiStatic/index.md'
+  [jacobian]
+    requirement = 'The module shall pass Jacobian tests with the PetscJacobianTester for test case '
+    [cosserat01]
+      type = 'PetscJacobianTester'
+      input = 'cosserat01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cosserat01'
+    []
+    [cosserat02]
+      type = 'PetscJacobianTester'
+      input = 'cosserat02.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cosserat02'
+    []
+    [cosserat03]
+      type = 'PetscJacobianTester'
+      input = 'cosserat03.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cosserat03'
+    []
+    [cosserat04]
+      type = 'PetscJacobianTester'
+      input = 'cosserat04.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cosserat04'
+    []
+    [cosserat05]
+      type = 'PetscJacobianTester'
+      input = 'cosserat05.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cosserat05'
+    []
+    [cosserat06]
+      type = 'PetscJacobianTester'
+      input = 'cosserat06.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cosserat06'
+    []
+    [inertial_torque]
+      type = 'PetscJacobianTester'
+      input = 'inertial_torque.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'inertial_torque'
+    []
+    # The --no-trap-fpe is necessary because when performing a singular value decomposition PETSc/LAPACK/BLAS checks 0/0, 1/0, etc, and Libmesh would trap these checks
+    [cto01]
+      type = 'PetscJacobianTester'
+      input = 'cto01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto01'
+    []
+    [cto02]
+      type = 'PetscJacobianTester'
+      input = 'cto02.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto02'
+    []
+    [cto03]
+      type = 'PetscJacobianTester'
+      input = 'cto03.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto03'
+    []
+    [cto04]
+      type = 'PetscJacobianTester'
+      input = 'cto04.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto04'
+    []
+    [cto05]
+      type = 'PetscJacobianTester'
+      input = 'cto05.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto05'
+    []
+    [cto06]
+      type = 'PetscJacobianTester'
+      input = 'cto06.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto06'
+    []
+    [cto07]
+      type = 'PetscJacobianTester'
+      input = 'cto07.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto07'
+    []
+    [cto08]
+      type = 'PetscJacobianTester'
+      input = 'cto08.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto08'
+    []
+    [cto09]
+      type = 'PetscJacobianTester'
+      input = 'cto09.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto09'
+    []
+    [cto10]
+      type = 'PetscJacobianTester'
+      input = 'cto10.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto10'
+    []
+    [cto11]
+      type = 'PetscJacobianTester'
+      input = 'cto11.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto11'
+    []
+    [cto12]
+      type = 'PetscJacobianTester'
+      input = 'cto12.i'
+      ratio_tol = 1E-6 # this is a very nonlinear test
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto12'
+    []
+    [cto13]
+      type = 'PetscJacobianTester'
+      input = 'cto13.i'
+      ratio_tol = 1E-5 # this is a very nonlinear test
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto13'
+    []
+    [cto14]
+      type = 'PetscJacobianTester'
+      input = 'cto14.i'
+      ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto14'
+    []
+    [cto15]
+      type = 'PetscJacobianTester'
+      input = 'cto15.i'
+      ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto15'
+    []
+    [cto16]
+      type = 'PetscJacobianTester'
+      input = 'cto16.i'
+      ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around a tip where some derivatives are not defined
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto16'
+    []
+    [cto17]
+      type = 'PetscJacobianTester'
+      input = 'cto17.i'
+      ratio_tol = 1E-6 # this is a very nonlinear test
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto17'
+    []
+    [cto18]
+      type = 'PetscJacobianTester'
+      input = 'cto18.i'
+      ratio_tol = 1E-6 # this is a very nonlinear test, and a delicate test as it perturbs around an edge where some derivatives are not defined
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto18'
+    []
 
-  [cto19]
-    type = 'PetscJacobianTester'
-    input = 'cto19.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto20]
-    type = 'PetscJacobianTester'
-    input = 'cto20.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto21]
-    type = 'PetscJacobianTester'
-    input = 'cto21.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
+    [cto19]
+      type = 'PetscJacobianTester'
+      input = 'cto19.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto19'
+    []
+    [cto20]
+      type = 'PetscJacobianTester'
+      input = 'cto20.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto20'
+    []
+    [cto21]
+      type = 'PetscJacobianTester'
+      input = 'cto21.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto21'
+    []
 
-  [cto22]
-    type = 'PetscJacobianTester'
-    input = 'cto22.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto23]
-    type = 'PetscJacobianTester'
-    input = 'cto23.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
+    [cto22]
+      type = 'PetscJacobianTester'
+      input = 'cto22.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto22'
+    []
+    [cto23]
+      type = 'PetscJacobianTester'
+      input = 'cto23.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto23'
+    []
 
-  [cto24]
-    type = 'PetscJacobianTester'
-    input = 'cto24.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto25]
-    type = 'PetscJacobianTester'
-    input = 'cto25.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
-  [cto26]
-    type = 'PetscJacobianTester'
-    input = 'cto26.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = '--no-trap-fpe Executioner/num_steps=1'
-  []
+    [cto24]
+      type = 'PetscJacobianTester'
+      input = 'cto24.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto24'
+    []
+    [cto25]
+      type = 'PetscJacobianTester'
+      input = 'cto25.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto25'
+    []
+    [cto26]
+      type = 'PetscJacobianTester'
+      input = 'cto26.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = '--no-trap-fpe Executioner/num_steps=1'
+      detail = 'cto26'
+    []
 
-  [cto27]
-    type = 'PetscJacobianTester'
-    input = 'cto27.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [cto27]
+      type = 'PetscJacobianTester'
+      input = 'cto27.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cto27'
+    []
 
-  [cto29]
-    type = 'PetscJacobianTester'
-    input = 'cto29.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [cto29]
+      type = 'PetscJacobianTester'
+      input = 'cto29.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cto29'
+    []
 
-  [poro01]
-    type = 'PetscJacobianTester'
-    input = 'poro01.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [poro01]
+      type = 'PetscJacobianTester'
+      input = 'poro01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'poro01'
+    []
 
-  [cwp01]
-    type = 'PetscJacobianTester'
-    input = 'cwp01.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp02]
-    type = 'PetscJacobianTester'
-    input = 'cwp02.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp03]
-    type = 'PetscJacobianTester'
-    input = 'cwp03.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp04]
-    type = 'PetscJacobianTester'
-    input = 'cwp04.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp05]
-    type = 'PetscJacobianTester'
-    input = 'cwp05.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp06]
-    type = 'PetscJacobianTester'
-    input = 'cwp06.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp07]
-    type = 'PetscJacobianTester'
-    input = 'cwp07.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp08]
-    type = 'PetscJacobianTester'
-    input = 'cwp08.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp09]
-    type = 'PetscJacobianTester'
-    input = 'cwp09.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp10]
-    type = 'PetscJacobianTester'
-    input = 'cwp10.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwp11]
-    type = 'PetscJacobianTester'
-    input = 'cwp11.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [cwp01]
+      type = 'PetscJacobianTester'
+      input = 'cwp01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp01'
+    []
+    [cwp02]
+      type = 'PetscJacobianTester'
+      input = 'cwp02.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp02'
+    []
+    [cwp03]
+      type = 'PetscJacobianTester'
+      input = 'cwp03.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp03'
+    []
+    [cwp04]
+      type = 'PetscJacobianTester'
+      input = 'cwp04.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp04'
+    []
+    [cwp05]
+      type = 'PetscJacobianTester'
+      input = 'cwp05.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp05'
+    []
+    [cwp06]
+      type = 'PetscJacobianTester'
+      input = 'cwp06.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp06'
+    []
+    [cwp07]
+      type = 'PetscJacobianTester'
+      input = 'cwp07.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp07'
+    []
+    [cwp08]
+      type = 'PetscJacobianTester'
+      input = 'cwp08.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp08'
+    []
+    [cwp09]
+      type = 'PetscJacobianTester'
+      input = 'cwp09.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp09'
+    []
+    [cwp10]
+      type = 'PetscJacobianTester'
+      input = 'cwp10.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp10'
+    []
+    [cwp11]
+      type = 'PetscJacobianTester'
+      input = 'cwp11.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwp11'
+    []
 
-  [cwpc01]
-    type = 'PetscJacobianTester'
-    input = 'cwpc01.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cwpc02]
-    type = 'PetscJacobianTester'
-    input = 'cwpc02.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [cwpc01]
+      type = 'PetscJacobianTester'
+      input = 'cwpc01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwpc01'
+    []
+    [cwpc02]
+      type = 'PetscJacobianTester'
+      input = 'cwpc02.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cwpc02'
+    []
 
-  [phe01]
-    type = 'PetscJacobianTester'
-    input = 'phe01.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [phe01]
+      type = 'PetscJacobianTester'
+      input = 'phe01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'phe01'
+    []
 
-  [cdpc01]
-    type = 'PetscJacobianTester'
-    input = 'cdpc01.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cdpc02]
-    type = 'PetscJacobianTester'
-    input = 'cdpc02.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [cdpc01]
+      type = 'PetscJacobianTester'
+      input = 'cdpc01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cdpc01'
+    []
+    [cdpc02]
+      type = 'PetscJacobianTester'
+      input = 'cdpc02.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cdpc02'
+    []
 
-  [cdp_cwp_coss01]
-    type = 'PetscJacobianTester'
-    input = 'cdp_cwp_coss01.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [cdp_cwp_coss02]
-    type = 'PetscJacobianTester'
-    input = 'cdp_cwp_coss02.i'
-    ratio_tol = 1E-6
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [cdp_cwp_coss01]
+      type = 'PetscJacobianTester'
+      input = 'cdp_cwp_coss01.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cdp_cwp_coss01'
+    []
+    [cdp_cwp_coss02]
+      type = 'PetscJacobianTester'
+      input = 'cdp_cwp_coss02.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'cdp_cwp_coss02'
+    []
 
-  [coss_elastic]
-    type = 'PetscJacobianTester'
-    input = 'coss_elastic.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [coss_elastic]
+      type = 'PetscJacobianTester'
+      input = 'coss_elastic.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'coss_elastic'
+    []
 
-  [tensile_update1]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update1.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [tensile_update2]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update2.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [tensile_update3]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update3.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [tensile_update4]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update4.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [tensile_update5]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update5.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [tensile_update6]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update5.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [tensile_update7]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update7.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [tensile_update8]
-    type = 'PetscJacobianTester'
-    input = 'tensile_update8.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [tensile_update1]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update1.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update1'
+    []
+    [tensile_update2]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update2.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update2'
+    []
+    [tensile_update3]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update3.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update3'
+    []
+    [tensile_update4]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update4.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update4'
+    []
+    [tensile_update5]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update5.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update5'
+    []
+    [tensile_update6]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update5.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update6'
+    []
+    [tensile_update7]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update7.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update7'
+    []
+    [tensile_update8]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update8.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'tensile_update8'
+    []
 
-  [mc_update1]
-    type = 'PetscJacobianTester'
-    input = 'mc_update1.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update2]
-    type = 'PetscJacobianTester'
-    input = 'mc_update2.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update3]
-    type = 'PetscJacobianTester'
-    input = 'mc_update3.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update4]
-    type = 'PetscJacobianTester'
-    input = 'mc_update4.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update5]
-    type = 'PetscJacobianTester'
-    input = 'mc_update5.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update6]
-    type = 'PetscJacobianTester'
-    input = 'mc_update6.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update7]
-    type = 'PetscJacobianTester'
-    input = 'mc_update7.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update8]
-    type = 'PetscJacobianTester'
-    input = 'mc_update8.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update11]
-    type = 'PetscJacobianTester'
-    input = 'mc_update11.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update12]
-    type = 'PetscJacobianTester'
-    input = 'mc_update12.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update13]
-    type = 'PetscJacobianTester'
-    input = 'mc_update13.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update14]
-    type = 'PetscJacobianTester'
-    input = 'mc_update14.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update15]
-    type = 'PetscJacobianTester'
-    input = 'mc_update15.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update16]
-    type = 'PetscJacobianTester'
-    input = 'mc_update15.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update17]
-    type = 'PetscJacobianTester'
-    input = 'mc_update17.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update18]
-    type = 'PetscJacobianTester'
-    input = 'mc_update18.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update21]
-    type = 'PetscJacobianTester'
-    input = 'mc_update21.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update22]
-    type = 'PetscJacobianTester'
-    input = 'mc_update22.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update23]
-    type = 'PetscJacobianTester'
-    input = 'mc_update23.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update24]
-    type = 'PetscJacobianTester'
-    input = 'mc_update24.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update33]
-    type = 'PetscJacobianTester'
-    input = 'mc_update33.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update34]
-    type = 'PetscJacobianTester'
-    input = 'mc_update34.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [mc_update1]
+      type = 'PetscJacobianTester'
+      input = 'mc_update1.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update1'
+    []
+    [mc_update2]
+      type = 'PetscJacobianTester'
+      input = 'mc_update2.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update2'
+    []
+    [mc_update3]
+      type = 'PetscJacobianTester'
+      input = 'mc_update3.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update3'
+    []
+    [mc_update4]
+      type = 'PetscJacobianTester'
+      input = 'mc_update4.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update4'
+    []
+    [mc_update5]
+      type = 'PetscJacobianTester'
+      input = 'mc_update5.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update5'
+    []
+    [mc_update6]
+      type = 'PetscJacobianTester'
+      input = 'mc_update6.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update6'
+    []
+    [mc_update7]
+      type = 'PetscJacobianTester'
+      input = 'mc_update7.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update7'
+    []
+    [mc_update8]
+      type = 'PetscJacobianTester'
+      input = 'mc_update8.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update8'
+    []
+    [mc_update11]
+      type = 'PetscJacobianTester'
+      input = 'mc_update11.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update11'
+    []
+    [mc_update12]
+      type = 'PetscJacobianTester'
+      input = 'mc_update12.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update12'
+    []
+    [mc_update13]
+      type = 'PetscJacobianTester'
+      input = 'mc_update13.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update13'
+    []
+    [mc_update14]
+      type = 'PetscJacobianTester'
+      input = 'mc_update14.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update14'
+    []
+    [mc_update15]
+      type = 'PetscJacobianTester'
+      input = 'mc_update15.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update15'
+    []
+    [mc_update16]
+      type = 'PetscJacobianTester'
+      input = 'mc_update15.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update16'
+    []
+    [mc_update17]
+      type = 'PetscJacobianTester'
+      input = 'mc_update17.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update17'
+    []
+    [mc_update18]
+      type = 'PetscJacobianTester'
+      input = 'mc_update18.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update18'
+    []
+    [mc_update21]
+      type = 'PetscJacobianTester'
+      input = 'mc_update21.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update21'
+    []
+    [mc_update22]
+      type = 'PetscJacobianTester'
+      input = 'mc_update22.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update22'
+    []
+    [mc_update23]
+      type = 'PetscJacobianTester'
+      input = 'mc_update23.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update23'
+    []
+    [mc_update24]
+      type = 'PetscJacobianTester'
+      input = 'mc_update24.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update24'
+    []
+    [mc_update33]
+      type = 'PetscJacobianTester'
+      input = 'mc_update33.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update33'
+    []
+    [mc_update34]
+      type = 'PetscJacobianTester'
+      input = 'mc_update34.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update34'
+    []
 
-  [mc_update1_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update1_cosserat.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update8_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update8_cosserat.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update18_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update18_cosserat.i'
-    ratio_tol = 1E-4
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update21_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update21_cosserat.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update22_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update22_cosserat.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update23_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update23_cosserat.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update24_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update24_cosserat.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update33_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update33_cosserat.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [mc_update34_cosserat]
-    type = 'PetscJacobianTester'
-    input = 'mc_update34_cosserat.i'
-    ratio_tol = 1E-5
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
+    [mc_update1_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update1_cosserat.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update1_cosserat'
+    []
+    [mc_update8_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update8_cosserat.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update8_cosserat'
+    []
+    [mc_update18_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update18_cosserat.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update18_cosserat'
+    []
+    [mc_update21_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update21_cosserat.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update21_cosserat'
+    []
+    [mc_update22_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update22_cosserat.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update22_cosserat'
+    []
+    [mc_update23_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update23_cosserat.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update23_cosserat'
+    []
+    [mc_update24_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update24_cosserat.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update24_cosserat'
+    []
+    [mc_update33_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update33_cosserat.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update33_cosserat'
+    []
+    [mc_update34_cosserat]
+      type = 'PetscJacobianTester'
+      input = 'mc_update34_cosserat.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'mc_update34_cosserat'
+    []
 
-  [thermal_coupling]
-    type = 'PetscJacobianTester'
-    input = 'thermal_coupling.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
-  []
-  [thermal_coupling_rz]
-    type = 'PetscJacobianTester'
-    input = 'thermal_coupling_rz.i'
-    ratio_tol = 1E-7
-    difference_tol = 1E10
-    cli_args = 'Executioner/num_steps=1'
+    [thermal_coupling]
+      type = 'PetscJacobianTester'
+      input = 'thermal_coupling.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'thermal_coupling'
+    []
+    [thermal_coupling_rz]
+      type = 'PetscJacobianTester'
+      input = 'thermal_coupling_rz.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'thermal_coupling_rz'
+    []
   []
 []

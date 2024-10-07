@@ -17,6 +17,9 @@ InputParameters
 StepUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription(
+      "Generate steps to be used in StepPeriod to control the enabled/disabled state of objects "
+      "with user-provided simulation steps.");
   params.addParam<std::vector<Real>>(
       "step_start_times",
       "The beginning of step times. The number of steps is inferred from the number of times. One "
