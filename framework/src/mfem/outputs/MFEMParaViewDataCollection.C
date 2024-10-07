@@ -30,7 +30,7 @@ MFEMParaViewDataCollection::validParams()
 MFEMParaViewDataCollection::MFEMParaViewDataCollection(const InputParameters & parameters)
   : MFEMDataCollection(parameters),
     _pv_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str(),
-           &(dynamic_cast<MFEMMesh &>(*_mesh_ptr).getMFEMParMesh())),
+           _problem_data._pmesh.get()),
     _high_order_output(getParam<bool>("high_order_output")),
     _refinements(getParam<unsigned int>("refinements")),
     _vtk_format(parameters.get<MooseEnum>("vtk_format").getEnum<mfem::VTKFormat>())
@@ -39,8 +39,5 @@ MFEMParaViewDataCollection::MFEMParaViewDataCollection(const InputParameters & p
   _pv_dc.SetHighOrderOutput(_high_order_output);
   _pv_dc.SetLevelsOfDetail(_refinements + 1);
   _pv_dc.SetDataFormat(_vtk_format);
-  for (auto & gridfunction : _problem_data._gridfunctions)
-  {
-    _pv_dc.RegisterField(gridfunction.first, gridfunction.second.get());
-  }
+  registerFields();
 }

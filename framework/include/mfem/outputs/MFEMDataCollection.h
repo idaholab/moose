@@ -10,20 +10,12 @@ class MFEMDataCollection : public FileOutput
 {
 public:
   static InputParameters validParams();
-
   MFEMDataCollection(const InputParameters & parameters);
-
   virtual mfem::DataCollection & getDataCollection() = 0;
 
 protected:
+  void registerFields();
+  void output() override;
+
   MFEMProblemData & _problem_data;
-  void output() override
-  {
-    mfem::DataCollection & dc(getDataCollection());
-    // Write fields to disk
-    dc.SetCycle(getFileNumber());
-    dc.SetTime(time());
-    dc.Save();
-    _file_num++;
-  }
 };
