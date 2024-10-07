@@ -10,4 +10,15 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+  [./variational_smooth_mesh_operator]
+      type = 'Exodiff'
+      input = 'variational_mesh_smoother_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'variational_mesh_smoother_generator_in.e'
+      requirement = 'The system shall be able to use libmesh mesh modification tools.'
+      design = 'meshgenerators/VariationalSmoothMeshGenerator.md'
+      issues = '#9999'
+      mesh_mode = 'REPLICATED'
+      recover = false
+  [../]
 []
