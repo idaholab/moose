@@ -50,7 +50,7 @@ class ApptainerGenerator:
         else:
             self.def_path = library_meta['def']
 
-        if self.args.suffix is not None:
+        if getattr(self.args, 'suffix', None):
             self.name = self.add_name_suffix(library_meta, self.args.suffix)
         if self.args.tag is not None:
             self.tag = self.args.tag
