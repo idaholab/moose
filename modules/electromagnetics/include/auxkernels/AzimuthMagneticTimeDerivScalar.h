@@ -12,8 +12,8 @@
 #include "AuxKernel.h"
 
 /**
- *  Computes the time derivative of the azimuthal component 
- *  of the magnetic field assuming cylindrical electric field. The electric field is 
+ *  Computes the time derivative of the azimuthal component
+ *  of the magnetic field assuming cylindrical electric field. The electric field is
  *  is supplied as scalar components.
  */
 class AzimuthMagneticTimeDerivScalar : public AuxKernel
@@ -27,7 +27,6 @@ protected:
   virtual Real computeValue() override;
 
 private:
-
   /// Gradient of the x-component of the E-field
   const VariableGradient & _efield_x_grad;
 

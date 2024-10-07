@@ -12,7 +12,7 @@
 #include "ADKernel.h"
 
 /**
- *  Supplies the heating due to the electic field in the form of 
+ *  Supplies the heating due to the electic field in the form of
  *  0.5 Re( conductivity * E * E^* )
  */
 class ComplexHeating : public ADKernel

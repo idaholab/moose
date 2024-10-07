@@ -12,7 +12,7 @@
 #include "ADVectorKernel.h"
 
 /**
- *  Calculates the current source term in the Helmholtz wave equation using 
+ *  Calculates the current source term in the Helmholtz wave equation using
  *  the dielectric formulation of the current.
  */
 class ADMatWaveEquation : public ADVectorKernel
@@ -26,7 +26,6 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-
   /// Vector variable of the real component of the E-field
   const ADVectorVariableValue & _E_real;
 
@@ -35,7 +34,7 @@ private:
 
   /// The real component of the coefficient for the Helmholtz wave equation
   const ADMaterialProperty<Real> & _coef_real;
-  
+
   /// The imaginary component of the coefficient for the Helmholtz wave equation
   const ADMaterialProperty<Real> & _coef_imag;
 

@@ -29,11 +29,15 @@ ADConductiveCurrent::validParams()
   params.addParam<MaterialPropertyName>(
       "conductivity_imag", 0.0, "The imaginary component of the material conductivity.");
 
-  params.addParam<MaterialPropertyName>("ang_freq_real", "ang_freq", "The real component of the angular drive frequency.");
-  params.addParam<MaterialPropertyName>("ang_freq_imag", 0.0, "The imaginary component of the angular drive frequency.");
+  params.addParam<MaterialPropertyName>(
+      "ang_freq_real", "ang_freq", "The real component of the angular drive frequency.");
+  params.addParam<MaterialPropertyName>(
+      "ang_freq_imag", 0.0, "The imaginary component of the angular drive frequency.");
 
-  params.addParam<MaterialPropertyName>("permeability_real", "mu_vacuum", "The real component of the material permeability.");
-  params.addParam<MaterialPropertyName>("permeability_imag", 0.0, "The imaginary component of the material permeability.");
+  params.addParam<MaterialPropertyName>(
+      "permeability_real", "mu_vacuum", "The real component of the material permeability.");
+  params.addParam<MaterialPropertyName>(
+      "permeability_imag", 0.0, "The imaginary component of the material permeability.");
 
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Component of field (real or imaginary).");
