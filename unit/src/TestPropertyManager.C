@@ -70,7 +70,7 @@ matrix_func_t(const mfem::Vector & x, mfem::real_t t, mfem::DenseMatrix & mat)
 
 TEST_F(CheckPropertyManager, DeclareUniformScalar)
 {
-  manager.declareScalar("resistivity", 2.);
+  manager.declareScalar<mfem::ConstantCoefficient>("resistivity", {}, 2.);
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -80,8 +80,8 @@ TEST_F(CheckPropertyManager, DeclareUniformScalar)
 
 TEST_F(CheckPropertyManager, DeclarePWScalar)
 {
-  manager.declareScalar("test", 2., {"1", "2"});
-  manager.declareScalar("test", 1., {"3"});
+  manager.declareScalar<mfem::ConstantCoefficient>("test", {"1", "2"}, 2.);
+  manager.declareScalar<mfem::ConstantCoefficient>("test", {"3"}, 1.);
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
   ASSERT_NE(c, nullptr);
   fe_transform.Attribute = 1;
