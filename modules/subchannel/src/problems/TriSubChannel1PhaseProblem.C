@@ -32,14 +32,15 @@ TriSubChannel1PhaseProblem::TriSubChannel1PhaseProblem(const InputParameters & p
     _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh))
 {
   // Initializing heat conduction system
-  createPetscMatrix(
-      _hc_axial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels);
-  createPetscVector(_hc_axial_heat_conduction_rhs, _block_size * _n_channels);
-  createPetscMatrix(
-      _hc_radial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels);
-  createPetscVector(_hc_radial_heat_conduction_rhs, _block_size * _n_channels);
-  createPetscMatrix(_hc_sweep_enthalpy_mat, _block_size * _n_channels, _block_size * _n_channels);
-  createPetscVector(_hc_sweep_enthalpy_rhs, _block_size * _n_channels);
+  LibmeshPetscCall(createPetscMatrix(
+      _hc_axial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_axial_heat_conduction_rhs, _block_size * _n_channels));
+  LibmeshPetscCall(createPetscMatrix(
+      _hc_radial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_radial_heat_conduction_rhs, _block_size * _n_channels));
+  LibmeshPetscCall(createPetscMatrix(
+      _hc_sweep_enthalpy_mat, _block_size * _n_channels, _block_size * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_sweep_enthalpy_rhs, _block_size * _n_channels));
 }
 
 TriSubChannel1PhaseProblem::~TriSubChannel1PhaseProblem()
@@ -781,23 +782,23 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
   }
   else
   {
-    MatZeroEntries(_hc_time_derivative_mat);
-    MatZeroEntries(_hc_advective_derivative_mat);
-    MatZeroEntries(_hc_cross_derivative_mat);
-    MatZeroEntries(_hc_axial_heat_conduction_mat);
-    MatZeroEntries(_hc_radial_heat_conduction_mat);
-    MatZeroEntries(_hc_sweep_enthalpy_mat);
+    LibmeshPetscCall(MatZeroEntries(_hc_time_derivative_mat));
+    LibmeshPetscCall(MatZeroEntries(_hc_advective_derivative_mat));
+    LibmeshPetscCall(MatZeroEntries(_hc_cross_derivative_mat));
+    LibmeshPetscCall(MatZeroEntries(_hc_axial_heat_conduction_mat));
+    LibmeshPetscCall(MatZeroEntries(_hc_radial_heat_conduction_mat));
+    LibmeshPetscCall(MatZeroEntries(_hc_sweep_enthalpy_mat));
 
-    VecZeroEntries(_hc_time_derivative_rhs);
-    VecZeroEntries(_hc_advective_derivative_rhs);
-    VecZeroEntries(_hc_cross_derivative_rhs);
-    VecZeroEntries(_hc_added_heat_rhs);
-    VecZeroEntries(_hc_axial_heat_conduction_rhs);
-    VecZeroEntries(_hc_radial_heat_conduction_rhs);
-    VecZeroEntries(_hc_sweep_enthalpy_rhs);
+    LibmeshPetscCall(VecZeroEntries(_hc_time_derivative_rhs));
+    LibmeshPetscCall(VecZeroEntries(_hc_advective_derivative_rhs));
+    LibmeshPetscCall(VecZeroEntries(_hc_cross_derivative_rhs));
+    LibmeshPetscCall(VecZeroEntries(_hc_added_heat_rhs));
+    LibmeshPetscCall(VecZeroEntries(_hc_axial_heat_conduction_rhs));
+    LibmeshPetscCall(VecZeroEntries(_hc_radial_heat_conduction_rhs));
+    LibmeshPetscCall(VecZeroEntries(_hc_sweep_enthalpy_rhs));
 
-    MatZeroEntries(_hc_sys_h_mat);
-    VecZeroEntries(_hc_sys_h_rhs);
+    LibmeshPetscCall(MatZeroEntries(_hc_sys_h_mat));
+    LibmeshPetscCall(VecZeroEntries(_hc_sys_h_rhs));
 
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
@@ -845,21 +846,24 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           PetscScalar value_vec_tt =
               -1.0 * _TR * alpha * (*_rho_soln)(node_in) * (*_h_soln)(node_in)*volume / _dt;
           PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
-          VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES);
+          LibmeshPetscCall(
+              VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));
         }
         else
         {
           PetscInt row_tt = i_ch + _n_channels * iz_ind;
           PetscInt col_tt = i_ch + _n_channels * (iz_ind - 1);
           PetscScalar value_tt = _TR * alpha * (*_rho_soln)(node_in)*volume / _dt;
-          MatSetValues(_hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
         }
 
         // Adding diagonal elements
         PetscInt row_tt = i_ch + _n_channels * iz_ind;
         PetscInt col_tt = i_ch + _n_channels * iz_ind;
         PetscScalar value_tt = _TR * (1.0 - alpha) * (*_rho_soln)(node_out)*volume / _dt;
-        MatSetValues(_hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES);
+        LibmeshPetscCall(MatSetValues(
+            _hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
 
         // Adding RHS elements
         PetscScalar rho_old_interp = computeInterpolatedValue(
@@ -868,33 +872,39 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             _h_soln->old(node_out), _h_soln->old(node_in), _interpolation_scheme, Pe);
         PetscScalar value_vec_tt = _TR * rho_old_interp * h_old_interp * volume / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
-        VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES);
+        LibmeshPetscCall(
+            VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));
 
         /// Advective derivative term
         if (iz == first_node)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscScalar value_at = alpha * (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
-          VecSetValues(_hc_advective_derivative_rhs, 1, &row_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(
+              VecSetValues(_hc_advective_derivative_rhs, 1, &row_at, &value_at, ADD_VALUES));
 
           value_at = alpha * (*_mdot_soln)(node_out) - (1 - alpha) * (*_mdot_soln)(node_in);
           PetscInt col_at = i_ch + _n_channels * iz_ind;
-          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
 
           value_at = (1 - alpha) * (*_mdot_soln)(node_out);
           col_at = i_ch + _n_channels * (iz_ind + 1);
-          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
         }
         else if (iz == last_node)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscScalar value_at = 1.0 * (*_mdot_soln)(node_out);
           PetscInt col_at = i_ch + _n_channels * iz_ind;
-          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
 
           value_at = -1.0 * (*_mdot_soln)(node_in);
           col_at = i_ch + _n_channels * (iz_ind - 1);
-          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
         }
         else
         {
@@ -903,15 +913,18 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
           PetscScalar value_at = -alpha * (*_mdot_soln)(node_in);
           col_at = i_ch + _n_channels * (iz_ind - 1);
-          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
 
           value_at = alpha * (*_mdot_soln)(node_out) - (1 - alpha) * (*_mdot_soln)(node_in);
           col_at = i_ch + _n_channels * iz_ind;
-          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
 
           value_at = (1 - alpha) * (*_mdot_soln)(node_out);
           col_at = i_ch + _n_channels * (iz_ind + 1);
-          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
         }
 
         /// Axial heat conduction
@@ -945,18 +958,19 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscInt col_at = i_ch + _n_channels * iz_ind;
           PetscScalar value_at = diff_up * S_up / dz_up + diff_down * S_down / dz_down;
-          MatSetValues(
-              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
 
           // Bottom value
           value_at = 1.0 * diff_down * S_down / dz_down * (*_h_soln)(node_bottom);
-          VecSetValues(_hc_axial_heat_conduction_rhs, 1, &row_at, &value_at, ADD_VALUES);
+          LibmeshPetscCall(
+              VecSetValues(_hc_axial_heat_conduction_rhs, 1, &row_at, &value_at, ADD_VALUES));
 
           // Top value
           col_at = i_ch + _n_channels * (iz_ind + 1);
           value_at = -diff_up * S_up / dz_up;
-          MatSetValues(
-              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
         }
         else if (iz == last_node)
         {
@@ -975,14 +989,14 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscInt col_at = i_ch + _n_channels * iz_ind;
           PetscScalar value_at = diff_down * S_down / dz_down;
-          MatSetValues(
-              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
 
           // Bottom value
           col_at = i_ch + _n_channels * (iz_ind - 1);
           value_at = -diff_down * S_down / dz_down;
-          MatSetValues(
-              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
 
           // Outflow derivative
           /// TODO: Current axial derivative is zero - check if outflow conditions may make a difference
@@ -1013,20 +1027,20 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscInt col_at = i_ch + _n_channels * iz_ind;
           PetscScalar value_at = diff_up * S_up / dz_up + diff_down * S_down / dz_down;
-          MatSetValues(
-              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
 
           // Bottom value
           col_at = i_ch + _n_channels * (iz_ind - 1);
           value_at = -diff_down * S_down / dz_down;
-          MatSetValues(
-              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
 
           // Top value
           col_at = i_ch + _n_channels * (iz_ind + 1);
           value_at = -diff_up * S_up / dz_up;
-          MatSetValues(
-              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
         }
 
         /// Radial Terms
@@ -1051,7 +1065,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
                                          _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                          _Wij(i_gap, cross_index) * h_star;
               PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
-              VecSetValues(_hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
+              LibmeshPetscCall(VecSetValues(
+                  _hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES));
             }
             else
             {
@@ -1059,14 +1074,16 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
                                      _Wij(i_gap, cross_index);
               PetscInt row_ct = i_ch + _n_channels * iz_ind;
               PetscInt col_ct = ii_ch + _n_channels * (iz_ind - 1);
-              MatSetValues(_hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
+              LibmeshPetscCall(MatSetValues(
+                  _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
             }
             PetscScalar value_ct = (1.0 - alpha) *
                                    _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                    _Wij(i_gap, cross_index);
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
             PetscInt col_ct = ii_ch + _n_channels * iz_ind;
-            MatSetValues(_hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
+            LibmeshPetscCall(MatSetValues(
+                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
           }
           else if (_Wij(i_gap, cross_index) < 0.0) // _Wij=0 operations not necessary
           {
@@ -1077,7 +1094,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
                                          _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                          _Wij(i_gap, cross_index) * h_star;
               PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
-              VecSetValues(_hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
+              LibmeshPetscCall(VecSetValues(
+                  _hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES));
             }
             else
             {
@@ -1085,14 +1103,16 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
                                      _Wij(i_gap, cross_index);
               PetscInt row_ct = i_ch + _n_channels * iz_ind;
               PetscInt col_ct = jj_ch + _n_channels * (iz_ind - 1);
-              MatSetValues(_hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
+              LibmeshPetscCall(MatSetValues(
+                  _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
             }
             PetscScalar value_ct = (1.0 - alpha) *
                                    _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                    _Wij(i_gap, cross_index);
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
             PetscInt col_ct = jj_ch + _n_channels * iz_ind;
-            MatSetValues(_hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
+            LibmeshPetscCall(MatSetValues(
+                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
           }
 
           // Turbulent cross flows
@@ -1103,45 +1123,46 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             value_vec_ct += alpha * (*_h_soln)(node_in_j)*_WijPrime(i_gap, cross_index);
             value_vec_ct += alpha * (*_h_soln)(node_in_i)*_WijPrime(i_gap, cross_index);
             PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
-            VecSetValues(_hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
+            LibmeshPetscCall(
+                VecSetValues(_hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES));
           }
           else
           {
             PetscScalar value_center_ct = 2.0 * alpha * _WijPrime(i_gap, cross_index);
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
             PetscInt col_ct = i_ch + _n_channels * (iz_ind - 1);
-            MatSetValues(
-                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES);
+            LibmeshPetscCall(MatSetValues(
+                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES));
 
             PetscScalar value_left_ct = -1.0 * alpha * _WijPrime(i_gap, cross_index);
             row_ct = i_ch + _n_channels * iz_ind;
             col_ct = jj_ch + _n_channels * (iz_ind - 1);
-            MatSetValues(
-                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES);
+            LibmeshPetscCall(MatSetValues(
+                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES));
 
             PetscScalar value_right_ct = -1.0 * alpha * _WijPrime(i_gap, cross_index);
             row_ct = i_ch + _n_channels * iz_ind;
             col_ct = ii_ch + _n_channels * (iz_ind - 1);
-            MatSetValues(
-                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES);
+            LibmeshPetscCall(MatSetValues(
+                _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES));
           }
           PetscScalar value_center_ct = 2.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
           PetscInt row_ct = i_ch + _n_channels * iz_ind;
           PetscInt col_ct = i_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES));
 
           PetscScalar value_left_ct = -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
           row_ct = i_ch + _n_channels * iz_ind;
           col_ct = jj_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES));
 
           PetscScalar value_right_ct = -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
           row_ct = i_ch + _n_channels * iz_ind;
           col_ct = ii_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES));
 
           /// Radial heat conduction
           auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
@@ -1179,23 +1200,23 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
           row_ct = ii_ch + _n_channels * iz_ind;
           col_ct = ii_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
 
           row_ct = jj_ch + _n_channels * iz_ind;
           col_ct = jj_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
 
           row_ct = ii_ch + _n_channels * iz_ind;
           col_ct = jj_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES));
 
           row_ct = jj_ch + _n_channels * iz_ind;
           col_ct = ii_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES);
+          LibmeshPetscCall(MatSetValues(
+              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES));
           counter++;
         }
 
@@ -1282,17 +1303,19 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           {
             PetscInt row_sh = i_ch + _n_channels * iz_ind;
             PetscScalar value_hs = -sweep_enthalpy;
-            VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_sh, &value_hs, ADD_VALUES);
+            LibmeshPetscCall(
+                VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_sh, &value_hs, ADD_VALUES));
           }
           else
           {
             PetscInt row_sh = i_ch + _n_channels * (iz_ind - 1);
             PetscInt col_sh = i_ch + _n_channels * (iz_ind - 1);
-            MatSetValues(_hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &wsweep_out, ADD_VALUES);
+            LibmeshPetscCall(MatSetValues(
+                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &wsweep_out, ADD_VALUES));
             PetscInt col_sh_l = sweep_in + _n_channels * (iz_ind - 1);
             PetscScalar neg_sweep_in = -1.0 * wsweep_in;
-            MatSetValues(
-                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh_l, &(neg_sweep_in), ADD_VALUES);
+            LibmeshPetscCall(MatSetValues(
+                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh_l, &(neg_sweep_in), ADD_VALUES));
           }
         }
 
@@ -1305,53 +1328,60 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           added_enthalpy = 0.0;
         added_enthalpy += computeAddedHeatDuct(i_ch, iz);
         PetscInt row_vec_ht = i_ch + _n_channels * iz_ind;
-        VecSetValues(_hc_added_heat_rhs, 1, &row_vec_ht, &added_enthalpy, ADD_VALUES);
+        LibmeshPetscCall(
+            VecSetValues(_hc_added_heat_rhs, 1, &row_vec_ht, &added_enthalpy, ADD_VALUES));
       }
     }
     /// Assembling system
-    MatAssemblyBegin(_hc_time_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_time_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_hc_advective_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_advective_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_hc_cross_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_cross_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_hc_axial_heat_conduction_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_axial_heat_conduction_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_hc_radial_heat_conduction_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_radial_heat_conduction_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_hc_sweep_enthalpy_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sweep_enthalpy_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+    LibmeshPetscCall(MatAssemblyBegin(_hc_time_derivative_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_time_derivative_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_advective_derivative_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_advective_derivative_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_cross_derivative_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_cross_derivative_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_axial_heat_conduction_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_axial_heat_conduction_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_radial_heat_conduction_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_radial_heat_conduction_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sweep_enthalpy_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sweep_enthalpy_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     /// Add all matrices together
-    MatAXPY(_hc_sys_h_mat, 1.0, _hc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_hc_sys_h_mat, 1.0, _hc_advective_derivative_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_hc_sys_h_mat, 1.0, _hc_cross_derivative_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_hc_sys_h_mat, 1.0, _hc_axial_heat_conduction_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_hc_sys_h_mat, 1.0, _hc_radial_heat_conduction_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_hc_sys_h_mat, 1.0, _hc_sweep_enthalpy_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+    LibmeshPetscCall(
+        MatAXPY(_hc_sys_h_mat, 1.0, _hc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(
+        MatAXPY(_hc_sys_h_mat, 1.0, _hc_advective_derivative_mat, DIFFERENT_NONZERO_PATTERN));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(
+        MatAXPY(_hc_sys_h_mat, 1.0, _hc_cross_derivative_mat, DIFFERENT_NONZERO_PATTERN));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(
+        MatAXPY(_hc_sys_h_mat, 1.0, _hc_axial_heat_conduction_mat, DIFFERENT_NONZERO_PATTERN));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(
+        MatAXPY(_hc_sys_h_mat, 1.0, _hc_radial_heat_conduction_mat, DIFFERENT_NONZERO_PATTERN));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(
+        MatAXPY(_hc_sys_h_mat, 1.0, _hc_sweep_enthalpy_mat, DIFFERENT_NONZERO_PATTERN));
+    LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     if (_verbose_subchannel)
       _console << "Block: " << iblock << " - Enthalpy conservation matrix assembled" << std::endl;
     // RHS
-    VecAXPY(_hc_sys_h_rhs, 1.0, _hc_time_derivative_rhs);
-    VecAXPY(_hc_sys_h_rhs, 1.0, _hc_advective_derivative_rhs);
-    VecAXPY(_hc_sys_h_rhs, 1.0, _hc_cross_derivative_rhs);
-    VecAXPY(_hc_sys_h_rhs, 1.0, _hc_added_heat_rhs);
-    VecAXPY(_hc_sys_h_rhs, 1.0, _hc_axial_heat_conduction_rhs);
-    VecAXPY(_hc_sys_h_rhs, 1.0, _hc_radial_heat_conduction_rhs);
-    VecAXPY(_hc_sys_h_rhs, 1.0, _hc_sweep_enthalpy_rhs);
+    LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_time_derivative_rhs));
+    LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_advective_derivative_rhs));
+    LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_cross_derivative_rhs));
+    LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_added_heat_rhs));
+    LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_axial_heat_conduction_rhs));
+    LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_radial_heat_conduction_rhs));
+    LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_sweep_enthalpy_rhs));
 
     if (_segregated_bool || (!_monolithic_thermal_bool))
     {
@@ -1359,17 +1389,17 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       KSP ksploc;
       PC pc;
       Vec sol;
-      VecDuplicate(_hc_sys_h_rhs, &sol);
-      KSPCreate(PETSC_COMM_WORLD, &ksploc);
-      KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat);
-      KSPGetPC(ksploc, &pc);
-      PCSetType(pc, PCJACOBI);
-      KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
-      KSPSetFromOptions(ksploc);
-      KSPSolve(ksploc, _hc_sys_h_rhs, sol);
+      LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
+      LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+      LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
+      LibmeshPetscCall(KSPGetPC(ksploc, &pc));
+      LibmeshPetscCall(PCSetType(pc, PCJACOBI));
+      LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+      LibmeshPetscCall(KSPSetFromOptions(ksploc));
+      LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
       // VecView(sol, PETSC_VIEWER_STDOUT_WORLD);
       PetscScalar * xx;
-      VecGetArray(sol, &xx);
+      LibmeshPetscCall(VecGetArray(sol, &xx));
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
         auto iz_ind = iz - first_node;
@@ -1379,8 +1409,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           _h_soln->set(node_out, xx[iz_ind * _n_channels + i_ch]);
         }
       }
-      KSPDestroy(&ksploc);
-      VecDestroy(&sol);
+      LibmeshPetscCall(KSPDestroy(&ksploc));
+      LibmeshPetscCall(VecDestroy(&sol));
     }
   }
 }
