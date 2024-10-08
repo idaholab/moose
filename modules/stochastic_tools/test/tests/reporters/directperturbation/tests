@@ -40,11 +40,11 @@
     []
   []
   [relative_sensitivity]
-      type = JSONDiff
-      input = dp_main.i
-      cli_args = 'Reporters/sensitivities/relative_sensitivity=true'
-      jsondiff = dp_main_out.json
-      allow_test_objects = true
-      requirement = 'The system shall support the ability to compute direct perturbation-based relative sensitivity values.'
-    []
+    type = JSONDiff
+    input = dp_main.i
+    cli_args = 'Reporters/sensitivities/relative_sensitivity=true Outputs/file_base=relative_sens'
+    jsondiff = relative_sens.json
+    allow_test_objects = true
+    requirement = 'The system shall support the ability to compute direct perturbation-based relative sensitivity values.'
+  []
 []

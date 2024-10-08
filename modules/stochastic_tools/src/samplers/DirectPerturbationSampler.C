@@ -41,7 +41,7 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
 {
   // TODO: we need to add capability to do absolute intervals too, in case there is a material
   // property with a nominal value of 0.0
-  for (const interval : _relative_intervals)
+  for (const auto interval : _relative_intervals)
     if (interval <= 0.0 || interval >= 1.0)
       paramError("relative_perturbation_intervals",
                  "The relative perturbation interval must be between 0 and 1!");

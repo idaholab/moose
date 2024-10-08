@@ -1,0 +1,61 @@
+{
+    "reporters": {
+        "sensitivities": {
+            "type": "DirectPerturbationReporter",
+            "values": {
+                "storage_data:const:f1": {
+                    "type": "DirectPerturbationSensitivity<double>"
+                },
+                "storage_data:const:f2": {
+                    "type": "DirectPerturbationSensitivity<double>"
+                },
+                "storage_data:const:f3": {
+                    "type": "DirectPerturbationSensitivity<double>"
+                },
+                "storage_data:const:f_combined": {
+                    "type": "DirectPerturbationSensitivity<std::vector<double>>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "sensitivities": {
+                "storage_data:const:f1": [
+                    0.0714285714285694,
+                    0.2857142857142865,
+                    0.6428571428571423
+                ],
+                "storage_data:const:f2": [
+                    0.125,
+                    0.3125000000000009,
+                    0.5625
+                ],
+                "storage_data:const:f3": [
+                    0.14000000000000057,
+                    0.3200000000000003,
+                    0.5399999999999991
+                ],
+                "storage_data:const:f_combined": [
+                    [
+                        0.0714285714285694,
+                        0.125,
+                        0.14000000000000057
+                    ],
+                    [
+                        0.2857142857142865,
+                        0.3125000000000009,
+                        0.3200000000000003
+                    ],
+                    [
+                        0.6428571428571423,
+                        0.5625,
+                        0.5399999999999991
+                    ]
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}
