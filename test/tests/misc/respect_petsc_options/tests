@@ -2,7 +2,7 @@
   issues = '#28380 #28354'
   design = 'Executioner.md'
   [take_vec_mat_types]
-    requirement = 'The system shall vector and matrix types from the PETSc command line option parameters within an input file.'
+    requirement = 'The system shall set vector and matrix types from the PETSc command line option parameters within an input file.'
     input = test.i
     csvdiff = test_out.csv
     type = CSVDiff

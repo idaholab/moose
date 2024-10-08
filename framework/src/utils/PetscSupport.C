@@ -523,6 +523,7 @@ petscSetDefaults(FEProblemBase & problem)
     NonlinearSystemBase & nl = problem.getNonlinearSystemBase(nl_index);
     auto * const petsc_solver = cast_ptr<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
     auto * const sys_matrix = petsc_solver->system().request_matrix("System Matrix");
+    // Prefix the name of the system matrix with the name of the system
     if (sys_matrix && problem.solverParams()._type != Moose::ST_JFNK)
     {
       auto * const petsc_sys_matrix = cast_ptr<PetscMatrix<Number> *>(sys_matrix);
@@ -957,12 +958,15 @@ setSinglePetscOption(const std::string & name,
   auto check_problem = [problem, &lower_case_name]()
   {
     if (!problem)
-      mooseError("Setting the option '",
-                 lower_case_name,
-                 "' requires passing a 'problem' parameter. Check with your application developer "
-                 "to have them update their code");
+      mooseError(
+          "Setting the option '",
+          lower_case_name,
+          "' requires passing a 'problem' parameter. Contact a developer of your application "
+          "to have them update their code. If in doubt, reach out to the MOOSE team on Github "
+          "discussions");
   };
 
+  // Select vector type from user-passed PETSc options
   if (lower_case_name.find("-vec_type") != std::string::npos)
   {
     check_problem();
@@ -982,6 +986,7 @@ setSinglePetscOption(const std::string & name,
       LibmeshPetscCall2(comm, VecSetFromOptions(petsc_vec->vec()));
     }
   }
+  // Select matrix type from user-passed PETSc options
   else if (lower_case_name.find("mat_type") != std::string::npos)
   {
     check_problem();
