@@ -24,8 +24,14 @@ public:
   /// Return the requested perturbation method
   const MooseEnum & perturbationMethod() const { return _perturbation_method; }
 
-  /// Return the perturbation interval for a given index
-  Real getInterval(const Real param_index) const;
+  /// Return the absolute perturbation interval for a given index
+  Real getAbsoluteInterval(const Real param_index) const;
+
+  /// Return the relative perturbation interval for a given index
+  Real getRelativeInterval(const Real param_index) const;
+
+  /// Return the nominal value of the parameter
+  Real getNominalValue(const Real param_index) const;
 
 protected:
   /// Return the sample for the given row and column
