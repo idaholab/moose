@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMDataCollection.h"
-#include "mfem.hpp"
 
 /**
  * Class for output information saved in MFEM ParaViewDataCollections
@@ -12,10 +11,10 @@ public:
 
   MFEMParaViewDataCollection(const InputParameters & parameters);
 
-  std::shared_ptr<mfem::DataCollection>
-  createDataCollection(const std::string & collection_name) const override;
+  virtual mfem::DataCollection & getDataCollection() override { return _pv_dc; }
 
 protected:
+  mfem::ParaViewDataCollection _pv_dc;
   bool _high_order_output;
   unsigned int _refinements;
   const mfem::VTKFormat _vtk_format;
