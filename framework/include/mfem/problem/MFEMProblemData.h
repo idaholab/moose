@@ -2,7 +2,6 @@
 #include "equation_system.h"
 #include "MFEMContainers.h"
 #include "PropertyManager.h"
-#include "outputs.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -18,7 +17,6 @@ public:
   platypus::PropertyManager _properties;
   platypus::BCMap _bc_map;
   platypus::Coefficients _coefficients;
-  platypus::Outputs _outputs;
 
   std::unique_ptr<mfem::ODESolver> _ode_solver{nullptr};
   mfem::BlockVector _f;
