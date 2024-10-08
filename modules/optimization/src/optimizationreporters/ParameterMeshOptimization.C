@@ -188,17 +188,18 @@ ParameterMeshOptimization::setICsandBounds()
                "There must be an upper bound associated with each parameter.");
 
   // error checking that initial conditions and bounds are only read from a single location
-  if (!initial_condition_mesh_variable[0].empty() && !constant_group_initial_condition.empty())
+  if (isParamValid("initial_condition_mesh_variable") &&
+      isParamValid("constant_group_initial_condition"))
     paramError("constant_group_initial_condition",
                "Initial conditions for all parameter groups can only be defined by "
                "initial_condition_mesh_variable or "
                "constant_group_initial_condition but not both.");
-  else if (!lower_bound_mesh_variable[0].empty() && !constant_group_lower_bounds.empty())
+  else if (isParamValid("lower_bound_mesh_variable") && isParamValid("constant_group_lower_bounds"))
     paramError(
         "constant_group_lower_bounds",
         "Lower bounds for all parameter groups can only be defined by lower_bound_mesh_variable or "
         "constant_group_lower_bounds but not both.");
-  else if (!upper_bound_mesh_variable[0].empty() && !constant_group_upper_bounds.empty())
+  else if (isParamValid("upper_bound_mesh_variable") && isParamValid("constant_group_upper_bounds"))
     paramError(
         "constant_group_upper_bounds",
         "Upper bounds for all parameter groups can only be defined by upper_bound_mesh_variable or "
@@ -206,8 +207,9 @@ ParameterMeshOptimization::setICsandBounds()
 
   // Make sure they did not specify too many timesteps
   if (isParamValid("exodus_timesteps_for_parameter_mesh_variable") &&
-      ((lower_bound_mesh_variable[0].empty() + upper_bound_mesh_variable[0].empty() +
-        initial_condition_mesh_variable[0].empty()) == 3))
+      (!isParamValid("lower_bound_mesh_variable") + !isParamValid("upper_bound_mesh_variable") +
+           !isParamValid("initial_condition_mesh_variable") ==
+       3))
     paramError("\"exodus_timesteps_for_parameter_mesh_variable\" should only be specified if "
                "reading values from a mesh.");
   else if (exodus_timestep.size() != ntimes && exodus_timestep.size() != 1)
@@ -218,51 +220,57 @@ ParameterMeshOptimization::setICsandBounds()
                "\"num_parameter_times\" timesteps.");
 
   _ndof = 0;
-  for (const auto & i : make_range(_nparams))
+  for (const auto & param_id : make_range(_nparams))
   {
     // store off all the variable names that you might want to read from the mesh
     std::vector<std::string> var_names;
-    if (!initial_condition_mesh_variable[i].empty())
-      var_names.push_back(initial_condition_mesh_variable[i]);
-    if (!lower_bound_mesh_variable[i].empty())
-      var_names.push_back(lower_bound_mesh_variable[i]);
-    if (!upper_bound_mesh_variable[i].empty())
-      var_names.push_back(upper_bound_mesh_variable[i]);
+    if (isParamValid("initial_condition_mesh_variable"))
+      var_names.push_back(initial_condition_mesh_variable[param_id]);
+    if (isParamValid("lower_bound_mesh_variable"))
+      var_names.push_back(lower_bound_mesh_variable[param_id]);
+    if (isParamValid("upper_bound_mesh_variable"))
+      var_names.push_back(upper_bound_mesh_variable[param_id]);
 
-    const std::string family = families.size() > 1 ? families[i] : families[0];
-    const std::string order = orders.size() > 1 ? orders[i] : orders[0];
+    const std::string family = families.size() > 1 ? families[param_id] : families[0];
+    const std::string order = orders.size() > 1 ? orders[param_id] : orders[0];
     const FEType fetype(Utility::string_to_enum<Order>(order),
                         Utility::string_to_enum<FEFamily>(family));
 
-    ParameterMesh pmesh(fetype, meshes[i], var_names);
-    _nvalues[i] = pmesh.size() * ntimes;
-    _ndof += _nvalues[i];
+    ParameterMesh pmesh(fetype, meshes[param_id], var_names);
+    _nvalues[param_id] = pmesh.size() * ntimes;
+    _ndof += _nvalues[param_id];
 
     // read and assign initial conditions
     const Real defaultIC = 0.0;
-    const Real constant_valueIC(
-        constant_group_initial_condition.empty() ? defaultIC : constant_group_initial_condition[i]);
-    std::vector<Real> initial_condition = parseData(
-        exodus_timestep, pmesh, constant_valueIC, initial_condition_mesh_variable[i], ntimes);
-    _parameters[i]->assign(initial_condition.begin(), initial_condition.end());
+    const Real constant_valueIC(isParamValid("constant_group_initial_condition")
+                                    ? constant_group_initial_condition[param_id]
+                                    : defaultIC);
+    std::vector<Real> initial_condition = parseData(exodus_timestep,
+                                                    pmesh,
+                                                    constant_valueIC,
+                                                    initial_condition_mesh_variable[param_id],
+                                                    ntimes);
+    _parameters[param_id]->assign(initial_condition.begin(), initial_condition.end());
 
     // read and assign lower bound
     const Real defaultLB = std::numeric_limits<Real>::lowest();
-    const Real constant_valueLB(
-        constant_group_lower_bounds.empty() ? defaultLB : constant_group_lower_bounds[i]);
-    std::vector<Real> lower_bound =
-        parseData(exodus_timestep, pmesh, constant_valueLB, lower_bound_mesh_variable[i], ntimes);
+    const Real constant_valueLB(isParamValid("constant_group_lower_bounds")
+                                    ? constant_group_lower_bounds[param_id]
+                                    : defaultLB);
+    std::vector<Real> lower_bound = parseData(
+        exodus_timestep, pmesh, constant_valueLB, lower_bound_mesh_variable[param_id], ntimes);
     _lower_bounds.insert(_lower_bounds.end(), lower_bound.begin(), lower_bound.end());
 
     // read and assign upper bound
     const Real defaultUB = std::numeric_limits<Real>::max();
-    const Real constant_valueUB(
-        constant_group_upper_bounds.empty() ? defaultUB : constant_group_upper_bounds[i]);
-    std::vector<Real> upper_bound =
-        parseData(exodus_timestep, pmesh, constant_valueUB, upper_bound_mesh_variable[i], ntimes);
+    const Real constant_valueUB(isParamValid("constant_group_upper_bounds")
+                                    ? constant_group_upper_bounds[param_id]
+                                    : defaultUB);
+    std::vector<Real> upper_bound = parseData(
+        exodus_timestep, pmesh, constant_valueUB, upper_bound_mesh_variable[param_id], ntimes);
     _upper_bounds.insert(_upper_bounds.end(), upper_bound.begin(), upper_bound.end());
 
     // resize gradient vector to be filled later
-    _gradients[i]->resize(_nvalues[i]);
+    _gradients[param_id]->resize(_nvalues[param_id]);
   }
 }
