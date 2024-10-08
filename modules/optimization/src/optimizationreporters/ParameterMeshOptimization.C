@@ -204,7 +204,7 @@ ParameterMeshOptimization::setICsandBounds()
       initial_condition = parseExodusData(
           exodus_timestep, pmesh, initial_condition_mesh_variable[param_id], ntimes);
     else
-      initial_condition = fillParamsVector("initial_condition", 0, param_id);
+      initial_condition = parseInputData("initial_condition", 0, param_id);
 
     _parameters[param_id]->assign(initial_condition.begin(), initial_condition.end());
 
@@ -214,7 +214,7 @@ ParameterMeshOptimization::setICsandBounds()
       lower_bound =
           parseExodusData(exodus_timestep, pmesh, lower_bound_mesh_variable[param_id], ntimes);
     else
-      lower_bound = fillParamsVector("lower_bounds", std::numeric_limits<Real>::lowest(), param_id);
+      lower_bound = parseInputData("lower_bounds", std::numeric_limits<Real>::lowest(), param_id);
 
     _lower_bounds.insert(_lower_bounds.end(), lower_bound.begin(), lower_bound.end());
 
@@ -224,7 +224,7 @@ ParameterMeshOptimization::setICsandBounds()
       upper_bound =
           parseExodusData(exodus_timestep, pmesh, upper_bound_mesh_variable[param_id], ntimes);
     else
-      upper_bound = fillParamsVector("upper_bounds", std::numeric_limits<Real>::max(), param_id);
+      upper_bound = parseInputData("upper_bounds", std::numeric_limits<Real>::max(), param_id);
 
     _upper_bounds.insert(_upper_bounds.end(), upper_bound.begin(), upper_bound.end());
 

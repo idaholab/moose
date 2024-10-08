@@ -64,11 +64,11 @@ OptimizationReporter::setICsandBounds()
   {
     _gradients[param_id]->resize(_nvalues[param_id]);
 
-    std::vector<Real> ic(fillParamsVector("initial_condition", 0, param_id));
+    std::vector<Real> ic(parseInputData("initial_condition", 0, param_id));
     std::vector<Real> lb(
-        fillParamsVector("lower_bounds", std::numeric_limits<Real>::lowest(), param_id));
+        parseInputData("lower_bounds", std::numeric_limits<Real>::lowest(), param_id));
     std::vector<Real> ub(
-        fillParamsVector("upper_bounds", std::numeric_limits<Real>::max(), param_id));
+        parseInputData("upper_bounds", std::numeric_limits<Real>::max(), param_id));
 
     _lower_bounds.insert(_lower_bounds.end(), lb.begin(), lb.end());
     _upper_bounds.insert(_upper_bounds.end(), ub.begin(), ub.end());

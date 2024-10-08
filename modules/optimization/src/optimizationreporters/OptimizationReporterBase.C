@@ -121,9 +121,9 @@ OptimizationReporterBase::getUpperBound(dof_id_type i) const
 }
 
 std::vector<Real>
-OptimizationReporterBase::fillParamsVector(std::string type,
-                                           Real default_value,
-                                           unsigned int param_id) const
+OptimizationReporterBase::parseInputData(std::string type,
+                                         Real default_value,
+                                         unsigned int param_id) const
 {
   // fill with default values
   std::vector<Real> parsed_data_id(_nvalues[param_id], default_value);
