@@ -115,7 +115,8 @@ protected:
   /**
    * Function to fill vector with parameters.
    */
-  std::vector<Real> fillParamsVector(std::string type, Real default_value) const;
+  std::vector<Real>
+  fillParamsVector(std::string type, Real default_value, unsigned int param_id) const;
 
   /// Sets the initial conditions and bounds right before it is needed.
   virtual void setICsandBounds(){};
