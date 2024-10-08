@@ -22,11 +22,8 @@ RANSYPlusAux::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-<<<<<<< HEAD
   params.addParam<MooseFunctorName>("k", "Turbulent kinetic energy functor.");
   params.deprecateParam("k", NS::TKE, "01/01/2025");
-=======
->>>>>>> 1fd9f6c4b6 (solving issues in RANSYPlusAux.C, INSFVTKEDSourceSink.C, and INSFVTKESourceSink.C for compiling after rebasing Refs #28130)
   params.addParam<MooseFunctorName>(NS::TKE, "Turbulent kinetic energy functor.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Fluid density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
@@ -109,9 +106,11 @@ RANSYPlusAux::computeValue()
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
       y_plus_vec.push_back(raw_value(y_plus));
-
-      // Return average of y+ for cells with multiple wall faces
-      return std::accumulate(y_plus_vec.begin(), y_plus_vec.end(), 0.0) / y_plus_vec.size();
     }
-    else return 0.;
+
+    // Return average of y+ for cells with multiple wall faces
+    return std::accumulate(y_plus_vec.begin(), y_plus_vec.end(), 0.0) / y_plus_vec.size();
   }
+  else
+    return 0.;
+}

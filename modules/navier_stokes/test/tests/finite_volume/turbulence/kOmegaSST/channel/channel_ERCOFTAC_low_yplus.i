@@ -227,7 +227,7 @@ vortex_stretching_modficiation = false
     variable = TKESD
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t_k_omega'
@@ -284,7 +284,7 @@ vortex_stretching_modficiation = false
     type = INSFVMixingLengthTKESDBC
     boundary = 'left'
     variable = TKESD
-    k = TKE
+    tke = TKE
     characteristic_length = '${fparse 2*H}'
   []
   [walls_mu_t]
@@ -296,7 +296,7 @@ vortex_stretching_modficiation = false
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t_k_omega'
-    k = TKE
+    tke = TKE
   []
   [sym-u]
     type = INSFVSymmetryVelocityBC
@@ -391,7 +391,7 @@ vortex_stretching_modficiation = false
   [compute_F1]
     type = kOmegaSSTF1BlendingAux
     variable = F1
-    k = TKE
+    tke = TKE
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
@@ -400,7 +400,7 @@ vortex_stretching_modficiation = false
   [compute_F2]
     type = kOmegaSSTF2BlendingAux
     variable = F2
-    k = TKE
+    tke = TKE
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
@@ -421,7 +421,7 @@ vortex_stretching_modficiation = false
   [compute_mu_t_k_omega]
     type = kOmegaSSTViscosityAux
     variable = 'mu_t_k_omega'
-    k = TKE
+    tke = TKE
     omega = TKESD
     mu = ${mu}
     rho = ${rho}

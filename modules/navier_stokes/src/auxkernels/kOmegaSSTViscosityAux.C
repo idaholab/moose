@@ -252,13 +252,10 @@ kOmegaSSTViscosityAux::computeValue()
 
     if (wall_bounded)
     {
-
       const auto & elem_distances = _dist[&elem];
       const auto min_wall_distance_iterator =
           (std::min_element(elem_distances.begin(), elem_distances.end()));
       const auto min_wall_dist = *min_wall_distance_iterator;
-      // const size_t minIndex = std::distance(elem_distances.begin(), min_wall_distance_iterator);
-      // const auto loc_normal = _face_infos[&elem][minIndex]->normal();
 
       ADReal y_plus;
       y_plus = std::pow(_C_mu, 0.25) * min_wall_dist * std::sqrt(TKE) * rho / mu;
@@ -266,10 +263,9 @@ kOmegaSSTViscosityAux::computeValue()
       ADReal S;
       if (y_plus >= 11.225)
       {
-
         ADReal u_tau;
         u_tau = std::sqrt(std::sqrt(_C_mu) * TKE);
-        S = u_tau / (NS::von_karman_constant * min_wall_dist); //(rho * u_tau)
+        S = u_tau / (NS::von_karman_constant * min_wall_dist);
         symmetric_strain_tensor_norm = S;
       }
     }

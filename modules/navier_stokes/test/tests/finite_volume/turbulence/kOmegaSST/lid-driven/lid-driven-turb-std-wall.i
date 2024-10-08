@@ -223,7 +223,7 @@ pressure_tag = "pressure_grad"
     variable = 'TKESD'
     u = vel_x
     v = vel_y
-    k = TKE
+    tke =  TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t_k_omega'
@@ -266,7 +266,7 @@ pressure_tag = "pressure_grad"
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t_k_omega'
-    k = TKE
+    tke =  TKE
     wall_treatment = ${wall_treatment}
   []
 []
@@ -314,7 +314,7 @@ pressure_tag = "pressure_grad"
   [compute_F1]
     type = kOmegaSSTF1BlendingAux
     variable = F1
-    k = TKE
+    tke =  TKE
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
@@ -323,7 +323,7 @@ pressure_tag = "pressure_grad"
   [compute_F2]
     type = kOmegaSSTF2BlendingAux
     variable = F2
-    k = TKE
+    tke =  TKE
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
@@ -344,7 +344,7 @@ pressure_tag = "pressure_grad"
   [compute_mu_t_k_omega]
     type = kOmegaSSTViscosityAux
     variable = 'mu_t_k_omega'
-    k = TKE
+    tke =  TKE
     omega = TKESD
     mu = ${mu}
     rho = ${rho}

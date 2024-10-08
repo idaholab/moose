@@ -236,7 +236,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = TKESD
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t_k_omega'
@@ -286,13 +286,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     v = vel_y
     intensity = ${intensity}
   []
-  # [inlet_TKESD]
-  #   type = INSFVMixingLengthTKEDBC
-  #   boundary = 'left'
-  #   variable = TKESD
-  #   k = TKE
-  #   characteristic_length = '${fparse 2*H}'
-  # []
   [inlet_TKESD]
     type = FVDirichletBC
     boundary = 'left'
@@ -308,7 +301,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t_k_omega'
-    k = TKE
+    tke = TKE
     wall_treatment = ${wall_treatment}
   []
 []
@@ -351,7 +344,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [compute_F1]
     type = kOmegaSSTF1BlendingAux
     variable = F1
-    k = TKE
+    tke = TKE
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
@@ -360,7 +353,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [compute_F2]
     type = kOmegaSSTF2BlendingAux
     variable = F2
-    k = TKE
+    tke = TKE
     omega = TKESD
     rho = ${rho}
     mu = ${mu}
@@ -381,7 +374,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [compute_mu_t_k_omega]
     type = kOmegaSSTViscosityAux
     variable = 'mu_t_k_omega'
-    k = TKE
+    tke = TKE
     omega = TKESD
     mu = ${mu}
     rho = ${rho}
