@@ -78,7 +78,7 @@ HeatConductionFV::addFVKernels()
     const std::string kernel_type = "FVBodyForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    const auto functor_name = getParam<MooseFunctorName>("heat_source_functor");
+    const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
     if (MooseUtils::parsesToReal(functor_name))
       params.set<Real>("value") = std::stod(functor_name);
     else if (getProblem().hasFunction(functor_name))

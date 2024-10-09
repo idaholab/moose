@@ -32,8 +32,8 @@ protected:
   const ADMaterialProperty<Real> * const _htc;
 
   /// Far-field temperature functor
-  const Moose::Functor<ADReal> * _T_infinity_functor;
+  const Moose::Functor<ADReal> * const _T_infinity_functor;
 
   /// Convective heat transfer coefficient as a functor
-  const Moose::Functor<ADReal> * _htc_functor;
+  const Moose::Functor<ADReal> * const _htc_functor;
 };
