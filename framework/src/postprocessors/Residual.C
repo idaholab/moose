@@ -46,8 +46,7 @@ Residual::getValue() const
     const auto & snes = _fe_problem.getNonlinearSystemBase(_sys.number()).getSNES();
 
     PetscReal norm;
-    auto ierr = SNESGetFunctionNorm(snes, &norm);
-    CHKERRABORT(_fe_problem.comm().get(), ierr);
+    LibmeshPetscCall(SNESGetFunctionNorm(snes, &norm));
 
     residual = norm;
   }
