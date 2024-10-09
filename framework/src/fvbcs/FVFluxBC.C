@@ -42,7 +42,7 @@ FVFluxBC::FVFluxBC(const InputParameters & parameters)
 }
 
 void
-FVFluxBC::computeResidual(const FaceInfo & fi)
+FVFluxBC::updateCurrentFace(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
@@ -57,6 +57,12 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   // the FaceInfo normal polarity is always oriented with respect to the lower-id element.
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
+}
+
+void
+FVFluxBC::computeResidual(const FaceInfo & fi)
+{
+  updateCurrentFace(fi);
 
   if (_face_type == FaceInfo::VarFaceNeighbors::BOTH)
     mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
