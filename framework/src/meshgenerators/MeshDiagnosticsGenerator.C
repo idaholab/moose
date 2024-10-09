@@ -56,6 +56,10 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<MooseEnum>("examine_non_conformality",
                              chk_option,
                              "whether to examine the conformality of elements in the mesh");
+  params.addParam<MooseEnum>("examine_non_matching_edges",
+                             chk_option,
+                             "Whether to check if there are any intersecting edges");
+  params.addParam<Real>("intersection_tol", TOLERANCE, "tolerence for intersecting edges");
   params.addParam<Real>("nonconformal_tol", TOLERANCE, "tolerance for element non-conformality");
   params.addParam<MooseEnum>(
       "search_for_adaptivity_nonconformality",
@@ -83,6 +87,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
+    _check_non_matching_edges(getParam<MooseEnum>("examine_non_matching_edges")),
+    _non_matching_edge_tol(getParam<Real>("intersection_tol")),
     _check_adaptivity_non_conformality(
         getParam<MooseEnum>("search_for_adaptivity_nonconformality")),
     _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
@@ -100,7 +106,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   if (_check_sidesets_orientation == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
-      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
+      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" &&
+      _check_non_matching_edges == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -140,6 +147,9 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_local_jacobian != "NO_CHECK")
     checkLocalJacobians(mesh);
+
+  if (_check_non_matching_edges != "NO_CHECK")
+    checkNonMatchingEdges(mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -1250,6 +1260,115 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
                      Moose::stringify(num_negative_side_qp_jacobians),
                  _check_local_jacobian,
                  num_negative_side_qp_jacobians);
+}
+
+void
+MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> & mesh) const
+{
+  /*Algorithm Overview
+    1)Prechecks
+      a)This algorithn only works for 3D so check for that first
+    2)Loop
+      a)Loop through every element
+      b)For each element get the edges associated with it
+      c)For each edge check overlap with any edges of nearby elements
+      d)Have check to make sure the same pair of edges are not being tested twice for overlap
+    3)Overlap check
+      a)Shortest line that connects both lines is perpendicular to both lines
+      b)A good overview of the math for finding intersecting lines can be found
+    here->paulbourke.net/geometry/pointlineplane/
+  */
+  if (mesh->mesh_dimension() != 3)
+    mooseError("The edge intersection algorithm only works with 3D meshes");
+  if (!mesh->is_serial())
+    mooseError("Only serialized/replicated meshes are supported");
+  unsigned int num_intersecting_edges = 0;
+  std::set<Node> overlapping_edges_nodes;
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
+    for (auto i : elem->edge_index_range())
+      elem_edges[i] = elem->build_edge_ptr(i);
+    for (const auto other_elem : mesh->active_element_ptr_range())
+    {
+      // If they're the same element then there's no need to check for overlap
+      if (elem == other_elem)
+        continue;
+
+      // Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges
+      // will either
+      const auto boundingBox1 = elem->loose_bounding_box();
+      const auto boundingBox2 = other_elem->loose_bounding_box();
+      if (!(boundingBox1.intersects(boundingBox2)))
+        continue;
+
+      std::vector<std::unique_ptr<Elem>> other_edges(other_elem->n_edges());
+      for (auto j : other_elem->edge_index_range())
+        other_edges[j] = other_elem->build_edge_ptr(j);
+      for (auto & edge : elem_edges)
+      {
+        for (auto & other_edge : other_edges)
+        {
+          // Get nodes from edges
+          const Node * n1 = edge->get_nodes()[0];
+          const Node * n2 = edge->get_nodes()[1];
+          const Node * n3 = other_edge->get_nodes()[0];
+          const Node * n4 = other_edge->get_nodes()[1];
+
+          // Check if the edges have already been added to our check_edges list
+          if (overlapping_edges_nodes.count(*n1) && overlapping_edges_nodes.count(*n2) &&
+              overlapping_edges_nodes.count(*n3) && overlapping_edges_nodes.count(*n4))
+          {
+            continue;
+          }
+
+          // Check element/edge type
+          if (edge->type() != EDGE2)
+          {
+            std::string element_message = "Edge of type " + Utility::enum_to_string(edge->type()) +
+                                          " was found in cell " + std::to_string(elem->id()) +
+                                          " which is of type " +
+                                          Utility::enum_to_string(elem->type()) + '\n' +
+                                          "The edge intersection check only works for EDGE2 "
+                                          "elements.\nThis message will not be output again";
+            mooseDoOnce(_console << element_message << std::endl);
+            continue;
+          }
+          if (other_edge->type() != EDGE2)
+            continue;
+
+          // Now compare edge with other_edge
+          std::vector<double> intersection_coords(3);
+          bool overlap = MeshBaseDiagnosticsUtils::checkFirstOrderEdgeOverlap(
+              edge, other_edge, intersection_coords, _non_matching_edge_tol);
+          if (overlap)
+          {
+            // Add the nodes that make up the 2 edges to the vector overlapping_edges_nodes
+            overlapping_edges_nodes.insert(*n1);
+            overlapping_edges_nodes.insert(*n2);
+            overlapping_edges_nodes.insert(*n3);
+            overlapping_edges_nodes.insert(*n4);
+            num_intersecting_edges += 2;
+
+            // Print error message
+            std::string elem_id = std::to_string(elem->id());
+            std::string other_elem_id = std::to_string(other_elem->id());
+            std::string x_coord = std::to_string(intersection_coords[0]);
+            std::string y_coord = std::to_string(intersection_coords[1]);
+            std::string z_coord = std::to_string(intersection_coords[2]);
+            std::string message = "Intersecting edges found between elements " + elem_id + " and " +
+                                  other_elem_id + " near point (" + x_coord + ", " + y_coord +
+                                  ", " + z_coord + ")";
+            _console << message << std::endl;
+          }
+        }
+      }
+    }
+  }
+  diagnosticsLog("Number of intersecting element edges: " +
+                     Moose::stringify(num_intersecting_edges),
+                 _check_non_matching_edges,
+                 num_intersecting_edges);
 }
 
 void
