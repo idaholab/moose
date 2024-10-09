@@ -423,6 +423,10 @@ petscNonlinearConverged(SNES snes,
       break;
   }
 
+  // copy back previous nonlinear iteration solution
+  problem.currentNonlinearSystem().copyPreviousNLSolutions();
+  problem.getAuxiliarySystem().copyPreviousNLSolutions();
+
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 

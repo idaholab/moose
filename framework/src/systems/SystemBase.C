@@ -1258,6 +1258,13 @@ SystemBase::copyOldSolutions()
     *solutionPreviousNewton() = *currentSolution();
 }
 
+void
+SystemBase::copyPreviousNLSolutions()
+{
+  if (solutionPreviousNewton())
+    *solutionPreviousNewton() = *currentSolution();
+}
+
 /**
  * Restore current solutions (call after your solve failed)
  */

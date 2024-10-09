@@ -655,8 +655,6 @@ public:
 
   virtual void setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old);
 
-  virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
-
   TagID timeVectorTag() const override { return _Re_time_tag; }
   TagID nonTimeVectorTag() const override { return _Re_non_time_tag; }
   TagID residualVectorTag() const override { return _Re_tag; }
