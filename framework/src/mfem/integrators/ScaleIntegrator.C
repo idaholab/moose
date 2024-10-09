@@ -1,121 +1,113 @@
 #include "ScaleIntegrator.h"
 
-void ScaleIntegrator::SetIntRule(const IntegrationRule *ir)
+void ScaleIntegrator::SetIntRule(const mfem::IntegrationRule *ir)
 {
   IntRule = ir;
   _integrator->SetIntRule(ir);
 }
 
 void ScaleIntegrator::AssembleElementMatrix(
-   const FiniteElement &el, ElementTransformation &Trans, DenseMatrix &elmat)
+   const mfem::FiniteElement &el, mfem::ElementTransformation &Trans, mfem::DenseMatrix &elmat)
 {
   CheckIntegrator();
   _integrator->AssembleElementMatrix(el, Trans, elmat);
-  _integrator->AssembleElementMatrix(el, Trans, elem_mat);
-  elmat += elem_mat;
   elmat *= _scale;
 }
 
 void ScaleIntegrator::AssembleElementMatrix2(
-   const FiniteElement &el1, const FiniteElement &el2,
-   ElementTransformation &Trans, DenseMatrix &elmat)
+   const mfem::FiniteElement &el1, const mfem::FiniteElement &el2,
+   mfem::ElementTransformation &Trans, mfem::DenseMatrix &elmat)
 {
   CheckIntegrator();
   _integrator->AssembleElementMatrix2(el1, el2, Trans, elmat);
-  _integrator->AssembleElementMatrix2(el1, el2, Trans, elem_mat);
-  elmat += elem_mat;
   elmat *= _scale;
 }
 
 void ScaleIntegrator::AssembleFaceMatrix(
-   const FiniteElement &el1, const FiniteElement &el2,
-   FaceElementTransformations &Trans, DenseMatrix &elmat)
+   const mfem::FiniteElement &el1, const mfem::FiniteElement &el2,
+   mfem::FaceElementTransformations &Trans, mfem::DenseMatrix &elmat)
 {
   CheckIntegrator();
   _integrator->AssembleFaceMatrix(el1, el2, Trans, elmat);
-  _integrator->AssembleFaceMatrix(el1, el2, Trans, elem_mat);
-  elmat += elem_mat;
   elmat *= _scale;
 }
 
 void ScaleIntegrator::AssembleFaceMatrix(
-   const FiniteElement &tr_fe,
-   const FiniteElement &te_fe1, const FiniteElement &te_fe2,
-   FaceElementTransformations &Trans, DenseMatrix &elmat)
+   const mfem::FiniteElement &tr_fe,
+   const mfem::FiniteElement &te_fe1, const mfem::FiniteElement &te_fe2,
+   mfem::FaceElementTransformations &Trans, mfem::DenseMatrix &elmat)
 {
   CheckIntegrator();
   _integrator->AssembleFaceMatrix(tr_fe, te_fe1, te_fe2, Trans, elmat);
-  _integrator->AssembleFaceMatrix(tr_fe, te_fe1, te_fe2, Trans, elem_mat);
-  elmat += elem_mat;
   elmat *= _scale;
 }
 
-void ScaleIntegrator::AssemblePA(const FiniteElementSpace& fes)
+void ScaleIntegrator::AssemblePA(const mfem::FiniteElementSpace& fes)
 {
   _integrator->AssemblePA(fes);
 }
 
-void ScaleIntegrator::AssembleDiagonalPA(Vector &diag)
+void ScaleIntegrator::AssembleDiagonalPA(mfem::Vector &diag)
 {
   _integrator->AssembleDiagonalPA(diag); 
 }
 
-void ScaleIntegrator::AssemblePAInteriorFaces(const FiniteElementSpace &fes)
+void ScaleIntegrator::AssemblePAInteriorFaces(const mfem::FiniteElementSpace &fes)
 {
   _integrator->AssemblePAInteriorFaces(fes);
 }
 
-void ScaleIntegrator::AssemblePABoundaryFaces(const FiniteElementSpace &fes)
+void ScaleIntegrator::AssemblePABoundaryFaces(const mfem::FiniteElementSpace &fes)
 {
   _integrator->AssemblePABoundaryFaces(fes);
 }
 
-void ScaleIntegrator::AddMultPA(const Vector& x, Vector& y) const
+void ScaleIntegrator::AddMultPA(const mfem::Vector& x, mfem::Vector& y) const
 {
   _integrator->AddMultPA(x, y);
 }
 
-void ScaleIntegrator::AddMultTransposePA(const Vector &x, Vector &y) const
+void ScaleIntegrator::AddMultTransposePA(const mfem::Vector &x, mfem::Vector &y) const
 {
   _integrator->AddMultTransposePA(x, y);
 }
 
-void ScaleIntegrator::AssembleMF(const FiniteElementSpace &fes)
+void ScaleIntegrator::AssembleMF(const mfem::FiniteElementSpace &fes)
 {
   _integrator->AssembleMF(fes);
 }
 
-void ScaleIntegrator::AddMultMF(const Vector& x, Vector& y) const
+void ScaleIntegrator::AddMultMF(const mfem::Vector& x, mfem::Vector& y) const
 {
   _integrator->AddMultTransposeMF(x, y);
 }
 
-void ScaleIntegrator::AddMultTransposeMF(const Vector &x, Vector &y) const
+void ScaleIntegrator::AddMultTransposeMF(const mfem::Vector &x, mfem::Vector &y) const
 {
   _integrator->AddMultMF(x, y);
 }
 
-void ScaleIntegrator::AssembleDiagonalMF(Vector &diag)
+void ScaleIntegrator::AssembleDiagonalMF(mfem::Vector &diag)
 {
   _integrator->AssembleDiagonalMF(diag);
 }
 
-void ScaleIntegrator::AssembleEA(const FiniteElementSpace &fes, Vector &emat,
+void ScaleIntegrator::AssembleEA(const mfem::FiniteElementSpace &fes, mfem::Vector &emat,
                                const bool add)
 {
   _integrator->AssembleEA(fes, emat, add);
 }
 
-void ScaleIntegrator::AssembleEAInteriorFaces(const FiniteElementSpace &fes,
-                                            Vector &ea_data_int,
-                                            Vector &ea_data_ext,
+void ScaleIntegrator::AssembleEAInteriorFaces(const mfem::FiniteElementSpace &fes,
+                                            mfem::Vector &ea_data_int,
+                                            mfem::Vector &ea_data_ext,
                                             const bool add)
 {
   _integrator->AssembleEAInteriorFaces(fes,ea_data_int,ea_data_ext,add);
 }
 
-void ScaleIntegrator::AssembleEABoundaryFaces(const FiniteElementSpace &fes,
-                                            Vector &ea_data_bdr,
+void ScaleIntegrator::AssembleEABoundaryFaces(const mfem::FiniteElementSpace &fes,
+                                            mfem::Vector &ea_data_bdr,
                                             const bool add)
 {
   _integrator->AssembleEABoundaryFaces(fes, ea_data_bdr, add);
