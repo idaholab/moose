@@ -45,13 +45,23 @@ TriSubChannel1PhaseProblem::TriSubChannel1PhaseProblem(const InputParameters & p
 
 TriSubChannel1PhaseProblem::~TriSubChannel1PhaseProblem()
 {
+  PetscErrorCode ierr = cleanUp();
+  if (ierr)
+    mooseError(name(), ": Error in memory cleanup");
+}
+
+PetscErrorCode
+TriSubChannel1PhaseProblem::cleanUp()
+{
+  PetscFunctionBegin;
   // Clean up heat conduction system
-  MatDestroy(&_hc_axial_heat_conduction_mat);
-  VecDestroy(&_hc_axial_heat_conduction_rhs);
-  MatDestroy(&_hc_radial_heat_conduction_mat);
-  VecDestroy(&_hc_radial_heat_conduction_rhs);
-  MatDestroy(&_hc_sweep_enthalpy_mat);
-  VecDestroy(&_hc_sweep_enthalpy_rhs);
+  LibmeshPetscCall(MatDestroy(&_hc_axial_heat_conduction_mat));
+  LibmeshPetscCall(VecDestroy(&_hc_axial_heat_conduction_rhs));
+  LibmeshPetscCall(MatDestroy(&_hc_radial_heat_conduction_mat));
+  LibmeshPetscCall(VecDestroy(&_hc_radial_heat_conduction_rhs));
+  LibmeshPetscCall(MatDestroy(&_hc_sweep_enthalpy_mat));
+  LibmeshPetscCall(VecDestroy(&_hc_sweep_enthalpy_rhs));
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 void
@@ -239,7 +249,8 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
   Real a_p = 0.0;
 
   // Find the coefficients of bare rod bundle friction factor
-  // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume 1
+  // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
+  // Volume 1
   if (subch_type == EChannelType::CENTER)
   {
     if (p_over_d < 1.1)
@@ -317,8 +328,8 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
   }
 
   // Find the coefficients of wire-wrapped rod bundle friction factor
-  // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume 1
-  // also Chen and Todreas (2018).
+  // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
+  // Volume 1 also Chen and Todreas (2018).
   if ((wire_diameter != 0.0) && (wire_lead_length != 0.0))
   {
     if (subch_type == EChannelType::CENTER)
@@ -432,8 +443,8 @@ TriSubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
       _WijPrime(i_gap, iz) = 0.0;
       auto beta = 0.0;
-      // Calculation of Turbulent Crossflow for wire-wrapped triangular assemblies. Cheng & Todreas
-      // (1986)
+      // Calculation of Turbulent Crossflow for wire-wrapped triangular assemblies. Cheng &
+      // Todreas (1986)
       if ((subch_type1 == EChannelType::CENTER || subch_type2 == EChannelType::CENTER) &&
           (wire_lead_length != 0) && (wire_diameter != 0))
       {
