@@ -1356,7 +1356,9 @@ SystemBase::solutionState(const unsigned int state,
                " was requested in ",
                name(),
                " but only up to state ",
-               _solution_states[static_cast<unsigned short>(iteration_type)].size() - 1,
+               (_solution_states[static_cast<unsigned short>(iteration_type)].size() == 0)
+                   ? 0
+                   : _solution_states[static_cast<unsigned short>(iteration_type)].size() - 1,
                " is available.");
 
   const auto & solution_states = _solution_states[static_cast<unsigned short>(iteration_type)];
@@ -1385,6 +1387,9 @@ SystemBase::needSolutionState(const unsigned int state,
                               const Moose::SolutionIterationType iteration_type)
 {
   libmesh_parallel_only(this->comm());
+  mooseAssert(!Threads::in_threads,
+              "This routine is not thread-safe. Request the solution state before using it in "
+              "a threaded region.");
 
   if (hasSolutionState(state, iteration_type))
     return;
