@@ -4,6 +4,7 @@
 #include "coefficients.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
+#include "ScaleIntegrator.h"
 
 namespace platypus
 {

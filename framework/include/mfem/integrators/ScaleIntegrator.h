@@ -1,23 +1,23 @@
 #pragma once
+#include "MFEMGeneralUserObject.h"
 #include "../common/pfem_extras.hpp"
 
-using namespace mfem;
-
 /// Integrator which scales its results by a constant value
-class ScaleIntegrator : public BilinearFormIntegrator
+class ScaleIntegrator : public mfem::BilinearFormIntegrator
 {
 private:
-   bool _own_integrator;
-   double _scale;
-   BilinearFormIntegrator* _integrator{nullptr};
+
+  mfem::BilinearFormIntegrator* _integrator{nullptr};
+  double _scale;
+  bool _own_integrator;  
 
 public:
    
-   ScaleIntegrator(BilinearFormIntegrator *integ) : _integrator{integ}, _scale{1}, _own_integrator{true} {}
-   ScaleIntegrator(BilinearFormIntegrator *integ, double scale) : _integrator{integ}, _scale{scale}, _own_integrator{true} {}
-   ScaleIntegrator(BilinearFormIntegrator *integ, double scale, bool own) : _integrator{integ}, _scale{scale}, _own_integrator{own} {}
+   ScaleIntegrator(mfem::BilinearFormIntegrator *integ) : _integrator{integ}, _scale{1}, _own_integrator{true} {}
+   ScaleIntegrator(mfem::BilinearFormIntegrator *integ, double scale) : _integrator{integ}, _scale{scale}, _own_integrator{true} {}
+   ScaleIntegrator(mfem::BilinearFormIntegrator *integ, double scale, bool own) : _integrator{integ}, _scale{scale}, _own_integrator{own} {}
 
-   void SetIntegrator(BilinearFormIntegrator *integ)
+   void SetIntegrator(mfem::BilinearFormIntegrator *integ)
    { 
       if (_integrator && _own_integrator)
       {
@@ -37,60 +37,60 @@ public:
         mooseError("Integrator not set");
    }
 
-   virtual void SetIntRule(const IntegrationRule *ir);
+   virtual void SetIntRule(const mfem::IntegrationRule *ir);
 
 
-   virtual void AssembleElementMatrix(const FiniteElement &el,
-                                      ElementTransformation &Trans,
-                                      DenseMatrix &elmat);
-   virtual void AssembleElementMatrix2(const FiniteElement &trial_fe,
-                                       const FiniteElement &test_fe,
-                                       ElementTransformation &Trans,
-                                       DenseMatrix &elmat);
+   virtual void AssembleElementMatrix(const mfem::FiniteElement &el,
+                                      mfem::ElementTransformation &Trans,
+                                      mfem::DenseMatrix &elmat);
+   virtual void AssembleElementMatrix2(const mfem::FiniteElement &trial_fe,
+                                       const mfem::FiniteElement &test_fe,
+                                       mfem::ElementTransformation &Trans,
+                                       mfem::DenseMatrix &elmat);
 
-   using BilinearFormIntegrator::AssembleFaceMatrix;
-   virtual void AssembleFaceMatrix(const FiniteElement &el1,
-                                   const FiniteElement &el2,
-                                   FaceElementTransformations &Trans,
-                                   DenseMatrix &elmat);
+   using mfem::BilinearFormIntegrator::AssembleFaceMatrix;
+   virtual void AssembleFaceMatrix(const mfem::FiniteElement &el1,
+                                   const mfem::FiniteElement &el2,
+                                   mfem::FaceElementTransformations &Trans,
+                                   mfem::DenseMatrix &elmat);
 
-   virtual void AssembleFaceMatrix(const FiniteElement &trial_face_fe,
-                                   const FiniteElement &test_fe1,
-                                   const FiniteElement &test_fe2,
-                                   FaceElementTransformations &Trans,
-                                   DenseMatrix &elmat);
+   virtual void AssembleFaceMatrix(const mfem::FiniteElement &trial_face_fe,
+                                   const mfem::FiniteElement &test_fe1,
+                                   const mfem::FiniteElement &test_fe2,
+                                   mfem::FaceElementTransformations &Trans,
+                                   mfem::DenseMatrix &elmat);
 
-   using BilinearFormIntegrator::AssemblePA;
-   virtual void AssemblePA(const FiniteElementSpace& fes);
+   using mfem::BilinearFormIntegrator::AssemblePA;
+   virtual void AssemblePA(const mfem::FiniteElementSpace& fes);
 
-   virtual void AssembleDiagonalPA(Vector &diag);
+   virtual void AssembleDiagonalPA(mfem::Vector &diag);
 
-   virtual void AssemblePAInteriorFaces(const FiniteElementSpace &fes);
+   virtual void AssemblePAInteriorFaces(const mfem::FiniteElementSpace &fes);
 
-   virtual void AssemblePABoundaryFaces(const FiniteElementSpace &fes);
+   virtual void AssemblePABoundaryFaces(const mfem::FiniteElementSpace &fes);
 
-   virtual void AddMultTransposePA(const Vector &x, Vector &y) const;
+   virtual void AddMultTransposePA(const mfem::Vector &x, mfem::Vector &y) const;
 
-   virtual void AddMultPA(const Vector& x, Vector& y) const;
+   virtual void AddMultPA(const mfem::Vector& x, mfem::Vector& y) const;
 
-   virtual void AssembleMF(const FiniteElementSpace &fes);
+   virtual void AssembleMF(const mfem::FiniteElementSpace &fes);
 
-   virtual void AddMultMF(const Vector &x, Vector &y) const;
+   virtual void AddMultMF(const mfem::Vector &x, mfem::Vector &y) const;
 
-   virtual void AddMultTransposeMF(const Vector &x, Vector &y) const;
+   virtual void AddMultTransposeMF(const mfem::Vector &x, mfem::Vector &y) const;
 
-   virtual void AssembleDiagonalMF(Vector &diag);
+   virtual void AssembleDiagonalMF(mfem::Vector &diag);
 
-   virtual void AssembleEA(const FiniteElementSpace &fes, Vector &emat,
+   virtual void AssembleEA(const mfem::FiniteElementSpace &fes, mfem::Vector &emat,
                            const bool add);
 
-   virtual void AssembleEAInteriorFaces(const FiniteElementSpace &fes,
-                                        Vector &ea_data_int,
-                                        Vector &ea_data_ext,
+   virtual void AssembleEAInteriorFaces(const mfem::FiniteElementSpace &fes,
+                                        mfem::Vector &ea_data_int,
+                                        mfem::Vector &ea_data_ext,
                                         const bool add);
 
-   virtual void AssembleEABoundaryFaces(const FiniteElementSpace &fes,
-                                        Vector &ea_data_bdr,
+   virtual void AssembleEABoundaryFaces(const mfem::FiniteElementSpace &fes,
+                                        mfem::Vector &ea_data_bdr,
                                         const bool add);
 
    virtual ~ScaleIntegrator();
