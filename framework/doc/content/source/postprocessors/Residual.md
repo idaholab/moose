@@ -5,8 +5,9 @@ The parameter [!param](/Postprocessors/Residual/residual_type) may have one of
 the following values:
 
 - `FINAL`: The final norm, obtained by `NonlinearSystemBase::finalNonlinearResidual()`
-- `INITIAL`: The post-SMO initial norm, obtained by `NonlinearSystemBase::preSMOResidual()`
-- `PRE_SMO`: The pre-SMO initial norm, obtained by `NonlinearSystemBase::initialResidual()`
+- `INITIAL`: The post-SMO initial residual norm, obtained by `NonlinearSystemBase::preSMOResidual()`.
+  For the definition of pre- vs. post-SMO residual, see [NonlinearSystem.md].
+- `PRE_SMO`: The pre-SMO initial residual norm, obtained by `NonlinearSystemBase::initialResidual()`
 - `CURRENT`: The current norm, obtained directly from the PETSc SNES object.
   It is recommended to set [!param](/Postprocessors/Residual/execute_on) to
   `NONLINEAR_CONVERGENCE` to get the desired behavior for this option.
