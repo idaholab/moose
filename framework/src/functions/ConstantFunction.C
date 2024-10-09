@@ -50,3 +50,9 @@ ConstantFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   return RealVectorValue(0);
 }
+
+Real
+ConstantFunction::timeIntegral(Real t1, Real t2, const Point & /*p*/) const
+{
+  return _value * (t2 - t1);
+}
