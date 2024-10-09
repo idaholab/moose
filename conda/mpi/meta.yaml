@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.10.01" %}
+{% set version = "2024.10.09" %}
 
 # HDF5 Version
 {% set hdf5_version = "1.14.2" %}
@@ -142,3 +142,4 @@ extra:
   recipe-maintainers:
     - milljm
     - cticenhour
+

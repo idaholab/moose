@@ -10,8 +10,7 @@ packages:
       - conda/tools/conda_build_config.yaml
   mpi:
     influential:
-      # need to remember to add apptainer/set_prompt.bash
-      # the next time we update this
+      - apptainer/set_prompt.bash
       - apptainer/mpi.def
       - apptainer/files/mpi
       - conda/mpi/meta.yaml
@@ -73,6 +72,27 @@ packages:
       - conda/moose-dev/meta.yaml
       - conda/moose-dev/conda_build_config.yaml
       - scripts/setup_libtorch.sh
+  libmesh-vtk:
+    dependencies:
+      - mpi
+    influential:
+      - conda/libmesh-vtk
+  peacock:
+    dependencies:
+      - mpi
+    influential:
+      - conda/peacock
+  pprof:
+    influential:
+      - conda/pprof
+  pyhit:
+    dependencies:
+      - wasp
+    influential:
+      - conda/pyhit
+  seacas:
+    influential:
+      - conda/seacas
   app:
     dependencies:
       - moose-dev

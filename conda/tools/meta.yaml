@@ -56,7 +56,7 @@ requirements:
     - sympy
     - tabulate
     - uncertainties
-    - xmltodict
+    - xmltodict <0.14
     - yaml
 test:
   commands:
