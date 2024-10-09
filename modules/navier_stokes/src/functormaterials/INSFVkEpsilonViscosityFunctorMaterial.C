@@ -41,7 +41,9 @@ INSFVkEpsilonViscosityFunctorMaterial::INSFVkEpsilonViscosityFunctorMaterial(
   addFunctorProperty<ADReal>(NS::mu_t,
                              [this](const auto & r, const auto & t) -> ADReal
                              {
-                               return _C_mu(r, t) * _rho(r, t) * Utility::pow<2>(_k(r, t)) /
-                                      std::max(NS::mu_t_low_limit, _epsilon(r, t));
+                               return std::max(NS::mu_t_low_limit,
+                                               _C_mu(r, t) * _rho(r, t) *
+                                                   Utility::pow<2>(_k(r, t)) /
+                                                   std::max(NS::epsilon_low_limit, _epsilon(r, t)));
                              });
 }

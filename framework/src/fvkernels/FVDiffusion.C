@@ -54,8 +54,9 @@ FVDiffusion::computeQpResidual()
     const ADReal coeff_neighbor = _coeff(neighborArg(), state);
     // If the diffusion coefficients are zero, then we can early return 0 (and avoid warnings if we
     // have a harmonic interpolation)
+    // We multiply by 0 to keep the sparsity pattern
     if (!coeff_elem.value() && !coeff_neighbor.value())
-      return 0;
+      return 0 * (coeff_elem + coeff_neighbor) * dudn;
 
     interpolate(_coeff_interp_method, coeff, coeff_elem, coeff_neighbor, *_face_info, true);
   }

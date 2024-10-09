@@ -227,8 +227,7 @@
                "Modules/NavierStokesFV/turbulence_handling='mixing-length' "
                "Modules/NavierStokesFV/scalar_transport_physics='NavierStokesFV' "
                "Modules/NavierStokesFV/verbose=true"
-    expect_err = "The number of Schmidt numbers defined is not equal to the number of passive scalar "
-                 "fields!"
+    expect_err = "The number of turbulent Schmidt numbers defined is not equal to the number of passive scalar fields!"
     # Wall distance mixing length aux currently does not support distributed meshes
     mesh_mode = 'replicated'
   []

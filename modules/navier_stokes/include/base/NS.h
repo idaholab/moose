@@ -119,8 +119,10 @@ static const std::string k_s = "k_s";
 static const std::string cp = "cp";
 static const std::string cv = "cv";
 static const std::string mu = "mu";
-// Turbulent viscosity
+// Turbulent dynamic viscosity
 static const std::string mu_t = "mu_t";
+// Turbulent dynamic scalar viscosity
+static const std::string mu_t_passive_scalar = "mu_t_passive_scalar";
 // Effective viscosity = sum of viscosities
 static const std::string mu_eff = "mu_eff";
 static const std::string k = "k";
@@ -188,6 +190,8 @@ static constexpr Real von_karman_constant = 0.4187;
 static constexpr Real E_turb_constant = 9.793;
 // Lower limit for mu_t
 static constexpr Real mu_t_low_limit = 1.0e-8;
+// Lower limit for epsilon in the k-epsilon
+static constexpr Real epsilon_low_limit = 1.0e-8;
 // Lower limit for y_plus
 static constexpr Real min_y_plus = 1e-10;
 }

@@ -54,6 +54,9 @@ HeatConductionPhysics::validParams()
 HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
   : PhysicsBase(parameters), _temperature_name(getParam<VariableName>("temperature_name"))
 {
+  // Save variables (for initialization from file for example)
+  saveSolverVariableName(_temperature_name);
+
   // Parameter checking
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("heat_flux_boundaries",
                                                               "boundary_heat_fluxes");
@@ -68,6 +71,16 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
 void
 HeatConductionPhysics::addInitialConditions()
 {
+  // error on inconsistent user selections
+  if (getParam<bool>("initialize_variables_from_mesh_file") &&
+      isParamSetByUser("initial_temperature"))
+    paramError("initial_temperature",
+               "Initial temperature should not be set if the variables should be initialized from "
+               "the mesh file");
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+
   // Always obey the user, but dont set a hidden default when restarting
   if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
   {
