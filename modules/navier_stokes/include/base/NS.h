@@ -171,6 +171,7 @@ static const std::string mass_flux = "mass_flux";
 // Turbulence variables
 static const std::string TKE = "tke";
 static const std::string TKED = "epsilon";
+static const std::string TKESD = "omega";
 
 /**
  * Wall treatment options
