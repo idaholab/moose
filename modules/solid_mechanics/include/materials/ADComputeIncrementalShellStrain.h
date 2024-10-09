@@ -47,6 +47,9 @@ protected:
   /// Computes the transformation matrix from natural coordinates to local cartesian coordinates for elasticity tensor transformation
   virtual void computeGMatrix();
 
+  /// Computes the element's local coordinate
+  virtual void computeLocalCoordinate();
+
   /// Number of coupled rotational variables
   unsigned int _nrot;
 
@@ -158,6 +161,10 @@ protected:
   /// Old material property containing jacobian of transformation
   std::vector<const MaterialProperty<Real> *> _J_map_old;
 
+  /// Transformation matrix to map stresses from global coordinate to the element's local coordinate
+  std::vector<MaterialProperty<RankTwoTensor> *> _local_transformation_matrix;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _local_transformation_matrix_old;
+
   /// Covariant base vector matrix material property to transform stress
   std::vector<MaterialProperty<RankTwoTensor> *> _covariant_transformation_matrix;
   std::vector<const MaterialProperty<RankTwoTensor> *> _covariant_transformation_matrix_old;
@@ -172,11 +179,17 @@ protected:
   /// Rotation matrix material property
   ADMaterialProperty<RankTwoTensor> * _transformation_matrix;
 
+  MaterialProperty<RealVectorValue> * _first_local_vector;
+  MaterialProperty<RealVectorValue> * _second_local_vector;
+  MaterialProperty<RealVectorValue> * _normal_local_vector;
+  MaterialProperty<Real> * _shell_thickness;
+
   /// simulation variables
   ADRealVectorValue _x2;
   ADRealVectorValue _x3;
   const NumericVector<Number> * const & _sol;
   const NumericVector<Number> & _sol_old;
+  const bool _is_v1_defined;
   ADRealVectorValue _g3_a;
   ADRealVectorValue _g3_c;
   ADRealVectorValue _g3_b;
@@ -186,4 +199,7 @@ protected:
   ADRealVectorValue _g2_b;
   ADRealVectorValue _g2_d;
   RankTwoTensor _unrotated_total_strain;
+  ADRealVectorValue _e1;
+  ADRealVectorValue _e2;
+  ADRealVectorValue _e3;
 };
