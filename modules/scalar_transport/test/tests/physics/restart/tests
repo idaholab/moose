@@ -1,0 +1,31 @@
+[Tests]
+  issues = '#28730'
+  # Note: ICs are handled by the parent class MultiSpeciesDiffusionPhysicsBase
+  design = 'MultiSpeciesDiffusionCG.md'
+  [restart]
+    requirement = 'The system shall be able to restart several diffused Physics in the shorthand Physics-syntax'
+    [user_ics]
+      type = CSVDiff
+      input = test_cg.i
+      csvdiff = 'user_ics.csv'
+      cli_args = "Physics/MultiSpeciesDiffusion/ContinuousGalerkin/diff/initial_conditions_species='1 2 3' Outputs/file_base=user_ics"
+      detail = 'with a user-defined initial condition,'
+    []
+    [restart_with_user_ics]
+      type = CSVDiff
+      input = test_cg.i
+      csvdiff = 'restart_user_ics.csv'
+      cli_args = "Physics/MultiSpeciesDiffusion/ContinuousGalerkin/diff/initial_conditions_species='2 3 4'
+                  Problem/restart_file_base=user_ics_cp/LATEST Problem/allow_initial_conditions_with_restart=true
+                  Outputs/file_base=restart_user_ics"
+      detail = 'when performing a regular checkpoint restart, but still obeying the user-defined initial condition,'
+    []
+    [restart_from_file]
+      type = CSVDiff
+      input = test_cg.i
+      csvdiff = 'from_file.csv'
+      cli_args = "Mesh/active='fmg_restart' Outputs/file_base=from_file"
+      detail = 'when performing manual restart from a mesh file, ignoring the default initial condition.'
+    []
+  []
+[]

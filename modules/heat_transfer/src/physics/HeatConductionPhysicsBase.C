@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HeatConductionPhysics.h"
+#include "HeatConductionPhysicsBase.h"
 
 InputParameters
-HeatConductionPhysics::validParams()
+HeatConductionPhysicsBase::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
   params.addClassDescription("Add the heat conduction physics");
@@ -19,6 +19,7 @@ HeatConductionPhysics::validParams()
   params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
   params.addParam<std::vector<SubdomainName>>("heat_source_blocks",
                                               "Block restriction of the heat source");
+  params.addParam<MooseFunctorName>("heat_source_functor", "Functor providing the heat source");
 
   params.addParam<FunctionName>(
       "initial_temperature", 300, "Initial value of the temperature variable");
@@ -26,18 +27,30 @@ HeatConductionPhysics::validParams()
   // Boundary conditions
   params.addParam<std::vector<BoundaryName>>(
       "heat_flux_boundaries", {}, "Boundaries on which to apply a heat flux");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "boundary_heat_fluxes",
+      {},
+      "Functors to compute the heat flux on each boundary in 'heat_flux_boundaries'");
   params.addParam<std::vector<BoundaryName>>(
       "insulated_boundaries", {}, "Boundaries on which to apply a zero heat flux");
   params.addParam<std::vector<BoundaryName>>(
       "fixed_temperature_boundaries", {}, "Boundaries on which to apply a fixed temperature");
   params.addParam<std::vector<MooseFunctorName>>(
-      "boundary_heat_fluxes",
-      {},
-      "Functors to compute the heat flux on each boundary in 'heat_flux_boundaries'");
-  params.addParam<std::vector<MooseFunctorName>>(
       "boundary_temperatures",
       {},
       "Functors to compute the heat flux on each boundary in 'fixed_temperature_boundaries'");
+  params.addParam<std::vector<BoundaryName>>(
+      "fixed_convection_boundaries",
+      {},
+      "Boundaries on which to apply convection with a neighboring fluid");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "fixed_convection_T_fluid",
+      {},
+      "Temperature of the convecting fluid. The user should note that numerous heat transfer "
+      "coefficient correlation will require this fluid temperature to be the bulk fluid "
+      "temperature / fluid temperature at an infinite distance.");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "fixed_convection_htc", {}, "Heat transfer coefficient for convection with a fluid");
   params.addParamNamesToGroup(
       "heat_flux_boundaries insulated_boundaries fixed_temperature_boundaries boundary_heat_fluxes "
       "boundary_temperatures",
@@ -51,7 +64,7 @@ HeatConductionPhysics::validParams()
   return params;
 }
 
-HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
+HeatConductionPhysicsBase::HeatConductionPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters), _temperature_name(getParam<VariableName>("temperature_name"))
 {
   // Parameter checking
@@ -59,14 +72,16 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
                                                               "boundary_heat_fluxes");
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("fixed_temperature_boundaries",
                                                               "boundary_temperatures");
-  checkVectorParamsNoOverlap<BoundaryName>(
-      {"heat_flux_boundaries", "insulated_boundaries", "fixed_temperature_boundaries"});
+  checkVectorParamsNoOverlap<BoundaryName>({"heat_flux_boundaries",
+                                            "insulated_boundaries",
+                                            "fixed_temperature_boundaries",
+                                            "fixed_convection_boundaries"});
 
   addRequiredPhysicsTask("add_preconditioning");
 }
 
 void
-HeatConductionPhysics::addInitialConditions()
+HeatConductionPhysicsBase::addInitialConditions()
 {
   // Always obey the user, but dont set a hidden default when restarting
   if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
@@ -79,7 +94,7 @@ HeatConductionPhysics::addInitialConditions()
 }
 
 void
-HeatConductionPhysics::addPreconditioning()
+HeatConductionPhysicsBase::addPreconditioning()
 {
   // Use a multigrid method, known to work for elliptic problems such as diffusion
   if (_preconditioning == "default")

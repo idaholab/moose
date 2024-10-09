@@ -129,7 +129,7 @@ DiffusionCG::addFEKernels()
 void
 DiffusionCG::addFEBCs()
 {
-  if (isParamValid("neumann_boundaries"))
+  if (isParamSetByUser("neumann_boundaries"))
   {
     const auto & boundary_fluxes = getParam<std::vector<MooseFunctorName>>("boundary_fluxes");
     for (const auto i : index_range(_neumann_boundaries))
@@ -171,7 +171,7 @@ DiffusionCG::addFEBCs()
           bc_type, prefix() + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
     }
   }
-  if (isParamValid("dirichlet_boundaries"))
+  if (isParamSetByUser("dirichlet_boundaries"))
   {
     const auto & boundary_values = getParam<std::vector<MooseFunctorName>>("boundary_values");
     for (const auto i : index_range(_dirichlet_boundaries))

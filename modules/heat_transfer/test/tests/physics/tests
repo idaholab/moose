@@ -1,17 +1,55 @@
 [Tests]
-  issues = '#25642'
+  issues = '#25642 #28779'
   [cg]
-    type = Exodiff
-    input = 'test_cg.i'
-    exodiff = 'test_cg_out.e'
-    requirement = 'The system shall be able to define the heat conduction equation including its boundary conditions using a shorthand syntax.'
+    requirement = 'The system shall be able to define the heat conduction equation including its boundary conditions using a shorthand syntax,'
     design = 'physics/HeatConductionCG.md'
+    [base]
+      type = Exodiff
+      input = 'test_cg.i'
+      exodiff = 'test_cg_out.e'
+      detail = 'with Dirichlet and Neumann boundary conditions and a heat source defined using a variable,'
+    []
+    [functor_heat]
+      type = Exodiff
+      input = 'test_cg.i'
+      exodiff = 'test_cg_functor_hs_out.e'
+      cli_args = "AuxVariables/Q_0/initial_condition=0
+                  Physics/HeatConduction/FiniteElement/h1/heat_source_var='Q_0'
+                  Physics/HeatConduction/FiniteElement/h1/heat_source_functor='100'
+                  Outputs/hide=Q_0
+                  Outputs/file_base=test_cg_functor_hs_out"
+      detail = 'with a heat source defined using a functor,'
+    []
+    [convective_bc]
+      type = Exodiff
+      input = 'test_cg_convective_bc.i'
+      exodiff = 'test_cg_convective_bc_out.e'
+      detail = 'with convective heat flux boundary conditions.'
+    []
   []
   [fv]
-    type = Exodiff
-    input = 'test_fv.i'
-    exodiff = 'test_fv_out.e'
-    requirement = 'The system shall be able to define the heat conduction equation including its boundary conditions using a shorthand syntax and a finite volume discretization.'
+    requirement = 'The system shall be able to define the heat conduction equation including its boundary conditions using a shorthand syntax and a finite volume discretization'
     design = 'physics/HeatConductionFV.md'
+    [base]
+      type = Exodiff
+      input = 'test_fv.i'
+      exodiff = 'test_fv_out.e'
+      detail = 'with Dirichlet and Neumann boundary conditions and a heat source defined using a variable,'
+    []
+    [functor_heat]
+      type = Exodiff
+      input = 'test_fv.i'
+      exodiff = 'test_fv_functor_hs_out.e'
+      cli_args = "Physics/HeatConduction/FiniteVolume/h1/heat_source_var='0'
+                  Physics/HeatConduction/FiniteVolume/h1/heat_source_functor='100'
+                  Outputs/file_base=test_fv_functor_hs_out"
+      detail = 'with a heat source defined using a functor,'
+    []
+    [convective_bc]
+      type = Exodiff
+      input = 'test_fv_convective_bc.i'
+      exodiff = 'test_fv_convective_bc_out.e'
+      detail = 'with convective heat flux boundary conditions.'
+    []
   []
 []

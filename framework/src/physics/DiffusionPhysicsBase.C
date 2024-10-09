@@ -21,6 +21,7 @@ DiffusionPhysicsBase::validParams()
   params.addClassDescription("Base class for creating a diffusion equation");
 
   params.addParam<VariableName>("variable_name", "u", "Variable name for the equation");
+  params.addParam<FunctionName>("initial_condition", "Initial condition for the diffused variable");
 
   // Diffusivity
   params.addParam<MaterialPropertyName>("diffusivity_matprop",
@@ -117,5 +118,22 @@ DiffusionPhysicsBase::addPostprocessors()
     params.set<ExecFlagEnum>("execute_on") = {
         EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR, EXEC_LINEAR};
     getProblem().addPostprocessor(pp_type, prefix() + "diffusive_flux_" + boundary_name, params);
+  }
+}
+
+void
+DiffusionPhysicsBase::addInitialConditions()
+{
+  InputParameters params = getFactory().getValidParams("FunctionIC");
+  assignBlocks(params, _blocks);
+
+  // always obey the user specification of initial conditions
+  // there are no default initial conditions
+  if (parameters().isParamSetByUser("initial_condition"))
+  {
+    params.set<VariableName>("variable") = _var_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_condition");
+
+    getProblem().addInitialCondition("FunctionIC", prefix() + _var_name + "_ic", params);
   }
 }

@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "HeatConductionPhysics.h"
+#include "HeatConductionPhysicsBase.h"
 
 /**
  * Creates all the objects needed to solve the heat conduction equations with CG
  */
-class HeatConductionCG : public HeatConductionPhysics
+class HeatConductionCG : public HeatConductionPhysicsBase
 {
 public:
   static InputParameters validParams();

@@ -52,6 +52,10 @@ MultiSpeciesDiffusionPhysicsBase::validParams()
                               "boundary_values",
                               "Boundary conditions");
 
+  // Initial conditions
+  params.addParam<std::vector<FunctionName>>(
+      "initial_conditions_species", "Functions describing the initial conditions for the species");
+
   // Postprocessing
   params.addParam<std::vector<BoundaryName>>(
       "compute_diffusive_fluxes_on", {}, "Surfaces to compute the diffusive flux on");
@@ -93,8 +97,12 @@ MultiSpeciesDiffusionPhysicsBase::MultiSpeciesDiffusionPhysicsBase(
     checkParamsBothSetOrNotSet("source_functors", "source_coefs");
   if (isParamValid("source_functors"))
     checkVectorParamsSameLength<VariableName, MooseFunctorName>("species", "source_functors");
+  if (isParamValid("initial_conditions_species"))
+    checkVectorParamsSameLength<VariableName, FunctionName>("species",
+                                                            "initial_conditions_species");
 
   addRequiredPhysicsTask("add_preconditioning");
+  addRequiredPhysicsTask("add_ic");
 }
 
 void
@@ -152,4 +160,24 @@ MultiSpeciesDiffusionPhysicsBase::addComponent(const ActionComponent & component
 {
   for (const auto & block : component.blocks())
     _blocks.push_back(block);
+}
+
+void
+MultiSpeciesDiffusionPhysicsBase::addInitialConditions()
+{
+  InputParameters params = getFactory().getValidParams("FunctionIC");
+  assignBlocks(params, _blocks);
+
+  // always obey the user specification of initial conditions
+  // There are no default values, so no need to consider whether the app is restarting
+  if (isParamValid("initial_conditions_species"))
+    for (const auto i : index_range(_species_names))
+    {
+      const auto & var_name = _species_names[i];
+      params.set<VariableName>("variable") = var_name;
+      params.set<FunctionName>("function") =
+          getParam<std::vector<FunctionName>>("initial_conditions_species")[i];
+
+      getProblem().addInitialCondition("FunctionIC", prefix() + var_name + "_ic", params);
+    }
 }
