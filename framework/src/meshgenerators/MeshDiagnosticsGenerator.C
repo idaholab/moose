@@ -289,7 +289,10 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
   3) If !neighbors it's external
   4) If external check if it's part of a sideset
   */
-
+  if (mesh->mesh_dimension() < 2)
+    mooseError("The sideset check only works for 2D and 3D meshes");
+  if (!mesh->is_serial())
+    mooseError("Only serialized/replicated meshes are supported");
   auto & boundary_info = mesh->get_boundary_info();
   boundary_info.build_side_list();
   const auto sideset_map = boundary_info.get_sideset_map();
@@ -300,34 +303,38 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
     std::vector<std::unique_ptr<Elem>> elem_sides(elem->n_sides());
     for (auto i : elem->side_index_range())
     {
-      // build sides
-      elem_sides[i] = elem->build_side_ptr(i, false);
-    }
-    for (const auto & side : elem_sides)
-    {
-      // Need a different check to see if it's external or not. Try checking all nodes
-      bool external = true;
-      for (unsigned int node_num = 0; node_num < elem->n_nodes(); node_num++)
+      // Check if side is external
+      if (elem->neighbor_ptr(i) == nullptr)
       {
-        if (side->is_internal(node_num))
-          external = false;
-      }
-      if(external)
-      {
-        //unsigned int side_id = elem->which_side_am_i(*side);
-        // check for side_id in sideset_map
-        auto sideset_count = sideset_map.count(side);
-        if (sideset_count == 0)
-        {
-          // This side does not have a sideset!!!
-          std::string message = "Side " + std::to_string(side_id) + " is has not been assigned to any sidesets";
-          _console << message << std::endl;
-          num_faces_without_sideset++;
-        }
+	// If external check if that side had a sideset 
+        auto side_itr = sideset_map.equal_range(elem);
+	bool has_boundary = false;
+	for (auto itr = side_itr.first; itr != side_itr.second; itr++)
+	{
+	  if (itr->second.first == i)
+	  {  
+            has_boundary = true;
+	  }
+	}
+        if (!has_boundary)
+	{
+	  // This side does not have a sideset!!!
+          std::string message;
+	  if (mesh->mesh_dimension() == 3)
+	    message = "Element " + std::to_string(elem->id()) + " contains an external face which has not been assigned to a sideset";
+          else
+	    message = "Element " + std::to_string(elem->id()) + " contains an external edge which has not been assigned to a sideset";
+	  _console << message << std::endl;
+	  num_faces_without_sideset++;
+	}
       }
     }  
   }
-  std::string message = "Number of element sides that have not been assigned to a sideset: " + std::to_string(num_faces_without_sideset);
+  std::string message;
+  if (mesh->mesh_dimension() == 3)
+    message = "Number of external element faces that have not been assigned to a sideset: " + std::to_string(num_faces_without_sideset);
+  else
+    message = "Number of external element edges that have not been assigned to a sideset: " + std::to_string(num_faces_without_sideset);
   diagnosticsLog(message, _check_watertight_sidesets, num_faces_without_sideset);
 }
 

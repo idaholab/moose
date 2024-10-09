@@ -29,6 +29,22 @@
       expect_out = 'Sideset bad_one \(4\) has two neighboring sides with a very large angle'
       detail = 'inconsistently oriented sidesets between two neighbor sides within the sideset,'
     []
+    [2D_watertight_sidesets]
+      type = 'RunApp'
+      input = '2D_missing_sideset.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of external element edges that have not been assigned to a sideset: 2'
+      detail = '2D meshed square missing a sideset on one side'
+    []
+    [3D_Watertight_sidesets]
+      type = 'RunApp'
+      input = '3D_missing_sideset.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of external element faces that have not been assigned to a sideset: 4'
+      detail = '3D meshed cube missing a sideset on one side'
+    []
     [overlap]
       type = 'RunApp'
       input = 'node_based_test.i'
