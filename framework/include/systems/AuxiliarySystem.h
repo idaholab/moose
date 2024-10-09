@@ -131,8 +131,6 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  virtual void setPreviousNewtonSolution();
-
   void setScalarVariableCoupleableTags(ExecFlagType type);
 
   void clearScalarVariableCoupleableTags();

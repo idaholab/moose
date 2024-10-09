@@ -3736,13 +3736,6 @@ NonlinearSystemBase::doingDG() const
 }
 
 void
-NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & soln)
-{
-  if (hasVector(Moose::PREVIOUS_NL_SOLUTION_TAG))
-    getVector(Moose::PREVIOUS_NL_SOLUTION_TAG) = soln;
-}
-
-void
 NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type,
                                        const std::set<TagID> & vector_tags,
                                        const std::set<TagID> & matrix_tags)

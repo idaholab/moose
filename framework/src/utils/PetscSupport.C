@@ -294,6 +294,9 @@ petscNonlinearConverged(SNES snes,
   PetscFunctionBegin;
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
 
+  // execute objects that may be used in convergence check
+  problem.execute(EXEC_NONLINEAR_CONVERGENCE);
+
   // Let's be nice and always check PETSc error codes.
   auto ierr = (PetscErrorCode)0;
 
@@ -419,6 +422,10 @@ petscNonlinearConverged(SNES snes,
       *reason = SNES_DIVERGED_LOCAL_MIN;
       break;
   }
+
+  // copy back previous nonlinear iteration solution
+  problem.currentNonlinearSystem().copyPreviousNLSolutions();
+  problem.getAuxiliarySystem().copyPreviousNLSolutions();
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }

@@ -791,13 +791,6 @@ AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
          _elemental_vec_aux_storage.hasActiveBoundaryObjects(bnd_id);
 }
 
-void
-AuxiliarySystem::setPreviousNewtonSolution()
-{
-  // Evaluate aux variables to get the solution vector
-  compute(EXEC_LINEAR);
-}
-
 template <typename AuxKernelType>
 void
 AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse)
