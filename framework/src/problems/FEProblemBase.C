@@ -490,14 +490,18 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   for (const auto i : index_range(_nl_sys_names))
   {
-    _nl_sys_name_to_num[_nl_sys_names[i]] = i;
-    _solver_sys_name_to_num[_nl_sys_names[i]] = i;
+    const auto & name = _nl_sys_names[i];
+    _nl_sys_name_to_num[name] = i;
+    _solver_sys_name_to_num[name] = i;
+    _solver_sys_names.push_back(name);
   }
 
   for (const auto i : index_range(_linear_sys_names))
   {
-    _linear_sys_name_to_num[_linear_sys_names[i]] = i;
-    _solver_sys_name_to_num[_linear_sys_names[i]] = i + _num_nl_sys;
+    const auto & name = _linear_sys_names[i];
+    _linear_sys_name_to_num[name] = i;
+    _solver_sys_name_to_num[name] = i + _num_nl_sys;
+    _solver_sys_names.push_back(name);
   }
 
   _nonlocal_cm.resize(_nl_sys_names.size());
@@ -6108,7 +6112,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
-    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
+    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
     _is_petsc_options_inserted = true;
   }
 #endif
@@ -6271,7 +6275,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
-    Moose::PetscSupport::petscSetOptions(options, solver_params);
+    Moose::PetscSupport::petscSetOptions(options, solver_params, this);
     _is_petsc_options_inserted = true;
   }
 #endif
