@@ -2,15 +2,15 @@
   issues = '#6101'
   design = 'syntax/Variables/index.md'
 
-  [./test]
-    type = Exodiff
+  [test]
+    type = CSVDiff
     input = 'test.i'
-    exodiff = 'test_out.e'
+    csvdiff = 'test_out.csv'
     # convergence history is different when running threaded and in MPI,
     # which would cause diffs at some NL iterations
     max_parallel = 1
     max_threads = 1
 
     requirement = 'The system shall support the ability to couple to a previous field variable calculation to produce another field such that there is no Jacobian contribution due to the lagged coupling.'
-  [../]
+  []
 []
