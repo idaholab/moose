@@ -1,0 +1,22 @@
+[Tests]
+    issues = '#28753'
+    design = 'AnisotropicRankTwoTensor.md'
+    [isotropic]
+      requirement = 'The system shall be able to create an isotropic rank two tensor material property using the AnisotropicRankTwoTensor object.'
+        type = 'Exodiff'
+        input = 'isotropic.i'
+        exodiff = 'isotropic_out.e'
+    []
+    [isotropic]        
+      requirement = 'The system shall be able to create an anisotropic rank two tensor material property using the AnisotropicRankTwoTensor object.'
+        type = 'Exodiff'
+        input = 'anisotropic.i'
+        exodiff = 'anisotropic_out.e'
+    []
+    [isotropic]
+      requirement = 'The system shall be able to create a noncartesian  anisotropic rank two tensor material property using the AnisotropicRankTwoTensor object.'
+        type = 'Exodiff'
+        input = 'anisotropic_noncartesian.i'
+        exodiff = 'anisotropic_noncartesian_out.e'
+    []
+[]
