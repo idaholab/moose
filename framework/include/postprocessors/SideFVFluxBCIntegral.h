@@ -28,9 +28,12 @@ public:
   SideFVFluxBCIntegral(const InputParameters & parameters);
 
 protected:
-  Real computeQpIntegral() override;
-  Real computeFaceInfoIntegral(const FaceInfo * fi) override;
+  virtual Real computeQpIntegral() override;
+  virtual Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
+  /// The names of the boundary conditions that we would like to integrate
   const std::vector<std::string> _bc_names;
+
+  /// Pointers to the boundary conditions which will be integrated
   std::vector<FVFluxBC *> _bc_objects;
 };

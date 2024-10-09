@@ -34,6 +34,7 @@ public:
   void computeJacobian(const FaceInfo & fi) override;
   void computeResidualAndJacobian(const FaceInfo & fi) override;
 
+  /// Update internal structures (normal, face type, etc) for the given face
   void updateCurrentFace(const FaceInfo & fi);
 
 protected:

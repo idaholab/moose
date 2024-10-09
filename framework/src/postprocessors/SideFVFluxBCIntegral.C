@@ -56,6 +56,8 @@ SideFVFluxBCIntegral::initialSetup()
                  "' was not found! This can be due to the boundary condition not existing in the "
                  "'FVBCs' block or the boundary condition not inheriting from FVFluxBC.");
 
+    // We expect the code to error at an earlier stage if there are more than one
+    // BCs with the same name
     _bc_objects.push_back(flux_bcs[0]);
   }
 
