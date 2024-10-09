@@ -41,10 +41,9 @@ MeshDiagnosticsGenerator::validParams()
       chk_option,
       "whether to check that sidesets are consistently oriented using neighbor subdomains. If a "
       "sideset is inconsistently oriented within a subdomain, this will not be detected");
-  params.addParam<MooseEnum>(
-      "check_for_watertight_sidesets",
-      chk_option,
-      "whether to check for sides that are not assigned to any sidesets");
+  params.addParam<MooseEnum>("check_for_watertight_sidesets",
+                             chk_option,
+                             "whether to check for sides that are not assigned to any sidesets");
   params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
@@ -103,10 +102,10 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
   if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
-      _check_element_volumes == "NO_CHECK" &&
-      _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
-      _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
-      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
+      _check_element_volumes == "NO_CHECK" && _check_element_types == "NO_CHECK" &&
+      _check_element_overlap == "NO_CHECK" && _check_non_planar_sides == "NO_CHECK" &&
+      _check_non_conformal_mesh == "NO_CHECK" && _check_adaptivity_non_conformality == "NO_CHECK" &&
+      _check_local_jacobian == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -162,7 +161,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
   auto side_set = boundary_info.get_side_boundary_ids();
   boundary_info.build_node_list_from_side_list();
   auto nodeset_map = boundary_info.get_nodeset_map();
-  //auto & num_sides = mesh->n_sides();
+  // auto & num_sides = mesh->n_sides();
   for (const auto bid : boundary_info.get_boundary_ids())
   {
     // This check only looks at subdomains on both sides of the sideset
@@ -306,35 +305,39 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
       // Check if side is external
       if (elem->neighbor_ptr(i) == nullptr)
       {
-	// If external check if that side had a sideset 
+        // If external check if that side had a sideset
         auto side_itr = sideset_map.equal_range(elem);
-	bool has_boundary = false;
-	for (auto itr = side_itr.first; itr != side_itr.second; itr++)
-	{
-	  if (itr->second.first == i)
-	  {  
+        bool has_boundary = false;
+        for (auto itr = side_itr.first; itr != side_itr.second; itr++)
+        {
+          if (itr->second.first == i)
+          {
             has_boundary = true;
-	  }
-	}
+          }
+        }
         if (!has_boundary)
-	{
-	  // This side does not have a sideset!!!
+        {
+          // This side does not have a sideset!!!
           std::string message;
-	  if (mesh->mesh_dimension() == 3)
-	    message = "Element " + std::to_string(elem->id()) + " contains an external face which has not been assigned to a sideset";
+          if (mesh->mesh_dimension() == 3)
+            message = "Element " + std::to_string(elem->id()) +
+                      " contains an external face which has not been assigned to a sideset";
           else
-	    message = "Element " + std::to_string(elem->id()) + " contains an external edge which has not been assigned to a sideset";
-	  _console << message << std::endl;
-	  num_faces_without_sideset++;
-	}
+            message = "Element " + std::to_string(elem->id()) +
+                      " contains an external edge which has not been assigned to a sideset";
+          _console << message << std::endl;
+          num_faces_without_sideset++;
+        }
       }
-    }  
+    }
   }
   std::string message;
   if (mesh->mesh_dimension() == 3)
-    message = "Number of external element faces that have not been assigned to a sideset: " + std::to_string(num_faces_without_sideset);
+    message = "Number of external element faces that have not been assigned to a sideset: " +
+              std::to_string(num_faces_without_sideset);
   else
-    message = "Number of external element edges that have not been assigned to a sideset: " + std::to_string(num_faces_without_sideset);
+    message = "Number of external element edges that have not been assigned to a sideset: " +
+              std::to_string(num_faces_without_sideset);
   diagnosticsLog(message, _check_watertight_sidesets, num_faces_without_sideset);
 }
 
