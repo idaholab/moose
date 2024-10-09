@@ -1457,9 +1457,9 @@ label: v text: v desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: r
   request_char = 6;
   expect_count = 3;
   expect_items = R"INPUT(
-label: TimeIntegrator text: TimeIntegrator]\n  type = \n  $0\n[] desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
-label: TimeStepper    text: TimeStepper]\n  type = \n  $0\n[]    desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
-label: TimeSteppers   text: TimeSteppers]\n  $0\n[]              desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeIntegrator  text: TimeIntegrator]\n  type = \n  $0\n[] desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeStepper     text: TimeStepper]\n  type = \n  $0\n[]    desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeSteppers    text: TimeSteppers]\n  $0\n[]              desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
