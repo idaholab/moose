@@ -31,9 +31,8 @@ private:
    * Read initialization data off of parameter mesh and error check.
    * @return values read from mesh
    */
-  std::vector<Real> parseData(const std::vector<unsigned int> & exodus_timestep,
-                              const ParameterMesh & pmesh,
-                              Real constantDataFromInput,
-                              const std::string & meshVarName,
-                              unsigned int ntimes) const;
+  std::vector<Real> parseExodusData(const std::vector<unsigned int> & exodus_timestep,
+                                    const ParameterMesh & pmesh,
+                                    const std::string & mesh_var_name,
+                                    unsigned int ntimes) const;
 };

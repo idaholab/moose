@@ -11,19 +11,19 @@ This optimization reporter performs the same type of optimization as [Optimizati
 - finite-element order ([!param](/OptimizationReporter/ParameterMeshOptimization/parameter_orders)) where a single value input is applied to all parameters,
 - initial condition which can be set by the following inputs:
 
-  - from the input file using ([!param](/OptimizationReporter/ParameterMeshOptimization/constant_group_initial_condition)) where one value is given for each group of parameters
+  - from the input file using ([!param](/OptimizationReporter/OptimizationReporter/initial_condition)) where all values or one value per group can be specified
   - from the parameter mesh using ([!param](/OptimizationReporter/ParameterMeshOptimization/initial_condition_mesh_variable)) where each parameter in the group is initialized from data read from the parameter mesh exodus file,
   - default is zero
-  
+
 - lower bound which can be set by the following inputs:
 
-  - from the input file using ([!param](/OptimizationReporter/ParameterMeshOptimization/constant_group_lower_bounds)) where one value is given for each group of parameters
+  - from the input file using ([!param](/OptimizationReporter/ParameterMeshOptimization/lower_bounds)) where all values or one value per group can be specified
   - from the parameter mesh using ([!param](/OptimizationReporter/ParameterMeshOptimization/lower_bound_mesh_variable)) where each parameter in the group is initialized from data read from the parameter mesh exodus file
   - default is no bounds
 
 - upper bound can be set by the following inputs:
 
-  - from the input file using ([!param](/OptimizationReporter/ParameterMeshOptimization/constant_group_upper_bounds)) where one value is given for each group of parameters
+  - from the input file using ([!param](/OptimizationReporter/ParameterMeshOptimization/upper_bounds)) where all values or one value per group can be specified.
   - from the parameter mesh using ([!param](/OptimizationReporter/ParameterMeshOptimization/upper_bound_mesh_variable)) where each parameter in the group is initialized from data read from the parameter mesh exodus file
   - default is no bounds
 
@@ -56,11 +56,11 @@ A good guess for the initial parameter values will help with the convergence of 
 
 !listing mesh_source/parameter_mesh_restart.i
 
-After the parameter mesh is initialized with parameter values, it can be used as an initial guess in the optimization problem.  The AuxVariable `restart_source` is then read in by `OptimizationReporter` using `initial_condition_mesh_variable` as the initial guess for the parameter field:  
+After the parameter mesh is initialized with parameter values, it can be used as an initial guess in the optimization problem.  The AuxVariable `restart_source` is then read in by `OptimizationReporter` using `initial_condition_mesh_variable` as the initial guess for the parameter field:
 
 !listing mesh_source/main_linearRestart.i block=OptimizationReporter
 
-This optimization simulation is restarted with the optimized parameter values from the first example and convergence occurs in a single step.  The `ParameterMeshOptimization` reporter also defined an `exodus_timesteps_for_parameter_mesh_variable` to identify which step to read from the exodus file.  Constant lower and upper bounds were also given by `constant_group_lower_bounds` and `constant_group_upper_bounds` but do not have an effect on the optimization algorithm because it was started from the exact solution for the parameter field.  To use bounds, the `tao_solver` in the `Executioner` block was changed to `taoblmvm` (bounded lmvm).  For difficult optimization problems, it is better to start with a good guess for the parameters than to tighten up their bounds.  Multi-resolution optimization strategies [!citet](eslaminia2022full) find better initial guesses for the parameters by starting with an easier to solve optimization problem containing a few controllable parameters and then reusing those optimized parameters as an initial guess for a more difficult optimization problem with more parameters.
+This optimization simulation is restarted with the optimized parameter values from the first example and convergence occurs in a single step.  The `ParameterMeshOptimization` reporter also defined an `exodus_timesteps_for_parameter_mesh_variable` to identify which step to read from the exodus file.  Constant lower and upper bounds were also given by `lower_bounds` and `upper_bounds` but do not have an effect on the optimization algorithm because it was started from the exact solution for the parameter field.  To use bounds, the `tao_solver` in the `Executioner` block was changed to `taoblmvm` (bounded lmvm).  For difficult optimization problems, it is better to start with a good guess for the parameters than to tighten up their bounds.  Multi-resolution optimization strategies [!citet](eslaminia2022full) find better initial guesses for the parameters by starting with an easier to solve optimization problem containing a few controllable parameters and then reusing those optimized parameters as an initial guess for a more difficult optimization problem with more parameters.
 !syntax parameters /OptimizationReporter/ParameterMeshOptimization
 
 !syntax inputs /OptimizationReporter/ParameterMeshOptimization

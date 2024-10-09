@@ -8,8 +8,8 @@
   parameter_meshes = 'parameter_mesh_restart_out.e'
   exodus_timesteps_for_parameter_mesh_variable = 2
   initial_condition_mesh_variable = restart_source
-  constant_group_lower_bounds = -1
-  constant_group_upper_bounds = 5
+  lower_bounds = -1
+  upper_bounds = 5
   outputs = none
 []
 

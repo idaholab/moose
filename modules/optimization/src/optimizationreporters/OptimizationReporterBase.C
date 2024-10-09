@@ -121,14 +121,17 @@ OptimizationReporterBase::getUpperBound(dof_id_type i) const
 }
 
 std::vector<Real>
-OptimizationReporterBase::fillParamsVector(std::string type, Real default_value) const
+OptimizationReporterBase::parseInputData(std::string type,
+                                         Real default_value,
+                                         unsigned int param_id) const
 {
-  std::vector<std::vector<Real>> parsed_data;
+  // fill with default values
+  std::vector<Real> parsed_data_id(_nvalues[param_id], default_value);
   if (isParamValid(type))
   {
-    parsed_data = getParam<std::vector<std::vector<Real>>>(type);
+    std::vector<std::vector<Real>> parsed_data(getParam<std::vector<std::vector<Real>>>(type));
+    parsed_data_id.assign(parsed_data[param_id].begin(), parsed_data[param_id].end());
     if (parsed_data.size() != _nvalues.size())
-    {
       paramError(type,
                  "There must be a vector of ",
                  type,
@@ -138,32 +141,18 @@ OptimizationReporterBase::fillParamsVector(std::string type, Real default_value)
                  "seperated by \";\" even if it is a single value per group for a constant ",
                  type,
                  ".");
-    }
-    for (std::size_t i = 0; i < parsed_data.size(); ++i)
-    {
-      // The case when the initial condition is constant for each parameter group
-      if (parsed_data[i].size() == 1)
-        parsed_data[i].resize(_nvalues[i], parsed_data[i][0]);
-      else if (parsed_data[i].size() != _nvalues[i])
-        paramError(type,
-                   "When ",
-                   type,
-                   " are given in input file, there must either be a single value per parameter "
-                   "group or a value for every parameter in the group.");
-    }
+    // The case when the initial condition is constant for each parameter group
+    if (parsed_data[param_id].size() == 1)
+      parsed_data_id.assign(_nvalues[param_id], parsed_data[param_id][0]);
+    else if (parsed_data[param_id].size() != _nvalues[param_id])
+      paramError(type,
+                 "When ",
+                 type,
+                 " are given in input file, there must either be a single value per parameter "
+                 "group or a value for every parameter in the group.");
   }
 
-  // fill with default values
-  if (parsed_data.empty())
-    for (const auto & params_per_group : _nvalues)
-      parsed_data.emplace_back(params_per_group, default_value);
-
-  // flatten into single vector
-  std::vector<Real> flattened_data;
-  for (const auto & vec : parsed_data)
-    flattened_data.insert(flattened_data.end(), vec.begin(), vec.end());
-
-  return flattened_data;
+  return parsed_data_id;
 }
 
 void

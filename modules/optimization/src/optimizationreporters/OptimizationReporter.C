@@ -60,17 +60,20 @@ OptimizationReporter::setICsandBounds()
         "num_parameters",
         "There should be a number in \'num_parameters\' for each name in \'parameter_names\'.");
 
-  std::vector<Real> initial_conditions(fillParamsVector("initial_condition", 0));
-  _lower_bounds = fillParamsVector("lower_bounds", std::numeric_limits<Real>::lowest());
-  _upper_bounds = fillParamsVector("upper_bounds", std::numeric_limits<Real>::max());
-
-  std::size_t stride = 0;
-  for (const auto & i : make_range(_nparams))
+  for (const auto & param_id : make_range(_nparams))
   {
-    _gradients[i]->resize(_nvalues[i]);
-    _parameters[i]->assign(initial_conditions.begin() + stride,
-                           initial_conditions.begin() + stride + _nvalues[i]);
-    stride += _nvalues[i];
+    _gradients[param_id]->resize(_nvalues[param_id]);
+
+    std::vector<Real> ic(parseInputData("initial_condition", 0, param_id));
+    std::vector<Real> lb(
+        parseInputData("lower_bounds", std::numeric_limits<Real>::lowest(), param_id));
+    std::vector<Real> ub(
+        parseInputData("upper_bounds", std::numeric_limits<Real>::max(), param_id));
+
+    _lower_bounds.insert(_lower_bounds.end(), lb.begin(), lb.end());
+    _upper_bounds.insert(_upper_bounds.end(), ub.begin(), ub.end());
+
+    _parameters[param_id]->assign(ic.begin(), ic.end());
   }
 }
 
