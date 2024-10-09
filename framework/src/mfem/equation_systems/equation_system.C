@@ -534,7 +534,11 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   auto lf = _lfs.Get(test_var_name);
   // if implicit, add contribution to linear form from terms involving state
   // variable at previous timestep: {
-  blf->AddMult(*_trial_variables.Get(test_var_name), *lf, 1.0);
+  
+  // The AddMult() method in mfem::BilinearForm is not defined for non-legacy assembly
+  mfem::Vector lf_prev(lf->Size());
+  blf->Mult(*_trial_variables.Get(test_var_name), lf_prev);
+  *lf += lf_prev;
   // }
   mfem::Vector aux_x, aux_rhs;
   // Update solution values on Dirichlet values to be in terms of du/dt instead of u
