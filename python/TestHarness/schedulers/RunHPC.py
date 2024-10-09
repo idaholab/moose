@@ -894,7 +894,7 @@ class RunHPC(RunParallel):
         """
         Helper that splits out the mpi command from a given command, if any
         """
-        find_mpi = re.search('^(\s+)?(mpiexec|mpirun)(\s+-(n|np)\s+\d+)?(\s+)?', command)
+        find_mpi = re.search(r'^(\s+)?(mpiexec|mpirun)(\s+-(n|np)\s+\d+)?(\s+)?', command)
         if find_mpi is not None:
             return find_mpi.group(0)
         return None

@@ -39,8 +39,8 @@ class TestHarnessTester(TestHarnessTestCase):
         output += self.runTests('-i', 'duplicate_outputs_ok', '--heavy')
 
         # skip case
-        self.assertNotRegexpMatches(output, 'skipped_out.e')
+        self.assertNotRegex(output, 'skipped_out.e')
         # heavy case
-        self.assertNotRegexpMatches(output, 'heavy_out.e')
+        self.assertNotRegex(output, 'heavy_out.e')
         # all
-        self.assertNotRegexpMatches(output, 'FATAL TEST HARNESS ERROR')
+        self.assertNotRegex(output, 'FATAL TEST HARNESS ERROR')

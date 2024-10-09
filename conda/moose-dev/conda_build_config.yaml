@@ -7,13 +7,13 @@ moose_libmesh:
   - moose-libmesh 2024.10.17 openmpi_0
 
 moose_wasp:
-  - moose-wasp 2024.05.08
+  - moose-wasp 2024.11.13
 
 moose_tools:
-  - moose-tools 2024.10.01
+  - moose-tools 2024.11.13
 
 moose_peacock:
-  - moose-peacock 2024.10.01
+  - moose-peacock 2024.11.13
 
 zip_keys:
   - mpi

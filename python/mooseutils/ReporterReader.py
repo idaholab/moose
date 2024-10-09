@@ -14,7 +14,7 @@ import json
 from . import message
 
 class ReporterReader(object):
-    """
+    r"""
     A Reader for MOOSE Reporter data.
 
     Args:
@@ -65,7 +65,7 @@ class ReporterReader(object):
         return self._filename
 
     def partFilename(self, part):
-        """
+        r"""
         Gets the filename assocated with the given part
 
         Args:
@@ -79,7 +79,7 @@ class ReporterReader(object):
         return self._filename + '.' + '{}'.format(part).zfill(len(str(self.numParts())))
 
     def __getitem__(self, keys):
-        """
+        r"""
         Operator[] returns the data for the current time.
 
         Args:
@@ -109,7 +109,7 @@ class ReporterReader(object):
         return self._index < len(self._data['time_steps'])
 
     def __contains__(self, variable):
-        """
+        r"""
         Returns true if the variable exists in the data structure.
 
         Args:
@@ -167,7 +167,7 @@ class ReporterReader(object):
         return rnames
 
     def info(self, key=None):
-        """
+        r"""
         Return a information within json file.
 
         Args:
@@ -204,7 +204,7 @@ class ReporterReader(object):
         return info
 
     def update(self, time=None, part=0):
-        """
+        r"""
         Update data by reading/re-reading files.
 
         Args:
