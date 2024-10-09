@@ -39,6 +39,7 @@ protected:
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
   virtual void computeWijPrime(int iblock) override;
   virtual void computeh(int iblock) override;
+  PetscErrorCode cleanUp();
   TriSubChannelMesh & _tri_sch_mesh;
   // Extra objects for heat conduction, which is important with metal coolants
   Mat _hc_axial_heat_conduction_mat;

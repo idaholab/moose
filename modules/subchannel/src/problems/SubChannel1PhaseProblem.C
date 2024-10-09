@@ -272,55 +272,66 @@ SubChannel1PhaseProblem::initialSetup()
 
 SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
 {
+  PetscErrorCode ierr = cleanUp();
+  if (ierr)
+    mooseError(name(), ": Error in memory cleanup");
+}
+
+PetscErrorCode
+SubChannel1PhaseProblem::cleanUp()
+{
+  PetscFunctionBegin;
   // We need to clean up the petsc matrices/vectors
   // Mass conservation components
-  MatDestroy(&_mc_sumWij_mat);
-  VecDestroy(&_Wij_vec);
-  VecDestroy(&_prod);
-  VecDestroy(&_prodp);
-  MatDestroy(&_mc_axial_convection_mat);
-  VecDestroy(&_mc_axial_convection_rhs);
+  LibmeshPetscCall(MatDestroy(&_mc_sumWij_mat));
+  LibmeshPetscCall(VecDestroy(&_Wij_vec));
+  LibmeshPetscCall(VecDestroy(&_prod));
+  LibmeshPetscCall(VecDestroy(&_prodp));
+  LibmeshPetscCall(MatDestroy(&_mc_axial_convection_mat));
+  LibmeshPetscCall(VecDestroy(&_mc_axial_convection_rhs));
 
   // Axial momentum conservation components
-  MatDestroy(&_amc_turbulent_cross_flows_mat);
-  VecDestroy(&_amc_turbulent_cross_flows_rhs);
-  MatDestroy(&_amc_time_derivative_mat);
-  VecDestroy(&_amc_time_derivative_rhs);
-  MatDestroy(&_amc_advective_derivative_mat);
-  VecDestroy(&_amc_advective_derivative_rhs);
-  MatDestroy(&_amc_cross_derivative_mat);
-  VecDestroy(&_amc_cross_derivative_rhs);
-  MatDestroy(&_amc_friction_force_mat);
-  VecDestroy(&_amc_friction_force_rhs);
-  VecDestroy(&_amc_gravity_rhs);
-  MatDestroy(&_amc_pressure_force_mat);
-  VecDestroy(&_amc_pressure_force_rhs);
-  MatDestroy(&_amc_sys_mdot_mat);
-  VecDestroy(&_amc_sys_mdot_rhs);
+  LibmeshPetscCall(MatDestroy(&_amc_turbulent_cross_flows_mat));
+  LibmeshPetscCall(VecDestroy(&_amc_turbulent_cross_flows_rhs));
+  LibmeshPetscCall(MatDestroy(&_amc_time_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_amc_time_derivative_rhs));
+  LibmeshPetscCall(MatDestroy(&_amc_advective_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_amc_advective_derivative_rhs));
+  LibmeshPetscCall(MatDestroy(&_amc_cross_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_amc_cross_derivative_rhs));
+  LibmeshPetscCall(MatDestroy(&_amc_friction_force_mat));
+  LibmeshPetscCall(VecDestroy(&_amc_friction_force_rhs));
+  LibmeshPetscCall(VecDestroy(&_amc_gravity_rhs));
+  LibmeshPetscCall(MatDestroy(&_amc_pressure_force_mat));
+  LibmeshPetscCall(VecDestroy(&_amc_pressure_force_rhs));
+  LibmeshPetscCall(MatDestroy(&_amc_sys_mdot_mat));
+  LibmeshPetscCall(VecDestroy(&_amc_sys_mdot_rhs));
 
   // Lateral momentum conservation components
-  MatDestroy(&_cmc_time_derivative_mat);
-  VecDestroy(&_cmc_time_derivative_rhs);
-  MatDestroy(&_cmc_advective_derivative_mat);
-  VecDestroy(&_cmc_advective_derivative_rhs);
-  MatDestroy(&_cmc_friction_force_mat);
-  VecDestroy(&_cmc_friction_force_rhs);
-  MatDestroy(&_cmc_pressure_force_mat);
-  VecDestroy(&_cmc_pressure_force_rhs);
-  MatDestroy(&_cmc_sys_Wij_mat);
-  VecDestroy(&_cmc_sys_Wij_rhs);
-  VecDestroy(&_cmc_Wij_channel_dummy);
+  LibmeshPetscCall(MatDestroy(&_cmc_time_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_cmc_time_derivative_rhs));
+  LibmeshPetscCall(MatDestroy(&_cmc_advective_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_cmc_advective_derivative_rhs));
+  LibmeshPetscCall(MatDestroy(&_cmc_friction_force_mat));
+  LibmeshPetscCall(VecDestroy(&_cmc_friction_force_rhs));
+  LibmeshPetscCall(MatDestroy(&_cmc_pressure_force_mat));
+  LibmeshPetscCall(VecDestroy(&_cmc_pressure_force_rhs));
+  LibmeshPetscCall(MatDestroy(&_cmc_sys_Wij_mat));
+  LibmeshPetscCall(VecDestroy(&_cmc_sys_Wij_rhs));
+  LibmeshPetscCall(VecDestroy(&_cmc_Wij_channel_dummy));
 
   // Energy conservation components
-  MatDestroy(&_hc_time_derivative_mat);
-  VecDestroy(&_hc_time_derivative_rhs);
-  MatDestroy(&_hc_advective_derivative_mat);
-  VecDestroy(&_hc_advective_derivative_rhs);
-  MatDestroy(&_hc_cross_derivative_mat);
-  VecDestroy(&_hc_cross_derivative_rhs);
-  VecDestroy(&_hc_added_heat_rhs);
-  MatDestroy(&_hc_sys_h_mat);
-  VecDestroy(&_hc_sys_h_rhs);
+  LibmeshPetscCall(MatDestroy(&_hc_time_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_hc_time_derivative_rhs));
+  LibmeshPetscCall(MatDestroy(&_hc_advective_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_hc_advective_derivative_rhs));
+  LibmeshPetscCall(MatDestroy(&_hc_cross_derivative_mat));
+  LibmeshPetscCall(VecDestroy(&_hc_cross_derivative_rhs));
+  LibmeshPetscCall(VecDestroy(&_hc_added_heat_rhs));
+  LibmeshPetscCall(MatDestroy(&_hc_sys_h_mat));
+  LibmeshPetscCall(VecDestroy(&_hc_sys_h_rhs));
+
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 bool

@@ -117,7 +117,7 @@ protected:
                                                PetscScalar botValue,
                                                const std::string interp_type,
                                                PetscScalar Peclet);
-
+  PetscErrorCode cleanUp();
   SubChannelMesh & _subchannel_mesh;
   /// number of axial blocks
   unsigned int _n_blocks;
