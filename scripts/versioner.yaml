@@ -14,9 +14,7 @@ packages:
       # the next time we update this
       - apptainer/mpi.def
       - apptainer/files/mpi
-      - conda/mpi/meta.yaml
-      - conda/mpi/conda_build_config.yaml
-      - conda/mpi/base_build.sh
+      - conda/mpi
     apptainer:
   petsc:
     dependencies:
@@ -73,6 +71,27 @@ packages:
       - conda/moose-dev/meta.yaml
       - conda/moose-dev/conda_build_config.yaml
       - scripts/setup_libtorch.sh
+  libmesh-vtk:
+    dependencies:
+      - mpi
+    influential:
+      - conda/libmesh-vtk
+  peacock:
+    dependencies:
+      - mpi
+    influential:
+      - conda/peacock
+  pprof:
+    influential:
+      - conda/pprof
+  pyhit:
+    dependencies:
+      - wasp
+    influential:
+      - conda/pyhit
+  seacas:
+    influential:
+      - conda/seacas
   app:
     dependencies:
       - moose-dev
