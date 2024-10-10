@@ -11,6 +11,7 @@
 
 #include "SolveObject.h"
 #include "RhieChowMassFlux.h"
+#include "SegregatedSolverBase.h"
 
 class SIMPLESolve : public SolveObject
 {
@@ -30,7 +31,7 @@ public:
     mooseError("Cannot set inner solve for SIMPLESolve");
   }
 
-  /// Fetch the Rhie Chow
+  /// Fetch the Rhie Chow user object that
   void linkRhieChowUserObject();
 
   const RhieChowMassFlux & getRCUserObject() { return *_rc_uo; }
@@ -67,4 +68,13 @@ protected:
 
   /// Pointer to the segregated RhieChow interpolation object
   RhieChowMassFlux * _rc_uo;
+
+  /// Options for the linear solver of the momentum equation
+  SIMPLESolverConfiguration _momentum_linear_control;
+
+  /// Options for the linear solver of the pressure equation
+  SIMPLESolverConfiguration _pressure_linear_control;
+
+  /// Debug parameter which allows printing the coupling and solution vectors/matrices
+  const bool _print_fields;
 };

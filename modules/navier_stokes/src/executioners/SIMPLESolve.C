@@ -22,7 +22,8 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
     _momentum_system_names(getParam<std::vector<SolverSystemName>>("momentum_systems")),
     _pressure_system_name(getParam<SolverSystemName>("pressure_system")),
     _pressure_sys_number(_problem.linearSysNum(_pressure_system_name)),
-    _pressure_system(_problem.getLinearSystem(_pressure_sys_number))
+    _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+    _print_fields(getParam<bool>("print_fields"))
 {
   // We fetch the system numbers for the momentum components plus add vectors
   // for removing the contribution from the pressure gradient terms.
@@ -31,6 +32,16 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
     _momentum_system_numbers.push_back(_problem.linearSysNum(_momentum_system_names[system_i]));
     _momentum_systems.push_back(&_problem.getLinearSystem(_momentum_system_numbers[system_i]));
   }
+
+  _momentum_linear_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
+  _momentum_linear_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
+  _momentum_linear_control.int_valued_data["max_its"] =
+      getParam<unsigned int>("momentum_l_max_its");
+
+  _pressure_linear_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
+  _pressure_linear_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
+  _pressure_linear_control.int_valued_data["max_its"] =
+      getParam<unsigned int>("pressure_l_max_its");
 }
 
 bool
