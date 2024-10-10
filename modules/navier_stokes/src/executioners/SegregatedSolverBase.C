@@ -571,6 +571,9 @@ SegregatedSolverBase::SegregatedSolverBase(const InputParameters & parameters)
                                  false);
 
   _time = 0;
+  // This class of segregated solvers for the Navier Stokes equations does not require preserving
+  // entries in a Jacobian
+  _problem.setPreserveMatrixSparsityPattern(false);
 }
 
 void
