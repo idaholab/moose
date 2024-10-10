@@ -13,6 +13,7 @@
 #include "INSFVRhieChowInterpolatorSegregated.h"
 #include "PetscSupport.h"
 #include "SolverParams.h"
+#include "SegregatedSolverUtils.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -47,95 +48,7 @@ public:
   virtual void init() override;
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
-  /**
-   * Compute a normalization factor which is applied to the linear residual to determine
-   * convergence. This function is based on the description provided here:
-   *  // @article{greenshields2022notes,
-   * title={Notes on computational fluid dynamics: General principles},
-   * author={Greenshields, Christopher J and Weller, Henry G},
-   * journal={(No Title)},
-   * year={2022}
-   * }
-   * @param solution The solution vector
-   * @param mat The system matrix
-   * @param rhs The system right hand side
-   */
-  Real computeNormalizationFactor(const NumericVector<Number> & solution,
-                                  const SparseMatrix<Number> & mat,
-                                  const NumericVector<Number> & rhs);
-
 protected:
-  /**
-   * Relax the matrix to ensure diagonal dominance, we hold onto the difference in diagonals
-   * for later use in relaxing the right hand side. For the details of this relaxation process, see
-   *
-   * Juretic, Franjo. Error analysis in finite volume CFD. Diss.
-   * Imperial College London (University of London), 2005.
-   *
-   * @param matrix_in The matrix that needs to be relaxed
-   * @param relaxation_parameter The scale which described how much the matrix is relaxed
-   * @param diff_diagonal A vector holding the $A_{diag}-A_{diag, relaxed}$ entries for further
-   *                      use in the relaxation of the right hand side
-   */
-  void relaxMatrix(SparseMatrix<Number> & matrix_in,
-                   const Real relaxation_parameter,
-                   NumericVector<Number> & diff_diagonal);
-
-  /**
-   * Relax the right hand side of an equation, this needs to be called once and the system matrix
-   * has been relaxed and the field describing the difference in the diagonals of the system matrix
-   * is already available. The relaxation process needs modification to both the system matrix and
-   * the right hand side. For more information see:
-   *
-   * Juretic, Franjo. Error analysis in finite volume CFD. Diss.
-   * Imperial College London (University of London), 2005.
-   *
-   * @param rhs_in The unrelaxed right hand side that needs to be relaxed
-   * @param solution_in The solution
-   * @param diff_diagonal The diagonal correction used for the corresponding system matrix
-   */
-  void relaxRightHandSide(NumericVector<Number> & rhs_in,
-                          const NumericVector<Number> & solution_in,
-                          const NumericVector<Number> & diff_diagonal);
-
-  /**
-   * Relax the update on a solution field using the following approach:
-   * $u = u_{old}+\lambda (u - u_{old})$
-   *
-   * @param vector_new The new solution vector
-   * @param vec_old The old solution vector
-   * @param relaxation_factor The lambda parameter in the expression above
-   */
-  void relaxSolutionUpdate(NumericVector<Number> & vec_new,
-                           const NumericVector<Number> & vec_old,
-                           const Real relaxation_factor);
-
-  /**
-   * Limit a solution to its minimum and maximum bounds:
-   * $u = min(max(u, min_limit), max_limit)$
-   *
-   * @param system_in The system whose solution shall be limited
-   * @param min_limit = 0.0 The minimum limit for the solution
-   * @param max_limit = 1e10 The maximum limit for the solution
-   */
-  void limitSolutionUpdate(NumericVector<Number> & solution,
-                           const Real min_limit = std::numeric_limits<Real>::epsilon(),
-                           const Real max_limit = 1e10);
-
-  /**
-   * Implicitly constrain the system by adding a factor*(u-u_desired) to it at a desired dof
-   * value. To make sure the conditioning of the matrix does not change significantly, factor
-   * is chosen to be the diagonal component of the matrix coefficients for a given dof.
-   * @param mx The matrix of the system which needs to be constrained
-   * @param rhs The right hand side of the system which needs to be constrained
-   * @param value The desired value for the solution field at a dof
-   * @param dof_id The ID of the dof which needs to be constrained
-   */
-  void constrainSystem(SparseMatrix<Number> & mx,
-                       NumericVector<Number> & rhs,
-                       const Real desired_value,
-                       const dof_id_type dof_id);
-
   /**
    * Find the ID of the degree of freedom which corresponds to the variable and
    * a given point on the mesh
