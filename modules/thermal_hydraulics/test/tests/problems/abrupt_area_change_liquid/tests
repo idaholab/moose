@@ -1,0 +1,24 @@
+[Tests]
+  design = 'VolumeJunction1Phase.md'
+  issues = '#25958'
+
+  [test]
+    requirement = 'The system shall be able to model an abrupt area change in a liquid flow'
+    [with_junction]
+      type = CSVDiff
+      input = 'with_junction.i'
+      csvdiff = 'with_junction_vpp_FINAL.csv'
+      abs_zero = 1e-8
+      heavy = True
+      detail = 'with a junction.'
+    []
+    [without_junction]
+      type = CSVDiff
+      input = 'without_junction.i'
+      csvdiff = 'without_junction_vpp_FINAL.csv'
+      abs_zero = 1e-8
+      heavy = True
+      detail = 'without a junction.'
+    []
+  []
+[]

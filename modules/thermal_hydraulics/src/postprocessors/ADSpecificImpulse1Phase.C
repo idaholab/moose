@@ -10,7 +10,7 @@
 #include "ADSpecificImpulse1Phase.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "ADBoundaryFluxBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADSpecificImpulse1Phase);
@@ -39,7 +39,7 @@ ADSpecificImpulse1Phase::validParams()
 
 ADSpecificImpulse1Phase::ADSpecificImpulse1Phase(const InputParameters & parameters)
   : SidePostprocessor(parameters),
-    _n_components(THM3Eqn::N_CONS_VAR),
+    _n_components(THMVACE1D::N_FLUX_INPUTS),
     _boundary_name(getParam<std::vector<BoundaryName>>("boundary")[0]),
     _boundary_uo_name(_boundary_name + ":boundary_uo"),
     _boundary_uo(getUserObjectByName<ADBoundaryFluxBase>(_boundary_uo_name)),

@@ -136,6 +136,7 @@ ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("K") = getParam<Real>("K");
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<std::string>("turbine_name") = cname();
+    params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, getShaftConnectedUserObjectName(), params);
     connectObject(params, _junction_uo_name, "K");

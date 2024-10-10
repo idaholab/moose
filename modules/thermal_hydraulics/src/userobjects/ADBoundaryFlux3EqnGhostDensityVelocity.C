@@ -10,7 +10,7 @@
 #include "ADBoundaryFlux3EqnGhostDensityVelocity.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADBoundaryFlux3EqnGhostDensityVelocity);
 
@@ -51,12 +51,12 @@ std::vector<ADReal>
 ADBoundaryFlux3EqnGhostDensityVelocity::getGhostCellSolution(
     const std::vector<ADReal> & U_interior) const
 {
-  const ADReal rhoA = U_interior[THM3Eqn::CONS_VAR_RHOA];
-  const ADReal rhouA = U_interior[THM3Eqn::CONS_VAR_RHOUA];
-  const ADReal rhoEA = U_interior[THM3Eqn::CONS_VAR_RHOEA];
-  const ADReal A = U_interior[THM3Eqn::CONS_VAR_AREA];
+  const ADReal rhoA = U_interior[THMVACE1D::RHOA];
+  const ADReal rhouA = U_interior[THMVACE1D::RHOUA];
+  const ADReal rhoEA = U_interior[THMVACE1D::RHOEA];
+  const ADReal A = U_interior[THMVACE1D::AREA];
 
-  std::vector<ADReal> U_ghost(THM3Eqn::N_CONS_VAR);
+  std::vector<ADReal> U_ghost(THMVACE1D::N_FLUX_INPUTS);
   if (!_reversible || THM::isInlet(_vel, _normal))
   {
     // Get the pressure from the interior solution
@@ -73,17 +73,17 @@ ADBoundaryFlux3EqnGhostDensityVelocity::getGhostCellSolution(
     const ADReal E_b = e_b + 0.5 * _vel * _vel;
 
     // compute ghost solution
-    U_ghost[THM3Eqn::CONS_VAR_RHOA] = _rho * A;
-    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = _rho * _vel * A;
-    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = _rho * E_b * A;
-    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+    U_ghost[THMVACE1D::RHOA] = _rho * A;
+    U_ghost[THMVACE1D::RHOUA] = _rho * _vel * A;
+    U_ghost[THMVACE1D::RHOEA] = _rho * E_b * A;
+    U_ghost[THMVACE1D::AREA] = A;
   }
   else
   {
-    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rhoA;
-    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = rhoA * _vel;
-    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rhoEA;
-    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+    U_ghost[THMVACE1D::RHOA] = rhoA;
+    U_ghost[THMVACE1D::RHOUA] = rhoA * _vel;
+    U_ghost[THMVACE1D::RHOEA] = rhoEA;
+    U_ghost[THMVACE1D::AREA] = A;
   }
 
   return U_ghost;

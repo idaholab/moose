@@ -491,7 +491,7 @@ m_dot_sec_in = 1. # kg/s
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 0
   nl_abs_tol = 1e-8
   nl_max_its = 25
 

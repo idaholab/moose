@@ -12,20 +12,19 @@
 #include "MooseObjectUnitTest.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "IdealGasFluidProperties.h"
+#include "FluidPropertiesTestUtils.h"
 
 /**
- * Base class for testing rDG objects for the 3-equation model.
+ * Base class for testing numerical flux objects for the variable-area compressible Euler equations.
  */
-class Test3EqnRDGObjectBase : public MooseObjectUnitTest
+class TestNumericalFlux3EqnBase : public MooseObjectUnitTest
 {
 public:
-  Test3EqnRDGObjectBase()
+  TestNumericalFlux3EqnBase()
     : MooseObjectUnitTest("ThermalHydraulicsApp"),
 
       _fp_name("fp"),
-      _fp(getFluidPropertiesObject()),
-
-      _nLR_dot_d(1.0)
+      _fp(getFluidPropertiesObject())
   {
   }
 
@@ -53,22 +52,44 @@ protected:
                                                   const ADReal & A) const;
 
   /**
+   * Computes the 1D flux vector from the primitive solution
+   *
+   * @param[in] W   Primitive solution vector: {p, T, vel}
+   * @param[in] A   Cross-sectional area
+   */
+  std::vector<ADReal> computeFluxFromPrimitive(const std::vector<ADReal> & W,
+                                               const ADReal & A) const;
+
+  /**
    * Creates the flux object to be tested
    */
   virtual const ADNumericalFlux3EqnBase * createFluxObject() = 0;
 
   /**
-   * Runs the tests
+   * Gets a vector of pairs of primitive solution vectors to use for symmetry test
    */
-  virtual void test() = 0;
+  virtual std::vector<std::pair<std::vector<ADReal>, std::vector<ADReal>>>
+  getPrimitiveSolutionsSymmetryTest() const = 0;
+
+  /**
+   * Gets a vector of primitive solution vectors to use for consistency test
+   */
+  virtual std::vector<std::vector<ADReal>> getPrimitiveSolutionsConsistencyTest() const = 0;
+
+  /**
+   * Runs the consistency test(s)
+   */
+  void testConsistency();
+
+  /**
+   * Runs the symmetry test(s)
+   */
+  void testSymmetry();
 
   /// Fluid properties user object name
   const UserObjectName _fp_name;
   /// Fluid properties user object
   const SinglePhaseFluidProperties & _fp;
-
-  /// Dot product of normal from L to R with direction vector
-  const Real _nLR_dot_d;
 
   /// Flux object to be tested
   const ADNumericalFlux3EqnBase * _flux;

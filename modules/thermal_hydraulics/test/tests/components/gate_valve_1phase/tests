@@ -7,7 +7,7 @@
     input = 'gate_valve_1phase.i'
     exodiff = 'gate_valve_1phase_out.e'
     rel_err = 5e-5
-    abs_zero = 1e-8
+    abs_zero = 1e-6
     heavy = true
     requirement = 'The system shall be able to simulate a gate valve in between two components for a full transient.'
   []

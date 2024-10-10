@@ -29,9 +29,9 @@
   []
 
   [phy:coastdown]
-    type = 'Exodiff'
+    type = CSVDiff
     input = 'pump_coastdown.i'
-    exodiff = 'pump_coastdown_out.e'
+    csvdiff = 'pump_coastdown.csv'
     rel_err = 1e-3
     abs_zero = 1e-9
     heavy = true

@@ -1,0 +1,31 @@
+import matplotlib.pyplot as plt
+from thm_utilities import readCSVFile
+
+data_with = readCSVFile('with_junction_vpp_FINAL.csv')
+data_without = readCSVFile('without_junction_vpp_FINAL.csv')
+
+plt.figure(figsize=(8, 6))
+plt.rc('text', usetex=True)
+plt.rc('font', family='sans-serif')
+ax = plt.subplot(1, 1, 1)
+ax.get_yaxis().get_major_formatter().set_useOffset(False)
+plt.xlabel("Position [m]")
+plt.ylabel("Velocity [m/s]")
+plt.plot(data_without['x'], data_without['vel'], '-', color='black', marker='', label='Without junction')
+plt.plot(data_with['x'], data_with['vel'], '--', color='indianred', marker='', label='With junction')
+ax.legend(frameon=False, prop={'size':12})
+plt.tight_layout()
+plt.savefig('velocity.png', dpi=300)
+
+plt.figure(figsize=(8, 6))
+plt.rc('text', usetex=True)
+plt.rc('font', family='sans-serif')
+ax = plt.subplot(1, 1, 1)
+ax.get_yaxis().get_major_formatter().set_useOffset(False)
+plt.xlabel("Position [m]")
+plt.ylabel("Pressure [bar]")
+plt.plot(data_without['x'], data_without['p'] / 1e5, '-', color='black', marker='', label='Without junction')
+plt.plot(data_with['x'], data_with['p'] / 1e5, '--', color='indianred', marker='', label='With junction')
+ax.legend(frameon=False, prop={'size':12})
+plt.tight_layout()
+plt.savefig('pressure.png', dpi=300)

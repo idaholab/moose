@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADGateValve1PhaseUserObject.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Function.h"
 #include "Numerics.h"
@@ -21,9 +21,9 @@ registerMooseObject("ThermalHydraulicsApp", ADGateValve1PhaseUserObject);
 
 const std::vector<std::pair<std::string, unsigned int>>
     ADGateValve1PhaseUserObject::_varname_eq_index_pairs{
-        std::pair<std::string, unsigned int>("rhoA", THM3Eqn::EQ_MASS),
-        std::pair<std::string, unsigned int>("rhouA", THM3Eqn::EQ_MOMENTUM),
-        std::pair<std::string, unsigned int>("rhoEA", THM3Eqn::EQ_ENERGY)};
+        std::pair<std::string, unsigned int>("rhoA", THMVACE1D::MASS),
+        std::pair<std::string, unsigned int>("rhouA", THMVACE1D::MOMENTUM),
+        std::pair<std::string, unsigned int>("rhoEA", THMVACE1D::ENERGY)};
 
 InputParameters
 ADGateValve1PhaseUserObject::validParams()
@@ -74,8 +74,8 @@ ADGateValve1PhaseUserObject::ADGateValve1PhaseUserObject(const InputParameters &
     _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _solutions(_n_connections),
-    _fluxes(_n_connections, std::vector<ADReal>(THM3Eqn::N_EQ, 0)),
-    _dof_indices(_n_connections, std::vector<dof_id_type>(THM3Eqn::N_EQ, 0)),
+    _fluxes(_n_connections, std::vector<ADReal>(THMVACE1D::N_FLUX_OUTPUTS, 0)),
+    _dof_indices(_n_connections, std::vector<dof_id_type>(THMVACE1D::N_FLUX_OUTPUTS, 0)),
 
     _stored_p(_n_connections),
 
@@ -92,10 +92,10 @@ ADGateValve1PhaseUserObject::initialize()
 {
   _connection_indices.clear();
 
-  std::vector<ADReal> zero(THM3Eqn::N_CONS_VAR, ADReal(0.));
+  std::vector<ADReal> zero(THMVACE1D::N_FLUX_INPUTS, ADReal(0.));
   for (auto & s : _solutions)
     s = zero;
-  for (unsigned int i = 0; i < THM3Eqn::N_EQ; i++)
+  for (unsigned int i = 0; i < THMVACE1D::N_FLUX_OUTPUTS; i++)
   {
     _fluxes[0][i] = 0;
     _fluxes[1][i] = 0;
@@ -119,11 +119,11 @@ ADGateValve1PhaseUserObject::execute()
   }
 
   // Store solution vector for connection
-  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, ADReal(0.));
-  U[THM3Eqn::CONS_VAR_RHOA] = _rhoA[0];
-  U[THM3Eqn::CONS_VAR_RHOUA] = _rhouA[0];
-  U[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA[0];
-  U[THM3Eqn::CONS_VAR_AREA] = _A[0];
+  std::vector<ADReal> U(THMVACE1D::N_FLUX_INPUTS, ADReal(0.));
+  U[THMVACE1D::RHOA] = _rhoA[0];
+  U[THMVACE1D::RHOUA] = _rhouA[0];
+  U[THMVACE1D::RHOEA] = _rhoEA[0];
+  U[THMVACE1D::AREA] = _A[0];
   _solutions[c] = U;
 
   // Store element ID and local side ID for connection
@@ -188,29 +188,29 @@ ADGateValve1PhaseUserObject::finalize()
     // compute flow contribution
     std::vector<ADReal> U_flow1 = _solutions[0];
     std::vector<ADReal> U_flow2 = _solutions[1];
-    U_flow1[THM3Eqn::CONS_VAR_AREA] = A_flow;
-    U_flow2[THM3Eqn::CONS_VAR_AREA] = A_flow;
-    for (unsigned int i = 0; i < THM3Eqn::N_EQ; i++)
+    U_flow1[THMVACE1D::AREA] = A_flow;
+    U_flow2[THMVACE1D::AREA] = A_flow;
+    for (unsigned int i = 0; i < THMVACE1D::N_FLUX_OUTPUTS; i++)
     {
       U_flow1[i] *= A_flow / A1;
       U_flow2[i] *= A_flow / A2;
     }
-    U_flow2[THM3Eqn::CONS_VAR_RHOUA] *= d1_dot_d2;
+    U_flow2[THMVACE1D::RHOUA] *= d1_dot_d2;
 
     _fluxes[0] = _numerical_flux.getFlux(
         _local_side_ids[0], _elem_ids[0], true, U_flow1, U_flow2, n1_dot_d1);
 
     _fluxes[1] = _numerical_flux.getFlux(
         _local_side_ids[0], _elem_ids[0], false, U_flow1, U_flow2, n1_dot_d1);
-    _fluxes[1][THM3Eqn::CONS_VAR_RHOA] *= d1_dot_d2;
-    _fluxes[1][THM3Eqn::CONS_VAR_RHOEA] *= d1_dot_d2;
+    _fluxes[1][THMVACE1D::RHOA] *= d1_dot_d2;
+    _fluxes[1][THMVACE1D::RHOEA] *= d1_dot_d2;
   }
 
   // compute wall contribution
   for (unsigned int c = 0; c < _n_connections; c++)
   {
     const ADReal A_wall = _areas[c] - A_flow;
-    _fluxes[c][THM3Eqn::CONS_VAR_RHOUA] += _stored_p[c] * A_wall;
+    _fluxes[c][THMVACE1D::RHOUA] += _stored_p[c] * A_wall;
   }
 }
 

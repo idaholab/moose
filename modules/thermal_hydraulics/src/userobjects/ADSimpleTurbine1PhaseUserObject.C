@@ -10,7 +10,7 @@
 #include "ADSimpleTurbine1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
 #include "VolumeJunction1Phase.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
 

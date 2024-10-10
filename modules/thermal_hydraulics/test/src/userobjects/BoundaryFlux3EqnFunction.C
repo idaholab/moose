@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BoundaryFlux3EqnFunction.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Function.h"
 #include "Assembly.h"
 
@@ -54,13 +54,13 @@ BoundaryFlux3EqnFunction::calcFlux(unsigned int /*iside*/,
   const Real vel = _vel_fn.value(_t, q_point);
   const Real p = _p_fn.value(_t, q_point);
 
-  const Real A = MetaPhysicL::raw_value(U1[THM3Eqn::CONS_VAR_AREA]);
+  const Real A = MetaPhysicL::raw_value(U1[THMVACE1D::AREA]);
 
   const Real e = _fp.e_from_p_rho(p, rho);
   const Real E = e + 0.5 * vel * vel;
 
-  flux.resize(THM3Eqn::N_EQ);
-  flux[THM3Eqn::EQ_MASS] = rho * vel * A;
-  flux[THM3Eqn::EQ_MOMENTUM] = (rho * vel * vel + p) * A;
-  flux[THM3Eqn::EQ_ENERGY] = vel * (rho * E + p) * A;
+  flux.resize(THMVACE1D::N_FLUX_OUTPUTS);
+  flux[THMVACE1D::MASS] = rho * vel * A;
+  flux[THMVACE1D::MOMENTUM] = (rho * vel * vel + p) * A;
+  flux[THMVACE1D::ENERGY] = vel * (rho * E + p) * A;
 }

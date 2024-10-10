@@ -31,7 +31,7 @@ public:
   virtual void threadJoin(const UserObject &) override;
 
   /**
-   * Gets the flux vector for an element/side combination
+   * Gets the 1D flux vector for an element/side combination
    *
    * If the element/side is cached, the cached values are used. Otherwise the
    * values are computed, cached, and returned.
@@ -39,8 +39,8 @@ public:
    * @param[in] iside    local index of current side
    * @param[in] ielem    global index of the current element
    * @param[in] res_side_is_left    getting flux on the left ("elem") side?
-   * @param[in] UL       vector of variables on the "left"
-   * @param[in] UR       vector of variables on the "right"
+   * @param[in] UL_1d    vector of 1D flux inputs on the "left"
+   * @param[in] UR_1d    vector of 1D flux inputs on the "right"
    * @param[in] nLR_dot_d   Dot product of direction from "left" to "right" with
    *                        the flow channel direction
    *
@@ -49,25 +49,54 @@ public:
   virtual const std::vector<ADReal> & getFlux(const unsigned int iside,
                                               const dof_id_type ielem,
                                               bool res_side_is_left,
-                                              const std::vector<ADReal> & UL,
-                                              const std::vector<ADReal> & UR,
+                                              const std::vector<ADReal> & UL_1d,
+                                              const std::vector<ADReal> & UR_1d,
                                               const ADReal & nLR_dot_d) const;
 
   /**
-   * Calculates the flux vectors given "left" and "right" states
+   * Gets the 3D flux vector for an element/side combination
+   *
+   * If the element/side is cached, the cached values are used. Otherwise the
+   * values are computed, cached, and returned.
+   *
+   * @param[in] iside    local index of current side
+   * @param[in] ielem    global index of the current element
+   * @param[in] res_side_is_left    getting flux on the left ("elem") side?
+   * @param[in] UL_3d    vector of 3D flux inputs on the "left"
+   * @param[in] UR_3d    vector of 3D flux inputs on the "right"
+   * @param[in] nLR      Direction from "left" to "right"
+   * @param[in] t1       1st tangent direction
+   * @param[in] t2       2nd tangent direction
+   *
+   * @return flux vector for an element/side combination
+   */
+  virtual const std::vector<ADReal> & getFlux3D(const unsigned int iside,
+                                                const dof_id_type ielem,
+                                                bool res_side_is_left,
+                                                const std::vector<ADReal> & UL_3d,
+                                                const std::vector<ADReal> & UR_3d,
+                                                const RealVectorValue & nLR,
+                                                const RealVectorValue & t1,
+                                                const RealVectorValue & t2) const;
+
+  /**
+   * Calculates the 3D flux vectors given "left" and "right" states
    *
    * This function is called only if the values are not already cached.
    *
-   * @param[in] UL        vector of variables on the "left"
-   * @param[in] UR        vector of variables on the "right"
-   * @param[in] nLR_dot_d   Dot product of direction from "left" to "right" with
-   *                        the flow channel direction
-   * @param[out] FL       flux vector to be added to "left" side
-   * @param[out] FR       flux vector to be added to "right" side
+   * @param[in] UL_3d  Vector of 3D flux inputs on the "left"
+   * @param[in] UR_3d  Vector of 3D flux inputs on the "right"
+   * @param[in] nLR   Direction from "left" to "right"
+   * @param[in] t1    1st tangent direction
+   * @param[in] t2    2nd tangent direction
+   * @param[out] FL   Flux vector to be added to "left" side
+   * @param[out] FR   Flux vector to be added to "right" side
    */
-  virtual void calcFlux(const std::vector<ADReal> & UL,
-                        const std::vector<ADReal> & UR,
-                        const ADReal & nLR_dot_d,
+  virtual void calcFlux(const std::vector<ADReal> & UL_3d,
+                        const std::vector<ADReal> & UR_3d,
+                        const RealVectorValue & nLR,
+                        const RealVectorValue & t1,
+                        const RealVectorValue & t2,
                         std::vector<ADReal> & FL,
                         std::vector<ADReal> & FR) const = 0;
 
@@ -97,10 +126,14 @@ protected:
   /// side ID of the cached flux values
   mutable unsigned int _cached_flux_side_id;
 
-  /// flux vector for the "left" cell
-  mutable std::vector<ADReal> _FL;
-  /// flux vector for the "right" cell
-  mutable std::vector<ADReal> _FR;
+  /// flux vector for the "left" cell for 3D
+  mutable std::vector<ADReal> _FL_3d;
+  /// flux vector for the "right" cell for 3D
+  mutable std::vector<ADReal> _FR_3d;
+  /// flux vector for the "left" cell for 1D
+  mutable std::vector<ADReal> _FL_1d;
+  /// flux vector for the "right" cell for 1D
+  mutable std::vector<ADReal> _FR_1d;
 
   /// Index describing the region last entered, which is useful for testing and debugging
   mutable unsigned int _last_region_index;

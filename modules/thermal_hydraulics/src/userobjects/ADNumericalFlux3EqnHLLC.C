@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADNumericalFlux3EqnHLLC.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Numerics.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADNumericalFlux3EqnHLLC);
@@ -33,141 +33,166 @@ ADNumericalFlux3EqnHLLC::ADNumericalFlux3EqnHLLC(const InputParameters & paramet
 }
 
 void
-ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & U1,
-                                  const std::vector<ADReal> & U2,
-                                  const ADReal & nLR_dot_d,
+ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
+                                  const std::vector<ADReal> & UR,
+                                  const RealVectorValue & nLR,
+                                  const RealVectorValue & t1,
+                                  const RealVectorValue & t2,
                                   std::vector<ADReal> & FL,
                                   std::vector<ADReal> & FR) const
 {
   // extract the conserved variables and area
 
-  const ADReal rhoA1 = U1[THM3Eqn::CONS_VAR_RHOA];
-  const ADReal rhouA1 = U1[THM3Eqn::CONS_VAR_RHOUA];
-  const ADReal rhoEA1 = U1[THM3Eqn::CONS_VAR_RHOEA];
-  const ADReal A1 = U1[THM3Eqn::CONS_VAR_AREA];
+  const ADReal rhoAL = UL[THMVACE3D::RHOA];
+  const ADReal rhouAL = UL[THMVACE3D::RHOUA];
+  const ADReal rhovAL = UL[THMVACE3D::RHOVA];
+  const ADReal rhowAL = UL[THMVACE3D::RHOWA];
+  const ADReal rhoEAL = UL[THMVACE3D::RHOEA];
+  const ADReal AL = UL[THMVACE3D::AREA];
 
-  const ADReal rhoA2 = U2[THM3Eqn::CONS_VAR_RHOA];
-  const ADReal rhouA2 = U2[THM3Eqn::CONS_VAR_RHOUA];
-  const ADReal rhoEA2 = U2[THM3Eqn::CONS_VAR_RHOEA];
-  const ADReal A2 = U2[THM3Eqn::CONS_VAR_AREA];
-
-  // reference transformation normal
-  const ADReal & nx = nLR_dot_d;
+  const ADReal rhoAR = UR[THMVACE3D::RHOA];
+  const ADReal rhouAR = UR[THMVACE3D::RHOUA];
+  const ADReal rhovAR = UR[THMVACE3D::RHOVA];
+  const ADReal rhowAR = UR[THMVACE3D::RHOWA];
+  const ADReal rhoEAR = UR[THMVACE3D::RHOEA];
+  const ADReal AR = UR[THMVACE3D::AREA];
 
   // compute the primitive variables
 
-  const ADReal rho1 = rhoA1 / A1;
-  const ADReal rhou1 = rhouA1 / A1;
-  const ADReal rhoE1 = rhoEA1 / A1;
-  const ADReal u1 = rhouA1 / rhoA1;
-  const ADReal q1 = u1 * nx;
-  const ADReal v1 = 1.0 / rho1;
-  const ADReal E1 = rhoEA1 / rhoA1;
-  const ADReal e1 = E1 - 0.5 * u1 * u1;
-  const ADReal p1 = _fp.p_from_v_e(v1, e1);
-  const ADReal H1 = E1 + p1 / rho1;
-  const ADReal c1 = _fp.c_from_v_e(v1, e1);
+  const ADReal rhoL = rhoAL / AL;
+  const ADRealVectorValue uvecL(rhouAL / rhoAL, rhovAL / rhoAL, rhowAL / rhoAL);
+  const ADReal unL = uvecL * nLR;
+  const ADReal ut1L = uvecL * t1;
+  const ADReal ut2L = uvecL * t2;
+  const ADReal rhoEL = rhoEAL / AL;
+  const ADReal vL = 1.0 / rhoL;
+  const ADReal EL = rhoEAL / rhoAL;
+  const ADReal eL = EL - 0.5 * uvecL * uvecL;
+  const ADReal pL = _fp.p_from_v_e(vL, eL);
+  const ADReal HL = EL + pL / rhoL;
+  const ADReal cL = _fp.c_from_v_e(vL, eL);
 
-  const ADReal rho2 = rhoA2 / A2;
-  const ADReal rhou2 = rhouA2 / A2;
-  const ADReal rhoE2 = rhoEA2 / A2;
-  const ADReal u2 = rhouA2 / rhoA2;
-  const ADReal q2 = u2 * nx;
-  const ADReal v2 = 1.0 / rho2;
-  const ADReal E2 = rhoEA2 / rhoA2;
-  const ADReal e2 = E2 - 0.5 * u2 * u2;
-  const ADReal p2 = _fp.p_from_v_e(v2, e2);
-  const ADReal H2 = E2 + p2 / rho2;
-  const ADReal c2 = _fp.c_from_v_e(v2, e2);
+  const ADReal rhoR = rhoAR / AR;
+  const ADRealVectorValue uvecR(rhouAR / rhoAR, rhovAR / rhoAR, rhowAR / rhoAR);
+  const ADReal unR = uvecR * nLR;
+  const ADReal ut1R = uvecR * t1;
+  const ADReal ut2R = uvecR * t2;
+  const ADReal rhoER = rhoEAR / AR;
+  const ADReal vR = 1.0 / rhoR;
+  const ADReal ER = rhoEAR / rhoAR;
+  const ADReal eR = ER - 0.5 * uvecR * uvecR;
+  const ADReal pR = _fp.p_from_v_e(vR, eR);
+  const ADReal HR = ER + pR / rhoR;
+  const ADReal cR = _fp.c_from_v_e(vR, eR);
 
   // compute Roe-averaged variables
-  const ADReal sqrt_rho1 = std::sqrt(rho1);
-  const ADReal sqrt_rho2 = std::sqrt(rho2);
-  const ADReal u_roe = (sqrt_rho1 * u1 + sqrt_rho2 * u2) / (sqrt_rho1 + sqrt_rho2);
-  const ADReal q_roe = u_roe * nx;
-  const ADReal H_roe = (sqrt_rho1 * H1 + sqrt_rho2 * H2) / (sqrt_rho1 + sqrt_rho2);
-  const ADReal h_roe = H_roe - 0.5 * u_roe * u_roe;
-  const ADReal rho_roe = std::sqrt(rho1 * rho2);
+  const ADReal sqrt_rhoL = std::sqrt(rhoL);
+  const ADReal sqrt_rhoR = std::sqrt(rhoR);
+  const ADReal un_roe = (sqrt_rhoL * unL + sqrt_rhoR * unR) / (sqrt_rhoL + sqrt_rhoR);
+  const ADReal ut1_roe = (sqrt_rhoL * ut1L + sqrt_rhoR * ut1R) / (sqrt_rhoL + sqrt_rhoR);
+  const ADReal ut2_roe = (sqrt_rhoL * ut2L + sqrt_rhoR * ut2R) / (sqrt_rhoL + sqrt_rhoR);
+  const ADReal H_roe = (sqrt_rhoL * HL + sqrt_rhoR * HR) / (sqrt_rhoL + sqrt_rhoR);
+  const ADRealVectorValue uvec_roe(un_roe, ut1_roe, ut2_roe);
+  const ADReal h_roe = H_roe - 0.5 * uvec_roe * uvec_roe;
+  const ADReal rho_roe = std::sqrt(rhoL * rhoR);
   const ADReal v_roe = 1.0 / rho_roe;
   const ADReal e_roe = _fp.e_from_v_h(v_roe, h_roe);
   const ADReal c_roe = _fp.c_from_v_e(v_roe, e_roe);
 
   // compute wave speeds
-  const ADReal s1 = std::min(q1 - c1, q_roe - c_roe);
-  const ADReal s2 = std::max(q2 + c2, q_roe + c_roe);
-  const ADReal sm = (rho2 * q2 * (s2 - q2) - rho1 * q1 * (s1 - q1) + p1 - p2) /
-                    (rho2 * (s2 - q2) - rho1 * (s1 - q1));
+  const ADReal sL = std::min(unL - cL, un_roe - c_roe);
+  const ADReal sR = std::max(unR + cR, un_roe + c_roe);
+  const ADReal sm = (rhoR * unR * (sR - unR) - rhoL * unL * (sL - unL) + pL - pR) /
+                    (rhoR * (sR - unR) - rhoL * (sL - unL));
 
   // compute Omega_L, Omega_R
-  const ADReal omeg1 = 1.0 / (s1 - sm);
-  const ADReal omeg2 = 1.0 / (s2 - sm);
+  const ADReal omegL = 1.0 / (sL - sm);
+  const ADReal omegR = 1.0 / (sR - sm);
 
   // compute p^*
-  const ADReal ps = rho1 * (s1 - q1) * (sm - q1) + p1;
+  const ADReal ps = rhoL * (sL - unL) * (sm - unL) + pL;
 
   // compute U_L^*, U_R^*
 
-  const ADReal rhoLs = omeg1 * (s1 - q1) * rho1;
-  const ADReal rhouLs = omeg1 * ((s1 - q1) * rhou1 + (ps - p1) * nx);
-  const ADReal rhoELs = omeg1 * ((s1 - q1) * rhoE1 - p1 * q1 + ps * sm);
+  const ADReal rhoLs = omegL * (sL - unL) * rhoL;
+  const ADReal rhounLs = omegL * ((sL - unL) * rhoL * unL + ps - pL);
+  const ADReal rhoELs = omegL * ((sL - unL) * rhoEL - pL * unL + ps * sm);
 
-  const ADReal rhoRs = omeg2 * (s2 - q2) * rho2;
-  const ADReal rhouRs = omeg2 * ((s2 - q2) * rhou2 + (ps - p2) * nx);
-  const ADReal rhoERs = omeg2 * ((s2 - q2) * rhoE2 - p2 * q2 + ps * sm);
+  const ADReal rhoRs = omegR * (sR - unR) * rhoR;
+  const ADReal rhounRs = omegR * ((sR - unR) * rhoR * unR + ps - pR);
+  const ADReal rhoERs = omegR * ((sR - unR) * rhoER - pR * unR + ps * sm);
 
-  const ADReal A_flow = computeFlowArea(U1, U2);
+  std::vector<ADReal> UL_1d(THMVACE1D::N_FLUX_INPUTS);
+  UL_1d[THMVACE1D::RHOA] = UL[THMVACE3D::RHOA];
+  UL_1d[THMVACE1D::RHOUA] = UL[THMVACE3D::RHOUA];
+  UL_1d[THMVACE1D::RHOEA] = UL[THMVACE3D::RHOEA];
+  UL_1d[THMVACE1D::AREA] = UL[THMVACE3D::AREA];
+
+  std::vector<ADReal> UR_1d(THMVACE1D::N_FLUX_INPUTS);
+  UR_1d[THMVACE1D::RHOA] = UR[THMVACE3D::RHOA];
+  UR_1d[THMVACE1D::RHOUA] = UR[THMVACE3D::RHOUA];
+  UR_1d[THMVACE1D::RHOEA] = UR[THMVACE3D::RHOEA];
+  UR_1d[THMVACE1D::AREA] = UR[THMVACE3D::AREA];
+
+  const ADReal A_flow = computeFlowArea(UL_1d, UR_1d);
 
   // compute the fluxes
-  FL.resize(THM3Eqn::N_EQ);
-  if (s1 > 0.0)
+  FL.resize(THMVACE3D::N_FLUX_OUTPUTS);
+  if (sL > 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = u1 * rho1 * A_flow;
-    FL[THM3Eqn::EQ_MOMENTUM] = (u1 * rhou1 + p1) * A_flow;
-    FL[THM3Eqn::EQ_ENERGY] = u1 * (rhoE1 + p1) * A_flow;
+    FL[THMVACE3D::MASS] = unL * rhoL * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (unL * rhoL * unL + pL) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhoL * unL * ut1L * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhoL * unL * ut2L * A_flow;
+    FL[THMVACE3D::ENERGY] = unL * (rhoEL + pL) * A_flow;
 
     _last_region_index = 0;
   }
-  else if (s1 <= 0.0 && sm > 0.0)
+  else if (sL <= 0.0 && sm > 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = sm * nx * rhoLs * A_flow;
-    FL[THM3Eqn::EQ_MOMENTUM] = (sm * nx * rhouLs + ps) * A_flow;
-    FL[THM3Eqn::EQ_ENERGY] = sm * nx * (rhoELs + ps) * A_flow;
+    FL[THMVACE3D::MASS] = sm * rhoLs * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (sm * rhounLs + ps) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhounLs * ut1L * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhounLs * ut2L * A_flow;
+    FL[THMVACE3D::ENERGY] = sm * (rhoELs + ps) * A_flow;
 
     _last_region_index = 1;
   }
-  else if (sm <= 0.0 && s2 >= 0.0)
+  else if (sm <= 0.0 && sR >= 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = sm * nx * rhoRs * A_flow;
-    FL[THM3Eqn::EQ_MOMENTUM] = (sm * nx * rhouRs + ps) * A_flow;
-    FL[THM3Eqn::EQ_ENERGY] = sm * nx * (rhoERs + ps) * A_flow;
+    FL[THMVACE3D::MASS] = sm * rhoRs * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (sm * rhounRs + ps) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhounRs * ut1R * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhounRs * ut2R * A_flow;
+    FL[THMVACE3D::ENERGY] = sm * (rhoERs + ps) * A_flow;
 
     _last_region_index = 2;
   }
-  else if (s2 < 0.0)
+  else if (sR < 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = u2 * rho2 * A_flow;
-    FL[THM3Eqn::EQ_MOMENTUM] = (u2 * rhou2 + p2) * A_flow;
-    FL[THM3Eqn::EQ_ENERGY] = u2 * (rhoE2 + p2) * A_flow;
+    FL[THMVACE3D::MASS] = unR * rhoR * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (unR * rhoR * unR + pR) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhoR * unR * ut1R * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhoR * unR * ut2R * A_flow;
+    FL[THMVACE3D::ENERGY] = unR * (rhoER + pR) * A_flow;
 
     _last_region_index = 3;
   }
   else
-  {
-    FL = {getNaN(), getNaN(), getNaN()};
-  }
+    std::fill(FL.begin(), FL.end(), getNaN());
 
   FR = FL;
 
-  const ADReal A_wall_L = A1 - A_flow;
-  FL[THM3Eqn::EQ_MOMENTUM] += p1 * A_wall_L;
+  const ADReal A_wall_L = AL - A_flow;
+  FL[THMVACE3D::MOM_NORM] += pL * A_wall_L;
 
-  const ADReal A_wall_R = A2 - A_flow;
-  FR[THM3Eqn::EQ_MOMENTUM] += p2 * A_wall_R;
+  const ADReal A_wall_R = AR - A_flow;
+  FR[THMVACE3D::MOM_NORM] += pR * A_wall_R;
 }
 
 ADReal
-ADNumericalFlux3EqnHLLC::computeFlowArea(const std::vector<ADReal> & U1,
-                                         const std::vector<ADReal> & U2) const
+ADNumericalFlux3EqnHLLC::computeFlowArea(const std::vector<ADReal> & UL,
+                                         const std::vector<ADReal> & UR) const
 {
-  return std::min(U1[THM3Eqn::CONS_VAR_AREA], U2[THM3Eqn::CONS_VAR_AREA]);
+  return std::min(UL[THMVACE1D::AREA], UR[THMVACE1D::AREA]);
 }

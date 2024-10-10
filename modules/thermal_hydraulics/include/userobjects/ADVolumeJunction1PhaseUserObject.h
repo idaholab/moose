@@ -45,6 +45,9 @@ protected:
   /// Reference area
   const Real & _A_ref;
 
+  /// Apply velocity scaling?
+  const bool _apply_velocity_scaling;
+
   /// Single-phase fluid properties user object
   const SinglePhaseFluidProperties & _fp;
 

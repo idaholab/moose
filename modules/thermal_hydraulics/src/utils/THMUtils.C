@@ -8,12 +8,40 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "THMUtils.h"
+#include "MooseUtils.h"
+#include "MooseTypes.h"
+#include "libmesh/vector_value.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_numberarray.h"
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 
 namespace THM
 {
+
+void
+computeOrthogonalDirections(const RealVectorValue & n_unnormalized,
+                            RealVectorValue & t1,
+                            RealVectorValue & t2)
+{
+  const RealVectorValue n = n_unnormalized.unit();
+
+  if (MooseUtils::absoluteFuzzyEqual(std::abs(n(0)), 1.0))
+  {
+    t1 = RealVectorValue(0, 1, 0);
+    t2 = RealVectorValue(0, 0, 1);
+  }
+  else
+  {
+    // Gram-Schmidt process to get first
+    RealVectorValue ex(1, 0, 0);
+    t1 = ex - (ex * n) * n;
+    t1 = t1.unit();
+
+    // use cross-product to get second
+    t2 = n.cross(t1);
+    t2 = t2.unit();
+  }
+}
 
 void
 allGatherADVectorMap(const Parallel::Communicator & comm,

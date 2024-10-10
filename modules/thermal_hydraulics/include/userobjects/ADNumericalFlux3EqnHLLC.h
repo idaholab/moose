@@ -29,9 +29,11 @@ class ADNumericalFlux3EqnHLLC : public ADNumericalFlux3EqnBase, public NaNInterf
 public:
   ADNumericalFlux3EqnHLLC(const InputParameters & parameters);
 
-  virtual void calcFlux(const std::vector<ADReal> & U1,
-                        const std::vector<ADReal> & U2,
-                        const ADReal & nLR_dot_d,
+  virtual void calcFlux(const std::vector<ADReal> & UL,
+                        const std::vector<ADReal> & UR,
+                        const RealVectorValue & nLR,
+                        const RealVectorValue & t1,
+                        const RealVectorValue & t2,
                         std::vector<ADReal> & FL,
                         std::vector<ADReal> & FR) const override;
 
@@ -41,8 +43,8 @@ protected:
   /**
    * Computes the flow area that is used in the numerical flux
    */
-  virtual ADReal computeFlowArea(const std::vector<ADReal> & U1,
-                                 const std::vector<ADReal> & U2) const;
+  virtual ADReal computeFlowArea(const std::vector<ADReal> & UL,
+                                 const std::vector<ADReal> & UR) const;
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;

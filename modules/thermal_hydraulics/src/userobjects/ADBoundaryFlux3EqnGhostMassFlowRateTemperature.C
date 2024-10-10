@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADBoundaryFlux3EqnGhostMassFlowRateTemperature.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
@@ -49,12 +49,12 @@ std::vector<ADReal>
 ADBoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolution(
     const std::vector<ADReal> & U) const
 {
-  const ADReal rhoA = U[THM3Eqn::CONS_VAR_RHOA];
-  const ADReal rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
-  const ADReal rhoEA = U[THM3Eqn::CONS_VAR_RHOEA];
-  const ADReal A = U[THM3Eqn::CONS_VAR_AREA];
+  const ADReal rhoA = U[THMVACE1D::RHOA];
+  const ADReal rhouA = U[THMVACE1D::RHOUA];
+  const ADReal rhoEA = U[THMVACE1D::RHOEA];
+  const ADReal A = U[THMVACE1D::AREA];
 
-  std::vector<ADReal> U_ghost(THM3Eqn::N_CONS_VAR);
+  std::vector<ADReal> U_ghost(THMVACE1D::N_FLUX_INPUTS);
   if (!_reversible || THM::isInlet(_rhouA, _normal))
   {
     // Pressure is the only quantity coming from the interior
@@ -69,17 +69,17 @@ ADBoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolution(
     const ADReal e_b = _fp.e_from_p_rho(p, rho_b);
     const ADReal E_b = e_b + 0.5 * vel_b * vel_b;
 
-    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rho_b * A;
-    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = _rhouA;
-    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rho_b * E_b * A;
-    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+    U_ghost[THMVACE1D::RHOA] = rho_b * A;
+    U_ghost[THMVACE1D::RHOUA] = _rhouA;
+    U_ghost[THMVACE1D::RHOEA] = rho_b * E_b * A;
+    U_ghost[THMVACE1D::AREA] = A;
   }
   else
   {
-    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rhoA;
-    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = _rhouA;
-    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rhoEA;
-    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+    U_ghost[THMVACE1D::RHOA] = rhoA;
+    U_ghost[THMVACE1D::RHOUA] = _rhouA;
+    U_ghost[THMVACE1D::RHOEA] = rhoEA;
+    U_ghost[THMVACE1D::AREA] = A;
   }
 
   return U_ghost;

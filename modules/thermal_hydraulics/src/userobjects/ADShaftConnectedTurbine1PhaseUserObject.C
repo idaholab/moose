@@ -12,7 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "VolumeJunction1Phase.h"
 #include "MooseVariableScalar.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Function.h"
 #include "Numerics.h"
 #include "metaphysicl/parallel_numberarray.h"

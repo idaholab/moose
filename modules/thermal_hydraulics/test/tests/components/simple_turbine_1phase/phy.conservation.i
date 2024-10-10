@@ -166,7 +166,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = ' lu'
 
-  nl_rel_tol = 1e-7
+  nl_rel_tol = 0
   nl_abs_tol = 2e-6
 
   nl_max_its = 10

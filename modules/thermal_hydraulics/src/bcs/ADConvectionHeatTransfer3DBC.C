@@ -9,7 +9,7 @@
 
 #include "ADConvectionHeatTransfer3DBC.h"
 #include "ADHeatTransferFromHeatStructure3D1PhaseUserObject.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADConvectionHeatTransfer3DBC);
 

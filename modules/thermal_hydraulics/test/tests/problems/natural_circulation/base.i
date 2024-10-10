@@ -14,23 +14,6 @@
 #
 # Heating and cooling occurs in the range z = (0.2 m, 0.8 m) with uniform heat fluxes.
 
-n_elems = 50
-
-diam = 0.1
-length = 1.0
-heated_length = 0.6
-power = 1e3
-
-p_initial = 100e3
-T_ambient = 300
-htc = 25.0
-
-area = ${fparse 0.25 * pi * diam^2}
-S_heated = ${fparse pi * diam * heated_length}
-S_cooled = ${fparse pi * diam * heated_length}
-
-output_variables = 'rho p T vel rhouA'
-
 [GlobalParams]
   gravity_vector = '0 0 -9.81'
   length = ${length}
@@ -101,23 +84,6 @@ output_variables = 'rho p T vel rhouA'
     orientation = '-1 0 0'
   []
 
-  [junction_heated_top]
-    type = JunctionOneToOne1Phase
-    connections = 'heated_pipe:out top_pipe:in'
-  []
-  [junction_top_cooled]
-    type = JunctionOneToOne1Phase
-    connections = 'top_pipe:out cooled_pipe:in'
-  []
-  [junction_cooled_bottom]
-    type = JunctionOneToOne1Phase
-    connections = 'cooled_pipe:out bottom_pipe:in'
-  []
-  [junction_bottom_heated]
-    type = JunctionOneToOne1Phase
-    connections = 'bottom_pipe:out heated_pipe:in'
-  []
-
   [heating]
     type = HeatTransferFromHeatFlux1Phase
     flow_channel = 'heated_pipe'
@@ -137,15 +103,6 @@ output_variables = 'rho p T vel rhouA'
   []
 []
 
-[Functions]
-  # Time step size function. NaN gets into residual for debug mode on first step,
-  # so that step gets cut to 0.5 s, but the rest of the transient can take 1 s time steps.
-  [dt_fn]
-    type = ParsedFunction
-    expression = 'if(t < 1e-10, 0.5, 1.0)'
-  []
-[]
-
 [Executioner]
   type = Transient
 
@@ -153,8 +110,12 @@ output_variables = 'rho p T vel rhouA'
   start_time = 0
   end_time = 50
   [TimeStepper]
-    type = FunctionDT
-    function = dt_fn
+    type = IterationAdaptiveDT
+    dt = 0.01
+    optimal_iterations = 6
+    iteration_window = 0
+    growth_factor = 1.2
+    cutback_factor = 0.8
   []
 
   steady_state_detection = true
