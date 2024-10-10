@@ -9,21 +9,20 @@
 
 #pragma once
 
-#include "FEProblem.h"
-#include "ReferenceConvergenceInterface.h"
+#include "MooseObjectAction.h"
 
 /**
- * FEProblemBase derived class to enable convergence checking relative to a user-specified
- * postprocessor
+ * Action for creating Convergence objects
+ *
+ * Convergence objects are MooseObjects, thus just
+ * use the MooseObjectAction
  */
-class ReferenceResidualProblem : public FEProblem, public ReferenceConvergenceInterface
+class AddConvergenceAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  ReferenceResidualProblem(const InputParameters & params);
+  AddConvergenceAction(const InputParameters & params);
 
-  virtual void addDefaultConvergence() override;
-
-protected:
+  virtual void act() override;
 };

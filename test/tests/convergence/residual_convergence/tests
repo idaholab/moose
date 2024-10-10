@@ -1,0 +1,24 @@
+[Tests]
+  design = 'ResidualConvergence.md'
+  issues = '#25931'
+  [nonlinear]
+    type = 'Exodiff'
+    input = 'diffusion_convergence.i'
+    exodiff = 'diffusion_convergence_out.e'
+    requirement = 'The system shall query the convergence status of the nonlinear solvers.'
+  []
+  [default]
+    type = 'Exodiff'
+    input = 'diffusion_convergence_default.i'
+    cli_args = "Outputs/file_base=diffusion_convergence_out"
+    exodiff = 'diffusion_convergence_out.e'
+    requirement = 'The system shall query the convergence status using the default convergence object.'
+  []
+  [block_test]
+    type = 'Exodiff'
+    input = 'diffusion_convergence_default.i'
+    cli_args = "Outputs/file_base=diffusion_convergence_out Convergence/res_conv/type=ResidualConvergence Convergence/res_conv/nl_abs_tol=1e-6 Executioner/nonlinear_convergence=res_conv"
+    exodiff = 'diffusion_convergence_out.e'
+    requirement = 'The system shall query the convergence status of the nonlinear solvers.'
+  []
+[]

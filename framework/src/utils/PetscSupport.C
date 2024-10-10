@@ -27,6 +27,7 @@
 #include "Executioner.h"
 #include "MooseMesh.h"
 #include "ComputeLineSearchObjectWrapper.h"
+#include "Convergence.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/linear_implicit_system.h"
@@ -283,140 +284,44 @@ petscSetupOutput(CommandLine * cmd_line)
 }
 
 PetscErrorCode
-petscNonlinearConverged(SNES snes,
-                        PetscInt it,
-                        PetscReal xnorm,
-                        PetscReal snorm,
-                        PetscReal fnorm,
-                        SNESConvergedReason * reason,
-                        void * ctx)
+petscAlgebraicTest(SNES snes,
+                   PetscInt /*it*/,
+                   PetscReal /*xnorm*/,
+                   PetscReal /*snorm*/,
+                   PetscReal /*fnorm*/,
+                   SNESConvergedReason * reason,
+                   void * ctx)
 {
   PetscFunctionBegin;
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
 
-  // Let's be nice and always check PETSc error codes.
-  auto ierr = (PetscErrorCode)0;
-
-  // Temporary variables to store SNES tolerances.  Usual C-style would be to declare
-  // but not initialize these... but it bothers me to leave anything uninitialized.
-  PetscReal atol = 0.; // absolute convergence tolerance
-  PetscReal rtol = 0.; // relative convergence tolerance
-  PetscReal stol = 0.; // convergence (step) tolerance in terms of the norm of the change in the
-                       // solution between steps
-  PetscInt maxit = 0;  // maximum number of iterations
-  PetscInt maxf = 0;   // maximum number of function evaluations
-
-  // Ask the SNES object about its tolerances.
-  ierr = SNESGetTolerances(snes, &atol, &rtol, &stol, &maxit, &maxf);
-  CHKERRABORT(problem.comm().get(), ierr);
-
-  // Ask the SNES object about its divergence tolerance.
-  PetscReal divtol = 0.; // relative divergence tolerance
-#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
-  ierr = SNESGetDivergenceTolerance(snes, &divtol);
-  CHKERRABORT(problem.comm().get(), ierr);
-#endif
-
-  // Get current number of function evaluations done by SNES.
-  PetscInt nfuncs = 0;
-  ierr = SNESGetNumberFunctionEvals(snes, &nfuncs);
-  CHKERRABORT(problem.comm().get(), ierr);
-
-  // Whether or not to force SNESSolve() take at least one iteration regardless of the initial
-  // residual norm
-#if !PETSC_VERSION_LESS_THAN(3, 8, 4)
-  PetscBool force_iteration = PETSC_FALSE;
-  ierr = SNESGetForceIteration(snes, &force_iteration);
-  CHKERRABORT(problem.comm().get(), ierr);
-
-  if (force_iteration && !(problem.getNonlinearForcedIterations()))
-    problem.setNonlinearForcedIterations(1);
-
-  if (!force_iteration && (problem.getNonlinearForcedIterations()))
-  {
-    ierr = SNESSetForceIteration(snes, PETSC_TRUE);
-    CHKERRABORT(problem.comm().get(), ierr);
-  }
-#endif
-
-  // See if SNESSetFunctionDomainError() has been called.  Note:
-  // SNESSetFunctionDomainError() and SNESGetFunctionDomainError()
-  // were added in different releases of PETSc.
-  PetscBool domainerror;
-  ierr = SNESGetFunctionDomainError(snes, &domainerror);
-  CHKERRABORT(problem.comm().get(), ierr);
-  if (domainerror)
-  {
-    *reason = SNES_DIVERGED_FUNCTION_DOMAIN;
-    PetscFunctionReturn(PETSC_SUCCESS);
-  }
-
-  // Error message that will be set by the FEProblemBase.
+  // Error message that was set by the FEProblemBase and now is not used
   std::string msg;
 
-  // xnorm: 2-norm of current iterate
-  // snorm: 2-norm of current step
-  // fnorm: 2-norm of function at current iterate
-  MooseNonlinearConvergenceReason moose_reason =
-      problem.checkNonlinearConvergence(msg,
-                                        it,
-                                        xnorm,
-                                        snorm,
-                                        fnorm,
-                                        rtol,
-                                        divtol,
-                                        stol,
-                                        atol,
-                                        nfuncs,
-                                        maxf,
-                                        std::numeric_limits<Real>::max());
+  auto & convergence = problem.getConvergence(problem.getNonlinearConvergenceName());
 
-  if (msg.length() > 0)
+  Convergence::MooseConvergenceStatus mreason = convergence.checkConvergence();
+
+  // if (msg.length() > 0)
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
-    ierr = PetscInfo(snes, "%s", msg.c_str());
+  auto ierr = PetscInfo(snes, "%s", msg.c_str());
 #else
-    ierr = PetscInfo(snes, msg.c_str());
+  auto ierr = PetscInfo(snes, msg.c_str());
 #endif
   CHKERRABORT(problem.comm().get(), ierr);
 
-  switch (moose_reason)
+  switch (mreason)
   {
-    case MooseNonlinearConvergenceReason::ITERATING:
+    case Convergence::MooseConvergenceStatus::ITERATING:
       *reason = SNES_CONVERGED_ITERATING;
       break;
 
-    case MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS:
+    case Convergence::MooseConvergenceStatus::CONVERGED:
       *reason = SNES_CONVERGED_FNORM_ABS;
       break;
 
-    case MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE:
-      *reason = SNES_CONVERGED_FNORM_RELATIVE;
-      break;
-
-    case MooseNonlinearConvergenceReason::DIVERGED_DTOL:
-#if !PETSC_VERSION_LESS_THAN(3, 8, 0) // A new convergence enum in PETSc 3.8
+    case Convergence::MooseConvergenceStatus::DIVERGED:
       *reason = SNES_DIVERGED_DTOL;
-#endif
-      break;
-
-    case MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE:
-      *reason = SNES_CONVERGED_SNORM_RELATIVE;
-      break;
-
-    case MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT:
-      *reason = SNES_DIVERGED_FUNCTION_COUNT;
-      break;
-
-    case MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN:
-      *reason = SNES_DIVERGED_FNORM_NAN;
-      break;
-
-    case MooseNonlinearConvergenceReason::DIVERGED_LINE_SEARCH:
-      *reason = SNES_DIVERGED_LINE_SEARCH;
-      break;
-
-    case MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG:
-      *reason = SNES_DIVERGED_LOCAL_MIN;
       break;
   }
 
@@ -537,7 +442,7 @@ petscSetDefaults(FEProblemBase & problem)
     // we use the default context provided by PETSc in addition to
     // a few other tests.
     {
-      ierr = SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR);
+      auto ierr = SNESSetConvergenceTest(snes, petscAlgebraicTest, &problem, LIBMESH_PETSC_NULLPTR);
       CHKERRABORT(nl.comm().get(), ierr);
     }
 

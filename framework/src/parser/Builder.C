@@ -1144,6 +1144,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(SolverVariableName, string);
         setscalar(AuxVariableName, string);
         setscalar(FunctionName, string);
+        setscalar(ConvergenceName, string);
         setscalar(MeshDivisionName, string);
         setscalar(UserObjectName, string);
         setscalar(VectorPostprocessorName, string);
@@ -1220,6 +1221,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(SolverVariableName, string);
         setvector(AuxVariableName, string);
         setvector(FunctionName, string);
+        setvector(ConvergenceName, string);
         setvector(MeshDivisionName, string);
         setvector(UserObjectName, string);
         setvector(IndicatorName, string);
@@ -1285,6 +1287,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvector(SolverVariableName);
         setvectorvector(AuxVariableName);
         setvectorvector(FunctionName);
+        setvectorvector(ConvergenceName);
         setvectorvector(UserObjectName);
         setvectorvector(IndicatorName);
         setvectorvector(MarkerName);
