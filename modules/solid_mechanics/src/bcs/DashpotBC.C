@@ -15,6 +15,7 @@ InputParameters
 DashpotBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
+  params.addClassDescription("Imposes a viscous friction stress, proportional to the velocity");
   params.addRequiredParam<unsigned int>(
       "component", "The displacement component corresponding the variable this BC acts on.");
   params.addRequiredCoupledVar("disp_x", "Displacement in the x direction");

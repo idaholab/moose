@@ -18,6 +18,8 @@ InputParameters
 CHPFCRFFSplitKernelAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Creates the kernels for the transient Cahn-Hilliard equation for the "
+                             "RFF form of the phase field crystal model");
   params.addRequiredParam<unsigned int>(
       "num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<NonlinearVariableName>("n_name", "Variable name used for the n variable");

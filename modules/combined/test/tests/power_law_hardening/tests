@@ -1,19 +1,19 @@
 [tests]
   design = 'IsotropicPowerLawHardeningStressUpdate.md'
-  [./PowerLawHardening]
-    issues = '# 5481'
+  [PowerLawHardening]
+    issues = '#5481'
     type = 'Exodiff'
     input = 'PowerLawHardening.i'
     exodiff = 'PowerLawHardening_out.e'
     abs_zero = 1e-09
     requirement = 'The tensor mechanics system shall reproduce isotropic power law hardening on a single Hex8 element.'
-  [../]
-  [./ADPowerLawHardening]
-    issues = '# 18454'
+  []
+  [ADPowerLawHardening]
+    issues = '#18454'
     type = 'Exodiff'
     input = 'ADPowerLawHardening.i'
     exodiff = 'PowerLawHardening_out.e'
     abs_zero = 1e-09
     requirement = 'The tensor mechanics system shall reproduce isotropic power law hardening on a single Hex8 element using automatic differentiation.'
-  [../]
+  []
 []

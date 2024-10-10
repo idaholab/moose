@@ -15,6 +15,8 @@ InputParameters
 ReconPhaseVarIC::validParams()
 {
   InputParameters params = InitialCondition::validParams();
+  params.addClassDescription(
+      "Sets the initial condition of the phase weights from the EBSD reader");
   params.addRequiredParam<UserObjectName>("ebsd_reader",
                                           "The EBSDReader object holding the EBSD data");
   params.addRequiredParam<unsigned int>("phase", "EBSD phase number this variable is to represent");
@@ -43,7 +45,7 @@ ReconPhaseVarIC::value(const Point & /*p*/)
   if (it == _node_to_phase_weight_map.end())
     mooseError("The following node id is not in the node map: ", _current_node->id());
 
-  // make sure we have enough ophase weights
+  // make sure we have enough phase weights
   if (_phase >= it->second.size())
     mooseError("Requested an out-of-range phase number");
 

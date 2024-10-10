@@ -1,12 +1,17 @@
 [Tests]
+  issues = '#15998'
   [indenter_rz_nodeface_friction]
     type = RunApp
     input = 'indenter_rz_nodeface_friction.i'
     check_input = True
+    requirement = 'The system shall have an example of a 2D indentation test with a node-face contact formulation with friction.'
+    design = 'TwoDimensionalSphericalIndenterNodeFace.md'
   []
   [indenter_rz_fine.i]
     type = RunApp
     input = 'indenter_rz_fine.i'
     check_input = True
+    requirement = 'The system shall have an example of a 2D indentation test with frictionless mortar contact.'
+    design = 'TwoDimensionalSphericalIndenterMortar.md'
   []
 []

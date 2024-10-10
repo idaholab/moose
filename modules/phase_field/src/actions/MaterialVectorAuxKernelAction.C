@@ -18,6 +18,8 @@ InputParameters
 MaterialVectorAuxKernelAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Outputs all components of the standard vector-valued properties specified");
   params.addRequiredParam<unsigned int>(
       "grain_num", "Value that specifies the number of grains to create aux kernels for.");
   params.addRequiredParam<std::vector<std::string>>(

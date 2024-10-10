@@ -16,6 +16,8 @@ InputParameters
 InclusionProperties::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription(
+      "Computes analytical stress, strain and elastic energy terms for an elliptic inclusion");
   params.addRequiredParam<Real>("a", "Ellipse semiaxis");
   params.addRequiredParam<Real>("b", "Ellipse semiaxis");
   params.addRequiredParam<Real>("lambda", "Lame's first parameter");

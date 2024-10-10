@@ -7,7 +7,7 @@
     cli_args = 'Materials/density/type=Density Materials/density/block=PATCH Materials/density/density=12.335297548665'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant with RZ formulation"
+    requirement = "Mass shall remain constant in a body being displaced with RZ formulation"
   [../]
   [./ad_test_rz_tm]
     type = 'Exodiff'
@@ -18,7 +18,7 @@
     prereq = 'test_rz_tm'
     design = "/Mass.md"
     issues = "#12633"
-    requirement = "Mass shall remain constant with RZ formulation"
+    requirement = "Mass shall remain constant in a body being displaced with RZ formulation when using automatic differentiation."
   [../]
 
 
@@ -30,7 +30,7 @@
                 Materials/density/type=Density Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant in shear test simulations."
   [../]
   [./ad_test_shear_z_tm]
     type = 'Exodiff'
@@ -41,7 +41,7 @@
     prereq = test_shear_z_tm
     design = "/Mass.md"
     issues = "#12633"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant in shear test simulations when using automatic differentiation."
   [../]
 
   [./test_shear_y_tm]
@@ -53,7 +53,7 @@
     prereq = 'test_shear_z_tm'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant in Y-axis shear test simulations"
   [../]
   [./ad_test_shear_y_tm]
     type = 'Exodiff'
@@ -64,7 +64,7 @@
     prereq = 'test_shear_y_tm'
     design = "/Mass.md"
     issues = "#12633"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant in Y-axis shear test simulations when using automatic differentiation"
   [../]
 
   [./test_shear_x_tm]
@@ -76,7 +76,7 @@
     prereq = 'test_shear_y_tm'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant in X-axis shear test simulations"
   [../]
   [./ad_test_shear_x_tm]
     type = 'Exodiff'
@@ -87,7 +87,7 @@
     prereq = 'test_shear_x_tm'
     design = "/Mass.md"
     issues = "#12633"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant in X-axis shear test simulations when using automatic differentiation."
   [../]
 
 
@@ -98,7 +98,7 @@
     cli_args = 'Materials/density/type=Density Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a uniform compression simulation."
   [../]
   [./ad_test_uniform_tm]
     type = 'Exodiff'
@@ -108,7 +108,7 @@
     cli_args = 'Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0 Postprocessors/Mass/type=ADMass'
     design = "/Mass.md"
     issues = "#12633"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a uniform compression simulation when using automatic differentiation."
   [../]
 
 
@@ -120,7 +120,7 @@
                 Materials/density/type=Density Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a Z-axis compression simulation."
   [../]
   [./ad_test_z_tm]
     type = 'Exodiff'
@@ -131,7 +131,7 @@
     prereq = 'test_z_tm'
     issues = "#12633"
     design = "/Mass.md"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a Z-axis compression simulation when using automatic differentation."
   [../]
 
   [./test_y_tm]
@@ -143,7 +143,7 @@
     prereq = 'test_z_tm'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a Y-axis compression simulation."
   [../]
   [./ad_test_y_tm]
     type = 'Exodiff'
@@ -154,7 +154,7 @@
     prereq = 'test_y_tm'
     design = "/Mass.md"
     issues = "#12633"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a Y-axis compression simulation when using automatic differentation."
   [../]
 
   [./test_x_tm]
@@ -166,7 +166,7 @@
     prereq = 'test_y_tm'
     design = "/Mass.md"
     issues = "#6484"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a X-axis compression simulation."
   [../]
   [./ad_test_x_tm]
     type = 'Exodiff'
@@ -177,6 +177,6 @@
     prereq = 'test_x_tm'
     design = "/Mass.md"
     issues = "#12633"
-    requirement = "Mass shall remain constant"
+    requirement = "Mass shall remain constant during a X-axis compression simulation when using automatic differentation."
   [../]
 []

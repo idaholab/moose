@@ -12,7 +12,7 @@
     input = 'refine.i'
     check_input = True
     requirement = "The nucleation marker shall have an example"
-    design = 'Markers/DiscreteNucleationMarker.md'
+    design = 'markers/DiscreteNucleationMarker.md'
     issues = '#12099'
   [../]
 []

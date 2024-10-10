@@ -1,28 +1,36 @@
 [Tests]
   issues = '#3958'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./simple_contact_test]
-    type = Exodiff
-    input = 'simple_contact_test.i'
-    exodiff = 'simple_contact_test_out.e'
-  [../]
-  [./simple_contact_test2]
-    type = Exodiff
-    input = 'simple_contact_test2.i'
-    exodiff = 'simple_contact_test2_out.e'
-  [../]
-  [./simple_contact_rz_test]
-    type = Exodiff
-    input = 'simple_contact_rz_test.i'
-    exodiff = 'simple_contact_rz_test_out.e'
-    abs_zero = 1e-7
-    scale_refine = 1
-    max_parallel = 1
-  [../]
-  [./simple_contact_rspherical]
-    type = Exodiff
-    input = 'simple_contact_rspherical.i'
-    exodiff = 'simple_contact_rspherical_out.e'
-    max_parallel = 1
-  [../]
+  [simple_contact]
+    requirement = 'The system shall be able to model simple contact problems'
+    [simple_contact_test]
+      type = Exodiff
+      input = 'simple_contact_test.i'
+      exodiff = 'simple_contact_test_out.e'
+      detail = 'using a kinematic formulation,'
+
+    []
+    [simple_contact_test2]
+      type = Exodiff
+      input = 'simple_contact_test2.i'
+      exodiff = 'simple_contact_test2_out.e'
+      detail = 'using a penalty formulation,'
+    []
+    [simple_contact_rz_test]
+      type = Exodiff
+      input = 'simple_contact_rz_test.i'
+      exodiff = 'simple_contact_rz_test_out.e'
+      abs_zero = 1e-7
+      scale_refine = 1
+      max_parallel = 1
+      detail = 'using R-Z coordinates,'
+    []
+    [simple_contact_rspherical]
+      type = Exodiff
+      input = 'simple_contact_rspherical.i'
+      exodiff = 'simple_contact_rspherical_out.e'
+      max_parallel = 1
+      detail = 'and using R-spherical coordinates.'
+    []
+  []
 []

@@ -16,6 +16,8 @@ InputParameters
 EulerAngleVariables2RGBAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Outputs one color or a scalar for the RGB-encoding of the local "
+                             "Euler angles for the grain orientation");
   MooseEnum sd_enum = MooseEnum("100=1 010=2 001=3", "001");
   params.addParam<MooseEnum>("sd", sd_enum, "Reference sample direction");
   MooseEnum output_types = MooseEnum("red green blue scalar", "scalar");

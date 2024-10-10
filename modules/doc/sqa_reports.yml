@@ -30,7 +30,6 @@ Applications:
             - framework/doc/unregister.yml
         remove:
             - framework/doc/remove.yml
-        log_missing_markdown: WARNING
 
     electromagnetics:
         exe_directory: modules/combined
@@ -123,7 +122,6 @@ Applications:
             - framework/doc/remove.yml
         unregister:
             - framework/doc/unregister.yml
-        log_stub_files: WARNING
 
     optimization:
         exe_directory: modules/combined
@@ -156,7 +154,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
         log_stub_files: WARNING
-        log_missing_description: WARNING
 
     porous_flow:
         exe_directory: modules/combined
@@ -240,7 +237,6 @@ Applications:
         unregister:
             - framework/doc/unregister.yml
         log_stub_files: WARNING
-        log_missing_description: WARNING
 
     THM:
         exe_directory: modules/combined
@@ -312,10 +308,6 @@ Requirements:
             - modules/combined
         log_missing: WARNING
         log_missing_requirement: WARNING
-        log_top_level_detail: WARNING
-        log_issue_format: WARNING
-        log_design_files: WARNING
-        log_duplicate_requirement: WARNING
 
     chemical_reactions:
         directories:
@@ -325,9 +317,6 @@ Requirements:
     contact:
         directories:
             - modules/contact
-        log_duplicate_requirement: WARNING
-        log_missing: WARNING
-        log_missing_requirement: WARNING
 
     electromagnetics:
         directories:
@@ -340,7 +329,6 @@ Requirements:
     fluid_properties:
         directories:
             - modules/fluid_properties
-        log_missing: WARNING
 
     fsi:
         directories:
@@ -361,13 +349,10 @@ Requirements:
     level_set:
         directories:
             - modules/level_set
-        log_missing: WARNING
 
     misc:
         directories:
             - modules/misc
-        log_duplicate_requirement: WARNING
-        log_missing: WARNING
 
     navier_stokes:
         directories:
@@ -383,21 +368,16 @@ Requirements:
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING
-        log_design_files: WARNING
 
     porous_flow:
         directories:
             - modules/porous_flow
         log_duplicate_requirement: WARNING
         log_missing: WARNING
-        log_issue_format: WARNING
-        log_design_files: WARNING
 
     peridynamics:
         directories:
             - modules/peridynamics
-        log_duplicate_requirement: WARNING
-        log_design_files: WARNING
 
     ray_tracing:
         directories:
@@ -414,7 +394,7 @@ Requirements:
     richards:
         directories:
             - modules/richards
-        log_missing: NONE # deprcated module
+        log_missing: NONE # deprecated module
 
     scalar_transport:
         directories:
@@ -427,8 +407,6 @@ Requirements:
     stochastic_tools:
         directories:
             - modules/stochastic_tools
-        log_missing_requirement: WARNING
-        log_top_level_detail: WARNING
 
     solid_mechanics:
         directories:
