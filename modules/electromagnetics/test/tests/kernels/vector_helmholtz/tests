@@ -15,4 +15,70 @@
     design = 'VectorCurrentSource.md'
     issues = '#21080'
   []
+
+  [vector_ADmaterial_wave_equation]
+    type = 'Exodiff'
+    input = 'vector_ADmaterial_wave_equation.i'
+    exodiff = 'vector_ADmaterial_wave_equation_out.e'
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
+    design = 'ADMatWaveEquation.md'
+    issues = '#28758'
+  []
+  [vector_ADmaterial_wave_equation_csv]
+    type = CSVDiff
+    command = 'vector_ADmaterial_wave_equation_convergence.py'
+    csvdiff = 'vector_ADmaterial_wave_equation_convergence.csv'
+    requirement = 'The system shall include a tool for writing spatial convergence data for modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
+    design = 'ADMatWaveEquation.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy'
+  []
+
+  [vector_conductive_current]
+    type = 'Exodiff'
+    input = 'vector_conductive_current.i'
+    exodiff = 'vector_conductive_current_out.e'
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
+    design = 'ADConductiveCurrent.md'
+    issues = '#28758'
+  []
+  [vector_conductive_current_convergence_csv]
+    type = CSVDiff
+    command = vector_conductive_current_convergence.py
+    csvdiff = 'vector_conductive_current_convergence.csv'
+    requirement = 'The system shall include a tool for writing spatial convergence data for modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
+    design = 'ADConductiveCurrent.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy'
+  []
+
+  [microwave_heating]
+    type = 'Exodiff'
+    input = 'microwave_heating.i'
+    exodiff = 'microwave_heating_out.e'
+    requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions.'
+    design = 'ComplexHeating.md'
+    issues = '#28758'
+  []
+  [microwave_heating_convergence_csv]
+    type = CSVDiff
+    command = microwave_heating_convergence.py
+    csvdiff = 'microwave_heating_convergence.csv'
+    requirement = 'The system shall include a tool for writing spatial convergence data for modeling the power deposition due to the electric field interactions.'
+    design = 'ComplexHeating.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy'
+  []
 []
