@@ -60,7 +60,7 @@ private:
 
   /// whether to check that sidesets are consistently oriented using neighbor subdomains
   const MooseEnum _check_sidesets_orientation;
-  //// whether to check that each side is assigned to a sideset
+  //// whether to check that each external side is assigned to a sideset
   const MooseEnum _check_watertight_sidesets;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;

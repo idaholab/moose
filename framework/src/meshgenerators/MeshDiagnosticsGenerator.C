@@ -41,9 +41,10 @@ MeshDiagnosticsGenerator::validParams()
       chk_option,
       "whether to check that sidesets are consistently oriented using neighbor subdomains. If a "
       "sideset is inconsistently oriented within a subdomain, this will not be detected");
-  params.addParam<MooseEnum>("check_for_watertight_sidesets",
-                             chk_option,
-                             "whether to check for sides that are not assigned to any sidesets");
+  params.addParam<MooseEnum>(
+      "check_for_watertight_sidesets",
+      chk_option,
+      "whether to check for external sides that are not assigned to any sidesets");
   params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
@@ -157,11 +158,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 {
   auto & boundary_info = mesh->get_boundary_info();
   auto side_tuples = boundary_info.build_side_list();
-  auto sideset_map = boundary_info.get_sideset_map();
-  auto side_set = boundary_info.get_side_boundary_ids();
-  boundary_info.build_node_list_from_side_list();
-  auto nodeset_map = boundary_info.get_nodeset_map();
-  // auto & num_sides = mesh->n_sides();
+
   for (const auto bid : boundary_info.get_boundary_ids())
   {
     // This check only looks at subdomains on both sides of the sideset
@@ -284,14 +281,12 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
   /*
   Algorithm Overview:
   1) Loop through all elements
-  2) For each element loop through it's edges
-  3) If !neighbors it's external
+  2) For each element loop through all it's sides
+  3) If it has no neighbors it's an external side
   4) If external check if it's part of a sideset
   */
   if (mesh->mesh_dimension() < 2)
     mooseError("The sideset check only works for 2D and 3D meshes");
-  if (!mesh->is_serial())
-    mooseError("Only serialized/replicated meshes are supported");
   auto & boundary_info = mesh->get_boundary_info();
   boundary_info.build_side_list();
   const auto sideset_map = boundary_info.get_sideset_map();
@@ -306,11 +301,11 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
       if (elem->neighbor_ptr(i) == nullptr)
       {
         // If external check if that side had a sideset
-        auto side_itr = sideset_map.equal_range(elem);
+        auto side_range = sideset_map.equal_range(elem);
         bool has_boundary = false;
-        for (auto itr = side_itr.first; itr != side_itr.second; itr++)
+        for (const auto & itr : as_range(side_range))
         {
-          if (itr->second.first == i)
+          if (itr.second.first == i)
           {
             has_boundary = true;
           }
