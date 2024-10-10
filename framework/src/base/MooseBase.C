@@ -21,6 +21,9 @@ MooseBase::MooseBase(const std::string & type,
                      const InputParameters & params)
   : _app(app), _type(type), _name(name), _params(params)
 {
+  // This allows mooseError() within InputParameters to call the mooseError
+  // from within this base instead, providing more context
+  _params.setMooseBase(*this, {});
 }
 
 std::string
@@ -32,7 +35,8 @@ MooseBase::typeAndName() const
 [[noreturn]] void
 MooseBase::callMooseError(std::string msg, const bool with_prefix) const
 {
-  _app.getOutputWarehouse().mooseConsole();
+  _app.getOutputWarehouse().mooseConsole(); // flush output first
+
   const std::string prefix = _app.isUltimateMaster() ? "" : _app.name();
   if (with_prefix)
     msg = errorPrefix("error") + msg;
