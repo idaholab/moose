@@ -44,12 +44,14 @@ void ScaleIntegrator::AssembleFaceMatrix(
 
 void ScaleIntegrator::AssemblePA(const mfem::FiniteElementSpace& fes)
 {
+  CheckIntegrator();
   _integrator->AssemblePA(fes);
 }
 
 void ScaleIntegrator::AssembleDiagonalPA(mfem::Vector &diag)
 {
-  _integrator->AssembleDiagonalPA(diag); 
+  _integrator->AssembleDiagonalPA(diag);
+  diag *= _scale;
 }
 
 void ScaleIntegrator::AssemblePAInteriorFaces(const mfem::FiniteElementSpace &fes)
@@ -64,38 +66,57 @@ void ScaleIntegrator::AssemblePABoundaryFaces(const mfem::FiniteElementSpace &fe
 
 void ScaleIntegrator::AddMultPA(const mfem::Vector& x, mfem::Vector& y) const
 {
-  _integrator->AddMultPA(x, y);
+  // y += Mx*scale
+  mfem::Vector Mx(y.Size());
+  Mx = 0.0;
+  _integrator->AddMultPA(x, Mx);
+  Mx *= _scale;
+  y += Mx;
 }
 
 void ScaleIntegrator::AddMultTransposePA(const mfem::Vector &x, mfem::Vector &y) const
 {
-  _integrator->AddMultTransposePA(x, y);
+  // y += M^T x*scale
+  mfem::Vector MTx(y.Size());
+  MTx = 0.0;
+  _integrator->AddMultTransposePA(x, MTx);
+  MTx *= _scale;
+  y += MTx;
 }
 
 void ScaleIntegrator::AssembleMF(const mfem::FiniteElementSpace &fes)
 {
   _integrator->AssembleMF(fes);
+  std::cout << "AssembleMF" << std::endl;
+
 }
 
 void ScaleIntegrator::AddMultMF(const mfem::Vector& x, mfem::Vector& y) const
 {
   _integrator->AddMultTransposeMF(x, y);
+  std::cout << "AddMultTransposeMF" << std::endl;
+
 }
 
 void ScaleIntegrator::AddMultTransposeMF(const mfem::Vector &x, mfem::Vector &y) const
 {
   _integrator->AddMultMF(x, y);
+  std::cout << "AddMultTransposeMF" << std::endl;
+
 }
 
 void ScaleIntegrator::AssembleDiagonalMF(mfem::Vector &diag)
 {
   _integrator->AssembleDiagonalMF(diag);
+  std::cout << "AssembleDiagonalMF" << std::endl;
 }
 
 void ScaleIntegrator::AssembleEA(const mfem::FiniteElementSpace &fes, mfem::Vector &emat,
                                const bool add)
 {
   _integrator->AssembleEA(fes, emat, add);
+  std::cout << "AssembleEA" << std::endl;
+
 }
 
 void ScaleIntegrator::AssembleEAInteriorFaces(const mfem::FiniteElementSpace &fes,
@@ -104,6 +125,8 @@ void ScaleIntegrator::AssembleEAInteriorFaces(const mfem::FiniteElementSpace &fe
                                             const bool add)
 {
   _integrator->AssembleEAInteriorFaces(fes,ea_data_int,ea_data_ext,add);
+  std::cout << "AssembleEAInteriorFaces" << std::endl;
+
 }
 
 void ScaleIntegrator::AssembleEABoundaryFaces(const mfem::FiniteElementSpace &fes,
@@ -111,6 +134,8 @@ void ScaleIntegrator::AssembleEABoundaryFaces(const mfem::FiniteElementSpace &fe
                                             const bool add)
 {
   _integrator->AssembleEABoundaryFaces(fes, ea_data_bdr, add);
+  std::cout << "AssembleEABoundaryFaces" << std::endl;
+
 }
 
 ScaleIntegrator::~ScaleIntegrator()
