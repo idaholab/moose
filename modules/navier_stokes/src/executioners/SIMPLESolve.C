@@ -24,6 +24,8 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
     _pressure_system_name(getParam<SolverSystemName>("pressure_system")),
     _pressure_sys_number(_problem.linearSysNum(_pressure_system_name)),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+    _pin_pressure(getParam<bool>("pin_pressure")),
+    _pressure_pin_value(getParam<Real>("pressure_pin_value")),
     _print_fields(getParam<bool>("print_fields"))
 {
   // We fetch the system numbers for the momentum components plus add vectors
@@ -43,6 +45,15 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
   _pressure_linear_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
   _pressure_linear_control.int_valued_data["max_its"] =
       getParam<unsigned int>("pressure_l_max_its");
+}
+
+void
+SIMPLESolve::setupPressurePin()
+{
+  if (_pin_pressure)
+    _pressure_pin_dof = NS::FV::findPointDoFID(_problem.getVariable(0, "pressure"),
+                                               _problem.mesh(),
+                                               getParam<Point>("pressure_pin_point"));
 }
 
 bool

@@ -50,14 +50,6 @@ public:
 
 protected:
   /**
-   * Find the ID of the degree of freedom which corresponds to the variable and
-   * a given point on the mesh
-   * @param var_name The name of the variable
-   * @param point The point on the mesh
-   */
-  dof_id_type findDoFID(const VariableName & var_name, const Point & point);
-
-  /**
    * Determine if the iterative process on a set of equations converged or not
    * @param residuals The current (linear iteration number, residual) pairs for the systems.
    * @param abs_tolerances The corresponding absolute tolerances.

@@ -14,8 +14,6 @@
 #include "RhieChowMassFlux.h"
 #include "SegregatedSolverBase.h"
 
-
-
 class SIMPLESolve : public SolveObject
 {
 public:
@@ -37,6 +35,10 @@ public:
   /// Fetch the Rhie Chow user object that
   void linkRhieChowUserObject();
 
+  /// Setup pressure pin if there is need for one
+  void setupPressurePin();
+
+  /// Get the user object responsible for the Rhie-Chow interpolation
   const RhieChowMassFlux & getRCUserObject() { return *_rc_uo; }
 
 protected:
@@ -77,6 +79,15 @@ protected:
 
   /// Options for the linear solver of the pressure equation
   SIMPLESolverConfiguration _pressure_linear_control;
+
+  /// If the pressure needs to be pinned
+  const bool _pin_pressure;
+
+  /// The value we want to enforce for pressure
+  const Real _pressure_pin_value;
+
+  /// The dof ID where the pressure needs to be pinned
+  dof_id_type _pressure_pin_dof;
 
   /// Debug parameter which allows printing the coupling and solution vectors/matrices
   const bool _print_fields;

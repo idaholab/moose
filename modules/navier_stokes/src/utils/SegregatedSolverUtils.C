@@ -10,6 +10,12 @@
 // Moose includes
 #include "SegregatedSolverUtils.h"
 #include "PetscVectorReader.h"
+#include "MooseVariableFieldBase.h"
+#include "SystemBase.h"
+
+// Libmesh includes
+#include "libmesh/enum_point_locator_type.h"
+#include "libmesh/system.h"
 
 namespace NS
 {
@@ -185,6 +191,38 @@ constrainSystem(SparseMatrix<Number> & mx,
     rhs.add(dof_id, desired_value * diag);
     mx.add(dof_id, dof_id, diag);
   }
+}
+
+dof_id_type
+findPointDoFID(const MooseVariableFieldBase & variable, const MooseMesh & mesh, const Point & point)
+{
+  // Find the element containing the point
+  auto point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
+  point_locator->enable_out_of_mesh_mode();
+
+  unsigned int var_num = variable.sys().system().variable_number(variable.name());
+
+  // We only check in the restricted blocks, if needed
+  const bool block_restricted =
+      variable.blockIDs().find(Moose::ANY_BLOCK_ID) == variable.blockIDs().end();
+  const Elem * elem =
+      block_restricted ? (*point_locator)(point, &variable.blockIDs()) : (*point_locator)(point);
+
+  // We communicate the results and if there is conflict between processes,
+  // the minimum cell ID is chosen
+  const dof_id_type elem_id = elem ? elem->id() : DofObject::invalid_id;
+  dof_id_type min_elem_id = elem_id;
+  variable.sys().comm().min(min_elem_id);
+
+  if (min_elem_id == DofObject::invalid_id)
+    mooseError("Variable ",
+               variable.name(),
+               " is not defined at ",
+               Moose::stringify(point),
+               "! Try alleviating block restrictions or using another point!");
+
+  return min_elem_id == elem_id ? elem->dof_number(variable.sys().number(), var_num, 0)
+                                : DofObject::invalid_id;
 }
 } // End FV namespace
 } // End Moose namespace

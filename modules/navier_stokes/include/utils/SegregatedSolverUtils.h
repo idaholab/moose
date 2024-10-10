@@ -104,5 +104,16 @@ void constrainSystem(SparseMatrix<Number> & mx,
                      NumericVector<Number> & rhs,
                      const Real desired_value,
                      const dof_id_type dof_id);
+
+/**
+ * Find the ID of the degree of freedom which corresponds to the variable and
+ * a given point on the mesh
+ * @param variable Reference to the moose variable whose dof should be fetched
+ * @param mesh The moose mesh where the element is
+ * @param point The point on the mesh
+ */
+dof_id_type findPointDoFID(const MooseVariableFieldBase & variable,
+                           const MooseMesh & mesh,
+                           const Point & point);
 } // End FV namespace
 } // End Moose namespace

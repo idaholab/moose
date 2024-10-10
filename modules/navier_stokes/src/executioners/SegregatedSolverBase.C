@@ -631,40 +631,9 @@ SegregatedSolverBase::init()
   _problem.initialSetup();
 
   if (_pin_pressure)
-    _pressure_pin_dof = findDoFID("pressure", getParam<Point>("pressure_pin_point"));
-}
-
-dof_id_type
-SegregatedSolverBase::findDoFID(const VariableName & var_name, const Point & point)
-{
-  // Find the element containing the point
-  auto point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, _fe_problem.mesh());
-  point_locator->enable_out_of_mesh_mode();
-
-  const auto & variable = _fe_problem.getVariable(0, var_name);
-  unsigned int var_num = variable.sys().system().variable_number(var_name);
-
-  // We only check in the restricted blocks, if needed
-  const bool block_restricted =
-      variable.blockIDs().find(Moose::ANY_BLOCK_ID) == variable.blockIDs().end();
-  const Elem * elem =
-      block_restricted ? (*point_locator)(point, &variable.blockIDs()) : (*point_locator)(point);
-
-  // We communicate the results and if there is conflict between processes,
-  // the minimum cell ID is chosen
-  const dof_id_type elem_id = elem ? elem->id() : DofObject::invalid_id;
-  dof_id_type min_elem_id = elem_id;
-  comm().min(min_elem_id);
-
-  if (min_elem_id == DofObject::invalid_id)
-    mooseError("Variable ",
-               var_name,
-               " is not defined at ",
-               Moose::stringify(point),
-               "! Try alleviating block restrictions or using another point!");
-
-  return min_elem_id == elem_id ? elem->dof_number(variable.sys().number(), var_num, 0)
-                                : DofObject::invalid_id;
+    _pressure_pin_dof = NS::FV::findPointDoFID(_problem.getVariable(0, "pressure"),
+                                               _problem.mesh(),
+                                               getParam<Point>("pressure_pin_point"));
 }
 
 bool
