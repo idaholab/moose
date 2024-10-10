@@ -24,6 +24,12 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
     _pressure_system_name(getParam<SolverSystemName>("pressure_system")),
     _pressure_sys_number(_problem.linearSysNum(_pressure_system_name)),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+    _momentum_l_abs_tol(getParam<Real>("momentum_l_abs_tol")),
+    _pressure_l_abs_tol(getParam<Real>("pressure_l_abs_tol")),
+    _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
+    _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
+    _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
+    _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value")),
     _print_fields(getParam<bool>("print_fields"))
@@ -36,10 +42,24 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
     _momentum_systems.push_back(&_problem.getLinearSystem(_momentum_system_numbers[system_i]));
   }
 
+  const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");
+  const auto & momentum_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+      "momentum_petsc_options_iname", "momentum_petsc_options_value");
+  Moose::PetscSupport::processPetscFlags(momentum_petsc_options, _momentum_petsc_options);
+  Moose::PetscSupport::processPetscPairs(
+      momentum_petsc_pair_options, _problem.mesh().dimension(), _momentum_petsc_options);
+
   _momentum_linear_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
   _momentum_linear_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
   _momentum_linear_control.int_valued_data["max_its"] =
       getParam<unsigned int>("momentum_l_max_its");
+
+  const auto & pressure_petsc_options = getParam<MultiMooseEnum>("pressure_petsc_options");
+  const auto & pressure_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+      "pressure_petsc_options_iname", "pressure_petsc_options_value");
+  Moose::PetscSupport::processPetscFlags(pressure_petsc_options, _pressure_petsc_options);
+  Moose::PetscSupport::processPetscPairs(
+      pressure_petsc_pair_options, _problem.mesh().dimension(), _pressure_petsc_options);
 
   _pressure_linear_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
   _pressure_linear_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");

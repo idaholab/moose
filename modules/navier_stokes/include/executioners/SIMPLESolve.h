@@ -77,8 +77,34 @@ protected:
   /// Options for the linear solver of the momentum equation
   SIMPLESolverConfiguration _momentum_linear_control;
 
+  /// Absolute linear tolerance for the momentum equation(s). We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _momentum_l_abs_tol;
+
   /// Options for the linear solver of the pressure equation
   SIMPLESolverConfiguration _pressure_linear_control;
+
+  /// Absolute linear tolerance for the pressure equation. We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _pressure_l_abs_tol;
+
+  /// The user-defined absolute tolerance for determining the convergence in momentum
+  const Real _momentum_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in pressure
+  const Real _pressure_absolute_tolerance;
+
+  /// Options which hold the petsc settings for the momentum equation
+  Moose::PetscSupport::PetscOptions _momentum_petsc_options;
+
+  /// Options which hold the petsc settings for the pressure equation
+  Moose::PetscSupport::PetscOptions _pressure_petsc_options;
+
+  /// The user-defined relaxation parameter for the momentum equation
+  const Real _momentum_equation_relaxation;
+
+  /// The user-defined relaxation parameter for the pressure variable
+  const Real _pressure_variable_relaxation;
 
   /// If the pressure needs to be pinned
   const bool _pin_pressure;
