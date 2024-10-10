@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SolveObject.h"
+#include "RhieChowMassFlux.h"
 
 class SIMPLESolve : public SolveObject
 {
@@ -28,4 +29,42 @@ public:
   {
     mooseError("Cannot set inner solve for SIMPLESolve");
   }
+
+  /// Fetch the Rhie Chow
+  void linkRhieChowUserObject();
+
+  const RhieChowMassFlux & getRCUserObject() { return *_rc_uo; }
+
+protected:
+  /// Solve a momentum predictor step with a fixed pressure field
+  /// @return A vector of (number of linear iterations, normalized residual norm) pairs for
+  /// the momentum equations. The length of the vector equals the dimensionality of
+  /// the domain.
+  std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor();
+
+  /// Solve a pressure corrector step.
+  /// @return The number of linear iterations and the normalized residual norm of
+  /// the pressure equation.
+  std::pair<unsigned int, Real> solvePressureCorrector();
+
+  /// The names of the momentum systems.
+  const std::vector<SolverSystemName> & _momentum_system_names;
+
+  /// The number(s) of the system(s) corresponding to the momentum equation(s)
+  std::vector<unsigned int> _momentum_system_numbers;
+
+  /// Pointer(s) to the system(s) corresponding to the momentum equation(s)
+  std::vector<LinearSystem *> _momentum_systems;
+
+  /// The name of the pressure system
+  const SolverSystemName & _pressure_system_name;
+
+  /// The number of the system corresponding to the pressure equation
+  const unsigned int _pressure_sys_number;
+
+  /// Reference to the nonlinear system corresponding to the pressure equation
+  LinearSystem & _pressure_system;
+
+  /// Pointer to the segregated RhieChow interpolation object
+  RhieChowMassFlux * _rc_uo;
 };
