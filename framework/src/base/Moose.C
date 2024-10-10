@@ -169,6 +169,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_time_steppers",            TimeStepper,               false);
   registerMooseObjectTask("add_time_stepper",             TimeStepper,               false);
   registerTask           ("compose_time_stepper",                                    true);
+  registerMooseObjectTask("setup_time_integrators",       TimeIntegrator,            false);
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,            false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,       false);
@@ -326,7 +327,7 @@ addActionTypes(Syntax & syntax)
                            "(init_component_physics)" // components must add their blocks to physics before init_physics
                            "(init_physics)"
                            "(setup_postprocessor_data)"
-                           "(setup_time_integrator)"
+                           "(setup_time_integrator, setup_time_integrators)"
                            "(setup_executioner)"
                            "(setup_executioner_complete)"
                            "(setup_component)"  // no particular reason for that placement
@@ -566,7 +567,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddTimeStepperAction", "Executioner/TimeStepper", "add_time_stepper");
   registerSyntaxTask(
       "ComposeTimeStepperAction", "Executioner/TimeSteppers", "compose_time_stepper");
-  registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
+  registerSyntaxTask(
+      "SetupTimeIntegratorAction", "Executioner/TimeIntegrators/*", "setup_time_integrators");
+  registerSyntaxTask(
+      "SetupTimeIntegratorAction", "Executioner/TimeIntegrator", "setup_time_integrator");
   syntax.registerSyntaxType("Executors/*", "ExecutorName");
 
   registerSyntax("SetupQuadratureAction", "Executioner/Quadrature");

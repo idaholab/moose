@@ -85,7 +85,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _rot_dot_residual(_nrot),
     _rot_vel_old_value(_nrot),
     _rot_dotdot_residual(_nrot),
-    _time_integrator(*_sys.getTimeIntegrator())
+    _time_integrator(_sys.getTimeIntegrator(_var.number()))
 {
   if (_has_beta && _has_gamma && _has_rot_velocities && _has_rot_accelerations)
   {

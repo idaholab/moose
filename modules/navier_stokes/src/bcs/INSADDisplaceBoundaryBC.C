@@ -36,7 +36,7 @@ INSADDisplaceBoundaryBC::INSADDisplaceBoundaryBC(const InputParameters & paramet
     _component(getParam<unsigned short>("component")),
     _sub_id(_mesh.getSubdomainID(getParam<SubdomainName>("associated_subdomain")))
 {
-  if (!dynamic_cast<ImplicitEuler *>(_sys.getTimeIntegrator()))
+  if (!dynamic_cast<const ImplicitEuler *>(&_sys.getTimeIntegrator(_var.number())))
     mooseError("This boundary condition hard-codes a displacement update with the form of an "
                "implicit Euler discretization. Consequently please use the default time "
                "integrator, ImplicitEuler.");

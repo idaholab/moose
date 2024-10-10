@@ -58,7 +58,7 @@ NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & par
     _gamma(_has_gamma ? getParam<Real>("gamma") : 0.1),
     _eta(getParam<Real>("eta")),
     _alpha(getParam<Real>("alpha")),
-    _time_integrator(*_sys.getTimeIntegrator())
+    _time_integrator(_sys.getTimeIntegrator(_var.number()))
 {
   if (_has_beta && _has_gamma && _has_velocity && _has_acceleration)
   {
