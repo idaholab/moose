@@ -20,8 +20,8 @@ Residual::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report the non-linear residual.");
-  MooseEnum residual_types("FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET PRE_SMO INITIAL",
-                           "FINAL");
+  MooseEnum residual_types(
+      "FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET PRE_SMO INITIAL CURRENT", "FINAL");
   params.addParam<MooseEnum>("residual_type", residual_types, "Type of residual to be reported.");
   return params;
 }
@@ -41,6 +41,15 @@ Residual::getValue() const
   Real residual = 0.0;
   if (_residual_type == "FINAL")
     residual = _subproblem.finalNonlinearResidual(_sys.number());
+  else if (_residual_type == "CURRENT")
+  {
+    const auto & snes = _fe_problem.getNonlinearSystemBase(_sys.number()).getSNES();
+
+    PetscReal norm;
+    LibmeshPetscCall(SNESGetFunctionNorm(snes, &norm));
+
+    residual = norm;
+  }
   else
   {
     FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);

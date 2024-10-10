@@ -1,0 +1,17 @@
+[Tests]
+  design = 'Residual.md'
+  issues = '#28765'
+
+  [test]
+    type = CSVDiff
+    input = 'current_residual.i'
+    csvdiff = 'current_residual_out.csv'
+    # The tolerance needs to be very loose since the gold is a residual norm,
+    # which is prone to significant variations with different solve/execution
+    # types, like serial vs. parallel. We really just want to check that it is
+    # getting the correct iteration's residual, which vary by 6 orders of
+    # magnitude here.
+    rel_err = 1
+    requirement = 'The system shall be able to report the nonlinear residual norm at each nonlinear iteration.'
+  []
+[]
