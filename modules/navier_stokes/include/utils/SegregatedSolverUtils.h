@@ -13,7 +13,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-namespace Moose
+namespace NS
 {
 namespace FV
 {

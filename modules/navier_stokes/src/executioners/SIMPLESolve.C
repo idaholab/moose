@@ -9,6 +9,7 @@
 
 #include "SIMPLESolve.h"
 #include "FEProblem.h"
+#include "SegregatedSolverUtils.h"
 
 InputParameters
 SIMPLESolve::validParams()
@@ -90,12 +91,12 @@ SIMPLESolve::solveMomentumPredictor()
     _problem.computeLinearSystemSys(momentum_system, mmat, rhs);
 
     // Still need to relax the right hand side with the same vector
-    relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
-    relaxRightHandSide(rhs, solution, *diff_diagonal);
+    NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
+    NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
-    Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+    Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
 
     // Very important, for deciding the convergence, we need the unpreconditioned
     // norms in the linear solve
@@ -170,7 +171,7 @@ SIMPLESolve::solvePressureCorrector()
   }
 
   // We compute the normalization factors based on the fluxes
-  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+  Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
 
   // We need the non-preconditioned norm to be consistent with the norm factor
   LIBMESH_CHKERR(KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
@@ -180,7 +181,7 @@ SIMPLESolve::solvePressureCorrector()
   pressure_solver.set_solver_configuration(_pressure_linear_control);
 
   if (_pin_pressure)
-    constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
+    NS::FV::constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
   pressure_system.update();
 
   auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);

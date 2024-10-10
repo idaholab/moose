@@ -11,7 +11,7 @@
 #include "SegregatedSolverUtils.h"
 #include "PetscVectorReader.h"
 
-namespace Moose
+namespace NS
 {
 namespace FV
 {
@@ -123,23 +123,6 @@ limitSolutionUpdate(NumericVector<Number> & solution, const Real min_limit, cons
     value[i] = std::min(std::max(min_limit, value[i]), max_limit);
 
   solution_vector.restore_array();
-}
-
-void
-SegregatedSolverBase::constrainSystem(SparseMatrix<Number> & mx,
-                                      NumericVector<Number> & rhs,
-                                      const Real desired_value,
-                                      const dof_id_type dof_id)
-{
-  // Modify the given matrix and right hand side. We use the matrix diagonal
-  // to enforce the constraint instead of 1, to make sure we don't mess up the matrix conditioning
-  // too much.
-  if (dof_id >= mx.row_start() && dof_id < mx.row_stop())
-  {
-    Real diag = mx(dof_id, dof_id);
-    rhs.add(dof_id, desired_value * diag);
-    mx.add(dof_id, dof_id, diag);
-  }
 }
 
 Real

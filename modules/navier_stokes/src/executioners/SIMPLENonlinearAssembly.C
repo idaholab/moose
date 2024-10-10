@@ -159,12 +159,12 @@ SIMPLENonlinearAssembly::solveMomentumPredictor()
     rhs.scale(-1.0);
 
     // Still need to relax the right hand side with the same vector
-    relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
-    relaxRightHandSide(rhs, solution, *diff_diagonal);
+    NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
+    NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
-    Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+    Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
 
     // Very important, for deciding the convergence, we need the unpreconditioned
     // norms in the linear solve
@@ -239,7 +239,7 @@ SIMPLENonlinearAssembly::solvePressureCorrector()
   }
 
   // We compute the normalization factors based on the fluxes
-  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+  Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
 
   // We need the non-preconditioned norm to be consistent with the norm factor
   LIBMESH_CHKERR(KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
@@ -249,7 +249,7 @@ SIMPLENonlinearAssembly::solvePressureCorrector()
   pressure_solver.set_solver_configuration(_pressure_linear_control);
 
   if (_pin_pressure)
-    constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
+    NS::FV::constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
 
   auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
@@ -302,8 +302,8 @@ SIMPLENonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   rhs.scale(-1.0);
 
   // Go and relax the system matrix and the right hand side
-  relaxMatrix(mmat, relaxation_factor, *diff_diagonal);
-  relaxRightHandSide(rhs, solution, *diff_diagonal);
+  NS::FV::relaxMatrix(mmat, relaxation_factor, *diff_diagonal);
+  NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
 
   if (_print_fields)
   {
@@ -312,7 +312,7 @@ SIMPLENonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   }
 
   // We compute the normalization factors based on the fluxes
-  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+  Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
 
   // We need the non-preconditioned norm to be consistent with the norm factor
   LIBMESH_CHKERR(KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
@@ -372,7 +372,7 @@ SIMPLENonlinearAssembly::solveSolidEnergySystem()
   }
 
   // We compute the normalization factors based on the fluxes
-  Real norm_factor = computeNormalizationFactor(solution, mat, rhs);
+  Real norm_factor = NS::FV::computeNormalizationFactor(solution, mat, rhs);
 
   // We need the non-preconditioned norm to be consistent with the norm factor
   LIBMESH_CHKERR(KSPSetNormType(se_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
@@ -532,7 +532,7 @@ SIMPLENonlinearAssembly::execute()
       auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
       auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
       // Relax the pressure update for the next momentum predictor
-      relaxSolutionUpdate(
+      NS::FV::relaxSolutionUpdate(
           pressure_current_solution, pressure_old_solution, _pressure_variable_relaxation);
 
       // Overwrite old solution
@@ -591,13 +591,13 @@ SIMPLENonlinearAssembly::execute()
 
           auto & current_solution =
               *(_turbulence_systems[system_i]->system().current_local_solution.get());
-          limitSolutionUpdate(current_solution, _turbulence_field_min_limit[system_i]);
+          NS::FV::limitSolutionUpdate(current_solution, _turbulence_field_min_limit[system_i]);
 
           // Relax the turbulence update for the next momentum predictor
           auto & old_solution = *(_turbulence_systems[system_i]->solutionPreviousNewton());
 
           // Relax the pressure update for the next momentum predictor
-          relaxSolutionUpdate(
+          NS::FV::relaxSolutionUpdate(
               current_solution, old_solution, _turbulence_equation_relaxation[system_i]);
 
           // Overwrite old solution
