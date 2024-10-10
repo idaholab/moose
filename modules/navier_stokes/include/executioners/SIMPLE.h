@@ -38,8 +38,6 @@ public:
   virtual void execute() override;
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
-  const RhieChowMassFlux & getRCUserObject() { return *_rc_uo; }
-
 protected:
   /// Solve a momentum predictor step with a fixed pressure field
   /// @return A vector of (number of linear iterations, normalized residual norm) pairs for
