@@ -9,9 +9,6 @@
 
 #include "PorousFlowMultiComponentFluidBase.h"
 
-registerMooseObject("PorousFlowApp", PorousFlowMultiComponentFluidBase);
-registerMooseObject("PorousFlowApp", ADPorousFlowMultiComponentFluidBase);
-
 template <bool is_ad>
 InputParameters
 PorousFlowMultiComponentFluidBaseTempl<is_ad>::validParams()

@@ -24,6 +24,20 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
+  /**
+   * Convert mixture mass fractions to mole fractions
+   * @param X Mass fraction of each gas component (-)
+   * @return mole fractions (-)
+   */
+  std::vector<GenericReal<is_ad>> massFractionsToMoleFractions(std::vector<GenericReal<is_ad>> & X);
+
+  /**
+   * Scaling for derivative of mole fraction wrt mass fraction
+   * @param X Mass fraction of each gas component (-)
+   * @return derivative of mole fractions wrt mass fractions (-)
+   */
+  std::vector<Real> dMoleFraction(std::vector<GenericReal<is_ad>> & X);
+
   /// Fluid properties UserObject
   std::vector<const SinglePhaseFluidProperties *> _fp;
 
@@ -34,10 +48,13 @@ protected:
   const unsigned int _n_components;
 
   /// number of mass fraction variable
-  const unsigned int _x_components;
+  const unsigned int _X_components;
 
   /// mass fraction variables
-  std::vector<const GenericVariableValue<is_ad> *> _x;
+  std::vector<const GenericVariableValue<is_ad> *> _X;
+
+  /// Molar masses of each gas component
+  std::vector<Real> _M;
 
   usingPorousFlowFluidPropertiesMembers;
   using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_ddensity_dX;
