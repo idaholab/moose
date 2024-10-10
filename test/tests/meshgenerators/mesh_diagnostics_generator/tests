@@ -29,6 +29,22 @@
       expect_out = 'Sideset bad_one \(4\) has two neighboring sides with a very large angle'
       detail = 'inconsistently oriented sidesets between two neighbor sides within the sideset,'
     []
+    [2D_watertight_sidesets]
+      type = 'RunApp'
+      input = '2D_missing_sideset.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of external element edges that have not been assigned to a sideset: 2'
+      detail = '2D meshed square missing a sideset on one side'
+    []
+    [3D_Watertight_sidesets]
+      type = 'RunApp'
+      input = '3D_missing_sideset.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of external element faces that have not been assigned to a sideset: 4'
+      detail = '3D meshed cube missing a sideset on one side'
+    []
     [overlap]
       type = 'RunApp'
       input = 'node_based_test.i'
@@ -236,6 +252,7 @@
                   Mesh/diag/examine_non_conformality=NO_CHECK
                   Mesh/diag/examine_nonplanar_sides=NO_CHECK
                   Mesh/diag/examine_sidesets_orientation=NO_CHECK
+                  Mesh/diag/check_for_watertight_sidesets=NO_CHECK
                   Mesh/diag/search_for_adaptivity_nonconformality=NO_CHECK
                   Mesh/diag/check_local_jacobian=NO_CHECK --mesh-only"
       detail = 'a diagnostics object is created but no diagnostics are requested.'
