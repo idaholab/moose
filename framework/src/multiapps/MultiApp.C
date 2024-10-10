@@ -214,8 +214,12 @@ MultiApp::validParams()
                         false,
                         "This is useful when doing MultiApp coupling iterations. It takes the "
                         "final solution from the previous coupling iteration"
-                        "and re-uses it as the initial guess "
-                        "for the next coupling iteration");
+                        "and re-uses it as the initial guess for the next coupling iteration");
+  params.addParam<bool>("keep_aux_solution_during_restore",
+                        false,
+                        "This is useful when doing MultiApp coupling iterations. It takes the "
+                        "final auxiliary solution from the previous coupling iteration"
+                        "and re-uses it as the initial guess for the next coupling iteration");
   params.addParam<bool>(
       "no_backup_and_restore",
       false,
@@ -245,8 +249,9 @@ MultiApp::validParams()
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions", "Timed move of MultiApps");
   params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
-                              "keep_solution_during_restore",
-                              "Fixed point acceleration of MultiApp quantities");
+                              "keep_solution_during_restore keep_aux_solution_during_restore "
+                              "no_restore",
+                              "Fixed point iteration");
   params.addParamNamesToGroup("library_name library_path library_load_dependencies",
                               "Dynamic loading");
   params.addParamNamesToGroup("cli_args cli_args_files", "Passing command line argument");
@@ -287,6 +292,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _cli_args(getParam<std::vector<CLIArgString>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _keep_aux_solution_during_restore(getParam<bool>("keep_aux_solution_during_restore")),
     _no_restore(getParam<bool>("no_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
     _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups", this)),
@@ -777,6 +783,16 @@ MultiApp::restore(bool force)
       }
     }
 
+    // We temporarily copy and store solutions for all subapps
+    if (_keep_aux_solution_during_restore)
+    {
+      _end_aux_solutions.resize(_my_num_apps);
+
+      for (unsigned int i = 0; i < _my_num_apps; i++)
+        _end_aux_solutions[i] =
+            _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().solution().clone();
+    }
+
     if (_fe_problem.verboseMultiApps())
       _console << "Restoring MultiApp ... ";
 
@@ -803,6 +819,20 @@ MultiApp::restore(bool force)
       }
 
       _end_solutions.clear();
+    }
+    // Now copy the latest auxiliary solutions back for each subapp
+    if (_keep_aux_solution_during_restore)
+    {
+      for (unsigned int i = 0; i < _my_num_apps; i++)
+      {
+        _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().solution() =
+            *_end_aux_solutions[i];
+
+        // We need to synchronize solution so that local_solution has the right values
+        _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().update();
+      }
+
+      _end_aux_solutions.clear();
     }
   }
   else

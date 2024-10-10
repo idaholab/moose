@@ -1,0 +1,10 @@
+[Tests]
+  design = 'syntax/MultiApps/index.md'
+  issues = '#19078'
+  [aux]
+    type = Exodiff
+    input = 'picard_parent.i'
+    exodiff = 'picard_parent_out.e picard_parent_out_sub0.e'
+    requirement = 'The system shall be able to keep the auxiliary solution during fixed point iterations.'
+  []
+[]
