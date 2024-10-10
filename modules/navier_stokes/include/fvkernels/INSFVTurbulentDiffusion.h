@@ -45,5 +45,5 @@ protected:
   std::map<const Elem *, bool> _wall_bounded;
 
   /// Whether a Newton's method is being used (and we need to preserve the sparsity pattern in edge cases)
-  const bool _newton_solve;
+  const bool _preserve_sparsity_pattern;
 };

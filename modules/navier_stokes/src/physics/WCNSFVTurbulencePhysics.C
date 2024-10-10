@@ -606,6 +606,8 @@ WCNSFVTurbulencePhysics::addKEpsilonAdvection()
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+  // Currently only Newton method for WCNSFVTurbulencePhysics
+  params.set<bool>("newton_solve") = true;
 
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("tke_advection_interpolation");
@@ -625,7 +627,6 @@ WCNSFVTurbulencePhysics::addKEpsilonDiffusion()
     const std::string kernel_type = "INSFVTurbulentDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
-    params.set<bool>("newton_solve") = true;
 
     params.set<NonlinearVariableName>("variable") = _tke_name;
     params.set<MooseFunctorName>("coeff") = _flow_equations_physics->dynamicViscosityName();
@@ -782,8 +783,6 @@ WCNSFVTurbulencePhysics::addFVBCs()
     params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
-    // Currently only Newton method for WCNSFVTurbulencePhysics
-    params.set<bool>("newton_solve") = true;
 
     getProblem().addFVBC(bc_type, prefix() + "turbulence_walls", params);
     // Energy wall function boundary conditions are added in the WCNSFVFluidEnergyPhysics

@@ -196,6 +196,7 @@ kEpsilonViscosityAux::computeValue()
     {
       time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
     }
+    // For newton solvers, epsilon might not be bounded
     if (_newton_solve)
       if (MooseUtils::absoluteFuzzyEqual(_epsilon(current_argument, state), 0))
         time_scale = 1;

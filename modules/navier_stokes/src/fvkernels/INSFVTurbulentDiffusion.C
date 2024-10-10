@@ -23,8 +23,6 @@ INSFVTurbulentDiffusion::validParams()
   params.set<unsigned short>("ghost_layers") = 2;
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
-  params.addParam<bool>(
-      "newton_solve", false, "Whether a Newton method is used to solve the equations");
 
   return params;
 }
@@ -33,7 +31,7 @@ INSFVTurbulentDiffusion::INSFVTurbulentDiffusion(const InputParameters & params)
   : FVDiffusion(params),
     _scaling_coef(getFunctor<ADReal>("scaling_coef")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _newton_solve(getParam<bool>("newton_solve"))
+    _preserve_sparsity_pattern(_fe_problem.preserveMatrixSparsityPattern())
 {
 }
 
@@ -64,10 +62,10 @@ INSFVTurbulentDiffusion::computeQpResidual()
     const auto coeff_neighbor = _coeff(neighborArg(), state);
     if (!coeff_elem.value() && !coeff_neighbor.value())
     {
-      if (!_newton_solve)
+      if (!_preserve_sparsity_pattern)
         return 0;
       else
-        // we return 0 but preserve the sparsity pattern for Newton's method
+        // we return 0 but preserve the sparsity pattern of the Jacobian for Newton's method
         return 0 * (coeff_elem + coeff_neighbor) *
                (_scaling_coef(elemArg(), state) + _scaling_coef(neighborArg(), state)) * dudn;
     }
