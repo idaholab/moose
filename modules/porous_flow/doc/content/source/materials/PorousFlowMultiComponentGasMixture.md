@@ -1,4 +1,4 @@
-# PorousFlow1PhaseFullySaturated
+# PorousFlowMultiComponentGasMixture
 
 !syntax description /Materials/PorousFlowMultiComponentGasMixture
 

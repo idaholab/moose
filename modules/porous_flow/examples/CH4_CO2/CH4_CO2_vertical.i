@@ -36,6 +36,7 @@ time = 3153600000
   [pp_CO2]
   []
   [mass_frac_CH4]
+    scaling = 1e4
   []
 []
 
@@ -52,13 +53,11 @@ time = 3153600000
     fluid_component = 1
     variable = pp_CO2
   []
-
   [adv_CO2]
     type = PorousFlowFullySaturatedDarcyFlow
     variable = pp_CO2
     fluid_component = 1
   []
-
   [diff_CO2]
     type = PorousFlowDispersiveFlux
     fluid_component = 1
@@ -66,19 +65,16 @@ time = 3153600000
     disp_trans = 0
     disp_long = 0
   []
-
   [mass_CH4]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = mass_frac_CH4
   []
-
   [adv_CH4]
     type = PorousFlowFullySaturatedDarcyFlow
     fluid_component = 0
     variable = mass_frac_CH4
   []
-
   [diff_CH4]
     type = PorousFlowDispersiveFlux
     fluid_component = 0
@@ -86,7 +82,6 @@ time = 3153600000
     disp_trans = 0
     disp_long = 0
   []
-
 []
 
 [AuxKernels]
@@ -112,7 +107,6 @@ time = 3153600000
   [CO2]
     type = CO2FluidProperties
   []
-
   [CH4]
     type = MethaneFluidProperties
   []
@@ -134,14 +128,15 @@ time = 3153600000
   [CO2]
     type = PorousFlowMultiComponentGasMixture
     fp = 'CH4 CO2'
-    x = mass_frac_CH4
+    mass_fraction = mass_frac_CH4
     phase = 0
+    compute_enthalpy = false
+    compute_internal_energy = false
   []
   [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = mass_frac_CH4
   []
-
   [temperature]
     type = PorousFlowTemperature
     temperature = 313
@@ -171,14 +166,11 @@ time = 3153600000
     value = 1
     block = top_box
   []
-  [pressure_bot]
+  [pressure]
     type = ConstantIC
     variable = pp_CO2
     value = 4e6
   []
-[]
-
-[BCs]
 []
 
 [Preconditioning]
@@ -193,7 +185,7 @@ time = 3153600000
 [Executioner]
   type = Transient
   end_time = ${time}
-  dtmax = 1e7
+  dtmax = 1e6
   nl_rel_tol = 1e-4
   nl_abs_tol = 1e-8
   [TimeStepper]
@@ -222,7 +214,7 @@ time = 3153600000
 []
 
 [Outputs]
-  sync_times = '0 315360000 3153600000'
+  # sync_times = '0 315360000 3153600000'
   file_base = CO2_CH4_${time}
   [CSV]
     type = CSV
