@@ -441,7 +441,6 @@ TimeDependentEquationSystem::BuildBilinearForms()
     mfem::SumIntegrator * sum = new mfem::SumIntegrator;
     mfem::SumIntegrator * sum_to_scale = new mfem::SumIntegrator;
     ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum_to_scale, -_dt_coef.constant);
-    //ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, -_dt_coef.constant, false);
 
     // Apply kernels
     auto blf = _blfs.Get(test_var_name);
@@ -500,6 +499,8 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     // if implicit, add contribution to linear form from terms involving state
     // variable at previous timestep: {
     blf->AddMult(*_trial_variables.Get(test_var_name), *lf, 1.0);
+    std::cout << "lf = " << lf->Norml2() << std::endl;
+    std::cout << "trial_vars = " << _trial_variables.Get(test_var_name)->Norml2() << std::endl;
     // }
     mfem::Vector aux_x, aux_rhs;
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
@@ -514,6 +515,16 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     _h_blocks(i, i) = aux_a;
     truedXdt.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
+
+    mfem::Vector one(aux_x.Size());
+    mfem::Vector res(aux_x.Size());
+    one = 1.0;
+    res = 0.0;
+    aux_a->Mult(one,res);
+    std::cout << "aux_a = " << res.Norml2() << std::endl;
+    std::cout << "aux_x = " << aux_x.Norml2() << std::endl;
+    std::cout << "aux_rhs = " << aux_rhs.Norml2() << std::endl << std::endl;
+
   }
 
   truedXdt.SyncFromBlocks();
@@ -535,10 +546,12 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   // if implicit, add contribution to linear form from terms involving state
   // variable at previous timestep: {
   
-  // The AddMult() method in mfem::BilinearForm is not defined for non-legacy assembly
+  // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
   mfem::Vector lf_prev(lf->Size());
   blf->Mult(*_trial_variables.Get(test_var_name), lf_prev);
   *lf += lf_prev;
+  std::cout << "lf = " << lf->Norml2() << std::endl;
+  std::cout << "trial_vars = " << _trial_variables.Get(test_var_name)->Norml2() << std::endl;
   // }
   mfem::Vector aux_x, aux_rhs;
   // Update solution values on Dirichlet values to be in terms of du/dt instead of u
@@ -555,6 +568,16 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   trueRHS.GetBlock(0) = aux_rhs;
   truedXdt.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
+
+  mfem::Vector one(aux_x.Size());
+  mfem::Vector res(aux_x.Size());
+  one = 1.0;
+  res = 0.0;
+  (*aux_a)->Mult(one,res);
+  std::cout << "aux_a = " << res.Norml2() << std::endl;
+  std::cout << "aux_x = " << aux_x.Norml2() << std::endl;
+  std::cout << "aux_rhs = " << aux_rhs.Norml2() << std::endl << std::endl;
+
 
   // Create monolithic matrix
   op.Reset(aux_a->Ptr());
