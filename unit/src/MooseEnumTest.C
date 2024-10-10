@@ -298,11 +298,10 @@ TEST(MultiMooseEnum, testExecuteOn)
 
   // MultiMooseEnum doc string generation
   std::string doc = exec_enum.getDocString();
-  EXPECT_EQ(doc,
-            "The list of flag(s) indicating when this object should be executed, the "
-            "available options include NONE, INITIAL, LINEAR, NONLINEAR_CONVERGENCE, "
-            "NONLINEAR, POSTCHECK, TIMESTEP_END, TIMESTEP_BEGIN, MULTIAPP_FIXED_POINT_END, "
-            "MULTIAPP_FIXED_POINT_BEGIN, FINAL, FAILED, CUSTOM.");
+  EXPECT_EQ(
+      doc,
+      "The list of flag(s) indicating when this object should be executed. For a description of "
+      "each flag, see https://mooseframework.inl.gov/source/interfaces/SetupInterface.html.");
 
   // Tests with ExecFlagType assignment operators
   exec_enum = EXEC_FINAL;
