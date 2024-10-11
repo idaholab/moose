@@ -281,7 +281,7 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
   /*
   Algorithm Overview:
   1) Loop through all elements
-  2) For each element loop through all it's sides
+  2) For each element loop through all its sides
   3) If it has no neighbors it's an external side
   4) If external check if it's part of a sideset
   */
@@ -304,24 +304,23 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
         auto side_range = sideset_map.equal_range(elem);
         bool has_boundary = false;
         for (const auto & itr : as_range(side_range))
-        {
           if (itr.second.first == i)
-          {
             has_boundary = true;
-          }
-        }
         if (!has_boundary)
         {
           // This side does not have a sideset!!!
           std::string message;
-          if (mesh->mesh_dimension() == 3)
-            message = "Element " + std::to_string(elem->id()) +
-                      " contains an external face which has not been assigned to a sideset";
-          else
-            message = "Element " + std::to_string(elem->id()) +
-                      " contains an external edge which has not been assigned to a sideset";
-          _console << message << std::endl;
-          num_faces_without_sideset++;
+          if (num_faces_without_sideset < _num_outputs)
+          {
+            if (mesh->mesh_dimension() == 3)
+              message = "Element " + std::to_string(elem->id()) +
+                        " contains an external face which has not been assigned to a sideset";
+            else
+              message = "Element " + std::to_string(elem->id()) +
+                        " contains an external edge which has not been assigned to a sideset";
+            _console << message << std::endl;
+            num_faces_without_sideset++;
+          }
         }
       }
     }
