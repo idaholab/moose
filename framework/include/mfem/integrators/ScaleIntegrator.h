@@ -2,6 +2,9 @@
 #include "MFEMGeneralUserObject.h"
 #include "../common/pfem_extras.hpp"
 
+namespace platypus
+{
+
 /// Integrator which scales its results by a constant value
 class ScaleIntegrator : public mfem::BilinearFormIntegrator
 {
@@ -101,3 +104,4 @@ public:
 
   virtual ~ScaleIntegrator();
 };
+} // namespace platypus
