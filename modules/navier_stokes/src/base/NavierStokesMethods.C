@@ -156,7 +156,7 @@ computeSpeed(const ADRealVectorValue & velocity)
 
 /// Bounded element maps for wall treatment
 void
-getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
+getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
                        const FEProblemBase & fe_problem,
                        const SubProblem & subproblem,
                        const std::set<SubdomainID> & block_ids,
@@ -164,6 +164,7 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
 {
 
   wall_bounded_map.clear();
+  const auto wall_boundary_ids = subproblem.mesh().getBoundaryIDs(wall_boundary_names);
 
   for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
   {
@@ -171,9 +172,8 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
       for (const auto i_side : elem->side_index_range())
       {
         const auto & side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-        for (const auto & name : wall_boundary_name)
+        for (const auto & wall_id : wall_boundary_ids)
         {
-          const auto wall_id = subproblem.mesh().getBoundaryID(name);
           for (const auto side_id : side_bnds)
             if (side_id == wall_id)
               wall_bounded_map[elem] = true;
