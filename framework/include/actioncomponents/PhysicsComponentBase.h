@@ -32,7 +32,7 @@ public:
 protected:
   /// Whether the physics exists with the requested type and name
   template <typename T>
-  bool physicsExists(const PhysicsName & name);
+  bool physicsExists(const PhysicsName & name) const;
 
   virtual void addPhysics() override { initComponentPhysics(); }
   virtual void initComponentPhysics();
@@ -45,9 +45,9 @@ protected:
 
 template <typename T>
 bool
-PhysicsComponentBase::physicsExists(const PhysicsName & name)
+PhysicsComponentBase::physicsExists(const PhysicsName & name) const
 {
-  const auto physics = _awh.getPhysics<T>();
+  const auto physics = _awh.getPhysics<const T>();
   for (const auto phys : physics)
     if (phys->name() == name)
       return true;
