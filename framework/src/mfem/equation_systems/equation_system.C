@@ -427,7 +427,7 @@ TimeDependentEquationSystem::AddKernel(const std::string & test_var_name,
 void
 TimeDependentEquationSystem::BuildBilinearForms()
 {
-  
+
   // Build and assemble bilinear forms acting on time derivatives
   for (int i = 0; i < _test_var_names.size(); i++)
   {
@@ -437,7 +437,8 @@ TimeDependentEquationSystem::BuildBilinearForms()
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
 
-    // Initially both sum and sum_to_scale correspond to the same blf integrators. However, the latter gets scaled by -dt later
+    // Initially both sum and sum_to_scale correspond to the same blf integrators. However, the
+    // latter gets scaled by -dt later
     mfem::SumIntegrator * sum = new mfem::SumIntegrator;
     mfem::SumIntegrator * sum_to_scale = new mfem::SumIntegrator;
     ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum_to_scale, -_dt_coef.constant);
@@ -454,9 +455,8 @@ TimeDependentEquationSystem::BuildBilinearForms()
         sum->AddIntegrator(blf_kernel->createIntegrator());
         sum_to_scale->AddIntegrator(blf_kernel->createIntegrator());
       }
-
     }
-        
+
     // Apply td_blf kernels
     auto td_blf = _td_blfs.Get(test_var_name);
     if (_td_blf_kernels_map.Has(test_var_name))
@@ -473,8 +473,8 @@ TimeDependentEquationSystem::BuildBilinearForms()
     // sum is owned by blf and scaled_sum is owned by td_blf
     blf->AddDomainIntegrator(sum);
     td_blf->AddDomainIntegrator(scaled_sum);
-    
-    // Assemble forms 
+
+    // Assemble forms
     blf->Assemble();
     td_blf->Assemble();
   }
@@ -533,7 +533,7 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   auto lf = _lfs.Get(test_var_name);
   // if implicit, add contribution to linear form from terms involving state
   // variable at previous timestep: {
-  
+
   // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
   mfem::Vector lf_prev(lf->Size());
   blf->Mult(*_trial_variables.Get(test_var_name), lf_prev);
@@ -557,7 +557,6 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 
   // Create monolithic matrix
   op.Reset(aux_a->Ptr());
-
 }
 
 void
