@@ -100,13 +100,13 @@
   dt = 0.25
   start_time = 0.0
   end_time = 1.0
-  assembly_level = partial
+  assembly_level = element
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/HeatConductionPartial
+    file_base = OutputData/HeatConductionElement
     vtk_format = ASCII
   []
 []
