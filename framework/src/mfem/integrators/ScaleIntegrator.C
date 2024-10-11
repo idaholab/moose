@@ -43,18 +43,6 @@ ScaleIntegrator::AssembleFaceMatrix(const mfem::FiniteElement & el1,
 }
 
 void
-ScaleIntegrator::AssembleFaceMatrix(const mfem::FiniteElement & tr_fe,
-                                    const mfem::FiniteElement & te_fe1,
-                                    const mfem::FiniteElement & te_fe2,
-                                    mfem::FaceElementTransformations & Trans,
-                                    mfem::DenseMatrix & elmat)
-{
-  CheckIntegrator();
-  _integrator->AssembleFaceMatrix(tr_fe, te_fe1, te_fe2, Trans, elmat);
-  elmat *= _scale;
-}
-
-void
 ScaleIntegrator::AssemblePA(const mfem::FiniteElementSpace & fes)
 {
   CheckIntegrator();
@@ -155,25 +143,6 @@ ScaleIntegrator::AssembleEA(const mfem::FiniteElementSpace & fes,
     _integrator->AssembleEA(fes, emat, add);
     emat *= _scale;
   }
-}
-
-void
-ScaleIntegrator::AssembleEAInteriorFaces(const mfem::FiniteElementSpace & fes,
-                                         mfem::Vector & ea_data_int,
-                                         mfem::Vector & ea_data_ext,
-                                         const bool add)
-{
-  _integrator->AssembleEAInteriorFaces(fes, ea_data_int, ea_data_ext, add);
-  ea_data_int *= _scale;
-}
-
-void
-ScaleIntegrator::AssembleEABoundaryFaces(const mfem::FiniteElementSpace & fes,
-                                         mfem::Vector & ea_data_bdr,
-                                         const bool add)
-{
-  _integrator->AssembleEABoundaryFaces(fes, ea_data_bdr, add);
-  ea_data_bdr *= _scale;
 }
 
 ScaleIntegrator::~ScaleIntegrator()
