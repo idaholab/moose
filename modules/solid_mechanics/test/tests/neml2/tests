@@ -25,7 +25,7 @@
   [neml2_modular]
     issues = '#27493'
     collections = 'SYSTEM'
-    requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update '
+    requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update on cpu '
     [elasticity]
       type = Exodiff
       input = 'fem_modular.i'
@@ -37,6 +37,7 @@
       detail = 'to solve an elasticity problem;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -51,6 +52,7 @@
       detail = 'to solve a perfect viscoplasticity problem;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -65,6 +67,7 @@
       detail = 'to solve a viscoplasticity problem with isotropic hardening;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -79,6 +82,7 @@
       detail = 'to solve a viscoplasticity problem with kinematic hardening;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -93,6 +97,7 @@
       detail = 'to solve a viscoplasticity problem with both isotropic and kinematic hardening;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -107,6 +112,7 @@
       detail = 'to solve a viscoplasticity problem with non-associative Chaboche hardening;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -121,6 +127,7 @@
       detail = 'to solve a viscoplasticity problem using radial return;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       valgrind = heavy
     []
     [rate_independent_plasticity_perfect]
@@ -134,6 +141,7 @@
       detail = 'to solve a rate-independent problem with perfect plasticity;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -148,6 +156,7 @@
       detail = 'to solve a rate-independent problem with isotropic hardening;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -162,6 +171,7 @@
       detail = 'to solve a rate-independent problem with kinematic hardening;'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
       recover = false
       valgrind = heavy
     []
@@ -176,6 +186,187 @@
       detail = 'to solve a rate-independent problem with both isotropic and kinematic hardening.'
       required_submodule = 'contrib/neml2'
       libtorch = true
+      libtorch_devices = 'cpu'
+      recover = false
+      valgrind = heavy
+    []
+  []
+  [neml2_modular_cuda]
+    issues = '#27493'
+    collections = 'SYSTEM'
+    requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update on cuda '
+    [elasticity]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=elasticity
+                  UserObjects/active='model input_strain'
+                  UserObjects/model/gather_uos='input_strain'
+                  Materials/active='output_stress_jacobian'
+                  NEML2/device='cuda'"
+      exodiff = 'elasticity.e'
+      detail = 'to solve an elasticity problem;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [viscoplasticity_perfect]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=viscoplasticity_perfect
+                  UserObjects/active='model input_strain input_old_strain input_old_stress'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress'
+                  Materials/active='output_stress_jacobian'
+                  NEML2/device='cuda'"
+      exodiff = 'viscoplasticity_perfect.e'
+      detail = 'to solve a perfect viscoplasticity problem;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [viscoplasticity_isoharden]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=viscoplasticity_isoharden
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_ep'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_ep'
+                  Materials/active='output_stress_jacobian output_ep'
+                  NEML2/device='cuda'"
+      exodiff = 'viscoplasticity_isoharden.e'
+      detail = 'to solve a viscoplasticity problem with isotropic hardening;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [viscoplasticity_kinharden]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=viscoplasticity_kinharden
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_Kp'
+                  Materials/active='output_stress_jacobian output_Kp'
+                  NEML2/device='cuda'"
+      exodiff = 'viscoplasticity_kinharden.e'
+      detail = 'to solve a viscoplasticity problem with kinematic hardening;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [viscoplasticity_isokinharden]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=viscoplasticity_isokinharden
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_ep input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_ep input_old_Kp'
+                  Materials/active='output_stress_jacobian output_ep output_Kp'
+                  NEML2/device='cuda'"
+      exodiff = 'viscoplasticity_isokinharden.e'
+      detail = 'to solve a viscoplasticity problem with both isotropic and kinematic hardening;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [viscoplasticity_chaboche]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=viscoplasticity_chaboche
+                  UserObjects/active='model input_strain input_old_strain input_old_stress input_old_ep input_old_X1 input_old_X2'
+                  UserObjects/model/gather_uos='input_strain input_old_strain input_old_stress input_old_ep input_old_X1 input_old_X2'
+                  Materials/active='output_stress_jacobian output_ep output_X1 output_X2'
+                  NEML2/device='cuda'"
+      exodiff = 'viscoplasticity_chaboche.e'
+      detail = 'to solve a viscoplasticity problem with non-associative Chaboche hardening;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [viscoplasticity_radial_return]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=viscoplasticity_radial_return
+                  UserObjects/active='model input_strain input_old_Ep input_old_gamma'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_gamma'
+                  Materials/active='output_stress_jacobian output_Ep output_gamma'
+                  NEML2/device='cuda'"
+      exodiff = 'viscoplasticity_radial_return.e'
+      detail = 'to solve a viscoplasticity problem using radial return;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      valgrind = heavy
+    []
+    [rate_independent_plasticity_perfect]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=rate_independent_plasticity_perfect
+                  UserObjects/active='model input_strain input_old_Ep'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep'
+                  Materials/active='output_stress_jacobian output_Ep'
+                  NEML2/device='cuda'"
+      exodiff = 'rate_independent_plasticity_perfect.e'
+      detail = 'to solve a rate-independent problem with perfect plasticity;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [rate_independent_plasticity_isoharden]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=rate_independent_plasticity_isoharden
+                  UserObjects/active='model input_strain input_old_Ep input_old_ep'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_ep'
+                  Materials/active='output_stress_jacobian output_Ep output_ep'
+                  NEML2/device='cuda'"
+      exodiff = 'rate_independent_plasticity_isoharden.e'
+      detail = 'to solve a rate-independent problem with isotropic hardening;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [rate_independent_plasticity_kinharden]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=rate_independent_plasticity_kinharden
+                  UserObjects/active='model input_strain input_old_Ep input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_Kp'
+                  Materials/active='output_stress_jacobian output_Ep output_Kp'
+                  NEML2/device='cuda'"
+      exodiff = 'rate_independent_plasticity_kinharden.e'
+      detail = 'to solve a rate-independent problem with kinematic hardening;'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
+      recover = false
+      valgrind = heavy
+    []
+    [rate_independent_plasticity_isokinharden]
+      type = Exodiff
+      input = 'fem_modular.i'
+      cli_args = "neml2_input=rate_independent_plasticity_isokinharden
+                  UserObjects/active='model input_strain input_old_Ep input_old_ep input_old_Kp'
+                  UserObjects/model/gather_uos='input_strain input_old_Ep input_old_ep input_old_Kp'
+                  Materials/active='output_stress_jacobian output_Ep output_ep output_Kp'
+                  NEML2/device='cuda'"
+      exodiff = 'rate_independent_plasticity_isokinharden.e'
+      detail = 'to solve a rate-independent problem with both isotropic and kinematic hardening.'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      libtorch_devices = 'cuda'
       recover = false
       valgrind = heavy
     []
