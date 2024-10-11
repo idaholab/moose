@@ -11,15 +11,14 @@
 
 // Moose includes
 #include "SolveObject.h"
-#include "RhieChowMassFlux.h"
-#include "SegregatedSolverBase.h"
+#include "UserObjectInterface.h"
 
 /**
  * Solve class serving as a base class for the two SIMPLE solvers that operate with
  * different assembly algorithms. Includes base routines and variables for the coupling of
  * momentum and pressure.
  */
-class SIMPLESolveBase : public SolveObject
+class SIMPLESolveBase : public SolveObject, public UserObjectInterface
 {
 public:
   SIMPLESolveBase(Executioner & ex);
@@ -99,6 +98,11 @@ protected:
 
   /// The dof ID where the pressure needs to be pinned
   dof_id_type _pressure_pin_dof;
+
+  // ************************ Iteration control **************************** //
+
+  /// The maximum number of momentum-pressure iterations
+  const unsigned int _num_iterations;
 
   // ************************ Other Variables ****************************** //
 

@@ -473,7 +473,7 @@ SIMPLENonlinearAssembly::execute()
         ns_abs_tols.push_back(_turbulence_absolute_tolerance[system_i]);
 
     // Loop until converged or hit the maximum allowed iteration number
-    while (iteration_counter < _num_iterations && !converged(ns_its_residuals, ns_abs_tols))
+    while (iteration_counter < _num_iterations && !NS::FV::converged(ns_its_residuals, ns_abs_tols))
     {
       // Resdiual index
       size_t residual_index = 0;
@@ -663,7 +663,7 @@ SIMPLENonlinearAssembly::execute()
       std::vector<std::pair<unsigned int, Real>> passive_scalar_residuals(
           _passive_scalar_systems.size(), std::make_pair(0, 1.0));
       while (iteration_counter < _num_iterations &&
-             !converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance))
+             !NS::FV::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance))
       {
         // We clear the caches in the passive scalar variables
         for (auto system_i : index_range(_passive_scalar_systems))

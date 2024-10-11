@@ -115,5 +115,13 @@ void constrainSystem(SparseMatrix<Number> & mx,
 dof_id_type findPointDoFID(const MooseVariableFieldBase & variable,
                            const MooseMesh & mesh,
                            const Point & point);
+
+  /**
+   * Determine if the iterative process on a set of equations converged or not
+   * @param residuals The current (linear iteration number, residual) pairs for the systems.
+   * @param abs_tolerances The corresponding absolute tolerances.
+   */
+  bool converged(const std::vector<std::pair<unsigned int, Real>> & residuals,
+                 const std::vector<Real> & abs_tolerances);
 } // End FV namespace
 } // End Moose namespace

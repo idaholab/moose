@@ -49,14 +49,6 @@ public:
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
 protected:
-  /**
-   * Determine if the iterative process on a set of equations converged or not
-   * @param residuals The current (linear iteration number, residual) pairs for the systems.
-   * @param abs_tolerances The corresponding absolute tolerances.
-   */
-  bool converged(const std::vector<std::pair<unsigned int, Real>> & residuals,
-                 const std::vector<Real> & abs_tolerances);
-
   void checkDependentParameterError(const std::string & main_parameter,
                                     const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined);

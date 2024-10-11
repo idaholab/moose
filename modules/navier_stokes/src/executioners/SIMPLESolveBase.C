@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SimpleSolveBase.h"
+#include "SIMPLESolveBase.h"
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
 
 InputParameters
-SimpleSolveBase::validParams()
+SIMPLESolveBase::validParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -137,23 +137,33 @@ SimpleSolveBase::validParams()
       false,
       "Use this to print the coupling and solution fields and matrices throughout the iteration.");
 
+  /*
+   * Momentum-pressure iteration control
+   */
+
+  params.addRangeCheckedParam<unsigned int>(
+      "num_iterations",
+      1000,
+      "0<num_iterations",
+      "The number of momentum-pressure-(other fields) iterations needed.");
+
   return params;
 }
 
-SimpleSolveBase::SimpleSolveBase(Executioner & ex)
+SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
   : SolveObject(ex),
+    UserObjectInterface(this),
     _momentum_system_names(getParam<std::vector<SolverSystemName>>("momentum_systems")),
     _momentum_l_abs_tol(getParam<Real>("momentum_l_abs_tol")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
     _pressure_system_name(getParam<SolverSystemName>("pressure_system")),
-    _pressure_sys_number(_problem.linearSysNum(_pressure_system_name)),
-    _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
     _pressure_l_abs_tol(getParam<Real>("pressure_l_abs_tol")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value")),
+    _num_iterations(getParam<unsigned int>("num_iterations")),
     _print_fields(getParam<bool>("print_fields"))
 {
   const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");
@@ -182,7 +192,7 @@ SimpleSolveBase::SimpleSolveBase(Executioner & ex)
 }
 
 void
-SimpleSolveBase::setupPressurePin()
+SIMPLESolveBase::setupPressurePin()
 {
   if (_pin_pressure)
     _pressure_pin_dof = NS::FV::findPointDoFID(_problem.getVariable(0, "pressure"),
