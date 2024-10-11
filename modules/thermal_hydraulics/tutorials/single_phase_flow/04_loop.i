@@ -381,7 +381,7 @@ tot_power = 2000 # W
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 0
   nl_abs_tol = 1e-8
   nl_max_its = 25
 

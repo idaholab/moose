@@ -9,7 +9,7 @@
 
 #include "ADHeatFluxBaseBC.h"
 #include "ADHeatFluxFromHeatStructureBaseUserObject.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Assembly.h"
 #include "NonlinearSystemBase.h"
 

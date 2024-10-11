@@ -43,6 +43,11 @@ VolumeJunction1Phase::validParams()
   params.addParam<Real>("K", 0., "Form loss factor [-]");
   params.addParam<Real>("A_ref", "Reference area [m^2]");
 
+  params.addParam<bool>("apply_velocity_scaling",
+                        false,
+                        "Set to true to apply the scaling to the normal velocity. See "
+                        "documentation for more information.");
+
   params.declareControllable("K");
   params.addClassDescription("Junction between 1-phase flow channels that has a non-zero volume");
 
@@ -229,6 +234,7 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("K") = _K;
     params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
+    params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
     connectObject(params, _junction_uo_name, "K");

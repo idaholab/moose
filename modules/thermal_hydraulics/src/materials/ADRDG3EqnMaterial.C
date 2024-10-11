@@ -9,7 +9,7 @@
 
 #include "ADRDG3EqnMaterial.h"
 #include "SinglePhaseFluidProperties.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "FlowModel1PhaseUtils.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADRDG3EqnMaterial);
@@ -61,11 +61,11 @@ ADRDG3EqnMaterial::ADRDG3EqnMaterial(const InputParameters & parameters)
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
-  _U_vars.resize(THM3Eqn::N_CONS_VAR);
-  _U_vars[THM3Eqn::CONS_VAR_RHOA] = _rhoA_var;
-  _U_vars[THM3Eqn::CONS_VAR_RHOUA] = _rhouA_var;
-  _U_vars[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA_var;
-  _U_vars[THM3Eqn::CONS_VAR_AREA] = _A_var;
+  _U_vars.resize(THMVACE1D::N_FLUX_INPUTS);
+  _U_vars[THMVACE1D::RHOA] = _rhoA_var;
+  _U_vars[THMVACE1D::RHOUA] = _rhouA_var;
+  _U_vars[THMVACE1D::RHOEA] = _rhoEA_var;
+  _U_vars[THMVACE1D::AREA] = _A_var;
 }
 
 void
@@ -81,25 +81,25 @@ ADRDG3EqnMaterial::computeQpProperties()
   else
   {
     // compute primitive variables from the cell-average solution
-    std::vector<ADReal> U_avg(THM3Eqn::N_CONS_VAR, 0.0);
-    U_avg[THM3Eqn::CONS_VAR_RHOA] = _rhoA_avg[_qp];
-    U_avg[THM3Eqn::CONS_VAR_RHOUA] = _rhouA_avg[_qp];
-    U_avg[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA_avg[_qp];
-    U_avg[THM3Eqn::CONS_VAR_AREA] = _A_avg[_qp];
+    std::vector<ADReal> U_avg(THMVACE1D::N_FLUX_INPUTS, 0.0);
+    U_avg[THMVACE1D::RHOA] = _rhoA_avg[_qp];
+    U_avg[THMVACE1D::RHOUA] = _rhouA_avg[_qp];
+    U_avg[THMVACE1D::RHOEA] = _rhoEA_avg[_qp];
+    U_avg[THMVACE1D::AREA] = _A_avg[_qp];
     auto W = FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U_avg, _fp);
 
     // compute and apply slopes to primitive variables
     const auto slopes = getElementSlopes(_current_elem);
     const auto delta_x = (_q_point[_qp] - _current_elem->vertex_average()) * _dir[_qp];
-    for (unsigned int m = 0; m < THM3Eqn::N_PRIM_VAR; m++)
+    for (unsigned int m = 0; m < THMVACE1D::N_PRIM_VARS; m++)
       W[m] = W[m] + slopes[m] * delta_x;
 
     // compute reconstructed conservative variables
     const auto U =
         FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W, _A_linear[_qp], _fp);
-    _rhoA[_qp] = U[THM3Eqn::CONS_VAR_RHOA];
-    _rhouA[_qp] = U[THM3Eqn::CONS_VAR_RHOUA];
-    _rhoEA[_qp] = U[THM3Eqn::CONS_VAR_RHOEA];
+    _rhoA[_qp] = U[THMVACE1D::RHOA];
+    _rhouA[_qp] = U[THMVACE1D::RHOUA];
+    _rhoEA[_qp] = U[THMVACE1D::RHOEA];
   }
 }
 

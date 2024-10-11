@@ -9,7 +9,7 @@
 
 #include "ADOneD3EqnEnergyHeatFluxFromHeatStructure3D.h"
 #include "ADHeatFluxFromHeatStructureBaseUserObject.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "FlowModelSinglePhase.h"
 #include "HeatConductionModel.h"
 

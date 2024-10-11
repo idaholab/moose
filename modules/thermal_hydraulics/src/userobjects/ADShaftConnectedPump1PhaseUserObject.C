@@ -10,7 +10,7 @@
 #include "ADShaftConnectedPump1PhaseUserObject.h"
 #include "VolumeJunction1Phase.h"
 #include "MooseVariableScalar.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Function.h"
 #include "metaphysicl/parallel_numberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
