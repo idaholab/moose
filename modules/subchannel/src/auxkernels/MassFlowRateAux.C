@@ -20,21 +20,21 @@ InputParameters
 MassFlowRateAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription(
-      "Computes mass flow rate from specified mass flux and cross-sectional area");
+  params.addClassDescription("Computes mass flow rate from specified mass flux and cross-sectional "
+                             "area. Reads postprocessor value");
   params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
-  params.addRequiredParam<Real>("mass_flux", "User specified mass flux [kg/s-m^2]");
-  params.declareControllable("mass_flux");
+  params.addRequiredParam<PostprocessorName>("massflux",
+                                             "The postprocessor to use for the value of massflux");
   return params;
 }
 
 MassFlowRateAux::MassFlowRateAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _mass_flux(getParam<Real>("mass_flux")), _area(coupledValue("area"))
+  : AuxKernel(parameters), _massflux(getPostprocessorValue("massflux")), _area(coupledValue("area"))
 {
 }
 
 Real
 MassFlowRateAux::computeValue()
 {
-  return _mass_flux * _area[_qp];
+  return _massflux * _area[_qp];
 }
