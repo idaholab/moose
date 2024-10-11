@@ -148,9 +148,6 @@ wall_treatment_tem = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linear
 
 [Problem]
   solve = false
-  # Currently necessary when using Newton's method, somewhere in the K-epsilon equations we do not preserve
-  # the sparsity pattern when no initial conditions for velocity are used
-  error_on_jacobian_nonzero_reallocation = false
 []
 
 [Outputs]

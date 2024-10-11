@@ -23,6 +23,7 @@ INSFVTurbulentAdvection::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
   params.addParam<bool>("newton_solve",
+                        false,
                         "Whether to avoid removing automatic differentiation derivative terms "
                         "because a Newton or Newton-like solve is being used");
   return params;

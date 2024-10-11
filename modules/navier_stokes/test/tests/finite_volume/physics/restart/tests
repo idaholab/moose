@@ -1,6 +1,15 @@
 [Tests]
   issues = '#28730'
   design = 'NavierStokesPhysicsBase.md'
+  [input]
+    type = CSVDiff
+    input = '2d_channel_scalar_turbulence_init.i'
+    csvdiff = '2d_channel_scalar_turbulence_init_out.csv'
+    requirement = "The system shall be able to run a flow simulation using both scalar advection and K-epsilon turbulence."
+    cli_args = 'Problem/solve=true'
+    allow_unused = true
+    heavy = true
+  []
   [restart]
     requirement = 'The system shall be able to restart all the flow variable in the shorthand Navier Stokes Physics-syntax'
     [default]

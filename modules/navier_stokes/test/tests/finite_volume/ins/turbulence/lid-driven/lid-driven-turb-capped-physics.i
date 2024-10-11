@@ -59,9 +59,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         dynamic_viscosity = ${mu}
 
         initial_pressure = 0.2
-        # This initialization is required, otherwise set in the Problem:
-        # error_on_jacobian_nonzero_reallocation = false
-        initial_velocity = '1e-12 1e-12 0'
+        initial_velocity = '0 0 0'
 
         wall_boundaries = 'top left right bottom'
         momentum_wall_types = 'noslip noslip noslip noslip'
