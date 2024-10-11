@@ -10,13 +10,13 @@
 #pragma once
 
 #include "FEProblem.h"
-#include "ReferenceConvergenceInterface.h"
+#include "ReferenceResidualInterface.h"
 
 /**
  * FEProblemBase derived class to enable convergence checking relative to a user-specified
  * postprocessor
  */
-class ReferenceResidualProblem : public FEProblem, public ReferenceConvergenceInterface
+class ReferenceResidualProblem : public FEProblem, public ReferenceResidualInterface
 {
 public:
   static InputParameters validParams();

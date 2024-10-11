@@ -287,13 +287,13 @@ petscSetupOutput(CommandLine * cmd_line)
 }
 
 PetscErrorCode
-petscAlgebraicTest(SNES snes,
-                   PetscInt it,
-                   PetscReal /*xnorm*/,
-                   PetscReal /*snorm*/,
-                   PetscReal /*fnorm*/,
-                   SNESConvergedReason * reason,
-                   void * ctx)
+petscNonlinearConverged(SNES snes,
+                        PetscInt it,
+                        PetscReal /*xnorm*/,
+                        PetscReal /*snorm*/,
+                        PetscReal /*fnorm*/,
+                        SNESConvergedReason * reason,
+                        void * ctx)
 {
   PetscFunctionBegin;
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
@@ -301,22 +301,21 @@ petscAlgebraicTest(SNES snes,
   // execute objects that may be used in convergence check
   problem.execute(EXEC_NONLINEAR_CONVERGENCE);
 
-  // Error message that was set by the FEProblemBase and now is not used
-  std::string msg;
+  // perform the convergence check
+  Convergence::MooseConvergenceStatus status;
+  if (problem.getFailNextNonlinearConvergenceCheck())
+  {
+    status = Convergence::MooseConvergenceStatus::DIVERGED;
+    problem.resetFailNextNonlinearConvergenceCheck();
+  }
+  else
+  {
+    auto & convergence = problem.getConvergence(problem.getNonlinearConvergenceName());
+    status = convergence.checkConvergence(it);
+  }
 
-  auto & convergence = problem.getConvergence(problem.getNonlinearConvergenceName());
-
-  Convergence::MooseConvergenceStatus mreason = convergence.checkConvergence(it);
-
-  // if (msg.length() > 0)
-#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
-  auto ierr = PetscInfo(snes, "%s", msg.c_str());
-#else
-  auto ierr = PetscInfo(snes, msg.c_str());
-#endif
-  CHKERRABORT(problem.comm().get(), ierr);
-
-  switch (mreason)
+  // convert convergence status to PETSc converged reason
+  switch (status)
   {
     case Convergence::MooseConvergenceStatus::ITERATING:
       *reason = SNES_CONVERGED_ITERATING;
@@ -458,7 +457,8 @@ petscSetDefaults(FEProblemBase & problem)
     // we use the default context provided by PETSc in addition to
     // a few other tests.
     {
-      auto ierr = SNESSetConvergenceTest(snes, petscAlgebraicTest, &problem, LIBMESH_PETSC_NULLPTR);
+      auto ierr =
+          SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR);
       CHKERRABORT(nl.comm().get(), ierr);
     }
 

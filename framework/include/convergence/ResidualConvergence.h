@@ -12,17 +12,14 @@
 #include "Convergence.h"
 #include "PerfGraphInterface.h"
 
+#include "libmesh/equation_systems.h"
+
 // PETSc includes
 #include <petsc.h>
 #include <petscmat.h>
 
 /**
- * The ResidualConvergence is designed to provide a more flexible convergence
- * criteria and user access to each iteration computation. It allows for the user to
- * specify the relative and absolute tolerance for the residual, as well as
- * the maximum number of iterations and function evaluations. The ResidualConvergence
- * class also allows for the user to specify the convergence tolerance for the
- * linear solver.
+ * Checks convergence using residual criteria.
  */
 class ResidualConvergence : public Convergence
 {
@@ -38,15 +35,15 @@ public:
 protected:
   /**
    * Check the relative convergence of the nonlinear solution
-   * @param fnorm          Norm of the residual vector
-   * @param the_residual   The residual to check
-   * @param rtol           Relative tolerance
-   * @param abstol         Absolute tolerance
-   * @return               Bool signifying convergence
+   * @param fnorm      Norm of the residual vector
+   * @param ref_norm   Norm to use for reference value
+   * @param rtol       Relative tolerance
+   * @param abstol     Absolute tolerance
+   * @return           Bool signifying convergence
    */
   virtual bool checkRelativeConvergence(const PetscInt it,
                                         const Real fnorm,
-                                        const Real the_residual,
+                                        const Real ref_norm,
                                         const Real rtol,
                                         const Real abstol,
                                         std::ostringstream & oss);
@@ -55,6 +52,18 @@ protected:
    * Performs setup necessary for each call to checkConvergence
    */
   virtual void nonlinearConvergenceSetup(){};
+
+  /**
+   * Gets a parameter if the user supplies and else takes from EquationSystems object
+   *
+   * @param[in] conv_param   Parameter name in this convergence object
+   * @param[in] es_param     Parameter name in the EquationSystems object
+   * @param[in] es           EquationSystems object
+   */
+  template <typename T>
+  T getSharedESParam(const std::string & conv_param,
+                     const std::string & es_param,
+                     EquationSystems & es) const;
 
   FEProblemBase & _fe_problem;
 
@@ -98,3 +107,18 @@ protected:
   PetscReal fnorm_petsc;
   PetscReal snorm_petsc;
 };
+
+template <typename T>
+T
+ResidualConvergence::getSharedESParam(const std::string & conv_param,
+                                      const std::string & es_param,
+                                      EquationSystems & es) const
+{
+  if (isParamSetByUser(conv_param))
+  {
+    es.parameters.set<T>(es_param) = getParam<T>(conv_param);
+    return getParam<T>(conv_param);
+  }
+  else
+    return es.parameters.get<T>(es_param);
+}

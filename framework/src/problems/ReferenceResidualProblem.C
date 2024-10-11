@@ -17,7 +17,7 @@ ReferenceResidualProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
   params += ReferenceResidualConvergence::validCommonReferenceResidualProblemParams();
-  params += ReferenceConvergenceInterface::validParams();
+  params += ReferenceResidualInterface::validParams();
   params.addClassDescription("Problem that checks for convergence relative to "
                              "a user-supplied reference quantity rather than "
                              "the initial residual");
@@ -26,7 +26,7 @@ ReferenceResidualProblem::validParams()
 }
 
 ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & params)
-  : FEProblem(params), ReferenceConvergenceInterface(this)
+  : FEProblem(params), ReferenceResidualInterface(this)
 {
 }
 

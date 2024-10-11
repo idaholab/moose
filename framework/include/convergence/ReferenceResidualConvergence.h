@@ -11,7 +11,7 @@
 
 #include "ResidualConvergence.h"
 #include "FEProblem.h"
-#include "ReferenceConvergenceInterface.h"
+#include "ReferenceResidualInterface.h"
 #include "PerfGraphInterface.h"
 
 // PETSc includes
@@ -21,14 +21,10 @@
 #include "libmesh/enum_norm_type.h"
 
 /**
- * The ReferenceResidualConvergence is designed to query the solver based on user specified
- * convergence criteria, an assess current solver iterations with respect to a reference solution.
- * The ReferenceResidualConvergence class also allows for the user to specify the convergence
- * tolerance for the linear solver.
+ * Uses a reference residual to define relative convergence criteria.
  */
 
-class ReferenceResidualConvergence : public ResidualConvergence,
-                                     public ReferenceConvergenceInterface
+class ReferenceResidualConvergence : public ResidualConvergence, public ReferenceResidualInterface
 {
 public:
   static InputParameters validParams();

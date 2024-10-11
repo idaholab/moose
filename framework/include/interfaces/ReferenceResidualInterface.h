@@ -16,17 +16,17 @@ class InputParameters;
 class MooseObject;
 
 /**
- * The ReferenceConvergenceInterface class is designed to provide an interface for
+ * The ReferenceResidualInterface class is designed to provide an interface for
  * the ReferenceConvergence class, and allow access to parameters shared by other classes.
  */
 
 InputParameters validParams();
 
-class ReferenceConvergenceInterface
+class ReferenceResidualInterface
 {
 public:
-  ReferenceConvergenceInterface(const MooseObject * moose_object);
-  virtual ~ReferenceConvergenceInterface();
+  ReferenceResidualInterface(const MooseObject * moose_object);
+  virtual ~ReferenceResidualInterface();
 
   static InputParameters validParams();
 
@@ -51,7 +51,7 @@ protected:
 
 template <typename T>
 void
-ReferenceConvergenceInterface::addGroupVariables(const std::set<T> & group_vars)
+ReferenceResidualInterface::addGroupVariables(const std::set<T> & group_vars)
 {
   _group_variables.push_back(
       std::vector<NonlinearVariableName>(group_vars.begin(), group_vars.end()));

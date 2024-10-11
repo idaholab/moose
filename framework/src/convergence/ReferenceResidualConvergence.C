@@ -37,7 +37,7 @@ ReferenceResidualConvergence::validParams()
 {
   InputParameters params = ResidualConvergence::validParams();
   params += validCommonReferenceResidualProblemParams();
-  params += ReferenceConvergenceInterface::validParams();
+  params += ReferenceResidualInterface::validParams();
 
   params.addClassDescription(
       "Check the convergence of a problem with respect to a user-supplied reference solution."
@@ -107,7 +107,7 @@ ReferenceResidualConvergence::validCommonReferenceResidualProblemParams()
 
 ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters & parameters)
   : ResidualConvergence(parameters),
-    ReferenceConvergenceInterface(this),
+    ReferenceResidualInterface(this),
     _reference_vector(nullptr),
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
     _zero_ref_type(

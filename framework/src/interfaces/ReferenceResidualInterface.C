@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ReferenceConvergenceInterface.h"
+#include "ReferenceResidualInterface.h"
 #include "MooseObject.h"
 
 InputParameters
-ReferenceConvergenceInterface::validParams()
+ReferenceResidualInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::vector<NonlinearVariableName>>>(
@@ -21,7 +21,7 @@ ReferenceConvergenceInterface::validParams()
   return params;
 }
 
-ReferenceConvergenceInterface::ReferenceConvergenceInterface(const MooseObject * moose_object)
+ReferenceResidualInterface::ReferenceResidualInterface(const MooseObject * moose_object)
   : _fi_params(moose_object->parameters()), _use_group_variables(false)
 {
   if (_fi_params.isParamValid("group_variables"))
@@ -32,4 +32,4 @@ ReferenceConvergenceInterface::ReferenceConvergenceInterface(const MooseObject *
   }
 }
 
-ReferenceConvergenceInterface::~ReferenceConvergenceInterface() {}
+ReferenceResidualInterface::~ReferenceResidualInterface() {}
