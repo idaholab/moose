@@ -1,5 +1,8 @@
 #include "ScaleIntegrator.h"
 
+namespace platypus
+{
+
 void
 ScaleIntegrator::SetIntRule(const mfem::IntegrationRule * ir)
 {
@@ -102,26 +105,36 @@ ScaleIntegrator::AddMultTransposePA(const mfem::Vector & x, mfem::Vector & y) co
 void
 ScaleIntegrator::AssembleMF(const mfem::FiniteElementSpace & fes)
 {
-  mooseError("Matrix-Free assembly not yet implemented for ScaleIntegrator");
   _integrator->AssembleMF(fes);
 }
 
 void
 ScaleIntegrator::AddMultMF(const mfem::Vector & x, mfem::Vector & y) const
 {
-  _integrator->AddMultTransposeMF(x, y);
+  // y += Mx*scale
+  mfem::Vector Mx(y.Size());
+  Mx = 0.0;
+  _integrator->AddMultMF(x, Mx);
+  Mx *= _scale;
+  y += Mx;
 }
 
 void
 ScaleIntegrator::AddMultTransposeMF(const mfem::Vector & x, mfem::Vector & y) const
 {
-  _integrator->AddMultMF(x, y);
+  // y += M^T x*scale
+  mfem::Vector MTx(y.Size());
+  MTx = 0.0;
+  _integrator->AddMultTransposeMF(x, MTx);
+  MTx *= _scale;
+  y += MTx;
 }
 
 void
 ScaleIntegrator::AssembleDiagonalMF(mfem::Vector & diag)
 {
   _integrator->AssembleDiagonalMF(diag);
+  diag *= _scale;
 }
 
 void
@@ -168,3 +181,5 @@ ScaleIntegrator::~ScaleIntegrator()
   if (_own_integrator)
     delete _integrator;
 }
+
+} // namespace platypus
