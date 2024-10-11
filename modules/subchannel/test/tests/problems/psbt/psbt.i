@@ -132,11 +132,11 @@ rod_diameter = 0.00950
     block = sub_channel
   []
   [mdot_in_bc]
-    type = PostprocessorMassFlowRateAux
+    type = MassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
-    postprocessor = report_mass_flux_inlet
+    mass_flux = report_mass_flux_inlet
     execute_on = 'timestep_begin'
     block = sub_channel
   []
