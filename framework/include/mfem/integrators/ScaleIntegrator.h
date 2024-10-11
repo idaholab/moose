@@ -63,12 +63,6 @@ public:
                                   mfem::FaceElementTransformations & Trans,
                                   mfem::DenseMatrix & elmat);
 
-  virtual void AssembleFaceMatrix(const mfem::FiniteElement & trial_face_fe,
-                                  const mfem::FiniteElement & test_fe1,
-                                  const mfem::FiniteElement & test_fe2,
-                                  mfem::FaceElementTransformations & Trans,
-                                  mfem::DenseMatrix & elmat);
-
   using mfem::BilinearFormIntegrator::AssemblePA;
   virtual void AssemblePA(const mfem::FiniteElementSpace & fes);
 
@@ -92,15 +86,6 @@ public:
 
   virtual void
   AssembleEA(const mfem::FiniteElementSpace & fes, mfem::Vector & emat, const bool add);
-
-  virtual void AssembleEAInteriorFaces(const mfem::FiniteElementSpace & fes,
-                                       mfem::Vector & ea_data_int,
-                                       mfem::Vector & ea_data_ext,
-                                       const bool add);
-
-  virtual void AssembleEABoundaryFaces(const mfem::FiniteElementSpace & fes,
-                                       mfem::Vector & ea_data_bdr,
-                                       const bool add);
 
   virtual ~ScaleIntegrator();
 };
