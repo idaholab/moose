@@ -86,37 +86,41 @@ void ScaleIntegrator::AddMultTransposePA(const mfem::Vector &x, mfem::Vector &y)
 
 void ScaleIntegrator::AssembleMF(const mfem::FiniteElementSpace &fes)
 {
+  mooseError("Matrix-Free assembly not yet implemented for ScaleIntegrator");
   _integrator->AssembleMF(fes);
-  std::cout << "AssembleMF" << std::endl;
-
 }
 
 void ScaleIntegrator::AddMultMF(const mfem::Vector& x, mfem::Vector& y) const
 {
   _integrator->AddMultTransposeMF(x, y);
-  std::cout << "AddMultTransposeMF" << std::endl;
-
 }
 
 void ScaleIntegrator::AddMultTransposeMF(const mfem::Vector &x, mfem::Vector &y) const
 {
   _integrator->AddMultMF(x, y);
-  std::cout << "AddMultTransposeMF" << std::endl;
-
 }
 
 void ScaleIntegrator::AssembleDiagonalMF(mfem::Vector &diag)
 {
   _integrator->AssembleDiagonalMF(diag);
-  std::cout << "AssembleDiagonalMF" << std::endl;
 }
 
 void ScaleIntegrator::AssembleEA(const mfem::FiniteElementSpace &fes, mfem::Vector &emat,
                                const bool add)
 {
-  _integrator->AssembleEA(fes, emat, add);
-  std::cout << "AssembleEA" << std::endl;
-
+  CheckIntegrator();
+  if(add)
+  {
+    mfem::Vector emat_scale(emat.Size());
+    _integrator->AssembleEA(fes, emat_scale, false);
+    emat_scale *= _scale;
+    emat += emat_scale;
+  }
+  else
+  {
+    _integrator->AssembleEA(fes, emat, add);
+    emat *= _scale;
+  }
 }
 
 void ScaleIntegrator::AssembleEAInteriorFaces(const mfem::FiniteElementSpace &fes,
@@ -125,8 +129,7 @@ void ScaleIntegrator::AssembleEAInteriorFaces(const mfem::FiniteElementSpace &fe
                                             const bool add)
 {
   _integrator->AssembleEAInteriorFaces(fes,ea_data_int,ea_data_ext,add);
-  std::cout << "AssembleEAInteriorFaces" << std::endl;
-
+  ea_data_int *= _scale;
 }
 
 void ScaleIntegrator::AssembleEABoundaryFaces(const mfem::FiniteElementSpace &fes,
@@ -134,8 +137,7 @@ void ScaleIntegrator::AssembleEABoundaryFaces(const mfem::FiniteElementSpace &fe
                                             const bool add)
 {
   _integrator->AssembleEABoundaryFaces(fes, ea_data_bdr, add);
-  std::cout << "AssembleEABoundaryFaces" << std::endl;
-
+  ea_data_bdr *= _scale;
 }
 
 ScaleIntegrator::~ScaleIntegrator()
