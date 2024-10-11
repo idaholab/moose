@@ -792,10 +792,10 @@ AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
 }
 
 void
-AuxiliarySystem::setPreviousNewtonSolution()
+AuxiliarySystem::copyCurrentIntoPreviousNL()
 {
-  // Evaluate aux variables to get the solution vector
-  compute(EXEC_LINEAR);
+  if (solutionPreviousNewton())
+    *solutionPreviousNewton() = *currentSolution();
 }
 
 template <typename AuxKernelType>
