@@ -9,6 +9,7 @@
 
 #include "AbaqusUserElement.h"
 #include "SystemBase.h"
+#include "Executioner.h"
 #include "UELThread.h"
 
 #define QUOTE(macro) stringifyName(macro)
@@ -51,6 +52,9 @@ AbaqusUserElement::validParams()
                                         "The number of state variables this UMAT is going to use");
 
   params.addParam<int>("jtype", 0, "Abaqus element type integer");
+
+  params.addParam<bool>(
+      "use_energy", false, "Set to true of the UEL plugin makes use of the ENERGY parameter");
 
   return params;
 }
@@ -105,6 +109,25 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
 }
 
 void
+AbaqusUserElement::timestepSetup()
+{
+  // swap the current and old state data after a converged timestep
+  if (_app.getExecutioner()->lastSolveConverged())
+  {
+    std::swap(_statev_index_old, _statev_index_current);
+    if (_use_energy)
+      for (const auto & [key, value] : _energy)
+        _energy_old[key] = value;
+  }
+  else
+  {
+    // last timestep did not converge, restore energy from energy_old
+    if (_use_energy)
+      for (const auto & [key, value] : _energy_old)
+        _energy[key] = value;
+  }
+}
+void
 AbaqusUserElement::initialSetup()
 {
   setupElemRange();
@@ -158,4 +181,18 @@ AbaqusUserElement::setupElemRange()
       _statev[0][elem->id()].resize(_nstatev);
       _statev[1][elem->id()].resize(_nstatev);
     }
+}
+
+const std::array<Real, 8> *
+AbaqusUserElement::getUELEnergy(dof_id_type element_id) const
+{
+  const auto it = _energy.find(element_id);
+
+  // if this UO does not have the data for the requested element we return null
+  // this allows the querying object to try multiple (block restricted) AbaqusUserElement
+  // user objects until it finds the value (or else error out)
+  if (it == _energy.end())
+    return nullptr;
+
+  return &it->second;
 }

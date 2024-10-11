@@ -166,7 +166,8 @@ UELThread::onElement(const Elem * elem)
   Real time = _fe_problem.time();
   std::vector<Real> times{time - dt, time - dt}; // first entry should be the step time (TODO)
 
-  std::array<Real, 8> energy;
+  std::array<Real, 8> dummy_energy;
+
   int jelem = elem->id() + 1; // User-assigned element number
   Real pnewdt;
 
@@ -187,7 +188,7 @@ UELThread::onElement(const Elem * elem)
   _uel(_local_re.get_values().data(),
        _local_ke.get_values().data(),
        _statev_copy.data(),
-       energy.data(),
+       _uel_uo._use_energy ? _uel_uo._energy[elem->id()].data() : dummy_energy.data(),
        &ndofel,
        &nrhs,
        &_uel_uo._nstatev,
