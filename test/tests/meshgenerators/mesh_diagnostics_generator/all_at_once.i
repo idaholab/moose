@@ -14,6 +14,7 @@
     examine_non_conformality = WARNING
     examine_nonplanar_sides = INFO
     examine_sidesets_orientation = WARNING
+    examine_non_matching_edges = WARNING
     search_for_adaptivity_nonconformality = WARNING
     check_local_jacobian = WARNING
   []
