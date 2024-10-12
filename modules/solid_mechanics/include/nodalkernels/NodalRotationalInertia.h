@@ -105,5 +105,5 @@ protected:
   const VariableValue * _du_dotdot_du;
 
   /// The TimeIntegrator
-  TimeIntegrator & _time_integrator;
+  const TimeIntegrator & _time_integrator;
 };

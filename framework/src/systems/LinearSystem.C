@@ -93,14 +93,6 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 LinearSystem::~LinearSystem() = default;
 
 void
-LinearSystem::addTimeIntegrator(const std::string & /*type*/,
-                                const std::string & /*name*/,
-                                InputParameters & /*parameters*/)
-{
-  mooseError("LinearSystem does not support time integrators yet!");
-}
-
-void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();

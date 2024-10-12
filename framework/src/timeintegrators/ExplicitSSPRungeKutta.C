@@ -69,7 +69,9 @@ void
 ExplicitSSPRungeKutta::computeTimeDerivatives()
 {
   // Only the Jacobian needs to be computed, since the mass matrix needs it
-  _du_dot_du = 1.0 / (_b[_stage] * _dt);
+  for (const auto i : index_range(_du_dot_du))
+    if (integratesVar(i))
+      _du_dot_du[i] = 1.0 / (_b[_stage] * _dt);
 }
 
 void

@@ -60,7 +60,7 @@ private:
   const VariableValue * _du_dotdot_du;
 
   /// The TimeIntegrator
-  TimeIntegrator & _time_integrator;
+  const TimeIntegrator & _time_integrator;
 
   using InertialForceParent<is_ad>::_dt;
   using InertialForceParent<is_ad>::_i;

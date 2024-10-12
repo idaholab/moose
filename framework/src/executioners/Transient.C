@@ -261,7 +261,9 @@ Transient::preExecute()
                  "input file or report an error.\n"
                  "2. If you are developing a new time stepper, make sure that initial time step "
                  "size in your code is computed correctly.");
-    _nl.getTimeIntegrator()->init();
+    const auto & tis = _nl.getTimeIntegrators();
+    for (auto & ti : tis)
+      ti->init();
   }
 }
 
@@ -456,7 +458,9 @@ Transient::endStep(Real input_time)
       _time = _time_old;
     else
     {
-      _nl.getTimeIntegrator()->postStep();
+      const auto & tis = _nl.getTimeIntegrators();
+      for (auto & ti : tis)
+        ti->postStep();
 
       // Compute the Error Indicators and Markers
       _problem.computeIndicators();
@@ -703,14 +707,18 @@ Transient::getTimeStepperName() const
     return std::string();
 }
 
-std::string
-Transient::getTimeIntegratorName() const
+std::vector<std::string>
+Transient::getTimeIntegratorNames() const
 {
-  const auto * ti = _nl.getTimeIntegrator();
-  if (ti)
-    return ti->type();
-  else
+  const auto & tis = _nl.getTimeIntegrators();
+  if (tis.empty())
     mooseError("Time integrator has not been built yet so we can't retrieve its name");
+
+  std::vector<std::string> ret;
+  for (const auto & ti : tis)
+    ret.push_back(ti->type());
+
+  return ret;
 }
 
 Real
