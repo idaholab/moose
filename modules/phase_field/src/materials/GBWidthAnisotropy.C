@@ -15,6 +15,9 @@ InputParameters
 GBWidthAnisotropy::validParams()
 {
   InputParameters params = GBAnisotropyBase::validParams();
+  params.addClassDescription(
+      "A material to compute anisotropic grain boundary energies and mobilities with "
+      "user-specified grain boundary widths, independently for each interface between grains");
   params.addRequiredParam<Real>("mu", "Prefactor of bulk free energy");
   params.addRequiredParam<Real>("kappa",
                                 "Prefactor of gradient free energies for all i-j interfaces");

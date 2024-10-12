@@ -3,7 +3,7 @@
     type = CSVDiff
     input = aquifer_equilibrium.i
     csvdiff = aquifer_equilibrium_out.csv
-    requirement = "The geochemistry model shall be able to find the molality of species at equilibrium with free minerals"
+    requirement = "The geochemistry model shall be able to find the molality of species at equilibrium with free minerals, with quartz-like minerals."
     issues = '#15693'
     design = 'geotes_2D.md'
   [../]
@@ -20,7 +20,7 @@
     input = 'aquifer_geochemistry.i'
     csvdiff = 'aquifer_geochemistry_out.csv'
     cli_args = 'Outputs/exodus=false Executioner/end_time=1E5'
-    requirement = "Spatially-dependent aquifer geochemical models shall be possible in the geochemistry module"
+    requirement = "The system shhall be able to model spatially-dependent aquifer geochemical models."
     issues = '#15693'
     design = 'geotes_2D.md'
   [../]
@@ -29,7 +29,7 @@
     input = 'aquifer_un_quartz_geochemistry.i'
     csvdiff = 'aquifer_un_quartz_geochemistry_out.csv'
     cli_args = 'Outputs/exodus=false Executioner/end_time=1E5'
-    requirement = "Spatially-dependent aquifer geochemical models shall be possible in the geochemistry module"
+    requirement = "The system shhall be able to model spatially-dependent aquifer geochemical models with unquartz-like minerals."
     issues = '#15693'
     design = 'geotes_2D.md'
   [../]
@@ -61,7 +61,7 @@
     cli_args = 'Executioner/end_time=2E5 Outputs/file_base=exchanger_un_quartz_2steps'
     heavy = true
     prereq = porous_flow
-    requirement = "Porous-flow simulations should be able to two-way couple to spatially-dependent geochemical models to simulate reactive transport"
+    requirement = "The system shall be able to two-way couple porous-flow simulations to spatially-dependent geochemical models to simulate reactive transport, in the presence of unquartz-like minerals"
     issues = '#15693'
     design = 'geotes_2D.md'
   [../]

@@ -15,6 +15,8 @@ InputParameters
 GBAnisotropy::validParams()
 {
   InputParameters params = GBAnisotropyBase::validParams();
+  params.addClassDescription(
+      "A material to compute anisotropic grain boundary energies and mobilities.");
   params.addRequiredParam<Real>("wGB", "Diffuse GB width in nm");
   return params;
 }

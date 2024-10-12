@@ -15,7 +15,7 @@
     exodiff = 'ad_elastic_patch_plane_strain_out.e'
     scale_refine = 1
     requirement = 'AD density shall calculate the density due to changes in strain in the plane strain formulation'
-    design = "ADDensity.md"
+    design = "Density.md"
     issues = "#12633"
   []
   [rz]
@@ -33,7 +33,7 @@
     exodiff = 'ad_elastic_patch_rz_out.e'
     scale_refine = 1
     requirement = 'AD density shall calculate the density due to changes in strain in the 2DRZ formulation'
-    design = "ADDensity.md"
+    design = "Density.md"
     issues = "#12633"
   []
   [rz_nonlinear]
@@ -49,7 +49,7 @@
     input = 'ad_elastic_patch_rz_nonlinear.i'
     exodiff = 'ad_elastic_patch_rz_nonlinear_out.e'
     requirement = 'AD density shall calculate the density due to changes in strain in the 2DRZ eigenstrain formulation'
-    design = "ADDensity.md"
+    design = "Density.md"
     issues = "#12633"
   []
   [rspherical]
@@ -65,7 +65,7 @@
     input = 'ad_elastic_patch_rspherical.i'
     exodiff = 'ad_elastic_patch_rspherical_out.e'
     requirement = 'AD density shall calculate the density due to changes in strain in the spherical formulation'
-    design = "ADDensity.md"
+    design = "Density.md"
     issues = "#12633"
   []
 []

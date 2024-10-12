@@ -15,6 +15,8 @@ InputParameters
 PFCRFFMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Defined the mobility, alpha and A constants for the RFF form of the "
+                             "phase field crystal model");
   params.addRequiredParam<unsigned int>(
       "num_L", "specifies the number of complex L variables will be solved for");
   return params;

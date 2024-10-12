@@ -5,9 +5,9 @@
     exodiff = 'preset_bc_out.e'
     map = false
 
-    requirement = "PenaltyDirichletOldValuePD shall support enforcement of
+    requirement = "The system shall be able to support enforcement of
                    Dirichlet boundary condition of old value by penalty method for nodesets."
-    design = 'modules/peridynamics/nodalkernels/PenaltyDirichletOldValuePD.md'
+    design = 'nodalkernels/PenaltyDirichletOldValuePD.md'
     issues = '#11561'
   [../]
 []

@@ -16,10 +16,12 @@ InputParameters
 PFCRFFEnergyDensity::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription(
+      "Computes the crystal free energy density for the RFF form of the phase field crystal model");
   params.addRequiredCoupledVar("v", "Array of coupled variables");
-  params.addParam<Real>("a", 1.0, "Modified Coefficent in Taylor series expansion");
-  params.addParam<Real>("b", 1.0, "Modified Coefficent in Taylor series expansion");
-  params.addParam<Real>("c", 1.0, "Modified Coefficent in Taylor series expansion");
+  params.addParam<Real>("a", 1.0, "Modified coefficient in Taylor series expansion");
+  params.addParam<Real>("b", 1.0, "Modified coefficient in Taylor series expansion");
+  params.addParam<Real>("c", 1.0, "Modified coefficient in Taylor series expansion");
   params.addParam<unsigned int>(
       "num_exp_terms", 4, "Number of terms to use in the Taylor series expansion");
   MooseEnum log_options("tolerance cancelation expansion nothing");
@@ -48,7 +50,7 @@ PFCRFFEnergyDensity::computeValue()
   Real val = 0.0;
   switch (_log_approach)
   {
-    case 0: // approach using tolerence
+    case 0: // approach using tolerance
       if (1.0 + (*_vals[0])[_qp] < _tol)
         val += ((1.0 + _tol) * std::log(1 + _tol)) - _tol;
       else

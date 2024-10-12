@@ -15,6 +15,8 @@ InputParameters
 ComputeHomogenizedLagrangianStrain::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Sets the homogenization gradient as a material property from an "
+                             "auxiliary variable input gradient");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredParam<UserObjectName>(
       "homogenization_constraint", "The UserObject for defining the homogenization constraint");
