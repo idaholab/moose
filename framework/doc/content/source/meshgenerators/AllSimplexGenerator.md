@@ -22,3 +22,9 @@ In 3D, the geometry of any non-planar quadrilateral faces of cubes
 and/or prisms will not be exactly preserved, due to the change from
 bilinear or biquadratic mapping on quadrilaterals to linear or
 quadratic mapping on the triangles that replace them.
+
+!syntax parameters /Mesh/AllSimplexGenerator
+
+!syntax inputs /Mesh/AllSimplexGenerator
+
+!syntax children /Mesh/AllSimplexGenerator
