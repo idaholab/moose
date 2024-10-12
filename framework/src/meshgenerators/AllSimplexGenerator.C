@@ -9,6 +9,8 @@
 
 #include "AllSimplexGenerator.h"
 
+#include "CastUniquePointer.h"
+
 #include "libmesh/mesh_modification.h"
 #include "libmesh/unstructured_mesh.h"
 
