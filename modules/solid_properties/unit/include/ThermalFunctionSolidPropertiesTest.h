@@ -30,9 +30,10 @@ protected:
     Function & rho = _fe_problem->getFunction("rho");
     rho.initialSetup();
 
-    InputParameters cp_pars = _factory.getValidParams("ParsedFunction");
-    cp_pars.set<std::string>("value") = "1200.0";
-    _fe_problem->addFunction("ParsedFunction", "cp", cp_pars);
+    InputParameters cp_pars = _factory.getValidParams("PiecewiseLinear");
+    cp_pars.set<std::vector<Real>>("x") = {700.0, 900.0};
+    cp_pars.set<std::vector<Real>>("y") = {1000.0, 1400.0};
+    _fe_problem->addFunction("PiecewiseLinear", "cp", cp_pars);
     Function & cp = _fe_problem->getFunction("cp");
     cp.initialSetup();
 

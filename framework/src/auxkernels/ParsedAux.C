@@ -25,6 +25,11 @@ ParsedAux::validParams()
   params.addCoupledVar("args", "Vector of coupled variable names");
   params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
 
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "material_properties", {}, "Material properties (Real-valued) in the expression");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "ad_material_properties", {}, "AD material properties (ADReal-valued) in the expression");
+
   params.addParam<bool>(
       "use_xyzt",
       false,
@@ -54,6 +59,10 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     _function(getParam<std::string>("expression")),
     _nargs(coupledComponents("coupled_variables")),
     _args(coupledValues("coupled_variables")),
+    _matprop_names(getParam<std::vector<MaterialPropertyName>>("material_properties")),
+    _ad_matprop_names(getParam<std::vector<MaterialPropertyName>>("ad_material_properties")),
+    _n_matprops(_matprop_names.size()),
+    _n_ad_matprops(_ad_matprop_names.size()),
     _use_xyzt(getParam<bool>("use_xyzt")),
     _xyzt({"x", "y", "z", "t"}),
     _functor_names(getParam<std::vector<MooseFunctorName>>("functor_names")),
@@ -86,7 +95,13 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     for (const auto & name : _functor_names)
       variables += (variables.empty() ? "" : ",") + name;
 
-  // "system" variables
+  // material properties
+  for (const auto & matprop : _matprop_names)
+    variables += (variables.empty() ? "" : ",") + matprop;
+  for (const auto & matprop : _ad_matprop_names)
+    variables += (variables.empty() ? "" : ",") + matprop;
+
+  // positions and time
   if (_use_xyzt)
     for (auto & v : _xyzt)
       variables += (variables.empty() ? "" : ",") + v;
@@ -126,8 +141,15 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   }
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs + _n_functors + (_use_xyzt ? 4 : 0));
+  _func_params.resize(_nargs + _n_functors + _n_matprops + _n_ad_matprops + (_use_xyzt ? 4 : 0));
 
+  // keep pointers to the material properties
+  for (const auto & name : _matprop_names)
+    _matprops.push_back(&getMaterialProperty<Real>(name));
+  for (const auto & name : _ad_matprop_names)
+    _ad_matprops.push_back(&getADMaterialProperty<Real>(name));
+
+  // keep pointers to the functors
   for (const auto & name : _functor_names)
     _functors.push_back(&getFunctor<Real>(name));
 }
@@ -135,9 +157,11 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
 Real
 ParsedAux::computeValue()
 {
+  // Variables
   for (const auto j : make_range(_nargs))
     _func_params[j] = (*_args[j])[_qp];
 
+  // Functors
   const auto & state = determineState();
   if (isNodal())
   {
@@ -152,11 +176,19 @@ ParsedAux::computeValue()
       _func_params[_nargs + i] = (*_functors[i])(qp_arg, state);
   }
 
+  // Material properties
+  for (const auto j : make_range(_n_matprops))
+    _func_params[_nargs + _n_functors + j] = (*_matprops[j])[_qp];
+  for (const auto j : make_range(_n_ad_matprops))
+    _func_params[_nargs + _n_functors + _n_matprops + j] = (*_ad_matprops[j])[_qp].value();
+
+  // Positions and time
   if (_use_xyzt)
   {
     for (const auto j : make_range(LIBMESH_DIM))
-      _func_params[_nargs + _n_functors + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
-    _func_params[_nargs + _n_functors + 3] = _t;
+      _func_params[_nargs + _n_functors + _n_matprops + _n_ad_matprops + j] =
+          isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
+    _func_params[_nargs + _n_functors + _n_matprops + _n_ad_matprops + 3] = _t;
   }
 
   return evaluate(_func_F);

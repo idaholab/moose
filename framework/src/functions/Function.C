@@ -85,6 +85,12 @@ Function::timeDerivative(Real /*t*/, const Point & /*p*/) const
   return 0;
 }
 
+Real
+Function::timeIntegral(Real /*t1*/, Real /*t2*/, const Point & /*p*/) const
+{
+  mooseError("timeIntegral() not implemented.");
+}
+
 RealVectorValue
 Function::vectorValue(Real /*t*/, const Point & /*p*/) const
 {

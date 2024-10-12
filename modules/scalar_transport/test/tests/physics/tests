@@ -6,7 +6,7 @@
     [non-ad]
       type = CSVDiff
       input = 'diffusion_multi_cg.i'
-      cli_args = 'Physics/Diffusion/ContinuousGalerkin/diff/use_automatic_differentiation=false Materials/diff_coeffs/type=ADGenericConstantMaterial'
+      cli_args = 'Physics/MultiSpeciesDiffusion/ContinuousGalerkin/diff/use_automatic_differentiation=false Materials/diff_coeffs/type=GenericConstantMaterial'
       csvdiff = 'diffusion_multi_cg_out_sample_0010.csv'
       detail = 'without automatic differentiation for several terms,'
     []

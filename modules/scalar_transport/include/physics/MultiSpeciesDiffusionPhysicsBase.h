@@ -16,7 +16,8 @@ class ActionComponent;
 #define registerMultiSpeciesDiffusionPhysicsBaseTasks(app_name, derived_name)                      \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_preconditioning");                              \
-  registerMooseAction(app_name, derived_name, "add_postprocessor")
+  registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
+  registerMooseAction(app_name, derived_name, "add_ic")
 
 /**
  * Base class to host all common parameters and attributes of Physics actions to solve the diffusion
@@ -49,4 +50,6 @@ private:
   virtual void addPreconditioning() override;
   /// Add postprocessing of the fluxes
   virtual void addPostprocessors() override;
+  /// Add initial conditions for each diffused variable
+  virtual void addInitialConditions() override;
 };

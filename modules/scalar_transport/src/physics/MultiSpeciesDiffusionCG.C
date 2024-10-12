@@ -131,7 +131,7 @@ MultiSpeciesDiffusionCG::addFEKernels()
 void
 MultiSpeciesDiffusionCG::addFEBCs()
 {
-  if (isParamValid("neumann_boundaries"))
+  if (isParamSetByUser("neumann_boundaries"))
   {
     const auto & boundary_fluxes =
         getParam<std::vector<std::vector<MooseFunctorName>>>("boundary_fluxes");
@@ -180,7 +180,7 @@ MultiSpeciesDiffusionCG::addFEBCs()
       }
     }
   }
-  if (isParamValid("dirichlet_boundaries"))
+  if (isParamSetByUser("dirichlet_boundaries"))
   {
     const auto & boundary_values =
         getParam<std::vector<std::vector<MooseFunctorName>>>("boundary_values");

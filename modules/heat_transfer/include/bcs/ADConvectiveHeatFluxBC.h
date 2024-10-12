@@ -26,8 +26,14 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// Far-field temperature variable
-  const ADMaterialProperty<Real> & _T_infinity;
+  const ADMaterialProperty<Real> * const _T_infinity;
 
   /// Convective heat transfer coefficient
-  const ADMaterialProperty<Real> & _htc;
+  const ADMaterialProperty<Real> * const _htc;
+
+  /// Far-field temperature functor
+  const Moose::Functor<ADReal> * const _T_infinity_functor;
+
+  /// Convective heat transfer coefficient as a functor
+  const Moose::Functor<ADReal> * const _htc_functor;
 };

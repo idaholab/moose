@@ -47,6 +47,14 @@ protected:
   const unsigned int _nargs;
   const std::vector<const VariableValue *> _args;
 
+  /// material properties
+  const std::vector<MaterialPropertyName> & _matprop_names;
+  const std::vector<MaterialPropertyName> & _ad_matprop_names;
+  const unsigned int _n_matprops;
+  const unsigned int _n_ad_matprops;
+  std::vector<const MaterialProperty<Real> *> _matprops;
+  std::vector<const ADMaterialProperty<Real> *> _ad_matprops;
+
   /// import coordinates and time
   const bool _use_xyzt;
 

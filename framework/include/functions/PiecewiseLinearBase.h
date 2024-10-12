@@ -32,6 +32,7 @@ public:
   virtual RealGradient gradient(Real, const Point & p) const override;
   virtual Real integral() const override;
   virtual Real average() const override;
+  virtual Real timeIntegral(Real t1, Real t2, const Point & p) const override;
   virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y) override;
 
 protected:

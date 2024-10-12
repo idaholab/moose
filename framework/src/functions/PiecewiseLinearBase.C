@@ -85,6 +85,18 @@ PiecewiseLinearBase::average() const
          (_linear_interp->domain(_linear_interp->getSampleSize() - 1) - _linear_interp->domain(0));
 }
 
+Real
+PiecewiseLinearBase::timeIntegral(Real t1, Real t2, const Point & p) const
+{
+  if (_has_axis)
+    // function is constant in time; evaluate at arbitrary point in time
+    // and multiply by time integral domain width
+    return value(t1, p) * (t2 - t1);
+  else
+    // function is piecewise linear in time
+    return _scale_factor * _linear_interp->integratePartial(t1, t2);
+}
+
 void
 PiecewiseLinearBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
 {
