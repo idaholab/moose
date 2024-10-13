@@ -9,6 +9,8 @@
 
 #include "CavityPressureUserObject.h"
 
+using namespace libMesh;
+
 registerMooseObject("SolidMechanicsApp", CavityPressureUserObject);
 
 InputParameters

@@ -38,7 +38,7 @@ protected:
 
   ///@{ data of the to_elem side being initialized
   std::unique_ptr<const Elem> _current_remote_side;
-  std::unique_ptr<FEBase> _current_remote_fe;
+  std::unique_ptr<libMesh::FEBase> _current_remote_fe;
   Real _current_remote_side_volume;
   const std::vector<Real> * _current_remote_JxW;
   const std::vector<Point> * _current_remote_xyz;

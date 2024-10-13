@@ -17,6 +17,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
 
+using namespace libMesh;
+
 namespace Moose
 {
 template <typename T, typename T2, typename std::enable_if<ScalarTraits<T>::value, int>::type = 0>

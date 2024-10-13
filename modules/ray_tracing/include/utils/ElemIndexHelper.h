@@ -40,25 +40,25 @@ public:
   ElemIndexHelper(libMesh::MeshBase & mesh, const std::string & extra_elem_integer_name);
 
   /**
-   * Initializes the indices in a continguous manner for the given element range
+   * Initializes the indices in a contiguous manner for the given element range
    */
-  void initialize(const SimpleRange<libMesh::MeshBase::element_iterator> elems);
+  void initialize(const libMesh::SimpleRange<libMesh::MeshBase::element_iterator> elems);
 
   /**
    * Whether or not the element \p elem has an index set for it using this object.
    */
-  bool hasIndex(const Elem * elem) const
+  bool hasIndex(const libMesh::Elem * elem) const
   {
     mooseAssert(elem, "Null elem");
     mooseAssert(_initialized, "Not initialized");
     mooseAssert(_mesh.query_elem_ptr(elem->id()), "Not an elem of the mesh");
-    return elem->get_extra_integer(_extra_integer) != DofObject::invalid_id;
+    return elem->get_extra_integer(_extra_integer) != libMesh::DofObject::invalid_id;
   }
 
   /**
    * Get the index associated with the element \p elem.
    */
-  dof_id_type getIndex(const Elem * elem) const
+  libMesh::dof_id_type getIndex(const libMesh::Elem * elem) const
   {
     mooseAssert(hasIndex(elem), "Elem not in indexed range");
     return elem->get_extra_integer(_extra_integer);
@@ -70,7 +70,7 @@ public:
    * Useful for initializing data structures that will be indexed
    * using the indices provided by this object.
    */
-  dof_id_type maxIndex() const { return _max_index; }
+  libMesh::dof_id_type maxIndex() const { return _max_index; }
 
 private:
   // The mesh
@@ -80,5 +80,5 @@ private:
   /// Whether or not this object is initialized
   bool _initialized;
   /// The max index generated
-  dof_id_type _max_index;
+  libMesh::dof_id_type _max_index;
 };

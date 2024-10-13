@@ -23,6 +23,8 @@
 #include <petscsys.h>
 #include <petscksp.h>
 
+using namespace libMesh;
+
 InputParameters
 SegregatedSolverBase::validParams()
 {

@@ -12,6 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
+using namespace libMesh;
+
 registerMooseObject("RdgApp", AEFVMaterial);
 
 InputParameters

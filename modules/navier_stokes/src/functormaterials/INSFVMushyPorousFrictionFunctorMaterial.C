@@ -55,7 +55,7 @@ INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial
         mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
                     "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
+        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / libMesh::pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
         return _mu(r, t) / K;
@@ -70,7 +70,7 @@ INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial
         mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
                     "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
+        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / libMesh::pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
         return _forchheimer_coef * _rho_l(r, t) / std::sqrt(K);

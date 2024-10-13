@@ -63,7 +63,7 @@ protected:
   /// Vector of all coupled variables
   std::vector<MooseVariableFEBase *> _fe_vars;
   /// FEType object defining order and family of displacement variables
-  const FEType & _fe_type;
+  const libMesh::FEType & _fe_type;
   /// Whether the crack plane is also a symmetry plane in the model
   bool _has_symmetry_plane;
   /// Poisson's ratio of the material
@@ -85,7 +85,7 @@ protected:
   /// Vector of shape function values for the current element
   const std::vector<std::vector<Real>> * _phi_curr_elem;
   /// Vector of gradients of shape function values for the current element
-  const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;
+  const std::vector<std::vector<libMesh::RealGradient>> * _dphi_curr_elem;
   /// Current quadrature point index
   unsigned int _qp;
   /// Vectors computed by this VectorPostprocessor:

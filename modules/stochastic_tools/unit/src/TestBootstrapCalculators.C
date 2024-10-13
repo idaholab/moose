@@ -17,6 +17,7 @@
 #include "libmesh/communicator.h"
 #include "libmesh/parallel_object.h"
 
+using namespace libMesh;
 using namespace StochasticTools;
 
 /**

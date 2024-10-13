@@ -62,5 +62,5 @@ ComputeUpdatedEulerAngle::computeEulerAngleFromRotationMatrix(const RankTwoTenso
   euler_angle = (RealVectorValue)ea;
 
   if (!getParam<bool>("radian_to_degree"))
-    euler_angle *= pi / 180.0;
+    euler_angle *= libMesh::pi / 180.0;
 }

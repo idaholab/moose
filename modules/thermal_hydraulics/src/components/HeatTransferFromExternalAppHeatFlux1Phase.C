@@ -33,7 +33,7 @@ HeatTransferFromExternalAppHeatFlux1Phase::addVariables()
   HeatTransfer1PhaseBase::addVariables();
 
   getTHMProblem().addSimVariable(
-      false, _q_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
+      false, _q_wall_name, libMesh::FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
 
   if (!_app.isRestarting())
     getTHMProblem().addConstantIC(_q_wall_name, 0, _flow_channel_subdomains);

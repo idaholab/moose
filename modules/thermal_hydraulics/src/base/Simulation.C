@@ -32,6 +32,8 @@
 
 #include "libmesh/string_to_enum.h"
 
+using namespace libMesh;
+
 std::map<VariableName, int> Simulation::_component_variable_order_map;
 
 void

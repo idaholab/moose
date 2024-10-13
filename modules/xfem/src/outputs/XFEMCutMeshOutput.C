@@ -52,7 +52,7 @@ XFEMCutMeshOutput::output()
   int exodus_num = 1;
   ++_file_num;
   _es = std::make_unique<EquationSystems>(_cutter_uo.getCutterMesh());
-  _exodus_io = std::make_unique<ExodusII_IO>(_es->get_mesh());
+  _exodus_io = std::make_unique<libMesh::ExodusII_IO>(_es->get_mesh());
   // Default to non-HDF5 output for wider compatibility
   _exodus_io->set_hdf5_writing(false);
   _exodus_io->write_timestep(

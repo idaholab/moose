@@ -312,6 +312,7 @@ share/
 /modules/ray_tracing/unit/ray_tracing-unit.yaml
 /modules/phase_field/unit/phase_field-unit.yaml
 /modules/heat_transfer/unit/heat_transfer-unit.yaml
+/modules/solid_mechanics/unit/solid_mechanics-unit.yaml
 /modules/tensor_mechanics/unit/tensor_mechanics-unit.yaml
 /modules/richards/unit/richards-unit.yaml
 /modules/level_set/unit/level_set-unit.yaml

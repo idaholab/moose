@@ -50,7 +50,7 @@ ADStressDivergenceShell::ADStressDivergenceShell(const InputParameters & paramet
     _component(getParam<unsigned int>("component")),
     _large_strain(getParam<bool>("large_strain"))
 {
-  _t_qrule = std::make_unique<QGauss>(
+  _t_qrule = std::make_unique<libMesh::QGauss>(
       1, Utility::string_to_enum<Order>(getParam<std::string>("through_thickness_order")));
   _t_weights = _t_qrule->get_weights();
 

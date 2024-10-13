@@ -22,6 +22,9 @@ namespace libMesh
 {
 class System;
 }
+
+using libMesh::RealGradient;
+
 /**
  * Utility class to use an Exodus mesh to define controllable parameters for optimization problems
  * This class will:
@@ -34,7 +37,7 @@ class System;
 class ParameterMesh
 {
 public:
-  ParameterMesh(const FEType & param_type,
+  ParameterMesh(const libMesh::FEType & param_type,
                 const std::string & exodus_mesh,
                 const std::vector<std::string> & var_names = {});
 
@@ -72,12 +75,12 @@ public:
   std::vector<Real> getParameterValues(std::string var_name, unsigned int timestep) const;
 
 protected:
-  Parallel::Communicator _communicator;
-  ReplicatedMesh _mesh;
-  std::unique_ptr<EquationSystems> _eq;
-  System * _sys;
-  std::unique_ptr<PointLocatorBase> _point_locator;
-  std::unique_ptr<ExodusII_IO> _exodusII_io;
+  libMesh::Parallel::Communicator _communicator;
+  libMesh::ReplicatedMesh _mesh;
+  std::unique_ptr<libMesh::EquationSystems> _eq;
+  libMesh::System * _sys;
+  std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
+  std::unique_ptr<libMesh::ExodusII_IO> _exodusII_io;
 
   dof_id_type _param_dofs;
 };
