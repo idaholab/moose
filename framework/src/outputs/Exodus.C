@@ -21,6 +21,8 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/libmesh_config.h" // LIBMESH_HAVE_HDF5
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", Exodus);
 
 InputParameters

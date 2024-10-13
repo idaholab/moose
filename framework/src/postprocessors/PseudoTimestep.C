@@ -94,7 +94,8 @@ PseudoTimestep::currentResidualNorm() const
   Real res_norm = 0.0;
   for (const auto var_num : make_range(nl.system().n_vars()))
   {
-    auto var_res = nl.system().calculate_norm(nl.getResidualNonTimeVector(), var_num, DISCRETE_L2);
+    auto var_res =
+        nl.system().calculate_norm(nl.getResidualNonTimeVector(), var_num, libMesh::DISCRETE_L2);
     res_norm = res_norm + std::pow(var_res, 2);
   }
   res_norm = std::sqrt(res_norm);

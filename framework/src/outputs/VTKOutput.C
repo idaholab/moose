@@ -44,7 +44,7 @@ VTKOutput::output()
 {
 #ifdef LIBMESH_HAVE_VTK
   /// Create VTKIO object
-  VTKIO vtk(_es_ptr->get_mesh());
+  libMesh::VTKIO vtk(_es_ptr->get_mesh());
 
   // Set the comppression
   vtk.set_compression(_binary);

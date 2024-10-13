@@ -80,6 +80,8 @@
 #include <chrono>
 #include <thread>
 
+using namespace libMesh;
+
 #define QUOTE(macro) stringifyName(macro)
 
 void

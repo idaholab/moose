@@ -106,13 +106,13 @@ PNGOutput::makeMeshFunc()
 
   // Set up the mesh_function
   if (_nl_sys_num == libMesh::invalid_uint)
-    _mesh_function =
-        std::make_unique<MeshFunction>(*_es_ptr,
-                                       _problem_ptr->getAuxiliarySystem().serializedSolution(),
-                                       _problem_ptr->getAuxiliarySystem().dofMap(),
-                                       var_nums);
+    _mesh_function = std::make_unique<libMesh::MeshFunction>(
+        *_es_ptr,
+        _problem_ptr->getAuxiliarySystem().serializedSolution(),
+        _problem_ptr->getAuxiliarySystem().dofMap(),
+        var_nums);
   else
-    _mesh_function = std::make_unique<MeshFunction>(
+    _mesh_function = std::make_unique<libMesh::MeshFunction>(
         *_es_ptr,
         _problem_ptr->getNonlinearSystem(_nl_sys_num).serializedSolution(),
         _problem_ptr->getNonlinearSystem(_nl_sys_num).dofMap(),

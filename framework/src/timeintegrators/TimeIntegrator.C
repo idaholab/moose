@@ -15,6 +15,8 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
+using namespace libMesh;
+
 InputParameters
 TimeIntegrator::validParams()
 {

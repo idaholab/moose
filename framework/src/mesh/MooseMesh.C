@@ -3667,7 +3667,7 @@ MooseMesh::buildFiniteVolumeInfo() const
         // We initialize the weights/other information in faceInfo. If the neighbor does not exist
         // or is remote (so when we are on some sort of mesh boundary), we initialize the ghost
         // cell and use it to compute the weights corresponding to the faceInfo.
-        if (!neighbor || neighbor == remote_elem)
+        if (!neighbor || neighbor == libMesh::remote_elem)
           fi.computeBoundaryCoefficients();
         else
           fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor->id()]);

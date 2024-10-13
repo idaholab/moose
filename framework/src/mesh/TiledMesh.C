@@ -104,7 +104,7 @@ TiledMesh::buildMesh()
 
     if (mesh_file.rfind(".exd") < mesh_file.size() || mesh_file.rfind(".e") < mesh_file.size())
     {
-      ExodusII_IO ex(*this);
+      libMesh::ExodusII_IO ex(*this);
       ex.read(mesh_file);
       serial_mesh->prepare_for_use();
     }

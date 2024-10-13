@@ -14,6 +14,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/enum_to_string.h"
 #include "libmesh/int_range.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_serializer.h"
@@ -274,7 +275,7 @@ XYDelaunayGenerator::generate()
   if (_desired_area_func != "")
   {
     // poly2tri will clone this so it's fine going out of scope
-    ParsedFunction<Real> area_func{_desired_area_func};
+    libMesh::ParsedFunction<Real> area_func{_desired_area_func};
     poly2tri.set_desired_area_function(&area_func);
   }
   else if (_use_auto_area_func)
@@ -327,7 +328,7 @@ XYDelaunayGenerator::generate()
     {
       mooseAssert(elem->type() ==
                       (_tri_elem_type == "TRI6" ? TRI6 : (_tri_elem_type == "TRI7" ? TRI7 : TRI3)),
-                  "Unexpected element type " << Utility::enum_to_string(elem->type())
+                  "Unexpected element type " << libMesh::Utility::enum_to_string(elem->type())
                                              << " found in triangulation");
 
       elem->subdomain_id() = _output_subdomain_id;
@@ -440,7 +441,7 @@ XYDelaunayGenerator::generate()
 
   // libMesh mesh stitching still requires a serialized mesh, and it's
   // cheaper to do that once than to do it once-per-hole
-  MeshSerializer serial(*mesh, doing_stitching);
+  libMesh::MeshSerializer serial(*mesh, doing_stitching);
 
   // Define a reference map variable for subdomain map
   auto & main_subdomain_map = mesh->set_subdomain_name_map();
