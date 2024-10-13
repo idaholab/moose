@@ -18,6 +18,8 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/numeric_vector.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseTestApp", AllSystemsEvaluable);
 
 InputParameters
