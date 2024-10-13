@@ -18,6 +18,8 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/explicit_system.h"
 
+using namespace libMesh;
+
 InputParameters
 OversampleOutput::validParams()
 {

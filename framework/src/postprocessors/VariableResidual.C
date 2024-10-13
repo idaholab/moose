@@ -49,7 +49,7 @@ void
 VariableResidual::execute()
 {
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase(_sys.number());
-  _var_residual = nl.system().calculate_norm(nl.RHS(), _var.number(), DISCRETE_L2);
+  _var_residual = nl.system().calculate_norm(nl.RHS(), _var.number(), libMesh::DISCRETE_L2);
 }
 
 PostprocessorValue

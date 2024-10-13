@@ -22,7 +22,8 @@ CrankNicolson::validParams()
 }
 
 CrankNicolson::CrankNicolson(const InputParameters & parameters)
-  : TimeIntegrator(parameters), _residual_old(_nl.addVector("residual_old", false, GHOSTED))
+  : TimeIntegrator(parameters),
+    _residual_old(_nl.addVector("residual_old", false, libMesh::GHOSTED))
 {
 }
 

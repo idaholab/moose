@@ -110,7 +110,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
 
   // Bound the coarse mesh (n_nodes * n_nodes)
   auto nodes_mesh = std::make_unique<ReplicatedMesh>(this->_communicator);
-  nodes_mesh->partitioner() = std::make_unique<LinearPartitioner>();
+  nodes_mesh->partitioner() = std::make_unique<libMesh::LinearPartitioner>();
 
   if (mesh.spatial_dimension() == 2)
     MeshTools::Generation::build_cube(*nodes_mesh,
@@ -163,7 +163,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
     }
 
     auto procs_mesh = std::make_unique<ReplicatedMesh>(this->_communicator);
-    procs_mesh->partitioner() = std::make_unique<LinearPartitioner>();
+    procs_mesh->partitioner() = std::make_unique<libMesh::LinearPartitioner>();
 
     if (mesh.spatial_dimension() == 2)
       MeshTools::Generation::build_cube(*procs_mesh,
@@ -195,7 +195,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
 
   auto nodes_point_locator_ptr = nodes_mesh->sub_point_locator();
 
-  std::vector<std::unique_ptr<PointLocatorBase>> procs_point_locators(procs_meshes.size());
+  std::vector<std::unique_ptr<libMesh::PointLocatorBase>> procs_point_locators(procs_meshes.size());
 
   for (unsigned int i = 0; i < procs_meshes.size(); i++)
     procs_point_locators[i] = procs_meshes[i]->sub_point_locator();

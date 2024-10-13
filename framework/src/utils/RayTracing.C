@@ -17,6 +17,8 @@
 #include "libmesh/mesh.h"
 #include "libmesh/elem.h"
 
+using namespace libMesh;
+
 namespace Moose
 {
 

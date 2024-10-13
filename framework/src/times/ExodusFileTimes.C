@@ -41,7 +41,7 @@ ExodusFileTimes::ExodusFileTimes(const InputParameters & parameters) : Times(par
       // dummy mesh
       ReplicatedMesh mesh(_communicator);
 
-      ExodusII_IO exodusII_io(mesh);
+      libMesh::ExodusII_IO exodusII_io(mesh);
       exodusII_io.read(times_files[p_file_it]);
       auto & times = exodusII_io.get_time_steps();
 

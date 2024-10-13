@@ -26,6 +26,8 @@
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
 
+using namespace libMesh;
+
 #ifdef LIBMESH_ENABLE_AMR
 
 Adaptivity::Adaptivity(FEProblemBase & fe_problem)

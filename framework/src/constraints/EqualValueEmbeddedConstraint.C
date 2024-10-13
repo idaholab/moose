@@ -57,7 +57,7 @@ void
 EqualValueEmbeddedConstraint::prepareSecondaryToPrimaryMap()
 {
   // get mesh pointLocator
-  std::unique_ptr<PointLocatorBase> pointLocator = _mesh.getPointLocator();
+  std::unique_ptr<libMesh::PointLocatorBase> pointLocator = _mesh.getPointLocator();
   pointLocator->enable_out_of_mesh_mode();
   const std::set<subdomain_id_type> allowed_subdomains{_primary};
 

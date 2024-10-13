@@ -24,6 +24,8 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_quad4.h"
 
+using namespace libMesh;
+
 namespace FillBetweenPointVectorsTools
 {
 void
@@ -504,7 +506,7 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
 {
   // This has no communication and expects elem_ptr to find any
   // element, so it only works on serialized meshes
-  MeshSerializer serial(mesh);
+  libMesh::MeshSerializer serial(mesh);
 
   max_node_radius = 0.0;
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -587,7 +589,7 @@ isExternalBoundary(MeshBase & mesh, const boundary_id_type bid)
 {
   // This has no communication and expects elem_ptr to find any
   // element, so it only works on serialized meshes
-  MeshSerializer serial(mesh);
+  libMesh::MeshSerializer serial(mesh);
 
   if (!mesh.is_prepared())
     mesh.find_neighbors();
@@ -611,7 +613,7 @@ isCurveSimpleClosedLoop(MeshBase & mesh,
 {
   // This has no communication and expects to loop over all elements
   // on every processor, so it only works on serialized meshes
-  MeshSerializer serial(mesh);
+  libMesh::MeshSerializer serial(mesh);
 
   max_node_radius = 0.0;
   std::vector<std::pair<dof_id_type, dof_id_type>> node_assm;
@@ -673,7 +675,7 @@ isClosedLoop(MeshBase & mesh,
 {
   // This has no communication and expects node_ptr to find any
   // node, so it only works on serialized meshes
-  MeshSerializer serial(mesh);
+  libMesh::MeshSerializer serial(mesh);
 
   std::vector<dof_id_type> dummy_elem_list = std::vector<dof_id_type>(node_assm.size(), 0);
   std::vector<dof_id_type> ordered_dummy_elem_list;

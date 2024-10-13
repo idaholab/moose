@@ -128,6 +128,8 @@
 
 #include "metaphysicl/dualnumber.h"
 
+using namespace libMesh;
+
 // Anonymous namespace for helper function
 namespace
 {
@@ -618,7 +620,7 @@ FEProblemBase::createTagVectors()
     for (auto & vector : vectors[nl_sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+      _nl[nl_sys_num]->addVector(tag, false, libMesh::GHOSTED);
     }
 
   auto & not_zeroed_vectors = getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors");
@@ -647,8 +649,8 @@ FEProblemBase::createTagSolutions()
   {
     auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
     for (auto & sys : _solver_systems)
-      sys->addVector(tag, false, GHOSTED);
-    _aux->addVector(tag, false, GHOSTED);
+      sys->addVector(tag, false, libMesh::GHOSTED);
+    _aux->addVector(tag, false, libMesh::GHOSTED);
   }
 
   if (_previous_nl_solution_required)
@@ -709,7 +711,7 @@ FEProblemBase::initNullSpaceVectors(const InputParameters & parameters,
     // do not project, since this will be recomputed, but make it ghosted, since the near nullspace
     // builder might march over all nodes
     for (auto & nl : nls)
-      nl->addVector("NullSpace" + oss.str(), false, GHOSTED);
+      nl->addVector("NullSpace" + oss.str(), false, libMesh::GHOSTED);
   }
   _subspace_dim["NullSpace"] = dimNullSpace;
   for (unsigned int i = 0; i < dimTransposeNullSpace; ++i)
@@ -719,7 +721,7 @@ FEProblemBase::initNullSpaceVectors(const InputParameters & parameters,
     // do not project, since this will be recomputed, but make it ghosted, since the near nullspace
     // builder might march over all nodes
     for (auto & nl : nls)
-      nl->addVector("TransposeNullSpace" + oss.str(), false, GHOSTED);
+      nl->addVector("TransposeNullSpace" + oss.str(), false, libMesh::GHOSTED);
   }
   _subspace_dim["TransposeNullSpace"] = dimTransposeNullSpace;
   for (unsigned int i = 0; i < dimNearNullSpace; ++i)
@@ -729,7 +731,7 @@ FEProblemBase::initNullSpaceVectors(const InputParameters & parameters,
     // do not project, since this will be recomputed, but make it ghosted, since the near-nullspace
     // builder might march over all semilocal nodes
     for (auto & nl : nls)
-      nl->addVector("NearNullSpace" + oss.str(), false, GHOSTED);
+      nl->addVector("NearNullSpace" + oss.str(), false, libMesh::GHOSTED);
   }
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
 }
@@ -937,7 +939,7 @@ FEProblemBase::initialSetup()
   }
   else
   {
-    ExodusII_IO * reader = _app.getExReaderForRestart();
+    libMesh::ExodusII_IO * reader = _app.getExReaderForRestart();
 
     if (reader)
     {
@@ -1384,10 +1386,10 @@ FEProblemBase::timestepSetup()
 
   if (_t_step > 1 && _num_grid_steps)
   {
-    MeshRefinement mesh_refinement(_mesh);
-    std::unique_ptr<MeshRefinement> displaced_mesh_refinement(nullptr);
+    libMesh::MeshRefinement mesh_refinement(_mesh);
+    std::unique_ptr<libMesh::MeshRefinement> displaced_mesh_refinement(nullptr);
     if (_displaced_mesh)
-      displaced_mesh_refinement = std::make_unique<MeshRefinement>(*_displaced_mesh);
+      displaced_mesh_refinement = std::make_unique<libMesh::MeshRefinement>(*_displaced_mesh);
 
     for (MooseIndex(_num_grid_steps) i = 0; i < _num_grid_steps; ++i)
     {

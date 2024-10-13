@@ -13,6 +13,8 @@
 #include "Function.h"
 #include "MooseUtils.h"
 
+using namespace libMesh;
+
 MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem,
                                                        const std::string & function_str,
                                                        const std::vector<std::string> & vars,

@@ -24,6 +24,8 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/mesh_base.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", DisplacedProblem);
 
 InputParameters

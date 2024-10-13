@@ -64,7 +64,7 @@ SideSetsFromPointsGenerator::generate()
 
   // Our flood fill doesn't do any communication, so it requires a
   // serialized mesh
-  MeshSerializer serial(*mesh);
+  libMesh::MeshSerializer serial(*mesh);
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryID> boundary_ids =

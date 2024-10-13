@@ -28,7 +28,7 @@ ElementLpNormAux::validParams()
 ElementLpNormAux::ElementLpNormAux(const InputParameters & parameters)
   : AuxKernel(parameters), _p(getParam<Real>("p")), _coupled_var(coupledValue("coupled_variable"))
 {
-  if (mooseVariableBase()->feType() != FEType(CONSTANT, MONOMIAL))
+  if (mooseVariableBase()->feType() != libMesh::FEType(CONSTANT, MONOMIAL))
     paramError("variable", "Must be of type CONSTANT MONOMIAL");
 }
 

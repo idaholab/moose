@@ -129,10 +129,10 @@ LibmeshPartitioner::clone() const
       break;
     }
     case 2: // hilbert_sfc
-      return std::make_unique<HilbertSFCPartitioner>();
+      return std::make_unique<libMesh::HilbertSFCPartitioner>();
 
     case 3: // morton_sfc
-      return std::make_unique<MortonSFCPartitioner>();
+      return std::make_unique<libMesh::MortonSFCPartitioner>();
 
     case 4: // subdomain_partitioner
       return _app.getFactory().clone(*this);
@@ -140,12 +140,12 @@ LibmeshPartitioner::clone() const
   // this cannot happen but I need to trick the compiler into
   // believing me
   mooseError("Error in LibmeshPartitioner: Supplied partitioner option causes error in clone()");
-  return std::make_unique<MetisPartitioner>();
+  return std::make_unique<libMesh::MetisPartitioner>();
 }
 
 void
 LibmeshPartitioner::prepareBlocksForSubdomainPartitioner(
-    const MeshBase & mesh, SubdomainPartitioner & subdomain_partitioner)
+    const MeshBase & mesh, libMesh::SubdomainPartitioner & subdomain_partitioner)
 {
   // For making sure all of the blocks exist
   std::set<subdomain_id_type> mesh_subdomain_ids;
@@ -174,8 +174,8 @@ LibmeshPartitioner::partition(MeshBase & mesh, const unsigned int n)
   if (_partitioner_name == "subdomain_partitioner")
   {
     mooseAssert(_partitioner.get(), "Partitioner is a NULL object");
-    prepareBlocksForSubdomainPartitioner(mesh,
-                                         static_cast<SubdomainPartitioner &>(*_partitioner.get()));
+    prepareBlocksForSubdomainPartitioner(
+        mesh, static_cast<libMesh::SubdomainPartitioner &>(*_partitioner.get()));
   }
 
   _partitioner->partition(mesh, n);
@@ -187,8 +187,8 @@ LibmeshPartitioner::partition(MeshBase & mesh)
   if (_partitioner_name == "subdomain_partitioner")
   {
     mooseAssert(_partitioner.get(), "Partitioner is a NULL object");
-    prepareBlocksForSubdomainPartitioner(mesh,
-                                         static_cast<SubdomainPartitioner &>(*_partitioner.get()));
+    prepareBlocksForSubdomainPartitioner(
+        mesh, static_cast<libMesh::SubdomainPartitioner &>(*_partitioner.get()));
   }
 
   _partitioner->partition(mesh);

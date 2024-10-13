@@ -26,6 +26,8 @@
 #include "petscsnes.h"
 #include "slepceps.h"
 
+using namespace libMesh;
+
 namespace Moose
 {
 namespace SlepcSupport

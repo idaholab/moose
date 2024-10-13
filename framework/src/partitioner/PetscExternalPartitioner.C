@@ -17,6 +17,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/mesh_base.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", PetscExternalPartitioner);
 
 #include <memory>

@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+using namespace libMesh;
+
 // Mutex to use when accessing _penetration_info;
 Threads::spin_mutex pinfo_mutex;
 
