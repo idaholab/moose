@@ -231,8 +231,6 @@ greenGaussGradient(const ElemArg & elem_arg,
         for (const auto i : make_range(Moose::dim))
           grad(i) = x(i);
       }
-
-      return grad;
     }
     catch (libMesh::LogicError & e)
     {
@@ -242,9 +240,8 @@ greenGaussGradient(const ElemArg & elem_arg,
             "I believe we should only get singular systems when two-term boundary expansion is "
             "being used. The error thrown during the computation of the gradient: ",
             e.what());
-      const auto grad = greenGaussGradient(elem_arg, state_arg, functor, false, mesh, true);
 
-      return grad;
+      grad = greenGaussGradient(elem_arg, state_arg, functor, false, mesh, true);
     }
   }
   else // Do Least-Squares
@@ -486,8 +483,6 @@ greenGaussGradient(const ElemArg & elem_arg,
           coord_type != Moose::CoordinateSystemType::COORD_RSPHERICAL,
           "We have not yet implemented the correct translation from gradient to divergence for "
           "spherical coordinates yet.");
-
-      return grad;
     }
     catch (libMesh::LogicError & e)
     {
@@ -496,12 +491,23 @@ greenGaussGradient(const ElemArg & elem_arg,
           "Singular matrix encountered in least squares gradient computation. Falling back "
           "to Green-Gauss gradient.");
 
-      const auto grad = greenGaussGradient(
+      grad = greenGaussGradient(
           elem_arg, state_arg, functor, false, mesh, /* force_green_gauss */ true);
-
-      return grad;
     }
   }
+
+  return grad;
+
+  // Notes to future developer:
+  // Note 1:
+  // For the least squares gradient, the LS matrix could be precomputed and store for every cell
+  // I tried doing this on October 2024, but the element lookup for these matrices is too slow
+  // and seems better to compute weights on the fly.
+  // Consider building a map from elem_id to these matrices and speed up lookup with octree
+  // Note 2:
+  // In the future one would like to have a hybrid gradient scheme, where:
+  // \nabla \phi = \beta (\nabla \phi)_{LS} + (1 - \beta) (\nabla \phi)_{GG}
+  // Then optize \beta based on mesh heuristics
 }
 
 /**
