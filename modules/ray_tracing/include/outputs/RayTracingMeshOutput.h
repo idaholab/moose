@@ -66,7 +66,7 @@ protected:
   /// The EquationSystems
   std::unique_ptr<EquationSystems> _es;
   /// The system that stores the field data
-  ExplicitSystem * _sys;
+  libMesh::ExplicitSystem * _sys;
 
 private:
   /**

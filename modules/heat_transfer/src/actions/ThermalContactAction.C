@@ -417,7 +417,8 @@ ThermalContactAction::addMaterials()
 void
 ThermalContactAction::addSecondaryFluxVector()
 {
-  _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).addVector("secondary_flux", false, GHOSTED);
+  _problem->getNonlinearSystemBase(/*nl_sys_num=*/0)
+      .addVector("secondary_flux", false, libMesh::GHOSTED);
   _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).zeroVectorForResidual("secondary_flux");
 
   // It is risky to apply this optimization to contact problems

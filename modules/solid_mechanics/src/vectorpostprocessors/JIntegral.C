@@ -172,7 +172,7 @@ JIntegral::execute()
 {
   // calculate phi and dphi for this element
   const std::size_t dim = _current_elem->dim();
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
+  std::unique_ptr<libMesh::FEBase> fe(libMesh::FEBase::build(dim, _fe_type));
   fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _phi_curr_elem = &fe->get_phi();
   _dphi_curr_elem = &fe->get_dphi();

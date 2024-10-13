@@ -34,7 +34,7 @@ protected:
   const bool _use_wall_cell;
 
   /// libmesh object to find points in the mesh
-  std::unique_ptr<PointLocatorBase> _pl;
+  std::unique_ptr<libMesh::PointLocatorBase> _pl;
 
   /// Boolean to see if variable1 is the fluid
   const bool _var1_is_fluid;

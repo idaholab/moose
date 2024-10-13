@@ -38,7 +38,7 @@ enum class AssignType
  * @return list of reporting IDs for individual mesh elements
  **/
 std::vector<dof_id_type>
-getCellwiseIntegerIDs(const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
+getCellwiseIntegerIDs(const std::vector<std::unique_ptr<libMesh::ReplicatedMesh>> & meshes,
                       const std::vector<std::vector<unsigned int>> & pattern,
                       const bool use_exclude_id,
                       const std::vector<bool> & exclude_ids);
@@ -50,7 +50,7 @@ getCellwiseIntegerIDs(const std::vector<std::unique_ptr<ReplicatedMesh>> & meshe
  * @return list of reporting IDs for individual mesh elements
  **/
 std::vector<dof_id_type>
-getPatternIntegerIDs(const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
+getPatternIntegerIDs(const std::vector<std::unique_ptr<libMesh::ReplicatedMesh>> & meshes,
                      const std::vector<std::vector<unsigned int>> & pattern);
 
 /**
@@ -61,7 +61,7 @@ getPatternIntegerIDs(const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes
  * @return list of reporting IDs for individual mesh elements
  **/
 std::vector<dof_id_type>
-getManualIntegerIDs(const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
+getManualIntegerIDs(const std::vector<std::unique_ptr<libMesh::ReplicatedMesh>> & meshes,
                     const std::vector<std::vector<unsigned int>> & pattern,
                     const std::vector<std::vector<dof_id_type>> & id_pattern);
 
@@ -71,8 +71,9 @@ getManualIntegerIDs(const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
  * @param pattern 2D vector of the mesh pattern
  * @return list of  block IDs in input meshes
  **/
-std::set<SubdomainID> getCellBlockIDs(const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
-                                      const std::vector<std::vector<unsigned int>> & pattern);
+std::set<SubdomainID>
+getCellBlockIDs(const std::vector<std::unique_ptr<libMesh::ReplicatedMesh>> & meshes,
+                const std::vector<std::vector<unsigned int>> & pattern);
 
 /**
  * get list of block IDs for the assembly duck regions
@@ -111,7 +112,7 @@ void assignReportingIDs(MeshBase & mesh,
                         const std::vector<bool> & exclude_ids,
                         const bool has_assembly_boundary,
                         const std::set<subdomain_id_type> background_block_ids,
-                        const std::vector<std::unique_ptr<ReplicatedMesh>> & input_meshes,
+                        const std::vector<std::unique_ptr<libMesh::ReplicatedMesh>> & input_meshes,
                         const std::vector<std::vector<unsigned int>> & pattern,
                         const std::vector<std::vector<dof_id_type>> & id_pattern);
 }

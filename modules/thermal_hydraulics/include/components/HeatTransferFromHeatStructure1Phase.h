@@ -26,7 +26,7 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual const FEType & getFEType() override;
+  virtual const libMesh::FEType & getFEType() override;
 
   virtual void setupMesh() override;
   virtual void check() const override;

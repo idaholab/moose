@@ -11,6 +11,8 @@
 #include "NonlinearSystemBase.h"
 #include "libmesh/petsc_matrix.h"
 
+using namespace libMesh;
+
 registerMooseObject("NavierStokesApp", NavierStokesProblem);
 
 InputParameters

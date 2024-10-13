@@ -18,7 +18,7 @@
 #include <fstream>
 #include <string>
 
-PerfLog Moose::perf_log("gtest");
+libMesh::PerfLog Moose::perf_log("gtest");
 
 GTEST_API_ int
 main(int argc, char ** argv)

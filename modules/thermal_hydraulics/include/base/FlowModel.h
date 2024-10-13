@@ -65,7 +65,7 @@ protected:
   FlowChannelBase & _flow_channel;
 
   /// The type of FE used for flow
-  const FEType & _fe_type;
+  const libMesh::FEType & _fe_type;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;

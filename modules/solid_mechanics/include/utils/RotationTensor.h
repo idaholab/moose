@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 
 // Any requisite includes here
 #include "libmesh/tensor_value.h"

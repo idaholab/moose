@@ -108,7 +108,7 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
     }
   }
 
-  _t_qrule = std::make_unique<QGauss>(
+  _t_qrule = std::make_unique<libMesh::QGauss>(
       1, Utility::string_to_enum<Order>(getParam<std::string>("through_thickness_order")));
   _t_points = _t_qrule->get_points();
   _strain_increment.resize(_t_points.size());

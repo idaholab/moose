@@ -9,6 +9,8 @@
 
 #include "ReportingIDGeneratorUtils.h"
 
+using namespace libMesh;
+
 std::vector<dof_id_type>
 ReportingIDGeneratorUtils::getCellwiseIntegerIDs(
     const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,

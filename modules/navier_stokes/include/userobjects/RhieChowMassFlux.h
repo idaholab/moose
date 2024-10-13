@@ -161,7 +161,7 @@ protected:
   std::vector<unsigned int> _global_momentum_system_numbers;
 
   /// Pointers to the momentum equation implicit system(s) from libmesh
-  std::vector<LinearImplicitSystem *> _momentum_implicit_systems;
+  std::vector<libMesh::LinearImplicitSystem *> _momentum_implicit_systems;
 
   /// Pointer to the pressure system
   const LinearSystem * _pressure_system;

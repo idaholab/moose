@@ -11,7 +11,7 @@
 
 #include "ElementLoopUserObject.h"
 
-// Forward Declarations
+using libMesh::RealGradient;
 
 /**
  * Base class for slope limiting to limit
@@ -47,7 +47,7 @@ protected:
 
   /// required data for face assembly
   const MooseArray<Point> & _q_point_face;
-  const QBase * const & _qrule_face;
+  const libMesh::QBase * const & _qrule_face;
   const MooseArray<Real> & _JxW_face;
   const MooseArray<Point> & _normals_face;
 

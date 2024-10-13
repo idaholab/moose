@@ -65,7 +65,7 @@ private:
 
 template <typename InType, typename OutType>
 SobolCalculator<std::vector<InType>, std::vector<OutType>>::SobolCalculator(
-    const ParallelObject & other, const std::string & name, bool resample)
+    const libMesh::ParallelObject & other, const std::string & name, bool resample)
   : Calculator<std::vector<std::vector<InType>>, std::vector<std::vector<OutType>>>(other, name),
     _resample(resample)
 {
