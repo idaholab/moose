@@ -24,7 +24,7 @@ fe_lagrange_1D_shape(const Order order, const unsigned int i, const T & xi)
   switch (order)
   {
       // Lagrange linears
-    case FIRST:
+    case libMesh::FIRST:
     {
       libmesh_assert_less(i, 2);
 
@@ -42,7 +42,7 @@ fe_lagrange_1D_shape(const Order order, const unsigned int i, const T & xi)
     }
 
       // Lagrange quadratics
-    case SECOND:
+    case libMesh::SECOND:
     {
       libmesh_assert_less(i, 3);
 
@@ -63,7 +63,7 @@ fe_lagrange_1D_shape(const Order order, const unsigned int i, const T & xi)
     }
 
       // Lagrange cubics
-    case THIRD:
+    case libMesh::THIRD:
     {
       libmesh_assert_less(i, 4);
 
@@ -98,7 +98,7 @@ fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const T & xi
   switch (order)
   {
       // Lagrange linear shape function derivatives
-    case FIRST:
+    case libMesh::FIRST:
     {
       libmesh_assert_less(i, 2);
 
@@ -116,7 +116,7 @@ fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const T & xi
     }
 
       // Lagrange quadratic shape function derivatives
-    case SECOND:
+    case libMesh::SECOND:
     {
       libmesh_assert_less(i, 3);
 
@@ -137,7 +137,7 @@ fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const T & xi
     }
 
       // Lagrange cubic shape function derivatives
-    case THIRD:
+    case libMesh::THIRD:
     {
       libmesh_assert_less(i, 4);
 
@@ -168,7 +168,7 @@ fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const T & xi
 // Copy of libMesh function but templated to enable calling with DualNumber vectors
 template <typename T, template <typename> class VectorType>
 T
-fe_lagrange_2D_shape(const ElemType type,
+fe_lagrange_2D_shape(const libMesh::ElemType type,
                      const Order order,
                      const unsigned int i,
                      const VectorType<T> & p)
@@ -176,15 +176,15 @@ fe_lagrange_2D_shape(const ElemType type,
   switch (order)
   {
       // linear Lagrange shape functions
-    case FIRST:
+    case libMesh::FIRST:
     {
       switch (type)
       {
-        case QUAD4:
-        case QUADSHELL4:
-        case QUAD8:
-        case QUADSHELL8:
-        case QUAD9:
+        case libMesh::QUAD4:
+        case libMesh::QUADSHELL4:
+        case libMesh::QUAD8:
+        case libMesh::QUADSHELL8:
+        case libMesh::QUAD9:
         {
           // Compute quad shape functions as a tensor-product
           const T xi = p(0);
@@ -199,10 +199,10 @@ fe_lagrange_2D_shape(const ElemType type,
           return (fe_lagrange_1D_shape(FIRST, i0[i], xi) * fe_lagrange_1D_shape(FIRST, i1[i], eta));
         }
 
-        case TRI3:
-        case TRISHELL3:
-        case TRI6:
-        case TRI7:
+        case libMesh::TRI3:
+        case libMesh::TRISHELL3:
+        case libMesh::TRI6:
+        case libMesh::TRI7:
         {
           const T zeta1 = p(0);
           const T zeta2 = p(1);
@@ -232,11 +232,11 @@ fe_lagrange_2D_shape(const ElemType type,
     }
 
       // quadratic Lagrange shape functions
-    case SECOND:
+    case libMesh::SECOND:
     {
       switch (type)
       {
-        case QUAD8:
+        case libMesh::QUAD8:
         {
           // Compute quad shape functions as a tensor-product
           const T xi = p(0);
@@ -266,7 +266,7 @@ fe_lagrange_2D_shape(const ElemType type,
               mooseError("Invalid shape function index i = ", i);
           }
         }
-        case QUAD9:
+        case libMesh::QUAD9:
         {
           // Compute quad shape functions as a tensor-product
           const T xi = p(0);
@@ -278,11 +278,11 @@ fe_lagrange_2D_shape(const ElemType type,
           static const unsigned int i0[] = {0, 1, 1, 0, 2, 1, 2, 0, 2};
           static const unsigned int i1[] = {0, 0, 1, 1, 0, 2, 1, 2, 2};
 
-          return (fe_lagrange_1D_shape(SECOND, i0[i], xi) *
-                  fe_lagrange_1D_shape(SECOND, i1[i], eta));
+          return (fe_lagrange_1D_shape(libMesh::SECOND, i0[i], xi) *
+                  fe_lagrange_1D_shape(libMesh::SECOND, i1[i], eta));
         }
-        case TRI6:
-        case TRI7:
+        case libMesh::TRI6:
+        case libMesh::TRI7:
         {
           const T zeta1 = p(0);
           const T zeta2 = p(1);
@@ -321,11 +321,11 @@ fe_lagrange_2D_shape(const ElemType type,
     }
 
       // "cubic" (one cubic bubble) Lagrange shape functions
-    case THIRD:
+    case libMesh::THIRD:
     {
       switch (type)
       {
-        case TRI7:
+        case libMesh::TRI7:
         {
           const T zeta1 = p(0);
           const T zeta2 = p(1);
@@ -375,7 +375,7 @@ fe_lagrange_2D_shape(const ElemType type,
 
 template <typename T, template <typename> class VectorType>
 T
-fe_lagrange_2D_shape_deriv(const ElemType type,
+fe_lagrange_2D_shape_deriv(const libMesh::ElemType type,
                            const Order order,
                            const unsigned int i,
                            const unsigned int j,
@@ -386,15 +386,15 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
   switch (order)
   {
       // linear Lagrange shape functions
-    case FIRST:
+    case libMesh::FIRST:
     {
       switch (type)
       {
-        case QUAD4:
-        case QUADSHELL4:
-        case QUAD8:
-        case QUADSHELL8:
-        case QUAD9:
+        case libMesh::QUAD4:
+        case libMesh::QUADSHELL4:
+        case libMesh::QUAD8:
+        case libMesh::QUADSHELL8:
+        case libMesh::QUAD9:
         {
           // Compute quad shape functions as a tensor-product
           const T xi = p(0);
@@ -423,10 +423,10 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
           }
         }
 
-        case TRI3:
-        case TRISHELL3:
-        case TRI6:
-        case TRI7:
+        case libMesh::TRI3:
+        case libMesh::TRISHELL3:
+        case libMesh::TRI6:
+        case libMesh::TRI7:
         {
           libmesh_assert_less(i, 3);
 
@@ -487,12 +487,12 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
     }
 
       // quadratic Lagrange shape functions
-    case SECOND:
+    case libMesh::SECOND:
     {
       switch (type)
       {
-        case QUAD8:
-        case QUADSHELL8:
+        case libMesh::QUAD8:
+        case libMesh::QUADSHELL8:
         {
           const T xi = p(0);
           const T eta = p(1);
@@ -570,7 +570,7 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
           }
         }
 
-        case QUAD9:
+        case libMesh::QUAD9:
         {
           // Compute quad shape functions as a tensor-product
           const T xi = p(0);
@@ -586,21 +586,21 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
           {
               // d()/dxi
             case 0:
-              return (fe_lagrange_1D_shape_deriv(SECOND, i0[i], xi) *
-                      fe_lagrange_1D_shape(SECOND, i1[i], eta));
+              return (fe_lagrange_1D_shape_deriv(libMesh::SECOND, i0[i], xi) *
+                      fe_lagrange_1D_shape(libMesh::SECOND, i1[i], eta));
 
               // d()/deta
             case 1:
-              return (fe_lagrange_1D_shape(SECOND, i0[i], xi) *
-                      fe_lagrange_1D_shape_deriv(SECOND, i1[i], eta));
+              return (fe_lagrange_1D_shape(libMesh::SECOND, i0[i], xi) *
+                      fe_lagrange_1D_shape_deriv(libMesh::SECOND, i1[i], eta));
 
             default:
               mooseError("Invalid derivative index j = ", j);
           }
         }
 
-        case TRI6:
-        case TRI7:
+        case libMesh::TRI6:
+        case libMesh::TRI7:
         {
           libmesh_assert_less(i, 6);
 
@@ -682,11 +682,11 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
     }
 
       // "cubic" (one cubic bubble) Lagrange shape functions
-    case THIRD:
+    case libMesh::THIRD:
     {
       switch (type)
       {
-        case TRI7:
+        case libMesh::TRI7:
         {
           libmesh_assert_less(i, 7);
 

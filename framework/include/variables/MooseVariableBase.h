@@ -51,7 +51,7 @@ public:
   /**
    * Get the type of finite element object
    */
-  const FEType & feType() const { return _fe_type; }
+  const libMesh::FEType & feType() const { return _fe_type; }
 
   /**
    * Get the system this variable is part of.
@@ -99,7 +99,7 @@ public:
    * Get the order of this variable
    * Note: Order enum can be implicitly converted to unsigned int.
    */
-  Order order() const;
+  libMesh::Order order() const;
 
   /**
    * Get the number of components
@@ -122,12 +122,15 @@ public:
   /**
    * Return the continuity of this variable
    */
-  virtual FEContinuity getContinuity() const { mooseError("Base class cannot determine this"); };
+  virtual libMesh::FEContinuity getContinuity() const
+  {
+    mooseError("Base class cannot determine this");
+  };
 
   /**
    * The DofMap associated with the system this variable is in.
    */
-  const DofMap & dofMap() const { return _dof_map; }
+  const libMesh::DofMap & dofMap() const { return _dof_map; }
 
   virtual void getDofIndices(const Elem * /*elem*/,
                              std::vector<dof_id_type> & /*dof_indices*/) const
@@ -192,7 +195,7 @@ protected:
   SystemBase & _sys;
 
   /// The FEType associated with this variable
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
 
   /// variable number (from libMesh)
   unsigned int _var_num;
@@ -210,13 +213,13 @@ protected:
   SubProblem & _subproblem;
 
   /// libMesh variable object for this variable
-  const Variable & _variable;
+  const libMesh::Variable & _variable;
 
   /// Assembly data
   Assembly & _assembly;
 
   /// DOF map
-  const DofMap & _dof_map;
+  const libMesh::DofMap & _dof_map;
 
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;

@@ -35,7 +35,8 @@ public:
   /**
    * Called before this RM is attached
    */
-  void init(MooseMesh & moose_mesh, const MeshBase & mesh, const DofMap * dof_map = nullptr);
+  void
+  init(MooseMesh & moose_mesh, const MeshBase & mesh, const libMesh::DofMap * dof_map = nullptr);
 
   /**
    * Whether or not this RM has been init-ed. NOTE that this just indicates that the \p init method
@@ -117,7 +118,7 @@ public:
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
 
-  const DofMap * dofMap() { return _dof_map; }
+  const libMesh::DofMap * dofMap() { return _dof_map; }
 
 protected:
   /**
@@ -135,7 +136,7 @@ protected:
 
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
   /// matrices in call-backs from DofMap::reinit
-  const DofMap * _dof_map = nullptr;
+  const libMesh::DofMap * _dof_map = nullptr;
 
   /// Boolean indicating whether this RM can be attached early (e.g. all parameters are known
   /// without the need for inspecting things like variables or other parts of the system that

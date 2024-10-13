@@ -101,7 +101,7 @@ RefineBlockGenerator::generate()
 
     if (found_element_to_refine)
     {
-      MeshRefinement refinedmesh(*mesh_ptr);
+      libMesh::MeshRefinement refinedmesh(*mesh_ptr);
       if (!_enable_neighbor_refinement)
         refinedmesh.face_level_mismatch_limit() = 0;
       refinedmesh.refine_elements();
@@ -132,7 +132,7 @@ RefineBlockGenerator::recursive_refine(std::vector<subdomain_id_type> block_ids,
         elem->set_refinement_flag(Elem::REFINE);
     }
   }
-  MeshRefinement refinedmesh(*mesh);
+  libMesh::MeshRefinement refinedmesh(*mesh);
   if (!_enable_neighbor_refinement)
     refinedmesh.face_level_mismatch_limit() = 0;
   refinedmesh.refine_elements();

@@ -149,7 +149,7 @@ LineMaterialSamplerBase<T>::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  std::unique_ptr<libMesh::PointLocatorBase> pl = _mesh.getPointLocator();
   Moose::elementsIntersectedByLine(_start, _end, _mesh, *pl, intersected_elems, segments);
 
   const RealVectorValue line_vec = _end - _start;

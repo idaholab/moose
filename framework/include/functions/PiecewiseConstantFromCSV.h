@@ -46,5 +46,5 @@ protected:
   const PropertyReadFile::ReadTypeEnum _read_type;
 
   /// The point locator is used when values are sorted by elements or blocks in the CSV
-  std::unique_ptr<PointLocatorBase> _point_locator;
+  std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
 };

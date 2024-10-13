@@ -68,7 +68,7 @@ protected:
   /// Quadrature points
   const MooseArray<Point> & _q_point;
   /// Quadrature rule
-  const QBase * const & _qrule;
+  const libMesh::QBase * const & _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
 

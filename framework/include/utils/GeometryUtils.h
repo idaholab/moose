@@ -20,14 +20,14 @@ namespace geom_utils
  * @param[in] pt point
  * @return whether point is equal to the zero point
  */
-bool isPointZero(const Point & pt);
+bool isPointZero(const libMesh::Point & pt);
 
 /**
  * Get the unit vector for a point parameter
  * @param[in] pt point
  * @param[in] name name of the parameter
  */
-Point unitVector(const Point & pt, const std::string & name);
+libMesh::Point unitVector(const libMesh::Point & pt, const std::string & name);
 
 /**
  * Rotate point about an axis
@@ -36,7 +36,9 @@ Point unitVector(const Point & pt, const std::string & name);
  * @param[in] axis axis expressed as vector
  * @return rotated point
  */
-Point rotatePointAboutAxis(const Point & p, const Real angle, const Point & axis);
+libMesh::Point rotatePointAboutAxis(const libMesh::Point & p,
+                                    const libMesh::Real angle,
+                                    const libMesh::Point & axis);
 
 /**
  * Get the minimum distance from a point to another set of points, in the plane
@@ -46,9 +48,9 @@ Point rotatePointAboutAxis(const Point & p, const Real angle, const Point & axis
  * @param[in] axis axis perpendicular to the plane of the polygon
  * @return minimum distance to the provided points
  */
-Real minDistanceToPoints(const Point & pt,
-                         const std::vector<Point> & candidates,
-                         const unsigned int axis);
+libMesh::Real minDistanceToPoints(const libMesh::Point & pt,
+                                  const std::vector<libMesh::Point> & candidates,
+                                  const unsigned int axis);
 
 /**
  * Get the corner coordinates of a regular 2-D polygon, assuming a face of the polygon
@@ -58,8 +60,8 @@ Real minDistanceToPoints(const Point & pt,
  * @param[in] axis axis perpendicular to the plane of the polygon
  * @return corner coordinates
  */
-std::vector<Point>
-polygonCorners(const unsigned int num_sides, const Real radius, const unsigned int axis);
+std::vector<libMesh::Point>
+polygonCorners(const unsigned int num_sides, const libMesh::Real radius, const unsigned int axis);
 
 /**
  * Get the indices of the plane perpendicular to the specified axis.
@@ -79,7 +81,8 @@ std::pair<unsigned int, unsigned int> projectedIndices(const unsigned int axis);
  * @param[in] axis axis perpendicular to the projection plane
  * @return point
  */
-Point projectPoint(const Real x0, const Real x1, const unsigned int axis);
+libMesh::Point
+projectPoint(const libMesh::Real x0, const libMesh::Real x1, const unsigned int axis);
 
 /**
  * Get the unit normal vector between two points (which are first projected onto
@@ -90,7 +93,7 @@ Point projectPoint(const Real x0, const Real x1, const unsigned int axis);
  * @param[in] axis project points onto plane perpendicular to this axis
  * @return unit normal
  */
-Point projectedUnitNormal(Point pt1, Point pt2, const unsigned int axis);
+libMesh::Point projectedUnitNormal(libMesh::Point pt1, libMesh::Point pt2, const unsigned int axis);
 
 /**
  * Compute the distance from a 3-D line, provided in terms of two points on the line
@@ -99,7 +102,9 @@ Point projectedUnitNormal(Point pt1, Point pt2, const unsigned int axis);
  * @param[in] line1 second point on line
  * @return distance from line
  */
-Real distanceFromLine(const Point & pt, const Point & line0, const Point & line1);
+libMesh::Real distanceFromLine(const libMesh::Point & pt,
+                               const libMesh::Point & line0,
+                               const libMesh::Point & line1);
 
 /**
  * Compute the distance from a 3-D line, provided in terms of two points on the line.
@@ -111,7 +116,10 @@ Real distanceFromLine(const Point & pt, const Point & line0, const Point & line1
  * @param[in] axis axis index (0 = x, 1 = y, 2 = z) perpendicular to the projection plane
  * @return distance from line
  */
-Real projectedDistanceFromLine(Point pt, Point line0, Point line1, const unsigned int axis);
+libMesh::Real projectedDistanceFromLine(libMesh::Point pt,
+                                        libMesh::Point line0,
+                                        libMesh::Point line1,
+                                        const unsigned int axis);
 
 /**
  * If positive, point is on the positive side of the half space (and vice versa). Because
@@ -123,7 +131,10 @@ Real projectedDistanceFromLine(Point pt, Point line0, Point line1, const unsigne
  * @param[in] axis axis perpendicular to plane onto which point and line are first projected
  * @return half space of line
  */
-Real projectedLineHalfSpace(Point pt1, Point pt2, Point pt3, const unsigned int axis);
+libMesh::Real projectedLineHalfSpace(libMesh::Point pt1,
+                                     libMesh::Point pt2,
+                                     libMesh::Point pt3,
+                                     const unsigned int axis);
 
 /**
  * Whether a point is in 2-D a polygon in the plane perpendicular to the specified
@@ -133,8 +144,9 @@ Real projectedLineHalfSpace(Point pt1, Point pt2, Point pt3, const unsigned int 
  * @param[in] axis axis perpendicular to the plane of the polygon
  * @return whether point is inside the polygon
  */
-bool
-pointInPolygon(const Point & point, const std::vector<Point> & corners, const unsigned int axis);
+bool pointInPolygon(const libMesh::Point & point,
+                    const std::vector<libMesh::Point> & corners,
+                    const unsigned int axis);
 
 /**
  * Whether a point is on the edge of a 2-D polygon in the plane perpendicular to
@@ -144,12 +156,15 @@ pointInPolygon(const Point & point, const std::vector<Point> & corners, const un
  * @param[in] axis axis perpendicular to the plane of the polygon
  * @return whether point is on edge of polygon
  */
-bool pointOnEdge(const Point & point, const std::vector<Point> & corners, const unsigned int axis);
+bool pointOnEdge(const libMesh::Point & point,
+                 const std::vector<libMesh::Point> & corners,
+                 const unsigned int axis);
 
 /**
  * Get corner points of a bounding box, with side length re-scaled
  * @param[in] box bounding box to start from
  * @param[in] factor by which to multiply the bounding box side
  */
-std::vector<Point> boxCorners(const BoundingBox & box, const Real factor);
+std::vector<libMesh::Point> boxCorners(const libMesh::BoundingBox & box,
+                                       const libMesh::Real factor);
 } // end of namespace geom_utils

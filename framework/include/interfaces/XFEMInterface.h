@@ -109,7 +109,7 @@ public:
 
   virtual bool getXFEMWeights(MooseArray<Real> & weights,
                               const Elem * elem,
-                              QBase * qrule,
+                              libMesh::QBase * qrule,
                               const MooseArray<Point> & q_points) = 0;
 
   /**
@@ -122,7 +122,7 @@ public:
    */
   virtual bool getXFEMFaceWeights(MooseArray<Real> & weights,
                                   const Elem * elem,
-                                  QBase * qrule,
+                                  libMesh::QBase * qrule,
                                   const MooseArray<Point> & q_points,
                                   unsigned int side) = 0;
 

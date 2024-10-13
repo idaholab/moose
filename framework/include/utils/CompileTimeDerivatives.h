@@ -802,7 +802,7 @@ pow(const B & base)
     else if constexpr (std::is_base_of<CTBase, R>::value)                                          \
       return OP<decltype(makeValue(left)), R>(makeValue(left), right);                             \
     else                                                                                           \
-      static_assert(always_false<L>, "This should not be instantiated.");                          \
+      static_assert(libMesh::always_false<L>, "This should not be instantiated.");                 \
   }
 
 CT_OPERATOR_BINARY(+, CTAdd)

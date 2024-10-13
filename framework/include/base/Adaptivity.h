@@ -30,7 +30,7 @@ class DisplacedProblem;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
+typedef MooseVariableFE<libMesh::VectorValue<Real>> VectorMooseVariable;
 class MooseEnum;
 class MultiMooseEnum;
 
@@ -82,7 +82,7 @@ public:
   /**
    * Set the error norm (FIXME: improve description)
    */
-  void setErrorNorm(SystemNorm & sys_norm);
+  void setErrorNorm(libMesh::SystemNorm & sys_norm);
 
   /**
    *
@@ -241,7 +241,7 @@ public:
    *
    * @param indicator_field The name of the field to get an ErrorVector for.
    */
-  ErrorVector & getErrorVector(const std::string & indicator_field);
+  libMesh::ErrorVector & getErrorVector(const std::string & indicator_field);
 
   /**
    * Update the ErrorVectors that have been requested through calls to getErrorVector().
@@ -262,16 +262,16 @@ protected:
   /// on/off flag reporting if the adaptivity system has been initialized
   bool _initialized;
   /// A mesh refinement object to be used either with initial refinement or with Adaptivity.
-  std::unique_ptr<MeshRefinement> _mesh_refinement;
+  std::unique_ptr<libMesh::MeshRefinement> _mesh_refinement;
   /// Error estimator to be used by the apps.
-  std::unique_ptr<ErrorEstimator> _error_estimator;
+  std::unique_ptr<libMesh::ErrorEstimator> _error_estimator;
   /// Error vector for use with the error estimator.
-  std::unique_ptr<ErrorVector> _error;
+  std::unique_ptr<libMesh::ErrorVector> _error;
 
   std::shared_ptr<DisplacedProblem> _displaced_problem;
 
   /// A mesh refinement object for displaced mesh
-  std::unique_ptr<MeshRefinement> _displaced_mesh_refinement;
+  std::unique_ptr<libMesh::MeshRefinement> _displaced_mesh_refinement;
 
   /// the number of adaptivity steps to do at the beginning of simulation
   unsigned int _initial_steps;
@@ -310,7 +310,7 @@ protected:
   bool _recompute_markers_during_cycles;
 
   /// Stores pointers to ErrorVectors associated with indicator field names
-  std::map<std::string, std::unique_ptr<ErrorVector>> _indicator_field_to_error_vector;
+  std::map<std::string, std::unique_ptr<libMesh::ErrorVector>> _indicator_field_to_error_vector;
 
   bool _p_refinement_flag = false;
 };

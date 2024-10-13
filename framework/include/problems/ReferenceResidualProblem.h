@@ -137,7 +137,7 @@ protected:
   bool _local_norm;
 
   /// Container for normalization type
-  FEMNormType _norm_type;
+  libMesh::FEMNormType _norm_type;
 
   /// Container for convergence treatment when the reference residual is zero
   const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;

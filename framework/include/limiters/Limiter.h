@@ -66,13 +66,13 @@ public:
    */
   virtual T limit(const T & phi_upwind,
                   const T & phi_downwind,
-                  const VectorValue<T> * grad_phi_upwind,
+                  const libMesh::VectorValue<T> * grad_phi_upwind,
                   const RealVectorValue & dCD) const = 0;
   virtual bool constant() const = 0;
   virtual InterpMethod interpMethod() const = 0;
   T operator()(const T & phi_upwind,
                const T & phi_downwind,
-               const VectorValue<T> * grad_phi_upwind,
+               const libMesh::VectorValue<T> * grad_phi_upwind,
                const RealVectorValue & dCD) const
   {
     return std::max(T(0), std::min(T(2), limit(phi_upwind, phi_downwind, grad_phi_upwind, dCD)));

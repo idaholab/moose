@@ -184,8 +184,8 @@ XYDelaunayGenerator::generate()
       dynamic_pointer_cast<UnstructuredMesh>(std::move(_bdy_ptr));
 
   // Get ready to triangulate the line segments we extract from it
-  Poly2TriTriangulator poly2tri(*mesh);
-  poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
+  libMesh::Poly2TriTriangulator poly2tri(*mesh);
+  poly2tri.triangulation_type() = libMesh::TriangulatorInterface::PSLG;
 
   // If we're using a user-requested subset of boundaries on that
   // mesh, get their ids.
@@ -240,8 +240,8 @@ XYDelaunayGenerator::generate()
   poly2tri.minimum_angle() = 0; // Not yet supported
   poly2tri.smooth_after_generating() = _smooth_tri;
 
-  std::vector<TriangulatorInterface::MeshedHole> meshed_holes;
-  std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
+  std::vector<libMesh::TriangulatorInterface::MeshedHole> meshed_holes;
+  std::vector<libMesh::TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
   std::vector<std::unique_ptr<MeshBase>> hole_ptrs(_hole_ptrs.size());
   // This tells us the element orders of the hole meshes
   // For the boundary meshes, it can be access through poly2tri.segment_midpoints.
@@ -463,14 +463,14 @@ XYDelaunayGenerator::generate()
       // redundant serialization and deserialization (libMesh
       // MeshedHole and stitch_meshes still also require
       // serialization) we'll do the serialization up front.
-      MeshSerializer serial_hole(hole_mesh);
+      libMesh::MeshSerializer serial_hole(hole_mesh);
 
       // It would have been nicer for MeshedHole to add the BCID
       // itself, but we want MeshedHole to work with a const mesh.
       // We'll still use MeshedHole, for its code distinguishing
       // outer boundaries from inner boundaries on a
       // hole-with-holes.
-      TriangulatorInterface::MeshedHole mh{hole_mesh};
+      libMesh::TriangulatorInterface::MeshedHole mh{hole_mesh};
 
       // We have to translate from MeshedHole points to mesh
       // sides.

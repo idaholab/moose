@@ -120,7 +120,7 @@ XYZDelaunayGenerator::generate()
       dynamic_pointer_cast<UnstructuredMesh>(std::move(_bdy_ptr));
 
   // Get ready to triangulate its boundary
-  NetGenMeshInterface ngint(*mesh);
+  libMesh::NetGenMeshInterface ngint(*mesh);
 
   ngint.smooth_after_generating() = _smooth_tri;
 

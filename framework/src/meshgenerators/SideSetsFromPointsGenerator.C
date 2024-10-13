@@ -74,7 +74,8 @@ SideSetsFromPointsGenerator::generate()
 
   _visited.clear();
 
-  std::unique_ptr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *mesh);
+  std::unique_ptr<libMesh::PointLocatorBase> pl =
+      libMesh::PointLocatorBase::build(libMesh::TREE, *mesh);
 
   for (const auto i : index_range(boundary_ids))
   {
