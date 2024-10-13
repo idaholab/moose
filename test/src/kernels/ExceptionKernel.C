@@ -13,6 +13,8 @@
 
 #include "libmesh/threads.h"
 
+using namespace libMesh;
+
 /**
  * Class static initialization:
  * These members are used to create easily accessed shared memory among threads

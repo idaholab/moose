@@ -27,7 +27,7 @@ protected:
   virtual Real computeValue();
 
   /// Gradient being set by this kernel
-  RealGradient _grad;
+  libMesh::RealGradient _grad;
   /// The number of coupled variable
   int _coupled;
   /// The value of coupled gradient
