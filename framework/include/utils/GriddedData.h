@@ -13,8 +13,6 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 
-// using namespace libMesh;
-
 #include <iosfwd>
 #include <string>
 #include <vector>

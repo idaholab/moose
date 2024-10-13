@@ -43,10 +43,10 @@ public:
 
   PenetrationLocator & getPenetrationLocator(const BoundaryName & primary,
                                              const BoundaryName & secondary,
-                                             Order order = FIRST);
+                                             libMesh::Order order = libMesh::FIRST);
   PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & primary,
                                                        const BoundaryName & secondary,
-                                                       Order order = FIRST);
+                                                       libMesh::Order order = libMesh::FIRST);
 
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & primary,
                                              const BoundaryName & secondary);

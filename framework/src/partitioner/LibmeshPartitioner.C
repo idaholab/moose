@@ -51,14 +51,14 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params)
   switch (_partitioner_name)
   {
     case -2: // metis
-      _partitioner = std::make_unique<MetisPartitioner>();
+      _partitioner = std::make_unique<libMesh::MetisPartitioner>();
       break;
     case -1: // parmetis
-      _partitioner = std::make_unique<ParmetisPartitioner>();
+      _partitioner = std::make_unique<libMesh::ParmetisPartitioner>();
       break;
 
     case 0: // linear
-      _partitioner = std::make_unique<LinearPartitioner>();
+      _partitioner = std::make_unique<libMesh::LinearPartitioner>();
       break;
     case 1: // centroid
     {
@@ -69,23 +69,27 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params)
       MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
       if (direction == "x")
-        _partitioner = std::make_unique<CentroidPartitioner>(CentroidPartitioner::X);
+        _partitioner =
+            std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::X);
       else if (direction == "y")
-        _partitioner = std::make_unique<CentroidPartitioner>(CentroidPartitioner::Y);
+        _partitioner =
+            std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::Y);
       else if (direction == "z")
-        _partitioner = std::make_unique<CentroidPartitioner>(CentroidPartitioner::Z);
+        _partitioner =
+            std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::Z);
       else if (direction == "radial")
-        _partitioner = std::make_unique<CentroidPartitioner>(CentroidPartitioner::RADIAL);
+        _partitioner =
+            std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::RADIAL);
       break;
     }
     case 2: // hilbert_sfc
-      _partitioner = std::make_unique<HilbertSFCPartitioner>();
+      _partitioner = std::make_unique<libMesh::HilbertSFCPartitioner>();
       break;
     case 3: // morton_sfc
-      _partitioner = std::make_unique<MortonSFCPartitioner>();
+      _partitioner = std::make_unique<libMesh::MortonSFCPartitioner>();
       break;
     case 4: // subdomain_partitioner
-      _partitioner = std::make_unique<SubdomainPartitioner>();
+      _partitioner = std::make_unique<libMesh::SubdomainPartitioner>();
       break;
   }
 }
@@ -98,13 +102,13 @@ LibmeshPartitioner::clone() const
   switch (_partitioner_name)
   {
     case -2: // metis
-      return std::make_unique<MetisPartitioner>();
+      return std::make_unique<libMesh::MetisPartitioner>();
 
     case -1: // parmetis
-      return std::make_unique<ParmetisPartitioner>();
+      return std::make_unique<libMesh::ParmetisPartitioner>();
 
     case 0: // linear
-      return std::make_unique<LinearPartitioner>();
+      return std::make_unique<libMesh::LinearPartitioner>();
 
     case 1: // centroid
     {
@@ -115,13 +119,13 @@ LibmeshPartitioner::clone() const
       MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
       if (direction == "x")
-        return std::make_unique<CentroidPartitioner>(CentroidPartitioner::X);
+        return std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::X);
       else if (direction == "y")
-        return std::make_unique<CentroidPartitioner>(CentroidPartitioner::Y);
+        return std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::Y);
       else if (direction == "z")
-        return std::make_unique<CentroidPartitioner>(CentroidPartitioner::Z);
+        return std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::Z);
       else if (direction == "radial")
-        return std::make_unique<CentroidPartitioner>(CentroidPartitioner::RADIAL);
+        return std::make_unique<libMesh::CentroidPartitioner>(libMesh::CentroidPartitioner::RADIAL);
       break;
     }
     case 2: // hilbert_sfc

@@ -329,7 +329,7 @@ template <typename T>
 std::string
 prettyCppType(const T * = nullptr)
 {
-  return prettyCppType(demangle(typeid(T).name()));
+  return prettyCppType(libMesh::demangle(typeid(T).name()));
 }
 
 /**
@@ -353,12 +353,13 @@ doesMapContainValue(const std::map<T1, T2> & the_map, const T2 & value)
  * @param tol The tolerance to be used
  * @return true if var1 and var2 are equal within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyEqual(const T & var1,
                    const T2 & var2,
@@ -376,12 +377,13 @@ absoluteFuzzyEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 or var1 == var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyGreaterEqual(const T & var1,
                           const T2 & var2,
@@ -399,12 +401,13 @@ absoluteFuzzyGreaterEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 and var1 != var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyGreaterThan(const T & var1,
                          const T2 & var2,
@@ -422,12 +425,13 @@ absoluteFuzzyGreaterThan(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 or var1 == var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyLessEqual(const T & var1,
                        const T2 & var2,
@@ -444,12 +448,13 @@ absoluteFuzzyLessEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 and var1 != var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyLessThan(const T & var1,
                       const T2 & var2,
@@ -521,12 +526,13 @@ relativeFuzzyEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 or var1 == var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyGreaterEqual(const T & var1,
                           const T2 & var2,
@@ -545,12 +551,13 @@ relativeFuzzyGreaterEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 and var1 != var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyGreaterThan(const T & var1,
                          const T2 & var2,
@@ -570,12 +577,13 @@ relativeFuzzyGreaterThan(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 or var1 == var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyLessEqual(const T & var1,
                        const T2 & var2,
@@ -594,12 +602,13 @@ relativeFuzzyLessEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 and var1 != var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyLessThan(const T & var1,
                       const T2 & var2,
@@ -850,8 +859,8 @@ convert(const std::string & str, bool throw_on_failure = false)
   T val;
   if ((ss >> val).fail() || !ss.eof())
   {
-    std::string msg =
-        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
+    std::string msg = std::string("Unable to convert '") + str + "' to type " +
+                      libMesh::demangle(typeid(T).name());
 
     if (throw_on_failure)
       throw std::invalid_argument(msg);
@@ -1091,7 +1100,7 @@ findPair(C & container, const M1 & first, const M2 & second)
  * @param p2 Second corner of the constructed bounding box
  * @return Valid bounding box
  */
-BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
+libMesh::BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
 
 /**
  * Utility class template for a semidynamic vector with a maximum size N

@@ -472,8 +472,8 @@ std::pair<T, T>
 interpCoeffs(const Limiter<T> & limiter,
              const T & phi_upwind,
              const T & phi_downwind,
-             const VectorValue<T> * const grad_phi_upwind,
-             const VectorValue<T> * const grad_phi_face,
+             const libMesh::VectorValue<T> * const grad_phi_upwind,
+             const libMesh::VectorValue<T> * const grad_phi_face,
              const Real & max_value,
              const Real & min_value,
              const FaceInfo & fi,
@@ -502,7 +502,7 @@ interpCoeffs(const Limiter<T> & limiter,
  */
 template <typename Scalar,
           typename Vector,
-          typename Enable = typename std::enable_if<ScalarTraits<Scalar>::value>::type>
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<Scalar>::value>::type>
 Scalar
 interpolate(const Limiter<Scalar> & limiter,
             const Scalar & phi_upwind,
@@ -528,7 +528,7 @@ interpolate(const Limiter<Scalar> & limiter,
  * Vector overload
  */
 template <typename Limiter, typename T, typename Tensor>
-VectorValue<T>
+libMesh::VectorValue<T>
 interpolate(const Limiter & limiter,
             const TypeVector<T> & phi_upwind,
             const TypeVector<T> & phi_downwind,
@@ -539,13 +539,13 @@ interpolate(const Limiter & limiter,
   mooseAssert(limiter.constant() || grad_phi_upwind,
               "Non-null gradient only supported for constant limiters.");
 
-  const VectorValue<T> * const gradient_example = nullptr;
-  VectorValue<T> ret;
+  const libMesh::VectorValue<T> * const gradient_example = nullptr;
+  libMesh::VectorValue<T> ret;
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))
   {
     if (grad_phi_upwind)
     {
-      const VectorValue<T> gradient = grad_phi_upwind->row(i);
+      const libMesh::VectorValue<T> gradient = grad_phi_upwind->row(i);
       ret(i) =
           interpolate(limiter, phi_upwind(i), phi_downwind(i), &gradient, fi, fi_elem_is_upwind);
     }
@@ -780,7 +780,7 @@ computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
  */
 template <typename T,
           FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
-          typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<T>::value>::type>
 std::pair<std::pair<T, T>, std::pair<T, T>>
 interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
@@ -888,7 +888,7 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
  */
 template <typename T,
           FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
-          typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<T>::value>::type>
 T
 interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
@@ -974,13 +974,13 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg
  * ensuring that the interpolation adheres to the constraints imposed by the limiter.
  */
 template <typename T>
-VectorValue<T>
-interpolate(const FunctorBase<VectorValue<T>> & functor,
+libMesh::VectorValue<T>
+interpolate(const FunctorBase<libMesh::VectorValue<T>> & functor,
             const FaceArg & face,
             const StateArg & time)
 {
   // Define a zero gradient vector for initialization
-  static const VectorValue<T> grad_zero(0);
+  static const libMesh::VectorValue<T> grad_zero(0);
 
   mooseAssert(face.fi, "this must be non-null");
 
@@ -994,7 +994,7 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
   auto phi_downwind = functor(downwind_arg, time);
 
   // Initialize the return vector value
-  VectorValue<T> ret;
+  libMesh::VectorValue<T> ret;
   T coeff_upwind, coeff_downwind;
 
   // Compute interpolation coefficients and advected values for Upwind or CentralDifference limiters
@@ -1036,9 +1036,9 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       const auto &component_upwind = phi_upwind(i), component_downwind = phi_downwind(i);
-      const VectorValue<T> &grad_upwind = grad_phi_upwind.row(i),
-                           grad_face = coeffs.first * grad_phi_upwind.row(i) +
-                                       coeffs.second * grad_phi_downwind.row(i);
+      const libMesh::VectorValue<T> &grad_upwind = grad_phi_upwind.row(i),
+                                    grad_face = coeffs.first * grad_phi_upwind.row(i) +
+                                                coeffs.second * grad_phi_downwind.row(i);
 
       // Initialize min-max values
       Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());

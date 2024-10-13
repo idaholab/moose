@@ -496,14 +496,14 @@ SymmetricRankFourTensorTempl<T>::sum3x3() const
 }
 
 template <typename T>
-VectorValue<T>
+libMesh::VectorValue<T>
 SymmetricRankFourTensorTempl<T>::sum3x1() const
 {
   mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
   // used for volumetric locking correction
-  return VectorValue<T>(_vals[0] + _vals[1] + _vals[2],
-                        _vals[6] + _vals[7] + _vals[8],
-                        _vals[12] + _vals[13] + _vals[14]);
+  return libMesh::VectorValue<T>(_vals[0] + _vals[1] + _vals[2],
+                                 _vals[6] + _vals[7] + _vals[8],
+                                 _vals[12] + _vals[13] + _vals[14]);
 }
 
 template <typename T>

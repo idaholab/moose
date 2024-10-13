@@ -130,15 +130,16 @@ protected:
    * Transform a bounding box according to the transformations in the provided coordinate
    * transformation object
    */
-  static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
+  static void transformBoundingBox(libMesh::BoundingBox & box,
+                                   const MultiAppCoordTransform & transform);
 
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
 
   std::vector<FEProblemBase *> _to_problems;
   std::vector<FEProblemBase *> _from_problems;
-  std::vector<EquationSystems *> _to_es;
-  std::vector<EquationSystems *> _from_es;
+  std::vector<libMesh::EquationSystems *> _to_es;
+  std::vector<libMesh::EquationSystems *> _from_es;
   std::vector<MooseMesh *> _to_meshes;
   std::vector<MooseMesh *> _from_meshes;
   std::vector<Point> _to_positions;
@@ -176,8 +177,8 @@ protected:
    * Note: global bounding boxes are not indexed by app number. But rather outer indexing is by
    * process, then the inner indexing is by local app number.
    */
-  std::vector<BoundingBox> getFromBoundingBoxes();
-  std::vector<BoundingBox> getFromBoundingBoxes(BoundaryID boundary_id);
+  std::vector<libMesh::BoundingBox> getFromBoundingBoxes();
+  std::vector<libMesh::BoundingBox> getFromBoundingBoxes(BoundaryID boundary_id);
   ///@}
 
   /**
@@ -190,7 +191,7 @@ protected:
    * If we are transferring to a multiapp, return the appropriate solution
    * vector
    */
-  NumericVector<Real> & getTransferVector(unsigned int i_local, std::string var_name);
+  libMesh::NumericVector<Real> & getTransferVector(unsigned int i_local, std::string var_name);
 
   /// Given local app index, returns global app index.
   std::vector<unsigned int> _to_local2global_map;
@@ -245,7 +246,7 @@ protected:
                      const std::string & param_name = "") const;
 
   /// Extends bounding boxes to avoid missing points
-  void extendBoundingBoxes(const Real factor, std::vector<BoundingBox> & bboxes) const;
+  void extendBoundingBoxes(const Real factor, std::vector<libMesh::BoundingBox> & bboxes) const;
 
 private:
   /**

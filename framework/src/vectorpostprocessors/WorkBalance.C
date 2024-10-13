@@ -228,7 +228,7 @@ public:
 
   processor_id_type _this_pid;
 
-  ElemSideBuilder _elem_side_builder;
+  libMesh::ElemSideBuilder _elem_side_builder;
 
   std::unique_ptr<PetscExternalPartitioner> _petsc_partitioner;
 

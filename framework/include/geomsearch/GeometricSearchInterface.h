@@ -28,7 +28,7 @@ public:
   GeometricSearchInterface(const MooseObject * moose_object);
 
   /**
-   * Retrieve the PentrationLocator associated with the two sides.
+   * Retrieve the PenetrationLocator associated with the two sides.
    */
   PenetrationLocator &
   getPenetrationLocator(const BoundaryName & primary, const BoundaryName & secondary, Order order);

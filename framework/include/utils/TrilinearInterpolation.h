@@ -12,6 +12,8 @@
 #include <vector>
 #include "Moose.h"
 
+using libMesh::Real;
+
 /**
  * This class interpolates a function of three values (f(x,y,z)).  It takes 4
  * vectors for x, y, z, and function values, f(x,y,z).  The vector of function

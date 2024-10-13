@@ -80,7 +80,7 @@ public:
    */
   unsigned int getNumConvergedEigenvalues() const { return _eigen_sys.get_n_converged(); };
 
-  virtual NonlinearSolver<Number> * nonlinearSolver() override;
+  virtual libMesh::NonlinearSolver<Number> * nonlinearSolver() override;
 
   /**
    * Retrieve snes from slepc eigen solver. It is valid for only nonlinear eigen solver.
@@ -93,7 +93,7 @@ public:
    */
   virtual EPS getEPS();
 
-  CondensedEigenSystem & sys() { return _eigen_sys; }
+  libMesh::CondensedEigenSystem & sys() { return _eigen_sys; }
 
   /**
    * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
@@ -166,9 +166,9 @@ public:
 
   TagID precondMatrixTag() const { return _precond_tag; }
 
-  virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;
+  virtual void attachPreconditioner(libMesh::Preconditioner<Number> * preconditioner) override;
 
-  Preconditioner<Number> * preconditioner() const { return _preconditioner; }
+  libMesh::Preconditioner<Number> * preconditioner() const { return _preconditioner; }
 
   virtual void turnOffJacobian() override;
 
@@ -189,7 +189,7 @@ protected:
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 
-  CondensedEigenSystem & _eigen_sys;
+  libMesh::CondensedEigenSystem & _eigen_sys;
   EigenProblem & _eigen_problem;
   std::unique_ptr<SlepcEigenSolverConfiguration> _solver_configuration;
   std::vector<std::pair<Real, Real>> _eigen_values;
@@ -203,7 +203,7 @@ protected:
   TagID _precond_tag;
   bool _precond_matrix_includes_eigen;
   // Libmesh preconditioner
-  Preconditioner<Number> * _preconditioner;
+  libMesh::Preconditioner<Number> * _preconditioner;
 
   /// The number of degrees of freedom constrained at the libMesh level, e.g. via hanging node or
   /// periodic boundary constraints

@@ -24,7 +24,7 @@ class Function;
  * Periodic boundary for calculation periodic BC on domains where the translation is given by
  * functions
  */
-class FunctionPeriodicBoundary : public PeriodicBoundaryBase
+class FunctionPeriodicBoundary : public libMesh::PeriodicBoundaryBase
 {
 public:
   /**
@@ -44,12 +44,12 @@ public:
    * @param pt - point on the 'source' boundary
    * @return point on the paired boundary
    */
-  virtual Point get_corresponding_pos(const Point & pt) const override;
+  virtual libMesh::Point get_corresponding_pos(const libMesh::Point & pt) const override;
 
   /**
    * Required interface, this class must be able to clone itself
    */
-  virtual std::unique_ptr<PeriodicBoundaryBase> clone(TransformationType t) const override;
+  virtual std::unique_ptr<libMesh::PeriodicBoundaryBase> clone(TransformationType t) const override;
 
 protected:
   //  /// The dimension of the problem (says which _tr_XYZ member variables are active)

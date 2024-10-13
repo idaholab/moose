@@ -39,7 +39,7 @@ protected:
   const NonlinearSystemBase & _nl;
 
   /// Reference to libMesh system
-  const System & _sys;
+  const libMesh::System & _sys;
 
   /**
    * Perform the debugging output

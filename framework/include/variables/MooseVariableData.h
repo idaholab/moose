@@ -50,9 +50,9 @@ class MooseVariableData : public MooseVariableDataBase<OutputType>
 {
 public:
   // type for gradient, second and divergence of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
   // shortcut for types storing values on quadrature points
   typedef MooseArray<OutputType> FieldVariableValue;
@@ -65,9 +65,9 @@ public:
   typedef typename Moose::ShapeType<OutputType>::type OutputShape;
 
   // type for gradient, second and divergence of shape functions of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
-  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
-  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
 
   // shortcut for types storing shape function values on quadrature points
   typedef MooseArray<std::vector<OutputShape>> FieldVariablePhiValue;
@@ -241,8 +241,8 @@ public:
   //////////////////////////////// Nodal stuff ///////////////////////////////////////////
 
   bool isNodal() const override { return _is_nodal; }
-  bool hasDoFsOnNodes() const override { return _continuity != DISCONTINUOUS; }
-  FEContinuity getContinuity() const override { return _continuity; };
+  bool hasDoFsOnNodes() const override { return _continuity != libMesh::DISCONTINUOUS; }
+  libMesh::FEContinuity getContinuity() const override { return _continuity; };
   const Node * const & node() const { return _node; }
   const dof_id_type & nodalDofIndex() const { return _nodal_dof_index; }
   bool isNodalDefined() const { return _has_dof_indices; }
@@ -376,7 +376,7 @@ public:
   /**
    * Write a nodal value to the passed-in solution vector
    */
-  void insertNodalValue(NumericVector<Number> & residual, const OutputData & v);
+  void insertNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const OutputData & v);
   OutputData getNodalValue(const Node & node, Moose::SolutionState state) const;
   OutputData
   getElementalValue(const Elem * elem, Moose::SolutionState state, unsigned int idx = 0) const;
@@ -412,7 +412,8 @@ public:
   /**
    * Add passed in local DOF values to a solution vector
    */
-  void addSolution(NumericVector<Number> & sol, const DenseVector<Number> & v) const;
+  void addSolution(libMesh::NumericVector<libMesh::Number> & sol,
+                   const DenseVector<libMesh::Number> & v) const;
 
   /////////////////////////// DoF value getters /////////////////////////////////////
 
@@ -420,8 +421,8 @@ public:
   const DoFValue & dofValuesDotOld() const;
   const DoFValue & dofValuesDotDot() const;
   const DoFValue & dofValuesDotDotOld() const;
-  const MooseArray<Number> & dofValuesDuDotDu() const;
-  const MooseArray<Number> & dofValuesDuDotDotDu() const;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDu() const;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const;
 
   /**
    * Return the AD dof values
@@ -444,12 +445,12 @@ public:
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
    */
-  void computeIncrementAtQps(const NumericVector<Number> & increment_vec);
+  void computeIncrementAtQps(const libMesh::NumericVector<libMesh::Number> & increment_vec);
 
   /**
    * Compute and store incremental change at the current node based on increment_vec
    */
-  void computeIncrementAtNode(const NumericVector<Number> & increment_vec);
+  void computeIncrementAtNode(const libMesh::NumericVector<libMesh::Number> & increment_vec);
 
 private:
   /**
@@ -460,7 +461,7 @@ private:
   void assignADNodalValue(const ADReal & value, const unsigned int & component);
   void fetchADNodalValues();
 
-  const FEType & _fe_type;
+  const libMesh::FEType & _fe_type;
 
   const unsigned int _var_num;
 
@@ -476,7 +477,7 @@ private:
   dof_id_type _nodal_dof_index;
 
   /// Continuity type of the variable
-  FEContinuity _continuity;
+  libMesh::FEContinuity _continuity;
 
   /// Increment in the variable used in dampers
   FieldVariableValue _increment;
@@ -608,44 +609,46 @@ private:
   const bool _use_dual;
 
   std::function<const typename OutputTools<OutputType>::VariablePhiValue &(const Assembly &,
-                                                                           FEType)>
+                                                                           libMesh::FEType)>
       _phi_assembly_method;
   std::function<const typename OutputTools<OutputShape>::VariablePhiValue &(const Assembly &,
-                                                                            FEType)>
+                                                                            libMesh::FEType)>
       _phi_face_assembly_method;
 
   std::function<const typename OutputTools<OutputShape>::VariablePhiGradient &(const Assembly &,
-                                                                               FEType)>
+                                                                               libMesh::FEType)>
       _grad_phi_assembly_method;
   std::function<const typename OutputTools<OutputShape>::VariablePhiGradient &(const Assembly &,
-                                                                               FEType)>
+                                                                               libMesh::FEType)>
       _grad_phi_face_assembly_method;
 
   std::function<const typename OutputTools<OutputShape>::VariablePhiSecond &(const Assembly &,
-                                                                             FEType)>
+                                                                             libMesh::FEType)>
       _second_phi_assembly_method;
   std::function<const typename OutputTools<OutputShape>::VariablePhiSecond &(const Assembly &,
-                                                                             FEType)>
+                                                                             libMesh::FEType)>
       _second_phi_face_assembly_method;
 
   std::function<const typename OutputTools<OutputShape>::VariablePhiCurl &(const Assembly &,
-                                                                           FEType)>
+                                                                           libMesh::FEType)>
       _curl_phi_assembly_method;
   std::function<const typename OutputTools<OutputShape>::VariablePhiCurl &(const Assembly &,
-                                                                           FEType)>
+                                                                           libMesh::FEType)>
       _curl_phi_face_assembly_method;
 
   std::function<const typename OutputTools<OutputShape>::VariablePhiDivergence &(const Assembly &,
-                                                                                 FEType)>
+                                                                                 libMesh::FEType)>
       _div_phi_assembly_method;
 
   std::function<const typename OutputTools<OutputShape>::VariablePhiDivergence &(const Assembly &,
-                                                                                 FEType)>
+                                                                                 libMesh::FEType)>
       _div_phi_face_assembly_method;
 
-  std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &, FEType)>
+  std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &,
+                                                                   libMesh::FEType)>
       _ad_grad_phi_assembly_method;
-  std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &, FEType)>
+  std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &,
+                                                                   libMesh::FEType)>
       _ad_grad_phi_face_assembly_method;
 
   /// Pointer to time integrator

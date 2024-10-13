@@ -23,7 +23,7 @@ class MooseObject;
 class ReporterContextBase;
 
 /**
- * The base class for storing a Repoter's state
+ * The base class for storing a Reporter's state
  *
  * The base class is needed in order to store the states without a template
  * parameter so that they can be iterated through to observe the producers

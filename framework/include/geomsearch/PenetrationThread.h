@@ -19,7 +19,7 @@
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
+typedef MooseVariableFE<libMesh::VectorValue<Real>> VectorMooseVariable;
 
 class PenetrationThread
 {
@@ -36,8 +36,8 @@ public:
       bool do_normal_smoothing,
       Real normal_smoothing_distance,
       PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-      std::vector<std::vector<FEBase *>> & fes,
-      FEType & fe_type,
+      std::vector<std::vector<libMesh::FEBase *>> & fes,
+      libMesh::FEType & fe_type,
       NearestNodeLocator & nearest_node,
       const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
       const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples);
@@ -72,9 +72,9 @@ protected:
   MooseVariable * _nodal_normal_y;
   MooseVariable * _nodal_normal_z;
 
-  std::vector<std::vector<FEBase *>> & _fes;
+  std::vector<std::vector<libMesh::FEBase *>> & _fes;
 
-  FEType & _fe_type;
+  libMesh::FEType & _fe_type;
 
   NearestNodeLocator & _nearest_node;
 
@@ -86,7 +86,7 @@ protected:
   THREAD_ID _tid;
 
   /// Helper for building element sides without extraneous allocation
-  ElemSideBuilder _elem_side_builder;
+  libMesh::ElemSideBuilder _elem_side_builder;
 
   enum CompeteInteractionResult
   {
@@ -124,27 +124,27 @@ protected:
 
   CommonEdgeResult interactionsOffCommonEdge(PenetrationInfo * pi1, PenetrationInfo * pi2);
 
-  bool findRidgeContactPoint(Point & contact_point,
+  bool findRidgeContactPoint(libMesh::Point & contact_point,
                              Real & tangential_distance,
                              const Node *& closest_node,
                              unsigned int & index,
-                             Point & contact_point_ref,
+                             libMesh::Point & contact_point_ref,
                              std::vector<PenetrationInfo *> & p_info,
                              const unsigned int index1,
                              const unsigned int index2);
 
   void getSideCornerNodes(const Elem * side, std::vector<const Node *> & corner_nodes);
 
-  bool restrictPointToSpecifiedEdgeOfFace(Point & p,
+  bool restrictPointToSpecifiedEdgeOfFace(libMesh::Point & p,
                                           const Node *& closest_node,
                                           const Elem * side,
                                           const std::vector<const Node *> & edge_nodes);
-  bool restrictPointToFace(Point & p, const Node *& closest_node, const Elem * side);
+  bool restrictPointToFace(libMesh::Point & p, const Node *& closest_node, const Elem * side);
 
   bool isFaceReasonableCandidate(const Elem * primary_elem,
                                  const Elem * side,
-                                 FEBase * fe,
-                                 const Point * secondary_point,
+                                 libMesh::FEBase * fe,
+                                 const libMesh::Point * secondary_point,
                                  const Real tangential_tolerance);
 
   void
@@ -155,7 +155,7 @@ protected:
                                    std::vector<Real> & edge_face_weights,
                                    std::vector<PenetrationInfo *> & p_info,
                                    const Node & secondary_node);
-  void getSmoothingEdgeNodesAndWeights(const Point & p,
+  void getSmoothingEdgeNodesAndWeights(const libMesh::Point & p,
                                        const Elem * side,
                                        std::vector<std::vector<const Node *>> & edge_nodes,
                                        std::vector<Real> & edge_face_weights);
@@ -179,15 +179,15 @@ protected:
 
   void getSidesOnPrimaryBoundary(std::vector<unsigned int> & sides, const Elem * const elem);
 
-  void computeSlip(FEBase & fe, PenetrationInfo & info);
+  void computeSlip(libMesh::FEBase & fe, PenetrationInfo & info);
 
   void switchInfo(PenetrationInfo *& info, PenetrationInfo *& infoNew);
 
   struct RidgeData
   {
     unsigned int _index;
-    Point _closest_coor;
-    Point _closest_coor_ref;
+    libMesh::Point _closest_coor;
+    libMesh::Point _closest_coor_ref;
     Real _tangential_distance;
     const Node * _closest_node;
   };
@@ -195,7 +195,7 @@ protected:
   struct RidgeSetData
   {
     Real _distance;
-    Point _closest_coor;
+    libMesh::Point _closest_coor;
     const Node * _closest_node;
     std::vector<RidgeData> _ridge_data_vec;
   };

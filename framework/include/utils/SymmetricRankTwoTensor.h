@@ -43,6 +43,8 @@ template <typename>
 class TensorValue;
 }
 
+namespace boostcopy = libMesh::boostcopy;
+
 namespace MathUtils
 {
 template <typename T>
@@ -198,10 +200,10 @@ public:
   }
 
   /// get the specified row of the tensor
-  VectorValue<T> row(const unsigned int n) const;
+  libMesh::VectorValue<T> row(const unsigned int n) const;
 
   /// get the specified column of the tensor
-  VectorValue<T> column(const unsigned int n) const { return row(n); }
+  libMesh::VectorValue<T> column(const unsigned int n) const { return row(n); }
 
   /// return the matrix multiplied with its transpose A*A^T (guaranteed symmetric)
   [[nodiscard]] static SymmetricRankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
@@ -248,7 +250,8 @@ public:
    * Assignment-from-scalar operator.  Used only to zero out vectors.
    */
   template <typename Scalar>
-  typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, SymmetricRankTwoTensorTempl &>::type
+  typename boostcopy::enable_if_c<libMesh::ScalarTraits<Scalar>::value,
+                                  SymmetricRankTwoTensorTempl &>::type
   operator=(const Scalar & libmesh_dbg_var(p))
   {
     libmesh_assert_equal_to(p, Scalar(0));
@@ -261,7 +264,7 @@ public:
 
   /// returns _vals + a
   template <typename T2>
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
   operator+(const SymmetricRankTwoTensorTempl<T2> & a) const;
 
   /// sets _vals -= a and returns vals
@@ -269,7 +272,7 @@ public:
 
   /// returns _vals - a
   template <typename T2>
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
   operator-(const SymmetricRankTwoTensorTempl<T2> & a) const;
 
   /// returns -_vals
@@ -281,7 +284,7 @@ public:
   /// returns _vals*a
   template <typename T2>
   auto operator*(const T2 & a) const ->
-      typename std::enable_if<ScalarTraits<T2>::value,
+      typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                               SymmetricRankTwoTensorTempl<decltype(T() * T2())>>::type;
 
   /// performs _vals /= a
@@ -290,12 +293,13 @@ public:
   /// returns _vals/a
   template <typename T2>
   auto operator/(const T2 & a) const ->
-      typename std::enable_if<ScalarTraits<T2>::value,
+      typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                               SymmetricRankTwoTensorTempl<decltype(T() / T2())>>::type;
 
   /// Defines multiplication with a vector to get a vector
   template <typename T2>
-  TypeVector<typename CompareTypes<T, T2>::supertype> operator*(const TypeVector<T2> & a) const;
+  TypeVector<typename libMesh::CompareTypes<T, T2>::supertype>
+  operator*(const TypeVector<T2> & a) const;
 
   /// Defines logical equality with another SymmetricRankTwoTensorTempl<T2>
   template <typename T2>
@@ -512,7 +516,7 @@ template <typename T>
 template <typename T2>
 auto
 SymmetricRankTwoTensorTempl<T>::operator*(const T2 & a) const ->
-    typename std::enable_if<ScalarTraits<T2>::value,
+    typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                             SymmetricRankTwoTensorTempl<decltype(T() * T2())>>::type
 {
   SymmetricRankTwoTensorTempl<decltype(T() * T2())> result;
@@ -525,7 +529,7 @@ template <typename T>
 template <typename T2>
 auto
 SymmetricRankTwoTensorTempl<T>::operator/(const T2 & a) const ->
-    typename std::enable_if<ScalarTraits<T2>::value,
+    typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                             SymmetricRankTwoTensorTempl<decltype(T() / T2())>>::type
 {
   SymmetricRankTwoTensorTempl<decltype(T() / T2())> result;
@@ -537,10 +541,10 @@ SymmetricRankTwoTensorTempl<T>::operator/(const T2 & a) const ->
 /// Defines multiplication with a vector to get a vector
 template <typename T>
 template <typename T2>
-TypeVector<typename CompareTypes<T, T2>::supertype>
+TypeVector<typename libMesh::CompareTypes<T, T2>::supertype>
 SymmetricRankTwoTensorTempl<T>::operator*(const TypeVector<T2> & a) const
 {
-  TypeVector<typename CompareTypes<T, T2>::supertype> ret;
+  TypeVector<typename libMesh::CompareTypes<T, T2>::supertype> ret;
   ret(0) = a(0) * _vals[0] + a(1) * _vals[5] + a(2) * _vals[4];
   ret(1) = a(0) * _vals[5] + a(1) * _vals[1] + a(2) * _vals[3];
   ret(2) = a(0) * _vals[4] + a(1) * _vals[3] + a(2) * _vals[2];
@@ -685,8 +689,8 @@ SymmetricRankTwoTensorTempl<T>::operator=(const SymmetricRankTwoTensorTempl<T2> 
 
 template <typename T, typename Scalar>
 inline typename std::enable_if_t<
-    ScalarTraits<Scalar>::value,
-    SymmetricRankTwoTensorTempl<typename CompareTypes<T, Scalar>::supertype>>
+    libMesh::ScalarTraits<Scalar>::value,
+    SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, Scalar>::supertype>>
 operator*(const Scalar & factor, const SymmetricRankTwoTensorTempl<T> & t)
 {
   return t * factor;

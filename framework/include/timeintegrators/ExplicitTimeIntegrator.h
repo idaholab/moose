@@ -81,7 +81,7 @@ protected:
   TagID _Ke_time_tag;
 
   /// For solving with the consistent matrix
-  std::unique_ptr<LinearSolver<Number>> _linear_solver;
+  std::unique_ptr<libMesh::LinearSolver<Number>> _linear_solver;
 
   /// For solving with lumped preconditioning
   std::unique_ptr<LumpedPreconditioner> _preconditioner;

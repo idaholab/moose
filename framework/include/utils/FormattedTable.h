@@ -206,7 +206,7 @@ public:
   void printCSV(const std::string & file_name, int interval = 1, bool align = false);
 
   void printEnsight(const std::string & file_name);
-  void writeExodus(ExodusII_IO * ex_out, Real time);
+  void writeExodus(libMesh::ExodusII_IO * ex_out, Real time);
   void makeGnuplot(const std::string & base_file, const std::string & format);
 
   static MooseEnum getWidthModes();

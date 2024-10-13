@@ -83,7 +83,7 @@ public:
   /**
    * Return a reference to the stored linear implicit system
    */
-  LinearImplicitSystem & linearImplicitSystem() { return _linear_implicit_system; }
+  libMesh::LinearImplicitSystem & linearImplicitSystem() { return _linear_implicit_system; }
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -186,7 +186,7 @@ protected:
   bool _converged;
 
   /// Base class reference to the linear implicit system in libmesh
-  LinearImplicitSystem & _linear_implicit_system;
+  libMesh::LinearImplicitSystem & _linear_implicit_system;
 
   /// Vectors to store the new gradients during the computation. This is needed
   /// because the old gradients might still be needed to determine boundary values

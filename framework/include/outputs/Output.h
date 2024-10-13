@@ -185,7 +185,7 @@ protected:
   bool _use_displaced;
 
   /// Reference the the libMesh::EquationSystems object that contains the data
-  EquationSystems * _es_ptr;
+  libMesh::EquationSystems * _es_ptr;
 
   /// A convenience pointer to the current mesh (reference or displaced depending on "use_displaced")
   MooseMesh * _mesh_ptr;

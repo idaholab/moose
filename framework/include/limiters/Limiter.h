@@ -88,8 +88,8 @@ public:
    */
   virtual T limit(const T & phi_upwind,
                   const T & phi_downwind,
-                  const VectorValue<T> * grad_phi_upwind,
-                  const VectorValue<T> * grad_phi_downwind,
+                  const libMesh::VectorValue<T> * grad_phi_upwind,
+                  const libMesh::VectorValue<T> * grad_phi_downwind,
                   const RealVectorValue & dCD,
                   const Real & max_value,
                   const Real & min_value,
@@ -108,7 +108,7 @@ public:
    */
   T operator()(const T & phi_upwind,
                const T & phi_downwind,
-               const VectorValue<T> * grad_phi_upwind,
+               const libMesh::VectorValue<T> * grad_phi_upwind,
                const RealVectorValue & dCD) const
   {
     return std::max(T(0),

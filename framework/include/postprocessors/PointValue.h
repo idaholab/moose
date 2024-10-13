@@ -34,7 +34,7 @@ protected:
   const unsigned int _var_number;
 
   /// A reference to the system containing the variable
-  const System & _system;
+  const libMesh::System & _system;
 
   /// The point to locate
   const Point & _point;

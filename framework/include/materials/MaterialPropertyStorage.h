@@ -102,8 +102,8 @@ public:
    */
   void prolongStatefulProps(processor_id_type pid,
                             const std::vector<std::vector<QpMap>> & refinement_map,
-                            const QBase & qrule,
-                            const QBase & qrule_face,
+                            const libMesh::QBase & qrule,
+                            const libMesh::QBase & qrule_face,
                             MaterialPropertyStorage & parent_material_props,
                             const THREAD_ID tid,
                             const Elem & elem,
@@ -128,8 +128,8 @@ public:
    */
   void updateStatefulPropsForPRefinement(const processor_id_type pid,
                                          const std::vector<QpMap> & p_refinement_map,
-                                         const QBase & qrule,
-                                         const QBase & qrule_face,
+                                         const libMesh::QBase & qrule,
+                                         const libMesh::QBase & qrule_face,
                                          const THREAD_ID tid,
                                          const Elem & elem,
                                          const int input_side);
@@ -148,8 +148,8 @@ public:
    */
   void restrictStatefulProps(const std::vector<std::pair<unsigned int, QpMap>> & coarsening_map,
                              const std::vector<const Elem *> & coarsened_element_children,
-                             const QBase & qrule,
-                             const QBase & qrule_face,
+                             const libMesh::QBase & qrule,
+                             const libMesh::QBase & qrule_face,
                              const THREAD_ID tid,
                              const Elem & elem,
                              int input_side = -1);
@@ -310,15 +310,18 @@ public:
   /**
    * @returns A range over states to be used in range-based for loops
    */
-  IntRange<unsigned int> stateIndexRange() const { return IntRange<unsigned int>(0, numStates()); }
+  libMesh::IntRange<unsigned int> stateIndexRange() const
+  {
+    return libMesh::IntRange<unsigned int>(0, numStates());
+  }
   /**
    * @returns A range over stateful states to be used in range-based for loops
    *
    * Will be an empty range if there are no stateful states
    */
-  IntRange<unsigned int> statefulIndexRange() const
+  libMesh::IntRange<unsigned int> statefulIndexRange() const
   {
-    return IntRange<unsigned int>(1, numStates());
+    return libMesh::IntRange<unsigned int>(1, numStates());
   }
 
   /**
