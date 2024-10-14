@@ -20,6 +20,9 @@
 
 #include "metaphysicl/raw_type.h"
 
+using libMesh::Real;
+using libMesh::VectorValue;
+
 TEST(RankThreeTensor, constructors)
 {
   // Default

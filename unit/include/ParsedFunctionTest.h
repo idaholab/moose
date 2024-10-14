@@ -21,7 +21,7 @@ public:
   ParsedFunctionTest() : MooseObjectUnitTest("MooseUnitApp") {}
 
 protected:
-  ParsedFunction<Real> * fptr(MooseParsedFunction & f);
+  libMesh::ParsedFunction<Real> * fptr(MooseParsedFunction & f);
   InputParameters getParams();
   MooseParsedFunction & buildFunction(InputParameters & params);
 
