@@ -223,6 +223,9 @@ UELThread::onElement(const Elem * elem)
        &rdummy /* PERIOD */
   );
 
+  if (pnewdt < _min_pnewdt && pnewdt != 0.0)
+    _min_pnewdt = pnewdt;
+
   if (_uel_uo._nstatev)
   {
     auto & statev_current = _uel_uo._statev[_uel_uo._statev_index_current][elem->id()];
@@ -243,4 +246,18 @@ UELThread::onElement(const Elem * elem)
                         _all_dof_indices,
                         _all_dof_indices,
                         -1.0);
+}
+
+void
+UELThread::pre()
+{
+  // reset pnewdt for the next element loop
+  _min_pnewdt = 0.0;
+}
+
+void
+UELThread::join(const UELThread & other)
+{
+  if (other._min_pnewdt < _min_pnewdt && other._min_pnewdt != 0.0)
+    _min_pnewdt = other._min_pnewdt;
 }
