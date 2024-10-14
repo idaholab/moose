@@ -5,14 +5,14 @@
     type = Exodiff
     input = 'small_patch.i'
     exodiff = 'small_patch_out.e'
-    requirement = "Small strain uniaxial patch test passes"
+    requirement = "Small strain uniaxial patch test passes with the total Lagrangian formulation"
     abs_zero = 1e-6
   []
   [large]
     type = Exodiff
     input = 'large_patch.i'
     exodiff = 'large_patch_out.e'
-    requirement = "Large strain uniaxial patch test passes"
+    requirement = "Large strain uniaxial patch test passes with the total Lagrangian formulation"
     abs_zero = 1e-6
   []
   [residual_jacobian_together]
@@ -22,7 +22,7 @@
     exodiff = 'large_patch_out.e'
     cli_args = 'Executioner/residual_and_jacobian_together=true'
     requirement = "The new system shall produce the correct results if residual and jacobian are "
-                  "computed together."
+                  "computed together with the total Lagrangian formulation."
     abs_zero = 1e-6
   []
 []

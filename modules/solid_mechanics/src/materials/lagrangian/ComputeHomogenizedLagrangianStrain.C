@@ -15,6 +15,8 @@ InputParameters
 ComputeHomogenizedLagrangianStrain::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Calculate eigenstrain-like contribution from the homogenization "
+                             "strain used to satisfy the homogenization constraints.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredParam<UserObjectName>(
       "homogenization_constraint", "The UserObject for defining the homogenization constraint");

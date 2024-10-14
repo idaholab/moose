@@ -16,6 +16,8 @@ InputParameters
 InclusionProperties::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Calculate quantities used to define the analytical elasticity "
+                             "solution to the inclusion problem.");
   params.addRequiredParam<Real>("a", "Ellipse semiaxis");
   params.addRequiredParam<Real>("b", "Ellipse semiaxis");
   params.addRequiredParam<Real>("lambda", "Lame's first parameter");

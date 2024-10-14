@@ -1,70 +1,55 @@
 [Tests]
-  [./constant_expansion_coeff]
+  [constant_expansion_coeff]
     type = 'Exodiff'
     input = 'constant_expansion_coeff.i'
     exodiff = 'constant_expansion_coeff_out.e'
-    requirement = 'The tensor mechanics module shall have the capability to '
-                  'calculate the eigenstrain tensor resulting from isotropic '
-                  'thermal expansion.'
+    requirement = 'The solid mechanics module shall have the capability to calculate the eigenstrain tensor resulting from isotropic thermal expansion when automatic differentiation is requested.'
     design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#7457'
-  [../]
-  [./constant_expansion_coeff_restart]
+  []
+  [constant_expansion_coeff_restart]
     type = 'Exodiff'
     input = 'constant_expansion_coeff_restart.i'
     exodiff = 'constant_expansion_coeff_restart_out.e'
     prereq = 'constant_expansion_coeff'
-    requirement = 'The tensor mechanics module shall have the capability to '
-                  'calculate the eigenstrain tensor resulting from isotropic '
-                  'thermal expansion when restarting the simulation.'
+    requirement = 'The solid mechanics module shall have the capability to calculate the eigenstrain tensor resulting from isotropic thermal expansion when restarting the simulation when automatic differentiation is requested.'
     design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#7457'
-  [../]
-  [./constant_expansion_stress_free_temp]
+  []
+  [constant_expansion_stress_free_temp]
     type = 'Exodiff'
     input = 'constant_expansion_stress_free_temp.i'
     exodiff = 'constant_expansion_stress_free_temp_out.e'
-    requirement = 'The tensor mechanics module shall have the capability to '
-                  'calculate the eigenstrain tensor resulting from isotropic '
-                  'thermal expansion with an initial strain due to the '
-                  'difference between the stress free temperature and initial '
-                  'temperature of the material.'
+    requirement = 'The solid mechanics module shall have the capability to calculate the eigenstrain tensor resulting from isotropic thermal expansion with an initial strain due to the difference between the stress free temperature and initial temperature of the material when automatic differentiation is requested.'
     design = 'ComputeThermalExpansionEigenstrain.md RankTwoAux.md'
     issues = '#8909'
-  [../]
-  [./multiple_thermal_eigenstrains]
+  []
+  [multiple_thermal_eigenstrains]
     type = 'Exodiff'
     input = 'multiple_thermal_eigenstrains.i'
     exodiff = 'multiple_thermal_eigenstrains_out.e'
-    requirement = 'The tensor mechanics module shall have the capability to '
-                  'combine multiple eigenstrains to correctly calculate an '
-                  'eigenstrain tensor resulting from isotropic thermal '
-                  'expansion.'
+    requirement = 'The solid mechanics module shall have the capability to combine multiple eigenstrains to correctly calculate an eigenstrain tensor resulting from isotropic thermal expansion when automatic differentiation is requested.'
     design = 'ComputeThermalExpansionEigenstrain.md RankTwoAux.md'
     issues = '#7457'
-  [../]
+  []
 
-  [./ad_constant_expansion_coeff]
+  [ad_constant_expansion_coeff]
     type = 'Exodiff'
     input = 'ad_constant_expansion_coeff.i'
     exodiff = 'ad_constant_expansion_coeff_out.e'
-    requirement = 'The tensor mechanics module shall have the capability to '
-                  'calculate the eigenstrain tensor resulting from isotropic '
-                  'thermal expansion.'
+    requirement = 'The solid mechanics module shall have the capability to calculate the eigenstrain tensor resulting from isotropic thermal expansion using automatic differentiation.'
     design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
-  [../]
-  [./ad_constant_expansion_coeff_old]
+  []
+  [ad_constant_expansion_coeff_old]
     type = 'Exodiff'
     input = 'ad_constant_expansion_coeff.i'
     exodiff = 'ad_constant_expansion_coeff_out.e'
-    requirement = 'The tensor mechanics module shall have the capability to '
-                  'calculate the eigenstrain tensor resulting from isotropic '
-                  'thermal expansion using the previous timestep.'
+    requirement = 'The solid mechanics module shall have the capability to calculate the eigenstrain tensor resulting from isotropic thermal expansion using the previous timestep when automatic differentiation is requested.'
     design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
-  [../]
-  [./ad_constant_expansion_coeff-jac]
+  []
+  [ad_constant_expansion_coeff-jac]
     type = 'PetscJacobianTester'
     input = 'ad_constant_expansion_coeff.i'
     run_sim = 'True'
@@ -72,22 +57,17 @@
     difference_tol = 1e-5
     issues = '#13091'
     design = 'ComputeThermalExpansionEigenstrain.md'
-    requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic '
-                  'thermal expansion shall be perfect'
-  [../]
-  [./ad_constant_expansion_stress_free_temp]
+    requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic thermal expansion shall be perfect'
+  []
+  [ad_constant_expansion_stress_free_temp]
     type = 'Exodiff'
     input = 'ad_constant_expansion_stress_free_temp.i'
     exodiff = 'ad_constant_expansion_stress_free_temp_out.e'
-    requirement = 'The tensor mechanics module shall have the capability to '
-                  'calculate the eigenstrain tensor resulting from isotropic '
-                  'thermal expansion with an initial strain due to the '
-                  'difference between the stress free temperature and initial '
-                  'temperature of the material.'
+    requirement = 'The solid mechanics module shall have the capability to calculate the eigenstrain tensor resulting from isotropic thermal expansion when automatic differentiation is requested with an initial strain due to the difference between the stress free temperature and initial temperature of the material.'
     design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
-  [../]
-  [./ad_constant_expansion_stress_free_temp-jac]
+  []
+  [ad_constant_expansion_stress_free_temp-jac]
     type = 'PetscJacobianTester'
     input = 'ad_constant_expansion_stress_free_temp.i'
     run_sim = 'True'
@@ -95,7 +75,6 @@
     difference_tol = 1e-5
     issues = '#13091'
     design = 'ComputeThermalExpansionEigenstrain.md'
-    requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic '
-                  'thermal expansion with an initial strain shall be perfect'
-  [../]
+    requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic thermal expansion with an initial strain shall be perfect'
+  []
 []
