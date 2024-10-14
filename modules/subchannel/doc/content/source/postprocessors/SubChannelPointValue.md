@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Postprocessors/SubChannelPointValue
+!syntax description /UserObjects/SubChannelPointValue
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the SubChannelPointValue object.
 
-!syntax parameters /Postprocessors/SubChannelPointValue
+!syntax parameters /UserObjects/SubChannelPointValue
 
-!syntax inputs /Postprocessors/SubChannelPointValue
+!syntax inputs /UserObjects/SubChannelPointValue
 
-!syntax children /Postprocessors/SubChannelPointValue
+!syntax children /UserObjects/SubChannelPointValue
