@@ -1,17 +1,24 @@
 #pragma once
-
-#include "MFEMBoundaryCondition.h"
+#include "MFEMEssentialBC.h"
 #include "MFEMVectorFunctionCoefficient.h"
-#include "boundary_conditions.h"
 
-class MFEMVectorDirichletBC : public MFEMBoundaryCondition
+class MFEMVectorDirichletBC : public MFEMEssentialBC
 {
+protected:
+  MFEMVectorCoefficient * _vec_coef{nullptr};
+  enum APPLY_TYPE
+  {
+    STANDARD,
+    TANGENTIAL,
+    NORMAL
+  };
+
 public:
   static InputParameters validParams();
 
   MFEMVectorDirichletBC(const InputParameters & parameters);
-  ~MFEMVectorDirichletBC() override {}
 
-protected:
-  MFEMVectorCoefficient * _vec_coef{nullptr};
+  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_) override;
+
+  APPLY_TYPE _boundary_apply_type;
 };
