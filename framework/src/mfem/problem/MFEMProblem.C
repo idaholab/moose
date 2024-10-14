@@ -85,7 +85,9 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                   InputParameters & parameters)
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
-  MFEMBoundaryCondition * mfem_bc(&getUserObject<MFEMBoundaryCondition>(name));
+
+  auto object_ptr = getUserObject<MFEMBoundaryCondition>(name).getSharedPtr();
+  auto mfem_bc = std::dynamic_pointer_cast<MFEMBoundaryCondition>(object_ptr);
 
   if (getProblemData()._bc_map.Has(name))
   {
@@ -93,7 +95,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                       " has already been added to the problem boundary conditions.";
     mfem::mfem_error(error_message.c_str());
   }
-  getProblemData()._bc_map.Register(name, std::move(mfem_bc->getBC()));
+  getProblemData()._bc_map.Register(name, std::move(mfem_bc));
 }
 
 void
