@@ -23,8 +23,8 @@ InputParameters
 TriSubChannelBuildMeshAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription(
-      "Builds the infastructure for the subchannel mesh in the triangular lattice arrangement");
+  params.addClassDescription("Creates the infastructure necessary to build the subchannel mesh in "
+                             "the triangular lattice arrangement");
   return params;
 }
 
