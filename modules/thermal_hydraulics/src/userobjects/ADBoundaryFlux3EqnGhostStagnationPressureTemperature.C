@@ -9,7 +9,7 @@
 
 #include "ADBoundaryFlux3EqnGhostStagnationPressureTemperature.h"
 #include "SinglePhaseFluidProperties.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Numerics.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADBoundaryFlux3EqnGhostStagnationPressureTemperature);
@@ -49,13 +49,13 @@ std::vector<ADReal>
 ADBoundaryFlux3EqnGhostStagnationPressureTemperature::getGhostCellSolution(
     const std::vector<ADReal> & U) const
 {
-  const ADReal rhoA = U[THM3Eqn::CONS_VAR_RHOA];
-  const ADReal rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
-  const ADReal A = U[THM3Eqn::CONS_VAR_AREA];
+  const ADReal rhoA = U[THMVACE1D::RHOA];
+  const ADReal rhouA = U[THMVACE1D::RHOUA];
+  const ADReal A = U[THMVACE1D::AREA];
 
   const ADReal vel = rhouA / rhoA;
 
-  std::vector<ADReal> U_ghost(THM3Eqn::N_CONS_VAR);
+  std::vector<ADReal> U_ghost(THMVACE1D::N_FLUX_INPUTS);
   if (!_reversible || THM::isInlet(vel, _normal))
   {
     // compute stagnation quantities
@@ -73,20 +73,20 @@ ADBoundaryFlux3EqnGhostStagnationPressureTemperature::getGhostCellSolution(
     const ADReal e = _fp.e_from_p_rho(p, rho);
     const ADReal E = e + 0.5 * vel * vel;
 
-    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rho * A;
-    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = rho * vel * A;
-    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rho * E * A;
-    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+    U_ghost[THMVACE1D::RHOA] = rho * A;
+    U_ghost[THMVACE1D::RHOUA] = rho * vel * A;
+    U_ghost[THMVACE1D::RHOEA] = rho * E * A;
+    U_ghost[THMVACE1D::AREA] = A;
   }
   else
   {
     const ADReal rho = rhoA / A;
     const ADReal E = _fp.e_from_p_rho(_p0, rho) + 0.5 * vel * vel;
 
-    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rhoA;
-    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = rhouA;
-    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rhoA * E;
-    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+    U_ghost[THMVACE1D::RHOA] = rhoA;
+    U_ghost[THMVACE1D::RHOUA] = rhouA;
+    U_ghost[THMVACE1D::RHOEA] = rhoA * E;
+    U_ghost[THMVACE1D::AREA] = A;
   }
 
   return U_ghost;

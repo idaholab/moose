@@ -9,7 +9,7 @@
 
 #include "ADGateValve1PhaseBC.h"
 #include "ADGateValve1PhaseUserObject.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Assembly.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADGateValve1PhaseBC);
@@ -67,9 +67,9 @@ std::map<unsigned int, unsigned int>
 ADGateValve1PhaseBC::getIndexMapping() const
 {
   std::map<unsigned int, unsigned int> jvar_map;
-  jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhoA_jvar, THM3Eqn::EQ_MASS));
-  jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhouA_jvar, THM3Eqn::EQ_MOMENTUM));
-  jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhoEA_jvar, THM3Eqn::EQ_ENERGY));
+  jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhoA_jvar, THMVACE1D::MASS));
+  jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhouA_jvar, THMVACE1D::MOMENTUM));
+  jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhoEA_jvar, THMVACE1D::ENERGY));
 
   return jvar_map;
 }

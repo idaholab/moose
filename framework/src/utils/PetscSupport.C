@@ -38,6 +38,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/simple_range.h"
 
 // PETSc includes
 #include <petsc.h>
@@ -243,7 +244,9 @@ addPetscOptionsFromCommandline()
 }
 
 void
-petscSetOptions(const PetscOptions & po, const SolverParams & solver_params)
+petscSetOptions(const PetscOptions & po,
+                const SolverParams & solver_params,
+                FEProblemBase * const problem /*=nullptr*/)
 {
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
   auto ierr = PetscOptionsClear();
@@ -260,7 +263,7 @@ petscSetOptions(const PetscOptions & po, const SolverParams & solver_params)
 
   // Add option pairs
   for (auto & option : po.pairs)
-    setSinglePetscOption(option.first, option.second);
+    setSinglePetscOption(option.first, option.second, problem);
 
   addPetscOptionsFromCommandline();
 }
@@ -293,6 +296,9 @@ petscNonlinearConverged(SNES snes,
 {
   PetscFunctionBegin;
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
+
+  // execute objects that may be used in convergence check
+  problem.execute(EXEC_NONLINEAR_CONVERGENCE);
 
   // Let's be nice and always check PETSc error codes.
   auto ierr = (PetscErrorCode)0;
@@ -518,8 +524,18 @@ petscSetDefaults(FEProblemBase & problem)
   {
     // dig out PETSc solver
     NonlinearSystemBase & nl = problem.getNonlinearSystemBase(nl_index);
-    PetscNonlinearSolver<Number> * petsc_solver =
-        dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+    auto * const petsc_solver = cast_ptr<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+    auto * const sys_matrix = petsc_solver->system().request_matrix("System Matrix");
+    // Prefix the name of the system matrix with the name of the system
+    if (sys_matrix && problem.solverParams()._type != Moose::ST_JFNK)
+    {
+      auto * const petsc_sys_matrix = cast_ptr<PetscMatrix<Number> *>(sys_matrix);
+      LibmeshPetscCall2(
+          nl.comm(),
+          MatSetOptionsPrefix(petsc_sys_matrix->mat(),
+                              (problem.getNonlinearSystemNames()[nl_index] + "_").c_str()));
+      LibmeshPetscCall2(nl.comm(), MatSetFromOptions(petsc_sys_matrix->mat()));
+    }
     SNES snes = petsc_solver->snes();
     KSP ksp;
     auto ierr = SNESGetKSP(snes, &ksp);
@@ -931,23 +947,79 @@ isSNESVI(FEProblemBase & fe_problem)
 }
 
 void
-setSinglePetscOption(const std::string & name, const std::string & value)
+setSinglePetscOption(const std::string & name,
+                     const std::string & value,
+                     FEProblemBase * const problem /*=nullptr*/)
 {
-  PetscErrorCode ierr;
+  static const TIMPI::Communicator comm_world(PETSC_COMM_WORLD);
+  const TIMPI::Communicator & comm = problem ? problem->comm() : comm_world;
+  LibmeshPetscCall2(comm,
+                    PetscOptionsSetValue(LIBMESH_PETSC_NULLPTR,
+                                         name.c_str(),
+                                         value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str()));
+  const auto lower_case_name = MooseUtils::toLower(name);
+  auto check_problem = [problem, &lower_case_name]()
+  {
+    if (!problem)
+      mooseError(
+          "Setting the option '",
+          lower_case_name,
+          "' requires passing a 'problem' parameter. Contact a developer of your application "
+          "to have them update their code. If in doubt, reach out to the MOOSE team on Github "
+          "discussions");
+  };
 
-#if PETSC_VERSION_LESS_THAN(3, 7, 0)
-  ierr = PetscOptionsSetValue(name.c_str(), value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str());
-#else
-  // PETSc 3.7.0 and later version.  First argument is the options
-  // database to use, NULL indicates the default global database.
-  ierr = PetscOptionsSetValue(
-      LIBMESH_PETSC_NULLPTR, name.c_str(), value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str());
-#endif
+  // Select vector type from user-passed PETSc options
+  if (lower_case_name.find("-vec_type") != std::string::npos)
+  {
+    check_problem();
+    for (auto & solver_system : problem->_solver_systems)
+    {
+      auto & lm_sys = solver_system->system();
+      for (auto & [vec_name, vec] : as_range(lm_sys.vectors_begin(), lm_sys.vectors_end()))
+      {
+        libmesh_ignore(vec_name);
+        auto * const petsc_vec = cast_ptr<PetscVector<Number> *>(vec.get());
+        LibmeshPetscCall2(comm, VecSetFromOptions(petsc_vec->vec()));
+      }
+      // The solution vectors aren't included in the system vectors storage
+      auto * petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.solution.get());
+      LibmeshPetscCall2(comm, VecSetFromOptions(petsc_vec->vec()));
+      petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.current_local_solution.get());
+      LibmeshPetscCall2(comm, VecSetFromOptions(petsc_vec->vec()));
+    }
+  }
+  // Select matrix type from user-passed PETSc options
+  else if (lower_case_name.find("mat_type") != std::string::npos)
+  {
+    check_problem();
+    if (problem->solverParams()._type == Moose::ST_JFNK)
+      mooseError("Setting option '", lower_case_name, "' is incompatible with a JFNK 'solve_type'");
 
-  // Not convenient to use the usual error checking macro, because we
-  // don't have a specific communicator in this helper function.
-  if (ierr)
-    mooseError("Error setting PETSc option: ", name);
+    bool found_matching_prefix = false;
+    for (const auto i : index_range(problem->_solver_systems))
+    {
+      const auto & prefix = problem->_solver_sys_names[i];
+      if (lower_case_name.find("-" + MooseUtils::toLower(prefix) + "_mat_type") ==
+          std::string::npos)
+        continue;
+
+      auto & lm_sys = problem->_solver_systems[i]->system();
+      for (auto & [mat_name, mat] : as_range(lm_sys.matrices_begin(), lm_sys.matrices_end()))
+      {
+        libmesh_ignore(mat_name);
+        auto * const petsc_mat = cast_ptr<PetscMatrix<Number> *>(mat.get());
+        LibmeshPetscCall2(comm, MatSetFromOptions(petsc_mat->mat()));
+      }
+      found_matching_prefix = true;
+      break;
+    }
+
+    if (!found_matching_prefix)
+      mooseError("We did not find a matching solver system name for the petsc option '",
+                 lower_case_name,
+                 "'");
+  }
 }
 
 void

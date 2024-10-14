@@ -27,9 +27,9 @@
     [allInputParams]
       type = RunApp
       input = paramMeshOptRep.i
-      cli_args = 'OptimizationReporter/constant_group_initial_condition=6
-                  OptimizationReporter/constant_group_lower_bounds=5
-                  OptimizationReporter/constant_group_upper_bounds=7
+      cli_args = 'OptimizationReporter/initial_condition=6
+                  OptimizationReporter/lower_bounds=5
+                  OptimizationReporter/upper_bounds=7
                   OptimizationReporter/num_parameter_times=1
                   UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60\'
                   UserObjects/optReporterTester/expected_lower_bounds=\'5 5 5 5 5 5\'
@@ -42,7 +42,7 @@
       type = RunApp
       input = paramMeshOptRep.i
       cli_args = 'OptimizationReporter/initial_condition_mesh_variable=initialConditions
-                  OptimizationReporter/constant_group_lower_bounds=5
+                  OptimizationReporter/lower_bounds=5
                   OptimizationReporter/upper_bound_mesh_variable=upperBounds
                   OptimizationReporter/num_parameter_times=1
                   UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60\'
@@ -74,9 +74,9 @@
     [allInputTwoParams]
       type = RunApp
       input = twoParamMeshOptRep.i
-      cli_args = 'OptimizationReporter/constant_group_initial_condition=\'6 7\'
-                  OptimizationReporter/constant_group_lower_bounds=\'5 4\'
-                  OptimizationReporter/constant_group_upper_bounds=\'8 9\'
+      cli_args = 'OptimizationReporter/initial_condition=\'6; 7\'
+                  OptimizationReporter/lower_bounds=\'5; 4\'
+                  OptimizationReporter/upper_bounds=\'8; 9\'
                   OptimizationReporter/num_parameter_times=1
                   UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60 0 0\'
                   UserObjects/optReporterTester/expected_lower_bounds=\'5 5 5 5 5 5 4 4\'
@@ -89,7 +89,7 @@
       type = RunApp
       input = twoParamMeshOptRep.i
       cli_args = 'OptimizationReporter/initial_condition_mesh_variable=\'initialConditions elemInitialConditions\'
-                  OptimizationReporter/constant_group_lower_bounds=\'5 8\'
+                  OptimizationReporter/lower_bounds=\'5; 8\'
                   OptimizationReporter/upper_bound_mesh_variable=\'upperBounds elemUpperBounds\'
                   OptimizationReporter/num_parameter_times=1
                   UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60 0 0\'
@@ -123,13 +123,13 @@
     [errorMixedParams]
       type = RunException
       input = paramMeshOptRep.i
-      cli_args = 'OptimizationReporter/constant_group_initial_condition=6
+      cli_args = 'OptimizationReporter/initial_condition=6
                   OptimizationReporter/lower_bound_mesh_variable=lowerBounds
-                  OptimizationReporter/constant_group_lower_bounds=5
+                  OptimizationReporter/lower_bounds=5
                   OptimizationReporter/upper_bound_mesh_variable=upperBounds
                   OptimizationReporter/num_parameter_times=1'
       allow_test_objects = true
-      expect_err = 'Lower bounds for all parameter groups can only be defined by lower_bound_mesh_variable or constant_group_lower_bounds but not both.'
+      expect_err = 'Lower bounds for all parameter groups can only be defined by lower_bound_mesh_variable or lower_bounds but not both.'
       detail = "by having input and mesh parameters for the same bound; "
     []
     [errorMissingMeshParam]
@@ -165,7 +165,7 @@
     [errorNoSteps]
       type = RunException
       input = paramMeshOptRep.i
-      cli_args = 'OptimizationReporter/constant_group_lower_bounds=5
+      cli_args = 'OptimizationReporter/lower_bounds=5
                   OptimizationReporter/num_parameter_times=3
                   OptimizationReporter/exodus_timesteps_for_parameter_mesh_variable=\'2 3 4\''
       allow_test_objects = true

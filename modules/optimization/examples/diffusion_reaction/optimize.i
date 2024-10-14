@@ -7,8 +7,8 @@
   parameter_names = 'reaction_rate'
   parameter_meshes = 'parameter_mesh_out.e'
 
-  constant_group_initial_condition = 0
-  constant_group_lower_bounds = 0
+  initial_condition = 0
+  lower_bounds = 0
 
 []
 

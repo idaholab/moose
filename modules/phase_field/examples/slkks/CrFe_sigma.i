@@ -120,6 +120,7 @@
     cs = SIGMA_1CR
     as = 4
     F = F_SIGMA
+    coupled_variables = 'SIGMA_2CR'
   []
   [chempot2b2c]
     # This kernel ties the remaining two sublattices in the sigma phase together
@@ -129,6 +130,7 @@
     cs = SIGMA_2CR
     as = 16
     F = F_SIGMA
+    coupled_variables = 'SIGMA_0CR'
   []
   [sum]
     type = SLKKSSum
