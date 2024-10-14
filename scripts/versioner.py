@@ -17,7 +17,6 @@ import os
 import sys
 import argparse
 import hashlib
-import re
 import subprocess
 import platform
 import json
@@ -31,7 +30,18 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
 
 ### Tracking Libraries
 # note: Order is important only for historical lookups; git_ancestor(commit) == True
-TRACKING_LIBRARIES = ['tools', 'mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
+TRACKING_LIBRARIES = ['libmesh-vtk',
+                      'peacock',
+                      'pprof',
+                      'pyhit',
+                      'seacas',
+                      'tools',
+                      'mpi',
+                      'petsc',
+                      'libmesh',
+                      'wasp',
+                      'moose-dev',
+                      'app']
 
 ### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
 # pylint: disable=unused-argument
@@ -72,7 +82,10 @@ class Versioner:
         args = self.parse_args(args, self.entities)
         self.check_args(args)
 
-        meta = self.version_meta(args.commit)[args.library]
+        meta = self.version_meta(args.commit).get(args.library, {})
+        if not meta:
+            print(f'{args.library} not tracked in {args.commit}')
+            sys.exit(2)
         if args.json:
             return json.dumps(meta)
         if args.yaml:
@@ -406,7 +419,8 @@ class Versioner:
                      'name_suffix': name_suffix,
                      'tag': package_hash,
                      'uri': f'{name}:{package_hash}',
-                     'def': os.path.realpath(os.path.join(MOOSE_DIR, f'apptainer/{def_package}.def'))})
+                     'def': os.path.realpath(os.path.join(MOOSE_DIR,
+                                                          f'apptainer/{def_package}.def'))})
         return meta
 
     @staticmethod
