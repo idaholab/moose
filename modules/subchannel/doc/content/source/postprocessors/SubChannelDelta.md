@@ -6,11 +6,9 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Postprocessors/SubChannelDelta
+!syntax description /UserObjects/SubChannelDelta
 
 ## Overview
-
-<!-- -->
 
 !! Replace these lines with information regarding the SubChannelDelta object.
 
@@ -18,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the SubChannelDelta object.
 
-!syntax parameters /Postprocessors/SubChannelDelta
+!syntax parameters /UserObjects/SubChannelDelta
 
-!syntax inputs /Postprocessors/SubChannelDelta
+!syntax inputs /UserObjects/SubChannelDelta
 
-!syntax children /Postprocessors/SubChannelDelta
+!syntax children /UserObjects/SubChannelDelta

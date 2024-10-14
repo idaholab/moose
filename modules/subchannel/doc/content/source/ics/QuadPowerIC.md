@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /ICs/QuadPowerIC
+!syntax description /Variables/InitialCondition/QuadPowerIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the QuadPowerIC object.
 
-!syntax parameters /ICs/QuadPowerIC
+!syntax parameters /Variables/InitialCondition/QuadPowerIC
 
-!syntax inputs /ICs/QuadPowerIC
+!syntax inputs /Variables/InitialCondition/QuadPowerIC
 
-!syntax children /ICs/QuadPowerIC
+!syntax children /Variables/InitialCondition/QuadPowerIC

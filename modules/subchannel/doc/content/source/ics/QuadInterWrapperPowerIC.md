@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /ICs/QuadInterWrapperPowerIC
+!syntax description /Variables/InitialCondition/QuadInterWrapperPowerIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the QuadInterWrapperPowerIC object.
 
-!syntax parameters /ICs/QuadInterWrapperPowerIC
+!syntax parameters /Variables/InitialCondition/QuadInterWrapperPowerIC
 
-!syntax inputs /ICs/QuadInterWrapperPowerIC
+!syntax inputs /Variables/InitialCondition/QuadInterWrapperPowerIC
 
-!syntax children /ICs/QuadInterWrapperPowerIC
+!syntax children /Variables/InitialCondition/QuadInterWrapperPowerIC
