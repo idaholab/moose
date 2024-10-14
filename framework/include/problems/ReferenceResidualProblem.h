@@ -13,8 +13,8 @@
 #include "ReferenceResidualInterface.h"
 
 /**
- * FEProblemBase derived class to enable convergence checking relative to a user-specified
- * postprocessor
+ * Problem that checks for convergence relative to a user-supplied reference quantity
+ * rather than the initial residual.
  */
 class ReferenceResidualProblem : public FEProblem, public ReferenceResidualInterface
 {
@@ -24,6 +24,4 @@ public:
   ReferenceResidualProblem(const InputParameters & params);
 
   virtual void addDefaultConvergence() override;
-
-protected:
 };

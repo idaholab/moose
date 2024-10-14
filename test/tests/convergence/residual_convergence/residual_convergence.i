@@ -35,7 +35,16 @@
 [Convergence]
   [res_conv]
     type = ResidualConvergence
-    nl_abs_tol=1e-6
+    # With default tolerances, the solve takes 2 iterations, but with this
+    # value, the solve takes only 1:
+    nl_abs_tol = 1e-5
+  []
+[]
+
+[Postprocessors]
+  [num_nl_its]
+    type = NumNonlinearIterations
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -48,5 +57,6 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
+  execute_on = 'FINAL'
 []

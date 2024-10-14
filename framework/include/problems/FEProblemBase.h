@@ -2206,7 +2206,11 @@ public:
     _set_nonlinear_convergence_name = true;
   }
 
+  /**
+   * Gets the nonlinear convergence object name if there is one
+   */
   ConvergenceName getNonlinearConvergenceName() const { return _nonlinear_convergence_name; }
+
   /**
    * Setter for whether we're computing the scaling jacobian
    */

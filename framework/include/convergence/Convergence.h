@@ -14,6 +14,8 @@
 #include "PostprocessorInterface.h"
 #include "PerfGraphInterface.h"
 
+class FEProblemBase;
+
 /**
  * Base class for convergence criteria.
  */
@@ -47,5 +49,9 @@ public:
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) = 0;
 
 protected:
-  PerfID _perf_check_convergence;
+  /// FE problem
+  FEProblemBase & _fe_problem_base;
+
+  /// Performance ID for \c checkConvergence
+  PerfID _perfid_check_convergence;
 };

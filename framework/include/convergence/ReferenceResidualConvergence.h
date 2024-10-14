@@ -28,7 +28,6 @@ class ReferenceResidualConvergence : public ResidualConvergence, public Referenc
 {
 public:
   static InputParameters validParams();
-  static InputParameters validCommonReferenceResidualProblemParams();
 
   ReferenceResidualConvergence(const InputParameters & parameters);
 

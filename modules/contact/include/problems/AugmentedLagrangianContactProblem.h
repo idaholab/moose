@@ -40,6 +40,7 @@ protected:
   using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
   using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
 };
+
 typedef AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>
     AugmentedLagrangianContactProblem;
 typedef AugmentedLagrangianContactProblemTempl<FEProblem> AugmentedLagrangianContactFEProblem;

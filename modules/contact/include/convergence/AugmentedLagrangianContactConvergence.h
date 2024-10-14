@@ -9,10 +9,6 @@
 
 #pragma once
 
-#include "ReferenceResidualProblem.h"
-#include "FEProblem.h"
-#include "NodeFaceConstraint.h"
-#include "MechanicalContactConstraint.h"
 #include "AugmentedLagrangianContactProblemInterface.h"
 #include "ReferenceResidualConvergence.h"
 #include "ResidualConvergence.h"
@@ -33,9 +29,9 @@ public:
   checkConvergence(unsigned int iter) override;
 
 protected:
-  FEProblemBase & _fe_problem;
   using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
   using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
+  using Convergence::_fe_problem_base;
 };
 
 typedef AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>

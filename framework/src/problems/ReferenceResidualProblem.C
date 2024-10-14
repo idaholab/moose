@@ -16,8 +16,8 @@ InputParameters
 ReferenceResidualProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
-  params += ReferenceResidualConvergence::validCommonReferenceResidualProblemParams();
   params += ReferenceResidualInterface::validParams();
+
   params.addClassDescription("Problem that checks for convergence relative to "
                              "a user-supplied reference quantity rather than "
                              "the initial residual");

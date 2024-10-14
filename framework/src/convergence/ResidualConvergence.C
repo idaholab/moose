@@ -43,9 +43,11 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
   EquationSystems & es = _fe_problem.es();
+
   _l_tol = getSharedESParam<Real>("l_tol", "linear solver tolerance", es);
   _l_abs_tol = getSharedESParam<Real>("l_abs_tol", "linear solver absolute tolerance", es);
   _l_max_its = getSharedESParam<unsigned int>("l_max_its", "linear solver maximum iterations", es);
+
   _nl_max_its =
       getSharedESParam<unsigned int>("nl_max_its", "nonlinear solver maximum iterations", es);
   _nl_max_funcs = getSharedESParam<unsigned int>(
@@ -55,6 +57,10 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
   _nl_rel_tol =
       getSharedESParam<Real>("nl_rel_tol", "nonlinear solver relative residual tolerance", es);
   _divtol = getSharedESParam<Real>("nl_div_tol", "nonlinear solver divergence tolerance", es);
+
+  // These two are not used at all in the check below; it appears a relative step tolerance is
+  // obtained from PETSc, which may come from 'nl_rel_step_tol' in an indirect fashion.
+  // 'nl_abs_step_tol' is used only in libMesh's own nonlinear solver.
   _nl_abs_step_tol =
       getSharedESParam<Real>("nl_abs_step_tol", "nonlinear solver absolute step tolerance", es);
   _nl_rel_step_tol =
@@ -66,9 +72,7 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
     _nl_forced_its = getParam<unsigned int>("nl_forced_its");
   }
   else
-  {
     _nl_forced_its = _fe_problem.getNonlinearForcedIterations();
-  }
 
   if (isParamSetByUser("nl_abs_div_tol"))
     _fe_problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
@@ -81,9 +85,7 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
     _n_max_nl_pingpong = getParam<unsigned int>("n_max_nonlinear_pingpong");
   }
   else
-  {
     _n_max_nl_pingpong = _fe_problem.getMaxNLPingPong();
-  }
 }
 
 bool
@@ -106,7 +108,7 @@ ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
 Convergence::MooseConvergenceStatus
 ResidualConvergence::checkConvergence(unsigned int iter)
 {
-  TIME_SECTION(_perf_check_convergence);
+  TIME_SECTION(_perfid_check_convergence);
 
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
   MooseConvergenceStatus status = MooseConvergenceStatus::ITERATING;
@@ -116,12 +118,15 @@ ResidualConvergence::checkConvergence(unsigned int iter)
 
   SNES snes = system.getSNES();
 
+  // ||u||
   ierr = SNESGetSolutionNorm(snes, &xnorm_petsc);
   CHKERRABORT(_fe_problem.comm().get(), ierr);
 
+  // ||r||
   ierr = SNESGetFunctionNorm(snes, &fnorm_petsc);
   CHKERRABORT(_fe_problem.comm().get(), ierr);
 
+  // ||du||
   ierr = SNESGetUpdateNorm(snes, &snorm_petsc);
   CHKERRABORT(_fe_problem.comm().get(), ierr);
 

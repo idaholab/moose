@@ -65,6 +65,9 @@ IterationCountConvergence::checkConvergence(unsigned int iter)
     case MooseConvergenceStatus::DIVERGED:
       return MooseConvergenceStatus::DIVERGED;
       break;
+
+    default:
+      mooseError("Invalid convergence status");
   }
 }
 

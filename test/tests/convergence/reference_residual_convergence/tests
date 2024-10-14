@@ -1,6 +1,7 @@
 [Tests]
   design = 'ReferenceResidualConvergence.md'
   issues = '#25931'
+
   [reference_residual]
     type = 'Exodiff'
     input = 'reference_residual.i'

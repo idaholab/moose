@@ -287,7 +287,7 @@ petscSetupOutput(CommandLine * cmd_line)
 }
 
 PetscErrorCode
-petscNonlinearConverged(SNES snes,
+petscNonlinearConverged(SNES /*snes*/,
                         PetscInt it,
                         PetscReal /*xnorm*/,
                         PetscReal /*snorm*/,

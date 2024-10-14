@@ -40,16 +40,14 @@ AugmentedLagrangianContactConvergence<T>::validParams()
 {
   InputParameters params = T::validParams();
   params += AugmentedLagrangianContactProblemInterface::validParams();
-  params.addClassDescription("Manages convergence for augmented Lagrange contact");
+  params.addClassDescription("Convergence for augmented Lagrangian contact");
   return params;
 }
 
 template <class T>
 AugmentedLagrangianContactConvergence<T>::AugmentedLagrangianContactConvergence(
     const InputParameters & params)
-  : T(params),
-    AugmentedLagrangianContactProblemInterface(params),
-    _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+  : T(params), AugmentedLagrangianContactProblemInterface(params)
 {
 }
 
@@ -59,7 +57,7 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
 {
   auto reason = T::checkConvergence(iter);
 
-  auto aug_contact = dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem);
+  auto aug_contact = dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem_base);
   _lagrangian_iteration_number = aug_contact->getLagrangianIterationNumber();
 
   bool repeat_augmented_lagrange_step = false;
@@ -68,15 +66,15 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
   {
     if (_lagrangian_iteration_number < _maximum_number_lagrangian_iterations)
     {
-      auto & nonlinear_sys = _fe_problem.currentNonlinearSystem();
+      auto & nonlinear_sys = _fe_problem_base.currentNonlinearSystem();
       nonlinear_sys.update();
 
       // Get the penetration locator from the displaced mesh if it exist, otherwise get
       // it from the undisplaced mesh.
-      const auto displaced_problem = _fe_problem.getDisplacedProblem();
-      const auto & penetration_locators =
-          (displaced_problem ? displaced_problem->geomSearchData() : _fe_problem.geomSearchData())
-              ._penetration_locators;
+      const auto displaced_problem = _fe_problem_base.getDisplacedProblem();
+      const auto & penetration_locators = (displaced_problem ? displaced_problem->geomSearchData()
+                                                             : _fe_problem_base.geomSearchData())
+                                              ._penetration_locators;
 
       // loop over contact pairs (penetration locators)
       const ConstraintWarehouse & constraints = nonlinear_sys.getConstraintWarehouse();
@@ -135,7 +133,6 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
       if (repeat_augmented_lagrange_step)
       {
         _lagrangian_iteration_number++;
-        // setLagrangianIterationNumber(_lagrangian_iteration_number);
         Moose::out << "Augmented Lagrangian contact repeat " << _lagrangian_iteration_number
                    << '\n';
 

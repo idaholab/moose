@@ -1,44 +1,64 @@
 # ResidualConvergence
 
-By default, MOOSE checks convergence using relative and absolute criteria. Once the residual drops
-below either an absolute tolerance or the residual divided by the initial residual for the current
-timestep drops below a relative tolerance, the solution is considered converged.
+This [Convergence](Convergence/index.md) uses a combination of criteria to
+determine convergence, focused on the residual vector.
 
-### +Solver convergence criteria parameters+
+Consider the system of algebraic equations:
 
-Parameters for setting absolute convergence, relative convergence etc. are usually set in the `Executioner` block. However, now they can also prescribed in the `Convergence` block.
+!equation
+\mathbf{r}(\mathbf{u}) = \mathbf{0} \,.
 
-We shall provide a few guidelines for setting convergence parameters. In the following presume we have a partial differential equation, given as 
-$\mathcal{P}(\mathbf u)=f$, and subsequent residual $\mathcal R(\mathbf u)=\mathcal P(\mathbf u)-f=0$. Convergence with respect to a tolerance $\tau$, implies $|\mathcal R (\mathbf u)|<\tau$, while divergence is encountered when the residual cannot decrease below the value of $\tau$.
+This class reports convergence of the solution to this system if
+any of the following conditions are true:
 
-If we consider an iterative process to determine the solution $\mathbf u$, we have a set of intermediary solutions $\mathbf u_i$ required to verify the equation $\mathcal R(\mathbf u)\approx 0$, but do not meet the required tolerance $\tau$.
+!equation
+\|\mathbf{r}\|_2 < \tau_\text{abs} \,,
 
-#### 1. Absolute and relative tolerances
+!equation
+\frac{\|\mathbf{r}\|_2}{\|\mathbf{r}_0\|_2} > \tau_\text{rel} \,,
 
-- +Absolute Tolerance (`abs_tol`)+: This is a parameter that determines the threshold at which the residual norm of the solution is deemed small enough in absolute terms. For a system of equation this translates into $|\mathbf u_{i+1}-\mathbf u_i|<\tau$.
- 
-- +Relative Tolerance (`rel_tol`)+: This parameter sets the threshold for the residual norm in relation to the norm of the right-hand side of the equation. For a system of equation this translates into $|\mathbf u_{i+1}-\mathbf u_i|/|\mathbf u_{i+1}|<\tau$.
+!equation
+\frac{\|\mathbf{\delta u}\|_2}{\|\mathbf{u}\|_2} < \tau_{\delta u,\text{rel}} \,.
 
+This class reports divergence if any of the following conditions are true:
 
-Considering that nonlinear systems are ultimately solved via linearization the user should append `l_` for linear systems, or `nl_` for nonlinear ones, on a per case base.
+!equation
+\|\mathbf{r}\|_2 = \text{NaN} \,,
 
-#### 2. Choosing appropiate `abs_tol` and `rel_tol`
+!equation
+n_\text{evals} \geq n_\text{evals,max} \,,
 
-- To start, apply the same values for both `abs_tol` and `rel_tol` in both preconditioned and non-preconditioned systems. This allows for a straightforward comparison under similar stopping criteria.
-- +Preconditioning+ aims to improve the numerical properties of an iterative solver (specifically the condition number). This often results in the preconditioned system converging more quickly or requiring fewer iterations. However, preconditioning modifies the scale and the properties of the problem, which can affect the scale of the residuals.
-- The user must make sure that `abs_tol` and `rel_tol` are set in a manner that mirrors the +scaling+ of the problem. If preconditioning significantly changes the scale (which is often the case), the user needs to adjust these tolerances to accommodate the changes.
-- The user should +experiment+ with different settings of `abs_tol` and `rel_tol` to observe their effect on convergence and the quality of the solution. To make a fair comparison, one should ensure that the solver’s behavior (in terms of convergence and accuracy) is similar under both settings.
+!equation
+\|\mathbf{r}\|_2 > \tau_\text{div,abs} \,,
 
-#### Other stopping criteria
+!equation
+\frac{\|\mathbf{r}\|_2}{\|\mathbf{r}_0\|_2} > \tau_\text{div,rel} \,,
 
-Presuming the user gathered enough knowledge about the solver behaviour and the nature of the problem, addtional stopping requirements can be added, such as `nl_max_its` which instructs after how many iterations to abort the solver, or `nl_abs_step_tol`, which indicates what tolerance to be accepted at each solver step.  
+!equation
+n_\text{ping} > n_\text{ping,max} \,,
 
-## Example input syntax
+where
 
-!listing test/tests/convergence/residual_convergence/diffusion_convergence.i block=Convergence
-
-!listing test/tests/convergence/residual_convergence/diffusion_convergence.i block=Executioner
-where the [!param](/Executioner/nonlinear_convergence) indicates the convergence type to be `ResidualConvergence` and additional parameters. Curently convergence specific parameters can be still specified in the Executioner block.
+- $\|\cdot\|_2$ is the discrete $L_2$ norm,
+- $\mathbf{r}_0$ is the initial (guess) residual vector,
+- $\mathbf{\delta u} = \mathbf{u}^{(\ell)} - \mathbf{u}^{(\ell-1)}$ is the solution step vector,
+- "NaN" is a not-a-number value,
+- $\tau_\text{abs}$ is the absolute residual tolerance, provided by
+  [!param](/Convergence/ResidualConvergence/nl_abs_tol).
+- $\tau_\text{rel}$ is the relative residual tolerance, provided by
+  [!param](/Convergence/ResidualConvergence/nl_rel_tol).
+- $\tau_{\delta u,\text{abs}}$ is the relative step tolerance., provided by
+  [!param](/Convergence/ResidualConvergence/nl_rel_step_tol).
+- $\tau_\text{div,abs}$ is the absolute residual divergence tolerance, provided by
+  [!param](/Convergence/ResidualConvergence/nl_abs_div_tol).
+- $\tau_\text{div,rel}$ is the relative residual divergence tolerance, provided by
+  [!param](/Convergence/ResidualConvergence/nl_div_tol).
+- $n_\text{evals}$ is the number of residual evaluations.
+- $n_\text{evals,max}$ is the maximum number of residual evaluations, provided by
+  [!param](/Convergence/ResidualConvergence/nl_max_funcs).
+- $n_\text{ping}$ is the number of ping-pong iterations.
+- $n_\text{ping,max}$ is the maximum number of ping-pong iterations, provided by
+  [!param](/Convergence/ResidualConvergence/n_max_nonlinear_pingpong).
 
 !syntax parameters /Convergence/ResidualConvergence
 
