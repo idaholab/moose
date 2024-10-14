@@ -104,6 +104,7 @@ public:
   const uel_t & getPlugin() const { return _uel; }
 
   const std::array<Real, 8> * getUELEnergy(dof_id_type element_id) const;
+  const Real & getPNewDt() const {return _pnewdt; }
 
 protected:
   /// setup the range of elements this object operates on
@@ -163,6 +164,9 @@ protected:
 
   /// Abaqus element type
   const int _jtype;
+
+  /// timestep scaling factor
+  Real _pnewdt;
 
   friend class UELThread;
 };
