@@ -22,10 +22,10 @@ INSFVTurbulentAdvection::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
-  params.addParam<bool>("newton_solve",
-                        false,
-                        "Whether to avoid removing automatic differentiation derivative terms "
-                        "because a Newton or Newton-like solve is being used");
+  params.addParam<bool>("neglect_advection_derivatives",
+                        true,
+                        "Whether to remove automatic differentiation derivative terms "
+                        "for velocity in the advection term");
   return params;
 }
 
@@ -33,7 +33,7 @@ INSFVTurbulentAdvection::INSFVTurbulentAdvection(const InputParameters & params)
   : INSFVAdvectionKernel(params),
     _rho(getFunctor<ADReal>(NS::density)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _newton_solve(getParam<bool>("newton_solve"))
+    _neglect_advection_derivatives(getParam<bool>("neglect_advection_derivatives"))
 {
 }
 
@@ -58,7 +58,7 @@ INSFVTurbulentAdvection::computeQpResidual()
                                       limiterType(_advected_interp_method),
                                       MetaPhysicL::raw_value(v) * _normal > 0),
                              determineState());
-  if (_newton_solve)
+  if (!_neglect_advection_derivatives)
     return _normal * v * rho_face * var_face;
   else
     return _normal * MetaPhysicL::raw_value(v) * rho_face * var_face;

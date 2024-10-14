@@ -104,6 +104,11 @@ WCNSFVTurbulencePhysics::validParams()
                              "face when in the advection kernel.");
   // Better Jacobian if not linearizing sink and sources
   params.addParam<bool>("linearize_sink_sources", false, "Whether to linearize the source term");
+  // Better convergence on some cases when neglecting advection derivatives
+  params.addParam<bool>(
+      "neglect_advection_derivatives",
+      false,
+      "Whether to remove the off-diagonal velocity term in the TKE and TKED advection term");
   params.addParam<bool>(
       "tke_two_term_bc_expansion",
       true,
@@ -606,8 +611,8 @@ WCNSFVTurbulencePhysics::addKEpsilonAdvection()
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
-  // Currently only Newton method for WCNSFVTurbulencePhysics
-  params.set<bool>("newton_solve") = true;
+  params.set<bool>("neglect_advection_derivatives") =
+      getParam<bool>("neglect_advection_derivatives");
 
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("tke_advection_interpolation");

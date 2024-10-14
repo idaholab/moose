@@ -40,6 +40,6 @@ protected:
   /// Maps for wall treatment
   std::map<const Elem *, bool> _wall_bounded;
 
-  /// Whether a Newton-like method is in use and derivatives should be preserved
-  const bool _newton_solve;
+  /// Whether to remove the derivative of this term wrt to velocity
+  const bool _neglect_advection_derivatives;
 };
