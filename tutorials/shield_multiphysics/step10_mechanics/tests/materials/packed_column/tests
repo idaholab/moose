@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [test]
+    type = 'Exodiff'
+    input = 'packed_column.i'
+    exodiff = 'packed_column_out.e'
+    requirement = "The Darcy-Thermomechanics tutorial shall include an implementation of a material properties for use in coupling the heat and the Darcy equations."
+  []
+[]
