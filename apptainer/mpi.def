@@ -54,6 +54,11 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.9-0
         source /init_env
     fi
 
+    # Load a custom user environment if it exists
+    if [ -e ${HOME}/.bashrc_apptainer ]; then
+        source ${HOME}/.bashrc_apptainer
+    fi
+
 %post
     umask 022
 
@@ -231,4 +236,3 @@ EOF
 %files
     {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}
     {{ FILES_DIR }}/.singularity.d/env/01-fix-exec.sh /.singularity.d/env/01-fix-exec.sh
-    {{ FILES_DIR }}/.singularity.d/env/02-bashrc-apptainer.sh /.singularity.d/env/02-bashrc-apptainer.sh
