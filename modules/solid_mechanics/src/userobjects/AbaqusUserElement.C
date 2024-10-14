@@ -163,6 +163,9 @@ AbaqusUserElement::execute()
   {
     UELThread ut(_fe_problem, *this);
     Threads::parallel_reduce(*_elem_range, ut);
+
+    // copy over PNEWDT
+    _pnewdt = ut._min_pnewdt;
   }
   PARALLEL_CATCH;
 }
