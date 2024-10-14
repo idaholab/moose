@@ -10,6 +10,8 @@ documentation clear for users.
 
 ## Overview
 
+<!-- -->
+
 !! Replace these lines with information regarding the SubChannelDelta object.
 
 ## Example Input File Syntax
