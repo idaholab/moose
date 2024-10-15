@@ -109,6 +109,19 @@ ThermalContactAction::validParams()
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();
 
+  params.addParamNamesToGroup("primary secondary", "Gap surface definition");
+  params.addParamNamesToGroup(
+      "tangential_tolerance normal_smoothing_distance normal_smoothing_method",
+      "Gap edge and edge normal smoothing");
+  params.addParamNamesToGroup("gap_aux_type secondary_gap_offset mapped_primary_gap_offset",
+                              "Gap size");
+  params.addParamNamesToGroup("order quadrature", "Integration");
+  params.addParamNamesToGroup(
+      "gap_conductivity gap_conductivity_function gap_conductivity_function_variable",
+      "Gap conductivity");
+  params.addParamNamesToGroup("save_in check_boundary_restricted warnings",
+                              "Diagnostics and debug");
+
   return params;
 }
 
@@ -226,7 +239,7 @@ ThermalContactAction::addAuxVariables()
   // We need to add variables only once per variable name.  However, we don't know how many unique
   // variable names we will have.  So, we'll always add them.
 
-  MooseEnum order = getParam<MooseEnum>("order");
+  auto order = getParam<MooseEnum>("order");
   std::string family = "LAGRANGE";
 
   if (_quadrature)

@@ -22,7 +22,7 @@ GapFluxModelConductionBase::validParams()
       0,
       "min_gap_order<=1",
       "Order of the Taylor expansion below min_gap for GapFluxModelConductionBase");
-
+  params.addParamNamesToGroup("gap_conductivity min_gap min_gap_order", "Gap conductive flux");
   return params;
 }
 

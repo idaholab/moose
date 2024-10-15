@@ -22,6 +22,8 @@ GapFluxModelRadiationBase::validParams()
                                     1,
                                     "secondary_emissivity>=0 & secondary_emissivity<=1",
                                     "The emissivity of the secondary surface");
+  params.addParamNamesToGroup("stefan_boltzmann primary_emissivity secondary_emissivity",
+                              "Gap Radiative Flux");
   return params;
 }
 
