@@ -1,21 +1,14 @@
-coef=3000
+coef=1
 
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 100
+  nx = 2
 []
 
 [Problem]
-    extra_tag_vectors = 'ref'
-[]
-
-[Convergence]
-    [res_conv]
-      type = ReferenceResidualConvergence
-      reference_vector = 'ref'
-      nl_max_its = 10
-    []
+  # type = ReferenceResidualProblem
+  extra_tag_vectors = 'ref'
 []
 
 [Variables]
@@ -74,8 +67,16 @@ coef=3000
   []
 []
 
+[Convergence]
+  [conv]
+    type = ReferenceResidualConvergence
+    reference_vector = 'ref'
+  []
+[]
+
 [Executioner]
   type = Steady
+  nonlinear_convergence = conv
 []
 
 [Outputs]

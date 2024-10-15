@@ -57,7 +57,7 @@ AugmentedLagrangianContactProblemTempl<T>::timestepSetup()
 
 template <>
 void
-AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultConvergence()
+AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultNonlinearConvergence()
 {
   std::string class_name = "AugmentedLagrangianContactReferenceConvergence";
   InputParameters params = this->_factory.getValidParams(class_name);
@@ -68,7 +68,7 @@ AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultConv
 
 template <>
 void
-AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultConvergence()
+AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultNonlinearConvergence()
 {
   std::string class_name = "AugmentedLagrangianContactFEProblemConvergence";
   InputParameters params = _factory.getValidParams(class_name);

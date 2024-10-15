@@ -31,7 +31,6 @@ public:
 protected:
   using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
   using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
-  using Convergence::_fe_problem_base;
 };
 
 typedef AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>

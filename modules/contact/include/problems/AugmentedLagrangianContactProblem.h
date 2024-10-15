@@ -34,7 +34,8 @@ public:
   virtual ~AugmentedLagrangianContactProblemTempl() {}
 
   virtual void timestepSetup() override;
-  virtual void addDefaultConvergence() override;
+  virtual void addDefaultNonlinearConvergence() override;
+  virtual bool onlyAllowDefaultNonlinearConvergence() const override { return true; }
 
 protected:
   using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;

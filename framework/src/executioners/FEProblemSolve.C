@@ -242,11 +242,13 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   if (isParamValid("nonlinear_convergence"))
   {
     _problem.setNonlinearConvergenceName(getParam<ConvergenceName>("nonlinear_convergence"));
+    if (_problem.onlyAllowDefaultNonlinearConvergence())
+      mooseError("The selected problem does not allow 'nonlinear_convergence' to be set.");
   }
   else
   {
     _problem.setNonlinearConvergenceName("default_convergence");
-    _problem.addDefaultConvergence();
+    _problem.addDefaultNonlinearConvergence();
   }
 
   _nl.setDecomposition(_splitting);

@@ -27,7 +27,6 @@ Convergence::Convergence(const InputParameters & parameters)
     SetupInterface(this),
     PostprocessorInterface(this),
     PerfGraphInterface(this),
-    _fe_problem_base(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _perfid_check_convergence(registerTimedSection("checkConvergence", 5, "Checking Convergence"))
 {
 }

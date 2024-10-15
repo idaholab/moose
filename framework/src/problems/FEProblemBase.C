@@ -2404,7 +2404,7 @@ FEProblemBase::addConvergence(const std::string & type,
 }
 
 void
-FEProblemBase::addDefaultConvergence()
+FEProblemBase::addDefaultNonlinearConvergence()
 {
   // parallel_object_only();
   const std::string class_name = "ResidualConvergence";

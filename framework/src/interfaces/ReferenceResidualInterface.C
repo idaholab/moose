@@ -9,6 +9,7 @@
 
 #include "ReferenceResidualInterface.h"
 #include "MooseObject.h"
+#include "MooseEnum.h"
 
 InputParameters
 ReferenceResidualInterface::validParams()

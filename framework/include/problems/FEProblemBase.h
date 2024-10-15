@@ -634,13 +634,31 @@ public:
   /// Get a MeshDivision
   MeshDivision & getMeshDivision(const std::string & name, const THREAD_ID tid = 0) const;
 
+  /// Adds a Convergence object
   virtual void
   addConvergence(const std::string & type, const std::string & name, InputParameters & parameters);
+  /// Gets a Convergence object
   virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0) const;
+  /// Gets the Convergence objects
   virtual const std::vector<std::shared_ptr<Convergence>> &
   getConvergenceObjects(const THREAD_ID tid = 0) const;
+  /// Returns true if the problem has a Convergence object of the given name
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0) const;
-  virtual void addDefaultConvergence();
+  /**
+   * Adds the default nonlinear Convergence associated with the problem
+   *
+   * This is called if the user does not supply 'nonlinear_convergence'.
+   */
+  virtual void addDefaultNonlinearConvergence();
+  /**
+   * Returns true if an error will result if the user supplies 'nonlinear_convergence'
+   *
+   * Some problems are strongly tied to their convergence, and it does not make
+   * sense to use any convergence other than their default and additionally
+   * would be error-prone.
+   */
+  virtual bool onlyAllowDefaultNonlinearConvergence() const { return false; }
+
   /**
    * add a MOOSE line search
    */
