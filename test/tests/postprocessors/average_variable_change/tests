@@ -1,0 +1,22 @@
+[Tests]
+  design = 'AverageVariableChange.md'
+  issues = '#28801'
+
+  [test]
+    requirement = 'The system shall be able to compute volume-weighted norms of the difference of a variable between nonlinear iterations and time steps'
+    [steady]
+      type = CSVDiff
+      input = 'steady.i'
+      csvdiff = 'steady_out.csv'
+      abs_zero = 1e-5
+      detail = 'for a steady executioner.'
+    []
+    [transient]
+      type = CSVDiff
+      input = 'transient.i'
+      csvdiff = 'transient_out.csv'
+      abs_zero = 1e-5
+      detail = 'for a transient executioner.'
+    []
+  []
+[]

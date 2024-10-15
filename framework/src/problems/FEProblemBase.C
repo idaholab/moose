@@ -7405,7 +7405,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
   if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
     _current_nl_sys->setPreviousNewtonSolution(old_soln);
-    _aux->setPreviousNewtonSolution();
+    _aux->copyCurrentIntoPreviousNL();
   }
 
   // MOOSE doesn't change the search_direction
