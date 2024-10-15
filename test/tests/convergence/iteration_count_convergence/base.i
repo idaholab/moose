@@ -50,6 +50,7 @@
 [Executioner]
   type = Steady
   solve_type = PJFNK
+  line_search = none
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'hypre'
   nonlinear_convergence = test_conv
