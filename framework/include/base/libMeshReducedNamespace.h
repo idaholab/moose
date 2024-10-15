@@ -21,13 +21,15 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/node_range.h"
-#include "libmesh/print_trace.h"
 #include "libmesh/remote_elem.h"
 
 // Added for convenience
 #include "libmesh/enum_elem_type.h"
 #include "libmesh/enum_fe_family.h"
 #include "libmesh/enum_order.h"
+
+// needed to print print--trace.h without triggering precheck
+#include "MooseError.h"
 
 // README
 // If you hit a compilation error that the XYZ class shown here is not defined, and it is declared
