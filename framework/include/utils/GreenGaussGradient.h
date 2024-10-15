@@ -270,18 +270,31 @@ greenGaussGradient(const ElemArg & elem_arg,
       // This results in an augmented system that simultaneously solves for the gradient and the ebf
       // values.
 
+      // Get estimated number of faces in a cell
+      const auto ptr_range = elem_arg.elem->neighbor_ptr_range();
+      const size_t num_faces = std::distance(ptr_range.begin(), ptr_range.end());
+
       // Lists to store position differences and value differences for least squares computation
       std::vector<Point> delta_x_list; // List of position differences between neighbor centroids
                                        // and element centroid
+      delta_x_list.reserve(num_faces);
+
       std::vector<T>
           delta_phi_list; // List of value differences between neighbor values and element value
+      delta_phi_list.reserve(num_faces);
 
       // Variables to handle extrapolated boundary faces (ebfs) in the least squares method
       std::vector<Point> delta_x_ebf_list; // Position differences for ebfs
+      delta_phi_list.reserve(num_faces);
+
       std::vector<VectorValue<Real>>
-          ebf_grad_coeffs;          // Coefficients for the gradient in ebf equations
+          ebf_grad_coeffs; // Coefficients for the gradient in ebf equations
+      delta_phi_list.reserve(num_faces);
+
       std::vector<const T *> ebf_b; // RHS values for ebf equations (pointers to avoid copying)
-      unsigned int num_ebfs = 0;    // Number of extrapolated boundary faces
+      delta_phi_list.reserve(num_faces);
+
+      unsigned int num_ebfs = 0; // Number of extrapolated boundary faces
 
       // Action functor to collect data from each face of the element
       auto action_functor = [&elem_value,
@@ -386,20 +399,21 @@ greenGaussGradient(const ElemArg & elem_arg,
       for (unsigned int i = 0; i < n; ++i)
       {
         const Point & delta_x = delta_x_list[i];
-        const T delta_phi = delta_phi_list[i];
+        const T & delta_phi = delta_phi_list[i];
 
         for (unsigned int d1 = 0; d1 < dim; ++d1)
         {
           const Real dx_d1 = delta_x(d1);
           const Real dx_norm = delta_x.norm();
+          const Real dx_d1_norm = dx_d1 / dx_norm;
 
           for (unsigned int d2 = 0; d2 < dim; ++d2)
           {
-            const Real dx_d2 = delta_x(d2);
-            ATA(d1, d2) += dx_d1 / dx_norm * dx_d2 / dx_norm;
+            const Real dx_d2_norm = delta_x(d2) / dx_norm;
+            ATA(d1, d2) += dx_d1_norm * dx_d2_norm;
           }
 
-          ATb(d1) += dx_d1 / dx_norm * delta_phi / dx_norm;
+          ATb(d1) += dx_d1_norm * delta_phi / dx_norm;
         }
       }
 
@@ -412,7 +426,7 @@ greenGaussGradient(const ElemArg & elem_arg,
 
       if (num_ebfs == 0)
       {
-        // Solve for grad
+        // Solve and store the least squares gradient
         DenseVector<T> grad_ls(dim);
         ATA.lu_solve(ATb, grad_ls);
 
@@ -500,7 +514,7 @@ greenGaussGradient(const ElemArg & elem_arg,
 
   // Notes to future developer:
   // Note 1:
-  // For the least squares gradient, the LS matrix could be precomputed and store for every cell
+  // For the least squares gradient, the LS matrix could be precomputed and stored for every cell
   // I tried doing this on October 2024, but the element lookup for these matrices is too slow
   // and seems better to compute weights on the fly.
   // Consider building a map from elem_id to these matrices and speed up lookup with octree
