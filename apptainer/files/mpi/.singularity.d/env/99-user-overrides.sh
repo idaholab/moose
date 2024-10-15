@@ -1,5 +1,5 @@
 #!/bin/sh
-# allow user overrides if /init_env exists
+# allow user overrides if ${HOME}/.bashrc_appatiner` exists
 # NOTE: `source ${HOME}/.bashrc_appatiner` is not enough to support user profile bash functions
 if test "${HOME}/.bashrc_apptainer" ; then
     user_override="${HOME}/.bashrc_apptainer"

@@ -54,7 +54,7 @@ packages:
       - framework/contrib/wasp
       - conda/wasp/meta.yaml
       - conda/wasp/conda_build_config.yaml
-      - conda/wasp/build.sh
+      - conda/wasp/build_wasp.sh
   moose-dev:
     dependencies:
       - libmesh
@@ -89,7 +89,9 @@ packages:
     dependencies:
       - wasp
     influential:
-      - conda/pyhit
+      - conda/wasp/pyhit
+      - conda/wasp/build_pyhit.sh
+      - conda/wasp/pyhit.patch
   seacas:
     influential:
       - conda/seacas
