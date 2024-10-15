@@ -1,20 +1,19 @@
 # QuadSubChannelNormalSliceValues
 
-!alert construction title=Undocumented Class
-The QuadSubChannelNormalSliceValues has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Outputs/QuadSubChannelNormalSliceValues
 
 ## Overview
 
-!! Replace these lines with information regarding the QuadSubChannelNormalSliceValues object.
+<!-- -->
+
+This kernel is used to save the solution variables in a file, for the square subchannel problem.
+Imagine a plane perpendicular to the flow direction at a specific height defined by the user.
+The solution variables defined by the user are interpolated at the intersection of that plane
+and the subchannel mesh and printed on that file as a matrix.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the QuadSubChannelNormalSliceValues object.
+!listing /examples/psbt/psbt_axial/psbt_axial.i block=Outputs language=cpp
 
 !syntax parameters /Outputs/QuadSubChannelNormalSliceValues
 

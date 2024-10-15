@@ -1,4 +1,4 @@
-# M. Avramova et. all 2012,
+# This is an input file based on M. Avramova et. all 2012,
 # OECD/NRC Benchmark Based on NUPEC PWR
 # Sub-channel and Bundle Tests (PSBT). Volume III: Departure from Nucleate Boiling
 T_in = 502.35

@@ -1,3 +1,6 @@
+# This is an input file based on M. Avramova et. all 2012,
+# OECD/NRC Benchmark Based on NUPEC PWR
+# Sub-channel and Bundle Tests (PSBT). Volume III: Departure from Nucleate Boiling
 T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
