@@ -247,8 +247,14 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   }
   else
   {
-    _problem.setNonlinearConvergenceName("default_convergence");
-    _problem.addDefaultNonlinearConvergence();
+    const std::string default_name = "default_nonlinear_convergence";
+    _problem.setNonlinearConvergenceName(default_name);
+
+    // Some executioners may create multiple FEProblemSolves - only need to
+    // create a single Convergence object for now. Later we may consider having
+    // a Convergence per FEProblemSolve.
+    if (!_problem.hasConvergence(default_name))
+      _problem.addDefaultNonlinearConvergence();
   }
 
   _nl.setDecomposition(_splitting);

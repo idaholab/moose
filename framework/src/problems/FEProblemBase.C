@@ -2395,7 +2395,8 @@ FEProblemBase::addConvergence(const std::string & type,
                               const std::string & name,
                               InputParameters & parameters)
 {
-  // parallel_object_only();
+  parallel_object_only();
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     std::shared_ptr<Convergence> conv = _factory.create<Convergence>(type, name, parameters, tid);
@@ -2406,7 +2407,6 @@ FEProblemBase::addConvergence(const std::string & type,
 void
 FEProblemBase::addDefaultNonlinearConvergence()
 {
-  // parallel_object_only();
   const std::string class_name = "ResidualConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(parameters());

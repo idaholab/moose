@@ -75,8 +75,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
                    "' for Kernel '",
                    _moose_object.name(),
                    "' is not a residual vector tag");
-      else
-        _vector_tags.insert(vector_tag_id);
+      _vector_tags.insert(vector_tag_id);
     }
   }
 
@@ -93,8 +92,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
                  "' for Kernel '",
                  _moose_object.name(),
                  "' is not a residual vector tag");
-    else
-      _vector_tags.insert(vector_tag_id);
+    _vector_tags.insert(vector_tag_id);
   }
 
   // Add absolue value vector tags. These tags should be created in the System already, otherwise
@@ -131,12 +129,11 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   const auto * const fe_problem =
       moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
 
-  for (auto conv_obj : fe_problem->getConvergenceObjects())
+  for (const auto & conv : fe_problem->getConvergenceObjects())
   {
-    if (conv_obj->name() == "ReferenceResidualProblem")
+    const auto * const ref_conv = dynamic_cast<const ReferenceResidualConvergence *>(conv.get());
+    if (ref_conv)
     {
-      const auto * const ref_conv =
-          dynamic_cast<const ReferenceResidualConvergence *>(conv_obj.get());
       const auto reference_tag = ref_conv->referenceVectorTagID({});
       auto create_tags_split =
           [reference_tag](const auto & tags, auto & non_ref_tags, auto & ref_tags)

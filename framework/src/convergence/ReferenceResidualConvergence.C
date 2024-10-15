@@ -141,9 +141,6 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
 
   if (_local_norm && !parameters.isParamValid("reference_vector"))
     paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");
-
-  Moose::out << "ReferenceResidualConvergence" << parameters.isParamValid("reference_vector")
-             << '\n';
 }
 
 void
