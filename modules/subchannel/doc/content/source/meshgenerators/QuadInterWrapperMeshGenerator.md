@@ -1,23 +1,19 @@
 # QuadInterWrapperMeshGenerator
 
-!alert construction title=Undocumented Class
-The QuadInterWrapperMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/QuadInterWrapperMeshGenerator
+!syntax description /Mesh/QuadInterWrapperMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the QuadInterWrapperMeshGenerator object.
+<!-- -->
+
+This kernel creates the mesh were the `SCM` solution variables associated with the inter-wrapper live.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the QuadInterWrapperMeshGenerator object.
+!listing test/tests/problems/interwrapper/quad_interwrapper.i block=QuadInterWrapperMesh language=cpp
 
-!syntax parameters /TriSubChannelMesh/QuadInterWrapperMeshGenerator
+!syntax parameters /Mesh/QuadInterWrapperMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/QuadInterWrapperMeshGenerator
+!syntax inputs /Mesh/QuadInterWrapperMeshGenerator
 
-!syntax children /TriSubChannelMesh/QuadInterWrapperMeshGenerator
+!syntax children /Mesh/QuadInterWrapperMeshGenerator

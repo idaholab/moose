@@ -1,23 +1,22 @@
 # DetailedTriPinMeshGenerator
 
-!alert construction title=Undocumented Class
-The DetailedTriPinMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/DetailedTriPinMeshGenerator
+!syntax description /Mesh/DetailedTriPinMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the DetailedTriPinMeshGenerator object.
+<!-- -->
+
+This is a kernel used for visualization purposes only. It is part of an input file that creates
+a 3D realistic mesh of the pins in a triangular lattice arrangement. This input file has a Problem block
+with `type = NoSolveProblem` because it is not used to perform any calculations. It is used to create a detailed 3D mesh that the `SCM` solution
+gets projected on.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the DetailedTriPinMeshGenerator object.
+!listing /examples/full-sodium-assembly/3d.i block=Mesh language=cpp
 
-!syntax parameters /TriSubChannelMesh/DetailedTriPinMeshGenerator
+!syntax parameters /Mesh/DetailedTriPinMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/DetailedTriPinMeshGenerator
+!syntax inputs /Mesh/DetailedTriPinMeshGenerator
 
-!syntax children /TriSubChannelMesh/DetailedTriPinMeshGenerator
+!syntax children /Mesh/DetailedTriPinMeshGenerator

@@ -44,9 +44,8 @@ InputParameters
 QuadInterWrapperMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("Creates a mesh for the inter-wrapper in the location of the modeled "
-                             "reactor section centroid");
-  params.addRequiredParam<Real>("assembly_pitch", "Pitch [m]");
+  params.addClassDescription("Creates a mesh for the inter-wrapper around square subassemblies");
+  params.addRequiredParam<Real>("assembly_pitch", "Assembly Pitch [m]");
   params.addRequiredParam<Real>("assembly_side_x",
                                 "Outer side lengths of assembly in x [m] - including duct");
   params.addRequiredParam<Real>("assembly_side_y",
