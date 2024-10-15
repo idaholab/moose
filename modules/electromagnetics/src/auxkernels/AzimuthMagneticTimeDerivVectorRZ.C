@@ -23,7 +23,8 @@ AzimuthMagneticTimeDerivVectorRZ::validParams()
   return params;
 }
 
-AzimuthMagneticTimeDerivVectorRZ::AzimuthMagneticTimeDerivVectorRZ(const InputParameters & parameters)
+AzimuthMagneticTimeDerivVectorRZ::AzimuthMagneticTimeDerivVectorRZ(
+    const InputParameters & parameters)
   : AuxKernel(parameters), _efield_curl(coupledCurl("Efield"))
 {
 }

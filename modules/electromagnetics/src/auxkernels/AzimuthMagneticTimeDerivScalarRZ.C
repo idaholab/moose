@@ -24,7 +24,8 @@ AzimuthMagneticTimeDerivScalarRZ::validParams()
   return params;
 }
 
-AzimuthMagneticTimeDerivScalarRZ::AzimuthMagneticTimeDerivScalarRZ(const InputParameters & parameters)
+AzimuthMagneticTimeDerivScalarRZ::AzimuthMagneticTimeDerivScalarRZ(
+    const InputParameters & parameters)
   : AuxKernel(parameters),
     _efield_x_grad(coupledGradient("Efield_X")),
     _efield_y_grad(coupledGradient("Efield_Y"))
