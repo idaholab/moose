@@ -37,7 +37,6 @@ requirements:
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - packaging
-    - setuptools <60
 
 test:
   commands:

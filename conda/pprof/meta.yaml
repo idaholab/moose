@@ -1,4 +1,4 @@
-{% set version = "2022.12.05" %}
+{% set version = "2024.10.15" %}
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 
@@ -30,7 +30,6 @@ requirements:
     - gperftools
     - graphviz
     - perl
-    - setuptools <60
 
 test:
   commands:
