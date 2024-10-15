@@ -1,23 +1,22 @@
 # DetailedQuadSubChannelMeshGenerator
 
-!alert construction title=Undocumented Class
-The DetailedQuadSubChannelMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/DetailedQuadSubChannelMeshGenerator
+!syntax description /Mesh/DetailedQuadSubChannelMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the DetailedQuadSubChannelMeshGenerator object.
+<!-- -->
+
+This is a kernel used for visualization purposes only. It is part of an input file that creates
+a 3D realistic mesh of the subchannels in a square lattice arrangement. This input file has a Problem block
+with `type = NoSolveProblem` because it is not used to perform any calculations. It is used to create a detailed 3D mesh that the `SCM` solution
+gets projected on.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the DetailedQuadSubChannelMeshGenerator object.
+!listing /examples/coupling/BISON_SC/detailedMesh.i start=GlobalParams end=AuxVariables language=cpp
 
-!syntax parameters /TriSubChannelMesh/DetailedQuadSubChannelMeshGenerator
+!syntax parameters /Mesh/DetailedQuadSubChannelMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/DetailedQuadSubChannelMeshGenerator
+!syntax inputs /Mesh/DetailedQuadSubChannelMeshGenerator
 
-!syntax children /TriSubChannelMesh/DetailedQuadSubChannelMeshGenerator
+!syntax children /Mesh/DetailedQuadSubChannelMeshGenerator

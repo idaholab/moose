@@ -1,23 +1,22 @@
 # DetailedTriSubChannelMeshGenerator
 
-!alert construction title=Undocumented Class
-The DetailedTriSubChannelMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/DetailedTriSubChannelMeshGenerator
+!syntax description /Mesh/DetailedTriSubChannelMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the DetailedTriSubChannelMeshGenerator object.
+<!-- -->
+
+This is a kernel used for visualization purposes only. It is part of an input file that creates
+a 3D realistic mesh of the subchannels in a triangular lattice arrangement. This input file has a Problem block
+with `type = NoSolveProblem` because it is not used to perform any calculations. It is used to create a detailed 3D mesh that the `SCM` solution
+gets projected on.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the DetailedTriSubChannelMeshGenerator object.
+!listing /test/tests/problems/Lead-LBE-19pin/3D_LBE-19pin.i block=Mesh language=cpp
 
-!syntax parameters /TriSubChannelMesh/DetailedTriSubChannelMeshGenerator
+!syntax parameters /Mesh/DetailedTriSubChannelMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/DetailedTriSubChannelMeshGenerator
+!syntax inputs /Mesh/DetailedTriSubChannelMeshGenerator
 
-!syntax children /TriSubChannelMesh/DetailedTriSubChannelMeshGenerator
+!syntax children /Mesh/DetailedTriSubChannelMeshGenerator

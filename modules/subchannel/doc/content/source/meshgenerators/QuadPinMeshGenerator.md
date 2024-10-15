@@ -1,23 +1,19 @@
 # QuadPinMeshGenerator
 
-!alert construction title=Undocumented Class
-The QuadPinMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/QuadPinMeshGenerator
+!syntax description /Mesh/QuadPinMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the QuadPinMeshGenerator object.
+<!-- -->
+
+This kernel creates the mesh were the `SCM` solution variables associated with the pins live.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the QuadPinMeshGenerator object.
+!listing /examples/psbt/psbt_ss/psbt_example.i block=QuadSubChannelMesh language=cpp
 
-!syntax parameters /TriSubChannelMesh/QuadPinMeshGenerator
+!syntax parameters /Mesh/QuadPinMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/QuadPinMeshGenerator
+!syntax inputs /Mesh/QuadPinMeshGenerator
 
-!syntax children /TriSubChannelMesh/QuadPinMeshGenerator
+!syntax children /Mesh/QuadPinMeshGenerator

@@ -1,23 +1,19 @@
 # TriSubChannelMeshGenerator
 
-!alert construction title=Undocumented Class
-The TriSubChannelMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/TriSubChannelMeshGenerator
+!syntax description /Mesh/TriSubChannelMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the TriSubChannelMeshGenerator object.
+<!-- -->
+
+This kernel creates the mesh were the `SCM` solution variables associated with the subchannels live.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the TriSubChannelMeshGenerator object.
+!listing /examples/Toshiba_37_pin/toshiba_37_pin.i block=TriSubChannelMesh language=cpp
 
-!syntax parameters /TriSubChannelMesh/TriSubChannelMeshGenerator
+!syntax parameters /Mesh/TriSubChannelMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/TriSubChannelMeshGenerator
+!syntax inputs /Mesh/TriSubChannelMeshGenerator
 
-!syntax children /TriSubChannelMesh/TriSubChannelMeshGenerator
+!syntax children /Mesh/TriSubChannelMeshGenerator

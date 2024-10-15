@@ -72,7 +72,9 @@ QuadSubChannelMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
-  params.addRequiredParam<Real>("gap", "(Edge Pitch W = pitch/2 - rod_diameter/2 + gap) [m]");
+  params.addRequiredParam<Real>("gap",
+                                "(Its an added distance between a perimetric pin and the duct: "
+                                "Edge Pitch W = pitch/2 - rod_diameter/2 + gap) [m]");
   params.addParam<unsigned int>("block_id", 0, "Domain Index");
   return params;
 }
@@ -117,14 +119,14 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   if (*max_element(_reduction_blockage.begin(), _reduction_blockage.end()) > 1)
     mooseError(name(), ": The area reduction of the blocked subchannels cannot be more than 1");
 
-  if ((_index_blockage.size() > _nx * _ny) | (_reduction_blockage.size() > _nx * _ny) |
+  if ((_index_blockage.size() > _nx * _ny) || (_reduction_blockage.size() > _nx * _ny) ||
       (_k_blockage.size() > _nx * _ny))
     mooseError(name(),
                ": Size of vectors: index_blockage, reduction_blockage, k_blockage, cannot be more "
                "than the total number of subchannels");
 
-  if ((_index_blockage.size() != _reduction_blockage.size()) |
-      (_index_blockage.size() != _k_blockage.size()) |
+  if ((_index_blockage.size() != _reduction_blockage.size()) ||
+      (_index_blockage.size() != _k_blockage.size()) ||
       (_reduction_blockage.size() != _k_blockage.size()))
     mooseError(name(),
                ": Size of vectors: index_blockage, reduction_blockage, k_blockage, must be equal "
