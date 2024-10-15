@@ -71,13 +71,18 @@ GaussianMisfit::computeQpProperties()
       p_m = _measurement_points[idx];
     else
       p_m = Point(_coordx[idx], _coordy[idx], _coordz[idx]);
+
     Point p_sim = _q_point[_qp];
     Real value_m = _measurement_values[idx];
     Real value_sim = _sim_var[_qp];
 
+    // Compute Gaussian value
     Real guass_value = computeGuassian(p_m, p_sim);
+
+    // Calculate misfit and misfit gradient
     Real diff = value_m - value_sim;
     _misfit[_qp] += diff * guass_value;
+    _misfit_gradient[_qp] -= guass_value;
   }
 }
 
