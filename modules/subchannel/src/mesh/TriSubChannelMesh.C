@@ -22,7 +22,7 @@ InputParameters
 TriSubChannelMesh::validParams()
 {
   InputParameters params = SubChannelMesh::validParams();
-  params.addClassDescription("Creates an subchannel mesh container in a triangular "
+  params.addClassDescription("Creates an subchannel mesh container for a triangular "
                              "lattice arrangement");
   return params;
 }
