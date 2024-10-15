@@ -25,7 +25,7 @@ DetailedQuadSubChannelMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription(
-      "Creates detailed mesh of subchannels in a square lattice arrangement");
+      "Creates a detailed mesh of subchannels in a square lattice arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
@@ -34,7 +34,9 @@ DetailedQuadSubChannelMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
-  params.addRequiredParam<Real>("gap", "Half of gap between assemblies [m]");
+  params.addRequiredParam<Real>("gap",
+                                "(Its an added distance between a perimetric pin and the duct: "
+                                "Edge Pitch W = pitch/2 - rod_diameter/2 + gap) [m]");
   params.addParam<unsigned int>("block_id", 0, "Block ID used for the mesh subdomain.");
   return params;
 }

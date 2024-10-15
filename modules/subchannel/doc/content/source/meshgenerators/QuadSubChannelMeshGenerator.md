@@ -1,23 +1,19 @@
 # QuadSubChannelMeshGenerator
 
-!alert construction title=Undocumented Class
-The QuadSubChannelMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/QuadSubChannelMeshGenerator
+!syntax description /Mesh/QuadSubChannelMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the QuadSubChannelMeshGenerator object.
+<!-- -->
+
+This kernel creates the mesh were the `SCM` solution variables associated with the subchannels live.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the QuadSubChannelMeshGenerator object.
+!listing /test/tests/problems/psbt_transient/psbt.i block=QuadSubChannelMesh language=cpp
 
-!syntax parameters /TriSubChannelMesh/QuadSubChannelMeshGenerator
+!syntax parameters /Mesh/QuadSubChannelMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/QuadSubChannelMeshGenerator
+!syntax inputs /Mesh/QuadSubChannelMeshGenerator
 
-!syntax children /TriSubChannelMesh/QuadSubChannelMeshGenerator
+!syntax children /Mesh/QuadSubChannelMeshGenerator

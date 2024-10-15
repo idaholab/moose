@@ -24,7 +24,8 @@ InputParameters
 TriSubChannelMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("Creates a subchannel mesh in a triangular lattice arrangement");
+  params.addClassDescription(
+      "Creates a mesh of 1D subchannels in a triangular lattice arrangement");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
@@ -93,8 +94,8 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   if (*max_element(_reduction_blockage.begin(), _reduction_blockage.end()) > 1)
     mooseError(name(), ": The area reduction of the blocked subchannels cannot be more than 1");
 
-  if ((_index_blockage.size() != _reduction_blockage.size()) |
-      (_index_blockage.size() != _k_blockage.size()) |
+  if ((_index_blockage.size() != _reduction_blockage.size()) ||
+      (_index_blockage.size() != _k_blockage.size()) ||
       (_reduction_blockage.size() != _k_blockage.size()))
     mooseError(name(),
                ": Size of vectors: index_blockage, reduction_blockage, k_blockage, must be equal "
@@ -175,7 +176,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
                ": The index of the blocked subchannel cannot be more than the max index of the "
                "subchannels");
 
-  if ((_index_blockage.size() > _n_channels) | (_reduction_blockage.size() > _n_channels) |
+  if ((_index_blockage.size() > _n_channels) || (_reduction_blockage.size() > _n_channels) ||
       (_k_blockage.size() > _n_channels))
     mooseError(name(),
                ": Size of vectors: index_blockage, reduction_blockage, k_blockage, cannot be more "

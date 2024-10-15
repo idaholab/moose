@@ -1,23 +1,22 @@
 # DetailedQuadInterWrapperMeshGenerator
 
-!alert construction title=Undocumented Class
-The DetailedQuadInterWrapperMeshGenerator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /TriSubChannelMesh/DetailedQuadInterWrapperMeshGenerator
+!syntax description /Mesh/DetailedQuadInterWrapperMeshGenerator
 
 ## Overview
 
-!! Replace these lines with information regarding the DetailedQuadInterWrapperMeshGenerator object.
+<!-- -->
+
+This is a kernel used for visualization purposes only. It is part of an input file that creates
+a 3D realistic mesh of the inter-wrapper in a square lattice arrangement. This input file has a Problem block
+with `type = NoSolveProblem` because it is not used to perform any calculations. It is used to create a detailed 3D mesh that the `SCM` solution
+gets projected on.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the DetailedQuadInterWrapperMeshGenerator object.
+!listing /examples/mesh_generator/inter_wrapper_3d.i block=Mesh language=cpp
 
-!syntax parameters /TriSubChannelMesh/DetailedQuadInterWrapperMeshGenerator
+!syntax parameters /Mesh/DetailedQuadInterWrapperMeshGenerator
 
-!syntax inputs /TriSubChannelMesh/DetailedQuadInterWrapperMeshGenerator
+!syntax inputs /Mesh/DetailedQuadInterWrapperMeshGenerator
 
-!syntax children /TriSubChannelMesh/DetailedQuadInterWrapperMeshGenerator
+!syntax children /Mesh/DetailedQuadInterWrapperMeshGenerator
