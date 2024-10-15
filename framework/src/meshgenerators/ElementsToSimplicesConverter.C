@@ -23,6 +23,8 @@ ElementsToSimplicesConverter::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to convert to all-simplex mesh");
 
+  params.addClassDescription("Splits all non-simplex elements in a mesh into simplices.");
+
   return params;
 }
 
