@@ -50,9 +50,9 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_curl_old(false),
     _need_curl_older(false),
     // for FV variables, they use each other's ad_u values to compute ghost cell
-    // values - we don't have any way to propogate these inter-variable-data
+    // values - we don't have any way to propagate these inter-variable-data
     // dependencies. So if something needs an ad_u value, that need isn't
-    // propogated through to both the element and the neighbor
+    // propagated through to both the element and the neighbor
     // data structures. So instead just set _need_ad+_need_ad_u values to true always.
     _need_ad(true),
     _need_ad_u(true),

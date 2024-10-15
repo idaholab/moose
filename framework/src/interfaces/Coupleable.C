@@ -2207,12 +2207,18 @@ Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp) const
     return *getADDefaultValue(var_name);
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
-  if (_c_nodal)
-    mooseError("Not implemented");
-
   if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->adDofValuesDot();
     return var->adUDot();
-  return var->adUDotNeighbor();
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("AD neighbor nodal dof dot implemented");
+    return var->adUDotNeighbor();
+  }
 }
 
 const ADVariableValue &
