@@ -16,12 +16,12 @@
  * as needed to produce a mesh of the same domain with all simplex
  * (triangles in 2D, tetrahedra in 3D) elements.
  */
-class AllSimplexGenerator : public MeshGenerator
+class ElementsToSimplicesConverter : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  AllSimplexGenerator(const InputParameters & parameters);
+  ElementsToSimplicesConverter(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

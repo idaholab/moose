@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AllSimplexGenerator.h"
+#include "ElementsToSimplicesConverter.h"
 
 #include "CastUniquePointer.h"
 
 #include "libmesh/mesh_modification.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", AllSimplexGenerator);
+registerMooseObject("MooseApp", ElementsToSimplicesConverter);
 
 InputParameters
-AllSimplexGenerator::validParams()
+ElementsToSimplicesConverter::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -26,13 +26,13 @@ AllSimplexGenerator::validParams()
   return params;
 }
 
-AllSimplexGenerator::AllSimplexGenerator(const InputParameters & parameters)
+ElementsToSimplicesConverter::ElementsToSimplicesConverter(const InputParameters & parameters)
   : MeshGenerator(parameters), _input_ptr(getMesh("input"))
 {
 }
 
 std::unique_ptr<MeshBase>
-AllSimplexGenerator::generate()
+ElementsToSimplicesConverter::generate()
 {
   // Put the input mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh =

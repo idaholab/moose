@@ -1,9 +1,9 @@
-# AllSimplexGenerator
+# ElementsToSimplicesConverter
 
-!syntax description /Mesh/AllSimplexGenerator
+!syntax description /Mesh/ElementsToSimplicesConverter
 
 An input mesh, as specified in the
-[!param](/Mesh/AllSimplexGenerator/input) parameter, will be modified
+[!param](/Mesh/ElementsToSimplicesConverter/input) parameter, will be modified
 to replace each non-simplex mesh element with a set of simplices
 connecting the same nodes.  Each quad is split into 2 triangles, each
 pyramid into 2 tetrahedra, each prism into 3 tets, and each cube into
@@ -23,8 +23,8 @@ and/or prisms will not be exactly preserved, due to the change from
 bilinear or biquadratic mapping on quadrilaterals to linear or
 quadratic mapping on the triangles that replace them.
 
-!syntax parameters /Mesh/AllSimplexGenerator
+!syntax parameters /Mesh/ElementsToSimplicesConverter
 
-!syntax inputs /Mesh/AllSimplexGenerator
+!syntax inputs /Mesh/ElementsToSimplicesConverter
 
-!syntax children /Mesh/AllSimplexGenerator
+!syntax children /Mesh/ElementsToSimplicesConverter
