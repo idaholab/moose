@@ -16,12 +16,12 @@
  *  of the magnetic field assuming cylindrical electric field. The electric field is
  *  is supplied as a vector.
  */
-class AzimuthMagneticTimeDerivVector : public AuxKernel
+class AzimuthMagneticTimeDerivVectorRZ : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  AzimuthMagneticTimeDerivVector(const InputParameters & parameters);
+  AzimuthMagneticTimeDerivVectorRZ(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

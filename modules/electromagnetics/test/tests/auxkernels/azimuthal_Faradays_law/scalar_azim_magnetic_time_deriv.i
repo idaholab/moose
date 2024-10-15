@@ -1,4 +1,4 @@
-# Test for AzimuthMagneticTimeDerivScalar
+# Test for AzimuthMagneticTimeDerivScalarRZ
 # Manufactured solution: E_real = y^2 * x_hat - x^2 * y_hat
 #                        E_imag = y^2 * x_hat - x^2 * y_hat
 #                        dB_theta_real / dt = -(2*y + 2*x)
@@ -169,7 +169,7 @@
   []
 
   [aux_azim_dB_dt_scalar]
-    type = AzimuthMagneticTimeDerivScalar
+    type = AzimuthMagneticTimeDerivScalarRZ
     Efield_X = aux_E_real_x
     Efield_Y = aux_E_real_y
     variable = azim_dB_dt_term_scalar

@@ -1,4 +1,4 @@
-# Test for AzimuthMagneticTimeDerivVector
+# Test for AzimuthMagneticTimeDerivVectorRZ
 # Manufactured solution: E_real = y^2 * x_hat - x^2 * y_hat
 #                        E_imag = y^2 * x_hat - x^2 * y_hat
 #                        dB_theta_real / dt = -(2*y + 2*x)
@@ -147,7 +147,7 @@
 
 [AuxKernels]
   [aux_azim_dB_dt_vector]
-    type = AzimuthMagneticTimeDerivVector
+    type = AzimuthMagneticTimeDerivVectorRZ
     Efield = E_real
     variable = azim_dB_dt_term_vector
   []

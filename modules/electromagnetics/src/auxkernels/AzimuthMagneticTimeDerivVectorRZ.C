@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AzimuthMagneticTimeDerivVector.h"
+#include "AzimuthMagneticTimeDerivVectorRZ.h"
 
-registerMooseObject("ElectromagneticsApp", AzimuthMagneticTimeDerivVector);
+registerMooseObject("ElectromagneticsApp", AzimuthMagneticTimeDerivVectorRZ);
 
 InputParameters
-AzimuthMagneticTimeDerivVector::validParams()
+AzimuthMagneticTimeDerivVectorRZ::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -23,13 +23,13 @@ AzimuthMagneticTimeDerivVector::validParams()
   return params;
 }
 
-AzimuthMagneticTimeDerivVector::AzimuthMagneticTimeDerivVector(const InputParameters & parameters)
+AzimuthMagneticTimeDerivVectorRZ::AzimuthMagneticTimeDerivVectorRZ(const InputParameters & parameters)
   : AuxKernel(parameters), _efield_curl(coupledCurl("Efield"))
 {
 }
 
 Real
-AzimuthMagneticTimeDerivVector::computeValue()
+AzimuthMagneticTimeDerivVectorRZ::computeValue()
 {
   /* NOTE: The curl for a axisymmetric cylindrical vector is equal and opposite to
    * the curl for 2D cartesian vector, such that:
