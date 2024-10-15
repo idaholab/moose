@@ -27,9 +27,8 @@
 #include "libmesh/enum_elem_type.h"
 #include "libmesh/enum_fe_family.h"
 #include "libmesh/enum_order.h"
-
-// needed to print print--trace.h without triggering precheck
-#include "MooseError.h"
+#include "libmesh/enum_parallel_type.h"
+#include "libmesh/enum_point_locator_type.h"
 
 // README
 // If you hit a compilation error that the XYZ class shown here is not defined, and it is declared
@@ -87,6 +86,7 @@ using libMesh::Hex27;
 using libMesh::HEX27;
 using libMesh::Hex8;
 using libMesh::HEX8;
+using libMesh::NODEELEM;
 using libMesh::Prism;
 using libMesh::Prism15;
 using libMesh::PRISM15;
@@ -97,8 +97,11 @@ using libMesh::PRISM21;
 using libMesh::Prism6;
 using libMesh::PRISM6;
 using libMesh::Pyramid;
+using libMesh::Pyramid13;
 using libMesh::PYRAMID13;
+using libMesh::Pyramid14;
 using libMesh::PYRAMID14;
+using libMesh::Pyramid5;
 using libMesh::PYRAMID5;
 using libMesh::Quad;
 using libMesh::Quad4;
@@ -119,8 +122,37 @@ using libMesh::TET4;
 using libMesh::Tri;
 using libMesh::Tri3;
 using libMesh::TRI3;
+using libMesh::Tri6;
 using libMesh::TRI6;
+using libMesh::Tri7;
 using libMesh::TRI7;
+
+// Continuity types
+using libMesh::C_ONE;
+using libMesh::C_ZERO;
+using libMesh::DISCONTINUOUS;
+using libMesh::H_CURL;
+using libMesh::H_DIV;
+using libMesh::SIDE_DISCONTINUOUS;
+
+// Finite element helper classes
+namespace libMesh
+{
+class FEType;
+class FEInterface;
+class FEMap;
+template <typename T>
+class FEGenericBase;
+typedef FEGenericBase<Real> FEBase;
+typedef FEGenericBase<RealGradient> FEVectorBase;
+}
+
+using libMesh::FEBase;
+using libMesh::FEGenericBase;
+using libMesh::FEInterface;
+using libMesh::FEMap;
+using libMesh::FEType;
+using libMesh::FEVectorBase;
 
 // Ranges
 namespace libMesh
@@ -202,9 +234,11 @@ using libMesh::TypeVector;
 using libMesh::VectorValue;
 
 // Common FE families
+using libMesh::HIERARCHIC;
 using libMesh::L2_HIERARCHIC;
 using libMesh::L2_LAGRANGE;
 using libMesh::LAGRANGE;
+using libMesh::LAGRANGE_VEC;
 using libMesh::MONOMIAL;
 using libMesh::SCALAR;
 
@@ -233,6 +267,18 @@ using libMesh::THIRTEENTH;
 using libMesh::TWELFTH;
 using libMesh::TWENTIETH;
 
+// Parallel types
+using libMesh::AUTOMATIC;
+using libMesh::GHOSTED;
+using libMesh::PARALLEL;
+using libMesh::SERIAL;
+
+// Point locator types
+using libMesh::NANOFLANN;
+using libMesh::TREE;
+using libMesh::TREE_ELEMENTS;
+using libMesh::TREE_LOCAL_ELEMENTS;
+
 // Common mesh classes
 namespace libMesh
 {
@@ -252,7 +298,6 @@ using libMesh::as_range;
 using libMesh::cast_int;
 using libMesh::cast_ptr;
 using libMesh::cast_ref;
-using libMesh::demangle;
 using libMesh::index_range;
 using libMesh::libmesh_ignore;
 using libMesh::make_range;
@@ -290,3 +335,79 @@ namespace TensorTools = libMesh::TensorTools;
 namespace Threads = libMesh::Threads;
 namespace Utility = libMesh::Utility;
 namespace Parallel = libMesh::Parallel;
+
+// Added to pass downstream app tests
+// All these are all prefaced with 'libMesh::' in the framework and modules
+#include "libmesh/enum_norm_type.h"
+using libMesh::DISCRETE_L2;
+
+#include "libmesh/libmesh.h"
+using libMesh::pi;
+using libMesh::zero;
+
+namespace libMesh
+{
+class DoFMap;
+class PerfLog;
+class System;
+class ExplicitSystem;
+class ImplicitSystem;
+class LinearImplicitSystem;
+class NonlinearImplicitSystem;
+class EigenSystem;
+class ExodusII_IO;
+class PointLocatorBase;
+enum FEFamily : int;
+enum QuadratureType : int;
+template <typename T>
+struct ScalarTraits;
+class Mesh;
+class MeshSerializer;
+class Poly2TriTriangulator;
+template <typename T>
+class SimpleRange;
+template <typename Output, typename OutputGradient>
+class ParsedFunction;
+template <typename T>
+class PetscVector;
+template <typename T>
+class PetscMatrix;
+class PeriodicBoundaries;
+class QTrap;
+class QGauss;
+class TriangulatorInterface;
+template <typename T>
+class Preconditioner;
+enum PreconditionerType : int;
+template <typename T>
+class ReferenceCountedObject;
+struct SyncElementIntegers;
+}
+using libMesh::DoFMap;
+using libMesh::EigenSystem;
+using libMesh::ExodusII_IO;
+using libMesh::ExplicitSystem;
+using libMesh::FEFamily;
+using libMesh::ImplicitSystem;
+using libMesh::LinearImplicitSystem;
+using libMesh::Mesh;
+using libMesh::MeshSerializer;
+using libMesh::NonlinearImplicitSystem;
+using libMesh::ParsedFunction;
+using libMesh::PerfLog;
+using libMesh::PeriodicBoundaries;
+using libMesh::PetscMatrix;
+using libMesh::PetscVector;
+using libMesh::PointLocatorBase;
+using libMesh::Poly2TriTriangulator;
+using libMesh::Preconditioner;
+using libMesh::PreconditionerType;
+using libMesh::QGauss;
+using libMesh::QTrap;
+using libMesh::QuadratureType;
+using libMesh::ReferenceCountedObject;
+using libMesh::ScalarTraits;
+using libMesh::SimpleRange;
+using libMesh::SyncElementIntegers;
+using libMesh::System;
+using libMesh::TriangulatorInterface;

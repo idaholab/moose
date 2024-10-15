@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "libMeshReducedNamespace.h"
 #include "libmesh/perf_log.h"
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
