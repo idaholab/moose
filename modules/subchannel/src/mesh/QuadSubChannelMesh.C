@@ -25,7 +25,7 @@ InputParameters
 QuadSubChannelMesh::validParams()
 {
   InputParameters params = SubChannelMesh::validParams();
-  params.addClassDescription("Creates an subchannel mesh container in a square "
+  params.addClassDescription("Creates an subchannel mesh container for a square "
                              "lattice arrangement");
   return params;
 }
