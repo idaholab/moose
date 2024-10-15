@@ -25,7 +25,6 @@ InertialForceTempl<is_ad>::validParams()
                              " dependent Rayleigh damping and HHT time "
                              " integration scheme ($\\eta \\cdot M \\cdot"
                              " ((1+\\alpha)velq2-\\alpha \\cdot vel-old) $)");
-  params.set<bool>("use_displaced_mesh") = true;
   params.addCoupledVar("velocity", "velocity variable");
   params.addCoupledVar("acceleration", "acceleration variable");
   params.addParam<Real>("beta", "beta parameter for Newmark Time integration");
@@ -51,7 +50,8 @@ InertialForceTempl<is_ad>::validParams()
 template <bool is_ad>
 InertialForceTempl<is_ad>::InertialForceTempl(const InputParameters & parameters)
   : InertialForceParent<is_ad>(parameters),
-    _density(this->template getGenericMaterialProperty<Real, is_ad>("density")),
+    _density(this->template getGenericMaterialProperty<Real, is_ad>(
+        this->template getParam<MaterialPropertyName>("density"))),
     _has_beta(this->isParamValid("beta")),
     _has_gamma(this->isParamValid("gamma")),
     _beta(_has_beta ? this->template getParam<Real>("beta") : 0.1),
