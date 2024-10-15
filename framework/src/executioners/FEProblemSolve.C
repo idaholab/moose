@@ -156,7 +156,7 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup(
       "solve_type nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol "
       "nl_rel_step_tol snesmf_reuse_base use_pre_SMO_residual num_grids nl_div_tol nl_abs_div_tol "
-      "residual_and_jacobian_together n_max_nonlinear_pingpong",
+      "residual_and_jacobian_together n_max_nonlinear_pingpong splitting",
       "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "

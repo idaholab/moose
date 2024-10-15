@@ -42,7 +42,6 @@ MortarGapHeatTransferAction::validParams()
   params += GapFluxModelRadiation::validParams();
   params += GapFluxModelConduction::validParams();
 
-  // Change default to true
   params.addParam<bool>(
       "correct_edge_dropping",
       true,
@@ -61,6 +60,11 @@ MortarGapHeatTransferAction::validParams()
       "user_created_gap_flux_models",
       {},
       "The name of the user objects created by the user to represent gap heat transfer physics");
+
+  params.addParamNamesToGroup("primary_subdomain secondary_subdomain", "Gap surface definition");
+  params.addParamNamesToGroup("gap_flux_options user_created_gap_flux_models", "Gap flux models");
+  params.addParamNamesToGroup("thermal_lm_scaling correct_edge_dropping",
+                              "Thermal Lagrange multiplier");
 
   return params;
 }

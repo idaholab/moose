@@ -31,6 +31,7 @@ GapConductanceConstant::actionParameters()
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<Real>("gap_conductance", 0.0, "Gap conductance");
+  params.addParamNamesToGroup("gap_conductance", "Gap conductivity");
   return params;
 }
 

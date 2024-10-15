@@ -119,6 +119,7 @@ getSlepcEigenProblemValidParams()
       "eigen_problem_type which_eigen_pairs n_eigen_pairs n_basis_vectors eigen_tol eigen_max_its "
       "free_power_iterations extra_power_iterations",
       "Eigen Solver");
+  params.addParamNamesToGroup("l_abs_tol", "Linear solver");
 
   return params;
 }
