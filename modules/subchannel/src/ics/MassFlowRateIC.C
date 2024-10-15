@@ -22,7 +22,7 @@ MassFlowRateIC::validParams()
   InputParameters params = InitialCondition::validParams();
   params.addClassDescription(
       "Computes mass float rate from specified mass flux and cross-sectional area");
-  params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
+  params.addRequiredCoupledVar("area", "Subchannel surface area [m^2]");
   params.addRequiredParam<Real>("mass_flux", "Specified mass flux [kg/s-m^2]");
   return params;
 }

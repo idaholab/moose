@@ -1,23 +1,16 @@
 # QuadInterWrapperFlowAreaIC
 
-!alert construction title=Undocumented Class
-The QuadInterWrapperFlowAreaIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
+!syntax description /ICs/QuadInterWrapperFlowAreaIC
 
 ## Overview
 
-!! Replace these lines with information regarding the QuadInterWrapperFlowAreaIC object.
+<!-- -->
 
-## Example Input File Syntax
+This kernel populates the auxiliary variable S (inter-wrapper cell surface area) at the beginning of the for the inter-wrapper problem
+for a sub-assembly with a square subchannel/pin arrangement.
 
-!! Describe and include an example of how to use the QuadInterWrapperFlowAreaIC object.
+!syntax parameters /ICs/QuadInterWrapperFlowAreaIC
 
-!syntax parameters /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
+!syntax inputs /ICs/QuadInterWrapperFlowAreaIC
 
-!syntax inputs /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
-
-!syntax children /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
+!syntax children /ICs/QuadInterWrapperFlowAreaIC
