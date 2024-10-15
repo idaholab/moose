@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AzimuthMagneticTimeDerivScalar.h"
+#include "AzimuthMagneticTimeDerivScalarRZ.h"
 
-registerMooseObject("ElectromagneticsApp", AzimuthMagneticTimeDerivScalar);
+registerMooseObject("ElectromagneticsApp", AzimuthMagneticTimeDerivScalarRZ);
 
 InputParameters
-AzimuthMagneticTimeDerivScalar::validParams()
+AzimuthMagneticTimeDerivScalarRZ::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -24,7 +24,7 @@ AzimuthMagneticTimeDerivScalar::validParams()
   return params;
 }
 
-AzimuthMagneticTimeDerivScalar::AzimuthMagneticTimeDerivScalar(const InputParameters & parameters)
+AzimuthMagneticTimeDerivScalarRZ::AzimuthMagneticTimeDerivScalarRZ(const InputParameters & parameters)
   : AuxKernel(parameters),
     _efield_x_grad(coupledGradient("Efield_X")),
     _efield_y_grad(coupledGradient("Efield_Y"))
@@ -32,7 +32,7 @@ AzimuthMagneticTimeDerivScalar::AzimuthMagneticTimeDerivScalar(const InputParame
 }
 
 Real
-AzimuthMagneticTimeDerivScalar::computeValue()
+AzimuthMagneticTimeDerivScalarRZ::computeValue()
 {
   return -(_efield_x_grad[_qp](1) - _efield_y_grad[_qp](0));
 }

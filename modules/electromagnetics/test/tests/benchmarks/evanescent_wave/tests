@@ -14,10 +14,10 @@
     type = Exodiff
     input = 'evanescent_wave_with_ADMaterials.i'
     exodiff = 'evanescent_wave_with_ADMaterials_out.e'
-    #valgrind = 
-    #requirement = ''
-    #design = ''
-    #verification = ''
-    #issues = ''
+    valgrind = heavy
+    requirement = 'The system shall calculate the evanescent wave decay for a waveguide structure below the cutoff frequency using AD materials properties.'
+    design = 'benchmarks/EvanescentWave.md'
+    verification = 'benchmarks/EvanescentWave.md'
+    issues = '#28758'
   []
 []

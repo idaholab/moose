@@ -16,12 +16,12 @@
  *  of the magnetic field assuming cylindrical electric field. The electric field is
  *  is supplied as scalar components.
  */
-class AzimuthMagneticTimeDerivScalar : public AuxKernel
+class AzimuthMagneticTimeDerivScalarRZ : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  AzimuthMagneticTimeDerivScalar(const InputParameters & parameters);
+  AzimuthMagneticTimeDerivScalarRZ(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

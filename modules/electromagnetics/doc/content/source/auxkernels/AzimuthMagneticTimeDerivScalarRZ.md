@@ -1,11 +1,11 @@
-# AzimuthMagneticTimeDerivScalar
+# AzimuthMagneticTimeDerivScalarRZ
 
-!syntax description /AuxKernels/AzimuthMagneticTimeDerivScalar
+!syntax description /AuxKernels/AzimuthMagneticTimeDerivScalarRZ
 
 ## Overview
 
 !style halign=left
-The AzimuthMagneticTimeDerivScalar object calculates the time derivative of the azimuthal magnetic field for an axisymmetric cylindrical configuration. The term is define as:
+The AzimuthMagneticTimeDerivScalarRZ object calculates the time derivative of the azimuthal magnetic field for an axisymmetric cylindrical configuration. This object evaluates the right hand side of the following equation:
 
 \begin{equation}
   \frac{\partial \vec{B}_{\theta}}{\partial t} = -\left( \frac{\partial \vec{E}_{\rho}}{\partial z} - \frac{\partial \vec{E}_{z}}{\partial \rho} \right)
@@ -21,8 +21,8 @@ where
 
 !listing scalar_azim_magnetic_time_deriv.i block=AuxKernels/aux_azim_dB_dt_scalar
 
-!syntax parameters /AuxKernels/AzimuthMagneticTimeDerivScalar
+!syntax parameters /AuxKernels/AzimuthMagneticTimeDerivScalarRZ
 
-!syntax inputs /AuxKernels/AzimuthMagneticTimeDerivScalar
+!syntax inputs /AuxKernels/AzimuthMagneticTimeDerivScalarRZ
 
-!syntax children /AuxKernels/AzimuthMagneticTimeDerivScalar
+!syntax children /AuxKernels/AzimuthMagneticTimeDerivScalarRZ
