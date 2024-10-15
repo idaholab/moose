@@ -21,6 +21,9 @@
 #include <tuple>
 #include <type_traits>
 
+// Used in numerous downstream classes without 'libMesh::' prefix
+using libMesh::demangle;
+
 namespace MetaPhysicL
 {
 class LogicError;
