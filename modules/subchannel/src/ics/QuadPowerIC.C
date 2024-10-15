@@ -25,13 +25,11 @@ InputParameters
 QuadPowerIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
-  params.addClassDescription("Computes axial power rate (W/m) that goes into the subchannel cells "
+  params.addClassDescription("Computes axial heat rate (W/m) that goes into the subchannel cells "
                              "or is assigned to the fuel pins, in a square lattice arrangement");
-  params.addRequiredParam<Real>("power", "[W]");
+  params.addRequiredParam<Real>("power", "The total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
-      "filename",
-      "name of power profile .txt file (should be a single column). It's "
-      "a Radial Power Profile. [UnitLess]");
+      "filename", "name of radial power profile .txt file (should be a single column) [UnitLess].");
   params.addParam<FunctionName>(
       "axial_heat_rate",
       "1.0",

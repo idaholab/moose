@@ -1,23 +1,16 @@
 # QuadFlowAreaIC
 
-!alert construction title=Undocumented Class
-The QuadFlowAreaIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /Variables/InitialCondition/QuadFlowAreaIC
+!syntax description /ICs/QuadFlowAreaIC
 
 ## Overview
 
-!! Replace these lines with information regarding the QuadFlowAreaIC object.
+<!-- -->
 
-## Example Input File Syntax
+This kernel populates the auxiliary variable S (subchannel surface area) at the beginning of the problem
+for a sub-assembly with a square subchannel/pin arrangement.
 
-!! Describe and include an example of how to use the QuadFlowAreaIC object.
+!syntax parameters /ICs/QuadFlowAreaIC
 
-!syntax parameters /Variables/InitialCondition/QuadFlowAreaIC
+!syntax inputs /ICs/QuadFlowAreaIC
 
-!syntax inputs /Variables/InitialCondition/QuadFlowAreaIC
-
-!syntax children /Variables/InitialCondition/QuadFlowAreaIC
+!syntax children /ICs/QuadFlowAreaIC

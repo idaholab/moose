@@ -22,7 +22,7 @@ FCTFdisplacementIC::validParams()
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
   params.addClassDescription(
-      "This class calculates the displacement of the duct for the areva FCTF facility");
+      "This class calculates the displacement of the duct for the areva FCTF");
   return params;
 }
 
