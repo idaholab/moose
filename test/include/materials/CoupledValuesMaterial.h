@@ -14,27 +14,33 @@
 /**
  * A material that couples variables values and stores them into material property
  * This makes sure that everything is properly resized and can be indexed into.
+ * @tparam whether to use the AD version, retrieving AD values from variables and storing them in
+ *         AD material properties, or not
  */
-class CoupledValuesMaterial : public Material
+template <bool is_ad>
+class CoupledValuesMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  CoupledValuesMaterial(const InputParameters & parameters);
+  CoupledValuesMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
-  const VariableValue & _value;
-  const VariableValue & _dot;
-  const VariableValue & _dot_dot;
+  const GenericVariableValue<is_ad> & _value;
+  const GenericVariableValue<is_ad> & _dot;
+  const GenericVariableValue<is_ad> & _dot_dot;
   const VariableValue & _dot_du;
   const VariableValue & _dot_dot_du;
 
   const std::string & _var_name;
-  MaterialProperty<Real> & _value_prop;
-  MaterialProperty<Real> & _dot_prop;
-  MaterialProperty<Real> & _dot_dot_prop;
+  GenericMaterialProperty<Real, is_ad> & _value_prop;
+  GenericMaterialProperty<Real, is_ad> & _dot_prop;
+  GenericMaterialProperty<Real, is_ad> & _dot_dot_prop;
   MaterialProperty<Real> & _dot_du_prop;
   MaterialProperty<Real> & _dot_dot_du_prop;
 };
+
+typedef CoupledValuesMaterialTempl<false> CoupledValuesMaterial;
+typedef CoupledValuesMaterialTempl<true> ADCoupledValuesMaterial;
