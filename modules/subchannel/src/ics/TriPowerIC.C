@@ -25,11 +25,9 @@ TriPowerIC::validParams()
   params.addClassDescription(
       "Computes axial power rate (W/m) that goes into the subchannel cells "
       "or is assigned to the fuel pins, in a triangular lattice arrangement");
-  params.addRequiredParam<Real>("power", "[W]");
+  params.addRequiredParam<Real>("power", "The total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
-      "filename",
-      "Name of file with power profile (values are stored in a single "
-      "column). It's a radial power profile. [Unitless]");
+      "filename", "name of radial power profile .txt file (should be a single column) [UnitLess].");
   params.addParam<FunctionName>("axial_heat_rate",
                                 "1.0",
                                 "user provided normalized function of axial heat rate [Unitless]. "
