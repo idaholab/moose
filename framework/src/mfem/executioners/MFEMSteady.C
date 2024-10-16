@@ -72,8 +72,6 @@ MFEMSteady::execute()
 
   // Solve equation system.
   _problem_operator->Solve(_problem_data._f);
-  // Output data
-  _problem_data._outputs.Write();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();

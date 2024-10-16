@@ -1,7 +1,5 @@
 #include "MFEMDataCollection.h"
 
-registerMooseObject("PlatypusApp", MFEMDataCollection);
-
 InputParameters
 MFEMDataCollection::validParams()
 {
@@ -10,12 +8,29 @@ MFEMDataCollection::validParams()
   return params;
 }
 
-MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters) : FileOutput(parameters)
+MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
+  : FileOutput(parameters),
+    _problem_data(static_cast<MFEMProblem *>(_problem_ptr)->getProblemData())
 {
 }
 
-std::shared_ptr<mfem::DataCollection>
-MFEMDataCollection::createDataCollection(const std::string & collection_name) const
+void
+MFEMDataCollection::registerFields()
 {
-  return std::make_shared<mfem::DataCollection>(collection_name);
+  mfem::DataCollection & dc(getDataCollection());
+  for (auto const & [gf_name, gf_ptr] : _problem_data._gridfunctions)
+  {
+    dc.RegisterField(gf_name, gf_ptr.get());
+  }
+}
+
+void
+MFEMDataCollection::output()
+{
+  mfem::DataCollection & dc(getDataCollection());
+  // Write fields to disk
+  dc.SetCycle(getFileNumber());
+  dc.SetTime(time());
+  dc.Save();
+  _file_num++;
 }

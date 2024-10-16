@@ -20,11 +20,13 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _t_step(getParam<Real>("dt")),
     _t_initial(getParam<Real>("start_time")),
     _t_final(getParam<Real>("end_time")),
-    _t(_t_initial),
+    _t(_mfem_problem.time()),
     _it(0),
     _vis_steps(params.get<unsigned int>("visualisation_steps")),
     _last_step(false)
 {
+  _app.setStartTime(_t_initial);
+  _t = _t_initial;
   _mfem_problem.transient(true);
 }
 
@@ -36,23 +38,6 @@ MFEMTransient::constructProblemOperator()
       std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(_problem_data);
   _problem_operator.reset();
   _problem_operator = std::move(problem_operator);
-}
-
-void
-MFEMTransient::registerTimeDerivatives()
-{
-  std::vector<std::string> gridfunction_names;
-  platypus::GridFunctions & gridfunctions = _problem_data._gridfunctions;
-  for (auto const & [name, gf] : gridfunctions)
-  {
-    gridfunction_names.push_back(name);
-  }
-  for (auto & gridfunction_name : gridfunction_names)
-  {
-    gridfunctions.Register(platypus::GetTimeDerivativeName(gridfunction_name),
-                           std::make_shared<mfem::ParGridFunction>(
-                               gridfunctions.Get(gridfunction_name)->ParFESpace()));
-  }
 }
 
 void
@@ -70,18 +55,14 @@ MFEMTransient::step(double dt, int it) const
   // Sync Host/Device
   _problem_data._f.HostRead();
 
-  // Output data
-  if (_last_step || (it % _vis_steps) == 0)
-  {
-    _problem_data._outputs.Write(_t);
-  }
+  // Perform the output of the current time step
+  _mfem_problem.outputStep(EXEC_TIMESTEP_END);
 }
 
 void
 MFEMTransient::init()
 {
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  registerTimeDerivatives();
   _mfem_problem.initialSetup();
 
   // Set up initial conditions

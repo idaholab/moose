@@ -12,41 +12,11 @@ MFEMProblem::validParams()
 MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params) {}
 
 void
-MFEMProblem::outputStep(ExecFlagType type)
-{
-  // Needed to ensure outputs from successive runs when using MultiApps are stored in
-  // directories with iterated names
-  if (type == EXEC_INITIAL)
-  {
-    getProblemData()._outputs.SetGridFunctions(getProblemData()._gridfunctions);
-    std::vector<OutputName> mfem_data_collections =
-        _app.getOutputWarehouse().getOutputNames<MFEMDataCollection>();
-    for (const auto & name : mfem_data_collections)
-    {
-      auto dc = _app.getOutputWarehouse().getOutput<MFEMDataCollection>(name);
-      int filenum(dc->getFileNumber());
-      std::string filename("/Run" + std::to_string(filenum));
-
-      getProblemData()._outputs.Register(name, dc->createDataCollection(filename));
-      getProblemData()._outputs.Reset();
-      dc->setFileNumber(filenum + 1);
-    }
-  }
-  FEProblemBase::outputStep(type);
-}
-
-void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
   getProblemData()._coefficients.AddGlobalCoefficientsFromSubdomains();
   addMFEMNonlinearSolver();
-}
-
-void
-MFEMProblem::init()
-{
-  FEProblemBase::init();
 }
 
 void
@@ -115,7 +85,9 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                   InputParameters & parameters)
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
-  MFEMBoundaryCondition * mfem_bc(&getUserObject<MFEMBoundaryCondition>(name));
+
+  auto object_ptr = getUserObject<MFEMBoundaryCondition>(name).getSharedPtr();
+  auto mfem_bc = std::dynamic_pointer_cast<MFEMBoundaryCondition>(object_ptr);
 
   if (getProblemData()._bc_map.Has(name))
   {
@@ -123,7 +95,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                       " has already been added to the problem boundary conditions.";
     mfem::mfem_error(error_message.c_str());
   }
-  getProblemData()._bc_map.Register(name, std::move(mfem_bc->getBC()));
+  getProblemData()._bc_map.Register(name, std::move(mfem_bc));
 }
 
 void
@@ -173,6 +145,21 @@ MFEMProblem::addVariable(const std::string & var_type,
                          const std::string & var_name,
                          InputParameters & parameters)
 {
+  addGridFunction(var_type, var_name, parameters);
+  // MOOSE variables store DoFs for the trial variable and its time derivatives up to second order;
+  // MFEM GridFunctions store data for only one set of DoFs each, so we must add additional
+  // GridFunctions for time derivatives.
+  if (isTransient())
+  {
+    addGridFunction(var_type, platypus::GetTimeDerivativeName(var_name), parameters);
+  }
+}
+
+void
+MFEMProblem::addGridFunction(const std::string & var_type,
+                             const std::string & var_name,
+                             InputParameters & parameters)
+{
   if (var_type == "MFEMVariable")
   {
     // Add MFEM variable directly.
@@ -180,7 +167,7 @@ MFEMProblem::addVariable(const std::string & var_type,
   }
   else
   {
-    // Add MOOSE auxvariable.
+    // Add MOOSE variable.
     FEProblemBase::addVariable(var_type, var_name, parameters);
 
     // Add MFEM variable indirectly ("gridfunction").
@@ -198,24 +185,8 @@ MFEMProblem::addAuxVariable(const std::string & var_type,
                             const std::string & var_name,
                             InputParameters & parameters)
 {
-  if (var_type == "MFEMVariable")
-  {
-    // Add MFEM variable directly.
-    FEProblemBase::addUserObject(var_type, var_name, parameters);
-  }
-  else
-  {
-    // Add MOOSE auxvariable.
-    FEProblemBase::addAuxVariable(var_type, var_name, parameters);
-
-    // Add MFEM variable indirectly ("gridfunction").
-    InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
-    FEProblemBase::addUserObject("MFEMVariable", var_name, mfem_variable_params);
-  }
-
-  // Register gridfunction.
-  MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  getProblemData()._gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  // We do not handle MFEM AuxVariables separately from variables currently
+  addVariable(var_type, var_name, parameters);
 }
 
 void
