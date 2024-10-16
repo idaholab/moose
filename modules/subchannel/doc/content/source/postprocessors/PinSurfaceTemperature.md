@@ -1,23 +1,26 @@
 # PinSurfaceTemperature
 
-!alert construction title=Undocumented Class
-The PinSurfaceTemperature has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /UserObjects/PinSurfaceTemperature
+!syntax description /Postprocessors/PinSurfaceTemperature
 
 ## Overview
 
-!! Replace these lines with information regarding the PinSurfaceTemperature object.
+<!-- -->
+
+This is a postprocessor that calculates and prints the pin surface temperature `Tpin`.
+To be more exact, `Tpin` is calcualted inside the `SCM` solver:
+
+The assumption is that each neighboring subchannel to a specific pin sees the same heat flux.
+Using a `Dittus-Boelter` approach we calculate surface temperatures for each neighbor. The numerical
+average is `Tpin`.
+
+Then, the postprocessor interpolates the value of the variable `Tpin` at a certain pin and height.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the PinSurfaceTemperature object.
+!listing /test/tests/problems/SFR/sodium-19pin/test19_monolithic.i block=Postprocessors language=cpp
 
-!syntax parameters /UserObjects/PinSurfaceTemperature
+!syntax parameters /Postprocessors/PinSurfaceTemperature
 
-!syntax inputs /UserObjects/PinSurfaceTemperature
+!syntax inputs /Postprocessors/PinSurfaceTemperature
 
-!syntax children /UserObjects/PinSurfaceTemperature
+!syntax children /Postprocessors/PinSurfaceTemperature
