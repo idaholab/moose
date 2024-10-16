@@ -444,7 +444,7 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
     // latter gets scaled by -dt later
     mfem::SumIntegrator * sum = new mfem::SumIntegrator;
     mfem::SumIntegrator * sum_to_scale = new mfem::SumIntegrator;
-    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum_to_scale, -_dt_coef.constant);
+    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum_to_scale, _dt_coef.constant);
 
     bc_map.ApplyIntegratedBCs(
         test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
