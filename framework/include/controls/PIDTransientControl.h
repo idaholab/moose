@@ -63,4 +63,6 @@ private:
   int _t_step_old;
   /// the previous value of the difference with the target, to detect changes of sign
   Real _old_delta;
+  /// the previous unaffected value of the difference with the target, to detect changes of sign, when _reset_every_timestep is true
+  Real _old_delta_unaffected;
 };
