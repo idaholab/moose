@@ -1,23 +1,20 @@
 # SubChannelDelta
 
-!alert construction title=Undocumented Class
-The SubChannelDelta has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /UserObjects/SubChannelDelta
+!syntax description /Postprocessors/SubChannelDelta
 
 ## Overview
 
-!! Replace these lines with information regarding the SubChannelDelta object.
+<!-- -->
+
+The user defines the variable which change they want to see along the whole assembly. The postprocessor calculates a
+massflow rate weighted average at the inlet and outlet and then prints the absolute difference.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the SubChannelDelta object.
+!listing /examples/coupling/THM/subchannel.i block=Postprocessors language=cpp
 
-!syntax parameters /UserObjects/SubChannelDelta
+!syntax parameters /Postprocessors/SubChannelDelta
 
-!syntax inputs /UserObjects/SubChannelDelta
+!syntax inputs /Postprocessors/SubChannelDelta
 
-!syntax children /UserObjects/SubChannelDelta
+!syntax children /Postprocessors/SubChannelDelta

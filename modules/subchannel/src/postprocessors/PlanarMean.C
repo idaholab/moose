@@ -27,7 +27,7 @@ InputParameters
 PlanarMean::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription("Calculates an overall mass-flow-averaged mean of the chosen "
+  params.addClassDescription("Calculates an overall mass-flow-rate averaged mean of the chosen "
                              "variable on a z-plane at a user defined height");
   params.addRequiredParam<AuxVariableName>("variable", "Variable you want the mean of");
   params.addRequiredParam<Real>("height", "Axial location of plane [m]");

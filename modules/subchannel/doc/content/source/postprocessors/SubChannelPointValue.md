@@ -1,23 +1,18 @@
 # SubChannelPointValue
 
-!alert construction title=Undocumented Class
-The SubChannelPointValue has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /UserObjects/SubChannelPointValue
+!syntax description /Postprocessors/SubChannelPointValue
 
 ## Overview
 
-!! Replace these lines with information regarding the SubChannelPointValue object.
+The user needs to specify the variable whose value they want to see, the index of the subchannel and the height.
+The postprocessor will interpolate the value of that variable at that location.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the SubChannelPointValue object.
+!listing /test/tests/problems/SFR/THORS/FFM-5B.i block=Postprocessors language=cpp
 
-!syntax parameters /UserObjects/SubChannelPointValue
+!syntax parameters /Postprocessors/SubChannelPointValue
 
-!syntax inputs /UserObjects/SubChannelPointValue
+!syntax inputs /Postprocessors/SubChannelPointValue
 
-!syntax children /UserObjects/SubChannelPointValue
+!syntax children /Postprocessors/SubChannelPointValue
