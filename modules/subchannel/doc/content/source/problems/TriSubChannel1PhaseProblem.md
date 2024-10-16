@@ -1,20 +1,17 @@
 # TriSubChannel1PhaseProblem
 
-!alert construction title=Undocumented Class
-The TriSubChannel1PhaseProblem has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /SubChannel/TriSubChannel1PhaseProblem
 
 ## Overview
 
-!! Replace these lines with information regarding the TriSubChannel1PhaseProblem object.
+<!-- -->
+
+This class solves for the subchannel flow variables in the case of subchannels arranged in a triangular lattice.
+It inherits from the base class : `SubChannel1PhaseProblem`.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the TriSubChannel1PhaseProblem object.
+!listing /test/tests/problems/Lead-LBE-19pin/test_LEAD-19pin.i block=Problem language=cpp
 
 !syntax parameters /SubChannel/TriSubChannel1PhaseProblem
 

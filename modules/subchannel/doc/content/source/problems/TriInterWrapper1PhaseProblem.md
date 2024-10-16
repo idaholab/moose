@@ -1,20 +1,19 @@
 # TriInterWrapper1PhaseProblem
 
-!alert construction title=Undocumented Class
-The TriInterWrapper1PhaseProblem has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /SubChannel/TriInterWrapper1PhaseProblem
 
-## Overview
+##
 
-!! Replace these lines with information regarding the TriInterWrapper1PhaseProblem object.
+<!-- -->
+
+The inter-wrapper is the flow area around subchannel subassemblies.
+This kernel solves for the flow variables in that area, for the case of subassembies that have subchannels in a triangular lattice.
+
+The inter-wrapper solver is very similar to the subchannel solver. Information regarding the solver can be found in [subchannel_theory.md].
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the TriInterWrapper1PhaseProblem object.
+!listing /test/tests/problems/interwrapper/tri_interwrapper_monolithic.i block=SubChannel language=cpp
 
 !syntax parameters /SubChannel/TriInterWrapper1PhaseProblem
 
