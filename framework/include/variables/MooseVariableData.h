@@ -736,6 +736,9 @@ const MooseArray<ADReal> &
 MooseVariableData<OutputType>::adDofValuesDot() const
 {
   _need_ad = _need_ad_u_dot = true;
+  if (!_time_integrator)
+    // See explanation in adUDot() body
+    _need_u_dot = true;
   return _ad_dofs_dot;
 }
 
