@@ -102,8 +102,6 @@ EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
     *(_dxdts.at(i)) = 0.0;
     bc_map.ApplyEssentialBCs(
         test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), _test_pfespaces.at(i)->GetParMesh());
-    bc_map.ApplyIntegratedBCs(
-        test_var_name, _lfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
   }
 }
 
@@ -281,6 +279,8 @@ EquationSystem::BuildLinearForms(platypus::BCMap & bc_map)
     auto test_var_name = _test_var_names.at(i);
     _lfs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
     _lfs.GetRef(test_var_name) = 0.0;
+    bc_map.ApplyIntegratedBCs(
+        test_var_name, _lfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
   }
   // Apply boundary conditions
   ApplyBoundaryConditions(bc_map);
@@ -303,7 +303,7 @@ EquationSystem::BuildLinearForms(platypus::BCMap & bc_map)
 }
 
 void
-EquationSystem::BuildBilinearForms()
+EquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
 {
   // Register bilinear forms
   for (int i = 0; i < _test_var_names.size(); i++)
@@ -311,6 +311,8 @@ EquationSystem::BuildBilinearForms()
     auto test_var_name = _test_var_names.at(i);
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
 
+    bc_map.ApplyIntegratedBCs(
+        test_var_name, _blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
     // Apply kernels
     auto blf = _blfs.Get(test_var_name);
     if (_blf_kernels_map.Has(test_var_name))
@@ -372,9 +374,9 @@ EquationSystem::BuildMixedBilinearForms()
 void
 EquationSystem::BuildEquationSystem(platypus::BCMap & bc_map)
 {
-  BuildLinearForms(bc_map);
-  BuildBilinearForms();
+  BuildBilinearForms(bc_map);
   BuildMixedBilinearForms();
+  BuildLinearForms(bc_map);
 }
 
 TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
@@ -425,8 +427,9 @@ TimeDependentEquationSystem::AddKernel(const std::string & test_var_name,
 }
 
 void
-TimeDependentEquationSystem::BuildBilinearForms()
+TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
 {
+  EquationSystem::BuildBilinearForms(bc_map);
 
   // Build and assemble bilinear forms acting on time derivatives
   for (int i = 0; i < _test_var_names.size(); i++)
@@ -442,6 +445,9 @@ TimeDependentEquationSystem::BuildBilinearForms()
     mfem::SumIntegrator * sum = new mfem::SumIntegrator;
     mfem::SumIntegrator * sum_to_scale = new mfem::SumIntegrator;
     ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum_to_scale, -_dt_coef.constant);
+
+    bc_map.ApplyIntegratedBCs(
+        test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
 
     // Apply kernels
     auto blf = _blfs.Get(test_var_name);
@@ -498,7 +504,7 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto lf = _lfs.Get(test_var_name);
     // if implicit, add contribution to linear form from terms involving state
     // variable at previous timestep: {
-    blf->AddMult(*_trial_variables.Get(test_var_name), *lf, 1.0);
+    blf->AddMult(*_trial_variables.Get(test_var_name), *lf, -1.0);
     // }
     mfem::Vector aux_x, aux_rhs;
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
@@ -562,9 +568,9 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 void
 TimeDependentEquationSystem::UpdateEquationSystem(platypus::BCMap & bc_map)
 {
-  BuildLinearForms(bc_map);
-  BuildBilinearForms();
+  BuildBilinearForms(bc_map);
   BuildMixedBilinearForms();
+  BuildLinearForms(bc_map);
 }
 
 } // namespace platypus

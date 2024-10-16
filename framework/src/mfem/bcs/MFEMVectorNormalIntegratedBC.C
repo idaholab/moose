@@ -5,8 +5,8 @@ registerMooseObject("PlatypusApp", MFEMVectorNormalIntegratedBC);
 InputParameters
 MFEMVectorNormalIntegratedBC::validParams()
 {
-  InputParameters params = MFEMBoundaryCondition::validParams();
-  params.addRequiredParam<UserObjectName>(
+  InputParameters params = MFEMIntegratedBC::validParams();
+  params.addRequiredParam<std::string>(
       "vector_coefficient",
       "The vector MFEM coefficient whose normal component will be used in the integrated BC");
   return params;
@@ -14,13 +14,23 @@ MFEMVectorNormalIntegratedBC::validParams()
 
 // TODO: Currently assumes the vector function coefficient is 3D
 MFEMVectorNormalIntegratedBC::MFEMVectorNormalIntegratedBC(const InputParameters & parameters)
-  : MFEMBoundaryCondition(parameters),
-    _vec_coef(const_cast<MFEMVectorCoefficient *>(
-        &getUserObject<MFEMVectorCoefficient>("vector_coefficient")))
+  : MFEMIntegratedBC(parameters),
+    _vec_coef_name(getParam<std::string>("vector_coefficient")),
+    _vec_coef(getMFEMProblem().getProperties().getVectorProperty(_vec_coef_name))
 {
+}
 
-  _boundary_condition = std::make_shared<platypus::IntegratedBC>(
-      getParam<std::string>("variable"),
-      bdr_attr,
-      std::make_unique<mfem::BoundaryNormalLFIntegrator>(*_vec_coef->getVectorCoefficient()));
+// Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
+// caller.
+mfem::LinearFormIntegrator *
+MFEMVectorNormalIntegratedBC::createLinearFormIntegrator()
+{
+  return new mfem::BoundaryNormalLFIntegrator(_vec_coef);
+}
+
+// Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
+mfem::BilinearFormIntegrator *
+MFEMVectorNormalIntegratedBC::createBilinearFormIntegrator()
+{
+  return nullptr;
 }

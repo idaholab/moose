@@ -28,40 +28,9 @@
     type = ParsedFunction
     expression = 1.0
   []
-  [value_top]
-    type = ParsedFunction
-    expression = 0.0
-  []
-[]
-
-[BCs]
-  [bottom]
-    type = MFEMScalarDirichletBC
-    variable = temperature
-    boundary = '1'
-    coefficient = BottomValue
-  []
-  [low_terminal]
-    type = MFEMScalarDirichletBC
-    variable = temperature
-    boundary = '2'
-    coefficient = TopValue
-  []
-[]
-
-[Materials]
-  [Substance]
-    type = MFEMGenericConstantMaterial
-    prop_names = 'thermal_conductivity volumetric_heat_capacity'
-    prop_values = '1.0 1.0'
-  []
 []
 
 [Coefficients]
-  [TopValue]
-    type = MFEMFunctionCoefficient
-    function = value_top
-  []
   [BottomValue]
     type = MFEMFunctionCoefficient
     function = value_bottom
@@ -73,12 +42,41 @@
     type = MFEMDiffusionKernel
     variable = temperature
     coefficient = thermal_conductivity
-  []
+  []  
   [dT_dt]
     type = MFEMTimeDerivativeMassKernel
     variable = temperature
     coefficient = volumetric_heat_capacity
-  []  
+  []    
+[]
+
+[BCs]
+  [bottom]
+    type = MFEMScalarDirichletBC
+    variable = temperature
+    boundary = '1'
+    coefficient = BottomValue
+  []
+  [top]
+    type = MFEMConvectiveHeatFluxBC
+    variable = temperature
+    boundary = '2'
+    T_infinity = 'reservoir_far_temperature'
+    heat_transfer_coefficient = 'heat_transfer_coefficient'
+  []
+[]
+
+[Materials]
+  [Substance]
+    type = MFEMGenericConstantMaterial
+    prop_names = 'thermal_conductivity volumetric_heat_capacity'
+    prop_values = '1.0 1.0'
+  []
+  [Boundary]
+    type = MFEMGenericConstantMaterial
+    prop_names = 'heat_transfer_coefficient reservoir_far_temperature'
+    prop_values = '5.0 0.5'
+  []
 []
 
 [Preconditioner]
@@ -97,15 +95,15 @@
 [Executioner]
   type = MFEMTransient
   device = cpu
-  dt = 0.25
+  dt = 2.0
   start_time = 0.0
-  end_time = 1.0
+  end_time = 6.0
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/HeatConduction
+    file_base = OutputData/HeatTransfer
     vtk_format = ASCII
   []
 []
