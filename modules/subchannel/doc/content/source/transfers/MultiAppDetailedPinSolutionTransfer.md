@@ -1,20 +1,17 @@
 # MultiAppDetailedPinSolutionTransfer
 
-!alert construction title=Undocumented Class
-The MultiAppDetailedPinSolutionTransfer has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Transfers/MultiAppDetailedPinSolutionTransfer
 
 ## Overview
 
-!! Replace these lines with information regarding the MultiAppDetailedPinSolutionTransfer object.
+<!-- -->
+
+This class is used to transfer the pin associated variables: pin surface temperature `Tpin`, axial heat rate qprime `q_prime` and pin diameter `Dpin`
+to the visualization mesh.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the MultiAppDetailedPinSolutionTransfer object.
+!listing /examples/coupling/1pinSquare_thermomech_SC/one_pin_problem.i block=pin_transfer language=cpp
 
 !syntax parameters /Transfers/MultiAppDetailedPinSolutionTransfer
 

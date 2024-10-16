@@ -292,7 +292,7 @@ heated_length = 1.0
   [subchannel_transfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu S'
+    variable = 'mdot SumWij P DP h T rho mu S w_perim'
   []
 
   [pin_transfer]
