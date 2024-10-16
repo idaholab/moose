@@ -31,4 +31,12 @@
     csvdiff = 'coupled_dots_out.csv'
     requirement = 'The system shall be able to retrieve the time derivatives of variables through the coupling interface.'
   []
+  [time_derivative_coupling_nodal]
+    design = 'Coupleable.md'
+    issues = '#28'
+    type = CSVDiff
+    input = 'coupled_dots_nodal.i'
+    csvdiff = 'coupled_dots_nodal_out.csv'
+    requirement = 'The system shall be able to retrieve the time derivatives of nodal variables through the coupling interface.'
+  []
 []
