@@ -45,8 +45,8 @@ outputs:
         - {{ moose_gfortran }}
         - {{ moose_libzlib }}
         - {{ moose_libcxx }}
-        - {{ moose_clangcc }}                     # [osx]
-        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
         - {{ moose_clang_osx }}                   # [osx]
         - {{ moose_compiler_rt }}                 # [osx]
         - {{ moose_libclang }}                    # [osx]
@@ -55,8 +55,6 @@ outputs:
         - {{ moose_llvm_openmp }}                 # [osx]
         - {{ moose_gcc_impl }}                    # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_gcc }}                         # [linux]
-        - {{ moose_gxx }}                         # [linux]
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
@@ -70,8 +68,8 @@ outputs:
         - {{ moose_gfortran }}
         - {{ moose_libzlib }}
         - {{ moose_libcxx }}
-        - {{ moose_clangcc }}                     # [osx]
-        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
         - {{ moose_clang_osx }}                   # [osx]
         - {{ moose_compiler_rt }}                 # [osx]
         - {{ moose_libclang }}                    # [osx]
@@ -80,8 +78,6 @@ outputs:
         - {{ moose_llvm_openmp }}                 # [osx]
         - {{ moose_gcc_impl }}                    # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_gcc }}                         # [linux]
-        - {{ moose_gxx }}                         # [linux]
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}

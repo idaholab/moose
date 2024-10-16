@@ -45,11 +45,11 @@ outputs:
         - {{ pin_subpackage('moose-wasp-base', max_pin='x.x')}}
     requirements:
       build:
-      - {{ compiler('c') }}
-      - {{ compiler('cxx') }}
-      - make
-      - cmake
-      - pkg-config
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
+        - make
+        - cmake
+        - pkg-config
 
   - name: moose-pyhit
     build:

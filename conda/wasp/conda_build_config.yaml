@@ -4,6 +4,18 @@ moose_python:
   - python 3.10
   - python 3.9
 
+### If you change these versions, change also conda/mpi/*
+moose_cc:
+  - gcc 12.3.0 h915e2ae_7                                   # [linux]
+  - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
+  - clang 16.0.6 h30cc82d_6                                 # [arm64]
+
+### If you change these versions, change also conda/mpi/*
+moose_cxx:
+  - gxx 12.3.0 h915e2ae_7                                   # [linux]
+  - clangxx 16.0.6 default_h7151d67_6                       # [not arm64 and osx]
+  - clangxx 16.0.6 default_h4cf2255_6                       # [arm64]
+
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
   - /opt/MacOSX11.3.sdk                                     # [osx]

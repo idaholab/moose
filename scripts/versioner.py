@@ -30,6 +30,8 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
 
 ### Tracking Libraries
 # note: Order is important only for historical lookups; git_ancestor(commit) == True
+# note: If adding to this list, see line 64 in
+# python/MooseDocs/test/extensions/test_versioner.py
 TRACKING_LIBRARIES = ['libmesh-vtk',
                       'peacock',
                       'pprof',
