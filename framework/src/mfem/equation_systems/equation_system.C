@@ -440,11 +440,8 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
 
-    // Initially both sum and sum_to_scale correspond to the same blf integrators. However, the
-    // latter gets scaled by -dt later
     mfem::SumIntegrator * sum = new mfem::SumIntegrator;
-    mfem::SumIntegrator * sum_to_scale = new mfem::SumIntegrator;
-    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum_to_scale, _dt_coef.constant);
+    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, false);
 
     bc_map.ApplyIntegratedBCs(
         test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
@@ -459,7 +456,6 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
       for (auto & blf_kernel : blf_kernels)
       {
         sum->AddIntegrator(blf_kernel->createIntegrator());
-        sum_to_scale->AddIntegrator(blf_kernel->createIntegrator());
       }
     }
 
