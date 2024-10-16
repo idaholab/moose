@@ -24,10 +24,8 @@ public:
   MFEMProblem(const InputParameters & params);
   virtual ~MFEMProblem(){};
 
-  virtual void init() override;
   virtual void initialSetup() override;
   virtual void externalSolve() override{};
-  virtual void outputStep(ExecFlagType type) override;
   virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };
   virtual void syncSolutions(Direction direction) override{};
 
@@ -87,11 +85,18 @@ public:
 
   /**
    * Override of ExternalProblem::addVariable. Sets a
-   * MFEM grid function to be used in the MFEM solve.
+   * MFEM grid function (and time derivative, for transient problems) to be used in the MFEM solve.
    */
   void addVariable(const std::string & var_type,
                    const std::string & var_name,
                    InputParameters & parameters) override;
+
+  /**
+   * Adds one MFEM GridFunction to be used in the MFEM solve.
+   */
+  void addGridFunction(const std::string & var_type,
+                       const std::string & var_name,
+                       InputParameters & parameters);
 
   /**
    * Override of ExternalProblem::addAuxVariable. Sets a

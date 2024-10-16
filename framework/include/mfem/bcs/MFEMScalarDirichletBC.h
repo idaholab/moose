@@ -1,16 +1,15 @@
 #pragma once
-
-#include "MFEMBoundaryCondition.h"
+#include "MFEMEssentialBC.h"
 #include "MFEMFunctionCoefficient.h"
-#include "boundary_conditions.h"
 
-class MFEMScalarDirichletBC : public MFEMBoundaryCondition
+class MFEMScalarDirichletBC : public MFEMEssentialBC
 {
 public:
   static InputParameters validParams();
 
   MFEMScalarDirichletBC(const InputParameters & parameters);
-  ~MFEMScalarDirichletBC() override {}
+
+  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_) override;
 
 protected:
   MFEMCoefficient * _coef{nullptr};
