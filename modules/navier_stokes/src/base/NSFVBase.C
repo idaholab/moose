@@ -328,10 +328,11 @@ NSFVBase::commonTurbulenceParams()
                                     1,
                                     "turbulent_prandtl > 0",
                                     "Turbulent Prandtl number for energy turbulent diffusion");
-  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
-                                     std::vector<Real>(),
-                                     "Schmidt numbers used for the passive scalar fields.");
-
+  params.addParam<std::vector<Real>>(
+      "passive_scalar_schmidt_number",
+      std::vector<Real>(),
+      "Turbulent Schmidt numbers used for the passive scalar fields.");
+  params.deprecateParam("passive_scalar_schmidt_number", "Sc_t", "01/01/2025");
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
                               "von_karman_const_0 mixing_length_delta",
                               "Mixing length model");

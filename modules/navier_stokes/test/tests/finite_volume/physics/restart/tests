@@ -1,0 +1,67 @@
+[Tests]
+  issues = '#28730'
+  design = 'NavierStokesPhysicsBase.md'
+  [input]
+    type = CSVDiff
+    input = '2d_channel_scalar_turbulence_init.i'
+    csvdiff = '2d_channel_scalar_turbulence_init_out.csv'
+    requirement = "The system shall be able to run a flow simulation using both scalar advection and K-epsilon turbulence."
+    cli_args = 'Problem/solve=true'
+    allow_unused = true
+    heavy = true
+  []
+  [restart]
+    requirement = 'The system shall be able to restart all the flow variable in the shorthand Navier Stokes Physics-syntax'
+    [default]
+      type = CSVDiff
+      input = 2d_channel_scalar_turbulence_init.i
+      csvdiff = 'default.csv'
+      cli_args = 'Outputs/file_base=default'
+      detail = 'with the default initial conditions,'
+      allow_unused = true
+    []
+    [user_ics]
+      type = CSVDiff
+      input = 2d_channel_scalar_turbulence_init.i
+      csvdiff = 'user_ics.csv'
+      cli_args = "Physics/NavierStokes/Flow/all_flow/initial_velocity='0.1 1e-6 0'
+                  Physics/NavierStokes/Flow/all_flow/initial_pressure=2e5
+                  Physics/NavierStokes/FluidHeatTransfer/all_energy/initial_temperature='355'
+                  Physics/NavierStokes/ScalarTransport/all_scalar/initial_scalar_variables='0.3 0.2'
+                  Physics/NavierStokes/Turbulence/keps/initial_tke=${k_init}
+                  Physics/NavierStokes/Turbulence/keps/initial_tked=${eps_init}
+                  Physics/NavierStokes/Turbulence/keps/mu_t_as_aux_variable=true
+                  Physics/NavierStokes/Turbulence/keps/initial_mu_t=${mu_t_init}
+                  Outputs/file_base=user_ics"
+      detail = 'with user-defined initial conditions,'
+    []
+    [restart_with_user_ics]
+      type = CSVDiff
+      input = 2d_channel_scalar_turbulence_init.i
+      csvdiff = 'restart_user_ics.csv'
+      cli_args = "Physics/NavierStokes/Flow/all_flow/initial_velocity='0.1 1e-6 0'
+                  Physics/NavierStokes/Flow/all_flow/initial_pressure=2e5
+                  Physics/NavierStokes/FluidHeatTransfer/all_energy/initial_temperature='355'
+                  Physics/NavierStokes/ScalarTransport/all_scalar/initial_scalar_variables='0.3 0.2'
+                  Physics/NavierStokes/Turbulence/keps/initial_tke=${k_init}
+                  Physics/NavierStokes/Turbulence/keps/initial_tked=${eps_init}
+                  Physics/NavierStokes/Turbulence/keps/mu_t_as_aux_variable=true
+                  Physics/NavierStokes/Turbulence/keps/initial_mu_t=${mu_t_init}
+                  Problem/restart_file_base=default_cp/LATEST Problem/allow_initial_conditions_with_restart=true
+                  Outputs/file_base=restart_user_ics"
+      detail = 'when performing a regular checkpoint restart, but still obeying the user-defined initial conditions,'
+    []
+    [restart_from_file]
+      type = CSVDiff
+      input = 2d_channel_scalar_turbulence_init.i
+      csvdiff = 'from_file.csv'
+      cli_args = "Mesh/active='fmg_restart' Outputs/file_base=from_file
+                  Physics/NavierStokes/Flow/all_flow/initialize_variables_from_mesh_file=true
+                  Physics/NavierStokes/FluidHeatTransfer/all_energy/initialize_variables_from_mesh_file=true
+                  Physics/NavierStokes/ScalarTransport/all_scalar/initialize_variables_from_mesh_file=true
+                  Physics/NavierStokes/Turbulence/keps/initialize_variables_from_mesh_file=true"
+      detail = 'when performing manual restart from a mesh file, ignoring the default initial conditions.'
+      allow_unused = true
+    []
+  []
+[]

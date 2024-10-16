@@ -464,6 +464,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
             ? getParam<bool>("error_on_jacobian_nonzero_reallocation")
             : _app.errorOnJacobianNonzeroReallocation()),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
+    _preserve_matrix_sparsity_pattern(true),
     _force_restart(getParam<bool>("force_restart")),
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
@@ -3592,6 +3593,17 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid
   }
 
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
+}
+
+void
+FEProblemBase::setPreserveMatrixSparsityPattern(bool preserve)
+{
+  if (_ignore_zeros_in_jacobian && preserve)
+    paramWarning(
+        "ignore_zeros_in_jacobian",
+        "We likely cannot preserve the sparsity pattern if ignoring zeros in the Jacobian, which "
+        "leads to removing those entries from the Jacobian sparsity pattern");
+  _preserve_matrix_sparsity_pattern = preserve;
 }
 
 bool

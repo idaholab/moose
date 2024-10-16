@@ -1,0 +1,2 @@
+time,max_T_fluid,max_mu_t,max_pressure,max_scalar1,max_scalar2,max_tke,max_tked,max_vel_x,max_vel_y,min_T_fluid,min_mu_t,min_pressure,min_scalar1,min_scalar2,min_tke,min_tked,min_vel_x,min_vel_y
+0,355,0.0067082039324994,200000,0.3,0.2,0.00015,3.0186917696247e-07,0.1,1e-06,355,0.0067082039324994,200000,0.3,0.2,0.00015,3.0186917696247e-07,0.1,1e-06

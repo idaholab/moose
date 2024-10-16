@@ -196,9 +196,10 @@ kEpsilonViscosityAux::computeValue()
     {
       time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
     }
+    // For newton solvers, epsilon might not be bounded
     if (_newton_solve)
-      if (MooseUtils::absoluteFuzzyEqual(_epsilon(current_argument, state), 0))
-        time_scale = 1;
+      time_scale = _k(current_argument, state) /
+                   std::max(NS::epsilon_low_limit, _epsilon(current_argument, state));
 
     const ADReal mu_t_nl =
         _rho(current_argument, state) * _C_mu * _k(current_argument, state) * time_scale;

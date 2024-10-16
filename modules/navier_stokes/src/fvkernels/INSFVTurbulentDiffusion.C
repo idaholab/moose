@@ -18,7 +18,8 @@ INSFVTurbulentDiffusion::validParams()
   InputParameters params = FVDiffusion::validParams();
   params.addClassDescription(
       "Computes residual for the turbulent scaled diffusion operator for finite volume method.");
-  params.addParam<MooseFunctorName>("scaling_coef", 1.0, "diffusion coefficient");
+  params.addParam<MooseFunctorName>(
+      "scaling_coef", 1.0, "Scaling factor to divide the diffusion coefficient with");
   params.set<unsigned short>("ghost_layers") = 2;
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
@@ -29,7 +30,8 @@ INSFVTurbulentDiffusion::validParams()
 INSFVTurbulentDiffusion::INSFVTurbulentDiffusion(const InputParameters & params)
   : FVDiffusion(params),
     _scaling_coef(getFunctor<ADReal>("scaling_coef")),
-    _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
+    _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
+    _preserve_sparsity_pattern(_fe_problem.preserveMatrixSparsityPattern())
 {
 }
 
@@ -54,12 +56,21 @@ INSFVTurbulentDiffusion::computeQpResidual()
   // If we are on internal faces, we interpolate the diffusivity as usual
   if (_var.isInternalFace(*_face_info))
   {
-    interpolate(_coeff_interp_method,
-                coeff,
-                _coeff(elemArg(), state),
-                _coeff(neighborArg(), state),
-                *_face_info,
-                true);
+    // If the diffusion coefficients are zero, then we can early return 0 (and avoid warnings if we
+    // have a harmonic interpolation)
+    const auto coeff_elem = _coeff(elemArg(), state);
+    const auto coeff_neighbor = _coeff(neighborArg(), state);
+    if (!coeff_elem.value() && !coeff_neighbor.value())
+    {
+      if (!_preserve_sparsity_pattern)
+        return 0;
+      else
+        // we return 0 but preserve the sparsity pattern of the Jacobian for Newton's method
+        return 0 * (coeff_elem + coeff_neighbor) *
+               (_scaling_coef(elemArg(), state) + _scaling_coef(neighborArg(), state)) * dudn;
+    }
+
+    interpolate(_coeff_interp_method, coeff, coeff_elem, coeff_neighbor, *_face_info, true);
     interpolate(_coeff_interp_method,
                 scaling_coef,
                 _scaling_coef(elemArg(), state),

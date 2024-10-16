@@ -36,12 +36,20 @@ INSFVkEpsilonViscosityFunctorMaterial::INSFVkEpsilonViscosityFunctorMaterial(
     _rho(getFunctor<ADReal>(NS::density)),
     _k(getFunctor<ADReal>(NS::TKE)),
     _epsilon(getFunctor<ADReal>(NS::TKED)),
-    _C_mu(getFunctor<ADReal>("C_mu"))
+    _C_mu(getFunctor<ADReal>("C_mu")),
+    _preserve_sparsity_pattern(_fe_problem.preserveMatrixSparsityPattern())
 {
-  addFunctorProperty<ADReal>(NS::mu_t,
-                             [this](const auto & r, const auto & t) -> ADReal
-                             {
-                               return _C_mu(r, t) * _rho(r, t) * Utility::pow<2>(_k(r, t)) /
-                                      std::max(NS::mu_t_low_limit, _epsilon(r, t));
-                             });
+  addFunctorProperty<ADReal>(
+      NS::mu_t,
+      [this](const auto & r, const auto & t) -> ADReal
+      {
+        if (_preserve_sparsity_pattern)
+          return std::max(NS::mu_t_low_limit + 0 * _k(r, t) * _epsilon(r, t),
+                          _C_mu(r, t) * _rho(r, t) * Utility::pow<2>(_k(r, t)) /
+                              std::max(NS::epsilon_low_limit, _epsilon(r, t)));
+        else
+          return std::max(NS::mu_t_low_limit,
+                          _C_mu(r, t) * _rho(r, t) * Utility::pow<2>(_k(r, t)) /
+                              std::max(NS::epsilon_low_limit, _epsilon(r, t)));
+      });
 }

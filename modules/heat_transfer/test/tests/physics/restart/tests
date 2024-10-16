@@ -1,0 +1,45 @@
+[Tests]
+  issues = '#28730'
+  # Note: ICs are handled by the parent class HeatConductionPhysics
+  design = 'HeatConductionFV.md HeatConductionCG.md'
+  [restart]
+    requirement = 'The system shall be able to restart the temperature variable in the shorthand Physics-syntax'
+    [default]
+      type = CSVDiff
+      input = test_fv.i
+      csvdiff = 'default.csv'
+      cli_args = 'Outputs/file_base=default'
+      detail = 'using the default initial condition,'
+    []
+    [user_ics]
+      type = CSVDiff
+      input = test_fv.i
+      csvdiff = 'user_ics.csv'
+      cli_args = 'Physics/HeatConduction/FiniteVolume/h1/initial_temperature=100 Outputs/file_base=user_ics'
+      detail = 'with a user-defined initial condition,'
+    []
+    [restart_with_user_ics]
+      type = CSVDiff
+      input = test_fv.i
+      csvdiff = 'restart_user_ics.csv'
+      cli_args = "Physics/HeatConduction/FiniteVolume/h1/initial_temperature=100
+                  Problem/restart_file_base=default_cp/LATEST Problem/allow_initial_conditions_with_restart=true
+                  Outputs/file_base=restart_user_ics"
+      detail = 'when performing a regular checkpoint restart, but still obeying the user-defined initial condition,'
+    []
+    [restart_from_file]
+      type = CSVDiff
+      input = test_fv.i
+      csvdiff = 'from_file.csv'
+      cli_args = "Mesh/active='fmg_restart' Physics/HeatConduction/FiniteVolume/h1/initialize_variables_from_mesh_file=true Outputs/file_base=from_file"
+      detail = 'when performing manual restart from a mesh file, ignoring the default initial condition.'
+    []
+  []
+  [error]
+    type = RunException
+    input = test_fv.i
+    cli_args = 'Physics/HeatConduction/FiniteVolume/h1/initial_temperature=100 Physics/HeatConduction/FiniteVolume/h1/initialize_variables_from_mesh_file=true'
+    expect_err = 'Initial temperature should not be set if the variables should be initialized from the mesh file'
+    requirement = 'The system shall error if the user specifies initial conditions while also requesting variables be loaded from a mesh file.'
+  []
+[]

@@ -41,6 +41,9 @@ protected:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Maps for wall treatement
+  /// Maps for wall treatment
   std::map<const Elem *, bool> _wall_bounded;
+
+  /// Whether a Newton's method is being used (and we need to preserve the sparsity pattern in edge cases)
+  const bool _preserve_sparsity_pattern;
 };
