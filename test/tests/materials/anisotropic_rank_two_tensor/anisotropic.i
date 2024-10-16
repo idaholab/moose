@@ -1,44 +1,44 @@
 [Mesh]
-    [gmg]
-        type = GeneratedMeshGenerator
-        dim = 3
-        nx = 2
-        ny = 2
-        nz = 2
-    []
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 2
+    ny = 2
+    nz = 2
+  []
 []
-    
+
 [Variables]
-    [u]
-    []
+  [u]
+  []
 []
-    
+
 [Kernels]
-    [diff]
-        type = Diffusion
-        variable = u
-    []
-    [react]
-        type = Reaction
-        variable = u
-    []
+  [diff]
+    type = Diffusion
+    variable = u
+  []
+  [react]
+    type = Reaction
+    variable = u
+  []
 []
-    
+
 [Materials]
-    [tensor]
-        type = AnisotropicRankTwoTensor
-        tensor_name = 'A'
-        value_1 = 1
-        value_2 = 2
-        value_3 = 3
-        outputs = 'exodus'
-    []
+	[tensor]
+    type = AnisotropicRankTwoTensor
+    tensor_name = 'A'
+    value_1 = 1
+    value_2 = 2
+    value_3 = 3
+    outputs = 'exodus'
+  []
 []
-    
+
 [Executioner]
-    type = Steady
+  type = Steady
 []
-    
+
 [Outputs]
-    exodus = true
+  exodus = true
 []
