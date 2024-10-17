@@ -1,7 +1,7 @@
 # test for displacement of pinched cylinder with user-defined local vectors
 # everything is similar to the pinch_cylinder_symm.i, except the local coordinates.
 # in the original test the first local axis is '0 0 1'
-# in this test, the first local vector is defined by the user : first_local_vector_ref='1 0 0'
+# in this test, the first local vector is defined by the user : first_local_vector_ref='1 -1 0'
 # the given vector by the user is projected on the shell elements
 # The rotational BCs are switched in order to get same results.
 
@@ -407,7 +407,7 @@
     rotations = 'rot_x rot_y'
     thickness = 0.01
     through_thickness_order = SECOND
-    first_local_vector_ref = '1 0 0'
+    first_local_vector_ref = '1 -1 0'
   []
   [stress]
     type = ADComputeShellStress

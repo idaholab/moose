@@ -481,23 +481,25 @@ ADComputeIncrementalShellStrain::computeLocalCoordinate()
   // calculating the element's local coordinates
   // the first local vector can be also defined by the user
 
+  // All nodes have the same normal vector. Therefore, here, we use only the normal vecor of the
+  // first element as "the element's normal vector"
   _e3 = _node_normal[0];
 
   if (_is_v1_defined)
   {
     _e1 = getParam<RealVectorValue>("first_local_vector_ref");
 
-    if (MooseUtils::absoluteFuzzyEqual(_e1.norm(), 0.0, 1e-6))
+    if (MooseUtils::absoluteFuzzyEqual(_e1.norm(), 0.0, 1e-3))
       mooseError(
-          "The norm of the defined first local axis is less than the acceptable telerance (1e-6)");
+          "The norm of the defined first local axis is less than the acceptable telerance (1e-3)");
 
     _e1 /= _e1.norm();
 
-    // vectors v1 and the normal are considered parallel if the angle between them is less
-    // than 0.5 degree
-    if (std::abs(_e1 * _e3) > std::cos(0.5 * libMesh::pi / 180.0))
+    // vector v1 and the normal are considered parallel if the angle between them is less
+    // than 0.05 degree
+    if (MooseUtils::absoluteFuzzyEqual(std::abs(_e1 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
     {
-      mooseError("The defined first local axis must not be perpenticular to any of the shell "
+      mooseError("The defined first local axis must not be perpendicular to any of the shell "
                  "elements ");
     }
     else
@@ -509,9 +511,9 @@ ADComputeIncrementalShellStrain::computeLocalCoordinate()
   else
   {
     _e1 = _x2.cross(_e3);
-    // If x2 is parallel to node normal, set V1 to x3 (less than 0.5 degree is considered
+    // If x2 is parallel to the element's normal, set e1 to x3 (less than 0.05 degree is considered
     // parallel)
-    if (_e1.norm() < std::sin(0.5 * libMesh::pi / 180.0))
+    if (MooseUtils::absoluteFuzzyEqual(std::abs(_x2 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
       _e1 = _x3;
   }
 
