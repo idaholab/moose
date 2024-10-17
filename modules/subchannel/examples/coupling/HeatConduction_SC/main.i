@@ -9,7 +9,7 @@ heated_length = 1.0 # m
     ny = 2
     n_cells = 10
     pitch = 0.014605
-    rod_diameter = 0.012065
+    pin_diameter = 0.012065
     gap = 0.0015875
     heated_length = 1.0
     spacer_z = '0.0'
@@ -244,7 +244,7 @@ heated_length = 1.0 # m
     user_object = Tpin_avg_uo
   []
 
-  [q_prime] # send heat flux from slave/BISON/heatConduction to subchannel/master
+  [q_prime] # send heat flux from BISON/heatConduction to subchannel
     type = MultiAppUserObjectTransfer2
     from_multi_app = sub
     variable = q_prime

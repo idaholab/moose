@@ -1,4 +1,4 @@
-rod_diameter = 0.00950
+pin_diameter = 0.00950
 heated_length = 1.0
 T_in = 359.15
 [GlobalParams]
@@ -10,7 +10,7 @@ T_in = 359.15
   [bisonMesh]
     type = GeneratedMeshGenerator
     dim = 2
-    xmax = ${fparse rod_diameter / 2.0}
+    xmax = ${fparse pin_diameter / 2.0}
     bias_x = 1.0
     nx = 20
     ymax = ${heated_length}
@@ -25,7 +25,7 @@ T_in = 359.15
     type = ParsedFunction
     expression = '(4.0 * 100000.0 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)'
     symbol_names = 'L D'
-    symbol_values = '${heated_length} ${rod_diameter}'
+    symbol_values = '${heated_length} ${pin_diameter}'
   []
 []
 
@@ -39,7 +39,7 @@ T_in = 359.15
 [AuxVariables]
   [Pin_surface_temperature]
   []
-  [rod_diameter_deformed]
+  [pin_diameter_deformed]
     # order = CONSTANT
     # family = MONOMIAL
   []
@@ -75,9 +75,9 @@ T_in = 359.15
   []
   [Deformation]
     type = ParsedAux
-    variable = rod_diameter_deformed
+    variable = pin_diameter_deformed
     coupled_variables = 'disp_x'
-    expression = '2.0 * disp_x + ${rod_diameter}'
+    expression = '2.0 * disp_x + ${pin_diameter}'
     execute_on = 'timestep_end'
   []
 []
@@ -172,8 +172,8 @@ T_in = 359.15
   []
   [RD_IC]
     type = ConstantIC
-    variable = rod_diameter_deformed
-    value = ${rod_diameter}
+    variable = pin_diameter_deformed
+    value = ${pin_diameter}
   []
 []
 
@@ -187,10 +187,10 @@ T_in = 359.15
     execute_on = 'TIMESTEP_END'
   []
 
-  [rod_diameter_uo]
+  [pin_diameter_uo]
     type = LayeredSideAverage
     boundary = right
-    variable = rod_diameter_deformed
+    variable = pin_diameter_deformed
     num_layers = 1000
     direction = y
     execute_on = 'TIMESTEP_END'

@@ -39,7 +39,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     unheated_length_entry = '${fparse length_entry_fuel}'
     heated_length = '${fparse length_heated_fuel}'
     unheated_length_exit = '${fparse length_outlet_fuel}'
-    rod_diameter = '${fparse fuel_pin_diameter}'
+    pin_diameter = '${fparse fuel_pin_diameter}'
     pitch = '${fparse fuel_pin_pitch}'
     dwire = '${fparse wire_diameter}'
     hwire = '${fparse wire_z_spacing}'
@@ -317,7 +317,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   #   source_variable = Tpin
   #   variable = Pin_surface_temperature
   # []
-  # [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
+  # [q_prime_pin] # send heat flux from BISON/heatConduction to subchannel
   #   type = MultiAppInterpolationTransfer
   #   from_multi_app = pin_map
   #   source_variable = q_prime_pin

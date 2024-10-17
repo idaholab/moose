@@ -1,4 +1,4 @@
-rod_diameter = 0.01
+pin_diameter = 0.01
 heated_length = 1.0
 T_in = 660 # K
 height = 1.0
@@ -20,9 +20,9 @@ height = 1.0
     pitch = 0.012
     num_sectors = 4
     region_ids='1 2 3 4'
-    ring_radii = '${fparse rod_diameter/2}
-                  ${fparse rod_diameter/2 + 1e-5}
-                  ${fparse rod_diameter/2 + 2e-5}'
+    ring_radii = '${fparse pin_diameter/2}
+                  ${fparse pin_diameter/2 + 1e-5}
+                  ${fparse pin_diameter/2 + 2e-5}'
     mesh_intervals = '5 1 1 1'
     quad_center_elements = true
   []
@@ -54,7 +54,7 @@ height = 1.0
     type = ParsedGenerateSideset
     input = rename_top_bottom
     new_sideset_name = side
-    combinatorial_geometry = 'sqrt(pow(x,2) + pow(y,2)) > ${fparse rod_diameter/2 - 1e-4}
+    combinatorial_geometry = 'sqrt(pow(x,2) + pow(y,2)) > ${fparse pin_diameter/2 - 1e-4}
                               & z > 1e-10 & ${fparse height} - z > 1e-10'
   []
 
@@ -72,7 +72,7 @@ height = 1.0
     type = ParsedFunction
     value = '(4.0 * 1000 / (pi * D* D * L)) * (pi/2)*sin(pi*z/L) * cos((x*x+y*y)/(2*D)*(pi/2))'
     vars = 'L D'
-    vals = '${heated_length} ${rod_diameter}'
+    vals = '${heated_length} ${pin_diameter}'
   []
 []
 

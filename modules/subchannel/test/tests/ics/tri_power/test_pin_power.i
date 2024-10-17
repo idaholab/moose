@@ -5,7 +5,7 @@
     n_cells = 10
     flat_to_flat = 0.60
     heated_length = 1.0
-    rod_diameter = 0.1
+    pin_diameter = 0.1
     pitch = 0.13
     dwire = 0.03
     hwire = 0.3

@@ -46,13 +46,12 @@ QuadPinMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Creates a mesh of 1D fuel pins in a square lattice arrangement");
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
-  params.addClassDescription("Creates a mesh in the location of the pin center lines");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
-  params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
+  params.addRequiredParam<unsigned int>("nx", "Number of subchannels in the x direction [-]");
+  params.addRequiredParam<unsigned int>("ny", "Number of subchannels in the y direction [-]");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addParam<unsigned int>("block_id", 1, "Domain Index");
   return params;

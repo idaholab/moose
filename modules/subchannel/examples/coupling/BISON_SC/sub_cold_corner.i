@@ -1,4 +1,4 @@
-rod_diameter = 0.00950
+pin_diameter = 0.00950
 heated_length = 3.6
 pitch = 0.0126
 clad_top_gap_height = 0.00127
@@ -6,7 +6,7 @@ clad_bot_gap_height = 0.00127
 clad_gap_width = 0.00009
 clad_thickness = 0.00057
 top_bot_clad_height = 0.00224
-pellet_outer_radius = ${fparse rod_diameter/2.0 - clad_gap_width - clad_thickness}
+pellet_outer_radius = ${fparse pin_diameter/2.0 - clad_gap_width - clad_thickness}
 pellet_height = ${fparse heated_length -  clad_top_gap_height - clad_bot_gap_height - 2.0 * top_bot_clad_height}
 full_pin_power = 66600 #W
 pin_factor = 0.7

@@ -4,7 +4,7 @@
 T_in = 588.5
 mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 2.0e5 # Pa
-rod_diameter = 5.84e-3
+pin_diameter = 5.84e-3
 heated_length = 1.0
 pitch = 7.26e-3
 [TriSubChannelMesh]
@@ -14,7 +14,7 @@ pitch = 7.26e-3
     n_cells = 40
     flat_to_flat = 2.1e-2 # 3.41e-2
     heated_length = ${heated_length} # 0.5334
-    rod_diameter = ${rod_diameter}
+    pin_diameter = ${pin_diameter}
     pitch = ${pitch}
     dwire = 1.42e-3
     hwire = 0.3048
@@ -225,35 +225,6 @@ pitch = 7.26e-3
   []
 []
 
-# [Executioner]
-#   type = Steady
-# []
-
-# ##############################################################################
-# ###  A multiapp that projects data to a detailed mesh
-# ##############################################################################
-
-# [MultiApps]
-#   [viz]
-#     type = FullSolveMultiApp
-#     input_files = "3d.i"
-#     execute_on = "timestep_end"
-#   []
-# []
-
-# [Transfers]
-#   [subchannel_transfer]
-#     type = MultiAppDetailedSolutionTransfer
-#     to_multi_app = viz
-#     variable = 'mdot SumWij P DP h T rho mu S'
-#   []
-#   [pin_transfer]
-#     type = MultiAppDetailedPinSolutionTransfer
-#     to_multi_app = viz
-#     variable = 'Tpin q_prime Dpin'
-#   []
-# []
-
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -296,14 +267,14 @@ pitch = 7.26e-3
     user_object = Tpin_avg_uo
   []
 
-  [diameter] # send diameter information from /BISON/heatConduction to subchannel/master
+  [diameter] # send diameter information from /BISON/heatConduction to subchannel
     type = MultiAppUserObjectTransfer2
     from_multi_app = sub
     variable = Dpin
-    user_object = rod_diameter_uo
+    user_object = pin_diameter_uo
   []
 
-  [q_prime] # send heat flux from /BISON/heatConduction to subchannel/master
+  [q_prime] # send heat flux from /BISON/heatConduction to subchannel
     type = MultiAppUserObjectTransfer2
     from_multi_app = sub
     variable = q_prime

@@ -7,7 +7,7 @@
     heated_length = 0.87
     unheated_length_entry = 0.0
     unheated_length_exit = 0.402
-    rod_diameter = 8.2e-3
+    pin_diameter = 8.2e-3
     pitch = 0.01148
   []
 []

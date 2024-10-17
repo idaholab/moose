@@ -2903,7 +2903,7 @@ SubChannel1PhaseProblem::externalSolve()
       auto Pr = (*_mu_soln)(node_chan)*cp / k;
       auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
       auto hw = Nu * k / Dh_i;
-      auto T_chan = (*_q_prime_duct_soln)(dn) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
+      auto T_chan = (*_q_prime_duct_soln)(dn) / (_subchannel_mesh.getPinDiameter() * M_PI * hw) +
                     (*_T_soln)(node_chan);
       _Tduct_soln->set(dn, T_chan);
     }

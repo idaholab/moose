@@ -1,6 +1,6 @@
 # NoSolveProblem
 
-!syntax description /SubChannel/NoSolveProblem
+!syntax description /Problem/NoSolveProblem
 
 ## Overview
 
@@ -13,8 +13,8 @@ a mesh for visualization purposes, there is no need to solve for anything.
 
 !! Describe and include an example of how to use the NoSolveProblem object.
 
-!syntax parameters /SubChannel/NoSolveProblem
+!syntax parameters /Problem/NoSolveProblem
 
-!syntax inputs /SubChannel/NoSolveProblem
+!syntax inputs /Problem/NoSolveProblem
 
-!syntax children /SubChannel/NoSolveProblem
+!syntax children /Problem/NoSolveProblem

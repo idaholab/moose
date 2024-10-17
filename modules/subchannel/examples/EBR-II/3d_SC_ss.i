@@ -21,7 +21,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     flat_to_flat = '${inner_duct_in}'
     unheated_length_exit = '${unheated_length_exit}'
     heated_length = '${heated_length}'
-    rod_diameter = '${fuel_pin_diameter}'
+    pin_diameter = '${fuel_pin_diameter}'
     pitch = '${fuel_pin_pitch}'
   []
 
@@ -32,7 +32,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     n_cells = 50
     unheated_length_exit = '${unheated_length_exit}'
     heated_length = '${heated_length}'
-    rod_diameter = '${fuel_pin_diameter}'
+    pin_diameter = '${fuel_pin_diameter}'
     pitch = '${fuel_pin_pitch}'
   []
 []

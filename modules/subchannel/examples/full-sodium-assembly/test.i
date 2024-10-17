@@ -9,7 +9,7 @@ P_out = 2.0e5 # Pa
     n_cells = 100
     flat_to_flat = 0.085
     heated_length = 1.0
-    rod_diameter = 0.01
+    pin_diameter = 0.01
     pitch = 0.012
     dwire = 0.002
     hwire = 0.0833
@@ -282,7 +282,7 @@ P_out = 2.0e5 # Pa
     source_variable = Tpin
     variable = Pin_surface_temperature
   []
-  [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
+  [q_prime_pin] # send heat flux from BISON/heatConduction to subchannel
     type = MultiAppInterpolationTransfer
     from_multi_app = pin_map
     source_variable = q_prime_pin

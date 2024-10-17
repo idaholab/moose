@@ -7,13 +7,13 @@
 <!-- -->
 
 This is a postprocessor that calculates and prints the pin surface temperature `Tpin`.
-To be more exact, `Tpin` is calcualted inside the `SCM` solver:
+To be more exact, `Tpin` is calculated inside the `SCM` solver:
 
 The assumption is that each neighboring subchannel to a specific pin sees the same heat flux.
-Using a `Dittus-Boelter` approach we calculate surface temperatures for each neighbor. The numerical
+Using the `Dittus-Boelter` approach we calculate surface temperatures for each neighbor. The numerical
 average is `Tpin`.
 
-Then, the postprocessor interpolates the value of the variable `Tpin` at a certain pin and height.
+Then, the postprocessor interpolates the value of the variable `Tpin` at a certain pin [!param](/Postprocessors/PinSurfaceTemperature/index) and [!param](/Postprocessors/PinSurfaceTemperature/height).
 
 ## Example Input File Syntax
 

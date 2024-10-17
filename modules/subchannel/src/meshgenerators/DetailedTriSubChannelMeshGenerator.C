@@ -28,7 +28,7 @@ DetailedTriSubChannelMeshGenerator::validParams()
   params.addClassDescription(
       "Creates a detailed mesh of subchannels in a triangular lattice arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
+  params.addRequiredParam<Real>("pin_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
@@ -48,7 +48,7 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
     _pitch(getParam<Real>("pitch")),
-    _rod_diameter(getParam<Real>("rod_diameter")),
+    _pin_diameter(getParam<Real>("pin_diameter")),
     _n_rings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
     _block_id(getParam<unsigned int>("block_id")),
@@ -219,7 +219,7 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
 
   // set the subchannel positions
   Real _duct_to_pin_gap =
-      0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
+      0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _pin_diameter);
   for (unsigned int i = 0; i < _n_channels; i++)
   {
     if (_subch_type[i] == EChannelType::CENTER)
@@ -268,7 +268,7 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
              (_pin_position[_chan_to_pin_map[i][0]](0) + _pin_position[_chan_to_pin_map[i][1]](0));
         y1 = 0.5 *
              (_pin_position[_chan_to_pin_map[i][0]](1) + _pin_position[_chan_to_pin_map[i][1]](1));
-        a1 = _rod_diameter / 2.0 + _duct_to_pin_gap / 2.0;
+        a1 = _pin_diameter / 2.0 + _duct_to_pin_gap / 2.0;
         a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
         _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
         _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
@@ -280,7 +280,7 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
       y0 = _pin_position[0](1);
       x1 = _pin_position[_chan_to_pin_map[i][0]](0);
       y1 = _pin_position[_chan_to_pin_map[i][0]](1);
-      a1 = _rod_diameter / 2.0 + _duct_to_pin_gap / 2.0;
+      a1 = _pin_diameter / 2.0 + _duct_to_pin_gap / 2.0;
       a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
       _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
@@ -387,7 +387,7 @@ DetailedTriSubChannelMeshGenerator::generate()
   // Build an array of points arranged in a circle on the xy-plane. (last and first node overlap)
   // We build for both the square discretization in the edges and the triangular discretization
   // within the mesh
-  const Real radius = _rod_diameter / 2.0;
+  const Real radius = _pin_diameter / 2.0;
   std::array<Point, theta_res_square + 1> circle_points_square;
   {
     Real theta = 0;
@@ -416,16 +416,16 @@ DetailedTriSubChannelMeshGenerator::generate()
   const Real shrink_factor = 0.99999;
   // Quadrants are used only for the side and corner subchannels
   Real _duct_to_pin_gap =
-      0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
+      0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _pin_diameter);
   std::array<Point, 2> quadrant_centers_sides;
   quadrant_centers_sides[0] = Point(
-      -_pitch * 0.5 * shrink_factor, -(_duct_to_pin_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
+      -_pitch * 0.5 * shrink_factor, -(_duct_to_pin_gap + _pin_diameter) * 0.5 * shrink_factor, 0);
   quadrant_centers_sides[1] = Point(
-      _pitch * 0.5 * shrink_factor, -(_duct_to_pin_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
+      _pitch * 0.5 * shrink_factor, -(_duct_to_pin_gap + _pin_diameter) * 0.5 * shrink_factor, 0);
   std::array<Point, 1> quadrant_centers_corner;
   quadrant_centers_corner[0] =
-      Point(-(_duct_to_pin_gap + _rod_diameter) * 0.5 * std::sin(libMesh::pi / 6) * shrink_factor,
-            -(_duct_to_pin_gap + _rod_diameter) * 0.5 * std::cos(libMesh::pi / 6) * shrink_factor,
+      Point(-(_duct_to_pin_gap + _pin_diameter) * 0.5 * std::sin(libMesh::pi / 6) * shrink_factor,
+            -(_duct_to_pin_gap + _pin_diameter) * 0.5 * std::cos(libMesh::pi / 6) * shrink_factor,
             0);
   // Triangles are used for all center subchannels
   std::array<Point, 3> triangle_centers;
@@ -479,8 +479,8 @@ DetailedTriSubChannelMeshGenerator::generate()
       auto c_pt = circle_points_triangle[1 * m_quarter - ii];
       corner_points[ii + 1] = quadrant_centers_corner[0] + c_pt;
     }
-    Real side_short = (_duct_to_pin_gap + _rod_diameter) * 0.5;
-    Real side_long = (2.0 * _duct_to_pin_gap + _rod_diameter) * 0.5;
+    Real side_short = (_duct_to_pin_gap + _pin_diameter) * 0.5;
+    Real side_long = (2.0 * _duct_to_pin_gap + _pin_diameter) * 0.5;
     Real side_length = std::sqrt(std::pow(side_short, 2) + std::pow(side_long, 2) -
                                  2 * side_short * side_long * std::cos(libMesh::pi / 6));
     Real angle =

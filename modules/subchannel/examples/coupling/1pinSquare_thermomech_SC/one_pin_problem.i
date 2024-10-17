@@ -11,7 +11,7 @@ heated_length = 1.0
   ny = 2
   n_cells = 25
   pitch = 0.0126
-  rod_diameter = 0.00950
+  pin_diameter = 0.00950
   gap = 0.00095
   heated_length = ${heated_length}
   spacer_z = '0.0'
@@ -229,10 +229,6 @@ heated_length = 1.0
   []
 []
 
-# [Executioner]
-#   type = Steady
-# []
-
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -275,14 +271,14 @@ heated_length = 1.0
     user_object = Tpin_avg_uo
   []
 
-  [diameter] # send diameter information from /BISON/heatConduction to subchannel/master
+  [diameter] # send diameter information from /BISON/heatConduction to subchannel
     type = MultiAppUserObjectTransfer2
     from_multi_app = sub
     variable = Dpin
-    user_object = rod_diameter_uo
+    user_object = pin_diameter_uo
   []
 
-  [q_prime] # send heat flux from /BISON/heatConduction to subchannel/master
+  [q_prime] # send heat flux from /BISON/heatConduction to subchannel
     type = MultiAppUserObjectTransfer2
     from_multi_app = sub
     variable = q_prime
