@@ -9,51 +9,36 @@
 
 #pragma once
 
-#include "NEML2Utils.h"
-#include "MOOSEToNEML2.h"
+#include "MOOSEToNEML2Batched.h"
 
-#ifndef NEML2_ENABLED
-NEML2ObjectStubHeader(MOOSERealMaterialPropertyToNEML2, ElementUserObject);
-NEML2ObjectStubHeader(MOOSERankTwoTensorMaterialPropertyToNEML2, ElementUserObject);
-NEML2ObjectStubHeader(MOOSESymmetricRankTwoTensorMaterialPropertyToNEML2, ElementUserObject);
-NEML2ObjectStubHeader(MOOSEStdVectorRealMaterialPropertyToNEML2, ElementUserObject);
-
-NEML2ObjectStubHeader(MOOSEOldRealMaterialPropertyToNEML2, ElementUserObject);
-NEML2ObjectStubHeader(MOOSEOldRankTwoTensorMaterialPropertyToNEML2, ElementUserObject);
-NEML2ObjectStubHeader(MOOSEOldSymmetricRankTwoTensorMaterialPropertyToNEML2, ElementUserObject);
-NEML2ObjectStubHeader(MOOSEOldStdVectorRealMaterialPropertyToNEML2, ElementUserObject);
-#else
+#include "RankTwoTensor.h"
+#include "SymmetricRankTwoTensor.h"
 
 /**
- * Gather a MOOSE material property for insertion into the specified input of a NEML2 model.
+ * Gather a MOOSE material property for insertion into the NEML2 model.
  */
 template <typename T, unsigned int state>
-class MOOSEMaterialPropertyToNEML2 : public MOOSEToNEML2
+class MOOSEMaterialPropertyToNEML2 : public MOOSEToNEML2Batched
 {
 public:
   static InputParameters validParams();
 
   MOOSEMaterialPropertyToNEML2(const InputParameters & params);
 
+#ifdef NEML2_ENABLED
 protected:
-  virtual torch::Tensor convertQpMOOSEData() const override;
+  torch::Tensor convertQpMOOSEData() const override;
 
   /// MOOSE material property to read data from
   const MaterialProperty<T> & _mat_prop;
+#endif
 };
 
-typedef MOOSEMaterialPropertyToNEML2<Real, 0> MOOSERealMaterialPropertyToNEML2;
-typedef MOOSEMaterialPropertyToNEML2<RankTwoTensor, 0> MOOSERankTwoTensorMaterialPropertyToNEML2;
-typedef MOOSEMaterialPropertyToNEML2<SymmetricRankTwoTensor, 0>
-    MOOSESymmetricRankTwoTensorMaterialPropertyToNEML2;
-typedef MOOSEMaterialPropertyToNEML2<std::vector<Real>, 0>
-    MOOSEStdVectorRealMaterialPropertyToNEML2;
+#define DefineMOOSEMaterialPropertyToNEML2Alias(T, alias)                                          \
+  using MOOSE##alias##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 0>;                \
+  using MOOSEOld##alias##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 1>
 
-typedef MOOSEMaterialPropertyToNEML2<Real, 1> MOOSEOldRealMaterialPropertyToNEML2;
-typedef MOOSEMaterialPropertyToNEML2<RankTwoTensor, 1> MOOSEOldRankTwoTensorMaterialPropertyToNEML2;
-typedef MOOSEMaterialPropertyToNEML2<SymmetricRankTwoTensor, 1>
-    MOOSEOldSymmetricRankTwoTensorMaterialPropertyToNEML2;
-typedef MOOSEMaterialPropertyToNEML2<std::vector<Real>, 1>
-    MOOSEOldStdVectorRealMaterialPropertyToNEML2;
-
-#endif
+DefineMOOSEMaterialPropertyToNEML2Alias(Real, Real);
+DefineMOOSEMaterialPropertyToNEML2Alias(RankTwoTensor, RankTwoTensor);
+DefineMOOSEMaterialPropertyToNEML2Alias(SymmetricRankTwoTensor, SymmetricRankTwoTensor);
+DefineMOOSEMaterialPropertyToNEML2Alias(std::vector<Real>, StdVector);

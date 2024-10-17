@@ -8,66 +8,97 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2Action.h"
+#include "NEML2ActionCommon.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "NEML2Utils.h"
+#include "InputParameterWarehouse.h"
 
 #ifdef NEML2_ENABLED
-#include "neml2/misc/utils.h"
 #include "neml2/misc/parser_utils.h"
-#include "neml2/base/HITParser.h"
 #endif
 
-registerMooseAction("SolidMechanicsApp", NEML2Action, "parse_neml2");
 registerMooseAction("SolidMechanicsApp", NEML2Action, "add_material");
 registerMooseAction("SolidMechanicsApp", NEML2Action, "add_user_object");
+
+#ifdef NEML2_ENABLED
+// NEML2 variable type --> MOOSE type
+const std::map<neml2::TensorType, std::string> tensor_type_map = {
+    {neml2::TensorType::kScalar, "Real"},
+    {neml2::TensorType::kSR2, "SymmetricRankTwoTensor"},
+    {neml2::TensorType::kR2, "RankTwoTensor"},
+    {neml2::TensorType::kSSR4, "SymmetricRankFourTensor"},
+    {neml2::TensorType::kR4, "RankFourTensor"},
+};
+// NEML2 (output, input) type --> NEML2 derivative type
+const std::map<std::pair<neml2::TensorType, neml2::TensorType>, neml2::TensorType> deriv_type_map =
+    {
+        {{neml2::TensorType::kScalar, neml2::TensorType::kScalar}, neml2::TensorType::kScalar},
+        {{neml2::TensorType::kSR2, neml2::TensorType::kSR2}, neml2::TensorType::kSSR4},
+        {{neml2::TensorType::kSR2, neml2::TensorType::kScalar}, neml2::TensorType::kSR2},
+        {{neml2::TensorType::kScalar, neml2::TensorType::kSR2}, neml2::TensorType::kSR2},
+        {{neml2::TensorType::kR2, neml2::TensorType::kR2}, neml2::TensorType::kR4},
+        {{neml2::TensorType::kR2, neml2::TensorType::kScalar}, neml2::TensorType::kR2},
+        {{neml2::TensorType::kScalar, neml2::TensorType::kR2}, neml2::TensorType::kR2},
+};
+#endif
 
 InputParameters
 NEML2Action::validParams()
 {
-  InputParameters params = Action::validParams();
-  NEML2Utils::addClassDescription(params, "Parse and set up NEML2 objects");
-  params.addRequiredParam<DataFileName>(
-      "input", "Path to the NEML2 input file containing the NEML2 model(s)");
-  params.addRequiredParam<std::string>(
-      "model",
-      "Name of the NEML2 model, i.e., the string inside the brackets [] in the NEML2 input file "
-      "that corresponds to the model you want to use.");
-  params.addParam<bool>("verbose",
-                        true,
-                        "Whether to print additional information about the NEML2 model at the "
-                        "beginning of the simulation");
-  params.addParam<std::vector<VariableName>>(
-      "temperature", std::vector<VariableName>{"0"}, "Coupled temperature");
-
-  MooseEnum mode("ELEMENT ALL PARSE_ONLY", "ELEMENT");
-  mode.addDocumentation("ELEMENT", "Perform constitutive update element-by-element.");
-  mode.addDocumentation("ALL", "Perform constitutive update for all quadrature points at once.");
-  mode.addDocumentation("PARSE_ONLY",
-                        "Only parse the NEML2 input file and manufacture the NEML2 model, do not "
-                        "setup any MOOSE objects.");
-  params.addParam<MooseEnum>("mode", mode, "Mode of operation for the NEML2 material model.");
-
+  InputParameters params = NEML2ActionCommon::commonParams();
+  params.addClassDescription(NEML2Utils::docstring("Set up the NEML2 material model"));
   params.addParam<std::string>(
-      "device",
-      "cpu",
-      "Device on which to evaluate the NEML2 model. The string supplied must follow the following "
-      "schema: (cpu|cuda)[:<device-index>] where cpu or cuda specifies the device type, and "
-      ":<device-index> optionally specifies a device index.");
-  params.addParam<bool>("enable_AD",
-                        false,
-                        "Set to true to enable PyTorch AD. When set to false (default), no "
-                        "function graph or gradient is computed, which speeds up model "
-                        "evaluation.");
+      "executor_name",
+      NEML2Utils::docstring("Name of the NEML2ModelExecutor user object. The default name is "
+                            "'neml2_<model-name>_<block-name>' where <model-name> is the NEML2 "
+                            "model's name, and <block-name> is this action sub-block's name."));
+  params.addParam<std::string>(
+      "batch_index_generator_name",
+      NEML2Utils::docstring(
+          "Name of the NEML2BatchIndexGenerator user object. The default name is "
+          "'neml2_index_<model-name>_<block-name>' where <model-name> is the NEML2 model's name, "
+          "and <block-name> is this action sub-block's name."));
+  params.addParam<std::vector<SubdomainName>>(
+      "block",
+      {},
+      NEML2Utils::docstring("List of blocks (subdomains) where the material model is defined"));
   return params;
 }
 
-#ifndef NEML2_ENABLED
-
-NEML2Action::NEML2Action(const InputParameters & parameters) : Action(parameters)
+NEML2Action::NEML2Action(const InputParameters & params)
+  : Action(params),
+    _executor_name(isParamValid("executor_name")
+                       ? getParam<std::string>("executor_name")
+                       : "neml2_" + getParam<std::string>("model") + "_" + name()),
+    _idx_generator_name(isParamValid("batch_index_generator_name")
+                            ? getParam<std::string>("batch_index_generator_name")
+                            : "neml2_index_" + getParam<std::string>("model") + "_" + name()),
+    _block(getParam<std::vector<SubdomainName>>("block"))
 {
-  NEML2Utils::libraryNotEnabledError(parameters);
+  NEML2Utils::assertNEML2Enabled();
+
+  // Apply parameters under the common area, i.e., under [NEML2]
+  const auto & all_params = _app.getInputParameterWarehouse().getInputParameters();
+  auto & sub_block_params = *(all_params.find(uniqueActionName())->second.get());
+  auto common_block = _awh.getActions<NEML2ActionCommon>();
+  mooseAssert(common_block.size() == 1, "There must exist one and only one common NEML2 action.");
+  sub_block_params.applyParameters(common_block[0]->parameters());
+
+  // verbosity
+  _verbose = getParam<bool>("verbose");
+
+  // Set up additional outputs for each requested material property
+  auto outputs = getParam<std::vector<MaterialPropertyName>>("export_outputs");
+  auto output_targets = getParam<std::vector<std::vector<OutputName>>>("export_output_targets");
+  if (outputs.size() != output_targets.size())
+    paramError("export_outputs",
+               "export_outputs should have the same length as export_output_targets");
+  for (auto i : index_range(outputs))
+    _export_output_targets[outputs[i]] = output_targets[i];
 }
+
+#ifndef NEML2_ENABLED
 
 void
 NEML2Action::act()
@@ -76,80 +107,371 @@ NEML2Action::act()
 
 #else
 
-NEML2Action::NEML2Action(const InputParameters & parameters)
-  : Action(parameters),
-    _fname(getDataFileName("input")),
-    _mname(getParam<std::string>("model")),
-    _verbose(getParam<bool>("verbose")),
-    _mode(getParam<MooseEnum>("mode")),
-    _device(getParam<std::string>("device")),
-    _enable_AD(getParam<bool>("enable_AD"))
-{
-}
-
 void
 NEML2Action::act()
 {
-  const auto mode_name = std::string(_mode);
-  if (_current_task == "parse_neml2")
-  {
-    neml2::load_input(std::string(_fname));
-
-    if (_verbose)
-    {
-      auto & model = neml2::get_model(_mname, _enable_AD);
-
-      _console << COLOR_YELLOW << "*** BEGIN NEML2 INFO ***" << std::endl;
-      _console << model << std::endl;
-      _console << "*** END NEML2 INFO ***" << COLOR_DEFAULT << std::endl;
-    }
-  }
-
   if (_current_task == "add_user_object")
   {
-    if (_mode == "ELEMENT")
+    // Get the NEML2 model so that we can introspect variable tensor types
+    auto & model = neml2::get_model(getParam<std::string>("model"));
+
+    // List inputs, outputs, and parameters of the model
+    if (_verbose)
     {
-      // no-op
+      _console << COLOR_YELLOW << "*** NEML2 MATERIAL MODEL SUMMARY BEGIN ***" << COLOR_DEFAULT
+               << std::endl;
+      _console << "Input file location:       " << parameters().blockLocation() << std::endl;
+      _console << "Input file path:           " << parameters().blockFullpath() << std::endl;
+      _console << "Material model Name:       " << getParam<std::string>("model") << std::endl;
+      _console << "Evaluation device:         " << getParam<std::string>("device") << std::endl;
+      _console << "Automatic differentiation: "
+               << (getParam<bool>("enable_AD") ? "Enabled" : "Disabled") << std::endl;
+      _console << "Material model structure:  " << std::endl;
+      _console << model;
+      _console << COLOR_YELLOW << "*** NEML2 MATERIAL MODEL SUMMARY END ***\n"
+               << COLOR_DEFAULT << std::endl;
     }
-    else if (_mode == "ALL")
+
+    setupInputMappings(model);
+    setupParameterMappings(model);
+    setupOutputMappings(model);
+    setupDerivativeMappings(model);
+    setupParameterDerivativeMappings(model);
+
+    // MOOSEToNEML2 input gatherers
+    std::vector<UserObjectName> gatherers;
+    for (const auto & input : _inputs)
     {
-      auto type = "CauchyStressFromNEML2UO";
+      if (input.moose.type == MOOSEIOType::MATERIAL)
+      {
+        auto obj_name = "__moose(" + input.moose.name + ")->neml2(" +
+                        neml2::utils::stringify(input.neml2.name) + ")_" + name() + "__";
+        auto obj_moose_type = tensor_type_map.at(input.neml2.type) + "MaterialProperty";
+        if (input.neml2.name.start_with("old_forces") || input.neml2.name.start_with("old_state"))
+          obj_moose_type = "Old" + obj_moose_type;
+        auto obj_type = "MOOSE" + obj_moose_type + "ToNEML2";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<MaterialPropertyName>("from_moose") = input.moose.name;
+        obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(input.neml2.name);
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        _problem->addUserObject(obj_type, obj_name, obj_params);
+        gatherers.push_back(obj_name);
+      }
+      else if (input.moose.type == MOOSEIOType::VARIABLE)
+      {
+        auto obj_name = "__moose(" + input.moose.name + ")->neml2(" +
+                        neml2::utils::stringify(input.neml2.name) + ")_" + name() + "__";
+        std::string obj_moose_type = "Variable";
+        if (input.neml2.name.start_with("old_forces") || input.neml2.name.start_with("old_state"))
+          obj_moose_type = "Old" + obj_moose_type;
+        auto obj_type = "MOOSE" + obj_moose_type + "ToNEML2";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<std::vector<VariableName>>("from_moose") = {input.moose.name};
+        obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(input.neml2.name);
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        _problem->addUserObject(obj_type, obj_name, obj_params);
+        gatherers.push_back(obj_name);
+      }
+      else if (input.moose.type == MOOSEIOType::POSTPROCESSOR)
+      {
+        auto obj_name = "__moose(" + input.moose.name + ")->neml2(" +
+                        neml2::utils::stringify(input.neml2.name) + ")" + name() + "__";
+        auto obj_moose_type = std::string("Postprocessor");
+        if (input.neml2.name.start_with("old_forces") || input.neml2.name.start_with("old_state"))
+          obj_moose_type = "Old" + obj_moose_type;
+        auto obj_type = "MOOSE" + obj_moose_type + "ToNEML2";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<PostprocessorName>("from_moose") = input.moose.name;
+        obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(input.neml2.name);
+        _problem->addUserObject(obj_type, obj_name, obj_params);
+        gatherers.push_back(obj_name);
+      }
+      else
+        paramError("moose_input_types",
+                   "Unsupported type corresponding to the moose input ",
+                   input.moose.name);
+    }
+
+    // MOOSEToNEML2 parameter gatherers
+    std::vector<UserObjectName> param_gatherers;
+    for (const auto & param : _params)
+    {
+      if (param.moose.type == MOOSEIOType::MATERIAL)
+      {
+        auto obj_name =
+            "__moose(" + param.moose.name + ")->neml2(" + param.neml2.name + ")_" + name() + "__";
+        auto obj_moose_type = tensor_type_map.at(param.neml2.type);
+        auto obj_type = "MOOSE" + obj_moose_type + "MaterialPropertyToNEML2";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<MaterialPropertyName>("from_moose") = param.moose.name;
+        obj_params.set<std::string>("to_neml2") = param.neml2.name;
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        _problem->addUserObject(obj_type, obj_name, obj_params);
+        param_gatherers.push_back(obj_name);
+      }
+      else if (param.moose.type == MOOSEIOType::VARIABLE)
+      {
+        auto obj_name =
+            "__moose(" + param.moose.name + ")->neml2(" + param.neml2.name + ")_" + name() + "__";
+        auto obj_type = "MOOSEVariableToNEML2";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<std::vector<VariableName>>("from_moose") = {param.moose.name};
+        obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(param.neml2.name);
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        _problem->addUserObject(obj_type, obj_name, obj_params);
+        param_gatherers.push_back(obj_name);
+      }
+      else if (param.moose.type == MOOSEIOType::POSTPROCESSOR)
+      {
+        auto obj_name =
+            "__moose(" + param.moose.name + ")->neml2(" + param.neml2.name + ")" + name() + "__";
+        auto obj_moose_type = std::string("Postprocessor");
+        auto obj_type = "MOOSE" + obj_moose_type + "ToNEML2";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<PostprocessorName>("from_moose") = param.moose.name;
+        obj_params.set<std::string>("to_neml2") = param.neml2.name;
+        _problem->addUserObject(obj_type, obj_name, obj_params);
+        param_gatherers.push_back(obj_name);
+      }
+      else
+        paramError("moose_parameter_types",
+                   "Unsupported type corresponding to the moose parameter ",
+                   param.moose.name);
+    }
+
+    // The index generator UO
+    {
+      auto type = "NEML2BatchIndexGenerator";
       auto params = _factory.getValidParams(type);
       params.applyParameters(parameters());
-      _problem->addUserObject(type, "_neml2_uo_" + mode_name, params);
+      _problem->addUserObject(type, _idx_generator_name, params);
     }
-    else if (_mode == "PARSE_ONLY")
+
+    // The Executor UO
     {
-      // no-op
+      auto type = "NEML2ModelExecutor";
+      auto params = _factory.getValidParams(type);
+      params.applyParameters(parameters());
+      params.set<UserObjectName>("batch_index_generator") = _idx_generator_name;
+      params.set<std::vector<UserObjectName>>("gatherers") = gatherers;
+      params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers;
+      _problem->addUserObject(type, _executor_name, params);
     }
-    else
-      mooseError("Unsupported mode of constitutive update: ", _mode);
   }
 
   if (_current_task == "add_material")
   {
-    if (_mode == "ELEMENT")
+    // NEML2ToMOOSE output retrievers
+    for (const auto & output : _outputs)
     {
-      auto type = "CauchyStressFromNEML2";
-      auto params = _factory.getValidParams(type);
-      params.applyParameters(parameters());
-      _problem->addMaterial(type, "_neml2_stress_" + mode_name, params);
+      if (output.moose.type == MOOSEIOType::MATERIAL)
+      {
+        auto obj_name = "__neml2(" + neml2::utils::stringify(output.neml2.name) + ")->moose(" +
+                        output.moose.name + ")_" + name() + "__";
+        auto obj_type = "NEML2ToMOOSE" + tensor_type_map.at(output.neml2.type) + "MaterialProperty";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
+        obj_params.set<MaterialPropertyName>("to_moose") = output.moose.name;
+        obj_params.set<std::string>("from_neml2") = neml2::utils::stringify(output.neml2.name);
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        if (_export_output_targets.count(output.moose.name))
+          obj_params.set<std::vector<OutputName>>("outputs") =
+              _export_output_targets[output.moose.name];
+        _problem->addMaterial(obj_type, obj_name, obj_params);
+      }
+      else
+        paramError("moose_output_types",
+                   "Unsupported type corresponding to the moose output ",
+                   output.moose.name);
     }
-    else if (_mode == "ALL")
+
+    // NEML2ToMOOSE derivative retrievers
+    for (const auto & deriv : _derivs)
     {
-      auto type = "CauchyStressFromNEML2Receiver";
-      auto params = _factory.getValidParams(type);
-      params.applyParameters(parameters());
-      params.set<UserObjectName>("neml2_uo") = "_neml2_uo_" + mode_name;
-      _problem->addMaterial(type, "_neml2_stress_" + mode_name, params);
+      if (deriv.moose.type == MOOSEIOType::MATERIAL)
+      {
+        auto obj_name = "__neml2(d(" + neml2::utils::stringify(deriv.neml2.y.name) + ")/d(" +
+                        neml2::utils::stringify(deriv.neml2.x.name) + "))->moose(" +
+                        deriv.moose.name + ")_" + name() + "__";
+        auto obj_type =
+            "NEML2ToMOOSE" +
+            tensor_type_map.at(deriv_type_map.at({deriv.neml2.y.type, deriv.neml2.x.type})) +
+            "MaterialProperty";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
+        obj_params.set<MaterialPropertyName>("to_moose") = deriv.moose.name;
+        obj_params.set<std::string>("from_neml2") = neml2::utils::stringify(deriv.neml2.y.name);
+        obj_params.set<std::string>("neml2_input_derivative") =
+            neml2::utils::stringify(deriv.neml2.x.name);
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        if (_export_output_targets.count(deriv.moose.name))
+          obj_params.set<std::vector<OutputName>>("outputs") =
+              _export_output_targets[deriv.moose.name];
+        _problem->addMaterial(obj_type, obj_name, obj_params);
+      }
+      else
+        paramError("moose_derivative_types",
+                   "Unsupported type corresponding to the moose derivative ",
+                   deriv.moose.name);
     }
-    else if (_mode == "PARSE_ONLY")
+
+    // NEML2ToMOOSE parameter derivative retrievers
+    for (const auto & param_deriv : _param_derivs)
     {
-      // no-op
+      if (param_deriv.moose.type == MOOSEIOType::MATERIAL)
+      {
+        auto obj_name = "__neml2(d(" + neml2::utils::stringify(param_deriv.neml2.y.name) + ")/d(" +
+                        param_deriv.neml2.x.name + "))->moose(" + param_deriv.moose.name + ")_" +
+                        name() + "__";
+        auto obj_type = "NEML2ToMOOSE" +
+                        tensor_type_map.at(deriv_type_map.at(
+                            {param_deriv.neml2.y.type, param_deriv.neml2.x.type})) +
+                        "MaterialProperty";
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
+        obj_params.set<MaterialPropertyName>("to_moose") = param_deriv.moose.name;
+        obj_params.set<std::string>("from_neml2") =
+            neml2::utils::stringify(param_deriv.neml2.y.name);
+        obj_params.set<std::string>("neml2_parameter_derivative") = param_deriv.neml2.x.name;
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+        if (_export_output_targets.count(param_deriv.moose.name))
+          obj_params.set<std::vector<OutputName>>("outputs") =
+              _export_output_targets[param_deriv.moose.name];
+        _problem->addMaterial(obj_type, obj_name, obj_params);
+      }
+      else
+        paramError("moose_parameter_derivative_types",
+                   "Unsupported type corresponding to the moose parameter derivative ",
+                   param_deriv.moose.name);
     }
-    else
-      mooseError("Unsupported mode of constitutive update: ", _mode);
   }
 }
 
+void
+NEML2Action::setupInputMappings(const neml2::Model & model)
+{
+  const auto moose_input_types =
+      getParam<MultiMooseEnum>("moose_input_types").getSetValueIDs<MOOSEIOType>();
+  const auto moose_inputs = getParam<std::vector<std::string>>("moose_inputs");
+  const auto neml2_inputs = getParam<std::vector<std::string>>("neml2_inputs");
+
+  if (moose_inputs.size() != moose_input_types.size())
+    paramError("moose_inputs", "moose_inputs must have the same length as moose_input_types");
+  if (moose_inputs.size() != neml2_inputs.size())
+    paramError("moose_inputs", "moose_inputs must have the same length as neml2_inputs");
+
+  for (auto i : index_range(moose_inputs))
+  {
+    auto neml2_input = neml2::utils::parse<neml2::VariableName>(neml2_inputs[i]);
+    _inputs.push_back({
+        {moose_inputs[i], moose_input_types[i]},
+        {neml2_input, model.input_type(neml2_input)},
+    });
+  }
+}
+
+void
+NEML2Action::setupParameterMappings(const neml2::Model & model)
+{
+  const auto moose_param_types =
+      getParam<MultiMooseEnum>("moose_parameter_types").getSetValueIDs<MOOSEIOType>();
+  const auto moose_params = getParam<std::vector<std::string>>("moose_parameters");
+  const auto neml2_params = getParam<std::vector<std::string>>("neml2_parameters");
+
+  if (moose_params.size() != moose_param_types.size())
+    paramError("moose_parameters",
+               "moose_params must have the same length as moose_parameter_types");
+  if (moose_params.size() != neml2_params.size())
+    paramError("moose_parameters",
+               "moose_parameters must have the same length as neml2_parameters");
+
+  for (auto i : index_range(moose_params))
+    _params.push_back({{moose_params[i], moose_param_types[i]},
+                       {neml2_params[i], model.get_parameter(neml2_params[i]).type()}});
+}
+
+void
+NEML2Action::setupOutputMappings(const neml2::Model & model)
+{
+  const auto moose_output_types =
+      getParam<MultiMooseEnum>("moose_output_types").getSetValueIDs<MOOSEIOType>();
+  const auto moose_outputs = getParam<std::vector<std::string>>("moose_outputs");
+  const auto neml2_outputs = getParam<std::vector<std::string>>("neml2_outputs");
+
+  if (moose_outputs.size() != moose_output_types.size())
+    paramError("moose_outputs", "moose_outputs must have the same length as moose_output_types");
+  if (moose_outputs.size() != neml2_outputs.size())
+    paramError("moose_outputs", "moose_outputs must have the same length as neml2_outputs");
+
+  for (auto i : index_range(moose_outputs))
+  {
+    auto neml2_output = neml2::utils::parse<neml2::VariableName>(neml2_outputs[i]);
+    _outputs.push_back({
+        {moose_outputs[i], moose_output_types[i]},
+        {neml2_output, model.output_type(neml2_output)},
+    });
+  }
+}
+
+void
+NEML2Action::setupDerivativeMappings(const neml2::Model & model)
+{
+  const auto moose_deriv_types =
+      getParam<MultiMooseEnum>("moose_derivative_types").getSetValueIDs<MOOSEIOType>();
+  const auto moose_derivs = getParam<std::vector<std::string>>("moose_derivatives");
+  const auto neml2_derivs = getParam<std::vector<std::vector<std::string>>>("neml2_derivatives");
+
+  if (moose_derivs.size() != moose_deriv_types.size())
+    paramError("moose_derivatives",
+               "moose_derivatives must have the same length as moose_derivative_types");
+  if (moose_derivs.size() != neml2_derivs.size())
+    paramError("moose_derivatives",
+               "moose_derivatives must have the same length as neml2_derivatives");
+
+  for (auto i : index_range(moose_derivs))
+  {
+    if (neml2_derivs[i].size() != 2)
+      paramError("neml2_derivatives", "The length of each pair in neml2_derivatives must be 2.");
+
+    auto neml2_y = neml2::utils::parse<neml2::VariableName>(neml2_derivs[i][0]);
+    auto neml2_x = neml2::utils::parse<neml2::VariableName>(neml2_derivs[i][1]);
+    _derivs.push_back({
+        {moose_derivs[i], moose_deriv_types[i]},
+        {{neml2_y, model.output_type(neml2_y)}, {neml2_x, model.input_type(neml2_x)}},
+    });
+  }
+}
+
+void
+NEML2Action::setupParameterDerivativeMappings(const neml2::Model & model)
+{
+  const auto moose_param_deriv_types =
+      getParam<MultiMooseEnum>("moose_parameter_derivative_types").getSetValueIDs<MOOSEIOType>();
+  const auto moose_param_derivs = getParam<std::vector<std::string>>("moose_parameter_derivatives");
+  const auto neml2_param_derivs =
+      getParam<std::vector<std::vector<std::string>>>("neml2_parameter_derivatives");
+
+  if (moose_param_derivs.size() != moose_param_deriv_types.size())
+    paramError("moose_parameter_derivatives",
+               "moose_parameter_derivatives must have the same length as "
+               "moose_parameter_derivative_types");
+  if (moose_param_derivs.size() != neml2_param_derivs.size())
+    paramError(
+        "moose_parameter_derivatives",
+        "moose_parameter_derivatives must have the same length as neml2_parameter_derivatives");
+
+  for (auto i : index_range(moose_param_derivs))
+  {
+    if (neml2_param_derivs[i].size() != 2)
+      paramError("neml2_parameter_derivatives",
+                 "The length of each pair in neml2_parameter_derivatives must be 2.");
+
+    auto neml2_y = neml2::utils::parse<neml2::VariableName>(neml2_param_derivs[i][0]);
+    auto neml2_x = neml2_param_derivs[i][1];
+    _param_derivs.push_back({
+        {moose_param_derivs[i], moose_param_deriv_types[i]},
+        {{neml2_y, model.output_type(neml2_y)}, {neml2_x, model.get_parameter(neml2_x).type()}},
+    });
+  }
+}
 #endif // NEML2_ENABLED

@@ -2,18 +2,19 @@
 
 !syntax description /UserObjects/MOOSEVariableToNEML2
 
+!alert note
+Users are +NOT+ expected to directly use this object in an input file. Instead, it is always recommended to use the [NEML2 action](syntax/NEML2/index.md).
+
 ## Description
 
-This object collects a given [!param](/UserObjects/MOOSEVariableToNEML2/moose_variable) for use as an input [!param](/UserObjects/MOOSEVariableToNEML2/neml2_variable) to a NEML2 model executed by a [ExecuteNEML2Model](ExecuteNEML2Model.md) user object.
+This family of objects collect a MOOSE variable or auxiliary variable given by [!param](/UserObjects/MOOSEVariableToNEML2/from_moose) for use as a NEML2 input variable or model parameter [!param](/UserObjects/MOOSEVariableToNEML2/to_neml2). The given variable is interpolated at each quadrature point.
 
-To use a MOOSE +material property+ as input to a NEML2 object see [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md).
+The naming convention is
 
-## Example Input Syntax
+```
+MOOSE[Old]VariableToNEML2
+```
 
-!listing modules/solid_mechanics/test/tests/neml2/neml2_to_moose_material.i block=UserObjects/gather_a
+For example, `MOOSEVariableToNEML2` gathers the (auxiliary) variable from the +current+ time step, and `MOOSEOldVariableToNEML2` gathers the (auxiliary) variable from the +previous+ time step.
 
 !syntax parameters /UserObjects/MOOSEVariableToNEML2
-
-!syntax inputs /UserObjects/MOOSEVariableToNEML2
-
-!syntax children /UserObjects/MOOSEVariableToNEML2
