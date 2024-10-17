@@ -10,9 +10,11 @@
 #include "CoupledAux.h"
 
 registerMooseObject("MooseTestApp", CoupledAux);
+registerMooseObject("MooseTestApp", ADCoupledAux);
 
+template <bool is_ad>
 InputParameters
-CoupledAux::validParams()
+CoupledAuxTempl<is_ad>::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
@@ -27,35 +29,40 @@ CoupledAux::validParams()
   return params;
 }
 
-CoupledAux::CoupledAux(const InputParameters & parameters)
+template <bool is_ad>
+CoupledAuxTempl<is_ad>::CoupledAuxTempl(const InputParameters & parameters)
   : AuxKernel(parameters),
     _value(getParam<Real>("value")),
     _operator(getParam<MooseEnum>("operator")),
     _coupled(coupled("coupled")),
-    _coupled_val(coupledValue("coupled"))
+    _coupled_val(coupledGenericValue<is_ad>("coupled"))
 {
 }
 
+template <bool is_ad>
 Real
-CoupledAux::computeValue()
+CoupledAuxTempl<is_ad>::computeValue()
 {
   if (_operator == "+")
-    return _coupled_val[_qp] + _value;
+    return MetaPhysicL::raw_value(_coupled_val[_qp]) + _value;
   else if (_operator == "-")
-    return _coupled_val[_qp] - _value;
+    return MetaPhysicL::raw_value(_coupled_val[_qp]) - _value;
   else if (_operator == "*")
-    return _coupled_val[_qp] * _value;
+    return MetaPhysicL::raw_value(_coupled_val[_qp]) * _value;
   else if (_operator == "/")
   // We are going to do division for this operation
-  // This is useful for testing evalutation order
+  // This is useful for testing evaluation order
   // when we attempt to divide by zero!
   {
     if (_coupled_val[_qp] == 0)
       mooseError("Floating point exception in coupled_value");
 
-    return _value / _coupled_val[_qp];
+    return _value / MetaPhysicL::raw_value(_coupled_val[_qp]);
   }
 
   // Won't reach this statement
   return 0;
 }
+
+template class CoupledAuxTempl<false>;
+template class CoupledAuxTempl<true>;

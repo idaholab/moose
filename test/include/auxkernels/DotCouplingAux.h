@@ -14,16 +14,19 @@
 /**
  * Couples in the time derivatives of a NL variable
  */
-class DotCouplingAux : public AuxKernel
+template <bool is_ad>
+class DotCouplingAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  DotCouplingAux(const InputParameters & parameters);
-  virtual ~DotCouplingAux();
+  DotCouplingAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
-  const VariableValue & _v_dot;
+  const GenericVariableValue<is_ad> & _v_dot;
 };
+
+typedef DotCouplingAuxTempl<false> DotCouplingAux;
+typedef DotCouplingAuxTempl<true> ADDotCouplingAux;
