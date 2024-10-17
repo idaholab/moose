@@ -61,10 +61,12 @@ ADNumericalFlux3EqnDGKernel::computeQpResidual(Moose::DGResidualType type)
   std::vector<ADReal> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_elem[_qp]};
   std::vector<ADReal> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_neig[_qp]};
 
+  const Real nLR_dot_d = _current_side * 2 - 1.0;
+
   const std::vector<ADReal> & flux_elem =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, _normals[_qp](0));
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, nLR_dot_d);
   const std::vector<ADReal> & flux_neig =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), false, U1, U2, _normals[_qp](0));
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), false, U1, U2, nLR_dot_d);
 
   ADReal re = 0.0;
   switch (type)

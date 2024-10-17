@@ -61,10 +61,12 @@ NumericalFlux3EqnDGKernel::computeQpResidual(Moose::DGResidualType type)
   std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_elem[_qp]};
   std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_neig[_qp]};
 
+  const Real nLR_dot_d = _current_side * 2 - 1.0;
+
   const std::vector<Real> & flux_elem =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, _normals[_qp](0));
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, nLR_dot_d);
   const std::vector<Real> & flux_neig =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), false, U1, U2, _normals[_qp](0));
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), false, U1, U2, nLR_dot_d);
 
   Real re = 0.0;
   switch (type)
@@ -92,14 +94,18 @@ NumericalFlux3EqnDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, 
   std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_elem[_qp]};
   std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_neig[_qp]};
 
+  // Temporary hack to allow libMesh fix. After the fix, this should be changed to:
+  // const Real nLR_dot_d = _normals[_qp] * _direction[_qp];
+  const Real nLR_dot_d = _current_side * 2 - 1.0;
+
   const DenseMatrix<Real> & dF1_dU1 = _numerical_flux.getJacobian(
-      true, true, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+      true, true, _current_side, _current_elem->id(), U1, U2, nLR_dot_d);
   const DenseMatrix<Real> & dF1_dU2 = _numerical_flux.getJacobian(
-      true, false, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+      true, false, _current_side, _current_elem->id(), U1, U2, nLR_dot_d);
   const DenseMatrix<Real> & dF2_dU1 = _numerical_flux.getJacobian(
-      false, true, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+      false, true, _current_side, _current_elem->id(), U1, U2, nLR_dot_d);
   const DenseMatrix<Real> & dF2_dU2 = _numerical_flux.getJacobian(
-      false, false, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
+      false, false, _current_side, _current_elem->id(), U1, U2, nLR_dot_d);
 
   Real re = 0.0;
   switch (type)
