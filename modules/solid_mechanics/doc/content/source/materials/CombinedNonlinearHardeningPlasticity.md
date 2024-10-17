@@ -12,7 +12,7 @@ hardening is governed by a backstress evolution equation of the form: $dX = Cdp 
 
 The non-linear equations for Isotropic and Kinematic Hardening are based on
 [!cite](besson2009non)
-pg. 82--84. The reference uses the nonlinear kinematic hardening rule proposed by Chaboche [CHA77] and Armstrong and Frederick [ARM66], while the isotropic hardening rule follows the Voce isotropic hardening model [VOC49].
+pg. 82--84. The reference uses the nonlinear kinematic hardening rule proposed by Armstrong and Frederick [!cite](armstrong1966mathematical), while the isotropic hardening rule follows the Voce isotropic hardening model [!cite](voce1948relationship).
 
 The effective plastic strain
 increment for combined hardening has the form:
