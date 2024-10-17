@@ -165,7 +165,7 @@ namespace MathUtils
   FactorizedRankTwoTensorTempl<T> operatorname(const FactorizedRankTwoTensorTempl<T> & A,          \
                                                const T2 & arg)                                     \
   {                                                                                                \
-    if constexpr (ScalarTraits<T2>::value)                                                         \
+    if constexpr (libMesh::ScalarTraits<T2>::value)                                                \
     {                                                                                              \
       FactorizedRankTwoTensorOperatorMapBody(operator)                                             \
     }                                                                                              \
@@ -225,7 +225,7 @@ namespace MathUtils
   RankFourTensorTempl<typename T::value_type> derivativename(                                      \
       const FactorizedRankTwoTensorTempl<T> & A, const T2 & arg)                                   \
   {                                                                                                \
-    if constexpr (ScalarTraits<T2>::value)                                                         \
+    if constexpr (libMesh::ScalarTraits<T2>::value)                                                \
     {                                                                                              \
       FactorizedRankTwoTensorOperatorMapDerivativeBody(operator, derivative)                       \
     }                                                                                              \
@@ -263,7 +263,7 @@ template <typename T2>
 FactorizedRankTwoTensorTempl<T>
 FactorizedRankTwoTensorTempl<T>::operator*(const T2 & a) const
 {
-  if constexpr (ScalarTraits<T2>::value)
+  if constexpr (libMesh::ScalarTraits<T2>::value)
   {
     FactorizedRankTwoTensorTempl<T> A = *this;
     for (auto & eigval : A._eigvals)
@@ -277,7 +277,7 @@ template <typename T2>
 FactorizedRankTwoTensorTempl<T>
 FactorizedRankTwoTensorTempl<T>::operator/(const T2 & a) const
 {
-  if constexpr (ScalarTraits<T2>::value)
+  if constexpr (libMesh::ScalarTraits<T2>::value)
   {
     FactorizedRankTwoTensorTempl<T> A = *this;
     for (auto & eigval : A._eigvals)

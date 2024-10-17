@@ -260,10 +260,12 @@ MaterialPropertyBase<T, is_ad>::qpCopy(const unsigned int to_qp,
 {
   // If we're the same
   if (rhs.isAD() == is_ad)
-    _value[to_qp] = cast_ptr<const MaterialPropertyBase<T, is_ad> *>(&rhs)->_value[from_qp];
+    _value[to_qp] =
+        libMesh::cast_ptr<const MaterialPropertyBase<T, is_ad> *>(&rhs)->_value[from_qp];
   else
     moose::internal::rawValueEqualityHelper(
-        _value[to_qp], (*cast_ptr<const MaterialPropertyBase<T, !is_ad> *>(&rhs))[from_qp]);
+        _value[to_qp],
+        (*libMesh::cast_ptr<const MaterialPropertyBase<T, !is_ad> *>(&rhs))[from_qp]);
 }
 
 template <typename T, bool is_ad>
@@ -293,7 +295,7 @@ MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
   if (rhs.isAD() == is_ad)
   {
     mooseAssert(dynamic_cast<decltype(this)>(&rhs), "Expected same type is not the same");
-    this->_value.swap(cast_ptr<decltype(this)>(&rhs)->_value);
+    this->_value.swap(libMesh::cast_ptr<decltype(this)>(&rhs)->_value);
     return;
   }
 

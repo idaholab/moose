@@ -30,6 +30,8 @@
 
 #include <regex>
 
+using namespace libMesh;
+
 InputParameters
 SubProblem::validParams()
 {

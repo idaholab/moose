@@ -28,6 +28,8 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
+using namespace libMesh;
+
 namespace GeneralFieldTransfer
 {
 Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();

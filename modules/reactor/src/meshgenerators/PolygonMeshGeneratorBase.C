@@ -14,6 +14,8 @@
 #include <cmath>
 #include <iomanip>
 
+using namespace libMesh;
+
 InputParameters
 PolygonMeshGeneratorBase::validParams()
 {

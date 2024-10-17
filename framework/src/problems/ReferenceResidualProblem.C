@@ -21,6 +21,8 @@
 #include "libmesh/enum_norm_type.h"
 #include "libmesh/utility.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", ReferenceResidualProblem);
 
 InputParameters

@@ -25,7 +25,7 @@
 #include <chrono>
 
 template <typename Object, typename Context>
-class ReceiveBuffer : public ParallelObject
+class ReceiveBuffer : public libMesh::ParallelObject
 {
 public:
   ReceiveBuffer(const libMesh::Parallel::Communicator & comm,

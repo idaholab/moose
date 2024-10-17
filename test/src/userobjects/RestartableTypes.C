@@ -9,6 +9,8 @@
 
 #include "RestartableTypes.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseTestApp", RestartableTypes);
 
 InputParameters

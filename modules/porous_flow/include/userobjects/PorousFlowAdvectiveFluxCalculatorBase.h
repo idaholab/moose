@@ -108,7 +108,7 @@ protected:
   const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
 
   /// FEType to use
-  const FEType _fe_type;
+  const libMesh::FEType _fe_type;
 
   /// Kuzmin-Turek shape function
   const VariablePhiValue & _phi;

@@ -13,6 +13,8 @@
 
 #include "libmesh/numeric_vector.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseTestApp", TestVectorType);
 
 InputParameters

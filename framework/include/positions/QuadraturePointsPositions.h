@@ -30,7 +30,7 @@ public:
   MooseMesh & _mesh;
 
   /// Type of the quadrature
-  QuadratureType _q_type;
+  libMesh::QuadratureType _q_type;
   /// Order of the quadrature
-  Order _q_order;
+  libMesh::Order _q_order;
 };

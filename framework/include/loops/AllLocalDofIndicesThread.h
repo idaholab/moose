@@ -27,16 +27,16 @@ class SubProblem;
  * Grab all the (possibly semi)local dof indices for the variables passed in, in the system passed
  * in.
  */
-class AllLocalDofIndicesThread : public ParallelObject
+class AllLocalDofIndicesThread : public libMesh::ParallelObject
 {
 public:
   AllLocalDofIndicesThread(SubProblem & problem,
                            std::vector<std::string> vars,
                            bool include_semilocal = false);
   // Splitting Constructor
-  AllLocalDofIndicesThread(AllLocalDofIndicesThread & x, Threads::split split);
+  AllLocalDofIndicesThread(AllLocalDofIndicesThread & x, libMesh::Threads::split split);
 
-  void operator()(const ConstElemRange & range);
+  void operator()(const libMesh::ConstElemRange & range);
 
   void join(const AllLocalDofIndicesThread & y);
 
@@ -46,7 +46,7 @@ public:
 
 protected:
   SubProblem & _problem;
-  System * _sys;
+  libMesh::System * _sys;
   std::vector<unsigned int> _var_numbers;
 
   /// Whether to include semilocal dof indices

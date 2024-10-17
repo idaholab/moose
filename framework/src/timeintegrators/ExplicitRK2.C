@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
+using namespace libMesh;
+
 InputParameters
 ExplicitRK2::validParams()
 {

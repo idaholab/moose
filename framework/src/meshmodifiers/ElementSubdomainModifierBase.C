@@ -253,7 +253,7 @@ ElementSubdomainModifierBase::applySubdomainChanges(
   }
 
   // Synchronize ghost element subdomain changes
-  SyncSubdomainIds sync(mesh.getMesh());
+  libMesh::SyncSubdomainIds sync(mesh.getMesh());
   Parallel::sync_dofobject_data_by_id(
       mesh.getMesh().comm(), mesh.getMesh().elements_begin(), mesh.getMesh().elements_end(), sync);
 }

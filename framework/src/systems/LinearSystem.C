@@ -55,6 +55,8 @@
 
 #include <ios>
 
+using namespace libMesh;
+
 namespace Moose
 {
 void

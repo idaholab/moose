@@ -21,6 +21,8 @@
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", MultiAppPostprocessorInterpolationTransfer);
 
 InputParameters

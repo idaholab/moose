@@ -15,6 +15,8 @@
 
 #include "libmesh/mesh_tools.h"
 
+using namespace libMesh;
+
 const std::string MeshGeneratorSystem::data_driven_generator_param = "data_driven_generator";
 const std::string MeshGeneratorSystem::allow_data_driven_param =
     "allow_data_driven_mesh_generation";

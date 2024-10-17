@@ -27,5 +27,5 @@ protected:
   virtual Real computeValue() override;
 
   /// The metric type to use
-  ElemQuality _metric_type;
+  libMesh::ElemQuality _metric_type;
 };

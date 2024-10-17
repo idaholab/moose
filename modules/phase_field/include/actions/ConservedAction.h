@@ -37,7 +37,7 @@ protected:
   /// Name of the variable being created
   const NonlinearVariableName _var_name;
   /// FEType for the variable being created
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
   /// Scaling parameter
   const Real _scaling;
 };

@@ -9,6 +9,8 @@
 
 #include "CoupledDiffusionReactionSub.h"
 
+using libMesh::RealGradient;
+
 registerMooseObject("ChemicalReactionsApp", CoupledDiffusionReactionSub);
 
 InputParameters

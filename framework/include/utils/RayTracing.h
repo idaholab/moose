@@ -39,7 +39,7 @@ namespace Moose
 void elementsIntersectedByLine(const Point & p0,
                                const Point & p1,
                                const MeshBase & mesh,
-                               const PointLocatorBase & point_locator,
+                               const libMesh::PointLocatorBase & point_locator,
                                std::vector<Elem *> & intersected_elems,
                                std::vector<LineSegment> & segments);
 }

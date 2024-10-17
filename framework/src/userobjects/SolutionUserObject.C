@@ -187,14 +187,14 @@ SolutionUserObject::readXda()
   // Use new read syntax (binary)
   if (_file_type == "xdr")
     _es->read(_es_file,
-              DECODE,
+              libMesh::DECODE,
               EquationSystems::READ_HEADER | EquationSystems::READ_DATA |
                   EquationSystems::READ_ADDITIONAL_DATA);
 
   // Use new read syntax
   else if (_file_type == "xda")
     _es->read(_es_file,
-              READ,
+              libMesh::READ,
               EquationSystems::READ_HEADER | EquationSystems::READ_DATA |
                   EquationSystems::READ_ADDITIONAL_DATA);
 
@@ -216,7 +216,7 @@ SolutionUserObject::readExodusII()
     _system_name = "SolutionUserObjectSystem";
 
   // Read the Exodus file
-  _exodusII_io = std::make_unique<ExodusII_IO>(*_mesh);
+  _exodusII_io = std::make_unique<libMesh::ExodusII_IO>(*_mesh);
   _exodusII_io->read(_mesh_file);
   readBlockIdMapFromExodusII();
   _exodus_times = &_exodusII_io->get_time_steps();
@@ -261,7 +261,7 @@ SolutionUserObject::readExodusII()
 
   // Create EquationSystems object for solution
   _es = std::make_unique<EquationSystems>(*_mesh);
-  _es->add_system<ExplicitSystem>(_system_name);
+  _es->add_system<libMesh::ExplicitSystem>(_system_name);
   _system = &_es->get_system(_system_name);
 
   // Get the variable name lists as set; these need to be sets to perform set_intersection
@@ -327,7 +327,7 @@ SolutionUserObject::readExodusII()
   {
     // Create a second equation system
     _es2 = std::make_unique<EquationSystems>(*_mesh);
-    _es2->add_system<ExplicitSystem>(_system_name);
+    _es2->add_system<libMesh::ExplicitSystem>(_system_name);
     _system2 = &_es2->get_system(_system_name);
 
     // Add the variables to the system
@@ -504,7 +504,7 @@ SolutionUserObject::initialSetup()
 
   // Initialize the serial solution vector
   _serialized_solution = NumericVector<Number>::build(_communicator);
-  _serialized_solution->init(_system->n_dofs(), false, SERIAL);
+  _serialized_solution->init(_system->n_dofs(), false, libMesh::SERIAL);
 
   // Pull down a full copy of this vector on every processor so we can get values in parallel
   _system->solution->localize(*_serialized_solution);
@@ -528,8 +528,8 @@ SolutionUserObject::initialSetup()
   }
 
   // Create the MeshFunction for working with the solution data
-  _mesh_function =
-      std::make_unique<MeshFunction>(*_es, *_serialized_solution, _system->get_dof_map(), var_nums);
+  _mesh_function = std::make_unique<libMesh::MeshFunction>(
+      *_es, *_serialized_solution, _system->get_dof_map(), var_nums);
   _mesh_function->init();
 
   // Tell the MeshFunctions that we might be querying them outside the
@@ -544,11 +544,11 @@ SolutionUserObject::initialSetup()
     // Need to pull down a full copy of this vector on every processor so we can get values in
     // parallel
     _serialized_solution2 = NumericVector<Number>::build(_communicator);
-    _serialized_solution2->init(_system2->n_dofs(), false, SERIAL);
+    _serialized_solution2->init(_system2->n_dofs(), false, libMesh::SERIAL);
     _system2->solution->localize(*_serialized_solution2);
 
     // Create the MeshFunction for the second copy of the data
-    _mesh_function2 = std::make_unique<MeshFunction>(
+    _mesh_function2 = std::make_unique<libMesh::MeshFunction>(
         *_es2, *_serialized_solution2, _system2->get_dof_map(), var_nums);
     _mesh_function2->init();
     _mesh_function2->enable_out_of_mesh_mode(default_values);
@@ -1245,7 +1245,7 @@ void
 SolutionUserObject::readBlockIdMapFromExodusII()
 {
 #ifdef LIBMESH_HAVE_EXODUS_API
-  ExodusII_IO_Helper & exio_helper = _exodusII_io->get_exio_helper();
+  libMesh::ExodusII_IO_Helper & exio_helper = _exodusII_io->get_exio_helper();
   const auto & id_to_block = exio_helper.id_to_block_names;
   _block_name_to_id.clear();
   _block_id_to_name.clear();

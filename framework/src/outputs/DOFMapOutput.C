@@ -23,6 +23,8 @@
 #include <cxxabi.h>
 #include <fstream>
 
+using namespace libMesh;
+
 registerMooseObjectAliased("MooseApp", DOFMapOutput, "DOFMap");
 
 InputParameters

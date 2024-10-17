@@ -31,6 +31,6 @@ AddBoundsVectorsAction::act()
   if (!_problem->numNonlinearSystems() && _problem->numLinearSystems())
     mooseError("Vector bounds cannot be used with only LinearSystems!");
 
-  _problem->getNonlinearSystemBase(/*nl_sys=*/0).addVector("lower_bound", false, GHOSTED);
-  _problem->getNonlinearSystemBase(/*nl_sys=*/0).addVector("upper_bound", false, GHOSTED);
+  _problem->getNonlinearSystemBase(/*nl_sys=*/0).addVector("lower_bound", false, libMesh::GHOSTED);
+  _problem->getNonlinearSystemBase(/*nl_sys=*/0).addVector("upper_bound", false, libMesh::GHOSTED);
 }

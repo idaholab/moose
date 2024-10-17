@@ -54,7 +54,7 @@ public:
 
 protected:
   /// Setup the coupling matrix on the finite element problem
-  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm);
+  void setCouplingMatrix(std::unique_ptr<libMesh::CouplingMatrix> cm);
 
   /// Subproblem this preconditioner is part of
   FEProblemBase & _fe_problem;

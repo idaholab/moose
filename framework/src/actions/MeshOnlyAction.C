@@ -21,6 +21,8 @@
 #include "libmesh/exodusII_io_helper.h"
 #include "libmesh/checkpoint_io.h"
 
+using namespace libMesh;
+
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
 InputParameters

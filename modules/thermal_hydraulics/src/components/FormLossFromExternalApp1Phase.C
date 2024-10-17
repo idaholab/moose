@@ -31,7 +31,7 @@ void
 FormLossFromExternalApp1Phase::addVariables()
 {
   getTHMProblem().addSimVariable(
-      false, _K_prime_var_name, FEType(FIRST, LAGRANGE), _flow_channel_subdomains);
+      false, _K_prime_var_name, libMesh::FEType(FIRST, LAGRANGE), _flow_channel_subdomains);
 }
 
 void

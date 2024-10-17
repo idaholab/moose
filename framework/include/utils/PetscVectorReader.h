@@ -16,6 +16,7 @@
 
 using libMesh::Number;
 using libMesh::numeric_index_type;
+using libMesh::NumericVector;
 using libMesh::PetscVector;
 
 /**

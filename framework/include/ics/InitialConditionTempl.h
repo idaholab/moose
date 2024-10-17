@@ -34,7 +34,7 @@ public:
   typedef typename OutputTools<T>::OutputGradient GradientType;
   typedef typename OutputTools<T>::OutputShapeGradient GradientShapeType;
   typedef typename OutputTools<T>::OutputData DataType;
-  typedef FEGenericBase<ValueType> FEBaseType;
+  typedef libMesh::FEGenericBase<ValueType> FEBaseType;
 
   /**
    * Constructor
@@ -87,9 +87,12 @@ public:
    * Helps perform multiplication of GradientTypes: a normal dot product for vectors and a
    * contraction for tensors
    */
-  Real dotHelper(const RealGradient & op1, const RealGradient & op2) { return op1 * op2; }
+  Real dotHelper(const libMesh::RealGradient & op1, const libMesh::RealGradient & op2)
+  {
+    return op1 * op2;
+  }
   Real dotHelper(const RealTensor & op1, const RealTensor & op2) { return op1.contract(op2); }
-  RealEigenVector dotHelper(const RealVectorArrayValue & op1, const RealGradient & op2)
+  RealEigenVector dotHelper(const RealVectorArrayValue & op1, const libMesh::RealGradient & op2)
   {
     RealEigenVector v = op1.col(0) * op2(0);
     for (const auto i : make_range(Moose::dim))
@@ -146,9 +149,9 @@ protected:
   DenseVector<DataType> _Ue;
 
   /// The finite element type for the IC variable
-  const FEType & _fe_type;
+  const libMesh::FEType & _fe_type;
   /// The type of continuity, e.g. C0, C1
-  FEContinuity _cont;
+  libMesh::FEContinuity _cont;
 
   /// The global DOF indices
   std::vector<dof_id_type> _dof_indices;

@@ -49,7 +49,7 @@ SphereSurfaceMeshGenerator::generate()
   mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(3);
 
-  const Sphere sphere(_center, _radius);
+  const libMesh::Sphere sphere(_center, _radius);
 
   // icosahedron points (using golden ratio rectangle construction)
   const Real phi = (1.0 + std::sqrt(5.0)) / 2.0;
@@ -90,7 +90,7 @@ SphereSurfaceMeshGenerator::generate()
   // Now we have the beginnings of a sphere.
   // Add some more elements by doing uniform refinements and
   // popping nodes to the boundary.
-  MeshRefinement mesh_refinement(*mesh);
+  libMesh::MeshRefinement mesh_refinement(*mesh);
 
   // Loop over the elements, refine, pop nodes to boundary.
   for (unsigned int r = 0; r < _depth; ++r)

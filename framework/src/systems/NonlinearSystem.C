@@ -31,6 +31,8 @@
 #include "libmesh/default_coupling.h"
 #include "libmesh/petsc_solver_exception.h"
 
+using namespace libMesh;
+
 namespace Moose
 {
 void

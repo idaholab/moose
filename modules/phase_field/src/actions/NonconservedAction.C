@@ -18,6 +18,8 @@
 
 #include "libmesh/string_to_enum.h"
 
+using namespace libMesh;
+
 registerMooseAction("PhaseFieldApp", NonconservedAction, "add_variable");
 
 registerMooseAction("PhaseFieldApp", NonconservedAction, "add_kernel");
@@ -64,7 +66,7 @@ NonconservedAction::NonconservedAction(const InputParameters & params)
   : Action(params),
     _var_name(name()),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")))
+             Utility::string_to_enum<libMesh::FEFamily>(getParam<MooseEnum>("family")))
 {
 }
 

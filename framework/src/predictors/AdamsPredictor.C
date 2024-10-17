@@ -27,12 +27,12 @@ AdamsPredictor::validParams()
 AdamsPredictor::AdamsPredictor(const InputParameters & parameters)
   : Predictor(parameters),
     _order(getParam<int>("order")),
-    _current_old_solution(_nl.addVector("AB2_current_old_solution", true, GHOSTED)),
-    _older_solution(_nl.addVector("AB2_older_solution", true, GHOSTED)),
-    _oldest_solution(_nl.addVector("AB2_rejected_solution", true, GHOSTED)),
-    _tmp_previous_solution(_nl.addVector("tmp_previous_solution", true, GHOSTED)),
-    _tmp_residual_old(_nl.addVector("tmp_residual_old", true, GHOSTED)),
-    _tmp_third_vector(_nl.addVector("tmp_third_vector", true, GHOSTED)),
+    _current_old_solution(_nl.addVector("AB2_current_old_solution", true, libMesh::GHOSTED)),
+    _older_solution(_nl.addVector("AB2_older_solution", true, libMesh::GHOSTED)),
+    _oldest_solution(_nl.addVector("AB2_rejected_solution", true, libMesh::GHOSTED)),
+    _tmp_previous_solution(_nl.addVector("tmp_previous_solution", true, libMesh::GHOSTED)),
+    _tmp_residual_old(_nl.addVector("tmp_residual_old", true, libMesh::GHOSTED)),
+    _tmp_third_vector(_nl.addVector("tmp_third_vector", true, libMesh::GHOSTED)),
     _dt_older(declareRestartableData<Real>("dt_older", 0)),
     _dtstorage(declareRestartableData<Real>("dtstorage", 0))
 {

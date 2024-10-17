@@ -24,8 +24,6 @@
 #include "MooseException.h"
 #endif
 
-using namespace libMesh;
-
 class ParallelUniqueId
 {
 public:

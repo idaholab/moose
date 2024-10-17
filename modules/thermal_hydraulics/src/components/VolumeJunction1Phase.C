@@ -369,7 +369,7 @@ VolumeJunction1Phase::addJunctionVariable(bool is_nonlinear,
 
   if (_use_scalar_variables)
   {
-    const FEType fe_type(FIRST, SCALAR);
+    const libMesh::FEType fe_type(FIRST, SCALAR);
 
     if (is_nonlinear)
       problem.addSimVariable(is_nonlinear, var, fe_type, scaling_factor);
@@ -378,7 +378,7 @@ VolumeJunction1Phase::addJunctionVariable(bool is_nonlinear,
   }
   else
   {
-    const FEType fe_type(CONSTANT, MONOMIAL);
+    const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
     const auto & subdomains = getSubdomainNames();
 
     if (is_nonlinear)

@@ -27,6 +27,8 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
+using namespace libMesh;
+
 registerMooseObjectDeprecated("MooseApp", MultiAppShapeEvaluationTransfer, "12/31/2024 24:00");
 registerMooseObjectRenamed("MooseApp",
                            MultiAppMeshFunctionTransfer,

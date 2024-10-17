@@ -68,8 +68,8 @@ struct FunctorReturnType<T, FunctorEvaluationKind::Gradient>
 {
   typedef typename MetaPhysicL::ReplaceAlgebraicType<
       T,
-      typename TensorTools::IncrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type
-      type;
+      typename libMesh::TensorTools::IncrementRank<
+          typename MetaPhysicL::ValueType<T>::type>::type>::type type;
 };
 
 /**
@@ -498,7 +498,7 @@ private:
    */
   template <typename SpaceArg, typename StateArg>
   ValueType queryQpCache(unsigned int qp,
-                         const QBase & qrule,
+                         const libMesh::QBase & qrule,
                          std::vector<std::pair<bool, T>> & qp_cache_data,
                          const SpaceArg & space,
                          const StateArg & state) const;
@@ -520,7 +520,7 @@ private:
   // caching implementation
 
   /// Current key for qp map cache
-  mutable dof_id_type _current_qp_map_key = DofObject::invalid_id;
+  mutable dof_id_type _current_qp_map_key = libMesh::DofObject::invalid_id;
 
   /// Current value for qp map cache
   mutable std::vector<std::pair<bool, ValueType>> * _current_qp_map_value = nullptr;
@@ -536,7 +536,7 @@ private:
   // caching implementation
 
   /// Current key for side-qp map cache
-  mutable dof_id_type _current_side_qp_map_key = DofObject::invalid_id;
+  mutable dof_id_type _current_side_qp_map_key = libMesh::DofObject::invalid_id;
 
   /// Current value for side-qp map cache
   mutable std::vector<std::vector<std::pair<bool, ValueType>>> * _current_side_qp_map_value =
@@ -624,7 +624,7 @@ template <typename T>
 template <typename SpaceArg, typename StateArg>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::queryQpCache(const unsigned int qp,
-                             const QBase & qrule,
+                             const libMesh::QBase & qrule,
                              std::vector<std::pair<bool, ValueType>> & qp_cache_data,
                              const SpaceArg & space,
                              const StateArg & state) const
@@ -799,9 +799,9 @@ FunctorBase<T>::clearCacheData()
         pr.first = false;
   }
 
-  _current_qp_map_key = DofObject::invalid_id;
+  _current_qp_map_key = libMesh::DofObject::invalid_id;
   _current_qp_map_value = nullptr;
-  _current_side_qp_map_key = DofObject::invalid_id;
+  _current_side_qp_map_key = libMesh::DofObject::invalid_id;
   _current_side_qp_map_value = nullptr;
 
   _elem_arg_to_value.clear();

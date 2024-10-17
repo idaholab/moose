@@ -39,6 +39,6 @@ protected:
 
   const SystemEnum _system_enum;
 
-  const System * _system_pointer;
+  const libMesh::System * _system_pointer;
   const EquationSystems * _es_pointer;
 };
