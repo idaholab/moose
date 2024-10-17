@@ -26,7 +26,6 @@ protected:
   /// Gradient of misfit with respect to material properties
   MaterialProperty<Real> & _misfit_gradient;
 
-  /// Coupled
   /// bool if data format read in is points
   const bool _read_in_points;
 

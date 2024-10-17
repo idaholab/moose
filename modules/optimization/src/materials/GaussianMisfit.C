@@ -8,7 +8,8 @@ InputParameters
 GaussianMisfit::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("");
+  params.addClassDescription(
+      "Computes the misfit and misfit gradient materials for inverse optimizations problems.");
 
   params.addRequiredCoupledVar("sim_variable",
                                "Variable that is being for the simulation variable.");
