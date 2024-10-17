@@ -55,7 +55,8 @@ ADReal
 ADBoundaryFlux3EqnBC::computeQpResidual()
 {
   const std::vector<ADReal> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_linear[_qp]};
-  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, {_normal, 0, 0});
+  const auto & flux =
+      _flux.getFlux(_current_side, _current_elem->id(), U, MetaPhysicL::raw_value(_normals[_qp]));
 
   return flux[_equation_index] * _normal * _test[_i][_qp];
 }
