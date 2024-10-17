@@ -1,19 +1,20 @@
 #pragma once
 
 #include "MaterialProperty.h"
-#include "BackstressRadialReturnStressUpdate.h"
+#include "RadialReturnBackstressStressUpdateBase.h"
 
 template <bool is_ad>
-class CombinedPlasticityStressUpdateTempl : public BackstressRadialReturnStressUpdateTempl<is_ad>
+class CombinedNonlinearHardeningPlasticityTempl
+  : public RadialReturnBackstressStressUpdateBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  CombinedPlasticityStressUpdateTempl(const InputParameters & parameters);
+  CombinedNonlinearHardeningPlasticityTempl(const InputParameters & parameters);
 
   using Material::_qp;
-  using BackstressRadialReturnStressUpdateTempl<is_ad>::_base_name;
-  using BackstressRadialReturnStressUpdateTempl<is_ad>::_three_shear_modulus;
+  using RadialReturnBackstressStressUpdateBaseTempl<is_ad>::_base_name;
+  using RadialReturnBackstressStressUpdateBaseTempl<is_ad>::_three_shear_modulus;
 
   virtual void
   computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
@@ -52,18 +53,18 @@ protected:
   GenericRankTwoTensor<is_ad> elastic_strain_old;
   GenericRankTwoTensor<is_ad> strain_increment;
 
-  /// plastic strain in this model
+  /// plastic strain
   GenericMaterialProperty<RankTwoTensor, is_ad> & _plastic_strain;
 
   /// old value of plastic strain
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 
+  ///@{  Coefficients for combined isotropic and kinematic hardening
   const Real _kinematic_hardening_modulus;
-
-  /// Nonlinear terms for Isotropic and Kinematic Hardening
   const Real _gamma;
-  const Real Q;
-  const Real b;
+  const Real _q;
+  const Real _b;
+  ///@}
 
   GenericMaterialProperty<Real, is_ad> & _isotropic_hardening_variable;
   const MaterialProperty<Real> & _isotropic_hardening_variable_old;
@@ -72,5 +73,5 @@ protected:
   const GenericVariableValue<is_ad> & _temperature;
 };
 
-typedef CombinedPlasticityStressUpdateTempl<false> CombinedPlasticityStressUpdate;
-typedef CombinedPlasticityStressUpdateTempl<true> ADCombinedPlasticityStressUpdate;
+typedef CombinedNonlinearHardeningPlasticityTempl<false> CombinedNonlinearHardeningPlasticity;
+typedef CombinedNonlinearHardeningPlasticityTempl<true> ADCombinedNonlinearHardeningPlasticity;

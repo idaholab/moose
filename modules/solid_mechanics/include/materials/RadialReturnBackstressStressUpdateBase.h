@@ -3,12 +3,12 @@
 #include "RadialReturnStressUpdate.h"
 
 template <bool is_ad>
-class BackstressRadialReturnStressUpdateTempl : public RadialReturnStressUpdateTempl<is_ad>
+class RadialReturnBackstressStressUpdateBaseTempl : public RadialReturnStressUpdateTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  BackstressRadialReturnStressUpdateTempl(const InputParameters & parameters);
+  RadialReturnBackstressStressUpdateBaseTempl(const InputParameters & parameters);
 
   using Material::_qp;
   using RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn;
@@ -30,5 +30,5 @@ protected:
   const MaterialProperty<RankTwoTensor> & _backstress_old;
 };
 
-typedef BackstressRadialReturnStressUpdateTempl<false> BackstressRadialReturnStressUpdate;
-typedef BackstressRadialReturnStressUpdateTempl<true> ADBackstressRadialReturnStressUpdate;
+typedef RadialReturnBackstressStressUpdateBaseTempl<false> RadialReturnBackstressStressUpdateBase;
+typedef RadialReturnBackstressStressUpdateBaseTempl<true> ADRadialReturnBackstressStressUpdateBase;

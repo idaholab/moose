@@ -110,14 +110,14 @@
     poissons_ratio = 0.0
   []
   [linear_kinematic_plasticity]
-    type = CombinedPlasticityStressUpdate
+    type = CombinedNonlinearHardeningPlasticity
     yield_stress = 100
     block = 0
     isotropic_hardening_constant = 0
-    Q = 0
+    q = 0
     b = 0
     kinematic_hardening_modulus = 15000
-    material_constant_gamma = 0
+    gamma = 0
   []
   [radial_return_stress]
     type = ComputeMultipleInelasticStress

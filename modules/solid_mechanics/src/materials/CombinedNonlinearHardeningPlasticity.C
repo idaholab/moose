@@ -1,22 +1,21 @@
-#include "CombinedPlasticityStressUpdate.h"
+#include "CombinedNonlinearHardeningPlasticity.h"
 #include "Function.h"
 #include "ElasticityTensorTools.h"
-#include "BackstressRadialReturnStressUpdate.h"
+#include "RadialReturnBackstressStressUpdateBase.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("SolidMechanicsApp", ADCombinedPlasticityStressUpdate);
-registerMooseObject("SolidMechanicsApp", CombinedPlasticityStressUpdate);
+registerMooseObject("SolidMechanicsApp", ADCombinedNonlinearHardeningPlasticity);
+registerMooseObject("SolidMechanicsApp", CombinedNonlinearHardeningPlasticity);
 
 template <bool is_ad>
 InputParameters
-CombinedPlasticityStressUpdateTempl<is_ad>::validParams()
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::validParams()
 {
-  InputParameters params = BackstressRadialReturnStressUpdateTempl<is_ad>::validParams();
-  params.addClassDescription("This class uses the discrete material in a radial return isotropic"
-                             "plasticity model.  This class is one of the basic radial return "
-                             "constitutive models, yet it can be used in conjunction with other "
-                             "creep and plasticity materials for more complex simulations.");
-  params.addParam<Real>("Q", 0.0, "Saturation value for isotropic hardening (Q in Voce model)");
+  InputParameters params = RadialReturnBackstressStressUpdateBaseTempl<is_ad>::validParams();
+  params.addClassDescription("Combined isotropic and kinematic plasticity model with nonlinear "
+                             "hardening rules, including a Voce model for isotropic hardening and "
+                             "an Armstrong-Fredrick model for kinematic hardening.");
+  params.addParam<Real>("q", 0.0, "Saturation value for isotropic hardening (Q in Voce model)");
   params.addParam<Real>("b", 0.0, "Rate constant for isotropic hardening (b in Voce model)");
   params.addParam<FunctionName>("yield_stress_function",
                                 "Yield stress as a function of temperature");
@@ -27,17 +26,16 @@ CombinedPlasticityStressUpdateTempl<is_ad>::validParams()
   params.addCoupledVar("temperature", 0.0, "Coupled Temperature");
   params.set<std::string>("effective_inelastic_strain_name") = "effective_plastic_strain";
   params.addParam<Real>("kinematic_hardening_modulus", 0.0, "Kinematic hardening modulus");
-  params.addParam<Real>("material_constant_gamma",
-                        0.0,
-                        "The nonlinear hardening parameter (gamma) for back stress evolution");
+  params.addParam<Real>(
+      "gamma", 0.0, "The nonlinear hardening parameter (gamma) for back stress evolution");
 
   return params;
 }
 
 template <bool is_ad>
-CombinedPlasticityStressUpdateTempl<is_ad>::CombinedPlasticityStressUpdateTempl(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::CombinedNonlinearHardeningPlasticityTempl(
     const InputParameters & parameters)
-  : BackstressRadialReturnStressUpdateTempl<is_ad>(parameters),
+  : RadialReturnBackstressStressUpdateBaseTempl<is_ad>(parameters),
     _yield_stress_function(this->isParamValid("yield_stress_function")
                                ? &this->getFunction("yield_stress_function")
                                : nullptr),
@@ -57,9 +55,9 @@ CombinedPlasticityStressUpdateTempl<is_ad>::CombinedPlasticityStressUpdateTempl(
     _plastic_strain_old(
         this->template getMaterialPropertyOld<RankTwoTensor>(_base_name + "plastic_strain")),
     _kinematic_hardening_modulus(this->template getParam<Real>("kinematic_hardening_modulus")),
-    _gamma(this->template getParam<Real>("material_constant_gamma")),
-    Q(this->template getParam<Real>("Q")),
-    b(this->template getParam<Real>("b")),
+    _gamma(this->template getParam<Real>("gamma")),
+    _q(this->template getParam<Real>("q")),
+    _b(this->template getParam<Real>("b")),
     _isotropic_hardening_variable(this->template declareGenericProperty<Real, is_ad>(
         _base_name + "isotropic_hardening_variable")),
     _isotropic_hardening_variable_old(
@@ -88,33 +86,33 @@ CombinedPlasticityStressUpdateTempl<is_ad>::CombinedPlasticityStressUpdateTempl(
 
 template <bool is_ad>
 void
-CombinedPlasticityStressUpdateTempl<is_ad>::initQpStatefulProperties()
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::initQpStatefulProperties()
 {
   _isotropic_hardening_variable[_qp] = 0.0;
   _kinematic_hardening_variable[_qp] = 0.0;
   _plastic_strain[_qp].zero();
-  BackstressRadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties();
+  RadialReturnBackstressStressUpdateBaseTempl<is_ad>::initQpStatefulProperties();
 }
 
 template <bool is_ad>
 void
-CombinedPlasticityStressUpdateTempl<is_ad>::propagateQpStatefulProperties()
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::propagateQpStatefulProperties()
 {
   _isotropic_hardening_variable[_qp] = _isotropic_hardening_variable_old[_qp];
   _kinematic_hardening_variable[_qp] = _kinematic_hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 
-  BackstressRadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn();
+  RadialReturnBackstressStressUpdateBaseTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn();
 }
 
 template <bool is_ad>
 void
-CombinedPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeStressInitialize(
     const GenericReal<is_ad> & effective_trial_stress,
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
-  BackstressRadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(effective_trial_stress,
-                                                                          elasticity_tensor);
+  RadialReturnBackstressStressUpdateBaseTempl<is_ad>::computeStressInitialize(
+      effective_trial_stress, elasticity_tensor);
 
   computeYieldStress(elasticity_tensor);
   _yield_condition =
@@ -124,7 +122,7 @@ CombinedPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
 
 template <bool is_ad>
 GenericReal<is_ad>
-CombinedPlasticityStressUpdateTempl<is_ad>::computeResidual(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
   mooseAssert(_yield_condition != -1.0,
@@ -145,7 +143,7 @@ CombinedPlasticityStressUpdateTempl<is_ad>::computeResidual(
 
 template <bool is_ad>
 GenericReal<is_ad>
-CombinedPlasticityStressUpdateTempl<is_ad>::computeDerivative(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeDerivative(
     const GenericReal<is_ad> & /*effective_trial_stress*/, const GenericReal<is_ad> & /*scalar*/)
 {
   if (_yield_condition > 0.0)
@@ -155,7 +153,8 @@ CombinedPlasticityStressUpdateTempl<is_ad>::computeDerivative(
 
 template <bool is_ad>
 void
-CombinedPlasticityStressUpdateTempl<is_ad>::iterationFinalize(const GenericReal<is_ad> & scalar)
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::iterationFinalize(
+    const GenericReal<is_ad> & scalar)
 {
   if (_yield_condition > 0.0)
   {
@@ -166,7 +165,7 @@ CombinedPlasticityStressUpdateTempl<is_ad>::iterationFinalize(const GenericReal<
 
 template <bool is_ad>
 void
-CombinedPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeStressFinalize(
     const GenericRankTwoTensor<is_ad> & plastic_strain_increment)
 {
   _plastic_strain[_qp] += plastic_strain_increment;
@@ -178,27 +177,27 @@ CombinedPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
 
 template <bool is_ad>
 GenericReal<is_ad>
-CombinedPlasticityStressUpdateTempl<is_ad>::computeIsotropicHardeningValue(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeIsotropicHardeningValue(
     const GenericReal<is_ad> & scalar)
 {
-  const Real Q = this->template getParam<Real>("Q");
-  const Real b = this->template getParam<Real>("b");
+  const Real _q = this->template getParam<Real>("q");
+  const Real _b = this->template getParam<Real>("b");
   if (_isotropic_hardening_function)
   {
     const Real strain_old = this->_effective_inelastic_strain_old[_qp];
     return _isotropic_hardening_function->value(strain_old + scalar) - _yield_stress;
   }
 
-  _isotropic_hardening_variable[_qp] = Q * (1.0 - std::exp(-b * scalar));
+  _isotropic_hardening_variable[_qp] = _q * (1.0 - std::exp(-_b * scalar));
 
   return (_isotropic_hardening_variable_old[_qp] + _isotropic_hardening_slope * scalar +
-          b * (Q - _isotropic_hardening_variable_old[_qp]) *
+          _b * (_q - _isotropic_hardening_variable_old[_qp]) *
               this->_effective_inelastic_strain_increment);
 }
 
 template <bool is_ad>
 GenericReal<is_ad>
-CombinedPlasticityStressUpdateTempl<is_ad>::computeIsotropicHardeningDerivative(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeIsotropicHardeningDerivative(
     const GenericReal<is_ad> & /*scalar*/)
 {
   if (_isotropic_hardening_function)
@@ -211,7 +210,7 @@ CombinedPlasticityStressUpdateTempl<is_ad>::computeIsotropicHardeningDerivative(
 
 template <bool is_ad>
 GenericReal<is_ad>
-CombinedPlasticityStressUpdateTempl<is_ad>::computeKinematicHardeningValue(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeKinematicHardeningValue(
     const GenericReal<is_ad> & scalar)
 {
   _kinematic_hardening_variable[_qp] = _kinematic_hardening_modulus * scalar;
@@ -220,7 +219,7 @@ CombinedPlasticityStressUpdateTempl<is_ad>::computeKinematicHardeningValue(
 
 template <bool is_ad>
 void
-CombinedPlasticityStressUpdateTempl<is_ad>::computeYieldStress(
+CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeYieldStress(
     const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
 {
   if (_yield_stress_function)
@@ -236,5 +235,5 @@ CombinedPlasticityStressUpdateTempl<is_ad>::computeYieldStress(
   }
 }
 
-template class CombinedPlasticityStressUpdateTempl<false>;
-template class CombinedPlasticityStressUpdateTempl<true>;
+template class CombinedNonlinearHardeningPlasticityTempl<false>;
+template class CombinedNonlinearHardeningPlasticityTempl<true>;

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#28688'
-  design = 'CombinedPlasticityStressUpdate.md'
+  design = 'CombinedNonlinearHardeningPlasticity.md'
   [linear_kinharden_nonsymmetric_strain_controlled]
     type = CSVDiff
     rel_err = 1.0e-4
