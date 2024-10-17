@@ -68,6 +68,10 @@
   initial_steps = 2
   max_h_level = 2
   marker = EFM
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [Markers]
     [EFM]
       type = ErrorFractionMarker

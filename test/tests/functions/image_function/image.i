@@ -10,6 +10,10 @@
   max_h_level = 5
   initial_steps = 5
   initial_marker = marker
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [Indicators]
     [indicator]
       type = GradientJumpIndicator

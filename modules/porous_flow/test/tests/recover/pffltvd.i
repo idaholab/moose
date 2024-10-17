@@ -21,6 +21,10 @@
 [Adaptivity]
   initial_steps = 1
   initial_marker = tracer_marker
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   marker = tracer_marker
   max_h_level = 1
   [Markers]

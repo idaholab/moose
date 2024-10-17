@@ -280,6 +280,10 @@
  initial_steps = 5
  max_h_level = 3
  initial_marker = err_eta
+
+ # backwards compatibility for exodiffs after #25067
+ project_initial_marker = true
+
  marker = err_bnds
 [./Markers]
    [./err_eta]
