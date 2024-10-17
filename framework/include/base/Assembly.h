@@ -43,6 +43,7 @@ template <typename T>
 class NumericVector;
 template <typename T>
 class SparseMatrix;
+class StaticCondensation;
 }
 
 // MOOSE Forward Declares
@@ -574,6 +575,16 @@ public:
    * Set the cached quadrature rules to nullptr
    */
   void clearCachedQRules();
+
+  /**
+   * Set the static condensation object
+   */
+  void addStaticCondensation(StaticCondensation & sc) { _sc = &sc; }
+
+  /**
+   * @returns Whether we have static condensation
+   */
+  bool hasStaticCondensation() const { return _sc; }
 
 private:
   /**
@@ -2849,6 +2860,9 @@ protected:
 
   /// The current reference points on the neighbor element
   std::vector<Point> _current_neighbor_ref_points;
+
+  /// A pointer to the static condensation class. Null if not present
+  StaticCondensation * _sc;
 };
 
 template <typename OutputType>

@@ -2526,7 +2526,6 @@ protected:
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
-protected:
   // material properties
   MaterialPropertyRegistry _material_prop_registry;
   MaterialPropertyStorage & _material_props;
