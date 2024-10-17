@@ -85,7 +85,9 @@ class Versioner:
         # Load the yaml file at the given commit; the location changed
         # from module_hash.yaml -> versioner.yaml at changed_commit
         changed_commit = '2bd844dc5d4de47238eab94a3a718e9714592de1'
-        if self.git_ancestor(changed_commit, commit) and commit != changed_commit:
+        if commit == 'HEAD':
+            _file = 'versioner.yaml'
+        elif self.git_ancestor(changed_commit, commit) and commit != changed_commit:
             _file = 'versioner.yaml'
         else:
             _file = 'module_hash.yaml'
@@ -209,7 +211,9 @@ class Versioner:
     def do_sortlist(self, commit):
         """ determine if we need to sort the infuential file list """
         changed_commit = '0e0785ee8a25742715b49bc26871117b788e7190'
-        if self.git_ancestor(changed_commit, commit) and commit != changed_commit:
+        if commit == 'HEAD':
+            return True
+        elif self.git_ancestor(changed_commit, commit) and commit != changed_commit:
             return True
         return False
 
