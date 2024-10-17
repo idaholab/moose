@@ -4,13 +4,14 @@ set -eu
 # this function is called from conda/functions/retry_build.sh
 function do_build(){
     export INSTALL_PATH="${PREFIX}/seacas"
-    rm -rf "${INSTALL_PATH:?}"
+    rm -rf "${INSTALL_PATH:?}" "${SRC_DIR:?}/build"
 
     # Configure and build options
     export BUILD=YES
     export GNU_PARALLEL=NO
     export H5VERSION=V112
     export NEEDS_ZLIB=YES
+    export JOBS=${MOOSE_JOBS:-2}
 
     # If on macOS, set COMPILER to clang
     if [[ $(uname) == Darwin ]]; then
@@ -25,15 +26,14 @@ function do_build(){
     ./install-tpl.sh
 
     # Setup build location and configure there.
-    rm -rf "${SRC_DIR:?}/build"
-    mkdir -p "${SRC_DIR}/build" || exit 1
-    cd "${SRC_DIR}/build" || exit 1
+    mkdir -p "${SRC_DIR:?}/build" || exit 1
+    cd "${SRC_DIR:?}/build" || exit 1
     ../cmake-config \
-        -DTPL_X11_LIBRARIES="${BUILD_PREFIX}"/lib/libX11."${BUILD_LD_EXT}" \
-        -DTPL_X11_INCLUDE_DIRS="${BUILD_PREFIX}"/include || return 1
+        -DTPL_X11_LIBRARIES="${BUILD_PREFIX:?}"/lib/libX11."${BUILD_LD_EXT:?}" \
+        -DTPL_X11_INCLUDE_DIRS="${BUILD_PREFIX:?}"/include || return 1
 
     # Make and install
-    make -j "${JOBS:-2}" || return 1
+    make -j "${JOBS:?}" || return 1
     make install || return 1
 }
 
