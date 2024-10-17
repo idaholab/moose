@@ -24,6 +24,7 @@ source:
     folder: src
   - path: ../../python/pyhit/pyhit.py
     folder: pyhit
+  - path: ../functions/retry_build.sh
   - patches:
       - pyhit.patch
 

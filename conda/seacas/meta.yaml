@@ -9,8 +9,9 @@ package:
   version: {{ seacas_version }}
 
 source:
-  git_url: https://github.com/sandialabs/seacas
-  git_rev: {{ seacas_git_rev }}
+  - git_url: https://github.com/sandialabs/seacas
+  - git_rev: {{ seacas_git_rev }}
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}

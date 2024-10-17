@@ -14,6 +14,7 @@ package:
 source:
   - path: ../../libmesh
   - path: ../../scripts/configure_libmesh.sh
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}

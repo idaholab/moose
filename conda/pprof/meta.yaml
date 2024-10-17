@@ -7,8 +7,8 @@ package:
   version: {{ version }}
 
 source:
-  path:
-    ../pprof
+  - path: ../pprof
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}

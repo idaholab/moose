@@ -16,6 +16,7 @@ source:
   - url: https://www.vtk.org/files/release/{{ vtk_friendly_version }}/VTK-{{ vtk_version }}.tar.gz
   - vtk_friendly_version: {{ vtk_friendly_version }}
   - sha256: {{ sha256 }}
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}

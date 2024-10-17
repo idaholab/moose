@@ -17,6 +17,7 @@ package:
 source:
   - path: ../../petsc
   - path: ../../scripts/configure_petsc.sh
+  - path: ../functions/retry_build.sh
   - patches:
       - no-cppflags-in-pkgconfig-cflags.patch
       - ../../scripts/tao_restore_viewer.patch
