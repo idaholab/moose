@@ -120,6 +120,7 @@ QuadSubChannel1PhaseProblem::initializeSolution()
 
           if (pitch < (Radius1 + Radius2)) // overlapping pins
           {
+            mooseWarning(" The gap of index : '", i_gap, " at axial cell ", iz, " ' is blocked.");
             auto cos1 =
                 (pitch * pitch + Radius1 * Radius1 - Radius2 * Radius2) / (2 * pitch * Radius1);
             auto cos2 =
