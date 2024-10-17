@@ -67,6 +67,8 @@ SIMPLESolveBase::validParams()
       10000,
       "The maximum allowed iterations in the linear solver of the momentum equation.");
 
+  params.addParam<bool>("continue_on_max_its", false, "If solve should continue if maximum number of iterations is hit.");
+
   params.addParamNamesToGroup(
       "momentum_equation_relaxation momentum_petsc_options momentum_petsc_options_iname "
       "momentum_petsc_options_value momentum_petsc_options_value momentum_absolute_tolerance "
@@ -164,6 +166,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
+    _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
 {
   const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");

@@ -104,6 +104,9 @@ protected:
   /// The maximum number of momentum-pressure iterations
   const unsigned int _num_iterations;
 
+  /// If solve should continue if maximum number of iterations is hit
+  const bool _continue_on_max_its;
+
   // ************************ Other Variables ****************************** //
 
   /// Debug parameter which allows printing the coupling and solution vectors/matrices

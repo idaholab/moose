@@ -277,5 +277,7 @@ SIMPLESolve::solve()
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }
 
+  converged = _continue_on_max_its ? true : converged;
+
   return converged;
 }
