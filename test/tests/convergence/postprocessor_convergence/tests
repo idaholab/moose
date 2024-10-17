@@ -1,0 +1,11 @@
+[Tests]
+  design = 'PostprocessorConvergence.md'
+  issues = '#28765'
+
+  [test]
+    type = CSVDiff
+    input = 'postprocessor_convergence.i'
+    csvdiff = 'postprocessor_convergence_out.csv'
+    requirement = 'The system shall be able to terminate iteration according to a post-processor value.'
+  []
+[]

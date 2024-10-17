@@ -18,6 +18,8 @@ public:
 
   static InputParameters validParams();
 
+  static InputParameters residualConvergenceParams();
+
   static const std::set<std::string> & mooseLineSearches();
 
   /**
