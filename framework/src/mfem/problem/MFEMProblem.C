@@ -22,7 +22,7 @@ MFEMProblem::initialSetup()
 void
 MFEMProblem::setMesh()
 {
-  auto pmesh = std::make_shared<mfem::ParMesh>(mesh().getMFEMParMesh());
+  auto pmesh = mesh().getMFEMParMeshPtr();
   getProblemData()._pmesh = pmesh;
   getProblemData()._comm = pmesh->GetComm();
   MPI_Comm_size(pmesh->GetComm(), &(getProblemData()._num_procs));
