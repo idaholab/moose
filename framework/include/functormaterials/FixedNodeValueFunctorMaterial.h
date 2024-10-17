@@ -13,6 +13,10 @@
 #include "FunctorMaterial.h"
 #include "FixedNodeValueFunctor.h"
 
+/**
+ * Functor material to define a functor material property that evaluates an input functor with
+ * always the same element argument
+ */
 template <bool is_ad>
 class FixedNodeValueFunctorMaterialTempl : public FunctorMaterial
 {

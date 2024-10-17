@@ -48,7 +48,7 @@ DiffusionCG::addFEKernels()
     else if (isParamValid("diffusivity_functor"))
     {
       const auto & d = getParam<MooseFunctorName>("diffusivity_functor");
-      if (getProblem().hasFunction(d))
+      if (getProblem().hasFunction(d) || MooseUtils::parsesToReal(d))
         kernel_type = "FunctionDiffusion";
       else
         paramError(
