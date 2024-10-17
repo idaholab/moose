@@ -46,7 +46,7 @@ QuadSubChannelMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Creates a mesh of 1D subchannels in a square lattice arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
+  params.addRequiredParam<Real>("pin_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
@@ -74,7 +74,7 @@ QuadSubChannelMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
   params.addRequiredParam<Real>("gap",
                                 "(Its an added distance between a perimetric pin and the duct: "
-                                "Edge Pitch W = pitch/2 - rod_diameter/2 + gap) [m]");
+                                "Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]");
   params.addParam<unsigned int>("block_id", 0, "Domain Index");
   return params;
 }
@@ -92,7 +92,7 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
     _k_blockage(getParam<std::vector<Real>>("k_blockage")),
     _kij(getParam<Real>("Kij")),
     _pitch(getParam<Real>("pitch")),
-    _rod_diameter(getParam<Real>("rod_diameter")),
+    _pin_diameter(getParam<Real>("pin_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
@@ -252,9 +252,9 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
 
       // make a gap size map
       if (iy == 0 || iy == _ny - 1)
-        _gij_map[0].push_back((_pitch - _rod_diameter) / 2 + _gap);
+        _gij_map[0].push_back((_pitch - _pin_diameter) / 2 + _gap);
       else
-        _gij_map[0].push_back(_pitch - _rod_diameter);
+        _gij_map[0].push_back(_pitch - _pin_diameter);
       ++i_gap;
     }
   }
@@ -274,9 +274,9 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
 
       // make a gap size map
       if (ix == 0 || ix == _nx - 1)
-        _gij_map[0].push_back((_pitch - _rod_diameter) / 2 + _gap);
+        _gij_map[0].push_back((_pitch - _pin_diameter) / 2 + _gap);
       else
-        _gij_map[0].push_back(_pitch - _rod_diameter);
+        _gij_map[0].push_back(_pitch - _pin_diameter);
       ++i_gap;
     }
   }
@@ -483,7 +483,7 @@ QuadSubChannelMeshGenerator::generate()
   sch_mesh._reduction_blockage = _reduction_blockage;
   sch_mesh._kij = _kij;
   sch_mesh._pitch = _pitch;
-  sch_mesh._rod_diameter = _rod_diameter;
+  sch_mesh._pin_diameter = _pin_diameter;
   sch_mesh._n_cells = _n_cells;
   sch_mesh._nx = _nx;
   sch_mesh._ny = _ny;

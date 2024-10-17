@@ -27,7 +27,7 @@ DetailedQuadSubChannelMeshGenerator::validParams()
   params.addClassDescription(
       "Creates a detailed mesh of subchannels in a square lattice arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
+  params.addRequiredParam<Real>("pin_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
@@ -36,7 +36,7 @@ DetailedQuadSubChannelMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
   params.addRequiredParam<Real>("gap",
                                 "(Its an added distance between a perimetric pin and the duct: "
-                                "Edge Pitch W = pitch/2 - rod_diameter/2 + gap) [m]");
+                                "Edge Pitch W = pitch/2 - pin_diameter/2 + gap) [m]");
   params.addParam<unsigned int>("block_id", 0, "Block ID used for the mesh subdomain.");
   return params;
 }
@@ -48,7 +48,7 @@ DetailedQuadSubChannelMeshGenerator::DetailedQuadSubChannelMeshGenerator(
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
     _pitch(getParam<Real>("pitch")),
-    _rod_diameter(getParam<Real>("rod_diameter")),
+    _pin_diameter(getParam<Real>("pin_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
@@ -157,7 +157,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
   mesh_base->reserve_nodes(n_points);
   mesh_base->reserve_elem(n_elems);
   // Build an array of points arranged in a circle on the xy-plane. (last and first node overlap)
-  const Real radius = _rod_diameter / 2.0;
+  const Real radius = _pin_diameter / 2.0;
   std::array<Point, theta_res + 1> circle_points;
   {
     Real theta = 0;

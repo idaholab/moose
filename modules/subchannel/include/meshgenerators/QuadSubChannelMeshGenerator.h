@@ -55,7 +55,7 @@ protected:
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
   /// fuel rod diameter
-  Real _rod_diameter;
+  Real _pin_diameter;
   /// number of axial cells
   unsigned int _n_cells;
   /// number of axial blocks

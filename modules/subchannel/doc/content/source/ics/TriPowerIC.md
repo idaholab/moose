@@ -6,13 +6,13 @@
 
 <!-- -->
 
-This kernel assigns the axial heat rate on the subchannels or pins in the case of a problem with subchannels/pins in a
-triangular lattice arrangement. The user must provide the total power of the subassembly, the axial shape of the power profile and the radial
+This kernel assigns the axial heat rate ([!param](/ICs/TriPowerIC/variable) = `q_prime`) on the subchannels or pins in the case of a problem with subchannels/pins in a
+triangular lattice arrangement. The user must provide the total power of the subassembly [!param](/ICs/TriPowerIC/power), the axial shape of the power profile and the radial
 power distribution (power per pin). The axial power profile is given as a function, which integral over the length of the heated portion of the pin, is equal
-to the length of the heated portion of the pin. The radial power distribution is given as a column of numbers in a .txt file that has as many entries as the number of pins.
+to the length of the heated portion of the pin. The radial power distribution is given as a column of numbers in a .txt file [!param](/ICs/TriPowerIC/filename) that has as many entries as the number of pins.
 
 If the first entry is 1.0, that means that the pin with index 0 is at 100% power. If the 5th entry has a value of 0.0 that means that pin with index 4 has 0% power, etc.
-The pin and subchannel indexes are presented in [user notes page](http://127.0.0.1:8000/getting_started/user_notes.html).
+The pin and subchannel indexes are presented in [user notes page](user_notes.md).
 
 A pin with 100% power has a value of power which is equal to the total power of the subassembly divided with the total number of heated pins (if a pin has zero power it doesn't count in that number).
 

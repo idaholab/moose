@@ -57,7 +57,7 @@ protected:
   /// Lateral form loss coefficient
   const Real & _kij;
   /// fuel rod diameter
-  Real _rod_diameter;
+  Real _pin_diameter;
   /// number of axial cells
   unsigned int _n_cells;
   /// number of rings of fuel rods

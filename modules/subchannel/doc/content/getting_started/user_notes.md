@@ -27,8 +27,6 @@ index, white is the fuel-pin index and red is the gap index.
 
 SCM's solver is designed to solve for relative pressure: $P_{relative} = P_{absolute} - P_{boundary}$, such that the relative pressure at the outlet boundary is zero. The pressure boundary condition is only explicitly used in the calculation of fluid properties. The user should be careful to initialize/set the pressure at the assembly outlet to zero (not setting it at all will also define the default value of zero).
 
-## Related articles/papers
+## Naming/Branding
 
-Development of a Single-Phase, Transient, Subchannel Code, within the MOOSE Multi-Physics Computational Framework [!cite](kyriakopoulos2022development)
-
-Demonstration of Pronghorn’s Subchannel Code Modeling of Liquid-Metal Reactors and Validation in Normal Operation Conditions and Blockage Scenarios [!cite](kyriakopoulos2023demonstration)
+Initially SCM was part of [Pronghorn](https://mooseframework.inl.gov/ncrc/applications/ncrc_root_pronghorn.html). It was called `Pronghorn-Subchannel`, `Pr-Sub`. Once the code became a [MOOSE](https://mooseframework.inl.gov/index.html) module it has been re-branded as SCM.

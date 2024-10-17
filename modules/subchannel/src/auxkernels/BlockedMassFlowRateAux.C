@@ -29,9 +29,8 @@ BlockedMassFlowRateAux::validParams()
                                 "Specified mass flux for blocked subchannels [kg/s-m^2]]");
   params.declareControllable("unblocked_mass_flux");
   params.declareControllable("blocked_mass_flux");
-  params.addParam<std::vector<unsigned int>>("index_blockage",
-                                             std::vector<unsigned int>({1000}),
-                                             "index of subchannels affected by blockage");
+  params.addRequiredParam<std::vector<unsigned int>>("index_blockage",
+                                                     "index of subchannels affected by blockage");
   return params;
 }
 

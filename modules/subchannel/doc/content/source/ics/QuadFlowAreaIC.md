@@ -6,8 +6,7 @@
 
 <!-- -->
 
-This kernel populates the auxiliary variable S (subchannel surface area) at the beginning of the problem
-for a sub-assembly with a square subchannel/pin arrangement.
+This kernel creates an initial field for the subchannel surface area ([!param](/ICs/QuadFlowAreaIC/variable) = `S`), for a sub-assembly with a square subchannel/pin arrangement.
 
 !syntax parameters /ICs/QuadFlowAreaIC
 

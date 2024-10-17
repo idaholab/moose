@@ -94,7 +94,7 @@ TriSubChannelMesh::channelIndex(const Point & p) const
 
   // Projecting point into hexahedral coordinated to determine if the point belongs to a center
   // subchannel
-  Real distance_outer_ring = _flat_to_flat / 2 - _duct_to_pin_gap - _rod_diameter / 2;
+  Real distance_outer_ring = _flat_to_flat / 2 - _duct_to_pin_gap - _pin_diameter / 2;
   Real channel_distance = std::sqrt(std::pow(p(0), 2) + std::pow(p(1), 2));
   Real angle = std::abs(std::atan(p(1) / p(0)));
   Real projection_angle =

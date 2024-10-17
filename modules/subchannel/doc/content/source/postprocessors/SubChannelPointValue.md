@@ -6,8 +6,8 @@
 
 <!-- -->
 
-The user needs to specify the variable whose value they want to see, the index of the subchannel and the height.
-The postprocessor will interpolate the value of that variable at that location.
+The user needs to specify the [!param](/Postprocessors/SubChannelPointValue/variable) whose value they want to see, the [!param](/Postprocessors/SubChannelPointValue/index) of the subchannel and the
+[!param](/Postprocessors/SubChannelPointValue/height). The postprocessor will interpolate and print the value of that subchannel variable at that location.
 
 ## Example Input File Syntax
 

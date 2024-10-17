@@ -38,7 +38,7 @@ protected:
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
   /// fuel rod diameter
-  Real _rod_diameter;
+  Real _pin_diameter;
   /// Number of cells in the axial direction
   unsigned int _n_cells;
   /// Subdomain ID used for the mesh block

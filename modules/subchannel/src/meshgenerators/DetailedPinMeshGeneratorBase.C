@@ -22,7 +22,7 @@ DetailedPinMeshGeneratorBase::validParams()
   params.addClassDescription(
       "Base Class used to create the detailed pin mesh in a square lattice arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
+  params.addRequiredParam<Real>("pin_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
@@ -41,7 +41,7 @@ DetailedPinMeshGeneratorBase::DetailedPinMeshGeneratorBase(const InputParameters
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
     _pitch(getParam<Real>("pitch")),
-    _rod_diameter(getParam<Real>("rod_diameter")),
+    _pin_diameter(getParam<Real>("pin_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
     _block_id(getParam<unsigned int>("block_id")),
     _num_radial_parts(getParam<unsigned int>("num_radial_parts"))
@@ -57,7 +57,7 @@ DetailedPinMeshGeneratorBase::generatePin(std::unique_ptr<MeshBase> & mesh_base,
                                           const Point & center)
 {
   const Real dalpha = 360. / _num_radial_parts;
-  Real radius = _rod_diameter / 2.;
+  Real radius = _pin_diameter / 2.;
 
   // nodes
   std::vector<std::vector<Node *>> nodes;

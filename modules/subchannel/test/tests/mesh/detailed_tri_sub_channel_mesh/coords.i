@@ -9,7 +9,7 @@
 [TriSubChannelMesh]
   [subchannel]
     type = DetailedTriSubChannelMeshGenerator
-    rod_diameter = 0.01
+    pin_diameter = 0.01
     dwire = 0.002
     hwire = 0.0833
     spacer_z = '0'

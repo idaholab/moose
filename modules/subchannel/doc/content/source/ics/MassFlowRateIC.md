@@ -6,7 +6,7 @@
 
 <!-- -->
 
-This kernel creates an initial field for mass flow rate by mutiplying a user provided mass flux with the subchannel flow area.
+This kernel creates an initial field for mass-flow rate ([!param](/ICs/MassFlowRateIC/variable) = `mdot`) by mutiplying a user provided [!param](/ICs/MassFlowRateIC/mass_flux) with the subchannel flow [!param](/ICs/MassFlowRateIC/area).
 
 !syntax parameters /ICs/MassFlowRateIC
 

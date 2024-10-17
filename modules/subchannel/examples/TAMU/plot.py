@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 total_length = 2.0
-rod_diameter = 1.59e-2
+pin_diameter = 1.59e-2
 pitch = 1.89e-2
 hwire = 0.476
-p_over_d = pitch / rod_diameter
-h_over_d = hwire / rod_diameter
+p_over_d = pitch / pin_diameter
+h_over_d = hwire / pin_diameter
 ReL = pow(10, (p_over_d - 1.0)) * 320.0
 ReT = pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4
 CFBL = (-974.6 + 1612.0 * p_over_d - 598.5 * pow(p_over_d, 2.0)) * pow(h_over_d, 0.06 - 0.085 * p_over_d)

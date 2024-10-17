@@ -4,7 +4,7 @@
   flat_to_flat = 0.056
   heated_length = 0.2
   pitch = 0.012
-  rod_diameter = 0.01
+  pin_diameter = 0.01
 []
 
 [TriSubChannelMesh]

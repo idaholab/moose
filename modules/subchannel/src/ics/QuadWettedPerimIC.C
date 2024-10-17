@@ -34,9 +34,9 @@ Real
 QuadWettedPerimIC::value(const Point & p)
 {
   auto pitch = _mesh.getPitch();
-  auto rod_diameter = _mesh.getRodDiameter();
+  auto pin_diameter = _mesh.getPinDiameter();
   auto gap = _mesh.getGap();
-  auto rod_circumference = M_PI * rod_diameter;
+  auto rod_circumference = M_PI * pin_diameter;
   auto i = _mesh.getSubchannelIndexFromPoint(p);
   auto subch_type = _mesh.getSubchannelType(i);
 

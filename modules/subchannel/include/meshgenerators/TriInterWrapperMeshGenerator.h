@@ -43,7 +43,7 @@ protected:
   /// Distance between the neighbor fuel rods, assembly_pitch
   Real _assembly_pitch;
   /// assembly diameter
-  Real _rod_diameter;
+  Real _pin_diameter;
   /// number of axial cells
   unsigned int _n_cells;
   /// number of rings of fuel rods

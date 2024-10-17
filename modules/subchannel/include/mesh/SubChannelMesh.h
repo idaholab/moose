@@ -148,7 +148,7 @@ public:
   /**
    * Return rod diameter
    */
-  virtual const Real & getRodDiameter() const { return _rod_diameter; }
+  virtual const Real & getPinDiameter() const { return _pin_diameter; }
 
   /**
    * Return a signs for the cross flow given a subchannel index and local neighbor index
@@ -225,7 +225,7 @@ protected:
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
   /// fuel rod diameter
-  Real _rod_diameter;
+  Real _pin_diameter;
   /// number of axial cells
   unsigned int _n_cells;
 

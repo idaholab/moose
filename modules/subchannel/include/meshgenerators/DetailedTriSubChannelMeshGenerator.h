@@ -45,7 +45,7 @@ protected:
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
   /// fuel rod diameter
-  Real _rod_diameter;
+  Real _pin_diameter;
   /// Number of rings in the geometry
   unsigned int _n_rings;
   /// Half of gap between adjacent assemblies

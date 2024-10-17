@@ -28,7 +28,7 @@ TriSubChannelMeshGenerator::validParams()
       "Creates a mesh of 1D subchannels in a triangular lattice arrangement");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
+  params.addRequiredParam<Real>("pin_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
@@ -73,14 +73,14 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     _k_blockage(getParam<std::vector<Real>>("k_blockage")),
     _pitch(getParam<Real>("pitch")),
     _kij(getParam<Real>("Kij")),
-    _rod_diameter(getParam<Real>("rod_diameter")),
+    _pin_diameter(getParam<Real>("pin_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
     _n_rings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
     _dwire(getParam<Real>("dwire")),
     _hwire(getParam<Real>("hwire")),
     _duct_to_pin_gap(0.5 *
-                     (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter))
+                     (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _pin_diameter))
 {
   if (_spacer_z.size() != _spacer_k.size())
     mooseError(name(), ": Size of vector spacer_z should be equal to size of vector spacer_k");
@@ -591,7 +591,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     {
       if (_gap_type[i_gap] == EChannelType::CENTER)
       {
-        _gij_map[iz].push_back(_pitch - _rod_diameter);
+        _gij_map[iz].push_back(_pitch - _pin_diameter);
       }
       else if (_gap_type[i_gap] == EChannelType::EDGE || _gap_type[i_gap] == EChannelType::CORNER)
       {
@@ -715,7 +715,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
              (_pin_position[_chan_to_pin_map[i][0]](0) + _pin_position[_chan_to_pin_map[i][1]](0));
         y1 = 0.5 *
              (_pin_position[_chan_to_pin_map[i][0]](1) + _pin_position[_chan_to_pin_map[i][1]](1));
-        a1 = _rod_diameter / 2.0 + _duct_to_pin_gap / 2.0;
+        a1 = _pin_diameter / 2.0 + _duct_to_pin_gap / 2.0;
         a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
         _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
         _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
@@ -727,7 +727,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
       y0 = _pin_position[0](1);
       x1 = _pin_position[_chan_to_pin_map[i][0]](0);
       y1 = _pin_position[_chan_to_pin_map[i][0]](1);
-      a1 = _rod_diameter / 2.0 + _duct_to_pin_gap / 2.0;
+      a1 = _pin_diameter / 2.0 + _duct_to_pin_gap / 2.0;
       a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
       _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
@@ -823,7 +823,7 @@ TriSubChannelMeshGenerator::generate()
   sch_mesh._reduction_blockage = _reduction_blockage;
   sch_mesh._kij = _kij;
   sch_mesh._pitch = _pitch;
-  sch_mesh._rod_diameter = _rod_diameter;
+  sch_mesh._pin_diameter = _pin_diameter;
   sch_mesh._n_cells = _n_cells;
   sch_mesh._n_rings = _n_rings;
   sch_mesh._n_channels = _n_channels;

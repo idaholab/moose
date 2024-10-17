@@ -33,7 +33,7 @@ n_rings = 9
     unheated_length_entry = '${fparse length_entry_fuel}'
     heated_length = '${fparse length_heated_fuel}'
     unheated_length_exit = '${fparse length_outlet_fuel}'
-    rod_diameter = '${fparse fuel_pin_diameter}'
+    pin_diameter = '${fparse fuel_pin_diameter}'
     pitch = '${fparse fuel_pin_pitch}'
     spacer_z = '${fparse orifice_plate_height} ${fparse length_entry_fuel}'
     spacer_k = '0.5 0.5'
@@ -48,7 +48,7 @@ n_rings = 9
     heated_length = '${fparse length_heated_fuel}'
     unheated_length_exit = '${fparse length_outlet_fuel}'
     pitch = '${fparse fuel_pin_pitch}'
-    rod_diameter = '${fparse fuel_pin_diameter}'
+    pin_diameter = '${fparse fuel_pin_diameter}'
   []
 []
 

@@ -2,9 +2,14 @@
 
 !syntax description /Postprocessors/PlanarMean
 
-## Example Input File Syntax
+## Overview
 
-!! Describe and include an example of how to use the PlanarMean object.
+<!-- -->
+
+This is a postprocessor that calculates a mass-flow-rate-averaged mean value of a user specified [!param](/Postprocessors/PlanarMean/variable) over all subchannels
+at a user specified [!param](/Postprocessors/PlanarMean/height).
+
+## Example Input File Syntax
 
 !listing /test/tests/problems/psbt/psbt.i block=Postprocessors language=cpp
 

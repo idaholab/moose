@@ -74,7 +74,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
     auto flat_to_flat = _tri_sch_mesh.getFlatToFlat();
     auto n_rings = _tri_sch_mesh.getNumOfRings();
     auto pitch = _subchannel_mesh.getPitch();
-    auto rod_diameter = _subchannel_mesh.getRodDiameter();
+    auto pin_diameter = _subchannel_mesh.getPinDiameter();
     auto wire_diameter = _tri_sch_mesh.getWireDiameter();
     auto wire_lead_length = _tri_sch_mesh.getWireLeadLength();
     auto gap = _tri_sch_mesh.getDuctToRodGap();
@@ -83,7 +83,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
     auto reduction_blockage = _subchannel_mesh.getReductionBlockage();
     auto theta = std::acos(wire_lead_length /
                            std::sqrt(std::pow(wire_lead_length, 2) +
-                                     std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+                                     std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
     for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
     {
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -120,7 +120,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
         }
         else if (subch_type == EChannelType::EDGE)
         {
-          standard_area = pitch * (rod_diameter / 2.0 + gap);
+          standard_area = pitch * (pin_diameter / 2.0 + gap);
           additional_area = 0.0;
           displaced_area = (*_displacement_soln)(node)*pitch;
           wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
@@ -129,15 +129,15 @@ TriSubChannel1PhaseProblem::initializeSolution()
         }
         else
         {
-          standard_area = 1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
+          standard_area = 1.0 / std::sqrt(3.0) * std::pow((pin_diameter / 2.0 + gap), 2.0);
           additional_area = 0.0;
           displaced_area = 1.0 / std::sqrt(3.0) *
-                           (rod_diameter + 2.0 * gap + (*_displacement_soln)(node)) *
+                           (pin_diameter + 2.0 * gap + (*_displacement_soln)(node)) *
                            (*_displacement_soln)(node);
           wire_area = libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta);
           wetted_perimeter =
               rod_perimeter + libMesh::pi * wire_diameter / std::cos(theta) / 6.0 +
-              2.0 / std::sqrt(3.0) * (rod_diameter / 2.0 + gap + (*_displacement_soln)(node));
+              2.0 / std::sqrt(3.0) * (pin_diameter / 2.0 + gap + (*_displacement_soln)(node));
         }
 
         /// Calculate subchannel area
@@ -264,25 +264,25 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
   Real aL, b1L, b2L, cL;
   Real aT, b1T, b2T, cT;
   const Real & pitch = _subchannel_mesh.getPitch();
-  const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+  const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
-  auto p_over_d = pitch / rod_diameter;
+  auto p_over_d = pitch / pin_diameter;
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   auto gap = _tri_sch_mesh.getDuctToRodGap();
-  auto w_over_d = (rod_diameter + gap) / rod_diameter;
+  auto w_over_d = (pin_diameter + gap) / pin_diameter;
   auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
   const Real lambda = 7.0;
   auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
   auto theta = std::acos(wire_lead_length /
                          std::sqrt(std::pow(wire_lead_length, 2) +
-                                   std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
-  auto wd_t = (19.56 - 98.71 * (wire_diameter / rod_diameter) +
-               303.47 * std::pow((wire_diameter / rod_diameter), 2.0)) *
-              std::pow((wire_lead_length / rod_diameter), -0.541);
+                                   std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
+  auto wd_t = (19.56 - 98.71 * (wire_diameter / pin_diameter) +
+               303.47 * std::pow((wire_diameter / pin_diameter), 2.0)) *
+              std::pow((wire_lead_length / pin_diameter), -0.541);
   auto wd_l = 1.4 * wd_t;
-  auto ws_t = -11.0 * std::log(wire_lead_length / rod_diameter) + 19.0;
+  auto ws_t = -11.0 * std::log(wire_lead_length / pin_diameter) + 19.0;
   auto ws_l = ws_t;
   Real pw_p = 0.0;
   Real ar = 0.0;
@@ -375,9 +375,9 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
     if (subch_type == EChannelType::CENTER)
     {
       // wetted perimeter for center subchannel and bare rod bundle
-      pw_p = libMesh::pi * rod_diameter / 2.0;
+      pw_p = libMesh::pi * pin_diameter / 2.0;
       // wire projected area - center subchannel wire-wrapped bundle
-      ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
+      ar = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
       // bare rod bundle center subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
       // turbulent friction factor equation constant - Center subchannel
@@ -391,7 +391,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
     else if (subch_type == EChannelType::EDGE)
     {
       // wire projected area - edge subchannel wire-wrapped bundle
-      ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
+      ar = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
       // bare rod bundle edge subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
       // turbulent friction factor equation constant - Edge subchannel
@@ -402,7 +402,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
     else
     {
       // wire projected area - corner subchannel wire-wrapped bundle
-      ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
+      ar = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
       // bare rod bundle corner subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 24.0 / std::cos(theta);
       // turbulent friction factor equation constant - Corner subchannel
@@ -441,7 +441,7 @@ TriSubChannel1PhaseProblem::computeWijPrime(int iblock)
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
   const Real & pitch = _subchannel_mesh.getPitch();
-  const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+  const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -479,8 +479,8 @@ TriSubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
       auto Sij = dz * gap;
       // Calculation of flow regime
-      auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
-      auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+      auto ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1);
+      auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1));
       _WijPrime(i_gap, iz) = 0.0;
       auto beta = 0.0;
       // Calculation of Turbulent Crossflow for wire-wrapped triangular assemblies. Cheng &
@@ -492,27 +492,27 @@ TriSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto theta =
             std::acos(wire_lead_length /
                       std::sqrt(std::pow(wire_lead_length, 2) +
-                                std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
-        auto Ar1 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
+                                std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
+        auto Ar1 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
         auto A1prime = (std::sqrt(3.0) / 4.0) * std::pow(pitch, 2) -
-                       libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
+                       libMesh::pi * std::pow(pin_diameter, 2) / 8.0;
         auto A1 = A1prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
         auto Cm = 0.0;
         if (Re < ReL)
         {
-          Cm = 0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+          Cm = 0.077 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
         }
         else if (Re > ReT)
         {
-          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+          Cm = 0.14 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
         }
         else
         {
           auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
           auto gamma = 2.0 / 3.0;
-          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) +
-               (0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) -
-                0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5)) *
+          Cm = 0.14 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5) +
+               (0.14 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5) -
+                0.077 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5)) *
                    std::pow(psi, gamma);
         }
         // Calculation of turbulent mixing parameter
@@ -545,10 +545,10 @@ TriSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto lamda = gap / L_x; // aspect ratio
         auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
         auto z_FP_over_D =
-            (2.0 * L_x / rod_diameter) *
+            (2.0 * L_x / pin_diameter) *
             (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
         auto Str =
-            1.0 / (0.822 * (gap / rod_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
+            1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
         auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
         auto dum2 = (1 / Pr_t) * lamda;
         auto dum3 = a_x * z_FP_over_D * Str;
@@ -613,7 +613,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   const Real & pitch = _subchannel_mesh.getPitch();
-  const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+  const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
 
   if (iblock == 0)
   {
@@ -679,15 +679,15 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             (wire_diameter != 0.0) && (wire_lead_length != 0.0))
         {
           const Real & pitch = _subchannel_mesh.getPitch();
-          const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+          const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
           const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
           const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
           auto gap = _tri_sch_mesh.getDuctToRodGap();
-          auto w = rod_diameter + gap;
+          auto w = pin_diameter + gap;
           auto theta =
               std::acos(wire_lead_length /
                         std::sqrt(std::pow(wire_lead_length, 2) +
-                                  std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+                                  std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
           auto Sij = dz * gap;
           auto Si = (*_S_flow_soln)(node_in);
           // in/out channels for i_ch
@@ -695,8 +695,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
 
           // Calculation of flow regime
-          auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
-          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+          auto ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1);
+          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1));
           auto massflux = (*_mdot_soln)(node_in) / Si;
           auto w_perim = (*_w_perim_soln)(node_in);
           auto mu = (*_mu_soln)(node_in);
@@ -704,26 +704,26 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto hD = 4.0 * Si / w_perim;
           auto Re = massflux * hD / mu;
           // Calculation of geometric parameters
-          auto Ar2 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
+          auto Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
           auto A2prime =
-              pitch * (w - rod_diameter / 2.0) - libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
+              pitch * (w - pin_diameter / 2.0) - libMesh::pi * std::pow(pin_diameter, 2) / 8.0;
           auto A2 = A2prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
           auto Cs = 0.0;
           if (Re < ReL)
           {
-            Cs = 0.033 * std::pow(wire_lead_length / rod_diameter, 0.3);
+            Cs = 0.033 * std::pow(wire_lead_length / pin_diameter, 0.3);
           }
           else if (Re > ReT)
           {
-            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3);
+            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3);
           }
           else
           {
             auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
             auto gamma = 2.0 / 3.0;
-            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) +
-                 (0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) -
-                  0.033 * std::pow(wire_lead_length / rod_diameter, 0.3)) *
+            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) +
+                 (0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) -
+                  0.033 * std::pow(wire_lead_length / pin_diameter, 0.3)) *
                      std::pow(psi, gamma);
           }
           // Calculation of turbulent mixing parameter
@@ -783,8 +783,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
           auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
           auto shape_factor =
-              0.66 * (pitch / rod_diameter) *
-              std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / rod_diameter), -0.3);
+              0.66 * (pitch / pin_diameter) *
+              std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / pin_diameter), -0.3);
           if (ii_ch == i_ch)
           {
             e_cond += 0.5 * (thcon_i + thcon_j) * Sij * shape_factor *
@@ -857,7 +857,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       auto heated_length = _subchannel_mesh.getHeatedLength();
       auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
       auto pitch = _subchannel_mesh.getPitch();
-      auto rod_diameter = _subchannel_mesh.getRodDiameter();
+      auto pin_diameter = _subchannel_mesh.getPinDiameter();
       auto iz_ind = iz - first_node;
 
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -1243,8 +1243,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto A_j = K_j / cp_j;
           auto harm_A = 2.0 * A_i * A_j / (A_i + A_j);
           auto shape_factor =
-              0.66 * (pitch / rod_diameter) *
-              std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / rod_diameter), -0.3);
+              0.66 * (pitch / pin_diameter) *
+              std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / pin_diameter), -0.3);
           // auto base_value =  0.5 * (A_i + A_j) * Sij * shape_factor / dist_ij;
           auto base_value = harm_A * shape_factor * Sij / dist_ij;
           auto neg_base_value = -1.0 * base_value;
@@ -1294,15 +1294,15 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             (wire_diameter != 0.0) && (wire_lead_length != 0.0))
         {
           const Real & pitch = _subchannel_mesh.getPitch();
-          const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+          const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
           const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
           const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
           auto gap = _tri_sch_mesh.getDuctToRodGap();
-          auto w = rod_diameter + gap;
+          auto w = pin_diameter + gap;
           auto theta =
               std::acos(wire_lead_length /
                         std::sqrt(std::pow(wire_lead_length, 2) +
-                                  std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+                                  std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
           auto Sij = dz * gap;
           auto Si = (*_S_flow_soln)(node_in);
           // in/out channels for i_ch
@@ -1310,8 +1310,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
 
           // Calculation of flow regime
-          auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
-          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+          auto ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1);
+          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1));
           auto massflux = (*_mdot_soln)(node_in) / Si;
           auto w_perim = (*_w_perim_soln)(node_in);
           auto mu = (*_mu_soln)(node_in);
@@ -1319,26 +1319,26 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto hD = 4.0 * Si / w_perim;
           auto Re = massflux * hD / mu;
           // Calculation of geometric parameters
-          auto Ar2 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
+          auto Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
           auto A2prime =
-              pitch * (w - rod_diameter / 2.0) - libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
+              pitch * (w - pin_diameter / 2.0) - libMesh::pi * std::pow(pin_diameter, 2) / 8.0;
           auto A2 = A2prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
           auto Cs = 0.0;
           if (Re < ReL)
           {
-            Cs = 0.033 * std::pow(wire_lead_length / rod_diameter, 0.3);
+            Cs = 0.033 * std::pow(wire_lead_length / pin_diameter, 0.3);
           }
           else if (Re > ReT)
           {
-            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3);
+            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3);
           }
           else
           {
             auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
             auto gamma = 2.0 / 3.0;
-            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) +
-                 (0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) -
-                  0.033 * std::pow(wire_lead_length / rod_diameter, 0.3)) *
+            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) +
+                 (0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) -
+                  0.033 * std::pow(wire_lead_length / pin_diameter, 0.3)) *
                      std::pow(psi, gamma);
           }
           // Calculation of turbulent mixing parameter

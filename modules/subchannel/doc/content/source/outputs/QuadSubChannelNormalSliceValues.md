@@ -7,9 +7,9 @@
 <!-- -->
 
 This kernel is used to save the solution variables in a file, for the square subchannel problem.
-Imagine a plane perpendicular to the flow direction at a specific height defined by the user.
-The solution variables defined by the user are interpolated at the intersection of that plane
-and the subchannel mesh and printed on that file as a matrix.
+Imagine a plane perpendicular to the flow direction at a specific [!param](/Outputs/QuadSubChannelNormalSliceValues/height) defined by the user.
+The solution [!param](/Outputs/QuadSubChannelNormalSliceValues/variable) defined by the user is interpolated at the intersection of that plane
+and the subchannel mesh and printed on that [!param](/Outputs/QuadSubChannelNormalSliceValues/file_base) as a matrix.
 
 ## Example Input File Syntax
 

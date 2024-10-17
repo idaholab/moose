@@ -4,7 +4,7 @@
   n_cells = 3
   pitch = 1
   heated_length = 0.2
-  rod_diameter = 0.5
+  pin_diameter = 0.5
 []
 
 [Mesh]
