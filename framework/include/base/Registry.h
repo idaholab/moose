@@ -10,7 +10,6 @@
 #pragma once
 
 #include "InputParameters.h"
-#include "MooseObject.h"
 
 #include <string>
 #include <vector>
