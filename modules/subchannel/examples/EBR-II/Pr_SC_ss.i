@@ -521,7 +521,7 @@ ramp_time = 1.0
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeDuctFVAux
+    type = QPrimeDuctAux
     diffusivity = ${k_wrapper}
     flat_to_flat = ${flat_to_flat}
     variable = q_prime_duct
