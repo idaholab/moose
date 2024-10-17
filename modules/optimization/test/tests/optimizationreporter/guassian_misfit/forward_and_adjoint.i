@@ -139,5 +139,4 @@
 
 [Outputs]
   console = false
-
 []
