@@ -17,8 +17,6 @@ InputParameters
 ThermalHydraulicsFlowPhysics::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
-  params.addRequiredParam<UserObjectName>(
-      "fp", "The name of the user object that defines fluid properties");
   return params;
 }
 
@@ -32,7 +30,7 @@ const std::string ThermalHydraulicsFlowPhysics::UNITY = "unity";
 const std::string ThermalHydraulicsFlowPhysics::DIRECTION = "direction";
 
 ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters & params)
-  : PhysicsBase(params), _fp_name(params.get<UserObjectName>("fp")), _component_names({})
+  : PhysicsBase(params), _component_names({})
 {
   // A derived physics must act on those tasks
   addRequiredPhysicsTask("THMPhysics:add_ic");

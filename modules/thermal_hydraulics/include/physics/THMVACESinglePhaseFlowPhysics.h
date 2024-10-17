@@ -28,7 +28,7 @@ protected:
   const MooseEnum _rdg_slope_reconstruction;
 
   /// Numerical flux user object name
-  const UserObjectName _numerical_flux_name;
+  std::unordered_map<std::string, UserObjectName> _numerical_flux_names;
 
   /// Scaling factors for each solution variable (rhoA, rhouA, rhoEA)
   const std::vector<Real> _scaling_factors;

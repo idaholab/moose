@@ -25,15 +25,16 @@
 [Closures]
   [simple_closures]
     type = Closures1PhaseSimple
+    add_functor_materials = true
+    add_regular_materials = false
   []
 []
 
 
 [Physics]
   [ThermalHydraulics]
-    [WCNSFV]
+    [WeaklyCompressibleFlow]
       [all]
-        fp = fp
         velocity_interpolation = 'average'
       []
     []

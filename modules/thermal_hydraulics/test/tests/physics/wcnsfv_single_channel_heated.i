@@ -34,15 +34,13 @@
 
 [Physics]
   [ThermalHydraulics]
-    [WCNSFV]
+    [WeaklyCompressibleFlow]
       [flow]
-        fp = fp
         velocity_interpolation = 'average'
       []
     []
-    [WCNSFVEnergy]
+    [WeaklyCompressibleFluidHeatTransfer]
       [energy]
-        fp = fp
       []
     []
   []

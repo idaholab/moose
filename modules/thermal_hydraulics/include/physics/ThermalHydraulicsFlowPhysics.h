@@ -140,9 +140,6 @@ protected:
   /// The flow channel component that built this class
   std::vector<const FlowChannelBase *> _flow_channels;
 
-  /// The name of the user object that defines fluid properties
-  const UserObjectName _fp_name;
-
   /// The name of the flow components
   std::vector<std::string> _component_names;
   /// The name of the inlet components

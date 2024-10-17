@@ -74,7 +74,6 @@ THMVACESinglePhaseFlowPhysics::THMVACESinglePhaseFlowPhysics(const InputParamete
   : PhysicsBase(params),
     ThermalHydraulicsFlowPhysics(params),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
-    _numerical_flux_name(prefix() + "VACE_uo"),
     _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase")),
     _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
@@ -197,7 +196,7 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
           params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
           params.set<FunctionName>("vel") = vel_fn;
           params.set<std::vector<VariableName>>("A") = {ThermalHydraulicsFlowPhysics::AREA};
-          params.set<UserObjectName>("fp") = _fp_name;
+          params.set<UserObjectName>("fp") = flow_channel->getFluidPropertiesName();
           _sim->addSimInitialCondition(class_name, genName(comp_name, "rhoEA_ic"), params);
         }
       }
@@ -223,7 +222,7 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
           params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
           params.set<std::vector<VariableName>>("vel") = {VELOCITY};
           params.set<std::vector<VariableName>>("A") = {ThermalHydraulicsFlowPhysics::AREA};
-          params.set<UserObjectName>("fp") = _fp_name;
+          params.set<UserObjectName>("fp") = flow_channel->getFluidPropertiesName();
           _sim->addSimInitialCondition(class_name, genName(comp_name, "rhoEA_ic"), params);
         }
       }
@@ -235,7 +234,7 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
         params.set<std::vector<SubdomainName>>("block") = block;
         params.set<std::vector<VariableName>>("p") = {PRESSURE};
         params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
-        params.set<UserObjectName>("fp") = _fp_name;
+        params.set<UserObjectName>("fp") = flow_channel->getFluidPropertiesName();
         _sim->addSimInitialCondition(class_name, genName(comp_name, "rho_ic"), params);
       }
 
@@ -297,7 +296,7 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       std::string class_name = "ADFluidProperties3EqnMaterial";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
-      params.set<UserObjectName>("fp") = _fp_name;
+      params.set<UserObjectName>("fp") = flow_channel->getFluidPropertiesName();
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
@@ -308,7 +307,7 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       const std::string class_name = "ADDynamicViscosityMaterial";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
-      params.set<UserObjectName>("fp_1phase") = _fp_name;
+      params.set<UserObjectName>("fp_1phase") = flow_channel->getFluidPropertiesName();
       params.set<MaterialPropertyName>("mu") = {DYNAMIC_VISCOSITY};
       params.set<MaterialPropertyName>("v") = {SPECIFIC_VOLUME};
       params.set<MaterialPropertyName>("e") = {SPECIFIC_INTERNAL_ENERGY};
@@ -326,7 +325,7 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
       params.set<MaterialPropertyName>("direction") = DIRECTION;
-      params.set<UserObjectName>("fluid_properties") = _fp_name;
+      params.set<UserObjectName>("fluid_properties") = flow_channel->getFluidPropertiesName();
       params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
       _sim->addMaterial(class_name, genName(comp_name, "rdg_3egn_mat"), params);
     }
@@ -446,7 +445,8 @@ THMVACESinglePhaseFlowPhysics::addDGKernels()
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+    params.set<UserObjectName>("numerical_flux") =
+        libmesh_map_find(_numerical_flux_names, flow_channel->getFluidPropertiesName());
     params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
     _sim->addDGKernel(class_name, genName(comp_name, "mass_advection"), params);
 
@@ -549,7 +549,7 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
       params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
       params.set<std::vector<VariableName>>("e") = {SPECIFIC_INTERNAL_ENERGY};
       params.set<std::vector<VariableName>>("v") = {SPECIFIC_VOLUME};
-      params.set<UserObjectName>("fp") = _fp_name;
+      params.set<UserObjectName>("fp") = flow_channel->getFluidPropertiesName();
       _sim->addAuxKernel(class_name, genName(comp_name, "pressure_uv_auxkernel"), params);
     }
     {
@@ -559,7 +559,7 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
       params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
       params.set<std::vector<VariableName>>("e") = {SPECIFIC_INTERNAL_ENERGY};
       params.set<std::vector<VariableName>>("v") = {SPECIFIC_VOLUME};
-      params.set<UserObjectName>("fp") = _fp_name;
+      params.set<UserObjectName>("fp") = flow_channel->getFluidPropertiesName();
       _sim->addAuxKernel(class_name, genName(comp_name, "T_auxkernel"), params);
     }
 
@@ -580,12 +580,25 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
 void
 THMVACESinglePhaseFlowPhysics::addUserObjects()
 {
-  const std::string class_name = "ADNumericalFlux3EqnHLLC";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<UserObjectName>("fluid_properties") = _fp_name;
-  params.set<MooseEnum>("emit_on_nan") = "none";
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-  _sim->addUserObject(class_name, _numerical_flux_name, params);
+  // Keep track of which fluid properties we added a flux UO for
+  for (const auto i : index_range(_flow_channels))
+  {
+    const auto flow_channel = _flow_channels[i];
+    const std::string class_name = "ADNumericalFlux3EqnHLLC";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<UserObjectName>("fluid_properties") = flow_channel->getFluidPropertiesName();
+    params.set<MooseEnum>("emit_on_nan") = "none";
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+    if (!_numerical_flux_names.count(flow_channel->getFluidPropertiesName()))
+    {
+      _numerical_flux_names[flow_channel->getFluidPropertiesName()] =
+          name() + "_HLLC_3eqn_UO_" + flow_channel->getFluidPropertiesName();
+      _sim->addUserObject(
+          class_name,
+          libmesh_map_find(_numerical_flux_names, flow_channel->getFluidPropertiesName()),
+          params);
+    }
+  }
 }
 
 void
@@ -621,8 +634,9 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
       params.set<Real>("T") = comp.getParam<Real>("T");
       params.set<Real>("normal") = comp.getNormal();
       params.set<bool>("reversible") = comp.isReversible();
-      params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-      params.set<UserObjectName>("fluid_properties") = _fp_name;
+      params.set<UserObjectName>("numerical_flux") =
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
+      params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
       comp.connectObject(params, comp.getBoundaryUOName(), "m_dot", "mass_flow_rate");
@@ -656,8 +670,9 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
       InputParameters params = _factory.getValidParams(class_name);
       params.set<Real>("p") = comp.getParam<Real>("p");
       params.set<Real>("normal") = comp.getNormal();
-      params.set<UserObjectName>("fluid_properties") = _fp_name;
-      params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+      params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
+      params.set<UserObjectName>("numerical_flux") =
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
       comp.connectObject(params, comp.getBoundaryUOName(), "p");
@@ -666,7 +681,7 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
     {
       const std::string class_name = "ADBoundaryFlux3EqnFreeOutflow";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("fluid_properties") = _fp_name;
+      params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
     }
@@ -725,10 +740,11 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
         params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
         params.set<std::vector<Real>>("normals") = normals;
         params.set<std::vector<processor_id_type>>("processor_ids") = comp.getProcIds();
-        params.set<UserObjectName>("fluid_properties") = _fp_name;
+        params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
         // It is assumed that each channel should have the same numerical flux, so
         // just use the first one.
-        params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+        params.set<UserObjectName>("numerical_flux") =
+            libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
         params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
         params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
         params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};

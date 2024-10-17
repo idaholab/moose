@@ -127,10 +127,12 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
   // Physics
   auto & syntax = s;
-  registerSyntax("THMVACESinglePhaseFlowPhysics", "Physics/ThermalHydraulics/VACESinglePhase/*");
-  registerSyntax("THMWCNSFVFlowPhysics", "Physics/ThermalHydraulics/WCNSFV/*");
-  registerSyntax("THMWCNSFVFluidHeatTransferPhysics", "Physics/ThermalHydraulics/WCNSFVEnergy/*");
-  registerSyntax("THMWCNSFVScalarTransportPhysics", "Physics/ThermalHydraulics/WCNSFVScalar/*");
+  registerSyntax("THMVACESinglePhaseFlowPhysics", "Physics/ThermalHydraulics/CompressibleEuler/*");
+  registerSyntax("THMWCNSFVFlowPhysics", "Physics/ThermalHydraulics/WeaklyCompressibleFlow/*");
+  registerSyntax("THMWCNSFVFluidHeatTransferPhysics",
+                 "Physics/ThermalHydraulics/WeaklyCompressibleFluidHeatTransfer/*");
+  registerSyntax("THMWCNSFVScalarTransportPhysics",
+                 "Physics/ThermalHydraulics/WeaklyCompressibleScalarTransport/*");
 }
 
 const std::string &

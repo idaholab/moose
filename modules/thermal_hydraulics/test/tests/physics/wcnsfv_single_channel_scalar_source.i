@@ -31,15 +31,13 @@
 
 [Physics]
   [ThermalHydraulics]
-    [WCNSFV]
+    [WeaklyCompressibleFlow]
       [flow]
-        fp = fp
       []
     []
-    [WCNSFVScalar]
+    [WeaklyCompressibleScalarTransport]
       [scalar]
         passive_scalar_names = 'c1 c2'
-        fp = fp
       []
     []
   []

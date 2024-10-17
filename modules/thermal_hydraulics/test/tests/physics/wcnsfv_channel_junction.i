@@ -55,16 +55,17 @@ p_outlet = 2e5
 [Closures]
   [simple_closures]
     type = Closures1PhaseSimple
+    add_functor_materials = true
+    add_regular_materials = false
   []
 []
 
 [Physics]
   [ThermalHydraulics]
-    [WCNSFV]
+    [WeaklyCompressibleFlow]
       [all]
         # needed to avoid ANY_BLOCK_ID
         block = 'left_channel'
-        fp = fp
         verbose = true
       []
     []

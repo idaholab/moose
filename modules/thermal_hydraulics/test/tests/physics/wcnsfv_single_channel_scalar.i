@@ -25,21 +25,21 @@
 [Closures]
   [simple_closures]
     type = Closures1PhaseSimple
+    add_functor_materials = true
+    add_regular_materials = false
   []
 []
 
 
 [Physics]
   [ThermalHydraulics]
-    [WCNSFV]
+    [WeaklyCompressibleFlow]
       [flow]
-        fp = fp
       []
     []
-    [WCNSFVScalar]
+    [WeaklyCompressibleScalarTransport]
       [scalar]
         passive_scalar_names = 'c1 c2'
-        fp = fp
       []
     []
   []
