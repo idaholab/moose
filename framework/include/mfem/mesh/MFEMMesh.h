@@ -35,6 +35,11 @@ public:
   mfem::ParMesh & getMFEMParMesh() { return *_mfem_par_mesh; };
 
   /**
+   * Copy a shared_ptr to the mfem::ParMesh object.
+   */
+  std::shared_ptr<mfem::ParMesh> getMFEMParMeshPtr() { return _mfem_par_mesh; };
+
+  /**
    * Build MFEM ParMesh and a placeholder MOOSE mesh.
    */
   void buildMesh() override;
