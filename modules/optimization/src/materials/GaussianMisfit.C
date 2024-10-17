@@ -36,8 +36,8 @@ GaussianMisfit::GaussianMisfit(const InputParameters & parameters)
     ReporterInterface(this),
     _sim_var(coupledValue("sim_variable")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _misfit(declarePropertyByName<Real>(_base_name + "_misfit")),
-    _misfit_gradient(declarePropertyByName<Real>(_base_name + "_misfit_gradient")),
+    _misfit(declareProperty<Real>(_base_name + "misfit")),
+    _misfit_gradient(declareProperty<Real>(_base_name + "misfit_gradient")),
     _read_in_points(isParamValid("point_name")),
     _measurement_values(
         getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
@@ -79,10 +79,10 @@ GaussianMisfit::computeQpProperties()
     // Compute Gaussian value
     Real guass_value = computeGuassian(p_m, p_sim);
 
-    // Calculate misfit and misfit gradient
-    Real diff = value_m - value_sim;
-    _misfit[_qp] += diff * guass_value;
-    _misfit_gradient[_qp] -= guass_value;
+    _misfit[_qp] += Utility::pow<2>(value_m * guass_value - value_sim * guass_value);
+    _misfit_gradient[_qp] -=
+        2.0 * guass_value *
+        (value_m * guass_value - value_sim * guass_value); // Gradient with respect to value_sim
   }
 }
 
