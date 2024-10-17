@@ -243,11 +243,11 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
     Real aL, b1L, b2L, cL;
     Real aT, b1T, b2T, cT;
     auto pitch = _subchannel_mesh.getPitch();
-    auto rod_diameter = _subchannel_mesh.getRodDiameter();
+    auto pin_diameter = _subchannel_mesh.getPinDiameter();
     auto gap = _subchannel_mesh.getGap();
-    auto w = (rod_diameter / 2.0) + (pitch / 2.0) + gap;
-    auto p_over_d = pitch / rod_diameter;
-    auto w_over_d = w / rod_diameter;
+    auto w = (pin_diameter / 2.0) + (pitch / 2.0) + gap;
+    auto p_over_d = pitch / pin_diameter;
+    auto w_over_d = w / pin_diameter;
     auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
     auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
     auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
@@ -363,7 +363,7 @@ QuadSubChannel1PhaseProblem::computeWijPrime(int iblock)
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
   const Real & pitch = _subchannel_mesh.getPitch();
-  const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+  const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
   if (!_implicit_bool)
   {
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -426,10 +426,10 @@ QuadSubChannel1PhaseProblem::computeWijPrime(int iblock)
           auto lamda = gap / L_x; // aspect ratio
           auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
           auto z_FP_over_D =
-              (2.0 * L_x / rod_diameter) *
+              (2.0 * L_x / pin_diameter) *
               (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
           auto Str =
-              1.0 / (0.822 * (gap / rod_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
+              1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
           auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
           auto dum2 = (1 / Pr_t) * lamda;
           auto dum3 = a_x * z_FP_over_D * Str;
@@ -504,10 +504,10 @@ QuadSubChannel1PhaseProblem::computeWijPrime(int iblock)
           auto lamda = gap / L_x; // aspect ratio
           auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
           auto z_FP_over_D =
-              (2.0 * L_x / rod_diameter) *
+              (2.0 * L_x / pin_diameter) *
               (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
           auto Str =
-              1.0 / (0.822 * (gap / rod_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
+              1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
           auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
           auto dum2 = (1 / Pr_t) * lamda;
           auto dum3 = a_x * z_FP_over_D * Str;

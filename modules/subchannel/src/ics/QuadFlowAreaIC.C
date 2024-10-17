@@ -35,7 +35,7 @@ QuadFlowAreaIC::value(const Point & p)
 {
   Real standard_area, rod_area, additional_area;
   auto pitch = _mesh.getPitch();
-  auto rod_diameter = _mesh.getRodDiameter();
+  auto pin_diameter = _mesh.getPinDiameter();
   auto gap = _mesh.getGap();
   auto z_blockage = _mesh.getZBlockage();
   auto index_blockage = _mesh.getIndexBlockage();
@@ -46,19 +46,19 @@ QuadFlowAreaIC::value(const Point & p)
   if (subch_type == EChannelType::CORNER)
   {
     standard_area = 0.25 * pitch * pitch;
-    rod_area = 0.25 * 0.25 * M_PI * rod_diameter * rod_diameter;
+    rod_area = 0.25 * 0.25 * M_PI * pin_diameter * pin_diameter;
     additional_area = pitch * gap + gap * gap;
   }
   else if (subch_type == EChannelType::EDGE)
   {
     standard_area = 0.5 * pitch * pitch;
-    rod_area = 0.5 * 0.25 * M_PI * rod_diameter * rod_diameter;
+    rod_area = 0.5 * 0.25 * M_PI * pin_diameter * pin_diameter;
     additional_area = pitch * gap;
   }
   else
   {
     standard_area = pitch * pitch;
-    rod_area = 0.25 * M_PI * rod_diameter * rod_diameter;
+    rod_area = 0.25 * M_PI * pin_diameter * pin_diameter;
     additional_area = 0.0;
   }
 

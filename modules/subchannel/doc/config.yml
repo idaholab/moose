@@ -18,6 +18,7 @@ Extensions:
                 Using SCM: getting_started/using_SubChannel.md
                 User Notes: getting_started/user_notes.md
                 SubChannel Theory: getting_started/subchannel_theory.md
+                List of Publications: getting_started/list_of_publications.md
             Documentation:
                 SCM-only Syntax: syntax/subchannel_only.md
                 Complete Code Syntax: syntax/index.md
@@ -29,6 +30,7 @@ Extensions:
         executable: ${ROOT_DIR}
         remove:
             framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
+            subchannel: !include ${ROOT_DIR}/doc/remove.yml
     MooseDocs.extensions.common:
         shortcuts:
             framework: !include ${MOOSE_DIR}/framework/doc/globals.yml

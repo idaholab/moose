@@ -5,7 +5,7 @@
   n_cells = 36
   n_blocks = 1
   pitch = 0.0126
-  rod_diameter = 0.00950
+  pin_diameter = 0.00950
   gap = 0.00095
   heated_length = 3.6
   spacer_z = '0.0'
@@ -129,7 +129,7 @@ pitch = 0.0126
   [Dpin_ic]
     type = ConstantIC
     variable = Dpin
-    value = ${rod_diameter}
+    value = ${pin_diameter}
   []
 
   [P_ic]
@@ -270,7 +270,7 @@ pitch = 0.0126
   # [sub1]
   #   app_type = BisonApp
   #   type = FullSolveMultiApp
-  #   input_files = sub_hot_corner.i # seperate file for multiapps due to radial power profile (each slave has different power)
+  #   input_files = sub_hot_corner.i # seperate file for multiapps due to radial power profile (each sub has different power)
   #   execute_on = 'timestep_end'
   #   positions = '${fparse -1.5 * pitch}   ${fparse -1.5 * pitch}   0'
   #   output_in_position = true
@@ -280,7 +280,7 @@ pitch = 0.0126
   # [sub2]
   #   app_type = BisonApp
   #   type = FullSolveMultiApp
-  #   input_files = sub_cold_corner.i # seperate file for multiapps due to radial power profile (each slave has different power)
+  #   input_files = sub_cold_corner.i # seperate file for multiapps due to radial power profile (each sub has different power)
   #   execute_on = 'timestep_end'
   #   positions = '${fparse 1.5 * pitch}   ${fparse 1.5 * pitch}   0'
   #   output_in_position = true
@@ -324,7 +324,7 @@ pitch = 0.0126
   #   user_object = Tpin_avg_uo
   # []
   #
-  # [q_prime1] # send heat flux from slave/BISON/heatConduction to subchannel/master
+  # [q_prime1] # send heat flux from BISON/heatConduction to subchannel
   #   type = MultiAppUserObjectTransfer2
   #   from_multi_app = sub1
   #   variable = q_prime
@@ -332,7 +332,7 @@ pitch = 0.0126
   #   execute_on = 'timestep_end'
   # []
   #
-  # [q_prime2] # send heat flux from slave/BISON/heatConduction to subchannel/master
+  # [q_prime2] # send heat flux from BISON/heatConduction to subchannel
   #   type = MultiAppUserObjectTransfer2
   #   from_multi_app = sub2
   #   variable = q_prime

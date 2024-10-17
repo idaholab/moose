@@ -1,4 +1,4 @@
-rod_diameter = 0.012065
+pin_diameter = 0.012065
 heated_length = 1.0
 T_in = 297.039 # K
 
@@ -20,7 +20,7 @@ T_in = 297.039 # K
     type = ParsedFunction
     value = '(4.0 * 1000 / (pi * D* D * L)) * (pi/2)*sin(pi*y/L)'
     vars = 'L D'
-    vals = '${heated_length} ${rod_diameter}'
+    vals = '${heated_length} ${pin_diameter}'
   []
 []
 

@@ -6,8 +6,7 @@
 
 <!-- -->
 
-This kernel populates the auxiliary variable S (inter-wrapper cell surface area) at the beginning of the for the inter-wrapper problem
-for a sub-assembly with a square subchannel/pin arrangement.
+This kernel creates an initial field for the inter-wrapper cell surface area ([!param](/ICs/QuadInterWrapperFlowAreaIC/variable) = `S`), for an inter-wrapper that wraps around sub-assemblies with a square subchannel/pin arrangement.
 
 !syntax parameters /ICs/QuadInterWrapperFlowAreaIC
 

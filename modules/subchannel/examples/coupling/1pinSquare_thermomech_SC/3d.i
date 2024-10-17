@@ -3,7 +3,7 @@
   ny = 2
   n_cells = 25
   pitch = 0.0126
-  rod_diameter = 0.00950
+  pin_diameter = 0.00950
   gap = 0.00095
   heated_length = 1.0
 []

@@ -1,5 +1,4 @@
-# a wrapper mesh for coupling to subchannel11
-
+# a wrapper mesh for coupling to subchannel
 # sqrt(3) / 2 is by how much flat to flat is smaller than corer to corner
 f = ${fparse sqrt(3) / 2}
 

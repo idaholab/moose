@@ -7,7 +7,7 @@
 <!-- -->
 
 In the case were the user wants to define a uniform mass flow rate at the inlet, the `UniformlyDistributedMassFlowRateAux`
-kernel can be used. In this kernel the user must define a total mass flow rate (`mass_flow`) which will be divided equally among the subchannels.
+kernel can be used. In this kernel the user must define a total [!param](/AuxKernels/UniformlyDistributedMassFlowRateAux/mass_flow) rate  which will be divided equally among the subchannels.
 
 ## Example Input File Syntax
 

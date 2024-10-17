@@ -19,7 +19,7 @@ unheated_length_exit = 0.855 #m
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
     unheated_length_exit = ${unheated_length_exit}
-    rod_diameter = '${fuel_pin_diameter}'
+    pin_diameter = '${fuel_pin_diameter}'
     pitch = '${fuel_pin_pitch}'
   []
 
@@ -31,7 +31,7 @@ unheated_length_exit = 0.855 #m
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
     unheated_length_exit = ${unheated_length_exit}
-    rod_diameter = '${fuel_pin_diameter}'
+    pin_diameter = '${fuel_pin_diameter}'
     pitch = '${fuel_pin_pitch}'
   []
 []

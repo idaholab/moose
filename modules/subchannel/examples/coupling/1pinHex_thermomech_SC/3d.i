@@ -1,4 +1,4 @@
-rod_diameter = 5.84e-3
+pin_diameter = 5.84e-3
 heated_length = 1.0
 [Mesh]
   [subchannel]
@@ -7,7 +7,7 @@ heated_length = 1.0
     n_cells = 40
     flat_to_flat = 2.1e-2 # 3.41e-2
     heated_length = ${heated_length} # 0.5334
-    rod_diameter = ${rod_diameter}
+    pin_diameter = ${pin_diameter}
     pitch = 7.26e-3
   []
 
@@ -17,7 +17,7 @@ heated_length = 1.0
     nrings = 2
     n_cells = 40
     heated_length = ${heated_length} # 0.5334
-    rod_diameter = ${rod_diameter}
+    pin_diameter = ${pin_diameter}
     pitch = 7.26e-3
   []
 []

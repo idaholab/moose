@@ -5,7 +5,7 @@
   pitch = 1
   gap = 0.1
   heated_length = 1
-  rod_diameter = 0.5
+  pin_diameter = 0.5
 []
 
 [Mesh]
