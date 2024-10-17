@@ -91,4 +91,3 @@ From: {{ APPTAINER_FROM }}
 %files
     {{ MOOSE_DIR }}/scripts/configure_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/configure_petsc.sh
     {{ MOOSE_DIR }}/scripts/update_and_rebuild_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/update_and_rebuild_petsc.sh
-    {{ MOOSE_DIR }}/scripts/tao_restore_viewer.patch {{ ROOT_BUILD_DIR }}/scripts/tao_restore_viewer.patch
