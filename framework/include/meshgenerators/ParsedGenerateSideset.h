@@ -14,9 +14,10 @@
 #include "libmesh/point.h"
 
 /**
- * MeshGenerator for defining a Sideset by a parsed expression and
- * optionally by looking at the subdomain a side's element belongs to
- * and the side's normal vector
+ * MeshGenerator for defining a sideset by a parsed expression and
+ * optionally by considering additional constraints on sides being included, for example
+ * based on their normal, on the subdomains of the element owning the side, or on pre-existing
+ * sidesets in the mesh
  */
 class ParsedGenerateSideset : public SideSetsGeneratorBase, public FunctionParserUtils<false>
 {
