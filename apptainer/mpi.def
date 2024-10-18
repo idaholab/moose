@@ -54,6 +54,11 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.9-0
         source /init_env
     fi
 
+    # Load a custom user environment if it exists
+    if [ -e ${HOME}/.bashrc_apptainer ]; then
+        source ${HOME}/.bashrc_apptainer
+    fi
+
 %post
     umask 022
 
