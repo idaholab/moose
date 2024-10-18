@@ -12,6 +12,7 @@
 #include "ComputeGeneralStressBase.h"
 #include "DynamicLibraryLoader.h"
 #include "ComputeFiniteStrain.h"
+#include "RotationTensor.h"
 #include "StepUOInterface.h"
 
 class StepUserObject;
@@ -223,6 +224,7 @@ protected:
 
   // Time step rotation increment
   const OptionalMaterialProperty<RankTwoTensor> & _rotation_increment;
+  const OptionalMaterialProperty<RankTwoTensor> & _rotation_increment_old;
 
   // Coupled temperature field
   const VariableValue & _temperature;
@@ -245,6 +247,12 @@ protected:
 
   /// parameter to assist with the transition to 1-based indexing
   const bool _use_one_based_indexing;
+
+  /// Rotation information
+  const bool _use_orientation;
+  const RotationTensor _R;
+  MaterialProperty<RankTwoTensor> & _total_rotation;
+  const MaterialProperty<RankTwoTensor> & _total_rotation_old;
 
 private:
   /// Method being used to compute strain and rotation increments
