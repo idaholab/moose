@@ -539,7 +539,7 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
   mfem::Vector lf_prev(lf->Size());
   blf->Mult(*_trial_variables.Get(test_var_name), lf_prev);
-  *lf += lf_prev;
+  *lf -= lf_prev;
   // }
   mfem::Vector aux_x, aux_rhs;
   // Update solution values on Dirichlet values to be in terms of du/dt instead of u
