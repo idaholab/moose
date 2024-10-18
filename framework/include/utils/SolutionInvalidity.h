@@ -34,7 +34,7 @@ class VariadicTable;
  * The SolutionInvalidity will contain all the information about the occurrence(s) of solution
  * invalidity
  */
-class SolutionInvalidity : protected ConsoleStreamInterface, public ParallelObject
+class SolutionInvalidity : protected ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
   using SolutionInvalidityRegistry = moose::internal::SolutionInvalidityRegistry;

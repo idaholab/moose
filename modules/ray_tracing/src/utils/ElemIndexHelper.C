@@ -9,15 +9,16 @@
 
 #include "ElemIndexHelper.h"
 
-ElemIndexHelper::ElemIndexHelper(libMesh::MeshBase & mesh,
-                                 const std::string & extra_elem_integer_name)
+using namespace libMesh;
+
+ElemIndexHelper::ElemIndexHelper(MeshBase & mesh, const std::string & extra_elem_integer_name)
   : _mesh(mesh), _extra_integer(invalid_uint), _initialized(false)
 {
   _extra_integer = mesh.add_elem_integer(extra_elem_integer_name);
 }
 
 void
-ElemIndexHelper::initialize(const SimpleRange<libMesh::MeshBase::element_iterator> elems)
+ElemIndexHelper::initialize(const SimpleRange<MeshBase::element_iterator> elems)
 {
   // First, invalidate the integers for all elements that we know about
   // so that we can tell when getting an index for an elem if said elem

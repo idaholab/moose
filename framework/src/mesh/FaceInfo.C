@@ -28,8 +28,9 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_t
   // Compute face-related quantities
   unsigned int dim = _elem_info->elem()->dim();
   const std::unique_ptr<const Elem> face = _elem_info->elem()->build_side_ptr(_elem_side_id);
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(_elem_info->elem()->default_order())));
-  QGauss qface(dim - 1, CONSTANT);
+  std::unique_ptr<libMesh::FEBase> fe(
+      libMesh::FEBase::build(dim, libMesh::FEType(_elem_info->elem()->default_order())));
+  libMesh::QGauss qface(dim - 1, libMesh::CONSTANT);
   fe->attach_quadrature_rule(&qface);
   const std::vector<Point> & normals = fe->get_normals();
   fe->reinit(_elem_info->elem(), _elem_side_id);

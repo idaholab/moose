@@ -99,7 +99,7 @@ protected:
   const MaterialProperty<RealVectorValue> & _node_normal_old;
 
   /// Quadrature rule in the out of plane direction
-  std::unique_ptr<QGauss> _t_qrule;
+  std::unique_ptr<libMesh::QGauss> _t_qrule;
 
   /// Quadrature points in the out of plane direction in isoparametric coordinate system
   std::vector<Point> _t_points;

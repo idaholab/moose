@@ -14,6 +14,8 @@
 
 #include "libmesh/point_neighbor_coupling.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", ElementPointNeighborLayers);
 
 InputParameters

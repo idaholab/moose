@@ -18,6 +18,8 @@
 
 #include "libmesh/equation_systems.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseTestApp", LinearPicardSteady);
 
 InputParameters

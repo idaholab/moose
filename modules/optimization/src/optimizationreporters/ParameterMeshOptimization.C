@@ -13,6 +13,8 @@
 #include "ParameterMesh.h"
 #include "libmesh/string_to_enum.h"
 
+using namespace libMesh;
+
 registerMooseObject("OptimizationApp", ParameterMeshOptimization);
 
 InputParameters

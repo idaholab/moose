@@ -55,8 +55,8 @@ SERIAL_ACCESS_SCALAR(const ADReal);
     static constexpr std::size_t size() { return sizeval; }                                        \
   }
 
-SERIAL_ACCESS_CONST_SIZE(VectorValue, &obj(0u), Moose::dim);
-SERIAL_ACCESS_CONST_SIZE(const VectorValue, &obj(0u), Moose::dim);
+SERIAL_ACCESS_CONST_SIZE(libMesh::VectorValue, &obj(0u), Moose::dim);
+SERIAL_ACCESS_CONST_SIZE(const libMesh::VectorValue, &obj(0u), Moose::dim);
 SERIAL_ACCESS_CONST_SIZE(RankTwoTensorTempl, &obj(0u, 0u), RankTwoTensorTempl<T>::N2);
 SERIAL_ACCESS_CONST_SIZE(const RankTwoTensorTempl, &obj(0u, 0u), RankTwoTensorTempl<T>::N2);
 SERIAL_ACCESS_CONST_SIZE(RankFourTensorTempl, &obj(0u, 0u, 0u, 0u), RankFourTensorTempl<T>::N4);

@@ -40,13 +40,13 @@ public:
   /**
    * determine the FEType by examining family and order in the provided parameters
    */
-  static FEType feType(const InputParameters & params);
+  static libMesh::FEType feType(const InputParameters & params);
 
   /**
    * DEPRECATED: Use variableType instead
    */
   static std::string
-  determineType(const FEType & fe_type, unsigned int components, bool is_fv = false);
+  determineType(const libMesh::FEType & fe_type, unsigned int components, bool is_fv = false);
 
   /**
    * Determines a variable type
@@ -54,8 +54,9 @@ public:
    * @param is_fv Whether or not the variable is use for finite volume
    * @param is_array Whether or not the variable is an array variable
    */
-  static std::string
-  variableType(const FEType & fe_type, const bool is_fv = false, const bool is_array = false);
+  static std::string variableType(const libMesh::FEType & fe_type,
+                                  const bool is_fv = false,
+                                  const bool is_array = false);
 
 protected:
   /**
@@ -85,7 +86,7 @@ protected:
   std::set<SubdomainID> getSubdomainIDs();
 
   /// FEType for the variable being created
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
 
   /// True if the variable being created is a scalar
   bool _scalar_var;

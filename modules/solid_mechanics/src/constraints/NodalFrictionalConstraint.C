@@ -22,6 +22,8 @@
 // C++ includes
 #include <limits.h>
 
+using namespace libMesh;
+
 registerMooseObject("SolidMechanicsApp", NodalFrictionalConstraint);
 
 InputParameters

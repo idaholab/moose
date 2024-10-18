@@ -41,7 +41,7 @@ BoundsBase::BoundsBase(const InputParameters & parameters)
         mooseWarning("A variational inequalities solver must be used in conjunction with Bounds"));
 
   // Check that the bounded variable is of a supported type
-  if (!_bounded_var.isNodal() && (_bounded_var.feType().order != CONSTANT))
+  if (!_bounded_var.isNodal() && (_bounded_var.feType().order != libMesh::CONSTANT))
     paramError("bounded_variable", "Bounded variable must be nodal or of a CONSTANT order!");
 
   const auto & dummy =

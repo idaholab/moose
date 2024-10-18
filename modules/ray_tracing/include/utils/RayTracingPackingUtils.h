@@ -304,7 +304,7 @@ template <typename BufferType>
 BufferType
 pack(const Elem * elem, MeshBase * libmesh_dbg_var(mesh_base /* = nullptr */))
 {
-  const dof_id_type id = elem ? elem->id() : DofObject::invalid_id;
+  const dof_id_type id = elem ? elem->id() : libMesh::DofObject::invalid_id;
   mooseAssert(mesh_base ? mesh_base->query_elem_ptr(id) == elem : true,
               "Elem doesn't exist in mesh");
 
@@ -318,6 +318,6 @@ unpack(const Elem *& elem, const BufferType id_as_buffer_type, MeshBase * mesh_b
   dof_id_type id;
   unpack<BufferType>(id_as_buffer_type, id);
 
-  elem = (id == DofObject::invalid_id ? nullptr : mesh_base->query_elem_ptr(id));
+  elem = (id == libMesh::DofObject::invalid_id ? nullptr : mesh_base->query_elem_ptr(id));
 }
 }

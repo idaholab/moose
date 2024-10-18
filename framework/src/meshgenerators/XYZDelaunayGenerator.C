@@ -120,7 +120,7 @@ XYZDelaunayGenerator::generate()
       dynamic_pointer_cast<UnstructuredMesh>(std::move(_bdy_ptr));
 
   // Get ready to triangulate its boundary
-  NetGenMeshInterface ngint(*mesh);
+  libMesh::NetGenMeshInterface ngint(*mesh);
 
   ngint.smooth_after_generating() = _smooth_tri;
 
@@ -285,7 +285,7 @@ XYZDelaunayGenerator::generate()
 
   // libMesh mesh stitching still requires a serialized mesh, and it's
   // cheaper to do that once than to do it once-per-hole
-  MeshSerializer serial(*mesh, doing_stitching);
+  libMesh::MeshSerializer serial(*mesh, doing_stitching);
 
   // We'll be looking for any sides that match between hole meshes and
   // the newly triangulated mesh, to apply bcids accordingly.  We
@@ -349,7 +349,7 @@ XYZDelaunayGenerator::generate()
       // redundant serialization and deserialization (libMesh
       // MeshedHole and stitch_meshes still also require
       // serialization) we'll do the serialization up front.
-      MeshSerializer serial_hole(hole_mesh);
+      libMesh::MeshSerializer serial_hole(hole_mesh);
 
       // We'll look for any sides that match between the hole mesh and
       // the newly triangulated mesh, and apply bcids accordingly.

@@ -66,5 +66,5 @@ private:
   std::unique_ptr<RealTensorValue> _rot_matrix;
 
   /// The bounding box used to test if the point is contained within
-  std::unique_ptr<BoundingBox> _bounding_box;
+  std::unique_ptr<libMesh::BoundingBox> _bounding_box;
 };

@@ -62,7 +62,7 @@ protected:
 
   void dumpVariableHelper(const std::string & system,
                           const std::string & var_name,
-                          FEFamily family,
+                          libMesh::FEFamily family,
                           Order order,
                           Real scale_factor,
                           const std::set<SubdomainID> * const active_subdomains);

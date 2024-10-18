@@ -18,6 +18,9 @@
 
 #include "libmesh/petsc_solver_exception.h"
 
+// Needed for LIBMESH_CHECK_ERR
+using libMesh::PetscSolverException;
+
 registerMooseObject("MooseApp", Eigenvalue);
 
 InputParameters

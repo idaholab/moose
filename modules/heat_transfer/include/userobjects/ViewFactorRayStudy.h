@@ -113,9 +113,9 @@ protected:
   const RayDataIndex _ray_index_start_total_weight;
 
   /// Face FE used for creating face quadrature points and weights
-  const std::unique_ptr<FEBase> _fe_face;
+  const std::unique_ptr<libMesh::FEBase> _fe_face;
   /// Face quadrature used for _fe_face
-  const std::unique_ptr<QBase> _q_face;
+  const std::unique_ptr<libMesh::QBase> _q_face;
 
   // Whether or not the mesh is 3D
   const bool _is_3d;

@@ -12,7 +12,7 @@
 #include "BCUserObject.h"
 #include "ElementLoopUserObject.h"
 
-// Forward Declarations
+using libMesh::RealGradient;
 
 /**
  * Base class for piecewise linear slope reconstruction

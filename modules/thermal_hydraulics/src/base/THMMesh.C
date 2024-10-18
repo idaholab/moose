@@ -15,6 +15,8 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_quad9.h"
 
+using namespace libMesh;
+
 registerMooseObject("ThermalHydraulicsApp", THMMesh);
 
 const BoundaryName THMMesh::INVALID_BOUNDARY_ID = "invalid_boundary_id";

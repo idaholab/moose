@@ -12,6 +12,8 @@
 #include "FEProblemBase.h"
 #include "TimeIntegrator.h"
 
+using namespace libMesh;
+
 SolverSystem::SolverSystem(SubProblem & subproblem,
                            FEProblemBase & fe_problem,
                            const std::string & name,

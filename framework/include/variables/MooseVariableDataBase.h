@@ -34,9 +34,9 @@ class MooseVariableDataBase
 {
 public:
   // type for gradient, second and divergence of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
   // shortcut for types storing values on quadrature points
   typedef MooseArray<OutputType> FieldVariableValue;
@@ -65,7 +65,7 @@ public:
   /**
    * Return the variable continuity
    */
-  virtual FEContinuity getContinuity() const = 0;
+  virtual libMesh::FEContinuity getContinuity() const = 0;
 
   /**
    * Local solution getter
@@ -93,12 +93,12 @@ public:
   /**
    * Set the current local DOF values to the input vector
    */
-  void insert(NumericVector<Number> & residual);
+  void insert(libMesh::NumericVector<libMesh::Number> & residual);
 
   /**
    * Add the current local DOF values to the input vector
    */
-  void add(NumericVector<Number> & residual);
+  void add(libMesh::NumericVector<libMesh::Number> & residual);
 
   /**
    * prepare the initial condition
@@ -160,7 +160,7 @@ protected:
    */
   void fetchDoFValues();
   void zeroSizeDofValues();
-  void getArrayDoFValues(const NumericVector<Number> & sol,
+  void getArrayDoFValues(const libMesh::NumericVector<libMesh::Number> & sol,
                          unsigned int n,
                          MooseArray<RealEigenVector> & dof_values) const;
   void assignNodalValue();
@@ -189,7 +189,7 @@ protected:
   const THREAD_ID _tid;
 
   /// The degree of freedom map from libMesh
-  const DofMap & _dof_map;
+  const libMesh::DofMap & _dof_map;
 
   /// Number of components of the associated variable
   unsigned int _count;
@@ -271,10 +271,10 @@ protected:
   /// the previous time step's solution value second time derivative
   DoFValue _dof_values_dotdot_old;
   /// derivatives of the solution value time derivative with respect to the degrees of freedom
-  MooseArray<Number> _dof_du_dot_du;
+  MooseArray<libMesh::Number> _dof_du_dot_du;
   /// derivatives of the solution value second time derivative with respect to the degrees of
   /// freedom
-  MooseArray<Number> _dof_du_dotdot_du;
+  MooseArray<libMesh::Number> _dof_du_dotdot_du;
 
   /// nodal values of u_dot
   OutputType _nodal_value_dot;

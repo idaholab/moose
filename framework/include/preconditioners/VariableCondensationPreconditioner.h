@@ -30,7 +30,8 @@ class VariableCondensationPreconditioner;
 /**
  * Interface for condensing out LMs for the dual mortar approach.
  */
-class VariableCondensationPreconditioner : public MoosePreconditioner, public Preconditioner<Number>
+class VariableCondensationPreconditioner : public MoosePreconditioner,
+                                           public libMesh::Preconditioner<Number>
 {
 public:
   static InputParameters validParams();
@@ -144,7 +145,7 @@ private:
   MooseMesh & _mesh;
 
   /// DofMap for easy reference
-  const DofMap & _dofmap;
+  const libMesh::DofMap & _dofmap;
 
   /// Whether the coupling is diagonal
   const bool _is_lm_coupling_diagonal;
@@ -188,7 +189,7 @@ private:
   mutable bool _need_condense;
 
   /// Which preconditioner to use for the solve
-  PreconditionerType _pre_type;
+  libMesh::PreconditionerType _pre_type;
 
   /// Holds one Preconditioner object for the condensed system to solve
   std::unique_ptr<Preconditioner<Number>> _preconditioner;

@@ -40,6 +40,6 @@ private:
   /// The EquationSystems
   std::unique_ptr<EquationSystems> _es;
 
-  /// Exodus for outputing points and values
-  std::unique_ptr<ExodusII_IO> _exodus_io;
+  /// Exodus for outputting points and values
+  std::unique_ptr<libMesh::ExodusII_IO> _exodus_io;
 };

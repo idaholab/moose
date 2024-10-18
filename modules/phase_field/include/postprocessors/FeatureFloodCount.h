@@ -668,9 +668,9 @@ protected:
   std::vector<std::size_t> _feature_id_to_local_index;
 
   /// A pointer to the periodic boundary constraints object
-  PeriodicBoundaries * _pbs;
+  libMesh::PeriodicBoundaries * _pbs;
 
-  std::unique_ptr<PointLocatorBase> _point_locator;
+  std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
 
   /// Average value of the domain which can optionally be used to find features in a field
   const PostprocessorValue & _element_average_value;

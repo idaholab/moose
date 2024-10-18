@@ -22,6 +22,8 @@
 #include <petscsys.h>
 #include <petscksp.h>
 
+using namespace libMesh;
+
 registerMooseObject("NavierStokesApp", SIMPLENonlinearAssembly);
 
 InputParameters

@@ -41,6 +41,7 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/mesh.h"
 
+using namespace libMesh;
 using namespace TraceRayTools;
 
 TraceRay::TraceRay(RayTracingStudy & study, const THREAD_ID tid)

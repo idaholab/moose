@@ -78,7 +78,7 @@ ExtraNodesetGenerator::generate()
   // add nodes with their coordinates
   const auto dim = mesh->mesh_dimension();
 
-  std::unique_ptr<PointLocatorBase> locator = mesh->sub_point_locator();
+  std::unique_ptr<libMesh::PointLocatorBase> locator = mesh->sub_point_locator();
   locator->enable_out_of_mesh_mode();
 
   const auto tolerance = getParam<Real>("tolerance");

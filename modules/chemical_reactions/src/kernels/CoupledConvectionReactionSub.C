@@ -9,6 +9,8 @@
 
 #include "CoupledConvectionReactionSub.h"
 
+using libMesh::RealGradient;
+
 registerMooseObject("ChemicalReactionsApp", CoupledConvectionReactionSub);
 
 InputParameters

@@ -11,6 +11,7 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
+using namespace libMesh;
 
 registerMooseObject("MooseApp", LStableDirk3);
 

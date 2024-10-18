@@ -28,7 +28,8 @@ ElementQualityAux::validParams()
 }
 
 ElementQualityAux::ElementQualityAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _metric_type(getParam<MooseEnum>("metric").getEnum<ElemQuality>())
+  : AuxKernel(parameters),
+    _metric_type(getParam<MooseEnum>("metric").getEnum<libMesh::ElemQuality>())
 {
   if (isNodal())
     mooseError("ElementQualityAux only works on elemental fields.");

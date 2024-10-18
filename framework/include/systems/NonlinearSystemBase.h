@@ -81,7 +81,7 @@ public:
 
   virtual void solve() override = 0;
 
-  virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
+  virtual libMesh::NonlinearSolver<Number> * nonlinearSolver() = 0;
 
   virtual SNES getSNES() = 0;
 
@@ -365,12 +365,12 @@ public:
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
    */
-  void computeJacobian(SparseMatrix<Number> & jacobian, const std::set<TagID> & tags);
+  void computeJacobian(libMesh::SparseMatrix<Number> & jacobian, const std::set<TagID> & tags);
 
   /**
    * Take all tags in the system, and form a matrix for all tags in the system
    */
-  void computeJacobian(SparseMatrix<Number> & jacobian);
+  void computeJacobian(libMesh::SparseMatrix<Number> & jacobian);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller
@@ -452,7 +452,7 @@ public:
 
   virtual NumericVector<Number> & RHS() = 0;
 
-  virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
+  virtual void augmentSparsity(libMesh::SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) override;
 
@@ -511,7 +511,7 @@ public:
    * Attach a customized preconditioner that requires physics knowledge.
    * Generic preconditioners should be implemented in PETSc, instead.
    */
-  virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) = 0;
+  virtual void attachPreconditioner(libMesh::Preconditioner<Number> * preconditioner) = 0;
 
   /**
    * Setup damping stuff (called before we actually start)
@@ -991,7 +991,7 @@ protected:
   bool _off_diagonals_in_auto_scaling;
 
   /// A diagonal matrix used for computing scaling
-  std::unique_ptr<DiagonalMatrix<Number>> _scaling_matrix;
+  std::unique_ptr<libMesh::DiagonalMatrix<Number>> _scaling_matrix;
 
 private:
   /**
