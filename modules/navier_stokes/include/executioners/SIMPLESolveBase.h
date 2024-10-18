@@ -98,11 +98,11 @@ protected:
   /// The maximum number of momentum-pressure iterations
   const unsigned int _num_iterations;
 
-  /// The user-defined absolute tolerance for determining the convergence in pressure
-  const Real _pressure_absolute_tolerance;
-
   /// The user-defined absolute tolerance for determining the convergence in momentum
   const Real _momentum_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in pressure
+  const Real _pressure_absolute_tolerance;
 
   /// If solve should continue if maximum number of iterations is hit
   const bool _continue_on_max_its;

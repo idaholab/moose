@@ -157,15 +157,15 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     UserObjectInterface(this),
     _momentum_system_names(getParam<std::vector<SolverSystemName>>("momentum_systems")),
     _momentum_l_abs_tol(getParam<Real>("momentum_l_abs_tol")),
-    _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
     _pressure_system_name(getParam<SolverSystemName>("pressure_system")),
     _pressure_l_abs_tol(getParam<Real>("pressure_l_abs_tol")),
-    _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
+    _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
+    _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
 {
