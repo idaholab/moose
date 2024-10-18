@@ -36,7 +36,7 @@ public:
    * @param scalar_name the name of the desired scalar
    * @param scalar reference to the scalar that will be set with the scalar in the JSON
    */
-  template<typename T>
+  template <typename T>
   void getScalar(const std::string & scalar_name, T & scalar) const
   {
     if (!_root.contains(scalar_name))
@@ -52,7 +52,7 @@ public:
    * @param scalar_keys the keys in descending order to access the scalar
    * @param scalar reference to the scalar that will be set with the scalar in the JSON
    */
-  template<typename T>
+  template <typename T>
   void getScalar(const std::vector<std::string> & scalar_keys, T & scalar) const
   {
     if (!scalar_keys.size())
@@ -76,16 +76,16 @@ public:
    * @param vector_name the name of the desired vector
    * @param vector_to_fill reference to the vector that will be set with the vector in the JSON
    */
-  template<typename T>
+  template <typename T>
   void getVector(const std::string & vector_name, std::vector<T> & vector_to_fill) const
   {
-  if (!_root.contains(vector_name))
-    mooseError("Attempted to get '",
-               vector_name,
-               "' but the JSON file does not contain this key at the root level");
-  vector_to_fill.clear();
-  for (const auto& item : _root[vector_name])
-    vector_to_fill.push_back(item.get<T>());
+    if (!_root.contains(vector_name))
+      mooseError("Attempted to get '",
+                 vector_name,
+                 "' but the JSON file does not contain this key at the root level");
+    vector_to_fill.clear();
+    for (const auto & item : _root[vector_name])
+      vector_to_fill.push_back(item.get<T>());
   }
   /**
    * Get a vector in the JSON file/tree using the keys in the 'vector_keys' vector one by one
@@ -93,8 +93,9 @@ public:
    * @param vector_keys the keys in descending order to access the vector
    * @param vector_to_fill reference to the vector that will be set with the vector in the JSON
    */
-  template<typename T>
-  void getVector(const std::vector<std::string>& vector_keys, std::vector<T>& vector_to_fill) const
+  template <typename T>
+  void getVector(const std::vector<std::string> & vector_keys,
+                 std::vector<T> & vector_to_fill) const
   {
     if (!vector_keys.size())
       mooseError("There should be at least one key to retrieve a value from the JSON");
@@ -111,7 +112,7 @@ public:
                      "obtained with last key",
                      vector_keys[key_index]);
         vector_to_fill.clear();
-        for (const auto& item : *current_node)
+        for (const auto & item : *current_node)
           vector_to_fill.push_back(item.get<T>());
         return;
       }

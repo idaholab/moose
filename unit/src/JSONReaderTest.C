@@ -93,6 +93,6 @@ TEST_F(JSONReaderTest, getters)
   reader.getVector<Real>("direct_vector_key", from_json_vec);
   EXPECT_EQ(from_json_vec[2], 2);
   reader.getVector<Real>(std::vector<std::string>({"the_data", "some_key", "some_other_key"}),
-                   from_json_vec);
+                         from_json_vec);
   EXPECT_EQ(from_json_vec[2], 7);
 }
