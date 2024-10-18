@@ -7,7 +7,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 0 %}
+{% set build = 1 %}
 {% set version = "3.21.5" %}
 
 package:
@@ -17,6 +17,7 @@ package:
 source:
   - path: ../../petsc
   - path: ../../scripts/configure_petsc.sh
+  - path: ../functions/retry_build.sh
   - patches:
       - no-cppflags-in-pkgconfig-cflags.patch
       - ../../scripts/tao_restore_viewer.patch

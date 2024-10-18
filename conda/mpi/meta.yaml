@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.10.01" %}
+{% set version = "2024.10.15" %}
 
 # HDF5 Version
 {% set hdf5_version = "1.14.2" %}
@@ -45,8 +45,8 @@ outputs:
         - {{ moose_gfortran }}
         - {{ moose_libzlib }}
         - {{ moose_libcxx }}
-        - {{ moose_clangcc }}                     # [osx]
-        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
         - {{ moose_clang_osx }}                   # [osx]
         - {{ moose_compiler_rt }}                 # [osx]
         - {{ moose_libclang }}                    # [osx]
@@ -55,8 +55,6 @@ outputs:
         - {{ moose_llvm_openmp }}                 # [osx]
         - {{ moose_gcc_impl }}                    # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_gcc }}                         # [linux]
-        - {{ moose_gxx }}                         # [linux]
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
@@ -70,8 +68,8 @@ outputs:
         - {{ moose_gfortran }}
         - {{ moose_libzlib }}
         - {{ moose_libcxx }}
-        - {{ moose_clangcc }}                     # [osx]
-        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
         - {{ moose_clang_osx }}                   # [osx]
         - {{ moose_compiler_rt }}                 # [osx]
         - {{ moose_libclang }}                    # [osx]
@@ -80,8 +78,6 @@ outputs:
         - {{ moose_llvm_openmp }}                 # [osx]
         - {{ moose_gcc_impl }}                    # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_gcc }}                         # [linux]
-        - {{ moose_gxx }}                         # [linux]
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
@@ -97,7 +93,7 @@ outputs:
         - zlib
         - m4
       run_constrained:
-        - python >=3.8,<3.12
+        - python >=3.9,<3.13
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
@@ -109,7 +105,7 @@ outputs:
     requirements:
       run:
         - {{ pin_subpackage("moose-mpi-base", exact=True) }}
-        - python >=3.8,<3.12
+        - python >=3.9,<3.13
         - packaging
         - requests
         - jinja2
@@ -142,3 +138,4 @@ extra:
   recipe-maintainers:
     - milljm
     - cticenhour
+

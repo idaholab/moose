@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
+{% set build = 2 %}
 {% set version = "2024.08.30" %}
 
 package:
@@ -14,6 +14,7 @@ package:
 source:
   - path: ../../libmesh
   - path: ../../scripts/configure_libmesh.sh
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}
@@ -37,7 +38,6 @@ requirements:
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - packaging
-    - setuptools <60
 
 test:
   commands:

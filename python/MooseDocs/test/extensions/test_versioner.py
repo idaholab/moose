@@ -59,8 +59,14 @@ class TestTemplate(MooseDocsTestCase):
     def testCodeRender(self):
         """Test inline replacement within code blocks"""
         for package in versioner.TRACKING_LIBRARIES:
-            # Application doesn't have a conda version
-            has_conda_version = package != 'app'
+            # Application, doesn't have a conda version
+            # Several support libraries also have no conda version
+            has_conda_version = package not in ['app',
+                                                'libmesh-vtk',
+                                                'peacock',
+                                                'pprof',
+                                                'pyhit',
+                                                'seacas']
 
             # Change something like "moose-dev" -> "MOOSE_DEV"
             package_inline = package.upper().replace('-', '_')
