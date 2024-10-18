@@ -44,6 +44,9 @@ EigenProblem::validParams()
       "Which eigenvector is used to compute residual and also associated to nonlinear variable");
   params.addParam<PostprocessorName>("bx_norm", "A postprocessor describing the norm of Bx");
 
+  params.addParamNamesToGroup("negative_sign_eigen_kernel active_eigen_index bx_norm",
+                              "Eigenvalue solve");
+
   return params;
 }
 
