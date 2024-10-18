@@ -20,25 +20,27 @@ following two methods:
    $\mu_i$ can be approximated as:
 
   \begin{equation}
-  S_{\mu_i} =\frac{\Phi(\vec{\mu}_{i+})-\Phi(\vec{\mu}_{i-})}{\mu_{i+}-\mu_{i-}},
+  S_{\mu_i} =C\frac{\Phi(\vec{\mu}_{i+})-\Phi(\vec{\mu}_{i-})}{\mu_{i+}-\mu_{i-}},
   \end{equation}
 
   where $\vec{\mu}_{i+/-}$ are the vectors with the $i$-th entries
   perturbed in the positive and negative direction (so they
   are replaced by $\mu_{i+}$ and $\mu_{i-}$), respectively.
-  Parameter [!param](/Samplers/DirectPerturbationSampler/relative_perturbation_intervals) can be used to specify
+  Parameter [!param](/Samplers/DirectPerturbationSampler/relative_perturbation_intervals)
+  can be used to specify
   the perturbation interval around the nominal values. For the
   central difference approach a 0.1 value would mean that the
   parameter is perturbed by 5% in both directions making the
   total perturbation centered around the nominal value. This
-  approach is more accurate, but needs $2N_p$ model evaluations.
+  approach is more accurate, but needs $2N_p+1$ model evaluations.
+  We add an additional model evaluation for the reference point.
 
 - +Forward difference approximation:+
   We assume that the sensitivity coefficient for parameter
    $\mu_i$ can be approximated as:
 
   \begin{equation}
-  S_{\mu_i} =\frac{\Phi(\vec{\mu}_{i+})-\Phi(\vec{\mu})}{\mu_{i+}-\mu},
+  S_{\mu_i} =C \frac{\Phi(\vec{\mu}_{i+})-\Phi(\vec{\mu})}{\mu_{i+}-\mu},
   \end{equation}
 
   where $\vec{mu}_{i+}$ is the vector with the $i$-th entry
@@ -50,6 +52,12 @@ following two methods:
   parameter is perturbed by 10% in one direction. This
   approach is less accurate, but only needs $N_p+1$ model
   evaluations.
+
+The multiplication factor $C$ in the expressions above depends on if the
+user requested relative sensitivities in the [DirectPerturbationReporter.md].
+If an absolute sensitivity was requested $C=1$, for relative sensitivities
+$C=\frac{\mu_{ref}}{\Phi_{ref}}$, where $\mu_{ref}$ and $\Phi_{ref}$
+are the parameter value and quantity of interest at the reference point.
 
 This sampler is responsible for creating parameter vectors with
 perturbed entries. The computation of the sensitivity
