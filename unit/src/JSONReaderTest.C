@@ -25,7 +25,7 @@ TEST_F(JSONReaderTest, errors)
   try
   {
     Real a;
-    reader.getScalar("not_a_key", a);
+    reader.getScalar<Real>("not_a_key", a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -38,7 +38,7 @@ TEST_F(JSONReaderTest, errors)
   try
   {
     Real a;
-    reader.getScalar(std::vector<std::string>(), a);
+    reader.getScalar<Real>(std::vector<std::string>(), a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -52,7 +52,7 @@ TEST_F(JSONReaderTest, errors)
   try
   {
     std::vector<Real> a;
-    reader.getVector("not_a_key", a);
+    reader.getVector<Real>("not_a_key", a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -64,7 +64,7 @@ TEST_F(JSONReaderTest, errors)
   try
   {
     std::vector<Real> a;
-    reader.getVector(std::vector<std::string>(), a);
+    reader.getVector<Real>(std::vector<std::string>(), a);
     FAIL() << "Missing the expected exception.";
   }
   catch (const std::exception & e)
@@ -83,16 +83,16 @@ TEST_F(JSONReaderTest, getters)
 
   // Test scalar getters
   Real from_json;
-  reader.getScalar("direct_key", from_json);
+  reader.getScalar<Real>("direct_key", from_json);
   EXPECT_EQ(from_json, 3);
-  reader.getScalar(std::vector<std::string>({"the_data", "random_other_key"}), from_json);
+  reader.getScalar<Real>(std::vector<std::string>({"the_data", "random_other_key"}), from_json);
   EXPECT_EQ(from_json, 2);
 
   // Test vector getters
   std::vector<Real> from_json_vec;
-  reader.getVector("direct_vector_key", from_json_vec);
+  reader.getVector<Real>("direct_vector_key", from_json_vec);
   EXPECT_EQ(from_json_vec[2], 2);
-  reader.getVector(std::vector<std::string>({"the_data", "some_key", "some_other_key"}),
+  reader.getVector<Real>(std::vector<std::string>({"the_data", "some_key", "some_other_key"}),
                    from_json_vec);
   EXPECT_EQ(from_json_vec[2], 7);
 }
