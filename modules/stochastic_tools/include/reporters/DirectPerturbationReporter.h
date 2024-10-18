@@ -43,6 +43,9 @@ private:
   /// Direct perturbation sampler
   DirectPerturbationSampler & _sampler;
 
+  /// If relative sensitivity should be computed
+  const bool _relative_sensitivity;
+
   /// Whether or not initialize() has been called for reporter value declaration
   bool _initialized;
 };
@@ -67,7 +70,8 @@ public:
                                     const MooseObject & producer,
                                     ReporterState<std::vector<DataType>> & state,
                                     DirectPerturbationSampler & sampler,
-                                    const std::vector<DataType> & data);
+                                    const std::vector<DataType> & data,
+                                    const bool relative_sensitivity);
 
   virtual void finalize() override;
   virtual std::string type() const override
@@ -80,19 +84,24 @@ private:
   /// the different operators on vectors and scalars
   /// @param add_to The data structure which will be extended
   /// @param to_add The data structure which will be added to the other one
-  /// @param interval The interval scaling coefficient
-  void addSensitivityConstribution(DataType & add_to,
-                                   const DataType & to_add,
-                                   const Real interval) const;
+  /// @param reference_value The reference values in case we are computing relative sensitivities
+  /// @param interval The interval scaling coefficient vector
+  void addSensitivityContribution(DataType & add_to,
+                                  const DataType & to_add,
+                                  const DataType & reference_value,
+                                  const Real interval) const;
 
   /// Initialize the sensitivity container, split into a separate function due to
   /// the different constructors for scalars and vectors
   /// @param example_output A structure which supplies the dimensions for the allocation
-  DataType initializeSensitivity(const DataType & example_output) const;
+  DataType initializeDataType(const DataType & example_output) const;
 
   /// Reference to the direct perturbation sampler
   DirectPerturbationSampler & _sampler;
 
   /// Data used for the statistic calculation
   const std::vector<DataType> & _data;
+
+  /// If relative sensitivities should be computed
+  const bool _relative_sensitivity;
 };
