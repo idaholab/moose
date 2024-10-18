@@ -213,8 +213,8 @@ PiecewiseTabularBase::buildFromJSON()
     mooseError("Missing 'x_keys' parameters for loading data from JSON");
   if (!isParamValid("y_keys"))
     mooseError("Missing 'y_keys' parameters for loading data from JSON");
-  json_uo.getVector(getParam<std::vector<std::string>>("x_keys"), _raw_x);
-  json_uo.getVector(getParam<std::vector<std::string>>("y_keys"), _raw_y);
+  json_uo.getVector<Real>(getParam<std::vector<std::string>>("x_keys"), _raw_x);
+  json_uo.getVector<Real>(getParam<std::vector<std::string>>("y_keys"), _raw_y);
   _raw_data_loaded = true;
 
   // Size mismatch error
