@@ -60,9 +60,6 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _momentum_l_abs_tol;
 
-  /// The user-defined absolute tolerance for determining the convergence in momentum
-  const Real _momentum_absolute_tolerance;
-
   /// Options which hold the petsc settings for the momentum equation
   Moose::PetscSupport::PetscOptions _momentum_petsc_options;
 
@@ -80,9 +77,6 @@ protected:
   /// Absolute linear tolerance for the pressure equation. We need to store this, because
   /// it needs to be scaled with a representative flux.
   const Real _pressure_l_abs_tol;
-
-  /// The user-defined absolute tolerance for determining the convergence in pressure
-  const Real _pressure_absolute_tolerance;
 
   /// Options which hold the petsc settings for the pressure equation
   Moose::PetscSupport::PetscOptions _pressure_petsc_options;
@@ -103,6 +97,12 @@ protected:
 
   /// The maximum number of momentum-pressure iterations
   const unsigned int _num_iterations;
+
+  /// The user-defined absolute tolerance for determining the convergence in pressure
+  const Real _pressure_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in momentum
+  const Real _momentum_absolute_tolerance;
 
   /// If solve should continue if maximum number of iterations is hit
   const bool _continue_on_max_its;
