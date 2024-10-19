@@ -323,10 +323,10 @@ public:
   /**
    * Add jacobian contributions from Constraints
    *
-   * @param jacobian reference to the Jacobian matrix
+   * @param jacobian reference to a read-only view of the Jacobian matrix
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintJacobians(bool displaced);
+  void constraintJacobians(const SparseMatrix<Number> & jacobian_to_view, bool displaced);
 
   /**
    * Computes multiple (tag associated) Jacobian matricese

@@ -107,10 +107,6 @@ public:
    */
   const MooseVariable & variable() const override { return _var; }
 
-  // TODO: Make this protected or add an accessor
-  // Do the same for all the other public members
-  SparseMatrix<Number> * _jacobian;
-
   Real secondaryResidual() const;
 
   void residualSetup() override;
@@ -139,6 +135,10 @@ public:
   std::set<SubdomainID> getSecondaryConnectedBlocks() const;
 
 protected:
+  // TODO: Make this protected or add an accessor
+  // Do the same for all the other public members
+  const SparseMatrix<Number> * _jacobian;
+
   /**
    * Compute the value the secondary node should have at the beginning of a timestep.
    */

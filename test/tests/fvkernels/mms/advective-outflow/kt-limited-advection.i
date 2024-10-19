@@ -2,6 +2,10 @@ a=1.1
 c=343
 max_abs_eig=${fparse c + a}
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Mesh]
   [./gen_mesh]
     type = GeneratedMeshGenerator

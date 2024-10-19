@@ -8,6 +8,10 @@
   file=gold/2D_2D.e
 []
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Variables]
   [phi]
     order = FIRST
