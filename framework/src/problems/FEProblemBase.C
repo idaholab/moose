@@ -166,6 +166,7 @@ FEProblemBase::validParams()
                         "Eigenvalue system (Automatically determined based "
                         "on executioner)");
   params.addParam<bool>("error_on_jacobian_nonzero_reallocation",
+                        true,
                         "This causes PETSc to error if it had to reallocate memory in the Jacobian "
                         "matrix due to not having enough nonzeros");
   params.addParam<bool>("ignore_zeros_in_jacobian",
@@ -350,6 +351,12 @@ FEProblemBase::validParams()
       "If we catch an exception during residual/Jacobian evaluaton for which we don't have "
       "specific handling, immediately error instead of allowing the time step to be cut");
 
+  params.addParam<bool>(
+      "prefer_hash_table_matrix_assembly",
+      true,
+      "Whether to preallocate matrix memory. If this is false, then no sparsity pattern will be "
+      "precomputed and instead a hash table will be used for matrix assembly");
+
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
@@ -357,9 +364,10 @@ FEProblemBase::validParams()
       "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
-  params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
-                              "ignore_zeros_in_jacobian identify_variable_groups_in_nl",
-                              "Nonlinear system(s)");
+  params.addParamNamesToGroup(
+      "use_nonlinear previous_nl_solution_required nl_sys_names "
+      "ignore_zeros_in_jacobian identify_variable_groups_in_nl prefer_hash_table_matrix_assembly",
+      "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
   params.addParamNamesToGroup("verbose_setup verbose_multiapps parallel_barrier_messaging",
@@ -7220,7 +7228,10 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           if (_current_nl_sys->hasMatrix(tag))
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
-            matrix.zero();
+            if (matrix.use_hash_table())
+              matrix.reset_memory();
+            else
+              matrix.zero();
             if (haveADObjects())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
