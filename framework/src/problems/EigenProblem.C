@@ -91,6 +91,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _nl_eigen = std::dynamic_pointer_cast<NonlinearEigenSystem>(nl);
     _current_nl_sys = nl.get();
     _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(nl);
+    nl->system().prefer_hash_table_matrix_assembly(_use_hash_table_matrix_assembly);
   }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
