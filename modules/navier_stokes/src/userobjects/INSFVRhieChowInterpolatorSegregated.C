@@ -136,7 +136,7 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
       if (_u->isInternalFace(*fi))
       {
         const Moose::FaceArg face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
         _face_velocity[fi->id()] = MetaPhysicL::raw_value((*_vel)(face, Moose::currentState()));
       }
@@ -147,7 +147,7 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
             hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
 
         const Moose::FaceArg boundary_face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
 
         _face_velocity[fi->id()] =
             MetaPhysicL::raw_value((*_vel)(boundary_face, Moose::currentState()));
@@ -185,7 +185,7 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
       if (_u->isInternalFace(*fi))
       {
         const Moose::FaceArg face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
         RealVectorValue Ainv;
         RealVectorValue HbyA = MetaPhysicL::raw_value(_HbyA(face, time_arg));
@@ -207,7 +207,7 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
         const Elem * const boundary_elem =
             hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
         const Moose::FaceArg boundary_face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
 
         // If we have a dirichlet boundary conditions, this sill give us the exact value of the
         // velocity on the face as expected (see populateHbyA())
@@ -310,7 +310,7 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
             hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
 
         const Moose::FaceArg boundary_face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
 
         if (_u->isDirichletBoundaryFace(*fi, boundary_elem, Moose::currentState()))
           _HbyA[fi->id()] = -MetaPhysicL::raw_value((*_vel)(boundary_face, Moose::currentState()));

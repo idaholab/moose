@@ -163,7 +163,7 @@ INSFVTKESourceSink::computeQpResidual()
       const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
       const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
       const Moose::FaceArg facearg = {
-          fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
+          fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
       const ADReal wall_mut = _mu_t(facearg, state);
       const ADReal wall_mu = _mu(facearg, state);
 

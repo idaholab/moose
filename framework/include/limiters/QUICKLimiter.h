@@ -27,12 +27,48 @@ public:
   T limit(const T & phi_upwind,
           const T & phi_downwind,
           const VectorValue<T> * grad_phi_upwind,
-          const RealVectorValue & dCD) const override final
+          const VectorValue<T> * grad_phi_downwind,
+          const RealVectorValue & dCD,
+          const T &,
+          const T &,
+          const FaceInfo * fi,
+          const bool & fi_elem_is_upwind) const override final
   {
     mooseAssert(grad_phi_upwind, "QUICK limiter requires a gradient");
-    const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
 
-    return (3. + r_f) / 4.;
+    const auto & w_f = fi_elem_is_upwind ? fi->gC() : (1. - fi->gC());
+    const auto & phiCD = w_f * phi_upwind + (1.0 - w_f) * phi_downwind;
+    const auto & face_grad = w_f * (*grad_phi_upwind) + (1.0 - w_f) * (*grad_phi_downwind);
+    const auto & faceFlux = face_grad * fi->normal();
+
+    T phiU, phif;
+
+    if (faceFlux > 0)
+    {
+      phiU = phi_upwind;
+      phif = 0.5 * (phiCD + phiU + (1 - w_f) * (dCD * (*grad_phi_upwind)));
+    }
+    else
+    {
+      phiU = phi_downwind;
+      phif = 0.5 * (phiCD + phiU - w_f * (dCD * (*grad_phi_downwind)));
+    }
+
+    const auto & s = phiCD - phiU;
+    if (s >= 0)
+    {
+      return s + 1e-10;
+    }
+    else
+    {
+      return s - 1e-10;
+    }
+
+    // Calculate the effective limiter for the QUICK interpolation
+    const auto quick = (phif - phiU) / s;
+
+    // Limit the limiter between upwind and downwind
+    return std::max(std::min(quick, T(2)), T(0));
   }
   bool constant() const override final { return false; }
   InterpMethod interpMethod() const override final { return InterpMethod::QUICK; }

@@ -21,10 +21,10 @@ namespace FV
  * $\beta(r_f) = r_f$
  */
 template <typename T>
-class SOULimiter : public Limiter<T>
+class VenkatakrishnanLimiter : public Limiter<T>
 {
 public:
-  T limit(const T &,
+  T limit(const T & phi_upwind,
           const T &,
           const VectorValue<T> * grad_phi_upwind,
           const VectorValue<T> *,
@@ -34,28 +34,20 @@ public:
           const FaceInfo * fi,
           const bool & fi_elem_is_upwind) const override final
   {
-    mooseAssert(grad_phi_upwind, "SOU limiter requires a gradient");
+    const auto face_centroid = fi->faceCentroid();
+    const auto cell_centroid = fi_elem_is_upwind ? fi->elemCentroid() : fi->neighborCentroid();
 
-    // Determine the face centroid and the appropriate cell centroid
-    const auto & face_centroid = fi->faceCentroid();
-    const auto & cell_centroid = fi_elem_is_upwind ? fi->elemCentroid() : fi->neighborCentroid();
+    const auto delta_face = (*grad_phi_upwind) * (face_centroid - cell_centroid);
+    const auto delta_max = max_value - phi_upwind + 1e-10;
+    const auto delta_min = min_value - phi_upwind + 1e-10;
 
-    // Compute the abs delta value at the face
-    const auto & delta_face = std::abs((*grad_phi_upwind) * (face_centroid - cell_centroid));
+    return delta_face >= 0 ? delta_face / delta_max : delta_face / delta_min;
 
-    // Compute the delta between the two elements
-    const auto & elem_delta = max_value - min_value;
-
-    // return the limited value
-    if (elem_delta > 1e-10)
-      return std::min(1.0, elem_delta / delta_face);
-    else
-      return 1.0;
   }
   bool constant() const override final { return false; }
   InterpMethod interpMethod() const override final { return InterpMethod::SOU; }
 
-  SOULimiter() = default;
+  VenkatakrishnanLimiter() = default;
 };
 }
 }

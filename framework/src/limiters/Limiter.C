@@ -14,6 +14,7 @@
 #include "MinModLimiter.h"
 #include "SOULimiter.h"
 #include "QUICKLimiter.h"
+#include "VenkatakrishnanLimiter.h"
 #include "MooseError.h"
 #include "MathFVUtils.h"
 
@@ -23,8 +24,8 @@ namespace Moose
 {
 namespace FV
 {
-const MooseEnum
-    moose_limiter_type("vanLeer=0 upwind=1 central_difference=2 min_mod=3 sou=4 quick=5", "upwind");
+const MooseEnum moose_limiter_type(
+    "vanLeer=0 upwind=1 central_difference=2 min_mod=3 sou=4 quick=5 venkatakrishnan=6", "upwind");
 
 template <typename T>
 std::unique_ptr<Limiter<T>>
@@ -49,6 +50,9 @@ Limiter<T>::build(const LimiterType limiter)
 
     case LimiterType::QUICK:
       return std::make_unique<QUICKLimiter<T>>();
+
+    case LimiterType::Venkatakrishnan:
+      return std::make_unique<VenkatakrishnanLimiter<T>>();
 
     default:
       mooseError("Unrecognized limiter type ", unsigned(limiter));
@@ -78,6 +82,9 @@ limiterType(const InterpMethod interp_method)
 
     case InterpMethod::QUICK:
       return LimiterType::QUICK;
+
+    case InterpMethod::Venkatakrishnan:
+      return LimiterType::Venkatakrishnan;
 
     default:
       mooseError("Unrecognized interpolation method type.");

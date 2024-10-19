@@ -27,10 +27,20 @@ public:
   T limit(const T & phi_upwind,
           const T & phi_downwind,
           const VectorValue<T> * grad_phi_upwind,
-          const RealVectorValue & dCD) const override final
+          const VectorValue<T> * grad_phi_downwind,
+          const RealVectorValue & dCD,
+          const T &,
+          const T &,
+          const FaceInfo *,
+          const bool &) const override final
   {
     mooseAssert(grad_phi_upwind, "min-mod limiter requires a gradient");
-    const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
+    // Compute gradient ratio coefficient
+    T r_f;
+    if (grad_phi_downwind) // compute full slope-reconstruction limiter
+      r_f = this->rf_grad(grad_phi_upwind, grad_phi_downwind, dCD);
+    else // compute upwind slope reconstruction limiter
+      r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
 
     // Dummy addition to avoid new nonzeros
     return 0 * r_f + std::max(T(0), std::min(T(1), r_f));

@@ -255,7 +255,7 @@ FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
                                 ? nullptr
                                 : (defined_on_elem_side ? fi->elemPtr() : fi->neighborPtr());
 
-  return {fi, limiter_type, true, correct_skewness, elem};
+  return {fi, limiter_type, true, correct_skewness, elem, nullptr};
 }
 
 bool
