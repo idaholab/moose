@@ -27,40 +27,11 @@ registerMooseObject("NavierStokesApp", SIMPLE);
 InputParameters
 SIMPLE::validParams()
 {
-  InputParameters params = SegregatedSolverBase::validParams();
+  InputParameters params = SIMPLESolveBase::validParams();
+  InputParameters params += Executioner::validParams();
 
   params.addClassDescription("Solves the Navier-Stokes equations using the SIMPLE algorithm and "
                              "linear finite volume variables.");
-
-  /*
-   * We suppress parameters which are not supported yet
-   */
-  params.suppressParameter<SolverSystemName>("solid_energy_system");
-  params.suppressParameter<std::vector<SolverSystemName>>("passive_scalar_systems");
-  params.suppressParameter<std::vector<SolverSystemName>>("turbulence_systems");
-  params.suppressParameter<std::vector<Real>>("passive_scalar_equation_relaxation");
-  params.suppressParameter<std::vector<Real>>("turbulence_equation_relaxation");
-  params.suppressParameter<MultiMooseEnum>("solid_energy_petsc_options");
-  params.suppressParameter<MultiMooseEnum>("solid_energy_petsc_options_iname");
-  params.suppressParameter<std::vector<std::string>>("solid_energy_petsc_options_value");
-  params.suppressParameter<MultiMooseEnum>("passive_scalar_petsc_options");
-  params.suppressParameter<MultiMooseEnum>("passive_scalar_petsc_options_iname");
-  params.suppressParameter<std::vector<std::string>>("passive_scalar_petsc_options_value");
-  params.suppressParameter<MultiMooseEnum>("turbulence_petsc_options");
-  params.suppressParameter<MultiMooseEnum>("turbulence_petsc_options_iname");
-  params.suppressParameter<std::vector<std::string>>("turbulence_petsc_options_value");
-  params.suppressParameter<Real>("solid_energy_absolute_tolerance");
-  params.suppressParameter<std::vector<Real>>("passive_scalar_absolute_tolerance");
-  params.suppressParameter<std::vector<Real>>("turbulence_absolute_tolerance");
-  params.suppressParameter<Real>("solid_energy_l_tol");
-  params.suppressParameter<Real>("solid_energy_l_abs_tol");
-  params.suppressParameter<unsigned int>("solid_energy_l_max_its");
-  params.suppressParameter<Real>("passive_scalar_l_tol");
-  params.suppressParameter<Real>("passive_scalar_l_abs_tol");
-  params.suppressParameter<unsigned int>("passive_scalar_l_max_its");
-  params.suppressParameter<Real>("turbulence_l_tol");
-  params.suppressParameter<Real>("turbulence_l_abs_tol");
-  params.suppressParameter<unsigned int>("turbulence_l_max_its");
 
   return params;
 }

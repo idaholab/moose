@@ -15,6 +15,7 @@ InputParameters
 SIMPLESolveBase::validParams()
 {
   InputParameters params = emptyInputParameters();
+  params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
 
   /*
    * The names of the different systems in the segregated solver
@@ -66,8 +67,6 @@ SIMPLESolveBase::validParams()
       "momentum_l_max_its",
       10000,
       "The maximum allowed iterations in the linear solver of the momentum equation.");
-
-  params.addParam<bool>("continue_on_max_its", false, "If solve should continue if maximum number of iterations is hit.");
 
   params.addParamNamesToGroup(
       "momentum_equation_relaxation momentum_petsc_options momentum_petsc_options_iname "
@@ -148,6 +147,10 @@ SIMPLESolveBase::validParams()
       1000,
       "0<num_iterations",
       "The number of momentum-pressure-(other fields) iterations needed.");
+
+  params.addParam<bool>("continue_on_max_its",
+                        false,
+                        "If solve should continue if maximum number of iterations is hit.");
 
   return params;
 }
