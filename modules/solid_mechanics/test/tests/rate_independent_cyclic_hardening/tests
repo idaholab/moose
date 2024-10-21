@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#28688'
+  design = 'CombinedNonlinearHardeningPlasticity.md'
+  [linear_kinharden_nonsymmetric_strain_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = 'linear_kinharden_nonsymmetric_strain_controlled.i'
+    csvdiff = 'linear_kinharden_nonsymmetric_strain_controlled_out.csv'
+    requirement = 'The system shall compute the J2 linear kinematic plasticity stress based on the imposed '
+                    'cyclic nonsymmetric strain'
+  []
+  [linear_kinharden_symmetric_strain_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = 'linear_kinharden_symmetric_strain_controlled.i'
+    csvdiff = 'linear_kinharden_symmetric_strain_controlled_out.csv'
+    requirement = 'The system shall compute the J2 linear kinematic plasticity stress based on the imposed'
+                   'cyclic symmetric strain'
+  []
+  [nonlin_isoharden_symmetric_strain_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = 'nonlin_isoharden_symmetric_strain_controlled.i'
+    csvdiff = 'nonlin_isoharden_symmetric_strain_controlled_out.csv'
+    requirement = 'The system shall compute the J2 nonlinear isotropic plasticity stress based on the imposed'
+                    'cyclic symmetric strain'
+  []
+  [nonlin_isokinharden_symmetric_strain_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = 'nonlin_isokinharden_symmetric_strain_controlled.i'
+    csvdiff = 'nonlin_isokinharden_symmetric_strain_controlled_out.csv'
+    requirement = 'The system shall compute the J2 nonlinear combined plasticity stress based on the imposed '
+                   'cyclic symmetric strain'
+  []
+  [nonlin_kinharden_nonsymmetric_strain_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = 'nonlin_kinharden_nonsymmetric_strain_controlled.i'
+    csvdiff = 'nonlin_kinharden_nonsymmetric_strain_controlled_out.csv'
+    requirement = 'The system shall compute the J2 nonlinear kinematic plasticity stress based on the imposed '
+                  'cyclic nonsymmetric strain'
+  []
+  [nonlin_kinharden_symmetric_strain_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = 'nonlin_kinharden_symmetric_strain_controlled.i'
+    csvdiff = 'nonlin_kinharden_symmetric_strain_controlled_out.csv'
+    requirement = 'The system shall compute the J2 nonlinear kinematic plasticity stress based on the imposed '
+                   'cyclic nonsymmetric strain'
+  []
+  [1D_ratcheting_nonlin_kinharden_stress_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = '1D_ratcheting_nonlin_kinharden_stress_controlled.i'
+    csvdiff = '1D_ratcheting_nonlin_kinharden_stress_controlled_out.csv'
+    requirement = 'The system shall compute the J2 nonlinear kinematic plasticity strain based on the imposed '
+                  'cyclic nonsymmetric loading'
+  []
+  [linear_kinharden_nonsymmetric_stress_controlled]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = 'linear_kinharden_nonsymmetric_stress_controlled.i'
+    csvdiff = 'linear_kinharden_nonsymmetric_stress_controlled_out.csv'
+    requirement = 'The system shall compute the J2 linear kinematic plasticity strain based on the imposed '
+                  'cyclic nonsymmetric loading'
+  []
+[]
