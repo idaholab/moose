@@ -27,12 +27,17 @@ DirectPerturbationReporter::validParams()
   params.addParam<std::vector<ReporterName>>(
       "reporters", {}, "List of Reporter values to utilize for sensitivity computations.");
 
+  params.addParam<bool>("relative_sensitivity",
+                        false,
+                        "If the reporter should return relative or absolute sensitivities.");
+
   return params;
 }
 
 DirectPerturbationReporter::DirectPerturbationReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _sampler(getSampler<DirectPerturbationSampler>("sampler")),
+    _relative_sensitivity(getParam<bool>("relative_sensitivity")),
     _initialized(false)
 {
   if (getParam<std::vector<ReporterName>>("reporters").empty() &&
@@ -83,7 +88,7 @@ DirectPerturbationReporter::declareValueHelper(const ReporterName & r_name)
   const auto & data = getReporterValueByName<std::vector<DataType>>(r_name);
   const std::string s_name = r_name.getObjectName() + "_" + r_name.getValueName();
   declareValueByName<std::vector<DataType>, DirectPerturbationReporterContext<DataType>>(
-      s_name, REPORTER_MODE_ROOT, _sampler, data);
+      s_name, REPORTER_MODE_ROOT, _sampler, data, _relative_sensitivity);
 }
 
 template <typename DataType>
@@ -92,10 +97,12 @@ DirectPerturbationReporterContext<DataType>::DirectPerturbationReporterContext(
     const MooseObject & producer,
     ReporterState<std::vector<DataType>> & state,
     DirectPerturbationSampler & sampler,
-    const std::vector<DataType> & data)
+    const std::vector<DataType> & data,
+    const bool relative_sensitivity)
   : ReporterGeneralContext<std::vector<DataType>>(other, producer, state),
     _sampler(sampler),
-    _data(data)
+    _data(data),
+    _relative_sensitivity(relative_sensitivity)
 {
   this->_state.value().resize(_sampler.getNumberOfCols());
 }
@@ -107,17 +114,32 @@ DirectPerturbationReporterContext<DataType>::finalize()
   const dof_id_type offset = _sampler.getLocalRowBegin();
   const dof_id_type num_columns = _sampler.getNumberOfCols();
 
+  // If we are computing the relative sensitivity, we will need
+  // the reference value. So the process that has that will communicate it
+  // to everybody. We reuse the initialization function for the reference
+  // value as well
+  auto reference_value = initializeDataType(_data[0]);
+  if (_relative_sensitivity)
+  {
+    if (_sampler.getLocalRowBegin() == 0)
+      reference_value = _data[0];
+
+    this->comm().sum(reference_value);
+  }
+
   for (const auto param_i : make_range(num_columns))
   {
-    const auto & interval = _sampler.getInterval(param_i);
+    // If we need relative coefficients we need to normalize the difference
+    const auto interval = _relative_sensitivity ? _sampler.getRelativeInterval(param_i)
+                                                : _sampler.getAbsoluteInterval(param_i);
 
     dof_id_type left_i;
     dof_id_type right_i;
     // Depending on which method we use, the indices will change
     if (_sampler.perturbationMethod() == "central_difference")
     {
-      left_i = 2 * param_i;
-      right_i = 2 * param_i + 1;
+      left_i = 2 * param_i + 1;
+      right_i = 2 * param_i + 2;
     }
     else
     {
@@ -133,17 +155,18 @@ DirectPerturbationReporterContext<DataType>::finalize()
     if (left_i_in_owned_range || right_i_in_owned_range)
     {
       const dof_id_type copy_i = left_i_in_owned_range ? left_i - offset : right_i - offset;
-      this->_state.value()[param_i] = initializeSensitivity(_data[copy_i]);
+      this->_state.value()[param_i] = initializeDataType(_data[copy_i]);
     }
 
     // We add the contribution from one side
     if (left_i_in_owned_range)
-      addSensitivityConstribution(this->_state.value()[param_i], _data[left_i - offset], interval);
+      addSensitivityContribution(
+          this->_state.value()[param_i], _data[left_i - offset], reference_value, interval);
 
     // We add the contribution from the other side
     if (right_i_in_owned_range)
-      addSensitivityConstribution(
-          this->_state.value()[param_i], _data[right_i - offset], -interval);
+      addSensitivityContribution(
+          this->_state.value()[param_i], _data[right_i - offset], reference_value, -interval);
   }
 
   // We gather the contributions across all processors
@@ -152,14 +175,16 @@ DirectPerturbationReporterContext<DataType>::finalize()
 
 template <typename DataType>
 void
-DirectPerturbationReporterContext<DataType>::addSensitivityConstribution(DataType & add_to,
-                                                                         const DataType & to_add,
-                                                                         const Real interval) const
+DirectPerturbationReporterContext<DataType>::addSensitivityContribution(
+    DataType & add_to,
+    const DataType & to_add,
+    const DataType & reference_value,
+    const Real interval) const
 {
   // DataType is a numeric type that we can sum (excluding bool)
   if constexpr (std::is_arithmetic<DataType>::value && !std::is_same<DataType, bool>::value)
   {
-    add_to += to_add / interval;
+    add_to += to_add / (_relative_sensitivity ? interval * reference_value : interval);
     return;
   }
   // DataType is a vector type
@@ -175,7 +200,8 @@ DirectPerturbationReporterContext<DataType>::addSensitivityConstribution(DataTyp
                   !std::is_same<VectorValueType, bool>::value)
     {
       for (const auto index : index_range(add_to))
-        add_to[index] += to_add[index] / interval;
+        add_to[index] +=
+            to_add[index] / (_relative_sensitivity ? interval * reference_value[index] : interval);
       return;
     }
     // Check if the vector elements are also vectors
@@ -194,7 +220,9 @@ DirectPerturbationReporterContext<DataType>::addSensitivityConstribution(DataTyp
           mooseAssert(add_to[inner_index].size() == to_add[inner_index].size(),
                       "The vectors for summation have different sizes!");
           for (const auto index : index_range(add_to[inner_index]))
-            add_to[inner_index][index] += to_add[inner_index][index] / interval;
+            add_to[inner_index][index] +=
+                to_add[inner_index][index] /
+                (_relative_sensitivity ? interval * reference_value[inner_index][index] : interval);
         }
         return;
       }
@@ -210,7 +238,7 @@ DirectPerturbationReporterContext<DataType>::addSensitivityConstribution(DataTyp
 
 template <typename DataType>
 DataType
-DirectPerturbationReporterContext<DataType>::initializeSensitivity(
+DirectPerturbationReporterContext<DataType>::initializeDataType(
     const DataType & example_output) const
 {
   // DataType is a numeric type so we just return 0

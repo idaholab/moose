@@ -39,9 +39,17 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
     _relative_intervals(getParam<std::vector<Real>>("relative_perturbation_intervals")),
     _perturbation_method(getParam<MooseEnum>("perturbation_method"))
 {
+  // TODO: we need to add capability to do absolute intervals too, in case there is a material
+  // property with a nominal value of 0.0
+  for (const auto interval : _relative_intervals)
+    if (interval <= 0.0 || interval >= 1.0)
+      paramError("relative_perturbation_intervals",
+                 "The relative perturbation interval must be between 0 and 1!");
+
+  // The number of samples will always include an addition sample for the reference point
   dof_id_type num_samples = 0;
   if (_perturbation_method == "central_difference")
-    num_samples = 2 * _nominal_values.size();
+    num_samples = 2 * _nominal_values.size() + 1;
   else
     num_samples = _nominal_values.size() + 1;
 
@@ -49,7 +57,7 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
   setNumberOfRows(num_samples);
   setNumberOfCols(_nominal_values.size());
 
-  _absolute_intervals = std::vector<Real>(num_samples, 0);
+  _absolute_intervals = std::vector<Real>(num_samples - 1, 0);
   _parameter_vectors = std::vector<std::vector<Real>>(num_samples, _nominal_values);
 
   // Depending on what kind of perturbation we selected, the parameter values will change
@@ -57,8 +65,9 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
     for (const auto i : index_range(_nominal_values))
     {
       _absolute_intervals[i] = _nominal_values[i] * _relative_intervals[i];
-      _parameter_vectors[2 * i][i] += _absolute_intervals[i] / 2;
-      _parameter_vectors[2 * i + 1][i] -= _absolute_intervals[i] / 2;
+      // +1 because the first sample is the reference point
+      _parameter_vectors[2 * i + 1][i] += _absolute_intervals[i] / 2;
+      _parameter_vectors[2 * i + 2][i] -= _absolute_intervals[i] / 2;
     }
   else
     for (const auto i : index_range(_nominal_values))
@@ -69,10 +78,27 @@ DirectPerturbationSampler::DirectPerturbationSampler(const InputParameters & par
 }
 
 Real
-DirectPerturbationSampler::getInterval(const Real param_index) const
+DirectPerturbationSampler::getAbsoluteInterval(const Real param_index) const
 {
-  mooseAssert(param_index < _absolute_intervals.size(), "We don't have the required interval!");
+  mooseAssert(param_index < _absolute_intervals.size(),
+              "We don't have the required absolute interval!");
   return _absolute_intervals[param_index];
+}
+
+Real
+DirectPerturbationSampler::getRelativeInterval(const Real param_index) const
+{
+  mooseAssert(param_index < _absolute_intervals.size(),
+              "We don't have the required relative interval!");
+  return _relative_intervals[param_index];
+}
+
+Real
+DirectPerturbationSampler::getNominalValue(const Real param_index) const
+{
+  mooseAssert(param_index < _nominal_values.size(),
+              "We don't have the required nominal values for the given parameter!");
+  return _nominal_values[param_index];
 }
 
 Real
