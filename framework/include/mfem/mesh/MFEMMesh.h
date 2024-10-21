@@ -49,6 +49,25 @@ public:
    */
   std::unique_ptr<MooseMesh> safeClone() const override;
 
+  /**
+   * Returns true if mesh displacement is required.
+   */
+  bool shouldDisplace() const { return _mesh_displacement_variable.has_value(); }
+
+  /**
+   * Returns an optional reference to displacement variable name.
+   */
+  std::optional<std::reference_wrapper<std::string const>> getMeshDisplacementVariable() const
+  {
+    return _mesh_displacement_variable;
+  }
+
+  /**
+   * Displace the nodes of the mesh by the given displacement.
+   * Does not update FE spaces for variables.
+   */
+  void displace(mfem::GridFunction const & displacement);
+
 private:
   /**
    * Builds a placeholder mesh when no MOOSE mesh is required.
@@ -59,6 +78,11 @@ private:
    * Performs a uniform refinement on the chosen mesh @nref times.
    */
   void uniformRefinement(mfem::Mesh & mesh, int nref);
+
+  /**
+   * Holds name of variable used for mesh displacement, if set.
+   */
+  std::optional<std::string> _mesh_displacement_variable;
 
   /**
    * Smart pointers to mfem::ParMesh object. Do not access directly.

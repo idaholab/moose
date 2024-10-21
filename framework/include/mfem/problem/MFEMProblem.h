@@ -155,6 +155,17 @@ public:
    */
   MFEMProblemData & getProblemData() { return _problem_data; }
 
+  /**
+   * Displace the mesh, if mesh displacement is enabled.
+   */
+  void displaceMesh();
+
+  /**
+   * Returns optional reference to the displacement GridFunction to apply to nodes.
+   */
+  std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+  getMeshDisplacementGridFunction();
+
 protected:
   /**
    * Template method for adding kernels. We can only add kernels using equation system problem
