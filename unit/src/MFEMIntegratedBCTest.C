@@ -72,3 +72,32 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
   ASSERT_NE(blf_integrator, nullptr);
   delete blf_integrator;
 }
+
+TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
+{
+  // Build required BC inputs
+  InputParameters vec_coef_params = _factory.getValidParams("MFEMVectorConstantCoefficient");
+  vec_coef_params.set<double>("value_x") = 1.0;
+  vec_coef_params.set<double>("value_y") = 2.0;
+  vec_coef_params.set<double>("value_z") = 3.0;
+  _mfem_problem->addVectorCoefficient(
+      "MFEMVectorConstantCoefficient", "vec_coef1", vec_coef_params);
+
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorBoundaryIntegratedBC");
+  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  bc_params.set<std::string>("vector_coefficient") = "vec_coef1";
+  auto & bc =
+      addObject<MFEMVectorBoundaryIntegratedBC>("MFEMVectorBoundaryIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMVectorBoundaryIntegratedBC returns an integrator of the expected type
+  auto lf_integrator =
+      dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLinearFormIntegrator());
+  ASSERT_NE(lf_integrator, nullptr);
+  delete lf_integrator;
+
+  auto blf_integrator = bc.createBilinearFormIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
+}
