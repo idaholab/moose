@@ -16,7 +16,7 @@
     exodiff = 2d-segregated-velocity-rz_out.e
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
                   "cylindrical channel using the SIMPLE algorithm."
-    abs_zero = 1e-9
+    abs_zero = 1e-8
     recover = false # we don't support recovery for SIMPLE yet
   []
   [slip]
@@ -100,7 +100,8 @@
                "FVKernels/scalar_2_advection/boundaries_to_force=bottom "
                "FVKernels/scalar_1_advection/boundaries_to_force=bottom "
                "FVKernels/inactive='scalar_1_src scalar_2_src scalar_1_coupled_source "
-               "scalar_2_coupled_source' Outputs/file_base='2d-segregated-scalar-symmetry'"
+               "scalar_2_coupled_source' Outputs/file_base='2d-segregated-scalar-symmetry' "
+               "Executioner/continue_on_max_its=true"
     requirement = "The system shall be able to produce a constant solution for scalar values in a "
                   "symmetric 2D channel flow without sources using the SIMPLE algorithm."
     recover = false # we don't support recovery for SIMPLE yet

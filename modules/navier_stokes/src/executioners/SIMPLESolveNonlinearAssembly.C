@@ -219,8 +219,8 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     _pressure_system(_problem.getNonlinearSystemBase(_pressure_sys_number)),
     _has_energy_system(isParamValid("energy_system")),
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
-    _has_passive_scalar_systems(isParamValid("passive_scalar_systems")),
-    _has_turbulence_systems(isParamValid("turbulence_systems")),
+    _has_passive_scalar_systems(!getParam<std::vector<SolverSystemName>>("passive_scalar_systems").empty()),
+    _has_turbulence_systems(!getParam<std::vector<SolverSystemName>>("turbulence_systems").empty()),
     _energy_sys_number(_has_energy_system
                            ? _problem.nlSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),

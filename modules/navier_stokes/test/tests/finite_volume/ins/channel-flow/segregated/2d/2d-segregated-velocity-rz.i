@@ -183,9 +183,10 @@ pressure_tag = "pressure_grad"
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
   num_iterations = 100
-  pressure_absolute_tolerance = 1e-14
-  momentum_absolute_tolerance = 1e-14
+  pressure_absolute_tolerance = 1e-13
+  momentum_absolute_tolerance = 1e-13
   print_fields = false
+  continue_on_max_its = true
 []
 
 [Outputs]

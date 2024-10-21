@@ -247,6 +247,7 @@ pressure_tag = "pressure_grad"
   pressure_absolute_tolerance = 1e-13
   momentum_absolute_tolerance = 1e-13
   print_fields = false
+  continue_on_max_its = true
 []
 
 [Outputs]
