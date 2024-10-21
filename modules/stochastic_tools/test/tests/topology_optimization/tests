@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#23975'
+  design = 'XXXX.md'
+  [topological_optimization]
+    type = 'Exodiff'
+    input = 'topology_opt.i'
+    exodiff = 'topology_opt_out_sub0.e'
+    allow_warnings = true
+    mesh_mode = REPLICATED # because the TopologyOptimizationSampler does not work with distributed
+    min_parallel = 1
+    max_parallel = 1
+  []
+
+  [topological_optimization_p3]
+    type = 'Exodiff'
+    input = 'topology_opt.i'
+    exodiff = 'topological_optimization_p3_sub0.e topological_optimization_p3_sub1.e topological_optimization_p3_sub2.e'
+    allow_warnings = true
+    cli_args = 'Outputs/file_base=topological_optimization_p3 Samplers/sample/num_parallel_proposals=3'
+    mesh_mode = REPLICATED # because the TopologyOptimizationSampler does not work with distributed
+    min_parallel = 3
+    max_parallel = 3
+  []
+[]
