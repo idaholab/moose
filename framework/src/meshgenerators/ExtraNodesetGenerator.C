@@ -38,6 +38,7 @@ ExtraNodesetGenerator::validParams()
       "supplied).");
   params.addParam<Real>(
       "tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
+  params.addParam<bool>("use_closest_node", false, "Use the node closest to the coordinate.");
   params.addClassDescription(
       "Creates a new node set and a new boundary made with the nodes the user provides.");
 
@@ -81,7 +82,11 @@ ExtraNodesetGenerator::generate()
   locator->enable_out_of_mesh_mode();
 
   const auto tolerance = getParam<Real>("tolerance");
-  for (const auto & c : getParam<std::vector<std::vector<Real>>>("coord"))
+  const bool use_closest_node = getParam<bool>("use_closest_node");
+  const auto coords = getParam<std::vector<std::vector<Real>>>("coord");
+  if (use_closest_node && coords.empty())
+    paramError("coord", "A coordinate should be specified to use 'use_closest_node'");
+  for (const auto & c : coords)
   {
     Point p;
     if (c.size() < dim)
@@ -132,13 +137,45 @@ ExtraNodesetGenerator::generate()
       this->comm().max(on_node);
     }
 
+    // only search for closest node if it is not found on a node
+    if (use_closest_node && !on_node)
+    {
+      // these are always true when using closest node
+      found_elem = true;
+      on_node = true;
+      Real dmin(std::numeric_limits<Real>::max());
+      dof_id_type dmin_id(std::numeric_limits<dof_id_type>::max());
+      // find this processors closest node and save distance and the node id
+      for (const auto & node_iter : as_range(mesh->local_nodes_begin(), mesh->local_nodes_end()))
+      {
+        Real dist = (*node_iter - p).norm_sq();
+        if (dist < dmin)
+        {
+          dmin = dist;
+          dmin_id = node_iter->id();
+        }
+      }
+
+      // get proc id with the global closest node and then communicate that procs closest node_id
+      processor_id_type dmin_proc_id;
+      this->comm().minloc(dmin, dmin_proc_id);
+      this->comm().broadcast(dmin_id, dmin_proc_id);
+
+      const Node * node = mesh->query_node_ptr(dmin_id);
+      if (node)
+        for (const auto & boundary_id : boundary_ids)
+          boundary_info.add_node(node, boundary_id);
+    }
+
     if (!found_elem)
       mooseError("Unable to locate the following point within the domain, please check its "
                  "coordinates:\n",
                  p);
 
     if (!on_node)
-      mooseError("No node found at point:\n", p);
+      mooseError("No node found at point:\n",
+                 p,
+                 "\nSet use_closest_node=true if you want to find the closest node.");
   }
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)

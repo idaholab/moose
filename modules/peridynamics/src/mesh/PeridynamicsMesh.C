@@ -62,7 +62,8 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
     _pdnode_sub_vol(declareRestartableData<std::vector<std::vector<Real>>>("pdnode_sub_vol")),
     _pdnode_sub_vol_sum(declareRestartableData<std::vector<Real>>("pdnode_sub_vol_sum")),
     _boundary_node_offset(
-        declareRestartableData<std::map<dof_id_type, Real>>("boundary_node_offset"))
+        declareRestartableData<std::map<dof_id_type, Real>>("boundary_node_offset")),
+    _pdnode_weight_normalizer(declareRestartableData<std::vector<Real>>("pdnode_weight_normalizer"))
 {
   if (!(isParamValid("horizon_radius") || _has_horizon_number))
     mooseError("Must specify either horizon_radius or horizon_number to determine horizon size in "
@@ -153,7 +154,7 @@ PeridynamicsMesh::createPeridynamicsMeshData(
   _pdnode_average_spacing.resize(_n_pdnodes);
   _pdnode_horizon_radius.resize(_n_pdnodes);
   _pdnode_vol.resize(_n_pdnodes);
-  _pdnode_horizon_vol.resize(_n_pdnodes);
+  _pdnode_horizon_vol.resize(_n_pdnodes, 0.0);
   _pdnode_blockID.resize(_n_pdnodes);
   _pdnode_elemID.resize(_n_pdnodes);
   _pdnode_neighbors.resize(_n_pdnodes);
@@ -161,6 +162,7 @@ PeridynamicsMesh::createPeridynamicsMeshData(
   _dg_neighbors.resize(_n_pdnodes);
   _pdnode_sub_vol.resize(_n_pdnodes);
   _pdnode_sub_vol_sum.resize(_n_pdnodes, 0.0);
+  _pdnode_weight_normalizer.resize(_n_pdnodes, 0.0);
 
   // loop through converted fe elements to generate PD nodes structure
   unsigned int id = 0; // make pd nodes start at 0 in the new mesh
@@ -210,7 +212,6 @@ PeridynamicsMesh::createPeridynamicsMeshData(
     // NOTE: PeridynamicsMesh does not support RZ/RSpherical so using volume from libmesh elem is
     // fine
     _pdnode_vol[id] = fe_elem->volume();
-    _pdnode_horizon_vol[id] = 0.0;
     _pdnode_blockID[id] = fe_elem->subdomain_id() + 1000; // set new subdomain id for PD mesh in
                                                           //  case FE mesh is retained
     _pdnode_elemID[id] = fe_elem->id();
@@ -293,6 +294,7 @@ PeridynamicsMesh::createNodeHorizBasedData(
             {
               _pdnode_neighbors[i].push_back(j);
               _pdnode_horizon_vol[i] += _pdnode_vol[j];
+              _pdnode_weight_normalizer[i] += _pdnode_horizon_radius[i] / dis;
             }
             // check whether i was also considered as a neighbor of j, if not, add i to j's
             // neighborlist
@@ -301,6 +303,7 @@ PeridynamicsMesh::createNodeHorizBasedData(
             {
               _pdnode_neighbors[j].push_back(i);
               _pdnode_horizon_vol[j] += _pdnode_vol[i];
+              _pdnode_weight_normalizer[j] += _pdnode_horizon_radius[j] / dis;
             }
           }
         }
@@ -515,6 +518,22 @@ PeridynamicsMesh::getBoundaryOffset(dof_id_type node_id)
     return _boundary_node_offset[node_id];
   else
     return 0.0;
+}
+
+Real
+PeridynamicsMesh::getNeighborWeight(dof_id_type node_id, dof_id_type neighbor_id)
+{
+  if (node_id > _n_pdnodes)
+    mooseError("Querying node ID exceeds the available PD node IDs!");
+
+  if (neighbor_id > _pdnode_neighbors[node_id].size() - 1)
+    mooseError("Querying neighbor index exceeds the available neighbors!");
+
+  Real dis =
+      (_pdnode_coord[node_id] - _pdnode_coord[_pdnode_neighbors[node_id][neighbor_id]]).norm();
+  Real result = _pdnode_horizon_radius[node_id] / dis / _pdnode_weight_normalizer[node_id];
+
+  return result;
 }
 
 bool

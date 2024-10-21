@@ -18,9 +18,6 @@
 class AddOutputAction : public MooseObjectAction
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   AddOutputAction(const InputParameters & params);

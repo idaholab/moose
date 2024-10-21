@@ -8,7 +8,7 @@ they are coupled together.
 !equation
 -\nabla \cdot \frac{\mathbf{K}}{\mu} \nabla p  = 0
 \\
-C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla T}_{\textrm{DarcyAdvection}} \right) - \nabla \cdot k \nabla T = 0
+\rho c_p \frac{\partial T}{\partial t} + \underbrace{\rho c_p \epsilon \vec{u}\cdot\nabla T}_{\textrm{DarcyAdvection}} - \nabla \cdot k \nabla T = 0
 
 - Objects have been created for everything except the $\vec{u}\cdot\nabla T$ term; a `Kernel`,
   `DarcyAdvection`, will be developed for this term.

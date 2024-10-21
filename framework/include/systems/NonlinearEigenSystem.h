@@ -14,7 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "SlepcEigenSolverConfiguration.h"
 
-#include "libmesh/eigen_system.h"
+#include "libmesh/condensed_eigen_system.h"
 
 // forward declarations
 class EigenProblem;
@@ -22,6 +22,11 @@ class KernelBase;
 class ResidualObject;
 
 #ifdef LIBMESH_HAVE_SLEPC
+
+namespace Moose
+{
+void assemble_matrix(EquationSystems & es, const std::string & system_name);
+}
 
 /**
  * Nonlinear eigenvalue system to be solved
@@ -87,7 +92,7 @@ public:
    */
   virtual EPS getEPS();
 
-  EigenSystem & sys() { return _eigen_sys; }
+  CondensedEigenSystem & sys() { return _eigen_sys; }
 
   /**
    * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
@@ -168,13 +173,22 @@ public:
 
   void residualAndJacobianTogether() override;
 
+  /**
+   * Initialize the condensed matrices. This is a no-op if there are no
+   * constraints in the DofMap
+   */
+  void initializeCondensedMatrices();
+
+  virtual void postInit() override;
+  virtual void reinit() override;
+
 protected:
   virtual void postAddResidualObject(ResidualObject & object) override;
 
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 
-  EigenSystem & _eigen_sys;
+  CondensedEigenSystem & _eigen_sys;
   EigenProblem & _eigen_problem;
   std::unique_ptr<SlepcEigenSolverConfiguration> _solver_configuration;
   std::vector<std::pair<Real, Real>> _eigen_values;
@@ -189,6 +203,10 @@ protected:
   bool _precond_matrix_includes_eigen;
   // Libmesh preconditioner
   Preconditioner<Number> * _preconditioner;
+
+  /// The number of degrees of freedom constrained at the libMesh level, e.g. via hanging node or
+  /// periodic boundary constraints
+  dof_id_type _num_constrained_dofs;
 };
 
 #else

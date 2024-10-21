@@ -60,7 +60,7 @@ public:
 
   virtual void initialize() final;
   virtual void execute() final;
-  virtual void finalize() final{};
+  virtual void finalize() final {}
 
 protected:
   /*
@@ -131,6 +131,8 @@ protected:
   std::vector<unsigned int> _pcols;
   /// Dimension of predictor data - either _sampler.getNumberOfCols() or _pvals.size() + _pcols.size().
   unsigned int _n_dims;
+  /// The number of outputs
+  unsigned int & _n_outputs;
   ///@}
   // TRAINING_DATA_MEMBERS_END
 

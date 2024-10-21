@@ -170,9 +170,11 @@ private:
    * Add parameter values to completion list for request line and column.
    * @param completionItems - list of completion objects to be filled out
    * @param valid_params - all valid parameters used for value completion
+   * @param existing_params - set of parameters already existing in input
    * @param existing_subblocks - active and inactive subblock name values
    * @param param_name - name of input parameter for value autocompletion
    * @param obj_act_tasks - tasks to verify object type with valid syntax
+   * @param object_path - full node path where autocomplete was requested
    * @param replace_line_beg - start line of autocompletion replace range
    * @param replace_char_beg - start column of autocomplete replace range
    * @param replace_line_end - end line of autocomplete replacement range
@@ -181,9 +183,11 @@ private:
    */
   bool addValuesToList(wasp::DataArray & completionItems,
                        const InputParameters & valid_params,
+                       const std::set<std::string> & existing_params,
                        const std::set<std::string> & existing_subblocks,
                        const std::string & param_name,
                        const std::set<std::string> & obj_act_tasks,
+                       const std::string & object_path,
                        int replace_line_beg,
                        int replace_char_beg,
                        int replace_line_end,
@@ -219,12 +223,12 @@ private:
                                      const std::string & val_string);
 
   /**
-   * Add locations of lookups or parameter declarator to definition list.
-   * @param definitionLocations - data array of locations objects to fill
+   * Add set of nodes sorted by location to definition or reference list.
+   * @param defsOrRefsLocations - data array of locations objects to fill
    * @param location_nodes - set of nodes that have locations to be added
    * @return - true if filling of location objects completed successfully
    */
-  bool addLocationNodesToList(wasp::DataArray & definitionLocations,
+  bool addLocationNodesToList(wasp::DataArray & defsOrRefsLocations,
                               const SortedLocationNodes & location_nodes);
 
   /**
@@ -248,6 +252,18 @@ private:
                                          int line,
                                          int character,
                                          bool include_declaration);
+
+  /**
+   * Recursively walk input to gather all nodes matching value and types.
+   * @param match_nodes - set to fill with nodes matching value and types
+   * @param view_parent - nodeview used to start recursive tree traversal
+   * @param target_value -
+   * @param target_types -
+   */
+  void getNodesByValueAndTypes(SortedLocationNodes & match_nodes,
+                               wasp::HITNodeView view_parent,
+                               const std::string & target_value,
+                               const std::set<std::string> & target_types);
 
   /**
    * Gather formatting text edits - specific to this server implemention.
@@ -306,6 +322,19 @@ private:
   int getDocumentSymbolKind(wasp::HITNodeView symbol_node);
 
   /**
+   * Get required parameter completion text list for given subblock path.
+   * @param subblock_path - subblock path for finding required parameters
+   * @param subblock_type - subblock type for finding required parameters
+   * @param existing_params - set of parameters already existing in input
+   * @param indent_spaces - indentation to be added before each parameter
+   * @return - list of required parameters to use in subblock insert text
+   */
+  std::string getRequiredParamsText(const std::string & subblock_path,
+                                    const std::string & subblock_type,
+                                    const std::set<std::string> & existing_params,
+                                    const std::string & indent_spaces);
+
+  /**
    * Read from connection into object - specific to this server's connection.
    * @param object - reference to object to be read into
    * @return - true if the read from the connection completed successfully
@@ -337,6 +366,11 @@ private:
   std::shared_ptr<MooseApp> getCheckApp() const;
 
   /**
+   * @return up to date text string associated with current document path
+   */
+  const std::string & getDocumentText() const;
+
+  /**
    * @brief _moose_app - reference to parent application that owns this server
    */
   MooseApp & _moose_app;
@@ -345,6 +379,11 @@ private:
    * @brief _check_apps - map from document paths to input check applications
    */
   std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
+
+  /**
+   * @brief _path_to_text - map of document paths to current text strings
+   */
+  std::map<std::string, std::string> _path_to_text;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream
@@ -360,6 +399,11 @@ private:
    * @brief _type_to_input_paths - map of parameter types to lookup paths
    */
   std::map<std::string, std::set<std::string>> _type_to_input_paths;
+
+  /**
+   * @brief _type_to_input_paths - map of lookup paths to parameter types
+   */
+  std::map<std::string, std::set<std::string>> _input_path_to_types;
 
   /**
    * @brief _formatting_tab_size - number of indent spaces for formatting

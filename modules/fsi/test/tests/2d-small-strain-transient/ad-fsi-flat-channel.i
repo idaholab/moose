@@ -148,14 +148,14 @@
     type = MatReaction
     variable = vel_x_solid
     block = 1
-    mob_name = 1
+    reaction_rate = 1
     use_displaced_mesh = false
   []
   [source_vys]
     type = MatReaction
     variable = vel_y_solid
     block = 1
-    mob_name = 1
+    reaction_rate = 1
     use_displaced_mesh = false
   []
 []
@@ -172,7 +172,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [solid_domain]
     strain = SMALL
     incremental = false

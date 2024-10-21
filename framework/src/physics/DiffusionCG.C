@@ -58,6 +58,7 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADDiffusion" : "Diffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
 
     // Transfer the diffusivity parameter from the Physics to the kernel
     if (isParamValid("diffusivity_matprop"))
@@ -89,6 +90,7 @@ DiffusionCG::addFEKernels()
 
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
 
     // Transfer the source and coefficient parameter from the Physics to the kernel
     const auto coef = getParam<Real>("source_coef");
@@ -119,6 +121,7 @@ DiffusionCG::addFEKernels()
     const std::string kernel_type = _use_ad ? "ADTimeDerivative" : "TimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
     getProblem().addKernel(kernel_type, prefix() + _var_name + "_time", params);
   }
 }
@@ -126,7 +129,7 @@ DiffusionCG::addFEKernels()
 void
 DiffusionCG::addFEBCs()
 {
-  if (isParamValid("neumann_boundaries"))
+  if (isParamSetByUser("neumann_boundaries"))
   {
     const auto & boundary_fluxes = getParam<std::vector<MooseFunctorName>>("boundary_fluxes");
     for (const auto i : index_range(_neumann_boundaries))
@@ -168,7 +171,7 @@ DiffusionCG::addFEBCs()
           bc_type, prefix() + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
     }
   }
-  if (isParamValid("dirichlet_boundaries"))
+  if (isParamSetByUser("dirichlet_boundaries"))
   {
     const auto & boundary_values = getParam<std::vector<MooseFunctorName>>("boundary_values");
     for (const auto i : index_range(_dirichlet_boundaries))
@@ -213,7 +216,7 @@ void
 DiffusionCG::addNonlinearVariables()
 {
   // If the variable was added outside the Physics
-  if (nonlinearVariableExists(_var_name, /*error_if_aux*/ true))
+  if (variableExists(_var_name, /*error_if_aux*/ true))
   {
     if (isParamValid("variable_order"))
       paramError("variable_order",
@@ -226,6 +229,7 @@ DiffusionCG::addNonlinearVariables()
   const std::string variable_type = "MooseVariable";
   InputParameters params = getFactory().getValidParams(variable_type);
   params.set<MooseEnum>("order") = getParam<MooseEnum>("variable_order");
+  assignBlocks(params, _blocks);
 
   getProblem().addVariable(variable_type, _var_name, params);
 }

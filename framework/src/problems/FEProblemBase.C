@@ -205,8 +205,29 @@ FEProblemBase::validParams()
                                        rz_coord_axis,
                                        "The rotation axis (X | Y) for axisymetric coordinates",
                                        "Please use 'Mesh/rz_coord_axis' instead");
-  params.addParam<bool>(
-      "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
+  auto coverage_check_description = [](std::string scope, std::string list_param_name)
+  {
+    return "Controls, if and how a " + scope +
+           " subdomain coverage check is performed. "
+           "With 'TRUE' or 'ON' all subdomains are checked (the default). Setting 'FALSE' or 'OFF' "
+           "will disable the check for all subdomains. "
+           "To exclude a predefined set of subdomains 'SKIP_LIST' is to "
+           "be used, while the subdomains to skip are to be defined in the parameter '" +
+           list_param_name +
+           "'. To limit the check to a list of subdomains, 'ONLY_LIST' is to "
+           "be used (again, using the parameter '" +
+           list_param_name + "').";
+  };
+  MooseEnum kernel_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
+  params.addParam<MooseEnum>("kernel_coverage_check",
+                             kernel_coverage_check_modes,
+                             coverage_check_description("kernel", "kernel_coverage_block_list"));
+  params.addParam<std::vector<SubdomainName>>(
+      "kernel_coverage_block_list",
+      {},
+      "List of subdomains for kernel coverage check. The meaning of this list is controlled by the "
+      "parameter 'kernel_coverage_check' (whether this is the list of subdomains to be checked, "
+      "not to be checked or not taken into account).");
   params.addParam<bool>(
       "boundary_restricted_node_integrity_check",
       true,
@@ -217,9 +238,18 @@ FEProblemBase::validParams()
                         "Set to false to disable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");
-  params.addParam<bool>("material_coverage_check",
-                        true,
-                        "Set to false to disable material->subdomain coverage check");
+  MooseEnum material_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
+  params.addParam<MooseEnum>(
+      "material_coverage_check",
+      material_coverage_check_modes,
+      coverage_check_description("material", "material_coverage_block_list"));
+  params.addParam<std::vector<SubdomainName>>(
+      "material_coverage_block_list",
+      {},
+      "List of subdomains for material coverage check. The meaning of this list is controlled by "
+      "the parameter 'material_coverage_check' (whether this is the list of subdomains to be "
+      "checked, not to be checked or not taken into account).");
+
   params.addParam<bool>("fv_bcs_integrity_check",
                         true,
                         "Set to false to disable checking of overlapping Dirichlet and Flux BCs "
@@ -292,6 +322,9 @@ FEProblemBase::validParams()
       "allow_invalid_solution",
       false,
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
+  params.addParam<bool>("show_invalid_solution_console",
+                        true,
+                        "Set to true to show the invalid solution occurance summary in console");
   params.addParam<bool>("immediately_print_invalid_solution",
                         false,
                         "Whether or not to report invalid solution warnings at the time the "
@@ -309,12 +342,14 @@ FEProblemBase::validParams()
       "specific handling, immediately error instead of allowing the time step to be cut");
 
   params.addParamNamesToGroup(
-      "skip_nl_system_check kernel_coverage_check boundary_restricted_node_integrity_check "
-      "boundary_restricted_elem_integrity_check material_coverage_check fv_bcs_integrity_check "
+      "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
+      "boundary_restricted_node_integrity_check "
+      "boundary_restricted_elem_integrity_check material_coverage_check "
+      "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
-                              "ignore_zeros_in_jacobian",
+                              "ignore_zeros_in_jacobian identify_variable_groups_in_nl",
                               "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
@@ -325,8 +360,9 @@ FEProblemBase::validParams()
       "Null space removal");
   params.addParamNamesToGroup("extra_tag_vectors extra_tag_matrices extra_tag_solutions",
                               "Tagging");
-  params.addParamNamesToGroup("allow_invalid_solution immediately_print_invalid_solution",
-                              "Solution validity control");
+  params.addParamNamesToGroup(
+      "allow_invalid_solution show_invalid_solution_console immediately_print_invalid_solution",
+      "Solution validity control");
 
   return params;
 }
@@ -395,14 +431,19 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _const_jacobian(false),
     _has_jacobian(false),
     _needs_old_newton_iter(false),
+    _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
-    _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
+    _kernel_coverage_check(
+        getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()),
+    _kernel_coverage_blocks(getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")),
     _boundary_restricted_node_integrity_check(
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
-    _material_coverage_check(getParam<bool>("material_coverage_check")),
+    _material_coverage_check(
+        getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
+    _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
@@ -428,6 +469,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
+    _show_invalid_solution_console(getParam<bool>("show_invalid_solution_console")),
     _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
@@ -448,14 +490,18 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   for (const auto i : index_range(_nl_sys_names))
   {
-    _nl_sys_name_to_num[_nl_sys_names[i]] = i;
-    _solver_sys_name_to_num[_nl_sys_names[i]] = i;
+    const auto & name = _nl_sys_names[i];
+    _nl_sys_name_to_num[name] = i;
+    _solver_sys_name_to_num[name] = i;
+    _solver_sys_names.push_back(name);
   }
 
   for (const auto i : index_range(_linear_sys_names))
   {
-    _linear_sys_name_to_num[_linear_sys_names[i]] = i;
-    _solver_sys_name_to_num[_linear_sys_names[i]] = i + _num_nl_sys;
+    const auto & name = _linear_sys_names[i];
+    _linear_sys_name_to_num[name] = i;
+    _solver_sys_name_to_num[name] = i + _num_nl_sys;
+    _solver_sys_names.push_back(name);
   }
 
   _nonlocal_cm.resize(_nl_sys_names.size());
@@ -586,24 +632,31 @@ FEProblemBase::createTagSolutions()
     _aux->addVector(tag, false, GHOSTED);
   }
 
-  if (getParam<bool>("previous_nl_solution_required"))
+  if (_previous_nl_solution_required)
   {
     // We'll populate the zeroth state of the nonlinear iterations with the current solution for
     // ease of use in doing things like copying solutions backwards. We're just storing pointers in
     // the solution states containers so populating the zeroth state does not cost us the memory of
     // a new vector
-    for (const auto i : make_range(0, 2))
-    {
-      for (auto & sys : _solver_systems)
-        sys->needSolutionState(i, Moose::SolutionIterationType::Nonlinear);
-      _aux->needSolutionState(i, Moose::SolutionIterationType::Nonlinear);
-    }
+    needSolutionState(2, Moose::SolutionIterationType::Nonlinear);
   }
 
   auto tag = addVectorTag(Moose::SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
   for (auto & sys : _solver_systems)
     sys->associateVectorToTag(*sys->system().current_local_solution.get(), tag);
   _aux->associateVectorToTag(*_aux->system().current_local_solution.get(), tag);
+}
+
+void
+FEProblemBase::needSolutionState(unsigned int oldest_needed,
+                                 Moose::SolutionIterationType iteration_type)
+{
+  for (const auto i : make_range((unsigned)0, oldest_needed))
+  {
+    for (auto & sys : _solver_systems)
+      sys->needSolutionState(i, iteration_type);
+    _aux->needSolutionState(i, iteration_type);
+  }
 }
 
 void
@@ -2479,8 +2532,19 @@ FEProblemBase::getSampler(const std::string & name, const THREAD_ID tid)
 bool
 FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                                       const FEType & type,
-                                      bool is_aux)
+                                      bool is_aux,
+                                      const std::set<SubdomainID> * const active_subdomains)
 {
+
+  std::set<SubdomainID> subdomainIDs;
+  if (active_subdomains->size() == 0)
+  {
+    const auto subdomains = _mesh.meshSubdomains();
+    subdomainIDs.insert(subdomains.begin(), subdomains.end());
+  }
+  else
+    subdomainIDs.insert(active_subdomains->begin(), active_subdomains->end());
+
   for (auto & sys : _solver_systems)
   {
     SystemBase * curr_sys_ptr = sys.get();
@@ -2490,7 +2554,7 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
     {
       curr_sys_ptr = _aux.get();
       other_sys_ptr = sys.get();
-      error_prefix = "Aux";
+      error_prefix = "aux";
     }
 
     if (other_sys_ptr->hasVariable(var_name))
@@ -2501,11 +2565,74 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
     {
       const Variable & var =
           curr_sys_ptr->system().variable(curr_sys_ptr->system().variable_number(var_name));
+
+      // variable type
       if (var.type() != type)
-        mooseError(error_prefix,
-                   "Variable with name '",
+      {
+        const auto stringifyType = [](FEType t)
+        { return Moose::stringify(t.family) + " of order " + Moose::stringify(t.order); };
+
+        mooseError("Mismatching types are specified for ",
+                   error_prefix,
+                   "variable with name '",
                    var_name,
-                   "' already exists but is of a differing type!");
+                   "': '",
+                   stringifyType(var.type()),
+                   "' and '",
+                   stringifyType(type),
+                   "'");
+      }
+
+      // block-restriction
+      if (!(active_subdomains->size() == 0 && var.active_subdomains().size() == 0))
+      {
+        const auto varActiveSubdomains = var.active_subdomains();
+        std::set<SubdomainID> varSubdomainIDs;
+        if (varActiveSubdomains.size() == 0)
+        {
+          const auto subdomains = _mesh.meshSubdomains();
+          varSubdomainIDs.insert(subdomains.begin(), subdomains.end());
+        }
+        else
+          varSubdomainIDs.insert(varActiveSubdomains.begin(), varActiveSubdomains.end());
+
+        // Is subdomainIDs a subset of varSubdomainIDs? With this we allow the case that the newly
+        // requested block restriction is only a subset of the existing one.
+        const auto isSubset = std::includes(varSubdomainIDs.begin(),
+                                            varSubdomainIDs.end(),
+                                            subdomainIDs.begin(),
+                                            subdomainIDs.end());
+
+        if (!isSubset)
+        {
+          // helper function: make a string from a set of subdomain ids
+          const auto stringifySubdomains = [this](std::set<SubdomainID> subdomainIDs)
+          {
+            std::stringstream s;
+            for (auto const i : subdomainIDs)
+            {
+              // do we need to insert a comma?
+              if (s.tellp() != 0)
+                s << ", ";
+
+              // insert subdomain name and id -or- only the id (if no name is given)
+              const auto subdomainName = _mesh.getSubdomainName(i);
+              if (subdomainName.empty())
+                s << i;
+              else
+                s << subdomainName << " (" << i << ")";
+            }
+            return s.str();
+          };
+
+          const std::string msg = "Mismatching block-restrictions are specified for " +
+                                  error_prefix + "variable with name '" + var_name + "': {" +
+                                  stringifySubdomains(varSubdomainIDs) + "} and {" +
+                                  stringifySubdomains(subdomainIDs) + "}";
+
+          mooseError(msg);
+        }
+      }
 
       return true;
     }
@@ -2524,7 +2651,12 @@ FEProblemBase::addVariable(const std::string & var_type,
   auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
 
-  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
+  const auto active_subdomains_vector =
+      _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
+  const std::set<SubdomainID> active_subdomains(active_subdomains_vector.begin(),
+                                                active_subdomains_vector.end());
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false, &active_subdomains))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -2800,7 +2932,12 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
 
-  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true))
+  const auto active_subdomains_vector =
+      _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
+  const std::set<SubdomainID> active_subdomains(active_subdomains_vector.begin(),
+                                                active_subdomains_vector.end());
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true, &active_subdomains))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -2822,7 +2959,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
 
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true, active_subdomains))
     return;
 
   std::string var_type;
@@ -2861,7 +2998,7 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
 
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true, active_subdomains))
     return;
 
   InputParameters params = _factory.getValidParams("ArrayMooseVariable");
@@ -2895,7 +3032,7 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
     _max_scalar_order = order;
 
   FEType type(order, SCALAR);
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true, active_subdomains))
     return;
 
   InputParameters params = _factory.getValidParams("MooseVariableScalar");
@@ -3455,6 +3592,13 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid
   }
 
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
+}
+
+bool
+FEProblemBase::acceptInvalidSolution() const
+{
+  return allowInvalidSolution() || // invalid solutions are always allowed
+         !_app.solutionInvalidity().hasInvalidSolutionError(); // if not allowed, check for errors
 }
 
 void
@@ -5253,7 +5397,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   // flag so the set by user flag is not reset, calling set with the true flag causes the set
   // by user status to be reset, which should only be done if the EXEC_SAME_AS_MULTIAPP is
   // being applied to the object.
-  if (parameters.get<ExecFlagEnum>("execute_on").contains(EXEC_SAME_AS_MULTIAPP))
+  if (parameters.get<ExecFlagEnum>("execute_on").isValueSet(EXEC_SAME_AS_MULTIAPP))
   {
     ExecFlagEnum & exec_enum = parameters.set<ExecFlagEnum>("execute_on", true);
     std::shared_ptr<MultiApp> multiapp;
@@ -5279,11 +5423,11 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
       std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
   if (multi_app_transfer)
   {
-    if (multi_app_transfer->directions().contains(MultiAppTransfer::TO_MULTIAPP))
+    if (multi_app_transfer->directions().isValueSet(MultiAppTransfer::TO_MULTIAPP))
       _to_multi_app_transfers.addObject(multi_app_transfer);
-    if (multi_app_transfer->directions().contains(MultiAppTransfer::FROM_MULTIAPP))
+    if (multi_app_transfer->directions().isValueSet(MultiAppTransfer::FROM_MULTIAPP))
       _from_multi_app_transfers.addObject(multi_app_transfer);
-    if (multi_app_transfer->directions().contains(MultiAppTransfer::BETWEEN_MULTIAPP))
+    if (multi_app_transfer->directions().isValueSet(MultiAppTransfer::BETWEEN_MULTIAPP))
       _between_multi_app_transfers.addObject(multi_app_transfer);
   }
   else
@@ -5859,8 +6003,8 @@ FEProblemBase::init()
       nl->turnOffJacobian();
 
   for (auto & sys : _solver_systems)
-    sys->init();
-  _aux->init();
+    sys->preInit();
+  _aux->preInit();
 
   // Build the mortar segment meshes, if they haven't been already, for a couple reasons:
   // 1) Get the ghosting correct for both static and dynamic meshes
@@ -5878,6 +6022,10 @@ FEProblemBase::init()
     es().init();
   }
 
+  for (auto & sys : _solver_systems)
+    sys->postInit();
+  _aux->postInit();
+
   // Now that the equation system and the dof distribution is done, we can generate the
   // finite volume-related parts if needed.
   if (haveFV())
@@ -5889,7 +6037,14 @@ FEProblemBase::init()
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     for (const auto i : index_range(_nl))
+    {
+      mooseAssert(
+          _cm[i],
+          "Coupling matrix not set for system "
+              << i
+              << ". This should only happen if a preconditioner was not setup for this system");
       _assembly[tid][i]->init(_cm[i].get());
+    }
 
   if (_displaced_problem)
     _displaced_problem->init();
@@ -5957,7 +6112,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
-    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
+    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
     _is_petsc_options_inserted = true;
   }
 #endif
@@ -6120,7 +6275,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
-    Moose::PetscSupport::petscSetOptions(options, solver_params);
+    Moose::PetscSupport::petscSetOptions(options, solver_params, this);
     _is_petsc_options_inserted = true;
   }
 #endif
@@ -7250,7 +7405,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
   if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
     _current_nl_sys->setPreviousNewtonSolution(old_soln);
-    _aux->setPreviousNewtonSolution();
+    _aux->copyCurrentIntoPreviousNL();
   }
 
   // MOOSE doesn't change the search_direction
@@ -7628,7 +7783,14 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   if (intermediate_change)
     es().reinit_solutions();
   else
+  {
     es().reinit();
+    // Since the mesh has changed, we need to make sure that we update any of our
+    // MOOSE-system specific data.
+    for (auto & sys : _solver_systems)
+      sys->reinit();
+    _aux->reinit();
+  }
 
   // Updating MooseMesh first breaks other adaptivity code, unless we
   // then *again* update the MooseMesh caches.  E.g. the definition of
@@ -7726,12 +7888,6 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   _has_jacobian = false; // we have to recompute jacobian when mesh changed
-
-  // Since the mesh has changed, we need to make sure that we update any of our
-  // MOOSE-system specific data. libmesh system data has already been updated
-  for (auto & sys : _solver_systems)
-    sys->update(/*update_libmesh_system=*/false);
-  _aux->update(/*update_libmesh_system=*/false);
 }
 
 void
@@ -7760,9 +7916,38 @@ FEProblemBase::checkProblemIntegrity()
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
 
   // Check kernel coverage of subdomains (blocks) in the mesh
-  if (!_skip_nl_system_check && _solve && _kernel_coverage_check)
-    for (auto & nl : _nl)
-      nl->checkKernelCoverage(mesh_subdomains);
+  if (!_skip_nl_system_check && _solve && _kernel_coverage_check != CoverageCheckMode::FALSE &&
+      _kernel_coverage_check != CoverageCheckMode::OFF)
+  {
+    std::set<SubdomainID> blocks;
+    if (_kernel_coverage_check == CoverageCheckMode::TRUE ||
+        _kernel_coverage_check == CoverageCheckMode::ON)
+      blocks = mesh_subdomains;
+    else if (_kernel_coverage_check == CoverageCheckMode::SKIP_LIST)
+    {
+      blocks = mesh_subdomains;
+      for (const auto & subdomain_name : _kernel_coverage_blocks)
+      {
+        const auto id = _mesh.getSubdomainID(subdomain_name);
+        if (id == Moose::INVALID_BLOCK_ID)
+          paramError("kernel_coverage_block_list",
+                     "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+        blocks.erase(id);
+      }
+    }
+    else if (_kernel_coverage_check == CoverageCheckMode::ONLY_LIST)
+      for (const auto & subdomain_name : _kernel_coverage_blocks)
+      {
+        const auto id = _mesh.getSubdomainID(subdomain_name);
+        if (id == Moose::INVALID_BLOCK_ID)
+          paramError("kernel_coverage_block_list",
+                     "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+        blocks.insert(id);
+      }
+    if (!blocks.empty())
+      for (auto & nl : _nl)
+        nl->checkKernelCoverage(blocks);
+  }
 
   // Check materials
   {
@@ -7778,7 +7963,8 @@ FEProblemBase::checkProblemIntegrity()
 
     std::set<SubdomainID> local_mesh_subs(mesh_subdomains);
 
-    if (_material_coverage_check)
+    if (_material_coverage_check != CoverageCheckMode::FALSE &&
+        _material_coverage_check != CoverageCheckMode::OFF)
     {
       /**
        * If a material is specified for any block in the simulation, then all blocks must
@@ -7790,6 +7976,33 @@ FEProblemBase::checkProblemIntegrity()
       {
         local_mesh_subs.erase(id);
         check_material_coverage = true;
+      }
+
+      // did the user limit the subdomains to be checked?
+      if (_material_coverage_check == CoverageCheckMode::SKIP_LIST)
+      {
+        for (const auto & subdomain_name : _material_coverage_blocks)
+        {
+          const auto id = _mesh.getSubdomainID(subdomain_name);
+          if (id == Moose::INVALID_BLOCK_ID)
+            paramError("material_coverage_block_list",
+                       "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+          local_mesh_subs.erase(id);
+        }
+      }
+      else if (_material_coverage_check == CoverageCheckMode::ONLY_LIST)
+      {
+        std::set<SubdomainID> blocks(local_mesh_subs);
+        for (const auto & subdomain_name : _material_coverage_blocks)
+        {
+          const auto id = _mesh.getSubdomainID(subdomain_name);
+          if (id == Moose::INVALID_BLOCK_ID)
+            paramError("material_coverage_block_list",
+                       "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+          blocks.erase(id);
+        }
+        for (const auto id : blocks)
+          local_mesh_subs.erase(id);
       }
 
       // also exclude mortar spaces from the material check
@@ -8665,8 +8878,8 @@ FEProblemBase::shouldPrintExecution(const THREAD_ID tid) const
   if (tid != 0)
     return false;
 
-  if (_print_execution_on.contains(_current_execute_on_flag) ||
-      _print_execution_on.contains(EXEC_ALWAYS))
+  if (_print_execution_on.isValueSet(_current_execute_on_flag) ||
+      _print_execution_on.isValueSet(EXEC_ALWAYS))
     return true;
   else
     return false;

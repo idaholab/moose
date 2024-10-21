@@ -131,7 +131,8 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  virtual void setPreviousNewtonSolution();
+  /// Copies the current solution into the previous nonlinear iteration solution
+  virtual void copyCurrentIntoPreviousNL();
 
   void setScalarVariableCoupleableTags(ExecFlagType type);
 

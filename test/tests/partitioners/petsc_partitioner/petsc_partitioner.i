@@ -4,7 +4,10 @@
   nx = 10
   ny = 10
   [Partitioner]
+    # You need to use PetscExternalPartitioner to gain an access to these external packages
     type = PetscExternalPartitioner
+    # specify which package you want to use
+    # you could choose one of {Chaco, Party, PTScotch, ParMETIS}
     part_package = parmetis
   []
   parallel_type = distributed

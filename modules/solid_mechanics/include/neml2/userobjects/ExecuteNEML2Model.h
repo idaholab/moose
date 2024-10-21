@@ -24,6 +24,7 @@ NEML2ObjectStubHeader(ExecuteNEML2Model, ElementUserObject);
 #include <map>
 
 class MOOSEToNEML2;
+class MOOSEToNEML2Parameter;
 
 /**
  * ExecuteNEML2Model executes a NEML2 model. The NEML2 input variables are gathered by UserObjects
@@ -40,7 +41,6 @@ public:
   ExecuteNEML2Model(const InputParameters & params);
 
   virtual void initialSetup() override;
-  virtual void timestepSetup() override;
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -51,21 +51,34 @@ public:
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
   /// Get a reference(!) to the requested output view
-  const neml2::BatchTensor & getOutputView(const neml2::VariableName & output_name) const;
+  const neml2::Tensor & getOutputView(const neml2::VariableName & output_name) const;
 
   /// Get a reference(!) to the requested output derivative view
-  const neml2::BatchTensor & getOutputDerivativeView(const neml2::VariableName & output_name,
-                                                     const neml2::VariableName & input_name) const;
+  const neml2::Tensor & getOutputDerivativeView(const neml2::VariableName & output_name,
+                                                const neml2::VariableName & input_name) const;
+
+  /// Get a reference(!) to the requested output parameter derivative view
+  const neml2::Tensor & getOutputParameterDerivativeView(const neml2::VariableName & output_name,
+                                                         const std::string & parameter_name) const;
 
   /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
 
 protected:
+  /// Register a variable gathered by a gatherer UO
+  virtual void addUOVariable(const UserObjectName & uo_name, const neml2::VariableName & uo_var);
+
+  /// Prevent output and derivative retrieval after construction
+  virtual void checkExecutionStage() const final;
+
+  /// Set parameters from parameter UO and/or enable AD
+  virtual void setParameter();
+
+  /// Obtain derivative of output with respect to parameters
+  virtual void getParameterDerivative();
+
   /// Determine whether the material model should be called
   virtual bool shouldCompute();
-
-  /// Advance state and forces in time
-  virtual void advanceStep();
 
   /// Update the forces driving the material model update
   virtual void updateForces();
@@ -76,11 +89,21 @@ protected:
   /// Perform the material update
   virtual void solve();
 
+  // set of variables to skip
+  std::set<neml2::VariableName> _skip_vars;
+
+  // set of provided and required inputs
+  std::set<neml2::VariableName> _provided_inputs;
+
   /// MOOSE data gathering user objects
-  std::vector<const MOOSEToNEML2 *> _gather_uos;
+  std::vector<const MOOSEToNEML2 *> _gather_uos;                // for input
+  std::vector<const MOOSEToNEML2Parameter *> _gather_param_uos; // for parameters
 
   /// (optional) NEML2 time input
   const neml2::VariableName _neml2_time;
+
+  /// (optional) NEML2 old time input
+  const neml2::VariableName _neml2_time_old;
 
   /// The input vector of the material model
   neml2::LabeledVector _in;
@@ -104,20 +127,27 @@ protected:
   std::map<neml2::VariableName, std::string> _var_to_uo;
 
   /// model outputs (the map is an unstable container and we're doling out references to the items. we must not change it after construction!)
-  std::map<neml2::VariableName, neml2::BatchTensor> _outputs;
+  std::map<neml2::VariableName, neml2::Tensor> _outputs;
 
   /// model output derivatives (see above))
-  std::map<std::pair<neml2::VariableName, std::string>, neml2::BatchTensor> _doutputs;
+  std::map<std::pair<neml2::VariableName, std::string>, neml2::Tensor> _doutputs;
+
+  /// model output derivatives wrt parameters (see above)
+  std::map<std::pair<neml2::VariableName, std::string>, neml2::Tensor> _doutputs_dparams;
 
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
 
-  /// are the input and output tensors allocated yet?
-  bool _in_out_allocated;
+  /// set of output variables that were retrieved
+  mutable std::set<neml2::VariableName> _retrieved_outputs;
 
   /// set of derivatives that were retrieved
-  mutable std::set<std::tuple<neml2::VariableName, neml2::VariableName, neml2::BatchTensor *>>
+  mutable std::set<std::tuple<neml2::VariableName, neml2::VariableName, neml2::Tensor *>>
       _retrieved_derivatives;
+
+  /// set of parameter derivatives that were retrieved
+  mutable std::set<std::tuple<neml2::VariableName, std::string, neml2::Tensor *>>
+      _retrieved_parameter_derivatives;
 };
 
 #endif

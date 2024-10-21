@@ -503,6 +503,10 @@
                         "type": "bool",
                         "value": true
                     },
+                    "MeshMetaData/rmp/flexible_assembly_stitching": {
+                        "type": "bool",
+                        "value": false
+                    },
                     "MeshMetaData/rmp/mesh_dimensions": {
                         "type": "int",
                         "value": 3

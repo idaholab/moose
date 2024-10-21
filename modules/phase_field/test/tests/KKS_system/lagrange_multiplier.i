@@ -182,14 +182,14 @@
     type = MatReaction
     variable = eta1
     v = lambda
-    mob_name = L
+    reaction_rate = L
   []
 
   # Kernels for the Lagrange multiplier equation
   [mult_lambda]
     type = MatReaction
     variable = lambda
-    mob_name = 2
+    reaction_rate = 2
   []
   [mult_ACBulkF_1]
     type = KKSMultiACBulkF
@@ -253,13 +253,13 @@
   [eta2reaction]
     type = MatReaction
     variable = eta2
-    mob_name = 1
+    reaction_rate = 1
   []
   [eta1reaction]
     type = MatReaction
     variable = eta2
     v = eta1
-    mob_name = 1
+    reaction_rate = 1
   []
   [one]
     type = BodyForce

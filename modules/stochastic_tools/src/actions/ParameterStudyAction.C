@@ -499,7 +499,7 @@ ParameterStudyAction::act()
     const auto & output = getParam<MultiMooseEnum>("output_type");
 
     // Add csv output
-    if (output.contains("csv"))
+    if (output.isValueSet("csv"))
     {
       auto params = _factory.getValidParams("CSV");
       params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
@@ -509,7 +509,7 @@ ParameterStudyAction::act()
     }
 
     // Add json output
-    if (output.contains("json") || _compute_stats)
+    if (output.isValueSet("json") || _compute_stats)
     {
       auto params = _factory.getValidParams("JSON");
       params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
@@ -556,11 +556,11 @@ ParameterStudyAction::act()
     // Specify output objects
     const auto & output_type = getParam<MultiMooseEnum>("output_type");
     auto & outputs = params.set<std::vector<OutputName>>("outputs");
-    if (output_type.contains("csv"))
+    if (output_type.isValueSet("csv"))
       outputs.push_back(outputName("csv"));
-    if (output_type.contains("json"))
+    if (output_type.isValueSet("json"))
       outputs.push_back(outputName("json"));
-    if (output_type.contains("none"))
+    if (output_type.isValueSet("none"))
       outputs = {"none"};
 
     params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};

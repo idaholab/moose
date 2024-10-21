@@ -9,6 +9,10 @@
 
 #include "ADUtils.h"
 
+// We must include this first for the unity build to see some dataStore template specializations
+// before including DataIO.h through NonlinearSystemBase.h
+#include "PerfGraphRegistry.h"
+
 #include "NonlinearSystemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"

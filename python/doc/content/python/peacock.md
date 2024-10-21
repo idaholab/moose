@@ -1,95 +1,51 @@
 # Peacock
 
 !style! halign=left
-Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows the user to build or modify an input file, execute the application, and view the results all within one package.
+Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows the user to build or modify an input file, execute an application, and view the results, all within one package.
 !style-end!
-
-
-## Conda Packages
-
-!include installation/install_peacock.md
 
 ## Environment
 
-!style! halign=left
-Adding Peacock to your PATH will allow you to launch it from your application or `tests` directory. Peacock will search up through the filesystem directory tree until it finds your application, obviating the need to specify your application as an argument, and simplifying Peacock usage.
-!style-end!
-
-First, we need to discover the absolute path to `peacock` on your machine. Assuming that your MOOSE
-repository sits in the default location of `~/projects/moose`, enter the following directory and run
-`pwd`. Example:
-
-```bash
-cd ~/projects/moose/python/peacock
-pwd
-/home/you/projects/moose/python/peacock
-```
-
-Whatever returns, this is your path to `peacock`.
-
-Next, we need to know what shell you are operating in to determine what profile to modify.
-Run `echo $0` to do so.
-Example:
-
-```bash
-echo $0
--zsh
-```
-
-Where `-zsh` is our example result. The following table describes which profile file one must edit,
-as well as how to assign a value to a variable in that shell:
+To allow the shell to find the Peacock executable, you must add its directory
+to your `PATH` environment variable. Within the MOOSE directory, the Peacock
+executable is located in `python/peacock/`. If for example your MOOSE directory
+is installed at `~/projects/moose`, then you would add `~/projects/moose/python/peacock`
+to your `PATH`. To avoid needing to manually modify `PATH` for each terminal
+session, it is recommended that you do this in your shell profile file.
+The shell profile file name and the syntax to modify environment variables
+differ by shell, so consult shell documentation for proper usage.
+To know which shell you are using, use `echo $SHELL`. The following table
+gives the profile file name and `PATH` modification syntax for each shell:
 
 | Shell | Profile Location | Command |
 | :- | :- | :- |
-| bash | `~/.bash_profile` | `export PATH=pwd:$PATH` |
-| zsh | `~/.zshrc` | `export PATH=pwd:$PATH` |
-| sh | `~/.profile` | `export PATH=pwd:$PATH` |
-| csh | `~/.cshrc` | `setenv PATH pwd:$PATH` |
-| tcsh | `~/.tcshrc` | `setenv PATH pwd:$PATH` |
-
-Replace occurrences of `pwd` in the above table with the result you received in the previous step
-as you apply the following instructions:
-
-!alert! warning title=Dangerous Syntax Below
-Use single quotes: ( `'` ). We *literally* want to write "`$PATH`" in the below example, and not the
-value of `$PATH`.
-
-Use two greater thans: ( `>>` ). Two greater thans append information to a file, while a single
-greater than ( `>` ) overwrites the file entirely.
-
-If you do not trust yourself, create a backup of this file using `cp` (copy) before you begin.
-!alert-end!
-
-`zsh` Example:
-
-```bash
-echo 'export PATH=/home/you/projects/moose/python/peacock:$PATH' >> ~/.zshrc
-```
-
-!alert! tip
-A wealth of information on how shell profiles work is available on the internet. Search for
-"`<your shell> profile`" for more information.
-!alert-end!
+| bash | `~/.bash_profile` | `export PATH=~/projects/moose/python/peacock:$PATH` |
+| zsh | `~/.zshrc` | `export PATH=~/projects/moose/python/peacock:$PATH` |
+| sh | `~/.profile` | `export PATH=~/projects/moose/python/peacock:$PATH` |
+| csh | `~/.cshrc` | `setenv PATH ~/projects/moose/python/peacock:$PATH` |
+| tcsh | `~/.tcshrc` | `setenv PATH ~/projects/moose/python/peacock:$PATH` |
 
 ## Usage
 
-!style! halign=left
-The following examples assume you have added Peacock to your PATH. General usage is as follows:
-!style-end!
+After you have added the Peacock directory to your `PATH` as described above, you
+can invoke Peacock in any directory below the directory containing your application
+executable. For example, if your project is located at `~/projects/myapp`, and you
+built the binary `~/projects/myapp/myapp-opt`, you can run Peacock in the
+directory `~/projects/myapp/test/tests/mytest/`, and Peacock will be able to
+find your application:
 
 ```bash
-cd ~/projects/<your application directory>
+cd ~/projects/myapp/test/tests/mytest/
 peacock
 ```
 
-Peacock will search upwards from the current directory, and attempt to find your application's executable. Syntax is gathered, and you are presented with input syntax specific to your application.
+This will load Peacock without any input file (which you can load afterward);
+alternatively, you can start Peacock with an input file directly from the
+command line:
 
 ```bash
-cd ~/projects/<your application directory>/<your test directory>
 peacock -i your_input_file.i
 ```
-
-Peacock will attempt to find your application's executable, and then the Input file tab will be populated with information from 'your_input_file.i'.
 
 !alert! warning
 Do not use `sudo` when running Peacock.

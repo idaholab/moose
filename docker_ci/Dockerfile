@@ -99,7 +99,7 @@ WORKDIR ${MOOSE_DIR}
 #-----------------------------------------------------------------------------#
 # Install PETSc to system path
 #-----------------------------------------------------------------------------#
-ARG PETSC_REV=9a61b8cbbacd10b14c2a18c9bc314b0ecb8ec018
+ARG PETSC_REV=0d6defa7a01093b0f9cf3ff983d2b19d1f01a13e
 ARG PETSC_OPTIONS
 ENV PETSC_DIR=/usr/local
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
@@ -114,7 +114,7 @@ if [ ! -d $PETSC_DIR/lib/petsc ]; then exit 1; fi
 #-----------------------------------------------------------------------------#
 # Install Libmesh to system path
 #-----------------------------------------------------------------------------#
-ARG LIBMESH_REV=1c5369aa05eaae8ebeb7930845fce3b1d59cbb37
+ARG LIBMESH_REV=80e8b6c591a704cd426fb50f8cc05d97994b2241
 ARG LIBMESH_OPTIONS
 ARG LIBMESH_METHODS="opt dbg"
 ENV LIBMESH_DIR=/usr/local \

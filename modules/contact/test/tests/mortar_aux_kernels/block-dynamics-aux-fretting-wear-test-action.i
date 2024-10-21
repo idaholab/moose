@@ -40,14 +40,14 @@ offset = -0.045
   []
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Physics/SolidMechanics/Dynamic]
   [all]
-    add_variables = true
     hht_alpha = 0.0
     newmark_beta = 0.25
     newmark_gamma = 0.5
     mass_damping_coefficient = 0.0
     stiffness_damping_coefficient = 1.0
+    accelerations = 'accel_x accel_y'
     generate_output = 'stress_xx stress_yy'
     block = '1 2'
     strain = FINITE
@@ -86,6 +86,22 @@ offset = -0.045
   []
   [gap_vel]
     block = 'normal_secondary_subdomain'
+  []
+  [vel_x]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [vel_y]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [accel_x]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [accel_y]
+    order = FIRST
+    family = LAGRANGE
   []
 []
 

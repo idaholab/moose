@@ -61,6 +61,7 @@
     scaling_factor_rhoEV = 1e-5
     position = '1 0 0'
     volume = 1e-8
+    use_scalar_variables = false
   []
 
   [pipe2]

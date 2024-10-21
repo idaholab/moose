@@ -22,7 +22,7 @@
   elem_type = QUAD4
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   strain = SMALL
   eigenstrain_names = eigenstrain
   add_variables = true

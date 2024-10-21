@@ -10,11 +10,13 @@
 #include "MaterialRankFourTensorAux.h"
 
 registerMooseObject("MooseApp", MaterialRankFourTensorAux);
+registerMooseObject("MooseApp", ADMaterialRankFourTensorAux);
 
+template <bool is_ad>
 InputParameters
-MaterialRankFourTensorAux::validParams()
+MaterialRankFourTensorAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBase<>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<RankFourTensor, is_ad>::validParams();
   params.addClassDescription(
       "Access a component of a RankFourTensor for automatic material property output");
   params.addRequiredParam<unsigned int>("i", "The index i of ijkl for the tensor to output");
@@ -24,12 +26,14 @@ MaterialRankFourTensorAux::validParams()
   return params;
 }
 
-MaterialRankFourTensorAux::MaterialRankFourTensorAux(const InputParameters & parameters)
-  : MaterialAuxBase<RankFourTensor>(parameters),
-    _i(getParam<unsigned int>("i")),
-    _j(getParam<unsigned int>("j")),
-    _k(getParam<unsigned int>("k")),
-    _l(getParam<unsigned int>("l"))
+template <bool is_ad>
+MaterialRankFourTensorAuxTempl<is_ad>::MaterialRankFourTensorAuxTempl(
+    const InputParameters & parameters)
+  : MaterialAuxBaseTempl<RankFourTensor, is_ad>(parameters),
+    _i(this->template getParam<unsigned int>("i")),
+    _j(this->template getParam<unsigned int>("j")),
+    _k(this->template getParam<unsigned int>("k")),
+    _l(this->template getParam<unsigned int>("l"))
 {
   mooseAssert(_i < LIBMESH_DIM, "i component out of range for current LIBMESH_DIM");
   mooseAssert(_j < LIBMESH_DIM, "j component out of range for current LIBMESH_DIM");
@@ -37,8 +41,9 @@ MaterialRankFourTensorAux::MaterialRankFourTensorAux(const InputParameters & par
   mooseAssert(_l < LIBMESH_DIM, "l component out of range for current LIBMESH_DIM");
 }
 
+template <bool is_ad>
 Real
-MaterialRankFourTensorAux::getRealValue()
+MaterialRankFourTensorAuxTempl<is_ad>::getRealValue()
 {
-  return _full_value(_i, _j, _k, _l);
+  return MetaPhysicL::raw_value(this->_full_value(_i, _j, _k, _l));
 }

@@ -321,6 +321,12 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
+  MooseEnum libtorch_device_type("cpu cuda mps", "cpu");
+  params.addCommandLineParam<MooseEnum>("libtorch_device",
+                                        "--libtorch-device",
+                                        libtorch_device_type,
+                                        "The device type we want to run libtorch on.");
+
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(
       "gperf_profiler_on",
@@ -397,6 +403,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _factory(*this),
     _error_overridden(false),
     _ready_to_exit(false),
+    _exit_code(0),
     _initial_from_file(false),
     _distributed_mesh_on_command_line(false),
     _recover(false),
@@ -425,6 +432,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
+#ifdef LIBTORCH_ENABLED
+    ,
+    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
+#endif
 {
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
@@ -810,13 +821,19 @@ MooseApp::setupOptions()
       _builder.buildJsonSyntaxTree(tree);
     }
 
-    // Turn off live printing so that it doesn't mess with the dump
-    _perf_graph.disableLivePrint();
+    // Check if second arg is valid or not
+    if ((tree.getRoot()).is_object())
+    {
+      // Turn off live printing so that it doesn't mess with the dump
+      _perf_graph.disableLivePrint();
 
-    JsonInputFileFormatter formatter;
-    Moose::out << "\n### START DUMP DATA ###\n"
-               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
-    _ready_to_exit = true;
+      JsonInputFileFormatter formatter;
+      Moose::out << "\n### START DUMP DATA ###\n"
+                 << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
+      _ready_to_exit = true;
+    }
+    else
+      mooseError("Search parameter '", param_search, "' was not found in the registered syntax.");
   }
   else if (isParamValid("registry"))
   {
@@ -1589,10 +1606,13 @@ MooseApp::getInstallableInputs() const
 }
 
 bool
-MooseApp::copyInputs() const
+MooseApp::copyInputs()
 {
   if (isParamValid("copy_inputs"))
   {
+    if (comm().size() > 1)
+      mooseError("The --copy-inputs option should not be ran in parallel");
+
     // Get command line argument following --copy-inputs on command line
     auto dir_to_copy = getParam<std::string>("copy_inputs");
 
@@ -1638,25 +1658,29 @@ MooseApp::copyInputs() const
 
     TIME_SECTION("copy_inputs", 2, "Copying Inputs");
 
-    // Only perform the copy on the root processor
-    int return_value = 0;
-    if (processor_id() == 0)
-      return_value = system(cmd.c_str());
-    _communicator.broadcast(return_value);
-
-    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
-      mooseError("Failed to copy the requested directory.");
-    Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
+    mooseAssert(comm().size() == 1, "Should be run in serial");
+    const auto return_value = system(cmd.c_str());
+    if (!WIFEXITED(return_value))
+      mooseError("Process exited unexpectedly");
+    setExitCode(WEXITSTATUS(return_value));
+    if (exitCode() == 0)
+      Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
     return true;
   }
   return false;
 }
 
 bool
-MooseApp::runInputs() const
+MooseApp::runInputs()
 {
   if (isParamValid("run"))
   {
+    // These options will show as unused by petsc; ignore them all
+    Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
+
+    if (comm().size() > 1)
+      mooseError("The --run option should not be ran in parallel");
+
     // Here we are going to pass everything after --run on the cli to the TestHarness. That means
     // cannot validate these CLIs.
     auto it = _command_line->find("run");
@@ -1692,15 +1716,12 @@ MooseApp::runInputs() const
           " --run <dir>\" again.");
     }
 
-    // Only launch the tests on the root processor
     Moose::out << "Working Directory: " << working_dir << "\nRunning Command: " << cmd << std::endl;
-    int return_value = 0;
-    if (processor_id() == 0)
-      return_value = system(cmd.c_str());
-    _communicator.broadcast(return_value);
-
-    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
-      mooseError("Run failed");
+    mooseAssert(comm().size() == 1, "Should be run in serial");
+    const auto return_value = system(cmd.c_str());
+    if (!WIFEXITED(return_value))
+      mooseError("Process exited unexpectedly");
+    setExitCode(WEXITSTATUS(return_value));
     return true;
   }
 
@@ -1772,6 +1793,12 @@ MooseApp::getFileName(bool stripLeadingPath) const
 
 OutputWarehouse &
 MooseApp::getOutputWarehouse()
+{
+  return _output_warehouse;
+}
+
+const OutputWarehouse &
+MooseApp::getOutputWarehouse() const
 {
   return _output_warehouse;
 }
@@ -2397,7 +2424,7 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
 const std::string &
 MooseApp::checkpointSuffix()
 {
-  static const std::string suffix = "-mesh.cpr";
+  static const std::string suffix = "-mesh.cpa.gz";
   return suffix;
 }
 
@@ -2852,3 +2879,33 @@ MooseApp::constructingMeshGenerators() const
   return _action_warehouse.getCurrentTaskName() == "create_added_mesh_generators" ||
          _mesh_generator_system.appendingMeshGenerators();
 }
+
+#ifdef LIBTORCH_ENABLED
+torch::DeviceType
+MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
+{
+  if (device_enum == "cuda")
+  {
+#ifdef __linux__
+    if (!torch::cuda::is_available())
+      mooseError("--libtorch-device=cuda: CUDA is not available");
+    return torch::kCUDA;
+#else
+    mooseError("--libtorch-device=cuda: CUDA is not supported on your platform");
+#endif
+  }
+  else if (device_enum == "mps")
+  {
+#ifdef __APPLE__
+    if (!torch::mps::is_available())
+      mooseError("--libtorch-device=mps: MPS is not available");
+    return torch::kMPS;
+#else
+    mooseError("--libtorch-device=mps: MPS is not supported on your platform");
+#endif
+  }
+
+  mooseAssert(device_enum == "cpu", "Should be cpu");
+  return torch::kCPU;
+}
+#endif

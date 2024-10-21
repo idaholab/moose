@@ -18,9 +18,6 @@
 class AddExternalAuxVariableAction : public Action
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   AddExternalAuxVariableAction(const InputParameters & params);

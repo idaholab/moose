@@ -1,12 +1,8 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   moose/conda_build_config.yaml
-#
-#   And documentation:
-#   framework/doc/packages_config.yml
-#
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.06.17" %}
+{% set version = "2024.10.01" %}
 
 package:
   name: moose-dev
@@ -17,13 +13,14 @@ source:
 
 build:
   number: 0
-  string: build_0
+  string: {{ mpi }}
   skip: true  # [win]
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
 requirements:
   run:
+    - {{ mpi }}
     - {{ moose_tools }}
     - {{ moose_libmesh }}
     - {{ moose_wasp }}

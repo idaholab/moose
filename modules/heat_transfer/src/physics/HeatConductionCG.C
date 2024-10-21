@@ -22,7 +22,7 @@ registerMooseAction("HeatTransferApp", HeatConductionCG, "add_preconditioning");
 InputParameters
 HeatConductionCG::validParams()
 {
-  InputParameters params = HeatConductionPhysics::validParams();
+  InputParameters params = HeatConductionPhysicsBase::validParams();
   params.addClassDescription("Creates the heat conduction equation discretized with CG");
 
   // Material properties
@@ -37,7 +37,7 @@ HeatConductionCG::validParams()
 }
 
 HeatConductionCG::HeatConductionCG(const InputParameters & parameters)
-  : HeatConductionPhysics(parameters)
+  : HeatConductionPhysicsBase(parameters)
 {
 }
 
@@ -57,7 +57,26 @@ HeatConductionCG::addFEKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
+    if (isParamValid("heat_source_blocks"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("heat_source_blocks");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source", params);
+  }
+  if (isParamValid("heat_source_functor"))
+  {
+    const std::string kernel_type = "BodyForce";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+    const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
+    if (MooseUtils::parsesToReal(functor_name))
+      params.set<Real>("value") = std::stod(functor_name);
+    else if (getProblem().hasFunction(functor_name))
+      params.set<FunctionName>("function") = functor_name;
+    else if (getProblem().hasPostprocessorValueByName(functor_name))
+      params.set<PostprocessorName>("postprocessor") = functor_name;
+    else
+      paramError("heat_source_functor", "Unsupported functor type.");
+    getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
   }
   if (isTransient())
   {
@@ -139,12 +158,48 @@ HeatConductionCG::addFEBCs()
       }
     }
   }
+  if (isParamValid("fixed_convection_boundaries"))
+  {
+    const std::string bc_type = "ADConvectiveHeatFluxBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+
+    const auto & convective_boundaries =
+        getParam<std::vector<BoundaryName>>("fixed_convection_boundaries");
+    const auto & boundary_T_fluid =
+        getParam<std::vector<MooseFunctorName>>("fixed_convection_T_fluid");
+    const auto & boundary_htc = getParam<std::vector<MooseFunctorName>>("fixed_convection_htc");
+    // Optimization if all the same
+    if (std::set<MooseFunctorName>(boundary_T_fluid.begin(), boundary_T_fluid.end()).size() == 1 &&
+        std::set<MooseFunctorName>(boundary_htc.begin(), boundary_htc.end()).size() == 1 &&
+        convective_boundaries.size() > 1)
+    {
+      params.set<std::vector<BoundaryName>>("boundary") = convective_boundaries;
+      params.set<MooseFunctorName>("T_infinity_functor") = boundary_T_fluid[0];
+      params.set<MooseFunctorName>("heat_transfer_coefficient_functor") = boundary_htc[0];
+      getProblem().addBoundaryCondition(
+          bc_type, prefix() + _temperature_name + "_fixed_convection_bc_all", params);
+    }
+    else
+    {
+      for (const auto i : index_range(convective_boundaries))
+      {
+        params.set<std::vector<BoundaryName>>("boundary") = {convective_boundaries[i]};
+        params.set<MooseFunctorName>("T_infinity_functor") = boundary_T_fluid[i];
+        params.set<MooseFunctorName>("heat_transfer_coefficient_functor") = boundary_htc[i];
+        getProblem().addBoundaryCondition(bc_type,
+                                          prefix() + _temperature_name + "_fixed_convection_bc_" +
+                                              convective_boundaries[i],
+                                          params);
+      }
+    }
+  }
 }
 
 void
 HeatConductionCG::addNonlinearVariables()
 {
-  if (nonlinearVariableExists(_temperature_name, /*error_if_aux=*/true))
+  if (variableExists(_temperature_name, /*error_if_aux=*/true))
     return;
 
   const std::string variable_type = "MooseVariable";

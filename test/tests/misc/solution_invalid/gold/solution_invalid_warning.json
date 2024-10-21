@@ -1,0 +1,29 @@
+{
+    "reporters": {
+        "solution_invalidity": {
+            "type": "SolutionInvalidityReporter",
+            "values": {
+                "solution_invalidity": {
+                    "type": "SolutionInvalidity const*"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "converged_counts": 16,
+                        "message": "Solution invalid warning!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 48,
+                        "total_counts": 48
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

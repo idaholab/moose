@@ -12,7 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "VolumeJunction1Phase.h"
 #include "MooseVariableScalar.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Function.h"
 #include "Numerics.h"
 #include "metaphysicl/parallel_numberarray.h"
@@ -120,6 +120,8 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
   // inlet c=0 established in component
   if (c == 0)
   {
+    const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
+
     const ADReal Q_in = (_rhouA[0] / _rhoA[0]) * _A[0];
 
     _flow_coeff = Q_in / (_omega[0] * _D_wheel * _D_wheel * _D_wheel);
@@ -149,7 +151,7 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
     }
 
     _driving_torque =
-        power_coeff * (_rhoV[0] / _volume) * _omega[0] * _omega[0] * Utility::pow<5>(_D_wheel);
+        power_coeff * (rhoV / _volume) * _omega[0] * _omega[0] * Utility::pow<5>(_D_wheel);
 
     _torque += _driving_torque + _friction_torque;
 
@@ -169,7 +171,7 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
     _power = _torque * _omega[0];
     const ADReal S_energy = -_power;
 
-    _delta_p = (_rhoV[0] / _volume) * gH;
+    _delta_p = (rhoV / _volume) * gH;
 
     const ADRealVectorValue S_momentum = -_delta_p * _A_ref * _di_out;
 

@@ -44,4 +44,7 @@ protected:
   /// Whether to renumber all boundaries in stitched meshes to prevent accidental merging
   /// of sidesets with the same id
   const bool _prevent_boundary_ids_overlap;
+
+  /// Whether to merge boundaries if they have the same name but different boundary IDs
+  const bool _merge_boundaries_with_same_name;
 };

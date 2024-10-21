@@ -115,6 +115,9 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   if (!_boundary_id_overlap)
   {
+    // Request to compute normal vectors
+    const std::vector<Point> & face_normals = _fe_face->get_normals();
+
     // Loop over the elements
     for (const auto & elem : mesh->active_element_ptr_range())
     {
@@ -130,7 +133,7 @@ SideSetsFromBoundingBoxGenerator::generate()
         {
           _fe_face->reinit(elem, side);
           // We'll just use the normal of the first qp
-          const Point face_normal = _fe_face->get_normals()[0];
+          const Point face_normal = face_normals[0];
 
           if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
           {
@@ -155,9 +158,9 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   else if (_boundary_id_overlap)
   {
-    if (_restricted_boundary_ids.size() < 2)
+    if (_included_boundary_ids.size() < 2)
       mooseError("boundary_id_old out of bounds: ",
-                 _restricted_boundary_ids.size(),
+                 _included_boundary_ids.size(),
                  " Must be 2 boundary inputs or more.");
 
     bool found_node = false;
@@ -174,14 +177,14 @@ SideSetsFromBoundingBoxGenerator::generate()
 
         // sort boundary ids on node and sort boundary ids provided in input file
         std::sort(node_boundary_ids.begin(), node_boundary_ids.end());
-        std::sort(_restricted_boundary_ids.begin(), _restricted_boundary_ids.end());
+        std::sort(_included_boundary_ids.begin(), _included_boundary_ids.end());
 
         // check if input boundary ids are all contained in the node
         // if true, write new boundary id on respective node
         if (std::includes(node_boundary_ids.begin(),
                           node_boundary_ids.end(),
-                          _restricted_boundary_ids.begin(),
-                          _restricted_boundary_ids.end()))
+                          _included_boundary_ids.begin(),
+                          _included_boundary_ids.end()))
         {
           boundary_info.add_node(*node, boundary_id_new);
           found_node = true;

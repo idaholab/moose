@@ -28,7 +28,9 @@ SideSetsAroundSubdomainGenerator::validParams()
   params.renameParam("included_subdomains", "block", "The blocks around which to create sidesets");
   params.makeParamRequired<std::vector<SubdomainName>>("block");
 
+  // Not implemented, but could be implemented
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
+  params.suppressParameter<std::vector<BoundaryName>>("excluded_boundaries");
   params.suppressParameter<std::vector<SubdomainName>>("included_neighbors");
 
   params.addClassDescription(
@@ -66,6 +68,9 @@ SideSetsAroundSubdomainGenerator::generate()
   typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
   std::vector<vec_type> queries(my_n_proc);
 
+  // Request to compute normal vectors
+  const std::vector<Point> & face_normals = _fe_face->get_normals();
+
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {
@@ -88,7 +93,7 @@ SideSetsAroundSubdomainGenerator::generate()
       {
         _fe_face->reinit(elem, side);
         // We'll just use the normal of the first qp
-        const Point & face_normal = _fe_face->get_normals()[0];
+        const Point & face_normal = face_normals[0];
         // Add the boundaries, if appropriate
         if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
         {

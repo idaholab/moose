@@ -49,7 +49,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     volumetric_locking_correction = true
     incremental = true

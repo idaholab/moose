@@ -25,7 +25,7 @@ To solve this problem, the following physics must be considered:
 - Conservation of Energy:
 
 !equation id=energy
-C \left(\dfrac{\partial T}{\partial t} + \epsilon \vec{u} \cdot \nabla T \right) - \nabla \cdot k \nabla T = 0
+\rho c_p \left(\dfrac{\partial T}{\partial t} + \epsilon \vec{u} \cdot \nabla T \right) - \nabla \cdot k \nabla T = 0
 
 - Darcy's Law:
 

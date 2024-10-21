@@ -22,18 +22,30 @@ SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_obj
 }
 
 /// Set solution invalid mark for the given solution ID
+template <bool warning>
 void
-SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id) const
+SolutionInvalidInterface::flagInvalidSolutionInternal(
+    const InvalidSolutionID invalid_solution_id) const
 {
+  mooseAssert(
+      warning == moose::internal::getSolutionInvalidityRegistry().item(invalid_solution_id).warning,
+      "Inconsistent warning flag");
   auto & solution_invalidity = _si_moose_object.getMooseApp().solutionInvalidity();
-  if (_si_problem.immediatelyPrintInvalidSolution())
-    solution_invalidity.printDebug(_invalid_solution_id);
-  return solution_invalidity.flagInvalidSolutionInternal(_invalid_solution_id);
+  if constexpr (!warning)
+    if (_si_problem.immediatelyPrintInvalidSolution())
+      solution_invalidity.printDebug(invalid_solution_id);
+  return solution_invalidity.flagInvalidSolutionInternal(invalid_solution_id);
 }
 
 InvalidSolutionID
-SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message) const
+SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message,
+                                                          const bool warning) const
 {
   return moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
-      _si_moose_object.type(), message);
+      _si_moose_object.type(), message, warning);
 }
+
+template void SolutionInvalidInterface::flagInvalidSolutionInternal<true>(
+    const InvalidSolutionID invalid_solution_id) const;
+template void SolutionInvalidInterface::flagInvalidSolutionInternal<false>(
+    const InvalidSolutionID invalid_solution_id) const;

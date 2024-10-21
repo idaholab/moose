@@ -183,7 +183,7 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
       mooseError("Invalid PETSc option name ", op, " for Split ", _name);
 
     // push back PETSc options
-    po.flags.push_back(prefix + op.substr(1));
+    po.flags.setAdditionalValue(prefix + op.substr(1));
   }
 
   for (auto & option : _petsc_options.pairs)

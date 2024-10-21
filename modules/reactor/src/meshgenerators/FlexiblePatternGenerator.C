@@ -122,6 +122,8 @@ FlexiblePatternGenerator::validParams()
   params.addParam<boundary_id_type>(
       "external_boundary_id",
       "The boundary id of the external boundary in addition to the default 10000.");
+  params.addParam<BoundaryName>("external_boundary_name",
+                                "Optional boundary name for the external boundary.");
 
   params.addParam<bool>("delete_default_external_boundary_from_inputs",
                         true,
@@ -145,9 +147,10 @@ FlexiblePatternGenerator::validParams()
                               "auto_area_func_default_size auto_area_func_default_size_dist "
                               "auto_area_function_num_points auto_area_function_power",
                               "Background Area Delaunay");
-  params.addParamNamesToGroup("boundary_type boundary_mesh boundary_sectors boundary_size "
-                              "delete_default_external_boundary_from_inputs external_boundary_id",
-                              "Boundary");
+  params.addParamNamesToGroup(
+      "boundary_type boundary_mesh boundary_sectors boundary_size "
+      "delete_default_external_boundary_from_inputs external_boundary_id external_boundary_name",
+      "Boundary");
 
   return params;
 }
@@ -203,7 +206,14 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                                    ? getParam<SubdomainName>("background_subdomain_name")
                                    : SubdomainName()),
     _delete_default_external_boundary_from_inputs(
-        getParam<bool>("delete_default_external_boundary_from_inputs"))
+        getParam<bool>("delete_default_external_boundary_from_inputs")),
+    _external_boundary_id(isParamValid("external_boundary_id")
+                              ? getParam<boundary_id_type>("external_boundary_id")
+                              : (boundary_id_type)OUTER_SIDESET_ID),
+    _external_boundary_name(isParamValid("external_boundary_name")
+                                ? getParam<BoundaryName>("external_boundary_name")
+                                : BoundaryName())
+
 {
   declareMeshesForSub("inputs");
 
@@ -553,9 +563,26 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
 std::unique_ptr<MeshBase>
 FlexiblePatternGenerator::generate()
 {
-  if (isParamValid("external_boundary_id"))
-    MooseMesh::changeBoundaryId(
-        **_build_mesh, OUTER_SIDESET_ID, getParam<boundary_id_type>("external_boundary_id"), false);
+  if (_external_boundary_id != OUTER_SIDESET_ID)
+    MooseMesh::changeBoundaryId(**_build_mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
+  if (!_external_boundary_name.empty())
+  {
+    // Check if _external_boundary_name has been assigned to another boundary id
+    const auto external_id_by_name =
+        (*_build_mesh)->get_boundary_info().get_id_by_name(_external_boundary_name);
+    if ((external_id_by_name != Moose::INVALID_BOUNDARY_ID) &&
+        (external_id_by_name != _external_boundary_id))
+      paramError("external_boundary_name",
+                 "External boundary name " + _external_boundary_name +
+                     " is already associated with id " + std::to_string(external_id_by_name) +
+                     ", which differs from the user-specified external_boundary_id " +
+                     std::to_string(_external_boundary_id));
+
+    (*_build_mesh)->get_boundary_info().sideset_name(_external_boundary_id) =
+        _external_boundary_name;
+    (*_build_mesh)->get_boundary_info().nodeset_name(_external_boundary_id) =
+        _external_boundary_name;
+  }
   (*_build_mesh)->find_neighbors();
   (*_build_mesh)->set_isnt_prepared();
   return std::move(*_build_mesh);

@@ -104,6 +104,18 @@ gold_conda_list = [{
     "version": "2024.02.19"
 }]
 
+# Have a gold for the apptainer environment so that we can
+# test it without being in apptainer
+gold_apptainer_tag = '561161b'
+gold_apptainer_library = 'moose-dev'
+gold_apptainer_suffix = '-openmpi'
+gold_apptainer_arch = 'x86_64'
+gold_apptainer_env = {'TAG': gold_apptainer_tag,
+                      'VERSION': gold_apptainer_tag,
+                      'LIBRARY': gold_apptainer_library,
+                      'NAME': f'{gold_apptainer_library}{gold_apptainer_suffix}-{gold_apptainer_arch}',
+                      'NAME_SUMMARY': f'{gold_apptainer_library}{gold_apptainer_suffix}-{gold_apptainer_arch}:{gold_apptainer_tag}'}
+
 class Test(unittest.TestCase):
     def testCondaList(self):
         # Can only test this if we actually have conda
@@ -170,7 +182,7 @@ class Test(unittest.TestCase):
         package = 'moose-dev'
         version = copy.copy(pre_make.conda_env[package]['version'])
         current_version = copy.copy(pre_make.versioner_meta[package]['conda']['version'])
-        build = copy.copy(pre_make.conda_env[package]['build_string'])
+        build_number = copy.copy(pre_make.conda_env[package]['build_number'])
 
         # Same version and build
         pre_make = PreMake()
@@ -185,25 +197,83 @@ class Test(unittest.TestCase):
         self.assertEqual(e.exception.package, package)
         self.assertEqual(e.exception.version, 'foo')
         self.assertEqual(e.exception.required_version, current_version)
-        self.assertEqual(e.exception.build, build)
-        self.assertEqual(e.exception.required_build, build)
+        self.assertEqual(e.exception.build, build_number)
+        self.assertEqual(e.exception.required_build, build_number)
 
-        # Different build
+        # Different build number
         pre_make = PreMake()
         different_build = 100
-        different_build_string = f'build_{different_build}'
         pre_make.conda_env[package]['version'] = version
-        pre_make.conda_env[package]['build_string'] = different_build_string
+        pre_make.conda_env[package]['build_number'] = different_build
         with self.assertRaises(PreMake.CondaVersionMismatch) as e:
             pre_make._checkCondaPackage(package)
         self.assertEqual(e.exception.package, package)
         self.assertEqual(e.exception.version, version)
         self.assertEqual(e.exception.required_version, current_version)
-        self.assertEqual(e.exception.build, different_build_string)
-        self.assertEqual(e.exception.required_build, build)
+        self.assertEqual(e.exception.build, different_build)
+        self.assertEqual(e.exception.required_build, build_number)
 
         # Set this back once we're done
         os.environ['CONDA_PREFIX'] = CONDA_PREFIX
+
+    def testGetApptainerEnv(self):
+        prefix = 'MOOSE_APPTAINER_GENERATOR_'
+        apptainer_env = {}
+        keys = list(gold_apptainer_env.keys())
+        for key in keys:
+            entry = os.environ.get(f'{prefix}{key}')
+            if entry:
+                apptainer_env[key] = entry
+
+        # If we have one of the keys, it means we're in an apptainer environment
+        # and we should have all of them
+        if os.environ.get(f'{prefix}{keys[0]}') is not None:
+            self.assertEqual(len(apptainer_env), len(keys))
+        # Otherwise, we should expect none
+        else:
+            self.assertEqual(len(apptainer_env), 0)
+
+        if len(apptainer_env) == 0:
+            apptainer_env = None
+        self.assertEqual(apptainer_env, PreMake.getApptainerEnv())
+
+    @patch.object(PreMake, "getApptainerEnv")
+    def testCheckApptainer(self, mock_get_apptainer_env):
+        # So that we can still test this on systems outside of apptainer
+        mock_get_apptainer_env.return_value = gold_apptainer_env
+        library = gold_apptainer_library
+
+        # The current apptainer info for moose-dev
+        pre_make = PreMake()
+        apptainer_meta = pre_make.versioner_meta[library]['apptainer']
+        tag = apptainer_meta['tag']
+
+        # Same version
+        pre_make = PreMake()
+        pre_make.apptainer_env['TAG'] = tag
+        pre_make.apptainer_env['VERSION'] = tag
+        pre_make._checkApptainer()
+
+        # Different version
+        different_tag = 'abcd123'
+        pre_make = PreMake()
+        pre_make.apptainer_env['TAG'] = different_tag
+        pre_make.apptainer_env['VERSION'] = different_tag
+        with self.assertRaises(PreMake.ApptainerVersionMismatch) as e:
+            pre_make._checkApptainer()
+        self.assertEqual(e.exception.name, gold_apptainer_env['NAME'])
+        self.assertEqual(e.exception.name_base, apptainer_meta['name_base'])
+        self.assertEqual(e.exception.current_version, different_tag)
+        self.assertEqual(e.exception.required_version, tag)
+        self.assertIn(f'oras://harbor.hpc.inl.gov/{library}/{gold_apptainer_env["NAME"]}:{tag}', str(e.exception))
+
+        # Message with a module instead
+        container_module_name_before = os.environ.get('CONTIANER_MODULE_NAME')
+        container_module_name = 'moose-dev-openmpi-foo'
+        os.environ['CONTAINER_MODULE_NAME'] = container_module_name
+        with self.assertRaises(PreMake.ApptainerVersionMismatch) as e:
+            pre_make._checkApptainer()
+            self.assertIn(f'{container_module_name}/{tag}', str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

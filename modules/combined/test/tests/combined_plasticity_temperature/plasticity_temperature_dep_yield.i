@@ -41,7 +41,7 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = FINITE
     incremental = true

@@ -103,7 +103,7 @@ velocity = 0.1
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     incremental = true

@@ -152,7 +152,7 @@
     issues = "#8574"
     design = "PorousFlowBasicTHM.md"
   []
-  [block_restricted]
+  [block_restricted_materials]
     type = Exodiff
     input = block_restricted_materials.i
     exodiff = block_restricted_materials_out.e
@@ -196,5 +196,16 @@
     requirement = "PorousFlow shall be able to be block-restricted, and Joiners shall work even when one PorousFlow material is block-restricted for one phase and non block-restricted for another"
     issues = '#20260'
     design = 'actions/PorousFlowAddMaterialJoiner.md'
+  []
+  [block_restricted]
+    type = 'Exodiff'
+    input = block_restricted.i
+    threading = '!pthreads'
+    exodiff = 'block_restricted_out.e'
+    requirement = "The system shall be able to block-restrict the definition of the porous flow equations."
+    issues = '#28030'
+    design = 'actions/PorousFlowFullySaturated.md actions/PorousFlowBasicTHM.md actions/PorousFlowUnsaturated.md'
+    valgrind = 'heavy'
+    method = "!dbg"
   []
 []

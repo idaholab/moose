@@ -89,6 +89,7 @@ tot_power = 2000 # W
     position = '0 0 0.5'
     connections = 'up_pipe_1:out core_chan:in'
     volume = 1e-5
+    use_scalar_variables = false
   []
   [core_chan]
     type = FlowChannel1Phase
@@ -134,6 +135,7 @@ tot_power = 2000 # W
     position = '0 0 1.5'
     connections = 'core_chan:out up_pipe_2:in'
     volume = 1e-5
+    use_scalar_variables = false
   []
 
   [up_pipe_2]

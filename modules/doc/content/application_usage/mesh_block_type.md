@@ -3,7 +3,9 @@
 ## Creating a Mesh
 
 - For complicated geometries, we generally use CUBIT from Sandia National Laboratories.
-- CUBIT can be licensed from CSimSoft for a fee depending on the type of organization you work for.
+  - Cubit® is available for US government use only and requires proof of a current US government contract. 
+- If your work is not US government use, you can use [Coreform Cubit](https://coreform.com/coreform-cubit/), the commercial version of Cubit®, available through [Coreform](https://coreform.com/), which is available for purchase for any use, including academic and commercial.
+  - Coreform also provides a free non-commercial-use "[Coreform Cubit Learn](https://coreform.com/coreform-cubit-learn/)" license, fully-functional with a 50k element export limit.
 - Other mesh generators can work as long as they output a file format that libMesh reads (next section).
 - If you have a specific mesh format you like, we can take a look at adding support for it to libMesh.
 
@@ -15,7 +17,7 @@
 | Extension   | Description                              |
 | :-          | :-                                       |
 | .dat        | [Tecplot ASCII file](https://people.sc.fsu.edu/~jburkardt/data/tec/tec.html)                       |
-| .e, .exd    | [Sandia's ExodusII format](https://nalu.readthedocs.io/en/latest/source/user/nalu_run/nalu_mesh.html)                 |
+| .e, .exd    | [Sandia's ExodusII format](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodus-library)                 |
 | .fro        | [ACDL's surface triangulation file](https://www.reviversoft.com/file-extensions/fro)        |
 | .gmv        | [LANL's GMV (General Mesh Viewer) format](www.generalmeshviewer.com/)  |
 | .mat        | [Matlab triangular ASCII file](https://www.reviversoft.com/file-extensions/mat) (read only) |

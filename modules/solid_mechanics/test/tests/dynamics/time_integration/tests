@@ -72,4 +72,39 @@
     design = "Dynamics.md"
     issues = "#18687"
   []
+
+  [direct_central_difference]
+    type = 'Exodiff'
+    input = 'direct_central_difference.i'
+    exodiff = 'direct_central_difference_out.e'
+    abs_zero = 1e-09
+    requirement = "The solid mechanics app shall support a form of central difference time integration
+                   that uses a direct calculation of the acceleration from the residual forces to 
+                   perform a solution update."
+    design = "DirectCentralDifference.md"
+    issues = "#27833"
+  []
+  [direct_central_difference_varied_dt]
+    type = 'Exodiff'
+    input = 'direct_central_difference_varied_dt.i'
+    exodiff = 'direct_central_difference_varied_dt_out.e'
+    abs_zero = 1e-09
+    requirement = "The solid mechanics app shall support a form of central difference time integration
+                   that uses a direct calculation of the acceleration from the residual forces to 
+                   perform a solution update. The direct central difference method should properly use 
+                   a time step averaging method to handle non-constant time steps."
+    design = "DirectCentralDifference.md"
+    issues = "#27833"
+  []
+  [direct_central_difference_multiVarBC]
+    type = 'Exodiff'
+    input = 'direct_central_difference_multiVarBC.i'
+    exodiff = 'direct_central_difference_multiVarBC_out.e'
+    abs_zero = 1e-09
+    requirement = "The solid mechanics app shall support dirichlet boundary conditions for direct central
+                   difference time integration that correctly enforce constant and function boundary
+                   conditions"
+    design = "DirectCentralDifference.md"
+    issues = "#27833"
+  []
 []

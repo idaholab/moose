@@ -11,7 +11,7 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
 #include "WCNSFVFluidHeatTransferPhysics.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
 
 registerPhysicsBaseTasks("NavierStokesApp", PNSFVSolidHeatTransferPhysics);
 registerMooseAction("NavierStokesApp", PNSFVSolidHeatTransferPhysics, "add_variable");
@@ -26,6 +26,11 @@ PNSFVSolidHeatTransferPhysics::validParams()
 {
   InputParameters params = HeatConductionFV::validParams();
   params.addClassDescription("Define the Navier Stokes porous media solid energy equation");
+
+  // These boundary conditions parameters are not implemented yet
+  params.suppressParameter<std::vector<BoundaryName>>("fixed_convection_boundaries");
+  params.suppressParameter<std::vector<MooseFunctorName>>("fixed_convection_T_fluid");
+  params.suppressParameter<std::vector<MooseFunctorName>>("fixed_convection_htc");
 
   // Swap out some parameters, base class is not specific to porous media
   // Variables
@@ -49,7 +54,7 @@ PNSFVSolidHeatTransferPhysics::validParams()
 
   // Porous media parameters
   // TODO: ensure consistency with fluid energy physics
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "porosity");
+  params.transferParam<MooseFunctorName>(NSFVBase::validParams(), "porosity");
 
   // Material properties
   params.suppressParameter<MaterialPropertyName>("specific_heat");
@@ -87,6 +92,9 @@ PNSFVSolidHeatTransferPhysics::validParams()
   params.addParam<bool>("use_external_enthalpy_material",
                         false,
                         "To indicate if the enthalpy material is set up outside of the action.");
+
+  params.suppressParameter<VariableName>("heat_source_var");
+  params.suppressParameter<std::vector<SubdomainName>>("heat_source_blocks");
 
   // Numerical scheme
   params.addParam<unsigned short>(
@@ -132,7 +140,7 @@ PNSFVSolidHeatTransferPhysics::PNSFVSolidHeatTransferPhysics(const InputParamete
     _ambient_convection_alpha(getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha")),
     _ambient_temperature(getParam<std::vector<MooseFunctorName>>("ambient_convection_temperature"))
 {
-  saveNonlinearVariableName(_solid_temperature_name);
+  saveSolverVariableName(_solid_temperature_name);
 
   // Parameter checks
   if (getParam<std::vector<MooseFunctorName>>("ambient_convection_temperature").size() != 1)
@@ -149,8 +157,8 @@ void
 PNSFVSolidHeatTransferPhysics::addNonlinearVariables()
 {
   // Dont add if the user already defined the variable
-  if (nonlinearVariableExists(_solid_temperature_name,
-                              /*error_if_aux=*/true))
+  if (variableExists(_solid_temperature_name,
+                     /*error_if_aux=*/true))
     checkBlockRestrictionIdentical(_solid_temperature_name,
                                    getProblem().getVariable(0, _solid_temperature_name).blocks());
   else

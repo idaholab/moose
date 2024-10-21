@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#8437'
+  issues = '#8437 #26920'
   design = 'syntax/Materials/index.md'
   [./real]
     requirement = 'The system shall be able to produce a valid Real material object on the fly for use in calculations requiring material properties'
@@ -47,5 +47,20 @@
       csvdiff = 'ad_generic_function_rank_two_tensor_out.csv'
       detail = 'with values determined by functions using automatic differentiation.'
     [../]
+  [../]
+  [./symmetric_ranktwotensor]
+    requirement = 'The system shall shall be able to compute a SymmetricRankTwoTensor material object'
+    [./constant]
+      type = 'CSVDiff'
+      input = 'generic_constant_symmetric_rank_two_tensor.i'
+      csvdiff = 'generic_constant_symmetric_rank_two_tensor_out.csv'
+      detail = 'with constant values.'
+    [../]
+      [./ad_constant]
+        type = 'CSVDiff'
+        input = 'ad_generic_constant_symmetric_rank_two_tensor.i'
+        csvdiff = 'ad_generic_constant_symmetric_rank_two_tensor_out.csv'
+        detail = 'with constant values using automatic differentiation.'
+      [../]
   [../]
 []

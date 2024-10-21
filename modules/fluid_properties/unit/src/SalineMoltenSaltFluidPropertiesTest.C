@@ -47,8 +47,11 @@ TEST_F(SalineMoltenSaltFluidPropertiesTest, properties)
     // Density
     REL_TEST(_fp->rho_from_p_T(p, T), rho_refs[i], tol);
 
-    // Enthalpy
+    // Specific enthalpy
     REL_TEST(_fp->h_from_p_T(p, T), h_refs[i], tol);
+
+    // Specific energy
+    REL_TEST(_fp->e_from_p_T(p, T), h_refs[i] - pressures[i] / rho_refs[i], tol);
 
     // Temperature
     // Does not seem very accurate
@@ -78,6 +81,9 @@ TEST_F(SalineMoltenSaltFluidPropertiesTest, derivatives)
 
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->cp_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->mu_from_p_T, p, T, 100 * tol);
+  DERIV_TEST(_fp->k_from_p_T, p, T, tol);
 }
 #endif

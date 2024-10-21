@@ -44,6 +44,16 @@ ReactorMeshParams::validParams()
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
   params.addParam<bool>("region_id_as_block_name", false, "Set block names based on region id");
+  params.addParam<bool>(
+      "flexible_assembly_stitching",
+      false,
+      "Use FlexiblePatternGenerator for stitching dissimilar assemblies together");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_sectors_at_flexible_boundary",
+      6,
+      "num_sectors_at_flexible_boundary>2",
+      "Number of sectors to use at assembly boundary interface when flexible patterning is used "
+      "(Defaults to 6)");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
 
@@ -83,6 +93,18 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
   this->declareMeshProperty(RGMB::region_id_as_block_name,
                             getParam<bool>(RGMB::region_id_as_block_name));
+
+  const bool flexible_assembly_stitching = getParam<bool>(RGMB::flexible_assembly_stitching);
+  this->declareMeshProperty(RGMB::flexible_assembly_stitching, flexible_assembly_stitching);
+  if (flexible_assembly_stitching)
+    this->declareMeshProperty(RGMB::num_sectors_flexible_stitching,
+                              getParam<unsigned int>("num_sectors_at_flexible_boundary"));
+  if (parameters.isParamSetByUser("num_sectors_at_flexible_boundary") &&
+      !flexible_assembly_stitching)
+    paramWarning(
+        "num_sectors_at_flexible_boundary",
+        "This parameter is only relevant when ReactorMeshParams/flexible_assembly_stitching is set "
+        "to true. This value will be ignored");
 
   // Option to bypass mesh generation is controlled by presence of Mesh/data_driven_generator
   // and whether the current generator is in data only mode

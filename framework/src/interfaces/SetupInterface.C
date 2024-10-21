@@ -31,7 +31,8 @@ SetupInterface::SetupInterface(const MooseObject * moose_object)
         (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
             ->getCurrentExecuteOnFlag())
 {
-  _empty_execute_enum.clear(); // remove any flags for the case when "execute_on" is not used
+  _empty_execute_enum
+      .clearSetValues(); // remove any flags for the case when "execute_on" is not used
 }
 
 SetupInterface::~SetupInterface() {}

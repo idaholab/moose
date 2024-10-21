@@ -1,0 +1,223 @@
+[Tests]
+  issues = '#15795 #17100 #17239 #21383 #27486'
+  design = 'CoupledVarThresholdElementSubdomainModifier.md VariableValueElementSubdomainModifier.md'
+  [group]
+    requirement = 'The framework shall include the ability to change element subdomain during simulation'
+
+    [reversible]
+      type = 'Exodiff'
+      input = 'reversible.i'
+      exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
+      detail = 'reversibly, '
+    []
+
+    [irreversible]
+      type = 'Exodiff'
+      input = 'irreversible.i'
+      exodiff = 'irreversible_out.e irreversible_out.e-s002 irreversible_out.e-s003 irreversible_out.e-s004'
+      detail = 'irreversibly, '
+    []
+
+    [parallel]
+      type = 'Exodiff'
+      input = 'parallel.i'
+      exodiff = 'parallel_out.e parallel_out.e-s002'
+      detail = 'run in parallel, '
+    []
+
+    [initial_condition]
+      type = 'Exodiff'
+      input = 'initial_condition.i'
+      exodiff = 'initial_condition_out.e initial_condition_out.e-s002 initial_condition_out.e-s003 initial_condition_out.e-s004'
+      detail = 'with solution, '
+    []
+
+    [displaced]
+      type = 'Exodiff'
+      input = 'initial_condition.i'
+      cli_args = 'AuxVariables/inactive="" Mesh/displacements="disp_x disp_y" Outputs/file_base=displaced_out Outputs/out/use_displaced=true'
+      exodiff = "displaced_out.e displaced_out.e-s002 displaced_out.e-s003 displaced_out.e-s004"
+      detail = 'with a displaced mesh, '
+    []
+
+    [stateful_property]
+      type = 'Exodiff'
+      input = 'stateful_property.i'
+      exodiff = 'stateful_property_out.e stateful_property_out.e-s002 stateful_property_out.e-s003 stateful_property_out.e-s004'
+      detail = 'and stateful material properties properly initialized.'
+    []
+  []
+
+  [boundary]
+    requirement = 'The framework shall update the boundary over elements that change subdomain, with the ability to'
+
+    [moving_boundary]
+      type = 'Exodiff'
+      input = 'moving_boundary.i'
+      exodiff = 'moving_boundary_out.e moving_boundary_out.e-s002 moving_boundary_out.e-s003 moving_boundary_out.e-s004'
+      detail = 'update a given boundary, '
+    []
+
+    [complement_moving_boundary]
+      type = 'Exodiff'
+      input = 'moving_boundary.i'
+      cli_args = "MeshModifiers/moving_circle/moving_boundary_subdomain_pairs='2 1' "
+                 "Outputs/file_base='complement_moving_boundary_out'"
+      exodiff = 'complement_moving_boundary_out.e complement_moving_boundary_out.e-s002 complement_moving_boundary_out.e-s003 complement_moving_boundary_out.e-s004'
+      detail = 'choose which subdomain to add the element sides from, '
+    []
+
+    [external_moving_boundary]
+      type = 'Exodiff'
+      input = 'external_moving_boundary.i'
+      exodiff = 'external_moving_boundary_out.e external_moving_boundary_out.e-s002 external_moving_boundary_out.e-s003 external_moving_boundary_out.e-s004'
+      detail = 'add the external sides of elements, '
+    []
+
+    [partial_moving_boundary]
+      type = 'Exodiff'
+      input = 'partial_moving_boundary.i'
+      exodiff = 'partial_moving_boundary_out.e partial_moving_boundary_out.e-s002 partial_moving_boundary_out.e-s003 partial_moving_boundary_out.e-s004'
+      detail = 'update a boundary that covers part of a subdomain, '
+    []
+
+    [return_moving_boundary]
+      type = 'Exodiff'
+      input = 'return_moving_boundary.i'
+      exodiff = 'return_moving_boundary_out.e return_moving_boundary_out.e-s002 return_moving_boundary_out.e-s003'
+      detail = 'continue updating the boundary if it temporarily contains no element sides, '
+    []
+  []
+
+  [reinitialization]
+    requirement = 'The framework shall include the ability to change element subdomain during simulation with reinitialization of'
+
+    [all]
+      type = 'Exodiff'
+      input = 'reinitialization.i'
+      exodiff = 'reinitialization_out.e reinitialization_out.e-s002 reinitialization_out.e-s003 reinitialization_out.e-s004'
+      detail = 'all the changed elements, '
+    []
+
+    [none]
+      type = 'Exodiff'
+      input = 'no_reinitialization.i'
+      exodiff = 'no_reinitialization_out.e no_reinitialization_out.e-s002 no_reinitialization_out.e-s003 no_reinitialization_out.e-s004'
+      detail = 'none of the changed elements, '
+    []
+
+    [into]
+      type = 'Exodiff'
+      input = 'reinitialization_into.i'
+      exodiff = 'reinitialization_into_out.e reinitialization_into_out.e-s002 reinitialization_into_out.e-s003 reinitialization_into_out.e-s004'
+      detail = 'only the elements that change into particular subdomains, '
+    []
+
+    [from_into]
+      type = 'Exodiff'
+      input = 'reinitialization_from_into.i'
+      exodiff = 'reinitialization_from_into_out.e reinitialization_from_into_out.e-s002 reinitialization_from_into_out.e-s003 reinitialization_from_into_out.e-s004'
+      detail = 'only the elements that change from outside of to into particular subdomains, '
+    []
+  []
+
+  [steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    requirement = 'The framework shall include the ability to change element subdomain for a steady state simulation'
+  []
+
+  [subdomain_caching]
+    type = RunApp
+    input = 'initial_condition.i'
+    cli_args = 'Postprocessors/active=average'
+    issues = '#23371'
+    requirement = "The system shall only apply subdomain changes when the userobject is finalized to "
+                  "avoid subdomain id mismatches"
+    recover = false # not needed for this test, and will interfere with the `initial_condition` recover
+  []
+
+  [amr_moving_boundary]
+    type = 'Exodiff'
+    input = 'adaptivity_moving_boundary.i'
+    exodiff = 'adaptivity_moving_boundary_out.e
+    adaptivity_moving_boundary_out.e-s002 adaptivity_moving_boundary_out.e-s003 adaptivity_moving_boundary_out.e-s004 adaptivity_moving_boundary_out.e-s005'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The framework shall support adaptive mesh refinement in the element subdomain modifier'
+  []
+
+  [amr_moving_boundary_3d]
+    type = 'Exodiff'
+    input = 'adaptivity_moving_boundary_3d.i'
+    exodiff = 'adaptivity_moving_boundary_3d_out.e
+    adaptivity_moving_boundary_3d_out.e-s002 adaptivity_moving_boundary_3d_out.e-s003 adaptivity_moving_boundary_3d_out.e-s004 adaptivity_moving_boundary_3d_out.e-s005'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The framework shall support adaptive mesh refinement in the element subdomain modifier for 3D problems'
+  []
+
+  [amr_bc]
+    type = 'Exodiff'
+    input = 'amr_bc.i'
+    exodiff = 'amr_bc_out.e amr_bc_out.e-s002 amr_bc_out.e-s003 amr_bc_out.e-s004 amr_bc_out.e-s005'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The framework shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
+  []
+
+  [amr_nbc]
+    type = 'Exodiff'
+    input = 'amr_bc.i'
+    cli_args = "BCs/active='nbc leftright' Outputs/file_base=amr_integral_bc_out"
+    exodiff = 'amr_integral_bc_out.e amr_integral_bc_out.e-s002
+    amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The framework shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
+  []
+
+  [error-distributed]
+    type = RunException
+    input = 'amr_bc.i'
+    expect_err = "Cannot use BoundaryPreservedMarker with DistributedMesh"
+    requirement = "The system shall produce an error when a boundary preserved marker is used with "
+                  "distributed mesh."
+    mesh_mode = 'DISTRIBUTED'
+  []
+
+  [var_block_id]
+    type = 'Exodiff'
+    input = 'var_block_id.i'
+    exodiff = 'var_block_id_out.e var_block_id_out.e-s002 var_block_id_out.e-s003 var_block_id_out.e-s004 var_block_id_out.e-s005'
+    requirement = 'The system shall be able to change element subdomain IDs based on the average coupled variable value in the element.'
+    recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases
+  []
+
+  [var_block_id_warning]
+    type = 'Exodiff'
+    input = 'var_block_id.i'
+    cli_args = "Functions/fcn/expression='100' Executioner/num_steps=1 "
+               "Outputs/file_base='var_block_id_warning_out'"
+    exodiff = 'var_block_id_warning_out.e'
+    requirement = 'When the desired value is not present in the subdomain ID list, the closest existing subdomain ID value will be assigned to the element with a warning.'
+    allow_warnings = true
+    recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases
+  []
+
+  [times]
+    requirement = 'The system shall be able to move elements between blocks at user specified times'
+    [direct]
+      type = 'Exodiff'
+      input = 'tsm_direct.i'
+      exodiff = 'tsm_direct_out.e tsm_direct_out.e-s002 tsm_direct_out.e-s003'
+      detail = 'listed in the input file,'
+      exodiff_opts = '-pedantic'
+    []
+
+    [csv]
+      type = 'Exodiff'
+      input = 'tsm_csv.i'
+      exodiff = 'tsm_csv_out.e tsm_csv_out.e-s002 tsm_csv_out.e-s003'
+      detail = 'listed in a CSV file.'
+      exodiff_opts = '-pedantic'
+    []
+  []
+[]

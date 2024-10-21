@@ -432,6 +432,8 @@ hs_power = 105750
     speed_cr_fr = 0
     tau_fr_const = 0
     tau_fr_coeff = '0 0 0 0'
+
+    use_scalar_variables = false
   []
 
   # Outlet pipe from the compressor
@@ -450,6 +452,7 @@ hs_power = 105750
     connections = 'pipe2:out cold_leg:in'
     position = '${x3} ${y3} 0'
     volume = ${fparse A2*0.1}
+    use_scalar_variables = false
   []
 
   # Cold leg of the recuperator
@@ -511,6 +514,7 @@ hs_power = 105750
     connections = 'pipe3:out pipe4:in'
     position = '${x4} ${y4} 0'
     volume = ${fparse A3*0.1}
+    use_scalar_variables = false
   []
 
   # Pipe through the "reactor core"
@@ -560,6 +564,7 @@ hs_power = 105750
     connections = 'pipe4:out pipe5:in'
     position = '${x5} ${y5} 0'
     volume = ${fparse A4*0.1}
+    use_scalar_variables = false
   []
 
   # Pipe carrying hot gas back to the PCU
@@ -578,6 +583,7 @@ hs_power = 105750
     connections = 'pipe5:out pipe6:in'
     position = '${x6} ${y6} 0'
     volume = ${fparse A5*0.1}
+    use_scalar_variables = false
   []
 
   # Inlet pipe to the turbine
@@ -623,6 +629,8 @@ hs_power = 105750
     speed_cr_fr = 0
     tau_fr_const = 0
     tau_fr_coeff = '0 0 0 0'
+
+    use_scalar_variables = false
   []
 
   # Outlet pipe from turbine
@@ -641,6 +649,7 @@ hs_power = 105750
     connections = 'pipe7:out hot_leg:in'
     position = '${x8} ${y8} 0'
     volume = ${fparse A7*0.1}
+    use_scalar_variables = false
   []
 
   # Hot leg of the recuperator
@@ -853,18 +862,21 @@ hs_power = 105750
   # Compressor
   ##########################
   [comp_dissipation_torque]
-    type = ScalarVariable
-    variable = 'compressor:dissipation_torque'
+    type = ElementAverageValue
+    variable = dissipation_torque
+    block = 'compressor'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [comp_isentropic_torque]
-    type = ScalarVariable
-    variable = 'compressor:isentropic_torque'
+    type = ElementAverageValue
+    variable = isentropic_torque
+    block = 'compressor'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [comp_friction_torque]
-    type = ScalarVariable
-    variable = 'compressor:friction_torque'
+    type = ElementAverageValue
+    variable = friction_torque
+    block = 'compressor'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [compressor_torque]
@@ -921,18 +933,21 @@ hs_power = 105750
   ##########################
 
   [turb_dissipation_torque]
-    type = ScalarVariable
-    variable = 'turbine:dissipation_torque'
+    type = ElementAverageValue
+    variable = dissipation_torque
+    block = 'turbine'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [turb_isentropic_torque]
-    type = ScalarVariable
-    variable = 'turbine:isentropic_torque'
+    type = ElementAverageValue
+    variable = isentropic_torque
+    block = 'turbine'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [turb_friction_torque]
-    type = ScalarVariable
-    variable = 'turbine:friction_torque'
+    type = ElementAverageValue
+    variable = friction_torque
+    block = 'turbine'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [turbine_torque]
@@ -1065,6 +1080,6 @@ hs_power = 105750
   []
   [console]
     type = Console
-    show = 'shaft_speed p_ratio_comp p_ratio_turb compressor:pressure_ratio turbine:pressure_ratio'
+    show = 'shaft_speed p_ratio_comp p_ratio_turb pressure_ratio pressure_ratio'
   []
 []

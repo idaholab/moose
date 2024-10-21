@@ -48,7 +48,7 @@ protected:
    *
    * @param[in] mass_matrix   Mass matrix
    */
-  bool performExplicitSolve(SparseMatrix<Number> & mass_matrix);
+  virtual bool performExplicitSolve(SparseMatrix<Number> & mass_matrix);
 
   /**
    * Solves a linear system

@@ -49,7 +49,7 @@ RadiationTransferAction::validParams()
                                                      "Number of radiation patches per sideset.");
   MultiMooseEnum partitioning(
       "default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc", "default");
-  partitioning += "grid";
+  partitioning.addValidName("grid");
   params.addParam<MultiMooseEnum>(
       "partitioners",
       partitioning,
@@ -488,9 +488,9 @@ RadiationTransferAction::addMeshGenerator()
   MultiMooseEnum partitioners = getParam<MultiMooseEnum>("partitioners");
   if (!_pars.isParamSetByUser("partitioners"))
   {
-    partitioners.clear();
+    partitioners.clearSetValues();
     for (unsigned int j = 0; j < _boundary_names.size(); ++j)
-      partitioners.push_back("metis");
+      partitioners.setAdditionalValue("metis");
   }
 
   MultiMooseEnum direction = getParam<MultiMooseEnum>("centroid_partitioner_directions");

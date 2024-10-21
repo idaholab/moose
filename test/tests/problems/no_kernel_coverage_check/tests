@@ -1,12 +1,29 @@
 [Tests]
-  [./test]
+  [no_coverage_check]
     type = 'Exodiff'
     input = 'no_coverage_check.i'
     exodiff = 'no_coverage_check_out.e'
-
     requirement = 'The system shall support the ability to disable the check for'
                   ' PDE operators in all or some parts of the domain.'
     issues = '#2291'
     design = 'Problem/index.md'
-  [../]
+  []
+  [kernel_coverage_only_list]
+    type = 'Exodiff'
+    input = 'kernel_coverage_only_list.i'
+    exodiff = 'kernel_coverage_only_list_out.e'
+    requirement = 'The system shall support the ability to limit the check for'
+                  ' active kernels to only some parts of the domain.'
+    issues = '#28117'
+    design = 'Problem/index.md'
+  []
+  [kernel_coverage_skip_list]
+    type = 'Exodiff'
+    input = 'kernel_coverage_skip_list.i'
+    exodiff = 'kernel_coverage_skip_list_out.e'
+    requirement = 'The system shall support the ability to disable the check for'
+                  ' active kernels in some parts of the domain.'
+    issues = '#28117'
+    design = 'Problem/index.md'
+  []
 []

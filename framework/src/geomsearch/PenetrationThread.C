@@ -129,6 +129,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
         std::vector<Point> points(1);
         points[0] = contact_ref;
         const std::vector<Point> & secondary_pos = fe_side->get_xyz();
+        bool search_succeeded = false;
 
         Moose::findContactPoint(*info,
                                 fe_elem,
@@ -137,7 +138,8 @@ PenetrationThread::operator()(const NodeIdRange & range)
                                 secondary_pos[0],
                                 false,
                                 _tangential_tolerance,
-                                contact_point_on_side);
+                                contact_point_on_side,
+                                search_succeeded);
 
         // Restore the original reference coordinates
         info->_closest_point_ref = contact_ref;
@@ -150,6 +152,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
       {
         Real old_tangential_distance(info->_tangential_distance);
         bool contact_point_on_side(false);
+        bool search_succeeded = false;
 
         Moose::findContactPoint(*info,
                                 fe_elem,
@@ -158,7 +161,8 @@ PenetrationThread::operator()(const NodeIdRange & range)
                                 node,
                                 false,
                                 _tangential_tolerance,
-                                contact_point_on_side);
+                                contact_point_on_side,
+                                search_succeeded);
 
         if (contact_point_on_side)
         {
@@ -211,7 +215,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
       else if (p_info.size() > 1)
       {
 
-        // Loop through all pairs of faces, and check for contact on ridge betweeen each face pair
+        // Loop through all pairs of faces, and check for contact on ridge between each face pair
         std::vector<RidgeData> ridgeDataVec;
         for (unsigned int i = 0; i + 1 < p_info.size(); ++i)
           for (unsigned int j = i + 1; j < p_info.size(); ++j)
@@ -1707,22 +1711,24 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     std::vector<RealGradient> dxyzdeta;
     std::vector<RealGradient> d2xyzdxideta;
 
-    PenetrationInfo * pen_info = new PenetrationInfo(elem,
-                                                     side,
-                                                     sides[i],
-                                                     normal,
-                                                     distance,
-                                                     tangential_distance,
-                                                     contact_phys,
-                                                     contact_ref,
-                                                     contact_on_face_ref,
-                                                     off_edge_nodes,
-                                                     side_phi,
-                                                     side_grad_phi,
-                                                     dxyzdxi,
-                                                     dxyzdeta,
-                                                     d2xyzdxideta);
+    std::unique_ptr<PenetrationInfo> pen_info =
+        std::make_unique<PenetrationInfo>(elem,
+                                          side,
+                                          sides[i],
+                                          normal,
+                                          distance,
+                                          tangential_distance,
+                                          contact_phys,
+                                          contact_ref,
+                                          contact_on_face_ref,
+                                          off_edge_nodes,
+                                          side_phi,
+                                          side_grad_phi,
+                                          dxyzdxi,
+                                          dxyzdeta,
+                                          d2xyzdxideta);
 
+    bool search_succeeded = false;
     Moose::findContactPoint(*pen_info,
                             fe_elem,
                             fe_side,
@@ -1730,11 +1736,15 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
                             *secondary_node,
                             true,
                             _tangential_tolerance,
-                            contact_point_on_side);
+                            contact_point_on_side,
+                            search_succeeded);
 
-    thisElemInfo.push_back(pen_info);
-
-    p_info.push_back(pen_info);
+    // Do not add contact info from failed searches
+    if (search_succeeded)
+    {
+      thisElemInfo.push_back(pen_info.get());
+      p_info.push_back(pen_info.release());
+    }
   }
 }
 

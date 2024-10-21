@@ -310,16 +310,18 @@ INSFVRhieChowInterpolator::initialSetup()
   if (_bool_correct_vf && _volume_force_correction_method == "force-consistent")
   {
     _baseline_volume_force = 1e10;
-    for (const auto & loc_elem : _mesh.element_ptr_range())
+    for (const auto & loc_elem : *_elem_range)
     {
       Real elem_value = 0.0;
       for (const auto i : make_range(_volumetric_force.size()))
         elem_value += (*_volumetric_force[i])(makeElemArg(loc_elem), determineState());
+
       if (std::abs(elem_value) < _baseline_volume_force)
         _baseline_volume_force = std::abs(elem_value);
       if (_baseline_volume_force == 0)
         break;
     }
+    _communicator.min(_baseline_volume_force);
   }
 }
 
@@ -608,11 +610,12 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell
   // centroid values on either side of the face
-  const auto & grad_p = p.adGradSln(fi, time);
+  const auto correct_skewness_p = pressureSkewCorrection(tid);
+  const auto & grad_p = p.adGradSln(fi, time, correct_skewness_p);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
-  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
+  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time, correct_skewness_p);
 
   // Volumetric Correction Method #1: pressure-based correction
   // Function that allows us to mark the face for which the Rhie-Chow interpolation is

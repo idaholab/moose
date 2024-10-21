@@ -15,11 +15,11 @@ TEST_F(GeochemicalSystemTest, constructWithMultiMooseEnum)
   MultiMooseEnum constraint_user_meaning(
       "kg_solvent_water bulk_composition bulk_composition_with_kinetic free_concentration "
       "free_mineral activity log10activity fugacity log10fugacity");
-  constraint_user_meaning.push_back(
+  constraint_user_meaning.setAdditionalValue(
       "activity bulk_composition bulk_composition free_concentration");
   MultiMooseEnum constraint_unit("dimensionless moles molal kg g mg ug kg_per_kg_solvent "
                                  "g_per_kg_solvent mg_per_kg_solvent ug_per_kg_solvent cm3");
-  constraint_unit.push_back("dimensionless moles moles molal");
+  constraint_unit.setAdditionalValue("dimensionless moles moles molal");
   ModelGeochemicalDatabase mgd_calcite2 = _model_calcite.modelGeochemicalDatabase();
   const GeochemicalSystem egs(mgd_calcite2,
                               _ac3,

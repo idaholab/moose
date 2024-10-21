@@ -39,7 +39,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   add_variables = true
   strain = SMALL
   incremental = true

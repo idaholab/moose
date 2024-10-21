@@ -214,6 +214,11 @@ public:
   void
   h_from_p_T_template(const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const;
 
+  virtual Real s_from_h_p(Real enthalpy, Real pressure) const override;
+  virtual ADReal s_from_h_p(const ADReal & enthalpy, const ADReal & pressure) const override;
+  void virtual s_from_h_p(
+      Real enthalpy, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
+
   virtual Real vaporPressure(Real temperature) const override;
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
@@ -329,6 +334,7 @@ public:
    */
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
   virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
+  virtual ADReal T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const override;
 
   /**
    * Boundary between subregions b and c in region 2.
@@ -722,7 +728,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal T_from_p_h_ad(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal T_from_p_h_ad(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 1
@@ -734,7 +740,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph1(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph1(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2a
@@ -746,7 +752,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph2a(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph2a(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2b
@@ -758,7 +764,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph2b(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph2b(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2c
@@ -770,7 +776,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph2c(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph2c(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3a
@@ -783,7 +789,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph3a(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph3a(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3b
@@ -796,7 +802,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph3b(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph3b(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * AD version of saturation temperature as a function of pressure (used internally)
@@ -810,7 +816,7 @@ protected:
    * @param pressure water pressure (Pa)
    * @return saturation temperature (K)
    */
-  FPADReal vaporTemperature_ad(const FPADReal & pressure) const;
+  ADReal vaporTemperature_ad(const ADReal & pressure) const;
 
   /// Water molar mass (kg/mol)
   const Real _Mh2o;

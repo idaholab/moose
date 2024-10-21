@@ -86,12 +86,22 @@ PetscExternalPartitioner::partition(MeshBase & mesh, const unsigned int n_parts)
 {
   // We want to use a parallel partitioner that requires a distributed graph
   // Simply calling a linear partitioner provides us the distributed graph
-  // We shold not do anything when using a distributed mesh since the mesh itself
+  // We should not do anything when using a distributed mesh since the mesh itself
   // is already distributed
   // When n_parts=1, we do not need to run any partitioner, instead, let libmesh
   // handle this
   if (mesh.is_replicated() && n_parts > 1)
     preLinearPartition(mesh);
+
+  if (!isParamSetByUser("part_package") && (mesh.n_elem() / n_parts < 28) &&
+      _part_package == "parmetis")
+  {
+    Moose::out
+        << "Average number of elements per partition (" << mesh.n_elem() / n_parts
+        << ") is less than 28. We are switching from ParMETIS to PTScotch for the partitioning."
+        << std::endl;
+    _part_package = "ptscotch";
+  }
 
   Partitioner::partition(mesh, n_parts);
 }

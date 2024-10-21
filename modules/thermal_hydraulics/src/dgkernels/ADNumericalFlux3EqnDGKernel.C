@@ -10,7 +10,7 @@
 #include "ADNumericalFlux3EqnDGKernel.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "MooseVariable.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADNumericalFlux3EqnDGKernel);
 
@@ -61,10 +61,12 @@ ADNumericalFlux3EqnDGKernel::computeQpResidual(Moose::DGResidualType type)
   std::vector<ADReal> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_elem[_qp]};
   std::vector<ADReal> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_neig[_qp]};
 
+  const Real nLR_dot_d = _current_side * 2 - 1.0;
+
   const std::vector<ADReal> & flux_elem =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, _normals[_qp](0));
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, nLR_dot_d);
   const std::vector<ADReal> & flux_neig =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), false, U1, U2, _normals[_qp](0));
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), false, U1, U2, nLR_dot_d);
 
   ADReal re = 0.0;
   switch (type)
@@ -83,9 +85,9 @@ std::map<unsigned int, unsigned int>
 ADNumericalFlux3EqnDGKernel::getIndexMapping() const
 {
   std::map<unsigned int, unsigned int> jmap;
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, THM3Eqn::EQ_MASS));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, THM3Eqn::EQ_MOMENTUM));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, THM3Eqn::EQ_ENERGY));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, THMVACE1D::MASS));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, THMVACE1D::MOMENTUM));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, THMVACE1D::ENERGY));
 
   return jmap;
 }

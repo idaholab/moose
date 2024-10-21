@@ -46,7 +46,12 @@ protected:
   const Moose::Functor<ADReal> & _kappa;
   /// Turbulent Prandtl number near the wall
   const Moose::Functor<ADReal> & _Pr_t;
-
-  /// Linearized equation to find the wall function?
-  const bool _linearized_yplus;
+  /// Turbulent kinetic energy
+  const Moose::Functor<ADReal> & _k;
+  /// C_mu turbulent coefficient
+  const Real _C_mu;
+  /// Method used for wall treatment
+  const MooseEnum _wall_treatment;
+  /// For Newton solves we want to add extra zero-valued terms regardless of y-plus to avoid sparsity pattern changes as y-plus changes near the walls
+  const bool _newton_solve;
 };

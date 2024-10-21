@@ -10,12 +10,14 @@
 #include "ADVolumeJunctionAdvectionScalarKernel.h"
 #include "ADVolumeJunctionBaseUserObject.h"
 
+registerMooseObject("ThermalHydraulicsApp", ADVolumeJunctionAdvectionKernel);
 registerMooseObject("ThermalHydraulicsApp", ADVolumeJunctionAdvectionScalarKernel);
 
+template <typename T>
 InputParameters
-ADVolumeJunctionAdvectionScalarKernel::validParams()
+ADVolumeJunctionAdvectionKernelTempl<T>::validParams()
 {
-  InputParameters params = ADScalarKernel::validParams();
+  InputParameters params = T::validParams();
 
   params.addRequiredParam<unsigned int>("equation_index", "Equation index");
   params.addRequiredParam<UserObjectName>("volume_junction_uo", "Volume junction user object name");
@@ -26,7 +28,17 @@ ADVolumeJunctionAdvectionScalarKernel::validParams()
   return params;
 }
 
-ADVolumeJunctionAdvectionScalarKernel::ADVolumeJunctionAdvectionScalarKernel(
+template <>
+ADVolumeJunctionAdvectionKernelTempl<ADKernel>::ADVolumeJunctionAdvectionKernelTempl(
+    const InputParameters & params)
+  : ADKernel(params),
+    _equation_index(getParam<unsigned int>("equation_index")),
+    _volume_junction_uo(getUserObject<ADVolumeJunctionBaseUserObject>("volume_junction_uo"))
+{
+}
+
+template <>
+ADVolumeJunctionAdvectionKernelTempl<ADScalarKernel>::ADVolumeJunctionAdvectionKernelTempl(
     const InputParameters & params)
   : ADScalarKernel(params),
     _equation_index(getParam<unsigned int>("equation_index")),
@@ -36,8 +48,9 @@ ADVolumeJunctionAdvectionScalarKernel::ADVolumeJunctionAdvectionScalarKernel(
     mooseError(name(), ": This scalar kernel can be used only with first-order scalar variables.");
 }
 
+template <typename T>
 ADReal
-ADVolumeJunctionAdvectionScalarKernel::computeQpResidual()
+ADVolumeJunctionAdvectionKernelTempl<T>::computeQpResidual()
 {
   return _volume_junction_uo.getResidual()[_equation_index];
 }

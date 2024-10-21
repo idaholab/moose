@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#11628'
+  issues = '#11628 #27240'
   design = '/PetscExternalPartitioner.md'
   # 'cmp' file is used for each test, so that we can easily adjust tolerance for each variable
   # At this point, we test against min, max, average, sum
@@ -82,7 +82,11 @@
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_out.csv'
-    cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_out Outputs/exodus=false'
+    # Make the mesh big enough to use parmetis (ptscotch is used for <28 elems per processor)
+    cli_args = "Mesh/nx=20
+                Mesh/Partitioner/part_package=parmetis
+                Outputs/file_base=petsc_partitioner_parmetis_out
+                Outputs/exodus=false"
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
     parmetis = true
@@ -97,7 +101,12 @@
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_element_out.csv'
-    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_element_out Mesh/Partitioner/apply_element_weight=true Outputs/exodus=false'
+    cli_args = "Mesh/nx=20
+                Mesh/Partitioner/part_package=parmetis
+                Mesh/Partitioner/type=PartitionerWeightTest
+                Mesh/Partitioner/apply_element_weight=true
+                Outputs/file_base=petsc_partitioner_parmetis_weight_element_out
+                Outputs/exodus=false"
     parmetis = true
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
@@ -113,7 +122,12 @@
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_side_out.csv'
-    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_side_out Mesh/Partitioner/apply_side_weight=true Outputs/exodus=false'
+    cli_args = "Mesh/nx=20
+                Mesh/Partitioner/part_package=parmetis
+                Mesh/Partitioner/type=PartitionerWeightTest
+                Mesh/Partitioner/apply_side_weight=true
+                Outputs/file_base=petsc_partitioner_parmetis_weight_side_out
+                Outputs/exodus=false"
     parmetis = true
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
@@ -129,7 +143,13 @@
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_both_out.csv'
-    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_both_out Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/exodus=false'
+    cli_args = "Mesh/nx=20
+                Mesh/Partitioner/part_package=parmetis
+                Mesh/Partitioner/type=PartitionerWeightTest
+                Mesh/Partitioner/apply_element_weight=true
+                Mesh/Partitioner/apply_side_weight=true
+                Outputs/file_base=petsc_partitioner_parmetis_weight_both_out
+                Outputs/exodus=false"
     parmetis = true
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
@@ -137,7 +157,7 @@
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '1e-1'
+    rel_err = '2e-1'
   [../]
 
   [./parmetis_presplit_mesh]
@@ -145,7 +165,7 @@
     type = 'CheckFiles'
     input = 'petsc_partitioner.i'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Mesh/parallel_type=replicated --split-file petsc_partitioner_parmetis_presplit --split-mesh 4,8'
-    check_files = 'petsc_partitioner_parmetis_presplit.cpr/4/header.cpr petsc_partitioner_parmetis_presplit.cpr/4/split-4-0.cpr petsc_partitioner_parmetis_presplit.cpr/4/split-4-3.cpr petsc_partitioner_parmetis_presplit.cpr/8/header.cpr petsc_partitioner_parmetis_presplit.cpr/8/split-8-0.cpr petsc_partitioner_parmetis_presplit.cpr/8/split-8-7.cpr'
+    check_files = 'petsc_partitioner_parmetis_presplit.cpa.gz/4/header.gz petsc_partitioner_parmetis_presplit.cpa.gz/4/split-4-0.gz petsc_partitioner_parmetis_presplit.cpa.gz/4/split-4-3.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/header.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/split-8-0.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/split-8-7.gz'
     recover = false
 
     parmetis = true

@@ -17,54 +17,54 @@ produce_time = 91 # days
 rest_time = 91 # days
 num_cycles = 5 # Currently needs to be <= 10
 
-cycle_length = ${fparse inject_time + store_time + produce_time + rest_time}
+cycle_length = '${fparse inject_time + store_time + produce_time + rest_time}'
 
-end_simulation = ${fparse cycle_length * num_cycles}
+end_simulation = '${fparse cycle_length * num_cycles}'
 
 # Note: I have setup 10 cycles but you can set num_cycles less than 10.
 start_injection1 = 0
 start_injection2 = ${cycle_length}
-start_injection3 = ${fparse cycle_length * 2}
-start_injection4 = ${fparse cycle_length * 3}
-start_injection5 = ${fparse cycle_length * 4}
-start_injection6 = ${fparse cycle_length * 5}
-start_injection7 = ${fparse cycle_length * 6}
-start_injection8 = ${fparse cycle_length * 7}
-start_injection9 = ${fparse cycle_length * 8}
-start_injection10 = ${fparse cycle_length * 9}
+start_injection3 = '${fparse cycle_length * 2}'
+start_injection4 = '${fparse cycle_length * 3}'
+start_injection5 = '${fparse cycle_length * 4}'
+start_injection6 = '${fparse cycle_length * 5}'
+start_injection7 = '${fparse cycle_length * 6}'
+start_injection8 = '${fparse cycle_length * 7}'
+start_injection9 = '${fparse cycle_length * 8}'
+start_injection10 = '${fparse cycle_length * 9}'
 
-end_injection1 = ${fparse start_injection1 + inject_time}
-end_injection2 = ${fparse start_injection2 + inject_time}
-end_injection3 = ${fparse start_injection3 + inject_time}
-end_injection4 = ${fparse start_injection4 + inject_time}
-end_injection5 = ${fparse start_injection5 + inject_time}
-end_injection6 = ${fparse start_injection6 + inject_time}
-end_injection7 = ${fparse start_injection7 + inject_time}
-end_injection8 = ${fparse start_injection8 + inject_time}
-end_injection9 = ${fparse start_injection9 + inject_time}
-end_injection10 = ${fparse start_injection10 + inject_time}
+end_injection1 = '${fparse start_injection1 + inject_time}'
+end_injection2 = '${fparse start_injection2 + inject_time}'
+end_injection3 = '${fparse start_injection3 + inject_time}'
+end_injection4 = '${fparse start_injection4 + inject_time}'
+end_injection5 = '${fparse start_injection5 + inject_time}'
+end_injection6 = '${fparse start_injection6 + inject_time}'
+end_injection7 = '${fparse start_injection7 + inject_time}'
+end_injection8 = '${fparse start_injection8 + inject_time}'
+end_injection9 = '${fparse start_injection9 + inject_time}'
+end_injection10 = '${fparse start_injection10 + inject_time}'
 
-start_production1 = ${fparse end_injection1 + store_time}
-start_production2 = ${fparse end_injection2 + store_time}
-start_production3 = ${fparse end_injection3 + store_time}
-start_production4 = ${fparse end_injection4 + store_time}
-start_production5 = ${fparse end_injection5 + store_time}
-start_production6 = ${fparse end_injection6 + store_time}
-start_production7 = ${fparse end_injection7 + store_time}
-start_production8 = ${fparse end_injection8 + store_time}
-start_production9 = ${fparse end_injection9 + store_time}
-start_production10 = ${fparse end_injection10 + store_time}
+start_production1 = '${fparse end_injection1 + store_time}'
+start_production2 = '${fparse end_injection2 + store_time}'
+start_production3 = '${fparse end_injection3 + store_time}'
+start_production4 = '${fparse end_injection4 + store_time}'
+start_production5 = '${fparse end_injection5 + store_time}'
+start_production6 = '${fparse end_injection6 + store_time}'
+start_production7 = '${fparse end_injection7 + store_time}'
+start_production8 = '${fparse end_injection8 + store_time}'
+start_production9 = '${fparse end_injection9 + store_time}'
+start_production10 = '${fparse end_injection10 + store_time}'
 
-end_production1 = ${fparse start_production1 + produce_time}
-end_production2 = ${fparse start_production2 + produce_time}
-end_production3 = ${fparse start_production3 + produce_time}
-end_production4 = ${fparse start_production4 + produce_time}
-end_production5 = ${fparse start_production5 + produce_time}
-end_production6 = ${fparse start_production6 + produce_time}
-end_production7 = ${fparse start_production7 + produce_time}
-end_production8 = ${fparse start_production8 + produce_time}
-end_production9 = ${fparse start_production9 + produce_time}
-end_production10 = ${fparse start_production10 + produce_time}
+end_production1 = '${fparse start_production1 + produce_time}'
+end_production2 = '${fparse start_production2 + produce_time}'
+end_production3 = '${fparse start_production3 + produce_time}'
+end_production4 = '${fparse start_production4 + produce_time}'
+end_production5 = '${fparse start_production5 + produce_time}'
+end_production6 = '${fparse start_production6 + produce_time}'
+end_production7 = '${fparse start_production7 + produce_time}'
+end_production8 = '${fparse start_production8 + produce_time}'
+end_production9 = '${fparse start_production9 + produce_time}'
+end_production10 = '${fparse start_production10 + produce_time}'
 
 synctimes = '${start_injection1} ${end_injection1} ${start_production1} ${end_production1}
              ${start_injection2} ${end_injection2} ${start_production2} ${end_production2}
@@ -88,8 +88,8 @@ aq_thickness = 20
 # cap thickness (m)
 cap_thickness = 40
 # injection region top and bottom (m).  Note, the mesh is created with the aquifer in y = (-0.5 * aq_thickness, 0.5 * aq_thickness), irrespective of depth (depth only sets the insitu porepressure and temperature)
-screen_top = ${fparse 0.5 * aq_thickness}
-screen_bottom = ${fparse -0.5 * aq_thickness}
+screen_top = '${fparse 0.5 * aq_thickness}'
+screen_bottom = '${fparse -0.5 * aq_thickness}'
 
 # number of elements in radial direction
 num_r = 25
@@ -105,10 +105,10 @@ bias_y_aq_top = 0.9
 # mesh bias in vertical direction in cap top
 bias_y_cap_top = 1.3
 # mesh bias in vertical direction in aquifer bottom
-bias_y_aq_bottom = ${fparse 1.0 / bias_y_aq_top}
+bias_y_aq_bottom = '${fparse 1.0 / bias_y_aq_top}'
 # mesh bias in vertical direction in cap bottom
-bias_y_cap_bottom = ${fparse 1.0 / bias_y_cap_top}
-depth_centre = ${fparse depth + aq_thickness/2}
+bias_y_cap_bottom = '${fparse 1.0 / bias_y_cap_top}'
+depth_centre = '${fparse depth + aq_thickness/2}'
 
 #####################################
 # temperature at ground surface (degC)
@@ -121,18 +121,18 @@ geothermal_gradient = 20E-3
 gravity = -9.81
 
 #####################################
-half_aq_thickness = ${fparse aq_thickness * 0.5}
-half_height = ${fparse half_aq_thickness + cap_thickness}
-approx_screen_length = ${fparse screen_top - screen_bottom}
+half_aq_thickness = '${fparse aq_thickness * 0.5}'
+half_height = '${fparse half_aq_thickness + cap_thickness}'
+approx_screen_length = '${fparse screen_top - screen_bottom}'
 
 # Thermal radius (note this is not strictly correct, it should use the bulk specific heat
 #  capacity as defined below, but it doesn't matter here because this is purely for
 #  defining the region of refined mesh)
-th_r = ${fparse sqrt(inject_fluid_mass / 1000 * 4.12e6 / (approx_screen_length * 3.1416 * aq_specific_heat_cap * aq_density))}
+th_r = '${fparse sqrt(inject_fluid_mass / 1000 * 4.12e6 / (approx_screen_length * 3.1416 * aq_specific_heat_cap * aq_density))}'
 # radius of fine mesh
-fine_r = ${fparse th_r * 2}
+fine_r = '${fparse th_r * 2}'
 bias_r_fine = 1
-num_r_fine = ${fparse int(fine_r/1)}
+num_r_fine = '${fparse int(fine_r/1)}'
 
 ######################################
 # aquifer properties
@@ -146,15 +146,15 @@ aq_ver_thermal_cond = 3 # W/m/K
 aq_disp_parallel = 0 # m
 aq_disp_perp = 0 # m
 # Bulk volumetric heat capacity of aquifer:
-aq_vol_cp = ${fparse aq_specific_heat_cap * aq_density * (1 - aq_porosity) + 4180 * 1000 * aq_porosity}
+aq_vol_cp = '${fparse aq_specific_heat_cap * aq_density * (1 - aq_porosity) + 4180 * 1000 * aq_porosity}'
 # Thermal radius (correct version using bulk cp):
-R_th = ${fparse sqrt(inject_fluid_mass * 4180 / (approx_screen_length * 3.1416 * aq_vol_cp))}
-aq_lambda_eff_hor = ${fparse aq_hor_thermal_cond + 0.3 * aq_disp_parallel * R_th * aq_vol_cp / (inject_time * 60 * 60 * 24)}
-aq_lambda_eff_ver = ${fparse aq_ver_thermal_cond + 0.3 * aq_disp_perp * R_th * aq_vol_cp / (inject_time * 60 * 60 * 24)}
-aq_hor_dry_thermal_cond = ${fparse aq_lambda_eff_hor * 60 * 60 * 24} # J/day/m/K
-aq_ver_dry_thermal_cond = ${fparse aq_lambda_eff_ver * 60 * 60 * 24} # J/day/m/K
-aq_hor_wet_thermal_cond = ${fparse aq_lambda_eff_hor * 60 * 60 * 24} # J/day/m/K
-aq_ver_wet_thermal_cond = ${fparse aq_lambda_eff_ver * 60 * 60 * 24} # J/day/m/K
+R_th = '${fparse sqrt(inject_fluid_mass * 4180 / (approx_screen_length * 3.1416 * aq_vol_cp))}'
+aq_lambda_eff_hor = '${fparse aq_hor_thermal_cond + 0.3 * aq_disp_parallel * R_th * aq_vol_cp / (inject_time * 60 * 60 * 24)}'
+aq_lambda_eff_ver = '${fparse aq_ver_thermal_cond + 0.3 * aq_disp_perp * R_th * aq_vol_cp / (inject_time * 60 * 60 * 24)}'
+aq_hor_dry_thermal_cond = '${fparse aq_lambda_eff_hor * 60 * 60 * 24}' # J/day/m/K
+aq_ver_dry_thermal_cond = '${fparse aq_lambda_eff_ver * 60 * 60 * 24}' # J/day/m/K
+aq_hor_wet_thermal_cond = '${fparse aq_lambda_eff_hor * 60 * 60 * 24}' # J/day/m/K
+aq_ver_wet_thermal_cond = '${fparse aq_lambda_eff_ver * 60 * 60 * 24}' # J/day/m/K
 # cap-rock properties
 cap_porosity = 0.25
 cap_hor_perm = 1E-16 # m^2
@@ -163,10 +163,10 @@ cap_density = 2650 # kg/m^3
 cap_specific_heat_cap = 800 # J/kg/K
 cap_hor_thermal_cond = 3 # W/m/K
 cap_ver_thermal_cond = 3 # W/m/K
-cap_hor_dry_thermal_cond = ${fparse cap_hor_thermal_cond * 60 * 60 * 24} # J/day/m/K
-cap_ver_dry_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day/m/K
-cap_hor_wet_thermal_cond = ${fparse cap_hor_thermal_cond * 60 * 60 * 24} # J/day/m/K
-cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day/m/K
+cap_hor_dry_thermal_cond = '${fparse cap_hor_thermal_cond * 60 * 60 * 24}' # J/day/m/K
+cap_ver_dry_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/day/m/K
+cap_hor_wet_thermal_cond = '${fparse cap_hor_thermal_cond * 60 * 60 * 24}' # J/day/m/K
+cap_ver_wet_thermal_cond = '${fparse cap_ver_thermal_cond * 60 * 60 * 24}' # J/day/m/K
 
 ######################################
 
@@ -231,6 +231,7 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
     inputs = 'aq_bottom_fine cap_bottom_fine'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'bottom top'
+    merge_boundaries_with_same_name = false
   []
   [aq_and_cap_fine]
     type = StitchedMeshGenerator
@@ -449,7 +450,7 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
 [Functions]
   [insitu_pressure]
     type = ParsedFunction
-    expression = '(y - ${depth_centre}) * 1000 * ${gravity} + 1E5'  # approx insitu pressure in Pa
+    expression = '(y - ${depth_centre}) * 1000 * ${gravity} + 1E5' # approx insitu pressure in Pa
   []
   [insitu_temperature]
     type = ParsedFunction
@@ -547,7 +548,9 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
     temperature_min = 275 # K
     temperature_max = 600
     interpolated_properties = 'density viscosity enthalpy internal_energy'
-    fluid_property_file = water97_tabulated_modified.csv
+    fluid_property_output_file = water97_tabulated_modified.csv
+    # Comment out the fp parameter and uncomment below to use the newly generated tabulation
+    # fluid_property_file = water97_tabulated_modified.csv
   []
 []
 

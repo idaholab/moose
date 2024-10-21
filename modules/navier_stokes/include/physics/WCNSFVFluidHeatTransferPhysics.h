@@ -30,6 +30,11 @@ public:
   /// Get the name of the specific heat material property
   const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
   MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
+  const std::vector<MooseFunctorName> & getThermalConductivityName() const
+  {
+    return _thermal_conductivity_name;
+  }
+
   /// Get the ambient convection parameters for parameter checking
   const std::vector<std::vector<SubdomainName>> & getAmbientConvectionBlocks() const
   {
@@ -46,6 +51,7 @@ public:
 
 protected:
 private:
+  void actOnAdditionalTasks() override;
   void addNonlinearVariables() override;
   void addInitialConditions() override;
   void addFVKernels() override;
@@ -65,7 +71,6 @@ private:
   void addINSEnergyAdvectionKernels();
   void addINSEnergyAmbientConvection();
   void addINSEnergyExternalHeatSource();
-  void addWCNSEnergyMixingLengthKernels();
 
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.

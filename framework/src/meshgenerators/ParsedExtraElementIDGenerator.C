@@ -25,7 +25,7 @@ ParsedExtraElementIDGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>(
-      "expression", "Function expression to return the exra element ID based on element centroid");
+      "expression", "Function expression to return the extra element ID based on element centroid");
   params.addRequiredParam<std::string>(
       "extra_elem_integer_name", "Name of the extra element integer to be added by this generator");
   params.addParam<std::vector<SubdomainName>>("restricted_subdomains",

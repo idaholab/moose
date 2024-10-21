@@ -1,34 +1,82 @@
 Content:
-    - framework/doc/content
-    - python/doc/content
-    - modules/doc/content
-    - modules/chemical_reactions/doc/content
-    - modules/combined/doc/content
-    - modules/contact/doc/content
-    - modules/electromagnetics/doc/content
-    - modules/external_petsc_solver/doc/content
-    - modules/fluid_properties/doc/content
-    - modules/fsi/doc/content
-    - modules/functional_expansion_tools/doc/content
-    - modules/geochemistry/doc/content
-    - modules/heat_transfer/doc/content
-    - modules/level_set/doc/content
-    - modules/misc/doc/content
-    - modules/navier_stokes/doc/content
-    - modules/optimization/doc/content
-    - modules/peridynamics/doc/content
-    - modules/phase_field/doc/content
-    - modules/porous_flow/doc/content
-    - modules/ray_tracing/doc/content
-    - modules/rdg/doc/content
-    - modules/reactor/doc/content
-    - modules/richards/doc/content
-    - modules/scalar_transport/doc/content
-    - modules/solid_properties/doc/content
-    - modules/stochastic_tools/doc/content
-    - modules/solid_mechanics/doc/content
-    - modules/thermal_hydraulics/doc/content
-    - modules/xfem/doc/content
+    framework:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+    modules:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
+    python:
+        root_dir: ${MOOSE_DIR}/python/doc/content
+    chemical_reactions:
+        root_dir: ${MOOSE_DIR}/modules/chemical_reactions/doc/content
+    combined:
+        root_dir: ${MOOSE_DIR}/modules/combined/doc/content
+    contact:
+        root_dir: ${MOOSE_DIR}/modules/contact/doc/content
+    electromagnetics:
+        root_dir: ${MOOSE_DIR}/modules/electromagnetics/doc/content
+    external_petsc_solver:
+        root_dir: ${MOOSE_DIR}/modules/external_petsc_solver/doc/content
+    fluid_properties:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/doc/content
+    fsi:
+        root_dir: ${MOOSE_DIR}/modules/fsi/doc/content
+    functional_expansion_tools:
+        root_dir: ${MOOSE_DIR}/modules/functional_expansion_tools/doc/content
+    geochemistry:
+        root_dir: ${MOOSE_DIR}/modules/geochemistry/doc/content
+    heat_transfer:
+        root_dir: ${MOOSE_DIR}/modules/heat_transfer/doc/content
+    level_set:
+        root_dir: ${MOOSE_DIR}/modules/level_set/doc/content
+    misc:
+        root_dir: ${MOOSE_DIR}/modules/misc/doc/content
+    navier_stokes:
+        root_dir: ${MOOSE_DIR}/modules/navier_stokes/doc/content
+    optimization:
+        root_dir: ${MOOSE_DIR}/modules/optimization/doc/content
+    peridynamics:
+        root_dir: ${MOOSE_DIR}/modules/peridynamics/doc/content
+    phase_field:
+        root_dir: ${MOOSE_DIR}/modules/phase_field/doc/content
+    porous_flow:
+        root_dir: ${MOOSE_DIR}/modules/porous_flow/doc/content
+    ray_tracing:
+        root_dir: ${MOOSE_DIR}/modules/ray_tracing/doc/content
+    rdg:
+        root_dir: ${MOOSE_DIR}/modules/rdg/doc/content
+    richards:
+        root_dir: ${MOOSE_DIR}/modules/richards/doc/content
+    reactor:
+        root_dir: ${MOOSE_DIR}/modules/reactor/doc/content
+    scalar_transport:
+        root_dir: ${MOOSE_DIR}/modules/scalar_transport/doc/content
+    solid_mechanics:
+        root_dir: ${MOOSE_DIR}/modules/solid_mechanics/doc/content
+    solid_properties:
+        root_dir: ${MOOSE_DIR}/modules/solid_properties/doc/content
+    stochastic_tools:
+        root_dir: ${MOOSE_DIR}/modules/stochastic_tools/doc/content
+    thermal_hydraulics:
+        root_dir: ${MOOSE_DIR}/modules/thermal_hydraulics/doc/content
+    xfem:
+        root_dir: ${MOOSE_DIR}/modules/xfem/doc/content
+    air:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content/source
+        external: True
+    carbon_dioxide:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/doc/content/source
+        external: True
+    helium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/doc/content/source
+        external: True
+    nitrogen:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/doc/content/source
+        external: True
+    potassium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/doc/content/source
+        external: True
+    sodium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/doc/content/source
+        external: True
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     favicon: media/moose.ico
@@ -81,6 +129,7 @@ Extensions:
                 Component: Components/*/*
         remove:
             framework: !include framework/doc/remove.yml
+            fluid_properties: !include modules/fluid_properties/doc/remove.yml
             richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
     MooseDocs.extensions.common:
@@ -89,8 +138,8 @@ Extensions:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.content:
         source_links:
-            action: source/actions/Action.md
             actions: source/actions/Action.md
+            actioncomponents: ActionComponents/index.md
             application: Application/index.md
             auxkernels: AuxKernels/index.md
             auxscalarkernels: AuxScalarKernels/index.md
@@ -101,6 +150,8 @@ Extensions:
             constraints: syntax/Constraints/index.md
             controllogic: syntax/ControlLogic/index.md
             controls: syntax/Controls/index.md
+            correctors: syntax/Correctors/index.md
+            covariances: syntax/Covariance/index.md
             dampers: syntax/Dampers/index.md
             dgkernels: syntax/DGKernels/index.md
             dirackernels: syntax/DiracKernels/index.md
@@ -129,7 +180,9 @@ Extensions:
             mesh: syntax/Mesh/index.md
             meshdivisions: syntax/MeshDivisions/index.md
             meshgenerators: syntax/Mesh/index.md
+            meshmodifiers: syntax/MeshModifiers/index.md
             multiapps: syntax/MultiApps/index.md
+            neml2: syntax/NEML2/index.md
             nodalkernels: syntax/NodalKernels/index.md
             optimizationreporters: syntax/OptimizationReporter/index.md
             outputs: syntax/Outputs/index.md
@@ -143,6 +196,7 @@ Extensions:
             problems: syntax/Problem/index.md
             raybcs: syntax/RayBCs/index.md
             raykernels: syntax/RayKernels/index.md
+            raytracing: modules/ray_tracing/index.md
             relationshipmanagers: source/relationshipmanagers/RelationshipManager.md
             reporters: syntax/Reporters/index.md
             restart: application_usage/restart_recover.md

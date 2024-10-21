@@ -37,7 +37,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [block]
     strain = FINITE
     add_variables = true

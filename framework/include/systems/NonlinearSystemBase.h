@@ -70,7 +70,7 @@ public:
   NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
   virtual ~NonlinearSystemBase();
 
-  virtual void init() override;
+  virtual void preInit() override;
 
   bool computedScalingJacobian() const { return _computed_scaling; }
 
@@ -605,6 +605,7 @@ public:
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
+  const MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() const { return _kernels; }
   MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
   MooseObjectTagWarehouse<InterfaceKernelBase> & getInterfaceKernelWarehouse()
   {

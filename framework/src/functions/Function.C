@@ -17,6 +17,8 @@ Function::validParams()
   InputParameters params = MooseObject::validParams();
   params += SetupInterface::validParams();
 
+  // Functions should be executed on the fly
+  params.suppressParameter<ExecFlagEnum>("execute_on");
   params.registerBase("Function");
 
   return params;
@@ -81,6 +83,12 @@ Function::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("timeDerivative method not implemented");
   return 0;
+}
+
+Real
+Function::timeIntegral(Real /*t1*/, Real /*t2*/, const Point & /*p*/) const
+{
+  mooseError("timeIntegral() not implemented.");
 }
 
 RealVectorValue

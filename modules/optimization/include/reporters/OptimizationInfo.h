@@ -48,7 +48,7 @@ template <typename T>
 T &
 OptimizationInfo::declareHelper(const std::string & item_name, const ReporterMode mode)
 {
-  if (!_items.isValid() || _items.contains(item_name))
+  if (!_items.isValid() || _items.isValueSet(item_name))
   {
     return declareValueByName<T>(item_name, mode);
   }

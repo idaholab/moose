@@ -44,6 +44,9 @@ EigenProblem::validParams()
       "Which eigenvector is used to compute residual and also associated to nonlinear variable");
   params.addParam<PostprocessorName>("bx_norm", "A postprocessor describing the norm of Bx");
 
+  params.addParamNamesToGroup("negative_sign_eigen_kernel active_eigen_index bx_norm",
+                              "Eigenvalue solve");
+
   return params;
 }
 
@@ -194,10 +197,9 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
-EigenProblem::computeMatricesTags(
-    const NumericVector<Number> & soln,
-    const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
-    const std::set<TagID> & tags)
+EigenProblem::computeMatricesTags(const NumericVector<Number> & soln,
+                                  const std::vector<SparseMatrix<Number> *> & jacobians,
+                                  const std::set<TagID> & tags)
 {
   TIME_SECTION("computeMatricesTags", 3);
 
@@ -622,7 +624,17 @@ EigenProblem::setNormalization(const PostprocessorName & pp, const Real value)
 void
 EigenProblem::init()
 {
-#if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+  // Prior to Slepc 3.13 we did not have a nonlinear eigenvalue solver so we must always assemble
+  // before the solve
+  _nl_eigen->sys().attach_assemble_function(Moose::assemble_matrix);
+#else
+  if (isNonlinearEigenvalueSolver())
+    // We don't need to assemble before the solve
+    _nl_eigen->sys().assemble_before_solve = false;
+  else
+    _nl_eigen->sys().attach_assemble_function(Moose::assemble_matrix);
+
   // If matrix_free=true, this tells Libmesh to use shell matrices
   _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free &&
                                       !solverParams()._eigen_matrix_vector_mult);

@@ -9,7 +9,7 @@
 
 #include "BoundaryFlux3EqnBC.h"
 #include "MooseVariable.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 
 registerMooseObject("ThermalHydraulicsApp", BoundaryFlux3EqnBC);
 
@@ -57,7 +57,7 @@ Real
 BoundaryFlux3EqnBC::computeQpResidual()
 {
   const std::vector<Real> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_elem[_qp]};
-  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, {_normal, 0, 0});
+  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, _normals[_qp]);
 
   // Note that the ratio A_linear / A_elem is necessary because A_elem is passed
   // to the flux function, but A_linear is to be used on the boundary.
@@ -84,9 +84,9 @@ std::map<unsigned int, unsigned int>
 BoundaryFlux3EqnBC::getIndexMapping() const
 {
   std::map<unsigned int, unsigned int> jmap;
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, THM3Eqn::EQ_MASS));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, THM3Eqn::EQ_MOMENTUM));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, THM3Eqn::EQ_ENERGY));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, THMVACE1D::MASS));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, THMVACE1D::MOMENTUM));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, THMVACE1D::ENERGY));
 
   return jmap;
 }

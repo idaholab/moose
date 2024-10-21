@@ -248,7 +248,7 @@ private:
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled variable.
    * @param var_name the name of the variable for which to retrieve a default value
-   * @return VariableValue * a pointer to the associated VarirableValue.
+   * @return VariableValue * a pointer to the associated VariableValue.
    */
   const VariableValue * getDefaultValue(const std::string & var_name) const;
 

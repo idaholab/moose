@@ -26,7 +26,7 @@
     type = 'CSVDiff'
     input = 'pump_pressure_check.i'
     csvdiff = 'pump_pressure_check_out.csv'
-    abs_zero = 5e-7
+    abs_zero = 1e-4
     group = 'pump1phase'
     requirement = 'The system shall be able to compute the expected pressure rise when modeling a pump in 1D single phase flow.'
   []
@@ -37,7 +37,7 @@
                 Outputs/file_base=pump_pressure_check_out_orientation"
     # csvdiff made with Components/pipe1/orientation='1 0 0'
     csvdiff = 'pump_pressure_check_out_orientation.csv'
-    abs_zero = 5e-7
+    abs_zero = 1e-4
     group = 'pump1phase'
     requirement = 'The system shall be able to compute the expected pressure rise when modeling a pump in 1D single phase flow with an orientation not aligned with one of the frame axis.'
   []

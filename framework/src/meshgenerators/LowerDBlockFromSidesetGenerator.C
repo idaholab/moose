@@ -82,9 +82,13 @@ LowerDBlockFromSidesetGenerator::generate()
     mesh->allow_remote_element_removal(allow_remote_element_removal);
   }
 
+  // Check that the sidesets are present in the mesh
+  for (const auto & sideset : _sideset_names)
+    if (!MooseMeshUtils::hasBoundaryName(*mesh, sideset))
+      paramError("sidesets", "The sideset '", sideset, "' was not found within the mesh");
+
   auto sideset_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _sideset_names, true);
   std::set<boundary_id_type> sidesets(sideset_ids.begin(), sideset_ids.end());
-
   auto side_list = mesh->get_boundary_info().build_side_list();
   if (!mesh->is_serial() && mesh->comm().size() > 1)
   {

@@ -14,6 +14,7 @@ InputParameters
 FlowChannelHeatStructureCouplerUserObject::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
+  params += ADFunctorInterface::validParams();
   params.addRequiredParam<MeshAlignment *>("_mesh_alignment", "Mesh alignment object");
   params.addClassDescription(
       "Base class for caching quantities computed between flow channels and heat structures.");
@@ -23,6 +24,7 @@ FlowChannelHeatStructureCouplerUserObject::validParams()
 FlowChannelHeatStructureCouplerUserObject::FlowChannelHeatStructureCouplerUserObject(
     const InputParameters & parameters)
   : ElementUserObject(parameters),
+    ADFunctorInterface(this),
     _fc_elem_id(0),
     _hs_elem_id(0),
     _fc_qp(0),

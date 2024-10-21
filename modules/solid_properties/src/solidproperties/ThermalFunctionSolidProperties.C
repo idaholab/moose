@@ -45,6 +45,12 @@ ThermalFunctionSolidProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_
 }
 
 Real
+ThermalFunctionSolidProperties::cp_integral(const Real & T) const
+{
+  return _cp_function.timeIntegral(_T_zero_e, T, Point(0, 0, 0));
+}
+
+Real
 ThermalFunctionSolidProperties::k_from_T(const Real & T) const
 {
   return _k_function.value(T);

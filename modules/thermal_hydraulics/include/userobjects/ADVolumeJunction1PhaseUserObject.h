@@ -40,39 +40,13 @@ protected:
   /// rho*E*A of the connected flow channels
   const ADVariableValue & _rhoEA;
 
-  /// rho*V of the junction
-  const ADVariableValue & _rhoV;
-  /// rho*u*V of the junction
-  const ADVariableValue & _rhouV;
-  /// rho*v*V of the junction
-  const ADVariableValue & _rhovV;
-  /// rho*w*V of the junction
-  const ADVariableValue & _rhowV;
-  /// rho*E*V of the junction
-  const ADVariableValue & _rhoEV;
-
-  /// Flow channel rho*A coupled variable index
-  const unsigned int _rhoA_jvar;
-  /// Flow channel rho*u*A coupled variable index
-  const unsigned int _rhouA_jvar;
-  /// Flow channel rho*E*A coupled variable index
-  const unsigned int _rhoEA_jvar;
-
-  /// Junction rho*V coupled variable index
-  const unsigned int _rhoV_jvar;
-  /// Junction rho*u*V coupled variable index
-  const unsigned int _rhouV_jvar;
-  /// Junction rho*v*V coupled variable index
-  const unsigned int _rhovV_jvar;
-  /// Junction rho*w*V coupled variable index
-  const unsigned int _rhowV_jvar;
-  /// Junction rho*E*V coupled variable index
-  const unsigned int _rhoEV_jvar;
-
   /// Form loss coefficient
   const Real & _K;
   /// Reference area
   const Real & _A_ref;
+
+  /// Apply velocity scaling?
+  const bool _apply_velocity_scaling;
 
   /// Single-phase fluid properties user object
   const SinglePhaseFluidProperties & _fp;

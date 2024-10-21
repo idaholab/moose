@@ -1677,7 +1677,7 @@ DMSetUp_Moose_Pre(DM dm)
     std::string bname = mesh.subdomain_name(bid);
     if (!bname.length())
     {
-      // Block names are currently implemented for Exodus II meshes
+      // Block names are currently implemented for Exodus meshes
       // only, so we might have to make up our own block names and
       // maintain our own mapping of block ids to names.
       std::ostringstream ss;

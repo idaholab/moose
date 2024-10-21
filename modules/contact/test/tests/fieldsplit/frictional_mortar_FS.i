@@ -18,7 +18,7 @@ refine = 1
   uniform_refine = ${refine}
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     incremental = true

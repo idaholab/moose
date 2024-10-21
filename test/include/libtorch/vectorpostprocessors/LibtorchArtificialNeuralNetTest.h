@@ -10,7 +10,7 @@
 #ifdef LIBTORCH_ENABLED
 
 #pragma once
-
+#include <torch/types.h>
 #include "GeneralVectorPostprocessor.h"
 
 /**
@@ -28,8 +28,15 @@ public:
   virtual void finalize(){};
 
 protected:
-  // We create a vector to store the output of the neural net
+  /// Function to determine the torch data type to be used based on
+  /// an input enum
+  torch::ScalarType determineTorchDataType(const MooseEnum & data_enum);
+
+  /// We create a vector to store the output of the neural net
   VectorPostprocessorValue & _nn_values;
+
+  /// The data type for the neural net this
+  const torch::ScalarType _data_type;
 };
 
 #endif

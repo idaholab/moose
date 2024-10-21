@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "InputParameters.h"
 #include "Moose.h"
 
@@ -68,6 +70,11 @@ protected:
   /// @param param_vecs vector of parameters that should not overlap with each other
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
+  /// Check that there is no overlap between the respective items in each vector of the two-D parameters
+  /// Each vector of the two-D vector parameter should also have unique items
+  /// @param param_vecs vector of parameters that should not overlap with each other
+  template <typename T>
+  void checkTwoDVectorParamsNoRespectiveOverlap(const std::vector<std::string> & param_vecs) const;
   /// Check that each inner vector of a two-D vector parameter are the same size as another one-D vector parameter
   /// @param param1 two-D vector parameter to check the dimensions of
   /// @param param2 one-D vector parameter to set the desired size
@@ -125,6 +132,13 @@ protected:
   void errorDependentParameter(const std::string & param1,
                                const std::string & value_not_set,
                                const std::vector<std::string> & dependent_params) const;
+  /// Error messages for parameters that should depend on another parameter but with a different error message
+  /// @param param1 the parameter has not been set to the desired value (for logging purposes)
+  /// @param value_set the value it has been set to and which is not appropriate (for logging purposes)
+  /// @param dependent_params all the parameters that should not have been since 'param1' was not set to 'value_not_set'
+  void errorInconsistentDependentParameter(const std::string & param1,
+                                           const std::string & value_set,
+                                           const std::vector<std::string> & dependent_params) const;
 
 private:
   // Convenience routines so that defining new checks feels very similar to coding checks in
@@ -353,9 +367,43 @@ InputParametersChecksUtils<C>::checkVectorParamsNoOverlap(
 
     for (const auto & value : forwardGetParam<std::vector<T>>(param))
       if (!unique_params.insert(value).second)
+      {
+        auto copy_params = param_vec;
+        copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
         forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
                           "' is also present in one or more of the parameters '" +
-                          Moose::stringify(param_vec) + "'. This is disallowed.");
+                          Moose::stringify(copy_params) + "', which is not allowed.");
+      }
+  }
+}
+
+template <typename C>
+template <typename T>
+void
+InputParametersChecksUtils<C>::checkTwoDVectorParamsNoRespectiveOverlap(
+    const std::vector<std::string> & param_vec) const
+{
+  // Outer loop, each param is the name of a parameter for a vector of vectors
+  for (const auto & param : param_vec)
+  {
+    assertParamDefined<std::vector<std::vector<T>>>(param);
+    const auto & twoD_vec = forwardGetParam<std::vector<std::vector<T>>>(param);
+    std::vector<std::set<T>> unique_params(twoD_vec.size());
+
+    // Loop over each outer vector and compare the inner vectors respectively to other parameters
+    for (const auto i : index_range(twoD_vec))
+    {
+      for (const auto & value : twoD_vec[i])
+        if (!unique_params[i].insert(value).second)
+        {
+          auto copy_params = param_vec;
+          copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
+          forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
+                            "' is also present in one or more of the two-D vector parameters '" +
+                            Moose::stringify(copy_params) +
+                            "' in the inner vector of the same index, which is not allowed.");
+        }
+    }
   }
 }
 
@@ -439,7 +487,8 @@ InputParametersChecksUtils<C>::checkBlockwiseConsistency(
           if (std::find(object_blocks.begin(), object_blocks.end(), block) == object_blocks.end())
             forwardParamError(block_param_name,
                               "Block '" + block + "' is not present in the block restriction of " +
-                                  forwardName() + "!");
+                                  forwardName() +
+                                  "!\nBlock restriction: " + Moose::stringify(object_blocks));
 
     for (const auto & param_name : parameter_names)
     {
@@ -510,6 +559,21 @@ InputParametersChecksUtils<C>::errorDependentParameter(
                         "Parameter '" + dependent_param +
                             "' should not be set by the user if parameter '" + param1 +
                             "' has not been set to '" + value_not_set + "'");
+}
+
+template <typename C>
+void
+InputParametersChecksUtils<C>::errorInconsistentDependentParameter(
+    const std::string & param1,
+    const std::string & value_set,
+    const std::vector<std::string> & dependent_params) const
+{
+  for (const auto & dependent_param : dependent_params)
+    if (forwardIsParamSetByUser(dependent_param))
+      forwardParamError(dependent_param,
+                        "Parameter '" + dependent_param +
+                            "' should not be set by the user if parameter '" + param1 +
+                            "' has been set to '" + value_set + "'");
 }
 
 template <typename C>

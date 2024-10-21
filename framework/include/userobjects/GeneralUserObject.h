@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "UserObject.h"
+#include "ScalarCoupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 #include "DependencyResolverInterface.h"
@@ -19,6 +20,7 @@
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class GeneralUserObject : public UserObject,
+                          public ScalarCoupleable,
                           public MaterialPropertyInterface,
                           public TransientInterface
 {

@@ -132,4 +132,38 @@
     design = 'AdvancedExtruderGenerator.md'
     issues = '#25486'
   []
+
+  [errors]
+    requirement = 'The system shall error'
+    issues = '#22117'
+    design = 'AdvancedExtruderGenerator.md'
+    [bad_subdomain_swap]
+      type = RunException
+      input = advanced_extruder_with_boundary_swap.i
+      cli_args = "Mesh/extrude/subdomain_swaps='1234 11 2 12 3 13; ; '"
+      detail = 'if the source subdomain for a subdomain swap in a layer does not exist in the mesh,'
+      expect_err = 'The block \'1234\' was not found within the mesh'
+    []
+    [bad_boundary_swap]
+      type = RunException
+      input = advanced_extruder_with_boundary_swap.i
+      cli_args = "Mesh/extrude/boundary_swaps='101 11 2 12; ; '"
+      detail = 'if the source boundary for a boundary swap in a layer does not exist in the mesh,'
+      expect_err = 'The boundary \'101\' was not found within the mesh'
+    []
+    [bad_upward_source_subdomain]
+      type = RunException
+      input = advanced_extruder_with_boundary_swap.i
+      cli_args = "Mesh/extrude/upward_boundary_source_blocks='1234; ; ' Mesh/extrude/upward_boundary_ids='10; ; '"
+      detail = 'if the source subdomain for an upward boundary assignment in a layer does not exist in the mesh,'
+      expect_err = 'The block \'1234\' was not found within the mesh'
+    []
+    [bad_downward_source_subdomain]
+      type = RunException
+      input = advanced_extruder_with_boundary_swap.i
+      cli_args = "Mesh/extrude/downward_boundary_source_blocks='1234; ; ' Mesh/extrude/downward_boundary_ids='1; ; '"
+      detail = 'if the source subdomain for an downward boundary assignment in a layer does not exist in the mesh,'
+      expect_err = 'The block \'1234\' was not found within the mesh'
+    []
+  []
 []

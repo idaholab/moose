@@ -123,9 +123,9 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
 NonlinearSystem::~NonlinearSystem() {}
 
 void
-NonlinearSystem::init()
+NonlinearSystem::preInit()
 {
-  NonlinearSystemBase::init();
+  NonlinearSystemBase::preInit();
 
   if (_automatic_scaling && _resid_vs_jac_scaling_param < 1. - TOLERANCE)
     // Add diagonal matrix that will be used for computing scaling factors
@@ -351,7 +351,7 @@ NonlinearSystem::converged()
 {
   if (_fe_problem.hasException() || _fe_problem.getFailNextNonlinearConvergenceCheck())
     return false;
-  if (!_fe_problem.allowInvalidSolution() && _solution_is_invalid)
+  if (!_fe_problem.acceptInvalidSolution())
   {
     mooseWarning("The solution is not converged due to the solution being invalid.");
     return false;

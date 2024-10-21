@@ -24,7 +24,7 @@ method to use to interpolate between the tabulated data, must be used instead.
 Currently only [bicubic tabular interpolation](TabulatedBicubicFluidProperties.md) is implemented.
 Bilinear interpolation is a work in progress.
 
-## File format
+## File format id=format
 
 The expected file format for the tabulated fluid properties is now described.  The first line must be
 the header containing the required column names *pressure* and *temperature*, and also any number of
@@ -90,8 +90,8 @@ With a (specific volume, specific energy) variable set, the syntax shown in the 
 
 ### Writing data file
 
-If no tabulated fluid property data file exists, then data for the properties specified in the
-input file parameter *interpolated_properties* will be generated using the pressure and temperature
+The `TabulatedFluidProperties`-derived classes can write a file containing the data for the properties specified in the
+input file parameter *interpolated_properties*. It will use the pressure and temperature
 ranges specified in the input file at the beginning of the simulation.
 
 For example, if we wish to generate a file containing tabulated properties for CO$_2$ density, enthalpy
@@ -106,7 +106,7 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
   [tabulated]
     type = TabulatedBicubicFluidProperties
     fp = co2
-    fluid_property_file = fluid_properties.csv
+    fluid_property_output_file = fluid_properties.csv
     interpolated_properties = 'density enthalpy viscosity'
 
     # Bounds of interpolation
@@ -131,6 +131,11 @@ times the property members in the FluidProperties object are used, the initial t
 the data and the subsequent interpolation time can be much less than using the original
 FluidProperties object.
 
+Using the  [!param](/FluidProperties/TabulatedFluidProperties/construct_pT_from_ve) parameter and the
+[!param](/FluidProperties/TabulatedFluidProperties/fluid_property_output_file) parameters, a tabulation
+using the (specific volume, specific internal energy) variables can be generated. The output file name
+for this additional tabulation will be suffixed with `_ve.csv`.
+
 !alert note
 All fluid properties read from a file or specified in the input file (and their derivatives with
 respect to pressure and temperature) will be calculated through interpolation, while all
@@ -140,7 +145,14 @@ remaining (or missing) fluid properties will be calculated using the provided `F
 
 The (pressure, temperature) variable set is not adequate for all fluid flow applications, and alternative
 variable sets may be used with `TabulatedFluidProperties` objects. (specific volume (v), specific internal energy (e)),
-and (specific volume, specific enthalpy (h)) are supported. The process goes as follows:
+and (specific volume, specific enthalpy (h)) are supported.
+
+### Option 1: Creation of interpolations between variable sets
+
+The first option is to use (pressure, temperature) variable for all fluid properties, and rely on tabulated conversions from (specific volume, specific internal energy / enthalpy) to (pressure, temperature) to compute properties.
+This option is selected with the [!param](/FluidProperties/TabulatedFluidProperties/construct_pT_from_ve) and
+[!param](/FluidProperties/TabulatedFluidProperties/construct_pT_from_vh) parameters.
+The workflow is as follows:
 
 - The data is read from a data file tabulated with pressure and temperature, and interpolations based on
   pressure and temperature are created for each tabulated property.
@@ -151,7 +163,7 @@ and (specific volume, specific enthalpy (h)) are supported. The process goes as 
 
 - A grid of values for pressure and temperature is computed for the alternative variable set. This is used to create
   a tabulated interpolation from the alternative variable set to the (pressure, temperature) variable set. This process is
-  described in the next section.
+  described in the next section, see [TabulatedFluidProperties.md#pt_from_ve].
 
 - When querying a fluid property using the alternative variable set, the interpolations are first used to convert
   to the (pressure, temperature) variable set (for example, computing $p(v,e)$ and $T(v,e)$). Then the fluid property
@@ -168,7 +180,7 @@ File data may only be read and written with the (pressure, temperature) variable
 must be either contained in the tabulation read or be computable from pressure and temperature in the
 `FluidProperties` object.
 
-### Creation of interpolations between variable sets
+### Generating (v,e) to (p,T) conversion interpolations id=pt_from_ve
 
 As fluid properties are much more often tabulated using pressure and temperature than alternative variable
 sets, the alternative variables are systematically converted to pressure and temperature to perform the
@@ -179,6 +191,7 @@ alternative variable sets. This is done in several sets, described for the $(v,e
   the specified bounds on pressure and temperature : $e_{min/max} = e(p_{min/max}, T_{min/max})$, else the bounds
   are chosen from the tabulated data. The number of points in the grid in both dimensions are user-selected parameters.
   The v grid may be created using base-10 log-spacing by setting [!param](/FluidProperties/TabulatedFluidProperties/use_log_grid_v).
+  The e grid may be created using base-10 log-spacing by setting [!param](/FluidProperties/TabulatedFluidProperties/use_log_grid_e).
 
 - These bounds may not be physically realizable simultaneously. It could be that the fluid may not have both $v=v_{min}$
   and $e=e_{min}$. Part of the grid may not be physical.
@@ -198,6 +211,19 @@ alternative variable sets. This is done in several sets, described for the $(v,e
 Warnings will be output when a pressure or temperature value is limited to its bound, and when an inversion from
 the alternative variable set to pressure or temperature fails, often because the grid extends beyond physically
 reachable values.
+
+### Option 2: Using interpolations in (v,e) of the fluid properties
+
+To avoid the difficulties in converting from (v,e) to (pressure, temperature) and then evaluating the properties
+with (pressure, temperature), the properties can also be interpolated in (v,e). These interpolations can be created
+from either another `FluidProperties` object, with the [!param](/FluidProperties/TabulatedFluidProperties/fp), or from a
+(specific volume, specific internal energy) tabulation, using the [!param](/FluidProperties/TabulatedFluidProperties/fluid_property_ve_file) parameter.
+
+Similarly as for (pressure, temperature), the list of properties to interpolate should be provided using the [!param](/FluidProperties/TabulatedFluidProperties/interpolated_properties) parameter.
+
+The format of the tabulation is similar to the one mentioned in [TabulatedFluidProperties.md#format], except that specific volume and specific internal
+energy replace pressure and temperature for the tabulation variables. Pressure and temperature will likely
+instead appear as the tabulated properties, so that `temperature(v,e)` and `pressure(v,e)` can be computed directly from interpolations.
 
 !syntax parameters /FluidProperties/TabulatedFluidProperties
 

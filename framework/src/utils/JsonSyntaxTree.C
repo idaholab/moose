@@ -144,6 +144,9 @@ JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann:
     std::string doc = params->getDocString(iter.first);
     MooseUtils::escape(doc);
     param_json["description"] = doc;
+
+    param_json["doc_unit"] = params->getDocUnit(iter.first);
+
     param_json["controllable"] = params->isControllable(iter.first);
     param_json["deprecated"] = params->isParamDeprecated(iter.first);
     all_params[iter.first] = param_json;
@@ -216,9 +219,20 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json["syntax_path"] = path;
     json["parent_syntax"] = parent;
     json["description"] = params->getClassDescription();
-    auto label_pair = getObjectLabel(path);
-    json["label"] = label_pair.first;
-    json["register_file"] = label_pair.second;
+    // We do this for ActionComponents which are registered as Actions but
+    // dumped to the syntax tree as Objects
+    if (params->isParamValid("_moose_base") && json["moose_base"] == "Action")
+    {
+      auto label_pair = getActionLabel(classname);
+      json["label"] = label_pair.first;
+      json["register_file"] = label_pair.second;
+    }
+    else
+    {
+      auto label_pair = getObjectLabel(path);
+      json["label"] = label_pair.first;
+      json["register_file"] = label_pair.second;
+    }
     if (lineinfo.isValid())
     {
       json["file_info"][lineinfo.file()] = lineinfo.line();
@@ -266,6 +280,15 @@ JsonSyntaxTree::buildOptions(const std::iterator_traits<InputParameters::iterato
   }
   {
     auto * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum>> *>(val);
+    if (enum_type)
+    {
+      out_of_range_allowed = (enum_type->get())[0].isOutOfRangeAllowed();
+      options = (enum_type->get())[0].getRawNames();
+      docs = enum_type->get()[0].getItemDocumentation();
+    }
+  }
+  {
+    auto * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MultiMooseEnum>> *>(val);
     if (enum_type)
     {
       out_of_range_allowed = (enum_type->get())[0].isOutOfRangeAllowed();

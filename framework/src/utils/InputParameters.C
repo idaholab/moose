@@ -356,6 +356,20 @@ InputParameters::setDocString(const std::string & name_in, const std::string & d
   it->second._doc_string = doc;
 }
 
+std::string
+InputParameters::getDocUnit(const std::string & name_in) const
+{
+  const auto name = checkForRename(name_in);
+  return _params.at(name)._doc_unit;
+}
+
+void
+InputParameters::setDocUnit(const std::string & name_in, const std::string & doc_unit)
+{
+  const auto name = checkForRename(name_in);
+  _params[name]._doc_unit = doc_unit;
+}
+
 bool
 InputParameters::isParamRequired(const std::string & name_in) const
 {
@@ -389,6 +403,15 @@ InputParameters::isParamValid(const std::string & name_in) const
   }
   else if (have_parameter<MultiMooseEnum>(name))
     return get<MultiMooseEnum>(name).isValid();
+  else if (have_parameter<std::vector<MultiMooseEnum>>(name))
+  {
+    for (auto it = get<std::vector<MultiMooseEnum>>(name).begin();
+         it != get<std::vector<MultiMooseEnum>>(name).end();
+         ++it)
+      if (!it->isValid())
+        return false;
+    return true;
+  }
   else if (have_parameter<ExecFlagEnum>(name))
     return get<ExecFlagEnum>(name).isValid();
   else
@@ -661,6 +684,7 @@ InputParameters::finalize(const std::string & parsing_syntax)
     set_if_filename(FileName);
     set_if_filename(FileNameNoExtension);
     set_if_filename(MeshFileName);
+    set_if_filename(MatrixFileName);
 #undef set_if_filename
   }
 
@@ -1144,6 +1168,27 @@ InputParameters::addRequiredParam<std::vector<MooseEnum>>(
 
 template <>
 void
+InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(
+    const std::string & name,
+    const std::vector<MultiMooseEnum> & moose_enums,
+    const std::string & doc_string)
+{
+  mooseAssert(
+      moose_enums.size() == 1,
+      "Only 1 MultiMooseEnum is supported in addRequiredParam<std::vector<MultiMooseEnum>> for " +
+          name);
+  mooseAssert(!moose_enums[0].items().empty(),
+              "The MultiMooseEnum in addRequiredParam<std::vector<MultiMooseEnum>> is empty for " +
+                  name);
+  InputParameters::set<std::vector<MultiMooseEnum>>(name) =
+      moose_enums; // valid parameter is set by set_attributes
+  auto & metadata = _params[name];
+  metadata._required = true;
+  metadata._doc_string = doc_string;
+}
+
+template <>
+void
 InputParameters::addParam<MooseEnum>(const std::string & /*name*/,
                                      const std::string & /*doc_string*/)
 {
@@ -1167,6 +1212,24 @@ InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
 {
   mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the "
              "parameter is not required!");
+}
+
+template <>
+void
+InputParameters::addParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                       const std::string & /*doc_string*/)
+{
+  mooseError(
+      "You must supply a vector of MultiMooseEnum object(s) when using addParam, even if the "
+      "parameter is not required!");
+}
+
+template <>
+void
+InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                               const std::string & /*doc_string*/)
+{
+  mooseError("You must supply a vector of MultiMooseEnum object(s) when using addRequiredParam!");
 }
 
 template <>

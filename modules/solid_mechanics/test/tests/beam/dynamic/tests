@@ -122,6 +122,8 @@
                   " accelerations computed by the Newmark-Beta time integrator."
     issues = "#12185"
     prereq = "dyn_euler_added_mass_inertia_damping_action"
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
   [./dyn_euler_rayleigh_hht_action]
     type = 'Exodiff'

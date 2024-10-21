@@ -1,8 +1,8 @@
 [Tests]
   design = 'Problem/index.md'
-  issues = '#8780'
   [coupled_system]
     requirement = 'The software shall be able to solve a system of equations in which one variable depends on another by'
+    issues = '#8780'
     [segregated]
       type = Exodiff
       input = test.i
@@ -24,6 +24,7 @@
   []
   [AD]
     requirement = 'The system shall be able to perform a segregated solve using AD objects and'
+    issues = '#8780'
     [residuals]
       type = Exodiff
       input = ad-test.i
@@ -38,9 +39,45 @@
     []
   []
   [hand-jac]
+    issues = '#8780'
     type = PetscJacobianTester
     run_sim = True
     input = test.i
     requirement = 'The system shall be able to perform a segregated solve using objects with hand-coded Jacobians and show perfect Jacobians for those objects.'
+  []
+  [different_num_vars_per_system]
+    requirement = 'The software shall allow having a different number of variables in nonlinear systems within the same problem when the action of the Jacobian is provided by'
+    issues = '#8780'
+    [newton]
+      type = Exodiff
+      input = different-vars-per-system.i
+      exodiff = different-vars-per-system_out.e
+      detail = 'an assembled matrix, or'
+    []
+    [pjfnk]
+      type = Exodiff
+      input = different-vars-per-system.i
+      exodiff = different-vars-per-system_out.e
+      detail = 'a matrix-free approximation.'
+      prereq = 'different_num_vars_per_system/newton'
+      cli_args = 'Executioner/solve_type=PJFNK'
+    []
+  []
+  [postprocessors]
+    type = CSVDiff
+    csvdiff = pp_out.csv
+    input = pp.i
+    issues = '#28331'
+    requirement = 'The system shall be able to output postprocessor data after solving multiple solver systems.'
+  []
+  [restart]
+    requirement = 'The system shall be able to restart multiple nonlinear variables from different nonlinear systems from an exodus file'
+    issues = '#26580'
+    [restart_problem]
+      type = Exodiff
+      input = restart_problem.i
+      exodiff = restart_problem_out.e
+      detail = 'using problem_out.e as a starting point, slightly modify the BCs and rerun' 
+    []
   []
 []

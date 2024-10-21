@@ -48,7 +48,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   volumetric_locking_correction = true
   strain = FINITE
   generate_output = 'strain_yy stress_yy'

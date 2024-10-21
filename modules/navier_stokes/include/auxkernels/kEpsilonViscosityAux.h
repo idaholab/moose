@@ -1,5 +1,4 @@
 
-
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -13,6 +12,7 @@
 
 #include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 /**
  * Computes the turbuent viscosity for the k-Epsilon model.
@@ -29,10 +29,6 @@ public:
 
 protected:
   virtual Real computeValue() override;
-
-  /// Local method to find friction velocity.
-  /// This method may need to be reimplemented for each new turbulence model
-  ADReal findUStarLocalMethod(const ADReal & u, const Real & dist);
 
   /// The dimension of the domain
   const unsigned int _dim;
@@ -57,17 +53,23 @@ protected:
   /// C-mu closure coefficient
   const Real _C_mu;
 
+  // Maximum allowable mu_t_ratio : mu/mu_t
+  const Real _mu_t_ratio_max;
+
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
-
-  /// If the user wants the linearized computation of y_plus
-  const bool _linearized_yplus;
 
   /// If the user wants to enable bulk wall treatment
   const bool _bulk_wall_treatment;
 
-  /// IF the user requested non-equilibrium wall treatment
-  const bool _non_equilibrium_treatment;
+  /// Method used for wall treatment
+  NS::WallTreatmentEnum _wall_treatment;
+
+  /// Method used to limit the k-e time scale
+  const MooseEnum _scale_limiter;
+
+  /// Whether we are using a newton solve
+  const bool _newton_solve;
 
   // -- Parameters of the wall function method
 

@@ -6,7 +6,9 @@ The [/SolutionInvalidity.md] object holds solution invalid warning information f
 
 To declare a solution as "invalid", use the macro in the following code to mark it. The user can provide a message to describe the reason for invalidity:
 
-!listing /test/src/materials/NonsafeMaterial.C  re=\s+if \(_test_diffusivity > _threshold && _fe_problem.time\(\) > _invalid_after_time\)(?:.|\n)*\}
+!listing /test/src/materials/NonsafeMaterial.C  re=\s+if \(_fe_problem.dt\(\) < 1 && _test_invalid_recover\)(?:.|\n)*\}
+
+The `flagInvalidSolution` macro will mark the solution as not converged when triggered. The `flagSolutionWarning` will not do so but simply report on the number of warnings encountered.
 
 !alert tip
 It is recommended to have a unique message for each invalidity, especially when you want to mark multiple types of invalid solutions within one object.
@@ -18,8 +20,8 @@ Solution Invalid Warnings:
 ---------------------------------------------------------------------------------------------------------
 |     Object      | Converged | Timestep | Total |                        Message                       |
 ---------------------------------------------------------------------------------------------------------
-| NonsafeMaterial |        16 |       64 |    64 | The diffusivity is greater than the threshold value! |
-| NonsafeMaterial |        16 |       64 |    64 | Extra invalid thing!                                 |
+| NonsafeMaterial |        16 |       48 |    48 | The diffusivity is greater than the threshold value! |
+| NonsafeMaterial |        16 |       48 |    48 | Extra invalid thing!                                 |
 ---------------------------------------------------------------------------------------------------------
 ```
 
@@ -36,7 +38,7 @@ This Solution Invalid Warnings table can be silenced by setting [!param](/Proble
 
 ```
 *** Warning ***
-The Solution Invalidity warnings are detected but silenced! Use Problem/allow_invalid_solution=false to activate
+The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show invalid solution counts
 ```
 
 The Solution Invalid Warning can also be printed out immediately after it is detected by setting [!param](/Problem/FEProblem/immediately_print_invalid_solution) to `true`.

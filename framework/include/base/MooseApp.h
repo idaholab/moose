@@ -9,6 +9,14 @@
 
 #pragma once
 
+#ifdef LIBTORCH_ENABLED
+// Libtorch includes
+#include <torch/types.h>
+#include <torch/mps.h>
+#include <torch/cuda.h>
+#include <c10/core/DeviceType.h>
+#endif
+
 // MOOSE includes
 #include "Moose.h"
 #include "Parser.h"
@@ -76,6 +84,11 @@ class MooseApp : public ConsoleStreamInterface,
                  public MooseBase
 {
 public:
+#ifdef LIBTORCH_ENABLED
+  /// Get the device torch is supposed to be running on.
+  torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
+#endif
+
   /**
    * Stores configuration options relating to the fixed-point solving
    * capability.  This is used for communicating input-file-based config from
@@ -116,6 +129,17 @@ public:
   }
 
   /**
+   * Get the shell exit code for the application
+   * @return The shell exit code
+   */
+  int exitCode() const { return _exit_code; }
+
+  /**
+   * Sets the exit code that the application will exit with.
+   */
+  void setExitCode(const int exit_code) { _exit_code = exit_code; }
+
+  /**
    * Get the parameters of the object
    * @return The parameters of the object
    */
@@ -135,7 +159,10 @@ public:
   /**
    * Get the SolutionInvalidity for this app
    */
+  ///@{
   SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
+  const SolutionInvalidity & solutionInvalidity() const { return _solution_invalidity; }
+  ///@}
 
   ///@{
   /**
@@ -538,6 +565,7 @@ public:
    * Get the OutputWarehouse objects
    */
   OutputWarehouse & getOutputWarehouse();
+  const OutputWarehouse & getOutputWarehouse() const;
 
   /**
    * Get SystemInfo object
@@ -950,6 +978,16 @@ private:
    */
   void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
+#ifdef LIBTORCH_ENABLED
+  /**
+   * Function to determine the device which should be used by libtorch on this
+   * application. We use this function to decide what is available on different
+   * builds.
+   * @param device Enum to describe if a cpu or a gpu should be used.
+   */
+  torch::DeviceType determineLibtorchDeviceType(const MooseEnum & device) const;
+#endif
+
 public:
   /**
    * Attach the relationship managers of the given type
@@ -1207,6 +1245,8 @@ protected:
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
   bool _ready_to_exit;
+  /// The exit code
+  int _exit_code;
 
   /// This variable indicates when a request has been made to restart from an Exodus file
   bool _initial_from_file;
@@ -1378,14 +1418,14 @@ private:
    * read/writable location for the user.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool copyInputs() const;
+  bool copyInputs();
 
   /**
    * Handles the run input parameter logic: Checks to see whether a directory exists in user space
    * and launches the TestHarness to process the given directory.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool runInputs() const;
+  bool runInputs();
 
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
@@ -1453,6 +1493,11 @@ private:
   /// This is a pointer to a pointer because at the time of construction of the app,
   /// the backup will not be filled yet.
   std::unique_ptr<Backup> * const _initial_backup;
+
+#ifdef LIBTORCH_ENABLED
+  /// The libtorch device this app is using.
+  const torch::DeviceType _libtorch_device;
+#endif
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

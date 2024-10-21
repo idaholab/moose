@@ -10,6 +10,7 @@
 #include "ExecFlagEnum.h"
 #include "MooseError.h"
 #include "Conversion.h"
+#include "MooseUtils.h"
 
 ExecFlagEnum::ExecFlagEnum() : MultiMooseEnum() {}
 ExecFlagEnum::ExecFlagEnum(const MultiMooseEnum & other) : MultiMooseEnum(other) {}
@@ -29,7 +30,7 @@ ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag)
                flag,
                "' is not an available enum item for the "
                "MultiMooseEnum object, thus it cannot be removed.");
-  else if (contains(flag))
+  else if (isValueSet(flag))
     mooseError("The supplied item '", flag, "' is a selected item, thus it can not be removed.");
 
   _items.erase(flag);
@@ -38,9 +39,9 @@ ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag)
 std::string
 ExecFlagEnum::getDocString() const
 {
-  std::string doc("The list of flag(s) indicating when this object should be executed, the "
-                  "available options include ");
-  doc += Moose::stringify(getNames(), ", ");
+  std::string doc("The list of flag(s) indicating when this object should be executed. For a "
+                  "description of each flag, see ");
+  doc += MooseUtils::mooseDocsURL("source/interfaces/SetupInterface.html");
   doc += ".";
   return doc;
 }
@@ -48,7 +49,7 @@ ExecFlagEnum::getDocString() const
 ExecFlagEnum &
 ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 {
-  clear();
+  clearSetValues();
   *this += flags;
   return *this;
 }
@@ -56,7 +57,7 @@ ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 ExecFlagEnum &
 ExecFlagEnum::operator=(const ExecFlagType & flag)
 {
-  clear();
+  clearSetValues();
   *this += flag;
   return *this;
 }
@@ -86,5 +87,5 @@ ExecFlagEnum::appendCurrent(const ExecFlagType & item)
                item,
                "' is not an available item for the "
                "ExecFlagEnum object, thus it cannot be set as current.");
-  _current.push_back(item);
+  _current_values.push_back(item);
 }

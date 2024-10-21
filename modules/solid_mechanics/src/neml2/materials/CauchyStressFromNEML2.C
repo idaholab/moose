@@ -63,14 +63,14 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
   // A state variable is said to be stateful if it exists on the input's old_state axis as well as
   // on the output's state axis.
   if (model().input_axis().has_subaxis("old_state"))
-    for (auto var :
-         model().input_axis().subaxis("old_state").variable_accessors(/*recursive=*/true))
+    for (auto var : model().input_axis().subaxis("old_state").variable_names())
     {
-      if (!model().output_axis().has_variable(var.on("state")))
+      if (!model().output_axis().has_variable(var.prepend("state")))
         mooseError("NEML2 model has nonconformal input's old_state and output's state");
 
-      _state_vars[var.on("state")] = &declareProperty<std::vector<Real>>(Moose::stringify(var));
-      _state_vars_old[var.on("old_state")] =
+      _state_vars[var.prepend("state")] =
+          &declareProperty<std::vector<Real>>(Moose::stringify(var));
+      _state_vars_old[var.prepend("old_state")] =
           &getMaterialPropertyOld<std::vector<Real>>(Moose::stringify(var));
     }
 }
@@ -82,6 +82,10 @@ CauchyStressFromNEML2::initialSetup()
   if (solver->residual_object || solver->jacobian || !solver->residual_and_jacobian_object)
     mooseWarning("NEML2 material models are designed to be used together with "
                  "residual_and_jacobian_together = true.");
+
+  // Initialize the model with a dummy batch shape of 1
+  initModel(1);
+  _in = neml2::LabeledVector::zeros(1, {&model().input_axis()});
 }
 
 void
@@ -99,10 +103,14 @@ CauchyStressFromNEML2::computeProperties()
 {
   try
   {
-    initModel(_qrule->n_points());
+    auto batch_shape = neml2::TensorShape{neml2::Size(_qrule->n_points())};
 
-    // Allocate input
-    _in = neml2::LabeledVector::zeros(_qrule->n_points(), {&model().input_axis()});
+    // Reallocate the variable storage only when the batch shape has changed
+    if (neml2::TensorShapeRef(batch_shape) != model().batch_sizes())
+    {
+      initModel(batch_shape);
+      _in = neml2::LabeledVector::zeros(batch_shape, {&model().input_axis()});
+    }
 
     advanceStep();
 
@@ -132,17 +140,17 @@ CauchyStressFromNEML2::computeProperties()
 void
 CauchyStressFromNEML2::computeQpSmallStress()
 {
-  neml2::TorchSize qp = _qp;
+  neml2::Size qp = _qp;
 
   // Set the results into the corresponding MOOSE material properties
   _small_stress[_qp] =
-      NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(_out(stress()).batch_index({qp}));
+      NEML2Utils::toMOOSE<SymmetricRankTwoTensor>(_out.base_index(stress()).batch_index({qp}));
 
   _small_jacobian[_qp] = RankFourTensor(NEML2Utils::toMOOSE<SymmetricRankFourTensor>(
-      _dout_din(stress(), strain()).batch_index({qp})));
+      _dout_din.base_index({stress(), strain()}).batch_index({qp})));
 
   for (auto && [var, prop] : _state_vars)
-    (*prop)[_qp] = NEML2Utils::toMOOSE<std::vector<Real>>(_out(var).batch_index({qp}));
+    (*prop)[_qp] = NEML2Utils::toMOOSE<std::vector<Real>>(_out.base_index(var).batch_index({qp}));
 }
 
 void

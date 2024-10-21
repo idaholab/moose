@@ -124,6 +124,7 @@
     connections = 'pipe1:in pipe2:in pipe3:in'
     position = '0 0 0'
     volume = 1e-5
+    use_scalar_variables = false
   []
 
   [in1]

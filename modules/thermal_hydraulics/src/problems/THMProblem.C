@@ -27,6 +27,8 @@ THMProblem::validParams()
       "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
       "for a given variable. (Default: LATEST)");
 
+  params.set<bool>("boundary_restricted_elem_integrity_check") = false;
+
   params.addClassDescription("Specialization of FEProblem to run with component subsystem");
 
   return params;

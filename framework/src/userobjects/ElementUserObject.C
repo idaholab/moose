@@ -29,8 +29,7 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(this),
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
-    Coupleable(this, false),
-    MooseVariableDependencyInterface(this),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     TransientInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),
     ElementIDInterface(this),
@@ -42,8 +41,4 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters)
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation())
 {
-  // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
 }

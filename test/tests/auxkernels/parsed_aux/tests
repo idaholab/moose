@@ -1,19 +1,90 @@
 [Tests]
   design = 'source/auxkernels/ParsedAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'parsed_aux_test.i'
     exodiff = 'out.e'
     scale_refine = 3
     issues = '#4807'
     requirement = "The system shall include an AuxKernel object capable of computing values from a functional expression."
-  [../]
-  [./xyzt]
+  []
+  [xyzt]
     type = 'Exodiff'
     input = 'xyzt.i'
     exodiff = 'xyzt_out.e'
     scale_refine = 3
     issues = '#15877'
     requirement = "The parsed expression AuxKernel in The system shall expose quadrature/nodal point coordinates and time if requested by the user."
-  [../]
+  []
+  [matprop_test]
+    type = 'Exodiff'
+    input = 'parsed_aux_mat_test.i'
+    exodiff = 'parsed_aux_mat_test_out.e'
+    issues = '#21244'
+    requirement = "The system shall be capable of computing parsed expressions setting a variable using material properties."
+  []
+  [ad_matprop_test]
+    type = 'Exodiff'
+    input = 'parsed_aux_mat_test.i'
+    exodiff = 'parsed_aux_mat_test_out.e'
+    cli_args = "Materials/u/type=ADParsedMaterial Materials/v/type=ADParsedMaterial
+                AuxKernels/set_parsed/material_properties='' AuxKernels/set_parsed/ad_material_properties='u_mat v_mat'"
+    issues = '#21244'
+    prereq = 'matprop_test'
+    requirement = "The system shall be capable of computing parsed expressions setting a variable using material properties with automatic differentiation."
+  []
+  [functor_test]
+    type = 'Exodiff'
+    input = 'parsed_aux_functors_test.i'
+    exodiff = 'parsed_aux_functors_test_out.e'
+    scale_refine = 3
+    issues = '#21244'
+    requirement = "The system shall be capable of computing values from a functor."
+  []
+  [errors]
+    issues = '#21244'
+    requirement = 'The system shall report an error if'
+    [functor_symbol_length]
+      type = RunException
+      input = 'parsed_aux_functors_test.i'
+      cli_args = "AuxKernels/set_parsed/functor_names='u v' AuxKernels/set_parsed/functor_symbols='u v w'"
+      expect_err = "functor_symbols must be the same length as functor_names."
+      detail = 'functor symbols parameter does not have the same length as functor names parameter'
+    []
+    [invalid_functor_symbol]
+      type = RunException
+      input = 'parsed_aux_functors_test.i'
+      cli_args = "AuxKernels/set_parsed/functor_names='u v' AuxKernels/set_parsed/functor_symbols='x v' AuxKernels/set_parsed/use_xyzt=true"
+      expect_err = "x, y, z, and t cannot be used in 'functor_symbols' when use_xyzt=true."
+      detail = "functor symbols parameter contains 'x', 'y', 'z', or 't' when coordinates and time parameters are already in use"
+    []
+    [functor_symbol_variable_name_overlap]
+      type = RunException
+      input = 'parsed_aux_functors_test.i'
+      cli_args = "AuxKernels/set_parsed/functor_symbols='u v' AuxKernels/set_parsed/coupled_variables='u v'"
+      expect_err = "Values in 'functor_symbols' cannot overlap with coupled variable names."
+      detail = "functor symbols cannot overlap with coupled variable names"
+    []
+    [invalid_functor_name]
+      type = RunException
+      input = 'parsed_aux_functors_test.i'
+      cli_args = "AuxKernels/set_parsed/functor_names='x v' AuxKernels/set_parsed/functor_symbols='' AuxKernels/set_parsed/use_xyzt=true"
+      expect_err = "x, y, z, and t cannot be used in 'functor_names' when use_xyzt=true. Use 'functor_symbols' to disambiguate."
+      detail = "functor names parameter contains 'x', 'y', 'z', or 't' when coordinates and time parameters are already in use"
+    []
+    [functor_name_variable_name_overlap]
+      type = RunException
+      input = 'parsed_aux_functors_test.i'
+      cli_args = "AuxKernels/set_parsed/functor_names='u v' AuxKernels/set_parsed/coupled_variables='u v' AuxKernels/set_parsed/functor_symbols=''"
+      expect_err = "Values in 'functor_names' cannot overlap with coupled variable names. Use 'functor_symbols' to disambiguate."
+      detail = "functor names cannot overlap with coupled variable names"
+    []
+    [expression]
+      type = RunException
+      input = 'parsed_aux_functors_test.i'
+      cli_args = "AuxKernels/set_parsed/expression='l'"
+      expect_err = "Invalid function"
+      detail = "an invalid function is provided."
+    []
+  []
 []

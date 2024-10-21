@@ -24,10 +24,20 @@ protected:
   virtual void initSecondary() override;
   virtual void check() const override;
 
-  /// Element IDs of connected flow channels
+  /// Gets the element IDs of the connected 1D components
+  const std::vector<dof_id_type> & getConnectedElementIDs() { return _connected_elems; }
+  /// Gets the processor IDs of the connected 1D components
+  const std::vector<processor_id_type> & getConnectedProcessorIDs() { return _proc_ids; }
+
+  // TODO: make _connected_elems and _proc_ids private (after applications
+  // switch to using the getter methods)
+  /// Element IDs of connected 1D components
   std::vector<dof_id_type> _connected_elems;
-  /// Processor IDs owning the connected flow channels
+  /// Processor IDs of connected 1D components
   std::vector<processor_id_type> _proc_ids;
+
+  /// Junction subdomain ID
+  subdomain_id_type _junction_subdomain_id;
 
 public:
   static InputParameters validParams();

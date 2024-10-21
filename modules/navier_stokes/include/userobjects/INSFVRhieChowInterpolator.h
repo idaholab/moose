@@ -58,7 +58,8 @@ public:
    * @param component The velocity component we are adding 'a' coefficient data for
    * @param value The value of 'a' that we are adding
    */
-  void addToA(const libMesh::Elem * elem, unsigned int component, const ADReal & value) override;
+  virtual void
+  addToA(const libMesh::Elem * elem, unsigned int component, const ADReal & value) override;
 
   /**
    * Retrieve a face velocity
@@ -71,25 +72,25 @@ public:
    * mesh
    * @return The face velocity
    */
-  VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
-                                  const FaceInfo & fi,
-                                  const Moose::StateArg & time,
-                                  const THREAD_ID tid,
-                                  bool subtract_mesh_velocity) const override;
+  virtual VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
+                                          const FaceInfo & fi,
+                                          const Moose::StateArg & time,
+                                          const THREAD_ID tid,
+                                          bool subtract_mesh_velocity) const override;
 
-  void initialSetup() override;
-  void meshChanged() override;
+  virtual void initialSetup() override;
+  virtual void meshChanged() override;
 
-  void initialize() override final;
-  void execute() override;
-  void finalize() override final;
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
-  bool segregated() const override { return false; };
+  virtual bool segregated() const override { return false; };
 
   /**
    * makes sure coefficient data gets communicated on both sides of a given boundary
    */
-  void ghostADataOnBoundary(const BoundaryID boundary_id) override;
+  virtual void ghostADataOnBoundary(const BoundaryID boundary_id) override;
 
   /**
    * Whether to pull all 'a' coefficient data from the owning process for all nonlocal elements we
@@ -100,8 +101,17 @@ public:
   /**
    * Whether central differencing face interpolations of velocity should include a skewness
    * correction
+   * Also used for the face interpolation of the D coefficient
+   * and the face interpolation of volumetric forces for for the volume correction method
+   * and the face interpolation of porosity
    */
   bool velocitySkewCorrection(THREAD_ID tid) const;
+
+  /**
+   * Whether central differencing face interpolations of pressure should include a skewness
+   * correction
+   */
+  bool pressureSkewCorrection(THREAD_ID tid) const;
 
 protected:
   /**
@@ -231,4 +241,11 @@ INSFVRhieChowInterpolator::velocitySkewCorrection(const THREAD_ID tid) const
 {
   const auto * const u = _us[tid];
   return (u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+}
+
+inline bool
+INSFVRhieChowInterpolator::pressureSkewCorrection(const THREAD_ID tid) const
+{
+  const auto * const p = _ps[tid];
+  return (p->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 }

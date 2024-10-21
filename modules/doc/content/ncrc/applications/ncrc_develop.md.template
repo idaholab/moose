@@ -21,9 +21,9 @@ operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a cou
 - If +Personal Machine+: Follow the [Conda Installation](ncrc/applications/ncrc_install_conda.md)
   instructions and then install our MOOSE Conda packages:
 
-  !package! code
-  conda create -n moose moose-dev=__MOOSE_DEV__
-  !package-end!
+  !versioner! code
+  conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
+  !versioner-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
 
@@ -120,7 +120,7 @@ either a Conda update, or rebuild PETSc/libMesh:
   !package! code
   conda activate base
   conda env remove -n moose
-  conda create -n moose moose-dev=__MOOSE_DEV__
+  conda create -n moose moose-dev=__MOOSE_DEV__ __DEFAULT_MPI__
   conda activate moose
   !package-end!
 

@@ -5,14 +5,14 @@
 There are two primary ways of creating a mesh for use in a MOOSE simulation: "offline generation" through
 a tool like [CUBIT](https://cubit.sandia.gov/) from [Sandia National Laboratories](http://www.sandia.gov/), and
 "online generation" through programmatic interfaces. CUBIT is useful for creating complex geometries, and can be
-licensed from CSimSoft for a fee depending on the type of organization and work
+licensed from Coreform for a fee depending on the type of organization and work
 being performed. Other mesh generators can work as long as they output a file format that is
 supported by the [FileMesh](/FileMesh.md) object.
 
 ## Example Syntax and Mesh Objects
 
-Mesh settings are applied with the `[Mesh]` of the input files, for example the basic input file
-syntax for reading a file from a mesh is shown below. For additional information on the other types
+Mesh settings are applied with the `[Mesh]` section in input files, for example the basic input file
+syntax for generating a simple square mesh is shown below. For additional information on the other types
 of Mesh objects refer to the individual object pages listed below.
 
 !listing test/tests/auxkernels/solution_aux/build.i block=Mesh
@@ -53,14 +53,14 @@ defensive action that at worst will incur an unnecessary `prepare_for_use`,
 which may slow down the simulation setup, and at best may save follow-on mesh
 generators or simulation execution from undesirable behavior.
 
-### DAG and final mesh selection
+### DAG and final mesh selection id=final
 
 When chaining together several MeshGenerators, you are implicitly creating a DAG (directed acyclic graph).
 MOOSE evaluates and generates the individual objects to build up your final mesh. If your input file has
 multiple end points, (e.g. B->A and C->A) then MOOSE will issue an error and terminate. Generally, it doesn't
 make sense to have multiple end points since the output of one would simply be discarded anyway. It is possible
-to force the selection of a particular end point by using the "final_generator" parameter in the Mesh block.
-This parameter can be used on any generator whether there is ambiguity or not in the generator dependencies.
+to force the selection of a particular end point by using the [!param](/Mesh/MeshGeneratorMesh/final_generator)
+parameter in the Mesh block. This parameter can be used on any generator whether there is ambiguity or not in the generator dependencies.
 
 
 ## Outputting The Mesh

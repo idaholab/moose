@@ -4,18 +4,25 @@
 # If adding a new control key, a change to versioner.py:influential_list will be required
 # (add that control key to 'not_libraries').
 packages:
-  mpich:
+  tools:
     influential:
-      - apptainer/mpich.def
-      - conda/mpich/meta.yaml
-      - conda/mpich/conda_build_config.yaml
-      - conda/mpich/build.sh
+      - conda/tools/meta.yaml
+      - conda/tools/conda_build_config.yaml
+  mpi:
+    influential:
+      # need to remember to add apptainer/set_prompt.bash
+      # the next time we update this
+      - apptainer/mpi.def
+      - apptainer/files/mpi
+      - conda/mpi/meta.yaml
+      - conda/mpi/conda_build_config.yaml
+      - conda/mpi/base_build.sh
     apptainer:
   petsc:
     dependencies:
-      - mpich
+      - mpi
     apptainer:
-      from: mpich
+      from: mpi
     influential:
       - petsc
       - apptainer/petsc.def
@@ -24,6 +31,8 @@ packages:
       - conda/petsc/build.sh
       - scripts/configure_petsc.sh
       - scripts/update_and_rebuild_petsc.sh
+      - scripts/apple-silicon-hdf5-autogen.patch
+      - scripts/tao_restore_viewer.patch
   libmesh:
     dependencies:
       - petsc
@@ -56,12 +65,14 @@ packages:
     influential:
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def
+      - apptainer/files/moose-dev
       - conda/peacock/meta.yaml
       - conda/peacock/conda_build_config.yaml
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
       - conda/moose-dev/meta.yaml
       - conda/moose-dev/conda_build_config.yaml
+      - scripts/setup_libtorch.sh
   app:
     dependencies:
       - moose-dev

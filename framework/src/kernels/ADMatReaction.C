@@ -22,8 +22,8 @@ ADMatReaction::validParams()
   params.addCoupledVar("v",
                        "Set this to make v a coupled variable, otherwise it will use the "
                        "kernel's nonlinear variable for v");
-  params.addParam<MaterialPropertyName>(
-      "reaction_rate", "L", "The reaction_rate used with the kernel.");
+  params.addRequiredParam<MaterialPropertyName>("reaction_rate",
+                                                "The reaction_rate used with the kernel.");
   return params;
 }
 

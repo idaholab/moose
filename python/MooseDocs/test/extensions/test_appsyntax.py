@@ -126,10 +126,11 @@ class TestParameters(AppSyntaxTestCase):
         self.assertHTMLTag(res(2,0,0,1), 'span', class_='moose-parameter-header-description', size=1)
         self.assertIn('The name of the variable', res(2,0,0,1,0)['content'])
 
-        self.assertHTMLTag(res(2,0,1), 'div', size=3, class_='collapsible-body')
+        self.assertHTMLTag(res(2,0,1), 'div', size=4, class_='collapsible-body')
         self.assertHTMLTag(res(2,0,1,0), 'p', size=2, class_='moose-parameter-description-cpptype')
-        self.assertHTMLTag(res(2,0,1,1), 'p', size=2, class_='moose-parameter-description-controllable')
-        self.assertHTMLTag(res(2,0,1,2), 'p', size=2, class_='moose-parameter-description')
+        self.assertHTMLTag(res(2,0,1,1), 'p', size=2, class_='moose-parameter-description-doc-unit')
+        self.assertHTMLTag(res(2,0,1,2), 'p', size=2, class_='moose-parameter-description-controllable')
+        self.assertHTMLTag(res(2,0,1,3), 'p', size=2, class_='moose-parameter-description')
 
         self.assertHTMLTag(res(3), 'h3')
         self.assertEqual(res(3)['data-details-open'], 'open')
@@ -201,14 +202,16 @@ class TestParam(AppSyntaxTestCase):
         self.assertHTMLTag(res(0,0), 'a', string=u'"variable"', class_='moose-modal-link modal-trigger')
 
         self.assertHTMLTag(res(1), 'div', size=1, class_='moose-modal modal')
-        self.assertHTMLTag(res(1, 0), 'div', size=4, class_='modal-content')
+        self.assertHTMLTag(res(1, 0), 'div', size=5, class_='modal-content')
         self.assertHTMLTag(res(1, 0, 0), 'h4', size=1, string=u'variable')
         self.assertHTMLTag(res(1, 0, 1), 'p', size=2, class_='moose-parameter-description-cpptype')
         self.assertEqual(u"NonlinearVariableName", res(1, 0, 1, 1)['content'])
-        self.assertHTMLTag(res(1, 0, 2), 'p', size=2, class_='moose-parameter-description-controllable')
-        self.assertHTMLString(res(1, 0, 2, 1), 'No')
-        self.assertHTMLTag(res(1, 0, 3), 'p', size=2, class_='moose-parameter-description')
-        self.assertIn(u"The name of the variable", res(1, 0, 3, 1)['content'])
+        self.assertHTMLTag(res(1, 0, 2), 'p', size=2, class_='moose-parameter-description-doc-unit')
+        self.assertEqual(u"(no unit assumed)", res(1, 0, 2, 1)['content'])
+        self.assertHTMLTag(res(1, 0, 3), 'p', size=2, class_='moose-parameter-description-controllable')
+        self.assertHTMLString(res(1, 0, 3, 1), 'No')
+        self.assertHTMLTag(res(1, 0, 4), 'p', size=2, class_='moose-parameter-description')
+        self.assertIn(u"The name of the variable", res(1, 0, 4, 1)['content'])
 
     def testLatex(self):
         _, res = self.execute(self.TEXT, renderer=base.LatexRenderer())
@@ -260,7 +263,7 @@ class TestComplete(AppSyntaxTestCase):
     def testAST(self):
         ast = self.tokenize(self.TEXT)
         self.assertToken(ast(0), 'Heading', level=2, size=1)
-        self.assertToken(ast(0,0), 'AutoLink', page=u'syntax/Adaptivity/index.md', string=u'Adaptivity')
+        self.assertToken(ast(0,0), 'AutoLink', page=u'syntax/ActionComponents/index.md', string=u'ActionComponents')
 
         self.assertToken(ast(1), 'SyntaxList')
         self.assertToken(ast(1,0), 'SyntaxListItem', string=u'Moose App')

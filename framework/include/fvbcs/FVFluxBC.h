@@ -14,6 +14,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "MathFVUtils.h"
 #include "FVFaceResidualObject.h"
+#include "SideFVFluxBCIntegral.h"
 
 /**
  * Provides an interface for computing residual contributions from finite
@@ -32,6 +33,9 @@ public:
   void computeResidual(const FaceInfo & fi) override;
   void computeJacobian(const FaceInfo & fi) override;
   void computeResidualAndJacobian(const FaceInfo & fi) override;
+
+  /// Update internal structures (normal, face type, etc) for the given face
+  void updateCurrentFace(const FaceInfo & fi);
 
 protected:
   virtual ADReal computeQpResidual() = 0;
@@ -67,4 +71,8 @@ protected:
 
   /// The variable face type
   FaceInfo::VarFaceNeighbors _face_type;
+
+  // This class will want to call computeQpResidual from here considering that
+  // it will directly use the boundary conditions to compute the flux.
+  friend class SideFVFluxBCIntegral;
 };

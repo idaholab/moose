@@ -2,14 +2,14 @@
 # Lid-driven cavity test
 # Reynolds: 5,000
 # Author: Dr. Mauricio Tano
-# Last Update: Novomber, 2023
+# Last Update: November, 2023
 # Turbulent model using:
 # k-epsilon model
 # Incremental wall function formulation (similar to OpenFOAM)
 # SIMPLE Solve
 ##########################################################
 
-### Thermophsyical Properties ###
+### Thermophysical Properties ###
 mu = 2e-5
 rho = 1.0
 
@@ -22,7 +22,7 @@ intensity = 0.01
 k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
@@ -30,11 +30,8 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
 bulk_wall_treatment = false
 walls = 'left top right bottom'
-max_mixing_length = 1e10
-linearized_yplus_mu_t = false
 wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 pressure_tag = "pressure_grad"
@@ -199,8 +196,7 @@ pressure_tag = "pressure_grad"
     mu = ${mu}
     mu_t = 'mu_t'
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment}
   []
 
   [TKED_advection]
@@ -234,8 +230,7 @@ pressure_tag = "pressure_grad"
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment}
   []
 []
 
@@ -293,8 +288,7 @@ pressure_tag = "pressure_grad"
     v = vel_y
     bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
-    linearized_yplus = ${linearized_yplus_mu_t}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
+    wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
   []
 []

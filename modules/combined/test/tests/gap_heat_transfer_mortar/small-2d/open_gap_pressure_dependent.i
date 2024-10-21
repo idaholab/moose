@@ -64,8 +64,8 @@
   []
 []
 
-[Modules]
-  [TensorMechanics/Master]
+[Physics]
+  [SolidMechanics/QuasiStatic]
     [steel]
       strain = SMALL
       add_variables = false

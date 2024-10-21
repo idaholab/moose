@@ -85,6 +85,15 @@ std::string installedInputsDir(const std::string & app_name,
 /// Returns the directory of any installed docs/site.
 std::string docsDir(const std::string & app_name);
 
+/**
+ * Returns the URL of a page located on the MOOSE documentation site.
+ *
+ * @param[in] path   URL path following the domain name. For example, in the
+ *                   URL "www.example.com/folder1/folder2/file.html", this
+ *                   would be "folder1/folder2/file.html".
+ */
+std::string mooseDocsURL(const std::string & path);
+
 /// Replaces all occurrences of from in str with to and returns the result.
 std::string replaceAll(std::string str, const std::string & from, const std::string & to);
 
@@ -213,10 +222,19 @@ void serialEnd(const libMesh::Parallel::Communicator & comm, bool warn = true);
 bool hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext = false);
 
 /**
+ * Gets the extension of the passed file name.
+ * @param filename The filename of which to get the extension
+ * @param rfind When true, searches for last "." in filename. Otherwise, searches for first "."
+ * @return file_ext The extension of filename (does not include the leading "."). If filename has no
+ * extension, returns "".
+ */
+std::string getExtension(const std::string & filename, const bool rfind = false);
+
+/**
  * Removes any file extension from the given string s (i.e. any ".[extension]" suffix of s) and
  * returns the result.
  */
-std::string stripExtension(const std::string & s);
+std::string stripExtension(const std::string & s, const bool rfind = false);
 
 /**
  * Function for splitting path and filename
@@ -1199,6 +1217,21 @@ inline bool
 isDigits(const std::string & str)
 {
   return std::all_of(str.begin(), str.end(), [](unsigned char c) { return std::isdigit(c); });
+}
+
+/**
+ * Courtesy https://stackoverflow.com/a/57163016 and
+ * https://stackoverflow.com/questions/447206/c-isfloat-function
+ * @return Whether the string is convertible to a float
+ */
+inline bool
+isFloat(const std::string & str)
+{
+  if (str.empty())
+    return false;
+  char * ptr;
+  strtof(str.c_str(), &ptr);
+  return (*ptr) == '\0';
 }
 } // MooseUtils namespace
 

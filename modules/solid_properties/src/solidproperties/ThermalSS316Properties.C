@@ -21,21 +21,27 @@ ThermalSS316Properties::validParams()
 }
 
 ThermalSS316Properties::ThermalSS316Properties(const InputParameters & parameters)
-  : ThermalSolidProperties(parameters)
+  : ThermalSolidProperties(parameters), _c1(0.1816), _c2(428.46)
 {
 }
 
 Real
 ThermalSS316Properties::cp_from_T(const Real & T) const
 {
-  return 0.1816 * T + 428.46;
+  return _c1 * T + _c2;
 }
 
 void
 ThermalSS316Properties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const
 {
   cp = cp_from_T(T);
-  dcp_dT = 0.1816;
+  dcp_dT = _c1;
+}
+
+Real
+ThermalSS316Properties::cp_integral(const Real & T) const
+{
+  return 0.5 * _c1 * T * T + _c2 * T;
 }
 
 Real

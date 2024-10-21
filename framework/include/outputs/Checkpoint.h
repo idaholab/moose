@@ -27,7 +27,6 @@
  */
 enum CheckpointType : unsigned short
 {
-  NONE,
   SYSTEM_CREATED,
   USER_CREATED
 };
@@ -44,6 +43,12 @@ struct CheckpointFileNames
 
   /// Filenames for restartable data
   std::vector<std::filesystem::path> restart;
+
+  bool operator==(const CheckpointFileNames & rhs) const
+  {
+    // Compare the relevant members for equality
+    return (this->checkpoint == rhs.checkpoint) && (this->restart == rhs.restart);
+  }
 };
 
 /**
@@ -83,6 +88,16 @@ public:
   /// Sets the autosave flag manually if the object has already been initialized.
   void setAutosaveFlag(CheckpointType flag) { _checkpoint_type = flag; }
 
+  /**
+   * Gathers and records information used later for console output
+   * @return A stringstream containing the following entries:
+   * Wall Time Interval : interval length in seconds, if any, otherwise "Disabled"
+   * User Checkpoint    : name of user-define checkpoint, if any, otherwise "Disabled"
+   * # Checkpoints Kept : value if the 'num_files' parameter
+   * Execute On         : value of the 'execute_on' parameter
+   */
+  std::stringstream checkpointInfo() const;
+
 protected:
   /**
    * Outputs a checkpoint file.
@@ -95,6 +110,9 @@ protected:
 
 private:
   void updateCheckpointFiles(CheckpointFileNames file_struct);
+
+  /// Determines if the requested values of execute_on are valid for checkpoints
+  void validateExecuteOn() const;
 
   /// Determines if this checkpoint is an autosave, and what kind of autosave it is.
   CheckpointType _checkpoint_type;

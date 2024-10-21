@@ -21,6 +21,7 @@
 #include "NonlinearSystem.h"
 #include "OutputWarehouse.h"
 #include "SystemInfo.h"
+#include "Checkpoint.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -41,6 +42,14 @@ outputFrameworkInformation(const MooseApp & app)
 
   if (app.getSystemInfo() != NULL)
     oss << app.getSystemInfo()->getInfo();
+
+  const auto checkpoints = app.getOutputWarehouse().getOutputs<Checkpoint>();
+  if (checkpoints.size())
+  {
+    oss << std::left << "Checkpoint:\n";
+    oss << checkpoints[0]->checkpointInfo().str();
+    oss << std::endl;
+  }
 
   oss << std::left << "Parallelism:\n"
       << std::setw(console_field_width)
@@ -346,7 +355,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
           << "  MOOSE Preconditioner" +
                  (problem.numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") + ": "
           << mpc->getParam<std::string>("_type");
-      if (mpc->name() == "_moose_auto")
+      if (mpc->name().find("_moose_auto") != std::string::npos)
         oss << " (auto)";
       oss << '\n';
     }

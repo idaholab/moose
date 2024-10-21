@@ -20,6 +20,7 @@ GeneralUserObject::validParams()
 
 GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
   : UserObject(parameters),
+    ScalarCoupleable(this),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     TransientInterface(this)
 {

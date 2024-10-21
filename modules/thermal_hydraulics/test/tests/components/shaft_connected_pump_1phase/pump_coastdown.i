@@ -53,6 +53,7 @@ dt = 0.005
     head = head_fcn
     torque_hydraulic = torque_fcn
     density_rated = 124.2046
+    use_scalar_variables = false
   []
 
   [pipe]
@@ -82,85 +83,23 @@ dt = 0.005
     data_file = semiscale_torque_data.csv
     format = columns
   []
-
-  [S_energy_fcn]
-    type = ParsedFunction
-    expression = '-tau_hyd * omega'
-    symbol_names = 'tau_hyd  omega'
-    symbol_values = 'pump:hydraulic_torque shaft:omega'
-  []
-  [energy_conservation_fcn]
-    type = ParsedFunction
-    expression = '(E_change - S_energy * dt) / E_tot'
-    symbol_names = 'E_change S_energy dt E_tot'
-    symbol_values = 'E_change S_energy ${dt} E_tot'
-  []
 []
 
 [Postprocessors]
-  # mass conservation
-  [mass_pipes]
-    type = ElementIntegralVariablePostprocessor
-    variable = rhoA
+  [vel_avg]
+    type = ElementAverageValue
+    variable = vel
     block = 'pipe'
-    execute_on = 'initial timestep_end'
-  []
-  [mass_pump]
-    type = ScalarVariable
-    variable = pump:rhoV
-    execute_on = 'initial timestep_end'
-  []
-  [mass_tot]
-    type = SumPostprocessor
-    values = 'mass_pipes mass_pump'
-    execute_on = 'initial timestep_end'
-  []
-  [mass_conservation]
-    type = ChangeOverTimePostprocessor
-    postprocessor = mass_tot
-    change_with_respect_to_initial = true
-    compute_relative_change = true
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  # energy conservation
-  [E_pipes]
-    type = ElementIntegralVariablePostprocessor
-    variable = rhoEA
-    block = 'pipe'
+  [hydraulic_torque]
+    type = ElementAverageValue
+    variable = hydraulic_torque
+    block = 'pump'
     execute_on = 'initial timestep_end'
-  []
-  [E_pump]
-    type = ScalarVariable
-    variable = pump:rhoEV
-    execute_on = 'initial timestep_end'
-  []
-  [E_tot]
-    type = LinearCombinationPostprocessor
-    pp_coefs = '1 1'
-    pp_names = 'E_pipes E_pump'
-    execute_on = 'initial timestep_end'
-  []
-  [S_energy]
-    type = FunctionValuePostprocessor
-    function = S_energy_fcn
-    execute_on = 'initial timestep_end'
-  []
-  [E_change]
-    type = ChangeOverTimePostprocessor
-    postprocessor = E_tot
-    execute_on = 'initial timestep_end'
-  []
-
-  # This should also execute on initial. This value is
-  # lagged by one timestep as a workaround to moose issue #13262.
-  [energy_conservation]
-    type = FunctionValuePostprocessor
-    function = energy_conservation_fcn
-    execute_on = 'timestep_end'
   []
 []
-
 
 [Preconditioning]
   [SMP]
@@ -193,5 +132,9 @@ dt = 0.005
 
 [Outputs]
   velocity_as_vector = false
-  exodus = true
+  file_base = 'pump_coastdown'
+  [csv]
+    type = CSV
+    show = 'shaft:omega vel_avg'
+  []
 []

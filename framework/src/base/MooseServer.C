@@ -46,7 +46,7 @@ MooseServer::MooseServer(MooseApp & moose_app)
   server_capabilities[wasp::lsp::m_doc_symbol_provider] = true;
   server_capabilities[wasp::lsp::m_doc_format_provider] = true;
   server_capabilities[wasp::lsp::m_definition_provider] = true;
-  server_capabilities[wasp::lsp::m_references_provider] = false;
+  server_capabilities[wasp::lsp::m_references_provider] = true;
   server_capabilities[wasp::lsp::m_hover_provider] = true;
 }
 
@@ -72,6 +72,9 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // create new application with parameters modified for input check run
   _check_apps[document_path] = AppFactory::instance().createShared(
       _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
+
+  // add updated document text to map associated with current document path
+  _path_to_text[document_path] = document_text;
 
   // enable exceptions to be thrown for errors and cache initial setting
   bool cached_throw_on_error = Moose::_throw_on_error;
@@ -303,9 +306,11 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
       valid_params.getParametersList().count(parent_name))
     pass &= addValuesToList(completionItems,
                             valid_params,
+                            existing_params,
                             existing_subblocks,
                             parent_name,
                             obj_act_tasks,
+                            object_path,
                             replace_line_beg,
                             replace_char_beg,
                             replace_line_end,
@@ -598,6 +603,10 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
   // walk over subblock names if found or at root and build completion list
   if (!registered_syntax.empty() || object_path == "/")
   {
+    // choose format of insertion text based on if client supports snippets
+    int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
+                                             : wasp::lsp::m_text_format_plaintext;
+
     for (const auto & subblock_name : _syntax_to_subblocks[registered_syntax])
     {
       // filter subblock if it does not begin with prefix and one was given
@@ -608,24 +617,24 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       std::string insert_text;
       int complete_kind;
 
-      // choose format for insert text based on if client supports snippets
-      int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
-                                               : wasp::lsp::m_text_format_plaintext;
+      // build required parameter list for each block to use in insert text
+      const std::string full_block_path = object_path + "/" + subblock_name;
+      const std::string req_params = getRequiredParamsText(full_block_path, "", {}, "  ");
 
       // customize description and insert text for star and named subblocks
       if (subblock_name == "*")
       {
         doc_string = "custom user named block";
         insert_text = (request_on_block_decl ? "" : "[") +
-                      (filtering_prefix.size() ? filtering_prefix : "block_name") + "]\n  " +
-                      (client_snippet_support ? "$0" : "") + "\n[]";
+                      (filtering_prefix.size() ? filtering_prefix : "block_name") + "]" +
+                      req_params + "\n  " + (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
         doc_string = "application named block";
-        insert_text = (request_on_block_decl ? "" : "[") + subblock_name + "]\n  " +
-                      (client_snippet_support ? "$0" : "") + "\n[]";
+        insert_text = (request_on_block_decl ? "" : "[") + subblock_name + "]" + req_params +
+                      "\n  " + (client_snippet_support ? "$0" : "") + "\n[]";
         complete_kind = wasp::lsp::m_comp_kind_struct;
       }
 
@@ -655,9 +664,11 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
 bool
 MooseServer::addValuesToList(wasp::DataArray & completionItems,
                              const InputParameters & valid_params,
+                             const std::set<std::string> & existing_params,
                              const std::set<std::string> & existing_subblocks,
                              const std::string & param_name,
                              const std::set<std::string> & obj_act_tasks,
+                             const std::string & object_path,
                              int replace_line_beg,
                              int replace_char_beg,
                              int replace_line_end,
@@ -714,6 +725,10 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
       const std::string & object_name = objects_iter.first;
       const InputParameters & object_params = objects_iter.second->buildParameters();
 
+      // build required parameter list for each block to use in insert text
+      std::string req_params = getRequiredParamsText(object_path, object_name, existing_params, "");
+      req_params += !req_params.empty() ? "\n" : "";
+
       // check if object has registered base parameter that can be verified
       if (!object_params.have_parameter<std::string>("_moose_base"))
         continue;
@@ -726,7 +741,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
           continue;
         std::string type_description = object_params.getClassDescription();
         MooseUtils::escape(type_description);
-        options_and_descs[object_name] = type_description;
+        options_and_descs[object_name + req_params] = type_description;
         break;
       }
     }
@@ -776,23 +791,24 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
   // walk over pairs of options with descriptions and build completion list
   for (const auto & option_and_desc : options_and_descs)
   {
-    const std::string & option = option_and_desc.first;
-    const std::string & dscrpt = option_and_desc.second;
+    const std::string & insert_text = option_and_desc.first;
+    const std::string & option_name = insert_text.substr(0, insert_text.find('\n'));
+    const std::string & description = option_and_desc.second;
 
     // add option name, insertion range, and description to completion list
     completionItems.push_back(wasp::DataObject());
     wasp::DataObject * item = completionItems.back().to_object();
     pass &= wasp::lsp::buildCompletionObject(*item,
                                              errors,
-                                             option,
+                                             option_name,
                                              replace_line_beg,
                                              replace_char_beg,
                                              replace_line_end,
                                              replace_char_end,
-                                             option,
+                                             insert_text,
                                              complete_kind,
                                              "",
-                                             dscrpt,
+                                             description,
                                              false,
                                              false,
                                              wasp::lsp::m_text_format_plaintext);
@@ -964,20 +980,20 @@ MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
 }
 
 bool
-MooseServer::addLocationNodesToList(wasp::DataArray & definitionLocations,
+MooseServer::addLocationNodesToList(wasp::DataArray & defsOrRefsLocations,
                                     const SortedLocationNodes & location_nodes)
 {
   bool pass = true;
 
-  // walk over set of nodes with locations to add and build definition list
+  // walk over set of sorted nodes provided to add and build locations list
   for (const auto & location_nodes_iter : location_nodes)
   {
-    // add file scheme prefix to front of file path to build definition uri
+    // add file scheme prefix onto front of file path to build location uri
     auto location_uri = wasp::lsp::m_uri_prefix + location_nodes_iter.node_pool()->stream_name();
 
-    // add file uri and zero based line and column range to definition list
-    definitionLocations.push_back(wasp::DataObject());
-    wasp::DataObject * location = definitionLocations.back().to_object();
+    // add file uri with zero based line and column range to locations list
+    defsOrRefsLocations.push_back(wasp::DataObject());
+    wasp::DataObject * location = defsOrRefsLocations.back().to_object();
     pass &= wasp::lsp::buildLocationObject(*location,
                                            errors,
                                            location_uri,
@@ -1073,16 +1089,120 @@ MooseServer::getHoverDisplayText(std::string & display_text, int line, int chara
 }
 
 bool
-MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & /* referencesLocations */,
-                                               int /* line */,
-                                               int /* character */,
-                                               bool /* include_declaration */)
+MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & referencesLocations,
+                                               int line,
+                                               int character,
+                                               bool include_declaration)
 {
-  bool pass = true;
+  Syntax & syntax = getCheckApp()->syntax();
 
-  // TODO - hook up this capability by adding server specific logic here
+  // return without adding any reference locations when parser root is null
+  if (!rootIsValid())
+    return true;
 
-  return pass;
+  // find hit node for zero based request line and column number from input
+  wasp::HITNodeView view_root = getRoot().getNodeView();
+  wasp::HITNodeView request_context =
+      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // return without adding any references when request not block declarator
+  if ((request_context.type() != wasp::DECL && request_context.type() != wasp::DOT_SLASH &&
+       request_context.type() != wasp::LBRACKET && request_context.type() != wasp::RBRACKET) ||
+      !request_context.has_parent() || request_context.parent().type() != wasp::OBJECT)
+    return true;
+
+  // get input path and block name of declarator located at request context
+  const std::string & block_path = request_context.parent().path();
+  const std::string & block_name = request_context.parent().name();
+
+  // build map from input lookup paths to parameter types and save to reuse
+  if (_input_path_to_types.empty())
+    for (const auto & associated_types_iter : syntax.getAssociatedTypes())
+    {
+      const std::string & path = associated_types_iter.first;
+      const std::string & type = associated_types_iter.second;
+      _input_path_to_types[path].insert(type);
+    }
+
+  // get registered syntax from block path with map of input paths to types
+  bool is_parent;
+  std::string registered_syntax = syntax.isAssociated(block_path, &is_parent, _input_path_to_types);
+
+  // return without adding any references if syntax has no types associated
+  if (is_parent || !_input_path_to_types.count(registered_syntax))
+    return true;
+
+  // get set of parameter types which are associated with registered syntax
+  const std::set<std::string> & target_types = _input_path_to_types.at(registered_syntax);
+
+  // set used to gather nodes collected by value custom sorted by locations
+  SortedLocationNodes match_nodes(
+      [](const wasp::HITNodeView & l, const wasp::HITNodeView & r)
+      {
+        const std::string & l_file = l.node_pool()->stream_name();
+        const std::string & r_file = r.node_pool()->stream_name();
+        return (l_file < r_file || (l_file == r_file && l.line() < r.line()) ||
+                (l_file == r_file && l.line() == r.line() && l.column() < r.column()));
+      });
+
+  // walk input recursively and gather all nodes that match value and types
+  getNodesByValueAndTypes(match_nodes, view_root, block_name, target_types);
+
+  // return without adding any references if no nodes match value and types
+  if (match_nodes.empty())
+    return true;
+
+  // add request context node to set if declaration inclusion was specified
+  if (include_declaration && request_context.parent().child_count_by_name("decl"))
+    match_nodes.insert(request_context.parent().first_child_by_name("decl"));
+
+  // add locations to references list with nodes that match value and types
+  return addLocationNodesToList(referencesLocations, match_nodes);
+}
+
+void
+MooseServer::getNodesByValueAndTypes(SortedLocationNodes & match_nodes,
+                                     wasp::HITNodeView view_parent,
+                                     const std::string & target_value,
+                                     const std::set<std::string> & target_types)
+{
+  // walk over children of context to gather nodes matching value and types
+  for (const auto & view_child : view_parent)
+  {
+    // check for parameter type match if node is value matching target data
+    if (view_child.type() == wasp::VALUE && view_child.to_string() == target_value)
+    {
+      // get object context path and object type value of node if it exists
+      wasp::HITNodeView object_context = view_child;
+      while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+        object_context = object_context.parent();
+      const std::string object_path = object_context.path();
+      wasp::HITNodeView type_node = object_context.first_child_by_name("type");
+      const std::string object_type =
+          type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
+
+      // gather global, action, and object parameters for context of object
+      InputParameters valid_params = emptyInputParameters();
+      std::set<std::string> obj_act_tasks;
+      getAllValidParameters(valid_params, object_path, object_type, obj_act_tasks);
+
+      // get name from parent of current value node which is parameter node
+      std::string param_name = view_child.has_parent() ? view_child.parent().name() : "";
+
+      // get type of parameter and prepare string to check target set match
+      std::string dirty_type = valid_params.type(param_name);
+      std::string clean_type = MooseUtils::prettyCppType(dirty_type);
+      pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+      // add input node to collection if its type is also in set of targets
+      if (target_types.count(clean_type))
+        match_nodes.insert(view_child);
+    }
+
+    // recurse deeper into input to search for matches if node has children
+    if (!view_child.is_leaf())
+      getNodesByValueAndTypes(match_nodes, view_child, target_value, target_types);
+  }
 }
 
 bool
@@ -1090,10 +1210,17 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
                                                int tab_size,
                                                bool /* insert_spaces */)
 {
+  // strip scheme prefix from document uri if it exists for parse file path
+  std::string parse_file_path = document_path;
+  pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
+
   // input check expanded any brace expressions in cached tree so reprocess
-  std::stringstream input_errors, input_stream(document_text);
+  std::stringstream input_errors, input_stream(getDocumentText());
   wasp::DefaultHITInterpreter interpreter(input_errors);
-  interpreter.parse(input_stream);
+
+  // return without adding any formatting text edits if input parsing fails
+  if (!interpreter.parseStream(input_stream, parse_file_path))
+    return true;
 
   // return without adding any formatting text edits if parser root is null
   if (interpreter.root().is_null())
@@ -1150,7 +1277,7 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
     std::string blank = child.line() > prev_line + 1 ? "\n" : "";
 
     // format include directive with indentation and collapse extra spacing
-    if (wasp::is_nested_file(child))
+    if (child.type() == wasp::FILE)
       format_string += blank + newline_indent + MooseUtils::trim(collapse_spaces(child.data()));
 
     // format normal comment with indentation and inline comment with space
@@ -1358,6 +1485,32 @@ MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
     return wasp::lsp::m_symbol_kind_property;
 }
 
+std::string
+MooseServer::getRequiredParamsText(const std::string & subblock_path,
+                                   const std::string & subblock_type,
+                                   const std::set<std::string> & existing_params,
+                                   const std::string & indent_spaces)
+{
+  // gather global, action, and object parameters in request object context
+  InputParameters valid_params = emptyInputParameters();
+  std::set<std::string> obj_act_tasks;
+  getAllValidParameters(valid_params, subblock_path, subblock_type, obj_act_tasks);
+
+  // walk over collection of all parameters and build text of ones required
+  std::string required_param_text;
+  for (const auto & valid_params_iter : valid_params)
+  {
+    // skip parameter if deprecated, private, defaulted, optional, existing
+    const std::string & param_name = valid_params_iter.first;
+    if (!valid_params.isParamDeprecated(param_name) && !valid_params.isPrivate(param_name) &&
+        !valid_params.isParamValid(param_name) && valid_params.isParamRequired(param_name) &&
+        !existing_params.count(param_name))
+      required_param_text += "\n" + indent_spaces + param_name + " = ";
+  }
+
+  return required_param_text;
+}
+
 bool
 MooseServer::rootIsValid() const
 {
@@ -1377,4 +1530,11 @@ MooseServer::getCheckApp() const
 {
   mooseAssert(_check_apps.count(document_path), "No check app for path");
   return _check_apps.at(document_path);
+}
+
+const std::string &
+MooseServer::getDocumentText() const
+{
+  mooseAssert(_path_to_text.count(document_path), "No text for path");
+  return _path_to_text.at(document_path);
 }

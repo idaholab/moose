@@ -216,6 +216,13 @@ MultiApp::validParams()
                         "final solution from the previous coupling iteration"
                         "and re-uses it as the initial guess "
                         "for the next coupling iteration");
+  params.addParam<bool>(
+      "no_backup_and_restore",
+      false,
+      "True to turn off restore for this multiapp. This is useful when doing steady-state "
+      "Picard iterations where we want to use the solution of previous Picard iteration as the "
+      "initial guess of the current Picard iteration.");
+  params.deprecateParam("no_backup_and_restore", "no_restore", "01/01/2025");
 
   params.addDeprecatedParam<bool>("clone_master_mesh",
                                   false,
@@ -280,6 +287,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _cli_args(getParam<std::vector<CLIArgString>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _no_restore(getParam<bool>("no_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
     _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups", this)),
     _solve_step_timer(registerTimedSection("solveStep", 3, "Executing MultiApps", false)),

@@ -53,9 +53,8 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
-    add_variables = true
     strain = FINITE
     block = '1 2'
     use_automatic_differentiation = false

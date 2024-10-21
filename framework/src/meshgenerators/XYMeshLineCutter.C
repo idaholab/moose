@@ -110,6 +110,18 @@ XYMeshLineCutter::generate()
       *(replicated_mesh_ptr->elem_dimensions().rbegin()) != 2)
     paramError("input", "Only 2D meshes are supported.");
 
+  // Check that the input boundaries are part of the mesh
+  if (isParamValid("input_mesh_external_boundary_id"))
+    if (!MooseMeshUtils::hasBoundaryID(*replicated_mesh_ptr, _input_mesh_external_boundary_id))
+      paramError("input_mesh_external_boundary_id", "Boundary must exist in input mesh");
+
+  // Check that the other boundaries to conform to are part of the mesh
+  if (isParamValid("other_boundaries_to_conform"))
+    for (const auto bid : _other_boundaries_to_conform)
+      if (!MooseMeshUtils::hasBoundaryID(*replicated_mesh_ptr, bid))
+        paramError("other_boundaries_to_conform",
+                   "Boundary '" + std::to_string(bid) + "' must exist in input mesh");
+
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
   // Subdomain ID for TRI elements arising of QUAD element cuts must be new
   std::set<subdomain_id_type> subdomain_ids_set;

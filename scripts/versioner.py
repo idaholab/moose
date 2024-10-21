@@ -31,7 +31,7 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
 
 ### Tracking Libraries
 # note: Order is important only for historical lookups; git_ancestor(commit) == True
-TRACKING_LIBRARIES = ['mpich', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
+TRACKING_LIBRARIES = ['tools', 'mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
 
 ### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
 # pylint: disable=unused-argument
@@ -42,33 +42,24 @@ def undefined(arg, *args, **kwargs):
     """
     return arg
 
-# Add your undefined template variables to call 'undefined' method above
+# Read MOOSE_DIR/framework/doc/packages_config.yml to grab defaults
+packages_config = os.path.join(MOOSE_DIR, 'framework', 'doc', 'packages_config.yml')
+packages_yaml = {'default_mpi' : 'mpich'}
+if os.path.exists(packages_config):
+    with open(packages_config, 'r') as pkg_file:
+        packages_yaml.update(yaml.safe_load(pkg_file))
+
+# Allow jinja template variables to return a value when otherwise it would not
 JINJA_CONFIG = {'pin_compatible'        : undefined,
                 'pin_subpackage'        : undefined,
                 'compiler'              : undefined,
-                'base_mpich'            : undefined('mpich'),
-                'base_mpicc'            : undefined('mpicc'),
-                'base_mpicxx'           : undefined('mpicxx'),
-                'base_mpifort'          : undefined('mpifort'),
+                'mpi'                   : undefined(packages_yaml['default_mpi']),
                 'moose_libgfortran'     : undefined('libgfortran'),
                 'moose_libgfortran5'    : undefined('libgfortran5'),
-                'moose_hdf5'            : undefined('hdf5'),
-                'moose_ld64'            : undefined('ld64'),
-                'moose_libxt'           : undefined('ld64'),
-                'moose_libsm'           : undefined('ld64'),
-                'moose_libx11'          : undefined('libx11'),
-                'moose_libice'          : undefined('libice'),
-                'moose_libxext'         : undefined('libxext'),
-                'moose_mesa_libgl'      : undefined('mesa_libgl'),
-                'moose_xorg_x11'        : undefined('xorg_x11'),
-                'moose_libglu'          : undefined('libglu'),
-                'moose_mesalib'         : undefined('mesalib'),
-                'moose_mpich'           : undefined('moose-mpich'),
                 'moose_petsc'           : undefined('moose-petsc'),
                 'moose_libmesh_vtk'     : undefined('moose-libmesh-vtk'),
                 'moose_libmesh'         : undefined('moose-libmesh'),
                 }
-### End Beautify global
 
 class Versioner:
     """ generates reproducible versions (hashes) for moose apps and moose dependencies """
@@ -90,7 +81,7 @@ class Versioner:
         return meta['hash']
 
     def get_yamlcontents(self, commit):
-        """ load yaml file contents at time of suppllied commit """
+        """ load yaml file contents at time of supplied commit """
         # Load the yaml file at the given commit; the location changed
         # from module_hash.yaml -> versioner.yaml at changed_commit
         changed_commit = '2bd844dc5d4de47238eab94a3a718e9714592de1'
@@ -113,6 +104,8 @@ class Versioner:
     @staticmethod
     def parse_args(argv, entities):
         """ parses arguments """
+        # TODO: deprecate mpich. Remove when it gets removed from versioner.yaml
+        argv = [x.replace('mpich', 'mpi') for x in argv]
         parser = argparse.ArgumentParser(description='Supplies a hash for a given library')
         parser.add_argument('library', nargs='?', metavar='library', choices=entities,
                             help=f'choose from: {", ".join(entities)}', default='moose-dev')
@@ -179,7 +172,12 @@ class Versioner:
     @staticmethod
     def git_file(file, commit, repo_dir=MOOSE_DIR, allow_missing=False):
         """ gets the contents of a file at a given git commit """
-        file = file.replace(repo_dir, '.')
+        if os.path.isabs(file):
+            relative = os.path.relpath(file, MOOSE_DIR)
+            if relative.startswith('..'):
+                raise Exception(f'Supplied path {file} is not in {MOOSE_DIR}')
+            file = relative
+
         command = ['git', 'show', f'{commit}:{file}']
         process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                  cwd=repo_dir, check=False)
@@ -266,8 +264,9 @@ class Versioner:
         return child
 
     def version_meta(self, commit='HEAD'):
-        """ populate and return dictionary making up the contents involved
-        with generating hashes """
+        """
+        populate and return dictionary making up the contents involved with generating hashes
+        """
         # pylint: disable=too-many-locals
         if not self.is_git_object(commit):
             # pylint: disable=broad-exception-raised
@@ -361,26 +360,26 @@ class Versioner:
         meta = yaml.safe_load(Versioner.parse_jinja(contents))
         name = meta['package']['name']
         version = meta['package']['version']
-        build = meta['build'].get('string', None)
-        return name, version, build, meta
+        build_string = meta['build'].get('string', None)
+        build_number = meta['build']['number']
+        return name, version, build_string, build_number, meta
 
     @staticmethod
     def conda_meta(package, influential, commit):
         """ produces the conda meta entry """
         # Read the conda-build jinja2 styled template
         contents = Versioner.git_file(influential, commit)
-        name, version, build, meta = Versioner.conda_meta_jinja(contents)
+        name, version, build_string, build_number, meta = Versioner.conda_meta_jinja(contents)
 
-        # Make sure the string is build_<NUMBER>
-        build_re = re.search(r'^build\_([0-9]+)$', build)
-        if not build_re:
-            print(f'fatal: {package} conda build string not understood')
-            sys.exit(1)
+        version_and_build = version
+        if build_string is not None:
+            version_and_build += f'={build_string}'
 
         return {'name': name,
                 'version': version,
-                'build': int(build_re.group(1)),
-                'install': f'{name}={version}={build}',
+                'build': int(build_number) if build_number is not None else None,
+                'version_and_build': version_and_build,
+                'install': f'{name}={version_and_build}',
                 'meta': meta}
 
     @staticmethod
@@ -392,7 +391,7 @@ class Versioner:
         def_package = 'app' if is_app else package
 
         name_base = package
-        if package in ['mpich', 'petsc', 'libmesh', 'wasp']:
+        if package in ['mpi', 'petsc', 'libmesh', 'wasp']:
             name_base = f'moose-{name_base}'
         name_suffix = platform.machine()
         name = f'{name_base}-{name_suffix}'

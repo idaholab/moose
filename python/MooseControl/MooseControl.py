@@ -35,7 +35,8 @@ class MooseControl:
     def __init__(self,
                  moose_command: list[str] = None,
                  moose_port: int = None,
-                 moose_control_name: str = None):
+                 moose_control_name: str = None,
+                 inherit_environment: bool = True):
         """Constructor
 
         If "moose_port" is specified without "moose_command": Connect to the webserver at
@@ -55,6 +56,7 @@ class MooseControl:
             moose_command (list[str]): The command to use to start the moose process
             moose_port (int): The webserver port to connect to
             moose_control_name (str): The name of the input control object
+            inherit_environment (bool): Whether or not the MOOSE command will inherit the current shell environment
         """
         # Setup a basic logger
         logging.basicConfig(level=logging.INFO,
@@ -76,6 +78,7 @@ class MooseControl:
         self._moose_command = moose_command
         self._moose_port = moose_port
         self._moose_control_name = moose_control_name
+        self._inherit_environment = inherit_environment
 
         # Set defaults
         self._url = None
@@ -111,10 +114,8 @@ class MooseControl:
     def kill(self):
         """Kills the underlying moose process if one is running"""
         if self.isProcessRunning():
-            try:
-                self._moose_process.kill()
-            except:
-                pass
+            self._moose_process.kill()
+            self._moose_process.wait()
         self.possiblyRemoveSocket()
 
     class ControlException(Exception):
@@ -252,7 +253,7 @@ class MooseControl:
 
             # Spawn the moose process
             logger.info(f'Spawning MOOSE with command "{moose_command}"')
-            self._moose_process = self.spawnMoose(moose_command)
+            self._moose_process = self.spawnMoose(moose_command, self._inherit_environment)
 
             # And setup the threaded reader that will pipe the moose process
             # to the common logger
@@ -458,6 +459,18 @@ class MooseControl:
         self._requireNumeric(value)
         self._setControllable(path, 'Real', float(value))
 
+    def setControllableInt(self, path: str, value: int):
+        """Sets a controllable int-valued parameter
+
+        The provided value must be numeric
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (int): The value to set
+        """
+        self._requireNumeric(value)
+        self._setControllable(path, 'int', int(value))
+
     def setControllableVectorReal(self, path: str, value: list[float]):
         """Sets a controllable vector-of-Real parameter
 
@@ -473,6 +486,22 @@ class MooseControl:
             self._requireNumeric(entry)
             value_list.append(entry)
         self._setControllable(path, 'std::vector<Real>', value_list)
+
+    def setControllableVectorInt(self, path: str, value: list[int]):
+        """Sets a controllable vector-of-int parameter
+
+        The provided value must be a list of numeric values
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (list): The value to set
+        """
+        self._requireType(value, list)
+        value_list = []
+        for entry in value:
+            self._requireNumeric(entry)
+            value_list.append(int(entry))
+        self._setControllable(path, 'std::vector<int>', value_list)
 
     def setControllableString(self, path: str, value: str):
         """Sets a controllable string parameter
@@ -521,12 +550,14 @@ class MooseControl:
         return value
 
     @staticmethod
-    def spawnMoose(cmd: list[str]) -> subprocess.Popen:
+    def spawnMoose(cmd: list[str], inherit_environment: bool = True) -> subprocess.Popen:
         """Helper for spawning a MOOSE process that will be cleanly killed"""
         popen_kwargs = {'stdout': subprocess.PIPE,
                         'stderr': subprocess.STDOUT,
                         'text': True,
                         'universal_newlines': True,
-                        'bufsize': 1}
+                        'bufsize': 1,
+                        'env': os.environ if inherit_environment else None,
+                        'preexec_fn': os.setsid}
 
         return subprocess.Popen(cmd, **popen_kwargs)

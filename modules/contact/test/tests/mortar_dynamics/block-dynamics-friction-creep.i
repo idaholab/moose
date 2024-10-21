@@ -73,7 +73,7 @@ offset = -0.095
   []
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Physics/SolidMechanics/Dynamic]
   [all]
     add_variables = true
     alpha = 0.0

@@ -72,6 +72,8 @@ public:
 
   virtual Real h_from_p_T(Real p, Real T) const override;
 
+  virtual ADReal h_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+
   virtual void
   h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
@@ -104,11 +106,27 @@ public:
 
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
 
+  /**
+   * The following routines are simply forwarded to the 'fp' companion FluidProperties
+   * as they are not included in the tabulations presently
+   */
   virtual std::vector<Real> henryCoefficients() const override;
 
   virtual Real vaporPressure(Real temperature) const override;
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
+
+  virtual Real vaporTemperature(Real pressure) const override;
+  virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
+
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+  virtual ADReal T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const override;
+
+  virtual Real triplePointPressure() const override;
+  virtual Real triplePointTemperature() const override;
+  virtual Real criticalPressure() const override;
+  virtual Real criticalTemperature() const override;
+  virtual Real criticalDensity() const override;
 
   /**
    * Derivatives like dc_dv & dc_de are computed using the chain rule
@@ -136,7 +154,10 @@ public:
   virtual Real T_from_p_s(Real p, Real s) const;
   virtual void T_from_p_s(Real p, Real s, Real & T, Real & dT_dp, Real & dT_ds) const;
   virtual Real T_from_h_p(Real h, Real pressure) const override;
+  virtual Real s_from_v_e(Real v, Real e) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
+  virtual void
+  s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
 
   /// AD implementations needed
   using SinglePhaseFluidProperties::c_from_v_e;
@@ -160,9 +181,31 @@ protected:
   void checkInputVariables(T & pressure, T & temperature) const;
 
   /**
+   * Checks that the inputs are within the range of the tabulated data, and throws
+   * an error if they are not.
+   * @param v specific volume (m3/kg)
+   * @param e specific internal energy (J/kg)
+   */
+  template <typename T>
+  void checkInputVariablesVE(T & v, T & e) const;
+
+  /**
    * Checks initial guess for Newton Method
    */
   virtual void checkInitialGuess() const;
+
+  /// Read tabulation data from file
+  void readFileTabulationData(bool use_pT);
+
+  /// Check that the tabulation grids in the file are correct (no repeats etc)
+  /// @param v1 the first grid axis (pressure for pT grid)
+  /// @param v2 the second grid axis (temperature for pT grid)
+  /// @param file_name the name of the tabulation file
+  void checkFileTabulationGrids(std::vector<Real> & v1,
+                                std::vector<Real> & v2,
+                                const std::string & file_name,
+                                const std::string & v1_name,
+                                const std::string & v2_name);
 
   /**
    * Generates a table of fluid properties by looping over pressure and temperature
@@ -170,17 +213,64 @@ protected:
    */
   virtual void generateTabulatedData();
 
-  /// File name of tabulated data file
-  FileName _file_name;
+  /**
+   * Generates a table of fluid properties by looping over specific volume and internal energy
+   * and calculating properties using the FluidProperties UserObject _fp.
+   */
+  virtual void generateVETabulatedData();
+
+  /// Retrieves the index for each property in the vector of interpolations
+  void computePropertyIndicesInInterpolationVectors();
+
+  /// Create (or reset) the grid vectors for the specific volume and internal energy interpolations
+  /// The order of priority for determining the range boundaries in v and e:
+  /// - if user-specified, use _v_min/max and _e_min/max
+  /// - if reading a (v,e) interpolation, the bounds of that range
+  /// - if a _fp exist find the min/max v/e from T_min/max and p_min/max
+  void createVEGridVectors();
+
+  /// Standardized error message for missing interpolation
+  void missingVEInterpolationError(const std::string & function_name) const;
+
+  // Utility to forward errors related to fluid properties methods not implemented
+  [[noreturn]] void FluidPropertiesForwardError(const std::string & desired_routine) const;
+
+  /// File name of input tabulated data file
+  FileName _file_name_in;
+  /// File name of input (v,e) tabulated data file
+  FileName _file_name_ve_in;
+  /// File name of output tabulated data file
+  FileName _file_name_out;
+  /// File name of output (v,e) tabulated data file
+  FileName _file_name_ve_out;
+  /// Whether to save a generated fluid properties file to disk
+  const bool _save_file;
+
   /// Pressure vector
   std::vector<Real> _pressure;
   /// Temperature vector
   std::vector<Real> _temperature;
-  /// Tabulated fluid properties
+  /// Specific volume vector
+  std::vector<Real> _specific_volume;
+  /// Specific internal energy vector
+  std::vector<Real> _internal_energy;
+  /// Specific enthalpy vector
+  std::vector<Real> _enthalpy;
+
+  /// Whether to create direct (p,T) interpolations
+  const bool _create_direct_pT_interpolations;
+  /// Whether to create direct (v,e) interpolations
+  const bool _create_direct_ve_interpolations;
+
+  /// Tabulated fluid properties (read from file OR computed from _fp)
   std::vector<std::vector<Real>> _properties;
+  /// Tabulated fluid properties in (v,e) (read from file OR computed from _fp)
+  std::vector<std::vector<Real>> _properties_ve;
 
   /// Vector of bi-dimensional interpolation of fluid properties
   std::vector<std::unique_ptr<BidimensionalInterpolation>> _property_ipol;
+  /// Vector of bi-dimensional interpolation of fluid properties directly in (v,e)
+  std::vector<std::unique_ptr<BidimensionalInterpolation>> _property_ve_ipol;
 
   /// Minimum temperature in tabulated data
   Real _temperature_min;
@@ -194,17 +284,12 @@ protected:
   unsigned int _num_T;
   /// Number of pressure points in the tabulated data
   unsigned int _num_p;
-  /// Whether to save a generated fluid properties file to disk
-  const bool _save_file;
 
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidProperties * const _fp;
+  /// Whether to allow a fp object when a tabulation is in use
+  const bool _allow_fp_and_tabulation;
 
-  /// List of required column names to be read
-  const std::vector<std::string> _required_columns{"pressure", "temperature"};
-  /// List of possible property column names to be read
-  const std::vector<std::string> _property_columns{
-      "density", "enthalpy", "internal_energy", "viscosity", "k", "c", "cv", "cp", "entropy"};
   /// Properties to be interpolated entered in the input file
   MultiMooseEnum _interpolated_properties_enum;
   /// List of properties to be interpolated
@@ -219,6 +304,8 @@ protected:
   bool _interpolate_cp;
   bool _interpolate_cv;
   bool _interpolate_entropy;
+  bool _interpolate_pressure;
+  bool _interpolate_temperature;
 
   /// Index of each property
   unsigned int _density_idx;
@@ -230,6 +317,8 @@ protected:
   unsigned int _cp_idx;
   unsigned int _cv_idx;
   unsigned int _entropy_idx;
+  unsigned int _p_idx;
+  unsigned int _T_idx;
 
   /// The MOOSE delimited file reader.
   MooseUtils::DelimitedFileReader _csv_reader;
@@ -244,10 +333,21 @@ protected:
   unsigned int _num_v;
   /// Number of internal energy points in tabulated data
   unsigned int _num_e;
-  /// to error or not on out-of-bounds check
-  bool _error_on_out_of_bounds;
-  /// log-space the specific volume instead of linear
+  /// log-space the specific volume interpolation grid axis instead of linear
   bool _log_space_v;
+  /// log-space the internal energy interpolation grid axis instead of linear
+  bool _log_space_e;
+
+  /// User-selected out-of-bounds behavior
+  MooseEnum _OOBBehavior;
+  /// Enum specifying all the behavior on out of bounds data options
+  enum OOBBehavior
+  {
+    Ignore,
+    Throw,
+    DeclareInvalid,
+    SetToClosestBound
+  };
 
   /// Bi-dimensional interpolation of temperature from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_e_ipol;
@@ -261,25 +361,22 @@ protected:
   /// Bidimensional interpolation of pressure from (v,h)
   std::unique_ptr<BidimensionalInterpolation> _p_from_v_h_ipol;
 
-  /// Minimum internal energy in tabulated data
+  /// Whether the specific internal energy bounds were set by the user
+  bool _e_bounds_specified;
+  /// Whether the specific volume bounds were set by the user
+  bool _v_bounds_specified;
+  /// Minimum internal energy in tabulated data (can be user-specified)
   Real _e_min;
-  /// Maximum internal energy in tabulated data
+  /// Maximum internal energy in tabulated data (can be user-specified)
   Real _e_max;
-  /// Minimum specific volume in tabulated data
+  /// Minimum specific volume in tabulated data (can be user-specified)
   Real _v_min;
-  /// Maximum specific volume in tabulated data
+  /// Maximum specific volume in tabulated data (can be user-specified)
   Real _v_max;
   /// Minimum specific enthalpy in tabulated data
   Real _h_min;
   /// Maximum specific enthalpy in tabulated data
   Real _h_max;
-
-  /// specific volume vector
-  std::vector<Real> _specific_volume;
-  /// internal energy vector
-  std::vector<Real> _internal_energy;
-  /// enthalpy vector
-  std::vector<Real> _enthalpy;
 };
 
 #pragma GCC diagnostic pop

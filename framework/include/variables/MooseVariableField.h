@@ -399,3 +399,8 @@ protected:
   using MooseVariableField<OutputType>::_time_integrator;                                          \
   using MooseVariableField<OutputType>::_ad_real_dummy;                                            \
   using MooseVariableField<OutputType>::getSolution
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MooseVariableField<Real>;
+extern template class MooseVariableField<RealVectorValue>;
+extern template class MooseVariableField<RealEigenVector>;

@@ -9,7 +9,7 @@
 
 #include "ADHeatFlux3EqnBC.h"
 #include "ADHeatFluxFromHeatStructureBaseUserObject.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Assembly.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADHeatFlux3EqnBC);

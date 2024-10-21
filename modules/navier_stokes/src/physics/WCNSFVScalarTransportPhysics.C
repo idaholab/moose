@@ -10,7 +10,8 @@
 #include "WCNSFVScalarTransportPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
-#include "NSFVAction.h"
+#include "NSFVBase.h"
+#include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
@@ -23,7 +24,7 @@ WCNSFVScalarTransportPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible scalar field transport equation(s)");
 
-  params += NSFVAction::commonScalarFieldAdvectionParams();
+  params += NSFVBase::commonScalarFieldAdvectionParams();
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>(
@@ -45,10 +46,10 @@ WCNSFVScalarTransportPhysics::validParams()
   params.addParam<std::vector<MooseFunctorName>>("passive_scalar_source", "Passive scalar sources");
 
   // Spatial finite volume discretization scheme
-  params.transferParam<MooseEnum>(NSFVAction::validParams(),
+  params.transferParam<MooseEnum>(NSFVBase::validParams(),
                                   "passive_scalar_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "passive_scalar_face_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "passive_scalar_two_term_bc_expansion");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "passive_scalar_face_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "passive_scalar_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
   params.addRangeCheckedParam<std::vector<Real>>(
@@ -70,7 +71,7 @@ WCNSFVScalarTransportPhysics::validParams()
 
 WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
-    WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
+    WCNSFVCoupledAdvectionPhysicsHelper(this),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _has_scalar_equation(isParamValid("add_scalar_equation") ? getParam<bool>("add_scalar_equation")
                                                              : !usingNavierStokesFVSyntax()),
@@ -84,7 +85,7 @@ WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters
         getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff"))
 {
   for (const auto & scalar_name : _passive_scalar_names)
-    saveNonlinearVariableName(scalar_name);
+    saveSolverVariableName(scalar_name);
 
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -133,7 +134,7 @@ WCNSFVScalarTransportPhysics::addNonlinearVariables()
   for (const auto name_i : index_range(_passive_scalar_names))
   {
     // Dont add if the user already defined the variable
-    if (nonlinearVariableExists(_passive_scalar_names[name_i], /*error_if_aux=*/true))
+    if (variableExists(_passive_scalar_names[name_i], /*error_if_aux=*/true))
     {
       checkBlockRestrictionIdentical(
           _passive_scalar_names[name_i],
@@ -364,6 +365,12 @@ WCNSFVScalarTransportPhysics::addInitialConditions()
     paramError("initial_scalar_variables",
                "Scalar variables are defined externally of NavierStokesFV, so should their inital "
                "conditions");
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+  // do not set initial conditions if we are not defining variables
+  if (!_define_variables)
+    return;
 
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);

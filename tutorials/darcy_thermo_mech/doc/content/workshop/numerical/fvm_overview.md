@@ -201,7 +201,7 @@ Split to integral to cell-wise integrals and use the divergence theorem:
 On an internal cell (let's say on cell C), assuming that $\beta$ is constant:
 
 !equation
-\int_{\partial\Omega_i} (\vec{\beta}~u) \cdot \hat{n}~ dS = \sum_f^{N_{f,C}} \int_{\partial\Omega_{C,f}} (\vec{\beta}~u) \cdot \hat{n}~ dS \approx \sum_f^{N_{f,C}} \vec{\beta}_f~ u_f \hat{n}_f |S_f|
+\int_{\partial\Omega_i} (\vec{\beta}~u) \cdot \hat{n}~ dS = \sum_f^{N_{f,C}} \int_{\partial\Omega_{C,f}} (\vec{\beta}~u) \cdot \hat{n}~ dS \approx \sum_f^{N_{f,C}} (\vec{\beta}_f~ u_f) \cdot \hat{n}_f |S_f|
 
 !col-end!
 

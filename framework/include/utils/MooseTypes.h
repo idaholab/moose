@@ -1047,6 +1047,9 @@ DerivativeStringClass(DataFileName);
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
 DerivativeStringClass(MeshFileName);
 
+/// This type is similar to "FileName", but is used to further filter file dialogs on known matrix file types
+DerivativeStringClass(MatrixFileName);
+
 /// This type is for output file base
 DerivativeStringClass(OutFileBase);
 
@@ -1124,6 +1127,9 @@ DerivativeStringClass(ExtraElementIDName);
 
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
 DerivativeStringClass(ReporterValueName);
+
+/// Name of a Component object
+DerivativeStringClass(ComponentName);
 
 /// Name of a Physics object
 DerivativeStringClass(PhysicsName);

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "ADKernel.h"
 #include "ADScalarKernel.h"
 
 class ADVolumeJunctionBaseUserObject;
@@ -16,10 +17,11 @@ class ADVolumeJunctionBaseUserObject;
 /**
  * Adds advective fluxes for the junction variables for a volume junction
  */
-class ADVolumeJunctionAdvectionScalarKernel : public ADScalarKernel
+template <typename T>
+class ADVolumeJunctionAdvectionKernelTempl : public T
 {
 public:
-  ADVolumeJunctionAdvectionScalarKernel(const InputParameters & params);
+  ADVolumeJunctionAdvectionKernelTempl(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;
@@ -33,3 +35,6 @@ protected:
 public:
   static InputParameters validParams();
 };
+
+typedef ADVolumeJunctionAdvectionKernelTempl<ADKernel> ADVolumeJunctionAdvectionKernel;
+typedef ADVolumeJunctionAdvectionKernelTempl<ADScalarKernel> ADVolumeJunctionAdvectionScalarKernel;

@@ -21,6 +21,8 @@ PINSFVRhieChowInterpolator::validParams()
   auto params = INSFVRhieChowInterpolator::validParams();
   params.addClassDescription("Performs interpolations and reconstructions of porosity and computes "
                              "the Rhie-Chow face velocities.");
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", /*quiet=*/true);
+  exec_enum.setAdditionalValue(EXEC_INITIAL);
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addParam<unsigned short>(
       "smoothing_layers",
@@ -44,8 +46,7 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
     _smoothed_eps(_moose_mesh, NS::smoothed_porosity, /*extrapolated_boundary*/ true),
     _epss(libMesh::n_threads(), nullptr),
     _smoothed_epss(libMesh::n_threads(), nullptr),
-    _smoothing_layers(getParam<unsigned short>("smoothing_layers")),
-    _pinsfv_setup_done(false)
+    _smoothing_layers(getParam<unsigned short>("smoothing_layers"))
 {
   if (_smoothing_layers && _eps.wrapsType<MooseVariableBase>())
     paramError(
@@ -79,7 +80,7 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
 void
 PINSFVRhieChowInterpolator::meshChanged()
 {
-  insfvSetup();
+  INSFVRhieChowInterpolator::meshChanged();
   pinsfvSetup();
 }
 
@@ -122,21 +123,6 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
         UserObject::_subproblem.getFunctor<ADReal>(NS::smoothed_porosity, tid, name(), true));
     other_smoothed_epss.assign(_smoothed_eps);
   }
-}
-
-void
-PINSFVRhieChowInterpolator::residualSetup()
-{
-  // We cant do this on initialSetup because user objects are initialized before
-  // functions are, so the porosity function is not available for interpolation-reconstruction
-  // on initialSetup().
-  if (!_pinsfv_setup_done)
-  {
-    pinsfvSetup();
-    _pinsfv_setup_done = true;
-  }
-
-  INSFVRhieChowInterpolator::residualSetup();
 }
 
 bool
@@ -187,4 +173,30 @@ PINSFVRhieChowInterpolator::isFaceGeometricallyRelevant(const FaceInfo & fi) con
 
   // We made it through all the tests!
   return true;
+}
+
+void
+PINSFVRhieChowInterpolator::initialize()
+{
+  if (_current_execute_flag == EXEC_INITIAL)
+    pinsfvSetup();
+  else
+    // Cannot compute Rhie Chow coefficients on initial
+    INSFVRhieChowInterpolator::initialize();
+}
+
+void
+PINSFVRhieChowInterpolator::execute()
+{
+  // Cannot compute Rhie Chow coefficients on initial
+  if (_current_execute_flag != EXEC_INITIAL)
+    INSFVRhieChowInterpolator::execute();
+}
+
+void
+PINSFVRhieChowInterpolator::finalize()
+{
+  // Cannot compute Rhie Chow coefficients on initial
+  if (_current_execute_flag != EXEC_INITIAL)
+    INSFVRhieChowInterpolator::finalize();
 }

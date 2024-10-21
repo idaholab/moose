@@ -29,21 +29,31 @@ ThermalMonolithicSiCProperties::validParams()
 ThermalMonolithicSiCProperties::ThermalMonolithicSiCProperties(const InputParameters & parameters)
   : ThermalSolidProperties(parameters),
     _k_model(getParam<MooseEnum>("thermal_conductivity_model").getEnum<ThermalConductivityModel>()),
-    _rho_const(getParam<Real>("density"))
+    _rho_const(getParam<Real>("density")),
+    _c1(925.65),
+    _c2(0.3772),
+    _c3(7.9259e-5),
+    _c4(3.1946e7)
 {
 }
 
 Real
 ThermalMonolithicSiCProperties::cp_from_T(const Real & T) const
 {
-  return 925.65 + 0.3772 * T - 7.9259e-5 * Utility::pow<2>(T) - 3.1946e7 / Utility::pow<2>(T);
+  return _c1 + _c2 * T - _c3 * Utility::pow<2>(T) - _c4 / Utility::pow<2>(T);
 }
 
 void
 ThermalMonolithicSiCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const
 {
   cp = cp_from_T(T);
-  dcp_dT = 0.3772 - 1.58518e-4 * T + 6.3892e7 / Utility::pow<3>(T);
+  dcp_dT = _c2 - 2 * _c3 * T + 2 * _c4 / Utility::pow<3>(T);
+}
+
+Real
+ThermalMonolithicSiCProperties::cp_integral(const Real & T) const
+{
+  return _c1 * T + 0.5 * _c2 * Utility::pow<2>(T) - _c3 / 3.0 * Utility::pow<3>(T) + _c4 / T;
 }
 
 Real

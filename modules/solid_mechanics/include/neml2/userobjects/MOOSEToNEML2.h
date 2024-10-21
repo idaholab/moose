@@ -19,6 +19,7 @@ NEML2ObjectStubHeader(MOOSEToNEML2, ElementUserObject);
 #include "neml2/tensors/LabeledVector.h"
 #include "neml2/tensors/LabeledMatrix.h"
 #include "neml2/models/Model.h"
+
 class MOOSEToNEML2 : public ElementUserObject
 {
 public:
@@ -36,14 +37,21 @@ public:
 
 protected:
   virtual void initialize() override;
+  virtual void execute() override;
   virtual void finalize() override {}
   virtual void threadJoin(const UserObject &) override;
+
+  /// Convert the underlying MOOSE data to a torch::Tensor
+  virtual torch::Tensor convertQpMOOSEData() const = 0;
 
   /// NEML2 input variable to transfer data to
   const neml2::VariableName _neml2_variable;
 
   /// Intermediate data buffer, filled during the element loop
   std::vector<torch::Tensor> _buffer;
+
+  /// Current element's quadrature point indexing
+  unsigned int _qp;
 };
 
 #endif

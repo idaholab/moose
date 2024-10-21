@@ -80,16 +80,16 @@ NEML2SolidMechanicsInterface<T>::NEML2SolidMechanicsInterface(const InputParamet
 #ifdef NEML2_ENABLED
     ,
     // The VariableNames for the NEML2 variables:
-    _neml2_stress(getNEML2VariableName(params.get<std::string>("neml2_stress")).on("state")),
-    _neml2_strain(getNEML2VariableName(params.get<std::string>("neml2_strain")).on("forces")),
+    _neml2_stress(getNEML2VariableName(params.get<std::string>("neml2_stress")).prepend("state")),
+    _neml2_strain(getNEML2VariableName(params.get<std::string>("neml2_strain")).prepend("forces")),
     _neml2_temperature(
-        getNEML2VariableName(params.get<std::string>("neml2_temperature")).on("forces")),
-    _neml2_time(getNEML2VariableName(params.get<std::string>("neml2_time")).on("forces")),
+        getNEML2VariableName(params.get<std::string>("neml2_temperature")).prepend("forces")),
+    _neml2_time(getNEML2VariableName(params.get<std::string>("neml2_time")).prepend("forces")),
     // and their corresponding old state/forces:
-    _neml2_stress_n(_neml2_stress.slice(1).on("old_state")),
-    _neml2_strain_n(_neml2_strain.slice(1).on("old_forces")),
-    _neml2_temperature_n(_neml2_temperature.slice(1).on("old_forces")),
-    _neml2_time_n(_neml2_time.slice(1).on("old_forces"))
+    _neml2_stress_n(_neml2_stress.slice(1).prepend("old_state")),
+    _neml2_strain_n(_neml2_strain.slice(1).prepend("old_forces")),
+    _neml2_temperature_n(_neml2_temperature.slice(1).prepend("old_forces")),
+    _neml2_time_n(_neml2_time.slice(1).prepend("old_forces"))
 #endif // NEML2_ENABLED
 {
 }

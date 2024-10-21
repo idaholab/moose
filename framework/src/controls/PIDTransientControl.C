@@ -54,7 +54,12 @@ PIDTransientControl::validParams()
   params.addParam<Real>("minimum_output_value",
                         -std::numeric_limits<Real>::max(),
                         "Can be used to limit the minimum value output by the PID controller.");
-
+  params.addRangeCheckedParam<Real>(
+      "maximum_change_rate",
+      std::numeric_limits<Real>::max(),
+      "maximum_change_rate>0",
+      "Can be used to limit the absolute rate of change per second of value "
+      "output by the PID controller.");
   return params;
 }
 
@@ -71,6 +76,7 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
     _reset_integral_windup(getParam<bool>("reset_integral_windup")),
     _maximum_output_value(getParam<Real>("maximum_output_value")),
     _minimum_output_value(getParam<Real>("minimum_output_value")),
+    _maximum_change_rate(getParam<Real>("maximum_change_rate")),
     _integral(0),
     _integral_old(0),
     _value_old(0),
@@ -147,7 +153,14 @@ PIDTransientControl::execute()
     if (_dt > 0)
       value += _Kder * delta / _dt;
 
-    value = std::min(std::max(_minimum_output_value, value), _maximum_output_value);
+    // If the maxmimum rate of change by the pid is fixed
+    if (_maximum_change_rate != std::numeric_limits<Real>::max())
+    {
+      value = std::min(std::max(_value_old - _dt * _maximum_change_rate, value),
+                       _value_old + _dt * _maximum_change_rate);
+    }
+    else
+      value = std::min(std::max(_minimum_output_value, value), _maximum_output_value);
 
     // Set the new value of the postprocessor
     if (isParamValid("parameter"))

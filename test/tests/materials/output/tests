@@ -12,6 +12,13 @@
 
       detail = 'outputting all properties within a material definition;'
     []
+    [ad_all]
+      type = 'Exodiff'
+      input = 'output.i'
+      exodiff = 'ad_output_out.e'
+      cli_args = "Materials/test_material/type=ADOutputTestMaterial Outputs/file_base=ad_output_out"
+      detail = 'outputting all AD properties within a material definition;'
+    []
     [all_via_outputs]
       # Test the ability for Output objects to enable all material property output
       type = 'Exodiff'

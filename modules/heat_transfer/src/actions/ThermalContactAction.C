@@ -11,6 +11,7 @@
 
 #include "AddVariableAction.h"
 #include "FEProblem.h"
+#include "GapHeatTransfer.h"
 #include "libmesh/string_to_enum.h"
 #include "GapConductance.h"
 #include "GapConductanceConstant.h"
@@ -107,6 +108,19 @@ ThermalContactAction::validParams()
 
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();
+
+  params.addParamNamesToGroup("primary secondary", "Gap surface definition");
+  params.addParamNamesToGroup(
+      "tangential_tolerance normal_smoothing_distance normal_smoothing_method",
+      "Gap edge and edge normal smoothing");
+  params.addParamNamesToGroup("gap_aux_type secondary_gap_offset mapped_primary_gap_offset",
+                              "Gap size");
+  params.addParamNamesToGroup("order quadrature", "Integration");
+  params.addParamNamesToGroup(
+      "gap_conductivity gap_conductivity_function gap_conductivity_function_variable",
+      "Gap conductivity");
+  params.addParamNamesToGroup("save_in check_boundary_restricted warnings",
+                              "Diagnostics and debug");
 
   return params;
 }
@@ -225,7 +239,7 @@ ThermalContactAction::addAuxVariables()
   // We need to add variables only once per variable name.  However, we don't know how many unique
   // variable names we will have.  So, we'll always add them.
 
-  MooseEnum order = getParam<MooseEnum>("order");
+  auto order = getParam<MooseEnum>("order");
   std::string family = "LAGRANGE";
 
   if (_quadrature)
@@ -392,4 +406,23 @@ ThermalContactAction::addSecondaryFluxVector()
   // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3 or older.
   if (!_problem->isSNESMFReuseBaseSetbyUser())
     _problem->setSNESMFReuseBase(false, false);
+}
+
+void
+ThermalContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  if (!_quadrature)
+    return;
+
+  for (const auto & contact_pair : _boundary_pairs)
+  {
+    const auto & object_name = getParam<std::string>("type");
+    auto params = _factory.getValidParams(object_name);
+    params.applyParameters(parameters());
+
+    params.set<BoundaryName>("paired_boundary") = contact_pair.first;
+    params.set<bool>("use_displaced_mesh") = true;
+    params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
+    addRelationshipManagers(input_rm_type, params);
+  }
 }

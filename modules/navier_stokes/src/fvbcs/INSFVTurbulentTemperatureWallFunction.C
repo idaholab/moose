@@ -25,13 +25,18 @@ INSFVTurbulentTemperatureWallFunction::validParams()
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
-  params.addRequiredParam<MooseFunctorName>(NS::cp, "The spcific heat at constant pressure.");
+  params.addRequiredParam<MooseFunctorName>(NS::cp, "The specific heat at constant pressure.");
   params.addParam<MooseFunctorName>(NS::kappa, "The thermal conductivity.");
   params.addParam<MooseFunctorName>("Pr_t", 0.58, "The turbulent Prandtl number.");
-  params.addParam<bool>(
-      "linearized_yplus",
-      false,
-      "Boolean to indicate if yplus must be estimate locally for the blending functions.");
+  params.addParam<MooseFunctorName>("k", "Turbulent kinetic energy functor.");
+  params.deprecateParam("k", NS::TKE, "01/01/2025");
+  params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
+  MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
+  params.addParam<MooseEnum>(
+      "wall_treatment", wall_treatment, "The method used for computing the wall functions");
+
+  params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
+  params.addParamNamesToGroup("newton_solve", "Advanced");
   return params;
 }
 
@@ -48,7 +53,10 @@ INSFVTurbulentTemperatureWallFunction::INSFVTurbulentTemperatureWallFunction(
     _cp(getFunctor<ADReal>(NS::cp)),
     _kappa(getFunctor<ADReal>(NS::kappa)),
     _Pr_t(getFunctor<ADReal>("Pr_t")),
-    _linearized_yplus(getParam<bool>("linearized_yplus"))
+    _k(getFunctor<ADReal>(NS::TKE)),
+    _C_mu(getParam<Real>("C_mu")),
+    _wall_treatment(getParam<MooseEnum>("wall_treatment")),
+    _newton_solve(getParam<bool>("newton_solve"))
 {
 }
 
@@ -61,6 +69,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   const Elem & _current_elem = fi.elem();
   const auto current_argument = makeElemArg(&_current_elem);
   const auto state = determineState();
+  const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto mu = _mu(current_argument, state);
   const auto rho = _rho(current_argument, state);
   const auto cp = _cp(current_argument, state);
@@ -74,23 +83,43 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     velocity(2) = (*_w_var)(current_argument, state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  const ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
+  const ADReal parallel_speed =
+      NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
 
-  // Computing friction velocity
-  ADReal u_tau;
-  if (_linearized_yplus)
+  // Computing friction velocity and y+
+  ADReal u_tau, y_plus;
+
+  if (_wall_treatment == "eq_newton")
   {
-    const ADReal a_c = 1 / NS::von_karman_constant;
-    const ADReal b_c =
-        1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * wall_dist / mu) + 1.0);
-    const ADReal c_c = parallel_speed;
-    u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
-  }
-  else
+    // Full Newton-Raphson solve to find the wall quantities from the law of the wall
     u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
+    y_plus = wall_dist * u_tau * rho / mu;
+  }
+  else if (_wall_treatment == "eq_incremental")
+  {
+    // Incremental solve on y_plus to get the near-wall quantities
+    y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
+    u_tau = parallel_speed / (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) /
+                              NS::von_karman_constant);
+  }
+  else if (_wall_treatment == "eq_linearized")
+  {
+    // Linearized approximation to the wall function to find the near-wall quantities faster
+    const ADReal a_c = 1 / NS::von_karman_constant;
+    const ADReal b_c = 1.0 / NS::von_karman_constant *
+                       (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
+    const ADReal c_c = parallel_speed;
 
-  // Computing non-dimensional wall distance
-  const ADReal y_plus = wall_dist * u_tau * rho / mu;
+    u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
+    y_plus = wall_dist * u_tau * rho / mu;
+  }
+  else if (_wall_treatment == "neq")
+  {
+    // Assign non-equilibrium wall function value
+    y_plus = wall_dist * std::sqrt(std::sqrt(_C_mu) * _k(current_argument, old_state)) * rho / mu;
+    u_tau = parallel_speed / (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) /
+                              NS::von_karman_constant);
+  }
 
   ADReal alpha;
   if (y_plus <= 5.0) // sub-laminar layer
@@ -111,15 +140,20 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   {
     const auto alpha_lam = kappa / (rho * cp);
     const auto Pr = cp * mu / kappa;
-    const auto Pr_ratio = Pr / _Pr_t(current_argument, state);
+    const auto Pr_t = _Pr_t(current_argument, state);
+    const auto Pr_ratio = Pr / Pr_t;
     const auto jayatilleke_P =
         9.24 * (std::pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * std::exp(-0.007 * Pr_ratio));
     const auto wall_scaling =
         1.0 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus) + jayatilleke_P;
-    const auto alpha_turb = u_tau * wall_dist / (_Pr_t(current_argument, state) * wall_scaling);
+    const auto alpha_turb = u_tau * wall_dist / (Pr_t * wall_scaling);
     const auto blending_function = (y_plus - 5.0) / 25.0;
     alpha = blending_function * alpha_turb + (1.0 - blending_function) * alpha_lam;
   }
+
+  // To make sure new derivatives are not introduced as the solve progresses
+  if (_newton_solve)
+    alpha += 0 * kappa * (rho * cp) + 0 * u_tau * _Pr_t(current_argument, state) * y_plus;
 
   const auto face_arg = singleSidedFaceArg();
   return -rho * cp * alpha * (_T_w(face_arg, state) - _var(current_argument, state)) / wall_dist;

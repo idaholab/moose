@@ -34,7 +34,7 @@
   [add_aux_variable_multiple_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
-    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3' and 'MONOMIAL of order 0'"
 
     requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting types.'
     issues = '#1222'
@@ -44,10 +44,19 @@
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
     cli_args = 'Variables/q/family=SCALAR MoreAuxVariables/q/family=SCALAR'
-    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3' and 'SCALAR of order 0'"
 
     requirement = 'The system shall report an error when multiple Scalar AuxVariables are added to the system with conflicting types.'
     issues = '#9313'
+  []
+
+  [add_aux_variable_multiple_subdomain_test]
+    type = 'RunException'
+    input = 'add_aux_variable_multiple_subdomain_test.i'
+    expect_err = "Mismatching block-restrictions are specified for auxvariable with name 'q': \{2\} and \{0, 2\}"
+
+    requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting block-restriction.'
+    issues = '#28568'
   []
 
   [bad_bc_test]
@@ -1168,5 +1177,14 @@
     requirement = 'The system shall report an error when a git-lfs file pointer is encountered for the mesh for a mesh generator.'
     design = 'MooseUtils.md'
     issues = '#17407'
+  []
+  [dump_error_with_unrecogized_param]
+    type = 'RunException'
+    input = ''
+    cli_args = '--dump bad_parameter'
+    expect_err = "Search parameter 'bad_parameter' was not found in the registered syntax."
+
+    requirement = 'The system shall report a helpful error when the dump parameter does not match any valid parameters'
+    issues = '#26714'
   []
 []

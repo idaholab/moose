@@ -67,12 +67,12 @@ ShaftConnectedTurbine1Phase::ShaftConnectedTurbine1Phase(const InputParameters &
     _inertia_coeff(getParam<std::vector<Real>>("inertia_coeff")),
     _head_coefficient(getParam<FunctionName>("head_coefficient")),
     _power_coefficient(getParam<FunctionName>("power_coefficient")),
-    _delta_p_var_name(genName(name(), "delta_p")),
-    _power_var_name(genName(name(), "power")),
-    _driving_torque_var_name(genName(name(), "driving_torque")),
-    _friction_torque_var_name(genName(name(), "friction_torque")),
-    _flow_coeff_var_name(genName(name(), "flow_coeff")),
-    _moi_var_name(genName(name(), "moment_of_inertia"))
+    _delta_p_var_name(junctionVariableName("delta_p")),
+    _power_var_name(junctionVariableName("power")),
+    _driving_torque_var_name(junctionVariableName("driving_torque")),
+    _friction_torque_var_name(junctionVariableName("friction_torque")),
+    _flow_coeff_var_name(junctionVariableName("flow_coeff")),
+    _moi_var_name(junctionVariableName("moment_of_inertia"))
 {
   // this determines connection ordering
   addConnection(_inlet);
@@ -102,9 +102,12 @@ ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
   {
     const std::string class_name = "ADShaftConnectedTurbine1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
+    params.set<bool>("use_scalar_variables") = _use_scalar_variables;
+    if (!_use_scalar_variables)
+      params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
-    params.set<std::vector<processor_id_type>>("processor_ids") = _proc_ids;
+    params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();
     params.set<std::vector<UserObjectName>>("numerical_flux_names") = _numerical_flux_names;
     params.set<Real>("volume") = _volume;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
@@ -133,6 +136,7 @@ ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("K") = getParam<Real>("K");
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<std::string>("turbine_name") = cname();
+    params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, getShaftConnectedUserObjectName(), params);
     connectObject(params, _junction_uo_name, "K");
@@ -144,21 +148,21 @@ ShaftConnectedTurbine1Phase::addVariables()
 {
   VolumeJunction1Phase::addVariables();
 
-  getTHMProblem().addSimVariable(false, _delta_p_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _power_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _driving_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _flow_coeff_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _friction_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addSimVariable(false, _moment_of_inertia_var_name, FEType(FIRST, SCALAR));
+  addJunctionVariable(false, _delta_p_var_name);
+  addJunctionVariable(false, _power_var_name);
+  addJunctionVariable(false, _driving_torque_var_name);
+  addJunctionVariable(false, _flow_coeff_var_name);
+  addJunctionVariable(false, _friction_torque_var_name);
+  addJunctionVariable(false, _moment_of_inertia_var_name);
 
   if (!_app.isRestarting())
   {
-    getTHMProblem().addConstantScalarIC(_delta_p_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_power_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_driving_torque_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_flow_coeff_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
-    getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+    addJunctionIC(_delta_p_var_name, 0);
+    addJunctionIC(_power_var_name, 0);
+    addJunctionIC(_driving_torque_var_name, 0);
+    addJunctionIC(_flow_coeff_var_name, 0);
+    addJunctionIC(_friction_torque_var_name, 0);
+    addJunctionIC(_moment_of_inertia_var_name, _inertia_const);
   }
 }
 
@@ -167,52 +171,28 @@ ShaftConnectedTurbine1Phase::addMooseObjects()
 {
   VolumeJunction1Phase::addMooseObjects();
 
+  const std::vector<std::pair<std::string, VariableName>> quantities_aux = {
+      {"delta_p", _delta_p_var_name},
+      {"flow_coefficient", _flow_coeff_var_name},
+      {"driving_torque", _driving_torque_var_name},
+      {"friction_torque", _friction_torque_var_name},
+      {"moment_of_inertia", _moment_of_inertia_var_name},
+      {"power", _power_var_name}};
+  for (const auto & quantity_and_name : quantities_aux)
   {
-    std::string class_name = "Turbine1PhaseDeltaPAux";
+    const std::string class_name = _use_scalar_variables ? "ShaftConnectedTurbine1PhaseScalarAux"
+                                                         : "ShaftConnectedTurbine1PhaseAux";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _delta_p_var_name;
+    params.set<AuxVariableName>("variable") = quantity_and_name.second;
+    params.set<MooseEnum>("quantity") = quantity_and_name.first;
     params.set<UserObjectName>("turbine_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "delta_p_aux"), params);
-  }
-  {
-    std::string class_name = "Turbine1PhasePowerAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _power_var_name;
-    params.set<UserObjectName>("turbine_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "power"), params);
-  }
-  {
-    std::string class_name = "Turbine1PhaseDrivingTorqueAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _driving_torque_var_name;
-    params.set<UserObjectName>("turbine_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "driving_torque_aux"), params);
-  }
-  {
-    std::string class_name = "Turbine1PhaseFlowCoefficientAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _flow_coeff_var_name;
-    params.set<UserObjectName>("turbine_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "flow_coeff_aux"), params);
-  }
-  {
-    std::string class_name = "Turbine1PhaseFrictionTorqueAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _friction_torque_var_name;
-    params.set<UserObjectName>("turbine_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "friction_torque_aux"), params);
-  }
-  {
-    std::string class_name = "Turbine1PhaseMomentOfInertiaAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = _moment_of_inertia_var_name;
-    params.set<UserObjectName>("turbine_uo") = getShaftConnectedUserObjectName();
-
-    getTHMProblem().addAuxScalarKernel(class_name, genName(name(), "inertia_aux"), params);
+    const std::string obj_name = genName(name(), quantity_and_name.first + "_aux");
+    if (_use_scalar_variables)
+      getTHMProblem().addAuxScalarKernel(class_name, obj_name, params);
+    else
+    {
+      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+      getTHMProblem().addAuxKernel(class_name, obj_name, params);
+    }
   }
 }

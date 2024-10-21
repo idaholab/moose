@@ -65,6 +65,10 @@ h_cv = 1.0
         thermal_conductivity = ${k}
         specific_heat = ${cp}
 
+        # Reference file sets effective_conductivity by default that way
+        # so the conductivity is multiplied by the porosity in the kernel
+        effective_conductivity = false
+
         initial_temperature = 0.0
 
         energy_inlet_types = 'heatflux'

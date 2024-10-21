@@ -3,39 +3,39 @@
 
   [interval]
     requirement = "The system shall support outputting of checkpoint files:"
-    issues = '#1927 #2395'
+    issues = '#1927 #2395 #27240'
 
     [test_files]
       type = 'CheckFiles'
       input = 'checkpoint_interval.i'
       check_files = "checkpoint_interval_out_cp/0006-restart-0.rd/data "
                     "checkpoint_interval_out_cp/0006-restart-0.rd/header "
-                    "checkpoint_interval_out_cp/0006-mesh.cpr/1/header.cpr "
-                    "checkpoint_interval_out_cp/0006-mesh.cpr/1/split-1-0.cpr "
-                    "checkpoint_interval_out_cp/0006-mesh.cpr/meta_data_mesh.rd/data "
-                    "checkpoint_interval_out_cp/0006-mesh.cpr/meta_data_mesh.rd/header "
+                    "checkpoint_interval_out_cp/0006-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_interval_out_cp/0006-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_interval_out_cp/0006-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_interval_out_cp/0006-mesh.cpa.gz/meta_data_mesh.rd/header "
                     "checkpoint_interval_out_cp/0009-restart-0.rd/data "
                     "checkpoint_interval_out_cp/0009-restart-0.rd/header "
-                    "checkpoint_interval_out_cp/0009-mesh.cpr/1/header.cpr "
-                    "checkpoint_interval_out_cp/0009-mesh.cpr/1/split-1-0.cpr "
-                    "checkpoint_interval_out_cp/0009-mesh.cpr/meta_data_mesh.rd/data "
-                    "checkpoint_interval_out_cp/0009-mesh.cpr/meta_data_mesh.rd/header"
+                    "checkpoint_interval_out_cp/0009-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_interval_out_cp/0009-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_interval_out_cp/0009-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_interval_out_cp/0009-mesh.cpa.gz/meta_data_mesh.rd/header"
       check_not_exists = "checkpoint_interval_out_cp/0003-restart-0.rd "
-                         "checkpoint_interval_out_cp/0003-mesh.cpr/1/header.cpr "
-                         "checkpoint_interval_out_cp/0003-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_interval_out_cp/0003-mesh.cpr/meta_data_mesh.rd "
+                         "checkpoint_interval_out_cp/0003-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_interval_out_cp/0003-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_interval_out_cp/0003-mesh.cpa.gz/meta_data_mesh.rd "
                          "checkpoint_interval_out_cp/0007-restart-0.rd "
-                         "checkpoint_interval_out_cp/0007-mesh.cpr/1/header.cpr "
-                         "checkpoint_interval_out_cp/0007-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_interval_out_cp/0007-mesh.cpr/meta_data_mesh.rd "
+                         "checkpoint_interval_out_cp/0007-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_interval_out_cp/0007-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_interval_out_cp/0007-mesh.cpa.gz/meta_data_mesh.rd "
                          "checkpoint_interval_out_cp/0008-restart-0.rd "
-                         "checkpoint_interval_out_cp/0008-mesh.cpr/1/header.cpr "
-                         "checkpoint_interval_out_cp/0008-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_interval_out_cp/0008-mesh.cpr/meta_data_mesh.rd "
+                         "checkpoint_interval_out_cp/0008-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_interval_out_cp/0008-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_interval_out_cp/0008-mesh.cpa.gz/meta_data_mesh.rd "
                          "checkpoint_interval_out_cp/0010-restart-0.rd "
-                         "checkpoint_interval_out_cp/0010-mesh.cpr/1/header.cpr "
-                         "checkpoint_interval_out_cp/0010-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_interval_out_cp/0010-mesh.cpr/meta_data_mesh.rd"
+                         "checkpoint_interval_out_cp/0010-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_interval_out_cp/0010-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_interval_out_cp/0010-mesh.cpa.gz/meta_data_mesh.rd"
       recover = false
 
       # The suffixes of these files change when running in parallel or with threads
@@ -65,43 +65,44 @@
   [default]
     requirement = "The system shall support outputting of checkpoint files, using a simplified input "
                   "format:"
-    issues = '#1927 #13562'
+    issues = '#1927 #13562 #27240'
     [recover_half_transient]
       type = CheckFiles
       input = checkpoint.i
       cli_args = 'Outputs/checkpoint=true --test-checkpoint-half-transient'
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 3600 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       recover = false
 
       check_files = "checkpoint_out_cp/0004-restart-0.rd/data "
                     "checkpoint_out_cp/0004-restart-0.rd/header "
-                    "checkpoint_out_cp/0004-mesh.cpr/1/header.cpr "
-                    "checkpoint_out_cp/0004-mesh.cpr/1/split-1-0.cpr "
-                    "checkpoint_out_cp/0004-mesh.cpr/meta_data_mesh.rd/data "
-                    "checkpoint_out_cp/0004-mesh.cpr/meta_data_mesh.rd/header "
+                    "checkpoint_out_cp/0004-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_out_cp/0004-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_out_cp/0004-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_out_cp/0004-mesh.cpa.gz/meta_data_mesh.rd/header "
                     "checkpoint_out_cp/0005-restart-0.rd/data "
                     "checkpoint_out_cp/0005-restart-0.rd/header "
-                    "checkpoint_out_cp/0005-mesh.cpr/1/header.cpr "
-                    "checkpoint_out_cp/0005-mesh.cpr/1/split-1-0.cpr "
-                    "checkpoint_out_cp/0005-mesh.cpr/meta_data_mesh.rd/data "
-                    "checkpoint_out_cp/0005-mesh.cpr/meta_data_mesh.rd/header"
+                    "checkpoint_out_cp/0005-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_out_cp/0005-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_out_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_out_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/header"
       check_not_exists = "checkpoint_out_cp/0001-restart-0.rd "
-                         "checkpoint_out_cp/0001-mesh.cpr/1/header.cpr "
-                         "checkpoint_out_cp/0001-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_out_cp/0001-mesh.cpr/meta_data_mesh.rd "
+                         "checkpoint_out_cp/0001-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_out_cp/0001-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_out_cp/0001-mesh.cpa.gz/meta_data_mesh.rd "
                          "checkpoint_out_cp/0002-restart-0.rd "
-                         "checkpoint_out_cp/0002-mesh.cpr/1/header.cpr "
-                         "checkpoint_out_cp/0002-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_out_cp/0002-mesh.cpr/meta_data_mesh.rd "
+                         "checkpoint_out_cp/0002-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_out_cp/0002-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_out_cp/0002-mesh.cpa.gz/meta_data_mesh.rd "
                          "checkpoint_out_cp/0003-restart-0.rd "
-                         "checkpoint_out_cp/0003-mesh.cpr/1/header.cpr "
-                         "checkpoint_out_cp/0003-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_out_cp/0003-mesh.cpr/meta_data_mesh.rd"
+                         "checkpoint_out_cp/0003-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_out_cp/0003-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_out_cp/0003-mesh.cpa.gz/meta_data_mesh.rd"
 
       # The suffixes of these files change when running in parallel or with threads
       max_parallel = 1
       max_threads = 1
 
-      detail = "at every timestep while maintaining the most recent two files and"
+      detail = " at every timestep while maintaining the most recent two files and"
     []
     [recover]
       # Gold for this test was created using checkpoint.i without any recover options
@@ -115,7 +116,7 @@
       delete_output_before_running = false
       cli_args = '--recover'
       expect_out = 'checkpoint_out_cp/0005 for recovery'
-      detail = "be capable of restarting a simulation from the output data."
+      detail = " be capable of restarting a simulation from the output data."
     []
 
     [wall_time_interval]
@@ -123,7 +124,8 @@
       input = checkpoint.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --output-wall-time-interval 0.02'
-      detail = "at specified wall time intervals"
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.02 s\s+ User Checkpoint:\s+ Disabled\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      detail = " at specified wall time intervals and"
     []
     [wall_time_interval_recover]
       type = Exodiff
@@ -134,7 +136,25 @@
       delete_output_before_running = false
       cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --recover'
       expect_out = 'Using checkpoint_wall_time_interval_out_cp/\d+ for recovery'
-      detail = "be capable of restarting a simulation from the wall time checkpoint."
+      detail = " be capable of restarting a simulation from the wall time checkpoint."
+    []
+
+    [wall_time_interval_disabled]
+      type = RunApp
+      input = checkpoint.i
+      recover = false
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/wall_time_checkpoint=false'
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Disabled\s+ User Checkpoint:\s+ Disabled"
+      absent_out = "# Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      detail = " with an option to disable wall time checkpoints and"
+    []
+    [wall_time_interval_disabled_recover]
+      type = RunException
+      input = checkpoint.i
+      prereq = 'default/wall_time_interval_disabled'
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --recover'
+      expect_err = "No checkpoint file found!"
+      detail = " not recover."
     []
 
     [output_wall_time_interval_error]
@@ -142,14 +162,79 @@
       input = 'checkpoint.i'
       cli_args = '--output-wall-time-interval -1'
       expect_err = 'output-wall-time-interval must be greater than zero.'
-      detail = ', catching invalid values of output-wall-time-interval.'
+      detail = ' catching invalid values of output-wall-time-interval.'
+    []
+
+    [wall_time_interval_tiny]
+      type = CheckFiles
+      input = checkpoint.i
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_tiny_out --output-wall-time-interval 1e-50'
+      recover = false
+
+      check_files = "checkpoint_wall_time_interval_tiny_out_cp/0010-restart-0.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-restart-0.rd/header "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/header "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-restart-0.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-restart-0.rd/header "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_wall_time_interval_tiny_out_cp/0011-mesh.cpa.gz/meta_data_mesh.rd/header"
+
+      # The suffixes of these files change when running in parallel or with threads
+      max_parallel = 1
+      max_threads = 1
+
+      detail = " at specified wall time intervals smaller than the time required to output a checkpoint"
+    []
+
+    [wall_time_interval_multiapp]
+      type = CheckFiles
+      input = checkpoint_parent.i
+      cli_args = '--output-wall-time-interval 1e-50'
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 1e-50 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      recover = false
+
+      check_files = "checkpoint_parent_out_cp/0010-restart-0.rd/data "
+                    "checkpoint_parent_out_cp/0010-restart-0.rd/header "
+                    "checkpoint_parent_out_cp/0010-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_parent_out_cp/0010-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_parent_out_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_parent_out_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/header "
+                    "checkpoint_parent_out_cp/0011-restart-0.rd/data "
+                    "checkpoint_parent_out_cp/0011-restart-0.rd/header "
+                    "checkpoint_parent_out_cp/0011-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_parent_out_cp/0011-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_parent_out_cp/0011-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_parent_out_cp/0011-mesh.cpa.gz/meta_data_mesh.rd/header"
+      check_not_exists = "checkpoint_parent_out_sub_app0_cp/0010-restart-0.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0010-restart-0.rd/header "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/header "
+                         "checkpoint_parent_out_sub_app0_cp/0011-restart-0.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0011-restart-0.rd/header "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpa.gz/meta_data_mesh.rd/data "
+                         "checkpoint_parent_out_sub_app0_cp/0011-mesh.cpa.gz/meta_data_mesh.rd/header"
+
+      # The suffixes of these files change when running in parallel or with threads
+      max_parallel = 1
+      max_threads = 1
+
+      detail = " ensuring that wall time checkpoints are not written at the subapp level if not explicitly requested."
     []
   []
 
   [block]
     requirement = "The system shall support outputting of checkpoint files, using a complete input "
                   "block:"
-    issues = '#1927 #13562 #25755'
+    issues = '#1927 #13562 #25755 #27240'
     [recover_with_checkpoint_block_half_transient]
       # Tests that recover works when defining as a Output sub-block
       type = CheckFiles
@@ -160,28 +245,28 @@
 
       check_files = "checkpoint_block_out_cp/0004-restart-0.rd/data "
                     "checkpoint_block_out_cp/0004-restart-0.rd/header "
-                    "checkpoint_block_out_cp/0004-mesh.cpr/1/header.cpr "
-                    "checkpoint_block_out_cp/0004-mesh.cpr/1/split-1-0.cpr "
-                    "checkpoint_block_out_cp/0004-mesh.cpr/meta_data_mesh.rd/data "
-                    "checkpoint_block_out_cp/0004-mesh.cpr/meta_data_mesh.rd/header "
+                    "checkpoint_block_out_cp/0004-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_block_out_cp/0004-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_block_out_cp/0004-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_block_out_cp/0004-mesh.cpa.gz/meta_data_mesh.rd/header "
                     "checkpoint_block_out_cp/0005-restart-0.rd/data "
                     "checkpoint_block_out_cp/0005-restart-0.rd/header "
-                    "checkpoint_block_out_cp/0005-mesh.cpr/1/header.cpr "
-                    "checkpoint_block_out_cp/0005-mesh.cpr/1/split-1-0.cpr "
-                    "checkpoint_block_out_cp/0005-mesh.cpr/meta_data_mesh.rd/data "
-                    "checkpoint_block_out_cp/0005-mesh.cpr/meta_data_mesh.rd/header"
+                    "checkpoint_block_out_cp/0005-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_block_out_cp/0005-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_block_out_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_block_out_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/header"
       check_not_exists = "checkpoint_block_out_cp/0001-restart-0.rd "
-                         "checkpoint_block_out_cp/0001-mesh.cpr/1/header.cpr "
-                         "checkpoint_block_out_cp/0001-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_block_out_cp/0001-mesh.cpr/meta_data_mesh.rd "
+                         "checkpoint_block_out_cp/0001-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_block_out_cp/0001-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_block_out_cp/0001-mesh.cpa.gz/meta_data_mesh.rd "
                          "checkpoint_block_out_cp/0002-restart-0.rd "
-                         "checkpoint_block_out_cp/0002-mesh.cpr/1/header.cpr "
-                         "checkpoint_block_out_cp/0002-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_block_out_cp/0002-mesh.cpr/meta_data_mesh.rd "
+                         "checkpoint_block_out_cp/0002-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_block_out_cp/0002-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_block_out_cp/0002-mesh.cpa.gz/meta_data_mesh.rd "
                          "checkpoint_block_out_cp/0003-restart-0.rd "
-                         "checkpoint_block_out_cp/0003-mesh.cpr/1/header.cpr "
-                         "checkpoint_block_out_cp/0003-mesh.cpr/1/split-1-0.cpr "
-                         "checkpoint_block_out_cp/0003-mesh.cpr/meta_data_mesh.rd"
+                         "checkpoint_block_out_cp/0003-mesh.cpa.gz/1/header.gz "
+                         "checkpoint_block_out_cp/0003-mesh.cpa.gz/1/split-1-0.gz "
+                         "checkpoint_block_out_cp/0003-mesh.cpa.gz/meta_data_mesh.rd"
 
       # The suffixes of these files change when running in parallel or with threads
       max_parallel = 1
@@ -207,6 +292,7 @@
       input = checkpoint_block.i
       recover = false
       cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --output-wall-time-interval 0.02'
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.02 s\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       detail = "at specified wall time intervals"
     []
     [wall_time_interval_recover]
@@ -221,11 +307,28 @@
       detail = "be capable of restarting a simulation from the wall time checkpoint."
     []
 
+    [wall_time_interval_disabled]
+      type = RunApp
+      input = checkpoint_block.i
+      recover = false
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/out/wall_time_checkpoint=false'
+      expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Disabled\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
+      detail = " with an option to disable wall time checkpoints and"
+    []
+    [wall_time_interval_disabled_recover]
+      type = RunException
+      input = checkpoint_block.i
+      prereq = 'block/wall_time_interval_disabled'
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --recover'
+      expect_err = "No checkpoint file found!"
+      detail = " not recover."
+    []
+
     [execute_on_param_error]
       type = 'RunException'
       input = 'checkpoint_block.i'
       cli_args = 'Outputs/out/execute_on=TIMESTEP_BEGIN'
-      expect_err = 'The checkpoint system may only be used with execute_on values INITIAL, TIMESTEP_END, and FINAL'
+      expect_err = 'The exec flag TIMESTEP_BEGIN is not allowed. Allowed flags are INITIAL, TIMESTEP_END, and FINAL.'
       detail = 'catching invalid values of execute_on'
     []
   []
@@ -234,7 +337,45 @@
     requirement = 'The system shall be capable of throwing an error when multiple checkpoints are defined'
     type = 'RunException'
     input = 'checkpoint_block.i'
+    cli_args = 'Outputs/cp/type=Checkpoint'
+    expect_err = "Multiple Checkpoint objects are not allowed and there is more than one Checkpoint defined in the 'Outputs' block."
+  []
+  [multiple_checkpoints_error_shortcut]
+    issues = '#13562'
+    requirement = 'The system shall be capable of throwing an error when multiple checkpoints are defined, including the shortcut syntax'
+    type = 'RunException'
+    input = 'checkpoint_block.i'
     cli_args = 'Outputs/checkpoint=true'
-    expect_err = 'Multiple checkpoints are not allowed.'
+    expect_err = "Shortcut checkpoint syntax cannot be used with another Checkpoint object in the 'Outputs' block"
+  []
+
+  [subapp]
+    issues = "#24777 #20998"
+    requirement = "The system shall support outputting checkpoint files at the subapp level with checkpoints disabled in the main app:"
+    [subapp_only_cp_transient]
+      type = CheckFiles
+      recover = false
+      input = checkpoint_parent.i
+      cli_args = 'Outputs/checkpoint=false sub_app:Outputs/cp/type=Checkpoint sub_app:Outputs/cp/num_files=1 sub_app:Outputs/cp/execute_on=final'
+      check_files = "checkpoint_parent_out_sub_app0_cp_cp/0003-restart-0.rd/data "
+                    "checkpoint_parent_out_sub_app0_cp_cp/0003-restart-0.rd/header "
+                    "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_parent_out_sub_app0_cp_cp/0003-mesh.cpa.gz/meta_data_mesh.rd/header"
+      detail = "for transient simulations"
+    []
+    [subapp_only_cp_steady_state]
+      type = CheckFiles
+      recover = false
+      input = checkpoint_parent_ss.i
+      check_files = "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-restart-0.rd/data "
+                    "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-restart-0.rd/header "
+                    "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-mesh.cpa.gz/1/header.gz "
+                    "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-mesh.cpa.gz/1/split-1-0.gz "
+                    "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-mesh.cpa.gz/meta_data_mesh.rd/data "
+                    "checkpoint_parent_ss_out_sub_app0_cp_cp/0001-mesh.cpa.gz/meta_data_mesh.rd/header"
+      detail = "for steady-state simulations"
+    []
   []
 []

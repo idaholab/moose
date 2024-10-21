@@ -157,6 +157,38 @@
     issues = '#18768'
   []
 
+  [iga_constraint_matrix]
+    type = Exodiff
+    input = 'iga_constraint_matrix.i'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+    exodiff = 'iga_constraint_matrix_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to apply externally defined constraint matrices to 3D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+  [iga_constraint_matrix_1d]
+    type = Exodiff
+    input = 'iga_constraint_matrix_1d.i'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+    exodiff = 'iga_constraint_matrix_1d_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to apply externally defined constraint matrices to 1D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
   [./exodus_discontinuous_iga_2d_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
@@ -186,35 +218,11 @@
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = '2d_diffusion_test_out.e'
-    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001-mesh.cpr'
+    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001-mesh.cpa.gz'
     recover = false
     prereq = pre_checkpoint_load_test
     requirement = 'The system shall have the ability to load the mesh from checkpoint files.'
     design = 'meshgenerators/FileMeshGenerator.md'
-    issues = '#16192'
-  []
-
-  [checkpoint_new_prefix]
-    type = 'CheckFiles'
-    input = 'checkpoint_old_prefix.i'
-    check_files = 'checkpoint_old_prefix_out_cp/0001-mesh.cpr/meta_data_mesh.rd/header'
-    cli_args = 'Outputs/checkpoint=true Mesh/final_generator=gmg'
-    requirement = 'The system shall support outputting checkpoints using a consistent directory naming scheme.'
-    design = 'Checkpoint.md'
-    issues = '#21011'
-    recover = false
-  []
-
-  [checkpoint_old_prefix]
-    type = 'RunApp'
-    input = 'checkpoint_old_prefix.i'
-    expect_out = 'checkpoint_old_prefix_out_cp/0001-mesh.cpr'
-    cli_args = 'Mesh/final_generator=checkpoint'
-    requirement = 'The system shall support loading checkpointed meshes using the deprecated suffix when a checkpoint exists with the standard suffix.'
-    design = 'FileMeshGenerator.md'
-    issues = '#21011'
-    prereq = 'checkpoint_new_prefix'
-    allow_warnings = True
-    recover = false
+    issues = '#16192 #27240'
   []
 []

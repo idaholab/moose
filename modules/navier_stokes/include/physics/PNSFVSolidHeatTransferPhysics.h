@@ -29,8 +29,8 @@ private:
   virtual void addMaterials() override;
 
   // Note that we inherit:
-  // - addInitialConditions from HeatConductionPhysics
-  // - addPreconditioning from HeatConductionPhysics
+  // - addInitialConditions from HeatConductionPhysicsBase
+  // - addPreconditioning from HeatConductionPhysicsBase
   // - addFVBCs from HeatConductionFV
 
   virtual InputParameters getAdditionalRMParams() const override;

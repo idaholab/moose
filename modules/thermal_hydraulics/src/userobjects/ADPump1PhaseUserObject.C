@@ -9,7 +9,7 @@
 
 #include "ADPump1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "VolumeJunction1Phase.h"
 #include "NumericalFlux3EqnBase.h"
 #include "Numerics.h"
@@ -43,12 +43,19 @@ ADPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
 {
   ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
 
+  const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
+  const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
+  const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
+  const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
+
   const ADRealVectorValue di = _dir[0];
-  const ADRealVectorValue rhouV_vec(_rhouV[0], _rhovV[0], _rhowV[0]);
+  const ADReal rho = rhoV / _volume;
+  const ADRealVectorValue uvec(rhouV / rhoV, rhovV / rhoV, rhowV / rhoV);
 
   // compute momentum and energy source terms
-  const ADRealVectorValue S_momentum = 0.5 * (_rhoV[0] / _volume) * _g * _head * _A_ref * di;
-  const ADReal S_energy = 0.5 * ((rhouV_vec * di) / _volume) * _g * _head * _A_ref;
+  const ADRealVectorValue S_momentum = 0.5 * rho * _g * _head * _A_ref * di;
+  const ADReal S_energy = S_momentum * uvec;
+
   _residual[VolumeJunction1Phase::RHOUV_INDEX] -= S_momentum(0);
   _residual[VolumeJunction1Phase::RHOVV_INDEX] -= S_momentum(1);
   _residual[VolumeJunction1Phase::RHOWV_INDEX] -= S_momentum(2);

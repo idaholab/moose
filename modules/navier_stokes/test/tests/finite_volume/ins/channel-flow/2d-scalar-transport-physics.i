@@ -79,20 +79,24 @@ cp = 1
         energy_advection_interpolation = 'average'
       []
     []
-    [ScalarTransport]
-      [heat]
-        passive_scalar_names = 'scalar'
+  []
+[]
+# This separation is introduced for documentation purposes.
+# Both could be nested under Physics/NavierStokes
+[Physics/NavierStokes]
+  [ScalarTransport]
+    [heat]
+      passive_scalar_names = 'scalar'
 
-        passive_scalar_diffusivity = ${diff}
-        passive_scalar_source = 0.1
-        passive_scalar_coupled_source = U
-        passive_scalar_coupled_source_coeff = 0.1
+      passive_scalar_diffusivity = ${diff}
+      passive_scalar_source = 0.1
+      passive_scalar_coupled_source = U
+      passive_scalar_coupled_source_coeff = 0.1
 
-        passive_scalar_inlet_types = 'fixed-value'
-        passive_scalar_inlet_function = '1'
+      passive_scalar_inlet_types = 'fixed-value'
+      passive_scalar_inlet_function = '1'
 
-        passive_scalar_advection_interpolation = 'average'
-      []
+      passive_scalar_advection_interpolation = 'average'
     []
   []
 []

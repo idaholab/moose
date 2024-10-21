@@ -10,7 +10,7 @@
 #include "ADSimpleTurbine1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
 #include "VolumeJunction1Phase.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
 
@@ -44,8 +44,12 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
 
   if ((c == 0) && _on)
   {
+    const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
+    const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
+    const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
+
     const Point di = _dir[0];
-    const ADRealVectorValue rhouV_vec(_rhouV[0], _rhovV[0], _rhowV[0]);
+    const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
 
     // energy source
     const ADReal S_E = _W_dot;

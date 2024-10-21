@@ -65,6 +65,15 @@ GapConductance::validParams()
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
+  // These parameter groups match the ones in ThermalContactAction
+  params.addParamNamesToGroup("gap_distance", "Gap size");
+  params.addParamNamesToGroup("paired_boundary", "Gap surface definition");
+  params.addParamNamesToGroup("order quadrature", "Integration");
+  params.addParamNamesToGroup("warnings", "Diagnostics and debug");
+  params.addParamNamesToGroup(
+      "gap_conductivity gap_conductivity_function gap_conductivity_function_variable",
+      "Gap conductivity");
+
   return params;
 }
 

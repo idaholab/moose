@@ -2,14 +2,14 @@
 # Lid-driven cavity test
 # Reynolds: 5,000
 # Author: Dr. Mauricio Tano
-# Last Update: Novomber, 2023
+# Last Update: November, 2023
 # Turbulent model using:
 # k-epsilon model
 # Standard wall functions with temperature wall functions
 # SIMPLE Solve
 ##########################################################
 
-### Thermophsyical Properties ###
+### Thermophysical Properties ###
 mu = 2e-5
 rho = 1.0
 k = 0.01
@@ -25,7 +25,7 @@ intensity = 0.01
 k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
@@ -33,12 +33,10 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
 bulk_wall_treatment = false
 walls = 'left top right bottom'
-max_mixing_length = 1e10
-linearized_yplus_mu_t = false
-wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment_v = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment_T = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 pressure_tag = "pressure_grad"
 
@@ -225,8 +223,7 @@ pressure_tag = "pressure_grad"
     mu = ${mu}
     mu_t = 'mu_t'
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment_v}
   []
 
   [TKED_advection]
@@ -260,8 +257,7 @@ pressure_tag = "pressure_grad"
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment_v}
   []
 []
 
@@ -295,6 +291,8 @@ pressure_tag = "pressure_grad"
     mu = ${mu}
     cp = ${cp}
     kappa = ${k}
+    k = TKE
+    wall_treatment = ${wall_treatment_T}
   []
   [T_cold]
     type = INSFVTurbulentTemperatureWallFunction
@@ -307,6 +305,8 @@ pressure_tag = "pressure_grad"
     mu = ${mu}
     cp = ${cp}
     kappa = ${k}
+    k = TKE
+    wall_treatment = ${wall_treatment_T}
   []
   [walls_mu_t]
     type = INSFVTurbulentViscosityWallFunction
@@ -318,7 +318,7 @@ pressure_tag = "pressure_grad"
     mu = ${mu}
     mu_t = 'mu_t'
     k = TKE
-    wall_treatment = ${wall_treatment}
+    wall_treatment = ${wall_treatment_v}
   []
 []
 
@@ -347,8 +347,7 @@ pressure_tag = "pressure_grad"
     v = vel_y
     bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
-    linearized_yplus = ${linearized_yplus_mu_t}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
+    wall_treatment = ${wall_treatment_v}
     execute_on = 'NONLINEAR'
   []
   [compute_k_t]
@@ -361,9 +360,9 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
     cp = ${cp}

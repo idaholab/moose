@@ -29,6 +29,16 @@ class THMProblem;
 class Simulation : public libMesh::ParallelObject, public LoggingInterface, public NamingInterface
 {
 public:
+  /**
+   * Sets a component variable order index.
+   *
+   * See Component system documentation for more information.
+   *
+   * @param[in] var  Variable to order
+   * @param[in] index  Order index
+   */
+  static void setComponentVariableOrder(const VariableName & var, int index);
+
   Simulation(FEProblemBase & fe_problem, const InputParameters & params);
   virtual ~Simulation();
 
@@ -463,6 +473,17 @@ protected:
 
 public:
   Real _zero;
+
+private:
+  /**
+   * Returns a sorted list of the variables added by components
+   *
+   * See Component system documentation for more information.
+   */
+  std::vector<VariableName> sortAddedComponentVariables() const;
+
+  /// Component variable order map; see setComponentVariableOrder for more info
+  static std::map<VariableName, int> _component_variable_order_map;
 };
 
 template <typename T>

@@ -9,17 +9,12 @@
 
 #pragma once
 
-#include "MooseBase.h"
-#include "MooseBaseParameterInterface.h"
-#include "MooseBaseErrorInterface.h"
+#include "ParallelParamObject.h"
 #include "InputParameters.h"
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
-#include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
-
-#include "libmesh/parallel_object.h"
 
 #include <string>
 #include <ostream>
@@ -35,13 +30,7 @@ class Factory;
 /**
  * Base class for actions.
  */
-class Action : public MooseBase,
-               public MooseBaseParameterInterface,
-               public MooseBaseErrorInterface,
-               public MeshMetaDataInterface,
-               public PerfGraphInterface,
-               public libMesh::ParallelObject,
-               public DataFileInterface<Action>
+class Action : public ParallelParamObject, public MeshMetaDataInterface, public PerfGraphInterface
 {
 public:
   static InputParameters validParams();
@@ -142,7 +131,7 @@ protected:
    * parameters from this action.
    *
    * An example here is when you want to associate the creation of an action with
-   * an arugment from the aplication.
+   * an argument from the application.
    */
   void associateWithParameter(const InputParameters & from_params,
                               const std::string & param_name,

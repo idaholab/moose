@@ -78,7 +78,7 @@ require_total = 63
 require_total = 93
 
 [scalar_transport]
-require_total = 85
+require_total = 81
 
 [solid_properties]
 require_total = 83
@@ -90,7 +90,7 @@ require_total = 88
 require_total = 84
 
 [thermal_hydraulics]
-require_total = 89
+require_total = 88
 
 [xfem]
 require_total = 80

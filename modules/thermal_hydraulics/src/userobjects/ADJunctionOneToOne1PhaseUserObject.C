@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADJunctionOneToOne1PhaseUserObject.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "FlowModel1PhaseUtils.h"
 #include "SinglePhaseFluidProperties.h"
 #include "ADNumericalFlux3EqnBase.h"
@@ -22,9 +22,9 @@ registerMooseObject("ThermalHydraulicsApp", ADJunctionOneToOne1PhaseUserObject);
 
 const std::vector<std::pair<std::string, unsigned int>>
     ADJunctionOneToOne1PhaseUserObject::_varname_eq_index_pairs{
-        std::pair<std::string, unsigned int>("rhoA", THM3Eqn::EQ_MASS),
-        std::pair<std::string, unsigned int>("rhouA", THM3Eqn::EQ_MOMENTUM),
-        std::pair<std::string, unsigned int>("rhoEA", THM3Eqn::EQ_ENERGY)};
+        std::pair<std::string, unsigned int>("rhoA", THMVACE1D::MASS),
+        std::pair<std::string, unsigned int>("rhouA", THMVACE1D::MOMENTUM),
+        std::pair<std::string, unsigned int>("rhoEA", THMVACE1D::ENERGY)};
 
 Threads::spin_mutex ADJunctionOneToOne1PhaseUserObject::_spin_mutex;
 
@@ -79,7 +79,7 @@ ADJunctionOneToOne1PhaseUserObject::ADJunctionOneToOne1PhaseUserObject(
     _neighbor_primitive_solutions(_n_connections),
 
     _fluxes(_n_connections),
-    _dof_indices(_n_connections, std::vector<dof_id_type>(THM3Eqn::N_EQ, 0)),
+    _dof_indices(_n_connections, std::vector<dof_id_type>(THMVACE1D::N_FLUX_OUTPUTS, 0)),
 
     _elem_ids(_n_connections),
     _local_side_ids(_n_connections),
@@ -91,11 +91,11 @@ ADJunctionOneToOne1PhaseUserObject::ADJunctionOneToOne1PhaseUserObject(
     _delta_x(_n_connections),
     _has_neighbor(_n_connections)
 {
-  _U_vars.resize(THM3Eqn::N_CONS_VAR);
-  _U_vars[THM3Eqn::CONS_VAR_RHOA] = _rhoA_var;
-  _U_vars[THM3Eqn::CONS_VAR_RHOUA] = _rhouA_var;
-  _U_vars[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA_var;
-  _U_vars[THM3Eqn::CONS_VAR_AREA] = _A_var;
+  _U_vars.resize(THMVACE1D::N_FLUX_INPUTS);
+  _U_vars[THMVACE1D::RHOA] = _rhoA_var;
+  _U_vars[THMVACE1D::RHOUA] = _rhouA_var;
+  _U_vars[THMVACE1D::RHOEA] = _rhoEA_var;
+  _U_vars[THMVACE1D::AREA] = _A_var;
 }
 
 void
@@ -104,7 +104,7 @@ ADJunctionOneToOne1PhaseUserObject::initialize()
   _connection_indices.clear();
 
   // Broadcasts require vectors on all processes to have the same size
-  std::vector<ADReal> zero(THM3Eqn::N_PRIM_VAR, ADReal(0.));
+  std::vector<ADReal> zero(THMVACE1D::N_PRIM_VARS, ADReal(0.));
   for (unsigned int c = 0; c < _n_connections; c++)
   {
     _primitive_solutions[c] = zero;
@@ -214,8 +214,8 @@ ADJunctionOneToOne1PhaseUserObject::finalize()
   const Real dir_mult = -_normal[0] * _normal[1];
   auto W0_ref = W0_avg;
   auto W1_ref = W1_avg;
-  W0_ref[THM3Eqn::PRIM_VAR_VELOCITY] *= dir_mult;
-  W1_ref[THM3Eqn::PRIM_VAR_VELOCITY] *= dir_mult;
+  W0_ref[THMVACE1D::VELOCITY] *= dir_mult;
+  W1_ref[THMVACE1D::VELOCITY] *= dir_mult;
 
   std::vector<std::vector<GenericReal<true>>> W_neighbor0;
   std::vector<Point> x_neighbor0;
@@ -240,7 +240,7 @@ ADJunctionOneToOne1PhaseUserObject::finalize()
 
   auto W0 = W0_avg;
   auto W1 = W1_avg;
-  for (unsigned int m = 0; m < THM3Eqn::N_PRIM_VAR; m++)
+  for (unsigned int m = 0; m < THMVACE1D::N_PRIM_VARS; m++)
   {
     W0[m] = W0_avg[m] + slopes0[m] * _delta_x[0];
     W1[m] = W1_avg[m] + slopes1[m] * _delta_x[1];
@@ -250,13 +250,13 @@ ADJunctionOneToOne1PhaseUserObject::finalize()
       FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W0, _areas_linear[0], _fp);
   auto U1 =
       FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W1, _areas_linear[1], _fp);
-  U1[THM3Eqn::CONS_VAR_RHOUA] *= dir_mult;
+  U1[THMVACE1D::RHOUA] *= dir_mult;
 
   _fluxes[0] = _numerical_flux.getFlux(_local_side_ids[0], _elem_ids[0], true, U0, U1, _normal[0]);
 
   _fluxes[1] = _numerical_flux.getFlux(_local_side_ids[0], _elem_ids[0], false, U0, U1, _normal[0]);
-  _fluxes[1][THM3Eqn::CONS_VAR_RHOA] *= dir_mult;
-  _fluxes[1][THM3Eqn::CONS_VAR_RHOEA] *= dir_mult;
+  _fluxes[1][THMVACE1D::RHOA] *= dir_mult;
+  _fluxes[1][THMVACE1D::RHOEA] *= dir_mult;
 }
 
 const std::vector<ADReal> &

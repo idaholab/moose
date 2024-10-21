@@ -8,13 +8,22 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess, os, re, sys, traceback
-from versioner import Versioner
+import subprocess, os, platform, re, sys, traceback
 from datetime import date
 
 class PreMake:
     def __init__(self):
         self.conda_env = self.getCondaEnv()
+        self.apptainer_env = self.getApptainerEnv()
+
+        try:
+            from versioner import Versioner
+        except Exception as e:
+            warning = 'Failed to initialize PreMake for version checking; '
+            warning += 'this may be ignored but may suggest an environment issue.'
+            warning += f'\n\n{traceback.format_exc()}'
+            self.warn(warning)
+
         self.versioner_meta = Versioner().version_meta()
 
     @staticmethod
@@ -83,12 +92,28 @@ class PreMake:
 
         return conda_env
 
-    class CondaVersionMismatch(Exception):
+    @staticmethod
+    def getApptainerEnv():
+        """
+        Gets the apptainer generator generated apptainer environment
+        information if it exists.
+        """
+        prefix = 'MOOSE_APPTAINER_GENERATOR_'
+        apptainer_env = {}
+        for key, value in os.environ.items():
+            if key.startswith(prefix):
+                apptainer_env[key.replace(prefix, '')] = value
+        return apptainer_env if apptainer_env else None
+
+    class VersionMismatch(Exception):
+        pass
+
+    class CondaVersionMismatch(VersionMismatch):
         """
         Exception that denotes the mismatch of a version or build
         in a conda packages
         """
-        def __init__(self, package, version, required_version, build, required_build, msg=None):
+        def __init__(self, package, version, build, required_version, required_build, msg=None):
             self.package = package
             self.version = version
             self.required_version = required_version
@@ -122,7 +147,7 @@ class PreMake:
 
             if msg:
                 full_message += f'\n{msg}'
-            Exception.__init__(self, full_message)
+            super().__init__(full_message)
 
         @staticmethod
         def parseVersionDate(version: str):
@@ -136,13 +161,45 @@ class PreMake:
                         int(version_date_re.group(2)),
                         int(version_date_re.group(3)))
 
+    class ApptainerVersionMismatch(VersionMismatch):
+        """
+        Exception that denotes the mismatch of an apptainer
+        container version
+        """
+        def __init__(self, name, name_base, current_version, required_version):
+            self.name = name
+            self.name_base = name_base
+            self.current_version = current_version
+            self.required_version = required_version
+
+            message = f'Container {name} is currently at version {current_version} '
+            message += f'and the required version is {required_version}.\n'
+            message += f'Before updating the container, make sure that your version '
+            message += f'of MOOSE is up to date.\n\n'
+
+            # Using a loaded module on INL HPC
+            CONTAINER_MODULE_NAME = os.environ.get('CONTAINER_MODULE_NAME')
+            if CONTAINER_MODULE_NAME == name.replace(f'-{platform.machine()}', ''):
+                message += 'You can obtain the correct container via the module '
+                message += f'{CONTAINER_MODULE_NAME}/{required_version}.'
+            # Not using a loaded module on INL HPC
+            else:
+                message += 'You can obtain the correct container at '
+                if name_base == 'moose-dev':
+                    harbor = 'harbor.hpc.inl.gov'
+                else:
+                    harbor = 'mooseharbor.hpc.inl.gov'
+                message += f'oras://{harbor}/{name_base}/{name}:{required_version}.'
+
+            super().__init__(message)
+
     def check(self):
         """
         Checks for build issues
         """
         try:
             self._check()
-        except self.CondaVersionMismatch as e:
+        except self.VersionMismatch as e:
             self.warn(str(e))
         except Exception as e:
             warning = 'PreMake check failed; this may be ignored but may suggest an environment issue'
@@ -157,26 +214,47 @@ class PreMake:
         if package:
             if versioner_name is None:
                 versioner_name = package_name
-            version = package['version']
-            versioner_version = self.versioner_meta[versioner_name]['conda']['version']
-            build = package['build_string']
-            # we store the integer in Version, not the full string
-            versioner_build = f"build_{self.versioner_meta[versioner_name]['conda']['build']}"
-            if version != versioner_version or (versioner_build is not None and build != versioner_build):
-                raise self.CondaVersionMismatch(package_name, version, versioner_version,
-                                                build, versioner_build)
+            package_tuple = (package['version'], package['build_number'])
+            version_tuple = (self.versioner_meta[versioner_name]['conda']['version'],
+                             self.versioner_meta[versioner_name]['conda']['build'])
+            if package_tuple != version_tuple:
+                raise self.CondaVersionMismatch(package_name,
+                                                *package_tuple,
+                                                *version_tuple,
+                                                version_tuple[1])
 
+    def _checkApptainer(self):
+        library = self.apptainer_env['LIBRARY']
+
+        library_meta = self.versioner_meta.get(library)
+        if not library_meta:
+            return
+
+        apptainer_meta = library_meta.get('apptainer')
+        if not apptainer_meta:
+            return
+
+        required_version = apptainer_meta['tag']
+        current_version = self.apptainer_env['VERSION']
+        if required_version != current_version:
+            name = self.apptainer_env['NAME']
+            name_base = apptainer_meta['name_base']
+            raise self.ApptainerVersionMismatch(name, name_base, current_version, required_version)
 
     def _check(self):
         """
         Internal check method
         """
+        # We have apptainer available, check the version if we can
+        if self.apptainer_env:
+            self._checkApptainer()
+
         # We have conda available, check those environments
         if self.conda_env:
             self._checkCondaPackage('moose-dev')
             self._checkCondaPackage('moose-libmesh', 'libmesh')
             self._checkCondaPackage('moose-petsc', 'petsc')
-            self._checkCondaPackage('moose-mpich', 'mpich')
+            self._checkCondaPackage('moose-mpi', 'mpi')
             self._checkCondaPackage('moose-wasp', 'wasp')
 
 if __name__ == '__main__':

@@ -41,7 +41,7 @@ void
 assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
-  EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
+  CondensedEigenSystem & eigen_system = es.get_system<CondensedEigenSystem>(system_name);
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem(/*nl_sys_num=*/0);
 
   // If this is a nonlinear eigenvalue problem,
@@ -104,18 +104,18 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
 }
 
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
-  : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<EigenSystem>(name), name),
-    _eigen_sys(eigen_problem.es().get_system<EigenSystem>(name)),
+  : NonlinearSystemBase(
+        eigen_problem, eigen_problem.es().add_system<CondensedEigenSystem>(name), name),
+    _eigen_sys(eigen_problem.es().get_system<CondensedEigenSystem>(name)),
     _eigen_problem(eigen_problem),
     _solver_configuration(nullptr),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
     _work_rhs_vector_AX(addVector("work_rhs_vector_Ax", false, PARALLEL)),
     _work_rhs_vector_BX(addVector("work_rhs_vector_Bx", false, PARALLEL)),
     _precond_matrix_includes_eigen(false),
-    _preconditioner(nullptr)
+    _preconditioner(nullptr),
+    _num_constrained_dofs(0)
 {
-  sys().attach_assemble_function(Moose::assemble_matrix);
-
   SlepcEigenSolver<Number> * solver =
       cast_ptr<SlepcEigenSolver<Number> *>(_eigen_sys.eigen_solver.get());
 
@@ -140,6 +140,9 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   // the preconditioning matrix, and then _precond_tag will
   // point to part of "B" objects
   _precond_tag = eigen_problem.addMatrixTag("Eigen_precond");
+
+  // We do not rely on creating submatrices in the solve routine
+  _eigen_sys.dont_create_submatrices_in_solve();
 }
 
 void
@@ -189,15 +192,67 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
 }
 
 void
+NonlinearEigenSystem::initializeCondensedMatrices()
+{
+  if (!(_num_constrained_dofs = dofMap().n_constrained_dofs()))
+    return;
+
+  _eigen_sys.initialize_condensed_dofs();
+  const auto m = cast_int<numeric_index_type>(_eigen_sys.local_non_condensed_dofs_vector.size());
+  auto M = m;
+  _communicator.sum(M);
+  if (_eigen_sys.has_condensed_matrix_A())
+  {
+    _eigen_sys.get_condensed_matrix_A().init(M, M, m, m);
+    // A bit ludicrously MatCopy requires the matrix being copied to to be assembled
+    _eigen_sys.get_condensed_matrix_A().close();
+  }
+  if (_eigen_sys.has_condensed_matrix_B())
+  {
+    _eigen_sys.get_condensed_matrix_B().init(M, M, m, m);
+    _eigen_sys.get_condensed_matrix_B().close();
+  }
+  if (_eigen_sys.has_condensed_precond_matrix())
+  {
+    _eigen_sys.get_condensed_precond_matrix().init(M, M, m, m);
+    _eigen_sys.get_condensed_precond_matrix().close();
+  }
+}
+
+void
+NonlinearEigenSystem::postInit()
+{
+  NonlinearSystemBase::postInit();
+  initializeCondensedMatrices();
+}
+
+void
+NonlinearEigenSystem::reinit()
+{
+  NonlinearSystemBase::reinit();
+  initializeCondensedMatrices();
+}
+
+void
 NonlinearEigenSystem::solve()
 {
   const bool presolve_succeeded = preSolve();
   if (!presolve_succeeded)
     return;
 
+  std::unique_ptr<NumericVector<Number>> subvec;
+
   // We apply initial guess for only nonlinear solver
   if (_eigen_problem.isNonlinearEigenvalueSolver())
-    _eigen_sys.set_initial_space(solution());
+  {
+    if (_num_constrained_dofs)
+    {
+      subvec = solution().get_subvector(_eigen_sys.local_non_condensed_dofs_vector);
+      _eigen_sys.set_initial_space(*subvec);
+    }
+    else
+      _eigen_sys.set_initial_space(solution());
+  }
 
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.
@@ -224,28 +279,68 @@ NonlinearEigenSystem::solve()
   // Update the solution vector to the active eigenvector
   if (n_converged_eigenvalues)
     getConvergedEigenpair(_eigen_problem.activeEigenvalueIndex());
+
+  if (_eigen_problem.isNonlinearEigenvalueSolver() && _num_constrained_dofs)
+    solution().restore_subvector(std::move(subvec), _eigen_sys.local_non_condensed_dofs_vector);
 }
 
 void
 NonlinearEigenSystem::attachSLEPcCallbacks()
 {
-  // Tell libmesh not close matrices before solve
+  // Tell libmesh not to close matrices before solve
   _eigen_sys.get_eigen_solver().set_close_matrix_before_solve(false);
 
-  // Matrix A
-  if (_eigen_sys.has_matrix_A())
+  if (_num_constrained_dofs)
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_A()).mat();
+    // Condensed Matrix A
+    if (_eigen_sys.has_condensed_matrix_A())
+    {
+      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_condensed_matrix_A()).mat();
 
-    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
+      Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
+    }
+
+    // Condensed Matrix B
+    if (_eigen_sys.has_condensed_matrix_B())
+    {
+      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_condensed_matrix_B()).mat();
+
+      Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+    }
+
+    // Condensed Preconditioning matrix
+    if (_eigen_sys.has_condensed_precond_matrix())
+    {
+      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_condensed_precond_matrix()).mat();
+
+      Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+    }
   }
-
-  // Matrix B
-  if (_eigen_sys.has_matrix_B())
+  else
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_B()).mat();
+    // Matrix A
+    if (_eigen_sys.has_matrix_A())
+    {
+      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_A()).mat();
 
-    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+      Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
+    }
+
+    // Matrix B
+    if (_eigen_sys.has_matrix_B())
+    {
+      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_B()).mat();
+
+      Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+    }
+
+    // Preconditioning matrix
+    if (_eigen_sys.has_precond_matrix())
+    {
+      Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_precond_matrix()).mat();
+
+      Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+    }
   }
 
   // Shell matrix A
@@ -269,14 +364,6 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
 
     // Set MatMult operations for shell
     Moose::SlepcSupport::setOperationsForShellMat(_eigen_problem, mat, true);
-  }
-
-  // Preconditioning matrix
-  if (_eigen_sys.has_precond_matrix())
-  {
-    Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_precond_matrix()).mat();
-
-    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
 
   // Shell preconditioning matrix

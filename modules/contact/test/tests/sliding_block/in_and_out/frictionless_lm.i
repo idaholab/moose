@@ -11,7 +11,7 @@
   volumetric_locking_correction = false
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     strain = FINITE

@@ -10,9 +10,11 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
-#include "NSFVAction.h"
+#include "PINSFVEnergyAnisotropicDiffusion.h"
+#include "NSFVBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
+registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "get_turbulence_physics");
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFluidHeatTransferPhysics, "add_fv_kernel");
@@ -26,7 +28,9 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params += WCNSFVCoupledAdvectionPhysicsHelper::validParams();
   params.addClassDescription("Define the Navier Stokes weakly-compressible energy equation");
 
-  params += NSFVAction::commonFluidEnergyEquationParams();
+  params += NSFVBase::commonFluidEnergyEquationParams();
+  params.transferParam<bool>(PINSFVEnergyAnisotropicDiffusion::validParams(),
+                             "effective_conductivity");
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>("add_energy_equation",
@@ -40,12 +44,12 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   params.deprecateParam("energy_wall_function", "energy_wall_functors", "01/01/2025");
 
   // Spatial finite volume discretization scheme
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_face_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "energy_two_term_bc_expansion");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_advection_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "energy_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
-  params.transferParam<Real>(NSFVAction::validParams(), "energy_scaling");
+  params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
 
   params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks "
                               "use_external_enthalpy_material",
@@ -62,7 +66,7 @@ WCNSFVFluidHeatTransferPhysics::validParams()
 
 WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
-    WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
+    WCNSFVCoupledAdvectionPhysicsHelper(this),
     _has_energy_equation(
         isParamValid("add_energy_equation")
             ? getParam<bool>("add_energy_equation")
@@ -87,7 +91,7 @@ WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParame
   if (!_has_energy_equation)
     return;
 
-  saveNonlinearVariableName(_fluid_temperature_name);
+  saveSolverVariableName(_fluid_temperature_name);
 
   // set block restrictions if not set by user
   // This should probably be done for all the coupled physics, tbd
@@ -118,8 +122,8 @@ WCNSFVFluidHeatTransferPhysics::addNonlinearVariables()
     return;
 
   // Dont add if the user already defined the variable
-  if (nonlinearVariableExists(_fluid_temperature_name,
-                              /*error_if_aux=*/true))
+  if (variableExists(_fluid_temperature_name,
+                     /*error_if_aux=*/true))
     checkBlockRestrictionIdentical(_fluid_temperature_name,
                                    getProblem().getVariable(0, _fluid_temperature_name).blocks());
   else if (_define_variables)
@@ -183,7 +187,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyTimeKernels()
   if (_porous_medium_treatment)
   {
     params.set<MooseFunctorName>(NS::porosity) =
-        _flow_equations_physics->getPorosityFunctorName(false);
+        _flow_equations_physics->getPorosityFunctorName(/*smoothed=*/false);
     if (getProblem().hasFunctor(NS::time_deriv(_density_name),
                                 /*thread_id=*/0))
     {
@@ -219,7 +223,7 @@ WCNSFVFluidHeatTransferPhysics::addWCNSEnergyTimeKernels()
   {
     params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
     params.set<MooseFunctorName>(NS::porosity) =
-        _flow_equations_physics->getPorosityFunctorName(false);
+        _flow_equations_physics->getPorosityFunctorName(/*smoothed=*/false);
     params.set<bool>("is_solid") = false;
   }
 
@@ -261,7 +265,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
     if (num_blocks)
       block_name = Moose::stringify(_thermal_conductivity_blocks[block_i]);
     else
-      block_name = std::to_string(block_i);
+      block_name = "all";
 
     if (_porous_medium_treatment)
     {
@@ -276,6 +280,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
       params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) =
           _flow_equations_physics->getPorosityFunctorName(true);
+      params.set<bool>("effective_conductivity") = getParam<bool>("effective_conductivity");
 
       getProblem().addFVKernel(
           kernel_type, prefix() + "pins_energy_diffusion_" + block_name, params);
@@ -340,28 +345,6 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
   getProblem().addFVKernel(kernel_type, prefix() + "external_heat_source", params);
-}
-
-void
-WCNSFVFluidHeatTransferPhysics::addWCNSEnergyMixingLengthKernels()
-{
-  const std::string u_names[3] = {"u", "v", "w"};
-  const std::string kernel_type = "WCNSFVMixingLengthEnergyDiffusion";
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
-  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
-  params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-
-  for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
-    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
-
-  if (_porous_medium_treatment)
-    getProblem().addFVKernel(kernel_type, prefix() + "pins_energy_mixing_length_diffusion", params);
-  else
-    getProblem().addFVKernel(kernel_type, prefix() + "ins_energy_mixing_length_diffusion", params);
 }
 
 void
@@ -454,6 +437,14 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyInletBC()
 }
 
 void
+WCNSFVFluidHeatTransferPhysics::actOnAdditionalTasks()
+{
+  // Turbulence physics would not be initialized before this task
+  if (_current_task == "get_turbulence_physics")
+    _turbulence_physics = getCoupledTurbulencePhysics();
+}
+
+void
 WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
 {
   const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
@@ -491,6 +482,41 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
 
       getProblem().addFVBC(
           bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
+    }
+    // We add this boundary condition here to facilitate the input of wall boundaries / functors for
+    // energy. If there are too many turbulence options and this gets out of hand we will have to
+    // move this to the turbulence Physics
+    else if (_energy_wall_types[bc_ind] == "wallfunction")
+    {
+      if (!_turbulence_physics)
+        paramError("coupled_turbulence_physics",
+                   "A coupled turbulence Physics was not found for defining the wall function "
+                   "boundary condition on boundary: " +
+                       wall_boundaries[bc_ind]);
+      const std::string bc_type = "INSFVTurbulentTemperatureWallFunction";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
+      params.set<MooseEnum>("wall_treatment") =
+          _turbulence_physics->turbulenceTemperatureWallTreatment();
+      params.set<MooseFunctorName>("T_w") = _energy_wall_functors[bc_ind];
+      params.set<MooseFunctorName>(NS::density) = _density_name;
+      params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+      params.set<MooseFunctorName>(NS::TKE) = _turbulence_physics->tkeName();
+      if (_thermal_conductivity_name.size() != 1)
+        mooseError("Several anisotropic thermal conductivity (kappa) regions have been specified. "
+                   "Selecting the right kappa coefficient for the turbulence boundaries is not "
+                   "currently implemented.\nBoundaries:\n" +
+                   Moose::stringify(_turbulence_physics->turbulenceWalls()) +
+                   "\nKappa(s) specified:\n" + Moose::stringify(_thermal_conductivity_name));
+      params.set<MooseFunctorName>(NS::kappa) = _thermal_conductivity_name[0];
+      params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+      const std::string u_names[3] = {"u", "v", "w"};
+      for (const auto d : make_range(dimension()))
+        params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+      // Currently only Newton method for WCNSFVFluidHeatTransferPhysics
+      params.set<bool>("newton_solve") = true;
+      getProblem().addFVBC(bc_type, prefix() + "wallfunction_" + wall_boundaries[bc_ind], params);
     }
   }
 }
@@ -549,6 +575,12 @@ WCNSFVFluidHeatTransferPhysics::addInitialConditions()
         "initial_temperature",
         "T_fluid is defined externally of WCNSFVFluidHeatTransferPhysics, so should the inital "
         "condition");
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+  // do not set initial conditions if we are not defining variables
+  if (!_define_variables)
+    return;
 
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);

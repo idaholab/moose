@@ -20,7 +20,7 @@ ExternalProblem::validParams()
 
   // there is no nonlinear system (we set it as empty in the constructor)
   params.suppressParameter<bool>("ignore_zeros_in_jacobian");
-  params.suppressParameter<bool>("kernel_coverage_check");
+  params.suppressParameter<MooseEnum>("kernel_coverage_check");
   params.suppressParameter<std::vector<NonlinearSystemName>>("nl_sys_names");
   params.suppressParameter<bool>("previous_nl_solution_required");
   params.suppressParameter<bool>("skip_nl_system_check");

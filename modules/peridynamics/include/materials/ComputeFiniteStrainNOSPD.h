@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ComputeStrainBaseNOSPD.h"
-#include "RankTwoTensor.h"
+#include "FactorizedRankTwoTensor.h"
 
 /**
  * Material class for peridynamic correspondence model for finite strain

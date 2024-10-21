@@ -73,7 +73,7 @@ name = 'small'
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [action]
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx '
                       'strain_yy strain_zz'
@@ -86,7 +86,7 @@ name = 'small'
     primary = plank_right
     secondary = block_left
     formulation = mortar
-    c_normal = 1e0
+    c_normal = 1e3
   []
 []
 
@@ -147,13 +147,13 @@ name = 'small'
   type = Transient
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
+  petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       1e-5          NONZERO               1e-15                   mumps'
   end_time = 5.0
   dt = 0.1
   dtmin = 0.1
   timestep_tolerance = 1e-6
-  line_search = 'contact'
+  line_search = 'none'
 []
 
 [Postprocessors]

@@ -12,6 +12,25 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#ifdef AIR_FP_ENABLED
+#include "AirApp.h"
+#endif
+#ifdef CARBON_DIOXIDE_FP_ENABLED
+#include "CarbonDioxideApp.h"
+#endif
+#ifdef HELIUM_FP_ENABLED
+#include "HeliumApp.h"
+#endif
+#ifdef NITROGEN_FP_ENABLED
+#include "NitrogenApp.h"
+#endif
+#ifdef POTASSIUM_FP_ENABLED
+#include "PotassiumApp.h"
+#endif
+#ifdef SODIUM_FP_ENABLED
+#include "SodiumApp.h"
+#endif
+
 InputParameters
 FluidPropertiesApp::validParams()
 {
@@ -60,6 +79,25 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 void
 FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+#ifdef AIR_FP_ENABLED
+  AirApp::registerAll(f, af, s);
+#endif
+#ifdef CARBON_DIOXIDE_FP_ENABLED
+  CarbonDioxideApp::registerAll(f, af, s);
+#endif
+#ifdef HELIUM_FP_ENABLED
+  HeliumApp::registerAll(f, af, s);
+#endif
+#ifdef NITROGEN_FP_ENABLED
+  NitrogenApp::registerAll(f, af, s);
+#endif
+#ifdef POTASSIUM_FP_ENABLED
+  PotassiumApp::registerAll(f, af, s);
+#endif
+#ifdef SODIUM_FP_ENABLED
+  SodiumApp::registerAll(f, af, s);
+#endif
+
   Registry::registerObjectsTo(f, {"FluidPropertiesApp"});
   Registry::registerActionsTo(af, {"FluidPropertiesApp"});
   associateSyntaxInner(s, af);

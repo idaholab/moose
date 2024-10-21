@@ -190,6 +190,15 @@ process. These functions can be found here:
 
 !listing framework/include/interfaces/Coupleable.h start=coupled-dof-values-begin end=coupled-dof-values-end include-start=false
 
+## Coupling of variables through their names
+
+Typically variables are coupled in through calling `params.addCoupledVar` or `params.addRequiredCoupledVar` of the valid parameters of an object.
+There are cases where the variable names are provided through parameters in other types with `params.addParam` or `params.addRequiredParam`.
+For these cases, this interface provides two functions `coupledValueByName` and `coupledArrayValueByName` that take a variable name directly.
+This suffix `ByName` is only available for the two functions currently because they are the only onces needed by MOOSE and MOOSE applications.
+More can be added as desired in the future.
+
+
 ## Writing directly to coupled variables
 
 Element- and nodal user objects as well AuxKernels may obtain a writable reference to a MOOSE field variable

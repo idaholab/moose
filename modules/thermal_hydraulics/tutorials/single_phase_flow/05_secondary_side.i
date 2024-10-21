@@ -110,6 +110,7 @@ m_dot_sec_in = 1. # kg/s
     position = '0 0 0.5'
     connections = 'up_pipe_1:out core_chan:in'
     volume = 1e-5
+    use_scalar_variables = false
   []
   [core_chan]
     type = FlowChannel1Phase
@@ -155,6 +156,7 @@ m_dot_sec_in = 1. # kg/s
     position = '0 0 1.5'
     connections = 'core_chan:out up_pipe_2:in'
     volume = 1e-5
+    use_scalar_variables = false
   []
 
   [up_pipe_2]
@@ -197,6 +199,7 @@ m_dot_sec_in = 1. # kg/s
     position = '0.5 0 2'
     volume = 1e-5
     connections = 'top_pipe_1:out top_pipe_2:in press_pipe:in'
+    use_scalar_variables = false
   []
 
   [press_pipe]
@@ -235,6 +238,7 @@ m_dot_sec_in = 1. # kg/s
     position = '1 0 1.75'
     connections = 'down_pipe_1:out hx/pri:in'
     volume = 1e-5
+    use_scalar_variables = false
   []
 
   [hx]
@@ -297,6 +301,7 @@ m_dot_sec_in = 1. # kg/s
     position = '1 0 0.5'
     connections = 'hx/pri:out down_pipe_2:in'
     volume = 1e-5
+    use_scalar_variables = false
   []
 
   [down_pipe_2]
@@ -331,6 +336,7 @@ m_dot_sec_in = 1. # kg/s
     volume = 1e-4
     A_ref = ${A_pipe}
     head = 0
+    use_scalar_variables = false
   []
 
   [bottom_2]
@@ -485,7 +491,7 @@ m_dot_sec_in = 1. # kg/s
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 0
   nl_abs_tol = 1e-8
   nl_max_its = 25
 

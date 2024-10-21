@@ -118,8 +118,8 @@ MeshInfo::possiblyAddSidesetInfo()
 
   const bool include_all = !_items.isValid();
 
-  if (include_all || _items.contains("local_sidesets") || _items.contains("local_sideset_elems") ||
-      _items.contains("sideset_elems"))
+  if (include_all || _items.isValueSet("local_sidesets") ||
+      _items.isValueSet("local_sideset_elems") || _items.isValueSet("sideset_elems"))
   {
     _local_sidesets.clear();
     _local_sideset_elems.clear();
@@ -137,7 +137,7 @@ MeshInfo::possiblyAddSidesetInfo()
       }
 
     // For local sidesets: copy over the local info, remove the sides, and add the names
-    if (include_all || _items.contains("local_sidesets"))
+    if (include_all || _items.isValueSet("local_sidesets"))
     {
       // Copy over the local sideset info, remove the sides, and add the names
       _local_sidesets = sidesets;
@@ -147,7 +147,7 @@ MeshInfo::possiblyAddSidesetInfo()
     }
 
     // For local sideset elems: copy over the local info, and add the names
-    if (include_all || _items.contains("local_sideset_elems"))
+    if (include_all || _items.isValueSet("local_sideset_elems"))
     {
       _local_sideset_elems = sidesets;
       sort_sides(_local_sideset_elems);
@@ -155,7 +155,7 @@ MeshInfo::possiblyAddSidesetInfo()
     }
 
     // For the global sideset elems, we need to communicate all of the elems
-    if (include_all || _items.contains("sideset_elems"))
+    if (include_all || _items.isValueSet("sideset_elems"))
     {
       // Set up a structure for sending each (id, elem id, side) tuple to root
       std::map<processor_id_type,
@@ -191,7 +191,7 @@ MeshInfo::possiblyAddSidesetInfo()
   // For global sideset information without elements, we can simplify communication.
   // All we need are the boundary IDs from libMesh (may not be reduced, so take the union)
   // and then add the names (global)
-  if (include_all || _items.contains("sidesets"))
+  if (include_all || _items.isValueSet("sidesets"))
   {
     _sidesets.clear();
 
@@ -269,8 +269,8 @@ MeshInfo::possiblyAddSubdomainInfo()
 
   const bool include_all = !_items.isValid();
 
-  if (include_all || _items.contains("local_subdomains") ||
-      _items.contains("local_subdomain_elems") || _items.contains("subdomain_elems"))
+  if (include_all || _items.isValueSet("local_subdomains") ||
+      _items.isValueSet("local_subdomain_elems") || _items.isValueSet("subdomain_elems"))
   {
     _local_subdomains.clear();
     _local_subdomain_elems.clear();
@@ -286,7 +286,7 @@ MeshInfo::possiblyAddSubdomainInfo()
     }
 
     // For local subdomains: copy over the local info, remove the elems, and add the names
-    if (include_all || _items.contains("local_subdomains"))
+    if (include_all || _items.isValueSet("local_subdomains"))
     {
       _local_subdomains = subdomains;
       for (auto & pair : _local_subdomains)
@@ -295,7 +295,7 @@ MeshInfo::possiblyAddSubdomainInfo()
     }
 
     // For local subdomain elems: copy over the local info, and add the names
-    if (include_all || _items.contains("local_subdomain_elems"))
+    if (include_all || _items.isValueSet("local_subdomain_elems"))
     {
       _local_subdomain_elems = subdomains;
       sort_elems(_local_subdomain_elems);
@@ -303,7 +303,7 @@ MeshInfo::possiblyAddSubdomainInfo()
     }
 
     // For the global subdomain elems, we need to communicate all of the elems
-    if (include_all || _items.contains("subdomain_elems"))
+    if (include_all || _items.isValueSet("subdomain_elems"))
     {
       // Set up a structure for sending each (id, elem id) to root
       std::map<processor_id_type, std::vector<std::pair<subdomain_id_type, dof_id_type>>> send_info;
@@ -338,7 +338,7 @@ MeshInfo::possiblyAddSubdomainInfo()
 
   // For global subdomain information without elements, we can simplify communication.
   // All we need are the subdomain IDs from libMesh and then add the names (global)
-  if (include_all || _items.contains("subdomains"))
+  if (include_all || _items.isValueSet("subdomains"))
   {
     _subdomains.clear();
 

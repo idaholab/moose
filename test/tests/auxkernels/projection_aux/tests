@@ -7,7 +7,7 @@
       type = 'CSVDiff'
       input = '1d.i'
       csvdiff = '1d_constant.csv'
-      cli_args = 'Outputs/file_base=1d_constant'
+      cli_args = 'AuxVariables/base_elem/type=MooseVariableFVReal Outputs/file_base=1d_constant'
       detail = "a constant to all variable families supported in 1d at various orders,"
     []
     [1d_linear]
@@ -111,6 +111,19 @@
                   ICs/active='cubic_elem cubic_nodal'"
       detail = "a cubic variation to all variable families supported in 2d at various orders on a "
                "triangle mesh,"
+    []
+    [2d_and_lower_d]
+      type = 'Exodiff'
+      input = '2d_and_lower_d.i'
+      exodiff = '2d_and_lower_d_out.e'
+      detail = "between variables on regular elements, in the presence of lower D elements,"
+    []
+    [excluding_some_source_blocks]
+      type = 'Exodiff'
+      input = '2d_and_lower_d.i'
+      exodiff = '2d_restrict_source.e'
+      cli_args = 'Outputs/file_base=2d_restrict_source AuxKernels/node_to_node_higher_order/use_block_restriction_for_source=true AuxKernels/elem_to_nodal/use_block_restriction_for_source=true'
+      detail = "between variables defined on multiple blocks, ignoring the source variable values on the subdomains that the auxkernel is not defined on."
     []
   []
 []

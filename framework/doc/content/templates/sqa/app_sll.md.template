@@ -8,18 +8,18 @@ The [!ac](SLL) provides a list of software libraries utilized by {{app}}.
 ## Dependencies id=dependencies
 
 !template field key=dependencies-intro required=False
-The {{app}} application is developed using MOOSE and is based on various modules, as such
-the [!ac](VVR) for {{app}} is dependent upon the following documents.
+The {{app}} application is developed using MOOSE and is based on various modules. As such,
+the [!ac](SLL) for {{app}} is dependent upon the following documents.
 
 !template! field key=dependencies required=False
 !sqa dependencies suffix=sll category={{category}}
 !template-end!
 
-!if! function=hasSubmodule('moose')
+!if! function=hasSubmodule('moose', False)
 ## MOOSE
 
 {{app}} is a MOOSE-based application, [mooseframework.org](https://mooseframework), which is
-summarized in the following abstract [!cite](permann2020moose).
+summarized in the following abstract [!citep](permann2020moose).
 
 > Harnessing modern parallel computing resources to achieve complex multiphysics simulations is a
 > daunting task. The Multiphysics Object Oriented Simulation Environment (MOOSE) aims to enable such

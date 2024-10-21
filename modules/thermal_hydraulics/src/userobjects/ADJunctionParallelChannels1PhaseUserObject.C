@@ -9,7 +9,7 @@
 
 #include "ADJunctionParallelChannels1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "VolumeJunction1Phase.h"
 #include "NumericalFlux3EqnBase.h"
 #include "Numerics.h"
@@ -68,10 +68,16 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
   const Point di = _dir[0];
   const Point ni = di * din;
 
-  const ADReal vJ = THM::v_from_rhoA_A(_rhoV[0], _volume);
-  const ADRealVectorValue rhouV_vec(_rhouV[0], _rhovV[0], _rhowV[0]);
+  const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
+  const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
+  const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
+  const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
+  const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
+
+  const ADReal vJ = THM::v_from_rhoA_A(rhoV, _volume);
+  const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
   const ADReal rhouV2 = rhouV_vec * rhouV_vec;
-  const ADReal eJ = _rhoEV[0] / _rhoV[0] - 0.5 * rhouV2 / (_rhoV[0] * _rhoV[0]);
+  const ADReal eJ = rhoEV / rhoV - 0.5 * rhouV2 / (rhoV * rhoV);
   const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
 
   _residual[VolumeJunction1Phase::RHOUV_INDEX] -= pJ * ni(0) * _A[0];

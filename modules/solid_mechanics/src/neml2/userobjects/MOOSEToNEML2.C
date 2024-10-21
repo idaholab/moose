@@ -22,7 +22,7 @@ MOOSEToNEML2::validParams()
 {
   auto params = ElementUserObject::validParams();
 
-  params.addRequiredParam<std::string>("neml2_variable", "NEML2 variable accessor to write to");
+  params.addRequiredParam<std::string>("neml2_variable", "Name of the NEML2 variable to write to");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -44,13 +44,20 @@ MOOSEToNEML2::MOOSEToNEML2(const InputParameters & params)
 void
 MOOSEToNEML2::insertIntoInput(neml2::LabeledVector & input) const
 {
-  input.set(neml2::BatchTensor(torch::stack(_buffer, 0), 1), _neml2_variable);
+  input.base_index_put_(_neml2_variable, neml2::Tensor(torch::stack(_buffer, 0), 1));
 }
 
 void
 MOOSEToNEML2::initialize()
 {
   _buffer.clear();
+}
+
+void
+MOOSEToNEML2::execute()
+{
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    _buffer.push_back(convertQpMOOSEData());
 }
 
 void

@@ -250,6 +250,18 @@ RevolveGenerator::generate()
   if (!input->is_serial())
     mesh->delete_remote_elements();
 
+  // check that subdomain swap sources exist in the mesh
+  std::set<subdomain_id_type> blocks;
+  input->subdomain_ids(blocks, true);
+  for (const auto & swap_map : _subdomain_swap_pairs)
+    for (const auto & [bid, tbid] : swap_map)
+    {
+      libmesh_ignore(tbid);
+      if (blocks.count(bid) == 0)
+        paramError("subdomain_swaps",
+                   "Source subdomain " + std::to_string(bid) + " was not found in the mesh");
+    }
+
   // Subdomain IDs for on-axis elements must be new
   std::set<subdomain_id_type> subdomain_ids_set;
   input->subdomain_ids(subdomain_ids_set);
@@ -270,9 +282,7 @@ RevolveGenerator::generate()
   const Point axis_centroid_cross = (input_centroid - _axis_point).cross(_axis_direction);
 
   if (MooseUtils::absoluteFuzzyEqual(axis_centroid_cross.norm(), 0.0))
-  {
     mooseError("The input mesh is either across the axis or overlapped with the axis!");
-  }
 
   Real inner_product_1d(0.0);
   bool inner_product_1d_initialized(false);
@@ -285,20 +295,14 @@ RevolveGenerator::generate()
     if (!MooseUtils::absoluteFuzzyEqual(axis_node_cross.norm(), 0.0))
     {
       if (MooseUtils::absoluteFuzzyLessThan(axis_node_cross * axis_centroid_cross, 0.0))
-      {
         mooseError("The input mesh is across the axis.");
-      }
       else if (MooseUtils::absoluteFuzzyLessThan(axis_node_cross * axis_centroid_cross,
                                                  axis_centroid_cross.norm() *
                                                      axis_node_cross.norm()))
-      {
         mooseError("The input mesh is not in the same plane with the rotation axis.");
-      }
     }
     else
-    {
       node_ids_on_axis.push_back(node->id());
-    }
 
     // Only for 1D input mesh, we need to check if the axis is perpendicular to the input mesh
     if (input->mesh_dimension() == 1)
@@ -307,9 +311,7 @@ RevolveGenerator::generate()
       if (inner_product_1d_initialized)
       {
         if (!MooseUtils::absoluteFuzzyEqual(temp_inner_product, inner_product_1d))
-        {
           mooseError("The 1D input mesh is not perpendicular to the rotation axis.");
-        }
       }
       else
       {
@@ -366,7 +368,9 @@ RevolveGenerator::generate()
   dof_id_type orig_nodes = input->n_nodes();
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-  unique_id_type orig_unique_ids = input->parallel_max_unique_id();
+  // Add the number of original elements as revolving may create two elements per layer for one
+  // original element
+  unique_id_type orig_unique_ids = input->parallel_max_unique_id() + orig_elem;
 #endif
 
   // get rotation vectors
@@ -393,11 +397,6 @@ RevolveGenerator::generate()
       order = 2;
   mesh->comm().max(order);
 
-#ifdef LIBMESH_ENABLE_UNIQUE_ID
-  const unique_id_type elem_unique_id_shift =
-      orig_unique_ids + total_num_azimuthal_intervals * order * (orig_elem + orig_nodes);
-#endif
-
   // Collect azimuthal angles and use them to calculate the correction factor if applicable
   std::vector<Real> azi_array;
   for (const auto & i : index_range(_revolving_angles))
@@ -410,7 +409,7 @@ RevolveGenerator::generate()
   }
   if (_preserve_volumes)
   {
-    _radius_correction_factor = radiusCorrectionFactor(azi_array, _full_circle_revolving);
+    _radius_correction_factor = radiusCorrectionFactor(azi_array, _full_circle_revolving, order);
 
     // In the meanwhile, modify the input mesh for radius correction if applicable
     for (const auto & node : input->node_ptr_range())
@@ -511,12 +510,11 @@ RevolveGenerator::generate()
           // Let's give the base nodes of the revolved mesh the same
           // unique_ids as the source mesh, in case anyone finds that
           // a useful map to preserve.
-          const unique_id_type uid = (current_node_layer == 0)
-                                         ? node->unique_id()
-                                         : orig_unique_ids +
-                                               (current_node_layer - 1) * (orig_nodes + orig_elem) +
-                                               node->id();
-
+          const unique_id_type uid =
+              (current_node_layer == 0)
+                  ? node->unique_id()
+                  : (orig_unique_ids + (current_node_layer - 1) * (orig_nodes + orig_elem * 2) +
+                     node->id());
           new_node->set_unique_id(uid);
 #endif
 
@@ -986,11 +984,11 @@ RevolveGenerator::generate()
         // Let's give the base elements of the revolved mesh the same
         // unique_ids as the source mesh, in case anyone finds that
         // a useful map to preserve.
-        const unique_id_type uid = (current_layer == 0)
-                                       ? elem->unique_id()
-                                       : orig_unique_ids +
-                                             (current_layer - 1) * (orig_nodes + orig_elem) +
-                                             orig_nodes + elem->id();
+        const unique_id_type uid =
+            (current_layer == 0)
+                ? elem->unique_id()
+                : (orig_unique_ids + (current_layer - 1) * (orig_nodes + orig_elem * 2) +
+                   orig_nodes + elem->id());
 
         new_elem->set_unique_id(uid);
 
@@ -998,11 +996,10 @@ RevolveGenerator::generate()
         if (new_elem_1)
         {
           const unique_id_type uid_1 =
-              elem_unique_id_shift +
-              ((current_layer == 0)
-                   ? elem->unique_id()
-                   : orig_unique_ids + (current_layer - 1) * (orig_nodes + orig_elem) + orig_nodes +
-                         elem->id());
+              (current_layer == 0)
+                  ? (elem->id() + orig_unique_ids - orig_elem)
+                  : (orig_unique_ids + (current_layer - 1) * (orig_nodes + orig_elem * 2) +
+                     orig_nodes + orig_elem + elem->id());
 
           new_elem_1->set_unique_id(uid_1);
         }
@@ -1470,6 +1467,15 @@ RevolveGenerator::generate()
       }
     }
   }
+
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+  // Update the value of next_unique_id based on newly created nodes and elements
+  // Note: the calculation here is quite conservative to ensure uniqueness
+  unsigned int total_new_node_layers = total_num_azimuthal_intervals * order;
+  unsigned int new_unique_ids = orig_unique_ids + (total_new_node_layers - 1) * orig_elem * 2 +
+                                total_new_node_layers * orig_nodes;
+  mesh->set_next_unique_id(new_unique_ids);
+#endif
 
   // Copy all the subdomain/sideset/nodeset name maps to the revolved mesh
   if (!input_subdomain_map.empty())

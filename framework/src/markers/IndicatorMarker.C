@@ -21,4 +21,8 @@ IndicatorMarker::validParams()
 IndicatorMarker::IndicatorMarker(const InputParameters & parameters)
   : Marker(parameters), _error_vector(getErrorVector(parameters.get<IndicatorName>("indicator")))
 {
+  if (!_subproblem.getVariable(0, getParam<IndicatorName>("indicator")).hasBlocks(blockIDs()))
+    mooseWarning("The block restriction of the marker is larger than the block restriction of its "
+                 "indicator. Blocks on which the indicator is not active will not be marked, and "
+                 "therefore will not be refined or coarsened");
 }

@@ -2,7 +2,7 @@
 # ERCOFTAC test case foe BFS
 # Case Number: 031
 # Author: Dr. Mauricio Tano
-# Last Update: Novomber, 2023
+# Last Update: November, 2023
 # Turbulent model using:
 # k-epsilon model
 # Equilibrium + Newton wall treatement
@@ -20,7 +20,7 @@ advected_interp_method = 'upwind'
 
 pressure_tag = "pressure_grad"
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
@@ -33,11 +33,8 @@ k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H}'
 
 ### Modeling parameters ###
-non_equilibrium_treatment = true
 bulk_wall_treatment = false
 walls = 'bottom wall-side top'
-max_mixing_length = 1e10
-linearized_yplus_mu_t = false
 wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
@@ -216,8 +213,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     mu = ${mu}
     mu_t = 'mu_t'
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment}
   []
 
   [TKED_advection]
@@ -251,8 +247,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
+    wall_treatment = ${wall_treatment}
   []
 []
 
@@ -337,8 +332,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     v = vel_y
     bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
-    linearized_yplus = ${linearized_yplus_mu_t}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
+    wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
   []
 []

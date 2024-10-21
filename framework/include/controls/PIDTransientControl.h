@@ -51,6 +51,8 @@ private:
   const Real _maximum_output_value;
   /// Limiting minimum value for the output of the PID controller
   const Real _minimum_output_value;
+  /// Limiting maximum value for the rate of change of output of the PID controller
+  const Real _maximum_change_rate;
   /// Integral of the error
   Real _integral;
   /// Saved value of the integral at the beginning of a timestep, to recover from a failed solve

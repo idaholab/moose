@@ -239,7 +239,7 @@ CohesiveZoneAction::verifyOrderAndFamilyOutputs()
 
   // if no value was provided, chose the default CONSTANT
   if (_material_output_order.size() == 0)
-    _material_output_order.push_back("CONSTANT");
+    _material_output_order.setAdditionalValue("CONSTANT");
 
   // For only one order, make all orders the same magnitude
   if (_material_output_order.size() == 1)
@@ -254,7 +254,7 @@ CohesiveZoneAction::verifyOrderAndFamilyOutputs()
 
   // if no value was provided, chose the default MONOMIAL
   if (_material_output_family.size() == 0)
-    _material_output_family.push_back("MONOMIAL");
+    _material_output_family.setAdditionalValue("MONOMIAL");
 
   // For only one family, make all families that value
   if (_material_output_family.size() == 1)

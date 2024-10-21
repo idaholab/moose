@@ -68,7 +68,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
 
-  if (_directions.contains("from_multiapp"))
+  if (_directions.isValueSet("from_multiapp"))
   {
     // Check that the variable is a CONSTANT MONOMIAL.
     auto & fe_type = _var.feType();
@@ -80,7 +80,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
     if (!_fe_problem.getAuxiliarySystem().hasVariable(_var_name))
       paramError("source_variable", "Variable must be an auxiliary variable");
   }
-  else if (_directions.contains("between_multiapp"))
+  else if (_directions.isValueSet("between_multiapp"))
     mooseError("MultiAppVariableValueSamplePostprocessorTransfer has not been made to support "
                "sibling transfers");
 
@@ -97,7 +97,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
 void
 MultiAppVariableValueSamplePostprocessorTransfer::setupPostprocessorCommunication()
 {
-  if (!_directions.contains("from_multiapp"))
+  if (!_directions.isValueSet("from_multiapp"))
     return;
 
   const auto num_global_apps = getFromMultiApp()->numGlobalApps();
@@ -125,7 +125,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::setupPostprocessorCommunicatio
 void
 MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
 {
-  if (!_directions.contains("from_multiapp"))
+  if (!_directions.isValueSet("from_multiapp"))
     return;
 
   // Cache the Multiapp position ID for every element.
@@ -179,8 +179,9 @@ MultiAppVariableValueSamplePostprocessorTransfer::initialSetup()
 {
   MultiAppTransfer::initialSetup();
 
-  unsigned int num_apps = _directions.contains("from_multiapp") ? getFromMultiApp()->numGlobalApps()
-                                                                : getToMultiApp()->numGlobalApps();
+  unsigned int num_apps = _directions.isValueSet("from_multiapp")
+                              ? getFromMultiApp()->numGlobalApps()
+                              : getToMultiApp()->numGlobalApps();
   if (_map_comp_to_child && num_apps % _var.count() != 0)
     paramError("map_array_variable_components_to_child_apps",
                "The number of sub-applications (",

@@ -31,7 +31,8 @@ protected:
   {
     NAN_MESSAGE_NONE = 0,
     NAN_MESSAGE_WARNING = 1,
-    NAN_MESSAGE_ERROR = 2
+    NAN_MESSAGE_EXCEPTION = 2,
+    NAN_MESSAGE_ERROR = 3
   };
 
   const MooseObject * const _moose_object;
@@ -65,6 +66,9 @@ protected:
       case (NAN_MESSAGE_WARNING):
         mooseWarning(_moose_object->name(), ": ", std::forward<Args>(args)...);
         break;
+      case (NAN_MESSAGE_EXCEPTION):
+        mooseException(_moose_object->name(), ": ", std::forward<Args>(args)...);
+        break;
       case (NAN_MESSAGE_ERROR):
         mooseError(_moose_object->name(), ": ", std::forward<Args>(args)...);
         break;
@@ -87,6 +91,9 @@ protected:
     {
       case (NAN_MESSAGE_WARNING):
         mooseWarning(_moose_object->name(), ": ", std::forward<Args>(args)...);
+        break;
+      case (NAN_MESSAGE_EXCEPTION):
+        mooseException(_moose_object->name(), ": ", std::forward<Args>(args)...);
         break;
       case (NAN_MESSAGE_ERROR):
         mooseError(_moose_object->name(), ": ", std::forward<Args>(args)...);

@@ -35,6 +35,8 @@
 #include "MooseObjectWarehouse.h"
 #include "MaterialPropertyRegistry.h"
 #include "RestartableEquationSystems.h"
+#include "SolutionInvalidity.h"
+#include "PetscSupport.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -88,6 +90,7 @@ class VectorPostprocessor;
 class Function;
 class MooseAppCoordTransform;
 class MortarUserObject;
+class SolutionInvalidity;
 
 // libMesh forward declarations
 namespace libMesh
@@ -152,6 +155,16 @@ public:
 
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
+
+  enum class CoverageCheckMode
+  {
+    FALSE,
+    TRUE,
+    OFF,
+    ON,
+    SKIP_LIST,
+    ONLY_LIST,
+  };
 
   virtual EquationSystems & es() override { return _req.set().es(); }
   virtual MooseMesh & mesh() override { return _mesh; }
@@ -598,6 +611,13 @@ public:
    * Restore old solutions from the backup vectors and deallocate them.
    */
   virtual void restoreOldSolutions();
+
+  /**
+   * Declare that we need up to old (1) or older (2) solution states for a given type of iteration
+   * @param oldest_needed oldest solution state needed
+   * @param iteration_type the type of iteration for which old/older states are needed
+   */
+  void needSolutionState(unsigned int oldest_needed, Moose::SolutionIterationType iteration_type);
 
   /**
    * Output the current step.
@@ -1735,7 +1755,16 @@ public:
    * Set flag to indicate whether kernel coverage checks should be performed. This check makes
    * sure that at least one kernel is active on all subdomains in the domain (default: true).
    */
-  void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
+  void setKernelCoverageCheck(CoverageCheckMode mode) { _kernel_coverage_check = mode; }
+
+  /**
+   * Set flag to indicate whether kernel coverage checks should be performed. This check makes
+   * sure that at least one kernel is active on all subdomains in the domain (default: true).
+   */
+  void setKernelCoverageCheck(bool flag)
+  {
+    _kernel_coverage_check = flag ? CoverageCheckMode::TRUE : CoverageCheckMode::FALSE;
+  }
 
   /**
    * Set flag to indicate whether material coverage checks should be performed. This check makes
@@ -1743,7 +1772,18 @@ public:
    * supplied. If no materials are supplied anywhere, a simulation is still considered OK as long as
    * no properties are being requested anywhere.
    */
-  void setMaterialCoverageCheck(bool flag) { _material_coverage_check = flag; }
+  void setMaterialCoverageCheck(CoverageCheckMode mode) { _material_coverage_check = mode; }
+
+  /**
+   * Set flag to indicate whether material coverage checks should be performed. This check makes
+   * sure that at least one material is active on all subdomains in the domain if any material is
+   * supplied. If no materials are supplied anywhere, a simulation is still considered OK as long as
+   * no properties are being requested anywhere.
+   */
+  void setMaterialCoverageCheck(bool flag)
+  {
+    _material_coverage_check = flag ? CoverageCheckMode::TRUE : CoverageCheckMode::FALSE;
+  }
 
   /**
    * Toggle parallel barrier messaging (defaults to on).
@@ -1842,9 +1882,21 @@ public:
   }
 
   /**
-   * Whether or not the invalid solutions are allowed
+   * Whether or not to accept the solution based on its invalidity.
+   *
+   * If this returns false, it means that an invalid solution was encountered
+   * (an error) that was not allowed.
+   */
+  bool acceptInvalidSolution() const;
+  /**
+   * Whether to accept / allow an invalid solution
    */
   bool allowInvalidSolution() const { return _allow_invalid_solution; }
+
+  /**
+   * Whether or not to print out the invalid solutions summary table in console
+   */
+  bool showInvalidSolutionConsole() const { return _show_invalid_solution_console; }
 
   /**
    * Whether or not the solution invalid warnings are printed out immediately
@@ -2318,6 +2370,11 @@ public:
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
   virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid) override;
 
+  /**
+   * @returns the nolinear system names in the problem
+   */
+  const std::vector<NonlinearSystemName> & getNonlinearSystemNames() const { return _nl_sys_names; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2432,6 +2489,9 @@ protected:
   /// Map connecting solver system names with their respective systems
   std::map<SolverSystemName, unsigned int> _solver_sys_name_to_num;
 
+  /// The union of nonlinear and linear system names
+  std::vector<std::string> _solver_sys_names;
+
   /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;
 
@@ -2539,7 +2599,10 @@ protected:
   void meshChangedHelper(bool intermediate_change = false);
 
   /// Helper to check for duplicate variable names across systems or within a single system
-  bool duplicateVariableCheck(const std::string & var_name, const FEType & type, bool is_aux);
+  bool duplicateVariableCheck(const std::string & var_name,
+                              const FEType & type,
+                              bool is_aux,
+                              const std::set<SubdomainID> * const active_subdomains);
 
   void computeUserObjectsInternal(const ExecFlagType & type,
                                   const Moose::AuxGroup & group,
@@ -2629,6 +2692,9 @@ protected:
   /// Indicates that we need to compute variable values for previous Newton iteration
   bool _needs_old_newton_iter;
 
+  /// Indicates we need to save the previous NL iteration variable values
+  bool _previous_nl_solution_required;
+
   /// Indicates if nonlocal coupling is required/exists
   bool _has_nonlocal_coupling;
   bool _calculate_jacobian_in_uo;
@@ -2640,8 +2706,9 @@ protected:
 
   SolverParams _solver_params;
 
-  /// Determines whether a check to verify an active kernel on every subdomain
-  bool _kernel_coverage_check;
+  /// Determines whether and which subdomains are to be checked to ensure that they have an active kernel
+  CoverageCheckMode _kernel_coverage_check;
+  std::vector<SubdomainName> _kernel_coverage_blocks;
 
   /// whether to perform checking of boundary restricted nodal object variable dependencies,
   /// e.g. whether the variable dependencies are defined on the selected boundaries
@@ -2651,8 +2718,9 @@ protected:
   /// e.g. whether the variable dependencies are defined on the selected boundaries
   const bool _boundary_restricted_elem_integrity_check;
 
-  /// Determines whether a check to verify an active material on every subdomain
-  bool _material_coverage_check;
+  /// Determines whether and which subdomains are to be checked to ensure that they have an active material
+  CoverageCheckMode _material_coverage_check;
+  std::vector<SubdomainName> _material_coverage_blocks;
 
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
   bool _fv_bcs_integrity_check;
@@ -2785,7 +2853,8 @@ private:
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
-  const bool & _allow_invalid_solution;
+  const bool _allow_invalid_solution;
+  const bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
 
   /// At or beyond initialSteup stage
@@ -2849,6 +2918,10 @@ private:
   /// If we catch an exception during residual/Jacobian evaluaton for which we don't have specific
   /// handling, immediately error instead of allowing the time step to be cut
   const bool _regard_general_exceptions_as_errors;
+
+  friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
+                                                        const std::string & value,
+                                                        FEProblemBase * const problem);
 };
 
 using FVProblemBase = FEProblemBase;

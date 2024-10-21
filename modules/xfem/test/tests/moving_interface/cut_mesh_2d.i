@@ -60,7 +60,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   displacements = 'disp_x disp_y'
   [all]
     strain = SMALL

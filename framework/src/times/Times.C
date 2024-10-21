@@ -73,7 +73,7 @@ Times::getPreviousTime(const Real current_time) const
 }
 
 Real
-Times::getNextTime(const Real current_time) const
+Times::getNextTime(const Real current_time, const bool error_if_no_next) const
 {
   for (const auto i : index_range(_times))
   {
@@ -81,11 +81,13 @@ Times::getNextTime(const Real current_time) const
     if (MooseUtils::absoluteFuzzyGreaterThan(time, current_time))
       return time;
   }
-  if (_times.size())
+  if (_times.size() && error_if_no_next)
     mooseError("No next time in Times vector for time ",
                current_time,
                ". Maximum time in vector is ",
-               *_times.end());
+               *_times.rbegin());
+  else if (!error_if_no_next)
+    return std::numeric_limits<Real>::max();
   else
     mooseError("Times vector has not been initialized.");
 }

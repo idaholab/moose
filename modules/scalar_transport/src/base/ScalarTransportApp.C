@@ -56,6 +56,8 @@ ScalarTransportApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   MiscApp::registerAll(f, af, s);
 
   /* register custom execute flags, action syntax, etc. here */
+  auto & syntax = s;
+  registerSyntax("MultiSpeciesDiffusionCG", "Physics/MultiSpeciesDiffusion/ContinuousGalerkin/*");
 }
 
 void

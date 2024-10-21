@@ -35,4 +35,6 @@ protected:
 
   const bool _test_invalid_recover;
   const Real _invalid_after_time;
+
+  const bool _flag_solution_warning;
 };

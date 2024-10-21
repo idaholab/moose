@@ -338,4 +338,35 @@
       max_parallel = 4
     []
   []
+
+  [show_block_restriction]
+    # These tests check whether the BlockRestrictionDebugOutput object works if it is defined via the
+    # parameter 'show_block_restriction' in the [Debug] block or directly within an [Output] block.
+
+    requirement = 'The system shall include the ability to output block-restriction of objects'
+    design = 'Debug/index.md'
+    issues = '#28290'
+
+    [debug_parameter]
+      type = RunApp
+      input = show_block_restriction_debug.i
+      detail = "when requested via debug parameter."
+      expect_out = "Block-Restrictions \(2 subdomains\)\: showing active objects[\n\s]*"
+                   "Subdomain \'BaseMesh\' \(id 0\):[\n\s]*"
+                   "Variables \(1 item\)\: u[\n\s]*"
+                   "Kernels \(1 item\)\: diff[\n\s]*"
+                   "Materials \(1 item\): block"
+    []
+
+    [block]
+      type = RunApp
+      input = show_block_restriction.i
+      detail = "when requested as output-block."
+      expect_out = "Block-Restrictions \(2 subdomains\)\: showing active objects[\n\s]*"
+                   "Subdomain \'BaseMesh\' \(id 0\):[\n\s]*"
+                   "Variables \(1 item\)\: u[\n\s]*"
+                   "Kernels \(1 item\)\: diff[\n\s]*"
+                   "Materials \(1 item\): block"
+    []
+  []
 []

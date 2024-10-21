@@ -46,7 +46,7 @@ moose --help
 Should produce the help page. This simple command demonstrates that you have successfully installed
 the MOOSE Conda package.
 
-!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$CONDA_PREFIX/moose/share/moose TUTORIAL=heat_conduction
+!template load file=getting_started/installation/workshop_tutorial.md.template TUTORIAL=heat_transfer
 
 ## Viewing Results
 

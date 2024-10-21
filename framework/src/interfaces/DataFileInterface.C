@@ -9,19 +9,15 @@
 
 #include "DataFileInterface.h"
 #include "MooseError.h"
-#include "MooseObject.h"
-#include "Action.h"
+#include "ParallelParamObject.h"
+#include "Registry.h"
 
 #include <filesystem>
 
-template <class T>
-DataFileInterface<T>::DataFileInterface(const T & parent) : _parent(parent)
-{
-}
+DataFileInterface::DataFileInterface(const ParallelParamObject & parent) : _parent(parent) {}
 
-template <class T>
 std::string
-DataFileInterface<T>::getDataFileName(const std::string & param) const
+DataFileInterface::getDataFileName(const std::string & param) const
 {
   // The path from the parameters, which has not been modified because it is a DataFileName
   const auto & value = _parent.template getParam<DataFileParameterType>(param);
@@ -48,10 +44,9 @@ DataFileInterface<T>::getDataFileName(const std::string & param) const
   return getDataFileNameByName(value, &param);
 }
 
-template <class T>
 std::string
-DataFileInterface<T>::getDataFileNameByName(const std::string & relative_path,
-                                            const std::string * param) const
+DataFileInterface::getDataFileNameByName(const std::string & relative_path,
+                                         const std::string * param) const
 {
   /// - relative to the running binary (assuming the application is installed)
   const auto share_dir = MooseUtils::pathjoin(Moose::getExecutablePath(), "..", "share");
@@ -92,6 +87,3 @@ DataFileInterface<T>::getDataFileNameByName(const std::string & relative_path,
                  relative_path,
                  "' anywhere");
 }
-
-template class DataFileInterface<Action>;
-template class DataFileInterface<MooseObject>;

@@ -102,9 +102,9 @@ CSV::initialSetup()
   const auto n_pps = getPostprocessorOutput().size();
   const auto n_scalars = getScalarOutput().size();
   const auto n_reporters = getReporterOutput().size();
-  const bool pp_active = n_pps > 0 && !pp_execute_on.contains(EXEC_NONE);
-  const bool scalar_active = n_scalars > 0 && !scalar_execute_on.contains(EXEC_NONE);
-  const bool reporter_active = n_reporters > 0 && !reporter_execute_on.contains(EXEC_NONE);
+  const bool pp_active = n_pps > 0 && !pp_execute_on.isValueSet(EXEC_NONE);
+  const bool scalar_active = n_scalars > 0 && !scalar_execute_on.isValueSet(EXEC_NONE);
+  const bool reporter_active = n_reporters > 0 && !reporter_execute_on.isValueSet(EXEC_NONE);
   if ((pp_execute_on != scalar_execute_on && pp_active && scalar_active) ||
       (pp_execute_on != reporter_execute_on && pp_active && reporter_active))
     mooseError("The parameters 'execute_postprocessors_on', 'execute_scalars_on', and "

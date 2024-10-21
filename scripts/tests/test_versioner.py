@@ -45,7 +45,11 @@ class Test(unittest.TestCase):
 
         for hash in [None, 'HEAD']:
             for package in versioner.entities:
-                if package == 'app':
+                # TODO: deprecate mpich by skipping it. It populates in entities because we are
+                #       allowing 'mpich' as a deprecated library in versioner.yaml. But we do not
+                #       have any hashes to verify with here in unittests. Remove this deprecation
+                #       when it gets removed from versioner.yaml keys
+                if package in ['app', 'mpich']:
                     continue
 
                 def run(library, args=[]):
@@ -100,6 +104,11 @@ class Test(unittest.TestCase):
         with self.assertRaises(Exception) as e:
             Versioner.git_file('foo', 'HEAD')
         self.assertIn('Failed to load', str(e.exception))
+
+        out_of_repo_path = os.path.join(MOOSE_DIR, '..', 'out_of_repo')
+        with self.assertRaises(Exception) as e:
+            Versioner.git_file(out_of_repo_path, 'HEAD')
+        self.assertEqual(f'Supplied path {out_of_repo_path} is not in {MOOSE_DIR}', str(e.exception))
 
     def testGetApp(self):
         app_name, git_root, git_hash = Versioner.get_app()

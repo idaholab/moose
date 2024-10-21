@@ -1,19 +1,18 @@
 [Tests]
   design = "Restartable.md DataIO.md"
-  [./part1]
+  [part1]
     # Run simple transient problem to 5 time steps, with checkpoint files enabled
     type = 'CheckFiles'
     input = 'recover1.i'
-    check_files = 'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/data '
-                  'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/header '
+    check_files = 'test_recover_dir_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/data '
+                  'test_recover_dir_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/header '
                   'test_recover_dir_cp/0005-restart-0.rd/data '
                   'test_recover_dir_cp/0005-restart-0.rd/header'
     cli_args = 'Executioner/num_steps=5'
-
     requirement = 'Correctly set up initial recover files for the part2 test.'
-    issues = '#2661'
-  [../]
-  [./part2]
+    issues = '#2661 #27240'
+  []
+  [part2]
     # Recover the solve from part1 with a specified file
     type = 'Exodiff'
     input = 'recover2.i'
@@ -22,26 +21,24 @@
     prereq = 'part1'
     delete_output_before_running = false
     recover = false
-
     requirement = 'A simulation executed using the "--recover" flag successfully runs a simulation using the specified recover file argument.'
     issues = '#2661'
-  [../]
-  [./part1_latest]
+  []
+  [part1_latest]
     # Run simple transient problem to 5 time steps, with checkpoint files enabled
     type = 'CheckFiles'
     input = 'recover1.i'
-    check_files = 'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/data '
-                  'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/header '
+    check_files = 'test_recover_dir_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/data '
+                  'test_recover_dir_cp/0005-mesh.cpa.gz/meta_data_mesh.rd/header '
                   'test_recover_dir_cp/0005-restart-0.rd/data '
                   'test_recover_dir_cp/0005-restart-0.rd/header'
     cli_args = 'Executioner/num_steps=5'
     delete_output_before_running = true
     prereq = part2
-
     requirement = 'Correctly set up initial recover files for the part2_latest test.'
-    issues = '#10494 #12403'
-  [../]
-  [./part2_latest]
+    issues = '#10494 #12403 #27240'
+  []
+  [part2_latest]
     # Recover the solve from part1 with a specified file
     type = 'Exodiff'
     input = 'recover2.i'
@@ -50,8 +47,37 @@
     prereq = 'part1_latest'
     delete_output_before_running = false
     recover = false
-
     requirement = 'A simulation executed using the "--recover" flag with a file argument using the placeholder "LATEST" successfully runs a simulation using most recent checkpoint/recover file from the specified directory.'
     issues = '#10494 #12403'
-  [../]
+  []
+  [nemesis_part1]
+    type = 'CheckFiles'
+    input = 'recover_nemesis.i'
+    min_parallel = 2
+    max_parallel = 2
+    check_files = 'recover_nemesis_out.e.2.0 recover_nemesis_out.e.2.1 '
+                  'test_nemesis_recover_dir_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/data '
+                  'test_nemesis_recover_dir_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/header '
+                  'test_nemesis_recover_dir_cp/0010-restart-0.rd/data '
+                  'test_nemesis_recover_dir_cp/0010-restart-0.rd/header '
+                  'test_nemesis_recover_dir_cp/0010-restart-1.rd/data '
+                  'test_nemesis_recover_dir_cp/0010-restart-1.rd/header'
+    delete_output_before_running = true
+    cli_args = 'Executioner/num_steps=10'
+    requirement = 'Correctly set up initial recover files for the nemesis part2 test.'
+    issues = '#2661 #13396 #27240 #28547'
+  []
+  [nemesis_part2]
+    type = 'Exodiff'
+    input = 'recover_nemesis.i'
+    exodiff = 'recover_nemesis_out.e.2.0 recover_nemesis_out.e.2.1'
+    min_parallel = 2
+    max_parallel = 2
+    delete_output_before_running = false
+    recover = false
+    cli_args = '--recover test_nemesis_recover_dir_cp/LATEST'
+    prereq = 'nemesis_part1'
+    requirement = 'A simulation executed using the "--recover" flag successfully runs a simulation using most recent checkpoint/recover file from the specified directory and correctly appends to the nemesis output.'
+    issues = '#2661 #13396 #27240 #28547'
+  []
 []

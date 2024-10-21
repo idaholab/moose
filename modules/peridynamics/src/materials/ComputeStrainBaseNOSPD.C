@@ -123,7 +123,8 @@ ComputeStrainBaseNOSPD::computeConventionalQpDeformationGradient()
     if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
     {
       vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
-      origin_vec_nb = *_pdmesh.nodePtr(neighbors[nb]) - *_current_elem->node_ptr(_qp);
+      origin_vec_nb =
+          _pdmesh.getNodeCoord(neighbors[nb]) - _pdmesh.getNodeCoord(_current_elem->node_id(_qp));
 
       for (unsigned int k = 0; k < _dim; ++k)
         current_vec_nb(k) = origin_vec_nb(k) +
@@ -180,8 +181,8 @@ ComputeStrainBaseNOSPD::computeBondHorizonQpDeformationGradient()
     if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[nb]])) > 0.5)
     {
       vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
-      origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                      *_pdmesh.nodePtr(_current_elem->node_id(_qp));
+      origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                      _pdmesh.getNodeCoord(_current_elem->node_id(_qp));
 
       for (unsigned int k = 0; k < _dim; ++k)
         current_vec_nb(k) =

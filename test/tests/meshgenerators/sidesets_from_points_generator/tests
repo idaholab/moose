@@ -19,5 +19,6 @@
     design = 'meshgenerators/SideSetsFromPointsGenerator.md'
     issues = '#24619'
     recover = false
+    allow_warnings = true
   []
 []

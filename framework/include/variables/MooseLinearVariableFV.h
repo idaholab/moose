@@ -513,5 +513,9 @@ MooseLinearVariableFV<OutputType>::adError() const
              this->name());
 }
 
+// Declare all the specializations, as the template specialization declarations below must know
 template <>
 ADReal MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & elem, const StateArg & state) const;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MooseLinearVariableFV<Real>;

@@ -22,7 +22,7 @@ intensity = 0.01
 k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
@@ -30,9 +30,7 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
 walls = ''
-max_mixing_length = 1e10
 linearized_model = false
 
 [GlobalParams]
@@ -180,7 +178,6 @@ linearized_model = false
   [TKE_time]
     type = FVFunctorTimeKernel
     variable = TKE
-    functor = TKE
   []
   [TKE_advection]
     type = INSFVTurbulentAdvection
@@ -209,15 +206,12 @@ linearized_model = false
     mu = ${mu}
     mu_t = 'mu_t'
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
     linearized_model = ${linearized_model}
   []
 
   [TKED_time]
     type = FVFunctorTimeKernel
     variable = TKED
-    functor = TKED
   []
   [TKED_advection]
     type = INSFVTurbulentAdvection
@@ -230,7 +224,6 @@ linearized_model = false
     variable = TKED
     coeff = ${mu}
     walls = ${walls}
-    coeff_interp_method = average
   []
   [TKED_diffusion_turbulent]
     type = INSFVTurbulentDiffusion
@@ -245,15 +238,13 @@ linearized_model = false
     variable = TKED
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
-    non_equilibrium_treatment = ${non_equilibrium_treatment}
-    max_mixing_length = ${max_mixing_length}
     linearized_model = ${linearized_model}
   []
 []
@@ -291,10 +282,10 @@ linearized_model = false
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [mu_t_material]
-    type = INSFVkEpsilonViscosityMaterial
-    k = TKE
+    type = INSFVkEpsilonViscosityFunctorMaterial
+    tke = TKE
     epsilon = TKED
     rho = ${rho}
   []

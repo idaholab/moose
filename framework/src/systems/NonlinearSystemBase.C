@@ -179,9 +179,9 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
 NonlinearSystemBase::~NonlinearSystemBase() = default;
 
 void
-NonlinearSystemBase::init()
+NonlinearSystemBase::preInit()
 {
-  SolverSystem::init();
+  SolverSystem::preInit();
 
   if (_fe_problem.hasDampers())
     setupDampers();
@@ -2043,6 +2043,20 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
   if (_has_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
+  // Select nodal kernels
+  MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
+
+  if (tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL) || !tags.size())
+    nbc_warehouse = &_nodal_bcs;
+  else if (tags.size() == 1)
+    nbc_warehouse = &(_nodal_bcs.getVectorTagObjectWarehouse(*(tags.begin()), 0));
+  else
+    nbc_warehouse = &(_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0));
+
+  // Return early if there is no nodal kernel
+  if (!nbc_warehouse->size())
+    return;
+
   PARALLEL_TRY
   {
     const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
@@ -2051,32 +2065,21 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
     {
       TIME_SECTION("NodalBCs", 3 /*, "Computing NodalBCs"*/);
 
-      MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
-
-      // Select nodal kernels
-      if (tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL) || !tags.size())
-        nbc_warehouse = &_nodal_bcs;
-      else if (tags.size() == 1)
-        nbc_warehouse = &(_nodal_bcs.getVectorTagObjectWarehouse(*(tags.begin()), 0));
-      else
-        nbc_warehouse = &(_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0));
-
       for (const auto & bnode : bnd_nodes)
       {
         BoundaryID boundary_id = bnode->_bnd_id;
         Node * node = bnode->_node;
 
-        if (node->processor_id() == processor_id())
+        if (node->processor_id() == processor_id() &&
+            nbc_warehouse->hasActiveBoundaryObjects(boundary_id))
         {
           // reinit variables in nodes
           _fe_problem.reinitNodeFace(node, boundary_id, 0);
-          if (nbc_warehouse->hasActiveBoundaryObjects(boundary_id))
-          {
-            const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
-            for (const auto & nbc : bcs)
-              if (nbc->shouldApply())
-                nbc->computeResidual();
-          }
+
+          const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
+          for (const auto & nbc : bcs)
+            if (nbc->shouldApply())
+              nbc->computeResidual();
         }
       }
     }

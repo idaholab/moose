@@ -123,12 +123,20 @@ ModulesApp::registerApps()
   ElectromagneticsApp::registerApps();
 #endif
 
+#ifdef FSI_ENABLED
+  FsiApp::registerApps();
+#endif
+
 #ifdef FLUID_PROPERTIES_ENABLED
   FluidPropertiesApp::registerApps();
 #endif
 
 #ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
   FunctionalExpansionToolsApp::registerApps();
+#endif
+
+#ifdef GEOCHEMISTRY_ENABLED
+  GeochemistryApp::registerApps();
 #endif
 
 #ifdef HEAT_TRANSFER_ENABLED
@@ -145,6 +153,10 @@ ModulesApp::registerApps()
 
 #ifdef NAVIER_STOKES_ENABLED
   NavierStokesApp::registerApps();
+#endif
+
+#ifdef OPTIMIZATION_ENABLED
+  OptimizationApp::registerApps();
 #endif
 
 #ifdef PERIDYNAMICS_ENABLED
@@ -173,6 +185,10 @@ ModulesApp::registerApps()
 
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerApps();
+#endif
+
+#ifdef SCALAR_TRANSPORT_ENABLED
+  ScalarTransportApp::registerApps();
 #endif
 
 #ifdef SOLID_MECHANICS_ENABLED

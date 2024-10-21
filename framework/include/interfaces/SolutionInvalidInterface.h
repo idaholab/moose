@@ -12,16 +12,23 @@
 // MOOSE includes
 #include "Moose.h"
 #include "SolutionInvalidity.h"
-#include "FEProblemBase.h"
 
 // Forward declarations
 class MooseObject;
+class FEProblemBase;
 
 #define flagInvalidSolution(message)                                                               \
   do                                                                                               \
   {                                                                                                \
-    static const auto __invalid_id = this->registerInvalidSolutionInternal(message);               \
-    this->flagInvalidSolutionInternal(__invalid_id);                                               \
+    static const auto __invalid_id = this->registerInvalidSolutionInternal(message, false);        \
+    this->flagInvalidSolutionInternal<false>(__invalid_id);                                        \
+  } while (0)
+
+#define flagSolutionWarning(message)                                                               \
+  do                                                                                               \
+  {                                                                                                \
+    static const auto __invalid_id = this->registerInvalidSolutionInternal(message, true);         \
+    this->flagInvalidSolutionInternal<true>(__invalid_id);                                         \
   } while (0)
 
 /**
@@ -33,10 +40,12 @@ public:
   SolutionInvalidInterface(MooseObject * const moose_object);
 
 protected:
-  void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id) const;
+  template <bool warning>
+  void flagInvalidSolutionInternal(const InvalidSolutionID invalid_solution_id) const;
 
   // Register invalid solution with a message
-  InvalidSolutionID registerInvalidSolutionInternal(const std::string & message) const;
+  InvalidSolutionID registerInvalidSolutionInternal(const std::string & message,
+                                                    const bool warning) const;
 
 private:
   /// The MooseObject that owns this interface

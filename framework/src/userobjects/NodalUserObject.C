@@ -32,8 +32,7 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(this),
     BoundaryRestrictable(this, blockIDs(), true), // true for applying to nodesets
-    Coupleable(this, true),
-    MooseVariableDependencyInterface(this),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     TransientInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, true),
     _mesh(_subproblem.mesh()),
@@ -41,9 +40,6 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters)
     _current_node(_assembly.node()),
     _unique_node_execute(getParam<bool>("unique_node_execute"))
 {
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
 }
 
 void

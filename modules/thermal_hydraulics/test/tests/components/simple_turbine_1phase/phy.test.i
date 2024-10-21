@@ -52,6 +52,7 @@
     volume = 1
     on = true
     power = 1000
+    use_scalar_variables = false
   []
 
   [pipe2]

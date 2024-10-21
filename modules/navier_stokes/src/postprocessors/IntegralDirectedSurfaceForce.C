@@ -41,18 +41,21 @@ IntegralDirectedSurfaceForce::IntegralDirectedSurfaceForce(const InputParameters
     _direction(getParam<RealVectorValue>("principal_direction"))
 {
   _vel_components.push_back(&getFunctor<Real>("vel_x"));
-  if (_mesh.dimension() == 2)
+
+  if (_mesh.dimension() >= 2)
   {
     if (!isParamValid("vel_y"))
       paramError("vel_y",
                  "For 2D meshes the second velocity component should be provided as well!");
     _vel_components.push_back(&getFunctor<Real>("vel_y"));
-  }
-  else
-  {
-    if (!isParamValid("vel_z"))
-      paramError("vel_z", "For 3D meshes the third velocity component should be provided as well!");
-    _vel_components.push_back(&getFunctor<Real>("vel_z"));
+
+    if (_mesh.dimension() == 3)
+    {
+      if (!isParamValid("vel_z"))
+        paramError("vel_z",
+                   "For 3D meshes the third velocity component should be provided as well!");
+      _vel_components.push_back(&getFunctor<Real>("vel_z"));
+    }
   }
 
   // This object will only work with finite volume variables
@@ -87,12 +90,12 @@ IntegralDirectedSurfaceForce::computeFaceInfoIntegral(const FaceInfo * fi)
     pressure_term(i, i) = -pressure;
   }
 
-  const auto sheer_force = mu *
+  const auto shear_force = mu *
                            (cell_velocity - face_velocity -
                             (cell_velocity - face_velocity) * fi->normal() * fi->normal()) /
                            std::abs(fi->dCN() * fi->normal());
 
-  return (sheer_force * _direction - pressure_term * fi->normal() * _direction);
+  return (shear_force * _direction - pressure_term * fi->normal() * _direction);
 }
 
 Real

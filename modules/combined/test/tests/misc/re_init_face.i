@@ -11,7 +11,7 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     use_automatic_differentiation = false
     strain = FINITE

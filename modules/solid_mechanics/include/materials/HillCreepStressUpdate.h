@@ -48,6 +48,7 @@ protected:
   computeResidual(const GenericDenseVector<is_ad> & effective_trial_stress,
                   const GenericDenseVector<is_ad> & stress_new,
                   const GenericReal<is_ad> & scalar) override;
+
   virtual GenericReal<is_ad>
   computeDerivative(const GenericDenseVector<is_ad> & effective_trial_stress,
                     const GenericDenseVector<is_ad> & stress_new,
@@ -58,6 +59,11 @@ protected:
                            const GenericDenseVector<is_ad> & stress_new,
                            const GenericReal<is_ad> & residual,
                            const GenericReal<is_ad> & scalar_effective_inelastic_strain) override;
+
+  void computeQsigmaChanged(GenericReal<is_ad> & qsigma_changed,
+                            const GenericDenseVector<is_ad> & stress_new,
+                            const GenericReal<is_ad> & delta_gamma,
+                            GenericRankTwoTensor<is_ad> & stress_changed);
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -142,11 +148,23 @@ protected:
   /// Example: Large rotation due to rigid body and/or large deformation kinematics
   const MaterialProperty<DenseMatrix<Real>> * _hill_tensor;
 
-  /// Square of the q function for orthotropy
-  GenericReal<is_ad> _qsigma;
-
   /// 2 * shear modulus
   GenericReal<is_ad> _two_shear_modulus;
+
+  /// Matrix form of the elasticity tensor
+  GenericDenseMatrix<is_ad> _C;
+
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+
+  /// Anisotropic elasticity tensor material property
+  const GenericMaterialProperty<RankFourTensor, is_ad> & _elasticity_tensor;
+
+  /// Materials's elasticity tensor is anisotropic or not
+  bool _anisotropic_elasticity;
+
+  /// Prefactor for scaling creep
+  const Function * const _prefactor_function;
 };
 
 typedef HillCreepStressUpdateTempl<false> HillCreepStressUpdate;

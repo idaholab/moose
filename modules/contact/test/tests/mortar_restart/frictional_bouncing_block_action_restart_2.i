@@ -8,7 +8,7 @@ offset = 1e-2
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = frictional_bouncing_block_action_restart_1_checkpoint_cp/0021-mesh.cpr
+    file = frictional_bouncing_block_action_restart_1_checkpoint_cp/0021-mesh.cpa.gz
     skip_partitioning = true
     allow_renumbering = false
   []
@@ -43,7 +43,7 @@ offset = 1e-2
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
     generate_output = 'stress_xx stress_yy'

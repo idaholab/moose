@@ -42,7 +42,7 @@ protected:
   virtual void validateModel() const;
 
   /// Initialize the model with a batch shape
-  void initModel(torch::IntArrayRef batch_shape);
+  void initModel(neml2::TensorShapeRef batch_shape);
 
   /// Get the NEML2 model
   neml2::Model & model() const { return _model; }
@@ -85,6 +85,11 @@ NEML2ModelInterface<T>::validParams()
       ":<device-index> optionally specifies a device index. For example, device='cpu' sets the "
       "target compute device to be CPU, and device='cuda:1' sets the target compute device to be "
       "CUDA with device ID 1.");
+  params.addParam<bool>("enable_AD",
+                        false,
+                        "Set to true to enable PyTorch AD. When set to false (default), no "
+                        "function graph or gradient is computed, which speeds up model "
+                        "evaluation.");
   return params;
 }
 
@@ -104,7 +109,7 @@ template <class T>
 template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...),
-    _model(neml2::Factory::get_object<neml2::Model>("Models", params.get<std::string>("model"))),
+    _model(neml2::get_model(params.get<std::string>("model"), params.get<bool>("enable_AD"))),
     _device(params.get<std::string>("device"))
 {
 }
@@ -113,29 +118,12 @@ template <class T>
 void
 NEML2ModelInterface<T>::validateModel() const
 {
-  // Forces and old forces on the input axis must match, i.e. all the variables on the old_forces
-  // subaxis must also exist on the forces subaxis:
-  if (_model.input_axis().has_subaxis("old_forces"))
-    for (auto var :
-         _model.input_axis().subaxis("old_forces").variable_accessors(/*recursive=*/true))
-      if (!_model.input_axis().subaxis("forces").has_variable(var))
-        mooseError("The NEML2 model has old force variable ",
-                   var,
-                   " as input, but does not have the corresponding force variable as input.");
-
-  // Similarly, state (on the output axis) and old state (on the input axis) must match, i.e. all
-  // the variables on the input's old_state subaxis must also exist on the output's state subaxis:
-  if (_model.input_axis().has_subaxis("old_state"))
-    for (auto var : _model.input_axis().subaxis("old_state").variable_accessors(/*recursive=*/true))
-      if (!_model.output_axis().subaxis("state").has_variable(var))
-        mooseError("The NEML2 model has old state variable ",
-                   var,
-                   " as input, but does not have the corresponding state variable as output.");
+  neml2::diagnose(_model);
 }
 
 template <class T>
 void
-NEML2ModelInterface<T>::initModel(torch::IntArrayRef batch_shape)
+NEML2ModelInterface<T>::initModel(neml2::TensorShapeRef batch_shape)
 {
   _model.reinit(batch_shape, /*deriv_order=*/1, _device, /*dtype=*/torch::kFloat64);
 }

@@ -73,7 +73,9 @@ AddTimeIndependentReactionSolverAction::act()
     params.set<bool>("use_nonlinear") = true;
     params.set<bool>("solve") = getParam<bool>("include_moose_solve");
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
-    _problem->setKernelCoverageCheck(getParam<bool>("include_moose_solve"));
+    _problem->setKernelCoverageCheck(getParam<bool>("include_moose_solve")
+                                         ? FEProblemBase::CoverageCheckMode::TRUE
+                                         : FEProblemBase::CoverageCheckMode::FALSE);
   }
   // Set up an arbitrary steady executioner
   else if (_current_task == "setup_executioner")

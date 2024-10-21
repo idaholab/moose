@@ -136,16 +136,26 @@ public:
   auto timeDerivative(const U & t, const U & x, const U & y = 0, const U & z = 0) const;
   ///@}
 
-  // Not defined
+  /// Returns the integral of the function over its domain
   virtual Real integral() const;
 
-  // Not defined
+  /// Returns the average of the function over its domain
   virtual Real average() const;
 
+  /**
+   * Computes the time integral at a spatial point between two time values
+   *
+   * @param[in] t1  Beginning time value
+   * @param[in] t2  End time value
+   * @param[in] p   Spatial point
+   */
+  virtual Real timeIntegral(Real t1, Real t2, const Point & p) const;
+
   void timestepSetup() override;
-  void residualSetup() override;
-  void jacobianSetup() override;
-  void customSetup(const ExecFlagType & exec_type) override;
+  // We will only allow initialSetup() and timestepSetup() to be overriden
+  void residualSetup() override final;
+  void jacobianSetup() override final;
+  void customSetup(const ExecFlagType & exec_type) override final;
 
   bool hasBlocks(SubdomainID) const override { return true; }
 
