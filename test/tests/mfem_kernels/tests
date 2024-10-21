@@ -35,5 +35,12 @@
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
                 OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary set up from MOOSE.'
-  []    
+  []
+  [./MFEMLinearElasticity]
+    type = XMLDiff
+    input = linearelasticity.i
+    xmldiff = 'OutputData/LinearElasticity/Run0/Run0.pvd
+                OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'Platypus shall have the ability to solve a linear elasticity problem set up from MOOSE and produce the same result as a native run.'
+  []
 []
