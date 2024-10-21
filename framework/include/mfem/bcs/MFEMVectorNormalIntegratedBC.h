@@ -18,5 +18,5 @@ public:
 
 protected:
   std::string _vec_coef_name;
-  mfem::VectorCoefficient & _vec_coef;
+  MFEMVectorCoefficient * _vec_coef;
 };
