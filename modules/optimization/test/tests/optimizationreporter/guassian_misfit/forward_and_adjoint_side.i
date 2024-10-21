@@ -86,8 +86,6 @@
     sim_variable = temperature
     beam_width = 0.1
     base_name = obj
-    output_properties = 'obj_misfit obj_misfit_gradient'
-    outputs = exodus
   []
 []
 

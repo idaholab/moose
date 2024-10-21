@@ -26,7 +26,7 @@ measurement_values = '293 304 315 320'
   type = Optimize
   tao_solver = taobqnktr
   petsc_options_iname = '-tao_gatol'
-  petsc_options_value = '1e-5'
+  petsc_options_value = '1e-8'
   ## THESE OPTIONS ARE FOR TESTING THE ADJOINT GRADIENT
   # petsc_options_iname = '-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
   # petsc_options_value = '1 true true false 1e-3 1e-5'

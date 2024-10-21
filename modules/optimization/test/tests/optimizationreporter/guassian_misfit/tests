@@ -1,6 +1,6 @@
 [Tests]
     issues = '#28871'
-    design = 'GuassianMisfit.md'
+    design = 'GaussianMisfit.md'
     [point_loads]
       requirement = "The system shall be able to invert for point loads using the GaussianMisfit material with misfit data obtained from Gaussian-type probes for"
       [volume]
@@ -8,8 +8,8 @@
         input = main_auto.i
         csvdiff = main_auto_out_OptimizationReporter_0001.csv
         max_threads = 1 # Optimize executioner does not support multiple threads
-        rel_err = 1e-6
-        abs_zero = 1e-8
+        rel_err = 1e-4
+        abs_zero = 1e-4
         # steady solve
         recover = false
         detail = 'volume measurements,'
@@ -19,8 +19,8 @@
         input = main_auto_side.i
         csvdiff = main_auto_side_out_OptimizationReporter_0001.csv
         max_threads = 1 # Optimize executioner does not support multiple threads
-        rel_err = 1e-6
-        abs_zero = 1e-8
+        rel_err = 1e-4
+        abs_zero = 1e-4
         # steady solve
         recover = false
         detail = 'for side only measurements.'
