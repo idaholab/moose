@@ -1,4 +1,5 @@
 #include "MFEMObjectUnitTest.h"
+#include "MFEMVectorBoundaryIntegratedBC.h"
 #include "MFEMVectorNormalIntegratedBC.h"
 #include "MFEMConvectiveHeatFluxBC.h"
 
@@ -13,11 +14,13 @@ public:
  */
 TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
 {
-  // Build required kernel inputs
-  InputParameters vec_coef_params = _factory.getValidParams("MFEMGenericConstantVectorMaterial");
-  vec_coef_params.set<std::vector<std::string>>("prop_names") = {"vec_coef1"};
-  vec_coef_params.set<std::vector<double>>("prop_values") = {1.0, 2.0, 3.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantVectorMaterial", "material1", vec_coef_params);
+  // Build required BC inputs
+  InputParameters vec_coef_params = _factory.getValidParams("MFEMVectorConstantCoefficient");
+  vec_coef_params.set<double>("value_x") = 1.0;
+  vec_coef_params.set<double>("value_y") = 2.0;
+  vec_coef_params.set<double>("value_z") = 3.0;
+  _mfem_problem->addVectorCoefficient(
+      "MFEMVectorConstantCoefficient", "vec_coef1", vec_coef_params);
 
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorNormalIntegratedBC");
@@ -27,7 +30,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
   MFEMVectorNormalIntegratedBC & integrated_bc =
       addObject<MFEMVectorNormalIntegratedBC>("MFEMVectorNormalIntegratedBC", "bc1", bc_params);
 
-  // Test MFEMKernel returns an integrator of the expected type
+  // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
@@ -43,7 +46,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
  */
 TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
 {
-  // Build required kernel inputs
+  // Build required BC inputs
   InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"htc", "Tinf"};
   coef_params.set<std::vector<double>>("prop_values") = {1.0, 3.0};
@@ -58,7 +61,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
   MFEMConvectiveHeatFluxBC & integrated_bc =
       addObject<MFEMConvectiveHeatFluxBC>("MFEMConvectiveHeatFluxBC", "bc1", bc_params);
 
-  // Test MFEMKernel returns an integrator of the expected type
+  // Test MFEMConvectiveHeatFluxBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
