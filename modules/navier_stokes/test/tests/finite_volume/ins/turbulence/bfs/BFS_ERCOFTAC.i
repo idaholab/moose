@@ -366,6 +366,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
   pressure_l_tol = 0.0
   turbulence_l_tol = 0.0
   print_fields = false
+  continue_on_max_its = true
 []
 
 [Outputs]
