@@ -1887,6 +1887,9 @@ public:
    */
   bool preserveMatrixSparsityPattern() const { return _preserve_matrix_sparsity_pattern; };
 
+  /// Set whether the sparsity pattern of the matrices being formed during the solve (usually the Jacobian)
+  /// should be preserved. This global setting can be retrieved by kernels, notably those using AD, to decide
+  /// whether to take additional care to preserve the sparsity pattern
   void setPreserveMatrixSparsityPattern(bool preserve);
 
   /**
@@ -1895,6 +1898,7 @@ public:
    */
   bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 
+  /// Set whether the zeros in the Jacobian should be dropped from the sparsity pattern
   void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
 
   /**
