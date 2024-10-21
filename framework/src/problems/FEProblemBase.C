@@ -6620,14 +6620,29 @@ FEProblemBase::computeResidualL2Norm()
 {
   TIME_SECTION("computeResidualL2Norm", 2, "Computing L2 Norm of Residual");
 
-  if (_nl.size() > 1)
-    mooseError("Multiple nonlinear systems in the same input are not currently supported when "
-               "performing fixed point iterations in multi-app contexts");
+  Real l2_norm = 0.0;
+  for (auto sys : _nl)
+  {
+    _current_nl_sys = sys.get();
+    computeResidual(*sys->currentSolution(), sys->RHS(), sys->number());
+    const auto norm = sys->RHS().l2_norm();
+    l2_norm += norm * norm;
+  }
 
-  _current_nl_sys = _nl[0].get();
-  computeResidual(*_nl[0]->currentSolution(), _nl[0]->RHS(), /*nl_sys=*/0);
+  for (auto sys : _linear_systems)
+  {
+    _current_linear_sys = sys.get();
+    auto residual = sys->currentSolution()->zero_clone();
 
-  return _nl[0]->RHS().l2_norm();
+    computeLinearSystemSys(sys->linearImplicitSystem(), *sys->linearImplicitSystem().matrix, *residual, true);
+    residual->scale(-1.0);
+    residual->add_vector(*sys->currentSolution(), *sys->linearImplicitSystem().matrix);
+
+    const auto norm = residual->l2_norm();
+    l2_norm += norm * norm;
+  }
+
+  return std::sqrt(l2_norm);
 }
 
 void
