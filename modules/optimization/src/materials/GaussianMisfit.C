@@ -1,11 +1,11 @@
-#include "GaussianMisfit.h"
+#include "MisfitReporterOffsetFunctionMaterial.h"
 #include "libmesh/int_range.h"
 #include "libmesh/libmesh_common.h"
 
-registerMooseObject("OptimizationApp", GaussianMisfit);
+registerMooseObject("OptimizationApp", MisfitReporterOffsetFunctionMaterial);
 
 InputParameters
-GaussianMisfit::validParams()
+MisfitReporterOffsetFunctionMaterial::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription(
@@ -15,81 +15,39 @@ GaussianMisfit::validParams()
                                "Variable that is being for the simulation variable.");
   params.addRequiredParam<ReporterName>(
       "value_name", "reporter value name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addParam<ReporterName>(
-      "x_coord_name",
-      "reporter x-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addParam<ReporterName>(
-      "y_coord_name",
-      "reporter y-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addParam<ReporterName>(
-      "z_coord_name",
-      "reporter z-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addParam<ReporterName>("point_name",
-                                "reporter point name.  This uses the reporter syntax "
-                                "<reporter>/<name>.");
-  params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<Real>("beam_width", "Width of the beam");
   return params;
 }
 
-GaussianMisfit::GaussianMisfit(const InputParameters & parameters)
-  : Material(parameters),
-    ReporterInterface(this),
+MisfitReporterOffsetFunctionMaterial::MisfitReporterOffsetFunctionMaterial(const InputParameters & parameters)
+  : ReporterOffsetFunctionMaterialTempl<false>(parameters),
     _sim_var(coupledValue("sim_variable")),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _misfit(declareProperty<Real>(_base_name + "misfit")),
-    _misfit_gradient(declareProperty<Real>(_base_name + "misfit_gradient")),
-    _read_in_points(isParamValid("point_name")),
-    _measurement_values(
-        getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
-    _coordx(isParamValid("x_coord_name")
-                ? getReporterValue<std::vector<Real>>("x_coord_name", REPORTER_MODE_REPLICATED)
-                : _zeros_vec),
-    _coordy(isParamValid("y_coord_name")
-                ? getReporterValue<std::vector<Real>>("y_coord_name", REPORTER_MODE_REPLICATED)
-                : _zeros_vec),
-    _coordz(isParamValid("z_coord_name")
-                ? getReporterValue<std::vector<Real>>("z_coord_name", REPORTER_MODE_REPLICATED)
-                : _zeros_vec),
-    _measurement_points(_read_in_points ? getReporterValue<std::vector<Point>>(
-                                              "point_name", REPORTER_MODE_REPLICATED)
-                                        : _zeros_pts),
-    _beam_width(getParam<Real>("beam_width"))
+    _mat_prop_gradient(declareProperty<Real>(_prop_name + "_gradient")),
+    _measurement_values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED))
 {
 }
 
 void
-GaussianMisfit::computeQpProperties()
+MisfitReporterOffsetFunctionMaterial::computeQpProperties()
 {
-  _misfit[_qp] = 0.0;
-  _misfit_gradient[_qp] = 0.0;
+  _material[_qp] = 0.0;
+  _mat_prop_gradient[_qp] = 0.0;
 
   for (const auto idx : index_range(_measurement_values))
   {
-    // Get measurement point
-    Point p_m(0);
-    if (_read_in_points)
-      p_m = _measurement_points[idx];
-    else
-      p_m = Point(_coordx[idx], _coordy[idx], _coordz[idx]);
+    Point offset = _read_in_points ? _points[idx] : Point(_coordx[idx], _coordy[idx], _coordz[idx]);
 
-    Point p_sim = _q_point[_qp];
-    Real value_m = _measurement_values[idx];
-    Real value_sim = _sim_var[_qp];
 
-    // Compute Gaussian value
-    Real guass_value = computeGuassian(p_m, p_sim);
+    Real measurement_value = _measurement_values[idx];
+    Real simulation_value = _sim_var[_qp];
 
-    _misfit[_qp] += Utility::pow<2>(value_m * guass_value - value_sim * guass_value);
-    _misfit_gradient[_qp] -=
-        2.0 * guass_value *
-        (value_m * guass_value - value_sim * guass_value); // Gradient with respect to value_sim
+    // Compute weighting function
+    Real weighting = computeOffsetFunction(offset);
+
+    // Computed weighted misfit and gradient materials
+    _material[_qp] += Utility::pow<2>(measurement_value * weighting - simulation_value * weighting);
+    _mat_prop_gradient[_qp] -=
+        2.0 * weighting *
+        (measurement_value * weighting -
+         simulation_value * weighting);
   }
-}
-
-Real
-GaussianMisfit ::computeGuassian(const Point & pt_measured, const Point & pt_sim)
-{
-  Real distance_squared = (pt_measured - pt_sim).norm_sq();
-  return std::exp(-2.0 * distance_squared / (_beam_width * _beam_width));
 }

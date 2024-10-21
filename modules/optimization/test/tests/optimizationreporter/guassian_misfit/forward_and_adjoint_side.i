@@ -84,11 +84,19 @@
     z_coord_name = measure_data/measurement_zcoord
     value_name = measure_data/measurement_values
     sim_variable = temperature
-    beam_width = 0.1
     base_name = obj
+    function = gauss
   []
 []
 
+[Functions]
+  [gauss]
+    type = ParsedFunction
+    expression = 'exp(-2.0 *(x^2 + y^2 + z^2)/(beam_radii^2))'
+    symbol_names = 'beam_radii'
+    symbol_values = 0.1
+  []
+[]
 [Executioner]
   type = SteadyAndAdjoint
   forward_system = nl0
