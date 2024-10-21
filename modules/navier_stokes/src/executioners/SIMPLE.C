@@ -28,7 +28,7 @@ InputParameters
 SIMPLE::validParams()
 {
   InputParameters params = SIMPLESolveBase::validParams();
-  InputParameters params += Executioner::validParams();
+  params += Executioner::validParams();
 
   params.addClassDescription("Solves the Navier-Stokes equations using the SIMPLE algorithm and "
                              "linear finite volume variables.");

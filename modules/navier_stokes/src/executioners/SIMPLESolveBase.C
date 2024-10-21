@@ -172,6 +172,11 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
 {
+  if (_momentum_system_names.size() != _problem.mesh().dimension())
+    paramError("momentum_systems",
+               "The number of momentum components should be equal to the number of "
+               "spatial dimensions on the mesh.");
+
   const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");
   const auto & momentum_petsc_pair_options = getParam<MooseEnumItem, std::string>(
       "momentum_petsc_options_iname", "momentum_petsc_options_value");
@@ -204,4 +209,18 @@ SIMPLESolveBase::setupPressurePin()
     _pressure_pin_dof = NS::FV::findPointDoFID(_problem.getVariable(0, "pressure"),
                                                _problem.mesh(),
                                                getParam<Point>("pressure_pin_point"));
+}
+
+void
+SIMPLESolveBase::checkDependentParameterError(
+    const std::string & main_parameter,
+    const std::vector<std::string> & dependent_parameters,
+    const bool should_be_defined)
+{
+  for (const auto & param : dependent_parameters)
+    if (parameters().isParamSetByUser(param) == !should_be_defined)
+      paramError(param,
+                 "This parameter should " + std::string(should_be_defined ? "" : "not") +
+                     " be given by the user with the corresponding " + main_parameter +
+                     " setting!");
 }

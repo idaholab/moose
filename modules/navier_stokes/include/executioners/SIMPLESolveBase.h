@@ -37,6 +37,10 @@ public:
   void setupPressurePin();
 
 protected:
+  void checkDependentParameterError(const std::string & main_parameter,
+                                    const std::vector<std::string> & dependent_parameters,
+                                    const bool should_be_defined);
+
   /// Solve a momentum predictor step with a fixed pressure field
   /// @return A vector of (number of linear iterations, normalized residual norm) pairs for
   /// the momentum equations. The length of the vector equals the dimensionality of

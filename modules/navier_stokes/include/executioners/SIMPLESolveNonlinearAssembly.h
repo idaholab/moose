@@ -26,6 +26,12 @@ public:
   /// Fetch the Rhie Chow user object that
   virtual void linkRhieChowUserObject() override;
 
+  /// Check if the user defined time kernels, if yes error out
+  virtual void checkIntegrity();
+
+  /// Check if the system contains time kernels
+  virtual void checkTimeKernels(NonlinearSystemBase & system);
+
   /**
    * Performs the momentum pressure coupling.
    * @return True if solver is converged.
@@ -35,6 +41,24 @@ public:
 protected:
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
+
+  /// Solve an equation which contains an advection term that depends
+  /// on the solution of the segregated Navier-Stokes equations.
+  /// @param system_num The number of the system which is solved
+  /// @param system Reference to the system which is solved
+  /// @param relaxation_factor The relaxation factor for matrix relaxation
+  /// @param solver_config The solver configuration object for the linear solve
+  /// @param abs_tol The scaled absolute tolerance for the linear solve
+  /// @return The normalized residual norm of the equation.
+  std::pair<unsigned int, Real> solveAdvectedSystem(const unsigned int system_num,
+                                                    NonlinearSystemBase & system,
+                                                    const Real relaxation_factor,
+                                                    SolverConfiguration & solver_config,
+                                                    const Real abs_tol);
+
+  /// Solve the solid energy conservation equation.
+  /// @return The normalized residual norm of the solid equation.
+  std::pair<unsigned int, Real> solveSolidEnergySystem();
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;
