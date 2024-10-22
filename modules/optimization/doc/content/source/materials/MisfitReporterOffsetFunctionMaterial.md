@@ -1,10 +1,10 @@
-# GaussianMisfit
+# MisfitReporterOffsetFunctionMaterial
 
-!syntax description /Materials/GaussianMisfit
+!syntax description /Materials/MisfitReporterOffsetFunctionMaterial
 
 ## Overview
 
-The `GaussianMisfit` material is a specialized material that calculates a misfit value and its gradient with respect to a simulation variable, using a Gaussian function to weight the contribution of measurement points
+The `MisfitReporterOffsetFunctionMaterial` material is a specialized material that calculates a misfit value and its gradient with respect to a simulation variable, using a Gaussian function to weight the contribution of measurement points
 
 
 
@@ -31,7 +31,7 @@ and the `misfit gradient` with respect to the simulation variable $u(\mathbf{x})
 
 $\frac{\partial m(\mathbf{x})}{\partial u(\mathbf{x})} = -2 \sum_{i=1}^{n} g(\mathbf{p}_{m,i}, \mathbf{x}) \left( u_{m,i} g(\mathbf{p}_{m,i}, \mathbf{x}) - u(\mathbf{x}) g(\mathbf{p}_{m,i}, \mathbf{x}) \right).$
 
-These equations represent the misfit value and its gradient computed by the `GaussianMisfit` material at each quadrature point in the simulation. The misfit value quantifies the discrepancy between the measured data and the simulation variable, while the misfit gradient provides the sensitivity of the misfit with respect to changes in the simulation variable.
+These equations represent the misfit value and its gradient computed by the `MisfitReporterOffsetFunctionMaterial` material at each quadrature point in the simulation. The misfit value quantifies the discrepancy between the measured data and the simulation variable, while the misfit gradient provides the sensitivity of the misfit with respect to changes in the simulation variable.
 
 ## Example Input File Syntax
 
@@ -40,8 +40,8 @@ constraints are not only based on volume but also on an additional cost function
 
 !listing test/tests/optimizationreporter/gaussian_misfit/forward_and_adjoint.i block=Materials/beam
 
-!syntax parameters /Materials/GaussianMisfit
+!syntax parameters /Materials/MisfitReporterOffsetFunctionMaterial
 
-!syntax inputs /Materials/GaussianMisfit
+!syntax inputs /Materials/MisfitReporterOffsetFunctionMaterial
 
-!syntax children /Materials/GaussianMisfit
+!syntax children /Materials/MisfitReporterOffsetFunctionMaterial

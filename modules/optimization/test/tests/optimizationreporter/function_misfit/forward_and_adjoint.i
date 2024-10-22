@@ -13,7 +13,7 @@
 
 [Problem]
   nl_sys_names = 'nl0 adjoint'
-  kernel_coverage_check = FALSE
+  kernel_coverage_check = false
 []
 
 [Variables]
@@ -29,6 +29,11 @@
     type = MatDiffusion
     variable = temperature
     diffusivity = thermal_conductivity
+  []
+  [adj_source]
+    type = MatBodyForce
+    variable = temperature_adjoint
+    material_property = obj_misfit_gradient
   []
 []
 
@@ -63,11 +68,10 @@
     value = 300
   []
   [top]
-    type = MatNeumannBC
+    type = DirichletBC
+    variable = temperature
     boundary = top
-    boundary_material = obj_misfit_gradient
-    variable = temperature_adjoint
-    value = 1
+    value = 300
   []
 []
 
@@ -78,7 +82,7 @@
     prop_values = 5
   []
   [beam]
-    type = GaussianMisfit
+    type = MisfitReporterOffsetFunctionMaterial
     x_coord_name = measure_data/measurement_xcoord
     y_coord_name = measure_data/measurement_ycoord
     z_coord_name = measure_data/measurement_zcoord
@@ -94,15 +98,15 @@
     type = ParsedFunction
     expression = 'exp(-2.0 *(x^2 + y^2 + z^2)/(beam_radii^2))'
     symbol_names = 'beam_radii'
-    symbol_values = 0.1
+    symbol_values = '.025'
   []
 []
+
 [Executioner]
   type = SteadyAndAdjoint
   forward_system = nl0
   adjoint_system = adjoint
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-10
   l_tol = 1e-12
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
@@ -111,9 +115,9 @@
 [VectorPostprocessors]
   [gradient]
     type = PointValueSampler
-    points = '0.2 1.1 0
-    0.7 1.1 0
-    0.4 1.1 0'
+    points = '0.2 0.2 0
+    0.7 0.56 0
+    0.4 1 0'
     variable = temperature_adjoint
     sort_by = id
     execute_on = ADJOINT_TIMESTEP_END
@@ -121,15 +125,9 @@
 []
 [Postprocessors]
   [objective]
-    type = SideIntegralMaterialProperty
-    boundary = top
-    property = obj_misfit
+    type = ElementIntegralMaterialProperty
+    mat_prop = obj_misfit
     execute_on = 'ADJOINT_TIMESTEP_END TIMESTEP_END'
-  []
-  [largest_adjoint]
-    type = NodalExtremeValue
-    variable = temperature_adjoint
-    execute_on = ADJOINT_TIMESTEP_END
   []
 []
 
@@ -142,7 +140,7 @@
     type = ConstantReporter
     real_vector_names = 'x y z value'
     real_vector_values = '0.2 0.7 0.4;
-                          1.1 1.1 1.1;
+                          0.2 0.56 1;
                           0 0 0;
                           -1000 120 500'
   []

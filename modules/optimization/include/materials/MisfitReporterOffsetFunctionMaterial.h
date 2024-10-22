@@ -13,7 +13,7 @@ class MisfitReporterOffsetFunctionMaterial : public ReporterOffsetFunctionMateri
 public:
   static InputParameters validParams();
 
-  ReporterOffsetFunctionMaterial(const InputParameters & parameters);
+  MisfitReporterOffsetFunctionMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

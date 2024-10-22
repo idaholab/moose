@@ -18,7 +18,8 @@ MisfitReporterOffsetFunctionMaterial::validParams()
   return params;
 }
 
-MisfitReporterOffsetFunctionMaterial::MisfitReporterOffsetFunctionMaterial(const InputParameters & parameters)
+MisfitReporterOffsetFunctionMaterial::MisfitReporterOffsetFunctionMaterial(
+    const InputParameters & parameters)
   : ReporterOffsetFunctionMaterialTempl<false>(parameters),
     _sim_var(coupledValue("sim_variable")),
     _mat_prop_gradient(declareProperty<Real>(_prop_name + "_gradient")),
@@ -36,7 +37,6 @@ MisfitReporterOffsetFunctionMaterial::computeQpProperties()
   {
     Point offset = _read_in_points ? _points[idx] : Point(_coordx[idx], _coordy[idx], _coordz[idx]);
 
-
     Real measurement_value = _measurement_values[idx];
     Real simulation_value = _sim_var[_qp];
 
@@ -46,8 +46,6 @@ MisfitReporterOffsetFunctionMaterial::computeQpProperties()
     // Computed weighted misfit and gradient materials
     _material[_qp] += Utility::pow<2>(measurement_value * weighting - simulation_value * weighting);
     _mat_prop_gradient[_qp] -=
-        2.0 * weighting *
-        (measurement_value * weighting -
-         simulation_value * weighting);
+        2.0 * weighting * (measurement_value * weighting - simulation_value * weighting);
   }
 }
