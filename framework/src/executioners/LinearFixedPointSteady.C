@@ -18,13 +18,14 @@
 
 #include "libmesh/equation_systems.h"
 
-registerMooseObject("MooseTestApp", LinearFixedPointSteady);
+registerMooseObject("MooseApp", LinearFixedPointSteady);
 
 InputParameters
 LinearFixedPointSteady::validParams()
 {
   InputParameters params = LinearFixedPointSolve::validParams();
   params += Executioner::validParams();
+  params.addParam<Real>("time", 0.0, "System time");
 
   return params;
 }
@@ -32,6 +33,7 @@ LinearFixedPointSteady::validParams()
 LinearFixedPointSteady::LinearFixedPointSteady(const InputParameters & parameters)
   : Executioner(parameters),
     _solve(*this),
+    _system_time(getParam<Real>("time")),
     _time_step(_fe_problem.timeStep()),
     _time(_fe_problem.time())
 {
@@ -61,6 +63,8 @@ LinearFixedPointSteady::execute()
   _time = _system_time;
 
   preExecute();
+
+  _fe_problem.advanceState();
 
   // first step in any steady state solve is always 1 (preserving backwards compatibility)
   _time_step = 1;
@@ -92,9 +96,7 @@ LinearFixedPointSteady::execute()
 
 #ifdef LIBMESH_ENABLE_AMR
     if (r_step != steps)
-    {
       _fe_problem.adaptMesh();
-    }
 
     _time_step++;
   }

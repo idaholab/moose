@@ -128,12 +128,6 @@ SIMPLE::execute()
     return;
   }
 
-  if (_problem.adaptivity().isOn())
-  {
-    _console << "\nCannot use SIMPLE solves with mesh adaptivity!\nExiting...\n" << std::endl;
-    return;
-  }
-
   ExecFlagEnum disabled_flags;
   disabled_flags.addAvailableFlags(EXEC_TIMESTEP_BEGIN,
                                    EXEC_TIMESTEP_END,

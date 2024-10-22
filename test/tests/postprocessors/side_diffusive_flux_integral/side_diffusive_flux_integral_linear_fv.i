@@ -88,10 +88,12 @@
 []
 
 [Executioner]
-  type = LinearPicardSteady
+  type = LinearFixedPointSteady
   linear_systems_to_solve = u_sys
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  continue_on_max_its = true
+  absolute_tolerance = 1e-10
 []
 
 [Outputs]

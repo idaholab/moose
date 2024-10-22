@@ -72,9 +72,11 @@
 []
 
 [Executioner]
-  type = LinearPicardSteady
+  type = LinearFixedPointSteady
   linear_systems_to_solve = u_sys
   number_of_iterations = 1
+  continue_on_max_its = true
+  absolute_tolerance = 1e-10
 []
 
 [Outputs]

@@ -51,18 +51,20 @@
     type = ElementL2FunctorError
     approximate = u
     exact = analytic_solution
-    execute_on = FINAL
+    execute_on = TIMESTEP_END
   []
 []
 
 [Executioner]
-  type = LinearPicardSteady
+  type = LinearFixedPointSteady
   linear_systems_to_solve = u_sys
+  continue_on_max_its = true
+  absolute_tolerance = 1e-10
 []
 
 [Outputs]
   [exodus]
     type = Exodus
-    execute_on = FINAL
+    execute_on = TIMESTEP_END
   []
 []

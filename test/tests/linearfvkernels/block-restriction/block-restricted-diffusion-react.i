@@ -66,28 +66,30 @@ reac_coeff=3
 [Postprocessors]
   [h]
     type = AverageElementSize
-    execute_on = FINAL
+    execute_on = TIMESTEP_END
     block = 2
   []
   [error]
     type = ElementL2FunctorError
     approximate = u
     exact = analytic_solution
-    execute_on = FINAL
+    execute_on = TIMESTEP_END
     block = 2
   []
 []
 
 [Executioner]
-  type = LinearPicardSteady
+  type = LinearFixedPointSteady
   linear_systems_to_solve = u_sys
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  continue_on_max_its = true
+  absolute_tolerance = 1e-10
 []
 
 [Outputs]
   [csv]
     type = CSV
-    execute_on = FINAL
+    execute_on = TIMESTEP_END
   []
 []
