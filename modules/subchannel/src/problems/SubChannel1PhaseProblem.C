@@ -136,10 +136,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _q_prime_duct_soln(nullptr),
     _Tduct_soln(nullptr)
 {
-  // Check number of processes. Error if more than one
-  int numProcesses;
-  MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
-  if (numProcesses > 1)
+  // Require only one process
+  if (n_processors() > 1)
     mooseError("Cannot use more than one MPI process.");
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
