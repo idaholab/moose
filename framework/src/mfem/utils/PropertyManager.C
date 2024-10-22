@@ -10,8 +10,8 @@ template <class T, class Tpw>
 inline void
 declareCoefficient(PropertyMap<T, Tpw> & map,
                    const std::string & name,
-                   std::shared_ptr<T> coef,
                    const std::vector<std::string> & blocks,
+                   std::shared_ptr<T> coef,
                    const ObjectManager<T> & manager)
 {
   mooseAssert(std::find(manager.cbegin(), manager.cend(), coef) != manager.cend(),
@@ -27,112 +27,71 @@ declareCoefficient(PropertyMap<T, Tpw> & map,
 }
 
 void
-PropertyManager::declareScalar(const std::string & name,
-                               mfem::real_t value,
-                               const std::vector<std::string> & blocks)
+PropertyManager::declareScalar(const std::string & name, std::shared_ptr<mfem::Coefficient> coef)
 {
-  this->declareScalar(name, this->_scalar_manager.make<mfem::ConstantCoefficient>(value), blocks);
+  this->declareScalar(name, std::vector<std::string>(), coef);
 }
 
 void
 PropertyManager::declareScalar(const std::string & name,
-                               std::function<mfem::real_t(const mfem::Vector &)> func,
-                               const std::vector<std::string> & blocks)
+                               PropertyManager::global_t,
+                               std::shared_ptr<mfem::Coefficient> coef)
 {
-  this->declareScalar(name, _scalar_manager.make<mfem::FunctionCoefficient>(func), blocks);
-}
-
-void
-PropertyManager::declareScalar(
-    const std::string & name,
-    std::function<mfem::real_t(const mfem::Vector &, mfem::real_t t)> func,
-    const std::vector<std::string> & blocks)
-{
-  this->declareScalar(name, this->_scalar_manager.make<mfem::FunctionCoefficient>(func), blocks);
+  this->declareScalar(name, std::vector<std::string>(), coef);
 }
 
 void
 PropertyManager::declareScalar(const std::string & name,
-                               std::shared_ptr<mfem::Coefficient> coef,
-                               const std::vector<std::string> & blocks)
+                               const std::vector<std::string> & blocks,
+                               std::shared_ptr<mfem::Coefficient> coef)
 {
-  declareCoefficient(this->_scalar_coeffs, name, coef, blocks, this->_scalar_manager);
+  declareCoefficient(this->_scalar_coeffs, name, blocks, coef, this->_scalar_manager);
 }
 
 void
 PropertyManager::declareVector(const std::string & name,
-                               const mfem::Vector & value,
-                               const std::vector<std::string> & blocks)
+                               std::shared_ptr<mfem::VectorCoefficient> coef)
 {
-  this->declareVector(
-      name, this->_vector_manager.make<mfem::VectorConstantCoefficient>(value), blocks);
+  this->declareVector(name, std::vector<std::string>(), coef);
 }
 
 void
 PropertyManager::declareVector(const std::string & name,
-                               int dim,
-                               std::function<void(const mfem::Vector &, mfem::Vector &)> func,
-                               const std::vector<std::string> & blocks)
+                               PropertyManager::global_t,
+                               std::shared_ptr<mfem::VectorCoefficient> coef)
 {
-  this->declareVector(
-      name, this->_vector_manager.make<mfem::VectorFunctionCoefficient>(dim, func), blocks);
-}
-
-void
-PropertyManager::declareVector(
-    const std::string & name,
-    int dim,
-    std::function<void(const mfem::Vector &, mfem::real_t t, mfem::Vector &)> func,
-    const std::vector<std::string> & blocks)
-{
-  this->declareVector(
-      name, this->_vector_manager.make<mfem::VectorFunctionCoefficient>(dim, func), blocks);
+  this->declareVector(name, std::vector<std::string>(), coef);
 }
 
 void
 PropertyManager::declareVector(const std::string & name,
-                               std::shared_ptr<mfem::VectorCoefficient> coef,
-                               const std::vector<std::string> & blocks)
+                               const std::vector<std::string> & blocks,
+                               std::shared_ptr<mfem::VectorCoefficient> coef)
 {
-  declareCoefficient(this->_vector_coeffs, name, coef, blocks, this->_vector_manager);
+  declareCoefficient(this->_vector_coeffs, name, blocks, coef, this->_vector_manager);
 }
 
 void
 PropertyManager::declareMatrix(const std::string & name,
-                               const mfem::DenseMatrix & value,
-                               const std::vector<std::string> & blocks)
+                               std::shared_ptr<mfem::MatrixCoefficient> coef)
 {
-  this->declareMatrix(
-      name, this->_matrix_manager.make<mfem::MatrixConstantCoefficient>(value), blocks);
+  this->declareMatrix(name, std::vector<std::string>(), coef);
 }
 
 void
 PropertyManager::declareMatrix(const std::string & name,
-                               int dim,
-                               std::function<void(const mfem::Vector &, mfem::DenseMatrix &)> func,
-                               const std::vector<std::string> & blocks)
+                               PropertyManager::global_t,
+                               std::shared_ptr<mfem::MatrixCoefficient> coef)
 {
-  this->declareMatrix(
-      name, this->_matrix_manager.make<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
-}
-
-void
-PropertyManager::declareMatrix(
-    const std::string & name,
-    int dim,
-    std::function<void(const mfem::Vector &, mfem::real_t, mfem::DenseMatrix &)> func,
-    const std::vector<std::string> & blocks)
-{
-  this->declareMatrix(
-      name, this->_matrix_manager.make<mfem::MatrixFunctionCoefficient>(dim, func), blocks);
+  this->declareMatrix(name, std::vector<std::string>(), coef);
 }
 
 void
 PropertyManager::declareMatrix(const std::string & name,
-                               std::shared_ptr<mfem::MatrixCoefficient> coef,
-                               const std::vector<std::string> & blocks)
+                               const std::vector<std::string> & blocks,
+                               std::shared_ptr<mfem::MatrixCoefficient> coef)
 {
-  declareCoefficient(this->_matrix_coeffs, name, coef, blocks, this->_matrix_manager);
+  declareCoefficient(this->_matrix_coeffs, name, blocks, coef, this->_matrix_manager);
 }
 
 mfem::Coefficient &

@@ -11,6 +11,7 @@
 
 #include "mfem.hpp"
 #include "property_map.h"
+#include "ObjectManager.h"
 
 namespace platypus
 {
@@ -22,6 +23,7 @@ namespace platypus
  */
 class PropertyManager
 {
+
 public:
   PropertyManager(ScalarCoefficientManager & scalar_manager,
                   VectorCoefficientManager & vector_manager,
@@ -35,61 +37,62 @@ public:
   {
   }
 
+  struct global_t
+  {
+  };
+
+  void declareScalar(const std::string & name, std::shared_ptr<mfem::Coefficient> coef);
+  void declareScalar(const std::string & name, global_t, std::shared_ptr<mfem::Coefficient> coef);
   void declareScalar(const std::string & name,
-                     mfem::real_t value,
-                     const std::vector<std::string> & blocks = {});
-  void declareScalar(const std::string & name,
-                     std::function<mfem::real_t(const mfem::Vector &)> func,
-                     const std::vector<std::string> & blocks = {});
-  void declareScalar(const std::string & name,
-                     std::function<mfem::real_t(const mfem::Vector &, mfem::real_t)> func,
-                     const std::vector<std::string> & blocks = {});
-  void declareScalar(const std::string & name,
-                     std::shared_ptr<mfem::Coefficient> coef,
-                     const std::vector<std::string> & blocks = {});
-  // New factory methods?
+                     const std::vector<std::string> & blocks,
+                     std::shared_ptr<mfem::Coefficient> coef);
   template <class P, class... Args>
   void
   declareScalar(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
   {
-    this->declareScalar(name, _scalar_manager.make<P>(args...), blocks);
+    this->declareScalar(name, _scalar_manager.make<P>(args...));
   }
   template <class P, class... Args>
-  void declareGlobalScalar(const std::string & name, Args &&... args)
+  void declareScalar(const std::string & name, global_t, Args &&... args)
   {
-    this->declareScalar<P>(name, {}, args...);
+    this->declareScalar<P>(name, std::vector<std::string>(), args...);
   }
 
-  void declareVector(const std::string & name,
-                     const mfem::Vector & value,
-                     const std::vector<std::string> & blocks = {});
-  void declareVector(const std::string & name,
-                     int dim,
-                     std::function<void(const mfem::Vector &, mfem::Vector &)> func,
-                     const std::vector<std::string> & blocks = {});
-  void declareVector(const std::string & name,
-                     int dim,
-                     std::function<void(const mfem::Vector &, double t, mfem::Vector &)> func,
-                     const std::vector<std::string> & blocks = {});
-  void declareVector(const std::string & name,
-                     std::shared_ptr<mfem::VectorCoefficient> coef,
-                     const std::vector<std::string> & blocks = {});
-
-  void declareMatrix(const std::string & name,
-                     const mfem::DenseMatrix & value,
-                     const std::vector<std::string> & blocks = {});
-  void declareMatrix(const std::string & name,
-                     int dim,
-                     std::function<void(const mfem::Vector &, mfem::DenseMatrix &)> func,
-                     const std::vector<std::string> & blocks = {});
+  void declareVector(const std::string & name, std::shared_ptr<mfem::VectorCoefficient> coef);
   void
-  declareMatrix(const std::string & name,
-                int dim,
-                std::function<void(const mfem::Vector &, mfem::real_t, mfem::DenseMatrix &)> func,
-                const std::vector<std::string> & blocks = {});
+  declareVector(const std::string & name, global_t, std::shared_ptr<mfem::VectorCoefficient> coef);
+  void declareVector(const std::string & name,
+                     const std::vector<std::string> & blocks,
+                     std::shared_ptr<mfem::VectorCoefficient> coef);
+  template <class P, class... Args>
+  void
+  declareVector(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
+  {
+    this->declareVector(name, _vector_manager.make<P>(args...));
+  }
+  template <class P, class... Args>
+  void declareVector(const std::string & name, global_t, Args &&... args)
+  {
+    this->declareVector<P>(name, std::vector<std::string>(), args...);
+  }
+
+  void declareMatrix(const std::string & name, std::shared_ptr<mfem::MatrixCoefficient> coef);
+  void
+  declareMatrix(const std::string & name, global_t, std::shared_ptr<mfem::MatrixCoefficient> coef);
   void declareMatrix(const std::string & name,
-                     std::shared_ptr<mfem::MatrixCoefficient> coef,
-                     const std::vector<std::string> & blocks = {});
+                     const std::vector<std::string> & blocks,
+                     std::shared_ptr<mfem::MatrixCoefficient> coef);
+  template <class P, class... Args>
+  void
+  declareMatrix(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
+  {
+    this->declareMatrix(name, _matrix_manager.make<P>(args...));
+  }
+  template <class P, class... Args>
+  void declareMatrix(const std::string & name, global_t, Args &&... args)
+  {
+    this->declareMatrix<P>(name, std::vector<std::string>(), args...);
+  }
 
   mfem::Coefficient & getScalarProperty(const std::string name);
   mfem::VectorCoefficient & getVectorProperty(const std::string name);
@@ -97,6 +100,8 @@ public:
   bool scalarIsDefined(const std::string & name, const std::string & block) const;
   bool vectorIsDefined(const std::string & name, const std::string & block) const;
   bool matrixIsDefined(const std::string & name, const std::string & block) const;
+
+  const static global_t global;
 
 private:
   ScalarCoefficientManager & _scalar_manager;

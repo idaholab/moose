@@ -70,7 +70,7 @@ matrix_func_t(const mfem::Vector & x, mfem::real_t t, mfem::DenseMatrix & mat)
 
 TEST_F(CheckPropertyManager, DeclareUniformScalar)
 {
-  manager.declareScalar<mfem::ConstantCoefficient>("resistivity", {}, 2.);
+  manager.declareScalar<mfem::ConstantCoefficient>("resistivity", manager.global, 2.);
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -97,7 +97,7 @@ TEST_F(CheckPropertyManager, DeclarePWScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionScalar)
 {
-  manager.declareScalar("resistivity", scalar_func);
+  manager.declareScalar<mfem::FunctionCoefficient>("resistivity", manager.global, scalar_func);
   auto c = &manager.getScalarProperty("resistivity");
   EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 1.5);
@@ -105,7 +105,7 @@ TEST_F(CheckPropertyManager, DeclareFunctionScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTScalar)
 {
-  manager.declareScalar("resistivity", scalar_func_t);
+  manager.declareScalar<mfem::FunctionCoefficient>("resistivity", manager.global, scalar_func_t);
   auto c = &manager.getScalarProperty("resistivity");
   c->SetTime(0.);
   EXPECT_EQ(c->Eval(fe_transform, point1), 0.0);
@@ -117,9 +117,9 @@ TEST_F(CheckPropertyManager, DeclareFunctionTScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionPWScalar)
 {
-  manager.declareScalar("test", scalar_func, {"1", "2"});
-  manager.declareScalar(
-      "test", [](const mfem::Vector & x) -> mfem::real_t { return scalar_func(x) + 1.; }, {"3"});
+  manager.declareScalar<mfem::FunctionCoefficient>("test", {"1", "2"}, scalar_func);
+  manager.declareScalar<mfem::FunctionCoefficient>(
+      "test", {"3"}, [](const mfem::Vector & x) -> mfem::real_t { return scalar_func(x) + 1.; });
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
   ASSERT_NE(c, nullptr);
   fe_transform.Attribute = 1;
@@ -138,9 +138,9 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWScalar)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTPWScalar)
 {
-  manager.declareScalar("test", scalar_func_t, {"1", "2"});
-  manager.declareScalar(
-      "test", [](const mfem::Vector & x) -> mfem::real_t { return scalar_func(x) + 1.; }, {"3"});
+  manager.declareScalar<mfem::FunctionCoefficient>("test", {"1", "2"}, scalar_func_t);
+  manager.declareScalar<mfem::FunctionCoefficient>(
+      "test", {"3"}, [](const mfem::Vector & x) -> mfem::real_t { return scalar_func(x) + 1.; });
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
   ASSERT_NE(c, nullptr);
   c->SetTime(0.);
@@ -174,17 +174,22 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWScalar)
 TEST_F(CheckPropertyManager, DeclareCoefficientScalar)
 {
   manager.declareScalar("resistivity", _scalar_manager.make<mfem::ConstantCoefficient>(2.));
+  manager.declareScalar(
+      "permittivity", manager.global, _scalar_manager.make<mfem::ConstantCoefficient>(3.));
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("resistivity"));
   ASSERT_NE(c, nullptr);
   EXPECT_EQ(c->Eval(fe_transform, point1), 2.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 2.0);
+  c = dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarProperty("permittivity"));
+  ASSERT_NE(c, nullptr);
+  EXPECT_EQ(c->Eval(fe_transform, point1), 3.0);
 }
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWScalar)
 {
-  manager.declareScalar("test", _scalar_manager.make<mfem::ConstantCoefficient>(2.), {"1", "2"});
-  manager.declareScalar("test", _scalar_manager.make<mfem::ConstantCoefficient>(1.), {"3"});
+  manager.declareScalar("test", {"1", "2"}, _scalar_manager.make<mfem::ConstantCoefficient>(2.));
+  manager.declareScalar("test", {"3"}, _scalar_manager.make<mfem::ConstantCoefficient>(1.));
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&manager.getScalarProperty("test"));
   ASSERT_NE(c, nullptr);
   fe_transform.Attribute = 1;
@@ -200,8 +205,8 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWScalar)
 
 TEST_F(CheckPropertyManager, ScalarIsDefined)
 {
-  manager.declareScalar("a", 2.);
-  manager.declareScalar("b", scalar_func);
+  manager.declareScalar<mfem::ConstantCoefficient>("a", manager.global, 2.);
+  manager.declareScalar<mfem::FunctionCoefficient>("b", manager.global, scalar_func);
   manager.declareScalar("c", _scalar_manager.make<mfem::ConstantCoefficient>(2.));
   EXPECT_TRUE(manager.scalarIsDefined("a", "1"));
   EXPECT_TRUE(manager.scalarIsDefined("a", "10"));
@@ -226,9 +231,9 @@ TEST_F(CheckPropertyManager, ScalarIsDefined)
 
 TEST_F(CheckPropertyManager, ScalarPWIsDefined)
 {
-  manager.declareScalar("a", 2., {"1", "2"});
-  manager.declareScalar("b", scalar_func, {"-1", "0"});
-  manager.declareScalar("c", _scalar_manager.make<mfem::ConstantCoefficient>(2.), {"42", "45"});
+  manager.declareScalar<mfem::ConstantCoefficient>("a", {"1", "2"}, 2.);
+  manager.declareScalar<mfem::FunctionCoefficient>("b", {"-1", "0"}, scalar_func);
+  manager.declareScalar("c", {"42", "45"}, _scalar_manager.make<mfem::ConstantCoefficient>(2.));
   EXPECT_TRUE(manager.scalarIsDefined("a", "1"));
   EXPECT_TRUE(manager.scalarIsDefined("a", "2"));
   EXPECT_FALSE(manager.scalarIsDefined("a", "0"));
@@ -256,7 +261,8 @@ TEST_F(CheckPropertyManager, ScalarPWIsDefined)
 
 TEST_F(CheckPropertyManager, DeclareUniformVector)
 {
-  manager.declareVector("resistivity", mfem::Vector({1., 2.}));
+  manager.declareVector<mfem::VectorConstantCoefficient>(
+      "resistivity", manager.global, mfem::Vector({1., 2.}));
   mfem::VectorConstantCoefficient * c =
       dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -271,8 +277,9 @@ TEST_F(CheckPropertyManager, DeclareUniformVector)
 
 TEST_F(CheckPropertyManager, DeclarePWVector)
 {
-  manager.declareVector("test", mfem::Vector({1., 2.}), {"1", "2"});
-  manager.declareVector("test", mfem::Vector({3., 4.}), {"3"});
+  manager.declareVector<mfem::VectorConstantCoefficient>(
+      "test", {"1", "2"}, mfem::Vector({1., 2.}));
+  manager.declareVector<mfem::VectorConstantCoefficient>("test", {"3"}, mfem::Vector({3., 4.}));
   mfem::PWVectorCoefficient * c =
       dynamic_cast<mfem::PWVectorCoefficient *>(&manager.getVectorProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -300,7 +307,8 @@ TEST_F(CheckPropertyManager, DeclarePWVector)
 
 TEST_F(CheckPropertyManager, DeclareFunctionVector)
 {
-  manager.declareVector("resistivity", 2, vector_func);
+  manager.declareVector<mfem::VectorFunctionCoefficient>(
+      "resistivity", manager.global, 2, vector_func);
   auto c = &manager.getVectorProperty("resistivity");
   mfem::Vector vec;
   c->Eval(vec, fe_transform, point1);
@@ -313,7 +321,8 @@ TEST_F(CheckPropertyManager, DeclareFunctionVector)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTVector)
 {
-  manager.declareVector("resistivity", 2, vector_func_t);
+  manager.declareVector<mfem::VectorFunctionCoefficient>(
+      "resistivity", manager.global, 2, vector_func_t);
   auto c = &manager.getVectorProperty("resistivity");
   mfem::Vector vec;
   c->SetTime(0.);
@@ -334,15 +343,16 @@ TEST_F(CheckPropertyManager, DeclareFunctionTVector)
 
 TEST_F(CheckPropertyManager, DeclareFunctionPWVector)
 {
-  manager.declareVector("test", 2, vector_func, {"1", "2"});
-  manager.declareVector("test",
-                        2,
-                        [](const mfem::Vector & x, mfem::Vector & vec)
-                        {
-                          vector_func(x, vec);
-                          vec *= scalar_func(x);
-                        },
-                        {"3"});
+  manager.declareVector<mfem::VectorFunctionCoefficient>("test", {"1", "2"}, 2, vector_func);
+  manager.declareVector<mfem::VectorFunctionCoefficient>(
+      "test",
+      {"3"},
+      2,
+      [](const mfem::Vector & x, mfem::Vector & vec)
+      {
+        vector_func(x, vec);
+        vec *= scalar_func(x);
+      });
   mfem::PWVectorCoefficient * c =
       dynamic_cast<mfem::PWVectorCoefficient *>(&manager.getVectorProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -372,15 +382,16 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWVector)
 }
 TEST_F(CheckPropertyManager, DeclareFunctionTPWVector)
 {
-  manager.declareVector("test", 2, vector_func_t, {"1", "2"});
-  manager.declareVector("test",
-                        2,
-                        [](const mfem::Vector & x, mfem::Vector & vec)
-                        {
-                          vector_func(x, vec);
-                          vec *= scalar_func(x);
-                        },
-                        {"3"});
+  manager.declareVector<mfem::VectorFunctionCoefficient>("test", {"1", "2"}, 2, vector_func_t);
+  manager.declareVector<mfem::VectorFunctionCoefficient>(
+      "test",
+      {"3"},
+      2,
+      [](const mfem::Vector & x, mfem::Vector & vec)
+      {
+        vector_func(x, vec);
+        vec *= scalar_func(x);
+      });
   mfem::PWVectorCoefficient * c =
       dynamic_cast<mfem::PWVectorCoefficient *>(&manager.getVectorProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -436,7 +447,12 @@ TEST_F(CheckPropertyManager, DeclareFunctionTPWVector)
 TEST_F(CheckPropertyManager, DeclareCoefficientVector)
 {
   manager.declareVector(
-      "resistivity", _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({1., 2.})));
+      "resistivity",
+      manager.global,
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({1., 2.})));
+  manager.declareVector(
+      "permittivity",
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})));
   mfem::VectorConstantCoefficient * c =
       dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -447,18 +463,23 @@ TEST_F(CheckPropertyManager, DeclareCoefficientVector)
   c->Eval(vec, fe_transform, point2);
   EXPECT_EQ(vec[0], 1.);
   EXPECT_EQ(vec[1], 2.0);
+  c = dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorProperty("permittivity"));
+  ASSERT_NE(c, nullptr);
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 3.0);
+  EXPECT_EQ(vec[1], 4.0);
 }
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWVector)
 {
   manager.declareVector(
       "test",
-      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})),
-      {"1", "2"});
+      {"1", "2"},
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})));
   manager.declareVector(
       "test",
-      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({-1., -7.})),
-      {"3"});
+      {"3"},
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({-1., -7.})));
   mfem::PWVectorCoefficient * c =
       dynamic_cast<mfem::PWVectorCoefficient *>(&manager.getVectorProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -486,8 +507,9 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWVector)
 
 TEST_F(CheckPropertyManager, VectorIsDefined)
 {
-  manager.declareVector("a", mfem::Vector({2., 1.}));
-  manager.declareVector("b", 2, vector_func);
+  manager.declareVector<mfem::VectorConstantCoefficient>(
+      "a", manager.global, mfem::Vector({2., 1.}));
+  manager.declareVector<mfem::VectorFunctionCoefficient>("b", manager.global, 2, vector_func);
   manager.declareVector(
       "c", _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})));
   EXPECT_TRUE(manager.vectorIsDefined("a", "1"));
@@ -513,12 +535,12 @@ TEST_F(CheckPropertyManager, VectorIsDefined)
 
 TEST_F(CheckPropertyManager, VectorPWIsDefined)
 {
-  manager.declareVector("a", mfem::Vector({2., 1.}), {"1", "2"});
-  manager.declareVector("b", 2, vector_func, {"-1", "0"});
+  manager.declareVector<mfem::VectorConstantCoefficient>("a", {"1", "2"}, mfem::Vector({2., 1.}));
+  manager.declareVector<mfem::VectorFunctionCoefficient>("b", {"-1", "0"}, 2, vector_func);
   manager.declareVector(
       "c",
-      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})),
-      {"42", "45"});
+      {"42", "45"},
+      _vector_manager.make<mfem::VectorConstantCoefficient>(mfem::Vector({3., 4.})));
   EXPECT_TRUE(manager.vectorIsDefined("a", "1"));
   EXPECT_TRUE(manager.vectorIsDefined("a", "2"));
   EXPECT_FALSE(manager.vectorIsDefined("a", "0"));
@@ -546,7 +568,8 @@ TEST_F(CheckPropertyManager, VectorPWIsDefined)
 
 TEST_F(CheckPropertyManager, DeclareUniformMatrix)
 {
-  manager.declareMatrix("resistivity", mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "resistivity", manager.global, mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
   mfem::MatrixConstantCoefficient * c =
       dynamic_cast<mfem::MatrixConstantCoefficient *>(&manager.getMatrixProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -565,8 +588,10 @@ TEST_F(CheckPropertyManager, DeclareUniformMatrix)
 
 TEST_F(CheckPropertyManager, DeclarePWMatrix)
 {
-  manager.declareMatrix("test", mfem::DenseMatrix({{1., 2.}, {3., 4.}}), {"1", "2"});
-  manager.declareMatrix("test", mfem::DenseMatrix({{-1., 4.}, {-10., -2.}}), {"3"});
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "test", {"1", "2"}, mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "test", {"3"}, mfem::DenseMatrix({{-1., 4.}, {-10., -2.}}));
   mfem::PWMatrixCoefficient * c =
       dynamic_cast<mfem::PWMatrixCoefficient *>(&manager.getMatrixProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -604,7 +629,8 @@ TEST_F(CheckPropertyManager, DeclarePWMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionMatrix)
 {
-  manager.declareMatrix("resistivity", 2, matrix_func);
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>(
+      "resistivity", manager.global, 2, matrix_func);
   auto c = &manager.getMatrixProperty("resistivity");
   mfem::DenseMatrix mat;
   c->Eval(mat, fe_transform, point1);
@@ -621,7 +647,8 @@ TEST_F(CheckPropertyManager, DeclareFunctionMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTMatrix)
 {
-  manager.declareMatrix("resistivity", 2, matrix_func_t);
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>(
+      "resistivity", manager.global, 2, matrix_func_t);
   auto c = &manager.getMatrixProperty("resistivity");
   mfem::DenseMatrix mat;
   c->SetTime(0.0);
@@ -650,15 +677,16 @@ TEST_F(CheckPropertyManager, DeclareFunctionTMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionPWMatrix)
 {
-  manager.declareMatrix("test", 2, matrix_func, {"1", "2"});
-  manager.declareMatrix("test",
-                        2,
-                        [](const mfem::Vector & x, mfem::DenseMatrix & mat)
-                        {
-                          matrix_func(x, mat);
-                          mat *= scalar_func(x);
-                        },
-                        {"3"});
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>("test", {"1", "2"}, 2, matrix_func);
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>(
+      "test",
+      {"3"},
+      2,
+      [](const mfem::Vector & x, mfem::DenseMatrix & mat)
+      {
+        matrix_func(x, mat);
+        mat *= scalar_func(x);
+      });
   mfem::PWMatrixCoefficient * c =
       dynamic_cast<mfem::PWMatrixCoefficient *>(&manager.getMatrixProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -701,15 +729,16 @@ TEST_F(CheckPropertyManager, DeclareFunctionPWMatrix)
 
 TEST_F(CheckPropertyManager, DeclareFunctionTPWMatrix)
 {
-  manager.declareMatrix("test", 2, matrix_func_t, {"1", "2"});
-  manager.declareMatrix("test",
-                        2,
-                        [](const mfem::Vector & x, mfem::DenseMatrix & mat)
-                        {
-                          matrix_func(x, mat);
-                          mat *= scalar_func(x);
-                        },
-                        {"3"});
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>("test", {"1", "2"}, 2, matrix_func_t);
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>(
+      "test",
+      {"3"},
+      2,
+      [](const mfem::Vector & x, mfem::DenseMatrix & mat)
+      {
+        matrix_func(x, mat);
+        mat *= scalar_func(x);
+      });
   mfem::PWMatrixCoefficient * c =
       dynamic_cast<mfem::PWMatrixCoefficient *>(&manager.getMatrixProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -791,6 +820,10 @@ TEST_F(CheckPropertyManager, DeclareCoefficientMatrix)
   manager.declareMatrix("resistivity",
                         _matrix_manager.make<mfem::MatrixConstantCoefficient>(
                             mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
+  manager.declareMatrix("permittivity",
+                        manager.global,
+                        _matrix_manager.make<mfem::MatrixConstantCoefficient>(
+                            mfem::DenseMatrix({{5., 6.}, {7., 8.}})));
   mfem::MatrixConstantCoefficient * c =
       dynamic_cast<mfem::MatrixConstantCoefficient *>(&manager.getMatrixProperty("resistivity"));
   ASSERT_NE(c, nullptr);
@@ -805,18 +838,25 @@ TEST_F(CheckPropertyManager, DeclareCoefficientMatrix)
   EXPECT_EQ(mat.Elem(0, 1), 2.0);
   EXPECT_EQ(mat.Elem(1, 0), 3.0);
   EXPECT_EQ(mat.Elem(1, 1), 4.0);
+  c = dynamic_cast<mfem::MatrixConstantCoefficient *>(&manager.getMatrixProperty("permittivity"));
+  ASSERT_NE(c, nullptr);
+  c->Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 5.0);
+  EXPECT_EQ(mat.Elem(0, 1), 6.0);
+  EXPECT_EQ(mat.Elem(1, 0), 7.0);
+  EXPECT_EQ(mat.Elem(1, 1), 8.0);
 }
 
 TEST_F(CheckPropertyManager, DeclareCoefficientPWMatrix)
 {
   manager.declareMatrix("test",
+                        {"1", "2"},
                         _matrix_manager.make<mfem::MatrixConstantCoefficient>(
-                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
-                        {"1", "2"});
+                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
   manager.declareMatrix("test",
+                        {"3"},
                         _matrix_manager.make<mfem::MatrixConstantCoefficient>(
-                            mfem::DenseMatrix({{-1., 4.}, {-10., -2.}})),
-                        {"3"});
+                            mfem::DenseMatrix({{-1., 4.}, {-10., -2.}})));
   mfem::PWMatrixCoefficient * c =
       dynamic_cast<mfem::PWMatrixCoefficient *>(&manager.getMatrixProperty("test"));
   ASSERT_NE(c, nullptr);
@@ -854,8 +894,9 @@ TEST_F(CheckPropertyManager, DeclareCoefficientPWMatrix)
 
 TEST_F(CheckPropertyManager, MatrixIsDefined)
 {
-  manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 0.}}));
-  manager.declareMatrix("b", 2, matrix_func);
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "a", manager.global, mfem::DenseMatrix({{2., 1.}, {0., 0.}}));
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>("b", manager.global, 2, matrix_func);
   manager.declareMatrix("c",
                         _matrix_manager.make<mfem::MatrixConstantCoefficient>(
                             mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
@@ -882,12 +923,13 @@ TEST_F(CheckPropertyManager, MatrixIsDefined)
 
 TEST_F(CheckPropertyManager, MatrixPWIsDefined)
 {
-  manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 1.}}), {"1", "2"});
-  manager.declareMatrix("b", 2, matrix_func, {"-1", "0"});
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "a", {"1", "2"}, mfem::DenseMatrix({{2., 1.}, {0., 1.}}));
+  manager.declareMatrix<mfem::MatrixFunctionCoefficient>("b", {"-1", "0"}, 2, matrix_func);
   manager.declareMatrix("c",
+                        {"42", "45"},
                         _matrix_manager.make<mfem::MatrixConstantCoefficient>(
-                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})),
-                        {"42", "45"});
+                            mfem::DenseMatrix({{1., 2.}, {3., 4.}})));
   EXPECT_TRUE(manager.matrixIsDefined("a", "1"));
   EXPECT_TRUE(manager.matrixIsDefined("a", "2"));
   EXPECT_FALSE(manager.matrixIsDefined("a", "0"));
@@ -916,20 +958,31 @@ TEST_F(CheckPropertyManager, MatrixPWIsDefined)
 TEST_F(CheckPropertyManager, CheckRepeatedNames)
 {
   // Check there can be scalar, vector, and matrix coefficients defined with the same name
-  manager.declareScalar("a", 2.);
-  manager.declareVector("a", mfem::Vector({2., 1.}));
-  manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 1.}}));
+  manager.declareScalar<mfem::ConstantCoefficient>("a", manager.global, 2.);
+  manager.declareVector<mfem::VectorConstantCoefficient>(
+      "a", manager.global, mfem::Vector({2., 1.}));
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "a", manager.global, mfem::DenseMatrix({{2., 1.}, {0., 1.}}));
 
-  manager.declareMatrix("b", mfem::DenseMatrix({{2., 1.}, {0., 1.}}));
-  manager.declareScalar("b", 2.);
-  manager.declareVector("b", mfem::Vector({2., 1.}));
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "b", manager.global, mfem::DenseMatrix({{2., 1.}, {0., 1.}}));
+  manager.declareScalar<mfem::ConstantCoefficient>("b", manager.global, 2.);
+  manager.declareVector<mfem::VectorConstantCoefficient>(
+      "b", manager.global, mfem::Vector({2., 1.}));
 
-  manager.declareVector("c", mfem::Vector({2., 1.}));
-  manager.declareMatrix("c", mfem::DenseMatrix({{2., 1.}, {0., 1.}}));
-  manager.declareScalar("c", 2.);
+  manager.declareVector<mfem::VectorConstantCoefficient>(
+      "c", manager.global, mfem::Vector({2., 1.}));
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+      "c", manager.global, mfem::DenseMatrix({{2., 1.}, {0., 1.}}));
+  manager.declareScalar<mfem::ConstantCoefficient>("c", manager.global, 2.);
 
   // Check that coefficients can not be redefined
-  EXPECT_THROW(manager.declareScalar("a", 2.), MooseException);
-  EXPECT_THROW(manager.declareVector("a", mfem::Vector({2., 1.})), MooseException);
-  EXPECT_THROW(manager.declareMatrix("a", mfem::DenseMatrix({{2., 1.}, {0., 1.}})), MooseException);
+  EXPECT_THROW(manager.declareScalar<mfem::ConstantCoefficient>("a", manager.global, 2.),
+               MooseException);
+  EXPECT_THROW(manager.declareVector<mfem::VectorConstantCoefficient>(
+                   "a", manager.global, mfem::Vector({2., 1.})),
+               MooseException);
+  EXPECT_THROW(manager.declareMatrix<mfem::MatrixConstantCoefficient>(
+                   "a", manager.global, mfem::DenseMatrix({{2., 1.}, {0., 1.}})),
+               MooseException);
 }
