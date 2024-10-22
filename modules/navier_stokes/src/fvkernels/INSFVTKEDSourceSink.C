@@ -219,14 +219,14 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     ADReal production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
     // Compute production limiter (needed for flows with stagnation zones)
-    const auto eps_old =
-        _newton_solve ? std::max(_var(elem_arg, old_state), 1e-10) : _var(elem_arg, old_state);
-    const ADReal production_limit = _C_pl * rho * eps_old;
+    const ADReal production_limit = _C_pl * rho * _var(elem_arg, old_state);
     // Apply production limiter
     production_k = std::min(production_k, production_limit);
 
-    const auto time_scale = raw_value(TKE_old) / raw_value(eps_old);
+    const auto time_scale = raw_value(_k(elem_arg, old_state) / _var(elem_arg, old_state));
+
     production = _C1_eps * production_k / time_scale;
+
     destruction = _C2_eps * rho * _var(elem_arg, state) / time_scale;
 
     residual = destruction - production;
