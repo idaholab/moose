@@ -376,7 +376,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
 }
 
 void
-NonlinearEigenSystem::stopSolve(const ExecFlagType &)
+NonlinearEigenSystem::stopSolve(const ExecFlagType &, const std::set<TagID> &)
 {
   mooseError("did not implement yet \n");
 }

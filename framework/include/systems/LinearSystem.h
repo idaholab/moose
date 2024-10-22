@@ -55,7 +55,8 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve(const ExecFlagType & exec_flag) override;
+  virtual void stopSolve(const ExecFlagType & exec_flag,
+                         const std::set<TagID> & vector_tags_to_close) override;
 
   /**
    * Compute the right hand side and the system matrix of the system for given tags.

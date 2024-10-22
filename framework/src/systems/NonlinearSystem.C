@@ -215,29 +215,22 @@ NonlinearSystem::solve()
 }
 
 void
-NonlinearSystem::stopSolve(const ExecFlagType & exec_flag)
+NonlinearSystem::stopSolve(const ExecFlagType & exec_flag,
+                           const std::set<TagID> & vector_tags_to_close)
 {
   PetscNonlinearSolver<Real> & solver =
       static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
 
   if (exec_flag == EXEC_LINEAR || exec_flag == EXEC_POSTCHECK)
   {
-    auto ierr = SNESSetFunctionDomainError(solver.snes());
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCall(SNESSetFunctionDomainError(solver.snes()));
 
     // Clean up by getting vectors into a valid state for a
-    // (possible) subsequent solve.  There may be more than just
-    // these...
-    _nl_implicit_sys.rhs->close();
-    if (_Re_time)
-      _Re_time->close();
-    _Re_non_time->close();
+    // (possible) subsequent solve.
+    closeTaggedVectors(vector_tags_to_close);
   }
   else if (exec_flag == EXEC_NONLINEAR)
-  {
-    auto ierr = SNESSetJacobianDomainError(solver.snes());
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(SNESSetJacobianDomainError(solver.snes()));
   else
     mooseError("Unsupported execute flag: ", Moose::stringify(exec_flag));
 }
