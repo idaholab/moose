@@ -6,9 +6,10 @@
 class Function;
 
 /**
- *
+ * This class creates a misfit and misfit gradient material that can be used for
+ * optimizing measurements weighted by functions.
  */
-class MisfitReporterOffsetFunctionMaterial : public ReporterOffsetFunctionMaterialTempl<false>
+class MisfitReporterOffsetFunctionMaterial : public ReporterOffsetFunctionMaterial
 {
 public:
   static InputParameters validParams();

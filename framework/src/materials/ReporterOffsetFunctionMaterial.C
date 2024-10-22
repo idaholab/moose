@@ -4,6 +4,7 @@
 
 registerMooseObject("MooseApp", ReporterOffsetFunctionMaterial);
 registerMooseObject("MooseApp", ADReporterOffsetFunctionMaterial);
+
 template <bool is_ad>
 InputParameters
 ReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
@@ -77,3 +78,6 @@ ReporterOffsetFunctionMaterialTempl<is_ad>::computeOffsetFunction(const Point & 
 {
   return _func.value(_t, _q_point[_qp] - point_offset);
 }
+
+template class ReporterOffsetFunctionMaterialTempl<true>;
+template class ReporterOffsetFunctionMaterialTempl<false>;

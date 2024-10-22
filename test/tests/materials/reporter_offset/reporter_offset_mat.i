@@ -1,11 +1,13 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 100
-  ny = 100
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 100
+    ny = 100
 
-  xmax = 1
-  ymax = 1
+    xmax = 1
+    ymax = 1
+  []
 []
 [Problem]
   solve = false

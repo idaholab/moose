@@ -88,7 +88,7 @@
     z_coord_name = measure_data/measurement_zcoord
     value_name = measure_data/measurement_values
     sim_variable = temperature
-    base_name = obj
+    property_name = 'obj_misfit'
     function = gauss
   []
 []
