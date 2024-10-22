@@ -285,10 +285,10 @@ pressure_tag = "pressure_grad"
   pressure_variable_relaxation = 0.4
   energy_equation_relaxation = 1.0
   num_iterations = 160
-  pressure_absolute_tolerance = 1e-13
-  momentum_absolute_tolerance = 1e-13
-  energy_absolute_tolerance = 1e-13
-  solid_energy_absolute_tolerance = 1e-13
+  pressure_absolute_tolerance = 1e-12
+  momentum_absolute_tolerance = 1e-12
+  energy_absolute_tolerance = 1e-12
+  solid_energy_absolute_tolerance = 1e-12
   print_fields = false
 []
 

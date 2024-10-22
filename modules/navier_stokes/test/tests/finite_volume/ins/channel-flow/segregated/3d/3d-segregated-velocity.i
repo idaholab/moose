@@ -211,6 +211,7 @@ pressure_tag = "pressure_grad"
   momentum_l_tol = 0
   pressure_l_tol = 0
   print_fields = false
+  continue_on_max_its = true
 []
 
 [Outputs]

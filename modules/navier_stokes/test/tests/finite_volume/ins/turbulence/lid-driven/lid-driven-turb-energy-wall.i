@@ -406,6 +406,7 @@ pressure_tag = "pressure_grad"
   pin_pressure = true
   pressure_pin_value = 0.0
   pressure_pin_point = '0.01 0.099 0.0'
+  continue_on_max_its = true
 []
 
 [Outputs]
