@@ -62,10 +62,6 @@
     type = MFEMVectorFunctionCoefficient
     function = exact_e_field
   []
-  [VolumetricSourceCoefficient]
-    type = MFEMVectorFunctionCoefficient
-    function = forcing_field
-  []
 []
 
 
@@ -91,7 +87,7 @@
   [source]
     type = MFEMVectorFEDomainLFKernel
     variable = e_field
-    vector_coefficient = VolumetricSourceCoefficient
+    function = forcing_field
   []    
 []
 
