@@ -8,22 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "LinearFixedPointSteady.h"
-#include "FEProblem.h"
-#include "Factory.h"
-#include "MooseApp.h"
-#include "NonlinearSystem.h"
+#include "LinearFixedPointSolve.h"
 #include "LinearSystem.h"
-#include "libmesh/linear_implicit_system.h"
 
-#include "libmesh/equation_systems.h"
-
-registerMooseObject("MooseTestApp", LinearFixedPointSteady);
+registerMooseObject("MooseApp", LinearFixedPointSolve);
 
 InputParameters
-LinearFixedPointSteady::validParams()
+LinearFixedPointSolve::validParams()
 {
-  InputParameters params = Executioner::validParams();
+  InputParameters params = emptyInputParameters();
   params.addRequiredParam<std::vector<LinearSystemName>>(
       "linear_systems_to_solve",
       "The names of linear systems to solve in the order which they should be solved");
@@ -31,6 +24,9 @@ LinearFixedPointSteady::validParams()
                                             1,
                                             "number_of_iterations>0",
                                             "The number of iterations between the two systems.");
+
+  params.addRequiredParam<std::vector<Real>>(
+      "absolute_tolerance", "Absolute tolerances for the system variables for convergence.");
 
   params.addParam<std::vector<std::vector<std::string>>>(
       "petsc_options", {}, "Singleton PETSc options for each linear equation");
@@ -47,19 +43,25 @@ LinearFixedPointSteady::validParams()
       false,
       "Print system matrix, right hand side and solution for the linear systems.");
 
+  params.addParam<bool>("continue_on_max_its",
+                        false,
+                        "If solve should continue if maximum number of iterations is hit.");
+
   return params;
 }
 
-LinearFixedPointSteady::LinearFixedPointSteady(const InputParameters & parameters)
-  : Executioner(parameters),
-    _problem(_fe_problem),
-    _time_step(_problem.timeStep()),
-    _time(_problem.time()),
+LinearFixedPointSolve::LinearFixedPointSolve(Executioner & ex)
+  : SolveObject(ex),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_systems_to_solve")),
     _petsc_options(_linear_sys_names.size()),
     _number_of_iterations(getParam<unsigned int>("number_of_iterations")),
+    _absolute_tolerances(getParam<std::vector<Real>>("absolute_tolerance")),
+    _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_operators_and_vectors(getParam<bool>("print_operators_and_vectors"))
 {
+  if (_absolute_tolerances.size() != _linear_sys_names.size())
+    paramError("absolute_tolerance", "The number of tolerances is not the same as the number of systems!");
+
   const auto & raw_petsc_options = getParam<std::vector<std::vector<std::string>>>("petsc_options");
   const auto & raw_petsc_options_iname =
       getParam<std::vector<std::vector<std::string>>>("petsc_options_iname");
@@ -117,85 +119,54 @@ LinearFixedPointSteady::LinearFixedPointSteady(const InputParameters & parameter
     Moose::PetscSupport::processPetscPairs(
         raw_iname_value_pairs, _problem.mesh().dimension(), _petsc_options[i]);
   }
-
-  _time = 0;
-}
-
-void
-LinearFixedPointSteady::init()
-{
-  if (_app.isRecovering())
-  {
-    _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
-    return;
-  }
-
-  _problem.initialSetup();
-}
-
-void
-LinearFixedPointSteady::execute()
-{
-  if (_app.isRecovering())
-    return;
-
-  _time_step = 0;
-  _problem.outputStep(EXEC_INITIAL);
-
-  preExecute();
-
-  // first step in any steady state solve is always 1 (preserving backwards compatibility)
-  _time_step = 1;
-
-  _problem.timestepSetup();
-
-  preSolve();
-  _problem.execute(EXEC_TIMESTEP_BEGIN);
-  _problem.outputStep(EXEC_TIMESTEP_BEGIN);
-  _problem.updateActiveObjects();
-
-  for (unsigned int i = 0; i < _number_of_iterations; i++)
-    for (const auto sys_index : index_range(_linear_sys_numbers))
-    {
-      const auto & options = _petsc_options[sys_index];
-      solveSystem(_linear_sys_numbers[sys_index], &options);
-    }
-
-  for (const auto sys_number : _linear_sys_numbers)
-    _problem.getLinearSystem(sys_number).computeGradients();
-
-  _last_solve_converged = true;
-
-  // need to keep _time in sync with _time_step to get correct output
-  _time = _time_step;
-  _problem.execute(EXEC_TIMESTEP_END);
-  _problem.outputStep(EXEC_TIMESTEP_END);
-  _time = _system_time;
-
-  {
-    TIME_SECTION("final", 1, "Executing Final Objects")
-    _problem.postExecute();
-    _problem.execute(EXEC_FINAL);
-    _time = _time_step;
-    _problem.outputStep(EXEC_FINAL);
-  }
-
-  postExecute();
 }
 
 bool
-LinearFixedPointSteady::solveSystem(const unsigned int sys_number,
+LinearFixedPointSolve::solve()
+{
+  // Initialize the quantities which matter in terms of the iteration
+  unsigned int iteration_counter = 0;
+  std::vector<std::pair<unsigned int, Real>> residuals_its(_linear_sys_names.size(), std::make_pair(0, 1.0));
+  bool converged = MooseUtils::converged(residuals_its, _absolute_tolerances);
+
+  while (iteration_counter < _number_of_iterations && !converged)
+  {
+    iteration_counter++;
+    for (const auto sys_index : index_range(_linear_sys_numbers))
+    {
+      const auto & options = _petsc_options[sys_index];
+      residuals_its[sys_index] = solveSystem(_linear_sys_numbers[sys_index], &options);
+    }
+
+    converged = MooseUtils::converged(residuals_its, _absolute_tolerances);
+  }
+
+  // This is for postprocessing (some postprocessors need the gradients)
+  for (const auto sys_number : _linear_sys_numbers)
+    _problem.getLinearSystem(sys_number).computeGradients();
+
+  converged = _continue_on_max_its ? true : converged;
+
+  return converged;
+}
+
+std::pair<unsigned int, Real>
+LinearFixedPointSolve::solveSystem(const unsigned int sys_number,
                                 const Moose::PetscSupport::PetscOptions * po)
 {
   _problem.solveLinearSystem(sys_number, po);
+
+  auto & sys = _problem.getLinearSystem(sys_number);
+  LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
+  PetscLinearSolver<Real> & linear_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*lisystem.get_linear_solver());
+
   if (_print_operators_and_vectors)
   {
-    auto & sys = _problem.getLinearSystem(sys_number);
-    LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
     lisystem.matrix->print();
     lisystem.rhs->print();
     lisystem.solution->print();
   }
 
-  return true;
+  return std::make_pair(lisystem.n_linear_iterations(), linear_solver.get_initial_residual());
 }

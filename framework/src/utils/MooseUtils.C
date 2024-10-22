@@ -1272,6 +1272,27 @@ prettyCppType(const std::string & cpp_type)
   r.GlobalReplace("std::vector<\\1>", &s);
   return s;
 }
+
+bool
+converged(
+    const std::vector<std::pair<unsigned int, Real>> & its_and_residuals,
+    const std::vector<Real> & abs_tolerances)
+{
+  mooseAssert(its_and_residuals.size() == abs_tolerances.size(),
+              "The number of residuals should (now " + std::to_string(its_and_residuals.size()) +
+                  ") be the same as the number of tolerances (" +
+                  std::to_string(abs_tolerances.size()) + ")!");
+
+  bool converged = true;
+  for (const auto system_i : index_range(its_and_residuals))
+  {
+    converged = converged && (its_and_residuals[system_i].second < abs_tolerances[system_i]);
+    if (!converged)
+      return converged;
+  }
+  return converged;
+}
+
 } // MooseUtils namespace
 
 void
