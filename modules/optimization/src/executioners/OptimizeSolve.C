@@ -384,15 +384,12 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
 }
 
 PetscErrorCode
-OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /*pc*/, void * ctx)
+OptimizeSolve::hessianFunctionWrapper(
+    Tao /*tao*/, Vec /*x*/, Mat /*hessian*/, Mat /*pc*/, void * ctx)
 {
   PetscFunctionBegin;
   // Define Hessian-vector multiplication routine
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-
-  libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *(solver->_local_parameters.get()) = param;
-
   PetscErrorCode ierr = MatShellSetOperation(
       solver->_hessian, MATOP_MULT, (void (*)(void))OptimizeSolve::applyHessianWrapper);
 
