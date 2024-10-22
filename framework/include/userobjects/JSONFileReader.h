@@ -30,44 +30,44 @@ public:
   /// Read the file again
   virtual void execute() override { read(_filename); }
 
-  /// Getters for scalar values
+  /// Getters for single values
   /**
-   * Get a scalar that is directly indexed at the root of the JSON file/tree
-   * @param scalar_name the name of the desired scalar
-   * @param scalar reference to the scalar that will be set with the scalar in the JSON
+   * Get a value that is directly indexed at the root of the JSON file/tree
+   * @param value_name the name of the desired value
+   * @param value reference to the value that will be set with the value in the JSON
    */
   template <typename T>
-  void getScalar(const std::string & scalar_name, T & scalar) const
+  void getValue(const std::string & value_name, T & value) const
   {
-    if (!_root.contains(scalar_name))
+    if (!_root.contains(value_name))
       mooseError("Attempted to get '",
-                 scalar_name,
+                 value_name,
                  "' but the JSON file does not contain this key directly at the root level");
-    scalar = _root[scalar_name].get<T>();
+    value = _root[value_name].get<T>();
   }
 
   /**
-   * Get a scalar in the JSON file/tree using the keys in the 'scalar_keys' one by one to
-   * traverse the JSON tree down to the requested scalar
-   * @param scalar_keys the keys in descending order to access the scalar
-   * @param scalar reference to the scalar that will be set with the scalar in the JSON
+   * Get a value in the JSON file/tree using the keys in the 'value_keys' one by one to
+   * traverse the JSON tree down to the requested value
+   * @param value_keys the keys in descending order to access the value
+   * @param value reference to the value that will be set with the value in the JSON
    */
   template <typename T>
-  void getScalar(const std::vector<std::string> & scalar_keys, T & scalar) const
+  void getValue(const std::vector<std::string> & value_keys, T & value) const
   {
-    if (!scalar_keys.size())
+    if (!value_keys.size())
       mooseError("There should be at least one key to retrieve a value from the JSON");
 
     // traverse the JSON tree
-    auto * current_node = &_root[scalar_keys[0]];
-    for (const auto key_index : index_range(scalar_keys))
+    auto * current_node = &_root[value_keys[0]];
+    for (const auto key_index : index_range(value_keys))
     {
-      if (key_index == scalar_keys.size() - 1)
+      if (key_index == value_keys.size() - 1)
       {
-        scalar = current_node->get<T>();
+        value = current_node->get<T>();
         break;
       }
-      current_node = &(*current_node)[scalar_keys[key_index + 1]];
+      current_node = &(*current_node)[value_keys[key_index + 1]];
     }
   }
   /// Getter for vector values
