@@ -20,7 +20,7 @@ class FEProblemBase;
 /**
  * Solver configuration class used with the linear solvers in a SIMPLE solver.
  */
-class LinearPicardSolverConfiguration : public libMesh::SolverConfiguration
+class LinearFixedPointSolverConfiguration : public libMesh::SolverConfiguration
 {
   /**
    * Override this to make sure the PETSc options are not overwritten in the linear solver
@@ -29,14 +29,14 @@ class LinearPicardSolverConfiguration : public libMesh::SolverConfiguration
 };
 
 /**
- * LinearPicardSteady executioners call "solve()" on two different nonlinear systems in sequence
+ * LinearFixedPointSteady executioners call "solve()" on two different nonlinear systems in sequence
  */
-class LinearPicardSteady : public Executioner
+class LinearFixedPointSteady : public Executioner
 {
 public:
   static InputParameters validParams();
 
-  LinearPicardSteady(const InputParameters & parameters);
+  LinearFixedPointSteady(const InputParameters & parameters);
 
   void init() override;
   void execute() override;
