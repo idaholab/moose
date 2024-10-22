@@ -11,8 +11,6 @@
 #include "LinearFixedPointSolve.h"
 #include "LinearSystem.h"
 
-registerMooseObject("MooseApp", LinearFixedPointSolve);
-
 InputParameters
 LinearFixedPointSolve::validParams()
 {
