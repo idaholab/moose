@@ -4,9 +4,11 @@
 #include "libmesh/libmesh_common.h"
 
 registerMooseObject("OptimizationApp", MisfitReporterOffsetFunctionMaterial);
+registerMooseObject("OptimizationApp", ADMisfitReporterOffsetFunctionMaterial);
 
+template <bool is_ad>
 InputParameters
-MisfitReporterOffsetFunctionMaterial::validParams()
+MisfitReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = ReporterOffsetFunctionMaterial::validParams();
   params.addClassDescription(
@@ -19,17 +21,21 @@ MisfitReporterOffsetFunctionMaterial::validParams()
   return params;
 }
 
-MisfitReporterOffsetFunctionMaterial::MisfitReporterOffsetFunctionMaterial(
+template <bool is_ad>
+MisfitReporterOffsetFunctionMaterialTempl<is_ad>::MisfitReporterOffsetFunctionMaterialTempl(
     const InputParameters & parameters)
-  : ReporterOffsetFunctionMaterial(parameters),
-    _sim_var(coupledValue("sim_variable")),
-    _mat_prop_gradient(declareProperty<Real>(_prop_name + "_gradient")),
-    _measurement_values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED))
+  : ReporterOffsetFunctionMaterialTempl<is_ad>(parameters),
+    _sim_var(this->template coupledGenericValue<is_ad>("sim_variable")),
+    _mat_prop_gradient(
+        this->template declareGenericProperty<Real, is_ad>(_prop_name + "_gradient")),
+    _measurement_values(
+        this->template getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED))
 {
 }
 
+template <bool is_ad>
 void
-MisfitReporterOffsetFunctionMaterial::computeQpProperties()
+MisfitReporterOffsetFunctionMaterialTempl<is_ad>::computeQpProperties()
 {
   _material[_qp] = 0.0;
   _mat_prop_gradient[_qp] = 0.0;
@@ -47,7 +53,7 @@ MisfitReporterOffsetFunctionMaterial::computeQpProperties()
         _read_in_points ? _points[idx] : Point(_coordx[idx], _coordy[idx], _coordz[idx]);
 
     Real measurement_value = _measurement_values[idx];
-    Real simulation_value = _sim_var[_qp];
+    auto simulation_value = _sim_var[_qp];
 
     // Compute weighting function
     Real weighting = computeOffsetFunction(offset);
@@ -58,3 +64,6 @@ MisfitReporterOffsetFunctionMaterial::computeQpProperties()
         2.0 * weighting * (measurement_value * weighting - simulation_value * weighting);
   }
 }
+
+template class MisfitReporterOffsetFunctionMaterialTempl<true>;
+template class MisfitReporterOffsetFunctionMaterialTempl<false>;

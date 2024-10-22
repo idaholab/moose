@@ -3,32 +3,46 @@
 #include "ReporterOffsetFunctionMaterial.h"
 #include "Function.h"
 
-class Function;
+template <bool>
+class MisfitReporterOffsetFunctionMaterialTempl;
+typedef MisfitReporterOffsetFunctionMaterialTempl<false> MisfitReporterOffsetFunctionMaterial;
+typedef MisfitReporterOffsetFunctionMaterialTempl<true> ADMisfitReporterOffsetFunctionMaterial;
 
 /**
  * This class creates a misfit and misfit gradient material that can be used for
  * optimizing measurements weighted by functions.
  */
-class MisfitReporterOffsetFunctionMaterial : public ReporterOffsetFunctionMaterial
+template <bool is_ad>
+class MisfitReporterOffsetFunctionMaterialTempl : public ReporterOffsetFunctionMaterialTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  MisfitReporterOffsetFunctionMaterial(const InputParameters & parameters);
+  MisfitReporterOffsetFunctionMaterialTempl<is_ad>(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
   /// Simulation variable
-  const VariableValue & _sim_var;
+  const GenericVariableValue<is_ad> & _sim_var;
 
   /// Gradient of misfit with respect to material properties
-  MaterialProperty<Real> & _mat_prop_gradient;
+  GenericMaterialProperty<Real, is_ad> & _mat_prop_gradient;
 
   /// values at each xyz coordinate
   const std::vector<Real> & _measurement_values;
 
   Real computeWeighting(const Point & point_shift);
+
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_prop_name;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_qp;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_material;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_points;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_read_in_points;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_coordx;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_coordy;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::_coordz;
+  using ReporterOffsetFunctionMaterialTempl<is_ad>::computeOffsetFunction;
 
 private:
   /// convenience vectors (these are not const because reporters can change their size)
