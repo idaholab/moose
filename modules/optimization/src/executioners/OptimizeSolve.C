@@ -359,10 +359,10 @@ OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, vo
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *(solver->_local_parameters.get()) = param;
+  solver->_parameters->swap(param);
 
   (*objective) = solver->objectiveFunction();
-
+  solver->_parameters->swap(param);
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
