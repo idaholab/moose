@@ -6616,29 +6616,46 @@ FEProblemBase::addPredictor(const std::string & type,
 }
 
 Real
+FEProblemBase::computeResidualL2Norm(NonlinearSystemBase & sys)
+{
+  _current_nl_sys = &sys;
+  computeResidual(*sys.currentSolution(), sys.RHS(), sys.number());
+  return sys->RHS().l2_norm();
+}
+
+Real
+FEProblemBase::computeResidualL2Norm(LinearSystem & sys)
+{
+  _current_linear_sys = &sys;
+
+  // Unfortunate, but we have to allocate a new vector for the residual
+  auto residual = sys->currentSolution()->zero_clone();
+
+  computeLinearSystemSys(sys.linearImplicitSystem(), *sys.linearImplicitSystem().matrix, *residual, /*compute fresh gradients*/true);
+
+  // Residual will be r = Ax-b in this case
+  residual->scale(-1.0);
+  residual->add_vector(*sys->currentSolution(), *sys->linearImplicitSystem().matrix);
+
+  return residual->l2_norm();
+}
+
+Real
 FEProblemBase::computeResidualL2Norm()
 {
   TIME_SECTION("computeResidualL2Norm", 2, "Computing L2 Norm of Residual");
 
+  // We use sum the squared norms of the individual systems and then take the square root of it
   Real l2_norm = 0.0;
   for (auto sys : _nl)
   {
-    _current_nl_sys = sys.get();
-    computeResidual(*sys->currentSolution(), sys->RHS(), sys->number());
-    const auto norm = sys->RHS().l2_norm();
+    const auto norm = computeResidualL2Norm(*sys);
     l2_norm += norm * norm;
   }
 
   for (auto sys : _linear_systems)
   {
-    _current_linear_sys = sys.get();
-    auto residual = sys->currentSolution()->zero_clone();
-
-    computeLinearSystemSys(sys->linearImplicitSystem(), *sys->linearImplicitSystem().matrix, *residual, true);
-    residual->scale(-1.0);
-    residual->add_vector(*sys->currentSolution(), *sys->linearImplicitSystem().matrix);
-
-    const auto norm = residual->l2_norm();
+    const auto norm = computeResidualL2Norm(*sys);
     l2_norm += norm * norm;
   }
 
