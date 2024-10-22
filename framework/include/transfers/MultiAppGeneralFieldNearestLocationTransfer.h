@@ -97,10 +97,13 @@ private:
   std::vector<std::vector<Real>> _local_values;
 
   /// Number of points to consider
-  unsigned int _num_nearest_points;
+  const long unsigned int _num_nearest_points;
 
   /// Whether to group data when creating the nearest-point regions
   const bool _group_subapps;
+
+  /// Use distance weighted average (true), or arithmetic mean (false)
+  const bool _distance_weighted_average;
 
   /// Whether the source of the values is at nodes (true) or centroids (false) for each variable
   std::vector<bool> _source_is_nodes;
