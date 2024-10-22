@@ -35,8 +35,8 @@ MFEMGenericFunctionVectorMaterial::MFEMGenericFunctionVectorMaterial(
   {
     // FIXME: Ideally this would support arbitrary dimensions
     _properties.declareVector(_prop_names[i],
-                              getMFEMProblem().getVectorFunctionCoefficient(_prop_values[i]),
-                              subdomainsToStrings(_block_ids));
+                              subdomainsToStrings(_block_ids),
+                              getMFEMProblem().getVectorFunctionCoefficient(_prop_values[i]));
   }
 }
 
