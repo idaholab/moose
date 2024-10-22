@@ -1,0 +1,12 @@
+[Tests]
+  [./2_slots]
+    type = RunCommand
+    command = "true"
+    job_slots = 2
+  [../]
+  [./3_slots]
+    type = RunCommand
+    command = "true"
+    job_slots = 3
+  [../]
+[]

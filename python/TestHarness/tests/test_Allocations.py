@@ -101,3 +101,24 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertNotIn('MAX_CPUS', output)
         self.assertNotIn('OVERSIZED', output)
         self.assertRegex(output, 'tests/test_harness.allocation_test.*OK')
+
+    def testRunCommand(self):
+        """
+        RunCommand [insufficient slots] SKIP / OK check
+        """
+        output = self.runTests('--no-color', '-i', 'allocation_runcommand', '-j 2').decode('utf-8')
+        self.assertNotIn('OVERSIZED', output)
+        # -j 2 forces job_slots = 3, test to be skipped.
+        self.assertRegex(output, 'tests/test_harness.3_slots.*? \[INSUFFICIENT SLOTS\] SKIP')
+        # -j 2 allows job_slots = 2, test to pass without displaying oversized caveat
+        self.assertNotIn('OVERSIZED', output)
+        self.assertRegex(output, 'tests/test_harness.2_slots.*? OK')
+
+    def testRunCommandOversized(self):
+        """
+        RunCommand [OVERSIZED] caveat check
+        """
+        output = self.runTests('--no-color', '-i', 'allocation_runcommand').decode('utf-8')
+        # both tests should run and pass, but while alerting the user of being oversized
+        self.assertRegex(output, 'tests/test_harness.2_slots.*? \[OVERSIZED\] OK')
+        self.assertRegex(output, 'tests/test_harness.3_slots.*? \[OVERSIZED\] OK')
