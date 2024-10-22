@@ -10,26 +10,14 @@
 #pragma once
 
 #include "Executioner.h"
-#include "PetscSupport.h"
-#include "libmesh/solver_configuration.h"
+#include "LinearFixedPointSolve.h"
 
 // Forward declarations
 class InputParameters;
 class FEProblemBase;
 
 /**
- * Solver configuration class used with the linear solvers in a SIMPLE solver.
- */
-class LinearFixedPointSolverConfiguration : public libMesh::SolverConfiguration
-{
-  /**
-   * Override this to make sure the PETSc options are not overwritten in the linear solver
-   */
-  virtual void configure_solver() override {}
-};
-
-/**
- * LinearFixedPointSteady executioners call "solve()" on two different nonlinear systems in sequence
+ * Executioner to solve multiple linear systems in a fixed point manner
  */
 class LinearFixedPointSteady : public Executioner
 {
@@ -45,18 +33,16 @@ public:
 protected:
   bool solveSystem(const unsigned int sys_number, const Moose::PetscSupport::PetscOptions * po);
 
-  FEProblemBase & _problem;
+  /// The solve object
+  LinearFixedPointSolve _solve;
 
+  /// Time-related variables
   Real _system_time;
   int & _time_step;
   Real & _time;
 
 private:
-  const std::vector<LinearSystemName> & _linear_sys_names;
-  std::vector<unsigned int> _linear_sys_numbers;
-  std::vector<Moose::PetscSupport::PetscOptions> _petsc_options;
-
+  /// Flag to check if the last solve converged or not
   bool _last_solve_converged;
-  const unsigned int _number_of_iterations;
-  const bool _print_operators_and_vectors;
+
 };
