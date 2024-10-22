@@ -87,3 +87,29 @@ when you are adding a parameter you need to think about:
 - is this more tied to the discretization of the equation? If so then it likely belong in the derived, user-instantiated,
   `XYZPhysics(CG/DG/HDG/FV/LinearFV)` class.
 
+#### Rules for implementation of Physics with regards to restarting variables or using initial conditions
+
+It is often convenient to define initial conditions in the `Physics`, and also to be able to
+restart the variables defined by the `Physics` automatically with minimal user effort. User-defined initial conditions
+are convenient to keep the input syntax compact, and default initial conditions are useful to avoid
+non-physical initial states. However, all these objectives conflict when the user defines parameters for initialization in
+a restarted simulation. To make things simple, developers of `Physics` should follow these rules, which we developed based on user
+feedback.
+
+- if the `initialize_variables_from_mesh_file` parameter is set to true, then:
+  - skip adding initial conditions
+  - error if an initial condition parameter is passed by the user to the `Physics`
+- if the `Physics` is set to use (define kernels for) variables that are defined outside the `Physics`, then:
+  - skip adding initial conditions
+  - error if an initial condition parameter is passed by the user to the `Physics`
+- else, if the user specifies initial conditions for variables in the `Physics`
+  - always obey these parameters and add the initial conditions, even if the simulation is restarting
+  - as a sanity check, the [FEProblemBase.md] will error during restarts, unless [!param](/Problem/FEProblem/allow_initial_conditions_with_restart) is set to true
+- else, if the user does not specify initial conditions in the `Physics`, but the `Physics` does define default values for the initial conditions
+  - if the simulation is restarting (from [Checkpoint.md] notably), skip adding the default initial conditions
+  - (redundant due to the first rule) if the `initialize_variables_from_mesh_file` parameter is set to true, skip adding the default initial conditions
+  - (redundant due to the second rule) if the `Physics` is set to use (define kernels for) variables that are defined outside the `Physics`, skip adding the default initial conditions
+
+!alert note
+For `initialize_variables_from_mesh_file` to work correctly, you must use the `saveNonlinearVariable()` and `saveAuxiliaryVariable()` `Physics` routines
+in the constructor of your `Physics` on any variable that you desire to be restarted.

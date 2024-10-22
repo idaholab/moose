@@ -30,4 +30,6 @@ protected:
   const Moose::Functor<ADReal> & _epsilon;
   /// The C_mu
   const Moose::Functor<ADReal> & _C_mu;
+  /// Whether to preserve the sparsity pattern between iterations (needed for Newton solvers)
+  const bool _preserve_sparsity_pattern;
 };
