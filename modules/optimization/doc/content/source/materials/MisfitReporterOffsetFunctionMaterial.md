@@ -38,7 +38,7 @@ These equations represent the misfit value and its gradient computed by the `Mis
 This material can be used to optimize a multimaterial topology problem, in which the
 constraints are not only based on volume but also on an additional cost function.
 
-!listing test/tests/optimizationreporter/gaussian_misfit/forward_and_adjoint.i block=Materials/beam
+!listing test/tests/optimizationreporter/function_misfit/forward_and_adjoint.i block=Materials/beam
 
 !syntax parameters /Materials/MisfitReporterOffsetFunctionMaterial
 
