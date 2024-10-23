@@ -293,9 +293,9 @@ MFEMProblem::addFunction(const std::string & type,
   }
   else
   {
-    mooseWarning("Could not identify whether function time ",
+    mooseWarning("Could not identify whether function ",
                  type,
-                 "is scalar or vector; no MFEM coefficient object created.");
+                 " is scalar or vector; no MFEM coefficient object created.");
   }
 }
 
