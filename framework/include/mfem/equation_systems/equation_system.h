@@ -1,7 +1,6 @@
 #pragma once
 #include "../common/pfem_extras.hpp"
 #include "boundary_conditions.h"
-#include "coefficients.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
 
