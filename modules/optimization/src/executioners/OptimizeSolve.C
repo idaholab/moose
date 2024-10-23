@@ -47,7 +47,8 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _verbose(getParam<bool>("verbose")),
     _output_opt_iters(getParam<bool>("output_optimization_iterations")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
-    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
+    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm)),
+    _local_parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
@@ -71,6 +72,7 @@ OptimizeSolve::solve()
 
   // Initialize solution and matrix
   _obj_function->setInitialCondition(*_parameters.get());
+  _obj_function->setInitialCondition(*_local_parameters.get());
   _ndof = _parameters->size();
 
   // time step defaults 1, we want to start at 0 for first iteration to be
@@ -357,9 +359,10 @@ OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, vo
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *solver->_parameters = param;
+  *(solver->_local_parameters.get()) = param;
 
   (*objective) = solver->objectiveFunction();
+
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -371,13 +374,12 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *solver->_parameters = param;
+  *(solver->_local_parameters.get()) = param;
 
   (*objective) = solver->objectiveFunction();
-
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
-
   solver->gradientFunction(grad);
+
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -387,10 +389,13 @@ OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /
   PetscFunctionBegin;
   // Define Hessian-vector multiplication routine
   auto * solver = static_cast<OptimizeSolve *>(ctx);
+
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *solver->_parameters = param;
+  *(solver->_local_parameters.get()) = param;
+
   PetscErrorCode ierr = MatShellSetOperation(
       solver->_hessian, MATOP_MULT, (void (*)(void))OptimizeSolve::applyHessianWrapper);
+
   CHKERRQ(ierr);
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -424,7 +429,7 @@ Real
 OptimizeSolve::objectiveFunction()
 {
   TIME_SECTION("objectiveFunction", 2, "Objective forward solve");
-  _obj_function->updateParameters(*_parameters.get());
+  _obj_function->updateParameters(*_local_parameters.get());
 
   Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
@@ -447,7 +452,7 @@ void
 OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   TIME_SECTION("gradientFunction", 2, "Gradient adjoint solve");
-  _obj_function->updateParameters(*_parameters.get());
+  _obj_function->updateParameters(*_local_parameters.get());
 
   Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
