@@ -50,7 +50,7 @@ public:
   void
   declareScalar(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
   {
-    this->declareScalar(name, _scalar_manager.make<P>(args...));
+    this->declareScalar(name, blocks, _scalar_manager.make<P>(args...));
   }
   template <class P, class... Args>
   void declareScalar(const std::string & name, global_t, Args &&... args)
@@ -68,7 +68,7 @@ public:
   void
   declareVector(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
   {
-    this->declareVector(name, _vector_manager.make<P>(args...));
+    this->declareVector(name, blocks, _vector_manager.make<P>(args...));
   }
   template <class P, class... Args>
   void declareVector(const std::string & name, global_t, Args &&... args)
@@ -86,7 +86,7 @@ public:
   void
   declareMatrix(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
   {
-    this->declareMatrix(name, _matrix_manager.make<P>(args...));
+    this->declareMatrix(name, blocks, _matrix_manager.make<P>(args...));
   }
   template <class P, class... Args>
   void declareMatrix(const std::string & name, global_t, Args &&... args)
