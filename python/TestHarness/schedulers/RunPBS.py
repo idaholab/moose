@@ -84,6 +84,12 @@ class RunPBS(RunHPC):
                 if exit_code is not None:
                     if exit_code < 0:
                         name, reason = PBS_User_EXITCODES.get(exit_code, ('TERMINATED', 'Unknown reason'))
+                        # Job failed to start outside of our submission script, so
+                        # try it again a few times. This was implemented due to a
+                        # common issue on lemhi
+                        if name == 'JOB_EXEC_FAIL2' and hpc_job.num_resubmit <= 5:
+                            self.resubmitHPCJob(hpc_job)
+                            continue
                         # Job timed out; give this a special timeout status because
                         # it is then marked as recoverable (could try running again)
                         if name == 'JOB_EXEC_KILL_WALLTIME':

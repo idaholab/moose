@@ -284,6 +284,10 @@ class Job(OutputInterface):
         """ Wrapper method for setting caveats """
         return self.__tester.addCaveats(kwargs)
 
+    def removeCaveat(self, caveat):
+        """ Wrapper method for removing caveats """
+        return self.__tester.removeCaveat(caveat)
+
     def getCaveats(self):
         """ Wrapper method for getting caveats """
         return self.__tester.getCaveats()

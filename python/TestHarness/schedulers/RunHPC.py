@@ -13,10 +13,10 @@ import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib,
 from enum import Enum
 import paramiko
 import jinja2
-import copy
 import statistics
+import contextlib
 from multiprocessing.pool import ThreadPool
-from TestHarness import OutputInterface, util
+from TestHarness import util
 
 class HPCJob:
     # The valid job states for a HPC job
@@ -36,6 +36,8 @@ class HPCJob:
         self.state = self.State.waiting
         # The exit code of the command that was ran (if any)
         self.exit_code = None
+        # The number of times the job has been resubmitted
+        self.num_resubmit = 0
         # Lock for accessing this object
         self.lock = threading.Lock()
 
@@ -63,6 +65,17 @@ class HPCJob:
         Thread-safe getter for whether or not this was killed
         """
         return self.getState() == self.State.killed
+
+    def reset(self):
+        """
+        Resets the job state
+
+        Not thread safe; should be called within a lock
+        """
+        self.id = None
+        self.command = None
+        self.state = self.State.waiting
+        self.exit_code = None
 
 class RunHPC(RunParallel):
     # The types for the pools for calling HPC commands
@@ -294,12 +307,41 @@ class RunHPC(RunParallel):
         # Support managing 250 HPC jobs concurrently
         return 250, False
 
-    def submitJob(self, job, hold):
+    @staticmethod
+    def jobCaveat(hpc_job) -> str:
+        """
+        Gets the caveat associated with the job ID for a HPCJob
+        """
+        job_id = hpc_job.id
+        assert job_id is not None
+        return f'job={job_id}' if job_id.isdigit() else job_id
+
+    def resubmitHPCJob(self, hpc_job):
+        """
+        Resumits the given HPCJob.
+
+        The HPCJob must have already been submitted.
+
+        This should be called from within the derived
+        scheduler to resubmit.
+        """
+        assert hpc_job.state != hpc_job.State.waiting
+        job = hpc_job.job
+        job.removeCaveat(self.jobCaveat(hpc_job))
+        hpc_job.job.addCaveats('resubmitted')
+        hpc_job.reset()
+        hpc_job.num_resubmit += 1
+        self.submitJob(job, False, lock=False)
+
+    def submitJob(self, job, hold, lock=True):
         """
         Method for submitting an HPC job for the given Job.
 
         The "hold" flag specifies whether or not to submit
         the job in a held state.
+
+        Set lock=False if calling this within a method
+        whether the HPC job lock is already obtained.
 
         Returns the resulting HPCJob.
         """
@@ -316,10 +358,12 @@ class RunHPC(RunParallel):
 
             # Job hasn't been recorded yet; set up with a waiting state
             if hpc_job is None:
+                assert lock is True
                 self.hpc_jobs[job.getID()] = HPCJob(job)
                 hpc_job = self.hpc_jobs.get(job.getID())
 
-        with hpc_job.getLock():
+        hpc_job_lock = hpc_job.getLock() if lock else contextlib.nullcontext()
+        with hpc_job_lock:
             # Job has already been submitted
             if hpc_job.state != hpc_job.State.waiting:
                 return hpc_job
@@ -480,21 +524,19 @@ class RunHPC(RunParallel):
             if exit_code != 0:
                 raise self.CallHPCException(self, f'{submission_command} failed', full_cmd, result)
 
-            # Parse the job ID from the command
-            job_id = self.parseHPCSubmissionJobID(result)
+            # Set the HPC job state
+            hpc_job.id = self.parseHPCSubmissionJobID(result)
+            hpc_job.command = job_command
+            hpc_job.state = hpc_job.State.held if hold else hpc_job.State.queued
 
             # Job has been submitted, so set it as queued
             # Here we append job_id if the ID is just a number so that it's more
             # obvious what it is
-            job.addCaveats(f'job={job_id}' if job_id.isdigit() else job_id)
+            job.addCaveats(self.jobCaveat(hpc_job))
 
             # Print the job as it's been submitted
             job_status = job.hold if hold else job.queued
             self.setAndOutputJobStatus(hpc_job.job, job_status, caveats=True)
-
-            hpc_job.id = job_id
-            hpc_job.command = job_command
-            hpc_job.state = hpc_job.State.held if hold else hpc_job.State.queued
 
         return hpc_job
 
@@ -883,9 +925,11 @@ class RunHPC(RunParallel):
         times = {}
         for key in timer_keys:
             times[key] = []
+        num_resubmit = 0
 
         for hpc_job in self.hpc_jobs.values():
             timer = hpc_job.job.timer
+            num_resubmit += hpc_job.num_resubmit
             for key in timer_keys:
                 if timer.hasTotalTime(key):
                     times[key].append(timer.totalTime(key))
@@ -895,7 +939,8 @@ class RunHPC(RunParallel):
             averages[key] = statistics.mean(values) if values else 0
 
         result = f'Average queue time {averages["hpc_queued"]:.1f} seconds, '
-        result += f'average output wait time {averages["hpc_wait_output"]:.1f} seconds.'
+        result += f'average output wait time {averages["hpc_wait_output"]:.1f} seconds, '
+        result += f'{num_resubmit} jobs resubmitted.'
         return result
 
     def appendResultFileHeader(self):

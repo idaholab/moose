@@ -453,6 +453,10 @@ class Tester(MooseObject, OutputInterface):
                 self.__caveats.add(i)
         return self.getCaveats()
 
+    def removeCaveat(self, caveat):
+        """ Removes a caveat, which _must_ exist """
+        self.__caveats.remove(caveat)
+
     def getCaveats(self):
         """ Return caveats accumalted by this tester """
         return self.__caveats
