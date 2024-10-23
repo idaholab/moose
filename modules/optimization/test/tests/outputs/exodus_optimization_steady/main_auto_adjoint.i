@@ -30,7 +30,7 @@
 [MultiApps]
   [forward]
     type = FullSolveMultiApp
-    input_files = forward_and_adjoint.i
+    input_files = forward_and_adjoint_iteration_output.i
     execute_on = "FORWARD"
   []
 []
