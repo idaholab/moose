@@ -96,6 +96,10 @@
 [Adaptivity]
   marker = box
   initial_steps = 1
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [Markers]
     [box]
       bottom_left = '0.3 0.3 0'

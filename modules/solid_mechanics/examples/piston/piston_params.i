@@ -21,6 +21,10 @@
   max_h_level = 3
   cycles_per_step = 1
   initial_marker = uniform
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   marker = errorFraction
   [Markers]
     [uniform]
