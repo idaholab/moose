@@ -429,33 +429,13 @@ TimeDependentEquationSystem::AddKernel(const std::string & test_var_name,
 void
 TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
 {
-  // EquationSystem::BuildBilinearForms(bc_map);
+  EquationSystem::BuildBilinearForms(bc_map);
 
   // Build and assemble bilinear forms acting on time derivatives
   for (int i = 0; i < _test_var_names.size(); i++)
   {
 
     auto test_var_name = _test_var_names.at(i);
-
-    _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
-    bc_map.ApplyIntegratedBCs(
-        test_var_name, _blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
-
-    mfem::SumIntegrator * sum = new mfem::SumIntegrator;
-    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, false);
-
-    // Apply kernels to blf
-    auto blf = _blfs.Get(test_var_name);
-    if (_blf_kernels_map.Has(test_var_name))
-    {
-      blf->SetAssemblyLevel(_assembly_level);
-      auto blf_kernels = _blf_kernels_map.GetRef(test_var_name);
-
-      for (auto & blf_kernel : blf_kernels)
-      {
-        sum->AddIntegrator(blf_kernel->createIntegrator());
-      }
-    }
 
     _td_blfs.Register(test_var_name,
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
@@ -475,21 +455,30 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
       }
     }
 
-    // Apply scaled integrated BCs to td_blf
-    auto integs = blf->GetBBFI();
+    // Recover and scale integrators from blf
+    auto blf = _blfs.Get(test_var_name);
+    auto integs = blf->GetDBFI();
+    auto b_integs = blf->GetBBFI();
     auto markers = blf->GetBBFI_Marker();
+
+    mfem::SumIntegrator * sum = new mfem::SumIntegrator;
+    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, false);
+
     for (int i = 0; i < integs->Size(); ++i)
     {
-      td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*integs[i], _dt_coef.constant, false),
+      sum->AddIntegrator(*integs[i]);
+    }
+
+    for (int i = 0; i < b_integs->Size(); ++i)
+    {
+      td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false),
                                     *(*markers[i]));
     }
 
-    // sum is owned by blf and scaled_sum is owned by td_blf
-    blf->AddDomainIntegrator(sum);
+    // scaled_sum is owned by td_blf
     td_blf->AddDomainIntegrator(scaled_sum);
 
-    // Assemble forms
-    blf->Assemble();
+    // Assemble form
     td_blf->Assemble();
   }
 }
