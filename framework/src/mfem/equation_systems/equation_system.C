@@ -491,8 +491,6 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
     // Assemble forms
     blf->Assemble();
     td_blf->Assemble();
-
-    // td_blf->SpMat().Add(_dt_coef.constant, blf->SpMat());
   }
 }
 
