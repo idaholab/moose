@@ -1,4 +1,5 @@
 #include "MFEMConstantCoefficient.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMConstantCoefficient);
 
@@ -12,7 +13,8 @@ MFEMConstantCoefficient::validParams()
 
 MFEMConstantCoefficient::MFEMConstantCoefficient(const InputParameters & parameters)
   : MFEMCoefficient(parameters),
-    coefficient{std::make_shared<mfem::ConstantCoefficient>(getParam<double>("value"))}
+    coefficient{getMFEMProblem().getProblemData()._scalar_manager.make<mfem::ConstantCoefficient>(
+        getParam<double>("value"))}
 {
 }
 
