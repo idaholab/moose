@@ -1,6 +1,8 @@
 [Tests]
   issues = '#1234'
   design = core.md
+  verification = sqa.md
+  validation = special.md
   [r0]
     type = Andrew
     requirement = "Requirement One"
