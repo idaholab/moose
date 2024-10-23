@@ -2,7 +2,7 @@
 #include "MFEMKernel.h"
 
 /*
-(σ ∇ q, ∇ q')
+(λ ∇.u, ∇.u') + (μ (∇u + (∇u)ᵀ), ∇u' + (∇u')ᵀ)
 */
 class MFEMLinearElasticityKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
