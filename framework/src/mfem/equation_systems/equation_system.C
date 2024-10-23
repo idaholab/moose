@@ -429,24 +429,22 @@ TimeDependentEquationSystem::AddKernel(const std::string & test_var_name,
 void
 TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
 {
-  EquationSystem::BuildBilinearForms(bc_map);
+  //EquationSystem::BuildBilinearForms(bc_map);
 
   // Build and assemble bilinear forms acting on time derivatives
   for (int i = 0; i < _test_var_names.size(); i++)
   {
 
     auto test_var_name = _test_var_names.at(i);
-    _td_blfs.Register(test_var_name,
-                      std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
+
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
+    bc_map.ApplyIntegratedBCs(
+        test_var_name, _blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
 
     mfem::SumIntegrator * sum = new mfem::SumIntegrator;
     ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, false);
 
-    bc_map.ApplyIntegratedBCs(
-        test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
-
-    // Apply kernels
+    // Apply kernels to blf
     auto blf = _blfs.Get(test_var_name);
     if (_blf_kernels_map.Has(test_var_name))
     {
@@ -459,7 +457,13 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
       }
     }
 
-    // Apply td_blf kernels
+    _td_blfs.Register(test_var_name,
+                      std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
+    bc_map.ApplyIntegratedBCs(
+        test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
+
+
+    // Apply kernels to td_blf
     auto td_blf = _td_blfs.Get(test_var_name);
     if (_td_blf_kernels_map.Has(test_var_name))
     {
@@ -472,6 +476,14 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
       }
     }
 
+    // Apply scaled integrated BCs to td_blf
+    auto integs = blf->GetBBFI();
+    auto markers = blf->GetBBFI_Marker();
+    for (int i=0; i<integs->Size(); ++i)
+    {
+      td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*integs[i], _dt_coef.constant, false), *(*markers[i]));
+    }
+
     // sum is owned by blf and scaled_sum is owned by td_blf
     blf->AddDomainIntegrator(sum);
     td_blf->AddDomainIntegrator(scaled_sum);
@@ -479,6 +491,8 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
     // Assemble forms
     blf->Assemble();
     td_blf->Assemble();
+
+    //td_blf->SpMat().Add(_dt_coef.constant, blf->SpMat());
   }
 }
 
