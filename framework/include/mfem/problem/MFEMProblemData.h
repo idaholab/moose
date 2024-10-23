@@ -1,6 +1,7 @@
 #pragma once
 #include "equation_system.h"
 #include "MFEMContainers.h"
+#include "ObjectManager.h"
 #include "PropertyManager.h"
 #include <fstream>
 #include <iostream>
@@ -19,7 +20,7 @@ public:
   platypus::MatrixCoefficientManager _matrix_manager;
   platypus::PropertyManager _properties{_scalar_manager, _vector_manager, _matrix_manager};
   platypus::BCMap _bc_map;
-  platypus::Coefficients _coefficients;
+  platypus::Outputs _outputs;
 
   std::unique_ptr<mfem::ODESolver> _ode_solver{nullptr};
   mfem::BlockVector _f;

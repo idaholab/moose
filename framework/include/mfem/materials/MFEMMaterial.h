@@ -1,9 +1,9 @@
 #pragma once
 
+#include <mfem.hpp>
 #include "MFEMGeneralUserObject.h"
 #include "MFEMCoefficient.h"
 #include "PropertyManager.h"
-#include "coefficients.h"
 
 class MFEMMaterial : public MFEMGeneralUserObject
 {

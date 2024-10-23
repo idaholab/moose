@@ -18,7 +18,6 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  getProblemData()._coefficients.AddGlobalCoefficientsFromSubdomains();
   addMFEMNonlinearSolver();
 }
 
@@ -116,8 +115,6 @@ MFEMProblem::addCoefficient(const std::string & user_object_name,
                             InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  MFEMCoefficient * mfem_coef(&getUserObject<MFEMCoefficient>(name));
-  getProblemData()._coefficients._scalars.Register(name, mfem_coef->getCoefficient());
 }
 
 void
@@ -126,8 +123,6 @@ MFEMProblem::addVectorCoefficient(const std::string & user_object_name,
                                   InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  MFEMVectorCoefficient * mfem_vec_coef(&getUserObject<MFEMVectorCoefficient>(name));
-  getProblemData()._coefficients._vectors.Register(name, mfem_vec_coef->getVectorCoefficient());
 }
 
 void
