@@ -7,9 +7,11 @@ MFEMLinearElasticityKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription(
-      "The Cauchy stress tensor $\\sigma(u)_{ij} = \\lambda \\partial_k u_k \\delta_{ij}"
-      "+ \\mu (\\partial_j u_i + \\partial_i u_j)$ with the weak form of"
-      "$(\\sigma(\\phi_i), \\sigma(u_h))$, to be added to an MFEM problem");
+      "The Cauchy stress tensor $\\sigma(u)_{ij} = \\lambda \\varepsilon_{kk} \\delta_{ij} "
+      "+ 2 \\mu \\varepsilon_{ij}$, where $\\varepsilon(u)_ij = \\frac{1}{2} \\partial_j u_i + "
+      "\\partial_i u_j$, with the weak form of "
+      "$(\\lambda \\varepsilon(\\phi_i)_{kk}, \\varepsilon(u_h)_{kk}) + 2 (\\mu "
+      "\\varepsilon(\\phi_i)_{mn}, \\varepsilon(u_h)_{mn} )$, to be added to an MFEM problem");
 
   params.addParam<std::string>(
       "lambda", "Name of MFEM Lame constant lambda to multiply the div(u)*I term by");
