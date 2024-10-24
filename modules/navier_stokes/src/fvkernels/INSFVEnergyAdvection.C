@@ -36,9 +36,14 @@ ADReal
 INSFVEnergyAdvection::computeQpResidual()
 {
   const auto v = velocity();
+  const auto & limiter_time = _subproblem.isTransient()
+                                  ? Moose::StateArg(1, Moose::SolutionIterationType::Time)
+                                  : Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto adv_quant_face = _adv_quant(makeFace(*_face_info,
                                                   limiterType(_advected_interp_method),
-                                                  MetaPhysicL::raw_value(v) * _normal > 0),
+                                                  MetaPhysicL::raw_value(v) * _normal > 0,
+                                                  false,
+                                                  &limiter_time),
                                          determineState());
   return _normal * v * adv_quant_face;
 }
