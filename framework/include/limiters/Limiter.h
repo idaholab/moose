@@ -125,7 +125,7 @@ public:
   virtual InterpMethod interpMethod() const = 0;
 
   /**
-   * @brief Functor for applying tsimplified slope limiting.
+   * @brief Functor for applying simplified slope limiting.
    *
    * This function applies the limiter by invoking the `limit` method with the provided parameters.
    * It acts as a functor, enabling objects of the `VanLeerLimiter` class to be used as if they were

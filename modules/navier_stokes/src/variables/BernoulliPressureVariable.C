@@ -68,7 +68,8 @@ BernoulliPressureVariable::elemIsUpwind(const Elem & elem,
                                         const FaceInfo & fi,
                                         const Moose::StateArg & time) const
 {
-  const Moose::FaceArg face{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
+  const Moose::FaceArg face{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
   const VectorValue<ADReal> vel_face{(*_u)(face, time), (*_v)(face, time), (*_w)(face, time)};
   const bool fi_elem_is_upwind = vel_face * fi.normal() > 0;

@@ -511,15 +511,16 @@ interpolate(const Limiter<Scalar> & limiter,
             const FaceInfo & fi,
             const bool fi_elem_is_upwind)
 {
-  auto pr = interpCoeffs(limiter,
-                         phi_upwind,
-                         phi_downwind,
-                         grad_phi_upwind,
-                         /*grad_phi_face*/ static_cast<const libMesh::VectorValue<Scalar>*>(nullptr),
-                         /* max_value */ Scalar(0.0),
-                         /* min_value */ Scalar(0.0),
-                         fi,
-                         fi_elem_is_upwind);
+  auto pr =
+      interpCoeffs(limiter,
+                   phi_upwind,
+                   phi_downwind,
+                   grad_phi_upwind,
+                   /*grad_phi_face*/ static_cast<const libMesh::VectorValue<Scalar> *>(nullptr),
+                   /* max_value */ Scalar(0.0),
+                   /* min_value */ Scalar(0.0),
+                   fi,
+                   fi_elem_is_upwind);
   return pr.first * phi_upwind + pr.second * phi_downwind;
 }
 

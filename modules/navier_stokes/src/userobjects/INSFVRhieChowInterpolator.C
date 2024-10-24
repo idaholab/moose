@@ -544,8 +544,12 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (Moose::FV::onBoundary(*this, fi))
   {
     const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
-    const Moose::FaceArg boundary_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem, nullptr};
+    const Moose::FaceArg boundary_face{&fi,
+                                       Moose::FV::LimiterType::CentralDifference,
+                                       true,
+                                       correct_skewness,
+                                       boundary_elem,
+                                       nullptr};
     auto velocity = vel(boundary_face, time);
     incorporate_mesh_velocity(boundary_face, velocity);
 
