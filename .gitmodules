@@ -16,9 +16,6 @@
     path = modules/fluid_properties/contrib/saline
     url = https://code.ornl.gov/neams/saline.git
     update = none
-[submodule "framework/contrib/wasp"]
-    path = framework/contrib/wasp
-    url = https://code.ornl.gov/neams-workbench/wasp.git
 [submodule "modules/solid_mechanics/contrib/neml2"]
     path = modules/solid_mechanics/contrib/neml2
     url = https://github.com/reverendbedford/neml2.git

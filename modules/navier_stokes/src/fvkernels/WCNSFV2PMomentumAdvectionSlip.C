@@ -73,7 +73,8 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
   if (on_boundary)
     face_arg = singleSidedFaceArg();
   else
-    face_arg = Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+    face_arg = Moose::FaceArg{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
   ADRealVectorValue u_slip_vel_vec;
   if (_dim == 1)
@@ -118,8 +119,12 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
   else // we are an internal fluid flow face
   {
     const bool elem_is_upwind = MetaPhysicL::raw_value(u_slip_vel_vec) * _normal > 0;
-    const Moose::FaceArg advected_face_arg{
-        &fi, limiterType(_advected_interp_method), elem_is_upwind, correct_skewness, nullptr};
+    const Moose::FaceArg advected_face_arg{&fi,
+                                           limiterType(_advected_interp_method),
+                                           elem_is_upwind,
+                                           correct_skewness,
+                                           nullptr,
+                                           nullptr};
     if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
             NS::isPorosityJumpFace(epsilon(), fi, state);
         is_jump)

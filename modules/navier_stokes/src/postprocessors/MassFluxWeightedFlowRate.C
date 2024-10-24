@@ -70,7 +70,8 @@ MassFluxWeightedFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInf
                       Moose::FV::limiterType(_advected_interp_method),
                       MetaPhysicL::raw_value(vel) * fi->normal() > 0,
                       correct_skewness,
-                      _adv_quant->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr()});
+                      _adv_quant->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr(),
+                      nullptr});
   auto dens = _density(face_arg, state);
   const auto adv_quant_face = MetaPhysicL::raw_value(dens * (*_adv_quant)(face_arg, state));
   _mdot += fi->faceArea() * fi->faceCoord() * MetaPhysicL::raw_value(dens) * fi->normal() * vel;

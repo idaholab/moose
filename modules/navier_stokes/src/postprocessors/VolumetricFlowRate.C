@@ -147,7 +147,8 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
                                     Moose::FV::limiterType(_advected_interp_method),
                                     MetaPhysicL::raw_value(vel) * fi->normal() > 0,
                                     correct_skewness,
-                                    elem}),
+                                    elem,
+                                    nullptr}),
                     state));
   return fi->normal() * adv_quant_face * vel;
 }

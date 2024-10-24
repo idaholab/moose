@@ -13,6 +13,7 @@
 #include "RelationshipManager.h"
 #include "NSFVUtils.h"
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
+#include "Limiter.h"
 
 InputParameters
 INSFVAdvectionKernel::validParams()
@@ -55,6 +56,14 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   };
 
   param_check("force_boundary_execution");
+
+  if (_var.getTwoTermBoundaryExpansion() &&
+      !(_advected_interp_method == Moose::FV::InterpMethod::Upwind ||
+        _advected_interp_method == Moose::FV::InterpMethod::Average))
+    mooseWarning("Second order upwind limiting is not supported when `two_term_boundary_expansion "
+                 "= true` for the limited variable. Use at your own risk or please consider "
+                 "changing `two_term_boundary_expansion = false` or changing your "
+                 "advected_interp_method to first order methods (`upwind`, `average`)");
 }
 
 void

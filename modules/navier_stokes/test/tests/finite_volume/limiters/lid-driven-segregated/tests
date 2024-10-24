@@ -1,0 +1,83 @@
+[Tests]
+  design = 'INSFVMomentumAdvection.md'
+  issues = '#28891'
+  [segregated_advection_limiting_schemes]
+    requirement = 'The system shall be able to perform a variety of limiting schemes when solving fluid flow equations in the segreagated solver. These schemes include'
+    [upwind]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'upwind.e'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
+      heavy = true
+      detail = 'first-order upwind test'
+    []
+    [upwind_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'upwind_run.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=upwind Executioner/num_iterations=10 Outputs/file_base=upwind_run'
+      detail = 'first-order upwind run test'
+    []
+    [vanLeer]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'vanLeer.e'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer'
+      heavy = true
+      detail = 'van Leer test'
+    []
+    [vanLeer_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'vanLeer_run.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Executioner/num_iterations=10 Outputs/file_base=vanLeer_run'
+      detail = 'van Leer run test'
+    []
+    [min_mod]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'min_mod.e'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
+      heavy = true
+      detail = 'min-mod test'
+    []
+    [min_mod_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'min_mod_run.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=min_mod Executioner/num_iterations=10 Outputs/file_base=min_mod_run'
+      detail = 'min-mod run test'
+    []
+    [quick]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'quick.e'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
+      heavy = true
+      detail = 'QUICK test'
+    []
+    [quick_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'quick_run.e'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      cli_args = 'GlobalParams/advected_interp_method=quick Executioner/num_iterations=10 Outputs/file_base=quick_run'
+      detail = 'QUICK run test'
+    []
+  []
+[]

@@ -102,7 +102,7 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                       _mesh.faceInfo(r_elem->neighbor_ptr(side_index),
                                      r_elem->neighbor_ptr(side_index)->which_neighbor_am_i(r_elem));
                 Moose::FaceArg face_arg{
-                    fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+                    fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
                 if (face_arg.fi)
                 {
                   average += functor_in(face_arg, t);

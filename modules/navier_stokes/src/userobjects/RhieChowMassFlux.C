@@ -216,7 +216,7 @@ RhieChowMassFlux::initFaceMassFlux()
           hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
 
       const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
 
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
@@ -392,7 +392,7 @@ RhieChowMassFlux::populateCouplingFunctors(
       if (_vel[0]->isDirichletBoundaryFace(*fi))
       {
         const Moose::FaceArg boundary_face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem()};
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
         face_rho = _rho(boundary_face, Moose::currentState());
 
         for (const auto dim_i : make_range(_dim))

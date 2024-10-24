@@ -249,12 +249,13 @@ FVFluxKernel::neighborArg(const bool correct_skewness) const
 Moose::FaceArg
 FVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
                                  const Moose::FV::LimiterType limiter_type,
-                                 const bool correct_skewness) const
+                                 const bool correct_skewness,
+                                 const Moose::StateArg * state_limiter) const
 {
   if (!fi)
     fi = _face_info;
 
-  return makeFace(*fi, limiter_type, true, correct_skewness);
+  return makeFace(*fi, limiter_type, true, correct_skewness, state_limiter);
 }
 
 bool

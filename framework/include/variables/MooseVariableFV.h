@@ -653,6 +653,9 @@ public:
                                                   const Elem * elem_side_to_extrapolate_from,
                                                   const StateArg & state) const;
 
+  /// Function to get the two term boudnary exansion for the variable
+  const bool & getTwoTermBoundaryExpansion() const { return _two_term_boundary_expansion; }
+
 protected:
   /**
    * clear finite volume caches

@@ -160,7 +160,8 @@ protected:
       const MooseVariableFV<Real> & variable,
       const FaceInfo * fi = nullptr,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
-      bool correct_skewness = false) const;
+      bool correct_skewness = false,
+      const Moose::StateArg * state_limiter = nullptr) const;
 
   /// To be consistent with FE interfaces we introduce this quadrature point member. However, for FV
   /// calculations there should every only be one qudrature point and it should be located at the

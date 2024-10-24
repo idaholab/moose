@@ -44,7 +44,8 @@ public:
   Moose::FaceArg makeFace(const FaceInfo & fi,
                           const Moose::FV::LimiterType limiter_type,
                           const bool elem_is_upwind,
-                          const bool correct_skewness = false) const;
+                          const bool correct_skewness = false,
+                          const Moose::StateArg * state_limiter = nullptr) const;
 
   /**
    * Make a functor face argument with a central differencing limiter, e.g. compose a face

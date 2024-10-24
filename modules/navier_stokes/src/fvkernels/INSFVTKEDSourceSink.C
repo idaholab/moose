@@ -149,7 +149,7 @@ INSFVTKEDSourceSink::computeQpResidual()
         const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
         const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
         const Moose::FaceArg facearg = {
-            fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
+            fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
         destruction += 2.0 * TKE_old * _mu(facearg, state) / rho /
                        Utility::pow<2>(distance_vec[i]) / tot_weight;
       }

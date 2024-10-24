@@ -1,8 +1,15 @@
 [Tests]
   design = 'INSFVMomentumAdvection.md'
-  issues = '#20493'
-  [limiting_schemes]
+  issues = '#20493 #28891'
+  [advection_limiting_schemes]
     requirement = 'The system shall be able to perform a variety of limiting schemes when solving fluid flow equations. These schemes include'
+    [upwind]
+      type = Exodiff
+      input = 'test.i'
+      exodiff = upwind.e
+      cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
+      detail = 'first-order upwind'
+    []
     [sou]
       type = Exodiff
       input = 'test.i'

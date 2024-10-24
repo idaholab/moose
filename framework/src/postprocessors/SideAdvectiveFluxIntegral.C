@@ -91,19 +91,21 @@ SideAdvectiveFluxIntegralTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * 
   // Get face value for velocity
   const auto vel_x =
       (_vel_x)(Moose::FaceArg(
-                   {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
+                   {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr}),
                state);
   const auto vel_y =
       _vel_y
-          ? ((*_vel_y)(Moose::FaceArg(
-                           {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
-                       state))
+          ? ((*_vel_y)(
+                Moose::FaceArg(
+                    {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr}),
+                state))
           : 0;
   const auto vel_z =
       _vel_z
-          ? ((*_vel_z)(Moose::FaceArg(
-                           {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
-                       state))
+          ? ((*_vel_z)(
+                Moose::FaceArg(
+                    {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr}),
+                state))
           : 0;
 
   auto fi_normal = _current_elem == fi->elemPtr() ? fi->normal() : Point(-fi->normal());
@@ -111,7 +113,7 @@ SideAdvectiveFluxIntegralTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * 
 
   const auto adv_quant_face = (*_adv_quant)(
       Moose::FaceArg(
-          {fi, Moose::FV::LimiterType::CentralDifference, elem_is_upwind, false, nullptr}),
+          {fi, Moose::FV::LimiterType::CentralDifference, elem_is_upwind, false, nullptr, nullptr}),
       state);
 
   return fi_normal * adv_quant_face * RealVectorValue(vel_x, vel_y, vel_z);
