@@ -30,70 +30,53 @@ PETScExternalSolverCreate(MPI_Comm comm, TS * ts)
 {
   DM da;
 
-  PetscErrorCode ierr;
-
   PetscFunctionBeginUser;
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Create distributed array (DMDA) to manage parallel grid and vectors
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  ierr = DMDACreate2d(comm,
-                      DM_BOUNDARY_NONE,
-                      DM_BOUNDARY_NONE,
-                      DMDA_STENCIL_STAR,
-                      11,
-                      11,
-                      PETSC_DECIDE,
-                      PETSC_DECIDE,
-                      1,
-                      1,
-                      NULL,
-                      NULL,
-                      &da);
-  CHKERRQ(ierr);
-  ierr = DMSetFromOptions(da);
-  CHKERRQ(ierr);
-  ierr = DMSetUp(da);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMDACreate2d(comm,
+                                 DM_BOUNDARY_NONE,
+                                 DM_BOUNDARY_NONE,
+                                 DMDA_STENCIL_STAR,
+                                 11,
+                                 11,
+                                 PETSC_DECIDE,
+                                 PETSC_DECIDE,
+                                 1,
+                                 1,
+                                 NULL,
+                                 NULL,
+                                 &da));
+  LibmeshPetscCallQ(DMSetFromOptions(da));
+  LibmeshPetscCallQ(DMSetUp(da));
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Create timestepping solver context
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  ierr = TSCreate(comm, ts);
-  CHKERRQ(ierr);
-  ierr = TSSetProblemType(*ts, TS_NONLINEAR);
-  CHKERRQ(ierr);
-  ierr = TSSetType(*ts, TSBEULER);
-  CHKERRQ(ierr);
-  ierr = TSSetDM(*ts, da);
-  CHKERRQ(ierr);
-  ierr = DMDestroy(&da);
-  CHKERRQ(ierr);
-  ierr = TSSetIFunction(*ts, NULL, FormIFunction, nullptr);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSCreate(comm, ts));
+  LibmeshPetscCallQ(TSSetProblemType(*ts, TS_NONLINEAR));
+  LibmeshPetscCallQ(TSSetType(*ts, TSBEULER));
+  LibmeshPetscCallQ(TSSetDM(*ts, da));
+  LibmeshPetscCallQ(DMDestroy(&da));
+  LibmeshPetscCallQ(TSSetIFunction(*ts, NULL, FormIFunction, nullptr));
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Set Jacobian evaluation routine
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  ierr = TSSetIJacobian(*ts, NULL, NULL, FormIJacobian, NULL);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSSetIJacobian(*ts, NULL, NULL, FormIJacobian, NULL));
   /*
    * Make it consistent with the original solver
    * This can be changed during runtime via -ts_dt
    */
-  ierr = TSSetTimeStep(*ts, 0.2);
-  CHKERRQ(ierr);
-  ierr = TSSetFromOptions(*ts);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSSetTimeStep(*ts, 0.2));
+  LibmeshPetscCallQ(TSSetFromOptions(*ts));
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 PETScExternalSolverDestroy(TS ts)
 {
-  PetscErrorCode ierr;
-
   PetscFunctionBeginUser;
-  ierr = TSDestroy(&ts);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSDestroy(&ts));
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -105,7 +88,6 @@ PetscErrorCode
 externalPETScDiffusionFDMSolve(
     TS ts, Vec u0, Vec u, PetscReal dt, PetscReal time, PetscBool * converged)
 {
-  PetscErrorCode ierr;
   TSConvergedReason reason;
 #if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   PetscInt current_step;
@@ -125,64 +107,46 @@ externalPETScDiffusionFDMSolve(
   PetscAssertPointer(converged, 6);
 #endif
 
-  ierr = TSGetDM(ts, &da);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSGetDM(ts, &da));
 
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
-  ierr = PetscOptionsSetValue(NULL, "-ts_monitor", NULL);
-  CHKERRQ(ierr);
-  ierr = PetscOptionsSetValue(NULL, "-snes_monitor", NULL);
-  CHKERRQ(ierr);
-  ierr = PetscOptionsSetValue(NULL, "-ksp_monitor", NULL);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PetscOptionsSetValue(NULL, "-ts_monitor", NULL));
+  LibmeshPetscCallQ(PetscOptionsSetValue(NULL, "-snes_monitor", NULL));
+  LibmeshPetscCallQ(PetscOptionsSetValue(NULL, "-ksp_monitor", NULL));
 #else
-  ierr = PetscOptionsSetValue("-ts_monitor", NULL);
-  CHKERRQ(ierr);
-  ierr = PetscOptionsSetValue("-snes_monitor", NULL);
-  CHKERRQ(ierr);
-  ierr = PetscOptionsSetValue("-ksp_monitor", NULL);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PetscOptionsSetValue("-ts_monitor", NULL));
+  LibmeshPetscCallQ(PetscOptionsSetValue("-snes_monitor", NULL));
+  LibmeshPetscCallQ(PetscOptionsSetValue("-ksp_monitor", NULL));
 #endif
 
   /*ierr = TSSetMaxTime(ts,1.0);CHKERRQ(ierr);*/
-  ierr = TSSetExactFinalTime(ts, TS_EXACTFINALTIME_STEPOVER);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSSetExactFinalTime(ts, TS_EXACTFINALTIME_STEPOVER));
 
-  ierr = VecCopy(u0, u);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(VecCopy(u0, u));
 
-  ierr = TSSetSolution(ts, u);
-  CHKERRQ(ierr);
-  ierr = TSSetTimeStep(ts, dt);
-  CHKERRQ(ierr);
-  ierr = TSSetTime(ts, time - dt);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSSetSolution(ts, u));
+  LibmeshPetscCallQ(TSSetTimeStep(ts, dt));
+  LibmeshPetscCallQ(TSSetTime(ts, time - dt));
 #if !PETSC_VERSION_LESS_THAN(3, 8, 0)
-  ierr = TSGetStepNumber(ts, &current_step);
-  CHKERRQ(ierr);
-  ierr = TSSetMaxSteps(ts, current_step + 1);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSGetStepNumber(ts, &current_step));
+  LibmeshPetscCallQ(TSSetMaxSteps(ts, current_step + 1));
 #else
   SETERRQ(PetscObjectComm((PetscObject)ts), PETSC_ERR_SUP, "Require PETSc-3.8.x or higher ");
 #endif
   /*  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Sets various TS parameters from user options
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  ierr = TSSetFromOptions(ts);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSSetFromOptions(ts));
   /*
    * Let the passed-in dt take the priority
    */
-  ierr = TSSetTimeStep(ts, dt);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSSetTimeStep(ts, dt));
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Solve nonlinear system
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  ierr = TSSolve(ts, u);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSSolve(ts, u));
 
-  ierr = TSGetConvergedReason(ts, &reason);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSGetConvergedReason(ts, &reason));
   *converged = reason > 0 ? PETSC_TRUE : PETSC_FALSE;
 
   PetscFunctionReturn(PETSC_SUCCESS);
@@ -195,7 +159,6 @@ externalPETScDiffusionFDMSolve(
 PetscErrorCode
 FormIFunction(TS ts, PetscReal /*t*/, Vec U, Vec Udot, Vec F, void * /*ctx*/)
 {
-  PetscErrorCode ierr;
   DM da;
   PetscInt i, j, Mx, My, xs, ys, xm, ym;
   PetscReal hx, hy, sx, sy;
@@ -204,26 +167,23 @@ FormIFunction(TS ts, PetscReal /*t*/, Vec U, Vec Udot, Vec F, void * /*ctx*/)
   MPI_Comm comm;
 
   PetscFunctionBeginUser;
-  ierr = PetscObjectGetComm((PetscObject)ts, &comm);
-  ierr = TSGetDM(ts, &da);
-  CHKERRQ(ierr);
-  ierr = DMGetLocalVector(da, &localU);
-  CHKERRQ(ierr);
-  ierr = DMDAGetInfo(da,
-                     PETSC_IGNORE,
-                     &Mx,
-                     &My,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PetscObjectGetComm((PetscObject)ts, &comm));
+  LibmeshPetscCallQ(TSGetDM(ts, &da));
+  LibmeshPetscCallQ(DMGetLocalVector(da, &localU));
+  LibmeshPetscCallQ(DMDAGetInfo(da,
+                                PETSC_IGNORE,
+                                &Mx,
+                                &My,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE));
 
   hx = 1.0 / (PetscReal)(Mx - 1);
   sx = 1.0 / (hx * hx);
@@ -236,22 +196,16 @@ FormIFunction(TS ts, PetscReal /*t*/, Vec U, Vec Udot, Vec F, void * /*ctx*/)
      By placing code between these two statements, computations can be
      done while messages are in transition.
   */
-  ierr = DMGlobalToLocalBegin(da, U, INSERT_VALUES, localU);
-  CHKERRQ(ierr);
-  ierr = DMGlobalToLocalEnd(da, U, INSERT_VALUES, localU);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMGlobalToLocalBegin(da, U, INSERT_VALUES, localU));
+  LibmeshPetscCallQ(DMGlobalToLocalEnd(da, U, INSERT_VALUES, localU));
 
   /* Get pointers to vector data */
-  ierr = DMDAVecGetArrayRead(da, localU, &uarray);
-  CHKERRQ(ierr);
-  ierr = DMDAVecGetArray(da, F, &f);
-  CHKERRQ(ierr);
-  ierr = DMDAVecGetArray(da, Udot, &udot);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMDAVecGetArrayRead(da, localU, &uarray));
+  LibmeshPetscCallQ(DMDAVecGetArray(da, F, &f));
+  LibmeshPetscCallQ(DMDAVecGetArray(da, Udot, &udot));
 
   /* Get local grid boundaries */
-  ierr = DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL));
 
   /* Compute function over the locally owned part of the grid */
   for (j = ys; j < ys + ym; j++)
@@ -325,16 +279,11 @@ FormIFunction(TS ts, PetscReal /*t*/, Vec U, Vec Udot, Vec F, void * /*ctx*/)
   }
 
   /* Restore vectors */
-  ierr = DMDAVecRestoreArrayRead(da, localU, &uarray);
-  CHKERRQ(ierr);
-  ierr = DMDAVecRestoreArray(da, F, &f);
-  CHKERRQ(ierr);
-  ierr = DMDAVecRestoreArray(da, Udot, &udot);
-  CHKERRQ(ierr);
-  ierr = DMRestoreLocalVector(da, &localU);
-  CHKERRQ(ierr);
-  ierr = PetscLogFlops(11.0 * ym * xm);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMDAVecRestoreArrayRead(da, localU, &uarray));
+  LibmeshPetscCallQ(DMDAVecRestoreArray(da, F, &f));
+  LibmeshPetscCallQ(DMDAVecRestoreArray(da, Udot, &udot));
+  LibmeshPetscCallQ(DMRestoreLocalVector(da, &localU));
+  LibmeshPetscCallQ(PetscLogFlops(11.0 * ym * xm));
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -347,32 +296,28 @@ PetscErrorCode
 FormIJacobian(
     TS ts, PetscReal /*t*/, Vec /*U*/, Vec /*Udot*/, PetscReal a, Mat J, Mat Jpre, void * /*ctx*/)
 {
-  PetscErrorCode ierr;
   PetscInt i, j, Mx, My, xs, ys, xm, ym, nc;
   DM da;
   MatStencil col[5], row;
   PetscScalar vals[5], hx, hy, sx, sy;
 
   PetscFunctionBeginUser;
-  ierr = TSGetDM(ts, &da);
-  CHKERRQ(ierr);
-  ierr = DMDAGetInfo(da,
-                     PETSC_IGNORE,
-                     &Mx,
-                     &My,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE);
-  CHKERRQ(ierr);
-  ierr = DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSGetDM(ts, &da));
+  LibmeshPetscCallQ(DMDAGetInfo(da,
+                                PETSC_IGNORE,
+                                &Mx,
+                                &My,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE));
+  LibmeshPetscCallQ(DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL));
 
   hx = 1.0 / (PetscReal)(Mx - 1);
   sx = 1.0 / (hx * hx);
@@ -446,20 +391,15 @@ FormIJacobian(
         col[nc].i = i;
         vals[nc++] = -sy;
       }
-      ierr = MatSetValuesStencil(Jpre, 1, &row, nc, col, vals, INSERT_VALUES);
-      CHKERRQ(ierr);
+      LibmeshPetscCallQ(MatSetValuesStencil(Jpre, 1, &row, nc, col, vals, INSERT_VALUES));
     }
   }
-  ierr = MatAssemblyBegin(Jpre, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
-  ierr = MatAssemblyEnd(Jpre, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(MatAssemblyBegin(Jpre, MAT_FINAL_ASSEMBLY));
+  LibmeshPetscCallQ(MatAssemblyEnd(Jpre, MAT_FINAL_ASSEMBLY));
   if (J != Jpre)
   {
-    ierr = MatAssemblyBegin(J, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(J, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(MatAssemblyBegin(J, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCallQ(MatAssemblyEnd(J, MAT_FINAL_ASSEMBLY));
   }
 
   PetscFunctionReturn(PETSC_SUCCESS);
@@ -471,40 +411,35 @@ FormInitialSolution(TS ts, Vec U, void * /*ptr*/)
 {
   DM da;
   PetscReal c = -30.0;
-  PetscErrorCode ierr;
   PetscInt i, j, xs, ys, xm, ym, Mx, My;
   PetscScalar ** u;
   PetscReal hx, hy, x, y, r;
 
   PetscFunctionBeginUser;
-  ierr = TSGetDM(ts, &da);
-  CHKERRQ(ierr);
-  ierr = DMDAGetInfo(da,
-                     PETSC_IGNORE,
-                     &Mx,
-                     &My,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(TSGetDM(ts, &da));
+  LibmeshPetscCallQ(DMDAGetInfo(da,
+                                PETSC_IGNORE,
+                                &Mx,
+                                &My,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE));
 
   hx = 1.0 / (PetscReal)(Mx - 1);
   hy = 1.0 / (PetscReal)(My - 1);
 
   /* Get pointers to vector data */
-  ierr = DMDAVecGetArray(da, U, &u);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMDAVecGetArray(da, U, &u));
 
   /* Get local grid boundaries */
-  ierr = DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL));
 
   /* Compute function over the locally owned part of the grid */
   for (j = ys; j < ys + ym; j++)
@@ -522,7 +457,6 @@ FormInitialSolution(TS ts, Vec U, void * /*ptr*/)
   }
 
   /* Restore vectors */
-  ierr = DMDAVecRestoreArray(da, U, &u);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(DMDAVecRestoreArray(da, U, &u));
   PetscFunctionReturn(PETSC_SUCCESS);
 }

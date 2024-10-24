@@ -514,7 +514,6 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
 PetscErrorCode
 mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
 {
-  PetscErrorCode ierr;
   ST st;
   Mat A, B;
   PetscBool aisshell, bisshell;
@@ -533,16 +532,11 @@ mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
   auto & sys = eigen_nl.sys();
   SNES snes = eigen_nl.getSNES();
   // Rest ST state so that we can retrieve matrices
-  ierr = EPSGetST(eps, &st);
-  CHKERRQ(ierr);
-  ierr = STResetMatrixState(st);
-  CHKERRQ(ierr);
-  ierr = EPSGetOperators(eps, &A, &B);
-  CHKERRQ(ierr);
-  ierr = PetscObjectTypeCompare((PetscObject)A, MATSHELL, &aisshell);
-  CHKERRQ(ierr);
-  ierr = PetscObjectTypeCompare((PetscObject)B, MATSHELL, &bisshell);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(EPSGetST(eps, &st));
+  LibmeshPetscCallQ(STResetMatrixState(st));
+  LibmeshPetscCallQ(EPSGetOperators(eps, &A, &B));
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)A, MATSHELL, &aisshell));
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)B, MATSHELL, &bisshell));
   if (aisshell || bisshell)
   {
     SETERRQ(PetscObjectComm((PetscObject)eps),
@@ -696,7 +690,6 @@ moosePetscSNESFormMatricesTags(SNES /*snes*/,
 PetscErrorCode
 mooseSlepcEigenFormFunctionMFFD(void * ctx, Vec x, Vec r)
 {
-  PetscErrorCode ierr;
   PetscErrorCode (*func)(SNES, Vec, Vec, void *);
   void * fctx;
   PetscFunctionBegin;
@@ -707,15 +700,13 @@ mooseSlepcEigenFormFunctionMFFD(void * ctx, Vec x, Vec r)
 
   eigen_problem->onLinearSolver(true);
 
-  ierr = SNESGetFunction(snes, NULL, &func, &fctx);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(SNESGetFunction(snes, NULL, &func, &fctx));
   if (fctx != ctx)
   {
     SETERRQ(
         PetscObjectComm((PetscObject)snes), PETSC_ERR_ARG_INCOMP, "Contexts are not consistent \n");
   }
-  ierr = (*func)(snes, x, r, ctx);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ((*func)(snes, x, r, ctx));
 
   eigen_problem->onLinearSolver(false);
 
@@ -727,7 +718,6 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
   PetscBool jisshell, pisshell;
   PetscBool jismffd;
-  PetscErrorCode ierr;
 
   PetscFunctionBegin;
 
@@ -737,44 +727,34 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 
   // If both jacobian and preconditioning are shell matrices,
   // and then assemble them and return
-  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jisshell);
-  CHKERRQ(ierr);
-  ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jisshell));
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd));
 
   if (jismffd && eigen_problem->solverParams()._eigen_matrix_vector_mult)
   {
-    ierr = MatMFFDSetFunction(jac, Moose::SlepcSupport::mooseSlepcEigenFormFunctionMFFD, ctx);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(
+        MatMFFDSetFunction(jac, Moose::SlepcSupport::mooseSlepcEigenFormFunctionMFFD, ctx));
 
     EPS eps = eigen_nl.getEPS();
 
-    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(mooseEPSFormMatrices(*eigen_problem, eps, x, ctx));
 
     if (pc != jac)
     {
-      ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
-      CHKERRQ(ierr);
-      ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
-      CHKERRQ(ierr);
+      LibmeshPetscCallQ(MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY));
+      LibmeshPetscCallQ(MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY));
     }
     PetscFunctionReturn(PETSC_SUCCESS);
   }
 
-  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pisshell);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pisshell));
   if ((jisshell || jismffd) && pisshell)
   {
     // Just assemble matrices and return
-    ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCallQ(MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCallQ(MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCallQ(MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY));
 
     PetscFunctionReturn(PETSC_SUCCESS);
   }
@@ -803,20 +783,16 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     {
       moosePetscSNESFormMatrixTag(
           snes, x, pc, sys.get_precond_matrix(), ctx, eigen_nl.precondMatrixTag());
-      ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
-      CHKERRQ(ierr);
-      ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
-      CHKERRQ(ierr);
+      LibmeshPetscCallQ(MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY));
+      LibmeshPetscCallQ(MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY));
       PetscFunctionReturn(PETSC_SUCCESS);
     }
     if (!jisshell && !jismffd) // We need to form only Jacobian matrix
     {
       moosePetscSNESFormMatrixTag(
           snes, x, jac, sys.get_matrix_A(), ctx, eigen_nl.nonEigenMatrixTag());
-      ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
-      CHKERRQ(ierr);
-      ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
-      CHKERRQ(ierr);
+      LibmeshPetscCallQ(MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY));
+      LibmeshPetscCallQ(MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY));
       PetscFunctionReturn(PETSC_SUCCESS);
     }
   }
@@ -828,7 +804,6 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
   PetscBool jshell, pshell;
   PetscBool jismffd;
-  PetscErrorCode ierr;
 
   PetscFunctionBegin;
 
@@ -838,23 +813,16 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 
   // If both jacobian and preconditioning are shell matrices,
   // and then assemble them and return
-  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jshell);
-  CHKERRQ(ierr);
-  ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
-  CHKERRQ(ierr);
-  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pshell);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jshell));
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd));
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pshell));
   if ((jshell || jismffd) && pshell)
   {
     // Just assemble matrices and return
-    ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCallQ(MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCallQ(MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCallQ(MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY));
 
     PetscFunctionReturn(PETSC_SUCCESS);
   }
@@ -868,8 +836,7 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 
   if (eigen_problem->negativeSignEigenKernel())
   {
-    ierr = MatScale(pc, -1.);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(MatScale(pc, -1.));
   }
 
   PetscFunctionReturn(PETSC_SUCCESS);
@@ -885,8 +852,6 @@ moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, TagID tag)
 PetscErrorCode
 mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
 {
-  PetscErrorCode ierr;
-
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
@@ -899,19 +864,14 @@ mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
     Mat A;
     ST st;
 
-    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(mooseEPSFormMatrices(*eigen_problem, eps, x, ctx));
 
     // Rest ST state so that we can restrieve matrices
-    ierr = EPSGetST(eps, &st);
-    CHKERRQ(ierr);
-    ierr = STResetMatrixState(st);
-    CHKERRQ(ierr);
-    ierr = EPSGetOperators(eps, &A, NULL);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(EPSGetST(eps, &st));
+    LibmeshPetscCallQ(STResetMatrixState(st));
+    LibmeshPetscCallQ(EPSGetOperators(eps, &A, NULL));
 
-    ierr = MatMult(A, x, r);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(MatMult(A, x, r));
 
     PetscFunctionReturn(PETSC_SUCCESS);
   }
@@ -924,8 +884,6 @@ mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
 PetscErrorCode
 mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
 {
-  PetscErrorCode ierr;
-
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
@@ -938,27 +896,21 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
     ST st;
     Mat B;
 
-    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(mooseEPSFormMatrices(*eigen_problem, eps, x, ctx));
 
     // Rest ST state so that we can restrieve matrices
-    ierr = EPSGetST(eps, &st);
-    CHKERRQ(ierr);
-    ierr = STResetMatrixState(st);
-    CHKERRQ(ierr);
-    ierr = EPSGetOperators(eps, NULL, &B);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(EPSGetST(eps, &st));
+    LibmeshPetscCallQ(STResetMatrixState(st));
+    LibmeshPetscCallQ(EPSGetOperators(eps, NULL, &B));
 
-    ierr = MatMult(B, x, r);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(MatMult(B, x, r));
   }
   else
     moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
 
   if (eigen_problem->negativeSignEigenKernel())
   {
-    ierr = VecScale(r, -1.);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(VecScale(r, -1.));
   }
 
   PetscFunctionReturn(PETSC_SUCCESS);
@@ -967,8 +919,6 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
 PetscErrorCode
 mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
 {
-  PetscErrorCode ierr;
-
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
@@ -983,28 +933,19 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
     ST st;
     Mat A, B;
 
-    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(mooseEPSFormMatrices(*eigen_problem, eps, x, ctx));
 
     // Rest ST state so that we can restrieve matrices
-    ierr = EPSGetST(eps, &st);
-    CHKERRQ(ierr);
-    ierr = STResetMatrixState(st);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(EPSGetST(eps, &st));
+    LibmeshPetscCallQ(STResetMatrixState(st));
 
-    ierr = EPSGetOperators(eps, &A, &B);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(EPSGetOperators(eps, &A, &B));
 
-    ierr = MatMult(A, x, Ax);
-    CHKERRQ(ierr);
-    ierr = MatMult(B, x, Bx);
-    CHKERRQ(ierr);
+    LibmeshPetscCallQ(MatMult(A, x, Ax));
+    LibmeshPetscCallQ(MatMult(B, x, Bx));
 
     if (eigen_problem->negativeSignEigenKernel())
-    {
-      ierr = VecScale(Bx, -1.);
-      CHKERRQ(ierr);
-    }
+      LibmeshPetscCallQ(VecScale(Bx, -1.));
 
     PetscFunctionReturn(PETSC_SUCCESS);
   }
@@ -1031,10 +972,7 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   }
 
   if (eigen_problem->negativeSignEigenKernel())
-  {
-    ierr = VecScale(Bx, -1.);
-    CHKERRQ(ierr);
-  }
+    LibmeshPetscCallQ(VecScale(Bx, -1.));
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -1114,8 +1052,7 @@ mooseMatMult_Eigen(Mat mat, Vec x, Vec r)
 {
   PetscFunctionBegin;
   void * ctx = nullptr;
-  auto ierr = MatShellGetContext(mat, &ctx);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(MatShellGetContext(mat, &ctx));
 
   if (!ctx)
     mooseError("No context is set for shell matrix ");
@@ -1126,10 +1063,7 @@ mooseMatMult_Eigen(Mat mat, Vec x, Vec r)
   evaluateResidual(*eigen_problem, x, r, eigen_nl.eigenVectorTag());
 
   if (eigen_problem->negativeSignEigenKernel())
-  {
-    ierr = VecScale(r, -1.);
-    CHKERRQ(ierr);
-  }
+    LibmeshPetscCallQ(VecScale(r, -1.));
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -1139,8 +1073,7 @@ mooseMatMult_NonEigen(Mat mat, Vec x, Vec r)
 {
   PetscFunctionBegin;
   void * ctx = nullptr;
-  auto ierr = MatShellGetContext(mat, &ctx);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(MatShellGetContext(mat, &ctx));
 
   if (!ctx)
     mooseError("No context is set for shell matrix ");
@@ -1168,11 +1101,9 @@ setOperationsForShellMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
 PETSC_EXTERN PetscErrorCode
 registerPCToPETSc()
 {
-  PetscErrorCode ierr;
   PetscFunctionBegin;
 
-  ierr = PCRegister("moosepc", PCCreate_MoosePC);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PCRegister("moosepc", PCCreate_MoosePC));
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -1202,17 +1133,13 @@ PCDestroy_MoosePC(PC /*pc*/)
 PetscErrorCode
 PCView_MoosePC(PC /*pc*/, PetscViewer viewer)
 {
-  PetscErrorCode ierr;
   PetscBool iascii;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)viewer, PETSCVIEWERASCII, &iascii);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)viewer, PETSCVIEWERASCII, &iascii));
   if (iascii)
-  {
-    ierr = PetscViewerASCIIPrintf(viewer, "  %s\n", "moosepc");
-    CHKERRQ(ierr);
-  }
+    LibmeshPetscCallQ(PetscViewerASCIIPrintf(viewer, "  %s\n", "moosepc"));
+
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -1222,22 +1149,15 @@ PCApply_MoosePC(PC pc, Vec x, Vec y)
   void * ctx;
   Mat Amat, Pmat;
   PetscContainer container;
-  PetscErrorCode ierr;
 
   PetscFunctionBegin;
-  ierr = PCGetOperators(pc, &Amat, &Pmat);
-  CHKERRQ(ierr);
-  ierr = PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PCGetOperators(pc, &Amat, &Pmat));
+  LibmeshPetscCallQ(
+      PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container));
   if (container)
-  {
-    ierr = PetscContainerGetPointer(container, &ctx);
-    CHKERRQ(ierr);
-  }
+    LibmeshPetscCallQ(PetscContainerGetPointer(container, &ctx));
   else
-  {
     mooseError(" Can not find a context \n");
-  }
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & nl_eigen = eigen_problem->getCurrentNonlinearEigenSystem();
@@ -1258,24 +1178,18 @@ PetscErrorCode
 PCSetUp_MoosePC(PC pc)
 {
   void * ctx;
-  PetscErrorCode ierr;
   Mat Amat, Pmat;
   PetscContainer container;
 
   PetscFunctionBegin;
-  ierr = PCGetOperators(pc, &Amat, &Pmat);
-  CHKERRQ(ierr);
-  ierr = PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container);
-  CHKERRQ(ierr);
+  LibmeshPetscCallQ(PCGetOperators(pc, &Amat, &Pmat));
+  LibmeshPetscCallQ(
+      PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container));
   if (container)
-  {
-    ierr = PetscContainerGetPointer(container, &ctx);
-    CHKERRQ(ierr);
-  }
+    LibmeshPetscCallQ(PetscContainerGetPointer(container, &ctx));
   else
-  {
     mooseError(" Can not find a context \n");
-  }
+
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & nl_eigen = eigen_problem->getCurrentNonlinearEigenSystem();
   Preconditioner<Number> * preconditioner = nl_eigen.preconditioner();
