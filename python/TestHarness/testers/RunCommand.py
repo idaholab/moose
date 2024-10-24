@@ -16,11 +16,18 @@ class RunCommand(Tester):
         params = Tester.validParams()
         params.addRequiredParam('command',      "The command line to execute for this test.")
         params.addParam('test_name',          "The name of the test - populated automatically")
+        params.addParam('job_slots',    1, "Inform the TestHarness how many cores this job is"
+                                           " expected to consume")
         return params
 
     def __init__(self, name, params):
         Tester.__init__(self, name, params)
         self.command = params['command']
+
+    def getSlots(self, options) ->int:
+        """ return param job slots, default to 1 if 0 is provided """
+        # insure zero can't be used
+        return max(1, int(self.specs['job_slots']))
 
     def getCommand(self, options):
         # Create the command line string to run
