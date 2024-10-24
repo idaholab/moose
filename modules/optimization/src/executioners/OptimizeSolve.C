@@ -71,7 +71,6 @@ OptimizeSolve::solve()
 
   // Initialize solution and matrix
   _obj_function->setInitialCondition(*_parameters);
-  _obj_function->setInitialCondition(*_parameters);
   _ndof = _parameters->size();
 
   // time step defaults 1, we want to start at 0 for first iteration to be
