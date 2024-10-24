@@ -174,10 +174,7 @@ private:
   dof_id_type _ndof;
 
   /// Parameters (solution) given to TAO
-  std::shared_ptr<libMesh::PetscVector<Number>> _parameters;
-
-  /// Parameters (solution) owned by Optimize_solve and updated from TAO
-  std::shared_ptr<libMesh::PetscVector<Number>> _local_parameters;
+  std::unique_ptr<libMesh::PetscVector<Number>> _parameters;
 
   /// Hessian (matrix) - usually a matrix-free representation
   Mat _hessian;
