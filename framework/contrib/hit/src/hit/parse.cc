@@ -282,6 +282,11 @@ Node::vecIntVal()
 {
   valthrow();
 }
+std::vector<int64_t>
+Node::vecInt64Val()
+{
+  valthrow();
+}
 std::vector<std::string>
 Node::vecStrVal()
 {
@@ -816,6 +821,21 @@ Field::vecIntVal()
   {
     std::istringstream iss(s);
     int conversion;
+    if ((iss >> conversion).fail() || !iss.eof())
+      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to integer");
+    vec.push_back(conversion);
+  }
+  return vec;
+}
+
+std::vector<int64_t>
+Field::vecInt64Val()
+{
+  std::vector<int64_t> vec;
+  for (const auto & s : vecStrVal())
+  {
+    std::istringstream iss(s);
+    int64_t conversion;
     if ((iss >> conversion).fail() || !iss.eof())
       throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to integer");
     vec.push_back(conversion);
