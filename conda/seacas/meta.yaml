@@ -1,5 +1,5 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
-{% set build = "0" %}
+{% set build = "1" %}
 {% set seacas_version = "2024.08.15" %}
 {% set seacas_git_rev = "v2024-08-15" %}
 {% set strbuild = "build_" + build|string %}
@@ -9,8 +9,9 @@ package:
   version: {{ seacas_version }}
 
 source:
-  git_url: https://github.com/sandialabs/seacas
-  git_rev: {{ seacas_git_rev }}
+  - git_url: https://github.com/sandialabs/seacas
+  - git_rev: {{ seacas_git_rev }}
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}
@@ -20,15 +21,20 @@ build:
 
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
-    - {{ compiler('fortran') }}
+    - {{ moose_cc }}
+    - {{ moose_cxx }}
+    - {{ moose_gfortran }}
+    - {{ moose_ccompiler }}
+    - {{ moose_cxxcompiler }}
     - xorg-libx11
     - cmake
     - make
     - automake
     - wget
   run:
+    - {{ moose_gfortran }}
+    - {{ moose_ccompiler }}
+    - {{ moose_cxxcompiler }}
     - xorg-libx11
     - python 3
 

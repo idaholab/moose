@@ -49,11 +49,6 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.9-0
     export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 
-    # Load a custom environment if it exists
-    if [ -e /init_env ]; then
-        source /init_env
-    fi
-
 %post
     umask 022
 
@@ -74,6 +69,9 @@ source {{ SET_PROMPT_SCRIPT }}
 set_prompt
 EOF
     chmod 755 ${SINGULARITY_ROOTFS}{{ SET_PROMPT_SCRIPT }}
+
+    # insure all profiles are read/executable by everyone
+    chmod +rx ${SINGULARITY_ROOTFS}/.singularity.d/env/*.sh
 
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
@@ -231,3 +229,4 @@ EOF
 %files
     {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}
     {{ FILES_DIR }}/.singularity.d/env/01-fix-exec.sh /.singularity.d/env/01-fix-exec.sh
+    {{ FILES_DIR }}/.singularity.d/env/99-user-overrides.sh /.singularity.d/env/99-user-overrides.sh
