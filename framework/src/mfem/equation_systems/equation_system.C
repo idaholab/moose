@@ -434,7 +434,6 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
   // Build and assemble bilinear forms acting on time derivatives
   for (int i = 0; i < _test_var_names.size(); i++)
   {
-
     auto test_var_name = _test_var_names.at(i);
 
     _td_blfs.Register(test_var_name,
@@ -455,7 +454,8 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
       }
     }
 
-    // Recover and scale integrators from blf
+    // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
+    // operator on the trial variable in the implicit integration scheme
     auto blf = _blfs.Get(test_var_name);
     auto integs = blf->GetDBFI();
     auto b_integs = blf->GetBBFI();
