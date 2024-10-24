@@ -184,38 +184,29 @@ setSolverOptions(const SolverParams & solver_params)
 void
 petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name)
 {
-  PetscErrorCode ierr;
   PetscBool ismoose;
   DM dm = LIBMESH_PETSC_NULLPTR;
 
   // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this
   // call would be in DMInitializePackage()
-  ierr = DMMooseRegisterAll();
-  CHKERRABORT(nl.comm().get(), ierr);
+  LibmeshPetscCallA(nl.comm().get(), DMMooseRegisterAll());
   // Create and set up the DM that will consume the split options and deal with block matrices.
   PetscNonlinearSolver<Number> * petsc_solver =
       dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   // if there exists a DMMoose object, not to recreate a new one
-  ierr = SNESGetDM(snes, &dm);
-  CHKERRABORT(nl.comm().get(), ierr);
+  LibmeshPetscCallA(nl.comm().get(), SNESGetDM(snes, &dm));
   if (dm)
   {
-    ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
-    CHKERRABORT(nl.comm().get(), ierr);
+    LibmeshPetscCallA(nl.comm().get(), PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose));
     if (ismoose)
       return;
   }
-  ierr = DMCreateMoose(nl.comm().get(), nl, dm_name, &dm);
-  CHKERRABORT(nl.comm().get(), ierr);
-  ierr = DMSetFromOptions(dm);
-  CHKERRABORT(nl.comm().get(), ierr);
-  ierr = DMSetUp(dm);
-  CHKERRABORT(nl.comm().get(), ierr);
-  ierr = SNESSetDM(snes, dm);
-  CHKERRABORT(nl.comm().get(), ierr);
-  ierr = DMDestroy(&dm);
-  CHKERRABORT(nl.comm().get(), ierr);
+  LibmeshPetscCallA(nl.comm().get(), DMCreateMoose(nl.comm().get(), nl, dm_name, &dm));
+  LibmeshPetscCallA(nl.comm().get(), DMSetFromOptions(dm));
+  LibmeshPetscCallA(nl.comm().get(), DMSetUp(dm));
+  LibmeshPetscCallA(nl.comm().get(), SNESSetDM(snes, dm));
+  LibmeshPetscCallA(nl.comm().get(), DMDestroy(&dm));
   // We temporarily comment out this updating function because
   // we lack an approach to check if the problem
   // structure has been changed from the last iteration.
@@ -380,8 +371,8 @@ petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp)
   for (const auto i : make_range(problem.numSolverSystems()))
   {
     SolverSystem & sys = problem.getSolverSystem(i);
-    auto ierr = KSPSetNormType(ksp, getPetscKSPNormType(sys.getMooseKSPNormType()));
-    CHKERRABORT(problem.comm().get(), ierr);
+    LibmeshPetscCallA(problem.comm().get(),
+                      KSPSetNormType(ksp, getPetscKSPNormType(sys.getMooseKSPNormType())));
   }
 }
 
@@ -394,10 +385,7 @@ petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
 
     // PETSc 3.2.x+
     if (sys.getPCSide() != Moose::PCS_DEFAULT)
-    {
-      auto ierr = KSPSetPCSide(ksp, getPetscPCSide(sys.getPCSide()));
-      CHKERRABORT(problem.comm().get(), ierr);
-    }
+      LibmeshPetscCallA(problem.comm().get(), KSPSetPCSide(ksp, getPetscPCSide(sys.getPCSide())));
   }
 }
 
@@ -416,8 +404,7 @@ petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
   PetscReal maxits = es.parameters.get<unsigned int>("linear solver maximum iterations");
 
   // 1e100 is because we don't use divtol currently
-  auto ierr = KSPSetTolerances(ksp, rtol, atol, 1e100, maxits);
-  CHKERRABORT(problem.comm().get(), ierr);
+  LibmeshPetscCallA(problem.comm().get(), KSPSetTolerances(ksp, rtol, atol, 1e100, maxits));
 
   petscSetDefaultPCSide(problem, ksp);
 
@@ -445,14 +432,11 @@ petscSetDefaults(FEProblemBase & problem)
     }
     SNES snes = petsc_solver->snes();
     KSP ksp;
-    auto ierr = SNESGetKSP(snes, &ksp);
-    CHKERRABORT(nl.comm().get(), ierr);
+    LibmeshPetscCallA(nl.comm().get(), SNESGetKSP(snes, &ksp));
 
-    ierr = SNESSetMaxLinearSolveFailures(snes, 1000000);
-    CHKERRABORT(nl.comm().get(), ierr);
+    LibmeshPetscCallA(nl.comm().get(), SNESSetMaxLinearSolveFailures(snes, 1000000));
 
-    ierr = SNESSetCheckJacobianDomainError(snes, PETSC_TRUE);
-    CHKERRABORT(nl.comm().get(), ierr);
+    LibmeshPetscCallA(nl.comm().get(), SNESSetCheckJacobianDomainError(snes, PETSC_TRUE));
 
     // In 3.0.0, the context pointer must actually be used, and the
     // final argument to KSPSetConvergenceTest() is a pointer to a
@@ -460,9 +444,9 @@ petscSetDefaults(FEProblemBase & problem)
     // we use the default context provided by PETSc in addition to
     // a few other tests.
     {
-      auto ierr =
-          SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR);
-      CHKERRABORT(nl.comm().get(), ierr);
+      LibmeshPetscCallA(
+          nl.comm().get(),
+          SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
     }
 
     petscSetKSPDefaults(problem, ksp);
@@ -838,8 +822,7 @@ isSNESVI(FEProblemBase & fe_problem)
 
   int argc;
   char ** args;
-  auto ierr = PetscGetArgs(&argc, &args);
-  CHKERRABORT(fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(fe_problem.comm().get(), PetscGetArgs(&argc, &args));
 
   std::vector<std::string> cml_arg;
   for (int i = 0; i < argc; i++)
