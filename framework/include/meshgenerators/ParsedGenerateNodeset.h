@@ -9,22 +9,19 @@
 
 #pragma once
 
-#include "SideSetsGeneratorBase.h"
 #include "FunctionParserUtils.h"
+#include "NodeSetsGeneratorBase.h"
 #include "libmesh/point.h"
 
 /**
- * MeshGenerator for defining a sideset by a parsed expression and
- * optionally by considering additional constraints on sides being included, for example
- * based on their normal, on the subdomains of the element owning the side, or on pre-existing
- * sidesets in the mesh
+ * MeshGenerator for defining a nodeset by a parsed expression
  */
-class ParsedGenerateSideset : public SideSetsGeneratorBase, public FunctionParserUtils<false>
+class ParsedGenerateNodeset : public NodeSetsGeneratorBase, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
 
-  ParsedGenerateSideset(const InputParameters & parameters);
+  ParsedGenerateNodeset(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
