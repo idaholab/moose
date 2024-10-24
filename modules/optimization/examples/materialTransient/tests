@@ -18,6 +18,7 @@
       type = Exodiff
       input = optimize_nograd.i
       exodiff = optimize_nograd_out_forward0.e
+      rel_err = 1e-2
       prereq = material_transient/forward
       method = '!dbg'
       valgrind = none

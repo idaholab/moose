@@ -11,17 +11,13 @@
     abs_zero = 1.0e-5
     # steady solve
     recover = false
-    issues = '#25009'
-    design = 'ExodusOptimizationSteady.md'
-    cli_args = "MultiApps/adjoint/input_files='adjoint_iteration_output.i'"
     requirement = 'The system shall be able to perform gradient based material parameter inversion '
-                  'for a single material property and output the iteration-wise output for the '
+                  'for a single material property and output the iteration-wise exodus output for the '
                   'adjoint problem.'
   []
   [auto_adjoint_iteration_output]
     type = Exodiff
     input = main_auto_adjoint.i
-    cli_args = 'MultiApps/forward/input_files=forward_and_adjoint_iteration_output.i'
     exodiff = 'main_auto_adjoint_out_forward0_exodus.e'
     # Optimize executioner does not support multiple threads
     max_threads = 1
@@ -29,6 +25,6 @@
     recover = false
     requirement = 'The system shall be able to invert for point loads using gradient-based '
                   'optimization with an automatically computed adjoint and output the exodus output '
-                  'per iteration.'
+                  'per iteration for the combined forward and adjoint problem variables.'
   []
 []

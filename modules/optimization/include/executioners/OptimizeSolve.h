@@ -173,7 +173,7 @@ private:
   /// Number of parameters being optimized
   dof_id_type _ndof;
 
-  /// Parameters (solution)
+  /// Parameters (solution) given to TAO
   std::unique_ptr<libMesh::PetscVector<Number>> _parameters;
 
   /// Hessian (matrix) - usually a matrix-free representation

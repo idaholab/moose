@@ -35,7 +35,7 @@
   type = Optimize
   tao_solver = taoblmvm
   petsc_options_iname = '-tao_gatol'
-  petsc_options_value = '0.0001'
+  petsc_options_value = '1e-4'
   verbose = true
 []
 
@@ -48,7 +48,7 @@
   []
   [adjoint]
     type = FullSolveMultiApp
-    input_files = adjoint.i
+    input_files = adjoint_iteration_output.i
     execute_on = "ADJOINT"
     clone_parent_mesh = true
   []

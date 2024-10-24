@@ -6,7 +6,7 @@
   objective_name = objective_value
   parameter_names = 'D'
   num_values = '4'
-  initial_condition = '0.01 0.01 0.01 0.01'
+  initial_condition = '0.2 0.2 0.2 0.2'
 []
 
 [Reporters]
@@ -51,7 +51,7 @@
 [Executioner]
   type = Optimize
   tao_solver = taonm
-  petsc_options_iname = '-tao_gatol'
-  petsc_options_value = '1e-6'
+  petsc_options_iname = '-tao_gatol -tao_nm_lambda'
+  petsc_options_value = '1e-8 0.25'
   verbose = true
 []
