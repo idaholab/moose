@@ -15,6 +15,9 @@ InputParameters
 DashpotBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
+  params.addClassDescription(
+      "Model a dashpot boundary condition where the traction is proportional "
+      "to the normal velocity.");
   params.addRequiredParam<unsigned int>(
       "component", "The displacement component corresponding the variable this BC acts on.");
   params.addRequiredCoupledVar("disp_x", "Displacement in the x direction");

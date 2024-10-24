@@ -4,14 +4,14 @@
     type = CSVDiff
     input = cauchy-elastic.i
     csvdiff = 'cauchy-elastic_out.csv'
-    requirement = 'Stress matches elastic solution (xx=1e4, rest zero)'
+    requirement = 'Stress matches elastic solution using objectively-integrated linear elastic material model'
     design = 'source/materials/lagrangian/ComputeLagrangianLinearElasticStress.md'
   []
   [stvenantkirchhoff]
     type = CSVDiff
     input = stvenantkirchhoff.i
     csvdiff = 'stvenantkirchhoff_out.csv'
-    requirement = 'Stress matches exact solution (xx=1.6144e3, rest zero)'
+    requirement = 'Stress matches exact solution using St. Venant-Kirchhoff material model'
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
   []
   [neohookean]
@@ -19,7 +19,7 @@
     input = neohookean.i
     csvdiff = 'neohookean_out.csv'
     abs_zero = 1e-9
-    requirement = 'Stress matches exact analytic solution, rest zero'
+    requirement = 'Stress matches exact analytic solution using Neo-Hookean material model'
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
   []
   [stvenantkirchhoff_small_deformation]
@@ -27,7 +27,7 @@
     issues = '#22588'
     input = stvenantkirchhoff.i
     csvdiff = 'stvenantkirchhoff_small_deformation_out.csv'
-    requirement = 'Stress matches exact solution'
+    requirement = 'Stress matches exact solution for small deformations'
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
     cli_args = 'GlobalParams/large_kinematics=false Outputs/file_base=stvenantkirchhoff_small_deformation_out'
   []
@@ -37,25 +37,22 @@
     input = neohookean.i
     csvdiff = 'neohookean_small_deformation_out.csv'
     abs_zero = 1e-9
-    requirement = 'Stress matches exact analytic solution, rest zero'
+    requirement = 'Stress matches exact analytic solution for small deformations'
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
     cli_args = 'GlobalParams/large_kinematics=false Outputs/file_base=neohookean_small_deformation_out'
   []
   [stvenantkirchhoff_hypoelastic]
     type = CSVDiff
     input = stvenantkirchhoff.i
-    cli_args = 'Materials/compute_stress/type=ComputeHypoelasticStVenantKirchhoffStress '
-               'Outputs/file_base=stvenantkirchhoff_hypoelastic_out'
+    cli_args = 'Materials/compute_stress/type=ComputeHypoelasticStVenantKirchhoffStress Outputs/file_base=stvenantkirchhoff_hypoelastic_out'
     csvdiff = 'stvenantkirchhoff_hypoelastic_out.csv'
-    requirement = 'The hypoelastic equivalent of the St. Venant-Kirchhoff model gives the same '
-                  'result as its hyperelastic counterpart.'
+    requirement = 'The hypoelastic equivalent of the St. Venant-Kirchhoff model gives the same result as its hyperelastic counterpart.'
     design = 'source/materials/lagrangian/ComputeHypoelasticStVenantKirchhoffStress.md'
   []
   [elastoplastic_linear_hardening]
     type = CSVDiff
     input = hyperelastic_J2_plastic.i
-    cli_args = 'Materials/flow_stress/function=320+688*effective_plastic_strain '
-               'Outputs/file_base=hyperelastic_J2_plastic_linear_hardening_out'
+    cli_args = 'Materials/flow_stress/function=320+688*effective_plastic_strain Outputs/file_base=hyperelastic_J2_plastic_linear_hardening_out'
     csvdiff = 'hyperelastic_J2_plastic_linear_hardening_out.csv'
     abs_zero = 1e-9
     requirement = 'Stress matches exact analytic solution for elastoplasticity with linear hardening'
@@ -68,8 +65,7 @@
                "Outputs/file_base=hyperelastic_J2_plastic_powerlaw_hardening_out"
     csvdiff = 'hyperelastic_J2_plastic_powerlaw_hardening_out.csv'
     abs_zero = 1e-9
-    requirement = 'Stress matches exact analytic solution for elastoplasticity with power-law '
-                  'hardening'
+    requirement = 'Stress matches exact analytic solution for elastoplasticity with power-law hardening'
     design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
   []
 []

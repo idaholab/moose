@@ -16,6 +16,7 @@ InputParameters
 PresetVelocity::validParams()
 {
   InputParameters params = DirichletBCBase::validParams();
+  params.addClassDescription("Apply the prescribed velocity.");
 
   params.addParam<Real>(
       "velocity", 1, "Value of the velocity.  Used as scale factor if function is given.");

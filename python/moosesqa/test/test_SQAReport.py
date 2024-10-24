@@ -39,17 +39,17 @@ class TestSQAReport(unittest.TestCase):
         self.assertIn('log_warning: 1', r)
         self.assertIn('log_error: 1', r)
         self.assertIn('log_critical: 1', r)
-        self.assertIn('warning message', r)
+        self.assertNotIn('warning message', r)
         self.assertIn('error message', r)
         self.assertIn('critical message', r)
 
-        report = TestReport(show_warning=False)
+        report = TestReport(show_warning=True)
         r = str(report.getReport())
         self.assertEqual(report.status, SQAReport.Status.ERROR)
         self.assertIn('log_warning: 1', r)
         self.assertIn('log_error: 1', r)
         self.assertIn('log_critical: 1', r)
-        self.assertNotIn('warning message', r)
+        self.assertIn('warning message', r)
         self.assertIn('error message', r)
         self.assertIn('critical message', r)
 
@@ -59,7 +59,7 @@ class TestSQAReport(unittest.TestCase):
         self.assertIn('log_warning: 1', r)
         self.assertIn('log_error: 1', r)
         self.assertIn('log_critical: 1', r)
-        self.assertIn('warning message', r)
+        self.assertNotIn('warning message', r)
         self.assertNotIn('error message', r)
         self.assertIn('critical message', r)
 
@@ -69,7 +69,7 @@ class TestSQAReport(unittest.TestCase):
         self.assertIn('log_warning: 1', r)
         self.assertIn('log_error: 1', r)
         self.assertIn('log_critical: 1', r)
-        self.assertIn('warning message', r)
+        self.assertNotIn('warning message', r)
         self.assertIn('error message', r)
         self.assertNotIn('critical message', r)
 
