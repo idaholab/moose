@@ -19,12 +19,15 @@ rho=1
 [Variables]
   [u]
     type = INSFVVelocityVariable
+    two_term_boundary_expansion = false
   []
   [v]
     type = INSFVVelocityVariable
+    two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
+    two_term_boundary_expansion = false
   []
   [lambda]
     family = SCALAR
@@ -128,11 +131,15 @@ rho=1
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
-  nl_rel_tol = 1e-12
+  petsc_options_value = 'lu NONZERO'
+  dt = 0.1
+  end_time = 5.0
+  steady_state_detection = false
+  steady_state_tolerance = 1e-12
+  nl_abs_tol = 1e-12
 []
 
 [Outputs]
