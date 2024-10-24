@@ -13,6 +13,7 @@
 #include "NonlinearSystemBase.h"
 
 #include "libmesh/sparse_matrix.h"
+#include <chrono>
 
 registerMooseObject("StochasticToolsApp", InverseMapping);
 
@@ -110,6 +111,7 @@ InverseMapping::initialSetup()
 void
 InverseMapping::execute()
 {
+  auto start = std::chrono::high_resolution_clock::now();
   for (auto var_i : index_range(_var_names_to_reconstruct))
   {
     MooseVariableFieldBase & var_to_fill = *_variable_to_fill[var_i];
@@ -206,4 +208,7 @@ InverseMapping::execute()
     // Close the solution to make sure we can output the variable
     var_to_fill.sys().solution().close();
   }
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+  std::cout << "reconstructing the field " << duration.count() << std::endl;
 }

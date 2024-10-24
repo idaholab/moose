@@ -11,6 +11,7 @@
 #include "Sampler.h"
 
 #include "CovarianceFunctionBase.h"
+#include <chrono>
 
 registerMooseObject("StochasticToolsApp", GaussianProcessSurrogate);
 
@@ -69,6 +70,7 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
                                    std::vector<Real> & y,
                                    std::vector<Real> & std) const
 {
+  auto start = std::chrono::high_resolution_clock::now();
   const unsigned int n_dims = _training_params.cols();
 
   mooseAssert(x.size() == n_dims,
@@ -109,4 +111,7 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
     y[output_i] = pred_value(0, output_i);
     std[output_i] = std_dev_mat(output_i, output_i);
   }
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+  std::cout << "evaluating a surrogate " << duration.count() << std::endl;
 }
