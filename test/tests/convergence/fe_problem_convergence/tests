@@ -1,0 +1,11 @@
+[Tests]
+  design = 'FEProblemConvergence.md'
+  issues = '#25931'
+
+  [test]
+    type = CSVDiff
+    input = 'fe_problem_convergence.i'
+    csvdiff = 'fe_problem_convergence_out.csv'
+    requirement = 'The system shall be able to determine convergence of the nonlinear solve using default criteria through an object.'
+  []
+[]

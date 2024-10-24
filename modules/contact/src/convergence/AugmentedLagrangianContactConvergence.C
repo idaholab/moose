@@ -28,7 +28,7 @@
 #include "MortarUserObject.h"
 #include "AugmentedLagrangeInterface.h"
 
-#include "ResidualConvergence.h"
+#include "FEProblemConvergence.h"
 #include "ReferenceResidualConvergence.h"
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactReferenceConvergence);
@@ -172,4 +172,4 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
 }
 
 template class AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>;
-template class AugmentedLagrangianContactConvergence<ResidualConvergence>;
+template class AugmentedLagrangianContactConvergence<FEProblemConvergence>;

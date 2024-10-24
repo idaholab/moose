@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ResidualConvergence.h"
+#include "FEProblemConvergence.h"
 #include "FEProblem.h"
 #include "ReferenceResidualInterface.h"
 #include "PerfGraphInterface.h"

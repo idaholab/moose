@@ -34,7 +34,7 @@
 
 [Convergence]
   [res_conv]
-    type = ResidualConvergence
+    type = FEProblemConvergence
     # With default tolerances, the solve takes 2 iterations, but with this
     # value, the solve takes only 1:
     nl_abs_tol = 1e-5

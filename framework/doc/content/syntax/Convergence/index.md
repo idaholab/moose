@@ -33,7 +33,7 @@ for the near future.
 
 The `Convergence` classes provided by MOOSE are the following:
 
-- [/ResidualConvergence.md]: The default convergence criteria, which includes
+- [/FEProblemConvergence.md]: The default convergence criteria, which includes
   several convergence criteria combined together.
 - [/ReferenceResidualConvergence.md]: Like `ResidualConvergence`, but
   uses a custom norm to define the relative residual convergence criteria.

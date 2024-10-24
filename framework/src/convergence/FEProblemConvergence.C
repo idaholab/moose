@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "ResidualConvergence.h"
+#include "FEProblemConvergence.h"
 #include "FEProblemBase.h"
 #include "PetscSupport.h"
 #include "Executioner.h"
@@ -24,21 +24,20 @@
 // PetscDMMoose include
 #include "PetscDMMoose.h"
 
-registerMooseObject("MooseApp", ResidualConvergence);
+registerMooseObject("MooseApp", FEProblemConvergence);
 
 InputParameters
-ResidualConvergence::validParams()
+FEProblemConvergence::validParams()
 {
   InputParameters params = Convergence::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
-  params.addClassDescription(
-      "Checks convergence based on absolute and relative error of the residual.");
+  params.addClassDescription("Default convergence criteria for FEProblem.");
 
   return params;
 }
 
-ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
+FEProblemConvergence::FEProblemConvergence(const InputParameters & parameters)
   : Convergence(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _nl_abs_div_tol(getParam<Real>("nl_abs_div_tol")),
@@ -64,12 +63,12 @@ ResidualConvergence::ResidualConvergence(const InputParameters & parameters)
 }
 
 bool
-ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
-                                              const Real fnorm,
-                                              const Real ref_norm,
-                                              const Real rel_tol,
-                                              const Real /*abs_tol*/,
-                                              std::ostringstream & oss)
+FEProblemConvergence::checkRelativeConvergence(const PetscInt /*it*/,
+                                               const Real fnorm,
+                                               const Real ref_norm,
+                                               const Real rel_tol,
+                                               const Real /*abs_tol*/,
+                                               std::ostringstream & oss)
 {
   if (fnorm <= ref_norm * rel_tol)
   {
@@ -82,7 +81,7 @@ ResidualConvergence::checkRelativeConvergence(const PetscInt /*it*/,
 }
 
 Convergence::MooseConvergenceStatus
-ResidualConvergence::checkConvergence(unsigned int iter)
+FEProblemConvergence::checkConvergence(unsigned int iter)
 {
   TIME_SECTION(_perfid_check_convergence);
 

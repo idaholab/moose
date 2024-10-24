@@ -11,7 +11,7 @@
 
 #include "AugmentedLagrangianContactProblemInterface.h"
 #include "ReferenceResidualConvergence.h"
-#include "ResidualConvergence.h"
+#include "FEProblemConvergence.h"
 
 /**
  * Class to check convergence for the augmented Lagrangian contact problem.
@@ -25,8 +25,7 @@ public:
 
   AugmentedLagrangianContactConvergence(const InputParameters & params);
 
-  virtual ReferenceResidualConvergence::MooseConvergenceStatus
-  checkConvergence(unsigned int iter) override;
+  virtual Convergence::MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 
 protected:
   using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
@@ -35,5 +34,5 @@ protected:
 
 typedef AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>
     AugmentedLagrangianContactReferenceConvergence;
-typedef AugmentedLagrangianContactConvergence<ResidualConvergence>
+typedef AugmentedLagrangianContactConvergence<FEProblemConvergence>
     AugmentedLagrangianContactFEProblemConvergence;

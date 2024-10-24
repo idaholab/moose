@@ -1,6 +1,6 @@
 # ReferenceResidualConvergence
 
-This [Convergence](Convergence/index.md) is a [/ResidualConvergence.md] with a
+This [Convergence](Convergence/index.md) is a [/FEProblemConvergence.md] with a
 customized reference residual for its relative convergence checks. See
 [ReferenceResidualProblem.md] for more information.
 

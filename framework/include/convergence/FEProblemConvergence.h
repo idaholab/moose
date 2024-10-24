@@ -19,16 +19,16 @@
 #include <petscmat.h>
 
 /**
- * Checks convergence using residual criteria.
+ * Default convergence criteria for FEProblem
  */
-class ResidualConvergence : public Convergence
+class FEProblemConvergence : public Convergence
 {
 public:
   static InputParameters validParams();
 
   static InputParameters residualConvergenceParams();
 
-  ResidualConvergence(const InputParameters & parameters);
+  FEProblemConvergence(const InputParameters & parameters);
 
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 

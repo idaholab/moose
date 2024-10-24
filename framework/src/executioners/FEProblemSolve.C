@@ -11,7 +11,7 @@
 
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
-#include "ResidualConvergence.h"
+#include "FEProblemConvergence.h"
 #include "ReferenceResidualConvergence.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};

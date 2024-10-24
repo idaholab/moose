@@ -35,7 +35,7 @@ registerMooseObject("MooseApp", ReferenceResidualConvergence);
 InputParameters
 ReferenceResidualConvergence::validParams()
 {
-  InputParameters params = ResidualConvergence::validParams();
+  InputParameters params = FEProblemConvergence::validParams();
   params += ReferenceResidualInterface::validParams();
 
   params.addClassDescription(
@@ -46,7 +46,7 @@ ReferenceResidualConvergence::validParams()
 }
 
 ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters & parameters)
-  : ResidualConvergence(parameters),
+  : FEProblemConvergence(parameters),
     ReferenceResidualInterface(this),
     _reference_vector(nullptr),
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
