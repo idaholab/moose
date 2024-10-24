@@ -4,10 +4,20 @@ The following instructions are for those operating on [!ac](INL) [!ac](HPC) mach
 Bitterroot, Lemhi, and Sawtooth. It also includes the protected access hosts `rod` and `cone`.
 
 Requesting access to [!ac](INL) [!ac](HPC) is handled by the [NCRC](https://inl.gov/ncrc/) group.
+Once access has been granted, one can use [HPC OnDemand](hpc_ondemand.md) services to gain access to
+a shell.
 
 For information on running pre-built MOOSE-based NCRC applications (not the scope of this
 document), please see [NCRC Applications](help/inl/applications.md) instead, and choose the
 application applicable to you.
+
+At the time of this writing, the following [!ac](INL) [!ac](HPC) clusters are available for use:
+
+!include ncrc/hpc_cluster_information.md
+
+!alert! warning title=+In order to clone an application:+
+You +*MUST*+ be on one of the above login nodes!
+!alert-end!
 
 ## Containerization
 
@@ -17,6 +27,17 @@ on any host. This means that applications built within this environment can be e
 across all INL HPC clusters. For example, you can build an application within a compute node on
 Sawtooth and execute the same executable of the application (providing you follow the instructions
 that follow) on both Bitterroot and Lemhi.
+
+## Obtain MOOSE
+
+Once you have been granted access to [!ac](INL) [!ac](HPC), and you are logged into one of the above login nodes, you can proceed to clone MOOSE:
+
+```bash
+mkdir -p ~/projects
+cd ~/projects
+git clone https://github.com/idaholab/moose
+cd moose
+```
 
 ## Versioning id=versioning
 
@@ -96,8 +117,6 @@ and test it as normal:
 make -j 4
 ./run_tests -j 4
 ```
-make -j 6
-./run_tests -j 6
 
 ## Running id=running
 
