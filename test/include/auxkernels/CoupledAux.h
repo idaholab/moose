@@ -14,14 +14,13 @@
 /**
  * Coupled auxiliary value
  */
-class CoupledAux : public AuxKernel
+template <bool is_ad>
+class CoupledAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  CoupledAux(const InputParameters & parameters);
-
-  virtual ~CoupledAux() {}
+  CoupledAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
@@ -29,6 +28,9 @@ protected:
   Real _value;         ///< The value being set for this kernel
   MooseEnum _operator; ///< Operator being applied on this variable and coupled variable
 
-  int _coupled;                       ///< The number of the coupled variable
-  const VariableValue & _coupled_val; ///< Coupled variable
+  int _coupled;                                     ///< The number of the coupled variable
+  const GenericVariableValue<is_ad> & _coupled_val; ///< Coupled variable
 };
+
+typedef CoupledAuxTempl<false> CoupledAux;
+typedef CoupledAuxTempl<true> ADCoupledAux;

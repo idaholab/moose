@@ -259,6 +259,11 @@ public:
    */
   const MooseArray<ADReal> & adDofValues() const;
 
+  /**
+   * Return the AD dof time derivatives
+   */
+  const MooseArray<ADReal> & adDofValuesDot() const;
+
   /////////////////////////////// Increment stuff ///////////////////////////////////////
 
   /**
@@ -471,6 +476,14 @@ MooseVariableDataFV<OutputType>::adDofValues() const
 {
   _need_ad = true;
   return _ad_dof_values;
+}
+
+template <typename OutputType>
+const MooseArray<ADReal> &
+MooseVariableDataFV<OutputType>::adDofValuesDot() const
+{
+  _need_ad = _need_ad_u_dot = true;
+  return _ad_dofs_dot;
 }
 
 template <typename OutputType>
