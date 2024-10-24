@@ -31,6 +31,12 @@ TEST(CheckData, ScaleIntegratorTestLegacy)
   integ_sum.AssembleElementMatrix2(el1, el2, T, m2);
   m1 -= m2;
   EXPECT_NEAR(m1.MaxMaxNorm(), 0, 1e-12);
+
+  // Test SetIntRule
+  mfem::QuadratureSpace qs(&mesh, 1);
+  const mfem::IntegrationRule & ir = qs.GetIntRule(0);
+
+  EXPECT_NO_THROW({ integ_scale.SetIntRule(&ir); });
 }
 
 TEST(CheckData, ScaleIntegratorTestFaceAssembly)
