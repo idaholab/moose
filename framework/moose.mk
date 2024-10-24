@@ -484,11 +484,14 @@ moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
 
-install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data
+install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data install_testers
 
 install_data::
 	@mkdir -p $(moose_share_dir)
 	@cp -a $(FRAMEWORK_DIR)/data $(moose_share_dir)/
+
+install_testers::
+    @:
 
 install_adreal_monolith: ADRealMonolithic.h
 	@ mkdir -p $(moose_include_dir)

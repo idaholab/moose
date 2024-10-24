@@ -46,4 +46,27 @@ class PythonUnitTest(RunApp):
         else:
             cmd = "python3 -m unittest" + use_buffer + "-v " + test_case
 
-        return cmd  + ' '.join(self.specs['cli_args'])
+        return cmd + ' '.join(self.specs['cli_args'])
+
+    def checkRunnable(self, options):
+        # Don't run unit tests on HPC. These tests commonly involve running
+        # an appliacation within a black box script, which we cannot control
+        # very well within the HPC environment
+        if options.hpc:
+            self.addCaveats('hpc unsupported')
+            self.setStatus(self.skip)
+            return False
+
+        return super().checkRunnable(options)
+
+    def getProcs(self, options):
+        procs = super().getProcs(options)
+        # If we start within a script within apptainer and then call mpiexec on HPC,
+        # it will not work because the mpiexec call needs to be outside of the apptainer
+        # call. So, limit these tests to 1 proc
+        if options.hpc and \
+            os.environ.get('APPTAINER_CONTAINER') and \
+            int(self.specs['min_parallel']) == 1 and procs != 1:
+            self.addCaveats('hpc apptainer max_cpus=1')
+            return 1
+        return procs

@@ -10,5 +10,8 @@
 
     valgrind = 'NONE'
     method = '!dbg'
+
+    # HPC runs could lead to a timeout
+    hpc = false
   [../]
 []

@@ -498,6 +498,17 @@ install_data_%:
 	@mkdir -p $($@_dst)
 	@cp -r $($@_src) $($@_dst)
 
+ifneq ($(wildcard $(APPLICATION_DIR)/scripts/TestHarness/testers),)
+install_tester_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/scripts/TestHarness/testers
+install_tester_$(APPLICATION_NAME)_dst := $(share_install_dir)/scripts/TestHarness
+install_testers:: install_tester_$(APPLICATION_NAME)
+endif
+
+install_tester_%:
+	@echo "Installing TestHarness testers "$($@_dst)"..."
+	@mkdir -p $($@_dst)
+	@cp -r $($@_src) $($@_dst)
+
 $(copy_input_targets):
 	@$(eval kv := $(subst ->, ,$(subst target_$(APPLICATION_NAME)_,,$@)))
 	@$(eval source_dir := $(word 1, $(kv)))

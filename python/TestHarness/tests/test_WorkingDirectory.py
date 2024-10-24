@@ -17,7 +17,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         # Test a working scenario
         output = self.runTests('--no-color', '-i', 'working_directory', '--re', 'relative_and_available')
-        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.relative_and_available.*? OK')
+        self.assertRegex(output, 'tests/test_harness.relative_and_available.*? OK')
 
 
     def testDependency(self):
@@ -26,7 +26,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'working_directory')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.depend_on_available.*? OK')
+        self.assertRegex(e.output, r'tests/test_harness.depend_on_available.*? OK')
 
     def testAbsolutePath(self):
         # Test we catch an absolute path
@@ -34,7 +34,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'absolute_path')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.absolute_path.*? FAILED \(ABSOLUTE PATH DETECTED\)')
+        self.assertRegex(e.output, r'tests/test_harness.absolute_path.*? FAILED \(ABSOLUTE PATH DETECTED\)')
 
     def testDirectoryNotFound(self):
         # Test we catch a directory not found
@@ -42,7 +42,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'non_existent')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.non_existent.*? FAILED \(WORKING DIRECTORY NOT FOUND\)')
+        self.assertRegex(e.output, r'tests/test_harness.non_existent.*? FAILED \(WORKING DIRECTORY NOT FOUND\)')
 
     def testExodiff(self):
         ## Specific Testers ##
@@ -51,7 +51,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'exodiff')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.exodiff.*? FAILED \(EXODIFF\)')
+        self.assertRegex(e.output, r'tests/test_harness.exodiff.*? FAILED \(EXODIFF\)')
 
     def testCSVDiff(self):
         # csvdiff can access sub directories
@@ -59,7 +59,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'csvdiff')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.csvdiff.*? FAILED \(Override inputs not the same length\)')
+        self.assertRegex(e.output, r'tests/test_harness.csvdiff.*? FAILED \(Override inputs not the same length\)')
 
     def testRunException(self):
         # RunException can access sub directories
@@ -67,4 +67,4 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'runexception')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.runexception.*? FAILED \(EXPECTED ERROR MISSING\)')
+        self.assertRegex(e.output, r'tests/test_harness.runexception.*? FAILED \(EXPECTED ERROR MISSING\)')

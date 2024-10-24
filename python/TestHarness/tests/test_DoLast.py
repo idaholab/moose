@@ -20,7 +20,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(Cyclic or Invalid Dependency Detected!\)')
+        self.assertRegex(e.output, r'tests/test_harness.*?FAILED \(Cyclic or Invalid Dependency Detected!\)')
 
     def testDoLastDepends(self):
         """
@@ -31,21 +31,21 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(Cyclic or Invalid Dependency Detected!\)')
+        self.assertRegex(e.output, r'tests/test_harness.*?FAILED \(Cyclic or Invalid Dependency Detected!\)')
 
     def testDoLast(self):
         """
         Confirm 'do_last' tested last
         """
         output = self.runTests('--no-color', '-i', 'do_last')
-        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.a.*?OK\ntests/test_harness.do_last.*?OK')
+        self.assertRegex(output, 'tests/test_harness.a.*?OK\ntests/test_harness.do_last.*?OK')
 
     def testDoLastSkipped(self):
         """
         Confirm 'do_last' is skipped if a test it depends on failed/skipped.
         """
         output = self.runTests('--no-color', '-i', 'do_last_skipped')
-        self.assertRegex(output.decode('utf-8'), 'test_harness.do_last.*?\[SKIPPED DEPENDENCY\] SKIP')
+        self.assertRegex(output, 'test_harness.do_last.*?\[SKIPPED DEPENDENCY\] SKIP')
 
     def testDoLastName(self):
         """
@@ -56,4 +56,4 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegex(e.output.decode('utf-8'), 'test_harness.*?FAILED \(Test named ALL when "prereq = ALL" elsewhere in test spec file!\)')
+        self.assertRegex(e.output, 'test_harness.*?FAILED \(Test named ALL when "prereq = ALL" elsewhere in test spec file!\)')

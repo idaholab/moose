@@ -9,35 +9,24 @@
 
 from .schedulers.Job import Job
 from contrib import dag
-import pyhit
-import os
+import sys
+import threading
 
 class JobDAG(object):
     """ Class which builds a Job DAG for use by the Scheduler """
-    def __init__(self, options):
-        self.__job_dag = dag.DAG()
-        self.__parallel_scheduling = None
+    def __init__(self, options, parallel_scheduling):
         self.options = options
+        self.__parallel_scheduling = parallel_scheduling
+        self.__job_dag = dag.DAG()
+        self.__j_lock = threading.Lock()
 
-    def _setParallel(self):
-        """ Read the test spec file and determine if parallel_scheduling is set. """
-        if self.__parallel_scheduling is not None:
-            return self.__parallel_scheduling
-        self.__parallel_scheduling = False
-
-        job = self.getJob()
-        if job:
-            # We only need a single tester so we know what spec file to load.
-            # TODO: would be nice to have access to this without needing tester.specs
-            tester = job[0].getTester()
-            root = pyhit.load(os.path.join(tester.specs['test_dir'], tester.specs['spec_file']))
-            self.__parallel_scheduling = root.children[0].get('parallel_scheduling', False)
-
-        return self.__parallel_scheduling
+    def getLock(self):
+        """ Return the lock for this test spec (folder of jobs) """
+        return self.__j_lock
 
     def canParallel(self):
         """ Return bool whether or not this group runs in parallel """
-        return self._setParallel()
+        return self.__parallel_scheduling
 
     def createJobs(self, testers):
         """ Return a usable Job DAG based on supplied list of tester objects """
@@ -45,7 +34,7 @@ class JobDAG(object):
         self.__name_to_job = {}
         for tester in testers:
             job = Job(tester, self, self.options)
-            name = job.getTestName()
+            name = job.getTestNameShort()
             if name not in self.__name_to_job:
                 self.__name_to_job[name] = job
             else:
@@ -59,18 +48,12 @@ class JobDAG(object):
         """ return the running DAG object """
         return self.__job_dag
 
-    def getJobs(self):
+    def getAvailableJobs(self):
         """ Return a list of available jobs """
-        if (self.canParallel() or self.options.pbs) and not self.options.pedantic_checks:
-            return self.__job_dag.ind_nodes()
-        return self.getJob()
-
-    def getJob(self):
-        """ Return a single available job """
-        concurrent_jobs = self.__job_dag.ind_nodes()
-        if [x for x in concurrent_jobs if x.isHold()]:
-            return [[x for x in concurrent_jobs if x.isHold()][0]]
-        return []
+        available_jobs = [job for job in self.__job_dag.ind_nodes() if job.isHold()]
+        if self.canParallel() and not self.options.pedantic_checks:
+            return available_jobs
+        return available_jobs[0:1]
 
     def getJobsAndAdvance(self):
         """
@@ -85,14 +68,14 @@ class JobDAG(object):
                 next_jobs.add(job)
                 self.__job_dag.delete_node(job)
 
-        next_jobs.update(self.getJobs())
+        next_jobs.update(self.getAvailableJobs())
         return next_jobs
 
     def removeAllDependencies(self):
         """ Flatten current DAG so that it no longer contains any dependency information """
         if self.__name_to_job and self.__job_dag.size():
             tmp_job_dag = dag.DAG()
-            for job in self.__job_dag.topological_sort():
+            for job in self.getJobs():
                 tmp_job_dag.add_node(job)
             self.__job_dag = tmp_job_dag
         return self.__job_dag
@@ -100,13 +83,14 @@ class JobDAG(object):
     def _checkDAG(self):
         """ perform some sanity checks on the current DAG """
         if self.__job_dag.size():
+            # Add edges based on prereqs
+            self._setupPrereqs()
 
-            self._doMakeDependencies()
-            self._doLast()
+            # Check for race conditions in output
+            self._checkOutputCollisions()
 
-            # If there are race conditions, then there may be more skipped jobs
-            if self._doRaceConditions():
-                self._doSkippedDependencies()
+            # Remove edges for jobs that are skipped
+            self._doSkippedDependencies()
 
         return self.__job_dag
 
@@ -119,25 +103,20 @@ class JobDAG(object):
             err_output += ' %s <--> %s' % (parent.getTestName().split('.')[1],
                                            child.getTestName().split('.')[1])
 
-            parent.setOutput('Cyclic dependency error!\n\t' + err_output)
+            parent.appendOutput('Cyclic dependency error!\n\t' + err_output)
             parent.setStatus(parent.error, 'Cyclic or Invalid Dependency Detected!')
 
-    def _doLast(self):
-        for job in self.__job_dag.topological_sort():
-            if 'ALL' in job.getPrereqs():
-                for a_job in self.__job_dag.topological_sort():
-                    if a_job != job and not a_job.isSkip():
-                        if '.ALL' in a_job.getTestName():
-                            a_job.setStatus(a_job.error, 'Test named ALL when "prereq = ALL" elsewhere in test spec file!')
-                        self._addEdge(a_job, job)
-        self._doSkippedDependencies()
-
-    def _doMakeDependencies(self):
+    def _setupPrereqs(self):
         """ Setup dependencies within the current Job DAG """
+        # The jobs that have 'ALL' as a prereq
+        all_prereq_jobs = []
+
+        # Setup explicit dependencies (without 'ALL')
         for job in self.__job_dag.ind_nodes():
             prereq_jobs = job.getPrereqs()
             if prereq_jobs == ['ALL']:
-                prereq_jobs = []
+                all_prereq_jobs.append(job)
+                continue
             for prereq_job in prereq_jobs:
                 try:
                     self.__name_to_job[prereq_job]
@@ -147,7 +126,15 @@ class JobDAG(object):
 
                 # test file has invalid prereq set
                 except KeyError:
-                    job.setStatus(job.error, 'unknown dependency')
+                    job.setStatus(job.error, f'unknown dependency {prereq_job}')
+
+        # Setup dependencies for 'ALL'
+        for job in all_prereq_jobs:
+            for a_job in self.getJobs():
+                if a_job != job and not a_job.isSkip():
+                    if '.ALL' in a_job.getTestName():
+                        a_job.setStatus(a_job.error, 'Test named ALL when "prereq = ALL" elsewhere in test spec file!')
+                    self._addEdge(a_job, job)
 
     def _fix_cornercases(self, prereq_job, job):
         """
@@ -164,7 +151,7 @@ class JobDAG(object):
     def _hasDownStreamsWithFailures(self, job):
         """ Return True if any dependents of job has previous failures """
         for d_job in self.__job_dag.all_downstreams(job):
-            status, message, caveats = d_job.previousTesterStatus(self.options)
+            status, message, caveats = d_job.previousTesterStatus()
             if status in d_job.job_status.getFailingStatuses():
                 return True
 
@@ -173,7 +160,7 @@ class JobDAG(object):
         Set up statuses for jobs contained within the DAG for use with failed-tests option
         """
         tester = job.getTester()
-        status, message, caveats = job.previousTesterStatus(self.options)
+        status, message, caveats = job.previousTesterStatus()
 
         # This job passed, but one of its dependents has not
         if status == tester.success and self._hasDownStreamsWithFailures(job):
@@ -196,7 +183,7 @@ class JobDAG(object):
 
     def _doSkippedDependencies(self):
         """ Determine which jobs in the DAG should be skipped """
-        for job in list(self.__job_dag.topological_sort()):
+        for job in self.getJobs():
             dep_jobs = set([])
 
             if self.options.failed_tests:
@@ -219,37 +206,42 @@ class JobDAG(object):
                     d_job.addCaveats('skipped dependency')
                 self.__job_dag.delete_edge_if_exists(job, d_job)
 
-    def _doRaceConditions(self):
-        """ Check for race condition errors within in the DAG"""
-        # Build output_file in relation to job dictionary
-        output_to_job = {}
-        for job in self.__job_dag.topological_sort():
-            if job.getRunnable() and not job.isFinished():
-                for output_file in job.getOutputFiles():
-                    output_to_job[output_file] = output_to_job.get(output_file, [])
-                    output_to_job[output_file].append(job)
+    def _checkOutputCollisions(self):
+        """
+        If running in parallel, checks to see if any tests have outputs
+        that would collide when ran in parallel if prereqs are set.
+        """
+        # No need to check if this spec can't run in parallel, because
+        # all tests will be run sequentially, with no more than one at once
+        if not self.canParallel():
+            return
 
-        # Remove jobs which have accurate dependencies
-        for outfile, job_list in output_to_job.items():
-            for job in list(job_list):
-                for match_job in self.__job_dag.all_downstreams(job):
-                    if match_job in job_list:
-                        job_list.remove(match_job)
+        # Sort by ID so we get it in the input file from top down
+        jobs = sorted(self.getJobs(), key = lambda job: job.getID())
 
-        # Left over multiple items in job_list are problematic
-        for outfile, job_list in output_to_job.items():
-            # Same test has duplicate output files
-            if len(job_list) > 1 and len(set(job_list)) == 1:
-                job_list[0].setOutput('Duplicate output files:\n\t%s\n' % (outfile))
-                job_list[0].setStatus(job.error, 'DUPLICATE OUTFILES')
-
-            # Multiple tests will clobber eachothers output file
-            # Only check this with parallel_scheduling enabled because otherwise
-            # all of these jobs will be serialized
-            elif len(job_list) > 1 and self._setParallel():
-                for job in job_list:
-                    job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
-                    job.setStatus(job.error, 'OUTFILE RACE CONDITION')
+        # Work down the file, starting with the second input and looking up for
+        # collisions. By doing it in this order, we will error at the first occurance.
+        # This is nice because if we list all of the collisions it could be a lot of
+        # confusing output
+        for i in range(1, len(jobs)):
+            job = jobs[i]
+            for other_i in reversed(range(i)):
+                other_job = jobs[other_i]
+                tester = job.getTester()
+                other_tester = other_job.getTester()
+                files = set(tester.getOutputFiles(self.options))
+                other_files = set(other_tester.getOutputFiles(self.options))
+                conflicting_files = list(files.intersection(other_files))
+                if conflicting_files \
+                    and not self.__job_dag.is_dependency(other_job, job) \
+                    and not self.__job_dag.is_dependency(job, other_job):
+                    print('  This test spec is set to run in parallel, but a race condition was found')
+                    print('  that could lead to multiple tests reading/writing from the same file.\n')
+                    print(f'  Tests: {tester.getTestNameShort()}, {other_tester.getTestNameShort()}')
+                    print(f'  File(s): {", ".join(conflicting_files)}\n')
+                    print('  You can resolve this issue by setting the approprate prerequisites')
+                    print('  between your tests with the "prereq" parameter')
+                    sys.exit(1)
 
     def _skipPrereqs(self):
         """
@@ -271,6 +263,12 @@ class JobDAG(object):
         for d_job in downstreams:
             cyclic_path.append('%s -->'% (d_job.getTestNameShort()))
         return ' '.join(cyclic_path)
+
+    def getJobs(self):
+        """
+        Returns the sorted jobs in the DAG
+        """
+        return self.__job_dag.topological_sort()
 
     def printDAG(self):
         """ Print the current structure of the DAG  """

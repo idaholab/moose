@@ -60,6 +60,7 @@
     type = JSONDiff
     input = solution_invalid.i
     jsondiff = 'solution_invalid.json'
+    hpc = false # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed reasons and occurrences as to why a solution is invalid to file'
@@ -72,6 +73,7 @@
     input = solution_invalid.i
     cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
+    hpc = false # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed information about why a solution is invalid to a file in transient simulations'
@@ -84,6 +86,7 @@
     input = solution_invalid.i
     cli_args = "Materials/filter/test_different_procs=true Outputs/file_base='solution_invalid_parallel'"
     jsondiff = 'solution_invalid_parallel.json'
+    hpc = false # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
     min_parallel = 3
     max_parallel = 3
@@ -113,6 +116,7 @@
       type = JSONDiff
       input = solution_invalid_recover.i
       jsondiff = 'solution_invalid_checkpoint.json'
+      hpc = false # iteration counts can be MPI dependent
       cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
       detail = 'outputting of checkpoint files'
     []

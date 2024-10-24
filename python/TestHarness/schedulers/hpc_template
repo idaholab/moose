@@ -1,0 +1,142 @@
+#!/bin/bash
+{%- if SCHEDULER_NAME == "pbs" %}
+#PBS -N {{ NAME }}
+#PBS -l select={{ NUM_PROCS }}:mpiprocs=1:ncpus={{ NUM_THREADS }}
+#PBS -l walltime={{ WALLTIME }}
+#PBS -P {{ PROJECT }}
+{%- if HOLD is defined %}
+#PBS -h
+{%- endif %}
+{%- if QUEUE is defined %}
+#PBS -q {{ QUEUE }}
+{%- endif %}
+#PBS -j oe
+#PBS -o {{ OUTPUT }}
+#PBS -l place={{ PLACE }}
+{%- elif SCHEDULER_NAME == "slurm" %}
+#SBATCH --job-name={{ NAME }}
+#SBATCH --ntasks={{ NUM_PROCS }}
+#SBATCH --cpus-per-task={{ NUM_THREADS }}
+#SBATCH --time={{ WALLTIME }}
+#SBATCH --wckey={{ PROJECT }}
+#SBATCH --output={{ OUTPUT }}
+{%- if HOLD is defined %}
+#SBATCH --hold
+{%- endif %}
+{%- if PLACE == "scatter" %}
+#SBATCH --ntasks-per-node=1
+{%- endif %}
+{%- endif %}
+
+# Exit on failure
+set -e
+
+{%- if SOURCE_FILE is defined %}
+# Loaded from {{ SOURCE_FILE }}
+{{ SOURCE_CONTENTS }}
+{%- endif %}
+
+# Add MOOSE's python path for python scripts
+export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
+
+# Print a useful header
+echo "TestHarness {{ SCHEDULER_NAME }} job on $(hostname) in job ${{ JOB_ID_VARIABLE }}"
+echo "Time: $(date)"
+echo 'Test: {{ TEST_SPEC }}:{{ TEST_NAME }}'
+echo 'Directory: {{ CWD }}'
+echo 'Submitted hostname: {{ SUBMITTED_HOSTNAME }}'
+echo 'Submission script: {{ SUBMISSION_SCRIPT }}'
+echo 'Output: {{ OUTPUT }}'
+echo 'Result: {{ RESULT }}'
+module list
+
+echo "################################################################################"
+echo "Beginning TestHarness {{ SCHEDULER_NAME }} test execution"
+
+# Move into the test directory
+cd {{ CWD }}
+
+# Make a temp file to store the time
+time_output=$(mktemp)
+
+# Make a temporary directory that's shared for this job. Because slurm doesn't
+# make a tmpdir by default, this gets us a consistent tmpdir across all schedulers
+{%- if SCHEDULER_NAME == "pbs" %}
+NUM_NODES=$(sort $PBS_NODEFILE | uniq -c | wc -l)
+{%- else %}
+NUM_NODES=${SLURM_JOB_NUM_NODES}
+{%- endif %}
+JOB_TMPDIR="$(mktemp -d -u --suffix _${{ JOB_ID_VARIABLE }})"
+# This ONLY works for openmpi right now; -N needs to be -ppn for mpich
+mpiexec -n ${NUM_NODES} -N 1 mkdir ${JOB_TMPDIR}
+export TMPDIR="${JOB_TMPDIR}"
+
+# If we're using a run with APPTAINER_SHARENS, we really don't want to use /home
+# as a location for storing instance state as it can be very fickle. So, use a
+# temprorary one
+if [ "$APPTAINER_SHARENS" == "1" ]; then
+    export APPTAINER_CONFIGDIR="${JOB_TMPDIR}/.apptainer"
+fi
+
+# Don't exit on failure: need to capture the actual run's return code
+set +e
+# Run the command, wrapped in time so that we can capture the real runtime
+# We use which here to make sure we don't get the bash function 'time'
+$(which time) -f %e -o ${time_output} {{ COMMAND }}
+# ...and capture the return code cause we're not done yet
+return_code=$?
+# Exit on failure
+set -e
+
+# We will read this output later on to try to capture the return code
+# in the event that PBS doesn't get it to us correctly
+echo "################################################################################"
+{%- if USING_APPTAINER is defined %}
+# We have a special case with exit codes when we run within apptainer. Sometimes when
+# codes are received when running in a container, the container will return with exit code
+# 128 + <code>. Capture that here because we don't wanna exit code a code > 128, which
+# are special exit codes for the schedulers.
+if ((return_code > 128)); then
+    new_return_code=$((return_code - 128))
+    echo "Apptainer exited with code $return_code, using $new_return_code instead"
+    return_code=$new_return_code
+fi
+{%- endif %}
+# Load the execution time; we use a tail here because the process will
+# include a comment about a non-zero status first if the exit code is nonzero
+walltime=$(tail -1 ${time_output})
+rm ${time_output}
+# Print the exit footer
+echo "Completed TestHarness {{ SCHEDULER_NAME }} test execution; exit code = $return_code, walltime = $walltime sec"
+
+# Build the result file
+touch {{ RESULT }}
+echo "exit_code: $return_code" >> {{ RESULT }}
+echo "walltime: $walltime" >> {{ RESULT }}
+
+# Append a terminator to all of the output files for file syncing across NFS
+ADDITIONAL_OUTPUT_FILES=({{ ADDITIONAL_OUTPUT_FILES }})
+for file in ${ADDITIONAL_OUTPUT_FILES[@]}; do
+    if [ ! -e "$file" ]; then
+        echo "Failed to find output $file"
+        continue
+    fi
+
+    printf "{{ ENDING_COMMENT }}" >> $file;
+    if [ $? != 0 ]; then
+        echo "Failed to finalize output $file"
+    fi
+done
+
+# Append a recognizable string at the end of the output. We look
+# for this string when parsing the output so that we can be sure
+# that we have obtained all of the output
+printf "{{ ENDING_COMMENT }}"
+
+# Clean up the job tempdir
+set +e
+mpiexec -n ${NUM_NODES} -N 1 rm -rf ${JOB_TMPDIR}
+
+# Exit with the real return code from the job that we ran
+exit $return_code
+

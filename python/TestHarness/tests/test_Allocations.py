@@ -17,15 +17,15 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         # Subject a normally passing test to impossible cpu allocations
         output = self.runTests('--no-color', '-i', 'always_ok', '-p', '2', '-j', '1')
-        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
+        self.assertRegex(output, 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
 
         # Subject a normally passing test to impossible thread allocations
         output = self.runTests('--no-color', '-i', 'always_ok', '--n-threads', '2', '-j', '1')
-        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
+        self.assertRegex(output, 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
 
         # A combination of threads*cpus with too low a hard limit (3*3= -j9)
         output = self.runTests('--no-color', '-i', 'allocation_test', '--n-threads', '3', '-p', '3', '-j', '8')
-        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.allocation_test.*? \[INSUFFICIENT SLOTS\] SKIP')
+        self.assertRegex(output, 'tests/test_harness.allocation_test.*? \[INSUFFICIENT SLOTS\] SKIP')
 
     def testOversizedCaveat(self):
         """
@@ -33,13 +33,13 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         # A test which has no min/max cpu parameters should print oversized
         # when subjected to -p 2
-        output = self.runTests('-i', 'always_ok', '-p', '2').decode('utf-8')
+        output = self.runTests('-i', 'always_ok', '-p', '2')
         self.assertNotIn('CPUS', output)
         self.assertIn('OVERSIZED', output)
 
         # A test which has no min/max thread parameters should print oversized
         # when subjected to --n-threads 2
-        output = self.runTests('-i', 'always_ok', '--n-threads', '2').decode('utf-8')
+        output = self.runTests('-i', 'always_ok', '--n-threads', '2')
         self.assertNotIn('THREADS', output)
         self.assertIn('OVERSIZED', output)
 
@@ -51,14 +51,14 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         # Test MIN CPUs / Oversized caveat using soft limit (no -j) on a test
         # having a minimum cpu parameter of 2.
-        output = self.runTests('-i', 'allocation_test', '--n-threads', '2').decode('utf-8')
+        output = self.runTests('-i', 'allocation_test', '--n-threads', '2')
         self.assertNotIn('MIN_THREADS', output)
         self.assertIn('MIN_CPUS=2', output)
         self.assertIn('OVERSIZED', output)
 
         # Test MAX CPUs / Oversized caveat on a test having a maximum cpu
         # parameter of 3 (and we subjected it to 4).
-        output = self.runTests('-i', 'allocation_test', '-p', '4', '--n-threads', '2').decode('utf-8')
+        output = self.runTests('-i', 'allocation_test', '-p', '4', '--n-threads', '2')
         self.assertNotIn('MIN_THREADS', output)
         self.assertIn('MAX_CPUS=3', output)
         self.assertIn('OVERSIZED', output)
@@ -73,7 +73,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # Note: 1*2 should be -j 2 but the test minimum is 2 threads, so we need
         # to use -j 4 to suppress any cpu caveats. Oversized will not trigger as
         # -j4 satisfies this test's requirements.
-        output = self.runTests('-i', 'allocation_test', '-j', '4', '-p', '2', '--n-threads', '1').decode('utf-8')
+        output = self.runTests('-i', 'allocation_test', '-j', '4', '-p', '2', '--n-threads', '1')
         self.assertNotIn('CPUS', output)
         self.assertNotIn('OVERSIZED', output)
         self.assertIn('MIN_THREADS=2', output)
@@ -83,7 +83,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # are specifically testing that setting a lower j does _not_ trigger an
         # insufficient skipped test scenario. Oversized will not trigger as
         # -j6 satisfies this test's requirements.
-        output = self.runTests('-i', 'allocation_test', '-j', '6', '-p', '2', '--n-threads', '4').decode('utf-8')
+        output = self.runTests('-i', 'allocation_test', '-j', '6', '-p', '2', '--n-threads', '4')
         self.assertNotIn('CPUS', output)
         self.assertNotIn('OVERSIZED', output)
         self.assertIn('MAX_THREADS=3', output)
@@ -94,7 +94,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         # Passing test triggering no caveats, as supplied allocations satisfies
         # the test's requirements
-        output = self.runTests('-i', 'allocation_test', '-j', '4', '-p', '2', '--n-threads', '2').decode('utf-8')
+        output = self.runTests('-i', 'allocation_test', '-j', '4', '-p', '2', '--n-threads', '2')
         self.assertNotIn('MIN_THREADS', output)
         self.assertNotIn('MAX_THREADS', output)
         self.assertNotIn('MIN_CPUS', output)

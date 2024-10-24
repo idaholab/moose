@@ -326,3 +326,14 @@ share/
 /modules/misc/misc.yaml
 /tutorials/tutorial01_app_development/*/babbler.yaml
 /tutorials/darcy_thermo_mech/*/darcy_thermo_mech.yaml
+
+# test harness --sep-files output
+*.runner_run_out.txt
+*.runner_out.txt
+*.tester_out.txt
+*.job_out.txt
+
+# test harness hpc output
+*.hpc_out.txt
+*.hpc_result
+*.hpc_submit
