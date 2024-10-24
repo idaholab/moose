@@ -17,7 +17,7 @@ ComputeResidualFunctor::ComputeResidualFunctor(FEProblemBase & fe_problem) : _fe
 void
 ComputeResidualFunctor::residual(const NumericVector<Number> & soln,
                                  NumericVector<Number> & residual,
-                                 NonlinearImplicitSystem & sys)
+                                 libMesh::NonlinearImplicitSystem & sys)
 {
   libmesh_parallel_only(soln.comm());
 

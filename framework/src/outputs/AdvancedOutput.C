@@ -26,6 +26,8 @@
 
 #include "libmesh/fe_interface.h"
 
+using namespace libMesh;
+
 // A function, only available in this file, for adding the AdvancedOutput parameters. This is
 // used to eliminate code duplication between the difference specializations of the validParams
 // function.

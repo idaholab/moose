@@ -19,7 +19,6 @@
 
 #include "metaphysicl/raw_type.h"
 
-using libMesh::Real;
 namespace libMesh
 {
 template <typename>
@@ -126,7 +125,7 @@ public:
   RankThreeTensorTempl<T> & operator=(const RankThreeTensorTempl<T2> & a);
 
   /// b_i = r_ijk * a_jk
-  VectorValue<T> operator*(const RankTwoTensorTempl<T> & a) const;
+  libMesh::VectorValue<T> operator*(const RankTwoTensorTempl<T> & a) const;
 
   /// r_ijk*a
   RankThreeTensorTempl<T> operator*(const T a) const;
@@ -169,7 +168,7 @@ public:
    * Rotate the tensor using
    * r_ijk = R_im R_in R_ko r_mno
    */
-  void rotate(const TensorValue<T> & R);
+  void rotate(const libMesh::TensorValue<T> & R);
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
@@ -189,7 +188,7 @@ public:
    * ref. Kuhl et. al. Int. J. Solids Struct. 38(2001) 2933-2952
    * @param input plane normal vector
    */
-  void fillFromPlaneNormal(const VectorValue<T> & input);
+  void fillFromPlaneNormal(const libMesh::VectorValue<T> & input);
 
   /**
    * Creates fourth order tensor D_{ijkl}=A_{mij}*b_{mn}*A_{nkl} where A is rank 3 and b is rank 2
@@ -202,7 +201,7 @@ public:
    *
    * c_i = A_{ijk} * b_{jk}
    */
-  VectorValue<T> doubleContraction(const RankTwoTensorTempl<T> & b) const;
+  libMesh::VectorValue<T> doubleContraction(const RankTwoTensorTempl<T> & b) const;
 
 protected:
   /// The values of the rank-three tensor stored by index=((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)
@@ -236,9 +235,9 @@ struct RawType<RankThreeTensorTempl<T>>
   static value_type value(const RankThreeTensorTempl<T> & in)
   {
     value_type ret;
-    for (const auto i : make_range(RankThreeTensorTempl<T>::N))
-      for (const auto j : make_range(RankThreeTensorTempl<T>::N))
-        for (const auto k : make_range(RankThreeTensorTempl<T>::N))
+    for (const auto i : libMesh::make_range(RankThreeTensorTempl<T>::N))
+      for (const auto j : libMesh::make_range(RankThreeTensorTempl<T>::N))
+        for (const auto k : libMesh::make_range(RankThreeTensorTempl<T>::N))
           ret(i, j, k) = raw_value(in(i, j, k));
 
     return ret;
@@ -250,7 +249,7 @@ template <typename T>
 template <typename T2>
 RankThreeTensorTempl<T>::RankThreeTensorTempl(const RankThreeTensorTempl<T2> & copy)
 {
-  for (const auto i : make_range(N3))
+  for (const auto i : libMesh::make_range(N3))
     _vals[i] = copy._vals[i];
 }
 
@@ -260,19 +259,19 @@ void
 RankThreeTensorTempl<T>::rotate(const T2 & R)
 {
   unsigned int index = 0;
-  for (const auto i : make_range(N))
-    for (const auto j : make_range(N))
-      for (const auto k : make_range(N))
+  for (const auto i : libMesh::make_range(N))
+    for (const auto j : libMesh::make_range(N))
+      for (const auto k : libMesh::make_range(N))
       {
         unsigned int index2 = 0;
         T sum = 0.0;
-        for (const auto m : make_range(N))
+        for (const auto m : libMesh::make_range(N))
         {
           T a = R(i, m);
-          for (const auto n : make_range(N))
+          for (const auto n : libMesh::make_range(N))
           {
             T ab = a * R(j, n);
-            for (const auto o : make_range(N))
+            for (const auto o : libMesh::make_range(N))
               sum += ab * R(k, o) * _vals[index2++];
           }
         }
@@ -290,15 +289,15 @@ operator*(T a, const RankThreeTensorTempl<T> & b)
 ///r=v*A where r is rank 2, v is vector and A is rank 3
 template <typename T>
 RankTwoTensorTempl<T>
-operator*(const VectorValue<T> & p, const RankThreeTensorTempl<T> & b)
+operator*(const libMesh::VectorValue<T> & p, const RankThreeTensorTempl<T> & b)
 {
   static_assert(RankThreeTensorTempl<T>::N == RankTwoTensorTempl<T>::N,
                 "RankTwoTensor and RankThreeTensor have to have the same dimension N.");
   RankTwoTensorTempl<T> result;
 
-  for (const auto i : make_range(RankThreeTensorTempl<T>::N))
-    for (const auto j : make_range(RankThreeTensorTempl<T>::N))
-      for (const auto k : make_range(RankThreeTensorTempl<T>::N))
+  for (const auto i : libMesh::make_range(RankThreeTensorTempl<T>::N))
+    for (const auto j : libMesh::make_range(RankThreeTensorTempl<T>::N))
+      for (const auto k : libMesh::make_range(RankThreeTensorTempl<T>::N))
         result(i, j) += p(k) * b(k, i, j);
 
   return result;
@@ -309,9 +308,9 @@ template <typename T2>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator=(const RankThreeTensorTempl<T2> & a)
 {
-  for (const auto i : make_range(N))
-    for (const auto j : make_range(N))
-      for (const auto k : make_range(N))
+  for (const auto i : libMesh::make_range(N))
+    for (const auto j : libMesh::make_range(N))
+      for (const auto k : libMesh::make_range(N))
         (*this)(i, j, k) = a(i, j, k);
 
   return *this;

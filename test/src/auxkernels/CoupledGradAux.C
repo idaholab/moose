@@ -9,6 +9,8 @@
 
 #include "CoupledGradAux.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseTestApp", CoupledGradAux);
 
 InputParameters

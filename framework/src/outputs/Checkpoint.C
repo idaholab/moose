@@ -26,6 +26,8 @@
 #include "libmesh/enum_xdr_mode.h"
 #include "libmesh/utility.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", Checkpoint);
 
 InputParameters

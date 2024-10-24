@@ -22,6 +22,8 @@
 #include "libmesh/enum_solver_package.h"
 #include "libmesh/petsc_solver_exception.h"
 
+using namespace libMesh;
+
 template <>
 void
 dataStore(std::ostream & stream, Real & v, void * /*context*/)

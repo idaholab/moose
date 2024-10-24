@@ -21,7 +21,7 @@ ElemSideNeighborLayersTester::validParams()
   InputParameters params = ElementUOProvider::validParams();
   params.addParam<unsigned int>(
       "rank",
-      DofObject::invalid_processor_id,
+      libMesh::DofObject::invalid_processor_id,
       "The rank for which the ghosted elements are recorded (Default: ALL)");
 
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
@@ -62,7 +62,7 @@ ElemSideNeighborLayersTester::execute()
 {
   auto my_processor_id = processor_id();
 
-  if (_rank == DofObject::invalid_processor_id || my_processor_id == _rank)
+  if (_rank == libMesh::DofObject::invalid_processor_id || my_processor_id == _rank)
   {
     for (const auto & current_elem : _fe_problem.getNonlinearEvaluableElementRange())
       _evaluable_data.emplace(current_elem->id());

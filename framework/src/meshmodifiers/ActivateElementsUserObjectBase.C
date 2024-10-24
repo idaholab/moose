@@ -110,7 +110,7 @@ ActivateElementsUserObjectBase::finalize()
     Note: this needs to be done before updating boundary info because
     updating boundary requires the updated element subdomain ids
   */
-  SyncSubdomainIds sync(_mesh.getMesh());
+  libMesh::SyncSubdomainIds sync(_mesh.getMesh());
   Parallel::sync_dofobject_data_by_id(_mesh.getMesh().comm(),
                                       _mesh.getMesh().elements_begin(),
                                       _mesh.getMesh().elements_end(),
@@ -122,7 +122,7 @@ ActivateElementsUserObjectBase::finalize()
   auto displaced_problem = _fe_problem.getDisplacedProblem();
   if (displaced_problem)
   {
-    SyncSubdomainIds sync_mesh(displaced_problem->mesh().getMesh());
+    libMesh::SyncSubdomainIds sync_mesh(displaced_problem->mesh().getMesh());
     Parallel::sync_dofobject_data_by_id(displaced_problem->mesh().getMesh().comm(),
                                         displaced_problem->mesh().getMesh().elements_begin(),
                                         displaced_problem->mesh().getMesh().elements_end(),

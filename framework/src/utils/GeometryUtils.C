@@ -254,7 +254,7 @@ rotatePointAboutAxis(const Point & p, const Real angle, const Point & axis)
 }
 
 std::vector<Point>
-boxCorners(const BoundingBox & box, const Real factor)
+boxCorners(const libMesh::BoundingBox & box, const Real factor)
 {
   Point diff = (box.max() - box.min()) / 2.0;
   const Point origin = box.min() + diff;

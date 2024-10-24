@@ -32,6 +32,8 @@
 #include "libmesh/preconditioner.h"
 #include "libmesh/elem_side_builder.h"
 
+using namespace libMesh;
+
 template <typename I1, typename I2>
 void
 checkSize(const std::string & split_name, const I1 split_size, const I2 size_expected_by_parent)

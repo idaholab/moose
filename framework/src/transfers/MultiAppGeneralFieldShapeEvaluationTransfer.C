@@ -70,7 +70,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::prepareEvaluationOfInterpValues(
 
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
-    const unsigned int var_index, std::vector<MeshFunction> & local_meshfuns)
+    const unsigned int var_index, std::vector<libMesh::MeshFunction> & local_meshfuns)
 {
   local_meshfuns.reserve(_from_problems.size());
 
@@ -108,7 +108,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValues(
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctions(
     const std::vector<BoundingBox> & local_bboxes,
-    std::vector<MeshFunction> & local_meshfuns,
+    std::vector<libMesh::MeshFunction> & local_meshfuns,
     const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {

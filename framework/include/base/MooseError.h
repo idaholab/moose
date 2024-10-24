@@ -21,6 +21,9 @@
 #include <tuple>
 #include <type_traits>
 
+// Used in numerous downstream classes without 'libMesh::' prefix
+using libMesh::demangle;
+
 namespace MetaPhysicL
 {
 class LogicError;
@@ -81,7 +84,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
     if (err != MPI_SUCCESS)                                                                        \
     {                                                                                              \
       if (libMesh::global_n_processors() == 1)                                                     \
-        print_trace();                                                                             \
+        libMesh::print_trace();                                                                    \
       libmesh_here();                                                                              \
       MOOSE_ABORT;                                                                                 \
     }                                                                                              \
@@ -111,7 +114,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
       {                                                                                            \
         Moose::err << _assert_oss_.str() << std::flush;                                            \
         if (libMesh::global_n_processors() == 1)                                                   \
-          print_trace();                                                                           \
+          libMesh::print_trace();                                                                  \
         else                                                                                       \
           libMesh::write_traceout();                                                               \
         libmesh_here();                                                                            \
@@ -131,7 +134,7 @@ namespace moose
 
 namespace internal
 {
-inline Threads::spin_mutex moose_stream_lock;
+inline libMesh::Threads::spin_mutex moose_stream_lock;
 
 /// Builds and returns a string of the form:
 ///
@@ -190,7 +193,7 @@ mooseWarningStream(S & oss, Args &&... args)
     throw std::runtime_error(msg);
 
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
     oss << msg << std::flush;
   }
 }
@@ -206,7 +209,7 @@ mooseUnusedStream(S & oss, Args &&... args)
     throw std::runtime_error(msg);
 
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
     oss << msg << std::flush;
   }
 }
@@ -219,7 +222,7 @@ mooseInfoStreamRepeated(S & oss, Args &&... args)
   mooseStreamAll(ss, args...);
   std::string msg = mooseMsgFmt(ss.str(), "*** Info ***", COLOR_CYAN);
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
     oss << msg << std::flush;
   }
 }
@@ -254,11 +257,11 @@ mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args 
   if (Moose::show_trace)
   {
     if (libMesh::global_n_processors() == 1)
-      print_trace(ss);
+      libMesh::print_trace(ss);
     else
       libMesh::write_traceout();
     {
-      Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+      libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
       oss << ss.str() << std::endl;
     };
   };

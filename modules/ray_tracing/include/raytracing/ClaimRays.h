@@ -31,7 +31,7 @@ class MooseMesh;
 /**
  * Helper object for claiming Rays
  */
-class ClaimRays : public ParallelObject, public MeshChangedInterface
+class ClaimRays : public libMesh::ParallelObject, public MeshChangedInterface
 {
 public:
   /**
@@ -101,7 +101,7 @@ protected:
   /**
    * Get the inflated bounding box for rank \pid.
    */
-  const BoundingBox & inflatedBoundingBox(const processor_id_type pid) const
+  const libMesh::BoundingBox & inflatedBoundingBox(const processor_id_type pid) const
   {
     return _inflated_bboxes[pid];
   }
@@ -159,10 +159,10 @@ private:
   std::vector<std::shared_ptr<Ray>> & _local_rays;
 
   /// The point locator
-  std::unique_ptr<PointLocatorBase> _point_locator = nullptr;
+  std::unique_ptr<libMesh::PointLocatorBase> _point_locator = nullptr;
 
   /// The inflated bounding boxes for all processors
-  std::vector<BoundingBox> _inflated_bboxes;
+  std::vector<libMesh::BoundingBox> _inflated_bboxes;
 
   /// Map of point neighbors for each element
   std::unordered_map<dof_id_type, std::vector<const Elem *>> _elem_point_neighbors;

@@ -302,7 +302,7 @@ MeshGenerator::generateInternal()
 
     if (!getParam<bool>("nemesis"))
     {
-      ExodusII_IO exio(*mesh);
+      libMesh::ExodusII_IO exio(*mesh);
 
       if (mesh->mesh_dimension() == 1)
         exio.write_as_dimension(3);
@@ -314,7 +314,7 @@ MeshGenerator::generateInternal()
     }
     else
     {
-      Nemesis_IO nemesis_io(*mesh);
+      libMesh::Nemesis_IO nemesis_io(*mesh);
 
       // Default to non-HDF5 output for wider compatibility
       nemesis_io.set_hdf5_writing(false);

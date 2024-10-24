@@ -19,6 +19,8 @@
 class SubProblem;
 class FEProblemBase;
 
+namespace SparsityPattern = libMesh::SparsityPattern;
+
 class SolverSystem : public SystemBase
 {
 public:

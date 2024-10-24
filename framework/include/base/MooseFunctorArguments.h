@@ -159,7 +159,7 @@ struct ElemQpArg
   unsigned int qp;
 
   /// The quadrature rule
-  const QBase * qrule;
+  const libMesh::QBase * qrule;
 
   /// The physical location of the quadrature point
   Point point;
@@ -191,7 +191,7 @@ struct ElemSideQpArg
   unsigned int qp;
 
   /// The qudrature rule
-  const QBase * qrule;
+  const libMesh::QBase * qrule;
 
   /// The physical location of the quadrature point
   Point point;

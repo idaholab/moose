@@ -39,7 +39,7 @@ void
 FVPointValueConstraint::setMyElem()
 {
   // Find the element containing the point
-  _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, _mesh);
+  _point_locator = libMesh::PointLocatorBase::build(libMesh::TREE_LOCAL_ELEMENTS, _mesh);
   _point_locator->enable_out_of_mesh_mode();
 
   // We only check in the restricted blocks, if needed
@@ -48,11 +48,11 @@ FVPointValueConstraint::setMyElem()
 
   // We communicate the results and if there is conflict between processes,
   // the minimum cell ID is chosen
-  const dof_id_type elem_id = elem ? elem->id() : DofObject::invalid_id;
+  const dof_id_type elem_id = elem ? elem->id() : libMesh::DofObject::invalid_id;
   dof_id_type min_elem_id = elem_id;
   _mesh.comm().min(min_elem_id);
 
-  if (min_elem_id == DofObject::invalid_id)
+  if (min_elem_id == libMesh::DofObject::invalid_id)
     mooseError("The specified point for the FVPointValueConstraint is not in the "
                "domain! Try alleviating block restrictions or "
                "using another point!");

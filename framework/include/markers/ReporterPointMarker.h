@@ -36,7 +36,7 @@ protected:
   ///z coordinate
   const std::vector<Real> & _z_coord;
   /// Pointer to PointLocatorBase object
-  std::unique_ptr<PointLocatorBase> _pl;
+  std::unique_ptr<libMesh::PointLocatorBase> _pl;
   /// list of sort uniqued elements containing points
   std::set<dof_id_type> _point_elems;
 };

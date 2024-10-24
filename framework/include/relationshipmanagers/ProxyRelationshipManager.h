@@ -50,5 +50,5 @@ public:
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override{};
 
-  System * _other_system;
+  libMesh::System * _other_system;
 };

@@ -58,6 +58,8 @@
 #include <fstream>
 #include <string>
 
+using namespace libMesh;
+
 void
 MooseVecView(NumericVector<Number> & vector)
 {

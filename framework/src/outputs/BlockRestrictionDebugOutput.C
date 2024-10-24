@@ -23,6 +23,8 @@
 
 #include "libmesh/transient_system.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", BlockRestrictionDebugOutput);
 
 InputParameters

@@ -16,6 +16,8 @@
 // libMesh includes
 #include "libmesh/enum_convergence_flags.h"
 
+using namespace libMesh;
+
 InputParameters
 ExplicitTimeIntegrator::validParams()
 {

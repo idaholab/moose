@@ -90,7 +90,7 @@ private:
   std::vector<Real> _initial_vals;
 
   /// Pointer to the libMesh::ParsedFunction object
-  std::unique_ptr<ParsedFunction<Real>> _function_ptr;
+  std::unique_ptr<libMesh::ParsedFunction<Real>> _function_ptr;
 
   /// Stores indices into _addr variable that are connected to Postprocessors
   std::vector<unsigned int> _pp_index;

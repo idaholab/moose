@@ -169,8 +169,7 @@ protected:
   NonlinearSystemBase & _nl;
 
   /// Nonlinear implicit system, if applicable; otherwise, nullptr
-  // NonlinearImplicitSystem * _nonlinear_implicit_system;
-  NonlinearImplicitSystem * _nonlinear_implicit_system;
+  libMesh::NonlinearImplicitSystem * _nonlinear_implicit_system;
 
   /// residual vector for time contributions
   NumericVector<Number> & _Re_time;

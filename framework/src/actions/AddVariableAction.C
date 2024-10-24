@@ -28,6 +28,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 
+using namespace libMesh;
+
 registerMooseAction("MooseApp", AddVariableAction, "add_variable");
 
 InputParameters

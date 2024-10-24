@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "StaticallyAllocatedSet.h"
 #include "Conversion.h"
+#include "MooseTypes.h"
+#include "libMeshReducedNamespace.h"
 
 // Local includes
 #include "DebugRay.h"
@@ -558,7 +560,7 @@ bool intersectQuad(const Point & start,
  * @return Whether or not the line segment intersected with the face
  */
 template <typename T>
-typename std::enable_if<std::is_base_of<Face, T>::value, bool>::type
+typename std::enable_if<std::is_base_of<libMesh::Face, T>::value, bool>::type
 sideIntersectedByLine(const Elem * elem,
                       const Point & start_point,
                       const Point & direction,
@@ -732,7 +734,7 @@ sideIntersectedByLine(const Elem * elem,
  * @return Whether or not the line segment intersected with the face
  */
 template <typename T>
-typename std::enable_if<std::is_base_of<Pyramid, T>::value, bool>::type
+typename std::enable_if<std::is_base_of<libMesh::Pyramid, T>::value, bool>::type
 sideIntersectedByLine(const Elem * elem,
                       const Point & start_point,
                       const Point & direction,
@@ -803,7 +805,7 @@ sideIntersectedByLine(const Elem * elem,
  * @return Whether or not the line segment intersected with the face
  */
 template <typename T>
-typename std::enable_if<std::is_base_of<Prism, T>::value, bool>::type
+typename std::enable_if<std::is_base_of<libMesh::Prism, T>::value, bool>::type
 sideIntersectedByLine(const Elem * elem,
                       const Point & start_point,
                       const Point & direction,
@@ -889,8 +891,8 @@ unsigned short atVertexOnSide(const Elem * elem, const Point & point, const unsi
  * Returns the number of nodes on a side for an Elem that is not a Pyramid or Prism.
  */
 template <typename T>
-inline typename std::enable_if<!std::is_base_of<Pyramid, T>::value &&
-                                   !std::is_base_of<Prism, T>::value,
+inline typename std::enable_if<!std::is_base_of<libMesh::Pyramid, T>::value &&
+                                   !std::is_base_of<libMesh::Prism, T>::value,
                                unsigned short>::type
 nodesPerSide(const unsigned short)
 {
@@ -911,7 +913,7 @@ nodesPerSide(const unsigned short side)
  * Returns the number of nodes on a side on a Prism elem.
  */
 template <typename T>
-inline typename std::enable_if<std::is_base_of<Prism, T>::value, unsigned short>::type
+inline typename std::enable_if<std::is_base_of<libMesh::Prism, T>::value, unsigned short>::type
 nodesPerSide(const unsigned short side)
 {
   return T::nodes_per_side - (side == 0 || side == 4);
@@ -1029,7 +1031,7 @@ bool withinExtremaOnSide(const Elem * const elem,
  * @return If the point is within an edge on the side of the element
  */
 template <typename T>
-typename std::enable_if<std::is_base_of<Cell, T>::value, bool>::type withinEdgeOnSideTempl(
+typename std::enable_if<std::is_base_of<libMesh::Cell, T>::value, bool>::type withinEdgeOnSideTempl(
     const Elem * const elem, const Point & point, const unsigned short side, ElemExtrema & extrema);
 
 /**
@@ -1039,7 +1041,7 @@ typename std::enable_if<std::is_base_of<Cell, T>::value, bool>::type withinEdgeO
  * edges, therefore this function errors.
  */
 template <typename T>
-typename std::enable_if<!std::is_base_of<Cell, T>::value, bool>::type
+typename std::enable_if<!std::is_base_of<libMesh::Cell, T>::value, bool>::type
 withinEdgeOnSideTempl(const Elem * const, const Point &, const unsigned short, ElemExtrema &)
 {
   mooseError("Should not call withinEdgeOnSideTempl() with a non-Cell derived Elem");

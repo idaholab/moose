@@ -50,7 +50,7 @@ public:
 
 protected:
   AuxiliarySystem & _aux;
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
   bool _has_corners;
   std::vector<BoundaryID> _boundaries;
   BoundaryID _corner_boundary_id;

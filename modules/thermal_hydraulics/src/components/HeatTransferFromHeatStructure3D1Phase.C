@@ -51,7 +51,7 @@ HeatTransferFromHeatStructure3D1Phase::HeatTransferFromHeatStructure3D1Phase(
   addDependency(_hs_name);
 }
 
-const FEType &
+const libMesh::FEType &
 HeatTransferFromHeatStructure3D1Phase::getFEType()
 {
   return HeatConductionModel::feType();
@@ -241,10 +241,12 @@ HeatTransferFromHeatStructure3D1Phase::addVariables()
   if (!_app.isRestarting())
     getTHMProblem().addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_subdomains);
 
+  getTHMProblem().addSimVariable(false,
+                                 FlowModel::TEMPERATURE_WALL,
+                                 libMesh::FEType(CONSTANT, MONOMIAL),
+                                 _flow_channel_subdomains);
   getTHMProblem().addSimVariable(
-      false, FlowModel::TEMPERATURE_WALL, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
-  getTHMProblem().addSimVariable(
-      false, _T_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
+      false, _T_wall_name, libMesh::FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
 
   // wall temperature initial condition
   if (!getTHMProblem().hasInitialConditionsFromFile() && !_app.isRestarting())

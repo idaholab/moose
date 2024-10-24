@@ -12,6 +12,8 @@
 #include "FlowChannelBase.h"
 #include "ConstantFunction.h"
 
+using namespace libMesh;
+
 InputParameters
 FlowModel::validParams()
 {
