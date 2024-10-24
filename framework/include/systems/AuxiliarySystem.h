@@ -55,16 +55,6 @@ public:
   virtual void addVariable(const std::string & var_type,
                            const std::string & name,
                            InputParameters & parameters) override;
-  /**
-   * Add a time integrator
-   * @param type Type of the integrator
-   * @param name The name of the integrator
-   * @param parameters Integrator params
-   */
-  void addTimeIntegrator(const std::string & type,
-                         const std::string & name,
-                         InputParameters & parameters) override;
-  using SystemBase::addTimeIntegrator;
 
   /**
    * Adds an auxiliary kernel

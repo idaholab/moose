@@ -61,7 +61,7 @@ InertialForceTempl<is_ad>::InertialForceTempl(const InputParameters & parameters
     _eta(this->template getGenericMaterialProperty<Real, is_ad>("eta")),
     _density_scaling(this->template getMaterialProperty<Real>("density_scaling")),
     _alpha(this->template getParam<Real>("alpha")),
-    _time_integrator(*_sys.getTimeIntegrator())
+    _time_integrator(_sys.getTimeIntegrator(this->_var.number()))
 {
   if (_has_beta && _has_gamma && _has_velocity && _has_acceleration)
   {

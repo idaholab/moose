@@ -87,7 +87,9 @@ CentralDifference::computeTimeDerivatives()
   u_dot.close();
 
   // used for Jacobian calculations
-  _du_dot_du = 1.0 / (2 * _dt);
+  for (const auto i : index_range(_du_dot_du))
+    if (integratesVar(i))
+      _du_dot_du[i] = 1.0 / (2 * _dt);
   _du_dotdot_du = 1.0 / (_dt * _dt);
 
   // Computing udotdot "factor"

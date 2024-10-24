@@ -92,7 +92,9 @@ NewmarkBeta::computeTimeDerivatives()
 
   // used for Jacobian calculations
   _du_dotdot_du = 1.0 / _beta / _dt / _dt;
-  _du_dot_du = _gamma / _beta / _dt;
+  for (const auto i : index_range(_du_dot_du))
+    if (integratesVar(i))
+      _du_dot_du[i] = _gamma / _beta / _dt;
 }
 
 void

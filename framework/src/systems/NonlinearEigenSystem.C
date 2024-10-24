@@ -254,15 +254,24 @@ NonlinearEigenSystem::solve()
       _eigen_sys.set_initial_space(solution());
   }
 
-  // Solve the transient problem if we have a time integrator; the
-  // steady problem if not.
-  if (_time_integrator)
-  {
-    _time_integrator->solve();
-    _time_integrator->postSolve();
-  }
+  const bool time_integrator_solve = std::any_of(_time_integrators.begin(),
+                                                 _time_integrators.end(),
+                                                 [](auto & ti) { return ti->overridesSolve(); });
+  if (time_integrator_solve)
+    mooseAssert(_time_integrators.size() == 1,
+                "If solve is overridden, then there must be only one time integrator");
+
+  if (time_integrator_solve)
+    _time_integrators.front()->solve();
   else
     system().solve();
+
+  for (auto & ti : _time_integrators)
+  {
+    if (!ti->overridesSolve())
+      ti->setNumIterationsLastSolve();
+    ti->postSolve();
+  }
 
   // store eigenvalues
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();

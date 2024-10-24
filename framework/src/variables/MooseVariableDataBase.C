@@ -600,7 +600,7 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
   {
     _dof_du_dot_du.resize(n);
     for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dot_du[i] = _sys.duDotDu();
+      _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
   }
   if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
   {
@@ -708,7 +708,7 @@ MooseVariableDataBase<RealEigenVector>::fetchDoFValues()
   {
     _dof_du_dot_du.resize(n);
     for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dot_du[i] = _sys.duDotDu();
+      _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
   }
   if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
   {
