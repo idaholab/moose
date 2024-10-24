@@ -1,0 +1,161 @@
+[Tests]
+  issues = '#9151 #24128'
+  design = 'ReferenceResidualConvergence.md'
+
+  [base]
+    type = Exodiff
+    input = 'reference_residual.i'
+    exodiff = 'reference_residual_out.e'
+    requirement = 'The system shall have the ability to base convergence on the comparison of '
+                  'individual variables to reference quantities of those variables, using a convergence object.'
+  []
+  [scaled_bad]
+    type = RunApp
+    input = 'reference_residual.i'
+    expect_out = 'Solve Did NOT Converge'
+    cli_args = 'coef=1e17 Outputs/exodus=false -pc_type svd -pc_svd_monitor -ksp_max_it 10'
+    requirement = 'The system shall fail to find a converged solution when basing convergence on '
+                  'individual variable reference quantities with poor scaling, using a convergence object.'
+  []
+  [scaled_good]
+    type = Exodiff
+    input = 'reference_residual.i'
+    cli_args = 'coef=1e17 Outputs/file_base=scaled Executioner/automatic_scaling=true '
+               'Executioner/verbose=true -pc_type svd -pc_svd_monitor -ksp_max_it 10'
+    exodiff = 'scaled.e'
+    requirement = 'The system shall have the ability to automatically scale a originally poorly '
+                  'scaled problem and achieve convergence based on individual reference quantities, using a convergence object.'
+    petsc_version = '>=3.9.0'
+    max_parallel = 2
+  []
+  [converge_on]
+    type = RunApp
+    input = 'reference_residual.i'
+    expect_out = 'Solve Converged!'
+    cli_args = 'Convergence/conv/converge_on="u"'
+    requirement = 'The system shall have the ability to base system convergence on the convergence '
+                  'of a subset of variables, using a convergence object.'
+  []
+  [converge_on_group_error]
+    type = RunException
+    input = 'reference_residual.i'
+    expect_err = 'You added variable \'u\' to a group but excluded it from the convergence check. '
+                 'This is not permitted.'
+    cli_args = 'Convergence/conv/converge_on="v" Convergence/conv/group_variables="u v"'
+    requirement = 'The system shall require all grouped variables to be included in the convergence '
+                  'check, using a convergence object.'
+  []
+  [wildcard]
+    type = RunApp
+    input = 'reference_residual.i'
+    expect_out = 'Solve Converged!'
+    cli_args = 'Convergence/conv/converge_on="?"'
+    requirement = 'The system shall support wildcards for choosing the variables to base convergence '
+                  'on, using a convergence object.'
+  []
+  [abs_ref]
+    type = CSVDiff
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_out.csv'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
+                  'of those variables, using a convergence object.'
+  []
+  [abs_ref_acceptable]
+    type = RunApp
+    input = 'abs_ref_acceptable.i'
+    expect_out = 'Converged due to ACCEPTABLE tolerances'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
+                  'of those variables using an acceptable tolerance past a given number of nonlinear iterations, using a convergence object.'
+  []
+  [local_normalization]
+    type = CSVDiff
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_local_out.csv'
+    cli_args = 'Convergence/conv/normalization_type=local_L2 Outputs/file_base=abs_ref_local_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables locally divided by the absolute value of the residual contributions '
+                  'of those variables, using a convergence object.'
+  []
+  [local_linf_normalization]
+    type = CSVDiff
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_local_Linf_out.csv'
+    cli_args = 'Convergence/conv/normalization_type=local_Linf Outputs/file_base=abs_ref_local_Linf_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of Linf normalization of the residual for '
+                  'individual variables locally divided by the absolute value of the residual contributions '
+                  'of those variables, using a convergence object.'
+  []
+  [linf_normalization]
+    type = CSVDiff
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_Linf_out.csv'
+    cli_args = 'Convergence/conv/normalization_type=global_Linf Outputs/file_base=abs_ref_Linf_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of Linf normalization of the residual for '
+                  'individual variables to the sum of the Linf normalization of the absolute value of the residual contributions '
+                  'of those variables, using a convergence object.'
+  []
+  [ad_abs_ref]
+    type = CSVDiff
+    input = 'ad_abs_ref.i'
+    csvdiff = 'ad_abs_ref_out.csv'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
+                  'of those variables using AD, using a convergence object.'
+  []
+  [no_ref]
+    type = CSVDiff
+    input = 'no_ref.i'
+    csvdiff = 'no_ref_out.csv'
+    cli_args = 'Problem/extra_tag_vectors=absref'
+    requirement = 'The system shall have the ability to default to the traditional convergence checks if no '
+                  'reference vector is provided in ReferenceResidualConvergence.'
+  []
+  [zero_tolerance_ref]
+    type = RunException
+    input = no_ref.i
+    expect_err = 'Solve failed'
+    cli_args = 'Problem/extra_tag_vectors=absref Convergence/conv/reference_vector=absref Convergence/conv/zero_reference_residual_treatment=zero_tolerance'
+    requirement = 'The system shall treat convergence with a zero reference residual value as requiring zero residual value for convergence, using a convergence object.'
+  []
+  [zero_rel_tolerance_ref]
+    type = CSVDiff
+    input = no_ref.i
+    csvdiff = 'zero_rel_tolerance_ref_out.csv'
+    cli_args = 'Problem/extra_tag_vectors=absref Convergence/conv/reference_vector=absref Convergence/conv/zero_reference_residual_treatment=relative_tolerance Convergence/conv/nl_rel_tol=1e-8 Outputs/file_base=zero_rel_tolerance_ref_out'
+    requirement = 'The system shall treat convergence with a zero reference residual value as converged if the residual is below the relative tolerance, using a convergence object.'
+  []
+
+  [error]
+    requirement = 'When using ReferenceResidualConvergence the system shall throw an error '
+    [wrong_vector_tag_type]
+      type = RunException
+      input = abs_ref.i
+      cli_args = "Problem/extra_tag_solutions='absref' Problem/extra_tag_vectors=''"
+      expect_err = "is not a residual vector tag"
+      detail = "if the reference tag is not a residual vector tag."
+    []
+    [no_tag]
+      type = RunException
+      input = abs_ref.i
+      cli_args = "Problem/extra_tag_vectors=''"
+      expect_err = "does not exist"
+      detail = "if the reference tag does not exist."
+    []
+    [no_reference_vector]
+      type = RunException
+      input = no_ref.i
+      cli_args = "Convergence/conv/normalization_type=local_L2 Problem/extra_tag_vectors=absref"
+      expect_err = "If local norm is used, a reference_vector must be provided"
+      detail = "if the reference vector is not provided when using local normalization."
+    []
+    [not_residual_tag]
+      type = RunException
+      input = no_ref.i
+      cli_args = "Problem/extra_tag_solutions=absref GlobalParams/absolute_value_vector_tags=absref"
+      expect_err = "is not a residual vector tag"
+      detail = "if the reference vector is provided is not a residual vector tag."
+    []
+  []
+[]
