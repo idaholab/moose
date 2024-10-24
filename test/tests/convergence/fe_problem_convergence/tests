@@ -8,4 +8,15 @@
     csvdiff = 'fe_problem_convergence_out.csv'
     requirement = 'The system shall be able to determine convergence of the nonlinear solve using default criteria through an object.'
   []
+  [error_reporting]
+    requirement = 'The system shall report an error for the default convergence class'
+    [multiple_objects]
+      type = RunException
+      input = 'fe_problem_convergence.i'
+      cli_args = "Convergence/conv2/type=FEProblemConvergence"
+      expect_err = "Only one FEProblemConvergence may be constructed"
+      detail = 'if multiple instances are created.'
+      skip = '#28936'
+    []
+  []
 []
