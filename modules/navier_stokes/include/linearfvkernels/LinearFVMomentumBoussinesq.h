@@ -38,13 +38,12 @@ protected:
   const unsigned int _index;
   /// Pointer to the linear finite volume temperature variable
   MooseLinearVariableFV<Real> & _temperature_var;
-    /// The gravity vector
+  /// The gravity vector
   const RealVectorValue _gravity;
   /// The thermal expansion coefficient
-  const Moose::Functor<ADReal> & _alpha;
+  const Moose::Functor<Real> & _alpha;
   /// Reference temperature at which the value of _rho was measured
   const Real _ref_temperature;
   /// the density
-  const Moose::Functor<ADReal> & _rho;
-
+  const Moose::Functor<Real> & _rho;
 };

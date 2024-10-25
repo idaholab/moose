@@ -7,72 +7,65 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVAdvection.h"
-#include "Assembly.h"
-#include "SubProblem.h"
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVEnergyAdvection.h"
+#include "MooseLinearVariableFV.h"
+#include "NSFVUtils.h"
+#include "NS.h"
 
-registerMooseObject("MooseApp", LinearFVAdvection);
+registerMooseObject("MooseApp", LinearFVEnergyAdvection);
 
 InputParameters
-LinearFVAdvection::validParams()
+LinearFVEnergyAdvection::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
-                             "advection term in a partial differential equation.");
-  params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
+                             "advection term for the energy e.g. h=cp*T. A user may still "
+                             "override what quantity is advected, but the default is cp*T.");
+  params.addParam<MooseFunctorName>(
+      "advected_quantity", NS::specific_enthalpy, "The heat quantity to advect.");
+  params.addRequiredParam<UserObjectName>(
+      "rhie_chow_user_object",
+      "The rhie-chow user-object which is used to determine the face velocity.");
   params += Moose::FV::advectedInterpolationParameter();
   return params;
 }
 
-LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
-  : LinearFVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
-
+LinearFVEnergyAdvection::LinearFVEnergyAdvection(const InputParameters & params)
+  : LinearFVFluxKernel(params),
+    _adv_quant(getFunctor<ADReal>("advected_quantity")),
+    _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
+    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+    _face_mass_flux(0.0)
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
 }
 
-void
-LinearFVAdvection::initialSetup()
+Real
+LinearFVEnergyAdvection::computeElemMatrixContribution()
 {
-  for (const auto bc : _var.getBoundaryConditionMap())
-    if (!dynamic_cast<const LinearFVAdvectionDiffusionBC *>(bc.second))
-      mooseError(
-          bc.second->type(), " is not a compatible boundary condition with ", this->type(), "!");
+  return _advected_interp_coeffs.first * _face_mass_flux * _current_face_area;
 }
 
 Real
-LinearFVAdvection::computeElemMatrixContribution()
+LinearFVEnergyAdvection::computeNeighborMatrixContribution()
 {
-  const Real face_flux = _velocity * _current_face_info->normal();
-  const auto interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, face_flux);
-  return interp_coeffs.first * face_flux * _current_face_area;
+  return _advected_interp_coeffs.second * _face_mass_flux * _current_face_area;
 }
 
 Real
-LinearFVAdvection::computeNeighborMatrixContribution()
-{
-  const Real face_flux = _velocity * _current_face_info->normal();
-  const auto interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, face_flux);
-  return interp_coeffs.second * face_flux * _current_face_area;
-}
-
-Real
-LinearFVAdvection::computeElemRightHandSideContribution()
+LinearFVEnergyAdvection::computeElemRightHandSideContribution()
 {
   return 0.0;
 }
 
 Real
-LinearFVAdvection::computeNeighborRightHandSideContribution()
+LinearFVEnergyAdvection::computeNeighborRightHandSideContribution()
 {
   return 0.0;
 }
 
 Real
-LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
+LinearFVEnergyAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
   const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
@@ -82,12 +75,11 @@ LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return boundary_value_matrix_contrib * factor * (_velocity * _current_face_info->normal()) *
-         _current_face_area;
+  return boundary_value_matrix_contrib * factor * _face_mass_flux * _current_face_area;
 }
 
 Real
-LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
+LinearFVEnergyAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
   const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
@@ -96,6 +88,20 @@ LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
   const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
-  return -boundary_value_rhs_contrib * factor * (_velocity * _current_face_info->normal()) *
-         _current_face_area;
+  return -boundary_value_rhs_contrib * factor * _face_mass_flux * _current_face_area;
+}
+
+void
+LinearFVEnergyAdvection::setupFaceData(const FaceInfo * face_info)
+{
+  LinearFVFluxKernel::setupFaceData(face_info);
+
+  // Caching the mass flux on the face which will be reused in the advection term's matrix and right
+  // hand side contributions
+  _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
+
+  // Caching the interpolation coefficients so they will be reused for the matrix and right hand
+  // side terms
+  _advected_interp_coeffs =
+      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
 }

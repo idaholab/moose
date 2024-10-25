@@ -20,8 +20,7 @@ LinearFVMomentumBoussinesq::validParams()
   InputParameters params = LinearFVElementalKernel::validParams();
   params.addClassDescription("Represents the Boussinesq term in the Navier Stokes momentum "
                              "equations, added to the right hand side.");
-  params.addParam<VariableName>(NS::T_fluid,
-                                "The fluid temperature variable.");
+  params.addParam<VariableName>(NS::T_fluid, "The fluid temperature variable.");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addParam<MooseFunctorName>("alpha_name",
                                     NS::alpha_boussinesq,
@@ -43,12 +42,12 @@ LinearFVMomentumBoussinesq::LinearFVMomentumBoussinesq(const InputParameters & p
     _index(getParam<MooseEnum>("momentum_component")),
     _temperature_var(getTemperatureVariable(NS::T_fluid)),
     _gravity(getParam<RealVectorValue>("gravity")),
-    _alpha(getFunctor<ADReal>("alpha_name")),
+    _alpha(getFunctor<Real>("alpha_name")),
     _ref_temperature(getParam<Real>("ref_temperature")),
-    _rho(getFunctor<ADReal>(NS::density))
+    _rho(getFunctor<Real>(NS::density))
 {
   if (!_rho.isConstant() && !getParam<bool>("_override_constant_check"))
-  paramError(NS::density, "The density in the boussinesq term is not constant!");
+    paramError(NS::density, "The density in the boussinesq term is not constant!");
 }
 
 MooseLinearVariableFV<Real> &
@@ -58,7 +57,8 @@ LinearFVMomentumBoussinesq::getTemperatureVariable(const std::string & vname)
       &_fe_problem.getVariable(_tid, getParam<VariableName>(vname)));
 
   if (!ptr)
-    paramError(NS::T_fluid, "The fluid temperature variable should be of type MooseLinearVariableFVReal!");
+    paramError(NS::T_fluid,
+               "The fluid temperature variable should be of type MooseLinearVariableFVReal!");
 
   return *ptr;
 }
@@ -75,5 +75,5 @@ LinearFVMomentumBoussinesq::computeRightHandSideContribution()
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
   return -_alpha(elem, state) * _gravity(_index) * _rho(elem, state) *
-          (_temperature_var.getElemValue(*_current_elem_info, state) - _ref_temperature);
+         (_temperature_var.getElemValue(*_current_elem_info, state) - _ref_temperature);
 }
