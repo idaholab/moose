@@ -26,6 +26,7 @@
 #include "MooseUtils.h"
 #include "FVBoundaryCondition.h"
 #include "FEProblemBase.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
