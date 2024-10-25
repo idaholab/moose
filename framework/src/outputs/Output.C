@@ -260,6 +260,9 @@ Output::outputStep(const ExecFlagType & type)
   // Check whether we should output, then do it.
   if (shouldOutput())
   {
+    if (_problem_ptr->shouldPrintExecution(0))
+      _console << "[DBG]   Outputing " << _name << " at time " << _time << std::endl;
+
     // store current simulation time
     _last_output_simulation_time = _time;
 

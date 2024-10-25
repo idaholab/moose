@@ -97,6 +97,9 @@ OversampleOutput::outputStep(const ExecFlagType & type)
   // Call the output method
   if (shouldOutput())
   {
+    if (_problem_ptr->shouldPrintExecution(0))
+      _console << "[DBG]   Outputing " << _name << " at time " << _time << std::endl;
+
     TIME_SECTION("outputStep", 2, "Outputting Step");
     updateOversample();
     output();

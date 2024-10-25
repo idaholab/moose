@@ -149,6 +149,16 @@ OutputWarehouse::addOutputFilename(const OutputName & obj_name, const OutFileBas
 void
 OutputWarehouse::outputStep(ExecFlagType type)
 {
+  if (_app.feProblem().shouldPrintExecution(0))
+  {
+    std::ostringstream ss;
+    ss << "[DBG] Outputting on " << type << " with available outputs:";
+    for (const auto & obj : _all_objects)
+      ss << " " << obj->name();
+    ss << std::endl;
+    mooseConsole(ss);
+  }
+
   if (_force_output)
     type = EXEC_FORCED;
 
