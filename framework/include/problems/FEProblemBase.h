@@ -644,6 +644,16 @@ public:
   getConvergenceObjects(const THREAD_ID tid = 0) const;
   /// Returns true if the problem has a Convergence object of the given name
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0) const;
+  /// Returns true if the problem needs to add the default nonlinear convergence
+  bool needToAddDefaultNonlinearConvergence() const
+  {
+    return _need_to_add_default_nonlinear_convergence;
+  }
+  /// Sets _need_to_add_default_nonlinear_convergence to true
+  void setNeedToAddDefaultNonlinearConvergence()
+  {
+    _need_to_add_default_nonlinear_convergence = true;
+  }
   /**
    * Adds the default nonlinear Convergence associated with the problem
    *
@@ -2428,7 +2438,8 @@ protected:
 
   /// Flag that the nonlinear convergence name has been set
   bool _set_nonlinear_convergence_name;
-  bool _set_reference_convergence_name = false;
+  /// Flag that the problem needs to add the default nonlinear convergence
+  bool _need_to_add_default_nonlinear_convergence;
 
   /// The linear system names
   const std::vector<LinearSystemName> _linear_sys_names;

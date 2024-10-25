@@ -3,6 +3,13 @@
 This [Convergence](Convergence/index.md) is the default convergence for
 [/FEProblem.md], using a combination of criteria to determine convergence.
 
+!alert warning title=Shared executioner parameters
+This object shares several parameters with the executioner. If one of these
+parameters is set by the user in the executioner and not in the convergence
+object, then the value is taken from the executioner, rather than the default
+value. If a parameter is set by the user in both the executioner and the convergence
+object, an error is thrown.
+
 Consider the system of algebraic equations:
 
 !equation

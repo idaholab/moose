@@ -280,6 +280,8 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
 
+  registerTask("add_default_convergence", true);
+
   // Action for setting up the signal-based checkpoint
   registerTask("auto_checkpoint_action", true);
   /**************************/
@@ -336,6 +338,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_component)"  // no particular reason for that placement
                            "(read_executor)"
                            "(add_executor)"
+                           "(add_default_convergence)"
                            "(check_integrity_early)"
                            "(check_integrity_early_physics)"
                            "(setup_predictor)"

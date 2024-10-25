@@ -146,6 +146,8 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
 void
 ReferenceResidualConvergence::initialSetup()
 {
+  FEProblemConvergence::initialSetup();
+
   NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0);
   AuxiliarySystem & aux_sys = _fe_problem.getAuxiliarySystem();
   System & s = nonlinear_sys.system();

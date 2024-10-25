@@ -27,17 +27,17 @@ executioner, e.g.,
 ```
 
 Currently only the nonlinear solve convergence is supported, but others are planned
-for the near future.
+for the near future. If the `nonlinear_convergence` parameter is not specified,
+then the default `Convergence` associated with the problem is created internally.
 
 ## Available Classes
 
 The `Convergence` classes provided by MOOSE are the following:
 
-- [/FEProblemConvergence.md]: The default convergence criteria, which includes
-  several convergence criteria combined together.
-- [/ReferenceResidualConvergence.md]: Like `ResidualConvergence`, but
-  uses a custom norm to define the relative residual convergence criteria.
-  [/ReferenceResidualProblem.md] uses this as its convergence criteria.
+- [/FEProblemConvergence.md]: The default convergence criteria for [/FEProblem.md],
+  which includes several convergence criteria combined together.
+- [/ReferenceResidualConvergence.md]: The default convergence criteria for [/ReferenceResidualProblem.md],
+  which uses a custom norm to define the relative residual convergence criteria.
 - [/IterationCountConvergence.md]: Specifies minimum and maximum numbers of iterations.
 - [/PostprocessorConvergence.md]: Compares the value of a
   [Postprocessor](Postprocessors/index.md) to a tolerance.

@@ -383,6 +383,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
     _set_nonlinear_convergence_name(false),
+    _need_to_add_default_nonlinear_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
@@ -974,18 +975,15 @@ FEProblemBase::initialSetup()
     }
   }
 
+  unsigned int n_threads = libMesh::n_threads();
+
   // Convergence initial setup
   {
     TIME_SECTION("convergenceInitialSetup", 5, "Initializing Convergence objects");
 
-    auto conv_query = theWarehouse().query().condition<AttribSystem>("Convergence");
-    std::vector<UserObject *> conv_objs;
-    conv_query.queryInto(conv_objs);
-    for (auto conv_obj : conv_objs)
-      conv_obj->initialSetup();
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      _convergences.initialSetup(tid);
   }
-
-  unsigned int n_threads = libMesh::n_threads();
 
   // UserObject initialSetup
   std::set<std::string> depend_objects_ic = _ics.getDependObjects();
@@ -2417,6 +2415,7 @@ FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
+  params.set<bool>("added_as_default") = true;
   addConvergence(class_name, _nonlinear_convergence_name, params);
 }
 

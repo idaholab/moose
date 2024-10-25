@@ -91,9 +91,10 @@ FEProblemSolve::validParams()
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
-  params.addParam<ConvergenceName>(
-      "nonlinear_convergence",
-      "Name of Convergence object to use to assess convergence of the nonlinear solve");
+  params.addParam<ConvergenceName>("nonlinear_convergence",
+                                   "Name of Convergence object to use to assess convergence of the "
+                                   "nonlinear solve. If not provided, the default Convergence "
+                                   "associated with the Problem will be constructed internally.");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -240,16 +241,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
       mooseError("The selected problem does not allow 'nonlinear_convergence' to be set.");
   }
   else
-  {
-    const std::string default_name = "default_nonlinear_convergence";
-    _problem.setNonlinearConvergenceName(default_name);
-
-    // Some executioners may create multiple FEProblemSolves - only need to
-    // create a single Convergence object for now. Later we may consider having
-    // a Convergence per FEProblemSolve.
-    if (!_problem.hasConvergence(default_name))
-      _problem.addDefaultNonlinearConvergence(parameters());
-  }
+    _problem.setNeedToAddDefaultNonlinearConvergence();
 
   _nl.setDecomposition(_splitting);
 

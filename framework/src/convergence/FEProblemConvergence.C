@@ -16,7 +16,11 @@
 #include "NonlinearSystemBase.h"
 #include "ActionWarehouse.h"
 
+#include "libmesh/equation_systems.h"
+
 // PETSc includes
+#include <petsc.h>
+#include <petscmat.h>
 #include <petscsnes.h>
 #include <petscksp.h>
 #include <petscdm.h>
@@ -32,6 +36,8 @@ FEProblemConvergence::validParams()
   InputParameters params = Convergence::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
+  params.addPrivateParam<bool>("added_as_default", false);
+
   params.addClassDescription("Default convergence criteria for FEProblem.");
 
   return params;
@@ -39,27 +45,37 @@ FEProblemConvergence::validParams()
 
 FEProblemConvergence::FEProblemConvergence(const InputParameters & parameters)
   : Convergence(parameters),
+    _added_as_default(getParam<bool>("added_as_default")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _nl_abs_div_tol(getParam<Real>("nl_abs_div_tol")),
-    _nl_rel_div_tol(getParam<Real>("nl_div_tol")),
+    _nl_abs_div_tol(getSharedExecutionerParam<Real>("nl_abs_div_tol")),
+    _nl_rel_div_tol(getSharedExecutionerParam<Real>("nl_div_tol")),
     _div_threshold(std::numeric_limits<Real>::max()),
-    _nl_forced_its(getParam<unsigned int>("nl_forced_its")),
-    _nl_max_pingpong(getParam<unsigned int>("n_max_nonlinear_pingpong")),
+    _nl_forced_its(getSharedExecutionerParam<unsigned int>("nl_forced_its")),
+    _nl_max_pingpong(getSharedExecutionerParam<unsigned int>("n_max_nonlinear_pingpong")),
     _nl_current_pingpong(0)
 {
   EquationSystems & es = _fe_problem.es();
 
   es.parameters.set<unsigned int>("nonlinear solver maximum iterations") =
-      getParam<unsigned int>("nl_max_its");
+      getSharedExecutionerParam<unsigned int>("nl_max_its");
   es.parameters.set<unsigned int>("nonlinear solver maximum function evaluations") =
-      getParam<unsigned int>("nl_max_funcs");
+      getSharedExecutionerParam<unsigned int>("nl_max_funcs");
   es.parameters.set<Real>("nonlinear solver absolute residual tolerance") =
-      getParam<Real>("nl_abs_tol");
+      getSharedExecutionerParam<Real>("nl_abs_tol");
   es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
-      getParam<Real>("nl_rel_tol");
-  es.parameters.set<Real>("nonlinear solver divergence tolerance") = getParam<Real>("nl_div_tol");
+      getSharedExecutionerParam<Real>("nl_rel_tol");
+  es.parameters.set<Real>("nonlinear solver divergence tolerance") =
+      getSharedExecutionerParam<Real>("nl_div_tol");
   es.parameters.set<Real>("nonlinear solver relative step tolerance") =
-      getParam<Real>("nl_rel_step_tol");
+      getSharedExecutionerParam<Real>("nl_rel_step_tol");
+}
+
+void
+FEProblemConvergence::initialSetup()
+{
+  Convergence::initialSetup();
+
+  checkDuplicateSetSharedExecutionerParams();
 }
 
 bool
@@ -236,4 +252,18 @@ FEProblemConvergence::checkConvergence(unsigned int iter)
 #endif
 
   return status;
+}
+
+void
+FEProblemConvergence::checkDuplicateSetSharedExecutionerParams() const
+{
+  if (_duplicate_shared_executioner_params.size() > 0 && !_added_as_default)
+  {
+    std::ostringstream oss;
+    oss << "The following parameters were set in both this Convergence object and the "
+           "executioner:\n";
+    for (const auto & param : _duplicate_shared_executioner_params)
+      oss << "  " << param << "\n";
+    mooseError(oss.str());
+  }
 }

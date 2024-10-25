@@ -64,6 +64,7 @@ AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultNonl
   InputParameters params = this->_factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
+  params.set<bool>("added_as_default") = true;
   this->setNonlinearConvergenceName("reference_residual");
   this->addConvergence(class_name, this->getNonlinearConvergenceName(), params);
 }
@@ -77,6 +78,7 @@ AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultNonlinearConvergenc
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
+  params.set<bool>("added_as_default") = true;
   this->setNonlinearConvergenceName("default_convergence");
   this->addConvergence(class_name, this->getNonlinearConvergenceName(), params);
 }

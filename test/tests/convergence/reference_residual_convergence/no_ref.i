@@ -101,7 +101,6 @@
   petsc_options_value = 'lu'
   line_search = none
   num_steps = 10
-  nl_rel_tol = 1e-06
   nonlinear_convergence = conv
   verbose = true
 []

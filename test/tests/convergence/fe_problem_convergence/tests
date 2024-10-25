@@ -18,5 +18,12 @@
       detail = 'if multiple instances are created.'
       skip = '#28936'
     []
+    [conflicting_criteria]
+      type = RunException
+      input = 'fe_problem_convergence.i'
+      cli_args = "Executioner/nl_abs_tol=1e-20"
+      expect_err = "The following parameters were set in both this Convergence object and the executioner:\s+nl_abs_tol"
+      detail = 'if convergence criteria are additionally specified in the executioner.'
+    []
   []
 []
