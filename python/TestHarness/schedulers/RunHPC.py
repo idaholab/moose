@@ -920,7 +920,7 @@ class RunHPC(RunParallel):
         functor = lambda hpc_job: hpc_job.state == hpc_job.State.held
         self.killHPCJobs(functor)
 
-    def appendResultFooter(self):
+    def appendStats(self):
         timer_keys = ['hpc_queued', 'hpc_wait_output']
         times = {}
         for key in timer_keys:
@@ -938,9 +938,16 @@ class RunHPC(RunParallel):
         for key, values in times.items():
             averages[key] = statistics.mean(values) if values else 0
 
-        result = f'Average queue time {averages["hpc_queued"]:.1f} seconds, '
-        result += f'average output wait time {averages["hpc_wait_output"]:.1f} seconds, '
-        result += f'{num_resubmit} jobs resubmitted.'
+        stats = super().appendStats()
+        stats.update({'hpc_time_queue_average': averages['hpc_queued'],
+                      'hpc_time_wait_output_average': averages['hpc_wait_output'],
+                      'hpc_num_resubmitted': num_resubmit})
+        return stats
+
+    def appendResultFooter(self, stats):
+        result = f'Average queue time {stats["hpc_time_queue_average"]:.1f} seconds, '
+        result += f'average output wait time {stats["hpc_time_wait_output_average"]:.1f} seconds, '
+        result += f'{stats["hpc_num_resubmitted"]} jobs resubmitted.'
         return result
 
     def appendResultFileHeader(self):

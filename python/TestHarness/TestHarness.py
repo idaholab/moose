@@ -645,6 +645,28 @@ class TestHarness:
                 caveats = False if caveats is None else caveats
                 print(util.formatResult(job, self.options, result=job.getStatus().status, caveats=caveats), flush=True)
 
+    def getStats(self, time_total: float) -> dict:
+        """
+        Get cumulative stats for all runs
+        """
+        num_nonzero_timing = sum(1 if float(tup[0].getTiming()) > 0 else 0 for tup in self.test_table)
+        if num_nonzero_timing > 0:
+            time_max = max(float(tup[0].getTiming()) for tup in self.test_table)
+            time_average = sum(float(tup[0].getTiming()) for tup in self.test_table) / num_nonzero_timing
+        else:
+            time_max = 0
+            time_average = 0
+
+        stats = {'num_passed': self.num_passed,
+                 'num_failed': self.num_failed,
+                 'num_skipped': self.num_skipped,
+                 'num_total': self.num_passed + self.num_failed + self.num_skipped,
+                 'time_total': time_total,
+                 'time_max': time_max,
+                 'time_average': time_average}
+        stats.update(self.scheduler.appendStats())
+        return stats
+
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
         # Print the results table again if a bunch of output was spewed to the screen between
@@ -659,7 +681,8 @@ class TestHarness:
             for (job, sort_value, timing) in sorted(self.test_table, key=lambda x: x[1]):
                 print((util.formatResult(job, self.options, caveats=True)))
 
-        time = (datetime.datetime.now() - self.start_time).total_seconds()
+        time_total = (datetime.datetime.now() - self.start_time).total_seconds()
+        stats = self.getStats(time_total)
 
         print(('-' * (self.options.term_cols)))
 
@@ -671,13 +694,10 @@ class TestHarness:
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
-            print(('Processed %d tests in %.1f seconds.' % (self.num_passed+self.num_skipped, time)))
-            summary = '<b>%d would run</b>'
-            summary += ', <b>%d would be skipped</b>'
+            print(f'Processed {self.num_passed + self.num_skipped} tests in {stats["time_total"]:.1f} seconds.')
+            summary = f'<b>{self.num_passed} would run</b>, <b>{self.num_skipped} would be skipped</b>'
             summary += fatal_error
-            print((util.colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code )))
-
+            print(util.colorText(summary, "", html=True, colored=self.options.colored, code=self.options.code))
         else:
             num_nonzero_timing = sum(1 if float(tup[0].getTiming()) > 0 else 0 for tup in self.test_table)
             if num_nonzero_timing > 0:
@@ -686,37 +706,34 @@ class TestHarness:
             else:
                 timing_max = 0
                 timing_avg = 0
-            summary = f'Ran {self.num_passed + self.num_failed} tests in {time:.1f} seconds.'
+            summary = f'Ran {self.num_passed + self.num_failed} tests in {stats["time_total"]:.1f} seconds.'
             summary += f' Average test time {timing_avg:.1f} seconds,'
             summary += f' maximum test time {timing_max:.1f} seconds.'
             print(summary)
 
             # Get additional results from the scheduler
-            scheduler_summary = self.scheduler.appendResultFooter()
+            scheduler_summary = self.scheduler.appendResultFooter(stats)
             if scheduler_summary:
                 print(scheduler_summary)
 
             if self.num_passed:
-                summary = '<g>%d passed</g>'
+                summary = f'<g>{self.num_passed} passed</g>'
             else:
-                summary = '<b>%d passed</b>'
-            summary += ', <b>%d skipped</b>'
+                summary = f'<b>{self.num_passed} passed</b>'
+            summary += f', <b>{self.num_skipped} skipped</b>'
             if self.num_pending:
-                summary += ', <c>%d pending</c>'
-            else:
-                summary += ', <b>%d pending</b>'
+                summary += f', <c>{self.num_pending} pending</c>'
             if self.num_failed:
-                summary += ', <r>%d FAILED</r>'
+                summary += f', <r>{self.num_failed} FAILED</r>'
             else:
-                summary += ', <b>%d failed</b>'
+                summary += f', <b>{self.num_failed} failed</b>'
             if self.scheduler.maxFailures():
                 self.error_code = self.error_code | 0x80
                 summary += '\n<r>MAX FAILURES REACHED</r>'
 
             summary += fatal_error
 
-            print((util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code )))
+            print(util.colorText(summary, "", html=True, colored=self.options.colored, code=self.options.code))
 
             if self.options.longest_jobs:
                 # Sort all jobs by run time
@@ -780,8 +797,8 @@ class TestHarness:
                     for job in job_group:
                         job.storeResults(self.scheduler)
 
-                # And write the results
-                self.writeResults(complete=True)
+                # And write the results, including the stats
+                self.writeResults(complete=True, stats=stats)
 
         try:
             # Write one file, with verbose information (--file)
@@ -900,7 +917,7 @@ class TestHarness:
         # Write the headers
         self.writeResults()
 
-    def writeResults(self, complete=False):
+    def writeResults(self, complete=False, stats=None):
         """ Forcefully write the current results to file
 
         Will not do anything if using existing storage.
@@ -911,6 +928,8 @@ class TestHarness:
 
         # Make it as complete (run is done)
         self.options.results_storage['incomplete'] = not complete
+        # Store the stats
+        self.options.results_storage['stats'] = stats
 
         # Store to a temporary file so that we always have a working file
         file = self.options.results_file

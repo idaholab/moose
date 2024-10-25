@@ -548,7 +548,7 @@ class Scheduler(MooseObject):
         except KeyboardInterrupt:
             self.killRemaining(keyboard=True)
 
-    def appendResultFooter(self) -> str or None:
+    def appendResultFooter(self, stats: dict) -> str:
         """ Entrypoint to add additional results to the on screen result footer """
         return None
 
@@ -558,4 +558,8 @@ class Scheduler(MooseObject):
 
     def appendResultFileJob(self, job) -> dict:
         """ Entrypoint to add entries to the result file for a job """
+        return {}
+
+    def appendStats(self) -> dict:
+        """ Entrypoint to add entries to the harness statistics """
         return {}
