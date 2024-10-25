@@ -58,6 +58,7 @@ Executioner::Executioner(const InputParameters & parameters)
     PostprocessorInterface(this),
     Restartable(this, "Executioners"),
     PerfGraphInterface(this),
+    _legacy_execute_on(_app.parameters().get<bool>("use_legacy_fixed_point_execute_on")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
@@ -87,6 +88,7 @@ Executioner::Executioner(const InputParameters & parameters, bool)
     PostprocessorInterface(this),
     Restartable(this, "Executioners"),
     PerfGraphInterface(this),
+    _legacy_execute_on(_app.parameters().get<bool>("use_legacy_fixed_point_execute_on")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),

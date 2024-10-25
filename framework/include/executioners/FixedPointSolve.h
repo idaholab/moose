@@ -23,6 +23,10 @@ public:
 
   static InputParameters validParams();
 
+  /// Custom execute flags for fixed point iterations
+  static const ExecFlagType EXEC_FIXEDPOINT_BEGIN;
+  static const ExecFlagType EXEC_FIXEDPOINT_END;
+
   /**
    * Iteratively solves the FEProblem.
    * @return True if solver is converged.
@@ -143,8 +147,8 @@ protected:
   /**
    * Perform one fixed point iteration or a full solve.
    *
-   * @param begin_norm       Residual norm after timestep_begin execution
-   * @param end_norm         Residual norm after timestep_end execution
+   * @param begin_norm       Residual norm after fixedpoint_begin execution
+   * @param end_norm         Residual norm after fixedpoint_end execution
    * @param transformed_dofs DoFs targetted by the fixed point algorithm
    *
    * @return True if both nonlinear solve and the execution of multiapps are successful.
@@ -193,6 +197,8 @@ protected:
   /// Print information about the fixed point convergence
   void printFixedPointConvergenceReason();
 
+  /// Flag to indicate timestep_begin/end objects are to be executed within a fixed point iteration
+  const bool _legacy_execute_on;
   /// Minimum fixed point iterations
   unsigned int _min_fixed_point_its;
   /// Maximum fixed point iterations
@@ -239,10 +245,10 @@ protected:
   unsigned int _main_fixed_point_it;
   /// Initial residual norm
   Real _fixed_point_initial_norm;
-  /// Full history of residual norm after evaluation of timestep_begin
-  std::vector<Real> _fixed_point_timestep_begin_norm;
-  /// Full history of residual norm after evaluation of timestep_end
-  std::vector<Real> _fixed_point_timestep_end_norm;
+  /// Full history of residual norm after evaluation of fixedpoint_begin
+  std::vector<Real> _fixed_point_begin_norm;
+  /// Full history of residual norm after evaluation of fixedpoint_end
+  std::vector<Real> _fixed_point_end_norm;
   /// Status of fixed point solve
   MooseFixedPointConvergenceReason _fixed_point_status;
   ///@}

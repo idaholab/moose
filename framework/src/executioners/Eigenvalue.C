@@ -257,6 +257,21 @@ Eigenvalue::execute()
 #endif // LIBMESH_ENABLE_AMR
     _eigen_problem.timestepSetup();
 
+    if (!_legacy_execute_on)
+    {
+      _eigen_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+      if (!_eigen_problem.execMultiApps(EXEC_TIMESTEP_BEGIN))
+      {
+        _console << "Aborting as executing multiapps on timestep_begin failed" << std::endl;
+        return;
+      }
+
+      _eigen_problem.execute(EXEC_TIMESTEP_BEGIN);
+      _time = _time_step;
+      _eigen_problem.outputStep(EXEC_TIMESTEP_BEGIN);
+      _time = _system_time;
+    }
+
     _last_solve_converged = _fixed_point_solve->solve();
     if (!lastSolveConverged())
     {
@@ -269,6 +284,19 @@ Eigenvalue::execute()
     {
       _eigen_problem.computeIndicators();
       _eigen_problem.computeMarkers();
+    }
+
+    if (!_legacy_execute_on)
+    {
+      _eigen_problem.onTimestepEnd();
+      _eigen_problem.execute(EXEC_TIMESTEP_END);
+
+      _eigen_problem.execTransfers(EXEC_TIMESTEP_END);
+      if (!_eigen_problem.execMultiApps(EXEC_TIMESTEP_END))
+      {
+        _console << "Aborting as executing multiapps on timestep_end failed" << std::endl;
+        return;
+      }
     }
     // need to keep _time in sync with _time_step to get correct output
     _time = _time_step;

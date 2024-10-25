@@ -475,6 +475,17 @@ outputLegacyInformation(MooseApp & app)
         << COLOR_DEFAULT << std::endl;
   }
 
+  if (app.parameters().get<bool>("use_legacy_fixed_point_execute_on"))
+  {
+    oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
+    oss << " This application uses the legacy fixed point execution option: objects including aux "
+           "kernels, user objects, postprocessors, multi-apps, transfers, etc. on timestep_begin "
+           "and timestep_end are executed within a fixed point iteration while those objects "
+           "should be executed on fixedpoint_begin and fixedpoint_end. To remove this message set "
+           "the parameter 'use_legacy_fixed_point_execute_on' to false in *App.C. Codes in Actions "
+           "and inputs setting 'execute_on' parameters must be examined and changed if necessary.\n"
+        << COLOR_DEFAULT << std::endl;
+  }
   return oss.str();
 }
 

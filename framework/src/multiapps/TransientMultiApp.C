@@ -19,6 +19,7 @@
 #include "TimeStepper.h"
 #include "Transient.h"
 #include "NonlinearSystem.h"
+#include "FixedPointSolve.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -594,6 +595,10 @@ TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
         ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_BEGIN,
                                            /*recurse_through_multiapp_levels=*/true);
         ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_END,
+                                           /*recurse_through_multiapp_levels=*/true);
+        ex->feProblem().finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN,
+                                           /*recurse_through_multiapp_levels=*/true);
+        ex->feProblem().finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_END,
                                            /*recurse_through_multiapp_levels=*/true);
       }
     }

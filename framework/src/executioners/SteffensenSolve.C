@@ -231,8 +231,7 @@ SteffensenSolve::printFixedPointConvergenceHistory()
   Real max_norm_old = _fixed_point_initial_norm;
   for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
-    Real max_norm =
-        std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
+    Real max_norm = std::max(_fixed_point_begin_norm[i], _fixed_point_end_norm[i]);
     std::stringstream steffensen_prefix;
     if (i == 0)
       steffensen_prefix << " Steffensen initialization |R| = ";

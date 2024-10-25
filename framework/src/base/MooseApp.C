@@ -383,6 +383,12 @@ MooseApp::validParams()
       "solution modifying objects are executed prior to the initial (0th nonlinear iteration) "
       "residual evaluation. The new behavior skips that redundant residual evaluation unless the "
       "parameter Executioner/use_pre_SMO_residual is set to true.");
+  params.addParam<bool>(
+      "use_legacy_fixed_point_execute_on",
+      true,
+      "The legacy behavior executes objects including aux kernels, user objects, postprocessors, "
+      "MultiApps, transfers, etc. on timestep_begin and timestep_end within a fixed point "
+      "iteration.");
 
   params.addParam<bool>(
       MeshGeneratorSystem::allow_data_driven_param,

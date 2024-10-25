@@ -24,8 +24,8 @@ PicardSolve::validParams()
       "picard_max_its",
       1,
       "Specifies the maximum number of Picard iterations. "
-      "Mainly used when  wanting to do Picard iterations with MultiApps "
-      "that are set to execute_on timestep_end or timestep_begin. "
+      "Mainly used when wanting to do Picard iterations with MultiApps "
+      "that are set to execute_on fixedpoint_end or fixedpoint_begin. "
       "Setting this parameter to 1 turns off the Picard iterations.",
       "Deprecated, use fixed_point_max_its");
   params.addDeprecatedParam<bool>(
@@ -60,8 +60,8 @@ PicardSolve::validParams()
   params.addDeprecatedParam<bool>(
       "picard_force_norms",
       false,
-      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existence of active MultiApps with those execute_on flags, default: false.",
+      "Force the evaluation of both the FIXEDPOINT_BEGIN and FIXEDPOINT_END norms regardless of "
+      "the existence of active MultiApps with those execute_on flags, default: false.",
       "Deprecated, use fixed_point_force_norms");
 
   return params;
@@ -265,8 +265,7 @@ PicardSolve::printFixedPointConvergenceHistory()
   Real max_norm_old = _fixed_point_initial_norm;
   for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
-    Real max_norm =
-        std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
+    Real max_norm = std::max(_fixed_point_begin_norm[i], _fixed_point_end_norm[i]);
     _console << std::setw(2) << i + 1
              << " Picard |R| = " << Console::outputNorm(max_norm_old, max_norm) << '\n';
     max_norm_old = max_norm;

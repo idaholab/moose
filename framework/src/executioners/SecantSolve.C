@@ -135,10 +135,10 @@ SecantSolve::savePostprocessorValues(const bool primary)
     (*transformed_pps_values)[i][2] = (*transformed_pps_values)[i][0];
 
     // Save current value
-    // Primary: this is done before the timestep's solves and before timestep_begin transfers,
+    // Primary: this is done before the fixedpoint's solves and before fixedpoint_begin transfers,
     // so the value is the result of the previous Secant update (xn_m1)
-    // Secondary: this is done after the secondary solve, but before timestep_end postprocessors
-    // are computed, or timestep_end transfers are received.
+    // Secondary: this is done after the secondary solve, but before fixedpoint_end postprocessors
+    // are computed, or fixedpoint_end transfers are received.
     // This value is the same as before the solve (xn_m1)
     (*transformed_pps_values)[i][1] = getPostprocessorValueByName((*transformed_pps)[i]);
   }
@@ -258,8 +258,7 @@ SecantSolve::printFixedPointConvergenceHistory()
   Real max_norm_old = _fixed_point_initial_norm;
   for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
-    Real max_norm =
-        std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
+    Real max_norm = std::max(_fixed_point_begin_norm[i], _fixed_point_end_norm[i]);
     std::stringstream secant_prefix;
     if (i < 2)
       secant_prefix << " Secant initialization |R| = ";

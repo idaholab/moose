@@ -305,6 +305,10 @@ TransientBase::execute()
                                   /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
+      _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN,
+                                  /*recurse_through_multiapp_levels=*/true);
+      _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_END,
+                                  /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END,
                                   /*recurse_through_multiapp_levels=*/true);
     }
@@ -364,6 +368,8 @@ TransientBase::incrementStepOrReject()
         _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
+        _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN);
+        _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_END);
         _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
@@ -375,6 +381,8 @@ TransientBase::incrementStepOrReject()
       _problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
       _problem.incrementMultiAppTStep(EXEC_TIMESTEP_BEGIN);
       _problem.incrementMultiAppTStep(EXEC_TIMESTEP_END);
+      _problem.incrementMultiAppTStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN);
+      _problem.incrementMultiAppTStep(FixedPointSolve::EXEC_FIXEDPOINT_END);
       _problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_END);
     }
   }
@@ -383,6 +391,8 @@ TransientBase::incrementStepOrReject()
     _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
+    _problem.restoreMultiApps(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN, true);
+    _problem.restoreMultiApps(FixedPointSolve::EXEC_FIXEDPOINT_END, true);
     _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
     _time_stepper->rejectStep();
     _time = _time_old;
@@ -406,7 +416,28 @@ TransientBase::takeStep(Real input_dt)
 
   _problem.timestepSetup();
 
+  if (!_legacy_execute_on)
+  {
+    _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
+    _problem.backupMultiApps(EXEC_TIMESTEP_END);
+  }
+
   _problem.onTimestepBegin();
+
+  _last_solve_converged = true;
+  if (!_legacy_execute_on)
+  {
+    _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+    if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN))
+    {
+      _console << "Aborting as executing multiapps on timestep_begin failed" << std::endl;
+      _last_solve_converged = false;
+      return;
+    }
+
+    _fe_problem.execute(EXEC_TIMESTEP_BEGIN);
+    _fe_problem.outputStep(EXEC_TIMESTEP_BEGIN);
+  }
 
   _time_stepper->step();
   _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
@@ -417,6 +448,20 @@ TransientBase::takeStep(Real input_dt)
   {
     _console << "Aborting as solve did not converge" << std::endl;
     return;
+  }
+
+  if (!_legacy_execute_on)
+  {
+    _problem.onTimestepEnd();
+    _problem.execute(EXEC_TIMESTEP_END);
+
+    _problem.execTransfers(EXEC_TIMESTEP_END);
+    if (!_problem.execMultiApps(EXEC_TIMESTEP_END))
+    {
+      _console << "Aborting as executing multiapps on timestep_end failed" << std::endl;
+      _last_solve_converged = false;
+      return;
+    }
   }
 
   if (!(_problem.haveXFEM() && _fixed_point_solve->XFEMRepeatStep()))
@@ -532,6 +577,8 @@ TransientBase::computeConstrainedDT()
   constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_BEGIN);
   constrainDTFromMultiApp(dt_cur, diag, EXEC_TIMESTEP_BEGIN);
   constrainDTFromMultiApp(dt_cur, diag, EXEC_TIMESTEP_END);
+  constrainDTFromMultiApp(dt_cur, diag, FixedPointSolve::EXEC_FIXEDPOINT_BEGIN);
+  constrainDTFromMultiApp(dt_cur, diag, FixedPointSolve::EXEC_FIXEDPOINT_END);
   constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_END);
 
   if (_verbose)

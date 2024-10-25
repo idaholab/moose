@@ -153,6 +153,12 @@ public:
    */
   static MooseEnum iterationMethods() { return MooseEnum("picard secant steffensen", "picard"); }
 
+  /**
+   * Whether the executioner has the legacy time execution, i.e. timestep_begin/end are executed
+   * within the fixed point solve object
+   */
+  bool legacyTimeExecution() const { return _legacy_execute_on; }
+
 protected:
   /**
    * Adds a postprocessor that the executioner can directly assign values to
@@ -162,6 +168,9 @@ protected:
    */
   virtual PostprocessorValue & addAttributeReporter(const std::string & name,
                                                     Real initial_value = 0);
+
+  /// Flag to indicate timestep_begin/end objects are to be executed within a fixed point iteration
+  const bool _legacy_execute_on;
 
   FEProblemBase & _fe_problem;
 
