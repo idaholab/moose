@@ -166,7 +166,7 @@ public:
   /**
    * @returns Whether the virtual solve method is overridden
    */
-  virtual bool overridesSolve() const { return false; }
+  virtual bool overridesSolve() const = 0;
 
 protected:
   /**
