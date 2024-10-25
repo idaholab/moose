@@ -15,42 +15,48 @@ At the time of this writing, the following [!ac](INL) [!ac](HPC) clusters are av
 
 !include ncrc/hpc_cluster_information.md
 
-!alert! warning title=+In order to clone an application:+
-You +*MUST*+ be on one of the above login nodes!
+!alert! warning title=+In order to git-clone a repository:+
+You +*MUST*+ be on one of the above login nodes! The following instructions assume you are looking
+at an interactive shell prompt on one of the above listed hosts, awaiting your commands.
 !alert-end!
 
 ## Containerization
 
+!style halign=left
 The development environment is deployed using containerization, which is a deployment
-practice that bundles all application (i.e., MOOSE or a MOOSE-based app) dependencies need to run
-on any host. This means that applications built within this environment can be executed
-across all INL HPC clusters. For example, you can build an application within a compute node on
-Sawtooth and execute the same executable of the application (providing you follow the instructions
-that follow) on both Bitterroot and Lemhi.
+practice that bundles all application and application dependencies (i.e., MOOSE or a MOOSE-based
+app), needed to run on any host. This means that applications built within this environment can be
+executed across all [!ac](INL) [!ac](HPC) clusters. For example, you can build an application within
+a compute node on Sawtooth and execute the same executable of the application (providing you follow
+the instructions that follow) on both Bitterroot and Lemhi.
 
 ## Obtain MOOSE
 
-Once you have been granted access to [!ac](INL) [!ac](HPC), and you are logged into one of the above login nodes, you can proceed to clone MOOSE:
+!template load file=installation/clone_moose.md.template PATH=/scratch/<your user id>/projects
+
+!alert! tip title=Use `/scratch` when possible
+Use the available `/scratch/<your user id>/` location whenever possible. The scratch volume offers
+higher performance than what exists for your `/home/` directory.
+!alert-end!
+
+## Loading the Environment
+
+!style halign=left
+Figuring out the right environment to load is a two-step process involving our Versioner script,
+and `module load` commands:
+
+#### Versioning id=versioning
+
+!style halign=left
+To aid you in selecting the right container to use at any given commit, we created a script called
+`versioner.py`. Versioner returns a hash which we use as a naming suffix for the module you will be
+loading. Your copy of MOOSE, and all the accompanying submodules (recursively), contribute to the
+generation of this hash.
+
+To obtain the hash your copy of MOOSE requires, run the following command:
 
 ```bash
-mkdir -p ~/projects
-cd ~/projects
-git clone https://github.com/idaholab/moose
-cd moose
-```
-
-## Versioning id=versioning
-
-The version of the dependencies used within MOOSE (PETSc, libMesh, etc) are tied directly
-to a given version of MOOSE. Given a version of MOOSE (or a MOOSE-based application), we produce
-a version of the development environment that contains the correct version of these dependencies.
-Whenever you are compiling MOOSE or a MOOSE-based application, you should use the corresponding
-version of the development environment.
-
-In order to determine the version of the development environment to use when building, run the
-following within the MOOSE directory:
-
-```bash
+cd /scratch/<your user id>/projects/moose
 ./scripts/versioner.py moose-dev
 ```
 
@@ -64,13 +70,14 @@ In this case, the version of that should be used is [!versioner!version package=
 This is the version that should be used for loading the containerized environment module that
 follows.
 
-## Loading the Environment
+#### Module Load
 
-To access all MOOSE related modules, you must first load the `use.moose` module. The development
-container modules are then located within the `moose-dev-MPI` modules, where `MPI` denotes the variant
-of MPI is used. The version of these `moose-dev-MPI` modules used are the versions described by
-the versioner script explained in the [#versioning] section. Currently, the only deployed variant is
-`openmpi`, i.e. the development container module that should be used is `moose-dev-openmpi`.
+!style halign=left
+To access any MOOSE related module, you must first load the `use.moose` module. The development
+container modules are then located within the `moose-dev-MPI` modules, where `MPI` denotes the
+variant of MPI is used. The version of these `moose-dev-MPI` modules used are the versions described
+by the versioner script explained in the [#versioning] section. Currently, the only deployed variant
+is `openmpi`, i.e. the development container module that should be used is `moose-dev-openmpi`.
 
 With this, the containerized development environment is loaded with the following:
 
@@ -81,8 +88,8 @@ module load use.moose moose-dev-openmpi/__VERSIONER_VERSION_MOOSE_DEV__
 Take special note of the version applied to the `moose-dev-openmpi` module, which is
 [!versioner!version package=moose-dev]. Again, this version comes from the versioner script
 as described in [#versioning]. It is very important that you use the specific version that
-is required by the application that you are building. You will receive warnings during the
-compile process if the version is not correct.
+is required by the application that you are building. You will receive warnings (or worse) during
+the compile process if the version is not correct.
 
 !alert note
 It is strongly recommended that you do not use default versions of the `moose-dev-openmpi`
@@ -92,9 +99,10 @@ development from the fast-paced development of MOOSE, you should use specific mo
 
 ## Building id=building
 
-The containerized environment needs to be entered in order to build or execute. For the purposes
-of this documentation, we will use the version [!versioner!version package=moose-dev], although
-yours could be different!
+!style halign=left
+The containerized environment needs to be entered into in order to build or execute. For the
+purposes of this documentation, we will use the version [!versioner!version package=moose-dev],
+although yours could be different!
 
 To enter the containerized shell environment to proceed with building, run the following
 (note that here we are requesting the specific version of the environment that we need):
@@ -104,22 +112,27 @@ module load use.moose moose-dev-openmpi/__VERSIONER_VERSION_MOOSE_DEV__
 moose-dev-shell
 !versioner-end!
 
-You are now within the versioned, containerized environment. The standard
-MOOSE dependencies (PETSc, libMesh, WASP, etc) are built and there is not a need to run
-any of the update-and-rebuild scripts within MOOSE. You +must+ repeat the commands
-above whenever you build any code.
+You are now within the versioned, containerized environment. The standard MOOSE dependencies (PETSc,
+libMesh, WASP, etc) are pre-built and there is not a need to run any of the update-and-rebuild
+scripts traditionally required. You +must+ repeat the above versioning and module loading technique,
+whenever you are performing MOOSE based work:
+
+1. figure out the version you need
+1. load the matching module version
 
 At this point, we have assumed that you already have the source code for your application
 available and are in the directory that contains that application. Build your application
 and test it as normal:
 
 ```
+cd test/
 make -j 4
 ./run_tests -j 4
 ```
 
 ## Running id=running
 
+!style halign=left
 How your application is ran is dependent on whether or not you are running across multiple
 hosts. In general, you are running across multiple hosts when you are running within a job
 on HPC. We have two different methods of execution that we will reference later:
@@ -156,6 +169,7 @@ running with MPI.
 
 ## OnDemand Execution
 
+!style halign=left
 You can utilize HPC OnDemand to enter an interactive code server (similar to VSCode) window
 on a compute host within the same containerized development environment that was previously
 described.
@@ -191,3 +205,5 @@ is ran within the container, thus you can run commands normally, like:
 make -j 6
 mpiexec -n 6 /path/to/myapp-opt -i ...
 ```
+
+!include installation/conda_pagination.md optional=True
