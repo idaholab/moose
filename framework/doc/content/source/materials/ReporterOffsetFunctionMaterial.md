@@ -2,8 +2,11 @@
 
 !syntax description /Materials/ReporterOffsetFunctionMaterial
 
-This can be used to create a material that is the sum of a function that is shifted by a set of points. This can be useful for creating a field containing multiple sources, see Figure??.
+This can be used to create a material that is the sum of a function that is shifted by a set of points. This can be useful for creating a field containing multiple sources, as shown below.
 
+!media large_media/framework/materials/offset_func.png
+       id=offset
+       caption=Field with multiple offsets
 
 ## Example Input File Syntax
 
