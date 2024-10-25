@@ -1,4 +1,5 @@
 [Tests]
+  design = '/NaNInterface.md'
   [quiet_nan_scalar]
     type = 'RunException'
     input = 'nan_interface.i'
@@ -9,7 +10,6 @@
 
     requirement = 'The system should produce a warning when a scalar NaN is produced and user required that the execution would not terminate'
     expect_err = "fp: A NaN was produced."
-    design = '/NaNInterface.md'
     issues = '#12234 #12350'
   []
   [quiet_nan_vector]
@@ -22,7 +22,6 @@
 
     requirement = 'The system should produce a warning when a vector NaN is produced and user required that the execution would not terminate'
     expect_err = "fp: A NaN was produced."
-    design = '/NaNInterface.md'
     issues = '#12234 #12350'
   []
   [signaling_nan_dbg]
@@ -34,7 +33,6 @@
 
     requirement = 'The system should report an error when a NaN is produced by a computation in DEBUG mode, by default'
     expect_err = "fp: A NaN was produced."
-    design = '/NaNInterface.md'
     issues = '#12234 #12350'
   []
   [signaling_nan_opt]
@@ -45,13 +43,36 @@
     threading = '!pthreads'
 
     requirement = 'The system should not report an error when a NaN is produced by a computation in OPT mode, by default'
-    design = '/NaNInterface.md'
     issues = '#12234 #12350'
 
     # Make sure this test does not run in --recover mode because the default
     # value of execute_on for checkpoint is TIMESTEP_END. This test will fail
     # with a nan before it solves a timestep and writes a checkpoint, causing
     # the test to fail in --recover mode.
+    recover = False
+  []
+  [signaling_nan_warning]
+    type = 'RunApp'
+    input = 'nan_interface.i'
+    cli_args = 'FluidProperties/fp/emit_on_nan=warning'
+    allow_test_objects = True
+    allow_warnings = true
+    expect_out = 'fp: A NaN was produced.'
+
+    requirement = 'The system should be able to return a warning when a fluid property evaluation encounters a NaN.'
+    issues = '#12234 #12350'
+    recover = False
+  []
+  [signaling_nan_exception]
+    type = 'RunException'
+    input = 'nan_interface.i'
+    cli_args = 'FluidProperties/fp/emit_on_nan=exception Executioner/type=Transient'
+    allow_test_objects = True
+    allow_warnings = true
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+
+    requirement = 'The system should be able to throw an exception when a fluid property evaluation encounters a NaN.'
+    issues = '#12234 #12350'
     recover = False
   []
 []

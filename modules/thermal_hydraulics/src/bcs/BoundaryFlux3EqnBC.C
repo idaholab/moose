@@ -57,7 +57,7 @@ Real
 BoundaryFlux3EqnBC::computeQpResidual()
 {
   const std::vector<Real> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_elem[_qp]};
-  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, {_normal, 0, 0});
+  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, _normals[_qp]);
 
   // Note that the ratio A_linear / A_elem is necessary because A_elem is passed
   // to the flux function, but A_linear is to be used on the boundary.

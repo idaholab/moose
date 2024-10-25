@@ -30,5 +30,5 @@ DirectionMaterial::computeQpProperties()
 {
   const Elem * el = _mesh.elemPtr(_current_elem->id());
   RealVectorValue dir = el->node_ref(1) - el->node_ref(0);
-  _dir[_qp] = dir / dir.norm();
+  _dir[_qp] = dir.unit();
 }

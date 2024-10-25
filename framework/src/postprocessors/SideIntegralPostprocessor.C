@@ -28,7 +28,7 @@ SideIntegralPostprocessor::initialSetup()
 {
   SidePostprocessor::initialSetup();
 
-  if (!_qp_integration && _mesh.allFaceInfo().size() == 0)
+  if (!_qp_integration && _mesh.isFiniteVolumeInfoDirty())
     errorNoFaceInfo();
 }
 

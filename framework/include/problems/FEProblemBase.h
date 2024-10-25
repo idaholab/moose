@@ -1882,6 +1882,26 @@ public:
   }
 
   /**
+   * Will return True if the executioner in use requires preserving the sparsity pattern of the
+   * matrices being formed during the solve. This is usually the Jacobian.
+   */
+  bool preserveMatrixSparsityPattern() const { return _preserve_matrix_sparsity_pattern; };
+
+  /// Set whether the sparsity pattern of the matrices being formed during the solve (usually the Jacobian)
+  /// should be preserved. This global setting can be retrieved by kernels, notably those using AD, to decide
+  /// whether to take additional care to preserve the sparsity pattern
+  void setPreserveMatrixSparsityPattern(bool preserve);
+
+  /**
+   * Will return true if zeros in the Jacobian are to be dropped from the sparsity pattern.
+   * Note that this can make preserving the matrix sparsity pattern impossible.
+   */
+  bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
+
+  /// Set whether the zeros in the Jacobian should be dropped from the sparsity pattern
+  void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
+
+  /**
    * Whether or not to accept the solution based on its invalidity.
    *
    * If this returns false, it means that an invalid solution was encountered
@@ -1902,10 +1922,6 @@ public:
    * Whether or not the solution invalid warnings are printed out immediately
    */
   bool immediatelyPrintInvalidSolution() const { return _immediately_print_invalid_solution; }
-
-  bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
-
-  void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
 
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
@@ -2847,8 +2863,14 @@ private:
    */
   virtual void resetState();
 
+  // Parameters handling Jacobian sparsity pattern behavior
+  /// Whether to error when the Jacobian is re-allocated, usually because the sparsity pattern changed
   bool _error_on_jacobian_nonzero_reallocation;
+  /// Whether to ignore zeros in the Jacobian, thereby leading to a reduced sparsity pattern
   bool _ignore_zeros_in_jacobian;
+  /// Whether to preserve the system matrix / Jacobian sparsity pattern, using 0-valued entries usually
+  bool _preserve_matrix_sparsity_pattern;
+
   const bool _force_restart;
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;

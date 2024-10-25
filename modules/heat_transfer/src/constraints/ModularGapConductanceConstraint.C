@@ -48,6 +48,12 @@ ModularGapConductanceConstraint::validParams()
   // this will still prompt a call from AugmentSparsityOnInterface to get a displaced
   // mortar interface since object._use_displaced_mesh = true.
 
+  // These parameter groups have to match the MortarGapHeatTransferAction's
+  params.addParamNamesToGroup("gap_flux_models", "Gap flux models");
+  params.addParamNamesToGroup(
+      "gap_geometry_type max_gap cylinder_axis_point_1 cylinder_axis_point_2 sphere_origin",
+      "Gap geometry");
+
   return params;
 }
 

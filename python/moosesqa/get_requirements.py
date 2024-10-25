@@ -74,10 +74,16 @@ def get_requirements_from_file(filename, prefix=None, include_non_testable=False
     #   [Tests]
     #      design = 'foo.md bar.md'
     #      issues = '#12345 ab23bd34'
+    #      verification = 'ver-foo.md'
+    #      validation = 'val-bar.md'
     design = root.children[0].get('design', None)
     design_line = root.children[0].line('design', None)
     issues = root.children[0].get('issues', None)
     issues_line = root.children[0].line('issues', None)
+    verification = root.children[0].get('verification', None)
+    verification_line = root.children[0].line('verification', None)
+    validation = root.children[0].get('validation', None)
+    validation_line = root.children[0].line('validation', None)
     deprecated = root.children[0].get('deprecated', False)
     deprecated_line = root.children[0].line('deprecated', None)
     collections = root.children[0].get('collections', None)
@@ -87,6 +93,8 @@ def get_requirements_from_file(filename, prefix=None, include_non_testable=False
         req = _create_requirement(child, filename,
                                   design, design_line,
                                   issues, issues_line,
+                                  verification, verification_line,
+                                  validation, validation_line,
                                   collections, collections_line,
                                   deprecated, deprecated_line)
         req.prefix = prefix
@@ -174,6 +182,7 @@ def _create_specification(child, name, filename, root_dir):
     return spec
 
 def _create_requirement(child, filename, design, design_line, issues, issues_line,
+                        verification, verification_line, validation, validation_line,
                         collections, collections_line, deprecated, deprecated_line):
 
     # Create the Requirement object
@@ -205,13 +214,13 @@ def _create_requirement(child, filename, design, design_line, issues, issues_lin
     req.collections_line = child.line('collections', collections_line)
 
     # V&V document
-    verification = child.get('verification', None)
-    req.verification = verification.strip().split() if (verification is not None) else None
-    req.verification_line = child.line('verification', None)
+    verification = child.get('verification', verification if (verification is not None) else None)
+    req.verification = verification.split() if (verification is not None) else None
+    req.verification_line = child.line('verification', verification_line)
 
-    validation = child.get('validation', None)
-    req.validation = validation.strip().split() if (validation is not None) else None
-    req.validation_line = child.line('validation', None)
+    validation = child.get('validation', validation if (validation is not None) else None)
+    req.validation = validation.split() if (validation is not None) else None
+    req.validation_line = child.line('validation', validation_line)
 
     # "detail" parameter (this will error in check_requirements)
     req.detail = child.get('detail', None)

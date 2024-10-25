@@ -16,15 +16,18 @@ NaNInterface::validParams()
 {
 #ifdef NDEBUG
   // in opt mode, getNaN() emits neither a warning nor an error by default
-  MooseEnum emit_on_nan("none warning error", "none");
+  MooseEnum emit_on_nan("none warning exception error", "none");
 #else
   // in dbg mode, getNaN() raises an error by default
-  MooseEnum emit_on_nan("none warning error", "error");
+  MooseEnum emit_on_nan("none warning exception error", "error");
 #endif
 
   InputParameters params = emptyInputParameters();
 
-  params.addParam<MooseEnum>("emit_on_nan", emit_on_nan, "Raise mooseWarning or mooseError?");
+  params.addParam<MooseEnum>("emit_on_nan",
+                             emit_on_nan,
+                             "Whether to raise a warning, an exception (usually triggering a retry "
+                             "with a smaller time step) or an error (ending the simulation)");
 
   return params;
 }

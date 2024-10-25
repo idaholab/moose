@@ -108,12 +108,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
 []
 
-[Problem]
-  previous_nl_solution_required = true
-  # TODO: fix this
-  error_on_jacobian_nonzero_reallocation = false
-[]
-
 [AuxVariables]
   [dummy]
     type = MooseVariableConstMonomial
