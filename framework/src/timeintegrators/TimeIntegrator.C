@@ -38,6 +38,10 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionState(1)),
+    _solution_sub(declareRestartableDataWithContext<std::unique_ptr<NumericVector<Number>>>(
+        "solution_sub", &const_cast<libMesh::Parallel::Communicator &>(this->comm()))),
+    _solution_old_sub(declareRestartableDataWithContext<std::unique_ptr<NumericVector<Number>>>(
+        "solution_old_sub", &const_cast<libMesh::Parallel::Communicator &>(this->comm()))),
     _t_step(_fe_problem.timeStep()),
     _dt(_fe_problem.dt()),
     _dt_old(_fe_problem.dtOld()),
@@ -46,7 +50,10 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _is_lumped(false),
     _u_dot_factor_tag(_fe_problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
     _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION)),
-    _var_restriction(!getParam<std::vector<VariableName>>("variables").empty())
+    _var_restriction(declareRestartableData<bool>(
+        "var_restriction", !getParam<std::vector<VariableName>>("variables").empty())),
+    _local_indices(declareRestartableData<std::vector<dof_id_type>>("local_indices")),
+    _vars(declareRestartableData<std::unordered_set<unsigned int>>("vars"))
 {
   _fe_problem.setUDotRequested(true);
 }

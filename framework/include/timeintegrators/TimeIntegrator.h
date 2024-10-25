@@ -205,8 +205,8 @@ protected:
   /// solution vectors
   const NumericVector<Number> * const & _solution;
   const NumericVector<Number> & _solution_old;
-  std::unique_ptr<NumericVector<Number>> _solution_sub;
-  std::unique_ptr<NumericVector<Number>> _solution_old_sub;
+  std::unique_ptr<NumericVector<Number>> & _solution_sub;
+  std::unique_ptr<NumericVector<Number>> & _solution_old_sub;
   //
   int & _t_step;
   //
@@ -227,12 +227,12 @@ protected:
   const TagID _u_dotdot_factor_tag;
 
   /// Whether the user has requested that the time integrator be applied to a subset of variables
-  bool _var_restriction;
+  bool & _var_restriction;
 
   /// The local degree of freedom indices this time integrator is being applied to. If this
   /// container is empty then the time integrator is applied to all indices
-  std::vector<dof_id_type> _local_indices;
+  std::vector<dof_id_type> & _local_indices;
 
   /// The variables that this time integrator integrates
-  std::unordered_set<unsigned int> _vars;
+  std::unordered_set<unsigned int> & _vars;
 };
