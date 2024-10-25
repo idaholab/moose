@@ -6,7 +6,8 @@ iteration in various solves:
 - Nonlinear system solves
 - Linear system solves (not yet implemented)
 - Steady-state detection in [Transient.md] (not yet implemented)
-- Fixed point solves (not yet implemented)
+- Fixed point solves with [MultiApps](syntax/MultiApps/index.md) (not yet implemented)
+- Fixed point solves with multiple systems (not yet implemented)
 
 Instead of supplying convergence-related parameters directly to the executioner,
 the user creates `Convergence` objects whose names are then supplied to the
@@ -30,17 +31,11 @@ Currently only the nonlinear solve convergence is supported, but others are plan
 for the near future. If the `nonlinear_convergence` parameter is not specified,
 then the default `Convergence` associated with the problem is created internally.
 
-## Available Classes
+!syntax list /Convergence objects=True actions=False subsystems=False
 
-The `Convergence` classes provided by MOOSE are the following:
+!syntax list /Convergence objects=False actions=False subsystems=True
 
-- [/FEProblemConvergence.md]: The default convergence criteria for [/FEProblem.md],
-  which includes several convergence criteria combined together.
-- [/ReferenceResidualConvergence.md]: The default convergence criteria for [/ReferenceResidualProblem.md],
-  which uses a custom norm to define the relative residual convergence criteria.
-- [/IterationCountConvergence.md]: Specifies minimum and maximum numbers of iterations.
-- [/PostprocessorConvergence.md]: Compares the value of a
-  [Postprocessor](Postprocessors/index.md) to a tolerance.
+!syntax list /Convergence objects=False actions=True subsystems=False
 
 ## Convergence Criteria Design Considerations
 

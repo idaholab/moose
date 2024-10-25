@@ -11,7 +11,7 @@
 
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
-#include "FEProblemConvergence.h"
+#include "DefaultNonlinearConvergence.h"
 #include "ReferenceResidualConvergence.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
@@ -26,6 +26,7 @@ InputParameters
 FEProblemSolve::feProblemDefaultConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
+
   params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
   params.addParam<unsigned int>("nl_forced_its", 0, "The Number of Forced Nonlinear Iterations");
   params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
@@ -40,11 +41,16 @@ FEProblemSolve::feProblemDefaultConvergenceParams()
       1.0e50,
       "Nonlinear Absolute Divergence Tolerance. A negative value disables this check.");
   params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
-  params.addParam<unsigned int>(
-      "n_max_nonlinear_pingpong",
-      100,
-      "The maximum number of times the nonlinear residual can ping pong "
-      "before requesting halting the current evaluation and requesting timestep cut");
+  params.addParam<unsigned int>("n_max_nonlinear_pingpong",
+                                100,
+                                "The maximum number of times the nonlinear residual can ping pong "
+                                "before requesting halting the current evaluation and requesting "
+                                "timestep cut for transient simulations");
+
+  params.addParamNamesToGroup("nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol "
+                              "nl_rel_step_tol nl_div_tol nl_abs_div_tol n_max_nonlinear_pingpong",
+                              "Nonlinear Solver");
+
   return params;
 }
 
@@ -167,11 +173,9 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
                               "Linear Solver");
-  params.addParamNamesToGroup(
-      "solve_type nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol "
-      "nl_rel_step_tol snesmf_reuse_base use_pre_SMO_residual num_grids nl_div_tol nl_abs_div_tol "
-      "residual_and_jacobian_together n_max_nonlinear_pingpong splitting",
-      "Nonlinear Solver");
+  params.addParamNamesToGroup("solve_type nl_abs_step_tol snesmf_reuse_base use_pre_SMO_residual "
+                              "num_grids residual_and_jacobian_together splitting",
+                              "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",

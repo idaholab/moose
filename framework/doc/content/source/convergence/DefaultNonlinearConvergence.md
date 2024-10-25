@@ -1,4 +1,4 @@
-# FEProblemConvergence
+# DefaultNonlinearConvergence
 
 This [Convergence](Convergence/index.md) is the default convergence for
 [/FEProblem.md], using a combination of criteria to determine convergence.
@@ -22,7 +22,7 @@ any of the following conditions are true:
 \|\mathbf{r}\|_2 < \tau_\text{abs} \,,
 
 !equation
-\frac{\|\mathbf{r}\|_2}{\|\mathbf{r}_0\|_2} > \tau_\text{rel} \,,
+\frac{\|\mathbf{r}\|_2}{\|\mathbf{r}_0\|_2} < \tau_\text{rel} \,,
 
 !equation
 \frac{\|\mathbf{\delta u}\|_2}{\|\mathbf{u}\|_2} < \tau_{\delta u,\text{rel}} \,.
@@ -50,25 +50,25 @@ where
 - $\mathbf{r}_0$ is the initial (guess) residual vector,
 - $\mathbf{\delta u} = \mathbf{u}^{(\ell)} - \mathbf{u}^{(\ell-1)}$ is the solution step vector,
 - "NaN" is a not-a-number value,
-- $\tau_\text{abs}$ is the absolute residual tolerance, provided by
-  [!param](/Convergence/FEProblemConvergence/nl_abs_tol).
+- $\tau_\text{abs}$ is the absolute residual tolerance, specified with the
+  [!param](/Convergence/DefaultNonlinearConvergence/nl_abs_tol) parameter.
 - $\tau_\text{rel}$ is the relative residual tolerance, provided by
-  [!param](/Convergence/FEProblemConvergence/nl_rel_tol).
+  [!param](/Convergence/DefaultNonlinearConvergence/nl_rel_tol).
 - $\tau_{\delta u,\text{abs}}$ is the relative step tolerance., provided by
-  [!param](/Convergence/FEProblemConvergence/nl_rel_step_tol).
+  [!param](/Convergence/DefaultNonlinearConvergence/nl_rel_step_tol).
 - $\tau_\text{div,abs}$ is the absolute residual divergence tolerance, provided by
-  [!param](/Convergence/FEProblemConvergence/nl_abs_div_tol).
+  [!param](/Convergence/DefaultNonlinearConvergence/nl_abs_div_tol).
 - $\tau_\text{div,rel}$ is the relative residual divergence tolerance, provided by
-  [!param](/Convergence/FEProblemConvergence/nl_div_tol).
+  [!param](/Convergence/DefaultNonlinearConvergence/nl_div_tol).
 - $n_\text{evals}$ is the number of residual evaluations.
 - $n_\text{evals,max}$ is the maximum number of residual evaluations, provided by
-  [!param](/Convergence/FEProblemConvergence/nl_max_funcs).
+  [!param](/Convergence/DefaultNonlinearConvergence/nl_max_funcs).
 - $n_\text{ping}$ is the number of ping-pong iterations.
 - $n_\text{ping,max}$ is the maximum number of ping-pong iterations, provided by
-  [!param](/Convergence/FEProblemConvergence/n_max_nonlinear_pingpong).
+  [!param](/Convergence/DefaultNonlinearConvergence/n_max_nonlinear_pingpong).
 
-!syntax parameters /Convergence/FEProblemConvergence
+!syntax parameters /Convergence/DefaultNonlinearConvergence
 
-!syntax inputs /Convergence/FEProblemConvergence
+!syntax inputs /Convergence/DefaultNonlinearConvergence
 
-!syntax children /Convergence/FEProblemConvergence
+!syntax children /Convergence/DefaultNonlinearConvergence

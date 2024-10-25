@@ -100,21 +100,6 @@ class NonlinearImplicitSystem;
 class LinearImplicitSystem;
 } // namespace libMesh
 
-/// The below enums are replaced by the ones in the Convergence class,
-// Preserving them only if applications use any of them, to be removed if Civet passes
-enum class MooseNonlinearConvergenceReason
-{
-  ITERATING = 0,
-  CONVERGED_FNORM_ABS = 2,
-  CONVERGED_FNORM_RELATIVE = 3,
-  CONVERGED_SNORM_RELATIVE = 4,
-  DIVERGED_FUNCTION_COUNT = -2,
-  DIVERGED_FNORM_NAN = -4,
-  DIVERGED_LINE_SEARCH = -6,
-  DIVERGED_DTOL = -9,
-  DIVERGED_NL_RESIDUAL_PINGPONG = -10
-};
-
 enum class MooseLinearConvergenceReason
 {
   ITERATING = 0,

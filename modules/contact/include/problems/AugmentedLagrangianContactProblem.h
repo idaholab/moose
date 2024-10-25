@@ -14,8 +14,6 @@
 #include "NodeFaceConstraint.h"
 #include "MechanicalContactConstraint.h"
 #include "AugmentedLagrangianContactProblemInterface.h"
-#include "AugmentedLagrangianContactConvergence.h"
-#include "Convergence.h"
 
 /**
  * Class to manage nested solution for augmented Lagrange contact.

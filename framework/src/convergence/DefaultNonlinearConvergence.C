@@ -8,13 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "FEProblemConvergence.h"
+#include "DefaultNonlinearConvergence.h"
 #include "FEProblemBase.h"
 #include "PetscSupport.h"
-#include "Executioner.h"
-#include "PerfGraphInterface.h"
 #include "NonlinearSystemBase.h"
-#include "ActionWarehouse.h"
 
 #include "libmesh/equation_systems.h"
 
@@ -22,16 +19,11 @@
 #include <petsc.h>
 #include <petscmat.h>
 #include <petscsnes.h>
-#include <petscksp.h>
-#include <petscdm.h>
 
-// PetscDMMoose include
-#include "PetscDMMoose.h"
-
-registerMooseObject("MooseApp", FEProblemConvergence);
+registerMooseObject("MooseApp", DefaultNonlinearConvergence);
 
 InputParameters
-FEProblemConvergence::validParams()
+DefaultNonlinearConvergence::validParams()
 {
   InputParameters params = Convergence::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
@@ -43,7 +35,7 @@ FEProblemConvergence::validParams()
   return params;
 }
 
-FEProblemConvergence::FEProblemConvergence(const InputParameters & parameters)
+DefaultNonlinearConvergence::DefaultNonlinearConvergence(const InputParameters & parameters)
   : Convergence(parameters),
     _added_as_default(getParam<bool>("added_as_default")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -71,7 +63,7 @@ FEProblemConvergence::FEProblemConvergence(const InputParameters & parameters)
 }
 
 void
-FEProblemConvergence::initialSetup()
+DefaultNonlinearConvergence::initialSetup()
 {
   Convergence::initialSetup();
 
@@ -79,16 +71,16 @@ FEProblemConvergence::initialSetup()
 }
 
 bool
-FEProblemConvergence::checkRelativeConvergence(const PetscInt /*it*/,
-                                               const Real fnorm,
-                                               const Real ref_norm,
-                                               const Real rel_tol,
-                                               const Real /*abs_tol*/,
-                                               std::ostringstream & oss)
+DefaultNonlinearConvergence::checkRelativeConvergence(const unsigned int /*it*/,
+                                                      const Real fnorm,
+                                                      const Real ref_norm,
+                                                      const Real rel_tol,
+                                                      const Real /*abs_tol*/,
+                                                      std::ostringstream & oss)
 {
   if (fnorm <= ref_norm * rel_tol)
   {
-    oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rel_tol
+    oss << "Converged due to residual norm " << fnorm << " < relative tolerance (" << rel_tol
         << ")\n";
     return true;
   }
@@ -97,7 +89,7 @@ FEProblemConvergence::checkRelativeConvergence(const PetscInt /*it*/,
 }
 
 Convergence::MooseConvergenceStatus
-FEProblemConvergence::checkConvergence(unsigned int iter)
+DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
 {
   TIME_SECTION(_perfid_check_convergence);
 
@@ -187,17 +179,17 @@ FEProblemConvergence::checkConvergence(unsigned int iter)
   std::ostringstream oss;
   if (fnorm != fnorm)
   {
-    oss << "Failed to converge, function norm is NaN\n";
+    oss << "Failed to converge, residual norm is NaN\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
   else if ((iter >= _nl_forced_its) && fnorm < abs_tol)
   {
-    oss << "Converged due to function norm " << fnorm << " < " << abs_tol << '\n';
+    oss << "Converged due to residual norm " << fnorm << " < " << abs_tol << '\n';
     status = MooseConvergenceStatus::CONVERGED;
   }
   else if (nfuncs >= max_funcs)
   {
-    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs
+    oss << "Exceeded maximum number of residual evaluations: " << nfuncs << " > " << max_funcs
         << '\n';
     status = MooseConvergenceStatus::DIVERGED;
   }
@@ -255,7 +247,7 @@ FEProblemConvergence::checkConvergence(unsigned int iter)
 }
 
 void
-FEProblemConvergence::checkDuplicateSetSharedExecutionerParams() const
+DefaultNonlinearConvergence::checkDuplicateSetSharedExecutionerParams() const
 {
   if (_duplicate_shared_executioner_params.size() > 0 && !_added_as_default)
   {

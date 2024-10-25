@@ -31,8 +31,8 @@ public:
   enum class MooseConvergenceStatus
   {
     ITERATING = 0,
-    CONVERGED = 2,
-    DIVERGED = -2
+    CONVERGED = 1,
+    DIVERGED = -1
   };
 
   Convergence(const InputParameters & parameters);

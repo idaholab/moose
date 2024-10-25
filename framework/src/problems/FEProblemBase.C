@@ -2411,12 +2411,12 @@ FEProblemBase::addConvergence(const std::string & type,
 void
 FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply)
 {
-  const std::string class_name = "FEProblemConvergence";
+  const std::string class_name = "DefaultNonlinearConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  addConvergence(class_name, _nonlinear_convergence_name, params);
+  addConvergence(class_name, getNonlinearConvergenceName(), params);
 }
 
 bool

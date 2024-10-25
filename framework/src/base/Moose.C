@@ -172,6 +172,7 @@ addActionTypes(Syntax & syntax)
   registerTask           ("compose_time_stepper",                                    true);
   registerMooseObjectTask("setup_time_integrators",       TimeIntegrator,            false);
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,            false);
+  registerMooseObjectTask("add_convergence",              Convergence,            false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,       false);
   registerMooseObjectTask("add_field_split",              Split,                     false);
@@ -200,8 +201,6 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_control",                  Control,                   false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,          false);
-
-  registerMooseObjectTask("add_convergence",              Convergence,            false);
 
   // clang-format on
 

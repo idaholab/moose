@@ -16,8 +16,7 @@ PostprocessorConvergence::validParams()
 {
   InputParameters params = IterationCountConvergence::validParams();
 
-  params.addClassDescription(
-      "Checks convergence based on absolute and relative error of the residual.");
+  params.addClassDescription("Compares a post-processor to a tolerance.");
 
   params.addRequiredParam<PostprocessorName>("postprocessor",
                                              "Post-processor to use for convergence criteria");

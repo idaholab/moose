@@ -9,10 +9,7 @@
 
 #pragma once
 
-#include "FEProblem.h"
-#include "NodeFaceConstraint.h"
-#include "MechanicalContactConstraint.h"
-#include "Convergence.h"
+#include "InputParameters.h"
 
 /**
  *  Class to provide an interface for parameters and routines required to check
@@ -27,9 +24,9 @@ public:
   {
     return _lagrangian_iteration_number;
   }
-  virtual void setLagrangianIterationNumber(unsigned int iterNo)
+  virtual void setLagrangianIterationNumber(unsigned int iter)
   {
-    _lagrangian_iteration_number = iterNo;
+    _lagrangian_iteration_number = iter;
   }
 
 protected:

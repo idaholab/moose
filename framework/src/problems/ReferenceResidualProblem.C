@@ -38,6 +38,5 @@ ReferenceResidualProblem::addDefaultNonlinearConvergence(const InputParameters &
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  setNonlinearConvergenceName("reference_residual");
-  addConvergence(class_name, _nonlinear_convergence_name, params);
+  addConvergence(class_name, getNonlinearConvergenceName(), params);
 }

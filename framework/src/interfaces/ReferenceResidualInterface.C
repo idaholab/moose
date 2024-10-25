@@ -25,9 +25,10 @@ ReferenceResidualInterface::validParams()
   params.addParam<Real>("acceptable_multiplier",
                         1.0,
                         "Multiplier applied to relative tolerance for acceptable limit");
-  params.addParam<int>("acceptable_iterations",
-                       0,
-                       "Iterations after which convergence to acceptable limits is accepted");
+  params.addParam<unsigned int>(
+      "acceptable_iterations",
+      0,
+      "Iterations after which convergence to acceptable limits is accepted");
   params.addParam<std::vector<std::vector<NonlinearVariableName>>>(
       "group_variables",
       "Name of variables that are grouped together to check convergence. (Multiple groups can be "
@@ -46,17 +47,18 @@ ReferenceResidualInterface::validParams()
                          "absolute reference vector to determine relative convergence");
   Lnorm.addDocumentation(
       "local_L2",
-      "Compute the L2 norm of the residual vector divided componentwise by the absolute reference "
+      "Compute the L2 norm of the residual vector divided component-wise by the absolute reference "
       "vector to the L2 norm of the absolute reference vector to determine relative convergence");
   Lnorm.addDocumentation(
       "global_Linf",
       "Compare the L-infinity norm of the residual vector to the L-infinity norm of the "
       "absolute reference vector to determine relative convergence");
-  Lnorm.addDocumentation("local_Linf",
-                         "Compute the L-infinity norm of the residual vector divided componentwise "
-                         "by the absolute reference "
-                         "vector to the L-infinity norm of the absolute reference vector to "
-                         "determine relative convergence");
+  Lnorm.addDocumentation(
+      "local_Linf",
+      "Compute the L-infinity norm of the residual vector divided component-wise "
+      "by the absolute reference "
+      "vector to the L-infinity norm of the absolute reference vector to "
+      "determine relative convergence");
 
   MooseEnum zero_ref_res("zero_tolerance relative_tolerance", "relative_tolerance");
   params.addParam<MooseEnum>("zero_reference_residual_treatment",
@@ -68,6 +70,13 @@ ReferenceResidualInterface::validParams()
   zero_ref_res.addDocumentation(
       "relative_tolerance",
       "Solve is treated as converged if the residual is below the relative tolerance");
+
+  params.addParamNamesToGroup("acceptable_iterations acceptable_multiplier",
+                              "Acceptable convergence");
+  params.addParamNamesToGroup("reference_vector reference_residual_variables",
+                              "Reference residual");
+  params.addParamNamesToGroup("solution_variables group_variables",
+                              "Variables to check for convergence");
 
   return params;
 }

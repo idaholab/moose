@@ -12,7 +12,7 @@
 #include "Action.h"
 
 /**
- * Add a dafault Convergence object to the simulation.
+ * Add a default Convergence object to the simulation.
  */
 class AddDefaultConvergenceAction : public Action
 {

@@ -9,10 +9,8 @@
 
 #pragma once
 
-#include "FEProblemConvergence.h"
-#include "FEProblem.h"
+#include "DefaultNonlinearConvergence.h"
 #include "ReferenceResidualInterface.h"
-#include "PerfGraphInterface.h"
 
 // PETSc includes
 #include <petsc.h>
@@ -23,13 +21,15 @@
 /**
  * Uses a reference residual to define relative convergence criteria.
  */
-class ReferenceResidualConvergence : public FEProblemConvergence, public ReferenceResidualInterface
+class ReferenceResidualConvergence : public DefaultNonlinearConvergence,
+                                     public ReferenceResidualInterface
 {
 public:
   static InputParameters validParams();
 
   ReferenceResidualConvergence(const InputParameters & parameters);
 
+  /// Computes the reference residuals for each group
   void updateReferenceResidual();
 
   virtual void initialSetup() override;
@@ -49,12 +49,13 @@ public:
     ReferenceVectorTagIDKey(const ReferenceVectorTagIDKey &) {}
   };
 
+  /// Returns the tag ID associated with the reference vector tag ID key
   TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_vector_tag_id; }
 
 protected:
   virtual void nonlinearConvergenceSetup() override;
 
-  virtual bool checkRelativeConvergence(const PetscInt it,
+  virtual bool checkRelativeConvergence(const unsigned int it,
                                         const Real fnorm,
                                         const Real the_residual,
                                         const Real rtol,
@@ -62,7 +63,7 @@ protected:
                                         std::ostringstream & oss) override;
 
   /**
-   * Check the convergence by comparing the norm of each variable separately against
+   * Check the convergence by comparing the norm of each variable's residual separately against
    * its reference variable's norm. Only consider the solution converged if all
    * variables are converged individually using either a relative or absolute
    * criterion.
@@ -93,7 +94,7 @@ protected:
   ///@}
 
   ///@{
-  /// Variable numbers assoicated with the names in _soln_var_names and _ref_resid_var_names.
+  /// Variable numbers associated with the names in _soln_var_names and _ref_resid_var_names.
   std::vector<unsigned int> _soln_vars;
   std::vector<unsigned int> _ref_resid_vars;
   ///@}
@@ -103,7 +104,7 @@ protected:
   /// acceptable number of iterations.  Used when checking the
   /// convergence of individual variables.
   Real _accept_mult;
-  int _accept_iters;
+  unsigned int _accept_iters;
   ///@}
 
   ///@{
@@ -122,7 +123,9 @@ protected:
   /// The vector storing the reference residual values
   const NumericVector<Number> * _reference_vector;
 
+  /// Variables to use for individual variable convergence checks
   std::vector<NonlinearVariableName> _converge_on;
+  /// Flag for each solution variable being in 'converge_on'
   std::vector<bool> _converge_on_var;
 
   /// Container for convergence treatment when the reference residual is zero

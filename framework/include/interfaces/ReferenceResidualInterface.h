@@ -29,6 +29,7 @@ public:
    * Add a set of variables that need to be grouped together. For use in
    * actions that create variables. This is templated for backwards compatibility to allow passing
    * in std::string or NonlinearVariableName.
+   * @tparam T string type used for variable names
    * @param group_vars A set of solution variables that need to be grouped.
    */
   template <typename T>

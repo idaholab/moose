@@ -26,6 +26,8 @@
 #include "ConstraintWarehouse.h"
 #include "MortarUserObject.h"
 #include "AugmentedLagrangeInterface.h"
+#include "AugmentedLagrangianContactConvergence.h"
+#include "Convergence.h"
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactProblem);
 registerMooseObject("ContactApp", AugmentedLagrangianContactFEProblem);
@@ -65,7 +67,6 @@ AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultNonl
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  this->setNonlinearConvergenceName("reference_residual");
   this->addConvergence(class_name, this->getNonlinearConvergenceName(), params);
 }
 
@@ -79,7 +80,6 @@ AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultNonlinearConvergenc
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  this->setNonlinearConvergenceName("default_convergence");
   this->addConvergence(class_name, this->getNonlinearConvergenceName(), params);
 }
 

@@ -11,10 +11,11 @@
 
 #include "AugmentedLagrangianContactProblemInterface.h"
 #include "ReferenceResidualConvergence.h"
-#include "FEProblemConvergence.h"
+#include "DefaultNonlinearConvergence.h"
 
 /**
  * Class to check convergence for the augmented Lagrangian contact problem.
+ * @tparam T a convergence class type to use for such problems
  */
 template <class T>
 class AugmentedLagrangianContactConvergence : public T,
@@ -34,5 +35,5 @@ protected:
 
 typedef AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>
     AugmentedLagrangianContactReferenceConvergence;
-typedef AugmentedLagrangianContactConvergence<FEProblemConvergence>
+typedef AugmentedLagrangianContactConvergence<DefaultNonlinearConvergence>
     AugmentedLagrangianContactFEProblemConvergence;

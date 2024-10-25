@@ -13,29 +13,21 @@
 #include "FEProblemBase.h"
 #include "PetscSupport.h"
 #include "Executioner.h"
-#include "PerfGraphInterface.h"
 #include "NonlinearSystemBase.h"
-#include "ActionWarehouse.h"
 #include "TaggingInterface.h"
-
 #include "AuxiliarySystem.h"
 #include "MooseVariableScalar.h"
 #include "NonlinearSystem.h"
 
 // PETSc includes
 #include <petscsnes.h>
-#include <petscksp.h>
-#include <petscdm.h>
-
-// PetscDMMoose include
-#include "PetscDMMoose.h"
 
 registerMooseObject("MooseApp", ReferenceResidualConvergence);
 
 InputParameters
 ReferenceResidualConvergence::validParams()
 {
-  InputParameters params = FEProblemConvergence::validParams();
+  InputParameters params = DefaultNonlinearConvergence::validParams();
   params += ReferenceResidualInterface::validParams();
 
   params.addClassDescription(
@@ -46,7 +38,7 @@ ReferenceResidualConvergence::validParams()
 }
 
 ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters & parameters)
-  : FEProblemConvergence(parameters),
+  : DefaultNonlinearConvergence(parameters),
     ReferenceResidualInterface(this),
     _reference_vector(nullptr),
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
@@ -55,7 +47,6 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _reference_vector_tag_id(Moose::INVALID_TAG_ID),
     _initialized(false)
 {
-  ///The following parameters are from ReferenceResidualProblem
   if (parameters.isParamValid("solution_variables"))
   {
     if (parameters.isParamValid("reference_vector"))
@@ -68,7 +59,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
   if (parameters.isParamValid("reference_residual_variables") &&
       parameters.isParamValid("reference_vector"))
     mooseError(
-        "For `ReferenceResidualProblem` you can specify either the `reference_residual_variables` "
+        "You may specify either the `reference_residual_variables` "
         "or `reference_vector` parameter, not both. `reference_residual_variables` is deprecated "
         "so we recommend using `reference_vector`");
 
@@ -83,7 +74,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
         parameters.get<std::vector<AuxVariableName>>("reference_residual_variables");
 
     if (_soln_var_names.size() != _ref_resid_var_names.size())
-      mooseError("In ReferenceResidualProblem, size of solution_variables (",
+      mooseError("Size of solution_variables (",
                  _soln_var_names.size(),
                  ") != size of reference_residual_variables (",
                  _ref_resid_var_names.size(),
@@ -100,19 +91,12 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
   }
   else
     mooseInfo("Neither the `reference_residual_variables` nor `reference_vector` parameter is "
-              "specified for `ReferenceResidualProblem`, which means that no reference "
+              "specified, which means that no reference "
               "quantites are set. Because of this, the standard technique of comparing the "
               "norm of the full residual vector with its initial value will be used.");
 
-  /*if (parameters.isParamValid("group_variables"))
-  {
-    _group_variables =
-        parameters.get<std::vector<std::vector<NonlinearVariableName>>>("group_variables");
-    _use_group_variables = true;
-  }*/
-
   _accept_mult = parameters.get<Real>("acceptable_multiplier");
-  _accept_iters = parameters.get<int>("acceptable_iterations");
+  _accept_iters = parameters.get<unsigned int>("acceptable_iterations");
 
   const auto norm_type_enum =
       parameters.get<MooseEnum>("normalization_type").getEnum<NormalizationType>();
@@ -137,7 +121,9 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _local_norm = false;
   }
   else
-    mooseError("Internal error");
+  {
+    mooseAssert(false, "This point should not be reached.");
+  }
 
   if (_local_norm && !parameters.isParamValid("reference_vector"))
     paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");
@@ -146,7 +132,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
 void
 ReferenceResidualConvergence::initialSetup()
 {
-  FEProblemConvergence::initialSetup();
+  DefaultNonlinearConvergence::initialSetup();
 
   NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0);
   AuxiliarySystem & aux_sys = _fe_problem.getAuxiliarySystem();
@@ -167,7 +153,7 @@ ReferenceResidualConvergence::initialSetup()
     // want to skip the individual variable comparison, so leave it alone.
   }
   else if (_soln_var_names.size() != s.n_vars())
-    mooseError("In ReferenceResidualProblem, size of solution_variables (",
+    mooseError("Size of solution_variables (",
                _soln_var_names.size(),
                ") != number of variables in system (",
                s.n_vars(),
@@ -209,6 +195,7 @@ ReferenceResidualConvergence::initialSetup()
     _group_soln_var_names.resize(size);
     _group_ref_resid_var_names.resize(size);
   }
+  // If not using groups, use one group for each variable
   else
   {
     _group_ref_resid.resize(n_soln_vars);
@@ -233,17 +220,21 @@ ReferenceResidualConvergence::initialSetup()
   _soln_vars.clear();
   for (unsigned int i = 0; i < n_soln_vars; ++i)
   {
-    bool foundMatch = false;
+    bool found_match = false;
     for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
       if (_soln_var_names[i] == s.variable_name(var_num))
       {
         _soln_vars.push_back(var_num);
-        foundMatch = true;
+        found_match = true;
         break;
       }
 
-    if (!foundMatch)
-      mooseError("Could not find solution variable '", _soln_var_names[i], "' in system");
+    if (!found_match)
+      mooseError("Could not find solution variable '",
+                 _soln_var_names[i],
+                 "' in system '",
+                 s.name(),
+                 "'.");
   }
 
   if (!_reference_vector)
@@ -269,7 +260,7 @@ ReferenceResidualConvergence::initialSetup()
   if (_use_group_variables)
     ungroup_index = _group_variables.size();
 
-  for (unsigned int i = 0; i < _soln_vars.size(); ++i)
+  for (const auto i : index_range(_soln_vars))
   {
     bool find_group = false;
     if (_use_group_variables)
@@ -303,6 +294,7 @@ ReferenceResidualConvergence::initialSetup()
 
   if (_use_group_variables)
   {
+    // Check for variable groups containing both field and scalar variables
     for (unsigned int i = 0; i < _group_variables.size(); ++i)
     {
       unsigned int num_scalar_vars = 0;
@@ -327,6 +319,7 @@ ReferenceResidualConvergence::initialSetup()
     }
   }
 
+  // Keep track of the names of the variables in each group (of 1 variable if not using groups)
   for (unsigned int i = 0; i < n_soln_vars; ++i)
   {
     if (_group_soln_var_names[_variable_group_num_index[i]].empty())
@@ -346,9 +339,9 @@ ReferenceResidualConvergence::initialSetup()
 
   if (!_reference_vector)
   {
-    const unsigned int size_solnVars = _soln_vars.size();
-    _scaling_factors.resize(size_solnVars);
-    for (unsigned int i = 0; i < size_solnVars; ++i)
+    const unsigned int size_soln_vars = _soln_vars.size();
+    _scaling_factors.resize(size_soln_vars);
+    for (unsigned int i = 0; i < size_soln_vars; ++i)
       if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
         _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
       else
@@ -372,7 +365,7 @@ ReferenceResidualConvergence::updateReferenceResidual()
   else
     std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);
 
-  for (unsigned int i = 0; i < _soln_vars.size(); ++i)
+  for (const auto i : index_range(_soln_vars))
   {
     Real resid = 0.0;
     const auto group = _variable_group_num_index[i];
@@ -485,7 +478,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
   // 2) if group residual is less than absolute tolerance
   // 3) if group reference residual is zero and:
   //   3.1) Convergence type is ZERO_TOLERANCE and group residual is zero (rare, but possible, and
-  //        historically implemented way)
+  //        historically implemented that way)
   //   3.2) Convergence type is RELATIVE_TOLERANCE and group residual
   //        is less than relative tolerance. (i.e., using the relative tolerance to check group
   //        convergence in an absolute way)
@@ -509,7 +502,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
 }
 
 bool
-ReferenceResidualConvergence::checkRelativeConvergence(const PetscInt it,
+ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
                                                        const Real fnorm,
                                                        const Real the_residual,
                                                        const Real rtol,

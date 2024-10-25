@@ -19,7 +19,6 @@
 #include "NonlinearSystem.h"
 #include "PenetrationLocator.h"
 #include "FEProblemBase.h"
-
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "Executioner.h"
@@ -27,9 +26,9 @@
 #include "ConstraintWarehouse.h"
 #include "MortarUserObject.h"
 #include "AugmentedLagrangeInterface.h"
-
-#include "FEProblemConvergence.h"
+#include "DefaultNonlinearConvergence.h"
 #include "ReferenceResidualConvergence.h"
+#include "MechanicalContactConstraint.h"
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactReferenceConvergence);
 registerMooseObject("ContactApp", AugmentedLagrangianContactFEProblemConvergence);
@@ -55,6 +54,7 @@ template <class T>
 Convergence::MooseConvergenceStatus
 AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
 {
+  // Check convergence of the nonlinear problem
   auto reason = T::checkConvergence(iter);
 
   auto & fe_problem_base = this->getMooseApp().feProblem();
@@ -64,6 +64,7 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
 
   bool repeat_augmented_lagrange_step = false;
 
+  // Nonlinear solve is converged, now check that the constraints are met
   if (reason == Convergence::MooseConvergenceStatus::CONVERGED)
   {
     if (_lagrangian_iteration_number < _maximum_number_lagrangian_iterations)
@@ -172,4 +173,4 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
 }
 
 template class AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>;
-template class AugmentedLagrangianContactConvergence<FEProblemConvergence>;
+template class AugmentedLagrangianContactConvergence<DefaultNonlinearConvergence>;

@@ -16,14 +16,14 @@
 /**
  * Default convergence criteria for FEProblem
  */
-class FEProblemConvergence : public Convergence
+class DefaultNonlinearConvergence : public Convergence
 {
 public:
   static InputParameters validParams();
 
   static InputParameters residualConvergenceParams();
 
-  FEProblemConvergence(const InputParameters & parameters);
+  DefaultNonlinearConvergence(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
@@ -38,7 +38,7 @@ protected:
    * @param abs_tol    Absolute tolerance
    * @return           Bool signifying convergence
    */
-  virtual bool checkRelativeConvergence(const PetscInt it,
+  virtual bool checkRelativeConvergence(const unsigned int it,
                                         const Real fnorm,
                                         const Real ref_norm,
                                         const Real rel_tol,
@@ -48,7 +48,7 @@ protected:
   /**
    * Performs setup necessary for each call to checkConvergence
    */
-  virtual void nonlinearConvergenceSetup(){};
+  virtual void nonlinearConvergenceSetup() {}
 
   /**
    * This method is to be used for parameters that are shared with the executioner.
@@ -81,11 +81,15 @@ private:
 
 protected:
   FEProblemBase & _fe_problem;
-
+  /// Nonlinear absolute divergence tolerance
   const Real _nl_abs_div_tol;
+  /// Nonlinear relative divergence tolerance
   const Real _nl_rel_div_tol;
+  /// Divergence threshold value
   const Real _div_threshold;
+  /// Number of iterations to force
   unsigned int _nl_forced_its;
+  /// Maximum number of nonlinear ping-pong iterations for a solve
   const unsigned int _nl_max_pingpong;
   /// Current number of nonlinear ping-pong iterations for the current solve
   unsigned int _nl_current_pingpong;
@@ -93,7 +97,7 @@ protected:
 
 template <typename T>
 const T &
-FEProblemConvergence::getSharedExecutionerParam(const std::string & param)
+DefaultNonlinearConvergence::getSharedExecutionerParam(const std::string & param)
 {
   const auto * executioner = getMooseApp().getExecutioner();
   if (executioner->isParamSetByUser(param))
