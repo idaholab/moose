@@ -2,7 +2,7 @@
 
 !syntax description /Materials/ReporterOffsetFunctionMaterial
 
-This can be used to create a material that is the sum of a function that is shifted by a set of points. This can be useful for creating a field of laser heat sources.
+This can be used to create a material that is the sum of a function that is shifted by a set of points. This can be useful for creating a field containing multiple sources, see Figure??.
 
 
 ## Example Input File Syntax

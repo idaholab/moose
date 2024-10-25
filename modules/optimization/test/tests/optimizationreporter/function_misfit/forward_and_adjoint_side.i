@@ -124,7 +124,7 @@
     type = SideIntegralMaterialProperty
     boundary = top
     property = obj_misfit
-    execute_on = 'ADJOINT_TIMESTEP_END TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [largest_adjoint]
     type = NodalExtremeValue

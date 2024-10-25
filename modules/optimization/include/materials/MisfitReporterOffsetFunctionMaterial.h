@@ -26,7 +26,7 @@ protected:
   /// Simulation variable
   const GenericVariableValue<is_ad> & _sim_var;
 
-  /// Gradient of misfit with respect to material properties
+  /// Gradient of misfit with respect to the simulation variable
   GenericMaterialProperty<Real, is_ad> & _mat_prop_gradient;
 
   /// values at each xyz coordinate
@@ -43,10 +43,4 @@ protected:
   using ReporterOffsetFunctionMaterialTempl<is_ad>::_coordy;
   using ReporterOffsetFunctionMaterialTempl<is_ad>::_coordz;
   using ReporterOffsetFunctionMaterialTempl<is_ad>::computeOffsetFunction;
-
-private:
-  /// convenience vectors (these are not const because reporters can change their size)
-  std::vector<Real> _ones_vec;
-  std::vector<Real> _zeros_vec;
-  std::vector<Point> _zeros_pts;
 };

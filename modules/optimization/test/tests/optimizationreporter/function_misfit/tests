@@ -23,7 +23,7 @@
         abs_zero = 1e-4
         # steady solve
         recover = false
-        detail = 'for side only measurements.'
+        detail = 'for side only measurements and fewer measurements than controllable parameters.'
       []
     []
   []

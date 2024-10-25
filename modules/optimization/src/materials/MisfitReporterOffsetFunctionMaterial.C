@@ -15,7 +15,7 @@ MisfitReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
       "Computes the misfit and misfit gradient materials for inverse optimizations problems.");
 
   params.addRequiredCoupledVar("sim_variable",
-                               "Variable that is being for the simulation variable.");
+                               "Variable that is being used for the simulation variable.");
   params.addRequiredParam<ReporterName>(
       "value_name", "reporter value name.  This uses the reporter syntax <reporter>/<name>.");
   return params;
@@ -59,9 +59,10 @@ MisfitReporterOffsetFunctionMaterialTempl<is_ad>::computeQpProperties()
     Real weighting = computeOffsetFunction(offset);
 
     // Computed weighted misfit and gradient materials
-    _material[_qp] += Utility::pow<2>(measurement_value * weighting - simulation_value * weighting);
+    _material[_qp] +=
+        Utility::pow<2>(weighting) * Utility::pow<2>(measurement_value - simulation_value);
     _mat_prop_gradient[_qp] -=
-        2.0 * weighting * (measurement_value * weighting - simulation_value * weighting);
+        2.0 * Utility::pow<2>(weighting) * (measurement_value - simulation_value);
   }
 }
 

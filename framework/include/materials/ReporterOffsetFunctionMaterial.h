@@ -32,7 +32,10 @@ protected:
 
   /// bool if data format read in is points
   const bool _read_in_points;
-
+  /**
+   * Reporter offset locations for function
+   */
+  // @{
   /// x coordinate
   const std::vector<Real> & _coordx;
   /// y coordinate
@@ -41,6 +44,7 @@ protected:
   const std::vector<Real> & _coordz;
   ///xyz point
   const std::vector<Point> & _points;
+  // @}
 
   /// The function being used for evaluation
   const Function & _func;
@@ -53,7 +57,6 @@ protected:
 
 private:
   /// convenience vectors (these are not const because reporters can change their size)
-  std::vector<Real> _ones_vec;
   std::vector<Real> _zeros_vec;
   std::vector<Point> _zeros_pts;
 };
