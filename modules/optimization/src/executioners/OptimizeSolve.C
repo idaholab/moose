@@ -70,7 +70,7 @@ OptimizeSolve::solve()
   _obj_function = &_problem.getUserObject<OptimizationReporterBase>("OptimizationReporter");
 
   // Initialize solution and matrix
-  _obj_function->setInitialCondition(*_parameters.get());
+  _obj_function->setInitialCondition(*_parameters);
   _ndof = _parameters->size();
 
   // time step defaults 1, we want to start at 0 for first iteration to be
@@ -357,9 +357,10 @@ OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, vo
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *solver->_parameters = param;
+  solver->_parameters->swap(param);
 
   (*objective) = solver->objectiveFunction();
+  solver->_parameters->swap(param);
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -371,26 +372,25 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *solver->_parameters = param;
+  solver->_parameters->swap(param);
 
   (*objective) = solver->objectiveFunction();
-
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
-
   solver->gradientFunction(grad);
+  solver->_parameters->swap(param);
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
-OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /*pc*/, void * ctx)
+OptimizeSolve::hessianFunctionWrapper(
+    Tao /*tao*/, Vec /*x*/, Mat /*hessian*/, Mat /*pc*/, void * ctx)
 {
   PetscFunctionBegin;
   // Define Hessian-vector multiplication routine
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-  libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  *solver->_parameters = param;
   PetscErrorCode ierr = MatShellSetOperation(
       solver->_hessian, MATOP_MULT, (void (*)(void))OptimizeSolve::applyHessianWrapper);
+
   CHKERRQ(ierr);
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -424,7 +424,7 @@ Real
 OptimizeSolve::objectiveFunction()
 {
   TIME_SECTION("objectiveFunction", 2, "Objective forward solve");
-  _obj_function->updateParameters(*_parameters.get());
+  _obj_function->updateParameters(*_parameters);
 
   Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
@@ -447,7 +447,7 @@ void
 OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   TIME_SECTION("gradientFunction", 2, "Gradient adjoint solve");
-  _obj_function->updateParameters(*_parameters.get());
+  _obj_function->updateParameters(*_parameters);
 
   Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
