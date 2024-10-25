@@ -49,7 +49,7 @@ protected:
   /// The function being used for evaluation
   const Function & _func;
   /**
-   * Calculates the value of the offset function at the given point.
+   * Calculates the value of the function at the given offset point.
    * @param point_offset The offset point to shift the function evaluation by.
    * @return The value of the function at the shifted location.
    */

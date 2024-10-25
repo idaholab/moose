@@ -25,7 +25,7 @@ ReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
   params.addParam<ReporterName>("point_name",
                                 "reporter point name.  This uses the reporter syntax "
                                 "<reporter>/<name>.");
-  params.addParam<std::string>("property_name", "Material property base name");
+  params.addRequiredParam<std::string>("property_name", "Material property base name");
   return params;
 }
 template <bool is_ad>
