@@ -295,8 +295,8 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
   // specific system tags that we need for this instance
   _nl_eigen->disassociateDefaultVectorTags();
 
-  // Clear FE tags and first add the specific tag associated with the residual
-  _fe_vector_tags.clear();
+  // add the specific tag associated with the residual
+  mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
   _fe_vector_tags.insert(tag);
 
   // Add any other user-added vector residual tags if they have associated vectors
@@ -311,6 +311,7 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
 
   setCurrentNonlinearSystem(_nl_eigen->number());
   computeResidualTags(_fe_vector_tags);
+  _fe_vector_tags.clear();
 
   _nl_eigen->disassociateVectorFromTag(residual, tag);
 }
@@ -328,8 +329,8 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   // specific system tags that we need for this instance
   _nl_eigen->disassociateDefaultVectorTags();
 
-  // Clear FE tags and first add the specific tags associated with the residual
-  _fe_vector_tags.clear();
+  // add the specific tags associated with the residual
+  mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
   _fe_vector_tags.insert(tagA);
   _fe_vector_tags.insert(tagB);
 
@@ -345,6 +346,7 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   _nl_eigen->setSolution(soln);
 
   computeResidualTags(_fe_vector_tags);
+  _fe_vector_tags.clear();
 
   _nl_eigen->disassociateVectorFromTag(residualA, tagA);
   _nl_eigen->disassociateVectorFromTag(residualB, tagB);
