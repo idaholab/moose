@@ -50,7 +50,7 @@
     type = SideAverageValue
     variable = u
     boundary = right
-    execute_on = 'fixedpoint_begin'
+    execute_on = 'fixedpoint_end'
   []
   [average]
     type = ElementAverageValue

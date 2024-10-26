@@ -48,24 +48,25 @@
   [unorm_begin]
     type = ElementL2Norm
     variable = u
-    execute_on = 'initial timestep_begin'
+    execute_on = 'initial fixedpoint_begin'
     outputs = none
   []
   [unorm]
     type = ElementL2Norm
     variable = u
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial fixedpoint_end'
   []
   [unorm_err]
     type = RelativeDifferencePostprocessor
     value1 = unorm
     value2 = unorm_begin
     outputs = none
+    execute_on = 'fixedpoint_end'
   []
   [vnorm]
     type = ElementL2Norm
     variable = v
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial fixedpoint_end'
   []
 []
 

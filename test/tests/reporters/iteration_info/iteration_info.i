@@ -45,6 +45,7 @@
 
 [Reporters/iteration_info]
     type = IterationInfo
+    execute_on = fixedpoint_end
 []
 
 [Outputs]

@@ -52,7 +52,7 @@
   [cumulative_picard_its_pp]
     type = TestPostprocessor
     test_type = custom_execute_on
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
 []
 

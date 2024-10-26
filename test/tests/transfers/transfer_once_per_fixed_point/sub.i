@@ -32,6 +32,7 @@
 [Postprocessors]
   [num_fixed_point_its]
     type = NumFixedPointIterations
+    execute_on = 'FIXEDPOINT_END'
   []
   [parent_fp_its]
     type = Receiver
