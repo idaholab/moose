@@ -160,7 +160,7 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
 
   const auto & console = _fe_problem.console();
   const auto & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
-  console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
+  console << "[DBG]  Ordering of AuxKernels on block " << _subdomain << std::endl;
   printExecutionOrdering<AuxKernelType>(kernels, false);
   _blocks_exec_printed.insert(_subdomain);
 }

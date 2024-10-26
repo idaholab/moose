@@ -338,16 +338,16 @@ NonlinearThread::printBlockExecutionInformation() const
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;
-    console << "[DBG] Ordering of " + objectType() + " Objects on block " << block_name << " ("
+    console << "[DBG]  Ordering of " + objectType() + " Objects on block " << block_name << " ("
             << _subdomain << ")" << std::endl;
     if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
     {
-      console << "[DBG] Ordering of kernels:" << std::endl;
+      console << "[DBG]   Ordering of kernels:" << std::endl;
       console << _kernels.activeObjectsToFormattedString() << std::endl;
     }
     if (_fv_kernels.size())
     {
-      console << "[DBG] Ordering of FV elemental kernels:" << std::endl;
+      console << "[DBG]   Ordering of FV elemental kernels:" << std::endl;
       std::string fvkernels =
           std::accumulate(_fv_kernels.begin() + 1,
                           _fv_kernels.end(),
@@ -358,13 +358,13 @@ NonlinearThread::printBlockExecutionInformation() const
     }
     if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
     {
-      console << "[DBG] Ordering of DG kernels:" << std::endl;
+      console << "[DBG]   Ordering of DG kernels:" << std::endl;
       console << _dg_kernels.activeObjectsToFormattedString() << std::endl;
     }
   }
   else if (_fe_problem.shouldPrintExecution(_tid) && num_objects == 0 &&
            !_blocks_exec_printed.count(_subdomain))
-    console << "[DBG] No Active " + objectType() + " Objects on block " << block_name << " ("
+    console << "[DBG]  No Active " + objectType() + " Objects on block " << block_name << " ("
             << _subdomain << ")" << std::endl;
 
   _blocks_exec_printed.insert(_subdomain);
@@ -380,12 +380,12 @@ NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
 
   const auto & console = _fe_problem.console();
   const auto b_name = _mesh.getBoundaryName(bid);
-  console << "[DBG] Ordering of " + objectType() + " Objects on boundary " << b_name << " (" << bid
+  console << "[DBG]  Ordering of " + objectType() + " Objects on boundary " << b_name << " (" << bid
           << ")" << std::endl;
 
   if (_integrated_bcs.hasActiveBoundaryObjects(bid, _tid))
   {
-    console << "[DBG] Ordering of integrated boundary conditions:" << std::endl;
+    console << "[DBG]   Ordering of integrated boundary conditions:" << std::endl;
     console << _integrated_bcs.activeObjectsToFormattedString() << std::endl;
   }
 
@@ -394,7 +394,7 @@ NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
   // same boundary
   if (_interface_kernels.hasActiveBoundaryObjects(bid, _tid))
   {
-    console << "[DBG] Ordering of interface kernels:" << std::endl;
+    console << "[DBG]   Ordering of interface kernels:" << std::endl;
     console << _interface_kernels.activeObjectsToFormattedString() << std::endl;
   }
 

@@ -762,6 +762,7 @@ MooseObjectWarehouseBase<T>::activeObjectsToFormattedString(
     const THREAD_ID tid /*=0*/, const std::string & prefix /*="[DBG]"*/) const
 {
   std::vector<std::string> output;
+  output.push_back(" ");
   for (const auto & object : _active_objects[tid])
     output.push_back(object->name());
   return ConsoleUtils::formatString(MooseUtils::join(output, " "), prefix);

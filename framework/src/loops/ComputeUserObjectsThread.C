@@ -398,7 +398,7 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
     if (_blocks_exec_printed.count(_subdomain))
       return;
 
-    console << "[DBG] Ordering of User Objects on block " << _subdomain << std::endl;
+    console << "[DBG]  Ordering of User Objects on block " << _subdomain << std::endl;
     // Output specific ordering of objects
     printExecutionOrdering<ElementUserObject>(_element_objs, "element user objects");
     printExecutionOrdering<DomainUserObject>(_domain_objs, "domain user objects");

@@ -118,28 +118,28 @@
     [regular_kernels]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] diff1 test1 diff2 react forceu forcev'
+      expect_out = '\[DBG\]   diff1 test1 diff2 react forceu forcev'
       detail = 'objects contributing to the residual and Jacobian, notably regular kernels,'
       cli_args = '--color off'
     []
     [regular_bcs]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] bc_u_tb bc_ul bc_ur bc_ut bc_ub'
+      expect_out = '\[DBG\]   bc_u_tb bc_ul bc_ur bc_ut bc_ub'
       detail = 'objects contributing to the residual and Jacobian, notably boundary conditions,'
       cli_args = '--color off'
     []
     [elem_dampers]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] limit_v limit_u'
+      expect_out = '\[DBG\]   limit_v limit_u'
       detail = 'elemental dampers,'
       cli_args = "--color off Dampers/active='limit_v limit_u'"
     []
     [interface_kernels]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] diff_ik_2 diff_ik_1'
+      expect_out = '\[DBG\]   diff_ik_2 diff_ik_1'
       detail = 'interface kernels,'
       cli_args = "--color off"
       # no print if the interface is not on rank 0
@@ -148,7 +148,7 @@
     [dirac]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] source_2 source_0'
+      expect_out = '\[DBG\]   source_2 source_0'
       detail = 'Dirac kernels,'
       cli_args = "--color off"
       # no print if the interface is not on rank 0
@@ -157,7 +157,7 @@
     [dgkernels]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] diff_dg_2 diff_dg_1'
+      expect_out = '\[DBG\]   diff_dg_2 diff_dg_1'
       detail = 'discontinuous Galerkin kernels,'
       cli_args = "--color off"
     []
@@ -231,7 +231,7 @@
     [nodal_dampers]
       type = RunApp
       input = 'show_execution_nodal_aux_bcs.i'
-      expect_out = '\[DBG\] limit_u'
+      expect_out = '\[DBG\]   limit_u'
       detail = 'nodal dampers,'
       cli_args = "--color off Dampers/inactive=''"
     []
@@ -241,7 +241,7 @@
       type = RunApp
       input = 'show_execution_userobjects.i'
       cli_args = 'Debug/show_execution_order=INITIAL Postprocessors/dofs/execute_on=INITIAL UserObjects/find_node/execute_on=INITIAL UserObjects/side_int/execute_on=INITIAL UserObjects/values/execute_on=INITIAL --color off'
-      expect_out = '\[DBG\] side_int'
+      expect_out = '\[DBG\]    side_int'
       detail = 'user objects, including postprocessors, executed at the beginning of the simulation,'
     []
     [user_objects_timestep_begin_end]
@@ -265,7 +265,7 @@
       # The full print corresponds to one print on the subdomain 0. It could be extended to checking
       # the boundary and interface execution
       # Sometimes, block 0 is not present on rank 0, hence the regex pattern
-      expect_out = '\[DBG\] (domain_2 |)domain_1'
+      expect_out = '\[DBG\]    (domain_2 |)domain_1'
       detail = 'domain user objects,'
     []
     [general_user_objects]
@@ -300,14 +300,14 @@
     [adaptivity_side_indicator]
       type = RunApp
       input = 'show_execution_adaptivity.i'
-      expect_out = '\[DBG\] indicator'
+      expect_out = '\[DBG\]   indicator'
       detail = 'each step of the adaptive refinement process, including side-based indicators,'
       cli_args = '--color off'
     []
     [adaptivity_elem_indicator]
       type = RunApp
       input = 'show_execution_adaptivity.i'
-      expect_out = '\[DBG\] indicator_elem'
+      expect_out = '\[DBG\]   indicator_elem'
       detail = 'each step of the adaptive refinement process, including element-based indicators,'
       cli_args = '--color off Adaptivity/Markers/marker/indicator=indicator_elem Adaptivity/Indicators/indicator_elem/type=AnalyticalIndicator Adaptivity/Indicators/indicator_elem/variable=u Adaptivity/Indicators/indicator_elem/function=4'
     []
@@ -315,7 +315,7 @@
     [initial_conditions]
       type = RunApp
       input = 'show_execution_ics.i'
-      expect_out = '\[DBG\] a_ic u_ic v_ic b_ic ghost_ic test_var_ic power'
+      expect_out = '\[DBG\]   a_ic u_ic v_ic b_ic ghost_ic test_var_ic power'
       detail = 'initial conditions of variables,'
       cli_args = '--color off'
     []
@@ -324,7 +324,7 @@
     [auxkernels]
       type = RunApp
       input = 'show_execution_auxkernels.i'
-      expect_out = '\[DBG\] b_saux c_saux'
+      expect_out = '\[DBG\]   b_saux c_saux'
       detail = 'auxiliary kernels intermingled with initial conditions and user objects, and'
       cli_args = '--color off'
     []
