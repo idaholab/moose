@@ -76,7 +76,7 @@
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = sub_level1.i
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
 
     # We need to disable restoration within the multiapp so that the previous
     # picard iterate is used as the starting solution within each iteration
@@ -90,14 +90,14 @@
     source_variable = u
     variable = u
     to_multi_app = level1-
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
   [v_from_sub]
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     source_variable = v
     variable = v
     from_multi_app = level1-
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
 []
 

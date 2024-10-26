@@ -13,7 +13,7 @@
   [sub]
     type = TransientMultiApp
     input_files = sub.i
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL FIXEDPOINT_END'
     cli_args = "MultiApps/active='';Outputs/active=''"
   []
 []

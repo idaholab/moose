@@ -81,7 +81,7 @@
     positions = '0 0 0'
     input_files = picard_sub2.i
     sub_cycling = true
-    execute_on = timestep_end
+    execute_on = fixedpoint_end
   []
 []
 

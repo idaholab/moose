@@ -54,7 +54,7 @@
   [pwr_avg]
     type = ElementAverageValue
     variable = power_density
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial fixedpoint_end'
   []
   [temp_avg]
     type = ElementAverageValue
@@ -94,7 +94,7 @@
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files  = steady_with_sub_sub.i
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
 []
 
@@ -104,14 +104,14 @@
     source_variable = power_density
     variable = power_density
     to_multi_app = sub
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
   [t_from_sub]
     type = MultiAppShapeEvaluationTransfer
     source_variable = temp
     variable = Tf
     from_multi_app = sub
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
 []
 

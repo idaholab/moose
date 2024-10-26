@@ -85,7 +85,7 @@
     app_type = MooseTestApp
     type = TransientMultiApp
     input_files = 'function_dt_sub.i'
-    execute_on = timestep_end
+    execute_on = fixedpoint_end
     positions = '0 -1 0'
   []
 []

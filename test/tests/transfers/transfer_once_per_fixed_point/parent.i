@@ -30,7 +30,7 @@
     type = TransientMultiApp
     input_files = sub.i
     cli_args = "MultiApps/active='';Outputs/active=''"
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL FIXEDPOINT_END'
     # The input was originally created with effectively no restore
     # see the changes made for #5554 then reverted in #28115
     no_restore = true
@@ -39,7 +39,7 @@
   [sub]
     type = TransientMultiApp
     input_files = sub.i
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL FIXEDPOINT_END'
     # The input was originally created with effectively no restore
     # see the changes made for #5554 then reverted in #28115
     no_restore = true
@@ -70,7 +70,7 @@
   [num_fixed_point_total]
     type = TestPostprocessor
     test_type = 'grow'
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL FIXEDPOINT_END'
   []
   [num_fixed_point_begin]
     type = TestPostprocessor

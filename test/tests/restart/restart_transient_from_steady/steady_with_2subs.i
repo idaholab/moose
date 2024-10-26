@@ -96,7 +96,7 @@
     positions = '0   0 0
                  0.5 0 0'
     input_files  = steady_with_sub_sub.i
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
 []
 
@@ -106,14 +106,14 @@
     source_variable = power_density
     variable = power_density
     to_multi_app = sub
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
   [t_from_sub]
     type = MultiAppGeometricInterpolationTransfer
     source_variable = temp
     variable = Tf
     from_multi_app = sub
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
   []
 []
 

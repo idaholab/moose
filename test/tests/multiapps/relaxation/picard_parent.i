@@ -88,7 +88,7 @@
   [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep_begin
+    execute_on = fixedpoint_begin
     positions = '0 0 0'
     input_files = picard_relaxed_sub.i
     # The input was originally created with effectively no restore

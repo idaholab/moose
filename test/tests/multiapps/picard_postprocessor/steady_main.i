@@ -42,6 +42,7 @@
     type = SideAverageValue
     variable = u
     boundary = right
+    execute_on = 'fixedpoint_end'
   []
   [average]
     type = ElementAverageValue
@@ -77,7 +78,7 @@
     positions = '0 0 0'
     input_files = steady_sub.i
     clone_parent_mesh = true
-    execute_on = 'timestep_begin'
+    execute_on = 'fixedpoint_begin'
     # we keep the full postprocessor output history of the subapp
     keep_full_output_history = true
 

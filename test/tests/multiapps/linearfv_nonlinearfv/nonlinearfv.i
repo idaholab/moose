@@ -38,7 +38,7 @@
   [linear]
     type = FullSolveMultiApp
     input_files = linearfv.i
-    execute_on = timestep_begin
+    execute_on = fixedpoint_begin
     no_restore = true
   []
 []
@@ -50,14 +50,14 @@
     from_multi_app = linear
     source_variable = 'u'
     variable = 'diff_var'
-    execute_on = timestep_begin
+    execute_on = fixedpoint_begin
   []
   [to_linear]
     type = MultiAppCopyTransfer
     to_multi_app = linear
     source_variable = 'v'
     variable = 'diff_var'
-    execute_on = timestep_begin
+    execute_on = fixedpoint_begin
   []
 []
 

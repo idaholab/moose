@@ -79,7 +79,7 @@
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = picard_sub.i
-    execute_on = 'timestep_end'
+    execute_on = 'fixedpoint_end'
     # The input was originally created with effectively no restore
     # see the changes made for #5554 then reverted in #28115
     no_restore = true

@@ -109,7 +109,7 @@
 [MultiApps]
   [sub]
     type = TransientMultiApp
-    execute_on = timestep_begin
+    execute_on = fixedpoint_begin
     input_files = picard_relaxed_array_sub.i
   []
 []
