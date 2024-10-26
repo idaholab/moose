@@ -49,11 +49,8 @@ PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters) : MooseMesh(par
   ExternalPetscSolverApp * petsc_app = dynamic_cast<ExternalPetscSolverApp *>(&_app);
 
   if (petsc_app && petsc_app->getPetscTS())
-  {
     // Retrieve mesh from TS
-    auto ierr = TSGetDM(petsc_app->getPetscTS(), &_dmda);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(TSGetDM(petsc_app->getPetscTS(), &_dmda));
   else
     mooseError(" PETSc external solver TS does not exist or this is not a petsc external solver");
 }

@@ -444,8 +444,7 @@ NonlinearEigenSystem::getSNES()
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
     SNES snes = nullptr;
-    auto ierr = Moose::SlepcSupport::mooseSlepcEPSGetSNES(eps, &snes);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCall(Moose::SlepcSupport::mooseSlepcEPSGetSNES(eps, &snes));
     return snes;
   }
   else
@@ -531,8 +530,7 @@ NonlinearEigenSystem::attachPreconditioner(Preconditioner<Number> * precondition
   // We need to let PETSc know that
   if (_preconditioner)
   {
-    auto ierr = Moose::SlepcSupport::registerPCToPETSc();
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCall(Moose::SlepcSupport::registerPCToPETSc());
     // Mark this, and then we can setup correct petsc options
     _eigen_problem.solverParams()._customized_pc_for_eigen = true;
     _eigen_problem.solverParams()._type = Moose::ST_JFNK;

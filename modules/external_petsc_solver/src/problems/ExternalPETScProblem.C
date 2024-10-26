@@ -35,31 +35,22 @@ ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
     _petsc_udot(declareRestartableData<Vec>("petsc_udot"))
 {
   DM da;
-  auto ierr = TSGetDM(_ts, &da);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(TSGetDM(_ts, &da));
   // Create a global solution vector
-  ierr = DMCreateGlobalVector(da, &_petsc_sol);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(DMCreateGlobalVector(da, &_petsc_sol));
   // This is required because libMesh incorrectly treats the PETSc parallel vector as a ghost vector
   // We should be able to remove this line of code once libMesh is updated
-  ierr = VecMPISetGhost(_petsc_sol, 0, nullptr);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecMPISetGhost(_petsc_sol, 0, nullptr));
   // The solution at the previous time step
-  ierr = VecDuplicate(_petsc_sol, &_petsc_sol_old);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecDuplicate(_petsc_sol, &_petsc_sol_old));
   // Udot
-  ierr = VecDuplicate(_petsc_sol, &_petsc_udot);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecDuplicate(_petsc_sol, &_petsc_udot));
   // RHS
-  ierr = VecDuplicate(_petsc_sol, &_petsc_rhs);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecDuplicate(_petsc_sol, &_petsc_rhs));
   // Form an initial condition
-  ierr = FormInitialSolution(_ts, _petsc_sol, NULL);
-  LIBMESH_CHKERR(ierr);
-  ierr = VecCopy(_petsc_sol, _petsc_sol_old);
-  LIBMESH_CHKERR(ierr);
-  ierr = VecSet(_petsc_udot, 0);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(FormInitialSolution(_ts, _petsc_sol, NULL));
+  LibmeshPetscCall(VecCopy(_petsc_sol, _petsc_sol_old));
+  LibmeshPetscCall(VecSet(_petsc_udot, 0));
 }
 
 ExternalPETScProblem::~ExternalPETScProblem()
@@ -81,9 +72,8 @@ ExternalPETScProblem::externalSolve()
   // to store the solution of the next time step after this call.
   // This call advances a time step so that there is an opportunity to
   // exchange information with MOOSE simulations.
-  auto ierr = externalPETScDiffusionFDMSolve(
-      _ts, _petsc_sol_old, _petsc_sol, dt(), time(), &_petsc_converged);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(externalPETScDiffusionFDMSolve(
+      _ts, _petsc_sol_old, _petsc_sol, dt(), time(), &_petsc_converged));
 }
 
 // This function is called when MOOSE time stepper actually moves to the next time step
@@ -95,25 +85,20 @@ ExternalPETScProblem::advanceState()
   // Compute udot using a backward Euler method
   // If the external code uses a different method,
   // udot should be retrieved from the external solver
-  auto ierr = VecCopy(_petsc_sol, _petsc_udot);
-  LIBMESH_CHKERR(ierr);
-  ierr = VecAXPY(_petsc_udot, -1., _petsc_sol_old);
-  LIBMESH_CHKERR(ierr);
-  ierr = VecScale(_petsc_udot, 1. / dt());
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecCopy(_petsc_sol, _petsc_udot));
+  LibmeshPetscCall(VecAXPY(_petsc_udot, -1., _petsc_sol_old));
+  LibmeshPetscCall(VecScale(_petsc_udot, 1. / dt()));
   // Save current solution because we are moving to the next time step
-  ierr = VecCopy(_petsc_sol, _petsc_sol_old);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecCopy(_petsc_sol, _petsc_sol_old));
 }
 
 Real
 ExternalPETScProblem::computeResidualL2Norm()
 {
-  auto ierr = TSComputeIFunction(_ts, time(), _petsc_sol, _petsc_udot, _petsc_rhs, PETSC_FALSE);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(
+      TSComputeIFunction(_ts, time(), _petsc_sol, _petsc_udot, _petsc_rhs, PETSC_FALSE));
   PetscReal norm;
-  ierr = VecNorm(_petsc_rhs, NORM_2, &norm);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecNorm(_petsc_rhs, NORM_2, &norm));
 
   return norm;
 }
@@ -132,27 +117,23 @@ ExternalPETScProblem::syncSolutions(Direction direction)
     // Mx: number of grid points in x direction on all processors
     PetscInt i, j, xs, ys, xm, ym, Mx;
     PetscScalar ** _petsc_sol_array;
-    auto ierr = TSGetDM(_ts, &da);
-    LIBMESH_CHKERR(ierr);
-    ierr = DMDAGetInfo(da,
-                       PETSC_IGNORE,
-                       &Mx,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE,
-                       PETSC_IGNORE);
-    LIBMESH_CHKERR(ierr);
-    ierr = DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL);
-    LIBMESH_CHKERR(ierr);
-    ierr = DMDAVecGetArray(da, _petsc_sol, &_petsc_sol_array);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCall(TSGetDM(_ts, &da));
+    LibmeshPetscCall(DMDAGetInfo(da,
+                                 PETSC_IGNORE,
+                                 &Mx,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE,
+                                 PETSC_IGNORE));
+    LibmeshPetscCall(DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL));
+    LibmeshPetscCall(DMDAVecGetArray(da, _petsc_sol, &_petsc_sol_array));
 
     // Take the solution from PETSc, and sync it to one MOOSE variable
     // We currently support one variable only but it is straightforward
@@ -179,8 +160,7 @@ ExternalPETScProblem::syncSolutions(Direction direction)
 
     sync_to_var.sys().solution().close();
 
-    ierr = DMDAVecRestoreArray(da, _petsc_sol, &_petsc_sol_array);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCall(DMDAVecRestoreArray(da, _petsc_sol, &_petsc_sol_array));
 
     // Make the solution and the current local solution consistent
     sync_to_var.sys().update();

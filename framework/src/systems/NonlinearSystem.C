@@ -230,10 +230,7 @@ NonlinearSystem::solve()
   checkInvalidSolution();
 
   if (_use_coloring_finite_difference)
-  {
-    auto ierr = MatFDColoringDestroy(&_fdcoloring);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(MatFDColoringDestroy(&_fdcoloring));
 }
 
 void
@@ -293,12 +290,11 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
   PetscMatrix<Number> * petsc_mat =
       static_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
 
-  auto ierr = SNESSetJacobian(petsc_nonlinear_solver->snes(),
-                              petsc_mat->mat(),
-                              petsc_mat->mat(),
-                              SNESComputeJacobianDefault,
-                              nullptr);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(SNESSetJacobian(petsc_nonlinear_solver->snes(),
+                                   petsc_mat->mat(),
+                                   petsc_mat->mat(),
+                                   SNESComputeJacobianDefault,
+                                   nullptr));
 }
 
 void

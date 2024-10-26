@@ -159,12 +159,12 @@ AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
     auto petsc_solution = dynamic_cast<const PetscVector<Number> *>(&solution);
     auto petsc_rhs = dynamic_cast<PetscVector<Number> *>(&rhs);
     if (petsc_matrix && petsc_solution && petsc_rhs)
-      LIBMESH_CHKERR(MatZeroRowsColumns(petsc_matrix->mat(),
-                                        cast_int<PetscInt>(nbc_dofs.size()),
-                                        numeric_petsc_cast(nbc_dofs.data()),
-                                        1.0,
-                                        petsc_solution->vec(),
-                                        petsc_rhs->vec()));
+      LibmeshPetscCall(MatZeroRowsColumns(petsc_matrix->mat(),
+                                          cast_int<PetscInt>(nbc_dofs.size()),
+                                          numeric_petsc_cast(nbc_dofs.data()),
+                                          1.0,
+                                          petsc_solution->vec(),
+                                          petsc_rhs->vec()));
     else
       mooseError("Using PETSc matrices and vectors is required for applying homogenized boundary "
                  "conditions.");

@@ -49,28 +49,21 @@ void
 PetscProjectSolutionOntoBounds::lineSearch()
 {
   PetscBool changed_y = PETSC_FALSE;
-  PetscErrorCode ierr;
   Vec X, F, Y, W, G;
   SNESLineSearch line_search;
   PetscReal fnorm, xnorm, ynorm;
   PetscBool domainerror;
   SNES snes = _solver->snes();
 
-  ierr = SNESGetLineSearch(snes, &line_search);
-  LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchGetVecs(line_search, &X, &F, &Y, &W, &G);
-  LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchGetNorms(line_search, &xnorm, &fnorm, &ynorm);
-  LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(SNESGetLineSearch(snes, &line_search));
+  LibmeshPetscCall(SNESLineSearchGetVecs(line_search, &X, &F, &Y, &W, &G));
+  LibmeshPetscCall(SNESLineSearchGetNorms(line_search, &xnorm, &fnorm, &ynorm));
+  LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED));
 
-  ierr = SNESLineSearchPreCheck(line_search, X, Y, &changed_y);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(SNESLineSearchPreCheck(line_search, X, Y, &changed_y));
 
   // apply the full newton step
-  ierr = VecWAXPY(W, -1., Y, X);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecWAXPY(W, -1., Y, X));
 
   {
     PetscVector<Number> solution(W, this->comm());
@@ -132,32 +125,22 @@ PetscProjectSolutionOntoBounds::lineSearch()
           indices.push_back(static_cast<PetscInt>(dof_number));
           values.push_back(static_cast<PetscScalar>(required_solution_change(component++)));
         }
-        ierr = VecSetValues(
-            W, static_cast<PetscInt>(indices.size()), indices.data(), values.data(), ADD_VALUES);
-        LIBMESH_CHKERR(ierr);
+        LibmeshPetscCall(VecSetValues(
+            W, static_cast<PetscInt>(indices.size()), indices.data(), values.data(), ADD_VALUES));
       }
     }
 
-  ierr = VecAssemblyBegin(W);
-  LIBMESH_CHKERR(ierr);
-  ierr = VecAssemblyEnd(W);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecAssemblyBegin(W));
+  LibmeshPetscCall(VecAssemblyEnd(W));
 
-  ierr = SNESComputeFunction(snes, W, F);
-  LIBMESH_CHKERR(ierr);
-  ierr = SNESGetFunctionDomainError(snes, &domainerror);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(SNESComputeFunction(snes, W, F));
+  LibmeshPetscCall(SNESGetFunctionDomainError(snes, &domainerror));
   if (domainerror)
-  {
-    ierr = SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN);
-    LIBMESH_CHKERR(ierr);
-  }
-  ierr = VecNorm(F, NORM_2, &fnorm);
-  LIBMESH_CHKERR(ierr);
+    LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN));
 
-  ierr = VecCopy(W, X);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecNorm(F, NORM_2, &fnorm));
 
-  ierr = SNESLineSearchComputeNorms(line_search);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(VecCopy(W, X));
+
+  LibmeshPetscCall(SNESLineSearchComputeNorms(line_search));
 }
