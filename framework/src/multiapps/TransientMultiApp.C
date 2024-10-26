@@ -227,9 +227,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         if (std::abs(target_time - _app.getGlobalTimeOffset() - ex->getTime() - dt) >
             ex->timestepTol())
           mooseDoOnce(mooseWarning(
-              "The target time (time a multiapp must reach at the end of the time step) "
-              "is desynchronized between this app and subapp ",
+              "The target time (time a multiapp must reach at the end of the time step) ",
+              target_time,
+              " is desynchronized between this app and subapp ",
               i,
+              ", which has time ",
+              _app.getGlobalTimeOffset() + ex->getTime() + dt,
               ".\n If this is desired: use the 'global_time_offset' multiapp parameter to "
               "declare a constant offset\n"
               "If the apps should (eventually) be synchronized in time, please either: \n"

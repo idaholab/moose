@@ -14,7 +14,7 @@
   [warning]
     type = RunException
     input = parent.i
-    expect_err = 'The target time \(time a multiapp must reach at the end of the time step\) is desynchronized between this app and subapp 0'
+    expect_err = 'The target time \(time a multiapp must reach at the end of the time step\) 1 is desynchronized between this app and subapp 0'
     issues = '#22338'
     requirement = "The system shall issue a warning if the parent app and the child app time become de-synchronized, except when using sub-cycling or resetting mechanisms which naturally handle or create desynchronization"
     design = "TransientMultiApp.md"
