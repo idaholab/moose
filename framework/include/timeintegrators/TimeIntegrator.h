@@ -101,7 +101,7 @@ public:
    * This function is responsible for the following:
    * - computing the time derivative; a reference is retrieved from _sys.solutionUDot().
    * - computing the time derivative Jacobian, stored in _du_dot_du, which is a
-   *   reference to _sys.duDotDu().
+   *   reference to _sys.duDotDus().
    */
   virtual void computeTimeDerivatives() = 0;
 

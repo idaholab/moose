@@ -1623,6 +1623,12 @@ SystemBase::getTimeIntegrators()
   return _time_integrators;
 }
 
+const Number &
+SystemBase::duDotDu(const unsigned int var_num) const
+{
+  return _du_dot_du[var_num];
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 

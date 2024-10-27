@@ -35,7 +35,7 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _nonlinear_implicit_system(dynamic_cast<NonlinearImplicitSystem *>(&_sys.system())),
     _Re_time(_nl.getResidualTimeVector()),
     _Re_non_time(_nl.getResidualNonTimeVector()),
-    _du_dot_du(_sys.duDotDu()),
+    _du_dot_du(_sys.duDotDus()),
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionState(1)),
     _solution_sub(declareRestartableDataWithContext<std::unique_ptr<NumericVector<Number>>>(

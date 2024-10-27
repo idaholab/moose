@@ -149,9 +149,9 @@ public:
     return _undisplaced_system.solutionUDotDotOld();
   }
 
-  virtual std::vector<Number> & duDotDu() override { return _undisplaced_system.duDotDu(); }
+  virtual std::vector<Number> & duDotDus() override { return _undisplaced_system.duDotDus(); }
   virtual Number & duDotDotDu() override { return _undisplaced_system.duDotDotDu(); }
-  virtual const Number & duDotDu(const unsigned int var_num) const override;
+  virtual const Number & duDotDu(unsigned int var_num = 0) const override;
   virtual const Number & duDotDotDu() const override { return _undisplaced_system.duDotDotDu(); }
 
   virtual void addDotVectors() override { _undisplaced_system.addDotVectors(); }

@@ -244,9 +244,9 @@ public:
    */
   virtual void addDotVectors();
 
-  virtual std::vector<Number> & duDotDu() { return _du_dot_du; }
+  virtual std::vector<Number> & duDotDus() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
-  virtual const Number & duDotDu(const unsigned int var_num) const { return _du_dot_du[var_num]; }
+  virtual const Number & duDotDu(unsigned int var_num = 0) const;
   virtual const Number & duDotDotDu() const { return _du_dotdot_du; }
 
   virtual NumericVector<Number> * solutionUDot() { return _u_dot; }
