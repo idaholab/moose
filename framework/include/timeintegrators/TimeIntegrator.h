@@ -183,7 +183,18 @@ protected:
    * Copy from one vector into another. If the time integrator has been restricted to a subset of
    * variables, then this will selectively copy their dofs
    */
-  void copyVector(NumericVector<Number> & from, NumericVector<Number> & to);
+  void copyVector(const NumericVector<Number> & from, NumericVector<Number> & to);
+
+  /**
+   * @returns The \p _du_dot_du multiplicative coefficient, e.g. if \p _du_dot_du is equivalent to
+   * 2/dt, then this method returns 2
+   */
+  virtual Real duDotDuCoeff() const { return 1; }
+
+  /**
+   * Compute \p _du_dot_du
+   */
+  void computeDuDotDu();
 
   FEProblemBase & _fe_problem;
   SystemBase & _sys;
@@ -235,4 +246,7 @@ protected:
 
   /// The variables that this time integrator integrates
   std::unordered_set<unsigned int> & _vars;
+
+  /// A vector that is used for creating 'from' subvectors in the \p copyVector() method
+  std::unique_ptr<NumericVector<Number>> _from_subvector;
 };

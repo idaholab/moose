@@ -42,6 +42,8 @@ protected:
                                    T4 & u_dotdot,
                                    const T5 & u_dotdot_old) const;
 
+  virtual Real duDotDuCoeff() const override;
+
   /// Newmark time integration parameter-beta
   Real _beta;
 

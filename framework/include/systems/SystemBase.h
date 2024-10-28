@@ -882,8 +882,6 @@ public:
                          const std::string & name,
                          InputParameters & parameters);
 
-  // virtual void addTimeIntegrator(std::shared_ptr<TimeIntegrator> /*ti*/) {}
-
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
 
@@ -958,7 +956,7 @@ public:
    * integrator is found (this could happen for instance if we're solving a non-transient problem),
    * then a nullptr will be returned
    */
-  const TimeIntegrator * getPossiblyNullTimeIntegrator(const unsigned int var_num) const;
+  const TimeIntegrator * queryTimeIntegrator(const unsigned int var_num) const;
 
   /**
    * @returns All the time integrators owned by this system

@@ -53,7 +53,8 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _var_restriction(declareRestartableData<bool>(
         "var_restriction", !getParam<std::vector<VariableName>>("variables").empty())),
     _local_indices(declareRestartableData<std::vector<dof_id_type>>("local_indices")),
-    _vars(declareRestartableData<std::unordered_set<unsigned int>>("vars"))
+    _vars(declareRestartableData<std::unordered_set<unsigned int>>("vars")),
+    _from_subvector(NumericVector<Number>::build(this->comm()))
 {
   _fe_problem.setUDotRequested(true);
 }
@@ -104,7 +105,7 @@ TimeIntegrator::init()
 void
 TimeIntegrator::solve()
 {
-  mooseError("Calling this method is no longer supported");
+  mooseError("Calling TimeIntegrator::solve() is no longer supported");
 }
 
 void
@@ -130,17 +131,16 @@ TimeIntegrator::getNumLinearIterationsLastSolve() const
 }
 
 void
-TimeIntegrator::copyVector(NumericVector<Number> & from, NumericVector<Number> & to)
+TimeIntegrator::copyVector(const NumericVector<Number> & from, NumericVector<Number> & to)
 {
   if (!_var_restriction)
     to = from;
   else
   {
     auto to_sub = to.get_subvector(_local_indices);
-    auto from_sub = from.get_subvector(_local_indices);
-    *to_sub = *from_sub;
+    from.create_subvector(*_from_subvector, _local_indices, false);
+    *to_sub = *_from_subvector;
     to.restore_subvector(std::move(to_sub), _local_indices);
-    from.restore_subvector(std::move(from_sub), _local_indices);
   }
 }
 
@@ -151,4 +151,13 @@ TimeIntegrator::integratesVar(const unsigned int var_num) const
     return true;
 
   return _vars.count(var_num);
+}
+
+void
+TimeIntegrator::computeDuDotDu()
+{
+  const auto coeff = duDotDuCoeff();
+  for (const auto i : index_range(_du_dot_du))
+    if (integratesVar(i))
+      _du_dot_du[i] = coeff / _dt;
 }

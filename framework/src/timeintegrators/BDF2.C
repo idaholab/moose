@@ -50,21 +50,12 @@ BDF2::computeTimeDerivatives()
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   if (_t_step == 1)
-  {
     u_dot = *_solution;
-    for (const auto i : index_range(_du_dot_du))
-      if (integratesVar(i))
-        _du_dot_du[i] = 1. / _dt;
-  }
   else
-  {
     u_dot.zero();
-    for (const auto i : index_range(_du_dot_du))
-      if (integratesVar(i))
-        _du_dot_du[i] = _weight[0] / _dt;
-  }
   computeTimeDerivativeHelper(u_dot, *_solution, _solution_old, _solution_older);
   u_dot.close();
+  computeDuDotDu();
 }
 
 void
@@ -84,4 +75,13 @@ BDF2::postResidual(NumericVector<Number> & residual)
   residual += _Re_time;
   residual += _Re_non_time;
   residual.close();
+}
+
+Real
+BDF2::duDotDuCoeff() const
+{
+  if (_t_step == 1)
+    return 1;
+  else
+    return _weight[0];
 }

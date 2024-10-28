@@ -38,6 +38,8 @@ protected:
    */
   bool solveStage();
 
+  virtual Real duDotDuCoeff() const override;
+
   /// Order of time integration
   const MooseEnum & _order;
 

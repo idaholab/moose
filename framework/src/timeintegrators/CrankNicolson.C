@@ -76,9 +76,7 @@ CrankNicolson::init()
   // time derivative is assumed to be zero on initial
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot.zero();
-  for (const auto i : index_range(_du_dot_du))
-    if (integratesVar(i))
-      _du_dot_du[i] = 0;
+  computeDuDotDu();
 
   // compute residual for the initial time step
   // Note: we can not directly pass _residual_old in computeResidualTag because
@@ -140,4 +138,10 @@ void
 CrankNicolson::postStep()
 {
   copyVector(_Re_non_time, _residual_old);
+}
+
+Real
+CrankNicolson::duDotDuCoeff() const
+{
+  return 2;
 }

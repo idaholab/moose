@@ -43,6 +43,8 @@ protected:
   template <typename T, typename T2>
   void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const;
 
+  virtual Real duDotDuCoeff() const override;
+
   NumericVector<Number> & _residual_old;
 };
 

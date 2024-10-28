@@ -56,9 +56,7 @@ ExplicitTVDRK2::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old, _solution_older);
 
-  for (const auto i : index_range(_du_dot_du))
-    if (integratesVar(i))
-      _du_dot_du[i] = 1. / _dt;
+  computeDuDotDu();
   u_dot.close();
 }
 

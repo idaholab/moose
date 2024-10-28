@@ -49,10 +49,7 @@ ActuallyExplicitEuler::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old);
   u_dot.close();
-
-  for (const auto i : index_range(_du_dot_du))
-    if (integratesVar(i))
-      _du_dot_du[i] = 1.0 / _dt;
+  computeDuDotDu();
 }
 
 void

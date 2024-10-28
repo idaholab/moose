@@ -1596,7 +1596,7 @@ SystemBase::copyTimeIntegrators(const SystemBase & other_sys)
 }
 
 const TimeIntegrator *
-SystemBase::getPossiblyNullTimeIntegrator(const unsigned int var_num) const
+SystemBase::queryTimeIntegrator(const unsigned int var_num) const
 {
   for (auto & ti : _time_integrators)
     if (ti->integratesVar(var_num))
@@ -1608,7 +1608,7 @@ SystemBase::getPossiblyNullTimeIntegrator(const unsigned int var_num) const
 const TimeIntegrator &
 SystemBase::getTimeIntegrator(const unsigned int var_num) const
 {
-  const auto * const ti = getPossiblyNullTimeIntegrator(var_num);
+  const auto * const ti = queryTimeIntegrator(var_num);
 
   if (ti)
     return *ti;

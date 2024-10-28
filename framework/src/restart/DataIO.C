@@ -326,6 +326,9 @@ dataStore(std::ostream & stream,
           std::unique_ptr<libMesh::NumericVector<Number>> & v,
           void * context)
 {
+  // Classes may declare unique pointers to vectors as restartable data and never actually create
+  // vector instances. This happens for example in the `TimeIntegrator` class where subvector
+  // instances are only created if multiple time integrators are present
   bool have_vector = v.get();
   dataStore(stream, have_vector, context);
   if (!have_vector)

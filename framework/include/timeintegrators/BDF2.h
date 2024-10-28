@@ -39,6 +39,8 @@ protected:
   void
   computeTimeDerivativeHelper(T & u_dot, const T2 & u, const T3 & u_old, const T4 & u_older) const;
 
+  virtual Real duDotDuCoeff() const override;
+
   std::vector<Real> & _weight;
 
   /// The older solution
