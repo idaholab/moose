@@ -1232,12 +1232,10 @@ mooseSlepcStoppingTest(EPS eps,
                        EPSConvergedReason * reason,
                        void * ctx)
 {
-  PetscErrorCode ierr;
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
 
   PetscFunctionBegin;
-  ierr = EPSStoppingBasic(eps, its, max_it, nconv, nev, reason, NULL);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(EPSStoppingBasic(eps, its, max_it, nconv, nev, reason, NULL));
 
   // If we do free power iteration, we need to mark the solver as converged.
   // It is because SLEPc does not offer a way to copy unconverged solution.
@@ -1256,24 +1254,20 @@ mooseSlepcStoppingTest(EPS eps,
 PetscErrorCode
 mooseSlepcEPSGetSNES(EPS eps, SNES * snes)
 {
-  PetscErrorCode ierr;
   PetscBool same, nonlinear;
 
   PetscFunctionBegin;
-  ierr = PetscObjectTypeCompare((PetscObject)eps, EPSPOWER, &same);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(PetscObjectTypeCompare((PetscObject)eps, EPSPOWER, &same));
 
   if (!same)
     mooseError("It is not eps power, and there is no snes");
 
-  ierr = EPSPowerGetNonlinear(eps, &nonlinear);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(EPSPowerGetNonlinear(eps, &nonlinear));
 
   if (!nonlinear)
     mooseError("It is not a nonlinear eigen solver");
 
-  ierr = EPSPowerGetSNES(eps, snes);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(EPSPowerGetSNES(eps, snes));
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -1281,21 +1275,17 @@ mooseSlepcEPSGetSNES(EPS eps, SNES * snes)
 PetscErrorCode
 mooseSlepcEPSSNESSetUpOptionPrefix(EPS eps)
 {
-  PetscErrorCode ierr;
   SNES snes;
   const char * prefix = nullptr;
 
   PetscFunctionBegin;
-  ierr = mooseSlepcEPSGetSNES(eps, &snes);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(mooseSlepcEPSGetSNES(eps, &snes));
   // There is an extra "eps_power" in snes that users do not like it.
   // Let us remove that from snes.
   // Retrieve option prefix from EPS
-  ierr = PetscObjectGetOptionsPrefix((PetscObject)eps, &prefix);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(PetscObjectGetOptionsPrefix((PetscObject)eps, &prefix));
   // Set option prefix to SNES
-  ierr = SNESSetOptionsPrefix(snes, prefix);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(SNESSetOptionsPrefix(snes, prefix));
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -1303,41 +1293,33 @@ mooseSlepcEPSSNESSetUpOptionPrefix(EPS eps)
 PetscErrorCode
 mooseSlepcEPSSNESSetCustomizePC(EPS eps)
 {
-  PetscErrorCode ierr;
   SNES snes;
   KSP ksp;
   PC pc;
 
   PetscFunctionBegin;
   // Get SNES from EPS
-  ierr = mooseSlepcEPSGetSNES(eps, &snes);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(mooseSlepcEPSGetSNES(eps, &snes));
   // Get KSP from SNES
-  ierr = SNESGetKSP(snes, &ksp);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(SNESGetKSP(snes, &ksp));
   // Get PC from KSP
-  ierr = KSPGetPC(ksp, &pc);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(KSPGetPC(ksp, &pc));
   // Set PC type
-  ierr = PCSetType(pc, "moosepc");
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(PCSetType(pc, "moosepc"));
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
 mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
 {
-  PetscErrorCode ierr;
   SNES snes;
   KSP ksp;
 
   PetscFunctionBegin;
   // Get SNES from EPS
-  ierr = mooseSlepcEPSGetSNES(eps, &snes);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(mooseSlepcEPSGetSNES(eps, &snes));
   // Get KSP from SNES
-  ierr = SNESGetKSP(snes, &ksp);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(SNESGetKSP(snes, &ksp));
 
   Moose::PetscSupport::petscSetDefaultPCSide(problem, ksp);
 
@@ -1356,7 +1338,6 @@ mooseSlepcEPSMonitor(EPS eps,
                      void * mctx)
 {
   ST st;
-  auto ierr = (PetscErrorCode)0;
   PetscScalar eigenr, eigeni;
 
   PetscFunctionBegin;
@@ -1364,13 +1345,11 @@ mooseSlepcEPSMonitor(EPS eps,
   auto & console = eigen_problem->console();
 
   auto inverse = eigen_problem->outputInverseEigenvalue();
-  ierr = EPSGetST(eps, &st);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(EPSGetST(eps, &st));
   eigenr = eigr[0];
   eigeni = eigi[0];
   // Make the eigenvalue consistent with shift type
-  ierr = STBackTransform(st, 1, &eigenr, &eigeni);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallQ(STBackTransform(st, 1, &eigenr, &eigeni));
 
   auto eigenvalue = inverse ? 1.0 / eigenr : eigenr;
 
