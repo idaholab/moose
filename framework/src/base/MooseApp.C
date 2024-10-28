@@ -108,6 +108,11 @@ MooseApp::validParams()
       "mesh_only",
       "--mesh-only [mesh_file_name]",
       "Setup and Output the input mesh only (Default: \"<input_file_name>_in.e\")");
+  // TODO: csg_only option will need to be updated to reflect output file format for CSG base file
+  params.addCommandLineParam<std::string>(
+      "csg_only",
+      "--csg-only",
+      "Setup and Output the input mesh in CSG format only (Default: \"<input_file_name>_in.e\")");
 
   params.addCommandLineParam<bool>("show_input",
                                    "--show-input",
@@ -994,7 +999,32 @@ MooseApp::setupOptions()
 
     _builder.build();
 
-    if (isParamValid("mesh_only"))
+    if (isParamValid("csg_only"))
+    {
+      // Error checking on incompatible command line options
+      if (_distributed_mesh_on_command_line)
+        mooseError("--csg-only cannot be used in conjunction with --distributed-mesh");
+      const bool has_mesh_split =
+          isParamValid("split_mesh") || isParamSetByUser("split_file") || _use_split;
+      if (has_mesh_split)
+        mooseError("--csg-only is not compatible with any mesh splitting options");
+      if (isParamSetByUser("refinements"))
+        mooseError("--csg-only cannot be used in conjunction with -r refinements option");
+      if (!isUltimateMaster())
+        mooseError("--csg-only option cannot be used as a Subapp");
+      if (_recover)
+        mooseError("--csg-only option cannot be used in recovery mode");
+
+      _syntax.registerTaskName("execute_csg_generators", true);
+      _syntax.addDependency("execute_csg_generators", "execute_mesh_generators");
+      _syntax.addDependency("recover_meta_data", "execute_csg_generators");
+
+      _syntax.registerTaskName("csg_only", true);
+      _syntax.addDependency("csg_only", "recover_meta_data");
+      _syntax.addDependency("set_mesh_base", "csg_only");
+      _action_warehouse.setFinalTask("csg_only");
+    }
+    else if (isParamValid("mesh_only"))
     {
       _syntax.registerTaskName("mesh_only", true);
       _syntax.addDependency("mesh_only", "setup_mesh_complete");
@@ -1122,7 +1152,7 @@ MooseApp::runInputFile()
 
   _action_warehouse.executeAllActions();
 
-  if (isParamValid("mesh_only") || isParamValid("split_mesh"))
+  if (isParamValid("csg_only") || isParamValid("mesh_only") || isParamValid("split_mesh"))
     _ready_to_exit = true;
   else if (getParam<bool>("list_constructed_objects"))
   {

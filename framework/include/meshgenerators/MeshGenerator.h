@@ -58,6 +58,19 @@ public:
    */
   static bool hasGenerateData(const InputParameters & params);
 
+  /**
+   * Sets that a mesh generator has a generateCSG() implementation.
+   *
+   * This must be called in the validParams() implementation for all
+   * mesh generators that implement generateCSG().
+   */
+  static void setHasGenerateCSG(InputParameters & params);
+  /**
+   * @return Whether or not the mesh generator noted by the given parameters
+   * has a generateCSG() implementation
+   */
+  static bool hasGenerateCSG(const InputParameters & params);
+
   /// The name of the private parameter for setting data only
   static const std::string data_only_param;
 
@@ -67,6 +80,13 @@ public:
    * Generate / modify the mesh
    */
   virtual std::unique_ptr<MeshBase> generate() = 0;
+
+  /**
+   * Internal generation method - this is what is actually called
+   * within MooseApp to execute the MeshGenerator.
+   */
+  // TODO return type of this method should be updated to CSGBase type
+  void generateInternalCSG();
 
   /**
    * Internal generation method - this is what is actually called
@@ -185,6 +205,11 @@ public:
   bool hasGenerateData() const { return hasGenerateData(_pars); }
 
   /**
+   * @return Whether or not this generator has a generateCSG() implementation
+   */
+  bool hasGenerateCSG() const { return hasGenerateCSG(_pars); }
+
+  /**
    * @return Whether or not this generator is to be generated in data-only mode
    */
   bool isDataOnly() const { return _data_only; }
@@ -194,6 +219,11 @@ protected:
    * Generate the mesh data
    */
   virtual void generateData();
+
+  /**
+   * Generate the CSG mesh
+   */
+  virtual void generateCSG();
 
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from

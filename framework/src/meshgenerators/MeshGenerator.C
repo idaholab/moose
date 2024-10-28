@@ -45,6 +45,7 @@ MeshGenerator::validParams()
   params.registerBase("MeshGenerator");
 
   params.addPrivateParam<bool>("_has_generate_data", false);
+  params.addPrivateParam<bool>("_has_generate_csg", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
   params.addPrivateParam<bool>(data_only_param, false);
 
@@ -62,7 +63,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   const auto & system = _app.getMeshGeneratorSystem();
   if (isDataOnly())
   {
-    if (!hasGenerateData())
+    // Skip the requirement for generateData() if we are generating CSG mesh
+    if (!hasGenerateCSG() && !hasGenerateData())
       system.dataDrivenError(*this, "does not support data-driven generation");
     if (hasSaveMesh())
       system.dataDrivenError(*this, "has 'save_with_name' set");
@@ -82,6 +84,18 @@ bool
 MeshGenerator::hasGenerateData(const InputParameters & params)
 {
   return params.get<bool>("_has_generate_data");
+}
+
+void
+MeshGenerator::setHasGenerateCSG(InputParameters & params)
+{
+  params.set<bool>("_has_generate_csg") = true;
+}
+
+bool
+MeshGenerator::hasGenerateCSG(const InputParameters & params)
+{
+  return params.get<bool>("_has_generate_csg");
 }
 
 const MeshGeneratorName *
@@ -327,6 +341,13 @@ MeshGenerator::generateInternal()
 }
 
 void
+MeshGenerator::generateInternalCSG()
+{
+  mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
+  generateCSG();
+}
+
+void
 MeshGenerator::addMeshSubgenerator(const std::string & type,
                                    const std::string & name,
                                    InputParameters params)
@@ -421,4 +442,11 @@ MeshGenerator::generateData()
 {
   mooseAssert(!hasGenerateData(), "Inconsistent flag");
   mooseError("This MeshGenerator does not have a generateData() implementation.");
+}
+
+void
+MeshGenerator::generateCSG()
+{
+  mooseAssert(!hasGenerateCSG(), "Inconsistent flag");
+  mooseError("This MeshGenerator does not have a generateCSG() implementation.");
 }

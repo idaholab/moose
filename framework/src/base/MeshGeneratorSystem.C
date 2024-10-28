@@ -23,7 +23,8 @@ MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
     ParallelObject(app),
     _app(app),
-    _has_bmbb(false)
+    _has_bmbb(false),
+    _csg_only(false)
 {
 }
 
@@ -192,6 +193,7 @@ MeshGeneratorSystem::createAddedMeshGenerators()
   }
 
   // Construct all of the mesh generators that we know exist
+  const bool csg_only = getCSGOnly();
   for (const auto & generator_names : ordered_generators)
     for (const auto & generator_name : generator_names)
       if (auto it = _mesh_generator_params.find(generator_name); it != _mesh_generator_params.end())
@@ -199,12 +201,19 @@ MeshGeneratorSystem::createAddedMeshGenerators()
         auto & params = it->second.second;
 
         // Determine now if we need to run this in data only mode
-        const bool data_only = _data_driven_generator_name &&
-                               getDataDrivenGeneratorName() != generator_name &&
-                               resolver.dependsOn(getDataDrivenGeneratorName(), generator_name);
+        const bool data_only =
+            (csg_only ||
+             (_data_driven_generator_name && getDataDrivenGeneratorName() != generator_name &&
+              resolver.dependsOn(getDataDrivenGeneratorName(), generator_name)));
         params.set<bool>(MeshGenerator::data_only_param) = data_only;
 
         createMeshGenerator(generator_name);
+
+        if (csg_only && !getMeshGenerator(generator_name).hasGenerateCSG())
+          mooseError("Mesh generator ",
+                     generator_name,
+                     " cannot be used in csg-only mode since it does not have a generateCSG "
+                     "implementation");
 
         mooseAssert(data_only == getMeshGenerator(generator_name).isDataOnly(),
                     "Inconsistent data only");
@@ -438,6 +447,10 @@ MeshGeneratorSystem::executeMeshGenerators()
     }
   }
 
+  // No save in meshes exist in csg only mode
+  if (getCSGOnly())
+    return;
+
   // Grab all the valid save in meshes from the temporary map to_save_in_meshes
   // and store them in _save_in_meshes
   for (auto & [name, mesh_ptr] : to_save_in_meshes)
@@ -659,4 +672,10 @@ MeshGeneratorSystem::dataDrivenError(const MeshGenerator & generator,
                          generator.typeAndName(),
                          " ",
                          message);
+}
+
+void
+MeshGeneratorSystem::setCSGOnly()
+{
+  _csg_only = true;
 }
