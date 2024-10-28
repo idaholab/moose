@@ -65,16 +65,14 @@ void
 MooseVecView(NumericVector<Number> & vector)
 {
   PetscVector<Number> & petsc_vec = static_cast<PetscVector<Number> &>(vector);
-  auto ierr = VecView(petsc_vec.vec(), 0);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(vector.comm().get(), VecView(petsc_vec.vec(), 0));
 }
 
 void
 MooseMatView(SparseMatrix<Number> & mat)
 {
   PetscMatrix<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
-  auto ierr = MatView(petsc_mat.mat(), 0);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
 void
@@ -82,8 +80,7 @@ MooseVecView(const NumericVector<Number> & vector)
 {
   PetscVector<Number> & petsc_vec =
       static_cast<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
-  auto ierr = VecView(petsc_vec.vec(), 0);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(vector.comm().get(), VecView(petsc_vec.vec(), 0));
 }
 
 void
@@ -91,8 +88,7 @@ MooseMatView(const SparseMatrix<Number> & mat)
 {
   PetscMatrix<Number> & petsc_mat =
       static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
-  auto ierr = MatView(petsc_mat.mat(), 0);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
 namespace Moose

@@ -1016,51 +1016,54 @@ attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
   // Attach the Jacobian computation function. If \p mat is the "eigen" matrix corresponding to B,
   // then attach our JacobianB computation routine, else the matrix corresponds to A, and we attach
   // the JacobianA computation routine
-  auto ierr = PetscObjectComposeFunction((PetscObject)mat,
-                                         "formJacobian",
-                                         eigen ? Moose::SlepcSupport::mooseSlepcEigenFormJacobianB
-                                               : Moose::SlepcSupport::mooseSlepcEigenFormJacobianA);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(
+      eigen_problem.comm().get(),
+      PetscObjectComposeFunction((PetscObject)mat,
+                                 "formJacobian",
+                                 eigen ? Moose::SlepcSupport::mooseSlepcEigenFormJacobianB
+                                       : Moose::SlepcSupport::mooseSlepcEigenFormJacobianA));
 
   // Attach the residual computation function. If \p mat is the "eigen" matrix corresponding to B,
   // then attach our FunctionB computation routine, else the matrix corresponds to A, and we attach
   // the FunctionA computation routine
-  ierr = PetscObjectComposeFunction((PetscObject)mat,
-                                    "formFunction",
-                                    eigen ? Moose::SlepcSupport::mooseSlepcEigenFormFunctionB
-                                          : Moose::SlepcSupport::mooseSlepcEigenFormFunctionA);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(
+      eigen_problem.comm().get(),
+      PetscObjectComposeFunction((PetscObject)mat,
+                                 "formFunction",
+                                 eigen ? Moose::SlepcSupport::mooseSlepcEigenFormFunctionB
+                                       : Moose::SlepcSupport::mooseSlepcEigenFormFunctionA));
 
   // It's also beneficial to be able to evaluate both A and B residuals at once
-  ierr = PetscObjectComposeFunction(
-      (PetscObject)mat, "formFunctionAB", Moose::SlepcSupport::mooseSlepcEigenFormFunctionAB);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(eigen_problem.comm().get(),
+                    PetscObjectComposeFunction((PetscObject)mat,
+                                               "formFunctionAB",
+                                               Moose::SlepcSupport::mooseSlepcEigenFormFunctionAB));
 
   // Users may choose to provide a custom measure of the norm of B (Bx for a linear system)
   if (eigen_problem.bxNormProvided())
-  {
-    ierr = PetscObjectComposeFunction(
-        (PetscObject)mat, "formNorm", Moose::SlepcSupport::mooseSlepcEigenFormNorm);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCallA(eigen_problem.comm().get(),
+                      PetscObjectComposeFunction((PetscObject)mat,
+                                                 "formNorm",
+                                                 Moose::SlepcSupport::mooseSlepcEigenFormNorm));
 
   // Finally we need to attach the "context" object, which is our EigenProblem, to the matrices so
   // that eventually when we get callbacks from SLEPc we can call methods on the EigenProblem
   PetscContainer container;
-  ierr = PetscContainerCreate(eigen_problem.comm().get(), &container);
-  LIBMESH_CHKERR(ierr);
-  ierr = PetscContainerSetPointer(container, &eigen_problem);
-  LIBMESH_CHKERR(ierr);
-  ierr = PetscObjectCompose((PetscObject)mat, "formJacobianCtx", (PetscObject)container);
-  LIBMESH_CHKERR(ierr);
-  ierr = PetscObjectCompose((PetscObject)mat, "formFunctionCtx", (PetscObject)container);
+  LibmeshPetscCallA(eigen_problem.comm().get(),
+                    PetscContainerCreate(eigen_problem.comm().get(), &container));
+  LibmeshPetscCallA(eigen_problem.comm().get(),
+                    PetscContainerSetPointer(container, &eigen_problem));
+  LibmeshPetscCallA(
+      eigen_problem.comm().get(),
+      PetscObjectCompose((PetscObject)mat, "formJacobianCtx", (PetscObject)container));
+  LibmeshPetscCallA(
+      eigen_problem.comm().get(),
+      PetscObjectCompose((PetscObject)mat, "formFunctionCtx", (PetscObject)container));
   if (eigen_problem.bxNormProvided())
-  {
-    ierr = PetscObjectCompose((PetscObject)mat, "formNormCtx", (PetscObject)container);
-    LIBMESH_CHKERR(ierr);
-  }
-  ierr = PetscContainerDestroy(&container);
-  LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(eigen_problem.comm().get(),
+                      PetscObjectCompose((PetscObject)mat, "formNormCtx", (PetscObject)container));
+
+  LibmeshPetscCallA(eigen_problem.comm().get(), PetscContainerDestroy(&container));
 }
 
 PetscErrorCode
@@ -1105,13 +1108,12 @@ mooseMatMult_NonEigen(Mat mat, Vec x, Vec r)
 void
 setOperationsForShellMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
 {
-  auto ierr = MatShellSetContext(mat, &eigen_problem);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatShellSetOperation(mat,
-                              MATOP_MULT,
-                              eigen ? (void (*)(void))mooseMatMult_Eigen
-                                    : (void (*)(void))mooseMatMult_NonEigen);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(eigen_problem.comm().get(), MatShellSetContext(mat, &eigen_problem));
+  LibmeshPetscCallA(eigen_problem.comm().get(),
+                    MatShellSetOperation(mat,
+                                         MATOP_MULT,
+                                         eigen ? (void (*)(void))mooseMatMult_Eigen
+                                               : (void (*)(void))mooseMatMult_NonEigen));
 }
 
 PETSC_EXTERN PetscErrorCode
