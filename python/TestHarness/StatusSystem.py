@@ -8,6 +8,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from collections import namedtuple
+import threading
+import contextlib
 
 def initStatus():
     status = namedtuple('status', 'status color code sort_value')
@@ -19,6 +21,8 @@ class StatusSystemError(Exception):
 class StatusSystem(object):
     """
     A Class for supplying statuses, with status text color and corresponding exit codes.
+
+    Set locking=True within the initializer to enable thread-safe access.
 
     Syntax:
     status = StatusSystem()
@@ -103,8 +107,23 @@ class StatusSystem(object):
                           queued,
                           running]
 
-    def __init__(self):
+    def __init__(self, locking=False):
+        # The underlying status
         self.__status = self.no_status
+        # The lock for reading/changing the status, if any
+        if locking:
+            self.__lock = threading.Lock()
+        else:
+            self.__lock = None
+
+    def getLock(self):
+        """
+        Gets the thread lock for this system, if any.
+
+        This is safe to use in a with statement even if locking
+        is not enabled.
+        """
+        return self.__lock if self.__lock else contextlib.suppress()
 
     def createStatus(self, status_key='NA'):
         """ return a specific status object based on supplied status name """
@@ -115,39 +134,50 @@ class StatusSystem(object):
     def getStatus(self):
         """
         Return the status object.
+
+        This is thread-safe if initialized with locking=True.
         """
-        return self.__status
+        with self.getLock():
+            return self.__status
 
-    def getAllStatuses(self):
+    @staticmethod
+    def getAllStatuses():
         """ return list of named tuples containing all status types """
-        return self.__all_statuses
+        return StatusSystem.__all_statuses
 
-    def getFailingStatuses(self):
+    @staticmethod
+    def getFailingStatuses():
         """ return list of named tuples containing failing status types """
-        return self.__exit_nonzero_statuses
+        return StatusSystem.__exit_nonzero_statuses
 
-    def getSuccessStatuses(self):
+    @staticmethod
+    def getSuccessStatuses():
         """ return list of named tuples containing exit code zero status types """
-        return self.__exit_zero_statuses
+        return StatusSystem.__exit_zero_statuses
 
-    def getPendingStatuses(self):
+    @staticmethod
+    def getPendingStatuses():
         """ return list of named tuples containing pending status types """
-        return self.__pending_statuses
+        return StatusSystem.__pending_statuses
 
     def setStatus(self, status=no_status):
         """
         Set the current status to status. If status is not supplied, 'no_status' is implied.
         There is a validation check during this process to ensure the named tuple adheres to
         this class's set statuses.
-        """
-        if self.isValid(status):
-            self.__status = status
-        else:
-            raise StatusSystemError('Invalid status! %s' % (str(status)))
-        return self.__status
 
-    def isValid(self, status):
-        original = set(self.no_status._asdict().keys())
+        This is thread-safe if initialized with locking=True.
+        """
+        with self.getLock():
+            if self.isValid(status):
+                self.__status = status
+            else:
+                raise StatusSystemError('Invalid status! %s' % (str(status)))
+            return self.__status
+
+    @staticmethod
+    def isValid(status):
+        original = set(StatusSystem.no_status._asdict().keys())
         altered = set(status._asdict().keys())
-        if not original.difference(altered) or status in self.__all_statuses:
+        if not original.difference(altered) or status in StatusSystem.getAllStatuses():
             return True

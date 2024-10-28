@@ -19,10 +19,10 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'diffs')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.exodiff.*?Running exodiff')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?Running csvdiff')
+        self.assertRegex(e.output, r'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
+        self.assertRegex(e.output, r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
+        self.assertRegex(e.output, r'test_harness\.exodiff.*?Running exodiff')
+        self.assertRegex(e.output, r'test_harness\.csvdiff.*?Running csvdiff')
 
         # Verify return code is DIFF related (0x81)
         self.assertIs(0x81, e.returncode)

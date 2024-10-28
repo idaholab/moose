@@ -1,9 +1,0 @@
-[Tests]
-  [basic_mpirun_works]
-    type = RunCommand
-    command = 'mpirun -n 2 hostname'
-    requirement = "The system's test suite shall verify that the parallel environment is at least minimally working."
-    issues = '#22635'
-    design = 'MooseUtils.md'
-  []
-[]

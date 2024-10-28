@@ -39,7 +39,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # will use the --ignore feature to force the test to run
         # regardless if that check(s) would otherwise cause this
         # test to be skipped.
-        output = self.runTests('-c', '-i', 'extra_info', '--ignore', '-e').decode('utf-8')
+        output = self.runTests('-c', '-i', 'extra_info', '--ignore', '-e')
 
         # Parse the output, and find the caveat string
         raw_caveat_string = re.findall(r'\[(.*)\]', output)
