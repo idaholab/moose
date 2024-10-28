@@ -72,7 +72,7 @@ MooseVecView(NumericVector<Number> & vector)
 void
 MooseMatView(SparseMatrix<Number> & mat)
 {
-  PetscMatrix<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
+  PetscMatrixBase<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
@@ -87,7 +87,7 @@ MooseVecView(const NumericVector<Number> & vector)
 void
 MooseMatView(const SparseMatrix<Number> & mat)
 {
-  PetscMatrix<Number> & petsc_mat =
+  PetscMatrixBase<Number> & petsc_mat =
       static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
