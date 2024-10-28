@@ -121,6 +121,21 @@ public:
   std::vector<std::string> getSavedMeshNames() const;
 
   /**
+   * Set whether mesh generator system is running in CSG-only mode to true
+   */
+  void setCSGOnly();
+
+  /**
+   * Get whether mesh generator system is running in CSG-only mode
+   */
+  bool getCSGOnly() const { return _csg_only; }
+
+  const std::vector<std::vector<MeshGenerator *>> & getOrderedMeshGenerators() const
+  {
+    return _ordered_mesh_generators;
+  }
+
+  /**
    * @returns Whether or not a mesh generator exists with the name \p name.
    */
   bool hasMeshGenerator(const MeshGeneratorName & name) const;
@@ -247,4 +262,7 @@ private:
 
   /// Whether to print the names of the mesh generators being executed or not
   bool _verbose;
+
+  /// Whether mesh generator system is running in CSG-only mode
+  bool _csg_only;
 };
