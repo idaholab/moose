@@ -435,16 +435,17 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
   for (int i = 0; i < _test_var_names.size(); i++)
   {
     auto test_var_name = _test_var_names.at(i);
+
     _td_blfs.Register(test_var_name,
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
-
     bc_map.ApplyIntegratedBCs(
         test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
 
-    // Apply kernels
+    // Apply kernels to td_blf
     auto td_blf = _td_blfs.Get(test_var_name);
     if (_td_blf_kernels_map.Has(test_var_name))
     {
+      td_blf->SetAssemblyLevel(_assembly_level);
       auto td_blf_kernels = _td_blf_kernels_map.GetRef(test_var_name);
 
       for (auto & td_blf_kernel : td_blf_kernels)
@@ -452,12 +453,33 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
         td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator());
       }
     }
-    // Assemble bilinear form acting on only time derivatives
-    td_blf->Assemble();
-    // if implicit, add contribution from bilinear form acting on u: {
+
+    // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
+    // operator on the trial variable in the implicit integration scheme
     auto blf = _blfs.Get(test_var_name);
-    td_blf->SpMat().Add(_dt_coef.constant, blf->SpMat());
-    // }
+    auto integs = blf->GetDBFI();
+    auto b_integs = blf->GetBBFI();
+    auto markers = blf->GetBBFI_Marker();
+
+    mfem::SumIntegrator * sum = new mfem::SumIntegrator;
+    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, false);
+
+    for (int i = 0; i < integs->Size(); ++i)
+    {
+      sum->AddIntegrator(*integs[i]);
+    }
+
+    for (int i = 0; i < b_integs->Size(); ++i)
+    {
+      td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false),
+                                    *(*markers[i]));
+    }
+
+    // scaled_sum is owned by td_blf
+    td_blf->AddDomainIntegrator(scaled_sum);
+
+    // Assemble form
+    td_blf->Assemble();
   }
 }
 
@@ -508,7 +530,36 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
                                         mfem::BlockVector & truedXdt,
                                         mfem::BlockVector & trueRHS)
 {
-  mooseError("Non-legacy assembly not yet implemented for time-dependent systems");
+  auto & test_var_name = _test_var_names.at(0);
+  auto td_blf = _td_blfs.Get(test_var_name);
+  auto blf = _blfs.Get(test_var_name);
+  auto lf = _lfs.Get(test_var_name);
+  // if implicit, add contribution to linear form from terms involving state
+  // variable at previous timestep: {
+
+  // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
+  mfem::Vector lf_prev(lf->Size());
+  blf->Mult(*_trial_variables.Get(test_var_name), lf_prev);
+  *lf -= lf_prev;
+  // }
+  mfem::Vector aux_x, aux_rhs;
+  // Update solution values on Dirichlet values to be in terms of du/dt instead of u
+  mfem::Vector bc_x = *(_xs.at(0).get());
+  bc_x -= *_trial_variables.Get(test_var_name);
+  bc_x /= _dt_coef.constant;
+
+  // Form linear system for operator acting on vector of du/dt
+  mfem::OperatorPtr * aux_a = new mfem::OperatorPtr;
+  // Ownership of aux_a goes to the blf
+  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), bc_x, *lf, *aux_a, aux_x, aux_rhs);
+
+  truedXdt.GetBlock(0) = aux_x;
+  trueRHS.GetBlock(0) = aux_rhs;
+  truedXdt.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
+
+  // Create monolithic matrix
+  op.Reset(aux_a->Ptr());
 }
 
 void
