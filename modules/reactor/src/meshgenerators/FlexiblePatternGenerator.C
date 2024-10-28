@@ -408,7 +408,11 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
     {
       std::set<unsigned int> rect_pattern_elem_size;
       for (const auto & rect_pattern_elem : rect_pattern)
+      {
+        if (rect_pattern_elem.empty())
+          paramError("rect_patterns", "Each row of the element pattern must not be empty.");
         rect_pattern_elem_size.emplace(rect_pattern_elem.size());
+      }
       if (rect_pattern_elem_size.size() > 1)
         paramError("rect_patterns",
                    "The two-dimensional array element of this parameter must have a correct "
