@@ -10,6 +10,7 @@
 import os
 import unittest
 import subprocess
+import tempfile
 import re
 
 class TestHarnessTestCase(unittest.TestCase):
@@ -17,19 +18,22 @@ class TestHarnessTestCase(unittest.TestCase):
     TestCase class for running TestHarness commands.
     """
 
-    def runExceptionTests(self, *args):
-        os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
-        cmd = ['./run_tests'] + list(args)
+    def runTests(self, *args, tmp_output=True):
+        cmd = ['./run_tests'] + list(args) + ['--term-format', 'njCst']
+        sp_kwargs = {'cwd': os.path.join(os.getenv('MOOSE_DIR'), 'test'),
+                     'text': True}
+        if tmp_output:
+            with tempfile.TemporaryDirectory() as output_dir:
+                cmd += ['-o', output_dir]
+            return subprocess.check_output(cmd, **sp_kwargs)
+        return subprocess.check_output(cmd, **sp_kwargs)
+
+    def runExceptionTests(self, *args, tmp_output=True):
         try:
-            return subprocess.check_output(cmd, cwd=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
-            raise RuntimeError('test failed to fail')
+            self.runTests(*args, tmp_output=tmp_output)
         except Exception as err:
             return err.output
-
-    def runTests(self, *args):
-        os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
-        cmd = ['./run_tests'] + list(args)
-        return subprocess.check_output(cmd, cwd=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
+        raise RuntimeError('test failed to fail')
 
     def checkStatus(self, output, passed=0, skipped=0, pending=0, failed=0):
         """

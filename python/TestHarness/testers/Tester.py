@@ -7,17 +7,14 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, re, os, sys, pkgutil, shutil, shlex
+import re, os, sys, shutil
 import mooseutils
-from TestHarness import util
+from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
-from tempfile import SpooledTemporaryFile, TemporaryDirectory
 from pathlib import Path
-import subprocess
-from signal import SIGTERM
 
-class Tester(MooseObject):
+class Tester(MooseObject, OutputInterface):
     """
     Base class from which all tester objects are instanced.
     """
@@ -26,10 +23,10 @@ class Tester(MooseObject):
         params = MooseObject.validParams()
 
         # Common Options
-        params.addRequiredParam('type', "The type of test of Tester to create for this test.")
-        params.addParam('max_time',   int(os.getenv('MOOSE_TEST_MAX_TIME', 300)), "The maximum in seconds that the test will be allowed to run.")
-        params.addParam('skip',     "Provide a reason this test will be skipped.")
-        params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
+        params.addRequiredParam('type',   "The type of test of Tester to create for this test.")
+        params.addParam('max_time',       Tester.getDefaultMaxTime(), "The maximum in seconds that the test will be allowed to run.")
+        params.addParam('skip',           "Provide a reason this test will be skipped.")
+        params.addParam('deleted',        "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
         params.addParam('unique_test_id', "The unique hash given to a test")
 
         params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
@@ -115,22 +112,20 @@ class Tester(MooseObject):
         params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.")
         params.addParam("collections", [], "A means for defining a collection of tests for SQA process.")
         params.addParam("classification", 'functional', "A means for defining a requirement classification for SQA process.")
-        return params
 
-    def __del__(self):
-        # Do any cleaning that we can (removes the temp dir for now if it exists)
-        self.cleanup()
+        params.addParam('hpc', True, 'Set to false to not run with HPC schedulers (PBS and slurm)')
+
+        return params
 
     # This is what will be checked for when we look for valid testers
     IS_TESTER = True
 
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
+        OutputInterface.__init__(self)
+
         self.specs = params
-        self.outfile = None
-        self.errfile = None
         self.joined_out = ''
-        self.exit_code = 0
         self.process = None
         self.tags = params['tags']
         self.__caveats = set([])
@@ -149,8 +144,11 @@ class Tester(MooseObject):
         if self.specs["allow_test_objects"]:
             self.specs["cli_args"].append("--allow-test-objects")
 
-        ### Enumerate the tester statuses we want to use
-        self.test_status = StatusSystem()
+        # The Tester status; here we do not use locks because we need to
+        # do deep copy operations of a Tester object, and thread locks
+        # cannot be deep copied.
+        self.test_status = StatusSystem(locking=False)
+        # Enumerate the tester statuses we want to use
         self.no_status = self.test_status.no_status
         self.queued = self.test_status.queued
         self.skip = self.test_status.skip
@@ -159,34 +157,14 @@ class Tester(MooseObject):
         self.fail = self.test_status.fail
         self.diff = self.test_status.diff
         self.deleted = self.test_status.deleted
+        self.error = self.test_status.error
 
         self.__failed_statuses = self.test_status.getFailingStatuses()
         self.__skipped_statuses = [self.skip, self.silent]
 
-        # A temp directory for this Tester, if requested
-        self.tmp_dir = None
-
-    def getTempDirectory(self):
-        """
-        Gets a shared temp directory that will be cleaned up for this Tester
-        """
-        if self.tmp_dir is None:
-            self.tmp_dir = TemporaryDirectory(prefix='tester_')
-        return self.tmp_dir
-
-    def cleanup(self):
-        """
-        Entry point for doing any cleaning if necessary.
-
-        Currently just cleans up the temp directory
-        """
-        if self.tmp_dir is not None:
-            # Don't let this fail
-            try:
-                self.tmp_dir.cleanup()
-            except:
-                pass
-            self.tmp_dir = None
+        # The command that we actually ended up running; this may change
+        # depending on the runner which might inject something
+        self.command_ran = None
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -198,19 +176,50 @@ class Tester(MooseObject):
     def createStatus(self):
         return self.test_status.createStatus()
 
-    # Return a tuple (status, message, caveats) for this tester as found
-    # in the .previous_test_results.json file (or supplied json object)
-    def previousTesterStatus(self, options, previous_storage=None):
-        if not previous_storage:
-            previous_storage = options.results_storage
+    def getResultsEntry(self, options, create, graceful=False):
+        """ Get the entry in the results storage for this tester """
+        tests = options.results_storage['tests']
 
-        status_exists = previous_storage.get(self.getTestDir(), {}).get(self.getTestName(), None)
+        test_dir = self.getTestDir()
+        test_dir_entry = tests.get(test_dir)
+        if not test_dir_entry:
+            if not create:
+                if graceful:
+                    return None, None
+                raise Exception(f'Test folder {test_dir} not in results')
+            tests[test_dir] = {}
+            test_dir_entry = tests[test_dir]
+
+        test_name = self.getTestName()
+        test_name_entry = test_dir_entry.get(test_name)
+        if not test_name_entry:
+            if not create:
+                if graceful:
+                    return test_dir_entry, None
+                raise Exception(f'Test {test_dir}/{test_name} not in results')
+            test_dir_entry[test_name] = {}
+        return test_dir_entry, test_dir_entry.get(test_name)
+
+    # Return a tuple (status, message, caveats) for this tester as found
+    # in the previous results
+    def previousTesterStatus(self, options):
+        test_dir_entry, test_entry = self.getResultsEntry(options, False, True)
         status = (self.test_status.createStatus(), '', '')
-        if status_exists:
-            status = (self.test_status.createStatus(str(status_exists['STATUS'])),
-                      str(status_exists['STATUS_MESSAGE']),
-                      status_exists['CAVEATS'])
+        if test_entry:
+            status = (self.test_status.createStatus(str(test_entry['status'])),
+                      str(test_entry['status_message']),
+                      test_entry['caveats'])
         return (status)
+
+    def getResults(self, options) -> dict:
+        """Get the results dict for this Tester"""
+        output_files = []
+        for file in self.getOutputFiles(options):
+            output_files.append(os.path.join(self.getTestDir(), file))
+        return {'name': self.__class__.__name__,
+                'command': self.getCommand(options),
+                'input_file': self.getInputFile(),
+                'output_files': output_files}
 
     def getStatusMessage(self):
         return self.__tester_message
@@ -232,10 +241,25 @@ class Tester(MooseObject):
         return self.getStatus() == self.diff
     def isDeleted(self):
         return self.getStatus() == self.deleted
+    def isError(self):
+        return self.getStatus() == self.error
 
     def getTestName(self):
         """ return test name """
         return self.specs['test_name']
+
+    def getTestNameShort(self):
+        """ return test short name (not including the path) """
+        return self.specs['test_name_short']
+
+    def appendTestName(self, value):
+        """
+        Appends a value to the test name.
+
+        Used when creating duplicate Testers for recover tests.
+        """
+        self.specs['test_name'] += value
+        self.specs['test_name_short'] += value
 
     def getPrereqs(self):
         """ return list of prerequisite tests this test depends on """
@@ -255,6 +279,9 @@ class Tester(MooseObject):
             return os.path.join(self.specs['test_dir'], self.specs['working_directory'])
         return self.specs['test_dir']
 
+    def getSpecFile(self):
+        return os.path.join(self.specs['test_dir'], self.specs['spec_file'])
+
     def getMinReportTime(self):
         """ return minimum time elapse before reporting a 'long running' status """
         return self.specs['min_reported_time']
@@ -262,6 +289,19 @@ class Tester(MooseObject):
     def getMaxTime(self):
         """ return maximum time elapse before reporting a 'timeout' status """
         return float(self.specs['max_time'])
+
+    def setMaxTime(self, value):
+        """
+        Sets the max time for the job
+        """
+        self.specs['max_time'] = float(value)
+
+    @staticmethod
+    def getDefaultMaxTime():
+        """
+        Gets the default max run time
+        """
+        return int(os.getenv('MOOSE_TEST_MAX_TIME', 300))
 
     def getUniqueTestID(self):
         """ return unique hash for test """
@@ -281,13 +321,9 @@ class Tester(MooseObject):
         """ return the contents of the input file applicable to this Tester """
         return None
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         """ return the output files if applicable to this Tester """
         return []
-
-    def getOutput(self):
-        """ Return the contents of stdout and stderr """
-        return self.joined_out
 
     def getCheckInput(self):
         return self.check_input
@@ -295,9 +331,9 @@ class Tester(MooseObject):
     def setValgrindMode(self, mode):
         """ Increase the alloted time for tests when running with the valgrind option """
         if mode == 'NORMAL':
-            self.specs['max_time'] = float(self.specs['max_time']) * 2
+            self.setMaxTime(self.getMaxTime() * 2)
         elif mode == 'HEAVY':
-            self.specs['max_time'] = float(self.specs['max_time']) * 6
+            self.setMaxTime(self.getMaxTime() * 6)
 
     def checkRunnable(self, options):
         """
@@ -335,10 +371,6 @@ class Tester(MooseObject):
         """ return number of slots to use for this tester """
         return self.getThreads(options) * self.getProcs(options)
 
-    def getCommand(self, options):
-        """ return the executable command that will be executed by the tester """
-        return ''
-
     def hasOpenMPI(self):
         """ return whether we have openmpi for execution
 
@@ -359,139 +391,46 @@ class Tester(MooseObject):
             return False
         return Path(which_mpiexec).parent.absolute() == Path(which_ompi_info).parent.absolute()
 
-    def spawnSubprocessFromOptions(self, timer, options):
+    def getCommand(self, options):
         """
-        Spawns a subprocess based on given options, sets output and error files,
-        and starts timer.
+        Return the command that the Tester wants ran
+
+        We say "wants ran" here because the Runner may inject something
+        within the command, for example when running within a container.
+        Due to this distinction, you can obtain the command that was
+        actually ran via getCommandRan()
         """
-        cmd = self.getCommand(options)
+        return None
 
-        use_shell = self.specs["use_shell"]
-
-        if not use_shell:
-            # Split command into list of args to be passed to Popen
-            cmd = shlex.split(cmd)
-
-        cwd = self.getTestDir()
-
-        # Verify that the working directory is available right before we execute.
-        if not os.path.exists(cwd):
-            # Timers must be used since they are directly indexed in the Job class
-            timer.start()
-            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
-            timer.stop()
-            return 1
-
-        self.process = None
-        try:
-            f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
-            e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
-
-            popen_args = [cmd]
-            popen_kwargs = {'stdout': f,
-                            'stderr': e,
-                            'close_fds': False,
-                            'shell': use_shell,
-                            'cwd': cwd}
-            # On Windows, there is an issue with path translation when the command
-            # is passed in as a list.
-            if platform.system() == "Windows":
-                popen_kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
-            else:
-                popen_kwargs['preexec_fn'] = os.setsid
-
-            # Special logic for openmpi runs
-            if self.hasOpenMPI():
-                popen_env = os.environ.copy()
-
-                # Don't clobber state
-                popen_env['OMPI_MCA_orte_tmpdir_base'] = self.getTempDirectory().name
-                # Allow oversubscription for hosts that don't have a hostfile
-                popen_env['PRTE_MCA_rmaps_default_mapping_policy'] = ':oversubscribe'
-
-                popen_kwargs['env'] = popen_env
-
-            process = subprocess.Popen(*popen_args, **popen_kwargs)
-        except:
-            print("Error in launching a new task", cmd)
-            raise
-
-        self.process = process
-        self.outfile = f
-        self.errfile = e
-
-        timer.start()
-        return 0
-
-    def finishAndCleanupSubprocess(self, timer):
+    def setCommandRan(self, command):
         """
-        Waits for the current subproccess to finish, stops the timer, and
-        cleans up.
+        Sets the command that was actually ran.
+
+        This is needed to account for running commands within containers
+        and needing to run an additional command up front (i.e., with
+        a pbs or slurm scheduler calling something like qsub)
         """
-        self.process.wait()
+        self.command_ran = command
 
-        timer.stop()
-
-        self.exit_code = self.process.poll()
-        self.outfile.flush()
-        self.errfile.flush()
-
-        # store the contents of output, and close the file
-        self.joined_out = util.readOutput(self.outfile, self.errfile, self)
-        self.outfile.close()
-        self.errfile.close()
-
-    def runCommand(self, timer, options):
+    def getCommandRan(self):
         """
-        Helper method for running external (sub)processes as part of the tester's execution.  This
-        uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
-        be the same timer passed to the run method.  Results from running the subprocess is stored
-        in the tester's output and exit_code fields.
-        """
+        Gets the command that was actually ran.
 
-        exit_code = self.spawnSubprocessFromOptions(timer, options)
-        if exit_code: # Something went wrong
-            return
-
-        self.finishAndCleanupSubprocess(timer)
-
-    def killCommand(self):
+        See setCommandRan() for the distinction.
         """
-        Kills any currently executing process started by the runCommand method.
-        """
-        if self.process is not None:
-            try:
-                if platform.system() == "Windows":
-                    from distutils import spawn
-                    if spawn.find_executable("taskkill"):
-                        subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.process.pid)])
-                    else:
-                        self.process.terminate()
-                else:
-                    pgid = os.getpgid(self.process.pid)
-                    os.killpg(pgid, SIGTERM)
-            except OSError: # Process already terminated
-                pass
+        return self.command_ran
 
-        # Try to clean up anything else that we can
-        self.cleanup()
-
-    def run(self, timer, options):
+    def postSpawn(self, runner):
         """
-        This is a method that is the tester's main execution code.  Subclasses can override this
-        method with custom code relevant to their specific testing needs.  By default this method
-        calls runCommand.  runCommand is provided as a helper for running (external) subprocesses
-        as part of the tester's execution and should be the *only* way subprocesses are executed
-        if needed. The run method is responsible to call the start+stop methods on timer to record
-        the time taken to run the actual test.  start+stop can be called multiple times.
+        Entry point for after the process has been spawned
         """
-        self.runCommand(timer, options)
+        return
 
     def processResultsCommand(self, moose_dir, options):
         """ method to return the commands (list) used for processing results """
         return []
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
         """ method to process the results of a finished tester """
         return
 
@@ -501,7 +440,9 @@ class Tester(MooseObject):
 
     def getRedirectedOutputFiles(self, options):
         """ return a list of redirected output """
-        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in range(self.getProcs(options))]
+        if self.hasRedirectedOutput(options):
+            return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in range(self.getProcs(options))]
+        return []
 
     def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
@@ -512,6 +453,10 @@ class Tester(MooseObject):
                 self.__caveats.add(i)
         return self.getCaveats()
 
+    def removeCaveat(self, caveat):
+        """ Removes a caveat, which _must_ exist """
+        self.__caveats.remove(caveat)
+
     def getCaveats(self):
         """ Return caveats accumalted by this tester """
         return self.__caveats
@@ -520,6 +465,18 @@ class Tester(MooseObject):
         """ Clear any caveats stored in tester """
         self.__caveats = set([])
         return self.getCaveats()
+
+    def mustOutputExist(self, exit_code):
+        """ Whether or not we should check for the output once it has ran
+
+        We need this because the PBS/slurm Runner objects, which use
+        networked file IO, need to wait until the output is available on
+        on the machine that submitted the jobs. A good example is RunException,
+        where we should only look for output when we get a nonzero return
+        code."""
+        return exit_code == 0
+
+    # need something that will tell  us if we should try to read the result
 
     def checkRunnableBase(self, options):
         """
@@ -778,11 +735,16 @@ class Tester(MooseObject):
                 self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
 
         # We can't offer the option of reading output files outside of initial TestDir
-        if self.specs['working_directory'] and (options.pbs
-                                                or options.ok_files
-                                                or options.fail_files
-                                                or options.sep_files):
+        if self.specs['working_directory'] and options.sep_files:
             reasons['working_directory'] = '--sep-files* enabled'
+
+        # Explicitly skip HPC tests
+        if not self.specs['hpc'] and options.hpc:
+            reasons['hpc'] = 'hpc=false'
+
+        # Use shell not supported for HPC
+        if self.specs['use_shell'] and options.hpc:
+            reasons['use_shell'] = 'no use_shell with hpc'
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
@@ -821,3 +783,34 @@ class Tester(MooseObject):
         # Check the return values of the derived classes
         self._runnable = self.checkRunnable(options)
         return self._runnable
+
+    def needFullOutput(self, options):
+        """
+        Whether or not the full output is needed.
+
+        If this is True, it means that we cannot truncate
+        the stderr/stdout output. This is often needed
+        when we're trying to read something from the output.
+        """
+        return False
+
+    def run(self, options, exit_code, runner_output):
+        output = self.processResults(self.getMooseDir(), options, exit_code, runner_output)
+
+        # If the tester requested to be skipped at the last minute, report that.
+        if self.isSkip():
+            output += f'\nTester skipped, reason: {self.getStatusMessage()}\n'
+        elif self.isFail():
+            output += f'\nTester failed, reason: {self.getStatusMessage()}\n'
+
+        self.setOutput(output)
+
+    def getHPCPlace(self, options):
+        """
+        Return the placement to use for HPC jobs
+        """
+        if options.hpc_scatter_procs:
+            procs = self.getProcs(options)
+            if procs > 1 and procs <= options.hpc_scatter_procs:
+                return 'scatter'
+        return 'free'

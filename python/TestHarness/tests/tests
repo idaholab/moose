@@ -183,12 +183,6 @@
     requirement = "The system shall be able to perform recovery of a test"
     issues = '#11492'
   []
-  [pbs_tests]
-    type = PythonUnitTest
-    input = test_PBS.py
-    requirement = "The system shall be able to submit jobs to a PBS third party scheduler"
-    issues = '#12138'
-  []
   [trim_output]
     type = PythonUnitTest
     input = test_TrimOutput.py
@@ -286,5 +280,11 @@
     input = test_SoftHeavyDependency.py
     requirement = "The system shall not skip non-heavy tests for which heavy tests depend on"
     issues = '#26215'
+  []
+  [test_output_interface]
+    type = PythonUnitTest
+    input = test_OutputInterface.py
+    requirement = 'The system shall provide a common interface for storing and retrieving output that supports sanitization
+    issues = '#27562'
   []
 []

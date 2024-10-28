@@ -28,11 +28,11 @@ class CheckFiles(FileTester):
         if not (params.isValid('check_files') or params.isValid('check_not_exists')):
             raise Exception('Either "check_files" or "check_not_exists" must be supplied for a CheckFiles test')
 
-    def getOutputFiles(self):
+    def getOutputFiles(self, options):
         return self.specs['check_files'] + self.specs['check_not_exists']
 
-    def processResults(self, moose_dir, options, output):
-        FileTester.processResults(self, moose_dir, options, output)
+    def processResults(self, moose_dir, options, exit_code, runner_output):
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
 
         specs = self.specs
 
@@ -75,3 +75,12 @@ class CheckFiles(FileTester):
             self.setStatus(self.fail, reason)
 
         return output
+
+    def checkRunnable(self, options):
+        # We cannot reliably check if files do not exist with a networked file system
+        if options.hpc and self.specs['check_not_exists']:
+            self.addCaveats('hpc unsupported')
+            self.setStatus(self.skip)
+            return False
+
+        return super().checkRunnable(options)

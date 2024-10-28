@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, io
+import os, io
 import unittest
 import mock
 import TestHarness
@@ -21,7 +21,8 @@ class TestHarnessTester(unittest.TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             mocked_return.return_value=mocked
-            harness = TestHarness.TestHarness(['', '-i', 'install_type', '-c'], MOOSE_DIR)
+            cmd = ['', '-i', 'install_type', '-c', '--term-format', 'njCst']
+            harness = TestHarness.TestHarness(cmd, MOOSE_DIR)
             if expect_fail:
                 with self.assertRaises(SystemExit):
                     harness.findAndRunTests()
@@ -34,15 +35,15 @@ class TestHarnessTester(unittest.TestCase):
         Test which only runs if binary is installed
         """
         out = self.mocked_output(set(['ALL', 'INSTALLED']), False)
-        self.assertRegex(out, r'.*?SKIP.*?in_tree_type.*?"IN_TREE" binary]')
-        self.assertRegex(out, r'.*?OK.*?installed_type')
-        self.assertRegex(out, r'.*?OK.*?all_type')
+        self.assertRegex(out, r'tests\/test_harness\.in_tree_type[\s.]+\[TEST REQUIRES "IN_TREE" BINARY\]\s+SKIP')
+        self.assertRegex(out, r'tests\/test_harness\.installed_type[\s.]+OK')
+        self.assertRegex(out, r'tests\/test_harness\.all_type[\s.]+OK')
 
     def testInTree(self):
         """
         Test which only runs if binary is in_tree
         """
         out = self.mocked_output(set(['ALL', 'IN_TREE']), False)
-        self.assertRegex(out, r'.*?SKIP.*?installed_type.*?"INSTALLED" binary]')
-        self.assertRegex(out, r'.*?OK.*?in_tree_type')
-        self.assertRegex(out, r'.*?OK.*?all_type')
+        self.assertRegex(out, r'tests\/test_harness\.in_tree_type[\s.]+OK')
+        self.assertRegex(out, r'tests\/test_harness\.installed_type[\s.]+\[TEST REQUIRES "INSTALLED" BINARY\]\s+SKIP')
+        self.assertRegex(out, r'tests\/test_harness\.all_type[\s.]+OK')
