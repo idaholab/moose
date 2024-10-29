@@ -87,7 +87,7 @@
 
 [Transfers]
   [variable_1]
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     all_master_nodes_contained_in_sub_app = true
     multi_app = sub
     direction = to_multiapp
@@ -95,7 +95,7 @@
     user_object = Variable_1_avg
   []
   [variable_2]
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     all_master_nodes_contained_in_sub_app = true
     multi_app = sub
     direction = to_multiapp
@@ -104,7 +104,7 @@
   []
 
   [variable_3]
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     all_master_nodes_contained_in_sub_app = true
     multi_app = sub
     direction = from_multiapp
@@ -113,7 +113,7 @@
     execute_on = 'timestep_end'
   []
   [variable_4]
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     all_master_nodes_contained_in_sub_app = true
     multi_app = sub
     direction = from_multiapp

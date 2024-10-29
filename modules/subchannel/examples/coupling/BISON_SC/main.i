@@ -296,14 +296,14 @@ pitch = 0.0126
 
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     to_multi_app = sub
     variable = Pin_surface_temperature
     user_object = Tpin_avg_uo
   []
 
   [q_prime]
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     from_multi_app = sub
     variable = q_prime
     user_object = q_prime_uo
@@ -311,21 +311,21 @@ pitch = 0.0126
   []
 
   # [Tpin1] # send pin surface temperature to bison,
-  #   type = MultiAppUserObjectTransfer2
+  #   type = MultiAppUserObjectTransferSCM
   #   to_multi_app = sub1
   #   variable = Pin_surface_temperature
   #   user_object = Tpin_avg_uo
   # []
   #
   # [Tpin2] # send pin surface temperature to bison,
-  #   type = MultiAppUserObjectTransfer2
+  #   type = MultiAppUserObjectTransferSCM
   #   to_multi_app = sub2
   #   variable = Pin_surface_temperature
   #   user_object = Tpin_avg_uo
   # []
   #
   # [q_prime1] # send heat flux from BISON/heatConduction to subchannel
-  #   type = MultiAppUserObjectTransfer2
+  #   type = MultiAppUserObjectTransferSCM
   #   from_multi_app = sub1
   #   variable = q_prime
   #   user_object = q_prime_uo
@@ -333,7 +333,7 @@ pitch = 0.0126
   # []
   #
   # [q_prime2] # send heat flux from BISON/heatConduction to subchannel
-  #   type = MultiAppUserObjectTransfer2
+  #   type = MultiAppUserObjectTransferSCM
   #   from_multi_app = sub2
   #   variable = q_prime
   #   user_object = q_prime_uo
