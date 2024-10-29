@@ -6,12 +6,11 @@ InputParameters
 MFEMMassKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
-  params.addClassDescription("The mass operator ($k u$), with the weak "
-                             "form of $ (k \\phi_i, \\times u_h), to be added to an MFEM problem");
-
-  params.addParam<std::string>("coefficient",
-                               "Name of MFEM coefficient k to multiply the Laplacian by");
-
+  params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
+                             "$(k u, v)_\\Omega$ "
+                             "arising from the weak form of the mass operator "
+                             "$ku$.");
+  params.addParam<std::string>("coefficient", "Name of property for the mass coefficient k.");
   return params;
 }
 
