@@ -240,6 +240,7 @@ public:
 
   /**
    * @brief Computes the flux limiting ratio using gradients.
+   * This method works well for incompressible and compressible flow.
    *
    * This function calculates the flux limiting ratio based on the provided gradients
    * at the upwind and downwind locations, along with a direction vector.
@@ -255,8 +256,6 @@ public:
    * 2. Computes the dot product of the downwind gradient vector with the direction vector `dCD`.
    * 3. Calculates the ratio of the upwind gradient dot product to the downwind gradient dot
    * product, adding a small epsilon value to the denominator to prevent division by zero.
-   * 4. Applies a flux limiting formula to this ratio to ensure it remains within a physically
-   *    reasonable range, specifically ensuring non-negative values.
    *
    * @note The small epsilon value `1e-10` is added to the denominator to avoid division by zero
    *       and numerical instability.

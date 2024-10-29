@@ -7,16 +7,11 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'upwind.e'
-<<<<<<< HEAD
-      detail = 'and pass debugging checks.'
-      abs_zero = 1e-6
-=======
       detail = 'and reach converged results with upwind advection scheme.'
       abs_zero = 1e-4
->>>>>>> a8e5e18f83 (completing argument definition for passing compile checks Refs #28891)
       cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
+      prereq = segregated_advection_limiting_schemes/upwind_run
       heavy = true
-      detail = 'first-order upwind test'
     []
     [upwind_run]
       type = 'Exodiff'
@@ -24,8 +19,8 @@
       exodiff = 'upwind_run.e'
       detail = 'and pass debugging checks with segregated solvers with upwind advection scheme.'
       abs_zero = 1e-4
+      rel_err = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=upwind Executioner/num_iterations=10 Outputs/file_base=upwind_run'
-      detail = 'first-order upwind run test'
     []
     [vanLeer]
       type = 'Exodiff'
@@ -33,9 +28,9 @@
       exodiff = 'vanLeer.e'
       detail = 'and reach converged results with van Leer limiter.'
       abs_zero = 1e-4
-      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer'
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer Outputs/file_base=vanLeer Mesh/gen/nx=10 Mesh/gen/ny=10'
+      prereq = segregated_advection_limiting_schemes/vanLeer_run
       heavy = true
-      detail = 'van Leer test'
     []
     [vanLeer_run]
       type = 'Exodiff'
@@ -43,8 +38,8 @@
       exodiff = 'vanLeer_run.e'
       detail = 'and pass debugging checks with segregated solvers with van Leer limiter.'
       abs_zero = 1e-4
-      cli_args = 'GlobalParams/advected_interp_method=vanLeer Executioner/num_iterations=10 Outputs/file_base=vanLeer_run'
-      detail = 'van Leer run test'
+      rel_err = 1e-4
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Executioner/num_iterations=10 Outputs/file_base=vanLeer_run Mesh/gen/nx=10 Mesh/gen/ny=10'
     []
     [min_mod]
       type = 'Exodiff'
@@ -53,8 +48,8 @@
       detail = 'and reach converged results with min-mod limiter.'
       abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
+      prereq = segregated_advection_limiting_schemes/min_mod_run
       heavy = true
-      detail = 'min-mod test'
     []
     [min_mod_run]
       type = 'Exodiff'
@@ -62,8 +57,8 @@
       exodiff = 'min_mod_run.e'
       detail = 'and pass debugging checks with segregated solvers with min-mod limiter.'
       abs_zero = 1e-4
+      rel_err = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=min_mod Executioner/num_iterations=10 Outputs/file_base=min_mod_run'
-      detail = 'min-mod run test'
     []
     [quick]
       type = 'Exodiff'
@@ -72,8 +67,8 @@
       detail = 'and reach converged results with QUICK limiter.'
       abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
+      prereq = segregated_advection_limiting_schemes/quick_run
       heavy = true
-      detail = 'QUICK test'
     []
     [quick_run]
       type = 'Exodiff'
@@ -81,8 +76,8 @@
       exodiff = 'quick_run.e'
       detail = 'and pass debugging checks with segregated solvers with QUICK limiter.'
       abs_zero = 1e-4
+      rel_err = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=quick Executioner/num_iterations=10 Outputs/file_base=quick_run'
-      detail = 'QUICK run test'
     []
   []
 []

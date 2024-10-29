@@ -16,15 +16,30 @@
 []
 
 [Mesh]
-  [gen]
-    type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 0
-    xmax = 1
-    ymin = 0
-    ymax = 1
-    nx = 10
-    ny = 10
+  [outer_bdy]
+    type = PolyLineMeshGenerator
+    points = '0.0 0.0 0.0
+              0.0 1.0 0.0
+              1.0 1.0 0.0
+              1.0 0.0 0.0'
+    loop = true
+  []
+  [triang]
+    type = XYDelaunayGenerator
+    boundary = 'outer_bdy'
+    add_nodes_per_boundary_segment = 3
+    refine_boundary = true
+    desired_area = 0.02
+  []
+  [sidesets]
+    type = SideSetsFromNormalsGenerator
+    input = triang
+    normals = '-1 0 0
+                1 0 0
+                0 -1 0
+                0 1 0'
+    fixed_normal = true
+    new_boundary = 'left right bottom top'
   []
 []
 
@@ -88,12 +103,15 @@
   petsc_options_value = 'lu NONZERO'
   dt = 0.1
   end_time = 5.0
-  steady_state_detection = false
+  steady_state_detection = true
   steady_state_tolerance = 1e-12
   nl_abs_tol = 1e-12
 []
 
 [Outputs]
-  exodus = true
-  csv = true
+  [out]
+    type = Exodus
+    execute_on = 'final'
+    hide = 'vel_x vel_y pressure'
+  []
 []

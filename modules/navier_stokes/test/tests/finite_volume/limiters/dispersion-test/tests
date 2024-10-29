@@ -5,42 +5,42 @@
     requirement = 'The system shall be able to perform a variety of limiting schemes when solving scalar transport equations in cartesian meshes with bottom-left advection. These schemes include'
     [sou]
       type = Exodiff
-      input = 'bottom_left_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = bottom_left_sou.e
       cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=bottom_left_sou'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'second-order upwind'
     []
     [vanLeer]
       type = Exodiff
-      input = 'bottom_left_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = bottom_left_vanLeer.e
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=bottom_left_vanLeer'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'van Leer'
     []
     [min_mod]
       type = Exodiff
-      input = 'bottom_left_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = bottom_left_min_mod.e
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=bottom_left_min_mod'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'min-mod'
     []
     [quick]
       type = Exodiff
-      input = 'bottom_left_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = bottom_left_quick.e
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=bottom_left_quick'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'QUICK'
     []
     [venkatakrishnan]
       type = Exodiff
-      input = 'bottom_left_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = bottom_left_venkatakrishnan.e
       cli_args = 'GlobalParams/advected_interp_method=venkatakrishnan Outputs/file_base=bottom_left_venkatakrishnan'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'venkatakrishnan'
     []
   []
@@ -48,42 +48,42 @@
     requirement = 'The system shall be able to perform a variety of limiting schemes when solving scalar transport equations in cartesian meshes with top-right advection. These schemes include'
     [sou]
       type = Exodiff
-      input = 'top_right_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = top_right_sou.e
-      cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=top_right_sou'
-      abs_zero = 1e-4
+      cli_args = "GlobalParams/advected_interp_method=sou Outputs/file_base=top_right_sou AuxVariables/vel_x/initial_condition=-1.0 AuxVariables/vel_y/initial_condition=-1.0 FVBCs/fv_inflow/boundary='right' FVBCs/fv_outflow/boundary='left top bottom'"
+      abs_zero = 1e-5
       detail = 'second-order upwind'
     []
     [vanLeer]
       type = Exodiff
-      input = 'top_right_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = top_right_vanLeer.e
-      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=top_right_vanLeer'
-      abs_zero = 1e-4
+      cli_args = "GlobalParams/advected_interp_method=vanLeer Outputs/file_base=top_right_vanLeer AuxVariables/vel_x/initial_condition=-1.0 AuxVariables/vel_y/initial_condition=-1.0 FVBCs/fv_inflow/boundary='right' FVBCs/fv_outflow/boundary='left top bottom'"
+      abs_zero = 1e-5
       detail = 'van Leer'
     []
     [min_mod]
       type = Exodiff
-      input = 'top_right_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = top_right_min_mod.e
-      cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=top_right_min_mod'
-      abs_zero = 1e-4
+      cli_args = "GlobalParams/advected_interp_method=min_mod Outputs/file_base=top_right_min_mod AuxVariables/vel_x/initial_condition=-1.0 AuxVariables/vel_y/initial_condition=-1.0 FVBCs/fv_inflow/boundary='right' FVBCs/fv_outflow/boundary='left top bottom'"
+      abs_zero = 1e-5
       detail = 'min-mod'
     []
     [quick]
       type = Exodiff
-      input = 'top_right_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = top_right_quick.e
-      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=top_right_quick'
-      abs_zero = 1e-4
+      cli_args = "GlobalParams/advected_interp_method=quick Outputs/file_base=top_right_quick AuxVariables/vel_x/initial_condition=-1.0 AuxVariables/vel_y/initial_condition=-1.0 FVBCs/fv_inflow/boundary='right' FVBCs/fv_outflow/boundary='left top bottom'"
+      abs_zero = 1e-5
       detail = 'QUICK'
     []
     [venkatakrishnan]
       type = Exodiff
-      input = 'top_right_advection.i'
+      input = 'cartesian_advection.i'
       exodiff = top_right_venkatakrishnan.e
-      cli_args = 'GlobalParams/advected_interp_method=venkatakrishnan Outputs/file_base=top_right_venkatakrishnan'
-      abs_zero = 1e-4
+      cli_args = "GlobalParams/advected_interp_method=venkatakrishnan Outputs/file_base=top_right_venkatakrishnan AuxVariables/vel_x/initial_condition=-1.0 AuxVariables/vel_y/initial_condition=-1.0 FVBCs/fv_inflow/boundary='right' FVBCs/fv_outflow/boundary='left top bottom'"
+      abs_zero = 1e-5
       detail = 'venkatakrishnan'
     []
   []
@@ -91,26 +91,26 @@
     requirement = 'The system shall be able to perform a variety of limiting schemes when solving scalar transport equations in triangular meshes with bottom-left advection. These schemes include'
     [vanLeer]
       type = Exodiff
-      input = 'bottom_left_tri_mesh_advection.i'
+      input = 'tri_mesh_advection.i'
       exodiff = bottom_left_tri_mesh_vanLeer.e
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=bottom_left_tri_mesh_vanLeer'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'van Leer'
     []
     [min_mod]
       type = Exodiff
-      input = 'bottom_left_tri_mesh_advection.i'
+      input = 'tri_mesh_advection.i'
       exodiff = bottom_left_tri_mesh_min_mod.e
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=bottom_left_tri_mesh_min_mod'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'min-mod'
     []
     [quick]
       type = Exodiff
-      input = 'bottom_left_tri_mesh_advection.i'
+      input = 'tri_mesh_advection.i'
       exodiff = bottom_left_tri_mesh_quick.e
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=bottom_left_tri_mesh_quick'
-      abs_zero = 1e-4
+      abs_zero = 1e-5
       detail = 'QUICK'
     []
   []

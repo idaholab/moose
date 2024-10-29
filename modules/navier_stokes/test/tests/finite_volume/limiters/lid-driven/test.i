@@ -137,11 +137,15 @@ rho=1
   petsc_options_value = 'lu NONZERO'
   dt = 0.1
   end_time = 5.0
-  steady_state_detection = false
+  steady_state_detection = true
   steady_state_tolerance = 1e-12
   nl_abs_tol = 1e-12
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    execute_on = 'final'
+    hide = 'lambda'
+  []
 []
