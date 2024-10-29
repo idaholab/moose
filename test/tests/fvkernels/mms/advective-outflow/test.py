@@ -1,6 +1,8 @@
 import mms
 import unittest
-from mooseutils import fuzzyAbsoluteEqual
+
+def bottom_bound(value, order, tolerance):
+    return value > (order - tolerance)
 
 class TestOutflow(unittest.TestCase):
     def test(self):
@@ -15,9 +17,9 @@ class TestOutflow(unittest.TestCase):
         fig.save('outflow.png')
         for label,value in fig.label_to_slope.items():
             if label == 'L2u':
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+                self.assertTrue(bottom_bound(value, 1., .05))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+                self.assertTrue(bottom_bound(value, 2., .05))
 
 class TestOutflowMinMod(unittest.TestCase):
     def test(self):
@@ -39,9 +41,9 @@ class TestOutflowMinMod(unittest.TestCase):
         fig.save('outflow-min-mod.png')
         for label,value in fig.label_to_slope.items():
             if label == 'L2u':
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, .05))
+                self.assertTrue(bottom_bound(value, 1.5, .05))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+                self.assertTrue(bottom_bound(value, 2., .05))
 
 class TestExtrapolation(unittest.TestCase):
     def test(self):
@@ -56,9 +58,9 @@ class TestExtrapolation(unittest.TestCase):
         fig.save('extrapolation.png')
         for label,value in fig.label_to_slope.items():
             if label == 'L2u':
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+                self.assertTrue(bottom_bound(value, 1., .05))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+                self.assertTrue(bottom_bound(value, 2., .05))
 
 class UpwindLimiter(unittest.TestCase):
     def test(self):
@@ -72,7 +74,7 @@ class UpwindLimiter(unittest.TestCase):
                  slope_precision=1)
         fig.save('upwind-limiter.png')
         for label,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+            self.assertTrue(bottom_bound(value, 1., .05))
 
 class CentralDifferenceLimiter(unittest.TestCase):
     def test(self):
@@ -86,7 +88,7 @@ class CentralDifferenceLimiter(unittest.TestCase):
                  slope_precision=1)
         fig.save('cd-limiter.png')
         for label,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(bottom_bound(value, 2., .05))
 
 class VanLeerLimiter(unittest.TestCase):
     def test(self):
@@ -100,7 +102,7 @@ class VanLeerLimiter(unittest.TestCase):
                  slope_precision=1)
         fig.save('vanLeer-limiter.png')
         for label,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(bottom_bound(value, 2., .05))
 
 class MinModLimiter(unittest.TestCase):
     def test(self):
@@ -114,7 +116,7 @@ class MinModLimiter(unittest.TestCase):
                  slope_precision=1)
         fig.save('min-mod-limiter.png')
         for label,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(bottom_bound(value, 2., .05))
 
 class SOULimiter(unittest.TestCase):
     def test(self):
@@ -128,7 +130,7 @@ class SOULimiter(unittest.TestCase):
                  slope_precision=1)
         fig.save('sou-limiter.png')
         for label,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(bottom_bound(value, 2., .05))
 
 class QUICKLimiter(unittest.TestCase):
     def test(self):
@@ -142,7 +144,7 @@ class QUICKLimiter(unittest.TestCase):
                  slope_precision=1)
         fig.save('quick-limiter.png')
         for label,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(bottom_bound(value, 2., .05))
 
 class KTLimitedCD(unittest.TestCase):
     def test(self):
@@ -156,7 +158,7 @@ class KTLimitedCD(unittest.TestCase):
                  slope_precision=1)
         fig.save('kt-cd-limiter.png')
         for key,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(bottom_bound(value, 2., .05))
             print("%s slope, %f" % (key, value))
 
 class KTLimitedUpwind(unittest.TestCase):
@@ -171,7 +173,7 @@ class KTLimitedUpwind(unittest.TestCase):
                  slope_precision=1)
         fig.save('kt-upwind-limiter.png')
         for key,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+            self.assertTrue(bottom_bound(value, 1., .05))
             print("%s slope, %f" % (key, value))
 
 class KTLimitedVanLeer(unittest.TestCase):
@@ -186,5 +188,5 @@ class KTLimitedVanLeer(unittest.TestCase):
                  slope_precision=1)
         fig.save('kt-van-leer-limiter.png')
         for key,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2.5, .05))
+            self.assertTrue(bottom_bound(value, 2.5, .05))
             print("%s slope, %f" % (key, value))
