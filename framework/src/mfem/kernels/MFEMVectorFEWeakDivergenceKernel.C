@@ -6,12 +6,12 @@ InputParameters
 MFEMVectorFEWeakDivergenceKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
-  params.addClassDescription("The weak divergence operator for the mixed form "
-                             "$(k\\vec u, \\nabla q')$ with $\\vec u$ a vector FE "
-                             "type, to be added to an MFEM problem");
-
+  params.addClassDescription(
+      "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
+      "$(-k\\vec u, \\vec\\nabla v)_\\Omega$ "
+      "arising from the weak form of the divergence operator "
+      "$\\vec \\nabla \\cdot (k\\vec u)$.");
   params.addParam<std::string>("coefficient", "Name of property k to use.");
-
   return params;
 }
 
