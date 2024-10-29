@@ -132,6 +132,15 @@
     expect_err = 'The input meshes contain subdomain name maps with conflicts.'
     requirement = 'The system shall throw an error if the input cartesian meshes contain different block ids that share the same block name.'
   []
+  [err_empty_pattern_row]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/pattern_boundary=none
+                  Mesh/pattern/pattern="0 0 0 0;0 1 0 0;0 0 1 0;0 0 0 0; "
+                  --mesh-only "patterned_err.e"'
+    expect_err = 'The element of the two-dimensional array parameter pattern must not be empty.'
+    requirement = 'The system shall throw an error if cartesian pattern input contains an empty row.'
+  []
   [err_pattern_unity]
     type = 'RunException'
     input = 'patterned_2d.i'
