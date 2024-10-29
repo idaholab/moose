@@ -427,6 +427,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
+    _chain_control_system(*this),
     _rd_reader(*this, _restartable_data),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _output_buffer_cache(nullptr),

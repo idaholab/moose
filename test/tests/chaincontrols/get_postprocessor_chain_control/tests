@@ -1,0 +1,10 @@
+[Tests]
+  design = 'GetPostprocessorChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'get_postprocessor_chain_control.i'
+    csvdiff = 'get_postprocessor_chain_control_out.csv'
+    requirement = 'The system shall be able to use postprocessor values to dynamically control input parameters.'
+  []
+[]

@@ -33,6 +33,7 @@
 #include "TheWarehouse.h"
 #include "RankMap.h"
 #include "MeshGeneratorSystem.h"
+#include "ChainControlDataSystem.h"
 #include "RestartableDataReader.h"
 #include "Backup.h"
 #include "MooseBase.h"
@@ -848,6 +849,11 @@ public:
   MeshGeneratorSystem & getMeshGeneratorSystem() { return _mesh_generator_system; }
 
   /**
+   * Gets the system that manages the ChainControls
+   */
+  ChainControlDataSystem & getChainControlDataSystem() { return _chain_control_system; }
+
+  /**
    * Add a mesh generator that will act on the meshes in the system
    *
    * @param type The type of MeshGenerator
@@ -1455,6 +1461,9 @@ private:
 
   /// The system that manages the MeshGenerators
   MeshGeneratorSystem _mesh_generator_system;
+
+  /// The system that manages the ChainControls
+  ChainControlDataSystem _chain_control_system;
 
   RestartableDataReader _rd_reader;
 

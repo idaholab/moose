@@ -1,0 +1,135 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "Control.h"
+#include "ChainControlData.h"
+#include "ChainControlDataSystem.h"
+
+/**
+ * Control that additionally provides the capability to produce/consume data values,
+ * to allow control operations to be chained together.
+ */
+class ChainControl : public Control
+{
+public:
+  static InputParameters validParams();
+
+  ChainControl(const InputParameters & parameters);
+
+  /**
+   * Returns the ChainControls that must run before this one
+   */
+  const std::vector<std::string> & getChainControlDataDependencies() const
+  {
+    return _control_data_depends_on;
+  }
+
+protected:
+  /**
+   * Declares chain control data with the given name and type
+   *
+   * @tparam T          Type of chain control data
+   * @param data_name   Chain control data name
+   */
+  template <typename T>
+  T & declareChainControlData(const std::string & data_name);
+
+  /**
+   * Get a reference to control data that are specified in the input parameter 'param_name'
+   *
+   * @tparam T      Type of chain control data
+   * @param param   Parameter containing chain control data name
+   */
+  template <typename T>
+  const T & getChainControlData(const std::string & param);
+
+  /**
+   * Get a reference to control data value from a previous time step that is specified in the input
+   * parameter 'param_name'
+   *
+   * @tparam T      Type of chain control data
+   * @param param   Parameter containing chain control data name
+   */
+  template <typename T>
+  const T & getChainControlDataOld(const std::string & param);
+
+  /**
+   * Get a reference to control data that are specified by 'data_name' name
+   *
+   * @tparam T          Type of chain control data
+   * @param data_name   Chain control data name
+   */
+  template <typename T>
+  const T & getChainControlDataByName(const std::string & data_name);
+
+  /**
+   * Get a reference to control data value from previous time step that is specified by 'data_name'
+   * name
+   *
+   * @tparam T          Type of chain control data
+   * @param data_name   Chain control data name
+   */
+  template <typename T>
+  const T & getChainControlDataOldByName(const std::string & data_name);
+
+  /// List of chain control data that this control depends upon
+  std::vector<std::string> _control_data_depends_on;
+};
+
+template <typename T>
+T &
+ChainControl::declareChainControlData(const std::string & data_name)
+{
+  ChainControlData<T> * data_ptr =
+      getMooseApp().getChainControlDataSystem().declareChainControlData<T>(data_name, this);
+  return data_ptr->set();
+}
+
+template <typename T>
+const T &
+ChainControl::getChainControlData(const std::string & param)
+{
+  return getChainControlDataByName<T>(getParam<std::string>(param));
+}
+
+template <typename T>
+const T &
+ChainControl::getChainControlDataOld(const std::string & param)
+{
+  return getChainControlDataOldByName<T>(getParam<std::string>(param));
+}
+
+template <typename T>
+const T &
+ChainControl::getChainControlDataByName(const std::string & data_name)
+{
+  ChainControlData<T> * data_ptr =
+      getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
+  mooseAssert(data_ptr, "Data must be non-null.");
+
+  // Add chain control data dependency
+  auto it = std::find(_control_data_depends_on.begin(), _control_data_depends_on.end(), data_name);
+  if (it == _control_data_depends_on.end())
+    _control_data_depends_on.push_back(data_name);
+
+  return data_ptr->get();
+}
+
+template <typename T>
+const T &
+ChainControl::getChainControlDataOldByName(const std::string & data_name)
+{
+  ChainControlData<T> * data_ptr =
+      getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
+  mooseAssert(data_ptr, "Data must be non-null.");
+
+  return data_ptr->getOld();
+}
