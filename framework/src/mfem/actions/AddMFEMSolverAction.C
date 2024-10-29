@@ -7,9 +7,7 @@ InputParameters
 AddMFEMSolverAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-
   params.addClassDescription("Set the platypus solver and the solver options.");
-
   return params;
 }
 
