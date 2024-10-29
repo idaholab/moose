@@ -1190,13 +1190,17 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
 
     // Evaluate the gradient of the functor at the upwind and downwind locations
     const auto & grad_phi_upwind = functor.gradient(upwind_arg, *time_arg);
-    const auto & grad_phi_face = functor.gradient(face, *time_arg);
+    const auto & grad_phi_downwind = functor.gradient(downwind_arg, *time_arg);
+
+    const auto coeffs = interpCoeffs(InterpMethod::Average, *face.fi, face.elem_is_upwind);
 
     // Compute interpolation coefficients and advected values for each component
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       const auto &component_upwind = phi_upwind(i), component_downwind = phi_downwind(i);
-      const VectorValue<T> &grad_upwind = grad_phi_upwind.row(i), grad_face = grad_phi_face.row(i);
+      const VectorValue<T> &grad_upwind = grad_phi_upwind.row(i),
+                           grad_face = coeffs.first * grad_phi_upwind.row(i) +
+                                       coeffs.second * grad_phi_downwind.row(i);
 
       // Initialize min-max values
       T max_value(0.0), min_value(1e10);
@@ -1307,13 +1311,17 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
 
     // Evaluate the gradient of the functor at the upwind and downwind locations
     const auto & grad_phi_upwind = functor.gradient(upwind_arg, *time_arg);
-    const auto & grad_phi_face = functor.gradient(face, *time_arg);
+    const auto & grad_phi_downwind = functor.gradient(downwind_arg, *time_arg);
+
+    const auto coeffs = interpCoeffs(InterpMethod::Average, *face.fi, face.elem_is_upwind);
 
     // Compute interpolation coefficients and advected values for each component
     for (const auto i : index_range(ret))
     {
       const auto &component_upwind = phi_upwind[i], component_downwind = phi_downwind[i];
-      const VectorValue<T> &grad_upwind = grad_phi_upwind[i], grad_face = grad_phi_face[i];
+      const VectorValue<T> &grad_upwind = grad_phi_upwind[i],
+                           grad_face = coeffs.first * grad_phi_upwind[i] +
+                                       coeffs.second * grad_phi_downwind[i];
 
       // Initialize min-max values
       T max_value(0.0), min_value(1e10);
