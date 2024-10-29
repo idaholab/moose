@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "ReporterOffsetFunctionMaterial.h"
@@ -10,7 +19,7 @@ typedef MisfitReporterOffsetFunctionMaterialTempl<true> ADMisfitReporterOffsetFu
 
 /**
  * This class creates a misfit and misfit gradient material that can be used for
- * optimizing measurements weighted by functions.
+ * optimizing measurements weighted by offset functions.
  */
 template <bool is_ad>
 class MisfitReporterOffsetFunctionMaterialTempl : public ReporterOffsetFunctionMaterialTempl<is_ad>

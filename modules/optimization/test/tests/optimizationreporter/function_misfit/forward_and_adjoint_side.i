@@ -62,6 +62,8 @@
     boundary = bottom
     value = 300
   []
+  # apply gradient material as a side force since the objective integral is only
+  # over this side
   [top]
     type = MatNeumannBC
     boundary = top
@@ -77,13 +79,16 @@
     prop_names = thermal_conductivity
     prop_values = 5
   []
+  # Create two materials.
+  # 1. Material which the integral of is our objective
+  # 2. dM/du material which is used for our adjoint problem
   [beam]
     type = MisfitReporterOffsetFunctionMaterial
     x_coord_name = measure_data/measurement_xcoord
     y_coord_name = measure_data/measurement_ycoord
     z_coord_name = measure_data/measurement_zcoord
-    value_name = measure_data/measurement_values
-    sim_variable = temperature
+    measurement_value_name = measure_data/measurement_values
+    forward_variable = temperature
     property_name = obj_misfit
     function = gauss
   []
@@ -119,6 +124,7 @@
     execute_on = ADJOINT_TIMESTEP_END
   []
 []
+
 [Postprocessors]
   [objective]
     type = SideIntegralMaterialProperty

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "MisfitReporterOffsetFunctionMaterial.h"
 #include "MooseError.h"
 #include "libmesh/int_range.h"
@@ -14,10 +23,10 @@ MisfitReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
   params.addClassDescription(
       "Computes the misfit and misfit gradient materials for inverse optimizations problems.");
 
-  params.addRequiredCoupledVar("sim_variable",
-                               "Variable that is being used for the simulation variable.");
-  params.addRequiredParam<ReporterName>(
-      "value_name", "reporter value name.  This uses the reporter syntax <reporter>/<name>.");
+  params.addRequiredCoupledVar("forward_variable",
+                               "Variable that is being used for the forward simulation.");
+  params.addRequiredParam<ReporterName>("measurement_value_name",
+                                        "Reporter with measurement data.");
   return params;
 }
 
@@ -25,11 +34,11 @@ template <bool is_ad>
 MisfitReporterOffsetFunctionMaterialTempl<is_ad>::MisfitReporterOffsetFunctionMaterialTempl(
     const InputParameters & parameters)
   : ReporterOffsetFunctionMaterialTempl<is_ad>(parameters),
-    _sim_var(this->template coupledGenericValue<is_ad>("sim_variable")),
+    _sim_var(this->template coupledGenericValue<is_ad>("forward_variable")),
     _mat_prop_gradient(
         this->template declareGenericProperty<Real, is_ad>(_prop_name + "_gradient")),
-    _measurement_values(
-        this->template getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED))
+    _measurement_values(this->template getReporterValue<std::vector<Real>>(
+        "measurement_value_name", REPORTER_MODE_REPLICATED))
 {
 }
 
@@ -52,11 +61,11 @@ MisfitReporterOffsetFunctionMaterialTempl<is_ad>::computeQpProperties()
     const Point offset =
         _read_in_points ? _points[idx] : Point(_coordx[idx], _coordy[idx], _coordz[idx]);
 
-    Real measurement_value = _measurement_values[idx];
-    auto simulation_value = _sim_var[_qp];
+    const Real measurement_value = _measurement_values[idx];
+    const auto simulation_value = _sim_var[_qp];
 
     // Compute weighting function
-    Real weighting = computeOffsetFunction(offset);
+    const Real weighting = computeOffsetFunction(offset);
 
     // Computed weighted misfit and gradient materials
     _material[_qp] +=

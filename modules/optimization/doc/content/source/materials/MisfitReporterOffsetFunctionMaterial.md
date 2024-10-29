@@ -8,7 +8,7 @@ The `MisfitReporterOffsetFunctionMaterial` material computes the misfit and its 
 
 ### Measurement data:
 
-Measurement values are provide by the reporter [!param](/Materials/MisfitReporterOffsetFunctionMaterial/value_name) and the corresponding measurement locations are given by a reporter containing either points [!param](/Materials/MisfitReporterOffsetFunctionMaterial/point_name) or three separate reporters containing the (x,y,z) coordinates of the points using [!param](/Materials/MisfitReporterOffsetFunctionMaterial/x_coord_name), [!param](/Materials/MisfitReporterOffsetFunctionMaterial/y_coord_name), and [!param](/Materials/MisfitReporterOffsetFunctionMaterial/z_coord_name).
+Measurement values are provide by the reporter [!param](/Materials/MisfitReporterOffsetFunctionMaterial/measurement_value_name) and the corresponding measurement locations are given by a reporter containing either points [!param](/Materials/MisfitReporterOffsetFunctionMaterial/point_name) or three separate reporters containing the (x,y,z) coordinates of the points using [!param](/Materials/MisfitReporterOffsetFunctionMaterial/x_coord_name), [!param](/Materials/MisfitReporterOffsetFunctionMaterial/y_coord_name), and [!param](/Materials/MisfitReporterOffsetFunctionMaterial/z_coord_name).
 
 - Measurement values: $\mathbf{u}_m = \{u_{m,1}, u_{m,2}, \ldots, u_{m,n}\}$
 - Measurement locations: $\mathbf{p}_m = \{\mathbf{p}_{m,1}, \mathbf{p}_{m,2}, \ldots, \mathbf{p}_{m,n}\}$, where $\mathbf{p}_{m,i} = (x_{m,i}, y_{m,i}, z_{m,i})$ for 3D data

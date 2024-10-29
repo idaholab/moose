@@ -30,6 +30,7 @@
     variable = temperature
     diffusivity = thermal_conductivity
   []
+  # apply gradient material as a body force since the integral is over the whole domain
   [adj_source]
     type = MatBodyForce
     variable = temperature_adjoint
@@ -81,13 +82,16 @@
     prop_names = thermal_conductivity
     prop_values = 5
   []
+  # Create two materials.
+  # 1. Material which the integral of is our objective
+  # 2. dM/du material which is used for our adjoint problem
   [beam]
     type = MisfitReporterOffsetFunctionMaterial
     x_coord_name = measure_data/measurement_xcoord
     y_coord_name = measure_data/measurement_ycoord
     z_coord_name = measure_data/measurement_zcoord
-    value_name = measure_data/measurement_values
-    sim_variable = temperature
+    measurement_value_name = measure_data/measurement_values
+    forward_variable = temperature
     property_name = 'obj_misfit'
     function = gauss
   []

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "MooseError.h"
 #include "ReporterOffsetFunctionMaterial.h"
 #include "libmesh/int_range.h"
@@ -10,20 +19,14 @@ InputParameters
 ReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Compute the sum of a function shifted by a set of points.");
+  params.addClassDescription("Compute the sum of a function offet by a set of points.");
   params.addRequiredParam<FunctionName>("function", "The weighting function.");
 
-  params.addParam<ReporterName>(
-      "x_coord_name",
-      "reporter x-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addParam<ReporterName>(
-      "y_coord_name",
-      "reporter y-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addParam<ReporterName>(
-      "z_coord_name",
-      "reporter z-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
+  params.addParam<ReporterName>("x_coord_name", "Reporter with x-coordinate data.");
+  params.addParam<ReporterName>("y_coord_name", "Reporter with y-coordinate data.");
+  params.addParam<ReporterName>("z_coord_name", "Reporter with z-coordinate data.");
   params.addParam<ReporterName>("point_name",
-                                "reporter point name.  This uses the reporter syntax "
+                                "Reporter with point data. "
                                 "<reporter>/<name>.");
   params.addRequiredParam<std::string>("property_name", "Material property base name");
   return params;
