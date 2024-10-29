@@ -15,6 +15,7 @@
 #include "libmesh/node.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/point_locator_base.h"
+#include "libmesh/utility.h"
 
 namespace MeshBaseDiagnosticsUtils
 {
