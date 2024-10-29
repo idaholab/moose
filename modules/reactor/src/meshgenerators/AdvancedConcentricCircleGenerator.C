@@ -286,6 +286,9 @@ AdvancedConcentricCircleGenerator::generate()
     MeshTools::Modification::rotate(other_mesh, -_azimuthal_angles[i], 0, 0);
     mesh->prepare_for_use();
     other_mesh.prepare_for_use();
+    // As we rotate the mesh in the negative direction (see "-" before _azimuthal_angles[i]),
+    // the order of SLICE_END and SLICE_BEGIN should be reversed compared to the similar call in
+    // PolygonConcentricCircleMeshGeneratorBase.C
     mesh->stitch_meshes(other_mesh, SLICE_END, SLICE_BEGIN, TOLERANCE, true);
     other_mesh.clear();
   }
