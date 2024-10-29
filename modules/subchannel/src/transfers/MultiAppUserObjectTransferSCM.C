@@ -12,7 +12,7 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "MultiAppUserObjectTransfer2.h"
+#include "MultiAppUserObjectTransferSCM.h"
 
 #include <limits>
 
@@ -29,13 +29,13 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
 
-registerMooseObject("SubChannelApp", MultiAppUserObjectTransfer2);
+registerMooseObject("SubChannelApp", MultiAppUserObjectTransferSCM);
 
 InputParameters
-MultiAppUserObjectTransfer2::validParams()
+MultiAppUserObjectTransferSCM::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
-  //  MultiAppUserObjectTransfer2 does not need source variable since it query values from user
+  //  MultiAppUserObjectTransferSCM does not need source variable since it query values from user
   //  objects
   params.suppressParameter<std::vector<VariableName>>("source_variable");
   params.set<std::vector<VariableName>>("source_variable") = std::vector<VariableName>{};
@@ -61,20 +61,22 @@ MultiAppUserObjectTransfer2::validParams()
       "parameter is used).");
 
   params.addClassDescription(
-      "Samples a variable's value in the Master domain at the point where the MultiApp is and "
-      "copies that value into a post-processor in the MultiApp");
+      "Transfers a variable's value that has been sampled into a UserObject, in the "
+      "MainApp/MultiApp domain, into a post-processor or variable in the MultiApp/MainApp. "
+      "This is a copy of MultiAppUserObjectTransfer, but swaps y-, and z- coordinate, so we can "
+      "map the SCM solution that lives in a 3D mesh on a (2D) RZ-mesh of a heating pin.");
 
   return params;
 }
 
-MultiAppUserObjectTransfer2::MultiAppUserObjectTransfer2(const InputParameters & parameters)
+MultiAppUserObjectTransferSCM::MultiAppUserObjectTransferSCM(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _all_master_nodes_contained_in_sub_app(getParam<bool>("all_master_nodes_contained_in_sub_app")),
     _skip_bbox_check(getParam<bool>("skip_bounding_box_check"))
 {
   // This transfer does not work with DistributedMesh
-  _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransfer2");
+  _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransferSCM");
 
   if (_to_var_names.size() != 1)
     paramError("variable", " Support single to-variable only ");
@@ -89,9 +91,9 @@ MultiAppUserObjectTransfer2::MultiAppUserObjectTransfer2(const InputParameters &
 }
 
 void
-MultiAppUserObjectTransfer2::execute()
+MultiAppUserObjectTransferSCM::execute()
 {
-  _console << "Beginning MultiAppUserObjectTransfer2 " << name() << std::endl;
+  _console << "Beginning MultiAppUserObjectTransferSCM " << name() << std::endl;
 
   switch (_current_direction)
   {
@@ -244,7 +246,7 @@ MultiAppUserObjectTransfer2::execute()
 
       // Only works with a serialized mesh to transfer to!
       mooseAssert(to_sys.get_mesh().is_serial(),
-                  "MultiAppUserObjectTransfer2 only works with ReplicatedMesh!");
+                  "MultiAppUserObjectTransferSCM only works with ReplicatedMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
@@ -316,14 +318,14 @@ MultiAppUserObjectTransfer2::execute()
               if (node_found_in_sub_app == 0)
               {
                 Point n = *node;
-                mooseError("MultiAppUserObjectTransfer2: Master node ",
+                mooseError("MultiAppUserObjectTransferSCM: Master node ",
                            n,
                            " not found within the bounding box of any of the sub applications.");
               }
               else if (node_found_in_sub_app > 1)
               {
                 Point n = *node;
-                mooseError("MultiAppUserObjectTransfer2: Master node ",
+                mooseError("MultiAppUserObjectTransferSCM: Master node ",
                            n,
                            " found within the bounding box of two or more sub applications.");
               }
@@ -383,14 +385,14 @@ MultiAppUserObjectTransfer2::execute()
               }
 
               if (elem_found_in_sub_app == 0)
-                mooseError("MultiAppUserObjectTransfer2: Master element with ",
+                mooseError("MultiAppUserObjectTransferSCM: Master element with ",
                            n_points > 1 ? "node" : "centroid",
                            " at ",
                            point,
                            " not found within the bounding box of any of the sub applications.");
 
               else if (elem_found_in_sub_app > 1)
-                mooseError("MultiAppUserObjectTransfer2: Master element with ",
+                mooseError("MultiAppUserObjectTransferSCM: Master element with ",
                            n_points > 1 ? "node" : "centroid",
                            " at ",
                            point,
@@ -439,9 +441,10 @@ MultiAppUserObjectTransfer2::execute()
                 if (from_value == std::numeric_limits<Real>::infinity())
                 {
                   Point n = *node;
-                  mooseError("MultiAppUserObjectTransfer2: Point corresponding to master node at (",
-                             n,
-                             ") not found in the sub application.");
+                  mooseError(
+                      "MultiAppUserObjectTransferSCM: Point corresponding to master node at (",
+                      n,
+                      ") not found in the sub application.");
                 }
                 to_solution->set(dof, from_value);
               }
@@ -503,7 +506,7 @@ MultiAppUserObjectTransfer2::execute()
 
                 if (from_value == std::numeric_limits<Real>::infinity())
                   mooseError(
-                      "MultiAppUserObjectTransfer2: Point corresponding to element's centroid (",
+                      "MultiAppUserObjectTransferSCM: Point corresponding to element's centroid (",
                       point,
                       ") not found in sub application.");
 
@@ -521,31 +524,31 @@ MultiAppUserObjectTransfer2::execute()
     }
   }
 
-  _console << "Finished MultiAppUserObjectTransfer2 " << name() << std::endl;
+  _console << "Finished MultiAppUserObjectTransferSCM " << name() << std::endl;
 
   postExecute();
 }
 
 bool
-MultiAppUserObjectTransfer2::blockRestricted() const
+MultiAppUserObjectTransferSCM::blockRestricted() const
 {
   return !_blk_ids.empty();
 }
 
 bool
-MultiAppUserObjectTransfer2::boundaryRestricted() const
+MultiAppUserObjectTransferSCM::boundaryRestricted() const
 {
   return !_bnd_ids.empty();
 }
 
 bool
-MultiAppUserObjectTransfer2::hasBlocks(const Elem * elem) const
+MultiAppUserObjectTransferSCM::hasBlocks(const Elem * elem) const
 {
   return _blk_ids.find(elem->subdomain_id()) != _blk_ids.end();
 }
 
 bool
-MultiAppUserObjectTransfer2::hasBlocks(const MooseMesh * mesh, const Node * node) const
+MultiAppUserObjectTransferSCM::hasBlocks(const MooseMesh * mesh, const Node * node) const
 {
   const std::set<SubdomainID> & node_blk_ids = mesh->getNodeBlockIds(*node);
   std::set<SubdomainID> u;
@@ -558,7 +561,7 @@ MultiAppUserObjectTransfer2::hasBlocks(const MooseMesh * mesh, const Node * node
 }
 
 bool
-MultiAppUserObjectTransfer2::isBoundaryNode(const MooseMesh * mesh, const Node * node) const
+MultiAppUserObjectTransferSCM::isBoundaryNode(const MooseMesh * mesh, const Node * node) const
 {
   for (auto & bid : _bnd_ids)
     if (mesh->isBoundaryNode(node->id(), bid))
@@ -567,7 +570,7 @@ MultiAppUserObjectTransfer2::isBoundaryNode(const MooseMesh * mesh, const Node *
 }
 
 bool
-MultiAppUserObjectTransfer2::isBoundaryElem(const MooseMesh * mesh, const Elem * elem) const
+MultiAppUserObjectTransferSCM::isBoundaryElem(const MooseMesh * mesh, const Elem * elem) const
 {
   for (auto & bid : _bnd_ids)
     if (mesh->isBoundaryElem(elem->id(), bid))
@@ -576,7 +579,7 @@ MultiAppUserObjectTransfer2::isBoundaryElem(const MooseMesh * mesh, const Elem *
 }
 
 BoundingBox
-MultiAppUserObjectTransfer2::getBoundingBox(unsigned int app, bool displaced_mesh)
+MultiAppUserObjectTransferSCM::getBoundingBox(unsigned int app, bool displaced_mesh)
 {
   FEProblemBase & fe_problem_base = _multi_app->appProblemBase(app);
   MooseMesh & mesh = (displaced_mesh && fe_problem_base.getDisplacedProblem().get() != NULL)

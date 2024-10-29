@@ -16,7 +16,7 @@
 
 #include "MultiAppConservativeTransfer.h"
 
-class MultiAppUserObjectTransfer2;
+class MultiAppUserObjectTransferSCM;
 
 /**
  * This is a copy of MultiAppUserObjectTransfer, but swaps y-, and z- coordinate, so we can
@@ -26,12 +26,12 @@ class MultiAppUserObjectTransfer2;
  *
  * NOTE: This will need a better name before merging into devel
  */
-class MultiAppUserObjectTransfer2 : public MultiAppConservativeTransfer
+class MultiAppUserObjectTransferSCM : public MultiAppConservativeTransfer
 {
 public:
   static InputParameters validParams();
 
-  MultiAppUserObjectTransfer2(const InputParameters & parameters);
+  MultiAppUserObjectTransferSCM(const InputParameters & parameters);
 
   virtual void execute() override;
 
