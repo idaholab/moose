@@ -20,6 +20,7 @@
 #include "libmesh/cell_tet4.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
+#include "libmesh/string_to_enum.h"
 
 registerMooseObject("MooseApp", MeshDiagnosticsGenerator);
 
