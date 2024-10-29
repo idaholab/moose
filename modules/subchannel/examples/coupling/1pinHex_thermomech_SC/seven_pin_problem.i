@@ -261,21 +261,21 @@ pitch = 7.26e-3
 
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     to_multi_app = sub
     variable = Pin_surface_temperature
     user_object = Tpin_avg_uo
   []
 
   [diameter] # send diameter information from /BISON/heatConduction to subchannel
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     from_multi_app = sub
     variable = Dpin
     user_object = pin_diameter_uo
   []
 
   [q_prime] # send heat flux from /BISON/heatConduction to subchannel
-    type = MultiAppUserObjectTransfer2
+    type = MultiAppUserObjectTransferSCM
     from_multi_app = sub
     variable = q_prime
     user_object = q_prime_uo
