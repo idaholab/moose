@@ -67,7 +67,7 @@ LStableDirk3::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old);
   u_dot.close();
-  _du_dot_du = 1. / _dt;
+  computeDuDotDu();
 }
 
 void

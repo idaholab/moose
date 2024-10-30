@@ -60,7 +60,7 @@ public:
    * Called _only_ before the very first timestep (t_step = 0)
    * Never called again (not even during recover/restart)
    */
-  virtual void init() {}
+  virtual void init();
   virtual void preSolve() {}
   virtual void preStep() {}
 
@@ -101,7 +101,7 @@ public:
    * This function is responsible for the following:
    * - computing the time derivative; a reference is retrieved from _sys.solutionUDot().
    * - computing the time derivative Jacobian, stored in _du_dot_du, which is a
-   *   reference to _sys.duDotDu().
+   *   reference to _sys.duDotDus().
    */
   virtual void computeTimeDerivatives() = 0;
 
@@ -153,6 +153,21 @@ public:
    */
   TagID uDotDotFactorTag() const { return _u_dotdot_factor_tag; }
 
+  /**
+   * @returns whether this integrator integrates the given variable
+   */
+  bool integratesVar(const unsigned int var_num) const;
+
+  /**
+   * Record the linear and nonlinear iterations from a just finished solve
+   */
+  void setNumIterationsLastSolve();
+
+  /**
+   * @returns Whether the virtual solve method is overridden
+   */
+  virtual bool overridesSolve() const = 0;
+
 protected:
   /**
    * Gets the number of nonlinear iterations in the most recent solve.
@@ -163,6 +178,23 @@ protected:
    * Gets the number of linear iterations in the most recent solve.
    */
   unsigned int getNumLinearIterationsLastSolve() const;
+
+  /**
+   * Copy from one vector into another. If the time integrator has been restricted to a subset of
+   * variables, then this will selectively copy their dofs
+   */
+  void copyVector(const NumericVector<Number> & from, NumericVector<Number> & to);
+
+  /**
+   * @returns The \p _du_dot_du multiplicative coefficient, e.g. if \p _du_dot_du is equivalent to
+   * 2/dt, then this method returns 2
+   */
+  virtual Real duDotDuCoeff() const { return 1; }
+
+  /**
+   * Compute \p _du_dot_du
+   */
+  void computeDuDotDu();
 
   FEProblemBase & _fe_problem;
   SystemBase & _sys;
@@ -177,11 +209,15 @@ protected:
   /// residual vector for non-time contributions
   NumericVector<Number> & _Re_non_time;
 
-  /// Derivative of time derivative with respect to current solution: \f$ {du^dot}\over{du} \f$
-  Real & _du_dot_du;
+  /// Derivative of time derivative with respect to current solution: \f$ {du^dot}\over{du} \f$ for
+  /// the different variables. We will only modify the elements in this vector corresponding to the
+  /// variables that we integrate
+  std::vector<Real> & _du_dot_du;
   /// solution vectors
   const NumericVector<Number> * const & _solution;
   const NumericVector<Number> & _solution_old;
+  std::unique_ptr<NumericVector<Number>> & _solution_sub;
+  std::unique_ptr<NumericVector<Number>> & _solution_old_sub;
   //
   int & _t_step;
   //
@@ -200,4 +236,17 @@ protected:
   const TagID _u_dot_factor_tag;
   /// The vector tag for the nodal multiplication factor for the residual calculation of the udotdot term
   const TagID _u_dotdot_factor_tag;
+
+  /// Whether the user has requested that the time integrator be applied to a subset of variables
+  bool & _var_restriction;
+
+  /// The local degree of freedom indices this time integrator is being applied to. If this
+  /// container is empty then the time integrator is applied to all indices
+  std::vector<dof_id_type> & _local_indices;
+
+  /// The variables that this time integrator integrates
+  std::unordered_set<unsigned int> & _vars;
+
+  /// A vector that is used for creating 'from' subvectors in the \p copyVector() method
+  std::unique_ptr<NumericVector<Number>> _from_subvector;
 };

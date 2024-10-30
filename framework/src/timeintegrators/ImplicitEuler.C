@@ -32,11 +32,24 @@ ImplicitEuler::computeTimeDerivatives()
                "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
-  u_dot = *_solution;
-  computeTimeDerivativeHelper(u_dot, _solution_old);
-  u_dot.close();
+  if (!_var_restriction)
+  {
+    u_dot = *_solution;
+    computeTimeDerivativeHelper(u_dot, _solution_old);
+  }
+  else
+  {
+    auto u_dot_sub = u_dot.get_subvector(_local_indices);
+    _solution->create_subvector(*_solution_sub, _local_indices, false);
+    _solution_old.create_subvector(*_solution_old_sub, _local_indices, false);
+    *u_dot_sub = *_solution_sub;
+    computeTimeDerivativeHelper(*u_dot_sub, *_solution_old_sub);
+    u_dot.restore_subvector(std::move(u_dot_sub), _local_indices);
+    // Scatter info needed for ghosts
+    u_dot.close();
+  }
 
-  _du_dot_du = 1.0 / _dt;
+  computeDuDotDu();
 }
 
 void
@@ -50,7 +63,21 @@ ImplicitEuler::computeADTimeDerivatives(ADReal & ad_u_dot,
 void
 ImplicitEuler::postResidual(NumericVector<Number> & residual)
 {
-  residual += _Re_time;
-  residual += _Re_non_time;
-  residual.close();
+  if (!_var_restriction)
+  {
+    residual += _Re_time;
+    residual += _Re_non_time;
+    residual.close();
+  }
+  else
+  {
+    auto residual_sub = residual.get_subvector(_local_indices);
+    auto re_time_sub = _Re_time.get_subvector(_local_indices);
+    auto re_non_time_sub = _Re_non_time.get_subvector(_local_indices);
+    *residual_sub += *re_time_sub;
+    *residual_sub += *re_non_time_sub;
+    residual.restore_subvector(std::move(residual_sub), _local_indices);
+    _Re_time.restore_subvector(std::move(re_time_sub), _local_indices);
+    _Re_non_time.restore_subvector(std::move(re_non_time_sub), _local_indices);
+  }
 }

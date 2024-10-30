@@ -108,7 +108,7 @@ public:
    * This is an empty string for non-Transient executioners
    * @return A string of giving the TimeIntegrator name
    */
-  virtual std::string getTimeIntegratorName() const { return std::string(); }
+  virtual std::vector<std::string> getTimeIntegratorNames() const { return {}; }
 
   /**
    * Can be used by subclasses to call parentOutputPositionChanged()

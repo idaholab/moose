@@ -27,7 +27,7 @@ MooseVariableField<OutputType>::MooseVariableField(const InputParameters & param
   : MooseVariableFieldBase(parameters),
     Moose::FunctorBase<typename Moose::ADType<OutputType>::type>(name()),
     MeshChangedInterface(parameters),
-    _time_integrator(_sys.getTimeIntegrator())
+    _time_integrator(_sys.queryTimeIntegrator(_var_num))
 {
 }
 

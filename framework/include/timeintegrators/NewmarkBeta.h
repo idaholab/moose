@@ -29,6 +29,7 @@ public:
                                         const dof_id_type & dof,
                                         ADReal & ad_u_dotdot) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
+  virtual bool overridesSolve() const override { return false; }
 
 protected:
   /**
@@ -40,6 +41,8 @@ protected:
                                    const T3 & u_dot_old,
                                    T4 & u_dotdot,
                                    const T5 & u_dotdot_old) const;
+
+  virtual Real duDotDuCoeff() const override;
 
   /// Newmark time integration parameter-beta
   Real _beta;

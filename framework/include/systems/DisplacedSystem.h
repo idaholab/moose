@@ -149,9 +149,9 @@ public:
     return _undisplaced_system.solutionUDotDotOld();
   }
 
-  virtual Number & duDotDu() override { return _undisplaced_system.duDotDu(); }
+  virtual std::vector<Number> & duDotDus() override { return _undisplaced_system.duDotDus(); }
   virtual Number & duDotDotDu() override { return _undisplaced_system.duDotDotDu(); }
-  virtual const Number & duDotDu() const override { return _undisplaced_system.duDotDu(); }
+  virtual const Number & duDotDu(unsigned int var_num = 0) const override;
   virtual const Number & duDotDotDu() const override { return _undisplaced_system.duDotDotDu(); }
 
   virtual void addDotVectors() override { _undisplaced_system.addDotVectors(); }
@@ -249,9 +249,6 @@ public:
   virtual System & system() override;
   virtual const System & system() const override;
 
-  using SystemBase::addTimeIntegrator;
-  void addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti) override;
-
   virtual void compute(ExecFlagType) override {}
 
 protected:
@@ -296,4 +293,10 @@ DisplacedSystem::hasSolutionState(const unsigned int state,
                                   const Moose::SolutionIterationType iteration_type) const
 {
   return _undisplaced_system.hasSolutionState(state, iteration_type);
+}
+
+inline const Number &
+DisplacedSystem::duDotDu(const unsigned int var_num) const
+{
+  return _undisplaced_system.duDotDu(var_num);
 }

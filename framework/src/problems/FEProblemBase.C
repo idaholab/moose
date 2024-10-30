@@ -1149,12 +1149,12 @@ FEProblemBase::initialSetup()
 
   for (auto & sys : _solver_systems)
   {
-    auto ti = sys->getTimeIntegrator();
+    const auto & tis = sys->getTimeIntegrators();
 
-    if (ti)
     {
       TIME_SECTION("timeIntegratorInitialSetup", 5, "Initializing Time Integrator");
-      ti->initialSetup();
+      for (auto & ti : tis)
+        ti->initialSetup();
     }
   }
 
@@ -6501,10 +6501,10 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   {
     nl->addDotVectors();
 
-    auto tag_udot = nl->getTimeIntegrator()->uDotFactorTag();
+    auto tag_udot = nl->getTimeIntegrators()[0]->uDotFactorTag();
     if (!nl->hasVector(tag_udot))
       nl->associateVectorToTag(*nl->solutionUDot(), tag_udot);
-    auto tag_udotdot = nl->getTimeIntegrator()->uDotDotFactorTag();
+    auto tag_udotdot = nl->getTimeIntegrators()[0]->uDotDotFactorTag();
     if (!nl->hasVector(tag_udotdot) && uDotDotRequested())
       nl->associateVectorToTag(*nl->solutionUDotDot(), tag_udotdot);
   }

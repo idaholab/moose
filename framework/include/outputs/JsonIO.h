@@ -26,6 +26,8 @@ template <typename T>
 class DenseVector;
 template <typename T>
 class DenseMatrix;
+template <typename T>
+class NumericVector;
 }
 
 // Overloads for to_json, which _must_ be overloaded in the namespace
@@ -38,6 +40,7 @@ namespace libMesh
 void to_json(nlohmann::json & json, const Point & p);
 void to_json(nlohmann::json & json, const DenseVector<Real> & vector);
 void to_json(nlohmann::json & json, const DenseMatrix<Real> & matrix);
+void to_json(nlohmann::json & json, const std::unique_ptr<NumericVector<Number>> & vector);
 }
 
 namespace nlohmann

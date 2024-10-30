@@ -69,7 +69,7 @@ void
 ExplicitSSPRungeKutta::computeTimeDerivatives()
 {
   // Only the Jacobian needs to be computed, since the mass matrix needs it
-  _du_dot_du = 1.0 / (_b[_stage] * _dt);
+  computeDuDotDu();
 }
 
 void
@@ -206,4 +206,10 @@ ExplicitSSPRungeKutta::postResidual(NumericVector<Number> & residual)
 
   // Set time at which to evaluate nodal BCs
   _fe_problem.time() = _current_time;
+}
+
+Real
+ExplicitSSPRungeKutta::duDotDuCoeff() const
+{
+  return Real(1) / _b[_stage];
 }

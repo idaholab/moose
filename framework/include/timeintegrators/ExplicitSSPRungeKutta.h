@@ -28,6 +28,7 @@ public:
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual int order() override { return _order; }
+  virtual bool overridesSolve() const override { return true; }
 
 protected:
   /**
@@ -36,6 +37,8 @@ protected:
    * @returns true if converged, false if not
    */
   bool solveStage();
+
+  virtual Real duDotDuCoeff() const override;
 
   /// Order of time integration
   const MooseEnum & _order;

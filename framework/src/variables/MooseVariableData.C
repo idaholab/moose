@@ -77,7 +77,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
 
   _is_nodal = (_continuity == C_ZERO || _continuity == C_ONE);
 
-  _time_integrator = _sys.getTimeIntegrator();
+  _time_integrator = _sys.queryTimeIntegrator(_var_num);
 
   switch (_element_type)
   {
@@ -1022,7 +1022,7 @@ MooseVariableData<OutputType>::computeMonomialValues()
   Real u_dotdot = 0;
   Real u_dot_old = 0;
   Real u_dotdot_old = 0;
-  const Real & du_dot_du = _sys.duDotDu();
+  const Real & du_dot_du = _sys.duDotDu(_var_num);
   const Real & du_dotdot_du = _sys.duDotDotDu();
 
   if (is_transient)

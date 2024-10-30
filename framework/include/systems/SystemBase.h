@@ -244,9 +244,9 @@ public:
    */
   virtual void addDotVectors();
 
-  virtual Number & duDotDu() { return _du_dot_du; }
+  virtual std::vector<Number> & duDotDus() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
-  virtual const Number & duDotDu() const { return _du_dot_du; }
+  virtual const Number & duDotDu(unsigned int var_num = 0) const;
   virtual const Number & duDotDotDu() const { return _du_dotdot_du; }
 
   virtual NumericVector<Number> * solutionUDot() { return _u_dot; }
@@ -878,18 +878,9 @@ public:
    */
   virtual void copySolutionsBackwards();
 
-  virtual void addTimeIntegrator(const std::string & /*type*/,
-                                 const std::string & /*name*/,
-                                 InputParameters & /*parameters*/)
-  {
-  }
-
-  virtual void addTimeIntegrator(std::shared_ptr<TimeIntegrator> /*ti*/) {}
-
-  TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
-  const TimeIntegrator * getTimeIntegrator() const { return _time_integrator.get(); }
-
-  std::shared_ptr<TimeIntegrator> getSharedTimeIntegrator() { return _time_integrator; }
+  void addTimeIntegrator(const std::string & type,
+                         const std::string & name,
+                         InputParameters & parameters);
 
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
@@ -950,6 +941,28 @@ public:
    */
   virtual void compute(ExecFlagType type) = 0;
 
+  /**
+   * Copy time integrators from another system
+   */
+  void copyTimeIntegrators(const SystemBase & other_sys);
+
+  /**
+   * Retrieve the time integrator that integrates the given variable's equation
+   */
+  const TimeIntegrator & getTimeIntegrator(const unsigned int var_num) const;
+
+  /**
+   * Retrieve the time integrator that integrates the given variable's equation. If no suitable time
+   * integrator is found (this could happen for instance if we're solving a non-transient problem),
+   * then a nullptr will be returned
+   */
+  const TimeIntegrator * queryTimeIntegrator(const unsigned int var_num) const;
+
+  /**
+   * @returns All the time integrators owned by this system
+   */
+  const std::vector<std::shared_ptr<TimeIntegrator>> & getTimeIntegrators();
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
@@ -990,7 +1003,9 @@ protected:
   /// old solution vector for u^dotdot
   NumericVector<Number> * _u_dotdot_old;
 
-  Real _du_dot_du;
+  /// Derivative of time derivative of u with respect to uj. This depends on the time integration
+  /// scheme
+  std::vector<Real> _du_dot_du;
   Real _du_dotdot_du;
 
   /// Tagged vectors (pointer)
@@ -1020,7 +1035,7 @@ protected:
   size_t _max_var_n_dofs_per_node;
 
   /// Time integrator
-  std::shared_ptr<TimeIntegrator> _time_integrator;
+  std::vector<std::shared_ptr<TimeIntegrator>> _time_integrators;
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFieldBase *>> _numbered_vars;
