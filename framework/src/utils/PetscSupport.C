@@ -222,14 +222,13 @@ addPetscOptionsFromCommandline()
     int argc;
     char ** args;
 
-    auto ierr = PetscGetArgs(&argc, &args);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(PETSC_COMM_WORLD, PetscGetArgs(&argc, &args));
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
-    ierr = PetscOptionsInsert(&argc, &args, NULL);
+    LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsInsert(&argc, &args, NULL));
 #else
-    ierr = PetscOptionsInsert(LIBMESH_PETSC_NULLPTR, &argc, &args, NULL);
+    LibmeshPetscCallA(PETSC_COMM_WORLD,
+                      PetscOptionsInsert(LIBMESH_PETSC_NULLPTR, &argc, &args, NULL));
 #endif
-    LIBMESH_CHKERR(ierr);
   }
 }
 
@@ -239,11 +238,10 @@ petscSetOptions(const PetscOptions & po,
                 FEProblemBase * const problem /*=nullptr*/)
 {
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
-  auto ierr = PetscOptionsClear();
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsClear());
 #else
-  auto ierr = PetscOptionsClear(LIBMESH_PETSC_NULLPTR);
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsClear(LIBMESH_PETSC_NULLPTR));
 #endif
-  LIBMESH_CHKERR(ierr);
 
   setSolverOptions(solver_params);
 
@@ -918,56 +916,39 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 {
   // Mat A will be a dense matrix from the incoming data structure
   Mat A;
-  auto ierr = MatCreate(MPI_COMM_SELF, &A);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatSetSizes(A, size, size, size, size);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatSetType(A, MATSEQDENSE);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatCreate(PETSC_COMM_SELF, &A));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatSetSizes(A, size, size, size, size));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatSetType(A, MATSEQDENSE));
   // PETSc requires a non-const data array to populate the matrix
-  ierr = MatSeqDenseSetPreallocation(A, adjacency_matrix);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatSeqDenseSetPreallocation(A, adjacency_matrix));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
   // Convert A to a sparse matrix
-  ierr = MatConvert(A,
-                    MATAIJ,
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
-                    MAT_REUSE_MATRIX,
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatConvert(A, MATAIJ, MAT_REUSE_MATRIX, &A));
 #else
-                    MAT_INPLACE_MATRIX,
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatConvert(A, MATAIJ, MAT_INPLACE_MATRIX, &A));
 #endif
-                    &A);
-  LIBMESH_CHKERR(ierr);
 
   ISColoring iscoloring;
   MatColoring mc;
-  ierr = MatColoringCreate(A, &mc);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatColoringSetType(mc, coloring_algorithm);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatColoringSetMaxColors(mc, static_cast<PetscInt>(colors));
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatColoringCreate(A, &mc));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatColoringSetType(mc, coloring_algorithm));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatColoringSetMaxColors(mc, static_cast<PetscInt>(colors)));
 
   // Petsc normally colors by distance two (neighbors of neighbors), we just want one
-  ierr = MatColoringSetDistance(mc, 1);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatColoringSetFromOptions(mc);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatColoringApply(mc, &iscoloring);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatColoringSetDistance(mc, 1));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatColoringSetFromOptions(mc));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatColoringApply(mc, &iscoloring));
 
   PetscInt nn;
   IS * is;
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  ierr = ISColoringGetIS(iscoloring, &nn, &is);
+  LibmeshPetscCallA(PETSC_COMM_SELF, ISColoringGetIS(iscoloring, &nn, &is));
 #else
-  ierr = ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is);
+  LibmeshPetscCallA(PETSC_COMM_SELF, ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is));
 #endif
-  LIBMESH_CHKERR(ierr);
 
   if (nn > static_cast<PetscInt>(colors))
     throw std::runtime_error("Not able to color with designated number of colors");
@@ -976,25 +957,19 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   {
     PetscInt isize;
     const PetscInt * indices;
-    ierr = ISGetLocalSize(is[i], &isize);
-    LIBMESH_CHKERR(ierr);
-    ierr = ISGetIndices(is[i], &indices);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(PETSC_COMM_SELF, ISGetLocalSize(is[i], &isize));
+    LibmeshPetscCallA(PETSC_COMM_SELF, ISGetIndices(is[i], &indices));
     for (int j = 0; j < isize; j++)
     {
       mooseAssert(indices[j] < static_cast<PetscInt>(vertex_colors.size()), "Index out of bounds");
       vertex_colors[indices[j]] = i;
     }
-    ierr = ISRestoreIndices(is[i], &indices);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(PETSC_COMM_SELF, ISRestoreIndices(is[i], &indices));
   }
 
-  ierr = MatDestroy(&A);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatColoringDestroy(&mc);
-  LIBMESH_CHKERR(ierr);
-  ierr = ISColoringDestroy(&iscoloring);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatDestroy(&A));
+  LibmeshPetscCallA(PETSC_COMM_SELF, MatColoringDestroy(&mc));
+  LibmeshPetscCallA(PETSC_COMM_SELF, ISColoringDestroy(&iscoloring));
 }
 
 void
