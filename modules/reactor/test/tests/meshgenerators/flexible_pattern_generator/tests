@@ -238,6 +238,14 @@
       detail = "if the provided rotation angles of the rectangular patterns have a size that does "
                "not match the number of rectangular patterns to be generated."
     []
+    [err_rect_empty_pattern]
+      type = 'RunException'
+      input = 'single_rect_pattern.i'
+      cli_args = "/Mesh/fpg/rect_patterns='0 0 0;0 0 0;0 0 0; '
+                  --mesh-only err.e"
+      expect_err = 'Each row of the element pattern must not be empty.'
+      detail ='if one of the rectangular patterns contains an empty row.'
+    []
     [err_wrong_circ_radii_size]
       type = RunException
       input = single_circ_pattern.i

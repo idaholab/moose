@@ -200,6 +200,9 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
   std::set<unsigned int> pattern_elem_size;
   for (const auto & pattern_elem : _pattern)
   {
+    if (pattern_elem.empty())
+      paramError("pattern",
+                 "The element of the two-dimensional array parameter pattern must not be empty.");
     pattern_elem_size.emplace(pattern_elem.size());
     pattern_max_array.push_back(*std::max_element(pattern_elem.begin(), pattern_elem.end()));
     pattern_1d.insert(pattern_1d.end(), pattern_elem.begin(), pattern_elem.end());
