@@ -1780,9 +1780,11 @@ Builder::setScalarComponentParameter(const std::string & full_name,
     _errmsg += hit::errormsg(root()->find(full_name),
                              "wrong number of values in scalar component parameter ",
                              full_name,
-                             ": size ",
+                             ": ",
+                             short_name,
+                             " was given ",
                              vec.size(),
-                             " is not a multiple of ",
+                             " components but should have ",
                              LIBMESH_DIM) +
                "\n";
     return;
