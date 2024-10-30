@@ -7,7 +7,9 @@ MFEMFECollection::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMFECollection");
-
+  params.addClassDescription(
+      "Specifies a collection of shape functions which (along with a mesh) define a "
+      "finite element space for MFEM variables.");
   MooseEnum fec_order(
       "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH ELEVENTH TWELFTH"
       "THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH EIGHTTEENTH NINETEENTH TWENTIETH "
@@ -18,11 +20,8 @@ MFEMFECollection::validParams()
       "FIRST",
       true);
   params.addParam<MooseEnum>("fec_order", fec_order, "Order of the FE shape function to use.");
-
   MooseEnum fec_types("H1 ND RT L2", "H1", true);
-  params.addParam<MooseEnum>(
-      "fec_type", fec_types, "Specifies the family of FE shape functions (FE space).");
-
+  params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
   return params;
 }
 
