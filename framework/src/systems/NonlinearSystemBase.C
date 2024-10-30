@@ -2280,7 +2280,12 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   if (!hasMatrix(systemMatrixTag()))
     mooseError("A system matrix is required");
 
-  auto & jacobian = getMatrix(systemMatrixTag());
+  auto & system_matrix = getMatrix(systemMatrixTag());
+#if PETSC_RELEASE_GREATER_EQUALS(3, 23, 0)
+  auto jacobian = libMesh::cast_ref<PetscMatrix<Number> &>(system_matrix).copy_from_hash();
+#else
+  auto & jacobian = system_matrix;
+#endif
 
   auto ierr = (PetscErrorCode)0;
   if (!_fe_problem.errorOnJacobianNonzeroReallocation())
@@ -2968,9 +2973,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Add in Jacobian contributions from other Constraints
     if (_fe_problem._has_constraints && tags.count(systemMatrixTag()))
     {
-      // Some constraints need values from the Jacobian
-      closeTaggedMatrices(tags);
-
       // Nodal Constraints
       enforceNodalConstraintsJacobian();
 
