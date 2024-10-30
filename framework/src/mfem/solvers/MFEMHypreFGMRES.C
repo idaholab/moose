@@ -8,7 +8,8 @@ InputParameters
 MFEMHypreFGMRES::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
-
+  params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
+                             "using the flexible generalized minimal residual method.");
   params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("kdim", 10, "Set the k-dimension.");

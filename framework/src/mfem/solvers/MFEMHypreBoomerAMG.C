@@ -8,6 +8,8 @@ InputParameters
 MFEMHypreBoomerAMG::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
+  params.addClassDescription("Hypre BoomerAMG solver and preconditioner for the iterative solution "
+                             "of MFEM equation systems.");
   params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");

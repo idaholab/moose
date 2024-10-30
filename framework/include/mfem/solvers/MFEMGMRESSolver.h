@@ -4,7 +4,7 @@
 #include <memory>
 
 /**
- * Wrapper for mfem::HyprePCG solver.
+ * Wrapper for mfem::GMRESSolver.
  */
 class MFEMGMRESSolver : public MFEMSolverBase
 {
