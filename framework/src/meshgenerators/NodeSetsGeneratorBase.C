@@ -131,7 +131,7 @@ NodeSetsGeneratorBase::setup(MeshBase & mesh)
     }
   }
 
-  // Get the nodeset ids from the names
+  // Get the subdomain ids from the names
   if (_check_included_subdomains)
   {
     // check that the subdomains exist in the mesh
@@ -212,7 +212,7 @@ bool
 NodeSetsGeneratorBase::nodeSatisfiesRequirements(const Node * node,
                                                  const std::vector<BoundaryID> & node_nodesets,
                                                  const std::vector<dof_id_type> & node_elems,
-                                                 const MeshBase & mesh)
+                                                 const MeshBase & mesh) const
 {
   // Skip if side has neighbor and we only want external nodes
   if (_include_only_external_nodes && !nodeOnMeshExteriorBoundary(node, node_elems, mesh))

@@ -69,12 +69,7 @@ ParsedGenerateNodeset::ParsedGenerateNodeset(const InputParameters & parameters)
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)
-    mooseError("Invalid function\n",
-               _function,
-               "\nin ParsedGenerateNodeset ",
-               name(),
-               ".\n",
-               _func_F->ErrorMsg());
+    paramError("expression", "Invalid function\n", _function, "\n", _func_F->ErrorMsg());
 
   _func_params.resize(3);
 }
@@ -128,8 +123,8 @@ ParsedGenerateNodeset::generate()
     {
       if (_replace)
       {
-        for (auto i = node_nodesets_iters.first; i != node_nodesets_iters.second; ++i)
-          boundary_info.remove_node(curr_node, i->second);
+        for (const auto nodeset_id : node_nodesets)
+          boundary_info.remove_node(curr_node, nodeset_id);
       }
       boundary_info.add_node(curr_node, nodeset_ids[0]);
     }

@@ -68,7 +68,8 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)
-    mooseError("Invalid function\n", _function, "\n", _func_F->ErrorMsg());
+    paramError(
+        "combinatorial_geometry", "Invalid function\n", _function, "\n", _func_F->ErrorMsg());
 
   _func_params.resize(3);
 }
