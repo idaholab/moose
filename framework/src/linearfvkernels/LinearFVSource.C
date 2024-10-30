@@ -21,7 +21,7 @@ LinearFVSource::validParams()
       "Represents the matrix and right hand side contributions of a "
       "solution-independent source term in a partial differential equation.");
   params.addParam<MooseFunctorName>("source_density", 1.0, "The source density.");
-  params.addParam<Real>("scaling_factor", 1.0, "Coefficient to multiply by the body force term");
+  params.addParam<Real>("scaling_factor", 1.0, "Coefficient to multiply the body force term with.");
   return params;
 }
 

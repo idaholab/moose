@@ -12,7 +12,7 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds the component of the pressure gradient in the momentum
+ * Kernel that adds the component of the Boussinesq term in the momentum
  * equations to the right hand side.
  */
 class LinearFVMomentumBoussinesq : public LinearFVElementalKernel
