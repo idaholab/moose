@@ -8,6 +8,8 @@ InputParameters
 MFEMSuperLU::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
+  params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
+                             "parallel using the SuperLU_DIST library.");
   return params;
 }
 
