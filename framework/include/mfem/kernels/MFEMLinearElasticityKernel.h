@@ -2,7 +2,12 @@
 #include "MFEMKernel.h"
 
 /*
-(λ ∇.u, ∇.u') + (μ (∇u + (∇u)ᵀ), ∇u' + (∇u')ᵀ)
+(cᵢₖⱼₗ∇uⱼ, ∇vᵢ),
+cᵢₖⱼₗ = λ δᵢₖδⱼₗ + μ (δᵢⱼδₖₗ + δᵢₗδⱼₖ),
+λ = (Eν)/((1-2ν)(1+ν)),
+μ = E/(2(1+ν)),
+E is Young's modulus,
+ν is Poisson's ratio
 */
 class MFEMLinearElasticityKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
