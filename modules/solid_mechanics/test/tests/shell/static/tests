@@ -131,4 +131,10 @@
     exodiff = 'inclined_straintest_local_stress_out.e'
     requirement = "Local stresses are calculated correctly on the shell element"
   []
+  [plate_cantilever]
+    type = 'Exodiff'
+    input = plate_cantilever.i
+    exodiff = 'plate_cantilever_out.e'
+    requirement = "Local stress and bending moment are calculated correctly on the shell element"
+  []
 []
