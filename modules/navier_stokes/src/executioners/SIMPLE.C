@@ -35,16 +35,11 @@ SIMPLE::validParams()
   /*
    * We suppress parameters which are not supported yet
    */
-  // params.suppressParameter<SolverSystemName>("energy_system");
   params.suppressParameter<SolverSystemName>("solid_energy_system");
   params.suppressParameter<std::vector<SolverSystemName>>("passive_scalar_systems");
   params.suppressParameter<std::vector<SolverSystemName>>("turbulence_systems");
-  // params.suppressParameter<Real>("energy_equation_relaxation");
   params.suppressParameter<std::vector<Real>>("passive_scalar_equation_relaxation");
   params.suppressParameter<std::vector<Real>>("turbulence_equation_relaxation");
-  // params.suppressParameter<MultiMooseEnum>("energy_petsc_options");
-  // params.suppressParameter<MultiMooseEnum>("energy_petsc_options_iname");
-  // params.suppressParameter<std::vector<std::string>>("energy_petsc_options_value");
   params.suppressParameter<MultiMooseEnum>("solid_energy_petsc_options");
   params.suppressParameter<MultiMooseEnum>("solid_energy_petsc_options_iname");
   params.suppressParameter<std::vector<std::string>>("solid_energy_petsc_options_value");
@@ -54,13 +49,9 @@ SIMPLE::validParams()
   params.suppressParameter<MultiMooseEnum>("turbulence_petsc_options");
   params.suppressParameter<MultiMooseEnum>("turbulence_petsc_options_iname");
   params.suppressParameter<std::vector<std::string>>("turbulence_petsc_options_value");
-  // params.suppressParameter<Real>("energy_absolute_tolerance");
   params.suppressParameter<Real>("solid_energy_absolute_tolerance");
   params.suppressParameter<std::vector<Real>>("passive_scalar_absolute_tolerance");
   params.suppressParameter<std::vector<Real>>("turbulence_absolute_tolerance");
-  // params.suppressParameter<Real>("energy_l_tol");
-  // params.suppressParameter<Real>("energy_l_abs_tol");
-  // params.suppressParameter<unsigned int>("energy_l_max_its");
   params.suppressParameter<Real>("solid_energy_l_tol");
   params.suppressParameter<Real>("solid_energy_l_abs_tol");
   params.suppressParameter<unsigned int>("solid_energy_l_max_its");
@@ -267,13 +258,13 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
   _problem.setCurrentLinearSystem(system_num);
 
   // We will need some members from the implicit linear system
-  LinearImplicitSystem & ni_system = libMesh::cast_ref<LinearImplicitSystem &>(system.system());
+  LinearImplicitSystem & li_system = libMesh::cast_ref<LinearImplicitSystem &>(system.system());
 
   // We will need the solution, the right hand side and the matrix
-  NumericVector<Number> & current_local_solution = *(ni_system.current_local_solution);
-  NumericVector<Number> & solution = *(ni_system.solution);
-  SparseMatrix<Number> & mmat = *(ni_system.matrix);
-  NumericVector<Number> & rhs = *(ni_system.rhs);
+  NumericVector<Number> & current_local_solution = *(li_system.current_local_solution);
+  NumericVector<Number> & solution = *(li_system.solution);
+  SparseMatrix<Number> & mmat = *(li_system.matrix);
+  NumericVector<Number> & rhs = *(li_system.rhs);
 
   mmat.zero();
   rhs.zero();
@@ -283,16 +274,9 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
 
-  _problem.computeLinearSystemSys(ni_system, mmat, rhs, false);
-
-  // We need a zero vector to be able to emulate the Ax=b system by evaluating the
-  // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
-  // so we correct it by multiplying it with (-1)
-  // auto zero_solution = current_local_solution.zero_clone();
-  //_problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
-  // rhs.scale(-1.0);
+  _problem.computeLinearSystemSys(li_system, mmat, rhs, true);
 
   // Go and relax the system matrix and the right hand side
   relaxMatrix(mmat, relaxation_factor, *diff_diagonal);
@@ -316,7 +300,7 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
 
   // Solve the system and update current local solution
   auto its_res_pair = linear_solver.solve(mmat, mmat, solution, rhs);
-  ni_system.update();
+  li_system.update();
 
   if (_print_fields)
   {
@@ -390,13 +374,9 @@ SIMPLE::execute()
     std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
     std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
     ns_abs_tols.push_back(_pressure_absolute_tolerance);
-
     if (_has_energy_system)
-    {
       ns_abs_tols.push_back(_energy_absolute_tolerance);
-      // if (_has_solid_energy_system)
-      //   ns_abs_tols.push_back(_solid_energy_absolute_tolerance);
-    }
+
     // Loop until converged or hit the maximum allowed iteration number
     while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
     {
@@ -464,14 +444,7 @@ SIMPLE::execute()
                                                            _energy_linear_control,
                                                            _energy_l_abs_tol);
 
-        // if (_has_solid_energy_system)
-        //{
-        //  We set the preconditioner/controllable parameters through petsc options. Linear
-        //  tolerances will be overridden within the solver.
-        //  Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-        //  residual_index += 1;
-        //  ns_its_residuals[residual_index] = solveSolidEnergySystem();
-        //}
+        _problem.execute(EXEC_NONLINEAR);
       }
       // Printing residuals
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
@@ -492,13 +465,8 @@ SIMPLE::execute()
       {
         residual_index += 1;
         _console << " Energy equation: " << COLOR_GREEN << ns_residuals[residual_index].second
-                 << COLOR_DEFAULT << std::endl;
-        // if (_has_solid_energy_system)
-        //{
-        //   residual_index += 1;
-        //   _console << " Solid energy equation: " << COLOR_GREEN
-        //             << ns_residuals[residual_index].second << COLOR_DEFAULT << std::endl;
-        // }
+                 << COLOR_DEFAULT << " Linear its: " << ns_residuals[residual_index].first
+                 << std::endl;
       }
     }
   }
