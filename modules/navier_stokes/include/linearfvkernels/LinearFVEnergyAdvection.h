@@ -38,12 +38,12 @@ public:
   virtual void setupFaceData(const FaceInfo * face_info) override;
 
 protected:
-  /// The advected heat quantity
-  const Moose::Functor<ADReal> & _adv_quant;
-
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
 
+  const Real _cp;
+
+private:
   /// Container for the current advected interpolation coefficients on the face to make sure
   /// we don't compute it multiple times for different terms.
   std::pair<Real, Real> _advected_interp_coeffs;
