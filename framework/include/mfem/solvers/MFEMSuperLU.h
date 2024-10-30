@@ -26,7 +26,7 @@ private:
 } // namespace platypus
 
 /**
- * Wrapper for mfem::HyprePCG solver.
+ * Wrapper for mfem::mfem::SuperLUSolver.
  */
 class MFEMSuperLU : public MFEMSolverBase
 {
