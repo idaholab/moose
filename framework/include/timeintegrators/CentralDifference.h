@@ -31,6 +31,8 @@ public:
                                 ADReal & ad_u_dotdot) const override;
 
 protected:
+  virtual Real duDotDuCoeff() const override;
+
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
   Real & _du_dotdot_du;
 

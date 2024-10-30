@@ -69,4 +69,15 @@ to_json(nlohmann::json & json, const DenseMatrix<Real> & matrix)
       values[i][j] = matrix(i, j);
   nlohmann::to_json(json, values);
 }
+
+void
+to_json(nlohmann::json & json, const std::unique_ptr<NumericVector<Number>> & vector)
+{
+  mooseAssert(vector, "vector must be non-null");
+  std::vector<Number> local_values;
+  local_values.reserve(vector->local_size());
+  for (const auto i : make_range(vector->first_local_index(), vector->last_local_index()))
+    local_values.push_back((*vector)(i));
+  nlohmann::to_json(json, local_values);
+}
 }

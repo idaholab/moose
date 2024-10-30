@@ -61,7 +61,7 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_ad_grad_u(false),
     _need_ad_grad_u_dot(false),
     _need_ad_second_u(false),
-    _time_integrator(_sys.getTimeIntegrator()),
+    _time_integrator(_sys.queryTimeIntegrator(_var_num)),
     _elem(elem),
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false),
     _qrule(nullptr)

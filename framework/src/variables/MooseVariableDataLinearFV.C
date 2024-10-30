@@ -41,7 +41,7 @@ MooseVariableDataLinearFV<OutputType>::MooseVariableDataLinearFV(
     _var_num(_var.number()),
     _assembly(_subproblem.assembly(_tid, var.kind() == Moose::VAR_SOLVER ? sys.number() : 0)),
     _element_type(element_type),
-    _time_integrator(_sys.getTimeIntegrator()),
+    _time_integrator(_sys.queryTimeIntegrator(_var_num)),
     _elem(elem),
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false),
     _qrule(nullptr)

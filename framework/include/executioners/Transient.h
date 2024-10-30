@@ -138,7 +138,7 @@ public:
    * Get the name of the time integrator (time integration scheme) used
    * @return string with the time integration scheme name
    */
-  virtual std::string getTimeIntegratorName() const override;
+  virtual std::vector<std::string> getTimeIntegratorNames() const override;
 
   /**
    * Get the time scheme used

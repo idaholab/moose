@@ -56,7 +56,7 @@ ExplicitTVDRK2::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old, _solution_older);
 
-  _du_dot_du = 1. / _dt;
+  computeDuDotDu();
   u_dot.close();
 }
 

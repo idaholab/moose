@@ -34,11 +34,26 @@ CrankNicolson::computeTimeDerivatives()
                "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
-  u_dot = *_solution;
-  computeTimeDerivativeHelper(u_dot, _solution_old);
-  u_dot.close();
+  if (!_var_restriction)
+  {
+    u_dot = *_solution;
+    computeTimeDerivativeHelper(u_dot, _solution_old);
+  }
+  else
+  {
+    auto u_dot_sub = u_dot.get_subvector(_local_indices);
+    _solution->create_subvector(*_solution_sub, _local_indices, false);
+    _solution_old.create_subvector(*_solution_old_sub, _local_indices, false);
+    *u_dot_sub = *_solution_sub;
+    computeTimeDerivativeHelper(*u_dot_sub, *_solution_old_sub);
+    u_dot.restore_subvector(std::move(u_dot_sub), _local_indices);
+    // Scatter info needed for ghosts
+    u_dot.close();
+  }
 
-  _du_dot_du = 2. / _dt;
+  for (const auto i : index_range(_du_dot_du))
+    if (integratesVar(i))
+      _du_dot_du[i] = 2. / _dt;
 }
 
 void
@@ -52,6 +67,8 @@ CrankNicolson::computeADTimeDerivatives(ADReal & ad_u_dot,
 void
 CrankNicolson::init()
 {
+  TimeIntegrator::init();
+
   if (!_sys.solutionUDot())
     mooseError("CrankNicolson: Time derivative of solution (`u_dot`) is not stored. Please set "
                "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
@@ -59,7 +76,7 @@ CrankNicolson::init()
   // time derivative is assumed to be zero on initial
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot.zero();
-  _du_dot_du = 0;
+  computeDuDotDu();
 
   // compute residual for the initial time step
   // Note: we can not directly pass _residual_old in computeResidualTag because
@@ -70,7 +87,8 @@ CrankNicolson::init()
   _fe_problem.setCurrentResidualVectorTags({_nl.nonTimeVectorTag()});
   _nl.computeResidualTag(_nl.RHS(), _nl.nonTimeVectorTag());
   _fe_problem.clearCurrentResidualVectorTags();
-  _residual_old = _nl.RHS();
+
+  copyVector(_nl.RHS(), _residual_old);
 }
 
 void
@@ -93,14 +111,37 @@ CrankNicolson::postResidual(NumericVector<Number> & residual)
     _Re_non_time.close();
   if (!inputs_closed[2])
     _residual_old.close();
-  residual += _Re_time;
-  residual += _Re_non_time;
-  residual += _residual_old;
+
+  if (!_var_restriction)
+  {
+    residual += _Re_time;
+    residual += _Re_non_time;
+    residual += _residual_old;
+  }
+  else
+  {
+    auto residual_sub = residual.get_subvector(_local_indices);
+    auto re_time_sub = _Re_time.get_subvector(_local_indices);
+    auto re_non_time_sub = _Re_non_time.get_subvector(_local_indices);
+    auto residual_old_sub = _residual_old.get_subvector(_local_indices);
+    *residual_sub += *re_time_sub;
+    *residual_sub += *re_non_time_sub;
+    *residual_sub += *residual_old_sub;
+    residual.restore_subvector(std::move(residual_sub), _local_indices);
+    _Re_time.restore_subvector(std::move(re_time_sub), _local_indices);
+    _Re_non_time.restore_subvector(std::move(re_non_time_sub), _local_indices);
+    _residual_old.restore_subvector(std::move(residual_old_sub), _local_indices);
+  }
 }
 
 void
 CrankNicolson::postStep()
 {
-  // shift the residual in time
-  _residual_old = _Re_non_time;
+  copyVector(_Re_non_time, _residual_old);
+}
+
+Real
+CrankNicolson::duDotDuCoeff() const
+{
+  return 2;
 }

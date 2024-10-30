@@ -92,7 +92,7 @@ NewmarkBeta::computeTimeDerivatives()
 
   // used for Jacobian calculations
   _du_dotdot_du = 1.0 / _beta / _dt / _dt;
-  _du_dot_du = _gamma / _beta / _dt;
+  computeDuDotDu();
 }
 
 void
@@ -117,4 +117,10 @@ NewmarkBeta::postResidual(NumericVector<Number> & residual)
   residual += _Re_time;
   residual += _Re_non_time;
   residual.close();
+}
+
+Real
+NewmarkBeta::duDotDuCoeff() const
+{
+  return _gamma / _beta;
 }

@@ -807,8 +807,11 @@ Simulation::couplingMatrixIntegrityCheck() const
   if (!_fe_problem.shouldSolve())
     return;
 
-  const TimeIntegrator * ti =
-      _fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0).getTimeIntegrator();
+  const TimeIntegrator * ti = nullptr;
+  const auto & time_integrators =
+      _fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0).getTimeIntegrators();
+  if (!time_integrators.empty())
+    ti = time_integrators.front().get();
   // Yes, this is horrible. Don't ask why...
   if ((dynamic_cast<const ExplicitTimeIntegrator *>(ti) != nullptr) ||
       (dynamic_cast<const ExplicitEuler *>(ti) != nullptr) ||

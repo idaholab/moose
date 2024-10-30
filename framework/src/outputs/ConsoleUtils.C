@@ -336,9 +336,10 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   std::string time_stepper = exec->getTimeStepperName();
   if (time_stepper != "")
     oss << std::setw(console_field_width) << "  TimeStepper: " << time_stepper << '\n';
-  std::string time_integrator = exec->getTimeIntegratorName();
-  if (time_integrator != "")
-    oss << std::setw(console_field_width) << "  TimeIntegrator: " << time_integrator << '\n';
+  const auto time_integrator_names = exec->getTimeIntegratorNames();
+  if (!time_integrator_names.empty())
+    oss << std::setw(console_field_width)
+        << "  TimeIntegrator(s): " << MooseUtils::join(time_integrator_names, ", ") << '\n';
 
   oss << std::setw(console_field_width) << "  Solver Mode: " << problem.solverTypeString() << '\n';
 

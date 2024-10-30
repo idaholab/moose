@@ -35,6 +35,7 @@
 #include <iostream>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <optional>
 
@@ -343,6 +344,18 @@ dataStore(std::ostream & stream, std::unordered_map<T, U> & m, void * context)
 
 template <typename T>
 inline void
+dataStore(std::ostream & stream, std::unordered_set<T> & s, void * context)
+{
+  // First store the size of the set
+  std::size_t size = s.size();
+  dataStore(stream, size, nullptr);
+
+  for (auto & element : s)
+    dataStore(stream, element, context);
+}
+
+template <typename T>
+inline void
 dataStore(std::ostream & stream, std::optional<T> & m, void * context)
 {
   bool has_value = m.has_value();
@@ -406,6 +419,7 @@ template <>
 void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
+
 template <>
 /**
  * Stores an owned numeric vector.
@@ -663,6 +677,25 @@ dataLoad(std::istream & stream, std::unordered_map<T, U> & m, void * context)
 
     U & value = m[key];
     loadHelper(stream, value, context);
+  }
+}
+
+template <typename T>
+inline void
+dataLoad(std::istream & stream, std::unordered_set<T> & s, void * context)
+{
+  s.clear();
+
+  // First read the size of the set
+  std::size_t size = 0;
+  dataLoad(stream, size, nullptr);
+  s.reserve(size);
+
+  for (std::size_t i = 0; i < size; i++)
+  {
+    T element;
+    dataLoad(stream, element, context);
+    s.insert(element);
   }
 }
 

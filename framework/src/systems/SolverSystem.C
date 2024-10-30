@@ -148,10 +148,11 @@ SolverSystem::compute(const ExecFlagType type)
       compute_tds = true;
   }
 
-  if (compute_tds && _fe_problem.dt() > 0. && _time_integrator)
-  {
-    // avoid division by dt which might be zero.
-    _time_integrator->preStep();
-    _time_integrator->computeTimeDerivatives();
-  }
+  if (compute_tds && _fe_problem.dt() > 0.)
+    for (auto & ti : _time_integrators)
+    {
+      // avoid division by dt which might be zero.
+      ti->preStep();
+      ti->computeTimeDerivatives();
+    }
 }

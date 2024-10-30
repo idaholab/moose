@@ -116,17 +116,6 @@ public:
   virtual bool converged() = 0;
 
   /**
-   * Add a time integrator
-   * @param type Type of the integrator
-   * @param name The name of the integrator
-   * @param parameters Integrator params
-   */
-  void addTimeIntegrator(const std::string & type,
-                         const std::string & name,
-                         InputParameters & parameters) override;
-  using SystemBase::addTimeIntegrator;
-
-  /**
    * Adds a kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel

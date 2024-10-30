@@ -26,6 +26,7 @@
 #include "MooseUtils.h"
 #include "FVBoundaryCondition.h"
 #include "FEProblemBase.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
@@ -76,7 +77,6 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _var_kind(var_kind),
     _max_var_n_dofs_per_elem(0),
     _max_var_n_dofs_per_node(0),
-    _time_integrator(nullptr),
     _automatic_scaling(false),
     _verbose(false),
     _solution_states_initialized(false)
@@ -797,6 +797,7 @@ SystemBase::addVariable(const std::string & var_type,
   // getMaxVariableNumber is an API method used in Rattlesnake
   if (var_num > _max_var_number)
     _max_var_number = var_num;
+  _du_dot_du.resize(var_num + 1);
 }
 
 bool
@@ -1577,6 +1578,55 @@ SystemBase::serializedSolution()
   }
 
   return *_serialized_solution;
+}
+
+void
+SystemBase::addTimeIntegrator(const std::string & type,
+                              const std::string & name,
+                              InputParameters & parameters)
+{
+  parameters.set<SystemBase *>("_sys") = this;
+  _time_integrators.push_back(_factory.create<TimeIntegrator>(type, name, parameters));
+}
+
+void
+SystemBase::copyTimeIntegrators(const SystemBase & other_sys)
+{
+  _time_integrators = other_sys._time_integrators;
+}
+
+const TimeIntegrator *
+SystemBase::queryTimeIntegrator(const unsigned int var_num) const
+{
+  for (auto & ti : _time_integrators)
+    if (ti->integratesVar(var_num))
+      return ti.get();
+
+  return nullptr;
+}
+
+const TimeIntegrator &
+SystemBase::getTimeIntegrator(const unsigned int var_num) const
+{
+  const auto * const ti = queryTimeIntegrator(var_num);
+
+  if (ti)
+    return *ti;
+  else
+    mooseError("No time integrator found that integrates variable number ",
+               std::to_string(var_num));
+}
+
+const std::vector<std::shared_ptr<TimeIntegrator>> &
+SystemBase::getTimeIntegrators()
+{
+  return _time_integrators;
+}
+
+const Number &
+SystemBase::duDotDu(const unsigned int var_num) const
+{
+  return _du_dot_du[var_num];
 }
 
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,

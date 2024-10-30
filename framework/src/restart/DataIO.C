@@ -326,7 +326,14 @@ dataStore(std::ostream & stream,
           std::unique_ptr<libMesh::NumericVector<Number>> & v,
           void * context)
 {
-  mooseAssert(v, "Null vector");
+  // Classes may declare unique pointers to vectors as restartable data and never actually create
+  // vector instances. This happens for example in the `TimeIntegrator` class where subvector
+  // instances are only created if multiple time integrators are present
+  bool have_vector = v.get();
+  dataStore(stream, have_vector, context);
+  if (!have_vector)
+    return;
+
   mooseAssert(context, "Needs a context of the communicator");
   const auto & comm = *static_cast<const libMesh::Parallel::Communicator *>(context);
   mooseAssert(&comm == &v->comm(), "Inconsistent communicator");
@@ -669,6 +676,12 @@ template <>
 void
 dataLoad(std::istream & stream, std::unique_ptr<libMesh::NumericVector<Number>> & v, void * context)
 {
+  bool have_vector;
+  dataLoad(stream, have_vector, context);
+
+  if (!have_vector)
+    return;
+
   mooseAssert(context, "Needs a context of the communicator");
   const auto & comm = *static_cast<const libMesh::Parallel::Communicator *>(context);
   if (v)
