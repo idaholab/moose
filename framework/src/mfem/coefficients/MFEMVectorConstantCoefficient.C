@@ -7,6 +7,8 @@ InputParameters
 MFEMVectorConstantCoefficient::validParams()
 {
   InputParameters params = MFEMVectorCoefficient::validParams();
+  params.addClassDescription(
+      "Class for defining an mfem::VectorConstantCoefficient object to add to an MFEMProblem.");
   params.addRequiredParam<double>("value_x", "x component of the VectorConstantCoefficient");
   params.addRequiredParam<double>("value_y", "y component of the VectorConstantCoefficient");
   params.addRequiredParam<double>("value_z", "z component of the VectorConstantCoefficient");
