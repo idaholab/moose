@@ -19,8 +19,8 @@ represent a heat transfer boundary condition
 !equation
 h(T-T_{\inf}, T')_{\partial\Omega} \,\,\, \forall T' \in V
 
-by identifying $\lambda=h$ as the heat transfer coefficient on the boundary, $u$ as the trial variable
-for the temperature, and $u_0=T_{inf}$ as the equilibrium temperature far from the boundary.
+by identifying $\lambda=h$ as the heat transfer coefficient on the boundary, $u=T$ as the trial variable
+for the temperature, $v=T'$ is the test variable, and $u_0=T_{inf}$ as the equilibrium temperature far from the boundary.
 
 ## Example Input File Syntax
 
