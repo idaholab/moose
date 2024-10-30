@@ -20,7 +20,6 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 EquationSystemProblemOperator::Solve(mfem::Vector & X)
 {
-  GetEquationSystem()->BuildEquationSystem(_problem._bc_map);
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
   _problem._nonlinear_solver->SetSolver(*_problem._jacobian_solver);

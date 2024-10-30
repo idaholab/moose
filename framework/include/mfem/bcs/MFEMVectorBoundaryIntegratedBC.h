@@ -2,12 +2,12 @@
 #include "MFEMIntegratedBC.h"
 #include "MFEMVectorFunctionCoefficient.h"
 
-class MFEMVectorNormalIntegratedBC : public MFEMIntegratedBC
+class MFEMVectorBoundaryIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorNormalIntegratedBC(const InputParameters & parameters);
+  MFEMVectorBoundaryIntegratedBC(const InputParameters & parameters);
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.

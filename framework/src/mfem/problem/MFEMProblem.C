@@ -273,6 +273,32 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
   return mfem_variable_params;
 }
 
+void
+MFEMProblem::displaceMesh()
+{
+  // Displace mesh
+  if (mesh().shouldDisplace())
+  {
+    mesh().displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
+    // TODO: update FESpaces GridFunctions etc for transient solves
+  }
+}
+
+std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+MFEMProblem::getMeshDisplacementGridFunction()
+{
+  // If C++23 transform were available this would be easier
+  auto const displacement_variable = mesh().getMeshDisplacementVariable();
+  if (displacement_variable)
+  {
+    return *_problem_data._gridfunctions.Get(displacement_variable.value());
+  }
+  else
+  {
+    return std::nullopt;
+  }
+}
+
 std::vector<VariableName>
 MFEMProblem::getAuxVariableNames()
 {
