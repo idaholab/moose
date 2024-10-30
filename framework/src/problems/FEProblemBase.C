@@ -341,6 +341,12 @@ FEProblemBase::validParams()
       "If we catch an exception during residual/Jacobian evaluaton for which we don't have "
       "specific handling, immediately error instead of allowing the time step to be cut");
 
+  params.addParam<bool>(
+      "preallocate_matrix_memory",
+      true,
+      "Whether to preallocate matrix memory. If this is false, then no sparsity pattern will be "
+      "precomputed and instead a hash table will be used for matrix assembly");
+
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
@@ -348,9 +354,10 @@ FEProblemBase::validParams()
       "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
-  params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
-                              "ignore_zeros_in_jacobian identify_variable_groups_in_nl",
-                              "Nonlinear system(s)");
+  params.addParamNamesToGroup(
+      "use_nonlinear previous_nl_solution_required nl_sys_names "
+      "ignore_zeros_in_jacobian identify_variable_groups_in_nl preallocate_matrix_memory",
+      "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
   params.addParamNamesToGroup("verbose_setup verbose_multiapps parallel_barrier_messaging",
