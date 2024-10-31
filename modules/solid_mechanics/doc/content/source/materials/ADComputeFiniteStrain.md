@@ -42,7 +42,7 @@ where $\boldsymbol{x}_{n+1}$ is the position vector of materials points in
 $\kappa_{n+1}$, and $\boldsymbol{x}_{n}$ is the position vector of materials
 points in $\kappa_{n}$.
 
-alert note title=Incremental vs Total Deformation Gradient
+!alert note title=Incremental vs Total Deformation Gradient
 Note that $\hat{\boldsymbol{F}}$ is NOT the deformation gradient, but rather the
 incremental deformation gradient of $\kappa_{n+1}$ with respect to $\kappa_n$.
 Thus $\hat{\boldsymbol{F}} = \boldsymbol{F}_{n+1} \boldsymbol{F}_n^{-1}$, where
