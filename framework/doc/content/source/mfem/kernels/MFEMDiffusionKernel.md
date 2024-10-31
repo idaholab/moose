@@ -16,7 +16,7 @@ where $u, v \in H^1$.
 This term arises from the weak form of the Laplacian operator
 
 !equation
--k \nabla^2 u
+- \vec\nabla \cdot \left( k \vec\nabla u \right)
 
 ## Example Input File Syntax
 

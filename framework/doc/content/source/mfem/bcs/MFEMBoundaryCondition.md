@@ -6,11 +6,11 @@ Base class for MFEM boundary condition objects.
 
 ## Overview
 
-`MFEMBoundaryCondition` represent boundary conditions applied to the MFEM problem, applied on the
+`MFEMBoundaryCondition` represents boundary conditions applied to the MFEM problem, applied on the
 user-provided list of boundaries.
 
 Similar to `MFEMKernel`, the boundary condition is applied to the weak form equation that is
-labelled according to the test variable name returned from `getTestVariableName()`.
+labeled according to the test variable name returned from `getTestVariableName()`.
 
 `MFEMBoundaryCondition` objects come in two varieties, depending on which child class they inherit
 from:

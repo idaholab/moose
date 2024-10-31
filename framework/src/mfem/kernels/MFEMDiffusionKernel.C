@@ -10,10 +10,9 @@ MFEMDiffusionKernel::validParams()
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
                              "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$ "
                              "arising from the weak form of the Laplacian operator "
-                             "$-k\\nabla^2 u$.");
+                             "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
   params.addParam<std::string>("coefficient",
-                               "Name of property for diffusion coefficient k to multiply "
-                               "the Laplacian by.");
+                               "Name of property for diffusion coefficient k."
   return params;
 }
 
