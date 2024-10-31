@@ -19,5 +19,5 @@ from:
   Dirichlet-like BCs removing degrees of freedom from the problem at the boundary;
 
 - Integrated boundary conditions, inheriting from `MFEMIntegratedBC`, which apply one or more
-  boundary integrators to the weak form on the specified boundary surfaces.
+  boundary integrators to the weak form on the specified boundaries.
 
