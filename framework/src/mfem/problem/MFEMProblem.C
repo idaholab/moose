@@ -110,22 +110,6 @@ MFEMProblem::addMaterial(const std::string & kernel_name,
 }
 
 void
-MFEMProblem::addCoefficient(const std::string & user_object_name,
-                            const std::string & name,
-                            InputParameters & parameters)
-{
-  FEProblemBase::addUserObject(user_object_name, name, parameters);
-}
-
-void
-MFEMProblem::addVectorCoefficient(const std::string & user_object_name,
-                                  const std::string & name,
-                                  InputParameters & parameters)
-{
-  FEProblemBase::addUserObject(user_object_name, name, parameters);
-}
-
-void
 MFEMProblem::addFESpace(const std::string & user_object_name,
                         const std::string & name,
                         InputParameters & parameters)

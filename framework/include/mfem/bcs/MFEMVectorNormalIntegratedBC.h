@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
-#include "MFEMVectorFunctionCoefficient.h"
 
 class MFEMVectorNormalIntegratedBC : public MFEMIntegratedBC
 {
