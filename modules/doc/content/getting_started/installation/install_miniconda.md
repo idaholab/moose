@@ -51,12 +51,6 @@ environment:
 conda update --all --yes
 ```
 
-Add [!ac](INL)'s public channel to gain access to [!ac](INL)'s Conda package library:
-
-```bash
-conda config --add channels https://conda.software.inl.gov/public
-```
-
 !alert warning title=Do not use sudo
 If you find yourself using `sudo` commands while engaging Conda commands... something is not right.
 The most common reason for needing sudo is due to an improper Conda installation. Conda *should* be

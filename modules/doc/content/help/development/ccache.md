@@ -9,7 +9,7 @@ In order to use ccache with MOOSE-based applications, it will be necessary to fi
 In other words If you are using our Conda moose-libmesh package, then you cannot use ccache. In order to begin using ccache, first create a new conda environment, free of moose-libmesh, and install everything necessary to build libMesh with ccache:
 
 ```bash
-conda create --name ccache-env moose-petsc moose-tools
+conda create --name ccache-env moose-petsc moose-tools --channel https://conda.software.inl.gov/public
 conda activate ccache-env
 export CC="ccache mpicc" CXX="ccache mpicxx"
 ```

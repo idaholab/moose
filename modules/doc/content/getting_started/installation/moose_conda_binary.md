@@ -23,7 +23,7 @@ With Conda initialized, create the `moose` environment and install `moose`:
 !style-end!
 
 ```bash
-conda create -n moose moose
+conda create -n moose moose --channel https://conda.software.inl.gov/public
 ```
 
 After the installation completes, activate the new environment:

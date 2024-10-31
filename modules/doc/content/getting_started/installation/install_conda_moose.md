@@ -6,7 +6,7 @@ packages:
 !style-end!
 
 !versioner! code
-conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
+conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__ --channel https://conda.software.inl.gov/public
 !versioner-end!
 
 After the installation completes, activate the new environment:

@@ -15,18 +15,13 @@ section for what may look familiar, and follow those instructions:
   ```
 
   If you receive errors about a channel not present (CondaKeyError), please ignore. You most likely
-  will not have all three 'old' channels. Next, add the correct channel:
-
-  ```bash
-  conda config --add channels https://conda.software.inl.gov/public
-  ```
+  will not have all three 'old' channels.
 
   When you're finished, a `conda config --show channels` should resemble the following:
 
   ```bash
   $ conda config --show channels
   channels:
-    - https://conda.software.inl.gov/public
     - conda-forge
     - defaults
   ```
@@ -93,7 +88,6 @@ section for what may look familiar, and follow those instructions:
 
   ```bash
   channels:
-    - https://conda.software.inl.gov/public
     - conda-forge
     - defaults
   ```
@@ -118,7 +112,7 @@ section for what may look familiar, and follow those instructions:
   !versioner! code
   conda activate base
   conda env remove -n moose
-  conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
+  conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__ --channel https://conda.software.inl.gov/public
   conda activate moose
   !versioner-end!
 
