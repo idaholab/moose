@@ -62,7 +62,7 @@ InterfaceKernelBase::validParams()
       "length as diag_save_in. This vector specifies whether the corresponding aux_var should "
       "save-in jacobian contributions from the primary ('p') or secondary side ('s').");
   params.addParamNamesToGroup("diag_save_in save_in save_in_var_side diag_save_in_var_side",
-                              "Advanced");
+                              "Residual and Jacobian debug output");
 
   // InterfaceKernels always need one layer of ghosting.
   params.addRelationshipManager("ElementSideNeighborLayers",
@@ -98,7 +98,6 @@ InterfaceKernelBase::InterfaceKernelBase(const InputParameters & parameters)
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_var_side(parameters.get<MultiMooseEnum>("diag_save_in_var_side")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
-
 {
 }
 

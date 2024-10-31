@@ -13,6 +13,7 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/quadrature.h"
 
@@ -56,7 +57,13 @@ InterfaceKernelTempl<T>::InterfaceKernelTempl(const InputParameters & parameters
     _grad_test_neighbor(_neighbor_var.gradPhiFaceNeighbor())
 
 {
+  // Neighbor variable dependency is added by
+  // NeighborCoupleableMooseVariableDependencyIntermediateInterface
   addMooseVariableDependency(this->mooseVariable());
+
+  // Disallow auxiliary variables for neighbor variables
+  if (_fe_problem.getAuxiliarySystem().hasVariable(_neighbor_var.name()))
+    paramError("neighbor_var", "Auxiliary variables may not be used as the neighbor variable");
 
   if (!parameters.isParamValid("boundary"))
     mooseError(
