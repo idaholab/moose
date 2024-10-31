@@ -1259,7 +1259,6 @@ template <typename T>
 T
 containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
-  // Define types for container gradient and gradient value
   typedef typename FunctorBase<T>::GradientType ContainerGradientType;
   typedef typename ContainerGradientType::value_type GradientType;
   const GradientType * const example_gradient = nullptr;
@@ -1290,8 +1289,8 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
       std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(*limiter,
                                                             component_upwind,
                                                             component_downwind,
-                                                            example_gradient,
-                                                            example_gradient,
+                                                            /*grad_phi_upwind*/ example_gradient,
+                                                            /*grad_phi_face*/ example_gradient,
                                                             T(0.0),
                                                             T(0.0),
                                                             *face.fi,
