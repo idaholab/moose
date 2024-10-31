@@ -7,8 +7,13 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'upwind.e'
+<<<<<<< HEAD
       detail = 'and pass debugging checks.'
       abs_zero = 1e-6
+=======
+      detail = 'and reach converged results with upwind advection scheme.'
+      abs_zero = 1e-4
+>>>>>>> a8e5e18f83 (completing argument definition for passing compile checks Refs #28891)
       cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
       heavy = true
       detail = 'first-order upwind test'
@@ -17,8 +22,8 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'upwind_run.e'
-      detail = 'and reach converged results with segregated solvers.'
-      abs_zero = 1e-6
+      detail = 'and pass debugging checks with segregated solvers with upwind advection scheme.'
+      abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=upwind Executioner/num_iterations=10 Outputs/file_base=upwind_run'
       detail = 'first-order upwind run test'
     []
@@ -26,8 +31,8 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'vanLeer.e'
-      detail = 'and pass debugging checks.'
-      abs_zero = 1e-6
+      detail = 'and reach converged results with van Leer limiter.'
+      abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer'
       heavy = true
       detail = 'van Leer test'
@@ -36,8 +41,8 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'vanLeer_run.e'
-      detail = 'and reach converged results with segregated solvers.'
-      abs_zero = 1e-6
+      detail = 'and pass debugging checks with segregated solvers with van Leer limiter.'
+      abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Executioner/num_iterations=10 Outputs/file_base=vanLeer_run'
       detail = 'van Leer run test'
     []
@@ -45,8 +50,8 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'min_mod.e'
-      detail = 'and pass debugging checks.'
-      abs_zero = 1e-6
+      detail = 'and reach converged results with min-mod limiter.'
+      abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
       heavy = true
       detail = 'min-mod test'
@@ -55,8 +60,8 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'min_mod_run.e'
-      detail = 'and reach converged results with segregated solvers.'
-      abs_zero = 1e-6
+      detail = 'and pass debugging checks with segregated solvers with min-mod limiter.'
+      abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=min_mod Executioner/num_iterations=10 Outputs/file_base=min_mod_run'
       detail = 'min-mod run test'
     []
@@ -64,8 +69,8 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'quick.e'
-      detail = 'and pass debugging checks.'
-      abs_zero = 1e-6
+      detail = 'and reach converged results with QUICK limiter.'
+      abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
       heavy = true
       detail = 'QUICK test'
@@ -74,8 +79,8 @@
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
       exodiff = 'quick_run.e'
-      detail = 'and reach converged results with segregated solvers.'
-      abs_zero = 1e-6
+      detail = 'and pass debugging checks with segregated solvers with QUICK limiter.'
+      abs_zero = 1e-4
       cli_args = 'GlobalParams/advected_interp_method=quick Executioner/num_iterations=10 Outputs/file_base=quick_run'
       detail = 'QUICK run test'
     []

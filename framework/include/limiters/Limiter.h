@@ -117,8 +117,8 @@ public:
                   const VectorValue<T> * grad_phi_upwind,
                   const VectorValue<T> * grad_phi_downwind,
                   const RealVectorValue & dCD,
-                  const T & max_value,
-                  const T & min_value,
+                  const Real & max_value,
+                  const Real & min_value,
                   const FaceInfo * fi,
                   const bool & fi_elem_is_upwind) const = 0;
   virtual bool constant() const = 0;
@@ -167,8 +167,8 @@ public:
                                    grad_phi_upwind,
                                    nullptr,
                                    dCD,
-                                   0.0,
-                                   0.0,
+                                   T(0),
+                                   T(0),
                                    nullptr,
                                    false)));
   }
@@ -222,8 +222,8 @@ public:
                const VectorValue<T> * grad_phi_upwind,
                const VectorValue<T> * grad_phi_downwind,
                const RealVectorValue & dCD,
-               const T & max_value,
-               const T & min_value,
+               const Real & max_value,
+               const Real & min_value,
                const FaceInfo * fi,
                const bool & fi_elem_is_upwind) const
   {
@@ -322,8 +322,8 @@ public:
    */
   T rf_minmax(const T & phi_upwind,
               const VectorValue<T> * grad_phi_upwind,
-              const T & max_value,
-              const T & min_value,
+              const Real & max_value,
+              const Real & min_value,
               const FaceInfo * fi,
               const bool & fi_elem_is_upwind) const
   {

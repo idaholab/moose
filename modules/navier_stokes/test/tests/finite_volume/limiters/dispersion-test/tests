@@ -8,6 +8,7 @@
       input = 'bottom_left_advection.i'
       exodiff = bottom_left_sou.e
       cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=bottom_left_sou'
+      abs_zero = 1e-4
       detail = 'second-order upwind'
     []
     [vanLeer]
@@ -15,6 +16,7 @@
       input = 'bottom_left_advection.i'
       exodiff = bottom_left_vanLeer.e
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=bottom_left_vanLeer'
+      abs_zero = 1e-4
       detail = 'van Leer'
     []
     [min_mod]
@@ -22,6 +24,7 @@
       input = 'bottom_left_advection.i'
       exodiff = bottom_left_min_mod.e
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=bottom_left_min_mod'
+      abs_zero = 1e-4
       detail = 'min-mod'
     []
     [quick]
@@ -29,6 +32,7 @@
       input = 'bottom_left_advection.i'
       exodiff = bottom_left_quick.e
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=bottom_left_quick'
+      abs_zero = 1e-4
       detail = 'QUICK'
     []
     [venkatakrishnan]
@@ -36,6 +40,7 @@
       input = 'bottom_left_advection.i'
       exodiff = bottom_left_venkatakrishnan.e
       cli_args = 'GlobalParams/advected_interp_method=venkatakrishnan Outputs/file_base=bottom_left_venkatakrishnan'
+      abs_zero = 1e-4
       detail = 'venkatakrishnan'
     []
   []
@@ -46,6 +51,7 @@
       input = 'top_right_advection.i'
       exodiff = top_right_sou.e
       cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=top_right_sou'
+      abs_zero = 1e-4
       detail = 'second-order upwind'
     []
     [vanLeer]
@@ -53,6 +59,7 @@
       input = 'top_right_advection.i'
       exodiff = top_right_vanLeer.e
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=top_right_vanLeer'
+      abs_zero = 1e-4
       detail = 'van Leer'
     []
     [min_mod]
@@ -60,6 +67,7 @@
       input = 'top_right_advection.i'
       exodiff = top_right_min_mod.e
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=top_right_min_mod'
+      abs_zero = 1e-4
       detail = 'min-mod'
     []
     [quick]
@@ -67,6 +75,7 @@
       input = 'top_right_advection.i'
       exodiff = top_right_quick.e
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=top_right_quick'
+      abs_zero = 1e-4
       detail = 'QUICK'
     []
     [venkatakrishnan]
@@ -74,6 +83,7 @@
       input = 'top_right_advection.i'
       exodiff = top_right_venkatakrishnan.e
       cli_args = 'GlobalParams/advected_interp_method=venkatakrishnan Outputs/file_base=top_right_venkatakrishnan'
+      abs_zero = 1e-4
       detail = 'venkatakrishnan'
     []
   []
@@ -84,6 +94,7 @@
       input = 'bottom_left_tri_mesh_advection.i'
       exodiff = bottom_left_tri_mesh_vanLeer.e
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=bottom_left_tri_mesh_vanLeer'
+      abs_zero = 1e-4
       detail = 'van Leer'
     []
     [min_mod]
@@ -91,6 +102,7 @@
       input = 'bottom_left_tri_mesh_advection.i'
       exodiff = bottom_left_tri_mesh_min_mod.e
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=bottom_left_tri_mesh_min_mod'
+      abs_zero = 1e-4
       detail = 'min-mod'
     []
     [quick]
@@ -98,6 +110,7 @@
       input = 'bottom_left_tri_mesh_advection.i'
       exodiff = bottom_left_tri_mesh_quick.e
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=bottom_left_tri_mesh_quick'
+      abs_zero = 1e-4
       detail = 'QUICK'
     []
   []

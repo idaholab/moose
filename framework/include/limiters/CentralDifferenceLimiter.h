@@ -30,8 +30,8 @@ public:
           const VectorValue<T> *,
           const VectorValue<T> *,
           const RealVectorValue &,
-          const T &,
-          const T &,
+          const Real &,
+          const Real &,
           const FaceInfo *,
           const bool &) const override final
   {

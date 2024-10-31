@@ -474,8 +474,8 @@ interpCoeffs(const Limiter<T> & limiter,
              const T & phi_downwind,
              const VectorValue<T> * const grad_phi_upwind,
              const VectorValue<T> * const grad_phi_face,
-             const T & max_value,
-             const T & min_value,
+             const Real & max_value,
+             const Real & min_value,
              const FaceInfo & fi,
              const bool fi_elem_is_upwind)
 {
@@ -517,8 +517,8 @@ interpolate(const Limiter<Scalar> & limiter,
                    phi_downwind,
                    grad_phi_upwind,
                    /*grad_phi_face*/ static_cast<const libMesh::VectorValue<Scalar> *>(nullptr),
-                   /* max_value */ Scalar(0.0),
-                   /* min_value */ Scalar(0.0),
+                   /* max_value */ std::numeric_limits<Real>::max(),
+                   /* min_value */ std::numeric_limits<Real>::min(),
                    fi,
                    fi_elem_is_upwind);
   return pr.first * phi_upwind + pr.second * phi_downwind;
@@ -595,8 +595,8 @@ fullLimitedInterpolation(const Limiter<T> & limiter,
                          const T & phi_downwind,
                          const VectorValue<T> * const grad_phi_upwind,
                          const VectorValue<T> * const grad_phi_face,
-                         const T & max_value,
-                         const T & min_value,
+                         const Real & max_value,
+                         const Real & min_value,
                          const FaceArg & face)
 {
   // Compute the direction vector based on whether the current element is upwind
@@ -655,7 +655,7 @@ fullLimitedInterpolation(const Limiter<T> & limiter,
  * value.
  *
  * This function performs the following steps:
- * 1. Initializes max_value to 0 and min_value to a large value (1e10).
+ * 1. Initializes max_value to 0 and min_value to a large value.
  * 2. Iterates over the direct neighbors of the element associated with the face.
  *    - If a neighbor is valid (not null), it evaluates the functor at that neighbor and updates
  * max_value and min_value.
@@ -672,11 +672,11 @@ fullLimitedInterpolation(const Limiter<T> & limiter,
 template <typename T,
           FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
           typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
-std::pair<T, T>
+std::pair<Real, Real>
 computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
-  // Initialize max_value to 0 and min_value to a large value (1e10)
-  T max_value(0), min_value(1e10);
+  // Initialize max_value to 0 and min_value to a large value
+  Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
 
   // Iterate over the direct neighbors of the element associated with the face
   for (auto neighbor : (*face.fi).elem().neighbor_ptr_range())
@@ -687,7 +687,8 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
 
     // Evaluate the functor at the neighbor and update max_value and min_value
     const ElemArg local_cell_arg = {neighbor, false};
-    const auto value = functor.template genericEvaluate<FEK>(local_cell_arg, time);
+    const auto value =
+        MetaPhysicL::raw_value(functor.template genericEvaluate<FEK>(local_cell_arg, time));
     max_value = std::max(max_value, value);
     min_value = std::min(min_value, value);
   }
@@ -701,7 +702,8 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
 
     // Evaluate the functor at the neighbor and update max_value and min_value
     const ElemArg local_cell_arg = {neighbor, false};
-    const auto value = functor.template genericEvaluate<FEK>(local_cell_arg, time);
+    const auto value =
+        MetaPhysicL::raw_value(functor.template genericEvaluate<FEK>(local_cell_arg, time));
     max_value = std::max(max_value, value);
     min_value = std::min(min_value, value);
   }
@@ -734,7 +736,7 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
  * second element is the minimum value.
  *
  * This function performs the following steps:
- * 1. Initializes max_value to 0 and min_value to a large value (1e10).
+ * 1. Initializes max_value to 0 and min_value to a large value.
  * 2. Iterates over the direct neighbors of the element associated with the face.
  *    - If a neighbor is valid (not null), it evaluates the functor at that neighbor for the
  * specified component and updates max_value and min_value.
@@ -749,14 +751,14 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
  * faces.
  */
 template <typename T>
-std::pair<T, T>
+std::pair<Real, Real>
 computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
                    const FaceArg & face,
                    const StateArg & time,
                    const unsigned int & component)
 {
-  // Initialize max_value to 0 and min_value to a large value (1e10)
-  T max_value(0), min_value(1e10);
+  // Initialize max_value to 0 and min_value to a large value
+  Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
 
   // Iterate over the direct neighbors of the element associated with the face
   for (auto neighbor : (*face.fi).elem().neighbor_ptr_range())
@@ -768,7 +770,7 @@ computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
     // Evaluate the functor at the neighbor for the specified component and update max_value and
     // min_value
     const ElemArg local_cell_arg = {neighbor, false};
-    const auto value = functor(local_cell_arg, time)(component);
+    const auto value = MetaPhysicL::raw_value(functor(local_cell_arg, time)(component));
     max_value = std::max(max_value, value);
     min_value = std::min(min_value, value);
   }
@@ -783,89 +785,7 @@ computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
     // Evaluate the functor at the neighbor for the specified component and update max_value and
     // min_value
     const ElemArg local_cell_arg = {neighbor, false};
-    const auto value = functor(local_cell_arg, time)(component);
-    max_value = std::max(max_value, value);
-    min_value = std::min(min_value, value);
-  }
-
-  // Return a pair containing the computed maximum and minimum values
-  return std::make_pair(max_value, min_value);
-}
-
-/**
- * @brief Computes the minimum and maximum scalar values of a specific component in a two-cell
- * stencil around a given face in a computational grid.
- *
- * This function calculates the minimum and maximum values of a specified component within a
- * two-cell stencil. The stencil includes the immediate neighboring elements of the face's
- * associated element and the neighboring elements of those neighbors. It evaluates the values using
- * a provided functor and accounts for the valid (non-null) neighbors.
- *
- * @tparam T The data type for the values being computed. This is typically a scalar type.
- *
- * @param functor An object of a functor class derived from FunctorBase<T>. This object provides the
- * operator() method to compute the value at a given element and time.
- * @param face An argument representing the face in the computational domain. The face provides
- * access to neighboring elements via neighbor_ptr_range().
- * @param time An argument representing the state or time at which the evaluation is performed.
- * @param component An unsigned integer representing the specific component of the container to be
- * evaluated.
- *
- * @return std::pair<T, T> A pair containing the minimum and maximum values of the specified
- * component computed across the two-cell stencil. The first element is the maximum value, and the
- * second element is the minimum value.
- *
- * This function performs the following steps:
- * 1. Initializes max_value to 0 and min_value to a large value (1e10).
- * 2. Iterates over the direct neighbors of the element associated with the face.
- *    - If a neighbor is valid (not null), it evaluates the functor at that neighbor for the
- * specified component and updates max_value and min_value.
- * 3. Iterates over the neighbors of the neighbors.
- *    - Similar to the first loop, it evaluates the functor at valid neighbors for the specified
- * component and updates max_value and min_value.
- * 4. Returns a pair containing the computed max_value and min_value.
- *
- * Usage:
- * This function is typically used in the finite volume methods for min-max computations over
- * stencils (neighborhoods). It helps compute the limiting for limited second order upwind at the
- * faces.
- */
-template <typename T>
-std::pair<T, T>
-containerComputeMinMaxValue(const FunctorBase<T> & functor,
-                            const FaceArg & face,
-                            const StateArg & time,
-                            const unsigned int & component)
-{
-  // Initialize max_value to 0 and min_value to a large value (1e10)
-  T max_value(0), min_value(1e10);
-
-  // Iterate over the direct neighbors of the element associated with the face
-  for (auto neighbor : (*face.fi).elem().neighbor_ptr_range())
-  {
-    // If not a valid neighbor, skip to the next one
-    if (neighbor == nullptr)
-      continue;
-
-    // Evaluate the functor at the neighbor for the specified component and update max_value and
-    // min_value
-    const ElemArg local_cell_arg = {neighbor, false};
-    const auto value = functor(local_cell_arg, time)[component];
-    max_value = std::max(max_value, value);
-    min_value = std::min(min_value, value);
-  }
-
-  // Iterate over the neighbors of the neighbor associated with the face
-  for (auto neighbor : (*face.fi).neighbor().neighbor_ptr_range())
-  {
-    // If not a valid neighbor, skip to the next one
-    if (neighbor == nullptr)
-      continue;
-
-    // Evaluate the functor at the neighbor for the specified component and update max_value and
-    // min_value
-    const ElemArg local_cell_arg = {neighbor, false};
-    const auto value = functor(local_cell_arg, time)[component];
+    const auto value = MetaPhysicL::raw_value(functor(local_cell_arg, time)(component));
     max_value = std::max(max_value, value);
     min_value = std::min(min_value, value);
   }
@@ -954,8 +874,8 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
                                  phi_downwind,
                                  &zero,
                                  &zero,
-                                 T(0.0),
-                                 T(0.0),
+                                 std::numeric_limits<Real>::max(),
+                                 std::numeric_limits<Real>::min(),
                                  *face.fi,
                                  face.elem_is_upwind);
   }
@@ -969,7 +889,7 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
       time_arg = &temp_state;
     }
 
-    T max_value(0.0), min_value(1e10);
+    Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
 
     // Compute min-max values for min-max limiters
     if (face.limiter_type == LimiterType::Venkatakrishnan || face.limiter_type == LimiterType::SOU)
@@ -1083,7 +1003,7 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg
     }
 
     // Initialize min-max values
-    T max_value(0.0), min_value(1e10);
+    Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
     if (face.limiter_type == LimiterType::Venkatakrishnan || face.limiter_type == LimiterType::SOU)
       std::tie(max_value, min_value) = computeMinMaxValue(functor, face, *time_arg);
 
@@ -1171,8 +1091,8 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
                                                             component_downwind,
                                                             &grad_zero,
                                                             &grad_zero,
-                                                            T(0.0),
-                                                            T(0.0),
+                                                            std::numeric_limits<Real>::max(),
+                                                            std::numeric_limits<Real>::min(),
                                                             *face.fi,
                                                             face.elem_is_upwind);
       ret(i) = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
@@ -1203,7 +1123,7 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
                                        coeffs.second * grad_phi_downwind.row(i);
 
       // Initialize min-max values
-      T max_value(0.0), min_value(1e10);
+      Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
       if (face.limiter_type == LimiterType::Venkatakrishnan ||
           face.limiter_type == LimiterType::SOU)
         std::tie(max_value, min_value) = computeMinMaxValue(functor, face, *time_arg, i);
@@ -1263,23 +1183,18 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
   typedef typename ContainerGradientType::value_type GradientType;
   const GradientType * const example_gradient = nullptr;
 
-  // Assert that the face information is non-null
   mooseAssert(face.fi, "this must be non-null");
-
-  // Construct the limiter based on the face limiter type
   const auto limiter = Limiter<typename T::value_type>::build(face.limiter_type);
 
-  // Determine upwind and downwind arguments based on the face element
   const auto upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
   const auto downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
   const auto phi_upwind = functor(upwind_arg, time);
   const auto phi_downwind = functor(downwind_arg, time);
 
-  // Initialize the return container value
+  // initialize in order to get proper size
   T ret = phi_upwind;
   typename T::value_type coeff_upwind, coeff_downwind;
 
-  // Compute interpolation coefficients and advected values for Upwind or CentralDifference limiters
   if (face.limiter_type == LimiterType::Upwind ||
       face.limiter_type == LimiterType::CentralDifference)
   {
@@ -1289,10 +1204,10 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
       std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(*limiter,
                                                             component_upwind,
                                                             component_downwind,
-                                                            /*grad_phi_upwind*/ example_gradient,
-                                                            /*grad_phi_face*/ example_gradient,
-                                                            T(0.0),
-                                                            T(0.0),
+                                                            example_gradient,
+                                                            example_gradient,
+                                                            std::numeric_limits<Real>::max(),
+                                                            std::numeric_limits<Real>::min(),
                                                             *face.fi,
                                                             face.elem_is_upwind);
       ret[i] = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
@@ -1300,47 +1215,24 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
   }
   else
   {
-    // Determine the time argument for the limiter
-    auto * time_arg = face.state_limiter;
-    if (!time_arg)
-    {
-      static Moose::StateArg temp_state(0, Moose::SolutionIterationType::Time);
-      time_arg = &temp_state;
-    }
-
-    // Evaluate the gradient of the functor at the upwind and downwind locations
-    const auto & grad_phi_upwind = functor.gradient(upwind_arg, *time_arg);
-    const auto & grad_phi_downwind = functor.gradient(downwind_arg, *time_arg);
-
-    const auto coeffs = interpCoeffs(InterpMethod::Average, *face.fi, face.elem_is_upwind);
-
-    // Compute interpolation coefficients and advected values for each component
+    const auto grad_phi_upwind = functor.gradient(upwind_arg, time);
     for (const auto i : index_range(ret))
     {
       const auto &component_upwind = phi_upwind[i], component_downwind = phi_downwind[i];
-      const VectorValue<T> &grad_upwind = grad_phi_upwind[i],
-                           grad_face = coeffs.first * grad_phi_upwind[i] +
-                                       coeffs.second * grad_phi_downwind[i];
-
-      // Initialize min-max values
-      T max_value(0.0), min_value(1e10);
-      if (face.limiter_type == LimiterType::Venkatakrishnan ||
-          face.limiter_type == LimiterType::SOU)
-        std::tie(max_value, min_value) = containerComputeMinMaxValue(functor, face, *time_arg, i);
-
-      // Perform full limited interpolation for the component
-      ret[i] = fullLimitedInterpolation(*limiter,
-                                        component_upwind,
-                                        component_downwind,
-                                        &grad_upwind,
-                                        &grad_face,
-                                        max_value,
-                                        min_value,
-                                        face);
+      const auto & grad = grad_phi_upwind[i];
+      std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(*limiter,
+                                                            component_upwind,
+                                                            component_downwind,
+                                                            &grad,
+                                                            example_gradient,
+                                                            std::numeric_limits<Real>::max(),
+                                                            std::numeric_limits<Real>::min(),
+                                                            *face.fi,
+                                                            face.elem_is_upwind);
+      ret[i] = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
     }
   }
 
-  // Return the interpolated container value
   return ret;
 }
 

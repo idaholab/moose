@@ -79,8 +79,8 @@ public:
           const VectorValue<T> * grad_phi_upwind,
           const VectorValue<T> * grad_phi_downwind,
           const RealVectorValue & dCD,
-          const T & /* max_value */,
-          const T & /* min_value */,
+          const Real & /* max_value */,
+          const Real & /* min_value */,
           const FaceInfo * /* fi */,
           const bool & /* fi_elem_is_upwind */) const override final
   {

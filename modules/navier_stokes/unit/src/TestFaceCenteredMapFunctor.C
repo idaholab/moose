@@ -85,8 +85,8 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   for (auto & fi : all_fi)
   {
     const auto & face_center = fi.faceCentroid();
-    const auto face_arg =
-        Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+    const auto face_arg = Moose::FaceArg{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
     const auto result = u(face_arg, Moose::currentState());
 
@@ -128,8 +128,8 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   // Arguments for the simple error checks, we use the first face and the corresponding
   // owner element
   QGauss qrule(1, CONSTANT);
-  const auto face_arg =
-      Moose::FaceArg{&all_fi[0], Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+  const auto face_arg = Moose::FaceArg{
+      &all_fi[0], Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
   const auto elem_arg = ElemArg{all_fi[0].elemPtr(), false};
   const auto elem_qp_arg = ElemQpArg({all_fi[0].elemPtr(), 0, &qrule, Point(0)});
   const auto elem_side_qp_arg = ElemSideQpArg({all_fi[0].elemPtr(), 0, 0, &qrule, Point(0)});
@@ -148,7 +148,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   try
   {
     unrestricted_error_test(
-        FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr},
+        FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr, nullptr},
         Moose::currentState());
     EXPECT_TRUE(false);
   }
@@ -162,8 +162,9 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
       restricted_error_test(*mesh, {1}, "is_restricted");
   try
   {
-    restricted_error_test(FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr},
-                          Moose::currentState());
+    restricted_error_test(
+        FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr, nullptr},
+        Moose::currentState());
     EXPECT_TRUE(false);
   }
   catch (std::runtime_error & e)
