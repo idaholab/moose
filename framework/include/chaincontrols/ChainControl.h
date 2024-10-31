@@ -47,9 +47,10 @@ protected:
    *
    * @tparam T          Type of chain control data
    * @param data_name   Chain control data name
+   * @param apply_object_prefix   If true, apply the object name as a prefix to the data name
    */
   template <typename T>
-  T & declareChainControlData(const std::string & data_name);
+  T & declareChainControlData(const std::string & data_name, bool apply_object_prefix = true);
 
   /**
    * Get a reference to control data that are specified in the input parameter 'param_name'
@@ -95,10 +96,11 @@ protected:
 
 template <typename T>
 T &
-ChainControl::declareChainControlData(const std::string & data_name)
+ChainControl::declareChainControlData(const std::string & data_name, bool apply_object_prefix)
 {
+  std::string full_data_name = (apply_object_prefix ? name() + ":" : "") + data_name;
   ChainControlData<T> * data_ptr =
-      getMooseApp().getChainControlDataSystem().declareChainControlData<T>(data_name, this);
+      getMooseApp().getChainControlDataSystem().declareChainControlData<T>(full_data_name, this);
   return data_ptr->set();
 }
 

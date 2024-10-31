@@ -16,13 +16,20 @@ GetPostprocessorChainControl::validParams()
 {
   InputParameters params = ChainControl::validParams();
   params.addRequiredParam<PostprocessorName>("postprocessor", "Post-processor name");
+  params.addParam<bool>(
+      "name_data_same_as_postprocessor",
+      false,
+      "If true, name the new control data to be the same as the post-processor name; otherwise "
+      "name as '<control>:value', where '<control>' is the name of this control object.");
   params.addClassDescription("Copies a post-processor value into a ChainControlData.");
   return params;
 }
 
 GetPostprocessorChainControl::GetPostprocessorChainControl(const InputParameters & parameters)
   : ChainControl(parameters),
-    _value(declareChainControlData<Real>(getParam<PostprocessorName>("postprocessor"))),
+    _value(getParam<bool>("name_data_same_as_postprocessor")
+               ? declareChainControlData<Real>(getParam<PostprocessorName>("postprocessor"), false)
+               : declareChainControlData<Real>("value")),
     _pp_value(getPostprocessorValue("postprocessor"))
 {
 }
