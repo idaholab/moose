@@ -9,9 +9,10 @@
 Adds the boundary integrator for integrating the linear form
 
 !equation
-(\vec f \cdot \vec n, v)_{\partial\Omega} \,\,\, \forall v \in V
+(\vec f \cdot \hat n, v)_{\partial\Omega} \,\,\, \forall v \in V
 
-where $v \in H^1$ and $\vec n$ is the outward facing unit normal vector on the boundary.
+where $v \in H^1$, $\vec f$ is a vector coefficient, and $\hat n$ is the outward facing unit normal
+vector on the boundary.
 
 !syntax parameters /BCs/MFEMVectorNormalIntegratedBC
 
