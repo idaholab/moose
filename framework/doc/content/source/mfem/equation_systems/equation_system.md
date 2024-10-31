@@ -1,9 +1,11 @@
 # EquationSystem
 
 The EquationSystem is responsible for defining and assembling the weak form of the PDE into an
-`mfem::Operator` used to solve an iteration of the FE problem. This operator is passed to an
-`mfem::NewtonSolver` in a [ProblemOperator](source/problem_operators/problem_operator.md), which
-handles the update of the state of all variables (including any required nonlinear iterations).  
+[`mfem::Operator`](https://docs.mfem.org/html/classmfem_1_1Operator.html) used to solve an iteration
+of the FE problem. This operator is passed to an
+[`mfem::NewtonSolver`](https://docs.mfem.org/html/classmfem_1_1NewtonSolver.html) in a
+[ProblemOperator](source/problem_operators/problem_operator.md), which handles the update of the
+state of all variables (including any required nonlinear iterations).  
 
 !equation
 {\left(\mathcal{L}(u), v\right)_{\Omega}=\left(f,v\right)_{\Omega}\,\,\,\forall v \in V}
@@ -22,11 +24,11 @@ ${b_i=\left(f,\varphi_i\right)_{\Omega}}$.
 !equation
 {\sum_j A_{ij} u_j = b_i}
 
-[MFEMKernels](source/kernels/MFEMKernel.md) contribute domain integrators to the
-weak form, and [MFEMIntegratedBCs](source/bcs/MFEMBoundaryCondition.md) contribute
-boundary integrators to the weak form.
-`mfem::BilinearFormIntegrators` add contributions to $A_{ij}(\varphi_i, \phi_j)$ and
-`mfem::LinearFormIntegrators` add contributions to $b_i(\varphi_i)$ when assembled.
+[MFEMKernels](source/kernels/MFEMKernel.md) contribute domain integrators to the weak form, and
+[MFEMIntegratedBCs](source/bcs/MFEMIntegratedBC.md) contribute boundary integrators to the weak
+form. [`mfem::BilinearFormIntegrators`](https://mfem.org/bilininteg/) add contributions to
+$A_{ij}(\varphi_i, \phi_j)$ and [`mfem::LinearFormIntegrators`](https://mfem.org/lininteg/) add
+contributions to $b_i(\varphi_i)$ when assembled.
 
 ## TimeDependentEquationSystem
 
