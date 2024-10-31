@@ -11,7 +11,7 @@ Adds the domain integrator for integrating the bilinear form
 !equation
 (k u, v)_\Omega \,\,\, \forall v \in V
 
-where $u, v \in H^1$.
+where $u, v \in H^1$ and $k$ is a scalar mass coefficient.
 
 This term arises from the weak form of the mass operator
 
