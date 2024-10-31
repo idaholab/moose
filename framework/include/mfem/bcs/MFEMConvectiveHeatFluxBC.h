@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
-#include "MFEMCoefficient.h"
 
 /*
 (h (T-T_inf), T')
