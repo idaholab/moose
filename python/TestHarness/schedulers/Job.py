@@ -553,11 +553,11 @@ class Job(OutputInterface):
 
         output = 'Working Directory: ' + self.getTestDir() + '\nRunning command: ' + command + '\n'
 
-        # Whether or not to skip the runner_run output, which is the output from the
+        # Whether or not to limit the runner_run output, which is the output from the
         # actual run (the process that the harness runs)
-        skip_runner_run = None
+        limit_runner_run = None
         if self.options.sep_files and not self.options.verbose:
-            skip_runner_run = '--sep-files'
+            limit_runner_run = '-x/--sep-files'
 
         options = self.options
         specs = self.specs
@@ -575,11 +575,13 @@ class Job(OutputInterface):
 
             # Possibly trim or skip the runner_run output (actual process output)
             if name == 'runner_run':
-                # Don't output the runner run
-                if skip_runner_run:
-                    output += f'\nSkipping runner_run output due to {skip_runner_run}; output located at:\n'
-                    output += object.getSeparateOutputFilePath() + '\n'
-                    continue
+                # Limit the runner run output
+                if limit_runner_run:
+                    output_split = object_output.splitlines()
+                    max_lines = 100
+                    if len(output_split) > max_lines:
+                        prefix = f'Displaying last {max_lines} lines due to {limit_runner_run}\n\n'
+                        object_output = prefix + '\n'.join(output_split[-max_lines:])
 
                 # Default trimmed output size
                 max_size = 100000
@@ -603,11 +605,12 @@ class Job(OutputInterface):
                 output += '\n'
             # Add a header before the output starts
             output += util.outputHeader(f'Begin {name} output', ending=False) + '\n'
+            # Remove extra line breaks
+            object_output = object_output.lstrip().rstrip()
             # Add the output, trimming if needed
-            output += util.trimOutput(object_output, max_size=max_size)
-            # Add a newline if one is missing
-            if output[-1] != '\n':
-                output += '\n'
+            output += util.trimOutput(object_output.lstrip().rstrip(), max_size=max_size)
+            # Add a newline as we ran rstrip
+            output += '\n'
             # Add a footer after the output ends
             output += '\n' + util.outputHeader(f'End {name} output', ending=False)
 
