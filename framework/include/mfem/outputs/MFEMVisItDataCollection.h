@@ -15,6 +15,5 @@ public:
 
 protected:
   mfem::VisItDataCollection _visit_dc;
-  bool _high_order_output;
   unsigned int _refinements;
 };
