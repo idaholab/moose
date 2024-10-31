@@ -1775,7 +1775,7 @@ MooseVariableData<OutputType>::computeNodalValues()
     assignNodalValue();
 
     if (_need_ad)
-      fetchADDoFValues();
+      fetchADNodalValues();
   }
   else
     zeroSizeDofValues();
@@ -1783,7 +1783,7 @@ MooseVariableData<OutputType>::computeNodalValues()
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::fetchADDoFValues()
+MooseVariableData<OutputType>::fetchADNodalValues()
 {
   auto n = _dof_indices.size();
   libmesh_assert(n);
@@ -1826,7 +1826,7 @@ MooseVariableData<OutputType>::fetchADDoFValues()
 
 template <>
 void
-MooseVariableData<RealEigenVector>::fetchADDoFValues()
+MooseVariableData<RealEigenVector>::fetchADNodalValues()
 {
   mooseError("I do not know how to support AD with array variables");
 }

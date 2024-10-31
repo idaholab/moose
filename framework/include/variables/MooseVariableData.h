@@ -429,7 +429,7 @@ public:
   const MooseArray<ADReal> & adDofValues() const;
 
   /**
-   * Return the AD time derivative values
+   * Return the AD time derivative values of degrees of freedom
    */
   const MooseArray<ADReal> & adDofValuesDot() const;
 
@@ -458,7 +458,7 @@ private:
    * for nodal basis families
    */
   void assignADNodalValue(const ADReal & value, const unsigned int & component);
-  void fetchADDoFValues();
+  void fetchADNodalValues();
 
   const FEType & _fe_type;
 

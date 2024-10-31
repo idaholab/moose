@@ -2230,7 +2230,7 @@ Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp) const
   else
   {
     if (_c_nodal)
-      mooseError("AD neighbor nodal dof dot implemented");
+      mooseError("AD neighbor nodal dof dot not implemented");
     return var->adUDotNeighbor();
   }
 }
