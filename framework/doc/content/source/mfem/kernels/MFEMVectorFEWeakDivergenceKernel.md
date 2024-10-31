@@ -11,8 +11,8 @@ Adds the domain integrator for integrating the mixed bilinear form
 !equation
 -(k \vec u, \vec\nabla v)_\Omega \,\,\, \forall v \in V
 
-where $\vec u \in H(\mathrm{curl})$ or $H(\mathrm{div})$ and
-$v \in H^1$.
+where $\vec u \in H(\mathrm{curl})$ or $H(\mathrm{div})$, $v \in H^1$, and $k$ is a scalar
+coefficient.
 
 This term arises from the weak form of the divergence operator
 
