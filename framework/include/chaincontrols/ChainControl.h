@@ -25,6 +25,15 @@ public:
   ChainControl(const InputParameters & parameters);
 
   /**
+   * Initialization that occurs in \c ChainControlSetupAction, right before the dependencies
+   * are added.
+   *
+   * Note that the \c initialSetup() method is executed after all
+   * actions are completed, so it is too late to add control data dependencies.
+   */
+  virtual void init() {}
+
+  /**
    * Returns the ChainControls that must run before this one
    */
   const std::vector<std::string> & getChainControlDataDependencies() const

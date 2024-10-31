@@ -117,6 +117,14 @@ public:
     return data;
   }
 
+  /**
+   * Gets the map of names to ChainControlDataBase
+   */
+  const std::map<std::string, ChainControlDataBase *> & getChainControlDataMap() const
+  {
+    return _chain_control_data_map;
+  }
+
 private:
   /// The MooseApp that owns this system
   MooseApp & _app;
