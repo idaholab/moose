@@ -6,14 +6,14 @@ InputParameters
 MFEMScalarDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<UserObjectName>(
-      "coefficient", "The scalar MFEM coefficient to use in the Dirichlet condition");
+  params.addRequiredParam<Real>("value", "Value of the BC.");
   return params;
 }
 
 MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef(const_cast<MFEMCoefficient *>(&getUserObject<MFEMCoefficient>("coefficient")))
+    _coef(getMFEMProblem().getProblemData()._scalar_manager.make<mfem::ConstantCoefficient>(
+        getParam<Real>("value")))
 {
 }
 
@@ -22,5 +22,5 @@ MFEMScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_
 {
   mfem::Array<int> ess_bdrs(mesh_->bdr_attributes.Max());
   ess_bdrs = GetMarkers(*mesh_);
-  gridfunc.ProjectBdrCoefficient(*_coef->getCoefficient(), ess_bdrs);
+  gridfunc.ProjectBdrCoefficient(*_coef, ess_bdrs);
 }
