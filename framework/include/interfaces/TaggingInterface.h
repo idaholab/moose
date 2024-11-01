@@ -27,6 +27,7 @@ class MooseObject;
 class SubProblem;
 class Assembly;
 class ReferenceResidualProblem;
+class EigenProblem;
 
 template <typename T>
 InputParameters validParams();
@@ -394,6 +395,11 @@ private:
   /// A container to hold absolute values of residuals passed into \p addResiduals. We maintain
   /// this data member to avoid constant dynamic heap allocations
   std::vector<Real> _absolute_residuals;
+
+  /// Pointer to the eigen problem for an eigen object
+  const EigenProblem * _eigen_problem = nullptr;
+  /// Pointer to the postprocessor for the Bx norm
+  const PostprocessorValue * _bx_norm = nullptr;
 
   friend void NonlinearSystemBase::constraintJacobians(bool);
 };

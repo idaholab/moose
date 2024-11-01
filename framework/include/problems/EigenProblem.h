@@ -49,6 +49,7 @@ public:
 
   NonlinearEigenSystem & getNonlinearEigenSystem(const unsigned int nl_sys_num);
   NonlinearEigenSystem & getCurrentNonlinearEigenSystem();
+  const NonlinearEigenSystem & getCurrentNonlinearEigenSystem() const;
 
   virtual void checkProblemIntegrity() override;
 
@@ -227,7 +228,7 @@ public:
   /**
    * Form the Bx norm
    */
-  Real formNorm();
+  const Real & formNorm() const;
 
   /**
    * Whether a Bx norm postprocessor has been provided
@@ -238,6 +239,8 @@ public:
    * Set the Bx norm postprocessor programatically
    */
   void setBxNorm(const PostprocessorName & bx_norm) { _bx_norm_name = bx_norm; }
+
+  const PostprocessorName & bxNormName() const { return _bx_norm_name.value(); }
 
 protected:
   unsigned int _n_eigen_pairs_required;
@@ -291,6 +294,8 @@ private:
   /// default L2 norm of Bx will be used as the Bx norm
   std::optional<PostprocessorName> _bx_norm_name;
 
+  /// Pointer to the postprocessor providing the Bx norm
+  const PostprocessorValue * _bx_norm = nullptr;
 #endif
 
   using FEProblemBase::_nl;
@@ -308,6 +313,12 @@ EigenProblem::getNonlinearEigenSystem(const unsigned int nl_sys_num)
 
 inline NonlinearEigenSystem &
 EigenProblem::getCurrentNonlinearEigenSystem()
+{
+  return *_nl_eigen;
+}
+
+inline const NonlinearEigenSystem &
+EigenProblem::getCurrentNonlinearEigenSystem() const
 {
   return *_nl_eigen;
 }

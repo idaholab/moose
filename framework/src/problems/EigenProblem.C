@@ -312,6 +312,14 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
   setCurrentNonlinearSystem(_nl_eigen->number());
   computeResidualTags(_fe_vector_tags);
 
+  if (tag == _nl_eigen->eigenVectorTag())
+  {
+    if (bxNormProvided())
+      residual *= (-*_bx_norm);
+    else
+      residual *= -1;
+  }
+
   _nl_eigen->disassociateVectorFromTag(residual, tag);
 }
 
@@ -346,6 +354,21 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
 
   computeResidualTags(_fe_vector_tags);
 
+  if (bxNormProvided())
+  {
+    if (tagA == _nl_eigen->eigenVectorTag())
+      residualA *= (-*_bx_norm);
+    if (tagB == _nl_eigen->eigenVectorTag())
+      residualB *= (-*_bx_norm);
+  }
+  else
+  {
+    if (tagA == _nl_eigen->eigenVectorTag())
+      residualA *= -1;
+    if (tagB == _nl_eigen->eigenVectorTag())
+      residualB *= -1;
+  }
+
   _nl_eigen->disassociateVectorFromTag(residualA, tagA);
   _nl_eigen->disassociateVectorFromTag(residualB, tagB);
 }
@@ -368,10 +391,7 @@ EigenProblem::computeResidualL2Norm()
   _nl_eigen->residualVectorBX() *= eigenvalue;
 
   // Compute entire residual
-  if (_negative_sign_eigen_kernel)
-    _nl_eigen->residualVectorAX() += _nl_eigen->residualVectorBX();
-  else
-    _nl_eigen->residualVectorAX() -= _nl_eigen->residualVectorBX();
+  _nl_eigen->residualVectorAX() -= _nl_eigen->residualVectorBX();
 
   return _nl_eigen->residualVectorAX().l2_norm();
 }
@@ -642,6 +662,9 @@ EigenProblem::init()
   _nl_eigen->sys().use_shell_precond_matrix(solverParams()._precond_matrix_free);
 #endif
 
+  if (bxNormProvided())
+    _bx_norm = &getPostprocessorValueByName(*_bx_norm_name);
+
   FEProblemBase::init();
 }
 
@@ -670,11 +693,11 @@ EigenProblem::initPetscOutputAndSomeSolverSettings()
   _app.getOutputWarehouse().solveSetup();
 }
 
-Real
-EigenProblem::formNorm()
+const Real &
+EigenProblem::formNorm() const
 {
   mooseAssert(_bx_norm_name,
               "We should not get here unless a bx_norm postprocessor has been provided");
-  return getPostprocessorValueByName(*_bx_norm_name);
+  return *_bx_norm;
 }
 #endif

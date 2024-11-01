@@ -866,12 +866,6 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 
   moosePetscSNESFormMatrixTag(snes, x, pc, sys.get_matrix_B(), ctx, eigen_nl.eigenMatrixTag());
 
-  if (eigen_problem->negativeSignEigenKernel())
-  {
-    ierr = MatScale(pc, -1.);
-    CHKERRQ(ierr);
-  }
-
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -955,12 +949,6 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
   else
     moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
 
-  if (eigen_problem->negativeSignEigenKernel())
-  {
-    ierr = VecScale(r, -1.);
-    CHKERRQ(ierr);
-  }
-
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -1000,12 +988,6 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
     ierr = MatMult(B, x, Bx);
     CHKERRQ(ierr);
 
-    if (eigen_problem->negativeSignEigenKernel())
-    {
-      ierr = VecScale(Bx, -1.);
-      CHKERRQ(ierr);
-    }
-
     PetscFunctionReturn(PETSC_SUCCESS);
   }
 
@@ -1028,12 +1010,6 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
     sys.copy_super_to_sub(*AX, sub_Ax);
     PetscVector<Number> sub_Bx(Bx, sys.comm());
     sys.copy_super_to_sub(*BX, sub_Bx);
-  }
-
-  if (eigen_problem->negativeSignEigenKernel())
-  {
-    ierr = VecScale(Bx, -1.);
-    CHKERRQ(ierr);
   }
 
   PetscFunctionReturn(PETSC_SUCCESS);
@@ -1124,12 +1100,6 @@ mooseMatMult_Eigen(Mat mat, Vec x, Vec r)
   NonlinearEigenSystem & eigen_nl = eigen_problem->getCurrentNonlinearEigenSystem();
 
   evaluateResidual(*eigen_problem, x, r, eigen_nl.eigenVectorTag());
-
-  if (eigen_problem->negativeSignEigenKernel())
-  {
-    ierr = VecScale(r, -1.);
-    CHKERRQ(ierr);
-  }
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }

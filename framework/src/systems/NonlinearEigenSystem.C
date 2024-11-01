@@ -81,14 +81,6 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
                          eigen_system.get_matrix_B(),
                          eigen_nl.nonEigenMatrixTag(),
                          eigen_nl.eigenMatrixTag());
-#if LIBMESH_HAVE_SLEPC
-    if (p->negativeSignEigenKernel())
-    {
-      auto ierr =
-          MatScale(static_cast<PetscMatrix<Number> &>(eigen_system.get_matrix_B()).mat(), -1.0);
-      LIBMESH_CHKERR(ierr);
-    }
-#endif
     return;
   }
 

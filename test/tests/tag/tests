@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#9669'
+  issues = '#9669 #28984'
   design = 'interfaces/TaggingInterface.md'
 
   [general]
@@ -147,7 +147,7 @@
       input = 'eigen_tag.i'
       exodiff = 'eigen_tag_out.e'
       slepc_version = '>=3.8.0'
-      detail = 'the eigen system, and '
+      detail = 'the eigen system with and without combined non-eigen and eigen residual objects, and '
     []
 
     [test_old_eigen]

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "Assembly.h"
 #include "ReferenceResidualProblem.h"
+#include "EigenProblem.h"
+#include "NonlinearEigenSystem.h"
 
 #include "libmesh/dense_vector.h"
 
@@ -146,6 +148,19 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   {
     _non_ref_vector_tags = _vector_tags;
     _non_ref_abs_vector_tags = _abs_vector_tags;
+  }
+
+  // we need to scale the eigen kernel residual when tagging to a vector different than Bx vector
+  if (const auto * const eigen_problem = dynamic_cast<const EigenProblem *>(fe_problem))
+  {
+    const auto & eigen_system = eigen_problem->getCurrentNonlinearEigenSystem();
+    if (_vector_tags.count(eigen_system.eigenVectorTag()))
+    {
+      _eigen_problem = eigen_problem;
+
+      if (_eigen_problem->bxNormProvided())
+        _bx_norm = &_eigen_problem->getPostprocessorValueByName(eigen_problem->bxNormName());
+    }
   }
 }
 
@@ -359,8 +374,15 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
 void
 TaggingInterface::accumulateTaggedLocalResidual()
 {
+  if (_eigen_problem)
+  {
+    Real fac = (_eigen_problem->negativeSignEigenKernel() ? 1 : -1) * (_bx_norm ? *_bx_norm : 1);
+    _local_re.scale(1 / fac);
+  }
+
   for (auto & re : _re_blocks)
     *re += _local_re;
+
   for (auto & absre : _absre_blocks)
     for (const auto i : index_range(_local_re))
       (*absre)(i) += std::abs(_local_re(i));
@@ -369,8 +391,15 @@ TaggingInterface::accumulateTaggedLocalResidual()
 void
 TaggingInterface::assignTaggedLocalResidual()
 {
+  if (_eigen_problem)
+  {
+    Real fac = (_eigen_problem->negativeSignEigenKernel() ? 1 : -1) * (_bx_norm ? *_bx_norm : 1);
+    _local_re.scale(1 / fac);
+  }
+
   for (auto & re : _re_blocks)
     *re = _local_re;
+
   for (auto & absre : _absre_blocks)
     for (const auto i : index_range(_local_re))
       (*absre)(i) = std::abs(_local_re(i));
@@ -379,8 +408,12 @@ TaggingInterface::assignTaggedLocalResidual()
 void
 TaggingInterface::accumulateTaggedLocalMatrix()
 {
-  for (auto & ke : _ke_blocks)
-    *ke += _local_ke;
+  if (_eigen_problem && _eigen_problem->negativeSignEigenKernel())
+    for (auto & ke : _ke_blocks)
+      *ke -= _local_ke;
+  else
+    for (auto & ke : _ke_blocks)
+      *ke += _local_ke;
 }
 
 void
@@ -396,8 +429,12 @@ TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
     _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
   mooseAssert(_ke_blocks[0]->m() == k.m() && _ke_blocks[0]->n() == k.n(),
               "Passed-in k must match the blocks we are about to sum into");
-  for (auto & ke : _ke_blocks)
-    *ke += k;
+  if (_eigen_problem && _eigen_problem->negativeSignEigenKernel())
+    for (auto & ke : _ke_blocks)
+      *ke -= k;
+  else
+    for (auto & ke : _ke_blocks)
+      *ke += k;
 }
 
 void
@@ -415,22 +452,37 @@ TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
         &assembly.jacobianBlockNeighbor(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
   mooseAssert(_ke_blocks[0]->m() == k.m() && _ke_blocks[0]->n() == k.n(),
               "Passed-in k must match the blocks we are about to sum into");
-  for (auto & ke : _ke_blocks)
-    *ke += k;
+  if (_eigen_problem && _eigen_problem->negativeSignEigenKernel())
+    for (auto & ke : _ke_blocks)
+      *ke -= k;
+  else
+    for (auto & ke : _ke_blocks)
+      *ke += k;
 }
 
 void
 TaggingInterface::accumulateTaggedNonlocalMatrix()
 {
-  for (auto & ke : _ke_blocks)
-    *ke += _nonlocal_ke;
+  if (_eigen_problem && _eigen_problem->negativeSignEigenKernel())
+    for (auto & ke : _ke_blocks)
+      *ke -= _nonlocal_ke;
+  else
+    for (auto & ke : _ke_blocks)
+      *ke += _nonlocal_ke;
 }
 
 void
 TaggingInterface::assignTaggedLocalMatrix()
 {
-  for (auto & ke : _ke_blocks)
-    *ke = _local_ke;
+  if (_eigen_problem && _eigen_problem->negativeSignEigenKernel())
+    for (auto & ke : _ke_blocks)
+    {
+      *ke = _local_ke;
+      ke->scale(-1);
+    }
+  else
+    for (auto & ke : _ke_blocks)
+      *ke = _local_ke;
 }
 
 TaggingInterface::~TaggingInterface() {}
