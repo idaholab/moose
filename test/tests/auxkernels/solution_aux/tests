@@ -168,6 +168,7 @@
       input = 'aux_nonlinear_solution.i'
       exodiff = 'aux_nonlinear_solution_out.e'
       detail = "from a simulation using"
+      xdr = true
     []
 
     [from_xda]

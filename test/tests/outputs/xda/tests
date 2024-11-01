@@ -18,6 +18,7 @@
       check_files = 'xdr_out_0000.xdr xdr_out_0000_mesh.xdr xdr_out_0001.xdr xdr_out_0001_mesh.xdr'
 
       detail = 'in XDR (binary) format.'
+      xdr = true
     []
   []
 []

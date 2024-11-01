@@ -146,6 +146,7 @@
     design = 'XDA.md'
     issues = '#2243'
     requirement = 'The system shall support XDR output.'
+    xdr = true
   []
 
   [json_full]
