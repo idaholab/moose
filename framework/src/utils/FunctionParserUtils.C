@@ -41,7 +41,7 @@ FunctionParserUtils<is_ad>::validParams()
 
   params.addParamNamesToGroup(
       "enable_jit enable_ad_cache enable_auto_optimize disable_fpoptimizer evalerror_behavior",
-      "Advanced");
+      "Parsed expression advanced");
   params.addParam<Real>("epsilon", FunctionParser::epsilon(), "Fuzzy comparison tolerance");
   return params;
 }

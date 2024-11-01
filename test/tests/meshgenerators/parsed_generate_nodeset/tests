@@ -1,0 +1,126 @@
+[Tests]
+  issues = '#28881'
+  design = 'meshgenerators/ParsedGenerateNodeset.md'
+
+  [parsed_generate_nodeset_sub_id_test]
+    type = 'Exodiff'
+    input = 'parsed_generate_nodeset_subdomain_limited.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_nodeset_subdomain_limited_in.e'
+    exodiff_opts = -pedantic
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system shall have the ability to assign mesh node sets based on parsed spatial functions, with a restriction on nodes that are in a given subdomain id.'
+  []
+
+  [limit_to_one_bid]
+    type = 'Exodiff'
+    input = 'parsed_generate_nodeset_nodeset_limited.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_nodeset_nodeset_limited_in.e'
+    exodiff_opts = -pedantic
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system shall have the ability to assign mesh node sets based on parsed spatial functions, with a restriction on nodes that are also part of another nodeset.'
+  []
+
+  [exclude_bids]
+    type = 'Exodiff'
+    input = 'parsed_generate_nodeset_nodeset_excluded.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_nodeset_nodeset_excluded_in.e'
+    exodiff_opts = -pedantic
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system shall have the ability to assign mesh node sets based on parsed spatial functions, excluding nodes that are also part of another nodeset.'
+  []
+
+  [limit_to_external_nodes]
+    type = 'Exodiff'
+    input = 'parsed_generate_nodeset_exterior_limited.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_nodeset_exterior_limited_in.e'
+    exodiff_opts = -pedantic
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system shall have the ability to assign mesh node sets based on parsed spatial functions, with a restriction on using nodes that are on the exterior of the mesh only.'
+  []
+
+  [replace]
+    type = 'Exodiff'
+    input = 'parsed_generate_nodeset_nodeset_limited.i'
+    cli_args = 'Mesh/nodeset_further_limited/replace=true --mesh-only replace_in.e'
+    exodiff = 'replace_in.e'
+    exodiff_opts = -pedantic
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system shall have the ability to assign mesh node sets based on parsed spatial functions, and replace existing nodesets for the nodes involved.'
+  []
+
+  [misc_errors]
+    requirement = 'The system shall report an error'
+    [bad_expression]
+      type = RunException
+      input = parsed_generate_nodeset_subdomain_limited.i
+      cli_args = 'Mesh/nodeset/expression="abcd" --mesh-only'
+      expect_err = "Invalid function"
+      detail = 'if the expression defining the new nodeset cannot be parsed.'
+      mesh_mode = 'replicated'
+    []
+  []
+  [missing_errors]
+    requirement = 'The system shall report an error'
+    issues = '#22117'
+    [invalid_included_subdomains]
+      type = RunException
+      input = parsed_generate_nodeset_subdomain_limited.i
+      cli_args = 'Mesh/nodeset/included_subdomains="missing" --mesh-only'
+      expect_err = "The block 'missing' was not found in the mesh"
+      detail = 'if one of the included subdomains does not exist in the mesh,'
+      mesh_mode = 'replicated'
+    []
+    [invalid_included_nodeset]
+      type = RunException
+      input = parsed_generate_nodeset_subdomain_limited.i
+      cli_args = 'Mesh/nodeset/included_nodesets="missing" --mesh-only'
+      expect_err = "The nodeset 'missing' was not found within the mesh"
+      detail = 'if one of the included nodesets does not exist in the mesh,'
+      mesh_mode = 'replicated'
+    []
+    [invalid_excluded_nodeset]
+      type = RunException
+      input = parsed_generate_nodeset_subdomain_limited.i
+      cli_args = 'Mesh/nodeset/excluded_nodesets="missing" --mesh-only'
+      expect_err = "The nodeset 'missing' was not found within the mesh"
+      detail = 'if one of the excluded nodesets does not exist in the mesh,'
+      mesh_mode = 'replicated'
+    []
+  []
+  [overlap_errors]
+    requirement = 'The system shall report an error'
+    [overlap_included_excluded_nodeset]
+      type = RunException
+      input = parsed_generate_nodeset_subdomain_limited.i
+      cli_args = 'Mesh/nodeset/included_nodesets="top" Mesh/nodeset/excluded_nodesets="top" --mesh-only'
+      expect_err = "'included_nodesets' and 'excluded_nodesets' lists should not overlap"
+      detail= 'if a nodeset appears in both the list of nodesets to include and to exclude.'
+      mesh_mode = 'replicated'
+    []
+    [overlap_included_target_nodeset]
+      type = RunException
+      input = parsed_generate_nodeset_subdomain_limited.i
+      cli_args = 'Mesh/nodeset/included_nodesets="interior" --mesh-only'
+      expect_err = "nodeset cannot be both the new nodeset and be included in the list of included nodesets"
+      detail = 'if the nodeset to create appears in the list of nodesets to include.'
+      mesh_mode = 'replicated'
+    []
+    [overlap_excluded_target_nodeset]
+      type = RunException
+      input = parsed_generate_nodeset_subdomain_limited.i
+      cli_args = 'Mesh/nodeset/excluded_nodesets="interior" --mesh-only'
+      expect_err = "nodeset cannot be both the new nodeset and be excluded in the list of excluded nodesets"
+      detail = 'if the nodeset to create appears in the list of nodesets to exclude.'
+      mesh_mode = 'replicated'
+    []
+  []
+[]
