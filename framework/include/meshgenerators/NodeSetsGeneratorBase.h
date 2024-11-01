@@ -107,5 +107,5 @@ protected:
   /// A map from nodes (ids) to  local elements (ids) which comprise the node
   // Build the node to element map, which is usually provided by a MooseMesh but here we have a
   // MeshBase.
-  std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
 };
