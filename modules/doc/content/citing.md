@@ -202,6 +202,26 @@ This paper gives an overview of the MOOSE Thermal Hydraulics module (THM):
 }
 ```
 
+
+### Fluid properties
+
+The following document summarizes the main capabilities available in the Fluid Properties module:
+
+```
+@article{GIUDICELLI2025109407,
+title = {The MOOSE fluid properties module},
+journal = {Computer Physics Communications},
+volume = {307},
+pages = {109407},
+year = {2025},
+issn = {0010-4655},
+doi = {https://doi.org/10.1016/j.cpc.2024.109407},
+url = {https://www.sciencedirect.com/science/article/pii/S0010465524003308},
+author = {Guillaume Giudicelli and Christopher Green and Joshua Hansel and David Andrs and April Novak and Sebastian Schunert and Benjamin Spaude and Steven Isaacs and Matthias Kunick and Robert Salko and Shane Henderson and Lise Charlot and Alexander Lindsay},
+keywords = {Modeling & simulation, Fluid properties, MOOSE}
+}
+```
+
 ### Peridynamics
 
 The following papers document the formulations used in the MOOSE Peridynamics module.
