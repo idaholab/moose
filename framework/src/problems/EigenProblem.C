@@ -486,6 +486,7 @@ EigenProblem::postScaleEigenVector()
 
     unsigned int itr = 0;
 
+    Real fac = 1;
     while (!MooseUtils::relativeFuzzyEqual(v, c))
     {
       // If postprocessor is not defined on eigen variables, scaling might not work
@@ -496,6 +497,7 @@ EigenProblem::postScaleEigenVector()
 
       mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
 
+      fac *= v / c;
       scaleEigenvector(v / c);
 
       // update all aux variables and user objects on linear
@@ -505,6 +507,8 @@ EigenProblem::postScaleEigenVector()
 
       itr++;
     }
+    _console << " Normalized solution with factor " << fac << " to make '" << _normalization
+             << "' equal to " << v << "." << std::endl;
   }
 }
 
@@ -611,7 +615,20 @@ EigenProblem::solve(const unsigned int nl_sys_num)
 
     // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
     if (solverParams()._eigen_solve_type == Moose::EST_PJFNKMO)
+    {
       execute(EXEC_LINEAR);
+
+      // this normalization makes PJFNKMO produce the same solution as PJFNK when bx_norm is
+      // provided
+      if (bxNormProvided() && !_has_normalization)
+      {
+        _has_normalization = true;
+        _normalization = bxNormName();
+        _normal_factor = std::numeric_limits<Real>::max();
+        postScaleEigenVector();
+        _has_normalization = false;
+      }
+    }
 
     // Scale eigen vector if users ask
     postScaleEigenVector();

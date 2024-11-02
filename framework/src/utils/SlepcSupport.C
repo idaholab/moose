@@ -1059,7 +1059,8 @@ attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
   LIBMESH_CHKERR(ierr);
 
   // Users may choose to provide a custom measure of the norm of B (Bx for a linear system)
-  if (eigen_problem.bxNormProvided())
+  if (eigen_problem.bxNormProvided() &&
+      eigen_problem.solverParams()._eigen_solve_type != Moose::EST_PJFNKMO)
   {
     ierr = PetscObjectComposeFunction(
         (PetscObject)mat, "formNorm", Moose::SlepcSupport::mooseSlepcEigenFormNorm);
@@ -1076,7 +1077,8 @@ attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
   ierr = PetscObjectCompose((PetscObject)mat, "formJacobianCtx", (PetscObject)container);
   LIBMESH_CHKERR(ierr);
   ierr = PetscObjectCompose((PetscObject)mat, "formFunctionCtx", (PetscObject)container);
-  if (eigen_problem.bxNormProvided())
+  if (eigen_problem.bxNormProvided() &&
+      eigen_problem.solverParams()._eigen_solve_type != Moose::EST_PJFNKMO)
   {
     ierr = PetscObjectCompose((PetscObject)mat, "formNormCtx", (PetscObject)container);
     LIBMESH_CHKERR(ierr);
