@@ -10,34 +10,38 @@
 #include "CoupledValuesMaterial.h"
 
 registerMooseObject("MooseTestApp", CoupledValuesMaterial);
+registerMooseObject("MooseTestApp", ADCoupledValuesMaterial);
 
+template <bool is_ad>
 InputParameters
-CoupledValuesMaterial::validParams()
+CoupledValuesMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("variable", "Coupled variable");
   return params;
 }
 
-CoupledValuesMaterial::CoupledValuesMaterial(const InputParameters & parameters)
+template <bool is_ad>
+CoupledValuesMaterialTempl<is_ad>::CoupledValuesMaterialTempl(const InputParameters & parameters)
   : Material(parameters),
-    _value(coupledValue("variable")),
-    _dot(coupledDot("variable")),
-    _dot_dot(coupledDotDot("variable")),
+    _value(coupledGenericValue<is_ad>("variable")),
+    _dot(coupledGenericDot<is_ad>("variable")),
+    _dot_dot(coupledGenericDotDot<is_ad>("variable")),
+    // We dont have a generic override for this, and we don't need one yet
     _dot_du(coupledDotDu("variable")),
     _dot_dot_du(coupledDotDotDu("variable")),
-
     _var_name(getVar("variable", 0)->name()),
-    _value_prop(declareProperty<Real>(_var_name + "_value")),
-    _dot_prop(declareProperty<Real>(_var_name + "_dot")),
-    _dot_dot_prop(declareProperty<Real>(_var_name + "_dot_dot")),
+    _value_prop(declareGenericProperty<Real, is_ad>(_var_name + "_value")),
+    _dot_prop(declareGenericProperty<Real, is_ad>(_var_name + "_dot")),
+    _dot_dot_prop(declareGenericProperty<Real, is_ad>(_var_name + "_dot_dot")),
     _dot_du_prop(declareProperty<Real>(_var_name + "_dot_du")),
     _dot_dot_du_prop(declareProperty<Real>(_var_name + "_dot_dot_du"))
 {
 }
 
+template <bool is_ad>
 void
-CoupledValuesMaterial::computeQpProperties()
+CoupledValuesMaterialTempl<is_ad>::computeQpProperties()
 {
   _value_prop[_qp] = _value[_qp];
   _dot_prop[_qp] = _dot[_qp];
@@ -45,3 +49,6 @@ CoupledValuesMaterial::computeQpProperties()
   _dot_du_prop[_qp] = _dot_du[_qp];
   _dot_dot_du_prop[_qp] = _dot_dot_du[_qp];
 }
+
+template class CoupledValuesMaterialTempl<false>;
+template class CoupledValuesMaterialTempl<true>;

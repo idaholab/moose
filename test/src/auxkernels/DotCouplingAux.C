@@ -10,9 +10,11 @@
 #include "DotCouplingAux.h"
 
 registerMooseObject("MooseTestApp", DotCouplingAux);
+registerMooseObject("MooseTestApp", ADDotCouplingAux);
 
+template <bool is_ad>
 InputParameters
-DotCouplingAux::validParams()
+DotCouplingAuxTempl<is_ad>::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable");
@@ -20,15 +22,18 @@ DotCouplingAux::validParams()
   return params;
 }
 
-DotCouplingAux::DotCouplingAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _v_dot(coupledDot("v"))
+template <bool is_ad>
+DotCouplingAuxTempl<is_ad>::DotCouplingAuxTempl(const InputParameters & parameters)
+  : AuxKernel(parameters), _v_dot(coupledGenericDot<is_ad>("v"))
 {
 }
 
-DotCouplingAux::~DotCouplingAux() {}
-
+template <bool is_ad>
 Real
-DotCouplingAux::computeValue()
+DotCouplingAuxTempl<is_ad>::computeValue()
 {
-  return _v_dot[_qp];
+  return MetaPhysicL::raw_value(_v_dot[_qp]);
 }
+
+template class DotCouplingAuxTempl<false>;
+template class DotCouplingAuxTempl<true>;

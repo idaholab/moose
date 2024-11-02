@@ -852,6 +852,13 @@ MooseLinearVariableFV<OutputType>::adDofValuesNeighbor() const
 }
 
 template <typename OutputType>
+const MooseArray<ADReal> &
+MooseLinearVariableFV<OutputType>::adDofValuesDot() const
+{
+  adError();
+}
+
+template <typename OutputType>
 const dof_id_type &
 MooseLinearVariableFV<OutputType>::nodalDofIndex() const
 {

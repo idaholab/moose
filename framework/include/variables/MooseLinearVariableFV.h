@@ -404,6 +404,7 @@ public:
 
   [[noreturn]] virtual const MooseArray<ADReal> & adDofValues() const override;
   [[noreturn]] virtual const MooseArray<ADReal> & adDofValuesNeighbor() const override;
+  [[noreturn]] virtual const MooseArray<ADReal> & adDofValuesDot() const override;
   [[noreturn]] virtual const dof_id_type & nodalDofIndex() const override final;
   [[noreturn]] virtual const dof_id_type & nodalDofIndexNeighbor() const override final;
 
