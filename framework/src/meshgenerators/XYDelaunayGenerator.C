@@ -195,9 +195,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
 
     const std::vector<Point> & data = file.getDataAsPoints();
     for (const auto & d : data)
-    {
       _interior_points.push_back(d);
-    }
   }
 }
 
