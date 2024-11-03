@@ -31,6 +31,7 @@
     input = triangulate
     new_boundary = ' top bottom left right'
     normals = '0 1 0 0 -1 0 -1 0 0 1 0 0'
+    fixed_normal = true
   []
 []
 

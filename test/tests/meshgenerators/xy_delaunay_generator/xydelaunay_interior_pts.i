@@ -25,6 +25,7 @@
       0.75 0.875 0
       0.875 0.75 0
       0.875 0.875 0'
+    interior_point_files = 'extra_points.csv'
   []
 
 []

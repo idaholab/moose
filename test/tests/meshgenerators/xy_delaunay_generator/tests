@@ -207,6 +207,5 @@
       expect_err = "Cannot use first order elements with stitched quadratic element holes."
       detail = "if the input hole meshes"
     []
-
   []
 []

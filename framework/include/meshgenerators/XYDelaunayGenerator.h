@@ -85,5 +85,5 @@ protected:
   const bool _verbose_stitching;
 
   /// Desired interior node locations
-  const std::vector<Point> _interior_points;
+  std::vector<Point> _interior_points;
 };
