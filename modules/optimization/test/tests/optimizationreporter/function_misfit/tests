@@ -2,7 +2,7 @@
     issues = '#28871'
     design = 'MisfitReporterOffsetFunctionMaterial.md'
     [point_loads]
-      requirement = "The system shall be able to invert for point loads using the MisfitReporterOffsetFunctionMaterial material with misfit data obtained from Gaussian-type probes for"
+      requirement = "The system shall be able to invert for point loads using objective and gradient materials constructed with misfit data obtained from Gaussian-type probes for"
       [volume]
         type = CSVDiff
         input = main_auto.i
