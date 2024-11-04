@@ -1,6 +1,7 @@
 #include "MFEMObjectUnitTest.h"
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMDiffusionKernel.h"
+#include "MFEMLinearElasticityKernel.h"
 #include "MFEMMixedVectorGradientKernel.h"
 #include "MFEMVectorFEDomainLFKernel.h"
 #include "MFEMVectorFEMassKernel.h"
@@ -56,6 +57,31 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::DiffusionIntegrator *>(kernel.createIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
+ * Test MFEMLinearElasticityKernel creates an mfem::ElasticityIntegrator successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMLinearElasticityKernel)
+{
+  // Build required kernel inputs
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  coef_params.set<std::vector<std::string>>("prop_names") = {"lambda", "mu"};
+  coef_params.set<std::vector<Real>>("prop_values") = {2.0, 3.0};
+  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMLinearElasticityKernel");
+  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<std::string>("lambda") = "lambda";
+  kernel_params.set<std::string>("mu") = "mu";
+  MFEMLinearElasticityKernel & kernel =
+      addObject<MFEMLinearElasticityKernel>("MFEMLinearElasticityKernel", "kernel1", kernel_params);
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator = dynamic_cast<mfem::ElasticityIntegrator *>(kernel.createIntegrator());
   ASSERT_NE(integrator, nullptr);
   delete integrator;
 }
