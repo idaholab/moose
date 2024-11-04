@@ -6,7 +6,7 @@
 
 ## Overview
 
-Defines and builds an `mfem::HypreBoomerAMG` solver to use as an preconditioner or solver to solve the MFEM equation system.
+Defines and builds an `mfem::HypreBoomerAMG` solver to use as a preconditioner or solver to solve the MFEM equation system.
 
 ## Example Input File Syntax
 

@@ -6,7 +6,8 @@
 
 ## Overview
 
-Defines and builds an `mfem::OperatorJacobiSmoother` solver to use to perform Jacobi iterations on the MFEM equation system.
+Defines and builds an `mfem::OperatorJacobiSmoother` solver to use to perform Jacobi iterations on
+the MFEM equation system. Most often used as a preconditioner, compatible with partial assembly.
 
 !syntax parameters /Solver/MFEMOperatorJacobiSmoother
 

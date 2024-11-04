@@ -6,7 +6,8 @@
 
 ## Overview
 
-Defines and builds an `mfem::HypreGMRES` solver to use as an iterative solver to solve the MFEM equation system.
+Defines and builds an `mfem::HypreGMRES` solver to use as an iterative solver to solve the MFEM
+equation system.
 
 !syntax parameters /Solver/MFEMHypreGMRES
 
