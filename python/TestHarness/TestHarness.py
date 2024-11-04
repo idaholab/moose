@@ -8,16 +8,15 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
-import itertools
 import platform
 import os, re, inspect, errno, copy, json
-import shlex
 from . import RaceChecker
 import subprocess
 import shutil
 import socket
 import datetime
 import getpass
+from collections import namedtuple
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -27,7 +26,6 @@ from . import util
 import pyhit
 
 import argparse
-from timeit import default_timer as clock
 
 def readTestRoot(fname):
 
@@ -37,17 +35,23 @@ def readTestRoot(fname):
     # TODO: add check to see if the binary exists before returning. This can be used to
     # allow users to control fallthrough for e.g. individual module binaries vs. the
     # combined binary.
-    return root['app_name'], args, root
+    return root.get('app_name'), args, root
 
-def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
-    rootdir = os.path.abspath(start)
-    while os.path.dirname(rootdir) != rootdir:
-        fname = os.path.join(rootdir, 'testroot')
-        if os.path.exists(fname):
-            app_name, args, hit_node = readTestRoot(fname)
-            return rootdir, app_name, args, hit_node
-        rootdir = os.path.dirname(rootdir)
-    raise RuntimeError('test root directory not found in "{}"'.format(start))
+# Struct that represents all of the information pertaining to a testroot file
+TestRoot = namedtuple('TestRoot', ['root_dir', 'app_name', 'args', 'hit_node'])
+def findTestRoot() -> TestRoot:
+    """
+    Search for the test root in all folders above this one
+    """
+    start = os.getcwd()
+    root_dir = start
+    while os.path.dirname(root_dir) != root_dir:
+        testroot_file = os.path.join(root_dir, 'testroot')
+        if os.path.exists(testroot_file) and os.access(testroot_file, os.R_OK):
+            app_name, args, hit_node = readTestRoot(testroot_file)
+            return TestRoot(root_dir=root_dir, app_name=app_name, args=args, hit_node=hit_node)
+        root_dir = os.path.dirname(root_dir)
+    return None
 
 # This function finds a file in the herd trunk containing all the possible applications
 # that may be built with an "up" target.  If passed the value ROOT it will simply
@@ -177,36 +181,64 @@ def findDepApps(dep_names, use_current_only=False):
     return '\n'.join(dep_dirs)
 
 class TestHarness:
-
     @staticmethod
-    def buildAndRun(argv, app_name, moose_dir, moose_python=None):
-        harness = TestHarness(argv, moose_dir, app_name=app_name, moose_python=moose_python)
+    def buildAndRun(argv: list, app_name: str, moose_dir: str, moose_python: str = None,
+                    skip_testroot: bool = False) -> None:
+        # Cannot skip the testroot if we don't have an application name
+        if skip_testroot and not app_name:
+            raise ValueError(f'Must provide "app_name" when skip_testroot=True')
+
+        # Assume python directory from moose (in-tree)
+        if moose_python is None:
+            moose_python_dir = os.path.join(moose_dir, "python")
+        # Given a python directory (installed app)
+        else:
+            moose_python_dir = moose_python
+
+        # Set MOOSE_DIR and PYTHONPATH for child processes
+        os.environ['MOOSE_DIR'] = moose_dir
+        pythonpath = os.environ.get('PYTHONPATH', '').split(':')
+        if moose_python_dir not in pythonpath:
+            pythonpath = [moose_python_dir] + pythonpath
+            os.environ['PYTHONPATH'] = ':'.join(pythonpath)
+
+        # Search for the test root (if any; required when app_name is not specified)
+        test_root = None if skip_testroot else findTestRoot()
+
+        # Failed to find a test root
+        if test_root is None:
+            # app_name was specified so without a testroot, we don't
+            # know what application to run
+            if app_name is None:
+                raise RuntimeError(f'Failed to find testroot by traversing upwards from {os.getcwd()}')
+            # app_name was specified so just run from this directory
+            # without any additional parameters
+            test_root = TestRoot(root_dir='.', app_name=app_name,
+                                 args=[], hit_node=pyhit.Node())
+        # Found a testroot, but without an app_name
+        elif test_root.app_name is None:
+            # app_name was specified from buildAndRun(), so use it
+            if app_name:
+                test_root = test_root._replace(app_name=app_name)
+            # Missing an app_name
+            else:
+                raise RuntimeError(f'{test_root.root_dir}/testroot missing app_name')
+
+        harness = TestHarness(argv, moose_dir, moose_python_dir, test_root)
         harness.findAndRunTests()
         sys.exit(harness.error_code)
 
-    def __init__(self, argv, moose_dir, app_name=None, moose_python=None):
-        if moose_python is None:
-            self.moose_python_dir = os.path.join(moose_dir, "python")
-        else:
-            self.moose_python_dir = moose_python
-        os.environ['MOOSE_DIR'] = moose_dir
-        os.environ['PYTHONPATH'] = self.moose_python_dir + ':' + os.environ.get('PYTHONPATH', '')
-
-        if app_name:
-            rootdir, app_name, args, root_params = '.', app_name, [], pyhit.Node()
-        else:
-            rootdir, app_name, args, root_params = findTestRoot(start=os.getcwd())
-
-        self._rootdir = rootdir
+    def __init__(self, argv: list, moose_dir: str, moose_python: str, test_root: TestRoot):
+        self.moose_python_dir = moose_python
+        self._rootdir = test_root.root_dir
         self._orig_cwd = os.getcwd()
-        os.chdir(rootdir)
-        argv = argv[:1] + args + argv[1:]
+        os.chdir(test_root.root_dir)
+        argv = argv[:1] + test_root.args + argv[1:]
 
         self.factory = Factory()
 
-        self.app_name = app_name
-
-        self.root_params = root_params
+        self.app_name = test_root.app_name
+        self.root_params = test_root.hit_node
 
         # Build a Warehouse to hold the MooseObjects
         self.warehouse = Warehouse()
@@ -217,7 +249,7 @@ class TestHarness:
         # Get dependent applications and load dynamic tester plugins
         # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
         # Use the find_dep_apps script to get the dependent applications for an app
-        app_dirs = findDepApps(app_name, use_current_only=True).split('\n')
+        app_dirs = findDepApps(self.app_name, use_current_only=True).split('\n')
         # For installed binaries, the apps will exist in RELEASE_PATH/scripts, where in
         # this case RELEASE_PATH is moose_dir
         share_dir = os.path.join(moose_dir, 'share')
@@ -348,10 +380,10 @@ class TestHarness:
         # This is so we can easily pass checks around to any scheduler plugin
         self.options._checks = checks
 
-        self.initialize(argv, app_name)
+        self.initialize(argv, self.app_name)
 
         # executable is available after initalize
-        checks['installation_type'] = util.checkInstalled(self.executable, app_name)
+        checks['installation_type'] = util.checkInstalled(self.executable, self.app_name)
 
         os.chdir(self._orig_cwd)
 

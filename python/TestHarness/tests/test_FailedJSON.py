@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, io
+import os, io
 import unittest
 import mock
 import TestHarness
@@ -21,12 +21,12 @@ class TestHarnessTester(unittest.TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             mocked_return.return_value=f'{mocked}'
-            harness = TestHarness.TestHarness(['', '-i', 'required_objects'], MOOSE_DIR)
+            with self.assertRaises(SystemExit) as e:
+                TestHarness.TestHarness.buildAndRun(['', '-i', 'required_objects'], None, MOOSE_DIR)
             if expect_fail:
-                with self.assertRaises(SystemExit):
-                    harness.findAndRunTests()
+                self.assertNotEqual(e.exception.code, 0)
             else:
-                harness.findAndRunTests()
+                self.assertEqual(e.exception.code, 0)
         return out.getvalue()
 
     def testGoodJSONOutput(self):

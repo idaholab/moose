@@ -22,12 +22,12 @@ class TestHarnessTester(unittest.TestCase):
         with redirect_stdout(out):
             mocked_return.return_value=mocked
             cmd = ['', '-i', 'install_type', '-c', '--term-format', 'njCst']
-            harness = TestHarness.TestHarness(cmd, MOOSE_DIR)
+            with self.assertRaises(SystemExit) as e:
+                TestHarness.TestHarness.buildAndRun(cmd, None, MOOSE_DIR)
             if expect_fail:
-                with self.assertRaises(SystemExit):
-                    harness.findAndRunTests()
+                self.assertNotEqual(e.exception.code, 0)
             else:
-                harness.findAndRunTests()
+                self.assertEqual(e.exception.code, 0)
         return out.getvalue()
 
     def testInstalled(self):
