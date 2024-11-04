@@ -34,6 +34,9 @@ DY = ${fparse y_location + clad_bot_gap_height + top_bot_clad_height}
     pellet_mesh_density = customize
     clad_mesh_density = customize
   []
+  coord_type = RZ
+  rz_coord_axis = Y
+  beta_rotation = 90
 []
 
 [Functions]
@@ -153,22 +156,6 @@ DY = ${fparse y_location + clad_bot_gap_height + top_bot_clad_height}
     variable = q_prime
     value = 1000.0
   []
-[]
-
-[UserObjects]
-  [q_prime_uo]
-    type = LayeredSideAverage
-    boundary = clad_outside_right
-    variable = q_prime
-    num_layers = 1000
-    direction = y
-    execute_on = 'TIMESTEP_END'
-  []
-[]
-
-[Problem]
-  coord_type = RZ
-  rz_coord_axis = Y
 []
 
 [Executioner]

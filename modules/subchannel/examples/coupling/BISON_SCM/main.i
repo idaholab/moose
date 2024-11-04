@@ -193,36 +193,6 @@ pitch = 0.0126
   []
 []
 
-[UserObjects]
-  [Tpin_avg_uo]
-    type = NearestPointLayeredAverage
-    direction = z
-    num_layers = 1000
-    variable = Tpin
-    block = fuel_pins
-    points = '${fparse -1.5 * pitch}   ${fparse -1.5 * pitch}   0
-              ${fparse -0.5 * pitch}   ${fparse -1.5 * pitch}   0
-              ${fparse  0.5 * pitch}   ${fparse -1.5 * pitch}   0
-              ${fparse  1.5 * pitch}   ${fparse -1.5 * pitch}   0
-
-              ${fparse -1.5 * pitch}   ${fparse -0.5 * pitch}   0
-              ${fparse -0.5 * pitch}   ${fparse -0.5 * pitch}   0
-              ${fparse  0.5 * pitch}   ${fparse -0.5 * pitch}   0
-              ${fparse  1.5 * pitch}   ${fparse -0.5 * pitch}   0
-
-              ${fparse -1.5 * pitch}   ${fparse  0.5 * pitch}   0
-              ${fparse -0.5 * pitch}   ${fparse  0.5 * pitch}   0
-              ${fparse  0.5 * pitch}   ${fparse  0.5 * pitch}   0
-              ${fparse  1.5 * pitch}   ${fparse  0.5 * pitch}   0
-
-              ${fparse -1.5 * pitch}   ${fparse  1.5 * pitch}   0
-              ${fparse -0.5 * pitch}   ${fparse  1.5 * pitch}   0
-              ${fparse  0.5 * pitch}   ${fparse  1.5 * pitch}   0
-              ${fparse  1.5 * pitch}   ${fparse  1.5 * pitch}   0'
-    execute_on = timestep_end
-  []
-[]
-
 [Outputs]
   exodus = true
   [Temp_Out_MATRIX]
@@ -267,26 +237,6 @@ pitch = 0.0126
     bounding_box_padding = '0 0 0.1'
   []
 
-  # [sub1]
-  #   app_type = BisonApp
-  #   type = FullSolveMultiApp
-  #   input_files = sub_hot_corner.i # seperate file for multiapps due to radial power profile (each sub has different power)
-  #   execute_on = 'timestep_end'
-  #   positions = '${fparse -1.5 * pitch}   ${fparse -1.5 * pitch}   0'
-  #   output_in_position = true
-  #   bounding_box_padding = '0 0 0.1'
-  # []
-  #
-  # [sub2]
-  #   app_type = BisonApp
-  #   type = FullSolveMultiApp
-  #   input_files = sub_cold_corner.i # seperate file for multiapps due to radial power profile (each sub has different power)
-  #   execute_on = 'timestep_end'
-  #   positions = '${fparse 1.5 * pitch}   ${fparse 1.5 * pitch}   0'
-  #   output_in_position = true
-  #   bounding_box_padding = '0 0 0.1'
-  # []
-
   [viz]
     type = FullSolveMultiApp
     input_files = "detailedMesh.i"
@@ -296,49 +246,21 @@ pitch = 0.0126
 
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransferSCM
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     variable = Pin_surface_temperature
-    user_object = Tpin_avg_uo
-  []
-
-  [q_prime]
-    type = MultiAppUserObjectTransferSCM
-    from_multi_app = sub
-    variable = q_prime
-    user_object = q_prime_uo
+    source_variable = Tpin
     execute_on = 'timestep_end'
   []
 
-  # [Tpin1] # send pin surface temperature to bison,
-  #   type = MultiAppUserObjectTransferSCM
-  #   to_multi_app = sub1
-  #   variable = Pin_surface_temperature
-  #   user_object = Tpin_avg_uo
-  # []
-  #
-  # [Tpin2] # send pin surface temperature to bison,
-  #   type = MultiAppUserObjectTransferSCM
-  #   to_multi_app = sub2
-  #   variable = Pin_surface_temperature
-  #   user_object = Tpin_avg_uo
-  # []
-  #
-  # [q_prime1] # send heat flux from BISON/heatConduction to subchannel
-  #   type = MultiAppUserObjectTransferSCM
-  #   from_multi_app = sub1
-  #   variable = q_prime
-  #   user_object = q_prime_uo
-  #   execute_on = 'timestep_end'
-  # []
-  #
-  # [q_prime2] # send heat flux from BISON/heatConduction to subchannel
-  #   type = MultiAppUserObjectTransferSCM
-  #   from_multi_app = sub2
-  #   variable = q_prime
-  #   user_object = q_prime_uo
-  #   execute_on = 'timestep_end'
-  # []
+  [q_prime] # send heat flux from /BISON/heatConduction to subchannel
+    type = MultiAppGeneralFieldNearestLocationTransfer
+    from_multi_app = sub
+    variable = q_prime
+    source_variable = q_prime
+    from_boundaries = clad_outside_right
+    execute_on = 'timestep_end'
+  []
 
   ###### Transfers to the detailedMesh at the end of the coupled simulations
   [subchannel_transfer]

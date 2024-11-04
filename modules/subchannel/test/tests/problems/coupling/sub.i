@@ -14,6 +14,7 @@ heated_length = 1.0
   []
   coord_type = RZ
   rz_coord_axis = Y
+  beta_rotation = 90
 []
 
 [Variables]
@@ -75,21 +76,6 @@ heated_length = 1.0
     variable = temperature
     boundary = 'right'
     v = Pin_surface_temperature
-  []
-[]
-
-# [DefaultElementQuality]
-#   failure_type = warning
-# []
-
-[UserObjects]
-  [q_prime_uo]
-    type = LayeredSideAverage
-    boundary = right
-    variable = q_prime
-    num_layers = 10
-    direction = y
-    execute_on = 'TIMESTEP_END'
   []
 []
 
