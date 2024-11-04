@@ -1,8 +1,8 @@
 #constant bending of 0.05 applied to the tip of a Plate_Cantilever
 #Analytical bending=ML/EI, deflection=ML^2/2EI
 #E=200e9, I=bh3/12=2e-4
-#Therefore, analytical solution Myy=2e5, uz=0.25
-#Numerical results Myy=2e5, uz=0.25
+#Therefore, analytical solution M22=2e5, uz=0.25
+#Numerical results M22=2e5, uz=0.25
 
 [Mesh]
   type = GeneratedMesh
@@ -149,34 +149,12 @@
 []
 
 [AuxVariables]
-  [force_1]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [force_2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [moment_11]
-    order = CONSTANT
-    family = MONOMIAL
-  []
+
   [moment_22]
     order = CONSTANT
     family = MONOMIAL
   []
-  [shear_12]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [shear_13]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [shear_23]
-    order = CONSTANT
-    family = MONOMIAL
-  []
+
   [first_axis_x]
     order = CONSTANT
     family = MONOMIAL
@@ -216,48 +194,14 @@
 []
 
 [AuxKernels]
-  [force_1]
-    type = MaterialRealAux
-    variable = force_1
-    property = shell_force_1
-    execute_on = TIMESTEP_END
-  []
-  [force_2]
-    type = MaterialRealAux
-    variable = force_2
-    property = shell_force_2
-    execute_on = TIMESTEP_END
-  []
-  [moment_11]
-    type = MaterialRealAux
-    variable = moment_11
-    property = shell_moment_11
-    execute_on = TIMESTEP_END
-  []
+
   [moment_22]
     type = MaterialRealAux
     variable = moment_22
     property = shell_moment_22
     execute_on = TIMESTEP_END
   []
-  [shear_12]
-    type = MaterialRealAux
-    variable = shear_12
-    property = shell_shear_12
-    execute_on = TIMESTEP_END
-  []
-  [shear_13]
-    type = MaterialRealAux
-    variable = shear_13
-    property = shell_shear_13
-    execute_on = TIMESTEP_END
-  []
-  [shear_23]
-    type = MaterialRealAux
-    variable = shear_23
-    property = shell_shear_23
-    execute_on = TIMESTEP_END
-  []
+
   [first_axis_x]
     type = MaterialRealVectorValueAux
     variable = first_axis_x
