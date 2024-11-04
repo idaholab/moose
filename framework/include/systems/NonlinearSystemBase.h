@@ -349,7 +349,7 @@ public:
    * @param jacobian reference to the Jacobian matrix
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintJacobians(bool displaced);
+  void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
 
   /**
    * Computes multiple (tag associated) Jacobian matricese
@@ -765,7 +765,7 @@ protected:
    * Enforce nodal constraints
    */
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
-  void enforceNodalConstraintsJacobian();
+  void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
 
   /**
    * Do mortar constraint residual/jacobian computations
