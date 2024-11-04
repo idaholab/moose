@@ -5,11 +5,9 @@ registerMooseObject("PlatypusApp", MFEMVectorDirichletBC);
 InputParameters
 MFEMVectorDirichletBC::validParams()
 {
-  InputParameters params = MFEMEssentialBC::validParams();
+  InputParameters params = MFEMVectorDirichletBCBase::validParams();
   params.addClassDescription(
-      "Applies a Dirichlet condition to the tangential components of a vector variable.");
-  params.addRequiredParam<UserObjectName>(
-      "vector_coefficient", "The vector MFEM coefficient to use in the Dirichlet condition");
+      "Applies a Dirichlet condition to all components of a vector variable.");
   return params;
 }
 
