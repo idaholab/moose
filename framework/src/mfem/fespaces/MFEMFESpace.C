@@ -8,7 +8,7 @@ MFEMFESpace::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMFESpace");
-  params.addClassDescription("Specifies a finite element space for MFEMVariables to be defined "
+  params.addClassDescription("Specifies a finite element space for `MFEMVariable`s to be defined "
                              "with respect to.");
   params.addParam<int>("vdim", 1, "Dimension of degrees of freedom");
   MooseEnum ordering("NODES VDIM", "VDIM", false);
