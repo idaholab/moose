@@ -163,6 +163,7 @@ FEProblemBase::validParams()
                         "Eigenvalue system (Automatically determined based "
                         "on executioner)");
   params.addParam<bool>("error_on_jacobian_nonzero_reallocation",
+                        true,
                         "This causes PETSc to error if it had to reallocate memory in the Jacobian "
                         "matrix due to not having enough nonzeros");
   params.addParam<bool>("ignore_zeros_in_jacobian",
