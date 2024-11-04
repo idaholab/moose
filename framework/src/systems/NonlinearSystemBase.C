@@ -1112,7 +1112,6 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jaco
       }
     }
     _fe_problem.addCachedJacobian(tid);
-    jacobian.close();
   }
 }
 
