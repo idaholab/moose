@@ -197,6 +197,13 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     for (const auto & d : data)
       _interior_points.push_back(d);
   }
+  bool has_duplicates =
+      std::any_of(_interior_points.begin(),
+                  _interior_points.end(),
+                  [&](const Point & p)
+                  { return std::count(_interior_points.begin(), _interior_points.end(), p) > 1; });
+  if (has_duplicates)
+    paramError("interior_points", "Duplicate points were found in the provided interior points.");
 }
 
 std::unique_ptr<MeshBase>

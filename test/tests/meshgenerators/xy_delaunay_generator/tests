@@ -207,5 +207,12 @@
       expect_err = "Cannot use first order elements with stitched quadratic element holes."
       detail = "if the input hole meshes"
     []
+    [err_interior_points]
+      type = RunException
+      input = 'xydelaunay_interior_pts.i'
+      cli_args = "Mesh/triangulate/interior_points='0.25 0.25 0.0' --mesh-only"
+      expect_err = "Duplicate points were found in the provided interior points."
+      detail = "with duplicate interior points"
+    []
   []
 []
