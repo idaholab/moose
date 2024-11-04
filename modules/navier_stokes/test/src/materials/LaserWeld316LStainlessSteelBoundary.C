@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MixedLaserWeld316LStainlessSteelBoundary.h"
+#include "LaserWeld316LStainlessSteelBoundary.h"
 #include "Assembly.h"
 
-registerMooseObject("NavierStokesTestApp", MixedLaserWeld316LStainlessSteelBoundary);
+registerMooseObject("NavierStokesTestApp", LaserWeld316LStainlessSteelBoundary);
 
 InputParameters
-MixedLaserWeld316LStainlessSteelBoundary::validParams()
+LaserWeld316LStainlessSteelBoundary::validParams()
 {
   InputParameters params = Material::validParams();
   params.addParam<Real>("P0", 1e5, "The ambient pressure for the recoil pressure");
@@ -21,8 +21,8 @@ MixedLaserWeld316LStainlessSteelBoundary::validParams()
   params.addParam<Real>("M", 56E-3, "Molar mass for the recoil pressure");
   params.addParam<Real>("T_v", 3080, "The vaporization temperature for recoil pressure");
   params.addParam<Real>("R", 8.314, "The gas constant for recoil pressure");
-  params.addParam<Real>("c_gamma0", 1.943, "Constant term in the surface tension");
-  params.addParam<Real>("c_gamma1", 4.3e-4, "Linear term multiplier in the surface tension");
+  params.addParam<Real>("c_gamma0", 1.593, "Constant term in the surface tension");
+  params.addParam<Real>("c_gamma1", 1.9e-4, "Linear term multiplier in the surface tension");
   params.addParam<Real>("Tl", 1708, "The liquidus temperature");
   params.addRequiredCoupledVar("temperature", "The temperature in K");
   params.addParam<MaterialPropertyName>("rc_pressure_name", "rc_pressure", "The recoil pressure");
@@ -33,7 +33,7 @@ MixedLaserWeld316LStainlessSteelBoundary::validParams()
   return params;
 }
 
-MixedLaserWeld316LStainlessSteelBoundary::MixedLaserWeld316LStainlessSteelBoundary(
+LaserWeld316LStainlessSteelBoundary::LaserWeld316LStainlessSteelBoundary(
     const InputParameters & parameters)
   : Material(parameters),
     _P0(getParam<Real>("P0")),
@@ -60,14 +60,24 @@ MixedLaserWeld316LStainlessSteelBoundary::MixedLaserWeld316LStainlessSteelBounda
 }
 
 void
-MixedLaserWeld316LStainlessSteelBoundary::computeQpProperties()
+LaserWeld316LStainlessSteelBoundary::computeQpProperties()
 {
+  // Below the vaporization temperature we don't have recoil pressure
   if (_temperature[_qp] < _T_v)
     _rc_pressure[_qp] = 0;
   else
     _rc_pressure[_qp] =
         0.54 * _P0 *
         std::exp(_L_v * _M / _R * (_temperature[_qp] - _T_v) / (_temperature[_qp] * _T_v));
+
+  // The surface tension treatment methodology is from:
+  // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator production,
+  // 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
+  //
+  // with the surface tension from:
+  //
+  // Pichler, Peter, et al. "Surface tension and thermal conductivity of NIST SRM 1155a
+  // (AISI 316L stainless steel)."
   _surface_tension[_qp] = _c_gamma0 + _c_gamma1 * (_temperature[_qp] - _Tl);
   _grad_surface_tension[_qp] = _c_gamma1 * _grad_temperature[_qp];
   _surface_term_curvature[_qp] =

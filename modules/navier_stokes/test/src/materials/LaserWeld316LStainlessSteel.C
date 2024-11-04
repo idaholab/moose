@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MixedLaserWeld316LStainlessSteel.h"
+#include "LaserWeld316LStainlessSteel.h"
 
-registerMooseObject("NavierStokesTestApp", MixedLaserWeld316LStainlessSteel);
+registerMooseObject("NavierStokesTestApp", LaserWeld316LStainlessSteel);
 
 InputParameters
-MixedLaserWeld316LStainlessSteel::validParams()
+LaserWeld316LStainlessSteel::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("temperature", "The temperature in K");
@@ -22,16 +22,18 @@ MixedLaserWeld316LStainlessSteel::validParams()
 
   params.addParam<Real>("Tmax", 4000, "The maximum temperature for limiting viscosity");
   params.addParam<Real>("Tl", 1708, "The liquidus temperature");
-  params.addParam<Real>("Ts", 1628, "The solidus temperature");
+  params.addParam<Real>("Ts", 1675, "The solidus temperature");
 
-  params.addParam<Real>("c_k0_s", 10.5599, "k0 coefficient for the solid in k0+k1*T");
-  params.addParam<Real>("c_k1_s", 1.2866E-2, "k1 coefficient for the solid in k0+k1*T");
-  params.addParam<Real>("c_k0_l", 5.07156, "k0 coefficient for the liquid in k0+k1*T");
-  params.addParam<Real>("c_k1_l", 1.269E-2, "k1 coefficien for the liquid in k0+k1*Tt");
+  params.addParam<Real>("c_k0_s", 6.38, "k0 coefficient for the solid in k0+k1*T");
+  params.addParam<Real>("c_k1_s", 1.9E-2, "k1 coefficient for the solid in k0+k1*T");
+  params.addParam<Real>("c_k2_s", -2.45E-6, "k1 coefficient for the solid in k0+k1*T");
+  params.addParam<Real>("c_k0_l", 2.27, "k0 coefficient for the liquid in k0+k1*T");
+  params.addParam<Real>("c_k1_l", 1.76E-2, "k1 coefficien for the liquid in k0+k1*Tt");
+  params.addParam<Real>("c_k2_l", -1.39E-6, "k1 coefficient for the solid in k0+k1*T");
 
-  params.addParam<Real>("c_cp0_s", 458.98, "cp0 coefficient for the solid in cp0+cp1*T");
-  params.addParam<Real>("c_cp1_s", 0.1328, "cp1 coefficient for the solid in cp0+cp1*T");
-  params.addParam<Real>("c_cp0_l", 794.96, "cp0 coefficient for the liquid in cp0");
+  params.addParam<Real>("c_cp0_s", 459.29, "cp0 coefficient for the solid in cp0+cp1*T");
+  params.addParam<Real>("c_cp1_s", 0.1329, "cp1 coefficient for the solid in cp0+cp1*T");
+  params.addParam<Real>("c_cp0_l", 795.49, "cp0 coefficient for the liquid in cp0");
 
   params.addParam<Real>(
       "c_rho0_s", 8084.2, "The rho0 density for the solid in rho0+rho1*T+rho2*T*T");
@@ -51,18 +53,23 @@ MixedLaserWeld316LStainlessSteel::validParams()
   params.addParam<MaterialPropertyName>("k_name", "k", "The name of the thermal conductivity");
   params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+
+  params.addParam<bool>("use_constant_density", true, "If a constant density should be used (would discard buoyancy effects)");
+
   return params;
 }
 
-MixedLaserWeld316LStainlessSteel::MixedLaserWeld316LStainlessSteel(
+LaserWeld316LStainlessSteel::LaserWeld316LStainlessSteel(
     const InputParameters & parameters)
   : Material(parameters),
     _c_mu0(getParam<Real>("c_mu0")),
     _c_mu1(getParam<Real>("c_mu1")),
     _c_k0_s(getParam<Real>("c_k0_s")),
     _c_k1_s(getParam<Real>("c_k1_s")),
+    _c_k2_s(getParam<Real>("c_k2_s")),
     _c_k0_l(getParam<Real>("c_k0_l")),
     _c_k1_l(getParam<Real>("c_k1_l")),
+    _c_k2_l(getParam<Real>("c_k2_l")),
     _c_cp0_s(getParam<Real>("c_cp0_s")),
     _c_cp1_s(getParam<Real>("c_cp1_s")),
     _c_cp0_l(getParam<Real>("c_cp0_l")),
@@ -81,18 +88,25 @@ MixedLaserWeld316LStainlessSteel::MixedLaserWeld316LStainlessSteel(
     _k(declareADProperty<Real>(getParam<MaterialPropertyName>("k_name"))),
     _cp(declareADProperty<Real>(getParam<MaterialPropertyName>("cp_name"))),
     _rho(declareADProperty<Real>(getParam<MaterialPropertyName>("rho_name"))),
-    _grad_k(declareADProperty<RealVectorValue>("grad_" + getParam<MaterialPropertyName>("k_name")))
+    _grad_k(declareADProperty<RealVectorValue>("grad_" + getParam<MaterialPropertyName>("k_name"))),
+    _use_constant_density(getParam<bool>("use_constant_density"))
 {
 }
 
 void
-MixedLaserWeld316LStainlessSteel::computeQpProperties()
+LaserWeld316LStainlessSteel::computeQpProperties()
 {
   ADReal That = _temperature[_qp] > _Tmax ? _Tmax : _temperature[_qp];
+  // First we check if it is enough to compute the solid properties only
   if (_temperature[_qp] < _Ts)
   {
+    // We are using an enormous viscosity for the solid phase to prevent it from moving.
+    // This approach was coined in:
+    // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator production,
+    // 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
     _mu[_qp] = 1e11 * 1e-3 * std::exp(_c_mu0 / That - _c_mu1);
-    _k[_qp] = _c_k0_s + _c_k1_s * _temperature[_qp];
+    _k[_qp] =
+        _c_k0_s + _c_k1_s * _temperature[_qp] + _c_k2_s * _temperature[_qp] * _temperature[_qp];
     _grad_k[_qp] = _c_k1_s * _grad_temperature[_qp];
     _cp[_qp] = _c_cp0_s + _c_cp1_s * _temperature[_qp];
     _rho[_qp] = _c_rho0_s + _c_rho1_s * _temperature[_qp] +
@@ -100,19 +114,27 @@ MixedLaserWeld316LStainlessSteel::computeQpProperties()
   }
   else
   {
+    // This contains an artifically large lower viscosity at this point, to make sure
+    // the fluid simulations are stable. This viscosity is still below the one used in:
+    // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator production,
+    // 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
     const auto mu_l = std::max(0.030, 1e-3 * std::exp(_c_mu0 / That - _c_mu1));
-    const auto k_l = _c_k0_l + _c_k1_l * _temperature[_qp];
+    const auto k_l =
+        _c_k0_l + _c_k1_l * _temperature[_qp] + _c_k2_l * _temperature[_qp] * _temperature[_qp];
     const auto grad_k_l = _c_k1_l * _grad_temperature[_qp];
     const auto cp_l = _c_cp0_l;
     const auto rho_l = _c_rho0_l + _c_rho1_l * _temperature[_qp] +
                        _c_rho2_l * _temperature[_qp] * _temperature[_qp];
 
+    // If we are between the solidus and liquidus temperatures we will need the
+    // solid properties too
     if (_temperature[_qp] < _Tl && _temperature[_qp] > _Ts)
     {
       const auto liquid_fraction = (_temperature[_qp] - _Ts) / (_Tl - _Ts);
 
       const auto mu_s = 1e11 * 1e-3 * std::exp(_c_mu0 / That - _c_mu1);
-      const auto k_s = _c_k0_s + _c_k1_s * _temperature[_qp];
+      const auto k_s =
+          _c_k0_s + _c_k1_s * _temperature[_qp] + _c_k2_s * _temperature[_qp] * _temperature[_qp];
       const auto grad_k_s = _c_k1_s * _grad_temperature[_qp];
       const auto cp_s = _c_cp0_s + _c_cp1_s * _temperature[_qp];
       const auto rho_s = _c_rho0_s + _c_rho1_s * _temperature[_qp] +
@@ -133,5 +155,9 @@ MixedLaserWeld316LStainlessSteel::computeQpProperties()
       _rho[_qp] = rho_l;
     }
   }
-  _rho[_qp] = 7950;
+
+  // If we use constant density we override it with the density at the liquidus line
+  if (_use_constant_density)
+    _rho[_qp] = _c_rho0_l + _c_rho1_l * _Tl +
+                       _c_rho2_l * _Tl * _Tl;
 }

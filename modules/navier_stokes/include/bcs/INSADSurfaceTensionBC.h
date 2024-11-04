@@ -28,4 +28,9 @@ protected:
   const ADMaterialProperty<RealVectorValue> & _surface_term_curvature;
   const ADMaterialProperty<RealVectorValue> & _surface_term_gradient1;
   const ADMaterialProperty<RealVectorValue> & _surface_term_gradient2;
+
+private:
+  /// If the surface tension should include the gradient terms
+  /// (increases fidelity, decreases stability)
+  const bool _include_gradient_terms;
 };

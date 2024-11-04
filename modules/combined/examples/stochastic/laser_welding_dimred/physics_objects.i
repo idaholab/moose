@@ -187,12 +187,12 @@
     use_displaced_mesh = true
   []
   [steel]
-    type = MixedLaserWeld316LStainlessSteel
+    type = LaserWeld316LStainlessSteel
     temperature = T
     use_displaced_mesh = true
   []
   [steel_boundary]
-    type = MixedLaserWeld316LStainlessSteelBoundary
+    type = LaserWeld316LStainlessSteelBoundary
     boundary = 'top'
     temperature = T
     use_displaced_mesh = true
