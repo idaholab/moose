@@ -5,7 +5,8 @@
 This creates a material that is the sum of a function shifted by a set of points contained in a reporter.  The reporter can contain points by specifying [!param](/Materials/ReporterOffsetFunctionMaterial/point_name) or by three seperate reporters containing the (x,y,z) coordinates of the points using [!param](/Materials/ReporterOffsetFunctionMaterial/x_coord_name), [!param](/Materials/ReporterOffsetFunctionMaterial/y_coord_name), and [!param](/Materials/ReporterOffsetFunctionMaterial/z_coord_name). This can be useful for creating a field containing multiple sources, as shown in [offset] and described in the equation below.
 
 
-## $\tilde f(\mathbf{x}) = \sum_{i=1}^{n} \left(f(\mathbf{x} - \mathbf{p}_{offset}) \right)$
+!equation
+\tilde f(\mathbf{x}) = \sum_{i=1}^{n} \left(f(\mathbf{x} - \mathbf{p}_{offset}) \right)
 
 !media large_media/framework/materials/offset_func.png
        id=offset

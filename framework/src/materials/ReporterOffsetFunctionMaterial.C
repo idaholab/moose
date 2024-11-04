@@ -7,9 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseError.h"
 #include "ReporterOffsetFunctionMaterial.h"
-#include "libmesh/int_range.h"
 
 registerMooseObject("MooseApp", ReporterOffsetFunctionMaterial);
 registerMooseObject("MooseApp", ADReporterOffsetFunctionMaterial);
@@ -19,7 +17,7 @@ InputParameters
 ReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Compute the sum of a function offet by a set of points.");
+  params.addClassDescription("Compute the sum of a function offset by a set of points.");
   params.addRequiredParam<FunctionName>("function", "The weighting function.");
 
   params.addParam<ReporterName>("x_coord_name", "Reporter with x-coordinate data.");
@@ -29,9 +27,11 @@ ReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
                                 "Reporter with point data. "
                                 "<reporter>/<name>.");
   params.addRequiredParam<std::string>("property_name", "Material property base name");
+  params.addParamNamesToGroup("point_name x_coord_name y_coord_name z_coord_name",
+                              "Offset locations for function evaluations");
   return params;
 }
-template <bool is_ad>
+
 ReporterOffsetFunctionMaterialTempl<is_ad>::ReporterOffsetFunctionMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
@@ -67,7 +67,7 @@ ReporterOffsetFunctionMaterialTempl<is_ad>::computeQpProperties()
     mooseAssert((_coordx.size() == _coordy.size()) && (_coordx.size() == _coordz.size()),
                 "Size of the coordinate offsets don't match.");
 
-  for (auto idx : make_range(num_pts))
+  for (const auto idx : make_range(num_pts))
   {
 
     Point offset = _read_in_points ? _points[idx] : Point(_coordx[idx], _coordy[idx], _coordz[idx]);

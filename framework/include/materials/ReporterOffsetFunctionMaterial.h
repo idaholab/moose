@@ -11,6 +11,7 @@
 
 #include "Material.h"
 #include "Function.h"
+#include "ReporterInterface.h"
 
 template <bool>
 class ReporterOffsetFunctionMaterialTempl;

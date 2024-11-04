@@ -8,8 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MisfitReporterOffsetFunctionMaterial.h"
-#include "MooseError.h"
-#include "libmesh/int_range.h"
+
 #include "libmesh/libmesh_common.h"
 
 registerMooseObject("OptimizationApp", MisfitReporterOffsetFunctionMaterial);
