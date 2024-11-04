@@ -32,13 +32,13 @@
     type = MFEMVectorDirichletBC
     variable = displacement
     boundary = '1'
-    vector_coefficient = FixedValue
+    values = '0.0 0.0 0.0'
   []
   [pull_down]
     type = MFEMVectorBoundaryIntegratedBC
     variable = displacement
     boundary = '2'
-    vector_coefficient = PullDownValue
+    values = '0.0 0.0 -0.01'
   []
 []
 
@@ -54,21 +54,6 @@
     prop_names = 'lambda mu'
     prop_values = '1.0 1.0'
     block = 2
-  []
-[]
-
-[VectorCoefficients]
-  [FixedValue]
-    type = MFEMVectorConstantCoefficient
-    value_x = 0.0
-    value_y = 0.0
-    value_z = 0.0
-  []
-  [PullDownValue]
-    type = MFEMVectorConstantCoefficient
-    value_x = 0.0
-    value_y = 0.0
-    value_z = -0.01
   []
 []
 

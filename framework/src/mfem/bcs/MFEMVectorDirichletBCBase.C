@@ -4,8 +4,8 @@ InputParameters
 MFEMVectorDirichletBCBase::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<UserObjectName>(
-      "vector_coefficient", "The vector MFEM coefficient to use in the Dirichlet condition");
+  params.addRequiredParam<std::vector<Real>>(
+      "values", "The vector whose normal component will be used in the integrated BC");
   return params;
 }
 
