@@ -6,7 +6,7 @@
 
 ## Overview
 
-Defines a finite element space for MFEM which one or more MFEMVariables can be defined with respect to.
+Defines a finite element space for MFEM which one or more `MFEMVariable`s can be defined with respect to.
 
 The family of shape functions is selected from the `fec_type` parameter, and the order is controlled
 using the `fec_order` parameter.
