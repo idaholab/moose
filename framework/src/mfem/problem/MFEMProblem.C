@@ -273,23 +273,22 @@ MFEMProblem::addFunction(const std::string & type,
   if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
   {
     // FIXME: Ideally this would support arbitrary spatial dimensions
-    _scalar_functions[name] = getProblemData()._scalar_manager.make<mfem::FunctionCoefficient>(
+    _scalar_functions[name] = makeScalarCoefficient<mfem::FunctionCoefficient>(
         [&func](const mfem::Vector & p, double t) -> mfem::real_t
         { return func.value(t, pointFromMFEMVector(p)); });
   }
   else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
   {
     // FIXME: Ideally this would support arbitrary spatial and vector dimensions
-    _vector_functions[name] =
-        getProblemData()._vector_manager.make<mfem::VectorFunctionCoefficient>(
-            3,
-            [&func](const mfem::Vector & p, double t, mfem::Vector & u)
-            {
-              libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-              u[0] = vector_value(0);
-              u[1] = vector_value(1);
-              u[2] = vector_value(2);
-            });
+    _vector_functions[name] = makeVectorCoefficient<mfem::VectorFunctionCoefficient>(
+        3,
+        [&func](const mfem::Vector & p, double t, mfem::Vector & u)
+        {
+          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+          u[0] = vector_value(0);
+          u[1] = vector_value(1);
+          u[2] = vector_value(2);
+        });
   }
   else
   {
