@@ -208,6 +208,17 @@ public:
   virtual std::shared_ptr<mfem::VectorFunctionCoefficient>
   getVectorFunctionCoefficient(const std::string & name);
 
+  /**
+   * Displace the mesh, if mesh displacement is enabled.
+   */
+  void displaceMesh();
+
+  /**
+   * Returns optional reference to the displacement GridFunction to apply to nodes.
+   */
+  std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+  getMeshDisplacementGridFunction();
+
 protected:
   /**
    * Template method for adding kernels. We can only add kernels using equation system problem
