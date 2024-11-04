@@ -13,7 +13,7 @@ MFEMConstantCoefficient::validParams()
 
 MFEMConstantCoefficient::MFEMConstantCoefficient(const InputParameters & parameters)
   : MFEMCoefficient(parameters),
-    coefficient{getMFEMProblem().getProblemData()._scalar_manager.make<mfem::ConstantCoefficient>(
+    coefficient{getMFEMProblem().makeScalarCoefficient<mfem::ConstantCoefficient>(
         getParam<double>("value"))}
 {
 }

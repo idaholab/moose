@@ -18,8 +18,7 @@ MFEMVectorConstantCoefficient::MFEMVectorConstantCoefficient(const InputParamete
     _vector(
         {getParam<double>("value_x"), getParam<double>("value_y"), getParam<double>("value_z")}),
     _vector_coefficient{
-        getMFEMProblem().getProblemData()._vector_manager.make<mfem::VectorConstantCoefficient>(
-            _vector)}
+        getMFEMProblem().makeVectorCoefficient<mfem::VectorConstantCoefficient>(_vector)}
 {
 }
 
