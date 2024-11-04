@@ -1,7 +1,7 @@
 #pragma once
 #include "MFEMGeneralUserObject.h"
 #include "MFEMContainers.h"
-#include "coefficients.h"
+#include "Function.h"
 
 class MFEMBoundaryCondition : public MFEMGeneralUserObject
 {

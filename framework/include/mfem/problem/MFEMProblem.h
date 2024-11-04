@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include "../common/pfem_extras.hpp"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
@@ -13,6 +14,7 @@
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
 #include "MFEMSolverBase.h"
+#include "Function.h"
 #include "MooseEnum.h"
 #include "libmesh/string_to_enum.h"
 
@@ -116,6 +118,15 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Override of ExternalProblem::addFunction. Uses ExternalProblem::addFunction to create a
+   * MFEMGeneralUserObject representing the function in MOOSE, and creates a corresponding
+   * MFEM Coefficient or VectorCoefficient object.
+   */
+  void addFunction(const std::string & type,
+                   const std::string & name,
+                   InputParameters & parameters) override;
+
+  /**
    * Method called in AddMFEMPreconditionerAction which will create the solver.
    */
   void addMFEMPreconditioner(const std::string & user_object_name,
@@ -156,6 +167,48 @@ public:
   MFEMProblemData & getProblemData() { return _problem_data; }
 
   /**
+   * Method to build scalar mfem::Coefficient objects. These will be
+   * tracked so that the simulation time can be updated on them later.
+   */
+  template <class T, class... Args>
+  std::shared_ptr<T> makeScalarCoefficient(Args &&... args)
+  {
+    return this->_problem_data._scalar_manager.make<T>(args...);
+  }
+
+  /**
+   * Method to build scalar mfem::VectorCoefficient objects. These will be
+   * tracked so that the simulation time can be updated on them later.
+   */
+  template <class T, class... Args>
+  std::shared_ptr<T> makeVectorCoefficient(Args &&... args)
+  {
+    return this->_problem_data._vector_manager.make<T>(args...);
+  }
+
+  /**
+   * Method to build scalar mfem::MatrixCoefficient objects. These will be
+   * tracked so that the simulation time can be updated on them later.
+   */
+  template <class T, class... Args>
+  std::shared_ptr<T> makeMatrixCoefficient(Args &&... args)
+  {
+    return this->_problem_data._matrix_manager.make<T>(args...);
+  }
+
+  /**
+   * Method to get the MFEM scalar coefficient object corresponding to the named function.
+   */
+  virtual std::shared_ptr<mfem::FunctionCoefficient>
+  getScalarFunctionCoefficient(const std::string & name);
+
+  /**
+   * Method to get the MFEM vector coefficient object corresponding to the named function.
+   */
+  virtual std::shared_ptr<mfem::VectorFunctionCoefficient>
+  getVectorFunctionCoefficient(const std::string & name);
+
+  /**
    * Displace the mesh, if mesh displacement is enabled.
    */
   void displaceMesh();
@@ -188,4 +241,6 @@ protected:
   }
 
   MFEMProblemData _problem_data;
+  std::map<std::string, std::shared_ptr<mfem::FunctionCoefficient>> _scalar_functions;
+  std::map<std::string, std::shared_ptr<mfem::VectorFunctionCoefficient>> _vector_functions;
 };
