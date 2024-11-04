@@ -127,10 +127,6 @@ NonlinearSystem::preInit()
 {
   NonlinearSystemBase::preInit();
 
-  if (_automatic_scaling && _resid_vs_jac_scaling_param < 1. - TOLERANCE)
-    // Add diagonal matrix that will be used for computing scaling factors
-    _nl_implicit_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
-
   if (_hybridized_kernels.hasObjects())
     addVector(HDGKernel::lm_increment_vector_name, true, GHOSTED);
 }
