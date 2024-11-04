@@ -451,8 +451,8 @@ protected:
   void createApps();
 
   /**
-   * Reserve the solution from the previous simulation,
-   *  and it is used as an initial guess for the next run
+   * Preserve the solution from the previous simulation,
+   * and it is used as an initial guess for the next run
    */
   void keepSolutionDuringRestore(bool keep_solution_during_restore);
 
@@ -594,11 +594,17 @@ protected:
   /// Flag indicates if or not restart from the latest solution
   bool _keep_solution_during_restore;
 
+  /// Flag indicates if or not restart the auxiliary system from the latest auxiliary solution
+  bool _keep_aux_solution_during_restore;
+
   /// Whether or not to skip restoring completely
   const bool _no_restore;
 
   /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
   std::vector<std::unique_ptr<NumericVector<Real>>> _end_solutions;
+
+  /// The auxiliary solution from the end of the previous solve, this is cloned from the auxiliary solution during restore
+  std::vector<std::unique_ptr<NumericVector<Real>>> _end_aux_solutions;
 
   /// The app configuration resulting from calling init
   LocalRankConfig _rank_config;
