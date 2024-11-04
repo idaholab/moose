@@ -111,7 +111,7 @@
   [./sub]
     type = FullSolveMultiApp
     input_files = sub.i
-    execute_on = timestep_begin
+    execute_on = FINAL 
   [../]
 []
 

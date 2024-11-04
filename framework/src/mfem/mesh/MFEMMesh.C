@@ -56,7 +56,9 @@ MFEMMesh::buildMesh()
                     isParamSetByUser("serial_refine") ? getParam<int>("serial_refine")
                                                       : getParam<int>("uniform_refine"));
 
-  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mfem_ser_mesh);
+  //multi app should take the mpi comm from moose so is split correctly??
+  auto comm = _app.comm().get(); 
+  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(comm, mfem_ser_mesh);
 
   // Perform parallel refinements
   uniformRefinement(*_mfem_par_mesh, getParam<int>("parallel_refine"));
