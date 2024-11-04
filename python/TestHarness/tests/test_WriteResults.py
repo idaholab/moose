@@ -17,31 +17,28 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         self.setUp()
 
-    def checkFilesExist(self, output_dir, tests, output_object_names):
+    def checkFilesExist(self, output_dir, tests, output_object_names, spec_file):
         # The directories within the test directory where these tests reside
-        test_folders = ['tests', 'test_harness']
+        test_folder = os.path.join('tests', 'test_harness')
         # The complete path to the directory where the tests reside
-        test_base_path = os.path.join(os.getenv('MOOSE_DIR'), 'test', *test_folders)
+        test_base_path = os.path.join(os.getenv('MOOSE_DIR'), 'test', test_folder)
         # The complete path where the output should reside
-        output_base_path = os.path.join(output_dir, *test_folders)
+        output_base_path = os.path.join(output_dir, test_folder)
 
         # Load the previous results
         with open(os.path.join(output_dir, '.previous_test_results.json')) as f:
             results = json.load(f)
         test_results = results['tests']
-        # We should only have one test spec
-        self.assertEqual(1, len(test_results))
-        # The test spec should be in the results
-        self.assertIn(test_base_path, test_results)
-        test_spec_results = test_results[test_base_path]
+        # The test folder should be in the results
+        test_spec_results = test_results[test_folder]
         # The number of tests in the test spec should be the number provided
-        self.assertEqual(len(tests), len(test_spec_results))
+        self.assertEqual(len(tests), len(test_spec_results['tests']))
+        # Test spec should match
+        self.assertEqual(os.path.join(test_base_path, spec_file), test_spec_results['spec_file'])
 
         for test in tests:
-            # The test name should be in the test spec results
-            test_name_short = f'{"/".join(test_folders)}.{test}'
-            self.assertIn(test_name_short, test_spec_results)
-            test_results = test_spec_results[test_name_short]
+            # Test should be in the results
+            test_results = test_spec_results['tests'][test]
             # Get the output files from the test spec
             result_output_files = test_results['output_files']
             # Make sure each output file exists and is set in the results file
@@ -59,8 +56,8 @@ class TestHarnessTester(TestHarnessTestCase):
         with tempfile.TemporaryDirectory() as output_dir:
             with self.assertRaises(subprocess.CalledProcessError):
                 self.runTests('--no-color', '-i', 'diffs', '--sep-files', '-o', output_dir, tmp_output=False)
-            self.checkFilesExist(output_dir, ['csvdiff', 'exodiff'], ['runner_run', 'tester'])
+            self.checkFilesExist(output_dir, ['csvdiff', 'exodiff'], ['runner_run', 'tester'], 'diffs')
 
         with tempfile.TemporaryDirectory() as output_dir:
             self.runTests('--no-color', '-i', 'always_ok', '--sep-files', '-o', output_dir, tmp_output=False)
-            self.checkFilesExist(output_dir, ['always_ok'], ['runner_run'])
+            self.checkFilesExist(output_dir, ['always_ok'], ['runner_run'], 'always_ok')

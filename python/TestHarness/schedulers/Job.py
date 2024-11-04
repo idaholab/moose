@@ -764,9 +764,7 @@ class Job(OutputInterface):
         joint_status = self.getJointStatus()
 
         # Base job data
-        job_data = {'name'                 : self.getTestNameShort(),
-                    'long_name'            : self.getTestName(),
-                    'timing'               : self.timer.totalTimes(),
+        job_data = {'timing'               : self.timer.totalTimes(),
                     'status'               : joint_status.status,
                     'status_message'       : joint_status.message,
                     'fail'                 : self.isFail(),

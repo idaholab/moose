@@ -180,25 +180,26 @@ class Tester(MooseObject, OutputInterface):
         """ Get the entry in the results storage for this tester """
         tests = options.results_storage['tests']
 
-        test_dir = self.getTestDir()
+        short_name = self.getTestNameShort()
+        test_dir = self.getTestName()[:(-len(short_name) - 1)]
         test_dir_entry = tests.get(test_dir)
         if not test_dir_entry:
             if not create:
                 if graceful:
                     return None, None
                 raise Exception(f'Test folder {test_dir} not in results')
-            tests[test_dir] = {}
+            tests[test_dir] = {'tests': {}}
             test_dir_entry = tests[test_dir]
 
-        test_name = self.getTestName()
-        test_name_entry = test_dir_entry.get(test_name)
+        test_name_entry = test_dir_entry['tests'].get(short_name)
+        test_dir_entry['spec_file'] = self.getSpecFile()
         if not test_name_entry:
             if not create:
                 if graceful:
                     return test_dir_entry, None
-                raise Exception(f'Test {test_dir}/{test_name} not in results')
-            test_dir_entry[test_name] = {}
-        return test_dir_entry, test_dir_entry.get(test_name)
+                raise Exception(f'Test {test_dir}/{short_name} not in results')
+            test_dir_entry['tests'][short_name] = {}
+        return test_dir_entry, test_dir_entry['tests'][short_name]
 
     # Return a tuple (status, message, caveats) for this tester as found
     # in the previous results
