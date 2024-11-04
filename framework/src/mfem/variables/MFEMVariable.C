@@ -14,7 +14,7 @@ MFEMVariable::validParams()
   // Require moose variable parameters (not used!)
   params += MooseVariableBase::validParams();
   params.addClassDescription(
-      "Class for adding MFEM variables to the problem (mfem::ParGridFunctions).");
+      "Class for adding MFEM variables to the problem (`mfem::ParGridFunction`s).");
   params.registerBase("MooseVariableBase");
   return params;
 }
