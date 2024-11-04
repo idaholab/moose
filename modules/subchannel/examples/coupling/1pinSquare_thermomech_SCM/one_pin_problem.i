@@ -265,28 +265,33 @@ heated_length = 1.0
 
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransferSCM
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     variable = Pin_surface_temperature
-    user_object = Tpin_avg_uo
+    source_variable = Tpin
+    execute_on = 'timestep_end'
   []
 
   [diameter] # send diameter information from /BISON/heatConduction to subchannel
-    type = MultiAppUserObjectTransferSCM
+    type =  MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     variable = Dpin
-    user_object = pin_diameter_uo
+    source_variable = pin_diameter_deformed
+    from_boundaries = right
+    execute_on = 'timestep_end'
   []
 
   [q_prime] # send heat flux from /BISON/heatConduction to subchannel
-    type = MultiAppUserObjectTransferSCM
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     variable = q_prime
-    user_object = q_prime_uo
+    source_variable = q_prime
+    from_boundaries = right
+    execute_on = 'timestep_end'
   []
 
   [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S w_perim'
   []

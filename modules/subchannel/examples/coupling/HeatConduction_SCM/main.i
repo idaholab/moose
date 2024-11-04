@@ -190,18 +190,6 @@ heated_length = 1.0 # m
   []
 []
 
-[UserObjects]
-  [Tpin_avg_uo]
-    type = NearestPointLayeredAverage
-    direction = z
-    num_layers = 1000
-    variable = Tpin
-    block = fuel_pins
-    points = '0 0 0'
-    execute_on = timestep_end
-  []
-[]
-
 [Outputs]
   exodus = true
 []
@@ -211,19 +199,18 @@ heated_length = 1.0 # m
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   fixed_point_max_its = 30
-  fixed_point_min_its = 1
+  fixed_point_min_its = 2
   fixed_point_rel_tol = 1e-6
 []
 
 ################################################################################
-# A multiapp that transfers data to BISON/heatconduction simulations
+# A multiapp that transfers data to heatconduction simulations
 ################################################################################
 
-[MultiApps] # I have as many multiapps as pins
+[MultiApps] # I may have as many multiapps as pins
   [sub]
-    # app_type = BisonApp
     type = FullSolveMultiApp
-    input_files = sub.i # seperate file for multiapps due to radial power profile
+    input_files = sub.i
     execute_on = 'timestep_end'
     positions = '0   0   0 '
     bounding_box_padding = '0 0 0.01'
@@ -237,18 +224,20 @@ heated_length = 1.0 # m
 []
 
 [Transfers]
-  [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransferSCM
+  [Tpin] # send pin surface temperature to heatConduction,
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     variable = Pin_surface_temperature
-    user_object = Tpin_avg_uo
+    source_variable = Tpin
+    execute_on = 'timestep_end'
   []
 
-  [q_prime] # send heat flux from BISON/heatConduction to subchannel
-    type = MultiAppUserObjectTransferSCM
+  [q_prime] # send heat flux from heatConduction to subchannel
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     variable = q_prime
-    user_object = q_prime_uo
+    source_variable = q_prime
+    from_boundaries = right
     execute_on = 'timestep_end'
   []
 

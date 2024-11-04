@@ -206,25 +206,6 @@ pitch = 7.26e-3
   exodus = true
 []
 
-# Need to have as many points as pins in the object
-[UserObjects]
-  [Tpin_avg_uo]
-    type = NearestPointLayeredAverage
-    direction = z
-    num_layers = 1000
-    variable = Tpin
-    block = fuel_pins
-    points = ' 0   0   0
-              ${fparse  1.0 * pitch}   0  0
-              ${fparse -1.0 * pitch}   0  0
-              ${fparse  0.5 * pitch}   ${fparse  0.866 * pitch}   0
-              ${fparse  0.5 * pitch}   ${fparse -0.866 * pitch}   0
-              ${fparse -0.5 * pitch}   ${fparse  0.866 * pitch}   0
-              ${fparse -0.5 * pitch}   ${fparse -0.866 * pitch}   0'
-    execute_on = timestep_end
-  []
-[]
-
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -261,24 +242,29 @@ pitch = 7.26e-3
 
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransferSCM
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     variable = Pin_surface_temperature
-    user_object = Tpin_avg_uo
+    source_variable = Tpin
+    execute_on = 'timestep_end'
   []
 
   [diameter] # send diameter information from /BISON/heatConduction to subchannel
-    type = MultiAppUserObjectTransferSCM
+    type =  MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     variable = Dpin
-    user_object = pin_diameter_uo
+    source_variable = pin_diameter_deformed
+    from_boundaries = right
+    execute_on = 'timestep_end'
   []
 
   [q_prime] # send heat flux from /BISON/heatConduction to subchannel
-    type = MultiAppUserObjectTransferSCM
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     variable = q_prime
-    user_object = q_prime_uo
+    source_variable = q_prime
+    from_boundaries = right
+    execute_on = 'timestep_end'
   []
 
   [subchannel_transfer]

@@ -15,9 +15,11 @@ T_in = 359.15
     nx = 20
     ymax = ${heated_length}
     ny = 100 # number of axial cells
+    beta_rotation = 90
   []
   coord_type = RZ
   rz_coord_axis = Y
+  beta_rotation = 90
 []
 
 [Functions]
@@ -177,26 +179,6 @@ T_in = 359.15
   []
 []
 
-[UserObjects]
-  [q_prime_uo]
-    type = LayeredSideAverage
-    boundary = right
-    variable = q_prime
-    num_layers = 1000
-    direction = y
-    execute_on = 'TIMESTEP_END'
-  []
-
-  [pin_diameter_uo]
-    type = LayeredSideAverage
-    boundary = right
-    variable = pin_diameter_deformed
-    num_layers = 1000
-    direction = y
-    execute_on = 'TIMESTEP_END'
-  []
-[]
-
 [Preconditioning]
   [smp]
     type = SMP
@@ -243,9 +225,6 @@ T_in = 359.15
     type = VolumePostprocessor
     use_displaced_mesh = true
   []
-
-  # [qprime_integral]
-  # []
 []
 
 [Outputs]

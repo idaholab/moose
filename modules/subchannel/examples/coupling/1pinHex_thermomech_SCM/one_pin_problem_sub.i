@@ -18,6 +18,7 @@ T_in = 588.5
   []
   coord_type = RZ
   rz_coord_axis = Y
+  beta_rotation = 90
 []
 
 [Functions]
@@ -172,26 +173,6 @@ T_in = 588.5
     type = ConstantIC
     variable = pin_diameter_deformed
     value = ${pin_diameter}
-  []
-[]
-
-[UserObjects]
-  [q_prime_uo]
-    type = LayeredSideAverage
-    boundary = right
-    variable = q_prime
-    num_layers = 1000
-    direction = y
-    execute_on = 'TIMESTEP_END'
-  []
-
-  [pin_diameter_uo]
-    type = LayeredSideAverage
-    boundary = right
-    variable = pin_diameter_deformed
-    num_layers = 1000
-    direction = y
-    execute_on = 'TIMESTEP_END'
   []
 []
 

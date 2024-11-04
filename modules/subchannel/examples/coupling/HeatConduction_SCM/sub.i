@@ -13,14 +13,17 @@ T_in = 297.039 # K
     ymax = 1.0 # heated length
     ny = 10 # number of axial cells
   []
+  coord_type = RZ
+  rz_coord_axis = Y
+  beta_rotation = 90
 []
 
 [Functions]
   [volumetric_heat_rate]
     type = ParsedFunction
-    value = '(4.0 * 1000 / (pi * D* D * L)) * (pi/2)*sin(pi*y/L)'
-    vars = 'L D'
-    vals = '${heated_length} ${pin_diameter}'
+    expression = '(4.0 * 1000 / (pi * D* D * L)) * (pi/2)*sin(pi*y/L)'
+    symbol_names = 'L D'
+    symbol_values = '${heated_length} ${pin_diameter}'
   []
 []
 
@@ -86,10 +89,6 @@ T_in = 297.039 # K
   []
 []
 
-# [DefaultElementQuality]
-#   failure_type = warning
-# []
-
 [ICs]
   [temperature_ic]
     type = ConstantIC
@@ -101,22 +100,6 @@ T_in = 297.039 # K
     variable = q_prime
     value = 666.0
   []
-[]
-
-[UserObjects]
-  [q_prime_uo]
-    type = LayeredSideAverage
-    boundary = right
-    variable = q_prime
-    num_layers = 1000
-    direction = y
-    execute_on = 'TIMESTEP_END'
-  []
-[]
-
-[Problem]
-  coord_type = RZ
-  rz_coord_axis = Y
 []
 
 [Executioner]
