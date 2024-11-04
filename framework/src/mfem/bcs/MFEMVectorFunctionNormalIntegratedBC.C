@@ -6,7 +6,7 @@ InputParameters
 MFEMVectorFunctionNormalIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
-  params.addRequiredParam<std::string>(
+  params.addRequiredParam<FunctionName>(
       "function", "The vector function whose normal component will be used in the integrated BC");
   return params;
 }
