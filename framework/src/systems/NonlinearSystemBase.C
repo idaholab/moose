@@ -2282,7 +2282,16 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
   auto & system_matrix = getMatrix(systemMatrixTag());
 #if PETSC_RELEASE_GREATER_EQUALS(3, 23, 0)
-  auto jacobian = libMesh::cast_ref<PetscMatrix<Number> &>(system_matrix).copy_from_hash();
+  SparseMatrix<Number> * jac_ptr;
+  std::unique_ptr<SparseMatrix<Number>> hash_copy;
+  if (system_matrix.use_hash_table())
+  {
+    hash_copy = libMesh::cast_ref<PetscMatrix<Number> &>(system_matrix).copy_from_hash();
+    jac_ptr = hash_copy.get();
+  }
+  else
+    jac_ptr = &system_matrix;
+  auto & jacobian = *jac_ptr;
 #else
   auto & jacobian = system_matrix;
 #endif
