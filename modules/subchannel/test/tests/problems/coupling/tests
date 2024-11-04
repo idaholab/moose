@@ -1,5 +1,5 @@
 [Tests]
-  [master]
+  [main]
     type = Exodiff
     input = main.i
     exodiff = main_out.e
@@ -7,7 +7,7 @@
     mesh_mode = 'replicated'
     allow_warnings = true
   []
-  [slave]
+  [sub]
     type = Exodiff
     input = main.i
     exodiff = main_out_sub0.e

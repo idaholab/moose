@@ -180,18 +180,6 @@ P_out = 101325 # Pa
   []
 []
 
-[UserObjects]
-  [Tpin_avg_uo]
-    type = NearestPointLayeredAverage
-    direction = z
-    num_layers = 10
-    variable = Tpin
-    block = fuel_pins
-    points = '0 0 0'
-    execute_on = timestep_end
-  []
-[]
-
 [Outputs]
   exodus = true
 []
@@ -206,7 +194,7 @@ P_out = 101325 # Pa
 []
 
 ################################################################################
-# A multiapp that transfers data to BISON simulations
+# A multiapp that transfers data to heat conduction simulations
 ################################################################################
 
 [MultiApps] # I have as many multiapps as pins
@@ -220,18 +208,20 @@ P_out = 101325 # Pa
 []
 
 [Transfers]
-  [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransferSCM
+  [Tpin] # send pin surface temperature to heat conduction,
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     variable = Pin_surface_temperature
-    user_object = Tpin_avg_uo
+    source_variable = Tpin
+    execute_on = 'timestep_end'
   []
 
-  [from_SLAVE] # send heat flux from BISON to subchannel
-    type = MultiAppUserObjectTransferSCM
+  [from_sub] # send heat flux from heat conduction to subchannel
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     variable = q_prime
-    user_object = q_prime_uo
+    source_variable = q_prime
+    from_boundaries = right
     execute_on = 'timestep_end'
   []
 []
