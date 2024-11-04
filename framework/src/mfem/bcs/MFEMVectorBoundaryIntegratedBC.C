@@ -1,0 +1,37 @@
+#include "MFEMVectorBoundaryIntegratedBC.h"
+
+registerMooseObject("PlatypusApp", MFEMVectorBoundaryIntegratedBC);
+
+InputParameters
+MFEMVectorBoundaryIntegratedBC::validParams()
+{
+  InputParameters params = MFEMIntegratedBC::validParams();
+  params.addRequiredParam<std::vector<Real>>(
+      "values", "The vector whose normal component will be used in the integrated BC");
+  return params;
+}
+
+// TODO: Currently assumes the vector function coefficient is 3D
+MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParameters & parameters)
+  : MFEMIntegratedBC(parameters),
+    _vec_value(getParam<std::vector<Real>>("values")),
+    _vec_coef(
+        getMFEMProblem().getProblemData()._vector_manager.make<mfem::VectorConstantCoefficient>(
+            mfem::Vector(_vec_value.data(), _vec_value.size())))
+{
+}
+
+// Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
+// caller.
+mfem::LinearFormIntegrator *
+MFEMVectorBoundaryIntegratedBC::createLinearFormIntegrator()
+{
+  return new mfem::VectorBoundaryLFIntegrator(*_vec_coef);
+}
+
+// Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
+mfem::BilinearFormIntegrator *
+MFEMVectorBoundaryIntegratedBC::createBilinearFormIntegrator()
+{
+  return nullptr;
+}

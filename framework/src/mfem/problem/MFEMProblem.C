@@ -257,23 +257,22 @@ MFEMProblem::addFunction(const std::string & type,
   if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
   {
     // FIXME: Ideally this would support arbitrary spatial dimensions
-    _scalar_functions[name] = getProblemData()._scalar_manager.make<mfem::FunctionCoefficient>(
+    _scalar_functions[name] = makeScalarCoefficient<mfem::FunctionCoefficient>(
         [&func](const mfem::Vector & p, double t) -> mfem::real_t
         { return func.value(t, pointFromMFEMVector(p)); });
   }
   else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
   {
     // FIXME: Ideally this would support arbitrary spatial and vector dimensions
-    _vector_functions[name] =
-        getProblemData()._vector_manager.make<mfem::VectorFunctionCoefficient>(
-            3,
-            [&func](const mfem::Vector & p, double t, mfem::Vector & u)
-            {
-              libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-              u[0] = vector_value(0);
-              u[1] = vector_value(1);
-              u[2] = vector_value(2);
-            });
+    _vector_functions[name] = makeVectorCoefficient<mfem::VectorFunctionCoefficient>(
+        3,
+        [&func](const mfem::Vector & p, double t, mfem::Vector & u)
+        {
+          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+          u[0] = vector_value(0);
+          u[1] = vector_value(1);
+          u[2] = vector_value(2);
+        });
   }
   else
   {
@@ -337,6 +336,32 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
   mfem_variable_params.set<UserObjectName>("fespace") = fespace_name;
 
   return mfem_variable_params;
+}
+
+void
+MFEMProblem::displaceMesh()
+{
+  // Displace mesh
+  if (mesh().shouldDisplace())
+  {
+    mesh().displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
+    // TODO: update FESpaces GridFunctions etc for transient solves
+  }
+}
+
+std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+MFEMProblem::getMeshDisplacementGridFunction()
+{
+  // If C++23 transform were available this would be easier
+  auto const displacement_variable = mesh().getMeshDisplacementVariable();
+  if (displacement_variable)
+  {
+    return *_problem_data._gridfunctions.Get(displacement_variable.value());
+  }
+  else
+  {
+    return std::nullopt;
+  }
 }
 
 std::vector<VariableName>
