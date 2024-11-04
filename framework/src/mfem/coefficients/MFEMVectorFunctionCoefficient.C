@@ -1,4 +1,5 @@
 #include "MFEMVectorFunctionCoefficient.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("PlatypusApp", MFEMVectorFunctionCoefficient);
 
@@ -12,16 +13,8 @@ MFEMVectorFunctionCoefficient::validParams()
 
 MFEMVectorFunctionCoefficient::MFEMVectorFunctionCoefficient(const InputParameters & parameters)
   : MFEMVectorCoefficient(parameters),
-    _func(getFunction("function")),
-    _vector_coefficient(std::make_shared<mfem::VectorFunctionCoefficient>(
-        3,
-        [&](const mfem::Vector & p, double t, mfem::Vector & u)
-        {
-          libMesh::RealVectorValue vector_value = _func.vectorValue(t, PointFromMFEMVector(p));
-          u[0] = vector_value(0);
-          u[1] = vector_value(1);
-          u[2] = vector_value(2);
-        }))
+    _vector_coefficient(
+        getMFEMProblem().getVectorFunctionCoefficient(getParam<FunctionName>("function")))
 {
 }
 
