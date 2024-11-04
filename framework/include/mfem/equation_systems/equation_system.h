@@ -3,6 +3,7 @@
 #include "boundary_conditions.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
+#include "ScaleIntegrator.h"
 
 namespace platypus
 {

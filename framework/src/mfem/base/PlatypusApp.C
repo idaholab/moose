@@ -1,3 +1,4 @@
+#include "ActionFactory.h"
 #include "PlatypusApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -53,6 +54,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("add_aux_variable", "add_mfem_fespaces");
   addTaskDependency("add_elemental_field_variable", "add_mfem_fespaces");
   addTaskDependency("add_kernel", "add_mfem_fespaces");
+
+  // set mesh FE space
+  registerTask("set_mesh_fe_space", true);
+  addTaskDependency("set_mesh_fe_space", "add_variable");
+  addTaskDependency("set_mesh_fe_space", "init_mesh");
 
   // add preconditioning.
   registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
