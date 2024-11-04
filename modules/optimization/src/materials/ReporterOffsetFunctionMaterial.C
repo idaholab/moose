@@ -9,8 +9,8 @@
 
 #include "ReporterOffsetFunctionMaterial.h"
 
-registerMooseObject("MooseApp", ReporterOffsetFunctionMaterial);
-registerMooseObject("MooseApp", ADReporterOffsetFunctionMaterial);
+registerMooseObject("OptimizationApp", ReporterOffsetFunctionMaterial);
+registerMooseObject("OptimizationApp", ADReporterOffsetFunctionMaterial);
 
 template <bool is_ad>
 InputParameters
@@ -32,6 +32,7 @@ ReporterOffsetFunctionMaterialTempl<is_ad>::validParams()
   return params;
 }
 
+template <bool is_ad>
 ReporterOffsetFunctionMaterialTempl<is_ad>::ReporterOffsetFunctionMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
@@ -57,6 +58,7 @@ ReporterOffsetFunctionMaterialTempl<is_ad>::ReporterOffsetFunctionMaterialTempl(
                                      isParamValid("z_coord_name")))
     paramError("Either supply x,y, and z reporters or a point reporter.");
 }
+
 template <bool is_ad>
 void
 ReporterOffsetFunctionMaterialTempl<is_ad>::computeQpProperties()
@@ -75,6 +77,7 @@ ReporterOffsetFunctionMaterialTempl<is_ad>::computeQpProperties()
     _material[_qp] += computeOffsetFunction(offset);
   }
 }
+
 template <bool is_ad>
 Real
 ReporterOffsetFunctionMaterialTempl<is_ad>::computeOffsetFunction(const Point & point_offset)

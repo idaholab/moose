@@ -16,7 +16,7 @@ This creates a material that is the sum of a function shifted by a set of points
 
 In this example, `ReporterOffsetFunctionMaterial` is used to define the two materials shown in [offset]. The value at a point is the sum of all the shifted functions.  In this example, the gaussian and constant circle functions are defined at (x,y,z)=(0,0,0), shown by the source in the lower left corner of each domain.  This function is then shifted according to the offset vectors given by the Reporter.
 
-!listing test/tests/materials/reporter_offset/reporter_offset_mat.i block=Materials/multiple_sources
+!listing test/tests/optimizationreporter/reporter_offset/reporter_offset_mat.i block=Materials/multiple_sources
 
 !syntax parameters /Materials/ReporterOffsetFunctionMaterial
 

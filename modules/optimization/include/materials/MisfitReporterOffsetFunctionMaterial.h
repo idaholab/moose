@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ReporterOffsetFunctionMaterial.h"
-#include "Function.h"
 
 template <bool>
 class MisfitReporterOffsetFunctionMaterialTempl;
