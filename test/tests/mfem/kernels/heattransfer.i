@@ -26,11 +26,11 @@
 [Functions]
   [reservoir_far_temperature]
     type = ParsedFunction
-    expression = 5.0
+    expression = 0.5
   []
   [heat_transfer_coefficient]
     type = ParsedFunction
-    expression = 0.5
+    expression = 5.0
   []
 []
 
