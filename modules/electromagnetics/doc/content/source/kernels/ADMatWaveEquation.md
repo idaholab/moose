@@ -5,7 +5,7 @@
 ## Overview
 
 !style halign=left
-The ADMatWaveEquation object implements a displacement current source term to the electric field Helmholtz wave equation. The term is define as:
+The ADMatWaveEquation object implements a displacement current source term to the electric field Helmholtz wave equation. The term is defined as:
 
 \begin{equation}
   -\omega^{2} \; \mu \; \varepsilon \; \vec{E}
