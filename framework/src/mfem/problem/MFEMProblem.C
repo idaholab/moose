@@ -1,5 +1,8 @@
 #include "MFEMProblem.h"
 
+#include <vector>
+#include <algorithm>
+
 registerMooseObject("PlatypusApp", MFEMProblem);
 
 InputParameters
@@ -15,14 +18,13 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  getProblemData()._coefficients.AddGlobalCoefficientsFromSubdomains();
   addMFEMNonlinearSolver();
 }
 
 void
 MFEMProblem::setMesh()
 {
-  auto pmesh = std::make_shared<mfem::ParMesh>(mesh().getMFEMParMesh());
+  auto pmesh = mesh().getMFEMParMeshPtr();
   getProblemData()._pmesh = pmesh;
   getProblemData()._comm = pmesh->GetComm();
   MPI_Comm_size(pmesh->GetComm(), &(getProblemData()._num_procs));
@@ -113,8 +115,6 @@ MFEMProblem::addCoefficient(const std::string & user_object_name,
                             InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  MFEMCoefficient * mfem_coef(&getUserObject<MFEMCoefficient>(name));
-  getProblemData()._coefficients._scalars.Register(name, mfem_coef->getCoefficient());
 }
 
 void
@@ -123,8 +123,6 @@ MFEMProblem::addVectorCoefficient(const std::string & user_object_name,
                                   InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  MFEMVectorCoefficient * mfem_vec_coef(&getUserObject<MFEMVectorCoefficient>(name));
-  getProblemData()._coefficients._vectors.Register(name, mfem_vec_coef->getVectorCoefficient());
 }
 
 void
@@ -217,6 +215,89 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   }
 }
 
+libMesh::Point
+pointFromMFEMVector(const mfem::Vector & vec)
+{
+  return libMesh::Point(vec.Elem(0), vec.Elem(1), vec.Elem(2));
+}
+
+const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction",
+                                               "BicubicSplineFunction",
+                                               "CoarsenedPiecewiseLinear",
+                                               "CompositeFunction",
+                                               "ConstantFunction",
+                                               "ImageFunction",
+                                               "ParsedFunction",
+                                               "ParsedGradFunction",
+                                               "PeriodicFunction",
+                                               "PiecewiseBilinear",
+                                               "PiecewiseConstant",
+                                               "PiecewiseConstantFromCSV",
+                                               "PiecewiseLinear",
+                                               "PiecewiseLinearFromVectorPostprocessor",
+                                               "PiecewiseMultiInterpolation",
+                                               "PiecewiseMulticonstant",
+                                               "SolutionFunction",
+                                               "SplineFunction",
+                                               "FunctionSeries",
+                                               "LevelSetOlssonBubble",
+                                               "LevelSetOlssonPlane",
+                                               "NearestReporterCoordinatesFunction",
+                                               "ParameterMeshFunction",
+                                               "ParsedOptimizationFunction",
+                                               "FourierNoise",
+                                               "MovingPlanarFront",
+                                               "MultiControlDrumFunction",
+                                               "Grad2ParsedFunction",
+                                               "GradParsedFunction",
+                                               "RichardsExcavGeom",
+                                               "ScaledAbsDifferenceDRLRewardFunction",
+                                               "CircularAreaHydraulicDiameterFunction",
+                                               "CosineHumpFunction",
+                                               "CosineTransitionFunction",
+                                               "CubicTransitionFunction",
+                                               "GeneralizedCircumference",
+                                               "PiecewiseFunction",
+                                               "TimeRampFunction"},
+                               VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"};
+
+void
+MFEMProblem::addFunction(const std::string & type,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  ExternalProblem::addFunction(type, name, parameters);
+  auto & func = getFunction(name);
+  // FIXME: Do we want to have optimised versions for when functions
+  // are only of space or only of time.
+  if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
+  {
+    // FIXME: Ideally this would support arbitrary spatial dimensions
+    _scalar_functions[name] = makeScalarCoefficient<mfem::FunctionCoefficient>(
+        [&func](const mfem::Vector & p, double t) -> mfem::real_t
+        { return func.value(t, pointFromMFEMVector(p)); });
+  }
+  else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
+  {
+    // FIXME: Ideally this would support arbitrary spatial and vector dimensions
+    _vector_functions[name] = makeVectorCoefficient<mfem::VectorFunctionCoefficient>(
+        3,
+        [&func](const mfem::Vector & p, double t, mfem::Vector & u)
+        {
+          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+          u[0] = vector_value(0);
+          u[1] = vector_value(1);
+          u[2] = vector_value(2);
+        });
+  }
+  else
+  {
+    mooseWarning("Could not identify whether function ",
+                 type,
+                 " is scalar or vector; no MFEM coefficient object created.");
+  }
+}
+
 InputParameters
 MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 {
@@ -273,10 +354,62 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
   return mfem_variable_params;
 }
 
+void
+MFEMProblem::displaceMesh()
+{
+  // Displace mesh
+  if (mesh().shouldDisplace())
+  {
+    mesh().displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
+    // TODO: update FESpaces GridFunctions etc for transient solves
+  }
+}
+
+std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+MFEMProblem::getMeshDisplacementGridFunction()
+{
+  // If C++23 transform were available this would be easier
+  auto const displacement_variable = mesh().getMeshDisplacementVariable();
+  if (displacement_variable)
+  {
+    return *_problem_data._gridfunctions.Get(displacement_variable.value());
+  }
+  else
+  {
+    return std::nullopt;
+  }
+}
+
 std::vector<VariableName>
 MFEMProblem::getAuxVariableNames()
 {
   return systemBaseAuxiliary().getVariableNames();
+}
+
+std::shared_ptr<mfem::FunctionCoefficient>
+MFEMProblem::getScalarFunctionCoefficient(const std::string & name)
+{
+  try
+  {
+    return this->_scalar_functions.at(name);
+  }
+  catch (std::out_of_range)
+  {
+    mooseError("No scalar function with name '" + name + "'.");
+  }
+}
+
+std::shared_ptr<mfem::VectorFunctionCoefficient>
+MFEMProblem::getVectorFunctionCoefficient(const std::string & name)
+{
+  try
+  {
+    return this->_vector_functions.at(name);
+  }
+  catch (std::out_of_range)
+  {
+    mooseError("No vector function with name '" + name + "'.");
+  }
 }
 
 MFEMMesh &

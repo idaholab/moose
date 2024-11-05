@@ -50,7 +50,7 @@
 
 [BCs]
   [tangential_E_bdr]
-    type = MFEMVectorDirichletBC
+    type = MFEMVectorTangentialDirichletBC
     variable = e_field
     boundary = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24'
     vector_coefficient = TangentialECoefficient
@@ -61,10 +61,6 @@
   [TangentialECoefficient]
     type = MFEMVectorFunctionCoefficient
     function = exact_e_field
-  []
-  [VolumetricSourceCoefficient]
-    type = MFEMVectorFunctionCoefficient
-    function = forcing_field
   []
 []
 
@@ -91,7 +87,7 @@
   [source]
     type = MFEMVectorFEDomainLFKernel
     variable = e_field
-    vector_coefficient = VolumetricSourceCoefficient
+    function = forcing_field
   []    
 []
 
