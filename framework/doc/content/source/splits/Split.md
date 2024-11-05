@@ -8,7 +8,7 @@ This syntax offers shorthands for some of the parameters that may be passed to P
 such as for splitting between variables, blocks or sidesets.
 
 More information about field split preconditioning may be found in the
-[PETSc manual]([here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
+[PETSc manual](https://petsc.org/release/manualpages/PC/PCFIELDSPLIT).
 
 ## Example input syntax
 
