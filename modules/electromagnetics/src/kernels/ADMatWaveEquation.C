@@ -54,7 +54,7 @@ ADMatWaveEquation::ADMatWaveEquation(const InputParameters & parameters)
 ADReal
 ADMatWaveEquation::computeQpResidual()
 {
-  // NOTE: In the future, need to add an AD capability to std::complex
+  // TODO: In the future, need to add an AD capability to std::complex
   if (_component == EM::REAL)
     return -_test[_i][_qp] * (_coef_real[_qp] * _E_real[_qp] - _coef_imag[_qp] * _E_imag[_qp]);
   else

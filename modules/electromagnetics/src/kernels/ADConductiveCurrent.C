@@ -65,7 +65,7 @@ ADConductiveCurrent::ADConductiveCurrent(const InputParameters & parameters)
 ADReal
 ADConductiveCurrent::computeQpResidual()
 {
-  // NOTE: In the future, need to add an AD capability to std::complex
+  // TODO: In the future, need to add an AD capability to std::complex
   ADReal mu_omega_real = _mu_real[_qp] * _omega_real[_qp] - _mu_imag[_qp] * _omega_imag[_qp];
   ADReal mu_omega_imag = _mu_real[_qp] * _omega_imag[_qp] + _mu_imag[_qp] * _omega_real[_qp];
 

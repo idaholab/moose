@@ -12,8 +12,9 @@
 #include "AuxKernel.h"
 
 /**
- *  Computes the heating due to the electic field in the form of
+ *  Computes the heating due to the electric field (E) in the form of
  *  0.5 Re( conductivity * E * E^* )
+ *  where E^* is the complex conjugate of the electric field.
  */
 class AuxComplexHeating : public AuxKernel
 {
@@ -26,7 +27,7 @@ protected:
   virtual Real computeValue() override;
 
 private:
-  /// Vector variable of the real component of the E-field
+  /// Vector variable of the real component of the electric field
   const VectorVariableValue & _E_real;
 
   /// Vector variable of the imaginary component of the E-field

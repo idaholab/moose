@@ -11,7 +11,7 @@
     type = CSVDiff
     command = 'scalar_azim_magnetic_time_deriv_convergence.py'
     csvdiff = 'scalar_azim_magnetic_time_deriv_convergence.csv'
-    requirement = 'The system shall include a tool for writing spatial convergence data for the time derivative of the azimuthal component of the magnetic field based on a supplied electric field scalar components.'
+    requirement = 'The system shall be able to perform a convergence analysis for the time derivative of the azimuthal component of the magnetic field based on a supplied electric field scalar components.'
     design = 'AzimuthMagneticTimeDerivScalarRZ.md'
     issues = '#28758'
     heavy = True

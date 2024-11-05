@@ -18,7 +18,7 @@ where
 
 Note that $\vec{J}$ is provided via vector-valued functions, using the
 [!param](/Kernels/VectorCurrentSource/source_real) and [!param](/Kernels/VectorCurrentSource/source_imag)
-parameters for the real and imaginary components respectively.
+parameters for the real and imaginary components, respectively.
 
 ## Example Input File Syntax
 

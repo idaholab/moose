@@ -5,7 +5,7 @@
 ## Overview
 
 !style halign=left
-The ComplexHeating object implements a heating term imparted to the medium based on the conduction current. The term is define as:
+The ComplexHeating object implements a heating term imparted to the medium based on the conduction current. The term is defined as:
 
 \begin{equation}
   -0.5 * Re \left(\sigma \; \vec{E} \cdot \vec{E}^{*} \right) * \text{Scaling}

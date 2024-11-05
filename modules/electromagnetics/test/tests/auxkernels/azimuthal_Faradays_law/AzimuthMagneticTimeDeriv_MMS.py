@@ -3,8 +3,8 @@
 
 # NOTE: For Cartesian to Cylindrical:
 # For MOOSE's 2D Cylindrical, it transforms (x,y) -> (r,z),
-# But MOOSE's mms.evaluate uses sympy, which assumes 3D and transforms (x,y,z) -> (r,theta,z).
-# For this reason, the 'z' coordinate in this file are inputted as the 'y' coordinate
+# But MOOSE's mms.evaluate Python utility uses sympy, which assumes 3D and transforms (x,y,z) -> (r,theta,z).
+# For this reason, the 'z' coordinate in this file is input as the 'y' coordinate
 # for the 2D cylindrical test file...
 
 import mms

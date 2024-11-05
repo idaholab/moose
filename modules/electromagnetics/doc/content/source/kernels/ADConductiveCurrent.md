@@ -5,7 +5,7 @@
 ## Overview
 
 !style halign=left
-The ADConductiveCurrent object implements a conduction current source term to the electric field Helmholtz wave equation. The term is define as:
+The ADConductiveCurrent object implements a conduction current source term to the electric field Helmholtz wave equation. The term is defined as:
 
 \begin{equation}
   j \; \mu \; \omega \; \sigma \; \vec{E}
