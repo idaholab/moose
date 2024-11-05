@@ -124,9 +124,8 @@ XYDelaunayGenerator::validParams()
   params.addParamNamesToGroup(
       "use_auto_area_func auto_area_func_default_size auto_area_func_default_size_dist",
       "Automatic triangle meshing area control");
-  params.addParamNamesToGroup(
-      "interior_points interior_point_files",
-      "Explicitly specify the interior points to be included in the mesh generation process.");
+  params.addParamNamesToGroup("interior_points interior_point_files",
+                              "Mandatory mesh interior nodes");
 
   return params;
 }
