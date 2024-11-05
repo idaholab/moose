@@ -395,7 +395,7 @@ private:
   /// this data member to avoid constant dynamic heap allocations
   std::vector<Real> _absolute_residuals;
 
-  friend void NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> &, bool);
+  friend void NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> &, bool);
 };
 
 #define usingTaggingInterfaceMembers                                                               \

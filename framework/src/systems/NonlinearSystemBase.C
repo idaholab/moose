@@ -2274,8 +2274,13 @@ NonlinearSystemBase::addImplicitGeometricCouplingEntries(GeometricSearchData & g
 }
 
 void
-NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
+NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_to_view, bool displaced)
 {
+  if (!hasMatrix(systemMatrixTag()))
+    mooseError("A system matrix is required");
+
+  auto & jacobian = getMatrix(systemMatrixTag());
+
   if (!_fe_problem.errorOnJacobianNonzeroReallocation())
     LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                                   MAT_NEW_NONZERO_ALLOCATION_ERR,
@@ -2343,7 +2348,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
                   nfc->primaryBoundary() != primary_boundary)
                 continue;
 
-              nfc->_jacobian = &jacobian;
+              nfc->_jacobian = &jacobian_to_view;
 
               if (nfc->shouldApply())
               {
@@ -2583,7 +2588,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
               {
                 constraints_applied = true;
 
-                nec->_jacobian = &jacobian;
+                nec->_jacobian = &jacobian_to_view;
                 nec->prepareShapes(nec->variable().number());
                 nec->prepareNeighborShapes(nec->variable().number());
 
@@ -2954,29 +2959,29 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     {
       auto & system_matrix = getMatrix(systemMatrixTag());
 #if PETSC_RELEASE_GREATER_EQUALS(3, 23, 0)
-      SparseMatrix<Number> * jac_ptr;
+      SparseMatrix<Number> * view_jac_ptr;
       std::unique_ptr<SparseMatrix<Number>> hash_copy;
       if (system_matrix.use_hash_table())
       {
         hash_copy = libMesh::cast_ref<PetscMatrix<Number> &>(system_matrix).copy_from_hash();
-        jac_ptr = hash_copy.get();
+        view_jac_ptr = hash_copy.get();
       }
       else
-        jac_ptr = &system_matrix;
-      auto & jacobian = *jac_ptr;
+        view_jac_ptr = &system_matrix;
+      auto & jacobian_to_view = *view_jac_ptr;
 #else
-      auto & jacobian = system_matrix;
+      auto & jacobian_to_view = system_matrix;
 #endif
 
       // Nodal Constraints
       enforceNodalConstraintsJacobian();
 
       // Undisplaced Constraints
-      constraintJacobians(jacobian, false);
+      constraintJacobians(jacobian_to_view, false);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintJacobians(jacobian, true);
+        constraintJacobians(jacobian_to_view, true);
     }
   }
   PARALLEL_CATCH;

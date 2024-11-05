@@ -137,7 +137,7 @@ public:
 protected:
   // TODO: Make this protected or add an accessor
   // Do the same for all the other public members
-  SparseMatrix<Number> * _jacobian;
+  const SparseMatrix<Number> * _jacobian;
 
   /**
    * Compute the value the secondary node should have at the beginning of a timestep.
