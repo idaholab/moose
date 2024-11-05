@@ -16,7 +16,7 @@ Consider the system of algebraic equations:
 \mathbf{r}(\mathbf{u}) = \mathbf{0} \,.
 
 This class reports convergence of the solution to this system if
-any of the following conditions are true:
++any+ of the following conditions are true:
 
 !equation
 \|\mathbf{r}\|_2 < \tau_\text{abs} \,,
@@ -27,7 +27,7 @@ any of the following conditions are true:
 !equation
 \frac{\|\mathbf{\delta u}\|_2}{\|\mathbf{u}\|_2} < \tau_{\delta u,\text{rel}} \,.
 
-This class reports divergence if any of the following conditions are true:
+This class reports divergence if +any+ of the following conditions are true:
 
 !equation
 \|\mathbf{r}\|_2 = \text{NaN} \,,
@@ -63,7 +63,7 @@ where
 - $n_\text{evals}$ is the number of residual evaluations.
 - $n_\text{evals,max}$ is the maximum number of residual evaluations, provided by
   [!param](/Convergence/DefaultNonlinearConvergence/nl_max_funcs).
-- $n_\text{ping}$ is the number of ping-pong iterations.
+- $n_\text{ping}$ is the number of ping-pong iterations (consecutive iterations in which the residual grows then reduces on every other iteration).
 - $n_\text{ping,max}$ is the maximum number of ping-pong iterations, provided by
   [!param](/Convergence/DefaultNonlinearConvergence/n_max_nonlinear_pingpong).
 
