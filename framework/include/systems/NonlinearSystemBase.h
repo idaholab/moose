@@ -765,7 +765,7 @@ protected:
    * Enforce nodal constraints
    */
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
-  void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
+  void enforceNodalConstraintsJacobian();
 
   /**
    * Do mortar constraint residual/jacobian computations

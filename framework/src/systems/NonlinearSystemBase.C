@@ -1092,8 +1092,12 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
 }
 
 void
-NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
+NonlinearSystemBase::enforceNodalConstraintsJacobian()
 {
+  if (!hasMatrix(systemMatrixTag()))
+    mooseError(" A system matrix is required");
+
+  auto & jacobian = getMatrix(systemMatrixTag());
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
 
   if (_constraints.hasActiveNodalConstraints())
@@ -2965,7 +2969,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 #endif
 
       // Nodal Constraints
-      enforceNodalConstraintsJacobian(jacobian);
+      enforceNodalConstraintsJacobian();
 
       // Undisplaced Constraints
       constraintJacobians(jacobian, false);
