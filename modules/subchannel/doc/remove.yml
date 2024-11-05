@@ -2,9 +2,8 @@
 - /QuadSubChannelMesh
 - /TriInterWrapperMesh
 - /TriSubChannelMesh
-- /UserObjects
-- /Modules/FluidProperties
-- /Variables
-- /AuxVariables
-- /Modules
+- /UserObjects/PinSurfaceTemperature
+- /UserObjects/PlanarMean
+- /UserObjects/SubChannelDelta
+- /UserObjects/SubChannelPointValue
 - /SubChannel
