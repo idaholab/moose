@@ -15,9 +15,8 @@ MFEMVectorNormalIntegratedBC::validParams()
 MFEMVectorNormalIntegratedBC::MFEMVectorNormalIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _vec_value(getParam<std::vector<Real>>("values")),
-    _vec_coef(
-        getMFEMProblem().getProblemData()._vector_manager.make<mfem::VectorConstantCoefficient>(
-            mfem::Vector(_vec_value.data(), _vec_value.size())))
+    _vec_coef(getMFEMProblem().makeVectorCoefficient<mfem::VectorConstantCoefficient>(
+        mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }
 
