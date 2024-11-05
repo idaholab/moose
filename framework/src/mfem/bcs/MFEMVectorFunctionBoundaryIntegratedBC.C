@@ -15,7 +15,6 @@ MFEMVectorFunctionBoundaryIntegratedBC::validParams()
 MFEMVectorFunctionBoundaryIntegratedBC::MFEMVectorFunctionBoundaryIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_value(getParam<std::vector<Real>>("values")),
     _vec_coef(getMFEMProblem().getVectorFunctionCoefficient(getParam<FunctionName>("function")))
 {
 }
