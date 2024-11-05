@@ -15,5 +15,5 @@ public:
 
 protected:
   mfem::ConduitDataCollection _conduit_dc;
-  std::string _protocol;
+  MooseEnum _protocol;
 };
