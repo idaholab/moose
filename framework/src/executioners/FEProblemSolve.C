@@ -208,25 +208,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   es.parameters.set<unsigned int>("linear solver maximum iterations") =
       getParam<unsigned int>("l_max_its");
 
-  es.parameters.set<unsigned int>("nonlinear solver maximum iterations") =
-      getParam<unsigned int>("nl_max_its");
-
-  es.parameters.set<unsigned int>("nonlinear solver maximum function evaluations") =
-      getParam<unsigned int>("nl_max_funcs");
-
-  es.parameters.set<Real>("nonlinear solver absolute residual tolerance") =
-      getParam<Real>("nl_abs_tol");
-
-  es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
-      getParam<Real>("nl_rel_tol");
-
-  es.parameters.set<Real>("nonlinear solver divergence tolerance") = getParam<Real>("nl_div_tol");
-
   es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
       getParam<Real>("nl_abs_step_tol");
-
-  es.parameters.set<Real>("nonlinear solver relative step tolerance") =
-      getParam<Real>("nl_rel_step_tol");
 
   es.parameters.set<bool>("reuse preconditioner") = getParam<bool>("reuse_preconditioner");
 
