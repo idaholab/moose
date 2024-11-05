@@ -89,8 +89,8 @@ class LocalListingCommand(command.CommandComponent):
 class FileListingCommand(LocalListingCommand):
     COMMAND = 'listing'
     SUBCOMMAND = '*'
-    DEFAULT_BEFORE_LINK_PREFIX = 'Before'
-    DEFAULT_AFTER_LINK_PREFIX = 'After'
+    DEFAULT_BEFORE_LINK_PREFIX = '-'
+    DEFAULT_AFTER_LINK_PREFIX = '+'
 
     @staticmethod
     def defaultSettings():
@@ -151,9 +151,9 @@ class FileListingCommand(LocalListingCommand):
         if settings['link']:
             if settings['diff']:
                 modal.ModalSourceLink(flt, src=before_filename, language=link_lang,
-                                      link_prefix=settings['before_link_prefix'] + ':')
+                                      link_prefix=settings['before_link_prefix'])
                 html.Tag(flt, 'link_break', string='<br>')
-            link_prefix = (settings['after_link_prefix'] + ':') if settings['diff'] else None
+            link_prefix = (settings['after_link_prefix']) if settings['diff'] else None
             modal.ModalSourceLink(flt, src=filename, language=link_lang,
                                   link_prefix=link_prefix)
 

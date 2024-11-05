@@ -128,6 +128,6 @@ can be modified using the "before_link_prefix" and "after_link_prefix" settings.
 !devel! example id=example-listing-diff-prefixed caption=Example listing using the "diff" setting with overridden link prefixes.
 !listing framework/src/kernels/Diffusion.C
          diff=framework/src/kernels/ADDiffusion.C
-         before_link_prefix=Diffusion without AD
-         after_link_prefix=Diffusion with AD
+         before_link_prefix=Diffusion without AD:
+         after_link_prefix=Diffusion with AD:
 !devel-end!

@@ -446,8 +446,8 @@ class TestFileListingDiff(MooseDocsTestCase):
     DIFF = listing.FileListingCommand.codeDiff(CODE, BEFORE_CODE)
     TEXT = f'!listing {FILE} diff={DIFF_FILE}'
 
-    BEFORE_PREFIX = 'Foo'
-    AFTER_PREFIX = 'Bar'
+    BEFORE_PREFIX = 'Foo:'
+    AFTER_PREFIX = 'Bar:'
     PREFIXED_TEST = f'{TEXT} before_link_prefix={BEFORE_PREFIX} after_link_prefix={AFTER_PREFIX}'
 
     def testAST(self):
@@ -456,15 +456,15 @@ class TestFileListingDiff(MooseDocsTestCase):
         self.assertToken(ast(0), 'Code', content=self.DIFF, style=CODE_STYLE,
                          language='diff-cpp diff-highlight')
         self.assertToken(ast(1), 'ModalSourceLink', size=0)
-        self.assertEqual(ast(1)['link_prefix'], 'Before:')
+        self.assertEqual(ast(1)['link_prefix'], '-')
         self.assertToken(ast(2), 'link_break')
         self.assertToken(ast(3), 'ModalSourceLink', size=0)
-        self.assertEqual(ast(3)['link_prefix'], 'After:')
+        self.assertEqual(ast(3)['link_prefix'], '+')
 
         ast = self.tokenize(self.PREFIXED_TEST)
         self.assertSize(ast, 4)
-        self.assertEqual(ast(1)['link_prefix'], f'{self.BEFORE_PREFIX}:')
-        self.assertEqual(ast(3)['link_prefix'], f'{self.AFTER_PREFIX}:')
+        self.assertEqual(ast(1)['link_prefix'], f'{self.BEFORE_PREFIX}')
+        self.assertEqual(ast(3)['link_prefix'], f'{self.AFTER_PREFIX}')
 
     def testHTML(self):
         _, res = self.execute(self.TEXT)
@@ -474,16 +474,16 @@ class TestFileListingDiff(MooseDocsTestCase):
         self.assertHTMLString(res(0,0)(0), content=self.DIFF)
         self.assertHTMLTag(res(1), 'span', size=1, class_='moose-source-filename')
         self.assertHTMLString(res(1,0),
-                              content=f'({listing.FileListingCommand.DEFAULT_BEFORE_LINK_PREFIX}: {self.DIFF_FILE})')
+                              content=f'({listing.FileListingCommand.DEFAULT_BEFORE_LINK_PREFIX} {self.DIFF_FILE})')
         self.assertHTMLString(res(2), '<br>')
         self.assertHTMLTag(res(3), 'span', size=1, class_='moose-source-filename')
         self.assertHTMLString(res(3,0),
-                              content=f'({listing.FileListingCommand.DEFAULT_AFTER_LINK_PREFIX}: {self.FILE})')
+                              content=f'({listing.FileListingCommand.DEFAULT_AFTER_LINK_PREFIX} {self.FILE})')
 
         _, res = self.execute(self.PREFIXED_TEST)
         self.assertHTMLTag(res, 'body', size=4)
-        self.assertHTMLString(res(1,0), content=f'({self.BEFORE_PREFIX}: {self.DIFF_FILE})')
-        self.assertHTMLString(res(3,0), content=f'({self.AFTER_PREFIX}: {self.FILE})')
+        self.assertHTMLString(res(1,0), content=f'({self.BEFORE_PREFIX} {self.DIFF_FILE})')
+        self.assertHTMLString(res(3,0), content=f'({self.AFTER_PREFIX} {self.FILE})')
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
@@ -493,18 +493,18 @@ class TestFileListingDiff(MooseDocsTestCase):
         self.assertHTMLString(res(0,0)(0), content=self.DIFF)
         self.assertHTMLTag(res(1), 'a', size=1, class_='moose-source-filename tooltipped modal-trigger')
         self.assertHTMLString(res(1,0),
-                              content=f'({listing.FileListingCommand.DEFAULT_BEFORE_LINK_PREFIX}: {self.DIFF_FILE})')
+                              content=f'({listing.FileListingCommand.DEFAULT_BEFORE_LINK_PREFIX} {self.DIFF_FILE})')
         self.assertHTMLString(res(2), '<br>')
         self.assertHTMLTag(res(3), 'a', size=1, class_='moose-source-filename tooltipped modal-trigger')
         self.assertHTMLString(res(3,0),
-                              content=f'({listing.FileListingCommand.DEFAULT_AFTER_LINK_PREFIX}: {self.FILE})')
+                              content=f'({listing.FileListingCommand.DEFAULT_AFTER_LINK_PREFIX} {self.FILE})')
         self.assertHTMLTag(res(4), 'div', class_='moose-modal modal')
         self.assertHTMLTag(res(5), 'div', class_='moose-modal modal')
 
         _, res = self.execute(self.PREFIXED_TEST, renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=6, class_='moose-content')
-        self.assertHTMLString(res(1,0), content=f'({self.BEFORE_PREFIX}: {self.DIFF_FILE})')
-        self.assertHTMLString(res(3,0), content=f'({self.AFTER_PREFIX}: {self.FILE})')
+        self.assertHTMLString(res(1,0), content=f'({self.BEFORE_PREFIX} {self.DIFF_FILE})')
+        self.assertHTMLString(res(3,0), content=f'({self.AFTER_PREFIX} {self.FILE})')
 
     def testCodeDiff(self):
         CODE_split = self.CODE.splitlines()
