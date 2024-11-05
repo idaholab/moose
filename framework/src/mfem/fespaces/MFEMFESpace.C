@@ -11,7 +11,7 @@ MFEMFESpace::validParams()
 
   params.addParam<int>("vdim", 1, "Dimension of degrees of freedom");
 
-  MooseEnum ordering("NODES VDIM", "NODES", false);
+  MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>("ordering", ordering, "Type of ordering of the vector dofs.");
 
   params += MFEMFECollection::validParams();

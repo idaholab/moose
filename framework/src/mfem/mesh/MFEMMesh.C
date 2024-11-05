@@ -25,6 +25,7 @@ MFEMMesh::validParams()
       "Number of serial refinements to perform on the mesh. Equivalent to serial_refine");
   params.addParam<int>(
       "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
+  params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -59,6 +60,20 @@ MFEMMesh::buildMesh()
 
   // Perform parallel refinements
   uniformRefinement(*_mfem_par_mesh, getParam<int>("parallel_refine"));
+
+  if (isParamSetByUser("displacement"))
+  {
+    _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+  }
+}
+
+void
+MFEMMesh::displace(mfem::GridFunction const & displacement)
+{
+  _mfem_par_mesh->EnsureNodes();
+  mfem::GridFunction * nodes = _mfem_par_mesh->GetNodes();
+
+  *nodes += displacement;
 }
 
 void

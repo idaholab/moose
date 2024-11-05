@@ -34,10 +34,10 @@ MFEMGenericConstantVectorMaterial::MFEMGenericConstantVectorMaterial(
   for (unsigned int i = 0; i < _num_props; i++)
   {
     const int j = i * LIBMESH_DIM;
-    _properties.declareVector(
+    _properties.declareVector<mfem::VectorConstantCoefficient>(
         _prop_names[i],
-        mfem::Vector({_prop_values[j], _prop_values[j + 1], _prop_values[j + 2]}),
-        subdomainsToStrings(_block_ids));
+        subdomainsToStrings(_block_ids),
+        mfem::Vector({_prop_values[j], _prop_values[j + 1], _prop_values[j + 2]}));
   }
 }
 

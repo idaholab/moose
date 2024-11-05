@@ -1,6 +1,7 @@
 #include "MFEMObjectUnitTest.h"
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMDiffusionKernel.h"
+#include "MFEMLinearElasticityKernel.h"
 #include "MFEMMixedVectorGradientKernel.h"
 #include "MFEMVectorFEDomainLFKernel.h"
 #include "MFEMVectorFEMassKernel.h"
@@ -61,6 +62,31 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
 }
 
 /**
+ * Test MFEMLinearElasticityKernel creates an mfem::ElasticityIntegrator successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMLinearElasticityKernel)
+{
+  // Build required kernel inputs
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  coef_params.set<std::vector<std::string>>("prop_names") = {"lambda", "mu"};
+  coef_params.set<std::vector<Real>>("prop_values") = {2.0, 3.0};
+  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMLinearElasticityKernel");
+  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<std::string>("lambda") = "lambda";
+  kernel_params.set<std::string>("mu") = "mu";
+  MFEMLinearElasticityKernel & kernel =
+      addObject<MFEMLinearElasticityKernel>("MFEMLinearElasticityKernel", "kernel1", kernel_params);
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator = dynamic_cast<mfem::ElasticityIntegrator *>(kernel.createIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
  * Test MFEMMixedVectorGradientKernel creates an mfem::MixedVectorGradientIntegrator successfully.
  */
 TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
@@ -90,17 +116,17 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
 TEST_F(MFEMKernelTest, MFEMVectorFEDomainLFKernel)
 {
   // Build required kernel inputs
-  InputParameters vec_coef_params = _factory.getValidParams("MFEMVectorConstantCoefficient");
-  vec_coef_params.set<double>("value_x") = 1.0;
-  vec_coef_params.set<double>("value_y") = 2.0;
-  vec_coef_params.set<double>("value_z") = 3.0;
-  _mfem_problem->addVectorCoefficient(
-      "MFEMVectorConstantCoefficient", "vec_coef1", vec_coef_params);
+  InputParameters func_params1 = _factory.getValidParams("ParsedVectorFunction");
+  func_params1.set<std::string>("expression_x") = "1.";
+  func_params1.set<std::string>("expression_y") = "2.";
+  func_params1.set<std::string>("expression_z") = "3.";
+  _mfem_problem->addFunction("ParsedVectorFunction", "vec_coef1", func_params1);
+  _mfem_problem->getFunction("vec_coef1").initialSetup();
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEDomainLFKernel");
   kernel_params.set<std::string>("variable") = "test_variable_name";
-  kernel_params.set<std::string>("vector_coefficient") = "vec_coef1";
+  kernel_params.set<FunctionName>("function") = "vec_coef1";
   MFEMVectorFEDomainLFKernel & kernel =
       addObject<MFEMVectorFEDomainLFKernel>("MFEMVectorFEDomainLFKernel", "kernel1", kernel_params);
 

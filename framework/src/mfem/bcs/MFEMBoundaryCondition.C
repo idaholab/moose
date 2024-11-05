@@ -1,4 +1,5 @@
 #include "MFEMBoundaryCondition.h"
+#include "mesh_extras.hpp"
 
 InputParameters
 MFEMBoundaryCondition::validParams()
