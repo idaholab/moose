@@ -12,8 +12,8 @@ MFEMScalarDirichletBC::validParams()
 
 MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef(getMFEMProblem().getProblemData()._scalar_manager.make<mfem::ConstantCoefficient>(
-        getParam<Real>("value")))
+    _coef(
+        getMFEMProblem().makeScalarCoefficient<mfem::ConstantCoefficient>(getParam<Real>("value")))
 {
 }
 
