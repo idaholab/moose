@@ -13,7 +13,7 @@ gets projected on.
 
 ## Example Input File Syntax
 
-!listing /examples/coupling/BISON_SC/detailedMesh.i start=GlobalParams end=AuxVariables language=cpp
+!listing /examples/coupling/BISON_SCM/detailedMesh.i start=GlobalParams end=AuxVariables language=cpp
 
 !syntax parameters /Mesh/DetailedQuadSubChannelMeshGenerator
 

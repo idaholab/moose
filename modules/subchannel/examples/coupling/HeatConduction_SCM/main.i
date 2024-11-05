@@ -236,7 +236,8 @@ heated_length = 1.0 # m
     type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     variable = q_prime
-    source_variable = q_prime
+    source_variable = q_prime_nodal
+    # num_nearest_points = 2
     from_boundaries = right
     execute_on = 'timestep_end'
   []
