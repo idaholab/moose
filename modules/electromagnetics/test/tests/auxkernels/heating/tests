@@ -11,7 +11,7 @@
     type = CSVDiff
     command = 'aux_microwave_heating_convergence.py'
     csvdiff = 'aux_microwave_heating_convergence.csv'
-    requirement = 'The system shall include a tool for writing spatial convergence data for the power deposition based on the material conductivity and electric field.'
+    requirement = 'The system shall be able to perform a convergence analysis for the power deposition based on the material conductivity and electric field.'
     design = 'AuxComplexHeating.md'
     issues = '#28758'
     heavy = True
@@ -33,7 +33,7 @@
     type = CSVDiff
     command = 'aux_current_source_heating_convergence.py'
     csvdiff = 'aux_current_source_heating_convergence.csv'
-    requirement = 'The system shall include a tool for writing spatial convergence data for the power deposition based on the electric field and a supplied current density source.'
+    requirement = 'The system shall be able to perform a convergence analysis for the power deposition based on the electric field and a supplied current density source.'
     design = 'SourceCurrentHeating.md'
     issues = '#28758'
     heavy = True

@@ -22,8 +22,8 @@ ADMatWaveEquation::validParams()
   params.addClassDescription(
       "Calculates the current source term in the Helmholtz wave equation using "
       "the dielectric formulation of the current.");
-  params.addRequiredCoupledVar("E_real", "The real component of the E-field.");
-  params.addRequiredCoupledVar("E_imag", "The imaginary component of the E-field.");
+  params.addRequiredCoupledVar("E_real", "The real component of the electric field.");
+  params.addRequiredCoupledVar("E_imag", "The imaginary component of the electric field.");
 
   params.addParam<MaterialPropertyName>(
       "wave_coef_real",
