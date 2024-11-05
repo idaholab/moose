@@ -1,5 +1,0 @@
-# QuadInterWrapperBuildMeshAction
-
-!syntax description /QuadInterWrapperMesh/QuadInterWrapperBuildMeshAction
-
-!syntax parameters /QuadInterWrapperMesh/QuadInterWrapperBuildMeshAction

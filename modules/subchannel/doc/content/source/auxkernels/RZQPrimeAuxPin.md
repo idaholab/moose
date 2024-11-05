@@ -12,7 +12,7 @@ diffusion coefficient and the temperature variable.
 
 ## Example Input File Syntax
 
-!listing /examples/coupling/1pinSquare_thermomech_SC/one_pin_problem_sub.i block=AuxKernels language=cpp
+!listing /examples/coupling/1pinSquare_thermomech_SCM/one_pin_problem_sub.i block=AuxKernels language=cpp
 
 !syntax parameters /AuxKernels/RZQPrimeAuxPin
 

@@ -41,6 +41,8 @@ T_in = 297.039 # K
     order = CONSTANT
     family = MONOMIAL
   []
+  [q_prime_nodal]
+  []
 []
 
 [AuxKernels]
@@ -51,6 +53,12 @@ T_in = 297.039 # K
     diffusion_variable = temperature
     component = normal
     boundary = 'right'
+    execute_on = 'NONLINEAR'
+  []
+  [q_to_q]
+    type = ProjectionAux
+    v = q_prime
+    variable = q_prime_nodal
     execute_on = 'timestep_end'
   []
 []
@@ -116,4 +124,8 @@ T_in = 297.039 # K
 
 [Outputs]
   exodus = true
+[]
+
+[Debug]
+  show_execution_order=timestep_end
 []

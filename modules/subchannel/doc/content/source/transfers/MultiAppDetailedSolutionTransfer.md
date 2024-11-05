@@ -10,7 +10,7 @@ This class is used to transfer the subchannel associated variables to the visual
 
 ## Example Input File Syntax
 
-!listing /examples/coupling/1pinSquare_thermomech_SC/one_pin_problem.i block=subchannel_transfer language=cpp
+!listing /examples/coupling/1pinSquare_thermomech_SCM/one_pin_problem.i block=subchannel_transfer language=cpp
 
 !syntax parameters /Transfers/MultiAppDetailedSolutionTransfer
 

@@ -1,5 +1,0 @@
-# QuadSubChannelBuildMeshAction
-
-!syntax description /QuadSubChannelMesh/QuadSubChannelBuildMeshAction
-
-!syntax parameters /QuadSubChannelMesh/QuadSubChannelBuildMeshAction

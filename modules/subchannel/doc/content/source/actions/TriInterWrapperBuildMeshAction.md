@@ -1,5 +1,0 @@
-# TriInterWrapperBuildMeshAction
-
-!syntax description /TriInterWrapperMesh/TriInterWrapperBuildMeshAction
-
-!syntax parameters /TriInterWrapperMesh/TriInterWrapperBuildMeshAction
