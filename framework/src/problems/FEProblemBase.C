@@ -7024,7 +7024,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
             if (matrix.use_hash_table())
-              matrix.reset();
+              matrix.reset_memory();
             else
               matrix.zero();
             if (haveADObjects())
