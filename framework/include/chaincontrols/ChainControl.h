@@ -90,6 +90,13 @@ protected:
   template <typename T>
   const T & getChainControlDataOldByName(const std::string & data_name);
 
+  /**
+   * Adds a chain control data dependency into the list
+   *
+   * @param data_name   Name of chain control data that this control depends upon
+   */
+  void addChainControlDataDependency(const std::string & data_name);
+
   /// List of chain control data that this control depends upon
   std::vector<std::string> _control_data_depends_on;
 };
@@ -126,10 +133,7 @@ ChainControl::getChainControlDataByName(const std::string & data_name)
       getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
   mooseAssert(data_ptr, "Data must be non-null.");
 
-  // Add chain control data dependency
-  auto it = std::find(_control_data_depends_on.begin(), _control_data_depends_on.end(), data_name);
-  if (it == _control_data_depends_on.end())
-    _control_data_depends_on.push_back(data_name);
+  addChainControlDataDependency(data_name);
 
   return data_ptr->get();
 }

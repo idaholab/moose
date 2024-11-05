@@ -18,3 +18,11 @@ ChainControl::validParams()
 }
 
 ChainControl::ChainControl(const InputParameters & parameters) : Control(parameters) {}
+
+void
+ChainControl::addChainControlDataDependency(const std::string & data_name)
+{
+  if (std::find(_control_data_depends_on.begin(), _control_data_depends_on.end(), data_name) ==
+      _control_data_depends_on.end())
+    _control_data_depends_on.push_back(data_name);
+}
