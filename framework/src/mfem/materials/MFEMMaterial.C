@@ -7,7 +7,8 @@ InputParameters
 MFEMMaterial::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
-
+  params.addClassDescription(
+      "Base class for declaration of material properties to add to MFEM problems.");
   params.set<std::string>("_moose_base") = "MaterialBase";
   params.addPrivateParam<bool>("_neighbor", false);
   params.addPrivateParam<bool>("_interface", false);
