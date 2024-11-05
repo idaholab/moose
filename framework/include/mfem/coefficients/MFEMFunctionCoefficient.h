@@ -12,6 +12,5 @@ public:
   std::shared_ptr<mfem::Coefficient> getCoefficient() const override { return _coefficient; };
 
 private:
-  const Function & _func;
   std::shared_ptr<mfem::FunctionCoefficient> _coefficient{nullptr};
 };

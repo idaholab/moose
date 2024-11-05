@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include "coefficients.h"
 #include "mfem.hpp"
 #include "ScaleIntegrator.h"
 

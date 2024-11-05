@@ -15,6 +15,5 @@ public:
   }
 
 private:
-  const Function & _func;
   std::shared_ptr<mfem::VectorFunctionCoefficient> _vector_coefficient{nullptr};
 };
