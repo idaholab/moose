@@ -122,7 +122,6 @@ def evaluate(pde, soln, variable='u',
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
     pde = pde.replace('div', 'divergence')
-    pde = pde.replace('curl', 'curl')
     _func_ = eval(pde)
     if negative:
         _func_ = -1 * _func_

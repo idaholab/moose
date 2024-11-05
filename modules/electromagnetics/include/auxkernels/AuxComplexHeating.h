@@ -30,7 +30,7 @@ private:
   /// Vector variable of the real component of the electric field
   const VectorVariableValue & _E_real;
 
-  /// Vector variable of the imaginary component of the E-field
+  /// Vector variable of the imaginary component of the electric field
   const VectorVariableValue & _E_imag;
 
   /// Real component of the material conductivity (in S/m)

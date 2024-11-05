@@ -1,5 +1,5 @@
 # This test is exactly the same as 'evanescent_wave/evanescent_wave.i'
-# expect it uses ADVectorMatReaction and WaveEquationCoefficient instead of VectorFunctionReaction
+# expect it uses ADMatWaveEquation and WaveEquationCoefficient instead of VectorFunctionReaction
 
 [Mesh]
   [fmg]

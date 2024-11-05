@@ -28,7 +28,7 @@
     type = CSVDiff
     command = 'vector_ADmaterial_wave_equation_convergence.py'
     csvdiff = 'vector_ADmaterial_wave_equation_convergence.csv'
-    requirement = 'The system shall include a tool for writing spatial convergence data for modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
     design = 'ADMatWaveEquation.md'
     issues = '#28758'
     heavy = True
@@ -50,7 +50,7 @@
     type = CSVDiff
     command = vector_conductive_current_convergence.py
     csvdiff = 'vector_conductive_current_convergence.csv'
-    requirement = 'The system shall include a tool for writing spatial convergence data for modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
     design = 'ADConductiveCurrent.md'
     issues = '#28758'
     heavy = True
@@ -72,7 +72,7 @@
     type = CSVDiff
     command = microwave_heating_convergence.py
     csvdiff = 'microwave_heating_convergence.csv'
-    requirement = 'The system shall include a tool for writing spatial convergence data for modeling the power deposition due to the electric field interactions.'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the power deposition due to the electric field interactions.'
     design = 'ComplexHeating.md'
     issues = '#28758'
     heavy = True

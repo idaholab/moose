@@ -17,8 +17,8 @@ AuxComplexHeating::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes the heating due to the electic field in the "
                              "form of $(0.5Re(\\sigma E \\cdot E^{*} ))$");
-  params.addRequiredCoupledVar("E_real", "The real component of the E-field.");
-  params.addRequiredCoupledVar("E_imag", "The imaginary component of the E-field.");
+  params.addRequiredCoupledVar("E_real", "The real component of the electric field.");
+  params.addRequiredCoupledVar("E_imag", "The imaginary component of the electric field.");
   params.addRequiredParam<std::string>("conductivity",
                                        "The real component of the material conductivity.");
   return params;

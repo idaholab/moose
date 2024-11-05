@@ -20,7 +20,7 @@
 []
 
 [Functions]
-  #The exact solution for the heated species and E-field real and imag. component
+  #The exact solution for the heated species and electric field real and imag. component
   [exact_real]
     type = ParsedVectorFunction
     expression_x = 'y^2'
@@ -32,7 +32,7 @@
     expression_y = '-x^2'
   []
 
-  #The forcing terms for the heated species and E-field real and imag. component
+  #The forcing terms for the heated species and electric field real and imag. component
   [source_real]
     type = ParsedVectorFunction
     expression_x = '-y^2 - cos(pi*y) - 2'

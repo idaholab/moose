@@ -18,8 +18,8 @@ SourceCurrentHeating::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(("Computes the heating due to the electic field in the "
                               "form of $(0.5Re(J \\cdot E^{*} ))$"));
-  params.addRequiredCoupledVar("E_real", "The real component of the E-field.");
-  params.addRequiredCoupledVar("E_imag", "The imaginary component of the E-field.");
+  params.addRequiredCoupledVar("E_real", "The real component of the electric field.");
+  params.addRequiredCoupledVar("E_imag", "The imaginary component of the electric field.");
   params.addRequiredParam<FunctionName>("source_real", "Current Source vector, real component");
   params.addRequiredParam<FunctionName>("source_imag",
                                         "Current Source vector, imaginary component");

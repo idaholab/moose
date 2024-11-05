@@ -27,9 +27,9 @@ protected:
   virtual Real computeValue() override;
 
 private:
-  /// Gradient of the x-component of the E-field
+  /// Gradient of the x-component of the electric field
   const VariableGradient & _efield_x_grad;
 
-  /// Gradient of the y-component of the E-field
+  /// Gradient of the y-component of the electric field
   const VariableGradient & _efield_y_grad;
 };

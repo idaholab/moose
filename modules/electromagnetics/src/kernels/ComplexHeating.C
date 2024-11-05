@@ -22,8 +22,8 @@ ComplexHeating::validParams()
   InputParameters params = ADKernel::validParams();
   params.addClassDescription("Supplies the heating due to the electic field in the "
                              "form of $(0.5Re(\\sigma E \\cdot E^{*} ))$");
-  params.addRequiredCoupledVar("E_real", "The real component of the E-field.");
-  params.addRequiredCoupledVar("E_imag", "The imaginary component of the E-field.");
+  params.addRequiredCoupledVar("E_real", "The real component of the electric field.");
+  params.addRequiredCoupledVar("E_imag", "The imaginary component of the electric field.");
   params.addRequiredParam<std::string>("conductivity",
                                        "The real component of the material conductivity.");
   params.addParam<Real>("value", 1.0, "Coefficient to multiply by heating term.");
