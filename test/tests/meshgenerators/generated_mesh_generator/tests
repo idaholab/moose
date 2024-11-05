@@ -114,4 +114,34 @@
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     recover = false
   []
+
+  [error_check]
+    issues = '#28998'
+    design = 'meshgenerators/GeneratedMeshGenerator.md'
+    requirement = 'The system shall error when unphysical input combinations are provided to the generated mesh generator, including when'
+    [xmax]
+      type = 'RunException'
+      input = 'generated_mesh_generator.i'
+      cli_args = 'Mesh/gmg/xmin=2 --mesh-only'
+      expect_err = 'xmax must be larger than xmin.'
+      recover = false
+      detail = 'the specified maximum X-coordinate is less than the minimum X-coordinate, and'
+    []
+    [ymax]
+      type = 'RunException'
+      input = 'generated_mesh_generator.i'
+      cli_args = 'Mesh/gmg/ymin=2 --mesh-only'
+      expect_err = 'ymax must be larger than ymin.'
+      recover = false
+      detail = 'the specified maximum Y-coordinate is less than the minimum Y-coordinate, and'
+    []
+    [zmax]
+      type = 'RunException'
+      input = 'generated_mesh_generator.i'
+      cli_args = 'Mesh/gmg/zmin=2 --mesh-only'
+      expect_err = 'zmax must be larger than zmin.'
+      recover = false
+      detail = 'the specified maximum Z-coordinate is less than the minimum Z-coordinate.'
+    []
+  []
 []
