@@ -20,7 +20,7 @@ class AzimuthMagneticTimeDerivRZ : public AuxKernel
 {
 public:
   static InputParameters validParams();
-  
+
   AzimuthMagneticTimeDerivRZ(const InputParameters & parameters);
 
 protected:
