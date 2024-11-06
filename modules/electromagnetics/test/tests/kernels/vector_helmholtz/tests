@@ -38,20 +38,20 @@
     required_python_packages = 'sympy'
   []
 
-  [vector_conductive_current]
+  [vector_conduction_current]
     type = 'Exodiff'
-    input = 'vector_conductive_current.i'
-    exodiff = 'vector_conductive_current_out.e'
+    input = 'vector_conduction_current.i'
+    exodiff = 'vector_conduction_current_out.e'
     requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
-    design = 'ADConductiveCurrent.md'
+    design = 'ADConductionCurrent.md'
     issues = '#28758'
   []
-  [vector_conductive_current_convergence_csv]
+  [vector_conduction_current_convergence_csv]
     type = CSVDiff
-    command = vector_conductive_current_convergence.py
-    csvdiff = 'vector_conductive_current_convergence.csv'
+    command = vector_conduction_current_convergence.py
+    csvdiff = 'vector_conduction_current_convergence.csv'
     requirement = 'The system shall be able to perform a convergence analysis for modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
-    design = 'ADConductiveCurrent.md'
+    design = 'ADConductionCurrent.md'
     issues = '#28758'
     heavy = True
     recover = false

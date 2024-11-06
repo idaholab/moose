@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADConductiveCurrent.h"
+#include "ADConductionCurrent.h"
 #include "ElectromagneticEnums.h"
 #include "ElectromagneticConstants.h"
 #include <complex>
 
-registerMooseObject("ElectromagneticsApp", ADConductiveCurrent);
+registerMooseObject("ElectromagneticsApp", ADConductionCurrent);
 
 InputParameters
-ADConductiveCurrent::validParams()
+ADConductionCurrent::validParams()
 {
   InputParameters params = ADVectorKernel::validParams();
   params.addClassDescription(
@@ -44,7 +44,7 @@ ADConductiveCurrent::validParams()
   return params;
 }
 
-ADConductiveCurrent::ADConductiveCurrent(const InputParameters & parameters)
+ADConductionCurrent::ADConductionCurrent(const InputParameters & parameters)
   : ADVectorKernel(parameters),
     _E_real(adCoupledVectorValue("E_real")),
     _E_imag(adCoupledVectorValue("E_imag")),
@@ -63,7 +63,7 @@ ADConductiveCurrent::ADConductiveCurrent(const InputParameters & parameters)
 }
 
 ADReal
-ADConductiveCurrent::computeQpResidual()
+ADConductionCurrent::computeQpResidual()
 {
   // TODO: In the future, need to add an AD capability to std::complex
   ADReal mu_omega_real = _mu_real[_qp] * _omega_real[_qp] - _mu_imag[_qp] * _omega_imag[_qp];

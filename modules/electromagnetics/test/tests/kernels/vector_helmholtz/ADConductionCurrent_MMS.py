@@ -1,4 +1,4 @@
-# Script to generate source term for vector_conductive_current.i
+# Script to generate source term for vector_conduction_current.i
 
 import mms
 from sympy import *

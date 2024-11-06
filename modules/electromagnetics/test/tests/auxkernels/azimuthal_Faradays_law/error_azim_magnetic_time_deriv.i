@@ -7,8 +7,8 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 5
-    ny = 5
+    nx = 10
+    ny = 10
     xmax = 1
     xmin = 0
     ymax = 1
@@ -148,7 +148,7 @@
     order = FIRST
   []
 
-  [azim_dB_dt_term_scalar]
+  [azim_dB_dt_term]
     family = MONOMIAL
     order = FIRST
   []
@@ -168,11 +168,12 @@
     component = Y
   []
 
-  [aux_azim_dB_dt_scalar]
+  [aux_azim_dB_dt]
     type = AzimuthMagneticTimeDerivRZ
-    Efield_X = aux_E_real_x
-    Efield_Y = aux_E_real_y
-    variable = azim_dB_dt_term_scalar
+    # Efield = E_real
+    # Efield_X = aux_E_real_x
+    # Efield_Y = aux_E_real_y
+    variable = azim_dB_dt_term
   []
 []
 
@@ -190,34 +191,6 @@
     function = exact_imag
     penalty = 1e8
     boundary = 'left right top bottom'
-  []
-[]
-
-[Postprocessors]
-  [error_real]
-    type = ElementVectorL2Error
-    variable = E_real
-    function = exact_real
-  []
-  [error_imag]
-    type = ElementVectorL2Error
-    variable = E_imag
-    function = exact_imag
-  []
-
-  [error_azim_dB_dt_scalar]
-    type = ElementL2Error
-    variable = azim_dB_dt_term_scalar
-    function = azim_dB_dt_func
-  []
-
-  [h]
-    type = AverageElementSize
-  []
-  [h_squared]
-    type = ParsedPostprocessor
-    pp_names = 'h'
-    expression = 'h * h'
   []
 []
 

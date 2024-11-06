@@ -1,4 +1,4 @@
-# Test for ADConductiveCurrent
+# Test for ADConductionCurrent
 # Manufactured solution: E_real = y^2 * x_hat - x^2 * y_hat
 #                        E_imag = y^2 * x_hat - x^2 * y_hat
 
@@ -135,7 +135,7 @@
     component = real
   []
   [conduction_real]
-    type = ADConductiveCurrent
+    type = ADConductionCurrent
     variable = E_real
     E_imag = E_imag
     E_real = E_real
@@ -168,7 +168,7 @@
     component = imaginary
   []
   [conduction_imag]
-    type = ADConductiveCurrent
+    type = ADConductionCurrent
     variable = E_imag
     E_imag = E_imag
     E_real = E_real
