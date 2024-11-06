@@ -6053,7 +6053,7 @@ FEProblemBase::init()
     _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
 
     if (!_skip_nl_system_check && _solve && n_vars == 0)
-      mooseError("No variables specified in the FEProblemBase '", name(), "'.");
+      mooseError("No variables specified in nonlinear system '", nl->name(), "'.");
   }
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added

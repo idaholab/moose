@@ -29,6 +29,12 @@ PhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
+  params.addParam<std::vector<SolverSystemName>>(
+      "system_name",
+      {"nl0"},
+      "Name of the solver system(s) for the variables. If a single name is specified, "
+      "that system is used for all solver variables.");
+
   MooseEnum pc_options("default none", "none");
   params.addParam<MooseEnum>(
       "preconditioning", pc_options, "Which preconditioning to use for this Physics");
@@ -53,7 +59,7 @@ PhysicsBase::validParams()
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : Action(parameters),
     InputParametersChecksUtils<PhysicsBase>(this),
-    _sys_number(0),
+    _system_names(getParam<std::vector<SolverSystemName>>("system_name")),
     _verbose(getParam<bool>("verbose")),
     _preconditioning(getParam<MooseEnum>("preconditioning")),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
@@ -143,7 +149,7 @@ PhysicsBase::act()
   // Exodus restart capabilities
   if (_current_task == "copy_vars_physics")
   {
-    copyVariablesFromMesh(nonlinearVariableNames(), true);
+    copyVariablesFromMesh(solverVariableNames(), true);
     if (_aux_var_names.size() > 0)
       copyVariablesFromMesh(auxVariableNames(), false);
   }
@@ -244,6 +250,19 @@ PhysicsBase::initializePhysics()
   else
     _dim = _mesh->dimension();
 
+  // Check that the systems exist in the Problem
+  // TODO: try to add the systems to the problem from here
+  const auto & problem_systems = getProblem().getNonlinearSystemNames();
+  for (const auto & sys_name : _system_names)
+    if (std::find(problem_systems.begin(), problem_systems.end(), sys_name) ==
+            problem_systems.end() &&
+        solverVariableNames().size())
+      mooseError("System '", sys_name, "' is not used in the problem");
+
+  // Cache system number as some routines prefer those
+  for (const auto & sys_name : _system_names)
+    _system_numbers.push_back(getProblem().solverSysNum(sys_name));
+
   // Forward physics verbosity to problem to output the setup
   if (_verbose)
     getProblem().setVerboseProblem(_verbose);
@@ -257,6 +276,14 @@ PhysicsBase::checkIntegrityEarly() const
 {
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
+
+  // Check that there is a system for each variable
+  if (_system_names.size() != 1 && _system_names.size() != _solver_var_names.size())
+    paramError("system_name",
+               "There should be one system name per solver variable (potentially repeated), or a "
+               "single system name for all variables. Current you have '" +
+                   std::to_string(_system_names.size()) + "' systems specified for '" +
+                   std::to_string(_solver_var_names.size()) + "' solver variables.");
 }
 
 void
@@ -265,14 +292,19 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
-    SystemBase & system = are_nonlinear ? getProblem().getNonlinearSystemBase(_sys_number)
-                                        : getProblem().systemBaseAuxiliary();
     mooseInfoRepeated("Adding Exodus restart for " + std::to_string(variables_to_copy.size()) +
                       " variables: " + Moose::stringify(variables_to_copy));
     // TODO Check that the variable types and orders are actually supported for exodus restart
-    for (const auto & var_name : variables_to_copy)
+    for (const auto i : index_range(variables_to_copy))
+    {
+      SystemBase & system = are_nonlinear
+                                ? getProblem().getNonlinearSystemBase(
+                                      _system_numbers.size() == 1 ? _system_numbers[0] : i)
+                                : getProblem().systemBaseAuxiliary();
+      const auto & var_name = variables_to_copy[i];
       system.addVariableToCopy(
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
+    }
   }
 }
 
@@ -289,6 +321,31 @@ PhysicsBase::variableExists(const VariableName & var_name, bool error_if_aux) co
     return true;
   else
     return false;
+}
+
+const SolverSystemName &
+PhysicsBase::getSolverSystem(unsigned int variable_index) const
+{
+  mooseAssert(!_system_names.empty(), "We should have a solver system name");
+  if (_system_names.size() == 1)
+    return _system_names[0];
+  else
+    return _system_names[variable_index];
+}
+
+const SolverSystemName &
+PhysicsBase::getSolverSystem(const VariableName & var_name) const
+{
+  mooseAssert(!_system_names.empty(), "We should have a solver system name");
+  // No need to look if only one system
+  if (_system_names.size() == 1)
+    return _system_names[0];
+
+  // Find the variable in the list of variables
+  for (const auto variable_index : index_range(_solver_var_names))
+    if (var_name == _solver_var_names[variable_index])
+      return _system_names[variable_index];
+  mooseError("Variable ", var_name, " was not found in list of variables");
 }
 
 void
