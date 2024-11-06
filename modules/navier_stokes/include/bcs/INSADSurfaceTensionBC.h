@@ -13,6 +13,10 @@
 
 /**
  * A class that imparts a surface tension on the momentum equation
+ * The treatment is based on:
+ * Cairncross RA, Schunk PR, Baer TA, Rao RR, Sackinger PA. A finite element method for free surface
+ * flows of incompressible fluids in three dimensions. Part I. Boundary fitted mesh motion.
+ * International journal for numerical methods in fluids. 2000 Jun 15;33(3):375-403.
  */
 class INSADSurfaceTensionBC : public ADVectorIntegratedBC
 {
@@ -24,7 +28,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// The recoil pressure
+  /// The surface tension terms
   const ADMaterialProperty<RealVectorValue> & _surface_term_curvature;
   const ADMaterialProperty<RealVectorValue> & _surface_term_gradient1;
   const ADMaterialProperty<RealVectorValue> & _surface_term_gradient2;

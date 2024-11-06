@@ -80,6 +80,11 @@ LaserWeld316LStainlessSteelBoundary::computeQpProperties()
   // (AISI 316L stainless steel)."
   _surface_tension[_qp] = _c_gamma0 + _c_gamma1 * (_temperature[_qp] - _Tl);
   _grad_surface_tension[_qp] = _c_gamma1 * _grad_temperature[_qp];
+
+  // These terms are needed for the treatment in:
+  // Cairncross RA, Schunk PR, Baer TA, Rao RR, Sackinger PA. A finite element method for free surface
+  // flows of incompressible fluids in three dimensions. Part I. Boundary fitted mesh motion.
+  // International journal for numerical methods in fluids. 2000 Jun 15;33(3):375-403.
   _surface_term_curvature[_qp] =
       -2. * _ad_curvatures[_qp] * _surface_tension[_qp] * _ad_normals[_qp];
   _surface_term_gradient1[_qp] = -_grad_surface_tension[_qp];
