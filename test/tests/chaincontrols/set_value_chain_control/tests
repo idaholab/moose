@@ -1,0 +1,16 @@
+[Tests]
+  design = 'SetValueChainControl.md'
+  issues = '#28948'
+  [real]
+    type = CSVDiff
+    input = 'set_real_value_chain_control.i'
+    csvdiff = 'set_real_value_chain_control_out.csv'
+    requirement = 'The system shall be able to set a floating point parameter to the value of a floating point control data.'
+  []
+  [bool]
+    type = CSVDiff
+    input = 'set_bool_value_chain_control.i'
+    csvdiff = 'set_bool_value_chain_control_out.csv'
+    requirement = 'The system shall be able to set a boolean parameter to the value of a boolean control data.'
+  []
+[]
