@@ -28,8 +28,8 @@ BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
   : GenericActiveLearner(parameters),
     LikelihoodInterface(parameters),
     _bayes_al_sampler(dynamic_cast<const BayesianActiveLearningSampler *>(&_sampler)),
-    _new_var_samples(_bayes_al_sampler->getVarSamples()),
     _inputs_test(_bayes_al_sampler->getSampleTries()),
+    _new_var_samples(_bayes_al_sampler->getVarSamples()),
     _var_prior(_bayes_al_sampler->getVarPrior()),
     _var_test(_bayes_al_sampler->getVarSampleTries()),
     _noise(declareValue<Real>("noise"))

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PMCMCDecisionBase.h"
+#include "PMCMCDecision.h"
 #include "AffineInvariantDES.h"
 #include "GaussianProcess.h"
 #include "SurrogateModel.h"
@@ -19,7 +19,7 @@
 /**
  * A class to perform decision making for Affine Invariant differential MCMC using a GP
  */
-class GPAffineInvariantDifferentialDecision : public PMCMCDecisionBase,
+class GPAffineInvariantDifferentialDecision : public PMCMCDecision,
                                               public SurrogateModelInterface
 {
 public:
