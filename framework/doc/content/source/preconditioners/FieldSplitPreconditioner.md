@@ -14,7 +14,7 @@ are then preconditioned individually. This is the default preconditioner for the
 [Executioner documentation](Executioner/index.md) for more information on the default preconditioner.
 
 More information about field split preconditioning may be found in the
-[PETSc manual]([here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
+[PETSc manual](https://petsc.org/release/manualpages/PC/PCFIELDSPLIT).
 
 ## Example input syntax
 
