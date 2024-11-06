@@ -58,6 +58,8 @@ DefaultNonlinearConvergence::DefaultNonlinearConvergence(const InputParameters &
       getSharedExecutionerParam<Real>("nl_rel_tol");
   es.parameters.set<Real>("nonlinear solver divergence tolerance") =
       getSharedExecutionerParam<Real>("nl_div_tol");
+  es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
+      getSharedExecutionerParam<Real>("nl_abs_step_tol");
   es.parameters.set<Real>("nonlinear solver relative step tolerance") =
       getSharedExecutionerParam<Real>("nl_rel_step_tol");
 }

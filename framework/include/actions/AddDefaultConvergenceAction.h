@@ -22,4 +22,11 @@ public:
   AddDefaultConvergenceAction(const InputParameters & params);
 
   virtual void act() override;
+
+protected:
+  /**
+   * Checks that nonlinear convergence parameters were not set in the executioner
+   * if using a Convergence object that does not use them.
+   */
+  void checkUnusedNonlinearConvergenceParameters();
 };

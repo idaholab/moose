@@ -40,6 +40,7 @@ FEProblemSolve::feProblemDefaultConvergenceParams()
       "nl_abs_div_tol",
       1.0e50,
       "Nonlinear Absolute Divergence Tolerance. A negative value disables this check.");
+  params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
   params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
   params.addParam<unsigned int>("n_max_nonlinear_pingpong",
                                 100,
@@ -96,7 +97,6 @@ FEProblemSolve::validParams()
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
-  params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
   params.addParam<ConvergenceName>("nonlinear_convergence",
                                    "Name of Convergence object to use to assess convergence of the "
                                    "nonlinear solve. If not provided, the default Convergence "
@@ -200,6 +200,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   // Extract and store PETSc related settings on FEProblemBase
   Moose::PetscSupport::storePetscOptions(_problem, _pars);
 
+  // Set linear solve parameters in the equation system
+  // Nonlinear solve parameters are added in the DefaultNonlinearConvergence
   EquationSystems & es = _problem.es();
   es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
 
@@ -207,9 +209,6 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   es.parameters.set<unsigned int>("linear solver maximum iterations") =
       getParam<unsigned int>("l_max_its");
-
-  es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
-      getParam<Real>("nl_abs_step_tol");
 
   es.parameters.set<bool>("reuse preconditioner") = getParam<bool>("reuse_preconditioner");
 

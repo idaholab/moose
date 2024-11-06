@@ -337,7 +337,6 @@ addActionTypes(Syntax & syntax)
                            "(setup_component)"  // no particular reason for that placement
                            "(read_executor)"
                            "(add_executor)"
-                           "(add_default_convergence)"
                            "(check_integrity_early)"
                            "(check_integrity_early_physics)"
                            "(setup_predictor)"
@@ -347,6 +346,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_convergence)"
+                           "(add_default_convergence)"
                            "(add_periodic_bc)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"
