@@ -23,4 +23,3 @@ LikelihoodFunctionBase::LikelihoodFunctionBase(const InputParameters & parameter
   : MooseObject(parameters)
 {
 }
-/Users/dhulls/projects/moose/modules/stochastic_tools/src/likelihoods
