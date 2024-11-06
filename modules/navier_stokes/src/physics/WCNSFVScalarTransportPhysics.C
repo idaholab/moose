@@ -84,8 +84,9 @@ WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters
     _passive_scalar_sources_coef(
         getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff"))
 {
-  for (const auto & scalar_name : _passive_scalar_names)
-    saveSolverVariableName(scalar_name);
+  if (_has_scalar_equation)
+    for (const auto & scalar_name : _passive_scalar_names)
+      saveSolverVariableName(scalar_name);
 
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -142,6 +143,7 @@ WCNSFVScalarTransportPhysics::addNonlinearVariables()
       continue;
     }
 
+    params.set<SolverSystemName>("solver_sys") = getSolverSystem(name_i);
     if (isParamValid("passive_scalar_scaling"))
       params.set<std::vector<Real>>("scaling") = {
           getParam<std::vector<Real>>("passive_scalar_scaling")[name_i]};

@@ -34,8 +34,8 @@ WCNSFVFlowPhysics::validParams()
       true,
       "Whether the time derivative term should contribute to the Rhie Chow coefficients. This adds "
       "stabilization, but makes the solution dependent on the time step size");
-  params.addParamNamesToGroup("time_derivative_contributes_to_RC_coefficients",
-                              "characteristic_speed Numerical scheme");
+  params.addParamNamesToGroup("time_derivative_contributes_to_RC_coefficients characteristic_speed",
+                              "Numerical scheme");
 
   // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
   params.addParam<MooseFunctorName>(
@@ -183,7 +183,10 @@ WCNSFVFlowPhysics::addNonlinearVariables()
           getParam<bool>("momentum_two_term_bc_expansion");
 
       for (const auto d : make_range(dimension()))
+      {
+        params.set<SolverSystemName>("solver_sys") = getSolverSystem(_velocity_names[d]);
         getProblem().addVariable(variable_type, _velocity_names[d], params);
+      }
     }
     else
       paramError("velocity_variable",
