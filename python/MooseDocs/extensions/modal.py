@@ -27,7 +27,7 @@ def make_extension(**kwargs):
     return ModalExtension(**kwargs)
 
 ModalLink = tokens.newToken('ModalLink', content=None, title=None)
-ModalSourceLink = tokens.newToken('ModalSourceLink', src=None, title=None, language=None)
+ModalSourceLink = tokens.newToken('ModalSourceLink', src=None, title=None, language=None, link_prefix=None)
 
 class ModalExtension(command.CommandExtension):
     """
@@ -117,16 +117,22 @@ class RenderModalLinkToken(components.RenderComponent):
         return parent
 
 class RenderSourceLinkToken(components.RenderComponent):
+    @staticmethod
+    def linkText(token):
+        prefix = (token['link_prefix'] + ' ') if token['link_prefix'] else ''
+        path = os.path.relpath(token["src"], MooseDocs.ROOT_DIR)
+        return f'({prefix}{path})' if not token.children else None
+
     def createHTML(self, parent, token, page):
-        string = '({})'.format(os.path.relpath(token['src'], MooseDocs.ROOT_DIR)) if not token.children else None
+        string = self.linkText(token)
         return html.Tag(parent, 'span', string=string, class_='moose-source-filename')
 
     def createMaterialize(self, parent, token, page):
-        fullpath = token['src']
         text = '({})'.format(os.path.relpath(token['src'], MooseDocs.ROOT_DIR))
-        string =  text if not token.children else None
+        string = self.linkText(token)
         a = html.Tag(parent, 'span', string=string, class_='moose-source-filename tooltipped')
 
+        fullpath = token['src']
         if self.extension['hide_source']:
             if not any([fnmatch.fnmatch(fullpath, p) for p in self.extension['exceptions']]):
                 LOG.debug("Hide source content: %s", fullpath)
@@ -174,5 +180,5 @@ class RenderSourceLinkToken(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         if not token.children:
-            latex.String(parent, content='({})'.format(os.path.relpath(token['src'], MooseDocs.ROOT_DIR)))
+            latex.String(parent, content=self.linkText(token))
         return parent

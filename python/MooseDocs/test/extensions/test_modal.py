@@ -110,6 +110,12 @@ class TestModalSourceLink(MooseDocsTestCase):
         self.assertHTMLTag(res, 'body', size=1)
         self.assertHTMLTag(res(0), 'span', size=1, class_='moose-source-filename', string='string')
 
+        # link_prefix
+        ast = modal.ModalSourceLink(None, src='test', link_prefix='Foo:')
+        res = self.render(ast, renderer=base.HTMLRenderer())
+        self.assertHTMLTag(res, 'body', size=1)
+        self.assertHTMLTag(res(0), 'span', size=1, class_='moose-source-filename', string='(Foo: python/MooseDocs/test/extensions/test)')
+
     def testMaterialize(self):
 
         # 'src' with source enabled
@@ -171,6 +177,11 @@ class TestModalSourceLink(MooseDocsTestCase):
         ast = modal.ModalSourceLink(None, src='framework/Makefile', language='other')
         res = self.render(ast, renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-other')
+
+        # link_prefix
+        ast = modal.ModalSourceLink(None, src='framework/Makefile', link_prefix='Foo:')
+        res = self.render(ast, renderer=base.MaterializeRenderer())
+        self.assertHTMLTag(res(0), 'a', string='(Foo: python/MooseDocs/test/extensions/framework/Makefile)')
 
     def testMaterializeErrors(self):
 

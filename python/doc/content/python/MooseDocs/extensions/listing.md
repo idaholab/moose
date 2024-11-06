@@ -112,3 +112,22 @@ The settings given in [hit-listing-settings] are available to all [!ac](HIT) for
                 object=InputListingCommand
                 id=hit-listing-settings
                 caption=Settings available for input file listings.
+
+## Diffing Content
+
+You can produce a diffed listing between two files using the "diff" setting.
+
+!devel! example id=example-listing-diff caption=Example listing using the "diff" setting.
+!listing framework/src/kernels/Diffusion.C
+         diff=framework/src/kernels/ADDiffusion.C
+!devel-end!
+
+The prefixes for the links after the listing (when using the "link" option, which defaults to true)
+can be modified using the "before_link_prefix" and "after_link_prefix" settings.
+
+!devel! example id=example-listing-diff-prefixed caption=Example listing using the "diff" setting with overridden link prefixes.
+!listing framework/src/kernels/Diffusion.C
+         diff=framework/src/kernels/ADDiffusion.C
+         before_link_prefix=Diffusion without AD:
+         after_link_prefix=Diffusion with AD:
+!devel-end!

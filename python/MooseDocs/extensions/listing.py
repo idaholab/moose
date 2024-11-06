@@ -6,15 +6,14 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import pyhit
 import moosetree
-import mooseutils
-import MooseDocs
+import difflib
+
 from .. import common
 from ..common import exceptions
 from ..base import LatexRenderer
-from ..tree import tokens, latex
+from ..tree import html, tokens, latex
 from . import core, command, floats, modal
 
 Listing = tokens.newToken('Listing', floats.Float)
@@ -62,12 +61,13 @@ class ListingExtension(command.CommandExtension):
 class LocalListingCommand(command.CommandComponent):
     COMMAND = 'listing'
     SUBCOMMAND = None
+    DEFAULT_MAX_HEIGHT = 350
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings.update(floats.caption_settings())
-        settings['max-height'] = ('350px', "The default height for listing content.")
+        settings['max-height'] = (f'{LocalListingCommand.DEFAULT_MAX_HEIGHT}px', "The default height for listing content.")
         settings['language'] = (None, "The language to use for highlighting, if not supplied it " \
                                       "will be inferred from the extension (if possible).")
         return settings
@@ -89,26 +89,56 @@ class LocalListingCommand(command.CommandComponent):
 class FileListingCommand(LocalListingCommand):
     COMMAND = 'listing'
     SUBCOMMAND = '*'
+    DEFAULT_BEFORE_LINK_PREFIX = '-'
+    DEFAULT_AFTER_LINK_PREFIX = '+'
 
     @staticmethod
     def defaultSettings():
         settings = LocalListingCommand.defaultSettings()
+        settings['diff'] = (None, 'Path to a file to diff against')
+        settings['before_link_prefix'] = (FileListingCommand.DEFAULT_BEFORE_LINK_PREFIX,
+                                          'Prefix for the modal link to the diffed "before" file')
+        settings['after_link_prefix'] = (FileListingCommand.DEFAULT_AFTER_LINK_PREFIX,
+                                         'Prefix for the modal link to the diffed "after" file')
         settings['link'] = (True, "Show the complete file via a link; overridden by SourceExtension")
         settings.update(common.extractContentSettings())
         return settings
+
+    def getContent(self, filename, settings):
+        """
+        Base method for extracting content from a file.
+
+        Allows specialized commands to filter content.
+        """
+        return common.read(filename)
 
     def createToken(self, parent, info, page, settings):
         """
         Build the tokens needed for displaying code listing.
         """
+        def get_content(filename):
+            content = self.getContent(filename, settings)
+            return common.extractContent(content, settings)[0]
 
         filename = common.check_filenames(info['subcommand'])
-        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
-                                  token_type=Listing)
+        content = get_content(filename)
+
         # Create code token
         lang = settings.get('language')
-        content = self.extractContent(filename, settings)
         lang = lang if lang else common.get_language(filename)
+        # Language for the ModelSourceLink; independent of the
+        # Code language when we're doing a diff
+        link_lang = lang
+
+        # Diff against a file
+        if settings['diff']:
+            before_filename = common.check_filenames(settings['diff'])
+            before_content = get_content(before_filename)
+            content = self.codeDiff(content, before_content)
+            lang = f'diff-{lang} diff-highlight'
+
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
+                                  token_type=Listing)
 
         code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
                          content=content, language=lang)
@@ -119,18 +149,45 @@ class FileListingCommand(LocalListingCommand):
             code.name = 'ListingCode' #TODO: Find a better way
 
         if settings['link']:
-            modal.ModalSourceLink(flt, src=filename, language=lang)
+            if settings['diff']:
+                modal.ModalSourceLink(flt, src=before_filename, language=link_lang,
+                                      link_prefix=settings['before_link_prefix'])
+                html.Tag(flt, 'link_break', string='<br>')
+            link_prefix = (settings['after_link_prefix']) if settings['diff'] else None
+            modal.ModalSourceLink(flt, src=filename, language=link_lang,
+                                  link_prefix=link_prefix)
 
         return parent
 
-    def extractContent(self, filename, settings):
+    @staticmethod
+    def codeDiff(before: str, after: str) -> str:
         """
-        Extract content to display in listing code box.
-        """
-        content = common.read(filename)
-        content, _ = common.extractContent(content, settings)
-        return content
+        Helper for producing a unified diff of content.
 
+        All of the context is kept with the diff, that is,
+        the full file is shown continuously instead of being
+        split up if diffs are minor
+
+        Args:
+            before: The before content
+            after: The after content
+        Returns:
+            str: The diff
+        """
+        # Content needs to be split into a list for difflib
+        before_split = before.splitlines(True)
+        after_split = after.splitlines(True)
+
+        # difflib won't produce anything if they're the same, so
+        # to mimc a diff we need to add a new empty space to each line
+        if before_split == after_split:
+            return ' ' + '\n '.join(after_split)
+
+        # Produce the diff here; n sets how much context to add (add all of it)
+        diff = difflib.unified_diff(after_split, before_split,
+                                    n=(len(before_split) + len(after_split)))
+        # Re-join the split diff but split the header (via the [3:])
+        return ' ' + ''.join(list(diff)[3:])
 
 class InputListingCommand(FileListingCommand):
     """
@@ -149,16 +206,17 @@ class InputListingCommand(FileListingCommand):
                                     'e.g., `Kernels/diffusion/variable`.')
         return settings
 
-    def extractContent(self, filename, settings):
-        """Extract the file contents for display."""
+    def getContent(self, filename, settings):
+        """
+        Specialized method for extracting content from a file.
+
+        Allows for filtering of input files by capturing
+        blocks or removing blocks.
+        """
         if any([settings['block'], settings['remove']]):
             hit = self.extractInputBlocks(filename, settings['block'] or '')
-            content = self.removeInputBlocks(hit, settings['remove'] or '')
-        else:
-            content = common.read(filename)
-
-        content, _ = common.extractContent(content, settings)
-        return content
+            return self.removeInputBlocks(hit, settings['remove'] or '')
+        return super().getContent(filename, settings)
 
     @staticmethod
     def extractInputBlocks(filename, blocks):
