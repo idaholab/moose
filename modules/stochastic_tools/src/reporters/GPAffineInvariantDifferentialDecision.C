@@ -14,7 +14,7 @@ registerMooseObject("StochasticToolsApp", GPAffineInvariantDifferentialDecision)
 InputParameters
 GPAffineInvariantDifferentialDecision::validParams()
 {
-  InputParameters params = PMCMCDecisionBase::validParams();
+  InputParameters params = PMCMCDecision::validParams();
   params.addClassDescription("Perform decision making for Affine Invariant differential MCMC using a GP.");
   params.addParam<bool>(
       "correct_GP_output",
@@ -32,7 +32,7 @@ GPAffineInvariantDifferentialDecision::validParams()
 
 GPAffineInvariantDifferentialDecision::GPAffineInvariantDifferentialDecision(
     const InputParameters & parameters)
-  : PMCMCDecisionBase(parameters),
+  : PMCMCDecision(parameters),
     SurrogateModelInterface(this),
     _correct_GP_output(getParam<bool>("correct_GP_output")),
     _incorrect_variance(getParam<Real>("incorrect_variance")),

@@ -8,13 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PMCMCDecision.h"
+#include "Sampler.h"
+#include "DenseMatrix.h"
 
 registerMooseObject("StochasticToolsApp", PMCMCDecision);
 
 InputParameters
 PMCMCDecision::validParams()
 {
-  InputParameters params = PMCMCDecisionBase::validParams();
+  InputParameters params = GeneralReporter::validParams();
   params += LikelihoodInterface::validParams();
   params.addClassDescription("Generic reporter which decides whether or not to accept a proposed "
                              "sample in parallel Markov chain Monte Carlo type of algorithms.");
@@ -24,15 +26,33 @@ PMCMCDecision::validParams()
       "outputs_required",
       "outputs_required",
       "Modified value of the model output from this reporter class.");
+  params.addParam<ReporterValueName>("inputs", "inputs", "Uncertain inputs to the model.");
+  params.addParam<ReporterValueName>("tpm", "tpm", "The transition probability matrix.");
+  params.addParam<ReporterValueName>("variance", "variance", "Model variance term.");
+  params.addParam<ReporterValueName>(
+      "noise", "noise", "Model noise term to pass to Likelihoods object.");
+  params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
   params.addRequiredParam<std::vector<UserObjectName>>("likelihoods", "Names of likelihoods.");
   return params;
 }
 
 PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
-  : PMCMCDecisionBase(parameters),
+  : GeneralReporter(parameters),
     LikelihoodInterface(parameters),
     _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
-    _outputs_required(declareValue<std::vector<Real>>("outputs_required"))
+    _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
+    _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
+    _tpm(declareValue<std::vector<Real>>("tpm")),
+    _variance(declareValue<std::vector<Real>>("variance")),
+    _noise(declareValue<Real>("noise")),
+    _sampler(getSampler("sampler")),
+    _pmcmc(dynamic_cast<const PMCMCBase *>(&_sampler)),
+    _rnd_vec(_pmcmc->getRandomNumbers()),
+    _new_var_samples(_pmcmc->getVarSamples()),
+    _priors(_pmcmc->getPriors()),
+    _var_prior(_pmcmc->getVarPrior()),
+    _local_comm(_sampler.getLocalComm()),
+    _check_step(std::numeric_limits<int>::max())
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
@@ -42,7 +62,18 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   if (!_pmcmc)
     paramError("sampler", "The selected sampler is not of type MCMC.");
 
+  // Fetching the sampler characteristics
+  _props = _pmcmc->getNumParallelProposals();
+  _num_confg_values = _pmcmc->getNumberOfConfigValues();
+  _num_confg_params = _pmcmc->getNumberOfConfigParams();
+
+  // Resizing the data arrays to transmit to the output file
+  _inputs.resize(_props);
+  for (unsigned int i = 0; i < _props; ++i)
+    _inputs[i].resize(_sampler.getNumberOfCols() - _num_confg_params);
   _outputs_required.resize(_sampler.getNumberOfRows());
+  _tpm.resize(_props);
+  _variance.resize(_props);
 }
 
 void
@@ -87,9 +118,9 @@ PMCMCDecision::computeTransitionVector(std::vector<Real> & tv,
 
 void
 PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
-                               DenseMatrix<Real> & input_matrix,
-                               const std::vector<Real> & tv,
-                               const unsigned int & parallel_index)
+                           DenseMatrix<Real> & input_matrix,
+                           const std::vector<Real> & tv,
+                           const unsigned int & parallel_index)
 {
   if (tv[parallel_index] >= _rnd_vec[parallel_index])
   {
