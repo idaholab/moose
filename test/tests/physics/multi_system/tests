@@ -1,0 +1,20 @@
+[Tests]
+  design = 'Physics/index.md'
+  issues = '#29019'
+  [cg]
+    type = CSVDiff
+    input = 'diffusion_multisys.i'
+    csvdiff = 'diffusion_multisys_out_sample_0010.csv'
+    requirement = 'The system shall be able to set up multi-system problems using a Physics syntax.'
+  []
+  [errors]
+    requirement = 'The system shall return an error'
+    [wrong_systems]
+      type = RunException
+      input = 'diffusion_multisys.i'
+      cli_args = "Diffusion/Physics/cg/system_name='abc'"
+      expect_err = "System 'abc' is not used in the Problem"
+      detail = 'if the system specified to the Physics does not exist'
+    []
+  []
+[]
