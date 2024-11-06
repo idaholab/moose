@@ -13,20 +13,29 @@
 
 /**
  *  Computes the time derivative of the azimuthal component
- *  of the magnetic field assuming cylindrical electric field. The electric field is
- *  is supplied as scalar components.
+ *  of the magnetic field assuming cylindrical electric field. The electric field can
+ *  be supplied as a vector or scalar components.
  */
-class AzimuthMagneticTimeDerivScalarRZ : public AuxKernel
+class AzimuthMagneticTimeDerivRZ : public AuxKernel
 {
 public:
   static InputParameters validParams();
-
-  AzimuthMagneticTimeDerivScalarRZ(const InputParameters & parameters);
+  
+  AzimuthMagneticTimeDerivRZ(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
 private:
+  /// True if the vector of the electric field was provided
+  const bool _is_efield_vector;
+
+  /// True if both the x- & y- component of the electric field were provided
+  const bool _is_efield_scalar;
+
+  /// Curl of the electric field vector
+  const VectorVariableCurl & _efield_curl;
+
   /// Gradient of the x-component of the electric field
   const VariableGradient & _efield_x_grad;
 

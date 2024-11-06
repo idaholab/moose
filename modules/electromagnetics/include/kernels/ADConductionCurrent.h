@@ -15,12 +15,12 @@
  *  Calculates the current source term in the Helmholtz wave equation using
  *  the conduction formulation of the current.
  */
-class ADConductiveCurrent : public ADVectorKernel
+class ADConductionCurrent : public ADVectorKernel
 {
 public:
   static InputParameters validParams();
 
-  ADConductiveCurrent(const InputParameters & parameters);
+  ADConductionCurrent(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;

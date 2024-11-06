@@ -166,7 +166,7 @@
     component = real
   []
   [conduction_real]
-    type = ADConductiveCurrent
+    type = ADConductionCurrent
     variable = E_real
     E_imag = E_imag
     E_real = E_real
@@ -199,7 +199,7 @@
     component = imaginary
   []
   [conduction_imag]
-    type = ADConductiveCurrent
+    type = ADConductionCurrent
     variable = E_imag
     E_imag = E_imag
     E_real = E_real
