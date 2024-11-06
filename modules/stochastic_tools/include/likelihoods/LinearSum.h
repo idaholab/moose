@@ -9,18 +9,17 @@
 
 #pragma once
 
-#include "LikelihoodFunctionBase.h"
-#include "ReporterInterface.h"
+#include "Gaussian.h"
 
 /**
- * A class used to generate a Linear function of observing model predictions
+ * A class used to generate a LinearSum function of observing model predictions
  */
-class Linear : public LikelihoodFunctionBase, public ReporterInterface
+class LinearSum : public Gaussian
 {
 public:
   static InputParameters validParams();
 
-  Linear(const InputParameters & parameters);
+  LinearSum(const InputParameters & parameters);
 
   virtual Real function(const std::vector<Real> & x) const override;
 
@@ -29,17 +28,8 @@ public:
    * @param exp The experimental measurement
    * @param model The model prediction
    * @param noise The standard deviation
-   * @param log_likelihood Bool to return the log likelihood value
    */
   static Real function(const std::vector<Real> & exp,
                        const std::vector<Real> & model,
-                       const Real & noise,
-                       const bool & log_likelihood);
-
-protected:
-  /// Noise value
-  const Real & _noise;
-
-  /// Experimental data values
-  std::vector<Real> _exp_values;
+                       const Real & noise);
 };
