@@ -231,7 +231,6 @@ class TestHarness:
         # Finally load the plugins!
         self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
 
-        self._infiles = ['tests']
         self.parse_errors = []
         self.test_table = []
         self.num_passed = 0
@@ -368,14 +367,12 @@ class TestHarness:
         self.preRun()
         self.start_time = datetime.datetime.now()
         launched_tests = []
-        if self.options.input_file_name != '':
-            self._infiles = self.options.input_file_name.split(',')
 
         if self.options.spec_file and os.path.isdir(self.options.spec_file):
             search_dir = self.options.spec_file
         elif self.options.spec_file and os.path.isfile(self.options.spec_file):
             search_dir = os.path.dirname(self.options.spec_file)
-            self._infiles = [os.path.basename(self.options.spec_file)]
+            assert self.options.input_file_name == os.path.basename(self.options.spec_file)
         else:
             search_dir = os.getcwd()
 
@@ -426,7 +423,7 @@ class TestHarness:
                             testroot_params["root_params"] = root_params
 
                         # See if there were other arguments (test names) passed on the command line
-                        if file in self._infiles \
+                        if file == self.options.input_file_name \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
                             if self.notMySpecFile(dirpath, file):
@@ -524,10 +521,8 @@ class TestHarness:
         test_dir = os.path.abspath(os.path.dirname(filename))
         relative_path = test_dir.replace(self.run_tests_dir, '')
         first_directory = relative_path.split(os.path.sep)[1] # Get first directory
-        for infile in self._infiles:
-            if infile in relative_path:
-                relative_path = relative_path.replace('/' + infile + '/', ':')
-                break
+        if self.options.input_file_name in relative_path:
+            relative_path = relative_path.replace('/' + self.options.input_file_name + '/', ':')
         relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
         relative_hitpath = os.path.join(*params['hit_path'].split(os.sep)[2:])  # Trim root node "[Tests]"
         formatted_name = relative_path + '.' + relative_hitpath
@@ -768,7 +763,7 @@ class TestHarness:
                         tester_dirs[tester.getTestDir()] = (tester_dirs.get(tester.getTestDir(), 0) + total_time)
                 for k, v in tester_dirs.items():
                     rel_spec_path = f'{os.path.sep}'.join(k.split(os.path.sep)[-2:])
-                    dag_table.append([f'{rel_spec_path}{os.path.sep}{self._infiles[0]}', f'{v:.3f}'])
+                    dag_table.append([f'{rel_spec_path}{os.path.sep}{self.options.input_file_name}', f'{v:.3f}'])
 
                 sorted_table = sorted(dag_table, key=lambda dag_table: float(dag_table[1]), reverse=True)
                 if sorted_table[0:self.options.longest_jobs]:
@@ -858,10 +853,7 @@ class TestHarness:
                 sys.exit(1)
 
             # Adhere to previous input file syntax, or set the default
-            _input_file_name = 'tests'
-            if self.options.input_file_name:
-                _input_file_name = self.options.input_file_name
-            self.options.input_file_name = self.options.results_storage.get('input_file_name', _input_file_name)
+            self.options.input_file_name = self.options.results_storage.get('input_file_name', self.options.input_file_name)
 
             # Done working with existing storage
             return
@@ -877,6 +869,8 @@ class TestHarness:
         # Record the input file name that was used
         storage['input_file_name'] = self.options.input_file_name
 
+        # The test root directory
+        storage['root_dir'] = self._rootdir
         # Record that we are using --sep-files
         storage['sep_files'] = self.options.sep_files
 
@@ -1036,7 +1030,7 @@ class TestHarness:
         parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
         parser.add_argument('--longest-jobs', action='store', dest='longest_jobs', type=int, default=0, help='Print the longest running jobs upon completion')
         parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
-        parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='', help='The test specification file to look for')
+        parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', help='The test specification file to look for (default: tests)')
         parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
         parser.add_argument('--skip-config-checks', action='store_true', dest='skip_config_checks', help='Skip configuration checks (all tests will run regardless of restrictions)')
         parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
@@ -1160,9 +1154,15 @@ class TestHarness:
         if opts.check_input and opts.enable_recover:
             print('ERROR: --check-input and --recover cannot be used simultaneously')
             sys.exit(1)
-        if opts.spec_file and not os.path.exists(opts.spec_file):
-            print('ERROR: --spec-file supplied but path does not exist')
-            sys.exit(1)
+        if opts.spec_file:
+            if not os.path.exists(opts.spec_file):
+                print('ERROR: --spec-file supplied but path does not exist')
+                sys.exit(1)
+            if os.path.isfile(opts.spec_file):
+                if opts.input_file_name:
+                    print('ERROR: Cannot use -i with --spec-file being a file')
+                    sys.exit(1)
+                self.options.input_file_name = os.path.basename(opts.spec_file)
         if opts.verbose and opts.quiet:
             print('Do not be an oxymoron with --verbose and --quiet')
             sys.exit(1)
@@ -1191,6 +1191,10 @@ class TestHarness:
         # Update libmesh_dir to reflect arguments
         if opts.libmesh_dir:
             self.libmesh_dir = opts.libmesh_dir
+
+        # Set default
+        if not self.options.input_file_name:
+            self.options.input_file_name = 'tests'
 
     def postRun(self, specs, timing):
         return

@@ -1168,6 +1168,20 @@ Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp) const
   }
 }
 
+template <>
+const GenericVariableValue<false> &
+Coupleable::coupledGenericDotDot<false>(const std::string & var_name, unsigned int comp) const
+{
+  return coupledDotDot(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::coupledGenericDotDot<true>(const std::string & var_name, unsigned int comp) const
+{
+  return adCoupledDotDot(var_name, comp);
+}
+
 const VariableValue &
 Coupleable::coupledDotOld(const std::string & var_name, unsigned int comp) const
 {
@@ -2207,12 +2221,18 @@ Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp) const
     return *getADDefaultValue(var_name);
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
-  if (_c_nodal)
-    mooseError("Not implemented");
-
   if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->adDofValuesDot();
     return var->adUDot();
-  return var->adUDotNeighbor();
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("AD neighbor nodal dof dot not implemented");
+    return var->adUDotNeighbor();
+  }
 }
 
 const ADVariableValue &
@@ -2685,6 +2705,20 @@ Coupleable::adCoupledDots(const std::string & var_name) const
 {
   auto func = [this, &var_name](unsigned int comp) { return &adCoupledDot(var_name, comp); };
   return coupledVectorHelper<const ADVariableValue *>(var_name, func);
+}
+
+template <>
+const GenericVariableValue<false> &
+Coupleable::coupledGenericDot<false>(const std::string & var_name, unsigned int comp) const
+{
+  return coupledDot(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::coupledGenericDot<true>(const std::string & var_name, unsigned int comp) const
+{
+  return adCoupledDot(var_name, comp);
 }
 
 // Explicit instantiations

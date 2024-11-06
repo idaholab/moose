@@ -46,6 +46,10 @@ CentralDifference::computeADTimeDerivatives(ADReal & ad_u_dot,
                                             const dof_id_type & dof,
                                             ADReal & ad_u_dotdot) const
 {
+  // Seeds ad_u_dotdot with _ad_dof_values and associated derivatives provided via ad_u_dot from
+  // MooseVariableData
+  ad_u_dotdot = ad_u_dot;
+
   computeTimeDerivativeHelper(ad_u_dot, ad_u_dotdot, _solution_old(dof), _solution_older(dof));
 }
 

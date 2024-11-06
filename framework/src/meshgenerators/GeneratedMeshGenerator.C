@@ -113,6 +113,12 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
 {
   if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
     mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
+  if (_xmax < _xmin)
+    paramError("xmax", "xmax must be larger than xmin.");
+  if (_ymax < _ymin)
+    paramError("ymax", "ymax must be larger than ymin.");
+  if (_zmax < _zmin)
+    paramError("zmax", "zmax must be larger than zmin.");
 }
 
 std::unique_ptr<MeshBase>

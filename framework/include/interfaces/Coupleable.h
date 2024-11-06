@@ -242,6 +242,28 @@ protected:
                                                              unsigned int comp = 0) const;
 
   /**
+   * Returns time derivative of a coupled variable for use in templated automatic differentiation
+   * classes
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a GenericVariableValue for the coupled variable time derivative
+   */
+  template <bool is_ad>
+  const GenericVariableValue<is_ad> & coupledGenericDot(const std::string & var_name,
+                                                        unsigned int comp = 0) const;
+
+  /**
+   * Returns the second time derivative of a coupled variable for use in templated automatic
+   * differentiation classes
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a GenericVariableValue for the coupled variable second time derivative
+   */
+  template <bool is_ad>
+  const GenericVariableValue<is_ad> & coupledGenericDotDot(const std::string & var_name,
+                                                           unsigned int comp = 0) const;
+
+  /**
    * Returns value of a coupled lower-dimensional variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
