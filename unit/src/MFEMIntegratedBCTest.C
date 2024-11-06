@@ -102,8 +102,6 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
 
 TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
 {
-  // Build required BC inputs
-
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorBoundaryIntegratedBC");
   bc_params.set<std::string>("variable") = "test_variable_name";
@@ -126,13 +124,13 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
 TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionBoundaryIntegratedBC)
 {
   // Build required BC inputs
-
-  // Construct boundary condition
   InputParameters func_params = _factory.getValidParams("ParsedVectorFunction");
   func_params.set<std::string>("expression_x") = "x + y";
   func_params.set<std::string>("expression_y") = "x + y + 1";
   func_params.set<std::string>("expression_z") = "x + y + 2";
   _mfem_problem->addFunction("ParsedVectorFunction", "func1", func_params);
+
+  // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionBoundaryIntegratedBC");
   bc_params.set<std::string>("variable") = "test_variable_name";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
