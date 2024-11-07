@@ -75,13 +75,7 @@ LinearFVMomentumBoussinesq::computeRightHandSideContribution()
 {
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
-  // return -_alpha(elem, state) * _gravity(_index) * _rho(elem, state) *
-  //        (_temperature_var.getElemValue(*_current_elem_info, state) - _ref_temperature);
-  // _console << _alpha(elem, state) * _rho(elem, state) *
-  //                 _temperature_var.gradSln(*_current_elem_info)(_index) / 300 *
-  //                 (_current_elem_info->centroid() * _gravity)
-  //          << std::endl;
-  return -_alpha(elem, state) * _rho(elem, state) *
-         _temperature_var.gradSln(*_current_elem_info)(_index) *
-         (_current_elem_info->centroid() * _gravity);
+  return -_alpha(elem, state) * _gravity(_index) * _rho(elem, state) *
+         (_temperature_var.getElemValue(*_current_elem_info, state) - _ref_temperature) *
+         _current_elem_volume;
 }
