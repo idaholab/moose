@@ -34,8 +34,7 @@ AddDefaultConvergenceAction::act()
   if (_problem->needToAddDefaultNonlinearConvergence())
   {
     const std::string default_name = "default_nonlinear_convergence";
-
-    // Create a default convergence and use it for every nonlinear system
+    // Create a default convergence for every nonlinear system
     std::vector<ConvergenceName> default_name_vec;
     for (const auto & nl_sys_name : _problem->getNonlinearSystemNames())
       default_name_vec.push_back(default_name + nl_sys_name);
