@@ -48,7 +48,7 @@ if [[ -n "$HELP" ]]; then
   echo "--cleanup                            Remove the downloaded tarball after the install"
   echo "--version=VERSION_NUMBER             Specify the version number of libtorch"
   echo "--libtorch-dest=DESTINATION          Specify where the packages are to be copied"
-  echo "--libtorch-distribution=DISTRIBUTION Specify the distribution (cpu/cuda)"
+  echo "--libtorch-distribution=DISTRIBUTION Specify the distribution (cpu/cu118/cu121/cu124/rocm6.2)"
   echo "*************************************************************************************"
   echo ""
   exit 0
@@ -173,6 +173,7 @@ PACKAGE=${TORCH_DEST}/${FILENAME}
 if [[ -f $PACKAGE ]]; then
   echo "Found requested package for libtorch v. $VERSION, no need to download."
 else
+  echo https://download.pytorch.org/libtorch/$TORCH_DISTRIBUTION/$FILENAME
   curl -L $IGNORE_CERT -o $PACKAGE https://download.pytorch.org/libtorch/$TORCH_DISTRIBUTION/$FILENAME
 fi
 echo "Extracting $PACKAGE."
