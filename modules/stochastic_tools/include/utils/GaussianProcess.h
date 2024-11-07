@@ -83,9 +83,9 @@ public:
     /// Tuning parameter from the paper
     const Real b2 = 0.999;
     /// Tuning parameter from the paper
-    const Real eps = 1e-8;
+    const Real eps = 1e-7;
     /// Tuning parameter from the paper
-    const Real lambda = 1e-4;
+    const Real lambda = 0.0;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.

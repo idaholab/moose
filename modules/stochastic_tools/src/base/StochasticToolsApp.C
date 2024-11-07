@@ -92,7 +92,7 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   addTaskDependency("add_distribution", "add_likelihood");
   // Parallel acquisition (active learning)
   registerSyntaxTask(
-      "AddParallelAcqusitionAction", "ParallelAcqusition/*", "add_parallelacquisition");
+      "AddParallelAcquisitionAction", "ParallelAcquisition/*", "add_parallelacquisition");
   registerMooseObjectTask("add_parallelacquisition", ParallelAcquisitionFunctionBase, false);
   addTaskDependency("add_parallelacquisition", "add_user_object");
   addTaskDependency("add_distribution", "add_parallelacquisition");
