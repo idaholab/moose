@@ -45,7 +45,7 @@ BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
   _num_confg_values = _bayes_al_sampler->getNumberOfConfigValues();
   _num_confg_params = _bayes_al_sampler->getNumberOfConfigParams();
 
-  // Resize the length scales depending upon variance is included
+  // Resize the length scales depending upon whether variance is included
   if (_var_prior)
     _length_scales.resize(_n_dim + 1);
   else
@@ -165,4 +165,3 @@ BayesianActiveLearner::includeAdditionalInputs()
     _inputs_test_modified[i] = tmp;
   }
 }
-

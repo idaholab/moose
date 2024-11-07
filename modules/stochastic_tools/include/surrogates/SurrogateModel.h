@@ -55,8 +55,9 @@ public:
     evaluateError(x, std, true);
     return 0.0;
   }
-  virtual void
-  evaluate(const std::vector<Real> & x, std::vector<Real> & y, std::vector<Real> & /*std*/) const
+  virtual void evaluate(const std::vector<Real> & x,
+                        std::vector<Real> & y,
+                        std::vector<Real> & /*std*/) const
   {
     evaluateError(x, y, true);
   }
