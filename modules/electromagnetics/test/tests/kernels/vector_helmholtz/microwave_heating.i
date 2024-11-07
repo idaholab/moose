@@ -1,4 +1,4 @@
-# Test for ComplexHeating
+# Test for EMJouleHeatingSource
 # Manufactured solution: E_real = cos(pi*y) * x_hat - cos(pi*x) * y_hat
 #                        E_imag = sin(pi*y) * x_hat - sin(pi*x) * y_hat
 #                        n = x^2*y^2
@@ -213,7 +213,7 @@
     variable = n
   []
   [microwave_heating]
-    type = ComplexHeating
+    type = EMJouleHeatingSource
     variable = n
     E_imag = E_imag
     E_real = E_real

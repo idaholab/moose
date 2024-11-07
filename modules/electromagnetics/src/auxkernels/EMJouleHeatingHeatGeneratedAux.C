@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AuxComplexHeating.h"
+#include "EMJouleHeatingHeatGeneratedAux.h"
 
-registerMooseObject("ElectromagneticsApp", AuxComplexHeating);
+registerMooseObject("ElectromagneticsApp", EMJouleHeatingHeatGeneratedAux);
 
 InputParameters
-AuxComplexHeating::validParams()
+EMJouleHeatingHeatGeneratedAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes the heating due to the electic field in the "
@@ -24,7 +24,7 @@ AuxComplexHeating::validParams()
   return params;
 }
 
-AuxComplexHeating::AuxComplexHeating(const InputParameters & parameters)
+EMJouleHeatingHeatGeneratedAux::EMJouleHeatingHeatGeneratedAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _E_real(coupledVectorValue("E_real")),
     _E_imag(coupledVectorValue("E_imag")),
@@ -33,7 +33,7 @@ AuxComplexHeating::AuxComplexHeating(const InputParameters & parameters)
 }
 
 Real
-AuxComplexHeating::computeValue()
+EMJouleHeatingHeatGeneratedAux::computeValue()
 {
   return 0.5 * raw_value(_cond[_qp]) * (_E_real[_qp] * _E_real[_qp] + _E_imag[_qp] * _E_imag[_qp]);
 }

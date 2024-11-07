@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComplexHeating.h"
+#include "EMJouleHeatingSource.h"
 #include "Assembly.h"
 #include "ElectromagneticEnums.h"
 #include "ElectromagneticConstants.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElectromagneticsApp", ComplexHeating);
+registerMooseObject("ElectromagneticsApp", EMJouleHeatingSource);
 
 InputParameters
-ComplexHeating::validParams()
+EMJouleHeatingSource::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription("Supplies the heating due to the electic field in the "
@@ -30,7 +30,7 @@ ComplexHeating::validParams()
   return params;
 }
 
-ComplexHeating::ComplexHeating(const InputParameters & parameters)
+EMJouleHeatingSource::EMJouleHeatingSource(const InputParameters & parameters)
   : ADKernel(parameters),
     _E_real(adCoupledVectorValue("E_real")),
     _E_imag(adCoupledVectorValue("E_imag")),
@@ -40,7 +40,7 @@ ComplexHeating::ComplexHeating(const InputParameters & parameters)
 }
 
 ADReal
-ComplexHeating::computeQpResidual()
+EMJouleHeatingSource::computeQpResidual()
 {
   return -_test[_i][_qp] * _scale * 0.5 * _cond[_qp] *
          (_E_real[_qp] * _E_real[_qp] + _E_imag[_qp] * _E_imag[_qp]);

@@ -9,30 +9,32 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "ADKernel.h"
 
 /**
- *  Computes the heating due to the electric field (E) in the form of
+ *  Supplies the heating due to the electic field (E) in the form of
  *  0.5 Re( conductivity * E * E^* )
  *  where E^* is the complex conjugate of the electric field.
  */
-class AuxComplexHeating : public AuxKernel
+class EMJouleHeatingSource : public ADKernel
 {
 public:
   static InputParameters validParams();
 
-  AuxComplexHeating(const InputParameters & parameters);
+  EMJouleHeatingSource(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue() override;
+  virtual ADReal computeQpResidual() override;
 
-private:
   /// Vector variable of the real component of the electric field
-  const VectorVariableValue & _E_real;
+  const ADVectorVariableValue & _E_real;
 
   /// Vector variable of the imaginary component of the electric field
-  const VectorVariableValue & _E_imag;
+  const ADVectorVariableValue & _E_imag;
 
   /// Real component of the material conductivity (in S/m)
   const ADMaterialProperty<Real> & _cond;
+
+  /// Coefficient to multiply by heating term
+  const Real & _scale;
 };
