@@ -103,6 +103,21 @@ It is strongly recommended that you +NOT+ load `moose-dev-openmpi` without a ver
 so invokes the default action of loading the latest available version (new versions are added
 multiple times, daily).
 
+### Environment Recap
+
+!style halign=left
+You +must+ repeat the above versioning/module-loading technique, whenever you are performing
+MOOSE based work:
+
+1. figure out the version you need:
+
+  `moose/scripts/versioner.py moose-dev`
+
+
+2. load the matching module version:
+
+  `module load use.moose moose-dev-openmpi/<results of step 1>`
+
 ## Building Application id=building
 
 !style halign=left
