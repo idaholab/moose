@@ -11,6 +11,8 @@
 
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
+#include "DefaultNonlinearConvergence.h"
+#include "ReferenceResidualConvergence.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -21,9 +23,43 @@ FEProblemSolve::mooseLineSearches()
 }
 
 InputParameters
+FEProblemSolve::feProblemDefaultConvergenceParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
+  params.addParam<unsigned int>("nl_forced_its", 0, "The Number of Forced Nonlinear Iterations");
+  params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
+  params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
+  params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
+  params.addParam<Real>(
+      "nl_div_tol",
+      1.0e10,
+      "Nonlinear Relative Divergence Tolerance. A negative value disables this check.");
+  params.addParam<Real>(
+      "nl_abs_div_tol",
+      1.0e50,
+      "Nonlinear Absolute Divergence Tolerance. A negative value disables this check.");
+  params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
+  params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
+  params.addParam<unsigned int>("n_max_nonlinear_pingpong",
+                                100,
+                                "The maximum number of times the nonlinear residual can ping pong "
+                                "before requesting halting the current evaluation and requesting "
+                                "timestep cut for transient simulations");
+
+  params.addParamNamesToGroup("nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol "
+                              "nl_rel_step_tol nl_div_tol nl_abs_div_tol n_max_nonlinear_pingpong",
+                              "Nonlinear Solver");
+
+  return params;
+}
+
+InputParameters
 FEProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
+  params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
   params.addParam<std::vector<std::string>>("splitting",
                                             {},
@@ -61,26 +97,10 @@ FEProblemSolve::validParams()
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
-  params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
-  params.addParam<unsigned int>("nl_forced_its", 0, "The Number of Forced Nonlinear Iterations");
-  params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
-  params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
-  params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
-  params.addParam<Real>(
-      "nl_div_tol",
-      1.0e10,
-      "Nonlinear Relative Divergence Tolerance. A negative value disables this check.");
-  params.addParam<Real>(
-      "nl_abs_div_tol",
-      1.0e50,
-      "Nonlinear Absolute Divergence Tolerance. A negative value disables this check.");
-  params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
-  params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
-  params.addParam<unsigned int>(
-      "n_max_nonlinear_pingpong",
-      100,
-      "The maximum number of times the nonlinear residual can ping pong "
-      "before requesting halting the current evaluation and requesting timestep cut");
+  params.addParam<ConvergenceName>("nonlinear_convergence",
+                                   "Name of Convergence object to use to assess convergence of the "
+                                   "nonlinear solve. If not provided, the default Convergence "
+                                   "associated with the Problem will be constructed internally.");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -153,11 +173,9 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
                               "Linear Solver");
-  params.addParamNamesToGroup(
-      "solve_type nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol "
-      "nl_rel_step_tol snesmf_reuse_base use_pre_SMO_residual num_grids nl_div_tol nl_abs_div_tol "
-      "residual_and_jacobian_together n_max_nonlinear_pingpong splitting",
-      "Nonlinear Solver");
+  params.addParamNamesToGroup("solve_type nl_abs_step_tol snesmf_reuse_base use_pre_SMO_residual "
+                              "num_grids residual_and_jacobian_together splitting",
+                              "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
@@ -182,6 +200,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   // Extract and store PETSc related settings on FEProblemBase
   Moose::PetscSupport::storePetscOptions(_problem, _pars);
 
+  // Set linear solve parameters in the equation system
+  // Nonlinear solve parameters are added in the DefaultNonlinearConvergence
   EquationSystems & es = _problem.es();
   es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
 
@@ -189,26 +209,6 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   es.parameters.set<unsigned int>("linear solver maximum iterations") =
       getParam<unsigned int>("l_max_its");
-
-  es.parameters.set<unsigned int>("nonlinear solver maximum iterations") =
-      getParam<unsigned int>("nl_max_its");
-
-  es.parameters.set<unsigned int>("nonlinear solver maximum function evaluations") =
-      getParam<unsigned int>("nl_max_funcs");
-
-  es.parameters.set<Real>("nonlinear solver absolute residual tolerance") =
-      getParam<Real>("nl_abs_tol");
-
-  es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
-      getParam<Real>("nl_rel_tol");
-
-  es.parameters.set<Real>("nonlinear solver divergence tolerance") = getParam<Real>("nl_div_tol");
-
-  es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
-      getParam<Real>("nl_abs_step_tol");
-
-  es.parameters.set<Real>("nonlinear solver relative step tolerance") =
-      getParam<Real>("nl_rel_step_tol");
 
   es.parameters.set<bool>("reuse preconditioner") = getParam<bool>("reuse_preconditioner");
 
@@ -220,11 +220,14 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
 
-  _problem.setMaxNLPingPong(getParam<unsigned int>("n_max_nonlinear_pingpong"));
-
-  _problem.setNonlinearForcedIterations(getParam<unsigned int>("nl_forced_its"));
-
-  _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
+  if (isParamValid("nonlinear_convergence"))
+  {
+    _problem.setNonlinearConvergenceName(getParam<ConvergenceName>("nonlinear_convergence"));
+    if (_problem.onlyAllowDefaultNonlinearConvergence())
+      mooseError("The selected problem does not allow 'nonlinear_convergence' to be set.");
+  }
+  else
+    _problem.setNeedToAddDefaultNonlinearConvergence();
 
   _nl.setDecomposition(_splitting);
 

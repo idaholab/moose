@@ -55,4 +55,12 @@
     requirement = "The system shall not print automatic scaling factors if not specified."
     issues = '#13795'
   [../]
+
+  [unused_nl_convergence_params]
+    type = RunException
+    input = 'unused_nl_convergence_params.i'
+    expect_err = "The following nonlinear convergence parameters were set in the executioner, but are not used"
+    requirement = "The system shall report an error if the user specifies nonlinear convergence parameters that are not used."
+    issues = '#24128'
+  []
 []

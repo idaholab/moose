@@ -87,7 +87,7 @@ class LineSearch;
 class UserObject;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
-class Function;
+class Convergence;
 class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
@@ -100,26 +100,6 @@ class NonlinearImplicitSystem;
 class LinearImplicitSystem;
 } // namespace libMesh
 
-/// Enumeration for nonlinear convergence reasons
-enum class MooseNonlinearConvergenceReason
-{
-  ITERATING = 0,
-  CONVERGED_FNORM_ABS = 2,
-  CONVERGED_FNORM_RELATIVE = 3,
-  CONVERGED_SNORM_RELATIVE = 4,
-  DIVERGED_FUNCTION_COUNT = -2,
-  DIVERGED_FNORM_NAN = -4,
-  DIVERGED_LINE_SEARCH = -6,
-  DIVERGED_DTOL = -9,
-  DIVERGED_NL_RESIDUAL_PINGPONG = -10
-};
-
-// The idea with these enums is to abstract the reasons for
-// convergence/divergence, i.e. they could be used with linear algebra
-// packages other than PETSc.  They were directly inspired by PETSc,
-// though.  This enum could also be combined with the
-// MooseNonlinearConvergenceReason enum but there might be some
-// confusion (?)
 enum class MooseLinearConvergenceReason
 {
   ITERATING = 0,
@@ -225,52 +205,6 @@ public:
   couplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
-
-  /**
-   * Check for convergence of the nonlinear solution
-   * @param msg Error message that gets sent back to the solver
-   * @param it Iteration counter
-   * @param xnorm Norm of the solution vector
-   * @param snorm Norm of the change in the solution vector
-   * @param fnorm Norm of the residual vector
-   * @param rtol Relative residual convergence tolerance
-   * @param divtol Relative residual divergence tolerance
-   * @param stol Solution change convergence tolerance
-   * @param abstol Absolute residual convergence tolerance
-   * @param nfuncs Number of function evaluations
-   * @param max_funcs Maximum Number of function evaluations
-   * @param div_threshold Maximum value of residual before triggering divergence check
-   */
-  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string & msg,
-                                                                    const PetscInt it,
-                                                                    const Real xnorm,
-                                                                    const Real snorm,
-                                                                    const Real fnorm,
-                                                                    const Real rtol,
-                                                                    const Real divtol,
-                                                                    const Real stol,
-                                                                    const Real abstol,
-                                                                    const PetscInt nfuncs,
-                                                                    const PetscInt max_funcs,
-                                                                    const Real div_threshold);
-
-  /// Perform steps required before checking nonlinear convergence
-  virtual void nonlinearConvergenceSetup() {}
-
-  /**
-   * Check the relative convergence of the nonlinear solution
-   * @param fnorm          Norm of the residual vector
-   * @param the_residual   The residual to check
-   * @param rtol           Relative tolerance
-   * @param abstol         Absolute tolerance
-   * @return               Bool signifying convergence
-   */
-  virtual bool checkRelativeConvergence(const PetscInt it,
-                                        const Real fnorm,
-                                        const Real the_residual,
-                                        const Real rtol,
-                                        const Real abstol,
-                                        std::ostringstream & oss);
 
   virtual bool hasVariable(const std::string & var_name) const override;
   using SubProblem::getVariable;
@@ -684,6 +618,43 @@ public:
   addMeshDivision(const std::string & type, const std::string & name, InputParameters & params);
   /// Get a MeshDivision
   MeshDivision & getMeshDivision(const std::string & name, const THREAD_ID tid = 0) const;
+
+  /// Adds a Convergence object
+  virtual void
+  addConvergence(const std::string & type, const std::string & name, InputParameters & parameters);
+  /// Gets a Convergence object
+  virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0) const;
+  /// Gets the Convergence objects
+  virtual const std::vector<std::shared_ptr<Convergence>> &
+  getConvergenceObjects(const THREAD_ID tid = 0) const;
+  /// Returns true if the problem has a Convergence object of the given name
+  virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0) const;
+  /// Returns true if the problem needs to add the default nonlinear convergence
+  bool needToAddDefaultNonlinearConvergence() const
+  {
+    return _need_to_add_default_nonlinear_convergence;
+  }
+  /// Sets _need_to_add_default_nonlinear_convergence to true
+  void setNeedToAddDefaultNonlinearConvergence()
+  {
+    _need_to_add_default_nonlinear_convergence = true;
+  }
+  /**
+   * Adds the default nonlinear Convergence associated with the problem
+   *
+   * This is called if the user does not supply 'nonlinear_convergence'.
+   *
+   * @param[in] params   Parameters to apply to Convergence parameters
+   */
+  virtual void addDefaultNonlinearConvergence(const InputParameters & params);
+  /**
+   * Returns true if an error will result if the user supplies 'nonlinear_convergence'
+   *
+   * Some problems are strongly tied to their convergence, and it does not make
+   * sense to use any convergence other than their default and additionally
+   * would be error-prone.
+   */
+  virtual bool onlyAllowDefaultNonlinearConvergence() const { return false; }
 
   /**
    * add a MOOSE line search
@@ -2231,26 +2202,19 @@ public:
 
   bool haveDisplaced() const override final { return _displaced_problem.get(); }
 
-  /// method setting the maximum number of allowable non linear residual pingpong
-  void setMaxNLPingPong(const unsigned int n_max_nl_pingpong)
+  /**
+   * Sets the nonlinear convergence object name if there is one
+   */
+  void setNonlinearConvergenceName(const ConvergenceName & convergence_name)
   {
-    _n_max_nl_pingpong = n_max_nl_pingpong;
+    _nonlinear_convergence_name = convergence_name;
+    _set_nonlinear_convergence_name = true;
   }
 
-  /// method setting the minimum number of nonlinear iterations before performing divergence checks
-  void setNonlinearForcedIterations(const unsigned int nl_forced_its)
-  {
-    _nl_forced_its = nl_forced_its;
-  }
-
-  /// method returning the number of forced nonlinear iterations
-  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; }
-
-  /// method setting the absolute divergence tolerance
-  void setNonlinearAbsoluteDivergenceTolerance(const Real nl_abs_div_tol)
-  {
-    _nl_abs_div_tol = nl_abs_div_tol;
-  }
+  /**
+   * Gets the nonlinear convergence object name if there is one
+   */
+  ConvergenceName getNonlinearConvergenceName() const;
 
   /**
    * Setter for whether we're computing the scaling jacobian
@@ -2322,6 +2286,10 @@ public:
    */
   void setFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = true; }
 
+  /**
+   * Do not skip further residual evaluations and fail the next nonlinear convergence check
+   */
+  void resetFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = false; }
   /*
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on
@@ -2430,6 +2398,9 @@ private:
 protected:
   bool _initialized;
 
+  /// Nonlinear convergence name
+  ConvergenceName _nonlinear_convergence_name;
+
   std::set<TagID> _fe_vector_tags;
 
   std::set<TagID> _fe_matrix_tags;
@@ -2450,15 +2421,10 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  /// maximum numbver
-  unsigned int _n_nl_pingpong = 0;
-  unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
-
-  /// the number of forced nonlinear iterations
-  int _nl_forced_its = 0;
-
-  /// the absolute non linear divergence tolerance
-  Real _nl_abs_div_tol = -1;
+  /// Flag that the nonlinear convergence name has been set
+  bool _set_nonlinear_convergence_name;
+  /// Flag that the problem needs to add the default nonlinear convergence
+  bool _need_to_add_default_nonlinear_convergence;
 
   /// The linear system names
   const std::vector<LinearSystemName> _linear_sys_names;
@@ -2528,6 +2494,9 @@ protected:
 
   /// functions
   MooseObjectWarehouse<Function> _functions;
+
+  /// convergence warehouse
+  MooseObjectWarehouse<Convergence> _convergences;
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
