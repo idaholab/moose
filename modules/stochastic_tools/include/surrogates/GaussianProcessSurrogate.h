@@ -24,8 +24,9 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const;
   virtual void evaluate(const std::vector<Real> & x, std::vector<Real> & y) const;
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
-  virtual void
-  evaluate(const std::vector<Real> & x, std::vector<Real> & y, std::vector<Real> & std) const;
+  virtual void evaluate(const std::vector<Real> & x,
+                        std::vector<Real> & y,
+                        std::vector<Real> & std) const;
 
   /**
    * This function is called by LoadCovarianceDataAction when the surrogate is

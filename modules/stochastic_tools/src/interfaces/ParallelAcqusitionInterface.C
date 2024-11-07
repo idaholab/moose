@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParallelAcquisitionInterface.h"
-#include "ParallelAcquisitionFunctionBase.h"
 
 InputParameters
 ParallelAcquisitionInterface::validParams()
@@ -28,7 +27,7 @@ ParallelAcquisitionInterface::getParallelAcquisitionFunctionByName(const UserObj
   _parallelacquisition_feproblem.theWarehouse()
       .query()
       .condition<AttribName>(name)
-      .condition<AttribSystem>("ParallelAcquisitionFunction")
+      .condition<AttribSystem>("ParallelAcquisitionFunctionBase")
       .queryInto(models);
 
   if (models.empty())
