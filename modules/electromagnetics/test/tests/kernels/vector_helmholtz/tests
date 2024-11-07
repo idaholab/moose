@@ -65,7 +65,7 @@
     input = 'microwave_heating.i'
     exodiff = 'microwave_heating_out.e'
     requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions.'
-    design = 'ComplexHeating.md'
+    design = 'EMJouleHeatingSource.md'
     issues = '#28758'
   []
   [microwave_heating_convergence_csv]
@@ -73,7 +73,7 @@
     command = microwave_heating_convergence.py
     csvdiff = 'microwave_heating_convergence.csv'
     requirement = 'The system shall be able to perform a convergence analysis for modeling the power deposition due to the electric field interactions.'
-    design = 'ComplexHeating.md'
+    design = 'EMJouleHeatingSource.md'
     issues = '#28758'
     heavy = True
     recover = false

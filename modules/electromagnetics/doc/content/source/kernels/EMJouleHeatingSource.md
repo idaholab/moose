@@ -1,11 +1,11 @@
-# ComplexHeating
+# EMJouleHeatingSource
 
-!syntax description /Kernels/ComplexHeating
+!syntax description /Kernels/EMJouleHeatingSource
 
 ## Overview
 
 !style halign=left
-The ComplexHeating object implements a heating term imparted to the medium based on the conduction current. The term is defined as:
+The EMJouleHeatingSource object implements a heating term imparted to the medium based on the conduction current. The term is defined as:
 
 \begin{equation}
   -0.5 * Re \left(\sigma \; \vec{E} \cdot \vec{E}^{*} \right) * \text{Scaling}
@@ -23,8 +23,8 @@ where
 
 !listing vector_helmholtz/microwave_heating.i block=Kernels/microwave_heating
 
-!syntax parameters /Kernels/ComplexHeating
+!syntax parameters /Kernels/EMJouleHeatingSource
 
-!syntax inputs /Kernels/ComplexHeating
+!syntax inputs /Kernels/EMJouleHeatingSource
 
-!syntax children /Kernels/ComplexHeating
+!syntax children /Kernels/EMJouleHeatingSource
