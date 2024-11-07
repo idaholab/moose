@@ -6,12 +6,14 @@ section for what may look familiar, and follow those instructions:
 - #### 404 error, The channel is not accessible or is invalid.
 
   If you are receiving this, you may be victim of us changing the channel name out from underneath
-  you (Sorry!). Remove the offending channel(s):
+  you (Sorry!). Remove the offending channels:
 
   ```bash
+  conda config --remove channels https://conda.software.inl.gov/public
   conda config --remove channels https://mooseframework.org/conda/moose
   conda config --remove channels https://mooseframework.com/conda/moose
   conda config --remove channels https://mooseframework.inl.gov/conda/moose
+  conda config --remove channels idaholab
   ```
 
   If you receive errors about a channel not present (CondaKeyError), please ignore. You most likely
@@ -109,12 +111,9 @@ section for what may look familiar, and follow those instructions:
 
   The quick fix-attempt, is to delete the faulty environment and re-install it:
 
-  !versioner! code
-  conda activate base
-  conda env remove -n moose
-  conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__ --channel https://conda.software.inl.gov/public
-  conda activate moose
-  !versioner-end!
+!include getting_started/installation/conda_remove_moose-env.md
+
+!include getting_started/installation/conda_install_moose-dev.md
 
   If the above re-install method ultimately failed, it is time to submit your errors to the
   [discussion forum](faq/discussion_forum.md).

@@ -1,11 +1,8 @@
 Update Conda:
 
-!versioner! code
-conda activate base
-conda env remove -n moose
-conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__ --channel https://conda.software.inl.gov/public
-conda activate moose
-!versioner-end!
+!include getting_started/installation/conda_remove_moose-env.md
+
+!include getting_started/installation/conda_install_moose-dev.md
 
 !alert note title=Always Update MOOSE and the Conda packages together
 There is a tight dependency between libraries being provided by Conda, and what libraries MOOSE

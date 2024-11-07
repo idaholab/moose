@@ -122,12 +122,9 @@ either a Conda update, or rebuild PETSc/libMesh:
 
 - If +Personal Machine (Conda)+:
 
-  !package! code
-  conda activate base
-  conda env remove -n moose
-  conda create -n moose moose-dev=__MOOSE_DEV__ __DEFAULT_MPI__ --channel https://conda.software.inl.gov/public
-  conda activate moose
-  !package-end!
+!include getting_started/installation/conda_remove_moose-env.md
+
+!include getting_started/installation/conda_install_moose-dev.md
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
 

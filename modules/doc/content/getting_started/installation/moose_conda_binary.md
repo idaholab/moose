@@ -16,21 +16,13 @@ Our preferred method for delivering pre-built MOOSE binaries is via Conda.
 
 !include getting_started/installation/install_miniconda.md
 
-## Install MOOSE
+## Install MOOSE Packages
 
 !style! halign=left
 With Conda initialized, create the `moose` environment and install `moose`:
 !style-end!
 
-```bash
-conda create -n moose moose --channel https://conda.software.inl.gov/public
-```
-
-After the installation completes, activate the new environment:
-
-```bash
-conda activate moose
-```
+!include getting_started/installation/conda_install_moose-opt.md
 
 !alert note
 Know that you will need to `conda activate moose` for +each terminal window you open, and each time

@@ -1,19 +1,9 @@
-## Install MOOSE id=moosepackages
+## Install moose-dev id=moosepackages
 
-!style! halign=left
-Create a unique conda environment for [!ac](MOOSE), named `moose`, and install the MOOSE dependency
-packages:
-!style-end!
+!style halign=left
+Create a unique developers environment (`moose`) and install the `moose-dev` Conda package:
 
-!versioner! code
-conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__ --channel https://conda.software.inl.gov/public
-!versioner-end!
-
-After the installation completes, activate the new environment:
-
-```bash
-conda activate moose
-```
+!include getting_started/installation/conda_install_moose-dev.md
 
 If you are running into errors, please see our
 [troubleshooting guide for Conda](help/troubleshooting.md#condaissues optional=True).

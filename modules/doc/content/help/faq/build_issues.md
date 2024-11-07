@@ -7,12 +7,9 @@ date.
 - Verify the Conda Environment is active and up to date, with the latest version of our moose
   packages:
 
-  !versioner! code
-  conda activate base
-  conda env remove -n moose
-  conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__ --channel https://conda.software.inl.gov/public
-  conda activate moose
-  !versioner-end!
+!include getting_started/installation/conda_remove_moose-env.md
+
+!include getting_started/installation/conda_install_moose-dev.md
 
   if `conda activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
