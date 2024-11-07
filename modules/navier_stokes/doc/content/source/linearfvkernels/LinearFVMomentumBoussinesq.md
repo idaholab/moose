@@ -1,0 +1,14 @@
+# LinearFVMomentumBoussinesq
+
+This kernel adds the contributions of the Boussinesq buoyancy treatment for density through a force/source term to the right hand side of the momentum equation system for the finite volume SIMPLE segregated solver [SIMPLE.md].
+
+This term is described by $-\rho_{ref}\alpha\vec{g}(T - T_{ref})$ present in the momentum equation conservation when describing an incompressible fluid, where $\rho_0$ is the reference density, $\alpha$ is the thermal expansion coefficient, $\vec{g}$ is the gravity vector, $T$ is the temperature, and $T_{ref}$ is a reference temperature. The Boussinesq buoyancy model assumes the changes in density as a function of temperature are linear and relevant only in the buoyant force term of the equation system. The Boussinesq kernel allows for modeling natural convection.
+
+This term deals only with the force due to the variation in density $\Delta \rho \vec{g}$, with the fluid density being $\rho = \rho_0+\Delta\rho$. Thus, with no extra added terms to the conventional incompressible Navier Stokes equations, the system will solve for dynamic pressure.
+For natural convection simulations, it is advisable to compute relevant dimensionless numbers such as the Rayleigh number or the Richardson number to decide on the need for turbulence models, mesh refinement and stability considerations.
+
+!syntax parameters /LinearFVKernels/LinearFVMomentumBoussinesq
+
+!syntax inputs /LinearFVKernels/LinearFVMomentumBoussinesq
+
+!syntax children /LinearFVKernels/LinearFVMomentumBoussinesq
