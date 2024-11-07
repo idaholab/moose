@@ -1716,6 +1716,9 @@ MooseApp::runInputs()
           " --run <dir>\" again.");
     }
 
+    // Set this application as the app name for the moose_test_runner script that we're running
+    setenv("MOOSE_TEST_RUNNER_APP_NAME", appBinaryName().c_str(), true);
+
     Moose::out << "Working Directory: " << working_dir << "\nRunning Command: " << cmd << std::endl;
     mooseAssert(comm().size() == 1, "Should be run in serial");
     const auto return_value = system(cmd.c_str());

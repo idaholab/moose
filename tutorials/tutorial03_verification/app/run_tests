@@ -9,4 +9,4 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR', MOOSE_DIR)
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 
 from TestHarness import TestHarness
-TestHarness.buildAndRun(sys.argv, 'verification_tutorial', MOOSE_DIR)
+TestHarness.buildAndRun(sys.argv, 'verification_tutorial', MOOSE_DIR, skip_testroot=True)
