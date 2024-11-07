@@ -18,11 +18,10 @@ InputParameters
 LinearFVEnergyAdvection::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
-  params.addClassDescription(
-      "Represents the matrix and right hand side contributions of an "
-      "advection term for the energy e.g. h=int(cp dT). A user may still "
-      "override what quantity is advected, but the default is specific enthalpy.");
-  params.addParam<Real>("cp", 1, "blabla");
+  params.addClassDescription("Represents the matrix and right hand side contributions of an "
+                             "advection term for the energy e.g. h=int(cp dT). A user may still "
+                             "override what quantity is advected, but the default is temperature.");
+  params.addParam<Real>("cp", 1, "Specific heat value");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
@@ -43,13 +42,13 @@ LinearFVEnergyAdvection::LinearFVEnergyAdvection(const InputParameters & params)
 Real
 LinearFVEnergyAdvection::computeElemMatrixContribution()
 {
-  return _cp*_advected_interp_coeffs.first * _face_mass_flux * _current_face_area;
+  return _cp * _advected_interp_coeffs.first * _face_mass_flux * _current_face_area;
 }
 
 Real
 LinearFVEnergyAdvection::computeNeighborMatrixContribution()
 {
-  return _cp*_advected_interp_coeffs.second * _face_mass_flux * _current_face_area;
+  return _cp * _advected_interp_coeffs.second * _face_mass_flux * _current_face_area;
 }
 
 Real
@@ -75,7 +74,7 @@ LinearFVEnergyAdvection::computeBoundaryMatrixContribution(const LinearFVBoundar
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return _cp*boundary_value_matrix_contrib * factor * _face_mass_flux * _current_face_area;
+  return _cp * boundary_value_matrix_contrib * factor * _face_mass_flux * _current_face_area;
 }
 
 Real
@@ -88,7 +87,7 @@ LinearFVEnergyAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCo
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
   const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
-  return -_cp*boundary_value_rhs_contrib * factor * _face_mass_flux * _current_face_area;
+  return -_cp * boundary_value_rhs_contrib * factor * _face_mass_flux * _current_face_area;
 }
 
 void
