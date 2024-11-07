@@ -106,9 +106,9 @@ T &
 ChainControl::declareChainControlData(const std::string & data_name, bool apply_object_prefix)
 {
   const std::string full_data_name = (apply_object_prefix ? name() + ":" : "") + data_name;
-  ChainControlData<T> * data_ptr =
+  auto & data =
       getMooseApp().getChainControlDataSystem().declareChainControlData<T>(full_data_name, this);
-  return data_ptr->set();
+  return data.set();
 }
 
 template <typename T>
@@ -129,22 +129,18 @@ template <typename T>
 const T &
 ChainControl::getChainControlDataByName(const std::string & data_name)
 {
-  ChainControlData<T> * data_ptr =
-      getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
-  mooseAssert(data_ptr, "Data must be non-null.");
+  auto & data = getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
 
   addChainControlDataDependency(data_name);
 
-  return data_ptr->get();
+  return data.get();
 }
 
 template <typename T>
 const T &
 ChainControl::getChainControlDataOldByName(const std::string & data_name)
 {
-  ChainControlData<T> * data_ptr =
-      getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
-  mooseAssert(data_ptr, "Data must be non-null.");
+  auto & data = getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
 
-  return data_ptr->getOld();
+  return data.getOld();
 }

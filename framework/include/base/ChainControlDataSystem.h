@@ -50,10 +50,10 @@ public:
    *
    * @tparam T             Type of the data
    * @param[in] data_name  Chain control data name
-   * @return Pointer to the requested chain control data
+   * @return Reference to the requested chain control data
    */
   template <typename T>
-  ChainControlData<T> * getChainControlData(const std::string & data_name);
+  ChainControlData<T> & getChainControlData(const std::string & data_name);
 
   /**
    * Declares chain control data of of the given name and type and creates if it does not exist.
@@ -64,23 +64,24 @@ public:
    * @tparam T                  Type of the data
    * @param[in] data_name       Chain control data name
    * @param[in] chain_control   Chain control that is declaring the data
-   * @return Pointer to the declared chain control data
+   * @return Reference to the declared chain control data
    */
   template <typename T>
-  ChainControlData<T> * declareChainControlData(const std::string & data_name,
+  ChainControlData<T> & declareChainControlData(const std::string & data_name,
                                                 ChainControl * chain_control);
 
   /**
    * Gets the map of names to ChainControlDataBase
    */
-  const std::map<std::string, ChainControlDataBase *> & getChainControlDataMap() const;
+  const std::map<std::string, std::unique_ptr<ChainControlDataBase>> &
+  getChainControlDataMap() const;
 
 private:
   /// The MooseApp that owns this system
   MooseApp & _app;
 
   /// Map of chain control data name to its value
-  std::map<std::string, ChainControlDataBase *> _chain_control_data_map;
+  std::map<std::string, std::unique_ptr<ChainControlDataBase>> _chain_control_data_map;
 };
 
 template <typename T>
@@ -88,51 +89,43 @@ bool
 ChainControlDataSystem::hasChainControlDataOfType(const std::string & data_name) const
 {
   if (hasChainControlData(data_name))
-    return dynamic_cast<ChainControlData<T> *>(_chain_control_data_map.at(data_name)) != nullptr;
+    return dynamic_cast<ChainControlData<T> *>(_chain_control_data_map.at(data_name).get()) !=
+           nullptr;
   else
     return false;
 }
 
 template <typename T>
-ChainControlData<T> *
+ChainControlData<T> &
 ChainControlDataSystem::getChainControlData(const std::string & data_name)
 {
-  ChainControlData<T> * data = nullptr;
   if (hasChainControlData(data_name))
   {
-    if (hasChainControlDataOfType<T>(data_name))
-      data = dynamic_cast<ChainControlData<T> *>(_chain_control_data_map[data_name]);
-    else
-    {
-      auto * chain_control_data_value = _chain_control_data_map[data_name];
+    if (!hasChainControlDataOfType<T>(data_name))
       mooseError("The chain control data '",
                  data_name,
                  "' was requested with the type '",
                  MooseUtils::prettyCppType<T>(),
                  "' but has the type '",
-                 chain_control_data_value->type(),
+                 _chain_control_data_map[data_name]->type(),
                  "'.");
-    }
   }
   else
-  {
-    data = new ChainControlData<T>(_app, data_name);
-    _chain_control_data_map[data_name] = data;
-  }
+    _chain_control_data_map[data_name] = std::make_unique<ChainControlData<T>>(_app, data_name);
 
-  return data;
+  return static_cast<ChainControlData<T> &>(*_chain_control_data_map[data_name]);
 }
 
 template <typename T>
-ChainControlData<T> *
+ChainControlData<T> &
 ChainControlDataSystem::declareChainControlData(const std::string & data_name,
                                                 ChainControl * chain_control)
 {
-  ChainControlData<T> * data = getChainControlData<T>(data_name);
-  if (!data->getDeclared())
+  auto & data = getChainControlData<T>(data_name);
+  if (!data.getDeclared())
   {
-    data->setDeclared();
-    data->setChainControl(chain_control);
+    data.setDeclared();
+    data.setChainControl(chain_control);
   }
   else
     mooseError("The chain control data '", data_name, "' has already been declared.");

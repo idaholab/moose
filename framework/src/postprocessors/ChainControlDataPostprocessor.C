@@ -39,9 +39,9 @@ ChainControlDataPostprocessor::initialSetup()
   if (chain_control_system.hasChainControlData(_data_name))
   {
     if (chain_control_system.hasChainControlDataOfType<Real>(_data_name))
-      _real_data = chain_control_system.getChainControlData<Real>(_data_name);
+      _real_data = &chain_control_system.getChainControlData<Real>(_data_name);
     else if (chain_control_system.hasChainControlDataOfType<bool>(_data_name))
-      _bool_data = chain_control_system.getChainControlData<bool>(_data_name);
+      _bool_data = &chain_control_system.getChainControlData<bool>(_data_name);
     else
       mooseError(
           "The chain control data '", _data_name, "' exists but is not of type 'Real' or 'bool'.");

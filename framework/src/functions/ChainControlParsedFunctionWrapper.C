@@ -55,16 +55,16 @@ ChainControlParsedFunctionWrapper::initializeFunctionInputs()
   {
     if (_chain_control_data_system.hasChainControlDataOfType<Real>(_symbol_values[i]))
     {
-      auto * data = _chain_control_data_system.getChainControlData<Real>(_symbol_values[i]);
-      _initial_values.push_back(data->get());
-      _real_control_data_values.push_back(data);
+      auto & data = _chain_control_data_system.getChainControlData<Real>(_symbol_values[i]);
+      _initial_values.push_back(data.get());
+      _real_control_data_values.push_back(&data);
       _real_control_data_indices.push_back(i);
     }
     else if (_chain_control_data_system.hasChainControlDataOfType<bool>(_symbol_values[i]))
     {
-      auto * data = _chain_control_data_system.getChainControlData<bool>(_symbol_values[i]);
-      _initial_values.push_back(data->get());
-      _bool_control_data_values.push_back(data);
+      auto & data = _chain_control_data_system.getChainControlData<bool>(_symbol_values[i]);
+      _initial_values.push_back(data.get());
+      _bool_control_data_values.push_back(&data);
       _bool_control_data_indices.push_back(i);
     }
     else if (_fe_problem.hasScalarVariable(_symbol_values[i]))
