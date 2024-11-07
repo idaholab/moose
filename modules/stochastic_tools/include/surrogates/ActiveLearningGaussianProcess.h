@@ -40,14 +40,20 @@ public:
   virtual void reTrain(const std::vector<std::vector<Real>> & inputs,
                        const std::vector<Real> & outputs) const final;
 
+  StochasticTools::GaussianProcess & gp() { return _gp; }
+  const StochasticTools::GaussianProcess & getGP() const { return _gp; }
+
   /**
    * Fill in the provided vector with the current length scales from GP training
    * @param length_scales The vector to be filled with the length scales
    */
   virtual void getLengthScales(std::vector<Real> & length_scales) const final;
 
-  StochasticTools::GaussianProcess & gp() { return _gp; }
-  const StochasticTools::GaussianProcess & getGP() const { return _gp; }
+  /**
+   * Return the training data outputs standardizer
+   * @param standardizer The standardizer to return
+   */
+  virtual void getTrainingStandardizer(StochasticTools::Standardizer & standardizer) const final;
 
 private:
   /// Name for the meta data associated with training

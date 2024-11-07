@@ -18,6 +18,7 @@
 #include "GaussianProcessSurrogate.h"
 #include "ParallelAcquisitionFunctionBase.h"
 #include "ParallelAcquisitionInterface.h"
+#include <Eigen/Dense>
 
 /**
  * A generic reporter to support parallel active learning: re-trains GP and picks the next best batch
@@ -67,7 +68,7 @@ protected:
   /**
    * Include additional inputs before evaluating the acquisition function.
    * Has trivial function in base, but can be modified in derived if necessary depending 
-   * upon the objective of active learning
+   * upon the objective of active learning (i.e., forward UQ, inverse UQ, optimization, etc.)
    */
   virtual void includeAdditionalInputs();
 
@@ -77,6 +78,16 @@ protected:
    * @param indices The indices ordered according to the acqusition values to be sent to Sampler
    */
   virtual void getAcquisition(std::vector<Real> & acq_new, std::vector<unsigned int> & indices);
+
+  /**
+   * Convert vector to Eigen matrix
+   */
+  virtual void convertToEigen(const std::vector<Real> & vec, RealEigenMatrix & mat);
+
+  /**
+   * Convert Eigen matrix to vector
+   */
+  virtual void convertToVector(const RealEigenMatrix & mat, std::vector<Real> & vec);
 
   /// Model output value from SubApp
   const std::vector<Real> & _output_value;
@@ -111,6 +122,12 @@ protected:
   /// For monitoring convergence of active learning
   Real & _convergence_value;
 
+  /// Storage for all the modified proposed samples to test the GP model
+  std::vector<std::vector<Real>> _inputs_test_modified;
+
+  /// Transmit the required inputs to the json file
+  std::vector<std::vector<Real>> & _inputs_required;
+
   /// Penalize acquisition to prevent clustering when operating in parallel
   const bool & _penalize_acquisition;
 
@@ -122,9 +139,6 @@ protected:
 
   /// Storage for the GP re-training inputs
   std::vector<std::vector<Real>> _gp_inputs;
-
-  /// Storage for all the modified proposed samples to test the GP model
-  std::vector<std::vector<Real>> _inputs_test_modified;
 
   /// Storage for the GP re-training outputs
   std::vector<Real> _gp_outputs;

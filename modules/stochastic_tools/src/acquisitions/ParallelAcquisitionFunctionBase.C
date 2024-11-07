@@ -20,7 +20,7 @@ ParallelAcquisitionFunctionBase::validParams()
 }
 
 ParallelAcquisitionFunctionBase::ParallelAcquisitionFunctionBase(const InputParameters & parameters)
-  : MooseObject(parameters), ParallelAcquisitionInterface(parameters)
+  : MooseObject(parameters)
 {
 }
 
