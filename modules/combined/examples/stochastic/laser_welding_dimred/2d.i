@@ -28,12 +28,12 @@
   petsc_options = '-snes_converged_reason -ksp_converged_reason -options_left'
   solve_type = 'NEWTON'
   line_search = 'none'
-  nl_max_its = 16
+  nl_max_its = 5
   l_max_its = 100
   [TimeStepper]
     type = IterationAdaptiveDT
-    optimal_iterations = 10
-    iteration_window = 4
+    optimal_iterations = 5
+    iteration_window = 1
     dt = ${timestep}
     linear_iteration_ratio = 1e6
     growth_factor = 1.25

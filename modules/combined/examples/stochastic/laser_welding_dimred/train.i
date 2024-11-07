@@ -10,18 +10,18 @@
   [power_dist]
     type = Uniform
     lower_bound = 60
-    upper_bound = 70
+    upper_bound = 74
   []
 []
 
 [Samplers]
   [train]
     type = MonteCarlo
-    num_rows = 20
+    num_rows = 45
     distributions = 'R_dist power_dist'
     execute_on = PRE_MULTIAPP_SETUP
-    min_procs_per_row = 10
-    max_procs_per_row = 10
+    min_procs_per_row = 9
+    max_procs_per_row = 9
   []
 []
 
@@ -31,8 +31,8 @@
     input_files = 2d.i
     sampler = train
     mode = batch-reset
-    min_procs_per_app = 10
-    max_procs_per_app = 10
+    min_procs_per_app = 9
+    max_procs_per_app = 9
   []
 []
 
@@ -77,6 +77,12 @@
     sampler = train
     parallel_type = ROOT
   []
+  [svd]
+    type = SingularTripletReporter
+    pod_mapping = pod
+    variables = "T"
+    execute_on = final
+  []
 []
 
 [VariableMappings]
@@ -84,7 +90,7 @@
     type = PODMapping
     solution_storage = parallel_storage
     variables = "T"
-    num_modes_to_compute = '5'
+    num_modes_to_compute = '8'
     extra_slepc_options = "-svd_monitor_all"
   []
 []
@@ -102,7 +108,7 @@
     tune_parameters = 'lmc:acoeff_0 lmc:lambda_0 covar:signal_variance covar:length_factor'
     tuning_min = '1e-9 1e-9 1e-9 1e-9'
     tuning_max = '1e16 1e16 1e16  1e16'
-    num_iters = 5000
+    num_iters = 10000
     learning_rate = 0.0005
     show_every_nth_iteration = 10
   []
@@ -118,7 +124,7 @@
   [lmc]
     type = LMC
     covariance_functions = covar
-    num_outputs = 5
+    num_outputs = 8
     num_latent_funcs = 1
   []
 []

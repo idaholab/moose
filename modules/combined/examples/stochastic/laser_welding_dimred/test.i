@@ -17,11 +17,11 @@
 [Samplers]
   [test]
     type = MonteCarlo
-    num_rows = 20
+    num_rows = 90
     distributions = 'R_dist power_dist'
     execute_on = PRE_MULTIAPP_SETUP
-    min_procs_per_row = 10
-    max_procs_per_row = 10
+    min_procs_per_row = 9
+    max_procs_per_row = 9
   []
 []
 
@@ -31,8 +31,8 @@
     input_files = 2d-reconst.i
     sampler = test
     mode = batch-reset
-    min_procs_per_app = 10
-    max_procs_per_app = 10
+    min_procs_per_app = 9
+    max_procs_per_app = 9
   []
 []
 
