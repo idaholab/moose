@@ -105,7 +105,7 @@ template <typename T>
 T &
 ChainControl::declareChainControlData(const std::string & data_name, bool apply_object_prefix)
 {
-  std::string full_data_name = (apply_object_prefix ? name() + ":" : "") + data_name;
+  const std::string full_data_name = (apply_object_prefix ? name() + ":" : "") + data_name;
   ChainControlData<T> * data_ptr =
       getMooseApp().getChainControlDataSystem().declareChainControlData<T>(full_data_name, this);
   return data_ptr->set();

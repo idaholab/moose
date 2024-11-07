@@ -21,7 +21,7 @@ class ChainControlDataBase : public Restartable
 public:
   /**
    * Constructor
-   * @param moose_app MOOSEApp object this object belong to
+   * @param moose_app MooseApp object this object belong to
    * @param name The full (unique) name for this piece of data.
    */
   ChainControlDataBase(MooseApp & moose_app, const std::string & name)
