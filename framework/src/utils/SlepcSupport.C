@@ -951,6 +951,13 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
 
     ierr = MatMult(B, x, r);
     CHKERRQ(ierr);
+
+    if (eigen_problem->bxNormProvided())
+    {
+      // User has provided a postprocessor. We need it updated
+      updateCurrentLocalSolution(eigen_nl.sys(), x);
+      eigen_problem->execute(EXEC_LINEAR);
+    }
   }
   else
     moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
@@ -1004,6 +1011,13 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
     {
       ierr = VecScale(Bx, -1.);
       CHKERRQ(ierr);
+    }
+
+    if (eigen_problem->bxNormProvided())
+    {
+      // User has provided a postprocessor. We need it updated
+      updateCurrentLocalSolution(sys, x);
+      eigen_problem->execute(EXEC_LINEAR);
     }
 
     PetscFunctionReturn(PETSC_SUCCESS);

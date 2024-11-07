@@ -57,6 +57,7 @@
     type = 'CSVDiff'
     input = 'ne_coupled_mo.i'
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+    cli_args = 'Problem/bx_norm=uint'
     slepc = true
     slepc_version = '>=3.11.0'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled eigenvalue problems"
