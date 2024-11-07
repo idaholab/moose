@@ -85,22 +85,8 @@ public:
     return (r_f + std::abs(r_f)) / (1.0 + std::abs(r_f));
   }
 
-  /**
-   * @brief Indicates whether the Van Leer limiter is constant.
-   *
-   * This method always returns `false` as the Van Leer limiter is not a constant limiter.
-   *
-   * @return `false` indicating the Van Leer limiter is not constant.
-   */
   bool constant() const override final { return false; }
 
-  /**
-   * @brief Returns the interpolation method used by the Van Leer limiter.
-   *
-   * This method returns `InterpMethod::VanLeer`, indicating the interpolation method used.
-   *
-   * @return The interpolation method `InterpMethod::VanLeer`.
-   */
   InterpMethod interpMethod() const override final { return InterpMethod::VanLeer; }
 
   /**

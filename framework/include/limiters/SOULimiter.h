@@ -112,22 +112,8 @@ public:
     return limiter;
   }
 
-  /**
-   * @brief Indicates whether the SOU limiter is constant.
-   *
-   * This method always returns `false` as the SOU limiter is not a constant limiter.
-   *
-   * @return `false` indicating the SOU limiter is not constant.
-   */
   bool constant() const override final { return false; }
 
-  /**
-   * @brief Returns the interpolation method used by the SOU limiter.
-   *
-   * This method returns `InterpMethod::SOU`, indicating the interpolation method used.
-   *
-   * @return The interpolation method `InterpMethod::SOU`.
-   */
   InterpMethod interpMethod() const override final { return InterpMethod::SOU; }
 
   /**

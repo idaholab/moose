@@ -107,22 +107,8 @@ public:
     return limiter;
   }
 
-  /**
-   * @brief Indicates whether the QUICK limiter is constant.
-   *
-   * This method always returns `false` as the QUICK limiter is not a constant limiter.
-   *
-   * @return `false` indicating the QUICK limiter is not constant.
-   */
   bool constant() const override final { return false; }
 
-  /**
-   * @brief Returns the interpolation method used by the QUICK limiter.
-   *
-   * This method returns `InterpMethod::QUICK`, indicating the interpolation method used.
-   *
-   * @return The interpolation method `InterpMethod::QUICK`.
-   */
   InterpMethod interpMethod() const override final { return InterpMethod::QUICK; }
 
   /**

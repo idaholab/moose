@@ -651,7 +651,7 @@ public:
                                                   const Elem * elem_side_to_extrapolate_from,
                                                   const StateArg & state) const;
 
-  /// Function to get the two term boundary expansion for the variable
+  /// Function to get wether two term boundary expansion is used for the variable
   const bool & getTwoTermBoundaryExpansion() const { return _two_term_boundary_expansion; }
 
 protected:

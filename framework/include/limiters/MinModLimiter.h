@@ -85,22 +85,8 @@ public:
     return 0 * r_f + std::max(T(0), std::min(T(1), r_f));
   }
 
-  /**
-   * @brief Indicates whether the Min-Mod limiter is constant.
-   *
-   * This method always returns `false` as the Min-Mod limiter is not a constant limiter.
-   *
-   * @return `false` indicating the Min-Mod limiter is not constant.
-   */
   bool constant() const override final { return false; }
 
-  /**
-   * @brief Returns the interpolation method used by the Min-Mod limiter.
-   *
-   * This method returns `InterpMethod::MinMod`, indicating the interpolation method used.
-   *
-   * @return The interpolation method `InterpMethod::MinMod`.
-   */
   InterpMethod interpMethod() const override final { return InterpMethod::MinMod; }
 
   /**

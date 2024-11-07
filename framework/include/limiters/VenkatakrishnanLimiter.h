@@ -44,7 +44,7 @@ namespace FV
  * \end{cases}
  * \f]
  *
- * 4. Venkatakrishnan limiter formula:
+ * 4. Venkatakrishnan limiter formula (Venkatakrishnan, 1993):
  * \f[
  * \beta(r_f) = \frac{2 r_f + 1.0}{r_f (2 r_f + 1.0) + 1.0}
  * \f]
@@ -113,22 +113,8 @@ public:
     return (2 * rf + 1.0) / (rf * (2 * rf + 1.0) + 1.0);
   }
 
-  /**
-   * @brief Indicates whether the Venkatakrishnan limiter is constant.
-   *
-   * This method always returns `false` as the Venkatakrishnan limiter is not a constant limiter.
-   *
-   * @return `false` indicating the Venkatakrishnan limiter is not constant.
-   */
   bool constant() const override final { return false; }
 
-  /**
-   * @brief Returns the interpolation method used by the Venkatakrishnan limiter.
-   *
-   * This method returns `InterpMethod::SOU`, indicating the interpolation method used.
-   *
-   * @return The interpolation method `InterpMethod::SOU`.
-   */
   InterpMethod interpMethod() const override final { return InterpMethod::SOU; }
 
   /**

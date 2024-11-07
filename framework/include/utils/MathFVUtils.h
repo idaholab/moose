@@ -679,7 +679,7 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
   Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
 
   // Iterate over the direct neighbors of the element associated with the face
-  for (auto neighbor : (*face.fi).elem().neighbor_ptr_range())
+  for (const auto neighbor : (*face.fi).elem().neighbor_ptr_range())
   {
     // If not a valid neighbor, skip to the next one
     if (neighbor == nullptr)
@@ -694,7 +694,7 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
   }
 
   // Iterate over the neighbors of the neighbor
-  for (auto neighbor : (*face.fi).neighbor().neighbor_ptr_range())
+  for (const auto neighbor : (*face.fi).neighbor().neighbor_ptr_range())
   {
     // If not a valid neighbor, skip to the next one
     if (neighbor == nullptr)
@@ -761,7 +761,7 @@ computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
   Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
 
   // Iterate over the direct neighbors of the element associated with the face
-  for (auto neighbor : (*face.fi).elem().neighbor_ptr_range())
+  for (const auto neighbor : (*face.fi).elem().neighbor_ptr_range())
   {
     // If not a valid neighbor, skip to the next one
     if (neighbor == nullptr)
@@ -776,7 +776,7 @@ computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
   }
 
   // Iterate over the neighbors of the neighbor associated with the face
-  for (auto neighbor : (*face.fi).neighbor().neighbor_ptr_range())
+  for (const auto neighbor : (*face.fi).neighbor().neighbor_ptr_range())
   {
     // If not a valid neighbor, skip to the next one
     if (neighbor == nullptr)

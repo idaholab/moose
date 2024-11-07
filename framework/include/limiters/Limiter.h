@@ -128,8 +128,8 @@ public:
    * @brief Functor for applying simplified slope limiting.
    *
    * This function applies the limiter by invoking the `limit` method with the provided parameters.
-   * It acts as a functor, enabling objects of the `VanLeerLimiter` class to be used as if they were
-   * functions.
+   * It acts as a functor, enabling objects of the derived `Limiter` class to be used as if they
+   * were functions.
    *
    * @tparam T The data type of the scalar values and the return type.
    * @param phi_upwind The scalar value at the upwind location.
@@ -307,17 +307,6 @@ public:
    *
    * @note The small epsilon value `1e-10` is added to the delta max and delta min values to
    *       avoid division by zero and numerical instability.
-   *
-   * @example
-   * @code
-   * Real phi_upwind = 2.0;
-   * VectorValue<Real> grad_upwind(0.1, 0.2, 0.3);
-   * Real max_value = 5.0;
-   * Real min_value = 1.0;
-   * FaceInfo * fi = ... // Assume this is properly initialized
-   * bool is_upwind = true;
-   * Real ratio = rf_minmax(phi_upwind, &grad_upwind, max_value, min_value, fi, is_upwind);
-   * @endcode
    */
   T rf_minmax(const T & phi_upwind,
               const VectorValue<T> * grad_phi_upwind,
