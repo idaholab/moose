@@ -100,8 +100,6 @@ GenericActiveLearningSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
 
   /* Finally, generate several new samples randomly for the GP to try and pass it to the
   reporter */
-  // 
-  // 
   for (dof_id_type i = 0; i < _num_tries; ++i)
   {
     fillVector(_sample_vector, _t_step);

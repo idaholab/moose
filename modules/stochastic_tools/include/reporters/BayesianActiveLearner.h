@@ -29,9 +29,6 @@ protected:
   virtual void setupGPData(const std::vector<Real> & data_out,
                            const DenseMatrix<Real> & data_in) override;
 
-  // virtual void computeGPOutput(std::vector<Real> & eval_outputs,
-  //                              const DenseMatrix<Real> & eval_inputs) override;
-
   virtual void computeConvergenceValue() override;
 
   virtual void evaluateGPTest() override;
