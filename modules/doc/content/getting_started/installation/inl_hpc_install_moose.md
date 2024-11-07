@@ -50,7 +50,7 @@ offers higher performance than what exists for your `/home/` directory.
 Figuring out the right environment to load is a two-step process involving our Versioner script,
 and `module load` commands:
 
-#### Versioner id=versioning
+### Versioner id=versioning
 
 !style halign=left
 To aid you in selecting the right container to use at any given commit, we created a script called
@@ -77,7 +77,7 @@ In this case, the version that should be used is [!versioner!version package=moo
 This is the version that should be used for loading the containerized environment module that
 follows.
 
-#### Module Load
+### Module Load
 
 !style halign=left
 To access any MOOSE related module, you must first load the `use.moose` module. The development
