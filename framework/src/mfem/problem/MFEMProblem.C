@@ -174,6 +174,14 @@ MFEMProblem::addAuxVariable(const std::string & var_type,
 }
 
 void
+MFEMProblem::addAuxKernel(const std::string & kernel_name,
+                          const std::string & name,
+                          InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(kernel_name, name, parameters);
+}
+
+void
 MFEMProblem::addKernel(const std::string & kernel_name,
                        const std::string & name,
                        InputParameters & parameters)

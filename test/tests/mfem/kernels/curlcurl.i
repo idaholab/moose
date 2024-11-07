@@ -17,12 +17,33 @@
     fec_type = ND
     fec_order = FIRST
   []
+  [HDivFESpace]
+    type = MFEMFESpace
+    fec_type = RT
+    fec_order = CONSTANT
+  []  
 []
 
 [Variables]
   [e_field]
     type = MFEMVariable
     fespace = HCurlFESpace
+  []
+[]
+
+[AuxVariables]
+  [neg_db_dt_field]
+    type = MFEMVariable
+    fespace = HDivFESpace
+  []
+[]
+
+[AuxKernels]
+  [curl]
+    type = MFEMCurlAux
+    variable = neg_db_dt_field
+    source = e_field
+    execute_on = FINAL
   []
 []
 
