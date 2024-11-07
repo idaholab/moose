@@ -43,13 +43,14 @@ lengthy prompt)
 ## Troubleshoot
 
 !style halign=left
-You are now operating from within the same container within which your PR is failing. By default,
+You are now operating from the same container which your PR is failing wihtin. By default,
 your home directory should be available. And by extension, your `~/cluster_name/projects` directory
 containing your project.
 
 !alert! tip
 See [Apptainer Features](help/inl/apptainer.md#features) below if you are operating from your
-`/scratch` directory.
+`/scratch` directory. As this will require an additional argument to `apptainer` in order to make
+available.
 !alert-end!
 
 Next, simply put: Clone your application (if you have not); build it; run it; and test it. Do

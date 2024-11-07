@@ -20,7 +20,7 @@ You +*MUST*+ be on one of the above login nodes! The following instructions assu
 at an interactive shell prompt on one of the above listed hosts, awaiting your commands.
 !alert-end!
 
-## Containerization
+# Containerization
 
 !style halign=left
 The development environment is deployed using containerization, which is a deployment
@@ -32,20 +32,25 @@ the instructions that follow) on both Bitterroot and Lemhi.
 
 ## Obtain MOOSE
 
-!template load file=installation/clone_moose.md.template PATH=/scratch/<your user id>/projects
+!style halign=left
+If you have not yet cloned MOOSE or an application that uses moose, do this now according to that
+application's instructions. Otherwise, skip to
+[Loading the Environment](inl_hpc_install_moose.md#envloading) below.
 
-!alert! tip title=Use `/scratch` when possible
-Use the available `/scratch/<your user id>/` location whenever possible. The scratch volume offers
-higher performance than what exists for your `/home/` directory.
+!alert! tip title=Use `/scratch` while using INL HPC resources
+Use the available `/scratch/<your INL HPC User ID>/` location whenever possible. The scratch volume
+offers higher performance than what exists for your `/home/` directory.
 !alert-end!
 
-## Loading the Environment
+!template load file=installation/clone_moose.md.template PATH=/scratch/<your INL HPC User ID>/projects
+
+## Loading the Environment id=envloading
 
 !style halign=left
 Figuring out the right environment to load is a two-step process involving our Versioner script,
 and `module load` commands:
 
-#### Versioning id=versioning
+#### Versioner id=versioning
 
 !style halign=left
 To aid you in selecting the right container to use at any given commit, we created a script called
@@ -53,10 +58,12 @@ To aid you in selecting the right container to use at any given commit, we creat
 loading. Your copy of MOOSE, and all the accompanying submodules (recursively), contribute to the
 generation of this hash.
 
-To obtain the hash your copy of MOOSE requires, run the following command:
+Enter the `moose` directory where ever that may be, and run the following command (the following
+assumes you cloned MOOSE as directed in the previous step):
 
 ```bash
-cd /scratch/<your user id>/projects/moose
+cd /scratch/<your INL HPC User ID>/projects/moose
+# or cd to your application/moose directory
 ./scripts/versioner.py moose-dev
 ```
 
@@ -66,7 +73,7 @@ where the output will be a hashed version:
 __VERSIONER_VERSION_MOOSE_DEV__
 !versioner-end!
 
-In this case, the version of that should be used is [!versioner!version package=moose-dev].
+In this case, the version that should be used is [!versioner!version package=moose-dev].
 This is the version that should be used for loading the containerized environment module that
 follows.
 
@@ -79,7 +86,7 @@ variant of MPI is used. The version of these `moose-dev-MPI` modules used are th
 by the versioner script explained in the [#versioning] section. Currently, the only deployed variant
 is `openmpi`, i.e. the development container module that should be used is `moose-dev-openmpi`.
 
-With this, the containerized development environment is loaded with the following:
+With this, the containerized development environment is loaded with the following command:
 
 !versioner! code
 module load use.moose moose-dev-openmpi/__VERSIONER_VERSION_MOOSE_DEV__
@@ -91,16 +98,15 @@ as described in [#versioning]. It is very important that you use the specific ve
 is required by the application that you are building. You will receive warnings (or worse) during
 the compile process if the version is not correct.
 
-!alert note
-It is strongly recommended that you do not use default versions of the `moose-dev-openmpi`
-module. Due to the fast-paced development of MOOSE, these development environments change often,
-and thus the default version of `moose-dev-openmpi` changes often. In order to separate your
-development from the fast-paced development of MOOSE, you should use specific module versions.
+!alert warning title=+loading moose-dev-openmpi without a version+
+It is strongly recommended that you +NOT+ load `moose-dev-openmpi` without a version suffix. Doing
+so invokes the default action of loading the latest available version (new versions are added
+multiple times, daily).
 
-## Building id=building
+## Building Application id=building
 
 !style halign=left
-The containerized environment needs to be entered into in order to build or execute. For the
+The containerized environment needs to be entered into in order to build or run. For the
 purposes of this documentation, we will use the version [!versioner!version package=moose-dev],
 although yours could be different!
 
@@ -114,15 +120,9 @@ moose-dev-shell
 
 You are now within the versioned, containerized environment. The standard MOOSE dependencies (PETSc,
 libMesh, WASP, etc) are pre-built and there is not a need to run any of the update-and-rebuild
-scripts traditionally required. You +must+ repeat the above versioning and module loading technique,
-whenever you are performing MOOSE based work:
+scripts traditionally required.
 
-1. figure out the version you need
-1. load the matching module version
-
-At this point, we have assumed that you already have the source code for your application
-available and are in the directory that contains that application. Build your application
-and test it as normal:
+Enter your application's source directory (or the MOOSE directory) and run the following:
 
 ```
 cd test/
@@ -130,15 +130,16 @@ make -j 4
 ./run_tests -j 4
 ```
 
-## Running id=running
+## Running Application id=running
 
 !style halign=left
 How your application is ran is dependent on whether or not you are running across multiple
 hosts. In general, you are running across multiple hosts when you are running within a job
 on HPC. We have two different methods of execution that we will reference later:
 
-- Shell: Enters an interactive shell within the container where you can run multiple commands within the environment, can only be used on a single host
-- Execute: Runs a single command within the container, required for running on multiple hosts
+- +Shell:+ Enters an interactive shell within the container where you can run multiple commands within
+  the environment, can only be used on a single host
+- +Execute:+ Runs a single command within the container, required for running on multiple hosts
 
 When running on a single host (i.e., not in a HPC job), enter the container in a shell as
 done above and execute your application as normal:
@@ -174,11 +175,10 @@ You can utilize HPC OnDemand to enter an interactive code server (similar to VSC
 on a compute host within the same containerized development environment that was previously
 described.
 
-Proceed to the "VSCode Container" IDE application HPC OnDemand. If you are within the internal INL
-network (on an INL device), you can access this application
-[here](https://ondemand.hpc.inl.gov/pun/sys/dashboard/batch_connect/sys/vscode-container/session_contexts/new).
-If you are an external (non-INL) user, you can access this application
-[here](https://hpcondemand.inl.gov/pun/sys/dashboard/batch_connect/sys/vscode-container/session_contexts/new).
+Proceed to the "VSCode Container" IDE application HPC OnDemand.
+
+- [Internal Users](https://ondemand.hpc.inl.gov/pun/sys/dashboard/batch_connect/sys/vscode-container/session_contexts/new)
+- [External Users](https://hpcondemand.inl.gov/pun/sys/dashboard/batch_connect/sys/vscode-container/session_contexts/new)
 
 On the HPC OnDemand application page described above, take note of the "Module" dropdown box.
 Here you should see as an option moose-dev-openmpi/[!versioner!version package=moose-dev]. This module
