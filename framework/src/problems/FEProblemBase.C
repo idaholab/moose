@@ -2416,7 +2416,8 @@ FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  addConvergence(class_name, getNonlinearConvergenceName(), params);
+  for (const auto & conv_name : getNonlinearConvergenceNames())
+    addConvergence(class_name, conv_name, params);
 }
 
 bool
@@ -8764,11 +8765,21 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
   getMaterialData(data_type, tid).resize(nqp);
 }
 
-ConvergenceName
-FEProblemBase::getNonlinearConvergenceName() const
+void
+FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names)
+{
+  if (convergence_names.size() != numNonlinearSystems())
+    paramError("nonlinear_convergence",
+               "There must be one convergence object per nonlinear system");
+  _nonlinear_convergence_names = convergence_names;
+  _set_nonlinear_convergence_name = true;
+}
+
+std::vector<ConvergenceName>
+FEProblemBase::getNonlinearConvergenceNames() const
 {
   if (_set_nonlinear_convergence_name)
-    return _nonlinear_convergence_name;
+    return _nonlinear_convergence_names;
   else
     mooseError("The nonlinear convergence name has not been set.");
 }

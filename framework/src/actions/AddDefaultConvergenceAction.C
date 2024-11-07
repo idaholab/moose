@@ -34,7 +34,12 @@ AddDefaultConvergenceAction::act()
   if (_problem->needToAddDefaultNonlinearConvergence())
   {
     const std::string default_name = "default_nonlinear_convergence";
-    _problem->setNonlinearConvergenceName(default_name);
+
+    // Create a default convergence and use it for every nonlinear system
+    std::vector<ConvergenceName> default_name_vec;
+    for (const auto & nl_sys_name : _problem->getNonlinearSystemNames())
+      default_name_vec.push_back(default_name + nl_sys_name);
+    _problem->setNonlinearConvergenceNames(default_name_vec);
     _problem->addDefaultNonlinearConvergence(getMooseApp().getExecutioner()->parameters());
   }
 
@@ -50,29 +55,39 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
     return;
 
   // Convergences may exist but be inactive
-  if (!_problem->hasConvergence(_problem->getNonlinearConvergenceName()))
+  bool has_convergence = false;
+  for (const auto & cv_name : _problem->getNonlinearConvergenceNames())
+    if (_problem->hasConvergence(cv_name))
+      has_convergence = true;
+  if (!has_convergence)
     return;
 
   // Only Convergence objects deriving from DefaultNonlinearConvergence should
   // share parameters with the executioner.
-  auto & conv = _problem->getConvergence(_problem->getNonlinearConvergenceName());
-  auto * default_nl_conv = dynamic_cast<DefaultNonlinearConvergence *>(&conv);
-  if (!default_nl_conv)
+  for (const auto & cv_name : _problem->getNonlinearConvergenceNames())
   {
-    auto nl_params = FEProblemSolve::feProblemDefaultConvergenceParams();
-    std::vector<std::string> unused_params;
-    for (const auto & param : nl_params.getParametersList())
-      if (executioner_params.isParamSetByUser(param))
-        unused_params.push_back(param);
-
-    if (unused_params.size() > 0)
+    if (!_problem->hasConvergence(cv_name))
+      continue;
+    auto & conv = _problem->getConvergence(cv_name);
+    auto * default_nl_conv = dynamic_cast<DefaultNonlinearConvergence *>(&conv);
+    if (!default_nl_conv)
     {
-      std::stringstream msg;
-      msg << "The following nonlinear convergence parameters were set in the executioner, but are "
-             "not used:\n";
-      for (const auto & param : unused_params)
-        msg << "  " << param << "\n";
-      mooseError(msg.str());
+      auto nl_params = FEProblemSolve::feProblemDefaultConvergenceParams();
+      std::vector<std::string> unused_params;
+      for (const auto & param : nl_params.getParametersList())
+        if (executioner_params.isParamSetByUser(param))
+          unused_params.push_back(param);
+
+      if (unused_params.size() > 0)
+      {
+        std::stringstream msg;
+        msg << "The following nonlinear convergence parameters were set in the executioner, but "
+               "are "
+               "not used:\n";
+        for (const auto & param : unused_params)
+          msg << "  " << param << "\n";
+        mooseError(msg.str());
+      }
     }
   }
 }

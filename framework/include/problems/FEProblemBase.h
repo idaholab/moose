@@ -2205,16 +2205,12 @@ public:
   /**
    * Sets the nonlinear convergence object name if there is one
    */
-  void setNonlinearConvergenceName(const ConvergenceName & convergence_name)
-  {
-    _nonlinear_convergence_name = convergence_name;
-    _set_nonlinear_convergence_name = true;
-  }
+  void setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
 
   /**
-   * Gets the nonlinear convergence object name if there is one
+   * Gets the nonlinear convergence object names if there are any.
    */
-  ConvergenceName getNonlinearConvergenceName() const;
+  std::vector<ConvergenceName> getNonlinearConvergenceNames() const;
 
   /**
    * Setter for whether we're computing the scaling jacobian
@@ -2358,6 +2354,10 @@ public:
    * @returns the nolinear system names in the problem
    */
   const std::vector<NonlinearSystemName> & getNonlinearSystemNames() const { return _nl_sys_names; }
+  /**
+   * @returns the linear system names in the problem
+   */
+  const std::vector<LinearSystemName> & getLinearSystemNames() const { return _linear_sys_names; }
 
 protected:
   /// Create extra tagged vectors and matrices
@@ -2398,8 +2398,8 @@ private:
 protected:
   bool _initialized;
 
-  /// Nonlinear convergence name
-  ConvergenceName _nonlinear_convergence_name;
+  /// Nonlinear system(s) convergence name(s)
+  std::vector<ConvergenceName> _nonlinear_convergence_names;
 
   std::set<TagID> _fe_vector_tags;
 
