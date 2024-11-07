@@ -68,7 +68,6 @@ void
 ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & inputs,
                                        const std::vector<Real> & outputs) const
 {
-
   // Addtional error check for each re-train call of the GP surrogate
   if (inputs.size() != outputs.size())
     mooseError("Number of inputs (",
@@ -112,4 +111,11 @@ void
 ActiveLearningGaussianProcess::getLengthScales(std::vector<Real> & length_scales) const
 {
   length_scales = _gp.getScales();
+}
+
+void
+ActiveLearningGaussianProcess::getTrainingStandardizer(
+    StochasticTools::Standardizer & standardizer) const
+{
+  standardizer = _gp.getDataStandardizer();
 }

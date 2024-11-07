@@ -11,8 +11,7 @@
 
 #include "InputParameters.h"
 #include "FEProblemBase.h"
-
-class ParallelAcquisitionFunctionBase;
+#include "ParallelAcquisitionFunctionBase.h"
 
 class ParallelAcquisitionInterface
 {

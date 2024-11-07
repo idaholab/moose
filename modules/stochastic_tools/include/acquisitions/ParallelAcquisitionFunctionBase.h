@@ -12,12 +12,11 @@
 #include "StochasticToolsApp.h"
 #include "MooseObject.h"
 #include "libmesh/utility.h"
-#include "ParallelAcquisitionInterface.h"
 
 /**
  * All ParallelAcquisition functions should inherit from this class
  */
-class ParallelAcquisitionFunctionBase : public MooseObject, public ParallelAcquisitionInterface
+class ParallelAcquisitionFunctionBase : public MooseObject
 {
 public:
   static InputParameters validParams();
@@ -47,6 +46,7 @@ public:
    * @param acq The originally acquisition function values
    * @param length_scales The length scales to compute the correlation between inputs
    * @param inputs All the input values under which acquisition needs to be computed
+   * @param penalize Bool to indicate whether to compute the correlations or not
    */
   void penalizeAcquisition(std::vector<Real> & modified_acq,
                            std::vector<unsigned int> & sorted_indices,

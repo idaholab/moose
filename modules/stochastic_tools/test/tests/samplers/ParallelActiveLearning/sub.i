@@ -1,15 +1,13 @@
-left_bc = 0.13508909593042528
-right_bc = -1.5530467809139854
-mesh1 = 1
+left_bc = 2.8833503
+right_bc = 2.5709298
 
 param1 = '${fparse left_bc}'
 param2 = '${fparse right_bc}'
-param3 = '${fparse mesh1}'
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmax = ${param3}
+  xmax = 1
   xmin = 0
   ymax = 1
   ymin = 0
@@ -38,13 +36,13 @@ param3 = '${fparse mesh1}'
     type = DirichletBC
     variable = u
     boundary = left
-    value = ${param1} # Actual = 0.15
+    value = ${param1}
   []
   [right]
     type = DirichletBC
     variable = u
     boundary = right
-    value = ${param2} # Actual = -1.5
+    value = ${param2}
   []
 []
 
