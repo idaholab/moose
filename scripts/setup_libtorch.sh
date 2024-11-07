@@ -173,7 +173,6 @@ PACKAGE=${TORCH_DEST}/${FILENAME}
 if [[ -f $PACKAGE ]]; then
   echo "Found requested package for libtorch v. $VERSION, no need to download."
 else
-  echo https://download.pytorch.org/libtorch/$TORCH_DISTRIBUTION/$FILENAME
   curl -L $IGNORE_CERT -o $PACKAGE https://download.pytorch.org/libtorch/$TORCH_DISTRIBUTION/$FILENAME
 fi
 echo "Extracting $PACKAGE."
