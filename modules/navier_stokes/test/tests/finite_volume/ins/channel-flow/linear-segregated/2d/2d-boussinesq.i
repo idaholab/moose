@@ -11,8 +11,8 @@ alpha_b = 1e-4
     dim = 2
     dx = '1.5'
     dy = '0.3'
-    ix = '80'
-    iy = '30'
+    ix = '55'
+    iy = '20'
   []
 []
 
@@ -48,10 +48,10 @@ alpha_b = 1e-4
     solver_sys = pressure_system
     initial_condition = 0.2
   []
-  [h]
+  [T]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${fparse 300*cp}
+    initial_condition = 300
   []
 []
 
@@ -96,9 +96,9 @@ alpha_b = 1e-4
     rho = ${rho}
     gravity = '0 -9.81 0'
     alpha_name = ${alpha_b}
-    ref_temperature = 300
-    T_fluid = h
-    momentum_component = 'y'
+    ref_temperature = 300.0
+    T_fluid = T
+    momentum_component = 'x'
   []
   [v_boussinesq]
     type = LinearFVMomentumBoussinesq
@@ -106,8 +106,8 @@ alpha_b = 1e-4
     rho = ${rho}
     gravity = '0 -9.81 0'
     alpha_name = ${alpha_b}
-    ref_temperature = 300
-    T_fluid = h
+    ref_temperature = 300.0
+    T_fluid = T
     momentum_component = 'y'
   []
 
@@ -126,32 +126,16 @@ alpha_b = 1e-4
 
   [h_advection]
     type = LinearFVEnergyAdvection
-    variable = h
+    variable = T
+    cp = ${cp}
     advected_interp_method = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
   []
   [conduction]
     type = LinearFVDiffusion
-    variable = h
-    diffusion_coeff = ${fparse k/cp}
-    use_nonorthogonal_correction = true
-  []
-[]
-
-[AuxVariables]
-  [T_fluid]
-    type = MooseLinearVariableFVReal
-    solver_sys = energy_system
-    initial_condition = 300
-  []
-[]
-
-[AuxKernels]
-  [enthalpy_to_temperature]
-    type = FunctorAux
-    variable = T_fluid
-    functor = enthalpy_to_temperature
-    execute_on = NONLINEAR
+    variable = T
+    diffusion_coeff = ${k}
+    # use_nonorthogonal_correction = true
   []
 []
 
@@ -160,13 +144,6 @@ alpha_b = 1e-4
     type = GenericFunctorMaterial
     prop_names = 'cp alpha_b'
     prop_values = '${cp} ${alpha_b}'
-  []
-  [enthalpy_to_temperature]
-    type = ADParsedFunctorMaterial
-    property_name = enthalpy_to_temperature
-    functor_names = "h cp"
-    functor_symbols = "h cp"
-    expression = "h/cp"
   []
 []
 
@@ -215,19 +192,19 @@ alpha_b = 1e-4
   []
   [inlet_top_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    variable = h
-    functor = ${fparse cp*300.0}
+    variable = T
+    functor = ${fparse 300.0}
     boundary = 'left top'
   []
   [bottom_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    variable = h
-    functor = ${fparse cp*350.0}
+    variable = T
+    functor = ${fparse 350.0}
     boundary = bottom
   []
   [outlet_T]
     type = LinearFVAdvectionDiffusionOutflowBC
-    variable = h
+    variable = T
     use_two_term_expansion = false
     boundary = right
   []
