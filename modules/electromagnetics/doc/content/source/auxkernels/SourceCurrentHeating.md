@@ -5,7 +5,7 @@
 ## Overview
 
 !style halign=left
-The SourceCurrentHeating object calculates the heating term imparted to the medium based on a supplied volumetric current. The term is define as:
+The SourceCurrentHeating object calculates the heating term imparted to the medium based on a supplied volumetric current. The term is defined as:
 
 \begin{equation}
   0.5 * Re \left(\vec{J} \cdot \vec{E}^{*} \right)

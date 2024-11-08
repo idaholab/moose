@@ -48,7 +48,7 @@
     input = 'error_azim_magnetic_time_deriv.i'
     cli_args = 'AuxKernels/aux_azim_dB_dt/Efield_X=aux_E_real_x AuxKernels/aux_azim_dB_dt/Efield_Y=aux_E_real_y AuxKernels/aux_azim_dB_dt/Efield=E_real'
     expect_err = 'Both a vector and scalar components of the electric field were provide! Please only choose one.'
-    requirement = 'The system shall throw an error if the electric field is suppled as a vector and scalar components to the AzimuthMagneticTimeDerivRZ object.'
+    requirement = 'The system shall throw an error if the electric field is supplied as a vector and scalar components to the AzimuthMagneticTimeDerivRZ object.'
     design = 'AzimuthMagneticTimeDerivRZ.md'
     issues = '#28758'
   []
@@ -57,7 +57,7 @@
     input = 'error_azim_magnetic_time_deriv.i'
     cli_args = 'AuxKernels/aux_azim_dB_dt/Efield_X=aux_E_real_x'
     expect_err = 'Neither a vector nor two scalar components of the electric field were provide! Please check the input parameters.'
-    requirement = 'The system shall throw an error if only the x-component of the electric field is suppled to the AzimuthMagneticTimeDerivRZ object.'
+    requirement = 'The system shall throw an error if only the x-component of the electric field is supplied to the AzimuthMagneticTimeDerivRZ object.'
     design = 'AzimuthMagneticTimeDerivRZ.md'
     issues = '#28758'
   []
@@ -66,7 +66,7 @@
     input = 'error_azim_magnetic_time_deriv.i'
     cli_args = 'AuxKernels/aux_azim_dB_dt/Efield_Y=aux_E_real_y'
     expect_err = 'Neither a vector nor two scalar components of the electric field were provide! Please check the input parameters.'
-    requirement = 'The system shall throw an error if only the y-component of the electric field is suppled to the AzimuthMagneticTimeDerivRZ object.'
+    requirement = 'The system shall throw an error if only the y-component of the electric field is supplied to the AzimuthMagneticTimeDerivRZ object.'
     design = 'AzimuthMagneticTimeDerivRZ.md'
     issues = '#28758'
   []
