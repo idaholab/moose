@@ -35,13 +35,13 @@ AzimuthMagneticTimeDerivRZ::AzimuthMagneticTimeDerivRZ(const InputParameters & p
 {
   if (_is_efield_vector && _is_efield_scalar)
   {
-    mooseError("Both a vector and scalar components of the electric field were provide! Please "
+    mooseError("Both a vector and scalar components of the electric field were provided! Please "
                "only choose one.");
   }
 
   if (!_is_efield_vector && !_is_efield_scalar)
   {
-    mooseError("Neither a vector nor two scalar components of the electric field were provide! "
+    mooseError("Neither a vector nor two scalar components of the electric field were provided! "
                "Please check the input parameters.");
   }
 }
