@@ -57,7 +57,7 @@ MOOSE requires several support libraries in order to build or run properly. Thes
 (PETSc, libMesh, and WASP) can be built using our supplied scripts:
 !style-end!
 
-!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects GLOBAL_ARGS=|| exit 1
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects GLOBAL_ARGS=|| return
 
 ## Build and Test MOOSE
 

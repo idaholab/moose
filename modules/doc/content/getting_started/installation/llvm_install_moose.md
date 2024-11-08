@@ -4,7 +4,7 @@
 
 ## Build PETSc and libMesh
 
-!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects GLOBAL_ARGS=|| exit 1
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects GLOBAL_ARGS=|| return
 
 ## Compile and Test MOOSE
 
