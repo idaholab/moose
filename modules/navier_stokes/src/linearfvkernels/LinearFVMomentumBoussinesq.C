@@ -21,11 +21,11 @@ LinearFVMomentumBoussinesq::validParams()
   params.addClassDescription("Represents the Boussinesq term in the Navier Stokes momentum "
                              "equations, added to the right hand side.");
   params.addParam<VariableName>(NS::T_fluid, "The fluid temperature variable.");
-  params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+  params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector.");
   params.addParam<MooseFunctorName>("alpha_name",
                                     NS::alpha_boussinesq,
                                     "The name of the thermal expansion coefficient"
-                                    "this is of the form rho = rho*(1-alpha (T-T_ref))");
+                                    "this is of the form rho = rho_ref*(1-alpha (T-T_ref))");
   params.addRequiredParam<Real>("ref_temperature", "The value for the reference temperature.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
   MooseEnum momentum_component("x=0 y=1 z=2");
@@ -47,7 +47,7 @@ LinearFVMomentumBoussinesq::LinearFVMomentumBoussinesq(const InputParameters & p
     _rho(getFunctor<Real>(NS::density))
 {
   _temperature_var.computeCellGradients();
-  if (!_rho.isConstant() && !getParam<bool>("_override_constant_check"))
+  if (!_rho.isConstant())
     paramError(NS::density, "The density in the boussinesq term is not constant!");
 }
 

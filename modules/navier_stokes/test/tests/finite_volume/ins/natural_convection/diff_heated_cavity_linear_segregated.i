@@ -71,7 +71,7 @@ walls = 'right left top bottom'
   [T_fluid]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${fparse 875}
+    initial_condition = 875
   []
 []
 
@@ -137,7 +137,7 @@ walls = 'right left top bottom'
     force_boundary_execution = true
   []
 
-    ####### FUEL ENERGY EQUATION #######
+   ####### FUEL ENERGY EQUATION #######
 
   [heat_advection]
     type = LinearFVEnergyAdvection
@@ -169,13 +169,13 @@ walls = 'right left top bottom'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T_fluid
     boundary = 'right'
-    functor = ${fparse 870.0}
+    functor = 870.0
   []
   [T_hot]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T_fluid
     boundary = 'left'
-    functor = ${fparse 880.0}
+    functor = 880.0
   []
   [T_all]
     type = LinearFVAdvectionDiffusionExtrapolatedBC

@@ -444,8 +444,8 @@ SIMPLE::execute()
                                                            _energy_linear_control,
                                                            _energy_l_abs_tol);
 
-        _problem.execute(EXEC_NONLINEAR);
       }
+      _problem.execute(EXEC_NONLINEAR);
       // Printing residuals
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))

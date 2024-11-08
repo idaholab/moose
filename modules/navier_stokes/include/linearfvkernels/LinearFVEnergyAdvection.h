@@ -41,6 +41,7 @@ protected:
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
 
+  /// The constant specific heat value
   const Real _cp;
 
 private:

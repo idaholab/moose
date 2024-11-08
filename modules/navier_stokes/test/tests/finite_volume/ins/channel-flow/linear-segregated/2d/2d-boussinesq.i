@@ -135,7 +135,7 @@ alpha_b = 1e-4
     type = LinearFVDiffusion
     variable = T
     diffusion_coeff = ${k}
-    # use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
 []
 
