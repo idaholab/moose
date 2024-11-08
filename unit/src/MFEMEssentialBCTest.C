@@ -1,3 +1,4 @@
+#include "mfem-common.hpp"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarDirichletBC.h"
 #include "MFEMScalarFunctionDirichletBC.h"
@@ -9,15 +10,16 @@
 class MFEMEssentialBCTest : public MFEMObjectUnitTest
 {
 public:
-  mfem::LinearFECollection _fec;
-  mfem::FiniteElementSpace _fes;
-  mfem::GridFunction _gridfunc;
+  mfem::common::H1_FESpace _scalar_fes;
+  mfem::common::ND_FESpace _vector_fes;
+  mfem::GridFunction _scalar_gridfunc, _vector_gridfunc;
 
   MFEMEssentialBCTest()
     : MFEMObjectUnitTest("PlatypusApp"),
-      _fec(),
-      _fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), &_fec),
-      _gridfunc(&_fes)
+      _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
+      _vector_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
+      _scalar_gridfunc(&_scalar_fes),
+      _vector_gridfunc(&_vector_fes)
   {
     InputParameters func_params = _factory.getValidParams("ParsedFunction");
     func_params.set<std::string>("expression") = "x + y";
@@ -48,7 +50,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_scalar_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // FIXME: We should actually check this applies the right boundary values...
 }
 
@@ -69,7 +71,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_scalar_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // FIXME: We should actually check this applies the right boundary values...
 }
 
@@ -89,7 +91,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // FIXME: We should actually check this applies the right boundary values...
 }
 
@@ -110,7 +112,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // FIXME: We should actually check this applies the right boundary values...
 }
 
@@ -131,7 +133,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // FIXME: We should actually check this applies the right boundary values...
 }
 
@@ -152,6 +154,6 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // FIXME: We should actually check this applies the right boundary values...
 }
