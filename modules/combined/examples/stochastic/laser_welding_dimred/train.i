@@ -20,8 +20,8 @@
     num_rows = 45
     distributions = 'R_dist power_dist'
     execute_on = PRE_MULTIAPP_SETUP
-    min_procs_per_row = 9
-    max_procs_per_row = 9
+    min_procs_per_row = 2
+    max_procs_per_row = 2
   []
 []
 
@@ -31,8 +31,8 @@
     input_files = 2d.i
     sampler = train
     mode = batch-reset
-    min_procs_per_app = 9
-    max_procs_per_app = 9
+    min_procs_per_app = 2
+    max_procs_per_app = 2
   []
 []
 
@@ -71,6 +71,7 @@
     variables = "T"
     outputs = json
     execute_on = final
+    parallel_type = ROOT
   []
   [matrix]
     type = StochasticMatrix

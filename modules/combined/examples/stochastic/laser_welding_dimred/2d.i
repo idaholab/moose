@@ -47,14 +47,6 @@
   []
 []
 
-[Outputs]
-  [exodus]
-    type = Exodus
-    output_material_properties = true
-    show_material_properties = 'mu rho cp k'
-  []
-[]
-
 [Debug]
   show_var_residual_norms = true
 []

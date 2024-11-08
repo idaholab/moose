@@ -16,7 +16,10 @@ INSADSurfaceTensionBC::validParams()
 {
   InputParameters params = ADVectorIntegratedBC::validParams();
   params.addClassDescription("Surface tension stresses.");
-  params.addParam<bool>("include_gradient_terms", false, "If the surface tension should include the gradient terms (increases fidelity, decreases stability)");
+  params.addParam<bool>("include_gradient_terms",
+                        false,
+                        "If the surface tension should include the gradient terms (increases "
+                        "fidelity, decreases stability)");
   return params;
 }
 

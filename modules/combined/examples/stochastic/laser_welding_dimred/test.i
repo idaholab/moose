@@ -20,8 +20,9 @@
     num_rows = 90
     distributions = 'R_dist power_dist'
     execute_on = PRE_MULTIAPP_SETUP
-    min_procs_per_row = 9
-    max_procs_per_row = 9
+    min_procs_per_row = 2
+    max_procs_per_row = 2
+    seed=42
   []
 []
 
@@ -31,8 +32,8 @@
     input_files = 2d-reconst.i
     sampler = test
     mode = batch-reset
-    min_procs_per_app = 9
-    max_procs_per_app = 9
+    min_procs_per_app = 2
+    max_procs_per_app = 2
   []
 []
 
