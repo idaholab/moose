@@ -35,9 +35,8 @@
 [Convergence]
   [res_conv]
     type = DefaultNonlinearConvergence
-    # With default tolerances, the solve takes 2 iterations, but with this
-    # value, the solve takes only 1:
-    nl_abs_tol = 1e-5
+    # With this, convergence should occur immediately (zero iterations)
+    nl_abs_tol = 1e15
   []
 []
 
