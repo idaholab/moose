@@ -34,8 +34,8 @@ walls = 'right left top bottom'
     xmax = 1
     ymin = 0
     ymax = 1
-    nx = 40
-    ny = 40
+    nx = 30
+    ny = 30
   []
 []
 
@@ -221,7 +221,7 @@ walls = 'right left top bottom'
   num_iterations = 3000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
-  energy_absolute_tolerance = 1e-6
+  energy_absolute_tolerance = 1e-8
   print_fields = false
   momentum_l_max_its = 300
 

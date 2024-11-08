@@ -9,10 +9,10 @@ alpha_b = 1e-4
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '1.5'
-    dy = '0.3'
-    ix = '55'
-    iy = '20'
+    dx = '1.'
+    dy = '0.2'
+    ix = '10'
+    iy = '5'
   []
 []
 

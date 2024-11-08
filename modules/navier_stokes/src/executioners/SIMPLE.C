@@ -443,7 +443,6 @@ SIMPLE::execute()
                                                            _energy_equation_relaxation,
                                                            _energy_linear_control,
                                                            _energy_l_abs_tol);
-
       }
       _problem.execute(EXEC_NONLINEAR);
       // Printing residuals

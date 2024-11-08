@@ -32,17 +32,17 @@ public:
 
 protected:
   /// Fluid Temperature
-  MooseLinearVariableFV<Real> & getTemperatureVariable(const std::string & vname);
+  const MooseLinearVariableFV<Real> & getTemperatureVariable(const std::string & vname);
 
   /// Index x|y|z of the momentum equation component
   const unsigned int _index;
   /// Pointer to the linear finite volume temperature variable
-  MooseLinearVariableFV<Real> & _temperature_var;
+  const MooseLinearVariableFV<Real> & _temperature_var;
   /// The gravity vector
   const RealVectorValue _gravity;
   /// The thermal expansion coefficient
   const Moose::Functor<Real> & _alpha;
-  /// Reference temperature at which the value of _rho was measured
+  /// Reference temperature at which the reference value of the density (_rho) was measured
   const Real _ref_temperature;
   /// the density
   const Moose::Functor<Real> & _rho;

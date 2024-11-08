@@ -33,7 +33,6 @@ LinearFVMomentumBoussinesq::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addPrivateParam("_override_constant_check", false);
   return params;
 }
 
@@ -46,12 +45,11 @@ LinearFVMomentumBoussinesq::LinearFVMomentumBoussinesq(const InputParameters & p
     _ref_temperature(getParam<Real>("ref_temperature")),
     _rho(getFunctor<Real>(NS::density))
 {
-  _temperature_var.computeCellGradients();
   if (!_rho.isConstant())
     paramError(NS::density, "The density in the boussinesq term is not constant!");
 }
 
-MooseLinearVariableFV<Real> &
+const MooseLinearVariableFV<Real> &
 LinearFVMomentumBoussinesq::getTemperatureVariable(const std::string & vname)
 {
   auto * ptr = dynamic_cast<MooseLinearVariableFV<Real> *>(

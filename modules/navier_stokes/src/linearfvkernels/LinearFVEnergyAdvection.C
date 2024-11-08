@@ -12,7 +12,7 @@
 #include "NSFVUtils.h"
 #include "NS.h"
 
-registerMooseObject("MooseApp", LinearFVEnergyAdvection);
+registerMooseObject("NavierStokesApp", LinearFVEnergyAdvection);
 
 InputParameters
 LinearFVEnergyAdvection::validParams()
