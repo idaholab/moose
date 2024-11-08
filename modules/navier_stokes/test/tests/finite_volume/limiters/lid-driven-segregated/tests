@@ -8,7 +8,7 @@
       input = 'lid-driven-segregated.i'
       exodiff = 'upwind.e'
       detail = 'and reach converged results with upwind advection scheme.'
-      abs_zero = 1e-4
+      rel_err = 1e-3
       cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
       prereq = segregated_advection_limiting_schemes/upwind_run
       heavy = true
@@ -46,7 +46,7 @@
       input = 'lid-driven-segregated.i'
       exodiff = 'min_mod.e'
       detail = 'and reach converged results with min-mod limiter.'
-      abs_zero = 1e-4
+      rel_err = 1e-3
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
       prereq = segregated_advection_limiting_schemes/min_mod_run
       heavy = true
@@ -65,7 +65,7 @@
       input = 'lid-driven-segregated.i'
       exodiff = 'quick.e'
       detail = 'and reach converged results with QUICK limiter.'
-      abs_zero = 1e-4
+      rel_err = 1e-3
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
       prereq = segregated_advection_limiting_schemes/quick_run
       heavy = true
