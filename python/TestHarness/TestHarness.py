@@ -1117,7 +1117,6 @@ class TestHarness:
         hpcgroup = parser.add_argument_group('HPC Options', 'Options controlling HPC execution')
         hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
         hpcgroup.add_argument('--hpc-host', nargs='+', action='store', dest='hpc_host', metavar='', help='The host(s) to use for submitting HPC jobs')
-        hpcgroup.add_argument('--hpc-pre-source', nargs=1, action="store", dest='hpc_pre_source', metavar='', help='Source specified file before launching HPC tests')
         hpcgroup.add_argument('--hpc-file-timeout', nargs=1, type=int, action='store', dest='hpc_file_timeout', default=300, help='The time in seconds to wait for HPC output')
         hpcgroup.add_argument('--hpc-scatter-procs', nargs=1, type=int, action='store', dest='hpc_scatter_procs', default=None, help='Set to run HPC jobs with scatter placement when the processor count is this or lower')
         hpcgroup.add_argument('--hpc-apptainer-bindpath', nargs=1, action='store', type=str, dest='hpc_apptainer_bindpath', help='Sets the apptainer bindpath for HPC jobs')
@@ -1154,11 +1153,9 @@ class TestHarness:
         # Try to guess the --hpc option if --hpc-host is set
         if self.options.hpc_host and not self.options.hpc:
             hpc_host = self.options.hpc_host[0]
-            if 'sawtooth' in hpc_host or 'lemhi' in hpc_host:
-                self.options.hpc = 'pbs'
-            elif 'bitterroot' in hpc_host:
-                self.options.hpc = 'slurm'
-            if self.options.hpc:
+            hpc_config = TestHarness.queryHPCCluster(hpc_host)
+            if hpc_config is not None:
+                self.options.hpc = hpc_config.scheduler
                 print(f'INFO: Setting --hpc={self.options.hpc} for known host {hpc_host}')
 
         self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
@@ -1244,3 +1241,29 @@ class TestHarness:
 
     def getOptions(self):
         return self.options
+
+    # Helper tuple for storing information about a cluster
+    HPCCluster = namedtuple('HPCCluster', ['scheduler', 'apptainer_modules'])
+    # The modules that we want to load when running in a non-moduled
+    # container on INL HPC
+    inl_modules = ['use.moose', 'moose-dev-container-openmpi/5.0.5_0']
+    # Define INL HPC clusters
+    hpc_configs = {'sawtooth': HPCCluster(scheduler='pbs',
+                                          apptainer_modules=inl_modules),
+                   'bitterroot': HPCCluster(scheduler='slurm',
+                                            apptainer_modules=inl_modules)}
+
+    @staticmethod
+    def queryHPCCluster(hostname: str):
+        """
+        Attempt to get the HPC cluster configuration given a host
+
+        Args:
+            hostname: The HPC system hostname
+        Returns:
+            HPCCluster: The config, if found, otherwise None
+        """
+        for host, config in TestHarness.hpc_configs.items():
+            if host in hostname:
+                return config
+        return None
