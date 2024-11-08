@@ -79,19 +79,19 @@ There are two main build optimizations: "header symlinking" and "unity builds":
 
 !style halign=left
 MOOSE and MOOSE-based applications include directories are organized into sub-directories for each
-system (such as `kernels`, `bcs`, `auxkernels`, etc.). There are currently ~30 different MOOSE
-systems, meaning that each application could potentially have 30+ directories to search for include
+system (such as `kernels`, `bcs`, `auxkernels`, etc.). There are currently ~70 different MOOSE
+systems, meaning that each application could potentially have 70+ directories to search for include
 files. In addition, applications can compose/use each other and use the physics modules. Each time
-you add another application/module, you're gaining another 30+ include directories.
+you add another application/module, you're gaining another 70+ include directories.
 
 This can lead to an "explosion" of include directory paths (application + 4 modules + framework =\
-180 paths!). This expansion of paths can lead to the compiler slowing down as each path needs to be
+420 paths!). This expansion of paths can lead to the compiler slowing down as each path needs to be
 searched at compile time to find a header.
 
 To combat this, during the build phase a directory named `build/header_symlinks` is created for each
 application/module. All of the header files within that application/module are then symlinked into
 that directory. This means that each application/module you add only adds _one_ include directory
-(instead of 30), greatly speeding up the compilation process.
+instead of 70), greatly speeding up the compilation process.
 
 ### Unity Builds
 
@@ -108,7 +108,7 @@ A different idea is to compile all of these files together as one file, providin
 savings for evaluating the `#include`s and ultimately just producing _one_ `.o` file to be linked.
 This is known as a "unity build" and can provide a huge savings in compile time. The following is
 showing timing for `make -j 16` for various sets of applications/modules/framework on the [!ac](INL)
-[!ac](HPC) Falcon supercompuer (now decommissioned). It is plain to see how much time is saved by
+[!ac](HPC) Falcon supercomputer (now decommissioned). It is plain to see how much time is saved by
 using both header symlinking and unity builds.
 
 !media media/application_development/falcon_compile_speed.png
@@ -123,7 +123,7 @@ By default this behavior is +on+. To turn it off you can set `MOOSE_UNITY=false`
 environment.  Further, an application can disable it permanently by putting `MOOSE_UNITY := false`
 at the top of their Makefile.
 
-In addition, you can also keep from using a unity build for individual directories within your
+In addition, you can also choose to avoid using a unity build for individual directories within your
 project. By default `src` and `src/base` are not built this way because they generally contain a mix
 of objects that don't benefit from being built simultaneously. To add to that list, set the
 `app_non_unity_dirs` variable in your `Makefile` before the `include` of `app.mk` like so:
@@ -204,8 +204,8 @@ You'll probably want to add the path above to your PATH.
 ### Adding a new C-Preprocessor variable in MooseConfig.h
 
 !style halign=left
-To add a new variable to MooseConfig.h, you'll first want to add the variable to configure.ac using
-one of the variable definition macros such as "AC_DEFINE". After that, you'll run `autoheader`
+To add a new variable to `MooseConfig.h`, you'll first want to add the variable to configure.ac
+using one of the variable definition macros such as "AC_DEFINE". After that, you'll run `autoheader`
 followed by `autoconf`.
 
 ### Adding a new "make" variable
@@ -238,7 +238,7 @@ package manager, or installation on a shared computing resource such as Sawtooth
 target will copy the binary, and required libraries to a file tree based on the prefix you
 configured with (set by the variable `PREFIX` or the `--prefix` argument).
 
-```
+```bash
 cd moose
 ./configure --prefix=<installation path>
 cd <application_dir>
@@ -252,7 +252,7 @@ application test suite, examples, tutorials, or other inputs of interest. To cus
 available for installation, the application developer will define the list of source directories
 that can be installed by end users in their application Makefile. For example:
 
-```
+```bash
 INSTALLABLE_DIRS := tests examples tutorials
 ```
 
@@ -264,7 +264,7 @@ These paths should all be relative to the root of the application.
 To give application developers the ability to customize the layout of the installed directories it's
 possible to specify the destination path as well by using a "key/value" syntax. For example:
 
-```
+```bash
 INSTALLABLE_DIRS := test/tests->tests examples/01->example_01 examples/02->example_02 tutorials
 ```
 
