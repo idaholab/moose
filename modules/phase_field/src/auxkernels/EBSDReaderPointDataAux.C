@@ -15,6 +15,7 @@ InputParameters
 EBSDReaderPointDataAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Outputs the requested EBSD reader point data.");
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
   MooseEnum field_types = EBSDAccessFunctors::getPointDataFieldType();
   params.addRequiredParam<MooseEnum>(

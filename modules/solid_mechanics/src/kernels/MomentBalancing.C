@@ -23,6 +23,8 @@ InputParameters
 MomentBalancing::validParams()
 {
   InputParameters params = Kernel::validParams();
+  params.addClassDescription("Additional term for moment balance of the in-plane components in the "
+                             "Cosserat layered elasticity model");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component<3",

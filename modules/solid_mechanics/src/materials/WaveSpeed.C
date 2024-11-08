@@ -21,6 +21,8 @@ InputParameters
 WaveSpeed::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription(
+      "Computes an approximate wave speed from the material stiffness and density");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "

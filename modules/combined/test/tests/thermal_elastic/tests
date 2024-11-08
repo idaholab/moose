@@ -15,7 +15,7 @@
     design = 'ADComputeVariableIsotropicElasticityTensor.md'
     issues = '#13232'
     requirement = "The system shall compute constant stress in the xx, yy, zz, xy, yz, and xz direction
-                   using irregular elements with functional Poisson's ratios and Young's moduli."
+                   using irregular elements with functional Poisson's ratios and Young's moduli, using automatic differentiation."
   [../]
   [./ad-test-jac]
     type = 'PetscJacobianTester'

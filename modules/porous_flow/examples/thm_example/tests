@@ -22,7 +22,7 @@
     max_time = 1000
     threading = '!pthreads'
     issues = '#15922'
-    design = 'thm_c_example.md'
+    design = 'thmc_example.md'
     requirement = 'An example of a 2-phase THMC problem shall be demonstrated in PorousFlow'
   [../]
 []

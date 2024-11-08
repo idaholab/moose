@@ -21,6 +21,9 @@ InputParameters
 HHPFCRFFSplitVariablesAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Creates the L nonlinear variables for the Cahn-Hilliard equation for the RFF form of the "
+      "phase field crystal model, when using a split approach");
   MooseEnum familyEnum = AddVariableAction::getNonlinearVariableFamilies();
   params.addParam<MooseEnum>(
       "family",
