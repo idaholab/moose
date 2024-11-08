@@ -14,7 +14,7 @@
                 Covariance/lmc/num_outputs=4'
     check_files = 'train_mogp_out_mogp.rd/data
                    train_pod_out_pod.rd/data
-                   tain_json.json'
+                   train_json.json'
     requirement = "The system shall be able to train a surrogate model on the coefficients obtained by dimensionality reduction."
     heavy = true
     min_parallel = 8

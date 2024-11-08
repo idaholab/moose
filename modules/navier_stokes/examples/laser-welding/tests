@@ -1,6 +1,6 @@
 [Tests]
   design = 'laser_welding.md'
-  issues = '#24462'
+  issues = '#24462 #28200'
   [ALE]
     requirement = 'The system shall be able to simulate the rastering of a laser spot around an initially solid material which melts and then vaporizes'
     [2d-fe]
@@ -12,6 +12,21 @@
       valgrind = 'heavy'
       strumpack = true
       detail = 'in two dimensions, using a finite element discretization for all variables, and'
+      abs_zero = 1e-8
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
+    []
+    [2d-fe-with-curvature]
+      input = 2d.i
+      exodiff = '2d_curvature_out.e-s004'
+      type = Exodiff
+      allow_test_objects = true
+      cli_args = "Executioner/num_steps=4 Mesh/elem_type=QUAD9 Variables/vel/order=SECOND Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND  Postprocessors/active='' BCs/surface_tension/include_gradient_terms=false BCs/weld_flux/x_beam_coord=-0.35e-3 surfacetemp=2800 timestep=1e-6 Outputs/file_base=2d_curvature_out  Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
+      valgrind = 'heavy'
+      strumpack = true
+      min_parallel = 8 # mesh refinement is very sensitive to number of cores here and before the 4th step we dont see deformation
+      max_parallel = 8 # mesh refinement is very sensitive to number of cores here and before the 4th step we dont see deformation
+      detail = 'in two dimensions, using a curvature-enabling second order mesh with finite element discretization, and'
       # PR #26848. Clang 16 Apple Si is not compatible.
       machine = X86_64
     []
