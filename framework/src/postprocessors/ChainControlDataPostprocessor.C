@@ -65,9 +65,11 @@ ChainControlDataPostprocessor::getValue() const
 {
   if (_real_data)
     return _real_data->get();
-  else if (_bool_data)
+  else
+  {
+    mooseAssert(_bool_data, "This point should not be reachable.");
+
     // for booleans, 'true' should convert to 1.0 and 'false' to 0.0.
     return _bool_data->get();
-  else
-    mooseError("This point should not be reachable.");
+  }
 }

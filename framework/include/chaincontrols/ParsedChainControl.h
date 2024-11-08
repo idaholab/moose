@@ -40,5 +40,5 @@ protected:
   /// Pointer to the Parsed chain control function
   std::unique_ptr<ChainControlParsedFunctionWrapper> _function_ptr;
   /// Spatial point at which to evaluate the function
-  const Point & _point;
+  const Point _point;
 };

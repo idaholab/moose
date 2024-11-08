@@ -31,5 +31,5 @@ protected:
   /// Function to be evaluated
   const Function & _function;
   /// Spatial point at which to evaluate the function
-  const Point & _point;
+  const Point _point;
 };

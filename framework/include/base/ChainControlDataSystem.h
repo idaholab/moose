@@ -71,7 +71,7 @@ public:
                                                 ChainControl * chain_control);
 
   /**
-   * Gets the map of names to ChainControlDataBase
+   * Gets the map of ChainControlData names to the relevant ChainControlDataBase
    */
   const std::map<std::string, std::unique_ptr<ChainControlDataBase>> &
   getChainControlDataMap() const;
