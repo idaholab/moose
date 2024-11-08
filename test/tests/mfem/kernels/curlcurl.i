@@ -43,7 +43,7 @@
     type = MFEMCurlAux
     variable = neg_db_dt_field
     source = e_field
-    execute_on = FINAL
+    execute_on = TIMESTEP_END
   []
 []
 

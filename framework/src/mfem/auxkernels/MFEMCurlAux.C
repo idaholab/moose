@@ -23,7 +23,6 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
     _hdiv_fespace(*_result_var.ParFESpace()),
     _curl(&_hcurl_fespace, &_hdiv_fespace)
 {
-  _curl.AddDomainInterpolator(new mfem::CurlInterpolator);
   _curl.Assemble();
   _curl.Finalize();
 }

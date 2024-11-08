@@ -1,4 +1,5 @@
 #pragma once
+#include "../common/pfem_extras.hpp"
 #include "MFEMAuxKernel.h"
 
 /*
@@ -25,5 +26,5 @@ protected:
   mfem::ParFiniteElementSpace & _hcurl_fespace;
   mfem::ParFiniteElementSpace & _hdiv_fespace;
   // Curl operator
-  mfem::ParDiscreteLinearOperator _curl;
+  mfem::common::ParDiscreteCurlOperator _curl;
 };
