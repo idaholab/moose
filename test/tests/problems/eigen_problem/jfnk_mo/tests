@@ -54,13 +54,25 @@
   []
 
   [ne_coupled_mo]
-    type = 'CSVDiff'
-    input = 'ne_coupled_mo.i'
-    csvdiff = 'ne_coupled_eigenvalues_0001.csv'
-    cli_args = 'Problem/bx_norm=uint'
-    slepc = true
-    slepc_version = '>=3.11.0'
-    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled eigenvalue problems"
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled eigenvalue problems with the bx norm"
+    issues = "#18493 #21056 #28993"
+    [l2_bx]
+      type = 'CSVDiff'
+      input = 'ne_coupled_mo.i'
+      csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+      slepc = true
+      slepc_version = '>=3.11.0'
+      detail = 'computed as the L2 norm of the bx vector, or'
+    []
+    [custom_bx]
+      type = 'CSVDiff'
+      input = 'ne_coupled_mo.i'
+      csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+      cli_args = 'Problem/bx_norm=uint'
+      slepc = true
+      slepc_version = '>=3.11.0'
+      detail = 'computed by a user provided postprocessor.'
+    []
   []
 
   [ne_coupled_mo_full]
