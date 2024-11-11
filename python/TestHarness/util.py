@@ -14,6 +14,7 @@ from collections import OrderedDict
 import json
 import yaml
 import sys
+import pycapabilities
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
@@ -613,6 +614,27 @@ def checkLibtorchVersion(checks, test):
 
     return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
+def getCapabilities(exe):
+    """
+    Get capabilities JSON and compare it to the required capabilities
+    """
+    output = runCommand("%s --show-capabilities" % exe)
+    try:
+        output = output.split('**START JSON DATA**\n')[1]
+        output = output.split('**END JSON DATA**\n')[0]
+        results = json.loads(output)
+    except IndexError:
+        return {}
+    except json.decoder.JSONDecodeError as e:
+        raise Exception(f'{exe} --show-capabilities, produced invalid JSON output') from e
+    return results
+
+def checkCapabilities(supported, test):
+    """
+    Get capabilities JSON and compare it to the required capabilities
+    """
+    [status, message, doc] = pycapabilities.check(test['capabilities'], supported)
+    return (status == pycapabilities.CERTAIN_PASS, message)
 
 def getIfAsioExists(moose_dir):
     option_set = set(['ALL'])

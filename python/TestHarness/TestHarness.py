@@ -382,8 +382,11 @@ class TestHarness:
 
         self.initialize(argv, self.app_name)
 
-        # executable is available after initalize
+        # executable is available after initialize
         checks['installation_type'] = util.checkInstalled(self.executable, self.app_name)
+
+        # get the capabilities of the executable
+        self.options._capabilities = util.getCapabilities(self.executable)
 
         os.chdir(self._orig_cwd)
 
@@ -501,7 +504,7 @@ class TestHarness:
             print('\nExiting due to keyboard interrupt...')
 
     # Create and return list of tester objects. A tester is created by providing
-    # abspath to basename (dirpath), and the test file in queustion (file)
+    # abspath to basename (dirpath), and the test file in question (file)
     def createTesters(self, dirpath, file, find_only, testroot_params={}):
         # Build a Parser to parse the objects
         parser = Parser(self.factory, self.warehouse)
@@ -837,8 +840,8 @@ class TestHarness:
                             if job.isSilent():
                                 continue
 
-                            formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
-                            f.write(formated_results + '\n')
+                            formatted_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
+                            f.write(formatted_results + '\n')
 
         except IOError:
             print('Permission error while writing results to disc')
