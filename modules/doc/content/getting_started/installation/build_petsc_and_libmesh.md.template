@@ -1,16 +1,23 @@
 ```bash
 cd {{PATH}}/moose/scripts
 export MOOSE_JOBS=6 METHODS=opt
-./update_and_rebuild_petsc.sh {{PETSC_ARGS1}} {{PETSC_ARGS2}}
-./update_and_rebuild_libmesh.sh {{LIBMESH_ARGS1}}
-./update_and_rebuild_wasp.sh {{WASP_ARGS1}}
+./update_and_rebuild_petsc.sh {{PETSC_ARGS1}} {{PETSC_ARGS2}} || return
+./update_and_rebuild_libmesh.sh {{LIBMESH_ARGS1}} || return
+./update_and_rebuild_wasp.sh {{WASP_ARGS1}} || return
 ```
 
 !alert! tip
 `MOOSE_JOBS` is a loose influential environment variable that dictates how many cores to use when
-executing many of our scripts.
+executing many of our scripts. While operating on [!ac](INL) [!ac](HPC) login nodes alongside
+everyone else, it is courtesy to limit your CPU core usage. We prefer that users limit themselves to
+6:
 
-`METHODS` is an influential environment variable that dictates how to
-build libMesh. If this variable is not set, libMesh will by default build 4 methods (taking 4x
-longer to finish).
+- `export MOOSE_JOBS=6`
+
+`METHODS` is an influential environment variable that dictates how to build libMesh. If this
+variable is not set, libMesh will by default build 4 methods (taking 4x longer to finish). Most of
+the time, folks will want to use optimized methods:
+
+- `export METHODS=opt`
+
 !alert-end!
