@@ -7,21 +7,21 @@ guide.
 
   ```bash
   curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-  bash Miniforge3-Linux-x86_64.sh -b -p ~/miniforge
+  bash Miniforge3-Linux-x86_64.sh -b -p $HOME/miniforge
   ```
 
 - +Macintosh Users with Intel processors:+
 
   ```bash
   curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-x86_64.sh
-  bash Miniforge3-MacOSX-x86_64.sh -b -p ~/miniforge
+  bash Miniforge3-MacOSX-x86_64.sh -b -p $HOME/miniforge
   ```
 
 - +Macintosh Users with Apple Silicon processors:+
 
   ```bash
   curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
-  bash Miniforge3-MacOSX-arm64.sh -b -p ~/miniforge
+  bash Miniforge3-MacOSX-arm64.sh -b -p $HOME/miniforge
   ```
 
 With Miniforge installed in your home directory, export PATH so that it may be used:
@@ -40,7 +40,7 @@ exit
 Upon restarting your terminal, you should see your prompt prefixed with (base). This indicates you
 are in the base environment, and Conda is ready for operation:
 
-```bash
+```pre
 $ (base) ~>
 ```
 

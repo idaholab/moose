@@ -20,6 +20,20 @@ You +*MUST*+ be on one of the above login nodes! The following instructions assu
 at an interactive shell prompt on one of the above listed hosts, awaiting your commands.
 !alert-end!
 
+!alert! tip title=Use `/scratch` while using INL HPC resources
+Use the available `/scratch` location when possible:
+
+```bash
+cd /scratch/$(whoami)
+```
+
+The scratch volume offers higher performance than what exists within your `/home/` directory.
+
+Note however, that items in this location which go stale will be deleted after a period of `90`
+days. Stale files are those that have not been read or touched for the aforementioned period. e.g. Long term results should not be stored here.
+!alert-end!
+
+
 # Containerization
 
 !style halign=left
@@ -37,12 +51,7 @@ If you have not yet cloned MOOSE or an application that uses moose, do this now 
 application's instructions. Otherwise, skip to
 [Loading the Environment](inl_hpc_install_moose.md#envloading) below.
 
-!alert! tip title=Use `/scratch` while using INL HPC resources
-Use the available `/scratch/<your INL HPC User ID>/` location whenever possible. The scratch volume
-offers higher performance than what exists for your `/home/` directory.
-!alert-end!
-
-!template load file=installation/clone_moose.md.template PATH=/scratch/<your INL HPC User ID>/projects
+!template load file=installation/clone_moose.md.template PATH=/scratch/$(whoami)/projects
 
 ## Loading the Environment id=envloading
 
@@ -58,14 +67,20 @@ To aid you in selecting the right container to use at any given commit, we creat
 loading. Your copy of MOOSE, and all the accompanying submodules (recursively), contribute to the
 generation of this hash.
 
-Enter the `moose` directory where ever that may be, and run the following command (the following
+Enter the `moose` directory where ever that may be, and run the following commands (the following
 assumes you cloned MOOSE as directed in the previous step):
 
 ```bash
-cd /scratch/<your INL HPC User ID>/projects/moose
+module load use.moose versioner
+cd /scratch/$(whoami)/projects/moose
 # or cd to your application/moose directory
 ./scripts/versioner.py moose-dev
 ```
+
+!style! style=position:relative;top:-15px;left:5px;font-style:italic;font-size:small;
+(`module load use.moose versioner` is a temporary step needed at the time of this writing to
+allow `versioner.py` to function)
+!style-end!
 
 where the output will be a hashed version:
 
@@ -139,8 +154,9 @@ scripts traditionally required.
 
 Enter your application's source directory (or the MOOSE directory) and run the following:
 
-```
+```bash
 cd test/
+# or your application's root directory
 make -j 4
 ./run_tests -j 4
 ```
@@ -162,7 +178,7 @@ done above and execute your application as normal:
 !versioner! code
 module load use.moose moose-dev-openmpi/__VERSIONER_VERSION_MOOSE_DEV__
 moose-dev-shell
-mpiexec -n 2 /path/to/your/application-opt -i ...
+mpiexec -n 2 /scratch/$(whoami)/projects/<your application>/application-opt -i ...
 !versioner-end!
 
 When you are running on multiple hosts (i.e., in an HPC job) you must use the "execute"
@@ -173,7 +189,7 @@ with:
 
 !versioner! code
 module load use.moose moose-dev-openmpi/__VERSIONER_VERSION_MOOSE_DEV__
-mpiexec -n 2 moose-dev-exec /path/to/your/application-opt -i ...
+mpiexec -n 2 moose-dev-exec /scratch/$(whoami)/projects/<your application>/application-opt -i ...
 !versioner-end!
 
 Note that the "execute" method will also work on a single host.
@@ -218,7 +234,7 @@ is ran within the container, thus you can run commands normally, like:
 
 ```
 make -j 6
-mpiexec -n 6 /path/to/myapp-opt -i ...
+mpiexec -n 6 /scratch/$(whoami)/projects/<your application>/application-opt -i ...
 ```
 
 !include installation/conda_pagination.md optional=True
