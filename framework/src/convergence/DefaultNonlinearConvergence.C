@@ -239,15 +239,13 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   if (_app.multiAppLevel() > 0)
     MooseUtils::indentMessage(_app.name(), msg);
   if (msg.length() > 0)
-  {
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
     ierr = PetscInfo(snes, "%s", msg.c_str());
 #else
     ierr = PetscInfo(snes, msg.c_str());
 #endif
-    if (verbose())
-      _console << name() << ": " << oss.str() << std::flush;
-  }
+
+  verboseOutput(oss);
 
   return status;
 }

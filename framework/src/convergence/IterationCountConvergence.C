@@ -41,15 +41,26 @@ IterationCountConvergence::checkConvergence(unsigned int iter)
 {
   const auto status_inner = checkConvergenceInner(iter);
 
+  std::ostringstream oss;
   switch (status_inner)
   {
     case MooseConvergenceStatus::ITERATING:
       if (iter >= _max_iterations)
       {
         if (_converge_at_max_iterations)
+        {
+          oss << "Converged due to iterations (" << iter << ") >= max iterations ("
+              << _max_iterations << ") and 'converge_at_max_iterations' = 'true'.";
+          verboseOutput(oss);
           return MooseConvergenceStatus::CONVERGED;
+        }
         else
+        {
+          oss << "Diverged due to iterations (" << iter << ") >= max iterations ("
+              << _max_iterations << ").";
+          verboseOutput(oss);
           return MooseConvergenceStatus::DIVERGED;
+        }
       }
       else
         return MooseConvergenceStatus::ITERATING;
@@ -57,7 +68,12 @@ IterationCountConvergence::checkConvergence(unsigned int iter)
 
     case MooseConvergenceStatus::CONVERGED:
       if (iter < _min_iterations)
+      {
+        oss << "Still iterating because iterations (" << iter << ") < min iterations ("
+            << _min_iterations << ").";
+        verboseOutput(oss);
         return MooseConvergenceStatus::ITERATING;
+      }
       else
         return MooseConvergenceStatus::CONVERGED;
       break;

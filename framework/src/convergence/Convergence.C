@@ -10,6 +10,7 @@
 #include "Convergence.h"
 #include "MooseApp.h"
 #include "Executioner.h"
+#include "MooseUtils.h"
 
 InputParameters
 Convergence::validParams()
@@ -37,4 +38,16 @@ Convergence::Convergence(const InputParameters & parameters)
     _perfid_check_convergence(registerTimedSection("checkConvergence", 5, "Checking Convergence")),
     _verbose(getParam<bool>("verbose") ? true : getMooseApp().getExecutioner()->verbose())
 {
+}
+
+void
+Convergence::verboseOutput(std::ostringstream & oss)
+{
+  const auto str = oss.str();
+
+  if (str.length() == 0)
+    return;
+
+  if (verbose())
+    _console << name() << ": " << MooseUtils::trim(str) << std::endl;
 }
