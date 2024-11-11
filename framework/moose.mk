@@ -547,8 +547,7 @@ install_python: $(pyhit_LIB) $(capabilities_LIB)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
 	@cp -f $(pyhit_LIB) $(python_install_dir)/
 	@cp -f $(capabilities_LIB) $(python_install_dir)/
-	@$(call patch_rpath,$(python_install_dir)/$(capabilities_LIBNAME),../../../$(lib_install_suffix)/)
-	@$(call patch_rpath,$(lib_install_dir)/$(libname_framework),./)
+	@$(call patch_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(lib_install_dir)/)
 
 install_harness: install_python
 	@echo "Installing TestHarness"
