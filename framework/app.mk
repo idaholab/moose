@@ -535,7 +535,7 @@ install_lib_from_archive_%: %
 	@cp $(lib_build) $(lib_installed)
 # Patch to add additional installed rpaths to the application libs
 # for dependencies-of-dependencies installed in a different folder
-	@if [ "$(notdir $<)" == "$(notdir $(app_LIB))" ] || [ "$(notdir $<)" == "$(notdir $(app_test_LIB))" ]; then \
+	@if [ "$(notdir $<)" = "$(notdir $(app_LIB))" ] || [ "$(notdir $<)" = "$(notdir $(app_test_LIB))" ]; then \
 	for lib_dir in $(ADDITIONAL_APP_INSTALL_RPATHS); do $(call patch_rpath,$(lib_installed),$(abspath $(lib_install_dir)/../$$lib_dir)); done \
 	fi
 # Patch to add libraries in the installed folder
