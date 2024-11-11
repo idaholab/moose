@@ -1,5 +1,5 @@
 #pragma once
-#include "../common/pfem_extras.hpp"
+#include "mfem/miniapps/common/pfem_extras.hpp"
 #include "MFEMProblemData.h"
 #include "problem_operator_interface.h"
 
