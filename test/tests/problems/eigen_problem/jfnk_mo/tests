@@ -54,19 +54,41 @@
   []
 
   [ne_coupled_mo]
-    type = 'CSVDiff'
-    input = 'ne_coupled_mo.i'
-    csvdiff = 'ne_coupled_eigenvalues_0001.csv'
-    slepc = true
-    slepc_version = '>=3.11.0'
-    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled eigenvalue problems"
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled eigenvalue problems with the bx norm"
+    issues = "#18493 #21056 #28993"
+    [l2_bx]
+      type = 'CSVDiff'
+      input = 'ne_coupled_mo.i'
+      csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+      slepc = true
+      slepc_version = '>=3.11.0'
+      detail = 'computed as the L2 norm of the bx vector, or'
+    []
+    [custom_bx]
+      type = 'CSVDiff'
+      input = 'ne_coupled_mo.i'
+      csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+      cli_args = 'Problem/bx_norm=uint'
+      slepc = true
+      slepc_version = '>=3.11.0'
+      detail = 'computed by a user provided postprocessor.'
+      prereq = 'ne_coupled_mo/l2_bx'
+    []
+  []
+  [missing_bx_norm_exec_linear]
+    type = RunException
+    issues = '#28993'
+    input = ne_coupled_mo.i
+    cli_args = "Problem/bx_norm=uint Postprocessors/uint/execute_on='initial nonlinear'"
+    requirement = 'The system shall error if the user wants the Bx norm provided by a postprocessor but the postprocessor is not executed during residual evaluations.'
+    expect_err = "If providing the Bx norm, this postprocessor must execute on linear"
   []
 
   [ne_coupled_mo_full]
     type = 'CSVDiff'
     input = 'ne_coupled_mo.i'
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
-    prereq = 'ne_coupled_mo'
+    prereq = 'ne_coupled_mo/custom_bx'
     cli_args = 'Preconditioning/active='''
     slepc = true
     slepc_version = '>=3.11.0'
