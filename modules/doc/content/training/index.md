@@ -4,7 +4,7 @@
 Upcoming MOOSE related training in chronological order:
 !style-end!
 
-- [MOOSE Framework Fundamentals (2024 October 15-17, University of Illinois Urbana-Champaign)](more_detail/MOOSE_2024_10_15-17_UIUC.md)
+- None
 
 # Conferences
 
@@ -15,6 +15,8 @@ Upcoming MOOSE related Conferences:
 - [MOOSE International Workshop (2025 March 10-14, Idaho Falls)](https://inl.gov/mooseworkshop2025/)
 
 #### Past Training:
+
+- MOOSE Framework Fundamentals (2024 October 15-17, University of Illinois Urbana-Champaign)
 
 - MOOSE Framework Fundamentals (2024 June 4-6, Idaho Falls)
 

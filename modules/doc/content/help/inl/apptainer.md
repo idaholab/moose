@@ -13,31 +13,31 @@ few lines from any [!ac](CIVET) step that failed (red box), the [!ac](URI) will 
 example:
 
 ```language=yaml
-//: Running in versioned apptainer container moose-dev
-BUILD_ROOT/moose/: Executing moosebuild in environment oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-x86_64:4b79189
-INFO:    Using cached SIF image
+Determining versioned container for moose-dev-mpich
+Using default versioned container
+Executing moosebuild in oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-mpich-x86_64:e930b1d
 ```
 
 The above contains the [!ac](URI) we want:
 
-```
-oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-x86_64:4b79189
+```pre
+oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-mpich-x86_64:e930b1d
 ```
 
 With the [!ac](URI) known, launch an interactive shell using
 [HPC OnDemand](hpc_ondemand.md#interactive-shell-idinteractive-shell) for any of the [!ac](INL)
 [!ac](HPC) cluster machine login nodes, and perform the following:
 
-```bash
-[~]> module load apptainer
-[~]> apptainer shell oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-x86_64:4b79189
-
-[sha256:52660332a1977bb9cbb3e4aaf9b19f810669eba8579b8dda6193eba7b05cf359][~]>
+```pre
+$ apptainer shell oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-mpich-x86_64:e930b1d
+INFO:    Downloading oras image
+moose-dev-mpich-x86_64:e930b1d [you@sawtooth1: ~ ]
+$
 ```
 
 !style! style=position:relative;top:-15px;left:5px;font-style:italic;font-size:small;
 (see [Apptainer Features](help/inl/apptainer.md#features) section below on how to control the
-lengthy prompt)
+prompt style)
 !style-end!
 
 ## Troubleshoot
@@ -59,6 +59,17 @@ whatever it is that [!ac](CIVET) failed to do.
 ### Troubleshooting Hints
 
 If you are having difficulty reproducing the failure:
+
+- Use Versioner to verify that your copy of MOOSE is the same copy being used on Civet:
+
+  !versioner! code
+  $ cd moose/scripts
+  $ ./versioner.py moose-dev
+  __VERSIONER_VERSION_MOOSE_DEV__
+  !versioner-end!
+
+  The hash should match the trailing suffix of the URI. If they do not, you may need to rebase your
+  project with your upstream remote.
 
 - Be absolutely certain your project repo is clean. Also, it might be best to create a new clone of
   your project. A clone identical to how [!ac](CIVET) clones your project during the
@@ -98,21 +109,27 @@ inside the container. On [!ac](INL) [!ac](HPC) machines, this is most useful if 
 in your `/scratch` directory. You can instruct Apptainer to mount this location by way of the `-B`
 argument:
 
-```bash
+!versioner! code
 apptainer shell -B /scratch oras://...
 
-[moose-dev][~]> ls /scratch  # contents of scratch is displayed
-```
+moose-dev-mpich-x86_64:__VERSIONER_VERSION_MOOSE_DEV__ [you@sawtooth1: ~ ]
+$ ls /scratch
+# <contents of scratch is displayed>
+!versioner-end!
 
 Do you want to mount something somewhere else - perhaps also with read-only permissions?
 
-```bash
+!versioner! code
 apptainer shell -B /scratch:/somewhere_else:ro oras://...
 
-[moose-dev][~]> ls /somewhere_else  # contents of somewhere_else which contains scratch is displayed
-[moose-dev][~]> touch /somewhere_else/<your user id>/testing
+moose-dev-mpich-x86_64:__VERSIONER_VERSION_MOOSE_DEV__ [you@sawtooth1: ~ ]
+$ ls /somewhere_else
+# <contents of /somewhere_else which contains /scratch is displayed>
+
+moose-dev-mpich-x86_64:__VERSIONER_VERSION_MOOSE_DEV__ [you@sawtooth1: ~ ]
+$ touch /somewhere_else/<your user id>/testing
 touch: cannot touch '/somewhere_else/<your user id>/testing': Read-only file system
-```
+!versioner-end!
 
 Multiple PATHs:
 
@@ -127,33 +144,24 @@ If you wish to have some environment variable made available as the container pa
 you, you only need to prefix your variable with the following Apptainer influential variable
 `APPTAINERENV_`, as so:
 
-```bash
-[~]> export APPTAINERENV_foo=bar
-[~]> apptainer shell oras://...
+!versioner! code
+$ export APPTAINERENV_foo=bar
+$ apptainer shell oras://...
 
-[moose-dev][~]> echo $foo
+moose-dev-mpich-x86_64:__VERSIONER_VERSION_MOOSE_DEV__ [you@sawtooth1: ~ ]
+$ echo $foo
 bar
-```
-
-Extremely useful for obvious reasons, you can also use `APPTAINERENV_` to control how the prompt is
-displayed:
-
-```bash
-[~]> export APPTAINERENV_APPTAINER_NAME=moose-dev
-[~]> apptainer shell oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-x86_64:4b79189
-
-[moose-dev][~]>
-```
+!versioner-end!
 
 !alert! tip title=Custom Prompt
 There is an all-encompasing `$CUSTOM_PROMPT` variable that allows you to pass your own prompt:
 
-```bash
+!versioner! code
 [~]> export APPTAINERENV_CUSTOM_PROMPT="\[\033[1;34m\][my-container]\[\033[1;32m\][\t]\[\033[0m\]> "
-[~]> apptainer shell oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-x86_64:4b79189
+[~]> apptainer shell oras://mooseharbor.hpc.inl.gov/moose-dev/moose-dev-x86_64:__VERSIONER_VERSION_MOOSE_DEV__
 
 [my-container][12:17:43]>
-```
+!versioner-end!
 
 <!-- NOTE to editor: sub children elements require less top positioning (-7 vs -15) -->
 

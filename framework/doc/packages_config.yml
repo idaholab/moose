@@ -4,9 +4,9 @@ minimum_gcc: 8.5.0
 maximum_gcc: 12.2.1
 minimum_clang: 10.0.1
 maximum_clang: 16.0.6
-python_default: 3.10
-minimum_python: 3.7
-maximum_python: 3.11
+python_default: 3.12
+minimum_python: 3.9
+maximum_python: 3.12
 mpich: 4.2.1
 openmpi: 4.1.6
 petsc_alt: 3.11.4

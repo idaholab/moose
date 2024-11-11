@@ -19,5 +19,5 @@ MOOSE on.
 
 With the compiler stack ready, you can proceed to the next section:
 
-!content pagination use_title=True
+!content pagination use_title=False
                     next=installation/gcc_install_moose.md

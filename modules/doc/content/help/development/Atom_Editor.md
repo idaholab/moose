@@ -85,7 +85,7 @@ and some other llvm and clang development tools will need to be available in
 your environment. To obtain the necessary tools, in your MOOSE conda environment, perform:
 
 ```bash
-conda install moose-libmesh moose-tools llvmdev clangdev
+conda install moose-libmesh moose-tools llvmdev clangdev --channel https://conda.software.inl.gov/public
 ```
 
 Note that though the relevant packages are `llvmdev` and `clangdev`, specifying
