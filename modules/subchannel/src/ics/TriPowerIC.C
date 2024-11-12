@@ -12,14 +12,14 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "TriPowerIC.h"
+#include "SCMTriPowerIC.h"
 #include "Function.h"
 #include "TriSubChannelMesh.h"
 
-registerMooseObject("SubChannelApp", TriPowerIC);
+registerMooseObject("SubChannelApp", SCMTriPowerIC);
 
 InputParameters
-TriPowerIC::validParams()
+SCMTriPowerIC::validParams()
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
   params.addClassDescription(
@@ -35,7 +35,7 @@ TriPowerIC::validParams()
   return params;
 }
 
-TriPowerIC::TriPowerIC(const InputParameters & params)
+SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
   : TriSubChannelBaseIC(params),
     _power(getParam<Real>("power")),
     _numberoflines(0),
@@ -87,7 +87,7 @@ TriPowerIC::TriPowerIC(const InputParameters & params)
 }
 
 void
-TriPowerIC::initialSetup()
+SCMTriPowerIC::initialSetup()
 {
   auto n_rods = _mesh.getNumOfRods();
   auto nz = _mesh.getNumOfAxialCells();
@@ -131,7 +131,7 @@ TriPowerIC::initialSetup()
 }
 
 Real
-TriPowerIC::value(const Point & p)
+SCMTriPowerIC::value(const Point & p)
 {
   auto heat_rate = 0.0;
   auto heated_length = _mesh.getHeatedLength();

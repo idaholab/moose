@@ -113,7 +113,7 @@ heated_length = 1.0
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -123,7 +123,7 @@ heated_length = 1.0
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = 10000 #W
     filename = "pin_power_profile19.txt"

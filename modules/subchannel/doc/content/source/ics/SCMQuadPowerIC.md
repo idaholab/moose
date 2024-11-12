@@ -1,15 +1,15 @@
-# QuadPowerIC
+# SCMQuadPowerIC
 
-!syntax description /ICs/QuadPowerIC
+!syntax description /ICs/SCMQuadPowerIC
 
 ## Overview
 
 <!-- -->
 
-This kernel assigns the axial heat rate ([!param](/ICs/QuadPowerIC/variable) = `q_prime`) on the subchannels or pins in the case of a problem with subchannels/pins in a
-square lattice arrangement. The user must provide the  total power of the subassembly [!param](/ICs/QuadPowerIC/power), the axial shape of the power profile and the radial
+This kernel assigns the axial heat rate ([!param](/ICs/SCMQuadPowerIC/variable) = `q_prime`) on the subchannels or pins in the case of a problem with subchannels/pins in a
+square lattice arrangement. The user must provide the  total power of the subassembly [!param](/ICs/SCMQuadPowerIC/power), the axial shape of the power profile and the radial
 power distribution (power per pin). The axial power profile is given as a function, which integral over the length of the heated portion of the pin, is equal
-to the length of the heated portion of the pin. The radial power distribution is given as a column of numbers in a .txt file [!param](/ICs/QuadPowerIC/filename) that has as many entries as the number of pins.
+to the length of the heated portion of the pin. The radial power distribution is given as a column of numbers in a .txt file [!param](/ICs/SCMQuadPowerIC/filename) that has as many entries as the number of pins.
 
 If the first entry is 1.0, that means that the pin with index 0 is at 100% power. If the 5th entry has a value of 0.0 that means that pin with index 4 has 0% power, etc.
 The pin and subchannel indexes are presented in [user notes page](user_notes.md).
@@ -28,8 +28,8 @@ The axial heat rate at a specific height is the product of the total power of th
 If the user has created a mesh for the pins, the axial hear rate will be assigned to the nodes of the pin mesh. If the user hasn't created a pin mesh the appropiate heat rate will be assigned to
 the nodes of the subchannel mesh.
 
-!syntax parameters /ICs/QuadPowerIC
+!syntax parameters /ICs/SCMQuadPowerIC
 
-!syntax inputs /ICs/QuadPowerIC
+!syntax inputs /ICs/SCMQuadPowerIC
 
-!syntax children /ICs/QuadPowerIC
+!syntax children /ICs/SCMQuadPowerIC

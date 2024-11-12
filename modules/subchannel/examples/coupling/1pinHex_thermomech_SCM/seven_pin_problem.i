@@ -112,7 +112,7 @@ pitch = 7.26e-3
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -122,7 +122,7 @@ pitch = 7.26e-3
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = 5000.0 #W
     axial_heat_rate = axial_heat_rate

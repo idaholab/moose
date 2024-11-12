@@ -103,17 +103,17 @@ heated_length = 1.0
 
 [ICs]
   [S_IC]
-    type = QuadFlowAreaIC
+    type = SCMQuadFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = QuadWettedPerimIC
+    type = SCMQuadWettedPerimIC
     variable = w_perim
   []
 
   [q_prime_IC]
-    type = QuadPowerIC
+    type = SCMQuadPowerIC
     variable = q_prime
     filename = "power_profile.txt"
     axial_heat_rate = axial_heat_rate

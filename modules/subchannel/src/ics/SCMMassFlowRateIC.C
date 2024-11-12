@@ -12,38 +12,30 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "QuadWettedPerimIC.h"
-#include "QuadSubChannelMesh.h"
+#include "SCMMassFlowRateIC.h"
 
-registerMooseObject("SubChannelApp", QuadWettedPerimIC);
+registerMooseObject("SubChannelApp", SCMMassFlowRateIC);
 
 InputParameters
-QuadWettedPerimIC::validParams()
+SCMMassFlowRateIC::validParams()
 {
-  InputParameters params = QuadSubChannelBaseIC::validParams();
+  InputParameters params = InitialCondition::validParams();
   params.addClassDescription(
-      "Computes wetted perimeter of subchannels in a square lattice arrangement");
+      "Computes mass float rate from specified mass flux and cross-sectional area");
+  params.addRequiredCoupledVar("area", "Subchannel surface area [m^2]");
+  params.addRequiredParam<Real>("mass_flux", "Specified mass flux [kg/s-m^2]");
   return params;
 }
 
-QuadWettedPerimIC::QuadWettedPerimIC(const InputParameters & params) : QuadSubChannelBaseIC(params)
+SCMMassFlowRateIC::SCMMassFlowRateIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
+    _mass_flux(getParam<Real>("mass_flux")),
+    _area(coupledValue("area"))
 {
 }
 
 Real
-QuadWettedPerimIC::value(const Point & p)
+SCMMassFlowRateIC::value(const Point & /*p*/)
 {
-  auto pitch = _mesh.getPitch();
-  auto pin_diameter = _mesh.getPinDiameter();
-  auto gap = _mesh.getGap();
-  auto rod_circumference = M_PI * pin_diameter;
-  auto i = _mesh.getSubchannelIndexFromPoint(p);
-  auto subch_type = _mesh.getSubchannelType(i);
-
-  if (subch_type == EChannelType::CORNER)
-    return 0.25 * rod_circumference + pitch + 2 * gap;
-  else if (subch_type == EChannelType::EDGE)
-    return 0.5 * rod_circumference + pitch;
-  else
-    return rod_circumference;
+  return _mass_flux * _area[_qp];
 }

@@ -12,30 +12,25 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "MassFlowRateIC.h"
+#pragma once
 
-registerMooseObject("SubChannelApp", MassFlowRateIC);
+#include "InitialCondition.h"
 
-InputParameters
-MassFlowRateIC::validParams()
+/**
+ * Computes mass float rate from specified mass flux and cross-sectional area
+ */
+class SCMMassFlowRateIC : public InitialCondition
 {
-  InputParameters params = InitialCondition::validParams();
-  params.addClassDescription(
-      "Computes mass float rate from specified mass flux and cross-sectional area");
-  params.addRequiredCoupledVar("area", "Subchannel surface area [m^2]");
-  params.addRequiredParam<Real>("mass_flux", "Specified mass flux [kg/s-m^2]");
-  return params;
-}
+public:
+  static InputParameters validParams();
 
-MassFlowRateIC::MassFlowRateIC(const InputParameters & parameters)
-  : InitialCondition(parameters),
-    _mass_flux(getParam<Real>("mass_flux")),
-    _area(coupledValue("area"))
-{
-}
+  SCMMassFlowRateIC(const InputParameters & parameters);
 
-Real
-MassFlowRateIC::value(const Point & /*p*/)
-{
-  return _mass_flux * _area[_qp];
-}
+  virtual Real value(const Point & p) override;
+
+protected:
+  /// Specified mass flux
+  const Real & _mass_flux;
+  /// Cross-sectional area
+  const VariableValue & _area;
+};

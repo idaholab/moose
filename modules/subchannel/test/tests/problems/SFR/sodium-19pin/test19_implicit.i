@@ -96,7 +96,7 @@ P_out = 2.0e5 # Pa
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -106,7 +106,7 @@ P_out = 2.0e5 # Pa
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = 1000 # W
     filename = "pin_power_profile19.txt"

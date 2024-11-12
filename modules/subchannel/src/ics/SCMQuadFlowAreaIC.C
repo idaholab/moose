@@ -12,12 +12,12 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "QuadFlowAreaIC.h"
+#include "SCMQuadFlowAreaIC.h"
 
-registerMooseObject("SubChannelApp", QuadFlowAreaIC);
+registerMooseObject("SubChannelApp", SCMQuadFlowAreaIC);
 
 InputParameters
-QuadFlowAreaIC::validParams()
+SCMQuadFlowAreaIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
   params.addClassDescription(
@@ -25,13 +25,13 @@ QuadFlowAreaIC::validParams()
   return params;
 }
 
-QuadFlowAreaIC::QuadFlowAreaIC(const InputParameters & params)
+SCMQuadFlowAreaIC::SCMQuadFlowAreaIC(const InputParameters & params)
   : QuadSubChannelBaseIC(params), _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
 {
 }
 
 Real
-QuadFlowAreaIC::value(const Point & p)
+SCMQuadFlowAreaIC::value(const Point & p)
 {
   Real standard_area, rod_area, additional_area;
   auto pitch = _mesh.getPitch();
