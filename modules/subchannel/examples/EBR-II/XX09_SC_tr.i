@@ -236,7 +236,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     block = subchannel
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S

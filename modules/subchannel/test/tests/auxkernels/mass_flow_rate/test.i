@@ -21,7 +21,7 @@
 
   [AuxKernels]
     [mdot_ak]
-      type = MassFlowRateAux
+      type = SCMMassFlowRateAux
       variable = mdot
       area = S
       mass_flux = 4722

@@ -132,7 +132,7 @@ pin_diameter = 0.00950
     block = sub_channel
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S

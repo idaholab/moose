@@ -12,12 +12,12 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "BlockedMassFlowRateAux.h"
+#include "SCMBlockedMassFlowRateAux.h"
 
-registerMooseObject("SubChannelApp", BlockedMassFlowRateAux);
+registerMooseObject("SubChannelApp", SCMBlockedMassFlowRateAux);
 
 InputParameters
-BlockedMassFlowRateAux::validParams()
+SCMBlockedMassFlowRateAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes inlet mass flow rate BCs, from specified mass flux and "
@@ -34,7 +34,7 @@ BlockedMassFlowRateAux::validParams()
   return params;
 }
 
-BlockedMassFlowRateAux::BlockedMassFlowRateAux(const InputParameters & parameters)
+SCMBlockedMassFlowRateAux::SCMBlockedMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
     _unblocked_mass_flux(getParam<Real>("unblocked_mass_flux")),
@@ -45,7 +45,7 @@ BlockedMassFlowRateAux::BlockedMassFlowRateAux(const InputParameters & parameter
 }
 
 Real
-BlockedMassFlowRateAux::computeValue()
+SCMBlockedMassFlowRateAux::computeValue()
 {
   auto i = _subchannel_mesh.getSubchannelIndexFromPoint(*_current_node);
 

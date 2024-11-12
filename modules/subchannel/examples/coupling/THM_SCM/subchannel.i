@@ -194,7 +194,7 @@ heated_length = 1.0
     block = subchannel
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
