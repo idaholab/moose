@@ -30,7 +30,7 @@ PhysicsBase::validParams()
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
   params.addParam<std::vector<SolverSystemName>>(
-      "system_name",
+      "system_names",
       {"nl0"},
       "Name of the solver system(s) for the variables. If a single name is specified, "
       "that system is used for all solver variables.");
@@ -59,7 +59,7 @@ PhysicsBase::validParams()
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : Action(parameters),
     InputParametersChecksUtils<PhysicsBase>(this),
-    _system_names(getParam<std::vector<SolverSystemName>>("system_name")),
+    _system_names(getParam<std::vector<SolverSystemName>>("system_names")),
     _verbose(getParam<bool>("verbose")),
     _preconditioning(getParam<MooseEnum>("preconditioning")),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
@@ -251,13 +251,16 @@ PhysicsBase::initializePhysics()
     _dim = _mesh->dimension();
 
   // Check that the systems exist in the Problem
-  // TODO: try to add the systems to the problem from here
-  const auto & problem_systems = getProblem().getNonlinearSystemNames();
+  // TODO: try to add the systems to the problem from here instead
+  const auto & problem_nl_systems = getProblem().getNonlinearSystemNames();
+  const auto & problem_lin_systems = getProblem().getLinearSystemNames();
   for (const auto & sys_name : _system_names)
-    if (std::find(problem_systems.begin(), problem_systems.end(), sys_name) ==
-            problem_systems.end() &&
+    if (std::find(problem_nl_systems.begin(), problem_nl_systems.end(), sys_name) ==
+            problem_nl_systems.end() &&
+        std::find(problem_lin_systems.begin(), problem_lin_systems.end(), sys_name) ==
+            problem_lin_systems.end() &&
         solverVariableNames().size())
-      mooseError("System '", sys_name, "' is not used in the problem");
+      mooseError("System '", sys_name, "' is not found in the Problem");
 
   // Cache system number as some routines prefer those
   for (const auto & sys_name : _system_names)
@@ -279,7 +282,7 @@ PhysicsBase::checkIntegrityEarly() const
 
   // Check that there is a system for each variable
   if (_system_names.size() != 1 && _system_names.size() != _solver_var_names.size())
-    paramError("system_name",
+    paramError("system_names",
                "There should be one system name per solver variable (potentially repeated), or a "
                "single system name for all variables. Current you have '" +
                    std::to_string(_system_names.size()) + "' systems specified for '" +

@@ -382,7 +382,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _set_nonlinear_convergence_name(false),
+    _set_nonlinear_convergence_names(false),
     _need_to_add_default_nonlinear_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
@@ -8780,16 +8780,16 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
     paramError("nonlinear_convergence",
                "There must be one convergence object per nonlinear system");
   _nonlinear_convergence_names = convergence_names;
-  _set_nonlinear_convergence_name = true;
+  _set_nonlinear_convergence_names = true;
 }
 
 std::vector<ConvergenceName>
 FEProblemBase::getNonlinearConvergenceNames() const
 {
-  if (_set_nonlinear_convergence_name)
+  if (_set_nonlinear_convergence_names)
     return _nonlinear_convergence_names;
   else
-    mooseError("The nonlinear convergence name has not been set.");
+    mooseError("The nonlinear convergence name(s) have not been set.");
 }
 
 void

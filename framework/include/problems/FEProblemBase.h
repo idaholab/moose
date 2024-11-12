@@ -2208,7 +2208,7 @@ public:
   void setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
 
   /**
-   * Gets the nonlinear convergence object names if there are any.
+   * Gets the nonlinear convergence object name(s).
    */
   std::vector<ConvergenceName> getNonlinearConvergenceNames() const;
 
@@ -2422,7 +2422,7 @@ protected:
   Real & _dt_old;
 
   /// Flag that the nonlinear convergence name has been set
-  bool _set_nonlinear_convergence_name;
+  bool _set_nonlinear_convergence_names;
   /// Flag that the problem needs to add the default nonlinear convergence
   bool _need_to_add_default_nonlinear_convergence;
 

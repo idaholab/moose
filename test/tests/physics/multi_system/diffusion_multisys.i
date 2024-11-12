@@ -21,14 +21,14 @@
     [ContinuousGalerkin]
       [diff_1]
         source_functor = 2
-        system_name = 'sys1'
+        system_names = 'sys1'
 
         dirichlet_boundaries = 'left_to_1 right_to_1 top_to_1 bottom_to_1'
         boundary_values = '2 3 4 5'
       []
       [diff_2]
         source_functor = 2
-        system_name = 'sys2'
+        system_names = 'sys2'
         variable_name = 'v'
 
         dirichlet_boundaries = 'left_to_1 right_to_1 top_to_1 bottom_to_1'

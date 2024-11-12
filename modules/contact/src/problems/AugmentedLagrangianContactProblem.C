@@ -68,6 +68,8 @@ AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultNonl
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
   // TODO: Add multi-nonlinear system support
+  if (this->numNonlinearSystems() > 1)
+    mooseError("Multi-system not currently implemented");
   this->addConvergence(class_name, this->getNonlinearConvergenceNames()[0], params);
 }
 
@@ -82,6 +84,8 @@ AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultNonlinearConvergenc
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
   // TODO: Add multi-nonlinear system support
+  if (this->numNonlinearSystems() > 1)
+    mooseError("Multi-system not currently implemented");
   this->addConvergence(class_name, this->getNonlinearConvergenceNames()[0], params);
 }
 

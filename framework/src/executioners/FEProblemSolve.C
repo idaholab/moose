@@ -290,25 +290,25 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     const auto & all_splittings = getParam<std::vector<std::vector<std::string>>>("splitting");
     if (all_splittings.size())
       nl.setDecomposition(
-          getParamFromNonLinearSystemVectorParam<std::vector<std::string>>("splitting", i_nl_sys));
+          getParamFromNonlinearSystemVectorParam<std::vector<std::string>>("splitting", i_nl_sys));
     else
       nl.setDecomposition({});
 
     const auto res_and_jac =
-        getParamFromNonLinearSystemVectorParam<bool>("residual_and_jacobian_together", i_nl_sys);
+        getParamFromNonlinearSystemVectorParam<bool>("residual_and_jacobian_together", i_nl_sys);
     if (res_and_jac)
       nl.residualAndJacobianTogether();
 
     // Automatic scaling parameters
     nl.computeScalingOnce(
-        getParamFromNonLinearSystemVectorParam<bool>("compute_scaling_once", i_nl_sys));
+        getParamFromNonlinearSystemVectorParam<bool>("compute_scaling_once", i_nl_sys));
     nl.autoScalingParam(
-        getParamFromNonLinearSystemVectorParam<Real>("resid_vs_jac_scaling_param", i_nl_sys));
+        getParamFromNonlinearSystemVectorParam<Real>("resid_vs_jac_scaling_param", i_nl_sys));
     nl.offDiagonalsInAutoScaling(
-        getParamFromNonLinearSystemVectorParam<bool>("off_diagonals_in_auto_scaling", i_nl_sys));
+        getParamFromNonlinearSystemVectorParam<bool>("off_diagonals_in_auto_scaling", i_nl_sys));
     if (isParamValid("scaling_group_variables"))
       nl.scalingGroupVariables(
-          getParamFromNonLinearSystemVectorParam<std::vector<std::vector<std::string>>>(
+          getParamFromNonlinearSystemVectorParam<std::vector<std::vector<std::string>>>(
               "scaling_group_variables", i_nl_sys));
     if (isParamValid("ignore_variables_for_autoscaling"))
     {
@@ -317,10 +317,10 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
       if (isParamValid("scaling_group_variables"))
       {
         const auto & ignore_variables_for_autoscaling =
-            getParamFromNonLinearSystemVectorParam<std::vector<std::string>>(
+            getParamFromNonlinearSystemVectorParam<std::vector<std::string>>(
                 "ignore_variables_for_autoscaling", i_nl_sys);
         const auto & scaling_group_variables =
-            getParamFromNonLinearSystemVectorParam<std::vector<std::vector<std::string>>>(
+            getParamFromNonlinearSystemVectorParam<std::vector<std::vector<std::string>>>(
                 "scaling_group_variables", i_nl_sys);
         for (const auto & group : scaling_group_variables)
           for (const auto & var_name : group)
@@ -331,7 +331,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
                          "Variables cannot be in a scaling grouping and also be ignored");
       }
       nl.ignoreVariablesForAutoscaling(
-          getParamFromNonLinearSystemVectorParam<std::vector<std::string>>(
+          getParamFromNonlinearSystemVectorParam<std::vector<std::string>>(
               "ignore_variables_for_autoscaling", i_nl_sys));
     }
   }
@@ -342,7 +342,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
 template <typename T>
 T
-FEProblemSolve::getParamFromNonLinearSystemVectorParam(std::string param_name,
+FEProblemSolve::getParamFromNonlinearSystemVectorParam(std::string param_name,
                                                        unsigned int index) const
 {
   const auto & param_vec = getParam<std::vector<T>>(param_name);
@@ -374,16 +374,16 @@ FEProblemSolve::solve()
 
   // Outer loop for multi-grid convergence
   bool converged = false;
-  unsigned int num_fp_multisys = 0;
+  unsigned int num_fp_multisys_iters = 0;
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
     // Multi-system fixed point loop
     // Use a convergence object if provided, if not, use a reasonable default of every nested system
     // being converged
-    num_fp_multisys = 0;
+    num_fp_multisys_iters = 0;
     converged = false;
     while (_multi_sys_fp_convergence
-               ? (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys) ==
+               ? (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
                   Convergence::MooseConvergenceStatus::ITERATING)
                : !converged)
     {
@@ -418,7 +418,7 @@ FEProblemSolve::solve()
 
       if (!_using_multi_sys_fp_iterations)
         converged = true;
-      num_fp_multisys++;
+      num_fp_multisys_iters++;
     }
 
     if (grid_step != _num_grid_steps)
@@ -426,7 +426,7 @@ FEProblemSolve::solve()
   }
 
   if (_multi_sys_fp_convergence)
-    return (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys) ==
+    return (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
             Convergence::MooseConvergenceStatus::CONVERGED);
   else
     return converged;

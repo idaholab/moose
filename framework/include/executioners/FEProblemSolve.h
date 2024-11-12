@@ -45,7 +45,7 @@ protected:
   /// @param index index of the nonlinear system
   /// @return parameter for that nonlinear system
   template <typename T>
-  T getParamFromNonLinearSystemVectorParam(std::string param_name, unsigned int index) const;
+  T getParamFromNonlinearSystemVectorParam(std::string param_name, unsigned int index) const;
 
   /// Moose provided line searches
   static std::set<std::string> const _moose_line_searches;

@@ -81,8 +81,7 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
       {
         std::stringstream msg;
         msg << "The following nonlinear convergence parameters were set in the executioner, but "
-               "are "
-               "not used:\n";
+               "are not used:\n";
         for (const auto & param : unused_params)
           msg << "  " << param << "\n";
         mooseError(msg.str());
