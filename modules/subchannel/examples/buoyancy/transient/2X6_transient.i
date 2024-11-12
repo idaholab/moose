@@ -39,17 +39,17 @@ P_out = 101325 # Pa
 
 [ICs]
   [S_IC]
-    type = QuadFlowAreaIC
+    type = SCMQuadFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = QuadWettedPerimIC
+    type = SCMQuadWettedPerimIC
     variable = w_perim
   []
 
   [q_prime_IC]
-    type = QuadPowerIC
+    type = SCMQuadPowerIC
     variable = q_prime
     power = 0.0 # W
     filename = "power_profile.txt"

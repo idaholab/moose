@@ -33,7 +33,7 @@ length = 1.0
 
 [ICs]
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = 5.0e5 # W
     filename = "pin_power_profile_axial.txt"

@@ -14,19 +14,16 @@
 
 #pragma once
 
-#include "TriSubChannelBaseIC.h"
-#include "SubChannelMesh.h"
-
-class TriSubChannelMesh;
+#include "QuadSubChannelBaseIC.h"
+#include "QuadSubChannelMesh.h"
 
 /**
- * This class calculates the area of the triangular, edge, and corner subchannels for hexagonal fuel
- * assemblies
+ * This class calculates the cross-sectional flow area of the quadrilateral subchannel
  */
-class TriFlowAreaIC : public TriSubChannelBaseIC
+class SCMQuadFlowAreaIC : public QuadSubChannelBaseIC
 {
 public:
-  TriFlowAreaIC(const InputParameters & params);
+  SCMQuadFlowAreaIC(const InputParameters & params);
   Real value(const Point & p) override;
 
 public:

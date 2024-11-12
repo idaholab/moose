@@ -12,17 +12,17 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "QuadPowerIC.h"
+#include "SCMQuadPowerIC.h"
 #include "Function.h"
 #include "QuadSubChannelMesh.h"
 
 using namespace std;
 using namespace Eigen;
 
-registerMooseObject("SubChannelApp", QuadPowerIC);
+registerMooseObject("SubChannelApp", SCMQuadPowerIC);
 
 InputParameters
-QuadPowerIC::validParams()
+SCMQuadPowerIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
   params.addClassDescription("Computes axial heat rate (W/m) that goes into the subchannel cells "
@@ -38,7 +38,7 @@ QuadPowerIC::validParams()
   return params;
 }
 
-QuadPowerIC::QuadPowerIC(const InputParameters & params)
+SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
   : QuadSubChannelBaseIC(params),
     _power(getParam<Real>("power")),
     _numberoflines(0),
@@ -91,7 +91,7 @@ QuadPowerIC::QuadPowerIC(const InputParameters & params)
 }
 
 void
-QuadPowerIC::initialSetup()
+SCMQuadPowerIC::initialSetup()
 {
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
@@ -136,7 +136,7 @@ QuadPowerIC::initialSetup()
 }
 
 Real
-QuadPowerIC::value(const Point & p)
+SCMQuadPowerIC::value(const Point & p)
 {
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();

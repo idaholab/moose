@@ -161,7 +161,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -171,7 +171,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = ${pin_power} # W
     filename = "pin_power_profile217.txt"

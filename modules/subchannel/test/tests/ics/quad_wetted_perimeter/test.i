@@ -20,7 +20,7 @@
 
 [ICs]
   [w_perim_IC]
-    type = QuadWettedPerimIC
+    type = SCMQuadWettedPerimIC
     variable = w_perim
   []
 []

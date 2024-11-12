@@ -14,17 +14,24 @@
 
 #pragma once
 
-#include "QuadSubChannelBaseIC.h"
+#include "TriSubChannelBaseIC.h"
+#include "SubChannelMesh.h"
+
+class TriSubChannelMesh;
 
 /**
- * Sets the wetted perimeter of the quadrilater subchannel
+ * This class calculates the area of the triangular, edge, and corner subchannels for hexagonal fuel
+ * assemblies
  */
-class QuadWettedPerimIC : public QuadSubChannelBaseIC
+class SCMTriFlowAreaIC : public TriSubChannelBaseIC
 {
 public:
-  QuadWettedPerimIC(const InputParameters & params);
+  SCMTriFlowAreaIC(const InputParameters & params);
   Real value(const Point & p) override;
 
 public:
   static InputParameters validParams();
+
+protected:
+  SubChannelMesh & _subchannel_mesh;
 };

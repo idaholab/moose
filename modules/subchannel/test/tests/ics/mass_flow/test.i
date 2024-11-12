@@ -25,12 +25,12 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 
 [ICs]
   [S_IC]
-    type = QuadFlowAreaIC
+    type = SCMQuadFlowAreaIC
     variable = S
   []
 
   [mdot_ic]
-    type = MassFlowRateIC
+    type = SCMMassFlowRateIC
     variable = mdot
     area = S
     mass_flux = ${mass_flux_in}

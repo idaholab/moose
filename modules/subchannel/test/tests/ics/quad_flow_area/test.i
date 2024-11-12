@@ -20,7 +20,7 @@
 
 [ICs]
   [S_IC]
-    type = QuadFlowAreaIC
+    type = SCMQuadFlowAreaIC
     variable = S
   []
 []

@@ -22,10 +22,10 @@ class TriSubChannelMesh;
  * Sets the axial heat rate for each pin according to a radial power distribution and a user defined
  * axial power shape for hexagonal fuel assemblies.
  */
-class TriPowerIC : public TriSubChannelBaseIC
+class SCMTriPowerIC : public TriSubChannelBaseIC
 {
 public:
-  TriPowerIC(const InputParameters & params);
+  SCMTriPowerIC(const InputParameters & params);
   Real value(const Point & p) override;
 
   virtual void initialSetup() override;

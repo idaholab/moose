@@ -84,7 +84,7 @@ P_out = 4.923e6 # Pa
   []
 
   [q_prime_IC]
-    type = QuadPowerIC
+    type = SCMQuadPowerIC
     variable = q_prime
   []
 

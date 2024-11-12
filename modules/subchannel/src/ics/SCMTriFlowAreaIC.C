@@ -12,13 +12,13 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "TriFlowAreaIC.h"
+#include "SCMTriFlowAreaIC.h"
 #include "TriSubChannelMesh.h"
 
-registerMooseObject("SubChannelApp", TriFlowAreaIC);
+registerMooseObject("SubChannelApp", SCMTriFlowAreaIC);
 
 InputParameters
-TriFlowAreaIC::validParams()
+SCMTriFlowAreaIC::validParams()
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
   params.addClassDescription(
@@ -26,13 +26,13 @@ TriFlowAreaIC::validParams()
   return params;
 }
 
-TriFlowAreaIC::TriFlowAreaIC(const InputParameters & params)
+SCMTriFlowAreaIC::SCMTriFlowAreaIC(const InputParameters & params)
   : TriSubChannelBaseIC(params), _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
 {
 }
 
 Real
-TriFlowAreaIC::value(const Point & p)
+SCMTriFlowAreaIC::value(const Point & p)
 {
   Real standard_area, rod_area, wire_area, additional_area;
   auto pitch = _mesh.getPitch();

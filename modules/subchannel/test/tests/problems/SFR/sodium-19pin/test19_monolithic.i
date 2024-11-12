@@ -102,7 +102,7 @@ P_out = 2.0e5 # Pa
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -112,7 +112,7 @@ P_out = 2.0e5 # Pa
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = '${fparse 16975/(0.5334+0.4046+0.0762)}' # W/m
     filename = "pin_power_profile19.txt"
