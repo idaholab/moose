@@ -75,12 +75,12 @@
 
 [Transfers]
   [P_transfer]
-    type = MultiAppDetailedSolutionTransfer
+    type = SCMSolutionTransfer
     to_multi_app = viz
     variable = 'P'
   []
   [T_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
+    type = SCMPinSolutionTransfer
     to_multi_app = viz
     variable = 'T'
   []

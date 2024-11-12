@@ -225,7 +225,7 @@ P_out = 2.0e5 # Pa
 
 [Transfers]
   [xfer]
-    type = MultiAppDetailedSolutionTransfer
+    type = SCMSolutionTransfer
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []

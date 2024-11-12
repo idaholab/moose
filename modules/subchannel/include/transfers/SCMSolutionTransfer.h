@@ -14,18 +14,18 @@
 
 #pragma once
 
-#include "MultiAppInterWrapperSolutionTransferBase.h"
+#include "MultiAppDetailedSolutionTransferBase.h"
 
 /**
- * Transfers inter-wrapper solution from computational mesh onto visualization mesh
+ * Transfers subchannel solution from computational mesh onto visualization mesh
  */
-class MultiAppInterWrapperSolutionTransfer : public MultiAppInterWrapperSolutionTransferBase
+class SCMSolutionTransfer : public MultiAppDetailedSolutionTransferBase
 {
 public:
-  MultiAppInterWrapperSolutionTransfer(const InputParameters & parameters);
+  SCMSolutionTransfer(const InputParameters & parameters);
 
 protected:
-  virtual Node * getFromNode(const InterWrapperMesh & from_mesh, const Point & src_node);
+  Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node) override;
 
 public:
   static InputParameters validParams();

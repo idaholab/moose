@@ -265,7 +265,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [Transfers]
   [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
+    type = SCMSolutionTransfer
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S'
   []
