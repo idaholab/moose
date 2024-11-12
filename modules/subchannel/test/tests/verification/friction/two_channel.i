@@ -119,7 +119,7 @@ P_out = 155e+5 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S

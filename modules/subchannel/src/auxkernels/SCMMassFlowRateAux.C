@@ -12,30 +12,32 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "UniformlyDistributedMassFlowRateAux.h"
+#include "SCMMassFlowRateAux.h"
 
-registerMooseObject("SubChannelApp", UniformlyDistributedMassFlowRateAux);
+registerMooseObject("SubChannelApp", SCMMassFlowRateAux);
 
 InputParameters
-UniformlyDistributedMassFlowRateAux::validParams()
+SCMMassFlowRateAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addRequiredParam<Real>("mass_flow", "Specified total mass flow at the inlet [kg/s]");
-  params.addClassDescription("Computes a uniform mass flow rate at the inlet");
+  params.addClassDescription(
+      "Computes mass flow rate from specified mass flux and subchannel cross-sectional "
+      "area. Can read either PostprocessorValue or Real");
+  params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
+  params.addRequiredParam<PostprocessorName>(
+      "mass_flux", "The postprocessor or Real to use for the value of mass_flux");
   return params;
 }
 
-UniformlyDistributedMassFlowRateAux::UniformlyDistributedMassFlowRateAux(
-    const InputParameters & parameters)
+SCMMassFlowRateAux::SCMMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _mass_flow(getParam<Real>("mass_flow")),
-    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
+    _mass_flux(getPostprocessorValue("mass_flux")),
+    _area(coupledValue("area"))
 {
 }
 
 Real
-UniformlyDistributedMassFlowRateAux::computeValue()
+SCMMassFlowRateAux::computeValue()
 {
-  unsigned int n_ch = _subchannel_mesh.getNumOfChannels();
-  return _mass_flow / n_ch;
+  return _mass_flux * _area[_qp];
 }

@@ -1,6 +1,6 @@
 # M. H. Fontana et al 1973, 1976, Inlet blockage, Case 719.
 # This input file models a block at the inlet of the assembly,
-# using the aux kernel BlockedMassFlowRateAux. The affected subchannels get a mass flux BC that is
+# using the aux kernel SCMBlockedMassFlowRateAux. The affected subchannels get a mass flux BC that is
 # user defined to be very low.
 T_in = 589.15
 A12 = 1.00423e3
@@ -155,7 +155,7 @@ P_out = 2.0e5 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = BlockedMassFlowRateAux
+    type = SCMBlockedMassFlowRateAux
     variable = mdot
     boundary = inlet
     index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'

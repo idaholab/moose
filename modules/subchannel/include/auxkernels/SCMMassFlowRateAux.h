@@ -20,12 +20,12 @@
  * Computes mass float rate from specified uniform mass flux and cross-sectional area.
  * Reads mass flux value from postprocessor.
  */
-class MassFlowRateAux : public AuxKernel
+class SCMMassFlowRateAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MassFlowRateAux(const InputParameters & parameters);
+  SCMMassFlowRateAux(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 

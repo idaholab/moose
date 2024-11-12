@@ -31,7 +31,7 @@
 
 [AuxKernels]
   [mdot_ak]
-    type = BlockedMassFlowRateAux
+    type = SCMBlockedMassFlowRateAux
     variable = mdot
     area = S
     index_blockage = '0'

@@ -123,7 +123,7 @@ P_out = 4.923e6 # Pa
     block = subchannel
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
