@@ -20,11 +20,11 @@
 /**
  * Calculates an overall Delta of a chosen variable for the subchannel assembly
  */
-class PlanarMean : public GeneralPostprocessor
+class SCMPlanarMean : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
-  PlanarMean(const InputParameters & params);
+  SCMPlanarMean(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}
