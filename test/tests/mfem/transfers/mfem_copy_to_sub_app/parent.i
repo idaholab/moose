@@ -17,14 +17,16 @@
 []
 
 [Variables]
-  [diffused]
+  [diffused0]
     type = MFEMVariable
     fespace = H1FESpace
   []
-  [sub]
+[]
+[AuxVariables]
+  [sub0]
     type = MFEMVariable
     fespace = H1FESpace
-    ic = 10.0
+    ic = -100.0
   []
 []
 
@@ -42,13 +44,13 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = diffused0
     boundary = '1'
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = diffused0
     boundary = '2'
     coefficient = TopValue
   []
@@ -76,7 +78,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = diffused
+    variable = diffused0
     coefficient = diffusivity
   []
 []
@@ -102,17 +104,28 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/Diffuseon
     vtk_format = ASCII
   []
 []
 
 [MultiApps]
-  [./sub]
+  [./subapp]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = FINAL 
   [../]
+[]
+
+[Transfers]
+    [./to_sub]
+        type = MFEMCopyTransfer
+        source_variable = diffused0
+        variable = sub1 
+        #execute_on = FINAL
+        to_multi_app = subapp
+        #skip_coordinate_collapsing = true
+    [../]
 []
 
 #[Transfers]

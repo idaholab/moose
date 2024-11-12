@@ -17,10 +17,16 @@
 []
 
 [Variables]
-  [sub]
+  [diffused1]
     type = MFEMVariable
     fespace = H1FESpace
-    ic = -10.0
+  []
+[]
+[AuxVariables]
+  [sub1]
+    type = MFEMVariable
+    fespace = H1FESpace
+    ic = 10.0
   []
 []
 
@@ -49,17 +55,18 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = sub
+    variable = diffused1
     boundary = '1'
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = sub
+    variable = diffused1
     boundary = '2'
     coefficient = TopValue
   []
 []
+
 
 
 [Materials]
@@ -74,7 +81,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = sub
+    variable = diffused1
     coefficient = diffusivity
   []
 []
