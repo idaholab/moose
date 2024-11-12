@@ -57,20 +57,24 @@ NSFVBase::commonMomentumEquationParams()
       "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
   params.addParam<MooseFunctorName>("density", NS::density, "The name of the density");
 
+  // Dynamic pressure parameter
+  // TODO: make default
+  params.addParam<bool>("solve_for_dynamic_pressure",
+                        false,
+                        "Whether to solve for the dynamic pressure instead of the total pressure");
+
+  // Pressure pin parameters
   params.addParam<bool>(
       "pin_pressure", false, "Switch to enable pressure shifting for incompressible simulations.");
-
   MooseEnum s_type("average point-value average-uo point-value-uo", "average-uo");
   params.addParam<MooseEnum>(
       "pinned_pressure_type",
       s_type,
       "Types for shifting (pinning) the pressure in case of incompressible simulations.");
-
   params.addParam<Point>(
       "pinned_pressure_point",
       Point(),
       "The XYZ coordinates where pressure needs to be pinned for incompressible simulations.");
-
   params.addParam<PostprocessorName>(
       "pinned_pressure_value",
       "1e5",

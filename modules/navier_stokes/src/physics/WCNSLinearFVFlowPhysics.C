@@ -248,7 +248,7 @@ WCNSLinearFVFlowPhysics::addINSMomentumPressureKernels()
 void
 WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
 {
-  if (parameters().isParamValid("gravity"))
+  if (parameters().isParamValid("gravity") && !_solve_for_dynamic_pressure)
   {
     std::string kernel_type = "LinearFVSource";
     std::string kernel_name = prefix() + "ins_momentum_gravity_";
