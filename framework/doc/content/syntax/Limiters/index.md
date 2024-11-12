@@ -94,7 +94,7 @@ TVD, and what the functional form of the flux limiting function $\beta(r)$ is.
 | `SOU`               | 2                 | No  | $r$                                          |
 | `QUICK`             | 2                 | No  | $\frac{3+r}{4}$                              |
 
-## Limiting Process for Incompressible and Weakly-Compressible flow Flow
+## Limiting Process for Incompressible and Weakly-Compressible flow
 
 A full second-order upwind reconstruction is used for incompressible and weakly-compressible solvers. In this reconstruction, the limited quantity at the face is expressed as follows:
 
@@ -112,7 +112,7 @@ where:
 
 Two kinds of limiters are supported: slope-limited and face-value limited. These limiters are defined below.
 
-For slope-limiting, the limiting function $r$ is defined as follows:
+For slope-limiting, the approximate gradient ratio (or flux limiting ratio) $r$ is defined as follows:
 
 \begin{equation}
 r = 2 \frac{\bm{d}_{NC} \cdot (\nabla \bm{\Psi})_C}{\bm{d}_{NC} \cdot (\nabla \bm{\Psi})_f} - 1
@@ -153,8 +153,7 @@ Each of the limiters implemented along with the implementation reference, limiti
 | `Venkatakrishnan` [!citep](venkatakrishnan1993) | Face-Value    | No  | $\frac{2r+1}{r(2r+1)+1}$                                          |
 
 
-To illustrate the performance of the limiters, a dispersion analysis is developed.
-The problem is illustrated in [dispersion].
+To illustrate the performance of the limiters, a dispersion analysis is developedand presented in [dispersion].
 This consists of the advection of a passive scalar in a Cartesian mesh at 45 degrees.
 The exact solution, without numerical diffusion, is a straight line at 45 degrees
 dividing the regions with a scalar concentration of 1 and 0.
@@ -172,5 +171,10 @@ can be expected for each of the limiters.
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=dispersion_line
       caption=Performance of each of the limiters in a line perpendicular to the advection front.
+
+!alert warning
+When using limiters with `Executioner` of `type = Steady`,
+the solver uses the previous nonlinear iterate for the limiting flux.
+This can ultimately lead to bad condition numbers in the Jacobian and poor convergence.
 
 !bibtex bibliography

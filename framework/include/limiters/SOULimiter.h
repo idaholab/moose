@@ -17,8 +17,6 @@ namespace Moose
 namespace FV
 {
 /**
- * @brief Implements the Second-Order Upwind (SOU) limiter for flux limiting in numerical methods.
- *
  * The SOU limiter is used for reproducing the second-order-upwind scheme. The limiter function
  * $\beta(delta_max)$ is defined as:
  *
@@ -37,8 +35,6 @@ class SOULimiter : public Limiter<T>
 {
 public:
   /**
-   * @brief Computes the limited value using the SOU limiter.
-   *
    * This method overrides the pure virtual `limit` method in the base `Limiter` class.
    * It calculates the flux limiting ratio based on the SOU limiter formula.
    *
@@ -50,27 +46,6 @@ public:
    * @param fi Pointer to the face information structure.
    * @param fi_elem_is_upwind Boolean flag indicating if the current element is upwind.
    * @return The computed flux limiting ratio.
-   *
-   * This method performs the following steps:
-   * 1. Asserts that the upwind gradient pointer is not null.
-   * 2. Handles initialization conflict by determining the face centroid and the appropriate cell
-   * centroid.
-   * 3. Computes the absolute delta value at the face.
-   * 4. Computes the delta between the two elements.
-   * 5. Returns the limited value based on the computed deltas.
-   *
-   * @example
-   * @code
-   * SOULimiter<Real> sou;
-   * VectorValue<Real> grad_upwind(0.1, 0.2, 0.3);
-   * RealVectorValue dCD(1.0, 0.0, 0.0);
-   * Real max_value = 1.0;
-   * Real min_value = 0.0;
-   * FaceInfo fi;
-   * bool fi_elem_is_upwind = true;
-   * Real result = sou.limit(0.0, 0.0, &grad_upwind, nullptr, dCD, max_value, min_value, &fi,
-   * fi_elem_is_upwind);
-   * @endcode
    */
   T limit(const T & phi_upwind,
           const T & phi_downwind,
@@ -116,9 +91,6 @@ public:
 
   InterpMethod interpMethod() const override final { return InterpMethod::SOU; }
 
-  /**
-   * @brief Default constructor for the SOU limiter.
-   */
   SOULimiter() = default;
 };
 }

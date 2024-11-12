@@ -558,8 +558,6 @@ interpolate(const Limiter & limiter,
 }
 
 /**
- * @brief Computes the full limited interpolation of a variable using a specified limiter.
- *
  * This function performs a full limited interpolation of a variable, taking into account
  * the values and gradients at both upwind and downwind locations, as well as geometric
  * information and limits. It applies the specified limiter to ensure the interpolation
@@ -567,26 +565,15 @@ interpolate(const Limiter & limiter,
  *
  * @tparam T The data type of the scalar values and the return type.
  * @param limiter The limiter object used to compute the flux limiting ratio.
- * @param phi_upwind The scalar value at the upwind location.
- * @param phi_downwind The scalar value at the downwind location.
- * @param grad_phi_upwind Pointer to the gradient vector at the upwind location.
- * @param grad_phi_face Pointer to the gradient vector at the face location.
+ * @param phi_upwind The field value at the upwind location.
+ * @param phi_downwind The field value at the downwind location.
+ * @param grad_phi_upwind Pointer to the gradient at the upwind location.
+ * @param grad_phi_face Pointer to the gradient at the face location.
  * @param fi FaceInfo object containing geometric details such as face centroid and cell centroids.
  * @param fi_elem_is_upwind Boolean indicating if the face info element is upwind.
  * @param max_value The maximum allowable value.
  * @param min_value The minimum allowable value.
  * @return The computed limited interpolation value.
- *
- * This function performs the following steps:
- * 1. Computes the direction vector \( dCD \) based on whether the current element is upwind.
- * 2. Calls the `limiter` functor with the provided scalar values, gradient vectors, direction
- * vector, and geometric information to compute the flux limiting ratio \( \beta \).
- * 3. Determines the face centroid and the appropriate cell centroid based on whether the current
- * element is upwind.
- * 4. Computes the delta value at the face by taking the dot product of the upwind gradient vector
- * with the difference between the face and cell centroids.
- * 5. Returns the interpolated value by adding the product of the limiter \( \beta \) and the delta
- * value to the upwind scalar value.
  */
 template <typename T>
 T
@@ -630,9 +617,6 @@ fullLimitedInterpolation(const Limiter<T> & limiter,
 }
 
 /**
- * @brief Computes the minimum and maximum scalar values in a two-cell stencil around a given face
- * in a computational grid.
- *
  * This function calculates the minimum and maximum values within a two-cell stencil. The stencil
  * includes the immediate neighboring elements of the face's associated element and the neighboring
  * elements of those neighbors. It evaluates the values using a provided functor and accounts for
@@ -653,21 +637,6 @@ fullLimitedInterpolation(const Limiter<T> & limiter,
  * @return std::pair<T, T> A pair containing the minimum and maximum values computed across the
  * two-cell stencil. The first element is the maximum value, and the second element is the minimum
  * value.
- *
- * This function performs the following steps:
- * 1. Initializes max_value to 0 and min_value to a large value.
- * 2. Iterates over the direct neighbors of the element associated with the face.
- *    - If a neighbor is valid (not null), it evaluates the functor at that neighbor and updates
- * max_value and min_value.
- * 3. Iterates over the neighbors of the neighbors.
- *    - Similar to the first loop, it evaluates the functor at valid neighbors and updates max_value
- * and min_value.
- * 4. Returns a pair containing the computed max_value and min_value.
- *
- * Usage:
- * This function is typically used in the finite volume methods for min-max computations over
- * stencils (neighborhoods). It helps compute the limiting for limited second order upwind at the
- * faces.
  */
 template <typename T,
           FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
@@ -713,9 +682,6 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
 }
 
 /**
- * @brief Computes the minimum and maximum scalar values of a specific component in a two-cell
- * stencil around a given face in a computational grid.
- *
  * This function calculates the minimum and maximum values of a specified component within a
  * two-cell stencil. The stencil includes the immediate neighboring elements of the face's
  * associated element and the neighboring elements of those neighbors. It evaluates the values using
@@ -734,16 +700,6 @@ computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const S
  * @return std::pair<T, T> A pair containing the minimum and maximum values of the specified
  * component computed across the two-cell stencil. The first element is the maximum value, and the
  * second element is the minimum value.
- *
- * This function performs the following steps:
- * 1. Initializes max_value to 0 and min_value to a large value.
- * 2. Iterates over the direct neighbors of the element associated with the face.
- *    - If a neighbor is valid (not null), it evaluates the functor at that neighbor for the
- * specified component and updates max_value and min_value.
- * 3. Iterates over the neighbors of the neighbors.
- *    - Similar to the first loop, it evaluates the functor at valid neighbors for the specified
- * component and updates max_value and min_value.
- * 4. Returns a pair containing the computed max_value and min_value.
  *
  * Usage:
  * This function is typically used in the finite volume methods for min-max computations over
@@ -795,8 +751,6 @@ computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
 }
 
 /**
- * @brief Interpolates with a limiter and a face argument.
- *
  * This function interpolates values using a specified limiter and face argument. It evaluates the
  * values at upwind and downwind locations and computes interpolation coefficients and advected
  * values.
@@ -820,15 +774,6 @@ computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
  *                         - The second pair corresponds to the face information functor element
  * value and neighbor value.
  *
- * This function performs the following steps:
- * 1. Asserts that the face information is non-null.
- * 2. Constructs a limiter based on the face limiter type.
- * 3. Determines the upwind and downwind arguments based on the face element.
- * 4. Evaluates the functor at the upwind and downwind locations.
- * 5. Computes the interpolation coefficients using the specified limiter.
- * 6. If necessary, computes the gradient and min-max values for certain limiter types.
- * 7. Returns the interpolation coefficients and advected values.
- *
  * Usage:
  * This function is used for interpolating values at faces in a finite volume method, ensuring that
  * the interpolation adheres to the constraints imposed by the limiter.
@@ -848,7 +793,6 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
   typedef typename FunctorBase<T>::GradientType GradientType;
   static const GradientType zero(0);
 
-  // Assert that the face information is non-null
   mooseAssert(face.fi, "this must be non-null");
 
   // Construct the limiter based on the face limiter type
@@ -868,7 +812,6 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
   // Compute interpolation coefficients for Upwind or CentralDifference limiters
   if (face.limiter_type == LimiterType::Upwind ||
       face.limiter_type == LimiterType::CentralDifference)
-  {
     interp_coeffs = interpCoeffs(*limiter,
                                  phi_upwind,
                                  phi_downwind,
@@ -878,7 +821,6 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
                                  std::numeric_limits<Real>::min(),
                                  *face.fi,
                                  face.elem_is_upwind);
-  }
   else
   {
     // Determine the time argument for the limiter
@@ -893,9 +835,7 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
 
     // Compute min-max values for min-max limiters
     if (face.limiter_type == LimiterType::Venkatakrishnan || face.limiter_type == LimiterType::SOU)
-    {
       std::tie(max_value, min_value) = computeMinMaxValue(functor, face, *time_arg);
-    }
 
     // Evaluate the gradient of the functor at the upwind and downwind locations
     const auto grad_phi_upwind = functor.template genericEvaluate<GFEK>(upwind_arg, *time_arg);
@@ -924,8 +864,6 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
 }
 
 /**
- * @brief Interpolates values using a specified functor and face argument.
- *
  * This function interpolates values at faces in a computational grid using a specified functor,
  * face argument, and evaluation kind. It handles different limiter types and performs
  * interpolation accordingly.
@@ -943,14 +881,6 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
  * @param time An argument representing the state or time at which the evaluation is performed.
  *
  * @return T The interpolated value at the face.
- *
- * This function performs the following steps:
- * 1. Checks that only supported FunctorEvaluationKinds are used.
- * 2. Handles central differencing separately as it supports skew correction.
- * 3. For Upwind or CentralDifference limiters, computes interpolation coefficients and advected
- * values.
- * 4. For other limiter types, computes the gradient and min-max values if necessary, and performs
- * full limited interpolation.
  *
  * Usage:
  * This function is used for interpolating values at faces in a finite volume method, ensuring that
@@ -1024,8 +954,6 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg
 }
 
 /**
- * @brief Interpolates vector values using a specified functor and face argument.
- *
  * This function interpolates vector values at faces in a computational grid using a specified
  * functor, face argument, and limiter type. It handles different limiter types and performs
  * interpolation accordingly.
@@ -1041,15 +969,6 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg
  *
  * @return VectorValue<T> The interpolated vector value at the face.
  *
- * This function performs the following steps:
- * 1. Asserts that the face information is non-null.
- * 2. Constructs a limiter based on the face limiter type.
- * 3. Determines the upwind and downwind arguments based on the face element.
- * 4. Evaluates the functor at the upwind and downwind locations.
- * 5. Initializes the return vector value.
- * 6. Computes the interpolation coefficients and advected values for each component.
- * 7. If necessary, computes the gradient and min-max values for certain limiter types.
- *
  * Usage:
  * This function is used for interpolating vector values at faces in a finite volume method,
  * ensuring that the interpolation adheres to the constraints imposed by the limiter.
@@ -1063,7 +982,6 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
   // Define a zero gradient vector for initialization
   static const VectorValue<T> grad_zero(0);
 
-  // Assert that the face information is non-null
   mooseAssert(face.fi, "this must be non-null");
 
   // Construct the limiter based on the face limiter type
@@ -1145,8 +1063,6 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
 }
 
 /**
- * @brief Interpolates container values using a specified functor and face argument.
- *
  * This function interpolates container values at faces in a computational grid using a specified
  * functor, face argument, and limiter type. It handles different limiter types and performs
  * interpolation accordingly.
@@ -1161,15 +1077,6 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
  * @param time An argument representing the state or time at which the evaluation is performed.
  *
  * @return T The interpolated container value at the face.
- *
- * This function performs the following steps:
- * 1. Asserts that the face information is non-null.
- * 2. Constructs a limiter based on the face limiter type.
- * 3. Determines the upwind and downwind arguments based on the face element.
- * 4. Evaluates the functor at the upwind and downwind locations.
- * 5. Initializes the return container value.
- * 6. Computes the interpolation coefficients and advected values for each component.
- * 7. If necessary, computes the gradient and min-max values for certain limiter types.
  *
  * Usage:
  * This function is used for interpolating container values at faces in a finite volume method,

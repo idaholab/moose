@@ -17,13 +17,8 @@ namespace Moose
 namespace FV
 {
 /**
- * @brief Implements the QUICK limiter for flux limiting in numerical methods.
- *
- * The QUICK (Quadratic Upstream Interpolation for Convective Kinematics) limiter is used to reduce
- * numerical oscillations and enforce monotonicity in computational fluid dynamics (CFD) and other
- * numerical simulations. This limiter ensures Total Variation Diminishing (TVD) compliance.
- *
- * The limiter function is derived from the following equations:
+ * The QUICK (Quadratic Upstream Interpolation for Convective Kinematics) limiter
+ * function is derived from the following equations:
  *
  * 1. Calculation of the gradient ratio coefficient \( r_f \):
  * \f[
@@ -45,8 +40,6 @@ class QUICKLimiter : public Limiter<T>
 {
 public:
   /**
-   * @brief Computes the limited value using the QUICK limiter.
-   *
    * This method overrides the pure virtual `limit` method in the base `Limiter` class.
    * It calculates the flux limiting ratio based on the QUICK limiter formula.
    *
@@ -56,23 +49,6 @@ public:
    * @param grad_phi_downwind Pointer to the gradient vector at the downwind location.
    * @param dCD A constant direction vector representing the direction of the cell face.
    * @return The computed flux limiting ratio.
-   *
-   * This method performs the following steps:
-   * 1. Asserts that the upwind gradient pointer is not null.
-   * 2. Computes the gradient ratio coefficient \( r_f \) using the `rf_grad` method or `rF` method.
-   * 3. Applies the QUICK limiter formula to \( r_f \) to obtain the limited value, ensuring TVD
-   * compliance.
-   * 4. Returns the computed limited value.
-   *
-   * @example
-   * @code
-   * QUICKLimiter<Real> quick;
-   * VectorValue<Real> grad_upwind(0.1, 0.2, 0.3);
-   * VectorValue<Real> grad_downwind(0.4, 0.5, 0.6);
-   * RealVectorValue dCD(1.0, 0.0, 0.0);
-   * Real result = quick.limit(0.0, 0.0, &grad_upwind, &grad_downwind, dCD, 0.0, 0.0, nullptr,
-   * true);
-   * @endcode
    */
   T limit(const T & phi_upwind,
           const T & phi_downwind,
@@ -111,9 +87,6 @@ public:
 
   InterpMethod interpMethod() const override final { return InterpMethod::QUICK; }
 
-  /**
-   * @brief Default constructor for the QUICK limiter.
-   */
   QUICKLimiter() = default;
 };
 }

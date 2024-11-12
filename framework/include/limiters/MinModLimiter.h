@@ -17,11 +17,7 @@ namespace Moose
 namespace FV
 {
 /**
- * @brief Implements the Min-Mod limiter for flux limiting in numerical methods.
- *
- * The Min-Mod limiter is used to reduce numerical oscillations and
- * enforce monotonicity in computational fluid dynamics (CFD) and other numerical simulations.
- * The limiter function $\beta(r_f)$ is defined as:
+ * The Min-Mod limiter function $\beta(r_f)$ is defined as:
  *
  * \f[
  * \beta(r_f) = \text{max}(0, \text{min}(1, r_f))
@@ -36,8 +32,6 @@ class MinModLimiter : public Limiter<T>
 {
 public:
   /**
-   * @brief Computes the limited value using the Min-Mod limiter.
-   *
    * This method overrides the pure virtual `limit` method in the base `Limiter` class.
    * It calculates the flux limiting ratio based on the Min-Mod limiter formula.
    *
@@ -45,22 +39,6 @@ public:
    * @param grad_phi_downwind Pointer to the gradient vector at the downwind location.
    * @param dCD A constant direction vector representing the direction of the cell face.
    * @return The computed flux limiting ratio.
-   *
-   * This method performs the following steps:
-   * 1. Asserts that the upwind gradient pointer is not null.
-   * 2. Computes the gradient ratio coefficient \( r_f \) using the `rf_grad` method.
-   * 3. Applies the Min-Mod limiter formula to \( r_f \) to obtain the limited value.
-   * 4. Returns the computed limited value.
-   *
-   * @example
-   * @code
-   * MinModLimiter<Real> minMod;
-   * VectorValue<Real> grad_upwind(0.1, 0.2, 0.3);
-   * VectorValue<Real> grad_downwind(0.4, 0.5, 0.6);
-   * RealVectorValue dCD(1.0, 0.0, 0.0);
-   * Real result = minMod.limit(0.0, 0.0, &grad_upwind, &grad_downwind, dCD, 0.0, 0.0, nullptr,
-   * true);
-   * @endcode
    */
   T limit(const T & phi_upwind,
           const T & phi_downwind,
@@ -89,9 +67,6 @@ public:
 
   InterpMethod interpMethod() const override final { return InterpMethod::MinMod; }
 
-  /**
-   * @brief Default constructor for the Min-Mod limiter.
-   */
   MinModLimiter() = default;
 };
 }

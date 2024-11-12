@@ -17,11 +17,7 @@ namespace Moose
 namespace FV
 {
 /**
- * @brief Implements the Van Leer limiter for flux limiting in numerical methods.
- *
- * The Van Leer limiter is a slope limiter used to reduce numerical oscillations and
- * enforce monotonicity in computational fluid dynamics (CFD) and other numerical simulations.
- * The limiter function $\beta(r_f)$ is defined as:
+ * The Van Leer limiter limiter function $\beta(r_f)$ is defined as:
  *
  * \f[
  * \beta(r_f) = \frac{r_f + \text{abs}(r_f)}{1 + \text{abs}(r_f)}
@@ -36,8 +32,6 @@ class VanLeerLimiter : public Limiter<T>
 {
 public:
   /**
-   * @brief Computes the limited value using the Van Leer limiter.
-   *
    * This method overrides the pure virtual `limit` method in the base `Limiter` class.
    * It calculates the flux limiting ratio based on the Van Leer limiter formula.
    *
@@ -45,22 +39,6 @@ public:
    * @param grad_phi_downwind Pointer to the gradient vector at the downwind location.
    * @param dCD A constant direction vector representing the direction of the cell face.
    * @return The computed flux limiting ratio.
-   *
-   * This method performs the following steps:
-   * 1. Asserts that the upwind and downwind gradient pointers are not null.
-   * 2. Computes the gradient ratio coefficient \( r_f \) using the `rf_grad` method.
-   * 3. Applies the Van Leer limiter formula to \( r_f \) to obtain the limited value.
-   * 4. Returns the computed limited value.
-   *
-   * @example
-   * @code
-   * VanLeerLimiter<Real> vanLeer;
-   * VectorValue<Real> grad_upwind(0.1, 0.2, 0.3);
-   * VectorValue<Real> grad_downwind(0.4, 0.5, 0.6);
-   * RealVectorValue dCD(1.0, 0.0, 0.0);
-   * Real result = vanLeer.limit(0.0, 0.0, &grad_upwind, &grad_downwind, dCD, 0.0, 0.0, nullptr,
-   * true);
-   * @endcode
    */
   T limit(const T & phi_upwind,
           const T & phi_downwind,
@@ -89,9 +67,6 @@ public:
 
   InterpMethod interpMethod() const override final { return InterpMethod::VanLeer; }
 
-  /**
-   * @brief Default constructor for the Van Leer limiter.
-   */
   VanLeerLimiter() = default;
 };
 }
