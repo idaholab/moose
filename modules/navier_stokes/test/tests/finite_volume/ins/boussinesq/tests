@@ -34,14 +34,29 @@
     abs_zero = 1e-9
     valgrind = 'none'
   []
-  [1e6-action]
+  [1e6-physics]
     type = Exodiff
     input = boussinesq-action.i
     exodiff = 1e6-action.e
     cli_args = 'rayleigh=1e6 Outputs/file_base=1e6-action'
-    requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e6 using the INSFV actions.'
+    requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e6 using the Navier Stokes Physics syntax.'
     valgrind = 'none'
     issues = '#19742'
+  []
+  [1e6-physics-dynamic_pressure]
+    prereq = '1e6-physics'
+    type = 'Exodiff'
+    input = boussinesq-action.i
+    cli_args = "rayleigh=1e6 Outputs/file_base=1e6-action "
+               "Physics/NavierStokes/Flow/flow/solve_for_dynamic_pressure=true"
+    exodiff = 1e6-action.e
+    method = "!dbg"
+    requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e6 using the Navier Stokes Physics syntax and solving for the dynamic pressure.'
+    abs_zero = 1e-9
+    recover = false # see #19126
+    valgrind = HEAVY
+    # Dynamic pressure in solution file being compared to total pressure
+    custom_cmp = 'dynamic_pressure.cmp'
   []
   [rho-error]
     type = RunException
