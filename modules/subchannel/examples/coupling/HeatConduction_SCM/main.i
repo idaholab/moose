@@ -244,12 +244,12 @@ heated_length = 1.0 # m
 
   ###### Transfers to the detailedMesh at the end of the coupled simulations
   [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
+    type = SCMSolutionTransfer
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S'
   []
   [pin_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
+    type = SCMPinSolutionTransfer
     to_multi_app = viz
     variable = 'Tpin q_prime'
   []

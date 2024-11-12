@@ -297,7 +297,7 @@ heated_length = 1.0
   []
 
   [pin_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
+    type = SCMPinSolutionTransfer
     to_multi_app = viz
     variable = 'Tpin Dpin q_prime'
   []

@@ -12,29 +12,27 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "MultiAppInterWrapperSolutionTransfer.h"
-#include "InterWrapperMesh.h"
+#include "SCMSolutionTransfer.h"
+#include "SubChannelMesh.h"
 
-registerMooseObject("SubChannelApp", MultiAppInterWrapperSolutionTransfer);
+registerMooseObject("SubChannelApp", SCMSolutionTransfer);
 
 InputParameters
-MultiAppInterWrapperSolutionTransfer::validParams()
+SCMSolutionTransfer::validParams()
 {
-  InputParameters params = MultiAppInterWrapperSolutionTransferBase::validParams();
+  InputParameters params = MultiAppDetailedSolutionTransferBase::validParams();
   params.addClassDescription(
-      "Transfers Inter-Wrapper solution from computational mesh onto visualization mesh");
+      "Transfers subchannel solution from computational mesh onto visualization mesh");
   return params;
 }
 
-MultiAppInterWrapperSolutionTransfer::MultiAppInterWrapperSolutionTransfer(
-    const InputParameters & parameters)
-  : MultiAppInterWrapperSolutionTransferBase(parameters)
+SCMSolutionTransfer::SCMSolutionTransfer(const InputParameters & parameters)
+  : MultiAppDetailedSolutionTransferBase(parameters)
 {
 }
 
 Node *
-MultiAppInterWrapperSolutionTransfer::getFromNode(const InterWrapperMesh & from_mesh,
-                                                  const Point & src_node)
+SCMSolutionTransfer::getFromNode(const SubChannelMesh & from_mesh, const Point & src_node)
 {
   unsigned int sch_idx = from_mesh.channelIndex(src_node);
   unsigned iz = from_mesh.getZIndex(src_node);

@@ -1,6 +1,6 @@
-# MultiAppDetailedPinSolutionTransfer
+# SCMPinSolutionTransfer
 
-!syntax description /Transfers/MultiAppDetailedPinSolutionTransfer
+!syntax description /Transfers/SCMPinSolutionTransfer
 
 ## Overview
 
@@ -13,8 +13,8 @@ to the visualization mesh.
 
 !listing /examples/coupling/1pinSquare_thermomech_SCM/one_pin_problem.i block=pin_transfer language=cpp
 
-!syntax parameters /Transfers/MultiAppDetailedPinSolutionTransfer
+!syntax parameters /Transfers/SCMPinSolutionTransfer
 
-!syntax inputs /Transfers/MultiAppDetailedPinSolutionTransfer
+!syntax inputs /Transfers/SCMPinSolutionTransfer
 
-!syntax children /Transfers/MultiAppDetailedPinSolutionTransfer
+!syntax children /Transfers/SCMPinSolutionTransfer

@@ -12,21 +12,29 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#pragma once
+#include "SCMPinSolutionTransfer.h"
+#include "SubChannelMesh.h"
 
-#include "MultiAppDetailedSolutionTransferBase.h"
+registerMooseObject("SubChannelApp", SCMPinSolutionTransfer);
 
-/**
- * Transfers subchannel solution from computational mesh onto visualization mesh
- */
-class MultiAppDetailedSolutionTransfer : public MultiAppDetailedSolutionTransferBase
+InputParameters
+SCMPinSolutionTransfer::validParams()
 {
-public:
-  MultiAppDetailedSolutionTransfer(const InputParameters & parameters);
+  InputParameters params = MultiAppDetailedSolutionTransferBase::validParams();
+  params.addClassDescription(
+      "Transfers subchannel solution from computational mesh onto visualization mesh");
+  return params;
+}
 
-protected:
-  Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node) override;
+SCMPinSolutionTransfer::SCMPinSolutionTransfer(const InputParameters & parameters)
+  : MultiAppDetailedSolutionTransferBase(parameters)
+{
+}
 
-public:
-  static InputParameters validParams();
-};
+Node *
+SCMPinSolutionTransfer::getFromNode(const SubChannelMesh & from_mesh, const Point & src_node)
+{
+  unsigned int pin_idx = from_mesh.pinIndex(src_node);
+  unsigned iz = from_mesh.getZIndex(src_node);
+  return from_mesh.getPinNode(pin_idx, iz);
+}
