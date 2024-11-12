@@ -231,7 +231,7 @@
   []
   ########### Planar mean of temperature at plane B
   [Temp_B]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = T
     execute_on = 'TIMESTEP_END'
     height = 2.3987595
@@ -424,7 +424,7 @@
   # []
   # ########### Planar mean of temperature at plane C
   # [Temp_C]
-  #   type = PlanarMean
+  #   type = SCMPlanarMean
   #   variable = T
   #   execute_on = 'TIMESTEP_END'
   #   height = 3.06375

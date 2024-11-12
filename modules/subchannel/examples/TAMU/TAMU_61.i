@@ -178,14 +178,14 @@ P_out = 2.0e5 # Pa
   []
 
   [Pin_Planar_Mean]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = P
     execute_on = 'TIMESTEP_END'
     height = 0.0
   []
 
   [Pout_Planar_Mean]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = P
     execute_on = 'TIMESTEP_END'
     height = 2.0
@@ -199,7 +199,7 @@ P_out = 2.0e5 # Pa
 
   ### Assembly inlet density
   [rho_in]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = rho
     execute_on = 'TIMESTEP_END'
     height = 0.0

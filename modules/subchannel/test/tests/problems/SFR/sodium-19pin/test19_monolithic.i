@@ -198,7 +198,7 @@ P_out = 2.0e5 # Pa
 
 [Postprocessors]
   [Temp_B]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = T
     execute_on = 'TIMESTEP_END'
     height = 0.5

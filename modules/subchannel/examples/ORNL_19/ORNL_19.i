@@ -180,14 +180,14 @@ P_out = 2.0e5 # Pa
   []
 
   [Pin_Planar_Mean]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = P
     execute_on = 'TIMESTEP_END'
     height = 0.0
   []
 
   [Pout_Planar_Mean]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = P
     execute_on = 'TIMESTEP_END'
     height = 1.2

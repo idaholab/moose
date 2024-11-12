@@ -211,14 +211,14 @@ P_out = 4.923e6 # Pa
 
 [Postprocessors]
   [Pin_Planar_Mean]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = P
     execute_on = 'TIMESTEP_END'
     height = 0.0
   []
 
   [Pout_Planar_Mean]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = P
     execute_on = 'TIMESTEP_END'
     height = 1.2

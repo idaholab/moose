@@ -12,7 +12,7 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "PlanarMean.h"
+#include "SCMPlanarMean.h"
 #include "SolutionHandle.h"
 #include "FEProblemBase.h"
 #include "Function.h"
@@ -21,10 +21,10 @@
 #include "SubProblem.h"
 #include "libmesh/system.h"
 
-registerMooseObject("SubChannelApp", PlanarMean);
+registerMooseObject("SubChannelApp", SCMPlanarMean);
 
 InputParameters
-PlanarMean::validParams()
+SCMPlanarMean::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Calculates an overall mass-flow-rate averaged mean of the chosen "
@@ -34,7 +34,7 @@ PlanarMean::validParams()
   return params;
 }
 
-PlanarMean::PlanarMean(const InputParameters & parameters)
+SCMPlanarMean::SCMPlanarMean(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(libMesh::cast_ref<SubChannelMesh &>(_fe_problem.mesh())),
     _variable(getParam<AuxVariableName>("variable")),
@@ -44,7 +44,7 @@ PlanarMean::PlanarMean(const InputParameters & parameters)
 }
 
 void
-PlanarMean::execute()
+SCMPlanarMean::execute()
 {
   auto nz = _mesh.getNumOfAxialCells();
   auto n_channels = _mesh.getNumOfChannels();
@@ -94,7 +94,7 @@ PlanarMean::execute()
 }
 
 Real
-PlanarMean::getValue() const
+SCMPlanarMean::getValue() const
 {
   return _mean_value;
 }
