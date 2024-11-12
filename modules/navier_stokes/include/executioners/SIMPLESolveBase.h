@@ -97,6 +97,24 @@ protected:
   /// The dof ID where the pressure needs to be pinned
   dof_id_type _pressure_pin_dof;
 
+  // ************************ Energy Eq Variables ************************** //
+
+  /// Boolean for easy check if a fluid energy system shall be solved or not
+  const bool _has_energy_system;
+
+  /// The user-defined relaxation parameter for the energy equation
+  const Real _energy_equation_relaxation;
+
+  /// Options which hold the petsc settings for the fluid energy equation
+  Moose::PetscSupport::PetscOptions _energy_petsc_options;
+
+  /// Options for the linear solver of the energy equation
+  SIMPLESolverConfiguration _energy_linear_control;
+
+  /// Absolute linear tolerance for the energy equations. We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _energy_l_abs_tol;
+
   // ************************ Iteration control **************************** //
 
   /// The maximum number of momentum-pressure iterations
@@ -107,6 +125,9 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in pressure
   const Real _pressure_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in energy
+  const Real _energy_absolute_tolerance;
 
   /// If solve should continue if maximum number of iterations is hit
   const bool _continue_on_max_its;

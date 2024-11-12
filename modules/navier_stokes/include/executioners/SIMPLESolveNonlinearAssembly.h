@@ -74,9 +74,6 @@ protected:
 
   // ************************ For quick equation check ********************* //
 
-  /// Boolean for easy check if a fluid energy system shall be solved or not
-  const bool _has_energy_system;
-
   /// Boolean for easy check if a solid energy system shall be solved or not
   const bool _has_solid_energy_system;
 
@@ -93,19 +90,6 @@ protected:
 
   /// Pointer to the nonlinear system corresponding to the fluid energy equation
   NonlinearSystemBase * _energy_system;
-
-  /// The user-defined relaxation parameter for the energy equation
-  const Real _energy_equation_relaxation;
-
-  /// Options which hold the petsc settings for the fluid energy equation
-  Moose::PetscSupport::PetscOptions _energy_petsc_options;
-
-  /// Options for the linear solver of the energy equation
-  SIMPLESolverConfiguration _energy_linear_control;
-
-  /// Absolute linear tolerance for the energy equations. We need to store this, because
-  /// it needs to be scaled with a representative flux.
-  const Real _energy_l_abs_tol;
 
   // ********************* Solid Energy Eq Variables *********************** //
 
@@ -177,9 +161,6 @@ protected:
   const Real _turbulence_l_abs_tol;
 
   // ********************* SIMPLE iteration variables ********************** //
-
-  /// The user-defined absolute tolerance for determining the convergence in energy
-  const Real _energy_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence in solid energy
   const Real _solid_energy_absolute_tolerance;

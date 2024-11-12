@@ -24,6 +24,7 @@ SIMPLESolveBase::validParams()
       "momentum_systems", "The solver system(s) for the momentum equation(s).");
   params.addRequiredParam<SolverSystemName>("pressure_system",
                                             "The solver system for the pressure equation.");
+  params.addParam<SolverSystemName>("energy_system", "The solver system for the energy equation.");
 
   /*
    * Parameters to control the solution of the momentum equation
@@ -139,7 +140,51 @@ SIMPLESolveBase::validParams()
       "Use this to print the coupling and solution fields and matrices throughout the iteration.");
 
   /*
-   * Momentum-pressure iteration control
+   * Parameters to control the solution of the energy equation
+   */
+
+  params.addRangeCheckedParam<Real>(
+      "energy_equation_relaxation",
+      1.0,
+      "0.0<energy_equation_relaxation<=1.0",
+      "The relaxation which should be used for the energy equation. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
+
+  params.addParam<MultiMooseEnum>("energy_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the energy equation");
+  params.addParam<MultiMooseEnum>("energy_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the energy equation");
+  params.addParam<std::vector<std::string>>(
+      "energy_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "energy equation");
+
+  params.addRangeCheckedParam<Real>(
+      "energy_absolute_tolerance",
+      1e-5,
+      "0.0<energy_absolute_tolerance",
+      "The absolute tolerance on the normalized residual of the energy equation.");
+
+  params.addRangeCheckedParam<Real>("energy_l_tol",
+                                    1e-5,
+                                    "0.0<=energy_l_tol & energy_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the energy equation.");
+  params.addRangeCheckedParam<Real>("energy_l_abs_tol",
+                                    1e-10,
+                                    "0.0<energy_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the energy equation.");
+  params.addRangeCheckedParam<unsigned int>(
+      "energy_l_max_its",
+      10000,
+      "0<energy_l_max_its",
+      "The maximum allowed iterations in the linear solver of the energy equation.");
+
+  /*
+   * SIMPLE iteration control
    */
 
   params.addRangeCheckedParam<unsigned int>(
@@ -166,9 +211,13 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value")),
+    _has_energy_system(isParamValid("energy_system")),
+    _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
+    _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
+    _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
 {
@@ -200,6 +249,31 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
   _pressure_linear_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
   _pressure_linear_control.int_valued_data["max_its"] =
       getParam<unsigned int>("pressure_l_max_its");
+
+  if (_has_energy_system)
+  {
+    const auto & energy_petsc_options = getParam<MultiMooseEnum>("energy_petsc_options");
+    const auto & energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+        "energy_petsc_options_iname", "energy_petsc_options_value");
+    Moose::PetscSupport::processPetscFlags(energy_petsc_options, _energy_petsc_options);
+    Moose::PetscSupport::processPetscPairs(
+        energy_petsc_pair_options, _problem.mesh().dimension(), _energy_petsc_options);
+
+    _energy_linear_control.real_valued_data["rel_tol"] = getParam<Real>("energy_l_tol");
+    _energy_linear_control.real_valued_data["abs_tol"] = getParam<Real>("energy_l_abs_tol");
+    _energy_linear_control.int_valued_data["max_its"] = getParam<unsigned int>("energy_l_max_its");
+  }
+  else
+    checkDependentParameterError("energy_system",
+                                 {"energy_petsc_options",
+                                  "energy_petsc_options_iname",
+                                  "energy_petsc_options_value",
+                                  "energy_l_tol",
+                                  "energy_l_abs_tol",
+                                  "energy_l_max_its",
+                                  "energy_absolute_tolerance",
+                                  "energy_equation_relaxation"},
+                                 false);
 }
 
 void
