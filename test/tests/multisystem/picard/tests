@@ -1,0 +1,43 @@
+[Tests]
+  issues = '#8780'
+  design = 'FEProblemSolve.md'
+  [one_way]
+    requirement = 'The system shall be able to solve a one-way coupled diffusion problem'
+    [fully_coupled_1]
+      type = Exodiff
+      input = one_way.i
+      exodiff = 'one_way_out.e'
+      detail = 'using the classic fully-coupled single-matrix approach,'
+    []
+    [no_picard]
+      type = Exodiff
+      input = one_way.i
+      cli_args = "Problem/nl_sys_names='u_sys v_sys' Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys"
+      exodiff = 'one_way_out.e'
+      detail = 'using the a multi-system sequential approach with no fixed point iterations,'
+    []
+    [unnecessary_picard]
+      type = Exodiff
+      input = one_way.i
+      cli_args = "Problem/nl_sys_names='u_sys v_sys' Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=multisys"
+      exodiff = 'one_way_out.e'
+      detail = 'using the a multi-system approach with fixed point iterations using a Picard algorithm.'
+    []
+  []
+  [two_way]
+    requirement = 'The system shall be able to solve a two-way coupled diffusion problem'
+    [fully_coupled]
+      type = Exodiff
+      input = two_way.i
+      exodiff = 'two_way_out.e'
+      detail = 'using the classic fully-coupled single-matrix approach,'
+    []
+    [necessary_picard]
+      type = Exodiff
+      input = two_way.i
+      cli_args = "Problem/nl_sys_names='u_sys v_sys' Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=multisys"
+      exodiff = 'two_way_out.e'
+      detail = 'using the a multi-system approach with fixed point iterations using a Picard algorithm.'
+    []
+  []
+[]
