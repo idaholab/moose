@@ -154,7 +154,7 @@ pin_diameter = 0.00950
   []
 
   [Mean_Temp_Out]
-    type = PlanarMean
+    type = SCMPlanarMean
     variable = T
     height = 1.2
   []
