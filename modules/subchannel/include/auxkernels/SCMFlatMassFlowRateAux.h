@@ -20,12 +20,12 @@
 /**
  * Computes mass float rate from total mass flow at the inlet
  */
-class UniformlyDistributedMassFlowRateAux : public AuxKernel
+class SCMFlatMassFlowRateAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  UniformlyDistributedMassFlowRateAux(const InputParameters & parameters);
+  SCMFlatMassFlowRateAux(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 

@@ -229,7 +229,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     block = subchannel
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S

@@ -21,12 +21,12 @@
  * Computes mass float rate from specified uniform mass flux and cross-sectional area and applies
  * inlet blockage conditions
  */
-class BlockedMassFlowRateAux : public AuxKernel
+class SCMBlockedMassFlowRateAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  BlockedMassFlowRateAux(const InputParameters & parameters);
+  SCMBlockedMassFlowRateAux(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 

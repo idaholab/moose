@@ -20,7 +20,7 @@
 
 [AuxKernels]
   [mdot_uniform]
-    type = UniformlyDistributedMassFlowRateAux
+    type = SCMFlatMassFlowRateAux
     variable = mdot
     boundary = inlet
     mass_flow = 36.0 #kg/sec
