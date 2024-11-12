@@ -142,7 +142,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -152,7 +152,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = ${Power_initial}
     filename = "pin_power_profile61.txt"

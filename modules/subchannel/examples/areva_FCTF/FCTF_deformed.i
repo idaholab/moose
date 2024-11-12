@@ -145,7 +145,7 @@ unheated_length_exit = 0.855 #m
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -155,7 +155,7 @@ unheated_length_exit = 0.855 #m
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     power = ${Power}
     filename = "pin_power_profile61.txt"

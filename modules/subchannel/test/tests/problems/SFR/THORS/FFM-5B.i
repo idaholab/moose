@@ -92,7 +92,7 @@ P_out = 2.0e5 # Pa
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
@@ -102,7 +102,7 @@ P_out = 2.0e5 # Pa
   []
 
   [q_prime_IC]
-    type = TriPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
     # power = 145000  #W, high flow case
     power = 52800 #W, low flow case
