@@ -111,6 +111,13 @@ CommandLine::parse()
       entry.raw_args.push_back(arg);
       entry.hit_param = true;
       has_value_accepting_entry = false;
+
+      // Disallow Application/type= in HIT parameters
+      if (!entry.subapp_name && hit_path == "Application/type")
+        mooseError("The command line argument '",
+                   arg,
+                   "' is not allowed.\nThe application type must be set via the --type command "
+                   "line option.");
     }
     // Has an = sign in it, so we have a name=value (non-HIT)
     else if (const auto find_equals = arg.find("="); find_equals != std::string::npos)

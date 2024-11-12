@@ -787,3 +787,22 @@ TEST(CommandLine, findCommandLineParam)
         "CommandLine::findCommandLineParam(): The parameter 'foo' is not a command line parameter");
   }
 }
+
+TEST(CommandLine, disallowApplicationType)
+{
+  CommandLine cl;
+  cl.addArgument("/path/to/exe");
+  cl.addArgument("Application/type=Foo");
+
+  try
+  {
+    cl.parse();
+  }
+  catch (const std::exception & err)
+  {
+    ASSERT_EQ(std::string(err.what()),
+              "The command line argument 'Application/type=Foo' is not allowed.\nThe application "
+              "type must be set via the --type command "
+              "line option.");
+  }
+}
