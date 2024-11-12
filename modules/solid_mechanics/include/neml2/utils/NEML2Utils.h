@@ -43,6 +43,20 @@ namespace NEML2Utils
 
 #ifdef NEML2_ENABLED
 
+/// Return the number of NEML2 tensor elements for a given MOOSE type
+template <typename T>
+int64_t
+numelNEML2()
+{
+  static int64_t size = 0;
+  if (size == 0)
+  {
+    T v;
+    size = torch::numel(toNEML2(v));
+  }
+  return size;
+}
+
 /// Map a variable name onto the old_xxx sub-axis
 neml2::VariableName getOldName(const neml2::VariableName & var);
 
@@ -65,7 +79,27 @@ neml2::Tensor toNEML2(const Real & v);
 template <>
 neml2::Tensor toNEML2(const RankTwoTensor & r2t);
 template <>
+neml2::Tensor toNEML2(const SymmetricRankTwoTensor & r2t);
+template <>
 neml2::Tensor toNEML2(const std::vector<Real> & v);
+// @}
+
+/**
+ * Serialize a MOOSE data structure for construction of a NEML2 counterpart
+ * using torch::from_blob(...).
+ */
+template <typename T>
+void serialize(const T & data, std::vector<Real> & buffer);
+
+// @{ Template specializations
+template <>
+void serialize(const Real & v, std::vector<Real> & buffer);
+template <>
+void serialize(const RankTwoTensor & r2t, std::vector<Real> & buffer);
+template <>
+void serialize(const SymmetricRankTwoTensor & r2t, std::vector<Real> & buffer);
+template <>
+void serialize(const std::vector<Real> & v, std::vector<Real> & buffer);
 // @}
 
 /**

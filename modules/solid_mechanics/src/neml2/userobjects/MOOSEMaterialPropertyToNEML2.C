@@ -55,7 +55,8 @@ MOOSEMaterialPropertyToNEML2<T, state>::validParams()
 template <typename T, unsigned int state>
 MOOSEMaterialPropertyToNEML2<T, state>::MOOSEMaterialPropertyToNEML2(const InputParameters & params)
   : MOOSEToNEML2(params),
-    _mat_prop(getGenericMaterialProperty<T, false>("moose_material_property", state))
+    _mat_prop(getGenericMaterialProperty<T, false>("moose_material_property", state)),
+    _item_size(torch::numel(NEML2Utils::toNEML2(T{})))
 {
   if constexpr (state == 0)
     if (!_neml2_variable.start_with("forces") && !_neml2_variable.start_with("state"))
@@ -74,10 +75,23 @@ MOOSEMaterialPropertyToNEML2<T, state>::MOOSEMaterialPropertyToNEML2(const Input
 }
 
 template <typename T, unsigned int state>
-torch::Tensor
-MOOSEMaterialPropertyToNEML2<T, state>::convertQpMOOSEData() const
+void
+MOOSEMaterialPropertyToNEML2<T, state>::insertIntoInput(neml2::LabeledVector & input) const
 {
-  return NEML2Utils::toNEML2<T>(_mat_prop[_qp]);
+  input.base_index_put_(
+      _neml2_variable,
+      neml2::Tensor(
+          torch::from_blob(const_cast<double *>(_buffer.data()),
+                           {static_cast<int64_t>(_buffer.size() / _item_size), _item_size}),
+          1));
+}
+
+template <typename T, unsigned int state>
+void
+MOOSEMaterialPropertyToNEML2<T, state>::execute()
+{
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    NEML2Utils::serialize(_mat_prop[_qp], _buffer);
 }
 
 template class MOOSEMaterialPropertyToNEML2<Real, 0>;

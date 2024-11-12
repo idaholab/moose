@@ -42,28 +42,15 @@ MOOSEToNEML2::MOOSEToNEML2(const InputParameters & params)
 }
 
 void
-MOOSEToNEML2::insertIntoInput(neml2::LabeledVector & input) const
-{
-  input.base_index_put_(_neml2_variable, neml2::Tensor(torch::stack(_buffer, 0), 1));
-}
-
-void
 MOOSEToNEML2::initialize()
 {
   _buffer.clear();
 }
 
 void
-MOOSEToNEML2::execute()
-{
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    _buffer.push_back(convertQpMOOSEData());
-}
-
-void
 MOOSEToNEML2::threadJoin(const UserObject & uo)
 {
-  // append vectors
+  // append blobs
   const auto & m2n = static_cast<const MOOSEToNEML2 &>(uo);
   _buffer.insert(_buffer.end(), m2n._buffer.begin(), m2n._buffer.end());
 }

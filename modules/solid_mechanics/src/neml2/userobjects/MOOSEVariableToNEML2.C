@@ -58,10 +58,21 @@ MOOSEVariableToNEML2Templ<1>::MOOSEVariableToNEML2Templ(const InputParameters & 
 }
 
 template <unsigned int state>
-torch::Tensor
-MOOSEVariableToNEML2Templ<state>::convertQpMOOSEData() const
+void
+MOOSEVariableToNEML2Templ<state>::insertIntoInput(neml2::LabeledVector & input) const
 {
-  return NEML2Utils::toNEML2<Real>(_moose_variable[_qp]);
+  input.base_index_put_(_neml2_variable,
+                        neml2::Tensor(torch::from_blob(const_cast<double *>(_buffer.data()),
+                                                       {static_cast<int64_t>(_buffer.size())}),
+                                      1));
+}
+
+template <unsigned int state>
+void
+MOOSEVariableToNEML2Templ<state>::execute()
+{
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    NEML2Utils::serialize(_moose_variable[_qp], _buffer);
 }
 
 template class MOOSEVariableToNEML2Templ<0>;

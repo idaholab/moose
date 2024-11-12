@@ -27,9 +27,13 @@ public:
 
   MOOSEVariableToNEML2Templ(const InputParameters & params);
 
-protected:
-  virtual torch::Tensor convertQpMOOSEData() const override;
+  virtual void execute() override;
 
+  virtual void insertIntoInput(neml2::LabeledVector & input) const override;
+
+  virtual std::size_t size() const override { return _buffer.size(); }
+
+protected:
   /// Coupled MOOSE variable to read data from
   const VariableValue & _moose_variable;
 };

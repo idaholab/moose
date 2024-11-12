@@ -30,25 +30,21 @@ public:
   const neml2::VariableName & getNEML2Variable() const { return _neml2_variable; }
 
   // get the number of gathered data items (for setting the model batch size)
-  std::size_t size() const { return _buffer.size(); }
+  virtual std::size_t size() const = 0;
 
   // inserts the gathered data into the
-  void insertIntoInput(neml2::LabeledVector & input) const;
+  virtual void insertIntoInput(neml2::LabeledVector & input) const = 0;
 
-protected:
   virtual void initialize() override;
-  virtual void execute() override;
   virtual void finalize() override {}
   virtual void threadJoin(const UserObject &) override;
 
-  /// Convert the underlying MOOSE data to a torch::Tensor
-  virtual torch::Tensor convertQpMOOSEData() const = 0;
-
+protected:
   /// NEML2 input variable to transfer data to
   const neml2::VariableName _neml2_variable;
 
   /// Intermediate data buffer, filled during the element loop
-  std::vector<torch::Tensor> _buffer;
+  std::vector<Real> _buffer;
 
   /// Current element's quadrature point indexing
   unsigned int _qp;

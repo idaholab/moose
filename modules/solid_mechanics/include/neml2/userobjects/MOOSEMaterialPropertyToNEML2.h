@@ -35,11 +35,17 @@ public:
 
   MOOSEMaterialPropertyToNEML2(const InputParameters & params);
 
-protected:
-  virtual torch::Tensor convertQpMOOSEData() const override;
+  virtual void execute() override;
 
+  virtual void insertIntoInput(neml2::LabeledVector & input) const override;
+
+  virtual std::size_t size() const override { return _buffer.size() / _item_size; }
+
+protected:
   /// MOOSE material property to read data from
   const MaterialProperty<T> & _mat_prop;
+
+  const int64_t _item_size;
 };
 
 typedef MOOSEMaterialPropertyToNEML2<Real, 0> MOOSERealMaterialPropertyToNEML2;

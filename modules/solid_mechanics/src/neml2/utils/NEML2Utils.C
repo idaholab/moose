@@ -78,6 +78,13 @@ toNEML2(const Real & v)
   return neml2::Scalar(v, neml2::default_tensor_options());
 }
 
+template <>
+void
+serialize(const Real & v, std::vector<Real> & buffer)
+{
+  buffer.push_back(v);
+}
+
 // FIXME: This is an unfortunately specialization because the models I included for testing use
 // symmetric tensors everywhere. Once I tested all the models with full tensors (i.e. not in Mandel
 // notation), I should be able to "fix" this specialization.
@@ -89,6 +96,13 @@ toNEML2(const RankTwoTensor & r2t)
 }
 
 template <>
+void
+serialize(const RankTwoTensor & r2t, std::vector<Real> & buffer)
+{
+  buffer.insert(buffer.end(), {r2t(0, 0), r2t(1, 1), r2t(2, 2), r2t(1, 2), r2t(0, 2), r2t(0, 1)});
+}
+
+template <>
 neml2::Tensor
 toNEML2(const SymmetricRankTwoTensor & r2t)
 {
@@ -96,10 +110,24 @@ toNEML2(const SymmetricRankTwoTensor & r2t)
 }
 
 template <>
+void
+serialize(const SymmetricRankTwoTensor & r2t, std::vector<Real> & buffer)
+{
+  buffer.insert(buffer.end(), {r2t(0, 0), r2t(1, 1), r2t(2, 2), r2t(1, 2), r2t(0, 2), r2t(0, 1)});
+}
+
+template <>
 neml2::Tensor
 toNEML2(const std::vector<Real> & v)
 {
   return neml2::Tensor(torch::tensor(v, neml2::default_tensor_options()), 0);
+}
+
+template <>
+void
+serialize(const std::vector<Real> & v, std::vector<Real> & buffer)
+{
+  buffer.insert(buffer.end(), v.begin(), v.end());
 }
 
 template <>
