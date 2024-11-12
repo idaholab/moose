@@ -229,6 +229,8 @@ private:
 
   /// Whether or not the Parser has parsed yet
   bool _has_parsed = false;
+  /// Whether or not command line parameters have been populated
+  bool _command_line_params_populated = false;
 };
 
 template <typename T>

@@ -247,6 +247,8 @@ CommandLine::initSubAppCommandLine(const std::string & multiapp_name,
 std::string
 CommandLine::buildHitParams()
 {
+  mooseAssert(_command_line_params_populated, "Must populate command line params first");
+
   std::string params;
   std::map<std::string, std::string> hit_path_to_arg;
 
@@ -313,7 +315,7 @@ CommandLine::buildHitParams()
 void
 CommandLine::populateCommandLineParams(InputParameters & params)
 {
-  mooseAssert(_command_line_params.empty(), "Already populated");
+  mooseAssert(!_command_line_params_populated, "Already populated");
 
   // Set the metadata for each command line parameter
   // We set this separately so that it can be used later to print usage
@@ -409,6 +411,8 @@ CommandLine::populateCommandLineParams(InputParameters & params)
       mooseError(
           "Missing required command-line parameter: ", name, "\nDoc string: ", param.description);
   }
+
+  _command_line_params_populated = true;
 }
 
 std::string
