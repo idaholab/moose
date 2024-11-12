@@ -265,12 +265,12 @@ unheated_length_exit = 0.855 #m
 
 [Transfers]
   [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
+    type = SCMSolutionTransfer
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S displacement'
   []
   [pin_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
+    type = SCMPinSolutionTransfer
     to_multi_app = viz
     variable = 'Dpin Tpin q_prime'
   []

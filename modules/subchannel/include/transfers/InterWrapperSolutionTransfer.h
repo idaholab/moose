@@ -12,31 +12,21 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "MultiAppDetailedPinSolutionTransfer.h"
-#include "SubChannelMesh.h"
+#pragma once
 
-registerMooseObject("SubChannelApp", MultiAppDetailedPinSolutionTransfer);
+#include "MultiAppInterWrapperSolutionTransferBase.h"
 
-InputParameters
-MultiAppDetailedPinSolutionTransfer::validParams()
+/**
+ * Transfers inter-wrapper solution from computational mesh onto visualization mesh
+ */
+class InterWrapperSolutionTransfer : public MultiAppInterWrapperSolutionTransferBase
 {
-  InputParameters params = MultiAppDetailedSolutionTransferBase::validParams();
-  params.addClassDescription(
-      "Transfers subchannel solution from computational mesh onto visualization mesh");
-  return params;
-}
+public:
+  InterWrapperSolutionTransfer(const InputParameters & parameters);
 
-MultiAppDetailedPinSolutionTransfer::MultiAppDetailedPinSolutionTransfer(
-    const InputParameters & parameters)
-  : MultiAppDetailedSolutionTransferBase(parameters)
-{
-}
+protected:
+  virtual Node * getFromNode(const InterWrapperMesh & from_mesh, const Point & src_node);
 
-Node *
-MultiAppDetailedPinSolutionTransfer::getFromNode(const SubChannelMesh & from_mesh,
-                                                 const Point & src_node)
-{
-  unsigned int pin_idx = from_mesh.pinIndex(src_node);
-  unsigned iz = from_mesh.getZIndex(src_node);
-  return from_mesh.getPinNode(pin_idx, iz);
-}
+public:
+  static InputParameters validParams();
+};

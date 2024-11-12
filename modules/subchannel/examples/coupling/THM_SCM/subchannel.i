@@ -261,12 +261,12 @@ heated_length = 1.0
 
 [Transfers]
   [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
+    type = SCMSolutionTransfer
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S'
   []
   [pin_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
+    type = SCMPinSolutionTransfer
     to_multi_app = viz
     variable = 'Dpin Tpin q_prime'
   []
