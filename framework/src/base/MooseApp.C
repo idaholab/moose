@@ -88,10 +88,15 @@ using namespace libMesh;
 void
 MooseApp::addAppParam(InputParameters & params)
 {
-  params.addCommandLineParam<std::string>("app_to_run",
-                                          "--app <app type>",
-                                          "Specify the application to run; this must match a "
-                                          "registered application type and is case-sensitive");
+  params.addCommandLineParam<std::string>(
+      "app_to_run", "--app <type>", "Specify the application type to run (case-sensitive)");
+}
+
+void
+MooseApp::addInputParam(InputParameters & params)
+{
+  params.addCommandLineParam<std::vector<std::string>>(
+      "input_file", "-i <input file(s)>", "Specify input file(s); multiple files are merged");
 }
 
 InputParameters
@@ -99,8 +104,8 @@ MooseApp::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  // Parameters that main also expects that we won't use (-i)
-  Moose::addMainCommandLineParams(params);
+  MooseApp::addAppParam(params);
+  MooseApp::addInputParam(params);
 
   params.addCommandLineParam<bool>("display_version", "-v --version", "Print application version");
 
@@ -174,10 +179,10 @@ MooseApp::validParams()
       "--show-copyable-inputs",
       "Shows the directories able to be copied into a user-writable location");
 
-  params.addCommandLineParam<std::string>("copy_inputs",
-                                          "--copy-inputs <dir>",
-                                          "Copies installed inputs (e.g. tests, examples, etc.) to "
-                                          "an directory named <appname>_<dir>");
+  params.addCommandLineParam<std::string>(
+      "copy_inputs",
+      "--copy-inputs <dir>",
+      "Copies installed inputs (e.g. tests, examples, etc.) to a directory <appname>_<dir>");
   // TODO: Should this remain a bool? It can't be a regular argument because it contains
   // values that have dashes in it, so it'll get treated as another arg
   params.addCommandLineParam<bool>("run",
@@ -240,36 +245,31 @@ MooseApp::validParams()
       "Continue the calculation. Without <file base>, the most recent recovery file will be used");
   params.setGlobalCommandLineParam("recover");
 
-  params.addCommandLineParam<bool>("test_checkpoint_half_transient",
-                                   "--test-checkpoint-half-transient",
-                                   "When true the simulation will only run half of "
-                                   "its specified transient (ie half the "
-                                   "timesteps) with checkpoints enabled. "
-                                   "This is useful for testing recovery and restart "
-                                   "and should only be used in the test harness.");
-  params.addCommandLineParam<bool>("half_transient",
-                                   "--half-transient",
-                                   "Run only half of the specified transient (half the timesteps); "
-                                   "used to test restart/recover");
-  // Some tests rely on this being global; don't think it should be but that's for another time
-  params.setGlobalCommandLineParam("half_transient");
+  params.addCommandLineParam<bool>(
+      "test_checkpoint_half_transient",
+      "--test-checkpoint-half-transient",
+      "Run half of a transient with checkpoints enabled; used by the TestHarness");
+  params.setGlobalCommandLineParam("test_checkpoint_half_transient");
 
-  params.addCommandLineParam<Real>("output_wall_time_interval",
-                                   "--output-wall-time-interval [interval]",
-                                   "The target wall time interval (in seconds) at "
-                                   "which to write to output. "
-                                   "USE FOR TEST SUITE PROBLEMS ONLY, FOR ALL OTHER USES "
-                                   "SEE THE wall_time_interval IN DERIVED Output OBJECTS.");
-
-  params.addCommandLineParam<bool>("trap_fpe",
-                                   "--trap-fpe",
-                                   "Enable Floating Point Exception handling in critical sections "
-                                   "of code. Automatic in DEBUG mode");
+  params.addCommandLineParam<bool>(
+      "trap_fpe",
+      "--trap-fpe",
+      "Enable floating point exception handling in critical sections of code"
+#ifdef DEBUG
+      " (automatic due to debug build)"
+#endif
+  );
   params.setGlobalCommandLineParam("trap_fpe");
-  params.addCommandLineParam<bool>("no_trap_fpe",
-                                   "--no-trap-fpe",
-                                   "Disable Floating Point Exception handling in critical "
-                                   "sections of code when using DEBUG mode");
+
+  params.addCommandLineParam<bool>(
+      "no_trap_fpe",
+      "--no-trap-fpe",
+      "Disable floating point exception handling in critical sections of code"
+#ifndef DEBUG
+      " (unused due to non-debug build)"
+#endif
+  );
+
   params.setGlobalCommandLineParam("no_trap_fpe");
 
   params.addCommandLineParam<bool>(
@@ -307,7 +307,7 @@ MooseApp::validParams()
 
   params.addCommandLineParam<std::string>(
       "timpi_sync",
-      "--timpi-sync <sync type=nbx>",
+      "--timpi-sync <type=nbx>",
       "nbx",
       "Changes the sync type used in spare parallel communitations within TIMPI");
   params.setGlobalCommandLineParam("timpi_sync");
@@ -320,8 +320,7 @@ MooseApp::validParams()
 
   params.addCommandLineParam<unsigned int>(
       "stop_for_debugger",
-      "--stop-for-debugger <seconds=30>",
-      30,
+      "--stop-for-debugger <seconds>",
       "Pauses the application during startup for <seconds> to allow for connection of debuggers");
 
   params.addCommandLineParam<bool>(
@@ -749,13 +748,6 @@ MooseApp::setupOptions()
 
   _test_checkpoint_half_transient = getParam<bool>("test_checkpoint_half_transient");
 
-  if (isParamValid("output_wall_time_interval"))
-  {
-    const auto output_wall_time_interval = getParam<Real>("output_wall_time_interval");
-    if (output_wall_time_interval <= 0)
-      mooseError("--output-wall-time-interval must be greater than zero.");
-  }
-
   // The no_timing flag takes precedence over the timing flag.
   if (getParam<bool>("no_timing"))
     _pars.set<bool>("timing") = false;
@@ -1067,6 +1059,7 @@ MooseApp::setupOptions()
   {
     _command_line->printUsage();
     _ready_to_exit = true;
+    _exit_code = 1;
   }
 
   Moose::out << std::flush;

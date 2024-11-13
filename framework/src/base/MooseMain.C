@@ -22,20 +22,6 @@
 
 namespace Moose
 {
-void
-addMainCommandLineParams(InputParameters & params)
-{
-  params.addCommandLineParam<std::vector<std::string>>(
-      "input_file",
-      "-i <input files>",
-      "Specify one or multiple input files. Multiple files get merged into a single simulation "
-      "input.");
-
-  params.addCommandLineParam<std::string>("type",
-                                          "--type <app type>",
-                                          "Specify the application to run; this must match a "
-                                          "registered application type and is case-sensitive");
-}
 
 std::shared_ptr<MooseApp>
 createMooseApp(const std::string & default_app_name, int argc, char * argv[])
@@ -43,11 +29,12 @@ createMooseApp(const std::string & default_app_name, int argc, char * argv[])
   CommandLine cl(argc, argv);
   cl.parse();
   auto command_line_params = emptyInputParameters();
-  addMainCommandLineParams(command_line_params);
+  MooseApp::addInputParam(command_line_params);
+  MooseApp::addAppParam(command_line_params);
   cl.populateCommandLineParams(command_line_params);
 
   const auto & input_filenames = command_line_params.get<std::vector<std::string>>("input_file");
-  const auto & cl_app_type = command_line_params.get<std::string>("type");
+  const auto & cl_app_type = command_line_params.get<std::string>("app_to_run");
 
   // loop over all the command line arguments and error out when the user uses Application block for
   // subapps

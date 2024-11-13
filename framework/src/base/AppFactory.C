@@ -12,6 +12,7 @@
 #include "InputParameters.h"
 #include "MooseApp.h"
 #include "Parser.h"
+#include "MooseMain.h"
 
 AppFactory &
 AppFactory::instance()
@@ -85,11 +86,7 @@ AppFactory::createAppShared(const std::string & default_app_type,
                   "see'test/src/main.C in MOOSE as an example of moose::main()'. ");
 
   auto command_line_params = emptyInputParameters();
-  command_line_params.addCommandLineParam<std::vector<std::string>>(
-      "input_file",
-      "-i <input_files>",
-      "Specify one or multiple input files. Multiple files get merged into a single simulation "
-      "input.");
+  MooseApp::addInputParam(command_line_params);
   MooseApp::addAppParam(command_line_params);
 
   {

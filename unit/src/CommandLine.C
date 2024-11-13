@@ -786,20 +786,39 @@ TEST(CommandLine, findCommandLineParam)
 
 TEST(CommandLine, disallowApplicationType)
 {
-  CommandLine cl;
-  cl.addArgument("/path/to/exe");
-  cl.addArgument("Application/type=Foo");
+  {
+    CommandLine cl;
+    cl.addArgument("/path/to/exe");
+    cl.addArgument("Application/type=Foo");
 
-  try
-  {
-    cl.parse();
+    try
+    {
+      cl.parse();
+    }
+    catch (const std::exception & err)
+    {
+      ASSERT_EQ(std::string(err.what()),
+                "The command line argument 'Application/type=Foo' is not allowed.\nThe application "
+                "type must be set via the --app command line option.");
+    }
   }
-  catch (const std::exception & err)
+
   {
-    ASSERT_EQ(std::string(err.what()),
-              "The command line argument 'Application/type=Foo' is not allowed.\nThe application "
-              "type must be set via the --type command "
-              "line option.");
+    CommandLine cl;
+    cl.addArgument("/path/to/exe");
+    cl.addArgument("sub0:Application/type=Foo");
+
+    try
+    {
+      cl.parse();
+    }
+    catch (const std::exception & err)
+    {
+      ASSERT_EQ(std::string(err.what()),
+                "The command line argument 'sub0:Application/type=Foo' is not allowed.\nThe "
+                "application type must be set via the MultiApp type input parameter or the "
+                "Application/type parameter in the MultiApp input.");
+    }
   }
 }
 

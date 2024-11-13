@@ -748,14 +748,13 @@
   []
 
   [wrong_input_switch]
-    type = 'RunApp'
-    input = 'Foo'
-    input_switch = '-m'
-    expect_out = '^Usage:'
+    type = 'RunException'
+    cli_args = '--foo'
+    no_additional_cli_args = True
+    expect_err = '^Usage:'
 
     requirement = 'The system shall report a standard Unix usage statement when an invalid command line switch is used.'
     issues = '#1405'
-    skip = 'TEMP'
   []
 
   [ics_missing_variable]

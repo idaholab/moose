@@ -113,11 +113,17 @@ CommandLine::parse()
       has_value_accepting_entry = false;
 
       // Disallow Application/type= in HIT parameters
-      if (!entry.subapp_name && hit_path == "Application/type")
-        mooseError("The command line argument '",
-                   arg,
-                   "' is not allowed.\nThe application type must be set via the --type command "
-                   "line option.");
+      if (hit_path == "Application/type")
+      {
+        std::string message = "The command line argument '" + arg +
+                              "' is not allowed.\nThe application type must be set via the ";
+        if (entry.subapp_name)
+          message += "MultiApp type input parameter or the Application/type parameter in the "
+                     "MultiApp input.";
+        else
+          message += "--app command line option.";
+        mooseError(message);
+      }
     }
     // Has an = sign in it, so we have a name=value (non-HIT)
     else if (const auto find_equals = arg.find("="); find_equals != std::string::npos)
@@ -412,7 +418,11 @@ CommandLine::printUsage() const
 {
   Moose::out << "Usage: " << getExecutableName() << " [<options>]\n\n";
 
-  const auto output_options = [this](const bool global)
+  std::size_t max_len = 0;
+  for (const auto & name_option_pair : _command_line_params)
+    max_len = std::max(max_len, name_option_pair.second.metadata.syntax.size());
+
+  const auto output_options = [this, &max_len](const bool global)
   {
     Moose::out << (global ? "Global " : "") << "Options:\n" << std::left;
     for (const auto & name_option_pair : _command_line_params)
@@ -421,7 +431,8 @@ CommandLine::printUsage() const
       if (option.metadata.syntax.empty() || option.metadata.global != global)
         continue;
 
-      Moose::out << "  " << std::setw(50) << option.metadata.syntax << option.description << "\n";
+      Moose::out << "  " << std::setw(max_len + 2) << option.metadata.syntax << option.description
+                 << "\n";
     }
     Moose::out << "\n";
   };
@@ -430,7 +441,7 @@ CommandLine::printUsage() const
   output_options(true);
 
   Moose::out << "Solver Options:\n"
-             << "  See solver manual for details (Petsc or Trilinos)" << std::endl;
+             << "  See PETSc manual for details" << std::endl;
 }
 
 std::vector<std::string>

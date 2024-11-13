@@ -14,14 +14,14 @@
     [registered_application]
       type = 'RunApp'
       input = 'application_block.i'
-      cli_args = '--type ContactApp'
+      cli_args = '--app ContactApp'
       detail = "not return an error when the application type is registered correctly"
     []
 
     [unregistered_application]
       type = 'RunException'
       input = 'application_block.i'
-      cli_args = '--type DummyApp'
+      cli_args = '--app DummyApp'
       expect_err = "'DummyApp' is not a registered application name."
       detail = "return an error message when the application type is not registered."
     []
