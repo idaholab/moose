@@ -57,7 +57,7 @@
     to_multi_app = linear
     source_variable = 'v'
     variable = 'diff_var'
-    execute_on = timestep_end
+    execute_on = timestep_begin
   []
 []
 
@@ -76,10 +76,10 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-12
-  fixed_point_rel_tol = 1e-12
+  fixed_point_rel_tol = 1e-10
 []
 
 [Outputs]
   exodus = true
-  execute_on = FINAL
+  execute_on = timestep_end
 []

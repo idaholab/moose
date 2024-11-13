@@ -48,6 +48,7 @@
 []
 
 [MultiApps]
+  inactive = 'nonlinear'
   [nonlinear]
     type = FullSolveMultiApp
     input_files = nonlinearfv.i
@@ -57,6 +58,7 @@
 []
 
 [Transfers]
+  inactive = 'from_nonlinear to_nonlinear'
   [from_nonlinear]
     type = MultiAppCopyTransfer
     from_multi_app = nonlinear
@@ -69,7 +71,7 @@
     to_multi_app = nonlinear
     source_variable = 'u'
     variable = 'diff_var'
-    execute_on = timestep_end
+    execute_on = timestep_begin
   []
 []
 
@@ -80,10 +82,10 @@
   petsc_options_value = 'hypre boomeramg'
   continue_on_max_its = true
   absolute_tolerance = 1e-12
-  fixed_point_rel_tol = 1e-12
+  fixed_point_rel_tol = 1e-10
 []
 
 [Outputs]
   exodus = true
-  execute_on = FINAL
+  execute_on = timestep_end
 []
