@@ -7,6 +7,7 @@
     exodiff = 'diff_heated_cavity_linear_segregated_out.e'
     abs_zero = 1e-5
     rel_err = 1e-3
+    max_threads = 1
     requirement = 'The system shall be able to use the density Boussinesq approximation to solve for a differentially heated 2D cavity.'
   []
 []

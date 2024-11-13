@@ -1,6 +1,6 @@
 [Tests]
-  design = 'NSFVAction.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
-  issues = '#21380 #24662 #28951'
+  design = 'NSFVAction.md'
+  issues = '#21380 #24662'
   [natural_circulation_dogleg]
     type = 'Exodiff'
     input = 'natural_circulation_dogleg.i'
