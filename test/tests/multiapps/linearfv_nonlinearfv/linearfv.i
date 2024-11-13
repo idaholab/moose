@@ -1,0 +1,88 @@
+[Mesh]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 6
+  []
+[]
+
+[Problem]
+  linear_sys_names = 'u_sys'
+[]
+
+[Variables]
+  [u]
+    type = MooseLinearVariableFVReal
+    solver_sys = 'u_sys'
+    initial_condition = 1.0
+  []
+[]
+
+[AuxVariables]
+  [diff_var]
+    type = MooseVariableFVReal
+    initial_condition = 2.0
+  []
+[]
+
+[LinearFVKernels]
+  [diffusion]
+    type = LinearFVDiffusion
+    variable = u
+    diffusion_coeff = diff_var
+  []
+  [source]
+    type = LinearFVSource
+    variable = u
+    source_density = 1
+  []
+[]
+
+[LinearFVBCs]
+  [dir]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    variable = u
+    boundary = "left right"
+    functor = 1
+  []
+[]
+
+[MultiApps]
+  [nonlinear]
+    type = FullSolveMultiApp
+    input_files = nonlinearfv.i
+    execute_on = timestep_begin
+    no_restore = true
+  []
+[]
+
+[Transfers]
+  [from_nonlinear]
+    type = MultiAppCopyTransfer
+    from_multi_app = nonlinear
+    source_variable = 'v'
+    variable = 'diff_var'
+    execute_on = timestep_begin
+  []
+  [to_nonlinear]
+    type = MultiAppCopyTransfer
+    to_multi_app = nonlinear
+    source_variable = 'u'
+    variable = 'diff_var'
+    execute_on = timestep_end
+  []
+[]
+
+[Executioner]
+  type = LinearFixedPointSteady
+  linear_systems_to_solve = u_sys
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  continue_on_max_its = true
+  absolute_tolerance = 1e-10
+  fixed_point_max_its = 5
+[]
+
+[Outputs]
+  exodus = true
+[]
