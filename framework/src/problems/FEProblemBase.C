@@ -6628,15 +6628,14 @@ FEProblemBase::computeResidualL2Norm(LinearSystem & sys)
 {
   _current_linear_sys = &sys;
 
+  // We assemble the current system to check the current residual
+  computeLinearSystemSys(sys.linearImplicitSystem(), *sys.linearImplicitSystem().matrix, *sys.linearImplicitSystem().rhs, /*compute fresh gradients*/true);
+
   // Unfortunate, but we have to allocate a new vector for the residual
-  auto residual = sys.currentSolution()->zero_clone();
-
-  computeLinearSystemSys(sys.linearImplicitSystem(), *sys.linearImplicitSystem().matrix, *residual, /*compute fresh gradients*/true);
-
+  auto residual = sys.linearImplicitSystem().rhs->clone();
   // Residual will be r = Ax-b in this case
   residual->scale(-1.0);
   residual->add_vector(*sys.currentSolution(), *sys.linearImplicitSystem().matrix);
-
   return residual->l2_norm();
 }
 
@@ -8860,13 +8859,23 @@ FEProblemBase::coordTransform()
 unsigned int
 FEProblemBase::currentNlSysNum() const
 {
-  return currentNonlinearSystem().number();
+  // If we don't have nonlinear systems this should be an invalid number
+  unsigned int current_nl_sys_num = libMesh::invalid_uint;
+  if (_nl.size())
+    current_nl_sys_num = currentNonlinearSystem().number();
+
+  return current_nl_sys_num;
 }
 
 unsigned int
 FEProblemBase::currentLinearSysNum() const
 {
-  return currentLinearSystem().number();
+  // If we don't have linear systems this should be an invalid number
+  unsigned int current_linear_sys_num = libMesh::invalid_uint;
+  if (_linear_systems.size())
+    current_linear_sys_num = currentLinearSystem().number();
+
+  return current_linear_sys_num;
 }
 
 bool

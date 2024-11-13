@@ -166,5 +166,9 @@ LinearFixedPointSolve::solveSystem(const unsigned int sys_number,
     lisystem.solution->print();
   }
 
+  _console << "System " << sys_number
+               << COLOR_GREEN << " " << linear_solver.get_initial_residual() << COLOR_DEFAULT
+               << " Linear its: " << lisystem.n_linear_iterations() << std::endl;
+
   return std::make_pair(lisystem.n_linear_iterations(), linear_solver.get_initial_residual());
 }
