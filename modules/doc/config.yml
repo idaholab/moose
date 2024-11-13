@@ -145,6 +145,7 @@ Extensions:
             auxscalarkernels: AuxScalarKernels/index.md
             bcs: syntax/BCs/index.md
             bounds: syntax/Bounds/index.md
+            chaincontrols: syntax/ChainControls/index.md
             closures: syntax/Closures/index.md
             components: syntax/Components/index.md
             constraints: syntax/Constraints/index.md
