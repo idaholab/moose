@@ -387,8 +387,9 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
             std::string message;
             if (num_nodes_without_nodeset < _num_outputs)
             {
-              message = "Node " + std::to_string(node->id()) +
-                        " is on an external boundary of the mesh, but has not been assigned to a nodeset";
+              message =
+                  "Node " + std::to_string(node->id()) +
+                  " is on an external boundary of the mesh, but has not been assigned to a nodeset";
               _console << message << std::endl;
             }
           }
