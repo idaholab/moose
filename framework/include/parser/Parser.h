@@ -177,8 +177,7 @@ private:
    *
    * Needed so that _input_filenames in this class can be const upon construction.
    */
-  static std::vector<std::string>
-  getAbsolutePaths(const std::vector<std::string> & paths);
+  static std::vector<std::string> getAbsolutePaths(const std::vector<std::string> & paths);
 
   /// The root node, which owns the whole tree
   std::unique_ptr<hit::Node> _root;
