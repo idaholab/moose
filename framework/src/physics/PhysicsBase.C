@@ -300,10 +300,10 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
     // TODO Check that the variable types and orders are actually supported for exodus restart
     for (const auto i : index_range(variables_to_copy))
     {
-      SystemBase & system = are_nonlinear
-                                ? getProblem().getNonlinearSystemBase(
-                                      _system_numbers.size() == 1 ? _system_numbers[0] : i)
-                                : getProblem().systemBaseAuxiliary();
+      SystemBase & system =
+          are_nonlinear ? getProblem().getNonlinearSystemBase(
+                              _system_numbers.size() == 1 ? _system_numbers[0] : _system_numbers[i])
+                        : getProblem().systemBaseAuxiliary();
       const auto & var_name = variables_to_copy[i];
       system.addVariableToCopy(
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
