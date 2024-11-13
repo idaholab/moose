@@ -158,7 +158,7 @@ protected:
   ///@}
 
   /// The number of the nonlinear system in which the monolithic momentum and continuity equations are located
-  const unsigned int _nl_sys_number;
+  const unsigned int _momentum_sys_number;
 
 private:
   /**
@@ -233,6 +233,7 @@ INSFVRhieChowInterpolator::addToA(const Elem * const elem,
 inline bool
 INSFVRhieChowInterpolator::needAComputation() const
 {
+  // We dont check for "a"s being in another nonlinear system here, only being auxiliary
   return !_a_data_provided && _velocity_interp_method == Moose::FV::InterpMethod::RhieChow;
 }
 
