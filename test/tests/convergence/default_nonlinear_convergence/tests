@@ -6,6 +6,7 @@
     type = CSVDiff
     input = 'default_nonlinear_convergence.i'
     csvdiff = 'default_nonlinear_convergence_out.csv'
+    expect_out = 'Converged due to residual norm'
     requirement = 'The system shall be able to determine convergence of the nonlinear solve using default criteria through an object.'
   []
   [error_reporting]
