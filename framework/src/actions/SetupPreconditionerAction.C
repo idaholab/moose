@@ -43,11 +43,5 @@ SetupPreconditionerAction::act()
         _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
 
     pc->_nl.setPreconditioner(pc);
-
-    /**
-     * Go ahead and set common precondition options here.  The child classes will still be called
-     * through the action warehouse
-     */
-    Moose::PetscSupport::storePetscOptions(*_problem, _moose_object_pars);
   }
 }
