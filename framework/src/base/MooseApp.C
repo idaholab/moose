@@ -103,7 +103,7 @@ MooseApp::validParams()
 
   params.addCommandLineParam<bool>("display_version", "-v --version", "Print application version");
 
-  params.addCommandLineParam<std::string>(
+  params.addOptionalValuedCommandLineParam<std::string>(
       "mesh_only",
       "--mesh-only <optional path>",
       {},
@@ -123,9 +123,9 @@ MooseApp::validParams()
       "no_color", "--no-color", "Disable coloring of all Console outputs");
   params.setGlobalCommandLineParam("no_color");
 
-  MooseEnum colors("auto on off", "on");
+  MooseEnum colors("auto on off");
   params.addCommandLineParam<MooseEnum>(
-      "color", "--color <auto,on,off=on>", colors, "Whether to use color in console output");
+      "color", "--color <auto,on,off>", colors, "Whether to use color in console output");
   params.setGlobalCommandLineParam("color");
 
   params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement");
@@ -139,13 +139,13 @@ MooseApp::validParams()
       "--language-server",
       "Starts a process to communicate with development tools using the language server protocol");
 
+  params.addCommandLineParam<bool>(
+      "definition", "--definition", "Shows a SON style input definition dump for input validation");
+  params.addCommandLineParam<bool>("dump", "--dump", "Shows a dump of available input file syntax");
   params.addCommandLineParam<std::string>(
-      "definition",
-      "--definition",
-      {},
-      "Shows a SON style input definition dump for input validation");
-  params.addCommandLineParam<std::string>(
-      "dump", "--dump <optional search>", {}, "Shows a dump of available input file syntax");
+      "dump_search",
+      "--dump-search <search>",
+      "Shows a dump of available input syntax matching a search");
   params.addCommandLineParam<bool>("registry", "--registry", "Lists all known objects and actions");
   params.addCommandLineParam<bool>(
       "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format");
@@ -154,10 +154,12 @@ MooseApp::validParams()
 
   params.addCommandLineParam<bool>(
       "show_type", "--show-type", "Return the name of the application object");
+  params.addCommandLineParam<bool>("yaml", "--yaml", "Dumps all input file syntax in YAML format");
   params.addCommandLineParam<std::string>(
-      "yaml", "--yaml <optional search>", {}, "Dumps input file syntax in YAML format");
+      "yaml_search", "--yaml-search", "Dumps input file syntax matching a search in YAML format");
+  params.addCommandLineParam<bool>("json", "--json", "Dumps all input file syntax in JSON format");
   params.addCommandLineParam<std::string>(
-      "json", "--json <optional search>", {}, "Dumps input file syntax in JSON format");
+      "json_search", "--json-search", "Dumps input file syntax matching a search in JSON format");
   params.addCommandLineParam<bool>(
       "syntax", "--syntax", "Dumps the associated Action syntax paths ONLY");
   params.addCommandLineParam<bool>(
@@ -175,11 +177,12 @@ MooseApp::validParams()
                                           "--copy-inputs <dir>",
                                           "Copies installed inputs (e.g. tests, examples, etc.) to "
                                           "an directory named <appname>_<dir>");
-  params.addCommandLineParam<std::string>("run",
-                                          "--run",
-                                          {},
-                                          "Runs the inputs in the current directory copied to a "
-                                          "user-writable location by \"--copy-inputs\"");
+  // TODO: Should this remain a bool? It can't be a regular argument because it contains
+  // values that have dashes in it, so it'll get treated as another arg
+  params.addCommandLineParam<bool>("run",
+                                   "--run <test harness args>",
+                                   "Runs the inputs in the current directory copied to a "
+                                   "user-writable location by \"--copy-inputs\"");
 
   params.addCommandLineParam<bool>(
       "list_constructed_objects",
@@ -187,7 +190,7 @@ MooseApp::validParams()
       "List all moose object type names constructed by the master app factory");
 
   params.addCommandLineParam<unsigned int>(
-      "n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads per process");
+      "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
   // This probably shouldn't be global, but the implications of removing this are currently
   // unknown and we need to manage it with libmesh better
   params.setGlobalCommandLineParam("n_threads");
@@ -221,17 +224,15 @@ MooseApp::validParams()
       "Comma-separated list of numbers of chunks to split the mesh into");
 
   // TODO: remove the logic now that this is global
-  params.addCommandLineParam<std::string>("split_file",
-                                          "--split-file <optional filename>",
-                                          "",
-                                          "Optional name of split mesh file(s) to write/read");
+  params.addCommandLineParam<std::string>(
+      "split_file", "--split-file <filename>", "Name of split mesh file(s) to write/read");
 
   params.addCommandLineParam<bool>("use_split", "--use-split", "Use split distributed mesh files");
 
   params.addCommandLineParam<unsigned int>(
       "refinements", "-r <num refinements>", "Specify additional initial uniform mesh refinements");
 
-  params.addCommandLineParam<std::string>(
+  params.addOptionalValuedCommandLineParam<std::string>(
       "recover",
       "--recover <optional file base>",
       {},
@@ -240,7 +241,6 @@ MooseApp::validParams()
 
   params.addCommandLineParam<bool>("test_checkpoint_half_transient",
                                    "--test-checkpoint-half-transient",
-                                   false,
                                    "When true the simulation will only run half of "
                                    "its specified transient (ie half the "
                                    "timesteps) with checkpoints enabled. "
@@ -306,7 +306,7 @@ MooseApp::validParams()
 
   params.addCommandLineParam<std::string>(
       "timpi_sync",
-      "--timpi-sync <sync type>",
+      "--timpi-sync <sync type=nbx>",
       "nbx",
       "Changes the sync type used in spare parallel communitations within TIMPI");
   params.setGlobalCommandLineParam("timpi_sync");
@@ -759,14 +759,14 @@ MooseApp::setupOptions()
   if (getParam<bool>("no_timing"))
     _pars.set<bool>("timing") = false;
 
-  if (isParamSetByUser("trap_fpe"))
+  if (getParam<bool>("trap_fpe"))
   {
     _trap_fpe = true;
     _perf_graph.setActive(false);
-    if (isParamSetByUser("no_trap_fpe"))
+    if (getParam<bool>("no_trap_fpe"))
       mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");
   }
-  else if (isParamSetByUser("no_trap_fpe"))
+  else if (getParam<bool>("no_trap_fpe"))
     _trap_fpe = false;
 
   // Turn all warnings in MOOSE to errors (almost see next logic block)
@@ -831,18 +831,12 @@ MooseApp::setupOptions()
     _command_line->printUsage();
     _ready_to_exit = true;
   }
-  else if (isParamSetByUser("dump"))
+  else if (getParam<bool>("dump") || isParamSetByUser("dump_search"))
   {
-    // Get command line argument following --dump on command line
-    std::string following_arg = getParam<std::string>("dump");
+    const std::string search =
+        isParamSetByUser("dump_search") ? getParam<std::string>("dump_search") : "";
 
-    // The argument following --dump is a parameter search string,
-    // which can be empty.
-    std::string param_search;
-    if (!following_arg.empty() && (following_arg.find('-') != 0))
-      param_search = following_arg;
-
-    JsonSyntaxTree tree(param_search);
+    JsonSyntaxTree tree(search);
 
     {
       TIME_SECTION("dump", 1, "Building Syntax Tree");
@@ -861,7 +855,7 @@ MooseApp::setupOptions()
       _ready_to_exit = true;
     }
     else
-      mooseError("Search parameter '", param_search, "' was not found in the registered syntax.");
+      mooseError("Search parameter '", search, "' was not found in the registered syntax.");
   }
   else if (getParam<bool>("registry"))
   {
@@ -930,7 +924,7 @@ MooseApp::setupOptions()
     Moose::out << "\n### END REGISTRY DATA ###\n";
     _ready_to_exit = true;
   }
-  else if (isParamSetByUser("definition"))
+  else if (getParam<bool>("definition"))
   {
     _perf_graph.disableLivePrint();
 
@@ -941,37 +935,22 @@ MooseApp::setupOptions()
                << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
     _ready_to_exit = true;
   }
-  else if (isParamSetByUser("yaml"))
+  else if (getParam<bool>("yaml") || isParamSetByUser("yaml_search"))
   {
+    const std::string search =
+        isParamSetByUser("yaml_search") ? getParam<std::string>("yaml_search") : "";
     _perf_graph.disableLivePrint();
 
     _builder.initSyntaxFormatter(Moose::Builder::YAML, true);
-
-    // Get command line argument following --yaml on command line
-    std::string yaml_following_arg = getParam<std::string>("yaml");
-
-    // If the argument following --yaml is non-existent or begins with
-    // a dash, call buildFullTree() with an empty string, otherwise
-    // pass the argument following --yaml.
-    if (yaml_following_arg.empty() || (yaml_following_arg.find('-') == 0))
-      _builder.buildFullTree("");
-    else
-      _builder.buildFullTree(yaml_following_arg);
+    _builder.buildFullTree(search);
 
     _ready_to_exit = true;
   }
-  else if (isParamSetByUser("json"))
+  else if (getParam<bool>("json") || isParamSetByUser("json_search"))
   {
+    const std::string search =
+        isParamSetByUser("json_search") ? getParam<std::string>("json_search") : "";
     _perf_graph.disableLivePrint();
-
-    // Get command line argument following --json on command line
-    std::string json_following_arg = getParam<std::string>("json");
-
-    // The argument following --json is a parameter search string,
-    // which can be empty.
-    std::string search;
-    if (!json_following_arg.empty() && (json_following_arg.find('-') != 0))
-      search = json_following_arg;
 
     JsonSyntaxTree tree(search);
     _builder.buildJsonSyntaxTree(tree);
@@ -1004,14 +983,9 @@ MooseApp::setupOptions()
       // We need to set the flag manually here since the recover parameter is a string type (takes
       // an optional filename)
       _recover = true;
-
-      // Get command line argument following --recover on command line
-      std::string recover_following_arg = getParam<std::string>("recover");
-
-      // If the argument following --recover is non-existent or begins with
-      // a dash then we are going to eventually find the newest recovery file to use
-      if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
-        _restart_recover_base = recover_following_arg;
+      const auto & recover = getParam<std::string>("recover");
+      if (recover.size())
+        _restart_recover_base = recover;
     }
 
     // In the event that we've parsed once before already in MooseMain, we
@@ -1600,9 +1574,9 @@ MooseApp::run()
 bool
 MooseApp::showInputs() const
 {
-  if (isParamSetByUser("show_inputs"))
+  if (getParam<bool>("show_inputs"))
   {
-    auto copy_syntax = _pars.getCommandLineMetadata("copy_inputs").switches;
+    const auto show_inputs_syntax = _pars.getCommandLineMetadata("show_inputs").switches;
     std::vector<std::string> dirs;
     const auto installable_inputs = getInstallableInputs();
 
@@ -1614,14 +1588,15 @@ MooseApp::showInputs() const
     }
     else
     {
-      mooseAssert(!copy_syntax.empty(), "copy_inputs sytnax should not be empty");
+      mooseAssert(!show_inputs_syntax.empty(), "show_inputs sytnax should not be empty");
 
       MooseUtils::tokenize(installable_inputs, dirs, 1, " ");
       Moose::out << "The following directories are installable into a user-writeable directory:\n\n"
                  << installable_inputs << '\n'
                  << "\nTo install one or more directories of inputs, execute the binary with the \""
-                 << copy_syntax[0] << "\" flag. e.g.:\n$ " << _command_line->getExecutableName()
-                 << ' ' << copy_syntax[0] << ' ' << dirs[0] << '\n';
+                 << show_inputs_syntax[0] << "\" flag. e.g.:\n$ "
+                 << _command_line->getExecutableName() << ' ' << show_inputs_syntax[0] << ' '
+                 << dirs[0] << '\n';
     }
     return true;
   }
@@ -1702,7 +1677,7 @@ MooseApp::copyInputs()
 bool
 MooseApp::runInputs()
 {
-  if (isParamSetByUser("run"))
+  if (getParam<bool>("run"))
   {
     // These options will show as unused by petsc; ignore them all
     Moose::PetscSupport::setSinglePetscOption("-options_left", "0");

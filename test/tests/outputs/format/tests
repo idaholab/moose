@@ -45,7 +45,7 @@
     valgrind = HEAVY
     # suppress error checking, the word 'ERROR' shows up in the yaml dump
     errors = 'zzzzz zzzzz'
-    cli_args = '--yaml /Executioner'
+    cli_args = '--yaml-search /Executioner'
     issues = '#2855'
     design = 'YAMLFormatter.md'
     requirement = 'The system shall only give Executioner output once.'

@@ -241,6 +241,7 @@ CommandLine::setCommandLineParam(std::list<CommandLine::Entry>::iterator entry_i
                                  T & value)
 {
   auto & entry = *entry_it;
+  const auto required = param.metadata.argument_type == ArgumentType::REQUIRED;
 
   // Mark this entry as used
   entry.used = true;
@@ -307,21 +308,25 @@ CommandLine::setCommandLineParam(std::list<CommandLine::Entry>::iterator entry_i
     if (!entry.value)
     {
       auto next_entry_it = std::next(entry_it);
-      if (next_entry_it != _entries.end() &&                   // has another value
-          !next_entry_it->used &&                              // isn't already used
-          !next_entry_it->hit_param &&                         // isn't a hit parameter
-          !MooseUtils::beginsWith(next_entry_it->name, "-") && // doesn't start with a -
-          next_entry_it->value_separator &&                    // has a separator
-          *next_entry_it->value_separator == "=" &&            // that separator is =
-          next_entry_it->value)                                // and has a value after the =
+      if (next_entry_it != _entries.end())
       {
         const auto & next_entry = *next_entry_it;
-        // Merge with the next Entry object and remove said next object
-        entry.value = next_entry.name + *next_entry.value_separator + *next_entry.value;
-        entry.raw_args.insert(
-            entry.raw_args.end(), next_entry.raw_args.begin(), next_entry.raw_args.end());
-        _name_to_entry.erase(next_entry.name);
-        _entries.erase(next_entry_it);
+        if (!next_entry.used &&                    // isn't already used
+            (required || !next_entry.hit_param) && // if required, get the last value. if not, get
+                                                   // it if it's not a hit param
+            !MooseUtils::beginsWith(next_entry.name, "-") && // doesn't start with a -
+            next_entry.value_separator &&                    // has a separator
+            *next_entry.value_separator == "=" &&            // that separator is =
+            next_entry.value)                                // and has a value after the =
+        {
+          const auto & next_entry = *next_entry_it;
+          // Merge with the next Entry object and remove said next object
+          entry.value = next_entry.name + *next_entry.value_separator + *next_entry.value;
+          entry.raw_args.insert(
+              entry.raw_args.end(), next_entry.raw_args.begin(), next_entry.raw_args.end());
+          _name_to_entry.erase(next_entry.name);
+          _entries.erase(next_entry_it);
+        }
       }
     }
 

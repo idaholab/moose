@@ -349,6 +349,37 @@ public:
   }
 
   /**
+   * Add a command line parameter with an optional value.
+   *
+   * This is a deprecated option and only remains for two parameters:
+   * "mesh_only" and "recover". There are issues with command line
+   * parameters with optional values because if a value following
+   * one of these is a hit cli parameter, we don't know if we should
+   * apply it to the optional option or as a hit parameter.
+   *
+   * @param name The name of the parameer
+   * @param syntax Space separated list of command-line switch syntax that can set this option
+   * @param value The default value to assign
+   * @param doc_string Documentation.  This will be shown for --help
+   */
+  ///@{
+  template <typename T>
+  void addOptionalValuedCommandLineParam(const std::string & name,
+                                         const std::string & syntax,
+                                         const T & value,
+                                         const std::string & doc_string);
+  template <typename T>
+  void
+  addOptionalValuedCommandLineParam(const std::string & name,
+                                    const std::string & syntax,
+                                    const std::initializer_list<typename T::value_type> & value,
+                                    const std::string & doc_string)
+  {
+    addOptionalValuedCommandLineParam<T>(name, syntax, T{value}, doc_string);
+  }
+  ///@}
+
+  /**
    * Sets the command line parameter with \p name as global.
    *
    * Global here means that it will be passed to all child MultiApps.
@@ -1826,11 +1857,10 @@ InputParameters::addRequiredCommandLineParam(const std::string & name,
                                              const std::string & syntax,
                                              const std::string & doc_string)
 {
-  static_assert(!std::is_same_v<T, bool>,
-                "Required command line parameters not supported for bool types");
+  static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool");
 
   addRequiredParam<T>(name, doc_string);
-  addCommandLineParamHelper<T>(name, syntax, /* required = */ true, /* value_required = */ false);
+  addCommandLineParamHelper<T>(name, syntax, /* required = */ true, /* value_required = */ true);
 }
 
 template <typename T>
@@ -1843,15 +1873,18 @@ InputParameters::addCommandLineParam(const std::string & name,
                 "addCommandLineParam() without a value cannot be used with a MooseEnum because a "
                 "MooseEnum requires initialization");
 
-  // Give a non-valued boolean a default value of false, because it can only be used
-  // by setting it to true
-  if constexpr (std::is_same_v<T, bool>)
-    addCommandLineParam(name, syntax, false, doc_string);
+  auto constexpr is_bool = std::is_same_v<T, bool>;
+  if constexpr (is_bool)
+  {
+    addParam<T>(name, false, doc_string);
+  }
   else
   {
     addParam<T>(name, doc_string);
-    addCommandLineParamHelper<T>(name, syntax, /* required = */ false, /* value_required = */ true);
   }
+
+  addCommandLineParamHelper<T>(
+      name, syntax, /* required = */ false, /* value_required = */ !is_bool);
 }
 
 template <typename T>
@@ -1861,9 +1894,21 @@ InputParameters::addCommandLineParam(const std::string & name,
                                      const T & value,
                                      const std::string & doc_string)
 {
-  if constexpr (std::is_same_v<T, bool>)
-    mooseAssert(!value, "Default value should be false for a boolean command line parameter");
+  static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool (default is always false)");
 
+  addParam<T>(name, value, doc_string);
+  addCommandLineParamHelper<T>(name, syntax, /* required = */ false, /* value_required = */ true);
+}
+
+template <typename T>
+void
+InputParameters::addOptionalValuedCommandLineParam(const std::string & name,
+                                                   const std::string & syntax,
+                                                   const T & value,
+                                                   const std::string & doc_string)
+{
+  mooseAssert(name == "mesh_only" || name == "recover", "Not supported for new parameters");
+  static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool (default is always false)");
   addParam<T>(name, value, doc_string);
   addCommandLineParamHelper<T>(name, syntax, /* required = */ false, /* value_required = */ false);
 }
