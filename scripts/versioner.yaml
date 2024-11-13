@@ -32,7 +32,6 @@ packages:
       - scripts/configure_petsc.sh
       - scripts/update_and_rebuild_petsc.sh
       - scripts/apple-silicon-hdf5-autogen.patch
-      - scripts/tao_restore_viewer.patch
   libmesh:
     dependencies:
       - petsc

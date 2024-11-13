@@ -2333,9 +2333,9 @@ public:
   void clearCurrentResidualVectorTags();
 
   /**
-   * Clear the current Jacobian vector tag data structure ... if someone creates it
+   * Clear the current Jacobian matrix tag data structure ... if someone creates it
    */
-  void clearCurrentJacobianVectorTags() {}
+  void clearCurrentJacobianMatrixTags() {}
 
   using SubProblem::doingPRefinement;
   virtual void doingPRefinement(bool doing_p_refinement,
