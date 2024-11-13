@@ -9,6 +9,10 @@ pre-built versions of MOOSE. To request access to these clusters, please follow 
 Once access has been granted, log into Sawtooth or Lemhi using either [inl/hpc_ondemand.md]
 Interactive Shell services, or directly by following our [SSH Primer](inl/hpc_remote.md).
 
+At the time of this writing, the following [!ac](INL) [!ac](HPC) clusters are available for use:
+
+!include ncrc/hpc_cluster_information.md
+
 !alert! tip
 If you are waiting to be granted access, you can instead follow our
 [Conda Pre-Built MOOSE](getting_started/installation/moose_conda_binary.md) in the meantime.
@@ -26,7 +30,7 @@ module load use.moose moose-openmpi
 
 !alert warning
 If you receive an error about modules not being known, please make sure you are logged into either
-Sawtooth or Lemhi.
+Bitterroot, Sawtooth or Lemhi.
 
 Once loaded, `moose` becomes available. You need now only provide input files to run simulations.
 Example input files are also available while this module is loaded.

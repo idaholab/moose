@@ -15,6 +15,7 @@ effectively performs an update each time.
 
 ## Environment
 
+!style halign=left
 If you plan on using your personal machine we recommend using our Conda packages. If you are instead
 operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of modules.
 
@@ -42,11 +43,13 @@ clusters, this flexibility potentially comes at the cost of the optimizations de
 
 ## Cloning {{ApplicationName}} id=cloning
 
+!style halign=left
 Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
 [NCRC/{{ApplicationName}}](ncrc/applications/ncrc_level4_{{ApplicationLower}}.md).
 
 ## Building {{ApplicationName}} id=build
 
+!style halign=left
 Building {{ApplicationName}} involves applying upstream changes, updating your submodules and/or
 Conda packages, and finally running make. Before we begin, +remember these two important
 warnings+:
@@ -64,6 +67,7 @@ to stay on top of any Conda updates (if Personal Machine), or rebuilding PETSc a
 
 ### Applying Upstream Changes
 
+!style halign=left
 Changes being made by other developers become available to you via the upstream remote. This section
 will show you how to apply these changes to your local {{ApplicationName}} repository.
 
@@ -74,10 +78,10 @@ cd ~/projects/{{binary}}
 git fetch upstream
 ```
 
-The `fetch upstream` git command updates your local references with that of the upstream remote. It does not modify
-any source files. If nothing returns, then there are no upstream updates. If you have built
-{{ApplicationName}} once before, you are finished and can safely exit this documentation. First time
-users will of course need to continue.
+The `fetch upstream` git command updates your local references with that of the upstream remote. It
+does not modify any source files. If nothing returns, then there are no upstream updates. If you
+have built {{ApplicationName}} once before, you are finished and can safely exit this documentation.
+First-time users will of course need to continue.
 
 You need to know your upstream head branch. This will be the branch to continuously rebase on. That
 is, keeping your local {{binary}} repository up to date with upstream.
@@ -98,6 +102,7 @@ With {{ApplicationName}} updated, we can update its submodules.
 
 ### Updating Submodules and Conda Packages
 
+!style halign=left
 Most MOOSE-based applications require additional support libraries available in the form of git
 submodules. To update submodules, perform the following:
 
@@ -133,17 +138,18 @@ either a Conda update, or rebuild PETSc/libMesh:
   module load use.moose moose-dev
   export MOOSE_JOBS=6 METHODS=opt
   cd ~/projects/{{binary}}/moose
-  scripts/update_and_rebuild_petsc.sh
-  scripts/update_and_rebuild_libmesh.sh
-  scripts/update_and_rebuild_wasp.sh
+  scripts/update_and_rebuild_petsc.sh   || return
+  scripts/update_and_rebuild_libmesh.sh || return
+  scripts/update_and_rebuild_wasp.sh    || return
   ```
 
-  For more information on the `METHODS` variable (and other influential environment variables) check out:
-  [MOOSE Build System](application_development/build_system.md). `MOOSE_JOBS` controls how many cores
-  to use during the use of our scripts.
+  For more information on the `METHODS` variable (and other influential environment variables) check
+  out: [MOOSE Build System](application_development/build_system.md). `MOOSE_JOBS` controls how many
+  cores to use during the use of our scripts.
 
 ### Running Make
 
+!style halign=left
 With everything up to date, we can now build the application:
 
 ```bash

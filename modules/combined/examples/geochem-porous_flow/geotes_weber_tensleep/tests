@@ -66,7 +66,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     csvdiff = 'aquifer_geochemistry_out.csv'
     cli_args = 'Outputs/exodus=false Executioner/end_time=1E4'
     heavy = true
-    requirement = "Spatially-dependent aquifer geochemical models shall be possible in the geochemistry module"
+    requirement = "The system shall be able to model spatially-dependent aquifer geochemical models."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]
@@ -77,7 +77,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     cli_args = 'Executioner/end_time=1E4'
     prereq = 'aquifer_geochemistry_only'
     heavy = true
-    requirement = "Porous-flow simulations should be able to couple to spatially-dependent geochemical models to simulate reactive transport"
+    requirement = "The system should be able to couple porous-flow simulations to spatially-dependent geochemical models to simulate reactive transport for spatially-dependent aquifer models."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]
@@ -88,7 +88,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     cli_args = 'Executioner/end_time=2E4'
     prereq = 'porous_flow'
     heavy = true
-    requirement = "Geochemical models should be able to two-way couple with porous-flow simulations"
+    requirement = "The system shall be able to two-way couple geochemical models with porous-flow simulations for spatially-dependent aquifer model."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]

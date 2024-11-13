@@ -16,6 +16,7 @@ InputParameters
 PFCEnergyDensity::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Computes the crystal free energy density");
   params.addRequiredCoupledVar("v", "Array of coupled variables");
   return params;
 }

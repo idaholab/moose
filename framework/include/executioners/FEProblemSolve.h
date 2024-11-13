@@ -16,6 +16,7 @@ class FEProblemSolve : public NonlinearSolveObject
 public:
   FEProblemSolve(Executioner & ex);
 
+  static InputParameters feProblemDefaultConvergenceParams();
   static InputParameters validParams();
 
   static const std::set<std::string> & mooseLineSearches();

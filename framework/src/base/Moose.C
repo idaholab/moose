@@ -172,6 +172,7 @@ addActionTypes(Syntax & syntax)
   registerTask           ("compose_time_stepper",                                    true);
   registerMooseObjectTask("setup_time_integrators",       TimeIntegrator,            false);
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,            false);
+  registerMooseObjectTask("add_convergence",              Convergence,            false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,       false);
   registerMooseObjectTask("add_field_split",              Split,                     false);
@@ -278,6 +279,8 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
 
+  registerTask("add_default_convergence", true);
+
   // Action for setting up the signal-based checkpoint
   registerTask("auto_checkpoint_action", true);
   /**************************/
@@ -342,6 +345,8 @@ addActionTypes(Syntax & syntax)
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
+                           "(add_convergence)"
+                           "(add_default_convergence)"
                            "(add_periodic_bc)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"
@@ -495,6 +500,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMeshDivisionAction", "MeshDivisions/*");
   syntax.registerSyntaxType("MeshDivisions/*", "MeshDivisionName");
+  registerSyntax("AddConvergenceAction", "Convergence/*");
+  syntax.registerSyntaxType("Convergence/*", "ConvergenceName");
 
   registerSyntax("GlobalParamsAction", "GlobalParams");
 

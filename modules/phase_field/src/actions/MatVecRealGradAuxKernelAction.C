@@ -18,6 +18,8 @@ InputParameters
 MatVecRealGradAuxKernelAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Outputs all components of the gradient of the real standard "
+                             "vector-valued properties specified");
   params.addRequiredParam<unsigned int>("op_num",
                                         "Value that specifies the number of grains to create");
   params.addRequiredParam<std::vector<std::string>>(

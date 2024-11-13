@@ -19,6 +19,7 @@
 #include "OutputWarehouse.h"
 #include "Function.h"
 #include "MooseVariableScalar.h"
+#include "UserObject.h"
 
 // libMesh includes
 #include "libmesh/system.h"
@@ -493,6 +494,16 @@ EigenProblem::checkProblemIntegrity()
 {
   FEProblemBase::checkProblemIntegrity();
   _nl_eigen->checkIntegrity();
+  if (_bx_norm_name)
+  {
+    if (!isNonlinearEigenvalueSolver())
+      paramWarning("bx_norm", "This parameter is only used for nonlinear solve types");
+    else if (auto & pp = getUserObjectBase(_bx_norm_name.value());
+             !pp.getExecuteOnEnum().contains(EXEC_LINEAR))
+      pp.paramError("execute_on",
+                    "If providing the Bx norm, this postprocessor must execute on linear e.g. "
+                    "during residual evaluations");
+  }
 }
 
 void

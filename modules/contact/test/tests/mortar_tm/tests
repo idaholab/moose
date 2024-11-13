@@ -2,8 +2,9 @@
   issues = '#14630'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
 
-  [./horizontal_blocks_mortar_TM]
+  [horizontal_blocks_mortar_TM]
     type = 'RunApp'
     input = horizontal_blocks_mortar_TM.i
-  [../]
+    requirement = 'The system shall be able to model contact between two horizontal blocks using a frictionless mortar formulation.'
+  []
 []

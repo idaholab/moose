@@ -13,24 +13,7 @@
 #include "FEProblem.h"
 #include "NodeFaceConstraint.h"
 #include "MechanicalContactConstraint.h"
-
-class AugmentedLagrangianContactProblemInterface
-{
-public:
-  static InputParameters validParams();
-  AugmentedLagrangianContactProblemInterface(const InputParameters & params);
-  virtual const unsigned int & getLagrangianIterationNumber() const
-  {
-    return _lagrangian_iteration_number;
-  }
-
-protected:
-  /// maximum mumber of augmented lagrange iterations
-  const unsigned int _maximum_number_lagrangian_iterations;
-
-  /// current augmented lagrange iteration number
-  unsigned int _lagrangian_iteration_number;
-};
+#include "AugmentedLagrangianContactProblemInterface.h"
 
 /**
  * Class to manage nested solution for augmented Lagrange contact.
@@ -49,29 +32,12 @@ public:
   virtual ~AugmentedLagrangianContactProblemTempl() {}
 
   virtual void timestepSetup() override;
-
-  virtual MooseNonlinearConvergenceReason
-  checkNonlinearConvergence(std::string & msg,
-                            const PetscInt it,
-                            const Real xnorm,
-                            const Real snorm,
-                            const Real fnorm,
-                            const Real rtol,
-                            const Real divtol,
-                            const Real stol,
-                            const Real abstol,
-                            const PetscInt nfuncs,
-                            const PetscInt max_funcs,
-                            const Real div_threshold) override;
+  virtual void addDefaultNonlinearConvergence(const InputParameters & params) override;
+  virtual bool onlyAllowDefaultNonlinearConvergence() const override { return true; }
 
 protected:
   using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
   using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
-  using FEProblem::_console;
-  using FEProblem::currentNonlinearSystem;
-  using FEProblem::geomSearchData;
-  using FEProblem::getDisplacedProblem;
-  using FEProblem::theWarehouse;
 };
 
 typedef AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>

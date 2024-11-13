@@ -160,7 +160,6 @@ PseudoTimestep::execute()
 {
   Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
 
-  // internal parameters needed for computing residuals and setting next timestep
   Real res_norm;
   Real curr_dt;
   Real update_dt;
