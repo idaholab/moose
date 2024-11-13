@@ -33,6 +33,34 @@
   []
 []
 
+[MultiApps]
+  inactive = 'linear'
+  [linear]
+    type = FullSolveMultiApp
+    input_files = linearfv.i
+    execute_on = timestep_begin
+    no_restore = true
+  []
+[]
+
+[Transfers]
+  inactive = 'from_linear to_linear'
+  [from_linear]
+    type = MultiAppCopyTransfer
+    from_multi_app = linear
+    source_variable = 'u'
+    variable = 'diff_var'
+    execute_on = timestep_begin
+  []
+  [to_linear]
+    type = MultiAppCopyTransfer
+    to_multi_app = linear
+    source_variable = 'v'
+    variable = 'diff_var'
+    execute_on = timestep_end
+  []
+[]
+
 [FVBCs]
   [dir]
     type = FVFunctorDirichletBC
@@ -48,8 +76,10 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-12
+  fixed_point_rel_tol = 1e-12
 []
 
 [Outputs]
   exodus = true
+  execute_on = FINAL
 []

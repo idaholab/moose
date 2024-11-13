@@ -79,10 +79,11 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   continue_on_max_its = true
-  absolute_tolerance = 1e-10
-  fixed_point_max_its = 5
+  absolute_tolerance = 1e-12
+  fixed_point_rel_tol = 1e-12
 []
 
 [Outputs]
   exodus = true
+  execute_on = FINAL
 []
