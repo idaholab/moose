@@ -21,15 +21,15 @@ class FEProblemBase;
 class InputParameters;
 class MooseParsedFunctionWrapper;
 
-template <typename T>
-InputParameters validParams();
-
 /**
  * Creates the 'vars' and 'vals' parameters used by all ParsedFunctions, the
  * parameters provided from this function should be appended to the parameters
  * for the class using the += operator.
  * @see MooseParsedFunction,  MooseParsedGradFunction, MooseParsedVectorFunction
  */
+template <typename T>
+InputParameters validParams();
+
 /**
  * Adds user facing parameters for parsed function
  * @see ParsedFunction ParsedVectorFunction ParsedGradFunction
