@@ -501,6 +501,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   //  We will toggle this to false when doing residual evaluations
   ADReal::do_derivatives = true;
 
+  _solver_params.reserve(_num_nl_sys + _num_linear_sys);
+  // Default constructor fine for nonlinear because it will be populated later by framework
+  // executioner/solve object parameters
+  _solver_params.resize(_num_nl_sys);
   for (const auto i : index_range(_nl_sys_names))
   {
     const auto & name = _nl_sys_names[i];
@@ -515,6 +519,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _linear_sys_name_to_num[name] = i;
     _solver_sys_name_to_num[name] = i + _num_nl_sys;
     _solver_sys_names.push_back(name);
+    // Unlike for nonlinear these are basically dummy parameters
+    _solver_params.push_back(makeLinearSolverParams());
   }
 
   _nonlocal_cm.resize(_nl_sys_names.size());
@@ -6143,7 +6149,7 @@ FEProblemBase::init()
 
   // do not assemble system matrix for JFNK solve
   for (auto & nl : _nl)
-    if (solverParams()._type == Moose::ST_JFNK)
+    if (solverParams(nl->number())._type == Moose::ST_JFNK)
       nl->turnOffJacobian();
 
   for (auto & sys : _solver_systems)
@@ -6273,10 +6279,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // Each app should have only one database
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
-
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
+    // Insert options for all systems all at once
     Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
     _is_petsc_options_inserted = true;
   }
@@ -6419,9 +6425,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   setCurrentLinearSystem(linear_sys_num);
 
   const Moose::PetscSupport::PetscOptions & options = po ? *po : _petsc_options;
-  SolverParams solver_params;
-  solver_params._type = Moose::SolveType::ST_LINEAR;
-  solver_params._line_search = Moose::LineSearchType::LS_NONE;
+  auto & solver_params = _solver_params[numNonlinearSystems() + linear_sys_num];
 
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
@@ -6445,7 +6449,10 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-    LibmeshPetscCall(PetscOptionsPop());
+  {
+    auto ierr = PetscOptionsPop();
+    LIBMESH_CHKERR(ierr);
+  }
 #endif
 }
 
@@ -8471,15 +8478,18 @@ FEProblemBase::getVariableNames()
 }
 
 SolverParams &
-FEProblemBase::solverParams()
+FEProblemBase::solverParams(const unsigned int solver_sys_num)
 {
-  return _solver_params;
+  mooseAssert(solver_sys_num < numSolverSystems(),
+              "Solver system number '" << solver_sys_num << "' is out of bounds. We have '"
+                                       << numSolverSystems() << "' solver systems");
+  return _solver_params[solver_sys_num];
 }
 
 const SolverParams &
-FEProblemBase::solverParams() const
+FEProblemBase::solverParams(const unsigned int solver_sys_num) const
 {
-  return _solver_params;
+  return const_cast<FEProblemBase *>(this)->solverParams(solver_sys_num);
 }
 
 void
@@ -9127,4 +9137,19 @@ unsigned short
 FEProblemBase::getCurrentICState()
 {
   return _current_ic_state;
+}
+
+std::string
+FEProblemBase::solverTypeString(const unsigned int solver_sys_num)
+{
+  return Moose::stringify(solverParams(solver_sys_num)._type);
+}
+
+SolverParams
+FEProblemBase::makeLinearSolverParams()
+{
+  SolverParams solver_params;
+  solver_params._type = Moose::SolveType::ST_LINEAR;
+  solver_params._line_search = Moose::LineSearchType::LS_NONE;
+  return solver_params;
 }

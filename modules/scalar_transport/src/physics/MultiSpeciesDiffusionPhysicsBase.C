@@ -112,12 +112,11 @@ MultiSpeciesDiffusionPhysicsBase::addPreconditioning()
   if (_preconditioning == "default")
   {
     // We only pass petsc options as that's all that's needed to set up the preconditioner
-    Moose::PetscSupport::PetscOptions & po = _problem->getPetscOptions();
     const auto option_pair1 =
         std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_type"), "hypre");
     const auto option_pair2 =
         std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_hypre_type"), "boomeramg");
-    addPetscPairsToPetscOptions({option_pair1, option_pair2}, _problem->mesh().dimension(), po);
+    addPetscPairsToPetscOptions({option_pair1, option_pair2});
   }
 }
 

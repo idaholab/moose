@@ -135,7 +135,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
 
   _nl.attachPreconditioner(this);
 
-  if (_fe_problem.solverParams()._type != Moose::ST_JFNK)
+  if (_fe_problem.solverParams(_nl.number())._type != Moose::ST_JFNK)
     mooseError("PBP must be used with JFNK solve type");
 }
 

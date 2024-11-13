@@ -23,6 +23,8 @@ class ResidualObject;
 
 #ifdef LIBMESH_HAVE_SLEPC
 
+#include <slepceps.h>
+
 namespace Moose
 {
 void assemble_matrix(EquationSystems & es, const std::string & system_name);

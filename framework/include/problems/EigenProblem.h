@@ -25,10 +25,7 @@ public:
 
   EigenProblem(const InputParameters & parameters);
 
-  virtual std::string solverTypeString() override
-  {
-    return Moose::stringify(solverParams()._eigen_solve_type);
-  }
+  virtual std::string solverTypeString(unsigned int solver_sys_num = 0) override;
 
 #ifdef LIBMESH_HAVE_SLEPC
   virtual void solve(const unsigned int nl_sys_num) override;
@@ -43,7 +40,7 @@ public:
     _n_eigen_pairs_required = n_eigen_pairs;
   }
   bool isGeneralizedEigenvalueProblem() const { return _generalized_eigenvalue_problem; }
-  bool isNonlinearEigenvalueSolver() const;
+  bool isNonlinearEigenvalueSolver(unsigned int eigen_sys_num) const;
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 

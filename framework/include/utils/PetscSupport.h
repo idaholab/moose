@@ -26,6 +26,7 @@ class FEProblemBase;
 class NonlinearSystemBase;
 class CommandLine;
 class InputParameters;
+class ParallelParamObject;
 
 namespace Moose
 {
@@ -60,11 +61,22 @@ public:
 };
 
 /**
- * A function for setting the PETSc options in PETSc from the options supplied to MOOSE
+ * A function for setting the PETSc options in PETSc from the options supplied to MOOSE. This
+ * interface function should be used when setting options on a per-system basis
  */
 void petscSetOptions(const PetscOptions & po,
                      const SolverParams & solver_params,
                      FEProblemBase * const problem = nullptr);
+
+/**
+ * A function for setting the PETSc options in PETSc from the options supplied to MOOSE. This
+ * interface function should be used for setting options all at once for all systems in a
+ * multi-system context. Note that PetscOptions is not a vector because the options database has
+ * prefixes for the different systems
+ */
+void petscSetOptions(const PetscOptions & po,
+                     const std::vector<SolverParams> & solver_params,
+                     FEProblemBase * problem);
 
 /**
  * Set the default options for a KSP
@@ -107,15 +119,29 @@ void outputNorm(libMesh::Real old_norm, libMesh::Real norm, bool use_color = fal
 PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void * void_ptr);
 
 /**
- * Process some MOOSE-wrapped PETSc options.
+ * Process some MOOSE-wrapped PETSc options. These options have no support for multi-system as
+ * indicated by the fact that this function takes no prefix nor solver system argument
  */
 void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
                                          const InputParameters & params);
 
 /**
- * Stores the PETSc options supplied from the InputParameters with MOOSE
+ * Stores the PETSc options supplied from the parameter object on the problem
+ * @param fe_problem The problem on which we will store the parameters
+ * @param prefix A prefix to apply to all the parameter object's PETSc options. This should either
+ * be a single character '-' or a string like "-foo_" where the trailing '_' is required
+ * @param param_object The parameter object potentially holding PETSc options
+ * String prefixes may be used to select the system the parameters is applied to
  */
-void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
+void storePetscOptions(FEProblemBase & fe_problem,
+                       const std::string & prefix,
+                       const ParallelParamObject & param_object);
+
+/**
+ * Set flags that will instruct the user on the reason their simulation diverged from PETSc's
+ * perspective
+ */
+void setConvergedReasonFlags(FEProblemBase & fe_problem, const std::string & prefix);
 
 /**
  * Sets the FE problem's solve type from the input params.
@@ -140,19 +166,28 @@ void storePetscOptionsFromParams(FEProblemBase & fe_problem, const InputParamete
 /**
  * Populate flags in a given PetscOptions object using a vector of input arguments
  * @param petsc_flags Container holding the flags of the petsc options
+ * @param prefix The prefix to add to the user provided \p petsc_flags
+ * @param param_object The \p ParallelParamObject adding the PETSc options
  * @param petsc_options Data structure which handles petsc options within moose
  */
-void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
+void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
+                                 const std::string & prefix,
+                                 const ParallelParamObject & param_object,
+                                 PetscOptions & petsc_options);
 
 /**
  * Populate name and value pairs in a given PetscOptions object using vectors of input arguments
  * @param petsc_pair_options Option-value pairs of petsc settings
  * @param mesh_dimension The mesh dimension, needed for multigrid settings
+ * @param prefix The prefix to add to the user provided \p petsc_flags
+ * @param param_object The \p ParallelParamObject adding the PETSc options
  * @param petsc_options Data structure which handles petsc options within moose
  */
 void addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
     const unsigned int mesh_dimension,
+    const std::string & prefix,
+    const ParallelParamObject & param_object,
     PetscOptions & petsc_options);
 
 /**
