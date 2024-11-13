@@ -50,7 +50,7 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
 {
   // Only perform this check if the executioner uses Convergence objects
   auto & executioner_params = getMooseApp().getExecutioner()->parameters();
-  if (!executioner_params.have_parameter<ConvergenceName>("nonlinear_convergence"))
+  if (!executioner_params.have_parameter<std::vector<ConvergenceName>>("nonlinear_convergence"))
     return;
 
   // Convergences may exist but be inactive
@@ -61,16 +61,28 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
   if (!has_convergence)
     return;
 
-  // Only Convergence objects deriving from DefaultNonlinearConvergence should
-  // share parameters with the executioner.
+  // If a single convergence is a `DefaultNonlinearConvergence` they can handle the Executioner
+  // parameters pertaining to the nonlinear system solve
+  bool has_a_default_nl_conv = false;
   for (const auto & cv_name : _problem->getNonlinearConvergenceNames())
   {
     if (!_problem->hasConvergence(cv_name))
       continue;
     auto & conv = _problem->getConvergence(cv_name);
     auto * default_nl_conv = dynamic_cast<DefaultNonlinearConvergence *>(&conv);
-    if (!default_nl_conv)
+    if (default_nl_conv)
+      has_a_default_nl_conv = true;
+  }
+
+  // Only Convergence objects deriving from DefaultNonlinearConvergence should
+  // share parameters with the executioner.
+  if (!has_a_default_nl_conv)
+  {
+    for (const auto & cv_name : _problem->getNonlinearConvergenceNames())
     {
+      if (!_problem->hasConvergence(cv_name))
+        continue;
+
       auto nl_params = FEProblemSolve::feProblemDefaultConvergenceParams();
       std::vector<std::string> unused_params;
       for (const auto & param : nl_params.getParametersList())

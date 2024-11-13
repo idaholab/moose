@@ -400,7 +400,7 @@ FEProblemSolve::solve()
 
         // Check convergence
         const auto solve_name =
-            _systems.size() == 1 ? " Solve " : "System " + sys->name() + ": Solve ";
+            _systems.size() == 1 ? " Solve" : "System " + sys->name() + ": Solve";
         if (_problem.shouldSolve())
         {
           if (_problem.converged(sys->number()))
