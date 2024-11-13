@@ -175,7 +175,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
-  _finalized = rhs._finalized;
+  _finalized = false;
 
   return *this;
 }

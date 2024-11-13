@@ -123,9 +123,9 @@ MooseApp::validParams()
       "no_color", "--no-color", "Disable coloring of all Console outputs");
   params.setGlobalCommandLineParam("no_color");
 
-  MooseEnum colors("auto on off");
+  MooseEnum colors("auto on off", "on");
   params.addCommandLineParam<MooseEnum>(
-      "color", "--color <auto,on,off>", colors, "Whether to use color in console output");
+      "color", "--color <auto,on,off=on>", colors, "Whether to use color in console output");
   params.setGlobalCommandLineParam("color");
 
   params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement");
@@ -777,18 +777,15 @@ MooseApp::setupOptions()
 
   if (isUltimateMaster()) // makes sure coloring isn't reset incorrectly in multi-app settings
   {
-    // Toggle the color console off
-    Moose::setColorConsole(true, true); // set default color condition
-    if (getParam<bool>("no_color"))
-      Moose::setColorConsole(false);
-
+    // Set from command line
     auto color = getParam<MooseEnum>("color");
+    // Set from environment
     char * c_color = std::getenv("MOOSE_COLOR");
     if (c_color)
       color.assign(std::string(c_color), "While assigning environment variable MOOSE_COLOR");
-
-    if (isParamSetByUser("color"))
-      color = getParam<MooseEnum>("color");
+    // Set from deprecated --no-color
+    if (getParam<bool>("no_color"))
+      color = "off";
 
     if (color == "auto")
       Moose::setColorConsole(true);
@@ -798,12 +795,11 @@ MooseApp::setupOptions()
       Moose::setColorConsole(false);
     else
       mooseAssert(false, "Should not hit");
-  }
 
-  // this warning goes below --color processing to honor that setting for
-  // the warning. And below settings for warnings/error setup.
-  if (getParam<bool>("no_color"))
-    mooseDeprecated("The --no-color flag is deprecated. Use '--color off' instead.");
+    // After setting color so that non-yellow deprecated is honored
+    if (getParam<bool>("no_color"))
+      mooseDeprecated("The --no-color flag is deprecated. Use '--color off' instead.");
+  }
 
 // If there's no threading model active, but the user asked for
 // --n-threads > 1 on the command line, throw a mooseError.  This is
@@ -1687,7 +1683,7 @@ MooseApp::runInputs()
 
     // Here we are going to pass everything after --run on the cli to the TestHarness. That means
     // cannot validate these CLIs.
-    const auto find_run_it = _command_line->findCommandLineParam("run");
+    const auto find_run_it = std::as_const(*_command_line).findCommandLineParam("run");
     const auto & cl_entries = std::as_const(*_command_line).getEntries();
     mooseAssert(find_run_it != cl_entries.end(), "Didn't find the option");
     std::string test_args;

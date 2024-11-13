@@ -596,25 +596,21 @@ TEST(CommandLine, requiredParameterArgument)
 TEST(CommandLine, duplicateOptions)
 {
   InputParameters params = emptyInputParameters();
-  params.addCommandLineParam<std::string>("value", "-v --value", "", "Doc");
+  params.addCommandLineParam<unsigned int>("value", "-v --value", "Doc");
 
   CommandLine cl;
   cl.addArgument("/path/to/exe");
   cl.addArgument("-v");
+  cl.addArgument("1");
   cl.addArgument("--value");
+  cl.addArgument("2");
+  cl.addArgument("-v");
+  cl.addArgument("3");
   cl.parse();
 
-  try
-  {
-    cl.populateCommandLineParams(params);
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    ASSERT_EQ(std::string(err.what()),
-              "The command line options '-v' and '--value' were both specified but they apply to "
-              "the same option.\nDoc string: Doc");
-  }
+  cl.populateCommandLineParams(params);
+
+  ASSERT_EQ(params.get<unsigned int>("value"), uint(3));
 }
 
 TEST(CommandLine, unappliedArgument)
@@ -768,16 +764,16 @@ TEST(CommandLine, findCommandLineParam)
   params.addCommandLineParam<std::string>("other_value", "--other_value", "Doc");
   cl.populateCommandLineParams(params);
 
-  auto find_value = cl.findCommandLineParam("value");
+  auto find_value = std::as_const(cl).findCommandLineParam("value");
   auto value_entry = std::next(std::as_const(cl).getEntries().begin());
   ASSERT_EQ(find_value, value_entry);
 
-  auto find_other_value = cl.findCommandLineParam("other_value");
+  auto find_other_value = std::as_const(cl).findCommandLineParam("other_value");
   ASSERT_EQ(find_other_value, std::as_const(cl).getEntries().end());
 
   try
   {
-    cl.findCommandLineParam("foo");
+    std::as_const(cl).findCommandLineParam("foo");
     FAIL();
   }
   catch (const std::exception & err)
@@ -804,5 +800,43 @@ TEST(CommandLine, disallowApplicationType)
               "The command line argument 'Application/type=Foo' is not allowed.\nThe application "
               "type must be set via the --type command "
               "line option.");
+  }
+}
+
+TEST(CommandLine, optionalValuedParam)
+{
+  {
+    // Because --mesh-only is optional, we shouldn't associate
+    // the value foo=bar with it because it could be seen as
+    // a hit parameter (this preserves old behavior)
+    CommandLine cl;
+    cl.addArgument("/path/to/exe");
+    cl.addArgument("--mesh-only");
+    cl.addArgument("foo=bar");
+    cl.parse();
+
+    InputParameters params = emptyInputParameters();
+    params.addOptionalValuedCommandLineParam<std::string>("mesh_only", "--mesh-only", {}, "Doc");
+    cl.populateCommandLineParams(params);
+
+    ASSERT_TRUE(params.isParamSetByUser("mesh_only"));
+    ASSERT_TRUE(params.get<std::string>("mesh_only").empty());
+    ASSERT_EQ(cl.buildHitParams(), "foo=bar");
+  }
+
+  {
+    // We should associate "foo" with --mesh-only (optional)
+    // because it is not a hit param
+    CommandLine cl;
+    cl.addArgument("/path/to/exe");
+    cl.addArgument("--mesh-only");
+    cl.addArgument("foo");
+    cl.parse();
+
+    InputParameters params = emptyInputParameters();
+    params.addOptionalValuedCommandLineParam<std::string>("mesh_only", "--mesh-only", {}, "Doc");
+    cl.populateCommandLineParams(params);
+
+    ASSERT_EQ(params.get<std::string>("mesh_only"), std::string("foo"));
   }
 }

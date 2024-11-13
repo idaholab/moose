@@ -11,6 +11,7 @@
 
 // C++ includes
 #include <iomanip>
+#include <optional>
 
 #include "pcrecpp.h"
 
@@ -66,7 +67,6 @@ CommandLine::parse()
 {
   mooseAssert(!hasParsed(), "Has already parsed");
   mooseAssert(_entries.empty(), "Should be empty");
-  mooseAssert(_name_to_entry.empty(), "Should be empty");
 
   // Whether or not we have a entry that accepts values
   bool has_value_accepting_entry = false;
@@ -177,11 +177,6 @@ CommandLine::parse()
       entry.raw_args.push_back(arg);
     }
   }
-
-  // Setup the name -> Entry map
-  for (auto it = _entries.begin(); it != _entries.end(); ++it)
-    if (!it->subapp_name)
-      _name_to_entry[it->name] = it;
 
   _has_parsed = true;
 }
@@ -348,56 +343,33 @@ CommandLine::populateCommandLineParams(InputParameters & params)
   // Set each paramter that we have a value for
   for (const auto & [name, param] : _command_line_params)
   {
-    std::list<Entry>::iterator entry_it;
-    std::optional<std::string> found_switch;
-
-    // Search for each syntax for this parameter
-    for (const auto & search_string : param.metadata.switches)
+    auto entry_it = findCommandLineParam(name);
+    if (entry_it != _entries.end())
     {
-      auto it = _name_to_entry.find(search_string);
-      if (it != _name_to_entry.end())
-      {
-        mooseAssert(!it->second->subapp_name, "Should not be for a subapp");
-        if (found_switch)
-          mooseError("The command line options '",
-                     *found_switch,
-                     "' and '",
-                     search_string,
-                     "' were both specified but they apply to the same option.\nDoc string: ",
-                     param.description);
-        entry_it = it->second;
+      auto & entry = *entry_it;
+      mooseAssert(!entry.subapp_name, "Should not be for a subapp");
 
+      bool found = false;
 #define trySetParameter(type)                                                                      \
-  if (params.have_parameter<type>(name))                                                           \
+  if (!found && params.have_parameter<type>(name))                                                 \
   {                                                                                                \
     static_assert(InputParameters::isValidCommandLineType<type>::value, "Not a supported value");  \
     auto & value = params.set<type>(name);                                                         \
-    setCommandLineParam(entry_it, param, search_string, value);                                    \
-    found_switch = search_string;                                                                  \
-    continue;                                                                                      \
+    setCommandLineParam(entry_it, param, entry.name, value);                                       \
+    found = true;                                                                                  \
   }
 
-        trySetParameter(std::string);
-        trySetParameter(std::vector<std::string>);
-        trySetParameter(Real);
-        trySetParameter(unsigned int);
-        trySetParameter(int);
-        trySetParameter(bool);
-        trySetParameter(MooseEnum);
-
+      trySetParameter(std::string);
+      trySetParameter(std::vector<std::string>);
+      trySetParameter(Real);
+      trySetParameter(unsigned int);
+      trySetParameter(int);
+      trySetParameter(bool);
+      trySetParameter(MooseEnum);
 #undef trySetParameter
 
-        // This error should be unreachable because it is a compile-time check within
-        // InputParameters::addCommandLineParamHelper, but let's keep it just in case
-        mooseError("Command-line parameter '",
-                   name,
-                   "' is not of a consumable type.\n\nAdd an entry with this type to "
-                   "CommandLine::populateCommandLineParams() if it is needed.");
-      }
-    }
+      mooseAssert(found, "Should have been found");
 
-    if (found_switch)
-    {
       // If we found this parameter, that means we set it and we should mark in the
       // InputParameters that it is set so that isParamSetByUser() returns true for this param
       params.commandLineParamSet(name, {});
@@ -494,12 +466,23 @@ CommandLine::findCommandLineParam(const std::string & name) const
                name,
                "' is not a command line parameter");
 
+  // Search for the last thing that matches a switch from this param
+  std::optional<std::list<Entry>::const_iterator> found_it;
   const auto & param = find_param->second;
-  for (const auto & search_switch : param.metadata.switches)
-    if (auto it = _name_to_entry.find(search_switch); it != _name_to_entry.end())
-      return it->second;
+  for (auto it = _entries.begin(); it != _entries.end(); ++it)
+    for (const auto & search_switch : param.metadata.switches)
+      if (it->name == search_switch)
+        found_it = it;
 
-  return getEntries().end();
+  return found_it ? *found_it : getEntries().end();
+}
+
+std::list<CommandLine::Entry>::iterator
+CommandLine::findCommandLineParam(const std::string & name)
+{
+  const auto it = std::as_const(*this).findCommandLineParam(name);
+  // Easy way to go from a const iterator -> non-const iterator
+  return _entries.erase(it, it);
 }
 
 std::string

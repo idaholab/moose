@@ -214,15 +214,18 @@ private:
                            const std::string & cli_switch,
                            T & value);
 
+  /**
+   * @return The entry iterator for the command line arguments for the command line input
+   * parameter with name \p name, if any.
+   */
+  std::list<Entry>::iterator findCommandLineParam(const std::string & name);
+
   /// Storage for the raw argv
   std::vector<std::string> _argv;
 
   /// The parsed command line entries (arguments split into name value pairs)
   /// This is a list because it is necessary to combine Entry objects later on
   std::list<Entry> _entries;
-  /// Map of argument name -> Entry iterator; DOES NOT include parameters
-  // that are designated for multiapps
-  std::map<std::string, std::list<Entry>::iterator> _name_to_entry;
 
   /// The command line parameters, added by populateCommandLineParams()
   std::map<std::string, CommandLineParam> _command_line_params;
@@ -324,7 +327,6 @@ CommandLine::setCommandLineParam(std::list<CommandLine::Entry>::iterator entry_i
           entry.value = next_entry.name + *next_entry.value_separator + *next_entry.value;
           entry.raw_args.insert(
               entry.raw_args.end(), next_entry.raw_args.begin(), next_entry.raw_args.end());
-          _name_to_entry.erase(next_entry.name);
           _entries.erase(next_entry_it);
         }
       }

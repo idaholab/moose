@@ -21,7 +21,6 @@ SolidMechanicsApp::validParams()
   params.set<bool>("use_legacy_initial_residual_evaluation_behavior") = false;
   params.addCommandLineParam<bool>("parse_neml2_only",
                                    "--parse-neml2-only",
-                                   false,
                                    "Executes the [NEML2] block in the input file and terminate.");
   return params;
 }

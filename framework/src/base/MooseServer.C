@@ -69,10 +69,8 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   command_line->addArgument("--check-input");
   command_line->addArgument("--error-unused");
   command_line->addArgument("--error");
-  command_line->addArgument("--error-deprecated");
   command_line->addArgument("--color=off");
   command_line->addArgument("--disable-perf-graph-live");
-
   command_line->parse();
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
 
