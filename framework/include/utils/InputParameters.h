@@ -1894,7 +1894,8 @@ InputParameters::addCommandLineParam(const std::string & name,
                                      const T & value,
                                      const std::string & doc_string)
 {
-  static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool (default is always false)");
+  if constexpr (std::is_same_v<T, bool>)
+    mooseAssert(!value, "Default for bool must be false");
 
   addParam<T>(name, value, doc_string);
   addCommandLineParamHelper<T>(name, syntax, /* required = */ false, /* value_required = */ true);
@@ -1908,7 +1909,7 @@ InputParameters::addOptionalValuedCommandLineParam(const std::string & name,
                                                    const std::string & doc_string)
 {
   mooseAssert(name == "mesh_only" || name == "recover", "Not supported for new parameters");
-  static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool (default is always false)");
+  static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool (does not take a value)");
   addParam<T>(name, value, doc_string);
   addCommandLineParamHelper<T>(name, syntax, /* required = */ false, /* value_required = */ false);
 }
