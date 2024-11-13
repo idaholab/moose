@@ -107,7 +107,7 @@ ChainControl::declareChainControlData(const std::string & data_name, bool apply_
 {
   const std::string full_data_name = (apply_object_prefix ? name() + ":" : "") + data_name;
   auto & data =
-      getMooseApp().getChainControlDataSystem().declareChainControlData<T>(full_data_name, this);
+      getMooseApp().getChainControlDataSystem().declareChainControlData<T>(full_data_name, *this);
   return data.set();
 }
 

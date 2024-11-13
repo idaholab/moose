@@ -48,12 +48,12 @@ public:
   /**
    * Get the pointer to the control object that declared this control data
    */
-  const ChainControl * getChainControl() const { return _chain_control; }
+  const ChainControl & getChainControl() const;
 
   /**
    * Set the pointer to the control object that declared this control data
    */
-  void setChainControl(ChainControl * ctrl) { _chain_control = ctrl; }
+  void setChainControl(ChainControl & ctrl) { _chain_control = &ctrl; }
 
   /**
    * Mark the data as declared

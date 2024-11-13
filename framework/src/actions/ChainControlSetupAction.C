@@ -62,7 +62,7 @@ ChainControlSetupAction::act()
       {
         // Get the name of the control object that declared the control data
         const auto & data_dep = *chain_control_data_map.at(data_dep_name);
-        const auto control_dep_name = data_dep.getChainControl()->name();
+        const auto control_dep_name = data_dep.getChainControl().name();
 
         // Add this name to the list of the control's dependencies if not present
         auto & control_deps = chain_control->getDependencies();

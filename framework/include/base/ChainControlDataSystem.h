@@ -68,7 +68,7 @@ public:
    */
   template <typename T>
   ChainControlData<T> & declareChainControlData(const std::string & data_name,
-                                                ChainControl * chain_control);
+                                                ChainControl & chain_control);
 
   /**
    * Gets the map of ChainControlData names to the relevant ChainControlDataBase
@@ -119,7 +119,7 @@ ChainControlDataSystem::getChainControlData(const std::string & data_name)
 template <typename T>
 ChainControlData<T> &
 ChainControlDataSystem::declareChainControlData(const std::string & data_name,
-                                                ChainControl * chain_control)
+                                                ChainControl & chain_control)
 {
   auto & data = getChainControlData<T>(data_name);
   if (!data.getDeclared())

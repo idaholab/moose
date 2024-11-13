@@ -54,7 +54,7 @@ public:
   /**
    * Get list of Real-valued control data objects
    */
-  const std::vector<ChainControlData<Real> *> getRealChainControlData()
+  std::vector<ChainControlData<Real> *> getRealChainControlData()
   {
     return _real_control_data_values;
   }
@@ -62,7 +62,7 @@ public:
   /**
    * Get list of boolean-valued control data objects
    */
-  const std::vector<ChainControlData<bool> *> getBoolChainControlData()
+  std::vector<ChainControlData<bool> *> getBoolChainControlData()
   {
     return _bool_control_data_values;
   }
