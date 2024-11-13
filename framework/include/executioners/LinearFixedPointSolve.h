@@ -49,9 +49,9 @@ public:
   virtual bool solve() override;
 
 private:
-
   /// Internal routine for solving the sytems
-  std::pair<unsigned int, Real> solveSystem(const unsigned int sys_number, const Moose::PetscSupport::PetscOptions * po);
+  std::pair<unsigned int, Real> solveSystem(const unsigned int sys_number,
+                                            const Moose::PetscSupport::PetscOptions * po);
 
   /// Vector of linear systems names to be used for the iteration
   const std::vector<LinearSystemName> & _linear_sys_names;

@@ -1274,9 +1274,8 @@ prettyCppType(const std::string & cpp_type)
 }
 
 bool
-converged(
-    const std::vector<std::pair<unsigned int, Real>> & its_and_residuals,
-    const std::vector<Real> & abs_tolerances)
+converged(const std::vector<std::pair<unsigned int, Real>> & its_and_residuals,
+          const std::vector<Real> & abs_tolerances)
 {
   mooseAssert(its_and_residuals.size() == abs_tolerances.size(),
               "The number of residuals should (now " + std::to_string(its_and_residuals.size()) +

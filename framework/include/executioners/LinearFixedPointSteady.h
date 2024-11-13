@@ -44,5 +44,4 @@ protected:
 private:
   /// Flag to check if the last solve converged or not
   bool _last_solve_converged;
-
 };

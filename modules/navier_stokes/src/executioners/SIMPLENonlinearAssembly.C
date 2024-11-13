@@ -144,5 +144,3 @@ SIMPLENonlinearAssembly::execute()
 
   postExecute();
 }
-
-

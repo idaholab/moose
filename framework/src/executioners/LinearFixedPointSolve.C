@@ -58,7 +58,8 @@ LinearFixedPointSolve::LinearFixedPointSolve(Executioner & ex)
     _print_operators_and_vectors(getParam<bool>("print_operators_and_vectors"))
 {
   if (_absolute_tolerances.size() != _linear_sys_names.size())
-    paramError("absolute_tolerance", "The number of tolerances is not the same as the number of systems!");
+    paramError("absolute_tolerance",
+               "The number of tolerances is not the same as the number of systems!");
 
   const auto & raw_petsc_options = getParam<std::vector<std::vector<std::string>>>("petsc_options");
   const auto & raw_petsc_options_iname =
@@ -124,7 +125,8 @@ LinearFixedPointSolve::solve()
 {
   // Initialize the quantities which matter in terms of the iteration
   unsigned int iteration_counter = 0;
-  std::vector<std::pair<unsigned int, Real>> residuals_its(_linear_sys_names.size(), std::make_pair(0, 1.0));
+  std::vector<std::pair<unsigned int, Real>> residuals_its(_linear_sys_names.size(),
+                                                           std::make_pair(0, 1.0));
   bool converged = MooseUtils::converged(residuals_its, _absolute_tolerances);
 
   while (iteration_counter < _number_of_iterations && !converged)
@@ -150,7 +152,7 @@ LinearFixedPointSolve::solve()
 
 std::pair<unsigned int, Real>
 LinearFixedPointSolve::solveSystem(const unsigned int sys_number,
-                                const Moose::PetscSupport::PetscOptions * po)
+                                   const Moose::PetscSupport::PetscOptions * po)
 {
   _problem.solveLinearSystem(sys_number, po);
 
@@ -166,9 +168,8 @@ LinearFixedPointSolve::solveSystem(const unsigned int sys_number,
     lisystem.solution->print();
   }
 
-  _console << "System " << sys_number
-               << COLOR_GREEN << " " << linear_solver.get_initial_residual() << COLOR_DEFAULT
-               << " Linear its: " << lisystem.n_linear_iterations() << std::endl;
+  _console << "System " << sys_number << COLOR_GREEN << " " << linear_solver.get_initial_residual()
+           << COLOR_DEFAULT << " Linear its: " << lisystem.n_linear_iterations() << std::endl;
 
   return std::make_pair(lisystem.n_linear_iterations(), linear_solver.get_initial_residual());
 }

@@ -6629,7 +6629,10 @@ FEProblemBase::computeResidualL2Norm(LinearSystem & sys)
   _current_linear_sys = &sys;
 
   // We assemble the current system to check the current residual
-  computeLinearSystemSys(sys.linearImplicitSystem(), *sys.linearImplicitSystem().matrix, *sys.linearImplicitSystem().rhs, /*compute fresh gradients*/true);
+  computeLinearSystemSys(sys.linearImplicitSystem(),
+                         *sys.linearImplicitSystem().matrix,
+                         *sys.linearImplicitSystem().rhs,
+                         /*compute fresh gradients*/ true);
 
   // Unfortunate, but we have to allocate a new vector for the residual
   auto residual = sys.linearImplicitSystem().rhs->clone();

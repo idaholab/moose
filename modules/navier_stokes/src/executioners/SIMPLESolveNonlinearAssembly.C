@@ -528,10 +528,10 @@ SIMPLESolveNonlinearAssembly::solvePressureCorrector()
 
 std::pair<unsigned int, Real>
 SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
-                                             NonlinearSystemBase & system,
-                                             const Real relaxation_factor,
-                                             SolverConfiguration & solver_config,
-                                             const Real absolute_tol)
+                                                  NonlinearSystemBase & system,
+                                                  const Real relaxation_factor,
+                                                  SolverConfiguration & solver_config,
+                                                  const Real absolute_tol)
 {
   _problem.setCurrentNonlinearSystem(system_num);
 
@@ -880,9 +880,9 @@ SIMPLESolveNonlinearAssembly::solve()
     std::vector<std::pair<unsigned int, Real>> passive_scalar_residuals(
         _passive_scalar_systems.size(), std::make_pair(0, 1.0));
 
-    bool passive_scalar_converged = NS::FV::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
-    while (iteration_counter < _num_iterations &&
-           !passive_scalar_converged)
+    bool passive_scalar_converged =
+        NS::FV::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
+    while (iteration_counter < _num_iterations && !passive_scalar_converged)
     {
       // We clear the caches in the passive scalar variables
       for (auto system_i : index_range(_passive_scalar_systems))
@@ -904,7 +904,8 @@ SIMPLESolveNonlinearAssembly::solve()
         _console << _passive_scalar_systems[system_i]->name() << " " << COLOR_GREEN
                  << passive_scalar_residuals[system_i].second << COLOR_DEFAULT << std::endl;
 
-      passive_scalar_converged = NS::FV::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
+      passive_scalar_converged =
+          NS::FV::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
     }
 
     converged = _continue_on_max_its ? true : passive_scalar_converged;
@@ -916,7 +917,7 @@ SIMPLESolveNonlinearAssembly::solve()
 void
 SIMPLESolveNonlinearAssembly::checkIntegrity()
 {
-// check to make sure that we don't have any time kernels in this simulation (Steady State)
+  // check to make sure that we don't have any time kernels in this simulation (Steady State)
   for (const auto system : _momentum_systems)
     checkTimeKernels(*system);
 

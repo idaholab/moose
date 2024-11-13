@@ -286,10 +286,9 @@ SIMPLESolveBase::setupPressurePin()
 }
 
 void
-SIMPLESolveBase::checkDependentParameterError(
-    const std::string & main_parameter,
-    const std::vector<std::string> & dependent_parameters,
-    const bool should_be_defined)
+SIMPLESolveBase::checkDependentParameterError(const std::string & main_parameter,
+                                              const std::vector<std::string> & dependent_parameters,
+                                              const bool should_be_defined)
 {
   for (const auto & param : dependent_parameters)
     if (parameters().isParamSetByUser(param) == !should_be_defined)
