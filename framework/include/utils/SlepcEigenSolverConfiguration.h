@@ -13,10 +13,15 @@
 
 #ifdef LIBMESH_HAVE_SLEPC
 
-#include "EigenProblem.h"
-
 #include "libmesh/solver_configuration.h"
-#include "libmesh/slepc_eigen_solver.h"
+
+class EigenProblem;
+class NonlinearEigenSystem;
+namespace libMesh
+{
+template <typename>
+class SlepcEigenSolver;
+}
 
 class SlepcEigenSolverConfiguration : public libMesh::SolverConfiguration
 {
@@ -25,7 +30,8 @@ public:
    * Constructur: get a reference to the \p SlepcEigenSolver variable to be able to manipulate it
    */
   SlepcEigenSolverConfiguration(EigenProblem & eigen_problem,
-                                libMesh::SlepcEigenSolver<libMesh::Number> & slepc_eigen_solver);
+                                libMesh::SlepcEigenSolver<libMesh::Number> & slepc_eigen_solver,
+                                const NonlinearEigenSystem & nl_eigen_sys);
 
   virtual void configure_solver() override;
 
@@ -36,6 +42,9 @@ private:
    *The slepc eigen solver object that we are configuring
    */
   libMesh::SlepcEigenSolver<libMesh::Number> & _slepc_solver;
+
+  /// The system that owns the SLEPc solver
+  const NonlinearEigenSystem & _nl_eigen_sys;
 };
 
 #endif

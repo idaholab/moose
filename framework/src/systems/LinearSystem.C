@@ -323,3 +323,9 @@ LinearSystem::containsTimeKernel()
 
   return contains_time_kernel;
 }
+
+void
+LinearSystem::compute(ExecFlagType)
+{
+  // Linear systems have their own time derivative computation machinery
+}

@@ -8,12 +8,27 @@ omega = '${fparse 2*3.14159265359*frequencyHz}'
   skip_nl_system_check = true
 []
 
+[Preconditioning]
+  [nl0]
+    type = SMP
+    nl_sys = 'nl0'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
+    full = true
+  []
+  [adjoint]
+    type = SMP
+    nl_sys = 'adjoint'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
+    full = true
+  []
+[]
+
 [Executioner]
   type = SteadyAndAdjoint
   forward_system = nl0
   adjoint_system = adjoint
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
   nl_forced_its = 1
   line_search = none
   nl_abs_tol = 1e-8
