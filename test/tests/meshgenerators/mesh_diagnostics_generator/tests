@@ -51,7 +51,7 @@
       cli_args = '--mesh-only'
       mesh_mode = 'replicated'
       expect_out = 'Number of external nodes that have not been assigned to a nodeset: 1'
-      detail = '2D meshed square missing a nodeset on one side'
+      detail = '2D meshed square with one external node that does not belong to a nodeset'
     []
     [3D_watertight_nodesets]
       type = 'RunApp'
@@ -59,7 +59,7 @@
       cli_args = '--mesh-only'
       mesh_mode = 'replicated'
       expect_out = 'Number of external nodes that have not been assigned to a nodeset: 1'
-      detail = '3D meshed cube missing a nodeset on one side'
+      detail = '3D meshed cube with one external node that does not belong to a nodeset'
     []
     [overlap]
       type = 'RunApp'

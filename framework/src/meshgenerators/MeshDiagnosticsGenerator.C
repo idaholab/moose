@@ -365,12 +365,12 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
 
   for (const auto elem : mesh->active_element_ptr_range())
   {
-    for (auto i : elem->side_index_range())
+    for (const auto i : elem->side_index_range())
     {
       // Check if side is external
       if (elem->neighbor_ptr(i) == nullptr)
       {
-        // Side is externa, now check nodes
+        // Side is external, now check nodes
         auto side = elem->side_ptr(i);
         const auto & node_list = side->get_nodes();
         for (unsigned int j = 0; j < side->n_nodes(); j++)
@@ -388,7 +388,7 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
             if (num_nodes_without_nodeset < _num_outputs)
             {
               message = "Node " + std::to_string(node->id()) +
-                        " is external, but has not been assigned to a nodeset";
+                        " is on an external boundary of the mesh, but has not been assigned to a nodeset";
               _console << message << std::endl;
             }
           }
