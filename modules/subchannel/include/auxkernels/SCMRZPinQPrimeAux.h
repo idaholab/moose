@@ -12,25 +12,19 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "RZQPrimeAuxPin.h"
+#pragma once
 
-registerMooseObject("MooseApp", RZQPrimeAuxPin);
+#include "DiffusionFluxAux.h"
 
-InputParameters
-RZQPrimeAuxPin ::validParams()
+/**
+ * Computes linear heat rate in a 2D-RZ model of a fuel pin
+ */
+class SCMRZPinQPrimeAux : public DiffusionFluxAux
 {
-  InputParameters params = DiffusionFluxAux::validParams();
-  params.addClassDescription(
-      "Axial heat rate on pin surface for a 2D-RZ axi-symmetric fuel pin model");
-  return params;
-}
+public:
+  static InputParameters validParams();
 
-RZQPrimeAuxPin ::RZQPrimeAuxPin(const InputParameters & parameters) : DiffusionFluxAux(parameters)
-{
-}
+  SCMRZPinQPrimeAux(const InputParameters & parameters);
 
-Real
-RZQPrimeAuxPin ::computeValue()
-{
-  return DiffusionFluxAux::computeValue() * M_PI * 2.0 * abs(_q_point[_qp](0));
-}
+  virtual Real computeValue() override;
+};

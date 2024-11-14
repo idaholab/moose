@@ -14,21 +14,21 @@
 
 #pragma once
 
-#include "DiffusionFluxAux.h"
+#include "DiffusionFluxFVAux.h"
 
 /**
  * Computes linear heat rate
  */
-class QPrimeDuctAux : public DiffusionFluxAux
+class SCMTriDuctQPrimeFVAux : public DiffusionFluxFVAux
 {
 public:
   static InputParameters validParams();
 
-  QPrimeDuctAux(const InputParameters & parameters);
+  SCMTriDuctQPrimeFVAux(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 
 protected:
-  /// rod diameter
+  /// flat-to-flat distance
   const Real & _flat_to_flat;
 };

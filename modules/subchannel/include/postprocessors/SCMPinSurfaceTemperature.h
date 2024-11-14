@@ -14,47 +14,25 @@
 
 #pragma once
 
-#include "MultiAppTransfer.h"
-
-class SubChannelMesh;
+#include "GeneralPostprocessor.h"
+#include "SubChannelMesh.h"
 
 /**
- * Base class for transfering solutions from computational mesh onto visualization mesh
+ * Returns the surface temperature of a specific fuel pin at a user defined height
  */
-class MultiAppDetailedSolutionTransferBase : public MultiAppTransfer
+class SCMPinSurfaceTemperature : public GeneralPostprocessor
 {
 public:
-  MultiAppDetailedSolutionTransferBase(const InputParameters & parameters);
-
+  static InputParameters validParams();
+  SCMPinSurfaceTemperature(const InputParameters & params);
+  virtual void initialize() override {}
   virtual void execute() override;
+  virtual void finalize() override {}
+  virtual Real getValue() const override;
 
 protected:
-  /**
-   * Do the transfer into the sub-app
-   */
-  void transferToMultiApps();
-
-  /**
-   * Transfer variables into the sub-app
-   *
-   * @param app_idx Multi-app index
-   */
-  void transferVarsToApp(unsigned int app_idx);
-
-  void transferNodalVars(unsigned int app_idx);
-
-  /**
-   * Find node on computational mesh given the visualization point
-   *
-   * @return Node from the computational mesh
-   * @param from_mesh Computational mesh
-   * @param src_node Node from the visualization
-   */
-  virtual Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node) = 0;
-
-  /// Variable names to transfer
-  const std::vector<AuxVariableName> & _var_names;
-
-public:
-  static InputParameters validParams();
+  SubChannelMesh & _mesh;
+  const Real & _height;
+  const int & _i_pin;
+  Real _value;
 };

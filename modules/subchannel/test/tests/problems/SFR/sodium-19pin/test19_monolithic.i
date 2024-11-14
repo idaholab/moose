@@ -205,7 +205,7 @@ P_out = 2.0e5 # Pa
   []
 
   [PinTemp]
-    type = PinSurfaceTemperature
+    type = SCMPinSurfaceTemperature
     index = 10
     height = 2
   []

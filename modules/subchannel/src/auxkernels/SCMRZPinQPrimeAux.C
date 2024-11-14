@@ -12,26 +12,26 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "QPrimeDuctAux.h"
+#include "SCMRZPinQPrimeAux.h"
 
-registerMooseObject("MooseApp", QPrimeDuctAux);
+registerMooseObject("MooseApp", SCMRZPinQPrimeAux);
 
 InputParameters
-QPrimeDuctAux::validParams()
+SCMRZPinQPrimeAux ::validParams()
 {
   InputParameters params = DiffusionFluxAux::validParams();
-  params.addClassDescription("Axial heat rate on duct surface");
-  params.addRequiredParam<Real>("flat_to_flat", "[m]");
+  params.addClassDescription(
+      "Axial heat rate on pin surface for a 2D-RZ axi-symmetric fuel pin model");
   return params;
 }
 
-QPrimeDuctAux::QPrimeDuctAux(const InputParameters & parameters)
-  : DiffusionFluxAux(parameters), _flat_to_flat(getParam<Real>("flat_to_flat"))
+SCMRZPinQPrimeAux ::SCMRZPinQPrimeAux(const InputParameters & parameters)
+  : DiffusionFluxAux(parameters)
 {
 }
 
 Real
-QPrimeDuctAux::computeValue()
+SCMRZPinQPrimeAux ::computeValue()
 {
-  return DiffusionFluxAux::computeValue() * 6 * _flat_to_flat / std::sqrt(3);
+  return DiffusionFluxAux::computeValue() * M_PI * 2.0 * abs(_q_point[_qp](0));
 }

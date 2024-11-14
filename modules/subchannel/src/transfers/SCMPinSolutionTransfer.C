@@ -20,14 +20,14 @@ registerMooseObject("SubChannelApp", SCMPinSolutionTransfer);
 InputParameters
 SCMPinSolutionTransfer::validParams()
 {
-  InputParameters params = MultiAppDetailedSolutionTransferBase::validParams();
+  InputParameters params = SCMSolutionTransferBase::validParams();
   params.addClassDescription(
       "Transfers subchannel solution from computational mesh onto visualization mesh");
   return params;
 }
 
 SCMPinSolutionTransfer::SCMPinSolutionTransfer(const InputParameters & parameters)
-  : MultiAppDetailedSolutionTransferBase(parameters)
+  : SCMSolutionTransferBase(parameters)
 {
 }
 

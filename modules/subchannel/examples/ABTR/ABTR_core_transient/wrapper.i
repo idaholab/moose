@@ -1,19 +1,19 @@
 # a wrapper mesh for coupling to subchannel
 
 # sqrt(3) / 2 is by how much flat to flat is smaller than corer to corner
-f = ${fparse sqrt(3) / 2}
+f = '${fparse sqrt(3) / 2}'
 
 # units are meters
 scale_factor = 0.01
-length_entry_fuel = ${fparse 60*scale_factor}
-length_heated_fuel = ${fparse 80*scale_factor}
-length_outlet_fuel = ${fparse 120*scale_factor}
-height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
-fuel_element_pitch = ${fparse 14.598*scale_factor}
-inter_assembly_gap = ${fparse 0.4*scale_factor}
-wrapper_thickness = ${fparse 0.3*scale_factor}
-duct_outside = ${fparse fuel_element_pitch - inter_assembly_gap}
-duct_inside = ${fparse duct_outside - 2 * wrapper_thickness}
+length_entry_fuel = '${fparse 60*scale_factor}'
+length_heated_fuel = '${fparse 80*scale_factor}'
+length_outlet_fuel = '${fparse 120*scale_factor}'
+height = '${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}'
+fuel_element_pitch = '${fparse 14.598*scale_factor}'
+inter_assembly_gap = '${fparse 0.4*scale_factor}'
+wrapper_thickness = '${fparse 0.3*scale_factor}'
+duct_outside = '${fparse fuel_element_pitch - inter_assembly_gap}'
+duct_inside = '${fparse duct_outside - 2 * wrapper_thickness}'
 
 # number of radial elements in the wrapper
 n_radial = 4
@@ -35,7 +35,7 @@ T_in = 630
     background_intervals = 1
     background_block_ids = '1'
     # note that polygon_size is "like radius"
-    polygon_size = ${fparse duct_outside / 2}
+    polygon_size = '${fparse duct_outside / 2}'
     duct_sizes = '${fparse duct_inside / 2 / f}'
     duct_intervals = '${n_radial}'
     duct_block_ids = '2'
@@ -145,9 +145,9 @@ T_in = 630
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeDuctAux
+    type = SCMTriDuctQPrimeAux
     diffusivity = 'thermal_conductivity'
-    flat_to_flat = ${fparse duct_inside}
+    flat_to_flat = '${fparse duct_inside}'
     variable = q_prime_d
     diffusion_variable = temperature
     component = normal

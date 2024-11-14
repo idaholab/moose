@@ -14,12 +14,12 @@
 
 #pragma once
 
-#include "MultiAppInterWrapperSolutionTransferBase.h"
+#include "InterWrapperSolutionTransferBase.h"
 
 /**
  * Transfers inter-wrapper solution from computational mesh onto visualization mesh
  */
-class InterWrapperSolutionTransfer : public MultiAppInterWrapperSolutionTransferBase
+class InterWrapperSolutionTransfer : public InterWrapperSolutionTransferBase
 {
 public:
   InterWrapperSolutionTransfer(const InputParameters & parameters);
