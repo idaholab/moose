@@ -69,6 +69,8 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
                                         "initial_from_file_timestep");
   prepareCopyVariablesFromMesh();
   addRequiredPhysicsTask("init_physics");
+  addRequiredPhysicsTask("copy_vars_physics");
+  addRequiredPhysicsTask("check_integrity_early_physics");
 }
 
 void
@@ -250,8 +252,17 @@ PhysicsBase::initializePhysics()
   else
     _dim = _mesh->dimension();
 
+  // Forward physics verbosity to problem to output the setup
+  if (_verbose)
+    getProblem().setVerboseProblem(_verbose);
+
+  // If the derived physics need additional initialization very early on
+  initializePhysicsAdditional();
+
   // Check that the systems exist in the Problem
   // TODO: try to add the systems to the problem from here instead
+  // NOTE: this must be performed after the "Additional" initialization because the list
+  // of systems might have been adjusted once the dimension of the Physics is known
   const auto & problem_nl_systems = getProblem().getNonlinearSystemNames();
   const auto & problem_lin_systems = getProblem().getLinearSystemNames();
   for (const auto & sys_name : _system_names)
@@ -262,16 +273,9 @@ PhysicsBase::initializePhysics()
         solverVariableNames().size())
       mooseError("System '", sys_name, "' is not found in the Problem");
 
-  // Cache system number as some routines prefer those
+  // Cache system number as it makes some logic easier
   for (const auto & sys_name : _system_names)
     _system_numbers.push_back(getProblem().solverSysNum(sys_name));
-
-  // Forward physics verbosity to problem to output the setup
-  if (_verbose)
-    getProblem().setVerboseProblem(_verbose);
-
-  // If the derived physics need additional initialization very early on
-  initializePhysicsAdditional();
 }
 
 void
@@ -287,6 +291,18 @@ PhysicsBase::checkIntegrityEarly() const
                "single system name for all variables. Current you have '" +
                    std::to_string(_system_names.size()) + "' systems specified for '" +
                    std::to_string(_solver_var_names.size()) + "' solver variables.");
+
+  // Check that each variable is present in the expected system
+  unsigned int var_i = 0;
+  for (const auto & var_name : _solver_var_names)
+  {
+    const auto & sys_name = _system_names.size() == 1 ? _system_names[0] : _system_names[var_i++];
+    if (!_problem->getSolverSystem(_problem->solverSysNum(sys_name)).hasVariable(var_name))
+      paramError("system_names",
+                 "We expected system '" + sys_name + "' to contain variable '" + var_name +
+                     "' but it did not. Make sure the system names closely match the ordering of "
+                     "the variables in the Physics.");
+  }
 }
 
 void
@@ -333,6 +349,8 @@ PhysicsBase::getSolverSystem(unsigned int variable_index) const
   if (_system_names.size() == 1)
     return _system_names[0];
   else
+    // We trust that the system names and the variable names match one-to-one as it is enforced by
+    // the checkIntegrityEarly() routine.
     return _system_names[variable_index];
 }
 
@@ -340,15 +358,16 @@ const SolverSystemName &
 PhysicsBase::getSolverSystem(const VariableName & var_name) const
 {
   mooseAssert(!_system_names.empty(), "We should have a solver system name");
-  // No need to look if only one system
+  // No need to look if only one system for the Physics
   if (_system_names.size() == 1)
     return _system_names[0];
 
-  // Find the variable in the list of variables
+  // We trust that the system names and the variable names match one-to-one as it is enforced by the
+  // checkIntegrityEarly() routine.
   for (const auto variable_index : index_range(_solver_var_names))
     if (var_name == _solver_var_names[variable_index])
       return _system_names[variable_index];
-  mooseError("Variable ", var_name, " was not found in list of variables");
+  mooseError("Variable '", var_name, "' was not found within the Physics solver variables.");
 }
 
 void

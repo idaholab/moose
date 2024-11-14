@@ -6164,6 +6164,21 @@ FEProblemBase::solverSysNum(const SolverSystemName & solver_sys_name) const
   return solver_sys_num;
 }
 
+unsigned int
+FEProblemBase::systemNumForVariable(const VariableName & variable_name) const
+{
+  for (const auto & solver_sys : _solver_systems)
+    if (solver_sys->hasVariable(variable_name))
+      return solver_sys->number();
+  mooseAssert(_aux, "Should have an auxiliary system");
+  if (_aux->hasVariable(variable_name))
+    return _aux->number();
+
+  mooseError("Variable '",
+             variable_name,
+             "' was not found in any solver (nonlinear/linear) or auxiliary system");
+}
+
 void
 FEProblemBase::solve(const unsigned int nl_sys_num)
 {

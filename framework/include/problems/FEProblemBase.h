@@ -2270,6 +2270,12 @@ public:
   unsigned int solverSysNum(const SolverSystemName & solver_sys_name) const override;
 
   /**
+   * @return the system number for the provided \p variable_name
+   * Can be nonlinear or auxiliary
+   */
+  unsigned int systemNumForVariable(const VariableName & variable_name) const;
+
+  /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
    */
   bool getFailNextNonlinearConvergenceCheck() const
