@@ -361,7 +361,7 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
   boundary_info.build_side_list();
   const auto nodeset_map = boundary_info.get_nodeset_map();
   unsigned int num_nodes_without_nodeset = 0;
-  std::set<Node> checked_nodes;
+  std::set<dof_id_type> checked_nodes_id;
 
   for (const auto elem : mesh->active_element_ptr_range())
   {
@@ -376,14 +376,14 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
         for (unsigned int j = 0; j < side->n_nodes(); j++)
         {
           const auto node = node_list[j];
-          if (checked_nodes.count(*node))
+          if (checked_nodes_id.count(node->id()))
             continue;
           // if node is not part of nodeset map add it to list of bad nodes
           if (nodeset_map.count(node) == 0)
           {
             // This node does not have a nodeset!!!
             num_nodes_without_nodeset++;
-            checked_nodes.insert(*node);
+            checked_nodes_id.insert(node->id());
             std::string message;
             if (num_nodes_without_nodeset < _num_outputs)
             {
