@@ -860,7 +860,7 @@ SIMPLESolveNonlinearAssembly::solve()
       }
     }
 
-    converged = NS::FV::converged(ns_its_residuals, ns_abs_tols);
+    converged = MooseUtils::converged(ns_its_residuals, ns_abs_tols);
   }
 
   converged = _continue_on_max_its ? true : converged;
@@ -881,7 +881,7 @@ SIMPLESolveNonlinearAssembly::solve()
         _passive_scalar_systems.size(), std::make_pair(0, 1.0));
 
     bool passive_scalar_converged =
-        NS::FV::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
+        MooseUtils::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
     while (iteration_counter < _num_iterations && !passive_scalar_converged)
     {
       // We clear the caches in the passive scalar variables
@@ -905,7 +905,7 @@ SIMPLESolveNonlinearAssembly::solve()
                  << passive_scalar_residuals[system_i].second << COLOR_DEFAULT << std::endl;
 
       passive_scalar_converged =
-          NS::FV::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
+          MooseUtils::converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance);
     }
 
     converged = _continue_on_max_its ? true : passive_scalar_converged;

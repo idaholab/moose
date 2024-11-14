@@ -12,6 +12,7 @@
 // Moose includes
 #include "RhieChowMassFlux.h"
 #include "SIMPLESolveBase.h"
+#include "INSFVRhieChowInterpolatorSegregated.h"
 
 /**
  * SIMPLE-based solution object with nonlinear FV system assembly.

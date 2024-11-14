@@ -10,6 +10,7 @@
 #include "SIMPLESolve.h"
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
+#include "LinearSystem.h"
 
 InputParameters
 SIMPLESolve::validParams()
@@ -361,7 +362,7 @@ SIMPLESolve::solve()
                << ns_residuals[momentum_residual.size() + 1].second << COLOR_DEFAULT
                << " Linear its: " << ns_residuals[momentum_residual.size() + 1].first << std::endl;
 
-    converged = NS::FV::converged(ns_residuals, ns_abs_tols);
+    converged = MooseUtils::converged(ns_residuals, ns_abs_tols);
   }
 
   converged = _continue_on_max_its ? true : converged;

@@ -10,30 +10,11 @@
 #pragma once
 
 #include "Executioner.h"
-#include "INSFVRhieChowInterpolatorSegregated.h"
-#include "PetscSupport.h"
-#include "SolverParams.h"
-#include "SegregatedSolverUtils.h"
-
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_matrix.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/solver_configuration.h"
+#include "SIMPLESolveBase.h"
 
 // Forward declarations
 class InputParameters;
 class FEProblemBase;
-
-/**
- * Solver configuration class used with the linear solvers in a SIMPLE solver.
- */
-class SIMPLESolverConfiguration : public libMesh::SolverConfiguration
-{
-  /**
-   * Override this to make sure the PETSc options are not overwritten in the linear solver
-   */
-  virtual void configure_solver() override {}
-};
 
 /**
  * Base class for the executioners relying on segregated solution approaches.

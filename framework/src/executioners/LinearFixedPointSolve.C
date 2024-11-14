@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "LinearFixedPointSolve.h"
 #include "LinearSystem.h"
+#include "FEProblemBase.h"
 
 InputParameters
 LinearFixedPointSolve::validParams()
