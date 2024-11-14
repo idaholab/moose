@@ -26,6 +26,8 @@
 #include "Registry.h"
 #include "CommandLine.h"
 
+#include <filesystem>
+
 #include "libmesh/string_to_enum.h"
 #include "libmesh/simple_range.h"
 
@@ -51,7 +53,7 @@ outputFrameworkInformation(const MooseApp & app)
 
   oss << "Input File(s):\n";
   for (const auto & entry : app.getInputFileNames())
-    oss << "  " << entry << "\n";
+    oss << "  " << std::filesystem::absolute(entry).c_str() << "\n";
   oss << "\n";
 
   const auto & cl = std::as_const(*app.commandLine());

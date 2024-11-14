@@ -1018,7 +1018,7 @@ MooseApp::setupOptions()
       {
         // if this app is a master, we use the first input file name as the default file base.
         // use proximate here because the input file is an absolute path
-        std::string base = std::filesystem::proximate(getLastInputFileName());
+        const auto & base = getLastInputFileName();
         size_t pos = base.find_last_of('.');
         _output_file_base = base.substr(0, pos);
         // Note: we did not append "_out" in the file base here because we do not want to
