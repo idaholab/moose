@@ -25,35 +25,45 @@ zip_keys:
   - mpi_website
   - mpi_dev_website
 
+### If you change these versions, change also conda/wasp/*, conda/seacas/*
+moose_cc:
+  - gcc 12.3.0 h915e2ae_7                                   # [linux]
+  - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
+  - clang 16.0.6 h30cc82d_6                                 # [arm64]
+
+### If you change these versions, change also conda/wasps/*, conda/seacas/*
+moose_cxx:
+  - gxx 12.3.0 h915e2ae_7                                   # [linux]
+  - clangxx 16.0.6 default_h7151d67_6                       # [not arm64 and osx]
+  - clangxx 16.0.6 default_h4cf2255_6                       # [arm64]
+
+### If you change these versions, change also conda/seacas/*
 moose_gfortran:
   - gfortran 12.3.0 h915e2ae_13                             # [linux]
   - gfortran 12.3.0 h2c809b3_1                              # [not arm64 and osx]
   - gfortran 12.3.0 h1ca8e4b_1                              # [arm64]
+
+### Cmake requires these be installed in order to "find" compilers
+moose_ccompiler:
+  - gcc_linux-64                                            # [linux]
+  - clang_osx-64                                            # [not arm64 and osx]
+  - clang_osx-arm64                                         # [arm64]
+
+moose_cxxcompiler:
+  - gxx_linux-64                                            # [linux]
+  - clangxx_osx-64                                          # [not arm64 and osx]
+  - clangxx_osx-arm64                                       # [arm64]
 
 moose_libgfortran5:
   - libgfortran5 13.2.0 ha4646dd_5                          # [linux]
   - libgfortran5 13.2.0 h2873a65_3                          # [not arm64 and osx]
   - libgfortran5 13.2.0 hf226fd6_3                          # [arm64]
 
-moose_gcc:                                                  # [linux]
-  - gcc 12.3.0 h915e2ae_7                                   # [linux]
-
-moose_gxx:                                                  # [linux]
-  - gxx 12.3.0 h915e2ae_7                                   # [linux]
-
 moose_gcc_impl:                                             # [linux]
   - gcc_impl_linux-64 12.3.0 h58ffeeb_7                     # [linux]
 
 moose_gfortran_impl:                                        # [linux]
   - gfortran_impl_linux-64 12.3.0 h1645026_7                # [linux]
-
-moose_clangcc:                                              # [osx]
-  - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
-  - clang 16.0.6 h30cc82d_6                                 # [arm64]
-
-moose_clangxx:                                              # [osx]
-  - clangxx 16.0.6 default_h7151d67_6                       # [not arm64 and osx]
-  - clangxx 16.0.6 default_h4cf2255_6                       # [arm64]
 
 ### Below are pinings created at the time of render
 ### based on above content. If any of the above

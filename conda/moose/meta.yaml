@@ -10,6 +10,7 @@ package:
 
 source:
   - path: ../../../moose
+  - path: ../functions/retry_build.sh
 
 build:
   number: 0

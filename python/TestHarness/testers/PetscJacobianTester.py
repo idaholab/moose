@@ -100,13 +100,13 @@ class PetscJacobianTester(RunApp):
 
         if self.old_petsc:
             if self.specs['state'].lower() == 'user':
-                m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)",
+                m = re.search(r"Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)",
                               runner_output, re.MULTILINE | re.DOTALL)
             elif self.specs['state'].lower() == 'const_positive':
-                m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(constant state 1\.0\)",
+                m = re.search(r"Norm of matrix ratio (\S+?),? difference (\S+) \(constant state 1\.0\)",
                               runner_output, re.MULTILINE | re.DOTALL)
             elif self.specs['state'].lower() == 'const_negative':
-                m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(constant state -1\.0\)",
+                m = re.search(r"Norm of matrix ratio (\S+?),? difference (\S+) \(constant state -1\.0\)",
                               runner_output, re.MULTILINE | re.DOTALL)
             else:
                 self.setStatus("state must be either 'user', const_positive', or 'const_negative'",
@@ -123,7 +123,7 @@ class PetscJacobianTester(RunApp):
                 reason = 'EXPECTED OUTPUT NOT FOUND'
 
         else:
-            matches = re.finditer("\|\|J - Jfd\|\|_F/\|\|J\|\|_F\s?=?\s?(\S+), \|\|J - Jfd\|\|_F\s?=?\s?(\S+)",
+            matches = re.finditer(r"\|\|J - Jfd\|\|_F/\|\|J\|\|_F\s?=?\s?(\S+), \|\|J - Jfd\|\|_F\s?=?\s?(\S+)",
                   runner_output, re.MULTILINE | re.DOTALL)
 
             reason = 'EXPECTED OUTPUT NOT FOUND'

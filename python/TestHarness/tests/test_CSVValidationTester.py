@@ -24,8 +24,8 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         output = e.output
-        self.assertRegexpMatches(output, r'test_harness\.csv_validation_tester_01.*?OK')
-        self.assertRegexpMatches(output, r'test_harness\.csv_validation_tester_02.*?FAILED \(DIFF\)')
+        self.assertRegex(output, r'test_harness\.csv_validation_tester_01.*?OK')
+        self.assertRegex(output, r'test_harness\.csv_validation_tester_02.*?FAILED \(DIFF\)')
 
     @unittest.skipIf(sys.platform == 'linux' and sys.version_info[0] == 3 and sys.version_info[1] < 7, "Python 3.6 print doesn't handle \xb1 on linux")
     def testCSVValidationTesterVerbose(self):
@@ -38,5 +38,5 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         output = e.output
-        self.assertRegexpMatches(output, 'csv_validation_tester_01.csv                        | 0.00 \xb1 0.01          | 0.01 \xb1 0.01')
-        self.assertRegexpMatches(output, 'csv_validation_tester_02.csv                        | 0.00 \xb1 0.01          | 0.01 \xb1 0.00')
+        self.assertRegex(output, 'csv_validation_tester_01.csv                        | 0.00 \xb1 0.01          | 0.01 \xb1 0.01')
+        self.assertRegex(output, 'csv_validation_tester_02.csv                        | 0.00 \xb1 0.01          | 0.01 \xb1 0.00')

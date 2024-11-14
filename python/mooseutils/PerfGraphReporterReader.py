@@ -9,6 +9,9 @@
 
 from mooseutils.ReporterReader import ReporterReader
 
+# Use old sum() behavior (Python <3.12)
+class fLoAt(float): pass
+
 class PerfGraphObject:
     """
     Base class PerfGraphNode and PerfGraphSection.
@@ -18,7 +21,7 @@ class PerfGraphObject:
     """
 
     def __init__(self, name, level):
-        """
+        r"""
         Inputs:
 
         - name\[str\]: The section name
@@ -83,7 +86,7 @@ class PerfGraphObject:
         """
         Returns the time the children took in seconds.
         """
-        return self._sumAllNodes(lambda node: sum([child.totalTime() for child in node.children()]))
+        return self._sumAllNodes(lambda node: sum([fLoAt(child.totalTime()) for child in node.children()]))
 
     def percentTime(self):
         """
@@ -127,7 +130,7 @@ class PerfGraphObject:
         return parent
 
 class PerfGraphNode(PerfGraphObject):
-    """
+    r"""
     A node in the graph for the PerfGraphReporterReader.
     These should really only be constructed internally within
     the PerfGraphReporterReader.
@@ -230,7 +233,7 @@ class PerfGraphNode(PerfGraphObject):
         return self._parent
 
 class PerfGraphSection(PerfGraphObject):
-    """
+    r"""
     A section in the graph for the PerfGraphReporterReader.
     These should really only be constructed internally within
     the PerfGraphReporterReader.
@@ -264,7 +267,7 @@ class PerfGraphSection(PerfGraphObject):
         return self._nodes
 
     def node(self, path):
-        """
+        r"""
         Returns the node with the given path, if one exists, otherwise None.
 
         Inputs:
@@ -278,7 +281,7 @@ class PerfGraphSection(PerfGraphObject):
         return None
 
 class PerfGraphReporterReader:
-    """
+    r"""
     A Reader for MOOSE PerfGraphReporterReader data.
 
     Inputs:
@@ -325,7 +328,7 @@ class PerfGraphReporterReader:
         return self.rootNode().child(name)
 
     def recurse(self, act, *args, **kwargs):
-        """
+        r"""
         Recursively do an action through the graph starting with the root node.
 
         Inputs:
@@ -346,7 +349,7 @@ class PerfGraphReporterReader:
         return self._root_node
 
     def node(self, path):
-        """
+        r"""
         Returns the node with the given path if one exists, otherwise None.
 
         Inputs:
@@ -368,7 +371,7 @@ class PerfGraphReporterReader:
         return self._sections.values()
 
     def section(self, name):
-        """
+        r"""
         Returns the PerfGraphSection with the given name if one exists, otherwise None.
 
         Inputs:
@@ -380,7 +383,7 @@ class PerfGraphReporterReader:
         return self._sections.get(name, None)
 
     def heaviestNodes(self, num, memory=False):
-        """
+        r"""
         Returns the heaviest nodes in the form of PerfGraphNode objects.
 
         Inputs:
@@ -398,7 +401,7 @@ class PerfGraphReporterReader:
         return sorted(nodes, key=lambda node: node.selfMemory() if memory else node.selfTime(), reverse=True)[0:num]
 
     def heaviestSections(self, num, memory=False):
-        """
+        r"""
         Returns the heaviest sections in the form of PerfGraphSection objects.
 
         Inputs:

@@ -1,29 +1,41 @@
+moose_python:
+  - python 3.11
+  - python 3.10
+  - python 3.9
+
+### If you change these versions, change also conda/mpi/*, conda/seacas/*
+moose_cc:
+  - gcc 12.3.0 h915e2ae_7                                   # [linux]
+  - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
+  - clang 16.0.6 h30cc82d_6                                 # [arm64]
+
+### If you change these versions, change also conda/mpi/*, conda/seacas/*
+moose_cxx:
+  - gxx 12.3.0 h915e2ae_7                                   # [linux]
+  - clangxx 16.0.6 default_h7151d67_6                       # [not arm64 and osx]
+  - clangxx 16.0.6 default_h4cf2255_6                       # [arm64]
+
+### Cmake requires these be installed in order to "find" compilers
+moose_ccompiler:
+  - gcc_linux-64                                            # [linux]
+  - clang_osx-64                                            # [not arm64 and osx]
+  - clang_osx-arm64                                         # [arm64]
+
+moose_cxxcompiler:
+  - gxx_linux-64                                            # [linux]
+  - clangxx_osx-64                                          # [not arm64 and osx]
+  - clangxx_osx-arm64                                       # [arm64]
+
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX10.15.sdk                                    # [not arm64 and osx]
-  - /opt/MacOSX11.3.sdk                                     # [arm64]
-
-c_compiler_version:                                         # [unix]
-  - 10.4.0                                                  # [linux]
-  - 14                                                      # [osx]
-
-cxx_compiler_version:                                       # [unix]
-  - 10.4.0                                                  # [linux]
-  - 14                                                      # [osx]
-
-fortran_compiler_version:                                   # [unix]
-  - 10.4.0                                                  # [linux]
-  - 9.3.0                                                   # [not arm64 and osx]
-  - 11.3                                                    # [arm64]
+  - /opt/MacOSX11.3.sdk                                     # [osx]
 
 macos_min_version:                                          # [osx]
-  - 10.15                                                   # [not arm64 and osx]
-  - 11.3                                                    # [arm64]
+  - 11.3                                                    # [osx]
 
 macos_machine:                                              # [osx]
   - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
   - arm64-apple-darwin20.0.0                                # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
-  - 10.15                                                   # [not arm64 and osx]
-  - 11.3                                                    # [arm64]
+  - 11.3                                                    # [osx]

@@ -123,7 +123,7 @@ def yaml_write(filename, content, indent=4):
 
     # see IncludeYamlFile.representer
     document = yaml.dump(content, None, lambda *args, **kwargs: make_dumper(*args, **kwargs))
-    document = re.sub(r"(?P<tag>!include\s+)'(?P<string>.*?)'", '\g<tag>\g<string>', document)
+    document = re.sub(r"(?P<tag>!include\s+)'(?P<string>.*?)'", r'\g<tag>\g<string>', document)
 
     with open(filename, 'w') as fid:
         fid.write(document)
