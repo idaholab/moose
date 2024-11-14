@@ -13,49 +13,49 @@ outlet_pressure = 2.0e5 # Pa # gauge pressure
 ###################################################
 # units are cm - do not forget to convert to meter
 scale_factor = 0.01
-pin_pitch = ${fparse 0.5664*scale_factor}
-pin_diameter = ${fparse 0.4419*scale_factor}
-wire_pitch = ${fparse 15.24*scale_factor}
-wire_diameter = ${fparse 0.1244*scale_factor}
-flat_to_flat = ${fparse 4.64*scale_factor}
+pin_pitch = '${fparse 0.5664*scale_factor}'
+pin_diameter = '${fparse 0.4419*scale_factor}'
+wire_pitch = '${fparse 15.24*scale_factor}'
+wire_diameter = '${fparse 0.1244*scale_factor}'
+flat_to_flat = '${fparse 4.64*scale_factor}'
 # n_rings = 5
-heated_length = ${fparse 34.3*scale_factor}
-unheated_length_exit = ${fparse 26.9*scale_factor}
-length = ${fparse heated_length + unheated_length_exit}
-inter_wrapper_width = ${fparse 0.3*scale_factor}
-outer_duct_in = ${fparse 5.5854*scale_factor}
-inner_duct_out =  ${fparse 4.8437*scale_factor}
+heated_length = '${fparse 34.3*scale_factor}'
+unheated_length_exit = '${fparse 26.9*scale_factor}'
+length = '${fparse heated_length + unheated_length_exit}'
+inter_wrapper_width = '${fparse 0.3*scale_factor}'
+outer_duct_in = '${fparse 5.5854*scale_factor}'
+inner_duct_out = '${fparse 4.8437*scale_factor}'
 ###################################################
-inter_wall_width = ${fparse outer_duct_in - inner_duct_out}
+inter_wall_width = '${fparse outer_duct_in - inner_duct_out}'
 
 # fluid properties
 ####  Density #####
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
-rho = ${fparse A12 + A13 * inlet_temperature + A14 * inlet_temperature * inlet_temperature}
+rho = '${fparse A12 + A13 * inlet_temperature + A14 * inlet_temperature * inlet_temperature}'
 #### Viscosity
 A52 = 3.6522e-5
 A53 = 0.16626
 A54 = -4.56877e1
 A55 = 2.8733e4
-mu = ${fparse A52 + A53 / inlet_temperature + A54 / inlet_temperature / inlet_temperature +
-        A55 / (inlet_temperature * inlet_temperature * inlet_temperature)}
+mu = '${fparse A52 + A53 / inlet_temperature + A54 / inlet_temperature / inlet_temperature +
+        A55 / (inlet_temperature * inlet_temperature * inlet_temperature)}'
 #### Specific heat at constant pressure
 A28 = 7.3898e5
 A29 = 3.154e5
 A30 = 1.1340e3
 A31 = -2.2153e-1
 A32 = 1.1156e-4
-dt = ${fparse 2503.3 - inlet_temperature}
-cp = ${fparse A28 / dt / dt + A29 / dt + A30 + A31 * dt + A32 * dt * dt}
+dt = '${fparse 2503.3 - inlet_temperature}'
+cp = '${fparse A28 / dt / dt + A29 / dt + A30 + A31 * dt + A32 * dt * dt}'
 #### Heat conduction coefficient
 A48 = 1.1045e2
 A49 = -6.5112e-2
 A50 = 1.5430e-5
 A51 = -2.4617e-9
-k = ${fparse A48 + A49 * inlet_temperature + A50 * inlet_temperature * inlet_temperature +
-        A51 * inlet_temperature * inlet_temperature * inlet_temperature}
+k = '${fparse A48 + A49 * inlet_temperature + A50 * inlet_temperature * inlet_temperature +
+        A51 * inlet_temperature * inlet_temperature * inlet_temperature}'
 #### Molar mass
 molar_mass = 22.989769e-3
 
@@ -65,8 +65,8 @@ cp_wrapper = 300
 rho_wrapper = 7800
 
 # hydraulic diameters
-D_hydraulic_interwrapper = ${fparse 2 * inter_wrapper_width}
-D_hydraulic_interwall = ${fparse 2 * inter_wall_width}
+D_hydraulic_interwrapper = '${fparse 2 * inter_wrapper_width}'
+D_hydraulic_interwall = '${fparse 2 * inter_wall_width}'
 D_hydraulic_fuel = 0.00297 # Why?
 
 wrapper_blocks = 'wall'
@@ -299,7 +299,7 @@ ramp_time = 1.0
     initial_pressure = '${outlet_pressure}'
 
     # boundary conditions
-    inlet_boundaries =     'inlet_interwrapper
+    inlet_boundaries = 'inlet_interwrapper
                             inlet_interwall
                             inlet_central_assembly
                             inlet_porous_flow_hfd
@@ -319,7 +319,7 @@ ramp_time = 1.0
                             flux-mass
                             flux-mass'
 
-    flux_inlet_pps  = 'interwrapper_mfr
+    flux_inlet_pps = 'interwrapper_mfr
                        interwall_mfr
                        XX09_mfr
                        HFD_mfr
@@ -413,7 +413,7 @@ ramp_time = 1.0
   ## set characteristic length on each block
   [characteristic_length]
     type = PiecewiseByBlockFunctorMaterial
-    prop_name =  'characteristic_length'
+    prop_name = 'characteristic_length'
     subdomain_to_prop_value = 'inter_wrapper ${D_hydraulic_interwrapper}
                                interwall     ${D_hydraulic_interwall}
                                porous_flow_hfd  ${D_hydraulic_fuel}
@@ -461,7 +461,7 @@ ramp_time = 1.0
 
   [heat_source]
     type = PiecewiseByBlockFunctorMaterial
-    prop_name =  'heat_source'
+    prop_name = 'heat_source'
     subdomain_to_prop_value = 'inter_wrapper 0.0
                                interwall     0.0
                                porous_flow_hfd  HFD_power
@@ -521,7 +521,7 @@ ramp_time = 1.0
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeDuctAux
+    type = SCMTriDuctQPrimeAux
     diffusivity = ${k_wrapper}
     flat_to_flat = ${flat_to_flat}
     variable = q_prime_duct
@@ -745,7 +745,7 @@ ramp_time = 1.0
   end_time = 10.0
   l_max_its = 20
   [TimeStepper]
-   type = IterationAdaptiveDT
+    type = IterationAdaptiveDT
     dt = 0.2
     iteration_window = 2
     optimal_iterations = 10

@@ -12,19 +12,26 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#pragma once
+#include "SCMTriDuctQPrimeAux.h"
 
-#include "DiffusionFluxAux.h"
+registerMooseObject("MooseApp", SCMTriDuctQPrimeAux);
 
-/**
- * Computes linear heat rate in a 2D-RZ model of a fuel pin
- */
-class RZQPrimeAuxPin : public DiffusionFluxAux
+InputParameters
+SCMTriDuctQPrimeAux::validParams()
 {
-public:
-  static InputParameters validParams();
+  InputParameters params = DiffusionFluxAux::validParams();
+  params.addClassDescription("Axial heat rate on duct surface");
+  params.addRequiredParam<Real>("flat_to_flat", "[m]");
+  return params;
+}
 
-  RZQPrimeAuxPin(const InputParameters & parameters);
+SCMTriDuctQPrimeAux::SCMTriDuctQPrimeAux(const InputParameters & parameters)
+  : DiffusionFluxAux(parameters), _flat_to_flat(getParam<Real>("flat_to_flat"))
+{
+}
 
-  virtual Real computeValue() override;
-};
+Real
+SCMTriDuctQPrimeAux::computeValue()
+{
+  return DiffusionFluxAux::computeValue() * 6 * _flat_to_flat / std::sqrt(3);
+}

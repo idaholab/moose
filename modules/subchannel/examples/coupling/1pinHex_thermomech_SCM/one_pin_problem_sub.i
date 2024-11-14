@@ -10,7 +10,7 @@ T_in = 588.5
   [bisonMesh]
     type = GeneratedMeshGenerator
     dim = 2
-    xmax = ${fparse pin_diameter / 2.0}
+    xmax = '${fparse pin_diameter / 2.0}'
     bias_x = 1.0
     nx = 20
     ymax = ${heated_length}
@@ -50,22 +50,28 @@ T_in = 588.5
   []
 []
 
-[Modules/TensorMechanics/Master]
-  add_variables = true
-  strain = SMALL
-  incremental = true
-  generate_output = 'stress_xx stress_yy stress_xy'
-  temperature = temperature
+[Modules]
 
-  [block0]
-    eigenstrain_names = eigenstrain
-    block = 0
+  [TensorMechanics]
+
+    [Master]
+      add_variables = true
+      strain = SMALL
+      incremental = true
+      generate_output = 'stress_xx stress_yy stress_xy'
+      temperature = temperature
+
+      [block0]
+        eigenstrain_names = eigenstrain
+        block = 0
+      []
+    []
   []
 []
 
 [AuxKernels]
   [QPrime]
-    type = RZQPrimeAuxPin
+    type = SCMRZPinQPrimeAux
     diffusivity = 'thermal_conductivity'
     variable = q_prime
     diffusion_variable = temperature

@@ -12,14 +12,14 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "MultiAppDetailedSolutionTransferBase.h"
+#include "SCMSolutionTransferBase.h"
 #include "MultiApp.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "SubChannelMesh.h"
 
 InputParameters
-MultiAppDetailedSolutionTransferBase::validParams()
+SCMSolutionTransferBase::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<std::vector<AuxVariableName>>("variable",
@@ -27,8 +27,7 @@ MultiAppDetailedSolutionTransferBase::validParams()
   return params;
 }
 
-MultiAppDetailedSolutionTransferBase::MultiAppDetailedSolutionTransferBase(
-    const InputParameters & parameters)
+SCMSolutionTransferBase::SCMSolutionTransferBase(const InputParameters & parameters)
   : MultiAppTransfer(parameters), _var_names(getParam<std::vector<AuxVariableName>>("variable"))
 {
   if (_directions.contains(Transfer::FROM_MULTIAPP))
@@ -36,7 +35,7 @@ MultiAppDetailedSolutionTransferBase::MultiAppDetailedSolutionTransferBase(
 }
 
 void
-MultiAppDetailedSolutionTransferBase::execute()
+SCMSolutionTransferBase::execute()
 {
   TIME_SECTION(
       "MultiAppDetailedSolutionBaseTransfer::execute()", 5, "Transferring subchannel solutions");
@@ -55,7 +54,7 @@ MultiAppDetailedSolutionTransferBase::execute()
 }
 
 void
-MultiAppDetailedSolutionTransferBase::transferToMultiApps()
+SCMSolutionTransferBase::transferToMultiApps()
 {
   _console << "********** Transfer to MultiApps a **********" << std::endl;
   mooseAssert(_from_meshes.size() == 1, "Only one master mesh can be active in this transfer.");
@@ -68,13 +67,13 @@ MultiAppDetailedSolutionTransferBase::transferToMultiApps()
 }
 
 void
-MultiAppDetailedSolutionTransferBase::transferVarsToApp(unsigned int app_idx)
+SCMSolutionTransferBase::transferVarsToApp(unsigned int app_idx)
 {
   transferNodalVars(app_idx);
 }
 
 void
-MultiAppDetailedSolutionTransferBase::transferNodalVars(unsigned int app_idx)
+SCMSolutionTransferBase::transferNodalVars(unsigned int app_idx)
 {
   Moose::ScopedCommSwapper swapper(getToMultiApp()->comm());
 

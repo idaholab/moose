@@ -14,12 +14,12 @@
 
 #pragma once
 
-#include "MultiAppDetailedSolutionTransferBase.h"
+#include "SCMSolutionTransferBase.h"
 
 /**
  * Transfers subchannel solution from computational mesh onto visualization mesh
  */
-class SCMPinSolutionTransfer : public MultiAppDetailedSolutionTransferBase
+class SCMPinSolutionTransfer : public SCMSolutionTransferBase
 {
 public:
   SCMPinSolutionTransfer(const InputParameters & parameters);

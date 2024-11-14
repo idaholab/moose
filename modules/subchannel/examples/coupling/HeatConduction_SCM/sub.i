@@ -47,7 +47,7 @@ T_in = 297.039 # K
 
 [AuxKernels]
   [QPrime]
-    type = RZQPrimeAuxPin
+    type = SCMRZPinQPrimeAux
     diffusivity = 'thermal_conductivity'
     variable = q_prime
     diffusion_variable = temperature
@@ -127,5 +127,5 @@ T_in = 297.039 # K
 []
 
 [Debug]
-  show_execution_order=timestep_end
+  show_execution_order = timestep_end
 []

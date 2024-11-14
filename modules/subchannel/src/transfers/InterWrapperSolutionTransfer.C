@@ -20,14 +20,14 @@ registerMooseObject("SubChannelApp", InterWrapperSolutionTransfer);
 InputParameters
 InterWrapperSolutionTransfer::validParams()
 {
-  InputParameters params = MultiAppInterWrapperSolutionTransferBase::validParams();
+  InputParameters params = InterWrapperSolutionTransferBase::validParams();
   params.addClassDescription(
       "Transfers Inter-Wrapper solution from computational mesh onto visualization mesh");
   return params;
 }
 
 InterWrapperSolutionTransfer::InterWrapperSolutionTransfer(const InputParameters & parameters)
-  : MultiAppInterWrapperSolutionTransferBase(parameters)
+  : InterWrapperSolutionTransferBase(parameters)
 {
 }
 

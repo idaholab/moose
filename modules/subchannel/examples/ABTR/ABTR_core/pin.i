@@ -1,15 +1,15 @@
 T_in = 630 # K
 reactor_power = 250e6 #WTh
-fuel_assemblies_per_power_unit = ${fparse 2}
+fuel_assemblies_per_power_unit = '${fparse 2}'
 fuel_pins_per_assembly = 217
-pin_power = ${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)} # Approx.
+pin_power = '${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)}' # Approx.
 
 scale_factor = 0.01
-fuel_pin_diameter= ${fparse 0.8*scale_factor}
-length_entry_fuel = ${fparse 60*scale_factor}
-length_heated_fuel = ${fparse 80*scale_factor}
-length_outlet_fuel = ${fparse 120*scale_factor}
-height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
+fuel_pin_diameter = '${fparse 0.8*scale_factor}'
+length_entry_fuel = '${fparse 60*scale_factor}'
+length_heated_fuel = '${fparse 80*scale_factor}'
+length_outlet_fuel = '${fparse 120*scale_factor}'
+height = '${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}'
 
 [Mesh]
   second_order = true
@@ -27,7 +27,7 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
     pin_type = 1
     pitch = 0.012
     num_sectors = 4
-    region_ids='1 2 3 4'
+    region_ids = '1 2 3 4'
     ring_radii = '${fparse fuel_pin_diameter/2}
                   ${fparse fuel_pin_diameter/2 + 1e-5}
                   ${fparse fuel_pin_diameter/2 + 2e-5}'
@@ -72,7 +72,6 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
     old_block = '1'
     new_block = 'fuel_pin'
   []
-
 []
 
 [Functions]
@@ -103,7 +102,7 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 
 [AuxKernels]
   [QPrime]
-    type = RZQPrimeAuxPin
+    type = SCMRZPinQPrimeAux
     diffusivity = 'thermal_conductivity'
     variable = q_prime_pin
     diffusion_variable = temperature

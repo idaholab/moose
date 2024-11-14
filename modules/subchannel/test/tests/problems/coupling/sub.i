@@ -35,7 +35,7 @@ heated_length = 1.0
 
 [AuxKernels]
   [QPrime]
-    type = RZQPrimeAuxPin
+    type = SCMRZPinQPrimeAux
     diffusivity = 'thermal_conductivity'
     variable = q_prime
     diffusion_variable = temperature
@@ -53,7 +53,7 @@ heated_length = 1.0
   [heat_source]
     type = HeatSource
     variable = temperature
-    value = ${fparse 4.0 * 1000 / (pi * pin_diameter * pin_diameter * heated_length)}
+    value = '${fparse 4.0 * 1000 / (pi * pin_diameter * pin_diameter * heated_length)}'
   []
 []
 

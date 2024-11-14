@@ -12,7 +12,7 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "PinSurfaceTemperature.h"
+#include "SCMPinSurfaceTemperature.h"
 #include "SolutionHandle.h"
 #include "FEProblemBase.h"
 #include "Function.h"
@@ -21,10 +21,10 @@
 #include "SubProblem.h"
 #include "libmesh/system.h"
 
-registerMooseObject("SubChannelApp", PinSurfaceTemperature);
+registerMooseObject("SubChannelApp", SCMPinSurfaceTemperature);
 
 InputParameters
-PinSurfaceTemperature::validParams()
+SCMPinSurfaceTemperature::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription(
@@ -34,7 +34,7 @@ PinSurfaceTemperature::validParams()
   return params;
 }
 
-PinSurfaceTemperature::PinSurfaceTemperature(const InputParameters & parameters)
+SCMPinSurfaceTemperature::SCMPinSurfaceTemperature(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(libMesh::cast_ref<SubChannelMesh &>(_fe_problem.mesh())),
     _height(getParam<Real>("height")),
@@ -42,13 +42,14 @@ PinSurfaceTemperature::PinSurfaceTemperature(const InputParameters & parameters)
     _value(0)
 {
   if (!_mesh.pinMeshExist())
-    mooseError(name(),
-               " : The PinSurfaceTemperature post processor calculates temperature on pins. A Pin "
-               "Mesh should be defined.");
+    mooseError(
+        name(),
+        " : The SCMPinSurfaceTemperature post processor calculates temperature on pins. A Pin "
+        "Mesh should be defined.");
 }
 
 void
-PinSurfaceTemperature::execute()
+SCMPinSurfaceTemperature::execute()
 {
   auto Tpin_soln = SolutionHandle(_fe_problem.getVariable(0, "Tpin"));
   auto nz = _mesh.getNumOfAxialCells();
@@ -78,7 +79,7 @@ PinSurfaceTemperature::execute()
 }
 
 Real
-PinSurfaceTemperature::getValue() const
+SCMPinSurfaceTemperature::getValue() const
 {
   return _value;
 }

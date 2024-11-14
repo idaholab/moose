@@ -19,7 +19,7 @@ height = 1.0
     pin_type = 1
     pitch = 0.012
     num_sectors = 4
-    region_ids='1 2 3 4'
+    region_ids = '1 2 3 4'
     ring_radii = '${fparse pin_diameter/2}
                   ${fparse pin_diameter/2 + 1e-5}
                   ${fparse pin_diameter/2 + 2e-5}'
@@ -64,7 +64,6 @@ height = 1.0
     old_block = '1'
     new_block = 'fuel_pin'
   []
-
 []
 
 [Functions]
@@ -94,7 +93,7 @@ height = 1.0
 
 [AuxKernels]
   [QPrime]
-    type = RZQPrimeAuxPin
+    type = SCMRZPinQPrimeAux
     diffusivity = 'thermal_conductivity'
     variable = q_prime_pin
     diffusion_variable = temperature
