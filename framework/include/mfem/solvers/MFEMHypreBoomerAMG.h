@@ -20,5 +20,6 @@ protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
+  std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
   std::shared_ptr<mfem::HypreBoomerAMG> _solver{nullptr};
 };
