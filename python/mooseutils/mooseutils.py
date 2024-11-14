@@ -234,7 +234,7 @@ def check_configuration(packages, message=True):
         if re_operators.findall(_package):
             try:
                 _op = re_operators.findall(_package)[0]
-                (_package, _operator, _version) = re.findall(f'([.\w_-]+)([{_op}]+)(.*)',
+                (_package, _operator, _version) = re.findall(fr'([.\w_-]+)([{_op}]+)(.*)',
                                                              _package)[0]
             # Try and capture possible regex issues
             except IndexError:

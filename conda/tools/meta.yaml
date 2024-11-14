@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.10.01" %}
+{% set version = "2024.11.13" %}
 
 package:
   name: moose-tools
@@ -23,11 +23,15 @@ requirements:
     - {{ moose_python }}
     - setuptools
   run:
+    # NOTE: If you are here to add a Python package in order to make the TestHarness or
+    #       versioner.py work, you also have to add that package in mpi/meta.yaml, under
+    #       moose-python. This allows folks that build their own PETSc, libMesh, WASP,
+    #       etc combos, to continue to do so with only needing the moose-mpi package.
     - beautifulsoup4
     - {{ clang_format }}
     - clang-tools
     - deepdiff
-    - git-lfs
+    - git-lfs <3.5.1
     - gitpython
     - graphviz
     - h5py
@@ -56,7 +60,7 @@ requirements:
     - sympy
     - tabulate
     - uncertainties
-    - xmltodict
+    - xmltodict <0.14
     - yaml
 test:
   commands:

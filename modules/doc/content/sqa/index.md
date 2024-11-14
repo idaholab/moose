@@ -38,6 +38,7 @@ this version of the documentation is available at the following links:
 
 The documentation for the SQA releases can be found using the following links:
 
+- [2024-11-11](https://mooseframework.inl.gov/releases/moose/2024-11-11/)
 - [2024-03-08](https://mooseframework.inl.gov/releases/moose/2024-03-08/)
 - [2022-06-13](https://mooseframework.inl.gov/releases/moose/2022-06-13)
 - [2022-06-10](https://mooseframework.inl.gvo/releases/moose/2022-06-10)

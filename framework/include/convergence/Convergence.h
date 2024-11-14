@@ -46,7 +46,19 @@ public:
    */
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) = 0;
 
+  /// Returns whether verbose mode has been enabled
+  bool verbose() const { return _verbose; }
+
 protected:
+  /**
+   * Outputs the stream to the console if verbose output is enabled
+   */
+  void verboseOutput(std::ostringstream & oss);
+
   /// Performance ID for \c checkConvergence
   PerfID _perfid_check_convergence;
+
+private:
+  /// Verbose mode enabled
+  const bool _verbose;
 };

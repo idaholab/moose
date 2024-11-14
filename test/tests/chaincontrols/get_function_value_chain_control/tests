@@ -1,0 +1,10 @@
+[Tests]
+  design = 'GetFunctionValueChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'get_function_value_chain_control.i'
+    csvdiff = 'get_function_value_chain_control_out.csv'
+    requirement = 'The system shall be able to get function values into the chain control system.'
+  []
+[]

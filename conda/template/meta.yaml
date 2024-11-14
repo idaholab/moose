@@ -8,7 +8,8 @@ package:
   version: {{ version }}
 
 source:
-  path: <REPO>
+  - path: <REPO>
+  - path: retry_build.sh
 
 build:
   number: 0

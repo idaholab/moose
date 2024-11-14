@@ -1,4 +1,4 @@
-{% set version = "2022.12.05" %}
+{% set version = "2024.11.13" %}
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 
@@ -7,8 +7,8 @@ package:
   version: {{ version }}
 
 source:
-  path:
-    ../pprof
+  - path: ../pprof
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}
@@ -30,7 +30,6 @@ requirements:
     - gperftools
     - graphviz
     - perl
-    - setuptools <60
 
 test:
   commands:

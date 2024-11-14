@@ -41,7 +41,7 @@ class JSONDiff(SchemaDiff):
         for entry in self.specs['ignored_regex_items']:
             re_entry = 'root'
             for key in entry.split('/'):
-                re_entry += f"\['{key}'\]"
+                re_entry += fr"\['{key}'\]"
             self.exclude_regex_paths.append(re_entry)
 
     def load_file(self, path1):

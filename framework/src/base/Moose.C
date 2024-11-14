@@ -200,6 +200,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_output",                   Output,                    false);
 
   registerMooseObjectTask("add_control",                  Control,                   false);
+  registerMooseObjectTask("add_chain_control",            ChainControl,              false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,          false);
 
   // clang-format on
@@ -280,6 +281,8 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_complete", false);
 
   registerTask("add_default_convergence", true);
+
+  registerTask("chain_control_setup", true);
 
   // Action for setting up the signal-based checkpoint
   registerTask("auto_checkpoint_action", true);
@@ -396,7 +399,8 @@ addActionTypes(Syntax & syntax)
                            "(coupling_functor_check)"
                            "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
-                           "(add_control)"
+                           "(add_control, add_chain_control)"
+                           "(chain_control_setup)"
                            "(check_output)"
                            "(check_integrity)"
                            "(create_application_block)");
@@ -605,6 +609,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddConstraintAction", "Constraints/*");
 
   registerSyntax("AddControlAction", "Controls/*");
+  registerSyntax("AddChainControlAction", "ChainControls/*");
   registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
 

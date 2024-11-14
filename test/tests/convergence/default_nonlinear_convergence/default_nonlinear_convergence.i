@@ -53,6 +53,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'hypre'
   nonlinear_convergence = res_conv
+  verbose = true
 []
 
 [Outputs]

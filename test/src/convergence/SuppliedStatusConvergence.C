@@ -39,17 +39,26 @@ SuppliedStatusConvergence::checkConvergenceInner(unsigned int iter)
   if (iter > _convergence_statuses.size() - 1)
     mooseError("Iteration index greater than last index of 'convergence_statuses'.");
 
+  std::ostringstream oss;
   switch (_convergence_statuses[iter])
   {
     case -1:
+    {
+      oss << "Diverged as specified.";
+      verboseOutput(oss);
       return MooseConvergenceStatus::DIVERGED;
       break;
+    }
     case 0:
       return MooseConvergenceStatus::ITERATING;
       break;
     case 1:
+    {
+      oss << "Converged as specified.";
+      verboseOutput(oss);
       return MooseConvergenceStatus::CONVERGED;
       break;
+    }
     default:
       mooseError("Invalid status integer in 'convergence_statuses'. Valid values are: -1 for "
                  "diverged, 0 for iterating, and 1 for converged.");

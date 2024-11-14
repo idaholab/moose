@@ -83,7 +83,7 @@ class Parser:
                 if params.type(key) == list:
                     if isinstance(value, str):
                         value = value.replace('\n', ' ')
-                        params[key] = re.split('\s+', value)
+                        params[key] = re.split(r'\s+', value)
                     else:
                         params[key] = [str(value)]
                 else:

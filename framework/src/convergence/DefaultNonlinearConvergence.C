@@ -245,6 +245,8 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
     ierr = PetscInfo(snes, msg.c_str());
 #endif
 
+  verboseOutput(oss);
+
   return status;
 }
 

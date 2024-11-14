@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.10.01" %}
+{% set version = "2024.11.13" %}
 
 # HDF5 Version
 {% set hdf5_version = "1.14.2" %}
@@ -45,8 +45,10 @@ outputs:
         - {{ moose_gfortran }}
         - {{ moose_libzlib }}
         - {{ moose_libcxx }}
-        - {{ moose_clangcc }}                     # [osx]
-        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
+        - {{ moose_ccompiler }}
+        - {{ moose_cxxcompiler }}
         - {{ moose_clang_osx }}                   # [osx]
         - {{ moose_compiler_rt }}                 # [osx]
         - {{ moose_libclang }}                    # [osx]
@@ -55,8 +57,6 @@ outputs:
         - {{ moose_llvm_openmp }}                 # [osx]
         - {{ moose_gcc_impl }}                    # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_gcc }}                         # [linux]
-        - {{ moose_gxx }}                         # [linux]
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
@@ -70,8 +70,10 @@ outputs:
         - {{ moose_gfortran }}
         - {{ moose_libzlib }}
         - {{ moose_libcxx }}
-        - {{ moose_clangcc }}                     # [osx]
-        - {{ moose_clangxx }}                     # [osx]
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
+        - {{ moose_ccompiler }}
+        - {{ moose_cxxcompiler }}
         - {{ moose_clang_osx }}                   # [osx]
         - {{ moose_compiler_rt }}                 # [osx]
         - {{ moose_libclang }}                    # [osx]
@@ -80,8 +82,6 @@ outputs:
         - {{ moose_llvm_openmp }}                 # [osx]
         - {{ moose_gcc_impl }}                    # [linux]
         - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_gcc }}                         # [linux]
-        - {{ moose_gxx }}                         # [linux]
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
@@ -89,7 +89,7 @@ outputs:
         - automake 1.16.5
         - libexpat 2.5.0
         - bison 3.4
-        - zfp 0.5.5
+        - zfp
         - autoconf
         - libtool
         - cmake
@@ -97,20 +97,22 @@ outputs:
         - zlib
         - m4
       run_constrained:
-        - python >=3.8,<3.12
+        - python >=3.9,<3.12
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
         - test -f $PREFIX/etc/conda/deactivate.d/deactivate_zzz_moose-mpi-base.sh
 
   # Default Python packages installed, with constrained Python versioning. These
-  # packages are what is required to build and pass moose/tests
+  # packages are what is required to build and pass moose/tests. Note: testing is
+  # being handled in the moose-mpi package below, making sure everything is tied
+  # together.
   - name: moose-python
     requirements:
       run:
-        - {{ pin_subpackage("moose-mpi-base", exact=True) }}
-        - python >=3.8,<3.12
+        - python >=3.9,<3.12
         - packaging
+        - paramiko
         - requests
         - jinja2
         - pyaml
@@ -129,6 +131,17 @@ outputs:
       run:
         - {{ pin_subpackage("moose-mpi-base", exact=True) }}
         - {{ pin_subpackage("moose-python", exact=True) }}
+    test:
+      commands:
+        - cmake --version
+        - bison --version
+        - flex --version
+      imports:
+        - packaging
+        - paramiko
+        - requests
+        - jinja2
+        - yaml
 
 about:
   home: https://mooseframework.org/
@@ -142,3 +155,4 @@ extra:
   recipe-maintainers:
     - milljm
     - cticenhour
+

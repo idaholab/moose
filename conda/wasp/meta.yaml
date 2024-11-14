@@ -1,11 +1,10 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   moose-dev/*
-#   pyhit/*
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.05.08" %}
+{% set version = "2024.11.13" %}
 
 package:
   name: moose-wasp
@@ -14,25 +13,79 @@ package:
 source:
   - path: ../../framework/contrib/wasp
   - path: ../../scripts/configure_wasp.sh
+  - path: ../pyhit
+  - path: ../../python/moosetree
+    folder: pyhit/moosetree
+  - path: ../../python/mooseutils/message.py
+    folder: pyhit/mooseutils/message.py
+  - path: ../../python/mooseutils/mooseutils.py
+    folder: pyhit/mooseutils/mooseutils.py
+  - path: ../../framework/contrib/hit
+    folder: src
+  - path: ../../python/pyhit/pyhit.py
+    folder: pyhit
+  - path: ../functions/retry_build.sh
+  - patches:
+      - pyhit.patch
 
 build:
   number: 0
   string: build_0
-  skip: true  # [win]
-  script_env:
-    - MOOSE_JOBS
-    - REQUESTS_CA_BUNDLE
-    - SSL_CERT_FILE
-  run_exports:
-    - {{ pin_subpackage('moose-wasp', max_pin='x.x')}}
 
-requirements:
-  build:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
-    - make
-    - cmake
-    - pkg-config
+outputs:
+  - name: moose-wasp-base
+    build:
+      number: 0
+      string: build_0
+      script: ${RECIPE_DIR}/build_wasp.sh
+      script_env:
+        - MOOSE_JOBS
+        - REQUESTS_CA_BUNDLE
+        - SSL_CERT_FILE
+      run_exports:
+        - {{ pin_subpackage('moose-wasp-base', max_pin='x.x')}}
+    requirements:
+      build:
+        - {{ moose_cc }}
+        - {{ moose_cxx }}
+        - {{ moose_ccompiler }}
+        - {{ moose_cxxcompiler }}
+        - make
+        - cmake
+        - pkg-config
+
+  - name: moose-pyhit
+    build:
+      number: 0
+      script: ${RECIPE_DIR}/build_pyhit.sh
+      script_env:
+        - MOOSE_JOBS
+        - REQUESTS_CA_BUNDLE
+        - SSL_CERT_FILE
+      run_exports:
+        - {{ pin_subpackage('moose-pyhit', max_pin='x.x')}}
+    requirements:
+      build:
+        - {{ moose_cxxcompiler }}
+        - {{ moose_python }}
+        - {{ pin_subpackage("moose-wasp-base", exact=True) }}
+        - make
+        - cython
+        - setuptools
+      host:
+        - {{ moose_python }}
+      run:
+        - {{ moose_python }}
+        - {{ pin_subpackage("moose-wasp-base", exact=True) }}
+    test:
+      imports:
+        - pyhit
+
+  - name: moose-wasp
+    requirements:
+      build: []
+      run:
+        - {{ pin_subpackage('moose-wasp-base', exact=True)}}
 
 about:
   home: https://code.ornl.gov/neams-workbench/wasp
