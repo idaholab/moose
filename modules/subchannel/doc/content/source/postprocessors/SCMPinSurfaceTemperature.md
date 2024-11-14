@@ -1,6 +1,6 @@
-# PinSurfaceTemperature
+# SCMPinSurfaceTemperature
 
-!syntax description /Postprocessors/PinSurfaceTemperature
+!syntax description /Postprocessors/SCMPinSurfaceTemperature
 
 ## Overview
 
@@ -13,14 +13,14 @@ The assumption is that each neighboring subchannel to a specific pin sees the sa
 Using the `Dittus-Boelter` approach we calculate surface temperatures for each neighbor. The numerical
 average is `Tpin`.
 
-Then, the postprocessor interpolates the value of the variable `Tpin` at a certain pin [!param](/Postprocessors/PinSurfaceTemperature/index) and [!param](/Postprocessors/PinSurfaceTemperature/height).
+Then, the postprocessor interpolates the value of the variable `Tpin` at a certain pin [!param](/Postprocessors/SCMPinSurfaceTemperature/index) and [!param](/Postprocessors/SCMPinSurfaceTemperature/height).
 
 ## Example Input File Syntax
 
 !listing /test/tests/problems/SFR/sodium-19pin/test19_monolithic.i block=Postprocessors language=cpp
 
-!syntax parameters /Postprocessors/PinSurfaceTemperature
+!syntax parameters /Postprocessors/SCMPinSurfaceTemperature
 
-!syntax inputs /Postprocessors/PinSurfaceTemperature
+!syntax inputs /Postprocessors/SCMPinSurfaceTemperature
 
-!syntax children /Postprocessors/PinSurfaceTemperature
+!syntax children /Postprocessors/SCMPinSurfaceTemperature

@@ -1,13 +1,13 @@
 # a wrapper mesh for coupling to subchannel
 
 # sqrt(3) / 2 is by how much flat to flat is smaller than corer to corner
-f = ${fparse sqrt(3) / 2}
+f = '${fparse sqrt(3) / 2}'
 
 # units are meters
 height = 1.0
 duct_inside = 0.085
 wrapper_thickness = 0.002
-duct_outside = ${fparse duct_inside + 2 * wrapper_thickness}
+duct_outside = '${fparse duct_inside + 2 * wrapper_thickness}'
 
 # number of radial elements in the wrapper
 n_radial = 4
@@ -36,7 +36,7 @@ T_in = 660
     background_intervals = 1
     background_block_ids = '1'
     # note that polygon_size is "like radius"
-    polygon_size = ${fparse duct_outside / 2}
+    polygon_size = '${fparse duct_outside / 2}'
     duct_sizes = '${fparse duct_inside / 2 / f}'
     duct_intervals = '${n_radial}'
     duct_block_ids = '2'
@@ -116,16 +116,22 @@ T_in = 660
   []
 []
 
-[Modules/TensorMechanics/Master]
-  add_variables = true
-  strain = SMALL
-  incremental = true
-  generate_output = 'stress_xx stress_yy stress_xy'
-  temperature = temperature
+[Modules]
 
-  [block0]
-    eigenstrain_names = eigenstrain
-    block = wrapper
+  [TensorMechanics]
+
+    [Master]
+      add_variables = true
+      strain = SMALL
+      incremental = true
+      generate_output = 'stress_xx stress_yy stress_xy'
+      temperature = temperature
+
+      [block0]
+        eigenstrain_names = eigenstrain
+        block = wrapper
+      []
+    []
   []
 []
 
@@ -154,9 +160,9 @@ T_in = 660
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeDuctAux
+    type = SCMTriDuctQPrimeAux
     diffusivity = 'thermal_conductivity'
-    flat_to_flat = ${fparse duct_inside}
+    flat_to_flat = '${fparse duct_inside}'
     variable = q_prime
     diffusion_variable = temperature
     component = normal
@@ -175,13 +181,13 @@ T_in = 660
 [Materials]
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block =  wrapper
+    block = wrapper
     bulk_modulus = 0.333333333333e6
     poissons_ratio = 0.0
   []
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
-    block =  wrapper
+    block = wrapper
     temperature = temperature
     stress_free_temperature = ${T_in}
     thermal_expansion_coeff = 1e-5
@@ -194,11 +200,11 @@ T_in = 660
   [heat_conductor]
     type = HeatConductionMaterial
     thermal_conductivity = 1.0
-    block =  wrapper
+    block = wrapper
   []
   [density]
     type = Density
-    block =  wrapper
+    block = wrapper
     density = 1.0
   []
 []
@@ -219,7 +225,7 @@ T_in = 660
     type = DirichletBC
     variable = temperature
     boundary = 'outside'
-    value = ${fparse T_in+10}
+    value = '${fparse T_in+10}'
   []
 
   [no_x]

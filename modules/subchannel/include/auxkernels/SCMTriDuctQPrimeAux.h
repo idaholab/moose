@@ -14,25 +14,21 @@
 
 #pragma once
 
-#include "GeneralPostprocessor.h"
-#include "SubChannelMesh.h"
+#include "DiffusionFluxAux.h"
 
 /**
- * Returns the surface temperature of a specific fuel pin at a user defined height
+ * Computes linear heat rate
  */
-class PinSurfaceTemperature : public GeneralPostprocessor
+class SCMTriDuctQPrimeAux : public DiffusionFluxAux
 {
 public:
   static InputParameters validParams();
-  PinSurfaceTemperature(const InputParameters & params);
-  virtual void initialize() override {}
-  virtual void execute() override;
-  virtual void finalize() override {}
-  virtual Real getValue() const override;
+
+  SCMTriDuctQPrimeAux(const InputParameters & parameters);
+
+  virtual Real computeValue() override;
 
 protected:
-  SubChannelMesh & _mesh;
-  const Real & _height;
-  const int & _i_pin;
-  Real _value;
+  /// flat-to-flat distance
+  const Real & _flat_to_flat;
 };

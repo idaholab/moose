@@ -1,12 +1,12 @@
-# RZQPrimeAuxPin
+# SCMRZPinQPrimeAux
 
-!syntax description /AuxKernels/RZQPrimeAuxPin
+!syntax description /AuxKernels/SCMRZPinQPrimeAux
 
 ## Description
 
 <!-- -->
 
-The `RZQPrimeAuxPin` AuxKernel is used to compute the linear heat rate (w/m) on the surface of a fuel pin that is modeled with a 2D-RZ axi-symmetric mesh.
+The `SCMRZPinQPrimeAux` AuxKernel is used to compute the linear heat rate (w/m) on the surface of a fuel pin that is modeled with a 2D-RZ axi-symmetric mesh.
 It's a kernel that inherits from `DiffusionFluxAux` to calculate the flux, but in addition it multiplies with the pin diameter. The user needs to provide the
 diffusion coefficient and the temperature variable.
 
@@ -14,8 +14,8 @@ diffusion coefficient and the temperature variable.
 
 !listing /examples/coupling/1pinSquare_thermomech_SCM/one_pin_problem_sub.i block=AuxKernels language=cpp
 
-!syntax parameters /AuxKernels/RZQPrimeAuxPin
+!syntax parameters /AuxKernels/SCMRZPinQPrimeAux
 
-!syntax inputs /AuxKernels/RZQPrimeAuxPin
+!syntax inputs /AuxKernels/SCMRZPinQPrimeAux
 
-!syntax children /AuxKernels/RZQPrimeAuxPin
+!syntax children /AuxKernels/SCMRZPinQPrimeAux

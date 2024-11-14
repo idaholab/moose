@@ -12,23 +12,26 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#pragma once
+#include "SCMTriDuctQPrimeFVAux.h"
 
-#include "DiffusionFluxFVAux.h"
+registerMooseObject("MooseApp", SCMTriDuctQPrimeFVAux);
 
-/**
- * Computes linear heat rate
- */
-class QPrimeDuctFVAux : public DiffusionFluxFVAux
+InputParameters
+SCMTriDuctQPrimeFVAux::validParams()
 {
-public:
-  static InputParameters validParams();
+  InputParameters params = DiffusionFluxFVAux::validParams();
+  params.addClassDescription("Axial heat rate on duct surface");
+  params.addRequiredParam<Real>("flat_to_flat", "[m]");
+  return params;
+}
 
-  QPrimeDuctFVAux(const InputParameters & parameters);
+SCMTriDuctQPrimeFVAux::SCMTriDuctQPrimeFVAux(const InputParameters & parameters)
+  : DiffusionFluxFVAux(parameters), _flat_to_flat(getParam<Real>("flat_to_flat"))
+{
+}
 
-  virtual Real computeValue() override;
-
-protected:
-  /// flat-to-flat distance
-  const Real & _flat_to_flat;
-};
+Real
+SCMTriDuctQPrimeFVAux::computeValue()
+{
+  return DiffusionFluxFVAux::computeValue() * 6 * _flat_to_flat / std::sqrt(3);
+}

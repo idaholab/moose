@@ -202,7 +202,7 @@ P_out = 4.923e6 # Pa
 
 [Postprocessors]
   [PinTemp]
-    type = PinSurfaceTemperature
+    type = SCMPinSurfaceTemperature
     index = 10
     height = 0.5
   []

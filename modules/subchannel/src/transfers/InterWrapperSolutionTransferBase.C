@@ -12,14 +12,14 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "MultiAppInterWrapperSolutionTransferBase.h"
+#include "InterWrapperSolutionTransferBase.h"
 #include "MultiApp.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "InterWrapperMesh.h"
 
 InputParameters
-MultiAppInterWrapperSolutionTransferBase::validParams()
+InterWrapperSolutionTransferBase::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<std::vector<AuxVariableName>>("variable",
@@ -27,7 +27,7 @@ MultiAppInterWrapperSolutionTransferBase::validParams()
   return params;
 }
 
-MultiAppInterWrapperSolutionTransferBase::MultiAppInterWrapperSolutionTransferBase(
+InterWrapperSolutionTransferBase::InterWrapperSolutionTransferBase(
     const InputParameters & parameters)
   : MultiAppTransfer(parameters), _var_names(getParam<std::vector<AuxVariableName>>("variable"))
 {
@@ -36,7 +36,7 @@ MultiAppInterWrapperSolutionTransferBase::MultiAppInterWrapperSolutionTransferBa
 }
 
 void
-MultiAppInterWrapperSolutionTransferBase::execute()
+InterWrapperSolutionTransferBase::execute()
 {
   getAppInfo();
 
@@ -52,7 +52,7 @@ MultiAppInterWrapperSolutionTransferBase::execute()
 }
 
 void
-MultiAppInterWrapperSolutionTransferBase::transferToMultiApps()
+InterWrapperSolutionTransferBase::transferToMultiApps()
 {
   mooseAssert(_from_meshes.size() == 1, "Only one master mesh can be active in this transfer.");
   if (dynamic_cast<InterWrapperMesh *>(_from_meshes[0]) == nullptr)
@@ -64,13 +64,13 @@ MultiAppInterWrapperSolutionTransferBase::transferToMultiApps()
 }
 
 void
-MultiAppInterWrapperSolutionTransferBase::transferVarsToApp(unsigned int app_idx)
+InterWrapperSolutionTransferBase::transferVarsToApp(unsigned int app_idx)
 {
   transferNodalVars(app_idx);
 }
 
 void
-MultiAppInterWrapperSolutionTransferBase::transferNodalVars(unsigned int app_idx)
+InterWrapperSolutionTransferBase::transferNodalVars(unsigned int app_idx)
 {
   Moose::ScopedCommSwapper swapper(_multi_app->comm());
 

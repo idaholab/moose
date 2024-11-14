@@ -16,15 +16,15 @@
 
 #include "MultiAppTransfer.h"
 
-class InterWrapperMesh;
+class SubChannelMesh;
 
 /**
  * Base class for transfering solutions from computational mesh onto visualization mesh
  */
-class MultiAppInterWrapperSolutionTransferBase : public MultiAppTransfer
+class SCMSolutionTransferBase : public MultiAppTransfer
 {
 public:
-  MultiAppInterWrapperSolutionTransferBase(const InputParameters & parameters);
+  SCMSolutionTransferBase(const InputParameters & parameters);
 
   virtual void execute() override;
 
@@ -50,7 +50,7 @@ protected:
    * @param from_mesh Computational mesh
    * @param src_node Node from the visualization
    */
-  virtual Node * getFromNode(const InterWrapperMesh & from_mesh, const Point & src_node) = 0;
+  virtual Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node) = 0;
 
   /// Variable names to transfer
   const std::vector<AuxVariableName> & _var_names;

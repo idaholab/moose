@@ -6,14 +6,14 @@ clad_bot_gap_height = 0.00127
 clad_gap_width = 0.00009
 clad_thickness = 0.00057
 top_bot_clad_height = 0.00224
-pellet_outer_radius = ${fparse pin_diameter/2.0 - clad_gap_width - clad_thickness}
-pellet_height = ${fparse heated_length -  clad_top_gap_height - clad_bot_gap_height - 2.0 * top_bot_clad_height}
+pellet_outer_radius = '${fparse pin_diameter/2.0 - clad_gap_width - clad_thickness}'
+pellet_height = '${fparse heated_length -  clad_top_gap_height - clad_bot_gap_height - 2.0 * top_bot_clad_height}'
 full_pin_power = 66600 #W
 pin_factor = 0.7
-pin_power = ${fparse full_pin_power * pin_factor}
+pin_power = '${fparse full_pin_power * pin_factor}'
 T_in = 560.15
-y_location = ${fparse 1.5 * pitch}
-DY = ${fparse y_location + clad_bot_gap_height + top_bot_clad_height}
+y_location = '${fparse 1.5 * pitch}'
+DY = '${fparse y_location + clad_bot_gap_height + top_bot_clad_height}'
 
 [Mesh]
   second_order = true
@@ -24,13 +24,13 @@ DY = ${fparse y_location + clad_bot_gap_height + top_bot_clad_height}
     top_bot_clad_height = ${top_bot_clad_height}
     clad_gap_width = ${clad_gap_width}
     clad_thickness = ${clad_thickness}
-    ny_c =  98
-    ny_p =  98
+    ny_c = 98
+    ny_p = 98
     nx_c = 4
     nx_p = 12
-    pellet_height = ${fparse pellet_height}
+    pellet_height = '${fparse pellet_height}'
     pellet_quantity = 1
-    pellet_outer_radius =${pellet_outer_radius}
+    pellet_outer_radius = ${pellet_outer_radius}
     pellet_mesh_density = customize
     clad_mesh_density = customize
   []
@@ -70,7 +70,7 @@ DY = ${fparse y_location + clad_bot_gap_height + top_bot_clad_height}
 
 [AuxKernels]
   [QPrime]
-    type = RZQPrimeAuxPin
+    type = SCMRZPinQPrimeAux
     diffusivity = 'thermal_conductivity'
     variable = q_prime
     diffusion_variable = temperature
@@ -107,7 +107,7 @@ DY = ${fparse y_location + clad_bot_gap_height + top_bot_clad_height}
 []
 
 [Materials]
-  [fuel_thermal]  # temperature and burnup dependent thermal properties of UO2 (BISON kernel)
+  [fuel_thermal] # temperature and burnup dependent thermal properties of UO2 (BISON kernel)
     type = UO2Thermal
     block = pellet
     thermal_conductivity_model = NFIR
