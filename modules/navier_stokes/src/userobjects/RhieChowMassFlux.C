@@ -322,6 +322,19 @@ RhieChowMassFlux::computeCellVelocity()
 }
 
 void
+RhieChowMassFlux::initCouplingField()
+{
+  // We loop through the faces and populate the coupling fields (face H/A and 1/H)
+  // with 0s for now. Pressure corrector solves will always come after the
+  // momentum source so we expect these fields to change before the actual solve.
+  for (auto & fi : _fe_problem.mesh().faceInfo())
+  {
+    _Ainv[fi->id()];
+    _HbyA_flux[fi->id()];
+  }
+}
+
+void
 RhieChowMassFlux::populateCouplingFunctors(
     const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
     const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv)

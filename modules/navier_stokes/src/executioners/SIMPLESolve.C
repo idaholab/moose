@@ -45,6 +45,7 @@ SIMPLESolve::linkRhieChowUserObject()
 
   // Initialize the face velocities in the RC object
   _rc_uo->initFaceMassFlux();
+  _rc_uo->initCouplingField();
 }
 
 std::vector<std::pair<unsigned int, Real>>
@@ -78,9 +79,6 @@ SIMPLESolve::solveMomentumPredictor()
     SparseMatrix<Number> & mmat = *(momentum_system.matrix);
 
     auto diff_diagonal = solution.zero_clone();
-
-    mmat.zero();
-    rhs.zero();
 
     // We plug zero in this to get the system matrix and the right hand side of the linear problem
     _problem.computeLinearSystemSys(momentum_system, mmat, rhs);
@@ -150,9 +148,6 @@ SIMPLESolve::solvePressureCorrector()
   SparseMatrix<Number> & mmat = *(pressure_system.matrix);
   NumericVector<Number> & rhs = *(pressure_system.rhs);
 
-  mmat.zero();
-  rhs.zero();
-
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =
       libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
@@ -213,9 +208,6 @@ SIMPLESolve::solveAdvectedSystem(const unsigned int system_num,
   NumericVector<Number> & solution = *(li_system.solution);
   SparseMatrix<Number> & mmat = *(li_system.matrix);
   NumericVector<Number> & rhs = *(li_system.rhs);
-
-  mmat.zero();
-  rhs.zero();
 
   // We need a vector that stores the (diagonal_relaxed-original_diagonal) vector
   auto diff_diagonal = solution.zero_clone();

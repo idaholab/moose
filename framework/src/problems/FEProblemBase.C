@@ -6636,7 +6636,6 @@ FEProblemBase::computeResidualL2Norm(LinearSystem & sys)
 
   // Unfortunate, but we have to allocate a new vector for the residual
   auto residual = sys.linearImplicitSystem().rhs->clone();
-  // Residual will be r = Ax-b in this case
   residual->scale(-1.0);
   residual->add_vector(*sys.currentSolution(), *sys.linearImplicitSystem().matrix);
   return residual->l2_norm();

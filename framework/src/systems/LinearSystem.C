@@ -180,6 +180,10 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 {
   TIME_SECTION("computeLinearSystemInternal", 3);
 
+  // Before we assemble we clear up the mmatrix and the vector
+  _linear_implicit_system.matrix->zero();
+  _linear_implicit_system.rhs->zero();
+
   // Make matrix ready to use
   activeAllMatrixTags();
 

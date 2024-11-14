@@ -49,6 +49,8 @@ public:
 
   /// Initialize the container for face velocities
   void initFaceMassFlux();
+  /// Initialize the coupling fields (HbyA and Ainv)
+  void initCouplingField();
   /// Update the values of the face velocities in the containers
   void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
