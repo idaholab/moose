@@ -52,17 +52,37 @@ protected:
   /// the pressure equation.
   std::pair<unsigned int, Real> solvePressureCorrector();
 
+  /// Solve an equation which contains an advection term that depends
+  /// on the solution of the segregated Navier-Stokes equations.
+  /// @param system_num The number of the system which is solved
+  /// @param system Reference to the system which is solved
+  /// @param relaxation_factor The relaxation factor for matrix relaxation
+  /// @param solver_config The solver configuration object for the linear solve
+  /// @param abs_tol The scaled absolute tolerance for the linear solve
+  /// @return The normalized residual norm of the equation.
+  std::pair<unsigned int, Real> solveAdvectedSystem(const unsigned int system_num,
+                                                    LinearSystem & system,
+                                                    const Real relaxation_factor,
+                                                    SolverConfiguration & solver_config,
+                                                    const Real abs_tol);
+
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;
 
   /// The number of the system corresponding to the pressure equation
   const unsigned int _pressure_sys_number;
 
+  /// The number of the system corresponding to the energy equation
+  const unsigned int _energy_sys_number;
+
   /// Pointer(s) to the system(s) corresponding to the momentum equation(s)
   std::vector<LinearSystem *> _momentum_systems;
 
   /// Reference to the nonlinear system corresponding to the pressure equation
   LinearSystem & _pressure_system;
+
+  /// Pointer to the nonlinear system corresponding to the fluid energy equation
+  LinearSystem * _energy_system;
 
   /// Pointer to the segregated RhieChow interpolation object
   RhieChowMassFlux * _rc_uo;

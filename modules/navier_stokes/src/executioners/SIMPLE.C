@@ -35,16 +35,11 @@ SIMPLE::validParams()
   /*
    * We suppress parameters which are not supported yet
    */
-  params.suppressParameter<SolverSystemName>("energy_system");
   params.suppressParameter<SolverSystemName>("solid_energy_system");
   params.suppressParameter<std::vector<SolverSystemName>>("passive_scalar_systems");
   params.suppressParameter<std::vector<SolverSystemName>>("turbulence_systems");
-  params.suppressParameter<Real>("energy_equation_relaxation");
   params.suppressParameter<std::vector<Real>>("passive_scalar_equation_relaxation");
   params.suppressParameter<std::vector<Real>>("turbulence_equation_relaxation");
-  params.suppressParameter<MultiMooseEnum>("energy_petsc_options");
-  params.suppressParameter<MultiMooseEnum>("energy_petsc_options_iname");
-  params.suppressParameter<std::vector<std::string>>("energy_petsc_options_value");
   params.suppressParameter<MultiMooseEnum>("solid_energy_petsc_options");
   params.suppressParameter<MultiMooseEnum>("solid_energy_petsc_options_iname");
   params.suppressParameter<std::vector<std::string>>("solid_energy_petsc_options_value");
@@ -54,13 +49,9 @@ SIMPLE::validParams()
   params.suppressParameter<MultiMooseEnum>("turbulence_petsc_options");
   params.suppressParameter<MultiMooseEnum>("turbulence_petsc_options_iname");
   params.suppressParameter<std::vector<std::string>>("turbulence_petsc_options_value");
-  params.suppressParameter<Real>("energy_absolute_tolerance");
   params.suppressParameter<Real>("solid_energy_absolute_tolerance");
   params.suppressParameter<std::vector<Real>>("passive_scalar_absolute_tolerance");
   params.suppressParameter<std::vector<Real>>("turbulence_absolute_tolerance");
-  params.suppressParameter<Real>("energy_l_tol");
-  params.suppressParameter<Real>("energy_l_abs_tol");
-  params.suppressParameter<unsigned int>("energy_l_max_its");
   params.suppressParameter<Real>("solid_energy_l_tol");
   params.suppressParameter<Real>("solid_energy_l_abs_tol");
   params.suppressParameter<unsigned int>("solid_energy_l_max_its");
@@ -77,7 +68,11 @@ SIMPLE::validParams()
 SIMPLE::SIMPLE(const InputParameters & parameters)
   : SegregatedSolverBase(parameters),
     _pressure_sys_number(_problem.linearSysNum(getParam<SolverSystemName>("pressure_system"))),
-    _pressure_system(_problem.getLinearSystem(_pressure_sys_number))
+    _energy_sys_number(_has_energy_system
+                           ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
+                           : libMesh::invalid_uint),
+    _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+    _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr)
 {
   // We fetch the system numbers for the momentum components plus add vectors
   // for removing the contribution from the pressure gradient terms.
@@ -253,6 +248,74 @@ SIMPLE::solvePressureCorrector()
   return std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
 }
 
+std::pair<unsigned int, Real>
+SIMPLE::solveAdvectedSystem(const unsigned int system_num,
+                            LinearSystem & system,
+                            const Real relaxation_factor,
+                            SolverConfiguration & solver_config,
+                            const Real absolute_tol)
+{
+  _problem.setCurrentLinearSystem(system_num);
+
+  // We will need some members from the implicit linear system
+  LinearImplicitSystem & li_system = libMesh::cast_ref<LinearImplicitSystem &>(system.system());
+
+  // We will need the solution, the right hand side and the matrix
+  NumericVector<Number> & current_local_solution = *(li_system.current_local_solution);
+  NumericVector<Number> & solution = *(li_system.solution);
+  SparseMatrix<Number> & mmat = *(li_system.matrix);
+  NumericVector<Number> & rhs = *(li_system.rhs);
+
+  mmat.zero();
+  rhs.zero();
+
+  // We need a vector that stores the (diagonal_relaxed-original_diagonal) vector
+  auto diff_diagonal = solution.zero_clone();
+
+  // Fetch the linear solver from the system
+  PetscLinearSolver<Real> & linear_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*li_system.get_linear_solver());
+
+  _problem.computeLinearSystemSys(li_system, mmat, rhs, true);
+
+  // Go and relax the system matrix and the right hand side
+  relaxMatrix(mmat, relaxation_factor, *diff_diagonal);
+  relaxRightHandSide(rhs, solution, *diff_diagonal);
+
+  if (_print_fields)
+  {
+    _console << system.name() << " system matrix" << std::endl;
+    mmat.print();
+  }
+
+  // We compute the normalization factors based on the fluxes
+  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+
+  // We need the non-preconditioned norm to be consistent with the norm factor
+  LIBMESH_CHKERR(KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
+
+  // Setting the linear tolerances and maximum iteration counts
+  solver_config.real_valued_data["abs_tol"] = absolute_tol * norm_factor;
+  linear_solver.set_solver_configuration(solver_config);
+
+  // Solve the system and update current local solution
+  auto its_res_pair = linear_solver.solve(mmat, mmat, solution, rhs);
+  li_system.update();
+
+  if (_print_fields)
+  {
+    _console << " rhs when we solve " << system.name() << std::endl;
+    rhs.print();
+    _console << system.name() << " solution " << std::endl;
+    solution.print();
+    _console << " Norm factor " << norm_factor << std::endl;
+  }
+
+  system.setSolution(current_local_solution);
+
+  return std::make_pair(its_res_pair.first, linear_solver.get_initial_residual() / norm_factor);
+}
+
 void
 SIMPLE::execute()
 {
@@ -307,15 +370,18 @@ SIMPLE::execute()
     unsigned int iteration_counter = 0;
 
     // Assign residuals to general residual vector
-    unsigned int no_systems = _momentum_systems.size() + 1;
+    unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system;
     std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
     std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
     ns_abs_tols.push_back(_pressure_absolute_tolerance);
+    if (_has_energy_system)
+      ns_abs_tols.push_back(_energy_absolute_tolerance);
 
     // Loop until converged or hit the maximum allowed iteration number
     while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
     {
       iteration_counter++;
+      size_t residual_index = 0;
 
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver. In case of a segregated momentum
@@ -360,6 +426,25 @@ SIMPLE::execute()
       // Reconstruct the cell velocity as well to accelerate convergence
       _rc_uo->computeCellVelocity();
 
+      // Update residual index
+      residual_index = momentum_residual.size();
+
+      // If we have an energy equation, solve it here. We assume the material properties in the
+      // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature
+      // outside of the velocity-pressure loop
+      if (_has_energy_system)
+      {
+        // We set the preconditioner/controllable parameters through petsc options. Linear
+        // tolerances will be overridden within the solver.
+        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+        residual_index += 1;
+        ns_residuals[residual_index] = solveAdvectedSystem(_energy_sys_number,
+                                                           *_energy_system,
+                                                           _energy_equation_relaxation,
+                                                           _energy_linear_control,
+                                                           _energy_l_abs_tol);
+      }
+      _problem.execute(EXEC_NONLINEAR);
       // Printing residuals
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
@@ -373,6 +458,15 @@ SIMPLE::execute()
       _console << " Pressure equation: " << COLOR_GREEN
                << ns_residuals[momentum_residual.size()].second << COLOR_DEFAULT
                << " Linear its: " << ns_residuals[momentum_residual.size()].first << std::endl;
+      residual_index = momentum_residual.size();
+
+      if (_has_energy_system)
+      {
+        residual_index += 1;
+        _console << " Energy equation: " << COLOR_GREEN << ns_residuals[residual_index].second
+                 << COLOR_DEFAULT << " Linear its: " << ns_residuals[residual_index].first
+                 << std::endl;
+      }
     }
   }
 
