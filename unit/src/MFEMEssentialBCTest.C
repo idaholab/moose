@@ -51,7 +51,15 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_scalar_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
-  // FIXME: We should actually check this applies the right boundary values...
+
+  // Check the correct boundary values have been applied
+  mfem::Array<int> ess_vdofs_list, ess_vdofs_marker;
+  _scalar_fes.GetEssentialVDofs(essential_bc._bdr_markers, ess_vdofs_marker);
+  _scalar_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
+  for (auto ess_dof : ess_vdofs_list)
+  {
+    EXPECT_EQ(_scalar_gridfunc[ess_dof], bc_params.get<Real>("value"));
+  }
 }
 
 /**
@@ -72,6 +80,8 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_scalar_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
+
   // FIXME: We should actually check this applies the right boundary values...
 }
 
