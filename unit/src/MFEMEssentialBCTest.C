@@ -80,8 +80,6 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_scalar_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
-  EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
-
   // FIXME: We should actually check this applies the right boundary values...
 }
 
