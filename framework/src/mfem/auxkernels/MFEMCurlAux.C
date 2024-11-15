@@ -4,7 +4,7 @@
 registerMooseObject("PlatypusApp", MFEMCurlAux);
 
 /*
-Class to set an auxvariable to be the curl of a variable.
+Class to set an H(div) auxvariable to be the curl of a H(curl) vector variable.
 */
 InputParameters
 MFEMCurlAux::validParams()

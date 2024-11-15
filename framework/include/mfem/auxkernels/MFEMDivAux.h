@@ -3,28 +3,28 @@
 #include "MFEMAuxKernel.h"
 
 /*
-Class to set an H(div) auxvariable to be the curl of a H(curl) vector variable.
+Class to set an L2 auxvariable to be the divergence of a H(div) vector variable.
 */
-class MFEMCurlAux : public MFEMAuxKernel
+class MFEMDivAux : public MFEMAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMCurlAux(const InputParameters & parameters);
+  MFEMDivAux(const InputParameters & parameters);
 
-  virtual ~MFEMCurlAux() = default;
+  virtual ~MFEMDivAux() = default;
 
   // Computes the auxvariable.
   virtual void execute() override;
 
 protected:
-  // Name of source MFEMVariable to take the curl of.
+  // Name of source MFEMVariable to take the divergence of.
   VariableName _source_var_name;
   // Pointer to source gridfunction.
   mfem::ParGridFunction & _source_var;
   // FESpaces
-  mfem::ParFiniteElementSpace & _hcurl_fespace;
   mfem::ParFiniteElementSpace & _hdiv_fespace;
-  // Curl operator
-  mfem::common::ParDiscreteCurlOperator _curl;
+  mfem::ParFiniteElementSpace & _l2_fespace;
+  // Divergence operator
+  mfem::common::ParDiscreteCurlOperator _div;
 };
