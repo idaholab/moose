@@ -43,5 +43,4 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters & parameters)
   {
     _solver->SetElasticityOptions(_mfem_fespace.get());
   }
-  //  void SetStrengthThresh(real_t strength)
 }
