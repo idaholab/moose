@@ -189,6 +189,9 @@ FEProblemSolve::validParams()
       "Convergence object to determine the convergence of the multi-system fixed point iteration. "
       "If unspecified, defaults to checking that every system is converged (based on their own "
       "convergence criterion)");
+  params.addParam<bool>("solve_only_first_system",
+                        false,
+                        "Whether to use the legacy behavior of solving only the first system");
 
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
@@ -212,7 +215,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   : MultiSystemSolveObject(ex),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1),
     _using_multi_sys_fp_iterations(getParam<bool>("multi_system_fixed_point")),
-    _multi_sys_fp_convergence(nullptr) // has not been created yet
+    _multi_sys_fp_convergence(nullptr), // has not been created yet
+    _solve_only_first_system(getParam<bool>("solve_only_first_system"))
 {
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
       _moose_line_searches.end())
@@ -414,6 +418,10 @@ FEProblemSolve::solve()
         }
         else
           _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << std::endl;
+
+        // Legacy behavior: solve first system only
+        if (_solve_only_first_system)
+          break;
       }
 
       if (!_using_multi_sys_fp_iterations)

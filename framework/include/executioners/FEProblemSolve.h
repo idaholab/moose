@@ -62,4 +62,6 @@ protected:
   const bool _using_multi_sys_fp_iterations;
   /// Convergence object to assess the convergence of the multi-system fixed point iteration
   Convergence * _multi_sys_fp_convergence;
+  /// Whether to only solve the first nonlinear system, which is the legacy behavior
+  const bool _solve_only_first_system;
 };
