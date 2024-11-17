@@ -107,6 +107,22 @@ if ((return_code > 128)); then
     echo "Apptainer exited with code $return_code, using $new_return_code instead"
     return_code=$new_return_code
 fi
+# If we're using --sharens, make sure the instance is dead
+if [ "$APPTAINER_SHARENS" == "1" ] && [ -n "$APPTAINER_CONFIGDIR" ]; then
+    apptainer instance list
+    set +e
+    instance_list=$(apptainer instance list | tail -n +2)
+    if [ -n "$instance_list" ]; then
+        instance_name=$(echo "$instance_list" | awk '{print $1}')
+        instance_pid=$(echo "$instance_list" | awk '{print $2}')
+        echo "Killing running apptainer instance \"${instance_name}\" in ${instance_pid}"
+        apptainer instance stop ${instance_name}
+        if ps -p $instance_pid > /dev/null; then
+            kill -9 $instance_pid
+        fi
+    fi
+    set -e
+fi
 {%- endif %}
 # Load the execution time; we use a tail here because the process will
 # include a comment about a non-zero status first if the exit code is nonzero
