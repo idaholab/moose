@@ -1,0 +1,10 @@
+[Tests]
+    [shifted_function]
+      design = 'ReporterOffsetFunctionMaterial.md'
+      issues = '#28871'
+      type = 'Exodiff'
+      input = 'reporter_offset_mat.i'
+      exodiff = 'reporter_offset_mat_out.e'
+      requirement = "The system shall support calculating material properties as the sum of the evaluations of a functor at the current location, with each term offset using a set of points provided through reporters."
+    []
+[]

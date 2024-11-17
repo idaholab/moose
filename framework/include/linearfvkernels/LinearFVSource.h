@@ -33,4 +33,7 @@ public:
 protected:
   /// The functor for the source density
   const Moose::Functor<Real> & _source_density;
+
+  /// Scale factor
+  const Real _scale;
 };

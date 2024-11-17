@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#27280'
-  design = 'SIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md'
+  issues = '#27280 #28951'
+  design = 'SIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
   [momentum-pressure]
     type = 'Exodiff'
     input = 2d-velocity-pressure.i
@@ -9,5 +9,15 @@
                   "channel using the SIMPLE algorithm using the linear finite volume system."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+  []
+  [energy_boussinesq]
+    type = 'Exodiff'
+    input = 2d-boussinesq.i
+    exodiff = 2d-boussinesq_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the SIMPLE algorithm using the linear finite volume system."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    abs_zero = 1e-5
+    rel_err = 1e-5
   []
 []

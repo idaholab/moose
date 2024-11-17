@@ -1,0 +1,29 @@
+[Tests]
+    issues = '#28871'
+    design = 'MisfitReporterOffsetFunctionMaterial.md'
+    [point_loads]
+      requirement = "The system shall be able to invert for point loads using objective and gradient materials constructed with misfit data obtained from Gaussian-type probes for"
+      [volume]
+        type = CSVDiff
+        input = main_auto.i
+        csvdiff = main_auto_out_OptimizationReporter_0001.csv
+        max_threads = 1 # Optimize executioner does not support multiple threads
+        rel_err = 1e-4
+        abs_zero = 1e-4
+        # steady solve
+        recover = false
+        detail = 'volume measurements,'
+      []
+      [side]
+        type = CSVDiff
+        input = main_auto_side.i
+        csvdiff = main_auto_side_out_OptimizationReporter_0001.csv
+        max_threads = 1 # Optimize executioner does not support multiple threads
+        rel_err = 1e-4
+        abs_zero = 1e-4
+        # steady solve
+        recover = false
+        detail = 'for side only measurements and fewer measurements than controllable parameters.'
+      []
+    []
+  []
