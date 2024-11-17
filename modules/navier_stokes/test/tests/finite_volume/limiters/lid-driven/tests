@@ -8,40 +8,40 @@
       input = 'test.i'
       exodiff = upwind.e
       cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
-      rel_err = 1e-4
       detail = 'first-order upwind'
+      recover = false # only using final for output in a transient
     []
     [sou]
       type = Exodiff
       input = 'test.i'
       exodiff = sou.e
       cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=sou'
-      rel_err = 1e-4
       detail = 'second-order upwind'
+      recover = false # only using final for output in a transient
     []
     [vanLeer]
       type = Exodiff
       input = 'test.i'
       exodiff = vanLeer.e
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer'
-      rel_err = 1e-4
       detail = 'van Leer'
+      recover = false # only using final for output in a transient
     []
     [min_mod]
       type = Exodiff
       input = 'test.i'
       exodiff = min_mod.e
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
-      rel_err = 1e-4
       detail = 'min-mod'
+      recover = false # only using final for output in a transient
     []
     [quick]
       type = Exodiff
       input = 'test.i'
       exodiff = quick.e
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
-      rel_err = 1e-4
       detail = 'QUICK'
+      recover = false # only using final for output in a transient
     []
   []
 []
