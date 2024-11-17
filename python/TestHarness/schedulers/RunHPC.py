@@ -789,7 +789,8 @@ class RunHPC(RunParallel):
 
     def killRemaining(self, keyboard=False):
         """Kills all currently running HPC jobs"""
-        functor = lambda hpc_job: hpc_job.state not in [hpc_job.State.killed, hpc_job.State.done]
+        running_states = [HPCJob.State.killed, HPCJob.State.done]
+        functor = lambda hpc_job: hpc_job is not None and hpc_job.state not in running_states
         killed_jobs = self.killHPCJobs(functor)
         if keyboard and killed_jobs:
             print(f'\nAttempted to kill remaining {killed_jobs} HPC jobs...')
@@ -996,7 +997,7 @@ class RunHPC(RunParallel):
 
         # --hpc-pre-source contents
         if self.options.hpc_pre_source:
-            submission_env['PRE_SOURCE_FILE'] = options.hpc_pre_source
+            submission_env['PRE_SOURCE_FILE'] = self.options.hpc_pre_source
             submission_env['PRE_SOURCE_CONTENTS'] = self.source_contents
 
         # If running on INL HPC, minimize the bindpath; this is a configuration
