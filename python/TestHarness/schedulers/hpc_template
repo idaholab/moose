@@ -40,6 +40,10 @@ module load {{ " ".join(LOAD_MODULES) }}
 {%- for key, val in VARS.items() %}
 export {{ key }}="{{ val }}"
 {%- endfor %}
+{%- if PRE_SOURCE_FILE is defined %}
+# Loaded from {{ PRE_SOURCE_FILE }}
+{{ PRE_SOURCE_CONTENTS }}
+{%- endif %}
 
 # Print a useful header
 echo "TestHarness {{ SCHEDULER_NAME }} job on $(hostname) in job ${{ JOB_ID_VARIABLE }}"

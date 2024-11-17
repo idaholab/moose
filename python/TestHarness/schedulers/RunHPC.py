@@ -181,6 +181,9 @@ class RunHPC(RunParallel):
                 print('ERROR: --hpc-apptainer-no-home is unused when not executing with apptainer')
                 sys.exit(1)
 
+        if self.options.hpc_pre_source and not os.path.exists(self.options.hpc_pre_source):
+            print(f'ERROR: --hpc-pre-source path {self.options.hpc_pre_source} does not exist')
+            sys.exit(1)
         if self.options.hpc and self.options.pedantic_checks:
             print('ERROR: --hpc and --pedantic-checks cannot be used simultaneously')
             sys.exit(1)
@@ -188,9 +191,16 @@ class RunHPC(RunParallel):
             print('ERROR: --hpc and -j|--jobs cannot be used simultaneously')
             sys.exit(1)
 
+        # Load the pre-source if it exists
+        self.pre_source_contents = None
+        if self.options.hpc_pre_source:
+            with open(self.options.hpc_pre_source, 'r') as f:
+                self.pre_source_contents = f.read()
+
         # Load the submission template
         template_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hpc_template')
-        self.submission_template = open(template_path, 'r').read()
+        with open(template_path, 'r') as f:
+            self.submission_template = f.read()
 
     class CallHPCException(Exception):
         """
@@ -983,6 +993,11 @@ class RunHPC(RunParallel):
         # running within the HPC job
         app_exec_prefix = []
         app_exec_suffix = []
+
+        # --hpc-pre-source contents
+        if self.options.hpc_pre_source:
+            submission_env['PRE_SOURCE_FILE'] = options.hpc_pre_source
+            submission_env['PRE_SOURCE_CONTENTS'] = self.source_contents
 
         # If running on INL HPC, minimize the bindpath; this is a configuration
         # option for the moose-dev-container module on INL HPC
