@@ -17,7 +17,6 @@
 class MooseMesh;
 namespace libMesh
 {
-class Elem;
 class MeshBase;
 }
 

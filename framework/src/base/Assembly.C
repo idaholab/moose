@@ -170,15 +170,18 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
 
   // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
   // of discretization
-  const auto mortar_helper_type =
-      FEType(_mesh_dimension == 2 ? helper_order : FIRST, LAGRANGE).set_p_refinement(false);
-  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, mortar_helper_type);
-  // This FE object should not take part in p-refinement
-  _fe_msm->add_p_level_in_reinit(false);
-  _JxW_msm = &_fe_msm->get_JxW();
-  // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
-  // _coord_msm
-  _fe_msm->get_xyz();
+  if (_mesh_dimension > 0)
+  {
+    const auto mortar_helper_type =
+        FEType(_mesh_dimension == 2 ? helper_order : FIRST, LAGRANGE).set_p_refinement(false);
+    _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, mortar_helper_type);
+    // This FE object should not take part in p-refinement
+    _fe_msm->add_p_level_in_reinit(false);
+    _JxW_msm = &_fe_msm->get_JxW();
+    // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
+    // _coord_msm
+    _fe_msm->get_xyz();
+  }
 
   _extra_elem_ids.resize(_mesh.getMesh().n_elem_integers() + 1);
   _neighbor_extra_elem_ids.resize(_mesh.getMesh().n_elem_integers() + 1);
@@ -202,7 +205,7 @@ Assembly::~Assembly()
     for (auto & it : _fe_face_neighbor[dim])
       delete it.second;
 
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  for (unsigned int dim = 0; dim + 1 <= _mesh_dimension; dim++)
     for (auto & it : _fe_lower[dim])
       delete it.second;
 
@@ -222,7 +225,7 @@ Assembly::~Assembly()
     for (auto & it : _vector_fe_face_neighbor[dim])
       delete it.second;
 
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  for (unsigned int dim = 0; dim + 1 <= _mesh_dimension; dim++)
     for (auto & it : _vector_fe_lower[dim])
       delete it.second;
 
@@ -379,7 +382,7 @@ Assembly::buildLowerDFE(FEType type) const
   // Build an FE object for this type for each dimension up to the dimension of
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  for (unsigned int dim = 0; dim + 1 <= _mesh_dimension; dim++)
   {
     if (!_fe_lower[dim][type])
     {
@@ -403,7 +406,7 @@ Assembly::buildLowerDDualFE(FEType type) const
   // Build an FE object for this type for each dimension up to the dimension of
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  for (unsigned int dim = 0; dim + 1 <= _mesh_dimension; dim++)
   {
     if (!_fe_lower[dim][type])
     {
@@ -429,7 +432,7 @@ Assembly::buildVectorLowerDFE(FEType type) const
   // elements!)
   unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
   const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
-  if (ending_dim < dim)
+  if (ending_dim < dim || _mesh_dimension == 0)
     return;
   for (; dim <= ending_dim; dim++)
   {
@@ -457,7 +460,7 @@ Assembly::buildVectorDualLowerDFE(FEType type) const
   // elements!)
   unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
   const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
-  if (ending_dim < dim)
+  if (ending_dim < dim || _mesh_dimension == 0)
     return;
   for (; dim <= ending_dim; dim++)
   {
@@ -683,6 +686,8 @@ Assembly::createQRules(QuadratureType type,
 
   delete _qrule_msm;
   _custom_mortar_qrule = false;
+  if (_mesh_dimension == 0)
+    return;
   _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
   _qrule_msm->allow_rules_with_negative_weights = allow_negative_qweights;
   _fe_msm->attach_quadrature_rule(_qrule_msm);
