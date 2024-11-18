@@ -28,6 +28,31 @@ public:
 
   virtual void buildMesh() override;
 
+  struct UELDefinition
+  {
+    int coords;
+    std::size_t nodes;
+    int nvars;
+    int properties;
+    bool symmetric;
+    std::string type;
+    std::vector<std::vector<std::size_t>> vars;
+  };
+
+  struct UserElement
+  {
+    std::size_t type_id;
+    std::size_t elem_id;
+    /// nodes uses 0-based indexing
+    std::vector<int> nodes;
+  };
+
+  const std::set<SubdomainID> & getVarBlocks() const { return _uel_block_ids; }
+  const std::vector<UELDefinition> & getUELs() const { return _element_definition; }
+  const std::vector<UserElement> & getElements() const { return _elements; }
+  const std::unordered_map<int, std::vector<int>> & getNodeToUELMap() { return  _node_to_uel_map;}
+  const UELDefinition & getUEL(const std::string & type);
+
 protected:
   /// read a single line from the input
   std::string readLine();
@@ -48,16 +73,6 @@ protected:
   std::unique_ptr<std::istream> _in;
 
   /// Element type definitions
-  struct UELDefinition
-  {
-    int coords;
-    std::size_t nodes;
-    int nvars;
-    int properties;
-    bool symmetric;
-    std::string type;
-    std::vector<std::vector<std::size_t>> vars;
-  };
   std::vector<UELDefinition> _element_definition;
 
   /// Element type string to type ID lookup
@@ -65,26 +80,14 @@ protected:
 
   int _max_node_id;
 
-  /// Element connectivity, this uses 1-based indexing (_elements[0] is unused)
-  struct UserElement
-  {
-    std::size_t type_id;
-    std::size_t elem_id;
-    /// nodes uses 0-based indexing
-    std::vector<int> nodes;
-  };
+  /// Element connectivity
   std::vector<UserElement> _elements;
 
   /// A map from nodes (i.e. node elements) to user elements (ids)
   std::unordered_map<int, std::vector<int>> _node_to_uel_map;
 
-  ///@{ nodesets for boundary restricting variables
-  std::vector<BoundaryName> _nodeset_names;
-  std::vector<BoundaryID> _nodeset_ids;
-  ///@}
-
-  /// A map from variable numbers to nodeset index
-  std::unordered_map<std::size_t, std::size_t> _var_to_nodeset;
+  /// all subdomain IDs used for UEL variable restriction
+  std::set<SubdomainID> _uel_block_ids;
 
 private:
   class EndOfAbaqusInput : public std::exception

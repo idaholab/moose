@@ -62,6 +62,7 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
                            "'Physics/SolidMechanics/Dynamic' instead.");
   registerSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
 
+  registerSyntax("AddUELVariables", "Variables/AddUELVariables");
   registerSyntax("EmptyAction", "BCs/Pressure");
   registerSyntax("PressureAction", "BCs/Pressure/*");
   registerSyntax("EmptyAction", "BCs/InclinedNoDisplacementBC");
