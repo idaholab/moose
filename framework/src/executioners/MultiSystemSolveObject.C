@@ -19,6 +19,7 @@ MultiSystemSolveObject::validParams()
   params.addParam<std::vector<SolverSystemName>>(
       "system_names",
       "Names of the solver systems (both linear and nonlinear) that will be solved");
+  params.addParamNamesToGroup("system_names", "Multiple solver system");
   return params;
 }
 

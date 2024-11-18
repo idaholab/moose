@@ -57,7 +57,7 @@ FEProblemSolve::feProblemDefaultConvergenceParams()
 InputParameters
 FEProblemSolve::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = MultiSystemSolveObject::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
   params.addParam<std::vector<std::vector<std::string>>>(
@@ -209,7 +209,7 @@ FEProblemSolve::validParams()
                               "Solver line search");
   params.addParamNamesToGroup(
       "multi_system_fixed_point multi_system_fixed_point_convergence solve_only_first_system",
-      "Multiple solver system fixed point iteration");
+      "Multiple solver system");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
   return params;
