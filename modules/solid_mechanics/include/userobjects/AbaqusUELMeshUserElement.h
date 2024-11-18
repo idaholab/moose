@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
+//* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,19 +13,12 @@
 #include "BlockRestrictable.h"
 #include "TaggingInterface.h"
 #include "DynamicLibraryLoader.h"
-
-class MooseMesh;
-namespace libMesh
-{
-class MeshBase;
-}
+#include "AbaqusUELMesh.h"
 
 /**
  * This user-object is a testbed for implementing a custom element.
  */
-class AbaqusUserElement : public GeneralUserObject,
-                          public BlockRestrictable,
-                          public TaggingInterface
+class AbaqusUELMeshUserElement : public GeneralUserObject
 {
 public:
   /// function type for the external UMAT function
@@ -82,12 +75,11 @@ public:
   );
 
   static InputParameters validParams();
-  AbaqusUserElement(const InputParameters & params);
+  AbaqusUELMeshUserElement(const InputParameters & params);
 
   virtual void timestepSetup() override;
   virtual void initialSetup() override;
   virtual void meshChanged() override;
-  virtual void timestepSetup() override;
 
   virtual void initialize() override final;
   virtual void execute() override;
@@ -109,6 +101,8 @@ protected:
   /// setup the range of elements this object operates on
   void setupElemRange();
 
+  std::string _uel_type;
+
   /// The plugin file name
   FileName _plugin;
 
@@ -119,13 +113,10 @@ protected:
   const uel_t _uel;
 
   /// The \p MooseMesh that this user object operates on
-  MooseMesh & _moose_mesh;
+  AbaqusUELMesh * _uel_mesh;
 
-  /// The \p libMesh mesh that this object acts on
-  const libMesh::MeshBase & _mesh;
-
-  /// The dimension of the mesh, e.g. 3 for hexes and tets, 2 for quads and tris
-  const unsigned int _dim;
+  /// definition of the UEL this object is operating on
+  const AbaqusUELMesh::UELDefinition & _uel_definition;
 
   /// coupled variables to provide the DOF values
   std::vector<NonlinearVariableName> _variable_names;
@@ -154,18 +145,12 @@ protected:
   std::array<std::map<dof_id_type, std::vector<Real>>, 2> _statev;
   std::size_t _statev_index_current;
   std::size_t _statev_index_old;
-  int & _t_step_old;
 
   /// energy data
   const bool _use_energy;
   std::map<dof_id_type, std::array<Real, 8>> _energy;
   std::map<dof_id_type, std::array<Real, 8>> _energy_old;
 
-  /// Abaqus element type
-  const int _jtype;
-
   /// timestep scaling factor
   Real _pnewdt;
-
-  friend class UELThread;
 };
