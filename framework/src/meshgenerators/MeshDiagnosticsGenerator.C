@@ -358,8 +358,6 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
   if (mesh->mesh_dimension() < 2)
     mooseError("The nodeset check only works for 2D and 3D meshes");
   auto & boundary_info = mesh->get_boundary_info();
-  boundary_info.build_side_list();
-  const auto nodeset_map = boundary_info.get_nodeset_map();
   unsigned int num_nodes_without_nodeset = 0;
   std::set<dof_id_type> checked_nodes_id;
 
@@ -378,8 +376,8 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
           const auto node = node_list[j];
           if (checked_nodes_id.count(node->id()))
             continue;
-          // if node is not part of nodeset map add it to list of bad nodes
-          if (nodeset_map.count(node) == 0)
+          // if node has no nodeset, add it to list of bad nodes
+          if (boundary_info.n_boundary_ids(node) == 0)
           {
             // This node does not have a nodeset!!!
             num_nodes_without_nodeset++;
