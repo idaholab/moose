@@ -156,10 +156,15 @@ AbaqusUELMesh::buildMesh()
     }
   }
 
-  // create nodesets to restrict each variable
+  // create blocks to restrict each variable
   setupNodeSets();
 
   _mesh->prepare_for_use();
+
+  // get set of all subdomain IDs
+  for (const auto & elem :
+       as_range(_mesh->active_local_elements_begin(), _mesh->active_local_elements_end()))
+    _uel_block_ids.insert(elem->subdomain_id());
 }
 
 void
@@ -176,7 +181,7 @@ AbaqusUELMesh::readNodes()
     MooseUtils::tokenize(s, col, 1, ",");
 
     // node id
-    int id = MooseUtils::convert<int>(col[0]);
+    int id = MooseUtils::convert<int>(col[0]) - 1;
 
     // check that we don't have too many coordinate components
     if (col.size() > 4)
@@ -189,9 +194,10 @@ AbaqusUELMesh::readNodes()
 
     // add the point with the original Abaqus id
     auto * node = _mesh->add_point(p, id);
-    auto * node_elem = _mesh->add_elem(Elem::build(NODEELEM));
+    auto node_elem = Elem::build(NODEELEM);
     node_elem->set_node(0) = node;
     node_elem->set_id() = id;
+    _mesh->add_elem(std::move(node_elem));
 
     // keep track of largest node ID
     if (id > _max_node_id)
@@ -222,11 +228,15 @@ AbaqusUELMesh::readUserElement(const std::string & header)
     // split line
     std::vector<std::size_t> col;
     MooseUtils::tokenizeAndConvert(s, col, ",");
-    const auto node_number = col[0];
-    if (node_number > n_nodes || node_number <= 0)
+    const auto node_number = col[0] - 1;
+    if (node_number >= n_nodes)
       paramError("file", "Invalid node number in Abaqus input.");
-    auto & var = uel.vars[node_number - 1];
-    var.insert(var.end(), ++col.begin(), col.end());
+
+    // copy in var numbers (converting from 1-base to 0-base)
+    auto & var = uel.vars[node_number];
+    for (const auto i : index_range(col))
+      if (i > 0)
+        var.push_back(col[i] - 1);
   }
 
   // insert custom element into map
@@ -254,7 +264,7 @@ AbaqusUELMesh::readElements(const std::string & header)
     // split line
     std::vector<std::size_t> col;
     MooseUtils::tokenizeAndConvert(s, col, ",");
-    const auto elem_id = col[0];
+    const auto elem_id = col[0] - 1;
 
     // check number of nodes
     if (col.size() - 1 != _element_definition[type_id].nodes)
@@ -268,7 +278,11 @@ AbaqusUELMesh::readElements(const std::string & header)
     if (elem_id >= _elements.size())
       _elements.resize(elem_id + 1);
 
-    elem.nodes.insert(elem.nodes.end(), ++col.begin(), col.end());
+    // copy in node numbers (converting from 1-base to 0-base)
+    for (const auto i : index_range(col))
+      if (i > 0)
+        elem.nodes.push_back(col[i] - 1);
+
     _elements[elem_id] = elem;
   }
 }
@@ -276,39 +290,45 @@ AbaqusUELMesh::readElements(const std::string & header)
 void
 AbaqusUELMesh::setupNodeSets()
 {
-  // build set of all variable numbers encountered in UEL definitions
-  std::set<std::size_t> unique_vars;
+  // verify variable numbers are below number of bits in BoundaryID
+  const auto bits = sizeof(SubdomainID) * 8;
   for (const auto & uel : _element_definition)
     for (const auto & nodes : uel.vars)
       for (const auto & var : nodes)
-        unique_vars.insert(var);
-
-  // setup nodesets
-  for (const auto & var : unique_vars)
-  {
-    const auto name = "uel_dofs_" + Moose::stringify(var);
-    _var_to_nodeset[var] = _nodeset_names.size();
-    _nodeset_names.push_back(name);
-  }
-  _nodeset_ids = MooseMeshUtils::getBoundaryIDs(*_mesh, _nodeset_names, true);
+        if (var >= bits)
+          mooseError("Currently variables numbers >= ", bits, " are not supported.");
 
   // iterate over all elements
-  BoundaryInfo & boundary_info = _mesh->get_boundary_info();
   for (const auto & [type_id, elem_id, nodes] : _elements)
   {
     const auto & uel = _element_definition[type_id];
+
     for (const auto i : index_range(nodes))
     {
       // build node to elem map
       _node_to_uel_map[nodes[i]].push_back(elem_id);
 
-      // add node to variable-specific nodeset
-      const auto * node = _mesh->node_ptr(nodes[i]);
-      for (const auto & var : uel.vars[nodes[i] - 1])
-        boundary_info.add_node(node, _nodeset_ids[_var_to_nodeset[var]]);
+      // add node element to variable-specific block
+      auto * elem = _mesh->elem_ptr(nodes[i]);
+      for (const auto & var : uel.vars[nodes[i]])
+      {
+        auto id = elem->subdomain_id();
+        id = id | (1 << var);
+        elem->subdomain_id() = id;
+      }
+      // for (const auto & var : uel.vars[nodes[i]])
+      //   elem->subdomain_id() |= (1 << var);
     }
   }
-  _mesh->set_isnt_prepared();
+}
+
+const AbaqusUELMesh::UELDefinition &
+AbaqusUELMesh::getUEL(const std::string & type)
+{
+  const auto it = _element_type_to_typeid.find(type);
+  if (it == _element_type_to_typeid.end())
+    mooseError("Unknown UEL type '", type, "'");
+  return _element_definition[it->second];
 }
 
 HeaderMap::HeaderMap(const std::string & header) : _header(header)
