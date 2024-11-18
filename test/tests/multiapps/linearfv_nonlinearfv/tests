@@ -10,6 +10,7 @@
       detail = 'with the linear FV problem being the main application, '
       cli_args = "Executioner/fixed_point_max_its=10 MultiApps/inactive='' Transfers/inactive=''"
       allow_warnings = true
+      recover = false # we need to use no_restore for the fullsolvemultiapp
     []
     [nonlinearfv_mainapp]
       type = 'Exodiff'
@@ -18,6 +19,7 @@
       detail = 'with the linear FV problem being the sub application'
       cli_args = "Executioner/fixed_point_max_its=10 MultiApps/inactive='' Transfers/inactive=''"
       allow_warnings = true
+      recover = false # we need to use no_restore for the fullsolvemultiapp
     []
   []
 []

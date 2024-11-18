@@ -24,6 +24,8 @@ InputParameters
 LinearFixedPointSteady::validParams()
 {
   InputParameters params = LinearFixedPointSolve::validParams();
+  params.addClassDescription(
+      "Executioner for steady-state fixed point iteration solves between linear systems.");
   params += Executioner::validParams();
   params.addParam<Real>("time", 0.0, "System time");
 
