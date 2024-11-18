@@ -357,13 +357,18 @@ FEProblemSolve::getParamFromNonlinearSystemVectorParam(std::string param_name,
   const auto & param_vec = getParam<std::vector<T>>(param_name);
   if (index > _num_nl_systems)
     paramError(param_name,
-               "Vector parameter size (" + std::to_string(param_vec.size()) +
-                   ") is larger than number of nonlinear systems (" +
+               "Vector parameter is requested at index (" + std::to_string(index) +
+                   ") which is larger than number of nonlinear systems (" +
                    std::to_string(_num_nl_systems) + ").");
   if (param_vec.size() == 0)
     paramError(
         param_name,
         "This parameter was passed to a routine which cannot handle empty vector parameters");
+  if (param_vec.size() != 1 && param_vec.size() != _num_nl_systems)
+    paramError(param_name,
+               "Vector parameter size (" + std::to_string(param_vec.size()) +
+                   ") is different than the number of nonlinear systems (" +
+                   std::to_string(_num_nl_systems) + ").");
 
   // User passed only one parameter, assume it applies to all nonlinear systems
   if (param_vec.size() == 1)
