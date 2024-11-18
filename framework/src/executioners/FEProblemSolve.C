@@ -196,9 +196,10 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
                               "Linear Solver");
-  params.addParamNamesToGroup("solve_type nl_abs_step_tol snesmf_reuse_base use_pre_SMO_residual "
-                              "num_grids residual_and_jacobian_together splitting",
-                              "Nonlinear Solver");
+  params.addParamNamesToGroup(
+      "solve_type nl_abs_step_tol snesmf_reuse_base use_pre_SMO_residual "
+      "num_grids residual_and_jacobian_together splitting nonlinear_convergence",
+      "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
@@ -206,6 +207,9 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
                               "contact_line_search_allowed_lambda_cuts",
                               "Solver line search");
+  params.addParamNamesToGroup(
+      "multi_system_fixed_point multi_system_fixed_point_convergence solve_only_first_system",
+      "Multiple solver system fixed point iteration");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
   return params;
@@ -273,7 +277,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     paramError("multi_system_fixed_point_convergence",
                "Cannot set a convergence object for multi-system fixed point iterations if "
                "'multi_system_fixed_point' is set to false");
-  if (_using_multi_sys_fp_iterations && !isParamValid("multi_system_fixed_point_convergence"))
+  if (_using_multi_sys_fp_iterations && !_solve_only_first_system &&
+      !isParamValid("multi_system_fixed_point_convergence"))
     paramError("multi_system_fixed_point_convergence",
                "Must set a convergence object for multi-system fixed point iterations if using "
                "multi-system fixed point iterations");

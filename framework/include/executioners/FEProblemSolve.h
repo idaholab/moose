@@ -11,6 +11,8 @@
 
 #include "MultiSystemSolveObject.h"
 
+class Convergence;
+
 class FEProblemSolve : public MultiSystemSolveObject
 {
 public:
