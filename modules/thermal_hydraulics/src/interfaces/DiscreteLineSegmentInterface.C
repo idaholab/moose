@@ -50,6 +50,9 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
 {
   std::partial_sum(_lengths.begin(), _lengths.end(), _section_end.begin());
 
+  if (_lengths.size() != _n_elems.size())
+    mooseError("The parameters 'length' and 'n_elems' must have the same number of entries.");
+
   // Compute the axial coordinates of the centers of each element
   unsigned int k_section_begin = 0;
   Real x_begin = 0.0;

@@ -62,11 +62,20 @@
     [compute_axial_coordinate_invalid_axial_coord]
       type = RunException
       input = 'discrete_line_segment_interface.i'
-      cli_args = "AuxKernels/testvar_aux/length=5.0"
-      expect_err = "testvar_aux: The point \(x,y,z\)=\(.*\) has an invalid axial coordinate \(.*\). Valid axial coordinates are in the range \(0,5\)."
+      cli_args = "AuxKernels/testvar_aux/length='1 2 3'"
+      expect_err = "testvar_aux: The point \(x,y,z\)=\(.*\) has an invalid axial coordinate \(.*\). Valid axial coordinates are in the range \(0,6\)."
       allow_test_objects = true
 
       detail = 'if an invalid axial coordinate is provided.'
+    []
+    [length_n_elems_size_mismatch]
+      type = RunException
+      input = 'discrete_line_segment_interface.i'
+      cli_args = "AuxKernels/testvar_aux/length=10.0"
+      expect_err = "The parameters 'length' and 'n_elems' must have the same number of entries"
+      allow_test_objects = true
+
+      detail = 'if the number of lengths and element counts do not match.'
     []
   []
 []
