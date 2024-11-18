@@ -1,0 +1,65 @@
+[Tests]
+  design = 'MeshGenerator.md'
+  issues = '#29095'
+
+  [csg_only]
+    type = 'RunApp'
+    input = 'csg_only.i'
+    cli_args = '--csg-only'
+    expect_out = 'Outputting CSGBase object at this step'
+    recover = false
+    mesh_mode = REPLICATED
+    requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file'
+  []
+
+  [errors]
+    requirement = 'The system shall report an error when generating a mesh in CSG only mode when'
+    [distributed_mesh]
+      type = RunException
+      input = 'csg_only.i'
+      detail = ' used in conjunction with distributed mesh command line option'
+      cli_args = '--distributed-mesh --csg-only'
+      expect_err = "--csg-only cannot be used in conjunction with --distributed-mesh"
+    []
+    [split_mesh]
+      type = RunException
+      input = 'csg_only.i'
+      detail = ' used in conjunction with split mesh command line option'
+      cli_args = '--split-mesh --csg-only'
+      expect_err = "--csg-only is not compatible with any mesh splitting options"
+      mesh_mode = REPLICATED
+    []
+    [use_split]
+      type = RunException
+      input = 'csg_only.i'
+      detail = ' used in conjunction with use split command line option'
+      cli_args = '--use-split --csg-only'
+      expect_err = "--csg-only is not compatible with any mesh splitting options"
+      mesh_mode = REPLICATED
+    []
+    [split_file]
+      type = RunException
+      input = 'csg_only.i'
+      detail = ' used in conjunction with split file command line option'
+      cli_args = '--split-file split_file --csg-only'
+      expect_err = "--csg-only is not compatible with any mesh splitting options"
+      mesh_mode = REPLICATED
+    []
+    [refinements]
+      type = RunException
+      input = 'csg_only.i'
+      detail = ' used in conjunction with mesh refinements command line option'
+      cli_args = '-r 5 --csg-only'
+      expect_err = "--csg-only cannot be used in conjunction with -r refinements option"
+      mesh_mode = REPLICATED
+    []
+    [recover]
+      type = RunException
+      input = 'csg_only.i'
+      detail = ' used in conjunction with recovery command line option'
+      cli_args = '--recover --csg-only'
+      expect_err = "--csg-only option cannot be used in recovery mode"
+      mesh_mode = REPLICATED
+    []
+  []
+[]
