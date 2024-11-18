@@ -47,7 +47,8 @@ protected:
   /// @param index index of the nonlinear system
   /// @return parameter for that nonlinear system
   template <typename T>
-  T getParamFromNonlinearSystemVectorParam(std::string param_name, unsigned int index) const;
+  T getParamFromNonlinearSystemVectorParam(const std::string & param_name,
+                                           unsigned int index) const;
 
   /// Moose provided line searches
   static std::set<std::string> const _moose_line_searches;
@@ -64,6 +65,4 @@ protected:
   const bool _using_multi_sys_fp_iterations;
   /// Convergence object to assess the convergence of the multi-system fixed point iteration
   Convergence * _multi_sys_fp_convergence;
-  /// Whether to only solve the first nonlinear system, which is the legacy behavior
-  const bool _solve_only_first_system;
 };

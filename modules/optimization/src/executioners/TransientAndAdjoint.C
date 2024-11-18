@@ -29,7 +29,7 @@ TransientAndAdjoint::validParams()
   // We seek to prevent the MultiSystemSolveObject from solving both systems
   // This is abusing input parameters, but SolveObjects do not have their own syntax
   // and we need to send this parameter from the executioner to the default nested SolveObject
-  params.addPrivateParam<bool>("solve_only_first_system", true);
+  params.renameParam("system_names", "forward_system", "");
 
   return params;
 }
