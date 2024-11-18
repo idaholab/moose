@@ -1,0 +1,5 @@
+[Mesh]
+  [test]
+    type = TestCSGOnlyMesh
+  []
+[]
