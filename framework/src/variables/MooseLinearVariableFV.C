@@ -789,8 +789,22 @@ MooseLinearVariableFV<OutputType>::adSlnNeighbor() const
 }
 
 template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adSlnAvgNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
 const ADTemplateVariableGradient<OutputType> &
 MooseLinearVariableFV<OutputType>::adGradSlnNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSlnAvgNeighbor() const
 {
   adError();
 }
@@ -831,8 +845,30 @@ MooseLinearVariableFV<OutputType>::adSln() const
 }
 
 template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseLinearVariableFV<OutputType>::adSlnAvg() const
+{
+  adError();
+}
+
+
+template <typename OutputType>
 const ADTemplateVariableGradient<OutputType> &
 MooseLinearVariableFV<OutputType>::adGradSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSlnAvg() const
+{
+  adError();
+}
+
+template <typename OutputType>
+VectorValue<ADReal>
+MooseLinearVariableFV<OutputType>::adGradSln(const FaceInfo & /*fi*/, const StateArg & /*state*/)
 {
   adError();
 }
