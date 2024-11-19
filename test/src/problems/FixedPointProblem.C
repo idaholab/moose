@@ -52,13 +52,14 @@ FixedPointProblem::computeResidual(const NumericVector<Number> & soln,
 
     const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
-    _fe_vector_tags.clear();
+    mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
 
     for (const auto & residual_vector_tag : residual_vector_tags)
       if (residual_vector_tag._id != _tag_id)
         _fe_vector_tags.insert(residual_vector_tag._id);
 
     computeResidualInternal(soln, residual, _fe_vector_tags);
+    _fe_vector_tags.clear();
 
     residual += _tagged_vector;
 
