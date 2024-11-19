@@ -1,0 +1,26 @@
+[Tests]
+  [Coupling-FE-Value-to-FVElementKernel]
+    type = Exodiff
+    input = '2D_Coupling_FEValue_to_FVElementKernel.i'
+    exodiff = '2D_Coupling_FEValue_to_FVElementKernel_out.e'
+    requirement = 'The system shall be able to solve a diffusion problem with a FE value coupled to a FVElementKernel and display second order convergence.'
+  []
+  [Coupling-FE-Gradient-to-FVElementKernel]
+    type = Exodiff
+    input = '2D_Coupling_FEGrad_to_FVElementKernel.i'
+    exodiff = '2D_Coupling_FEGrad_to_FVElementKernel_out.e'
+    requirement = 'The system shall be able to solve a diffusion problem with a FE gradient coupled to a FVElementKernel and display second order convergence.'
+  []
+  [Coupling-FE-Value-to-FVFluxKernel]
+    type = Exodiff
+    input = '2D_Coupling_FEValue_to_FVFluxKernel.i'
+    exodiff = '2D_Coupling_FEValue_to_FVFluxKernel_out.e'
+    requirement = 'The system shall be able to solve a modifed-diffusion problem with a FE value coupled to a FVFluxKernel and display second order convergence.'
+  []
+  [Coupling-FE-Gradient-to-FVFluxKernel]
+    type = Exodiff
+    input = '2D_Coupling_FEGrad_to_FVFluxKernel.i'
+    exodiff = '2D_Coupling_FEGrad_to_FVFluxKernel_out.e'
+    requirement = 'The system shall be able to solve an advection-diffusion problem with a FE gradient coupled to a FVFluxKernel and display second order convergence.'
+  []
+[]
