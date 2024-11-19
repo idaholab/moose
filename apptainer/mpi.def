@@ -229,4 +229,4 @@ EOF
 %files
     {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}
     {{ FILES_DIR }}/.singularity.d/env/01-fix-exec.sh /.singularity.d/env/01-fix-exec.sh
-    {{ FILES_DIR }}/.singularity.d/env/99-user-overrides.sh /.singularity.d/env/99-user-overrides.sh
+    {{ FILES_DIR }}/.singularity.d/env/89-user-overrides.sh /.singularity.d/env/89-user-overrides.sh
