@@ -433,6 +433,7 @@ MooseVariableData<OutputType>::computeValuesFace(const FaceInfo & /*fi*/)
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
   computeValues();
 }
+
 // NOTES: GhostValues for FE variable with equal the Face average value
 // of the neighbor side.
 template <typename OutputType>
@@ -455,6 +456,7 @@ MooseVariableData<OutputType>::computeGhostValuesFace(const FaceInfo & /*fi*/,
       _ad_grad_u_average[qp] = other_face.adGradSlnAvg()[qp];
   }
 }
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeADAveraging()
@@ -540,6 +542,7 @@ MooseVariableData<OutputType>::computeADAveraging()
     }
   }
 }
+
 template <>
 void
 MooseVariableData<RealEigenVector>::computeADAveraging()

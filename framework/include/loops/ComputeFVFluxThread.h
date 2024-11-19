@@ -468,9 +468,9 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   // to conditionally do some FE-specific reinit here if we have any active FE
   // variables.  However, we still want to keep/do FV-style quadrature.
   // Figure out how to do all this some day.
-
   // this->_subproblem.reinitFVFace(_tid, fi);
-  // Loops through the vars (should change _fv_vars to _vars) to check to any
+
+  // Loops through the vars (probably should change _fv_vars to _vars) to check to any
   // FE coupled variables. If there are some FE variables, then FE reinit is
   // necessary.
   bool areFE = false;
@@ -499,13 +499,10 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   for (auto var : _fv_vars)
     var->computeFaceValues(fi);
 
-  //_fe_problem.resizeMaterialData(Moose::MaterialDataType::FACE_MATERIAL_DATA, /*nqp=*/1, _tid);
   // NOTES: When coupling FE -> FV, the quadrature rule used is the FE quadrature
   // rule (expect for specific FV objects like kernels). Since there are no
   // FV specific material objects, then the material data uses the FE quadrature
   // points.
-  // NOTES: Unsure if _fe_problem.assembly(_tid, 0) is correct...
-  // _fe_problem.resizeMaterialData(Moose::MaterialDataType::FACE_MATERIAL_DATA, /*nqp=*/1, _tid);
   _fe_problem.resizeMaterialData(Moose::MaterialDataType::FACE_MATERIAL_DATA,
                                  _fe_problem.assembly(_tid, _nl_system_num).qRuleFace()->n_points(),
                                  _tid);
@@ -518,8 +515,6 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
 
   if (fi.neighborPtr())
   {
-    //_fe_problem.resizeMaterialData(
-    //    Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA, /*nqp=*/1, _tid);
     _fe_problem.resizeMaterialData(
         Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA,
         _fe_problem.assembly(_tid, _nl_system_num).qRuleFace()->n_points(),
@@ -695,8 +690,6 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::subdomainChanged()
     const auto & deps = k->getMooseVariableDependencies();
     for (auto var : deps)
     {
-      //mooseAssert(var->isFV(),
-      //            "We do not currently support coupling of FE variables into FV objects");
       _elem_sub_fv_vars.insert(var);
     }
   }
@@ -755,8 +748,6 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::neighborSubdomainChanged()
     const auto & deps = k->getMooseVariableDependencies();
     for (auto var : deps)
     {
-      //mooseAssert(var->isFV(),
-      //            "We do not currently support coupling of FE variables into FV objects");
       _neigh_sub_fv_vars.insert(var);
     }
   }

@@ -11,6 +11,14 @@
 
 #include "FVFluxKernel.h"
 
+/*
+ *  FVCoupledAdvection implements a standard advection term
+ *  where the advection component is the gradent of a coupled variable:
+ *
+ *      - strong form: \nabla  u \nabla v
+ *
+ *      - weak form: \int_{A} u \nabla v \cdot \vec{n} dA
+ */
 class FVCoupledAdvection : public FVFluxKernel
 {
 public:
@@ -22,4 +30,8 @@ protected:
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
+
+private:
+  /// The variable data of the couple variable
+  const MooseVariableFieldBase & _v_var;
 };

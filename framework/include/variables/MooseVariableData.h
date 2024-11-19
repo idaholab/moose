@@ -110,7 +110,7 @@ public:
 
   //////////////// Heavy lifting computational routines //////////////////////////////
 
-   /**
+  /**
    * compute the face values and averaging
    */
   void computeValuesFace(const FaceInfo & fi);

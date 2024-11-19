@@ -9,7 +9,7 @@
 
 #include "FVCoupledValueDotDiffusion.h"
 
-registerMooseObject("MooseApp", FVCoupledValueDotDiffusion);
+registerMooseObject("MooseTestApp", FVCoupledValueDotDiffusion);
 
 InputParameters
 FVCoupledValueDotDiffusion::validParams()
@@ -35,9 +35,6 @@ FVCoupledValueDotDiffusion::computeQpResidual()
 
   auto dudn = gradUDotNormal(state);
 
-  // Eventually, it will be nice to offer automatic-switching triggered by
-  // input parameters to change between different interpolation methods for
-  // this.
   ADReal v;
   interpolate(
       Moose::FV::InterpMethod::Average, v, _v_elem[_qp], _v_neighbor[_qp], *_face_info, true);

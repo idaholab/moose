@@ -1866,7 +1866,6 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 // Currently Doing: changing anything to a FV verison if an override is possible
 // during a FE reinit for FE coupling.
 void
-//Assembly::reinitFVFace(const FaceInfo & fi)
 Assembly::reinitFVFace(const FaceInfo & fi, bool areFE)
 {
   _current_elem = &fi.elem();
@@ -1884,7 +1883,6 @@ Assembly::reinitFVFace(const FaceInfo & fi, bool areFE)
   prepareJacobianBlock();
 
   unsigned int dim = _current_elem->dim();
-  // if (_current_qrule_face != qrules(dim).fv_face.get())
   if (_current_FV_qrule_face != qrules(dim).fv_face.get())
   {
     setFaceQRule(qrules(dim).fv_face.get(), dim);

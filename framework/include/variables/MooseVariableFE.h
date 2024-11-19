@@ -523,11 +523,9 @@ public:
   /// Actually compute variable values from the solution vectors
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;
-
   virtual void computeFaceValues(const FaceInfo & fi) override;
   void computeAdGradFaceAvg(const FaceInfo & fi);
   VectorValue<ADReal> adGradSln(const FaceInfo & fi, const Moose::StateArg & state) override;
-
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override;
@@ -902,9 +900,8 @@ MooseVariableFE<OutputType>::setActiveTags(const std::set<TagID> & vtags)
 template <>
 void MooseVariableFE<Real>::computeAdGradFaceAvg(const FaceInfo & fi);
 template <>
-VectorValue<ADReal>
-MooseVariableFE<Real>::adGradSln(const FaceInfo & fi, const Moose::StateArg & state);
-
+VectorValue<ADReal> MooseVariableFE<Real>::adGradSln(const FaceInfo & fi,
+                                                     const Moose::StateArg & state);
 template <>
 InputParameters MooseVariableFE<Real>::validParams();
 template <>

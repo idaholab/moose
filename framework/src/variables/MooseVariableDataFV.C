@@ -88,7 +88,6 @@ MooseVariableDataFV<OutputType>::setGeometry(Moose::GeometryType gm_type)
     }
     case Moose::Face:
     {
-      //_qrule = _assembly.qRuleFace();
       _qrule = _assembly.qRuleFVFace();
       // TODO: set integration multiplier to face area
       break;

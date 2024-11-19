@@ -298,7 +298,7 @@ public:
    * @return A _reference_.  Make sure to store this as a reference!
    */
   const QBase * const & qRuleFVFace() const { return _current_FV_qrule_face; }
-  
+
   /**
    * Returns the reference to the current quadrature being used on a current face
    * @return A _reference_.  Make sure to store this as a reference!
@@ -720,7 +720,6 @@ public:
    */
   void reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points);
 
-  // void reinitFVFace(const FaceInfo & fi);
   void reinitFVFace(const FaceInfo & fi, bool areFE);
 
   /**
