@@ -11,6 +11,13 @@
 
 #include "FVElementalKernel.h"
 
+/*
+ *  FVCoupledGradDotElementalAdvection implements:
+ *
+ *      - strong form: \nabla v \cdot \nabla u
+ *
+ *      - weak form: \int_{V} \nabla v \cdot \nabla u dV
+ */
 class FVCoupledGradDotElementalAdvection : public FVElementalKernel
 {
 public:
@@ -20,6 +27,8 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// Gradient of coupled variable (either FE or FV)
   const ADVariableGradient & _grad_v;
+  /// Gradient of primary variable
   const ADVariableGradient & _grad_u;
 };

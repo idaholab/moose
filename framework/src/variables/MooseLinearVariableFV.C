@@ -856,7 +856,6 @@ MooseLinearVariableFV<OutputType>::adSlnAvg() const
   adError();
 }
 
-
 template <typename OutputType>
 const ADTemplateVariableGradient<OutputType> &
 MooseLinearVariableFV<OutputType>::adGradSln() const
