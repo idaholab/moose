@@ -1411,7 +1411,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
 {
   /*Algorithm Overview
     1)Prechecks
-      a)This algorithn only works for 3D so check for that first
+      a)This algorithm only works for 3D so check for that first
     2)Loop
       a)Loop through every element
       b)For each element get the edges associated with it
@@ -1427,22 +1427,31 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
   if (!mesh->is_serial())
     mooseError("Only serialized/replicated meshes are supported");
   unsigned int num_intersecting_edges = 0;
-  std::set<dof_id_type> overlapping_edges_nodes;
+
+  // Create map of element to bounding box to avoing reinitializing the same bounding box multiple times
+  std::unordered_map<Elem *, BoundingBox> bounding_box_map;
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    const auto boundingBox = elem->loose_bounding_box();
+    bounding_box_map.insert({elem, boundingBox});
+  } 
+
+  std::set<std::array<dof_id_type, 4>> overlapping_edges_nodes;
   for (const auto elem : mesh->active_element_ptr_range())
   {
     std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
     for (auto i : elem->edge_index_range())
       elem_edges[i] = elem->build_edge_ptr(i);
+    const auto boundingBox1 = bounding_box_map[elem];
     for (const auto other_elem : mesh->active_element_ptr_range())
     {
       // If they're the same element then there's no need to check for overlap
-      if (elem == other_elem)
+      if (elem->id() >= other_elem->id())
         continue;
 
       // Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges
       // will either
-      const auto boundingBox1 = elem->loose_bounding_box();
-      const auto boundingBox2 = other_elem->loose_bounding_box();
+      const auto boundingBox2 = bounding_box_map[other_elem];
       if (!(boundingBox1.intersects(boundingBox2)))
         continue;
 
@@ -1459,9 +1468,12 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
           const Node * n3 = other_edge->get_nodes()[0];
           const Node * n4 = other_edge->get_nodes()[1];
 
+          // Create array<dof_id_type, 4> to check against set
+          std::array<dof_id_type, 4> node_id_array = {n1->id(), n2->id(), n3->id(), n4->id()};
+          std::sort(node_id_array.begin(), node_id_array.end());
+
           // Check if the edges have already been added to our check_edges list
-          if (overlapping_edges_nodes.count(n1->id()) && overlapping_edges_nodes.count(n2->id()) &&
-              overlapping_edges_nodes.count(n3->id()) && overlapping_edges_nodes.count(n4->id()))
+          if (overlapping_edges_nodes.count(node_id_array))
           {
             continue;
           }
@@ -1482,24 +1494,21 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
             continue;
 
           // Now compare edge with other_edge
-          std::vector<double> intersection_coords(3);
+          Point intersection_coords;
           bool overlap = MeshBaseDiagnosticsUtils::checkFirstOrderEdgeOverlap(
               edge, other_edge, intersection_coords, _non_matching_edge_tol);
           if (overlap)
           {
             // Add the nodes that make up the 2 edges to the vector overlapping_edges_nodes
-            overlapping_edges_nodes.insert(n1->id());
-            overlapping_edges_nodes.insert(n2->id());
-            overlapping_edges_nodes.insert(n3->id());
-            overlapping_edges_nodes.insert(n4->id());
+            overlapping_edges_nodes.insert(node_id_array);
             num_intersecting_edges += 2;
 
             // Print error message
             std::string elem_id = std::to_string(elem->id());
             std::string other_elem_id = std::to_string(other_elem->id());
-            std::string x_coord = std::to_string(intersection_coords[0]);
-            std::string y_coord = std::to_string(intersection_coords[1]);
-            std::string z_coord = std::to_string(intersection_coords[2]);
+            std::string x_coord = std::to_string(intersection_coords(0));
+            std::string y_coord = std::to_string(intersection_coords(1));
+            std::string z_coord = std::to_string(intersection_coords(2));
             std::string message = "Intersecting edges found between elements " + elem_id + " and " +
                                   other_elem_id + " near point (" + x_coord + ", " + y_coord +
                                   ", " + z_coord + ")";

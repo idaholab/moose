@@ -72,34 +72,20 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
 bool
 checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
                            const std::unique_ptr<Elem> & edge2,
-                           std::vector<double> & intersection_coords,
+                           Point & intersection_point,
                            const Real intersection_tol)
 {
   // check that the two elements are of type EDGE2
   mooseAssert(edge1->type() == EDGE2, "Elements must be of type EDGE2");
   mooseAssert(edge2->type() == EDGE2, "Elements must be of type EDGE2");
   // Get nodes from the two edges
-  const Node * const n1 = edge1->get_nodes()[0];
-  const Node * const n2 = edge1->get_nodes()[1];
-  const Node * const n3 = edge2->get_nodes()[0];
-  const Node * const n4 = edge2->get_nodes()[1];
-
-  // get x,y,z coordinates for each node
-  const auto n1x = n1->operator()(0);
-  const auto n1y = n1->operator()(1);
-  const auto n1z = n1->operator()(2);
-  const auto n2x = n2->operator()(0);
-  const auto n2y = n2->operator()(1);
-  const auto n2z = n2->operator()(2);
-  const auto n3x = n3->operator()(0);
-  const auto n3y = n3->operator()(1);
-  const auto n3z = n3->operator()(2);
-  const auto n4x = n4->operator()(0);
-  const auto n4y = n4->operator()(1);
-  const auto n4z = n4->operator()(2);
+  const Point & p1 = edge1->point(0);
+  const Point & p2 = edge1->point(1);
+  const Point & p3 = edge2->point(0);
+  const Point & p4 = edge2->point(1);
 
   // Check that the two edges are not sharing a node
-  if (n1->id() == n3->id() || n1->id() == n4->id() || n2->id() == n3->id() || n2->id() == n4->id())
+  if (p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4)
     return false;
 
   /*
@@ -107,16 +93,11 @@ checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
     is close enough to 0 return true The shortest line between the two edges will be perpendicular
     to both.
   */
-  const auto d1343 =
-      (n1x - n3x) * (n4x - n3x) + (n1y - n3y) * (n4y - n3y) + (n1z - n3z) * (n4z - n3z);
-  const auto d4321 =
-      (n4x - n3x) * (n2x - n1x) + (n4y - n3y) * (n2y - n1y) + (n4z - n3z) * (n2z - n1z);
-  const auto d1321 =
-      (n1x - n3x) * (n2x - n1x) + (n1y - n3y) * (n2y - n1y) + (n1z - n3z) * (n2z - n1z);
-  const auto d4343 =
-      (n4x - n3x) * (n4x - n3x) + (n4y - n3y) * (n4y - n3y) + (n4z - n3z) * (n4z - n3z);
-  const auto d2121 =
-      (n2x - n1x) * (n2x - n1x) + (n2y - n1y) * (n2y - n1y) + (n2z - n1z) * (n2z - n1z);
+  const auto d1343 = (p1-p3)*(p4-p3);
+  const auto d4321 = (p4-p3)*(p2-p1);
+  const auto d1321 = (p1-p3)*(p2-p1);
+  const auto d4343 = (p4-p3)*(p4-p3);
+  const auto d2121 = (p2-p1)*(p2-p1);
 
   const auto denominator = d2121 * d4343 - d4321 * d4321;
   const auto numerator = d1343 * d4321 - d1321 * d4343;
@@ -129,13 +110,8 @@ checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
   const auto mub = (d1343 + (mua * d4321)) / d4343;
 
   // Use these values to solve for the two points that define the shortest line segment
-  const auto nax = n1x + mua * (n2x - n1x);
-  const auto nay = n1y + mua * (n2y - n1y);
-  const auto naz = n1z + mua * (n2z - n1z);
-
-  const auto nbx = n3x + mub * (n4x - n3x);
-  const auto nby = n3y + mub * (n4y - n3y);
-  const auto nbz = n3z + mub * (n4z - n3z);
+  const auto pa = p1 + mua * (p2 - p1);
+  const auto pb = p3 + mub * (p4 - p3);
 
   // This method assume the two lines are infinite. This check to make sure na and nb are part of
   // their respective line segments
@@ -145,13 +121,10 @@ checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
     return false;
 
   // Calculate distance between these two nodes
-  const auto distance = std::sqrt(Utility::pow<2>(nax - nbx) + Utility::pow<2>(nay - nby) +
-                                  Utility::pow<2>(naz - nbz));
+  const auto distance = (pa - pb).norm();
   if (distance < intersection_tol)
   {
-    intersection_coords[0] = nax;
-    intersection_coords[1] = nay;
-    intersection_coords[2] = naz;
+    intersection_point = pa;
     return true;
   }
   else
