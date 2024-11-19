@@ -445,17 +445,10 @@ MooseVariableFE<OutputType>::computeAdGradFaceAvg(const FaceInfo & /*fi*/)
   mooseError("computeAdGradFaceAvg(const FaceInfo & fi) are only for MooseVariableFE<Real>.");
 }
 
-
 template <>
 void
 MooseVariableFE<Real>::computeAdGradFaceAvg(const FaceInfo & fi)
 {
-  // Maybe not needed anymore???
-  /*
-  #ifndef MOOSE_GLOBAL_AD_INDEXING
-    mooseError("MooseVariableFV::getElemValue only supported for global AD indexing");
-  #endif
-  */
 
   _ad_grad_u_face = adGradSlnAvg();
   _ad_grad_neighbor_u_face = adGradSlnAvgNeighbor();
@@ -463,6 +456,7 @@ MooseVariableFE<Real>::computeAdGradFaceAvg(const FaceInfo & fi)
   // This is needed since the gradients are not calculated through reinit
   // with MooseVariableFE<Real>::adGradSln(const FaceInfo & fi)
   computeFaceValues(fi);
+
   _ad_grad_u_face = adGradSlnAvg();
   _ad_grad_neighbor_u_face = adGradSlnAvgNeighbor();
   _ad_grad_face_avg = (_ad_grad_u_face[0] + _ad_grad_neighbor_u_face[0]) / 2.0;
@@ -482,20 +476,6 @@ MooseVariableFE<Real>::adGradSln(const FaceInfo & fi, const Moose::StateArg & /*
   computeAdGradFaceAvg(fi);
   return _ad_grad_face_avg;
 }
-
-// template <>
-// VectorValue<ADReal>
-// MooseVariableFE<Real>::adGradSln(const FaceInfo & fi, const Moose::StateArg & /*state*/)
-// {
-//   computeFaceValues(fi);
-// 
-//   _ad_grad_u_face = adGradSlnAvg();
-//   _ad_grad_neighbor_u_face = adGradSlnAvgNeighbor();
-// 
-//   _ad_grad_face_avg = (_ad_grad_u_face[0] + _ad_grad_neighbor_u_face[0]) / 2.0;
-// 
-//   return _ad_grad_face_avg;
-// }
 
 template <typename OutputType>
 void

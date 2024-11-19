@@ -371,7 +371,8 @@ public:
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adUDotDot() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const override;
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override;
-  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSlnAvgNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> &
+  adSlnAvgNeighbor() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
   adGradSlnNeighbor() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
