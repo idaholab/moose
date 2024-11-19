@@ -188,3 +188,18 @@ to a generator that is data-driven.
 This is an advanced method that requires a heavy understanding of all generators that
 exist in the generation tree, and thus it is not enabled by default. To enable it, the
 parameter `allow_data_driven_mesh_generation` on your application can be set to true.
+
+## Using CSG-based mesh generation
+
+The system optionally supports the capability to generate the base data to support Constructive Solid Geometry (CSG)-based mesh generation. In this execution setting, a `CSGBase` mesh object is created, which contains the surfaces, cells, and universes needed to define the equivalent finite element mesh in CSG representation, for use with downstream Monte Carlo codes. CSG-based mesh generation is triggered using the `--csg-only` command line option, and a `generateCSG()` method is overriden on each generator that is defined within the mesh input file. In order to indicate to the mesh generation system that CSG-based generation is supported, the following call is made
+
+```
+MeshGenerator::setHasGenerateCSG(params);
+```
+
+within the parameters of the generator.
+
+When running with `--csg-only` as a command line option, all mesh generators that are part of the 
+input file will call `generateData()` and then `generateCSG()` in favor `generate()`. The logic for 
+defining the `CSGBase` object should be contained within `generateCSG()`, and no finite element 
+mesh is created using this execution mode.
