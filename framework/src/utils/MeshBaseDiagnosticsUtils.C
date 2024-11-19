@@ -93,11 +93,11 @@ checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
     is close enough to 0 return true The shortest line between the two edges will be perpendicular
     to both.
   */
-  const auto d1343 = (p1-p3)*(p4-p3);
-  const auto d4321 = (p4-p3)*(p2-p1);
-  const auto d1321 = (p1-p3)*(p2-p1);
-  const auto d4343 = (p4-p3)*(p4-p3);
-  const auto d2121 = (p2-p1)*(p2-p1);
+  const auto d1343 = (p1 - p3) * (p4 - p3);
+  const auto d4321 = (p4 - p3) * (p2 - p1);
+  const auto d1321 = (p1 - p3) * (p2 - p1);
+  const auto d4343 = (p4 - p3) * (p4 - p3);
+  const auto d2121 = (p2 - p1) * (p2 - p1);
 
   const auto denominator = d2121 * d4343 - d4321 * d4321;
   const auto numerator = d1343 * d4321 - d1321 * d4343;

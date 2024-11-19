@@ -1428,13 +1428,14 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
     mooseError("Only serialized/replicated meshes are supported");
   unsigned int num_intersecting_edges = 0;
 
-  // Create map of element to bounding box to avoing reinitializing the same bounding box multiple times
+  // Create map of element to bounding box to avoing reinitializing the same bounding box multiple
+  // times
   std::unordered_map<Elem *, BoundingBox> bounding_box_map;
   for (const auto elem : mesh->active_element_ptr_range())
   {
     const auto boundingBox = elem->loose_bounding_box();
     bounding_box_map.insert({elem, boundingBox});
-  } 
+  }
 
   std::set<std::array<dof_id_type, 4>> overlapping_edges_nodes;
   for (const auto elem : mesh->active_element_ptr_range())
