@@ -42,10 +42,15 @@ FVAdvection::FVAdvection(const InputParameters & params)
 ADReal
 FVAdvection::computeQpResidual()
 {
+  const auto state = determineState();
+  const auto & limiter_time = _subproblem.isTransient()
+                                  ? Moose::StateArg(1, Moose::SolutionIterationType::Time)
+                                  : Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
+
   const bool elem_is_upwind = _velocity * _normal >= 0;
   const auto face =
-      makeFace(*_face_info, Moose::FV::limiterType(_advected_interp_method), elem_is_upwind);
-  ADReal u_interface = _var(face, determineState());
+      makeFace(*_face_info, Moose::FV::limiterType(_advected_interp_method), elem_is_upwind, false, &limiter_time);
+  ADReal u_interface = _var(face, state);
 
   return _normal * _velocity * u_interface;
 }

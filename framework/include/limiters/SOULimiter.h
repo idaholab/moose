@@ -58,33 +58,7 @@ public:
           const bool & fi_elem_is_upwind) const override final
   {
     mooseAssert(grad_phi_upwind, "SOU limiter requires a gradient");
-
-    T limiter;
-    if (!grad_phi_downwind)
-    {
-      // Determine the face centroid and the appropriate cell centroid
-      const auto & face_centroid = fi->faceCentroid();
-      const auto & cell_centroid = fi_elem_is_upwind ? fi->elemCentroid() : fi->neighborCentroid();
-
-      // Compute the abs delta value at the face
-      const auto & delta_face =
-          std::abs((*grad_phi_upwind) * (face_centroid - cell_centroid)) + 1e-10;
-
-      // Compute the delta between the two elements
-      const auto & elem_delta = max_value - min_value;
-
-      // Return the limited value
-      if (elem_delta > 1e-10)
-        limiter = std::min(1.0, elem_delta / delta_face);
-      else
-        limiter = T(1.0);
-    }
-    else
-    {
-      const auto & r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
-      limiter = r_f;
-    }
-    return limiter;
+    return T(1.0);
   }
 
   bool constant() const override final { return false; }
