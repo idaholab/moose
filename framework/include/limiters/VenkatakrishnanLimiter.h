@@ -85,7 +85,7 @@ public:
 
   bool constant() const override final { return false; }
 
-  InterpMethod interpMethod() const override final { return InterpMethod::SOU; }
+  InterpMethod interpMethod() const override final { return InterpMethod::Venkatakrishnan; }
 
   VenkatakrishnanLimiter() = default;
 };

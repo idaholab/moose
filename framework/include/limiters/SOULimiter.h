@@ -47,18 +47,25 @@ public:
    * @param fi_elem_is_upwind Boolean flag indicating if the current element is upwind.
    * @return The computed flux limiting ratio.
    */
-  T limit(const T & phi_upwind,
-          const T & phi_downwind,
+  T limit(const T & /* phi_upwind */,
+          const T & /* phi_downwind */,
           const VectorValue<T> * grad_phi_upwind,
-          const VectorValue<T> * grad_phi_downwind,
+          const VectorValue<T> * /* grad_phi_downwind */,
           const RealVectorValue & dCD,
           const Real & max_value,
           const Real & min_value,
-          const FaceInfo * fi,
-          const bool & fi_elem_is_upwind) const override final
+          const FaceInfo * /* fi */,
+          const bool & /*fi_elem_is_upwind */) const override final
   {
     mooseAssert(grad_phi_upwind, "SOU limiter requires a gradient");
-    return T(1.0);
+
+    T delta_face = std::abs((*grad_phi_upwind) * dCD);
+    T delta_max = std::abs(max_value - min_value);
+
+    if (delta_face > 1e-10)
+      return std::min(1.0, delta_max / delta_face);
+    else
+      return T(1.0);
   }
 
   bool constant() const override final { return false; }

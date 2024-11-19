@@ -117,7 +117,8 @@ setInterpolationMethod(const MooseObject & obj,
   interp_method = selectInterpolationMethod(interp_method_in);
 
   if (interp_method == InterpMethod::SOU || interp_method == InterpMethod::MinMod ||
-      interp_method == InterpMethod::VanLeer || interp_method == InterpMethod::QUICK)
+      interp_method == InterpMethod::VanLeer || interp_method == InterpMethod::QUICK ||
+      interp_method == InterpMethod::Venkatakrishnan)
     need_more_ghosting = true;
 
   return need_more_ghosting;

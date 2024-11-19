@@ -152,11 +152,14 @@ Each of the limiters implemented along with the implementation reference, limiti
 | `SOU` [!citep](harten1997)                      | Face-Value    | No  | $\text{min}(1,1/r)$                                               |
 | `Venkatakrishnan` [!citep](venkatakrishnan1993) | Face-Value    | No  | $\frac{2r+1}{r(2r+1)+1}$                                          |
 
-
 To illustrate the performance of the limiters, a dispersion analysis is developedand presented in [dispersion].
 This consists of the advection of a passive scalar in a Cartesian mesh at 45 degrees.
 The exact solution, without numerical diffusion, is a straight line at 45 degrees
 dividing the regions with a scalar concentration of 1 and 0.
+
+!alert note
+In general, we recomment using `VanLeer` and `MinMod` limiters for most of the
+applications considering that they provide truly bounded solutions.
 
 !media framework/finite_volume/dispersion.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
@@ -171,10 +174,5 @@ can be expected for each of the limiters.
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=dispersion_line
       caption=Performance of each of the limiters in a line perpendicular to the advection front.
-
-!alert warning
-When using limiters with `Executioner` of `type = Steady`,
-the solver uses the previous nonlinear iterate for the limiting flux.
-This can ultimately lead to bad condition numbers in the Jacobian and poor convergence.
 
 !bibtex bibliography
