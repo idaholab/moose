@@ -979,7 +979,8 @@ public:
   /**
    * reinitialize the finite volume assembly data for the provided face and thread
    */
-  void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi);
+  //void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi);
+  void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi, bool areFE);
 
   /**
    * Whether the simulation has active nonlocal coupling which should be accounted for in the

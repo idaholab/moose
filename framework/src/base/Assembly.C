@@ -101,6 +101,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qrule_arbitrary(nullptr),
     _coord_type(Moose::COORD_XYZ),
     _current_qrule_face(nullptr),
+    _current_FV_qrule_face(nullptr),
     _current_qface_arbitrary(nullptr),
     _current_qrule_neighbor(nullptr),
     _need_JxW_neighbor(false),
@@ -676,6 +677,12 @@ void
 Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
 {
   _current_qrule_face = qrule;
+
+  // These variables are for when both a FV and FE qrule is need for the
+  // FE->FV Flux coupling. This will get overwritten during the FE reinit stages,
+  // but a temp variable will store the properties both the FE reinit and
+  // re-write to _current_FV_qrule_face after the FE reinit in reinitFVFace.
+  _current_FV_qrule_face = qrule;
 
   for (auto & it : _fe_face[dim])
     it.second->attach_quadrature_rule(qrule);
@@ -1856,8 +1863,11 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
   computeCurrentElemVolume();
 }
 
+// Currently Doing: changing anything to a FV verison if an override is possible
+// during a FE reinit for FE coupling.
 void
-Assembly::reinitFVFace(const FaceInfo & fi)
+//Assembly::reinitFVFace(const FaceInfo & fi)
+Assembly::reinitFVFace(const FaceInfo & fi, bool areFE)
 {
   _current_elem = &fi.elem();
   _current_neighbor_elem = fi.neighborPtr();
@@ -1874,20 +1884,21 @@ Assembly::reinitFVFace(const FaceInfo & fi)
   prepareJacobianBlock();
 
   unsigned int dim = _current_elem->dim();
-  if (_current_qrule_face != qrules(dim).fv_face.get())
+  // if (_current_qrule_face != qrules(dim).fv_face.get())
+  if (_current_FV_qrule_face != qrules(dim).fv_face.get())
   {
     setFaceQRule(qrules(dim).fv_face.get(), dim);
     // The order of the element that is used for initing here doesn't matter since this will just
     // be used for constant monomials (which only need a single integration point)
     if (dim == 3)
-      _current_qrule_face->init(QUAD4, /* p_level = */ 0, /* simple_type_only = */ true);
+      _current_FV_qrule_face->init(QUAD4, /* p_level = */ 0, /* simple_type_only = */ true);
     else
-      _current_qrule_face->init(EDGE2, /* p_level = */ 0, /* simple_type_only = */ true);
+      _current_FV_qrule_face->init(EDGE2, /* p_level = */ 0, /* simple_type_only = */ true);
   }
 
   _current_side_elem = &_current_side_elem_builder(*_current_elem, _current_side);
 
-  mooseAssert(_current_qrule_face->n_points() == 1,
+  mooseAssert(_current_FV_qrule_face->n_points() == 1,
               "Our finite volume quadrature rule should always yield a single point");
 
   // We've initialized the reference points. Now we need to compute the physical location of the
@@ -1895,7 +1906,7 @@ Assembly::reinitFVFace(const FaceInfo & fi)
   // results like we do in reinitFEFace. Instead we handle the computation of the physical
   // locations manually
   _current_q_points_face.resize(1);
-  const auto & ref_points = _current_qrule_face->get_points();
+  const auto & ref_points = _current_FV_qrule_face->get_points();
   const auto & ref_point = ref_points[0];
   auto physical_point = FEMap::map(_current_side_elem->dim(), _current_side_elem, ref_point);
   _current_q_points_face[0] = physical_point;
@@ -1913,6 +1924,30 @@ Assembly::reinitFVFace(const FaceInfo & fi)
     setNeighborQRule(neighbor_rule, _current_neighbor_elem->dim());
     _current_q_points_face_neighbor.resize(1);
     _current_q_points_face_neighbor[0] = std::move(physical_point);
+  }
+
+  // NOTES: This will overwrite _fe_face[dim]->attach_quadrature_rule(qrule) and
+  // _vector_fe_face[dim]->attach_quadrature_rule(qrule), which sets the
+  // quadrature rule to the faces. I think that this ok, since the FE quadrature rule
+  // is needed at the face and the FV variable will just over populate the other
+  // quadrature point (like what currently happens for FVElementKernels).
+  if (!areFE)
+  {
+    _current_qrule_face = _current_FV_qrule_face;
+  }
+  else
+  {
+    QBase * temp_qrule_face = _current_FV_qrule_face;
+    if (_current_neighbor_elem == nullptr)
+    {
+      reinit(_current_elem, _current_side);
+    }
+    else
+    {
+      reinitElemAndNeighbor(
+          _current_elem, _current_side, _current_neighbor_elem, _current_neighbor_side);
+    }
+    _current_FV_qrule_face = temp_qrule_face;
   }
 }
 

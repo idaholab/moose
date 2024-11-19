@@ -58,6 +58,8 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _need_ad_grad_u_dot(false),
     _need_ad_second_u(false),
     _need_ad_curl_u(false),
+    _need_averaging(false),
+    _face_averaging(false),
     _has_dof_indices(false),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
@@ -169,6 +171,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi;
       _current_div_phi = _div_phi;
       _current_ad_grad_phi = _ad_grad_phi;
+      _face_averaging = false;
       break;
     }
     case Moose::Face:
@@ -180,6 +183,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi_face;
       _current_div_phi = _div_phi_face;
       _current_ad_grad_phi = _ad_grad_phi_face;
+      _face_averaging = true;
       break;
     }
   }
@@ -420,6 +424,127 @@ MooseVariableData<OutputType>::divPhiFace() const
 {
   _div_phi_face = &_div_phi_face_assembly_method(_assembly, _fe_type);
   return *_div_phi_face;
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeValuesFace(const FaceInfo & /*fi*/)
+{
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  computeValues();
+}
+// NOTES: GhostValues for FE variable with equal the Face average value
+// of the neighbor side.
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeGhostValuesFace(const FaceInfo & /*fi*/,
+                                                      MooseVariableData<OutputType> & other_face)
+{
+  if (_need_ad_u)
+  {
+    const auto nqp = other_face.adSlnAvg().size();
+    _ad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_u_average[qp] = other_face.adSlnAvg()[qp];
+  }
+  if (_need_ad_grad_u)
+  {
+    const auto nqp = other_face.adGradSlnAvg().size();
+    _ad_grad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_grad_u_average[qp] = other_face.adGradSlnAvg()[qp];
+  }
+}
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeADAveraging()
+{
+  _ad_zero = 0;
+  unsigned int nqp = _current_qrule->n_points();
+  // NOTES: This seems like a lot of if statements. Maybe there is better way
+  // to seperate face vs element averaging...
+  if (_face_averaging)
+  {
+    const MooseArray<ADReal> & _ad_JxW = _assembly.adJxWFace();
+    const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
+    ADReal _current_elem_volume = 0.0;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
+    if (_need_ad_u)
+    {
+      _ad_u_average.resize(nqp);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+      {
+        _ad_u_average[qp] = _ad_zero;
+      }
+      auto value_temp = _ad_u[0];
+      value_temp = 0.0;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
+      value_temp /= _current_elem_volume;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_u_average[qp] = value_temp;
+    }
+    if (_need_ad_grad_u)
+    {
+      _ad_grad_u_average.resize(nqp);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+      {
+        _ad_grad_u_average[qp] = _ad_zero;
+      }
+      auto value_temp = _ad_grad_u[0];
+      value_temp = 0.0;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
+      value_temp /= _current_elem_volume;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_grad_u_average[qp] = value_temp;
+    }
+  }
+  else
+  {
+    const MooseArray<ADReal> & _ad_JxW = _assembly.adJxW();
+    const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
+    ADReal _current_elem_volume = 0.0;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
+    if (_need_ad_u)
+    {
+      _ad_u_average.resize(nqp);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+      {
+        _ad_u_average[qp] = _ad_zero;
+      }
+      auto value_temp = _ad_u[0];
+      value_temp = 0.0;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
+      value_temp /= _current_elem_volume;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_u_average[qp] = value_temp;
+    }
+    if (_need_ad_grad_u)
+    {
+      _ad_grad_u_average.resize(nqp);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+      {
+        _ad_grad_u_average[qp] = _ad_zero;
+      }
+      auto value_temp = _ad_grad_u[0];
+      value_temp = 0.0;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
+      value_temp /= _current_elem_volume;
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_grad_u_average[qp] = value_temp;
+    }
+  }
+}
+template <>
+void
+MooseVariableData<RealEigenVector>::computeADAveraging()
+{
+  mooseError("AD for array variable has not been implemented");
 }
 
 template <typename OutputType>
@@ -816,15 +941,17 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
             for (const auto qp : make_range(nqp))
               _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
         else
-          for (const auto i : make_range(num_dofs))
-            for (const auto qp : make_range(nqp))
-              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
+          _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
       }
       else if (!_time_integrator)
         for (const auto qp : make_range(nqp))
           _ad_grad_u_dot[qp] = _grad_u_dot[qp];
     }
   }
+  
+  // Averaging FE values for FE -> FV coupling
+  if (_need_averaging)
+    computeADAveraging();
 }
 
 template <>

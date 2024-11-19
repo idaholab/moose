@@ -104,14 +104,34 @@ public:
   virtual const ADTemplateVariableValue<OutputType> & adSln() const = 0;
 
   /**
+   * AD element / face average getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adSlnAvg() const = 0;
+
+  /**
    * AD neighbor solution getter
    */
   virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const = 0;
 
   /**
+   * AD neighbor element / face average getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adSlnAvgNeighbor() const = 0;
+
+  /**
    * AD grad solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
+
+  // /**
+  //  * AD grad solution at the face for FV problems
+  //  */
+  virtual VectorValue<ADReal> adGradSln(const FaceInfo & fi, const Moose::StateArg & state) = 0;
+
+  /**
+   * AD grad element / face average getter
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const = 0;
 
   /**
    * AD grad of time derivative solution getter
@@ -127,6 +147,11 @@ public:
    * AD grad neighbor solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const = 0;
+
+  /**
+   * AD grad neighbor element / face average getter
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnAvgNeighbor() const = 0;
 
   /**
    * AD grad of time derivative neighbor solution getter

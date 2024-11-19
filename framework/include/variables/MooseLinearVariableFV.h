@@ -371,8 +371,11 @@ public:
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adUDotDot() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const override;
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSlnAvgNeighbor() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
   adGradSlnNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
+  adGradSlnAvgNeighbor() const override;
   [[noreturn]] virtual const ADTemplateVariableSecond<OutputType> &
   adSecondSlnNeighbor() const override;
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override;
@@ -381,10 +384,13 @@ public:
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
   adGradSlnNeighborDot() const override;
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSln() const override;
+  [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSlnAvg() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const override;
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> & adCurlSln() const override;
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> &
   adCurlSlnNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const override;
+  [[noreturn]] VectorValue<ADReal> adGradSln(const FaceInfo & fi, const StateArg & state) override;
 
   virtual const DoFValue & dofValues() const override;
   virtual const DoFValue & dofValuesOld() const override;

@@ -245,6 +245,7 @@ Coupleable::checkVar(const std::string & var_name_in,
         _c_name,
         ": We did all our checks for the existence of a var, yet we still don't have a var!?");
 
+  /*
   // Only perform the following checks for objects that feed into residuals/Jacobians, e.g. objects
   // that inherit from the TaggingInterface
   if (_c_parameters.have_parameter<MultiMooseEnum>("vector_tags"))
@@ -257,6 +258,7 @@ Coupleable::checkVar(const std::string & var_name_in,
                  _c_name,
                  ". This is not currently supported");
   }
+  */
 
   if (!(vars_vector[comp])->isNodal() && _c_nodal && !_c_allow_element_to_nodal_coupling)
     mooseError(_c_name, ": cannot couple elemental variables into nodal objects");
@@ -2166,7 +2168,13 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp) cons
     return var->adDofValues();
 
   if (!_coupleable_neighbor)
+  {
+    if (!var->isFV() && _is_fv)
+      return var->adSlnAvg();
     return var->adSln();
+  }
+  if (!var->isFV() && _is_fv)
+    return var->adSlnAvgNeighbor();
   return var->adSlnNeighbor();
 }
 
@@ -2201,8 +2209,23 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp) c
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
+  {
+    if (!var->isFV() && _is_fv)
+      return var->adGradSlnAvg();
     return var->adGradSln();
+  }
+  if (!var->isFV() && _is_fv)
+    return var->adGradSlnAvgNeighbor();
   return var->adGradSlnNeighbor();
+}
+
+ADRealVectorValue
+Coupleable::adCoupledGradientFace(const std::string & var_name,
+                                  const FaceInfo & fi,
+                                  const Moose::StateArg & state)
+{
+  auto _coupled_var = getVarHelper<MooseVariableField<Real>>(var_name, 0);
+  return _coupled_var->adGradSln(fi, state);
 }
 
 const ADVariableGradient &

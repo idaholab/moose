@@ -263,9 +263,17 @@ public:
   {
     return _element_data->adSln();
   }
+  const ADTemplateVariableValue<OutputType> & adSlnAvg() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
+  }
   const ADTemplateVariableGradient<OutputType> & adGradSln() const override
   {
     return _element_data->adGradSln();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
   }
 
   /**
@@ -294,6 +302,16 @@ public:
    */
   virtual VectorValue<ADReal>
   adGradSln(const FaceInfo & fi, const StateArg & state, const bool correct_skewness = false) const;
+
+  // /**
+  //  * Retrieve the const adGradSln(const FaceInfo & fi) when
+  //  * non-const adGradSln(const FaceInfo & fi) is called for. This is because
+  //  * adGradSln(const FaceInfo & fi) for FE variable are non-const.
+  //  */
+  VectorValue<ADReal> adGradSln(const FaceInfo & fi, const StateArg & state) override
+  {
+    return adGradSln(fi, state, false);
+  }
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -347,9 +365,17 @@ public:
   {
     return _neighbor_data->adSln();
   }
+  const ADTemplateVariableValue<OutputType> & adSlnAvgNeighbor() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
+  }
   const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override
   {
     return _neighbor_data->adGradSln();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvgNeighbor() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
   }
   const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override
   {

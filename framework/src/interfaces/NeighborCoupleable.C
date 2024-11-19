@@ -19,7 +19,7 @@ NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
                                        bool nodal,
                                        bool neighbor_nodal,
                                        bool is_fv)
-  : Coupleable(moose_object, nodal, is_fv), _neighbor_nodal(neighbor_nodal)
+  : Coupleable(moose_object, nodal, is_fv), _neighbor_nodal(neighbor_nodal), _is_fv(is_fv)
 {
 }
 
@@ -72,6 +72,8 @@ NeighborCoupleable::adCoupledNeighborValue(const std::string & var_name, unsigne
                "use old solution data which do not have derivatives so adCoupledNeighborValue is "
                "not appropriate. Please use coupledNeighborValue instead");
 
+  if (!var->isFV() && _is_fv)
+    return var->adSlnAvgNeighbor();
   return var->adSlnNeighbor();
 }
 
@@ -232,6 +234,8 @@ NeighborCoupleable::adCoupledNeighborGradient(const std::string & var_name, unsi
         "not appropriate. Please use coupledNeighborGradient instead");
 
   const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  if (!var->isFV() && _is_fv)
+    return var->adGradSlnAvgNeighbor();
   return var->adGradSlnNeighbor();
 }
 
