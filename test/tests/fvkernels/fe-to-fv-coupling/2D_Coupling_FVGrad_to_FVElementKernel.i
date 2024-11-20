@@ -1,5 +1,3 @@
-#Checked
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -18,147 +16,118 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
-  [./u_diffusion]
+  [u_diffusion]
     type = FVDiffusion
     variable = u
     coeff = 1.0
-  [../]
-  [./u_v_coupled_force]
+  []
+  [u_v_coupled_force]
     type = FVCoupledGradDotElementalAdvection
     variable = u
     v = v
-  [../]
-  [./u_source]
+  []
+  [u_source]
     type = FVBodyForce
     variable = u
     function = 'u_source'
-  [../]
+  []
 
-#Potential Equations
-  [./v_diffusion]
+  [v_diffusion]
     type = FVDiffusion
     variable = v
     coeff = 1.0
-  [../]
-  [./v_source]
+  []
+  [v_source]
     type = FVBodyForce
     variable = v
     function = 'v_source'
-  [../]
-[]
-
-[AuxVariables]
-  [./u_sol]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
-  [../]
-
-  [./v_sol]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
-  [../]
-[]
-
-[AuxKernels]
-  [./u_sol]
-    type = FunctionAux
-    variable = u_sol
-    function = u_fun
-  [../]
-
-  [./v_sol]
-    type = FunctionAux
-    variable = v_sol
-    function = v_fun
-  [../]
+  []
 []
 
 [Functions]
-  [./u_fun]
+  [u_fun]
     type = ParsedFunction
     value = 'cos(2*x*pi)*cos(2*y*pi)'
-  [../]
-  [./v_fun]
+  []
+  [v_fun]
     type = ParsedFunction
     value = 'sin(2*x*pi)*sin(2*y*pi)'
-  [../]
-  [./u_source]
+  []
+  [u_source]
     type = ParsedFunction
     value = '8*pi^2*sin(2*x*pi)*sin(2*y*pi)*cos(2*x*pi)*cos(2*y*pi) + 8*pi^2*cos(2*x*pi)*cos(2*y*pi)'
-  [../]
-  [./v_source]
+  []
+  [v_source]
     type = ParsedFunction
     value = '8*pi^2*sin(2*x*pi)*sin(2*y*pi)'
-  [../]
+  []
 []
 
 [FVBCs]
-  [./u_BC]
+  [u_BC]
     type = FVFunctionDirichletBC
     variable = u
     function = 'u_fun'
     boundary = '0 1 2 3'
-  [../]
+  []
 
-  [./v_BC]
+  [v_BC]
     type = FVFunctionDirichletBC
     variable = v
     function = 'v_fun'
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./u_l2Error]
+  [u_l2Error]
     type = ElementCenterL2Error
     variable = u
     function = u_fun
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 
-  [./v_l2Error]
+  [v_l2Error]
     type = ElementCenterL2Error
     variable = v
     function = v_fun
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 
-  [./h]
+  [h]
     type = AverageElementSize
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'smp'
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 
-  [./fdp]
+  [fdp]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

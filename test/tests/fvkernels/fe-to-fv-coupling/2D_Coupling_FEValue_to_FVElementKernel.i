@@ -1,5 +1,3 @@
-#Checked
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
