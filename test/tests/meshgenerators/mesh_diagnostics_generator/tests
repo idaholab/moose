@@ -45,6 +45,22 @@
       expect_out = 'Number of external element faces that have not been assigned to a sideset: 4'
       detail = '3D meshed cube missing a sideset on one side'
     []
+    [2D_watertight_nodesets]
+      type = 'RunApp'
+      input = '2D_missing_nodeset.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of external nodes that have not been assigned to a nodeset: 1'
+      detail = '2D meshed square with one external node that does not belong to a nodeset'
+    []
+    [3D_watertight_nodesets]
+      type = 'RunApp'
+      input = '3D_missing_nodeset.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Number of external nodes that have not been assigned to a nodeset: 1'
+      detail = '3D meshed cube with one external node that does not belong to a nodeset'
+    []
     [overlap]
       type = 'RunApp'
       input = 'node_based_test.i'
@@ -253,6 +269,7 @@
                   Mesh/diag/examine_nonplanar_sides=NO_CHECK
                   Mesh/diag/examine_sidesets_orientation=NO_CHECK
                   Mesh/diag/check_for_watertight_sidesets=NO_CHECK
+                  Mesh/diag/check_for_watertight_nodesets=NO_CHECK
                   Mesh/diag/search_for_adaptivity_nonconformality=NO_CHECK
                   Mesh/diag/check_local_jacobian=NO_CHECK --mesh-only"
       detail = 'a diagnostics object is created but no diagnostics are requested.'
